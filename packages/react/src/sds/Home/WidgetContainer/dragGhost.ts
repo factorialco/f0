@@ -35,3 +35,60 @@ export const takeCardGhost = (
 
   return copy
 }
+
+export interface PageSurfaceGhost {
+  node: HTMLElement
+  offset: { top: number; left: number; width: number; height: number }
+  /** The colour the page is painted on, under its own wash. */
+  base: string | null
+}
+
+/** A copy of the page's own surface, placed so it lines up under `card`. */
+export const takePageSurface = (
+  surface: Element | null | undefined,
+  card: Element | null | undefined
+): PageSurfaceGhost | null => {
+  if (!surface || !card) return null
+
+  const copy = surface.cloneNode(true)
+  if (!(copy instanceof HTMLElement)) return null
+
+  copy.classList.remove("-z-10")
+  copy.style.position = "absolute"
+  copy.style.inset = "0"
+  copy.style.top = "0"
+  copy.style.left = "0"
+  copy.style.right = "auto"
+  copy.style.bottom = "auto"
+  copy.style.width = "100%"
+  copy.style.height = "100%"
+  copy.removeAttribute("id")
+  copy.querySelectorAll("[id]").forEach((node) => node.removeAttribute("id"))
+  copy.setAttribute("aria-hidden", "true")
+  copy.setAttribute("inert", "")
+
+  const from = surface.getBoundingClientRect()
+  const to = card.getBoundingClientRect()
+
+  return {
+    node: copy,
+    offset: {
+      top: from.top - to.top,
+      left: from.left - to.left,
+      width: from.width,
+      height: from.height,
+    },
+    base: opaqueBackgroundOf(surface),
+  }
+}
+
+const TRANSPARENT = ["rgba(0, 0, 0, 0)", "transparent", ""]
+
+const opaqueBackgroundOf = (from: Element): string | null => {
+  if (typeof getComputedStyle !== "function") return null
+  for (let el: Element | null = from; el; el = el.parentElement) {
+    const colour = getComputedStyle(el).backgroundColor
+    if (!TRANSPARENT.includes(colour)) return colour
+  }
+  return null
+}

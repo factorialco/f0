@@ -51,7 +51,7 @@ export type ButtonInternalProps = Pick<
      */
     variant?: ActionButtonVariant
     /**
-     * The filters'counter value to display.
+     * A count shown in a neutral counter to the right of the label.
      */
     counterValue?: number
     /**

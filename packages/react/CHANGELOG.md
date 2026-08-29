@@ -1,5 +1,54 @@
 # Changelog
 
+## [6.71.0](https://github.com/factorialco/f0/compare/f0-react-v6.70.0...f0-react-v6.71.0) (2026-08-28)
+
+
+### Features
+
+* **Tooltip:** accept a title, body and bullets in cell tooltips ([#5289](https://github.com/factorialco/f0/issues/5289)) ([bf2836e](https://github.com/factorialco/f0/commit/bf2836eadd9f9671b6743d933e03363a92305aba))
+
+## [6.70.0](https://github.com/factorialco/f0/compare/f0-react-v6.69.0...f0-react-v6.70.0) (2026-08-28)
+
+
+### Features
+
+* **F0DataChart:** show how far a bar passed its target ([#5242](https://github.com/factorialco/f0/issues/5242)) ([9e1ff18](https://github.com/factorialco/f0/commit/9e1ff18e2b7a9c0215f3fe5a85c5d8e4f21c8f59))
+
+## [6.69.0](https://github.com/factorialco/f0/compare/f0-react-v6.68.0...f0-react-v6.69.0) (2026-08-28)
+
+
+### Features
+
+* **WidgetCatalog:** configure a widget's params before adding it ([#5303](https://github.com/factorialco/f0/issues/5303)) ([dbf815f](https://github.com/factorialco/f0/commit/dbf815f1a6d79fbbbe0b1c950d4c33949d20065e))
+
+## [6.68.0](https://github.com/factorialco/f0/compare/f0-react-v6.67.1...f0-react-v6.68.0) (2026-08-28)
+
+
+### Features
+
+* **F0Button:** show a counter on buttons, styled right ([#5225](https://github.com/factorialco/f0/issues/5225)) ([2075450](https://github.com/factorialco/f0/commit/2075450abfae7bb88e88d2ec42a3f4be5a163d17))
+
+## [6.67.1](https://github.com/factorialco/f0/compare/f0-react-v6.67.0...f0-react-v6.67.1) (2026-08-28)
+
+
+### Bug Fixes
+
+* **NewHomeLayout:** leave the collapsed rail alone unless you mean it ([#5301](https://github.com/factorialco/f0/issues/5301)) ([67b8bb2](https://github.com/factorialco/f0/commit/67b8bb2553e0284c7c9051bac286ce73abe529e8))
+
+## [6.67.0](https://github.com/factorialco/f0/compare/f0-react-v6.66.3...f0-react-v6.67.0) (2026-08-28)
+
+
+### Features
+
+* **F0Chat:** add edit-last and double-click-to-reply shortcuts ([#5285](https://github.com/factorialco/f0/issues/5285)) ([d11f192](https://github.com/factorialco/f0/commit/d11f19210b461a1d826a1d81e6dc621e40172087))
+
+## [6.66.3](https://github.com/factorialco/f0/compare/f0-react-v6.66.2...f0-react-v6.66.3) (2026-08-28)
+
+
+### Bug Fixes
+
+* **OneDataCollection:** report selected nested rows to the selection callbacks ([#5294](https://github.com/factorialco/f0/issues/5294)) ([46a02a6](https://github.com/factorialco/f0/commit/46a02a6fcccdddf967f76c4a857f7b99fe687bf7))
+
 ## [6.66.2](https://github.com/factorialco/f0/compare/f0-react-v6.66.1...f0-react-v6.66.2) (2026-08-28)
 
 

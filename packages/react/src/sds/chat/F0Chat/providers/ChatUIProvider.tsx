@@ -5,6 +5,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -47,20 +48,35 @@ type ChatHighlightedIdContextValue = {
   highlightedId: string | null
 }
 
-type ChatReplyContextValue = {
-  /** Message being replied to (quoted in the composer), or null. */
-  replyTo: F0ChatMessage | null
-  setReplyTo: (message: F0ChatMessage | null) => void
-  /** The composer registers how to focus its textarea. */
-  registerComposerFocus: (fn: () => void) => void
-  /** Move focus (and the caret) to the composer — called when starting a reply. */
-  focusComposer: () => void
+/** One value, not a reply target plus an edit target: as two nullable states
+ * "both set" is representable and has to be prevented by hand at each caller. */
+export type ChatComposeTarget =
+  | { kind: "none" }
+  | { kind: "reply"; message: F0ChatMessage }
+  | { kind: "edit"; message: F0ChatMessage }
+
+type ChatComposeTargetContextValue = {
+  target: ChatComposeTarget
 }
 
-type ChatEditContextValue = {
-  /** Message being edited (reloaded into the composer), or null. */
-  editingMessage: F0ChatMessage | null
-  setEditingMessage: (message: F0ChatMessage | null) => void
+/**
+ * Called on every target move, inside the user's gesture. Not an effect: that
+ * runs a frame late, losing the gesture so iOS opens no keyboard, and cannot
+ * see the previous target — which is what says whether to discard the draft.
+ */
+export type ChatComposerHandle = {
+  retarget: (previous: ChatComposeTarget, next: ChatComposeTarget) => void
+  /** Drop the whole draft — text, attachments, mentions — not just an edit's. */
+  abandonDraft: () => void
+}
+
+/** Identity-stable for the provider's lifetime, so message rows can move the
+ * target without subscribing to it and re-rendering on every change. */
+type ChatComposeActionsContextValue = {
+  startReply: (message: F0ChatMessage) => void
+  startEdit: (message: F0ChatMessage) => void
+  clearComposeTarget: () => void
+  registerComposerHandle: (handle: ChatComposerHandle | null) => void
 }
 
 type ChatDropContextValue = {
@@ -109,8 +125,10 @@ type ChatSearchContextValue = {
 const ChatJumpContext = createContext<ChatJumpContextValue | null>(null)
 const ChatHighlightedIdContext =
   createContext<ChatHighlightedIdContextValue | null>(null)
-const ChatReplyContext = createContext<ChatReplyContextValue | null>(null)
-const ChatEditContext = createContext<ChatEditContextValue | null>(null)
+const ChatComposeTargetContext =
+  createContext<ChatComposeTargetContextValue | null>(null)
+const ChatComposeActionsContext =
+  createContext<ChatComposeActionsContextValue | null>(null)
 const ChatDropContext = createContext<ChatDropContextValue | null>(null)
 const ChatImagePreviewContext =
   createContext<ChatImagePreviewContextValue | null>(null)
@@ -124,17 +142,26 @@ export const ChatUIProvider = ({
 }: {
   children: ReactNode
 }): ReactNode => {
-  const { messages, searchMessages, loadMessageContext } = useF0Chat()
+  const {
+    messages,
+    searchMessages,
+    loadMessageContext,
+    channel,
+    capabilities,
+  } = useF0Chat()
   const emit = useF0ChatEmit()
 
-  const [replyTo, setReplyTo] = useState<F0ChatMessage | null>(null)
-  const [editingMessage, setEditingMessage] = useState<F0ChatMessage | null>(
-    null
-  )
+  const [target, setTarget] = useState<ChatComposeTarget>({ kind: "none" })
   const [highlightedId, setHighlightedId] = useState<string | null>(null)
   const scrollFnRef = useRef<((id: string) => void) | null>(null)
   const dropFnRef = useRef<((files: File[]) => void) | null>(null)
-  const composerFocusFnRef = useRef<(() => void) | null>(null)
+  const composerHandleRef = useRef<ChatComposerHandle | null>(null)
+  // Read by the setters below, which have no dependencies on purpose: a
+  // dependency here would change the actions context and re-render every row.
+  const targetRef = useRef(target)
+  targetRef.current = target
+  const canSendRef = useRef(capabilities?.canSend)
+  canSendRef.current = capabilities?.canSend
   const highlightTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const [imagePreview, setImagePreview] = useState<{
@@ -190,14 +217,6 @@ export const ChatUIProvider = ({
     dropFnRef.current?.(files)
   }, [])
 
-  const registerComposerFocus = useCallback((fn: () => void) => {
-    composerFocusFnRef.current = fn
-  }, [])
-
-  const focusComposer = useCallback(() => {
-    composerFocusFnRef.current?.()
-  }, [])
-
   const openImagePreview = useCallback(
     (images: F0ChatImageAttachment[], index: number) =>
       setImagePreview({ images, index }),
@@ -215,6 +234,71 @@ export const ChatUIProvider = ({
     if (kind) setDocumentPreview({ file, kind })
   }, [])
   const closeDocumentPreview = useCallback(() => setDocumentPreview(null), [])
+
+  const registerComposerHandle = useCallback(
+    (handle: ChatComposerHandle | null) => {
+      composerHandleRef.current = handle
+    },
+    []
+  )
+
+  // State first: a throw inside the composer's transition must not leave the
+  // two disagreeing. Both still land in one commit — a gesture's setState calls
+  // flush together in a microtask at the end of the event.
+  const setComposeTarget = useCallback(
+    (next: ChatComposeTarget) => {
+      const previous = targetRef.current
+      targetRef.current = next
+      setTarget(next)
+      composerHandleRef.current?.retarget(previous, next)
+      // Emitted here, so every route reports it — the actions menu, a
+      // double-click, the arrow-up shortcut. Clearing emits nothing: the
+      // cancelled events count abandonment, and this same call also runs after
+      // a successful send, so only the dismiss controls can emit those.
+      if (next.kind === "reply") {
+        emit.onReplyStarted({ messageId: next.message.id })
+      } else if (next.kind === "edit") {
+        emit.onEditStarted({ messageId: next.message.id })
+      }
+    },
+    [emit]
+  )
+
+  const startReply = useCallback(
+    (message: F0ChatMessage) => {
+      // A read-only channel renders no composer, so a target set there is
+      // invisible and unclearable.
+      if (canSendRef.current === false) return
+      setComposeTarget({ kind: "reply", message })
+    },
+    [setComposeTarget]
+  )
+  const startEdit = useCallback(
+    (message: F0ChatMessage) => {
+      if (canSendRef.current === false) return
+      setComposeTarget({ kind: "edit", message })
+    },
+    [setComposeTarget]
+  )
+  const clearComposeTarget = useCallback(
+    () => setComposeTarget({ kind: "none" }),
+    [setComposeTarget]
+  )
+
+  // Only the transcript is keyed by channel; this provider and the composer
+  // survive the switch, so the draft has to be dropped by hand or it is sent to
+  // the next conversation. Layout, not passive: a passive effect lets a frame
+  // paint the old draft under the new channel.
+  const channelIdRef = useRef(channel.id)
+  useLayoutEffect(
+    function abandonDraftOnChannelChange() {
+      if (channelIdRef.current === channel.id) return
+      channelIdRef.current = channel.id
+      composerHandleRef.current?.abandonDraft()
+      clearComposeTarget()
+    },
+    [channel.id, clearComposeTarget]
+  )
 
   /** Scroll to a message and highlight it; `persist` keeps the ring (search). */
   const scrollAndHighlight = useCallback((id: string, persist: boolean) => {
@@ -354,13 +438,18 @@ export const ChatUIProvider = ({
     () => ({ highlightedId }),
     [highlightedId]
   )
-  const replyValue = useMemo<ChatReplyContextValue>(
-    () => ({ replyTo, setReplyTo, registerComposerFocus, focusComposer }),
-    [replyTo, registerComposerFocus, focusComposer]
+  const composeTargetValue = useMemo<ChatComposeTargetContextValue>(
+    () => ({ target }),
+    [target]
   )
-  const editValue = useMemo<ChatEditContextValue>(
-    () => ({ editingMessage, setEditingMessage }),
-    [editingMessage]
+  const composeActionsValue = useMemo<ChatComposeActionsContextValue>(
+    () => ({
+      startReply,
+      startEdit,
+      clearComposeTarget,
+      registerComposerHandle,
+    }),
+    [startReply, startEdit, clearComposeTarget, registerComposerHandle]
   )
   const dropValue = useMemo<ChatDropContextValue>(
     () => ({ registerFileDropHandler, dropFiles }),
@@ -406,10 +495,10 @@ export const ChatUIProvider = ({
   )
 
   return (
-    <ChatJumpContext.Provider value={jumpValue}>
-      <ChatHighlightedIdContext.Provider value={highlightedIdValue}>
-        <ChatReplyContext.Provider value={replyValue}>
-          <ChatEditContext.Provider value={editValue}>
+    <ChatComposeActionsContext.Provider value={composeActionsValue}>
+      <ChatJumpContext.Provider value={jumpValue}>
+        <ChatHighlightedIdContext.Provider value={highlightedIdValue}>
+          <ChatComposeTargetContext.Provider value={composeTargetValue}>
             <ChatDropContext.Provider value={dropValue}>
               <ChatImagePreviewContext.Provider value={imagePreviewValue}>
                 <ChatDocumentPreviewContext.Provider
@@ -421,10 +510,10 @@ export const ChatUIProvider = ({
                 </ChatDocumentPreviewContext.Provider>
               </ChatImagePreviewContext.Provider>
             </ChatDropContext.Provider>
-          </ChatEditContext.Provider>
-        </ChatReplyContext.Provider>
-      </ChatHighlightedIdContext.Provider>
-    </ChatJumpContext.Provider>
+          </ChatComposeTargetContext.Provider>
+        </ChatHighlightedIdContext.Provider>
+      </ChatJumpContext.Provider>
+    </ChatComposeActionsContext.Provider>
   )
 }
 
@@ -446,15 +535,12 @@ export const useChatJump = (): ChatJumpContextValue =>
 export const useChatHighlightedId = (): ChatHighlightedIdContextValue =>
   useCtx(ChatHighlightedIdContext, "useChatHighlightedId")
 
-/** Reply-target state. Consumed by the composer and message actions. */
-export const useChatReply = (): ChatReplyContextValue =>
-  useCtx(ChatReplyContext, "useChatReply")
+/** Composer only: a row reading this re-renders on every target change. */
+export const useChatComposeTarget = (): ChatComposeTargetContextValue =>
+  useCtx(ChatComposeTargetContext, "useChatComposeTarget")
 
-/** Edit-target state. Consumed by the composer and message actions. Editing and
- * replying are mutually exclusive — the action handlers clear one when setting
- * the other. */
-export const useChatEdit = (): ChatEditContextValue =>
-  useCtx(ChatEditContext, "useChatEdit")
+export const useChatComposeActions = (): ChatComposeActionsContextValue =>
+  useCtx(ChatComposeActionsContext, "useChatComposeActions")
 
 /** Window-wide file-drop routing. Consumed by the shell and composer. */
 export const useChatDrop = (): ChatDropContextValue =>

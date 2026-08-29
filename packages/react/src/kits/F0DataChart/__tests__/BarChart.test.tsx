@@ -22,6 +22,21 @@ import { resolveChartTheme } from "../utils/theme"
 
 const setOptionMock = vi.fn()
 
+/**
+ * Stands in for the gradient constructor, so the tests that assert on a fill can
+ * read the stops it was built with. Hoisted because the `echarts` mock factory
+ * reads it as it is built, before module-level bindings exist.
+ */
+const { linearGradientMock } = vi.hoisted(() => ({
+  linearGradientMock: vi.fn(function LinearGradient(
+    this: object,
+    ..._args: unknown[]
+  ) {
+    // eslint-disable-next-line react/no-this-in-sfc -- echarts constructor mock, not a component
+    return this
+  }),
+}))
+
 /** Handlers the chart registered, so tests can fire ECharts events at it. */
 const chartHandlers: Record<string, ((params: unknown) => void)[]> = {}
 
@@ -49,10 +64,7 @@ vi.mock("echarts", () => ({
   use: vi.fn(),
   getInstanceByDom: vi.fn(),
   graphic: {
-    LinearGradient: vi.fn(function LinearGradient(this: object) {
-      // eslint-disable-next-line react/no-this-in-sfc -- echarts constructor mock, not a component
-      return this
-    }),
+    LinearGradient: linearGradientMock,
   },
 }))
 
@@ -2174,5 +2186,147 @@ describe("BarChart — the window takes data order, not rank", () => {
     // (Barcelona, 90) being inside it is a coincidence of position.
     expect(shown).toBeLessThan(categories.length)
     expect(onHidden).toHaveBeenLastCalledWith(categories.length - shown)
+  })
+})
+
+describe("BarChart — overachievement", () => {
+  const base = {
+    type: "bar" as const,
+    categories: ["Q1", "Q2"],
+    series: [
+      {
+        name: "Attainment",
+        data: [
+          { value: 80, target: 100 },
+          { value: 150, target: 100 },
+        ],
+      },
+    ],
+  }
+
+  /**
+   * The gradient built for the overachieving bar: the one with four stops. The
+   * two-stop gradients are the target ghosts.
+   */
+  function overachievementGradient() {
+    return linearGradientMock.mock.calls.find(
+      (args) => (args[4] as { offset: number }[]).length === 4
+    )
+  }
+
+  beforeEach(() => {
+    linearGradientMock.mockClear()
+  })
+
+  it("leaves the bars alone until the flag is on", () => {
+    render(<F0DataChart {...base} />)
+
+    // Both points stay plain numbers: no per-point fill to describe.
+    expect(getLatestOption().series[0]?.data).toEqual([80, 150])
+  })
+
+  it("fills the stretch past the target with a darker shade of the bar", () => {
+    render(<F0DataChart {...base} highlightOverachievement />)
+
+    const data = getLatestOption().series[0]?.data
+    // The bar that fell short is untouched; only the one that passed its
+    // target carries a fill of its own.
+    expect(data?.[0]).toBe(80)
+    expect(typeof data?.[1]).toBe("object")
+
+    // 150 against a target of 100: the darker third sits at the top, and the
+    // two stops meet exactly at the target.
+    const stops = overachievementGradient()?.[4] as
+      | { offset: number; color: string }[]
+      | undefined
+    expect(stops?.map((s) => s.offset)).toEqual([0, 1 / 3, 1 / 3, 1])
+    expect(stops?.[0]?.color).toBe(stops?.[1]?.color)
+    expect(stops?.[2]?.color).toBe(stops?.[3]?.color)
+    expect(stops?.[0]?.color).not.toBe(stops?.[3]?.color)
+  })
+
+  it("runs the darker stretch in from the far end of a horizontal bar", () => {
+    render(
+      <F0DataChart
+        {...base}
+        orientation="horizontal"
+        highlightOverachievement
+      />
+    )
+
+    // Right-to-left, so the dark end is the one the bar grew towards.
+    expect(overachievementGradient()?.slice(0, 4)).toEqual([1, 0, 0, 0])
+  })
+
+  it("ignores points that have no target of their own", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        categories={["A"]}
+        series={[{ name: "S", data: [42] }]}
+        highlightOverachievement
+      />
+    )
+
+    expect(getLatestOption().series[0]?.data).toEqual([42])
+  })
+})
+
+describe("BarChart — target progress row", () => {
+  function getTooltipFormatter() {
+    const call = setOptionMock.mock.calls.at(-1)
+    if (!call) throw new Error("setOption was never called")
+    return (call[0] as { tooltip?: { formatter?: (p: unknown) => string } })
+      .tooltip?.formatter
+  }
+
+  const base = {
+    type: "bar" as const,
+    categories: ["Q2"],
+    series: [
+      { name: "Attainment", data: [{ value: 200_000, target: 185_000 }] },
+    ],
+  }
+  const hover = {
+    seriesName: "Attainment",
+    name: "Q2",
+    value: 200_000,
+    dataIndex: 0,
+  }
+
+  it("stays out of the tooltip until asked for", () => {
+    render(<F0DataChart {...base} />)
+
+    const html = getTooltipFormatter()?.(hover)
+    expect(html).toContain("185,000")
+    expect(html).not.toContain("of target")
+  })
+
+  it("reports what the bar came to against its target", () => {
+    render(<F0DataChart {...base} showTargetProgress />)
+
+    const html = getTooltipFormatter()?.(hover)
+    expect(html).toContain("108.1%")
+    expect(html).toContain("of target")
+  })
+
+  it("says nothing about a target of zero", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        categories={["A"]}
+        series={[{ name: "S", data: [{ value: 5, target: 0 }] }]}
+        showTargetProgress
+      />
+    )
+
+    const html = getTooltipFormatter()?.({
+      seriesName: "S",
+      name: "A",
+      value: 5,
+      dataIndex: 0,
+    })
+    expect(html).not.toContain("of target")
+    expect(html).not.toContain("Infinity")
   })
 })

@@ -14,7 +14,10 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
 import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
-import { useChatHighlightedId } from "../providers/ChatUIProvider"
+import {
+  useChatComposeActions,
+  useChatHighlightedId,
+} from "../providers/ChatUIProvider"
 import { useF0ChatStable } from "../providers/F0ChatProvider"
 import { type F0ChatMessage, type F0ChatUser } from "../types"
 import { microEnterTransition } from "../utils/chat-motion"
@@ -27,6 +30,30 @@ import { SendingClock } from "./ChatMessageStatusIcon"
 /** See armActionsSoon: long enough for a click burst on the placeholder to
  * finish, well under the pointer travel time from row edge to the ellipsis. */
 const ARM_ACTIONS_ON_HOVER_MS = 150
+
+/** Parts of a message that already do something when clicked, so a
+ * double-click on one must not also quote. The test is whether the element can
+ * take focus, not a list of tags, so new attachment types are covered — but a
+ * tabindex on the row or the bubble itself would stop every message quoting. */
+const SELF_HANDLING_DESCENDANTS =
+  "a, button, input, textarea, select, video, audio, summary," +
+  ' [role="button"], [role="link"], [role="slider"], [contenteditable="true"],' +
+  ' [tabindex]:not([tabindex="-1"]), [data-chat-attachments]'
+
+/**
+ * Searches up from the clicked element and stops at `stopAt`, the message's own
+ * wrapper. `closest` would keep going and match the scrolling container, which
+ * react-virtuoso gives `tabIndex={0}`, so nothing would ever quote. An element
+ * that never reaches `stopAt` is in a popover: React sends its events here, but
+ * it does not belong to this message.
+ */
+const isSelfHandling = (target: Element, stopAt: Element): boolean => {
+  for (let node: Element | null = target; node; node = node.parentElement) {
+    if (node === stopAt) return false
+    if (node.matches(SELF_HANDLING_DESCENDANTS)) return true
+  }
+  return true
+}
 
 /** One message: bubble (with any reply quote nested inside) + reactions, with a
  * hover ellipsis menu. */
@@ -103,6 +130,8 @@ export const ChatMessageItem = ({
     actionsWrapperRef.current?.querySelector("button")?.focus()
   }, [actionsArmed])
   const { highlightedId } = useChatHighlightedId()
+  // Not the VALUE context: that would re-render the row on every target change.
+  const { startReply } = useChatComposeActions()
   // Stable slice — the full runtime context changes on every transport event
   // and would re-render every mounted row.
   const { currentUserId } = useF0ChatStable()
@@ -128,6 +157,22 @@ export const ChatMessageItem = ({
     message.body.trim().length > 0 ||
     Boolean(message.replyTo)
   const hasContent = hasBubble || hasAttachments
+  // A deleted message has nothing to quote, and one that has not been sent
+  // yet has no server id for a reply to point at.
+  const canQuote =
+    !message.deleted &&
+    message.status !== "sending" &&
+    message.status !== "failed"
+
+  const handleDoubleClick = useCallback(
+    (event: React.MouseEvent<HTMLDivElement>) => {
+      if (!canQuote) return
+      if (!(event.target instanceof Element)) return
+      if (isSelfHandling(event.target, event.currentTarget)) return
+      startReply(message)
+    },
+    [canQuote, message, startReply]
+  )
 
   return (
     <div
@@ -186,6 +231,8 @@ export const ChatMessageItem = ({
                 highlighted &&
                   "ring-1 ring-f1-special-ring ring-offset-1 ring-offset-f1-background"
               )}
+              onDoubleClick={handleDoubleClick}
+              data-testid="chat-message-surface"
             >
               {hasAttachments && (
                 <ChatMessageAttachments

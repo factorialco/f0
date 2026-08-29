@@ -223,6 +223,41 @@ describe("F0Chat events — message actions", () => {
     expect(onReplyStarted).toHaveBeenCalledWith({ messageId: "m1" })
   })
 
+  // The started events moved to the compose-target transition so the routes the
+  // menu cannot see report too.
+  it("reports starting a reply from a double-click", async () => {
+    const onReplyStarted = vi.fn()
+    renderChat(makeRuntime(), { onReplyStarted })
+
+    await userEvent.dblClick(screen.getAllByTestId("chat-message-surface")[0])
+
+    expect(onReplyStarted).toHaveBeenCalledWith({ messageId: "m1" })
+  })
+
+  it("reports starting an edit from the arrow-up shortcut", async () => {
+    const onEditStarted = vi.fn()
+    const mine: F0ChatMessage = {
+      id: "m2",
+      author: { id: "me", name: "Me" },
+      body: "Hi back",
+      createdAt: new Date().toISOString(),
+      isMine: true,
+    }
+    renderChat(
+      makeRuntime({
+        messages: [theirs, mine],
+        editMessage: vi.fn(),
+        editWindowMs: 60_000,
+      }),
+      { onEditStarted }
+    )
+
+    await userEvent.click(screen.getByPlaceholderText(/write something here/i))
+    await userEvent.keyboard("{ArrowUp}")
+
+    expect(onEditStarted).toHaveBeenCalledWith({ messageId: "m2" })
+  })
+
   it("reports viewing the info panel", async () => {
     const onMessageInfoViewed = vi.fn()
     renderChat(makeRuntime(), { onMessageInfoViewed })

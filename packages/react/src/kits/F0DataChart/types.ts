@@ -234,6 +234,33 @@ export interface F0DataChartBarProps extends F0DataChartBaseProps {
   /** Stack all series into a single bar per category. @default false */
   stacked?: boolean
   /**
+   * Draw the stretch of a bar that ran past its `target` in a darker shade of
+   * the bar's own colour, split at the target.
+   *
+   * Left off, a target only shows as the faded ghost the bar has yet to reach,
+   * so a bar that beat its target looks the same as one that landed exactly on
+   * it — the reader has to eye its height against the ghosts beside it. Turn it
+   * on wherever passing the target is itself the news: attainment against a
+   * quota, a goal, a budget.
+   *
+   * Ignored by points with no target, and by negative values — "past the
+   * target" has no single reading when the bar grows downwards.
+   * @default false
+   */
+  highlightOverachievement?: boolean
+  /**
+   * Add the share of the target the bar reached to its tooltip, under the
+   * target row (e.g. "108.1% of target").
+   *
+   * Opt-in: the percentage answers "how did this do against its target", which
+   * is the question on a quota or a goal, and noise on a chart where the target
+   * is a reference line the reader is not scoring against.
+   *
+   * The percentage is `value / target`, the same two numbers the bar draws.
+   * @default false
+   */
+  showTargetProgress?: boolean
+  /**
    * When {@link F0DataChartBaseProps.showLabels} is on, hide a category's value
    * labels if the widest value in that category doesn't fit the bar. The whole
    * category drops together (all-or-nothing), so a tight chart never shows a
