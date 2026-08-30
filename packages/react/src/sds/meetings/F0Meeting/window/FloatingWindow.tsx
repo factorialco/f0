@@ -258,7 +258,9 @@ export const FloatingWindow = ({ header, children }: FloatingWindowProps) => {
             // Fullscreen is a room rather than a widget, so its chrome scales
             // up with it. The body's height has to follow the same number.
             isFullscreen ? "h-14 px-4" : "px-3",
-            effectiveMode === "minimized" ? "h-full" : !isFullscreen && "h-9",
+            effectiveMode === "minimized"
+              ? "h-full"
+              : !isFullscreen && "h-[3.75rem]",
             canManipulate && "cursor-grab active:cursor-grabbing"
           )}
         >
@@ -269,7 +271,7 @@ export const FloatingWindow = ({ header, children }: FloatingWindowProps) => {
           <div
             className={cn(
               "relative w-full",
-              isFullscreen ? "h-[calc(100%-3.5rem)]" : "h-[calc(100%-2.25rem)]"
+              isFullscreen ? "h-[calc(100%-3.5rem)]" : "h-[calc(100%-3.75rem)]"
             )}
           >
             {children}

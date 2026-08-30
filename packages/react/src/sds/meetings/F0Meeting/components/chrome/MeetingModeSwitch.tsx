@@ -59,9 +59,10 @@ export const MeetingModeSwitch = () => {
     <div role="group" aria-label={i18n.meeting.modeSwitch}>
       <F0ButtonToggleGroup
         items={items}
-        // Fullscreen is a room, not a widget in the corner: its chrome scales up
-        // with it so the controls stay reachable from across the screen.
-        size={effectiveMode === "fullscreen" ? "md" : "sm"}
+        // One size everywhere: the design gives the header's controls a 32px
+        // slot whatever the surface, so the switch stops changing shape as the
+        // window does.
+        size="md"
         value={mode}
         required
         withBorder={false}

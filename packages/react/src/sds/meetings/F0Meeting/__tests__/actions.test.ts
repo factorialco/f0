@@ -5,7 +5,8 @@ import { Microphone, Phone, VideoRecorder } from "@/icons/app"
 import {
   ACTION_GAP,
   ACTION_SIZE,
-  BAR_PADDING,
+  LEAVE_SIZE,
+  OVERFLOW_SLOT,
   collapseActions,
 } from "../components/controls/collapse-actions"
 import { mergeActions } from "../components/controls/merge-actions"
@@ -38,8 +39,17 @@ const CORE: F0MeetingAction[] = [
   }),
 ]
 
-const widthFor = (slots: number): number =>
-  slots * (ACTION_SIZE + ACTION_GAP) - ACTION_GAP + BAR_PADDING * 2
+/**
+ * Bar width with room for `slots` icon-sized controls plus the permanent
+ * overflow button. `extra` covers controls wider than an icon — "Leave"
+ * carries its label, so the bar's arithmetic has to know it is 72 and not 40.
+ */
+const widthFor = (slots: number, extra = 0): number =>
+  slots * (ACTION_SIZE + ACTION_GAP) -
+  ACTION_GAP +
+  extra +
+  OVERFLOW_SLOT +
+  ACTION_GAP
 
 describe("mergeActions", () => {
   it("keeps the core actions when the host adds nothing", () => {
@@ -123,7 +133,7 @@ describe("collapseActions", () => {
   it("shows everything when there is room", () => {
     const { visible, overflow } = collapseActions(
       many,
-      widthFor(many.length),
+      widthFor(many.length, LEAVE_SIZE - ACTION_SIZE),
       "fullscreen"
     )
     expect(visible).toHaveLength(many.length)

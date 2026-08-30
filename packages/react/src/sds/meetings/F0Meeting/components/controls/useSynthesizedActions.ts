@@ -4,6 +4,7 @@ import {
   CameraPlus,
   Desktop,
   Handshake,
+  Messages,
   Microphone,
   MicrophoneNegative,
   Phone,
@@ -17,10 +18,12 @@ import {
   useF0MeetingRoster,
   useF0MeetingStable,
 } from "../../providers/F0MeetingProvider"
+import { useMeetingSurface } from "../../providers/MeetingSurfaceProvider"
 import {
   type F0MeetingAction,
   type F0MeetingLocalSource,
   type F0MeetingPermission,
+  type F0MeetingSidePanel,
 } from "../../types"
 
 const permissionMessage = (
@@ -40,9 +43,9 @@ const permissionMessage = (
 }
 
 /**
- * The device picker is a control of its own next to the source it configures,
- * not a chevron hanging off it: a menu glued to a toggle turns one target into
- * two, and the small one always wins the misclick.
+ * The device picker travels as its own action so hosts can still patch or
+ * remove it by id, but the bar draws it as the chevron half of the control it
+ * configures rather than as a separate button — see `MeetingMediaControl`.
  */
 const settingsAction = (
   id: string,
@@ -71,10 +74,13 @@ const settingsAction = (
  * explains itself. A feature the deployment does not have at all (no
  * `setScreenShareEnabled`) is the case that is genuinely omitted.
  */
-export const useSynthesizedActions = (): F0MeetingAction[] => {
+export const useSynthesizedActions = (
+  sidePanel?: F0MeetingSidePanel
+): F0MeetingAction[] => {
   const i18n = useI18n()
   const stable = useF0MeetingStable()
   const { localMedia, participants } = useF0MeetingRoster()
+  const { isSidePanelOpen, setSidePanelOpen } = useMeetingSurface()
 
   const local = participants.find(
     (participant) => participant.id === stable.localParticipantId
@@ -182,6 +188,27 @@ export const useSynthesizedActions = (): F0MeetingAction[] => {
       })
     }
 
+    if (sidePanel && sidePanel.tabs.length > 0) {
+      const unread = sidePanel.tabs.reduce(
+        (total, tab) => total + (tab.badge ?? 0),
+        0
+      )
+      actions.push({
+        id: "core:chat",
+        label: isSidePanelOpen ? i18n.meeting.closeChat : i18n.meeting.openChat,
+        icon: Messages,
+        pressed: isSidePanelOpen,
+        onClick: () => setSidePanelOpen(!isSidePanelOpen),
+        badge: unread > 0 ? unread : undefined,
+        // A 420px panel beside the grid only exists where there is room for
+        // both. In a side panel or a floating window it would leave the video
+        // a sliver, so the control is not offered rather than offered broken.
+        modes: ["fullscreen"],
+        priority: 50,
+        group: "collab",
+      })
+    }
+
     actions.push({
       id: "core:leave",
       label: i18n.meeting.leave,
@@ -194,5 +221,13 @@ export const useSynthesizedActions = (): F0MeetingAction[] => {
     })
 
     return actions
-  }, [i18n, stable, localMedia, handRaised])
+  }, [
+    i18n,
+    stable,
+    localMedia,
+    handRaised,
+    sidePanel,
+    isSidePanelOpen,
+    setSidePanelOpen,
+  ])
 }

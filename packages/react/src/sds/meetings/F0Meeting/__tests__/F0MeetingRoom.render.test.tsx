@@ -292,15 +292,15 @@ describe("mode switch", () => {
     )
   })
 
-  it("scales its chrome up in fullscreen", async () => {
-    // Fullscreen is a room, not a widget in a corner: title-bar controls sized
-    // for a 360px window are unreachably small across a whole screen.
+  it("keeps one chrome size across every surface", async () => {
+    // The design gives the header's controls a 32px slot whatever the window
+    // is doing, so the switch does not change shape as the room resizes —
+    // moving between modes should not move the control you just used.
     renderSurface()
-    const small = toFloating().className
+    const floating = toFloating().className
     await userEvent.click(toFullscreen())
-    expect(toFullscreen().className).not.toBe(small)
-    expect(toFullscreen().className).toContain("h-8")
-    expect(small).toContain("h-6")
+    expect(toFullscreen().className).toBe(floating)
+    expect(floating).toContain("h-8")
   })
 
   it("has no button for the pill, which is derived rather than chosen", () => {

@@ -94,9 +94,16 @@ describe("ParticipantTile video fit", () => {
     expect(element.className).toContain("bg-f1-background-inverse")
   })
 
-  it("keeps a filled camera tile on the light surface", () => {
+  // The room reads as one object. A tile that followed the light surface when
+  // the camera was off looked like a hole in the grid instead.
+  it("puts a filled camera tile on the dark plate", () => {
     const { element } = renderTile(build())
-    expect(element.className).toContain("bg-f1-background-secondary")
+    expect(element.className).toContain("bg-f1-background-inverse")
+  })
+
+  it("keeps the same dark plate when the camera is off", () => {
+    const { element } = renderTile(build({ tracks: [] }))
+    expect(element.className).toContain("bg-f1-background-inverse")
   })
 })
 
@@ -107,12 +114,11 @@ describe("ParticipantTile name contrast", () => {
     expect(chip.className).toContain("bg-f1-background-inverse/80")
   })
 
-  it("goes dark on the light tile when the camera is off", () => {
-    // White-on-a-dark-smudge over a pale avatar placeholder is the contrast
-    // failure this exists to prevent.
+  it("drops the chip's plate over the placeholder, keeping the light text", () => {
+    // On the dark placeholder there is no imagery to fight, and the plate would
+    // read as a smudge — but the text still has to be light against it.
     const { chip } = renderTile(build({ tracks: [] }))
-    expect(chip.className).toContain("text-f1-foreground")
-    expect(chip.className).not.toContain("text-f1-foreground-inverse")
-    expect(chip.className).not.toContain("bg-f1-background-inverse")
+    expect(chip.className).toContain("text-f1-foreground-inverse")
+    expect(chip.className).not.toContain("bg-f1-background-inverse/80")
   })
 })

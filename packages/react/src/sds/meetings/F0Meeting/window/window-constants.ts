@@ -2,11 +2,12 @@
 export const WINDOW_MARGIN = 12
 
 export const WINDOW_MIN_WIDTH = 280
-/** 16:9 of the minimum width plus the header and control bar. */
-export const WINDOW_MIN_HEIGHT = 218
+/** 16:9 of the minimum width plus the 60px header and the 64px control bar. */
+export const WINDOW_MIN_HEIGHT = 282
 
 export const WINDOW_DEFAULT_WIDTH = 360
-export const WINDOW_DEFAULT_HEIGHT = 260
+/** 16:9 of the default width, plus the header and the control bar. */
+export const WINDOW_DEFAULT_HEIGHT = 340
 
 export const MINIMIZED_WIDTH = 280
 export const MINIMIZED_HEIGHT = 56
@@ -18,7 +19,7 @@ export const SNAP_THRESHOLD = 88
 export const DRAG_THRESHOLD = 5
 
 /** Side panel widths, matching the chat's so the two panels feel like siblings. */
-export const PANEL_DEFAULT_WIDTH = 360
+export const PANEL_DEFAULT_WIDTH = 450
 export const PANEL_MIN_WIDTH = 300
 export const PANEL_MAX_WIDTH = 712
 /**
@@ -31,8 +32,8 @@ export const PANEL_GAP = 4
 export const KEYBOARD_STEP = 16
 export const KEYBOARD_STEP_LARGE = 48
 
-export const WINDOW_HEADER_HEIGHT = 36
-export const WINDOW_CONTROLS_HEIGHT = 52
+export const WINDOW_HEADER_HEIGHT = 60
+export const WINDOW_CONTROLS_HEIGHT = 64
 
 export const PLACEMENT_STORAGE_KEY = "ONE-meeting-window"
 export const MODE_STORAGE_KEY = "ONE-meeting-mode"

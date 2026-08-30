@@ -48,9 +48,25 @@ export const MeetingActionButton = ({
     )
   }
 
+  // Hanging up is the one action that carries its label. It is irreversible and
+  // it is the only red control in the bar, so it should not depend on reading a
+  // glyph — the design gives it a wider, labelled button for exactly that.
+  if (action.variant === "critical") {
+    return (
+      <F0Button
+        variant="critical"
+        size={size}
+        label={action.label}
+        disabled={action.disabled}
+        loading={action.pending}
+        onClick={action.onClick}
+      />
+    )
+  }
+
   return (
     <F0Button
-      variant={action.variant === "critical" ? "default" : "ghost"}
+      variant="ghost"
       size={size}
       hideLabel
       icon={action.icon}
