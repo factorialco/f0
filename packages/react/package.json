@@ -1,12 +1,12 @@
 {
   "name": "@factorialco/f0-react",
   "version": "6.78.1",
+  "private": false,
   "repository": {
     "type": "git",
     "url": "git+https://github.com/factorialco/f0.git",
     "directory": "packages/react"
   },
-  "private": false,
   "files": [
     "assets",
     "dist",
@@ -26,67 +26,67 @@
   "exports": {
     ".": {
       "types": "./dist/f0.d.ts",
-      "import": "./dist/f0.js"
+      "import": "./dist/esm/f0.js"
     },
     "./experimental": {
       "types": "./dist/experimental.d.ts",
-      "import": "./dist/experimental.js"
+      "import": "./dist/esm/experimental.js"
     },
     "./ai": {
       "types": "./dist/ai.d.ts",
-      "import": "./dist/ai.js"
+      "import": "./dist/esm/ai.js"
     },
     "./component-status": {
       "types": "./dist/component-status.d.ts",
-      "import": "./dist/component-status.js"
+      "import": "./dist/esm/component-status.js"
     },
     "./i18n-provider-defaults": {
       "types": "./dist/lib/providers/i18n/i18n-provider-defaults.d.ts",
-      "import": "./dist/i18n-provider-defaults.js"
+      "import": "./dist/esm/i18n-provider-defaults.js"
     },
     "./F0Alert": {
       "types": "./dist/components/F0Alert/index.d.ts",
-      "import": "./dist/F0Alert.js"
+      "import": "./dist/esm/F0Alert.js"
     },
     "./F0Box": {
       "types": "./dist/lib/F0Box/index.d.ts",
-      "import": "./dist/F0Box.js"
+      "import": "./dist/esm/F0Box.js"
     },
     "./F0Button": {
       "types": "./dist/components/F0Button/index.d.ts",
-      "import": "./dist/F0Button.js"
+      "import": "./dist/esm/F0Button.js"
     },
     "./F0Card": {
       "types": "./dist/components/F0Card/index.d.ts",
-      "import": "./dist/F0Card.js"
+      "import": "./dist/esm/F0Card.js"
     },
     "./F0DatePicker": {
       "types": "./dist/components/F0DatePicker/index.d.ts",
-      "import": "./dist/F0DatePicker.js"
+      "import": "./dist/esm/F0DatePicker.js"
     },
     "./F0Dialog": {
       "types": "./dist/patterns/F0Dialog/index.d.ts",
-      "import": "./dist/F0Dialog.js"
+      "import": "./dist/esm/F0Dialog.js"
     },
     "./F0Heading": {
       "types": "./dist/components/F0Heading/index.d.ts",
-      "import": "./dist/F0Heading.js"
+      "import": "./dist/esm/F0Heading.js"
     },
     "./F0NumberInput": {
       "types": "./dist/components/F0NumberInput/index.d.ts",
-      "import": "./dist/F0NumberInput.js"
+      "import": "./dist/esm/F0NumberInput.js"
     },
     "./F0Select": {
       "types": "./dist/components/F0Select/index.d.ts",
-      "import": "./dist/F0Select.js"
+      "import": "./dist/esm/F0Select.js"
     },
     "./F0Text": {
       "types": "./dist/components/F0Text/index.d.ts",
-      "import": "./dist/F0Text.js"
+      "import": "./dist/esm/F0Text.js"
     },
     "./F0TextInput": {
       "types": "./dist/components/F0TextInput/index.d.ts",
-      "import": "./dist/F0TextInput.js"
+      "import": "./dist/esm/F0TextInput.js"
     },
     "./icons/ai": {
       "types": "./icons/ai/index.d.ts",
@@ -141,12 +141,13 @@
     "start": "pnpm run dev",
     "size": "pnpm run build && size-limit",
     "check:consumer-bundle": "tsx .scripts/check-consumer-bundle.ts",
-    "build": "tsc --project ./tsconfig-build.json && run-p build-icons && NODE_OPTIONS=--max-old-space-size=8192 vite build -- --tailwind && NODE_OPTIONS=--max-old-space-size=8192 BUILD_TYPES=true BUILD_DECLARATIONS_ONLY=true vite build && pnpm run check:build-artifacts",
+    "build": "tsc --project ./tsconfig-build.json && run-p build-icons && NODE_OPTIONS=--max-old-space-size=8192 vite build -- --tailwind && BUILD_PRESERVED_ESM=true NODE_OPTIONS=--max-old-space-size=8192 vite build && NODE_OPTIONS=--max-old-space-size=8192 BUILD_TYPES=true BUILD_DECLARATIONS_ONLY=true vite build && pnpm run check:build-artifacts && pnpm run check:published-runtime-dependencies",
     "build:tsup": "tsup && pnpm run build:tailwind && run-p build-icons",
     "build-icons": "tsc --project ./tsconfig-build-icons.json",
     "build:tailwind": "NODE_ENV=production tailwindcss -i src/styles.css -o ./dist/styles.css --postcss --minify",
-    "build:watch": "pnpm run build && run-p --race build:watch:runtime build:watch:declarations",
+    "build:watch": "pnpm run build && run-p --race build:watch:runtime build:watch:esm build:watch:declarations",
     "build:watch:runtime": "BUILD_WATCH=true NODE_OPTIONS=--max-old-space-size=8192 vite build --watch -- --tailwind",
+    "build:watch:esm": "BUILD_WATCH=true BUILD_PRESERVED_ESM=true NODE_OPTIONS=--max-old-space-size=8192 vite build --watch",
     "build:watch:declarations": "BUILD_WATCH=true BUILD_TYPES=true BUILD_DECLARATIONS_ONLY=true NODE_OPTIONS=--max-old-space-size=8192 vite build --watch",
     "lint": "sh -c 'oxlint \"${@:-src/}\" --max-warnings 0' --",
     "lint:fix": "sh -c 'oxlint \"${@:-src/}\" --fix --max-warnings 0' --",
@@ -167,6 +168,7 @@
     "tsc": "tsc --noEmit",
     "check:api-surface": "tsx .scripts/check-api-surface.ts",
     "check:build-artifacts": "tsx .scripts/check-build-artifacts.ts",
+    "check:published-runtime-dependencies": "tsx .scripts/check-published-runtime-dependencies.ts",
     "check:docs-index": "tsx .scripts/check-docs-index.ts",
     "check:bugfix-red-green": "tsx .scripts/check-bugfix-red-green.ts",
     "check:new-component-dod": "tsx .scripts/check-new-component-dod.ts",
@@ -187,6 +189,7 @@
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
+    "@emoji-mart/data": "^1.2.1",
     "@factorialco/f0-core": "workspace:*",
     "@mapbox/mapbox-gl-rtl-text": "0.2.3",
     "@radix-ui/number": "^1.1.1",
@@ -242,6 +245,7 @@
     "@tiptap/suggestion": "^2.12.0",
     "@vueless/storybook-dark-mode": "^10.0.7",
     "aria-hidden": "^1.2.6",
+    "axe-core": "^4.11.1",
     "colord": "^2.9.3",
     "cva": "1.0.0-beta.3",
     "docx-preview": "^0.4.0",
@@ -251,12 +255,15 @@
     "embla-carousel-autoplay": "^8.5.2",
     "embla-carousel-react": "^8.6.0",
     "embla-carousel-wheel-gestures": "^8.0.1",
+    "emoji-mart": "^5.6.0",
+    "emojibase-data": "^16.0.3",
     "gridstack": "^12.3.3",
     "libphonenumber-js": "^1.13.9",
+    "lodash": "^4.17.21",
     "maplibre-gl": "^5.24.0",
+    "postcss-value-parser": "^4.2.0",
     "prosemirror-state": "^1.4.3",
     "prosemirror-view": "^1.38.1",
-    "postcss-value-parser": "^4.2.0",
     "react-phone-number-input": "^3.4.17",
     "react-remove-scroll": "^2.7.1",
     "react-virtuoso": "^4.18.10",
@@ -278,7 +285,6 @@
     "@chromatic-com/storybook": "^5.1.1",
     "@commitlint/cli": "^19.7.1",
     "@commitlint/config-conventional": "^19.7.1",
-    "@emoji-mart/data": "^1.2.1",
     "@emotion/is-prop-valid": "^1.3.1",
     "@github-ui/storybook-addon-performance-panel": "^1.2.0",
     "@livekit/components-react": "^2.9.19",
@@ -315,14 +321,11 @@
     "@vitest/ui": "4.1.11",
     "@xyflow/react": "^12",
     "autoprefixer": "^10.4.21",
-    "axe-core": "^4.11.1",
     "axe-playwright": "^2.1.0",
     "chalk": "^5.4.1",
     "chromatic": "^11.28.0",
     "consola": "^3.4.0",
     "dotenv": "^16.4.7",
-    "emoji-mart": "^5.6.0",
-    "emojibase-data": "^16.0.3",
     "esbuild": "^0.28.2",
     "eslint-plugin-react-refresh": "^0.4.26",
     "eslint-plugin-storybook": "^10.5.10",
@@ -331,7 +334,6 @@
     "jsdom": "^26.0.0",
     "lefthook": "^1.11.3",
     "livekit-client": "^2.17.0",
-    "lodash": "^4.17.21",
     "markdown-to-jsx": "^9.3.3",
     "mockdate": "^3.0.5",
     "npm-run-all": "^4.1.5",
