@@ -18,9 +18,9 @@
     "f0Button": {
       "assets": {
         "js": {
-          "raw": 624023,
-          "gzip": 199473,
-          "brotli": 167911
+          "raw": 585195,
+          "gzip": 187309,
+          "brotli": 161182
         },
         "css": {
           "raw": 0,
@@ -29,9 +29,9 @@
         }
       },
       "retainedF0Modules": [
+        "F0Button.js",
         "clsx.js",
         "i18n-provider-defaults.js",
-        "popover.js",
         "rolldown-runtime.js",
         "tooltip.js"
       ]
@@ -39,9 +39,9 @@
     "f0ButtonWithGlobalStyles": {
       "assets": {
         "js": {
-          "raw": 624023,
-          "gzip": 199473,
-          "brotli": 167878
+          "raw": 585195,
+          "gzip": 187309,
+          "brotli": 161137
         },
         "css": {
           "raw": 1958106,
@@ -50,9 +50,9 @@
         }
       },
       "retainedF0Modules": [
+        "F0Button.js",
         "clsx.js",
         "i18n-provider-defaults.js",
-        "popover.js",
         "rolldown-runtime.js",
         "tooltip.js"
       ]
