@@ -11,6 +11,7 @@ const baseline: BundleReport = {
     native: {
       assets: {
         js: { raw: 100, gzip: 80, brotli: 70 },
+        initialJs: { raw: 100, gzip: 80, brotli: 70 },
         css: { raw: 0, gzip: 0, brotli: 0 },
       },
       retainedF0Modules: [],
@@ -18,6 +19,7 @@ const baseline: BundleReport = {
     f0Button: {
       assets: {
         js: { raw: 1_000, gzip: 800, brotli: 700 },
+        initialJs: { raw: 1_000, gzip: 800, brotli: 700 },
         css: { raw: 100, gzip: 80, brotli: 70 },
       },
       retainedF0Modules: ["f0.js", "F0CanvasPanel.js"],
@@ -51,6 +53,15 @@ describe("consumer bundle baseline", () => {
 
     expect(compareBundleReport(actual, baseline)).toEqual([
       "f0Button retained new F0 module: xlsx.js",
+    ])
+  })
+
+  it("requires every measured variant to have a reviewed baseline", () => {
+    const actual: BundleReport = structuredClone(baseline)
+    actual.variants.unreviewed = structuredClone(actual.variants.native)
+
+    expect(compareBundleReport(actual, baseline)).toEqual([
+      "Unexpected consumer bundle variant without baseline: unreviewed",
     ])
   })
 

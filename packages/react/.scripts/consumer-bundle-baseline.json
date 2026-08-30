@@ -7,6 +7,11 @@
           "gzip": 45066,
           "brotli": 39484
         },
+        "initialJs": {
+          "raw": 140678,
+          "gzip": 45066,
+          "brotli": 39484
+        },
         "css": {
           "raw": 0,
           "gzip": 0,
@@ -18,9 +23,14 @@
     "f0Button": {
       "assets": {
         "js": {
-          "raw": 585195,
-          "gzip": 187309,
-          "brotli": 161182
+          "raw": 585131,
+          "gzip": 187232,
+          "brotli": 160992
+        },
+        "initialJs": {
+          "raw": 585131,
+          "gzip": 187232,
+          "brotli": 160992
         },
         "css": {
           "raw": 0,
@@ -30,18 +40,27 @@
       },
       "retainedF0Modules": [
         "F0Button.js",
+        "OneEllipsis.js",
         "clsx.js",
+        "component.js",
+        "dist.js",
         "i18n-provider-defaults.js",
         "rolldown-runtime.js",
-        "tooltip.js"
+        "tooltip.js",
+        "utils.js"
       ]
     },
     "f0ButtonWithGlobalStyles": {
       "assets": {
         "js": {
-          "raw": 585195,
-          "gzip": 187309,
-          "brotli": 161137
+          "raw": 585131,
+          "gzip": 187231,
+          "brotli": 161072
+        },
+        "initialJs": {
+          "raw": 585131,
+          "gzip": 187231,
+          "brotli": 161072
         },
         "css": {
           "raw": 1958106,
@@ -51,10 +70,323 @@
       },
       "retainedF0Modules": [
         "F0Button.js",
+        "OneEllipsis.js",
         "clsx.js",
+        "component.js",
+        "dist.js",
         "i18n-provider-defaults.js",
         "rolldown-runtime.js",
-        "tooltip.js"
+        "tooltip.js",
+        "utils.js"
+      ]
+    },
+    "f0Box": {
+      "assets": {
+        "js": {
+          "raw": 179516,
+          "gzip": 56967,
+          "brotli": 49141
+        },
+        "initialJs": {
+          "raw": 179516,
+          "gzip": 56967,
+          "brotli": 49141
+        },
+        "css": {
+          "raw": 0,
+          "gzip": 0,
+          "brotli": 0
+        }
+      },
+      "retainedF0Modules": [
+        "F0Box.js",
+        "clsx.js",
+        "component.js",
+        "dist.js",
+        "utils.js"
+      ]
+    },
+    "f0Text": {
+      "assets": {
+        "js": {
+          "raw": 390314,
+          "gzip": 123644,
+          "brotli": 107364
+        },
+        "initialJs": {
+          "raw": 390314,
+          "gzip": 123644,
+          "brotli": 107364
+        },
+        "css": {
+          "raw": 0,
+          "gzip": 0,
+          "brotli": 0
+        }
+      },
+      "retainedF0Modules": [
+        "F0Text.js",
+        "OneEllipsis.js",
+        "Text.js",
+        "clsx.js",
+        "dist.js",
+        "rolldown-runtime.js",
+        "tooltip.js",
+        "utils.js",
+        "variants.js"
+      ]
+    },
+    "f0Dialog": {
+      "assets": {
+        "js": {
+          "raw": 3785306,
+          "gzip": 1148987,
+          "brotli": 893110
+        },
+        "initialJs": {
+          "raw": 3785306,
+          "gzip": 1148987,
+          "brotli": 893110
+        },
+        "css": {
+          "raw": 0,
+          "gzip": 0,
+          "brotli": 0
+        }
+      },
+      "retainedF0Modules": [
+        "F0Button.js",
+        "F0Checkbox.js",
+        "F0Dialog.js",
+        "F0Select.js",
+        "Maximize.js",
+        "OneEllipsis.js",
+        "clsx.js",
+        "component.js",
+        "dist.js",
+        "dropdown-menu.js",
+        "i18n-provider-defaults.js",
+        "popover.js",
+        "progress.js",
+        "rolldown-runtime.js",
+        "skeleton.js",
+        "tooltip.js",
+        "utils.js",
+        "variants.js"
+      ]
+    },
+    "f0Select": {
+      "assets": {
+        "js": {
+          "raw": 3657875,
+          "gzip": 1112588,
+          "brotli": 867218
+        },
+        "initialJs": {
+          "raw": 3657875,
+          "gzip": 1112588,
+          "brotli": 867218
+        },
+        "css": {
+          "raw": 0,
+          "gzip": 0,
+          "brotli": 0
+        }
+      },
+      "retainedF0Modules": [
+        "F0Button.js",
+        "F0Checkbox.js",
+        "F0Select.js",
+        "OneEllipsis.js",
+        "clsx.js",
+        "component.js",
+        "dist.js",
+        "i18n-provider-defaults.js",
+        "popover.js",
+        "rolldown-runtime.js",
+        "tooltip.js",
+        "utils.js",
+        "variants.js"
+      ]
+    },
+    "f0Form": {
+      "assets": {
+        "js": {
+          "raw": 5953880,
+          "gzip": 1754239,
+          "brotli": 1362033
+        },
+        "initialJs": {
+          "raw": 5953880,
+          "gzip": 1754239,
+          "brotli": 1362033
+        },
+        "css": {
+          "raw": 15198,
+          "gzip": 3340,
+          "brotli": 2937
+        }
+      },
+      "retainedF0Modules": [
+        "Download.js",
+        "F0AiFormRegistry.js",
+        "F0Button.js",
+        "F0Card.js",
+        "F0Checkbox.js",
+        "F0Dialog.js",
+        "F0Form.js",
+        "F0Select.js",
+        "F0TextInput.js",
+        "Globe.js",
+        "Maximize.js",
+        "Minimize.js",
+        "OneEllipsis.js",
+        "Reset.js",
+        "RichText.js",
+        "clsx.js",
+        "component.js",
+        "dist.js",
+        "dropdown-menu.js",
+        "i18n-provider-defaults.js",
+        "popover.js",
+        "progress.js",
+        "rolldown-runtime.js",
+        "skeleton.js",
+        "tooltip.js",
+        "useDataCollectionSource.js",
+        "utils.js",
+        "variants.js"
+      ]
+    },
+    "oneDataCollection": {
+      "assets": {
+        "js": {
+          "raw": 4402456,
+          "gzip": 1344403,
+          "brotli": 1043556
+        },
+        "initialJs": {
+          "raw": 4402456,
+          "gzip": 1344403,
+          "brotli": 1043556
+        },
+        "css": {
+          "raw": 1890,
+          "gzip": 703,
+          "brotli": 619
+        }
+      },
+      "retainedF0Modules": [
+        "Download.js",
+        "F0Button.js",
+        "F0Card.js",
+        "F0Checkbox.js",
+        "F0Dialog.js",
+        "F0Select.js",
+        "F0TextInput.js",
+        "Maximize.js",
+        "Minimize.js",
+        "OneEllipsis.js",
+        "Reset.js",
+        "clsx.js",
+        "component.js",
+        "dist.js",
+        "dropdown-menu.js",
+        "i18n-provider-defaults.js",
+        "popover.js",
+        "progress.js",
+        "rolldown-runtime.js",
+        "skeleton.js",
+        "tooltip.js",
+        "useDataCollectionSource.js",
+        "utils.js",
+        "variants.js"
+      ]
+    },
+    "f0AiChat": {
+      "assets": {
+        "js": {
+          "raw": 3363941,
+          "gzip": 1025288,
+          "brotli": 795534
+        },
+        "initialJs": {
+          "raw": 3363941,
+          "gzip": 1025288,
+          "brotli": 795534
+        },
+        "css": {
+          "raw": 12192,
+          "gzip": 2535,
+          "brotli": 2177
+        }
+      },
+      "retainedF0Modules": [
+        "AiChatTranslationsProvider.js",
+        "F0Button.js",
+        "F0Checkbox.js",
+        "OneEllipsis.js",
+        "RichText.js",
+        "clsx.js",
+        "component.js",
+        "dist.js",
+        "dropdown-menu.js",
+        "i18n-provider-defaults.js",
+        "popover.js",
+        "progress.js",
+        "rolldown-runtime.js",
+        "tooltip.js",
+        "utils.js"
+      ]
+    },
+    "f0PdfViewer": {
+      "assets": {
+        "js": {
+          "raw": 7545816,
+          "gzip": 2299813,
+          "brotli": 1435400
+        },
+        "initialJs": {
+          "raw": 7028644,
+          "gzip": 2133637,
+          "brotli": 1294170
+        },
+        "css": {
+          "raw": 436,
+          "gzip": 248,
+          "brotli": 180
+        }
+      },
+      "retainedF0Modules": [
+        "DocumentToolbar.js",
+        "DocxViewer.js",
+        "Download.js",
+        "F0Button.js",
+        "F0Checkbox.js",
+        "F0PdfViewer.js",
+        "F0Select.js",
+        "OneEllipsis.js",
+        "Printer.js",
+        "Reset.js",
+        "SheetViewer.js",
+        "TextViewer.js",
+        "ToggleGroup.js",
+        "clsx.js",
+        "component.js",
+        "dist.js",
+        "docx-preview.js",
+        "i18n-provider-defaults.js",
+        "pdfWorker.js",
+        "popover.js",
+        "rolldown-runtime.js",
+        "scales.js",
+        "sheetPreview.js",
+        "skeleton.js",
+        "tiny-invariant.js",
+        "tooltip.js",
+        "utils.js",
+        "variants.js",
+        "xlsx.js"
       ]
     }
   }
