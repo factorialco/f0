@@ -28,9 +28,10 @@ describe("PresetFormDialog - name uniqueness", () => {
     await user.type(titleInput, "  eng TEAM ")
     await user.click(screen.getByRole("button", { name: "Save" }))
 
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      "A view with this name already exists"
-    )
+    const error = await screen.findByRole("alert")
+    expect(error).toHaveTextContent("A view with this name already exists")
+    expect(titleInput).toHaveAttribute("aria-invalid", "true")
+    expect(titleInput).toHaveAttribute("aria-describedby", error.id)
     expect(titleInput).toHaveFocus()
     expect(onSubmit).not.toHaveBeenCalled()
 
@@ -80,7 +81,7 @@ describe("PresetFormDialog - name uniqueness", () => {
     const view = zeroRender(
       <PresetFormDialog
         {...baseProps}
-        mode="edit"
+        mode="update"
         initialValues={{ title: "First", description: "Old description" }}
         onSubmit={onSubmit}
       />
@@ -95,7 +96,7 @@ describe("PresetFormDialog - name uniqueness", () => {
       <PresetFormDialog
         {...baseProps}
         isOpen={false}
-        mode="edit"
+        mode="update"
         initialValues={{ title: "First", description: "Old description" }}
         onSubmit={onSubmit}
       />
@@ -103,7 +104,7 @@ describe("PresetFormDialog - name uniqueness", () => {
     view.rerender(
       <PresetFormDialog
         {...baseProps}
-        mode="edit"
+        mode="update"
         initialValues={{ title: "Second", description: "New description" }}
         onSubmit={onSubmit}
       />

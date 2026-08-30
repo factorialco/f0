@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useId, useRef, useState } from "react"
 
 import { F0TextAreaInput } from "@/components/F0TextAreaInput"
 import { F0TextInput } from "@/components/F0TextInput"
@@ -62,6 +62,7 @@ export function PresetFormDialog({
   )
   const [titleError, setTitleError] = useState<string>()
   const titleInputRef = useRef<HTMLInputElement>(null)
+  const titleErrorId = useId()
 
   useEffect(() => {
     if (!isOpen) return
@@ -144,9 +145,11 @@ export function PresetFormDialog({
           error={titleError}
           required
           onPressEnter={handleSubmit}
+          aria-invalid={titleError ? true : undefined}
+          aria-describedby={titleError ? titleErrorId : undefined}
         />
         {titleError && (
-          <span className="sr-only" role="alert">
+          <span id={titleErrorId} className="sr-only" role="alert">
             {titleError}
           </span>
         )}

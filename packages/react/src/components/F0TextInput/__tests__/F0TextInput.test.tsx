@@ -167,5 +167,15 @@ describe("F0TextInput", () => {
 
       expect(onPressEnter).not.toHaveBeenCalled()
     })
+
+    it("does not fire while an IME composition is active", () => {
+      const onPressEnter = vi.fn()
+      render(<F0TextInput label="Submit" onPressEnter={onPressEnter} />)
+
+      const input = screen.getAllByLabelText("Submit")[0]
+      fireEvent.keyDown(input, { key: "Enter", isComposing: true })
+
+      expect(onPressEnter).not.toHaveBeenCalled()
+    })
   })
 })
