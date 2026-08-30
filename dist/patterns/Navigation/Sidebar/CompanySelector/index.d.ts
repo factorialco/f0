@@ -1,0 +1,21 @@
+import { IconType } from '../../../../components/F0Icon';
+export interface Company {
+    id: string;
+    name: string;
+    logo?: string;
+}
+export type CompanySelectorProps = {
+    companies: Company[];
+    selected?: string;
+    onChange: (value: string) => void;
+    isLoading?: boolean;
+    withNotification?: boolean;
+    additionalOptions?: {
+        label: string;
+        value: string;
+        icon?: IconType;
+        description?: string;
+        onClick?: () => void;
+    }[];
+};
+export declare function CompanySelector({ companies, selected, onChange, isLoading, withNotification, additionalOptions, }: CompanySelectorProps): import("react").JSX.Element;

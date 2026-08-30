@@ -1,0 +1,72 @@
+import e from "../../../icons/app/Download.js";
+import t from "../../../icons/app/Minus.js";
+import n from "../../../icons/app/Plus.js";
+import { useI18n as r } from "../../../lib/providers/i18n/i18n-provider.js";
+import { F0Select as i } from "../../../F0Select.js";
+import { ToolbarButton as a } from "./ToolbarButton.js";
+import { downloadFromUrl as o } from "../pdfActions.js";
+import { fixedScales as s, nextScaleDown as c, nextScaleUp as l } from "../scales.js";
+import { useCallback as u, useMemo as d, useState as f } from "react";
+import { jsx as p, jsxs as m } from "react/jsx-runtime";
+//#region src/components/F0PdfViewer/components/DocumentToolbar.tsx
+var h = () => {
+	let [e, t] = f(1);
+	return {
+		scale: e,
+		zoomIn: u(() => t((e) => l(e) ?? e), []),
+		zoomOut: u(() => t((e) => c(e) ?? e), []),
+		setScale: t
+	};
+}, g = ({ url: c, filename: l, withCredentials: u, actions: f, zoom: h, children: g }) => {
+	let { pdfViewer: _ } = r(), v = d(() => s.map((e) => ({
+		value: e,
+		label: `${Number(e) * 100}%`
+	})), []);
+	return /* @__PURE__ */ m("div", {
+		role: "toolbar",
+		"aria-label": _.toolbar,
+		className: "F0PdfViewer__surface sticky top-0 z-10 flex flex-row items-center justify-between gap-2 px-6 py-4",
+		children: [
+			/* @__PURE__ */ p("div", {
+				className: "flex min-w-0 flex-1 basis-0 flex-row items-center gap-2 overflow-x-auto",
+				children: g
+			}),
+			h && /* @__PURE__ */ m("div", {
+				className: "flex shrink-0 flex-row items-center gap-2",
+				children: [
+					/* @__PURE__ */ p(a, {
+						label: _.zoomOut,
+						onClick: h.zoomOut,
+						icon: t
+					}),
+					/* @__PURE__ */ p(a, {
+						label: _.zoomIn,
+						onClick: h.zoomIn,
+						icon: n
+					}),
+					/* @__PURE__ */ p(i, {
+						hideLabel: !0,
+						label: _.scaleSelector,
+						options: v,
+						value: String(h.scale),
+						onChange: (e) => h.setScale(Number(e))
+					})
+				]
+			}),
+			/* @__PURE__ */ m("div", {
+				className: "flex flex-1 basis-0 flex-row items-center justify-end gap-2",
+				children: [/* @__PURE__ */ p(a, {
+					label: _.download,
+					onClick: () => void o(c, l, u),
+					icon: e
+				}), f?.map((e, t) => /* @__PURE__ */ p(a, {
+					label: e.label,
+					onClick: e.onClick,
+					icon: e.icon
+				}, `${e.label}-${t}`))]
+			})
+		]
+	});
+};
+//#endregion
+export { g as DocumentToolbar, h as useDocumentZoom };

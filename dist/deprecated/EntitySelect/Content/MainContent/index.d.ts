@@ -1,0 +1,35 @@
+import { default as React } from 'react';
+import { Action } from '../../../../components/F0Select/components/SelectBottomActions';
+import { EntitySelectEntity, EntitySelectNamedGroup, EntitySelectSubEntity } from '../../types';
+interface MainContentProps {
+    groupView: boolean;
+    entities: EntitySelectEntity[];
+    groups: EntitySelectNamedGroup[];
+    selectedGroup: string;
+    search: string;
+    onSelect: (entity: EntitySelectEntity) => void;
+    onRemove: (entity: EntitySelectEntity) => void;
+    onSubItemRemove: (parentEntity: EntitySelectEntity, entity: EntitySelectSubEntity) => void;
+    onSubItemSelect: (parentEntity: EntitySelectEntity, entity: EntitySelectSubEntity) => void;
+    onClear: () => void;
+    onSelectAll: () => void;
+    onSearch: (search: string) => void;
+    selectedEntities?: EntitySelectEntity[];
+    onGroupChange: (key: string | null) => void;
+    onToggleExpand: (entity: EntitySelectEntity, expanded: boolean) => void;
+    notFoundTitle: string;
+    notFoundSubtitle: string;
+    className?: string;
+    searchPlaceholder?: string;
+    selectAllLabel?: string;
+    clearLabel?: string;
+    singleSelector?: boolean;
+    loading?: boolean;
+    disabled?: boolean;
+    hiddenAvatar?: boolean;
+    actions?: Action[];
+    onCreate?: (partialName: string) => void;
+    onCreateLabel?: string;
+}
+export declare const MainContent: React.FC<MainContentProps>;
+export {};

@@ -1,0 +1,11 @@
+import { F0WizardStep } from './types';
+export interface F0WizardContextValue {
+    currentStep: number;
+    totalSteps: number;
+    loading: boolean;
+    goToStep: (index: number) => Promise<void>;
+    goNext: () => Promise<void>;
+    goPrevious: () => void;
+    steps: F0WizardStep[];
+    allowStepSkipping: boolean;
+}

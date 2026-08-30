@@ -1,0 +1,538 @@
+import { __exportAll as ee } from "../../_virtual/_rolldown/runtime.js";
+import te from "./AcademicCap.js";
+import e from "./Add.js";
+import t from "./Ai.js";
+import n from "./Alert.js";
+import r from "./AlertCircle.js";
+import i from "./AlertCircleLine.js";
+import a from "./AlignTextCenter.js";
+import o from "./AlignTextJustify.js";
+import s from "./AlignTextLeft.js";
+import c from "./AlignTextRight.js";
+import l from "./Appearance.js";
+import u from "./Archive.js";
+import d from "./ArchiveOpen.js";
+import f from "./ArrowCycle.js";
+import p from "./ArrowDown.js";
+import m from "./ArrowLeft.js";
+import h from "./ArrowRight.js";
+import g from "./ArrowUp.js";
+import _ from "./Ascending.js";
+import v from "./Balance.js";
+import y from "./Bank.js";
+import b from "./BarGraph.js";
+import x from "./Basket.js";
+import S from "./Bell.js";
+import C from "./BellOff.js";
+import w from "./Bold.js";
+import T from "./BookOpen.js";
+import E from "./Bookmark.js";
+import D from "./BookmarkFilled.js";
+import O from "./Briefcase.js";
+import k from "./Bucket.js";
+import A from "./Building.js";
+import j from "./Bullet.js";
+import M from "./Calculator.js";
+import N from "./Calendar.js";
+import P from "./CalendarArrowDown.js";
+import F from "./CalendarArrowLeft.js";
+import I from "./CalendarArrowRight.js";
+import L from "./CameraPlus.js";
+import R from "./CardPin.js";
+import z from "./ChartFunnel.js";
+import B from "./ChartHorizontalBars.js";
+import V from "./ChartLine.js";
+import H from "./ChartPie.js";
+import U from "./ChartVerticalBars.js";
+import W from "./Check.js";
+import G from "./CheckCircle.js";
+import K from "./CheckCircleLine.js";
+import q from "./CheckDouble.js";
+import J from "./ChevronDown.js";
+import Y from "./ChevronLeft.js";
+import X from "./ChevronRight.js";
+import Z from "./ChevronUp.js";
+import Q from "./Chip.js";
+import ne from "./Circle.js";
+import re from "./Clock.js";
+import ie from "./ClockBack.js";
+import ae from "./ClockPlus.js";
+import oe from "./Cloud.js";
+import se from "./Code.js";
+import ce from "./Coffee.js";
+import le from "./Command.js";
+import ue from "./Comment.js";
+import de from "./Completed.js";
+import fe from "./Computer.js";
+import pe from "./Contactless.js";
+import me from "./CornerHandle.js";
+import he from "./CreditCard.js";
+import ge from "./Cross.js";
+import _e from "./CrossedCircle.js";
+import ve from "./Crown.js";
+import ye from "./CursorClick.js";
+import be from "./Delete.js";
+import xe from "./Deny.js";
+import Se from "./Descending.js";
+import Ce from "./Desktop.js";
+import we from "./DollarBill.js";
+import Te from "./DollarReset.js";
+import Ee from "./DottedCircle.js";
+import De from "./Download.js";
+import Oe from "./DropdownDefault.js";
+import ke from "./DropdownOpen.js";
+import Ae from "./Ellipsis.js";
+import je from "./EllipsisHorizontal.js";
+import Me from "./Envelope.js";
+import Ne from "./EnvelopeOpen.js";
+import Pe from "./Equal.js";
+import Fe from "./EqualApproximately.js";
+import Ie from "./EqualGreater.js";
+import Le from "./EqualLess.js";
+import Re from "./Exit.js";
+import ze from "./ExternalLink.js";
+import Be from "./EyeInvisible.js";
+import Ve from "./EyeVisible.js";
+import He from "./FaceNegative.js";
+import Ue from "./FaceNeutral.js";
+import We from "./FacePositive.js";
+import Ge from "./FaceSuperNegative.js";
+import Ke from "./FaceSuperPositive.js";
+import qe from "./Feed.js";
+import Je from "./File.js";
+import Ye from "./FileFilled.js";
+import Xe from "./FileSigned.js";
+import Ze from "./Files.js";
+import Qe from "./Filter.js";
+import $e from "./FitView.js";
+import et from "./Flag.js";
+import tt from "./Flask.js";
+import nt from "./Folder.js";
+import rt from "./Folders.js";
+import it from "./Forward.js";
+import at from "./Globe.js";
+import ot from "./Graph.js";
+import st from "./Greater.js";
+import ct from "./Group.js";
+import lt from "./GroupBy.js";
+import ut from "./Handle.js";
+import dt from "./Handshake.js";
+import ft from "./HardDrive.js";
+import pt from "./HeadcountPlanning.js";
+import mt from "./Heading1.js";
+import ht from "./Heading2.js";
+import gt from "./Heading3.js";
+import _t from "./Headset.js";
+import vt from "./Heart.js";
+import yt from "./HoldHeart.js";
+import bt from "./Home.js";
+import xt from "./Hub.js";
+import St from "./Image.js";
+import Ct from "./InProgressTask.js";
+import wt from "./Inbox.js";
+import Tt from "./Info.js";
+import Et from "./InfoCircle.js";
+import Dt from "./InfoCircleLine.js";
+import Ot from "./InputField.js";
+import kt from "./Italic.js";
+import At from "./Kanban.js";
+import jt from "./Keyboard.js";
+import Mt from "./Laptop.js";
+import Nt from "./LayersFront.js";
+import Pt from "./Less.js";
+import Ft from "./Lightbulb.js";
+import It from "./Link.js";
+import Lt from "./LinkRemove.js";
+import Rt from "./List.js";
+import zt from "./LockLocked.js";
+import Bt from "./LockUnlocked.js";
+import $ from "./LogoAvatar.js";
+import Vt from "./LogoEruditai.js";
+import Ht from "./LogoTravelperk.js";
+import Ut from "./Marker.js";
+import Wt from "./Marketplace.js";
+import Gt from "./Masonry.js";
+import Kt from "./Maximize.js";
+import qt from "./MaximizeHorizontal.js";
+import Jt from "./Megaphone.js";
+import Yt from "./Menu.js";
+import Xt from "./MessageFilled.js";
+import Zt from "./MessageFrown.js";
+import Qt from "./MessageHeart.js";
+import $t from "./Messages.js";
+import en from "./Microphone.js";
+import tn from "./MicrophoneNegative.js";
+import nn from "./Minimize.js";
+import rn from "./MinimizeHorizontal.js";
+import an from "./Minus.js";
+import on from "./Mobile.js";
+import sn from "./Money.js";
+import cn from "./MoneyBag.js";
+import ln from "./MonitorDot.js";
+import un from "./MonitorSmartphone.js";
+import dn from "./Moon.js";
+import fn from "./Mouse.js";
+import pn from "./MoveDown.js";
+import mn from "./MoveTop.js";
+import hn from "./MoveUp.js";
+import gn from "./Multitask.js";
+import _n from "./New.js";
+import vn from "./Numbers.js";
+import yn from "./Office.js";
+import bn from "./OlList.js";
+import xn from "./Organization.js";
+import Sn from "./PalmTree.js";
+import Cn from "./Paperclip.js";
+import wn from "./PartiallyCompleted.js";
+import Tn from "./Password.js";
+import En from "./PauseCircle.js";
+import Dn from "./Pencil.js";
+import On from "./People.js";
+import kn from "./Person.js";
+import An from "./PersonMinus.js";
+import jn from "./PersonNegative.js";
+import Mn from "./PersonPlus.js";
+import Nn from "./Phone.js";
+import Pn from "./Pig.js";
+import Fn from "./Pin.js";
+import In from "./PixBrazil.js";
+import Ln from "./Placeholder.js";
+import Rn from "./Plane.js";
+import zn from "./Plus.js";
+import Bn from "./Present.js";
+import Vn from "./Printer.js";
+import Hn from "./Proyector.js";
+import Un from "./PushPin.js";
+import Wn from "./PushPinSolid.js";
+import Gn from "./Question.js";
+import Kn from "./QuestionCircle.js";
+import qn from "./Quote.js";
+import Jn from "./Reaction.js";
+import Yn from "./Receipt.js";
+import Xn from "./Record.js";
+import Zn from "./RemoveFavorite.js";
+import Qn from "./Replace.js";
+import $n from "./Reply.js";
+import er from "./Reset.js";
+import tr from "./Rocket.js";
+import nr from "./Salad.js";
+import rr from "./Save.js";
+import ir from "./Schedule.js";
+import ar from "./Search.js";
+import or from "./SearchPerson.js";
+import sr from "./Settings.js";
+import cr from "./Share.js";
+import lr from "./Shield.js";
+import ur from "./ShoppingCart.js";
+import dr from "./SignPost.js";
+import fr from "./Sleep.js";
+import pr from "./Sliders.js";
+import mr from "./SolidPause.js";
+import hr from "./SolidPlay.js";
+import gr from "./SolidStop.js";
+import _r from "./Sort.js";
+import vr from "./Sparkles.js";
+import yr from "./Spinner.js";
+import br from "./Split.js";
+import xr from "./Star.js";
+import Sr from "./StarFilled.js";
+import Cr from "./Strikethrough.js";
+import wr from "./Suitcase.js";
+import Tr from "./Swap.js";
+import Er from "./Table.js";
+import Dr from "./Tablet.js";
+import Or from "./Tag.js";
+import kr from "./Target.js";
+import Ar from "./TextSize.js";
+import jr from "./ThumbsDown.js";
+import Mr from "./ThumbsDownFilled.js";
+import Nr from "./ThumbsUp.js";
+import Pr from "./ThumbsUpFilled.js";
+import Fr from "./Timer.js";
+import Ir from "./Underline.js";
+import Lr from "./Upload.js";
+import Rr from "./Upsell.js";
+import zr from "./UserProtected.js";
+import Br from "./Video.js";
+import Vr from "./VideoRecorder.js";
+import Hr from "./VideoRecorderNegative.js";
+import Ur from "./VolumeHigh.js";
+import Wr from "./VolumeMid.js";
+import Gr from "./VolumeMuted.js";
+import Kr from "./Wallet.js";
+import qr from "./Warning.js";
+import Jr from "./Watch.js";
+import Yr from "./WhatsappChat.js";
+import Xr from "./Wifi.js";
+import Zr from "./Windows.js";
+//#region src/icons/app/index.ts
+var Qr = /* @__PURE__ */ ee({
+	AcademicCap: () => te,
+	Add: () => e,
+	Ai: () => t,
+	Alert: () => n,
+	AlertCircle: () => r,
+	AlertCircleLine: () => i,
+	AlignTextCenter: () => a,
+	AlignTextJustify: () => o,
+	AlignTextLeft: () => s,
+	AlignTextRight: () => c,
+	Appearance: () => l,
+	Archive: () => u,
+	ArchiveOpen: () => d,
+	ArrowCycle: () => f,
+	ArrowDown: () => p,
+	ArrowLeft: () => m,
+	ArrowRight: () => h,
+	ArrowUp: () => g,
+	Ascending: () => _,
+	Balance: () => v,
+	Bank: () => y,
+	BarGraph: () => b,
+	Basket: () => x,
+	Bell: () => S,
+	BellOff: () => C,
+	Bold: () => w,
+	BookOpen: () => T,
+	Bookmark: () => E,
+	BookmarkFilled: () => D,
+	Briefcase: () => O,
+	Bucket: () => k,
+	Building: () => A,
+	Bullet: () => j,
+	Calculator: () => M,
+	Calendar: () => N,
+	CalendarArrowDown: () => P,
+	CalendarArrowLeft: () => F,
+	CalendarArrowRight: () => I,
+	CameraPlus: () => L,
+	CardPin: () => R,
+	ChartFunnel: () => z,
+	ChartHorizontalBars: () => B,
+	ChartLine: () => V,
+	ChartPie: () => H,
+	ChartVerticalBars: () => U,
+	Check: () => W,
+	CheckCircle: () => G,
+	CheckCircleLine: () => K,
+	CheckDouble: () => q,
+	ChevronDown: () => J,
+	ChevronLeft: () => Y,
+	ChevronRight: () => X,
+	ChevronUp: () => Z,
+	Chip: () => Q,
+	Circle: () => ne,
+	Clock: () => re,
+	ClockBack: () => ie,
+	ClockPlus: () => ae,
+	Cloud: () => oe,
+	Code: () => se,
+	Coffee: () => ce,
+	Command: () => le,
+	Comment: () => ue,
+	Completed: () => de,
+	Computer: () => fe,
+	Contactless: () => pe,
+	CornerHandle: () => me,
+	CreditCard: () => he,
+	Cross: () => ge,
+	CrossedCircle: () => _e,
+	Crown: () => ve,
+	CursorClick: () => ye,
+	Delete: () => be,
+	Deny: () => xe,
+	Descending: () => Se,
+	Desktop: () => Ce,
+	DollarBill: () => we,
+	DollarReset: () => Te,
+	DottedCircle: () => Ee,
+	Download: () => De,
+	DropdownDefault: () => Oe,
+	DropdownOpen: () => ke,
+	Ellipsis: () => Ae,
+	EllipsisHorizontal: () => je,
+	Envelope: () => Me,
+	EnvelopeOpen: () => Ne,
+	Equal: () => Pe,
+	EqualApproximately: () => Fe,
+	EqualGreater: () => Ie,
+	EqualLess: () => Le,
+	Exit: () => Re,
+	ExternalLink: () => ze,
+	EyeInvisible: () => Be,
+	EyeVisible: () => Ve,
+	FaceNegative: () => He,
+	FaceNeutral: () => Ue,
+	FacePositive: () => We,
+	FaceSuperNegative: () => Ge,
+	FaceSuperPositive: () => Ke,
+	Feed: () => qe,
+	File: () => Je,
+	FileFilled: () => Ye,
+	FileSigned: () => Xe,
+	Files: () => Ze,
+	Filter: () => Qe,
+	FitView: () => $e,
+	Flag: () => et,
+	Flask: () => tt,
+	Folder: () => nt,
+	Folders: () => rt,
+	Forward: () => it,
+	Globe: () => at,
+	Graph: () => ot,
+	Greater: () => st,
+	Group: () => ct,
+	GroupBy: () => lt,
+	Handle: () => ut,
+	Handshake: () => dt,
+	HardDrive: () => ft,
+	HeadcountPlanning: () => pt,
+	Heading1: () => mt,
+	Heading2: () => ht,
+	Heading3: () => gt,
+	Headset: () => _t,
+	Heart: () => vt,
+	HoldHeart: () => yt,
+	Home: () => bt,
+	Hub: () => xt,
+	Image: () => St,
+	InProgressTask: () => Ct,
+	Inbox: () => wt,
+	Info: () => Tt,
+	InfoCircle: () => Et,
+	InfoCircleLine: () => Dt,
+	InputField: () => Ot,
+	Italic: () => kt,
+	Kanban: () => At,
+	Keyboard: () => jt,
+	Laptop: () => Mt,
+	LayersFront: () => Nt,
+	Less: () => Pt,
+	Lightbulb: () => Ft,
+	Link: () => It,
+	LinkRemove: () => Lt,
+	List: () => Rt,
+	LockLocked: () => zt,
+	LockUnlocked: () => Bt,
+	LogoAvatar: () => $,
+	LogoEruditai: () => Vt,
+	LogoTravelperk: () => Ht,
+	Marker: () => Ut,
+	Marketplace: () => Wt,
+	Masonry: () => Gt,
+	Maximize: () => Kt,
+	MaximizeHorizontal: () => qt,
+	Megaphone: () => Jt,
+	Menu: () => Yt,
+	MessageFilled: () => Xt,
+	MessageFrown: () => Zt,
+	MessageHeart: () => Qt,
+	Messages: () => $t,
+	Microphone: () => en,
+	MicrophoneNegative: () => tn,
+	Minimize: () => nn,
+	MinimizeHorizontal: () => rn,
+	Minus: () => an,
+	Mobile: () => on,
+	Money: () => sn,
+	MoneyBag: () => cn,
+	MonitorDot: () => ln,
+	MonitorSmartphone: () => un,
+	Moon: () => dn,
+	Mouse: () => fn,
+	MoveDown: () => pn,
+	MoveTop: () => mn,
+	MoveUp: () => hn,
+	Multitask: () => gn,
+	New: () => _n,
+	Numbers: () => vn,
+	Office: () => yn,
+	OlList: () => bn,
+	Organization: () => xn,
+	PalmTree: () => Sn,
+	Paperclip: () => Cn,
+	PartiallyCompleted: () => wn,
+	Password: () => Tn,
+	PauseCircle: () => En,
+	Pencil: () => Dn,
+	People: () => On,
+	Person: () => kn,
+	PersonMinus: () => An,
+	PersonNegative: () => jn,
+	PersonPlus: () => Mn,
+	Phone: () => Nn,
+	Pig: () => Pn,
+	Pin: () => Fn,
+	PixBrazil: () => In,
+	Placeholder: () => Ln,
+	Plane: () => Rn,
+	Plus: () => zn,
+	Present: () => Bn,
+	Printer: () => Vn,
+	Proyector: () => Hn,
+	PushPin: () => Un,
+	PushPinSolid: () => Wn,
+	Question: () => Gn,
+	QuestionCircle: () => Kn,
+	Quote: () => qn,
+	Reaction: () => Jn,
+	Receipt: () => Yn,
+	Record: () => Xn,
+	RemoveFavorite: () => Zn,
+	Replace: () => Qn,
+	Reply: () => $n,
+	Reset: () => er,
+	Rocket: () => tr,
+	Salad: () => nr,
+	Save: () => rr,
+	Schedule: () => ir,
+	Search: () => ar,
+	SearchPerson: () => or,
+	Settings: () => sr,
+	Share: () => cr,
+	Shield: () => lr,
+	ShoppingCart: () => ur,
+	SignPost: () => dr,
+	Sleep: () => fr,
+	Sliders: () => pr,
+	SolidPause: () => mr,
+	SolidPlay: () => hr,
+	SolidStop: () => gr,
+	Sort: () => _r,
+	Sparkles: () => vr,
+	Spinner: () => yr,
+	Split: () => br,
+	Star: () => xr,
+	StarFilled: () => Sr,
+	Strikethrough: () => Cr,
+	Suitcase: () => wr,
+	Swap: () => Tr,
+	Table: () => Er,
+	Tablet: () => Dr,
+	Tag: () => Or,
+	Target: () => kr,
+	TextSize: () => Ar,
+	ThumbsDown: () => jr,
+	ThumbsDownFilled: () => Mr,
+	ThumbsUp: () => Nr,
+	ThumbsUpFilled: () => Pr,
+	Timer: () => Fr,
+	Underline: () => Ir,
+	Upload: () => Lr,
+	Upsell: () => Rr,
+	UserProtected: () => zr,
+	Video: () => Br,
+	VideoRecorder: () => Vr,
+	VideoRecorderNegative: () => Hr,
+	VolumeHigh: () => Ur,
+	VolumeMid: () => Wr,
+	VolumeMuted: () => Gr,
+	Wallet: () => Kr,
+	Warning: () => qr,
+	Watch: () => Jr,
+	WhatsappChat: () => Yr,
+	Wifi: () => Xr,
+	Windows: () => Zr
+});
+//#endregion
+export { te as AcademicCap, e as Add, t as Ai, n as Alert, r as AlertCircle, i as AlertCircleLine, a as AlignTextCenter, o as AlignTextJustify, s as AlignTextLeft, c as AlignTextRight, l as Appearance, u as Archive, d as ArchiveOpen, f as ArrowCycle, p as ArrowDown, m as ArrowLeft, h as ArrowRight, g as ArrowUp, _ as Ascending, v as Balance, y as Bank, b as BarGraph, x as Basket, S as Bell, C as BellOff, w as Bold, T as BookOpen, E as Bookmark, D as BookmarkFilled, O as Briefcase, k as Bucket, A as Building, j as Bullet, M as Calculator, N as Calendar, P as CalendarArrowDown, F as CalendarArrowLeft, I as CalendarArrowRight, L as CameraPlus, R as CardPin, z as ChartFunnel, B as ChartHorizontalBars, V as ChartLine, H as ChartPie, U as ChartVerticalBars, W as Check, G as CheckCircle, K as CheckCircleLine, q as CheckDouble, J as ChevronDown, Y as ChevronLeft, X as ChevronRight, Z as ChevronUp, Q as Chip, ne as Circle, re as Clock, ie as ClockBack, ae as ClockPlus, oe as Cloud, se as Code, ce as Coffee, le as Command, ue as Comment, de as Completed, fe as Computer, pe as Contactless, me as CornerHandle, he as CreditCard, ge as Cross, _e as CrossedCircle, ve as Crown, ye as CursorClick, be as Delete, xe as Deny, Se as Descending, Ce as Desktop, we as DollarBill, Te as DollarReset, Ee as DottedCircle, De as Download, Oe as DropdownDefault, ke as DropdownOpen, Ae as Ellipsis, je as EllipsisHorizontal, Me as Envelope, Ne as EnvelopeOpen, Pe as Equal, Fe as EqualApproximately, Ie as EqualGreater, Le as EqualLess, Re as Exit, ze as ExternalLink, Be as EyeInvisible, Ve as EyeVisible, He as FaceNegative, Ue as FaceNeutral, We as FacePositive, Ge as FaceSuperNegative, Ke as FaceSuperPositive, qe as Feed, Je as File, Ye as FileFilled, Xe as FileSigned, Ze as Files, Qe as Filter, $e as FitView, et as Flag, tt as Flask, nt as Folder, rt as Folders, it as Forward, at as Globe, ot as Graph, st as Greater, ct as Group, lt as GroupBy, ut as Handle, dt as Handshake, ft as HardDrive, pt as HeadcountPlanning, mt as Heading1, ht as Heading2, gt as Heading3, _t as Headset, vt as Heart, yt as HoldHeart, bt as Home, xt as Hub, St as Image, Ct as InProgressTask, wt as Inbox, Tt as Info, Et as InfoCircle, Dt as InfoCircleLine, Ot as InputField, kt as Italic, At as Kanban, jt as Keyboard, Mt as Laptop, Nt as LayersFront, Pt as Less, Ft as Lightbulb, It as Link, Lt as LinkRemove, Rt as List, zt as LockLocked, Bt as LockUnlocked, $ as LogoAvatar, Vt as LogoEruditai, Ht as LogoTravelperk, Ut as Marker, Wt as Marketplace, Gt as Masonry, Kt as Maximize, qt as MaximizeHorizontal, Jt as Megaphone, Yt as Menu, Xt as MessageFilled, Zt as MessageFrown, Qt as MessageHeart, $t as Messages, en as Microphone, tn as MicrophoneNegative, nn as Minimize, rn as MinimizeHorizontal, an as Minus, on as Mobile, sn as Money, cn as MoneyBag, ln as MonitorDot, un as MonitorSmartphone, dn as Moon, fn as Mouse, pn as MoveDown, mn as MoveTop, hn as MoveUp, gn as Multitask, _n as New, vn as Numbers, yn as Office, bn as OlList, xn as Organization, Sn as PalmTree, Cn as Paperclip, wn as PartiallyCompleted, Tn as Password, En as PauseCircle, Dn as Pencil, On as People, kn as Person, An as PersonMinus, jn as PersonNegative, Mn as PersonPlus, Nn as Phone, Pn as Pig, Fn as Pin, In as PixBrazil, Ln as Placeholder, Rn as Plane, zn as Plus, Bn as Present, Vn as Printer, Hn as Proyector, Un as PushPin, Wn as PushPinSolid, Gn as Question, Kn as QuestionCircle, qn as Quote, Jn as Reaction, Yn as Receipt, Xn as Record, Zn as RemoveFavorite, Qn as Replace, $n as Reply, er as Reset, tr as Rocket, nr as Salad, rr as Save, ir as Schedule, ar as Search, or as SearchPerson, sr as Settings, cr as Share, lr as Shield, ur as ShoppingCart, dr as SignPost, fr as Sleep, pr as Sliders, mr as SolidPause, hr as SolidPlay, gr as SolidStop, _r as Sort, vr as Sparkles, yr as Spinner, br as Split, xr as Star, Sr as StarFilled, Cr as Strikethrough, wr as Suitcase, Tr as Swap, Er as Table, Dr as Tablet, Or as Tag, kr as Target, Ar as TextSize, jr as ThumbsDown, Mr as ThumbsDownFilled, Nr as ThumbsUp, Pr as ThumbsUpFilled, Fr as Timer, Ir as Underline, Lr as Upload, Rr as Upsell, zr as UserProtected, Br as Video, Vr as VideoRecorder, Hr as VideoRecorderNegative, Ur as VolumeHigh, Wr as VolumeMid, Gr as VolumeMuted, Kr as Wallet, qr as Warning, Jr as Watch, Yr as WhatsappChat, Xr as Wifi, Zr as Windows, Qr as app_exports };

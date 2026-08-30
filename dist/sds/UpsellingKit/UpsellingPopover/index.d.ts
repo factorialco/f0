@@ -1,0 +1,26 @@
+import { PopoverContentProps } from '@radix-ui/react-popover';
+import { F0ButtonProps } from '../../../components/F0Button';
+import { IconType } from '../../../components/F0Icon';
+import { Action } from '../ProductWidget';
+type UpsellingPopoverProps = {
+    isOpen: boolean;
+    setIsOpen: (isOpen: boolean) => void;
+    label: string;
+    variant: F0ButtonProps["variant"];
+    size?: F0ButtonProps["size"];
+    side?: PopoverContentProps["side"];
+    align?: PopoverContentProps["align"];
+    icon?: IconType;
+    showIcon?: boolean;
+    mediaUrl: string;
+    title: string;
+    description: string;
+    width?: string;
+    trackVisibility?: (visible: boolean) => void;
+    actions?: Action[];
+    onClick?: () => void;
+    hideLabel?: boolean;
+};
+declare function _UpsellingPopover({ isOpen, setIsOpen, label, variant, size, showIcon, side, align, icon, mediaUrl, title, description, width, trackVisibility, actions, onClick, hideLabel, }: UpsellingPopoverProps): import("react").JSX.Element;
+export declare const UpsellingPopover: import('../../../lib/data-testid').WithDataTestIdReturnType<typeof _UpsellingPopover>;
+export {};

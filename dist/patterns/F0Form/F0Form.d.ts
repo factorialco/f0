@@ -1,0 +1,3 @@
+import { default as React } from 'react';
+import { F0FormPropsWithPerSectionSchema, F0FormPropsWithPerSectionDefinition, F0FormPropsWithSingleSchema, F0FormPropsWithSingleSchemaDefinition, F0FormSchema, F0PerSectionSchema } from './types';
+export declare function F0Form<TSchema extends F0FormSchema | F0PerSectionSchema>(props: TSchema extends F0FormSchema ? F0FormPropsWithSingleSchema<TSchema> | F0FormPropsWithSingleSchemaDefinition<TSchema> : TSchema extends F0PerSectionSchema ? F0FormPropsWithPerSectionSchema<TSchema> | F0FormPropsWithPerSectionDefinition<TSchema> : never): React.JSX.Element;
