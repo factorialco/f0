@@ -1,0 +1,61 @@
+{
+  "variants": {
+    "native": {
+      "assets": {
+        "js": {
+          "raw": 140678,
+          "gzip": 45066,
+          "brotli": 39484
+        },
+        "css": {
+          "raw": 0,
+          "gzip": 0,
+          "brotli": 0
+        }
+      },
+      "retainedF0Modules": []
+    },
+    "f0Button": {
+      "assets": {
+        "js": {
+          "raw": 624023,
+          "gzip": 199473,
+          "brotli": 167911
+        },
+        "css": {
+          "raw": 0,
+          "gzip": 0,
+          "brotli": 0
+        }
+      },
+      "retainedF0Modules": [
+        "clsx.js",
+        "i18n-provider-defaults.js",
+        "popover.js",
+        "rolldown-runtime.js",
+        "tooltip.js"
+      ]
+    },
+    "f0ButtonWithGlobalStyles": {
+      "assets": {
+        "js": {
+          "raw": 624023,
+          "gzip": 199473,
+          "brotli": 167878
+        },
+        "css": {
+          "raw": 1958106,
+          "gzip": 152191,
+          "brotli": 86570
+        }
+      },
+      "retainedF0Modules": [
+        "clsx.js",
+        "i18n-provider-defaults.js",
+        "popover.js",
+        "rolldown-runtime.js",
+        "tooltip.js"
+      ]
+    }
+  }
+}
