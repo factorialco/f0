@@ -1,5 +1,5 @@
-import { useDeepCompareEffect } from "@reactuses/core"
 import { useComposedRefs } from "@radix-ui/react-compose-refs"
+import { useDeepCompareEffect } from "@reactuses/core"
 import { cva } from "cva"
 import { isEqual } from "lodash"
 import {
@@ -13,11 +13,14 @@ import {
   useState,
 } from "react"
 
+import type { OneFilterPicker as OneFilterPickerComponent } from "@/patterns/OneFilterPicker"
+
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
 import { F0InputField } from "@/components/F0InputField"
 import { InputMessages } from "@/components/F0InputField/components/InputMessages"
 import { Label } from "@/components/F0InputField/components/Label"
+import { TooltipInternal } from "@/experimental/Overlays/Tooltip"
 import {
   BaseFetchOptions,
   BaseResponse,
@@ -37,7 +40,7 @@ import { DataTestIdWrapper } from "@/lib/data-testid"
 import { useI18n } from "@/lib/providers/i18n"
 import { toArray } from "@/lib/toArray"
 import { cn, focusRing } from "@/lib/utils"
-import { F0DialogContext } from "@/patterns/F0Dialog"
+import { F0DialogContext } from "@/patterns/F0Dialog/components/F0DialogProvider"
 import { GroupHeader } from "@/ui/GroupHeader/index"
 import {
   SelectContent,
@@ -48,16 +51,16 @@ import {
 } from "@/ui/Select"
 import { textVariants } from "@/ui/Text"
 
+import type { ActiveFiltersChips as ActiveFiltersChipsComponent } from "./components/ActiveFiltersChips"
 import type {
   F0SelectItemObject,
   F0SelectItemProps,
   F0SelectProps,
+  F0SelectStaticProps,
   ResolvedRecordType,
 } from "./types"
 
 import { Arrow } from "./components/Arrow"
-import { TooltipInternal } from "@/experimental/Overlays/Tooltip"
-
 import { SelectAll } from "./components/SelectAll"
 import { SelectBottomActions } from "./components/SelectBottomActions"
 import { SelectedItems } from "./components/SelectedItems"
@@ -158,6 +161,11 @@ const InlineSelectTrigger = forwardRef<
 
 InlineSelectTrigger.displayName = "InlineSelectTrigger"
 
+type F0SelectRuntimeDependencies = {
+  OneFilterPickerComponent: typeof OneFilterPickerComponent
+  ActiveFiltersChipsComponent: typeof ActiveFiltersChipsComponent
+}
+
 const F0SelectComponent = forwardRef(function Select<
   T extends string,
   R = unknown,
@@ -203,8 +211,10 @@ const F0SelectComponent = forwardRef(function Select<
     preserveSelectionOnDatasetChange = true,
     fitContentWidth,
     dataTestId,
+    OneFilterPickerComponent,
+    ActiveFiltersChipsComponent,
     ...props
-  }: F0SelectProps<T, R>,
+  }: F0SelectProps<T, R> & F0SelectRuntimeDependencies,
   ref: React.ForwardedRef<HTMLButtonElement>
 ) {
   const id = useId()
@@ -1195,6 +1205,9 @@ const F0SelectComponent = forwardRef(function Select<
       top={
         <>
           <SelectTopActions
+            SelectComponent={F0SelectStatic}
+            OneFilterPickerComponent={OneFilterPickerComponent}
+            ActiveFiltersChipsComponent={ActiveFiltersChipsComponent}
             searchValue={currentSearch}
             onSearchChange={onSearchChangeLocal}
             searchBoxPlaceholder={searchBoxPlaceholder}
@@ -1474,11 +1487,20 @@ const F0SelectComponent = forwardRef(function Select<
   )
 })
 
-export const F0Select = F0SelectComponent as <
+export const F0SelectInternal = F0SelectComponent as <
   T extends string = string,
   R = unknown,
 >(
-  props: F0SelectProps<T, R> & {
+  props: F0SelectProps<T, R> &
+    F0SelectRuntimeDependencies & {
+      ref?: React.Ref<HTMLButtonElement>
+    }
+) => React.ReactElement
+
+export const F0SelectStatic = F0SelectComponent as unknown as <
+  T extends string = string,
+>(
+  props: F0SelectStaticProps<T> & {
     ref?: React.Ref<HTMLButtonElement>
   }
 ) => React.ReactElement
