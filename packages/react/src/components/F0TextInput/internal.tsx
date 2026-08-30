@@ -122,7 +122,7 @@ const InputInternal = forwardRef<HTMLInputElement, InputInternalProps>(
           props.onChange?.(type === "email" ? value.toLowerCase() : value)
         }
         onKeyDown={(event) => {
-          if (event.key === "Enter") {
+          if (event.key === "Enter" && !event.nativeEvent.isComposing) {
             onPressEnter?.()
           }
         }}
@@ -132,5 +132,7 @@ const InputInternal = forwardRef<HTMLInputElement, InputInternalProps>(
     )
   }
 )
+
+InputInternal.displayName = "InputInternal"
 
 export { InputInternal }

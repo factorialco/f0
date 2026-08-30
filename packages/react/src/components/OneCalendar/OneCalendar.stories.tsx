@@ -21,7 +21,7 @@ const mockTodayDate = new Date(2025, 5, 30)
 const meta = {
   title: "Calendar",
   component: OneCalendar,
-  tags: ["autodocs", "stable"],
+  tags: ["autodocs"],
   argTypes: {
     weekStartsOn: {
       description:

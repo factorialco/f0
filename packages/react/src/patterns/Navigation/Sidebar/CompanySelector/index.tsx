@@ -11,7 +11,7 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
 
-interface Company {
+export interface Company {
   id: string
   name: string
   logo?: string
