@@ -7,6 +7,7 @@ export interface AssetMetric {
 export interface BundleVariantReport {
   assets: {
     js: AssetMetric
+    initialJs: AssetMetric
     css: AssetMetric
   }
   retainedF0Modules: string[]
@@ -34,8 +35,16 @@ export function compareBundleReport(
   baseline: BundleReport
 ): string[] {
   const failures: string[] = []
-  const assetKinds = ["js", "css"] as const
+  const assetKinds = ["js", "initialJs", "css"] as const
   const metricKinds = ["raw", "gzip", "brotli"] as const
+
+  for (const variantName of Object.keys(actual.variants)) {
+    if (!baseline.variants[variantName]) {
+      failures.push(
+        `Unexpected consumer bundle variant without baseline: ${variantName}`
+      )
+    }
+  }
 
   for (const [variantName, baselineVariant] of Object.entries(
     baseline.variants

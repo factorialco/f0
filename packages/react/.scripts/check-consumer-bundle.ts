@@ -51,6 +51,33 @@ export default function App() {
   return <F0Button label="Save" />
 }
 `,
+  f0Box: retainRootExport("F0Box"),
+  f0Text: retainRootExport("F0Text"),
+  f0Dialog: retainRootExport("F0Dialog"),
+  f0Select: retainRootExport("F0Select"),
+  f0Form: retainRootExport("F0Form"),
+  oneDataCollection: retainExport(
+    "OneDataCollection",
+    "@factorialco/f0-react/dist/experimental"
+  ),
+  f0AiChat: retainRootExport("F0AiChat"),
+  f0PdfViewer: retainRootExport("F0PdfViewer"),
+}
+
+function retainRootExport(exportName: string): string {
+  return retainExport(exportName, "@factorialco/f0-react")
+}
+
+function retainExport(exportName: string, moduleSpecifier: string): string {
+  return `
+import { ${exportName} } from "${moduleSpecifier}"
+
+console.log(${exportName})
+
+export default function App() {
+  return null
+}
+`
 }
 
 function run(command: string, args: string[], cwd: string): void {
@@ -151,7 +178,7 @@ createRoot(document.getElementById("root")!).render(
 `
   )
 
-  await build({
+  const buildResult = (await build({
     root: consumerDir,
     configFile: false,
     logLevel: "silent",
@@ -160,12 +187,35 @@ createRoot(document.getElementById("root")!).render(
       outDir: "dist",
       sourcemap: true,
     },
-  })
+  })) as { output: EmittedOutput[] } | Array<{ output: EmittedOutput[] }>
 
   const outputFiles = walkFiles(resolve(consumerDir, "dist"))
+  const emittedOutputs = Array.isArray(buildResult)
+    ? buildResult.flatMap((result) => result.output)
+    : buildResult.output
+  const chunks = emittedOutputs.filter(
+    (output): output is EmittedChunk => output.type === "chunk"
+  )
+  const chunksByName = new Map(chunks.map((chunk) => [chunk.fileName, chunk]))
+  const initialChunkNames = new Set<string>()
+  const pendingChunkNames = chunks
+    .filter((chunk) => chunk.isEntry)
+    .map((chunk) => chunk.fileName)
+  while (pendingChunkNames.length > 0) {
+    const chunkName = pendingChunkNames.pop()!
+    if (initialChunkNames.has(chunkName)) continue
+    initialChunkNames.add(chunkName)
+    pendingChunkNames.push(...(chunksByName.get(chunkName)?.imports ?? []))
+  }
+
   return {
     assets: {
       js: assetMetric(outputFiles.filter((file) => file.endsWith(".js"))),
+      initialJs: assetMetric(
+        [...initialChunkNames].map((fileName) =>
+          resolve(consumerDir, "dist", fileName)
+        )
+      ),
       css: assetMetric(outputFiles.filter((file) => file.endsWith(".css"))),
     },
     retainedF0Modules: retainedF0Modules(
@@ -173,6 +223,17 @@ createRoot(document.getElementById("root")!).render(
       extractedPackageDir
     ),
   }
+}
+
+interface EmittedOutput {
+  type: string
+  fileName: string
+}
+
+interface EmittedChunk extends EmittedOutput {
+  type: "chunk"
+  isEntry: boolean
+  imports: string[]
 }
 
 async function measureBundle(): Promise<BundleReport> {
@@ -196,19 +257,27 @@ async function measureBundle(): Promise<BundleReport> {
 
     run("tar", ["-xzf", tarball, "-C", tempDir], PACKAGE_DIR)
     const extractedPackageDir = resolve(tempDir, "package")
-    const variants = Object.fromEntries(
-      await Promise.all(
-        Object.entries(VARIANTS).map(async ([variantName, appSource]) => [
-          variantName,
-          await buildVariant(
-            tempDir,
-            extractedPackageDir,
-            variantName,
-            appSource
-          ),
-        ])
+    const requestedVariant = process.argv
+      .find((argument) => argument.startsWith("--variant="))
+      ?.slice("--variant=".length)
+    if (requestedVariant && !VARIANTS[requestedVariant]) {
+      throw new Error(`Unknown consumer bundle variant: ${requestedVariant}`)
+    }
+    const variantsToBuild = requestedVariant
+      ? { [requestedVariant]: VARIANTS[requestedVariant] }
+      : VARIANTS
+    const variants: BundleReport["variants"] = {}
+    // Vite 8 uses Rolldown's in-process compiler. Running multiple builds in
+    // parallel can cross-contaminate their chunk graphs, so production bundle
+    // evidence must be collected sequentially.
+    for (const [variantName, appSource] of Object.entries(variantsToBuild)) {
+      variants[variantName] = await buildVariant(
+        tempDir,
+        extractedPackageDir,
+        variantName,
+        appSource
       )
-    )
+    }
     return { variants }
   } finally {
     rmSync(tempDir, { recursive: true, force: true })
@@ -228,6 +297,7 @@ async function main(): Promise<void> {
     for (const [variantName, variant] of Object.entries(report.variants)) {
       process.stdout.write(
         `${variantName}: JS ${formatBytes(variant.assets.js.brotli)} brotli, ` +
+          `initial ${formatBytes(variant.assets.initialJs.brotli)} brotli, ` +
           `CSS ${formatBytes(variant.assets.css.brotli)} brotli\n`
       )
     }
@@ -239,7 +309,17 @@ async function main(): Promise<void> {
   const baseline = JSON.parse(
     readFileSync(BASELINE_PATH, "utf8")
   ) as BundleReport
-  const failures = compareBundleReport(report, baseline)
+  const requestedVariant = process.argv
+    .find((argument) => argument.startsWith("--variant="))
+    ?.slice("--variant=".length)
+  const relevantBaseline = requestedVariant
+    ? {
+        variants: baseline.variants[requestedVariant]
+          ? { [requestedVariant]: baseline.variants[requestedVariant] }
+          : {},
+      }
+    : baseline
+  const failures = compareBundleReport(report, relevantBaseline)
   if (failures.length > 0) {
     console.error("Consumer bundle baseline failed:")
     for (const failure of failures) console.error(`- ${failure}`)
