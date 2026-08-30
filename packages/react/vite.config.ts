@@ -9,7 +9,7 @@ import dts from "vite-plugin-dts"
 import { libInjectCss } from "vite-plugin-lib-inject-css"
 
 import { componentStatusVitePlugin } from "./scripts/component-status-build.mjs"
-import { buildSyncPlugin } from "./vite/build-sync.plugin"
+import { buildSyncPlugin } from "./vite/build-sync.plugin.ts"
 
 dotenv.config({
   path: [".env.local", ".env"],
@@ -69,8 +69,8 @@ if (process.env.BUILD_TYPES) {
       rollupTypes: true,
       afterBuild: () => {
         // Copy global.d.ts to dist - needed because rollupTypes doesn't inline ambient declarations
-        const src = resolve(__dirname, "src/global.d.ts")
-        const dest = resolve(__dirname, "dist/global.d.ts")
+        const src = resolve(import.meta.dirname, "src/global.d.ts")
+        const dest = resolve(import.meta.dirname, "dist/global.d.ts")
         copyFileSync(src, dest)
         consola.success("Copied global.d.ts to dist/")
 
@@ -93,7 +93,7 @@ if (process.env.BUILD_TYPES) {
           "component-status.d.ts",
         ]
         for (const file of dtsFiles) {
-          const filePath = resolve(__dirname, `dist/${file}`)
+          const filePath = resolve(import.meta.dirname, `dist/${file}`)
           if (existsSync(filePath)) {
             let content = readFileSync(filePath, "utf-8")
             const bundleName = file.replace(".d.ts", "")
@@ -125,8 +125,8 @@ if (process.env.BUILD_TYPES) {
   )
 }
 const alias = {
-  "@": path.resolve(__dirname, "./src"),
-  "~": path.resolve(__dirname, "./"),
+  "@": path.resolve(import.meta.dirname, "./src"),
+  "~": path.resolve(import.meta.dirname, "./"),
 }
 
 // https://vitejs.dev/config/
@@ -140,18 +140,24 @@ export default defineConfig({
   resolve: {
     alias: {
       ...alias,
-      "@storybook-static": path.resolve(__dirname, "./.storybook/static"),
+      "@storybook-static": path.resolve(
+        import.meta.dirname,
+        "./.storybook/static"
+      ),
     },
   },
   build: {
     lib: {
       entry: {
-        ["f0"]: resolve(__dirname, "src/f0.ts"),
-        ["experimental"]: resolve(__dirname, "src/experimental.ts"),
-        ["ai"]: resolve(__dirname, "src/ai.ts"),
-        ["component-status"]: resolve(__dirname, "src/component-status.ts"),
+        ["f0"]: resolve(import.meta.dirname, "src/f0.ts"),
+        ["experimental"]: resolve(import.meta.dirname, "src/experimental.ts"),
+        ["ai"]: resolve(import.meta.dirname, "src/ai.ts"),
+        ["component-status"]: resolve(
+          import.meta.dirname,
+          "src/component-status.ts"
+        ),
         ["i18n-provider-defaults"]: resolve(
-          __dirname,
+          import.meta.dirname,
           "src/lib/providers/i18n/i18n-provider-defaults.ts"
         ),
       },
@@ -171,7 +177,6 @@ export default defineConfig({
         /@livekit\/.*/,
         "livekit-client",
       ],
-      maxParallelFileOps: 100,
       // Workaround to fix rebuild https://github.com/vitejs/vite/issues/19410#issuecomment-2661835482
       output: {
         globals: {

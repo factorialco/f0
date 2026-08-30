@@ -1,12 +1,9 @@
-import { fileURLToPath } from "node:url"
 import path from "path"
 import { defineConfig } from "vitest/config"
-import viteConfig from "./vite.config"
 
-const dirname =
-  typeof __dirname !== "undefined"
-    ? __dirname
-    : path.dirname(fileURLToPath(import.meta.url))
+import viteConfig from "./vite.config.ts"
+
+const dirname = import.meta.dirname
 
 const alias = {
   "@": path.resolve(dirname, "./src"),

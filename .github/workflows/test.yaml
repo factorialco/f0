@@ -37,7 +37,7 @@ jobs:
       - uses: actions/setup-node@v4
       - uses: ./.github/actions/setup-node-pnpm
         with:
-          node-version: "22.x"
+          node-version: "24.20.0"
           cache: pnpm
       - name: Install dependencies
         run: pnpm install
@@ -80,7 +80,7 @@ jobs:
           fetch-depth: 0
       - uses: ./.github/actions/setup-node-pnpm
         with:
-          node-version: "22.x"
+          node-version: "24.20.0"
       - name: Build core package
         run: pnpm --filter @factorialco/f0-core build
       - name: Verify the regression test (red on main, green with the fix)
@@ -104,7 +104,7 @@ jobs:
       - uses: actions/setup-node@v4
       - uses: ./.github/actions/setup-node-pnpm
         with:
-          node-version: "22.x"
+          node-version: "24.20.0"
           cache: pnpm
       - name: Install dependencies
         run: pnpm install
