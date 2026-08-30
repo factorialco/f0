@@ -13,7 +13,7 @@ import {
 } from "@/ui/Card"
 import { Skeleton } from "@/ui/skeleton"
 
-import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
+import { OneEllipsis } from "@/lib/OneEllipsis/PlainEllipsis"
 import {
   CardActions,
   type CardPrimaryAction,

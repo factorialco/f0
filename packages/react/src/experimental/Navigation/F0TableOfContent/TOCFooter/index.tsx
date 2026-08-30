@@ -1,5 +1,5 @@
 import { F0Icon } from "@/components/F0Icon"
-import { OneEllipsis } from "@/lib/OneEllipsis"
+import { OneEllipsis } from "@/lib/OneEllipsis/PlainEllipsis"
 import { cn } from "@/lib/utils"
 
 import { TOCAction } from "../types"

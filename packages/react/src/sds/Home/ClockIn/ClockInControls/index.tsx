@@ -6,7 +6,7 @@ import { F0Select } from "@/components/F0Select"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { SolidPause, SolidPlay, SolidStop } from "@/icons/app"
 import { useReducedMotion } from "@/lib/a11y"
-import { OneEllipsis } from "@/lib/OneEllipsis"
+import { OneEllipsis } from "@/lib/OneEllipsis/PlainEllipsis"
 import { cn } from "@/lib/utils"
 
 import { ClockInGraph, ClockInGraphProps } from "../ClockInGraph"

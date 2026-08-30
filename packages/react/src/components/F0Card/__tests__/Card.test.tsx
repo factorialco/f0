@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
-import "@testing-library/jest-dom/vitest"
+
 import { Briefcase } from "@/icons/app"
 import {
   zeroRender as render,
@@ -7,12 +7,22 @@ import {
   userEvent,
   waitFor,
 } from "@/testing/test-utils"
+import { valueDisplayRenderers } from "@/ui/value-display"
 
 import type { CardSecondaryLink } from "../components/CardActions"
 
+import { cardPropertyRenderers } from "../components/CardMetadata"
 import { F0Card } from "../F0Card"
 
 describe("F0Card Component", () => {
+  it("keeps every supported metadata renderer aligned with the shared registry", () => {
+    for (const [type, renderer] of Object.entries(cardPropertyRenderers)) {
+      expect(renderer).toBe(
+        valueDisplayRenderers[type as keyof typeof cardPropertyRenderers]
+      )
+    }
+  })
+
   it("renders title and description correctly", () => {
     render(
       <F0Card title="Test Card Title" description="Test card description" />

@@ -10,7 +10,7 @@ import {
   F0ActionBar,
   type F0ActionBarRef,
 } from "@/components/F0ActionBar"
-import { OneEllipsis } from "@/lib/OneEllipsis"
+import { OneEllipsis } from "@/lib/OneEllipsis/PlainEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 
 export type { ActionBarGroup, ActionBarItem, ActionBarStatus, F0ActionBarRef }

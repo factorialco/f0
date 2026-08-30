@@ -99,7 +99,7 @@ const meta = {
     tooltip: {
       control: "text",
       description:
-        "The tooltip to show when the button is hovered. If not provided, when the hideLabel is true, the tooltip will be generated based on the label property.",
+        "The tooltip to show when the button is hovered. Without one, the label supplies an automatic tooltip when hidden or visibly truncated unless noAutoTooltip is enabled.",
     },
     href: {
       control: "text",

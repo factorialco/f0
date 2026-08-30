@@ -1,6 +1,6 @@
 "use client"
 
-import { OneEllipsis } from "@/lib/OneEllipsis"
+import { OneEllipsis } from "@/lib/OneEllipsis/PlainEllipsis"
 import { cn, focusRing } from "@/lib/utils"
 
 import { InFilterOptionItem } from "../types"

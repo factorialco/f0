@@ -5,7 +5,7 @@ import { F0AvatarCompany } from "@/components/avatars/F0AvatarCompany"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { Sliders } from "@/icons/app"
 import { useReducedMotion } from "@/lib/a11y"
-import { OneEllipsis } from "@/lib/OneEllipsis"
+import { OneEllipsis } from "@/lib/OneEllipsis/PlainEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 

@@ -55,9 +55,18 @@ export default function App() {
 `,
   f0Box: retainRootExport("F0Box"),
   f0Text: retainRootExport("F0Text"),
+  f0Icon: retainRootExport("F0Icon"),
+  f0Alert: retainRootExport("F0Alert"),
+  f0Heading: retainRootExport("F0Heading"),
+  f0Card: retainRootExport("F0Card"),
+  f0Link: retainRootExport("F0Link"),
+  f0AvatarPerson: retainRootExport("F0AvatarPerson"),
   f0Dialog: retainRootExport("F0Dialog"),
   f0Select: retainRootExport("F0Select"),
+  f0FormField: retainRootExport("f0FormField"),
+  useEmojiConfetti: retainRootExport("useEmojiConfetti"),
   f0Form: retainRootExport("F0Form"),
+  stack: retainExport("Stack", "@factorialco/f0-react/dist/experimental"),
   oneDataCollection: retainExport(
     "OneDataCollection",
     "@factorialco/f0-react/dist/experimental"
@@ -68,7 +77,7 @@ export default function App() {
 
 const CLOUDFLARE_PROBES = {
   f0Button: {
-    maxBytes: 700_000,
+    maxBytes: 420_000,
     source: `
 import React from "react"
 import { createRoot } from "react-dom/client"
@@ -82,7 +91,7 @@ createRoot(document.createElement("div")).render(<App />)
 `,
   },
   f0ButtonFromRoot: {
-    maxBytes: 700_000,
+    maxBytes: 430_000,
     source: `
 import React from "react"
 import { createRoot } from "react-dom/client"
@@ -95,11 +104,30 @@ function App() {
 createRoot(document.createElement("div")).render(<App />)
 `,
   },
+  stackFromLegacyExperimentalPath: {
+    maxBytes: 180_000,
+    source: `
+import React from "react"
+import { createRoot } from "react-dom/client"
+import { Stack } from "@factorialco/f0-react/dist/experimental"
+
+function App() {
+  return <Stack>Content</Stack>
+}
+
+createRoot(document.createElement("div")).render(<App />)
+`,
+  },
+  tableOfContentFromLegacyExperimentalPath: {
+    maxBytes: 2_900_000,
+    source: `
+import { F0TableOfContent } from "@factorialco/f0-react/dist/experimental"
+
+console.log(F0TableOfContent)
+`,
+  },
   f0DialogWithButton: {
-    // F0Dialog's public resourceHeader feature currently retains the complete
-    // F0Avatar flag map. Keep that real boundary visible while preventing the
-    // root barrel and unrelated document/map/AI features from returning.
-    maxBytes: 4_200_000,
+    maxBytes: 3_900_000,
     source: `
 import React from "react"
 import { createRoot } from "react-dom/client"
@@ -118,6 +146,17 @@ createRoot(document.createElement("div")).render(<App />)
 `,
   },
 } as const
+
+const INITIAL_BROTLI_BUDGETS: Partial<Record<keyof typeof VARIANTS, number>> = {
+  f0Button: 120_000,
+  f0Card: 780_000,
+  f0Dialog: 850_000,
+  f0FormField: 85_000,
+  f0Select: 820_000,
+  oneDataCollection: 1_050_000,
+  stack: 55_000,
+  useEmojiConfetti: 50_000,
+}
 
 interface CloudflareProbeMetric {
   bytes: number
@@ -508,10 +547,24 @@ function formatBytes(bytes: number): string {
 
 async function main(): Promise<void> {
   const { cloudflareProbes, report } = await measureBundle()
+  const outputJson = process.argv.includes("--json")
 
-  if (process.argv.includes("--json")) {
+  if (outputJson) {
     process.stdout.write(`${JSON.stringify(report, null, 2)}\n`)
-  } else {
+  }
+
+  for (const [variantName, maxBytes] of Object.entries(
+    INITIAL_BROTLI_BUDGETS
+  )) {
+    const variant = report.variants[variantName]
+    if (variant && variant.assets.initialJs.brotli > maxBytes) {
+      throw new Error(
+        `${variantName} initial JS is ${variant.assets.initialJs.brotli} Brotli bytes; budget is ${maxBytes}`
+      )
+    }
+  }
+
+  if (!outputJson) {
     for (const [probeName, probe] of Object.entries(cloudflareProbes)) {
       process.stdout.write(
         `cloudflare/${probeName}: ${formatBytes(probe.bytes)} raw, ${probe.inputCount} inputs\n`
@@ -549,7 +602,7 @@ async function main(): Promise<void> {
     process.exit(1)
   }
 
-  if (!process.argv.includes("--json")) {
+  if (!outputJson) {
     process.stdout.write("Consumer bundle baseline passed\n")
   }
 }

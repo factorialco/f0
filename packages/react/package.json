@@ -40,6 +40,10 @@
       "types": "./dist/component-status.d.ts",
       "import": "./dist/esm/component-status.js"
     },
+    "./dist/experimental": {
+      "types": "./dist/experimental.d.ts",
+      "import": "./dist/esm/experimental.js"
+    },
     "./i18n-provider-defaults": {
       "types": "./dist/lib/providers/i18n/i18n-provider-defaults.d.ts",
       "import": "./dist/esm/i18n-provider-defaults.js"

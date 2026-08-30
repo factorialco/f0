@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useMemo, useRef, useState } from "react"
+import React, { forwardRef, useMemo, useRef, useState } from "react"
 
 import { parseMarkdown, stripMarkdown } from "@/lib/markdown"
 import { cn } from "@/lib/utils"
@@ -9,31 +9,10 @@ import {
   TooltipTrigger,
 } from "@/ui/tooltip"
 
-export const tags = [
-  "h1",
-  "h2",
-  "h3",
-  "h4",
-  "h5",
-  "h6",
-  "p",
-  "span",
-  "div",
-  "label",
-  "code",
-] as const
-export type Tag = (typeof tags)[number]
+import type { Tag } from "./types"
+import { useEllipsisOverflow } from "./use-ellipsis-overflow"
 
-const checkForEllipsis = (element: HTMLElement | null, lines: number) => {
-  if (!element) return false
-  if (lines > 1) {
-    // For multi-line, check if content height exceeds line-clamp height
-    const lineHeight = parseInt(window.getComputedStyle(element).lineHeight)
-    return element.scrollHeight > lineHeight * lines
-  }
-  // For single line, check if content width exceeds container width
-  return element.scrollWidth > element.clientWidth
-}
+export { type Tag, tags } from "./types"
 
 type EllipsisWrapperProps = {
   children: string
@@ -69,50 +48,12 @@ const EllipsisWrapper = forwardRef<HTMLElement, EllipsisWrapperProps>(
     },
     ref
   ) => {
-    const [hasEllipsis, setHasEllipsis] = useState(false)
-
-    useEffect(() => {
-      if (!ref || typeof ref !== "object" || disabled) return
-
-      const element = ref.current
-      if (!element) return
-
-      /**
-       * Finds the ellipsis state of the element and sets the state and emits the change
-       * @returns The ellipsis state of the element
-       */
-      const findAndSetEllipsisState = () => {
-        const ellipsis = checkForEllipsis(element, lines)
-        setHasEllipsis(ellipsis)
-        onHasEllipsisChange(ellipsis)
-        return ellipsis
-      }
-
-      // Initial check
-      findAndSetEllipsisState()
-
-      // Re-check after the next layout. When this text lives in a flex row that
-      // an ancestor width-constrains only on a later pass (e.g. an OverflowList
-      // inside a table cell), the element can mount at its natural width and
-      // shrink afterwards — a transition the ResizeObserver below sometimes
-      // misses, leaving `hasEllipsis` (and thus the tooltip) stale-false while
-      // the text is visibly clipped. A post-layout re-measure catches it.
-      const raf = requestAnimationFrame(() => findAndSetEllipsisState())
-      const timeout = setTimeout(() => findAndSetEllipsisState(), 100)
-
-      // Set up resize observer
-      const resizeObserver = new ResizeObserver(() => {
-        findAndSetEllipsisState()
-      })
-
-      resizeObserver.observe(element)
-
-      return () => {
-        cancelAnimationFrame(raf)
-        clearTimeout(timeout)
-        resizeObserver.disconnect()
-      }
-    }, [ref, onHasEllipsisChange, lines, disabled])
+    const hasEllipsis = useEllipsisOverflow({
+      disabled: disabled ?? false,
+      lines,
+      onChange: onHasEllipsisChange,
+      ref: ref && typeof ref === "object" ? ref : null,
+    })
 
     const html = markdown ? parseMarkdown(children) : undefined
 

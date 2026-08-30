@@ -1,7 +1,7 @@
-import { IconType } from "@/components/F0Icon"
-import { valueDisplayRenderers } from "@/ui/value-display"
+import type { IconType } from "@/components/F0Icon"
+import type { valueDisplayRenderers } from "@/ui/value-display"
 
-import { CardPropertyType } from "./components/CardMetadata"
+import type { CardPropertyType } from "./components/CardMetadata"
 
 export const cardAlertVariants = [
   "info",

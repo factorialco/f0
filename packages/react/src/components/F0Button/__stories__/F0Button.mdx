@@ -283,6 +283,12 @@ Counters surface a quantity tied to the action — items to review, pending appr
 
 ### Behavior
 
+**Truncated labels**
+
+When the visible label does not fit, the button truncates it and uses the full label as an automatic tooltip. Set `noAutoTooltip` only when surrounding context already communicates the complete action.
+
+<Canvas of={Stories.Ellipsis} />
+
 **Async action**
 
 If the `onClick` handler returns a Promise, the button automatically enters the `loading` state until the promise resolves — no need to manage loading state manually.

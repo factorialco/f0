@@ -1,28 +1,43 @@
-import React from "react"
+import type React from "react"
 
 import { F0Icon } from "@/components/F0Icon"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
-import { valueDisplayRenderers } from "@/ui/value-display"
+import { AlertTagCell } from "@/ui/value-display/types/alertTag"
+import { AmountCell } from "@/ui/value-display/types/amount"
+import { AvatarListCell } from "@/ui/value-display/types/avatarList"
+import { CompanyCell } from "@/ui/value-display/types/company"
+import { DateCell } from "@/ui/value-display/types/date"
+import { DotTagCell } from "@/ui/value-display/types/dotTag"
+import { FileCell } from "@/ui/value-display/types/file"
+import { FolderCell } from "@/ui/value-display/types/folder"
+import { NumberCell } from "@/ui/value-display/types/number"
+import { PersonCell } from "@/ui/value-display/types/person"
+import { ProgressBarCell } from "@/ui/value-display/types/progressBar"
+import { StatusCell } from "@/ui/value-display/types/status"
+import { TagCell } from "@/ui/value-display/types/tag"
+import { TagListCell } from "@/ui/value-display/types/tagList"
+import { TeamCell } from "@/ui/value-display/types/team"
+import { TextCell } from "@/ui/value-display/types/text"
 
-import { CardMetadata as CardMetadataType } from "../types"
+import type { CardMetadata as CardMetadataType } from "../types"
 
 export const cardPropertyRenderers = {
-  text: valueDisplayRenderers.text,
-  number: valueDisplayRenderers.number,
-  date: valueDisplayRenderers.date,
-  amount: valueDisplayRenderers.amount,
-  person: valueDisplayRenderers.person,
-  company: valueDisplayRenderers.company,
-  team: valueDisplayRenderers.team,
-  status: valueDisplayRenderers.status,
-  tag: valueDisplayRenderers.tag,
-  avatarList: valueDisplayRenderers.avatarList,
-  tagList: valueDisplayRenderers.tagList,
-  alertTag: valueDisplayRenderers.alertTag,
-  dotTag: valueDisplayRenderers.dotTag,
-  file: valueDisplayRenderers.file,
-  folder: valueDisplayRenderers.folder,
-  progressBar: valueDisplayRenderers.progressBar,
+  text: TextCell,
+  number: NumberCell,
+  date: DateCell,
+  amount: AmountCell,
+  person: PersonCell,
+  company: CompanyCell,
+  team: TeamCell,
+  status: StatusCell,
+  tag: TagCell,
+  avatarList: AvatarListCell,
+  tagList: TagListCell,
+  alertTag: AlertTagCell,
+  dotTag: DotTagCell,
+  file: FileCell,
+  folder: FolderCell,
+  progressBar: ProgressBarCell,
 } as const
 
 export type CardPropertyType = keyof typeof cardPropertyRenderers

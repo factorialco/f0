@@ -1,7 +1,7 @@
 import { useComposedRefs } from "@radix-ui/react-compose-refs"
 import { useDeepCompareEffect } from "@reactuses/core"
 import { cva } from "cva"
-import { isEqual } from "lodash"
+import isEqual from "lodash/isEqual.js"
 import {
   forwardRef,
   useCallback,
@@ -49,7 +49,7 @@ import {
   SelectTrigger,
   VirtualItem,
 } from "@/ui/Select"
-import { textVariants } from "@/ui/Text"
+import { textVariants } from "@/ui/Text/variants"
 
 import type { ActiveFiltersChips as ActiveFiltersChipsComponent } from "./components/ActiveFiltersChips"
 import type {

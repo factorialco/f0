@@ -1,6 +1,7 @@
 #!/usr/bin/env tsx
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs"
 import { dirname, relative, resolve } from "node:path"
+import { fileURLToPath } from "node:url"
 import ts from "typescript"
 
 interface PackageManifest {
@@ -68,6 +69,7 @@ const declaredRuntimePackages = new Set([
   ...Object.keys(packageManifest.optionalDependencies ?? {}),
 ])
 const undeclaredImports = new Set<string>()
+const unresolvableImports = new Set<string>()
 const invalidRelativeImports = new Set<string>()
 
 for (const filePath of walkJavaScriptFiles(esmRoot)) {
@@ -93,6 +95,22 @@ for (const filePath of walkJavaScriptFiles(esmRoot)) {
         `${relative(packageRoot, filePath)} -> ${specifier}`
       )
     }
+    try {
+      const resolvedUrl = import.meta.resolve(specifier)
+      if (
+        resolvedUrl.startsWith("file:") &&
+        (!existsSync(fileURLToPath(resolvedUrl)) ||
+          statSync(fileURLToPath(resolvedUrl)).isDirectory())
+      ) {
+        unresolvableImports.add(
+          `${relative(packageRoot, filePath)} -> ${specifier}`
+        )
+      }
+    } catch {
+      unresolvableImports.add(
+        `${relative(packageRoot, filePath)} -> ${specifier}`
+      )
+    }
   }
 }
 
@@ -112,4 +130,14 @@ if (undeclaredImports.size > 0) {
   )
 }
 
-process.stdout.write("Preserved ESM runtime imports are declared\n")
+if (unresolvableImports.size > 0) {
+  throw new Error(
+    `Preserved ESM contains imports that native ESM cannot resolve:\n${[
+      ...unresolvableImports,
+    ].join("\n")}`
+  )
+}
+
+process.stdout.write(
+  "Preserved ESM runtime imports are declared and resolvable\n"
+)

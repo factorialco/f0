@@ -1,6 +1,6 @@
 import { F0Button } from "@/components/F0Button"
 import { ChevronLeft, ChevronRight, Cross } from "@/icons/app"
-import { OneEllipsis } from "@/lib/OneEllipsis"
+import { OneEllipsis } from "@/lib/OneEllipsis/PlainEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 
 interface StepHeaderProps {

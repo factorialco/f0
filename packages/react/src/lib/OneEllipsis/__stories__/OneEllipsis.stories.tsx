@@ -2,6 +2,8 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { useId, useState } from "react"
 
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
+
 import { OneEllipsis, Tag, tags } from "../OneEllipsis"
 
 const meta = {
@@ -173,5 +175,24 @@ export const ShortTextMultiLine: Story = {
       lines={3}
       text="This is a short text that will fit within the container width and won't need truncation. It's short enough to be displayed in full without any ellipsis."
     />
+  ),
+}
+
+export const Snapshot: Story = {
+  parameters: withSnapshot({}),
+  args: {
+    children: "Ellipsis snapshot",
+  },
+  render: () => (
+    <div className="flex w-64 flex-col gap-4">
+      <OneEllipsis>
+        A long single-line label that is intentionally constrained
+      </OneEllipsis>
+      <OneEllipsis lines={2}>
+        A longer multi-line description that is intentionally constrained to
+        demonstrate line clamping in the consolidated snapshot.
+      </OneEllipsis>
+      <OneEllipsis>Short text</OneEllipsis>
+    </div>
   ),
 }

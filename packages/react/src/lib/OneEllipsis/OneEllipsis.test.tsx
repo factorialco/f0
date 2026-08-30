@@ -1,5 +1,11 @@
-import { act, render, screen } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+
+import {
+  act,
+  screen,
+  userEvent,
+  zeroRender as render,
+} from "@/testing/test-utils"
 
 import { OneEllipsis } from "./OneEllipsis"
 
@@ -77,7 +83,7 @@ describe("OneEllipsis", () => {
     expect(screen.getByTestId("one-ellipsis")).toBeInTheDocument()
   })
 
-  it("renders text with ellipsis and tooltip when content overflows", () => {
+  it("renders text with ellipsis and tooltip when content overflows", async () => {
     // Mock element dimensions for overflow
     Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
       configurable: true,
@@ -88,6 +94,7 @@ describe("OneEllipsis", () => {
       value: 100,
     })
 
+    const user = userEvent.setup()
     render(
       <OneEllipsis>
         This is a very long text that should definitely overflow and show an
@@ -101,6 +108,11 @@ describe("OneEllipsis", () => {
       )
     ).toBeInTheDocument()
     expect(screen.getByTestId("one-ellipsis")).toBeInTheDocument()
+
+    await user.hover(screen.getByTestId("one-ellipsis"))
+    expect(await screen.findByRole("tooltip")).toHaveTextContent(
+      "This is a very long text that should definitely overflow and show an ellipsis"
+    )
   })
 
   it("supports multiple lines", () => {
@@ -127,7 +139,9 @@ describe("OneEllipsis", () => {
       )
     ).toBeInTheDocument()
 
-    expect(screen.getByTestId("one-ellipsis")).toBeInTheDocument()
+    expect(screen.getByTestId("one-ellipsis").className).toContain(
+      "pointer-events-auto"
+    )
   })
 
   it("updates ellipsis state when size changes", () => {
@@ -157,10 +171,11 @@ describe("OneEllipsis", () => {
     })
 
     // Trigger resize observer callback
-    resizeCallback?.()
+    act(() => resizeCallback?.())
 
-    // Now tooltip should be present
-    expect(screen.getByTestId("one-ellipsis")).toBeInTheDocument()
+    expect(screen.getByTestId("one-ellipsis").className).toContain(
+      "pointer-events-auto"
+    )
 
     // Simulate resize back to no overflow
     Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
@@ -173,10 +188,31 @@ describe("OneEllipsis", () => {
     })
 
     // Trigger resize observer callback again
-    resizeCallback?.()
+    act(() => resizeCallback?.())
 
-    // Tooltip should be gone again
-    expect(screen.getByTestId("one-ellipsis")).toBeInTheDocument()
+    expect(screen.getByTestId("one-ellipsis").className).not.toContain(
+      "pointer-events-auto"
+    )
+  })
+
+  it("does not truncate or show a tooltip when disabled", () => {
+    Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
+      configurable: true,
+      value: 200,
+    })
+    Object.defineProperty(HTMLElement.prototype, "clientWidth", {
+      configurable: true,
+      value: 100,
+    })
+
+    render(<OneEllipsis disabled>Unclamped text</OneEllipsis>)
+
+    expect(screen.getByTestId("one-ellipsis").className).not.toContain(
+      "text-ellipsis"
+    )
+    expect(screen.getByTestId("one-ellipsis").className).not.toContain(
+      "pointer-events-auto"
+    )
   })
 
   it("keeps the ellipsized text hoverable (pointer-events-auto) so its tooltip is reachable inside a pointer-events-none container", () => {

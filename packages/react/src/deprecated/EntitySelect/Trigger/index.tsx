@@ -1,7 +1,7 @@
 import { useMemo } from "react"
 
 import { Arrow } from "@/components/F0Select/components/Arrow"
-import { OneEllipsis } from "@/lib/OneEllipsis"
+import { OneEllipsis } from "@/lib/OneEllipsis/PlainEllipsis"
 import { cn } from "@/lib/utils"
 import { F0InputField, InputFieldProps } from "@/components/F0InputField"
 

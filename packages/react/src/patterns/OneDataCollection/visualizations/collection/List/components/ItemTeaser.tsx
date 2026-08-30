@@ -1,5 +1,5 @@
 import { AvatarVariant, F0Avatar } from "@/components/avatars/F0Avatar"
-import { OneEllipsis } from "@/lib/OneEllipsis"
+import { OneEllipsis } from "@/lib/OneEllipsis/PlainEllipsis"
 
 export type ItemTeaserProps = {
   title: string

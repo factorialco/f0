@@ -2,7 +2,8 @@ import NumberFlow from "@number-flow/react"
 import { useEffect, useRef, useState } from "react"
 
 import { TooltipInternal } from "@/experimental/Overlays/Tooltip"
-import { EmojiImage, getEmojiLabel, useEmojiConfetti } from "@/lib/emojis"
+import { useEmojiConfetti } from "@/lib/emoji-confetti"
+import { EmojiImage, getEmojiLabel } from "@/lib/emojis"
 import { cn } from "@/lib/utils"
 import { Action } from "@/ui/Action"
 

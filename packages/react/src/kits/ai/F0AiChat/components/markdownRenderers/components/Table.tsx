@@ -2,7 +2,7 @@ import { useCallback, useRef } from "react"
 
 import { Dropdown } from "@/experimental/Navigation/Dropdown"
 import { Download } from "@/icons/app"
-import { OneEllipsis } from "@/lib/OneEllipsis"
+import { OneEllipsis } from "@/lib/OneEllipsis/PlainEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 

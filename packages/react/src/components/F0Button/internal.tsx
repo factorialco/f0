@@ -3,7 +3,6 @@ import { forwardRef, useState } from "react"
 
 import { F0Icon } from "@/components/F0Icon"
 import { EmojiImage } from "@/lib/emojis"
-import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useTextFormatEnforcer } from "@/lib/text"
 import { cn } from "@/lib/utils"
 import { Action } from "@/ui/Action"
@@ -11,6 +10,7 @@ import { Counter } from "@/ui/Counter"
 
 import { ButtonInternalProps } from "./internal-types"
 import { fontSizeVariants } from "./variants"
+import { ButtonLabel } from "./components/ButtonLabel"
 
 const IconMotion = motion.create(F0Icon)
 
@@ -56,6 +56,7 @@ const ButtonInternal = forwardRef<
 
   const [loading, setLoading] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
+  const [labelOverflows, setLabelOverflows] = useState(false)
 
   const handleClick = async (
     event: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement, MouseEvent>
@@ -87,6 +88,9 @@ const ButtonInternal = forwardRef<
   const counterIsDark =
     variant === "default" || (variant === "critical" && isHovered)
   const buttonFontSize = fontSize ?? size
+  const autoTooltip = noAutoTooltip
+    ? undefined
+    : (hideLabel && label) || (labelOverflows && label) || ""
 
   const iconNode = icon ? (
     iconRotate ? (
@@ -127,7 +131,10 @@ const ButtonInternal = forwardRef<
       disabled={disabled || isLoading}
       ref={ref}
       {...props}
-      tooltip={tooltip ?? (!noAutoTooltip && hideLabel && label)}
+      tooltip={
+        tooltip ??
+        (autoTooltip !== undefined ? { description: autoTooltip } : undefined)
+      }
       onClick={handleClick}
       loading={isLoading}
       className={cn(
@@ -179,15 +186,14 @@ const ButtonInternal = forwardRef<
           />
         )}
         {!shouldHideLabel ? (
-          <OneEllipsis
+          <ButtonLabel
             className={cn(
               shouldHideLabel && "sr-only",
               fontSizeVariants({ fontSize: buttonFontSize })
             )}
-            tag="span"
-          >
-            {buttonLabel}
-          </OneEllipsis>
+            label={buttonLabel}
+            onOverflowChange={setLabelOverflows}
+          />
         ) : (
           <span className="sr-only">{buttonLabel}</span>
         )}

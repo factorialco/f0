@@ -4,7 +4,7 @@ import { F0TagDot } from "@/components/tags/F0TagDot"
 import { F0TagPerson } from "@/components/tags/F0TagPerson"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
-import { OneEllipsis } from "@/lib/OneEllipsis"
+import { OneEllipsis } from "@/lib/OneEllipsis/PlainEllipsis"
 import { SelectItem as SelectItemPrimitive } from "@/ui/Select"
 
 import { F0SelectItemMetadata, F0SelectItemObject } from "../types"

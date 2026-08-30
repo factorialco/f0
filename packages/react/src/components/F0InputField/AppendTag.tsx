@@ -1,4 +1,4 @@
-import { OneEllipsis } from "@/lib/OneEllipsis"
+import { OneEllipsis } from "@/lib/OneEllipsis/PlainEllipsis"
 import { cn } from "@/lib/utils"
 
 export const AppendTag = ({ text }: { text: string }) => {

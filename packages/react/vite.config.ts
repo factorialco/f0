@@ -29,6 +29,11 @@ const isBareRuntimeImport = (id: string) =>
   !id.includes("?") &&
   !id.startsWith("\0")
 
+const isPreservedEsmExternal = (id: string, importer?: string) =>
+  isBareRuntimeImport(id) &&
+  !id.startsWith("@atlaskit/pragmatic-drag-and-drop") &&
+  !importer?.includes("/node_modules/")
+
 // Add tailwind build
 const buildTailwind = process.argv.find((arg) => arg.startsWith("--tailwind"))
 if (buildTailwind) {
@@ -176,10 +181,13 @@ export default defineConfig({
     copyPublicDir: false,
     rollupOptions: {
       external: buildPreservedEsm
-        ? isBareRuntimeImport
+        ? isPreservedEsmExternal
         : [/@copilotkit\/.*/, /@livekit\/.*/, "livekit-client"],
       // Workaround to fix rebuild https://github.com/vitejs/vite/issues/19410#issuecomment-2661835482
       output: {
+        assetFileNames: buildPreservedEsm
+          ? "_embedded/[hash][extname]"
+          : undefined,
         entryFileNames: buildPreservedEsm
           ? (chunkInfo) =>
               chunkInfo.name.includes("node_modules/")

@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef } from "react"
 
 import { EmojiImage } from "@/lib/emojis"
-import { OneEllipsis } from "@/lib/OneEllipsis"
+import { OneEllipsis } from "@/lib/OneEllipsis/PlainEllipsis"
 import { cn } from "@/lib/utils"
 
 import {

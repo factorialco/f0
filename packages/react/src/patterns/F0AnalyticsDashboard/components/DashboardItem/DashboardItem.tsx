@@ -25,7 +25,7 @@ import {
 import { InfoHint, type InfoHintContent } from "@/lib/InfoHint"
 import { One as OneIcon } from "@/icons/ai"
 import { useAiChat } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
-import { OneEllipsis } from "@/lib/OneEllipsis"
+import { OneEllipsis } from "@/lib/OneEllipsis/PlainEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import {

@@ -1,5 +1,5 @@
 import { userEvent } from "@testing-library/user-event"
-import { describe, expect, it, vi } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest"
 
 import { Add } from "@/icons/app"
 import { zeroRender as render, screen } from "@/testing/test-utils"
@@ -7,6 +7,10 @@ import { zeroRender as render, screen } from "@/testing/test-utils"
 import { F0Button } from "../index"
 
 describe("F0Button", () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
   it("should call the onClick handler when clicked", async () => {
     const onClick = vi.fn()
 
@@ -61,6 +65,66 @@ describe("F0Button", () => {
     expect(svg).toBeInTheDocument()
 
     expect(label).toHaveTextContent("Add Item")
+  })
+
+  it("keeps focus when overflow measurement enables the automatic tooltip", async () => {
+    vi.spyOn(HTMLElement.prototype, "scrollWidth", "get").mockReturnValue(200)
+    vi.spyOn(HTMLElement.prototype, "clientWidth", "get").mockReturnValue(100)
+
+    render(<F0Button label="A long button label" />)
+    const user = userEvent.setup()
+    const button = screen.getByRole("button")
+    button.focus()
+    await user.hover(button)
+
+    expect(
+      await screen.findByRole("tooltip", undefined, { timeout: 2_000 })
+    ).toHaveTextContent("A long button label")
+    expect(button).toHaveFocus()
+    expect(screen.getByRole("button")).toBe(button)
+  })
+
+  it("prefers an explicit tooltip over the overflowing label", async () => {
+    vi.spyOn(HTMLElement.prototype, "scrollWidth", "get").mockReturnValue(200)
+    vi.spyOn(HTMLElement.prototype, "clientWidth", "get").mockReturnValue(100)
+
+    render(<F0Button label="A long button label" tooltip="Explicit guidance" />)
+    await userEvent.hover(screen.getByRole("button"))
+
+    expect(await screen.findByRole("tooltip")).toHaveTextContent(
+      "Explicit guidance"
+    )
+  })
+
+  it("keeps the hidden-label automatic tooltip", async () => {
+    render(<F0Button label="Add item" icon={Add} hideLabel round />)
+    await userEvent.hover(screen.getByRole("button"))
+
+    expect(await screen.findByRole("tooltip")).toHaveTextContent("Add item")
+  })
+
+  it("does not show an overflow tooltip when noAutoTooltip is set", async () => {
+    vi.spyOn(HTMLElement.prototype, "scrollWidth", "get").mockReturnValue(200)
+    vi.spyOn(HTMLElement.prototype, "clientWidth", "get").mockReturnValue(100)
+
+    render(<F0Button label="A long button label" noAutoTooltip />)
+    await userEvent.hover(screen.getByRole("button"))
+
+    await expect(
+      screen.findByRole("tooltip", undefined, { timeout: 500 })
+    ).rejects.toThrow()
+  })
+
+  it("does not show an automatic tooltip when the visible label fits", async () => {
+    vi.spyOn(HTMLElement.prototype, "scrollWidth", "get").mockReturnValue(100)
+    vi.spyOn(HTMLElement.prototype, "clientWidth", "get").mockReturnValue(100)
+
+    render(<F0Button label="Short label" />)
+    await userEvent.hover(screen.getByRole("button"))
+
+    await expect(
+      screen.findByRole("tooltip", undefined, { timeout: 500 })
+    ).rejects.toThrow()
   })
 
   it("should show loading state", () => {
