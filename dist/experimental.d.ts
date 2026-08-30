@@ -31,8 +31,8 @@ import { CountryCellValue } from './types/country';
 import { DateCellValue } from './types/date';
 import { DateCellValue as DateCellValue_2 } from './experimental';
 import { DateFilterOptions } from './DateFilter/DateFilter';
-import { default as default_2 } from 'maplibre-gl';
-import { default as default_3 } from 'react';
+import { default as default_2 } from 'react';
+import { default as default_3 } from 'maplibre-gl';
 import { DeltaCellValue } from './types/delta';
 import { Dispatch } from 'react';
 import { DotTagCellValue } from './types/dotTag';
@@ -40,6 +40,7 @@ import { DotTagCellValue as DotTagCellValue_2 } from './experimental';
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 import { EmployeeItemProps } from './types';
 import { F0EmojiPickerProps as F0EmojiPickerProps_2 } from './types';
+import { F0ENPSButtonProps as F0ENPSButtonProps_2 } from './types';
 import { F0PhoneInputProps as F0PhoneInputProps_2 } from './types';
 import { F0SegmentedControlProps as F0SegmentedControlProps_2 } from './types';
 import { F0SelectProps as F0SelectProps_2 } from './types';
@@ -384,8 +385,8 @@ declare const actionVariants: readonly ["default", "outline", "critical", "neutr
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const ActivityItemList: (({ items, loadingMoreItems, onClickItem, onEndReached, onEndReachedItemsThreshold, }: ActivityItemListProps) => default_3.JSX.Element) & {
-    Skeleton: () => default_3.JSX.Element;
+export declare const ActivityItemList: (({ items, loadingMoreItems, onClickItem, onEndReached, onEndReachedItemsThreshold, }: ActivityItemListProps) => default_2.JSX.Element) & {
+    Skeleton: () => default_2.JSX.Element;
 };
 
 export declare type ActivityItemListProps = Pick<SectionProps, "items" | "onClickItem"> & {
@@ -394,7 +395,7 @@ export declare type ActivityItemListProps = Pick<SectionProps, "items" | "onClic
     loadingMoreItems?: boolean;
 };
 
-export declare const ActivityItemListSkeleton: () => default_3.JSX.Element;
+export declare const ActivityItemListSkeleton: () => default_2.JSX.Element;
 
 declare type ActivityItemProps = {
     id: string;
@@ -871,8 +872,8 @@ export declare const AUTO_PER_PAGE_MIN_RESERVED_ROWS = 10;
 
 declare type AutoFocusInput = {
     tiles: F0MeetingTile[];
-    /** The user's explicit pin. Wins over everything while its tile exists. */
-    manualFocusKey: string | null;
+    /** What the user asked for, if anything. */
+    intent: F0MeetingFocusIntent;
     /** Screen shares already auto-focused once, so they are not re-focused. */
     seenShareKeys: ReadonlySet<string>;
 };
@@ -881,8 +882,8 @@ declare type AutoFocusResult = {
     focusKey: string | null;
     /** Share keys to remember as already auto-focused. */
     seenShareKeys: ReadonlySet<string>;
-    /** True when the manual pin no longer matches a live tile. */
-    clearManualFocus: boolean;
+    /** True when the stored intent no longer matches a live tile. */
+    clearIntent: boolean;
 };
 
 export declare const AutoGrid: ForwardRefExoticComponent<Omit<HTMLAttributes<HTMLDivElement> & VariantProps<(props?: ({
@@ -1015,7 +1016,7 @@ chart: BarChartProps;
 
 declare type BaseAction = Pick<F0ButtonProps, "label" | "onClick" | "icon" | "disabled">;
 
-export declare const BaseActivityItemList: ({ items, loadingMoreItems, onClickItem, onEndReached, onEndReachedItemsThreshold, }: ActivityItemListProps) => default_3.JSX.Element;
+export declare const BaseActivityItemList: ({ items, loadingMoreItems, onClickItem, onEndReached, onEndReachedItemsThreshold, }: ActivityItemListProps) => default_2.JSX.Element;
 
 declare const BaseAvatar: ForwardRefExoticComponent<BaseAvatarProps & RefAttributes<HTMLDivElement>>;
 
@@ -1099,7 +1100,7 @@ declare interface BaseChipProps extends VariantProps<typeof chipVariants> {
 
 declare type BaseColor = keyof typeof baseColors;
 
-export declare const BaseCommunityPost: ({ id, author, group, createdAt, title, description, onClick, mediaUrl, event, counters, reactions, inLabel, comment, actions, dropdownItems, noReactionsButton, descriptionExpandable, }: CommunityPostProps) => JSX_2.Element;
+export declare const BaseCommunityPost: ({ id, author, group, createdAt, title, description, onClick, mediaUrl, event, counters, reactions, inLabel, comment, actions, dropdownItems, noReactionsButton, descriptionExpandable, hideTitle, }: CommunityPostProps) => JSX_2.Element;
 
 /**
  * Base data adapter configuration for non-paginated collections
@@ -1349,6 +1350,7 @@ export declare type BreadcrumbSelectItemType = BreadcrumbBaseItemType & {
 
 export declare type BreadcrumbSelectProps<T extends string, R = unknown> = F0SelectProps<T, R> & {
     multiple?: false;
+    variant?: "field";
 };
 
 export declare interface BreadcrumbsProps {
@@ -1469,7 +1471,7 @@ declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "clas
      */
     variant?: ActionButtonVariant;
     /**
-     * The filters'counter value to display.
+     * A count shown in a neutral counter to the right of the label.
      */
     counterValue?: number;
     /**
@@ -1500,6 +1502,11 @@ declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "clas
      * Adds an emoji to the button, can be used as a special case of icon-only button.
      */
     emoji?: string;
+    /**
+     * How that emoji is drawn — a twemoji image by default, or the system glyph
+     * with `"native"`. See {@link EmojiRenderMode}.
+     */
+    emojiMode?: EmojiRenderMode;
     /**
      * Hides the label visually (for icon-only or emoji-only buttons), but keeps it accessible for screen readers.
      */
@@ -1572,6 +1579,20 @@ declare type ButtonSize = (typeof buttonSizes)[number];
 
 declare const buttonSizes: readonly ["sm", "md", "lg"];
 
+export declare type ButtonToggleColor = (typeof buttonToggleColors)[number];
+
+/**
+ * The colours a toggle can wear when selected, beyond F0's own selected teal.
+ * Each one is an F0 semantic colour — the six statuses, then the five points of
+ * the mood scale — so a coloured toggle carries the same meaning here as the
+ * same colour does anywhere else in the product.
+ */
+export declare const buttonToggleColors: readonly ["accent", "critical", "warning", "promote", "info", "positive", "mood-super-negative", "mood-negative", "mood-neutral", "mood-positive", "mood-super-positive"];
+
+declare type ButtonToggleGroupSize = (typeof buttonToggleGroupSizes)[number];
+
+declare const buttonToggleGroupSizes: readonly ["sm", "md", "lg"];
+
 export declare type ButtonToggleSize = (typeof buttonToggleSizes)[number];
 
 export declare const buttonToggleSizes: readonly ["sm", "md", "lg"];
@@ -1623,7 +1644,7 @@ export declare interface CalendarEventProps {
 
 export declare type CalendarMode = "single" | "range";
 
-export declare type CalendarView = "day" | "month" | "year" | "week" | "quarter" | "halfyear";
+export declare type CalendarView = "day" | "month" | "year" | "week" | "quarter" | "halfyear" | "periods";
 
 declare type CalloutAction = {
     label: string;
@@ -1677,6 +1698,21 @@ declare type CanvasContentBase = {
     title: string;
     description?: string;
     toolCallId?: string;
+    /**
+     * Render this content across the whole frame, covering the docked chat
+     * instead of hugging a seam beside it. For content that is a step of its own
+     * rather than something you work through while talking — picking a template,
+     * say. The chat is only covered, never closed, so the conversation is exactly
+     * where it was when the canvas is dismissed.
+     *
+     * Deliberately NOT called `fullscreen`: the chat's own
+     * `visualizationMode: "fullscreen"` means the opposite arrangement (chat full
+     * width, no canvas), and going back to it is how a covering canvas is
+     * dismissed.
+     *
+     * Defaults to the docked split.
+     */
+    coversChat?: boolean;
 };
 
 /**
@@ -1805,6 +1841,28 @@ declare type CardAvatarVariant = AvatarVariant | {
 };
 
 /**
+ * Bookmark (save) toggle rendered as an icon button in the card's options overlay.
+ * Shows an outline bookmark icon when not bookmarked and a filled one when bookmarked,
+ * giving an at-a-glance indication of the saved state.
+ */
+declare interface CardBookmark {
+    /**
+     * Whether the card is currently bookmarked (saved).
+     * Controls the filled vs. outline icon and keeps the toggle visible while active.
+     */
+    bookmarked: boolean;
+    /**
+     * Called with the next bookmarked state when the user toggles the bookmark.
+     */
+    onBookmarkChange: (bookmarked: boolean) => void;
+    /**
+     * Accessible label for the toggle button (e.g. "Save product").
+     * Falls back to the card `title` when omitted.
+     */
+    label?: string;
+}
+
+/**
  * Group Cards: Renders
  */
 declare type CardCollectionProps<Record extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<Record>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<Record>> = CollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping, CardVisualizationOptions<Record, Filters, Sortings>>;
@@ -1847,6 +1905,121 @@ declare const cardImageFits: readonly ["contain", "cover", "fit-width", "fit-hei
 declare type CardImageSize = (typeof cardImageSizes)[number];
 
 declare const cardImageSizes: readonly ["xs", "sm", "md", "lg", "xl"];
+
+declare interface CardInternalProps {
+    /**
+     * Whether the card has a compact layout
+     */
+    compact?: boolean;
+    /**
+     * The avatar to display in the card
+     */
+    avatar?: CardAvatarVariant;
+    /**
+     * Whether the card has an image
+     */
+    image?: string;
+    /**
+     * How the image should be displayed/fitted within its container
+     * @default "fit-width"
+     */
+    imageFit?: CardImageFit;
+    /**
+     * Size of the image container
+     * @default "sm"
+     */
+    imageSize?: CardImageSize;
+    /**
+     * Constrain the image container to a fixed aspect ratio instead of a fixed height.
+     * When set, `imageSize` is ignored for height.
+     * @example "video"
+     */
+    imageAspectRatio?: CardImageAspectRatio;
+    /**
+     * Whether to show a blurred background image when the image doesn't fill the container
+     * @default true
+     */
+    blurredBackground?: boolean;
+    /**
+     * The title of the card
+     */
+    title?: string;
+    /**
+     * The description of the card
+     */
+    description?: string;
+    /**
+     * Metadata items to display in the card
+     */
+    metadata?: CardMetadata[];
+    /**
+     * The children to display in the card
+     */
+    children?: ReactNode;
+    /**
+     * The link to navigate to when the card is clicked
+     */
+    link?: string;
+    /**
+     * The primary action that displays a primary button in the card footer
+     */
+    primaryAction?: CardPrimaryAction;
+    /**
+     * The secondary actions - either an array of button actions or a single link
+     */
+    secondaryActions?: CardSecondaryAction[] | CardSecondaryLink;
+    /**
+     * Actions to display in the dropdown menu inside the card content
+     */
+    otherActions?: DropdownItem[];
+    /**
+     * Bookmark (save) toggle rendered as an icon button in the card's options overlay.
+     * Shows an outline bookmark when not bookmarked and a filled one when bookmarked.
+     */
+    bookmark?: CardBookmark;
+    /**
+     * Whether the card is selectable
+     */
+    selectable?: boolean;
+    /**
+     * Whether the card is selected
+     */
+    selected?: boolean;
+    /**
+     * The callback to handle the selection of the card
+     */
+    onSelect?: (selected: boolean) => void;
+    /**
+     * The callback to handle the click of the card
+     */
+    onClick?: () => void;
+    /**
+     * Force vertical metadata for compact layout
+     * Private prop
+     */
+    forceVerticalMetadata?: boolean;
+    /**
+     * Whether the card should have a full height
+     */
+    fullHeight?: boolean;
+    /**
+     * Use a softer/lighter border (`border-f1-border-secondary`) instead of the default
+     * `border-f1-border`. Opt-in so existing cards keep their current appearance.
+     * @default false
+     */
+    subtleBorder?: boolean;
+    /**
+     * When true, disables the full-card overlay link so parent components
+     * can manage drag-and-drop while still allowing click navigation via onClick
+     */
+    disableOverlayLink?: boolean;
+    /**
+     * Alert banner displayed above the card with a coloured header strip and matching border.
+     * Supports info, warning, critical, and positive variants with a default icon per variant.
+     * Use `visible` + `onDismiss` for controlled dismiss behaviour.
+     */
+    alert?: CardAlertProps;
+}
 
 declare type CardMetadata = {
     /** Leading icon. Optional — when omitted the row renders just the value. */
@@ -1891,22 +2064,22 @@ declare type CardPropertyDefinition<T> = PropertyDefinition_2<T> & {
 };
 
 declare const cardPropertyRenderers: {
-    readonly text: (args: TextCellValue_2, meta: ValueDisplayRendererContext_2) => default_3.JSX.Element;
-    readonly number: (args: NumberCellValue_2, meta: ValueDisplayRendererContext_2) => default_3.JSX.Element;
-    readonly date: (args: DateCellValue_2, meta: ValueDisplayRendererContext_2) => default_3.JSX.Element;
-    readonly amount: (args: AmountCellValue_2, meta: ValueDisplayRendererContext_2) => default_3.JSX.Element;
-    readonly person: (args: PersonCellValue_2, meta: ValueDisplayRendererContext_2) => default_3.JSX.Element;
-    readonly company: (args: CompanyCellValue_2, meta: ValueDisplayRendererContext_2) => default_3.JSX.Element;
-    readonly team: (args: TeamCellValue_2, meta: ValueDisplayRendererContext_2) => default_3.JSX.Element;
-    readonly status: (args: StatusCellValue_2) => default_3.JSX.Element;
-    readonly tag: (args: TagCellValue_2) => default_3.JSX.Element;
-    readonly avatarList: (args: AvatarListCellValue_2, meta: ValueDisplayRendererContext_2) => default_3.JSX.Element;
-    readonly tagList: (args: TagListCellValue_2) => default_3.JSX.Element;
-    readonly alertTag: (args: AlertTagCellValue_2) => default_3.JSX.Element;
-    readonly dotTag: (args: DotTagCellValue_2) => default_3.JSX.Element;
-    readonly file: (args: FileCellValue_2) => default_3.JSX.Element;
-    readonly folder: (args: FolderCellValue_2) => default_3.JSX.Element;
-    readonly progressBar: (args: ProgressBarCellValue_2, _meta: ValueDisplayRendererContext_2) => default_3.JSX.Element | null;
+    readonly text: (args: TextCellValue_2, meta: ValueDisplayRendererContext_2) => default_2.JSX.Element;
+    readonly number: (args: NumberCellValue_2, meta: ValueDisplayRendererContext_2) => default_2.JSX.Element;
+    readonly date: (args: DateCellValue_2, meta: ValueDisplayRendererContext_2) => default_2.JSX.Element;
+    readonly amount: (args: AmountCellValue_2, meta: ValueDisplayRendererContext_2) => default_2.JSX.Element;
+    readonly person: (args: PersonCellValue_2, meta: ValueDisplayRendererContext_2) => default_2.JSX.Element;
+    readonly company: (args: CompanyCellValue_2, meta: ValueDisplayRendererContext_2) => default_2.JSX.Element;
+    readonly team: (args: TeamCellValue_2, meta: ValueDisplayRendererContext_2) => default_2.JSX.Element;
+    readonly status: (args: StatusCellValue_2) => default_2.JSX.Element;
+    readonly tag: (args: TagCellValue_2) => default_2.JSX.Element;
+    readonly avatarList: (args: AvatarListCellValue_2, meta: ValueDisplayRendererContext_2) => default_2.JSX.Element;
+    readonly tagList: (args: TagListCellValue_2) => default_2.JSX.Element;
+    readonly alertTag: (args: AlertTagCellValue_2) => default_2.JSX.Element;
+    readonly dotTag: (args: DotTagCellValue_2) => default_2.JSX.Element;
+    readonly file: (args: FileCellValue_2) => default_2.JSX.Element;
+    readonly folder: (args: FolderCellValue_2) => default_2.JSX.Element;
+    readonly progressBar: (args: ProgressBarCellValue_2, _meta: ValueDisplayRendererContext_2) => default_2.JSX.Element | null;
 };
 
 declare type CardPropertyType = keyof typeof cardPropertyRenderers;
@@ -1979,6 +2152,9 @@ export declare interface CardSelectableMultipleProps<T extends CardSelectableVal
     isToggle?: boolean;
     /** When true, items are grouped in a single bordered container with dividers */
     grouped?: boolean;
+    /** Standalone cards only: 12px padding instead of 16px. Grouped rows already
+     * use 12px vertical padding, so they are unaffected. */
+    compact?: boolean;
 }
 
 export declare interface CardSelectableSingleProps<T extends CardSelectableValue> {
@@ -2000,6 +2176,9 @@ export declare interface CardSelectableSingleProps<T extends CardSelectableValue
     isToggle?: boolean;
     /** When true, items are grouped in a single bordered container with dividers */
     grouped?: boolean;
+    /** Standalone cards only: 12px padding instead of 16px. Grouped rows already
+     * use 12px vertical padding, so they are unaffected. */
+    compact?: boolean;
 }
 
 export declare type CardSelectableValue = string | number;
@@ -2020,7 +2199,7 @@ declare type CardVisualizationOptions<T, _Filters extends FiltersDefinition, _So
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const Carousel: WithDataTestIdReturnType_3<({ children, columns, showArrows, showDots, autoplay, delay, showPeek, doubleColumns, }: CarouselProps) => default_3.JSX.Element>;
+export declare const Carousel: WithDataTestIdReturnType_3<({ children, columns, showArrows, showDots, arrowsPlacement, arrowLabels, paging, autoplay, delay, showPeek, doubleColumns, }: CarouselProps) => default_2.JSX.Element>;
 
 declare interface CarouselBreakpoints {
     default?: ColumnNumber;
@@ -2031,10 +2210,70 @@ declare interface CarouselBreakpoints {
     xl?: ColumnNumber;
 }
 
+/**
+ * A carousel whose slides are ONE PAGE of a longer list.
+ *
+ * A carousel can only reason about the slides it holds, so on its own it says
+ * "there is no next one" the moment it reaches the last one it was given — which
+ * is wrong when the list continues on the server. This is the missing half of
+ * that answer, and it is deliberately the shape `useData` already returns for an
+ * infinite-scroll source (`paginationInfo.hasMore`, `isLoadingMore`, `loadMore`),
+ * so wiring one to the other is passing three fields across.
+ */
+declare type CarouselPaging = {
+    /** Whether the source has records past the slides currently mounted. */
+    hasMore: boolean;
+    /** A fetch for the next page is in flight. */
+    isLoading?: boolean;
+    /** Fetch the next page and APPEND it to the slides. */
+    onLoadMore: () => void;
+    /**
+     * How many records the source holds ALTOGETHER, when it says — `useData`'s
+     * `totalItems`. For anything that reports a position out loud ("3 of 11"):
+     * without it the only number available is how many have been loaded, which
+     * moves every time another page arrives.
+     *
+     * The carousel itself ignores it. Its dots describe the slides that exist, and
+     * a dot for a page nobody has fetched would be a control that cannot be
+     * pressed.
+     */
+    total?: number;
+};
+
 declare interface CarouselProps {
-    children: default_3.ReactNode;
+    children: default_2.ReactNode;
     showArrows?: boolean;
     showDots?: boolean;
+    /**
+     * WHERE THE ARROWS GO.
+     *
+     * - `"overlay"` (the default) — pinned to the carousel's sides and revealed on
+     *   hover. Right for a full-bleed gallery, where the slides are the page.
+     * - `"bottom"` — a row UNDER the slides, an arrow on each end with the dots
+     *   between them, always visible and always the same width. Use it whenever
+     *   the carousel sits inside something else — a widget, a card, a panel: side
+     *   overlays hang over whatever is beside the container, and a hover-only
+     *   control is one a touch user never finds.
+     *
+     * `"bottom"` puts the dots in that row, so `showDots` still decides whether
+     * there are any.
+     */
+    arrowsPlacement?: "overlay" | "bottom";
+    /** The arrows' accessible names. Defaults to "Previous" / "Next". */
+    arrowLabels?: {
+        previous?: string;
+        next?: string;
+    };
+    /**
+     * The slides are ONE PAGE of a longer list. Next then stays live at the end
+     * and fetches the rest instead of going dead — see {@link CarouselPaging}, and
+     * append the new records to `children` as they arrive.
+     *
+     * `arrowsPlacement: "bottom"` only: the overlay arrows are a hover affordance
+     * over the slides, and a fetch you can't see you triggered is worse than no
+     * fetch at all.
+     */
+    paging?: CarouselPaging;
     autoplay?: boolean;
     delay?: number;
     columns?: CarouselBreakpoints;
@@ -2846,12 +3085,14 @@ export declare const ComboChart: WithDataTestIdReturnType_5<ForwardRefExoticComp
 label?: boolean;
 legend?: boolean;
 showValueUnderLabel?: boolean;
-bar?: {
+bar?: ({
 categories: string | string[];
 axisLabel?: string;
 hideAxis?: boolean;
 axisPosition?: "left" | "right";
-} | undefined;
+} & {
+type?: "simple" | "stacked" | "stacked-by-sign";
+}) | undefined;
 line?: ({
 categories: string | string[];
 axisLabel?: string;
@@ -2875,7 +3116,7 @@ values: {
 }) => void) | undefined;
 } & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
 
-export declare const CommunityPost: (({ id, author, group, createdAt, title, description, onClick, mediaUrl, event, counters, reactions, inLabel, comment, actions, dropdownItems, noReactionsButton, descriptionExpandable, }: CommunityPostProps) => JSX_2.Element) & {
+export declare const CommunityPost: (({ id, author, group, createdAt, title, description, onClick, mediaUrl, event, counters, reactions, inLabel, comment, actions, dropdownItems, noReactionsButton, descriptionExpandable, hideTitle, }: CommunityPostProps) => JSX_2.Element) & {
     Skeleton: ({ withEvent, withImage, }: CommunityPostSkeletonProps) => JSX_2.Element;
 };
 
@@ -2914,10 +3155,30 @@ export declare type CommunityPostProps = {
     };
     actions?: CommunityPostAction[];
     noVideoPreload?: boolean;
-    onClick: (id: string) => void;
+    /**
+     * WHAT CLICKING THE POST DOES — and whether it does anything.
+     *
+     * OMIT IT once the post is the destination. In a feed the card is a way in, so
+     * it takes a pointer cursor, a hover tint and a focus ring. Opened in a dialog
+     * it is already what you came for, and every one of those says there is
+     * somewhere further to go when there isn't: the tint follows the mouse across
+     * a page you are reading, and clicking does nothing.
+     */
+    onClick?: (id: string) => void;
     noReactionsButton?: boolean;
     dropdownItems?: DropdownItem[];
     descriptionExpandable?: boolean;
+    /**
+     * Keeps the title as the post's ACCESSIBLE NAME but takes it out of the card —
+     * for a container that already shows it, like a dialog carrying the post's
+     * title in its own header. Without this the same words appear twice, an inch
+     * apart.
+     *
+     * The title element stays in the DOM, `sr-only`: it is what the expanded
+     * description points at (`aria-describedby`), so removing it would quietly
+     * break that as well as the post's name.
+     */
+    hideTitle?: boolean;
 };
 
 export declare const CommunityPostSkeleton: ({ withEvent, withImage, }: CommunityPostSkeletonProps) => JSX_2.Element;
@@ -2926,6 +3187,56 @@ export declare type CommunityPostSkeletonProps = {
     withEvent?: boolean;
     withImage?: boolean;
 };
+
+/**
+ * ONE POST as the Home card shows it — the shape a feed row keeps when it is
+ * given a whole tile instead of a line.
+ *
+ * Deliberately NOT `CommunityPostProps`: that is the post as the Communities
+ * page renders it, with its media, its reactions, its comment button and its own
+ * overflow menu. Here the post is a PREVIEW you click through — anything you
+ * can do to it, you do on the other side.
+ */
+export declare interface CommunityPostSummary {
+    id: string;
+    title: string;
+    /**
+     * The post's body as the editor stored it (an HTML string), clamped to the
+     * first few lines. Whatever links it contains are NOT clickable here: the
+     * whole tile is one target (see {@link CommunityPostCard}), and a link inside
+     * a link is neither valid nor operable.
+     */
+    description?: string;
+    /**
+     * The post's cover image, above the title.
+     *
+     * ALWAYS DRAWN AT {@link POST_IMAGE_RATIO} — the tile gives it the full width
+     * of its column and takes its height from that ratio, cropping (`object-cover`)
+     * whatever doesn't fit. A carousel is a ROW: a tile that sized itself to its
+     * own image would put every title on a different line and move them all when
+     * the page turned. So the frame is fixed and the picture fits into it.
+     */
+    imageUrl?: string;
+    author?: {
+        firstName: string;
+        lastName: string;
+        avatarUrl?: string;
+    };
+    createdAt: Date;
+    /**
+     * The counters under the author, ALREADY IN WORDS — "742 visits", "23
+     * comments". Strings rather than numbers because the plural, the thousands
+     * separator and the noun are all the app's locale, not this component's; the
+     * same reason `CommunityPost` takes them this way.
+     */
+    counters?: {
+        visits?: string;
+        comments?: string;
+    };
+    /** Where the post lives. A `url` makes the tile a real anchor. */
+    href?: string;
+    onClick?: () => void;
+}
 
 declare interface Company {
     id: string;
@@ -3171,7 +3482,7 @@ declare type DataCollectionSettings = {
 };
 
 declare interface DataCollectionSettingsContextType {
-    setSettings: default_3.Dispatch<default_3.SetStateAction<DataCollectionSettings>>;
+    setSettings: default_2.Dispatch<default_2.SetStateAction<DataCollectionSettings>>;
     settings: DataCollectionSettings;
     setVisualizationSettings: (key: keyof VisualizationSettings, settings: VisualizationSettings[keyof VisualizationSettings] | ((prev: VisualizationSettings[keyof VisualizationSettings]) => VisualizationSettings[keyof VisualizationSettings])) => void;
 }
@@ -3458,26 +3769,48 @@ export declare type DateNavigationOptions = {
 };
 
 declare type DateNavigationOptions_2 = {
-    granularity?: GranularityDefinitionKey[] | GranularityDefinitionKey;
-    defaultGranularity?: GranularityDefinitionKey;
+    granularity?: NavigationGranularityKey[] | NavigationGranularityKey;
+    defaultGranularity?: NavigationGranularityKey;
     min?: Date;
     max?: Date;
     presets?: DatePreset[];
     hideGoToCurrent?: boolean;
+    /**
+     * Consumer-defined ranges (payroll cycles, academic terms…) navigable as an
+     * extra entry in the granularity selector, named by its `label`.
+     */
+    periods?: DatePeriodsDefinition;
 };
 
 declare type DateNavigatorFilterDefinition = NavigationFilterDefinitionBase<Date | DateRange | DateValue> & {
     type: "date-navigator";
 } & DateNavigationOptions_2;
 
-declare type DatePickerCompareTo = Partial<Record<GranularityDefinitionKey, CompareToDef[]>>;
+export declare type DatePeriod = {
+    /** Title of the period, e.g. "January 2026" */
+    label: string;
+    /** Overrides the date range rendered under the label */
+    description?: string;
+    from: Date;
+    to: Date;
+};
+
+export declare type DatePeriodsDefinition = {
+    /** Label of the entry in the granularity selector, e.g. "Payroll" */
+    label?: string;
+    /** Heading rendered above the period list, e.g. the legal entity the periods belong to */
+    header?: string;
+    periods: DatePeriod[];
+};
+
+declare type DatePickerCompareTo = Partial<Record<NavigationGranularityKey, CompareToDef[]>>;
 
 declare interface DatePickerPopupProps {
     onSelect?: (value: DatePickerValue | undefined) => void;
     value?: DatePickerValue;
     defaultValue?: DatePickerValue;
     presets?: DatePreset[];
-    granularities?: GranularityDefinitionKey[];
+    granularities?: NavigationGranularityKey[];
     minDate?: Date;
     maxDate?: Date;
     disabled?: boolean;
@@ -3493,11 +3826,16 @@ declare interface DatePickerPopupProps {
     weekStartsOn?: WeekStartsOn;
     /** When true, switching granularity only changes the view; selection and close happen only on a cell click. Default false. */
     selectOnCellOnly?: boolean;
+    /**
+     * Consumer-defined ranges (payroll cycles, academic terms…) offered as an
+     * extra entry in the granularity selector. Its `label` names that entry.
+     */
+    periods?: DatePeriodsDefinition;
 }
 
 export declare type DatePickerValue = {
     value: DateRangeComplete | undefined;
-    granularity: GranularityDefinitionKey;
+    granularity: NavigationGranularityKey;
 };
 
 export declare interface DatePreset {
@@ -3528,7 +3866,7 @@ export declare type DateStringFormat = "default" | "long";
 declare type DateValue = {
     value: DateRangeComplete;
     valueString: string;
-    granularity: GranularityDefinitionKey;
+    granularity: NavigationGranularityKey;
 };
 
 /**
@@ -3577,6 +3915,23 @@ declare const daytimePageVariants: (props?: ({
  * widget which turns out to hold one item barely jumps.
  */
 export declare const DEFAULT_EXPECTED_ITEMS_COUNT = 3;
+
+/**
+ * How rows start out when the user has not touched them yet.
+ *
+ * - `true` / `false` — every row, or none (the default).
+ * - a number — expand rows shallower than that depth, so `1` opens the
+ *   top-level rows and reveals depth 1.
+ * - a predicate — anything else, e.g. `(node) => node.type !== "role"`.
+ *
+ * The policy is re-evaluated per row rather than resolved into a set of ids up
+ * front: rows evaluate it as they mount, so an expanded row's children evaluate
+ * it in turn and the cascade falls out of the component tree. That works the
+ * same whether the tree is already in memory or fetched lazily.
+ */
+declare type DefaultExpandedPolicy<R extends RecordType> = boolean | number | ((record: R, context: {
+    depth: number;
+}) => boolean);
 
 /**
  * Built-in renderers for the standard visualizations. `list` covers every
@@ -3961,6 +4316,7 @@ declare const defaultTranslations: {
         readonly copy: "Copy";
         readonly paste: "Paste";
         readonly close: "Close";
+        readonly back: "Back";
         readonly collapse: "Collapse";
         readonly collapseItem: "Collapse {{title}}";
         readonly expand: "Expand";
@@ -4087,11 +4443,14 @@ declare const defaultTranslations: {
             readonly viewSelectorLabel: "Select view";
         };
         readonly table: {
+            readonly seeMoreChildren: "See more";
             readonly settings: {
                 readonly showAllColumns: "Show all";
                 readonly hideAllColumns: "Hide all";
                 readonly addColumn: "Add column";
                 readonly removeColumn: "Remove column";
+                readonly lockColumn: "Lock column: {{label}}";
+                readonly unlockColumn: "Unlock column: {{label}}";
             };
         };
         readonly editableTable: {
@@ -4191,6 +4550,11 @@ declare const defaultTranslations: {
             readonly range: {
                 readonly currentDate: "Today";
                 readonly label: "Range";
+            };
+            readonly periods: {
+                readonly currentDate: "Current period";
+                readonly label: "Periods";
+                readonly empty: "No periods available";
             };
         };
         readonly month: {
@@ -4297,6 +4661,13 @@ declare const defaultTranslations: {
             readonly exporting: "Exporting…";
         };
         readonly dashboardItem: {
+            /**
+             * Deliberately not `ai.ask` ("Ask One" by default here, but hosts
+             * override it — factorial renders it as plain "Ask" for the widget and
+             * insight-card buttons). This menu entry needs the product name spelled
+             * out, so it owns its own key.
+             */
+            readonly askOne: "Ask One";
             readonly chartType: "Chart type";
             readonly errorTitle: "Error loading data";
             readonly retry: "Retry";
@@ -4329,6 +4700,7 @@ declare const defaultTranslations: {
         readonly fileUploadBlockedSubmit: "Your message wasn't sent because one of the attachments failed to upload. Remove it or retry.";
         readonly tooManyFilesError: "You can attach up to {{maxFiles}} files at once";
         readonly dropFilesHere: "Drop your files here";
+        readonly dropWidgetToDiscuss: "Drop here to discuss with One";
         readonly reply: "Reply";
         readonly removeQuote: "Remove quote";
         readonly clarifyingQuestion: {
@@ -4375,12 +4747,29 @@ declare const defaultTranslations: {
         readonly closeSearch: "Close search";
         readonly noResults: "No chats found";
         readonly backToLatest: "Jump to latest";
+        readonly readOnly: "You can't send messages in this conversation";
         readonly online: "Online";
         readonly muted: "Muted";
         readonly mute: "Mute";
         readonly unmute: "Unmute";
         readonly attachFile: "Attach file";
         readonly addEmoji: "Add emoji";
+        readonly emojiPicker: {
+            readonly search: "Search emoji";
+            readonly frequentlyUsed: "Frequently used";
+            readonly noResults: "No emoji found";
+            readonly grid: "Emoji";
+            readonly categories: {
+                readonly people: "Smileys & people";
+                readonly nature: "Animals & nature";
+                readonly foods: "Food & drink";
+                readonly activity: "Activity";
+                readonly places: "Travel & places";
+                readonly objects: "Objects";
+                readonly symbols: "Symbols";
+                readonly flags: "Flags";
+            };
+        };
         readonly recordAudio: "Record audio";
         readonly listening: "Listening…";
         readonly stopRecording: "Stop and transcribe";
@@ -4514,6 +4903,7 @@ declare const defaultTranslations: {
             readonly ofTotal: "of total";
             readonly total: "total";
             readonly target: "target";
+            readonly ofTarget: "of target";
             readonly ofRange: "of range";
             readonly fromPrevious: "from previous";
             readonly fromStage: "from {{stage}}";
@@ -4526,7 +4916,23 @@ declare const defaultTranslations: {
     readonly meeting: {
         readonly you: "You";
         readonly muted: "Muted";
+        readonly waitingToJoin: "Waiting…";
         readonly sharingScreen: "Sharing screen";
+        readonly chatPanel: "Chat";
+        readonly transcriptPanel: "Transcript";
+        readonly notesPanel: "Notes";
+        readonly openChat: "Open chat";
+        readonly closeChat: "Close chat";
+        readonly closePanel: "Close panel";
+        readonly notesPlaceholder: "Take notes for everyone in the call…";
+        readonly roomChatPlaceholder: "Message this call…";
+        readonly roomChatEmpty: "Messages here are only for this call and disappear when it ends.";
+        readonly sendMessage: "Send";
+        readonly notesReadOnly: "Only the host can edit these notes.";
+        readonly transcriptEmpty: "The transcript will appear here as people speak.";
+        readonly copyLink: "Copy link";
+        readonly linkCopied: "Link copied";
+        readonly noMoreActions: "No other actions";
         readonly handRaised: "Hand raised";
         readonly morePeople: "{{count}} more";
         readonly connecting: "Connecting…";
@@ -4554,6 +4960,7 @@ declare const defaultTranslations: {
         readonly leave: "Leave";
         readonly moreActions: "More actions";
         readonly selectMicrophone: "Select microphone";
+        readonly systemDefault: "System default";
         readonly selectCamera: "Select camera";
         readonly enterFullscreen: "Expand to fullscreen";
         readonly exitFullscreen: "Exit fullscreen";
@@ -4859,6 +5266,7 @@ declare const defaultTranslations: {
         readonly editParamsTitle: "Edit widget params";
         readonly removeWidget: "Remove widget";
         readonly addWidget: "Add widget";
+        readonly configureWidget: "Configure {{title}}";
         /** Heads the widgets a Home suggests, at the top of the picker. */
         readonly recommended: "Recommended";
         /** Why a drop onto a pinned widget was refused. `{{title}}` is its name. */
@@ -4956,7 +5364,7 @@ export declare type DetailsItemContent = (ComponentProps<typeof DataList.Item> &
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const DetailsItemsList: default_3.ForwardRefExoticComponent<DetailsItemsListProps & default_3.RefAttributes<HTMLDivElement>>;
+export declare const DetailsItemsList: default_2.ForwardRefExoticComponent<DetailsItemsListProps & default_2.RefAttributes<HTMLDivElement>>;
 
 declare interface DetailsItemsListProps extends WithDataTestIdProps {
     title?: string;
@@ -4981,6 +5389,31 @@ export declare interface DetailsItemType {
 
 export declare const Dialog: WithDataTestIdReturnType_2<ForwardRefExoticComponent<Omit<DialogProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
 
+declare type DialogControls = {
+    kind: "resource";
+    /**
+     * "Open detail" affordance. Provide `url` to render a link to the
+     * resource's full-page view (routed through the app's `LinkProvider`,
+     * so it is cmd/middle-clickable) — typically the active item's
+     * `itemUrl` from `useDataCollectionItemNavigation`. Provide `onClick`
+     * for imperative expansion. `url` wins when both are set.
+     */
+    expand?: {
+        label: string;
+        url?: string;
+        onClick?: () => void;
+    };
+    navigation?: NavigationProps;
+} | {
+    kind: "back";
+    label: string;
+    onClick: () => void;
+};
+
+declare type DialogPosition = (typeof dialogPositions)[number];
+
+declare const dialogPositions: readonly ["center", "left", "right", "fullscreen"];
+
 declare type DialogProps = {
     header: {
         type: AlertAvatarProps["type"];
@@ -4994,6 +5427,10 @@ declare type DialogProps = {
     open?: boolean;
     onClose?: () => void;
 };
+
+declare type DialogWidth = (typeof dialogWidths)[number];
+
+declare const dialogWidths: readonly ["sm", "md", "lg", "xl"];
 
 /**
  * Remove a property from a union of objects.
@@ -5022,7 +5459,7 @@ declare type DropdownInternalProps = {
     items: DropdownItem[];
     icon?: IconType;
     size?: F0ButtonProps["size"];
-    children?: default_3.ReactNode;
+    children?: default_2.ReactNode;
     align?: "start" | "end" | "center";
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
@@ -5145,6 +5582,18 @@ declare type EditableTableColumnDefinition<R extends RecordType, Sortings extend
      */
     dateConfig?: DateCellConfig | ((item: R) => DateCellConfig);
     /**
+     * Configuration for `"disabled"` cells.
+     *
+     * By default a disabled cell keeps the same affordances as its editable
+     * counterpart (leading icon, units, select chevron) so the column still
+     * reads as its field type. Set `hideSelectChevron` when the column also
+     * uses `editType: "select"` for other rows but the chevron shouldn't
+     * appear here since the cell isn't interactive.
+     */
+    disabledConfig?: {
+        hideSelectChevron?: boolean;
+    };
+    /**
      * Called after this cell's value changes. Use to compute derived values
      * and update other cells in the same row.
      *
@@ -5247,6 +5696,19 @@ export declare type editorStateType = {
     html: string;
     json: JSONContent | null;
 };
+
+/**
+ * How an emoji is drawn.
+ *
+ * - `image` (default) swaps it for a twemoji SVG, so every platform shows the
+ *   same picture.
+ * - `native` renders the character and lets the OS draw it, so people see the
+ *   emoji they know from the rest of their machine.
+ *
+ * F0Chat asks for `native`; the rest of F0 stays on `image` for now. Flipping
+ * this default is the single switch that takes the whole design system native.
+ */
+declare type EmojiRenderMode = "image" | "native";
 
 /**
  * Employee credits usage data returned by the host app.
@@ -5709,8 +6171,20 @@ declare type F0AvatarPersonProps = {
     badge?: AvatarBadge;
     /**
      * Whether the person is deactivated. If true, the avatar will display an icon instead of the person's name or picture.
+     *
+     * Mutually exclusive with `pending`: they represent opposite ends of the
+     * employee lifecycle. If both are set, `deactivated` takes precedence.
      */
     deactivated?: boolean;
+    /**
+     * Whether the position is still to be filled — a person who is planned but
+     * not hired yet (e.g. an open role in headcount planning). If true, the
+     * avatar will display a search-person icon instead of the person's name or
+     * picture.
+     *
+     * Mutually exclusive with `deactivated`.
+     */
+    pending?: boolean;
 } & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
 
 declare const F0AvatarPulse: {
@@ -5791,6 +6265,37 @@ declare type F0ButtonToggleInternalProps = {
      * "expanded" - The button will show the icon and the label.
      */
     variant?: ButtonToggleVariant;
+    /**
+     * Tooltip shown on hover and on keyboard focus. A string is the description
+     * on its own; the object form adds a bold first line above it — the same
+     * shape `Action` takes.
+     *
+     * A compact toggle is a glyph with no visible text, so the tooltip is what
+     * says out loud what it does. Setting it drops the native `title` (the
+     * browser would otherwise draw its own bubble beside this one) and keeps the
+     * accessible name.
+     *
+     * `instant` opens it on 100ms instead of the default 700ms. Reach for it when
+     * the tooltip is the ONLY place the toggle's name is written — the default
+     * wait is for a label that merely confirms what you can already read, and on
+     * a bare glyph it withholds the whole thing.
+     */
+    tooltip?: string | {
+        label?: string;
+        description: string;
+        instant?: boolean;
+    };
+    /**
+     * Makes the toggle a member of a COLOURED SET: it wears this colour when
+     * selected — fill, border and glyph — and stays a muted glyph when it isn't,
+     * so one answer out of several is readable at a glance. Without it the toggle
+     * uses F0's selected teal, like any other selected control.
+     *
+     * Only for a set whose members mean different things (a mood scale, a status
+     * picker). A lone toggle, or a group where every item is the same kind of
+     * thing, should stay on the default.
+     */
+    color?: ButtonToggleColor;
     /**
      * @private
      * Whether to show a border around the button toggle.
@@ -5927,6 +6432,102 @@ export declare interface F0CardHorizontalProps {
     descriptionAsSingleLine?: boolean;
 }
 
+declare type F0CardProps = Omit<CardInternalProps, (typeof privateProps_8)[number]>;
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export declare const F0CarouselDialog: WithDataTestIdReturnType_2<({ items, currentId, onNavigate, labels, loop, pagination, placeholder, isOpen, onClose, ...dialogProps }: F0CarouselDialogProps) => JSX_2.Element | null>;
+
+/** One page of the dialog. */
+export declare interface F0CarouselDialogItem {
+    id: string;
+    /**
+     * The dialog's title while this page is showing. The header therefore changes
+     * with the content, which is what makes this ONE dialog moving rather than a
+     * frame with something loaded into it.
+     *
+     * GIVE EVERY PAGE ONE: it is the dialog's accessible name as well as the words
+     * in the header, and a dialog without one is announced as nothing at all. If
+     * the content already shows the title itself, hide it THERE — `CommunityPost`
+     * has `hideTitle` for exactly this — rather than leaving the header blank.
+     */
+    title?: string;
+    content: ReactNode;
+}
+
+export declare interface F0CarouselDialogProps extends Pick<F0DialogInternalProps, "isOpen" | "onClose" | "width" | "position" | "primaryAction" | "secondaryAction" | "otherActions" | "disableContentPadding" | "container"> {
+    /** The pages, in the order they are walked. */
+    items: F0CarouselDialogItem[];
+    /**
+     * WHICH PAGE IS SHOWING. Controlled, deliberately: the thing you opened the
+     * dialog on is already state the app holds — the post you clicked in a feed,
+     * a param in the URL — and a dialog keeping its own copy of it is two answers
+     * to one question.
+     *
+     * An id that names nothing in `items` shows the {@link placeholder}, NOT some
+     * other page. In a params-driven app the URL moves before the data does, and
+     * "the id I asked for isn't here yet" must never render as "here is a
+     * different post".
+     */
+    currentId: string;
+    onNavigate: (id: string) => void;
+    /**
+     * WHAT TO SHOW WHILE `currentId` NAMES SOMETHING THE DIALOG DOESN'T HAVE — the
+     * gap between the URL changing and the data arriving.
+     *
+     * The dialog stays open and stays put: same element, no reopen animation, the
+     * arrows held until it knows where it is. Give it a `title` so the dialog keeps
+     * an accessible name across the gap; a feed usually knows a post's title long
+     * before its body.
+     *
+     * PREFER NOT TO NEED IT. If you can put an item in `items` for the id you are
+     * navigating to — with skeleton `content` while its body loads — do that
+     * instead: the id is always found, the title comes with it, and the position in
+     * the header stays honest. This is the net for when you genuinely cannot.
+     */
+    placeholder?: {
+        title?: string;
+        content: ReactNode;
+    };
+    /**
+     * The controls' words. There is no visible text on the arrows, so `previous`
+     * and `next` are what a screen reader reads and what the tooltips say;
+     * `position` writes the header's reading ("3 of 11").
+     */
+    labels?: {
+        previous?: string;
+        next?: string;
+        position?: (current: number, total: number) => string;
+    };
+    /**
+     * The ends JOIN UP: Next on the last page goes to the first. Off by default —
+     * a list of eleven posts has an end, and an arrow that silently returns you to
+     * the top is how you read the same thing twice without noticing.
+     */
+    loop?: boolean;
+    /**
+     * THE ITEMS ARE A PAGE of a longer set. Next then stays live past the last one
+     * loaded: pressing it fetches, and the walk CONTINUES onto the new page as
+     * soon as it lands, so the reader presses once rather than pressing, waiting,
+     * and pressing again.
+     *
+     * It is the same {@link CarouselPaging} the carousel takes, on purpose. A post
+     * opened from a feed is the same query as the feed it came from, so one
+     * `useData` feeds both: the same records, the same `loadMore`. Walk past the
+     * end in the dialog and the carousel behind it grows too, because there is one
+     * list and both are looking at it.
+     *
+     * Arriving at the last loaded item ALSO asks for the next page, once per
+     * position — so a source that answers `hasMore: true` with no new records
+     * stalls instead of looping.
+     *
+     * `loop` is ignored while `hasMore`: an end that hasn't been reached yet is not
+     * an end to join up.
+     */
+    pagination?: CarouselPaging;
+}
+
 /**
  * Headless chat surface — header, transcript and composer — driven entirely by
  * the {@link F0ChatRuntime} from a surrounding `F0ChatProvider`. Panel controls
@@ -5934,7 +6535,16 @@ export declare interface F0CardHorizontalProps {
  */
 export declare const F0Chat: (props: F0ChatProps) => ReactNode;
 
-export declare type F0ChatAttachment = F0ChatImageAttachment | F0ChatFileAttachment | F0ChatLocationAttachment | F0ChatVoiceAttachment;
+/** Attachment family, as the transcript classifies it (see
+ * `utils/attachments.ts`). Note `video` is not an {@link F0ChatAttachment}
+ * `kind` — videos are files with a video MIME type. */
+export declare type F0ChatAttachedKind = "image" | "video" | "document" | "file";
+
+export declare type F0ChatAttachment = F0ChatImageAttachment | F0ChatFileAttachment | F0ChatLocationAttachment | F0ChatVoiceAttachment | F0ChatCardAttachment;
+
+/** How files reached the composer. Same story as {@link F0ChatReactionSource}:
+ * {@link F0ChatRuntime.uploadFiles} cannot tell these apart. */
+export declare type F0ChatAttachSource = "button" | "drop" | "paste";
 
 declare type F0ChatCall = {
     id: string;
@@ -5981,28 +6591,74 @@ declare type F0ChatCallState = (typeof f0ChatCallStates)[number];
 declare const f0ChatCallStates: readonly ["ringing", "live", "ended", "missed"];
 
 /**
- * Per-channel permissions. Everything is optional and defaults to today's
- * behavior, so hosts only express what their transport restricts (frozen /
- * read-only channels, moderation roles…):
+ * Per-channel permissions, one per verb. Everything is optional and defaults to
+ * today's behavior, so hosts only express what their transport restricts
+ * (frozen / read-only channels, moderation roles…):
  * - `canSend` (default true): false hides the composer entirely.
+ * - `canReply` (default: `canSend`): false hides Reply. Replying needs a
+ *   composer to reply *into*, so it follows `canSend` unless stated otherwise.
  * - `canReact` (default true): false hides the quick-reaction row, the emoji
  *   pickers and disables toggling existing reaction pills.
  * - `canUpload` (default: whether `uploadFiles` exists): false disables the
  *   attach button, drag & drop and voice notes even when `uploadFiles` exists.
+ * - `canCopy` (default true): false hides Copy.
+ * - `canViewInfo` (default true): false hides Info (delivery / read receipts).
  * - `canEditMessage` (default: own message within {@link F0ChatRuntime.editWindowMs}):
- *   overrides the edit policy per message. Structural gates still apply (the
- *   host must provide `editMessage`; deleted messages and voice notes are
- *   never editable).
+ *   overrides the edit policy per message, INCLUDING the edit window — a host
+ *   that supplies this and wants a time limit must apply it here. Structural
+ *   gates still apply and cannot be overridden (the host must provide
+ *   `editMessage`; deleted messages, voice notes, and messages that have not
+ *   settled server-side — `sending` / `failed` — are never editable).
  * - `canDeleteMessage` (default: own message): overrides the delete policy per
  *   message (e.g. moderators deleting others' messages). Failed local echoes
  *   are always discardable — they don't exist server-side.
+ *
+ * On an `announcement` channel every boolean above defaults to **false**
+ * instead: a noticeboard is one-way by construction. An explicit value always
+ * wins, so a host with a poster passes `{ canSend: true }` and gets exactly
+ * that. See `utils/capabilities.ts`.
+ *
+ * When no action survives, the hover ellipsis is not rendered at all.
  */
 export declare type F0ChatCapabilities = {
     canSend?: boolean;
+    canReply?: boolean;
     canReact?: boolean;
     canUpload?: boolean;
+    canCopy?: boolean;
+    canViewInfo?: boolean;
     canEditMessage?: (message: F0ChatMessage) => boolean;
     canDeleteMessage?: (message: F0ChatMessage) => boolean;
+};
+
+/**
+ * A rich card inside a message — an {@link F0Card} the host describes as data.
+ *
+ * Deliberately a CURATED subset of `F0CardProps`, not a passthrough: selection,
+ * bookmarking, the overflow menu and the alert banner mean nothing in a
+ * transcript, and `children` isn't serialisable — which is exactly what a
+ * transport-backed card has to be (factorial → a Stream custom attachment
+ * `{ type: "card", … }`). Handlers stay optional so a card can be pure data
+ * (`href`) or host-wired (`onClick`).
+ */
+export declare type F0ChatCardAttachment = {
+    kind: "card";
+    title: string;
+    description?: string;
+    /** Leading avatar — the full F0Card set (emoji, icon, module, person, date…). */
+    avatar?: F0CardProps["avatar"];
+    /** Cover image above the content. */
+    image?: string;
+    /** Call to action, rendered as a button in the card's divided footer. */
+    action?: {
+        label: string;
+        /** Navigates. Takes precedence over `onClick` when both are set. */
+        href?: string;
+        onClick?: () => void;
+    };
+    /** Makes the whole card activate — the footer action still acts on its own. */
+    href?: string;
+    onClick?: () => void;
 };
 
 /** The conversation currently shown in the panel (header + behaviour differs by type). */
@@ -6033,6 +6689,13 @@ export declare type F0ChatChannel = {
     memberCount?: number;
     /** DM only — the counterpart, used for the header identity hover card. */
     user?: F0ChatUser;
+    /**
+     * Sentence shown where the composer would be when the current user can't
+     * send here ("Only Factorial can send messages"). Host-owned because only the
+     * host knows who *can* post — and has to translate it. Falls back to a
+     * generic i18n line.
+     */
+    readOnlyNotice?: string;
 };
 
 /** A status badge shown in the header next to the title (e.g. on vacation, away).
@@ -6042,7 +6705,22 @@ export declare type F0ChatChannelStatus = {
     label: string;
 };
 
-export declare type F0ChatChannelType = "dm" | "group";
+/**
+ * `announcement` is a one-way channel: a noticeboard (product changelog, company
+ * news) where only the people the host grants permission to can post, and
+ * everyone else reads. It renders like a DM — no avatar gutter, no sender names,
+ * no `@here` — and every capability defaults to off (see
+ * {@link F0ChatCapabilities}), so a read-only channel needs no configuration at
+ * all while a host that has a poster still turns `canSend` back on.
+ */
+export declare type F0ChatChannelType = "dm" | "group" | "announcement";
+
+/**
+ * What the composer can produce. Cards are authored by the host (a seeded
+ * announcement, a transport's custom attachment) — there is no affordance to
+ * attach one, so they're excluded from sending, editing and uploading.
+ */
+export declare type F0ChatComposableAttachment = Exclude<F0ChatAttachment, F0ChatCardAttachment>;
 
 /**
  * Edits applied to an existing message. Text, mentions and attachments are all
@@ -6051,11 +6729,116 @@ export declare type F0ChatChannelType = "dm" | "group";
  */
 export declare type F0ChatEditInput = {
     body: string;
-    attachments?: F0ChatAttachment[];
+    attachments?: F0ChatComposableAttachment[];
     /** People mentioned in the edited body (groups only). */
     mentions?: F0ChatMention[];
     /** Whether the edited message mentions the whole group (`@here`). */
     mentionedEveryone?: boolean;
+};
+
+export declare type F0ChatEmojiSource = "picker" | "autocomplete";
+
+/**
+ * Interactions F0Chat resolves internally, reported so the host can observe
+ * them. Everything here is either invisible to {@link F0ChatRuntime} (it calls
+ * no runtime method) or carries provenance a runtime call cannot express.
+ *
+ * F0 has no opinion on what these are for — it reports what the user did, not
+ * what it means. Anything whose truth depends on the server (a send that may
+ * still fail, a delete that may be rejected) is deliberately absent: the host
+ * already sees those through the runtime, and only there does it learn the
+ * outcome.
+ *
+ * Every handler is optional and independent — wire only the ones you need. No
+ * payload carries message content, a URL, coordinates or a user id.
+ *
+ * Passed to `F0ChatProvider`; the provider keeps the object behind a ref, so it
+ * may be rebuilt on every render without re-rendering the transcript.
+ */
+export declare type F0ChatEvents = {
+    onMessageCopied?: (p: {
+        messageId: string;
+    }) => void;
+    onMessageInfoViewed?: (p: {
+        messageId: string;
+    }) => void;
+    /** Pressing "Reply". Pair with `onReplyCancelled` to measure abandonment —
+     * the host only sees replies that were actually sent. */
+    onReplyStarted?: (p: {
+        messageId: string;
+    }) => void;
+    /** Dismissing the reply chip. NOT fired when the reply is sent, nor when
+     * switching to editing — only an explicit give-up counts. */
+    onReplyCancelled?: (p: {
+        messageId: string;
+    }) => void;
+    onEditStarted?: (p: {
+        messageId: string;
+    }) => void;
+    /** Dismissing the edit chip. Same rule as {@link F0ChatEvents.onReplyCancelled}. */
+    onEditCancelled?: (p: {
+        messageId: string;
+    }) => void;
+    onReactionAdded?: (p: {
+        messageId: string;
+        emoji: string;
+        source: F0ChatReactionSource;
+    }) => void;
+    onReactionRemoved?: (p: {
+        messageId: string;
+        emoji: string;
+        source: F0ChatReactionSource;
+    }) => void;
+    /** Once per file, when the selection passes validation — before the upload
+     * resolves, so it measures the affordance even when the upload then fails. */
+    onFileAttached?: (p: {
+        kind: F0ChatAttachedKind;
+        source: F0ChatAttachSource;
+    }) => void;
+    onAttachmentRemoved?: (p: {
+        kind: F0ChatAttachedKind;
+    }) => void;
+    onEmojiInserted?: (p: {
+        emoji: string;
+        source: F0ChatEmojiSource;
+    }) => void;
+    /** `isEveryone` distinguishes `@here` from a person. Who was mentioned is
+     * deliberately not reported. */
+    onMentionInserted?: (p: {
+        isEveryone: boolean;
+    }) => void;
+    onVoiceRecordingStarted?: () => void;
+    onVoiceRecordingCancelled?: () => void;
+    /** First play of a voice note only — resuming after a pause does not re-fire. */
+    onVoiceNotePlayed?: (p: {
+        durationSeconds?: number;
+    }) => void;
+    onVoicePlaybackRateChanged?: (p: {
+        rate: number;
+    }) => void;
+    /** Opening the image lightbox; `count` is how many images the group holds. */
+    onImageOpened?: (p: {
+        count: number;
+    }) => void;
+    onDocumentOpened?: (p: {
+        kind: F0DocumentKind;
+    }) => void;
+    onAttachmentDownloaded?: (p: {
+        kind: F0ChatAttachedKind;
+    }) => void;
+    onLocationOpened?: () => void;
+    onLinkPreviewClicked?: () => void;
+    /** A card attachment was activated — `source` tells the footer button apart
+     * from a click on the card body. Carries no title or URL. */
+    onCardActivated?: (p: {
+        source: "card" | "action";
+    }) => void;
+    onSearchOpened?: () => void;
+    onSearchResultNavigated?: (p: {
+        direction: "next" | "prev";
+    }) => void;
+    onJumpedToQuotedMessage?: () => void;
+    onJumpedToBottom?: () => void;
 };
 
 export declare type F0ChatFileAttachment = {
@@ -6099,7 +6882,7 @@ export declare type F0ChatHeaderAction = {
      * as its own icon button next to it. Inline requires `icon` — an inline
      * action without one falls back to the menu. */
     placement?: "menu" | "inline";
-    /** Restrict the action to a channel type. Omit for both. */
+    /** Restrict the action to given channel types. Omit for all of them. */
     channelTypes?: F0ChatChannelType[];
 };
 
@@ -6107,8 +6890,22 @@ export declare type F0ChatImageAttachment = {
     kind: "image";
     url: string;
     thumbnailUrl?: string;
+    /**
+     * A tiny (~40px) version of the same photo, used blurred underneath while the
+     * real one arrives. Distinct from `thumbnailUrl`, which hosts use for a
+     * display-sized derivative — this one is only ever seen out of focus, so the
+     * smaller the better.
+     *
+     * Optional: without it the tile simply shows the sender's tint until the
+     * photo paints. Hosts on a CDN that resizes on the fly can derive it from
+     * `url` (Stream, for instance, takes `?w=40&resize=clip`).
+     */
+    blurUrl?: string;
     name: string;
     mimeType?: string;
+    /** Intrinsic size. Drives the album cell's aspect ratio, so the box is
+     * reserved before the photo arrives; without it the cell falls back to a
+     * square. */
     width?: number;
     height?: number;
 };
@@ -6269,14 +7066,25 @@ export declare type F0ChatProps = {
      * the array per render with the current label/icon.
      */
     headerActions?: F0ChatHeaderAction[] | ((channel: F0ChatChannel) => F0ChatHeaderAction[]);
+    /**
+     * Replaces the built-in header. `null` removes it entirely, for hosts that
+     * already frame the chat with their own chrome — the in-call panel puts its
+     * Chat / Transcript / Notes tabs where this header would be.
+     *
+     * Undefined keeps the default header, so no existing usage changes.
+     */
+    header?: ReactNode | null;
 };
 
 /**
  * Makes a chat {@link F0ChatRuntime} available to the F0Chat UI. The host owns
  * the runtime (mock in stories, GetStream adapter in factorial); F0 only reads it.
  */
-export declare const F0ChatProvider: ({ runtime, children, }: {
+export declare const F0ChatProvider: ({ runtime, events, children, }: {
     runtime: F0ChatRuntime;
+    /** Observe interactions F0Chat resolves internally — see {@link F0ChatEvents}.
+     * Rebuild it freely: it is read through a ref, never as a context value. */
+    events?: F0ChatEvents;
     children: ReactNode;
 }) => ReactNode;
 
@@ -6290,6 +7098,11 @@ export declare type F0ChatReaction = {
      */
     users?: F0ChatUser[];
 };
+
+/** Which affordance produced a reaction — the four are indistinguishable from
+ * {@link F0ChatRuntime.toggleReaction}, which receives identical arguments from
+ * all of them. */
+export declare type F0ChatReactionSource = "quickRow" | "menuPicker" | "existingPill" | "inlinePicker";
 
 /**
  * The data + actions a host provides to drive the chat UI. F0 is headless: it
@@ -6395,7 +7208,7 @@ export declare type F0ChatRuntime = {
      * `channel.stopTyping()`).
      */
     stopTyping?: () => void | Promise<void>;
-    uploadFiles?: (files: File[]) => Promise<F0ChatAttachment[]>;
+    uploadFiles?: (files: File[]) => Promise<F0ChatComposableAttachment[]>;
     /**
      * Max files attachable at once. When a selection/drop would exceed it, the
      * composer rejects the whole batch and flashes a transient error in the
@@ -6485,7 +7298,7 @@ export declare const f0ChatSenderColors: readonly ["viridian", "malibu", "yellow
 
 export declare type F0ChatSendInput = {
     body: string;
-    attachments?: F0ChatAttachment[];
+    attachments?: F0ChatComposableAttachment[];
     replyToId?: string;
     /** People mentioned in the body (groups only). The host maps these to the
      * transport's mention field (factorial → Stream `mentioned_users`). */
@@ -6583,6 +7396,189 @@ export declare type F0ChatVoiceAttachment = {
 };
 
 /**
+ * F0CommunityPostsCarousel — the Communities widget's content: the latest posts as
+ * TILES you page through, two at a time on a main-column card and one in
+ * anything narrower.
+ *
+ * A WIDE-COLUMN WIDGET. Two tiles side by side is the whole reason this exists
+ * rather than a `list` slot — a post needs a title, four lines of its body and
+ * its author to be worth previewing at all, and that does not fit a 396px rail.
+ * Put it in the main column (`areas: ["main"]` in the catalog).
+ *
+ * THE PAGING IS UNDER THE TILES, not floating over them — `CarouselControls`,
+ * the shared row: an arrow on each end, the dots between, its own `pt-4` above
+ * it. Nothing about that row is this widget's, which is why it lives in
+ * `ui/carousel` beside the overlay arrows rather than here.
+ *
+ * EVERY POST IT HOLDS IS IN THE DOM. Embla lays its slides out in a flex row and
+ * transforms the track, so the slides off-screen are mounted and measured like
+ * the ones you can see — there is no windowing here, and adding it would mean
+ * the carousel could no longer measure its own snaps. That is the right trade
+ * for what this shows: a handful of tiles, each one a title and four lines.
+ *
+ * It is `pagination` that keeps it a handful. A feed of two hundred posts is not
+ * a longer carousel, it is a carousel that holds a PAGE and asks for the next
+ * one when you reach the end — so what is mounted is bounded by how far the
+ * reader actually walked rather than by how much the server has.
+ */
+export declare const F0CommunityPostsCarousel: ({ posts, labels, loading, expectedItemsCount, pagination, }: F0CommunityPostsCarouselProps) => JSX_2.Element;
+
+export declare interface F0CommunityPostsCarouselProps {
+    posts: CommunityPostSummary[];
+    /**
+     * The controls' words — the two arrows' accessible names. There is no visible
+     * text in this component's chrome, so these are what a screen reader reads and
+     * what the tooltips say.
+     */
+    labels: {
+        previous: string;
+        next: string;
+    };
+    /**
+     * Waiting on the FIRST posts: the same carousel with placeholder tiles in it,
+     * so the widget is the height it will be once they land. How MANY it draws is
+     * `expectedItemsCount`.
+     *
+     * This is the initial load only. A LATER page is `pagination`, and it does not
+     * blank the tiles you are already reading.
+     */
+    loading?: boolean;
+    /** How many placeholder tiles `loading` draws. Defaults to 2 — one screenful. */
+    expectedItemsCount?: number;
+    /**
+     * THE POSTS ARE A PAGE, not the whole feed. Pass this and the Next arrow stays
+     * live past the last mounted tile: reaching the end asks for the next page, and
+     * the new posts are appended to `posts` by whoever owns them.
+     *
+     * It is `useData`'s infinite-scroll return, field for field — `hasMore` off
+     * `paginationInfo`, `isLoadingMore`, `loadMore` — because that is where these
+     * posts come from in an app. The component itself stays ignorant of data
+     * sources: it takes posts and a way to ask for more.
+     *
+     * Omit it for a feed you already hold in full, which is what the widget's
+     * "latest five" is.
+     */
+    pagination?: CarouselPaging;
+}
+
+declare type F0DialogActionItem = {
+    value: string;
+    label: string;
+    icon?: IconType;
+    onClick: () => void;
+    disabled?: boolean;
+    loading?: boolean;
+};
+
+declare type F0DialogHeaderProps = {
+    title?: string;
+    description?: string;
+    module?: {
+        id: ModuleId;
+        label: string;
+        href: string;
+    };
+    otherActions?: DropdownInternalProps["items"];
+    navigation?: NavigationProps;
+    resourceHeader?: F0ResourceHeaderProps;
+    controls?: DialogControls;
+    headerStatus?: string;
+    /** See {@link F0DialogInternalProps.dismissable} — hides the close button. */
+    dismissable?: boolean;
+} & Partial<Pick<TabsProps, "tabs" | "activeTabId" | "setActiveTabId">>;
+
+declare type F0DialogInternalProps = {
+    isOpen: boolean;
+    onClose: () => void;
+    /**
+     * Whether the reader can walk away. `false` removes the close button and
+     * stops Escape and a click outside from closing — a forced choice, where the
+     * dialog's own actions are the only way out.
+     *
+     * Use it only when leaving would be worse than being trapped: a decision the
+     * product genuinely cannot proceed without. A dialog nobody can dismiss is a
+     * dead end for anyone who does not understand it.
+     * @default true
+     */
+    dismissable?: boolean;
+    asBottomSheetInMobile?: boolean;
+    position?: DialogPosition;
+    width?: DialogWidth;
+    primaryAction?: F0DialogPrimaryAction | F0DialogPrimaryActionItem[];
+    secondaryAction?: F0DialogSecondaryAction | F0DialogSecondaryActionItem[];
+    title?: string;
+    description?: string;
+    module?: F0DialogHeaderProps["module"];
+    otherActions?: F0DialogHeaderProps["otherActions"];
+    navigation?: F0DialogHeaderProps["navigation"];
+    resourceHeader?: F0DialogHeaderProps["resourceHeader"];
+    controls?: F0DialogHeaderProps["controls"];
+    /**
+     * A short reading beside the close button — "3 of 11". Where the dialog says
+     * WHICH of several things it is currently showing.
+     *
+     * Not `navigation`: that draws its own arrows in the header. This is the label
+     * alone, for a dialog whose arrows are somewhere else (`sideControls`).
+     */
+    headerStatus?: F0DialogHeaderProps["headerStatus"];
+    /**
+     * Controls flanking the panel — see {@link F0DialogSideControls}. On a phone
+     * (where the dialog is a bottom sheet and there is no room beside it) they move
+     * ONTO the panel's own edges instead, which is where a gallery puts them.
+     */
+    sideControls?: F0DialogSideControls;
+    children: ReactNode;
+    disableContentPadding?: boolean;
+    container?: HTMLElement | null;
+} & Partial<Pick<TabsProps, "tabs" | "activeTabId" | "setActiveTabId">>;
+
+declare type F0DialogPrimaryAction = {
+    label: string;
+    icon?: IconType;
+    iconPosition?: "left" | "right";
+    onClick: () => void;
+    disabled?: boolean;
+    loading?: boolean;
+};
+
+declare type F0DialogPrimaryActionItem = F0DialogActionItem;
+
+declare type F0DialogSecondaryAction = {
+    label: string;
+    icon?: IconType;
+    iconPosition?: "left" | "right";
+    onClick: () => void;
+    disabled?: boolean;
+    loading?: boolean;
+};
+
+declare type F0DialogSecondaryActionItem = F0DialogActionItem;
+
+/**
+ * Controls FLANKING the panel rather than inside it — the affordance for a
+ * dialog whose content can be changed without closing it (see
+ * `F0CarouselDialog`).
+ *
+ * They are rendered INSIDE the Radix content, so they are inside the focus trap
+ * and reachable by keyboard, and merely positioned outside its box. Anything
+ * portalled next to the dialog instead would be `aria-hidden` and inert, which
+ * is exactly the trap a modal is supposed to set.
+ */
+declare type F0DialogSideControls = {
+    previous?: ReactNode;
+    next?: ReactNode;
+};
+
+/**
+ * Document families the viewer can render. "pdf" is the default and keeps the
+ * full toolbar (paging, zoom, print, download); the other kinds render a
+ * lazy-loaded, read-only preview: "sheet" (xlsx/xls/csv) as an Excel-style
+ * grid with one tab per sheet, "docx" through docx-preview with page layout,
+ * and "text" as a rendered markdown document (`.md`) or monospaced source.
+ */
+declare type F0DocumentKind = "pdf" | "sheet" | "docx" | "text";
+
+/**
  * @experimental This is an experimental component, use it at your own risk.
  */
 export declare const F0EmojiPicker: WithDataTestIdReturnType_3<    {
@@ -6628,6 +7624,69 @@ export declare interface F0EmojiPickerProps {
 export declare type F0EmojiPickerSize = (typeof f0EmojiPickerSizes)[number];
 
 export declare const f0EmojiPickerSizes: readonly ["sm", "md", "lg"];
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export declare const F0ENPSButton: WithDataTestIdReturnType_3<    {
+({ value, onChange, labels, icons, size, fullWidth, disabled, required, }: F0ENPSButtonProps_2): JSX_2.Element;
+displayName: string;
+}>;
+
+export declare type F0ENPSButtonProps = {
+    /**
+     * The face that is answered, or `undefined` while the question is unanswered.
+     */
+    value?: Pulse;
+    /**
+     * Called with the answered face — or `undefined` when the answer is cleared,
+     * which only `required: false` allows. Never called on mount.
+     */
+    onChange?: (value: Pulse | undefined) => void;
+    /**
+     * What each face means, worst to best. A face carries no visible text, so its
+     * label is both the accessible name and the tooltip: word it as the answer the
+     * person is giving ("Very bad"), never as a number or a position.
+     *
+     * Required, and required in full — the wording belongs to the question, so the
+     * component holds no copy of its own: a mood check answers "Terrible", a
+     * recommendation question answers "Not at all likely". Pass it already
+     * translated.
+     */
+    labels: Record<Pulse, string>;
+    /**
+     * Override the face drawn for one or more points of the scale. Defaults to the
+     * five `Face*` icons from `lib/mood` — the same ones `F0AvatarPulse` shows, so
+     * an answer looks the same wherever it turns up.
+     *
+     * Swap them only when the question isn't about mood: a thumbs pair, a set of
+     * stars. Keep the replacements a *set* that reads worst-to-best on its own —
+     * five unrelated glyphs stop being a scale.
+     */
+    icons?: Partial<Record<Pulse, IconType>>;
+    /**
+     * The size of each face.
+     * @default "lg"
+     */
+    size?: ButtonToggleGroupSize;
+    /**
+     * Whether the five faces stretch to fill the container. A widget's eNPS row
+     * usually should — an equal split reads as one scale rather than five buttons.
+     * @default true
+     */
+    fullWidth?: boolean;
+    /**
+     * Whether every face is disabled — a submitted answer, or a question that is
+     * closed.
+     * @default false
+     */
+    disabled?: boolean;
+    /**
+     * Whether an answer, once given, can be taken back by pressing it again.
+     * @default false
+     */
+    required?: boolean;
+};
 
 export declare type F0FileAction = {
     icon?: IconType;
@@ -6898,7 +7957,7 @@ export declare interface F0MapControlsProps extends WithDataTestIdProps {
 /** Imperative handle exposed via `ref`. */
 export declare interface F0MapHandle {
     /** The raw MapLibre instance (escape hatch). `null` until the map has mounted. */
-    getMap: () => default_2.Map | null;
+    getMap: () => default_3.Map | null;
     /** Center on a marker (and select it). Always animates unless reduced-motion. */
     focusMarker: (id: string) => void;
     /** Frame all markers in view. */
@@ -7327,7 +8386,7 @@ export declare type F0MeetingConnectionQuality = (typeof f0MeetingConnectionQual
 
 export declare type F0MeetingCoreActionId = (typeof f0MeetingCoreActionIds)[number];
 
-export declare const f0MeetingCoreActionIds: readonly ["core:microphone", "core:microphoneSettings", "core:camera", "core:cameraSettings", "core:screenShare", "core:raiseHand", "core:leave"];
+export declare const f0MeetingCoreActionIds: readonly ["core:microphone", "core:microphoneSettings", "core:camera", "core:cameraSettings", "core:screenShare", "core:raiseHand", "core:chat", "core:leave"];
 
 export declare type F0MeetingDevice = {
     /** MediaDeviceInfo.deviceId. */
@@ -7341,6 +8400,23 @@ export declare type F0MeetingDevice = {
 export declare type F0MeetingDisconnectReason = (typeof f0MeetingDisconnectReasons)[number];
 
 export declare const f0MeetingDisconnectReasons: readonly ["user-left", "removed", "room-closed", "duplicate-identity", "server-shutdown", "connection-lost", "unknown"];
+
+/**
+ * Which tile is in the spotlight, as an INTENT rather than a key.
+ *
+ * A plain `string | null` cannot tell "nobody has pinned anything" apart from
+ * "the user dismissed the spotlight", so in a one-to-one the auto rule kept
+ * re-applying itself and the pin button did nothing. The three states make
+ * dismissal expressible.
+ */
+export declare type F0MeetingFocusIntent = {
+    type: "auto";
+} | {
+    type: "pinned";
+    key: string;
+} | {
+    type: "none";
+};
 
 /**
  * The local participant's media, split from the roster because it changes on a
@@ -7373,13 +8449,6 @@ export declare type F0MeetingLocalSource = {
     selectDevice?: (deviceId: string) => void | Promise<void>;
 };
 
-/**
- * A person in the room. `id` is the transport identity — the SAME string the
- * transport uses, so F0 never cross-references two id spaces internally. The
- * domain lookup (identity → employee name/avatar) belongs to the adapter.
- *
- * factorial → LiveKit `Participant.identity` (the employee id).
- */
 export declare type F0MeetingParticipant = {
     id: string;
     /** Display name, already resolved by the host. LiveKit `Participant.name`. */
@@ -7398,6 +8467,16 @@ export declare type F0MeetingParticipant = {
     isAgent?: boolean;
     /** Joined but has not published anything yet. */
     isConnecting?: boolean;
+    /**
+     * Whether this person is actually in the room. Absent means `joined`, so a
+     * host that only ever reports real participants needs no change.
+     *
+     * `invited` is someone the call is waiting for: they hold a tile that reads
+     * "Waiting…", publish nothing, and do NOT count toward "N people in the
+     * call". LiveKit does not know them — they come from the host's own list of
+     * attendees, which is why this cannot be derived from the transport.
+     */
+    presence?: F0MeetingPresence;
     tracks: F0MeetingTrack[];
     /**
      * ISO timestamp the hand was raised, so "who raised first" has an order.
@@ -7429,6 +8508,17 @@ export declare type F0MeetingPermission = (typeof f0MeetingPermissions)[number];
 
 export declare const f0MeetingPermissions: readonly ["granted", "prompt", "denied", "unavailable", "in-use"];
 
+export declare type F0MeetingPresence = (typeof f0MeetingPresences)[number];
+
+/**
+ * A person in the room. `id` is the transport identity — the SAME string the
+ * transport uses, so F0 never cross-references two id spaces internally. The
+ * domain lookup (identity → employee name/avatar) belongs to the adapter.
+ *
+ * factorial → LiveKit `Participant.identity` (the employee id).
+ */
+export declare const f0MeetingPresences: readonly ["invited", "joined"];
+
 /**
  * Makes a {@link F0MeetingRuntime} available to the meeting UI. The host owns
  * the runtime (a mock in stories, a LiveKit adapter in factorial); F0 only
@@ -7448,8 +8538,13 @@ export declare type F0MeetingProviderProps = {
     actionOrder?: string[];
     /** Surface mode when a meeting first appears. */
     defaultMode?: F0MeetingSurfaceMode;
-    /** Host content rendered beside the grid (in-meeting chat, participants). */
-    sidePanel?: React.ReactNode;
+    /**
+     * The tabs of the in-call side panel (chat, transcript, notes). F0 renders
+     * the bar and owns whether the panel is open, because the button that opens
+     * it lives in F0's own control bar — a bare `ReactNode` could not supply the
+     * tab labels or the unread badge that button needs.
+     */
+    sidePanel?: F0MeetingSidePanel;
     /** Host content rendered in the window header, before the mode controls. */
     headerContent?: React.ReactNode;
     /** Host content rendered above the whole room (banners, upsells). */
@@ -7500,7 +8595,7 @@ export declare type F0MeetingRoomInfo = {
 export declare type F0MeetingRoomProps = {
     actions?: F0MeetingActionsProp;
     actionOrder?: string[];
-    sidePanel?: React.ReactNode;
+    sidePanel?: F0MeetingSidePanel;
     overlay?: React.ReactNode;
 };
 
@@ -7560,9 +8655,34 @@ export declare type F0MeetingRuntime = {
     reactions?: F0MeetingReaction[];
     muteParticipant?: (participantId: string) => void | Promise<void>;
     removeParticipant?: (participantId: string) => void | Promise<void>;
+    /**
+     * Live transcription. Omit and the panel has no Transcript tab at all —
+     * the usual capability-by-presence rule.
+     */
+    transcript?: F0MeetingTranscriptSegment[];
+    /** Shared notes for the room. Present without `setNotes` means read-only. */
+    notes?: string;
+    setNotes?: (value: string) => void;
     /** Retry after a failed connect — wires the Rejoin action. */
     reconnect?: () => void | Promise<void>;
     capabilities?: F0MeetingCapabilities;
+};
+
+export declare type F0MeetingSidePanel = {
+    tabs: F0MeetingSidePanelTab[];
+    defaultTabId?: string;
+};
+
+/**
+ * A tab in the room's side panel. F0 owns the bar, the selection and the close
+ * button; the host owns what is inside each tab.
+ */
+export declare type F0MeetingSidePanelTab = {
+    id: string;
+    label: string;
+    content: React.ReactNode;
+    /** Unread count on the tab and on the control-bar button that opens it. */
+    badge?: number;
 };
 
 /**
@@ -7669,7 +8789,7 @@ export declare const f0MeetingSurfaceModes: readonly ["fullscreen", "panel", "fl
 declare type F0MeetingSurfaceProps = {
     actions?: F0MeetingActionsProp;
     actionOrder?: string[];
-    sidePanel?: React.ReactNode;
+    sidePanel?: F0MeetingSidePanel;
     headerContent?: React.ReactNode;
     overlay?: React.ReactNode;
 };
@@ -7716,6 +8836,24 @@ export declare type F0MeetingTrack = {
 export declare type F0MeetingTrackKind = (typeof f0MeetingTrackKinds)[number];
 
 export declare const f0MeetingTrackKinds: readonly ["camera", "microphone", "screenShare", "screenShareAudio"];
+
+/**
+ * One line of live transcription.
+ *
+ * Modelled on LiveKit's own shape so the adapter is a rename: segments arrive
+ * on the `lk.transcription` text-stream topic, and a non-final segment is
+ * REPLACED by its final version under the same id rather than appended.
+ * (`RoomEvent.TranscriptionReceived` is deprecated; do not wire it.)
+ */
+export declare type F0MeetingTranscriptSegment = {
+    /** LiveKit `lk.segment_id` — shared between the interim and final versions. */
+    id: string;
+    participantId: string;
+    text: string;
+    at: string;
+    /** LiveKit `lk.transcription_final`. Interim lines render as provisional. */
+    isFinal: boolean;
+};
 
 declare type F0Message = {
     id: string;
@@ -7948,6 +9086,18 @@ export declare type F0Rect = {
 };
 
 /**
+ * Header for a resource detail page: avatar, title, description, status,
+ * metadata and its primary, secondary and overflow actions.
+ */
+declare const F0ResourceHeader: ({ avatar, title, description, primaryAction, secondaryActions, otherActions, status, metadata, deactivated, metadataRowGap, showBottomBorder, onClose, }: Props) => JSX_2.Element;
+export { F0ResourceHeader }
+export { F0ResourceHeader as ResourceHeader }
+
+declare type F0ResourceHeaderProps = Props;
+export { F0ResourceHeaderProps }
+export { F0ResourceHeaderProps as ResourceHeaderProps }
+
+/**
  * @experimental This is an experimental component, use it at your own risk
  */
 export declare const F0RichTextDisplay: ForwardRefExoticComponent<F0RichTextDisplayProps & RefAttributes<HTMLDivElement>>;
@@ -8017,14 +9167,26 @@ value?: string;
 threshold?: number;
 debounceTime?: number;
 autoFocus?: boolean;
-} & Pick<InputFieldProps<string>, "onChange" | "name" | "size" | "onFocus" | "onBlur" | "loading" | "disabled" | "placeholder" | "clearable"> & RefAttributes<HTMLInputElement>>;
+/**
+* Defaults to `-1`, which is right for the search box of a list that is
+* already reachable some other way. A search box that IS the way in — a
+* combobox — has to be tabbable, or focus can leave it and never come back.
+*/
+tabIndex?: number;
+} & Pick<InputFieldProps<string>, "onChange" | "name" | "size" | "role" | "aria-activedescendant" | "aria-autocomplete" | "aria-controls" | "aria-expanded" | "onFocus" | "onBlur" | "onKeyDown" | "loading" | "disabled" | "placeholder" | "clearable"> & RefAttributes<HTMLInputElement>>;
 
 export declare type F0SearchInputProps = {
     value?: string;
     threshold?: number;
     debounceTime?: number;
     autoFocus?: boolean;
-} & Pick<InputFieldProps<string>, "size" | "loading" | "clearable" | "placeholder" | "disabled" | "onBlur" | "onFocus" | "onChange" | "name">;
+    /**
+     * Defaults to `-1`, which is right for the search box of a list that is
+     * already reachable some other way. A search box that IS the way in — a
+     * combobox — has to be tabbable, or focus can leave it and never come back.
+     */
+    tabIndex?: number;
+} & Pick<InputFieldProps<string>, "size" | "loading" | "clearable" | "placeholder" | "disabled" | "onBlur" | "onFocus" | "onChange" | "name" | "role" | "onKeyDown" | "aria-controls" | "aria-expanded" | "aria-activedescendant" | "aria-autocomplete">;
 
 /**
  * @experimental This is an experimental component, use it at your own risk.
@@ -8093,33 +9255,24 @@ export declare interface F0SegmentedControlProps {
     ariaLabelledBy?: string;
 }
 
-/**
- * Base props shared across all F0Select variants
- */
-declare type F0SelectBaseProps<T extends string, R = unknown> = {
+declare type F0SelectDataProps<T extends string, R = unknown> = {
+    source: DataSourceDefinition<ResolvedRecordType<R>, FiltersDefinition, SortingsDefinition, GroupingDefinition<ResolvedRecordType<R>>>;
+    mapOptions: (item: ResolvedRecordType<R>) => F0SelectItemProps<T, ResolvedRecordType<R>>;
+    options?: never;
+} | {
+    source?: never;
+    mapOptions?: never;
+    searchFn?: (option: F0SelectItemProps<T, unknown>, search?: string) => boolean | undefined;
+    options: F0SelectItemProps<T, unknown>[];
+};
+
+declare type F0SelectFieldProps<T extends string, R = unknown> = F0SelectPopupProps<T, R> & F0SelectSelectionProps<T, R> & {
+    /** Standard form-field presentation. This remains the default. */
+    variant?: "field";
     withApplySelection?: boolean;
     applySelectionLabel?: string;
-    onChangeSelectedOption?: (option: F0SelectItemObject<T, ResolvedRecordType<R>> | undefined, checked: boolean) => void;
     children?: React.ReactNode;
-    open?: boolean;
-    showSearchBox?: boolean;
-    searchBoxPlaceholder?: string;
-    onSearchChange?: (value: string) => void;
-    searchValue?: string;
-    onOpenChange?: (open: boolean) => void;
-    /**
-     * Called when the user changes the in-dropdown filters (requires a `source`
-     * with filter definitions). Lets consumers keep an external context — e.g.
-     * detail-page navigation — in sync with what the dropdown is showing.
-     */
-    onFiltersChange?: (filters: FiltersState<FiltersDefinition>) => void;
-    searchEmptyMessage?: string;
     className?: string;
-    actions?: Action[];
-    /** Callback to create a new item from the current search text. When provided, a "+ Create" button is shown in the empty state of the dropdown. */
-    onCreate?: (value: string) => Promise<void> | void;
-    /** Container element to render the portal content into */
-    portalContainer?: HTMLElement | null;
     /**
      * When true, renders the select as a static list without the input trigger.
      * Only displays the dropdown content with max height, border and scroll.
@@ -8131,23 +9284,32 @@ declare type F0SelectBaseProps<T extends string, R = unknown> = {
      * @default false
      */
     showPreview?: boolean;
+} & Pick<InputFieldProps<T>, "required" | "loading" | "hideLabel" | "labelIcon" | "size" | "label" | "icon" | "placeholder" | "disabled" | "name" | "error" | "status" | "hint">;
+
+declare type F0SelectInlineProps<T extends string, R = unknown> = F0SelectPopupProps<T, R> & F0SelectSingleSelectionProps<T, R> & Pick<InputFieldProps<T>, "label" | "placeholder" | "disabled"> & {
     /**
-     * When true, preserves selections when the dataset changes (search, filters,
-     * or sortings). Useful for picker components where the user searches and
-     * filters to find items to add to an existing selection.
-     *
-     * @default true
+     * Compact borderless presentation for single-value controls embedded in rows.
+     * The required label is used as the accessible name and is not shown visually.
      */
-    preserveSelectionOnDatasetChange?: boolean;
-    /**
-     * When true, the dropdown sizes to its widest option (never narrower than
-     * the trigger) instead of the default 20rem minimum. Useful for compact
-     * value pickers like month/year selectors.
-     *
-     * @default false
-     */
-    fitContentWidth?: boolean;
-} & WithDataTestIdProps;
+    variant: "inline";
+    size?: never;
+    disableSelectAll?: never;
+    withApplySelection?: never;
+    applySelectionLabel?: never;
+    children?: never;
+    className?: never;
+    asList?: never;
+    showPreview?: never;
+    required?: never;
+    loading?: never;
+    hideLabel?: never;
+    labelIcon?: never;
+    icon?: never;
+    name?: never;
+    error?: never;
+    status?: never;
+    hint?: never;
+};
 
 /**
  * Short token rendered next to the option label, in secondary color, on a
@@ -8195,22 +9357,56 @@ declare type F0SelectItemProps<T, R = unknown> = F0SelectItemObject<T, R> | {
 export { F0SelectItemProps }
 export { F0SelectItemProps as SelectItemProps }
 
+/** Props shared by the field and inline select variants. */
+declare type F0SelectPopupProps<T extends string, R = unknown> = {
+    onChangeSelectedOption?: (option: F0SelectItemObject<T, ResolvedRecordType<R>> | undefined, checked: boolean) => void;
+    open?: boolean;
+    showSearchBox?: boolean;
+    searchBoxPlaceholder?: string;
+    onSearchChange?: (value: string) => void;
+    searchValue?: string;
+    onOpenChange?: (open: boolean) => void;
+    /**
+     * Called when the user changes the in-dropdown filters (requires a `source`
+     * with filter definitions). Lets consumers keep an external context — e.g.
+     * detail-page navigation — in sync with what the dropdown is showing.
+     */
+    onFiltersChange?: (filters: FiltersState<FiltersDefinition>) => void;
+    searchEmptyMessage?: string;
+    actions?: Action[];
+    /** Callback to create a new item from the current search text. When provided, a "+ Create" button is shown in the empty state of the dropdown. */
+    onCreate?: (value: string) => Promise<void> | void;
+    /** Container element to render the portal content into */
+    portalContainer?: HTMLElement | null;
+    /**
+     * When true, preserves selections when the dataset changes (search, filters,
+     * or sortings). Useful for picker components where the user searches and
+     * filters to find items to add to an existing selection.
+     *
+     * @default true
+     */
+    preserveSelectionOnDatasetChange?: boolean;
+    /**
+     * When true, the dropdown sizes to its widest option (never narrower than
+     * the trigger) instead of the default 20rem minimum. Useful for compact
+     * value pickers like month/year selectors.
+     *
+     * @default false for field selects; true for inline selects
+     */
+    fitContentWidth?: boolean;
+} & WithDataTestIdProps;
+
 /**
  * Select component for choosing from a list of options.
  *
  * @template T - The type of the emitted value
  * @template R - The type of the record/item data (used with data source)
  */
-declare type F0SelectProps<T extends string, R = unknown> = F0SelectBaseProps<T, R> & // Single select not clearable
-({
-    clearable?: false;
-    multiple?: false;
-    value?: T;
-    defaultItem?: F0SelectItemObject<T, ResolvedRecordType<R>>;
-    onChange?: (value: T, originalItem?: ResolvedRecordType<R> | undefined, option?: F0SelectItemObject<T, ResolvedRecordType<R>>) => void;
-    /** Callback for selection changes - provides full selection state for advanced use cases (e.g., "Select All" with exclusions) */
-    onSelectItems?: never;
-} | {
+declare type F0SelectProps<T extends string, R = unknown> = (F0SelectFieldProps<T, R> | F0SelectInlineProps<T, R>) & F0SelectDataProps<T, R>;
+export { F0SelectProps }
+export { F0SelectProps as SelectProps }
+
+declare type F0SelectSelectionProps<T extends string, R = unknown> = F0SelectSingleSelectionProps<T, R> | {
     clearable: true;
     multiple?: false;
     value?: T;
@@ -8240,18 +9436,17 @@ declare type F0SelectProps<T extends string, R = unknown> = F0SelectBaseProps<T,
      * When enabled, the allSelected state will always be false and users must select items individually.
      */
     disableSelectAll?: boolean;
-}) & ({
-    source: DataSourceDefinition<ResolvedRecordType<R>, FiltersDefinition, SortingsDefinition, GroupingDefinition<ResolvedRecordType<R>>>;
-    mapOptions: (item: ResolvedRecordType<R>) => F0SelectItemProps<T, ResolvedRecordType<R>>;
-    options?: never;
-} | {
-    source?: never;
-    mapOptions?: never;
-    searchFn?: (option: F0SelectItemProps<T, unknown>, search?: string) => boolean | undefined;
-    options: F0SelectItemProps<T, unknown>[];
-}) & Pick<InputFieldProps<T>, "required" | "loading" | "hideLabel" | "labelIcon" | "size" | "label" | "icon" | "placeholder" | "disabled" | "name" | "error" | "status" | "hint">;
-export { F0SelectProps }
-export { F0SelectProps as SelectProps }
+};
+
+declare type F0SelectSingleSelectionProps<T extends string, R = unknown> = {
+    clearable?: false;
+    multiple?: false;
+    value?: T;
+    defaultItem?: F0SelectItemObject<T, ResolvedRecordType<R>>;
+    onChange?: (value: T, originalItem?: ResolvedRecordType<R> | undefined, option?: F0SelectItemObject<T, ResolvedRecordType<R>>) => void;
+    /** Callback for selection changes - provides full selection state for advanced use cases (e.g., "Select All" with exclusions) */
+    onSelectItems?: never;
+};
 
 export declare type F0SelectTagProp = string | {
     type: "dot";
@@ -8270,6 +9465,8 @@ export declare type F0SelectTagProp = string | {
     text: string;
     variant: StatusVariant;
 };
+
+export declare type F0SelectVariant = (typeof selectVariants)[number];
 
 /**
  * @experimental This is an experimental component use it at your own risk
@@ -8757,15 +9954,21 @@ export declare function generateCSVContent<R extends RecordType, Filters extends
  */
 export declare function getAutoPerPageMinHeight(rowHeight?: number): number;
 
-export declare const getGranularityDefinition: (granularityKey: GranularityDefinitionKey) => GranularityDefinition;
+export declare const getGranularityDefinition: (granularityKey: NavigationGranularityKey) => GranularityDefinition;
 
 /**
  * Get granularity definitions with week granularity configured with the specified weekStartsOn.
  * The week granularity is only created when needed (lazy creation).
+ *
+ * The `periods` granularity is only selectable once the consumer supplies its
+ * periods; without them it renders an empty list.
+ *
+ * Accepts a bare `weekStartsOn` for the original call style, or an options
+ * object when more than the week start is configured.
  */
-export declare function getGranularityDefinitions(weekStartsOn?: WeekStartsOn): Record<string, GranularityDefinition>;
+export declare function getGranularityDefinitions(options?: WeekStartsOn | GranularityDefinitionsOptions): Record<string, GranularityDefinition>;
 
-export declare const getGranularitySimpleDefinition: (granularityKey: GranularityDefinitionKey) => GranularityDefinitionSimple;
+export declare const getGranularitySimpleDefinition: (granularityKey: NavigationGranularityKey) => GranularityDefinitionSimple;
 
 /**
  * Get the primaryActionsItems from the primaryActionsDefinition or the actions property
@@ -8793,6 +9996,12 @@ export declare interface GranularityDefinition {
     calendarMode?: CalendarMode;
     calendarView: CalendarView;
     weekStartsOn?: WeekStartsOn;
+    selectorLabel?: string;
+    hideDateInput?: boolean;
+    getViewDateBounds?: () => {
+        min?: Date;
+        max?: Date;
+    } | undefined;
     label: (viewDate: Date, i18n: TranslationsType, locale?: string) => ReactNode;
     toRangeString: (date: Date | DateRange | undefined | null, i18n: TranslationsType, format?: DateStringFormat) => DateRangeString;
     toRange: <T extends Date | DateRange | undefined | null>(date: T) => T extends Date | DateRange ? DateRangeComplete : T;
@@ -8835,6 +10044,11 @@ export declare const granularityDefinitions: {
 
 export declare type GranularityDefinitionSimple = Pick<GranularityDefinition, "toRangeString" | "toString">;
 
+export declare type GranularityDefinitionsOptions = {
+    weekStartsOn?: WeekStartsOn;
+    periods?: DatePeriodsDefinition;
+};
+
 declare type GraphCollectionProps<Record extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<Record>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<Record>> = CollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping, GraphVisualizationOptions<Record, Filters, Sortings>>;
 
 /**
@@ -8875,6 +10089,15 @@ export declare type GraphVisualizationOptions<R extends RecordType, Filters exte
     /** Tag columns that are always visible and cannot be hidden in the settings. */
     pinnedTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>;
     /**
+     * Tag columns the actor is not allowed to see, mapped to the reason. Each is
+     * still listed in the settings but with its toggle forced OFF and disabled,
+     * and the given (already-translated) text shown in a tooltip. Unlike
+     * `pinnedTagTypes` (locked ON, drawn with a lock icon), these render no lock
+     * icon — the disabled switch + tooltip is the affordance. The caller should
+     * also omit these columns' tags from `tags(record)`.
+     */
+    lockedTagTypes?: Partial<Record<F0GraphNodeTagColumn, string>>;
+    /**
      * Floating toolbar shown above a node while it is selected. Provide the
      * action buttons (e.g. `<F0Button size="sm" … />`) for the given record.
      */
@@ -8883,6 +10106,29 @@ export declare type GraphVisualizationOptions<R extends RecordType, Filters exte
     getNodeId?: (record: R) => string;
     /** Number of children a node has. A node is expandable when this is `> 0`. */
     getChildrenCount: (record: R) => number;
+    /**
+     * Whether this record's children render as a vertical stack of compact rows
+     * directly under it, instead of the default horizontal fan-out. Use it for
+     * children that read as a list belonging to the record rather than as
+     * branches in their own right — job levels under a role, plan tiers under a
+     * product. A stacked group reserves no horizontal space, so the record's
+     * siblings close in around it.
+     *
+     * Only applies when every child is a leaf (`getChildrenCount` returns 0 for
+     * all of them); a group with an expandable child keeps the normal fan-out.
+     * Stacked rows are labelled with `title` and can carry `stackedTrailing`;
+     * `avatar` / `subtitle` / `tags` do not apply to them.
+     */
+    stackNodes?: (record: R) => boolean;
+    /**
+     * Trailing content for a stacked row — a count or a small icon button.
+     * Rendered at the row's trailing edge; clicks inside it do not select the
+     * node. Ignored for records that are not rendered as stacked rows.
+     *
+     * Not a selection affordance: F0Graph has no multi-select, so a checkbox here
+     * would promise a behaviour the graph does not have.
+     */
+    stackedTrailing?: (record: R) => ReactNode;
     /**
      * Returns the filters that, applied to the source `dataAdapter`, fetch the
      * direct children of `parentId`. `parentId === null` must return the roots.
@@ -8911,6 +10157,18 @@ export declare type GraphVisualizationOptions<R extends RecordType, Filters exte
      * the default entry view (roots expanded to `defaultExpandDepth`).
      */
     focusOnEntry?: string;
+    /**
+     * Id of a node to mark as **selected on entry** — the click-selection ring, so
+     * a deep link lands on the graph looking the way a user's own click leaves it,
+     * not just framed. Seeded on the first render; the selection then follows
+     * normal clicks/keyboard (this is a one-shot entry seed, not a controlled
+     * value). Pair it with `focusOnEntry` (usually the same id) so the node's
+     * branch is expanded and framed — otherwise the ring isn't visible until its
+     * branch is opened. Unlike `revealNodeId` (search) it sets the selection, not
+     * the reveal highlight. Providing it puts the graph's selection in controlled
+     * mode; omitting it leaves selection uncontrolled (the default).
+     */
+    initialSelectedNodeId?: string;
     /**
      * Resolves the ancestor path (root → … → matched node) for a node so it can
      * be revealed, returning the records in root-first order. Required for
@@ -9031,13 +10289,23 @@ declare type GraphVisualizationSettings = {
     hidden?: string[];
 };
 
+/** One row of the grid. Rows may hold different counts, so also different widths. */
+declare type GridRow = {
+    count: number;
+    tileWidth: number;
+    tileHeight: number;
+};
+
 export declare type GridSolution = {
     rows: number;
+    /** Widest row's tile count. */
     cols: number;
+    /** The NARROWEST row's tile — the worst case, which is what limits are about. */
     tileWidth: number;
     tileHeight: number;
     /** Tiles that fit. `count - visibleCount` go to the overflow chip. */
     visibleCount: number;
+    rowSpecs: GridRow[];
 };
 
 export declare type GridSolverInput = {
@@ -9051,7 +10319,7 @@ export declare type GridSolverInput = {
      */
     minAspect: number;
     maxAspect: number;
-    /** Only breaks ties between layouts of equal area. */
+    /** Only breaks ties between layouts of equal quality. */
     preferredAspect: number;
     /** Below this a tile stops being useful; the solver overflows instead. */
     minTileWidth: number;
@@ -9276,6 +10544,13 @@ export declare interface HomeRenderCtx {
      * { slotRowBleed}).
      */
     isLastSlot?: boolean;
+    /**
+     * WHAT THE CARD IS SHOWING, when its header carries a `headerSelect`: the
+     * option the reader is on. A slot renderer that owns its own data reads this
+     * to fetch for it — the switcher is in the header, the fetching is here, and
+     * neither needs the host to hold the value.
+     */
+    selection?: string;
 }
 
 /**
@@ -9341,7 +10616,29 @@ export declare interface HomeSlotParamsMap {
  * `alert` and `status` are EXCLUSIVE — `Widget` throws when given both — so the
  * type says so rather than leaving it to blow up at runtime.
  */
-export declare type HomeWidgetChrome = Pick<WidgetProps, "action" | "summaries"> & ({
+export declare type HomeWidgetChrome = Pick<WidgetProps, "action" | "summaries" | "headerControls"> & {
+    /**
+     * THE CARD'S OWN BUTTONS, in the header's top-right — as DATA, so a host that
+     * builds its widgets as data ("Write post", pointing at a route) can put one
+     * there without handing over a React node.
+     *
+     * `F0ButtonProps`, the same shape `action` takes, so a button can carry an
+     * `href` and be a real link. Drawn `ghost`/`sm` unless they say otherwise:
+     * this row is the TITLE's, and a filled button beside a title reads as the
+     * card's subject rather than as something you press.
+     *
+     * Keep it to one or two. What the card can do that needs no button belongs in
+     * `actions`, the overflow menu.
+     */
+    headerActions?: F0ButtonProps[];
+    /**
+     * WHAT THE CARD IS SHOWING, as a select in the same row — a scope switcher, as
+     * data. See {@link WidgetHeaderSelect}: `SlotWidget` keeps the choice and
+     * hands it to the slots as `ctx.selection`, so a widget declared as data can
+     * still be switched without its host holding the value.
+     */
+    headerSelect?: WidgetHeaderSelect;
+} & ({
     alert?: WidgetProps["alert"];
     status?: never;
 } | {
@@ -9397,6 +10694,11 @@ export declare type HomeWidgetItem = HomeWidgetChrome & {
      */
     icon?: IconType;
     /**
+     * The one thing the widget can do FROM THE COLLAPSED RAIL, drawn on its glyph
+     * instead of the catalog `icon`. See `HomeWidgetRailAction`.
+     */
+    railAction?: HomeWidgetRailAction;
+    /**
      * PINNED: the widget stays put. It offers no "Remove widget" in its menu, it
      * cannot be dragged, and no other widget can displace it — for widgets a user
      * must always have, like Clock in.
@@ -9413,6 +10715,86 @@ export declare type HomeWidgetItem = HomeWidgetChrome & {
      * its content (see `SlotWidget`'s `loading`).
      */
     loading?: boolean;
+};
+
+/**
+ * A DIRECT ACTION on a widget's collapsed glyph: the one thing the widget can be
+ * told to do without being opened — resume a paused timer, clock out, join the
+ * call that starts now.
+ *
+ * The glyph BECOMES the button, because 40px is one control's worth of room. So
+ * the widget is still one hover away (hovering or focusing the glyph floats it
+ * over the feed, as any glyph does) and the CLICK is the action's rather than the
+ * panel's.
+ *
+ * Only the COLLAPSED rail draws it. Expanded, the card's own footer button
+ * (`action`) is where a widget's call to action belongs, and stacked (below `md`)
+ * there is no glyph to put it on.
+ */
+export declare type HomeWidgetRailAction = {
+    /** The action's own glyph — `Play` to resume, `Pause` for a running timer. */
+    icon: IconType;
+    /**
+     * What it does, in the imperative ("Resume"): the glyph's tooltip, and half of
+     * its accessible name — the widget's title is the other half, since "Resume"
+     * alone says nothing about which of the strip's glyphs it is.
+     */
+    label: string;
+    onClick: () => void;
+    /**
+     * WHAT COLOUR THE STATE IS. One tone paints the whole chip — the pill behind
+     * the reading and the button at the end of it — because they are one object,
+     * and two colours picked separately is how you end up with a red button on an
+     * amber pill.
+     *
+     * - `"neutral"` (the default) — the dark slab, with the accent button on it.
+     *   Nothing about the state is remarkable; it is simply running.
+     * - `"accent"`, `"critical"`, `"warning"`, `"promote"`, `"positive"` — the pill
+     *   takes that colour and the button becomes a plain chip carrying it in its
+     *   icon, so the two never fight over the same hue.
+     *
+     * Without a `text` there is no pill, and the tone paints the button itself.
+     *
+     * PICK THE ONE THE WIDGET ALREADY USES. A rail action stands in for a state the
+     * card is also showing, and the semantic tones are the same values that state
+     * is drawn with elsewhere — a clock-in tile pulses `--positive-50` while it
+     * runs and `--promote-50` on a break, which is exactly `"positive"` and
+     * `"promote"` here. Two names for one state is how a glyph ends up a different
+     * green from the card it came out of.
+     */
+    tone?: RailActionTone;
+    /**
+     * A READING to put beside the button — a clock's running total or the break
+     * you are on today, but any short string the state can be summed up in. The
+     * glyph grows into a dark PILL to hold it, overflowing its 40px column
+     * leftwards, and the whole strip right-aligns behind it.
+     *
+     * It is only drawn while the widget is STOWED. Hovering floats the card, which
+     * says the same thing in full context, so the pill gives its width back and
+     * leaves the button — the one part of it you can act on.
+     *
+     * Keep it SHORT — "7:12", "0:20", "3 left". This is a glyph, not a status bar,
+     * and anything that has to be read twice does not belong on one.
+     */
+    text?: string;
+    /**
+     * The reading is COUNTING: the separators in `text` blink once a second, the
+     * way a clock does, so a stowed timer is visibly running rather than merely
+     * displayed. Reduced motion holds them lit, and a `text` with nothing to
+     * separate simply stands still.
+     */
+    ticking?: boolean;
+    /**
+     * THE STATE IS ASKING TO BE ACTED ON — a timer left on a break, a shift you
+     * never clocked out of. The glyph alternates once a second between the
+     * widget's own icon and the action's, so the strip can say which module wants
+     * something AND what it wants without growing a second control.
+     *
+     * It settles on the action's icon while the widget is floating, so what you
+     * click is never the face that happened to be up. Reduced motion is honoured:
+     * the glyph simply stays the button.
+     */
+    flashing?: boolean;
 };
 
 /** One slot of a widget: a visualization tag + its params (opaque to the layout). */
@@ -9578,6 +10960,27 @@ export declare type InfiniteScrollPaginatedResponse<TRecord> = BasePaginatedResp
 };
 
 /**
+ * Structured help copy for a labelled thing — a table column, a dashboard
+ * widget. `link` is for what the description implies but cannot do: opening the
+ * catalog entry the copy came from.
+ */
+declare type InfoHintContent = {
+    title: string;
+    description: string;
+    link?: {
+        label: string;
+        onClick: () => void;
+    };
+    /**
+     * Accessible name for the icon trigger. Falls back to `label` on the host
+     * and then to a generic "More information", so the trigger is never named
+     * after the thing it describes alone — a name identical to the heading
+     * beside it says nothing about what the control does.
+     */
+    label?: string;
+};
+
+/**
  * @deprecated Renamed to `F0TextInput` to match the F0 input vocabulary
  * (any component where the user types text in a box has the `Input` suffix
  * and lives under the `Inputs/` group). Will be removed once consumers have
@@ -9636,6 +11039,12 @@ declare type InputFieldProps<T> = {
     inputRef?: React.Ref<unknown>;
     "aria-controls"?: AriaAttributes["aria-controls"];
     "aria-expanded"?: AriaAttributes["aria-expanded"];
+    /** The two remaining pieces of the combobox contract. Without
+     * `aria-activedescendant` a field that drives a list it doesn't contain can
+     * never announce the active option: focus stays in the input while the
+     * selection moves elsewhere, so a screen reader hears nothing. */
+    "aria-activedescendant"?: AriaAttributes["aria-activedescendant"];
+    "aria-autocomplete"?: AriaAttributes["aria-autocomplete"];
     onClear?: () => void;
     onFocus?: () => void;
     onBlur?: () => void;
@@ -9872,9 +11281,12 @@ export declare type lastIntentType = {
 export declare const LATEST: "latest";
 
 /**
- * Places the solved tiles, centring the block and any orphan last row. Returns
- * absolute rects so the caller can animate x/y/width/height directly — no
- * `scale`, which is what would warp the video mid-flight.
+ * Places the solved tiles. Rows sit in equal-height slots that span the
+ * container, and each row centres its own tiles inside its slot — so a row
+ * that the aspect clamp shrank is centred rather than pinned to a corner.
+ *
+ * Returns absolute rects so the caller can animate x/y/width/height directly —
+ * no `scale`, which is what would warp the video mid-flight.
  */
 export declare const layoutGrid: (solution: GridSolution, box: {
     width: number;
@@ -10149,6 +11561,61 @@ export declare interface MeetingJoin {
     label?: string;
 }
 
+/**
+ * Shared notes for the room.
+ *
+ * Uncontrolled-looking but fully controlled: the value comes from the host, so
+ * whatever it syncs the notes through — a data channel, a document, a poll —
+ * arrives here as a re-render rather than as a second source of truth.
+ */
+export declare const MeetingNotes: ({ value, onChange }: MeetingNotesProps) => JSX_2.Element;
+
+declare type MeetingNotesProps = {
+    value: string;
+    /** Absent means read-only: the notes exist but this person cannot edit them. */
+    onChange?: (value: string) => void;
+};
+
+/**
+ * The call's own chat, for the room's side panel.
+ *
+ * Deliberately plainer than `F0Chat`: this transport has no reactions, no
+ * threads, no read receipts and no history — in production it is LiveKit's data
+ * channel, which delivers a string and forgets it. Rendering it with the full
+ * conversation surface would promise all of those.
+ */
+export declare const MeetingRoomChat: ({ messages, onSend }: MeetingRoomChatProps) => JSX_2.Element;
+
+declare type MeetingRoomChatMessage = {
+    id: string;
+    participantId: string;
+    text: string;
+    at: string;
+};
+
+declare type MeetingRoomChatProps = {
+    messages: MeetingRoomChatMessage[];
+    onSend: (text: string) => void;
+};
+
+/**
+ * The in-call panel: chat, transcript and notes beside the grid.
+ *
+ * F0 owns the bar, the selection and the close button because the control that
+ * opens the panel lives in F0's own action bar and needs the tab labels and
+ * unread counts. What goes inside each tab is entirely the host's.
+ *
+ * Only one tab is mounted at a time. That is deliberate for the chat tab in
+ * particular: its transcript is virtualized, and measuring rows inside a
+ * display:none subtree yields zero heights that the list then has to correct
+ * on reveal.
+ */
+export declare const MeetingSidePanel: ({ panel }: MeetingSidePanelProps) => JSX_2.Element | null;
+
+declare type MeetingSidePanelProps = {
+    panel: F0MeetingSidePanel;
+};
+
 export declare type MeetingSignalStore = F0MeetingSignalStore & {
     setAudioLevel: (participantId: string, level: number) => void;
     setSpeaking: (participantIds: readonly string[]) => void;
@@ -10200,9 +11667,14 @@ declare type MeetingSurfaceContextValue = {
      * rather than on top of the whole viewport.
      */
     setFrameRect: (rect: F0Rect | null) => void;
-    /** The tile the user pinned, if any. */
-    manualFocusKey: string | null;
-    setManualFocusKey: (key: string | null) => void;
+    /** What the user asked the spotlight to do, if anything. */
+    focusIntent: F0MeetingFocusIntent;
+    setFocusIntent: (intent: F0MeetingFocusIntent) => void;
+    /** Whether the in-call side panel is open, and on which tab. */
+    isSidePanelOpen: boolean;
+    setSidePanelOpen: (open: boolean) => void;
+    activeTabId: string | null;
+    setActiveTabId: (id: string) => void;
     announce: (message: string) => void;
     liveMessage: string;
 };
@@ -10213,6 +11685,19 @@ export declare const MeetingSurfaceProvider: ({ defaultMode, roomId, children, }
     roomId?: string;
     children: ReactNode;
 }) => ReactNode;
+
+/**
+ * Live transcription, newest at the bottom.
+ *
+ * Interim segments render at reduced emphasis and are REPLACED by their final
+ * version under the same id — appending both is what turns a transcript into
+ * the same sentence three times, each a word longer.
+ */
+export declare const MeetingTranscript: ({ segments }: MeetingTranscriptProps) => JSX_2.Element;
+
+declare type MeetingTranscriptProps = {
+    segments: F0MeetingTranscriptSegment[];
+};
 
 export declare type MentionedUser = {
     id: string | number;
@@ -10505,6 +11990,16 @@ export declare type NavigationFiltersState<Definition extends Record<string, Nav
  */
 export declare type NavigationFilterValue<T> = T extends DateNavigatorFilterDefinition ? DateValue : T extends undefined ? undefined : never;
 
+/**
+ * The keys a date navigation can be set to. `periods` is not a member of the
+ * static record — it has no definition until a consumer supplies its ranges —
+ * so it widens only the types that can actually render it. Keeping it out of
+ * `GranularityDefinitionKey` is what stops it leaking into every exhaustive map
+ * over that key, in places (form-field presets, compare-to) where it can do
+ * nothing.
+ */
+export declare type NavigationGranularityKey = GranularityDefinitionKey | "periods";
+
 declare type NavigationItem = Pick<LinkProps, "href" | "exactMatch" | "onClick"> & {
     label: string;
 } & DataAttributes_2;
@@ -10593,6 +12088,18 @@ export declare interface NewHomeLayoutProps {
      */
     editableWidgetContainers?: WidgetContainerSide[];
     /**
+     * Which containers may still be ADDED TO. Narrower than
+     * `editableWidgetContainers`, which it is a subset of: a column not named here
+     * keeps its dragging and its "Remove widget" and only loses the offer to add.
+     *
+     * Defaults to every editable container — the common case, where the catalog
+     * always has something for every column. Name the sides once a column's
+     * catalog can run out: a main column that only ever holds one kind of widget
+     * has nothing to offer the moment that widget is on it, and a "+" that opens
+     * an empty picker is an offer the app cannot keep.
+     */
+    addableWidgetContainers?: WidgetContainerSide[];
+    /**
      * Which containers keep ONLY THE WIDGETS YOU CAN SEE in the DOM. None by
      * default: for a Home of a dozen widgets, mounting them all is what keeps a
      * card's data, clock and animation alive across everything this layout does to
@@ -10645,7 +12152,10 @@ export declare interface NewHomeLayoutProps {
      * changes. Ignored when `rebuildWidget` is given.
      */
     renderWidgetPreview?: (widget: HomeWidgetItem, params: WidgetParams) => ReactNode;
-    /** When set, renders a "+ Add widget" affordance at the bottom of each column. */
+    /**
+     * When set, renders a "+ Add widget" affordance at the bottom of each column
+     * that takes widgets — see `addableWidgetContainers`.
+     */
     onClickAddNewWidget?: (side: WidgetContainerSide) => void;
     /** Called with a side and its widget ids in their new order after a drag. */
     onReorderWidgets?: (side: WidgetContainerSide, ids: string[]) => void;
@@ -10674,6 +12184,18 @@ export declare interface NewHomeLayoutProps {
     stackedPinsAfter?: number;
     ctx?: HomeRenderCtx;
     className?: string;
+    /** Tooltip copy for the One switch, forwarded to `F0OneSwitch`. */
+    oneSwitchTooltip?: {
+        whenDisabled?: string;
+        whenEnabled?: string;
+    };
+    /** Opens the One switch's tooltip for 3s on mount. */
+    oneSwitchAutoOpen?: boolean;
+    /**
+     * Hides the One AI toggle in the controls row. Use when One is reached
+     * elsewhere (e.g. a sidebar tab) so Home doesn't show a redundant switch.
+     */
+    hideOneSwitch?: boolean;
 }
 
 declare type NextDepth<T> = T extends 1 ? 2 : T extends 2 ? 3 : T extends 3 ? 4 : never;
@@ -10961,7 +12483,7 @@ export declare const OneCalendar: WithDataTestIdReturnType_2<    {
 displayName: string;
 }>;
 
-export declare const OneCalendarInternal: ({ mode, view, onSelect, defaultMonth, defaultSelected, showNavigation, showInput, minDate, maxDate, compact, weekStartsOn, selectOnCellOnly, }: OneCalendarInternalProps) => JSX_2.Element;
+export declare const OneCalendarInternal: ({ mode, view, onSelect, defaultMonth, defaultSelected, showNavigation, showInput, minDate, maxDate, compact, weekStartsOn, selectOnCellOnly, periods, }: OneCalendarInternalProps) => JSX_2.Element;
 
 export declare interface OneCalendarInternalProps {
     mode: CalendarMode;
@@ -10977,6 +12499,8 @@ export declare interface OneCalendarInternalProps {
     weekStartsOn?: WeekStartsOn;
     /** When true, a granularity change updates the view without emitting `onSelect`. Default false. */
     selectOnCellOnly?: boolean;
+    /** Consumer-defined ranges rendered by the `periods` view. */
+    periods?: DatePeriodsDefinition;
 }
 
 export declare type OneCalendarProps = Omit<OneCalendarInternalProps, (typeof privateProps_6)[number]>;
@@ -11110,7 +12634,7 @@ declare type OneDataCollectionProps<R extends RecordType, Filters extends Filter
 
 export declare const OneDateNavigator: typeof _OneDateNavigator;
 
-declare function _OneDateNavigator({ onSelect, defaultValue, presets, granularities, hideNavigation, hideGoToCurrent, compareTo, defaultCompareTo, onCompareToChange, value, dataTestId, ...props }: OneDatePickerProps): JSX_2.Element;
+declare function _OneDateNavigator({ onSelect, defaultValue, presets, granularities, hideNavigation, hideGoToCurrent, compareTo, defaultCompareTo, onCompareToChange, value, dataTestId, periods, ...props }: OneDatePickerProps): JSX_2.Element;
 
 export declare interface OneDatePickerProps extends Omit<DatePickerPopupProps, "children">, WithDataTestIdProps {
     hideNavigation?: boolean;
@@ -11257,8 +12781,8 @@ declare interface OnePaginationProps {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const OnePersonListItem: WithDataTestIdReturnType_3<default_3.ForwardRefExoticComponent<OnePersonListItemProps & default_3.RefAttributes<HTMLDivElement>> & {
-Skeleton: () => default_3.JSX.Element;
+export declare const OnePersonListItem: WithDataTestIdReturnType_3<default_2.ForwardRefExoticComponent<OnePersonListItemProps & default_2.RefAttributes<HTMLDivElement>> & {
+Skeleton: () => default_2.JSX.Element;
 }>;
 
 export declare type OnePersonListItemProps = {
@@ -11700,6 +13224,8 @@ declare const privateProps_6: readonly ["compact"];
 
 declare const privateProps_7: readonly ["delay", "onOpen"];
 
+declare const privateProps_8: readonly ["forceVerticalMetadata", "disableOverlayLink"];
+
 declare type ProductUpdate = {
     title: string;
     href: string;
@@ -11903,6 +13429,15 @@ declare interface RadarComputation {
     sortOrder?: "asc" | "desc";
 }
 
+export declare type RailActionTone = (typeof railActionTones)[number];
+
+/**
+ * The colours a rail action's chip can take, by what the state MEANS rather than
+ * by hue: the same five a tag or a banner picks from, so a red pill in the rail
+ * is red for the same reason a red tag is.
+ */
+export declare const railActionTones: readonly ["neutral", "accent", "critical", "warning", "promote", "positive"];
+
 export declare const rangeSeparator = "\u2192";
 
 declare interface ReactionProps {
@@ -12004,15 +13539,26 @@ declare type RequisitionProfile = {
 };
 
 /**
- * Decides which tile is spotlighted. Pure, so every branch is a unit test —
- * the previous implementation was a 75-line effect over mutable refs.
+ * Decides which tile is spotlighted. Pure, so every branch is a unit test.
  *
  * Priority: the user's pin, then a screen share we have not focused yet, then
  * the remote participant in a one-to-one.
+ *
+ * The `none` intent is what makes the pin button work in a one-to-one. With a
+ * plain nullable key, dismissing the spotlight fell straight back into the
+ * two-camera rule below and re-focused the same person in the same render, so
+ * the control did nothing at all.
  */
-export declare const resolveAutoFocus: ({ tiles, manualFocusKey, seenShareKeys, }: AutoFocusInput) => AutoFocusResult;
+export declare const resolveAutoFocus: ({ tiles, intent, seenShareKeys, }: AutoFocusInput) => AutoFocusResult;
 
 export declare type ResolvedRecordType<R> = R extends RecordType ? R : RecordType;
+
+/**
+ * The definition behind a key with no consumer data to build it from. Only
+ * `periods` has one: its empty definition renders the "no periods" state, which
+ * is what a periods value without periods means.
+ */
+export declare const resolveGranularityDefinition: (key: NavigationGranularityKey) => GranularityDefinition;
 
 /**
  * Resolves an anchored placement into an absolute rect, clamped into the
@@ -12030,14 +13576,6 @@ export declare const resolveSlotRenderer: (entry: SlotRendererEntry | undefined)
 
 /** Resolves a header's params-driven parts against the params in hand. */
 export declare const resolveWidgetHeader: (header: HomeWidgetHeader | undefined, params?: WidgetParams) => WidgetProps["header"];
-
-/**
- * Header for a resource detail page: avatar, title, description, status,
- * metadata and its primary, secondary and overflow actions.
- */
-export declare const ResourceHeader: ({ avatar, title, description, primaryAction, secondaryActions, otherActions, status, metadata, deactivated, metadataRowGap, showBottomBorder, onClose, }: Props) => JSX_2.Element;
-
-export declare type ResourceHeaderProps = Props;
 
 declare type RestrictComponentProps = {
     identifier: string;
@@ -12312,6 +13850,8 @@ export declare type SelectedState = {
 export declare type SelectionId = number | string;
 
 export declare const selectSizes: readonly ["sm", "md"];
+
+export declare const selectVariants: readonly ["field", "inline"];
 
 /**
  * Placement after a drag: always re-anchored to the nearest corner, and pulled
@@ -12794,7 +14334,22 @@ export declare const slotRowBleed: (ctx: HomeRenderCtx) => string;
  */
 export declare type SlotSkeletonRenderer<P = unknown> = (params: P, ctx: HomeSkeletonCtx) => ReactNode;
 
-export declare function SlotWidget({ header, params, fullHeight, action, summaries, alert, status, slots, loading, slotRenderers, actions, flipped, onFlipBack, isDragging, ctx, }: SlotWidgetProps): JSX_2.Element;
+export declare function SlotWidget({ header, params, fullHeight, action, summaries, headerControls, headerActions, headerSelect, alert, status, slots, loading, slotRenderers, actions, flipped, onFlipBack, isDragging, ctx, }: SlotWidgetProps): JSX_2.Element;
+
+/**
+ * A widget's CONTENT: the slot stack, with the dividers between slots and the
+ * skeletons while it loads — everything `SlotWidget` draws, minus the card.
+ *
+ * Public because the frame is not always wanted. A surface that drills into a
+ * widget (an overlay listing the tasks one of its grouped rows summarises) is
+ * already a surface: wrapped in a `Widget` it would be a card inside a card,
+ * with two borders and two paddings. Rendering the slots here keeps the rows
+ * IDENTICAL to the widget's — same slots, same renderers — which composing them
+ * by hand would not.
+ *
+ * Inside a card, prefer `SlotWidget`: it is this plus the frame.
+ */
+export declare function SlotWidgetContent({ slots, loading, slotRenderers, ctx, }: Pick<SlotWidgetProps, "slots" | "loading" | "slotRenderers" | "ctx">): JSX_2.Element;
 
 /**
  * SlotWidget — one Home widget rendered from data: the f0 `Widget` frame (the
@@ -12855,19 +14410,19 @@ export declare type SlotWidgetProps = HomeWidgetChrome & {
 };
 
 /**
- * Picks the rows × cols split that maximises tile AREA, letting each tile take
- * the shape of its own cell within `[minAspect, maxAspect]`.
+ * Picks the row split that makes the SMALLEST tile as large as possible, with
+ * each row filling the container's width on its own.
  *
- * Taking the cell's shape is the whole point: inside the range the tile IS the
- * cell, so the block covers the container completely instead of letterboxing a
- * fixed 16:9 box inside every cell and then centring the leftovers. It is what
- * Google Meet's Dynamic layouts do, and it only works because cameras are
- * painted with `object-cover`.
+ * Two ideas do the work. A tile takes the shape of its own cell within
+ * `[minAspect, maxAspect]`, so inside that range the tile IS the cell and the
+ * block covers the container instead of letterboxing a fixed 16:9 box in every
+ * cell. And rows are sized independently, so an incomplete last row spreads its
+ * tiles over the full width rather than leaving the missing cells as a hole —
+ * three people fill the room, they do not sit next to an empty square.
  *
- * Area alone is now enough to pick the conventional layouts (2→1×2, 6→2×3,
- * 9→3×3…) because filling the container well IS the conventional layout. The
- * previous implementation needed an orientation tie-break precisely because a
- * fixed ratio made area a poor signal.
+ * Maximin rather than total area: the person in the worst seat is the one who
+ * decides whether a layout is usable, and total area would happily starve one
+ * row to fatten another.
  *
  * O(n) with the n we care about, and pure, so it is tested without rendering.
  */
@@ -12878,7 +14433,7 @@ export declare const solveGrid: ({ count, width, height, gap, minAspect, maxAspe
  * rather than a fixed height: the previous implementation hard-coded 125px,
  * which is most of a small floating window.
  */
-export declare const solveSpotlight: ({ stripCount, width, height, gap, stripAspect, spotlightRange, }: SpotlightSolverInput) => SpotlightSolution;
+export declare const solveSpotlight: ({ stripCount, width, height, gap, stripRange, spotlightRange, }: SpotlightSolverInput) => SpotlightSolution;
 
 /**
  * Type helper to extract keys from a SortingsDefinition
@@ -12983,8 +14538,15 @@ export declare type SpotlightSolverInput = {
     width: number;
     height: number;
     gap: number;
-    /** Ratio of the thumbnails. Deliberately uniform, whatever the spotlight does. */
-    stripAspect: number;
+    /**
+     * How far a thumbnail may stray to take the shape of its own slot. Uniform
+     * across the strip, but derived from the container rather than fixed: a wide
+     * room gets nearly square thumbnails, a side panel portrait ones.
+     */
+    stripRange: {
+        min: number;
+        max: number;
+    };
     /**
      * Cameras pass a range: the spotlight takes the shape of its box, clamped, so
      * it crops the sides rather than leaving most of a tall panel empty.
@@ -13182,19 +14744,16 @@ declare type TableColumnDefinition<R extends RecordType, Sortings extends Sortin
 
 declare function TableHead({ children, width, minWidth, sortState, onSortClick, onClick, info, infoIcon, sticky, hidden, highlighted, align, className, colSpan, }: TableHeadProps): JSX_2.Element;
 
-declare type TableHeaderInfo = {
-    title: string;
-    description: string;
-    link?: {
-        label: string;
-        onClick: () => void;
-    };
-    /**
-     * Accessible name for the info-icon trigger. Defaults to the column label
-     * when the header's children are a string.
-     */
-    label?: string;
-};
+/**
+ * Structured help copy for a column header. The same shape every other
+ * ⓘ affordance takes — see {@link InfoHintContent}, where `label` defaults to
+ * the column label when the header's children are a string.
+ *
+ * A table-specific name for a shape that is no longer table-specific: the
+ * canonical export is `InfoHintContent`, and this stays as an alias so
+ * existing imports keep working.
+ */
+declare type TableHeaderInfo = InfoHintContent;
 
 declare interface TableHeadProps {
     children: React.ReactNode;
@@ -13291,6 +14850,27 @@ declare type TableVisualizationOptions<R extends RecordType, _Filters extends Fi
      */
     frozenColumns?: 0 | 1 | 2;
     /**
+     * For nested tables, which rows start out expanded before the user touches
+     * anything. Pass `true` for the whole tree, a depth, or a predicate:
+     *
+     * ```ts
+     * defaultExpanded: true                            // everything
+     * defaultExpanded: 2                               // down to depth 2
+     * defaultExpanded: (node) => node.type !== "role"  // stop at roles
+     * ```
+     *
+     * Once the user expands or collapses a row their choice wins for that row and
+     * the policy no longer applies to it. Changing filters, sortings or
+     * navigation filters resets the tree, so the policy applies again and a
+     * filtered view comes back expanded.
+     *
+     * Expanding a row loads its children, so a policy that opens a large tree
+     * costs one `fetchChildren` per opened row on first paint.
+     *
+     * @default false
+     */
+    defaultExpanded?: DefaultExpandedPolicy<R>;
+    /**
      * Allow users to reorder columns (you can only reorder columns that are not frozen) (check cols props to define the order)
      */
     allowColumnReordering?: boolean;
@@ -13312,8 +14892,32 @@ declare type TableVisualizationOptions<R extends RecordType, _Filters extends Fi
      * `noRemoving` are never removable.
      */
     onRemoveColumn?: (columnId: ColId) => void;
+    /**
+     * The user-managed frozen columns in the column-settings popover. Locked
+     * columns move into a sticky group on the left, stay visible, and cannot be
+     * reordered or removed. Their array order controls their order in that group.
+     * One visible managed column always remains unlocked as the table's
+     * scrollable region; an all-locked input is normalized accordingly.
+     *
+     * Unlocking a column returns it to its saved position. Columns covered by
+     * `frozenColumns` remain permanently locked before this managed group.
+     */
+    lockedColumnIds?: readonly ColId[];
+    /**
+     * Called with the complete set of user-managed locked column ids whenever a
+     * user locks or unlocks a column. Passing this callback enables the lock
+     * controls in the column-settings popover.
+     */
+    onLockedColumnIdsChange?: (columnIds: ColId[]) => void;
     /** Maps a row to a visual variant: `"striped"`, `"striked"`, or `"none"`. */
     referenceRowType?: (item: R) => ReferenceType;
+    /**
+     * In a table with nested rows, renders the cell text of the root rows
+     * (depth 0) in bold so aggregate rows stand out from their children.
+     * Cells that fix their own weight (tags, deltas) keep it.
+     * @default false
+     */
+    boldRootRows?: boolean;
     /**
      * Header group configuration. Keys are the `headerGroupId` values used in
      * column definitions. Pass a string for a plain spanning label, or a
@@ -13623,21 +15227,43 @@ export declare const ToggleGroupItem: React_2.ForwardRefExoticComponent<Omit<Tog
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const Tooltip: WithDataTestIdReturnType_3<(props: TooltipProps) => default_3.JSX.Element>;
+export declare const Tooltip: WithDataTestIdReturnType_3<(props: TooltipProps) => default_2.JSX.Element>;
+
+/**
+ * The copy a tooltip shows. At least one of the three must be present — a
+ * tooltip with nothing to say never opens.
+ */
+declare type TooltipCopyProps = {
+    label: string;
+    description?: string;
+    items?: TooltipListItem[];
+} | {
+    label?: string;
+    description: string;
+    items?: TooltipListItem[];
+} | {
+    label?: string;
+    description?: string;
+    items: TooltipListItem[];
+};
 
 declare type TooltipInternalProps = {
-    children: default_3.ReactNode;
+    children: default_2.ReactNode;
     shortcut?: ComponentProps<typeof Shortcut>["keys"];
     delay?: number;
     instant?: boolean;
     onOpen?: () => void;
-} & ({
-    label: string;
+} & TooltipCopyProps;
+
+/**
+ * One bullet of a tooltip's list. The object form gets a semibold lead so a
+ * list of named things (alerts, broken rules) reads as a list rather than a run
+ * of sentences.
+ */
+declare type TooltipListItem = string | {
+    title: string;
     description?: string;
-} | {
-    label?: string;
-    description: string;
-});
+};
 
 export declare type TooltipProps = Omit<TooltipInternalProps, (typeof privateProps_7)[number]>;
 
@@ -14279,7 +15905,7 @@ export declare const viewportRect: (viewport: Viewport) => F0Rect;
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const VirtualList: default_3.ForwardRefExoticComponent<VirtualListProps & default_3.RefAttributes<HTMLDivElement>>;
+export declare const VirtualList: default_2.ForwardRefExoticComponent<VirtualListProps & default_2.RefAttributes<HTMLDivElement>>;
 
 declare type VirtualListProps = {
     height: number;
@@ -14455,10 +16081,10 @@ declare type WelcomeSuggestionClickEvent = {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const Widget: WithDataTestIdReturnType_3<default_3.ForwardRefExoticComponent<WidgetProps & {
+export declare const Widget: WithDataTestIdReturnType_3<default_2.ForwardRefExoticComponent<WidgetProps & {
 children: ReactNode;
-} & default_3.RefAttributes<HTMLDivElement>> & {
-Skeleton: default_3.ForwardRefExoticComponent<WidgetSkeletonProps & default_3.RefAttributes<HTMLDivElement>>;
+} & default_2.RefAttributes<HTMLDivElement>> & {
+Skeleton: default_2.ForwardRefExoticComponent<WidgetSkeletonProps & default_2.RefAttributes<HTMLDivElement>>;
 }>;
 
 export declare function WidgetAvatarsListItem({ id, title, subtitle, avatars, remainingCount, withPointerCursor, onClick, ...props }: WidgetAvatarsListItemProps): JSX_2.Element;
@@ -14488,8 +16114,14 @@ export declare type WidgetAvatarsListItemProps = {
  * Selection follows the filter: if the selected row is filtered out, the first
  * remaining row takes over, so the preview always shows something the CTA can
  * actually add.
+ *
+ * ONE CATALOG, TWO COLUMNS. Pass the `area` the picker was opened for and the
+ * same `widgets` list serves both: entries that declare `areas` are shown only
+ * where they fit, entries that declare none are shown in both, and the preview
+ * takes that column's width. So a Home keeps one list — the widgets it offers —
+ * rather than two that have to be kept in step.
  */
-export declare function WidgetCatalog({ isOpen, onClose, widgets, onAdd, groups, previewWidth, slotRenderers, title, }: WidgetCatalogProps): JSX_2.Element;
+export declare function WidgetCatalog({ isOpen, onClose, widgets, onAdd, groups, area, previewWidth, slotRenderers, rebuildPreview, title, }: WidgetCatalogProps): JSX_2.Element;
 
 /**
  * One DOMAIN in the picker: a heading the widgets under it belong to.
@@ -14544,6 +16176,24 @@ export declare interface WidgetCatalogItem {
      * nothing recommended there is no section.
      */
     recommended?: boolean;
+    /**
+     * WHICH COLUMNS this widget may be added to — the same two sides the layout
+     * hands back from `onClickAddNewWidget`. The picker then shows it only when it
+     * was opened for one of them (see `area`).
+     *
+     * OMIT IT for a widget that belongs in either, which is most of them: a
+     * `list`-shaped card reads the same in a 396px rail and in the main column,
+     * and saying so twice is how the two lists drift apart. Name the sides for the
+     * widgets that genuinely cannot travel — a carousel of post cards needs the
+     * main column's width, a 40px clock tile is built for the rail.
+     *
+     * A widget listed for NEITHER side (`[]`) is offered nowhere, which is a way to
+     * retire an entry without deleting it.
+     */
+    areas?: WidgetContainerSide[];
+    paramsSchema?: WidgetParamsSchema;
+    params?: WidgetParams;
+    addWithDefaults?: boolean;
 }
 
 export declare interface WidgetCatalogProps {
@@ -14552,15 +16202,28 @@ export declare interface WidgetCatalogProps {
     /** The widgets that can be added, in the order to list them. */
     widgets: WidgetCatalogItem[];
     /** Called with the chosen widget id when the CTA is pressed. */
-    onAdd: (id: string) => void;
+    onAdd: (id: string, params?: WidgetParams) => void;
     /**
      * The DOMAINS the picker is organised into, in the order to show them. Omit it
      * and the list is flat — grouping is an offer, not a requirement.
      */
     groups?: WidgetCatalogGroup[];
     /**
+     * WHICH COLUMN the picker was opened for — pass the side `onClickAddNewWidget`
+     * handed you. It does two things: widgets that declare `areas` are filtered
+     * down to the ones this column can hold, and the preview is capped to that
+     * column's width by default (see {@link AREA_PREVIEW_WIDTH}).
+     *
+     * Omit it and the picker is what it has always been: every widget, previewed
+     * at `previewWidth`. That is right for a Home with ONE place to put a widget;
+     * a layout with two columns should say which one it is filling, or it will
+     * offer the rail's clock for the main column and preview it at the wrong width.
+     */
+    area?: WidgetContainerSide;
+    /**
      * Content width of the column this was opened from — the preview is capped
-     * to it, so a rail-bound widget previews at rail width.
+     * to it, so a rail-bound widget previews at rail width. Defaults to the
+     * `area`'s own width, and to the rail's when there is no `area`.
      */
     previewWidth?: number;
     /**
@@ -14570,6 +16233,7 @@ export declare interface WidgetCatalogProps {
      * "No renderer for slot …" and then render properly once added.
      */
     slotRenderers?: SlotRenderers;
+    rebuildPreview?: (item: WidgetCatalogItem, params: WidgetParams) => WidgetCatalogItem["preview"];
     title?: string;
 }
 
@@ -14601,6 +16265,34 @@ export declare type WidgetEmptyStateProps = {
     emoji?: string;
     actions?: Action_2[];
 };
+
+/**
+ * A SELECT IN THE WIDGET'S HEADER: which of several things the card is showing.
+ *
+ * The value lives in `SlotWidget`, not in the host — that is the point of it.
+ * A host that builds its widgets as plain data has nowhere to keep a live
+ * choice: params persist (and turn a switcher into a saved setting), and page
+ * state means the page knowing about one particular widget. So the card keeps
+ * it, hands it down to its slots (`ctx.selection`), and tells the host through
+ * `onChange` if it wants to know.
+ *
+ * It is therefore a SESSION choice: the card starts at `value` every time it
+ * mounts. A choice that should outlive the visit is a param, not this.
+ */
+export declare interface WidgetHeaderSelect {
+    /** What the reader can switch between. The first one is the default. */
+    options: Array<{
+        value: string;
+        label: string;
+        icon?: IconType;
+    }>;
+    /** Which one the card starts on. Defaults to the first option. */
+    value?: string;
+    /** The trigger names the selection, so this is what says what KIND it is. */
+    tooltip?: string;
+    /** Told when the reader picks another one. The card switches either way. */
+    onChange?: (value: string) => void;
+}
 
 export declare function WidgetHighlightButton({ label, count, icon, iconClassName, onClick, }: Props_7): JSX_2.Element;
 
@@ -14716,6 +16408,23 @@ export declare interface WidgetProps {
     AIButton?: () => void;
     /** An overflow menu at the header's right, beside `link`. */
     actions?: DropdownItem[];
+    /**
+     * THE WIDGET'S OWN CONTROLS, in the header's top-right: what the card is
+     * currently showing (a scope switcher), or what you can do from it without
+     * leaving the page ("New post"). They act on the WIDGET.
+     *
+     * They sit to the LEFT of the overflow menu, which keeps its corner — the menu
+     * is where every widget's items live, and a control that moved depending on
+     * whether a card had a menu would be a different control each time.
+     *
+     * Keep it to one or two `sm` controls. This row is the TITLE'S first, and the
+     * title gives up its width to whatever is put beside it: three buttons here
+     * and a narrow card has no name left.
+     *
+     * NOT the way out of the widget — that is `header.link`, drawn as the title
+     * itself — and NOT its call to action, which is `action`, in the footer.
+     */
+    headerControls?: ReactNode;
 }
 
 /**
@@ -15030,5 +16739,10 @@ declare namespace F0GraphExpanderWrapperInner {
 
 
 declare namespace F0GraphCollapserWrapperInner {
+    var displayName: string;
+}
+
+
+declare namespace F0GraphStackGroupWrapperInner {
     var displayName: string;
 }
