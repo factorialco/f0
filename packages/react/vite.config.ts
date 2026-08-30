@@ -17,6 +17,7 @@ dotenv.config({
 const extraPlugins: Plugin[] = []
 const buildDeclarationsOnly =
   process.env.BUILD_DECLARATIONS_ONLY === "true"
+const buildWatch = process.env.BUILD_WATCH === "true"
 
 // Add tailwind build
 const buildTailwind = process.argv.find((arg) => arg.startsWith("--tailwind"))
@@ -174,7 +175,7 @@ export default defineConfig({
     },
   },
   build: {
-    emptyOutDir: !buildDeclarationsOnly,
+    emptyOutDir: !buildDeclarationsOnly && !buildWatch,
     lib: {
       entry: buildDeclarationsOnly
         ? declarationEntries
