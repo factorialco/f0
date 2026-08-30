@@ -37,19 +37,31 @@ describe("useMockHuddle", () => {
   it("puts the other person in the ROOM, not just on the card", async () => {
     // The bug this locks: the card went live with two people while the room
     // stayed empty, because the mock only re-reads its roster when the room id
-    // changes — growing the seed mid-call does nothing.
+    // changes — growing the seed mid-call does nothing. They are now seeded as
+    // `invited` and admitted in place, which is the path a real
+    // `participant_joined` takes.
     const { result } = setup()
 
     act(() => result.current.huddle.start(DM.id))
     expect(callIn(result.current.chat, DM.id)?.state).toBe("ringing")
-    expect(result.current.huddle.runtime?.participants).toHaveLength(1)
+
+    const ringing = result.current.huddle.runtime?.participants ?? []
+    expect(ringing).toHaveLength(2)
+    const invited = ringing.find((person) => !person.isLocal)
+    expect(invited?.presence).toBe("invited")
+    // Waiting means waiting: nothing to bind, nothing to meter.
+    expect(invited?.tracks).toHaveLength(0)
 
     await act(async () => {
       vi.advanceTimersByTime(4000)
     })
 
     expect(callIn(result.current.chat, DM.id)?.state).toBe("live")
-    expect(result.current.huddle.runtime?.participants).toHaveLength(2)
+    const live = result.current.huddle.runtime?.participants ?? []
+    expect(live).toHaveLength(2)
+    const joined = live.find((person) => !person.isLocal)
+    expect(joined?.presence).toBe("joined")
+    expect(joined?.tracks.length).toBeGreaterThan(0)
   })
 
   it("admits them exactly once, however many times it re-renders", async () => {

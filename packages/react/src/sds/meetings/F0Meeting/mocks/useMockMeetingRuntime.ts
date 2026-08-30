@@ -12,7 +12,12 @@ import {
   type F0MeetingRuntime,
   type F0MeetingStatus,
   type F0MeetingTrack,
+  type F0MeetingTranscriptSegment,
 } from "../types"
+import {
+  applyTranscriptSegment,
+  createTranscriptDriver,
+} from "./mockTranscript"
 import {
   createClipVideoBinding,
   createEchoSource,
@@ -51,6 +56,8 @@ export type MockMeetingDrivers = {
   stopScreenShare: () => void
   /** Opens the browser's real display picker for the local participant. */
   shareMyScreen: () => Promise<void>
+  /** Lets an `invited` person in — the mock's `participant_joined`. */
+  admit: (id: string) => void
   simulateReconnect: (ms?: number) => void
   simulateError: (message: string) => void
   denyPermission: (kind: "camera" | "microphone") => void
@@ -123,6 +130,8 @@ export const useMockMeetingRuntime = (
   }>({ camera: [], microphone: [] })
   const [selectedCameraId, setSelectedCameraId] = useState<string>()
   const [audioBlocked, setAudioBlocked] = useState(false)
+  const [transcript, setTranscript] = useState<F0MeetingTranscriptSegment[]>([])
+  const [notes, setNotes] = useState(seed.notes ?? "")
   const [, forceRender] = useState(0)
 
   const signalsRef = useRef(createMeetingSignalStore())
@@ -170,10 +179,44 @@ export const useMockMeetingRuntime = (
     const engine = audioRef.current
     if (!engine) return
     members.forEach((member, index) => {
+      // Someone who has not joined yet has no voice to synthesize.
+      if (member.presence === "invited") return
       engine.add(member.id, index)
       engine.setMuted(member.id, Boolean(member.muted))
     })
   }, [members])
+
+  /* ---------------- transcription ---------------- */
+
+  // Driven off the speaker signal rather than off the director, which is how a
+  // real adapter sees it too: the server transcribes whoever holds the floor
+  // and the client only learns about segments.
+  useEffect(() => {
+    if (seed.transcript === false) return
+    const signals = signalsRef.current
+    const driver = createTranscriptDriver(
+      (segment) =>
+        setTranscript((current) => applyTranscriptSegment(current, segment)),
+      seed.seed ?? 11
+    )
+    let speaking: readonly string[] = []
+
+    const unsubscribe = signals.subscribeSpeakers(() => {
+      const next = signals.getSpeakers()
+      for (const id of next) {
+        if (!speaking.includes(id)) driver.start(id)
+      }
+      for (const id of speaking) {
+        if (!next.includes(id)) driver.stop(id)
+      }
+      speaking = next
+    })
+
+    return () => {
+      unsubscribe()
+      driver.dispose()
+    }
+  }, [seed.transcript, seed.seed])
 
   // Meter the real microphone into the same signals, so your own tile reacts to
   // your voice instead of sitting flat while everyone else animates. Keyed on
@@ -457,7 +500,10 @@ export const useMockMeetingRuntime = (
         isLocal: false,
         isHost: index === 0,
         raisedHandAt: member.handRaisedAt,
-        tracks,
+        presence: member.presence,
+        // Someone who has not arrived publishes nothing. Handing them tracks
+        // would give the tile a live mic to meter and a camera to bind.
+        tracks: member.presence === "invited" ? [] : tracks,
       }
     })
 
@@ -531,14 +577,20 @@ export const useMockMeetingRuntime = (
       setHandRaised: () => setMembers((current) => current),
       sendReaction: () => {},
       reconnect: () => setStatus("connected"),
+      transcript: seed.transcript === false ? undefined : transcript,
+      notes,
+      setNotes,
       capabilities: {},
     }),
     [
       seed.room,
       seed.me.id,
+      seed.transcript,
       status,
       errorMessage,
       participants,
+      transcript,
+      notes,
       localMuted,
       localCamera,
       cameraPermission,
@@ -563,6 +615,21 @@ export const useMockMeetingRuntime = (
       leave: (id) => {
         audioRef.current?.remove(id)
         setMembers((current) => current.filter((member) => member.id !== id))
+      },
+      admit: (id) => {
+        setMembers((current) =>
+          current.map((member) =>
+            member.id === id
+              ? // Bumping the generation is what makes F0 attach the tracks
+                // they only now have, exactly as a republish would.
+                {
+                  ...member,
+                  presence: "joined" as const,
+                  generation: member.generation + 1,
+                }
+              : member
+          )
+        )
       },
       toggleCamera: (id) =>
         setMembers((current) =>

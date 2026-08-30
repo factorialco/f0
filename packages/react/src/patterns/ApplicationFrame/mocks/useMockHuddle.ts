@@ -85,18 +85,16 @@ export const useMockHuddle = (): MockHuddle => {
         roomId: `huddle:${convId ?? "idle"}:${callCount}`,
         title: conversation ? `Huddle · ${conversation.title}` : "Huddle",
         me: { id: CHAT_ME.id, name: CHAT_ME.name, avatar: CHAT_ME.avatar },
-        // An outgoing call starts EMPTY — that is what makes ringing a real
-        // state rather than a label — and the other side walks in through the
-        // driver. Joining an incoming one puts you in a room they are already
-        // in, so there they are seeded.
-        attendees:
-          direction === "incoming"
-            ? (conversation?.participants ?? []).map((participant) => ({
-                id: participant.id,
-                name: participant.name,
-                avatar: participant.avatar,
-              }))
-            : [],
+        attendees: (conversation?.participants ?? []).map((participant) => ({
+          id: participant.id,
+          name: participant.name,
+          avatar: participant.avatar,
+        })),
+        // Ringing an outgoing call seeds them as INVITED: they hold a tile that
+        // says "Waiting…" and publish nothing until they pick up, which is what
+        // the design shows and what a room genuinely looks like while it rings.
+        // Joining an incoming one puts you in a room they are already in.
+        presence: direction === "incoming" ? "joined" : "invited",
         videoSource: "clip",
         clipUrls: ["/Big_Buck_Bunny_alt.webm"],
         audio: direction !== null,
@@ -180,23 +178,16 @@ export const useMockHuddle = (): MockHuddle => {
     })
   }, [phase, otherUser, me, write])
 
-  // Walk the other side into an outgoing call's room. It has to go through the
-  // driver rather than through the seed: the mock reads `others` only when the
-  // room id changes, so growing the seed mid-call would update the card and
-  // leave the room empty. This is also the path a real `participant_joined`
-  // event takes, so the mock exercises the same mechanism.
+  // They pick up. It has to go through the driver rather than through the seed:
+  // the mock reads `others` only when the room id changes, so growing the seed
+  // mid-call would update the card and leave the room empty. `admit` is also
+  // exactly what a real `participant_joined` webhook drives, so the mock
+  // exercises the same mechanism the adapter will.
   useEffect(() => {
     if (phase !== "live" || direction !== "outgoing") return
     if (admittedRef.current || !other) return
     admittedRef.current = true
-    const [firstName = other.name, ...rest] = other.name.split(" ")
-    drivers.join({
-      id: other.id,
-      firstName,
-      lastName: rest.join(" "),
-      avatar: other.avatar,
-      camera: true,
-    })
+    drivers.admit(other.id)
   }, [phase, direction, other, drivers])
 
   return {

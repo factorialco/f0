@@ -11,6 +11,12 @@ export type MockPerson = {
   /** Starts with the camera on. */
   camera?: boolean
   muted?: boolean
+  /**
+   * `invited` seeds someone the call is waiting for. They hold a tile that says
+   * so and publish nothing until `drivers.admit` lets them in — which is what a
+   * `participant_joined` webhook does in production.
+   */
+  presence?: "invited" | "joined"
 }
 
 export const mockVideoSources = ["echo", "clip", "synthetic"] as const
@@ -41,6 +47,10 @@ export type MockMeetingSeed = {
   screenShareBy?: string
   /** Ambient joins and leaves, to exercise the grid re-solving. */
   churnEveryMs?: number
+  /** Live transcription. `false` removes the Transcript tab entirely. */
+  transcript?: boolean
+  /** Starting content of the shared notes. */
+  notes?: string
 }
 
 const person = (
@@ -133,29 +143,36 @@ export const seedFromAttendees = ({
   title,
   me,
   attendees,
+  presence,
   ...rest
 }: {
   roomId: string
   title: string
   me: MockAttendee
   attendees: MockAttendee[]
+  /** Seeds the attendees as people the call is still waiting for. */
+  presence?: "invited" | "joined"
 } & Partial<
   Omit<MockMeetingSeed, "room" | "me" | "others">
->): MockMeetingSeed => ({
-  room: {
-    id: roomId,
-    title,
-    startedAt: new Date().toISOString(),
-  },
-  me: { ...fromAttendee(me, 0), camera: false, muted: false },
-  others: attendees
-    .filter((attendee) => attendee.id !== me.id)
-    .map(fromAttendee),
-  videoSource: "echo",
-  audio: true,
-  seed: 7,
-  ...rest,
-})
+>): MockMeetingSeed =>
+  ({
+    room: {
+      id: roomId,
+      title,
+      startedAt: new Date().toISOString(),
+    },
+    me: { ...fromAttendee(me, 0), camera: false, muted: false },
+    others: attendees
+      .filter((attendee) => attendee.id !== me.id)
+      .map((attendee, index) => ({
+        ...fromAttendee(attendee, index),
+        ...(presence ? { presence } : {}),
+      })),
+    videoSource: "echo",
+    audio: true,
+    seed: 7,
+    ...rest,
+  })
 
 export const soloSeed = seed("Huddle · Design", 0)
 export const oneToOneSeed = seed("Huddle · Marta", 1)

@@ -62,6 +62,10 @@ export type F0MeetingTrack = {
  *
  * factorial → LiveKit `Participant.identity` (the employee id).
  */
+export const f0MeetingPresences = ["invited", "joined"] as const
+
+export type F0MeetingPresence = (typeof f0MeetingPresences)[number]
+
 export type F0MeetingParticipant = {
   id: string
   /** Display name, already resolved by the host. LiveKit `Participant.name`. */
@@ -80,6 +84,16 @@ export type F0MeetingParticipant = {
   isAgent?: boolean
   /** Joined but has not published anything yet. */
   isConnecting?: boolean
+  /**
+   * Whether this person is actually in the room. Absent means `joined`, so a
+   * host that only ever reports real participants needs no change.
+   *
+   * `invited` is someone the call is waiting for: they hold a tile that reads
+   * "Waiting…", publish nothing, and do NOT count toward "N people in the
+   * call". LiveKit does not know them — they come from the host's own list of
+   * attendees, which is why this cannot be derived from the transport.
+   */
+  presence?: F0MeetingPresence
   tracks: F0MeetingTrack[]
   /**
    * ISO timestamp the hand was raised, so "who raised first" has an order.
@@ -289,6 +303,54 @@ export type F0MeetingReaction = {
 }
 
 /**
+ * One line of live transcription.
+ *
+ * Modelled on LiveKit's own shape so the adapter is a rename: segments arrive
+ * on the `lk.transcription` text-stream topic, and a non-final segment is
+ * REPLACED by its final version under the same id rather than appended.
+ * (`RoomEvent.TranscriptionReceived` is deprecated; do not wire it.)
+ */
+export type F0MeetingTranscriptSegment = {
+  /** LiveKit `lk.segment_id` — shared between the interim and final versions. */
+  id: string
+  participantId: string
+  text: string
+  at: string
+  /** LiveKit `lk.transcription_final`. Interim lines render as provisional. */
+  isFinal: boolean
+}
+
+/**
+ * A tab in the room's side panel. F0 owns the bar, the selection and the close
+ * button; the host owns what is inside each tab.
+ */
+export type F0MeetingSidePanelTab = {
+  id: string
+  label: string
+  content: React.ReactNode
+  /** Unread count on the tab and on the control-bar button that opens it. */
+  badge?: number
+}
+
+export type F0MeetingSidePanel = {
+  tabs: F0MeetingSidePanelTab[]
+  defaultTabId?: string
+}
+
+/**
+ * Which tile is in the spotlight, as an INTENT rather than a key.
+ *
+ * A plain `string | null` cannot tell "nobody has pinned anything" apart from
+ * "the user dismissed the spotlight", so in a one-to-one the auto rule kept
+ * re-applying itself and the pin button did nothing. The three states make
+ * dismissal expressible.
+ */
+export type F0MeetingFocusIntent =
+  | { type: "auto" }
+  | { type: "pinned"; key: string }
+  | { type: "none" }
+
+/**
  * The data and actions a host provides to drive the meeting UI. F0 is headless:
  * it never touches the transport. A mock runtime powers Storybook; factorial
  * implements this against LiveKit.
@@ -339,6 +401,14 @@ export type F0MeetingRuntime = {
   reactions?: F0MeetingReaction[]
   muteParticipant?: (participantId: string) => void | Promise<void>
   removeParticipant?: (participantId: string) => void | Promise<void>
+  /**
+   * Live transcription. Omit and the panel has no Transcript tab at all —
+   * the usual capability-by-presence rule.
+   */
+  transcript?: F0MeetingTranscriptSegment[]
+  /** Shared notes for the room. Present without `setNotes` means read-only. */
+  notes?: string
+  setNotes?: (value: string) => void
   /** Retry after a failed connect — wires the Rejoin action. */
   reconnect?: () => void | Promise<void>
 
@@ -402,6 +472,7 @@ export const f0MeetingCoreActionIds = [
   "core:cameraSettings",
   "core:screenShare",
   "core:raiseHand",
+  "core:chat",
   "core:leave",
 ] as const
 
@@ -474,8 +545,13 @@ export type F0MeetingProviderProps = {
   actionOrder?: string[]
   /** Surface mode when a meeting first appears. */
   defaultMode?: F0MeetingSurfaceMode
-  /** Host content rendered beside the grid (in-meeting chat, participants). */
-  sidePanel?: React.ReactNode
+  /**
+   * The tabs of the in-call side panel (chat, transcript, notes). F0 renders
+   * the bar and owns whether the panel is open, because the button that opens
+   * it lives in F0's own control bar — a bare `ReactNode` could not supply the
+   * tab labels or the unread badge that button needs.
+   */
+  sidePanel?: F0MeetingSidePanel
   /** Host content rendered in the window header, before the mode controls. */
   headerContent?: React.ReactNode
   /** Host content rendered above the whole room (banners, upsells). */
