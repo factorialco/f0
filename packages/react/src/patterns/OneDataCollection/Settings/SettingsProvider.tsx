@@ -1,21 +1,16 @@
 import React, { createContext, useContext, useState } from "react"
 
-import { collectionVisualizations } from "../visualizations/collection/collectionViewRegistry"
+import type { EditableTableVisualizationSettings } from "../visualizations/collection/EditableTable/types"
+import type { GraphVisualizationSettings } from "../visualizations/collection/Graph/types"
+import type { TableVisualizationSettings } from "../visualizations/collection/Table/types"
 
-// Utility type to extract settings from visualization definitions
-type ExtractVisualizationSettings<T> = T extends {
-  settings: {
-    default: infer S
-  }
-}
-  ? S
-  : never
-
-// Dynamic type that extracts settings from all visualizations
-type VisualizationSettings = {
-  [K in keyof typeof collectionVisualizations]: ExtractVisualizationSettings<
-    (typeof collectionVisualizations)[K]
-  >
+export type VisualizationSettings = {
+  table: TableVisualizationSettings
+  editableTable: EditableTableVisualizationSettings
+  list: Record<string, never>
+  card: Record<string, never>
+  kanban: Record<string, never>
+  graph: GraphVisualizationSettings
 }
 
 export type DataCollectionSettings = {
@@ -23,17 +18,15 @@ export type DataCollectionSettings = {
   visualization: VisualizationSettings
 }
 
-// Helper function to generate initial settings from visualization registry
 const generateInitialVisualizationSettings = (): VisualizationSettings => {
-  const settings = {} as Record<string, unknown>
-
-  for (const [key, visualization] of Object.entries(collectionVisualizations)) {
-    if (visualization.settings.default) {
-      settings[key] = { ...visualization.settings.default }
-    }
+  return {
+    table: {},
+    editableTable: {},
+    list: {},
+    card: {},
+    kanban: {},
+    graph: {},
   }
-
-  return settings as VisualizationSettings
 }
 
 export interface DataCollectionSettingsContextType {

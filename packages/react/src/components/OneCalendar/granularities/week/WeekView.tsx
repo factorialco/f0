@@ -11,7 +11,7 @@ import { Calendar } from "@/ui/calendar"
 import { useDateFnsLocale, useL10n } from "../../../../lib/providers/l10n"
 import { DateRange, WeekStartDay, WeekStartsOn } from "../../types"
 import { toCalendarPickerMatcher } from "../../utils"
-import { getEndOfWeek, getStartOfWeek } from "./index"
+import { getEndOfWeek, getStartOfWeek } from "./weekUtils"
 
 interface WeekViewProps {
   selected?: Date | DateRange | null

@@ -1,8 +1,9 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useCallback, useState } from "react"
 
-import { OneFilterPicker } from "@/patterns/OneFilterPicker"
-import { GroupingSelector } from "@/patterns/OneDataCollection/Settings/components/GroupingSelector"
+import type { OneFilterPicker as OneFilterPickerComponent } from "@/patterns/OneFilterPicker"
+
+import { F0SearchInput } from "@/components/F0SearchInput"
 import {
   FiltersDefinition,
   FiltersState,
@@ -11,15 +12,19 @@ import {
   RecordType,
 } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
+import { GroupingSelector } from "@/patterns/OneDataCollection/Settings/components/GroupingSelector"
 
-import { F0SearchInput } from "@/components/F0SearchInput"
-import { ActiveFiltersChips } from "./ActiveFiltersChips"
+import type { F0SelectStatic as F0SelectComponent } from "../F0Select"
+import type { ActiveFiltersChips as ActiveFiltersChipsComponent } from "./ActiveFiltersChips"
 
 interface SelectTopActionsProps<
   R extends RecordType = RecordType,
   Grouping extends GroupingDefinition<R> = GroupingDefinition<R>,
   Filters extends FiltersDefinition = FiltersDefinition,
 > {
+  SelectComponent: typeof F0SelectComponent
+  OneFilterPickerComponent: typeof OneFilterPickerComponent
+  ActiveFiltersChipsComponent: typeof ActiveFiltersChipsComponent
   showSearchBox?: boolean
   filters?: Filters
   currentFilters: FiltersState<Filters>
@@ -37,6 +42,9 @@ interface SelectTopActionsProps<
 }
 
 export const SelectTopActions = <R extends RecordType = RecordType>({
+  SelectComponent,
+  OneFilterPickerComponent,
+  ActiveFiltersChipsComponent,
   showSearchBox,
   searchBoxPlaceholder,
   onSearchChange,
@@ -75,7 +83,7 @@ export const SelectTopActions = <R extends RecordType = RecordType>({
 
   return (
     <div className="flex flex-col">
-      <div className="flex gap-2 p-2 border-0 border-b border-solid border-f1-border-secondary">
+      <div className="flex gap-2 border-0 border-b border-solid border-f1-border-secondary p-2">
         <div className="flex flex-1 flex-row gap-2">
           {showSearchBox && (
             <div className="flex-1">
@@ -90,7 +98,7 @@ export const SelectTopActions = <R extends RecordType = RecordType>({
             </div>
           )}
           {filters && (
-            <OneFilterPicker
+            <OneFilterPickerComponent
               filters={filters}
               value={currentFilters}
               onChange={onFiltersChange}
@@ -99,12 +107,15 @@ export const SelectTopActions = <R extends RecordType = RecordType>({
             />
           )}
         </div>
-        <GroupingSelector
-          hideLabel={true}
-          grouping={grouping}
-          currentGrouping={currentGrouping}
-          onGroupingChange={onGroupingChange}
-        />
+        {grouping && (
+          <GroupingSelector
+            SelectComponent={SelectComponent}
+            hideLabel={true}
+            grouping={grouping}
+            currentGrouping={currentGrouping}
+            onGroupingChange={onGroupingChange}
+          />
+        )}
       </div>
       <AnimatePresence>
         {filters && hasActiveFilters(currentFilters) && (
@@ -114,7 +125,7 @@ export const SelectTopActions = <R extends RecordType = RecordType>({
             exit={{ opacity: 0, height: 0 }}
             transition={{ type: "spring", duration: 0.3, bounce: 0 }}
           >
-            <ActiveFiltersChips
+            <ActiveFiltersChipsComponent
               filters={filters}
               currentFilters={currentFilters}
               onFiltersChange={onFiltersChange}

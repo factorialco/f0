@@ -2,10 +2,6 @@ import { forwardRef, useLayoutEffect, useRef } from "react"
 
 import type { TableVisualizationType } from "@/patterns/OneDataCollection/types"
 
-import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
-import { ItemActionsDefinition } from "@/patterns/OneDataCollection/item-actions"
-import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
-import { SummariesDefinition } from "@/patterns/OneDataCollection/summary"
 import {
   FiltersDefinition,
   GroupingDefinition,
@@ -13,8 +9,12 @@ import {
   SortingsDefinition,
 } from "@/hooks/datasource"
 import { ChildrenPaginationInfo } from "@/hooks/datasource/types/nested.typings"
+import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
+import { ItemActionsDefinition } from "@/patterns/OneDataCollection/item-actions"
+import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
+import { SummariesDefinition } from "@/patterns/OneDataCollection/summary"
 
-import { Row, RowProps } from "../Row"
+import { FlatRow, type RowProps } from "../FlatRow"
 
 export const DEFAULT_LOADING_ROWS_COUNT = 5
 
@@ -83,7 +83,7 @@ const SingleLoadingRowInner = <
   }
 
   return (
-    <Row
+    <FlatRow
       source={{
         ...source,
         itemsWithChildren: () => false,

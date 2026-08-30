@@ -1,15 +1,17 @@
 import { IconType } from "@/components/F0Icon"
-import { FiltersDefinition } from "@/patterns/OneFilterPicker"
-import { ItemActionsDefinition } from "@/patterns/OneDataCollection/item-actions"
-import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import {
   GroupingDefinition,
   RecordType,
   SortingsDefinition,
 } from "@/hooks/datasource"
 import { Kanban, List, Organization, Pencil, Table } from "@/icons/app"
+import { ItemActionsDefinition } from "@/patterns/OneDataCollection/item-actions"
+import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
+import { FiltersDefinition } from "@/patterns/OneFilterPicker"
 
-import { DataCollectionSettingsContextType } from "../../Settings/SettingsProvider"
+import type { DataCollectionSettingsContextType } from "../../Settings/SettingsProvider"
+import type { GraphVisualizationSettings } from "./Graph/types"
+
 import { SummariesDefinition } from "../../types"
 import { CardCollection, CardCollectionProps } from "./Card"
 import {
@@ -18,10 +20,7 @@ import {
 } from "./EditableTable"
 import { EditableTableVisualizationSettings } from "./EditableTable/types"
 import { GraphCollection, GraphCollectionProps } from "./Graph"
-import {
-  SettingsRenderer as graphSettingsRenderer,
-  type GraphVisualizationSettings,
-} from "./Graph/settings/SettingsRenderer"
+import { SettingsRenderer as graphSettingsRenderer } from "./Graph/settings/SettingsRenderer"
 import { KanbanCollection, KanbanCollectionProps } from "./Kanban"
 import { ListCollection, ListCollectionProps } from "./List"
 import {

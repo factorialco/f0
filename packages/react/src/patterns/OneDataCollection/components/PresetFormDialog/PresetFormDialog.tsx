@@ -1,10 +1,10 @@
-import { z } from "zod"
+import { useEffect, useRef, useState } from "react"
 
+import { F0TextAreaInput } from "@/components/F0TextAreaInput"
+import { F0TextInput } from "@/components/F0TextInput"
 import { Delete, Share } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { F0Dialog } from "@/patterns/F0Dialog"
-import { f0FormField, F0Form, useF0Form } from "@/patterns/F0Form"
-import { useF0FormDefinition } from "@/patterns/F0WizardForm"
 
 export type PresetFormValues = {
   title: string
@@ -39,7 +39,7 @@ interface PresetFormDialogProps {
 }
 
 /**
- * Dialog wrapping an F0Form (title + optional description), reused for both
+ * Dialog for editing a preset title and optional description, reused for both
  * creating a new custom view and renaming an existing one. The captured view
  * state (filters/sorting/view/grouping/columns) is owned by OneDataCollection;
  * this dialog only collects the title and description.
@@ -56,67 +56,40 @@ export function PresetFormDialog({
 }: PresetFormDialogProps) {
   const i18n = useI18n()
   const presets = i18n.collections.presets
-  const { formRef, submit, isSubmitting, hasErrors } = useF0Form()
-
-  // `submit()` rejects when validation fails (e.g. a duplicate name). The errors
-  // are already surfaced inline on the fields, so swallow the rejection to avoid
-  // an unhandled promise rejection.
-  const handleSubmit = () => {
-    void submit().catch(() => {})
-  }
-
-  const takenNames = new Set(
-    existingNames.map((name) => name.trim().toLowerCase())
+  const [title, setTitle] = useState(initialValues?.title ?? "")
+  const [description, setDescription] = useState(
+    initialValues?.description ?? ""
   )
+  const [titleError, setTitleError] = useState<string>()
+  const titleInputRef = useRef<HTMLInputElement>(null)
 
-  const schema = z
-    .object({
-      title: f0FormField.text({
-        label: presets.nameLabel,
-        placeholder: presets.namePlaceholder,
-        minLength: 1,
-      }),
-      description: f0FormField.textarea({
-        label: presets.descriptionLabel,
-        placeholder: presets.descriptionPlaceholder,
-        optional: true,
-        rows: 4,
-      }),
+  useEffect(() => {
+    if (!isOpen) return
+
+    setTitle(initialValues?.title ?? "")
+    setDescription(initialValues?.description ?? "")
+    setTitleError(undefined)
+  }, [initialValues?.description, initialValues?.title, isOpen, mode])
+
+  const handleSubmit = () => {
+    const normalizedTitle = title.trim().toLowerCase()
+    const duplicate = existingNames.some(
+      (name) => name.trim().toLowerCase() === normalizedTitle
+    )
+
+    if (duplicate) {
+      setTitleError(presets.duplicateName)
+      titleInputRef.current?.focus()
+      return
+    }
+
+    if (!normalizedTitle) return
+
+    onSubmit({
+      title,
+      description: description || undefined,
     })
-    // Names must be unique across views (case-insensitive). Surfaces the error on
-    // the title field; runs on submit, so it blocks saving a duplicate.
-    .superRefine((data, ctx) => {
-      const name = (data.title ?? "").trim().toLowerCase()
-      if (name && takenNames.has(name)) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ["title"],
-          message: presets.duplicateName,
-        })
-      }
-    })
-
-  const formDefinition = useF0FormDefinition({
-    // Key the form by mode + title so defaults re-seed when switching views.
-    name: `preset-${mode}-${initialValues?.title ?? ""}`,
-    schema,
-    defaultValues: {
-      title: initialValues?.title ?? "",
-      description: initialValues?.description ?? "",
-    },
-    onSubmit: async ({ data }) => {
-      if (!data.title) {
-        return { success: false }
-      }
-
-      onSubmit({
-        title: data.title,
-        description: data.description || undefined,
-      })
-      return { success: true }
-    },
-    submitConfig: { type: "default", hideSubmitButton: true },
-  })
+  }
 
   return (
     <F0Dialog
@@ -131,8 +104,7 @@ export function PresetFormDialog({
       primaryAction={{
         label: presets.save,
         onClick: handleSubmit,
-        loading: isSubmitting,
-        disabled: hasErrors,
+        disabled: !title.trim(),
       }}
       secondaryAction={{
         label: presets.cancel,
@@ -160,7 +132,31 @@ export function PresetFormDialog({
       disableContentPadding
     >
       <div className="flex flex-col gap-4">
-        <F0Form formDefinition={formDefinition} formRef={formRef} />
+        <F0TextInput
+          ref={titleInputRef}
+          label={presets.nameLabel}
+          placeholder={presets.namePlaceholder}
+          value={title}
+          onChange={(value) => {
+            setTitle(value)
+            setTitleError(undefined)
+          }}
+          error={titleError}
+          required
+          onPressEnter={handleSubmit}
+        />
+        {titleError && (
+          <span className="sr-only" role="alert">
+            {titleError}
+          </span>
+        )}
+        <F0TextAreaInput
+          label={presets.descriptionLabel}
+          placeholder={presets.descriptionPlaceholder}
+          value={description}
+          onChange={setDescription}
+          rows={4}
+        />
       </div>
     </F0Dialog>
   )

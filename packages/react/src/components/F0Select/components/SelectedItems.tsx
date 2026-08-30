@@ -7,6 +7,7 @@ import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 
 import type { F0SelectItemObject } from "../types"
+
 import { LABEL_SEPARATOR, useLabelsOverflow } from "../utils"
 
 type SelectValueProps = {

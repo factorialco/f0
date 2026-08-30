@@ -14,6 +14,13 @@ import type {
   FiltersState,
 } from "@/patterns/OneFilterPicker/types"
 
+export type GraphVisualizationSettings = {
+  /** Metadata order (tag-type ids), matching the table column settings shape. */
+  order?: string[]
+  /** Hidden metadata (tag-type ids). */
+  hidden?: string[]
+}
+
 /**
  * Configuration for the "graph" visualization (org-chart style).
  *
