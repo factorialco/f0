@@ -23,14 +23,14 @@
     "f0Button": {
       "assets": {
         "js": {
-          "raw": 585131,
-          "gzip": 187232,
-          "brotli": 160992
+          "raw": 585139,
+          "gzip": 187258,
+          "brotli": 161013
         },
         "initialJs": {
-          "raw": 585131,
-          "gzip": 187232,
-          "brotli": 160992
+          "raw": 585139,
+          "gzip": 187258,
+          "brotli": 161013
         },
         "css": {
           "raw": 0,
@@ -53,19 +53,19 @@
     "f0ButtonWithGlobalStyles": {
       "assets": {
         "js": {
-          "raw": 585131,
-          "gzip": 187231,
+          "raw": 585139,
+          "gzip": 187258,
           "brotli": 161072
         },
         "initialJs": {
-          "raw": 585131,
-          "gzip": 187231,
+          "raw": 585139,
+          "gzip": 187258,
           "brotli": 161072
         },
         "css": {
-          "raw": 1958106,
-          "gzip": 152191,
-          "brotli": 86570
+          "raw": 3024315,
+          "gzip": 950395,
+          "brotli": 825429
         }
       },
       "retainedF0Modules": [
@@ -140,13 +140,13 @@
       "assets": {
         "js": {
           "raw": 3785365,
-          "gzip": 1148988,
-          "brotli": 893630
+          "gzip": 1149934,
+          "brotli": 893858
         },
         "initialJs": {
           "raw": 3785365,
-          "gzip": 1148988,
-          "brotli": 893630
+          "gzip": 1149934,
+          "brotli": 893858
         },
         "css": {
           "raw": 0,
@@ -179,12 +179,12 @@
       "assets": {
         "js": {
           "raw": 3657934,
-          "gzip": 1112611,
+          "gzip": 1113296,
           "brotli": 867640
         },
         "initialJs": {
           "raw": 3657934,
-          "gzip": 1112611,
+          "gzip": 1113296,
           "brotli": 867640
         },
         "css": {
@@ -213,12 +213,12 @@
       "assets": {
         "js": {
           "raw": 5954017,
-          "gzip": 1754262,
+          "gzip": 1754524,
           "brotli": 1361979
         },
         "initialJs": {
           "raw": 5954017,
-          "gzip": 1754262,
+          "gzip": 1754524,
           "brotli": 1361979
         },
         "css": {
@@ -262,12 +262,12 @@
       "assets": {
         "js": {
           "raw": 4402593,
-          "gzip": 1344449,
+          "gzip": 1344654,
           "brotli": 1043978
         },
         "initialJs": {
           "raw": 4402593,
-          "gzip": 1344449,
+          "gzip": 1344654,
           "brotli": 1043978
         },
         "css": {
@@ -342,13 +342,13 @@
     "f0PdfViewer": {
       "assets": {
         "js": {
-          "raw": 7545875,
-          "gzip": 2299835,
+          "raw": 7551526,
+          "gzip": 2304237,
           "brotli": 1435170
         },
         "initialJs": {
-          "raw": 7028703,
-          "gzip": 2133663,
+          "raw": 7034349,
+          "gzip": 2138066,
           "brotli": 1293989
         },
         "css": {
