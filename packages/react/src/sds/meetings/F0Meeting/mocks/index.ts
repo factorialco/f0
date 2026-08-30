@@ -23,5 +23,7 @@ export type {
   MockPerson,
   MockVideoSource,
 } from "./mockSeeds"
+export { useMockRoomChat } from "./useMockRoomChat"
+export type { MockRoomChat, MockRoomMessage } from "./useMockRoomChat"
 export { useMockMeetingRuntime } from "./useMockMeetingRuntime"
 export type { MockMeetingDrivers } from "./useMockMeetingRuntime"

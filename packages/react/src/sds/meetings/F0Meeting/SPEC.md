@@ -97,12 +97,14 @@ which costs the top of the head. This is what Google Meet's Dynamic layouts (Mar
 _"a more flexible tile aspect ratio"_, _"portrait tiles"_, _"optimized tile placement logic to
 enable much more efficient layouts that minimize unused space"_.
 
-**Selection is by area alone.** An earlier version needed an orientation tie-break
-(`AREA_TOLERANCE` + `preferWide`) because a fixed ratio made area a poor signal — two people in a
-wide window solved to a marginally taller stack. With adaptive shapes, filling the container well
-_is_ the conventional layout, so 2→1×2, 4→2×2, 6→2×3, 9→3×3 and 12→3×4 all fall out of area.
-Tests lock those. A shape tie-break survives only for genuine ties (~1%), by log-distance to
-16:9, so the result is deterministic across a pixel of resize.
+**Selection is maximin: it maximises the area of the SMALLEST tile.** The person in the worst seat
+decides whether a layout is usable, and total area would happily starve one row to fatten another.
+With adaptive shapes, filling the container well _is_ the conventional layout, so 2→1×2, 4→2×2,
+6→2×3, 9→3×3 and 12→3×4 all fall out of it. Tests lock those. A shape tie-break survives for
+genuine ties, by log-distance to 16:9, so the result is deterministic across a pixel of resize.
+
+Rows are sized **independently** so each spans the full width — see §8 for why an incomplete last
+row must spread rather than leave the missing cells as a hole.
 
 ### The escape hatch
 
@@ -118,9 +120,10 @@ and letterboxes inside its own tile on `bg-f1-background-inverse`, so the black 
 part of the picture that is missing — the room around it stays light. Cropping a presentation
 hides content, which is a worse failure than a band.
 
-Spotlight is forced, with nobody pinned, when the container is narrower than
-`SPOTLIGHT_ASPECT` (0.85) — a side panel is a column, and stacking faces down it makes every one
-of them tiny.
+Spotlight is forced, with nobody pinned, when **the grid cannot seat everyone** — `solveGrid` runs
+first and the room falls back to a spotlight only if it overflows. An earlier version guessed from
+the container's aspect ratio (`SPOTLIGHT_ASPECT`, 0.85) and forced a two-person call in a side
+panel into a spotlight, where stacking the two of them fills the column perfectly well. See §8.
 
 ### Never "+1"
 
@@ -262,6 +265,28 @@ Starting a call needs **nothing** from the chat contract. The header action is h
 `F0ChatHeaderAction.channelTypes` already restricts it to `["dm"]`, so F0Chat still knows nothing
 about meetings.
 
+### Two chats, not one
+
+This is the thing to get right, and the easy mistake to make.
+
+|                     | Transport                                          | Lifetime           | Carries                              |
+| ------------------- | -------------------------------------------------- | ------------------ | ------------------------------------ |
+| **The call's chat** | LiveKit data channels (`useChat`, topic `lk.chat`) | dies with the room | what is said _during_ the call       |
+| **The huddle card** | a GetStream message in the DM                      | permanent          | how you find out, and how you get in |
+
+They are not alternatives. The call's chat is the one in the room's side panel; LiveKit's own
+documentation is explicit that "message history is not persisted and will be lost if the component
+is refreshed". The card is the durable half, and it is what puts the call in the conversation's
+history.
+
+Wiring the panel's chat tab to the DM would quietly promise that what you type during a call
+survives it. It does not — and factorial's existing room already does this correctly
+(`modules/meetings/components/Chat/index.tsx` uses LiveKit's `useChat`).
+
+`MeetingRoomChat` is deliberately plainer than `F0Chat`: no reactions, no threads, no receipts, no
+history. Rendering the full conversation surface over a transport that has none of those would
+promise all of them.
+
 ### The two transports, and who owns what
 
 GetStream carries the _fact_ that a call exists and its state, because it already fans messages
@@ -341,7 +366,64 @@ be a surface of its own.
 
 ---
 
-## 8. Open decisions
+## 8. Presence, focus and the panel
+
+Three things the design round added, each of which fixed something real.
+
+### Presence: people who have not arrived
+
+`F0MeetingParticipant.presence` is `"invited" | "joined"`, absent meaning joined. An `invited`
+person holds a tile that reads "Waiting…", publishes nothing, and does **not** count toward "N
+people in the call". LiveKit does not know them — they come from the host's own attendee list,
+which is why this cannot be derived from the transport.
+
+They are excluded from the spotlight rule below: blowing an empty "waiting" plate up to fill the
+room while the person who IS there sits in a thumbnail is exactly what a ringing call must not
+look like.
+
+### Focus is an intent, not a key
+
+```ts
+type F0MeetingFocusIntent =
+  | { type: "auto" } // F0 decides
+  | { type: "pinned"; key: string } // the user pinned someone
+  | { type: "none" } // the user dismissed the spotlight
+```
+
+A plain `string | null` cannot tell "nobody has pinned anything" apart from "the user dismissed
+it". In a one-to-one the auto rule spotlights the remote person, so clearing the pin fell straight
+back into it and re-focused them in the same render — **the pin button was a no-op**. The three
+states make dismissal expressible. A freshly started screen share still overrides `none`: that is
+an event, not a preference.
+
+### The grid fills the container
+
+Rows are distributed as evenly as possible and **each row spans the full width on its own**, so an
+incomplete last row spreads its tiles rather than leaving the missing cells as a hole. Three people
+fill the room; they do not sit beside an empty square.
+
+The aspect clamp is the one thing allowed to leave space. Where filling completely would need a
+tile flatter than `TILE_ASPECT_MAX`, the row widens as far as the clamp allows and the remainder is
+centred — the alternative is `object-cover` taking the sides off someone's face.
+
+Whether the room needs a spotlight is now decided by **evidence**: `solveGrid` is run first, and a
+spotlight happens only when the grid cannot seat everyone. The old `SPOTLIGHT_ASPECT` constant
+guessed from the container's shape and forced a two-person call in a side panel into a spotlight,
+where stacking the two of them fills it perfectly well.
+
+### The side panel
+
+`sidePanel` is `{ tabs, defaultTabId }` rather than a bare `ReactNode`: F0 owns whether the panel
+is open, because the button that opens it lives in F0's own control bar and needs the tab labels
+and the unread badge. Only the selected tab is mounted — a virtualized transcript measured inside
+a `display:none` subtree yields zero heights it then has to correct on reveal.
+
+It is fullscreen-only. At 420px it would leave the video a sliver anywhere else, so `core:chat`
+carries `modes: ["fullscreen"]` and the control and the surface agree.
+
+---
+
+## 9. Open decisions
 
 - **Fullscreen and the banner.** Undecided whether fullscreen should cover the app banner or sit
   below it. The frame's content rect is already wired, so it is a one-line change once decided.

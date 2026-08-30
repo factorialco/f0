@@ -98,6 +98,13 @@ import {
 } from "@/sds/chat/F0Chat/mocks/MockChatApp"
 import { SEED_BY_ID } from "@/sds/chat/F0Chat/mocks/mockSeeds"
 import { useDemoHeaderActions } from "@/sds/chat/F0Chat/mocks/useDemoHeaderActions"
+import {
+  MeetingNotes,
+  MeetingRoomChat,
+  MeetingTranscript,
+} from "@/sds/meetings/F0Meeting"
+import { useMockRoomChat } from "@/sds/meetings/F0Meeting/mocks/useMockRoomChat"
+
 import { useMockHuddle } from "./mocks/useMockHuddle"
 import { DaytimePage } from "@/sds/Home/DaytimePage"
 import { Action } from "@/ui/Action"
@@ -1284,6 +1291,23 @@ const useHuddle = () => useContext(HuddleContext)
  * meeting's room — and the frame is the only thing that sees both. That is
  * exactly where the glue sits in production too.
  */
+/**
+ * The chat tab of the in-call panel: the CALL's own chat, scoped to the room
+ * and gone when it ends — NOT the conversation the huddle was started from.
+ *
+ * The two are different transports with different jobs. In production this one
+ * is LiveKit's data channel (`useChat`, topic `lk.chat`), whose history dies
+ * with the room; the huddle CARD in the DM is the durable half, and that is
+ * what carries the fact of the call into the conversation's history.
+ *
+ * Rendering the DM here would quietly promise that what you type during a call
+ * survives it.
+ */
+const HuddleChatTab = ({ roomId }: { roomId: string }) => {
+  const { messages, send } = useMockRoomChat(roomId)
+  return <MeetingRoomChat messages={messages} onSend={send} />
+}
+
 const WithHuddle = ({
   children,
 }: {
@@ -1300,21 +1324,47 @@ const WithHuddle = ({
     [huddle.activeConvId, huddle.start, huddle.receive]
   )
 
+  const { runtime, activeConvId } = huddle
+  const transcript = runtime?.transcript
+  const notes = runtime?.notes ?? ""
+  const setNotes = runtime?.setNotes
+
+  const sidePanel = useMemo(() => {
+    if (!activeConvId) return undefined
+    return {
+      defaultTabId: "chat",
+      tabs: [
+        {
+          id: "chat",
+          label: "Chat",
+          content: <HuddleChatTab roomId={runtime?.room.id ?? activeConvId} />,
+        },
+        // Absent transcript means no tab at all, the same capability-by-presence
+        // rule the rest of the contract uses.
+        ...(transcript
+          ? [
+              {
+                id: "transcript",
+                label: "Transcript",
+                content: <MeetingTranscript segments={transcript} />,
+              },
+            ]
+          : []),
+        {
+          id: "notes",
+          label: "Notes",
+          content: <MeetingNotes value={notes} onChange={setNotes} />,
+        },
+      ],
+    }
+  }, [activeConvId, transcript, notes, setNotes])
+
   return (
     <HuddleContext.Provider value={value}>
       {children({
         runtime: huddle.runtime,
         defaultMode: "fullscreen",
-        actions: [
-          {
-            id: "chat",
-            label: "Open conversation",
-            icon: Icons.Comment,
-            group: "collab",
-            priority: 55,
-            onClick: () => {},
-          },
-        ],
+        sidePanel,
       })}
     </HuddleContext.Provider>
   )
@@ -1374,7 +1424,9 @@ const MockChatPanel = ({
       {
         id: "huddle",
         label: "Start huddle",
-        icon: Icons.VideoRecorder,
+        // Headphones, not a camera: a huddle is an audio-first drop-in, and
+        // that is the glyph the design uses in the conversation's header.
+        icon: Icons.Headset,
         placement: "inline",
         channelTypes: ["dm"],
         onClick: () => huddle.start(convId),

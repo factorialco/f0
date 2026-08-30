@@ -11,13 +11,13 @@ import { useSynthesizedActions } from "./components/controls/useSynthesizedActio
 import { F0MeetingRoom } from "./F0MeetingRoom"
 import { useF0Meeting } from "./providers/F0MeetingProvider"
 import { useMeetingSurface } from "./providers/MeetingSurfaceProvider"
-import { type F0MeetingActionsProp } from "./types"
+import { type F0MeetingActionsProp, type F0MeetingSidePanel } from "./types"
 import { FloatingWindow } from "./window/FloatingWindow"
 
 export type F0MeetingSurfaceProps = {
   actions?: F0MeetingActionsProp
   actionOrder?: string[]
-  sidePanel?: React.ReactNode
+  sidePanel?: F0MeetingSidePanel
   headerContent?: React.ReactNode
   overlay?: React.ReactNode
 }

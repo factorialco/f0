@@ -1,5 +1,7 @@
 import { useMemo } from "react"
 
+import { cn } from "@/lib/utils"
+
 import { MeetingAudioRenderer } from "./components/audio/MeetingAudioRenderer"
 import {
   AudioUnlockPrompt,
@@ -13,15 +15,16 @@ import { MeetingControlBar } from "./components/controls/MeetingControlBar"
 import { mergeActions } from "./components/controls/merge-actions"
 import { useSynthesizedActions } from "./components/controls/useSynthesizedActions"
 import { MeetingGrid } from "./components/grid/MeetingGrid"
+import { MeetingSidePanel } from "./components/panel/MeetingSidePanel"
 import { useF0MeetingRoster } from "./providers/F0MeetingProvider"
 import { useF0Meeting } from "./providers/F0MeetingProvider"
 import { useMeetingSurface } from "./providers/MeetingSurfaceProvider"
-import { type F0MeetingActionsProp } from "./types"
+import { type F0MeetingActionsProp, type F0MeetingSidePanel } from "./types"
 
 export type F0MeetingRoomProps = {
   actions?: F0MeetingActionsProp
   actionOrder?: string[]
-  sidePanel?: React.ReactNode
+  sidePanel?: F0MeetingSidePanel
   overlay?: React.ReactNode
 }
 
@@ -39,7 +42,7 @@ export const F0MeetingRoom = ({
   const runtime = useF0Meeting()
   const { status } = useF0MeetingRoster()
   const { effectiveMode } = useMeetingSurface()
-  const coreActions = useSynthesizedActions()
+  const coreActions = useSynthesizedActions(sidePanel)
 
   const hostActions = useMemo(
     () => (typeof actions === "function" ? actions(runtime) : actions),
@@ -56,6 +59,7 @@ export const F0MeetingRoom = ({
   if (status === "disconnected") return <MeetingEnded />
 
   const isCompact = effectiveMode === "minimized"
+  const isFullscreen = effectiveMode === "fullscreen"
 
   return (
     <div className="relative flex h-full w-full flex-col">
@@ -64,18 +68,22 @@ export const F0MeetingRoom = ({
       <RecordingBanner />
       <AudioUnlockPrompt />
 
-      <div className="flex min-h-0 flex-1">
-        <div className="relative min-w-0 flex-1 p-2">
+      <div
+        className={cn(
+          "flex min-h-0 flex-1",
+          isFullscreen ? "gap-4 px-4" : "gap-3 px-3"
+        )}
+      >
+        <div className="relative min-w-0 flex-1">
           <MeetingGrid />
         </div>
-        {sidePanel}
+        {/* Fullscreen only: the panel is 420px wide, which in a side panel or a
+            floating window would leave the video a sliver. `core:chat` carries
+            the same restriction, so the control and the surface agree. */}
+        {sidePanel && isFullscreen && <MeetingSidePanel panel={sidePanel} />}
       </div>
 
-      {!isCompact && (
-        <div className="shrink-0 px-2 pb-2">
-          <MeetingControlBar actions={resolvedActions} />
-        </div>
-      )}
+      {!isCompact && <MeetingControlBar actions={resolvedActions} />}
 
       {/* Mounted once, outside the grid, so pagination and layout changes can
           never interrupt someone mid-sentence. */}

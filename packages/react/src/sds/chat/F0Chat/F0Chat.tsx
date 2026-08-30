@@ -36,6 +36,14 @@ export type F0ChatProps = {
   headerActions?:
     | F0ChatHeaderAction[]
     | ((channel: F0ChatChannel) => F0ChatHeaderAction[])
+  /**
+   * Replaces the built-in header. `null` removes it entirely, for hosts that
+   * already frame the chat with their own chrome — the in-call panel puts its
+   * Chat / Transcript / Notes tabs where this header would be.
+   *
+   * Undefined keeps the default header, so no existing usage changes.
+   */
+  header?: ReactNode | null
 }
 
 const isFileDrag = (e: DragEvent) => e.dataTransfer?.types?.includes("Files")
@@ -45,6 +53,7 @@ const ChatShell = ({
   onToggleFullscreen,
   onClose,
   headerActions,
+  header,
 }: F0ChatProps): ReactNode => {
   const { channel, status, messages, capabilities } = useF0Chat()
   const { dropFiles } = useChatDrop()
@@ -96,17 +105,21 @@ const ChatShell = ({
         if (files.length > 0) dropFiles(files)
       }}
     >
-      <ChatHeader
-        channel={channel}
-        isFullscreen={isFullscreen}
-        onToggleFullscreen={onToggleFullscreen}
-        onClose={onClose}
-        actions={
-          typeof headerActions === "function"
-            ? headerActions(channel)
-            : headerActions
-        }
-      />
+      {header === undefined ? (
+        <ChatHeader
+          channel={channel}
+          isFullscreen={isFullscreen}
+          onToggleFullscreen={onToggleFullscreen}
+          onClose={onClose}
+          actions={
+            typeof headerActions === "function"
+              ? headerActions(channel)
+              : headerActions
+          }
+        />
+      ) : (
+        header
+      )}
       {status === "connecting" ? (
         <ChatConnecting />
       ) : status === "error" ? (

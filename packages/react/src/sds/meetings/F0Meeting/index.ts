@@ -26,6 +26,11 @@ export {
 } from "./providers/useMeetingSignal"
 export { useTrackBinding } from "./providers/useTrackBinding"
 
+export { MeetingSidePanel } from "./components/panel/MeetingSidePanel"
+export { MeetingRoomChat } from "./components/panel/MeetingRoomChat"
+export { MeetingTranscript } from "./components/panel/MeetingTranscript"
+export { MeetingNotes } from "./components/panel/MeetingNotes"
+
 export { solveGrid, layoutGrid } from "./layout/grid-solver"
 export type { GridSolution, GridSolverInput } from "./layout/grid-solver"
 export { solveSpotlight } from "./layout/spotlight-solver"
