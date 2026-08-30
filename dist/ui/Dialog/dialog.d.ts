@@ -1,0 +1,12 @@
+import { DialogClose } from './components/DialogClose';
+import { DialogContent } from './components/DialogContent';
+import { DialogDescription } from './components/DialogDescription';
+import { DialogFooter } from './components/DialogFooter';
+import { DialogHeader } from './components/DialogHeader';
+import { DialogOverlay } from './components/DialogOverlay';
+import { DialogPortal } from './components/DialogPortal';
+import { DialogTitle } from './components/DialogTitle';
+import { DialogTrigger } from './components/DialogTrigger';
+import * as DialogPrimitive from "@radix-ui/react-dialog";
+declare const Dialog: import('react').FC<DialogPrimitive.DialogProps>;
+export { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogOverlay, DialogPortal, DialogTitle, DialogTrigger, };

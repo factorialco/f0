@@ -1,0 +1,1 @@
+export declare const F0AvatarDate: import('../../../lib/data-testid').WithDataTestIdReturnType<({ date, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, }: import('./F0AvatarDate').F0AvatarDateProps) => import("react").JSX.Element>;

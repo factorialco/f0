@@ -12,6 +12,7 @@
     "dist",
     "flags",
     "icons",
+    "inline-font-assets.mjs",
     "postcss.config.js",
     "styles.css",
     "tailwind.config.ts"
@@ -22,6 +23,115 @@
   ],
   "main": "dist/f0.js",
   "typings": "dist/f0.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/f0.d.ts",
+      "import": "./dist/f0.js"
+    },
+    "./experimental": {
+      "types": "./dist/experimental.d.ts",
+      "import": "./dist/experimental.js"
+    },
+    "./ai": {
+      "types": "./dist/ai.d.ts",
+      "import": "./dist/ai.js"
+    },
+    "./component-status": {
+      "types": "./dist/component-status.d.ts",
+      "import": "./dist/component-status.js"
+    },
+    "./i18n-provider-defaults": {
+      "types": "./dist/lib/providers/i18n/i18n-provider-defaults.d.ts",
+      "import": "./dist/i18n-provider-defaults.js"
+    },
+    "./F0Alert": {
+      "types": "./dist/components/F0Alert/index.d.ts",
+      "import": "./dist/F0Alert.js"
+    },
+    "./F0Box": {
+      "types": "./dist/lib/F0Box/index.d.ts",
+      "import": "./dist/F0Box.js"
+    },
+    "./F0Button": {
+      "types": "./dist/components/F0Button/index.d.ts",
+      "import": "./dist/F0Button.js"
+    },
+    "./F0Card": {
+      "types": "./dist/components/F0Card/index.d.ts",
+      "import": "./dist/F0Card.js"
+    },
+    "./F0DatePicker": {
+      "types": "./dist/components/F0DatePicker/index.d.ts",
+      "import": "./dist/F0DatePicker.js"
+    },
+    "./F0Dialog": {
+      "types": "./dist/patterns/F0Dialog/index.d.ts",
+      "import": "./dist/F0Dialog.js"
+    },
+    "./F0Heading": {
+      "types": "./dist/components/F0Heading/index.d.ts",
+      "import": "./dist/F0Heading.js"
+    },
+    "./F0NumberInput": {
+      "types": "./dist/components/F0NumberInput/index.d.ts",
+      "import": "./dist/F0NumberInput.js"
+    },
+    "./F0Select": {
+      "types": "./dist/components/F0Select/index.d.ts",
+      "import": "./dist/F0Select.js"
+    },
+    "./F0Text": {
+      "types": "./dist/components/F0Text/index.d.ts",
+      "import": "./dist/F0Text.js"
+    },
+    "./F0TextInput": {
+      "types": "./dist/components/F0TextInput/index.d.ts",
+      "import": "./dist/F0TextInput.js"
+    },
+    "./icons/ai": {
+      "types": "./icons/ai/index.d.ts",
+      "import": "./icons/ai/index.js"
+    },
+    "./icons/ai/*": {
+      "types": "./icons/ai/*.d.ts",
+      "import": "./icons/ai/*.js"
+    },
+    "./icons/animated": {
+      "types": "./icons/animated/index.d.ts",
+      "import": "./icons/animated/index.js"
+    },
+    "./icons/animated/*": {
+      "types": "./icons/animated/*.d.ts",
+      "import": "./icons/animated/*.js"
+    },
+    "./icons/app": {
+      "types": "./icons/app/index.d.ts",
+      "import": "./icons/app/index.js"
+    },
+    "./icons/app/*": {
+      "types": "./icons/app/*.d.ts",
+      "import": "./icons/app/*.js"
+    },
+    "./icons/modules": {
+      "types": "./icons/modules/index.d.ts",
+      "import": "./icons/modules/index.js"
+    },
+    "./icons/modules/*": {
+      "types": "./icons/modules/*.d.ts",
+      "import": "./icons/modules/*.js"
+    },
+    "./icons/special": {
+      "types": "./icons/special/index.d.ts",
+      "import": "./icons/special/index.js"
+    },
+    "./icons/special/*": {
+      "types": "./icons/special/*.d.ts",
+      "import": "./icons/special/*.js"
+    },
+    "./styles.css": "./dist/styles.css",
+    "./package.json": "./package.json",
+    "./dist/*": "./dist/*"
+  },
   "scripts": {
     "dev": "storybook dev -p 6006",
     "dev:docs": "DOCS_MODE=true pnpm run dev",
@@ -146,6 +256,7 @@
     "maplibre-gl": "^5.24.0",
     "prosemirror-state": "^1.4.3",
     "prosemirror-view": "^1.38.1",
+    "postcss-value-parser": "^4.2.0",
     "react-phone-number-input": "^3.4.17",
     "react-remove-scroll": "^2.7.1",
     "react-virtuoso": "^4.18.10",
@@ -172,7 +283,7 @@
     "@github-ui/storybook-addon-performance-panel": "^1.2.0",
     "@livekit/components-react": "^2.9.19",
     "@mdx-js/react": "^3.1.1",
-    "@microsoft/api-extractor": "7.52.8",
+    "@microsoft/api-extractor": "7.59.0",
     "@playwright/test": "^1.57.0",
     "@size-limit/esbuild": "^13.0.3",
     "@size-limit/file": "^13.0.3",
@@ -197,6 +308,7 @@
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.1",
     "@types/twemoji-parser": "^13.1.4",
+    "@typescript/native": "npm:typescript@7.0.2",
     "@vitejs/plugin-react": "^6.1.1",
     "@vitest/browser-playwright": "^4.1.11",
     "@vitest/coverage-v8": "^4.1.11",
@@ -211,6 +323,7 @@
     "dotenv": "^16.4.7",
     "emoji-mart": "^5.6.0",
     "emojibase-data": "^16.0.3",
+    "esbuild": "^0.28.2",
     "eslint-plugin-react-refresh": "^0.4.26",
     "eslint-plugin-storybook": "^10.5.10",
     "globals": "^16.0.0",
@@ -233,11 +346,11 @@
     "rollup-plugin-jsx-remove-attributes": "^3.1.1",
     "size-limit": "^13.0.3",
     "storybook": "^10.5.10",
-    "tsup": "^8.3.5",
-    "typescript": "^5.7.2",
+    "tsup": "^8.5.1",
+    "typescript": "npm:@typescript/typescript6@6.0.2",
     "user-agent-data-types": "^0.4.2",
     "vite": "^8.2.2",
-    "vite-plugin-dts": "4.3.0",
+    "vite-plugin-dts": "5.0.3",
     "vite-plugin-lib-inject-css": "^2.2.2",
     "vitest": "^4.1.11"
   },
@@ -284,7 +397,7 @@
     "tailwindcss": "^3.4.3",
     "tailwindcss-animate": "^1.0.7",
     "twemoji-parser": "^14.0.0",
-    "typescript": "^5.7.2",
+    "typescript": ">=5.7.2 <8",
     "usehooks-ts": "^3.1.1",
     "zod": "^3.23.8"
   },

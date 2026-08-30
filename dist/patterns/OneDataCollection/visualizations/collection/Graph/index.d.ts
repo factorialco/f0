@@ -1,0 +1,10 @@
+import { GroupingDefinition, RecordType, SortingsDefinition } from '../../../../../hooks/datasource';
+import { FiltersDefinition } from '../../../../OneFilterPicker/types';
+import { ItemActionsDefinition } from '../../../item-actions';
+import { NavigationFiltersDefinition } from '../../../navigationFilters/types';
+import { SummariesDefinition } from '../../../summary';
+import { CollectionProps } from '../../../types';
+import { GraphVisualizationOptions } from './types';
+export type { GraphVisualizationOptions } from './types';
+export type GraphCollectionProps<Record extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<Record>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<Record>> = CollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping, GraphVisualizationOptions<Record, Filters, Sortings>>;
+export declare const GraphCollection: <Record extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<Record>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<Record>>({ source, title, subtitle, avatar, tags, nodeActions, nodeTagTypes, defaultVisibleTagTypes, pinnedTagTypes, lockedTagTypes, currentUserNodeId, getNodeId, getChildrenCount, stackNodes, stackedTrailing, childrenFilters, defaultExpandDepth, revealNodeId, searchSelectionNonce, focusOnEntry, initialSelectedNodeId, loadNodePath, getParentId, loadNodeData, liveUpdate, zoomPreset, minZoom, maxZoom, centerOnNodeClick, nodeClickZoom, viewportInset, showControls, canvasFooterActions, enableNodeWindowing, nodeWindowPadding, loadVisibleNodeData, visibleDataDebounceMs, onLoadData, onLoadError, }: GraphCollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>) => import("react").JSX.Element;

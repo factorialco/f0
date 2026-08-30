@@ -1,0 +1,207 @@
+import { UseFileUpload } from '../../../patterns/F0Form/fields/file/types';
+import { IconType } from '../../../components/F0Icon/F0Icon';
+import { F0SelectItemObject } from '../../../components/F0Select/types';
+import { DataSourceDefinition, RecordType } from '../../../hooks/datasource';
+import { CheckboxQuestionProps } from './QuestionTypes/CheckboxQuestion';
+import { DateQuestionProps } from './QuestionTypes/DateQuestion';
+import { DropdownMultiQuestionProps } from './QuestionTypes/DropdownMultiQuestion/types';
+import { DropdownSingleQuestionProps } from './QuestionTypes/DropdownSingleQuestion/types';
+import { FileQuestionProps } from './QuestionTypes/FileQuestion';
+import { LinkQuestionProps } from './QuestionTypes/LinkQuestion';
+import { NumericQuestionProps } from './QuestionTypes/NumericQuestion';
+import { RatingQuestionProps } from './QuestionTypes/RatingQuestion';
+import { SelectQuestionProps } from './QuestionTypes/SelectQuestion/types';
+import { TextQuestionProps } from './QuestionTypes/TextQuestion';
+import { SectionProps } from './Section/types';
+export type QuestionType = "rating" | "select" | "multi-select" | "dropdown-single" | "dropdown-multi" | "text" | "longText" | "numeric" | "link" | "date" | "file" | "checkbox";
+export type ElementType = QuestionType | "section";
+/**
+ * Per-question control to hide individual entries from the question
+ * actions menu (the "⋯" dropdown). Useful when a consumer wants to
+ * lock down a subset of question editing without disabling the whole
+ * question.
+ *
+ * When every available action is hidden, the actions menu trigger is
+ * not rendered at all.
+ */
+export type HiddenAction = "required" | "multiSelect" | "allowCreate" | "questionType" | "duplicate" | "delete";
+export type HiddenActions = ReadonlyArray<HiddenAction>;
+/**
+ * Explanation surfaced in a locked item's lock tooltip (authoring view only —
+ * never shown in the answering/preview form), saying why it can't be edited,
+ * moved, or removed. Rendered as a title-less popover on hovering the lock.
+ *
+ * A section and an individual question each carry their own `lockedNote`; a
+ * locked question prefers its own `LockedQuestionNotice` and otherwise falls
+ * back to the section's `LockedSectionNotice`.
+ */
+export type LockedSectionNotice = {
+    description: string;
+};
+export type LockedQuestionNotice = {
+    description: string;
+};
+export type BaseQuestionOnChangeParams = {
+    id: string;
+    title?: string;
+    description?: string;
+    required?: boolean;
+};
+export type SectionElement = Omit<SectionProps, "onAction" | "onChange">;
+type QuestionPropsToOmit = "onAction" | "onChange" | "onAddNewElement";
+export type QuestionElement = Omit<TextQuestionProps, QuestionPropsToOmit> | Omit<RatingQuestionProps & {
+    type: "rating";
+}, QuestionPropsToOmit> | Omit<SelectQuestionProps & {
+    type: "select" | "multi-select";
+}, QuestionPropsToOmit> | Omit<DropdownSingleQuestionProps & {
+    type: "dropdown-single";
+}, QuestionPropsToOmit> | Omit<DropdownMultiQuestionProps & {
+    type: "dropdown-multi";
+}, QuestionPropsToOmit> | Omit<NumericQuestionProps & {
+    type: "numeric";
+}, QuestionPropsToOmit> | Omit<LinkQuestionProps & {
+    type: "link";
+}, QuestionPropsToOmit> | Omit<DateQuestionProps & {
+    type: "date";
+}, QuestionPropsToOmit> | Omit<FileQuestionProps & {
+    type: "file";
+}, QuestionPropsToOmit> | Omit<CheckboxQuestionProps & {
+    type: "checkbox";
+}, QuestionPropsToOmit>;
+export type SurveyFormBuilderElement = {
+    type: "section";
+    section: SectionElement;
+} | {
+    type: "question";
+    question: QuestionElement;
+};
+export type ActionType = "duplicate" | "delete";
+export type SectionActionParams = {
+    sectionId: string;
+    type: ActionType;
+    index: number;
+};
+export type OnChangeSectionParams = {
+    id: string;
+    title: string;
+    description?: string;
+    questions?: QuestionElement[];
+};
+export type SelectQuestionOption = {
+    id?: string;
+    value: string;
+    label: string;
+    correct?: boolean;
+};
+export type SurveyDataset = {
+    title: string;
+    icon?: IconType;
+    placeholder?: string;
+    dataSource: DataSourceDefinition;
+    mapOptions: (item: RecordType) => F0SelectItemObject<string, RecordType>;
+    onCreate?: (value: string) => Promise<RecordType>;
+};
+export type SurveyDatasets = Record<string, SurveyDataset>;
+type OnChangeQuestionParams = BaseQuestionOnChangeParams & ({
+    type: "text" | "longText";
+    value?: string | null;
+} | {
+    type: "rating";
+    value?: number;
+    options?: {
+        value: number;
+        label: string;
+    }[];
+} | {
+    type: "select";
+    value?: string | null;
+    options: SelectQuestionOption[];
+} | {
+    type: "multi-select";
+    value?: string[] | null;
+    options: SelectQuestionOption[];
+} | {
+    type: "dropdown-single";
+    value?: string | null;
+    datasetKey?: string;
+    showSearchBox?: boolean;
+    searchBoxPlaceholder?: string;
+    allowCreate?: boolean;
+} | {
+    type: "dropdown-multi";
+    value?: string[] | null;
+    datasetKey?: string;
+    showSearchBox?: boolean;
+    searchBoxPlaceholder?: string;
+} | {
+    type: "numeric";
+    value?: number | null;
+} | {
+    type: "link";
+    value?: string | null;
+} | {
+    type: "date";
+    value?: Date | null;
+} | {
+    type: "file";
+    value?: string[] | null;
+} | {
+    type: "checkbox";
+    value?: boolean | null;
+    label: string;
+});
+export type QuestionActionParams = {
+    questionId: string;
+    type: ActionType;
+    index: number;
+};
+export type OnAddNewElementParams = {
+    type: ElementType;
+    afterId?: string;
+    datasetKey?: string;
+};
+export type OnDuplicateElementParams = {
+    elementId: string;
+    type: ElementType;
+};
+export type SurveyFormBuilderCallbacks = {
+    onQuestionChange?: (params: OnChangeQuestionParams) => void;
+    onSectionChange?: (params: OnChangeSectionParams) => void;
+    onAddNewElement?: (params: OnAddNewElementParams) => void;
+    onDuplicateElement?: (params: OnDuplicateElementParams) => void;
+};
+export type SurveyFormBuilderPlaceholders = {
+    /** Overrides the default "Question title" placeholder shown on empty questions. */
+    questionTitle?: string;
+    /** Overrides the default "Section title" placeholder shown on empty sections. */
+    sectionTitle?: string;
+    /** Overrides the default question description placeholder (pass "" to hide the hint). */
+    questionDescription?: string;
+    /** Overrides the default text-answer preview placeholder (pass "" to hide the hint). */
+    answer?: string;
+};
+export type SurveyFormBuilderLabels = {
+    /** Overrides the label/tooltip of the "add" buttons (default: "Add question"). */
+    addQuestion?: string;
+};
+export type SurveyFormBuilderProps = {
+    elements: SurveyFormBuilderElement[];
+    onChange: (elements: SurveyFormBuilderElement[]) => void;
+    disabled?: boolean;
+    disallowOptionalQuestions?: boolean;
+    allowedQuestionTypes?: QuestionType[];
+    applyingChanges?: boolean;
+    useUpload?: UseFileUpload;
+    datasets?: SurveyDatasets;
+    /** Per-instance overrides for the builder's title placeholders. Falls back to i18n defaults. */
+    placeholders?: SurveyFormBuilderPlaceholders;
+    /** Per-instance overrides for the builder's action labels. Falls back to i18n defaults. */
+    labels?: SurveyFormBuilderLabels;
+    /**
+     * When true, an empty builder does NOT auto-insert a default section on mount,
+     * letting the consumer start from a blank form. Defaults to the legacy behaviour
+     * (a section is created).
+     */
+    skipDefaultSection?: boolean;
+};
+export {};

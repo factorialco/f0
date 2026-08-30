@@ -1,7 +1,7 @@
-import { S as e, b as t } from "./F0Button-BFtTqm8n.js";
-import { C as n, S as r, _ as i, a, b as o, c as s, d as c, f as l, g as u, h as d, i as f, l as p, m, n as h, o as g, p as _, r as v, s as y, t as b, u as x, v as S, x as C, y as w } from "./F0AiProcessingOverlay-BB56wgpv.js";
-import { l as T, u as E } from "./F0AiFormRegistry-DtlE1Tj7.js";
-import { c as D, n as O, t as k } from "./F0CanvasPanel-Dn4gpL8t.js";
-import { _ as A, a as j, c as M, d as N, f as P, g as F, h as I, l as L, n as R, p as z, r as B, t as V, u as H, v as U } from "./AiChatTranslationsProvider-CB3DRj6q.js";
+import { f as e, u as t } from "./variants-B0wDByLy.js";
+import { C as n, S as r, _ as i, a, b as o, c as s, d as c, f as l, g as u, h as d, i as f, l as p, m, n as h, o as g, p as _, r as v, s as y, t as b, u as x, v as S, x as C, y as w } from "./F0AiProcessingOverlay-CapMw7GU.js";
+import { l as T, u as E } from "./F0AiFormRegistry-B2o-WW9Z.js";
+import { c as D, n as O, t as k } from "./F0CanvasPanel-BIEwuyD3.js";
+import { _ as A, a as j, c as M, d as N, f as P, g as F, h as I, l as L, n as R, p as z, r as B, t as V, u as H, v as U } from "./AiChatTranslationsProvider-Ct_dSFI7.js";
 import { t as W } from "./i18n-provider-defaults-B5_EAVz9.js";
 export { V as AiChatTranslationsProvider, E as ChatSpinner, a as CollapsibleGroup, A as DropOverlay, T as F0ActionItem, P as F0AiChat, y as F0AiChatCreditsButton, s as F0AiChatHeader, v as F0AiChatHistory, z as F0AiChatProvider, C as F0AiChatTextArea, _ as F0AiInsightCard, u as F0AiMask, x as F0AiMessageSources, w as F0AiMessagesContainer, I as F0AiPong, b as F0AiProcessingOverlay, c as F0AiProposalCard, p as F0AiTableCard, d as F0AuraVoiceAnimation, o as F0CanvasCard, k as F0CanvasPanel, i as F0ClarifyingPanel, m as F0HILActionConfirmation, D as F0OneIcon, O as F0OneSwitch, M as FormCardValueFormatterProvider, t as I18nProvider, F as PongBall, g as ThreadItem, f as ThreadListSkeleton, n as actionItemStatuses, B as aiTranslations, l as contentTypes, W as defaultTranslations, N as markdownRenderers, r as oneIconSizes, U as useAiChat, R as useAiChatTranslations, S as useCanvasEntity, h as useChatHistory, L as useFormCardValueFormatter, e as useI18n, H as useSetFormCardValueFormatter, j as useToolCallId };

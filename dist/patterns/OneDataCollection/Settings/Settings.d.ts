@@ -1,0 +1,20 @@
+import { GroupingDefinition, GroupingState, RecordType, SortingsDefinition, SortingsState } from '../../../hooks/datasource';
+import { FiltersDefinition } from '../../OneFilterPicker/types';
+import { ItemActionsDefinition } from '../item-actions';
+import { NavigationFiltersDefinition } from '../navigationFilters/types';
+import { SummariesDefinition } from '../summary';
+import { Visualization } from '../visualizations/collection';
+type SettingsProps<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<R>> = {
+    visualizations: ReadonlyArray<Visualization<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>>;
+    currentVisualization: number;
+    grouping?: Grouping;
+    currentGrouping?: GroupingState<R, Grouping>;
+    onGroupingChange: (groupingState: GroupingState<R, Grouping>) => void;
+    sortings?: SortingsDefinition;
+    summaries?: SummariesDefinition;
+    currentSortings: SortingsState<Sortings>;
+    defaultSortings: SortingsState<Sortings>;
+    onSortingsChange: (sortings: SortingsState<Sortings>) => void;
+};
+export declare const Settings: <R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<R>>({ visualizations, currentVisualization, grouping, currentGrouping, onGroupingChange, sortings, currentSortings, defaultSortings, onSortingsChange, }: SettingsProps<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>) => import("react").JSX.Element;
+export {};

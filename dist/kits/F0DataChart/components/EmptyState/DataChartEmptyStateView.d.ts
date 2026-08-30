@@ -1,0 +1,17 @@
+import { F0DataChartEmptyStateProps, F0DataChartProps } from '../../types';
+interface DataChartEmptyStateViewProps {
+    /**
+     * @deprecated No longer used — the empty state renders text only. Remove the prop.
+     * @removeIn 5.0.0
+     * @migration https://github.com/factorialco/f0/blob/main/packages/react/docs/migrations/f0-datachart-emptystate-charttype-removal.md
+     */
+    chartType?: F0DataChartProps["type"];
+    emptyState?: F0DataChartEmptyStateProps;
+}
+/**
+ * Resolves an `F0DataChartEmptyStateProps` config (i18n defaults + overrides
+ * + render-prop) into rendered output. Used internally by `F0DataChart` and
+ * reused by dashboard wrappers when data is absent.
+ */
+export declare const DataChartEmptyStateView: ({ emptyState, }: DataChartEmptyStateViewProps) => import("react").JSX.Element;
+export {};

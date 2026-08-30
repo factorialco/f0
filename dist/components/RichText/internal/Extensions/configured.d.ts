@@ -1,0 +1,15 @@
+export declare const ColorExtension: import('@tiptap/core').Extension<import('@tiptap/extension-color').ColorOptions, any>;
+export declare const HighlightExtension: import('@tiptap/core').Mark<import('@tiptap/extension-highlight').HighlightOptions, any>;
+export declare const TextStyleExtension: import('@tiptap/core').Mark<import('@tiptap/extension-text-style').TextStyleOptions, any>;
+export declare const TypographyExtension: import('@tiptap/core').Extension<import('@tiptap/extension-typography').TypographyOptions, any>;
+export declare const UnderlineExtension: import('@tiptap/core').Mark<import('@tiptap/extension-underline').UnderlineOptions, any>;
+export declare const DetailsContentExtension: import('@tiptap/core').Node<import('@tiptap/extension-details-content').DetailsContentOptions, any>;
+export declare const DetailsSummaryExtension: import('@tiptap/core').Node<import('@tiptap/extension-details-summary').DetailsSummaryOptions, any>;
+export declare const DetailsExtension: import('@tiptap/core').Node<import('@tiptap/extension-details').DetailsOptions, any>;
+export declare const TextAlignExtension: import('@tiptap/core').Extension<import('@tiptap/extension-text-align').TextAlignOptions, any>;
+export declare const TableExtension: import('@tiptap/core').Extension<import('@tiptap/extension-table').TableKitOptions, any>;
+export declare const TaskListExtension: import('@tiptap/core').Node<import('@tiptap/extension-task-list').TaskListOptions, any>;
+export declare const LinkExtension: import('@tiptap/core').Mark<import('@tiptap/extension-link').LinkOptions, any>;
+export declare const StarterKitExtension: import('@tiptap/core').Extension<import('@tiptap/starter-kit').StarterKitOptions, any>;
+export declare const createPlaceholderExtension: (placeholder: string) => import('@tiptap/core').Extension<import('@tiptap/extension-placeholder').PlaceholderOptions, any>;
+export declare const createCharacterCountExtension: (maxCharacters?: number) => import('@tiptap/core').Extension<import('@tiptap/extension-character-count').CharacterCountOptions, import('@tiptap/extension-character-count').CharacterCountStorage>;
