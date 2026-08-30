@@ -160,6 +160,10 @@ export default defineConfig({
           import.meta.dirname,
           "src/lib/providers/i18n/i18n-provider-defaults.ts"
         ),
+        ["F0Button"]: resolve(
+          import.meta.dirname,
+          "src/components/F0Button/index.ts"
+        ),
       },
       fileName: (_, entryName) => {
         return `${entryName}.js`
