@@ -1,0 +1,22 @@
+import { forwardRef as e } from "react";
+import { jsx as t, jsxs as n } from "react/jsx-runtime";
+var r = e((e, r) => /* @__PURE__ */ n("svg", {
+	xmlns: "http://www.w3.org/2000/svg",
+	fill: "none",
+	viewBox: "0 0 24 24",
+	ref: r,
+	...e,
+	children: [/* @__PURE__ */ t("path", {
+		stroke: "currentColor",
+		strokeLinecap: "round",
+		strokeLinejoin: "round",
+		d: "M14.12 12L21.9 12M21.9 12L19.07 9.17M21.9 12L19.07 14.83"
+	}), /* @__PURE__ */ t("path", {
+		stroke: "currentColor",
+		strokeLinecap: "round",
+		strokeLinejoin: "round",
+		d: "M9.88 12L2.1 12M2.1 12L4.93 9.17M2.1 12L4.93 14.83"
+	})]
+}));
+//#endregion
+export { r as default };

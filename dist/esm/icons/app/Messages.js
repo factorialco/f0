@@ -1,0 +1,22 @@
+import { forwardRef as e } from "react";
+import { jsx as t, jsxs as n } from "react/jsx-runtime";
+var r = e((e, r) => /* @__PURE__ */ n("svg", {
+	xmlns: "http://www.w3.org/2000/svg",
+	fill: "none",
+	viewBox: "0 0 24 24",
+	ref: r,
+	...e,
+	children: [/* @__PURE__ */ t("path", {
+		stroke: "currentColor",
+		strokeLinecap: "round",
+		strokeLinejoin: "round",
+		d: "M14 17V14C14 12.8954 13.1046 12 12 12H7C5.89543 12 5 12.8954 5 14V19.7929C5 20.2383 5.53857 20.4614 5.85355 20.1464L7 19H12C13.1046 19 14 18.1046 14 17Z"
+	}), /* @__PURE__ */ t("path", {
+		stroke: "currentColor",
+		strokeLinecap: "round",
+		strokeLinejoin: "round",
+		d: "M10 9V7C10 5.89543 10.8954 5 12 5H17C18.1046 5 19 5.89543 19 7V12.7929C19 13.2383 18.4614 13.4614 18.1464 13.1464L17 12H16.5"
+	})]
+}));
+//#endregion
+export { r as default };

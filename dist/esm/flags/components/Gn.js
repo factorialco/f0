@@ -1,0 +1,36 @@
+import { __exportAll as e } from "../../_virtual/_rolldown/runtime.js";
+import { forwardRef as t } from "react";
+import { jsx as n, jsxs as r } from "react/jsx-runtime";
+//#region src/flags/components/Gn.tsx
+var i = /* @__PURE__ */ e({ default: () => a }), a = t((e, t) => /* @__PURE__ */ r("svg", {
+	xmlns: "http://www.w3.org/2000/svg",
+	fill: "none",
+	viewBox: "0 0 512 512",
+	ref: t,
+	...e,
+	children: [/* @__PURE__ */ r("g", {
+		clipPath: "url(#a)",
+		children: [
+			/* @__PURE__ */ n("path", {
+				fill: "#73AF00",
+				d: "M341.333 0.275879H503.172C505.513 0.276283 507.759 1.69526 509.414 4.22073C511.07 6.7462 512 10.1714 512 13.7429V498.533C512 502.105 511.07 505.53 509.414 508.055C507.759 510.581 505.513 512 503.172 512H341.333V0.275879Z"
+			}),
+			/* @__PURE__ */ n("path", {
+				fill: "#FFE15A",
+				d: "M170.67 0.275879H341.34V511.998H170.67V0.275879Z"
+			}),
+			/* @__PURE__ */ n("path", {
+				fill: "#FF4B55",
+				d: "M8.828 0.275879H170.667V511.998H8.828C6.48675 511.998 4.24147 510.579 2.58595 508.054C0.930441 505.528 0.000265162 502.103 0 498.531L0 13.7414C0.000265197 10.17 0.930472 6.74497 2.58601 4.21974C4.24156 1.69451 6.48684 0.275879 8.828 0.275879Z"
+			})
+		]
+	}), /* @__PURE__ */ n("defs", { children: /* @__PURE__ */ n("clipPath", {
+		id: "a",
+		children: /* @__PURE__ */ n("path", {
+			fill: "currentColor",
+			d: "M0 0H512V512H0z"
+		})
+	}) })]
+}));
+//#endregion
+export { i as Gn_exports, a as default };
