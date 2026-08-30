@@ -17,7 +17,17 @@ dotenv.config({
 })
 const extraPlugins: Plugin[] = []
 const buildDeclarationsOnly = process.env.BUILD_DECLARATIONS_ONLY === "true"
+const buildPreservedEsm = process.env.BUILD_PRESERVED_ESM === "true"
 const buildWatch = process.env.BUILD_WATCH === "true"
+
+const isBareRuntimeImport = (id: string) =>
+  !id.startsWith(".") &&
+  !id.startsWith("/") &&
+  !id.startsWith("@/") &&
+  !id.startsWith("~/") &&
+  !id.startsWith("virtual:") &&
+  !id.includes("?") &&
+  !id.startsWith("\0")
 
 // Add tailwind build
 const buildTailwind = process.argv.find((arg) => arg.startsWith("--tailwind"))
@@ -162,15 +172,27 @@ export default defineConfig({
       },
       formats: ["es"],
     },
-    outDir: "dist",
+    outDir: buildPreservedEsm ? "dist/esm" : "dist",
     copyPublicDir: false,
     rollupOptions: {
-      external: [/@copilotkit\/.*/, /@livekit\/.*/, "livekit-client"],
+      external: buildPreservedEsm
+        ? isBareRuntimeImport
+        : [/@copilotkit\/.*/, /@livekit\/.*/, "livekit-client"],
       // Workaround to fix rebuild https://github.com/vitejs/vite/issues/19410#issuecomment-2661835482
       output: {
+        entryFileNames: buildPreservedEsm
+          ? (chunkInfo) =>
+              chunkInfo.name.includes("node_modules/")
+                ? "_embedded/[hash].js"
+                : "[name].js"
+          : undefined,
         globals: {
           react: "React",
         },
+        preserveModules: buildPreservedEsm,
+        preserveModulesRoot: buildPreservedEsm
+          ? resolve(import.meta.dirname, "src")
+          : undefined,
       },
     },
   },

@@ -12,7 +12,7 @@ import {
   symlinkSync,
   writeFileSync,
 } from "node:fs"
-import path, { dirname, resolve } from "node:path"
+import path, { dirname, relative, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 import { brotliCompressSync, constants, gzipSync } from "node:zlib"
 import valueParser from "postcss-value-parser"
@@ -81,6 +81,20 @@ function App() {
 createRoot(document.createElement("div")).render(<App />)
 `,
   },
+  f0ButtonFromRoot: {
+    maxBytes: 700_000,
+    source: `
+import React from "react"
+import { createRoot } from "react-dom/client"
+import { F0Button } from "@factorialco/f0-react"
+
+function App() {
+  return <F0Button label="Save" onClick={() => undefined} />
+}
+
+createRoot(document.createElement("div")).render(<App />)
+`,
+  },
   f0DialogWithButton: {
     // F0Dialog's public resourceHeader feature currently retains the complete
     // F0Avatar flag map. Keep that real boundary visible while preventing the
@@ -108,6 +122,7 @@ createRoot(document.createElement("div")).render(<App />)
 interface CloudflareProbeMetric {
   bytes: number
   inputCount: number
+  retainedInputPaths: string[]
 }
 
 function retainRootExport(exportName: string): string {
@@ -175,7 +190,10 @@ function retainedF0Modules(
   sourceMapFiles: string[],
   extractedPackageDir: string
 ): string[] {
-  const packageDist = resolve(extractedPackageDir, "dist") + path.sep
+  const packageDistRoots = [
+    resolve(extractedPackageDir, "dist") + path.sep,
+    resolve(PACKAGE_DIR, "dist") + path.sep,
+  ]
   const modules = new Set<string>()
 
   for (const sourceMapFile of sourceMapFiles) {
@@ -184,8 +202,22 @@ function retainedF0Modules(
     }
     for (const source of sourceMap.sources ?? []) {
       const sourcePath = resolve(dirname(sourceMapFile), source)
-      if (sourcePath.startsWith(packageDist) && sourcePath.endsWith(".js")) {
-        modules.add(normalizeChunkName(path.basename(sourcePath)))
+      if (
+        packageDistRoots.some((root) => sourcePath.startsWith(root)) &&
+        sourcePath.endsWith(".js")
+      ) {
+        const packageDistRoot = packageDistRoots.find((root) =>
+          sourcePath.startsWith(root)
+        )!
+        const distPath = relative(packageDistRoot, sourcePath)
+        if (distPath.startsWith(`esm${path.sep}`)) {
+          const [area, feature] = distPath
+            .slice(`esm${path.sep}`.length)
+            .split(path.sep)
+          modules.add(feature ? `${area}/${feature}` : area)
+        } else {
+          modules.add(normalizeChunkName(path.basename(sourcePath)))
+        }
       }
     }
   }
@@ -245,11 +277,12 @@ async function buildCloudflareProbes(
       logLevel: "silent",
       metafile: true,
       minify: true,
+      outdir: resolve(consumerDir, `out-${probeName}`),
       platform: "browser",
       target: "es2022",
       write: false,
     })
-    const output = result.outputFiles[0]
+    const output = result.outputFiles.find((file) => file.path.endsWith(".js"))
     if (!output)
       throw new Error(`Cloudflare probe emitted no output: ${probeName}`)
     const source = output.text
@@ -274,8 +307,18 @@ async function buildCloudflareProbes(
       )
     }
 
-    const inputPaths = Object.keys(result.metafile.inputs)
-    const forbiddenDependency = inputPaths.find((inputPath) =>
+    const javascriptOutput = Object.entries(result.metafile.outputs).find(
+      ([outputPath]) => outputPath.endsWith(".js")
+    )?.[1]
+    if (!javascriptOutput) {
+      throw new Error(
+        `Cloudflare probe emitted no JavaScript metadata: ${probeName}`
+      )
+    }
+    const retainedInputPaths = Object.entries(javascriptOutput.inputs)
+      .filter(([, input]) => input.bytesInOutput > 0)
+      .map(([inputPath]) => inputPath)
+    const forbiddenDependency = retainedInputPaths.find((inputPath) =>
       /(?:pdfjs-dist|xlsx|maplibre-gl|F0AiChat|F0CanvasPanel)/.test(inputPath)
     )
     if (forbiddenDependency) {
@@ -286,8 +329,29 @@ async function buildCloudflareProbes(
 
     metrics[probeName] = {
       bytes: output.contents.length,
-      inputCount: inputPaths.length,
+      inputCount: retainedInputPaths.length,
+      retainedInputPaths,
     }
+  }
+
+  const subpathButton = metrics.f0Button
+  const rootButton = metrics.f0ButtonFromRoot
+  if (
+    rootButton.bytes > subpathButton.bytes * 1.05 ||
+    rootButton.inputCount > subpathButton.inputCount * 1.1
+  ) {
+    const subpathInputs = new Set(subpathButton.retainedInputPaths)
+    const rootOnlyInputs = rootButton.retainedInputPaths.filter(
+      (inputPath) => !subpathInputs.has(inputPath)
+    )
+    throw new Error(
+      [
+        "Root F0Button import is not equivalent to the component subpath:",
+        `root=${rootButton.bytes} bytes/${rootButton.inputCount} inputs`,
+        `subpath=${subpathButton.bytes} bytes/${subpathButton.inputCount} inputs`,
+        `root-only inputs:\n${rootOnlyInputs.join("\n")}`,
+      ].join(" ")
+    )
   }
 
   return metrics
