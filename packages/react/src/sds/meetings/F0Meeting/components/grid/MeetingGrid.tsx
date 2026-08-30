@@ -6,7 +6,6 @@ import { useReducedMotion } from "@/lib/a11y"
 import {
   DEFAULT_ASPECT_RATIO,
   SPEAKER_PROMOTION_HOLD_MS,
-  SPOTLIGHT_ASPECT,
   TILE_ASPECT_MAX,
   TILE_ASPECT_MIN,
   gapFor,
@@ -54,7 +53,7 @@ const EMPTY_LAYOUT: GridLayout = {
 export const MeetingGrid = () => {
   const { participants } = useF0MeetingRoster()
   const speakers = useMeetingSpeakers()
-  const { manualFocusKey, setManualFocusKey } = useMeetingSurface()
+  const { focusIntent, setFocusIntent } = useMeetingSurface()
   const shouldReduceMotion = useReducedMotion()
   const [containerRef, box] = useMeasuredBox<HTMLDivElement>()
 
@@ -72,22 +71,27 @@ export const MeetingGrid = () => {
     () =>
       resolveAutoFocus({
         tiles,
-        manualFocusKey,
+        intent: focusIntent,
         seenShareKeys: seenShareKeysRef.current,
       }),
-    [tiles, manualFocusKey]
+    [tiles, focusIntent]
   )
   seenShareKeysRef.current = focus.seenShareKeys
 
   useEffect(() => {
-    if (focus.clearManualFocus) setManualFocusKey(null)
-  }, [focus.clearManualFocus, setManualFocusKey])
+    if (focus.clearIntent) setFocusIntent({ type: "auto" })
+  }, [focus.clearIntent, setFocusIntent])
 
   const handleToggleFocus = useCallback(
     (key: string) => {
-      setManualFocusKey(manualFocusKey === key ? null : key)
+      // Un-focusing has to be expressible, not just "stop pinning": in a
+      // one-to-one the auto rule would re-focus the same person immediately,
+      // which is what made this button a no-op.
+      setFocusIntent(
+        focus.focusKey === key ? { type: "none" } : { type: "pinned", key }
+      )
     },
-    [manualFocusKey, setManualFocusKey]
+    [focus.focusKey, setFocusIntent]
   )
 
   const layout = useMemo<GridLayout>(() => {
@@ -96,11 +100,26 @@ export const MeetingGrid = () => {
     }
 
     const gap = gapFor(box.width)
-    // A tall, narrow container (a docked panel) spotlights the active speaker
-    // even when nobody is pinned: a column of stacked faces is unreadable.
-    const forcedByShape =
-      box.width / box.height < SPOTLIGHT_ASPECT && tiles.length > 1
-    const speakingTile = forcedByShape
+    const minTileWidth = minTileWidthFor(box.width)
+    // Solve first, then decide. Whether the room needs a spotlight is a
+    // question about whether the grid can seat everyone, and the grid is the
+    // only thing that knows. Guessing from the container's aspect ratio — the
+    // old `SPOTLIGHT_ASPECT` — spotlighted a two-person call in a side panel,
+    // where stacking the two of them fills it perfectly well.
+    const solution = solveGrid({
+      count: tiles.length,
+      width: box.width,
+      height: box.height,
+      gap,
+      minAspect: TILE_ASPECT_MIN,
+      maxAspect: TILE_ASPECT_MAX,
+      preferredAspect: DEFAULT_ASPECT_RATIO,
+      minTileWidth,
+    })
+
+    const gridSeatsEveryone = solution.visibleCount >= tiles.length
+    const forcedByFit = !gridSeatsEveryone && tiles.length > 1
+    const speakingTile = forcedByFit
       ? tiles.find(
           (tile) =>
             tile.kind === "camera" && speakers.includes(tile.participant.id)
@@ -108,7 +127,7 @@ export const MeetingGrid = () => {
       : undefined
 
     const focusKey =
-      focus.focusKey ?? (forcedByShape ? (speakingTile ?? tiles[0])?.key : null)
+      focus.focusKey ?? (forcedByFit ? (speakingTile ?? tiles[0])?.key : null)
     const spotlight = focusKey
       ? tiles.find((tile) => tile.key === focusKey)
       : undefined
@@ -122,7 +141,11 @@ export const MeetingGrid = () => {
           width: box.width,
           height: box.height,
           gap,
-          stripAspect: DEFAULT_ASPECT_RATIO,
+          // The thumbnails take the shape of their own slot, exactly like the
+          // grid's tiles: nearly square in a wide room, portrait in a side
+          // panel. Pinning them to 16:9 was what left bands above and below
+          // them in the panel while the strip claimed the full height.
+          stripRange: { min: TILE_ASPECT_MIN, max: TILE_ASPECT_MAX },
           // A camera takes the shape of its box; a screen share fills the box
           // and letterboxes inside its own tile, so only the missing part of
           // the picture goes black.
@@ -179,20 +202,6 @@ export const MeetingGrid = () => {
       }
     }
 
-    const minTileWidth = minTileWidthFor(box.width)
-    // How many cells fit at a usable size. Solving a second time to "make room"
-    // for the chip is what used to lose a slot: the re-solve often returned the
-    // same cell count, so one fewer person was shown than actually fit.
-    const solution = solveGrid({
-      count: tiles.length,
-      width: box.width,
-      height: box.height,
-      gap,
-      minAspect: TILE_ASPECT_MIN,
-      maxAspect: TILE_ASPECT_MAX,
-      preferredAspect: DEFAULT_ASPECT_RATIO,
-      minTileWidth,
-    })
     const capacity = solution.visibleCount
     const hasOverflow = capacity < tiles.length
     // The chip is a cell like any other, so it simply takes the last one.

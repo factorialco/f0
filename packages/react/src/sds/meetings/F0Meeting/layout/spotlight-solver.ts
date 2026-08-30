@@ -5,6 +5,7 @@ import {
   STRIP_HEIGHT_MAX,
   STRIP_HEIGHT_MIN,
   STRIP_HEIGHT_RATIO,
+  STRIP_MIN_TILE_WIDTH,
   STRIP_SIDE_ASPECT,
 } from "./constants"
 
@@ -14,8 +15,12 @@ export type SpotlightSolverInput = {
   width: number
   height: number
   gap: number
-  /** Ratio of the thumbnails. Deliberately uniform, whatever the spotlight does. */
-  stripAspect: number
+  /**
+   * How far a thumbnail may stray to take the shape of its own slot. Uniform
+   * across the strip, but derived from the container rather than fixed: a wide
+   * room gets nearly square thumbnails, a side panel portrait ones.
+   */
+  stripRange: { min: number; max: number }
   /**
    * Cameras pass a range: the spotlight takes the shape of its box, clamped, so
    * it crops the sides rather than leaving most of a tall panel empty.
@@ -45,10 +50,20 @@ export const solveSpotlight = ({
   width,
   height,
   gap,
-  stripAspect,
+  stripRange,
   spotlightRange,
 }: SpotlightSolverInput): SpotlightSolution => {
   const box = { width, height }
+
+  /**
+   * The shape a thumbnail takes in a slot of the given size. Clamped for the
+   * same reason the grid clamps: a slot far from any usable ratio would crop
+   * the face rather than show it.
+   */
+  const stripAspectFor = (slotWidth: number, slotHeight: number): number =>
+    slotHeight > 0
+      ? clamp(slotWidth / slotHeight, stripRange.min, stripRange.max)
+      : stripRange.max
 
   const fitSpotlight = (available: {
     width: number
@@ -96,9 +111,24 @@ export const solveSpotlight = ({
       STRIP_HEIGHT_MIN,
       STRIP_HEIGHT_MAX
     )
-    const tileWidth = stripHeight * stripAspect
-    const fits = Math.max(1, Math.floor((width + gap) / (tileWidth + gap)))
-    const visible = Math.min(stripCount, fits)
+    // The strip is a row of the grid: the thumbnails span its full width and
+    // take the shape that follows, which is what the design does at both
+    // sizes — four across, edge to edge, square-ish wide and portrait narrow.
+    let visible = Math.max(1, stripCount)
+    let slotWidth = (width - gap * (visible - 1)) / visible
+    while (visible > 1 && slotWidth < STRIP_MIN_TILE_WIDTH) {
+      visible--
+      slotWidth = (width - gap * (visible - 1)) / visible
+    }
+    visible = Math.min(stripCount, visible)
+
+    const aspect = stripAspectFor(slotWidth, stripHeight)
+    let tileWidth = slotWidth
+    let tileHeight = tileWidth / aspect
+    if (tileHeight > stripHeight) {
+      tileHeight = stripHeight
+      tileWidth = tileHeight * aspect
+    }
     const rowWidth = visible * tileWidth + gap * (visible - 1)
     const startX = (width - rowWidth) / 2
 
@@ -109,9 +139,9 @@ export const solveSpotlight = ({
       }),
       strip: Array.from({ length: visible }, (_, index) => ({
         x: startX + index * (tileWidth + gap),
-        y: height - stripHeight,
+        y: height - stripHeight + (stripHeight - tileHeight) / 2,
         width: tileWidth,
-        height: stripHeight,
+        height: tileHeight,
       })),
       stripOverflow: stripCount - visible,
       stripSide: side,
@@ -120,21 +150,35 @@ export const solveSpotlight = ({
 
   const stripWidth = clamp(
     width * STRIP_HEIGHT_RATIO,
-    STRIP_HEIGHT_MIN * stripAspect,
-    STRIP_HEIGHT_MAX * stripAspect
+    STRIP_HEIGHT_MIN * stripRange.max,
+    STRIP_HEIGHT_MAX * stripRange.max
   )
-  const tileHeight = stripWidth / stripAspect
-  const fits = Math.max(1, Math.floor((height + gap) / (tileHeight + gap)))
-  const visible = Math.min(stripCount, fits)
+  // The mirror of the bottom strip: a column that spans the full height, with
+  // the thumbnails taking the shape their slot gives them.
+  let visible = Math.max(1, stripCount)
+  let slotHeight = (height - gap * (visible - 1)) / visible
+  while (visible > 1 && slotHeight * stripRange.max < STRIP_MIN_TILE_WIDTH) {
+    visible--
+    slotHeight = (height - gap * (visible - 1)) / visible
+  }
+  visible = Math.min(stripCount, visible)
+
+  const aspect = stripAspectFor(stripWidth, slotHeight)
+  let tileHeight = slotHeight
+  let tileWidth = tileHeight * aspect
+  if (tileWidth > stripWidth) {
+    tileWidth = stripWidth
+    tileHeight = tileWidth / aspect
+  }
   const columnHeight = visible * tileHeight + gap * (visible - 1)
   const startY = (height - columnHeight) / 2
 
   return {
     spotlight: fitSpotlight({ width: width - stripWidth - gap, height }),
     strip: Array.from({ length: visible }, (_, index) => ({
-      x: width - stripWidth,
+      x: width - stripWidth + (stripWidth - tileWidth) / 2,
       y: startY + index * (tileHeight + gap),
-      width: stripWidth,
+      width: tileWidth,
       height: tileHeight,
     })),
     stripOverflow: stripCount - visible,

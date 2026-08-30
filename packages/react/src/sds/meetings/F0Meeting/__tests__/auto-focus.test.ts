@@ -27,7 +27,7 @@ describe("resolveAutoFocus", () => {
   it("focuses nothing in a solo room", () => {
     const result = resolveAutoFocus({
       tiles: [camera("me", true)],
-      manualFocusKey: null,
+      intent: { type: "auto" },
       seenShareKeys: new Set(),
     })
     expect(result.focusKey).toBeNull()
@@ -36,7 +36,7 @@ describe("resolveAutoFocus", () => {
   it("focuses the remote participant in a one-to-one", () => {
     const result = resolveAutoFocus({
       tiles: [camera("me", true), camera("other")],
-      manualFocusKey: null,
+      intent: { type: "auto" },
       seenShareKeys: new Set(),
     })
     expect(result.focusKey).toBe("other:camera")
@@ -45,7 +45,7 @@ describe("resolveAutoFocus", () => {
   it("does not auto-focus with three or more cameras", () => {
     const result = resolveAutoFocus({
       tiles: [camera("me", true), camera("a"), camera("b")],
-      manualFocusKey: null,
+      intent: { type: "auto" },
       seenShareKeys: new Set(),
     })
     expect(result.focusKey).toBeNull()
@@ -54,7 +54,7 @@ describe("resolveAutoFocus", () => {
   it("focuses a new screen share over everything else", () => {
     const result = resolveAutoFocus({
       tiles: [share("a"), camera("me", true), camera("a")],
-      manualFocusKey: null,
+      intent: { type: "auto" },
       seenShareKeys: new Set(),
     })
     expect(result.focusKey).toBe("a:screenShare")
@@ -63,7 +63,7 @@ describe("resolveAutoFocus", () => {
   it("does not re-focus a screen share it already focused once", () => {
     const result = resolveAutoFocus({
       tiles: [share("a"), camera("me", true), camera("a")],
-      manualFocusKey: null,
+      intent: { type: "auto" },
       seenShareKeys: new Set(["a:screenShare"]),
     })
     // And it does not fall through to the one-to-one rule either: yanking the
@@ -75,14 +75,14 @@ describe("resolveAutoFocus", () => {
   it("re-focuses a share that stopped and started again", () => {
     const stopped = resolveAutoFocus({
       tiles: [camera("me", true), camera("a")],
-      manualFocusKey: null,
+      intent: { type: "auto" },
       seenShareKeys: new Set(["a:screenShare"]),
     })
     expect(stopped.seenShareKeys.has("a:screenShare")).toBe(false)
 
     const restarted = resolveAutoFocus({
       tiles: [share("a"), camera("me", true), camera("a")],
-      manualFocusKey: null,
+      intent: { type: "auto" },
       seenShareKeys: stopped.seenShareKeys,
     })
     expect(restarted.focusKey).toBe("a:screenShare")
@@ -91,20 +91,20 @@ describe("resolveAutoFocus", () => {
   it("lets a manual pin win over a new screen share", () => {
     const result = resolveAutoFocus({
       tiles: [share("a"), camera("me", true), camera("b")],
-      manualFocusKey: "b:camera",
+      intent: { type: "pinned", key: "b:camera" },
       seenShareKeys: new Set(),
     })
     expect(result.focusKey).toBe("b:camera")
-    expect(result.clearManualFocus).toBe(false)
+    expect(result.clearIntent).toBe(false)
   })
 
   it("asks to clear a pin whose tile has gone", () => {
     const result = resolveAutoFocus({
       tiles: [camera("me", true), camera("a"), camera("b")],
-      manualFocusKey: "gone:camera",
+      intent: { type: "pinned", key: "gone:camera" },
       seenShareKeys: new Set(),
     })
-    expect(result.clearManualFocus).toBe(true)
+    expect(result.clearIntent).toBe(true)
     expect(result.focusKey).toBeNull()
   })
 })

@@ -59,6 +59,12 @@ export const STRIP_HEIGHT_MIN = 48
 export const STRIP_HEIGHT_MAX = 168
 
 /**
+ * Narrowest a thumbnail may get before the strip drops one and puts the person
+ * in the overflow chip instead. A face below this is a smudge, not a face.
+ */
+export const STRIP_MIN_TILE_WIDTH = 72
+
+/**
  * Above this container aspect ratio the strip moves to the right edge, so the
  * spotlight keeps its height on very wide windows.
  */
@@ -66,11 +72,3 @@ export const STRIP_SIDE_ASPECT = 2.1
 
 /** Hysteresis before an off-page speaker is promoted into the visible page. */
 export const SPEAKER_PROMOTION_HOLD_MS = 2000
-
-/**
- * Below this container aspect ratio the grid stops being a grid: a docked panel
- * is a tall, narrow strip, and stacking faces down it makes every one of them
- * tiny. Past this point the room spotlights whoever is speaking instead, which
- * is what every call product does in a side panel.
- */
-export const SPOTLIGHT_ASPECT = 0.85

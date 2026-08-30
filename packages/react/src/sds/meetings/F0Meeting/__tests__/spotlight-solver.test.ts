@@ -1,10 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import {
-  DEFAULT_ASPECT_RATIO,
-  TILE_ASPECT_MAX,
-  TILE_ASPECT_MIN,
-} from "../layout/constants"
+import { TILE_ASPECT_MAX, TILE_ASPECT_MIN } from "../layout/constants"
 import { solveSpotlight } from "../layout/spotlight-solver"
 
 const RANGE = { min: TILE_ASPECT_MIN, max: TILE_ASPECT_MAX }
@@ -18,7 +14,7 @@ const solve = (input: Partial<Parameters<typeof solveSpotlight>[0]> = {}) =>
     width: PANEL.width,
     height: PANEL.height,
     gap: 8,
-    stripAspect: DEFAULT_ASPECT_RATIO,
+    stripRange: RANGE,
     ...input,
   })
 

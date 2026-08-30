@@ -99,7 +99,7 @@ describe("grid capacity", () => {
         width: box.width,
         height: box.height,
         gap,
-        stripAspect: DEFAULT_ASPECT_RATIO,
+        stripRange: { min: TILE_ASPECT_MIN, max: TILE_ASPECT_MAX },
       })
       // The chip takes the last thumbnail's slot rather than being appended
       // past the edge, which is where it used to land.
@@ -122,7 +122,7 @@ describe("grid capacity", () => {
       width: box.width,
       height: box.height,
       gap,
-      stripAspect: DEFAULT_ASPECT_RATIO,
+      stripRange: { min: TILE_ASPECT_MIN, max: TILE_ASPECT_MAX },
     })
     const hasOverflow = solution.stripOverflow > 0
     const stripSlots = hasOverflow

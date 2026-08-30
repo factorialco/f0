@@ -15,6 +15,7 @@ import { usePersistedState } from "@/lib/persisted-state"
 
 import {
   f0MeetingSurfaceModes,
+  type F0MeetingFocusIntent,
   type F0MeetingSurfaceMode,
   type F0Rect,
 } from "../types"
@@ -86,9 +87,14 @@ export type MeetingSurfaceContextValue = {
    * rather than on top of the whole viewport.
    */
   setFrameRect: (rect: F0Rect | null) => void
-  /** The tile the user pinned, if any. */
-  manualFocusKey: string | null
-  setManualFocusKey: (key: string | null) => void
+  /** What the user asked the spotlight to do, if anything. */
+  focusIntent: F0MeetingFocusIntent
+  setFocusIntent: (intent: F0MeetingFocusIntent) => void
+  /** Whether the in-call side panel is open, and on which tab. */
+  isSidePanelOpen: boolean
+  setSidePanelOpen: (open: boolean) => void
+  activeTabId: string | null
+  setActiveTabId: (id: string) => void
   announce: (message: string) => void
   liveMessage: string
 }
@@ -125,7 +131,11 @@ export const MeetingSurfaceProvider = ({
   const [inlineRect, setInlineRect] = useState<F0Rect | null>(null)
   const [frameRect, setFrameRect] = useState<F0Rect | null>(null)
   const [isDragging, setIsDragging] = useState(false)
-  const [manualFocusKey, setManualFocusKey] = useState<string | null>(null)
+  const [focusIntent, setFocusIntent] = useState<F0MeetingFocusIntent>({
+    type: "auto",
+  })
+  const [isSidePanelOpen, setSidePanelOpen] = useState(false)
+  const [activeTabId, setActiveTabId] = useState<string | null>(null)
   const [liveMessage, setLiveMessage] = useState("")
 
   const {
@@ -223,8 +233,12 @@ export const MeetingSurfaceProvider = ({
       isCompactViewport,
       setInlineRect,
       setFrameRect,
-      manualFocusKey,
-      setManualFocusKey,
+      focusIntent,
+      setFocusIntent,
+      isSidePanelOpen,
+      setSidePanelOpen,
+      activeTabId,
+      setActiveTabId,
       announce,
       liveMessage,
       panelWidth,
@@ -240,7 +254,9 @@ export const MeetingSurfaceProvider = ({
       settle,
       resize,
       isCompactViewport,
-      manualFocusKey,
+      focusIntent,
+      isSidePanelOpen,
+      activeTabId,
       announce,
       liveMessage,
       panelWidth,

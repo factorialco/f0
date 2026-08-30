@@ -25,7 +25,7 @@ const placement = (
   dx: 24,
   dy: 24,
   width: 360,
-  height: 260,
+  height: 340,
   ...overrides,
 })
 
@@ -33,7 +33,7 @@ describe("resolvePlacement", () => {
   it("anchors to the bottom right", () => {
     const rect = resolvePlacement(placement(), VIEWPORT)
     expect(rect.x).toBe(1440 - 24 - 360)
-    expect(rect.y).toBe(900 - 24 - 260)
+    expect(rect.y).toBe(900 - 24 - 340)
   })
 
   it("anchors to the top left", () => {
@@ -85,7 +85,7 @@ describe("settlePlacement", () => {
   })
 
   it("keeps the position when dropped away from any corner", () => {
-    const rect = { x: 600, y: 400, width: 320, height: 240 }
+    const rect = { x: 600, y: 400, width: 320, height: 300 }
     const settled = settlePlacement(rect, VIEWPORT)
     expect(settled.dx).toBeGreaterThan(SNAP_THRESHOLD)
     // Re-anchored, but resolving it returns the same place.
@@ -97,7 +97,7 @@ describe("settlePlacement", () => {
 
 describe("placementFromRect", () => {
   it("round-trips through resolvePlacement for every corner", () => {
-    const rect = { x: 400, y: 300, width: 320, height: 240 }
+    const rect = { x: 400, y: 300, width: 320, height: 300 }
     for (const corner of ["tl", "tr", "bl", "br"] as const) {
       const resolved = resolvePlacement(
         placementFromRect(rect, corner, VIEWPORT),
