@@ -1,5 +1,16 @@
-import { describe, expect, it, vi } from "vitest"
-import { screen, userEvent, zeroRender as render } from "@/testing/test-utils"
+import { beforeEach, describe, expect, it, vi } from "vitest"
+import {
+  screen,
+  userEvent,
+  waitFor,
+  zeroRender as render,
+} from "@/testing/test-utils"
+
+import {
+  AiChatStateProvider,
+  useAiChat,
+} from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
+import type { PendingQuote } from "@/kits/ai/F0AiChat/types"
 
 import { DashboardItem } from "../components/DashboardItem/DashboardItem"
 
@@ -166,5 +177,318 @@ describe("DashboardItem — description action", () => {
       screen.getByRole("button", { name: "Show less" })
     ).toBeInTheDocument()
     expect(screen.queryByText("·")).not.toBeInTheDocument()
+  })
+
+  describe("Ask One", () => {
+    // The chat's open state is persisted, so without this a test inherits
+    // whatever the previous one left behind — and "did the click open it?"
+    // stops meaning anything.
+    beforeEach(() => localStorage.clear())
+
+    const QuoteProbe = ({
+      onCapture,
+    }: {
+      onCapture?: (quote: PendingQuote | null) => void
+    } = {}) => {
+      const { pendingQuote, open } = useAiChat()
+      return (
+        <>
+          <span
+            data-testid="probe"
+            data-quote={pendingQuote?.text ?? ""}
+            data-open={String(open)}
+          />
+          {onCapture && (
+            <button type="button" onClick={() => onCapture(pendingQuote)}>
+              Capture pending quote
+            </button>
+          )}
+        </>
+      )
+    }
+
+    const openMenu = async () => {
+      const trigger = screen.getByLabelText("Other actions")
+      await userEvent.click(trigger)
+      return trigger
+    }
+
+    it("offers the action and hands the widget to the chat", async () => {
+      const onAskAiTarget = vi.fn()
+      const capturePendingQuote = vi.fn()
+      const onFullscreenChange = vi.fn()
+      render(
+        <AiChatStateProvider enabled>
+          <QuoteProbe onCapture={capturePendingQuote} />
+          <DashboardItem
+            title="Headcount by workplace"
+            itemId="headcount"
+            isLoading={false}
+            isFullscreen
+            onAskAiTarget={onAskAiTarget}
+            onFullscreenChange={onFullscreenChange}
+          >
+            <div>Content</div>
+          </DashboardItem>
+        </AiChatStateProvider>
+      )
+
+      const trigger = await openMenu()
+      await userEvent.click(screen.getByText("Ask One"))
+
+      const probe = screen.getByTestId("probe")
+      expect(probe).toHaveAttribute("data-quote", "Headcount by workplace")
+      // Opens the chat too — otherwise the quote lands somewhere unseen.
+      expect(probe).toHaveAttribute("data-open", "true")
+      expect(onAskAiTarget).toHaveBeenCalledWith({
+        id: "headcount",
+        title: "Headcount by workplace",
+        quote: { text: "Headcount by workplace" },
+      })
+      // The composer is not mounted in this harness. Radix must keep its
+      // normal restoration instead of dropping focus on document.body while
+      // the provider buffers the request.
+      await waitFor(() => expect(trigger).toHaveFocus())
+      await userEvent.click(
+        screen.getByRole("button", { name: "Capture pending quote" })
+      )
+      expect(capturePendingQuote.mock.calls[0][0]).toBe(
+        onAskAiTarget.mock.calls[0][0].quote
+      )
+      expect(onFullscreenChange).toHaveBeenCalledWith(false)
+    })
+
+    it("is absent without a chat provider, where the setters are inert", async () => {
+      render(
+        <DashboardItem
+          title="Headcount by workplace"
+          isLoading={false}
+          actions={[{ label: "CSV", onClick: vi.fn() }]}
+        >
+          <div>Content</div>
+        </DashboardItem>
+      )
+
+      await openMenu()
+
+      expect(screen.queryByText("Ask One")).not.toBeInTheDocument()
+      // The rest of the menu is untouched.
+      expect(screen.getByText("Download")).toBeInTheDocument()
+    })
+
+    it("hands the widget to the host instead, when it takes the action", async () => {
+      const onAskAi = vi.fn()
+      const onAskAiTarget = vi.fn()
+      const onFullscreenChange = vi.fn()
+      render(
+        <AiChatStateProvider enabled>
+          <QuoteProbe />
+          <DashboardItem
+            title="Headcount by workplace"
+            itemId="headcount"
+            isLoading={false}
+            isFullscreen
+            onAskAi={onAskAi}
+            onAskAiTarget={onAskAiTarget}
+            onFullscreenChange={onFullscreenChange}
+          >
+            <div>Content</div>
+          </DashboardItem>
+        </AiChatStateProvider>
+      )
+
+      await openMenu()
+      await userEvent.click(screen.getByText("Ask One"))
+
+      expect(onAskAi).toHaveBeenCalledWith({
+        id: "headcount",
+        title: "Headcount by workplace",
+      })
+      expect(onAskAiTarget).not.toHaveBeenCalled()
+      // The chat is left alone entirely — the host may not even be sending the
+      // widget there, so quoting into it would be a second, unasked-for action.
+      const probe = screen.getByTestId("probe")
+      expect(probe).toHaveAttribute("data-quote", "")
+      expect(probe).toHaveAttribute("data-open", "false")
+      expect(onFullscreenChange).not.toHaveBeenCalled()
+    })
+
+    it("offers the action with no chat mounted, once the host answers it", async () => {
+      const onAskAi = vi.fn()
+      render(
+        <DashboardItem
+          title="Headcount by workplace"
+          itemId="headcount"
+          isLoading={false}
+          onAskAi={onAskAi}
+        >
+          <div>Content</div>
+        </DashboardItem>
+      )
+
+      await openMenu()
+      await userEvent.click(screen.getByText("Ask One"))
+
+      expect(onAskAi).toHaveBeenCalledWith({
+        id: "headcount",
+        title: "Headcount by workplace",
+      })
+    })
+
+    it("hides a host-owned action when a direct item has no ID", () => {
+      render(
+        <DashboardItem
+          title="Headcount by workplace"
+          isLoading={false}
+          onAskAi={vi.fn()}
+        >
+          <div>Content</div>
+        </DashboardItem>
+      )
+
+      expect(
+        screen.queryByRole("button", { name: "Other actions" })
+      ).not.toBeInTheDocument()
+    })
+
+    it("keeps Ask One available when the widget data failed", async () => {
+      render(
+        <AiChatStateProvider enabled>
+          <QuoteProbe />
+          <DashboardItem
+            title="Headcount by workplace"
+            isLoading={false}
+            error={new Error("Failed to load")}
+          >
+            <div>Content</div>
+          </DashboardItem>
+        </AiChatStateProvider>
+      )
+
+      await openMenu()
+      await userEvent.click(screen.getByText("Ask One"))
+
+      expect(screen.getByTestId("probe")).toHaveAttribute(
+        "data-quote",
+        "Headcount by workplace"
+      )
+    })
+
+    it("hides the action when the title cannot produce a quote", async () => {
+      render(
+        <AiChatStateProvider enabled>
+          <DashboardItem
+            title="   "
+            isLoading={false}
+            actions={[{ label: "CSV", onClick: vi.fn() }]}
+          >
+            <div>Content</div>
+          </DashboardItem>
+        </AiChatStateProvider>
+      )
+
+      await openMenu()
+
+      expect(screen.queryByText("Ask One")).not.toBeInTheDocument()
+      expect(screen.getByText("Download")).toBeInTheDocument()
+    })
+  })
+})
+
+describe("DashboardItem — header info", () => {
+  const info = {
+    title: "Active headcount",
+    description: "Distinct active employees in the selected snapshot.",
+  }
+
+  it("renders no info trigger when info is omitted", () => {
+    render(
+      <DashboardItem title="Headcount by team" isLoading={false}>
+        <div>Content</div>
+      </DashboardItem>
+    )
+
+    expect(
+      screen.queryByRole("button", { name: "More information" })
+    ).not.toBeInTheDocument()
+  })
+
+  // Not the widget title: a trigger named "Headcount by team" sitting beside
+  // an <h3> that already says "Headcount by team" announces a duplicate and
+  // never says what the control actually does.
+  it("names the info trigger for what it does, not what it describes", () => {
+    render(
+      <DashboardItem title="Headcount by team" info={info} isLoading={false}>
+        <div>Content</div>
+      </DashboardItem>
+    )
+
+    expect(
+      screen.getByRole("button", { name: "More information" })
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole("button", { name: "Headcount by team" })
+    ).not.toBeInTheDocument()
+  })
+
+  it("reveals the member title and description on hover", async () => {
+    const user = userEvent.setup()
+    render(
+      <DashboardItem title="Headcount by team" info={info} isLoading={false}>
+        <div>Content</div>
+      </DashboardItem>
+    )
+
+    await user.hover(screen.getByRole("button", { name: "More information" }))
+
+    expect(
+      await screen.findByText("Active headcount", {}, { timeout: 2000 })
+    ).toBeInTheDocument()
+    expect(
+      await screen.findByText(info.description, {}, { timeout: 2000 })
+    ).toBeInTheDocument()
+  })
+
+  it("calls the link action from the hover card", async () => {
+    const onClick = vi.fn()
+    const user = userEvent.setup()
+    render(
+      <DashboardItem
+        title="Headcount by team"
+        info={{ ...info, link: { label: "Learn more", onClick } }}
+        isLoading={false}
+      >
+        <div>Content</div>
+      </DashboardItem>
+    )
+
+    await user.hover(screen.getByRole("button", { name: "More information" }))
+    await user.click(
+      await screen.findByRole(
+        "button",
+        { name: "Learn more" },
+        { timeout: 2000 }
+      )
+    )
+
+    expect(onClick).toHaveBeenCalledTimes(1)
+  })
+
+  it("keeps the info trigger in the error state", () => {
+    render(
+      <DashboardItem
+        title="Headcount by team"
+        info={info}
+        error={new Error("Failed to load")}
+        isLoading={false}
+      >
+        <div>Content</div>
+      </DashboardItem>
+    )
+
+    // The data failed, but what the widget was meant to measure did not change.
+    expect(
+      screen.getByRole("button", { name: "More information" })
+    ).toBeInTheDocument()
   })
 })

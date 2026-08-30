@@ -26,6 +26,8 @@ export const F0DialogHeader = ({
   navigation,
   resourceHeader,
   controls,
+  headerStatus,
+  dismissable = true,
   tabs,
   activeTabId,
   setActiveTabId,
@@ -89,19 +91,30 @@ export const F0DialogHeader = ({
     )
   }
 
-  const CloseButton = () => (
-    <ButtonInternal
-      variant="outline"
-      icon={CrossIcon}
-      onClick={onClose}
-      label={translations.actions.close}
-      hideLabel
-    />
-  )
+  /** "3 of 11" — which of several things this dialog is currently showing. */
+  const Status = () =>
+    headerStatus ? (
+      <span className="whitespace-nowrap text-f1-foreground-secondary">
+        {headerStatus}
+      </span>
+    ) : null
+
+  // Nothing to close with on a forced choice — a button that did nothing would
+  // be worse than none at all.
+  const CloseButton = () =>
+    dismissable ? (
+      <ButtonInternal
+        variant="outline"
+        icon={CrossIcon}
+        onClick={onClose}
+        label={translations.actions.close}
+        hideLabel
+      />
+    ) : null
 
   const TabsStrip = () =>
     tabs ? (
-      <div className="overflow-hidden">
+      <div className="shrink-0 overflow-hidden">
         <div className="-mx-2">
           <Tabs
             tabs={tabs}
@@ -159,6 +172,7 @@ export const F0DialogHeader = ({
             <Controls />
           </div>
           <div className="flex flex-row items-center gap-2">
+            <Status />
             <Actions />
             <CloseButton />
           </div>
@@ -212,6 +226,7 @@ export const F0DialogHeader = ({
         </div>
         <div className="flex flex-row items-center gap-2">
           {navigation && <PageNavigation {...navigation} />}
+          <Status />
           <Actions />
           {(navigation || otherActions) && <Divider />}
           <CloseButton />

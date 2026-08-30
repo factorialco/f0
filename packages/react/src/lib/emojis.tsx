@@ -5,6 +5,7 @@ import { RefObject, useCallback } from "react"
 import { parse } from "twemoji-parser"
 
 import { useReducedMotion } from "./a11y"
+import { cn } from "./utils"
 
 interface ParseObject {
   url: string
@@ -26,13 +27,52 @@ const emojiVariants = cva({
   },
 })
 
+/**
+ * Font size per box, for the native glyph. An `<img>` fills whatever box it is
+ * given; a character does not — without pinning this it would inherit whatever
+ * the surrounding text happens to be and land at a different size in every
+ * caller. Matched to the box so both modes read as the same weight.
+ */
+const nativeEmojiVariants = cva({
+  variants: {
+    size: {
+      xs: "text-[12px]",
+      sm: "text-[16px]",
+      md: "text-[20px]",
+      lg: "text-[24px]",
+    },
+  },
+  defaultVariants: {
+    size: "sm",
+  },
+})
+
+/**
+ * How an emoji is drawn.
+ *
+ * - `image` (default) swaps it for a twemoji SVG, so every platform shows the
+ *   same picture.
+ * - `native` renders the character and lets the OS draw it, so people see the
+ *   emoji they know from the rest of their machine.
+ *
+ * F0Chat asks for `native`; the rest of F0 stays on `image` for now. Flipping
+ * this default is the single switch that takes the whole design system native.
+ */
+export type EmojiRenderMode = "image" | "native"
+
 export interface EmojiImageProps extends VariantProps<typeof emojiVariants> {
   emoji: string
   alt?: string
+  mode?: EmojiRenderMode
 }
 
-export function EmojiImage({ emoji, size, alt }: EmojiImageProps) {
-  const emojiEntity = parseEmoji(emoji)
+export function EmojiImage({
+  emoji,
+  size,
+  alt,
+  mode = "image",
+}: EmojiImageProps) {
+  const emojiEntity = mode === "native" ? null : parseEmoji(emoji)
 
   const motionProps = {
     initial: { scale: 0.75 },
@@ -41,6 +81,28 @@ export function EmojiImage({ emoji, size, alt }: EmojiImageProps) {
     },
     exit: { scale: 0.75 },
     transition: { duration: 0.6, ease: [0.175, 0.885, 0.32, 1.275] },
+  }
+
+  if (mode === "native") {
+    return (
+      <motion.span
+        key={emoji}
+        // `font-emoji` only ever wraps a lone glyph — never prose, where it
+        // would turn digits, `#` and `™` into pictures. The box matches the
+        // image variant's so swapping modes doesn't move the layout.
+        className={cn(
+          emojiVariants({ size }),
+          nativeEmojiVariants({ size }),
+          "inline-flex items-center justify-center leading-none font-emoji"
+        )}
+        aria-label={alt === "" ? undefined : (alt ?? emoji)}
+        role={alt === "" ? undefined : "img"}
+        aria-hidden={alt === "" ? true : undefined}
+        {...motionProps}
+      >
+        {emoji}
+      </motion.span>
+    )
   }
 
   return emojiEntity ? (

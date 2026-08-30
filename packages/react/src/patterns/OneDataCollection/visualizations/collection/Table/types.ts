@@ -14,6 +14,7 @@ import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
 import { PropertyDefinition } from "../../../property-render"
 import { SummariesDefinition, SummaryKey } from "../../../summary"
 import { CollectionProps } from "../../../types"
+import { DefaultExpandedPolicy } from "./providers/NestedProvider"
 
 export type TableVisualizationSettings = {
   order?: ColId[]
@@ -174,6 +175,29 @@ export type TableVisualizationOptions<
    * The number of columns to freeze on the left
    */
   frozenColumns?: 0 | 1 | 2
+
+  /**
+   * For nested tables, which rows start out expanded before the user touches
+   * anything. Pass `true` for the whole tree, a depth, or a predicate:
+   *
+   * ```ts
+   * defaultExpanded: true                            // everything
+   * defaultExpanded: 2                               // down to depth 2
+   * defaultExpanded: (node) => node.type !== "role"  // stop at roles
+   * ```
+   *
+   * Once the user expands or collapses a row their choice wins for that row and
+   * the policy no longer applies to it. Changing filters, sortings or
+   * navigation filters resets the tree, so the policy applies again and a
+   * filtered view comes back expanded.
+   *
+   * Expanding a row loads its children, so a policy that opens a large tree
+   * costs one `fetchChildren` per opened row on first paint.
+   *
+   * @default false
+   */
+  defaultExpanded?: DefaultExpandedPolicy<R>
+
   /**
    * Allow users to reorder columns (you can only reorder columns that are not frozen) (check cols props to define the order)
    */
@@ -199,8 +223,35 @@ export type TableVisualizationOptions<
    */
   onRemoveColumn?: (columnId: ColId) => void
 
+  /**
+   * The user-managed frozen columns in the column-settings popover. Locked
+   * columns move into a sticky group on the left, stay visible, and cannot be
+   * reordered or removed. Their array order controls their order in that group.
+   * One visible managed column always remains unlocked as the table's
+   * scrollable region; an all-locked input is normalized accordingly.
+   *
+   * Unlocking a column returns it to its saved position. Columns covered by
+   * `frozenColumns` remain permanently locked before this managed group.
+   */
+  lockedColumnIds?: readonly ColId[]
+
+  /**
+   * Called with the complete set of user-managed locked column ids whenever a
+   * user locks or unlocks a column. Passing this callback enables the lock
+   * controls in the column-settings popover.
+   */
+  onLockedColumnIdsChange?: (columnIds: ColId[]) => void
+
   /** Maps a row to a visual variant: `"striped"`, `"striked"`, or `"none"`. */
   referenceRowType?: (item: R) => ReferenceType
+
+  /**
+   * In a table with nested rows, renders the cell text of the root rows
+   * (depth 0) in bold so aggregate rows stand out from their children.
+   * Cells that fix their own weight (tags, deltas) keep it.
+   * @default false
+   */
+  boldRootRows?: boolean
   /**
    * Header group configuration. Keys are the `headerGroupId` values used in
    * column definitions. Pass a string for a plain spanning label, or a

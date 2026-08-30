@@ -216,6 +216,22 @@ function summarize(
   return "Experimental. Complete the checklist below to reach stable."
 }
 
+/** Component naming convention: "F0" followed by an uppercase letter. */
+export const F0_NAME_PATTERN = /^F0[A-Z]/
+
+/**
+ * The component's code name — the leaf of its folder, given its story file
+ * path (a story in `__stories__/` maps to the parent folder). Story titles
+ * legitimately drop the F0 prefix ("Checkbox" ↔ `F0Checkbox/`), so naming is
+ * checked against the folder, which matches the exported symbol.
+ */
+export function componentFolderName(storyFile: string): string {
+  const parts = storyFile.split("/")
+  parts.pop() // the story file itself
+  if (parts[parts.length - 1] === "__stories__") parts.pop()
+  return parts[parts.length - 1] ?? ""
+}
+
 const DOC_QUALITY_ORDER: DocQuality[] = [
   "none",
   "stub",
@@ -252,6 +268,14 @@ export const STABLE_REQUIREMENTS: ReadonlyArray<{
   criteria?: Array<{ label: string; isMet: (c: ComponentEntry) => boolean }>
   isMet: (c: ComponentEntry) => boolean
 }> = [
+  {
+    key: "naming",
+    label: 'Named with the "F0" prefix',
+    detail:
+      'The component folder and exported symbol are "F0" followed by an ' +
+      "uppercase letter (e.g. F0Button).",
+    isMet: (c) => F0_NAME_PATTERN.test(componentFolderName(c.storyFile)),
+  },
   {
     key: "stories",
     label: "Has Storybook stories",

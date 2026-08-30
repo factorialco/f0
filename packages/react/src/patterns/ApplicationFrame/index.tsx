@@ -34,6 +34,11 @@ import { type F0MeetingProviderProps } from "@/sds/meetings/F0Meeting/types"
 import { FrameProvider, SidebarState, useSidebar } from "./FrameProvider"
 
 const CONTENT_TRANSITION = { duration: 0.3, ease: [0, 0, 0.1, 1] }
+// Module-level so the reference is stable across renders. Motion cancels an
+// in-flight animation when it sees a different `transition` and does not
+// restart it, so handing it a fresh object literal each render is a way to
+// strand an animation part-way.
+const INSTANT_TRANSITION = { duration: 0 }
 
 export interface ApplicationFrameProps {
   ai?: Omit<AiChatProviderProps, "children">
@@ -217,11 +222,20 @@ function ApplicationFrameContent({
     panelContent,
     panelContentSide,
     restoringPanelContentId,
+    isResizing,
   } = useAiChat()
   const isAiChatFullscreen = visualizationMode === "fullscreen"
   const isCanvasMode = visualizationMode === "canvas"
   const { open: isAiPromotionChatOpen } = useAiPromotionChat()
   const reservedChatWidth = resizable ? chatWidth : DEFAULT_CHAT_WIDTH
+  // The canvas hugs the seam with the docked chat, so it reserves the chat's
+  // width on that edge. Content marked `coversChat` reserves nothing: it spans
+  // the frame and covers the chat (the canvas layer sits above it), so the
+  // panel keeps its state and its conversation while it is out of view. Note
+  // this is unrelated to `visualizationMode: "fullscreen"`, which is the chat
+  // spanning the frame with no canvas at all.
+  const coversChat = canvasContent?.coversChat === true
+  const reservedCanvasInset = coversChat ? 0 : reservedChatWidth
   // Hosts can dock the whole panel left for a chat-first experience (e.g.
   // communications); the default is right, so the standard layout is unchanged.
   const isPanelLeft = panelSide === "left"
@@ -264,6 +278,21 @@ function ApplicationFrameContent({
       return { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] as const }
     return { duration: 0 }
   }, [isEnteringFullscreen, isExitingFullscreen])
+
+  // Instant while the resize handle is being dragged, eased otherwise.
+  //
+  // The flag flips only on drag start / drag end, which is what makes this
+  // safe. Motion CANCELS an in-flight animation when `transition` changes and
+  // does not restart it (the target is unchanged), stranding the canvas
+  // mid-travel — verified in the browser: the canvas froze part-way across the
+  // chat and stayed there. Keying off the drag never swaps the transition while
+  // an animation is running: a drag holds `{ duration: 0 }` for its whole
+  // duration, and a `coversChat` flip holds the eased curve for its whole
+  // animation. Keying off "is `coversChat` changing" is what does not work — it
+  // swaps the transition one render after starting the animation.
+  const canvasInsetTransition = isResizing
+    ? INSTANT_TRANSITION
+    : CONTENT_TRANSITION
 
   const shouldAutoCloseSidebar = useMediaQuery(
     `(max-width: ${breakpoints.xl}px)`,
@@ -484,7 +513,7 @@ function ApplicationFrameContent({
               {/* Chat */}
               {/* Canvas dashboard panel */}
               {ai?.enabled && isCanvasMode && canvasContent && (
-                <div
+                <motion.div
                   className={cn(
                     // z-[21] sits above the chat wrapper (z-20 in canvas
                     // mode) so the canvas card's seam-side shadow paints
@@ -500,13 +529,20 @@ function ApplicationFrameContent({
                           isPanelLeft ? "right-0" : "left-0"
                         )
                   )}
-                  style={
+                  // Animated on the same curve as the main content's padding, so
+                  // the canvas widens in step with the chat panel collapsing
+                  // instead of snapping across the gap it leaves behind. Both
+                  // edges are always written (motion retains the last animated
+                  // value, so leaving one out would strand a stale inset when
+                  // the viewport crosses the small breakpoint).
+                  animate={
                     isSmallViewport
-                      ? undefined
+                      ? { left: 0, right: 0 }
                       : isPanelLeft
-                        ? { left: reservedChatWidth }
-                        : { right: reservedChatWidth }
+                        ? { left: reservedCanvasInset, right: 0 }
+                        : { left: 0, right: reservedCanvasInset }
                   }
+                  transition={canvasInsetTransition}
                 >
                   <F0CanvasPanel
                     content={canvasContent}
@@ -514,7 +550,7 @@ function ApplicationFrameContent({
                     entities={canvasEntities}
                     side={panelSide}
                   />
-                </div>
+                </motion.div>
               )}
 
               {ai?.enabled &&

@@ -4,12 +4,19 @@ import { zeroRender as render, screen } from "@/testing/test-utils"
 
 import { bubbleCornerClass, ChatBubble } from "../components/ChatBubble"
 import { type F0ChatMessage } from "../types"
+import { formatClock } from "../utils/natural-time"
 import {
   senderBubbleColorClass,
   senderNameColorClass,
 } from "../utils/sender-color"
 
 const now = new Date().toISOString()
+const nowClock = formatClock(new Date(now))
+
+/** Own bubbles stay on the neutral token — the `-secondary` step, since the
+ * `-tertiary` 4% no longer separates from the transcript next to the sender
+ * tints. */
+const OWN_BUBBLE_SURFACE = "bg-f1-background-secondary"
 
 const makeMessage = (body: string): F0ChatMessage => ({
   id: "m1",
@@ -26,24 +33,20 @@ describe("ChatBubble emoji rendering", () => {
     expect(screen.queryByRole("img")).not.toBeInTheDocument()
   })
 
-  it("swaps an emoji in the body for a twemoji SVG, keeping the text", () => {
+  it("leaves an emoji in the body as text for the OS to draw", () => {
     render(<ChatBubble message={makeMessage("hi 👋 there")} isMine={false} />)
-    const img = screen.getByRole("img")
-    expect(img).toHaveAttribute("alt", "👋")
-    expect(img.getAttribute("src")).toContain(
-      "cdn.jsdelivr.net/gh/twitter/twemoji"
-    )
-    // The text either side of the emoji survives (the glyph is now an image,
-    // so it no longer contributes to text content; whitespace is normalized).
-    expect(screen.getByText(/hi/)).toHaveTextContent("hi there")
+    // The glyph stays in the text content — no <img>, no network request, and
+    // the reader gets the emoji their own machine draws.
+    expect(screen.getByText("hi 👋 there")).toBeInTheDocument()
+    expect(screen.queryByRole("img")).not.toBeInTheDocument()
   })
 
-  it("renders one image per emoji when several are present", () => {
-    render(
-      <ChatBubble message={makeMessage("🎉 ship it 🚀🔥")} isMine={false} />
-    )
-    const imgs = screen.getAllByRole("img")
-    expect(imgs.map((i) => i.getAttribute("alt"))).toEqual(["🎉", "🚀", "🔥"])
+  it("keeps multi-codepoint sequences intact", () => {
+    // A ZWJ family and a skin-tone modifier both survive as single characters:
+    // splitting them is what produces the "man + woman + girl + boy" render.
+    render(<ChatBubble message={makeMessage("👨‍👩‍👧‍👦 ship it 👋🏽")} isMine={false} />)
+    expect(screen.getByText("👨‍👩‍👧‍👦 ship it 👋🏽")).toBeInTheDocument()
+    expect(screen.queryByRole("img")).not.toBeInTheDocument()
   })
 })
 
@@ -62,8 +65,8 @@ describe("ChatBubble sender colour", () => {
     render(<ChatBubble message={message} isMine />)
 
     const bubble = screen.getByText("hello").closest(".rounded-2xl")
-    expect(bubble).toHaveClass("bg-f1-background-tertiary")
-    expect(bubble).not.toHaveClass("bg-f1-background-secondary")
+    expect(bubble).toHaveClass(OWN_BUBBLE_SURFACE)
+    expect(bubble).not.toHaveClass("bg-f1-background-tertiary")
     expect(bubble).not.toHaveClass(senderBubbleColorClass(message.author))
   })
 
@@ -72,8 +75,8 @@ describe("ChatBubble sender colour", () => {
     render(<ChatBubble message={message} isMine />)
 
     const bubble = screen.getByText("Message deleted")
-    expect(bubble).toHaveClass("bg-f1-background-tertiary")
-    expect(bubble).not.toHaveClass("bg-f1-background-secondary")
+    expect(bubble).toHaveClass(OWN_BUBBLE_SURFACE)
+    expect(bubble).not.toHaveClass("bg-f1-background-tertiary")
   })
 
   it("keeps failed message content at full opacity", () => {
@@ -143,12 +146,29 @@ describe("ChatBubble chained corners", () => {
     )
   })
 
-  it("keeps all corners rounded for a lone message (others, left)", () => {
+  // A lone message is a run of one, so it ends a stack and carries the point.
+  it("pulls in the bottom tail corner of a lone message (others, left)", () => {
     const { container } = render(
-      <ChatBubble message={makeMessage("hi")} isMine={false} />
+      <ChatBubble message={makeMessage("hi")} isMine={false} hasAvatar />
     )
+    expect(container.querySelector(".rounded-bl-2xs")).toBeInTheDocument()
     expect(container.querySelector(".rounded-tl-sm")).not.toBeInTheDocument()
     expect(container.querySelector(".rounded-bl-sm")).not.toBeInTheDocument()
+  })
+
+  // The point aims at the face it belongs to. With an empty gutter — a DM, or
+  // your own side of any conversation — it has nothing to point at and reads
+  // as a chipped corner, so the run ends on the base radius instead.
+  it("ends the run on the base radius when no avatar sits beside it", () => {
+    const others = render(<ChatBubble message={makeMessage("hi")} isMine />)
+    expect(others.container.querySelector(".rounded-br-2xs")).toBeNull()
+    expect(others.container.querySelector(".rounded-br-sm")).toBeNull()
+
+    const mine = render(
+      <ChatBubble message={makeMessage("hi")} isMine={false} />
+    )
+    expect(mine.container.querySelector(".rounded-bl-2xs")).toBeNull()
+    expect(mine.container.querySelector(".rounded-bl-sm")).toBeNull()
   })
 
   it("tucks only the bottom for the first of a run (others, left)", () => {
@@ -162,6 +182,8 @@ describe("ChatBubble chained corners", () => {
     )
     expect(container.querySelector(".rounded-bl-sm")).toBeInTheDocument()
     expect(container.querySelector(".rounded-tl-sm")).not.toBeInTheDocument()
+    // The point belongs to the END of the run, not its start.
+    expect(container.querySelector(".rounded-bl-2xs")).not.toBeInTheDocument()
   })
 
   it("tucks both corners for a middle message (others, left)", () => {
@@ -177,16 +199,18 @@ describe("ChatBubble chained corners", () => {
     expect(container.querySelector(".rounded-bl-sm")).toBeInTheDocument()
   })
 
-  it("tucks only the top for the last of a run (others, left)", () => {
+  it("tucks the top and pulls in the bottom for the last of a run (others, left)", () => {
     const { container } = render(
       <ChatBubble
         message={makeMessage("hi")}
         isMine={false}
         isFirstOfRun={false}
         isLastOfRun
+        hasAvatar
       />
     )
     expect(container.querySelector(".rounded-tl-sm")).toBeInTheDocument()
+    expect(container.querySelector(".rounded-bl-2xs")).toBeInTheDocument()
     expect(container.querySelector(".rounded-bl-sm")).not.toBeInTheDocument()
   })
 
@@ -200,14 +224,45 @@ describe("ChatBubble chained corners", () => {
       first.container.querySelector(".rounded-tr-sm")
     ).not.toBeInTheDocument()
 
-    // Last of a run: top-right tucked, bottom-right rounded again.
+    // Last of a run: top-right tucked, bottom-right squared — the point only
+    // when something (an avatar) sits on that side.
     const last = render(
-      <ChatBubble message={makeMessage("hi")} isMine isFirstOfRun={false} />
+      <ChatBubble
+        message={makeMessage("hi")}
+        isMine
+        isFirstOfRun={false}
+        hasAvatar
+      />
     )
     expect(last.container.querySelector(".rounded-tr-sm")).toBeInTheDocument()
+    expect(last.container.querySelector(".rounded-br-2xs")).toBeInTheDocument()
     expect(
       last.container.querySelector(".rounded-br-sm")
     ).not.toBeInTheDocument()
+  })
+
+  // The point exists on exactly one bubble per run, so the outer hover surface
+  // has to follow it or the 2px frame would bulge around it. This is the one
+  // corner that takes the inner radius rather than inner + 2.
+  it("keeps the outer surface on the same radius as the end corner", () => {
+    expect(
+      bubbleCornerClass({
+        isMine: false,
+        isFirstOfRun: false,
+        isLastOfRun: true,
+        hasAvatar: true,
+        layer: "outer",
+      }).split(" ")
+    ).toEqual(expect.arrayContaining(["rounded-[22px]", "rounded-bl-2xs"]))
+    expect(
+      bubbleCornerClass({
+        isMine: true,
+        isFirstOfRun: false,
+        isLastOfRun: true,
+        hasAvatar: true,
+        layer: "outer",
+      }).split(" ")
+    ).toEqual(expect.arrayContaining(["rounded-[22px]", "rounded-br-2xs"]))
   })
 })
 
@@ -247,22 +302,74 @@ describe("ChatBubble body links", () => {
   })
 })
 
-describe("ChatBubble edited marker", () => {
-  it("shows the muted 'edited' label when the message has been edited", () => {
+describe("ChatBubble meta cluster", () => {
+  it("pins the time to the end of the message, after the text", () => {
+    const { container } = render(
+      <ChatBubble message={makeMessage("hello")} isMine={false} />
+    )
+    const meta = screen.getByTestId("chat-message-time")
+    expect(meta).toHaveTextContent(nowClock)
+    expect(meta).toHaveClass(
+      "absolute",
+      "bottom-2.5",
+      "right-3",
+      "text-f1-foreground-tertiary"
+    )
+    // Never announced: the transcript has exactly one live region.
+    expect(meta).toHaveAttribute("aria-hidden", "true")
+
+    // An invisible twin trails the body and reserves the pinned copy's width,
+    // so the time either finishes the last line or wraps onto its own.
+    const reserve = screen.getByTestId("chat-message-time-reserve")
+    expect(reserve).toHaveTextContent(nowClock)
+    expect(reserve).toHaveClass("invisible", "inline-block")
+    // Same type scale, or the reserved gap is too narrow.
+    expect(reserve.className).toContain("text-xs")
+    expect(meta.className).toContain("text-xs")
+
+    // Order matters: the reserve must come AFTER the body text.
+    const body = container.querySelector(".relative.px-3\\.5")
+    expect(body?.textContent?.indexOf("hello")).toBeLessThan(
+      body?.textContent?.lastIndexOf(nowClock) ?? -1
+    )
+  })
+
+  it("pairs 'edited' with the time in a single cluster", () => {
     render(
       <ChatBubble
         message={{ ...makeMessage("updated text"), editedAt: now }}
         isMine
       />
     )
-    expect(screen.getByText("edited")).toHaveClass(
-      "text-f1-foreground-secondary"
+    expect(screen.getByTestId("chat-message-time")).toHaveTextContent(
+      `edited · ${nowClock}`
     )
+  })
+
+  it("repeats the cluster for assistive tech in reading order", () => {
+    const { container } = render(
+      <ChatBubble
+        message={{ ...makeMessage("updated text"), editedAt: now }}
+        isMine
+      />
+    )
+    const srOnly = container.querySelector(".sr-only")
+    expect(srOnly).toHaveTextContent(`edited · ${nowClock}`)
+  })
+
+  it("trims trailing newlines so the float isn't stranded above blank lines", () => {
+    const { container } = render(
+      <ChatBubble message={makeMessage("hello\n\n\n")} isMine={false} />
+    )
+    expect(container.textContent).toContain("hello")
+    expect(container.textContent).not.toContain("hello\n")
   })
 
   it("does not show 'edited' on an unedited message", () => {
     render(<ChatBubble message={makeMessage("hello")} isMine={false} />)
-    expect(screen.queryByText("edited")).not.toBeInTheDocument()
+    expect(screen.getByTestId("chat-message-time")).toHaveTextContent(
+      new RegExp(`^${nowClock}$`)
+    )
   })
 
   it("does not show 'edited' on a deleted tombstone", () => {
@@ -276,6 +383,8 @@ describe("ChatBubble edited marker", () => {
         isMine
       />
     )
-    expect(screen.queryByText("edited")).not.toBeInTheDocument()
+    expect(screen.getByTestId("chat-message-time")).toHaveTextContent(
+      new RegExp(`^${nowClock}$`)
+    )
   })
 })

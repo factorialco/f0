@@ -27,29 +27,44 @@ import type {
 import {
   BACKGROUND_DOT_GAP,
   COLLAPSER_OFFSET_ADJUSTMENT_BY_ZOOM,
+  STACKED_NODE_HEIGHT,
 } from "../constants"
 import {
   EXPANDER_Y_OFFSET_BY_ZOOM,
+  EXPANDER_Y_OFFSET_STACKED_BY_ZOOM,
   type CollapserNodeData,
   type ExpanderNodeData,
   type GraphNodeData,
+  type StackGroupData,
 } from "../internal/ReactFlowAdapters"
 import {
   collectVisibleNodes,
   computeLayoutBounds,
+  computeStackGroups,
   deriveEdgesFromTree,
   nodeIntersectsRect,
+  resolveStackedParents,
+  type StackHoverZone,
 } from "../utils"
 import { useLayoutEngine } from "./useLayoutEngine"
 import { useViewportGeometry } from "./useViewportGeometry"
 
-// Extra vertical room for the tags below the pill. Each row of small F0Tag
-// pills is ~`TAG_ROW_HEIGHT`; when several tag types are visible they wrap to
-// multiple rows, so we reserve height per estimated row to keep the expander
-// (and the next rank) below the metadata instead of overlapping it.
-const TAG_ROW_HEIGHT = 36
+// Extra vertical room for the tags below the pill, so the expander (and the
+// next rank) sits under the metadata instead of overlapping it. The three
+// numbers are not estimates — they are what the tag block actually renders:
+// the container's `gap-1.5` to the shape above it, one `F0Tag` pill per wrapped
+// line, and the `gap-1` between those lines. Keeping them exact is what lets a
+// stacked column's wrapper hug its rows (it derives its box from them, see
+// `stackGroups`); an over-estimate would show up as dead space at its bottom
+// edge and as uneven gaps between the rows.
+const TAG_BLOCK_GAP = 6
+const TAG_LINE_HEIGHT = 26
+const TAG_LINE_GAP = 4
+// How many pills fit on one line. Still an estimate: it holds for short pills
+// and under-reserves for wide ones, which then wrap past the reserved room.
 const ESTIMATED_TAGS_PER_ROW = 2
 
+/** Geometry of one stacked column's group node, plus its rows' offsets in it. */
 interface UseGraphRenderModelOptions<T> {
   roots: TreeNode<T>[]
   nodeMap: Map<string, TreeNode<T>>
@@ -71,6 +86,8 @@ interface UseGraphRenderModelOptions<T> {
   reserveTagRow?: boolean
   nodeWidthProp?: number
   nodeHeightProp?: number
+  stackedNodeHeightProp?: number
+  stackedNodeGapProp?: number
   layoutEngineProp?: LayoutEngine
   zoomLevel: ZoomLevel
   direction: LayoutDirection
@@ -101,10 +118,24 @@ export interface UseGraphRenderModelResult<T> {
   renderedNodeCount: number
   /** Ids of those `graphNode`s — for viewport-driven data loading. */
   renderedNodeIds: string[]
+  /**
+   * Ids of the rendered `graphNode`s with no rendered parent (roots, plus nodes
+   * whose parent is windowed out). The `role="tree"` container `aria-owns` these
+   * so every rendered `role="treeitem"` has exactly one owner across React
+   * Flow's `role="application"` wrapper.
+   */
+  treeRootNodeIds: string[]
   /** Bounding box of the full layout (`null` when empty), for fit-view. */
   contentBounds: { x: number; y: number; width: number; height: number } | null
   /** Layout position of a node id, regardless of whether it is windowed out. */
   getNodePosition: (id: string) => PositionedNode | undefined
+  /**
+   * One region per stacked parent, covering its card, the lane and its column.
+   * Feeds the pointer test that reveals that parent's collapse affordance from
+   * anywhere inside the column. Not filtered by windowing: a column whose
+   * affordance is windowed out has nothing to reveal.
+   */
+  stackHoverZones: StackHoverZone[]
 }
 
 /**
@@ -126,6 +157,8 @@ export function useGraphRenderModel<T>({
   reserveTagRow,
   nodeWidthProp,
   nodeHeightProp,
+  stackedNodeHeightProp,
+  stackedNodeGapProp,
   layoutEngineProp,
   zoomLevel,
   direction,
@@ -197,6 +230,23 @@ export function useGraphRenderModel<T>({
     return map
   }, [visibleTreeNodes, expandedNodes])
 
+  // ── Stacked groups ── Single source of truth for "does this group stack?",
+  // shared by the layout input, the edge pass and the node render context.
+  //
+  // Only the built-in engine can produce a column: `LayoutResult` has no way to
+  // express one, so a custom engine fans the rows out horizontally instead. The
+  // group box would then span that whole fan and the hover zones derived from it
+  // would swallow the neighbouring parents' cards, breaking the "zones cannot
+  // overlap" invariant they are looked up under. A consumer who supplies their
+  // own engine gets the plain fan-out rather than a broken column.
+  const { stackedParentIds, stackedNodeIndex } = useMemo(
+    () =>
+      layoutEngineProp
+        ? { stackedParentIds: new Set<string>(), stackedNodeIndex: new Map() }
+        : resolveStackedParents(visibleTreeNodes),
+    [visibleTreeNodes, layoutEngineProp]
+  )
+
   // ── Edges ──
   const resolvedEdges = useMemo((): GraphEdge[] => {
     if (resolvedEdgesProp && resolvedEdgesProp.length > 0)
@@ -261,8 +311,19 @@ export function useGraphRenderModel<T>({
       childrenCount: 0,
       childrenLoaded: true,
     }))
-    return [...visibleTreeNodes, ...expanderTreeNodes]
-  }, [visibleTreeNodes, expanderNodes])
+    // Hand the engine the RESOLVED flag, never the raw request: a group whose
+    // children can expand falls back to the normal fan-out, and the engine must
+    // not see `stackNodes` on it (it would lay the children out as a column
+    // with nowhere to hang their subtrees). Copies are made only for the nodes
+    // whose flag actually changes, so identity — and the layout memo — holds for
+    // every other node.
+    const treeNodes = visibleTreeNodes.map((node) => {
+      const stacked = stackedParentIds.has(node.id)
+      if (Boolean(node.stackNodes) === stacked) return node
+      return { ...node, stackNodes: stacked }
+    })
+    return [...treeNodes, ...expanderTreeNodes]
+  }, [visibleTreeNodes, expanderNodes, stackedParentIds])
 
   // ── Layout edges: include expander edges so the engine sees the full graph ──
   const layoutEdges = useMemo(() => visibleEdges, [visibleEdges])
@@ -272,6 +333,14 @@ export function useGraphRenderModel<T>({
   // when `reserveTagRow` is explicitly set (e.g. tags rendered via
   // `renderNode` without using the popover). Inflating the box otherwise
   // would push the source handle and the expander below the pill.
+  // Deliberately NOT gated on the zoom level, even though tags only render at
+  // detail. Reserving the row at every zoom keeps the geometry identical across
+  // zoom levels: nothing reflows when a threshold is crossed, and the expand /
+  // collapse affordance — placed from the bottom of this box — stays in exactly
+  // the same place. The cost is that at compact/dot a card's box is taller than
+  // the card it draws, so the affordance hangs further below it there. Gating
+  // this on zoom instead tightens the layout at compact, which snaps the rows of
+  // a stacked column together and reads as the column collapsing.
   const tagsAffectLayout =
     reserveTagRow ?? (nodeTagTypes ? visibleTagTypesSet.size > 0 : false)
   // Same-type tags collapse to a single pill, so the visible tag-type count is
@@ -280,12 +349,25 @@ export function useGraphRenderModel<T>({
   const tagRowCount = tagsAffectLayout
     ? Math.max(1, Math.ceil(visibleTagCount / ESTIMATED_TAGS_PER_ROW))
     : 0
-  const reservedTagHeight = tagRowCount * TAG_ROW_HEIGHT
+  const reservedTagHeight =
+    tagRowCount > 0
+      ? TAG_BLOCK_GAP +
+        tagRowCount * TAG_LINE_HEIGHT +
+        (tagRowCount - 1) * TAG_LINE_GAP
+      : 0
   const effectiveNodeHeight = (nodeHeightProp ?? 56) + reservedTagHeight
+  // A stacked row's band takes the same tag reservation as a card's rect. The
+  // strip itself stays `stackedNodeHeight` (the render config publishes that
+  // untouched); the extra room is where the tags below it go, so the next row
+  // starts under them instead of on top of them.
+  const effectiveStackedHeight =
+    (stackedNodeHeightProp ?? STACKED_NODE_HEIGHT) + reservedTagHeight
 
   const builtInEngine = useLayoutEngine({
     nodeWidth: nodeWidthProp,
     nodeHeight: effectiveNodeHeight,
+    stackedNodeHeight: effectiveStackedHeight,
+    stackedNodeGap: stackedNodeGapProp,
     snapGrid: BACKGROUND_DOT_GAP,
   })
   const layoutEngine = layoutEngineProp ?? builtInEngine
@@ -299,6 +381,49 @@ export function useGraphRenderModel<T>({
     () => new Map(layout.nodes.map((pn) => [pn.id, pn])),
     [layout.nodes]
   )
+
+  // ── Stacked columns as React Flow sub-flows ──
+  // The geometry itself lives in `computeStackGroups`; this only memoizes it.
+  const stackGroups = useMemo(
+    () =>
+      computeStackGroups(
+        visibleTreeNodes,
+        stackedNodeIndex,
+        positionMap,
+        direction
+      ),
+    [visibleTreeNodes, stackedNodeIndex, positionMap, direction]
+  )
+
+  // One region per stacked parent: its card unioned with its column, which makes
+  // the lane between them part of the same rect. Whoever owns the pointer uses
+  // this to reveal that parent's collapse affordance while the pointer is
+  // anywhere inside — the card, the lane, a row, a gap between rows or the
+  // group's padding all answer with the same id, so crossing between them is not
+  // a state change (see [[findStackHoverZoneAt]] for why this is geometry rather
+  // than a CSS hover).
+  //
+  // The group's y is used raw, matching how `rfNodes` places the group node at
+  // `group.y * yStretch` with `yStretch` fixed at 1. If that ever becomes a real
+  // scale, apply it here too.
+  const stackHoverZones = useMemo((): StackHoverZone[] => {
+    const zones: StackHoverZone[] = []
+    for (const [parentId, group] of stackGroups.groups) {
+      const parent = positionMap.get(parentId)
+      if (!parent) continue
+      const minX = Math.min(parent.x, group.x)
+      const minY = Math.min(parent.y, group.y)
+      zones.push({
+        parentId,
+        x: minX,
+        y: minY,
+        width: Math.max(parent.x + parent.width, group.x + group.width) - minX,
+        height:
+          Math.max(parent.y + parent.height, group.y + group.height) - minY,
+      })
+    }
+    return zones
+  }, [stackGroups, positionMap])
 
   // Bounding box of the whole layout, so fit-view / fly-to can target the full
   // graph even when windowing has removed off-screen nodes from React Flow.
@@ -322,6 +447,9 @@ export function useGraphRenderModel<T>({
   // Scales per zoom level (+100% each step) so the larger expander button remains
   // visually centered in its lane.
   const EXPANDER_Y_OFFSET = EXPANDER_Y_OFFSET_BY_ZOOM[zoomLevel]
+  // A stacked column hangs in a shortened lane, so its affordance is centered
+  // in that shorter gap instead of the full rank one.
+  const EXPANDER_Y_OFFSET_STACKED = EXPANDER_Y_OFFSET_STACKED_BY_ZOOM[zoomLevel]
   const COLLAPSER_OFFSET_ADJUSTMENT =
     COLLAPSER_OFFSET_ADJUSTMENT_BY_ZOOM[zoomLevel]
 
@@ -453,6 +581,17 @@ export function useGraphRenderModel<T>({
         ids.add(edge.target)
       }
     }
+
+    // A stacked row's connector comes from the row ABOVE it, not from the parent
+    // card (see the chain in `rfEdges`), and a sibling row is not on anyone's
+    // ancestry path — so neither pass above rescues it. Without this, scrolling a
+    // long column so its middle is on screen leaves the topmost visible row's
+    // connector pointing at a row React Flow never received, and the segment
+    // silently disappears. Bounded by one extra row per windowed row.
+    for (const id of Array.from(ids)) {
+      const above = stackGroups.previousRow.get(id)
+      if (above) ids.add(above)
+    }
     return ids
   }, [
     enableNodeWindowing,
@@ -462,6 +601,7 @@ export function useGraphRenderModel<T>({
     nodeWidthProp,
     effectiveNodeHeight,
     nodeMap,
+    stackGroups,
   ])
 
   // Identity-stable projections of tree nodes into the shape node wrappers
@@ -517,30 +657,64 @@ export function useGraphRenderModel<T>({
     // offsets lets React Flow derive the endpoint immediately; the real measured
     // handle bounds take over once the node's DOM mounts. Node dimensions are
     // supplied below (`width`/`height`) so the node also counts as "initialized".
-    const handleOffset = (p: Position): { x: number; y: number } =>
-      p === Position.Top
-        ? { x: BASE_W / 2, y: 0 }
-        : p === Position.Bottom
-          ? { x: BASE_W / 2, y: BASE_H }
-          : p === Position.Left
-            ? { x: 0, y: BASE_H / 2 }
-            : { x: BASE_W, y: BASE_H / 2 }
-    const graphNodeHandles = [
-      {
-        type: "source" as const,
-        position: sourcePos,
-        ...handleOffset(sourcePos),
-        width: 1,
-        height: 1,
-      },
-      {
-        type: "target" as const,
-        position: targetPos,
-        ...handleOffset(targetPos),
-        width: 1,
-        height: 1,
-      },
-    ] as RFNode["handles"]
+    //
+    // Built per box size rather than once, because a stacked row is shorter
+    // than a node card — seeding it with the card's height would anchor its
+    // handles below the row and bend the trunk edge into it.
+    const handlesForBox = (w: number, h: number): RFNode["handles"] => {
+      const handleOffset = (p: Position): { x: number; y: number } =>
+        p === Position.Top
+          ? { x: w / 2, y: 0 }
+          : p === Position.Bottom
+            ? { x: w / 2, y: h }
+            : p === Position.Left
+              ? { x: 0, y: h / 2 }
+              : { x: w, y: h / 2 }
+      return [
+        {
+          type: "source" as const,
+          position: sourcePos,
+          ...handleOffset(sourcePos),
+          width: 1,
+          height: 1,
+        },
+        {
+          type: "target" as const,
+          position: targetPos,
+          ...handleOffset(targetPos),
+          width: 1,
+          height: 1,
+        },
+      ] as RFNode["handles"]
+    }
+    const graphNodeHandles = handlesForBox(BASE_W, BASE_H)
+
+    // React Flow requires a parent node to appear BEFORE its children in the
+    // nodes array, so the groups are collected separately and prepended below.
+    // A group is materialized whenever any of its rows is — a child pointing at
+    // a `parentId` React Flow does not know about would be dropped.
+    const groupNodes: RFNode[] = []
+    for (const group of stackGroups.groups.values()) {
+      if (![...group.rows.keys()].some(inWindow)) continue
+      groupNodes.push({
+        id: group.id,
+        type: "stackGroup",
+        position: { x: group.x, y: group.y * yStretch },
+        width: group.width,
+        height: group.height,
+        // Decorative: it must not take focus, selection or drags away from the
+        // rows sitting on top of it.
+        selectable: false,
+        draggable: false,
+        focusable: false,
+        zIndex: 0,
+        targetPosition: targetPos,
+        ...(windowingActive
+          ? { handles: handlesForBox(group.width, group.height) }
+          : null),
+        data: { direction } as StackGroupData,
+      })
+    }
 
     const nodes: RFNode[] = []
 
@@ -587,21 +761,56 @@ export function useGraphRenderModel<T>({
         visibleChildIds = kept.length > 0 ? kept : undefined
       }
 
+      // A stacked row carries its own (shorter) box from the layout; every
+      // other node uses the shared card size. As a sub-flow child its box is
+      // the group-relative one, already narrowed to the width it paints.
+      const isStacked = stackedNodeIndex.has(treeNode.id)
+      const groupId = stackGroups.groupOf.get(treeNode.id)
+      const rowBox = groupId
+        ? stackGroups.groups.get(treeNode.parentId ?? "")?.rows.get(treeNode.id)
+        : undefined
+      const boxW = rowBox
+        ? rowBox.width
+        : isStacked
+          ? (pos?.width ?? BASE_W)
+          : BASE_W
+      const boxH = rowBox
+        ? rowBox.height
+        : isStacked
+          ? (pos?.height ?? BASE_H)
+          : BASE_H
+
       nodes.push({
         id: treeNode.id,
         type: "graphNode",
-        position: {
-          x: pos?.x ?? 0,
-          y: (pos?.y ?? 0) * yStretch,
-        },
-        width: BASE_W,
+        // A sub-flow child's position is relative to its group's top-left; every
+        // other node is absolute.
+        //
+        // Deliberately no `extent: "parent"`. It would keep a row inside its
+        // wrapper, but nothing can move these nodes (`nodesDraggable={false}`),
+        // so the only thing it constrains is a row that paints TALLER than the
+        // band the layout reserved — and it constrains it by clamping the row's
+        // position back inside the box, which jumps the row up onto the one above
+        // it. Overflowing past the band is the same failure mode a card already
+        // has, and it stays local to the row instead of moving it.
+        ...(rowBox && groupId ? { parentId: groupId } : null),
+        position: rowBox
+          ? { x: rowBox.x, y: rowBox.y }
+          : {
+              x: pos?.x ?? 0,
+              y: (pos?.y ?? 0) * yStretch,
+            },
+        width: boxW,
         // Only while windowing drives the render: seed the node's size and port
         // handles so React Flow can route its edges on the commit it is added,
         // before the DOM is measured (otherwise a freshly windowed-in node's
         // connecting lines drop for that frame). Omitted when windowing is off so
         // React Flow's own viewport culling keeps its original behavior.
         ...(windowingActive
-          ? { height: BASE_H, handles: graphNodeHandles }
+          ? {
+              height: boxH,
+              handles: isStacked ? handlesForBox(boxW, boxH) : graphNodeHandles,
+            }
           : null),
         sourcePosition: sourcePos,
         targetPosition: targetPos,
@@ -612,6 +821,7 @@ export function useGraphRenderModel<T>({
           ariaSetSize: aria?.setSize ?? 1,
           ariaPosInSet: aria?.posInSet ?? 1,
           visibleChildIds,
+          stacked: isStacked || undefined,
         } as GraphNodeData,
       })
     }
@@ -629,15 +839,18 @@ export function useGraphRenderModel<T>({
       }
       const pw = parentNode.width ?? BASE_W
       const ph = parentNode.height ?? BASE_H
+      const laneOffset = stackedParentIds.has(exp.parentId)
+        ? EXPANDER_Y_OFFSET_STACKED
+        : EXPANDER_Y_OFFSET
       const expX = isHorizontal
         ? direction === "LR"
-          ? parentNode.x + pw + EXPANDER_Y_OFFSET
+          ? parentNode.x + pw + laneOffset
           : parentNode.x - pw
         : parentNode.x
       const expY = isHorizontal
         ? parentNode.y * yStretch
         : direction === "TB"
-          ? parentNode.y * yStretch + ph + EXPANDER_Y_OFFSET
+          ? parentNode.y * yStretch + ph + laneOffset
           : parentNode.y * yStretch - ph
       nodes.push({
         id: exp.id,
@@ -666,15 +879,18 @@ export function useGraphRenderModel<T>({
       const py = parentPos?.y ?? 0
       const pw = parentPos?.width ?? BASE_W
       const ph = parentPos?.height ?? BASE_H
+      const laneOffset = stackedParentIds.has(parent.id)
+        ? EXPANDER_Y_OFFSET_STACKED
+        : EXPANDER_Y_OFFSET
       const colX = isHorizontal
         ? direction === "LR"
-          ? px + pw + EXPANDER_Y_OFFSET + COLLAPSER_OFFSET_ADJUSTMENT
+          ? px + pw + laneOffset + COLLAPSER_OFFSET_ADJUSTMENT
           : px - pw
         : px
       const colY = isHorizontal
         ? py * yStretch
         : direction === "TB"
-          ? py * yStretch + ph + EXPANDER_Y_OFFSET + COLLAPSER_OFFSET_ADJUSTMENT
+          ? py * yStretch + ph + laneOffset + COLLAPSER_OFFSET_ADJUSTMENT
           : py * yStretch - ph
       nodes.push({
         id: `collapser-${parent.id}`,
@@ -687,24 +903,29 @@ export function useGraphRenderModel<T>({
           parentId: parent.id,
           parentWidth: BASE_W,
           collapseLabel: controlLabels?.collapseChildren,
+          stacked: stackedParentIds.has(parent.id),
         } as CollapserNodeData,
       })
     }
 
-    return nodes
+    return [...groupNodes, ...nodes]
   }, [
     windowedIds,
     positionMap,
+    stackGroups,
     visibleTreeNodes,
     expanderNodes,
     expandedNodes,
     stableRenderNode,
     EXPANDER_Y_OFFSET,
+    EXPANDER_Y_OFFSET_STACKED,
     COLLAPSER_OFFSET_ADJUSTMENT,
+    stackedParentIds,
     nodeWidthProp,
     effectiveNodeHeight,
     direction,
     ariaTreeInfo,
+    stackedNodeIndex,
     controlLabels?.collapseChildren,
   ])
 
@@ -715,6 +936,25 @@ export function useGraphRenderModel<T>({
     [rfNodes]
   )
 
+  // Forest roots among the rendered treeitems: a rendered node whose parent is
+  // not itself rendered — either it has no parent, or the parent is windowed
+  // out. React Flow wraps its nodes in a `role="application"` div, so the
+  // `role="tree"` container can't reach any `role="treeitem"` through the DOM;
+  // it re-owns these ids via `aria-owns` instead. In-window parents already
+  // re-own their in-window children (`visibleChildIds` above), so owning the
+  // forest roots here gives every rendered treeitem exactly one owner and leaves
+  // none orphaned under windowing.
+  const treeRootNodeIds = useMemo(() => {
+    const rendered = new Set(renderedNodeIds)
+    return rfNodes
+      .filter((n) => n.type === "graphNode")
+      .filter((n) => {
+        const { parentId } = (n.data as GraphNodeData).graphNode
+        return parentId == null || !rendered.has(parentId)
+      })
+      .map((n) => n.id)
+  }, [rfNodes, renderedNodeIds])
+
   // ── Build React Flow edges ──
   const rfEdges = useMemo((): RFEdge[] => {
     // Parents that have a collapser button sitting on their outgoing edges
@@ -724,19 +964,33 @@ export function useGraphRenderModel<T>({
         .map((n) => n.id)
     )
 
+    // A stacked column is chained rather than fanned out: the parent's edge lands
+    // on the first row, and every row after it hangs off the row above instead of
+    // drawing its own line back to the parent. Re-sourced HERE rather than in
+    // `visibleEdges` — the layout engine derives its parent→child adjacency from
+    // that same list, so rewriting it earlier would orphan every row below the
+    // first and scatter it as its own root.
+    const sourceOf = (edge: GraphEdge): string =>
+      stackGroups.previousRow.get(edge.target) ?? edge.source
+
     // When windowing, drop edges whose endpoints aren't both materialized —
-    // React Flow can't route an edge to a node that isn't in its store.
+    // React Flow can't route an edge to a node that isn't in its store. Tested
+    // against the REWRITTEN source: the original parent card is always pulled in
+    // by the ancestry walk, so testing that instead would wave through an edge
+    // whose actual source is a row that never arrived.
     const inWindow = (edge: GraphEdge): boolean =>
       !windowedIds ||
-      (windowedIds.has(edge.source) && windowedIds.has(edge.target))
+      (windowedIds.has(sourceOf(edge)) && windowedIds.has(edge.target))
 
     return visibleEdges.filter(inWindow).map((edge): RFEdge => {
+      const above = stackGroups.previousRow.get(edge.target)
+      const source = sourceOf(edge)
       const isInteractive = Boolean(edge.onEdgeClick || edge.onEdgeHover)
       const isHovered = isInteractive && edge.id === hoveredEdgeId
       const baseData = edge.data as Record<string, unknown> | undefined
       return {
         id: edge.id,
-        source: edge.source,
+        source,
         target: edge.target,
         type: "graphEdge",
         data: {
@@ -748,7 +1002,10 @@ export function useGraphRenderModel<T>({
           showDot:
             !edge.target.startsWith("expander-") &&
             !edge.source.startsWith("expander-") &&
-            !parentsWithCollapsers.has(edge.source),
+            !parentsWithCollapsers.has(source) &&
+            // A row-to-row link is a spine, not a relationship: a dot on
+            // every segment would read as a ladder of stubs.
+            above === undefined,
         },
       }
     })
@@ -758,6 +1015,8 @@ export function useGraphRenderModel<T>({
     expandedNodes,
     hoveredEdgeId,
     windowedIds,
+    stackedNodeIndex,
+    stackGroups,
   ])
 
   return {
@@ -768,7 +1027,9 @@ export function useGraphRenderModel<T>({
     tagsAffectLayout,
     renderedNodeCount: renderedNodeIds.length,
     renderedNodeIds,
+    treeRootNodeIds,
     contentBounds,
     getNodePosition,
+    stackHoverZones,
   }
 }

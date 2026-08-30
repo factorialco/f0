@@ -5,6 +5,7 @@ import type { F0DataChartRadarProps } from "../../types"
 import { resolveChartSize } from "../../utils/responsive"
 import { useContainerSize } from "../../utils/useContainerSize"
 import { useEChartsInstance } from "../../utils/useEChartsInstance"
+import { usePointClick } from "../../utils/usePointClick"
 import { useLegendInteraction } from "../../utils/useLegendInteraction"
 import { useRadarChartOptions } from "./useRadarChartOptions"
 
@@ -14,7 +15,8 @@ export const RadarChart = (props: F0DataChartRadarProps) => {
   const size = resolveChartSize(width)
   const options = useRadarChartOptions(ref, props, size)
   const chartRef = useEChartsInstance(ref, options)
-  useLegendInteraction(chartRef)
+  usePointClick(chartRef, props.onPointClick)
+  useLegendInteraction(chartRef, props.onLegendSelectionChange)
 
   return <div ref={ref} className="h-full w-full" />
 }

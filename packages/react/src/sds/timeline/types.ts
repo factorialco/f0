@@ -42,7 +42,7 @@ export interface F0TimelineRowTaskProps extends F0TimelineRowBaseProps {
   icon?: IconType
   /** Description text (e.g., "Completed on 20/2025") */
   description?: string
-  /** Metadata items to display (assignees, tags, dates, etc.) using the same pattern as ResourceHeader */
+  /** Metadata items to display (assignees, tags, dates, etc.) using the same pattern as F0ResourceHeader */
   metadata?: (MetadataItem | undefined | boolean)[]
   /** Primary action button (displayed on the right after a divider) */
   primaryAction?: F0TimelineRowAction

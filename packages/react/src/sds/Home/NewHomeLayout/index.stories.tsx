@@ -15,6 +15,13 @@ import { F0Icon, type IconType } from "@/components/F0Icon"
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
 import { One } from "@/icons/ai"
 import {
+  MockAiChatRuntimeProvider,
+  MockConnectedChatHeader,
+  MockConnectedChatInput,
+  MockConnectedMessagesContainer,
+} from "@/kits/ai/F0AiChat/__stories__/_mock"
+import ApplicationFrameStories from "@/patterns/ApplicationFrame/index.stories"
+import {
   Building,
   Calendar,
   ChartVerticalBars,
@@ -30,10 +37,14 @@ import {
   PalmTree,
   Pencil,
   Person,
+  Plus,
   Receipt,
   Search,
   Settings,
+  SolidPause,
+  SolidPlay,
   Target,
+  Timer,
 } from "@/icons/app"
 import { F0AiChatTextArea } from "@/kits/ai/F0AiChatTextArea"
 import { type WelcomeScreenSuggestion } from "@/kits/ai/F0AiChat/types"
@@ -43,10 +54,17 @@ import {
   ClockInControls,
   type ClockInProject,
 } from "../ClockIn/ClockInControls"
+import { type ClockInStatus } from "../ClockIn/ClockInGraph"
+import {
+  F0CommunityPostsCarousel,
+  type CommunityPostSummary,
+} from "../Communities/F0CommunityPostsCarousel"
+import { CommunityPost } from "../Communities/Post/CommunityPost"
 import {
   fromParams,
   homeSlot,
   type HomeWidgetItem,
+  type HomeWidgetRailAction,
   listSlot,
   resolveWidgetHeader,
   type SlotRenderers,
@@ -54,6 +72,7 @@ import {
 } from "../slotRenderers"
 import { type WidgetContainerSide } from "../WidgetContainer"
 import { WidgetCatalog, type WidgetCatalogGroup } from "../WidgetCatalog"
+import { F0CarouselDialog } from "@/patterns/F0CarouselDialog"
 import { ApplicationFrame } from "@/patterns/ApplicationFrame"
 import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
 import { SidebarFooter } from "@/patterns/Navigation/Sidebar/Footer"
@@ -510,7 +529,23 @@ const CLOCK_IN_PROJECTS: ClockInProject[] = [
  * this same render rather than a hand-built stand-in that has to be kept in
  * step with it.
  */
-const ClockInTile = ({ loading }: { loading?: boolean }) => {
+const ClockInTile = ({
+  loading,
+  day,
+  onClockIn,
+  onClockOut,
+  onBreak,
+}: {
+  loading?: boolean
+  /**
+   * The day the tile is showing. `ClockInControls` reads its own status off the
+   * LAST entry's `variant`, so the day is the state — see `clockInDay` below.
+   */
+  day?: ClockInDay
+  onClockIn?: () => void
+  onClockOut?: () => void
+  onBreak?: () => void
+}) => {
   const [locationId, setLocationId] = useState("remote")
   const [projectId, setProjectId] = useState<string | undefined>()
 
@@ -519,8 +554,8 @@ const ClockInTile = ({ loading }: { loading?: boolean }) => {
       variant="horizontal-bar"
       loading={loading}
       labels={CLOCK_IN_LABELS}
-      data={[]}
-      trackedMinutes={0}
+      data={day?.data ?? []}
+      trackedMinutes={day?.trackedMinutes ?? 0}
       remainingMinutes={8 * 60}
       locations={CLOCK_IN_LOCATIONS}
       locationId={locationId}
@@ -528,10 +563,18 @@ const ClockInTile = ({ loading }: { loading?: boolean }) => {
       projects={CLOCK_IN_PROJECTS}
       projectId={projectId}
       onChangeProjectId={setProjectId}
-      onClockIn={() => {}}
-      onClockOut={() => {}}
+      canShowBreakButton
+      onClockIn={onClockIn ?? (() => {})}
+      onClockOut={onClockOut ?? (() => {})}
+      onBreak={onBreak}
     />
   )
+}
+
+/** The carousel's arrows — the only words its chrome has. */
+const COMMUNITY_CAROUSEL_LABELS = {
+  previous: "Previous posts",
+  next: "More posts",
 }
 
 const COMMS = [
@@ -832,16 +875,39 @@ const RIGHT_WIDGETS: HomeWidgetItem[] = [
 ]
 
 /**
- * The bespoke slot renderers this Home supplies — only `clock-in` here; every
- * other slot the rail and the feed use is a kit default. It declares its own
- * `skeleton` beside its `render`, so the tile has a placeholder shaped like
- * itself while the rail loads — and both are the SAME component, told whether
- * its data has landed (`ClockInControls`' `loading`).
+ * The bespoke slot renderers this Home supplies — `clock-in` for the rail and
+ * `community-posts` for the main column; every other slot the two use is a kit
+ * default. Each declares its own `skeleton` beside its `render`, so a tile has a
+ * placeholder shaped like ITSELF while the column loads — and in both cases the
+ * two are the SAME component, told whether its data has landed.
  */
 const SLOT_RENDERERS: SlotRenderers = {
   "clock-in": {
     render: () => <ClockInTile />,
     skeleton: () => <ClockInTile loading />,
+  },
+  "community-posts": {
+    render: (params, ctx) => (
+      <F0CommunityPostsCarousel
+        posts={postsForScope((ctx.selection ?? "all") as CommunityScope).map(
+          (post) => ({
+            ...post,
+            onClick: () => (params as CommunityPostsParams).onOpenPost(post.id),
+          })
+        )}
+        labels={COMMUNITY_CAROUSEL_LABELS}
+      />
+    ),
+    // The skeleton draws as many tiles as the slot said were coming, so the
+    // loading card is the height of the loaded one.
+    skeleton: (_, { expectedItemsCount }) => (
+      <F0CommunityPostsCarousel
+        posts={[]}
+        labels={COMMUNITY_CAROUSEL_LABELS}
+        loading
+        expectedItemsCount={expectedItemsCount}
+      />
+    ),
   },
 }
 
@@ -866,6 +932,227 @@ const LOADING_RIGHT_WIDGETS: HomeWidgetItem[] = RIGHT_WIDGETS.map((widget) => ({
     }
   }),
 }))
+
+/* ---------------------------- communities widget --------------------------- */
+
+/**
+ * THE MAIN COLUMN'S WIDGET, and the reason this one is not a `list` slot: a post
+ * preview is a title, four lines of the post and its author, which needs a tile
+ * rather than a row — and two tiles side by side needs the main column's 712px.
+ * The catalog offers it for `main` only (`areas`), so it can never be dropped
+ * into the 396px rail where it would be a single cramped card.
+ */
+const COMMUNITY_POSTS: CommunityPostSummary[] = [
+  {
+    id: "h2-planning",
+    title: "How we're changing planning for H2",
+    description: [
+      "<p>We're changing how planning works for the second half, and this note is the whole of it — there is no deck to read afterwards.</p>",
+      "<p><strong>What stays the same.</strong> Teams still own their roadmaps, still commit to outcomes rather than output, and still publish a weekly update. Nobody is being asked to re-plan work already underway.</p>",
+      "<p><strong>What changes.</strong> The quarterly planning week is gone. In its place, each team writes a one-pager per initiative and we review them asynchronously over three days.</p>",
+    ].join(""),
+    author: {
+      firstName: "Yusuf",
+      lastName: "Adeyemi",
+      avatarUrl: "/avatars/person01.jpg",
+    },
+    createdAt: new Date(2026, 6, 16),
+    counters: { visits: "742 visits", comments: "23 comments" },
+  },
+  {
+    id: "nordics-pilot",
+    title: "Hana closed the Nordics pilot",
+    description: [
+      "<p>Six weeks of evenings on top of her own reviews and a landing page nobody asked for, and the Nordics pilot is signed.</p>",
+      "<p>Hana ran the whole thing end to end while covering for two people on leave. Give her a clap.</p>",
+    ].join(""),
+    author: {
+      firstName: "Hana",
+      lastName: "Tanaka",
+      avatarUrl: "/avatars/person04.jpg",
+    },
+    createdAt: new Date(2026, 6, 15),
+    counters: { visits: "164 visits", comments: "11 comments" },
+  },
+  {
+    id: "office-move",
+    title: "The Barcelona office moves in September",
+    // A COVER, and only some posts have one: the tile with a picture and the
+    // tile without sit in the same row, at the same height.
+    imageUrl: "/landscape01.jpg",
+    description: [
+      "<p>We outgrew the second floor about a year ago and have been pretending otherwise ever since. From 7 September we are two streets over, on Pau Claris.</p>",
+      "<p>Desks, monitors and the good coffee machine all come with us. Bikes get a proper room this time.</p>",
+    ].join(""),
+    author: {
+      firstName: "Marta",
+      lastName: "Soler",
+      avatarUrl: "/avatars/person06.jpg",
+    },
+    createdAt: new Date(2026, 6, 11),
+    counters: { visits: "1,208 visits", comments: "47 comments" },
+  },
+  {
+    id: "handbook",
+    title: "The handbook is now the source of truth",
+    description: [
+      "<p>Every policy that used to live in a pinned message, a PDF or somebody's head is now in the handbook, and the handbook is now the thing we change when a policy changes.</p>",
+      "<p>If you find something that contradicts it, the handbook is right and the other thing is out of date — tell us and we'll delete it.</p>",
+    ].join(""),
+    author: {
+      firstName: "Leo",
+      lastName: "Costa",
+      avatarUrl: "/avatars/person08.jpg",
+    },
+    createdAt: new Date(2026, 6, 8),
+    counters: { visits: "512 visits", comments: "9 comments" },
+  },
+  {
+    id: "office-hours",
+    title: "Summer office hours ☀️",
+    imageUrl: "/landscape03.jpg",
+    description:
+      "<p>Through August we finish at 15:00 on Fridays. Nothing to request and nothing to log — the calendar already knows.</p>",
+    author: {
+      firstName: "Ana",
+      lastName: "Prat",
+      avatarUrl: "/avatars/person02.jpg",
+    },
+    createdAt: new Date(2026, 6, 2),
+    counters: { visits: "980 visits", comments: "16 comments" },
+  },
+]
+
+/**
+ * WHICH POSTS the widget is showing. A widget-scoped filter, so it belongs in the
+ * widget's header rather than in its menu: the menu is for things you DO to a
+ * card, and this is part of what the card currently IS — the trigger reads
+ * "Celebrations" once you pick it, the way a select does.
+ */
+const COMMUNITY_SCOPES = [
+  { value: "all", label: "All communications" },
+  { value: "announcements", label: "Company announcements" },
+  { value: "celebrations", label: "Celebrations" },
+  { value: "talent", label: "Talent spaces" },
+  { value: "claps", label: "Claps" },
+] as const
+
+type CommunityScope = (typeof COMMUNITY_SCOPES)[number]["value"]
+
+/** Which posts each scope covers — the app's own filter, not the widget's. */
+const postsForScope = (scope: CommunityScope): CommunityPostSummary[] => {
+  if (scope === "all") return COMMUNITY_POSTS
+  if (scope === "celebrations" || scope === "claps")
+    return COMMUNITY_POSTS.filter((post) => post.id === "nordics-pilot")
+  if (scope === "announcements")
+    return COMMUNITY_POSTS.filter((post) =>
+      ["h2-planning", "office-move", "handbook"].includes(post.id)
+    )
+  return COMMUNITY_POSTS.filter((post) => post.id === "office-hours")
+}
+
+/**
+ * ONE POST, as the dialog shows it — the whole thing rather than the tile's
+ * five-line preview.
+ *
+ * It is `CommunityPost`, the component the Communities feed itself is built
+ * from: the same author line, the same unclamped body, the same media, reactions
+ * and counters. The tile is a preview of a post; this is the post, and there is
+ * no reason for the two to be different components.
+ */
+const CommunityPostDetail = ({ post }: { post: CommunityPostSummary }) => (
+  <CommunityPost
+    id={post.id}
+    // The dialog's header carries the title, so the post doesn't repeat it.
+    hideTitle
+    author={post.author}
+    group={{ title: "All company", onClick: () => {} }}
+    createdAt={post.createdAt}
+    title={post.title}
+    description={post.description}
+    mediaUrl={post.imageUrl}
+    counters={{
+      views: post.counters?.visits,
+      comments: post.counters?.comments ?? "",
+    }}
+    // No `onClick`: the post is already open. In the feed the card is a way in
+    // and wears the affordances to say so; here there is nowhere further to go.
+    inLabel="in"
+    comment={{ label: "Comment", onClick: () => {} }}
+  />
+)
+
+/**
+ * The Communities widget as DATA, built for the scope it is currently showing.
+ *
+ * Its two controls sit in the header AS DATA — `headerActions` for "New post",
+ * the one thing you can do from the card without leaving the page, and
+ * `headerSelect` for the SCOPE SWITCHER. Neither is a React node: the card draws
+ * them both as ghosts (this row sits beside the widget's own title, and a filled
+ * button there reads as the card's subject rather than as something you press),
+ * and it KEEPS the scope, handing it to the slots as `ctx.selection`.
+ *
+ * Which is why this widget is built from no scope of its own. The story still
+ * hears about it — `onChange` mirrors it into state — but only because its
+ * carousel DIALOG walks the same set of posts; the card itself needs nobody to
+ * hold the value. The way OUT of the widget is still the title ("Go to
+ * Communities"), and the three-dots menu is still the column's.
+ */
+const communitiesWidget = ({
+  scope,
+  onChangeScope,
+  onNewPost,
+  onOpenPost,
+}: {
+  scope: CommunityScope
+  onChangeScope: (scope: CommunityScope) => void
+  onNewPost: () => void
+  /** A tile opens the post IN PLACE — see `F0CarouselDialog` below. */
+  onOpenPost: (id: string) => void
+}): HomeWidgetItem =>
+  ({
+    id: "communities",
+    icon: Comment,
+    hasUpdates: true,
+    header: {
+      title: "Communities",
+      info: "The latest posts from the spaces you follow.",
+      link: { title: "Go to Communities", url: "/communities" },
+    },
+    headerActions: [{ icon: Plus, label: "New Post", onClick: onNewPost }],
+    headerSelect: {
+      tooltip: "Show",
+      value: scope,
+      options: COMMUNITY_SCOPES.map((option) => ({ ...option })),
+      onChange: (value) => onChangeScope(value as CommunityScope),
+    },
+    actions: [
+      { label: "Mark all as read", icon: Check, onClick: () => {} },
+      { label: "Notification settings", icon: Settings, onClick: () => {} },
+    ],
+    // A BESPOKE visualization: its renderer is in `SLOT_RENDERERS`, beside
+    // `clock-in`'s. A plain literal rather than `homeSlot`, since the built-in
+    // vocabulary knows nothing about it.
+    slots: [
+      {
+        visualization: "community-posts",
+        // NO POSTS HERE. Which ones to draw is the scope the card is showing,
+        // and the card hands that to the renderer (`ctx.selection`) — so the
+        // slot carries only what the renderer cannot work out for itself.
+        params: {
+          // No `href`: a post opens OVER the Home rather than navigating away
+          // from it, so the feed you were reading is still behind the dialog and
+          // still where you left it.
+          onOpenPost,
+        },
+      },
+    ],
+  })
+
+/** What the bespoke `community-posts` slot carries — which posts is `ctx`'s. */
+interface CommunityPostsParams {
+  onOpenPost: (id: string) => void
+}
 
 /* ============================ add-widget catalog ============================ */
 
@@ -1077,7 +1364,32 @@ const CATALOG_ITEMS = [
       ],
     },
   },
+  {
+    // THE MAIN-COLUMN-ONLY ONE. Its preview is the widget itself, controls and
+    // all, so the picker shows the scope switcher and the New post button
+    // exactly where the card will wear them.
+    id: "communities",
+    title: "Communities",
+    icon: Comment,
+    preview: communitiesWidget({
+      scope: "all",
+      onChangeScope: () => {},
+      onNewPost: () => {},
+      onOpenPost: () => {},
+    }),
+  },
 ]
+
+/**
+ * WHICH COLUMN each widget may go in. Only the two that genuinely can't travel
+ * say anything: a carousel of post tiles needs the main column's width, and the
+ * clock-in tile is built for the rail's. Everything else is listed nowhere here
+ * and is therefore offered in both — which is what most widgets should be.
+ */
+const CATALOG_AREAS: Record<string, WidgetContainerSide[]> = {
+  communities: ["main"],
+  "clock-in": ["right"],
+}
 
 /**
  * THE PICKER’S DOMAINS, in the order it shows them, each headed by its module’s
@@ -1100,6 +1412,7 @@ const CATALOG_DOMAIN: Record<string, string> = {
   "clock-in": "time",
   "time-off": "time",
   communications: "comms",
+  communities: "comms",
   events: "calendar",
   goals: "performance",
   tasks: "performance",
@@ -1116,6 +1429,7 @@ const CATALOG = CATALOG_ITEMS.map((item) => ({
   ...item,
   group: CATALOG_DOMAIN[item.id],
   recommended: RECOMMENDED_IDS.has(item.id),
+  areas: CATALOG_AREAS[item.id],
 }))
 
 const Home = () => {
@@ -1125,19 +1439,50 @@ const Home = () => {
   // order: both are things the user set and the app persists.
   const [eventsParams, setEventsParams] = useState(EVENTS_DEFAULTS)
   const [rail, setRail] = useState(RIGHT_WIDGETS)
+  // THE MAIN COLUMN'S WIDGETS, as an order of their own: the two columns are two
+  // lists, and a widget added to one has nothing to do with the other.
+  const [mainIds, setMainIds] = useState(["communities"])
+  // What the Communities widget is showing — its own state, alongside the rail's
+  // order and the Events widget's params. Everything a user set, in one place.
+  const [scope, setScope] = useState<CommunityScope>("all")
+  // WHICH POST IS OPEN, if any. It lives out here rather than in the dialog for
+  // the reason the dialog is controlled at all: the feed already knows which post
+  // you clicked, and a second copy of that inside the dialog is a second answer
+  // to one question.
+  const [openPostId, setOpenPostId] = useState<string | null>(null)
   // The widget is REBUILT from its params — that is the app's half of the deal:
   // the layout resolves what the params merely say (title, info), while the
   // slots' data can only come from here.
   const railWidgets = rail.map((widget) =>
     widget.id === "events" ? eventsWidget(eventsParams) : widget
   )
+  // The dialog walks the posts the widget is currently SHOWING — the same list,
+  // in the same order. Switch the scope and the walk follows it, because there is
+  // only one list.
+  const openablePosts = postsForScope(scope)
+  const mainWidgets = mainIds.flatMap((id) =>
+    id === "communities"
+      ? [
+          communitiesWidget({
+            scope,
+            onChangeScope: setScope,
+            onNewPost: () => {},
+            onOpenPost: setOpenPostId,
+          }),
+        ]
+      : []
+  )
   return (
     <div className="h-full w-full p-6">
       <NewHomeLayout
+        leftWidgets={mainWidgets}
         rightWidgets={railWidgets}
         slotRenderers={SLOT_RENDERERS}
-        editableWidgetContainers={["right"]}
-        onRemoveWidget={(id) => setRail((w) => w.filter((x) => x.id !== id))}
+        editableWidgetContainers={["main", "right"]}
+        onRemoveWidget={(id) => {
+          setRail((w) => w.filter((x) => x.id !== id))
+          setMainIds((ids) => ids.filter((x) => x !== id))
+        }}
         onChangeWidgetParams={(id, params) => {
           if (id === "events") setEventsParams(params as EventsParams)
         }}
@@ -1148,9 +1493,10 @@ const Home = () => {
         rebuildWidget={(widget, params) =>
           widget.id === "events" ? eventsWidget(params as EventsParams) : widget
         }
-        onReorderWidgets={(_, ids) =>
-          setRail((w) => ids.flatMap((id) => w.filter((x) => x.id === id)))
-        }
+        onReorderWidgets={(reorderedSide, ids) => {
+          if (reorderedSide === "main") setMainIds(ids)
+          else setRail((w) => ids.flatMap((id) => w.filter((x) => x.id === id)))
+        }}
         onClickAddNewWidget={(s) => {
           setSide(s)
           setOpen(true)
@@ -1163,11 +1509,47 @@ const Home = () => {
         onClose={() => setOpen(false)}
         widgets={CATALOG}
         groups={CATALOG_GROUPS}
-        onAdd={() => setOpen(false)}
-        previewWidth={side === "right" ? 396 : 768}
+        onAdd={(id, params) => {
+          if (id === "events" && params) setEventsParams(params as EventsParams)
+          // The picker only offers what the column can hold, so "which column"
+          // is already decided — it is the side it was opened for.
+          if (side === "main" && !mainIds.includes(id))
+            setMainIds((ids) => [...ids, id])
+          setOpen(false)
+        }}
+        rebuildPreview={(item, params) =>
+          item.id === "events"
+            ? eventsWidget(params as EventsParams)
+            : item.preview
+        }
+        // ONE LIST, TWO COLUMNS. The side the layout handed back is passed
+        // straight through: the picker then drops the widgets that column can't
+        // hold (Communities is `main`-only, Clock in is rail-only) and previews
+        // at that column's width — no second catalog, and no `previewWidth`
+        // ternary that has to be kept in step with the layout's own columns.
+        area={side}
         // The same map the layout gets — a preview drawn without it would show
         // "No renderer for slot …" for every bespoke visualization.
         slotRenderers={SLOT_RENDERERS}
+      />
+      {/* A post opened from the carousel, and every other post one arrow away.
+          The tile you clicked and the page the dialog opens on are the same
+          state, so it can only ever open on what you clicked. */}
+      <F0CarouselDialog
+        isOpen={openPostId !== null}
+        onClose={() => setOpenPostId(null)}
+        width="lg"
+        items={openablePosts.map((post) => ({
+          id: post.id,
+          title: post.title,
+          content: <CommunityPostDetail post={post} />,
+        }))}
+        currentId={openPostId ?? ""}
+        onNavigate={setOpenPostId}
+        labels={{ previous: "Previous post", next: "Next post" }}
+        // The post brings its own padding; a second gutter from the frame just
+        // holds its cover off an edge it wants.
+        disableContentPadding
       />
     </div>
   )
@@ -1196,20 +1578,38 @@ const meta = {
   parameters: { layout: "fullscreen", docsFullWidth: true },
   decorators: [
     (Story, { parameters }) => (
-      <ApplicationFrame
-        // The frame's top row, outside the layout entirely: it takes real height
-        // off the content area, which is what the height probe is testing.
-        banner={parameters.frameBanner ? <FrameBanner /> : undefined}
-        sidebar={
-          <Sidebar
-            header={<SidebarHeader {...SidebarHeaderStories.Default.args} />}
-            body={<SidebarMenu {...SidebarMenuStories.Default.args} />}
-            footer={<SidebarFooter {...SidebarFooterStories.Default.args} />}
-          />
-        }
-      >
-        <Story />
-      </ApplicationFrame>
+      // The AI chat's own mock runtime, exactly as `ApplicationFrame`'s stories
+      // wire it: the panel the One switch opens has to hold A CHAT, and its
+      // header, transcript and composer are slots the app fills.
+      <MockAiChatRuntimeProvider>
+        <ApplicationFrame
+          // The frame's top row, outside the layout entirely: it takes real height
+          // off the content area, which is what the height probe is testing.
+          banner={parameters.frameBanner ? <FrameBanner /> : undefined}
+          // The One switch in the layout's top-right draws NOTHING unless the
+          // frame's AI chat is enabled — same as `DaytimePage`'s story. THE ONE
+          // THING IT OPENS is this chat: no panel content is ever pushed here,
+          // so the switch has nothing else to swap with.
+          ai={{
+            // THE SAME CHAT the frame's own story gives `HomeLayout` — its
+            // args, not a second configuration that can drift from them — with
+            // the mock header/transcript/composer filling the panel's slots.
+            ...ApplicationFrameStories.args.ai,
+            chatHeader: <MockConnectedChatHeader />,
+            chatMessages: <MockConnectedMessagesContainer />,
+            chatInput: <MockConnectedChatInput />,
+          }}
+          sidebar={
+            <Sidebar
+              header={<SidebarHeader {...SidebarHeaderStories.Default.args} />}
+              body={<SidebarMenu {...SidebarMenuStories.Default.args} />}
+              footer={<SidebarFooter {...SidebarFooterStories.Default.args} />}
+            />
+          }
+        >
+          <Story />
+        </ApplicationFrame>
+      </MockAiChatRuntimeProvider>
     ),
   ],
 } satisfies Meta<typeof NewHomeLayout>
@@ -1282,6 +1682,199 @@ export const Loading: Story = {
       </NewHomeLayout>
     </div>
   ),
+}
+
+/* ============================= glyph actions ============================= */
+
+/**
+ * HOURS AND MINUTES, as a glyph shows them: `7:04`. Seconds are what a stopwatch
+ * counts; a working day is read in hours, and the blinking separator is what says
+ * it is running — not a digit changing sixty times a minute.
+ */
+const hhmm = (seconds: number) => {
+  const minutes = Math.floor(seconds / 60)
+  return `${Math.floor(minutes / 60)}:${String(minutes % 60).padStart(2, "0")}`
+}
+
+/** What `ClockInControls` needs to draw the day — and to know which state it is in. */
+type ClockInDay = {
+  data: { from: Date; to: Date; variant: ClockInStatus }[]
+  trackedMinutes: number
+}
+
+/**
+ * THE DAY as the three states leave it. `ClockInControls` derives its status from
+ * the LAST entry's variant, so "on a break" is a worked stretch followed by a break
+ * stretch — the tile then says "On a break" on its own, with no status prop to keep
+ * in step with the rail.
+ *
+ * The clock started `worked + onBreak` seconds ago, so the two readings and the bar
+ * describe the same day.
+ */
+const clockInDay = (
+  status: ClockInStatus,
+  worked: number,
+  onBreak: number,
+  now: Date
+): ClockInDay => {
+  const at = (secondsAgo: number) => new Date(now.getTime() - secondsAgo * 1000)
+  const trackedMinutes = Math.floor(worked / 60)
+
+  if (status === "clocked-out") return { data: [], trackedMinutes: 0 }
+  if (status === "clocked-in")
+    return {
+      data: [{ from: at(worked), to: now, variant: "clocked-in" }],
+      trackedMinutes,
+    }
+  return {
+    data: [
+      { from: at(worked + onBreak), to: at(onBreak), variant: "clocked-in" },
+      { from: at(onBreak), to: now, variant: "break" },
+    ],
+    trackedMinutes,
+  }
+}
+
+/**
+ * THE RAIL'S ONE-CLICK STATE, as time tracking uses it: the clock's glyph is the
+ * clock's button, and the day decides which button that is. Click the glyph — or
+ * the tile's own controls, which drive the same state — to move between all three.
+ *
+ * Each state has its own COLOUR, and it is the colour the TILE already uses for
+ * it — `CLOCK_IN_COLORS`, the same values its status dot pulses and its bar is
+ * drawn in. One word (`tone`) paints the pill and the button together, so the
+ * rail says which state you are in before you have read the number, and says it
+ * in the same green the card does.
+ *
+ * - **Clocked out.** The dark slab (`neutral`), holding what the day came to, with
+ *   the accent play button on it. Nothing is running, so nothing blinks.
+ * - **Clocked in.** A `positive` pill — `--positive-50`, the tile's own green —
+ *   with the running total in HOURS AND MINUTES, its separator blinking once a
+ *   second the way a clock does (`ticking`), and "Take a break" as a plain chip at
+ *   the end of it. The face turns over on the same second (`flashing`), between
+ *   the timer and the break it offers.
+ * - **On a break.** A `promote` pill — `--promote-50`, the tile's amber — counting
+ *   the BREAK, and the button FLASHES between the timer icon and the play
+ *   triangle: the colour says paused, the flash asks you to do something about it.
+ *
+ * Hover any of them and the card floats out as ever — the pill gives its width
+ * back while it does, since the card says all of it in full, and the button it
+ * leaves behind is the same button it always was.
+ *
+ * Every reading is HOURS AND MINUTES on a real clock, so they change once a
+ * minute. What says "this is running" second to second is the blink, not a digit.
+ */
+const ClockGlyphActionHome = () => {
+  const [status, setStatus] = useState<ClockInStatus>("clocked-in")
+  /** Seconds worked today, and seconds into the CURRENT break. */
+  const [worked, setWorked] = useState((7 * 60 + 12) * 60)
+  const [onBreak, setOnBreak] = useState(0)
+
+  // The story's own clock, whichever counter the state says is running — REAL
+  // TIME, a second a second. It is kept in seconds so the day's bar and the
+  // tile's total stay in step with the pill, but nothing ever shows them: the
+  // glyph is read in hours and minutes, and a figure that moved every second in
+  // the corner of the page would be a stopwatch, not a day. In the real Home
+  // this is all the app's; the rail only draws the string it is handed.
+  useEffect(() => {
+    if (status === "clocked-out") return
+    const tick = setInterval(() => {
+      if (status === "clocked-in") setWorked((seconds) => seconds + 1)
+      else setOnBreak((seconds) => seconds + 1)
+    }, 1000)
+    return () => clearInterval(tick)
+  }, [status])
+
+  const railAction: HomeWidgetRailAction =
+    status === "clocked-in"
+      ? {
+          icon: SolidPause,
+          label: "Take a break",
+          text: hhmm(worked),
+          // THE SAME GREEN THE TILE PULSES: `positive` is `--positive-50`, which
+          // is exactly what `CLOCK_IN_COLORS["clocked-in"]` paints the status dot
+          // and the day's bar. The glyph and the card are one state, so they are
+          // one colour.
+          tone: "positive",
+          ticking: true,
+          // Ticking as well as counting: the icon turns over between the timer
+          // and what the button does, so a running day says so twice — the
+          // separator's blink and the face's turn, on the same second.
+          flashing: true,
+          onClick: () => {
+            setOnBreak(0)
+            setStatus("break")
+          },
+        }
+      : status === "break"
+        ? {
+            icon: SolidPlay,
+            label: "Resume",
+            text: hhmm(onBreak),
+            // …and the same amber, `--promote-50`, that the tile pulses on a
+            // break (`CLOCK_IN_COLORS.break`) — not `warning`, which is a
+            // different yellow and would say something the tile isn't saying.
+            tone: "promote",
+            ticking: true,
+            flashing: true,
+            onClick: () => setStatus("clocked-in"),
+          }
+        : {
+            icon: SolidPlay,
+            label: "Clock in",
+            // STILL A READING, on the dark slab: what the day came to so far. The
+            // clock has stopped, so nothing blinks — the tone is what says the
+            // difference between a total that is still moving and one that isn't.
+            text: hhmm(worked),
+            tone: "neutral",
+            onClick: () => setStatus("clocked-in"),
+          }
+
+  const [clock, ...rest] = RIGHT_WIDGETS
+  const day = clockInDay(status, worked, onBreak, new Date())
+  // `Timer`, not the catalog's plain `Clock`: this icon is the OTHER FACE of the
+  // flash, so it is read a second at a time next to a running total — a stopwatch
+  // says which clock is meant, where a wall clock would just say "time".
+  const rail: HomeWidgetItem[] = [
+    { ...clock, icon: Timer, railAction },
+    ...rest,
+  ]
+
+  return (
+    // Capped BELOW what two columns need (712 + 16 + 396), so the rail is in its
+    // collapsed strip — the only presentation that draws glyphs at all.
+    <div className="mx-auto h-full w-full max-w-[1000px] p-6">
+      <NewHomeLayout
+        rightWidgets={rail}
+        // The tile and the glyph are the SAME state: clocking in from the card
+        // grows the pill in the rail, and vice versa.
+        slotRenderers={{
+          "clock-in": {
+            render: () => (
+              <ClockInTile
+                day={day}
+                onClockIn={() => setStatus("clocked-in")}
+                onClockOut={() => setStatus("clocked-out")}
+                onBreak={() => {
+                  setOnBreak(0)
+                  setStatus("break")
+                }}
+              />
+            ),
+            skeleton: () => <ClockInTile loading />,
+          },
+        }}
+      >
+        {mainColumnBlocks()}
+      </NewHomeLayout>
+    </div>
+  )
+}
+
+export const GlyphAction: Story = {
+  // A story with a clock in it: every snapshot of it would differ from the last.
+  parameters: { chromatic: { disableSnapshot: true } },
+  render: () => <ClockGlyphActionHome />,
 }
 
 /* ============================== virtualization ============================== */

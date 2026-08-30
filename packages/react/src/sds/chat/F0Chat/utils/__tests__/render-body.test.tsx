@@ -6,7 +6,6 @@ import {
   type MentionToken,
   renderBodyWithLinks,
   renderBodyWithMentions,
-  renderTextWithEmojis,
 } from "../render-body"
 
 describe("renderBodyWithMentions", () => {
@@ -128,19 +127,21 @@ describe("renderBodyWithLinks (preview titles)", () => {
   })
 })
 
-describe("renderTextWithEmojis (composer overlay)", () => {
-  it("returns the text unchanged when there is no emoji", () => {
-    zeroRender(<div>{renderTextWithEmojis("just text")}</div>)
-    expect(screen.getByText("just text")).toBeInTheDocument()
+describe("emoji in bodies", () => {
+  it("leaves the glyph in place for the OS to draw", () => {
+    const { container } = zeroRender(
+      <div>{renderBodyWithLinks("hi 😀 there")}</div>
+    )
+    expect(screen.getByText("hi 😀 there")).toBeInTheDocument()
+    expect(container.querySelector("img")).toBeNull()
   })
 
-  it("paints an emoji as a twemoji image over a hidden native glyph", () => {
-    const { container } = zeroRender(<div>{renderTextWithEmojis("hi 😀")}</div>)
-    // The twemoji image is rendered…
-    const img = container.querySelector("img")
-    expect(img).not.toBeNull()
-    expect(img?.getAttribute("src")).toContain("twemoji")
-    // …over a hidden native glyph that reserves the textarea's layout width.
-    expect(container.querySelector("span.invisible")?.textContent).toBe("😀")
+  it("keeps ZWJ sequences, skin tones and the colour variation selector", () => {
+    // U+FE0F is a combining mark, so the sanitizer's zalgo cap runs over it —
+    // and it is the only thing making ☺️ render in colour rather than as a
+    // monochrome dingbat.
+    const body = "👨‍👩‍👧‍👦 👋🏽 ☺️ 🇪🇸"
+    zeroRender(<div>{renderBodyWithLinks(body)}</div>)
+    expect(screen.getByText(body)).toBeInTheDocument()
   })
 })

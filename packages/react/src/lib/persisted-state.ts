@@ -33,12 +33,16 @@ export function writeToLocalStorage<T>(key: string, value: T): void {
  * @param shouldWrite Optional predicate that gates persistence. Defaults to
  *                    "always write". Useful for transient sub-states that
  *                    should not be persisted.
+ * @param debounceMs  Delay before persisting. Default 0 — durable state must
+ *                    survive a reload that happens immediately after the
+ *                    change. Raise it only for values that churn.
  */
 export function usePersistedState<T>(
   key: string,
   fallback: T,
   validate?: (stored: unknown) => stored is T,
-  shouldWrite?: (value: T) => boolean
+  shouldWrite?: (value: T) => boolean,
+  debounceMs = 0
 ): [T, React.Dispatch<React.SetStateAction<T>>] {
   const [value, setValue] = useState<T>(() => {
     if (typeof window === "undefined") return fallback
@@ -51,8 +55,16 @@ export function usePersistedState<T>(
   useEffect(() => {
     if (typeof window === "undefined") return
     if (shouldWrite && !shouldWrite(value)) return
-    writeToLocalStorage(key, value)
-  }, [key, value, shouldWrite])
+    if (debounceMs <= 0) {
+      writeToLocalStorage(key, value)
+      return
+    }
+    const timer = window.setTimeout(
+      () => writeToLocalStorage(key, value),
+      debounceMs
+    )
+    return () => window.clearTimeout(timer)
+  }, [key, value, shouldWrite, debounceMs])
 
   return [value, setValue]
 }

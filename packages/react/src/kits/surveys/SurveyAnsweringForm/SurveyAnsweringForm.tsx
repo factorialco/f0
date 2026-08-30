@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils"
 import { F0Dialog } from "@/patterns/F0Dialog"
 import { F0Form } from "@/patterns/F0Form/F0Form"
 import { useF0Form } from "@/patterns/F0Form/useF0Form"
-import { ResourceHeader } from "@/patterns/ResourceHeader"
+import { F0ResourceHeader } from "@/patterns/F0ResourceHeader"
 import { ProgressBarCell } from "@/ui/value-display/types/progressBar"
 
 import type {
@@ -324,7 +324,7 @@ function SurveyAnsweringFormDialog({
             )}
           >
             <div className="mb-6">
-              <ResourceHeader
+              <F0ResourceHeader
                 title={title}
                 description={description}
                 {...resourceHeader}
@@ -442,7 +442,7 @@ function SurveyAnsweringFormInline({
       <div className="mx-auto flex w-full max-w-3xl flex-col">
         {!hideResourceHeader && (
           <div className="mb-6">
-            <ResourceHeader
+            <F0ResourceHeader
               title={title}
               description={description}
               {...resourceHeader}

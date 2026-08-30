@@ -24,6 +24,7 @@ import { renderProperty } from "@/patterns/OneDataCollection/property-render"
 import { SummariesDefinition } from "@/patterns/OneDataCollection/summary"
 import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import { Checkbox } from "@/ui/checkbox"
+import { tableCellContentClassName } from "@/ui/value-display/const"
 
 import type {
   CellRendererProps,
@@ -75,6 +76,8 @@ export type RowProps<
   isNew?: boolean
   /** Optional predicate to apply a row-level visual variant. */
   referenceRowType?: (item: R) => ReferenceType
+  /** In a table with nested rows, renders root rows (depth 0) in bold. */
+  boldRootRows?: boolean
   /** Optional custom cell renderer. When provided, wraps each cell's content. */
   cellRenderer?: React.ComponentType<
     CellRendererProps<R, Sortings, Summaries> & { isLastColumn?: boolean }
@@ -156,6 +159,7 @@ const RowComponentInner = <
     disableHover = false,
     isNew = false,
     referenceRowType: referenceRowTypeFn,
+    boldRootRows = false,
     cellRenderer: CellRenderer,
     rowWrapper,
     fromVisualization,
@@ -270,6 +274,7 @@ const RowComponentInner = <
         nestedRowProps={nestedRowProps}
         tableWithChildren={tableWithChildren}
         referenceRowType={referenceRowTypeFn}
+        boldRootRows={boldRootRows}
         cellRenderer={CellRenderer}
         rowWrapper={rowWrapper}
         headerGroups={headerGroups}
@@ -305,6 +310,12 @@ const RowComponentInner = <
         disableHover && "hover:bg-transparent",
         isSelected && "bg-f1-background-selected-secondary",
         flashing && "animate-row-flash",
+        // Cells inherit the weight; renderers that set their own (tags,
+        // deltas) and the first cell's explicit font-medium keep theirs.
+        boldRootRows &&
+          tableWithChildren &&
+          (nestedRowProps?.depth ?? 0) === 0 &&
+          "font-semibold",
         referenceTypeClasses[referenceRowType]
       )}
     >
@@ -351,7 +362,8 @@ const RowComponentInner = <
           <div
             className={cn(
               column.align === "right" ? "justify-end" : "",
-              "flex"
+              "flex",
+              tableCellContentClassName
             )}
           >
             {renderCell(item, column)}

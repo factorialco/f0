@@ -8,6 +8,7 @@ import { ChatDropOverlay } from "./components/ChatDropOverlay"
 import { ChatHeader } from "./components/ChatHeader"
 import { ChatImagePreview } from "./components/ChatImagePreview"
 import { ChatMessagesContainer } from "./components/ChatMessagesContainer"
+import { ChatReadOnlyNotice } from "./components/ChatReadOnlyNotice"
 import {
   ChatConnecting,
   ChatEmptyState,
@@ -18,6 +19,7 @@ import { ChatRenderConfigProvider } from "./providers/ChatRenderConfigProvider"
 import { ChatUIProvider, useChatDrop } from "./providers/ChatUIProvider"
 import { useF0Chat } from "./providers/F0ChatProvider"
 import { type F0ChatChannel, type F0ChatHeaderAction } from "./types"
+import { chatPermission } from "./utils/capabilities"
 
 export type F0ChatProps = {
   /** Whether the hosting panel is in fullscreen (controls the header toggle icon). */
@@ -57,7 +59,7 @@ const ChatShell = ({
 }: F0ChatProps): ReactNode => {
   const { channel, status, messages, capabilities } = useF0Chat()
   const { dropFiles } = useChatDrop()
-  const canSend = capabilities?.canSend !== false
+  const canSend = chatPermission("canSend", channel.type, capabilities)
   const { shellRef, composerOverlayRef } = useComposerOverlayLayout(canSend)
 
   // Whole-panel drag & drop, just like the AI chat: the overlay covers the
@@ -135,8 +137,11 @@ const ChatShell = ({
         // from "not loaded" — show the skeleton until the transport settles.
         <ChatConnecting />
       )}
-      {/* A read-only channel (frozen, announcements…) hides the composer. */}
-      {canSend && (
+      {/* A read-only channel (frozen, announcements…) hides the composer and
+          says so in its place, so the surface doesn't just end in nothing. The
+          notice is a normal flex child, not an overlay: there is no composer
+          for the transcript to scroll under. */}
+      {canSend ? (
         <div
           ref={composerOverlayRef}
           data-testid="chat-composer-overlay"
@@ -144,8 +149,12 @@ const ChatShell = ({
         >
           <ChatComposer />
         </div>
+      ) : (
+        <ChatReadOnlyNotice channel={channel} />
       )}
-      <ChatDropOverlay visible={dragging} />
+      {/* Without a composer the drop handler was never registered, so the
+          affordance promised something the panel could not do. */}
+      <ChatDropOverlay visible={dragging && canSend} />
       <ChatImagePreview />
       <ChatDocumentPreview />
     </div>

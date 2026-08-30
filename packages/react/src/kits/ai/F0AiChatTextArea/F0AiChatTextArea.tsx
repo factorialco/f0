@@ -14,6 +14,7 @@ import { F0OneIcon } from "../F0OneIcon"
 import { ActionBar } from "./components/ActionBar"
 import { AttachedFilesList } from "./components/AttachedFilesList"
 import { CreditWarningWrapper } from "./components/CreditWarningWrapper"
+import { DictationButton } from "./components/DictationButton"
 import { MentionPopover } from "./components/MentionPopover"
 import { PendingQuoteChip } from "./components/PendingQuoteChip"
 import { SubmitButton } from "./components/SubmitButton"
@@ -86,6 +87,7 @@ export const F0AiChatTextArea = ({
   welcomeScreenSuggestions,
   onSuggestionClick,
   welcomeScreenSuggestionsPlacement = "above",
+  welcomeScreenSuggestionsCollapsedByDefault = false,
   welcomeScreenCards,
   padding = "default",
   ref,
@@ -101,9 +103,20 @@ export const F0AiChatTextArea = ({
   const [pendingSubmit, setPendingSubmit] = useState(false)
   const [hoveredSuggestion, setHoveredSuggestion] =
     useState<WelcomeScreenSuggestionItem | null>(null)
+  // Whether focus is anywhere in the composer — what opens a collapsed bar, and
+  // what closes it again. See `welcomeScreenSuggestionsCollapsedByDefault`.
+  const [focusWithin, setFocusWithin] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const highlightRef = useRef<HTMLDivElement>(null)
+  const blurCheckRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(
+    () => () => {
+      if (blurCheckRef.current) clearTimeout(blurCheckRef.current)
+    },
+    []
+  )
 
   const isClarifying = clarifyingUI != null
 
@@ -111,7 +124,7 @@ export const F0AiChatTextArea = ({
   // hosts only need to wire the `onSuggestionClick` business action.
   // When the textarea is rendered outside an `F0AiChatProvider` the
   // tracking ref resolves to a no-op via the provider fallback.
-  const { tracking } = useAiChat()
+  const { tracking, setFocusChatInputFunction } = useAiChat()
   const handleSuggestionClick = useCallback(
     (item: WelcomeScreenSuggestionItem, group: WelcomeScreenSuggestion) => {
       tracking?.onWelcomeSuggestionClick?.({
@@ -183,10 +196,28 @@ export const F0AiChatTextArea = ({
   }, [recorder, tracking])
 
   useEffect(() => {
+    // A composer that asks to start collapsed must not focus itself: the focus
+    // is what opens the row, so autofocusing here would open it before the
+    // reader has touched anything and make the prop a no-op.
+    if (welcomeScreenSuggestionsCollapsedByDefault) return
     if (typeof window !== "undefined" && window.location.hash.length === 0) {
       textareaRef.current?.focus()
     }
+    // Mount only, deliberately: this is the initial autofocus, not something to
+    // re-run when a prop changes.
   }, [])
+
+  useEffect(() => {
+    if (isClarifying) {
+      setFocusChatInputFunction(null)
+      return
+    }
+
+    setFocusChatInputFunction(() => {
+      textareaRef.current?.focus()
+    })
+    return () => setFocusChatInputFunction(null)
+  }, [isClarifying, setFocusChatInputFunction])
 
   // Expose the file-drop handler to parents that own a wider drop zone
   // (e.g. the whole chat window). The handler is stable for the lifetime
@@ -354,28 +385,131 @@ export const F0AiChatTextArea = ({
       // collision, so a field pinned to the bottom of a sidepanel is safe.
       side={suggestionsInside ? "bottom" : "top"}
       reserveTwoRows={!suggestionsInside}
+      // Inside, the row is one cell of the action band and shares its line with
+      // the send button, so it scrolls sideways instead of wrapping onto a
+      // second line and growing the field. Above, wrapping is free.
+      overflow={suggestionsInside ? "scroll" : "wrap"}
     />
   ) : null
 
-  // THE BAR SHAPE the `inside` placement implies: One's mark leading the field
-  // and the send button trailing the text, so the suggestions can have the band
-  // below them to themselves. Named apart from `suggestionsInside` because this
-  // is about the composer's own layout and it does NOT switch off with the
-  // welcome screen — a bar that put send back in the action row on the first
-  // message would change shape under the reader mid-conversation.
+  // OPEN vs COLLAPSED. Focus opens it and losing focus closes it again — but two
+  // things keep it open regardless of focus:
+  //
+  // - anything the reader has already put in the field. A half-typed prompt or an
+  //   attached file with no visible way to send it would be a trap, and a host
+  //   that forwards a dropped file (`onProcessFilesRef`) can put one there
+  //   without the textarea ever being focused.
+  // - a recording in flight. The waveform and its cancel · confirm pair live in
+  //   the control row, so collapsing mid-recording would leave a recording with
+  //   no way to end it.
+  const composerOpen =
+    !welcomeScreenSuggestionsCollapsedByDefault ||
+    focusWithin ||
+    hasDataToSend ||
+    recorder.status !== "idle"
+
+  /**
+   * Whether focus landing on `next` should count as still being in the composer.
+   *
+   * The form is the obvious part. The suggestion panel is the part that is easy
+   * to get wrong: Radix portals it to the body, so a reader who tabs from a chip
+   * into its own panel has left the form in DOM terms while plainly still using
+   * the composer — and collapsing there would unmount the panel from under their
+   * focus.
+   */
+  const focusStaysInComposer = (next: EventTarget | null) => {
+    if (!(next instanceof Node)) return false
+    if (formRef.current?.contains(next)) return true
+    return (
+      next instanceof Element &&
+      next.closest("[data-radix-popper-content-wrapper]") !== null
+    )
+  }
+
+  /**
+   * Closes the bar when focus leaves — but ASKS AGAIN ON THE NEXT TICK rather
+   * than trusting the event.
+   *
+   * `relatedTarget` is null for two very different things: focus landing outside
+   * the composer (close) and the focused control being removed from the DOM
+   * (don't). The second one happens for real here — opening the bar unmounts the
+   * collapsed line, and the welcome screen ending unmounts the chips — and
+   * treating it as "the reader left" would snap the bar shut under them. By the
+   * next tick `document.activeElement` has settled and can be trusted.
+   */
+  const handleComposerBlur = () => {
+    if (blurCheckRef.current) clearTimeout(blurCheckRef.current)
+    blurCheckRef.current = setTimeout(() => {
+      if (!focusStaysInComposer(document.activeElement)) setFocusWithin(false)
+    }, 0)
+  }
+
+  // THE BAR SHAPE the `inside` placement implies: One's mark leading the field,
+  // and the chips sharing the action row with the buttons rather than claiming a
+  // band of their own. Named apart from `suggestionsInside` because this is about
+  // the composer's own layout and it does NOT switch off with the welcome screen
+  // — a bar that dropped the mark on the first message would change shape under
+  // the reader mid-conversation.
   const inlineComposerBar = suggestionsInside
 
-  // Which controls the action row would still have to itself once the bar takes
-  // the send button away. With none of them the row is 24px of padding around
-  // nothing, so it isn't rendered at all and the field is just its two bands.
-  // `canRecord` covers the recording state too — the waveform's cancel · confirm
-  // pair lives in this row, and it can only be reached when recording is on.
-  const actionRowHasControls = !!onUploadFiles || !!toolbarStart || canRecord
-  const showActionRow = !inlineComposerBar || actionRowHasControls
-  // While recording, the row below owns the whole gesture (waveform + cancel ·
-  // confirm). A send button beside the text would be a second, live way out of a
-  // recording that the row is already handling.
-  const showInlineSubmit = inlineComposerBar && !isRecording
+  // THE COLLAPSED BAR IS ONE LINE, and the whole control row is what goes: the
+  // chips, and the attachment and host controls. A row emptied of its chips would
+  // still be 56px of padding around two buttons, which is not a quiet bar — it is
+  // the same two-band field with a hole in it.
+  //
+  // Two controls come along onto the text's own line (at `sm`, centred on it):
+  // send, because a bar you cannot send from is not a composer, and dictation,
+  // because talking is a way to start a prompt without typing one and a bar that
+  // hid it would be asking the reader to type first.
+  //
+  // Only the `inside` bar collapses. With the row `above`, the chips are their
+  // own block on the page and the field below them is a plain composer that has
+  // no business changing shape.
+  const barCollapsible =
+    inlineComposerBar && welcomeScreenSuggestionsCollapsedByDefault
+  const barCollapsed = barCollapsible && !composerOpen
+
+  // The chips go in the action row's middle cell, so the row is ONE line however
+  // many groups there are: attachment · host controls | chips | mic · send. The
+  // row drops its middle while recording, where the waveform and its cancel ·
+  // confirm pair need the full width.
+  const actionRowCenter =
+    inlineComposerBar && suggestionsRow ? (
+      // Clicks are STOPPED here rather than bubbling to the form, whose onClick
+      // focuses the textarea — the same guard `toolbarStart` takes. Without it,
+      // pressing a chip would pull focus off the trigger and break the popover's
+      // own Escape-restores-focus handling.
+      <div onClick={(event) => event.stopPropagation()}>{suggestionsRow}</div>
+    ) : undefined
+
+  // The open/close reveal, shared by the two things that can do it: the row
+  // above the composer, and the `inside` bar's own control row.
+  const collapseTransition = {
+    duration: shouldReduceMotion ? 0 : 0.32,
+    ease: [0.4, 0, 0.2, 1] as const,
+  }
+
+  const actionRow = (
+    <ActionBar
+      onUploadFiles={onUploadFiles}
+      toolbarStart={toolbarStart}
+      center={actionRowCenter}
+      isAtMaxFiles={isAtMaxFiles}
+      maxFiles={maxFiles}
+      acceptValue={acceptValue}
+      fileInputRef={fileInputRef}
+      handleFileSelect={handleFileSelect}
+      inProgress={inProgress}
+      hasDataToSend={hasDataToSend}
+      isPreSending={isPreSending || pendingSubmit}
+      canRecord={canRecord}
+      recordingStatus={recorder.status}
+      recordingStream={recorder.stream}
+      onStartRecording={handleStartRecording}
+      onStopRecording={recorder.stop}
+      onCancelRecording={handleCancelRecording}
+    />
+  )
 
   // Welcome cards sit below the composer on the fullscreen welcome screen
   // (same gate the footer slot uses). Each card carries its own `onClick`;
@@ -413,47 +547,82 @@ export const F0AiChatTextArea = ({
       {...(fullscreen ? composerReveal : {})}
     >
       <div className="flex w-full max-w-content flex-col gap-2">
-        {suggestionsRow && !suggestionsInside && <div>{suggestionsRow}</div>}
+        {suggestionsRow && !suggestionsInside && (
+          <div>
+            {/* The row above the composer has no bar to collapse — it IS the
+                thing that opens, so the reveal is its own height. Composers that
+                never collapse render it plainly: no wrapper, no inline styles,
+                nothing for a layout to trip over. */}
+            {welcomeScreenSuggestionsCollapsedByDefault ? (
+              <AnimatePresence initial={false}>
+                {composerOpen && (
+                  <motion.div
+                    key="welcome-suggestions"
+                    className="overflow-hidden"
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={collapseTransition}
+                  >
+                    {suggestionsRow}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            ) : (
+              suggestionsRow
+            )}
+          </div>
+        )}
         <CreditWarningWrapper creditWarning={creditWarning}>
-          <motion.form
+          <form
             aria-busy={inProgress}
             ref={formRef}
             className={cn(
               "relative isolate z-20",
               "flex flex-col items-stretch md:gap-3 gap-2",
-              "rounded-lg border border-solid border-f1-border has-[textarea:focus]:border-f1-background-tertiary",
+              // `border-secondary`, the subtle border, NOT the default one: the
+              // composer stands among widgets and cards that all use it, and at
+              // neutral-30 against their neutral-20 the field read as a heavier
+              // box than everything around it. Only the resting border is
+              // subtle — focus still takes the field to `background-tertiary`
+              // under the gradient glow, which is what makes the focus obvious.
+              "rounded-lg border border-solid border-f1-border-secondary has-[textarea:focus]:border-f1-background-tertiary",
               "transition-all hover:cursor-text",
               "p-0",
               "before:pointer-events-none before:absolute before:inset-0 before:z-[-1]",
-              "before:rounded-[inherit] before:bg-f1-background before:content-['']",
-              "after:pointer-events-none after:absolute after:inset-0.5 after:z-[-2]",
-              "after:rounded-md after:blur-[6px] after:content-['']",
-              "after:scale-90 after:opacity-0",
+              "before:rounded-[inherit] before:content-['']",
+              "before:bg-f1-background-inverse-secondary dark:before:bg-f1-background-tertiary",
+              "after:pointer-events-none after:absolute after:-inset-2.5 after:z-[-2]",
+              "after:rounded-3xl after:border-[10px] after:border-solid after:border-transparent",
+              "after:p-0.5 after:blur-[6px] after:content-['']",
+              "after:[background-clip:content-box]",
+              "after:[mask:linear-gradient(#000,#000)_padding-box_exclude,linear-gradient(#000,#000)]",
+              "after:opacity-0",
               "after:bg-[conic-gradient(from_var(--gradient-angle),var(--tw-gradient-stops))]",
               "from-[#E55619] via-[#A1ADE5] to-[#E51943]",
-              "after:transition-all after:delay-200 after:duration-300",
-              "has-[textarea:focus]:after:scale-100 has-[textarea:focus]:after:opacity-100",
-              isClarifying &&
-                "after:scale-100 after:opacity-100 border-f1-background-tertiary"
+              "after:transition-opacity after:delay-200 after:duration-300",
+              "has-[textarea:focus]:after:opacity-100",
+              !shouldReduceMotion &&
+                !isClarifying &&
+                "after:[animation:rotate-gradient_6s_linear_infinite_paused] has-[textarea:focus]:after:[animation:rotate-gradient_6s_linear_infinite_running]",
+              !shouldReduceMotion &&
+                isClarifying &&
+                "after:[animation:rotate-gradient_6s_linear_infinite_running]",
+              isClarifying && "after:opacity-100 border-f1-background-tertiary"
             )}
-            animate={{
-              "--gradient-angle": ["0deg", "360deg"],
-            }}
-            transition={{
-              duration: 6,
-              ease: "linear",
-              repeat: Infinity,
-            }}
-            style={
-              {
-                "--gradient-angle": "180deg",
-              } as React.CSSProperties
-            }
             onClick={() => {
               if (!isClarifying) {
                 textareaRef.current?.focus()
               }
             }}
+            // Focus is tracked on the FORM, not on the textarea: the collapsed
+            // bar opens for anything the reader addresses — tabbing to the mic
+            // counts — and, more to the point, closing on the textarea's own blur
+            // would close it the moment a chip took focus, which is every way of
+            // picking one. React's onFocus/onBlur are focusin/focusout, so they
+            // do reach here from the controls inside.
+            onFocus={() => setFocusWithin(true)}
+            onBlur={handleComposerBlur}
             onSubmit={handleSubmit}
           >
             <MentionPopover
@@ -553,17 +722,20 @@ export const F0AiChatTextArea = ({
                   />
 
                   {/* THE TEXT BAND. A flex row only in the `inside` layout,
-                      where One's mark leads the text and the send button trails
-                      it. `items-end` is what keeps the button on the LAST line
-                      as the textarea grows, instead of floating beside the
-                      middle of the text.
+                      where One's mark leads the text — and, while the bar is
+                      collapsed, the send button trails it. `items-end` is what
+                      keeps that button on the LAST line as the textarea grows,
+                      instead of floating beside the middle of the text.
 
                       `TextareaField` is `flex-1` already and its own layers
                       carry the field's 12px inset (top and bottom), so this row
-                      adds no vertical padding of its own — the two things beside
-                      the text align against that inset. */}
+                      adds no vertical padding of its own — the things beside the
+                      text align against that inset. */}
                   <div
-                    className={cn(inlineComposerBar && "flex items-end pr-3")}
+                    className={cn(
+                      inlineComposerBar && "flex items-end",
+                      barCollapsed && "pr-3"
+                    )}
                   >
                     {/* ONE'S MARK, leading the field. `pl-3` is the field's own
                         left inset; the 12px gap to the text after it is
@@ -611,8 +783,33 @@ export const F0AiChatTextArea = ({
                         taller than the line, visibly high against the top
                         border. Grown past one line the same 10px keeps it on the
                         last line. */}
-                    {showInlineSubmit && (
-                      <div className="shrink-0 pb-[10px] pl-2">
+                    {barCollapsed && (
+                      // `preventDefault` ON MOUSEDOWN IS LOAD-BEARING, and the
+                      // bug it fixes is worth spelling out: taking focus is the
+                      // browser's DEFAULT ACTION for mousedown, focus is what
+                      // opens the bar, and opening the bar unmounts this very
+                      // line — so the button was destroyed between mousedown and
+                      // mouseup and its `click` never fired. Pressing the
+                      // microphone did nothing at all.
+                      //
+                      // These buttons therefore refuse the pointer focus and let
+                      // the form's own onClick put it on the textarea instead,
+                      // which opens the bar AFTER the click has been handled.
+                      // Nothing is lost: keyboard users reach the textarea first
+                      // (it is the first tab stop), so by the time Tab could
+                      // arrive here the bar is already open and this line is gone.
+                      <div
+                        className="flex shrink-0 items-center gap-2 pb-[10px] pl-2"
+                        onMouseDown={(event) => event.preventDefault()}
+                      >
+                        {canRecord && (
+                          <DictationButton
+                            inProgress={inProgress}
+                            recordingStatus={recorder.status}
+                            onStartRecording={handleStartRecording}
+                            size="sm"
+                          />
+                        )}
                         <SubmitButton
                           inProgress={inProgress}
                           hasDataToSend={hasDataToSend}
@@ -624,57 +821,41 @@ export const F0AiChatTextArea = ({
                     )}
                   </div>
 
-                  {/* THE SUGGESTIONS BAND, inside the field. `px-3` is the
-                      field's own inset — the chips line up with the text above
-                      them and nothing indents them further, which is the point
-                      of putting them in here. `pb-3` closes the box.
+                  {/* THE CONTROL ROW, and whether it is there at all. The
+                      collapsed bar has none — see `barCollapsed`. A composer
+                      that cannot collapse skips the wrapper entirely and renders
+                      the row as it always has.
 
-                      `pt-1` ON TOP OF the text band's own 12px bottom slack, for
-                      16px between the two bands — which is v2's `gap-4` between
-                      the same two rows, arrived at from the other direction.
-                      12px alone read as cramped against the chips (Saul,
-                      2026-08-13): they are 32px tall against a 20px line, so the
-                      gap has to clear the taller thing to look like a gap.
+                      `initial={false}` keeps a collapsible composer that opens
+                      un-collapsed (it already had something to send) from
+                      animating its row in on load; one that opens later, on the
+                      first focus, does animate.
 
-                      Clicks are STOPPED here rather than bubbling to the form,
-                      whose onClick focuses the textarea — the same guard
-                      `toolbarStart` takes. Without it, pressing a chip would pull
-                      focus off the trigger and break the popover's own
-                      Escape-restores-focus handling. */}
-                  {suggestionsRow && suggestionsInside && (
-                    <div
-                      className="px-3 pb-3 pt-1"
-                      onClick={(event) => event.stopPropagation()}
-                    >
-                      {suggestionsRow}
-                    </div>
-                  )}
-
-                  {showActionRow && (
-                    <ActionBar
-                      onUploadFiles={onUploadFiles}
-                      toolbarStart={toolbarStart}
-                      isAtMaxFiles={isAtMaxFiles}
-                      maxFiles={maxFiles}
-                      acceptValue={acceptValue}
-                      fileInputRef={fileInputRef}
-                      handleFileSelect={handleFileSelect}
-                      inProgress={inProgress}
-                      hasDataToSend={hasDataToSend}
-                      isPreSending={isPreSending || pendingSubmit}
-                      canRecord={canRecord}
-                      recordingStatus={recorder.status}
-                      recordingStream={recorder.stream}
-                      onStartRecording={handleStartRecording}
-                      onStopRecording={recorder.stop}
-                      onCancelRecording={handleCancelRecording}
-                      showSubmit={!inlineComposerBar}
-                    />
+                      `overflow-hidden` clips at the ROW's border box, 12px of
+                      padding away from the chips, so the scroller's 4px bleed
+                      (its focus-ring room) is not clipped with it. */}
+                  {barCollapsible ? (
+                    <AnimatePresence initial={false}>
+                      {!barCollapsed && (
+                        <motion.div
+                          key="action-row"
+                          className="overflow-hidden"
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={collapseTransition}
+                        >
+                          {actionRow}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  ) : (
+                    actionRow
                   )}
                 </motion.div>
               )}
             </AnimatePresence>
-          </motion.form>
+          </form>
         </CreditWarningWrapper>
       </div>
 

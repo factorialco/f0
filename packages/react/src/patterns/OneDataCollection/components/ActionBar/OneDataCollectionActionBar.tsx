@@ -145,7 +145,7 @@ export const OneDataCollectionActionBar = forwardRef<
         {!!displayedSelectedNumber && (
           <div className="dark flex h-8 w-full items-center justify-between gap-3 px-2 sm:h-auto sm:w-fit sm:justify-start sm:pl-2 sm:pr-0">
             {showAllItemsSelected ? (
-              <span className="font-medium tabular-nums">
+              <span className="font-medium tabular-nums text-f1-foreground">
                 {t("status.selected.allItemsSelected", {
                   total: totalItems ?? 0,
                 })}

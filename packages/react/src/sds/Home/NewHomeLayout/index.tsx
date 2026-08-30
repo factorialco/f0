@@ -1,3 +1,4 @@
+import { AnimatePresence, motion } from "motion/react"
 import {
   Children,
   type CSSProperties,
@@ -11,29 +12,26 @@ import {
   useState,
 } from "react"
 
-import { AnimatePresence, motion } from "motion/react"
-
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { F0Button } from "@/components/F0Button"
-import { F0Icon } from "@/components/F0Icon"
-import Menu from "@/icons/app/Menu"
+import { F0Icon, type F0IconProps } from "@/components/F0Icon"
+import { Tooltip } from "@/experimental/Overlays/Tooltip"
 // No `Pencil`/`Check`: there is no edit mode to toggle any more.
 import { Plus } from "@/icons/app"
-import { Tooltip } from "@/experimental/Overlays/Tooltip"
-import { useSidebar } from "@/patterns/ApplicationFrame/FrameProvider"
-import { SidebarIconSvg } from "@/patterns/Navigation/Sidebar/Icon"
-import { Action } from "@/ui/Action"
+import Menu from "@/icons/app/Menu"
+import { F0OneSwitch } from "@/kits/ai/F0OneSwitch"
 import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
+import { useSidebar } from "@/patterns/ApplicationFrame/FrameProvider"
+import { SidebarIconSvg } from "@/patterns/Navigation/Sidebar/Icon"
+import { Action } from "@/ui/Action"
 
 import {
   entranceDelay,
   entranceTransition,
   GENIE_GLYPH_ENTER_SCALE,
   GENIE_GLYPH_EXIT_SCALE,
-  GENIE_GLYPH_HOVER_SCALE,
-  GENIE_GLYPH_OPEN_SCALE,
   GENIE_GLYPH_TAP_SCALE,
   GENIE_ORIGIN,
   GENIE_RETRACTED_OFFSET_PX,
@@ -44,21 +42,22 @@ import {
   RIGHT_AREA_DELAY_MS,
   withReducedMotion,
 } from "../home-motion"
+import {
+  widgetTitle,
+  type HomeRenderCtx,
+  type HomeWidgetItem,
+  type RailActionTone,
+  type SlotRenderers,
+  type WidgetParams,
+} from "../slotRenderers"
 import { SlotWidget } from "../SlotWidget"
-import { useRailMotion } from "./useRailMotion"
 import { useScrollFade } from "../useScrollFade"
 import {
   WidgetContainer,
   type WidgetContainerSide,
   type WidgetVirtualization,
 } from "../WidgetContainer"
-import {
-  widgetTitle,
-  type HomeRenderCtx,
-  type HomeWidgetItem,
-  type SlotRenderers,
-  type WidgetParams,
-} from "../slotRenderers"
+import { useRailMotion } from "./useRailMotion"
 
 /**
  * The DaytimePage gradient wash, by period — the same stops and the same 8%
@@ -109,8 +108,178 @@ const CONTENT_WIDTH = 712
 const GLYPH_GAP_PX = 8
 
 /**
+ * THE GLYPH'S SECOND — how long each face of a flashing glyph is up, and how long
+ * a ticking readout's separator stays lit. One period, not two half-periods: a
+ * faster alternation reads as a fault rather than as a request, and a clock that
+ * blinks twice a second isn't a clock.
+ */
+const GLYPH_FLASH_MS = 1000
+
+/**
+ * The one-second beat both the flashing icon and the ticking readout are drawn
+ * on: `true` for the first half of it, `false` for the second.
+ *
+ * It rests on `true` whenever it isn't running, so every way of stopping — reduced
+ * motion, the widget floating under the pointer, a state that stopped asking for
+ * anything — leaves the glyph in the state that says the most: the action's icon,
+ * the separator lit.
+ */
+const useFlash = (running: boolean) => {
+  const reducedMotion = useReducedMotion()
+  const [lit, setLit] = useState(true)
+
+  useEffect(() => {
+    if (!running || reducedMotion) {
+      setLit(true)
+      return
+    }
+    const beat = setInterval(() => setLit((was) => !was), GLYPH_FLASH_MS)
+    return () => clearInterval(beat)
+  }, [running, reducedMotion])
+
+  return lit
+}
+
+/** How far a blinking reading goes down on the off beat. */
+const TICK_DIM = 0.24
+
+/**
+ * A rail action's reading, BLINKING LIKE A CLOCK while it is `ticking`: the
+ * figures stand still and the separators go dim for half of every second, which
+ * is what says the number is counting rather than parked. The figures never
+ * blink — a reading you cannot read at a glance is not a reading.
+ *
+ * Opacity only, and the string is never taken apart in the accessibility tree — a
+ * screen reader still reads "0:42", not "0 42". `tabular-nums` so a digit rolling
+ * over doesn't move the pill.
+ */
+const GlyphReading = ({
+  text,
+  ticking,
+}: {
+  text: string
+  ticking: boolean
+}) => {
+  const lit = useFlash(ticking)
+
+  return (
+    <span className="whitespace-nowrap px-2 text-2xl font-semibold tabular-nums">
+      {text.split(":").map((part, index) => (
+        <Fragment key={index}>
+          {index > 0 ? (
+            <span
+              className="transition-opacity duration-200"
+              style={{ opacity: lit ? 1 : TICK_DIM }}
+            >
+              :
+            </span>
+          ) : null}
+          {part}
+        </Fragment>
+      ))}
+    </span>
+  )
+}
+
+/**
+ * WHAT A TONE PAINTS. One entry per tone, and each says the same three things:
+ * the pill's fill, the button's fill, and what colour the button's icon takes.
+ *
+ * The pairing is the point. `neutral` is the dark slab with the accent button on
+ * it — a chip that isn't saying anything in particular. Every OTHER tone colours
+ * the pill and turns the button into a plain chip carrying that colour in its
+ * icon, so the two halves never put two strong hues side by side. Without a
+ * reading there is no pill, and `solo` is what the button wears on its own.
+ *
+ * THE CHIP KEEPS ITS FILL ON HOVER — `hover:` set to the SAME colour, which is
+ * not redundant: `tailwind-merge` only settles classes within one variant, so a
+ * plain `bg-*` never displaces the button variant's `hover:bg-*`, and the chip
+ * was repainting itself with the page's hover tint the moment you pointed at it.
+ * Over a bold pill that reads as the button going see-through rather than
+ * lighting up. What the chip does instead is take a BORDER — the glyphs no longer
+ * scale under the pointer (see `glyphMotion`), so the ring is the feedback: a
+ * hairline on the plain chips, and the inverse one on the solid buttons, which is
+ * the only border that shows on a bold fill.
+ *
+ * Literal class strings, one per tone: Tailwind reads source text, so a class
+ * built from a variable never reaches the stylesheet.
+ */
+const RAIL_ACTION_TONES = {
+  neutral: {
+    pill: "bg-f1-background-inverse text-f1-foreground-inverse",
+    button:
+      "bg-f1-background-accent-bold hover:bg-f1-background-accent-bold-hover",
+    icon: "inverse",
+    ring: "ring-f1-border-inverse",
+    solo: "bg-f1-background-accent-bold hover:bg-f1-background-accent-bold-hover",
+    soloIcon: "inverse",
+    soloRing: "ring-f1-border-inverse",
+  },
+  accent: {
+    pill: "bg-f1-background-accent-bold text-f1-foreground-inverse",
+    button: "bg-f1-background hover:bg-f1-background",
+    icon: "accent",
+    ring: "ring-f1-border-secondary",
+    solo: "bg-f1-background-accent-bold hover:bg-f1-background-accent-bold-hover",
+    soloIcon: "inverse",
+    soloRing: "ring-f1-border-inverse",
+  },
+  critical: {
+    pill: "bg-f1-background-critical-bold text-f1-foreground-inverse",
+    button: "bg-f1-background hover:bg-f1-background",
+    icon: "critical",
+    ring: "ring-f1-border-secondary",
+    solo: "bg-f1-background-critical-bold",
+    soloIcon: "inverse",
+    soloRing: "ring-f1-border-inverse",
+  },
+  warning: {
+    pill: "bg-f1-background-warning-bold text-f1-foreground-inverse",
+    button: "bg-f1-background hover:bg-f1-background",
+    icon: "warning",
+    ring: "ring-f1-border-secondary",
+    solo: "bg-f1-background-warning-bold",
+    soloIcon: "inverse",
+    soloRing: "ring-f1-border-inverse",
+  },
+  // The amber `--promote-50`, which is also the colour a clock-in tile pulses on
+  // a break: a rail action that mirrors a widget's own status should be able to
+  // mirror its colour exactly, not approximate it with `warning`.
+  promote: {
+    pill: "bg-f1-background-promote-bold text-f1-foreground-inverse",
+    button: "bg-f1-background hover:bg-f1-background",
+    icon: "promote",
+    ring: "ring-f1-border-secondary",
+    solo: "bg-f1-background-promote-bold",
+    soloIcon: "inverse",
+    soloRing: "ring-f1-border-inverse",
+  },
+  positive: {
+    pill: "bg-f1-background-positive-bold text-f1-foreground-inverse",
+    button: "bg-f1-background hover:bg-f1-background",
+    icon: "positive",
+    ring: "ring-f1-border-secondary",
+    solo: "bg-f1-background-positive-bold",
+    soloIcon: "inverse",
+    soloRing: "ring-f1-border-inverse",
+  },
+} as const satisfies Record<
+  RailActionTone,
+  {
+    pill: string
+    button: string
+    icon: F0IconProps["color"]
+    ring: string
+    solo: string
+    soloIcon: F0IconProps["color"]
+    soloRing: string
+  }
+>
+
+/**
  * One widget as the collapsed strip shows it: its own catalog glyph, standing in
- * for the whole card.
+ * for the whole card — or, when the widget carries a `railAction`, that action's
+ * button wearing the same 40px.
  *
  * It ARRIVES FROM LARGER THAN LIFE — the card that just shrank into it — and
  * leaves the other way, blooming back out into the card it becomes. While its
@@ -123,6 +292,7 @@ const CollapsedGlyph = ({
   open,
   delayMs,
   onOpen,
+  onCancelOpen,
   onClose,
 }: {
   widget: HomeWidgetItem
@@ -131,10 +301,164 @@ const CollapsedGlyph = ({
   open: boolean
   /** When this strip's first glyph starts arriving. */
   delayMs: number
-  onOpen: (id: string, anchor: HTMLElement) => void
+  onOpen: (id: string, anchor: HTMLElement, instant?: boolean) => void
+  onCancelOpen: () => void
   onClose: () => void
 }) => {
   const reducedMotion = useReducedMotion()
+  const action = widget.railAction
+  // The flash pauses while the widget is FLOATING, because the panel is open for
+  // exactly one reason — the pointer (or the focus ring) is on the glyph — and a
+  // face that changed under the pointer would make the click a coin toss about
+  // which icon was pressed.
+  const actionFace = useFlash(!!action?.flashing && !open)
+  /**
+   * THE PILL IS FOR THE STOWED WIDGET. Floating, the card is out with the same
+   * reading in full context, so the pill goes and leaves the button it was built
+   * around — which also takes the overhang out of the panel's way.
+   *
+   * THE BUTTON ITSELF DOES NOT CHANGE while that happens. Its colours come from
+   * whether the action HAS a reading, not from whether the pill is drawn right
+   * now (`action.text`, not this) — a control that repaints under the pointer is
+   * one you cannot aim at, and hover is exactly when you are aiming.
+   */
+  const text = action?.text && !open ? action.text : undefined
+  /** What the state's colour paints — the pill, the button, and its icon. */
+  const tone = RAIL_ACTION_TONES[action?.tone ?? "neutral"]
+
+  /**
+   * The genie, identical whichever face the glyph wears.
+   *
+   * EVERY SCALE HERE IS TRANSIENT — arriving, leaving, the press — and none of
+   * them is HELD. A held fractional scale is rasterized once and then stretched:
+   * the glyph's icon and a pill's figures go soft, and they stay soft for as long
+   * as you keep the pointer there, which is exactly when they are being read. The
+   * hover and open states say what they have to say with the panel they open, the
+   * tooltip, and the button's own hover border.
+   */
+  const glyphMotion = {
+    initial: {
+      opacity: 0,
+      scale: reducedMotion ? 1 : GENIE_GLYPH_ENTER_SCALE,
+    },
+    animate: { opacity: 1, scale: 1 },
+    exit: { opacity: 0, scale: reducedMotion ? 1 : GENIE_GLYPH_EXIT_SCALE },
+    whileTap: reducedMotion ? undefined : { scale: GENIE_GLYPH_TAP_SCALE },
+    transition: withReducedMotion(
+      { ...glyphTransition, delay: entranceDelay(order, delayMs) },
+      reducedMotion
+    ),
+  }
+
+  /* Same accent dot HomeListItem draws for unread rows — the ring keeps it
+     legible over any glyph, action button included. */
+  const updatesDot = widget.hasUpdates ? (
+    <span className="pointer-events-none absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-f1-background-accent-bold ring-2 ring-f1-background" />
+  ) : null
+
+  if (action) {
+    // The action's button IS the glyph — one control, so nothing is nested in
+    // anything and the strip's geometry is untouched (`size-10` + `compact`
+    // hold the button to the 40px every other glyph is).
+    //
+    // Which means the panel can't be a click any more: hover opens it as ever,
+    // and FOCUS opens it too, so reaching the glyph by keyboard still gets you
+    // to the widget's own controls — they are the next thing in the tab order.
+    //
+    // With a `text` the whole thing becomes a PILL: the reading, then the same
+    // button at the end of it. The pill keeps the strip's 40px HEIGHT — the one
+    // dimension the strip's rhythm and the cards' stow are built on — and takes
+    // the width it needs off the left, out over the feed.
+    //
+    // The tooltip is `instant`: it is the only place the action's NAME is
+    // written, and the glyph is a control you point at on your way past. The
+    // default 700ms wait is for a label that merely confirms what you can
+    // already read — here it withheld the whole thing.
+    return (
+      <Tooltip label={action.label} instant>
+        <motion.div
+          className={cn(
+            // `pointer-events-auto` against the strip's `none`: a pill is wider
+            // than the rail's column, and the box holding it must not become a
+            // 100px dead margin down the side of the feed.
+            //
+            // `group` so the BUTTON can answer this whole box's hover — see its
+            // border below.
+            "group pointer-events-auto relative shrink-0",
+            // The pill is the GLYPH'S OWN geometry, grown sideways: the 40px
+            // height every glyph has, the button unchanged inside it, and
+            // `rounded-lg` — one step up from the button's `rounded-md`, which is
+            // what the radius scale says a container holding an `lg` control
+            // takes. Nothing here is a shape the strip doesn't already use.
+            text
+              ? cn(
+                  "-mr-1 flex flex-row items-center gap-1 rounded-lg p-1",
+                  tone.pill
+                )
+              : "rounded-lg"
+          )}
+          onMouseEnter={(event) => onOpen(widget.id, event.currentTarget)}
+          onMouseLeave={onCancelOpen}
+          onFocus={(event) => onOpen(widget.id, event.currentTarget, true)}
+          {...glyphMotion}
+        >
+          {text ? (
+            <GlyphReading text={text} ticking={!!action.ticking} />
+          ) : null}
+          <Action
+            type="button"
+            // `ghost` and then painted: the tone decides this button's fill and
+            // its icon TOGETHER with the pill's, and a variant would bring a
+            // second opinion about both.
+            variant="ghost"
+            // THE SAME BUTTON either way — 40px at the strip's own radius,
+            // whether it is standing alone as the glyph or sitting at the end of
+            // a pill. A reading beside it doesn't make it a different control.
+            size="lg"
+            // FLAT, like every other glyph in the strip. A button's elevation
+            // chrome — the drop shadow and the `::after` top highlight — is for a
+            // control raised off a page; here it reads as a border, and the
+            // highlight's own radius is a step tighter than an `lg` button's, so
+            // it cuts a visible arc across each corner. The strip is tiles.
+            className={cn(
+              // `[&_.main]:px-0` — the button is 40px of icon, not a label with
+              // room around it, and an `lg` button's own padding would squeeze a
+              // 24px glyph out of a 40px box. The tile centres it instead.
+              "size-10 shadow-none after:hidden hover:shadow-none active:shadow-none [&_.main]:px-0",
+              action.text ? tone.button : tone.solo,
+              // THE BORDER ANSWERS THE WHOLE GLYPH, not just its 40px: the pill is
+              // one object, and pointing at the reading is pointing at the thing
+              // the button belongs to. It stays for as long as the widget is out
+              // (`open`), so crossing from the glyph into the card it opened
+              // doesn't switch the button off behind you.
+              "ring-inset group-hover:ring-1",
+              open && "ring-1",
+              action.text ? tone.ring : tone.soloRing
+            )}
+            // "Resume" on its own doesn't say which glyph this is; the tooltip
+            // can lean on the strip for that, an accessible name can't.
+            aria-label={`${action.label}, ${widgetTitle(widget)}`}
+            onClick={() => action.onClick()}
+          >
+            <F0Icon
+              // The strip's own glyph size: `F0AvatarIcon` at `lg` draws its icon
+              // at 24px, and an action glyph that drew a smaller one read as a
+              // different KIND of tile rather than the same tile doing something.
+              size="lg"
+              // `color` rather than a text class: it marks the svg
+              // `data-has-color`, which is what stops the button variant's own
+              // icon rules from painting over the tone.
+              color={action.text ? tone.icon : tone.soloIcon}
+              // No widget icon means no second face to flash to — the action's
+              // is the only one there is.
+              icon={actionFace || !widget.icon ? action.icon : widget.icon}
+            />
+          </Action>
+          {updatesDot}
+        </motion.div>
+      </Tooltip>
+    )
+  }
 
   return (
     <motion.button
@@ -144,26 +468,14 @@ const CollapsedGlyph = ({
       aria-label={widgetTitle(widget)}
       aria-expanded={open}
       onMouseEnter={(event) => onOpen(widget.id, event.currentTarget)}
+      onMouseLeave={onCancelOpen}
       onClick={(event) =>
-        open ? onClose() : onOpen(widget.id, event.currentTarget)
+        open ? onClose() : onOpen(widget.id, event.currentTarget, true)
       }
-      className="rounded-lg"
-      initial={{
-        opacity: 0,
-        scale: reducedMotion ? 1 : GENIE_GLYPH_ENTER_SCALE,
-      }}
-      animate={{ opacity: 1, scale: open ? GENIE_GLYPH_OPEN_SCALE : 1 }}
-      exit={{ opacity: 0, scale: reducedMotion ? 1 : GENIE_GLYPH_EXIT_SCALE }}
-      whileHover={
-        reducedMotion ? undefined : { scale: GENIE_GLYPH_HOVER_SCALE }
-      }
-      whileTap={reducedMotion ? undefined : { scale: GENIE_GLYPH_TAP_SCALE }}
-      transition={withReducedMotion(
-        { ...glyphTransition, delay: entranceDelay(order, delayMs) },
-        reducedMotion
-      )}
+      // See the strip: it takes no pointer events, so each glyph takes its own.
+      className="pointer-events-auto rounded-lg"
+      {...glyphMotion}
     >
-      {/* Same accent dot HomeListItem uses for unread rows. */}
       <span className="relative inline-flex">
         {widget.icon ? (
           <F0AvatarIcon icon={widget.icon} size="lg" />
@@ -172,11 +484,7 @@ const CollapsedGlyph = ({
             {widgetTitle(widget).charAt(0)}
           </span>
         )}
-        {widget.hasUpdates ? (
-          // Same dot HomeListItem draws for unread rows — the ring keeps it
-          // legible over any glyph.
-          <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-f1-background-accent-bold ring-2 ring-f1-background" />
-        ) : null}
+        {updatesDot}
       </span>
     </motion.button>
   )
@@ -191,6 +499,7 @@ const COLUMN_GAP_PX = 16
 /** Tailwind's `md` — below it the layout is one column unless the rail is collapsed. */
 const TWO_COLUMN_MIN_PX = 768
 const PANEL_LEAVE_MS = 150
+const PANEL_OPEN_MS = 150
 /** How far the floating panel clears the strip it comes out of. */
 const PANEL_GAP_PX = 8
 // The add control's name comes from the PROVIDER (`t.widgets.addWidget`) — it is
@@ -216,6 +525,18 @@ export interface NewHomeLayoutProps {
    * dragging and the add placeholder; the others stay put. Both by default.
    */
   editableWidgetContainers?: WidgetContainerSide[]
+  /**
+   * Which containers may still be ADDED TO. Narrower than
+   * `editableWidgetContainers`, which it is a subset of: a column not named here
+   * keeps its dragging and its "Remove widget" and only loses the offer to add.
+   *
+   * Defaults to every editable container — the common case, where the catalog
+   * always has something for every column. Name the sides once a column's
+   * catalog can run out: a main column that only ever holds one kind of widget
+   * has nothing to offer the moment that widget is on it, and a "+" that opens
+   * an empty picker is an offer the app cannot keep.
+   */
+  addableWidgetContainers?: WidgetContainerSide[]
   /**
    * Which containers keep ONLY THE WIDGETS YOU CAN SEE in the DOM. None by
    * default: for a Home of a dozen widgets, mounting them all is what keeps a
@@ -275,7 +596,10 @@ export interface NewHomeLayoutProps {
     widget: HomeWidgetItem,
     params: WidgetParams
   ) => ReactNode
-  /** When set, renders a "+ Add widget" affordance at the bottom of each column. */
+  /**
+   * When set, renders a "+ Add widget" affordance at the bottom of each column
+   * that takes widgets — see `addableWidgetContainers`.
+   */
   onClickAddNewWidget?: (side: WidgetContainerSide) => void
   /** Called with a side and its widget ids in their new order after a drag. */
   onReorderWidgets?: (side: WidgetContainerSide, ids: string[]) => void
@@ -304,6 +628,15 @@ export interface NewHomeLayoutProps {
   stackedPinsAfter?: number
   ctx?: HomeRenderCtx
   className?: string
+  /** Tooltip copy for the One switch, forwarded to `F0OneSwitch`. */
+  oneSwitchTooltip?: { whenDisabled?: string; whenEnabled?: string }
+  /** Opens the One switch's tooltip for 3s on mount. */
+  oneSwitchAutoOpen?: boolean
+  /**
+   * Hides the One AI toggle in the controls row. Use when One is reached
+   * elsewhere (e.g. a sidebar tab) so Home doesn't show a redundant switch.
+   */
+  hideOneSwitch?: boolean
 }
 
 /**
@@ -332,6 +665,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
       slotRenderers,
       renderWidget,
       editableWidgetContainers = ["main", "right"],
+      addableWidgetContainers,
       virtualizedWidgetContainers = [],
       virtualization,
       onRemoveWidget,
@@ -347,6 +681,9 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
       stackedPinsAfter = 2,
       ctx = {},
       className,
+      oneSwitchTooltip,
+      oneSwitchAutoOpen,
+      hideOneSwitch = false,
     },
     ref
   ) {
@@ -359,9 +696,10 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
     const [openId, setOpenId] = useState<string | null>(null)
     const [panelTop, setPanelTop] = useState(0)
     // Whether the panel should GLIDE to `panelTop` or simply be there — see
-    // `openFromAnchor`.
+    // `showFromAnchor`.
     const [panelGlide, setPanelGlide] = useState(false)
     const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+    const openTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
     // The rail collapses when the grid can't give both columns their width —
     // measured (clientWidth is a layout metric), not media-queried, because
@@ -389,6 +727,11 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
     const [manualCollapsed, setManualCollapsed] = useState<boolean | null>(null)
     const canEditSide = (side: WidgetContainerSide) =>
       editableWidgetContainers.includes(side)
+    // ADDING is a narrowing of arranging: a column you cannot arrange is not one
+    // you can add to, and an omitted `addableWidgetContainers` means every
+    // arrangeable column takes new widgets.
+    const canAddToSide = (side: WidgetContainerSide) =>
+      canEditSide(side) && (addableWidgetContainers?.includes(side) ?? true)
 
     const render = (widget: HomeWidgetItem) => {
       const node = renderWidget ? (
@@ -437,7 +780,9 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
         : false
 
     const hasSide =
-      aside != null || rightWidgets.length > 0 || onClickAddNewWidget != null
+      aside != null ||
+      rightWidgets.length > 0 ||
+      (onClickAddNewWidget != null && canAddToSide("right"))
     // Two reasons the rail collapses, and they don't compete: there ISN'T ROOM
     // for both columns, or you ASKED for the space. Narrowness always wins —
     // expanding by hand can't conjure room the layout doesn't have — so the
@@ -449,6 +794,11 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
       rightWidgets.length > 0 &&
       (autoCollapsed || (manualCollapsed ?? false))
     const railWidth = collapsed ? COLLAPSED_RAIL_WIDTH : asideWidth
+    // ONE string for the rail toggle: its accessible name AND what the tooltip
+    // says. A control whose tooltip and label can drift is two controls.
+    const railToggleLabel = collapsed
+      ? "Expand widgets panel"
+      : "Collapse widgets panel"
     // NOTHING ON THE RIGHT UNTIL THE BOX HAS BEEN MEASURED. Which presentation the
     // rail is in — column, strip, or nothing at all — is decided entirely by the
     // width, so drawn before there is one its first state is a guess the next
@@ -504,8 +854,19 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
     // the rail opens up: kept, it would reopen whatever was last hovered the
     // moment the layout narrowed again.
     useEffect(() => {
-      if (!collapsed) setOpenId(null)
+      if (collapsed) return
+      if (openTimer.current) clearTimeout(openTimer.current)
+      openTimer.current = null
+      setOpenId(null)
     }, [collapsed])
+
+    useEffect(
+      () => () => {
+        if (openTimer.current) clearTimeout(openTimer.current)
+        if (leaveTimer.current) clearTimeout(leaveTimer.current)
+      },
+      []
+    )
 
     // How the rail moves, and the one number the grid template reads. The genie
     // lives in there; the geometry it moves through stays here.
@@ -530,6 +891,8 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
      */
     const closingId = useRef<string | null>(null)
     if (openId) closingId.current = openId
+    const shownId = useRef<string | null>(null)
+    shownId.current = openId
     const panelWidgetId =
       openId ?? (rail.panelHidden ? null : closingId.current)
 
@@ -597,12 +960,17 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
       if (leaveTimer.current) clearTimeout(leaveTimer.current)
       leaveTimer.current = null
     }
+    const cancelOpen = () => {
+      if (openTimer.current) clearTimeout(openTimer.current)
+      openTimer.current = null
+    }
     const scheduleLeave = () => {
       cancelLeave()
+      cancelOpen()
       leaveTimer.current = setTimeout(() => setOpenId(null), PANEL_LEAVE_MS)
     }
-    const openFromAnchor = (id: string, anchor: HTMLElement) => {
-      cancelLeave()
+    const showFromAnchor = (id: string, anchor: HTMLElement) => {
+      cancelOpen()
       const root = rootRef.current
       if (root) {
         const top =
@@ -613,8 +981,25 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
       // there before it fades in. Moving between glyphs while it is already open
       // is the opposite: there it GLIDES, and that glide is what says the panel
       // is one thing showing a different widget rather than two panels.
-      setPanelGlide(openId != null)
+      setPanelGlide(shownId.current != null)
       setOpenId(id)
+    }
+    const openFromAnchor = (
+      id: string,
+      anchor: HTMLElement,
+      instant = false
+    ) => {
+      cancelLeave()
+      cancelOpen()
+      if (shownId.current === id) return
+      if (instant) {
+        showFromAnchor(id, anchor)
+        return
+      }
+      openTimer.current = setTimeout(
+        () => showFromAnchor(id, anchor),
+        PANEL_OPEN_MS
+      )
     }
 
     return (
@@ -682,6 +1067,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             belongs: under everything in this (isolated) layout. */}
         <div
           aria-hidden
+          data-page-surface
           className="pointer-events-none absolute -z-10 overflow-hidden bg-f1-special-page"
           style={{ top: -bleed, bottom: -bleed, left: -bleed, right: -bleed }}
         >
@@ -719,23 +1105,33 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
                 is collapsed regardless, so a toggle there would be a control
                 that does nothing. */}
             {hasSide && rightWidgets.length > 0 && !autoCollapsed ? (
-              <Action
-                variant="ghost"
-                size="md"
-                compact
-                onClick={() => setManualCollapsed(!collapsed)}
-                title={
-                  collapsed ? "Expand widgets panel" : "Collapse widgets panel"
-                }
-                aria-label={
-                  collapsed ? "Expand widgets panel" : "Collapse widgets panel"
-                }
-              >
-                {/* The sidebar's own collapse glyph, so collapsing the rail and
-                    collapsing the sidebar read as the same gesture. */}
-                <SidebarIconSvg isExpanded={!collapsed} />
-              </Action>
+              // f0's own tooltip rather than the browser's `title`: an
+              // icon-only control needs its name on hover, and the native one
+              // arrives late, unstyled, and never for a keyboard.
+              <Tooltip label={railToggleLabel}>
+                <Action
+                  variant="ghost"
+                  size="md"
+                  compact
+                  onClick={() => setManualCollapsed(!collapsed)}
+                  aria-label={railToggleLabel}
+                >
+                  {/* The sidebar's own collapse glyph, so collapsing the rail and
+                      collapsing the sidebar read as the same gesture. */}
+                  <SidebarIconSvg isExpanded={!collapsed} />
+                </Action>
+              </Tooltip>
             ) : null}
+            {/* The One toggle sits where it sits on every other layout — last in
+                the top-right controls, after the rail's own collapse button. It
+                draws NOTHING unless the AI chat context is enabled, so a Home
+                without One keeps the row it had. */}
+            {!hideOneSwitch && (
+              <F0OneSwitch
+                tooltip={oneSwitchTooltip}
+                autoOpen={oneSwitchAutoOpen}
+              />
+            )}
           </div>
         </HomeEntrance>
         {/* Main column: its own scroll region, no mask — a reading column should
@@ -748,7 +1144,18 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             screen instead of being cut short inside the page. */}
         <div
           ref={mainFade.ref}
-          className={cn("relative min-h-0 overflow-y-auto", SCROLLBAR_HIDDEN)}
+          className={cn(
+            // `isolate` — A STACKING CONTEXT OF ITS OWN, and the reason the
+            // floating panel is not buried by the feed. Without it the column is
+            // `relative` at `z-index: auto`, which is no context at all: every
+            // z-index INSIDE it competes at the layout's level, and the content a
+            // Home puts here brings its own (the Ask-AI composer is `z-20`, and
+            // whatever a card does next is not this layout's to know). Isolated,
+            // the whole column is one layer that the panel's `z-10` clears, no
+            // matter what its contents bid.
+            "relative isolate min-h-0 overflow-y-auto",
+            SCROLLBAR_HIDDEN
+          )}
           style={{
             // Placed rather than flowed, because the strip and the rail body
             // BOTH want this row's second column and for a moment mid-collapse
@@ -778,6 +1185,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             ctx={ctx}
             virtualized={virtualizationFor("main")}
             disableEdition={!canEditSide("main")}
+            dragSurfaceSelector="[data-page-surface]"
             onReorder={
               onReorderWidgets
                 ? (ids) => onReorderWidgets("main", ids)
@@ -789,7 +1197,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             renderWidgetPreview={renderWidgetPreview}
             paramsPreviewWidth={mainWidth}
             onClickAddNewWidget={
-              onClickAddNewWidget
+              onClickAddNewWidget && canAddToSide("main")
                 ? () => onClickAddNewWidget("main")
                 : undefined
             }
@@ -823,11 +1231,24 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
               key="collapsed-strip"
               ref={stripFade.ref}
               className={cn(
-                // `items-start` so a glyph is 40px wide whatever the column is
+                // `items-end` so a glyph is its own 40px whatever the column is
                 // doing: the strip lives in the rail's column, and that column
                 // spends the collapse on its way DOWN from the full rail width —
-                // stretched, the glyphs would start card-wide and shrink.
-                "-m-1 flex min-h-0 flex-col items-start gap-2 overflow-y-auto p-1",
+                // stretched, the glyphs would start card-wide and shrink. END
+                // rather than start because a `railAction` with a reading is a PILL
+                // wider than the column: the box grows to it and hangs out over
+                // the feed to the LEFT (`justifySelf: end` below), and the 40px
+                // glyphs have to stay on the rail's edge while it does.
+                //
+                // Which is also why the box itself takes NO pointer events: at a
+                // pill's width it would otherwise be a dead margin down the side
+                // of the feed, eating clicks meant for the cards under it. Each
+                // glyph turns them back on for its own 40px (`pointer-events-auto`).
+                "-m-1 flex min-h-0 flex-col items-end gap-2 overflow-y-auto p-1",
+                // ABOVE THE PANEL (`z-10`): a glyph is what the floating card
+                // came out of, so it stays in front of it — and a pill overhangs
+                // far enough to be half-covered otherwise.
+                "pointer-events-none z-20",
                 SCROLLBAR_HIDDEN
               )}
               style={{
@@ -863,13 +1284,14 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
                   open={openId === widget.id}
                   delayMs={rail.glyphDelayMs}
                   onOpen={openFromAnchor}
+                  onCancelOpen={cancelOpen}
                   onClose={() => setOpenId(null)}
                 />
               ))}
               {/* Always offered, not only in edit mode: collapsed, the strip has
                     no edit affordance of its own, and adding a widget is the one
                     thing you would still want from it. */}
-              {canEditSide("right") && onClickAddNewWidget ? (
+              {canAddToSide("right") && onClickAddNewWidget ? (
                 // The same control the column's placeholder is — a dashed box
                 // around one glyph, named only on hover — at the strip's size.
                 <Tooltip label={t.widgets.addWidget}>
@@ -877,7 +1299,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
                     type="button"
                     aria-label={t.widgets.addWidget}
                     onClick={() => onClickAddNewWidget("right")}
-                    className="flex h-10 w-10 items-center justify-center rounded-lg border border-dashed border-f1-border text-f1-foreground-secondary hover:border-f1-border-hover hover:text-f1-foreground"
+                    className="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-lg border border-dashed border-f1-border text-f1-foreground-secondary hover:border-f1-border-hover hover:text-f1-foreground"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
@@ -923,9 +1345,8 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             className={cn(
               "min-h-0 overflow-y-auto",
               SCROLLBAR_HIDDEN,
-              // Above the feed it floats over, and opaque: the widget behind it
-              // must not read through the card.
-              railInPanel && "absolute z-10 rounded-xl bg-f1-background",
+              railInPanel &&
+                "absolute z-10 rounded-xl bg-f1-background dark:bg-f1-background-secondary dark:backdrop-blur-[100px] dark:backdrop-saturate-150",
               // RETRACTING it is still in the grid, but it has lifted off the
               // column it is leaving: over the main column rather than beside it.
               rail.mode === "retracting" && "relative z-10"
@@ -983,6 +1404,8 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
               // would rebuild every widget in it — the one thing this rail
               // exists to avoid.
               disableEdition={!canEditSide("right")}
+              disableDrag={collapsed}
+              dragSurfaceSelector="[data-page-surface]"
               onReorder={
                 onReorderWidgets
                   ? (ids) => onReorderWidgets("right", ids)
@@ -997,7 +1420,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
               // affordance, and a placeholder under a single floating widget
               // would be an offer in the wrong place.
               onClickAddNewWidget={
-                onClickAddNewWidget && !collapsed
+                onClickAddNewWidget && canAddToSide("right") && !collapsed
                   ? () => onClickAddNewWidget("right")
                   : undefined
               }

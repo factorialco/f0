@@ -6,8 +6,11 @@
 // SlotWidget is public because a preview drawn any OTHER way is a preview that
 // can drift: an app that has to approximate a widget out of the content
 // components reproduces the frame, the seams and the spacing by hand, and the
-// first of those to fall out of step is silent. WidgetContainer and
-// HomeListItem stay internal — the layout draws columns from data.
+// first of those to fall out of step is silent. `SlotWidgetContent` is the same
+// guarantee WITHOUT the frame, for a surface that is already a surface (an
+// overlay drilling into a widget) and would otherwise be a card inside a card.
+// WidgetContainer and HomeListItem stay internal — the layout draws columns
+// from data.
 export * from "../../../sds/Home/NewHomeLayout"
 export * from "../../../sds/Home/slotRenderers"
 export * from "../../../sds/Home/SlotWidget"

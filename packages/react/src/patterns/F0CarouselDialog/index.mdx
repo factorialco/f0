@@ -1,0 +1,143 @@
+import { Canvas, Meta, Controls } from "@storybook/addon-docs/blocks"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+import * as Stories from "./index.stories"
+
+<Meta of={Stories} />
+
+# F0CarouselDialog
+
+One dialog you **walk through**: an arrow on each side of the panel, the position
+in the header, and the content swapped underneath without the dialog ever closing.
+
+---
+
+## Anatomy
+
+An `F0Dialog` with two additions — a reading beside the close button, and a
+control outside each edge of the panel.
+
+<Canvas of={Stories.Default} />
+
+| Element     | Description                                                           | Required |
+| ----------- | --------------------------------------------------------------------- | -------- |
+| Title       | The current page's title, in the header and as the accessible name    | Yes      |
+| Position    | "3 of 11" beside the close button; hidden when there is only one page | Auto     |
+| Side arrows | Previous / Next, outside the panel, disabled at the ends              | Auto     |
+| Content     | The current page only — one item is mounted at a time                 | Yes      |
+
+<Controls of={Stories.Default} />
+
+## Guidelines
+
+**It is for a set, not for a sequence.** Use it where a reader moves _between_
+things: a post opened from a feed, one photo of many, a record and the next
+record. A wizard's steps are one task with a beginning and an end — that is
+`F0Wizard`, which knows about progress and about not letting you skip.
+
+**The arrows are outside the panel,** which is the whole reason this is a
+component rather than two buttons in someone's `children`. Inside, they compete
+with the content for attention and for width; beside it, they are unmistakably
+chrome. They are still rendered _within_ the dialog's own element, so the focus
+trap holds and the keyboard reaches them.
+
+**The index is controlled.** The thing you opened the dialog on is already state
+the app holds — the post that was clicked — and a dialog keeping its own copy of
+it is two answers to one question. An id that names nothing falls back to the
+first item, so a page deleted underneath you leaves the dialog on something
+rather than empty.
+
+**Let the content name itself, or let the header do it — not both.** Components
+that render their own title (`CommunityPost`) take a `hideTitle` prop for exactly
+this. Always pass the item a `title` regardless: it is the dialog's accessible
+name.
+
+<Canvas of={Stories.Looping} />
+
+### Driven by the URL
+
+The index being controlled is what makes a **params-only activity** work: put the
+open page in the location (`#core.activity1?postId=b`), have `onNavigate` write
+the param, and read it back into `currentId`. Prev/next then move the URL and the
+dialog follows — back and forward buttons included, and the link is shareable.
+
+Changing the param does **not** remount the dialog. It is the same element with
+different content, so there is no reopen animation and focus and scroll position
+survive the walk.
+
+The one thing to get right is that **the URL moves before the data does**. An id
+`items` has never heard of renders the `placeholder`, never some other page — a
+dialog that answered an unknown id with `items[0]` would put a post nobody asked
+for under the id they did ask for. While waiting, the arrows stay in place but
+held, and the header shows no position, because the page's number is exactly what
+isn't known yet.
+
+Better still, avoid the gap: put an item in `items` for the id you are navigating
+to, with skeleton `content` while its body loads. Then the id is always found, its
+title comes with it, and the position stays honest. `placeholder` is the net for
+when you genuinely cannot.
+
+### Paged sets
+
+Pass `pagination` — the same `{ hasMore, isLoading, onLoadMore, total }` the
+carousel takes — and the dialog walks past the last loaded item: Next fetches and
+**continues** onto the new page as soon as it lands, so one press advances once
+even at the boundary. Arriving at the last loaded item prefetches, once per
+position, so most presses simply move.
+
+One `useData` can feed both surfaces, which is the point: a post opened from a
+feed is the same query as the feed it came from, so the carousel and the dialog
+are two views of one list rather than two lists to keep in step.
+
+Pass `total` (`useData`'s `totalItems`) or the header counts only what is loaded —
+it says `3 of 4+` rather than pretending to know.
+
+<Canvas of={Stories.PagedFromDataSource} />
+
+<DoDonts
+  do={{
+    description: "Give every page a title and let the app own the position.",
+    guidelines: [
+      "Drive `currentId` from the same state that opened the dialog.",
+      "Keep the set small enough that walking it is reasonable.",
+      "Leave `loop` off for anything with a real end.",
+    ],
+  }}
+  dont={{
+    description: "Use it as a wizard, or duplicate the title.",
+    guidelines: [
+      "Don't page through steps of one task — that is `F0Wizard`.",
+      "Don't render the title in the content and in the header both.",
+      "Don't keep per-page state in the page: only one is mounted at a time.",
+    ],
+  }}
+/>
+
+### When not to use
+
+Not for steps of one task, and not where the reader needs to compare pages side by
+side, since only one is ever visible.
+
+A set that happens to hold **one** item is fine, though — it quietly becomes an
+ordinary dialog rather than growing two dead controls, so you don't have to branch
+on the length of your own data.
+
+<Canvas of={Stories.SingleItem} />
+
+## Accessibility
+
+The arrows are children of the dialog panel, positioned outside its box rather
+than portalled beside it: anything outside a modal's content is `aria-hidden` and
+inert, so arrows rendered "next to" the dialog would be unreachable by keyboard
+and invisible to a screen reader.
+
+**The arrow keys work**, bound while the dialog is open, because that is what
+anyone who has used a photo viewer tries first — and they stand down while focus
+is in a text field, whose own caret movement is the more specific claim on those
+keys.
+
+Both arrows keep their places at the ends and go `disabled` rather than
+disappearing. The current page's `title` is the dialog's accessible name even when
+`hideTitle` on the content keeps it out of view.
+
+On a phone the dialog is a bottom sheet with no room beside it, so the arrows move
+onto the panel's own edges — where a gallery has always put them.

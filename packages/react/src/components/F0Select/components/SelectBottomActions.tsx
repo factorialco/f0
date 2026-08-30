@@ -40,6 +40,7 @@ export const SelectBottomActions = ({
           onClick={action.onClick}
           icon={action.icon}
           label={action.label}
+          disabled={action.disabled}
         />
       ))}
       {showCancelButton && (

@@ -54,7 +54,9 @@ const card = (container: HTMLElement): Element | null =>
 describe("ReplyQuote chained corner", () => {
   it("keeps the quoted message on a neutral nested surface", () => {
     const { container } = renderQuote({ isMine: false, isFirstOfRun: true })
-    expect(card(container)).toHaveClass("bg-f1-background-tertiary")
+    // Heavier than f1-background-tertiary (4%): the quote sits INSIDE a tinted
+    // bubble, and the tints are now strong enough to swallow it.
+    expect(card(container)).toHaveClass("bg-[hsl(var(--neutral-100)/0.06)]")
   })
 
   it("rounds the tail-side top corner to hug the bubble (others, run start)", () => {
