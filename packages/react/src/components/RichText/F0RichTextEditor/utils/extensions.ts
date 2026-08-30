@@ -1,3 +1,5 @@
+import type { Extensions } from "@tiptap/core"
+
 import {
   ColorExtension,
   CustomTaskExtension,
@@ -38,7 +40,7 @@ const ExtensionsConfiguration = ({
   placeholder,
   maxCharacters,
   plainHtmlMode = false,
-}: ExtensionsConfigurationProps) => {
+}: ExtensionsConfigurationProps): Extensions => {
   return [
     StarterKitExtension,
     PasteSanitizer,

@@ -49,6 +49,10 @@ import { CardSelectDepsContext } from "./fields/cardSelect/CardSelectDepsContext
 import { FieldRenderer } from "./fields/FieldRenderer"
 import { evaluateRenderIf } from "./fields/utils"
 import {
+  F0FormRendererProvider,
+  type F0FormRenderer,
+} from "./formRendererContext"
+import {
   buildCardSelectContentMap,
   groupContiguousSwitches,
 } from "./groupingUtils"
@@ -323,27 +327,30 @@ export function F0Form<TSchema extends F0FormSchema | F0PerSectionSchema>(
       : never
 ) {
   const castProps = props as unknown as AnyF0FormProps
+  let content: React.ReactElement
 
   if (hasFormDefinition(castProps)) {
-    return <F0FormFromDefinition {...castProps} />
-  }
+    content = <F0FormFromDefinition {...castProps} />
+  } else {
+    const legacyProps = castProps as
+      | F0FormPropsWithSingleSchema<F0FormSchema>
+      | F0FormPropsWithPerSectionSchema<F0PerSectionSchema>
 
-  const legacyProps = castProps as
-    | F0FormPropsWithSingleSchema<F0FormSchema>
-    | F0FormPropsWithPerSectionSchema<F0PerSectionSchema>
-
-  if (!isZodSchema(legacyProps.schema)) {
-    return (
+    content = !isZodSchema(legacyProps.schema) ? (
       <F0FormPerSection
         {...(legacyProps as F0FormPropsWithPerSectionSchema<F0PerSectionSchema>)}
+      />
+    ) : (
+      <F0FormSingleSchema
+        {...(legacyProps as F0FormPropsWithSingleSchema<F0FormSchema>)}
       />
     )
   }
 
   return (
-    <F0FormSingleSchema
-      {...(legacyProps as F0FormPropsWithSingleSchema<F0FormSchema>)}
-    />
+    <F0FormRendererProvider value={F0Form as F0FormRenderer}>
+      {content}
+    </F0FormRendererProvider>
   )
 }
 

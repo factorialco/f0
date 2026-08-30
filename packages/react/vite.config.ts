@@ -164,6 +164,27 @@ export default defineConfig({
           import.meta.dirname,
           "src/components/F0Button/index.ts"
         ),
+        ["F0Box"]: resolve(import.meta.dirname, "src/lib/F0Box/index.tsx"),
+        ["F0Text"]: resolve(
+          import.meta.dirname,
+          "src/components/F0Text/index.tsx"
+        ),
+        ["F0Dialog"]: resolve(
+          import.meta.dirname,
+          "src/patterns/F0Dialog/index.tsx"
+        ),
+        ["F0Form"]: resolve(
+          import.meta.dirname,
+          "src/patterns/F0Form/index.tsx"
+        ),
+        ["OneDataCollection"]: resolve(
+          import.meta.dirname,
+          "src/patterns/OneDataCollection/exports.ts"
+        ),
+        ["F0AiChat"]: resolve(
+          import.meta.dirname,
+          "src/kits/ai/F0AiChat/index.ts"
+        ),
       },
       fileName: (_, entryName) => {
         return `${entryName}.js`

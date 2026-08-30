@@ -1,4 +1,5 @@
 import { fireEvent, screen, within } from "@testing-library/react"
+import { createRef } from "react"
 import { describe, expect, it, vi } from "vitest"
 
 import { zeroRender as render } from "@/testing/test-utils"
@@ -6,6 +7,14 @@ import { zeroRender as render } from "@/testing/test-utils"
 import { F0TextInput } from "../F0TextInput"
 
 describe("F0TextInput", () => {
+  it("forwards its ref to the native input", () => {
+    const ref = createRef<HTMLInputElement>()
+
+    render(<F0TextInput ref={ref} label="Name" />)
+
+    expect(ref.current).toBe(screen.getByRole("textbox", { name: "Name" }))
+  })
+
   it("renders an input wired to its label", () => {
     render(<F0TextInput label="Email" />)
 

@@ -1,9 +1,8 @@
-import { openFormDialog } from "@/patterns/F0Form/openFormDialog"
+import type { F0FormRenderer } from "@/patterns/F0Form/formRendererContext"
 import type {
   OpenFormDialogOptions,
   OpenFormDialogResult,
 } from "@/patterns/F0Form/openFormDialog"
-import { openFormWizard } from "@/patterns/F0WizardForm/openFormWizard"
 import type {
   OpenFormWizardOptions,
   OpenFormWizardResult,
@@ -12,6 +11,10 @@ import type {
   F0FormSchema,
   F0PerSectionSchema,
 } from "@/patterns/F0WizardForm/types"
+
+import { F0Form } from "@/patterns/F0Form/F0Form"
+import { openFormDialog } from "@/patterns/F0Form/openFormDialog"
+import { openFormWizard } from "@/patterns/F0WizardForm/openFormWizard"
 
 /** Open a form in a dialog. */
 function openForm<TSchema extends F0FormSchema>(
@@ -28,7 +31,10 @@ function openForm(
   if (mode === "wizard") {
     return openFormWizard(rest as OpenFormWizardOptions<F0FormSchema>)
   }
-  return openFormDialog(rest as OpenFormDialogOptions<F0FormSchema>)
+  return openFormDialog(
+    rest as OpenFormDialogOptions<F0FormSchema>,
+    F0Form as F0FormRenderer
+  )
 }
 
 /**

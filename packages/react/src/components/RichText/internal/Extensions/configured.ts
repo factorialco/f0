@@ -1,15 +1,19 @@
+import type { AnyExtension } from "@tiptap/core"
+
 import CharacterCount from "@tiptap/extension-character-count"
 import Color from "@tiptap/extension-color"
-import Details from "@tiptap/extension-details"
-import DetailsContent from "@tiptap/extension-details-content"
-import DetailsSummary from "@tiptap/extension-details-summary"
+import {
+  Details,
+  DetailsContent,
+  DetailsSummary,
+} from "@tiptap/extension-details"
 import Highlight from "@tiptap/extension-highlight"
 import Link from "@tiptap/extension-link"
 import Placeholder from "@tiptap/extension-placeholder"
 import { TableKit } from "@tiptap/extension-table"
 import TaskList from "@tiptap/extension-task-list"
 import TextAlign from "@tiptap/extension-text-align"
-import TextStyle from "@tiptap/extension-text-style"
+import { TextStyle } from "@tiptap/extension-text-style"
 import Typography from "@tiptap/extension-typography"
 import Underline from "@tiptap/extension-underline"
 import StarterKit from "@tiptap/starter-kit"
@@ -71,5 +75,6 @@ export const createPlaceholderExtension = (placeholder: string) =>
     placeholder: placeholder,
   })
 
-export const createCharacterCountExtension = (maxCharacters?: number) =>
-  CharacterCount.configure({ limit: maxCharacters })
+export const createCharacterCountExtension = (
+  maxCharacters?: number
+): AnyExtension => CharacterCount.configure({ limit: maxCharacters })

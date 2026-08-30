@@ -2,27 +2,22 @@ import { nanoid } from "nanoid"
 import { useMemo, useRef } from "react"
 import { z } from "zod"
 
-import { F0Dialog, F0DialogSize } from "@/components/dialog-alike/F0Dialog"
-import { useI18n } from "@/lib/providers/i18n"
-import {
-  mountFormOverlay,
-  unmountFormOverlay,
-} from "@/lib/providers/form-overlays"
 import type { DialogId, DialogModule } from "@/lib/providers/dialogs-alike"
 import type {
   F0FormDefinitionSingleSchema,
   F0FormSchema,
 } from "@/patterns/F0WizardForm/types"
 
-import { F0Form } from "./F0Form"
-import type { F0FormPropsWithSingleSchemaDefinition } from "./types"
-import { useF0Form } from "./useF0Form"
+import { F0Dialog, F0DialogSize } from "@/components/dialog-alike/F0Dialog"
+import {
+  mountFormOverlay,
+  unmountFormOverlay,
+} from "@/lib/providers/form-overlays"
+import { useI18n } from "@/lib/providers/i18n"
 
-// F0Form is an overloaded generic; spreading generic props in JSX trips overload
-// resolution. Cast to the concrete definition-props signature for the call site.
-const FormView = F0Form as (
-  props: F0FormPropsWithSingleSchemaDefinition<F0FormSchema>
-) => React.ReactElement
+import type { F0FormRenderer } from "./formRendererContext"
+
+import { useF0Form } from "./useF0Form"
 
 export type OpenFormDialogResult<TSchema extends F0FormSchema> =
   | { submitted: true; data: z.infer<TSchema> }
@@ -56,6 +51,7 @@ export type OpenFormDialogOptions<TSchema extends F0FormSchema> = {
 
 type FormDialogContentProps<TSchema extends F0FormSchema> = {
   options: OpenFormDialogOptions<TSchema>
+  FormView: F0FormRenderer
   isOpen: boolean
   onSubmitted: (data: z.infer<TSchema>) => void
   onCancel: () => void
@@ -68,6 +64,7 @@ type FormDialogContentProps<TSchema extends F0FormSchema> = {
  */
 function FormDialogContent<TSchema extends F0FormSchema>({
   options,
+  FormView,
   isOpen,
   onSubmitted,
   onCancel,
@@ -159,7 +156,8 @@ function FormDialogContent<TSchema extends F0FormSchema>({
  * if (result.submitted) save(result.data)
  */
 export function openFormDialog<TSchema extends F0FormSchema>(
-  options: OpenFormDialogOptions<TSchema>
+  options: OpenFormDialogOptions<TSchema>,
+  FormView: F0FormRenderer
 ): Promise<OpenFormDialogResult<TSchema>> {
   return new Promise((resolve) => {
     const id = options.id ?? nanoid()
@@ -177,6 +175,7 @@ export function openFormDialog<TSchema extends F0FormSchema>(
       render: ({ isOpen }) => (
         <FormDialogContent
           options={options}
+          FormView={FormView}
           isOpen={isOpen}
           onSubmitted={(data) => finish({ submitted: true, data })}
           onCancel={() => finish({ submitted: false })}

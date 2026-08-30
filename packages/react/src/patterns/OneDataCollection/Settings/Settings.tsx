@@ -2,6 +2,7 @@ import { useMemo, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
+import { F0SelectStatic } from "@/components/F0Select/F0Select"
 import {
   GroupingDefinition,
   GroupingState,
@@ -14,6 +15,7 @@ import { useI18n } from "@/lib/providers/i18n"
 import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 
+import { isVisualizationSettingsDefault } from "../internal/isSettingsDefault"
 import { ItemActionsDefinition } from "../item-actions"
 import { NavigationFiltersDefinition } from "../navigationFilters/types"
 import { SummariesDefinition } from "../summary"
@@ -21,7 +23,6 @@ import {
   collectionVisualizations,
   Visualization,
 } from "../visualizations/collection"
-import { isVisualizationSettingsDefault } from "../internal/isSettingsDefault"
 import { GroupingSelector } from "./components/GroupingSelector"
 import { SortingSelector } from "./components/SortingSelector"
 import { useDataCollectionSettings } from "./SettingsProvider"
@@ -208,6 +209,7 @@ export const Settings = <
               ) && (
                 <div key="grouping" className="p-3">
                   <GroupingSelector
+                    SelectComponent={F0SelectStatic}
                     grouping={grouping}
                     currentGrouping={currentGrouping}
                     onGroupingChange={handleGroupingChange}

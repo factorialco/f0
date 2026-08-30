@@ -10,6 +10,8 @@ import { FC, useCallback, useEffect, useMemo, useState } from "react"
 import { F0Button } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
 import { F0AiBanner } from "@/kits/ai/Banners/F0AiBanner"
+import { Skeleton } from "@/ui/skeleton"
+
 // Import from the sibling modules (not the internal barrel): this file is
 // itself re-exported by the barrel, and evaluating the module-level extension
 // list through the barrel would hit the circular-import TDZ.
@@ -28,7 +30,6 @@ import {
   UnderlineExtension,
 } from "../configured"
 import { CustomTaskExtension } from "../CustomTask"
-import { Skeleton } from "@/ui/skeleton"
 
 export type AIButton = {
   type: string
@@ -211,7 +212,7 @@ const useAutoExecuteAction = (
 const useEditableContentIntegration = (
   editor: NodeViewProps["editor"],
   deleteNode: () => void,
-  getPos?: () => number,
+  getPos?: () => number | undefined,
   data?: AIBlockData
 ) => {
   useEffect(() => {

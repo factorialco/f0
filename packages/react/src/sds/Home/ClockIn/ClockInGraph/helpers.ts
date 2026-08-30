@@ -1,7 +1,9 @@
 import { formatTime24Hours } from "@/lib/date"
-import { getNormalizedRemainingMinutes } from "../ClockInControls/helpers"
+
 import type { ClockInSegment } from "./HorizontalBar"
-import { CLOCK_IN_COLORS, ClockInGraphProps } from "./index"
+
+import { getNormalizedRemainingMinutes } from "../utils"
+import { CLOCK_IN_COLORS, type ClockInGraphProps } from "./model"
 
 const EMPTY_LABEL = "--:--"
 

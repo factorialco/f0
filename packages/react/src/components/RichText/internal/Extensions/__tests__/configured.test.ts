@@ -1,7 +1,12 @@
 import { Editor, type JSONContent } from "@tiptap/core"
 import { afterEach, describe, expect, it } from "vitest"
 
-import { StarterKitExtension } from "../configured"
+import {
+  DetailsContentExtension,
+  DetailsExtension,
+  DetailsSummaryExtension,
+  StarterKitExtension,
+} from "../configured"
 
 describe("StarterKitExtension heading levels", () => {
   const editors: Editor[] = []
@@ -74,5 +79,29 @@ describe("StarterKitExtension heading levels", () => {
 
     expect(editor.getJSON().content?.[0]?.type).toBe("heading")
     expect(editor.getJSON().content?.[0]?.attrs?.level).toBe(level)
+  })
+
+  it("round-trips Tiptap v3 details nodes and their open state", () => {
+    const editor = new Editor({
+      extensions: [
+        StarterKitExtension,
+        DetailsExtension,
+        DetailsSummaryExtension,
+        DetailsContentExtension,
+      ],
+      content:
+        '<details class="rich-text-details" open><summary>Summary</summary><div data-type="detailsContent"><p>Body</p></div></details>',
+    })
+    editors.push(editor)
+
+    expect(editor.getJSON().content?.[0]).toMatchObject({
+      type: "details",
+      attrs: { open: true },
+      content: [{ type: "detailsSummary" }, { type: "detailsContent" }],
+    })
+    expect(editor.getHTML()).toContain(
+      '<details class="rich-text-details" open="">'
+    )
+    expect(editor.getHTML()).toContain('<div data-type="detailsContent">')
   })
 })

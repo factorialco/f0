@@ -1,5 +1,6 @@
 import {
   ComponentProps,
+  forwardRef,
   HTMLInputTypeAttribute,
   useMemo,
   useState,
@@ -63,73 +64,73 @@ const passwordManagerAvoidance = {
   "data-bwignore": true,
 }
 
-const InputInternal = ({
-  type,
-  onPressEnter,
-  ...props
-}: InputInternalProps) => {
-  const [showPassword, setShowPassword] = useState(false)
+const InputInternal = forwardRef<HTMLInputElement, InputInternalProps>(
+  function InputInternal({ type, onPressEnter, ...props }, ref) {
+    const [showPassword, setShowPassword] = useState(false)
 
-  // `password` and `private` are both masked; the eye toggle flips them to text.
-  const maskable = type === "password" || type === "private"
+    // `password` and `private` are both masked; the eye toggle flips them to text.
+    const maskable = type === "password" || type === "private"
 
-  const localType = useMemo(() => {
-    return maskable ? (showPassword ? "text" : "password") : type
-  }, [showPassword, maskable, type])
+    const localType = useMemo(() => {
+      return maskable ? (showPassword ? "text" : "password") : type
+    }, [showPassword, maskable, type])
 
-  const localIcon = useMemo(() => {
-    // Only `password` forces the lock icon; `private` keeps the consumer's icon.
-    return type === "password" ? LockLocked : props.icon
-  }, [type, props.icon])
+    const localIcon = useMemo(() => {
+      // Only `password` forces the lock icon; `private` keeps the consumer's icon.
+      return type === "password" ? LockLocked : props.icon
+    }, [type, props.icon])
 
-  const i18n = useI18n()
-  const buttonToggle: InputFieldProps<string>["buttonToggle"] = useMemo(() => {
-    if (type === "password") {
-      return {
-        label: [i18n.inputs.password.show, i18n.inputs.password.hide],
-        icon: [EyeInvisible, EyeVisible],
-        selected: showPassword,
-        onChange: setShowPassword,
-      }
-    }
-    if (type === "private") {
-      // Build the toggle's accessible name from the field label so screen-reader
-      // users can tell multiple private fields apart (e.g. "Show social security
-      // number"). The label feeds F0ButtonToggle's aria-label + title only — the
-      // toggle renders an icon, so there is no visible-text change.
-      return {
-        label: [
-          i18n.t("inputs.private.show", { label: props.label }),
-          i18n.t("inputs.private.hide", { label: props.label }),
-        ],
-        icon: [EyeInvisible, EyeVisible],
-        selected: showPassword,
-        onChange: setShowPassword,
-      }
-    }
-    return props.buttonToggle
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showPassword, type, props.buttonToggle, props.label])
-
-  return (
-    <ShadcnInput
-      {...props}
-      {...(type === "private" ? passwordManagerAvoidance : {})}
-      type={localType}
-      // Email addresses are case-insensitive, so normalise to lowercase as the
-      // user types (lowercasing preserves length, so the caret doesn't jump).
-      onChange={(value) =>
-        props.onChange?.(type === "email" ? value.toLowerCase() : value)
-      }
-      onKeyDown={(event) => {
-        if (event.key === "Enter") {
-          onPressEnter?.()
+    const i18n = useI18n()
+    const buttonToggle: InputFieldProps<string>["buttonToggle"] =
+      useMemo(() => {
+        if (type === "password") {
+          return {
+            label: [i18n.inputs.password.show, i18n.inputs.password.hide],
+            icon: [EyeInvisible, EyeVisible],
+            selected: showPassword,
+            onChange: setShowPassword,
+          }
         }
-      }}
-      icon={localIcon}
-      buttonToggle={buttonToggle}
-    />
-  )
-}
+        if (type === "private") {
+          // Build the toggle's accessible name from the field label so screen-reader
+          // users can tell multiple private fields apart (e.g. "Show social security
+          // number"). The label feeds F0ButtonToggle's aria-label + title only — the
+          // toggle renders an icon, so there is no visible-text change.
+          return {
+            label: [
+              i18n.t("inputs.private.show", { label: props.label }),
+              i18n.t("inputs.private.hide", { label: props.label }),
+            ],
+            icon: [EyeInvisible, EyeVisible],
+            selected: showPassword,
+            onChange: setShowPassword,
+          }
+        }
+        return props.buttonToggle
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, [showPassword, type, props.buttonToggle, props.label])
+
+    return (
+      <ShadcnInput
+        {...props}
+        {...(type === "private" ? passwordManagerAvoidance : {})}
+        ref={ref}
+        type={localType}
+        // Email addresses are case-insensitive, so normalise to lowercase as the
+        // user types (lowercasing preserves length, so the caret doesn't jump).
+        onChange={(value) =>
+          props.onChange?.(type === "email" ? value.toLowerCase() : value)
+        }
+        onKeyDown={(event) => {
+          if (event.key === "Enter") {
+            onPressEnter?.()
+          }
+        }}
+        icon={localIcon}
+        buttonToggle={buttonToggle}
+      />
+    )
+  }
+)
 
 export { InputInternal }

@@ -1,38 +1,14 @@
-import { BubbleMenu, Editor, isTextSelection } from "@tiptap/react"
-import { NodeSelection } from "prosemirror-state"
+import { NodeSelection } from "@tiptap/pm/state"
+import { Editor, isTextSelection } from "@tiptap/react"
+import { BubbleMenu } from "@tiptap/react/menus"
 import { memo, useEffect, useRef, useState } from "react"
 
 import { cn } from "@/lib/utils"
 
-import { EnhanceActivator } from "../Enhance/EnhanceActivator"
 import type { UseEnhanceReturn } from "../Enhance/useEnhance"
-import { Toolbar, ToolbarDivider } from "../Toolbar"
 
-const POPPER_OPTIONS = {
-  modifiers: [
-    {
-      name: "preventOverflow",
-      options: {
-        boundary: "viewport",
-        padding: 12,
-        altAxis: true,
-        tether: true,
-      },
-    },
-    {
-      name: "flip",
-      options: {
-        fallbackPlacements: [
-          "bottom-start",
-          "bottom-end",
-          "top",
-          "top-start",
-          "top-end",
-        ],
-      },
-    },
-  ],
-}
+import { EnhanceActivator } from "../Enhance/EnhanceActivator"
+import { Toolbar, ToolbarDivider } from "../Toolbar"
 
 interface EditorBubbleMenuProps {
   editor: Editor
@@ -74,20 +50,29 @@ export const EditorBubbleMenu = memo(function EditorBubbleMenu({
 
   return (
     <BubbleMenu
-      tippyOptions={{
-        duration: 100,
+      appendTo={() =>
+        isFullscreen
+          ? document.body
+          : document.getElementById(editorId) || document.body
+      }
+      options={{
         placement: "bottom",
-        hideOnClick: false,
-        interactive: true,
-        maxWidth: "none",
-        appendTo: () =>
-          isFullscreen
-            ? document.body
-            : document.getElementById(editorId) || document.body,
-        zIndex: 9999,
-        popperOptions: POPPER_OPTIONS,
+        shift: {
+          padding: 12,
+          crossAxis: true,
+        },
+        flip: {
+          fallbackPlacements: [
+            "bottom-start",
+            "bottom-end",
+            "top",
+            "top-start",
+            "top-end",
+          ],
+        },
       }}
       editor={editor}
+      className="z-[9999] max-w-none"
       shouldShow={({ view, state, from, to }) => {
         if (shouldKeepEnhanceVisible) {
           return true
@@ -123,6 +108,7 @@ export const EditorBubbleMenu = memo(function EditorBubbleMenu({
       {!isToolbarOpen && (!enhanceActive || shouldKeepEnhanceVisible) && (
         <div
           ref={bubbleMenuContainerRef}
+          role="toolbar"
           className={cn(
             "dark z-50 flex w-max flex-row items-center gap-1 rounded-md border border-solid border-f1-border bg-f1-background p-1.5 drop-shadow-sm",
             // Once the enhance flow starts (loading/review) the bubble bar

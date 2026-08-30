@@ -128,6 +128,9 @@
   "devDependencies": {
     "@babel/core": "^7.28.0",
     "@babel/preset-typescript": "^7.28.5",
+    "@expo/dom-webview": "~56.0.6",
+    "@expo/log-box": "~56.0.14",
+    "@expo/metro-runtime": "~56.0.21",
     "@expo/ui": "~56.0.18",
     "@expo/vector-icons": "^15.1.1",
     "@react-native/jest-preset": "0.85.3",
@@ -151,6 +154,7 @@
     "expo-font": "~56.0.7",
     "expo-glass-effect": "~56.0.4",
     "expo-image": "~56.0.11",
+    "expo-linking": "~56.0.17",
     "expo-router": "~56.2.11",
     "expo-splash-screen": "~56.0.10",
     "expo-status-bar": "~56.0.4",
