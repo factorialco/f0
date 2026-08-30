@@ -19,6 +19,7 @@ function analyze(files: Record<string, string>): RuntimeDependencyAnalysis {
     JSON.stringify({
       compilerOptions: {
         baseUrl: ".",
+        ignoreDeprecations: "6.0",
         jsx: "preserve",
         module: "esnext",
         moduleResolution: "bundler",

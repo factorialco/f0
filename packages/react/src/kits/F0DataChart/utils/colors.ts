@@ -1,6 +1,5 @@
+import { baseColors } from "@factorialco/f0-core"
 import { colord } from "colord"
-
-import { baseColors } from "../../../../../core/src/tokens/colors"
 
 // ---------------------------------------------------------------------------
 // Chart color tokens — constrained to the chromatic baseColors palette

@@ -1,4 +1,5 @@
 #!/usr/bin/env tsx
+import { build as buildWithEsbuild } from "esbuild"
 import { spawnSync } from "node:child_process"
 import {
   existsSync,
@@ -14,6 +15,7 @@ import {
 import path, { dirname, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 import { brotliCompressSync, constants, gzipSync } from "node:zlib"
+import valueParser from "postcss-value-parser"
 import { build } from "vite"
 
 import {
@@ -62,6 +64,50 @@ export default function App() {
   ),
   f0AiChat: retainRootExport("F0AiChat"),
   f0PdfViewer: retainRootExport("F0PdfViewer"),
+}
+
+const CLOUDFLARE_PROBES = {
+  f0Button: {
+    maxBytes: 700_000,
+    source: `
+import React from "react"
+import { createRoot } from "react-dom/client"
+import { F0Button } from "@factorialco/f0-react/F0Button"
+
+function App() {
+  return <F0Button label="Save" onClick={() => undefined} />
+}
+
+createRoot(document.createElement("div")).render(<App />)
+`,
+  },
+  f0DialogWithButton: {
+    // F0Dialog's public resourceHeader feature currently retains the complete
+    // F0Avatar flag map. Keep that real boundary visible while preventing the
+    // root barrel and unrelated document/map/AI features from returning.
+    maxBytes: 4_200_000,
+    source: `
+import React from "react"
+import { createRoot } from "react-dom/client"
+import { F0Button } from "@factorialco/f0-react/F0Button"
+import { F0Dialog } from "@factorialco/f0-react/F0Dialog"
+
+function App() {
+  return (
+    <F0Dialog isOpen title="Confirm action" onClose={() => undefined}>
+      <F0Button label="Continue" onClick={() => undefined} />
+    </F0Dialog>
+  )
+}
+
+createRoot(document.createElement("div")).render(<App />)
+`,
+  },
+} as const
+
+interface CloudflareProbeMetric {
+  bytes: number
+  inputCount: number
 }
 
 function retainRootExport(exportName: string): string {
@@ -145,6 +191,106 @@ function retainedF0Modules(
   }
 
   return [...modules].sort()
+}
+
+function validateSelfContainedStyles(extractedPackageDir: string): void {
+  const css = readFileSync(
+    resolve(extractedPackageDir, "dist/styles.css"),
+    "utf8"
+  )
+  const localReferences = new Set<string>()
+  const parsedCss = valueParser(css)
+  parsedCss.walk((node) => {
+    if (node.type !== "function" || node.value !== "url") return
+    if (node.nodes.length !== 1) return
+    const reference = node.nodes[0]
+    if (reference.type !== "string" && reference.type !== "word") return
+    if (
+      !reference.value.startsWith("data:") &&
+      !reference.value.startsWith("http:") &&
+      !reference.value.startsWith("https:") &&
+      !reference.value.startsWith("#") &&
+      !reference.value.startsWith("/")
+    ) {
+      localReferences.add(reference.value)
+    }
+  })
+
+  if (localReferences.size > 0) {
+    throw new Error(
+      `Published styles contain local asset references:\n${[...localReferences].join("\n")}`
+    )
+  }
+}
+
+async function buildCloudflareProbes(
+  tempDir: string,
+  extractedPackageDir: string
+): Promise<Record<string, CloudflareProbeMetric>> {
+  const consumerDir = resolve(tempDir, "cloudflare-consumer")
+  const packageScopeDir = resolve(consumerDir, "node_modules/@factorialco")
+  mkdirSync(packageScopeDir, { recursive: true })
+  symlinkSync(extractedPackageDir, resolve(packageScopeDir, "f0-react"), "dir")
+
+  const metrics: Record<string, CloudflareProbeMetric> = {}
+  for (const [probeName, probe] of Object.entries(CLOUDFLARE_PROBES)) {
+    const entryPath = resolve(consumerDir, `${probeName}.tsx`)
+    writeFileSync(entryPath, probe.source.trimStart())
+    const result = await buildWithEsbuild({
+      absWorkingDir: consumerDir,
+      bundle: true,
+      entryPoints: [entryPath],
+      format: "esm",
+      jsx: "automatic",
+      logLevel: "silent",
+      metafile: true,
+      minify: true,
+      platform: "browser",
+      target: "es2022",
+      write: false,
+    })
+    const output = result.outputFiles[0]
+    if (!output)
+      throw new Error(`Cloudflare probe emitted no output: ${probeName}`)
+    const source = output.text
+    const forbiddenRuntimePatterns = [
+      "Dynamic require of",
+      '__require("react")',
+      "__require('react')",
+      'require("react")',
+      "require('react')",
+    ]
+    const runtimeFailure = forbiddenRuntimePatterns.find((pattern) =>
+      source.includes(pattern)
+    )
+    if (runtimeFailure) {
+      throw new Error(
+        `Cloudflare probe ${probeName} retained browser-unsafe React loading: ${runtimeFailure}`
+      )
+    }
+    if (output.contents.length > probe.maxBytes) {
+      throw new Error(
+        `Cloudflare probe ${probeName} is ${output.contents.length} bytes; budget is ${probe.maxBytes}`
+      )
+    }
+
+    const inputPaths = Object.keys(result.metafile.inputs)
+    const forbiddenDependency = inputPaths.find((inputPath) =>
+      /(?:pdfjs-dist|xlsx|maplibre-gl|F0AiChat|F0CanvasPanel)/.test(inputPath)
+    )
+    if (forbiddenDependency) {
+      throw new Error(
+        `Cloudflare probe ${probeName} retained unrelated dependency: ${forbiddenDependency}`
+      )
+    }
+
+    metrics[probeName] = {
+      bytes: output.contents.length,
+      inputCount: inputPaths.length,
+    }
+  }
+
+  return metrics
 }
 
 async function buildVariant(
@@ -236,7 +382,10 @@ interface EmittedChunk extends EmittedOutput {
   imports: string[]
 }
 
-async function measureBundle(): Promise<BundleReport> {
+async function measureBundle(): Promise<{
+  cloudflareProbes: Record<string, CloudflareProbeMetric>
+  report: BundleReport
+}> {
   if (!existsSync(resolve(PACKAGE_DIR, "dist/f0.js"))) {
     throw new Error(
       "Missing packages/react/dist/f0.js. Build @factorialco/f0-react before running the consumer bundle check."
@@ -257,6 +406,11 @@ async function measureBundle(): Promise<BundleReport> {
 
     run("tar", ["-xzf", tarball, "-C", tempDir], PACKAGE_DIR)
     const extractedPackageDir = resolve(tempDir, "package")
+    validateSelfContainedStyles(extractedPackageDir)
+    const cloudflareProbes = await buildCloudflareProbes(
+      tempDir,
+      extractedPackageDir
+    )
     const requestedVariant = process.argv
       .find((argument) => argument.startsWith("--variant="))
       ?.slice("--variant=".length)
@@ -278,7 +432,7 @@ async function measureBundle(): Promise<BundleReport> {
         appSource
       )
     }
-    return { variants }
+    return { cloudflareProbes, report: { variants } }
   } finally {
     rmSync(tempDir, { recursive: true, force: true })
   }
@@ -289,11 +443,16 @@ function formatBytes(bytes: number): string {
 }
 
 async function main(): Promise<void> {
-  const report = await measureBundle()
+  const { cloudflareProbes, report } = await measureBundle()
 
   if (process.argv.includes("--json")) {
     process.stdout.write(`${JSON.stringify(report, null, 2)}\n`)
   } else {
+    for (const [probeName, probe] of Object.entries(cloudflareProbes)) {
+      process.stdout.write(
+        `cloudflare/${probeName}: ${formatBytes(probe.bytes)} raw, ${probe.inputCount} inputs\n`
+      )
+    }
     for (const [variantName, variant] of Object.entries(report.variants)) {
       process.stdout.write(
         `${variantName}: JS ${formatBytes(variant.assets.js.brotli)} brotli, ` +
