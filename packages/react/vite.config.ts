@@ -15,6 +15,8 @@ dotenv.config({
   path: [".env.local", ".env"],
 })
 const extraPlugins: Plugin[] = []
+const buildDeclarationsOnly =
+  process.env.BUILD_DECLARATIONS_ONLY === "true"
 
 // Add tailwind build
 const buildTailwind = process.argv.find((arg) => arg.startsWith("--tailwind"))
@@ -67,6 +69,7 @@ if (process.env.BUILD_TYPES) {
       include: ["src"],
       exclude: ["**/*.stories.tsx"],
       rollupTypes: true,
+      declarationOnly: buildDeclarationsOnly,
       afterBuild: () => {
         // Copy global.d.ts to dist - needed because rollupTypes doesn't inline ambient declarations
         const src = resolve(import.meta.dirname, "src/global.d.ts")
@@ -129,6 +132,30 @@ const alias = {
   "~": path.resolve(import.meta.dirname, "./"),
 }
 
+const declarationEntries = {
+  f0: resolve(import.meta.dirname, "src/f0.ts"),
+  experimental: resolve(import.meta.dirname, "src/experimental.ts"),
+  ai: resolve(import.meta.dirname, "src/ai.ts"),
+  "component-status": resolve(import.meta.dirname, "src/component-status.ts"),
+  "i18n-provider-defaults": resolve(
+    import.meta.dirname,
+    "src/lib/providers/i18n/i18n-provider-defaults.ts"
+  ),
+}
+
+const isolatedRuntimeEntries = {
+  F0Button: resolve(import.meta.dirname, "src/components/F0Button/index.ts"),
+  F0Box: resolve(import.meta.dirname, "src/lib/F0Box/index.tsx"),
+  F0Text: resolve(import.meta.dirname, "src/components/F0Text/index.tsx"),
+  F0Dialog: resolve(import.meta.dirname, "src/patterns/F0Dialog/index.tsx"),
+  F0Form: resolve(import.meta.dirname, "src/patterns/F0Form/index.tsx"),
+  OneDataCollection: resolve(
+    import.meta.dirname,
+    "src/patterns/OneDataCollection/exports.ts"
+  ),
+  F0AiChat: resolve(import.meta.dirname, "src/kits/ai/F0AiChat/index.ts"),
+}
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
@@ -147,45 +174,11 @@ export default defineConfig({
     },
   },
   build: {
+    emptyOutDir: !buildDeclarationsOnly,
     lib: {
-      entry: {
-        ["f0"]: resolve(import.meta.dirname, "src/f0.ts"),
-        ["experimental"]: resolve(import.meta.dirname, "src/experimental.ts"),
-        ["ai"]: resolve(import.meta.dirname, "src/ai.ts"),
-        ["component-status"]: resolve(
-          import.meta.dirname,
-          "src/component-status.ts"
-        ),
-        ["i18n-provider-defaults"]: resolve(
-          import.meta.dirname,
-          "src/lib/providers/i18n/i18n-provider-defaults.ts"
-        ),
-        ["F0Button"]: resolve(
-          import.meta.dirname,
-          "src/components/F0Button/index.ts"
-        ),
-        ["F0Box"]: resolve(import.meta.dirname, "src/lib/F0Box/index.tsx"),
-        ["F0Text"]: resolve(
-          import.meta.dirname,
-          "src/components/F0Text/index.tsx"
-        ),
-        ["F0Dialog"]: resolve(
-          import.meta.dirname,
-          "src/patterns/F0Dialog/index.tsx"
-        ),
-        ["F0Form"]: resolve(
-          import.meta.dirname,
-          "src/patterns/F0Form/index.tsx"
-        ),
-        ["OneDataCollection"]: resolve(
-          import.meta.dirname,
-          "src/patterns/OneDataCollection/exports.ts"
-        ),
-        ["F0AiChat"]: resolve(
-          import.meta.dirname,
-          "src/kits/ai/F0AiChat/index.ts"
-        ),
-      },
+      entry: buildDeclarationsOnly
+        ? declarationEntries
+        : { ...declarationEntries, ...isolatedRuntimeEntries },
       fileName: (_, entryName) => {
         return `${entryName}.js`
       },
