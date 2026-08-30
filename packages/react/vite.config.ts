@@ -4,12 +4,13 @@ import dotenv from "dotenv"
 import { spawnSync } from "node:child_process"
 import { copyFileSync, existsSync } from "node:fs"
 import path, { resolve } from "path"
-import { defineConfig, esmExternalRequirePlugin, Plugin } from "vite"
+import { defineConfig, Plugin } from "vite"
 import dts from "vite-plugin-dts"
 import { libInjectCss } from "vite-plugin-lib-inject-css"
 
 import { componentStatusVitePlugin } from "./scripts/component-status-build.mjs"
 import { buildSyncPlugin } from "./vite/build-sync.plugin.ts"
+import { createReactExternalizationPlugins } from "./vite/react-externalization.ts"
 
 dotenv.config({
   path: [".env.local", ".env"],
@@ -135,9 +136,7 @@ const isolatedRuntimeEntries = {
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    esmExternalRequirePlugin({
-      external: ["react/jsx-runtime", "react", "react-dom"],
-    }),
+    ...createReactExternalizationPlugins(),
     react(),
     libInjectCss(),
     componentStatusVitePlugin(),
