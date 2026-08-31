@@ -20,11 +20,12 @@ type NestedKeyOf<T> = {
         DEFAULT: string;
     } ? `${K}` | `${K}-${NestedKeyOf<T[K]>}` : `${K}-${NestedKeyOf<T[K]>}` : K extends "DEFAULT" ? never : `${K}`;
 }[keyof T & string];
+type SemanticIconColor = Lowercase<NestedKeyOf<typeof f1Colors.icon>>;
 export interface F0IconProps extends SVGProps<SVGSVGElement>, VariantProps<typeof iconVariants> {
     icon: IconType;
     size?: "lg" | "md" | "sm" | "xs";
     state?: "normal" | "animate";
-    color?: "default" | "currentColor" | `#${string}` | Lowercase<NestedKeyOf<typeof f1Colors.icon>>;
+    color?: "default" | "currentColor" | `#${string}` | SemanticIconColor;
 }
 export type IconType = ForwardRefExoticComponent<SVGProps<SVGSVGElement> & RefAttributes<SVGSVGElement> & {
     animate?: "normal" | "animate";

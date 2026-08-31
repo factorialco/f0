@@ -1,6 +1,6 @@
 export declare const graphNodeContainerVariants: (props?: ({
     variant?: "compact" | "dot" | "detail" | undefined;
-    state?: "default" | "selected" | "highlighted" | "dimmed" | undefined;
+    state?: "selected" | "default" | "highlighted" | "dimmed" | undefined;
 } & ({
     class?: import('cva').ClassValue;
     className?: never;

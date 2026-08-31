@@ -12,23 +12,45 @@ var i = n({
 		xs: "w-3 [&_circle]:stroke-xs [&_path]:stroke-xs [&_rect]:stroke-xs"
 	} },
 	defaultVariants: { size: "md" }
-}), a = t(function({ size: t, icon: n, state: a = "normal", color: o = "currentColor", ...s }, c) {
+}), a = {
+	secondary: "text-f1-icon-secondary",
+	inverse: "text-f1-icon-inverse",
+	bold: "text-f1-icon-bold",
+	critical: "text-f1-icon-critical",
+	"critical-bold": "text-f1-icon-critical-bold",
+	accent: "text-f1-icon-accent",
+	info: "text-f1-icon-info",
+	warning: "text-f1-icon-warning",
+	positive: "text-f1-icon-positive",
+	promote: "text-f1-icon-promote",
+	selected: "text-f1-icon-selected",
+	"selected-hover": "text-f1-icon-selected-hover",
+	"mood-super-negative": "text-f1-icon-mood-super-negative",
+	"mood-negative": "text-f1-icon-mood-negative",
+	"mood-neutral": "text-f1-icon-mood-neutral",
+	"mood-positive": "text-f1-icon-mood-positive",
+	"mood-super-positive": "text-f1-icon-mood-super-positive"
+};
+function o(e) {
+	return e.startsWith("#");
+}
+var s = t(function({ size: t, icon: n, state: s = "normal", color: c = "currentColor", ...l }, u) {
 	if (!n) return null;
-	let l = n, u = n.displayName?.includes("Animated"), d = o.startsWith("#"), f = ((e) => e === "currentColor" ? "text-current" : e === "default" ? "text-f1-icon" : e.startsWith("#") ? "" : `text-f1-icon-${e}`)(o), p = d ? { color: o } : void 0;
-	return u ? /* @__PURE__ */ r(l, {
-		ref: c,
-		...s,
-		animate: a,
-		className: e(i({ size: t }), "select-none", f),
-		style: p,
-		"data-has-color": o === "currentColor" ? void 0 : "true"
-	}) : /* @__PURE__ */ r(l, {
-		ref: c,
-		...s,
-		className: e("aspect-square", i({ size: t }), f),
-		style: p,
-		"data-has-color": o === "currentColor" ? void 0 : "true"
+	let d = n, f = n.displayName?.includes("Animated"), p = o(c), m = ((e) => e === "currentColor" ? "text-current" : e === "default" ? "text-f1-icon" : o(e) ? "" : a[e])(c), h = p ? { color: c } : void 0;
+	return f ? /* @__PURE__ */ r(d, {
+		ref: u,
+		...l,
+		animate: s,
+		className: e(i({ size: t }), "select-none", m),
+		style: h,
+		"data-has-color": c === "currentColor" ? void 0 : "true"
+	}) : /* @__PURE__ */ r(d, {
+		ref: u,
+		...l,
+		className: e("aspect-square", i({ size: t }), m),
+		style: h,
+		"data-has-color": c === "currentColor" ? void 0 : "true"
 	});
 });
 //#endregion
-export { a as F0Icon };
+export { s as F0Icon };

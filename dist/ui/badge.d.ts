@@ -1,7 +1,7 @@
 import { VariantProps } from 'cva';
 import * as React from "react";
 declare const badgeVariants: (props?: ({
-    readonly variant?: "info" | "name" | "default" | "critical" | "warning" | "positive" | "neutral" | undefined;
+    readonly variant?: "info" | "name" | "critical" | "warning" | "positive" | "neutral" | "default" | undefined;
 } & ({
     class?: import('cva').ClassValue;
     className?: never;

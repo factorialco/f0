@@ -4,11 +4,11 @@ declare const boxVariants: (props?: ({
     zIndex?: "0" | "auto" | "10" | "20" | "50" | "40" | "30" | undefined;
     boxShadow?: "none" | "lg" | "md" | "sm" | "xl" | undefined;
     divider?: "x" | "y" | undefined;
-    dividerColor?: "info" | "bold" | "default" | "secondary" | "critical" | "warning" | "positive" | "promote" | "selected" | "critical-bold" | "info-bold" | "warning-bold" | "positive-bold" | "selected-bold" | undefined;
+    dividerColor?: "info" | "bold" | "secondary" | "critical" | "warning" | "positive" | "promote" | "selected" | "critical-bold" | "default" | "info-bold" | "warning-bold" | "positive-bold" | "selected-bold" | undefined;
     overflow?: "hidden" | "auto" | "scroll" | "visible" | undefined;
     overflowX?: "hidden" | "auto" | "scroll" | "visible" | undefined;
     overflowY?: "hidden" | "auto" | "scroll" | "visible" | undefined;
-    borderColor?: "info" | "bold" | "default" | "secondary" | "critical" | "warning" | "positive" | "promote" | "selected" | "critical-bold" | "info-bold" | "warning-bold" | "positive-bold" | "selected-bold" | undefined;
+    borderColor?: "info" | "bold" | "secondary" | "critical" | "warning" | "positive" | "promote" | "selected" | "critical-bold" | "default" | "info-bold" | "warning-bold" | "positive-bold" | "selected-bold" | undefined;
     border?: "none" | "default" | "thick" | undefined;
     borderTop?: "none" | "default" | "thick" | undefined;
     borderBottom?: "none" | "default" | "thick" | undefined;

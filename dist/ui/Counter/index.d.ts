@@ -1,7 +1,7 @@
 import { VariantProps } from 'cva';
 declare const counterVariants: (props?: ({
     size?: "md" | "sm" | undefined;
-    type?: "bold" | "default" | "selected" | undefined;
+    type?: "bold" | "selected" | "default" | undefined;
 } & ({
     class?: import('cva').ClassValue;
     className?: never;

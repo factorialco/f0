@@ -1,6 +1,6 @@
 import { VariantProps } from 'cva';
 declare const shortcutVariants: (props?: ({
-    variant?: "default" | "inverse" | undefined;
+    variant?: "inverse" | "default" | undefined;
 } & ({
     class?: import('cva').ClassValue;
     className?: never;

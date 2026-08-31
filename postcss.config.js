@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url"
 import postcssImport from "postcss-import"
 import tailwindcss from "tailwindcss"
 
-import { inlineFontAssets } from "./inline-font-assets.mjs"
+import { publishFontAssets } from "./publish-font-assets.mjs"
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -13,6 +13,9 @@ export default {
     postcssImport(),
     tailwindcss(),
     autoprefixer(),
-    inlineFontAssets({ fontDirectory: path.resolve(dirname, "assets/fonts") }),
+    publishFontAssets({
+      fontDirectory: path.resolve(dirname, "assets/fonts"),
+      outputDirectory: path.resolve(dirname, "dist"),
+    }),
   ],
 }

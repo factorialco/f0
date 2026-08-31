@@ -14,8 +14,8 @@ export declare const actionsToDropdownItems: (actions: ActionDefinition[] | unde
     type: "item";
     label: string;
     description?: string | undefined;
-    icon?: import('../../../../f0').IconType | undefined;
     critical?: boolean | undefined;
+    icon?: import('../../../../f0').IconType | undefined;
     disabled?: boolean | undefined;
     disabledTooltip?: string | undefined;
     onClick: () => void;

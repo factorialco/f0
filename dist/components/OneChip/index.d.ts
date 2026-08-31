@@ -2,7 +2,7 @@ import { VariantProps } from 'cva';
 import { AvatarVariant } from '../avatars/F0Avatar';
 import { IconType } from '../F0Icon';
 export declare const chipVariants: (props?: ({
-    variant?: "default" | "selected" | undefined;
+    variant?: "selected" | "default" | undefined;
 } & ({
     class?: import('cva').ClassValue;
     className?: never;
