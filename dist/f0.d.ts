@@ -7696,10 +7696,17 @@ export declare const F0AnalyticsDashboard: {
     displayName: string;
 };
 
-/** The widget the user asked about. */
+/**
+ * What the user asked about: a whole widget, or one mark inside it.
+ *
+ * `point` is absent when the ask came from the widget's ⋯ menu and present
+ * when it came from clicking a mark, which is the only thing that tells the
+ * two apart.
+ */
 export declare interface F0AnalyticsDashboardAskAiTarget {
     id: string;
     title: string;
+    point?: F0AnalyticsDashboardPointClick;
 }
 
 /**
@@ -7711,6 +7718,11 @@ export declare interface F0AnalyticsDashboardAskAiTarget {
  */
 export declare type F0AnalyticsDashboardAskAiTargetWithQuote = F0AnalyticsDashboardAskAiTarget & {
     quote: PendingQuote;
+};
+
+/** A mark the reader clicked on the chart canvas. */
+export declare type F0AnalyticsDashboardPointClick = Omit<F0DataChartPointClick, "source"> & {
+    source: "pointer";
 };
 
 /**
@@ -7812,12 +7824,17 @@ export declare interface F0AnalyticsDashboardProps<Filters extends FiltersDefini
      *
      * Without it the entry appears only where an AI chat is mounted and enabled,
      * and drives that chat directly.
+     *
+     * `point` is set when the ask came from a clicked mark rather than the
+     * widget menu — clicking a mark asks about it outright, with no intermediate
+     * action — so one handler answers both without the host having to tell them
+     * apart by anything other than its presence.
      */
     onAskAi?: (item: F0AnalyticsDashboardAskAiTarget) => void;
     /**
      * Observes built-in Ask One interactions without replacing them.
      *
-     * Called immediately before F0 stages the quoted widget in the
+     * Called immediately before F0 stages the quoted widget or point in the
      * mounted chat. `quote` is the same object the composer later submits or
      * dismisses, so a host can bind structured analytical context to the exact
      * pending interaction and clean it up by quote identity.
