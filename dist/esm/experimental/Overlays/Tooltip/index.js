@@ -4,76 +4,79 @@ import { cn as n } from "../../../lib/utils.js";
 import { Tooltip as r, TooltipContent as i, TooltipProvider as a, TooltipTrigger as o } from "../../../ui/tooltip.js";
 import { stripNativeTitle as s } from "../../../lib/strip-native-title.js";
 import { Shortcut as c } from "../../../ui/Shortcut/index.js";
-import { useCallback as l, useEffect as u, useMemo as d, useRef as f, useState as p } from "react";
-import { Fragment as m, jsx as h, jsxs as g } from "react/jsx-runtime";
+import l, { useCallback as u, useEffect as d, useMemo as f, useRef as p, useState as m } from "react";
+import { Fragment as h, jsx as g, jsxs as _ } from "react/jsx-runtime";
 //#region src/experimental/Overlays/Tooltip/index.tsx
-function _({ label: e, description: t, items: _, children: v, shortcut: y, instant: b = !1, delay: x = 700, onOpen: S }) {
-	let [C, w] = p(!1), T = f(null), E = d(() => b ? 100 : x, [x, b]), D = !!(e || t || _?.length || y), O = l(() => {
-		T.current &&= (clearTimeout(T.current), null);
-	}, []), k = l(() => {
-		O(), w(!1);
-	}, [O]), A = l(() => {
-		D && (S?.(), O(), T.current = setTimeout(() => w(!0), E));
+function v({ label: e, description: t, items: v, children: y, shortcut: b, instant: x = !1, delay: S = 700, onOpen: C }) {
+	let [w, T] = m(!1), E = p(null), D = f(() => x ? 100 : S, [S, x]), O = !!(e || t || v?.length || b), k = u(() => {
+		E.current &&= (clearTimeout(E.current), null);
+	}, []), A = u(() => {
+		k(), T(!1);
+	}, [k]), j = u(() => {
+		O && (C?.(), k(), E.current = setTimeout(() => T(!0), D));
 	}, [
+		k,
 		O,
-		D,
-		S,
-		E
+		C,
+		D
 	]);
-	u(() => k, [k]);
-	let j = l((e) => {
+	d(() => A, [A]);
+	let M = u((e) => {
 		try {
 			return e.matches(":focus-visible");
 		} catch {
 			return !1;
 		}
-	}, []);
-	return /* @__PURE__ */ h(m, { children: /* @__PURE__ */ h(a, {
-		delayDuration: E,
-		disableHoverableContent: b,
-		children: /* @__PURE__ */ g(r, {
-			open: D && C,
+	}, []), N = l.isValidElement(y) && y.type !== l.Fragment;
+	return /* @__PURE__ */ g(h, { children: /* @__PURE__ */ g(a, {
+		delayDuration: D,
+		disableHoverableContent: x,
+		children: /* @__PURE__ */ _(r, {
+			open: O && w,
 			onOpenChange: (e) => {
-				e || k();
+				e || A();
 			},
-			children: [/* @__PURE__ */ h(o, {
+			children: [/* @__PURE__ */ g(o, {
 				asChild: !0,
 				className: "pointer-events-auto",
 				onPointerEnter: (e) => {
-					e.pointerType !== "touch" && A();
+					e.pointerType !== "touch" && j();
 				},
-				onPointerLeave: () => k(),
-				onPointerDown: () => k(),
+				onPointerLeave: () => A(),
+				onPointerDown: () => A(),
 				onFocus: (e) => {
-					D && (j(e.currentTarget) ? (S?.(), w(!0)) : k());
+					O && (M(e.currentTarget) ? (C?.(), T(!0)) : A());
 				},
-				onBlur: () => k(),
-				children: s(v)
-			}), /* @__PURE__ */ h(i, {
-				className: n("max-w-xs", y && "pr-1.5", b && "pointer-events-none"),
-				children: /* @__PURE__ */ g("div", {
+				onBlur: () => A(),
+				children: N ? s(y) : /* @__PURE__ */ g("span", {
+					className: "inline-flex h-fit w-fit",
+					children: y
+				})
+			}), /* @__PURE__ */ g(i, {
+				className: n("max-w-xs", b && "pr-1.5", x && "pointer-events-none"),
+				children: /* @__PURE__ */ _("div", {
 					className: "flex flex-col gap-0.5",
 					children: [
-						/* @__PURE__ */ g("div", {
+						/* @__PURE__ */ _("div", {
 							className: "flex items-center gap-2",
-							children: [e && /* @__PURE__ */ h("p", {
+							children: [e && /* @__PURE__ */ g("p", {
 								className: "font-semibold",
 								children: e
-							}), y && /* @__PURE__ */ h(c, {
-								keys: y,
+							}), b && /* @__PURE__ */ g(c, {
+								keys: b,
 								variant: "inverse"
 							})]
 						}),
-						t && /* @__PURE__ */ h("p", {
+						t && /* @__PURE__ */ g("p", {
 							className: "font-normal",
 							children: t.toString()
 						}),
-						_ && _.length > 0 && /* @__PURE__ */ h("ul", {
+						v && v.length > 0 && /* @__PURE__ */ g("ul", {
 							className: "m-0 flex list-disc flex-col gap-0.5 pl-4 font-normal",
-							children: _.map((e, t) => /* @__PURE__ */ h("li", { children: typeof e == "string" ? e : /* @__PURE__ */ g(m, { children: [/* @__PURE__ */ h("span", {
+							children: v.map((e, t) => /* @__PURE__ */ g("li", { children: typeof e == "string" ? e : /* @__PURE__ */ _(h, { children: [/* @__PURE__ */ g("span", {
 								className: "font-semibold",
 								children: e.title
-							}), e.description && /* @__PURE__ */ g(m, { children: [" ", e.description] })] }) }, `${t}-${typeof e == "string" ? e : e.title}`))
+							}), e.description && /* @__PURE__ */ _(h, { children: [" ", e.description] })] }) }, `${t}-${typeof e == "string" ? e : e.title}`))
 						})
 					]
 				})
@@ -81,12 +84,12 @@ function _({ label: e, description: t, items: _, children: v, shortcut: y, insta
 		})
 	}) });
 }
-var v = ["delay", "onOpen"], y = e(t("Tooltip", (e) => {
-	let t = v.reduce((e, t) => {
+var y = ["delay", "onOpen"], b = e(t("Tooltip", (e) => {
+	let t = y.reduce((e, t) => {
 		let { [t]: n, ...r } = e;
 		return r;
 	}, e);
-	return /* @__PURE__ */ h(_, { ...t });
+	return /* @__PURE__ */ g(v, { ...t });
 }));
 //#endregion
-export { y as Tooltip, _ as TooltipInternal };
+export { b as Tooltip, v as TooltipInternal };

@@ -94,7 +94,10 @@ var _ = {
 								children: y.name
 							})
 						}),
-						O,
+						/* @__PURE__ */ m("span", {
+							"data-chat-message-text": !0,
+							children: O
+						}),
 						/* @__PURE__ */ m(c, {
 							message: d,
 							placement: "bubble"

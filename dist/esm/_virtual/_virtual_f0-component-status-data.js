@@ -1,6 +1,6 @@
 //#region \0virtual:f0-component-status-data
 var e = {
-	generatedAt: "2026-08-31T06:21:26.589Z",
+	generatedAt: "2026-08-31T21:42:04.853Z",
 	stats: {
 		total: 265,
 		byStatus: {
@@ -708,7 +708,7 @@ var e = {
 				hasWhenToUse: !0,
 				hasWhenNotToUse: !0,
 				hasDoDonts: !0,
-				exampleCount: 10
+				exampleCount: 12
 			},
 			a11yTier: "todo",
 			storyFile: "components/F0AudioPlayer/__stories__/F0AudioPlayer.stories.tsx"

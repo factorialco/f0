@@ -1,8 +1,8 @@
 import { cn as e } from "../../../lib/utils.js";
 import t from "../../../icons/app/Marker.js";
 import { F0AvatarIcon as n } from "../../../components/avatars/F0AvatarIcon/F0AvatarIcon.js";
-import { Metadata as r } from "../../../experimental/Information/Headers/Metadata/index.js";
-import { F0Text as i } from "../../../components/F0Text/F0Text.js";
+import { F0Text as r } from "../../../components/F0Text/F0Text.js";
+import { Metadata as i } from "../../../experimental/Information/Headers/Metadata/index.js";
 import { jsx as a, jsxs as o } from "react/jsx-runtime";
 //#region src/sds/timeline/components/TaskHeader.tsx
 var s = ({ props: s }) => {
@@ -20,14 +20,14 @@ var s = ({ props: s }) => {
 					className: e("text-base font-semibold text-f1-foreground", c === "completed" && "line-through"),
 					children: u
 				}),
-				d && /* @__PURE__ */ a(i, {
+				d && /* @__PURE__ */ a(r, {
 					content: d,
 					variant: "description"
 				})
 			]
 		}), /* @__PURE__ */ a("div", {
 			className: "flex justify-end items-center gap-3 pl-9",
-			children: c === "completed" && f && p && /* @__PURE__ */ a(r, { items: f })
+			children: c === "completed" && f && p && /* @__PURE__ */ a(i, { items: f })
 		})]
 	});
 };

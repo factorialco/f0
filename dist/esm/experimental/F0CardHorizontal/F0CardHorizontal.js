@@ -4,10 +4,10 @@ import { cn as n, focusRing as r } from "../../lib/utils.js";
 import { Skeleton as i } from "../../ui/skeleton.js";
 import { withSkeleton as a } from "../../lib/skeleton.js";
 import { Card as o } from "../../ui/Card/Card.js";
-import { F0Link as s } from "../../components/F0Link/F0Link.js";
-import { CardAlertWrapper as c, alertBorderColor as l } from "../../components/F0Card/components/CardAlert.js";
-import { CardAvatar as u } from "../../components/F0Card/components/CardAvatar.js";
-import { Text as d } from "../../ui/Text/Text.js";
+import { Text as s } from "../../ui/Text/Text.js";
+import { F0Link as c } from "../../components/F0Link/F0Link.js";
+import { CardAlertWrapper as l, alertBorderColor as u } from "../../components/F0Card/components/CardAlert.js";
+import { CardAvatar as d } from "../../components/F0Card/components/CardAvatar.js";
 import { CardHorizontalActions as f, cardHorizontalClassName as p, cardHorizontalLeadingAlignClassName as m } from "./components/CardHorizontalActions.js";
 import { forwardRef as h } from "react";
 import { jsx as g, jsxs as _ } from "react/jsx-runtime";
@@ -17,12 +17,12 @@ var v = h(function({ title: e, description: t, avatar: i, primaryAction: a, seco
 		ref: M ? void 0 : j,
 		className: n("group relative @container bg-f1-background shadow-none transition-all", C && "h-full", (!!T || !!E) && !k && "cursor-pointer focus-within:border-f1-border-hover focus-within:shadow-md hover:border-f1-border-hover hover:shadow-md", k && "pointer-events-none opacity-50"),
 		style: M ? {
-			borderColor: l[w.variant],
+			borderColor: u[w.variant],
 			borderWidth: "2px"
 		} : void 0,
 		onClick: k ? void 0 : E,
 		"data-testid": "card",
-		children: [T && !D && /* @__PURE__ */ g(s, {
+		children: [T && !D && /* @__PURE__ */ g(c, {
 			href: T,
 			variant: "unstyled",
 			className: n("z-1 absolute inset-0 block rounded-xl", r()),
@@ -32,16 +32,16 @@ var v = h(function({ title: e, description: t, avatar: i, primaryAction: a, seco
 			className: p[O],
 			children: [/* @__PURE__ */ _("div", {
 				className: n("flex min-w-0 flex-row gap-3", m[O], i ? "items-start" : "items-center"),
-				children: [i && /* @__PURE__ */ g(u, {
+				children: [i && /* @__PURE__ */ g(d, {
 					avatar: i,
 					size: "lg"
 				}), /* @__PURE__ */ _("div", {
 					className: "flex min-w-0 flex-col gap-0",
-					children: [/* @__PURE__ */ g(d, {
+					children: [/* @__PURE__ */ g(s, {
 						variant: "body",
 						content: e,
 						className: n("break-words font-medium", S && "text-f1-foreground-secondary line-through")
-					}), t && /* @__PURE__ */ g(d, {
+					}), t && /* @__PURE__ */ g(s, {
 						variant: "description",
 						content: t,
 						ellipsis: A || void 0,
@@ -60,7 +60,7 @@ var v = h(function({ title: e, description: t, avatar: i, primaryAction: a, seco
 			})]
 		})]
 	});
-	return M ? /* @__PURE__ */ g(c, {
+	return M ? /* @__PURE__ */ g(l, {
 		ref: j,
 		alert: w,
 		fullHeight: C,

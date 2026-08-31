@@ -6,75 +6,93 @@ var a = (a) => {
 		1,
 		1.5,
 		2
-	], onPlay: d, onPause: f, onSeek: p, onTimeUpdate: m, onEnded: h, onError: g } = a, _ = typeof o == "function" ? o : void 0, v = typeof o == "function" ? void 0 : o, y = r(null), [b, x] = i(v), S = r(!1), C = r(!1), w = r(!1), T = t(async () => {
-		if (!(!_ || S.current)) {
-			S.current = !0;
+	], onPlay: d, onPause: f, onSeek: p, onTimeUpdate: m, onEnded: h, onError: g } = a, _ = typeof o == "function" ? o : void 0, v = typeof o == "function" ? void 0 : o, y = r(null), [b, x] = i(v), S = r(null), [C, w] = i(null), T = r(!1), E = r(!1), D = r(!1), O = t(async () => {
+		if (!(!_ || T.current)) {
+			T.current = !0;
 			try {
 				x(await _());
 			} catch {
-				C.current = !1, g?.(null);
+				E.current = !1, g?.(null);
 			} finally {
-				S.current = !1;
+				T.current = !1;
 			}
 		}
-	}, [_, g]), E = t(() => {
-		w.current = !1, d?.();
-	}, [d]), D = t((e) => {
-		g?.(e), !(!_ || w.current) && (w.current = !0, C.current = !0, x(void 0), T());
+	}, [_, g]), k = t(() => {
+		D.current = !1, d?.();
+	}, [d]), A = t((e) => {
+		g?.(e), !(!_ || D.current) && (D.current = !0, E.current = !0, x(void 0), O());
 	}, [
 		g,
 		_,
-		T
-	]), O = e(y, {
-		onPlay: E,
+		O
+	]), j = e(y, {
+		onPlay: k,
 		onPause: f,
 		onSeek: p,
 		onTimeUpdate: m,
 		onEnded: h,
-		onError: D
-	}, s ?? 0);
-	n(() => {
-		v !== void 0 && x(v);
-	}, [v]), n(() => {
-		!b || !C.current || (C.current = !1, O.play());
-	}, [b, O]);
-	let k = t(() => {
-		if (!O.isPlaying && !b && _) {
-			C.current = !0, T();
+		onError: A
+	}, s ?? 0), M = j.seek, N = t((e) => {
+		let t = y.current, n = Math.max(e, 0);
+		if (t && b && t.readyState >= t.HAVE_METADATA) {
+			M(n);
 			return;
 		}
-		O.toggle();
+		S.current = n, w(n);
+	}, [M, b]);
+	n(() => {
+		let e = y.current;
+		if (!e) return;
+		let t = () => {
+			let e = S.current;
+			e !== null && (S.current = null, w(null), M(e));
+		};
+		return e.addEventListener("loadedmetadata", t), () => e.removeEventListener("loadedmetadata", t);
+	}, [M]), n(() => {
+		v !== void 0 && x(v);
+	}, [v]), n(() => {
+		!b || !E.current || (E.current = !1, j.play());
+	}, [b, j]);
+	let P = t(() => {
+		if (!j.isPlaying && !b && _) {
+			E.current = !0, O();
+			return;
+		}
+		j.toggle();
 	}, [
-		O,
+		j,
 		b,
 		_,
-		T
+		O
 	]);
 	n(() => {
-		c !== void 0 && (c && !O.isPlaying ? !b && _ ? (C.current = !0, T()) : O.play() : !c && O.isPlaying && O.pause());
+		c !== void 0 && (c && !j.isPlaying ? !b && _ ? (E.current = !0, O()) : j.play() : !c && j.isPlaying && j.pause());
 	}, [
 		c,
-		O,
+		j,
 		b,
 		_,
-		T
+		O
 	]);
-	let A = r(O.isPlaying);
-	return n(() => {
-		A.current !== O.isPlaying && (A.current = O.isPlaying, l?.(O.isPlaying));
-	}, [O.isPlaying, l]), {
+	let F = r(j.isPlaying);
+	n(() => {
+		F.current !== j.isPlaying && (F.current = j.isPlaying, l?.(j.isPlaying));
+	}, [j.isPlaying, l]);
+	let I = C !== null && j.duration > 0 ? Math.min(C, j.duration) : null;
+	return {
 		audioRef: y,
 		currentSrc: b,
-		isPlaying: O.isPlaying,
-		currentTime: O.currentTime,
-		duration: O.duration,
-		buffered: O.buffered,
-		playbackRate: O.playbackRate,
-		isLoading: O.isLoading,
-		error: O.error,
-		toggle: k,
-		seek: O.seek,
-		setPlaybackRate: O.setPlaybackRate,
+		pendingTime: C,
+		isPlaying: j.isPlaying,
+		currentTime: I ?? j.currentTime,
+		duration: j.duration,
+		buffered: j.buffered,
+		playbackRate: j.playbackRate,
+		isLoading: j.isLoading,
+		error: j.error,
+		toggle: P,
+		seek: N,
+		setPlaybackRate: j.setPlaybackRate,
 		playbackRates: u
 	};
 };

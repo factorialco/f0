@@ -1,6 +1,6 @@
 //#region src/lib/localized.ts
 function e(e) {
-	return Array.isArray(e);
+	return Array.isArray(e) && e.every((e) => typeof e == "object" && !!e && "locale" in e && "value" in e);
 }
 function t(t, n) {
 	if (t !== void 0) {

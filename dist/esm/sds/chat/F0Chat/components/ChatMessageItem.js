@@ -16,7 +16,7 @@ import { useCallback as m, useEffect as h, useLayoutEffect as g, useRef as _, us
 import { jsx as y, jsxs as b } from "react/jsx-runtime";
 import { AnimatePresence as x, motion as S } from "motion/react";
 //#region src/sds/chat/F0Chat/components/ChatMessageItem.tsx
-var C = 150, w = "a, button, input, textarea, select, video, audio, summary, [role=\"button\"], [role=\"link\"], [role=\"slider\"], [contenteditable=\"true\"], [tabindex]:not([tabindex=\"-1\"]), [data-chat-attachments]", T = (e, t) => {
+var C = 150, w = "a, button, input, textarea, select, video, audio, summary, [role=\"button\"], [role=\"link\"], [role=\"slider\"], [contenteditable=\"true\"], [tabindex]:not([tabindex=\"-1\"]), [data-chat-attachments], [data-chat-message-text]", T = (e, t) => {
 	for (let n = e; n; n = n.parentElement) {
 		if (n === t) return !1;
 		if (n.matches(w)) return !0;

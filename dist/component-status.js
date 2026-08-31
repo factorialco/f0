@@ -5,7 +5,7 @@ import { jsx as l, jsxs as u } from "react/jsx-runtime";
 //#endregion
 //#region src/component-status/component-status.ts
 var d = {
-	generatedAt: "2026-08-31T06:21:12.161Z",
+	generatedAt: "2026-08-31T21:41:50.351Z",
 	stats: {
 		total: 265,
 		byStatus: {
@@ -713,7 +713,7 @@ var d = {
 				hasWhenToUse: !0,
 				hasWhenNotToUse: !0,
 				hasDoDonts: !0,
-				exampleCount: 10
+				exampleCount: 12
 			},
 			a11yTier: "todo",
 			storyFile: "components/F0AudioPlayer/__stories__/F0AudioPlayer.stories.tsx"

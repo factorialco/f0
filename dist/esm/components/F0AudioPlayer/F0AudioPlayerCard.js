@@ -1,130 +1,185 @@
 import { cn as e } from "../../lib/utils.js";
 import { useReducedMotion as t } from "../../lib/a11y.js";
 import { useI18n as n } from "../../lib/providers/i18n/i18n-provider.js";
-import { F0Button as ee } from "../F0Button/F0Button.js";
-import { ScrollArea as r } from "../../ui/scrollarea.js";
-import { getDataAttributes as i } from "./utils.js";
+import { F0Button as r } from "../F0Button/F0Button.js";
+import { ScrollArea as i } from "../../ui/scrollarea.js";
+import { buildCueTimeline as a, findActiveCueIndex as ee, getDataAttributes as o } from "./utils.js";
 import { AudioScrubber as te } from "./components/AudioScrubber.js";
-import { collectLanguages as a, defaultLocale as o, resolveLocalized as s } from "../../lib/localized.js";
-import { LanguageSelect as ne } from "./components/LanguageSelect.js";
-import { PlaybackTime as re } from "./components/PlaybackTime.js";
-import { PlayPauseButton as ie } from "./components/PlayPauseButton.js";
-import { preserveAudioPosition as ae, useAudioLanguage as c } from "./useAudioLanguage.js";
-import { usePlayerController as l } from "./usePlayerController.js";
-import { F0SegmentedControl as u } from "../../experimental/Actions/F0SegmentedControl/index.js";
-import { PlaybackMenu as d } from "./components/PlaybackMenu.js";
-import { useDerivedTranscription as f } from "./useDerivedTranscription.js";
-import { forwardRef as p, useMemo as m, useState as h } from "react";
-import { jsx as g, jsxs as _ } from "react/jsx-runtime";
-import { motion as v } from "motion/react";
-import { useControllableState as oe } from "@radix-ui/react-use-controllable-state";
+import { collectLanguages as ne, defaultLocale as s, resolveLocalized as c } from "../../lib/localized.js";
+import { LanguageSelect as re } from "./components/LanguageSelect.js";
+import { PlaybackTime as ie } from "./components/PlaybackTime.js";
+import { PlayPauseButton as ae } from "./components/PlayPauseButton.js";
+import { preserveAudioPosition as oe, useAudioLanguage as se } from "./useAudioLanguage.js";
+import { usePlayerController as ce } from "./usePlayerController.js";
+import { F0SegmentedControl as le } from "../../experimental/Actions/F0SegmentedControl/index.js";
+import { PlaybackMenu as ue } from "./components/PlaybackMenu.js";
+import { TranscriptCueList as de } from "./components/TranscriptCueList.js";
+import { useDerivedTranscription as fe } from "./useDerivedTranscription.js";
+import { forwardRef as l, useCallback as pe, useEffect as u, useMemo as d, useRef as f, useState as p } from "react";
+import { jsx as m, jsxs as h } from "react/jsx-runtime";
+import { motion as me } from "motion/react";
+import { useControllableState as he } from "@radix-ui/react-use-controllable-state";
 //#region src/components/F0AudioPlayer/F0AudioPlayerCard.tsx
-var y = p((p, y) => {
-	let { title: b, subtitle: x, actions: S, className: se, src: ce, preload: le, autoPlay: ue = !1, disabled: C = !1, ariaLabel: w, size: T = "md", content: E, defaultLanguage: D, details: O, expanded: k, defaultExpanded: A = !1, onExpandedChange: j, detailsMaxHeight: M = 200 } = p, N = n(), P = c(ce, D), F = l({
-		...p,
-		src: P.resolvedSrc
-	}), I = i(p), L = t(), R = (e) => {
-		ae(F.audioRef.current), P.setLocale(e);
-	}, z = !E && !!(O && O.length > 0), B = m(() => a(E?.summary, E?.transcription), [E?.summary, E?.transcription]), [V, H] = h(() => o(B, D)), U = B.some((e) => e.locale === V) ? V : o(B, D), W = s(E?.summary, U), G = s(E?.transcription, U), de = f(F.audioRef, F.currentSrc, !G), K = G ?? de, q = m(() => {
-		if (z) return O ?? [];
+var ge = /* @__PURE__ */ new Set([
+	"ArrowUp",
+	"ArrowDown",
+	"PageUp",
+	"PageDown",
+	"Home",
+	"End",
+	" "
+]), g = l((l, g) => {
+	let { title: _, subtitle: v, actions: y, className: _e, src: ve, preload: ye, autoPlay: be = !1, disabled: b = !1, ariaLabel: xe, size: x = "md", content: S, defaultLanguage: C, details: w, expanded: Se, defaultExpanded: Ce = !1, onExpandedChange: we, detailsMaxHeight: Te = 200 } = l, T = n(), E = se(ve, C), D = ce({
+		...l,
+		src: E.resolvedSrc
+	}), O = o(l), k = t(), Ee = (e) => {
+		oe(D.audioRef.current), E.setLocale(e);
+	}, A = !S && !!(w && w.length > 0), j = d(() => ne(S?.summary, S?.transcription), [S?.summary, S?.transcription]), [M, De] = p(() => s(j, C)), N = j.some((e) => e.locale === M) ? M : s(j, C), P = c(S?.summary, N), F = c(S?.transcription, N), Oe = fe(D.audioRef, D.currentSrc, !F), I = F ?? Oe, L = Array.isArray(I) ? I : void 0, R = typeof I == "string" ? I : void 0, z = !!(R || L?.length), B = d(() => L ? a(L) : [], [L]), V = B.length > 0, H = D.pendingTime ?? D.currentTime, U = d(() => V ? ee(B, H) : -1, [
+		V,
+		B,
+		H
+	]), W = f(null), G = f([]), K = f(!1), q = pe((e) => {
+		K.current = !1, D.seek(e);
+	}, [D.seek]);
+	u(() => {
+		let e = W.current;
+		if (!e) return;
+		let t = () => {
+			K.current = !0;
+		}, n = (e) => {
+			ge.has(e.key) && t();
+		}, r = (n) => {
+			e.contains(n.target) || t();
+		}, i = e.parentElement;
+		return e.addEventListener("wheel", t, { passive: !0 }), e.addEventListener("touchmove", t, { passive: !0 }), e.addEventListener("keydown", n), i?.addEventListener("pointerdown", r), () => {
+			e.removeEventListener("wheel", t), e.removeEventListener("touchmove", t), e.removeEventListener("keydown", n), i?.removeEventListener("pointerdown", r);
+		};
+	}, [z]);
+	let J = d(() => {
+		if (A) return w ?? [];
 		let e = [];
-		return W && e.push({
+		return P && e.push({
 			value: "summary",
-			label: N.audioPlayer.summary,
-			content: /* @__PURE__ */ g("p", {
+			label: T.audioPlayer.summary,
+			content: /* @__PURE__ */ m("p", {
 				className: "whitespace-pre-line",
-				children: W
+				children: P
 			})
-		}), K && e.push({
+		}), z && e.push({
 			value: "transcription",
-			label: N.audioPlayer.transcription,
-			content: /* @__PURE__ */ g("p", {
+			label: T.audioPlayer.transcription,
+			content: L ? /* @__PURE__ */ m(de, {
+				cues: L,
+				activeIndex: U,
+				onSeek: V ? q : void 0,
+				cueRefs: G
+			}) : /* @__PURE__ */ m("p", {
 				className: "whitespace-pre-line",
-				children: K
+				children: R
 			})
 		}), e;
 	}, [
+		A,
+		w,
+		P,
 		z,
-		O,
-		W,
-		K,
-		N.audioPlayer.summary,
-		N.audioPlayer.transcription
-	]), fe = K ? "available" : "missing", J = q.length > 0, Y = q.length === 1 ? q[0] : void 0, X = (e) => Y?.value === "transcription" ? e ? N.audioPlayer.hideTranscription : N.audioPlayer.viewTranscription : Y?.value === "summary" ? e ? N.audioPlayer.hideSummary : N.audioPlayer.viewSummary : e ? N.audioPlayer.hideDetail : N.audioPlayer.viewDetail, [Z = !1, pe] = oe({
-		prop: k,
-		defaultProp: A,
-		onChange: j
-	}), [Q, me] = h(q[0]?.value), $ = q.some((e) => e.value === Q) ? Q : q[0]?.value, he = q.find((e) => e.value === $)?.content;
-	return /* @__PURE__ */ _("div", {
-		ref: y,
+		L,
+		R,
+		U,
+		V,
+		q,
+		T.audioPlayer.summary,
+		T.audioPlayer.transcription
+	]), ke = z ? "available" : "missing", Y = J.length > 0, X = J.length === 1 ? J[0] : void 0, Ae = (e) => X?.value === "transcription" ? e ? T.audioPlayer.hideTranscription : T.audioPlayer.viewTranscription : X?.value === "summary" ? e ? T.audioPlayer.hideSummary : T.audioPlayer.viewSummary : e ? T.audioPlayer.hideDetail : T.audioPlayer.viewDetail, [Z = !1, je] = he({
+		prop: Se,
+		defaultProp: Ce,
+		onChange: we
+	});
+	u(() => {
+		if (!Z || U < 0 || K.current) return;
+		let e = W.current, t = G.current[U];
+		if (!e || !t) return;
+		let n = e.getBoundingClientRect(), r = t.getBoundingClientRect(), i = r.top - n.top, a = r.bottom - n.bottom;
+		i >= 0 && a <= 0 || e.scrollTo({
+			top: e.scrollTop + (i < 0 ? i : a),
+			behavior: k ? "auto" : "smooth"
+		});
+	}, [
+		U,
+		Z,
+		k
+	]);
+	let [Q, Me] = p(J[0]?.value), $ = J.some((e) => e.value === Q) ? Q : J[0]?.value, Ne = J.find((e) => e.value === $)?.content;
+	return /* @__PURE__ */ h("div", {
+		ref: g,
 		role: "group",
-		"aria-label": w ?? b,
-		"data-audio-transcription": fe,
-		className: e("flex flex-col gap-2.5 rounded-2xl border border-solid border-f1-border-secondary bg-f1-background p-3", se),
-		...I,
+		"aria-label": xe ?? _,
+		"data-audio-transcription": ke,
+		className: e("flex flex-col gap-2.5 rounded-2xl border border-solid border-f1-border-secondary bg-f1-background p-3", _e),
+		...O,
 		children: [
-			/* @__PURE__ */ g("audio", {
-				ref: F.audioRef,
-				src: F.currentSrc,
-				preload: le ?? (typeof P.resolvedSrc == "function" ? "none" : "metadata"),
-				autoPlay: ue
+			/* @__PURE__ */ m("audio", {
+				ref: D.audioRef,
+				src: D.currentSrc,
+				preload: ye ?? (typeof E.resolvedSrc == "function" ? "none" : "metadata"),
+				autoPlay: be
 			}),
-			/* @__PURE__ */ _("div", {
+			/* @__PURE__ */ h("div", {
 				className: "flex items-start justify-between gap-2",
-				children: [/* @__PURE__ */ _("div", {
+				children: [/* @__PURE__ */ h("div", {
 					className: "flex min-w-0 flex-1 items-center gap-2.5",
-					children: [/* @__PURE__ */ g(ie, {
-						isPlaying: F.isPlaying,
-						disabled: C,
-						size: T,
-						onToggle: F.toggle
-					}), /* @__PURE__ */ _("div", {
+					children: [/* @__PURE__ */ m(ae, {
+						isPlaying: D.isPlaying,
+						disabled: b,
+						size: x,
+						onToggle: D.toggle
+					}), /* @__PURE__ */ h("div", {
 						className: "flex min-w-0 flex-col",
-						children: [/* @__PURE__ */ g("span", {
+						children: [/* @__PURE__ */ m("span", {
 							className: "truncate text-base font-medium text-f1-foreground",
-							children: b
-						}), x && /* @__PURE__ */ g("span", {
+							children: _
+						}), v && /* @__PURE__ */ m("span", {
 							className: "truncate text-base text-f1-foreground-secondary",
-							children: x
+							children: v
 						})]
 					})]
-				}), (J || F.playbackRates.length > 0 || P.languages.length > 1 || S) && /* @__PURE__ */ _("div", {
+				}), (Y || D.playbackRates.length > 0 || E.languages.length > 1 || y) && /* @__PURE__ */ h("div", {
 					className: "flex shrink-0 items-center gap-2",
-					children: [J && /* @__PURE__ */ g(ee, {
+					children: [Y && /* @__PURE__ */ m(r, {
 						variant: "outline",
 						size: "sm",
-						label: X(Z),
-						onClick: () => pe(!Z),
+						label: Ae(Z),
+						onClick: () => je(!Z),
 						"aria-expanded": Z
-					}), (F.playbackRates.length > 0 || P.languages.length > 1 || S) && /* @__PURE__ */ g(d, {
-						playbackRate: F.playbackRate,
-						playbackRates: F.playbackRates,
-						onRateChange: F.setPlaybackRate,
-						disabled: C,
-						extraItems: S,
-						audioLanguages: P.languages,
-						audioLanguage: P.activeLocale,
-						onAudioLanguageChange: R
+					}), (D.playbackRates.length > 0 || E.languages.length > 1 || y) && /* @__PURE__ */ m(ue, {
+						playbackRate: D.playbackRate,
+						playbackRates: D.playbackRates,
+						onRateChange: D.setPlaybackRate,
+						disabled: b,
+						extraItems: y,
+						audioLanguages: E.languages,
+						audioLanguage: E.activeLocale,
+						onAudioLanguageChange: Ee
 					})]
 				})]
 			}),
-			/* @__PURE__ */ _("div", {
+			/* @__PURE__ */ h("div", {
 				className: "flex w-full items-center gap-2",
-				children: [/* @__PURE__ */ g(te, {
-					currentTime: F.currentTime,
-					duration: F.duration,
-					buffered: F.buffered,
-					disabled: C,
-					onSeek: F.seek
-				}), /* @__PURE__ */ g(re, {
-					currentTime: F.currentTime,
-					duration: F.duration,
-					size: T
+				children: [/* @__PURE__ */ m(te, {
+					currentTime: D.currentTime,
+					duration: D.duration,
+					buffered: D.buffered,
+					disabled: b,
+					onSeek: q
+				}), /* @__PURE__ */ m(ie, {
+					currentTime: D.currentTime,
+					duration: D.duration,
+					size: x
 				})]
 			}),
-			J && /* @__PURE__ */ _(v.div, {
+			Y && /* @__PURE__ */ h(me.div, {
 				role: "region",
-				"aria-label": Y ? Y.label : N.audioPlayer.details,
+				"aria-label": X ? X.label : T.audioPlayer.details,
 				initial: !1,
 				animate: {
 					height: Z ? "auto" : 0,
@@ -133,7 +188,7 @@ var y = p((p, y) => {
 					visibility: Z ? "visible" : "hidden"
 				},
 				transition: {
-					duration: L ? 0 : .15,
+					duration: k ? 0 : .15,
 					ease: [
 						.165,
 						.84,
@@ -143,33 +198,34 @@ var y = p((p, y) => {
 				},
 				className: "overflow-hidden",
 				children: [
-					B.length > 1 && U && /* @__PURE__ */ g("div", {
+					j.length > 1 && N && /* @__PURE__ */ m("div", {
 						className: "flex justify-end pb-2.5",
-						children: /* @__PURE__ */ g(ne, {
-							value: U,
-							options: B,
-							onChange: H,
-							kind: N.audioPlayer.language
+						children: /* @__PURE__ */ m(re, {
+							value: N,
+							options: j,
+							onChange: De,
+							kind: T.audioPlayer.language
 						})
 					}),
-					!Y && /* @__PURE__ */ g(u, {
+					!X && /* @__PURE__ */ m(le, {
 						fullWidth: !0,
-						ariaLabel: N.audioPlayer.details,
+						ariaLabel: T.audioPlayer.details,
 						value: $,
-						onChange: me,
-						items: q.map((e) => ({
+						onChange: Me,
+						items: J.map((e) => ({
 							value: e.value,
 							label: e.label
 						}))
 					}),
-					/* @__PURE__ */ g("div", {
-						className: Y ? void 0 : "pt-2.5",
-						children: /* @__PURE__ */ g(r, {
-							style: { "--audio-details-max-h": `${M}px` },
+					/* @__PURE__ */ m("div", {
+						className: X ? void 0 : "pt-2.5",
+						children: /* @__PURE__ */ m(i, {
+							viewportRef: W,
+							style: { "--audio-details-max-h": `${Te}px` },
 							className: "[&_[data-scroll-container]]:max-h-[var(--audio-details-max-h)]",
-							children: /* @__PURE__ */ g("div", {
+							children: /* @__PURE__ */ m("div", {
 								className: "break-words pr-1 text-base text-f1-foreground",
-								children: he
+								children: Ne
 							})
 						})
 					})
@@ -178,6 +234,6 @@ var y = p((p, y) => {
 		]
 	});
 });
-y.displayName = "F0AudioPlayerCard";
+g.displayName = "F0AudioPlayerCard";
 //#endregion
-export { y as F0AudioPlayerCardBase };
+export { g as F0AudioPlayerCardBase };

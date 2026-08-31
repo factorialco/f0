@@ -6,21 +6,21 @@ import a from "../../icons/app/Plus.js";
 import { useI18n as o } from "../../lib/providers/i18n/i18n-provider.js";
 import { TooltipInternal as s } from "../../experimental/Overlays/Tooltip/index.js";
 import { F0Button as ee } from "../F0Button/F0Button.js";
-import { InputMessages as te } from "../F0InputField/components/InputMessages.js";
-import { Label as ne } from "../F0InputField/components/Label.js";
-import { F0InputField as re } from "../F0InputField/F0InputField.js";
-import { getDataSourcePaginationType as ie, useDataSource as ae } from "../../hooks/datasource/useDataSource.js";
-import { useData as oe } from "../../hooks/datasource/useData.js";
-import { useGroups as se } from "../../hooks/datasource/useGroups.js";
-import { useSelectable as ce } from "../../hooks/datasource/useSelectable/useSelectable.js";
+import { textVariants as te } from "../../ui/Text/variants.js";
+import { InputMessages as ne } from "../F0InputField/components/InputMessages.js";
+import { Label as re } from "../F0InputField/components/Label.js";
+import { F0InputField as ie } from "../F0InputField/F0InputField.js";
+import { getDataSourcePaginationType as ae, useDataSource as oe } from "../../hooks/datasource/useDataSource.js";
+import { useData as se } from "../../hooks/datasource/useData.js";
+import { useGroups as ce } from "../../hooks/datasource/useGroups.js";
+import { useSelectable as le } from "../../hooks/datasource/useSelectable/useSelectable.js";
 import { toArray as c } from "../../lib/toArray.js";
-import { F0DialogContext as le } from "../../patterns/F0Dialog/components/F0DialogProvider.js";
-import { GroupHeader as ue } from "../../ui/GroupHeader/GroupHeader.js";
-import { Select as de } from "../../ui/Select/components/Select.js";
-import { SelectContent as fe } from "../../ui/Select/components/SelectContent.js";
-import { SelectSeparator as pe } from "../../ui/Select/components/SelectSeparator.js";
-import { SelectTrigger as me } from "../../ui/Select/components/SelectTrigger.js";
-import { textVariants as he } from "../../ui/Text/variants.js";
+import { F0DialogContext as ue } from "../../patterns/F0Dialog/components/F0DialogProvider.js";
+import { GroupHeader as de } from "../../ui/GroupHeader/GroupHeader.js";
+import { Select as fe } from "../../ui/Select/components/Select.js";
+import { SelectContent as pe } from "../../ui/Select/components/SelectContent.js";
+import { SelectSeparator as me } from "../../ui/Select/components/SelectSeparator.js";
+import { SelectTrigger as he } from "../../ui/Select/components/SelectTrigger.js";
 import { Arrow as ge } from "./components/Arrow.js";
 import { SelectAll as _e } from "./components/SelectAll.js";
 import { SelectBottomActions as ve } from "./components/SelectBottomActions.js";
@@ -47,8 +47,8 @@ var je = (e, t) => e.type === "separator" || !t || e.label.toLowerCase().include
 		info: "border-f1-border-info-bold"
 	} },
 	defaultVariants: { status: "default" }
-}), v = t("group inline-flex h-8 w-fit max-w-full items-center gap-1 rounded border-0 bg-transparent pl-3 pr-2 shadow-none outline-none transition-colors enabled:cursor-pointer enabled:hover:bg-f1-background-hover data-[state=open]:bg-f1-background-hover disabled:cursor-not-allowed disabled:bg-f1-background-tertiary disabled:text-f1-foreground-disabled disabled:data-[state=open]:bg-f1-background-tertiary disabled:[&_*]:text-f1-foreground-disabled", he({ variant: "label" })), Pe = u(function({ label: e, placeholder: a, selection: o, hasValue: s }, ee) {
-	return /* @__PURE__ */ _(me, {
+}), v = t("group inline-flex h-8 w-fit max-w-full items-center gap-1 rounded border-0 bg-transparent pl-3 pr-2 shadow-none outline-none transition-colors enabled:cursor-pointer enabled:hover:bg-f1-background-hover data-[state=open]:bg-f1-background-hover disabled:cursor-not-allowed disabled:bg-f1-background-tertiary disabled:text-f1-foreground-disabled disabled:data-[state=open]:bg-f1-background-tertiary disabled:[&_*]:text-f1-foreground-disabled", te({ variant: "label" })), Pe = u(function({ label: e, placeholder: a, selection: o, hasValue: s }, ee) {
+	return /* @__PURE__ */ _(he, {
 		ref: ee,
 		"aria-label": e,
 		className: t(v, n()),
@@ -72,8 +72,8 @@ var je = (e, t) => e.type === "separator" || !t || e.label.toLowerCase().include
 	});
 });
 Pe.displayName = "InlineSelectTrigger";
-var y = u(function({ variant: n = "field", placeholder: r, onChange: i, withApplySelection: he = !1, applySelectionLabel: Ce, onChangeSelectedOption: l, value: u, options: h = [], mapOptions: v, children: y, disabled: b, open: Ie, hideLabel: Le, onOpenChange: Re, showSearchBox: x, onSearchChange: ze, searchBoxPlaceholder: Be, searchEmptyMessage: Ve, size: He, actions: Ue, onCreate: We, onFiltersChange: Ge, source: S, label: C, icon: Ke, labelIcon: qe, clearable: Je, loading: Ye, name: Xe, error: Ze, status: Qe, hint: $e, required: et, multiple: w, portalContainer: tt, asList: T = !1, showPreview: nt = !1, preserveSelectionOnDatasetChange: rt = !0, fitContentWidth: it, dataTestId: at, OneFilterPickerComponent: ot, ActiveFiltersChipsComponent: st, ...E }, ct) {
-	let lt = Te(), ut = He ?? "sm", D = we(le), dt = D.portalContainer && (D.position === "center" || D.position === "fullscreen"), ft = tt === void 0 ? dt ? D.portalContainer : void 0 : tt, pt = "onSelectItems" in E ? E.onSelectItems : void 0, O = "disableSelectAll" in E && E.disableSelectAll, [k, mt] = Ee(Ie), ht = m(null), gt = ke(ct, ht), _t = m(k), vt = m(!1);
+var y = u(function({ variant: n = "field", placeholder: r, onChange: i, withApplySelection: te = !1, applySelectionLabel: Ce, onChangeSelectedOption: l, value: u, options: h = [], mapOptions: v, children: y, disabled: b, open: Ie, hideLabel: Le, onOpenChange: Re, showSearchBox: x, onSearchChange: ze, searchBoxPlaceholder: Be, searchEmptyMessage: Ve, size: He, actions: Ue, onCreate: We, onFiltersChange: Ge, source: S, label: C, icon: Ke, labelIcon: qe, clearable: Je, loading: Ye, name: Xe, error: Ze, status: Qe, hint: $e, required: et, multiple: w, portalContainer: tt, asList: T = !1, showPreview: nt = !1, preserveSelectionOnDatasetChange: rt = !0, fitContentWidth: it, dataTestId: at, OneFilterPickerComponent: ot, ActiveFiltersChipsComponent: st, ...E }, ct) {
+	let lt = Te(), ut = He ?? "sm", D = we(ue), dt = D.portalContainer && (D.position === "center" || D.position === "fullscreen"), ft = tt === void 0 ? dt ? D.portalContainer : void 0 : tt, pt = "onSelectItems" in E ? E.onSelectItems : void 0, O = "disableSelectAll" in E && E.disableSelectAll, [k, mt] = Ee(Ie), ht = m(null), gt = ke(ct, ht), _t = m(k), vt = m(!1);
 	f(() => {
 		n === "inline" && _t.current && !k && ht.current?.focus({ preventScroll: !0 }), _t.current = k;
 	}, [k, n]);
@@ -86,7 +86,7 @@ var y = u(function({ variant: n = "field", placeholder: r, onChange: i, withAppl
 		}
 	}, [u]);
 	let yt = p(() => {
-		if (S && !["infinite-scroll", "no-pagination"].includes(ie(S.dataAdapter))) throw Error("Select component only supports `infinite-scroll` or `no-pagination` pagination types");
+		if (S && !["infinite-scroll", "no-pagination"].includes(ae(S.dataAdapter))) throw Error("Select component only supports `infinite-scroll` or `no-pagination` pagination types");
 		return {
 			...S,
 			dataAdapter: S ? S.dataAdapter : { fetchData: ({ search: e }) => {
@@ -98,7 +98,7 @@ var y = u(function({ variant: n = "field", placeholder: r, onChange: i, withAppl
 		h,
 		S,
 		"searchFn" in E && E.searchFn
-	]), F = ae({
+	]), F = oe({
 		...yt,
 		selectable: (e) => {
 			if (!e) return;
@@ -115,7 +115,7 @@ var y = u(function({ variant: n = "field", placeholder: r, onChange: i, withAppl
 			return v(e);
 		}
 		return e;
-	}, [v, S]), { data: L, isInitialLoading: bt, loadMore: xt, isLoadingMore: St, isLoading: Ct, paginationInfo: wt } = oe(F), { currentSearch: R, setCurrentSearch: z } = F, B = m(/* @__PURE__ */ new Map()), V = p(() => {
+	}, [v, S]), { data: L, isInitialLoading: bt, loadMore: xt, isLoadingMore: St, isLoading: Ct, paginationInfo: wt } = se(F), { currentSearch: R, setCurrentSearch: z } = F, B = m(/* @__PURE__ */ new Map()), V = p(() => {
 		let e = [];
 		for (let t of L.records) {
 			let n = I(t);
@@ -146,7 +146,7 @@ var y = u(function({ variant: n = "field", placeholder: r, onChange: i, withAppl
 		u,
 		j,
 		V
-	]), { handleSelectAllItems: Et, handleSelectItemChange: H, selectedState: U, clearSelection: W, selectionMeta: G } = ce({
+	]), { handleSelectAllItems: Et, handleSelectItemChange: H, selectedState: U, clearSelection: W, selectionMeta: G } = le({
 		data: L,
 		paginationInfo: wt,
 		source: F,
@@ -196,7 +196,7 @@ var y = u(function({ variant: n = "field", placeholder: r, onChange: i, withAppl
 		K
 	]) ? "md" : ut, jt = it ?? n === "inline", Mt = (e) => {
 		z(e), ze?.(e);
-	}, Nt = w && !T, q = !!(he && Nt), J = m(!1), Pt = m(!0), Y = m(null), Ft = m(null), It = d((e, t) => {
+	}, Nt = w && !T, q = !!(te && Nt), J = m(!1), Pt = m(!0), Y = m(null), Ft = m(null), It = d((e, t) => {
 		if (!w && !Je && !t && M[0] === e) return;
 		J.current = !0, H(e, t);
 		let n = V[String(e)];
@@ -328,14 +328,14 @@ var y = u(function({ variant: n = "field", placeholder: r, onChange: i, withAppl
 		O,
 		rt
 	]);
-	let qt = F.grouping?.collapsible ?? !1, Jt = F.grouping?.defaultOpenGroups, { openGroups: Yt, setGroupOpen: Xt } = se(L?.type === "grouped" ? L.groups : [], Jt), Zt = d((e, t) => e.map((e, n) => {
+	let qt = F.grouping?.collapsible ?? !1, Jt = F.grouping?.defaultOpenGroups, { openGroups: Yt, setGroupOpen: Xt } = ce(L?.type === "grouped" ? L.groups : [], Jt), Zt = d((e, t) => e.map((e, n) => {
 		let r = I(e), i = Me(r);
 		if (i !== void 0 && (t.add(i), t.size > 1)) throw Error(`[F0Select] All options must use the same tag type, but multiple were provided: ${Array.from(t).map((e) => `"${e}"`).join(", ")}.`);
 		return r.type === "separator" ? {
 			height: 1,
 			key: `separator-${n}`,
 			type: "separator",
-			item: /* @__PURE__ */ g(pe, { className: "mb-1 mt-2" }, `separator-${n}`)
+			item: /* @__PURE__ */ g(me, { className: "mb-1 mt-2" }, `separator-${n}`)
 		} : {
 			height: r.description ? 64 : 32,
 			key: `item-${r.value}`,
@@ -352,7 +352,7 @@ var y = u(function({ variant: n = "field", placeholder: r, onChange: i, withAppl
 					height: 36,
 					key: `group-header-${n.key}`,
 					type: "group-header",
-					item: /* @__PURE__ */ g(ue, {
+					item: /* @__PURE__ */ g(de, {
 						label: n.label,
 						itemCount: n.itemCount,
 						showOpenChange: qt,
@@ -416,7 +416,7 @@ var y = u(function({ variant: n = "field", placeholder: r, onChange: i, withAppl
 			icon: a,
 			label: an
 		})
-	}) : void 0, sn = /* @__PURE__ */ g(fe, {
+	}) : void 0, sn = /* @__PURE__ */ g(pe, {
 		items: Qt,
 		fitContentWidth: jt,
 		taller: !!S?.filters,
@@ -488,7 +488,7 @@ var y = u(function({ variant: n = "field", placeholder: r, onChange: i, withAppl
 		children: /* @__PURE__ */ _("div", {
 			className: t("flex w-full max-h-full flex-col gap-2", b && "cursor-not-allowed opacity-50"),
 			children: [
-				C && !Le && /* @__PURE__ */ g(ne, {
+				C && !Le && /* @__PURE__ */ g(re, {
 					label: C,
 					required: et,
 					htmlFor: lt,
@@ -497,16 +497,16 @@ var y = u(function({ variant: n = "field", placeholder: r, onChange: i, withAppl
 				}),
 				/* @__PURE__ */ g("div", {
 					className: t("flex-1 min-h-0", Ne({ status: Ze ? "error" : Qe?.type ? Qe?.type : "default" })),
-					children: /* @__PURE__ */ g(de, {
+					children: /* @__PURE__ */ g(fe, {
 						...nn,
 						children: sn
 					})
 				}),
-				/* @__PURE__ */ g(te, { status: Qe })
+				/* @__PURE__ */ g(ne, { status: Qe })
 			]
 		})
 	});
-	let un = /* @__PURE__ */ _(de, {
+	let un = /* @__PURE__ */ _(fe, {
 		...nn,
 		children: [n === "inline" ? /* @__PURE__ */ g(Pe, {
 			ref: gt,
@@ -514,14 +514,14 @@ var y = u(function({ variant: n = "field", placeholder: r, onChange: i, withAppl
 			placeholder: r,
 			selection: K,
 			hasValue: !!M[0]
-		}) : /* @__PURE__ */ g(me, {
+		}) : /* @__PURE__ */ g(he, {
 			ref: gt,
 			asChild: !0,
 			children: y ? /* @__PURE__ */ g("div", {
 				className: "flex h-full w-full items-center justify-between",
 				"aria-label": C || r,
 				children: y
-			}) : /* @__PURE__ */ g(re, {
+			}) : /* @__PURE__ */ g(ie, {
 				label: C,
 				error: Ze,
 				required: et,

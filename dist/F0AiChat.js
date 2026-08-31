@@ -1,2 +1,2 @@
-import { a as e, c as t, d as n, f as r, l as i, n as a, p as o, r as s, t as c, u as l, v as u } from "./AiChatTranslationsProvider-BzN3wu6z.js";
+import { a as e, c as t, d as n, f as r, l as i, n as a, p as o, r as s, t as c, u as l, v as u } from "./AiChatTranslationsProvider-I8eAixfs.js";
 export { c as AiChatTranslationsProvider, r as F0AiChat, o as F0AiChatProvider, t as FormCardValueFormatterProvider, s as aiTranslations, n as markdownRenderers, u as useAiChat, a as useAiChatTranslations, i as useFormCardValueFormatter, l as useSetFormCardValueFormatter, e as useToolCallId };

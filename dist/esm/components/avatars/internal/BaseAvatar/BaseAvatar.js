@@ -29,8 +29,7 @@ var y = "md", b = {
 		D,
 		L,
 		R
-	]);
-	return /* @__PURE__ */ _(g, { children: /* @__PURE__ */ v("div", {
+	]), B = /* @__PURE__ */ v("div", {
 		className: "relative inline-flex h-fit w-fit",
 		children: [/* @__PURE__ */ _("div", {
 			className: "relative h-fit w-fit",
@@ -65,12 +64,13 @@ var y = "md", b = {
 			})
 		}), D && /* @__PURE__ */ _("div", {
 			className: "absolute -bottom-0.5 -right-0.5",
-			children: D.tooltip ? /* @__PURE__ */ _(t, {
-				description: D.tooltip,
-				children: z
-			}) : z
+			children: z
 		})]
-	}) });
+	});
+	return D?.tooltip ? /* @__PURE__ */ _(t, {
+		description: D.tooltip,
+		children: B
+	}) : B;
 });
 x.displayName = "BaseAvatar";
 //#endregion

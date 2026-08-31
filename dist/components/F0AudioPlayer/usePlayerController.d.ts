@@ -5,6 +5,12 @@ export interface PlayerController extends Omit<AudioPlayerControls, "play" | "pa
     audioRef: RefObject<HTMLAudioElement>;
     currentSrc: string | undefined;
     playbackRates: number[];
+    /**
+     * Where playback will resume when a seek made before the recording loaded is
+     * applied, or `null`. Unlike `currentTime` it is reported whether or not a
+     * duration is known yet, so a caller can reflect the position it asked for.
+     */
+    pendingTime: number | null;
 }
 /**
  * The controller drives a single `<audio>` element, so it takes an already

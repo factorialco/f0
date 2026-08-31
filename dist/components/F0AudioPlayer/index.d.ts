@@ -1,4 +1,4 @@
-export type { AudioPlayerMenuAction, AudioPlayerDetailTab, AudioPlayerContent, F0AudioPlayerProps, F0AudioPlayerCardProps, F0AudioPlayerSize, } from './types';
+export type { AudioPlayerMenuAction, AudioPlayerDetailTab, AudioPlayerContent, TranscriptCue, F0AudioPlayerProps, F0AudioPlayerCardProps, F0AudioPlayerSize, } from './types';
 export { audioPlayerSizes } from './types';
 export { formatPlaybackTime } from './utils';
 export { useAudioPlayer } from './useAudioPlayer';

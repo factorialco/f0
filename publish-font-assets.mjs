@@ -20,7 +20,7 @@ export function publishFontAssets({ fontDirectory, outputDirectory }) {
 
         const reference = node.nodes[0]
         if (reference.type !== "string" && reference.type !== "word") return
-        if (!reference.value.toLowerCase().endsWith(".woff")) return
+        if (!/\.woff2?$/i.test(reference.value)) return
         if (reference.value.includes(":")) return
 
         if (!outputDirectory) {

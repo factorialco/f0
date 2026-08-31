@@ -308,6 +308,8 @@ export declare const defaultTranslations: {
         readonly details: "Recording details";
         readonly summary: "Summary";
         readonly transcription: "Transcription";
+        readonly jumpTo: "Jump to {{time}}";
+        readonly transcriptHint: "Select a line to move the recording to that moment";
         readonly language: "Language";
         readonly audio: "Audio";
     };
