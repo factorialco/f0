@@ -608,6 +608,12 @@ Provide actions for selected detail nodes when graph exploration needs contextua
 
 F0GraphNode renders `role="treeitem"` and must remain inside a `role="tree"` ancestor. `F0Graph` provides this container; custom ReactFlow canvases must provide the equivalent semantics.
 
+### Placing the `role="tree"` container
+
+A `role="group"` wrapper is not a substitute for the tree. axe walks up from the treeitem and, on meeting a `group`, stops accepting `group` and keeps looking for a real `tree` above it, so a lone `group` fails `aria-required-parent`.
+
+ReactFlow hardcodes `role="application"` on its root element, after its props spread, so it cannot be overridden. Wrapping `<ReactFlow>` in the `role="tree"` container therefore gives that tree an `application` child, which fails `aria-required-children` — and `aria-owns` does not rescue it, because the rule reads what the tree contains, not only what it owns. Put the container inside the node type, wrapping the treeitem, or keep it out of the ReactFlow subtree entirely. The `WithToolbar` story above shows the first shape.
+
 ### Keyboard interaction
 
 <Unstyled>

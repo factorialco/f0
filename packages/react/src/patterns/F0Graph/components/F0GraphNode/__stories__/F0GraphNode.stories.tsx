@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { Decorator, Meta, StoryObj } from "@storybook/react-vite"
 
 import {
   ReactFlow,
@@ -25,21 +25,15 @@ const meta = {
     layout: "centered",
     a11y: { test: "error" },
   },
+  // Only React Flow context is shared here. The `role="tree"` owner that every
+  // story needs is added per story instead — `inTree` for arg-driven stories, an
+  // explicit `TreeExample` inside a `render` — because no single wrapper at this
+  // level is correct for all of them: a `tree` that DOM-contains another `tree`,
+  // or React Flow's own `role="application"` div, fails `aria-required-children`.
   decorators: [
-    // A bare `role="treeitem"` (what F0GraphNode renders) needs a `tree`/`group`
-    // owner or axe fails `aria-required-parent`. In the real graph the
-    // `role="tree"` container provides it; here a `role="group"` wrapper does —
-    // a valid treeitem parent (axe requiredContext is `group`/`tree`) that, being
-    // `group`, has no required children of its own, so a story that can't reach
-    // its node through the DOM (the node sits behind a nested `<ReactFlow>`'s
-    // `role="application"`) doesn't make this wrapper fail `aria-required-children`.
-    // Those stories provide their own `role="tree"` with `aria-owns` instead —
-    // see WithToolbar / ToolbarDemo.
     (Story) => (
       <ReactFlowProvider>
-        <div role="group" aria-label="Graph node preview">
-          <Story />
-        </div>
+        <Story />
       </ReactFlowProvider>
     ),
   ],
@@ -73,6 +67,13 @@ const baseProps = {
   subtitle: "Staff Designer",
 } as const
 
+// F0GraphNode renders a bare `role="treeitem"`, which axe's
+// `aria-required-parent` requires to be owned by a `tree`. A `role="group"`
+// wrapper is not a substitute: axe walks up from the treeitem and, on meeting a
+// `group`, drops `group` from the set of roles it will still accept
+// (axe-core 4.11.1, `getMissingContext`), then keeps looking for a real `tree`
+// above it. Measured, not inferred — under `a11y: { test: "error" }` a
+// `role="group"` wrapper failed six of these stories on `aria-required-parent`.
 function TreeExample({
   children,
   label,
@@ -87,7 +88,18 @@ function TreeExample({
   )
 }
 
+/** Story decorator form of `TreeExample`, for stories driven by `args`. */
+const inTree = (label: string): Decorator =>
+  function InTree(Story) {
+    return (
+      <TreeExample label={label}>
+        <Story />
+      </TreeExample>
+    )
+  }
+
 export const Default: Story = {
+  decorators: [inTree("Graph node example")],
   args: {
     ...baseProps,
     expanded: false,
@@ -284,6 +296,7 @@ export const Avatars: Story = {
 
 export const WithTags: Story = {
   tags: ["no-sidebar"],
+  decorators: [inTree("Graph node with tags example")],
   args: {
     ...baseProps,
     tags: [
@@ -314,6 +327,7 @@ export const WithTags: Story = {
 
 export const MetadataColumns: Story = {
   tags: ["no-sidebar"],
+  decorators: [inTree("Graph node metadata columns example")],
   args: {
     ...baseProps,
     tags: [
@@ -348,6 +362,7 @@ export const MetadataColumns: Story = {
 
 export const HoverCard: Story = {
   tags: ["no-sidebar"],
+  decorators: [inTree("Graph node hover card example")],
   args: {
     ...baseProps,
     variant: "compact",
@@ -501,17 +516,13 @@ const toolbarDemoNodes: Node[] = [
 
 function ToolbarDemo() {
   return (
-    // The node renders inside React Flow's hardcoded `role="application"` div,
-    // which severs the DOM tree→treeitem relationship. Mirror F0GraphView: a
-    // `role="tree"` directly wrapping React Flow re-owns the node via `aria-owns`
-    // (`ToolbarDemoNode` sets nodeId="toolbar-demo" → DOM id below), so the lone
-    // treeitem has a valid, owning parent.
-    <div
-      role="tree"
-      aria-label="Graph node preview"
-      aria-owns="f0-graph-node-toolbar-demo"
-      style={{ width: 480, height: 240 }}
-    >
+    // The `role="tree"` sits inside the node type (`ToolbarDemoNode`), wrapping
+    // the treeitem directly. It deliberately does not wrap `<ReactFlow>`:
+    // React Flow hardcodes `role="application"` on its root div after the props
+    // spread (@xyflow/react 12.10.2), and an `application` child makes the
+    // surrounding `tree` fail `aria-required-children`. `aria-owns` does not
+    // rescue that — the rule reads what the tree contains, not only what it owns.
+    <div style={{ width: 480, height: 240 }}>
       <ReactFlow
         nodes={toolbarDemoNodes}
         nodeTypes={toolbarNodeTypes}
