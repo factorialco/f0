@@ -23,6 +23,15 @@ export function publishFontAssets({ fontDirectory, outputDirectory }) {
         if (!/\.woff2?$/i.test(reference.value)) return
         if (reference.value.includes(":")) return
 
+        const fontPath = resolve(fontRoot, reference.value)
+        const relativeFontPath = relative(fontRoot, fontPath)
+        if (relativeFontPath.startsWith("..") || isAbsolute(relativeFontPath)) {
+          throw new Error(
+            `Font reference escapes the configured directory: ${reference.value}`
+          )
+        }
+        if (!existsSync(fontPath) || !statSync(fontPath).isFile()) return
+
         if (!outputDirectory) {
           throw new Error("An output directory is required for local fonts")
         }
@@ -40,14 +49,6 @@ export function publishFontAssets({ fontDirectory, outputDirectory }) {
           existsSync(referencedPublishedPath) &&
           statSync(referencedPublishedPath).isFile()
         if (isPublishedReference) return
-
-        const fontPath = resolve(fontRoot, reference.value)
-        const relativeFontPath = relative(fontRoot, fontPath)
-        if (relativeFontPath.startsWith("..") || isAbsolute(relativeFontPath)) {
-          throw new Error(
-            `Font reference escapes the configured directory: ${reference.value}`
-          )
-        }
 
         const publishedPath = resolve(outputRoot, "fonts", relativeFontPath)
         mkdirSync(dirname(publishedPath), { recursive: true })
