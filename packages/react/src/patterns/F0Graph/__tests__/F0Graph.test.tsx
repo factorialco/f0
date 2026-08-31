@@ -7,6 +7,8 @@ import type { GraphNode, ZoomLevel } from "../../types"
 
 import { F0Graph, type F0GraphNodeRenderContext } from "../F0Graph"
 
+import { graphContainer } from "./helpers"
+
 // React Flow requires DOM dimensions to render nodes.
 // For unit tests we verify mount, callbacks, and structure.
 
@@ -174,7 +176,7 @@ describe("F0Graph", () => {
       </div>
     )
 
-    const tree = screen.getByRole("tree", { name: "Graph view" })
+    const tree = graphContainer()
     expect(tree).toBeTruthy()
   })
 
@@ -367,7 +369,7 @@ describe("F0Graph keyboard navigation", () => {
       </div>
     )
 
-    const tree = screen.getByRole("tree", { name: "Graph view" })
+    const tree = graphContainer()
     // Focus starts on node "1" (only visible root, collapsed, has children)
     dispatchKey(tree, "ArrowRight")
     expect(onExpandToggle).toHaveBeenCalledWith("1", true)
@@ -387,7 +389,7 @@ describe("F0Graph keyboard navigation", () => {
       </div>
     )
 
-    const tree = screen.getByRole("tree", { name: "Graph view" })
+    const tree = graphContainer()
     // Focus starts on node "1" (expanded root)
     dispatchKey(tree, "ArrowLeft")
     expect(onExpandToggle).toHaveBeenCalledWith("1", false)
@@ -407,7 +409,7 @@ describe("F0Graph keyboard navigation", () => {
       </div>
     )
 
-    const tree = screen.getByRole("tree", { name: "Graph view" })
+    const tree = graphContainer()
     // Focus on node "1" (expanded). ArrowRight moves focus to first child "2".
     dispatchKey(tree, "ArrowRight")
     // Now focused on node "2" (collapsed, has children). ArrowRight expands it.
@@ -429,7 +431,7 @@ describe("F0Graph keyboard navigation", () => {
       </div>
     )
 
-    const tree = screen.getByRole("tree", { name: "Graph view" })
+    const tree = graphContainer()
     // Focus on node "1" (expanded). ArrowRight → first child "2".
     dispatchKey(tree, "ArrowRight")
     // Focus on "2" (collapsed). ArrowLeft → move to parent "1".

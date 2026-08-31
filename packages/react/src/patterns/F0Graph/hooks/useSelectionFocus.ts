@@ -27,11 +27,16 @@ export interface UseSelectionFocusResult {
   setFocusedNodeId: (id: string | null) => void
   focusedNodeIdRef: MutableRefObject<string | null>
   registerNodeRef: (nodeId: string, el: HTMLElement | null) => void
-  nodeRefsMapRef: MutableRefObject<Map<string, HTMLElement>>
   /** DFS order of visible node + expander/collapser ids, for keyboard nav. */
   flatVisibleOrderRef: MutableRefObject<string[]>
   selectNode: (nodeId: string) => void
   clearSelection: () => void
+  /**
+   * Focus a node now if it is mounted, otherwise as soon as it mounts. Culling
+   * and windowing drop off-screen nodes, so keyboard navigation regularly
+   * targets a node that has to be flown into view before it exists.
+   */
+  requestNodeFocus: (nodeId: string) => void
 }
 
 /**
@@ -77,16 +82,50 @@ export function useSelectionFocus<T>({
 
   // Node ref map for imperative .focus() calls
   const nodeRefsMapRef = useRef(new Map<string, HTMLElement>())
+
+  // A focus request for a node that is not in the DOM yet. React Flow culls
+  // off-screen nodes (and F0 windowing removes them too), so a keyboard move can
+  // target a node that only exists once the camera has flown to it.
+  const pendingFocusIdRef = useRef<string | null>(null)
+
   const registerNodeRef = useCallback(
     (nodeId: string, el: HTMLElement | null) => {
-      if (el) {
-        nodeRefsMapRef.current.set(nodeId, el)
-      } else {
+      if (!el) {
         nodeRefsMapRef.current.delete(nodeId)
+        return
       }
+      nodeRefsMapRef.current.set(nodeId, el)
+
+      if (pendingFocusIdRef.current !== nodeId) return
+      pendingFocusIdRef.current = null
+
+      // Drop the request if it went stale. Either the focused node moved on
+      // while the camera was flying, or focus left the graph altogether: a click
+      // into a side panel must not be yanked back because a node just mounted.
+      if (focusedNodeIdRef.current !== nodeId) return
+      const active = document.activeElement
+      if (
+        active &&
+        active !== document.body &&
+        !canvasRef.current?.contains(active)
+      ) {
+        return
+      }
+
+      el.focus()
     },
-    []
+    [canvasRef]
   )
+
+  const requestNodeFocus = useCallback((nodeId: string) => {
+    const el = nodeRefsMapRef.current.get(nodeId)
+    if (el) {
+      pendingFocusIdRef.current = null
+      el.focus()
+      return
+    }
+    pendingFocusIdRef.current = nodeId
+  }, [])
 
   // ── Flat visible order (DFS) for keyboard navigation ──
   // Includes expander/collapser pseudo-node IDs for roving tabindex
@@ -160,6 +199,7 @@ export function useSelectionFocus<T>({
   )
 
   const clearSelection = useCallback(() => {
+    pendingFocusIdRef.current = null
     const current = selectedNodesRef.current
     if (!isSelectionControlled) {
       setInternalSelected(new Set())
@@ -177,9 +217,9 @@ export function useSelectionFocus<T>({
     setFocusedNodeId,
     focusedNodeIdRef,
     registerNodeRef,
-    nodeRefsMapRef,
     flatVisibleOrderRef,
     selectNode,
     clearSelection,
+    requestNodeFocus,
   }
 }

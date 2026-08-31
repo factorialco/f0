@@ -202,6 +202,12 @@ decoupled from focus. Search and node detail are owned by the consumer
 (e.g. OneDataCollection's search and an `F0Dialog` opened from the node
 click), not by F0Graph.
 
+Pass `expandedNodes` and `selectedNodes` alongside `onExpandedNodesChange`
+and `onSelectedNodesChange` to drive both from your own state, for example to
+restore a view from the URL or sync it with a side panel.
+
+<Canvas of={F0GraphStories.Controlled} />
+
 ---
 
 ## Guidelines
@@ -228,6 +234,19 @@ click), not by F0Graph.
     ],
   }}
 />
+
+### When not to use
+
+Reach for something else when the structure is not the point:
+
+- **A flat or two-level hierarchy.** A grouped list or `OneDataCollection`
+  with a group-by carries the same information without the pan-and-zoom cost.
+- **Comparing attributes across many items.** A graph shows one node at a
+  time in detail; a table shows fifty side by side. Use `OneDataCollection`.
+- **Relationships that are not a tree.** Cycles and many-to-many edges have
+  no layout here. F0Graph assumes every node has at most one parent.
+- **A tree the user only ever reads once.** If nobody expands, collapses or
+  selects, render the hierarchy as static text or a nested list.
 
 ### Content best practices
 
@@ -263,6 +282,20 @@ color = team).
 
 - The canvas is keyboard-navigable: arrow keys move focus between nodes,
   `Enter` selects the focused node, `Space` toggles expansion
+- Arrow keys reach nodes that are currently off-screen. The camera flies to
+  the target first and focus lands on it once it mounts, so a windowed-out
+  node is still reachable from the keyboard
+- One node at a time is in the tab order (roving `tabindex`), so the graph
+  costs a single Tab stop no matter how large the tree is
+- The tree structure is exposed through `aria-owns` rather than DOM nesting.
+  React Flow renders every node as a flat, absolutely positioned sibling behind
+  its own `role="application"` wrapper, so nesting carries no tree relationship.
+  A `role="tree"` element beside the canvas owns every painted node, and depth
+  comes from `aria-level` / `aria-setsize` / `aria-posinset`
+- `<F0GraphNode>` wires `role="treeitem"`, `aria-level`, `aria-setsize`,
+  `aria-posinset`, `aria-expanded` and `aria-selected` from the render context.
+  If you write your own `renderNode`, spread the whole context onto your root
+  element, and give it the `ctx.nodeId`-derived `id` so the tree can own it
 - Override the default English control labels via `controlLabels` for
   localized experiences
 

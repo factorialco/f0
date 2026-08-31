@@ -14,6 +14,8 @@ import type {
 
 import { F0Graph, type F0GraphNodeRenderContext } from "../F0Graph"
 
+import { graphContainer } from "./helpers"
+
 // ─── Helpers ───────────────────────────────────────────────────
 
 function makeNodes(): GraphNode<string>[] {
@@ -84,7 +86,7 @@ describe("F0Graph integration — expand/collapse uncontrolled", () => {
       </div>
     )
 
-    const tree = screen.getByRole("tree", { name: "Graph view" })
+    const tree = graphContainer()
     // Focus starts on node "1" (root, collapsed, has children)
     dispatchKey(tree, "ArrowRight")
 
@@ -106,7 +108,7 @@ describe("F0Graph integration — expand/collapse uncontrolled", () => {
       </div>
     )
 
-    const tree = screen.getByRole("tree", { name: "Graph view" })
+    const tree = graphContainer()
     dispatchKey(tree, "ArrowLeft")
     expect(onExpandToggle).toHaveBeenCalledWith("1", false)
   })
@@ -129,7 +131,7 @@ describe("F0Graph integration — expand/collapse controlled", () => {
       </div>
     )
 
-    const tree = screen.getByRole("tree", { name: "Graph view" })
+    const tree = graphContainer()
     // Focus on "1" (expanded), ArrowRight moves to first child "2"
     dispatchKey(tree, "ArrowRight")
     // Focus on "2" (collapsed), ArrowRight expands it
@@ -174,7 +176,7 @@ describe("F0Graph integration — selection single mode", () => {
       </div>
     )
 
-    const tree = screen.getByRole("tree", { name: "Graph view" })
+    const tree = graphContainer()
     // Press Enter to select the focused node (node "1")
     dispatchKey(tree, "Enter")
 
@@ -208,7 +210,7 @@ describe("F0Graph integration — selection single mode", () => {
       </div>
     )
 
-    const tree = screen.getByRole("tree", { name: "Graph view" })
+    const tree = graphContainer()
     // Select node "1"
     dispatchKey(tree, "Enter")
     // Move to next node
@@ -243,7 +245,7 @@ describe("F0Graph integration — selection multi mode", () => {
       </div>
     )
 
-    const tree = screen.getByRole("tree", { name: "Graph view" })
+    const tree = graphContainer()
     // Select node "1"
     dispatchKey(tree, "Enter")
     // Move down

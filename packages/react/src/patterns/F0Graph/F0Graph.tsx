@@ -363,6 +363,15 @@ export interface F0GraphNodeRenderContext {
   setSize: number
   posInSet: number
   nodeId: string
+  /**
+   * @deprecated Always `undefined`. F0Graph used to nest the accessible tree by
+   * having each expanded node `aria-owns` its children, but React Flow culls
+   * painted nodes independently, so a node whose parent was culled ended up with
+   * no owner at all (axe `aria-required-parent`, critical). The `role="tree"`
+   * element now owns every painted treeitem directly and `aria-level` carries
+   * the depth. Drop it from custom `renderNode` implementations; the field will
+   * be removed in the next major.
+   */
   ariaOwns?: string
   /**
    * `true` when this node is one row of its parent's stacked column (the parent

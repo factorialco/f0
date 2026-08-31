@@ -101,7 +101,6 @@ export interface GraphNodeData extends Record<string, unknown> {
   ariaLevel: number
   ariaSetSize: number
   ariaPosInSet: number
-  visibleChildIds?: string[]
   /** Set when this node is one row of its parent's stacked column. */
   stacked?: boolean
 }
@@ -219,7 +218,6 @@ function F0GraphNodeWrapperInner({ data, id }: NodeProps<GraphRFNode>) {
     ariaLevel,
     ariaSetSize,
     ariaPosInSet,
-    visibleChildIds,
     stacked,
   } = data as GraphNodeData
   const { source: sourcePos, target: targetPos } = handlePositions(
@@ -246,11 +244,6 @@ function F0GraphNodeWrapperInner({ data, id }: NodeProps<GraphRFNode>) {
     ? (el: HTMLDivElement | null) => focusCtx.registerNodeRef(id, el)
     : () => {}
 
-  const ariaOwns =
-    isExpanded && visibleChildIds && visibleChildIds.length > 0
-      ? visibleChildIds.map((cid) => `f0-graph-node-${cid}`).join(" ")
-      : undefined
-
   const ctx: F0GraphNodeRenderContext = {
     zoomLevel,
     variant,
@@ -263,7 +256,6 @@ function F0GraphNodeWrapperInner({ data, id }: NodeProps<GraphRFNode>) {
     setSize: ariaSetSize,
     posInSet: ariaPosInSet,
     nodeId: id,
-    ariaOwns,
     stacked: stacked ?? false,
     stackedHeight: renderCfg?.stackedNodeHeight,
     onExpandToggle: () => toggleExpand(id),
@@ -327,11 +319,6 @@ export const F0GraphNodeWrapper = memo(
     if (prevData.ariaSetSize !== nextData.ariaSetSize) return false
     if (prevData.ariaPosInSet !== nextData.ariaPosInSet) return false
     if (prevData.stacked !== nextData.stacked) return false
-    if (
-      (prevData.visibleChildIds?.join(",") ?? "") !==
-      (nextData.visibleChildIds?.join(",") ?? "")
-    )
-      return false
     if (prev.positionAbsoluteX !== next.positionAbsoluteX) return false
     if (prev.positionAbsoluteY !== next.positionAbsoluteY) return false
     return true

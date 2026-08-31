@@ -57,6 +57,7 @@ import {
   F0GraphZoomContext,
   useF0GraphRenderConfigInternal,
 } from "../../contexts"
+import { useAccessibleTreeOwns } from "../../hooks/useAccessibleTreeOwns"
 import { useDeferredMerge } from "../../hooks/useDeferredMerge"
 import { useExpandState } from "../../hooks/useExpandState"
 import { useGraphKeyboard } from "../../hooks/useGraphKeyboard"
@@ -304,6 +305,7 @@ export function F0GraphView<T = unknown>(
   // ── Refs for the canvas / pointer tracking ──
   const canvasRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  const treeRef = useRef<HTMLDivElement>(null)
   // Distinguishes a click on a node from a pan drag ending over one.
   const pointerDownRef = useRef<{ x: number; y: number; id: number } | null>(
     null
@@ -392,7 +394,7 @@ export function F0GraphView<T = unknown>(
     setFocusedNodeId,
     focusedNodeIdRef,
     registerNodeRef,
-    nodeRefsMapRef,
+    requestNodeFocus,
     flatVisibleOrderRef,
     selectNode,
     clearSelection,
@@ -433,7 +435,6 @@ export function F0GraphView<T = unknown>(
     reservedTagHeight,
     renderedNodeCount,
     renderedNodeIds,
-    treeRootNodeIds,
     contentBounds,
     getNodePosition,
     stackHoverZones,
@@ -557,7 +558,7 @@ export function F0GraphView<T = unknown>(
     setFocusedNodeId,
     flatVisibleOrderRef,
     expandedNodesRef,
-    nodeRefsMapRef,
+    requestNodeFocus,
   })
 
   // Notify parent of visible node count changes
@@ -813,23 +814,12 @@ export function F0GraphView<T = unknown>(
     [focusedNodeId, setFocusedNodeId, registerNodeRef]
   )
 
-  // React Flow wraps its content in a hardcoded `role="application"` div, which
-  // sits between this `role="tree"` container and the `role="treeitem"` nodes
-  // and severs the ARIA tree relationship. Reconnect it with `aria-owns`: the
-  // tree owns the rendered forest-root treeitems (`treeRootNodeIds`), and each
-  // in-window parent node re-owns its own children (see `visibleChildIds`), so
-  // every rendered treeitem has exactly one owner. While the tree renders no
-  // treeitems (deferred / staged / viewport data loading, or an empty graph),
-  // `aria-busy` keeps the empty tree valid instead of failing
-  // `aria-required-children`.
-  const treeIsEmpty = treeRootNodeIds.length === 0
-  const treeAriaOwns = useMemo(
-    () =>
-      treeRootNodeIds.length > 0
-        ? treeRootNodeIds.map((id) => `f0-graph-node-${id}`).join(" ")
-        : undefined,
-    [treeRootNodeIds]
-  )
+  // The `role="tree"` element is a sibling of the canvas, not an ancestor, and
+  // claims the treeitems by reference. `aria-owns` and `aria-busy` are written
+  // imperatively from the DOM because React Flow culls painted nodes on its own
+  // schedule; see `useAccessibleTreeOwns` for the measured reason why neither
+  // the placement nor the DOM read is optional.
+  useAccessibleTreeOwns(treeRef, containerRef)
 
   return (
     <F0GraphActionsContext.Provider value={actionsContextValue}>
@@ -850,11 +840,13 @@ export function F0GraphView<T = unknown>(
                     className="f0-graph relative h-full w-full outline-none"
                   >
                     <div
-                      ref={containerRef}
+                      ref={treeRef}
                       role="tree"
                       aria-label={controlLabels?.graphView ?? i18n.graph.view}
-                      aria-owns={treeAriaOwns}
-                      aria-busy={treeIsEmpty || undefined}
+                      className="pointer-events-none absolute h-0 w-0 overflow-hidden"
+                    />
+                    <div
+                      ref={containerRef}
                       onKeyDown={handleTreeKeyDown}
                       onPointerMove={handleCanvasPointerMove}
                       onPointerLeave={handleCanvasPointerLeave}
