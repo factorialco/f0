@@ -362,6 +362,20 @@ export const Tree: Story = {
       expect(focused).toHaveAttribute("aria-expanded", "true")
     )
 
+    // The graph is one Tab stop, not one per node. React Flow marks its own node
+    // wrappers and edges focusable, which doubles every node and adds a stop per
+    // edge announced as "Edge from 1 to 2"; `nodesFocusable` / `edgesFocusable`
+    // turn that off so the roving tabindex is the only thing in the tab order.
+    // axe has no rule for this, so only an assertion catches a regression.
+    const tabbable = canvasElement.querySelectorAll(
+      '[tabindex="0"], button:not([tabindex]), a[href]'
+    )
+    await expect(tabbable).toHaveLength(2)
+    await expect(canvas.getByLabelText("Graph canvas")).toHaveAttribute(
+      "tabindex",
+      "0"
+    )
+
     // Selecting a person, last, because the click flies the camera.
     await userEvent.click(canvas.getByRole("treeitem", { name: /Sofia Reyes/ }))
     await waitFor(() =>

@@ -928,6 +928,16 @@ export function F0GraphView<T = unknown>(
                         // imperatively (see `didInitialFitRef` above), so a later
                         // layout change can never re-fire React Flow's queued fit.
                         nodesDraggable={false}
+                        // React Flow puts `tabindex="0"` on every node wrapper
+                        // and every edge of its own accord. That doubles each
+                        // node's tab stop and adds one per edge, announced as
+                        // "Edge from 1 to 2", which defeats the roving tabindex
+                        // the graph implements: the Tree story had 9 tab stops
+                        // where the design calls for 2, the canvas and the one
+                        // focused treeitem. axe cannot see this, so enforcing it
+                        // did not surface it.
+                        nodesFocusable={false}
+                        edgesFocusable={false}
                         nodesConnectable={false}
                         elementsSelectable={false}
                         nodeClickDistance={4}
