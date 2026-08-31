@@ -24,7 +24,7 @@ export type SidebarChatBlankStateProps = {
 /**
  * Compact blank state for a sidebar conversation list. Shared by the people
  * chat (`SidebarChatList`) and the AI history list so the two read identically.
- * Deliberately lighter than `OneEmptyState` — no emoji/avatar and tight
+ * Deliberately lighter than `F0EmptyState` — no emoji/avatar and tight
  * paddings — because it lives in a narrow sidebar column. The host (factorial)
  * supplies the copy + actions.
  */

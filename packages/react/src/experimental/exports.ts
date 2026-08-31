@@ -58,9 +58,9 @@ export * from "../patterns/OneDataCollection/exports"
  */
 export * from "../patterns/OneDateNavigator"
 /**
- * @deprecated OneEmptyState has moved to @/components/OneEmptyState. Import from there instead.
+ * @deprecated Renamed to F0EmptyState and moved to @/components/F0EmptyState. Import from there instead.
  */
-export * from "../components/OneEmptyState"
+export * from "../components/F0EmptyState"
 /**
  * @deprecated OnePagination has moved to @/ui/OnePagination. Import from there instead.
  */

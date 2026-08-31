@@ -3,7 +3,7 @@ import { useCallback, useRef, useState, useMemo } from "react"
 import type { DialogPosition } from "@/patterns/F0Dialog/types"
 import type { F0FormSubmitResult } from "@/patterns/F0Form/types"
 
-import { OneEmptyState } from "@/components/OneEmptyState"
+import { F0EmptyState } from "@/components/F0EmptyState"
 import { ArrowLeft, ArrowRight, Maximize, Minimize } from "@/icons/app"
 import { F0Box } from "@/lib/F0Box"
 import { useI18n } from "@/lib/providers/i18n"
@@ -345,7 +345,7 @@ function SurveyAnsweringFormDialog({
                 alignItems="center"
                 paddingX="lg"
               >
-                <OneEmptyState
+                <F0EmptyState
                   emoji={emptyLabels.emoji}
                   title={emptyLabels.title}
                   description={emptyLabels.description}
@@ -459,7 +459,7 @@ function SurveyAnsweringFormInline({
             alignItems="center"
             paddingX="lg"
           >
-            <OneEmptyState
+            <F0EmptyState
               emoji={emptyLabels.emoji}
               title={emptyLabels.title}
               description={emptyLabels.description}

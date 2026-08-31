@@ -68,7 +68,7 @@ export type ActionProps = {
     }
 )
 
-export type OneEmptyStateProps = {
+export type F0EmptyStateProps = {
   /**
    * The title of the empty state
    */

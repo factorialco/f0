@@ -18,7 +18,7 @@ import type {
 } from "@/patterns/OneFilterPicker/types"
 
 import { F0ActionBar } from "@/components/F0ActionBar"
-import { OneEmptyState } from "@/components/OneEmptyState"
+import { F0EmptyState } from "@/components/F0EmptyState"
 import {
   GroupingDefinition,
   OnSelectItemsCallback,
@@ -1778,7 +1778,7 @@ const OneDataCollectionComp = <
       </div>
       {emptyState ? (
         <div className="flex flex-1 flex-col items-center justify-center">
-          <OneEmptyState
+          <F0EmptyState
             emoji={emptyState.emoji}
             title={emptyState.title}
             description={emptyState.description}

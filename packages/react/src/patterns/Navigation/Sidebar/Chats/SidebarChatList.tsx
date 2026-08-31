@@ -20,7 +20,7 @@ import { useOffscreenUnreadChats } from "./useOffscreenUnreadChats"
 
 /**
  * Copy shown when there are no chats at all. Override via the `emptyState` prop.
- * Rendered through the shared `OneEmptyState`, so the AI history list and this
+ * Rendered through the shared `F0EmptyState`, so the AI history list and this
  * one read identically — the host (factorial) just supplies the copy + actions.
  */
 export type SidebarChatEmptyState = {
