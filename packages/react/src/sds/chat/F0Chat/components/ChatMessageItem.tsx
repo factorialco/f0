@@ -32,14 +32,21 @@ import { SendingClock } from "./ChatMessageStatusIcon"
  * finish, well under the pointer travel time from row edge to the ellipsis. */
 const ARM_ACTIONS_ON_HOVER_MS = 150
 
-/** Parts of a message that already do something when clicked, so a
- * double-click on one must not also quote. The test is whether the element can
- * take focus, not a list of tags, so new attachment types are covered — but a
- * tabindex on the row or the bubble itself would stop every message quoting. */
+/** Parts of a message that already do something when double-clicked, so
+ * quoting must stay out of their way. Two kinds:
+ *
+ * - Anything that can take focus — the test is focusability, not a list of
+ *   tags, so new attachment types are covered without touching this. A
+ *   tabindex on the row or the bubble itself would stop every message quoting.
+ * - The body text, whose own answer to a double-click is the browser selecting
+ *   a word. Copying a phrase out of a message beats quoting it, so the words
+ *   win and the quote is left to the bubble around them (padding, sender name,
+ *   time) and to the menu's Reply. The marker is set in ChatBubble. */
 const SELF_HANDLING_DESCENDANTS =
   "a, button, input, textarea, select, video, audio, summary," +
   ' [role="button"], [role="link"], [role="slider"], [contenteditable="true"],' +
-  ' [tabindex]:not([tabindex="-1"]), [data-chat-attachments]'
+  ' [tabindex]:not([tabindex="-1"]), [data-chat-attachments],' +
+  " [data-chat-message-text]"
 
 /**
  * Searches up from the clicked element and stops at `stopAt`, the message's own
