@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.74.0](https://github.com/factorialco/f0/compare/f0-react-v6.73.0...f0-react-v6.74.0) (2026-08-31)
+
+
+### Features
+
+* **F0AudioPlayer:** sync a timed transcription with playback ([#5205](https://github.com/factorialco/f0/issues/5205)) ([d5b552a](https://github.com/factorialco/f0/commit/d5b552aeab9fb58b348649d8f9771bb1b6f058a2))
+
 ## [6.73.0](https://github.com/factorialco/f0/compare/f0-react-v6.72.0...f0-react-v6.73.0) (2026-08-29)
 
 
