@@ -1470,6 +1470,11 @@ declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "clas
      */
     emoji?: string;
     /**
+     * How that emoji is drawn — a twemoji image by default, or the system glyph
+     * with `"native"`. See {@link EmojiRenderMode}.
+     */
+    emojiMode?: EmojiRenderMode;
+    /**
      * Hides the label visually (for icon-only or emoji-only buttons), but keeps it accessible for screen readers.
      */
     hideLabel?: boolean;
@@ -1803,6 +1808,28 @@ declare type CardAvatarVariant = AvatarVariant | {
 };
 
 /**
+ * Bookmark (save) toggle rendered as an icon button in the card's options overlay.
+ * Shows an outline bookmark icon when not bookmarked and a filled one when bookmarked,
+ * giving an at-a-glance indication of the saved state.
+ */
+declare interface CardBookmark {
+    /**
+     * Whether the card is currently bookmarked (saved).
+     * Controls the filled vs. outline icon and keeps the toggle visible while active.
+     */
+    bookmarked: boolean;
+    /**
+     * Called with the next bookmarked state when the user toggles the bookmark.
+     */
+    onBookmarkChange: (bookmarked: boolean) => void;
+    /**
+     * Accessible label for the toggle button (e.g. "Save product").
+     * Falls back to the card `title` when omitted.
+     */
+    label?: string;
+}
+
+/**
  * Group Cards: Renders
  */
 declare type CardCollectionProps<Record extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<Record>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<Record>> = CollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping, CardVisualizationOptions<Record, Filters, Sortings>>;
@@ -1845,6 +1872,121 @@ declare const cardImageFits: readonly ["contain", "cover", "fit-width", "fit-hei
 declare type CardImageSize = (typeof cardImageSizes)[number];
 
 declare const cardImageSizes: readonly ["xs", "sm", "md", "lg", "xl"];
+
+declare interface CardInternalProps {
+    /**
+     * Whether the card has a compact layout
+     */
+    compact?: boolean;
+    /**
+     * The avatar to display in the card
+     */
+    avatar?: CardAvatarVariant;
+    /**
+     * Whether the card has an image
+     */
+    image?: string;
+    /**
+     * How the image should be displayed/fitted within its container
+     * @default "fit-width"
+     */
+    imageFit?: CardImageFit;
+    /**
+     * Size of the image container
+     * @default "sm"
+     */
+    imageSize?: CardImageSize;
+    /**
+     * Constrain the image container to a fixed aspect ratio instead of a fixed height.
+     * When set, `imageSize` is ignored for height.
+     * @example "video"
+     */
+    imageAspectRatio?: CardImageAspectRatio;
+    /**
+     * Whether to show a blurred background image when the image doesn't fill the container
+     * @default true
+     */
+    blurredBackground?: boolean;
+    /**
+     * The title of the card
+     */
+    title?: string;
+    /**
+     * The description of the card
+     */
+    description?: string;
+    /**
+     * Metadata items to display in the card
+     */
+    metadata?: CardMetadata[];
+    /**
+     * The children to display in the card
+     */
+    children?: ReactNode;
+    /**
+     * The link to navigate to when the card is clicked
+     */
+    link?: string;
+    /**
+     * The primary action that displays a primary button in the card footer
+     */
+    primaryAction?: CardPrimaryAction;
+    /**
+     * The secondary actions - either an array of button actions or a single link
+     */
+    secondaryActions?: CardSecondaryAction[] | CardSecondaryLink;
+    /**
+     * Actions to display in the dropdown menu inside the card content
+     */
+    otherActions?: DropdownItem[];
+    /**
+     * Bookmark (save) toggle rendered as an icon button in the card's options overlay.
+     * Shows an outline bookmark when not bookmarked and a filled one when bookmarked.
+     */
+    bookmark?: CardBookmark;
+    /**
+     * Whether the card is selectable
+     */
+    selectable?: boolean;
+    /**
+     * Whether the card is selected
+     */
+    selected?: boolean;
+    /**
+     * The callback to handle the selection of the card
+     */
+    onSelect?: (selected: boolean) => void;
+    /**
+     * The callback to handle the click of the card
+     */
+    onClick?: () => void;
+    /**
+     * Force vertical metadata for compact layout
+     * Private prop
+     */
+    forceVerticalMetadata?: boolean;
+    /**
+     * Whether the card should have a full height
+     */
+    fullHeight?: boolean;
+    /**
+     * Use a softer/lighter border (`border-f1-border-secondary`) instead of the default
+     * `border-f1-border`. Opt-in so existing cards keep their current appearance.
+     * @default false
+     */
+    subtleBorder?: boolean;
+    /**
+     * When true, disables the full-card overlay link so parent components
+     * can manage drag-and-drop while still allowing click navigation via onClick
+     */
+    disableOverlayLink?: boolean;
+    /**
+     * Alert banner displayed above the card with a coloured header strip and matching border.
+     * Supports info, warning, critical, and positive variants with a default icon per variant.
+     * Use `visible` + `onDismiss` for controlled dismiss behaviour.
+     */
+    alert?: CardAlertProps;
+}
 
 declare type CardMetadata = {
     /** Leading icon. Optional — when omitted the row renders just the value. */
@@ -4076,6 +4218,8 @@ declare const defaultTranslations: {
         readonly details: "Recording details";
         readonly summary: "Summary";
         readonly transcription: "Transcription";
+        readonly jumpTo: "Jump to {{time}}";
+        readonly transcriptHint: "Select a line to move the recording to that moment";
         readonly language: "Language";
         readonly audio: "Audio";
     };
@@ -4559,12 +4703,29 @@ declare const defaultTranslations: {
         readonly closeSearch: "Close search";
         readonly noResults: "No chats found";
         readonly backToLatest: "Jump to latest";
+        readonly readOnly: "You can't send messages in this conversation";
         readonly online: "Online";
         readonly muted: "Muted";
         readonly mute: "Mute";
         readonly unmute: "Unmute";
         readonly attachFile: "Attach file";
         readonly addEmoji: "Add emoji";
+        readonly emojiPicker: {
+            readonly search: "Search emoji";
+            readonly frequentlyUsed: "Frequently used";
+            readonly noResults: "No emoji found";
+            readonly grid: "Emoji";
+            readonly categories: {
+                readonly people: "Smileys & people";
+                readonly nature: "Animals & nature";
+                readonly foods: "Food & drink";
+                readonly activity: "Activity";
+                readonly places: "Travel & places";
+                readonly objects: "Objects";
+                readonly symbols: "Symbols";
+                readonly flags: "Flags";
+            };
+        };
         readonly recordAudio: "Record audio";
         readonly listening: "Listening…";
         readonly stopRecording: "Stop and transcribe";
@@ -5417,6 +5578,19 @@ export declare type editorStateType = {
 };
 
 /**
+ * How an emoji is drawn.
+ *
+ * - `image` (default) swaps it for a twemoji SVG, so every platform shows the
+ *   same picture.
+ * - `native` renders the character and lets the OS draw it, so people see the
+ *   emoji they know from the rest of their machine.
+ *
+ * F0Chat asks for `native`; the rest of F0 stays on `image` for now. Flipping
+ * this default is the single switch that takes the whole design system native.
+ */
+declare type EmojiRenderMode = "image" | "native";
+
+/**
  * Employee credits usage data returned by the host app.
  *
  * Represents the logged-in employee's personal monthly allocation,
@@ -6138,6 +6312,8 @@ export declare interface F0CardHorizontalProps {
     descriptionAsSingleLine?: boolean;
 }
 
+declare type F0CardProps = Omit<CardInternalProps, (typeof privateProps_8)[number]>;
+
 /**
  * @experimental This is an experimental component use it at your own risk
  */
@@ -6244,21 +6420,25 @@ export declare const F0Chat: (props: F0ChatProps) => ReactNode;
  * `kind` — videos are files with a video MIME type. */
 export declare type F0ChatAttachedKind = "image" | "video" | "document" | "file";
 
-export declare type F0ChatAttachment = F0ChatImageAttachment | F0ChatFileAttachment | F0ChatLocationAttachment | F0ChatVoiceAttachment;
+export declare type F0ChatAttachment = F0ChatImageAttachment | F0ChatFileAttachment | F0ChatLocationAttachment | F0ChatVoiceAttachment | F0ChatCardAttachment;
 
 /** How files reached the composer. Same story as {@link F0ChatReactionSource}:
  * {@link F0ChatRuntime.uploadFiles} cannot tell these apart. */
 export declare type F0ChatAttachSource = "button" | "drop" | "paste";
 
 /**
- * Per-channel permissions. Everything is optional and defaults to today's
- * behavior, so hosts only express what their transport restricts (frozen /
- * read-only channels, moderation roles…):
+ * Per-channel permissions, one per verb. Everything is optional and defaults to
+ * today's behavior, so hosts only express what their transport restricts
+ * (frozen / read-only channels, moderation roles…):
  * - `canSend` (default true): false hides the composer entirely.
+ * - `canReply` (default: `canSend`): false hides Reply. Replying needs a
+ *   composer to reply *into*, so it follows `canSend` unless stated otherwise.
  * - `canReact` (default true): false hides the quick-reaction row, the emoji
  *   pickers and disables toggling existing reaction pills.
  * - `canUpload` (default: whether `uploadFiles` exists): false disables the
  *   attach button, drag & drop and voice notes even when `uploadFiles` exists.
+ * - `canCopy` (default true): false hides Copy.
+ * - `canViewInfo` (default true): false hides Info (delivery / read receipts).
  * - `canEditMessage` (default: own message within {@link F0ChatRuntime.editWindowMs}):
  *   overrides the edit policy per message, INCLUDING the edit window — a host
  *   that supplies this and wants a time limit must apply it here. Structural
@@ -6268,13 +6448,53 @@ export declare type F0ChatAttachSource = "button" | "drop" | "paste";
  * - `canDeleteMessage` (default: own message): overrides the delete policy per
  *   message (e.g. moderators deleting others' messages). Failed local echoes
  *   are always discardable — they don't exist server-side.
+ *
+ * On an `announcement` channel every boolean above defaults to **false**
+ * instead: a noticeboard is one-way by construction. An explicit value always
+ * wins, so a host with a poster passes `{ canSend: true }` and gets exactly
+ * that. See `utils/capabilities.ts`.
+ *
+ * When no action survives, the hover ellipsis is not rendered at all.
  */
 export declare type F0ChatCapabilities = {
     canSend?: boolean;
+    canReply?: boolean;
     canReact?: boolean;
     canUpload?: boolean;
+    canCopy?: boolean;
+    canViewInfo?: boolean;
     canEditMessage?: (message: F0ChatMessage) => boolean;
     canDeleteMessage?: (message: F0ChatMessage) => boolean;
+};
+
+/**
+ * A rich card inside a message — an {@link F0Card} the host describes as data.
+ *
+ * Deliberately a CURATED subset of `F0CardProps`, not a passthrough: selection,
+ * bookmarking, the overflow menu and the alert banner mean nothing in a
+ * transcript, and `children` isn't serialisable — which is exactly what a
+ * transport-backed card has to be (factorial → a Stream custom attachment
+ * `{ type: "card", … }`). Handlers stay optional so a card can be pure data
+ * (`href`) or host-wired (`onClick`).
+ */
+export declare type F0ChatCardAttachment = {
+    kind: "card";
+    title: string;
+    description?: string;
+    /** Leading avatar — the full F0Card set (emoji, icon, module, person, date…). */
+    avatar?: F0CardProps["avatar"];
+    /** Cover image above the content. */
+    image?: string;
+    /** Call to action, rendered as a button in the card's divided footer. */
+    action?: {
+        label: string;
+        /** Navigates. Takes precedence over `onClick` when both are set. */
+        href?: string;
+        onClick?: () => void;
+    };
+    /** Makes the whole card activate — the footer action still acts on its own. */
+    href?: string;
+    onClick?: () => void;
 };
 
 /** The conversation currently shown in the panel (header + behaviour differs by type). */
@@ -6305,6 +6525,13 @@ export declare type F0ChatChannel = {
     memberCount?: number;
     /** DM only — the counterpart, used for the header identity hover card. */
     user?: F0ChatUser;
+    /**
+     * Sentence shown where the composer would be when the current user can't
+     * send here ("Only Factorial can send messages"). Host-owned because only the
+     * host knows who *can* post — and has to translate it. Falls back to a
+     * generic i18n line.
+     */
+    readOnlyNotice?: string;
 };
 
 /** A status badge shown in the header next to the title (e.g. on vacation, away).
@@ -6314,7 +6541,22 @@ export declare type F0ChatChannelStatus = {
     label: string;
 };
 
-export declare type F0ChatChannelType = "dm" | "group";
+/**
+ * `announcement` is a one-way channel: a noticeboard (product changelog, company
+ * news) where only the people the host grants permission to can post, and
+ * everyone else reads. It renders like a DM — no avatar gutter, no sender names,
+ * no `@here` — and every capability defaults to off (see
+ * {@link F0ChatCapabilities}), so a read-only channel needs no configuration at
+ * all while a host that has a poster still turns `canSend` back on.
+ */
+export declare type F0ChatChannelType = "dm" | "group" | "announcement";
+
+/**
+ * What the composer can produce. Cards are authored by the host (a seeded
+ * announcement, a transport's custom attachment) — there is no affordance to
+ * attach one, so they're excluded from sending, editing and uploading.
+ */
+export declare type F0ChatComposableAttachment = Exclude<F0ChatAttachment, F0ChatCardAttachment>;
 
 /**
  * Edits applied to an existing message. Text, mentions and attachments are all
@@ -6323,7 +6565,7 @@ export declare type F0ChatChannelType = "dm" | "group";
  */
 export declare type F0ChatEditInput = {
     body: string;
-    attachments?: F0ChatAttachment[];
+    attachments?: F0ChatComposableAttachment[];
     /** People mentioned in the edited body (groups only). */
     mentions?: F0ChatMention[];
     /** Whether the edited message mentions the whole group (`@here`). */
@@ -6422,6 +6664,11 @@ export declare type F0ChatEvents = {
     }) => void;
     onLocationOpened?: () => void;
     onLinkPreviewClicked?: () => void;
+    /** A card attachment was activated — `source` tells the footer button apart
+     * from a click on the card body. Carries no title or URL. */
+    onCardActivated?: (p: {
+        source: "card" | "action";
+    }) => void;
     onSearchOpened?: () => void;
     onSearchResultNavigated?: (p: {
         direction: "next" | "prev";
@@ -6471,7 +6718,7 @@ export declare type F0ChatHeaderAction = {
      * as its own icon button next to it. Inline requires `icon` — an inline
      * action without one falls back to the menu. */
     placement?: "menu" | "inline";
-    /** Restrict the action to a channel type. Omit for both. */
+    /** Restrict the action to given channel types. Omit for all of them. */
     channelTypes?: F0ChatChannelType[];
 };
 
@@ -6479,8 +6726,22 @@ export declare type F0ChatImageAttachment = {
     kind: "image";
     url: string;
     thumbnailUrl?: string;
+    /**
+     * A tiny (~40px) version of the same photo, used blurred underneath while the
+     * real one arrives. Distinct from `thumbnailUrl`, which hosts use for a
+     * display-sized derivative — this one is only ever seen out of focus, so the
+     * smaller the better.
+     *
+     * Optional: without it the tile simply shows the sender's tint until the
+     * photo paints. Hosts on a CDN that resizes on the fly can derive it from
+     * `url` (Stream, for instance, takes `?w=40&resize=clip`).
+     */
+    blurUrl?: string;
     name: string;
     mimeType?: string;
+    /** Intrinsic size. Drives the album cell's aspect ratio, so the box is
+     * reserved before the photo arrives; without it the cell falls back to a
+     * square. */
     width?: number;
     height?: number;
 };
@@ -6775,7 +7036,7 @@ export declare type F0ChatRuntime = {
      * `channel.stopTyping()`).
      */
     stopTyping?: () => void | Promise<void>;
-    uploadFiles?: (files: File[]) => Promise<F0ChatAttachment[]>;
+    uploadFiles?: (files: File[]) => Promise<F0ChatComposableAttachment[]>;
     /**
      * Max files attachable at once. When a selection/drop would exceed it, the
      * composer rejects the whole batch and flashes a transient error in the
@@ -6865,7 +7126,7 @@ export declare const f0ChatSenderColors: readonly ["viridian", "malibu", "yellow
 
 export declare type F0ChatSendInput = {
     body: string;
-    attachments?: F0ChatAttachment[];
+    attachments?: F0ChatComposableAttachment[];
     replyToId?: string;
     /** People mentioned in the body (groups only). The host maps these to the
      * transport's mention field (factorial → Stream `mentioned_users`). */
@@ -7050,11 +7311,24 @@ declare type F0DialogHeaderProps = {
     resourceHeader?: F0ResourceHeaderProps;
     controls?: DialogControls;
     headerStatus?: string;
+    /** See {@link F0DialogInternalProps.dismissable} — hides the close button. */
+    dismissable?: boolean;
 } & Partial<Pick<TabsProps, "tabs" | "activeTabId" | "setActiveTabId">>;
 
 declare type F0DialogInternalProps = {
     isOpen: boolean;
     onClose: () => void;
+    /**
+     * Whether the reader can walk away. `false` removes the close button and
+     * stops Escape and a click outside from closing — a forced choice, where the
+     * dialog's own actions are the only way out.
+     *
+     * Use it only when leaving would be worse than being trapped: a decision the
+     * product genuinely cannot proceed without. A dialog nobody can dismiss is a
+     * dead end for anyone who does not understand it.
+     * @default true
+     */
+    dismissable?: boolean;
     asBottomSheetInMobile?: boolean;
     position?: DialogPosition;
     width?: DialogWidth;
@@ -8148,14 +8422,26 @@ value?: string;
 threshold?: number;
 debounceTime?: number;
 autoFocus?: boolean;
-} & Pick<InputFieldProps<string>, "onChange" | "name" | "size" | "onFocus" | "onBlur" | "loading" | "disabled" | "placeholder" | "clearable"> & RefAttributes<HTMLInputElement>>;
+/**
+* Defaults to `-1`, which is right for the search box of a list that is
+* already reachable some other way. A search box that IS the way in — a
+* combobox — has to be tabbable, or focus can leave it and never come back.
+*/
+tabIndex?: number;
+} & Pick<InputFieldProps<string>, "onChange" | "name" | "size" | "role" | "aria-activedescendant" | "aria-autocomplete" | "aria-controls" | "aria-expanded" | "onFocus" | "onBlur" | "onKeyDown" | "loading" | "disabled" | "placeholder" | "clearable"> & RefAttributes<HTMLInputElement>>;
 
 export declare type F0SearchInputProps = {
     value?: string;
     threshold?: number;
     debounceTime?: number;
     autoFocus?: boolean;
-} & Pick<InputFieldProps<string>, "size" | "loading" | "clearable" | "placeholder" | "disabled" | "onBlur" | "onFocus" | "onChange" | "name">;
+    /**
+     * Defaults to `-1`, which is right for the search box of a list that is
+     * already reachable some other way. A search box that IS the way in — a
+     * combobox — has to be tabbable, or focus can leave it and never come back.
+     */
+    tabIndex?: number;
+} & Pick<InputFieldProps<string>, "size" | "loading" | "clearable" | "placeholder" | "disabled" | "onBlur" | "onFocus" | "onChange" | "name" | "role" | "onKeyDown" | "aria-controls" | "aria-expanded" | "aria-activedescendant" | "aria-autocomplete">;
 
 /**
  * @experimental This is an experimental component, use it at your own risk.
@@ -9948,6 +10234,12 @@ declare type InputFieldProps<T> = {
     inputRef?: React.Ref<unknown>;
     "aria-controls"?: AriaAttributes["aria-controls"];
     "aria-expanded"?: AriaAttributes["aria-expanded"];
+    /** The two remaining pieces of the combobox contract. Without
+     * `aria-activedescendant` a field that drives a list it doesn't contain can
+     * never announce the active option: focus stays in the input while the
+     * selection moves elsewhere, so a screen reader hears nothing. */
+    "aria-activedescendant"?: AriaAttributes["aria-activedescendant"];
+    "aria-autocomplete"?: AriaAttributes["aria-autocomplete"];
     onClear?: () => void;
     onFocus?: () => void;
     onBlur?: () => void;
@@ -11960,6 +12252,8 @@ declare const privateProps_5: readonly [];
 declare const privateProps_6: readonly ["compact"];
 
 declare const privateProps_7: readonly ["delay", "onOpen"];
+
+declare const privateProps_8: readonly ["forceVerticalMetadata", "disableOverlayLink"];
 
 declare type ProductUpdate = {
     title: string;

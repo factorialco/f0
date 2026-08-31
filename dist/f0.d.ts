@@ -1325,12 +1325,18 @@ export declare interface AudioPlayerContent {
      */
     summary?: Localized<string>;
     /**
-     * Plain-text transcription of the recording, shown in the "Transcription"
-     * tab. Line breaks are preserved. When omitted, the card attempts to derive
-     * a transcription from the audio file's embedded/attached text tracks.
-     * Localizable.
+     * Transcription of the recording, shown in the "Transcription" tab.
+     *
+     * Pass a **string** for a plain transcript (line breaks are preserved), or a
+     * list of {@link TranscriptCue} to get a timed one: the card then marks the
+     * cue being spoken, keeps it in view, and moves playback to a cue when it is
+     * clicked. Pass a referentially stable array — a new identity on every
+     * render defeats the memoisation that keeps a playing transcript cheap.
+     *
+     * When omitted, the card attempts to derive a transcription from the audio
+     * file's embedded/attached text tracks. Localizable.
      */
-    transcription?: Localized<string>;
+    transcription?: Localized<string | TranscriptCue[]>;
 }
 
 export declare interface AudioPlayerControls extends AudioPlayerState {
@@ -2074,6 +2080,11 @@ declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "clas
      * Adds an emoji to the button, can be used as a special case of icon-only button.
      */
     emoji?: string;
+    /**
+     * How that emoji is drawn — a twemoji image by default, or the system glyph
+     * with `"native"`. See {@link EmojiRenderMode}.
+     */
+    emojiMode?: EmojiRenderMode;
     /**
      * Hides the label visually (for icon-only or emoji-only buttons), but keeps it accessible for screen readers.
      */
@@ -4967,6 +4978,8 @@ export declare const defaultTranslations: {
         readonly details: "Recording details";
         readonly summary: "Summary";
         readonly transcription: "Transcription";
+        readonly jumpTo: "Jump to {{time}}";
+        readonly transcriptHint: "Select a line to move the recording to that moment";
         readonly language: "Language";
         readonly audio: "Audio";
     };
@@ -5450,12 +5463,29 @@ export declare const defaultTranslations: {
         readonly closeSearch: "Close search";
         readonly noResults: "No chats found";
         readonly backToLatest: "Jump to latest";
+        readonly readOnly: "You can't send messages in this conversation";
         readonly online: "Online";
         readonly muted: "Muted";
         readonly mute: "Mute";
         readonly unmute: "Unmute";
         readonly attachFile: "Attach file";
         readonly addEmoji: "Add emoji";
+        readonly emojiPicker: {
+            readonly search: "Search emoji";
+            readonly frequentlyUsed: "Frequently used";
+            readonly noResults: "No emoji found";
+            readonly grid: "Emoji";
+            readonly categories: {
+                readonly people: "Smileys & people";
+                readonly nature: "Animals & nature";
+                readonly foods: "Food & drink";
+                readonly activity: "Activity";
+                readonly places: "Travel & places";
+                readonly objects: "Objects";
+                readonly symbols: "Symbols";
+                readonly flags: "Flags";
+            };
+        };
         readonly recordAudio: "Record audio";
         readonly listening: "Listening…";
         readonly stopRecording: "Stop and transcribe";
@@ -6538,12 +6568,26 @@ export declare type editorStateType = {
 
 export declare type ElementType = QuestionType | "section";
 
-export declare function EmojiImage({ emoji, size, alt }: EmojiImageProps): JSX_2.Element;
+export declare function EmojiImage({ emoji, size, alt, mode, }: EmojiImageProps): JSX_2.Element;
 
 export declare interface EmojiImageProps extends VariantProps<typeof emojiVariants> {
     emoji: string;
     alt?: string;
+    mode?: EmojiRenderMode;
 }
+
+/**
+ * How an emoji is drawn.
+ *
+ * - `image` (default) swaps it for a twemoji SVG, so every platform shows the
+ *   same picture.
+ * - `native` renders the character and lets the OS draw it, so people see the
+ *   emoji they know from the rest of their machine.
+ *
+ * F0Chat asks for `native`; the rest of F0 stays on `image` for now. Flipping
+ * this default is the single switch that takes the whole design system native.
+ */
+export declare type EmojiRenderMode = "image" | "native";
 
 declare const emojiVariants: (props?: ({
     size?: "lg" | "md" | "sm" | "xs" | undefined;
@@ -12454,14 +12498,26 @@ value?: string;
 threshold?: number;
 debounceTime?: number;
 autoFocus?: boolean;
-} & Pick<InputFieldProps<string>, "onChange" | "name" | "size" | "onFocus" | "onBlur" | "loading" | "disabled" | "placeholder" | "clearable"> & RefAttributes<HTMLInputElement>>;
+/**
+* Defaults to `-1`, which is right for the search box of a list that is
+* already reachable some other way. A search box that IS the way in — a
+* combobox — has to be tabbable, or focus can leave it and never come back.
+*/
+tabIndex?: number;
+} & Pick<InputFieldProps<string>, "onChange" | "name" | "size" | "role" | "aria-activedescendant" | "aria-autocomplete" | "aria-controls" | "aria-expanded" | "onFocus" | "onBlur" | "onKeyDown" | "loading" | "disabled" | "placeholder" | "clearable"> & RefAttributes<HTMLInputElement>>;
 
 export declare type F0SearchInputProps = {
     value?: string;
     threshold?: number;
     debounceTime?: number;
     autoFocus?: boolean;
-} & Pick<InputFieldProps<string>, "size" | "loading" | "clearable" | "placeholder" | "disabled" | "onBlur" | "onFocus" | "onChange" | "name">;
+    /**
+     * Defaults to `-1`, which is right for the search box of a list that is
+     * already reachable some other way. A search box that IS the way in — a
+     * combobox — has to be tabbable, or focus can leave it and never come back.
+     */
+    tabIndex?: number;
+} & Pick<InputFieldProps<string>, "size" | "loading" | "clearable" | "placeholder" | "disabled" | "onBlur" | "onFocus" | "onChange" | "name" | "role" | "onKeyDown" | "aria-controls" | "aria-expanded" | "aria-activedescendant" | "aria-autocomplete">;
 
 /**
  * Action button configuration for a section.
@@ -14917,6 +14973,12 @@ declare type InputFieldProps<T> = {
     inputRef?: React.Ref<unknown>;
     "aria-controls"?: AriaAttributes["aria-controls"];
     "aria-expanded"?: AriaAttributes["aria-expanded"];
+    /** The two remaining pieces of the combobox contract. Without
+     * `aria-activedescendant` a field that drives a list it doesn't contain can
+     * never announce the active option: focus stays in the input while the
+     * selection moves elsewhere, so a screen reader hears nothing. */
+    "aria-activedescendant"?: AriaAttributes["aria-activedescendant"];
+    "aria-autocomplete"?: AriaAttributes["aria-autocomplete"];
     onClear?: () => void;
     onFocus?: () => void;
     onBlur?: () => void;
@@ -18981,6 +19043,25 @@ declare type TranscribeOptions = {
     /** Aborted when the user cancels an in-flight transcription. */
     signal?: AbortSignal;
 };
+
+/**
+ * One utterance of a transcript. Give it a `startTime` and the card syncs it
+ * with playback: the cue being spoken is marked while the recording plays, and
+ * clicking it moves playback to that moment. Without a `startTime` the cue is
+ * plain text — no mark, no click target — so a transcript that carries no
+ * timings renders as a plain dialogue.
+ */
+export declare interface TranscriptCue {
+    /**
+     * What was said, as a single inline run. Rendered as markdown limited to
+     * bold and italic, which is how a speaker gets its label —
+     * `"**Recruiter:** How did you hear about us?"`. Escape `*` and `_` in text
+     * you didn't write yourself.
+     */
+    text: string;
+    /** Where the utterance starts, in seconds from the start of the recording. */
+    startTime?: number;
+}
 
 declare type TranslationKey = Join<PathsToStringProps<typeof defaultTranslations>, ".">;
 

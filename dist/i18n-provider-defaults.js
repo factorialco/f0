@@ -308,6 +308,8 @@ const e = {
     details: "Recording details",
     summary: "Summary",
     transcription: "Transcription",
+    jumpTo: "Jump to {{time}}",
+    transcriptHint: "Select a line to move the recording to that moment",
     language: "Language",
     audio: "Audio"
   },
@@ -791,12 +793,33 @@ const e = {
     closeSearch: "Close search",
     noResults: "No chats found",
     backToLatest: "Jump to latest",
+    // Shown where the composer would be on a read-only channel. Hosts that can
+    // name the poster override it per channel (`channel.readOnlyNotice`).
+    readOnly: "You can't send messages in this conversation",
     online: "Online",
     muted: "Muted",
     mute: "Mute",
     unmute: "Unmute",
     attachFile: "Attach file",
     addEmoji: "Add emoji",
+    // The picker lives in F0Chat and is used only while having a conversation;
+    // everywhere else in the product keeps the emoji-mart one.
+    emojiPicker: {
+      search: "Search emoji",
+      frequentlyUsed: "Frequently used",
+      noResults: "No emoji found",
+      grid: "Emoji",
+      categories: {
+        people: "Smileys & people",
+        nature: "Animals & nature",
+        foods: "Food & drink",
+        activity: "Activity",
+        places: "Travel & places",
+        objects: "Objects",
+        symbols: "Symbols",
+        flags: "Flags"
+      }
+    },
     recordAudio: "Record audio",
     listening: "Listening…",
     stopRecording: "Stop and transcribe",
