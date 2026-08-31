@@ -24,7 +24,7 @@ import type {
 } from "../types"
 
 // Keep this dashboard integration test at the chart boundary: jsdom has no
-// canvas context, while ChartItem's keyboard point surface is ordinary DOM.
+// canvas context.
 vi.mock("@/kits/F0DataChart", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/kits/F0DataChart")>()
   return {
@@ -489,112 +489,6 @@ describe("F0AnalyticsDashboard Ask One", () => {
       quote: { text: "Headcount" },
     })
     expect(screen.getByTestId("pending-quote")).toHaveTextContent("Headcount")
-  })
-
-  it("passes a chart point through the public target observer and built-in chat", async () => {
-    const user = userEvent.setup()
-    const onAskAiTarget = vi.fn()
-
-    render(
-      <AiChatStateProvider enabled>
-        <QuoteProbe />
-        <F0AnalyticsDashboard
-          items={[
-            {
-              id: "headcount-chart",
-              title: "Headcount by department",
-              type: "chart",
-              chart: { type: "bar" },
-              fetchData: () =>
-                Promise.resolve({
-                  categories: ["Engineering"],
-                  series: [{ name: "Headcount", data: [145] }],
-                }),
-            },
-          ]}
-          onAskAiTarget={onAskAiTarget}
-        />
-      </AiChatStateProvider>
-    )
-
-    const trigger = await screen.findByRole("button", {
-      name: "Ask One: Headcount by department",
-    })
-    trigger.focus()
-    await user.keyboard("{Enter}")
-    await user.click(
-      await screen.findByRole("menuitem", {
-        name: "Headcount by department — Engineering, Headcount: 145",
-      })
-    )
-
-    expect(onAskAiTarget).toHaveBeenCalledWith({
-      id: "headcount-chart",
-      title: "Headcount by department",
-      point: expect.objectContaining({
-        source: "keyboard",
-        category: "Engineering",
-        value: 145,
-      }),
-      quote: {
-        text: "Headcount by department — Engineering\nHeadcount: 145",
-      },
-    })
-    expect(screen.getByTestId("pending-quote")).toHaveTextContent(
-      "Headcount by department — Engineering Headcount: 145"
-    )
-  })
-
-  it("passes a keyboard-selected chart point through the public handler", async () => {
-    const user = userEvent.setup()
-    const onAskAi = vi.fn()
-
-    render(
-      <F0AnalyticsDashboard
-        items={[
-          {
-            id: "headcount-chart",
-            title: "Headcount by department",
-            type: "chart",
-            chart: { type: "bar" },
-            fetchData: () =>
-              Promise.resolve({
-                categories: ["Engineering"],
-                series: [{ name: "Headcount", data: [145] }],
-              }),
-          },
-        ]}
-        onAskAi={onAskAi}
-      />
-    )
-
-    const trigger = await screen.findByRole("button", {
-      name: "Ask One: Headcount by department",
-    })
-    trigger.focus()
-    await user.keyboard("{Enter}")
-    await user.click(
-      await screen.findByRole("menuitem", {
-        name: "Headcount by department — Engineering, Headcount: 145",
-      })
-    )
-
-    expect(onAskAi).toHaveBeenCalledWith({
-      id: "headcount-chart",
-      title: "Headcount by department",
-      point: {
-        source: "keyboard",
-        seriesName: "Headcount",
-        category: "Engineering",
-        value: 145,
-        values: [145],
-        series: [{ name: "Headcount", seriesIndex: 0, value: 145 }],
-        dataIndex: 0,
-        seriesIndex: 0,
-        clientX: 0,
-        clientY: 0,
-      },
-    })
   })
 })
 

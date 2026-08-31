@@ -168,13 +168,13 @@ the mounted chat:
 Pass `onAskAiTarget` when the mounted chat should keep the built-in quote,
 open, and focus behavior while the host attaches structured analytical
 context. The observer receives the widget identity plus the exact `quote`
-object staged in the composer. Point asks also include the raw `point`.
+object staged in the composer.
 
 ```tsx
 <F0AnalyticsDashboard
   items={items}
-  onAskAiTarget={({ id, point, quote }) => {
-    attachAnalyticalContext({ widgetId: id, point, quote })
+  onAskAiTarget={({ id, quote }) => {
+    attachAnalyticalContext({ widgetId: id, quote })
   }}
 />
 ```
@@ -198,55 +198,6 @@ If both callbacks are supplied, `onAskAi` owns the interaction:
 - WHEN the pointer drag is cancelled or ends outside chat → THEN no quote or
   host action is created.
 - WHEN a widget has no title → THEN the action is hidden because there is nothing to quote.
-
-### Ask One from a chart point
-
-Charts with an available chat or `onAskAi` handler let the reader click a mark
-before choosing **Ask One**. The intermediate action is intentional: ordinary
-chart exploration must not open the chat on every click.
-
-**Interactive point flow**
-
-In this story, click the Engineering bar to reveal the anchored action. Choose
-**Ask One** to review the category, series, and formatted value in the focused
-chat composer.
-
-<Canvas of={AskOneStories.ChartPointFlow} />
-
-**Observed point target**
-
-This story keeps the built-in formatted quote while exposing the raw point to
-the non-overriding observer.
-
-<Canvas of={AskOneStories.PointTargetObserver} />
-
-The host-owned callback receives the raw point as `point`, in addition to the
-widget `id` and `title`. `point.values` preserves every measure carried by one
-mark, while `point.series` preserves every visible series resolved by a line
-chart click. `point.source` distinguishes `"pointer"` from `"keyboard"`;
-keyboard-resolved points use `0` for both viewport coordinates because there is
-no pointer position to anchor to.
-
-```tsx
-<F0AnalyticsDashboard
-  items={items}
-  onAskAi={({ id, title, point }) => {
-    openProductChat({ widgetId: id, quote: title, point })
-  }}
-/>
-```
-
-- WHEN a pointer user clicks a chart mark → THEN **Ask One** appears beside that mark without opening the chat yet.
-- WHEN a keyboard user tabs to the chart's point action → THEN a visible **Ask One** trigger opens a menu containing every currently visible point, with the same formatted context as pointer selection.
-- WHEN a chart contains more than 100 points → THEN the keyboard menu pages them with **Previous** and **Next** actions instead of mounting the entire dataset at once.
-- WHEN the built-in action is chosen → THEN the quote keeps the chart title, visible point context, and tooltip-formatted values, opens the chat, and focuses its composer.
-- WHEN a scatter point is quoted → THEN both the X and Y measures are included with their axis names and formatters.
-- WHEN a line category is quoted → THEN every visible series at that category is included, matching the axis tooltip.
-- WHEN `onAskAi` owns the action → THEN it receives the raw point and the built-in chat state remains unchanged.
-- WHEN `onAskAiTarget` observes the built-in action → THEN it receives that exact pending quote together with the raw point.
-- WHEN the chart has no title → THEN pointer and keyboard point actions are hidden because there is no widget context to quote.
-- WHEN the chart moves because of scrolling or resizing, or the reader presses <kbd>Escape</kbd> or clicks elsewhere → THEN the anchored action closes.
-- WHEN a screen reader reaches the point action → THEN its trigger is named **Ask One: _chart title_** and each menu item exposes the complete formatted point context.
 
 ### Report filters
 
@@ -395,22 +346,7 @@ fallback without exposing selected values in the widget.
         <td>
           <kbd>Escape</kbd>
         </td>
-        <td>Closes the filter dialog or an anchored chart-point action.</td>
-      </tr>
-      <tr>
-        <td>
-          <kbd>Tab</kbd>, then <kbd>Enter</kbd> / <kbd>Space</kbd>
-        </td>
-        <td>
-          Reaches and reveals the chart's <strong>Ask One</strong> trigger, then
-          opens its keyboard-accessible data-point menu.
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <kbd>ArrowUp</kbd> / <kbd>ArrowDown</kbd>
-        </td>
-        <td>Moves through data points in the open chart action menu.</td>
+        <td>Closes the filter dialog.</td>
       </tr>
     </tbody>
   </table>

@@ -18,22 +18,6 @@ import type { DashboardItem } from "../types"
 import { mixedItems } from "./mockDataMixed"
 
 const widget = mixedItems.filter((item) => item.id === "headcount")
-const pointWidget = [
-  {
-    id: "point-headcount",
-    title: "Headcount by Department",
-    description: "Click the bar to mention this value in chat",
-    type: "chart",
-    chart: {
-      type: "bar",
-      tooltipValueFormatter: (value: number) => `${value} people`,
-    },
-    fetchData: async () => ({
-      categories: ["Engineering"],
-      series: [{ name: "Headcount", data: [145] }],
-    }),
-  },
-] satisfies DashboardItem[]
 
 const AskOneLayout = ({ items = widget }: { items?: DashboardItem[] }) => {
   return (
@@ -67,10 +51,8 @@ const TargetObserverLayout = ({
         </output>
         <F0AnalyticsDashboard
           items={items}
-          onAskAiTarget={({ id, point, quote }) => {
-            setObservedTarget(
-              `${id}: ${point ? `point=${point.category}/${point.value}` : "widget"}; quote=${quote.text}`
-            )
+          onAskAiTarget={({ id, quote }) => {
+            setObservedTarget(`${id}: widget; quote=${quote.text}`)
           }}
         />
       </div>
@@ -223,104 +205,5 @@ export const TargetObserver: Story = {
         "Headcount by Department"
       )
     })
-  },
-}
-
-/** The point observer receives raw identity while the composer keeps its quote. */
-export const PointTargetObserver: Story = {
-  tags: ["ask-one-target-observer"],
-  render: () => <TargetObserverLayout items={pointWidget} />,
-  play: async ({ canvasElement, step }) => {
-    const canvas = within(canvasElement)
-
-    await step("Choose a chart point with the keyboard action", async () => {
-      const trigger = await canvas.findByRole("button", {
-        name: "Ask One: Headcount by Department",
-      })
-      trigger.focus()
-      await userEvent.keyboard("{Enter}")
-      const menuId = trigger.getAttribute("aria-controls")
-      if (!menuId)
-        throw new Error("The point menu trigger has no aria-controls")
-      const menu = await waitFor(() => {
-        const element = canvasElement.ownerDocument.getElementById(menuId)
-        expect(element).toBeInTheDocument()
-        return within(element!)
-      })
-      await userEvent.click(
-        await menu.findByRole("menuitem", {
-          name: "Headcount by Department — Engineering, Headcount: 145 people",
-        })
-      )
-    })
-
-    await step("Verify raw target and formatted built-in quote", async () => {
-      await waitFor(() =>
-        expect(
-          canvas.getByText(/point-headcount: point=Engineering\/145/)
-        ).toHaveTextContent("point-headcount: point=Engineering/145")
-      )
-      const removeQuote = await canvas.findByRole("button", {
-        name: "Remove quote",
-      })
-      await expect(removeQuote.parentElement).toHaveTextContent(
-        "Headcount by Department — Engineering Headcount: 145 people"
-      )
-    })
-  },
-}
-
-/**
- * Click the Engineering bar, then choose Ask One from the anchored action. The
- * complete category, series, and formatted value appear in the real composer.
- */
-export const ChartPointFlow: Story = {
-  render: () => <AskOneLayout items={pointWidget} />,
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "Click the Engineering bar to reveal the anchored Ask One action, or Tab to the chart's Ask One trigger to open the keyboard point menu. Choose the point to review the complete quote in the focused chat composer.",
-      },
-    },
-  },
-  play: async ({ canvasElement, step }) => {
-    const canvas = within(canvasElement)
-
-    await step("Open the keyboard point menu", async () => {
-      const trigger = await canvas.findByRole("button", {
-        name: "Ask One: Headcount by Department",
-      })
-      trigger.focus()
-      await expect(trigger).toHaveFocus()
-      await userEvent.keyboard("{Enter}")
-      const menuId = trigger.getAttribute("aria-controls")
-      if (!menuId)
-        throw new Error("The point menu trigger has no aria-controls")
-
-      const menu = await waitFor(() => {
-        const element = canvasElement.ownerDocument.getElementById(menuId)
-        expect(element).toBeInTheDocument()
-        return within(element!)
-      })
-      await userEvent.click(
-        await menu.findByRole("menuitem", {
-          name: "Headcount by Department — Engineering, Headcount: 145 people",
-        })
-      )
-    })
-
-    await step(
-      "Verify the formatted point in the focused composer",
-      async () => {
-        const removeQuote = await canvas.findByRole("button", {
-          name: "Remove quote",
-        })
-        await expect(removeQuote.parentElement).toHaveTextContent(
-          "Headcount by Department — Engineering Headcount: 145 people"
-        )
-        await waitFor(() => expect(canvas.getByRole("textbox")).toHaveFocus())
-      }
-    )
   },
 }
