@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.74.1](https://github.com/factorialco/f0/compare/f0-react-v6.74.0...f0-react-v6.74.1) (2026-08-31)
+
+
+### Bug Fixes
+
+* **F0Chat:** leave the message body to text selection, not the reply quote ([#5322](https://github.com/factorialco/f0/issues/5322)) ([13b3a88](https://github.com/factorialco/f0/commit/13b3a88457d8fa3a54f11485d18fba2bee8c6b2b))
+
 ## [6.74.0](https://github.com/factorialco/f0/compare/f0-react-v6.73.0...f0-react-v6.74.0) (2026-08-31)
 
 
