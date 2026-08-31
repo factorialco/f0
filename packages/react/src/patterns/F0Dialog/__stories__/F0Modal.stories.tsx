@@ -4,6 +4,7 @@ import { ComponentProps, FC, useState } from "react"
 import { expect, within } from "storybook/test"
 
 import { F0Button } from "@/components/F0Button"
+import { F0TagTeam } from "@/components/tags/F0TagTeam"
 import { ApplicationFrame } from "@/patterns/ApplicationFrame"
 import ApplicationFrameStoryMeta from "@/patterns/ApplicationFrame/index.stories"
 import { F0ResourceHeader } from "@/patterns/F0ResourceHeader"
@@ -554,6 +555,37 @@ export const WithFewItems: Story = {
       onClick: () => {},
     },
     children: <ExamplePersonList numberOfItems={3} />,
+  },
+}
+
+export const WithHiddenHeaderBorder: Story = {
+  args: {
+    isOpen: true,
+    onClose: () => {},
+    position: "right",
+    title: "Members",
+    hideHeaderBorder: true,
+    disableContentPadding: true,
+    children: (
+      <div className="flex flex-col">
+        <div className="flex flex-row flex-wrap items-center gap-2 border border-x-0 border-b border-t-0 border-solid border-f1-border-secondary px-4 pb-3">
+          <span className="text-f1-foreground-secondary">Assigned to</span>
+          <F0TagTeam name="Team Foundations" />
+          <F0TagTeam name="Team Growth" />
+        </div>
+        <div className="p-4">
+          <ExamplePersonList numberOfItems={4} />
+        </div>
+      </div>
+    ),
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          '`hideHeaderBorder` drops the line F0 draws under the title row, so a dialog whose content continues the header — here an "Assigned to" row of team chips — can put the separator below that row instead. Without the prop the line lands between the title and the chips.',
+      },
+    },
   },
 }
 

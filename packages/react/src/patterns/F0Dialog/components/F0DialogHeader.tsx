@@ -27,6 +27,7 @@ export const F0DialogHeader = ({
   resourceHeader,
   controls,
   headerStatus,
+  hideHeaderBorder,
   tabs,
   activeTabId,
   setActiveTabId,
@@ -197,6 +198,7 @@ export const F0DialogHeader = ({
         className={cn(
           "flex flex-row items-start justify-between gap-3 px-4 py-3",
           !hasTabs &&
+            !hideHeaderBorder &&
             "border border-x-0 border-b border-t-0 border-solid border-f1-border-secondary"
         )}
       >

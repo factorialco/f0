@@ -29,6 +29,7 @@ export type F0DialogHeaderProps = {
   resourceHeader?: F0ResourceHeaderProps
   controls?: DialogControls
   headerStatus?: string
+  hideHeaderBorder?: boolean
 } & Partial<Pick<TabsProps, "tabs" | "activeTabId" | "setActiveTabId">>
 
 /**
@@ -101,6 +102,12 @@ export type F0DialogInternalProps = {
    * alone, for a dialog whose arrows are somewhere else (`sideControls`).
    */
   headerStatus?: F0DialogHeaderProps["headerStatus"]
+  /**
+   * Drop the line under the title row, for a dialog whose content continues the
+   * header and draws the separator itself. `resourceHeader` headers keep their
+   * own `showBottomBorder`.
+   */
+  hideHeaderBorder?: F0DialogHeaderProps["hideHeaderBorder"]
   /**
    * Controls flanking the panel — see {@link F0DialogSideControls}. On a phone
    * (where the dialog is a bottom sheet and there is no room beside it) they move
