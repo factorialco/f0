@@ -178,6 +178,49 @@ export const Horizontal: Story = {
   },
 }
 
+const compactLinkItems: CardSelectableItem<string>[] = [
+  {
+    value: "workflows",
+    title: "Link this course with Workflows",
+    description:
+      "Automate actions such as generating certificates or sending questionnaires.",
+    moreInfoLink: {
+      href: "https://help.factorial.co/workflows",
+    },
+  },
+]
+
+/**
+ * `compact` drops standalone card padding from 16px to 12px. The horizontal row
+ * is the density the form designs specify; the card below it checks that the
+ * `moreInfoLink` row stays aligned with the tightened card.
+ */
+export const Compact: Story = {
+  render: function Render() {
+    const [value, setValue] = useState<string | undefined>("new")
+    const [linked, setLinked] = useState<string | undefined>("workflows")
+    return (
+      <div className="flex flex-col gap-4">
+        <CardSelectableContainer
+          layout="horizontal"
+          items={defaultItems}
+          value={value}
+          onChange={setValue}
+          compact
+          label="Payment type selection"
+        />
+        <CardSelectableContainer
+          items={compactLinkItems}
+          value={linked}
+          onChange={setLinked}
+          compact
+          label="Course settings"
+        />
+      </div>
+    )
+  },
+}
+
 const titleOnlyItems: CardSelectableItem<string>[] = [
   { value: "yes", title: "Yes" },
   { value: "no", title: "No" },

@@ -192,6 +192,15 @@ export const NoSelectedItems: Story = {
   },
 }
 
+export const AllItemsSelected: Story = {
+  args: {
+    ...Default.args,
+    allPagesSelection: true,
+    isAllItemsSelected: true,
+    totalItems: 133,
+  },
+}
+
 export const MultiplePrimaryActions: Story = {
   args: {
     ...Default.args,

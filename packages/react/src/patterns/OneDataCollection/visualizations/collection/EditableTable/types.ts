@@ -195,6 +195,19 @@ export type EditableTableColumnDefinition<
   dateConfig?: DateCellConfig | ((item: R) => DateCellConfig)
 
   /**
+   * Configuration for `"disabled"` cells.
+   *
+   * By default a disabled cell keeps the same affordances as its editable
+   * counterpart (leading icon, units, select chevron) so the column still
+   * reads as its field type. Set `hideSelectChevron` when the column also
+   * uses `editType: "select"` for other rows but the chevron shouldn't
+   * appear here since the cell isn't interactive.
+   */
+  disabledConfig?: {
+    hideSelectChevron?: boolean
+  }
+
+  /**
    * Called after this cell's value changes. Use to compute derived values
    * and update other cells in the same row.
    *

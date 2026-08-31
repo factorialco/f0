@@ -113,6 +113,23 @@ export interface WidgetProps {
   AIButton?: () => void
   /** An overflow menu at the header's right, beside `link`. */
   actions?: DropdownItem[]
+  /**
+   * THE WIDGET'S OWN CONTROLS, in the header's top-right: what the card is
+   * currently showing (a scope switcher), or what you can do from it without
+   * leaving the page ("New post"). They act on the WIDGET.
+   *
+   * They sit to the LEFT of the overflow menu, which keeps its corner — the menu
+   * is where every widget's items live, and a control that moved depending on
+   * whether a card had a menu would be a different control each time.
+   *
+   * Keep it to one or two `sm` controls. This row is the TITLE'S first, and the
+   * title gives up its width to whatever is put beside it: three buttons here
+   * and a narrow card has no name left.
+   *
+   * NOT the way out of the widget — that is `header.link`, drawn as the title
+   * itself — and NOT its call to action, which is `action`, in the footer.
+   */
+  headerControls?: ReactNode
 }
 
 const InlineDot = () => (
@@ -279,6 +296,7 @@ const Container = forwardRef<
     status,
     fullHeight = false,
     actions,
+    headerControls,
     AIButton,
     draggable = false,
     onDragStart,
@@ -392,6 +410,7 @@ const Container = forwardRef<
                   {status && (
                     <F0TagStatus text={status.text} variant={status.variant} />
                   )}
+                  {headerControls}
                   {AIButton && (
                     <AIButtonComponent
                       size="sm"

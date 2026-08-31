@@ -63,6 +63,8 @@ export const defaultTranslations = {
     details: "Recording details",
     summary: "Summary",
     transcription: "Transcription",
+    jumpTo: "Jump to {{time}}",
+    transcriptHint: "Select a line to move the recording to that moment",
     language: "Language",
     audio: "Audio",
   },
@@ -115,6 +117,7 @@ export const defaultTranslations = {
     copy: "Copy",
     paste: "Paste",
     close: "Close",
+    back: "Back",
     collapse: "Collapse",
     collapseItem: "Collapse {{title}}",
     expand: "Expand",
@@ -242,11 +245,14 @@ export const defaultTranslations = {
       viewSelectorLabel: "Select view",
     },
     table: {
+      seeMoreChildren: "See more",
       settings: {
         showAllColumns: "Show all",
         hideAllColumns: "Hide all",
         addColumn: "Add column",
         removeColumn: "Remove column",
+        lockColumn: "Lock column: {{label}}",
+        unlockColumn: "Unlock column: {{label}}",
       },
     },
     editableTable: {
@@ -346,6 +352,11 @@ export const defaultTranslations = {
       range: {
         currentDate: "Today",
         label: "Range",
+      },
+      periods: {
+        currentDate: "Current period",
+        label: "Periods",
+        empty: "No periods available",
       },
     },
     month: {
@@ -453,6 +464,13 @@ export const defaultTranslations = {
       exporting: "Exporting…",
     },
     dashboardItem: {
+      /**
+       * Deliberately not `ai.ask` ("Ask One" by default here, but hosts
+       * override it — factorial renders it as plain "Ask" for the widget and
+       * insight-card buttons). This menu entry needs the product name spelled
+       * out, so it owns its own key.
+       */
+      askOne: "Ask One",
       chartType: "Chart type",
       errorTitle: "Error loading data",
       retry: "Retry",
@@ -487,6 +505,7 @@ export const defaultTranslations = {
       "Your message wasn't sent because one of the attachments failed to upload. Remove it or retry.",
     tooManyFilesError: "You can attach up to {{maxFiles}} files at once",
     dropFilesHere: "Drop your files here",
+    dropWidgetToDiscuss: "Drop here to discuss with One",
     reply: "Reply",
     removeQuote: "Remove quote",
     clarifyingQuestion: {
@@ -533,12 +552,33 @@ export const defaultTranslations = {
     closeSearch: "Close search",
     noResults: "No chats found",
     backToLatest: "Jump to latest",
+    // Shown where the composer would be on a read-only channel. Hosts that can
+    // name the poster override it per channel (`channel.readOnlyNotice`).
+    readOnly: "You can't send messages in this conversation",
     online: "Online",
     muted: "Muted",
     mute: "Mute",
     unmute: "Unmute",
     attachFile: "Attach file",
     addEmoji: "Add emoji",
+    // The picker lives in F0Chat and is used only while having a conversation;
+    // everywhere else in the product keeps the emoji-mart one.
+    emojiPicker: {
+      search: "Search emoji",
+      frequentlyUsed: "Frequently used",
+      noResults: "No emoji found",
+      grid: "Emoji",
+      categories: {
+        people: "Smileys & people",
+        nature: "Animals & nature",
+        foods: "Food & drink",
+        activity: "Activity",
+        places: "Travel & places",
+        objects: "Objects",
+        symbols: "Symbols",
+        flags: "Flags",
+      },
+    },
     recordAudio: "Record audio",
     listening: "Listening…",
     stopRecording: "Stop and transcribe",
@@ -690,6 +730,7 @@ export const defaultTranslations = {
       ofTotal: "of total",
       total: "total",
       target: "target",
+      ofTarget: "of target",
       ofRange: "of range",
       fromPrevious: "from previous",
       fromStage: "from {{stage}}",
@@ -988,6 +1029,7 @@ export const defaultTranslations = {
     editParamsTitle: "Edit widget params",
     removeWidget: "Remove widget",
     addWidget: "Add widget",
+    configureWidget: "Configure {{title}}",
     /** Heads the widgets a Home suggests, at the top of the picker. */
     recommended: "Recommended",
     /** Why a drop onto a pinned widget was refused. `{{title}}` is its name. */

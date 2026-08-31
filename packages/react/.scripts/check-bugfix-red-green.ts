@@ -36,6 +36,13 @@ import consola from "consola"
 const PKG_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "..")
 const PKG_PREFIX = "packages/react/"
 
+/**
+ * Where a regression test may live. `.scripts/` holds the repo's own gates and
+ * their tests; a fix to one of those could not satisfy this check while `src/`
+ * was the only place looked at.
+ */
+const TESTED_ROOTS = ["src/", ".scripts/"]
+
 /** Conventional-commit bugfix title: `fix: …`, `fix(scope): …`, `fix!: …`. */
 export function isBugfixTitle(title: string): boolean {
   return /^fix(\([^)]*\))?!?:/.test(title.trim())
@@ -64,7 +71,8 @@ export function overlayFilesFrom(nameStatusOutput: string): OverlayFiles {
     if (status.startsWith("D")) continue
     // Renames/copies (R100, C75) list "old<TAB>new" — keep the new path.
     const file = parts[parts.length - 1]
-    if (!file.startsWith(`${PKG_PREFIX}src/`)) continue
+    if (!TESTED_ROOTS.some((root) => file.startsWith(`${PKG_PREFIX}${root}`)))
+      continue
     if (/\.test\.(ts|tsx)$/.test(file)) {
       testFiles.push(file)
     } else if (file.includes("/__tests__/")) {

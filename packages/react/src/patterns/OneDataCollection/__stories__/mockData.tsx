@@ -78,6 +78,8 @@ import {
 import { OnBulkActionCallback } from "../types"
 import { Visualization, VisualizationType } from "../visualizations/collection"
 
+const CHILDREN_PER_PAGE = 2
+
 // Mock data for nested subfilters (office → space → desk)
 const OFFICES = [
   { id: 101, name: "Barcelona HQ" },
@@ -1549,23 +1551,30 @@ export const ExampleComponent = ({
       dataAdapter: dataAdapterMemoized,
       itemsWithChildren: (item) => !!item?.children?.length,
       childrenCount: ({ item }) => item?.children?.length,
-      fetchChildren: async ({ item }) => {
+      fetchChildren: async ({ item, pagination }) => {
         await new Promise((resolve) => setTimeout(resolve, 1000))
 
-        return item.children
-          ? {
-              records: item.children,
-              type: item.detailed ? "detailed" : "basic",
-              paginationInfo: {
-                cursor: "aaa",
-                total: item.children.length,
-                perPage: 2,
-                currentPage: 1,
-                pagesCount: 1,
-                hasMore: true,
-              },
-            }
-          : { records: [] }
+        if (!item.children) return { records: [] }
+
+        // A real page, not the whole list echoed back with a pinned `hasMore`:
+        // that shape made "See more" append the same records forever, so it
+        // never exercised the pagination it was meant to demo.
+        const perPage = pagination?.perPage ?? CHILDREN_PER_PAGE
+        const currentPage = (pagination?.currentPage ?? 0) + 1
+        const start = (currentPage - 1) * perPage
+        const total = item.children.length
+
+        return {
+          records: item.children.slice(start, start + perPage),
+          type: item.detailed ? "detailed" : "basic",
+          paginationInfo: {
+            total,
+            perPage,
+            currentPage,
+            pagesCount: Math.max(1, Math.ceil(total / perPage)),
+            hasMore: start + perPage < total,
+          },
+        }
       },
       lanes: [
         { id: "eng", filters: { department: ["Engineering"] } },

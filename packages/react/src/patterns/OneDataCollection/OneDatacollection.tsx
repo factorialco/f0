@@ -1504,6 +1504,8 @@ const OneDataCollectionComp = <
     filters: activeCurrentFilters as FiltersState<FiltersDefinition>,
     search: currentSearch,
     sortings: currentSortings as SortingsState<SortingsDefinition>,
+    defaultSortings:
+      defaultSortings.current as SortingsState<SortingsDefinition>,
     visualization: currentVisualization,
     visualizationKeys: visualizations.map((v) => v.type),
     selectedPresetId,

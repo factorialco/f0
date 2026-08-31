@@ -215,6 +215,65 @@ F0Chat renders a transport-agnostic direct or group conversation. The host provi
   </table>
 </Unstyled>
 
+### Observing in-chat interactions
+
+`F0ChatProvider` takes an optional `events` object so the host can observe the
+interactions F0Chat resolves on its own. Everything in it is either invisible to
+`F0ChatRuntime` — because no runtime method is called — or carries provenance a
+runtime call cannot express.
+
+```tsx
+<F0ChatProvider
+  runtime={runtime}
+  events={{
+    onMessageCopied: () => {},
+    onReactionAdded: ({ emoji, source }) => {},
+    onFileAttached: ({ kind, source }) => {},
+  }}
+>
+  <F0Chat />
+</F0ChatProvider>
+```
+
+Every handler is optional and independent — wire only the ones you need.
+
+**Why some interactions are not here.** Sends, deletes and edits already reach
+you through `F0ChatRuntime`, and only there do you learn whether the transport
+accepted them; F0Chat fires them optimistically. Search query text is likewise
+absent — `runtime.searchMessages` receives every query, and F0Chat debounces it
+per keystroke.
+
+**What the events add that the runtime cannot give you:**
+
+- `onMessageCopied` — copying touches nothing but the clipboard.
+- `onReplyStarted` / `onReplyCancelled`, `onEditStarted` / `onEditCancelled` —
+  the runtime only ever sees replies and edits that were completed. Pair each
+  start with its cancel to measure abandonment. The cancel fires only on an
+  explicit dismissal, never when the message is sent.
+- `onReactionAdded` / `onReactionRemoved` — `toggleReaction` is one call for both
+  directions, and it is identical from all four affordances (`source`).
+- `onFileAttached` — `uploadFiles` cannot tell a button click from a drop or a
+  paste. Fires once per file, once the selection passes validation and before
+  the upload resolves, so it records the affordance even when the upload fails.
+- `onAttachmentDownloaded`, `onImageOpened`, `onDocumentOpened`,
+  `onLocationOpened`, `onLinkPreviewClicked`, `onVoiceNotePlayed` — consuming
+  shared content never calls the runtime at all.
+
+**No payload carries message content, a URL, coordinates, or a user id.**
+`onMentionInserted` reports only whether the mention was `@here`.
+
+**But eight payloads do carry `messageId`** — `onMessageCopied`,
+`onMessageInfoViewed`, `onReplyStarted`, `onReplyCancelled`, `onEditStarted`,
+`onEditCancelled`, `onReactionAdded` and `onReactionRemoved`. It is there because
+a host may legitimately need per-message context. It is an identifier for a
+specific, possibly private message, so decide deliberately whether it leaves your
+application — an analytics pipeline is usually the wrong destination for it.
+
+**Render cost is zero.** The object is held in a ref and exposed through a
+context whose value never changes identity, so wiring every handler costs the
+same as wiring none. Rebuild it inline on each render if you like — no
+memoization is required of the host.
+
 ## Guidelines
 
 ### Design best practices
@@ -272,6 +331,15 @@ F0Chat renders a transport-agnostic direct or group conversation. The host provi
 
 ### Behavior
 
+- WHEN consecutive messages from the same author form a run → THEN the tail-side
+  corners chain: the top corner tucks in while the run continues above, the
+  bottom corner tucks in while another message follows, and the **last** message
+  of the run pulls its bottom tail corner in to 4px so the stack ends on a point
+  aimed at the sender's own side. Exactly one message per run carries it,
+  including a run of one.
+- WHEN the last message of a run is media-only → THEN the point lands on its
+  bottom-most card (album, video, location, voice or document), because the
+  chaining is computed per stacked element rather than per message.
 - WHEN a user provides <code>avatarColor</code> → THEN incoming bubbles, the
   sender name, and inline media and document surfaces share that stable accent.
   Link previews, file items, and failed-preview file fallbacks use neutral grey
@@ -281,12 +349,19 @@ F0Chat renders a transport-agnostic direct or group conversation. The host provi
   THEN it colours only the inline card chrome, placeholder, or letterbox; media
   pixels, rendered document content, maps, composer previews, reply quotes, and
   fullscreen viewers remain neutral.
+- WHEN a channel is `type: "announcement"` → THEN it is a one-way noticeboard: **every** capability defaults to off, so nobody can send, reply, react, upload, copy or inspect without the host explicitly granting it. It renders like a DM — no avatar gutter, no sender names, no `@here` — because a broadcast has one voice.
+- WHEN the host does grant a capability on an announcement channel, e.g. `{ canSend: true }` for an administrator → THEN only that one turns on; the rest stay off.
+- WHEN no per-message action survives its gates → THEN the hover ellipsis is not rendered at all, rather than opening an empty menu. A failed outgoing message keeps its critical alert regardless: retrying and discarding a local echo are not permissions.
+- WHEN `canSend` is false and the host does not set `canReply` → THEN Reply is hidden, because replying needs a composer to reply into.
+- WHEN the current user cannot send in a channel → THEN the composer is replaced by `channel.readOnlyNotice` (or a generic line), and dragging files over the panel no longer offers a drop affordance.
+- WHEN a channel is an announcement → THEN messages carry no per-message clock and the day separator carries the time instead, because those posts are seeded rather than sent and their minute would be invented. The header also drops its ellipsis: a fixed, short transcript has nothing to search.
+- WHEN a message carries a `kind: "card"` attachment → THEN F0 renders an `F0Card` at the shared media width from the host's data (avatar, title, description, image, one footer action). It keeps its own border and radius rather than chaining into the bubble stack, and it is not editable — the composer has no affordance for a card, so loading one into it could only drop it on save.
 - WHEN a group has an explicit emoji → THEN the sidebar and chat header render that emoji.
 - WHEN a group has neither an emoji nor a custom team/company image → THEN the sidebar and chat header render `＃` instead of an empty generated avatar.
 - WHEN an own group message has `readBy` → THEN F0 displays its list length and shows each reader in the message Info panel.
-- WHEN a sent group message is still missing readers → THEN its footer shows `Sent · time` without exposing a count.
-- WHEN every other channel member has read the message → THEN its footer advances to `Read · time`.
-- WHEN `memberCount` is known but receipt data is missing → THEN F0 keeps the footer at `Sent · time`; when `memberCount` is unavailable, F0 trusts the host-provided message status.
+- WHEN a sent group message is still missing readers → THEN its footer shows `Sent` without exposing a count.
+- WHEN every other channel member has read the message → THEN its footer advances to `Read`.
+- WHEN `memberCount` is known but receipt data is missing → THEN F0 keeps the footer at `Sent`; when `memberCount` is unavailable, F0 trusts the host-provided message status.
 - WHEN reader identities exceed the Info panel height → THEN the complete Info content scrolls as one region and the reader list does not create a nested scroll.
 - WHEN reader identities appear in message Info → THEN each row displays only the reader avatar and name, without links or hover cards.
 - WHEN `readBy` is unavailable but `readByCount` exists → THEN F0 displays the count without inventing identities.
@@ -296,11 +371,35 @@ F0Chat renders a transport-agnostic direct or group conversation. The host provi
 - WHEN `maxFileSizeBytes` is omitted → THEN F0 does not impose a file-size limit.
 - WHEN files are pasted into the composer with `Cmd+V` or `Ctrl+V` → THEN F0 uploads them through the same validation path as selected and dropped files.
 - WHEN pasted clipboard content contains no files → THEN F0 preserves the textarea's native text paste behavior.
+- WHEN Arrow Up is pressed in an empty, idle composer → THEN F0 reopens the viewer's newest own message, prefilled as the Edit action does.
+- WHEN that newest own message cannot be edited — past the edit window, a voice note, or attachments with no text → THEN Arrow Up does nothing. It never looks further back: the viewer pressed a key without choosing a message, so opening any other one would surprise them. The Edit action still reaches older messages.
+- WHEN the newest own messages are outside the loaded window, as after jumping to a search hit (`hasMoreNewer`) → THEN Arrow Up does nothing rather than reopening an older message.
+- WHEN a host capability allows editing other people's messages → THEN Arrow Up still only reopens the viewer's own; the Edit action follows the capability.
+- WHEN nothing editable remains → THEN Arrow Up does nothing and keeps its ordinary caret behavior.
+- WHEN the composer holds text, an attachment, a pending reply quote, an edit in progress, a recording being requested or running, a transcription, or a voice note being sent → THEN Arrow Up keeps its ordinary caret behavior.
+- WHEN Arrow Up carries Shift, Alt, Cmd, or Ctrl → THEN F0 treats it as a text-selection gesture and never reopens a message.
+- WHEN a message is double-clicked → THEN F0 quotes it in the composer and moves focus there — anyone's message, including the viewer's own. This replaces the browser's double- and triple-click text selection inside a message; the Copy action copies the whole body.
+- WHEN a double-click lands on a part of the message that handles its own activation — an image, a file, a reply quote, a link, the voice waveform, the inline video — → THEN that element performs its own action and no quote is created.
+- WHEN a double-click lands in a popover a message owns, such as a profile hover card → THEN no quote is created; the card is not part of the message.
+- WHEN the double-clicked message is deleted, still sending, or failed → THEN F0 creates no quote, matching the rows the menu offers no Reply on.
+- WHEN the channel is read-only (`canSend: false`) → THEN neither a double-click nor the menu's Reply sets a quote, because no composer is rendered to hold one.
+- WHEN a compose target is set → THEN it replaces any other: a quote drops an edit in progress AND its draft text, attachments and mentions; an edit drops a pending quote.
+- WHEN the Edit action is re-picked on the message already open for editing → THEN F0 keeps what the viewer has typed instead of reloading the original body.
+- WHEN a compose target is set by any route → THEN F0 focuses the textarea within the same interaction and places the caret at the end of the draft, without scrolling the host page.
+- WHEN the conversation changes → THEN F0 drops the compose target AND the whole composer draft, so neither an edit nor a half-typed reply can be sent to the channel the viewer switched to.
+- WHEN the composer is removed while a target is set, as when a channel becomes read-only → THEN F0 drops the target with it, so a returning composer never shows a chip over an empty draft.
 - WHEN `:` starts a token in the composer → THEN F0 opens a caret-anchored emoji list and filters it by shortcode, alias, keyword, or name as the query grows.
 - WHEN the emoji autocomplete is open → THEN Arrow Up and Arrow Down move through its options, Enter or Tab inserts the active emoji, and Escape dismisses the current trigger without sending.
 - WHEN an emoji autocomplete option is selected → THEN F0 replaces only the active `:query`, preserves surrounding message text, inserts one separating space, and restores the textarea focus and caret.
 - WHEN an exact shortcode or alias is completed with a closing colon, such as `:smile:` or `:thumbsup:` → THEN F0 converts it in place without requiring the suggestion list.
 - WHEN `:` belongs to another token such as a URL or time → THEN F0 leaves the composer unchanged and does not open emoji suggestions.
+- WHEN a message, reaction, quick-reaction row, or emoji suggestion contains an emoji → THEN F0 renders the reader's own system glyph rather than substituting an image, so emoji look the same here as everywhere else on their machine. The channel icon in the header and the sidebar is not part of a conversation and keeps the shared twemoji rendering.
+- WHEN the emoji picker is opened from the composer, the message action menu, or beside the reaction pills → THEN F0 shows **F0Chat's own picker**: system glyphs, F0 tokens, no shadow DOM. The rest of the product — post reactions, surveys, the channel icon input — deliberately keeps the emoji-mart picker, so nothing outside a conversation changes. Two pickers coexist on purpose; this is not a half-finished migration.
+- WHEN the picker opens with no room below the trigger → THEN it flips above it, and when neither side fits it shrinks the emoji grid only, holding the search box and the category bar in place. Its floor is 180px.
+- WHEN the browser asks for a language emojibase ships → THEN F0 lazily loads that language's emoji names and tags and layers them over the English index, so "fuego" and "fire" both find 🔥. English is never fetched — it is already bundled — and a failed load leaves the search working in English.
+- WHEN the running platform cannot draw an emoji — a release newer than its font, or a sequence it splits into parts → THEN F0 leaves that emoji out of the picker and the `:` suggestions instead of offering a tofu box. Emoji arriving in a received message are shown as-is.
+- WHEN emoji support cannot be measured (no canvas, a sandboxed frame, server rendering) → THEN F0 offers the complete set rather than hiding emoji on the strength of a failed probe.
+- WHEN emoji are typed into the composer → THEN the highlight overlay stays off and the native textarea keeps its own text, so IME composition remains visible. Only mentions and ghost completions turn the overlay on.
 - WHEN an image, PDF, spreadsheet, Word document, or text file enters the composer → THEN F0 renders an image-sized square preview immediately while the upload continues.
 - WHEN a video enters the composer → THEN F0 keeps the same compact height but renders a wider 16:9 preview so its media type is visually distinct.
 - WHEN an uploaded attachment replaces its local composer preview → THEN F0 preserves the preview's stable key and shape, swaps to the host URL, and revokes the temporary object URL.
@@ -313,9 +412,11 @@ F0Chat renders a transport-agnostic direct or group conversation. The host provi
 - WHEN one message contains several videos → THEN the players stack vertically and each uses the available width up to 36rem instead of shrinking into a media grid.
 - WHEN a video is still uploading → THEN F0 keeps its file chip and progress state until the upload completes.
 - WHEN a bubble attachment has an inline or document preview → THEN F0 omits the redundant download action from the bubble; download remains available inside the document viewer or video-player controls, while files without a preview and failed previews keep their downloadable file chip.
-- WHEN a video, map, document, or voice attachment is rendered only by transcript overscan → THEN its stable placeholder remains mounted and its expensive implementation remains unmounted without starting media or parsing work.
-- WHEN a heavy attachment becomes partially or fully visible → THEN it joins the transcript queue; after readiness and 250 ms without scrolling, F0 prepares and mounts one preview per paint turn.
-- WHEN scrolling resumes → THEN pending heavy previews pause, while previews that already mounted remain available until their virtual row leaves the window.
+- WHEN an attachment's row is rendered — including rows the transcript mounts ahead of the viewport → THEN F0 mounts the real attachment and starts fetching it, rather than holding a placeholder until it is seen. Every attachment's box is reserved by its own layout (aspect ratio or fixed height), so this never re-measures a row.
+- WHEN a photo has not arrived yet → THEN its cell shows the sender's surface, or the low-resolution `blurUrl` blurred beneath it when the host supplies one; F0 never covers a photo with a loading placeholder.
+- WHEN a row scrolls near the viewport → THEN F0 decodes the images of the rows just beyond the rendered window, biased in the direction of travel, and remembers each URL for the life of the conversation — so scrolling back over history already read shows those photos immediately even though their rows were destroyed in between.
+- WHEN a map attachment is rendered ahead of the viewport → THEN it stays unmounted until it first intersects, because each map holds a live WebGL context and browsers cap how many may exist at once. Every other attachment mounts with its row.
+- WHEN a document snapshot is mounting → THEN its skeleton stays beneath the snapshot until the renderer paints, because pdf.js, SheetJS and docx-preview mount quickly but render asynchronously.
 - WHEN a video player initializes → THEN its 16:9 poster or placeholder keeps the final player dimensions until media data is ready, while the player controls remain available for browsers that require a user gesture to load video.
 - WHEN a conversation or replaced message window enters → THEN F0 keeps a neutral surface while Virtuoso hides its provisional list and reveals the transcript only after the viewport is stable for two paint frames.
 - WHEN an older page is prepended → THEN F0 keeps the same Virtuoso instance and changes only `firstItemIndex`, leaving measured-anchor retention to Virtuoso.
@@ -366,11 +467,11 @@ playback-speed slot can overflow.
 
 ### Keyboard interaction
 
-The message action menu opens the Info panel with standard button navigation. Its content is one focusable region; when many reader identities exceed the available height, that complete region scrolls instead of introducing a nested scroll inside the reader list. The composer attachment strip is focusable and supports horizontal keyboard scrolling. After removing an attachment, focus stays on the strip when previews remain; removing the final preview returns focus to the composer textarea. Emoji suggestions keep focus in the textarea, expose the active option through `aria-activedescendant`, and use Arrow Up, Arrow Down, Enter, Tab, and Escape without intercepting ordinary message text.
+The message action menu opens the Info panel with standard button navigation. Its content is one focusable region; when many reader identities exceed the available height, that complete region scrolls instead of introducing a nested scroll inside the reader list. Arrow Up on an empty, idle composer reopens the viewer's last editable message; with any composer content, a pending quote, or a modifier held it keeps its ordinary caret meaning. Double-click to reply is a pointer-only shortcut for the menu's Reply action, which remains the keyboard path — and the only path on touch, where a double-tap is not a reliable gesture. The composer attachment strip is focusable and supports horizontal keyboard scrolling. After removing an attachment, focus stays on the strip when previews remain; removing the final preview returns focus to the composer textarea. Emoji suggestions keep focus in the textarea, expose the active option through `aria-activedescendant`, and use Arrow Up, Arrow Down, Enter, Tab, and Escape without intercepting ordinary message text.
 
 ### Screen reader behavior
 
-Reaction buttons announce their emoji label, count, and pressed state. Group reader lists use the localized “Read by” count as their accessible name. The final-message footer is a polite, atomic status region, so assistive technology announces asynchronous transitions from “Sent” to “Read” together with the message time.
+Reaction buttons announce their emoji label, count, and pressed state. Group reader lists use the localized “Read by” count as their accessible name. The final-message footer is a polite, atomic status region, so assistive technology announces the asynchronous transition from “Sent” to “Read”. It reports delivery only — the time belongs to the message itself, which carries it in its own bubble.
 
 Attachment actions include the filename in their accessible names. Each video
 player is contained in a figure named after its file and exposes a contextual

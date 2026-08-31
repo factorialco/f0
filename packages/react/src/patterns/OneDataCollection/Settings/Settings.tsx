@@ -206,9 +206,8 @@ export const Settings = <
                 !!grouping.mandatory &&
                 Object.entries(grouping.groupBy).length < 2
               ) && (
-                <div className="p-3">
+                <div key="grouping" className="p-3">
                   <GroupingSelector
-                    key="grouping"
                     grouping={grouping}
                     currentGrouping={currentGrouping}
                     onGroupingChange={handleGroupingChange}
@@ -216,9 +215,8 @@ export const Settings = <
                 </div>
               ),
             hasSortings && (
-              <div className="p-3">
+              <div key="sorting" className="p-3">
                 <SortingSelector
-                  key="sorting"
                   currentSortings={currentSortings}
                   onChange={onSortingsChange}
                   sortings={effectiveSortings}

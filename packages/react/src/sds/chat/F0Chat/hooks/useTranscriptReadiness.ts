@@ -67,6 +67,8 @@ export const useTranscriptReadiness = (
   const markReady = useCallback(() => {
     if (readyRef.current) return
     readyRef.current = true
+    // Resizes after the reveal are owned by useTranscriptResizeAnchor, which
+    // keeps its own observer for the life of the transcript.
     observerRef.current?.disconnect()
     observerRef.current = null
     setReadyKey(resetKey)

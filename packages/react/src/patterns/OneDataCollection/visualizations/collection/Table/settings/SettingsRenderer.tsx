@@ -23,7 +23,8 @@ export const SettingsRenderer = <
     !props.allowColumnHiding &&
     !props.allowColumnReordering &&
     !props.onAddColumn &&
-    !props.onRemoveColumn
+    !props.onRemoveColumn &&
+    !props.onLockedColumnIdsChange
   ) {
     return null
   }
@@ -37,6 +38,8 @@ export const SettingsRenderer = <
       visualizationKey={props.visualizationKey}
       onAddColumn={props.onAddColumn}
       onRemoveColumn={props.onRemoveColumn}
+      lockedColumnIds={props.lockedColumnIds}
+      onLockedColumnIdsChange={props.onLockedColumnIdsChange}
     />
   )
 }

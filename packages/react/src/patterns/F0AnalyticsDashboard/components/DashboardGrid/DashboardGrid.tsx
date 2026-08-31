@@ -8,11 +8,15 @@ import type {
 
 import { F0Icon } from "@/components/F0Icon"
 import Handle from "@/icons/app/Handle"
+import { WIDGET_DRAG_END, WIDGET_DRAG_START } from "@/lib/dnd/widgetDragEvents"
 import { cn } from "@/lib/utils"
 
 import type {
   DashboardItem as DashboardItemType,
+  DashboardItemFiltersConfig,
   DashboardItemLayout,
+  F0AnalyticsDashboardAskAiTarget,
+  F0AnalyticsDashboardAskAiTargetWithQuote,
 } from "../../types"
 
 import { ChartItem, chartItemFitsContent } from "../ChartItem/ChartItem"
@@ -23,6 +27,7 @@ import { MetricItem } from "../MetricItem/MetricItem"
 const GAP = 12
 const MAX_PER_ROW = 4
 const NARROW_THRESHOLD = 640
+const DRAG_START_THRESHOLD = 4
 
 /** Default row height in px, determined by the tallest item type. */
 const ROW_HEIGHTS: Record<string, number> = {
@@ -49,6 +54,9 @@ type Row = {
 
 interface DashboardGridProps<Filters extends FiltersDefinition> {
   items: DashboardItemType<Filters>[]
+  itemFilters?: (
+    item: DashboardItemType<Filters>
+  ) => DashboardItemFiltersConfig | undefined
   filters: FiltersState<Filters>
   editMode?: boolean
   onLayoutChange?: (layout: DashboardItemLayout[]) => void
@@ -60,6 +68,10 @@ interface DashboardGridProps<Filters extends FiltersDefinition> {
     newType: string,
     orientation?: "vertical" | "horizontal"
   ) => void
+  /** Overrides the built-in "Ask One" action on a widget. See `F0AnalyticsDashboardProps.onAskAi`. */
+  onAskAi?: (item: F0AnalyticsDashboardAskAiTarget) => void
+  /** Observes built-in Ask One actions without replacing chat behavior. */
+  onAskAiTarget?: (item: F0AnalyticsDashboardAskAiTargetWithQuote) => void
   /**
    * Notifies the parent when the grid enters/exits a "fill height" mode —
    * triggered by click-to-fullscreen on a multi-item dashboard. The parent
@@ -81,11 +93,14 @@ interface DashboardGridProps<Filters extends FiltersDefinition> {
  */
 export function DashboardGrid<Filters extends FiltersDefinition>({
   items,
+  itemFilters,
   filters,
   editMode,
   onLayoutChange,
   resetKey,
   onTransformChart,
+  onAskAi,
+  onAskAiTarget,
   onFullscreenChange,
 }: DashboardGridProps<Filters>) {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -232,6 +247,10 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
   const dropTargetRef = useRef<typeof dropTarget>(null)
   dropTargetRef.current = dropTarget
   const ghostRef = useRef<HTMLDivElement | null>(null)
+  /** AI chat drop zones, cached during movement and refreshed on release. */
+  const chatDropZonesRef = useRef<Element[]>([])
+  /** Teardown for the drag in flight, so an unmount can retract it. */
+  const endDragRef = useRef<(() => void) | null>(null)
 
   const commitDrop = useCallback(
     (draggedId: string, target: NonNullable<typeof dropTarget>) => {
@@ -282,6 +301,26 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
   // over a chart canvas or a full-width row all the same.
   const resolveDropTarget = useCallback(
     (clientX: number, clientY: number): typeof dropTarget => {
+      // The AI chat panel is a drop target of its own (drop a widget to quote
+      // it in the composer). Rows are matched on Y alone, and the chat shares
+      // that band, so without this the grid would paint a drop indicator
+      // behind the chat's overlay and commit a reorder on release. Returning
+      // null also makes `up`'s `if (draggedId && target)` skip `commitDrop`.
+      //
+      // Found once when the drag starts, not on every move — this runs per
+      // `pointermove`. The rect is still read live, since the panel can be
+      // resized mid-drag.
+      for (const chatEl of chatDropZonesRef.current) {
+        const c = chatEl.getBoundingClientRect()
+        if (
+          clientX >= c.left &&
+          clientX <= c.right &&
+          clientY >= c.top &&
+          clientY <= c.bottom
+        )
+          return null
+      }
+
       const rowEls = containerRef.current
         ? Array.from(
             containerRef.current.querySelectorAll<HTMLElement>(
@@ -341,12 +380,40 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
       e.preventDefault()
       e.stopPropagation()
 
+      const startX = e.clientX
+      const startY = e.clientY
+      let hasStartedDrag = false
       dragIdRef.current = id
       dropTargetRef.current = null
-      setDragId(id)
       setDropTarget(null)
 
       const move = (ev: PointerEvent) => {
+        if (!hasStartedDrag) {
+          if (
+            Math.hypot(ev.clientX - startX, ev.clientY - startY) <
+            DRAG_START_THRESHOLD
+          )
+            return
+
+          hasStartedDrag = true
+          setDragId(id)
+          chatDropZonesRef.current = Array.from(
+            document.querySelectorAll("[data-ai-chat-dropzone]")
+          )
+
+          // Invite other drop targets as soon as this becomes a real drag,
+          // while the pointer is still near the widget rather than waiting
+          // for it to reach the chat. A plain click on the grip stays quiet.
+          const title = itemMapRef.current.get(id)?.title ?? ""
+          if (title) {
+            window.dispatchEvent(
+              new CustomEvent(WIDGET_DRAG_START, {
+                detail: { id, title, onAskAi, onAskAiTarget },
+              })
+            )
+          }
+        }
+
         const ghost = ghostRef.current
         if (ghost) {
           ghost.style.transform = `translate(${ev.clientX + 12}px, ${ev.clientY + 16}px)`
@@ -357,22 +424,62 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
           setDropTarget(next)
         }
       }
-      const up = () => {
+
+      /**
+       * The single way out of a drag, whatever ends it.
+       *
+       * `commit` is false for the paths that aren't a deliberate release: a
+       * cancelled pointer (touch scroll takeover, the browser interrupting)
+       * and this grid unmounting mid-gesture. Both used to leave the listeners
+       * attached and, worse, never announce the end — so the chat kept its
+       * full-panel drop invitation up, and the next ordinary click inside it
+       * quoted a widget nobody was dragging.
+       */
+      const endDrag = (commit: boolean) => {
         document.removeEventListener("pointermove", move)
         document.removeEventListener("pointerup", up)
+        document.removeEventListener("pointercancel", cancel)
+        endDragRef.current = null
+
         const draggedId = dragIdRef.current
         const target = dropTargetRef.current
-        if (draggedId && target) commitDrop(draggedId, target)
+        if (commit && hasStartedDrag && draggedId && target)
+          commitDrop(draggedId, target)
         dragIdRef.current = null
         dropTargetRef.current = null
+        chatDropZonesRef.current = []
         setDragId(null)
         setDropTarget(null)
+        if (hasStartedDrag) {
+          window.dispatchEvent(new CustomEvent(WIDGET_DRAG_END))
+        }
       }
+      const up = (ev: PointerEvent) => {
+        // The release is authoritative. A coalesced final move or a resized
+        // panel can make the cached hover target stale; resolving once more
+        // prevents a chat drop from also committing the old grid reorder.
+        if (hasStartedDrag) {
+          chatDropZonesRef.current = Array.from(
+            document.querySelectorAll("[data-ai-chat-dropzone]")
+          )
+          dropTargetRef.current = resolveDropTarget(ev.clientX, ev.clientY)
+        }
+        endDrag(true)
+      }
+      const cancel = () => endDrag(false)
+
+      endDragRef.current = () => endDrag(false)
       document.addEventListener("pointermove", move)
       document.addEventListener("pointerup", up)
+      document.addEventListener("pointercancel", cancel)
     },
-    [commitDrop, resolveDropTarget]
+    [commitDrop, onAskAi, onAskAiTarget, resolveDropTarget]
   )
+
+  // A drag in flight when this unmounts (navigating away, switching
+  // dashboards) has to be retracted too, or the announcement outlives the grid
+  // that made it.
+  useEffect(() => () => endDragRef.current?.(), [])
 
   // ─── Row resize ─────────────────────────────────────────────
   const startResize = useCallback(
@@ -440,10 +547,13 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
       <div ref={containerRef} className="flex h-full min-h-0 flex-col">
         <DashboardGridItem
           item={soleItem}
+          itemFilters={itemFilters?.(soleItem)}
           filters={filters}
           editMode={editMode}
           onDelete={handleDelete}
           onTransformChart={onTransformChart}
+          onAskAi={onAskAi}
+          onAskAiTarget={onAskAiTarget}
           isFullscreen
         />
       </div>
@@ -478,10 +588,13 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
         >
           <DashboardGridItem
             item={fullscreenItem}
+            itemFilters={itemFilters?.(fullscreenItem)}
             filters={filters}
             editMode={editMode}
             onDelete={handleDelete}
             onTransformChart={onTransformChart}
+            onAskAi={onAskAi}
+            onAskAiTarget={onAskAiTarget}
             isFullscreen
             onFullscreenChange={(fs) =>
               setFullscreenItemId(fs ? fullscreenItemId : null)
@@ -564,10 +677,13 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
                   >
                     <DashboardGridItem
                       item={item}
+                      itemFilters={itemFilters?.(item)}
                       filters={filters}
                       editMode={editMode}
                       onDelete={handleDelete}
                       onTransformChart={onTransformChart}
+                      onAskAi={onAskAi}
+                      onAskAiTarget={onAskAiTarget}
                       onFullscreenChange={(fs) =>
                         setFullscreenItemId(fs ? id : null)
                       }
@@ -974,15 +1090,19 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
   item,
   filters,
   actions,
+  itemFilters,
   editMode,
   onDelete,
   onTransformChart,
+  onAskAi,
+  onAskAiTarget,
   isFullscreen,
   onFullscreenChange,
 }: {
   item: DashboardItemType<Filters>
   filters: FiltersState<Filters>
   actions?: DropdownItemType[]
+  itemFilters?: DashboardItemFiltersConfig
   editMode?: boolean
   onDelete?: (id: string) => void
   onTransformChart?: (
@@ -990,6 +1110,8 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
     newType: string,
     orientation?: "vertical" | "horizontal"
   ) => void
+  onAskAi?: (item: F0AnalyticsDashboardAskAiTarget) => void
+  onAskAiTarget?: (item: F0AnalyticsDashboardAskAiTargetWithQuote) => void
   isFullscreen?: boolean
   onFullscreenChange?: (fullscreen: boolean) => void
 }) {
@@ -1000,8 +1122,11 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
           item={item}
           filters={filters}
           actions={actions}
+          itemFilters={itemFilters}
           editMode={editMode}
           handleDelete={onDelete}
+          onAskAi={onAskAi}
+          onAskAiTarget={onAskAiTarget}
           onTransformChart={onTransformChart}
           isFullscreen={isFullscreen}
           onFullscreenChange={onFullscreenChange}
@@ -1013,8 +1138,11 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
           item={item}
           filters={filters}
           actions={actions}
+          itemFilters={itemFilters}
           editMode={editMode}
           handleDelete={onDelete}
+          onAskAi={onAskAi}
+          onAskAiTarget={onAskAiTarget}
           isFullscreen={isFullscreen}
           onFullscreenChange={onFullscreenChange}
         />
@@ -1025,8 +1153,11 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
           item={item}
           filters={filters}
           actions={actions}
+          itemFilters={itemFilters}
           editMode={editMode}
           handleDelete={onDelete}
+          onAskAi={onAskAi}
+          onAskAiTarget={onAskAiTarget}
           isFullscreen={isFullscreen}
           onFullscreenChange={onFullscreenChange}
         />

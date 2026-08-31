@@ -52,7 +52,8 @@ const parents: Person[] = [
 const columns = [{ label: "name", render: (item: Person) => item.name }]
 
 const createSource = (
-  onSelectItems: () => void
+  onSelectItems: () => void,
+  { allPagesSelection = true }: { allPagesSelection?: boolean } = {}
 ): DataCollectionSource<
   Person,
   FiltersDefinition,
@@ -78,7 +79,7 @@ const createSource = (
     currentGrouping: undefined,
     setCurrentGrouping: vi.fn(),
     selectable: (item: Person) => (item.children?.length ? undefined : item.id),
-    allPagesSelection: true,
+    allPagesSelection,
     itemsWithChildren: (item: Person) => !!item.children?.length,
     fetchChildren: ({ item }: { item: Person }) => ({
       records: item.children ?? [],
@@ -136,6 +137,37 @@ describe("Table nested-row selection (registry-backed select all)", () => {
     await waitFor(() => {
       expect(screen.getByTitle("Select c1")).toBeChecked()
       expect(screen.getByTitle("Select c2")).toBeChecked()
+    })
+  })
+
+  it("reports the selected nested child to onSelectItems (page-only selection)", async () => {
+    const user = userEvent.setup()
+    const onSelectItems = vi.fn()
+    render(
+      <EditableTableCollection
+        columns={columns}
+        // Page-only selection (the default) is where the page filter — and the
+        // bug — lives: `allPagesSelection` switches that path off entirely.
+        source={createSource(vi.fn(), { allPagesSelection: false })}
+        onSelectItems={onSelectItems}
+        onLoadData={vi.fn()}
+        onLoadError={vi.fn()}
+      />
+    )
+
+    await waitFor(() => expect(screen.getByText("Parent")).toBeInTheDocument())
+    await expandParent(user)
+
+    await user.click(screen.getByTitle("Select c1"))
+
+    // A tree's `data.records` holds only the roots, so page-scoping the payload
+    // used to drop the child and hand the consumer an empty selection.
+    await waitFor(() => {
+      const lastCall = onSelectItems.mock.calls.at(-1)
+      expect(lastCall?.[0].selectedIds).toEqual(["c1"])
+      expect(lastCall?.[0].itemsStatus).toEqual([
+        { item: expect.objectContaining({ id: "c1" }), checked: true },
+      ])
     })
   })
 

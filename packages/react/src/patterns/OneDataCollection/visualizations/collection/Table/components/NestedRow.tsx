@@ -137,8 +137,12 @@ const NestedRowContent = <
 
   const rowId = `${props.nestedRowProps?.depth ?? 0}-${"id" in props.item ? props.item.id + "-" + props.index : props.index}`
 
-  const { expandedRowIds, setRowExpanded, isExpandedByDefault } =
-    useNestedDataContext()
+  const {
+    expandedRowIds,
+    setRowExpanded,
+    isExpandedByDefault,
+    resetGeneration,
+  } = useNestedDataContext()
   // An absent entry means the user has not decided for this row, and only then
   // does the default policy apply. `??` is deliberate over `||`: a recorded
   // `false` is a deliberate collapse and must win over an opening policy.
@@ -158,7 +162,6 @@ const NestedRowContent = <
       rowId: rowId,
       item: props.item,
       source: props.source,
-      onClearFetchedData: () => setRowExpanded(rowId, false),
     })
 
   const shouldShowLoading = open && isLoading
@@ -222,15 +225,19 @@ const NestedRowContent = <
   }
 
   // A row the default policy opens never went through `handleExpand`, so it has
-  // to ask for its children itself. Guarded by a ref rather than by
-  // `children.length`, which stays 0 for a parent whose fetch comes back empty
-  // and would otherwise re-request on every render.
-  const requestedDefaultChildrenRef = useRef(false)
+  // to ask for its children itself. The flag is keyed on `resetGeneration`
+  // rather than a plain boolean: a tree reset wipes the children and bumps the
+  // generation, so the guard re-arms and the still-open row re-fetches instead
+  // of staying empty. Keying it (over `children.length`, which stays 0 for a
+  // parent whose fetch comes back empty) also avoids re-requesting every render.
+  const requestedDefaultChildrenGenerationRef = useRef<number | null>(null)
   useEffect(() => {
-    if (!open || requestedDefaultChildrenRef.current || children.length) return
-    requestedDefaultChildrenRef.current = true
+    if (!open || children.length) return
+    if (requestedDefaultChildrenGenerationRef.current === resetGeneration)
+      return
+    requestedDefaultChildrenGenerationRef.current = resetGeneration
     loadChildren()
-  }, [open, children.length, loadChildren])
+  }, [open, children.length, loadChildren, resetGeneration])
 
   const sharedNestedRowProps = {
     depth: props.nestedRowProps?.depth ?? 0,

@@ -14,6 +14,7 @@ import {
 } from "@/components/avatars/F0AvatarModule"
 import type { AvatarSize } from "@/components/avatars/internal/BaseAvatar"
 import { F0Button } from "@/components/F0Button"
+import { type F0ButtonProps } from "@/components/F0Button"
 import { F0Icon, type IconType } from "@/components/F0Icon"
 import { cn } from "@/lib/utils"
 import { Counter } from "@/ui/Counter"
@@ -61,6 +62,13 @@ export interface HomeRenderCtx {
    * { slotRowBleed}).
    */
   isLastSlot?: boolean
+  /**
+   * WHAT THE CARD IS SHOWING, when its header carries a `headerSelect`: the
+   * option the reader is on. A slot renderer that owns its own data reads this
+   * to fetch for it — the switcher is in the header, the fetching is here, and
+   * neither needs the host to hold the value.
+   */
+  selection?: string
 }
 
 /** Draws ONE slot from its params. Keyed by `visualization` in a renderer map. */
@@ -493,11 +501,59 @@ export const listSlot = <const S extends ListSchema>(
  * `alert` and `status` are EXCLUSIVE — `Widget` throws when given both — so the
  * type says so rather than leaving it to blow up at runtime.
  */
-export type HomeWidgetChrome = Pick<WidgetProps, "action" | "summaries"> &
-  (
+export type HomeWidgetChrome = Pick<
+  WidgetProps,
+  "action" | "summaries" | "headerControls"
+> & {
+  /**
+   * THE CARD'S OWN BUTTONS, in the header's top-right — as DATA, so a host that
+   * builds its widgets as data ("Write post", pointing at a route) can put one
+   * there without handing over a React node.
+   *
+   * `F0ButtonProps`, the same shape `action` takes, so a button can carry an
+   * `href` and be a real link. Drawn `ghost`/`sm` unless they say otherwise:
+   * this row is the TITLE's, and a filled button beside a title reads as the
+   * card's subject rather than as something you press.
+   *
+   * Keep it to one or two. What the card can do that needs no button belongs in
+   * `actions`, the overflow menu.
+   */
+  headerActions?: F0ButtonProps[]
+  /**
+   * WHAT THE CARD IS SHOWING, as a select in the same row — a scope switcher, as
+   * data. See {@link WidgetHeaderSelect}: `SlotWidget` keeps the choice and
+   * hands it to the slots as `ctx.selection`, so a widget declared as data can
+   * still be switched without its host holding the value.
+   */
+  headerSelect?: WidgetHeaderSelect
+} & (
     | { alert?: WidgetProps["alert"]; status?: never }
     | { status?: WidgetProps["status"]; alert?: never }
   )
+
+/**
+ * A SELECT IN THE WIDGET'S HEADER: which of several things the card is showing.
+ *
+ * The value lives in `SlotWidget`, not in the host — that is the point of it.
+ * A host that builds its widgets as plain data has nowhere to keep a live
+ * choice: params persist (and turn a switcher into a saved setting), and page
+ * state means the page knowing about one particular widget. So the card keeps
+ * it, hands it down to its slots (`ctx.selection`), and tells the host through
+ * `onChange` if it wants to know.
+ *
+ * It is therefore a SESSION choice: the card starts at `value` every time it
+ * mounts. A choice that should outlive the visit is a param, not this.
+ */
+export interface WidgetHeaderSelect {
+  /** What the reader can switch between. The first one is the default. */
+  options: Array<{ value: string; label: string; icon?: IconType }>
+  /** Which one the card starts on. Defaults to the first option. */
+  value?: string
+  /** The trigger names the selection, so this is what says what KIND it is. */
+  tooltip?: string
+  /** Told when the reader picks another one. The card switches either way. */
+  onChange?: (value: string) => void
+}
 
 /* ---------------------------- configurable widgets ---------------------------- */
 
@@ -778,18 +834,26 @@ export type HomeWidgetItem = HomeWidgetChrome & {
  * Public because drawing a `HomeWidgetItem` yourself is public (`SlotWidget`),
  * and this is the one part of that spread with a rule in it.
  */
-export const widgetChrome = (widget: HomeWidgetItem): HomeWidgetChrome =>
-  ("alert" in widget && widget.alert !== undefined
-    ? {
-        action: widget.action,
-        summaries: widget.summaries,
-        alert: widget.alert,
-      }
-    : {
-        action: widget.action,
-        summaries: widget.summaries,
-        status: "status" in widget ? widget.status : undefined,
-      }) as HomeWidgetChrome
+export const widgetChrome = (widget: HomeWidgetItem): HomeWidgetChrome => {
+  // EVERY chrome field, or the ones left out are dropped on the way to the card
+  // — which is how a widget can declare a header control and see nothing drawn.
+  const chrome = {
+    action: widget.action,
+    summaries: widget.summaries,
+    headerControls: widget.headerControls,
+    headerActions: widget.headerActions,
+    headerSelect: widget.headerSelect,
+  }
+
+  return (
+    "alert" in widget && widget.alert !== undefined
+      ? { ...chrome, alert: widget.alert }
+      : {
+          ...chrome,
+          status: "status" in widget ? widget.status : undefined,
+        }
+  ) as HomeWidgetChrome
+}
 
 /**
  * Row-based slots cancel their rows' own padding so the rows sit flush with the

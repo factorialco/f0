@@ -70,10 +70,50 @@ export const Default: Story = {}
  * A `locked` widget (the first here) is inert: it can't be dragged, nothing can
  * displace it, and it offers no menu at all — being mandatory, removing it is
  * not a choice the user has.
+ *
+ * AND NEITHER CAN THE OTHER ONE, in a column this short: with one free card
+ * among the pins there is a single legal order, so no card here has a grab
+ * cursor. A drag whose every outcome is the arrangement you already have is an
+ * offer of a refusal — see `PinnedWithRoomToMove` for the column that does
+ * have somewhere to put things.
  */
 export const WithLockedWidget: Story = {
   args: {
     widgets: [{ ...WIDGETS[0], locked: true }, WIDGETS[1]],
+  },
+}
+
+/**
+ * THE PINNED CEILING, which needs three widgets to see: Time off is `locked` at
+ * the top, and the two below it can be dragged past each other freely.
+ *
+ * Carry either one UP and it stops at the top of the first free slot — the
+ * pinned card's bottom edge plus the gap the column keeps between cards — rather
+ * than sailing over Time off to a place it cannot have. There is no order above
+ * a pinned widget for the drop to commit, so a card carried up there could only
+ * spring back (`lockedCeiling`).
+ */
+export const PinnedWithRoomToMove: Story = {
+  args: {
+    widgets: [
+      { ...WIDGETS[0], locked: true },
+      WIDGETS[1],
+      {
+        id: "tasks",
+        icon: Clock,
+        header: {
+          title: "Tasks",
+          count: 3,
+          link: { title: "Go to Tasks", onClick: () => {} },
+        },
+        slots: [
+          listSlot({ clickBehavior: "link" }, [
+            { id: "1", title: "Review the handbook", href: "/tasks/1" },
+            { id: "2", title: "Sign your contract", href: "/tasks/2" },
+          ]),
+        ],
+      },
+    ],
   },
 }
 

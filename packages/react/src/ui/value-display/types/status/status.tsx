@@ -4,13 +4,21 @@
  */
 import { IconType } from "@/components/F0Icon"
 import { F0TagStatus, StatusVariant } from "@/components/tags/F0TagStatus"
-import { TooltipWrapper } from "@/lib/tooltip-wrapper"
+import {
+  TooltipWrapper,
+  tooltipAccessibleText,
+  type TooltipValue,
+} from "@/lib/tooltip-wrapper"
 
 interface StatusValue {
   status: StatusVariant
   label: string
   icon?: IconType
-  tooltip?: string
+  /**
+   * A string is shown as a single title line. Pass an object for a title, a
+   * body and a bulleted list.
+   */
+  tooltip?: TooltipValue
 }
 export type StatusCellValue = StatusValue
 
@@ -22,7 +30,7 @@ export const StatusCell = (args: StatusCellValue) => (
           variant={args.status}
           text={args.label}
           icon={args.icon}
-          additionalAccessibleText={args.tooltip}
+          additionalAccessibleText={tooltipAccessibleText(args.tooltip)}
         />
       </div>
     </TooltipWrapper>

@@ -239,14 +239,21 @@ export function useSelectable<
   const { itemsStatus, selectedIds } = useMemo(() => {
     const items = localSelectedState.items || new Map()
 
-    // In page-only selection mode, only include items from current page
-    const currentPageItemIds = isPageOnlySelection
-      ? new Set(
-          data.records
-            .map((record) => getSelectable?.(record))
-            .filter((id): id is SelectionId => id !== undefined)
-        )
-      : null
+    // In page-only selection mode, only include items from current page.
+    // A tree's `data.records` holds the ROOTS only — its nested rows arrive
+    // through `fetchChildren` and never appear there — so page-scoping the
+    // payload would drop every selected child and hand the consumer an empty
+    // `itemsStatus` (which also keeps the action bar shut). A tree has no pages
+    // to scope to, so it is exempt.
+    const isTree = source.fetchChildren !== undefined
+    const currentPageItemIds =
+      isPageOnlySelection && !isTree
+        ? new Set(
+            data.records
+              .map((record) => getSelectable?.(record))
+              .filter((id): id is SelectionId => id !== undefined)
+          )
+        : null
 
     const itemsStatus = Array.from(items.values())
       .filter((itemState) => {
@@ -276,6 +283,7 @@ export function useSelectable<
     isPageOnlySelection,
     data.records,
     getSelectable,
+    source.fetchChildren,
   ])
 
   const groupsStatus = useMemo(
@@ -408,26 +416,33 @@ export function useSelectable<
               checked: itemState.checked,
               item,
             })
-          } else if (existingItem.item === undefined && item !== undefined) {
-            mergedItems.set(itemStateId, {
-              ...existingItem,
-              item,
-              // Single-select: external `checked` wins over stale local state.
-              ...(isMultiSelection ? {} : { checked: itemState.checked }),
-            })
-          } else if (
-            !isMultiSelection &&
-            existingItem.checked !== itemState.checked
-          ) {
-            // Single-select: external `checked` wins over stale local state.
-            // Only clone when actually flipping; otherwise the entry stored
-            // in loop 1 already has the right shape and keeping the same
-            // reference avoids spurious re-renders / re-emits in consumers
-            // that compare `selectedState` deeply.
-            mergedItems.set(itemStateId, {
-              ...existingItem,
-              checked: itemState.checked,
-            })
+          } else {
+            // External selected state is authoritative about which items are
+            // selected. Single-select: it fully wins (checked true or false).
+            // Multi-select: the merge is otherwise additive so cross-page user
+            // selections survive, but an item the external state explicitly
+            // marks `checked: true` must still win over a stale local
+            // `checked: false` — otherwise a pre-selected value whose option
+            // row is loaded (and added as `checked: false`) *before* the
+            // controlled value resolves stays stuck unchecked (a race between
+            // the options page load and the async value; the selector then
+            // shows one fewer item than are actually selected).
+            const shouldSyncChecked =
+              existingItem.checked !== itemState.checked &&
+              (!isMultiSelection || itemState.checked)
+            const needsItem =
+              existingItem.item === undefined && item !== undefined
+
+            // Only clone when something actually changes; otherwise keep the
+            // same reference to avoid spurious re-renders / re-emits in
+            // consumers that compare `selectedState` deeply.
+            if (needsItem || shouldSyncChecked) {
+              mergedItems.set(itemStateId, {
+                ...existingItem,
+                ...(needsItem ? { item } : {}),
+                ...(shouldSyncChecked ? { checked: itemState.checked } : {}),
+              })
+            }
           }
         }
 

@@ -111,6 +111,8 @@ export const TableCollection = <
   onLoadError,
   allowColumnHiding,
   allowColumnReordering,
+  lockedColumnIds,
+  onLockedColumnIdsChange,
   referenceRowType,
   boldRootRows,
   headerGroups: headerGroupsOption,
@@ -151,14 +153,22 @@ export const TableCollection = <
   )
 
   const { settings } = useDataCollectionSettings()
+  const usesExplicitColumnLocking =
+    lockedColumnIds !== undefined || !!onLockedColumnIdsChange
 
   // Sorted and hidden columns
-  const { columns: orderedColumns } = useColumns(
+  const { columns: orderedColumns, stickyColumnIds } = useColumns(
     originalColumns,
     frozenColumns,
     visualizationSettings ?? settings.visualization?.table,
     allowColumnReordering,
-    allowColumnHiding
+    allowColumnHiding,
+    lockedColumnIds,
+    usesExplicitColumnLocking
+  )
+  const stickyColumnIdSet = useMemo(
+    () => new Set(stickyColumnIds),
+    [stickyColumnIds]
   )
 
   // Header groups own the collapsed state and drop the columns hidden by a
@@ -173,6 +183,7 @@ export const TableCollection = <
   } = useHeaderGroups(orderedColumns, {
     headerGroups: headerGroupsOption,
     onCollapsedChange: onHeaderGroupCollapsedChange,
+    preservedColumnIds: stickyColumnIdSet,
   })
 
   const tableContainerRef = useRef<HTMLDivElement>(null)
@@ -244,7 +255,7 @@ export const TableCollection = <
     // eslint-disable-next-line react-hooks/exhaustive-deps --  we don't want to re-run this effect when the filters change, just when the data changes
   }, [paginationInfo?.total, data.records])
 
-  const frozenColumnsLeft = useMemo(() => frozenColumns, [frozenColumns])
+  const frozenColumnsLeft = stickyColumnIds.length
   const getRowKey = (item: R, index: number) => {
     if ("id" in item && item.id !== undefined && item.id !== null) {
       return `id:${String(item.id)}`
@@ -437,7 +448,12 @@ export const TableCollection = <
   // whenever a consumer passed an inline `defaultExpanded` predicate.
   return (
     <div className="flex h-full min-h-0 flex-col gap-4">
-      <NestedDataProvider defaultExpanded={defaultExpanded}>
+      <NestedDataProvider
+        defaultExpanded={defaultExpanded}
+        currentFilters={source.currentFilters}
+        currentSortings={source.currentSortings}
+        currentNavigationFilters={source.currentNavigationFilters}
+      >
         <div
           ref={tableContainerRef}
           className={cn(

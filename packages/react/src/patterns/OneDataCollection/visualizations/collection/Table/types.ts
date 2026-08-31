@@ -223,6 +223,25 @@ export type TableVisualizationOptions<
    */
   onRemoveColumn?: (columnId: ColId) => void
 
+  /**
+   * The user-managed frozen columns in the column-settings popover. Locked
+   * columns move into a sticky group on the left, stay visible, and cannot be
+   * reordered or removed. Their array order controls their order in that group.
+   * One visible managed column always remains unlocked as the table's
+   * scrollable region; an all-locked input is normalized accordingly.
+   *
+   * Unlocking a column returns it to its saved position. Columns covered by
+   * `frozenColumns` remain permanently locked before this managed group.
+   */
+  lockedColumnIds?: readonly ColId[]
+
+  /**
+   * Called with the complete set of user-managed locked column ids whenever a
+   * user locks or unlocks a column. Passing this callback enables the lock
+   * controls in the column-settings popover.
+   */
+  onLockedColumnIdsChange?: (columnIds: ColId[]) => void
+
   /** Maps a row to a visual variant: `"striped"`, `"striked"`, or `"none"`. */
   referenceRowType?: (item: R) => ReferenceType
 

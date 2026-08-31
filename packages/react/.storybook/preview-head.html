@@ -450,6 +450,28 @@
   cpk-web-inspector {
     display: none;
   }
+
+  /* ──────────────────────────────────────────────────────────────────────────
+     OVERLAYS ON DOCS PAGES
+
+     Storybook wraps every docs story in a zoom element carrying
+     `transform: scale(N)`. At the default zoom that is the identity matrix — but
+     an identity transform is still a transform, and a transformed element
+     becomes the containing block for `position: fixed` inside it.
+
+     So everything F0 paints as `fixed` — a dialog and its overlay, a toast, a
+     popover that escapes its scroll container — resolved against the story's own
+     little block instead of the viewport, and appeared trapped inside it. Docs
+     were the only place this bit: in a real app, and in a story viewed on its
+     own (`viewMode=story`), nothing wraps the tree in a transform.
+
+     Docs pages here are never zoomed, so dropping the transform costs nothing.
+     Scoped to `#storybook-docs` so the canvas view is untouched either way.
+     ────────────────────────────────────────────────────────────────────────── */
+  #storybook-docs .docs-story > div {
+    transform: none;
+  }
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/react-render-tracker"></script>
 <script>

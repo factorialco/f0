@@ -19,6 +19,7 @@ import { Tooltip } from "@/experimental/Overlays/Tooltip"
 // No `Pencil`/`Check`: there is no edit mode to toggle any more.
 import { Plus } from "@/icons/app"
 import Menu from "@/icons/app/Menu"
+import { F0OneSwitch } from "@/kits/ai/F0OneSwitch"
 import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
@@ -291,6 +292,7 @@ const CollapsedGlyph = ({
   open,
   delayMs,
   onOpen,
+  onCancelOpen,
   onClose,
 }: {
   widget: HomeWidgetItem
@@ -299,7 +301,8 @@ const CollapsedGlyph = ({
   open: boolean
   /** When this strip's first glyph starts arriving. */
   delayMs: number
-  onOpen: (id: string, anchor: HTMLElement) => void
+  onOpen: (id: string, anchor: HTMLElement, instant?: boolean) => void
+  onCancelOpen: () => void
   onClose: () => void
 }) => {
   const reducedMotion = useReducedMotion()
@@ -395,7 +398,8 @@ const CollapsedGlyph = ({
               : "rounded-lg"
           )}
           onMouseEnter={(event) => onOpen(widget.id, event.currentTarget)}
-          onFocus={(event) => onOpen(widget.id, event.currentTarget)}
+          onMouseLeave={onCancelOpen}
+          onFocus={(event) => onOpen(widget.id, event.currentTarget, true)}
           {...glyphMotion}
         >
           {text ? (
@@ -464,8 +468,9 @@ const CollapsedGlyph = ({
       aria-label={widgetTitle(widget)}
       aria-expanded={open}
       onMouseEnter={(event) => onOpen(widget.id, event.currentTarget)}
+      onMouseLeave={onCancelOpen}
       onClick={(event) =>
-        open ? onClose() : onOpen(widget.id, event.currentTarget)
+        open ? onClose() : onOpen(widget.id, event.currentTarget, true)
       }
       // See the strip: it takes no pointer events, so each glyph takes its own.
       className="pointer-events-auto rounded-lg"
@@ -494,6 +499,7 @@ const COLUMN_GAP_PX = 16
 /** Tailwind's `md` — below it the layout is one column unless the rail is collapsed. */
 const TWO_COLUMN_MIN_PX = 768
 const PANEL_LEAVE_MS = 150
+const PANEL_OPEN_MS = 150
 /** How far the floating panel clears the strip it comes out of. */
 const PANEL_GAP_PX = 8
 // The add control's name comes from the PROVIDER (`t.widgets.addWidget`) — it is
@@ -519,6 +525,18 @@ export interface NewHomeLayoutProps {
    * dragging and the add placeholder; the others stay put. Both by default.
    */
   editableWidgetContainers?: WidgetContainerSide[]
+  /**
+   * Which containers may still be ADDED TO. Narrower than
+   * `editableWidgetContainers`, which it is a subset of: a column not named here
+   * keeps its dragging and its "Remove widget" and only loses the offer to add.
+   *
+   * Defaults to every editable container — the common case, where the catalog
+   * always has something for every column. Name the sides once a column's
+   * catalog can run out: a main column that only ever holds one kind of widget
+   * has nothing to offer the moment that widget is on it, and a "+" that opens
+   * an empty picker is an offer the app cannot keep.
+   */
+  addableWidgetContainers?: WidgetContainerSide[]
   /**
    * Which containers keep ONLY THE WIDGETS YOU CAN SEE in the DOM. None by
    * default: for a Home of a dozen widgets, mounting them all is what keeps a
@@ -578,7 +596,10 @@ export interface NewHomeLayoutProps {
     widget: HomeWidgetItem,
     params: WidgetParams
   ) => ReactNode
-  /** When set, renders a "+ Add widget" affordance at the bottom of each column. */
+  /**
+   * When set, renders a "+ Add widget" affordance at the bottom of each column
+   * that takes widgets — see `addableWidgetContainers`.
+   */
   onClickAddNewWidget?: (side: WidgetContainerSide) => void
   /** Called with a side and its widget ids in their new order after a drag. */
   onReorderWidgets?: (side: WidgetContainerSide, ids: string[]) => void
@@ -607,6 +628,15 @@ export interface NewHomeLayoutProps {
   stackedPinsAfter?: number
   ctx?: HomeRenderCtx
   className?: string
+  /** Tooltip copy for the One switch, forwarded to `F0OneSwitch`. */
+  oneSwitchTooltip?: { whenDisabled?: string; whenEnabled?: string }
+  /** Opens the One switch's tooltip for 3s on mount. */
+  oneSwitchAutoOpen?: boolean
+  /**
+   * Hides the One AI toggle in the controls row. Use when One is reached
+   * elsewhere (e.g. a sidebar tab) so Home doesn't show a redundant switch.
+   */
+  hideOneSwitch?: boolean
 }
 
 /**
@@ -635,6 +665,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
       slotRenderers,
       renderWidget,
       editableWidgetContainers = ["main", "right"],
+      addableWidgetContainers,
       virtualizedWidgetContainers = [],
       virtualization,
       onRemoveWidget,
@@ -650,6 +681,9 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
       stackedPinsAfter = 2,
       ctx = {},
       className,
+      oneSwitchTooltip,
+      oneSwitchAutoOpen,
+      hideOneSwitch = false,
     },
     ref
   ) {
@@ -662,9 +696,10 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
     const [openId, setOpenId] = useState<string | null>(null)
     const [panelTop, setPanelTop] = useState(0)
     // Whether the panel should GLIDE to `panelTop` or simply be there — see
-    // `openFromAnchor`.
+    // `showFromAnchor`.
     const [panelGlide, setPanelGlide] = useState(false)
     const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+    const openTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
     // The rail collapses when the grid can't give both columns their width —
     // measured (clientWidth is a layout metric), not media-queried, because
@@ -692,6 +727,11 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
     const [manualCollapsed, setManualCollapsed] = useState<boolean | null>(null)
     const canEditSide = (side: WidgetContainerSide) =>
       editableWidgetContainers.includes(side)
+    // ADDING is a narrowing of arranging: a column you cannot arrange is not one
+    // you can add to, and an omitted `addableWidgetContainers` means every
+    // arrangeable column takes new widgets.
+    const canAddToSide = (side: WidgetContainerSide) =>
+      canEditSide(side) && (addableWidgetContainers?.includes(side) ?? true)
 
     const render = (widget: HomeWidgetItem) => {
       const node = renderWidget ? (
@@ -740,7 +780,9 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
         : false
 
     const hasSide =
-      aside != null || rightWidgets.length > 0 || onClickAddNewWidget != null
+      aside != null ||
+      rightWidgets.length > 0 ||
+      (onClickAddNewWidget != null && canAddToSide("right"))
     // Two reasons the rail collapses, and they don't compete: there ISN'T ROOM
     // for both columns, or you ASKED for the space. Narrowness always wins —
     // expanding by hand can't conjure room the layout doesn't have — so the
@@ -752,6 +794,11 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
       rightWidgets.length > 0 &&
       (autoCollapsed || (manualCollapsed ?? false))
     const railWidth = collapsed ? COLLAPSED_RAIL_WIDTH : asideWidth
+    // ONE string for the rail toggle: its accessible name AND what the tooltip
+    // says. A control whose tooltip and label can drift is two controls.
+    const railToggleLabel = collapsed
+      ? "Expand widgets panel"
+      : "Collapse widgets panel"
     // NOTHING ON THE RIGHT UNTIL THE BOX HAS BEEN MEASURED. Which presentation the
     // rail is in — column, strip, or nothing at all — is decided entirely by the
     // width, so drawn before there is one its first state is a guess the next
@@ -807,8 +854,19 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
     // the rail opens up: kept, it would reopen whatever was last hovered the
     // moment the layout narrowed again.
     useEffect(() => {
-      if (!collapsed) setOpenId(null)
+      if (collapsed) return
+      if (openTimer.current) clearTimeout(openTimer.current)
+      openTimer.current = null
+      setOpenId(null)
     }, [collapsed])
+
+    useEffect(
+      () => () => {
+        if (openTimer.current) clearTimeout(openTimer.current)
+        if (leaveTimer.current) clearTimeout(leaveTimer.current)
+      },
+      []
+    )
 
     // How the rail moves, and the one number the grid template reads. The genie
     // lives in there; the geometry it moves through stays here.
@@ -833,6 +891,8 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
      */
     const closingId = useRef<string | null>(null)
     if (openId) closingId.current = openId
+    const shownId = useRef<string | null>(null)
+    shownId.current = openId
     const panelWidgetId =
       openId ?? (rail.panelHidden ? null : closingId.current)
 
@@ -900,12 +960,17 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
       if (leaveTimer.current) clearTimeout(leaveTimer.current)
       leaveTimer.current = null
     }
+    const cancelOpen = () => {
+      if (openTimer.current) clearTimeout(openTimer.current)
+      openTimer.current = null
+    }
     const scheduleLeave = () => {
       cancelLeave()
+      cancelOpen()
       leaveTimer.current = setTimeout(() => setOpenId(null), PANEL_LEAVE_MS)
     }
-    const openFromAnchor = (id: string, anchor: HTMLElement) => {
-      cancelLeave()
+    const showFromAnchor = (id: string, anchor: HTMLElement) => {
+      cancelOpen()
       const root = rootRef.current
       if (root) {
         const top =
@@ -916,8 +981,25 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
       // there before it fades in. Moving between glyphs while it is already open
       // is the opposite: there it GLIDES, and that glide is what says the panel
       // is one thing showing a different widget rather than two panels.
-      setPanelGlide(openId != null)
+      setPanelGlide(shownId.current != null)
       setOpenId(id)
+    }
+    const openFromAnchor = (
+      id: string,
+      anchor: HTMLElement,
+      instant = false
+    ) => {
+      cancelLeave()
+      cancelOpen()
+      if (shownId.current === id) return
+      if (instant) {
+        showFromAnchor(id, anchor)
+        return
+      }
+      openTimer.current = setTimeout(
+        () => showFromAnchor(id, anchor),
+        PANEL_OPEN_MS
+      )
     }
 
     return (
@@ -985,6 +1067,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             belongs: under everything in this (isolated) layout. */}
         <div
           aria-hidden
+          data-page-surface
           className="pointer-events-none absolute -z-10 overflow-hidden bg-f1-special-page"
           style={{ top: -bleed, bottom: -bleed, left: -bleed, right: -bleed }}
         >
@@ -1022,23 +1105,33 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
                 is collapsed regardless, so a toggle there would be a control
                 that does nothing. */}
             {hasSide && rightWidgets.length > 0 && !autoCollapsed ? (
-              <Action
-                variant="ghost"
-                size="md"
-                compact
-                onClick={() => setManualCollapsed(!collapsed)}
-                title={
-                  collapsed ? "Expand widgets panel" : "Collapse widgets panel"
-                }
-                aria-label={
-                  collapsed ? "Expand widgets panel" : "Collapse widgets panel"
-                }
-              >
-                {/* The sidebar's own collapse glyph, so collapsing the rail and
-                    collapsing the sidebar read as the same gesture. */}
-                <SidebarIconSvg isExpanded={!collapsed} />
-              </Action>
+              // f0's own tooltip rather than the browser's `title`: an
+              // icon-only control needs its name on hover, and the native one
+              // arrives late, unstyled, and never for a keyboard.
+              <Tooltip label={railToggleLabel}>
+                <Action
+                  variant="ghost"
+                  size="md"
+                  compact
+                  onClick={() => setManualCollapsed(!collapsed)}
+                  aria-label={railToggleLabel}
+                >
+                  {/* The sidebar's own collapse glyph, so collapsing the rail and
+                      collapsing the sidebar read as the same gesture. */}
+                  <SidebarIconSvg isExpanded={!collapsed} />
+                </Action>
+              </Tooltip>
             ) : null}
+            {/* The One toggle sits where it sits on every other layout — last in
+                the top-right controls, after the rail's own collapse button. It
+                draws NOTHING unless the AI chat context is enabled, so a Home
+                without One keeps the row it had. */}
+            {!hideOneSwitch && (
+              <F0OneSwitch
+                tooltip={oneSwitchTooltip}
+                autoOpen={oneSwitchAutoOpen}
+              />
+            )}
           </div>
         </HomeEntrance>
         {/* Main column: its own scroll region, no mask — a reading column should
@@ -1092,6 +1185,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             ctx={ctx}
             virtualized={virtualizationFor("main")}
             disableEdition={!canEditSide("main")}
+            dragSurfaceSelector="[data-page-surface]"
             onReorder={
               onReorderWidgets
                 ? (ids) => onReorderWidgets("main", ids)
@@ -1103,7 +1197,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             renderWidgetPreview={renderWidgetPreview}
             paramsPreviewWidth={mainWidth}
             onClickAddNewWidget={
-              onClickAddNewWidget
+              onClickAddNewWidget && canAddToSide("main")
                 ? () => onClickAddNewWidget("main")
                 : undefined
             }
@@ -1190,13 +1284,14 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
                   open={openId === widget.id}
                   delayMs={rail.glyphDelayMs}
                   onOpen={openFromAnchor}
+                  onCancelOpen={cancelOpen}
                   onClose={() => setOpenId(null)}
                 />
               ))}
               {/* Always offered, not only in edit mode: collapsed, the strip has
                     no edit affordance of its own, and adding a widget is the one
                     thing you would still want from it. */}
-              {canEditSide("right") && onClickAddNewWidget ? (
+              {canAddToSide("right") && onClickAddNewWidget ? (
                 // The same control the column's placeholder is — a dashed box
                 // around one glyph, named only on hover — at the strip's size.
                 <Tooltip label={t.widgets.addWidget}>
@@ -1250,9 +1345,8 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             className={cn(
               "min-h-0 overflow-y-auto",
               SCROLLBAR_HIDDEN,
-              // Above the feed it floats over, and opaque: the widget behind it
-              // must not read through the card.
-              railInPanel && "absolute z-10 rounded-xl bg-f1-background",
+              railInPanel &&
+                "absolute z-10 rounded-xl bg-f1-background dark:bg-f1-background-secondary dark:backdrop-blur-[100px] dark:backdrop-saturate-150",
               // RETRACTING it is still in the grid, but it has lifted off the
               // column it is leaving: over the main column rather than beside it.
               rail.mode === "retracting" && "relative z-10"
@@ -1310,6 +1404,8 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
               // would rebuild every widget in it — the one thing this rail
               // exists to avoid.
               disableEdition={!canEditSide("right")}
+              disableDrag={collapsed}
+              dragSurfaceSelector="[data-page-surface]"
               onReorder={
                 onReorderWidgets
                   ? (ids) => onReorderWidgets("right", ids)
@@ -1324,7 +1420,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
               // affordance, and a placeholder under a single floating widget
               // would be an offer in the wrong place.
               onClickAddNewWidget={
-                onClickAddNewWidget && !collapsed
+                onClickAddNewWidget && canAddToSide("right") && !collapsed
                   ? () => onClickAddNewWidget("right")
                   : undefined
               }

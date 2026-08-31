@@ -1,0 +1,386 @@
+import { beforeEach, describe, expect, it, vi } from "vitest"
+import type { ReactNode } from "react"
+import { useEffect, useRef } from "react"
+
+import {
+  act,
+  fireEvent,
+  screen,
+  userEvent,
+  zeroRender as render,
+} from "@/testing/test-utils"
+
+import { WIDGET_DRAG_END, WIDGET_DRAG_START } from "@/lib/dnd/widgetDragEvents"
+
+import { F0AiChat } from "../F0AiChat"
+import {
+  AiChatStateProvider,
+  useAiChat,
+} from "../providers/AiChatStateProvider"
+
+const Probe = ({
+  onCaptureQuote,
+}: {
+  onCaptureQuote?: (quote: ReturnType<typeof useAiChat>["pendingQuote"]) => void
+}) => {
+  const {
+    setOpen,
+    pendingQuote,
+    setIsClarifying,
+    setPanelContent,
+    setMode,
+    openGame,
+  } = useAiChat()
+
+  return (
+    <>
+      <button type="button" onClick={() => setOpen(true)}>
+        Open chat
+      </button>
+      <button type="button" onClick={() => setOpen(false)}>
+        Close chat
+      </button>
+      <button type="button" onClick={() => setIsClarifying(true)}>
+        Start clarifying
+      </button>
+      <button
+        type="button"
+        onClick={() =>
+          setPanelContent({ id: "hosted", content: <div>Hosted content</div> })
+        }
+      >
+        Show hosted content
+      </button>
+      <button type="button" onClick={() => setMode("voice")}>
+        Start voice mode
+      </button>
+      <button type="button" onClick={() => openGame("pong")}>
+        Start Pong
+      </button>
+      <span data-testid="quote">{pendingQuote?.text ?? ""}</span>
+      {onCaptureQuote && (
+        <button type="button" onClick={() => onCaptureQuote(pendingQuote)}>
+          Capture pending quote
+        </button>
+      )}
+    </>
+  )
+}
+
+const TestChatInput = () => {
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const { setFocusChatInputFunction } = useAiChat()
+
+  useEffect(() => {
+    setFocusChatInputFunction(() => textareaRef.current?.focus())
+    return () => setFocusChatInputFunction(null)
+  }, [setFocusChatInputFunction])
+
+  return <textarea aria-label="Ask One" ref={textareaRef} />
+}
+
+/**
+ * No `fileAttachments`, so the file-drop path is off throughout — these tests
+ * also cover that the widget overlay isn't gated behind an upload handler.
+ */
+const renderChat = ({
+  overlay,
+  onCaptureQuote,
+}: {
+  overlay?: ReactNode
+  onCaptureQuote?: (quote: ReturnType<typeof useAiChat>["pendingQuote"]) => void
+} = {}) =>
+  render(
+    <AiChatStateProvider
+      enabled
+      chatHeader={<button type="button">Header action</button>}
+      chatMessages={<div>Messages</div>}
+      chatInput={<TestChatInput />}
+      VoiceMode={() => <div>Voice content</div>}
+    >
+      <Probe onCaptureQuote={onCaptureQuote} />
+      <F0AiChat overlay={overlay} />
+    </AiChatStateProvider>
+  )
+
+/** Stands in for the dashboard grid announcing a drag. */
+const startWidgetDrag = (
+  title: string,
+  callbacks: Pick<
+    import("@/lib/dnd/widgetDragEvents").WidgetDragStartDetail,
+    "onAskAi" | "onAskAiTarget"
+  > = {}
+) =>
+  act(() => {
+    window.dispatchEvent(
+      new CustomEvent(WIDGET_DRAG_START, {
+        detail: { id: "headcount", title, ...callbacks },
+      })
+    )
+  })
+
+const endWidgetDrag = () =>
+  act(() => {
+    window.dispatchEvent(new CustomEvent(WIDGET_DRAG_END))
+  })
+
+const dropZone = () => {
+  const zone = document.querySelector("[data-ai-chat-dropzone]")
+  if (!(zone instanceof HTMLElement)) {
+    throw new Error("Expected the chat to expose a drop zone")
+  }
+  return zone
+}
+
+describe("F0AiChat widget drop", () => {
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
+  it("invites the drop as soon as the drag starts, before the pointer arrives", async () => {
+    renderChat()
+    await userEvent.click(screen.getByRole("button", { name: "Open chat" }))
+
+    expect(
+      screen.queryByText("Drop here to discuss with One")
+    ).not.toBeInTheDocument()
+
+    startWidgetDrag("Headcount by department")
+
+    // No pointer has touched the chat — the announcement alone is enough.
+    expect(
+      screen.getByText("Drop here to discuss with One")
+    ).toBeInTheDocument()
+  })
+
+  it("quotes the dragged widget's title when released over the chat", async () => {
+    renderChat()
+    await userEvent.click(screen.getByRole("button", { name: "Open chat" }))
+
+    startWidgetDrag("Headcount by department")
+    fireEvent.pointerUp(dropZone())
+
+    expect(screen.getByTestId("quote")).toHaveTextContent(
+      "Headcount by department"
+    )
+    expect(screen.getByRole("textbox", { name: "Ask One" })).toHaveFocus()
+    expect(
+      screen.queryByText("Drop here to discuss with One")
+    ).not.toBeInTheDocument()
+  })
+
+  it("observes the dropped widget with the exact built-in quote", async () => {
+    const onAskAiTarget = vi.fn()
+    const capturePendingQuote = vi.fn()
+    renderChat({ onCaptureQuote: capturePendingQuote })
+    await userEvent.click(screen.getByRole("button", { name: "Open chat" }))
+
+    startWidgetDrag("Headcount by department", { onAskAiTarget })
+    fireEvent.pointerUp(dropZone())
+
+    expect(onAskAiTarget).toHaveBeenCalledWith({
+      id: "headcount",
+      title: "Headcount by department",
+      quote: { text: "Headcount by department" },
+    })
+    expect(screen.getByRole("textbox", { name: "Ask One" })).toHaveFocus()
+    await userEvent.click(
+      screen.getByRole("button", { name: "Capture pending quote" })
+    )
+    expect(capturePendingQuote.mock.calls[0][0]).toBe(
+      onAskAiTarget.mock.calls[0][0].quote
+    )
+  })
+
+  it("withdraws the invitation when the drag ends away from the chat", async () => {
+    const onAskAiTarget = vi.fn()
+    renderChat()
+    await userEvent.click(screen.getByRole("button", { name: "Open chat" }))
+
+    startWidgetDrag("Headcount by department", { onAskAiTarget })
+    endWidgetDrag()
+
+    expect(
+      screen.queryByText("Drop here to discuss with One")
+    ).not.toBeInTheDocument()
+
+    // A later stray release must not retroactively quote the widget.
+    fireEvent.pointerUp(dropZone())
+    expect(screen.getByTestId("quote")).toHaveTextContent("")
+    expect(onAskAiTarget).not.toHaveBeenCalled()
+  })
+
+  it("stops accepting widget drops as soon as the chat starts closing", async () => {
+    renderChat()
+    await userEvent.click(screen.getByRole("button", { name: "Open chat" }))
+    const exitingCard = dropZone()
+
+    await userEvent.click(screen.getByRole("button", { name: "Close chat" }))
+
+    // AnimatePresence keeps the card mounted during its exit animation, but
+    // it must stop advertising and consuming drops immediately.
+    expect(exitingCard).not.toHaveAttribute("data-ai-chat-dropzone")
+    startWidgetDrag("Headcount by department")
+    expect(
+      screen.queryByText("Drop here to discuss with One")
+    ).not.toBeInTheDocument()
+    fireEvent.pointerUp(exitingCard)
+    expect(screen.getByTestId("quote")).toHaveTextContent("")
+  })
+
+  it("ignores a release over the chat with no drag in flight", async () => {
+    renderChat()
+    await userEvent.click(screen.getByRole("button", { name: "Open chat" }))
+
+    fireEvent.pointerUp(dropZone())
+
+    expect(screen.getByTestId("quote")).toHaveTextContent("")
+  })
+
+  /**
+   * Regression guard. A fast drag can deliver the start announcement and the
+   * release inside a single React batch, so no re-render separates them. A
+   * release handler closing over the *state* would still read the pre-drag
+   * `null` and silently drop the quote — which is exactly what the real
+   * browser did before the payload moved into a ref. Both events go in one
+   * `act` here to reproduce that batching.
+   */
+  it("still quotes when start and release land in the same React batch", async () => {
+    renderChat()
+    await userEvent.click(screen.getByRole("button", { name: "Open chat" }))
+
+    act(() => {
+      window.dispatchEvent(
+        new CustomEvent(WIDGET_DRAG_START, {
+          detail: {
+            id: "headcount",
+            title: "Headcount by department",
+          },
+        })
+      )
+      fireEvent.pointerUp(dropZone())
+    })
+
+    expect(screen.getByTestId("quote")).toHaveTextContent(
+      "Headcount by department"
+    )
+  })
+
+  it("ignores widget drags while a clarifying flow owns the composer", async () => {
+    renderChat()
+    await userEvent.click(screen.getByRole("button", { name: "Open chat" }))
+    await userEvent.click(
+      screen.getByRole("button", { name: "Start clarifying" })
+    )
+
+    expect(document.querySelector("[data-ai-chat-dropzone]")).toBeNull()
+    startWidgetDrag("Headcount by department")
+
+    expect(
+      screen.queryByText("Drop here to discuss with One")
+    ).not.toBeInTheDocument()
+    expect(screen.getByTestId("quote")).toHaveTextContent("")
+  })
+
+  it("retracts an active widget drag when clarifying starts", async () => {
+    renderChat()
+    await userEvent.click(screen.getByRole("button", { name: "Open chat" }))
+    startWidgetDrag("Headcount by department")
+    expect(
+      screen.getByText("Drop here to discuss with One")
+    ).toBeInTheDocument()
+    const previousDropZone = dropZone()
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Start clarifying" })
+    )
+
+    expect(
+      screen.queryByText("Drop here to discuss with One")
+    ).not.toBeInTheDocument()
+    expect(previousDropZone).not.toHaveAttribute("data-ai-chat-dropzone")
+    expect(document.querySelector("[data-ai-chat-dropzone]")).toBeNull()
+    fireEvent.pointerUp(previousDropZone)
+    expect(screen.getByTestId("quote")).toHaveTextContent("")
+  })
+
+  it.each([
+    [
+      "host overlay",
+      () => renderChat({ overlay: <div>Blocking overlay</div> }),
+    ],
+    ["hosted panel", () => renderChat()],
+    ["voice mode", () => renderChat()],
+    ["clarifying flow", () => renderChat()],
+    ["Pong", () => renderChat()],
+  ])("does not expose a widget drop zone over %s", async (surface, setup) => {
+    setup()
+    await userEvent.click(screen.getByRole("button", { name: "Open chat" }))
+    if (surface === "hosted panel") {
+      await userEvent.click(
+        screen.getByRole("button", { name: "Show hosted content" })
+      )
+    } else if (surface === "voice mode") {
+      await userEvent.click(
+        screen.getByRole("button", { name: "Start voice mode" })
+      )
+    } else if (surface === "clarifying flow") {
+      await userEvent.click(
+        screen.getByRole("button", { name: "Start clarifying" })
+      )
+    } else if (surface === "Pong") {
+      await userEvent.click(screen.getByRole("button", { name: "Start Pong" }))
+    }
+
+    expect(document.querySelector("[data-ai-chat-dropzone]")).toBeNull()
+    startWidgetDrag("Headcount by department")
+    expect(
+      screen.queryByText("Drop here to discuss with One")
+    ).not.toBeInTheDocument()
+  })
+
+  it("ignores malformed or blank widget drag announcements", async () => {
+    renderChat()
+    await userEvent.click(screen.getByRole("button", { name: "Open chat" }))
+
+    startWidgetDrag("   ")
+    expect(
+      screen.queryByText("Drop here to discuss with One")
+    ).not.toBeInTheDocument()
+
+    act(() => {
+      window.dispatchEvent(new CustomEvent(WIDGET_DRAG_START))
+    })
+    expect(
+      screen.queryByText("Drop here to discuss with One")
+    ).not.toBeInTheDocument()
+  })
+
+  it("hands a dropped widget to the host without mutating the built-in quote", async () => {
+    const onAskAi = vi.fn()
+    const onAskAiTarget = vi.fn()
+    renderChat()
+    await userEvent.click(screen.getByRole("button", { name: "Open chat" }))
+
+    act(() => {
+      window.dispatchEvent(
+        new CustomEvent(WIDGET_DRAG_START, {
+          detail: {
+            id: "headcount",
+            title: "Headcount by department",
+            onAskAi,
+            onAskAiTarget,
+          },
+        })
+      )
+    })
+    fireEvent.pointerUp(dropZone())
+
+    expect(onAskAi).toHaveBeenCalledWith({
+      id: "headcount",
+      title: "Headcount by department",
+    })
+    expect(onAskAiTarget).not.toHaveBeenCalled()
+    expect(screen.getByTestId("quote")).toHaveTextContent("")
+  })
+})

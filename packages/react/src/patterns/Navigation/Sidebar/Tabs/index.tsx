@@ -253,8 +253,14 @@ export const SidebarTabs = ({
       setLabelsFit(probe.scrollWidth <= group.clientWidth)
     }
     measure()
+    // The row's width is not the only input. The row is a fixed width that
+    // never resizes, while the labels inside the probe can still reach their
+    // final width after this first measure — styles landing late, a font or a
+    // translation swapping in. Observing only the row leaves that stale verdict
+    // standing, and the labels revealed in a row too narrow to hold them.
     const observer = new ResizeObserver(measure)
     observer.observe(group)
+    for (const child of Array.from(probe.children)) observer.observe(child)
     return () => observer.disconnect()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tabsKey])
@@ -269,12 +275,13 @@ export const SidebarTabs = ({
       >
         {/* Measurement probe: the real TabButton rendered inert at its
             expanded (icon + label) width, so the measure always matches the
-            actual paddings/typography. Invisible and absolute, it never
-            affects layout. */}
+            actual paddings/typography. Absolute, so it never affects layout,
+            and clipped, because a `visibility: hidden` box still contributes
+            scrollable overflow to its ancestors. */}
         <div
           ref={probeRef}
           aria-hidden="true"
-          className="pointer-events-none invisible absolute left-0 top-0 flex flex-row"
+          className="pointer-events-none invisible absolute left-0 top-0 flex flex-row overflow-hidden"
         >
           {tabs.map((tab) => (
             <TabButton

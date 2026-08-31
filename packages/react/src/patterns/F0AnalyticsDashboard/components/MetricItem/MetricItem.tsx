@@ -11,8 +11,11 @@ import { useContainerSize } from "@/kits/F0DataChart/utils/useContainerSize"
 import { cn, focusRing } from "@/lib/utils"
 
 import type {
+  DashboardItemFiltersConfig,
   DashboardMetricData,
   DashboardMetricItem,
+  F0AnalyticsDashboardAskAiTarget,
+  F0AnalyticsDashboardAskAiTargetWithQuote,
   MetricFormat,
 } from "../../types"
 
@@ -24,8 +27,11 @@ interface MetricItemProps<Filters extends FiltersDefinition> {
   item: DashboardMetricItem<Filters>
   filters: FiltersState<Filters>
   actions?: import("@/experimental/Navigation/Dropdown").DropdownItem[]
+  itemFilters?: DashboardItemFiltersConfig
   editMode?: boolean
   handleDelete?: (itemId: string) => void
+  onAskAi?: (item: F0AnalyticsDashboardAskAiTarget) => void
+  onAskAiTarget?: (item: F0AnalyticsDashboardAskAiTargetWithQuote) => void
   isFullscreen?: boolean
   onFullscreenChange?: (fullscreen: boolean) => void
 }
@@ -185,14 +191,18 @@ export function MetricItem<Filters extends FiltersDefinition>({
   item,
   filters,
   actions,
+  itemFilters,
   editMode,
   handleDelete,
+  onAskAi,
+  onAskAiTarget,
 }: MetricItemProps<Filters>) {
   const enabled = item.useDashboardFilters !== false
+  const itemFiltersKey = JSON.stringify(itemFilters?.value ?? {})
   const { data, isLoading, error, retry } = useDashboardItemData<
     Filters,
     DashboardMetricData
-  >(item.fetchData, filters, enabled)
+  >(item.fetchData, filters, enabled, itemFiltersKey)
 
   const trend = data ? computeTrend(data.value, data.previousValue) : undefined
 
@@ -207,8 +217,11 @@ export function MetricItem<Filters extends FiltersDefinition>({
       onRetry={retry}
       skeleton={<MetricSkeleton />}
       actions={actions}
+      itemFilters={itemFilters}
       editMode={editMode}
       handleDelete={handleDelete}
+      onAskAi={onAskAi}
+      onAskAiTarget={onAskAiTarget}
       itemId={item.id}
     >
       {data && (
