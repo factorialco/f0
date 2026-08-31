@@ -20,7 +20,6 @@ export type AvatarBadge = (
       icon: BadgeProps["icon"]
     }
 ) & {
-  /** Shown when hovering the avatar */
   tooltip?: string
 }
 
