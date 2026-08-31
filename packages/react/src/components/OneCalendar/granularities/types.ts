@@ -30,6 +30,17 @@ export interface GranularityDefinition {
   calendarView: CalendarView
   // Week starts on day (only used by week granularity)
   weekStartsOn?: WeekStartsOn
+  // Names this granularity in the granularity selector. Data-driven
+  // granularities carry a consumer-supplied name; the rest fall back to the
+  // i18n label for their key
+  selectorLabel?: string
+  // Hides the date input: the view owns the full set of selectable values, so
+  // there is nothing to type
+  hideDateInput?: boolean
+  // Narrows the header's year dropdown and arrow navigation to the span the
+  // view can actually show. It bounds navigation only — selection stays bound
+  // by the consumer's minDate/maxDate
+  getViewDateBounds?: () => { min?: Date; max?: Date } | undefined
   // Label for the granularity in the calendar view
   label: (viewDate: Date, i18n: TranslationsType, locale?: string) => ReactNode
   // Format the date to a date range with dates as string

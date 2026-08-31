@@ -5,6 +5,10 @@ import { AnimatePresence, motion } from "motion/react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useMediaQuery } from "usehooks-ts"
 
+import type { WidgetDragStartDetail } from "@/lib/dnd/widgetDragEvents"
+
+import { useReducedMotion } from "@/lib/a11y"
+import { WIDGET_DRAG_END, WIDGET_DRAG_START } from "@/lib/dnd/widgetDragEvents"
 import { cn } from "@/lib/utils"
 
 import { DropOverlay } from "../../../F0AiChatTextArea"
@@ -18,6 +22,7 @@ export const SidebarWindow = ({
   visible,
   side,
   exitStyle = "shrink",
+  acceptsWidgetDrop = false,
 }: {
   children?: ReactNode
   /** Overrides the context `open` as the mount condition — lets the frame
@@ -32,6 +37,8 @@ export const SidebarWindow = ({
    * the panels feel like they were always there.
    */
   exitStyle?: "shrink" | "hold"
+  /** Enables dashboard-widget quoting for the real chat/composer view only. */
+  acceptsWidgetDrop?: boolean
 }) => {
   const {
     open,
@@ -41,20 +48,29 @@ export const SidebarWindow = ({
     resizable,
     setChatWidth,
     resetChatWidth,
+    setIsResizing,
     fileAttachments,
     isClarifying,
     fileDragOver,
     setFileDragOver,
     processDroppedFiles,
+    setPendingQuote,
+    focusChatInput,
     activeGame,
     closeGame,
     panelSide,
   } = useAiChat()
+  const isVisible = visible ?? open
+  const canAcceptWidgetDrop =
+    acceptsWidgetDrop && activeGame === null && isVisible && !isClarifying
+  const canAcceptWidgetDropRef = useRef(canAcceptWidgetDrop)
+  canAcceptWidgetDropRef.current = canAcceptWidgetDrop
+  const widgetDropZoneRef = useRef<HTMLDivElement>(null)
   const isCanvasMode = visualizationMode === "canvas"
+  const reducedMotion = useReducedMotion()
   // Hosts dock the whole panel left for a chat-first experience (communications);
   // the default is right. The AI chat follows the panel side too.
   const isLeft = (side ?? panelSide) === "left"
-  const isVisible = visible ?? open
 
   // Was the panel already open on the previous committed render? A window
   // mounting while it was (a swap between the chat and hosted content on
@@ -67,6 +83,15 @@ export const SidebarWindow = ({
 
   const dragCounterRef = useRef(0)
   const canDrop = fileAttachments?.onUploadFiles != null && !isClarifying
+
+  // AnimatePresence retains the last rendered DOM props during exit. Remove
+  // the marker imperatively when visibility changes so a closing card cannot
+  // remain discoverable as a live drop zone for the duration of the animation.
+  useEffect(() => {
+    if (!canAcceptWidgetDrop) {
+      widgetDropZoneRef.current?.removeAttribute("data-ai-chat-dropzone")
+    }
+  }, [canAcceptWidgetDrop])
 
   const handleDragEnter = useCallback(
     (e: React.DragEvent) => {
@@ -108,8 +133,94 @@ export const SidebarWindow = ({
     },
     [setFileDragOver]
   )
+
+  // ─── Dashboard widget drag → quote ──────────────────────────
+  // A widget drag is a plain pointer gesture, not native HTML5 drag-and-drop,
+  // so it fires no `dragenter` and the file handlers above never see it. The
+  // grid announces the gesture on `window` instead, which lets the invitation
+  // appear the moment the drag starts rather than when the cursor finally
+  // arrives — the user can see where the widget can go before aiming for it.
+  //
+  // The ref — not the state — is what the release reads, so a release that
+  // lands in the same React batch as the state update still sees the title
+  // instead of a stale `null`. The state exists to drive the overlay's render.
+  const dragQuoteRef = useRef<WidgetDragStartDetail | null>(null)
+  const [dragQuote, setDragQuote] = useState<string | null>(null)
+
+  const setDragQuoteBoth = useCallback(
+    (detail: WidgetDragStartDetail | null) => {
+      dragQuoteRef.current = detail
+      setDragQuote(detail?.title ?? null)
+    },
+    []
+  )
+
+  useEffect(() => {
+    const onStart = (e: Event) => {
+      if (!canAcceptWidgetDrop) return
+      const detail = (e as CustomEvent<WidgetDragStartDetail>).detail
+      if (
+        typeof detail?.id !== "string" ||
+        !detail.id ||
+        typeof detail.title !== "string" ||
+        !detail.title.trim()
+      )
+        return
+      setDragQuoteBoth(detail)
+    }
+    const onEnd = () => setDragQuoteBoth(null)
+
+    window.addEventListener(WIDGET_DRAG_START, onStart)
+    window.addEventListener(WIDGET_DRAG_END, onEnd)
+    return () => {
+      window.removeEventListener(WIDGET_DRAG_START, onStart)
+      window.removeEventListener(WIDGET_DRAG_END, onEnd)
+    }
+  }, [canAcceptWidgetDrop, setDragQuoteBoth])
+
+  // A view change, host overlay, or clarifying flow can take ownership of the
+  // shell while a pointer is still down. Retract the invitation immediately
+  // so releasing over non-chat content can never create an invisible quote.
+  useEffect(() => {
+    if (!canAcceptWidgetDrop) setDragQuoteBoth(null)
+  }, [canAcceptWidgetDrop, setDragQuoteBoth])
+
+  // Releasing over the chat quotes the widget. This is a handler on the card,
+  // so a release anywhere else simply never reaches it — the grid's own
+  // `pointerup` clears the invitation via WIDGET_DRAG_END.
+  const handlePointerUp = useCallback(() => {
+    if (!canAcceptWidgetDropRef.current) {
+      setDragQuoteBoth(null)
+      return
+    }
+    const detail = dragQuoteRef.current
+    if (detail === null) return
+    setDragQuoteBoth(null)
+    if (detail.onAskAi) {
+      detail.onAskAi({ id: detail.id, title: detail.title })
+    } else {
+      const quote = { text: detail.title }
+      detail.onAskAiTarget?.({ id: detail.id, title: detail.title, quote })
+      setPendingQuote(quote)
+      focusChatInput()
+    }
+  }, [canAcceptWidgetDrop, focusChatInput, setDragQuoteBoth, setPendingQuote])
+
   const fullscreen = visualizationMode === "fullscreen"
-  const [isResizing, setIsResizing] = useState(false)
+  // Stays LOCAL: it gates this handle's document mousemove listener and its
+  // active style, and a split layout renders two windows — a shared gate would
+  // have the idle handle grab the pointer too and apply a second delta from its
+  // own stale start position.
+  const [isDragging, setIsDragging] = useState(false)
+  // ...but the drag is mirrored outward, because the canvas panel is laid out
+  // against this window's edge and has to follow it 1:1 (see ApplicationFrame's
+  // canvas inset). Cleared on unmount too, so a window torn down mid-drag
+  // doesn't strand the flag.
+  useEffect(() => {
+    if (!isDragging) return
+    setIsResizing?.(true)
+    return () => setIsResizing?.(false)
+  }, [isDragging, setIsResizing])
   const isSmallScreen = useMediaQuery(`(max-width: ${breakpoints.md}px)`, {
     initializeWithValue: true,
   })
@@ -125,11 +236,12 @@ export const SidebarWindow = ({
   )
 
   const wrapperTransition = useMemo(() => {
-    if (isResizing) return { duration: 0 }
+    if (isDragging || reducedMotion) return { duration: 0 }
     if (shouldPlayEntranceAnimation)
       return { duration: 0.3, ease: [0, 0, 0.1, 1] as const }
     return { duration: 0.3, ease: [0, 0, 0.1, 1] as const }
-  }, [isResizing, shouldPlayEntranceAnimation])
+  }, [isDragging, reducedMotion, shouldPlayEntranceAnimation])
+  const closedClipPath = isLeft ? "inset(0 100% 0 0)" : "inset(0 0 0 100%)"
 
   return (
     <AnimatePresence>
@@ -145,23 +257,30 @@ export const SidebarWindow = ({
             fullscreen ? "md:pr-1" : isLeft ? "mr-auto" : "ml-auto md:pr-1"
           )}
           initial={
-            shouldPlayEntranceAnimation && !prevOpenRef.current
-              ? { opacity: 0, width: 0 }
+            !reducedMotion &&
+            shouldPlayEntranceAnimation &&
+            !prevOpenRef.current
+              ? { opacity: 0, clipPath: closedClipPath }
               : false
           }
           animate={{
             opacity: 1,
-            width: "100%",
+            clipPath: "inset(0 0 0 0)",
           }}
           exit={
-            exitStyle === "hold"
-              ? // Swap: stay put while the main content slides over (300ms),
-                // then a blink of fade right before unmounting.
-                { opacity: 0, transition: { delay: 0.25, duration: 0.05 } }
-              : { opacity: 0, width: 0 }
+            reducedMotion
+              ? { opacity: 0, transition: { duration: 0 } }
+              : exitStyle === "hold"
+                ? // Swap: stay put while the main content slides over (300ms),
+                  // then a blink of fade right before unmounting.
+                  { opacity: 0, transition: { delay: 0.25, duration: 0.05 } }
+                : { opacity: 0, clipPath: closedClipPath }
           }
           transition={wrapperTransition}
-          style={{ transformOrigin: isLeft ? "left center" : "right center" }}
+          style={{
+            width: "100%",
+            transformOrigin: isLeft ? "left center" : "right center",
+          }}
           onAnimationComplete={() => {
             if (shouldPlayEntranceAnimation) {
               setShouldPlayEntranceAnimation(false)
@@ -174,13 +293,14 @@ export const SidebarWindow = ({
             <ResizeHandle
               onResize={handleResize}
               onReset={resetChatWidth}
-              isResizing={isResizing}
-              setIsResizing={setIsResizing}
+              isResizing={isDragging}
+              setIsResizing={setIsDragging}
               isCanvasMode={isCanvasMode}
               side="right"
             />
           )}
           <div
+            ref={widgetDropZoneRef}
             aria-hidden={!isVisible}
             className={cn(
               "relative flex h-full w-full flex-col overflow-hidden bg-f1-special-page border border-solid border-f1-border-secondary",
@@ -196,32 +316,34 @@ export const SidebarWindow = ({
                   : "xs:rounded-r-xl"
                 : "xs:rounded-xl"
             )}
+            // Marks this card as a drop target for pointer-driven drags
+            // elsewhere in the app (the dashboard grid hit-tests for it to
+            // suppress its own reorder while the cursor is over the chat).
+            data-ai-chat-dropzone={canAcceptWidgetDrop ? "" : undefined}
             onDragEnter={handleDragEnter}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
+            onPointerUp={handlePointerUp}
           >
-            <motion.div
-              className="relative flex h-full w-full flex-col overflow-hidden"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{
-                duration: shouldPlayEntranceAnimation ? 0.3 : 0.05,
-                ease: "easeOut",
-                delay: shouldPlayEntranceAnimation ? 0.2 : 0,
-              }}
-            >
+            <div className="relative flex h-full w-full flex-col overflow-hidden">
               {children}
-            </motion.div>
-            {canDrop && (
+            </div>
+            {/* `canDrop` gates only the file drop — quoting a dragged widget
+                needs no upload handler, so it renders on its own. */}
+            {(canDrop || (canAcceptWidgetDrop && dragQuote !== null)) && (
               <DropOverlay
-                visible={fileDragOver}
-                onFilesDropped={(files) => {
-                  dragCounterRef.current = 0
-                  setFileDragOver(false)
-                  processDroppedFiles(files)
-                }}
+                visible={(canDrop && fileDragOver) || dragQuote !== null}
+                mode={dragQuote !== null ? "discuss" : "files"}
+                onFilesDropped={
+                  canDrop
+                    ? (files) => {
+                        dragCounterRef.current = 0
+                        setFileDragOver(false)
+                        processDroppedFiles(files)
+                      }
+                    : undefined
+                }
               />
             )}
             {activeGame === "pong" && <F0AiPong onClose={closeGame} />}
@@ -230,8 +352,8 @@ export const SidebarWindow = ({
             <ResizeHandle
               onResize={handleResize}
               onReset={resetChatWidth}
-              isResizing={isResizing}
-              setIsResizing={setIsResizing}
+              isResizing={isDragging}
+              setIsResizing={setIsDragging}
               isCanvasMode={isCanvasMode}
               side="left"
             />

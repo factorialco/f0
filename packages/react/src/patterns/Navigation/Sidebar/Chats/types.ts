@@ -4,9 +4,9 @@ import { IconType } from "@/components/F0Icon"
 export type SidebarChatPresence = "online" | "offline"
 
 /**
- * Status shown as a small icon avatar to the right of a person's name (people
- * only). The consumer fully controls it — pass any icon with an accessible
- * label. F0 does not hardcode any set of statuses.
+ * Status shown as a small icon to the right of a conversation name. The
+ * consumer fully controls it — pass any icon with an accessible label. F0
+ * does not hardcode any set of statuses.
  */
 export type SidebarChatStatus = {
   icon: IconType
@@ -50,8 +50,10 @@ export type SidebarChat = {
   /** When true, the name is replaced by a live "Writing…" label. */
   typing?: boolean
   presence?: SidebarChatPresence
-  /** Status icon shown to the right of the name. People only. */
+  /** Single status icon shown to the right of the conversation name. */
   status?: SidebarChatStatus
+  /** Multiple status icons. Takes precedence over `status` when provided. */
+  statuses?: SidebarChatStatus[]
   /** Epoch ms of the last activity; used for ordering. */
   lastActivityAt?: number
   /** Whether the chat is pinned (favourited) — selects the solid pin icon. */

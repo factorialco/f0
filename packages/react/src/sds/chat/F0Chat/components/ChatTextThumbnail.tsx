@@ -54,7 +54,7 @@ const ChatTextThumbnail = ({
   if (text === null) return null
 
   return (
-    <pre className="m-0 whitespace-pre-wrap break-words bg-f1-background p-3 text-left font-mono text-xs leading-5 text-f1-foreground-secondary">
+    <pre className="m-0 whitespace-pre-wrap break-words bg-f1-background p-3 text-left font-mono text-sm leading-5 text-f1-foreground-secondary">
       {text}
     </pre>
   )

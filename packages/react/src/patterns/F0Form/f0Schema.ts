@@ -1290,15 +1290,16 @@ export namespace f0FormField {
 
   // ---- phone ---------------------------------------------------------------
 
-  /** @internal */
-  type PhoneObjectSchema = z.ZodEffects<
+  export type PhoneObjectSchema = z.ZodEffects<
     z.ZodObject<{
       prefix: z.ZodOptional<z.ZodString>
       number: z.ZodString
     }>
   >
-  /** @internal */
-  type PhoneFieldShortcutConfig = Omit<F0PhoneFieldConfig, "fieldType"> & {
+  export type PhoneFieldShortcutConfig = Omit<
+    F0PhoneFieldConfig,
+    "fieldType"
+  > & {
     optional?: boolean
     /**
      * Validation strictness against libphonenumber metadata: "valid" checks

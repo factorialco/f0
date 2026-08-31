@@ -9,6 +9,20 @@ jobs:
   # Detect which projects have changed
   detect-changes:
     uses: ./.github/workflows/_check-workspaces-changes.yaml
+  # Intentionally NOT gated on detect-changes: a big file can land anywhere in
+  # the repo, including paths no package filter watches, and this check is a
+  # couple of seconds. It needs no pnpm install either — just git and tsx.
+  file-sizes:
+    name: "File sizes"
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+      - name: Check no tracked file is oversized
+        run: npx --yes tsx@4 scripts/check-file-sizes.ts
+
   format:
     needs: detect-changes
     # Prevents running on the release-please branch
@@ -60,6 +74,8 @@ jobs:
         run: pnpm --filter @factorialco/f0-core build
       - name: Check linting with oxlint
         run: pnpm --filter @factorialco/f0-react run lint
+      - name: Check no CSS custom properties are animated through motion
+        run: pnpm exec tsx packages/react/.scripts/check-animated-css-variables.ts
   lint-react-native:
     needs: detect-changes
     # Prevents running on the release-please branch
@@ -100,6 +116,81 @@ jobs:
       # Pure filesystem scan of src/ — no build or Storybook needed.
       - name: Check the stable DoD ratchet
         run: pnpm --filter @factorialco/f0-react run check:stable-dod
+  # Every component ADDED by a PR must meet the full mechanical Definition of
+  # Done from day one — no new debt. Runs on every react PR (the script exits
+  # 0 when no story file was added) rather than gating on the `new-component`
+  # label, which is applied asynchronously by pr-package-labels.yaml and could
+  # miss the first event. Escape hatch: the `skip-new-component-dod` label.
+  new-component-dod:
+    needs: detect-changes
+    if: |
+      needs.detect-changes.outputs.package_react == 'true' &&
+      !contains(github.event.pull_request.labels.*.name, 'skip-new-component-dod') &&
+      github.head_ref != 'release-please--branches--master' &&
+      !contains(github.event.pull_request.labels.*.name, 'autorelease')
+    name: "[⚛️ REACT] New Component Definition of Done"
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Full history: the script diffs against origin/main to find added
+          # story files.
+          fetch-depth: 0
+      - uses: ./.github/actions/setup-node-pnpm
+      # Pure filesystem scan of src/ + a git diff — no build needed.
+      - name: Check new components meet the full DoD
+        run: pnpm --filter @factorialco/f0-react run check:new-component-dod
+        env:
+          BASE_REF: origin/${{ github.base_ref }}
+  # User-visible copy must come from the i18n layer, not a string literal — a
+  # literal is untranslatable by construction. Existing debt is baselined in
+  # .scripts/untranslated-copy-debt.json, so this only blocks copy the PR ADDS.
+  # Escape hatch is the inline `i18n-exempt` comment rather than a label: it
+  # lands in the diff, so a reviewer sees the claim and can judge it.
+  untranslated-copy:
+    needs: detect-changes
+    # Prevents running on the release-please branch
+    if: |
+      needs.detect-changes.outputs.package_react == 'true' &&
+      github.head_ref != 'release-please--branches--master' &&
+      !contains(github.event.pull_request.labels.*.name, 'autorelease')
+    name: "[⚛️ REACT] Untranslated copy"
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-node-pnpm
+      # Pure AST scan of src/ — no build or Storybook needed.
+      #
+      # The script emits `::error file=,line=` annotations, which is what puts
+      # each offending string inline on the Files tab. `continue-on-error` lets
+      # the comment step run on failure; the gate step below restores the
+      # failure, so the job still blocks.
+      - name: Check the PR adds no untranslated copy
+        id: check
+        continue-on-error: true
+        run: pnpm --filter @factorialco/f0-react run check:untranslated-copy
+      - name: Build the PR comment
+        id: comment
+        run: |
+          {
+            echo "body<<COMMENT_BODY_EOF"
+            pnpm --filter @factorialco/f0-react --silent run check:untranslated-copy --comment
+            echo "COMMENT_BODY_EOF"
+          } >> "$GITHUB_OUTPUT"
+      - name: Comment on the PR
+        uses: ./.github/actions/add-or-update-pr-comment
+        with:
+          comment-type: untranslated_copy
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          comment-body: ${{ steps.comment.outputs.body }}
+      - name: Fail if untranslated copy was added
+        if: steps.check.outcome == 'failure'
+        run: |
+          echo "::error::This PR adds untranslated copy — see the annotations on the Files tab and the PR comment."
+          exit 1
   cycle-dependencies:
     needs: detect-changes
     # Prevents running on the release-please branch
@@ -253,3 +344,32 @@ jobs:
           comment-type: cycle_dependency
           github-token: ${{ secrets.GITHUB_TOKEN }}
           comment-body: ${{ steps.comment.outputs.body }}
+
+  # Single check to gate the branch on. It collapses this workflow's jobs into
+  # one status, so branch protection lists one stable name and never needs
+  # editing when jobs are added, removed, renamed or sharded.
+  #
+  # `if: always()` is load-bearing. Without it a failing dependency leaves this
+  # job *skipped* rather than *failed*, and GitHub counts a skipped required
+  # check as satisfied — the gate would go green over a red build.
+  #
+  # `skipped` is accepted on purpose: detect-changes skips the jobs for a
+  # package that this PR did not touch. Only failure/cancellation is fatal.
+  quality-passed:
+    needs: [detect-changes, format, format-react-native, lint, lint-react-native, stable-dod, new-component-dod, untranslated-copy, cycle-dependencies]
+    name: "✅ Quality"
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Confirm every Quality check passed
+        run: |
+          echo "Dependency results: ${{ join(needs.*.result, ' ') }}"
+          if ${{ contains(needs.*.result, 'failure') }}; then
+            echo "::error::A Quality check failed."
+            exit 1
+          fi
+          if ${{ contains(needs.*.result, 'cancelled') }}; then
+            echo "::error::A Quality check was cancelled."
+            exit 1
+          fi
+          echo "All Quality checks passed (or were skipped as not applicable)."

@@ -3,7 +3,7 @@ import { useMemo } from "react"
 import { useDataCollectionSettings } from "@/patterns/OneDataCollection/Settings/SettingsProvider"
 import { SortAndHideSettings } from "@/patterns/OneDataCollection/Settings/SortAndHideSettings"
 
-import { useColumns } from "../hooks/useColums"
+import { getNextLockedColumnIds, useColumns } from "../hooks/useColums"
 import { TableColumnDefinition } from "../types"
 
 export type TableVisualizationSettingsKey = "table" | "editableTable"
@@ -23,6 +23,10 @@ type TableSettingsProps = {
    * sets `noRemoving`). Called with the column id to drop it from the table.
    */
   onRemoveColumn?: (columnId: string) => void
+  /** The currently user-managed frozen columns. */
+  lockedColumnIds?: readonly string[]
+  /** Enables independently locking or unlocking columns. */
+  onLockedColumnIdsChange?: (columnIds: string[]) => void
 }
 
 export const TableSettings = ({
@@ -33,25 +37,30 @@ export const TableSettings = ({
   visualizationKey = "table",
   onAddColumn,
   onRemoveColumn,
+  lockedColumnIds,
+  onLockedColumnIdsChange,
 }: TableSettingsProps) => {
   const { settings } = useDataCollectionSettings()
 
   const visualizationSettings = settings.visualization[visualizationKey]
 
-  const { columnsWithStatus } = useColumns(
+  const usesExplicitColumnLocking =
+    lockedColumnIds !== undefined || !!onLockedColumnIdsChange
+  const { columnsWithStatus, savedOrder, managedLockedColumnIds } = useColumns(
     originalColumns,
     frozenColumns,
     visualizationSettings,
     allowSorting,
-    allowHiding
+    allowHiding,
+    lockedColumnIds,
+    usesExplicitColumnLocking
   )
 
   const items = useMemo(() => {
-    // The leading `frozenColumns || 1` columns are non-editable (always-visible,
-    // not reorderable). They can never be removed — mirror that for the trash.
-    const lockedCount = frozenColumns || 1
-    const lockedIds = new Set(
-      columnsWithStatus.slice(0, lockedCount).map((column) => column.column.id)
+    const visibleUnlockedIds = new Set(
+      columnsWithStatus
+        .filter((column) => column.visible && !column.locked)
+        .map((column) => column.column.id)
     )
 
     return (
@@ -64,13 +73,26 @@ export const TableSettings = ({
           sortable: column.sortable,
           canHide: column.canHide,
           visible: column.visible,
+          locked: column.locked,
+          lockable:
+            !!onLockedColumnIdsChange &&
+            !column.frozen &&
+            (column.locked ||
+              [...visibleUnlockedIds].some(
+                (columnId) => columnId !== column.column.id
+              )),
+          showLockState: usesExplicitColumnLocking && column.locked,
           removable:
-            !!onRemoveColumn &&
-            !lockedIds.has(column.column.id) &&
-            !column.column.noRemoving,
+            !!onRemoveColumn && !column.locked && !column.column.noRemoving,
         }))
     )
-  }, [columnsWithStatus, allowHiding, frozenColumns, onRemoveColumn])
+  }, [
+    columnsWithStatus,
+    allowHiding,
+    onLockedColumnIdsChange,
+    onRemoveColumn,
+    usesExplicitColumnLocking,
+  ])
 
   return (
     <SortAndHideSettings
@@ -80,6 +102,17 @@ export const TableSettings = ({
       allowHiding={allowHiding}
       onAddColumn={onAddColumn}
       onRemoveColumn={onRemoveColumn}
+      onLockedColumnChange={
+        onLockedColumnIdsChange
+          ? (columnId, locked) => {
+              onLockedColumnIdsChange(
+                getNextLockedColumnIds(managedLockedColumnIds, columnId, locked)
+              )
+            }
+          : undefined
+      }
+      orderBaseline={usesExplicitColumnLocking ? savedOrder : undefined}
+      keepOneUnlockedVisible={usesExplicitColumnLocking}
     />
   )
 }

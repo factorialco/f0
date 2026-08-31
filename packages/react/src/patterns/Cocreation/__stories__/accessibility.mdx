@@ -102,10 +102,15 @@ keyboard or screen-reader user is never left on a control that just disappeared.
   that is momentarily empty.
 - **Opening the canvas (Split)** — move focus into the canvas (or its heading), not back to
   the top of the page.
+- **Opening the template gallery, or a template preview** — both take the full width and cover the
+  chat, so focus must move into them: a user left behind on the covered conversation is focused on
+  something they can no longer see.
 - **Resolving a confirmation** — when Apply posts a new live card and supersedes the old one
   (the initial draft confirmation and every later proposal both do this), land focus on the new
   card (or the assistant's follow-up), not on the now-inert resolved card.
-- **Closing the canvas** — return focus to the card that opened it.
+- **Closing the canvas** — return focus to whatever opened it: the resource's card; the gallery for
+  a preview; and, for the gallery itself, the clarifying panel or welcome screen it came from. Each
+  Close during selection is a step back, so focus follows the step.
 
 <DoDonts
   do={{

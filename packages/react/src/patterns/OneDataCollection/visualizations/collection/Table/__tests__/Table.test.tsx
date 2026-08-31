@@ -298,6 +298,125 @@ describe("TableCollection", () => {
     })
   })
 
+  describe("boldRootRows", () => {
+    type NestedPerson = Person & { children?: NestedPerson[] }
+
+    const parent: NestedPerson = {
+      id: 1,
+      name: "Parent Row",
+      email: "parent@example.com",
+      displayName: "Parent Row",
+      children: [
+        {
+          id: 2,
+          name: "Leaf Row",
+          email: "leaf@example.com",
+          displayName: "Leaf Row",
+        },
+      ],
+    }
+
+    const createNestedSource = () =>
+      ({
+        currentFilters: {},
+        setCurrentFilters: vi.fn(),
+        currentSortings: null,
+        setCurrentSortings: vi.fn(),
+        currentNavigationFilters: {},
+        setCurrentNavigationFilters: vi.fn(),
+        navigationFilters: undefined,
+        currentSearch: undefined,
+        debouncedCurrentSearch: undefined,
+        setCurrentSearch: vi.fn(),
+        isLoading: false,
+        setIsLoading: vi.fn(),
+        currentGrouping: undefined,
+        setCurrentGrouping: vi.fn(),
+        itemsWithChildren: (item: NestedPerson) => !!item.children?.length,
+        fetchChildren: ({ item }: { item: NestedPerson }) => ({
+          records: item.children ?? [],
+        }),
+        dataAdapter: {
+          paginationType: "pages",
+          fetchData: async () => ({
+            records: [parent],
+            type: "pages",
+            total: 1,
+            perPage: 20,
+            currentPage: 1,
+            pagesCount: 1,
+          }),
+        },
+      }) as unknown as DataCollectionSource<
+        Person,
+        TestFilters,
+        SortingsDefinition,
+        SummariesDefinition,
+        ItemActionsDefinition<Person>,
+        TestNavigationFilters,
+        GroupingDefinition<Person>
+      >
+
+    // Child rows (depth > 0) staying regular is covered by the
+    // TableWithBoldRootRows story play test: expanding a nested row here
+    // triggers a pre-existing jsdom-only render loop in useData when a later
+    // test renders a failing fetch (see useData.ts subscription error path).
+    it("bolds root rows", async () => {
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={createNestedSource()}
+          boldRootRows
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText("Parent Row")).toBeInTheDocument()
+      })
+
+      const parentRow = screen.getByText("Parent Row").closest("tr")
+      expect(parentRow?.className).toMatch(/font-semibold/)
+    })
+
+    it("keeps every row regular when the option is off", async () => {
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={createNestedSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText("Parent Row")).toBeInTheDocument()
+      })
+
+      const parentRow = screen.getByText("Parent Row").closest("tr")
+      expect(parentRow?.className).not.toMatch(/font-semibold/)
+    })
+  })
+
   describe("features", () => {
     it("renders custom column formatting", async () => {
       const columnsWithCustomRender = [
@@ -376,6 +495,256 @@ describe("TableCollection", () => {
         .getAllByText(testData[0].name)[0]
         .closest("td")
       expect(firstNameCell).toHaveStyle({ minWidth: "220px" })
+    })
+
+    // The header paints the tint as a gradient image, the cell as a bg color;
+    // both carry the same token, so the assertion targets that.
+    const HIGHLIGHT_BG_CLASS = "hsl(var(--neutral-2))"
+
+    it("applies the highlighted background to the highlighted column's header and cells", async () => {
+      const columnsWithHighlighted = [
+        { label: "name", render: (item: Person) => item.name },
+        {
+          label: "email",
+          render: (item: Person) => item.email,
+          highlighted: true,
+        },
+      ]
+
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={columnsWithHighlighted}
+          source={createTestSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      const emailHeader = screen.getByRole("columnheader", { name: "email" })
+      expect(emailHeader.className).toMatch(HIGHLIGHT_BG_CLASS)
+      expect(emailHeader).toHaveAttribute("data-highlighted", "true")
+
+      const nameHeader = screen.getByRole("columnheader", { name: "name" })
+      expect(nameHeader.className).not.toMatch(HIGHLIGHT_BG_CLASS)
+
+      const emailCell = screen.getAllByText(testData[0].email)[0].closest("td")
+      expect(emailCell?.className).toMatch(HIGHLIGHT_BG_CLASS)
+
+      const nameCell = screen.getAllByText(testData[0].name)[0].closest("td")
+      expect(nameCell?.className).not.toMatch(HIGHLIGHT_BG_CLASS)
+    })
+
+    it("emphasizes every highlighted column", async () => {
+      const columnsWithHighlighted = [
+        {
+          label: "name",
+          render: (item: Person) => item.name,
+          highlighted: true,
+        },
+        {
+          label: "email",
+          render: (item: Person) => item.email,
+          highlighted: true,
+        },
+        { label: "displayName", render: (item: Person) => item.displayName },
+      ]
+
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={columnsWithHighlighted}
+          source={createTestSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      const nameHeader = screen.getByRole("columnheader", { name: "name" })
+      expect(nameHeader.className).toMatch(HIGHLIGHT_BG_CLASS)
+
+      const emailHeader = screen.getByRole("columnheader", { name: "email" })
+      expect(emailHeader.className).toMatch(HIGHLIGHT_BG_CLASS)
+
+      const displayNameHeader = screen.getByRole("columnheader", {
+        name: "displayName",
+      })
+      expect(displayNameHeader.className).not.toMatch(HIGHLIGHT_BG_CLASS)
+    })
+
+    it("highlights the spanning header of the highlighted column's group", async () => {
+      const groupedColumns = [
+        {
+          label: "name",
+          render: (item: Person) => item.name,
+          headerGroupId: "identity",
+        },
+        {
+          label: "email",
+          render: (item: Person) => item.email,
+          headerGroupId: "contact",
+          highlighted: true,
+        },
+      ]
+
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={groupedColumns}
+          source={createTestSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+          headerGroups={{ identity: "Identity", contact: "Contact" }}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      const contactGroupHeader = screen.getByRole("columnheader", {
+        name: "Contact",
+      })
+      expect(contactGroupHeader.className).toMatch(HIGHLIGHT_BG_CLASS)
+
+      const identityGroupHeader = screen.getByRole("columnheader", {
+        name: "Identity",
+      })
+      expect(identityGroupHeader.className).not.toMatch(HIGHLIGHT_BG_CLASS)
+    })
+
+    it("highlights every column of a highlighted header group", async () => {
+      const groupedColumns = [
+        { label: "name", render: (item: Person) => item.name },
+        {
+          label: "email",
+          render: (item: Person) => item.email,
+          headerGroupId: "contact",
+        },
+        {
+          label: "displayName",
+          render: (item: Person) => item.displayName,
+          headerGroupId: "contact",
+        },
+      ]
+
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={groupedColumns}
+          source={createTestSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+          headerGroups={{ contact: { label: "Contact", highlighted: true } }}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      const contactGroupHeader = screen.getByRole("columnheader", {
+        name: "Contact",
+      })
+      expect(contactGroupHeader.className).toMatch(HIGHLIGHT_BG_CLASS)
+
+      const emailHeader = screen.getByRole("columnheader", { name: "email" })
+      expect(emailHeader.className).toMatch(HIGHLIGHT_BG_CLASS)
+
+      const displayNameHeader = screen.getByRole("columnheader", {
+        name: "displayName",
+      })
+      expect(displayNameHeader.className).toMatch(HIGHLIGHT_BG_CLASS)
+
+      const nameHeader = screen.getByRole("columnheader", { name: "name" })
+      expect(nameHeader.className).not.toMatch(HIGHLIGHT_BG_CLASS)
+
+      const emailCell = screen.getAllByText(testData[0].email)[0].closest("td")
+      expect(emailCell?.className).toMatch(HIGHLIGHT_BG_CLASS)
+    })
+
+    it("combines a highlighted header group with independently highlighted columns", async () => {
+      const groupedColumns = [
+        {
+          label: "name",
+          render: (item: Person) => item.name,
+          highlighted: true,
+        },
+        {
+          label: "email",
+          render: (item: Person) => item.email,
+          headerGroupId: "contact",
+        },
+      ]
+
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={groupedColumns}
+          source={createTestSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+          headerGroups={{ contact: { label: "Contact", highlighted: true } }}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      const nameHeader = screen.getByRole("columnheader", { name: "name" })
+      expect(nameHeader.className).toMatch(HIGHLIGHT_BG_CLASS)
+
+      const emailHeader = screen.getByRole("columnheader", { name: "email" })
+      expect(emailHeader.className).toMatch(HIGHLIGHT_BG_CLASS)
     })
 
     it("applies minWidth in grouped header placeholders for ungrouped columns", async () => {
@@ -1165,6 +1534,27 @@ describe("TableCollection", () => {
         />
       )
 
+    it("uses the normalized sticky count when every managed column is requested", async () => {
+      renderTable({
+        lockedColumnIds: ["name", "email", "display"],
+        onLockedColumnIdsChange: vi.fn(),
+      })
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      expect(screen.getByRole("columnheader", { name: "Name" })).toHaveClass(
+        "sticky"
+      )
+      expect(screen.getByRole("columnheader", { name: "Email" })).toHaveClass(
+        "sticky"
+      )
+      expect(
+        screen.getByRole("columnheader", { name: "Display" })
+      ).not.toHaveClass("sticky")
+    })
+
     it("renders no toggle for groups without collapsedColumns", async () => {
       renderTable({ headerGroups: { contact: "Contact" } })
 
@@ -1283,6 +1673,83 @@ describe("TableCollection", () => {
       expect(
         screen.queryByText(testData[0].displayName)
       ).not.toBeInTheDocument()
+    })
+
+    it("keeps locked group columns sticky and retains a scrollable column when collapsed", async () => {
+      renderTable({
+        columns: [
+          {
+            label: "Email",
+            id: "email",
+            headerGroupId: "contact",
+            render: (item: Person) => item.email,
+          },
+          {
+            label: "Display",
+            id: "display",
+            headerGroupId: "contact",
+            render: (item: Person) => item.displayName,
+          },
+          {
+            label: "Detail",
+            id: "detail",
+            headerGroupId: "contact",
+            render: () => "Contact detail",
+          },
+          {
+            label: "Name",
+            id: "name",
+            headerGroupId: "contact",
+            render: (item: Person) => item.name,
+          },
+        ],
+        lockedColumnIds: ["email", "display"],
+        onLockedColumnIdsChange: vi.fn(),
+        headerGroups: {
+          contact: {
+            label: "Contact",
+            collapsedColumns: ["email"],
+            defaultCollapsed: true,
+          },
+        },
+      })
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      expect(screen.getByText(testData[0].email)).toBeInTheDocument()
+      expect(screen.getByText(testData[0].displayName)).toBeInTheDocument()
+      expect(screen.queryByText("Contact detail")).not.toBeInTheDocument()
+
+      const emailHeader = screen.getByRole("columnheader", { name: "Email" })
+      const displayHeader = screen.getByRole("columnheader", {
+        name: "Display",
+      })
+      const nameHeader = screen.getByRole("columnheader", { name: "Name" })
+      expect(emailHeader).toHaveClass("sticky")
+      expect(displayHeader).toHaveClass("sticky")
+      expect(nameHeader).not.toHaveClass("sticky")
+
+      await userEvent.click(screen.getByRole("button", { name: "Contact" }))
+      await waitFor(() => {
+        expect(screen.getAllByText("Contact detail")).toHaveLength(
+          testData.length
+        )
+      })
+      await userEvent.click(screen.getByRole("button", { name: "Contact" }))
+      await waitFor(() => {
+        expect(screen.queryAllByText("Contact detail")).toHaveLength(0)
+      })
+      expect(screen.getByRole("columnheader", { name: "Email" })).toHaveClass(
+        "sticky"
+      )
+      expect(screen.getByRole("columnheader", { name: "Display" })).toHaveClass(
+        "sticky"
+      )
+      expect(
+        screen.getByRole("columnheader", { name: "Name" })
+      ).not.toHaveClass("sticky")
     })
 
     it("renders no group header row when headerGroups is omitted", async () => {
@@ -2856,6 +3323,92 @@ describe("TableCollection", () => {
       await user.click(engineeringHeading)
 
       expect(onSelectItems.mock.calls.length).toBe(callCountAfterRender)
+    })
+  })
+
+  describe("cell content alignment", () => {
+    /**
+     * Cells are `align-top`, so a value shorter than the row sticks to the cell's
+     * top padding rather than its center. Every cell's value is wrapped in a
+     * centering band (`min-h-6 items-center`) so values of different intrinsic
+     * heights — a 20px line of text, a 20px avatar, a 26px tag — share one center
+     * at the row's natural height, while the band stays pinned to the top when a
+     * tall value stretches the row.
+     *
+     * Asserted on the class rather than on measured geometry because jsdom does
+     * not lay out: `getBoundingClientRect()` returns zeroes for every element.
+     * The rendered positions are covered by the
+     * `CellsOfDifferentHeightsShareOneCenter` story's play function.
+     */
+    it("wraps every cell value in the centering band", async () => {
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={createTestSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      const cells = screen.getAllByRole("cell")
+      expect(cells.length).toBeGreaterThan(0)
+
+      for (const cell of cells) {
+        const band = cell.querySelector(".min-h-6.items-center")
+        expect(band).not.toBeNull()
+        expect(band).toContainElement(
+          cell.querySelector<HTMLElement>(".truncate, span")
+        )
+      }
+    })
+
+    it("pads the cell to offset the separator the row paints over it", async () => {
+      // TableRow draws its 1px rule on its own last pixel (`after:bottom-0`), so a
+      // symmetric `py` leaves the gap below the value a pixel shorter than the gap
+      // above it. The bottom padding carries that pixel back.
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={createTestSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      const SEPARATOR_PX = 1
+      const cell = screen.getAllByRole("cell")[0]
+
+      const top = /(?:^| )pt-(\d+(?:\.\d+)?)(?: |$)/.exec(cell.className)
+      const bottom = /(?:^| )pb-\[(\d+)px\](?: |$)/.exec(cell.className)
+      expect(top).not.toBeNull()
+      expect(bottom).not.toBeNull()
+      expect(Number(bottom![1])).toBe(Number(top![1]) * 4 + SEPARATOR_PX)
     })
   })
 })

@@ -1,6 +1,6 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 
-import { screen, zeroRender } from "@/testing/test-utils"
+import { screen, userEvent, zeroRender } from "@/testing/test-utils"
 
 import { F0AiMessagesContainer } from "../F0AiMessagesContainer"
 
@@ -22,5 +22,22 @@ describe("F0AiMessagesContainer", () => {
       )
     ).toBeInTheDocument()
     expect(screen.getByText("Ask a data question.")).toBeInTheDocument()
+  })
+
+  it("renders the welcome CTA and fires its onClick", async () => {
+    const onClick = vi.fn()
+    const user = userEvent.setup()
+    zeroRender(
+      <F0AiMessagesContainer
+        turns={[]}
+        initialMessage="Ask a data question."
+        initialMessageCta={{ label: "How to use One", onClick }}
+      />
+    )
+
+    const cta = screen.getByRole("button", { name: "How to use One" })
+    await user.click(cta)
+
+    expect(onClick).toHaveBeenCalledTimes(1)
   })
 })

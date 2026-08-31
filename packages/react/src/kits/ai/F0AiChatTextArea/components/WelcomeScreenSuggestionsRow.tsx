@@ -1,8 +1,16 @@
-import { useId, useRef, useState } from "react"
+import {
+  type MouseEvent,
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
 import { ArrowUp } from "@/icons/app"
+import { useReducedMotion } from "@/lib/a11y"
 import { focusRing } from "@/lib/utils"
 import { cn } from "@/lib/utils"
 import { Popover, PopoverAnchor, PopoverContent } from "@/ui/popover"
@@ -11,8 +19,17 @@ import type {
   WelcomeScreenSuggestion,
   WelcomeScreenSuggestionItem,
 } from "../../F0AiChat/types"
+import { useHorizontalScrollFade } from "../useHorizontalScrollFade"
 
 const MAX_ITEMS_PER_GROUP = 5
+
+// Suggestion-item marquee tuning. The reveal is speed-based, not
+// fixed-duration, so short and long overflows scroll at the same visual pace
+// across a mixed list.
+const SUGGESTION_SCROLL_SPEED = 46 // px/s, constant (linear)
+const SUGGESTION_SCROLL_DELAY = 400 // ms hold before the reveal starts
+const SUGGESTION_TRAILING_GAP = 16 // px — the tail stops short of the trailing edge
+const SUGGESTION_FADE = 16 // px — leading-edge fade width once scrolling
 
 function pickRandomItems(
   list: WelcomeScreenSuggestionItem[],
@@ -46,6 +63,33 @@ export type WelcomeScreenSuggestionsRowProps = {
    * the row below the textarea.
    */
   side?: "top" | "bottom"
+  /**
+   * Reserve height for two chip rows so a suggestion-set swap that wraps 1↔2
+   * rows cannot shift the layout above the row.
+   *
+   * True for the row standing above the composer, where the reservation is
+   * free — it sits in the empty space the welcome screen already has. False
+   * when the row is rendered INSIDE the field: there the reservation is not
+   * free, it is 72px of permanent dead height inside a bordered box, and the
+   * field grows and shrinks with its own text anyway.
+   *
+   * @default true
+   */
+  reserveTwoRows?: boolean
+  /**
+   * What the row does when the groups do not fit its width.
+   *
+   * - `"wrap"` — they flow onto a second line. Right for the row standing above
+   *   the composer, which has the page's height to spend.
+   * - `"scroll"` — one line, scrolled sideways, with the overflowing ends faded
+   *   (see {@link useHorizontalScrollFade}). Right for the row sharing the
+   *   composer's action band with the send button: there the row is one cell of a
+   *   single-line flex row, and a second line of chips would grow the field's
+   *   whole bottom band. Ten groups then cost the same height as three.
+   *
+   * @default "wrap"
+   */
+  overflow?: "wrap" | "scroll"
 }
 
 /**
@@ -58,9 +102,13 @@ export const WelcomeScreenSuggestionsRow = ({
   onItemClick,
   onItemHover,
   side = "top",
+  reserveTwoRows = true,
+  overflow = "wrap",
 }: WelcomeScreenSuggestionsRowProps) => {
   const [activeIdx, setActiveIdx] = useState<number | null>(null)
-  const rowRef = useRef<HTMLDivElement>(null)
+  const rowRef = useRef<HTMLDivElement | null>(null)
+  const scrolls = overflow === "scroll"
+  const fade = useHorizontalScrollFade()
   const lastTriggerRef = useRef<HTMLElement | null>(null)
   const shouldRestoreFocusRef = useRef(false)
   const popoverContentId = useId()
@@ -84,12 +132,44 @@ export const WelcomeScreenSuggestionsRow = ({
           reservation lives on this outer box and NOT on the anchor: Radix
           positions the popover off the anchor's border box, so anchoring the
           reserved height would float a single-row popover ~40px above the
-          chips it belongs to. */}
-      <div className="flex min-h-[72px] w-full items-end">
+          chips it belongs to. See `reserveTwoRows` for why the inside
+          placement opts out. */}
+      <div
+        className={cn(
+          "flex w-full items-end",
+          reserveTwoRows && "min-h-[72px]"
+        )}
+      >
         <PopoverAnchor asChild>
+          {/* The scroller and the popover anchor are the SAME element on
+              purpose: the panel spans the row's width
+              (`--radix-popover-trigger-width`) and opens from its leading edge,
+              which is the box the reader sees the chips in — not the wider
+              content they scroll through. Radix reads the anchor's border box,
+              so anchoring the content instead would size the panel to all ten
+              groups and hang it off the field. */}
           <div
-            ref={rowRef}
-            className="flex w-full flex-wrap items-center gap-2"
+            ref={(node) => {
+              rowRef.current = node
+              if (scrolls) fade.ref(node)
+            }}
+            style={scrolls ? fade.style : undefined}
+            className={cn(
+              "flex w-full items-center gap-2",
+              scrolls
+                ? cn(
+                    // No visible scrollbar: it would sit under the chips inside
+                    // a 32px-tall band, and the faded end is the affordance.
+                    "flex-nowrap overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+                    // `p-1 -m-1` is room for a focused chip's ring, which is
+                    // drawn 2px OUTSIDE its border box and would otherwise be
+                    // clipped by the scrollport (setting overflow on one axis
+                    // makes the other axis clip too). The negative margin gives
+                    // the padding back, so the chips sit exactly where they did.
+                    "p-1 -m-1"
+                  )
+                : "flex-wrap"
+            )}
           >
             {/* Plain buttons, NOT `PopoverTrigger`s: Radix registers a single
                 trigger per popover (the last one mounted), whose built-in
@@ -100,9 +180,19 @@ export const WelcomeScreenSuggestionsRow = ({
             {suggestions.map((group, index) => (
               <ButtonInternal
                 key={`${group.label}-${index}`}
+                // The `inside` placement mounts this row within the composer's
+                // <form>, where a button's implicit `type="submit"` submits it —
+                // and the submit handler refocuses the textarea, which Radix
+                // takes as an outside interaction and closes the popover the
+                // same click just opened.
+                type="button"
                 variant="outline"
                 label={group.label}
                 icon={group.icon}
+                // A flex item shrinks before it overflows, so without this the
+                // labels would squeeze and truncate instead of the row becoming
+                // scrollable.
+                className={scrolls ? "shrink-0" : undefined}
                 pressed={activeIdx === index}
                 aria-haspopup="dialog"
                 aria-expanded={activeIdx === index}
@@ -163,37 +253,141 @@ export const WelcomeScreenSuggestionsRow = ({
           </div>
           <div className="flex flex-col">
             {pickRandomItems(activeGroup.items).map((item, index) => (
-              <button
+              <SuggestionItem
                 key={index}
-                type="button"
-                onClick={(event) => {
+                item={item}
+                onHover={onItemHover}
+                onSelect={(event) => {
                   onItemClick(item, activeGroup)
                   shouldRestoreFocusRef.current =
                     document.activeElement === event.currentTarget
                   setActiveIdx(null)
                   onItemHover?.(null)
                 }}
-                onMouseEnter={() => onItemHover?.(item)}
-                onMouseLeave={() => onItemHover?.(null)}
-                onFocus={() => onItemHover?.(item)}
-                onBlur={() => onItemHover?.(null)}
-                className={cn(
-                  "group flex items-center justify-between gap-2 rounded-sm px-2 py-2 text-left text-base font-medium text-f1-foreground transition-colors hover:bg-f1-background-hover focus-visible:bg-f1-background-hover",
-                  focusRing()
-                )}
-              >
-                <span className="min-w-0 flex-1 truncate">{item.title}</span>
-                <span
-                  aria-hidden
-                  className="flex flex-shrink-0 items-center text-f1-foreground-secondary opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
-                >
-                  <F0Icon icon={ArrowUp} size="sm" />
-                </span>
-              </button>
+              />
             ))}
           </div>
         </PopoverContent>
       )}
     </Popover>
+  )
+}
+
+type SuggestionItemProps = {
+  item: WelcomeScreenSuggestionItem
+  onSelect: (event: MouseEvent<HTMLButtonElement>) => void
+  onHover?: (item: WelcomeScreenSuggestionItem | null) => void
+}
+
+/**
+ * A single suggestion inside the popover. The title is truncated with an
+ * ellipsis; on hover/focus it holds for {@link SUGGESTION_SCROLL_DELAY}ms and
+ * then reveals the hidden tail with a one-way marquee — the label scrolls left
+ * at a constant {@link SUGGESTION_SCROLL_SPEED} until the tail clears (stopping
+ * {@link SUGGESTION_TRAILING_GAP}px short of the edge), with the leading edge
+ * fading as it moves. It does NOT loop and does NOT animate back: on leave it
+ * snaps to the start instantly.
+ *
+ * The reveal is driven imperatively (transform + mask) rather than via CSS
+ * classes because the scroll distance and duration depend on the measured
+ * overflow, which is only known at runtime. Pointer/focus handlers live on the
+ * button (not the label) so the cursor drifting onto the arrow doesn't reset
+ * the reveal mid-scroll.
+ *
+ * Accessibility: honours `prefers-reduced-motion` (static truncation, no
+ * marquee) and treats keyboard focus like hover. The full title is the button's
+ * text content, so it stays available to assistive tech regardless of the
+ * visual truncation.
+ */
+function SuggestionItem({ item, onSelect, onHover }: SuggestionItemProps) {
+  const wrapRef = useRef<HTMLSpanElement>(null)
+  const textRef = useRef<HTMLSpanElement>(null)
+  const timerRef = useRef<number | null>(null)
+  const reduceMotion = useReducedMotion()
+
+  const stopScroll = useCallback(() => {
+    if (timerRef.current != null) {
+      clearTimeout(timerRef.current)
+      timerRef.current = null
+    }
+    const text = textRef.current
+    const wrap = wrapRef.current
+    // Instant return — no animated slide-back.
+    if (text) {
+      text.style.transition = "none"
+      text.style.transform = "translateX(0)"
+      text.style.overflow = ""
+    }
+    if (wrap) {
+      wrap.style.removeProperty("mask-image")
+      wrap.style.removeProperty("-webkit-mask-image")
+    }
+  }, [])
+
+  const startScroll = useCallback(() => {
+    if (reduceMotion) return
+    timerRef.current = window.setTimeout(() => {
+      const text = textRef.current
+      const wrap = wrapRef.current
+      if (!text || !wrap) return
+      const overflow = text.scrollWidth - text.clientWidth
+      if (overflow <= 0) return // fits — nothing hidden to reveal
+      const distance = overflow + SUGGESTION_TRAILING_GAP
+      const duration = (distance / SUGGESTION_SCROLL_SPEED) * 1000
+      // Let the label spill past its own box so translating reveals the tail
+      // (the wrapper still clips), and fade the leading edge as it moves.
+      text.style.overflow = "visible"
+      const fade = `linear-gradient(90deg, transparent 0, #000 ${SUGGESTION_FADE}px)`
+      wrap.style.setProperty("mask-image", fade)
+      wrap.style.setProperty("-webkit-mask-image", fade)
+      text.style.transition = `transform ${duration}ms linear`
+      text.style.transform = `translateX(-${distance}px)`
+    }, SUGGESTION_SCROLL_DELAY)
+  }, [reduceMotion])
+
+  const activate = useCallback(() => {
+    onHover?.(item)
+    startScroll()
+  }, [item, onHover, startScroll])
+
+  const deactivate = useCallback(() => {
+    onHover?.(null)
+    stopScroll()
+  }, [onHover, stopScroll])
+
+  // Clear a pending reveal timer if the item unmounts (e.g. the popover closes)
+  // mid-hold.
+  useEffect(
+    () => () => {
+      if (timerRef.current != null) clearTimeout(timerRef.current)
+    },
+    []
+  )
+
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      onMouseEnter={activate}
+      onMouseLeave={deactivate}
+      onFocus={activate}
+      onBlur={deactivate}
+      className={cn(
+        "group flex items-center justify-between gap-2 rounded-sm px-2 py-2 text-left text-base font-medium text-f1-foreground transition-colors hover:bg-f1-background-hover focus-visible:bg-f1-background-hover",
+        focusRing()
+      )}
+    >
+      <span ref={wrapRef} className="min-w-0 flex-1 overflow-hidden">
+        <span ref={textRef} className="block w-full truncate">
+          {item.title}
+        </span>
+      </span>
+      <span
+        aria-hidden
+        className="flex flex-shrink-0 items-center text-f1-foreground-secondary opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
+      >
+        <F0Icon icon={ArrowUp} size="sm" />
+      </span>
+    </button>
   )
 }

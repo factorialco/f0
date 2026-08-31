@@ -53,6 +53,7 @@ beforeAll(() => {
 beforeEach(() => {
   vi.useFakeTimers()
   mockReactFlow.fitView.mockClear()
+  mockReactFlow.setCenter.mockClear()
 })
 afterEach(() => vi.useRealTimers())
 
@@ -91,10 +92,12 @@ describe("F0Graph — focusedNode fly-to does not re-fire on layout changes", ()
     expect(mockReactFlow.fitView.mock.calls.length).toBe(afterEntry)
   })
 
-  it("applies the initial fit once and does not re-fit on a later collapse", () => {
+  it("applies the initial frame once and does not re-frame on a later collapse", () => {
     // `initialFocusNodeId` set, no `focusedNode`: the graph frames the target
-    // once on entry and must NOT re-fit when a subsequent collapse changes the
-    // layout (the org-chart "open framed, then never yanked" contract).
+    // once on entry and must NOT re-frame when a subsequent collapse changes the
+    // layout (the org-chart "open framed, then never yanked" contract). The entry
+    // frame is measurement-independent — it centers on the node's layout position
+    // (`setCenter`), not an id-based `fitView` that would miss on the first paint.
     const { rerender } = zeroRender(
       <div style={{ width: 800, height: 600 }}>
         <F0Graph
@@ -106,7 +109,7 @@ describe("F0Graph — focusedNode fly-to does not re-fire on layout changes", ()
       </div>
     )
     settle()
-    const afterEntry = mockReactFlow.fitView.mock.calls.length
+    const afterEntry = mockReactFlow.setCenter.mock.calls.length
     expect(afterEntry).toBeGreaterThanOrEqual(1) // framed once on entry
 
     // Collapse `root` — layout changes, but the focus target never did.
@@ -122,8 +125,8 @@ describe("F0Graph — focusedNode fly-to does not re-fire on layout changes", ()
     )
     settle()
 
-    // No re-fit: the initial frame is one-shot.
-    expect(mockReactFlow.fitView.mock.calls.length).toBe(afterEntry)
+    // No re-frame: the initial frame is one-shot.
+    expect(mockReactFlow.setCenter.mock.calls.length).toBe(afterEntry)
   })
 
   it("still flies when focusedNode changes to a new value", () => {

@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write
+      id-token: write # npm trusted publishing (OIDC)
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -38,7 +38,6 @@ jobs:
         id: publish
         with:
           workspace: "@factorialco/f0-react"
-          registry_token: ${{ secrets.NPMJS_TOKEN }}
       - name: Notify Slack
         if: ${{ steps.publish.outputs.published == 'true' }}
         env:
@@ -96,7 +95,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write
+      id-token: write # npm trusted publishing (OIDC)
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -106,7 +105,6 @@ jobs:
         id: publish
         with:
           workspace: "@factorialco/f0-react-native"
-          registry_token: ${{ secrets.NPMJS_TOKEN }}
       # Slack notification moved to publish-expo-production.yaml
       # which sends the notification after publishing the EAS production update
       # and creating the QR code update PR
@@ -123,7 +121,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write
+      id-token: write # npm trusted publishing (OIDC)
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -133,7 +131,6 @@ jobs:
         id: publish
         with:
           workspace: "@factorialco/f0-core"
-          registry_token: ${{ secrets.NPMJS_TOKEN }}
       - name: Notify Slack
         if: ${{ steps.publish.outputs.published == 'true' }}
         env:

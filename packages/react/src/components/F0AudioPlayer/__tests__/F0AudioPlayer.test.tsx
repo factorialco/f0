@@ -1,4 +1,5 @@
 import { fireEvent, waitFor } from "@testing-library/react"
+import { type ComponentProps } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { screen, userEvent, zeroRender as render } from "@/testing/test-utils"
@@ -512,5 +513,449 @@ describe("F0AudioPlayer lazy source", () => {
     )
     await waitFor(() => expect(playSpy).toHaveBeenCalled())
     expect(resolveSrc).toHaveBeenCalledTimes(2)
+  })
+})
+
+describe("F0AudioPlayerCard timed transcription", () => {
+  const CUES = [
+    { text: "**Recruiter:** How did you hear about us?", startTime: 0 },
+    { text: "**Alex:** A friend who works here", startTime: 10 },
+    { text: "**Recruiter:** Tell me about the night shifts", startTime: 20 },
+  ]
+
+  const renderCard = (
+    props: Partial<ComponentProps<typeof F0AudioPlayerCard>> = {}
+  ) =>
+    render(
+      <F0AudioPlayerCard
+        src="test.mp3"
+        title="AI Call with Alex Williams"
+        defaultExpanded
+        content={{ transcription: CUES }}
+        {...props}
+      />
+    )
+
+  const markLoaded = (audio: HTMLAudioElement) => {
+    Object.defineProperty(audio, "readyState", { value: 1, configurable: true })
+  }
+
+  const playTo = (seconds: number) => {
+    const audio = getAudio()
+    audio.currentTime = seconds
+    fireEvent.timeUpdate(audio)
+  }
+
+  const activeCue = () => document.querySelector("[aria-current='true']")
+
+  beforeEach(() => {
+    vi.spyOn(HTMLMediaElement.prototype, "play").mockImplementation(() =>
+      Promise.resolve()
+    )
+    vi.spyOn(HTMLMediaElement.prototype, "pause").mockImplementation(() => {})
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it("renders each cue as a control and counts as an available transcription", () => {
+    renderCard()
+
+    expect(
+      screen.getAllByRole("button", { name: /Recruiter|Alex/ })
+    ).toHaveLength(3)
+    expect(
+      screen.getByRole("group", { name: "AI Call with Alex Williams" })
+    ).toHaveAttribute("data-audio-transcription", "available")
+  })
+
+  it("renders the speaker as markdown emphasis, not as literal asterisks", () => {
+    renderCard({ content: { transcription: [{ text: "**Recruiter:** hi" }] } })
+
+    expect(screen.getByText("Recruiter:").tagName).toBe("STRONG")
+    expect(screen.queryByText(/\*\*/)).not.toBeInTheDocument()
+  })
+
+  it("keeps escaped markdown literal", () => {
+    renderCard({
+      content: {
+        transcription: [{ text: "**Alex:** it costs 5 \\* 3 euros" }],
+      },
+    })
+
+    expect(screen.getByText(/5 \* 3 euros/)).toBeInTheDocument()
+  })
+
+  it("marks the cue being spoken and follows the audio", () => {
+    renderCard()
+
+    playTo(0)
+    expect(activeCue()).toHaveTextContent("How did you hear about us?")
+
+    playTo(12)
+    expect(activeCue()).toHaveTextContent("A friend who works here")
+    expect(document.querySelectorAll("[aria-current='true']")).toHaveLength(1)
+  })
+
+  it("keeps the previous cue marked through a silence", () => {
+    renderCard()
+
+    playTo(15)
+    expect(activeCue()).toHaveTextContent("A friend who works here")
+  })
+
+  it("marks no cue before the first one starts", () => {
+    renderCard({
+      content: { transcription: [{ text: "**Alex:** late", startTime: 5 }] },
+    })
+
+    playTo(2)
+    expect(activeCue()).toBeNull()
+  })
+
+  it("renders an untimed transcript as plain text with no controls", () => {
+    renderCard({
+      content: {
+        transcription: [
+          { text: "**Recruiter:** no timings here" },
+          { text: "**Alex:** none here either" },
+        ],
+      },
+    })
+
+    expect(screen.getByText(/no timings here/)).toBeInTheDocument()
+    expect(
+      screen.queryByRole("button", { name: /no timings here/ })
+    ).not.toBeInTheDocument()
+  })
+
+  it("keeps an untimed cue in place between timed ones", () => {
+    renderCard({
+      content: {
+        transcription: [
+          { text: "first", startTime: 0 },
+          { text: "untimed middle" },
+          { text: "last", startTime: 10 },
+        ],
+      },
+    })
+
+    const lines = screen.getAllByRole("listitem").map((li) => li.textContent)
+    expect(lines).toEqual(["first", "untimed middle", "last"])
+  })
+
+  it("moves playback to a cue when it is clicked, without changing play state", async () => {
+    const onSeek = vi.fn()
+    renderCard({ onSeek })
+    markLoaded(getAudio())
+
+    await userEvent.click(
+      screen.getByRole("button", { name: /A friend who works here/ })
+    )
+
+    expect(getAudio().currentTime).toBe(10)
+    expect(onSeek).toHaveBeenCalledExactlyOnceWith(10)
+    expect(HTMLMediaElement.prototype.play).not.toHaveBeenCalled()
+    expect(HTMLMediaElement.prototype.pause).not.toHaveBeenCalled()
+  })
+
+  it("marks the clicked cue straight away", async () => {
+    renderCard()
+    markLoaded(getAudio())
+
+    await userEvent.click(screen.getByRole("button", { name: /night shifts/ }))
+
+    expect(activeCue()).toHaveTextContent("night shifts")
+  })
+
+  it("moves playback from the keyboard", async () => {
+    const onSeek = vi.fn()
+    renderCard({ onSeek })
+    markLoaded(getAudio())
+
+    screen.getByRole("button", { name: /A friend who works here/ }).focus()
+    await userEvent.keyboard("{Enter}")
+
+    expect(onSeek).toHaveBeenCalledExactlyOnceWith(10)
+  })
+
+  it("still renders a string transcription as a paragraph", () => {
+    renderCard({ content: { transcription: "Agent: hello\nUser: hi" } })
+
+    expect(screen.getByText(/Agent: hello/)).toBeInTheDocument()
+    expect(screen.queryByRole("listitem")).not.toBeInTheDocument()
+  })
+})
+
+describe("seeking before the audio has loaded", () => {
+  const LAZY_CUES = [
+    { text: "**Recruiter:** first question", startTime: 0 },
+    { text: "**Alex:** an answer", startTime: 30 },
+  ]
+
+  beforeEach(() => {
+    vi.spyOn(HTMLMediaElement.prototype, "play").mockImplementation(() =>
+      Promise.resolve()
+    )
+    vi.spyOn(HTMLMediaElement.prototype, "pause").mockImplementation(() => {})
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it("queues a cue click made before the source resolves, and applies it on load", async () => {
+    const onSeek = vi.fn()
+    render(
+      <F0AudioPlayerCard
+        src={vi.fn().mockResolvedValue("resolved.mp3")}
+        duration={100}
+        title="AI Call"
+        defaultExpanded
+        onSeek={onSeek}
+        content={{ transcription: LAZY_CUES }}
+      />
+    )
+
+    await userEvent.click(screen.getByRole("button", { name: /an answer/ }))
+
+    expect(getAudio().currentTime).toBe(0)
+    expect(onSeek).not.toHaveBeenCalled()
+    expect(screen.getByText("0:30 / 1:40")).toBeInTheDocument()
+
+    fireEvent.loadedMetadata(getAudio())
+
+    expect(getAudio().currentTime).toBe(30)
+    expect(onSeek).toHaveBeenCalledExactlyOnceWith(30)
+  })
+
+  it("marks the clicked cue while the seek is still queued", async () => {
+    render(
+      <F0AudioPlayerCard
+        src={vi.fn().mockResolvedValue("resolved.mp3")}
+        duration={100}
+        title="AI Call"
+        defaultExpanded
+        content={{ transcription: LAZY_CUES }}
+      />
+    )
+
+    await userEvent.click(screen.getByRole("button", { name: /an answer/ }))
+
+    expect(document.querySelector("[aria-current='true']")).toHaveTextContent(
+      "an answer"
+    )
+  })
+
+  it("does not resolve the source, or start playback, on a cue click", async () => {
+    const resolveSrc = vi.fn().mockResolvedValue("resolved.mp3")
+    render(
+      <F0AudioPlayerCard
+        src={resolveSrc}
+        duration={100}
+        title="AI Call"
+        defaultExpanded
+        content={{ transcription: LAZY_CUES }}
+      />
+    )
+
+    await userEvent.click(screen.getByRole("button", { name: /an answer/ }))
+
+    expect(resolveSrc).not.toHaveBeenCalled()
+    expect(HTMLMediaElement.prototype.play).not.toHaveBeenCalled()
+  })
+
+  it("does not show a queued position against an unknown duration", async () => {
+    render(
+      <F0AudioPlayerCard
+        src={vi.fn().mockResolvedValue("resolved.mp3")}
+        title="AI Call"
+        defaultExpanded
+        content={{ transcription: LAZY_CUES }}
+      />
+    )
+
+    await userEvent.click(screen.getByRole("button", { name: /an answer/ }))
+
+    expect(screen.getByText("0:00 / 0:00")).toBeInTheDocument()
+
+    fireEvent.loadedMetadata(getAudio())
+    expect(getAudio().currentTime).toBe(30)
+  })
+
+  it("clamps a queued position to the known duration", async () => {
+    render(
+      <F0AudioPlayerCard
+        src={vi.fn().mockResolvedValue("resolved.mp3")}
+        duration={20}
+        title="AI Call"
+        defaultExpanded
+        content={{ transcription: LAZY_CUES }}
+      />
+    )
+
+    await userEvent.click(screen.getByRole("button", { name: /an answer/ }))
+
+    expect(screen.getByText("0:20 / 0:20")).toBeInTheDocument()
+  })
+
+  it("keeps a queued position across the expired-source retry", async () => {
+    const resolveSrc = vi
+      .fn()
+      .mockResolvedValueOnce("first.mp3")
+      .mockResolvedValueOnce("second.mp3")
+    const onSeek = vi.fn()
+    render(
+      <F0AudioPlayerCard
+        src={resolveSrc}
+        duration={100}
+        title="AI Call"
+        defaultExpanded
+        onSeek={onSeek}
+        content={{ transcription: LAZY_CUES }}
+      />
+    )
+
+    fireEvent.click(screen.getByRole("button", { name: "Play" }))
+    await waitFor(() => expect(getAudio()).toHaveAttribute("src", "first.mp3"))
+
+    await userEvent.click(screen.getByRole("button", { name: /an answer/ }))
+    fireEvent.error(getAudio())
+    await waitFor(() => expect(getAudio()).toHaveAttribute("src", "second.mp3"))
+
+    fireEvent.loadedMetadata(getAudio())
+    expect(getAudio().currentTime).toBe(30)
+    expect(onSeek).toHaveBeenCalledExactlyOnceWith(30)
+  })
+
+  it("queues a scrubber seek made before the source loads", async () => {
+    const onSeek = vi.fn()
+    render(
+      <F0AudioPlayer
+        src={vi.fn().mockResolvedValue("resolved.mp3")}
+        duration={100}
+        onSeek={onSeek}
+      />
+    )
+
+    screen.getByRole("slider").focus()
+    await userEvent.keyboard("{ArrowRight}")
+
+    expect(getAudio().currentTime).toBe(0)
+    fireEvent.loadedMetadata(getAudio())
+    expect(getAudio().currentTime).toBe(1)
+    expect(onSeek).toHaveBeenCalledExactlyOnceWith(1)
+  })
+})
+
+describe("keeping the spoken cue in view", () => {
+  const CUES = [
+    { text: "**Recruiter:** one", startTime: 0 },
+    { text: "**Alex:** two", startTime: 10 },
+    { text: "**Recruiter:** three", startTime: 20 },
+  ]
+
+  const stubLayout = () => {
+    const viewport = document.querySelector<HTMLElement>(
+      "[data-scroll-container]"
+    )
+    if (!viewport) throw new Error("scroll viewport not found")
+    const scrollTo = vi.fn()
+    viewport.scrollTo = scrollTo
+    vi.spyOn(viewport, "getBoundingClientRect").mockReturnValue({
+      top: 0,
+      bottom: 200,
+    } as DOMRect)
+    for (const cue of document.querySelectorAll("li")) {
+      vi.spyOn(cue, "getBoundingClientRect").mockReturnValue({
+        top: 300,
+        bottom: 340,
+      } as DOMRect)
+    }
+    return { viewport, scrollTo }
+  }
+
+  const playTo = (seconds: number) => {
+    const audio = getAudio()
+    audio.currentTime = seconds
+    fireEvent.timeUpdate(audio)
+  }
+
+  beforeEach(() => {
+    vi.spyOn(HTMLMediaElement.prototype, "play").mockImplementation(() =>
+      Promise.resolve()
+    )
+    vi.spyOn(HTMLMediaElement.prototype, "pause").mockImplementation(() => {})
+    render(
+      <F0AudioPlayerCard
+        src="test.mp3"
+        title="AI Call"
+        defaultExpanded
+        content={{ transcription: CUES }}
+      />
+    )
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it("follows the audio for every cue, not just the first", () => {
+    const { scrollTo } = stubLayout()
+
+    playTo(10)
+    expect(scrollTo).toHaveBeenCalledOnce()
+
+    playTo(20)
+    expect(scrollTo).toHaveBeenCalledTimes(2)
+  })
+
+  it("stops following once the reader scrolls, and does not mistake its own scrolling for that", () => {
+    const { viewport, scrollTo } = stubLayout()
+
+    playTo(10)
+    expect(scrollTo).toHaveBeenCalledOnce()
+
+    vi.spyOn(performance, "now").mockReturnValue(1e9)
+    fireEvent.scroll(viewport)
+    playTo(20)
+    expect(scrollTo).toHaveBeenCalledTimes(2)
+
+    fireEvent.wheel(viewport)
+    playTo(0)
+    expect(scrollTo).toHaveBeenCalledTimes(2)
+  })
+
+  it("stops following when the reader drags the scrollbar", () => {
+    const { viewport, scrollTo } = stubLayout()
+
+    playTo(10)
+    expect(scrollTo).toHaveBeenCalledOnce()
+
+    const scrollbarArea = viewport.parentElement
+    if (!scrollbarArea) throw new Error("scroll area root not found")
+    fireEvent.pointerDown(scrollbarArea)
+
+    playTo(20)
+    expect(scrollTo).toHaveBeenCalledOnce()
+  })
+
+  it("does not treat pressing a cue as a scrollbar drag", async () => {
+    const { scrollTo } = stubLayout()
+
+    await userEvent.click(screen.getByRole("button", { name: /two/ }))
+    expect(scrollTo).toHaveBeenCalled()
+  })
+
+  it("follows again after the reader jumps to a cue", async () => {
+    const { viewport, scrollTo } = stubLayout()
+
+    fireEvent.wheel(viewport)
+    playTo(10)
+    expect(scrollTo).not.toHaveBeenCalled()
+
+    await userEvent.click(screen.getByRole("button", { name: /three/ }))
+    expect(scrollTo).toHaveBeenCalled()
   })
 })

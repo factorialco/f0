@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest"
 
-import { type F0ChatFileAttachment } from "../../types"
+import { type F0ChatAttachment, type F0ChatFileAttachment } from "../../types"
 import {
   documentPreviewKind,
   formatFileSize,
   isVideoFileAttachment,
+  partitionChatAttachments,
   withinPreviewSizeLimit,
 } from "../attachments"
 
@@ -164,5 +165,33 @@ describe("withinPreviewSizeLimit", () => {
 
   it("treats an unknown size as previewable", () => {
     expect(withinPreviewSizeLimit(file({ name: "a.xlsx" }), "sheet")).toBe(true)
+  })
+})
+
+describe("partitionChatAttachments", () => {
+  it("classifies a mixed attachment list in one stable pass", () => {
+    const attachments: F0ChatAttachment[] = [
+      { kind: "image", url: "/image.jpg", name: "image" },
+      file({ name: "clip.mp4" }),
+      file({ name: "report.pdf" }),
+      file({ name: "upload.mp4", progress: 50 }),
+      file({ name: "archive.zip" }),
+      { kind: "location", latitude: 1, longitude: 2 },
+      { kind: "voice", url: "/voice.ogg" },
+    ]
+
+    const result = partitionChatAttachments(attachments)
+
+    expect(result.images.map(({ name }) => name)).toEqual(["image"])
+    expect(result.videos.map(({ name }) => name)).toEqual(["clip.mp4"])
+    expect(
+      result.documents.map(({ file: document, kind }) => [document.name, kind])
+    ).toEqual([["report.pdf", "pdf"]])
+    expect(result.files.map(({ name }) => name)).toEqual([
+      "upload.mp4",
+      "archive.zip",
+    ])
+    expect(result.locations).toHaveLength(1)
+    expect(result.voices).toHaveLength(1)
   })
 })

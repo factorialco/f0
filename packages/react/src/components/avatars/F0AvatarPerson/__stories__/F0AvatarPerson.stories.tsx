@@ -79,6 +79,13 @@ export const Deactivated: Story = {
   },
 }
 
+export const Pending: Story = {
+  args: {
+    ...Default.args,
+    pending: true,
+  },
+}
+
 export const Snapshot: Story = {
   parameters: withSnapshot({}),
   render: () => (
@@ -135,6 +142,20 @@ export const Snapshot: Story = {
               key={size}
               size={size}
               deactivated
+              firstName="Juanito"
+              lastName="Perez"
+            />
+          ))}
+        </div>
+      </section>
+      <section>
+        <h4 className="text-lg font-semibold">Pending</h4>
+        <div className="flex flex-row gap-2">
+          {avatarSizes.map((size) => (
+            <F0AvatarPerson
+              key={size}
+              size={size}
+              pending
               firstName="Juanito"
               lastName="Perez"
             />

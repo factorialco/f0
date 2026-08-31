@@ -15,6 +15,7 @@ import {
   type F0ChatMessageStatus,
   type F0ChatRuntime,
 } from "../types"
+import { formatClock } from "../utils/natural-time"
 
 // jsdom has no layout — wrap Virtuoso in its official mock context so every
 // row renders (see mocks/virtuoso-jsdom).
@@ -150,35 +151,34 @@ describe("connection states", () => {
 })
 
 describe("delivery states", () => {
-  // Sending and legacy messages keep the bare time. Once acknowledged, sent
-  // and delivered share "Sent · time"; read advances to "Read · time".
+  // The footer reports delivery only — the time lives in the bubble. Sent and
+  // delivered share "Sent"; read advances to "Read".
+
+  // Through the shared formatter, not a copy of it: the clock is written in the
+  // reader's own locale, so a hand-rolled 24-hour expectation would only hold
+  // on a 24-hour machine.
   const bareTimeOf = (message: F0ChatMessage) =>
-    new Intl.DateTimeFormat(undefined, {
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(new Date(message.createdAt))
+    formatClock(new Date(message.createdAt))
 
   it("shows the bare time while sending, from the very first frame", () => {
     const message = mine("sending")
     renderChat(makeRuntime({ messages: [theirs, message] }))
-    expect(screen.getByText(bareTimeOf(message))).toBeInTheDocument()
+    // The bubble carries its own clock now, so the footer's bare time is no
+    // longer the only match — both must read the same.
+    expect(screen.getAllByText(bareTimeOf(message)).length).toBeGreaterThan(0)
     expect(screen.queryByText("Sending…")).not.toBeInTheDocument()
   })
 
-  it("shows sent with the time once the message is acknowledged", () => {
+  it("shows sent once the message is acknowledged", () => {
     const message = mine("sent")
     renderChat(makeRuntime({ messages: [theirs, message] }))
-    expect(
-      screen.getByText(`Sent · ${bareTimeOf(message)}`)
-    ).toBeInTheDocument()
+    expect(screen.getByText("Sent")).toBeInTheDocument()
   })
 
   it("keeps delivered under the sent footer label", () => {
     const message = mine("delivered")
     renderChat(makeRuntime({ messages: [theirs, message] }))
-    expect(
-      screen.getByText(`Sent · ${bareTimeOf(message)}`)
-    ).toBeInTheDocument()
+    expect(screen.getByText("Sent")).toBeInTheDocument()
     expect(screen.queryByText(/^Delivered/)).not.toBeInTheDocument()
   })
 

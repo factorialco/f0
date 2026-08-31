@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
+import { BellOff } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
 
 import {
   isUserMessage,
-  type F0ChatAttachment,
+  type F0ChatComposableAttachment,
   type F0ChatChannel,
   type F0ChatEditInput,
   type F0ChatItem,
@@ -497,9 +499,9 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
   }, [])
 
   const uploadFiles = useCallback(
-    (files: File[]): Promise<F0ChatAttachment[]> =>
+    (files: File[]): Promise<F0ChatComposableAttachment[]> =>
       Promise.resolve(
-        files.map((file): F0ChatAttachment => {
+        files.map((file): F0ChatComposableAttachment => {
           const url = URL.createObjectURL(file)
           return file.type.startsWith("image/")
             ? { kind: "image", url, name: file.name }
@@ -518,11 +520,15 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
     []
   )
 
+  const i18n = useI18n()
+
   // Pinned (favourite) / muted state — surfaced by the host as header actions
   // (F0ChatHeaderAction) wired to these transport methods.
   const [pinned, setPinned] = useState(seed.channel.pinned ?? false)
   const togglePin = useCallback(() => setPinned((value) => !value), [])
-  const [muted, setMuted] = useState(seed.channel.muted ?? false)
+  const [muted, setMuted] = useState(
+    seed.channel.statuses?.some((status) => status.icon === BellOff) ?? false
+  )
   const toggleMute = useCallback(() => setMuted((value) => !value), [])
 
   // Membership events (groups): each appends a centered system row — one item
@@ -586,7 +592,17 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
 
   return {
     currentUserId: seed.me.id,
-    channel: { ...seed.channel, pinned, muted, memberCount },
+    channel: {
+      ...seed.channel,
+      pinned,
+      statuses: [
+        ...(seed.channel.statuses?.filter(
+          (status) => status.icon !== BellOff
+        ) ?? []),
+        ...(muted ? [{ icon: BellOff, label: i18n.chat.muted }] : []),
+      ],
+      memberCount,
+    },
     status: "ready",
     messages,
     typingUsers,

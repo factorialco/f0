@@ -18,7 +18,7 @@ The avatar for an individual — an employee, user or contact.
 
 - Represent a specific person consistently across the interface
 - Help distinguish people at a glance in lists, headers and assignments
-- Convey a person's state, such as deactivated
+- Convey a person's state, such as deactivated or pending
 
 ### Anatomy
 
@@ -37,6 +37,13 @@ A person can be shown as deactivated, which replaces the content with a muted
 person icon to signal that the account is no longer active.
 
 <Canvas of={PersonStories.Deactivated} />
+
+A person can also be shown as pending, which replaces the content with a muted
+search-person icon to signal a position that is planned but still to be filled —
+for example an open role in headcount planning. `deactivated` and `pending` are
+mutually exclusive; if both are set, `deactivated` wins.
+
+<Canvas of={PersonStories.Pending} />
 
 #### Badge
 

@@ -1,6 +1,19 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
 
-import { fireEvent, zeroRender as render, waitFor } from "@/testing/test-utils"
+import {
+  fireEvent,
+  screen,
+  userEvent,
+  waitFor,
+  within,
+  zeroRender as render,
+} from "@/testing/test-utils"
+
+import { AiChatStateProvider } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
+import {
+  WIDGET_DRAG_START,
+  type WidgetDragStartDetail,
+} from "@/lib/dnd/widgetDragEvents"
 
 import type { DashboardItem } from "../types"
 
@@ -151,6 +164,36 @@ describe("DashboardGrid", () => {
 
     await waitFor(() => {
       expect(collectionRow.style.height).toBe("960px")
+    })
+  })
+
+  it("forwards a collection widget's built-in Ask One target", async () => {
+    const onAskAiTarget = vi.fn()
+    const { container } = render(
+      <AiChatStateProvider enabled>
+        <DashboardGrid
+          items={makeCollectionItems(480)}
+          filters={{}}
+          onAskAiTarget={onAskAiTarget}
+        />
+      </AiChatStateProvider>
+    )
+    const card = container.querySelector('[data-card-id="expenses"]')
+    if (!(card instanceof HTMLElement)) {
+      throw new Error("Expected collection item to be rendered")
+    }
+
+    await userEvent.click(
+      within(card).getByRole("button", { name: "Other actions" })
+    )
+    await userEvent.click(
+      await screen.findByRole("menuitem", { name: "Ask One" })
+    )
+
+    expect(onAskAiTarget).toHaveBeenCalledWith({
+      id: "expenses",
+      title: "Expenses",
+      quote: { text: "Expenses" },
     })
   })
 
@@ -333,6 +376,58 @@ describe("DashboardGrid", () => {
       expect(grip.getAttribute("draggable")).toBeNull()
     })
 
+    it("announces the exact target observer to the chat drop path", () => {
+      const onAskAiTarget = vi.fn()
+      const onStart = vi.fn<(event: Event) => void>()
+      window.addEventListener(WIDGET_DRAG_START, onStart)
+
+      try {
+        const { container } = render(
+          <DashboardGrid
+            items={makeCollectionItems(480)}
+            filters={{}}
+            editMode
+            onAskAiTarget={onAskAiTarget}
+          />
+        )
+        const grip = container.querySelector('[aria-label="Drag to reorder"]')
+        if (!(grip instanceof HTMLElement)) {
+          throw new Error("Expected a grip to be rendered")
+        }
+
+        fireEvent.pointerDown(grip, { button: 0 })
+        fireEvent(
+          document,
+          new MouseEvent("pointermove", {
+            clientX: 10,
+            clientY: 10,
+            bubbles: true,
+          })
+        )
+
+        expect(onStart).toHaveBeenCalledTimes(1)
+        const event = onStart.mock
+          .calls[0][0] as CustomEvent<WidgetDragStartDetail>
+        expect(event.detail).toEqual({
+          id: "expenses",
+          title: "Expenses",
+          onAskAi: undefined,
+          onAskAiTarget,
+        })
+
+        fireEvent(
+          document,
+          new MouseEvent("pointerup", {
+            clientX: 10,
+            clientY: 10,
+            bubbles: true,
+          })
+        )
+      } finally {
+        window.removeEventListener(WIDGET_DRAG_START, onStart)
+      }
+    })
+
     it("reorders a widget via a pointerdown-on-grip → move → up gesture (no native drag)", () => {
       const { container } = render(
         <DashboardGrid items={makeCollectionItems(480)} filters={{}} editMode />
@@ -368,6 +463,368 @@ describe("DashboardGrid", () => {
       )
 
       expect(rowOrder(container)).toEqual(["category-totals", "expenses"])
+    })
+
+    it("does not reorder when the gesture ends over the AI chat drop zone", () => {
+      const { container } = render(
+        <DashboardGrid items={makeCollectionItems(480)} filters={{}} editMode />
+      )
+      expect(rowOrder(container)).toEqual(["expenses", "category-totals"])
+
+      // Stand in for the chat panel. jsdom reports every rect as 0, so the
+      // zone has to report a real one for the containment check to mean
+      // anything — that zeroed default is also why the reorder test above is
+      // unaffected by this guard.
+      const chat = document.createElement("div")
+      chat.setAttribute("data-ai-chat-dropzone", "")
+      chat.getBoundingClientRect = () =>
+        ({ left: 400, right: 800, top: 0, bottom: 600 }) as unknown as DOMRect
+      document.body.appendChild(chat)
+
+      const grip = container.querySelector('[aria-label="Drag to reorder"]')
+      if (!(grip instanceof HTMLElement)) {
+        throw new Error("Expected a grip to be rendered")
+      }
+
+      fireEvent.pointerDown(grip, { button: 0 })
+      fireEvent(
+        document,
+        new MouseEvent("pointermove", {
+          clientX: 500,
+          clientY: 100,
+          bubbles: true,
+        })
+      )
+      fireEvent(
+        document,
+        new MouseEvent("pointerup", {
+          clientX: 500,
+          clientY: 100,
+          bubbles: true,
+        })
+      )
+
+      expect(rowOrder(container)).toEqual(["expenses", "category-totals"])
+      chat.remove()
+    })
+
+    it("does not reorder when the gesture ends over a later AI chat drop zone", () => {
+      const { container } = render(
+        <DashboardGrid items={makeCollectionItems(480)} filters={{}} editMode />
+      )
+      expect(rowOrder(container)).toEqual(["expenses", "category-totals"])
+
+      const firstChat = document.createElement("div")
+      firstChat.setAttribute("data-ai-chat-dropzone", "")
+      firstChat.getBoundingClientRect = () =>
+        ({ left: 800, right: 1000, top: 0, bottom: 600 }) as unknown as DOMRect
+      document.body.appendChild(firstChat)
+
+      const secondChat = document.createElement("div")
+      secondChat.setAttribute("data-ai-chat-dropzone", "")
+      secondChat.getBoundingClientRect = () =>
+        ({ left: 400, right: 700, top: 0, bottom: 600 }) as unknown as DOMRect
+      document.body.appendChild(secondChat)
+
+      const grip = container.querySelector('[aria-label="Drag to reorder"]')
+      if (!(grip instanceof HTMLElement)) {
+        throw new Error("Expected a grip to be rendered")
+      }
+
+      try {
+        fireEvent.pointerDown(grip, { button: 0 })
+        fireEvent(
+          document,
+          new MouseEvent("pointermove", {
+            clientX: 500,
+            clientY: 100,
+            bubbles: true,
+          })
+        )
+        fireEvent(
+          document,
+          new MouseEvent("pointerup", {
+            clientX: 500,
+            clientY: 100,
+            bubbles: true,
+          })
+        )
+
+        expect(rowOrder(container)).toEqual(["expenses", "category-totals"])
+      } finally {
+        firstChat.remove()
+        secondChat.remove()
+      }
+    })
+
+    it("uses the release position when the last move still pointed at the grid", () => {
+      const { container } = render(
+        <DashboardGrid items={makeCollectionItems(480)} filters={{}} editMode />
+      )
+      const chat = document.createElement("div")
+      chat.setAttribute("data-ai-chat-dropzone", "")
+      chat.getBoundingClientRect = () =>
+        ({ left: 400, right: 800, top: 0, bottom: 600 }) as unknown as DOMRect
+      document.body.appendChild(chat)
+
+      const grip = container.querySelector('[aria-label="Drag to reorder"]')
+      if (!(grip instanceof HTMLElement)) {
+        throw new Error("Expected a grip to be rendered")
+      }
+
+      try {
+        fireEvent.pointerDown(grip, { button: 0 })
+        // Cache a real grid target first.
+        fireEvent(
+          document,
+          new MouseEvent("pointermove", {
+            clientX: 0,
+            clientY: 100,
+            bubbles: true,
+          })
+        )
+        // No final pointermove reaches the document before release in chat.
+        fireEvent(
+          document,
+          new MouseEvent("pointerup", {
+            clientX: 500,
+            clientY: 100,
+            bubbles: true,
+          })
+        )
+
+        expect(rowOrder(container)).toEqual(["expenses", "category-totals"])
+      } finally {
+        chat.remove()
+      }
+    })
+
+    it("rechecks chat eligibility on release before suppressing the reorder", () => {
+      const { container } = render(
+        <DashboardGrid items={makeCollectionItems(480)} filters={{}} editMode />
+      )
+      const chat = document.createElement("div")
+      chat.setAttribute("data-ai-chat-dropzone", "")
+      chat.getBoundingClientRect = () =>
+        ({ left: 400, right: 800, top: 0, bottom: 600 }) as unknown as DOMRect
+      document.body.appendChild(chat)
+
+      const grip = container.querySelector('[aria-label="Drag to reorder"]')
+      if (!(grip instanceof HTMLElement)) {
+        throw new Error("Expected a grip to be rendered")
+      }
+
+      try {
+        fireEvent.pointerDown(grip, { button: 0, clientX: 0, clientY: 0 })
+        fireEvent(
+          document,
+          new MouseEvent("pointermove", {
+            clientX: 10,
+            clientY: 0,
+            bubbles: true,
+          })
+        )
+
+        // The chat can become ineligible mid-gesture (clarifying, closing, or
+        // switching surfaces). Its stale pointerdown snapshot must not swallow
+        // a release that now belongs to the grid.
+        chat.removeAttribute("data-ai-chat-dropzone")
+        fireEvent(
+          document,
+          new MouseEvent("pointerup", {
+            clientX: 500,
+            clientY: 100,
+            bubbles: true,
+          })
+        )
+
+        expect(rowOrder(container)).toEqual(["category-totals", "expenses"])
+      } finally {
+        chat.remove()
+      }
+    })
+
+    describe("announcing the drag", () => {
+      const listen = () => {
+        const started: (string | undefined)[] = []
+        let ended = 0
+        const onStart = (e: Event) =>
+          started.push((e as CustomEvent<{ title?: string }>).detail?.title)
+        const onEnd = () => {
+          ended += 1
+        }
+        window.addEventListener("f0:widget-drag-start", onStart)
+        window.addEventListener("f0:widget-drag-end", onEnd)
+        return {
+          started,
+          endCount: () => ended,
+          stop: () => {
+            window.removeEventListener("f0:widget-drag-start", onStart)
+            window.removeEventListener("f0:widget-drag-end", onEnd)
+          },
+        }
+      }
+
+      const grabFirstGrip = (container: HTMLElement) => {
+        const grip = container.querySelector('[aria-label="Drag to reorder"]')
+        if (!(grip instanceof HTMLElement)) {
+          throw new Error("Expected a grip to be rendered")
+        }
+        fireEvent.pointerDown(grip, { button: 0, clientX: 0, clientY: 0 })
+        fireEvent(
+          document,
+          new MouseEvent("pointermove", {
+            clientX: 10,
+            clientY: 0,
+            bubbles: true,
+          })
+        )
+      }
+
+      it("does not announce a drag for a plain grip click", () => {
+        const { container } = render(
+          <DashboardGrid
+            items={makeCollectionItems(480)}
+            filters={{}}
+            editMode
+          />
+        )
+        const events = listen()
+        const grip = container.querySelector('[aria-label="Drag to reorder"]')
+        if (!(grip instanceof HTMLElement)) {
+          throw new Error("Expected a grip to be rendered")
+        }
+
+        try {
+          fireEvent.pointerDown(grip, { button: 0, clientX: 0, clientY: 0 })
+          fireEvent(
+            document,
+            new MouseEvent("pointerup", {
+              clientX: 0,
+              clientY: 0,
+              bubbles: true,
+            })
+          )
+
+          expect(events.started).toEqual([])
+          expect(events.endCount()).toBe(0)
+          expect(rowOrder(container)).toEqual(["expenses", "category-totals"])
+        } finally {
+          events.stop()
+        }
+      })
+
+      it("stays quiet for a widget with no title", () => {
+        const items = makeCollectionItems(480).map((item) => ({
+          ...item,
+          title: "",
+        }))
+        const { container } = render(
+          <DashboardGrid items={items} filters={{}} editMode />
+        )
+        const events = listen()
+
+        try {
+          grabFirstGrip(container)
+          // The title is the quote. Announcing an empty one invites a drop
+          // that could only do nothing.
+          expect(events.started).toEqual([])
+        } finally {
+          events.stop()
+        }
+      })
+
+      it("announces the widget identity and host-owned Ask One action", () => {
+        const onAskAi = vi.fn()
+        const details: Array<{
+          id: string
+          title: string
+          onAskAi?: typeof onAskAi
+        }> = []
+        const onStart = (event: Event) => {
+          details.push(
+            (
+              event as CustomEvent<{
+                id: string
+                title: string
+                onAskAi?: typeof onAskAi
+              }>
+            ).detail
+          )
+        }
+        window.addEventListener("f0:widget-drag-start", onStart)
+        const { container } = render(
+          <DashboardGrid
+            items={makeCollectionItems(480)}
+            filters={{}}
+            editMode
+            onAskAi={onAskAi}
+          />
+        )
+
+        try {
+          grabFirstGrip(container)
+          expect(details).toEqual([
+            { id: "expenses", title: "Expenses", onAskAi },
+          ])
+          fireEvent(
+            document,
+            new MouseEvent("pointercancel", { bubbles: true })
+          )
+        } finally {
+          window.removeEventListener("f0:widget-drag-start", onStart)
+        }
+      })
+
+      it("retracts the invitation when the pointer is cancelled", () => {
+        const { container } = render(
+          <DashboardGrid
+            items={makeCollectionItems(480)}
+            filters={{}}
+            editMode
+          />
+        )
+        const events = listen()
+
+        try {
+          grabFirstGrip(container)
+          expect(events.started).toEqual(["Expenses"])
+
+          // No `pointerup` follows a cancel, so without handling it the chat
+          // would keep a full-panel drop overlay up for good.
+          fireEvent(
+            document,
+            new MouseEvent("pointercancel", { bubbles: true })
+          )
+
+          expect(events.endCount()).toBe(1)
+          // A cancelled gesture is not a drop: the order must not change.
+          expect(rowOrder(container)).toEqual(["expenses", "category-totals"])
+        } finally {
+          events.stop()
+        }
+      })
+
+      it("retracts the invitation when the grid unmounts mid-drag", () => {
+        const { container, unmount } = render(
+          <DashboardGrid
+            items={makeCollectionItems(480)}
+            filters={{}}
+            editMode
+          />
+        )
+        const events = listen()
+
+        try {
+          grabFirstGrip(container)
+          unmount()
+
+          // Otherwise the announcement outlives the grid that made it.
+          expect(events.endCount()).toBe(1)
+        } finally {
+          events.stop()
+        }
+      })
     })
 
     it("renders no grip when not in edit mode", () => {

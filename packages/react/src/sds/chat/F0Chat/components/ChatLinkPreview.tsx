@@ -1,9 +1,10 @@
 import { type ReactNode } from "react"
 
-import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
-import { cn } from "@/lib/utils"
+import { cn, focusRing } from "@/lib/utils"
 
+import { useF0ChatEmit } from "../providers/F0ChatProvider"
 import { type F0ChatLinkPreview } from "../types"
+import { ClampText } from "./ClampText"
 import { FadeInImage } from "./FadeInImage"
 
 const hostOf = (url: string): string => {
@@ -29,7 +30,9 @@ const cardClass = (
 ) =>
   cn(
     "flex w-full flex-col overflow-hidden rounded-xl text-left no-underline",
-    "bg-f1-background-tertiary transition-colors hover:bg-f1-background-secondary",
+    "bg-f1-background-secondary",
+    "transition-shadow hover:ring-1 hover:ring-inset hover:ring-f1-border-secondary",
+    focusRing("focus-visible:ring-inset"),
     !isFirstCard && "rounded-t-sm",
     !isLastCard && "rounded-b-sm",
     isFirstCard && !isFirstOfRun && (isMine ? "rounded-tr-xs" : "rounded-tl-xs")
@@ -44,9 +47,9 @@ const PreviewTexts = ({
 }): ReactNode => (
   <div className="flex min-w-0 flex-col gap-0.5 p-2.5">
     {preview.title && (
-      <OneEllipsis className="text-base font-medium text-f1-foreground">
+      <ClampText className="text-base font-medium text-f1-foreground">
         {preview.title}
-      </OneEllipsis>
+      </ClampText>
     )}
     {preview.description && (
       <span
@@ -58,9 +61,9 @@ const PreviewTexts = ({
         {preview.description}
       </span>
     )}
-    <OneEllipsis className="text-sm text-f1-foreground-tertiary">
+    <ClampText className="text-sm text-f1-foreground">
       {hostOf(preview.url)}
-    </OneEllipsis>
+    </ClampText>
   </div>
 )
 
@@ -82,6 +85,7 @@ export const ChatLinkPreview = ({
   /** Mirrors the bubble's tail-side top corner, like the reply quote. */
   isFirstOfRun?: boolean
 }): ReactNode => {
+  const emit = useF0ChatEmit()
   if (previews.length === 0) return null
   const compact = previews.length > 1
   return (
@@ -90,6 +94,7 @@ export const ChatLinkPreview = ({
         <a
           key={`${preview.url}-${index}`}
           href={preview.url}
+          onClick={() => emit.onLinkPreviewClicked()}
           target="_blank"
           rel="noopener noreferrer"
           className={cardClass(

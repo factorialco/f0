@@ -154,6 +154,103 @@ export const CardWithContentExpanded: StoryObj<typeof F0AudioPlayerCard> = {
   },
 }
 
+const CALL_SRC = "/ai-call-sample.m4a"
+
+const TIMED_TRANSCRIPT = [
+  {
+    text: "**Recruiter:** Hi Alex, thanks for taking the time. I'd like to run through a few things about the warehouse operative role.",
+    startTime: 0.0,
+  },
+  {
+    text: "**Alex Williams:** Of course, happy to.",
+    startTime: 6.6,
+  },
+  {
+    text: "**Recruiter:** Can you tell me about your availability for night shifts and weekends?",
+    startTime: 8.86,
+  },
+  {
+    text: "**Alex Williams:** Yes, I'm fully available for nights and weekends. I live in Barajas, so my commute is under forty minutes on the motorbike.",
+    startTime: 12.83,
+  },
+  {
+    text: "**Recruiter:** Good. The role is physically demanding, a lot of time on your feet moving stock.",
+    startTime: 21.24,
+  },
+  {
+    text: "**Alex Williams:** That's what I've been doing for the last three years, so it's familiar to me.",
+    startTime: 26.12,
+  },
+  {
+    text: "**Recruiter:** And how much of that involved digital picking tools?",
+    startTime: 29.57,
+  },
+  {
+    text: "**Alex Williams:** Mostly paper picking, honestly. I used a handheld scanner in my last role, but only for about six months.",
+    startTime: 32.61,
+  },
+  {
+    text: "**Recruiter:** Understood. What are your salary expectations?",
+    startTime: 40.27,
+  },
+  {
+    text: "**Alex Williams:** Somewhere around twenty four thousand, depending on the shift premium.",
+    startTime: 43.59,
+  },
+  {
+    text: "**Recruiter:** That's within our range. And when could you start?",
+    startTime: 48.09,
+  },
+  {
+    text: "**Alex Williams:** I'd need to give two weeks' notice.",
+    startTime: 50.93,
+  },
+  {
+    text: "**Recruiter:** Perfect, that's everything I needed. We'll be in touch later this week.",
+    startTime: 53.41,
+  },
+]
+
+/**
+ * Pass `transcription` as a list of cues and the transcript follows the audio:
+ * the utterance being spoken is marked and kept in view, and clicking a line
+ * moves playback to it (playing keeps playing, paused stays paused). Scrolling
+ * the panel by hand stops the auto-scroll until the next jump.
+ *
+ * A cue without a `startTime` is plain text — no mark, no click target — so a
+ * recording whose transcript carries no timings renders as a plain dialogue.
+ */
+export const CardWithTimedTranscription: StoryObj<typeof F0AudioPlayerCard> = {
+  render: (args) => <F0AudioPlayerCard {...args} />,
+  args: {
+    src: CALL_SRC,
+    title: "AI Call with Alex Williams",
+    subtitle: "May 9, 2025 - 10:00am",
+    defaultExpanded: true,
+    detailsMaxHeight: 160,
+    content: { summary: SAMPLE_SUMMARY, transcription: TIMED_TRANSCRIPT },
+  },
+}
+
+/**
+ * The same transcript with no timings at all: the cues render as a dialogue,
+ * with nothing suggesting they can be jumped to.
+ */
+export const CardWithUntimedTranscription: StoryObj<typeof F0AudioPlayerCard> =
+  {
+    render: (args) => <F0AudioPlayerCard {...args} />,
+    args: {
+      src: CALL_SRC,
+      title: "AI Call with Alex Williams",
+      subtitle: "May 9, 2025 - 10:00am",
+      defaultExpanded: true,
+      detailsMaxHeight: 160,
+      content: {
+        transcription: TIMED_TRANSCRIPT.map(({ text }) => ({ text })),
+      },
+    },
+  }
+
 // Localized summary + transcript for the multi-language example.
 const SAMPLE_SUMMARY_ES =
   "La llamada con IA confirmó que Alex está disponible para turnos de noche y " +

@@ -1,14 +1,11 @@
-import { type CSSProperties, ReactNode } from "react"
-
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
+import { type CSSProperties, ReactNode } from "react"
 
 import { cn } from "@/lib/utils"
 
 /** What the sortable state hands to the widget being rendered. */
 export interface SortableWidgetState {
-  /** Show the widget's own drag handle. False for a locked widget. */
-  draggable: boolean
   isDragging: boolean
 }
 
@@ -20,13 +17,11 @@ export interface SortableWidgetProps {
 }
 
 /**
- * One draggable widget in an editable column. It contributes no drag chrome of
- * its own: the f0 `Widget` already draws a handle beside its title when
- * `draggable`, so this reports the sortable state through its render callback
- * and lets the design system own the affordance.
- *
- * dnd-kit's listeners sit on a wrapper rather than on the handle itself — the
- * handle lives inside `Widget`, so the events reach it by bubbling.
+ * One draggable widget in an editable column. THE WHOLE CARD IS THE HANDLE and
+ * there is no handle glyph: dragging is always available (no edit mode to enter
+ * first), so a permanent grip icon on every widget would be chrome the user
+ * never asked for. The grab cursor is the affordance; `WidgetContainer`'s sensor
+ * is what keeps a press on a row or a button from becoming a drag.
  *
  * The card the pointer carries is NOT this one: while dragging, this in-list
  * card turns invisible (still holding its slot for the shuffle) and a clone
@@ -47,9 +42,8 @@ export const SortableWidget = ({
 
   const style: CSSProperties = {
     // VERTICAL ONLY: a column is one dimension, so the neighbours' shuffles
-    // ignore any horizontal component. dnd-kit reports both axes; dropping x
-    // here is the same thing `restrictToVerticalAxis` does, without taking on
-    // @dnd-kit/modifiers for it.
+    // ignore any horizontal component. This is the shuffle; the card under the
+    // pointer is held to the same axis by the column's `verticalOnly` modifier.
     transform: CSS.Translate.toString(transform && { ...transform, x: 0 }),
     transition: transition ?? undefined,
   }
@@ -58,6 +52,11 @@ export const SortableWidget = ({
     <div
       ref={setNodeRef}
       style={style}
+      // Which widget's box this is. A LOCKED widget is not a dnd-kit droppable —
+      // that is what stops it being displaced — so dnd-kit never reports it as
+      // the thing you are over, and the column has to hit-test the dragged card
+      // against these boxes itself to say why a drop there won't happen.
+      data-widget-id={id}
       className={cn(
         !disabled && "cursor-grab active:cursor-grabbing",
         // The overlay clone is the visible card while this one is dragged;
@@ -74,7 +73,7 @@ export const SortableWidget = ({
       // pointer-only drag surface.
       {...(disabled ? {} : listeners)}
     >
-      {children({ draggable: !disabled, isDragging })}
+      {children({ isDragging })}
     </div>
   )
 }

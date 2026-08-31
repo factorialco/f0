@@ -249,7 +249,7 @@ const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
                   key={`link-${linkAction.label}`}
                   onClick={() => handleActionClick(linkAction)}
                 >
-                  <F0Link href={linkAction.href} children={linkAction.label} />
+                  <F0Link href={linkAction.href}>{linkAction.label}</F0Link>
                 </div>
               ))}
               {buttonActions.map((buttonAction) => (

@@ -22,6 +22,21 @@ export interface GraphNode<T = unknown> {
    * Leave undefined when not using on-demand data loading.
    */
   dataLoaded?: boolean
+  /**
+   * Render this node's children as a vertical stack directly under it — a tight
+   * column of compact rows sharing the parent's x — instead of the default
+   * horizontal fan-out. Use it for children that read as a list belonging to the
+   * parent rather than as branches in their own right (job levels under a role,
+   * plan tiers under a product).
+   *
+   * A stacked group reserves no horizontal space, so the parent's siblings sit
+   * as close together as if it had no children at all.
+   *
+   * **Only applies when every child is a leaf** (`childrenCount === 0`). A group
+   * with an expandable child falls back to the normal fan-out, because a stacked
+   * row has nowhere to hang a subtree.
+   */
+  stackNodes?: boolean
 }
 
 // Edge between nodes
@@ -59,6 +74,13 @@ export interface TreeNode<T = unknown> {
   childrenLoaded: boolean
   /** Mirrors `GraphNode.dataLoaded` for viewport-driven data loading. */
   dataLoaded?: boolean
+  /**
+   * Mirrors `GraphNode.stackNodes`. The layout engine reads it to lay this
+   * node's children out as a vertical stack instead of a horizontal fan-out.
+   * `useGraphRenderModel` normalizes it first — see `resolveStackedParents` —
+   * so by the time the engine sees it, the leaf-children precondition holds.
+   */
+  stackNodes?: boolean
   /**
    * Present when a node has multiple parents in a DAG. Lists all logical
    * parent IDs. The canonical layout parent (`parentId`) is the first entry.

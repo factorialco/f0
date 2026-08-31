@@ -108,7 +108,10 @@ export const SidebarTabPanel = ({
   const noResults = isSearching && hasAnyItems && filteredGroups.length === 0
 
   return (
-    <div className={cn("flex w-full flex-col gap-4 px-3", className)}>
+    <div
+      className={cn("flex w-full flex-col gap-4 px-3", className)}
+      data-sidebar-tab-panel-searching={isSearching}
+    >
       {/* Search always sits at the very top of the panel. */}
       {searchPlaceholder !== undefined && (
         <SidebarTabPanelSearch
@@ -148,6 +151,7 @@ export const SidebarTabPanel = ({
                   // Remount only when search toggles on/off (not per keystroke)
                   // so a collapsed group opens to reveal its matches.
                   key={`${group.id}-${isSearching}`}
+                  data-sidebar-panel-group-id={group.id}
                   layout="position"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -214,20 +218,24 @@ export const SidebarTabPanel = ({
           </LayoutGroup>
         ) : (
           filteredGroups.map((group) => (
-            <SidebarCollapsibleSection
+            <div
               // Remount only when search toggles on/off (not per keystroke) so a
               // collapsed group opens to reveal its matches while searching.
               key={`${group.id}-${isSearching}`}
-              title={group.title ?? ""}
-              isRoot={group.title === undefined}
-              isOpen={isSearching ? true : group.isOpen}
-              highlightWhenCollapsed={group.highlightWhenCollapsed}
-              collapsedBadge={group.collapsedBadge}
+              data-sidebar-panel-group-id={group.id}
             >
-              {group.items.map((item) => (
-                <Fragment key={item.id}>{item.content}</Fragment>
-              ))}
-            </SidebarCollapsibleSection>
+              <SidebarCollapsibleSection
+                title={group.title ?? ""}
+                isRoot={group.title === undefined}
+                isOpen={isSearching ? true : group.isOpen}
+                highlightWhenCollapsed={group.highlightWhenCollapsed}
+                collapsedBadge={group.collapsedBadge}
+              >
+                {group.items.map((item) => (
+                  <Fragment key={item.id}>{item.content}</Fragment>
+                ))}
+              </SidebarCollapsibleSection>
+            </div>
           ))
         ))}
     </div>

@@ -56,6 +56,15 @@ export type GraphVisualizationOptions<
   /** Tag columns that are always visible and cannot be hidden in the settings. */
   pinnedTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>
   /**
+   * Tag columns the actor is not allowed to see, mapped to the reason. Each is
+   * still listed in the settings but with its toggle forced OFF and disabled,
+   * and the given (already-translated) text shown in a tooltip. Unlike
+   * `pinnedTagTypes` (locked ON, drawn with a lock icon), these render no lock
+   * icon — the disabled switch + tooltip is the affordance. The caller should
+   * also omit these columns' tags from `tags(record)`.
+   */
+  lockedTagTypes?: Partial<Record<F0GraphNodeTagColumn, string>>
+  /**
    * Floating toolbar shown above a node while it is selected. Provide the
    * action buttons (e.g. `<F0Button size="sm" … />`) for the given record.
    */
@@ -64,6 +73,29 @@ export type GraphVisualizationOptions<
   getNodeId?: (record: R) => string
   /** Number of children a node has. A node is expandable when this is `> 0`. */
   getChildrenCount: (record: R) => number
+  /**
+   * Whether this record's children render as a vertical stack of compact rows
+   * directly under it, instead of the default horizontal fan-out. Use it for
+   * children that read as a list belonging to the record rather than as
+   * branches in their own right — job levels under a role, plan tiers under a
+   * product. A stacked group reserves no horizontal space, so the record's
+   * siblings close in around it.
+   *
+   * Only applies when every child is a leaf (`getChildrenCount` returns 0 for
+   * all of them); a group with an expandable child keeps the normal fan-out.
+   * Stacked rows are labelled with `title` and can carry `stackedTrailing`;
+   * `avatar` / `subtitle` / `tags` do not apply to them.
+   */
+  stackNodes?: (record: R) => boolean
+  /**
+   * Trailing content for a stacked row — a count or a small icon button.
+   * Rendered at the row's trailing edge; clicks inside it do not select the
+   * node. Ignored for records that are not rendered as stacked rows.
+   *
+   * Not a selection affordance: F0Graph has no multi-select, so a checkbox here
+   * would promise a behaviour the graph does not have.
+   */
+  stackedTrailing?: (record: R) => ReactNode
   /**
    * Returns the filters that, applied to the source `dataAdapter`, fetch the
    * direct children of `parentId`. `parentId === null` must return the roots.
@@ -92,6 +124,18 @@ export type GraphVisualizationOptions<
    * the default entry view (roots expanded to `defaultExpandDepth`).
    */
   focusOnEntry?: string
+  /**
+   * Id of a node to mark as **selected on entry** — the click-selection ring, so
+   * a deep link lands on the graph looking the way a user's own click leaves it,
+   * not just framed. Seeded on the first render; the selection then follows
+   * normal clicks/keyboard (this is a one-shot entry seed, not a controlled
+   * value). Pair it with `focusOnEntry` (usually the same id) so the node's
+   * branch is expanded and framed — otherwise the ring isn't visible until its
+   * branch is opened. Unlike `revealNodeId` (search) it sets the selection, not
+   * the reveal highlight. Providing it puts the graph's selection in controlled
+   * mode; omitting it leaves selection uncontrolled (the default).
+   */
+  initialSelectedNodeId?: string
   /**
    * Resolves the ancestor path (root → … → matched node) for a node so it can
    * be revealed, returning the records in root-first order. Required for

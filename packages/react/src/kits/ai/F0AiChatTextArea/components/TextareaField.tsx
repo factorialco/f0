@@ -70,10 +70,13 @@ export const TextareaField = ({
         >
           {highlightSegments.map((seg, i) =>
             seg.type === "mention" ? (
-              <span
-                key={i}
-                className="font-medium text-f1-foreground-secondary"
-              >
+              // No weight change: a `<textarea>` lays its entire run out at
+              // one weight, so a heavier mention paints wider than the
+              // transparent glyphs the caret is positioned from and every
+              // character after it sits off its boundary. Colour alone carries
+              // the distinction. See the comms twin (ChatTextareaField) for the
+              // measurement.
+              <span key={i} className="text-f1-foreground-secondary">
                 {seg.text}
               </span>
             ) : seg.type === "ghost" ? (
@@ -103,6 +106,7 @@ export const TextareaField = ({
         </p>
       )}
       <textarea
+        aria-label={resolvedDefaultPlaceholder}
         autoFocus={false}
         name="one-ai-input"
         rows={1}
@@ -121,7 +125,15 @@ export const TextareaField = ({
           "min-h-[20px] max-h-[240px] h-auto",
           "resize-none",
           "whitespace-pre-wrap break-words",
-          "text-[16px] sm:text-[14px] leading-[20px] font-normal",
+          // `[letter-spacing:inherit]` is load-bearing: a `<textarea>` does not
+          // inherit letter-spacing, because the UA stylesheet declares
+          // `letter-spacing: normal` on form controls and that beats the
+          // -0.005em `body` sets (packages/core/base.css) — which the sizer and
+          // overlay divs above DO inherit. Without it the transparent text and
+          // the painted overlay drift ~0.07px per character and wrap at
+          // different points. `text-base` is not usable here: the 16px mobile
+          // size is deliberate (it stops iOS zooming on focus).
+          "text-[16px] sm:text-[14px] leading-[20px] font-normal [letter-spacing:inherit]",
           "mt-3 px-3",
           "overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
           "outline-none",

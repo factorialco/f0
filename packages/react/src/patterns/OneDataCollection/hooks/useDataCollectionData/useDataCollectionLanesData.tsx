@@ -109,6 +109,7 @@ const LaneProvider = <
     totalItems,
     mergedFilters: hookMergedFilters,
     summaries,
+    committedQuery,
   } = hook
 
   useEffect(() => {
@@ -126,6 +127,7 @@ const LaneProvider = <
       totalItems,
       mergedFilters: hookMergedFilters,
       summaries,
+      committedQuery,
     })
   }, [
     data,
@@ -141,6 +143,7 @@ const LaneProvider = <
     totalItems,
     hookMergedFilters,
     summaries,
+    committedQuery,
     onHookUpdate,
     lane.id,
   ])
