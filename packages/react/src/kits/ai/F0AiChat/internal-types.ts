@@ -2,6 +2,7 @@ import {
   type CanvasActions,
   type CanvasEntityDefinition,
 } from "../canvas/types"
+import { type PanelBounds } from "./utils/panelWidth"
 import {
   type AiChatDisclaimer,
   type AiChatMode,
@@ -106,7 +107,8 @@ export type AiChatProviderReturnValue = {
   ) => void
   tracking?: AiChatTrackingOptions
   /**
-   * Current width of the chat window (for resizable mode)
+   * The user's preferred width, persisted against the absolute range. This is
+   * NOT what the layout reserves — read `effectiveChatWidth` for that.
    */
   chatWidth: number
   setChatWidth: React.Dispatch<React.SetStateAction<number>>
@@ -114,6 +116,21 @@ export type AiChatProviderReturnValue = {
    * Reset the chat width to the default value (360px)
    */
   resetChatWidth: () => void
+  /**
+   * `chatWidth` held inside what the measured frame can actually give it. The
+   * preference survives a narrow window; only this shrinks.
+   *
+   * OPTIONAL for the same reason as `isResizing` below: the provider always
+   * supplies it, but making it required reads as a breaking public-API change.
+   */
+  effectiveChatWidth?: number
+  /** The range the panel may be dragged to at the frame's current width. */
+  chatWidthBounds?: PanelBounds
+  /**
+   * Publishes the frame's content-box width. Called by ApplicationFrame, which
+   * is the only thing that knows how much room is left beside the navigation.
+   */
+  setFrameWidth?: (width: number) => void
   /**
    * True while the user is dragging the chat's resize handle. Broadcast here
    * because everything laid out against the chat's edge has to follow the drag
