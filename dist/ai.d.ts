@@ -528,6 +528,12 @@ declare type AiChatProviderReturnValue = {
     processDroppedFiles: (files: File[]) => void;
     /* Excluded from this release type: setProcessDroppedFilesFunction */
     /**
+     * Move focus into the mounted chat composer, or queue it until mount.
+     * Returns whether focus moved synchronously.
+     */
+    focusChatInput: () => boolean;
+    /* Excluded from this release type: setFocusChatInputFunction */
+    /**
      * Pre-loaded context shown as an empty state in the chat.
      * Prepended to the first user message as `<pending-context>`.
      */
@@ -791,6 +797,7 @@ export declare const aiTranslations: {
             readonly exporting: "Exporting…";
         };
         readonly dashboardItem: {
+            readonly askOne: "Ask One";
             readonly chartType: "Chart type";
             readonly errorTitle: "Error loading data";
             readonly retry: "Retry";
@@ -823,6 +830,7 @@ export declare const aiTranslations: {
         readonly fileUploadBlockedSubmit: "Your message wasn't sent because one of the attachments failed to upload. Remove it or retry.";
         readonly tooManyFilesError: "You can attach up to {{maxFiles}} files at once";
         readonly dropFilesHere: "Drop your files here";
+        readonly dropWidgetToDiscuss: "Drop here to discuss with One";
         readonly reply: "Reply";
         readonly removeQuote: "Remove quote";
         readonly clarifyingQuestion: {
@@ -2194,6 +2202,8 @@ export declare const defaultTranslations: {
         readonly details: "Recording details";
         readonly summary: "Summary";
         readonly transcription: "Transcription";
+        readonly jumpTo: "Jump to {{time}}";
+        readonly transcriptHint: "Select a line to move the recording to that moment";
         readonly language: "Language";
         readonly audio: "Audio";
     };
@@ -2246,6 +2256,7 @@ export declare const defaultTranslations: {
         readonly copy: "Copy";
         readonly paste: "Paste";
         readonly close: "Close";
+        readonly back: "Back";
         readonly collapse: "Collapse";
         readonly collapseItem: "Collapse {{title}}";
         readonly expand: "Expand";
@@ -2372,11 +2383,14 @@ export declare const defaultTranslations: {
             readonly viewSelectorLabel: "Select view";
         };
         readonly table: {
+            readonly seeMoreChildren: "See more";
             readonly settings: {
                 readonly showAllColumns: "Show all";
                 readonly hideAllColumns: "Hide all";
                 readonly addColumn: "Add column";
                 readonly removeColumn: "Remove column";
+                readonly lockColumn: "Lock column: {{label}}";
+                readonly unlockColumn: "Unlock column: {{label}}";
             };
         };
         readonly editableTable: {
@@ -2476,6 +2490,11 @@ export declare const defaultTranslations: {
             readonly range: {
                 readonly currentDate: "Today";
                 readonly label: "Range";
+            };
+            readonly periods: {
+                readonly currentDate: "Current period";
+                readonly label: "Periods";
+                readonly empty: "No periods available";
             };
         };
         readonly month: {
@@ -2582,6 +2601,13 @@ export declare const defaultTranslations: {
             readonly exporting: "Exporting…";
         };
         readonly dashboardItem: {
+            /**
+             * Deliberately not `ai.ask` ("Ask One" by default here, but hosts
+             * override it — factorial renders it as plain "Ask" for the widget and
+             * insight-card buttons). This menu entry needs the product name spelled
+             * out, so it owns its own key.
+             */
+            readonly askOne: "Ask One";
             readonly chartType: "Chart type";
             readonly errorTitle: "Error loading data";
             readonly retry: "Retry";
@@ -2614,6 +2640,7 @@ export declare const defaultTranslations: {
         readonly fileUploadBlockedSubmit: "Your message wasn't sent because one of the attachments failed to upload. Remove it or retry.";
         readonly tooManyFilesError: "You can attach up to {{maxFiles}} files at once";
         readonly dropFilesHere: "Drop your files here";
+        readonly dropWidgetToDiscuss: "Drop here to discuss with One";
         readonly reply: "Reply";
         readonly removeQuote: "Remove quote";
         readonly clarifyingQuestion: {
@@ -2660,12 +2687,29 @@ export declare const defaultTranslations: {
         readonly closeSearch: "Close search";
         readonly noResults: "No chats found";
         readonly backToLatest: "Jump to latest";
+        readonly readOnly: "You can't send messages in this conversation";
         readonly online: "Online";
         readonly muted: "Muted";
         readonly mute: "Mute";
         readonly unmute: "Unmute";
         readonly attachFile: "Attach file";
         readonly addEmoji: "Add emoji";
+        readonly emojiPicker: {
+            readonly search: "Search emoji";
+            readonly frequentlyUsed: "Frequently used";
+            readonly noResults: "No emoji found";
+            readonly grid: "Emoji";
+            readonly categories: {
+                readonly people: "Smileys & people";
+                readonly nature: "Animals & nature";
+                readonly foods: "Food & drink";
+                readonly activity: "Activity";
+                readonly places: "Travel & places";
+                readonly objects: "Objects";
+                readonly symbols: "Symbols";
+                readonly flags: "Flags";
+            };
+        };
         readonly recordAudio: "Record audio";
         readonly listening: "Listening…";
         readonly stopRecording: "Stop and transcribe";
@@ -2793,6 +2837,7 @@ export declare const defaultTranslations: {
             readonly ofTotal: "of total";
             readonly total: "total";
             readonly target: "target";
+            readonly ofTarget: "of target";
             readonly ofRange: "of range";
             readonly fromPrevious: "from previous";
             readonly fromStage: "from {{stage}}";
@@ -3085,6 +3130,7 @@ export declare const defaultTranslations: {
         readonly editParamsTitle: "Edit widget params";
         readonly removeWidget: "Remove widget";
         readonly addWidget: "Add widget";
+        readonly configureWidget: "Configure {{title}}";
         /** Heads the widgets a Home suggests, at the top of the picker. */
         readonly recommended: "Recommended";
         /** Why a drop onto a pinned widget was refused. `{{title}}` is its name. */
@@ -3210,11 +3256,17 @@ declare type DropdownItemSeparator = {
     type: "separator";
 };
 
-export declare const DropOverlay: ({ visible, onFilesDropped }: DropOverlayProps) => JSX_2.Element;
+export declare const DropOverlay: ({ visible, onFilesDropped, mode, }: DropOverlayProps) => JSX_2.Element;
 
 declare interface DropOverlayProps {
     visible: boolean;
-    onFilesDropped: (files: File[]) => void;
+    /**
+     * Handles a native file drop. Omit for `mode="discuss"`, where the drag is a
+     * pointer gesture and carries no `dataTransfer`.
+     */
+    onFilesDropped?: (files: File[]) => void;
+    /** Which drop the overlay is inviting. */
+    mode?: "files" | "discuss";
 }
 
 /**
@@ -3462,7 +3514,7 @@ export declare const F0AiChatProvider: ({ enabled, side, panelContentSide, initi
  * coupling to `useAiChat()` or CopilotKit — wrappers like F0AiChat
  * provide the wiring.
  */
-export declare const F0AiChatTextArea: ({ onSubmit, onStop, inProgress, onBeforeSubmit, placeholders, creditWarning, clarifyingUI, pendingContext, onPendingContextChange, pendingQuote, onPendingQuoteChange, fileAttachments, toolbarStart, onTranscribe, searchPersons, onProcessFilesRef, disclaimer, footer, isWelcomeScreen, fullscreen, welcomeScreenSuggestions, onSuggestionClick, welcomeScreenSuggestionsPlacement, welcomeScreenCards, padding, ref, }: F0AiChatTextAreaProps) => JSX_2.Element;
+export declare const F0AiChatTextArea: ({ onSubmit, onStop, inProgress, onBeforeSubmit, placeholders, creditWarning, clarifyingUI, pendingContext, onPendingContextChange, pendingQuote, onPendingQuoteChange, fileAttachments, toolbarStart, onTranscribe, searchPersons, onProcessFilesRef, disclaimer, footer, isWelcomeScreen, fullscreen, welcomeScreenSuggestions, onSuggestionClick, welcomeScreenSuggestionsPlacement, welcomeScreenSuggestionsCollapsedByDefault, welcomeScreenCards, padding, ref, }: F0AiChatTextAreaProps) => JSX_2.Element;
 
 export declare type F0AiChatTextAreaProps = {
     ref: RefObject<HTMLDivElement>;
@@ -3562,26 +3614,59 @@ export declare type F0AiChatTextAreaProps = {
      *   single bar about two lines tall. Its popover opens downward, because up is
      *   now the text you are about to type.
      *
-     * ⚠️ `"inside"` IS A COMPOSER SHAPE, NOT JUST A POSITION. It also moves the
-     * send button onto the textarea's own line (at `sm`, centred on the text) and
-     * puts One's mark in front of the text. Neither is a feature bolted onto this
-     * prop — they are what make the placement possible and legible. The action row
-     * is full-width, so a chips row plus an action row inside one field is three
-     * stacked bands and the "single bar" is gone; with send trailing the text there
-     * are two, text then suggestions. The attachment, host (`toolbarStart`) and
-     * dictation controls keep their own row when the host enables them; with none
-     * of them the field is just the two bands.
+     * ⚠️ `"inside"` IS A COMPOSER SHAPE, NOT JUST A POSITION. The chips do not get
+     * a band of their own: they take the middle of the ACTION row, between the
+     * attachment/host controls and the dictation · send pair, and One's mark goes
+     * in front of the text. That is what keeps the field two bands tall — text,
+     * then one row of controls — instead of three. Because the chips share that
+     * line, they scroll sideways rather than wrapping, with the overflowing ends
+     * faded: ten groups cost the same height as three.
      *
-     * THE INLINE SEND FOLLOWS THE PROP, NOT THE WELCOME STATE. The suggestions
+     * THE SHAPE FOLLOWS THE PROP, NOT THE WELCOME STATE. The suggestions
      * themselves are welcome-screen-only as they always were, but a composer that
-     * put send back in the action row the moment the first message landed would
-     * change shape under the reader mid-conversation. `"inside"` therefore keeps
-     * the two-band bar for the whole thread; after the welcome screen it is simply
-     * a bar with no chips in it.
+     * dropped One's mark the moment the first message landed would change shape
+     * under the reader mid-conversation. `"inside"` therefore keeps the bar for the
+     * whole thread; after the welcome screen it is simply a bar with no chips in
+     * it.
      *
      * @default "above"
      */
     welcomeScreenSuggestionsPlacement?: "above" | "inside";
+    /**
+     * Start closed, and open when the reader focuses the input — with a motion
+     * reveal, the row growing into place.
+     *
+     * For hosts where the composer is not the thing the reader came for — a Home
+     * hero, say — so the bar sits quiet until it is addressed, and the starter
+     * prompts arrive at the moment they are useful.
+     *
+     * ⚠️ WITH `"inside"` THIS COLLAPSES THE WHOLE CONTROL ROW, not just the chips:
+     * the field becomes ONE LINE — One's mark, the text, then dictation and send
+     * trailing it at `sm` — and the chips, attachment and host controls arrive with
+     * the row on focus. A row emptied of its chips would still be 56px of padding
+     * around two buttons, which is not a quiet bar; it is the same two-band field
+     * with a hole in it. Send comes along because a bar you cannot send from is not
+     * a composer, and dictation because talking is a way to start a prompt without
+     * typing one. With the row `"above"`, only that row collapses — the field below
+     * it is a plain composer and does not change shape.
+     *
+     * FOCUS IS TRACKED ON THE WHOLE COMPOSER, not on the textarea: it closes when
+     * focus leaves the field AND everything in it, including the suggestion panel
+     * (which Radix portals outside the form). Closing on the textarea's own blur
+     * would close the row the moment a chip took focus, which is every way of
+     * picking one. Three things hold it open regardless of focus: anything already
+     * typed or attached (a half-written prompt with no visible way to send it would
+     * be a trap — and a host that forwards a dropped file can put one there without
+     * the textarea ever being focused), and a recording in flight (its cancel ·
+     * confirm pair lives in the row).
+     *
+     * ⚠️ It also suppresses the composer's own autofocus-on-mount, which would
+     * otherwise open everything before the reader had touched anything and make
+     * this prop a no-op. A collapsed composer starts unfocused.
+     *
+     * @default false
+     */
+    welcomeScreenSuggestionsCollapsedByDefault?: boolean;
     /**
      * Cards rendered as a grid below the composer on the fullscreen welcome
      * screen. Each card carries its own `onClick`; the host decides the behavior.
@@ -5769,5 +5854,10 @@ declare namespace F0GraphExpanderWrapperInner {
 
 
 declare namespace F0GraphCollapserWrapperInner {
+    var displayName: string;
+}
+
+
+declare namespace F0GraphStackGroupWrapperInner {
     var displayName: string;
 }
