@@ -1,6 +1,6 @@
 import postcss from "postcss"
 import tailwindcss from "tailwindcss"
-import { describe, expect, it } from "vitest"
+import { beforeAll, describe, expect, it } from "vitest"
 
 import tailwindConfig from "../../tailwind.config"
 
@@ -35,8 +35,13 @@ const iconColorClasses = [
 ] as const
 
 describe("published Tailwind output", () => {
-  it("keeps semantic color generation proportional to real usage", async () => {
-    const css = await compileUtilities()
+  let css: string
+
+  beforeAll(async () => {
+    css = await compileUtilities()
+  }, 15_000)
+
+  it("keeps semantic color generation proportional to real usage", () => {
     let semanticColorRuleCount = 0
 
     postcss.parse(css).walkRules((rule) => {
@@ -46,9 +51,7 @@ describe("published Tailwind output", () => {
     expect(semanticColorRuleCount).toBeLessThan(1_000)
   })
 
-  it("includes every public semantic icon color", async () => {
-    const css = await compileUtilities()
-
+  it("includes every public semantic icon color", () => {
     for (const className of iconColorClasses) {
       expect(css).toContain(`.${className}`)
     }
