@@ -7826,9 +7826,8 @@ export declare interface F0AnalyticsDashboardProps<Filters extends FiltersDefini
      * and drives that chat directly.
      *
      * `point` is set when the ask came from a clicked mark rather than the
-     * widget menu — clicking a mark asks about it outright, with no intermediate
-     * action — so one handler answers both without the host having to tell them
-     * apart by anything other than its presence.
+     * widget menu, so one handler answers both without the host having to tell
+     * them apart by anything other than its presence.
      */
     onAskAi?: (item: F0AnalyticsDashboardAskAiTarget) => void;
     /**
