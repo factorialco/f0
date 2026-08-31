@@ -1,6 +1,7 @@
 import { Canvas, Controls, Meta, Unstyled } from "@storybook/addon-docs/blocks"
 
 import * as Stories from "./F0InputField.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
 
 <Meta of={Stories} />
 
@@ -168,6 +169,25 @@ The `F0InputField` is composed of several parts:
 - You only need a button or a non-editable visual chip. `F0InputField` always wraps an editable
   element; use `F0Button`, `F0Chip` or `F0Tag` for non-editable surfaces.
 
+<DoDonts
+  do={{
+    description:
+      "Compose F0InputField with a single controlled editable element as children, driving value and onChange yourself.",
+    guidelines: [
+      "Pass value and onChange down to the child input — F0InputField clones it and injects id, sizing and aria attributes, but does not own state.",
+      "Always pass label, even when the design hides it visually — use hideLabel to keep it in the accessibility tree instead of omitting label altogether.",
+    ],
+  }}
+  dont={{
+    description:
+      "Don't reach for F0InputField in product code, and don't set aria-* attributes on the child yourself.",
+    guidelines: [
+      "Use the dedicated F0TextInput, F0NumberInput, F0SearchInput, F0TextAreaInput or F0DurationInput instead — F0InputField is the shared chrome they're built on, not a public component.",
+      "Don't add aria-busy, aria-disabled, aria-controls or aria-expanded to the child manually — F0InputField injects them via cloneElement, so a value you set yourself gets overwritten or conflicts.",
+    ],
+  }}
+/>
+
 ### API contract
 
 `F0InputField` is a **chrome contract**, not a visual one. When composing a new writable input on top of it:
@@ -192,8 +212,6 @@ The `F0InputField` is composed of several parts:
 
 What `F0InputField` guarantees when the [API contract](#api-contract) is satisfied.
 
-A11y wiring is not visually demonstrable. It includes: `aria-busy`, `aria-disabled`, `aria-controls`, `aria-expanded`, label association via `id`, `aria-live`-polite status region, autofill detection, and `aria-label="Clear"` on the clear button (override via `onClear`).
-
 ### Status precedence
 
 When both `hint` and `status={{ type: "error", ... }}` are provided, the error message replaces the hint and the critical border colour wins. The legacy boolean `error` prop behaves the same way.
@@ -217,6 +235,17 @@ The example below sets `maxLength={10}` and a `value` of `"long text should be t
 Browsers do not fire `change` events on autofill, which would leave the floating placeholder visible on top of the autofilled value. `F0InputField` listens to the WebKit `animationstart` event and polls `:-webkit-autofill` / `:autofill` to hide the placeholder until the autofill state clears.
 
 ---
+
+## Accessibility
+
+None of this is visually demonstrable, so it is documented here instead of in a story. `F0InputField` wires the following onto the cloned child element, so a new writable input built on top of it does not need to set any of it manually:
+
+- A generated `id` links the rendered `<label htmlFor>` to the cloned child, and the child also gets `aria-label` (from `label`, falling back to `placeholder`) — `label` is required even when `hideLabel` visually hides the `<label>` element, so the accessible name survives either way.
+- `aria-disabled` while `disabled` or `readonly`, and `aria-busy` while `loading` — both land on the child element itself.
+- `aria-controls` and `aria-expanded` pass straight through to the child when the consumer supplies them, for a future input that needs to describe an owned listbox or popover.
+- The clear button has a fixed `aria-label="Clear"`; there is no prop to relabel it, only `onClear` to change what happens when it is activated.
+
+The `loading` spinner is a separate live region — it carries its own `aria-busy` and `aria-live="polite"` (`ui/Spinner`), independent of the child's `aria-busy`. Status, warning, info and hint messages, by contrast, render as plain text next to the field: they are not connected to the child via `aria-describedby` or an `aria-live` region, so a type-specific input built on `F0InputField` that needs a validation error to be announced has to wire that itself.
 
 ## Props
 
