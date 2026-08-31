@@ -73,6 +73,9 @@ export const Clearable: Story = {
     placeholder: "Search...",
     clearable: true,
     onChange: fn(),
+    // `tabIndex` defaults to -1, so a search box is not a tab stop unless it is
+    // the way into its list. This story walks the keyboard flow, so it opts in.
+    tabIndex: 0,
   },
   play: async ({ args, canvasElement, step }) => {
     const canvas = within(canvasElement)
