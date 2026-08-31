@@ -211,6 +211,33 @@ export const WithOverachievement: Story = {
   },
 }
 
+/**
+ * A plan whose later periods have yet to start: the gradient is the whole column
+ * there, and hovering it reports that period's target and how far along it is —
+ * the card belongs to the bar, not to the gap.
+ */
+export const TargetsBeforeAnyProgress: Story = {
+  render: (args) => <F0DataChart {...args} />,
+  args: {
+    type: "bar",
+    categories: ["Q1", "Q2", "Q3", "Q4"],
+    series: [
+      {
+        name: "Attainment",
+        data: [
+          { value: 125_000, target: 185_000 },
+          { value: 40_000, target: 185_000 },
+          { value: 0, target: 185_000 },
+          { value: 0, target: 185_000 },
+        ],
+      },
+    ],
+    showTargetProgress: true,
+    showLegend: false,
+    valueFormatter: (v) => `${v / 1000}k €`,
+  },
+}
+
 /** Multiple series stacked into a single bar per category. */
 export const Stacked: Story = {
   render: (args) => <F0DataChart {...args} />,
