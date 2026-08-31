@@ -5,6 +5,7 @@ import { zeroRender as render } from "@/testing/test-utils"
 import { F0DataChart } from "../F0DataChart"
 
 const setOptionMock = vi.fn()
+const chartEventHandlers: Record<string, ((params: unknown) => void)[]> = {}
 
 vi.mock("echarts", () => ({
   init: vi.fn(() => ({
@@ -12,13 +13,24 @@ vi.mock("echarts", () => ({
     resize: vi.fn(),
     dispose: vi.fn(),
     getDom: vi.fn(() => document.createElement("div")),
-    on: vi.fn(),
-    off: vi.fn(),
+    on: vi.fn((event: string, handler: (params: unknown) => void) => {
+      chartEventHandlers[event] = [
+        ...(chartEventHandlers[event] ?? []),
+        handler,
+      ]
+    }),
+    off: vi.fn((event: string, handler: (params: unknown) => void) => {
+      chartEventHandlers[event] = (chartEventHandlers[event] ?? []).filter(
+        (candidate) => candidate !== handler
+      )
+    }),
+    dispatchAction: vi.fn(),
   })),
   use: vi.fn(),
   getInstanceByDom: vi.fn(),
   graphic: {
     LinearGradient: vi.fn(function LinearGradient(this: object) {
+      // eslint-disable-next-line react/no-this-in-sfc -- echarts constructor mock, not a component
       return this
     }),
   },
@@ -64,8 +76,43 @@ const funnelProps = {
 
 beforeEach(() => {
   setOptionMock.mockClear()
+  for (const event of Object.keys(chartEventHandlers)) {
+    delete chartEventHandlers[event]
+  }
   containerSize.width = 800
   containerSize.height = 320
+})
+
+describe("FunnelChart — legend visibility", () => {
+  it("reports the final stage selection to companion surfaces", () => {
+    const onLegendSelectionChange = vi.fn()
+    render(
+      <F0DataChart
+        {...funnelProps}
+        showLegend
+        onLegendSelectionChange={onLegendSelectionChange}
+      />
+    )
+
+    chartEventHandlers.legendselectchanged?.forEach((handler) =>
+      handler({
+        name: "Applied",
+        selected: {
+          Applied: false,
+          Screened: true,
+          Interviewed: true,
+          Hired: true,
+        },
+      })
+    )
+
+    expect(onLegendSelectionChange).toHaveBeenLastCalledWith({
+      Applied: true,
+      Screened: false,
+      Interviewed: false,
+      Hired: false,
+    })
+  })
 })
 
 // The formatter runs inside ECharts on hover, so it only gets exercised by

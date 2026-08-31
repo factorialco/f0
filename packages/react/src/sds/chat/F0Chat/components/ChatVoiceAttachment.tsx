@@ -6,7 +6,13 @@ import { SolidPause, SolidPlay } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 
+import { useChatSurface } from "../providers/ChatSurfaceProvider"
+import {
+  useF0ChatEmit,
+  useF0ChatVoicePlayLog,
+} from "../providers/F0ChatProvider"
 import { type F0ChatVoiceAttachment } from "../types"
+import { CHAT_MEDIA_WIDTH_CLASS } from "../utils/media-layout"
 
 /** Speed cycle for the pill: tap to advance, wraps around. */
 const PLAYBACK_RATES = [1, 1.5, 2, 0.5]
@@ -26,51 +32,104 @@ const FALLBACK_LEVELS = Array.from(
   (_, i) => 0.3 + 0.25 * Math.abs(Math.sin(i / 2.4))
 )
 
+const waveformCache = new Map<string, number[]>()
+const waveformRequests = new Map<string, Promise<number[]>>()
+let waveformDecodeTail: Promise<void> = Promise.resolve()
+
+const enqueueWaveformDecode = <Result,>(
+  decode: () => Promise<Result>
+): Promise<Result> => {
+  const result = waveformDecodeTail.then(decode, decode)
+  waveformDecodeTail = result.then(
+    () => undefined,
+    () => undefined
+  )
+  return result
+}
+
+const loadVoiceWaveform = (url: string): Promise<number[]> => {
+  const cached = waveformCache.get(url)
+  if (cached) return Promise.resolve(cached)
+
+  const pending = waveformRequests.get(url)
+  if (pending) return pending
+
+  const AudioCtx =
+    typeof window !== "undefined"
+      ? (window.AudioContext ??
+        (window as { webkitAudioContext?: typeof AudioContext })
+          .webkitAudioContext)
+      : undefined
+  if (!AudioCtx) return Promise.resolve(FALLBACK_LEVELS)
+
+  const request = (async () => {
+    const response = await fetch(url)
+    const buffer = await response.arrayBuffer()
+    return enqueueWaveformDecode(async () => {
+      const ctx = new AudioCtx()
+      try {
+        const audio = await ctx.decodeAudioData(buffer)
+        const data = audio.getChannelData(0)
+        const bucket = Math.max(1, Math.floor(data.length / BAR_COUNT))
+        const raw: number[] = []
+
+        for (let i = 0; i < BAR_COUNT; i++) {
+          let sum = 0
+          let samples = 0
+          const start = i * bucket
+          // A visual waveform does not need every PCM sample. Bounding the
+          // work prevents long voice notes from monopolizing the main thread.
+          const stride = Math.max(1, Math.floor(bucket / 256))
+          for (
+            let j = start;
+            j < start + bucket && j < data.length;
+            j += stride
+          ) {
+            sum += data[j] * data[j]
+            samples += 1
+          }
+          raw.push(Math.sqrt(sum / Math.max(samples, 1)))
+        }
+
+        const max = Math.max(...raw, 0.001)
+        return raw.map((value) => Math.max(MIN_LEVEL, value / max))
+      } finally {
+        void ctx.close()
+      }
+    })
+  })()
+    .then((levels) => {
+      waveformCache.set(url, levels)
+      return levels
+    })
+    .catch(() => FALLBACK_LEVELS)
+    .finally(() => waveformRequests.delete(url))
+
+  waveformRequests.set(url, request)
+  return request
+}
+
 /**
  * Decode the audio and reduce it to per-bar RMS levels, normalized to [0, 1] —
  * the WhatsApp-style static waveform. Falls back to a neutral shape when the
  * fetch/decoding fails (CORS, unsupported codec, jsdom).
  */
 const useVoiceWaveform = (url: string): number[] => {
-  const [levels, setLevels] = useState<number[]>(FALLBACK_LEVELS)
+  const [levels, setLevels] = useState<number[]>(
+    () => waveformCache.get(url) ?? FALLBACK_LEVELS
+  )
 
   useEffect(() => {
-    const AudioCtx =
-      typeof window !== "undefined"
-        ? (window.AudioContext ??
-          (window as { webkitAudioContext?: typeof AudioContext })
-            .webkitAudioContext)
-        : undefined
-    if (!AudioCtx) return
+    const cached = waveformCache.get(url)
+    if (cached) {
+      setLevels(cached)
+      return
+    }
 
     let cancelled = false
-    void (async () => {
-      try {
-        const response = await fetch(url)
-        const buffer = await response.arrayBuffer()
-        const ctx = new AudioCtx()
-        const audio = await ctx.decodeAudioData(buffer)
-        void ctx.close()
-
-        const data = audio.getChannelData(0)
-        const bucket = Math.max(1, Math.floor(data.length / BAR_COUNT))
-        const raw: number[] = []
-        for (let i = 0; i < BAR_COUNT; i++) {
-          let sum = 0
-          const start = i * bucket
-          for (let j = start; j < start + bucket && j < data.length; j++) {
-            sum += data[j] * data[j]
-          }
-          raw.push(Math.sqrt(sum / bucket))
-        }
-        const max = Math.max(...raw, 0.001)
-        if (!cancelled) {
-          setLevels(raw.map((v) => Math.max(MIN_LEVEL, v / max)))
-        }
-      } catch {
-        // Keep the fallback shape.
-      }
-    })()
+    void loadVoiceWaveform(url).then((nextLevels) => {
+      if (!cancelled) setLevels(nextLevels)
+    })
     return () => {
       cancelled = true
     }
@@ -87,11 +146,12 @@ const useVoiceWaveform = (url: string): number[] => {
  * border) and follows the bubble's chained corners. Kept as its own component
  * so other surfaces can reuse the same voice-note rendering.
  */
-export const ChatVoiceAttachment = ({
+const ChatVoiceAttachmentContent = ({
   voice,
   isMine = false,
   cornerClass = "rounded-xl",
   className,
+  surfaceClassName,
 }: {
   voice: F0ChatVoiceAttachment
   /** Picks the bubble-matching background (mine → tertiary, others → base). */
@@ -99,6 +159,8 @@ export const ChatVoiceAttachment = ({
   /** Chained-corner classes mirroring the bubble (see `bubbleCornerClass`). */
   cornerClass?: string
   className?: string
+  /** Sender-aware surface supplied by a transcript message. */
+  surfaceClassName?: string
 }): ReactNode => {
   const i18n = useI18n()
   const audioRef = useRef<HTMLAudioElement>(null)
@@ -106,6 +168,9 @@ export const ChatVoiceAttachment = ({
   const levels = useVoiceWaveform(voice.url)
   const [rateIndex, setRateIndex] = useState(0)
   const barsRef = useRef<HTMLDivElement>(null)
+  const emit = useF0ChatEmit()
+  const surface = useChatSurface()
+  const voicePlayLog = useF0ChatVoicePlayLog()
 
   const duration =
     player.duration > 0 ? player.duration : (voice.durationSeconds ?? 0)
@@ -116,15 +181,33 @@ export const ChatVoiceAttachment = ({
       player.pause()
       return
     }
+    // Once per note, not once per mount: Virtuoso unmounts offscreen rows, so
+    // a component-local flag would re-report the same note on every scroll back.
+    // Resuming after a pause is the same listen. Draft notes are not consumption.
+    if (surface === "transcript" && !voicePlayLog.hasReported(voice.url)) {
+      voicePlayLog.markReported(voice.url)
+      emit.onVoiceNotePlayed({ durationSeconds: voice.durationSeconds })
+    }
     if (duration > 0 && player.currentTime >= duration) player.seek(0)
     player.play()
-  }, [player, duration])
+  }, [
+    player,
+    duration,
+    emit,
+    surface,
+    voicePlayLog,
+    voice.url,
+    voice.durationSeconds,
+  ])
 
   const handleCycleRate = useCallback(() => {
     const next = (rateIndex + 1) % PLAYBACK_RATES.length
     setRateIndex(next)
     player.setPlaybackRate(PLAYBACK_RATES[next])
-  }, [player, rateIndex])
+    if (surface === "transcript") {
+      emit.onVoicePlaybackRateChanged({ rate: PLAYBACK_RATES[next] })
+    }
+  }, [player, rateIndex, emit, surface])
 
   // Click anywhere on the waveform to seek to that point.
   const handleSeek = useCallback(
@@ -174,99 +257,132 @@ export const ChatVoiceAttachment = ({
 
   return (
     <div
-      className={cn("flex w-full flex-col gap-1 bg-f1-background", cornerClass)}
+      className={cn(
+        // The shared media width, not `w-full`: a waveform reads better wide
+        // and shouldn't look like a stray chip next to an album, but sizing it
+        // off the column made the column stretch. The fixed height is also used
+        // by the deferred placeholder.
+        "group/voice flex h-[58px] min-w-0 items-center gap-2 border border-solid border-f1-border-secondary p-3",
+        CHAT_MEDIA_WIDTH_CLASS,
+        // Carries the message's own bubble colour, so a voice note reads as
+        // part of the conversation rather than a neutral attachment.
+        isMine ? "bg-f1-background-tertiary" : "bg-f1-background",
+        cornerClass,
+        className,
+        surfaceClassName
+      )}
+      data-testid="chat-voice-attachment"
     >
+      {/* eslint-disable-next-line jsx-a11y/media-has-caption -- voice note */}
+      <audio ref={audioRef} src={voice.url} preload="metadata" />
+
+      <div className="shrink-0" data-testid="chat-voice-toggle">
+        <ButtonInternal
+          variant="outline"
+          size="md"
+          hideLabel
+          label={
+            player.isPlaying ? i18n.audioPlayer.pause : i18n.audioPlayer.play
+          }
+          icon={player.isPlaying ? SolidPause : SolidPlay}
+          onClick={handleToggle}
+        />
+      </div>
+
       <div
+        ref={barsRef}
+        onClick={handleSeek}
+        onKeyDown={handleSeekKeyDown}
+        // justify-between spreads the fixed set of bars across whatever width
+        // the card gets, so the waveform stays proportioned at any size.
         className={cn(
-          // 320px by default, shrinking with the column when it doesn't fit.
-          // The waveform below owns any remaining overflow at very small sizes.
-          "group/voice flex w-80 min-w-0 max-w-full items-center gap-2 border border-solid border-f1-border-secondary p-3",
-          isMine ? "bg-f1-background-tertiary" : "bg-f1-background",
-          cornerClass,
-          className
+          "flex h-8 min-w-0 flex-1 cursor-pointer items-center justify-between gap-0.5 overflow-hidden rounded-sm",
+          focusRing("focus-visible:ring-inset")
         )}
-        data-testid="chat-voice-attachment"
+        role="slider"
+        tabIndex={0}
+        aria-label={i18n.audioPlayer.seek}
+        aria-valuemin={0}
+        aria-valuemax={Math.round(duration)}
+        aria-valuenow={Math.round(player.currentTime)}
+        data-testid="chat-voice-waveform"
       >
-        {/* eslint-disable-next-line jsx-a11y/media-has-caption -- voice note */}
-        <audio ref={audioRef} src={voice.url} preload="metadata" />
-
-        <div className="shrink-0" data-testid="chat-voice-toggle">
-          <ButtonInternal
-            variant="outline"
-            size="md"
-            hideLabel
-            label={
-              player.isPlaying ? i18n.audioPlayer.pause : i18n.audioPlayer.play
-            }
-            icon={player.isPlaying ? SolidPause : SolidPlay}
-            onClick={handleToggle}
+        {levels.map((level, i) => (
+          <span
+            key={i}
+            className={cn(
+              "w-0.5 min-w-px shrink rounded-full transition-colors",
+              // Played part reads darker, WhatsApp-style.
+              i / levels.length <= progress && progress > 0
+                ? "bg-f1-foreground"
+                : "bg-f1-foreground-tertiary"
+            )}
+            style={{ height: `${Math.round(level * 100)}%` }}
           />
-        </div>
+        ))}
+      </div>
 
-        <div
-          ref={barsRef}
-          onClick={handleSeek}
-          onKeyDown={handleSeekKeyDown}
-          // justify-between spreads the fixed set of bars across whatever width
-          // the card gets, so the waveform stays proportioned at any size.
-          className={cn(
-            "flex h-8 min-w-0 flex-1 cursor-pointer items-center justify-between gap-0.5 overflow-hidden rounded-sm",
-            focusRing("focus-visible:ring-inset")
-          )}
-          role="slider"
-          tabIndex={0}
-          aria-label={i18n.audioPlayer.seek}
-          aria-valuemin={0}
-          aria-valuemax={Math.round(duration)}
-          aria-valuenow={Math.round(player.currentTime)}
-          data-testid="chat-voice-waveform"
-        >
-          {levels.map((level, i) => (
-            <span
-              key={i}
-              className={cn(
-                "w-0.5 min-w-px shrink rounded-full transition-colors",
-                // Played part reads darker, WhatsApp-style.
-                i / levels.length <= progress && progress > 0
-                  ? "bg-f1-foreground"
-                  : "bg-f1-foreground-tertiary"
-              )}
-              style={{ height: `${Math.round(level * 100)}%` }}
-            />
-          ))}
-        </div>
-
-        {/* The duration and the speed pill share the trailing slot: hovering the
+      {/* The duration and the speed pill share the trailing slot: hovering the
           card (or tabbing into it) swaps the time for the speed control. Both
           have the same FIXED width so neither the ticking time ("0:04" → "0:12")
           nor the cycling rate ("1x" → "1.5x") resizes the waveform. */}
-        <div
-          className="relative w-12 shrink-0"
-          data-testid="chat-voice-trailing"
+      <div className="relative w-12 shrink-0" data-testid="chat-voice-trailing">
+        <span
+          className="inline-block w-full pr-2 text-end text-base font-medium tabular-nums text-f1-foreground-secondary group-focus-within/voice:invisible group-hover/voice:invisible"
+          data-testid="chat-voice-time"
         >
-          <span
-            className="inline-block w-full pr-2 text-end text-base font-medium tabular-nums text-f1-foreground-secondary group-focus-within/voice:invisible group-hover/voice:invisible"
-            data-testid="chat-voice-time"
-          >
-            {formatTime(
-              player.isPlaying || player.currentTime > 0
-                ? player.currentTime
-                : duration
-            )}
-          </span>
+          {formatTime(
+            player.isPlaying || player.currentTime > 0
+              ? player.currentTime
+              : duration
+          )}
+        </span>
 
-          <div className="pointer-events-none absolute inset-0 flex justify-end opacity-0 transition-opacity group-focus-within/voice:pointer-events-auto group-focus-within/voice:opacity-100 group-hover/voice:pointer-events-auto group-hover/voice:opacity-100 motion-reduce:transition-none">
-            <ButtonInternal
-              variant="ghost"
-              size="sm"
-              label={`${PLAYBACK_RATES[rateIndex]}x`}
-              aria-label={`${i18n.audioPlayer.playbackSpeed}: ${PLAYBACK_RATES[rateIndex]}x`}
-              onClick={handleCycleRate}
-              data-testid="chat-voice-rate"
-            />
-          </div>
+        <div className="pointer-events-none absolute inset-0 flex justify-end opacity-0 transition-opacity group-focus-within/voice:pointer-events-auto group-focus-within/voice:opacity-100 group-hover/voice:pointer-events-auto group-hover/voice:opacity-100 motion-reduce:transition-none">
+          <ButtonInternal
+            variant="ghost"
+            size="sm"
+            label={`${PLAYBACK_RATES[rateIndex]}x`}
+            aria-label={`${i18n.audioPlayer.playbackSpeed}: ${PLAYBACK_RATES[rateIndex]}x`}
+            onClick={handleCycleRate}
+            data-testid="chat-voice-rate"
+          />
         </div>
       </div>
+    </div>
+  )
+}
+
+export const ChatVoiceAttachment = ({
+  voice,
+  isMine = false,
+  cornerClass = "rounded-xl",
+  className,
+  surfaceClassName,
+}: {
+  voice: F0ChatVoiceAttachment
+  isMine?: boolean
+  cornerClass?: string
+  className?: string
+  /** Sender-aware surface supplied by a transcript message. */
+  surfaceClassName?: string
+}): ReactNode => {
+  // Mounts with its row. The card has no chunk to fetch — the waveform decode
+  // it used to wait for is already serialized globally and cached per URL — so
+  // deferring it only ever showed a grey bar where the player was about to be.
+  // The card's own h-[58px] is what reserves the row now.
+  return (
+    <div
+      data-testid="chat-voice-attachment-shell"
+      className={cn("flex w-full flex-col gap-1 bg-f1-background", cornerClass)}
+    >
+      <ChatVoiceAttachmentContent
+        voice={voice}
+        isMine={isMine}
+        cornerClass={cornerClass}
+        className={className}
+        surfaceClassName={surfaceClassName}
+      />
     </div>
   )
 }

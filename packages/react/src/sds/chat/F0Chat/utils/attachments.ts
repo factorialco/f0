@@ -1,6 +1,14 @@
 import { type F0DocumentKind } from "@/components/F0PdfViewer"
 
-import { type F0ChatFileAttachment } from "../types"
+import {
+  type F0ChatAttachedKind,
+  type F0ChatAttachment,
+  type F0ChatCardAttachment,
+  type F0ChatFileAttachment,
+  type F0ChatImageAttachment,
+  type F0ChatLocationAttachment,
+  type F0ChatVoiceAttachment,
+} from "../types"
 
 const VIDEO_EXTENSIONS = new Set(["m4v", "mov", "mp4", "ogv", "webm"])
 
@@ -96,3 +104,80 @@ export const withinPreviewSizeLimit = (
   file: F0ChatFileAttachment,
   kind: ChatDocumentKind
 ): boolean => (file.size ?? 0) <= PREVIEW_MAX_BYTES[kind]
+
+/**
+ * Attachment family for reporting, mirroring how the transcript renders it.
+ *
+ * Deliberately unlike {@link partitionChatAttachments} in one way: a document
+ * too large to preview is still a document here. Previewability is a rendering
+ * concern; "what kinds of files do people share" is not.
+ */
+export const attachedKindOf = (
+  attachment: F0ChatImageAttachment | F0ChatFileAttachment
+): F0ChatAttachedKind => {
+  if (attachment.kind === "image") return "image"
+  if (isVideoFileAttachment(attachment)) return "video"
+  return documentPreviewKind(attachment) ? "document" : "file"
+}
+
+export type PartitionedChatAttachments = {
+  images: F0ChatImageAttachment[]
+  videos: F0ChatFileAttachment[]
+  documents: { file: F0ChatFileAttachment; kind: ChatDocumentKind }[]
+  files: F0ChatFileAttachment[]
+  locations: F0ChatLocationAttachment[]
+  voices: F0ChatVoiceAttachment[]
+  cards: F0ChatCardAttachment[]
+}
+
+/** Classifies each attachment exactly once for the transcript renderer. */
+export const partitionChatAttachments = (
+  attachments: F0ChatAttachment[]
+): PartitionedChatAttachments => {
+  const result: PartitionedChatAttachments = {
+    images: [],
+    videos: [],
+    documents: [],
+    files: [],
+    locations: [],
+    voices: [],
+    cards: [],
+  }
+
+  for (const attachment of attachments) {
+    if (attachment.kind === "image") {
+      result.images.push(attachment)
+      continue
+    }
+    if (attachment.kind === "card") {
+      result.cards.push(attachment)
+      continue
+    }
+    if (attachment.kind === "location") {
+      result.locations.push(attachment)
+      continue
+    }
+    if (attachment.kind === "voice") {
+      result.voices.push(attachment)
+      continue
+    }
+
+    if (
+      attachment.progress === undefined &&
+      isVideoFileAttachment(attachment)
+    ) {
+      result.videos.push(attachment)
+      continue
+    }
+
+    const kind =
+      attachment.progress === undefined ? documentPreviewKind(attachment) : null
+    if (kind && withinPreviewSizeLimit(attachment, kind)) {
+      result.documents.push({ file: attachment, kind })
+    } else {
+      result.files.push(attachment)
+    }
+  }
+
+  return result
+}

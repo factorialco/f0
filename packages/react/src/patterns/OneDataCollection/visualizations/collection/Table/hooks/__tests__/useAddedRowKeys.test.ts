@@ -74,4 +74,65 @@ describe("useAddedRowKeys", () => {
     rerender({ keys: ["a", "b", "c", "d"], cursor: "1" })
     expect([...result.current]).toEqual([])
   })
+
+  // `query` here stands for the datasource's committed query: it changes only
+  // once rows answering the new question are actually rendered. A render still
+  // showing the previous query's rows therefore carries the previous key, which
+  // is exactly what stops the baseline being seeded from stale rows.
+  it("does not flash the rows that come back after clearing a search that matched nothing", () => {
+    const { result, rerender } = renderHook(
+      ({ keys, query }) => useAddedRowKeys(keys, query),
+      { initialProps: { keys: ["a", "b", "c"], query: "all" } }
+    )
+
+    // Searching empties the table...
+    rerender({ keys: [], query: "zzz" })
+    expect([...result.current]).toEqual([])
+
+    // ...and clearing it brings every row back. None of them are new.
+    rerender({ keys: ["a", "b", "c"], query: "all" })
+    expect([...result.current]).toEqual([])
+  })
+
+  it("still flashes an insert after a query that returned the same rows", () => {
+    const { result, rerender } = renderHook(
+      ({ keys, query }) => useAddedRowKeys(keys, query),
+      { initialProps: { keys: ["a", "b"], query: "q1" } }
+    )
+
+    // A different question that happens to have the same answer. Nothing was
+    // inserted, so nothing flashes...
+    rerender({ keys: ["a", "b"], query: "q2" })
+    expect([...result.current]).toEqual([])
+
+    // ...but the insert that follows it must still flash. Waiting for the rows
+    // to change instead of for the query to commit swallowed this one.
+    rerender({ keys: ["a", "b", "c"], query: "q2" })
+    expect([...result.current]).toEqual(["c"])
+  })
+
+  it("still flashes a genuine insert while a search is active", () => {
+    const { result, rerender } = renderHook(
+      ({ keys, query }) => useAddedRowKeys(keys, query),
+      { initialProps: { keys: ["a", "b"], query: "all" } }
+    )
+
+    rerender({ keys: ["a"], query: "q" })
+
+    // A create that matches the active search: same query, new row → flash.
+    rerender({ keys: ["a", "new"], query: "q" })
+    expect([...result.current]).toEqual(["new"])
+  })
+
+  it("does not re-flash a row that briefly disappears during a refetch", () => {
+    const { result, rerender } = renderHook(
+      ({ keys }) => useAddedRowKeys(keys),
+      { initialProps: { keys: ["a", "b"] } }
+    )
+
+    // A refetch that momentarily renders nothing must not reset the baseline.
+    rerender({ keys: [] })
+    rerender({ keys: ["a", "b"] })
+    expect([...result.current]).toEqual([])
+  })
 })

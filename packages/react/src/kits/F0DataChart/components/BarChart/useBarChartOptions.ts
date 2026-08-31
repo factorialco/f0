@@ -10,7 +10,11 @@ import type {
   F0DataChartBarSeries,
 } from "../../types"
 
-import { paletteColor, resolveChartColorToken } from "../../utils/colors"
+import {
+  darkenChartColor,
+  paletteColor,
+  resolveChartColorToken,
+} from "../../utils/colors"
 import {
   buildBaseChartOptions,
   buildItemTooltip,
@@ -201,6 +205,51 @@ function resolveColor(series: F0DataChartBarSeries, index: number): string {
   return series.color
     ? resolveChartColorToken(series.color)
     : paletteColor(index)
+}
+
+/**
+ * Fill for a bar that ran past its target: the stretch beyond the target in a
+ * darker shade of the bar's own colour, split at the exact target.
+ *
+ * One gradient with a hard stop rather than a second stacked series, so the bar
+ * stays a single mark — its label, its tooltip, its rounded end and its share
+ * of a stack all keep counting the whole value.
+ */
+function overachievementFill(
+  color: string,
+  value: number,
+  target: number,
+  isVertical: boolean
+): echarts.graphic.LinearGradient {
+  // Offset 0 is the far end from the axis (top of a column, right of a row),
+  // so the darker stretch runs from there down to the target.
+  const split = (value - target) / value
+  const darker = darkenChartColor(color)
+  return new echarts.graphic.LinearGradient(
+    ...(isVertical
+      ? ([0, 0, 0, 1] as [number, number, number, number])
+      : ([1, 0, 0, 0] as [number, number, number, number])),
+    [
+      { offset: 0, color: darker },
+      { offset: split, color: darker },
+      { offset: split, color },
+      { offset: 1, color },
+    ]
+  )
+}
+
+/**
+ * The part of a point that passed its target, or `undefined` when it didn't.
+ * Negative bars are left alone: they grow away from zero, so "past the target"
+ * has no single reading.
+ */
+function overachievesTarget(
+  point: F0DataChartBarDataPoint
+): number | undefined {
+  const value = getValue(point)
+  const target = getTarget(point)
+  if (target === undefined || value <= 0 || value <= target) return undefined
+  return target
 }
 
 /** Check whether a series contains any target values */
@@ -464,6 +513,7 @@ function buildSeriesEntries(
   isVertical: boolean,
   showLabels: boolean,
   stacked: boolean,
+  highlightOverachievement: boolean,
   labelColor: string,
   stackGapColor: string,
   labelFontSize: number,
@@ -489,13 +539,25 @@ function buildSeriesEntries(
     const value = getValue(point)
     const pointColor = getPointColor(point)
     const pointBorderRadius = resolveBorderRadius?.(index, dataIndex, value)
-    if (pointColor === undefined && pointBorderRadius === undefined) {
+    const passedTarget = highlightOverachievement
+      ? overachievesTarget(point)
+      : undefined
+    const fill =
+      passedTarget === undefined
+        ? pointColor
+        : overachievementFill(
+            pointColor ?? color,
+            value,
+            passedTarget,
+            isVertical
+          )
+    if (fill === undefined && pointBorderRadius === undefined) {
       return value
     }
     return {
       value,
       itemStyle: {
-        ...(pointColor !== undefined && { color: pointColor }),
+        ...(fill !== undefined && { color: fill }),
         ...(pointBorderRadius !== undefined && {
           borderRadius: pointBorderRadius,
         }),
@@ -848,6 +910,8 @@ export function useBarChartOptions(
     series,
     orientation = "vertical",
     stacked = false,
+    highlightOverachievement = false,
+    showTargetProgress = false,
     showLegend = true,
     showGrid = true,
     showLabels = false,
@@ -1019,6 +1083,7 @@ export function useBarChartOptions(
         isVertical,
         showLabels,
         stacked,
+        highlightOverachievement,
         theme.colors.foregroundSecondary,
         theme.colors.containerBackground ?? theme.colors.background,
         resolvedLabelFontSize,
@@ -1191,7 +1256,7 @@ export function useBarChartOptions(
 
     // Bar charts use an item-triggered tooltip about the hovered bar or
     // segment (pairing with the stacked series highlight) instead of the axis
-    // tooltip listing every series: value large, then — with several
+    // tooltip listing every series: value large, then — on a stack of several
     // same-signed series — the hovered value's share of the category total,
     // that total, and the target when there is one.
     //
@@ -1214,22 +1279,39 @@ export function useBarChartOptions(
           const value = Number(p.value)
           const dataIndex = p.dataIndex ?? 0
           const target = targetMap.get(seriesName)?.[dataIndex]
-          // Share-of-total context only means something with several series
+          // Only a stack has a total this component can be sure of: its
+          // segments are parts of the very bar being hovered. Grouped bars
+          // sometimes add up to something real — male and female headcount
+          // side by side sums to the category's headcount — but just as often
+          // they don't: headcount, open positions and turnovers share an axis
+          // and nothing else, and three average salaries summed are not an
+          // average of anything. Layout is the only signal available here, so
+          // the guard gives up a right total on the additive groups to stop
+          // inventing one on the rest.
+          //
+          // Even stacked, the share only means something with several series
           // pushing the same way: a single-series bar is always 100% of its own
           // category, and a category mixing gains with losses has no "total"
           // the parts add up to — 24 hires against a net of 19 would read as
           // 126.3%, and near-cancellation makes that ratio arbitrarily large.
           // Signed categories therefore show the value alone.
-          const categoryValues = visibleSeries.map((s) => {
-            // A series can be shorter than `categories`.
-            const point = s.data[dataIndex]
-            return point === undefined ? 0 : getValue(point) || 0
-          })
+          //
+          // Gated before the sum rather than after it: neither row can render
+          // on a grouped chart, so neither the map nor the reduce is worth
+          // running on every hover.
+          const stackHasTotal = stacked && visibleSeries.length > 1
+          const categoryValues = stackHasTotal
+            ? visibleSeries.map((s) => {
+                // A series can be shorter than `categories`.
+                const point = s.data[dataIndex]
+                return point === undefined ? 0 : getValue(point) || 0
+              })
+            : []
           const hasMixedSigns =
             categoryValues.some((v) => v > 0) &&
             categoryValues.some((v) => v < 0)
           const total = categoryValues.reduce((sum, v) => sum + v, 0)
-          const showTotal = visibleSeries.length > 1 && !hasMixedSigns
+          const showTotal = stackHasTotal && !hasMixedSigns
 
           // No "from previous" row here: bar categories are not necessarily a
           // sequence (locations, departments), so comparing a bar with the one
@@ -1256,6 +1338,12 @@ export function useBarChartOptions(
                   value: formatTooltipValue(target),
                   label: i18n.dataChart.tooltip.target,
                 },
+                showTargetProgress &&
+                  target !== undefined &&
+                  target !== 0 && {
+                    value: `${((value / target) * 100).toFixed(1)}%`,
+                    label: i18n.dataChart.tooltip.ofTarget,
+                  },
               ],
             },
             theme
@@ -1344,6 +1432,8 @@ export function useBarChartOptions(
     series,
     orientation,
     stacked,
+    highlightOverachievement,
+    showTargetProgress,
     showLegend,
     showGrid,
     showLabels,

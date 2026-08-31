@@ -67,6 +67,55 @@ describe("F0AvatarList", () => {
     expect(screen.getByText("+7")).toBeInTheDocument()
   })
 
+  it("ignores the deprecated `layout` prop, whose two values are `max`", () => {
+    // `layout` was documented (`"fill"` vs `"compact"`, default `"compact"`)
+    // but never read. It stays deprecated rather than getting an
+    // implementation because `max` already covers both: unset fills the
+    // container, a number pins the count. This asserts the inertness both
+    // ways round — a future "implementation" of `layout` would have to make
+    // these two trees differ, and would fail here.
+    const avatars = [
+      { firstName: "Ada", lastName: "Lovelace" },
+      { firstName: "Alan", lastName: "Turing" },
+      { firstName: "Grace", lastName: "Hopper" },
+      { firstName: "Marie", lastName: "Curie" },
+      { firstName: "Lionel", lastName: "Messi" },
+    ]
+
+    // Radix hands the counter's popover a per-instance id (`radix-:r1:`,
+    // `radix-:r2:`, …) that increments across renders in a file, so the raw
+    // markup can never match twice. Normalising it is the whole allowance —
+    // everything else is compared byte for byte.
+    const stripReactIds = (html: string) =>
+      html.replace(/radix-:r[^:]*:/g, "radix-:id:")
+
+    const fill = render(
+      <F0AvatarList
+        type="person"
+        avatars={avatars}
+        max={3}
+        layout="fill"
+        noTooltip
+      />
+    )
+    const fillHtml = stripReactIds(fill.container.innerHTML)
+    fill.unmount()
+
+    const compact = render(
+      <F0AvatarList
+        type="person"
+        avatars={avatars}
+        max={3}
+        layout="compact"
+        noTooltip
+      />
+    )
+
+    expect(stripReactIds(compact.container.innerHTML)).toBe(fillHtml)
+    // And the tree is the one `max` dictates, not a `layout`-specific one.
+    expect(compact.getByText("+2")).toBeInTheDocument()
+  })
+
   it("renders tooltipDescription inside the overflow popover", async () => {
     const user = userEvent.setup()
     render(

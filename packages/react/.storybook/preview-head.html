@@ -1,6 +1,9 @@
 <style>
   :root {
     --storybook-docs-space-5: 20px;
+    /* Measure for docs pages. Keeps prose at a readable line length instead of
+       stretching to the full viewport on wide screens. */
+    --storybook-docs-content-width: 720px;
   }
 
   #storybook-docs h1:not(.docs-story *),
@@ -203,7 +206,36 @@
   }
 
   .sbdocs-content {
+    max-width: var(--storybook-docs-content-width) !important;
+    width: 100% !important;
+  }
+
+  /*
+   * Page shells are about the whole canvas, so the measure would squash them.
+   * A story opts in with `parameters: { docsFullWidth: true }` — the F0
+   * decorator in preview.tsx turns that into the marker below — and the column
+   * grows into the width left over by the table of contents.
+   */
+  .sbdocs-content:has([data-docs-full-width]) {
     max-width: 100% !important;
+  }
+
+  /*
+   * Only the canvas wants that width, though: the prose around it still reads
+   * better at the measure, so every other top-level block keeps it and stays
+   * centred over the canvas. Both selectors carry `#storybook-docs` to outrank
+   * the `#storybook-docs p { margin: 0 0 … !important }` rule above, which
+   * would otherwise pin paragraphs to the left edge.
+   */
+  #storybook-docs .sbdocs-content:has([data-docs-full-width]) > * {
+    max-width: var(--storybook-docs-content-width);
+    margin-inline: auto !important;
+  }
+
+  #storybook-docs
+    .sbdocs-content:has([data-docs-full-width])
+    > *:has(.sbdocs-preview) {
+    max-width: none;
   }
 
   input[type="radio"] {
@@ -418,6 +450,28 @@
   cpk-web-inspector {
     display: none;
   }
+
+  /* ──────────────────────────────────────────────────────────────────────────
+     OVERLAYS ON DOCS PAGES
+
+     Storybook wraps every docs story in a zoom element carrying
+     `transform: scale(N)`. At the default zoom that is the identity matrix — but
+     an identity transform is still a transform, and a transformed element
+     becomes the containing block for `position: fixed` inside it.
+
+     So everything F0 paints as `fixed` — a dialog and its overlay, a toast, a
+     popover that escapes its scroll container — resolved against the story's own
+     little block instead of the viewport, and appeared trapped inside it. Docs
+     were the only place this bit: in a real app, and in a story viewed on its
+     own (`viewMode=story`), nothing wraps the tree in a transform.
+
+     Docs pages here are never zoomed, so dropping the transform costs nothing.
+     Scoped to `#storybook-docs` so the canvas view is untouched either way.
+     ────────────────────────────────────────────────────────────────────────── */
+  #storybook-docs .docs-story > div {
+    transform: none;
+  }
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/react-render-tracker"></script>
 <script>

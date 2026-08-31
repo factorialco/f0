@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import {
-  GranularityDefinitionKey,
-  granularityDefinitions,
+  NavigationGranularityKey,
+  resolveGranularityDefinition,
 } from "@/components/OneCalendar"
 import { useI18n } from "@/lib/providers/i18n"
 import { DatePickerPopup, isSameDatePickerValue } from "@/ui/DatePickerPopup"
@@ -37,13 +37,10 @@ export function F0DatePicker({
   }, [granularities])
 
   const getGranularity = useCallback(
-    (granularityKey: GranularityDefinitionKey | undefined) => {
+    (granularityKey: NavigationGranularityKey | undefined) => {
       const key = granularityKey || defaultGranularity
-      if (!granularityDefinitions[key]) {
-        throw new Error(`Invalid granularity ${key}`)
-      }
       return {
-        ...granularityDefinitions[key],
+        ...resolveGranularityDefinition(key),
         key,
       }
     },

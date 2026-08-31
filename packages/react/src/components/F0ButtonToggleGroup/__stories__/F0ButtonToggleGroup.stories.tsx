@@ -144,6 +144,30 @@ export const Default: Story = {
   args: defaultArgs,
 }
 
+export const WithTooltips: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "An item's `tooltip` names it on hover and on keyboard focus — worth " +
+          "setting on a compact group, where every item is a glyph on its own.",
+      },
+    },
+  },
+  args: {
+    ...defaultArgs,
+    items: [
+      { label: "Archive", icon: Archive, value: "archive", tooltip: "Archive" },
+      {
+        label: "Delete",
+        icon: Delete,
+        value: "delete",
+        tooltip: { label: "Delete", description: "This can't be undone" },
+      },
+    ],
+  },
+}
+
 export const Single: Story = {
   args: {
     ...defaultArgs,

@@ -2,14 +2,17 @@ export { F0Chat, type F0ChatProps } from "./F0Chat"
 export { F0ChatProvider, useF0Chat } from "./providers/F0ChatProvider"
 export type {
   F0ChatUser,
+  F0ChatSenderColor,
   F0ChatChannel,
   F0ChatChannelType,
   F0ChatChannelStatus,
   F0ChatAttachment,
+  F0ChatComposableAttachment,
   F0ChatImageAttachment,
   F0ChatFileAttachment,
   F0ChatLocationAttachment,
   F0ChatVoiceAttachment,
+  F0ChatCardAttachment,
   F0ChatReaction,
   F0ChatLinkPreview,
   F0ChatMessage,
@@ -27,8 +30,18 @@ export type {
   F0ChatCapabilities,
   F0ChatSearchResult,
   F0ChatRuntime,
+  F0ChatEvents,
+  F0ChatReactionSource,
+  F0ChatAttachSource,
+  F0ChatAttachedKind,
+  F0ChatEmojiSource,
 } from "./types"
-export { isSystemMessage, isUserMessage, LATEST } from "./types"
+export {
+  f0ChatSenderColors,
+  isSystemMessage,
+  isUserMessage,
+  LATEST,
+} from "./types"
 // Re-exported because `F0ChatRuntime.transcribe` is typed as `TranscribeFn`;
 // a host implementing the runtime needs to name it.
 export type { TranscribeFn } from "@/kits/ai/F0AiChat/types"

@@ -63,7 +63,7 @@ const ChatSheetThumbnail = ({
             {row.map((cell, cellIndex) => (
               <td
                 key={cellIndex}
-                className="whitespace-nowrap border border-solid border-f1-border-secondary px-1.5 py-0.5 text-xs text-f1-foreground"
+                className="whitespace-nowrap border border-solid border-f1-border-secondary px-1.5 py-0.5 text-sm text-f1-foreground"
               >
                 {cell}
               </td>

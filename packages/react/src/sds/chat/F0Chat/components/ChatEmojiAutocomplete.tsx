@@ -95,7 +95,12 @@ export function ChatEmojiAutocomplete({
             onClick={() => onSelect(candidate)}
           >
             <span className="flex size-6 shrink-0 items-center justify-center">
-              <EmojiImage emoji={candidate.native} size="md" alt="" />
+              <EmojiImage
+                emoji={candidate.native}
+                mode="native"
+                size="md"
+                alt=""
+              />
             </span>
             <div className="flex min-w-0 flex-1 items-baseline gap-2">
               <OneEllipsis className="shrink-0 font-medium text-f1-foreground">

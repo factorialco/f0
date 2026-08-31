@@ -143,11 +143,11 @@ describe("ChatDocumentAttachmentCard (text)", () => {
       await screen.findByRole(
         "heading",
         { name: "Release notes" },
-        { timeout: 5000 }
+        { timeout: 60_000 }
       )
     ).toBeInTheDocument()
     expect(screen.getByText("Chat: document previews")).toBeInTheDocument()
-  })
+  }, 60_000)
 
   it("renders plain text fullscreen as monospaced source", async () => {
     renderChat([

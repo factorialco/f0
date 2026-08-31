@@ -1,12 +1,13 @@
 import { fireEvent, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import "@testing-library/jest-dom/vitest"
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { createRef, useState } from "react"
+import { beforeEach, describe, expect, expectTypeOf, it, vi } from "vitest"
 
 import { createDataSourceDefinition, type RecordType } from "@/hooks/datasource"
 import { zeroRender as render } from "@/testing/test-utils"
 
-import type { F0SelectItemProps } from "../types"
+import type { F0SelectItemProps, F0SelectProps } from "../types"
 
 import { Search } from "../../../icons/app"
 import { F0Select } from "../index"
@@ -93,12 +94,59 @@ describe("Select", () => {
   })
 
   const openSelect = async (user: ReturnType<typeof userEvent.setup>) => {
-    user.click(screen.getByRole("combobox"))
+    await user.click(screen.getByRole("combobox"))
 
     // Wait for animation to finish
     await waitFor(() => expect(screen.getByRole("listbox")).toBeInTheDocument())
     const teaser = screen.getByRole("listbox")
     fireEvent.animationStart(teaser)
+  }
+
+  const createDeferredOptionsSource = () => {
+    let resolveFetch: (() => void) | undefined
+    const source = createDataSourceDefinition<RecordType>({
+      dataAdapter: {
+        paginationType: "infinite-scroll",
+        fetchData: async () => {
+          await new Promise<void>((resolve) => {
+            resolveFetch = resolve
+          })
+          return {
+            type: "infinite-scroll" as const,
+            cursor: undefined,
+            perPage: 100,
+            hasMore: false,
+            records: [
+              { id: "option1", name: "Option 1" },
+              { id: "option2", name: "Option 2" },
+            ],
+            total: 2,
+          }
+        },
+      },
+    })
+
+    return {
+      source,
+      resolve: () => {
+        if (!resolveFetch) {
+          throw new Error("The deferred options request has not started")
+        }
+        resolveFetch()
+      },
+    }
+  }
+
+  const getSelectContent = () => {
+    const content = screen
+      .getByRole("listbox")
+      .closest<HTMLElement>("[data-radix-select-content]")
+
+    if (!content) {
+      throw new Error("Select content shell not found")
+    }
+
+    return content
   }
 
   it("renders with placeholder", async () => {
@@ -243,9 +291,9 @@ describe("Select", () => {
 
     await openSelect(user)
 
-    const listbox = screen.getByRole("listbox")
-    expect(listbox.className).toContain("w-max")
-    expect(listbox.className).not.toContain("min-w-80")
+    const content = getSelectContent()
+    expect(content.className).toContain("w-max")
+    expect(content.className).not.toContain("min-w-80")
   })
 
   it("keeps the default 20rem dropdown minimum without fitContentWidth", async () => {
@@ -260,7 +308,500 @@ describe("Select", () => {
 
     await openSelect(user)
 
-    expect(screen.getByRole("listbox").className).toContain("min-w-80")
+    expect(getSelectContent().className).toContain("min-w-80")
+  })
+
+  it("keeps the field presentation and sm default when variant is omitted", () => {
+    render(
+      <F0Select
+        label="Pick an option"
+        options={mockOptions}
+        onChange={() => {}}
+      />
+    )
+
+    const fieldWrapper = screen.getByTestId("input-field-wrapper")
+
+    expect(fieldWrapper).toHaveClass("h-[32px]", "rounded")
+    expect(fieldWrapper).not.toHaveClass("h-[40px]", "rounded-md")
+    expect(screen.getByRole("combobox").className).not.toContain("h-7")
+  })
+
+  describe("inline variant", () => {
+    it("exposes the single, non-clearable inline type contract", () => {
+      type InlineProps = Extract<F0SelectProps<"viewer">, { variant: "inline" }>
+
+      expectTypeOf<InlineProps["label"]>().toEqualTypeOf<string>()
+      expectTypeOf<InlineProps["multiple"]>().toEqualTypeOf<false | undefined>()
+      expectTypeOf<InlineProps["clearable"]>().toEqualTypeOf<
+        false | undefined
+      >()
+      expectTypeOf<InlineProps["children"]>().toEqualTypeOf<undefined>()
+      expectTypeOf<InlineProps["asList"]>().toEqualTypeOf<undefined>()
+      expectTypeOf<InlineProps["showPreview"]>().toEqualTypeOf<undefined>()
+      expectTypeOf<
+        InlineProps["withApplySelection"]
+      >().toEqualTypeOf<undefined>()
+      expectTypeOf<InlineProps["loading"]>().toEqualTypeOf<undefined>()
+      expectTypeOf<InlineProps["error"]>().toEqualTypeOf<undefined>()
+      expectTypeOf<InlineProps["size"]>().toEqualTypeOf<undefined>()
+    })
+
+    const roleOptions = [
+      {
+        value: "owner",
+        label: "Owner",
+        description: "Can manage access and change roles",
+      },
+      {
+        value: "editor",
+        label: "Editor",
+        description: "Can view and edit",
+      },
+      {
+        value: "viewer",
+        label: "Viewer",
+        description: "Can view",
+      },
+    ]
+
+    it("renders selected and placeholder states and follows controlled updates", async () => {
+      const { rerender } = render(
+        <F0Select
+          variant="inline"
+          label="Access level"
+          placeholder="Select role"
+          options={roleOptions}
+          value="viewer"
+          onChange={() => {}}
+        />
+      )
+
+      const trigger = screen.getByRole("combobox", { name: "Access level" })
+      expect(within(trigger).getByText("Viewer")).toBeInTheDocument()
+      expect(screen.queryByText("Access level")).not.toBeInTheDocument()
+
+      rerender(
+        <F0Select
+          variant="inline"
+          label="Access level"
+          placeholder="Select role"
+          options={roleOptions}
+          value="editor"
+          onChange={() => {}}
+        />
+      )
+
+      await waitFor(() => {
+        expect(within(trigger).getByText("Editor")).toBeInTheDocument()
+      })
+
+      rerender(
+        <F0Select
+          variant="inline"
+          label="Access level"
+          placeholder="Select role"
+          options={roleOptions}
+          value={undefined}
+          onChange={() => {}}
+        />
+      )
+
+      await waitFor(() => {
+        expect(within(trigger).getByText("Select role")).toBeInTheDocument()
+      })
+    })
+
+    it("falls back to the label when empty and no placeholder is provided", () => {
+      render(
+        <F0Select
+          variant="inline"
+          label="Access level"
+          options={roleOptions}
+          value={undefined}
+          onChange={() => {}}
+        />
+      )
+
+      const trigger = screen.getByRole("combobox", { name: "Access level" })
+      expect(within(trigger).getByText("Access level")).toBeInTheDocument()
+    })
+
+    it("uses fixed md dimensions, label typography, and the default icon color", () => {
+      render(
+        <F0Select
+          variant="inline"
+          label="Access level"
+          options={roleOptions}
+          value="viewer"
+          onChange={() => {}}
+        />
+      )
+
+      const trigger = screen.getByRole("combobox", { name: "Access level" })
+      const chevron = trigger.querySelector("[aria-hidden='true']")
+
+      expect(trigger.className).toContain("h-8")
+      expect(trigger.className).toContain("pl-3")
+      expect(trigger.className).toContain("pr-2")
+      expect(trigger.className).toContain("text-base")
+      expect(trigger.className).toContain("font-medium")
+      expect(trigger.className).not.toContain("text-sm")
+      expect(chevron).toHaveClass("text-f1-icon")
+      expect(chevron).not.toHaveClass("text-f1-icon-secondary")
+    })
+
+    it("uses defaultItem while a data source is loading", () => {
+      const source = createDataSourceDefinition<RecordType>({
+        dataAdapter: {
+          paginationType: "infinite-scroll",
+          fetchData: () =>
+            Promise.resolve({
+              type: "infinite-scroll" as const,
+              cursor: undefined,
+              perPage: 100,
+              hasMore: false,
+              records: [],
+              total: 0,
+            }),
+        },
+      })
+
+      render(
+        <F0Select
+          variant="inline"
+          label="Access level"
+          source={source}
+          mapOptions={(item) => ({
+            value: item.id as string,
+            label: item.name as string,
+          })}
+          value="viewer"
+          defaultItem={{ value: "viewer", label: "Viewer" }}
+          onChange={() => {}}
+        />
+      )
+
+      expect(
+        within(
+          screen.getByRole("combobox", { name: "Access level" })
+        ).getByText("Viewer")
+      ).toBeInTheDocument()
+    })
+
+    it("uses intrinsic borderless trigger styling and a plain chevron", () => {
+      render(
+        <F0Select
+          variant="inline"
+          label="Access level"
+          options={roleOptions}
+          value="viewer"
+          onChange={() => {}}
+        />
+      )
+
+      const trigger = screen.getByRole("combobox", { name: "Access level" })
+      expect(trigger.className).toContain("w-fit")
+      expect(trigger.className).toContain("gap-1")
+      expect(trigger).toHaveClass("rounded")
+      expect(trigger).not.toHaveClass("rounded-sm")
+      expect(trigger).not.toHaveClass("rounded-md")
+      expect(trigger.className).toContain("border-0")
+      expect(trigger.className).toContain("bg-transparent")
+      expect(trigger.className).toContain("shadow-none")
+
+      const chevron = trigger.querySelector("svg")
+      expect(chevron).toBeInTheDocument()
+      expect(chevron?.parentElement?.className).not.toContain("bg-")
+    })
+
+    it("does not open when disabled", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0Select
+          variant="inline"
+          label="Access level"
+          options={roleOptions}
+          value="viewer"
+          disabled
+          onChange={() => {}}
+        />
+      )
+
+      const trigger = screen.getByRole("combobox", { name: "Access level" })
+      expect(trigger).toBeDisabled()
+      expect(trigger.className).toContain("disabled:bg-f1-background-tertiary")
+      expect(trigger.className).toContain(
+        "disabled:text-f1-foreground-disabled"
+      )
+
+      await user.click(trigger)
+
+      expect(trigger).toHaveAttribute("aria-expanded", "false")
+      expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
+    })
+
+    it("selects an option and reports it through onChange", async () => {
+      const user = userEvent.setup()
+      const handleChange = vi.fn()
+
+      const ControlledInlineSelect = () => {
+        const [value, setValue] = useState("viewer")
+
+        return (
+          <F0Select
+            variant="inline"
+            label="Access level"
+            options={roleOptions}
+            value={value}
+            onChange={(nextValue, originalItem, option) => {
+              handleChange(nextValue, originalItem, option)
+              setValue(nextValue)
+            }}
+          />
+        )
+      }
+
+      render(<ControlledInlineSelect />)
+
+      await openSelect(user)
+      await user.keyboard("{ArrowUp}{Enter}")
+
+      await waitFor(() => {
+        expect(handleChange).toHaveBeenCalledWith(
+          "editor",
+          undefined,
+          expect.objectContaining({ value: "editor", label: "Editor" })
+        )
+        expect(handleChange).toHaveBeenCalledTimes(1)
+      })
+      await waitFor(() => {
+        expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
+      })
+      expect(
+        within(
+          screen.getByRole("combobox", { name: "Access level" })
+        ).getByText("Editor")
+      ).toBeInTheDocument()
+    })
+
+    it("restores a controlled value rejected by the parent and allows retrying it", async () => {
+      const user = userEvent.setup()
+      const handleChange = vi.fn()
+      render(
+        <F0Select
+          variant="inline"
+          label="Access level"
+          options={roleOptions}
+          value="viewer"
+          onChange={handleChange}
+        />
+      )
+
+      const trigger = screen.getByRole("combobox", { name: "Access level" })
+
+      await openSelect(user)
+      await user.keyboard("{ArrowUp}{Enter}")
+
+      await waitFor(() => {
+        expect(handleChange).toHaveBeenCalledTimes(1)
+        expect(handleChange).toHaveBeenLastCalledWith(
+          "editor",
+          undefined,
+          expect.objectContaining({ value: "editor", label: "Editor" })
+        )
+        expect(within(trigger).getByText("Viewer")).toBeInTheDocument()
+      })
+
+      await waitFor(() => {
+        expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
+      })
+      await openSelect(user)
+
+      expect(screen.getByRole("option", { name: /Viewer/ })).toHaveAttribute(
+        "data-state",
+        "checked"
+      )
+      expect(screen.getByRole("option", { name: /Editor/ })).toHaveAttribute(
+        "data-state",
+        "unchecked"
+      )
+
+      await user.keyboard("{ArrowUp}{Enter}")
+
+      await waitFor(() => {
+        expect(handleChange).toHaveBeenCalledTimes(2)
+        expect(handleChange).toHaveBeenLastCalledWith(
+          "editor",
+          undefined,
+          expect.objectContaining({ value: "editor", label: "Editor" })
+        )
+        expect(within(trigger).getByText("Viewer")).toBeInTheDocument()
+      })
+    })
+
+    it("defaults to content width and honors an explicit popup-width override", async () => {
+      const user = userEvent.setup()
+      const firstRender = render(
+        <F0Select
+          variant="inline"
+          label="Access level"
+          options={roleOptions}
+          value="viewer"
+          onChange={() => {}}
+        />
+      )
+
+      await openSelect(user)
+      expect(getSelectContent().className).toContain("w-max")
+
+      firstRender.unmount()
+
+      render(
+        <F0Select
+          variant="inline"
+          label="Access level"
+          options={roleOptions}
+          value="viewer"
+          fitContentWidth={false}
+          onChange={() => {}}
+        />
+      )
+
+      await openSelect(user)
+      expect(getSelectContent().className).toContain("min-w-80")
+    })
+
+    it("reuses the standard popup and option presentation", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0Select
+          variant="inline"
+          label="Access level"
+          options={roleOptions}
+          value="viewer"
+          onChange={() => {}}
+        />
+      )
+
+      await openSelect(user)
+
+      const content = getSelectContent()
+      const option = screen.getByRole("option", { name: /Viewer/ })
+      const description = screen.getByText("Can view")
+      const indicator = option.querySelector(".text-f1-icon-selected")
+
+      await waitFor(() => expect(option).toHaveFocus())
+
+      expect(content.className).toContain("rounded-md")
+      expect(content.className).toContain("shadow-md")
+      expect(option.className).toContain("px-3")
+      expect(option.className).toContain("py-2")
+      expect(option.className).toContain(
+        "data-[state=checked]:after:bg-f1-background-selected-bold/10"
+      )
+      expect(option.className).toContain("grid-cols-[1fr_20px]")
+      expect(description.className).not.toContain("text-sm")
+      expect(indicator).toBeInTheDocument()
+      expect(option.lastElementChild).toBe(indicator)
+      expect(indicator?.querySelector("svg")?.className.baseVal).toContain(
+        "w-5"
+      )
+    })
+
+    it("runs enabled footer actions and blocks disabled ones", async () => {
+      const user = userEvent.setup()
+      const handleRemove = vi.fn()
+      const handleDisabledAction = vi.fn()
+      render(
+        <F0Select
+          variant="inline"
+          label="Access level"
+          options={roleOptions}
+          value="viewer"
+          onChange={() => {}}
+          showSearchBox
+          actions={[
+            {
+              label: "Remove access",
+              variant: "critical",
+              onClick: handleRemove,
+            },
+            {
+              label: "Unavailable action",
+              onClick: handleDisabledAction,
+              disabled: true,
+            },
+          ]}
+        />
+      )
+
+      await openSelect(user)
+      const search = screen.getByRole("searchbox")
+      const action = screen.getByRole("button", { name: "Remove access" })
+      const disabledAction = screen.getByRole("button", {
+        name: "Unavailable action",
+      })
+
+      expect(disabledAction).toBeDisabled()
+      await user.click(disabledAction)
+
+      search.focus()
+      await user.tab()
+      expect(document.activeElement).toHaveAttribute("role", "option")
+
+      await user.tab()
+      expect(action).toHaveFocus()
+
+      await user.tab({ shift: true })
+      expect(document.activeElement).toHaveAttribute("role", "option")
+
+      await user.tab({ shift: true })
+      expect(search).toHaveFocus()
+
+      await user.tab()
+      await user.tab()
+      expect(action).toHaveFocus()
+
+      await user.keyboard("{Enter}")
+
+      await waitFor(() => {
+        expect(handleRemove).toHaveBeenCalledOnce()
+      })
+      expect(handleDisabledAction).not.toHaveBeenCalled()
+    })
+
+    it("forwards refs through both trigger variants", () => {
+      const fieldRef = createRef<HTMLButtonElement>()
+      const field = render(
+        <F0Select
+          ref={fieldRef}
+          label="Field access level"
+          options={roleOptions}
+          value="viewer"
+          onChange={() => {}}
+        />
+      )
+
+      expect(fieldRef.current).not.toBeNull()
+      field.unmount()
+
+      const inlineRef = createRef<HTMLButtonElement>()
+      render(
+        <F0Select
+          ref={inlineRef}
+          variant="inline"
+          label="Inline access level"
+          options={roleOptions}
+          value="viewer"
+          onChange={() => {}}
+        />
+      )
+
+      expect(inlineRef.current).toBe(
+        screen.getByRole("combobox", { name: "Inline access level" })
+      )
+    })
   })
 
   it("should display selected value", async () => {
@@ -288,7 +829,6 @@ describe("Select", () => {
     await openSelect(user)
 
     expect(screen.getByText("Search options")).toBeInTheDocument()
-    await waitFor(() => expect(screen.getByRole("searchbox")).toHaveFocus())
   })
 
   it("renders icon tags with text", async () => {
@@ -495,58 +1035,102 @@ describe("Select", () => {
 
   it("should not lose the focus when the search input is focused and the list changes", async () => {
     const user = userEvent.setup({ delay: 100 })
+    const onSearchChange = vi.fn()
     render(
       <F0Select
         {...defaultSelectProps}
         options={mockOptions}
         onChange={() => {}}
+        onSearchChange={onSearchChange}
         showSearchBox
       />
     )
 
     await openSelect(user)
-    const searchbox = screen.getByRole("searchbox")
-    await user.type(searchbox, "Option 1")
+    const searchInput = screen.getByRole("searchbox")
+    await user.type(searchInput, "Option 1")
 
-    expect(searchbox).toHaveFocus()
-    expect(searchbox).toHaveValue("Option 1")
+    await waitFor(() =>
+      expect(onSearchChange).toHaveBeenLastCalledWith("Option 1")
+    )
     expect(screen.getByText("Option 1")).toBeInTheDocument()
     await waitFor(() =>
       expect(screen.queryByText("Option 2")).not.toBeInTheDocument()
     )
+    expect(searchInput).toHaveFocus()
   })
 
-  it("keeps search editing and Tab navigation inside the searchable content", async () => {
+  it("keeps search focus when async options load", async () => {
     const user = userEvent.setup()
+    const deferredOptions = createDeferredOptionsSource()
+
     render(
       <F0Select
         {...defaultSelectProps}
-        options={mockOptions}
-        onChange={() => {}}
+        source={deferredOptions.source}
+        mapOptions={(item) => ({
+          value: item.id as string,
+          label: item.name as string,
+        })}
+        value="option2"
+        defaultItem={{ value: "option2", label: "Option 2" }}
         showSearchBox
       />
     )
 
     await openSelect(user)
-    const searchbox = screen.getByRole("searchbox")
-    await user.type(searchbox, "1")
-    await user.keyboard("{Home}{ArrowRight}{End}")
+    const searchInput = screen.getByRole("searchbox")
+    await waitFor(() => expect(searchInput).toHaveFocus())
 
-    expect(searchbox).toHaveFocus()
-    expect(searchbox).toHaveValue("1")
+    deferredOptions.resolve()
 
-    await user.tab()
-    const clearButton = screen.getByRole("button", { name: "Clear" })
-    expect(clearButton).toHaveFocus()
+    await waitFor(() =>
+      expect(
+        within(screen.getByRole("listbox")).getByRole("option", {
+          name: "Option 2",
+        })
+      ).toBeInTheDocument()
+    )
+    expect(searchInput).toHaveFocus()
+  })
 
-    await user.tab()
-    expect(document.activeElement).toHaveAttribute(
-      "data-scroll-container",
-      "true"
+  it("keeps footer focus when async options load", async () => {
+    const user = userEvent.setup()
+    const deferredOptions = createDeferredOptionsSource()
+
+    render(
+      <F0Select
+        {...defaultSelectProps}
+        source={deferredOptions.source}
+        mapOptions={(item) => ({
+          value: item.id as string,
+          label: item.name as string,
+        })}
+        value="option2"
+        defaultItem={{ value: "option2", label: "Option 2" }}
+        showSearchBox
+        actions={[{ label: "Manage options", onClick: vi.fn() }]}
+      />
     )
 
-    await user.tab({ shift: true })
-    expect(clearButton).toHaveFocus()
+    await openSelect(user)
+    const searchInput = screen.getByRole("searchbox")
+    const footerAction = screen.getByRole("button", { name: "Manage options" })
+    await waitFor(() => expect(searchInput).toHaveFocus())
+
+    await user.tab()
+    expect(footerAction).toHaveFocus()
+
+    deferredOptions.resolve()
+
+    await waitFor(() =>
+      expect(
+        within(screen.getByRole("listbox")).getByRole("option", {
+          name: "Option 2",
+        })
+      ).toBeInTheDocument()
+    )
+    expect(footerAction).toHaveFocus()
   })
 
   it("shows empty message when no options match search", async () => {
@@ -860,7 +1444,7 @@ describe("Select", () => {
     )
   })
 
-  it("cancels staged changes without closing when cancel button is clicked", async () => {
+  it("closes the dropdown and discards staged changes when cancel is clicked", async () => {
     const handleChange = vi.fn()
     const user = userEvent.setup()
 
@@ -869,7 +1453,7 @@ describe("Select", () => {
         {...defaultSelectProps}
         multiple
         options={mockOptions}
-        value={["option1", "option2"]}
+        value={["option1"]}
         onChange={handleChange}
         withApplySelection
       />
@@ -879,47 +1463,145 @@ describe("Select", () => {
     await user.click(screen.getByText("Option 2"))
     await user.click(screen.getByRole("button", { name: "Cancel" }))
 
-    expect(screen.getByRole("listbox")).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
+    })
     expect(handleChange).not.toHaveBeenCalled()
 
-    await user.click(screen.getByText("Option 3"))
+    await openSelect(user)
     await user.click(screen.getByRole("button", { name: "Apply selection" }))
 
-    expect(handleChange).toHaveBeenCalledWith(
-      expect.arrayContaining(["option1", "option2", "option3"]),
-      expect.arrayContaining([
-        {
-          id: "option1",
-          name: "Option 1",
-          description: "Description 1",
-        },
-        {
-          id: "option2",
-          name: "Option 2",
-          description: "Description 2",
-        },
-        {
-          id: "option3",
-          name: "Option 3",
-          description: "Description 3",
-        },
-      ]),
-      expect.arrayContaining([
-        expect.objectContaining({
-          label: "Option 1",
-          value: "option1",
-          description: "Description 1",
-        }),
-        expect.objectContaining({
-          label: "Option 2",
-          value: "option2",
-        }),
-        expect.objectContaining({
-          label: "Option 3",
-          value: "option3",
-        }),
-      ])
+    await waitFor(() => {
+      expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
+    })
+    expect(handleChange).not.toHaveBeenCalled()
+  })
+
+  it("renders a custom apply-button label when applySelectionLabel is provided", async () => {
+    const user = userEvent.setup()
+
+    render(
+      <F0Select
+        {...defaultSelectProps}
+        multiple
+        options={mockOptions}
+        value={[]}
+        onChange={vi.fn()}
+        withApplySelection
+        applySelectionLabel="Add to schedule"
+      />
     )
+
+    await openSelect(user)
+
+    expect(
+      screen.getByRole("button", { name: "Add to schedule" })
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole("button", { name: "Apply selection" })
+    ).not.toBeInTheDocument()
+  })
+
+  describe("selected item's display", () => {
+    it("shows `selectedLabel` on the trigger while the row keeps its `label`", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          value="option1"
+          options={[
+            {
+              value: "option1",
+              label: "Tokens",
+              selectedLabel: "Tokens — Design system",
+            },
+            { value: "option2", label: "Components" },
+          ]}
+          onChange={() => {}}
+        />
+      )
+
+      // The trigger has no group header or siblings to read "Tokens" against.
+      expect(screen.getByText("Tokens — Design system")).toBeInTheDocument()
+
+      await openSelect(user)
+
+      // The row does, so it stays short.
+      expect(screen.getByText("Tokens")).toBeInTheDocument()
+    })
+
+    it("draws ONE glyph on the trigger when the field and the option both have an icon", async () => {
+      const user = userEvent.setup()
+      const { container } = render(
+        <F0Select
+          {...defaultSelectProps}
+          icon={Search}
+          value="option1"
+          options={mockOptions}
+          onChange={() => {}}
+        />
+      )
+
+      // The field's icon owns the trigger's glyph slot; the selected option's is
+      // left out, because the two are drawn in different places and would sit 4px
+      // apart. `mockOptions[0]` carries an icon of its own.
+      const trigger = screen.getByRole("combobox")
+      expect(trigger.querySelectorAll("svg")).toHaveLength(0)
+      expect(container.querySelectorAll("svg").length).toBeGreaterThan(0)
+
+      // …while the ROW keeps its icon. Scoped to the list: the trigger shows the
+      // same label, so an unscoped query finds both.
+      await openSelect(user)
+      const row = within(screen.getByRole("listbox"))
+        .getByText("Option 1")
+        .closest("[role='option']")
+      expect(row?.querySelectorAll("svg").length).toBeGreaterThan(0)
+    })
+
+    describe("hover tooltip", () => {
+      /**
+       * The trigger is WIRED as a tooltip trigger: Radix marks its (asChild)
+       * trigger with `data-state`, and renders the content lazily — so this is
+       * what "there is a tooltip here" looks like before anyone hovers. Opening
+       * it for real needs Radix's 700ms timer, which deadlocks `user.hover`
+       * under fake timers and does not resolve under real ones in jsdom; what the
+       * tooltip SAYS is asserted in `F0Select.triggerTooltip.test.tsx`, against a
+       * stubbed tooltip.
+       */
+      const tooltipWrapper = () =>
+        screen.getByRole("combobox").closest("div[data-state]")
+
+      it("is wired on the trigger when an item is selected", () => {
+        render(
+          <F0Select
+            {...defaultSelectProps}
+            hideLabel
+            value="option1"
+            options={mockOptions}
+            onChange={() => {}}
+          />
+        )
+
+        expect(tooltipWrapper()).toHaveAttribute("data-state", "closed")
+      })
+
+      it("stays wired when nothing is selected", () => {
+        render(
+          <F0Select
+            {...defaultSelectProps}
+            hideLabel
+            options={mockOptions}
+            onChange={() => {}}
+          />
+        )
+
+        // Wired but silent: nothing selected means nothing to explain, and an
+        // empty tooltip never opens (`Tooltip.emptyContent.test.tsx`). Dropping
+        // the wiring instead would change the element type above the trigger and
+        // remount it (`F0Select.triggerIdentity.test.tsx`).
+        expect(tooltipWrapper()).toHaveAttribute("data-state", "closed")
+      })
+    })
   })
 
   describe("asList mode", () => {
@@ -1134,6 +1816,46 @@ describe("Select", () => {
       // The other group remains collapsed
       expect(screen.queryByText("Carol")).not.toBeInTheDocument()
     })
+
+    /**
+     * ONE SCROLLPORT. The virtualized list is rendered through Radix's
+     * `Select.Viewport` with `asChild`, so Radix merges its own
+     * `overflow: hidden auto; flex: 1 1 0%` onto the virtualizer's SIZER — which
+     * made a second scroll container inside the `ScrollArea` that already scrolls
+     * the list. Two nested scrollers is the "double scroll" a grouped list is long
+     * enough to expose: the wheel fills the inner one, then hands off to the outer.
+     */
+    it("leaves the scrolling to ONE element, not two", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          source={buildSource(true)}
+          mapOptions={mapOptions}
+          onChange={() => {}}
+        />
+      )
+
+      await openSelect(user)
+      await waitFor(() => {
+        expect(screen.getByText("Engineer")).toBeInTheDocument()
+      })
+
+      const sizer = document.querySelector<HTMLElement>(
+        "[data-radix-select-viewport]"
+      )
+      expect(sizer).not.toBeNull()
+      // The spacer must not scroll, and must not be shrinkable below the height
+      // the virtualizer gave it.
+      expect(sizer!.style.overflow).toBe("visible")
+      // `flex: none` as the browser stores it.
+      expect(sizer!.style.flex).toBe("0 0 auto")
+    })
+
+    // NOTE: the other half of this fix — that expanding a group no longer scrolls
+    // the list back to the selection — has no honest test here. jsdom has no
+    // layout, so the virtualizer's scroll is a no-op and any assertion about it
+    // passes whether the bug is present or not. It is verified in a browser.
   })
 
   describe("onCreate", () => {

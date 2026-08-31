@@ -1,9 +1,15 @@
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-import { fireEvent, zeroRender as render, screen } from "@/testing/test-utils"
+import {
+  fireEvent,
+  zeroRender as render,
+  screen,
+  waitFor,
+} from "@/testing/test-utils"
 
 import { ChatVoiceAttachment } from "../components/ChatVoiceAttachment"
 import { type F0ChatVoiceAttachment } from "../types"
+import { CHAT_MEDIA_WIDTH_CLASS } from "../utils/media-layout"
 import { summariseAttachments } from "../utils/reply-preview"
 
 const VOICE: F0ChatVoiceAttachment = {
@@ -13,11 +19,21 @@ const VOICE: F0ChatVoiceAttachment = {
   mimeType: "audio/webm",
 }
 
+let originalAudioContext: typeof window.AudioContext
+
 describe("ChatVoiceAttachment", () => {
   beforeEach(() => {
+    originalAudioContext = window.AudioContext
     // The waveform decoder fetches the audio — keep tests offline (it falls
     // back to the neutral bar shape).
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")))
+  })
+
+  afterEach(() => {
+    Object.defineProperty(window, "AudioContext", {
+      configurable: true,
+      value: originalAudioContext,
+    })
   })
 
   it("renders the audio element and the WhatsApp-style waveform bars", () => {
@@ -29,12 +45,64 @@ describe("ChatVoiceAttachment", () => {
     expect(waveform.querySelectorAll("span").length).toBe(32)
   })
 
-  it("defaults to 320px and never exceeds its container", () => {
+  it("serializes waveform decoding across voice notes", async () => {
+    const audioBuffer = {
+      getChannelData: () => new Float32Array(32),
+    }
+    let resolveFirstDecode: ((value: typeof audioBuffer) => void) | undefined
+    const decodeAudioData = vi
+      .fn()
+      .mockImplementationOnce(
+        () =>
+          new Promise<typeof audioBuffer>((resolve) => {
+            resolveFirstDecode = resolve
+          })
+      )
+      .mockResolvedValue(audioBuffer)
+    class AudioContextMock {
+      decodeAudioData = decodeAudioData
+      close = vi.fn()
+    }
+    Object.defineProperty(window, "AudioContext", {
+      configurable: true,
+      value: AudioContextMock,
+    })
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        arrayBuffer: () => Promise.resolve(new ArrayBuffer(8)),
+      })
+    )
+
+    render(
+      <>
+        <ChatVoiceAttachment
+          voice={{ ...VOICE, url: "https://cdn.example.com/serial-first.webm" }}
+        />
+        <ChatVoiceAttachment
+          voice={{
+            ...VOICE,
+            url: "https://cdn.example.com/serial-second.webm",
+          }}
+        />
+      </>
+    )
+
+    await waitFor(() => expect(decodeAudioData).toHaveBeenCalledOnce())
+    resolveFirstDecode?.(audioBuffer)
+    await waitFor(() => expect(decodeAudioData).toHaveBeenCalledTimes(2))
+  })
+
+  // Wide enough to scrub, and the same width as every other media surface so it
+  // doesn't read as a stray chip beside an album. Sizing it off the column
+  // (`w-full`) is what used to stretch the column itself.
+  it("takes the shared media width and never exceeds the column", () => {
     render(<ChatVoiceAttachment voice={VOICE} />)
     const card = screen.getByTestId("chat-voice-attachment")
-    expect(card.className).toContain("w-80")
-    expect(card.className).toContain("max-w-full")
+    expect(card).toHaveClass(CHAT_MEDIA_WIDTH_CLASS)
+    expect(card.classList.contains("w-full")).toBe(false)
     expect(card.className).toContain("min-w-0")
+    expect(card.className).toContain("h-[58px]")
   })
 
   it("shows the total duration before playback starts", () => {
@@ -124,7 +192,7 @@ describe("ChatVoiceAttachment", () => {
     expect(pill).toHaveTextContent("1x")
   })
 
-  it("matches the bubble surface: mine grey, others bordered white", () => {
+  it("matches the neutral bubble defaults outside a transcript message", () => {
     render(<ChatVoiceAttachment voice={VOICE} isMine />)
     expect(screen.getByTestId("chat-voice-attachment").className).toContain(
       "bg-f1-background-tertiary"
@@ -133,6 +201,20 @@ describe("ChatVoiceAttachment", () => {
     render(<ChatVoiceAttachment voice={VOICE} isMine={false} />)
     const cards = screen.getAllByTestId("chat-voice-attachment")
     expect(cards[1].className).toContain("border-f1-border-secondary")
+  })
+
+  it("applies a sender-aware surface to voice content", () => {
+    const surfaceClassName = "bg-[color:orange]"
+    const content = render(
+      <ChatVoiceAttachment voice={VOICE} surfaceClassName={surfaceClassName} />
+    )
+    expect(screen.getByTestId("chat-voice-attachment")).toHaveClass(
+      surfaceClassName
+    )
+    expect(screen.getByTestId("chat-voice-attachment-shell")).not.toHaveClass(
+      surfaceClassName
+    )
+    content.unmount()
   })
 
   it("applies the bubble's chained-corner classes", () => {

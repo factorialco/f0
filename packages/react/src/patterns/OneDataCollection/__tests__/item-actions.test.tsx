@@ -79,6 +79,23 @@ describe("filterItemActions", () => {
     expect(result[0].label).toBe("Enabled Action")
   })
 
+  it("should KEEP a `disabled` action (disabled greys it out; only enabled:false removes it)", () => {
+    const actions: ItemActionsDefinition<TestRecord> = () => [
+      {
+        label: "Disabled but visible",
+        onClick: () => {},
+        disabled: true,
+        disabledTooltip: "You can't do this right now",
+      },
+    ]
+    const result = filterItemActions(actions, mockItem)
+    expect(result).toHaveLength(1)
+    expect(result[0]).toMatchObject({
+      disabled: true,
+      disabledTooltip: "You can't do this right now",
+    })
+  })
+
   it("should handle mixed action types correctly", () => {
     const actions: ItemActionsDefinition<TestRecord> = () => [
       {

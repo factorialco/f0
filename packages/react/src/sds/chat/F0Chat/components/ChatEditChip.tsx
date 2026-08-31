@@ -28,6 +28,8 @@ export const ChatEditChip = ({
           <img
             src={thumbnailUrl}
             alt=""
+            loading="lazy"
+            decoding="async"
             className="h-9 w-9 shrink-0 self-center rounded-sm object-cover"
           />
         )}

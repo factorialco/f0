@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { Calendar, Clock } from "@/icons/app"
 
-import { type HomeWidgetItem, listSlot } from "../slotRenderers"
+import { type HomeWidgetItem, listSlot, widgetTitle } from "../slotRenderers"
 import { WidgetContainer } from "./index"
 
 const WIDGETS: HomeWidgetItem[] = [
@@ -20,7 +20,13 @@ const WIDGETS: HomeWidgetItem[] = [
   {
     id: "events",
     icon: Calendar,
-    header: { title: "Events", count: 2 },
+    // The way out of a widget: declared as `header.link`, drawn as a button in
+    // the card's FOOTER (see `SlotWidget`).
+    header: {
+      title: "Events",
+      count: 2,
+      link: { title: "Go to Calendar", onClick: () => {} },
+    },
     slots: [
       listSlot({ clickBehavior: "link" }, [
         { id: "1", title: "Design sync", href: "/calendar/1" },
@@ -53,31 +59,112 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 /**
- * View mode: the widgets and the add placeholder — adding is ALWAYS on offer;
- * edit mode is only for arranging what's already there.
+ * There is NO EDIT MODE. Every widget is draggable by its whole card (no handle
+ * glyph) and carries "Remove widget" in the three-dots menu at its header's
+ * top-right, and the column ends in the add placeholder — arranging a Home is
+ * something you just do.
  */
 export const Default: Story = {}
 
 /**
- * Edit mode: the movable widgets gain a remove control and become draggable.
- * A `locked` widget (the first here) stays inert — no drag, no remove.
+ * A `locked` widget (the first here) is inert: it can't be dragged, nothing can
+ * displace it, and it offers no menu at all — being mandatory, removing it is
+ * not a choice the user has.
+ *
+ * AND NEITHER CAN THE OTHER ONE, in a column this short: with one free card
+ * among the pins there is a single legal order, so no card here has a grab
+ * cursor. A drag whose every outcome is the arrangement you already have is an
+ * offer of a refusal — see `PinnedWithRoomToMove` for the column that does
+ * have somewhere to put things.
  */
-export const Editing: Story = {
+export const WithLockedWidget: Story = {
   args: {
-    editing: true,
     widgets: [{ ...WIDGETS[0], locked: true }, WIDGETS[1]],
   },
 }
 
 /**
- * `disableEdition` opts a column out entirely: no remove controls, no
- * dragging, and not even the add placeholder.
+ * THE PINNED CEILING, which needs three widgets to see: Time off is `locked` at
+ * the top, and the two below it can be dragged past each other freely.
+ *
+ * Carry either one UP and it stops at the top of the first free slot — the
+ * pinned card's bottom edge plus the gap the column keeps between cards — rather
+ * than sailing over Time off to a place it cannot have. There is no order above
+ * a pinned widget for the drop to commit, so a card carried up there could only
+ * spring back (`lockedCeiling`).
+ */
+export const PinnedWithRoomToMove: Story = {
+  args: {
+    widgets: [
+      { ...WIDGETS[0], locked: true },
+      WIDGETS[1],
+      {
+        id: "tasks",
+        icon: Clock,
+        header: {
+          title: "Tasks",
+          count: 3,
+          link: { title: "Go to Tasks", onClick: () => {} },
+        },
+        slots: [
+          listSlot({ clickBehavior: "link" }, [
+            { id: "1", title: "Review the handbook", href: "/tasks/1" },
+            { id: "2", title: "Sign your contract", href: "/tasks/2" },
+          ]),
+        ],
+      },
+    ],
+  },
+}
+
+/**
+ * `disableEdition` opts a column out entirely: no remove menus, no dragging,
+ * and not even the add placeholder.
  */
 export const EditingDisabled: Story = {
-  args: { editing: true, disableEdition: true },
+  args: { disableEdition: true },
 }
 
 /** The rail variant — a tighter gap between its widgets than the main column. */
 export const RightSide: Story = {
-  args: { side: "right", editing: true },
+  args: { side: "right" },
+}
+
+/**
+ * A COLUMN LONGER THAN ITS SCROLL REGION, `virtualized`: 50 widgets, of which
+ * only the handful in view (plus the overscan) is in the DOM. Inspect the column
+ * while you scroll it — the cards ahead and behind are not hidden, they are not
+ * there, and the box they sit in holds the height of all 50 so the scrollbar
+ * still describes the whole column.
+ *
+ * The scroll region is the column's nearest scrollable ancestor, which here is
+ * the decorator's own box; `NewHomeLayout` hands its columns theirs.
+ *
+ * `estimateHeight` is what an unmounted card is assumed to be worth, and these
+ * are small ones — left at the 280px default the column would claim nearly twice
+ * its real height and the scrollbar would shrink under your thumb as the cards
+ * you scroll past get measured. Aim it at the cards you actually have.
+ */
+export const Virtualized: Story = {
+  args: {
+    widgets: Array.from({ length: 50 }, (_, index) => {
+      const source = WIDGETS[index % WIDGETS.length]!
+      return {
+        ...source,
+        id: `widget-${index}`,
+        header: {
+          ...source.header,
+          title: `${index + 1}. ${widgetTitle(source)}`,
+        },
+      }
+    }),
+    virtualized: { estimateHeight: 150 },
+  },
+  decorators: [
+    (Story) => (
+      <div className="h-[480px] max-w-96 overflow-y-auto p-4">
+        <Story />
+      </div>
+    ),
+  ],
 }

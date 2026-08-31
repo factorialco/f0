@@ -82,7 +82,9 @@ each flow — the survey example fills all four:
           <strong>Templates</strong>
         </td>
         <td>
-          Opens the templates canvas to browse and preview pre-made surveys.
+          Opens the template gallery full width — no chat beside it — to browse
+          and preview pre-made surveys. Closing it steps back to this welcome
+          screen.
         </td>
       </tr>
       <tr>
@@ -90,9 +92,9 @@ each flow — the survey example fills all four:
           <strong>Employee NPS</strong>
         </td>
         <td>
-          Opens the eNPS template in a read-only preview; "Use this template"
-          then seeds the survey with the eNPS question locked so scores stay
-          comparable, the rest editable.
+          Opens the eNPS template in a full-width read-only preview; "Use this
+          template" then seeds the survey with the eNPS question locked so
+          scores stay comparable, the rest editable — and brings the chat back.
         </td>
       </tr>
       <tr>
@@ -138,10 +140,11 @@ gates. This mirrors the accept/reject on every later edit; see
 
 The Welcome Screen above is one way to open the conversation. The **Guided Chat** stories show the
 other: instead of a full-width welcome screen, the flow posts an opening line on the user's behalf
-and immediately asks **one** clarifying question. There is no blank canvas of choices — the
-conversation is already moving.
+and **asks straight away**. There is no blank canvas of choices — the conversation is already
+moving.
 
-The single question takes one of two shapes:
+The opening question takes one of two shapes — either the flow's only question, or the first of
+two:
 
 <Unstyled>
   <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
@@ -162,8 +165,9 @@ The single question takes one of two shapes:
           Knowledge Test.
         </td>
         <td>
-          A template gallery scoped to the chosen type, with "Empty Survey"
-          first.
+          A <em>second</em> question — the same entry actions as the shape
+          below, scoped to the chosen type: its most-used templates, plus Empty
+          Survey and Use a Template.
         </td>
       </tr>
       <tr>
@@ -188,13 +192,20 @@ blank canvas. See
 [When to use Welcome Screen vs Guided Chat](?path=/docs/patterns-ai-cocreation-guidelines--documentation)
 for the decision.
 
+Both shapes end at the same place: **Use a Template** opens the gallery full width, "Empty Survey"
+opens a blank resource, and a named template opens its preview — also full width, since previewing
+is still choosing. In the Triage shape the two questions are walked **consecutively in one panel**
+("1 of 2", with a back arrow), and everything on that second question is scoped to the type just
+picked, so the gallery it opens is that type's ("Satisfaction Survey Templates") rather than the
+whole list. Going back and changing the type re-derives the actions.
+
 Because Guided Chat has no welcome screen to fall back to, backing out **before** a survey is picked
-is treated as leaving creation and warns first ("Leave creation?") — whether the user dismisses the
-opening clarifying panel, closes the template gallery, or closes the chat panel itself while a survey
-is still being chosen. **Keep creating** leaves the flow where it was; **Leave** closes the chat and
-notes that nothing was created. Closing a template preview is a step back to the gallery it was
-opened from, not an exit, so it doesn't warn. In the entry-actions shape, picking "Empty Survey" runs
-the same clarifying → draft-confirmation chain described above.
+is treated as leaving creation and warns first ("Leave creation?") — whether the user dismisses a
+clarifying panel or closes the chat panel itself while a survey is still being chosen. **Keep
+creating** leaves the flow where it was; **Leave** closes the chat and notes that nothing was
+created. Closing the gallery, or a template preview, is a step back to whatever opened it rather
+than an exit, so neither warns. In the entry-actions shape, picking "Empty Survey" runs the same
+clarifying → draft-confirmation chain described above.
 
 ### Split
 

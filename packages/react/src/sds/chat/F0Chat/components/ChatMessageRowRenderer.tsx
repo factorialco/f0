@@ -1,10 +1,10 @@
-import { type ReactNode, memo, useEffect, useState } from "react"
-
 import { motion } from "motion/react"
+import { type ReactNode, memo, useEffect, useState } from "react"
 
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { cn } from "@/lib/utils"
 
+import { useF0ChatChannelType } from "../providers/F0ChatProvider"
 import { type F0ChatUser } from "../types"
 import { rowEntryTransition } from "../utils/chat-motion"
 import { type ChatRow } from "../utils/grouping"
@@ -26,13 +26,18 @@ const avatarFor = (author: F0ChatUser): ReactNode => (
 )
 
 /** Top spacing baked into the row (virtual rows are absolutely positioned, so
- * the old flex `gap-6`/`gap-1` can't apply — `measureElement` reads padding). */
-const topSpacing = (row: ChatRow, isFirstRow: boolean): string => {
-  if (isFirstRow) return "pt-2"
-  if (row.type === "message") return row.isFirstOfRun ? "pt-4" : "pt-1"
+ * the old flex `gap-6`/`gap-1` can't apply — `measureElement` reads padding).
+ *
+ * A function of the row's CONTENT only: it used to shrink for whatever row was
+ * currently first, which made a row's measured height depend on its position,
+ * so paginating silently resized a row Virtuoso had already measured. The
+ * transcript's top breathing room is a constant `components.Header` instead
+ * (see ChatTopGap), exactly like the bottom gap. */
+const topSpacing = (row: ChatRow): string => {
+  if (row.type === "message") return row.isFirstOfRun ? "pt-5" : "pt-0"
   // The status footer hugs its message (MessageStatus brings its own pt-1).
   if (row.type === "footer") return "pt-0"
-  return "pt-4"
+  return "pt-3"
 }
 
 /**
@@ -46,7 +51,6 @@ const topSpacing = (row: ChatRow, isFirstRow: boolean): string => {
 const ChatMessageRowRendererComponent = ({
   row,
   isGroup,
-  isFirstRow,
   enterAnimation,
   animatedIds,
   freshIds,
@@ -55,7 +59,6 @@ const ChatMessageRowRendererComponent = ({
 }: {
   row: ChatRow
   isGroup: boolean
-  isFirstRow: boolean
   /** Whether enter animations are enabled at all (off for reduced motion). */
   enterAnimation: boolean
   /** Ids already shown — seeded with the initial set so only true arrivals animate. */
@@ -69,10 +72,11 @@ const ChatMessageRowRendererComponent = ({
   /** Typing row only: streak-start gate for the bubble's entry pop. */
   typingEntry?: TypingEntryState
 }): ReactNode => {
+  const channelType = useF0ChatChannelType()
   // No per-row bottom padding: the transcript's bottom breathing room lives on
   // the viewport (constant), so being/stopping-being the last row never
   // changes a row's height (stable measurements = no send-time churn).
-  const spacing = topSpacing(row, isFirstRow)
+  const spacing = topSpacing(row)
 
   // Decided once at mount: animate only genuinely fresh arrivals (in this
   // commit's appended tail and never shown before) — prepends, scroll-backs
@@ -109,7 +113,13 @@ const ChatMessageRowRendererComponent = ({
     // Centered, author-less rows — same fast opacity-only entry as messages.
     const inner =
       row.type === "separator" ? (
-        <DateTimeSeparator at={row.at} padded />
+        // On a noticeboard the separator is the ONLY clock: the posts are
+        // seeded, so they don't carry one of their own (see ChatMessageMeta).
+        <DateTimeSeparator
+          at={row.at}
+          padded
+          withTime={channelType === "announcement"}
+        />
       ) : (
         <ChatSystemMessage message={row.message} />
       )
@@ -154,12 +164,8 @@ const ChatMessageRowRendererComponent = ({
     // sending a message only APPENDS rows — nothing shrinks, nothing shifts.
     const showFooterGutter = isGroup && !row.message.isMine
     return (
-      <div className={cn("flex w-full gap-2", spacing)}>
-        {showFooterGutter && (
-          <span aria-hidden className="invisible shrink-0">
-            {avatarFor(row.message.author)}
-          </span>
-        )}
+      <div className={cn("flex w-full gap-1.5", spacing)}>
+        {showFooterGutter && <span aria-hidden className="size-5 shrink-0" />}
         <div className="min-w-0 flex-1">
           <MessageStatus message={row.message} isGroup={isGroup} />
         </div>
@@ -171,18 +177,15 @@ const ChatMessageRowRendererComponent = ({
   const isMine = message.isMine
   const showIdentity = isGroup && !isMine
 
-  // Invisible avatar reserves the gutter so bubbles/reactions/footer stay aligned
-  // even on rows that don't show the avatar.
+  // A CSS spacer reserves the gutter without mounting hidden avatar/image work.
   const spacer = showIdentity ? (
-    <span aria-hidden className="invisible shrink-0">
-      {avatarFor(message.author)}
-    </span>
+    <span aria-hidden className="size-5 shrink-0" />
   ) : undefined
 
   const bubbleGutter = showIdentity ? (
     isLastOfRun ? (
       <ChatUserHoverCard user={message.author}>
-        <span className="shrink-0 cursor-default">
+        <span className="shrink-0 cursor-default flex items-end py-0.5">
           {avatarFor(message.author)}
         </span>
       </ChatUserHoverCard>
@@ -200,6 +203,7 @@ const ChatMessageRowRendererComponent = ({
       belowGutter={spacer}
       isFirstOfRun={isFirstOfRun}
       isLastOfRun={isLastOfRun}
+      hasAvatar={showIdentity}
     />
   )
 

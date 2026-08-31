@@ -1,20 +1,60 @@
-import { type ReactNode, useEffect, useRef, useState } from "react"
-
 import { AnimatePresence, motion } from "motion/react"
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react"
 
-import { useReducedMotion } from "@/lib/a11y"
+import { ButtonInternal } from "@/components/F0Button/internal"
+import { Ellipsis } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
-import { useChatHighlightedId } from "../providers/ChatUIProvider"
+import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
+import {
+  useChatComposeActions,
+  useChatHighlightedId,
+} from "../providers/ChatUIProvider"
 import { useF0ChatStable } from "../providers/F0ChatProvider"
 import { type F0ChatMessage, type F0ChatUser } from "../types"
 import { microEnterTransition } from "../utils/chat-motion"
+import { hasAnyMessageAction } from "../utils/message-actions"
 import { bubbleCornerClass, ChatBubble } from "./ChatBubble"
 import { ChatMessageActions } from "./ChatMessageActions"
 import { ChatMessageAttachments } from "./ChatMessageAttachments"
 import { ChatMessageReactions } from "./ChatMessageReactions"
 import { SendingClock } from "./ChatMessageStatusIcon"
+
+/** See armActionsSoon: long enough for a click burst on the placeholder to
+ * finish, well under the pointer travel time from row edge to the ellipsis. */
+const ARM_ACTIONS_ON_HOVER_MS = 150
+
+/** Parts of a message that already do something when clicked, so a
+ * double-click on one must not also quote. The test is whether the element can
+ * take focus, not a list of tags, so new attachment types are covered — but a
+ * tabindex on the row or the bubble itself would stop every message quoting. */
+const SELF_HANDLING_DESCENDANTS =
+  "a, button, input, textarea, select, video, audio, summary," +
+  ' [role="button"], [role="link"], [role="slider"], [contenteditable="true"],' +
+  ' [tabindex]:not([tabindex="-1"]), [data-chat-attachments]'
+
+/**
+ * Searches up from the clicked element and stops at `stopAt`, the message's own
+ * wrapper. `closest` would keep going and match the scrolling container, which
+ * react-virtuoso gives `tabIndex={0}`, so nothing would ever quote. An element
+ * that never reaches `stopAt` is in a popover: React sends its events here, but
+ * it does not belong to this message.
+ */
+const isSelfHandling = (target: Element, stopAt: Element): boolean => {
+  for (let node: Element | null = target; node; node = node.parentElement) {
+    if (node === stopAt) return false
+    if (node.matches(SELF_HANDLING_DESCENDANTS)) return true
+  }
+  return true
+}
 
 /** One message: bubble (with any reply quote nested inside) + reactions, with a
  * hover ellipsis menu. */
@@ -26,6 +66,7 @@ export const ChatMessageItem = ({
   belowGutter,
   isFirstOfRun = true,
   isLastOfRun = true,
+  hasAvatar = false,
 }: {
   message: F0ChatMessage
   isMine: boolean
@@ -40,14 +81,78 @@ export const ChatMessageItem = ({
   isFirstOfRun?: boolean
   /** Last message of a same-author run — drives the bubble's chained corners. */
   isLastOfRun?: boolean
+  /** The gutter holds a real avatar, not a spacer: the only case where the run
+   * ends on a point (see `bubbleCornerClass`). */
+  hasAvatar?: boolean
 }): ReactNode => {
   const i18n = useI18n()
-  const reducedMotion = useReducedMotion()
+  const { reducedMotion } = useChatRenderConfig()
   const [actionsOpen, setActionsOpen] = useState(false)
+  // The actions popover (Radix Popover + tooltip provider + timers) mounts
+  // on first interaction intent, not with the row: with the transcript's
+  // overscan, mounting it eagerly multiplies that cost by every rendered row
+  // during the first scroll pass. Until then a visually identical plain
+  // trigger holds its place (same component minus tooltip/popover), so hover
+  // reveal and keyboard tab order don't change. Failed messages skip the
+  // deferral — their trigger is always visible.
+  const [actionsArmed, setActionsArmed] = useState(false)
+  const actionsWrapperRef = useRef<HTMLDivElement>(null)
+  const restoreActionsFocusRef = useRef(false)
+  const armTimerRef = useRef<number | null>(null)
+  const armActions = useCallback(() => {
+    // Arming while the placeholder holds focus swaps the focused node — hand
+    // focus over so tabbing never lands in a void.
+    if (actionsWrapperRef.current?.contains(document.activeElement)) {
+      restoreActionsFocusRef.current = true
+    }
+    setActionsArmed(true)
+  }, [])
+  // Hover arming waits out any in-flight click: a click's event burst
+  // (pointer, focus, click) must finish on the placeholder node — swapping it
+  // mid-burst would swallow the click (the detached node no longer bubbles to
+  // the React root). A click faster than this is handled by the placeholder
+  // itself; a hover slower than this reaches an already-real trigger.
+  const armActionsSoon = useCallback(() => {
+    if (armTimerRef.current != null) return
+    armTimerRef.current = window.setTimeout(() => {
+      armTimerRef.current = null
+      armActions()
+    }, ARM_ACTIONS_ON_HOVER_MS)
+  }, [armActions])
+  useEffect(
+    () => () => {
+      if (armTimerRef.current != null) window.clearTimeout(armTimerRef.current)
+    },
+    []
+  )
+  useLayoutEffect(() => {
+    if (!restoreActionsFocusRef.current) return
+    restoreActionsFocusRef.current = false
+    actionsWrapperRef.current?.querySelector("button")?.focus()
+  }, [actionsArmed])
   const { highlightedId } = useChatHighlightedId()
+  // Not the VALUE context: that would re-render the row on every target change.
+  const { startReply } = useChatComposeActions()
   // Stable slice — the full runtime context changes on every transport event
   // and would re-render every mounted row.
-  const { currentUserId } = useF0ChatStable()
+  const {
+    currentUserId,
+    channelType,
+    capabilities,
+    editMessage,
+    editWindowMs,
+  } = useF0ChatStable()
+  // An ellipsis that opens an empty popover is worse than no ellipsis: on a
+  // read-only noticeboard nothing survives the gates, so the trigger goes too.
+  // Same predicate the popover uses, so the two can't disagree.
+  const hasActions = hasAnyMessageAction({
+    message,
+    isMine,
+    channelType,
+    capabilities,
+    hasEditMessage: !!editMessage,
+    editWindowMs,
+  })
   const highlighted = highlightedId === message.id
   const hasReactions = !message.deleted && (message.reactions?.length ?? 0) > 0
   // Whether the row MOUNTED with its reactions already there (history, or a
@@ -70,6 +175,22 @@ export const ChatMessageItem = ({
     message.body.trim().length > 0 ||
     Boolean(message.replyTo)
   const hasContent = hasBubble || hasAttachments
+  // A deleted message has nothing to quote, and one that has not been sent
+  // yet has no server id for a reply to point at.
+  const canQuote =
+    !message.deleted &&
+    message.status !== "sending" &&
+    message.status !== "failed"
+
+  const handleDoubleClick = useCallback(
+    (event: React.MouseEvent<HTMLDivElement>) => {
+      if (!canQuote) return
+      if (!(event.target instanceof Element)) return
+      if (isSelfHandling(event.target, event.currentTarget)) return
+      startReply(message)
+    },
+    [canQuote, message, startReply]
+  )
 
   return (
     <div
@@ -78,6 +199,7 @@ export const ChatMessageItem = ({
         "group flex flex-col",
         isMine ? "items-end" : "items-start"
       )}
+      onPointerEnter={actionsArmed || !hasActions ? undefined : armActionsSoon}
     >
       {/* Attachments + bubble are one message column on the message's side, so
           a text-less (files-only) message still aligns + gets hover actions.
@@ -85,14 +207,18 @@ export const ChatMessageItem = ({
       {hasContent && (
         <div
           className={cn(
-            "flex w-full gap-2",
+            // 4px here + the outer surface's own 2px of padding stand the
+            // bubble 6px off the avatar, so the run-end corner points at it
+            // instead of touching it. The reaction and delivery-status rows
+            // below carry the same 6px, so every left edge lines up.
+            "flex w-full gap-0.5",
             isMine ? "flex-row-reverse items-center" : "items-end"
           )}
         >
           {bubbleGutter}
           <div
             className={cn(
-              "flex min-w-0 items-center gap-1",
+              "flex min-w-0 items-center gap-0.5",
               isMine ? "flex-row-reverse" : "flex-row"
             )}
           >
@@ -102,24 +228,29 @@ export const ChatMessageItem = ({
               className={cn(
                 // Match the bubble's chained corners so the highlight ring and
                 // hover surface follow its exact shape (not a fixed 2xl box).
-                bubbleCornerClass(isMine, isFirstOfRun, isLastOfRun),
+                bubbleCornerClass({
+                  isMine,
+                  isFirstOfRun,
+                  isLastOfRun,
+                  hasAvatar,
+                  layer: "outer",
+                }),
                 // Shadow AND radius transition together (single property list —
                 // tailwind-merge would otherwise drop one): the jump-to ring
                 // fades instead of snapping, and a run extending animates the
                 // tail corner. `min-w-0` lets this flex item shrink below its
                 // content's intrinsic width so the reply quote's single line
                 // truncates instead of forcing the bubble wider than the column.
-                "flex min-w-0 max-w-full flex-col gap-1 transition-[box-shadow,border-radius] duration-200",
+                "p-0.5 flex min-w-0 max-w-full flex-col gap-1 transition-[box-shadow,border-radius] duration-200 motion-reduce:transition-none",
                 isMine ? "items-end" : "items-start",
                 // `ring-offset-f1-background` colours the offset gap with the
                 // transcript surface — without it the gap defaults to white and
                 // reads as an aura in dark mode.
                 highlighted &&
-                  "ring-1 ring-f1-special-ring ring-offset-2 ring-offset-f1-background",
-                !message.deleted &&
-                  "group-hover:bg-f1-background-hover focus-within:bg-f1-background-hover",
-                actionsOpen && "bg-f1-background-hover"
+                  "ring-1 ring-f1-special-ring ring-offset-1 ring-offset-f1-background"
               )}
+              onDoubleClick={handleDoubleClick}
+              data-testid="chat-message-surface"
             >
               {hasAttachments && (
                 <ChatMessageAttachments
@@ -127,6 +258,7 @@ export const ChatMessageItem = ({
                   isMine={isMine}
                   isFirstOfRun={isFirstOfRun}
                   isLastOfRun={isLastOfRun}
+                  hasAvatar={hasAvatar}
                 />
               )}
               {hasBubble && (
@@ -141,15 +273,8 @@ export const ChatMessageItem = ({
                   // preview mirror the same corner).
                   isFirstOfRun={isFirstOfRun && !hasAttachments}
                   isLastOfRun={isLastOfRun}
+                  hasAvatar={hasAvatar}
                 />
-              )}
-              {/* The bubble anchors the "edited" mark to the body text. An
-                  attachment-only message has no bubble, so surface it here
-                  instead — otherwise an edited media message shows no mark. */}
-              {!hasBubble && message.editedAt && !message.deleted && (
-                <span className="px-1 text-sm text-f1-foreground-tertiary">
-                  {i18n.chat.edited}
-                </span>
               )}
             </div>
             {/* Sending indicator for own messages, in the slot next to the
@@ -165,46 +290,68 @@ export const ChatMessageItem = ({
                 shows until it settles. The menu stays visible while open (not
                 just on hover) so the ellipsis doesn't flicker. A FAILED message
                 swaps the hover ellipsis for an always-visible critical alert
-                (same popover, reduced to Retry / Delete). */}
-            {!message.deleted && message.status !== "sending" && (
-              <div
-                className={cn(
-                  message.status === "failed"
-                    ? "opacity-100"
-                    : "opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100",
-                  actionsOpen && "opacity-100"
-                )}
-              >
-                {message.status === "failed" ? (
-                  // The alert fades in on a live failure (the branch switch
-                  // remounts it, so `initial` applies) — never on a
-                  // scroll-back of an old failure.
-                  <motion.div
-                    initial={
-                      wasFailedAtMountRef.current || reducedMotion
-                        ? false
-                        : { opacity: 0, scale: 0.9 }
-                    }
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={microEnterTransition}
-                  >
+                (same popover, reduced to Retry / Delete) — which is why it
+                ignores `hasActions`: retrying and discarding a local echo are
+                never permissions. */}
+            {!message.deleted &&
+              message.status !== "sending" &&
+              (hasActions || message.status === "failed") && (
+                <div
+                  ref={actionsWrapperRef}
+                  className={cn(
+                    message.status === "failed"
+                      ? "opacity-100"
+                      : "opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100",
+                    actionsOpen && "opacity-100"
+                  )}
+                >
+                  {message.status === "failed" ? (
+                    // The alert fades in on a live failure (the branch switch
+                    // remounts it, so `initial` applies) — never on a
+                    // scroll-back of an old failure.
+                    <motion.div
+                      initial={
+                        wasFailedAtMountRef.current || reducedMotion
+                          ? false
+                          : { opacity: 0, scale: 0.9 }
+                      }
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={microEnterTransition}
+                    >
+                      <ChatMessageActions
+                        message={message}
+                        isMine={isMine}
+                        open={actionsOpen}
+                        onOpenChange={setActionsOpen}
+                      />
+                    </motion.div>
+                  ) : actionsArmed ? (
                     <ChatMessageActions
                       message={message}
                       isMine={isMine}
                       open={actionsOpen}
                       onOpenChange={setActionsOpen}
                     />
-                  </motion.div>
-                ) : (
-                  <ChatMessageActions
-                    message={message}
-                    isMine={isMine}
-                    open={actionsOpen}
-                    onOpenChange={setActionsOpen}
-                  />
-                )}
-              </div>
-            )}
+                  ) : (
+                    // Same trigger the popover renders, minus the popover and
+                    // tooltip machinery — indistinguishable until interaction.
+                    // Activating it (click, tap, Enter) arms AND opens, so the
+                    // very first interaction behaves exactly like the real one.
+                    <ButtonInternal
+                      variant="outline"
+                      hideLabel
+                      noAutoTooltip
+                      label={i18n.chat.moreActions}
+                      icon={Ellipsis}
+                      pressed={false}
+                      onClick={() => {
+                        armActions()
+                        setActionsOpen(true)
+                      }}
+                    />
+                  )}
+                </div>
+              )}
           </div>
         </div>
       )}
@@ -217,7 +364,7 @@ export const ChatMessageItem = ({
           // popovers, so the overflow clip never cuts them.
           <motion.div
             key="reactions"
-            className="flex w-full gap-2 overflow-hidden"
+            className="flex w-full gap-1.5 overflow-hidden"
             initial={
               hadReactionsAtMountRef.current || reducedMotion
                 ? false

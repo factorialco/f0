@@ -5,7 +5,6 @@ import {
   formatClock,
   formatRelativeDay,
   formatSeparator,
-  formatStatusTime,
 } from "../natural-time"
 
 const LABELS = { today: "Today", yesterday: "Yesterday" }
@@ -20,6 +19,25 @@ describe("natural-time", () => {
 
   it("formats a clock with hours and minutes", () => {
     expect(formatClock(new Date("2026-06-21T22:14:00"), "en-GB")).toContain(":")
+  })
+
+  // The locale owns the whole shape of the clock, padding included: asking for
+  // a 2-digit hour produced "01:53 PM", which no US reader writes.
+  it("writes the clock the way the reader's locale does", () => {
+    const afternoon = new Date("2026-06-21T13:53:00")
+    expect(formatClock(afternoon, "es-ES")).toBe("13:53")
+    expect(formatClock(afternoon, "en-US")).toBe("1:53 PM")
+    expect(formatClock(new Date("2026-06-21T07:29:00"), "en-US")).toBe(
+      "7:29 AM"
+    )
+  })
+
+  // No locale means the runtime's — the browser's — which is what every caller
+  // in the transcript passes (there is no app-level locale to thread).
+  it("defaults to the reader's own runtime locale", () => {
+    const date = new Date("2026-06-21T13:53:00")
+    const runtimeLocale = new Intl.DateTimeFormat().resolvedOptions().locale
+    expect(formatClock(date)).toBe(formatClock(date, runtimeLocale))
   })
 
   it("labels today and yesterday", () => {
@@ -41,15 +59,5 @@ describe("natural-time", () => {
       "en-GB"
     )
     expect(sep.startsWith("Yesterday ")).toBe(true)
-  })
-
-  it("status time is clock-only today, day + clock otherwise", () => {
-    const now = new Date("2026-06-21T12:00:00")
-    expect(
-      formatStatusTime(new Date("2026-06-21T10:00:00"), now, LABELS, "en-GB")
-    ).not.toContain("Yesterday")
-    expect(
-      formatStatusTime(new Date("2026-06-20T10:00:00"), now, LABELS, "en-GB")
-    ).toContain("Yesterday")
   })
 })

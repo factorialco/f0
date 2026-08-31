@@ -16,6 +16,7 @@ interface SelectBottomActionsProps {
   showCancelButton?: boolean
   onApply?: () => void
   onCancel?: () => void
+  applyLabel?: string
 }
 
 export const SelectBottomActions = ({
@@ -24,6 +25,7 @@ export const SelectBottomActions = ({
   onApply,
   onCancel,
   showCancelButton,
+  applyLabel,
 }: SelectBottomActionsProps) => {
   const i18n = useI18n()
 
@@ -38,6 +40,7 @@ export const SelectBottomActions = ({
           onClick={action.onClick}
           icon={action.icon}
           label={action.label}
+          disabled={action.disabled}
         />
       ))}
       {showCancelButton && (
@@ -49,7 +52,10 @@ export const SelectBottomActions = ({
       )}
       {showApplyButton && (
         <div className={showCancelButton ? "" : "ml-auto"}>
-          <F0Button onClick={onApply} label={i18n.select.applySelection} />
+          <F0Button
+            onClick={onApply}
+            label={applyLabel ?? i18n.select.applySelection}
+          />
         </div>
       )}
     </div>

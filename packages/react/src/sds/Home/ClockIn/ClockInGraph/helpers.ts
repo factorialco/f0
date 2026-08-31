@@ -1,5 +1,6 @@
 import { formatTime24Hours } from "@/lib/date"
 import { getNormalizedRemainingMinutes } from "../ClockInControls/helpers"
+import type { ClockInSegment } from "./HorizontalBar"
 import { CLOCK_IN_COLORS, ClockInGraphProps } from "./index"
 
 const EMPTY_LABEL = "--:--"
@@ -62,49 +63,53 @@ export const normalizeData = ({
   let res = [
     ...dataCopy
       .reverse()
-      .reduce(
-        (acc, entry) => {
-          const totalEntrySeconds =
-            (entry.to.getTime() - entry.from.getTime()) / 1000
+      .reduce((acc, entry) => {
+        const totalEntrySeconds =
+          (entry.to.getTime() - entry.from.getTime()) / 1000
 
-          const totalEntryOvertimeSeconds =
-            entry.variant === "clocked-in"
-              ? Math.min(totalEntrySeconds, accumulatedOvertimeSeconds)
-              : 0
+        const totalEntryOvertimeSeconds =
+          entry.variant === "clocked-in"
+            ? Math.min(totalEntrySeconds, accumulatedOvertimeSeconds)
+            : 0
 
-          const finalEntrySeconds =
-            totalEntrySeconds - totalEntryOvertimeSeconds
+        const finalEntrySeconds = totalEntrySeconds - totalEntryOvertimeSeconds
 
-          const value = finalEntrySeconds / totalSecondsWithRemainingTime
+        const value = finalEntrySeconds / totalSecondsWithRemainingTime
 
-          accumulatedOvertimeSeconds -= totalEntryOvertimeSeconds
+        accumulatedOvertimeSeconds -= totalEntryOvertimeSeconds
 
-          if (entry.variant === "clocked-in" && overtimeOnly) {
-            return [
-              ...acc,
-              {
-                value:
-                  totalEntryOvertimeSeconds / totalSecondsWithRemainingTime +
-                  value,
-                color: CLOCK_IN_COLORS.overtime,
-              },
-            ]
-          }
+        // When and what this stretch was travels with every piece it is cut
+        // into: an overtime slice is still the same stretch of the day, so it
+        // answers a hover with the same range and label.
+        const context = { from: entry.from, to: entry.to, label: entry.label }
 
+        if (entry.variant === "clocked-in" && overtimeOnly) {
           return [
             ...acc,
             {
-              value: totalEntryOvertimeSeconds / totalSecondsWithRemainingTime,
+              value:
+                totalEntryOvertimeSeconds / totalSecondsWithRemainingTime +
+                value,
               color: CLOCK_IN_COLORS.overtime,
-            },
-            {
-              value,
-              color: CLOCK_IN_COLORS[entry.variant],
+              ...context,
             },
           ]
-        },
-        [] as { value: number; color: string }[]
-      )
+        }
+
+        return [
+          ...acc,
+          {
+            value: totalEntryOvertimeSeconds / totalSecondsWithRemainingTime,
+            color: CLOCK_IN_COLORS.overtime,
+            ...context,
+          },
+          {
+            value,
+            color: CLOCK_IN_COLORS[entry.variant],
+            ...context,
+          },
+        ]
+      }, [] as ClockInSegment[])
       .reverse(),
     ...(leftEntry ? [leftEntry] : []),
   ]

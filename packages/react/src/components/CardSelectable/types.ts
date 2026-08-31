@@ -49,6 +49,9 @@ export interface CardSelectableSingleProps<T extends CardSelectableValue> {
   isToggle?: boolean
   /** When true, items are grouped in a single bordered container with dividers */
   grouped?: boolean
+  /** Standalone cards only: 12px padding instead of 16px. Grouped rows already
+   * use 12px vertical padding, so they are unaffected. */
+  compact?: boolean
 }
 
 export interface CardSelectableMultipleProps<T extends CardSelectableValue> {
@@ -70,6 +73,9 @@ export interface CardSelectableMultipleProps<T extends CardSelectableValue> {
   isToggle?: boolean
   /** When true, items are grouped in a single bordered container with dividers */
   grouped?: boolean
+  /** Standalone cards only: 12px padding instead of 16px. Grouped rows already
+   * use 12px vertical padding, so they are unaffected. */
+  compact?: boolean
 }
 
 export type CardSelectableContainerProps<T extends CardSelectableValue> =

@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { expect, waitFor, within } from "storybook/test"
 
+import { AlertCircleLine } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0AiMessagesContainer } from "../F0AiMessagesContainer"
@@ -169,6 +170,18 @@ export const EmptyWelcomeWithCaptionAndSubtitle: Story = {
     initialMessageCaption: "Analytics mode:",
     initialMessageSubtitle:
       "Ask about employees, contracts, absences, and presence. More data soon.",
+  },
+}
+
+export const EmptyWelcomeWithCta: Story = {
+  args: {
+    turns: [],
+    initialMessage: "Skip the boring part of your job",
+    initialMessageCta: {
+      label: "How to use One",
+      icon: AlertCircleLine,
+      onClick: () => console.log("welcome CTA clicked"),
+    },
   },
 }
 

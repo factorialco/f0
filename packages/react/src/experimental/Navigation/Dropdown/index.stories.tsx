@@ -310,6 +310,34 @@ export const DisabledWithCustomTrigger: Story = {
   },
 }
 
+/**
+ * A single item can be disabled with `disabled: true` — it stays VISIBLE but
+ * greyed-out and non-interactive (unlike `enabled: false`, which removes it).
+ * Pair it with `disabledTooltip` to explain on hover why the action is
+ * unavailable; the tooltip works despite the disabled item's `pointer-events:
+ * none`. Open the menu and hover "Delete" to see it.
+ */
+export const DisabledItemWithTooltip: Story = {
+  args: {
+    items: [
+      {
+        label: "Edit",
+        onClick: () => console.log("Edit clicked"),
+        icon: Icons.Pencil,
+      },
+      {
+        label: "Delete",
+        onClick: () => console.log("Delete clicked"),
+        icon: Icons.Delete,
+        critical: true,
+        disabled: true,
+        disabledTooltip:
+          "You can't delete this while people with active contracts are assigned to it",
+      },
+    ],
+  },
+}
+
 export const MobileDropdown: Story = {
   args: {
     items: [

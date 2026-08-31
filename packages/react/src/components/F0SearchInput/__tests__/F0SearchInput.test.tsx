@@ -20,11 +20,27 @@ describe("F0SearchInput", () => {
   })
 
   describe("focus behavior", () => {
-    it("is reachable with the Tab key", async () => {
+    it("is skipped with the Tab key by default", async () => {
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
       render(
         <>
           <F0SearchInput placeholder="Search" />
+          <button type="button">Next action</button>
+        </>
+      )
+
+      await user.tab()
+
+      // `tabIndex` defaults to -1: the search box of a list that is already
+      // reachable some other way is not a tab stop of its own.
+      expect(screen.getByRole("button", { name: "Next action" })).toHaveFocus()
+    })
+
+    it("is reachable with the Tab key when tabIndex is 0", async () => {
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+      render(
+        <>
+          <F0SearchInput placeholder="Search" tabIndex={0} />
           <button type="button">Next action</button>
         </>
       )
@@ -58,6 +74,10 @@ describe("F0SearchInput", () => {
       )
 
       const nextAction = screen.getByRole("button", { name: "Next action" })
+      // autoFocus lands through a 50ms timeout, not on the first frame.
+      act(() => {
+        vi.advanceTimersByTime(50)
+      })
       expect(screen.getByRole("searchbox")).toHaveFocus()
 
       await user.tab()
@@ -114,6 +134,60 @@ describe("F0SearchInput", () => {
 
       expect(onChange).toHaveBeenCalledWith("")
       expect(screen.getByRole("searchbox")).toHaveFocus()
+    })
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  describe("autofocus behavior", () => {
+    it("focuses once without reclaiming focus after navigation", () => {
+      const onChange = vi.fn()
+      render(
+        <>
+          <F0SearchInput autoFocus debounceTime={400} onChange={onChange} />
+          <button type="button">Next</button>
+        </>
+      )
+
+      const input = screen.getByRole("searchbox")
+      const nextButton = screen.getByRole("button", { name: "Next" })
+
+      act(() => {
+        vi.advanceTimersByTime(50)
+      })
+      expect(input).toHaveFocus()
+
+      fireEvent.change(input, { target: { value: "query" } })
+      nextButton.focus()
+
+      act(() => {
+        vi.advanceTimersByTime(500)
+      })
+
+      expect(onChange).toHaveBeenCalledWith("query")
+      expect(nextButton).toHaveFocus()
+    })
+
+    it("cancels a pending retry after the input receives focus", () => {
+      render(
+        <>
+          <F0SearchInput autoFocus />
+          <button type="button">Next</button>
+        </>
+      )
+
+      const input = screen.getByRole("searchbox")
+      const nextButton = screen.getByRole("button", { name: "Next" })
+
+      input.focus()
+      nextButton.focus()
+      act(() => {
+        vi.advanceTimersByTime(100)
+      })
+
+      expect(nextButton).toHaveFocus()
     })
   })
 

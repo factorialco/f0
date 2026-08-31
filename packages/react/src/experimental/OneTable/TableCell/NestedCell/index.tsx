@@ -3,6 +3,7 @@ import { ChevronDown, ChevronRight } from "lucide-react"
 import { F0Button } from "@/components/F0Button"
 import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import { Add, ArrowDown } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { NestedRowProps } from "@/patterns/OneDataCollection/visualizations/collection/Table/components/Row"
 
@@ -38,6 +39,7 @@ export const NestedCell = ({
   children,
   onClick,
 }: NestedCellProps) => {
+  const { collections } = useI18n()
   const firstCellWithChildren = isFirstCellWithChildren(
     firstCell,
     !!nestedRowProps?.rowWithChildren
@@ -157,7 +159,7 @@ export const NestedCell = ({
               variant="ghost"
               size="md"
               icon={ArrowDown}
-              label="See more"
+              label={collections.table.seeMoreChildren}
               onClick={(e) => {
                 e.stopPropagation()
                 onLoadMoreChildren?.()

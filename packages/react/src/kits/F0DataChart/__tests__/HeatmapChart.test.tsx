@@ -20,6 +20,7 @@ vi.mock("echarts", () => ({
   getInstanceByDom: vi.fn(),
   graphic: {
     LinearGradient: vi.fn(function LinearGradient(this: object) {
+      // eslint-disable-next-line react/no-this-in-sfc -- echarts constructor mock, not a component
       return this
     }),
   },

@@ -66,7 +66,13 @@ interface OverflowListProps<T> {
   min?: number
 
   /**
-   * Whether the items can change their width dynamically, for example when they have ellipsis
+   * Whether the items can change their width dynamically, for example when they have ellipsis.
+   *
+   * Enable it for items that can ellipsize: the row then lets them shrink, so
+   * when `min` keeps an item visible that doesn't fit, it truncates inside its
+   * own box instead of painting over the overflow indicator. Leave it off for
+   * fixed-size items (avatars, chips), which have nothing to give and would
+   * only get squeezed.
    * @default false
    */
   fluidItems?: boolean
@@ -90,6 +96,7 @@ const OverflowList = function OverflowList<T>({
   gap = 8,
   max,
   min = 0,
+  fluidItems = false,
   itemsWidth,
 }: OverflowListProps<T>) {
   const [isOpen, setIsOpen] = useState(false)
@@ -152,7 +159,11 @@ const OverflowList = function OverflowList<T>({
           ref={measurementContainerRef}
           aria-hidden="true"
           className={cn(
-            "pointer-events-none invisible absolute left-0 top-0 opacity-0",
+            // `w-max` keeps this measuring at each item's natural width: it is
+            // absolutely positioned, so without it the container is shrink-to-fit
+            // against the row and items that can ellipsize would be measured
+            // squeezed.
+            "pointer-events-none invisible absolute left-0 top-0 w-max opacity-0",
             itemsWrapperClasses
           )}
           style={{ gap: gap > 0 ? `${gap}px` : undefined }}
@@ -171,7 +182,17 @@ const OverflowList = function OverflowList<T>({
       )}
 
       <div
-        className={itemsWrapperClasses}
+        className={cn(
+          itemsWrapperClasses,
+          // This container carries `min-w-0`, so it can end up narrower than its
+          // content: `min` keeps items in the row even when they don't fit (e.g.
+          // a single preset wider than the space the overflow indicator leaves).
+          // For fluid items, pass that pressure down so they truncate inside
+          // their own box instead of overflowing it and painting over the
+          // indicator. Fixed-size items keep their min-content floor — they have
+          // nothing to give, and squeezing them would only distort them.
+          fluidItems && "[&>*]:min-w-0"
+        )}
         style={{
           gap: gap > 0 ? `${gap}px` : undefined,
         }}

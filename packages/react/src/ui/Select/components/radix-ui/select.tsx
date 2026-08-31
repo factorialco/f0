@@ -29,6 +29,7 @@ type Direction = "ltr" | "rtl"
 
 const OPEN_KEYS = [" ", "Enter", "ArrowUp", "ArrowDown"]
 const SELECTION_KEYS = [" ", "Enter"]
+const SELECTED_ITEM_FALLBACK_DELAY = 50
 
 /* -------------------------------------------------------------------------------------------------
  * Select
@@ -716,23 +717,129 @@ const SelectContentImpl = React.forwardRef<
     [getItems, viewport]
   )
 
-  const focusSelectedItem = React.useCallback(() => {
-    if (!context.multiple) {
-      focusFirst([selectedItem, content])
-      return
-    }
-  }, [focusFirst, selectedItem, content, context.multiple])
+  const focusSelectedItem = React.useCallback(
+    (allowFocusFromFallback = false) => {
+      const activeElement = document.activeElement
+      const focusIsInsideContent =
+        activeElement instanceof HTMLElement &&
+        activeElement !== content &&
+        content?.contains(activeElement)
+
+      if (focusIsInsideContent && !allowFocusFromFallback) {
+        return
+      }
+
+      if (!context.multiple) {
+        focusFirst([selectedItem, content])
+        return
+      }
+    },
+    [focusFirst, selectedItem, content, context.multiple]
+  )
 
   // Since this is not dependent on layout, we want to ensure this runs at the same time as
   // other effects across components. Hence why we don't call `focusSelectedItem` inside `position`.
+  const hasFocusedOnOpenRef = React.useRef(false)
+  const focusFallbackRef = React.useRef<HTMLElement | null>(null)
+  const focusSelectedItemRef = React.useRef(focusSelectedItem)
+  focusSelectedItemRef.current = focusSelectedItem
   React.useEffect(() => {
-    const activeElement = document.activeElement
-    const focusIsAlreadyInsideContent =
-      activeElement instanceof HTMLElement && content?.contains(activeElement)
+    if (!context.open) {
+      hasFocusedOnOpenRef.current = false
+      focusFallbackRef.current = null
+      return
+    }
 
-    if (!isPositioned || focusIsAlreadyInsideContent) return
-    focusSelectedItem()
-  }, [content, isPositioned, focusSelectedItem])
+    if (isPositioned && !hasFocusedOnOpenRef.current) {
+      let cancelled = false
+      let fallbackTimeout: ReturnType<typeof setTimeout> | undefined
+      const selectedValues = (
+        Array.isArray(context.value) ? context.value : [context.value]
+      ).filter((value): value is string => value !== undefined)
+      const isPlaceholderValue =
+        context.value === undefined || context.value === ""
+      const selectedItemMatchesCurrentValue =
+        context.multiple ||
+        (selectedItem !== null &&
+          (isPlaceholderValue ||
+            getItems().some(
+              (item) =>
+                item.ref.current === selectedItem &&
+                selectedValues.includes(item.value)
+            )))
+
+      const timeout = setTimeout(() => {
+        if (cancelled) return
+
+        const activeElement = document.activeElement
+        const focusIsInsideContent =
+          activeElement instanceof HTMLElement &&
+          activeElement !== content &&
+          content?.contains(activeElement)
+        const fallback = focusFallbackRef.current
+
+        if (focusIsInsideContent && activeElement !== fallback) {
+          hasFocusedOnOpenRef.current = true
+          return
+        }
+
+        const focusCanMove = fallback
+          ? activeElement === fallback
+          : activeElement === content ||
+            activeElement === context.trigger ||
+            activeElement === document.body
+
+        if (!selectedItemMatchesCurrentValue) {
+          if (!focusCanMove) {
+            hasFocusedOnOpenRef.current = true
+            return
+          }
+
+          focusFallbackRef.current = content
+
+          if (selectedItem) {
+            fallbackTimeout = setTimeout(() => {
+              if (cancelled || hasFocusedOnOpenRef.current) return
+
+              if (document.activeElement !== focusFallbackRef.current) {
+                hasFocusedOnOpenRef.current = true
+                return
+              }
+
+              selectedItem.focus()
+              if (cancelled) return
+
+              if (document.activeElement === selectedItem) {
+                focusFallbackRef.current = selectedItem
+              }
+            }, SELECTED_ITEM_FALLBACK_DELAY)
+          }
+
+          content?.focus()
+          return
+        }
+
+        hasFocusedOnOpenRef.current = true
+        if (focusCanMove) {
+          focusSelectedItemRef.current(activeElement === fallback)
+        }
+      }, 0)
+      return () => {
+        cancelled = true
+        clearTimeout(timeout)
+        if (fallbackTimeout !== undefined) clearTimeout(fallbackTimeout)
+      }
+    }
+  }, [
+    context.multiple,
+    context.open,
+    context.trigger,
+    context.value,
+    content,
+    getItems,
+    isPositioned,
+    selectedItem,
+  ])
 
   // prevent selecting items on `pointerup` in some cases after opening from `pointerdown`
   // and close on `pointerup` outside.
@@ -905,8 +1012,7 @@ const SelectContentImpl = React.forwardRef<
             onDismiss={() => context.onOpenChange(false)}
           >
             <SelectPosition
-              role="listbox"
-              id={context.contentId}
+              data-radix-select-content=""
               data-state={context.open ? "open" : "closed"}
               dir={context.dir}
               onContextMenu={(event) => event.preventDefault()}
@@ -925,26 +1031,21 @@ const SelectContentImpl = React.forwardRef<
               onKeyDown={composeEventHandlers(
                 contentProps.onKeyDown,
                 (event) => {
-                  const target = event.target
-                  const isInteractiveTarget =
-                    target instanceof HTMLElement &&
-                    target.matches(
-                      "input, textarea, select, button, a[href], [contenteditable='true'], [tabindex]:not([tabindex='-1'])"
-                    )
-
-                  if (isInteractiveTarget) return
-
                   const isModifierKey =
                     event.ctrlKey || event.altKey || event.metaKey
+                  const isSearchbox =
+                    event.target instanceof HTMLElement &&
+                    event.target.getAttribute("role") === "searchbox"
 
                   // select should not be navigated using tab key so we prevent it
                   if (event.key === "Tab") event.preventDefault()
 
-                  if (!isModifierKey && event.key.length === 1)
+                  if (!isModifierKey && !isSearchbox && event.key.length === 1)
                     handleTypeaheadSearch(event.key)
 
                   if (
-                    ["ArrowUp", "ArrowDown", "Home", "End"].includes(event.key)
+                    ["ArrowUp", "ArrowDown"].includes(event.key) ||
+                    (!isSearchbox && ["Home", "End"].includes(event.key))
                   ) {
                     const items = getItems().filter((item) => !item.disabled)
                     let candidateNodes = items.map((item) => item.ref.current!)
@@ -978,6 +1079,36 @@ const SelectContentImpl = React.forwardRef<
 })
 
 SelectContentImpl.displayName = CONTENT_IMPL_NAME
+
+/* -------------------------------------------------------------------------------------------------
+ * SelectListbox
+ * -----------------------------------------------------------------------------------------------*/
+
+const LISTBOX_NAME = "SelectListbox"
+
+type SelectListboxElement = React.ElementRef<typeof Primitive.div>
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+interface SelectListboxProps extends PrimitiveDivProps {}
+
+const SelectListbox = React.forwardRef<
+  SelectListboxElement,
+  SelectListboxProps
+>((props: ScopedProps<SelectListboxProps>, forwardedRef) => {
+  const { __scopeSelect, ...listboxProps } = props
+  const context = useSelectContext(LISTBOX_NAME, __scopeSelect)
+
+  return (
+    <Primitive.div
+      {...listboxProps}
+      ref={forwardedRef}
+      role="listbox"
+      id={context.contentId}
+      aria-multiselectable={context.multiple || undefined}
+    />
+  )
+})
+
+SelectListbox.displayName = LISTBOX_NAME
 
 /* -------------------------------------------------------------------------------------------------
  * SelectItemAlignedPosition
@@ -2118,6 +2249,7 @@ const Value = SelectValue
 const Icon = SelectIcon
 const Portal = SelectPortal
 const Content = SelectContent
+const Listbox = SelectListbox
 const Viewport = SelectViewport
 const Group = SelectGroup
 const Label = SelectLabel
@@ -2139,6 +2271,7 @@ export {
   ItemIndicator,
   ItemText,
   Label,
+  Listbox,
   Portal,
   //
   Root,
@@ -2154,6 +2287,7 @@ export {
   SelectItemIndicator,
   SelectItemText,
   SelectLabel,
+  SelectListbox,
   SelectPortal,
   SelectScrollDownButton,
   SelectScrollUpButton,
@@ -2175,6 +2309,7 @@ export type {
   SelectItemProps,
   SelectItemTextProps,
   SelectLabelProps,
+  SelectListboxProps,
   SelectPortalProps,
   SelectProps,
   SelectScrollDownButtonProps,

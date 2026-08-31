@@ -185,6 +185,12 @@ export type InputFieldProps<T> = {
   inputRef?: React.Ref<unknown>
   "aria-controls"?: AriaAttributes["aria-controls"]
   "aria-expanded"?: AriaAttributes["aria-expanded"]
+  /** The two remaining pieces of the combobox contract. Without
+   * `aria-activedescendant` a field that drives a list it doesn't contain can
+   * never announce the active option: focus stays in the input while the
+   * selection moves elsewhere, so a screen reader hears nothing. */
+  "aria-activedescendant"?: AriaAttributes["aria-activedescendant"]
+  "aria-autocomplete"?: AriaAttributes["aria-autocomplete"]
   onClear?: () => void
   onFocus?: () => void
   onBlur?: () => void
@@ -270,6 +276,8 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
       avatar,
       "aria-controls": ariaControls,
       "aria-expanded": ariaExpanded,
+      "aria-activedescendant": ariaActiveDescendant,
+      "aria-autocomplete": ariaAutocomplete,
       buttonToggle,
       transparent,
       ...props
@@ -506,7 +514,14 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                 role,
                 ref: inputRef,
                 "aria-controls": ariaControls,
-                "aria-expanded": ariaExpanded,
+                // `aria-expanded` is not allowed on a textbox, only on a
+                // combobox. Radix triggers spread it onto whatever they wrap,
+                // so a plain field that happens to open a popover would render
+                // a critical axe violation the moment this stopped being
+                // dropped.
+                "aria-expanded": role === "combobox" ? ariaExpanded : undefined,
+                "aria-activedescendant": ariaActiveDescendant,
+                "aria-autocomplete": ariaAutocomplete,
                 id,
                 value: localValue ?? "",
                 "aria-label": label || placeholder || "no-label",
