@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.74.2](https://github.com/factorialco/f0/compare/f0-react-v6.74.1...f0-react-v6.74.2) (2026-08-31)
+
+
+### Bug Fixes
+
+* **Avatar:** anchor the badge tooltip to the whole avatar ([#5166](https://github.com/factorialco/f0/issues/5166)) ([c81054d](https://github.com/factorialco/f0/commit/c81054d30bd6bcf97c4123e92aa7e0644b6a4b7b))
+
 ## [6.74.1](https://github.com/factorialco/f0/compare/f0-react-v6.74.0...f0-react-v6.74.1) (2026-08-31)
 
 
