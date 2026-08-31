@@ -34172,6 +34172,8 @@ function oce(e) {
                     },
                     proOptions: { hideAttribution: !0 },
                     nodesDraggable: !1,
+                    nodesFocusable: !1,
+                    edgesFocusable: !1,
                     nodesConnectable: !1,
                     elementsSelectable: !1,
                     nodeClickDistance: 4,
