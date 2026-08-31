@@ -55,6 +55,7 @@
     "check:api-surface": "tsx .scripts/check-api-surface.ts",
     "check:docs-index": "tsx .scripts/check-docs-index.ts",
     "check:bugfix-red-green": "tsx .scripts/check-bugfix-red-green.ts",
+    "check:inline-styles": "tsx .scripts/check-inline-styles.ts",
     "check:new-component-dod": "tsx .scripts/check-new-component-dod.ts",
     "check:stable-dod": "tsx .scripts/check-stable-dod.ts",
     "check:untranslated-copy": "tsx .scripts/check-untranslated-copy.ts",

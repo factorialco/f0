@@ -198,7 +198,11 @@ See `f0-component-patterns` skill for code examples.
 - CVA from `"cva"` (not `"class-variance-authority"`) for multi-variant components
 - Design tokens use `f1-` prefix: `text-f1-foreground`, `bg-f1-background`, `border-f1-border`, etc.
 - `focusRing()` from `@/lib/utils` on all focusable elements
-- Inline `style` only for truly dynamic values (hex colors, percentages)
+- Inline `style` only for truly dynamic values (hex colors, percentages), and it
+  must carry a `styles-exempt` comment giving the reason. Everything else is a
+  Tailwind class. Enforced by `.scripts/check-inline-styles.ts`, which baselines
+  the existing debt in `.scripts/inline-styles-debt.json` — that list may only
+  shrink. `src/ui/` is out of scope (re-synced third-party wrappers).
 
 See `f0-component-patterns` skill for CVA, container query, and animation code examples.
 

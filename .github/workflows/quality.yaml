@@ -191,6 +191,63 @@ jobs:
         run: |
           echo "::error::This PR adds untranslated copy — see the annotations on the Files tab and the PR comment."
           exit 1
+  # Styling must come from Tailwind classes, not an inline `style` prop: an
+  # inline style bypasses the design tokens, outranks any consumer class, and is
+  # invisible to the Tailwind build. Existing debt is baselined in
+  # .scripts/inline-styles-debt.json, so this only flags styles the PR ADDS.
+  # `src/ui/` is out of scope — those are re-synced third-party wrappers.
+  # Escape hatch is the inline `styles-exempt` comment rather than a label: it
+  # lands in the diff, so a reviewer sees the claim and can judge it.
+  #
+  # NOT yet in `quality-passed` below — this is deliberately advisory for its
+  # first weeks so real PRs can shake out false positives (`style={style}`
+  # forwarding, Radix `asChild`). The job still goes red and annotates the diff;
+  # it just does not block the merge. To make it blocking, add `inline-styles`
+  # to the `quality-passed` needs list. That is the whole change.
+  inline-styles:
+    needs: detect-changes
+    # Prevents running on the release-please branch
+    if: |
+      needs.detect-changes.outputs.package_react == 'true' &&
+      github.head_ref != 'release-please--branches--master' &&
+      !contains(github.event.pull_request.labels.*.name, 'autorelease')
+    name: "[⚛️ REACT] Inline styles"
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-node-pnpm
+      # Pure AST scan of src/ — no build or Storybook needed.
+      #
+      # The script emits `::error file=,line=` annotations, which is what puts
+      # each offending style inline on the Files tab. `continue-on-error` lets
+      # the comment step run on failure; the gate step below restores the
+      # failure, so the job still reports red.
+      - name: Check the PR adds no inline styles
+        id: check
+        continue-on-error: true
+        run: pnpm --filter @factorialco/f0-react run check:inline-styles
+      - name: Build the PR comment
+        id: comment
+        run: |
+          {
+            echo "body<<COMMENT_BODY_EOF"
+            pnpm --filter @factorialco/f0-react --silent run check:inline-styles --comment
+            echo "COMMENT_BODY_EOF"
+          } >> "$GITHUB_OUTPUT"
+      - name: Comment on the PR
+        uses: ./.github/actions/add-or-update-pr-comment
+        with:
+          comment-type: inline_styles
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          comment-body: ${{ steps.comment.outputs.body }}
+      - name: Fail if inline styles were added
+        if: steps.check.outcome == 'failure'
+        run: |
+          echo "::error::This PR adds inline styles — see the annotations on the Files tab and the PR comment."
+          exit 1
   cycle-dependencies:
     needs: detect-changes
     # Prevents running on the release-please branch
