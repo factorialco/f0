@@ -1,10 +1,12 @@
-import { u as W, t as je, v as Ge, m as $, x as Xe, y as Ze, z as qe, A as Ye, B as Je, E as Qe, G as et, H as tt, J as nt, K as rt, L as at, M as ot, N as ye, O as st, Q as Ce, l as it, R as ct, U as lt, V as dt, w as ut, r as ft } from "./F0CanvasPanel-IC8zoE-w.js";
+import { u as W, t as je, v as Ge, m as $, x as Xe, y as Ze, z as qe, A as Ye, B as Je, E as Qe, G as et, H as tt, J as nt, K as rt, L as at, M as ot, N as ye, O as st, Q as Ce, l as it, R as ct, U as lt, V as dt, w as ut, r as ft } from "./F0CanvasPanel-BrdO1K91.js";
 import { jsxs as R, jsx as l } from "react/jsx-runtime";
 import { forwardRef as re, useId as mt, useState as x, useRef as O, useEffect as _, useMemo as J, useCallback as M } from "react";
 import { d as H, f as de } from "./tooltip-DTpaXpXW.js";
 import { F as pt, a as Pe, b as ht, c as gt } from "./VolumeMuted-DKLKhxyd.js";
 function Se(e) {
-  return Array.isArray(e);
+  return Array.isArray(e) && e.every(
+    (t) => typeof t == "object" && t !== null && "locale" in t && "value" in t
+  );
 }
 function ee(e, t) {
   return e === void 0 ? void 0 : Se(e) ? e.length === 0 ? void 0 : ((t ? e.find((n) => n.locale === t) : void 0) ?? e[0]).value : e;
