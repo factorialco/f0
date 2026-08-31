@@ -8,6 +8,7 @@ export type {
   AudioPlayerMenuAction,
   AudioPlayerDetailTab,
   AudioPlayerContent,
+  TranscriptCue,
   F0AudioPlayerProps,
   F0AudioPlayerCardProps,
   F0AudioPlayerSize,
