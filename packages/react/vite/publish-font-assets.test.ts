@@ -15,28 +15,28 @@ afterEach(() => {
 })
 
 describe("publishFontAssets", () => {
-  test("publishes local WOFF references as cacheable package assets", async () => {
+  test("publishes local WOFF2 references as cacheable package assets", async () => {
     const fontDirectory = mkdtempSync(join(tmpdir(), "f0-fonts-"))
     const outputDirectory = mkdtempSync(join(tmpdir(), "f0-dist-"))
     temporaryDirectories.push(fontDirectory)
     temporaryDirectories.push(outputDirectory)
     writeFileSync(
-      join(fontDirectory, "Inter-Regular.woff"),
+      join(fontDirectory, "InterVariable.woff2"),
       Buffer.from([0, 1, 2, 3])
     )
 
     const result = await postcss([
       publishFontAssets({ fontDirectory, outputDirectory }),
     ]).process(
-      '@font-face { src: url("Inter-Regular.woff") format("woff"); }',
+      '@font-face { src: url("InterVariable.woff2") format("woff2") tech(variations); }',
       {
         from: undefined,
       }
     )
 
-    expect(result.css).toContain('url("fonts/Inter-Regular.woff")')
+    expect(result.css).toContain('url("fonts/InterVariable.woff2")')
     expect(
-      readFileSync(join(outputDirectory, "fonts/Inter-Regular.woff"))
+      readFileSync(join(outputDirectory, "fonts/InterVariable.woff2"))
     ).toEqual(Buffer.from([0, 1, 2, 3]))
   })
 

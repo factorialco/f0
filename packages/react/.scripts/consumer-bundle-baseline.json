@@ -77,9 +77,9 @@
           "brotli": 160744
         },
         "css": {
-          "raw": 321123,
-          "gzip": 47987,
-          "brotli": 32438
+          "raw": 324681,
+          "gzip": 48617,
+          "brotli": 32834
         }
       },
       "retainedF0Modules": [
