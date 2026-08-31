@@ -12,8 +12,8 @@
     "dist",
     "flags",
     "icons",
-    "inline-font-assets.mjs",
     "postcss.config.js",
+    "publish-font-assets.mjs",
     "styles.css",
     "tailwind.config.ts"
   ],

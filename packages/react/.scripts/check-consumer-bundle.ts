@@ -225,32 +225,40 @@ function retainedF0Modules(
   return [...modules].sort()
 }
 
-function validateSelfContainedStyles(extractedPackageDir: string): void {
-  const css = readFileSync(
-    resolve(extractedPackageDir, "dist/styles.css"),
-    "utf8"
-  )
-  const localReferences = new Set<string>()
+function validatePublishedStyleAssets(extractedPackageDir: string): void {
+  const stylesheetPath = resolve(extractedPackageDir, "dist/styles.css")
+  const css = readFileSync(stylesheetPath, "utf8")
+  const invalidReferences = new Set<string>()
   const parsedCss = valueParser(css)
   parsedCss.walk((node) => {
     if (node.type !== "function" || node.value !== "url") return
     if (node.nodes.length !== 1) return
     const reference = node.nodes[0]
     if (reference.type !== "string" && reference.type !== "word") return
+    if (reference.value.includes(":")) return
+    if (reference.value.startsWith("#")) return
+    if (reference.value.startsWith("/")) return
+
+    const assetReference = reference.value.split(/[?#]/, 1)[0]
+    const assetPath = resolve(dirname(stylesheetPath), assetReference)
+    const packageRelativePath = relative(extractedPackageDir, assetPath)
+    const escapesPackage =
+      packageRelativePath.startsWith("..") ||
+      path.isAbsolute(packageRelativePath)
     if (
-      !reference.value.startsWith("data:") &&
-      !reference.value.startsWith("http:") &&
-      !reference.value.startsWith("https:") &&
-      !reference.value.startsWith("#") &&
-      !reference.value.startsWith("/")
+      escapesPackage ||
+      !existsSync(assetPath) ||
+      !statSync(assetPath).isFile()
     ) {
-      localReferences.add(reference.value)
+      invalidReferences.add(reference.value)
     }
   })
 
-  if (localReferences.size > 0) {
+  if (invalidReferences.size > 0) {
     throw new Error(
-      `Published styles contain local asset references:\n${[...localReferences].join("\n")}`
+      `Published styles reference missing or unpackable assets:\n${[
+        ...invalidReferences,
+      ].join("\n")}`
     )
   }
 }
@@ -470,7 +478,7 @@ async function measureBundle(): Promise<{
 
     run("tar", ["-xzf", tarball, "-C", tempDir], PACKAGE_DIR)
     const extractedPackageDir = resolve(tempDir, "package")
-    validateSelfContainedStyles(extractedPackageDir)
+    validatePublishedStyleAssets(extractedPackageDir)
     const cloudflareProbes = await buildCloudflareProbes(
       tempDir,
       extractedPackageDir

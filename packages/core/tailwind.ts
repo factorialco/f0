@@ -111,18 +111,4 @@ export const baseConfig: Omit<Config, "content"> = {
     require("tailwindcss-animate"),
     require("@tailwindcss/container-queries"),
   ],
-  safelist: [
-    {
-      pattern: /^bg-f1-/,
-      variants: ["hover", "focus", "active"],
-    },
-    {
-      pattern: /^text-f1-/,
-      variants: ["hover", "focus", "active"],
-    },
-    {
-      pattern: /^border-f1-/,
-      variants: ["hover", "focus", "active"],
-    },
-  ],
 }
