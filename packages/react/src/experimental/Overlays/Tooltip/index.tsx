@@ -95,6 +95,18 @@ export function TooltipInternal({
     }
   }, [])
 
+  /**
+   * The trigger mounts through Radix's `asChild` Slot, which clones its single
+   * child element and merges the hover/focus handlers and the anchoring ref
+   * into it. A Fragment, a string, or an array can't carry props or a ref, so
+   * Slot drops them SILENTLY — the tooltip renders no trigger and never opens.
+   * Wrap those children in a real inline element instead. It must produce a
+   * box (`inline-flex`, not `contents`): Radix positions the bubble from the
+   * trigger's bounding rect.
+   */
+  const slottableTrigger =
+    React.isValidElement(children) && children.type !== React.Fragment
+
   return (
     <>
       <TooltipProvider
@@ -130,7 +142,11 @@ export function TooltipInternal({
             }}
             onBlur={() => close()}
           >
-            {stripNativeTitle(children)}
+            {slottableTrigger ? (
+              stripNativeTitle(children)
+            ) : (
+              <span className="inline-flex h-fit w-fit">{children}</span>
+            )}
           </TooltipTrigger>
           <TooltipContent
             className={cn(
