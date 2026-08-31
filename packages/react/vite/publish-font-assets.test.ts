@@ -53,6 +53,21 @@ describe("publishFontAssets", () => {
     expect(result.css).toBe(css)
   })
 
+  test("leaves fonts owned by imported stylesheets unchanged", async () => {
+    const fontDirectory = mkdtempSync(join(tmpdir(), "f0-fonts-"))
+    const outputDirectory = mkdtempSync(join(tmpdir(), "f0-dist-"))
+    temporaryDirectories.push(fontDirectory)
+    temporaryDirectories.push(outputDirectory)
+    const css =
+      '@font-face { src: url("sb-common-assets/nunito-sans-regular.woff2") format("woff2"); }'
+
+    const result = await postcss([
+      publishFontAssets({ fontDirectory, outputDirectory }),
+    ]).process(css, { from: undefined })
+
+    expect(result.css).toBe(css)
+  })
+
   test("leaves already-published font references unchanged", async () => {
     const fontDirectory = mkdtempSync(join(tmpdir(), "f0-fonts-"))
     const outputDirectory = mkdtempSync(join(tmpdir(), "f0-dist-"))
