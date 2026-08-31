@@ -91,6 +91,15 @@ const pressArrowUp = async () => {
   await userEvent.keyboard("{ArrowUp}")
 }
 
+/** The padded box a body sits in — the part of a bubble a double-click still
+ * quotes. The words themselves are left to the browser's word selection, so a
+ * test that wants a quote must not aim at them. */
+const bubbleAround = (body: string): HTMLElement => {
+  const box = screen.getByText(body).parentElement
+  if (!box) throw new Error(`No bubble around "${body}"`)
+  return box
+}
+
 describe("F0Chat arrow-up editing", () => {
   it("reopens my last message for editing from an empty composer", async () => {
     renderChat(editable())
@@ -277,7 +286,7 @@ describe("F0Chat arrow-up editing", () => {
 describe("F0Chat double-click reply", () => {
   it("quotes someone else's message and focuses the composer", async () => {
     renderChat(makeRuntime())
-    await userEvent.dblClick(screen.getByText("Hello there"))
+    await userEvent.dblClick(bubbleAround("Hello there"))
 
     expect(
       screen.getByRole("button", { name: /remove quote/i })
@@ -287,7 +296,7 @@ describe("F0Chat double-click reply", () => {
 
   it("quotes my own message too", async () => {
     renderChat(makeRuntime())
-    await userEvent.dblClick(screen.getByText("Hi back"))
+    await userEvent.dblClick(bubbleAround("Hi back"))
 
     expect(
       screen.getByRole("button", { name: /remove quote/i })
@@ -299,7 +308,7 @@ describe("F0Chat double-click reply", () => {
     await pressArrowUp()
     expect(composer()).toHaveValue("Hi back")
 
-    await userEvent.dblClick(screen.getByText("Hello there"))
+    await userEvent.dblClick(bubbleAround("Hello there"))
 
     expect(
       screen.getByRole("button", { name: /remove quote/i })
@@ -317,7 +326,7 @@ describe("F0Chat double-click reply", () => {
     await pressArrowUp()
     expect(composer()).toHaveValue("Hi back")
 
-    await userEvent.dblClick(screen.getByText("Hello there"))
+    await userEvent.dblClick(bubbleAround("Hello there"))
 
     expect(composer()).toHaveValue("")
     expect(
@@ -349,13 +358,13 @@ describe("F0Chat double-click reply", () => {
   // Guards the bounded walk against being replaced by a plain `closest` over
   // the focusability selector: react-virtuoso renders its scroller with
   // tabIndex={0} (and ChatMessagesContainer forwards that onto the scroll
-  // viewport), so an unbounded lookup would match from any bubble text and no
-  // message would be quotable at all.
-  it("still quotes plain text when an ancestor of the row is focusable", async () => {
+  // viewport), so an unbounded lookup would match from anywhere in a bubble
+  // and no message would be quotable at all.
+  it("still quotes when an ancestor of the row is focusable", async () => {
     renderChat(makeRuntime())
     screen.getByTestId("chat-message-viewport").setAttribute("tabindex", "0")
 
-    await userEvent.dblClick(screen.getByText("Hello there"))
+    await userEvent.dblClick(bubbleAround("Hello there"))
 
     expect(
       screen.getByRole("button", { name: /remove quote/i })
@@ -373,13 +382,44 @@ describe("F0Chat double-click reply", () => {
     const slider = document.createElement("div")
     slider.setAttribute("role", "slider")
     slider.textContent = "seek"
-    screen.getByText("Hello there").append(slider)
+    // Appended beside the body, not inside it: the body's own marker would
+    // stop the quote on its own and the pin would prove nothing.
+    bubbleAround("Hello there").append(slider)
 
     await userEvent.dblClick(slider)
 
     expect(
       screen.queryByRole("button", { name: /remove quote/i })
     ).not.toBeInTheDocument()
+  })
+
+  it("leaves the body text to the browser's word selection", async () => {
+    renderChat(makeRuntime())
+    await userEvent.dblClick(screen.getByText("Hello there"))
+
+    expect(
+      screen.queryByRole("button", { name: /remove quote/i })
+    ).not.toBeInTheDocument()
+  })
+
+  // The sender name and the time sit in the same padded box as the body but
+  // outside its marker, so the bubble stays quotable around the words.
+  it("quotes from the sender name in a group channel", async () => {
+    renderChat(
+      makeRuntime({
+        channel: {
+          id: "c1",
+          type: "group",
+          title: "Product Team",
+          avatar: { type: "company", name: "Product Team" },
+        },
+      })
+    )
+    await userEvent.dblClick(screen.getByText("María José"))
+
+    expect(
+      screen.getByRole("button", { name: /remove quote/i })
+    ).toBeInTheDocument()
   })
 
   it("leaves an interactive attachment to its own action", async () => {
@@ -427,7 +467,7 @@ describe("F0Chat compose target lifecycle", () => {
 
   it("sets no quote on a read-only channel, where there is no composer", async () => {
     renderChat(makeRuntime({ capabilities: { canSend: false } }))
-    await userEvent.dblClick(screen.getByText("Hello there"))
+    await userEvent.dblClick(bubbleAround("Hello there"))
 
     expect(
       screen.queryByRole("button", { name: /remove quote/i })
@@ -480,7 +520,7 @@ describe("F0Chat compose target lifecycle", () => {
         <F0Chat />
       </F0ChatProvider>
     )
-    await userEvent.dblClick(screen.getByText("Hello there"))
+    await userEvent.dblClick(bubbleAround("Hello there"))
     await userEvent.type(composer(), "for your eyes only")
     expect(composer()).toHaveValue("for your eyes only")
 

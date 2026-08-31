@@ -247,7 +247,11 @@ const ChatBubbleImpl = ({
               </span>
             </ChatUserHoverCard>
           )}
-          {renderedBody}
+          {/* The body is the one part of a message a double-click must NOT
+              quote: the browser selects a word there instead. The marker is
+              read by SELF_HANDLING_DESCENDANTS in ChatMessageItem. An inline
+              span keeps the meta twin flowing on the body's last line. */}
+          <span data-chat-message-text>{renderedBody}</span>
           {/* Trails the body so the time reads as the end of the message. */}
           <ChatMessageMeta message={message} placement="bubble" />
           <ChatMessageMetaLabel message={message} />
