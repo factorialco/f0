@@ -161,7 +161,9 @@ export const StackedWithMissingCategories: Story = {
 
 /**
  * Each bar has a `target` value — the gap between the actual value and the
- * target is rendered as a faded "ghost" bar above the solid one.
+ * target is rendered as a faded "ghost" bar above the solid one. A month with
+ * nothing attained yet is that gradient and nothing else, and hovering it
+ * reports the month's target all the same.
  */
 export const WithTargets: Story = {
   render: (args) => <F0DataChart {...args} />,
@@ -171,9 +173,9 @@ export const WithTargets: Story = {
     series: [
       {
         name: "Revenue",
-        data: [
-          9_200_000, 10_800_000, 8_100_000, 5_400_000, 3_200_000, 2_400_000,
-        ].map((value) => ({ value, target: 12_000_000 })),
+        data: [9_200_000, 10_800_000, 8_100_000, 5_400_000, 3_200_000, 0].map(
+          (value) => ({ value, target: 12_000_000 })
+        ),
       },
     ],
     showLegend: false,
@@ -205,33 +207,6 @@ export const WithOverachievement: Story = {
       },
     ],
     highlightOverachievement: true,
-    showTargetProgress: true,
-    showLegend: false,
-    valueFormatter: (v) => `${v / 1000}k €`,
-  },
-}
-
-/**
- * A plan whose later periods have yet to start: the gradient is the whole column
- * there, and hovering it reports that period's target and how far along it is —
- * the card belongs to the bar, not to the gap.
- */
-export const TargetsBeforeAnyProgress: Story = {
-  render: (args) => <F0DataChart {...args} />,
-  args: {
-    type: "bar",
-    categories: ["Q1", "Q2", "Q3", "Q4"],
-    series: [
-      {
-        name: "Attainment",
-        data: [
-          { value: 125_000, target: 185_000 },
-          { value: 40_000, target: 185_000 },
-          { value: 0, target: 185_000 },
-          { value: 0, target: 185_000 },
-        ],
-      },
-    ],
     showTargetProgress: true,
     showLegend: false,
     valueFormatter: (v) => `${v / 1000}k €`,
