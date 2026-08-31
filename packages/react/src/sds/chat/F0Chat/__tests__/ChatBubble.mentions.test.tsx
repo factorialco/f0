@@ -17,7 +17,7 @@ const makeMessage = (over: Partial<F0ChatMessage>): F0ChatMessage => ({
 })
 
 describe("ChatBubble mentions", () => {
-  it("renders a mention of someone else in info colours, with a profile hover trigger", () => {
+  it("renders a neutral mention of someone else with a profile hover trigger", () => {
     render(
       <ChatBubble
         message={makeMessage({
@@ -31,13 +31,12 @@ describe("ChatBubble mentions", () => {
       />
     )
     const chip = screen.getByText("@Ana García")
-    expect(chip.className).toContain("bg-f1-background-info")
-    expect(chip.className).toContain("text-f1-foreground-info")
+    expect(chip.className).toContain("text-f1-foreground-secondary")
     // Wrapped in the hover-card trigger (same affordance as the sender avatar).
     expect(chip.closest("[data-state]")).not.toBeNull()
   })
 
-  it("renders a mention of you in warning/amber, still hover-carded", () => {
+  it("renders a neutral mention of you, still hover-carded", () => {
     render(
       <ChatBubble
         message={makeMessage({
@@ -49,12 +48,11 @@ describe("ChatBubble mentions", () => {
       />
     )
     const chip = screen.getByText("@Jordan Avery")
-    expect(chip.className).toContain("bg-f1-background-warning")
-    expect(chip.className).toContain("text-f1-foreground-warning")
+    expect(chip.className).toContain("text-f1-foreground-secondary")
     expect(chip.closest("[data-state]")).not.toBeNull()
   })
 
-  it("renders @here in warning/amber with no hover card", () => {
+  it("renders a neutral @here with no hover card", () => {
     render(
       <ChatBubble
         message={makeMessage({
@@ -66,7 +64,7 @@ describe("ChatBubble mentions", () => {
       />
     )
     const chip = screen.getByText("@here")
-    expect(chip.className).toContain("bg-f1-background-warning")
+    expect(chip.className).toContain("text-f1-foreground-secondary")
     expect(chip.closest("[data-state]")).toBeNull()
   })
 })

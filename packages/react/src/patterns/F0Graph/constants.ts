@@ -5,19 +5,121 @@ import type { ZoomLevel } from "./types"
 // re-render every node wrapper.
 export const EMPTY_HIGHLIGHTED_NODES: Set<string> = new Set<string>()
 
-// The collapser is an F0Button (md/lg) inside a top-aligned box with `pt-2`,
-// whereas the expander is a bare pill of `EXPANDER_SIZE`. These per-zoom nudges
-// account for that difference so the collapser lands on the same lane center as
-// the expander. `dot` is unused (the collapser is hidden at dot zoom).
+// Same reason, for the tag-column list: a fresh `[]` fallback per render rebuilt
+// the visible-tag-types Set, which re-created the render-config context value
+// that EVERY node wrapper subscribes to. Any state change in the view then
+// re-rendered every node in the graph.
+export const EMPTY_TAG_COLUMNS: readonly string[] = []
+
+// The collapser is an F0Button inside a top-aligned box with `pt-2`, whereas the
+// expander is a bare pill placed straight at the lane offset. Both are the same
+// 32px button now, so the nudge is just that padding back off — the two land on
+// the same lane centre AND the same top edge, at every zoom.
+// `dot` is unused (the collapser is hidden at dot zoom).
 export const COLLAPSER_OFFSET_ADJUSTMENT_BY_ZOOM: Record<ZoomLevel, number> = {
   detail: -8,
-  compact: -4,
+  compact: -8,
   dot: 0,
 }
+
+/**
+ * Vertical lane between a node's bottom and its children's top: the layout
+ * engine's default `rankSep`, and the lane the expand/collapse affordance is
+ * centred in. One definition on purpose — it used to be declared twice, in the
+ * engine and again in the React Flow adapters, kept in step by a comment, while
+ * the stacked lane and the affordance offsets were derived from the copy.
+ */
+export const NODE_RANK_SEP = 130
 
 // Canvas background dot spacing. Shared with the layout engine so node
 // columns/rows snap onto the dot grid (nodes "squared" with the dots).
 export const BACKGROUND_DOT_GAP = 32
+
+// ─── Stacked nodes (`GraphNode.stackNodes`) ──────────────
+// Geometry of a stacked row. The avatar sits the same distance from all four
+// edges, so the inset is one number rather than a set that can drift apart.
+//
+// The row is deliberately tighter than the card rather than aligned to it: the
+// title sits one 8px step off the avatar (the card's own gap) instead of being
+// pushed out to the card's 58px text offset. A column reads as a list belonging
+// to the parent, so its text hugging the avatar is what makes it a list; lining
+// up with the parent's title made each row read as another card.
+//
+// The row draws a real border; the card does not (its border lives on an
+// absolutely positioned chrome layer, costing no layout).
+const STACKED_NODE_BORDER = 1
+/** Avatar box in a stacked row: `md`, one step down from the card's `lg`. */
+export const STACKED_NODE_AVATAR = 32
+/** Inset from the inner edge of the border to the avatar, on all four sides. */
+export const STACKED_NODE_PADDING = 5
+/** Step from the avatar to the title. The same 8px the card puts there. */
+export const STACKED_NODE_TITLE_GAP = 8
+/**
+ * How much narrower a stacked row is than the card above it, split across both
+ * edges. A column is subordinate to its parent, so it reads better indented
+ * from the card's own silhouette than running flush with it.
+ *
+ * Width only — the reserved band is unaffected, since the layout engine gives a
+ * stacked parent no cross-axis cost at all (its column lives inside the
+ * parent's own lane).
+ */
+export const STACKED_NODE_WIDTH_INSET = 24
+
+/**
+ * Horizontal room the node wrapper leaves around a node's layout box, so two
+ * adjacent cards never touch. Subtracted from the box to get the width a node
+ * actually paints.
+ */
+export const NODE_BOX_INSET = 20
+
+/**
+ * A stacked column is a React Flow sub-flow: the rows are child nodes of a
+ * group node that wraps them (see
+ * https://reactflow.dev/learn/layouting/sub-flows). This is the room that group
+ * keeps between its edge and the rows inside it. Real geometry, not CSS: the
+ * group's box is the union of its rows grown by this much, and each row's
+ * position inside the group starts at it.
+ */
+export const STACKED_GROUP_PADDING = 8
+
+// Height of one stacked row and the gap between two of them. Shared by the
+// layout engine (which reserves the space) and F0GraphNode's stacked row (which
+// fills it) — the row must render exactly as tall as the layout believes it is,
+// or the column drifts out of its reserved band.
+export const STACKED_NODE_HEIGHT =
+  STACKED_NODE_AVATAR + 2 * (STACKED_NODE_PADDING + STACKED_NODE_BORDER)
+// The gap is also the connector: rows are chained to each other, so the line
+// from one row to the next spans exactly this much. Keep it long enough to read
+// as a line rather than a tick.
+export const STACKED_NODE_GAP = 16
+
+/**
+ * The row's title type scale per zoom variant, mirroring the node card's own
+ * (14/20 in detail, 24/32 in compact, no text in dot). Without it a column
+ * keeps detail typography while the cards around it scale up, so the stack
+ * stops reading at the same scale as the parent it hangs from.
+ *
+ * Both steps fit the *same* band, which is the point: 32px of line height plus
+ * the 2×(padding + border) inset is exactly `STACKED_NODE_HEIGHT`, as is the
+ * 32px avatar that governs the detail row. So the row can answer to zoom
+ * without the reserved band changing — and the band must not change, since the
+ * layout runs before the zoom level is known (see the zoomLevel⇄bounds cycle in
+ * F0GraphView).
+ */
+export const STACKED_NODE_TITLE_BY_ZOOM: Record<
+  ZoomLevel,
+  { fontSize: number; lineHeight: string } | null
+> = {
+  detail: { fontSize: 14, lineHeight: "20px" },
+  compact: { fontSize: 24, lineHeight: "32px" },
+  dot: null,
+}
+
+// Fraction of the normal `rankSep` lane a stacked column hangs below its
+// parent. A stack reads as part of the parent rather than as the next rank, so
+// a full rank gap detaches it visually. Shared with the expander/collapser
+// placement below — the affordance sits in that same (shortened) lane.
+export const STACKED_RANK_SEP_RATIO = 0.5
 
 // Delay used after a layout-affecting change before calling `fitView`,
 // so React Flow can settle the new node positions in its store.

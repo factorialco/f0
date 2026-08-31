@@ -31,7 +31,22 @@ export const TagType: Story = {
         type: "tag",
         value: {
           label: item.status,
-          color: item.status === "active" ? "green" : "red",
+        },
+      }),
+    },
+  },
+}
+
+export const NeutralTagType: Story = {
+  args: {
+    item: mockItem,
+    property: {
+      label: "Tag",
+      render: (item) => ({
+        type: "tag",
+        value: {
+          label: item.status,
+          variant: "neutral",
         },
       }),
     },

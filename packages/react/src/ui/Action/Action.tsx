@@ -162,8 +162,15 @@ export const Action = React.forwardRef<
     </button>
   )
 
-  const element = tooltip ? (
-    <TooltipInternal description={tooltip.toString()} delay={1000}>
+  const tooltipProps =
+    tooltip && typeof tooltip === "object"
+      ? tooltip
+      : tooltip
+        ? { description: tooltip.toString() }
+        : undefined
+
+  const element = tooltipProps ? (
+    <TooltipInternal {...tooltipProps} delay={1000}>
       {mainElement}
     </TooltipInternal>
   ) : (

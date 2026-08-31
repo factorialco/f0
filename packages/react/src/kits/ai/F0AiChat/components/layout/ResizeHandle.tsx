@@ -19,6 +19,8 @@ export const ResizeHandle = ({
   side?: "left" | "right"
 }) => {
   const startXRef = useRef(0)
+  const pendingDeltaRef = useRef(0)
+  const frameRef = useRef<number | null>(null)
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
@@ -38,6 +40,17 @@ export const ResizeHandle = ({
   useEffect(() => {
     if (!isResizing) return
 
+    // Pointer samples arrive faster than the screen repaints (120Hz trackpads),
+    // and every one of them re-lays-out the whole panel — including a
+    // synchronous re-measure of every rendered transcript row. Accumulate the
+    // deltas and apply at most one per frame.
+    const flush = () => {
+      frameRef.current = null
+      const delta = pendingDeltaRef.current
+      pendingDeltaRef.current = 0
+      if (delta !== 0) onResize(delta)
+    }
+
     const handleMouseMove = (e: MouseEvent) => {
       // Right-docked: dragging the (left-edge) handle leftward widens the panel.
       // Left-docked: the handle is on the right edge, so dragging right widens.
@@ -46,7 +59,10 @@ export const ResizeHandle = ({
           ? e.clientX - startXRef.current
           : startXRef.current - e.clientX
       startXRef.current = e.clientX
-      onResize(deltaX)
+      pendingDeltaRef.current += deltaX
+      if (frameRef.current == null) {
+        frameRef.current = requestAnimationFrame(flush)
+      }
     }
 
     const handleMouseUp = () => {
@@ -59,6 +75,12 @@ export const ResizeHandle = ({
     return () => {
       document.removeEventListener("mousemove", handleMouseMove)
       document.removeEventListener("mouseup", handleMouseUp)
+      if (frameRef.current != null) {
+        cancelAnimationFrame(frameRef.current)
+        frameRef.current = null
+      }
+      // Don't drop the last sample when the gesture ends between frames.
+      flush()
     }
   }, [isResizing, onResize, setIsResizing, side])
 

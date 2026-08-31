@@ -13,10 +13,13 @@ import { type RefObject, useEffect, useRef } from "react"
  * state from ECharts' `legendselectchanged` event.
  */
 export function useLegendInteraction(
-  chartRef: RefObject<echarts.ECharts | null>
+  chartRef: RefObject<echarts.ECharts | null>,
+  onSelectionChange?: (selected: Record<string, boolean>) => void
 ) {
   // Track the previous selected state so we know what changed
   const prevSelectedRef = useRef<Record<string, boolean> | null>(null)
+  const onSelectionChangeRef = useRef(onSelectionChange)
+  onSelectionChangeRef.current = onSelectionChange
 
   useEffect(() => {
     const chart = chartRef.current
@@ -47,6 +50,7 @@ export function useLegendInteraction(
           next[name] = name === clickedName
         }
         prevSelectedRef.current = next
+        onSelectionChangeRef.current?.(next)
         chart!.dispatchAction({ type: "legendSelect", name: clickedName })
         for (const name of allNames) {
           if (name !== clickedName) {
@@ -64,11 +68,13 @@ export function useLegendInteraction(
           chart!.dispatchAction({ type: "legendSelect", name })
         }
         prevSelectedRef.current = next
+        onSelectionChangeRef.current?.(next)
         return
       }
 
       // Default: accept ECharts' toggle
       prevSelectedRef.current = { ...echartsSelected }
+      onSelectionChangeRef.current?.({ ...echartsSelected })
     }
 
     chart.on(

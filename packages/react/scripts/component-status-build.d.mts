@@ -11,8 +11,25 @@ export const VIRTUAL_ID: string
 /** Scan `srcDir` (defaults to this package's `src/`) and build the dataset. */
 export function computeComponentStatusData(srcDir?: string): ComponentStatusData
 
-/** Whether an entry meets the mechanically-checkable stable bar. */
-export function meetsStableBar(c: ComponentEntry): boolean
+/** Naming convention: component folder is "F0" + uppercase letter. */
+export function isF0Named(storyFile: string): boolean
+
+/** Whether an entry meets the mechanically-checkable stable bar. Accepts any
+ * object carrying the DoD facts (the fields the bar actually reads), so
+ * lightweight views like the check scripts' StatusEntry qualify. */
+export function meetsStableBar(
+  c: Pick<
+    ComponentEntry,
+    | "hasStories"
+    | "hasUnitTests"
+    | "hasPlayFunction"
+    | "hasSnapshot"
+    | "hasMdxDocs"
+    | "docQuality"
+    | "a11yTier"
+    | "storyFile"
+  >
+): boolean
 
 /** The effective maturity level for an entry. */
 export function effectiveStatusOf(c: ComponentEntry): ApiStatus

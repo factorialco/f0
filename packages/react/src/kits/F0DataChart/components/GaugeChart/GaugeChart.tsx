@@ -5,6 +5,7 @@ import type { F0DataChartGaugeProps } from "../../types"
 import { resolveChartSize } from "../../utils/responsive"
 import { useContainerSize } from "../../utils/useContainerSize"
 import { useEChartsInstance } from "../../utils/useEChartsInstance"
+import { usePointClick } from "../../utils/usePointClick"
 import { useGaugeChartOptions } from "./useGaugeChartOptions"
 
 export const GaugeChart = (props: F0DataChartGaugeProps) => {
@@ -12,7 +13,8 @@ export const GaugeChart = (props: F0DataChartGaugeProps) => {
   const { width } = useContainerSize(ref)
   const size = resolveChartSize(width)
   const options = useGaugeChartOptions(ref, props, size)
-  useEChartsInstance(ref, options)
+  const chartRef = useEChartsInstance(ref, options)
+  usePointClick(chartRef, props.onPointClick)
 
   return <div ref={ref} className="h-full w-full" />
 }

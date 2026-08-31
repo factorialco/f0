@@ -13,6 +13,7 @@ Load this skill when you need to:
 
 - Build a new F0 component from scratch
 - Modify an existing component's architecture
+- Add a component, split one out of a file, or write a `useEffect`
 - Implement context/state management patterns
 - Add styling with CVA, Tailwind, or Framer Motion
 - Add i18n support to a component
@@ -26,6 +27,7 @@ Load this skill when you need to:
 | CVA, cn(), focusRing(), container queries, Framer Motion, design tokens                                       | `references/styling-and-animation.md`  |
 | Unit tests (zeroRender, vi.hoisted(), fake timers, deferred promises)                                         | Load the `f0-unit-testing` skill       |
 | useI18n, defaultTranslations, TranslationsType, plurals, interpolation                                        | `references/i18n-patterns.md`          |
+| One component per declaration site, no statement blocks inside JSX, named effect callbacks                    | `references/component-files.md`        |
 
 ## Key Rules
 

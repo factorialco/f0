@@ -4,7 +4,7 @@ import { ModuleId } from "@/components/avatars/F0AvatarModule"
 import { DropdownInternalProps } from "@/experimental/Navigation/Dropdown/internal"
 import { NavigationProps } from "@/experimental/Navigation/Header/PageNavigation"
 import { TabsProps } from "@/patterns/Navigation/Tabs"
-import { ResourceHeaderProps } from "@/patterns/ResourceHeader"
+import { F0ResourceHeaderProps } from "@/patterns/F0ResourceHeader"
 
 import {
   DialogControls,
@@ -26,9 +26,27 @@ export type F0DialogHeaderProps = {
   }
   otherActions?: DropdownInternalProps["items"]
   navigation?: NavigationProps
-  resourceHeader?: ResourceHeaderProps
+  resourceHeader?: F0ResourceHeaderProps
   controls?: DialogControls
+  headerStatus?: string
+  /** See {@link F0DialogInternalProps.dismissable} — hides the close button. */
+  dismissable?: boolean
 } & Partial<Pick<TabsProps, "tabs" | "activeTabId" | "setActiveTabId">>
+
+/**
+ * Controls FLANKING the panel rather than inside it — the affordance for a
+ * dialog whose content can be changed without closing it (see
+ * `F0CarouselDialog`).
+ *
+ * They are rendered INSIDE the Radix content, so they are inside the focus trap
+ * and reachable by keyboard, and merely positioned outside its box. Anything
+ * portalled next to the dialog instead would be `aria-hidden` and inert, which
+ * is exactly the trap a modal is supposed to set.
+ */
+export type F0DialogSideControls = {
+  previous?: ReactNode
+  next?: ReactNode
+}
 
 export type F0DialogContextType = {
   open: boolean
@@ -57,6 +75,17 @@ export type F0DialogInternalProps = {
   isOpen: boolean
   // Callback when dialog is closed
   onClose: () => void
+  /**
+   * Whether the reader can walk away. `false` removes the close button and
+   * stops Escape and a click outside from closing — a forced choice, where the
+   * dialog's own actions are the only way out.
+   *
+   * Use it only when leaving would be worse than being trapped: a decision the
+   * product genuinely cannot proceed without. A dialog nobody can dismiss is a
+   * dead end for anyone who does not understand it.
+   * @default true
+   */
+  dismissable?: boolean
   // Whether to render the dialog as a bottom sheet on mobile
   asBottomSheetInMobile?: boolean
   // The position of the dialog
@@ -77,6 +106,20 @@ export type F0DialogInternalProps = {
   navigation?: F0DialogHeaderProps["navigation"]
   resourceHeader?: F0DialogHeaderProps["resourceHeader"]
   controls?: F0DialogHeaderProps["controls"]
+  /**
+   * A short reading beside the close button — "3 of 11". Where the dialog says
+   * WHICH of several things it is currently showing.
+   *
+   * Not `navigation`: that draws its own arrows in the header. This is the label
+   * alone, for a dialog whose arrows are somewhere else (`sideControls`).
+   */
+  headerStatus?: F0DialogHeaderProps["headerStatus"]
+  /**
+   * Controls flanking the panel — see {@link F0DialogSideControls}. On a phone
+   * (where the dialog is a bottom sheet and there is no room beside it) they move
+   * ONTO the panel's own edges instead, which is where a gallery puts them.
+   */
+  sideControls?: F0DialogSideControls
   // Custom content to render in the dialog
   children: ReactNode
   // Disable the default padding from the dialog content area

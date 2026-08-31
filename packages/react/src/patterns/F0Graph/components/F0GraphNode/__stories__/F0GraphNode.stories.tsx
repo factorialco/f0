@@ -24,23 +24,24 @@ const meta = {
   parameters: {
     layout: "centered",
     a11y: { test: "error" },
-    wrapInTree: true,
   },
   decorators: [
-    (Story, context) => {
-      const content = <Story />
-      return (
-        <ReactFlowProvider>
-          {context.parameters.wrapInTree ? (
-            <div role="tree" aria-label="Graph node examples">
-              {content}
-            </div>
-          ) : (
-            content
-          )}
-        </ReactFlowProvider>
-      )
-    },
+    // A bare `role="treeitem"` (what F0GraphNode renders) needs a `tree`/`group`
+    // owner or axe fails `aria-required-parent`. In the real graph the
+    // `role="tree"` container provides it; here a `role="group"` wrapper does —
+    // a valid treeitem parent (axe requiredContext is `group`/`tree`) that, being
+    // `group`, has no required children of its own, so a story that can't reach
+    // its node through the DOM (the node sits behind a nested `<ReactFlow>`'s
+    // `role="application"`) doesn't make this wrapper fail `aria-required-children`.
+    // Those stories provide their own `role="tree"` with `aria-owns` instead —
+    // see WithToolbar / ToolbarDemo.
+    (Story) => (
+      <ReactFlowProvider>
+        <div role="group" aria-label="Graph node preview">
+          <Story />
+        </div>
+      </ReactFlowProvider>
+    ),
   ],
   argTypes: {
     variant: {
@@ -124,7 +125,6 @@ const teamAvatar = {
  */
 export const AvatarShape: Story = {
   tags: ["no-sidebar"],
-  parameters: { wrapInTree: false },
   render: () => (
     <div className="flex flex-wrap items-start gap-4">
       <TreeExample label="Person graph node example">
@@ -147,7 +147,6 @@ export const AvatarShape: Story = {
 
 export const States: Story = {
   tags: ["no-sidebar"],
-  parameters: { wrapInTree: false },
   render: () => (
     <div className="flex flex-wrap items-start gap-4">
       {(["default", "selected", "highlighted", "dimmed"] as const).map(
@@ -168,7 +167,6 @@ export const States: Story = {
 
 export const ZoomLevels: Story = {
   tags: ["no-sidebar"],
-  parameters: { wrapInTree: false },
   render: () => (
     <div className="flex flex-wrap items-start gap-16">
       {(["detail", "compact", "dot"] as const).map((variant) => (
@@ -275,7 +273,6 @@ export const Avatars: Story = {
     )
   },
   parameters: {
-    wrapInTree: false,
     docs: {
       description: {
         story:
@@ -375,7 +372,7 @@ export const HoverCard: Story = {
 
 export const Snapshot: Story = {
   tags: ["no-sidebar"],
-  parameters: withSnapshot({ wrapInTree: false }),
+  parameters: withSnapshot({}),
   render: () => (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-4">
@@ -504,7 +501,17 @@ const toolbarDemoNodes: Node[] = [
 
 function ToolbarDemo() {
   return (
-    <div style={{ width: 480, height: 240 }}>
+    // The node renders inside React Flow's hardcoded `role="application"` div,
+    // which severs the DOM tree→treeitem relationship. Mirror F0GraphView: a
+    // `role="tree"` directly wrapping React Flow re-owns the node via `aria-owns`
+    // (`ToolbarDemoNode` sets nodeId="toolbar-demo" → DOM id below), so the lone
+    // treeitem has a valid, owning parent.
+    <div
+      role="tree"
+      aria-label="Graph node preview"
+      aria-owns="f0-graph-node-toolbar-demo"
+      style={{ width: 480, height: 240 }}
+    >
       <ReactFlow
         nodes={toolbarDemoNodes}
         nodeTypes={toolbarNodeTypes}
@@ -528,7 +535,6 @@ export const WithToolbar: Story = {
   tags: ["no-sidebar"],
   render: () => <ToolbarDemo />,
   parameters: {
-    wrapInTree: false,
     docs: {
       description: {
         story:

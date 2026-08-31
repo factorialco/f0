@@ -10,6 +10,12 @@ export interface PlayerController extends Omit<
   audioRef: RefObject<HTMLAudioElement>
   currentSrc: string | undefined
   playbackRates: number[]
+  /**
+   * Where playback will resume when a seek made before the recording loaded is
+   * applied, or `null`. Unlike `currentTime` it is reported whether or not a
+   * duration is known yet, so a caller can reflect the position it asked for.
+   */
+  pendingTime: number | null
 }
 
 /**
@@ -44,6 +50,8 @@ export const usePlayerController = (
 
   const audioRef = useRef<HTMLAudioElement>(null)
   const [resolvedSrc, setResolvedSrc] = useState(eagerSrc)
+  const pendingSeekRef = useRef<number | null>(null)
+  const [pendingSeek, setPendingSeek] = useState<number | null>(null)
   const resolvingRef = useRef(false)
   const playAfterResolveRef = useRef(false)
   const refreshedRef = useRef(false)
@@ -91,6 +99,38 @@ export const usePlayerController = (
     duration ?? 0
   )
 
+  const playerSeek = player.seek
+
+  const seek = useCallback(
+    (seconds: number) => {
+      const audio = audioRef.current
+      const target = Math.max(seconds, 0)
+      if (audio && resolvedSrc && audio.readyState >= audio.HAVE_METADATA) {
+        playerSeek(target)
+        return
+      }
+      pendingSeekRef.current = target
+      setPendingSeek(target)
+    },
+    [playerSeek, resolvedSrc]
+  )
+
+  useEffect(() => {
+    const audio = audioRef.current
+    if (!audio) return
+
+    const applyPendingSeek = () => {
+      const target = pendingSeekRef.current
+      if (target === null) return
+      pendingSeekRef.current = null
+      setPendingSeek(null)
+      playerSeek(target)
+    }
+
+    audio.addEventListener("loadedmetadata", applyPendingSeek)
+    return () => audio.removeEventListener("loadedmetadata", applyPendingSeek)
+  }, [playerSeek])
+
   useEffect(() => {
     if (eagerSrc !== undefined) setResolvedSrc(eagerSrc)
   }, [eagerSrc])
@@ -131,18 +171,27 @@ export const usePlayerController = (
     onPlayingChange?.(player.isPlaying)
   }, [player.isPlaying, onPlayingChange])
 
+  // A queued position is only shown once there is a duration to place it in;
+  // reporting it against an unknown one reads as "3:20 / 0:00" on a scrubber
+  // that is disabled until the recording loads, so it cannot be corrected.
+  const queuedTime =
+    pendingSeek !== null && player.duration > 0
+      ? Math.min(pendingSeek, player.duration)
+      : null
+
   return {
     audioRef,
     currentSrc: resolvedSrc,
+    pendingTime: pendingSeek,
     isPlaying: player.isPlaying,
-    currentTime: player.currentTime,
+    currentTime: queuedTime ?? player.currentTime,
     duration: player.duration,
     buffered: player.buffered,
     playbackRate: player.playbackRate,
     isLoading: player.isLoading,
     error: player.error,
     toggle,
-    seek: player.seek,
+    seek,
     setPlaybackRate: player.setPlaybackRate,
     playbackRates,
   }

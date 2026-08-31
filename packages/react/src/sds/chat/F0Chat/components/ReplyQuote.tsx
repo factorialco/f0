@@ -1,15 +1,15 @@
 import { type ReactNode } from "react"
 
 import { F0Icon } from "@/components/F0Icon"
-import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
 import { useReplyPreview } from "../hooks/useReplyPreview"
 import { useChatJump } from "../providers/ChatUIProvider"
-import { useF0ChatStable } from "../providers/F0ChatProvider"
+import { useF0ChatEmit, useF0ChatStable } from "../providers/F0ChatProvider"
 import { type F0ChatMessage } from "../types"
 import { senderNameColorClass } from "../utils/sender-color"
+import { ClampText } from "./ClampText"
 
 /**
  * Reply quote nested at the top of the bubble (WhatsApp-style): a compact card
@@ -31,6 +31,7 @@ export const ReplyQuote = ({
   isFirstOfRun?: boolean
 }): ReactNode => {
   const { jumpToMessage } = useChatJump()
+  const emit = useF0ChatEmit()
   const { currentUserId } = useF0ChatStable()
   const i18n = useI18n()
   const { icon, label, thumbnailUrl } = useReplyPreview(reply)
@@ -41,10 +42,17 @@ export const ReplyQuote = ({
     <div className="p-1 pb-0">
       <button
         type="button"
-        onClick={() => jumpToMessage(reply.id)}
+        onClick={() => {
+          jumpToMessage(reply.id)
+          emit.onJumpedToQuotedMessage()
+        }}
         className={cn(
           "flex w-full items-center overflow-hidden rounded-xl text-left",
-          "bg-f1-background-tertiary transition-colors hover:bg-f1-background-secondary",
+          // Sits INSIDE a tinted bubble, so it needs a heavier neutral than
+          // `f1-background-tertiary` (4%) to stay legible against the stronger
+          // sender tints — same 6%/8% mobile uses.
+          "bg-[hsl(var(--neutral-100)/0.06)] transition-colors hover:bg-[hsl(var(--neutral-100)/0.1)]",
+          "dark:bg-[hsl(var(--neutral-100)/0.08)] dark:hover:bg-[hsl(var(--neutral-100)/0.12)]",
           // Tail-side top corner mirrors the host bubble: rounded to hug the
           // bubble at a run's start, tucked in when the message continues a run.
           isFirstOfRun
@@ -60,23 +68,23 @@ export const ReplyQuote = ({
           <img
             src={thumbnailUrl}
             alt=""
+            loading="lazy"
+            decoding="async"
             className="ml-2.5 h-9 w-9 shrink-0 self-center rounded-sm object-cover"
           />
         )}
         <div className="flex min-w-0 flex-1 flex-col gap-0.5 p-2.5">
-          <OneEllipsis
+          <ClampText
             className={cn(
               "text-sm font-medium",
               senderNameColorClass(reply.author)
             )}
           >
             {senderName}
-          </OneEllipsis>
+          </ClampText>
           <span className="flex min-w-0 items-center gap-1 text-f1-foreground-secondary">
             {icon && <F0Icon icon={icon} size="sm" color="default" />}
-            <OneEllipsis className="min-w-0 text-base" lines={1}>
-              {label}
-            </OneEllipsis>
+            <ClampText className="min-w-0 text-base">{label}</ClampText>
           </span>
         </div>
       </button>

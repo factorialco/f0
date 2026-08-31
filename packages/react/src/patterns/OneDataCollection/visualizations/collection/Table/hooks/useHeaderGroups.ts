@@ -44,6 +44,7 @@ type NormalizedHeaderGroup = {
   label: string
   collapsedColumns?: ColId[]
   defaultCollapsed: boolean
+  highlighted: boolean
 }
 
 type NormalizedHeaderGroups = Record<string, NormalizedHeaderGroup>
@@ -53,6 +54,8 @@ type HeaderGroupRun = {
   groupId: string
   columnIndices: number[]
 }
+
+const emptyPreservedColumnIds: ReadonlySet<ColId> = new Set()
 
 /**
  * Resolves the shorthand string form and the per-group defaults into a single
@@ -68,11 +71,12 @@ export const normalizeHeaderGroups = (
   Object.entries(headerGroups).forEach(([groupId, definition]) => {
     normalized[groupId] =
       typeof definition === "string"
-        ? { label: definition, defaultCollapsed: false }
+        ? { label: definition, defaultCollapsed: false, highlighted: false }
         : {
             label: definition.label,
             collapsedColumns: definition.collapsedColumns,
             defaultCollapsed: definition.defaultCollapsed ?? false,
+            highlighted: definition.highlighted ?? false,
           }
   })
 
@@ -122,7 +126,8 @@ const getCollapsedColumnIndices = <
 >(
   columns: ReadonlyArray<Col>,
   definitions: NormalizedHeaderGroups,
-  collapsedGroups: ReadonlySet<string>
+  collapsedGroups: ReadonlySet<string>,
+  preservedColumnIds: ReadonlySet<ColId> = emptyPreservedColumnIds
 ): ReadonlySet<number> => {
   const hidden = new Set<number>()
 
@@ -130,15 +135,33 @@ const getCollapsedColumnIndices = <
     if (!collapsedGroups.has(run.groupId)) return
 
     const collapsedColumns = definitions[run.groupId]?.collapsedColumns
-    const kept = run.columnIndices.filter((index) =>
-      collapsedColumns?.includes(getColumnId(columns[index]))
-    )
+    const kept = run.columnIndices.filter((index) => {
+      const columnId = getColumnId(columns[index])
+      return (
+        preservedColumnIds.has(columnId) || collapsedColumns?.includes(columnId)
+      )
+    })
     const keptIndices = new Set(kept.length > 0 ? kept : [run.columnIndices[0]])
 
     run.columnIndices.forEach((index) => {
       if (!keptIndices.has(index)) hidden.add(index)
     })
   })
+
+  // Collapsing must not leave a table made entirely of sticky columns. If the
+  // configured groups would hide every scrollable column, retain the final one
+  // in table order as the stable horizontal-scroll boundary.
+  const scrollableIndices = columns
+    .map((column, index) =>
+      preservedColumnIds.has(getColumnId(column)) ? -1 : index
+    )
+    .filter((index) => index !== -1)
+  if (
+    scrollableIndices.length > 0 &&
+    scrollableIndices.every((index) => hidden.has(index))
+  ) {
+    hidden.delete(scrollableIndices.at(-1)!)
+  }
 
   return hidden
 }
@@ -190,6 +213,8 @@ export const computeHeaderGroups = (
 export type UseHeaderGroupsOptions = {
   headerGroups?: Record<string, string | HeaderGroupDefinition>
   onCollapsedChange?: (groupId: string, collapsed: boolean) => void
+  /** Columns that stay rendered even when their header group collapses. */
+  preservedColumnIds?: ReadonlySet<ColId>
 }
 
 export type UseHeaderGroupsReturn<
@@ -232,7 +257,11 @@ export const useHeaderGroups = <
   Summaries extends SummariesDefinition,
 >(
   columns: ReadonlyArray<TableColumnDefinition<R, Sortings, Summaries>>,
-  { headerGroups, onCollapsedChange }: UseHeaderGroupsOptions = {}
+  {
+    headerGroups,
+    onCollapsedChange,
+    preservedColumnIds = emptyPreservedColumnIds,
+  }: UseHeaderGroupsOptions = {}
 ): UseHeaderGroupsReturn<R, Sortings, Summaries> => {
   const definitions = useMemo(
     () => normalizeHeaderGroups(headerGroups),
@@ -302,17 +331,31 @@ export const useHeaderGroups = <
   }, [collapsedGroups, animatingGroups])
 
   const visibleColumns = useMemo(() => {
-    if (!definitions || settledCollapsedGroups.size === 0) return columns
+    const kept =
+      !definitions || settledCollapsedGroups.size === 0
+        ? columns
+        : (() => {
+            const hidden = getCollapsedColumnIndices(
+              columns,
+              definitions,
+              settledCollapsedGroups,
+              preservedColumnIds
+            )
+            return hidden.size === 0
+              ? columns
+              : columns.filter((_, index) => !hidden.has(index))
+          })()
 
-    const hidden = getCollapsedColumnIndices(
-      columns,
-      definitions,
-      settledCollapsedGroups
+    // A highlighted group's emphasis lives on its columns — equivalent to setting
+    // `highlighted` on each of them — so headers, body cells and the summary row
+    // can all read `column.highlighted` directly.
+    if (!definitions) return kept
+    return kept.map((column) =>
+      column.headerGroupId && definitions[column.headerGroupId]?.highlighted
+        ? { ...column, highlighted: true }
+        : column
     )
-    if (hidden.size === 0) return columns
-
-    return columns.filter((_, index) => !hidden.has(index))
-  }, [columns, definitions, settledCollapsedGroups])
+  }, [columns, definitions, settledCollapsedGroups, preservedColumnIds])
 
   // Stable order, so a group's marker class does not change between renders.
   const collapsibleGroupIds = useMemo(
@@ -336,7 +379,8 @@ export const useHeaderGroups = <
       const indices = getCollapsedColumnIndices(
         visibleColumns,
         definitions,
-        new Set([groupId])
+        new Set([groupId]),
+        preservedColumnIds
       )
 
       indices.forEach((index) => {
@@ -348,7 +392,13 @@ export const useHeaderGroups = <
     })
 
     return classes
-  }, [visibleColumns, definitions, animatingGroups, collapsibleGroupIds])
+  }, [
+    visibleColumns,
+    definitions,
+    animatingGroups,
+    collapsibleGroupIds,
+    preservedColumnIds,
+  ])
 
   // One entry per group in flight, for the animation to pick up.
   const collapseTransitions = useMemo(

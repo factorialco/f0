@@ -8,6 +8,7 @@ import { DataAttributes } from "@/global.types"
 import { EllipsisHorizontal } from "@/icons/app"
 import { Link } from "@/lib/linkHandler"
 import { useI18n } from "@/lib/providers/i18n"
+import { TooltipWrapper } from "@/lib/tooltip-wrapper"
 import { cn } from "@/lib/utils"
 import {
   DropdownMenu,
@@ -36,6 +37,13 @@ export type DropdownItemObject = Pick<NavigationItem, "label" | "href"> & {
   critical?: boolean
   avatar?: AvatarVariant
   disabled?: boolean
+  /**
+   * Tooltip shown on hover while the item is `disabled` — use it to explain why
+   * the action is unavailable. Ignored when the item is not disabled. The
+   * tooltip trigger re-enables pointer events, so it works despite the disabled
+   * item's `pointer-events: none`.
+   */
+  disabledTooltip?: string
 }
 
 export type DropdownInternalProps = {
@@ -64,6 +72,7 @@ const DropdownItem = ({ item }: { item: DropdownItemObject }) => {
     icon: _icon,
     avatar: _avatar,
     description: _description,
+    disabledTooltip,
     href,
     critical,
     disabled,
@@ -75,7 +84,7 @@ const DropdownItem = ({ item }: { item: DropdownItemObject }) => {
     critical && "text-f1-foreground-critical"
   )
 
-  return (
+  const menuItem = (
     <DropdownMenuItem
       asChild
       className={cn(itemClass, "cursor-pointer")}
@@ -99,6 +108,20 @@ const DropdownItem = ({ item }: { item: DropdownItemObject }) => {
       )}
     </DropdownMenuItem>
   )
+
+  // A disabled item sets `pointer-events: none`, so it emits NO hover events —
+  // the tooltip must hang off a wrapper span that keeps pointer events and that
+  // the hover passes THROUGH to (same approach as F0FormEditableTable). Only a
+  // disabled item with a tooltip gets the wrapper; every other item renders bare.
+  if (disabled && disabledTooltip) {
+    return (
+      <TooltipWrapper tooltip={disabledTooltip}>
+        <span className="block w-full cursor-not-allowed">{menuItem}</span>
+      </TooltipWrapper>
+    )
+  }
+
+  return menuItem
 }
 
 function renderDropdownItem(

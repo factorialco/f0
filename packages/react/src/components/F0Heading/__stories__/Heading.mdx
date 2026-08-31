@@ -7,7 +7,7 @@ import * as Stories from "./Heading.stories"
 
 > **Before using this component**, check if a higher-level component covers your use case:
 >
-> - **`ResourceHeader`** — entity pages (employee, team, company). Includes avatar, metadata, status, and actions.
+> - **`F0ResourceHeader`** — entity pages (employee, team, company). Includes avatar, metadata, status, and actions.
 > - **`SectionHeader`** — sections inside a page or form. Includes description, help center link, separator, and action button.
 >
 > `F0Heading` is a low-level typography primitive. Use it only when neither of the above fits.
@@ -80,7 +80,7 @@ Renders a heading with consistent typographic scale. It separates visual style (
 #### When NOT to use
 
 - Do not use `F0Heading` for body copy, descriptions, or labels: use `F0Text` instead
-- Do not use `F0Heading` to build a resource page header (employee, team, company): use `ResourceHeader` instead — it handles avatar, metadata, status, and actions
+- Do not use `F0Heading` to build a resource page header (employee, team, company): use `F0ResourceHeader` instead — it handles avatar, metadata, status, and actions
 - Do not use `F0Heading` to build a section header inside a form or content block: use `SectionHeader` instead — it handles description, help link, separator, and action
 - Do not use `heading-large` for section titles inside a page — it creates false visual hierarchy
 - Do not omit the `as` prop when the heading level matters for accessibility — the default rendering tag may not match the document structure

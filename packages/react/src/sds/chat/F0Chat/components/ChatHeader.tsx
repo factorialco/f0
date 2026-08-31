@@ -6,15 +6,8 @@ import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon, type IconType } from "@/components/F0Icon"
 import { Dropdown, type DropdownItem } from "@/experimental/Navigation/Dropdown"
+import { Cross, Ellipsis, Maximize, Minimize, Search } from "@/icons/app"
 import { EmojiImage } from "@/lib/emojis"
-import {
-  Cross,
-  Ellipsis,
-  Maximize,
-  MicrophoneNegative,
-  Minimize,
-  Search,
-} from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
@@ -23,12 +16,23 @@ import { type F0ChatChannel, type F0ChatHeaderAction } from "../types"
 import { ChatHeaderSearch } from "./ChatHeaderSearch"
 import { ChatUserHoverCard } from "./ChatUserHoverCard"
 
-const PresenceDot = ({ online }: { online: boolean }): ReactNode => {
+const PresenceDot = ({
+  online,
+  label,
+}: {
+  online: boolean
+  label: string
+}): ReactNode => {
   if (!online) return null
 
   return (
-    <span className="absolute -bottom-0.5 -right-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-f1-background">
+    <span
+      role="img"
+      aria-label={label}
+      className="absolute -bottom-0.5 -right-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-f1-background"
+    >
       <span
+        aria-hidden="true"
         className={cn("h-2 w-2 rounded-full", "bg-f1-background-positive-bold")}
       />
     </span>
@@ -45,7 +49,7 @@ export type ChatHeaderProps = {
   actions?: F0ChatHeaderAction[]
 }
 
-/** Top bar of the chat: avatar + presence + name (+ muted) and panel actions. */
+/** Top bar of the chat: avatar + presence + name + statuses and panel actions. */
 export const ChatHeader = ({
   channel,
   isFullscreen,
@@ -88,8 +92,13 @@ export const ChatHeader = ({
   const inlineActions = channelActions.filter(isInline)
   const menuActions = channelActions.filter((action) => !isInline(action))
 
+  // A noticeboard is a short, fixed transcript — there is nothing to search
+  // through, and without host actions the menu would hold a single useless item.
+  const canSearch = channel.type !== "announcement"
   const menuItems: DropdownItem[] = [
-    { label: i18n.actions.search, icon: Search, onClick: openSearch },
+    ...(canSearch
+      ? [{ label: i18n.actions.search, icon: Search, onClick: openSearch }]
+      : []),
     ...menuActions.map((action) => ({
       label: action.label,
       icon: action.icon,
@@ -99,13 +108,13 @@ export const ChatHeader = ({
 
   const identity = (
     <div className="flex min-w-0 items-center gap-2">
-      <div className="relative shrink-0 flex">
+      <div className="relative flex shrink-0">
         {identityEmoji ? (
           // Emoji groups show the glyph alone (no avatar chrome) so it reads at
           // full size instead of shrunk inside the bordered avatar box.
           <span
             aria-hidden={showGroupFallback || undefined}
-            className="flex size-5 text-lg items-center font-medium justify-center text-f1-foreground-secondary"
+            className="flex size-5 items-center justify-center text-lg font-medium text-f1-foreground-secondary"
             data-testid={
               showGroupFallback ? "chat-group-avatar-fallback" : undefined
             }
@@ -115,26 +124,22 @@ export const ChatHeader = ({
         ) : (
           <F0Avatar size="sm" avatar={channel.avatar} />
         )}
-        {showPresence && <PresenceDot online={channel.presence === "online"} />}
+        {showPresence && (
+          <PresenceDot
+            online={channel.presence === "online"}
+            label={i18n.chat.online}
+          />
+        )}
       </div>
       <span className="truncate text-base font-medium text-f1-foreground">
         {channel.title}
       </span>
-      {/* All states surface in the header the same way the mute icon does. */}
-      {channel.muted && (
-        <F0Icon
-          icon={MicrophoneNegative}
-          size="sm"
-          color="secondary"
-          aria-label={i18n.chat.muted}
-        />
-      )}
       {channel.statuses?.map((status) => (
         <F0Icon
           key={status.label}
           icon={status.icon}
           size="sm"
-          color="secondary"
+          color="default"
           aria-label={status.label}
         />
       ))}
@@ -169,15 +174,18 @@ export const ChatHeader = ({
                 onClick={() => action.onClick(channel)}
               />
             ))}
-            {/* Search + the host's menu actions live behind the ellipsis menu. */}
-            <Dropdown items={menuItems} align="end" label={i18n.chat.options}>
-              <ButtonInternal
-                variant="ghost"
-                hideLabel
-                label={i18n.chat.options}
-                icon={Ellipsis}
-              />
-            </Dropdown>
+            {/* Search + the host's menu actions live behind the ellipsis menu,
+                which only exists while it holds something. */}
+            {menuItems.length > 0 && (
+              <Dropdown items={menuItems} align="end" label={i18n.chat.options}>
+                <ButtonInternal
+                  variant="ghost"
+                  hideLabel
+                  label={i18n.chat.options}
+                  icon={Ellipsis}
+                />
+              </Dropdown>
+            )}
             {onToggleFullscreen && !isSmallScreen && (
               <ButtonInternal
                 variant="ghost"
