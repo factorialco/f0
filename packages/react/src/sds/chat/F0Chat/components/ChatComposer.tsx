@@ -159,6 +159,8 @@ export const ChatComposer = (): ReactNode => {
       channel.type === "group" ? i18n.chat.mentionEveryone : undefined,
   })
   const closeEmojiAutocomplete = emojiAutocomplete.close
+  const suspendEmojiAutocomplete = emojiAutocomplete.suspend
+  const resumeEmojiAutocomplete = emojiAutocomplete.resume
   const handleEmojiAutocompleteKeyDown = emojiAutocomplete.handleKeyDown
   const mentionReactId = useId()
   const mentionListboxId = `chat-mention-autocomplete-${mentionReactId.replace(/:/g, "")}`
@@ -352,6 +354,11 @@ export const ChatComposer = (): ReactNode => {
       const nextCursorPosition = replacement?.cursorPosition ?? cursorPos
       setValue(nextValue)
       setCursorPosition(nextCursorPosition)
+      // A keystroke is proof the composer has focus — a reader cannot type into
+      // a field they have left. Resuming from the change, and not from `focus`
+      // alone, is what caps the cost of a blur at the one keystroke it landed
+      // on, whether or not a matching `focus` ever arrives.
+      resumeEmojiAutocomplete()
       onInputActivity()
       if (replacement) {
         requestAnimationFrame(() => {
@@ -365,7 +372,7 @@ export const ChatComposer = (): ReactNode => {
       // counterpart's dots hanging until the transport's timeout.
       if (nextValue.trim().length === 0) void stopTyping?.()
     },
-    [onInputActivity, stopTyping]
+    [onInputActivity, resumeEmojiAutocomplete, stopTyping]
   )
 
   // Leaving the conversation mid-type must also drop the dots immediately.
@@ -998,7 +1005,8 @@ export const ChatComposer = (): ReactNode => {
             onChange={handleChange}
             onKeyDown={handleKeyDown}
             onPaste={handlePaste}
-            onBlur={closeEmojiAutocomplete}
+            onBlur={suspendEmojiAutocomplete}
+            onFocus={resumeEmojiAutocomplete}
             onCursorUpdate={updateCursorPosition}
             onScroll={syncHighlightScroll}
             highlightSegments={highlightSegments}
