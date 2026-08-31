@@ -192,7 +192,9 @@ function ApplicationFrameContent({
     canvasContent,
     canvasEntities,
     closeCanvas,
-    chatWidth,
+    effectiveChatWidth,
+    chatWidthBounds,
+    setFrameWidth,
     resizable,
     panelSide,
     panelContent,
@@ -203,7 +205,11 @@ function ApplicationFrameContent({
   const isAiChatFullscreen = visualizationMode === "fullscreen"
   const isCanvasMode = visualizationMode === "canvas"
   const { open: isAiPromotionChatOpen } = useAiPromotionChat()
-  const reservedChatWidth = resizable ? chatWidth : DEFAULT_CHAT_WIDTH
+  // A fixed-width panel is clamped too: 360px is just as capable of crushing
+  // the content on a narrow frame as a dragged one.
+  const reservedChatWidth = resizable
+    ? (effectiveChatWidth ?? DEFAULT_CHAT_WIDTH)
+    : Math.min(DEFAULT_CHAT_WIDTH, chatWidthBounds?.max ?? DEFAULT_CHAT_WIDTH)
   // The canvas hugs the seam with the docked chat, so it reserves the chat's
   // width on that edge. Content marked `coversChat` reserves nothing: it spans
   // the frame and covers the chat (the canvas layer sits above it), so the
@@ -279,11 +285,71 @@ function ApplicationFrameContent({
     initializeWithValue: true,
   })
 
+  // A left-docked panel normally keeps the sidebar in place (see
+  // `floatsOverSidebar`), but three columns do not fit on a narrow viewport.
+  // Keyed on the VIEWPORT, deliberately: the measured frame below shrinks and
+  // grows with the very sidebar this decides about, and the two would
+  // oscillate if this read it.
+  const isNarrowForLeftPanel = useMediaQuery(
+    `(max-width: ${breakpoints.lg}px)`,
+    { initializeWithValue: true }
+  )
+
+  // Publish the width of the region the panel and the content share, so the
+  // panel can only grow as far as the room beside it allows. Only the frame
+  // knows this: it is the viewport minus whatever the navigation is taking.
+  //
+  // Read off `getBoundingClientRect()` — the BORDER box — and not a
+  // ResizeObserver's `contentRect`. The reservation is this element's padding,
+  // so the content box is the thing being computed from the width; feeding it
+  // back in would make the panel chase its own tail.
+  const mainAreaRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const element = mainAreaRef.current
+    if (!element || !setFrameWidth) return
+
+    let frame = 0
+    const publish = (): void => {
+      cancelAnimationFrame(frame)
+      // Coalesced to one frame: a window drag fires these faster than the
+      // screen repaints, and every width change re-measures every row of the
+      // chat transcript.
+      frame = requestAnimationFrame(() => {
+        const { width } = element.getBoundingClientRect()
+        // A hidden container measures 0. Publishing that would read as "no
+        // room" and collapse the panel, so leave the last good width standing.
+        if (width > 0) setFrameWidth(width)
+      })
+    }
+
+    publish()
+    const observer = new ResizeObserver(publish)
+    observer.observe(element)
+    window.addEventListener("resize", publish)
+    return () => {
+      cancelAnimationFrame(frame)
+      observer.disconnect()
+      window.removeEventListener("resize", publish)
+    }
+  }, [setFrameWidth])
+
+  // Too narrow to seat a panel beside the content at all: it covers the frame
+  // instead of splitting it. The viewport rule is the long-standing mobile
+  // case; the measured one additionally catches a frame narrowed by the
+  // sidebar, which a viewport query cannot see.
+  const shouldOverlayPanel =
+    isSmallViewport || (chatWidthBounds?.shouldOverlay ?? false)
+
   // A left-docked panel sits beside the navigation (not over it), so the chat
   // list stays usable — don't float / auto-close the sidebar in that case.
   // Keyed on the side of the *visible* content: in split mode a left-docked
   // conversation coexists with the sidebar while the right AI chat floats it.
-  const floatsOverSidebar = isAiChatOpen && !isActiveLeft
+  //
+  // ...unless the viewport is too narrow to seat all three. Nav + panel +
+  // content only coexist when there is room for them; below that the sidebar
+  // is the one that yields, since it can be brought back on hover.
+  const floatsOverSidebar =
+    isAiChatOpen && (!isActiveLeft || isNarrowForLeftPanel)
 
   useEffect(() => {
     setForceFloat(floatsOverSidebar)
@@ -345,6 +411,7 @@ function ApplicationFrameContent({
 
             {/* Main area */}
             <motion.div
+              ref={mainAreaRef}
               className="relative min-w-0 flex-1"
               // Both paddings animate together, so swapping the visible side
               // (split mode) slides the main content from one edge to the
@@ -352,11 +419,11 @@ function ApplicationFrameContent({
               // incoming one, which stay put underneath (z-0 vs z-10).
               animate={{
                 paddingRight:
-                  isAiChatOpen && !isSmallViewport && !isActiveLeft
+                  isAiChatOpen && !shouldOverlayPanel && !isActiveLeft
                     ? reservedChatWidth
                     : 0,
                 paddingLeft:
-                  isAiChatOpen && !isSmallViewport && isActiveLeft
+                  isAiChatOpen && !shouldOverlayPanel && isActiveLeft
                     ? reservedChatWidth
                     : 0,
               }}
@@ -415,7 +482,7 @@ function ApplicationFrameContent({
                     // Canvas sits opposite the panel, hugging the seam between
                     // them: panel-right -> canvas on the left, and vice versa.
                     isPanelLeft ? "justify-start" : "justify-end",
-                    isSmallViewport
+                    shouldOverlayPanel
                       ? "fixed inset-0 z-[50]"
                       : cn(
                           "absolute bottom-0 top-0 z-[21]",
@@ -429,7 +496,7 @@ function ApplicationFrameContent({
                   // value, so leaving one out would strand a stale inset when
                   // the viewport crosses the small breakpoint).
                   animate={
-                    isSmallViewport
+                    shouldOverlayPanel
                       ? { left: 0, right: 0 }
                       : isPanelLeft
                         ? { left: reservedCanvasInset, right: 0 }
@@ -463,7 +530,7 @@ function ApplicationFrameContent({
                       className={cn(
                         "pointer-events-none",
                         "[&_.copilotKitSidebarContentWrapper]:relative [&_.copilotKitSidebarContentWrapper]:h-full [&_.copilotKitSidebarContentWrapper]:w-full",
-                        isSmallViewport
+                        shouldOverlayPanel
                           ? "fixed inset-0 z-[30]"
                           : cn(
                               "absolute top-0 bottom-0",
@@ -490,7 +557,7 @@ function ApplicationFrameContent({
                       )}
                       animate={{
                         width:
-                          isSmallViewport ||
+                          shouldOverlayPanel ||
                           (isAiChatFullscreen && isActivePanel)
                             ? "100%"
                             : reservedChatWidth,

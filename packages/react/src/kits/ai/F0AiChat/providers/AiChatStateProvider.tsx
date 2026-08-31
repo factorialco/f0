@@ -9,9 +9,12 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react"
+
+import { panelWidths } from "@factorialco/f0-core"
 
 import { useI18n } from "@/lib/providers/i18n"
 
@@ -27,6 +30,11 @@ import {
   WelcomeScreenSuggestion,
 } from "../types"
 import { DEFAULT_CHAT_WIDTH } from "../utils/constants"
+import {
+  clampPanelWidth,
+  panelBoundsFor,
+  type PanelBounds,
+} from "../utils/panelWidth"
 
 import { usePersistedState } from "./usePersistedState"
 
@@ -38,8 +46,7 @@ const CHAT_OPEN_STORAGE_KEY = "ONE-ai-chat-open"
 const CHAT_VISUALIZATION_MODE_STORAGE_KEY = "ONE-ai-chat-visualization-mode"
 const CHAT_PANEL_CONTENT_ID_STORAGE_KEY = "ONE-ai-chat-panel-content-id"
 
-const CHAT_WIDTH_MIN = 300
-const CHAT_WIDTH_MAX = 712
+const { min: CHAT_WIDTH_MIN, max: CHAT_WIDTH_MAX } = panelWidths
 
 /** How long a pending panel-content restore may wait for the host before
  * falling back to the AI chat — a host that never resolves (the conversation
@@ -108,6 +115,25 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
 
   // Not persisted: this is the live state of a pointer drag, not a preference.
   const [isResizing, setIsResizing] = useState(false)
+
+  // How much room the frame has for panel + content, published by
+  // ApplicationFrame from its measured content box. 0 means "not measured yet".
+  const [frameWidth, setFrameWidth] = useState(0)
+
+  const chatWidthBounds: PanelBounds = useMemo(
+    () => panelBoundsFor(frameWidth),
+    [frameWidth]
+  )
+
+  // `chatWidth` above is the PREFERENCE — what the user last dragged to, kept
+  // in localStorage against the absolute range. This is what the layout
+  // actually reserves. Narrowing the window must not overwrite a width chosen
+  // deliberately on a wider one, so the clamp lives here and not in the
+  // setter: widen the window again and the preference comes back untouched.
+  const effectiveChatWidth = useMemo(
+    () => clampPanelWidth(chatWidth, frameWidth),
+    [chatWidth, frameWidth]
+  )
 
   const [open, setOpen] = usePersistedState<boolean>(
     CHAT_OPEN_STORAGE_KEY,
@@ -407,6 +433,9 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         chatWidth,
         setChatWidth,
         resetChatWidth,
+        effectiveChatWidth,
+        chatWidthBounds,
+        setFrameWidth,
         isResizing,
         setIsResizing,
         tracking,
@@ -505,6 +534,9 @@ const UNDEFINED_KEYS = new Set<ProviderKey>([
 
 const REAL_VALUES: Partial<AiChatProviderReturnValue> = {
   chatWidth: DEFAULT_CHAT_WIDTH,
+  effectiveChatWidth: DEFAULT_CHAT_WIDTH,
+  // Unmeasured, so the absolute range — same fallback the provider starts on.
+  chatWidthBounds: panelBoundsFor(0),
   panelSide: "right",
   panelContentSide: "right",
   visualizationMode: "sidepanel",

@@ -48,6 +48,7 @@ export const SidebarWindow = ({
     resizable,
     setChatWidth,
     resetChatWidth,
+    chatWidthBounds,
     setIsResizing,
     fileAttachments,
     isClarifying,
@@ -225,14 +226,30 @@ export const SidebarWindow = ({
     initializeWithValue: true,
   })
 
+  // Bounded by what the frame can currently give, not by the absolute range —
+  // otherwise the handle keeps travelling after the main content has run out
+  // of room. `chatWidthBounds` is optional on the context (see internal-types),
+  // so fall back to the absolute range when no provider is mounted.
+  const { min: minWidth, max: maxWidth } = chatWidthBounds ?? {
+    min: MIN_CHAT_WIDTH,
+    max: MAX_CHAT_WIDTH,
+  }
+
+  // No seam to drag when the panel is covering the frame rather than sitting
+  // beside content. The viewport check is the mobile case; the measured one
+  // catches a wide window whose frame is still too narrow to split — a
+  // viewport query cannot see the sidebar eating into it.
+  const isCoveringFrame =
+    isSmallScreen || (chatWidthBounds?.shouldOverlay ?? false)
+
   const handleResize = useCallback(
     (deltaX: number) => {
       setChatWidth((prev) => {
         const newWidth = prev + deltaX
-        return Math.max(MIN_CHAT_WIDTH, Math.min(MAX_CHAT_WIDTH, newWidth))
+        return Math.max(minWidth, Math.min(maxWidth, newWidth))
       })
     },
-    [setChatWidth]
+    [setChatWidth, minWidth, maxWidth]
   )
 
   const wrapperTransition = useMemo(() => {
@@ -289,7 +306,7 @@ export const SidebarWindow = ({
         >
           {/* Resize seam: inner (left) edge for a right-docked panel, inner
               (right) edge for a left-docked one — so it renders after the card. */}
-          {resizable && !fullscreen && !isSmallScreen && !isLeft && (
+          {resizable && !fullscreen && !isCoveringFrame && !isLeft && (
             <ResizeHandle
               onResize={handleResize}
               onReset={resetChatWidth}
@@ -348,7 +365,7 @@ export const SidebarWindow = ({
             )}
             {activeGame === "pong" && <F0AiPong onClose={closeGame} />}
           </div>
-          {resizable && !fullscreen && !isSmallScreen && isLeft && (
+          {resizable && !fullscreen && !isCoveringFrame && isLeft && (
             <ResizeHandle
               onResize={handleResize}
               onReset={resetChatWidth}
