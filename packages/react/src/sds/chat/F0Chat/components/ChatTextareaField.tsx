@@ -14,6 +14,7 @@ type ChatTextareaFieldProps = {
   onKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void
   onPaste: (e: React.ClipboardEvent<HTMLTextAreaElement>) => void
   onBlur?: (event: React.FocusEvent<HTMLTextAreaElement>) => void
+  onFocus?: (event: React.FocusEvent<HTMLTextAreaElement>) => void
   onCursorUpdate: () => void
   onScroll: () => void
   highlightSegments: HighlightSegment[]
@@ -54,6 +55,7 @@ export const ChatTextareaField = ({
   onKeyDown,
   onPaste,
   onBlur,
+  onFocus,
   onCursorUpdate,
   onScroll,
   highlightSegments,
@@ -137,6 +139,7 @@ export const ChatTextareaField = ({
         onKeyDown={onKeyDown}
         onPaste={onPaste}
         onBlur={onBlur}
+        onFocus={onFocus}
         onKeyUp={onCursorUpdate}
         onClick={onCursorUpdate}
         onSelect={onCursorUpdate}
