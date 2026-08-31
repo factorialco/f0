@@ -3,7 +3,8 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { subDays } from "date-fns"
 import { useState } from "react"
 
-import { CalendarView, DateRange } from "@/components/OneCalendar/types"
+import { DateRange } from "@/components/OneCalendar/types"
+import { GranularityDefinitionKey } from "@/components/OneCalendar/granularities"
 
 import { DatePickerPopup, DatePickerPopupProps } from "../DatePickerPopup"
 import { predefinedPresets } from "../presets"
@@ -59,7 +60,7 @@ const presets = [
   predefinedPresets.lastYear,
   {
     label: "Last 7 days",
-    granularity: "day" as CalendarView,
+    granularity: "day" as GranularityDefinitionKey,
     value: {
       from: subDays(today, 7),
       to: today,

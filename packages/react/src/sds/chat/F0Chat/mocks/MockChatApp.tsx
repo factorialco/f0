@@ -2,13 +2,14 @@
 
 import { useCallback, useMemo, type ReactNode } from "react"
 
-import { MicrophoneNegative, PalmTree } from "@/icons/app"
+import { BellOff, PalmTree } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
 import { type SidebarChatGroup } from "@/patterns/Navigation/Sidebar/Chats/types"
 
 import {
   isUserMessage,
-  type F0ChatAttachment,
+  type F0ChatComposableAttachment,
   type F0ChatEditInput,
   type F0ChatItem,
   type F0ChatRuntime,
@@ -66,6 +67,7 @@ export const resolveMockReactionUsers = (
 /** F0ChatRuntime for one conversation, backed by the shared store. */
 export const useConversationRuntime = (convId: string): F0ChatRuntime => {
   const app = useMockChatApp()
+  const i18n = useI18n()
   const seed = SEED_BY_ID.get(convId)
   const state = app.states[convId]
 
@@ -111,13 +113,13 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
   )
   const loadOlder = useCallback(() => app.loadOlder(convId), [app, convId])
   const uploadFiles = useCallback(
-    (files: File[]): Promise<F0ChatAttachment[]> =>
+    (files: File[]): Promise<F0ChatComposableAttachment[]> =>
       // Simulate a real upload so the composer's uploading skeleton is visible.
       new Promise((resolve) =>
         setTimeout(
           () =>
             resolve(
-              files.map((file): F0ChatAttachment => {
+              files.map((file): F0ChatComposableAttachment => {
                 const url = URL.createObjectURL(file)
                 return file.type.startsWith("image/")
                   ? { kind: "image", url, name: file.name, mimeType: file.type }
@@ -201,17 +203,22 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
         lastName: "",
       },
       presence: seed?.presence,
-      muted: app.muted[convId] ?? false,
       pinned: app.pinned[convId] ?? false,
       // Surface the same states the sidebar shows (e.g. on vacation) in the header.
-      statuses:
-        seed?.type === "dm" && seed.participants[0]?.vacation
+      statuses: [
+        ...(seed?.statuses?.filter((status) => status.icon !== BellOff) ?? []),
+        ...(app.muted[convId]
+          ? [{ icon: BellOff, label: i18n.chat.muted }]
+          : []),
+        ...(seed?.type === "dm" && seed.participants[0]?.vacation
           ? [{ icon: PalmTree, label: "On vacation" }]
-          : undefined,
+          : []),
+      ],
       memberCount: seed ? seed.participants.length + 1 : undefined,
       // DMs expose the counterpart for the header identity hover card.
       user:
         seed?.type === "dm" ? (seed.participants[0] ?? undefined) : undefined,
+      readOnlyNotice: seed?.readOnlyNotice,
     },
     status: app.loadState[convId] ?? "ready",
     messages,
@@ -219,7 +226,11 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
     hasMoreOlder: app.hasMoreOlder(convId),
     loadingOlder: !!app.loadingOlder[convId],
     unreadCount: unread.length,
-    firstUnreadId: unread[0]?.id ?? null,
+    // The badge and the in-transcript divider are separate on purpose: a
+    // noticeboard keeps the badge (it's what makes anyone open it the first
+    // time) but slicing a two-message welcome screen in half is just noise.
+    firstUnreadId:
+      seed?.type === "announcement" ? null : (unread[0]?.id ?? null),
     sendMessage,
     retryMessage,
     loadOlder,
@@ -273,31 +284,37 @@ export const useMockChatGroups = (
       const mentionCount =
         seed.type === "group" && state ? unreadMentionCountOf(state) : 0
       const dmPerson = seed.type === "dm" ? seed.participants[0] : undefined
+      // The product's own noticeboard isn't a conversation you curate — no pin.
+      const isAnnouncement = seed.type === "announcement"
       return {
         id: seed.id,
         label: seed.title,
         avatar: seed.avatar,
         onClick: () => onSelect(seed.id),
-        pinned: !!pinned[seed.id],
-        onTogglePin: () => togglePin(seed.id),
+        pinned: !isAnnouncement && !!pinned[seed.id],
+        onTogglePin: isAnnouncement ? undefined : () => togglePin(seed.id),
         unreadCount: unreadCount || undefined,
         mentionCount: mentionCount || undefined,
         // Live "Writing…" while the other side is typing in this conversation.
         typing: (state?.typingIds.length ?? 0) > 0,
         presence: seed.type === "dm" ? seed.presence : undefined,
-        // On-vacation takes precedence over the mute icon.
-        status: dmPerson?.vacation
-          ? { icon: PalmTree, label: "On vacation" }
-          : muted[seed.id]
-            ? { icon: MicrophoneNegative, label: "Muted" }
-            : undefined,
+        statuses: [
+          ...(dmPerson?.vacation
+            ? [{ icon: PalmTree, label: "On vacation" }]
+            : []),
+          ...(muted[seed.id] ? [{ icon: BellOff, label: "Muted" }] : []),
+        ],
       }
     }
     // Pinned (favourite) chats — both people and groups — surface in their own
     // group at the top and are removed from Direct messages / Groups below.
-    const isPinned = (s: Seed) => !!pinned[s.id]
+    const isPinned = (s: Seed) => s.type !== "announcement" && !!pinned[s.id]
     const pinnedChats = SEEDS.filter(isPinned).map(toChat)
-    const dms = SEEDS.filter((s) => s.type === "dm" && !isPinned(s)).map(toChat)
+    // Announcement channels live among the direct messages — they read as a
+    // one-to-one conversation with the product, which is what they are.
+    const dms = SEEDS.filter(
+      (s) => (s.type === "dm" || s.type === "announcement") && !isPinned(s)
+    ).map(toChat)
     const groups = SEEDS.filter((s) => s.type === "group" && !isPinned(s)).map(
       toChat
     )

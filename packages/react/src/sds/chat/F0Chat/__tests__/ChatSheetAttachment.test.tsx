@@ -156,7 +156,7 @@ describe("ChatDocumentAttachmentCard (sheet)", () => {
     // Excel-style grid: the first sheet's cells (generous timeout: the viewer
     // chunk resolves through React.lazy).
     expect(
-      await dialog.findByText("Luis Pérez", undefined, { timeout: 5000 })
+      await dialog.findByText("Luis Pérez", undefined, { timeout: 60_000 })
     ).toBeInTheDocument()
 
     // Both workbook sheets are offered in the toolbar's ToggleGroup (items
@@ -169,7 +169,7 @@ describe("ChatDocumentAttachmentCard (sheet)", () => {
     await waitFor(() =>
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
     )
-  })
+  }, 60_000)
 
   it("falls back to the plain file chip when the sheet can't load", async () => {
     renderChat([

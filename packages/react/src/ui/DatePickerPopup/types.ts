@@ -1,4 +1,7 @@
-import { GranularityDefinitionKey } from "@/components/OneCalendar/granularities"
+import {
+  GranularityDefinitionKey,
+  NavigationGranularityKey,
+} from "@/components/OneCalendar/granularities"
 import { DateRange, DateRangeComplete } from "@/components/OneCalendar/types"
 
 export interface DatePreset {
@@ -8,5 +11,5 @@ export interface DatePreset {
 }
 export type DatePickerValue = {
   value: DateRangeComplete | undefined
-  granularity: GranularityDefinitionKey
+  granularity: NavigationGranularityKey
 }

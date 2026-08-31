@@ -1,12 +1,14 @@
-import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
+import type { F0GraphNodeTagColumn } from "@/patterns/F0Graph"
+
 import { RecordType } from "@/hooks/datasource"
 import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
-import type { F0GraphNodeTagColumn } from "@/patterns/F0Graph"
+import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
+
+import type { SortAndHideListItem } from "../../Table/components/SortAndHideList/types"
+import type { GraphVisualizationOptions } from "../types"
 
 import { useDataCollectionSettings } from "../../../../Settings/SettingsProvider"
 import { SortAndHideSettings } from "../../../../Settings/SortAndHideSettings"
-import type { SortAndHideListItem } from "../../Table/components/SortAndHideList/types"
-import type { GraphVisualizationOptions } from "../types"
 
 export type GraphVisualizationSettings = {
   /** Metadata order (tag-type ids), matching the table column settings shape. */
@@ -20,6 +22,7 @@ type GraphSettingsProps = {
   labels?: Partial<Record<F0GraphNodeTagColumn, string>>
   defaultVisibleTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>
   pinnedTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>
+  lockedTagTypes?: Partial<Record<F0GraphNodeTagColumn, string>>
 }
 
 /**
@@ -32,12 +35,14 @@ const GraphSettings = ({
   labels,
   defaultVisibleTagTypes,
   pinnedTagTypes,
+  lockedTagTypes,
 }: GraphSettingsProps) => {
   const { settings } = useDataCollectionSettings()
   const graphSettings = settings.visualization.graph ?? {}
 
   const defaultVisible = new Set(defaultVisibleTagTypes ?? tagTypes)
   const pinned = new Set<string>(pinnedTagTypes ?? [])
+  const locked = lockedTagTypes ?? {}
   const hidden = new Set(
     graphSettings.hidden ?? tagTypes.filter((type) => !defaultVisible.has(type))
   )
@@ -51,15 +56,31 @@ const GraphSettings = ({
     ...tagTypes.filter((type) => !savedOrder.includes(type)),
   ]
 
-  const items: SortAndHideListItem[] = orderedTypes.map((type) => ({
-    id: type,
-    label: labels?.[type as F0GraphNodeTagColumn] ?? type,
-    // Pinned tags can't be reordered or hidden — shown with a lock icon, just
-    // like frozen columns in the table settings.
-    sortable: !pinned.has(type),
-    canHide: !pinned.has(type),
-    visible: pinned.has(type) || !hidden.has(type),
-  }))
+  const items: SortAndHideListItem[] = orderedTypes.map((type) => {
+    const lockReason = locked[type as F0GraphNodeTagColumn]
+    // Locked by permission takes precedence over pinned/default: the row is
+    // forced OFF + disabled with the reason in a tooltip (no lock icon).
+    if (lockReason !== undefined) {
+      return {
+        id: type,
+        label: labels?.[type as F0GraphNodeTagColumn] ?? type,
+        sortable: false,
+        canHide: false,
+        visible: false,
+        disabledReason: lockReason,
+      }
+    }
+
+    return {
+      id: type,
+      label: labels?.[type as F0GraphNodeTagColumn] ?? type,
+      // Pinned tags can't be reordered or hidden — shown with a lock icon, just
+      // like frozen columns in the table settings.
+      sortable: !pinned.has(type),
+      canHide: !pinned.has(type),
+      visible: pinned.has(type) || !hidden.has(type),
+    }
+  })
 
   return (
     <SortAndHideSettings
@@ -88,6 +109,7 @@ export const SettingsRenderer = <
       labels={props.nodeTagTypeLabels}
       defaultVisibleTagTypes={props.defaultVisibleTagTypes}
       pinnedTagTypes={props.pinnedTagTypes}
+      lockedTagTypes={props.lockedTagTypes}
     />
   )
 }

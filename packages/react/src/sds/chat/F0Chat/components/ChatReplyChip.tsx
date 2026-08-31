@@ -5,10 +5,10 @@ import { F0Icon } from "@/components/F0Icon"
 import { Cross } from "@/icons/app"
 import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
+import { cn } from "@/lib/utils"
 
 import { useReplyPreview } from "../hooks/useReplyPreview"
 import { type F0ChatMessage } from "../types"
-import { cn } from "@/lib/utils"
 import { senderNameColorClass } from "../utils/sender-color"
 
 /** Compact "replying to" preview above the composer (quotes the whole message). */
@@ -28,6 +28,8 @@ export const ChatReplyChip = ({
           <img
             src={thumbnailUrl}
             alt=""
+            loading="lazy"
+            decoding="async"
             className="h-9 w-9 shrink-0 self-center rounded-sm object-cover"
           />
         )}

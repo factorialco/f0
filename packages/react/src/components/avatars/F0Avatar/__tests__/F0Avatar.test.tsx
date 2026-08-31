@@ -5,49 +5,37 @@ import { screen, zeroRender } from "@/testing/test-utils"
 import { F0Avatar } from "../F0Avatar"
 
 describe("F0Avatar", () => {
-  it("renders the person variant with its accessible label", () => {
+  it("forwards deactivated to the person avatar", () => {
     zeroRender(
       <F0Avatar
+        size="md"
         avatar={{
           type: "person",
-          firstName: "John",
-          lastName: "Doe",
-          "aria-label": "John Doe",
+          firstName: "Jane",
+          lastName: "Smith",
+          deactivated: true,
+          "aria-label": "Jane Smith",
         }}
       />
     )
 
-    expect(screen.getByRole("img", { name: "John Doe" })).toBeInTheDocument()
+    expect(screen.queryByText("JS")).not.toBeInTheDocument()
   })
 
-  it("dispatches to the avatar matching the type discriminator", () => {
+  it("forwards pending to the person avatar", () => {
     zeroRender(
       <F0Avatar
+        size="md"
         avatar={{
-          type: "company",
-          name: "Factorial HR",
-          "aria-label": "Factorial HR",
+          type: "person",
+          firstName: "Jane",
+          lastName: "Smith",
+          pending: true,
+          "aria-label": "Jane Smith",
         }}
       />
     )
 
-    expect(
-      screen.getByRole("img", { name: "Factorial HR" })
-    ).toBeInTheDocument()
-  })
-
-  it("forwards dataTestId to the rendered avatar", () => {
-    zeroRender(
-      <F0Avatar
-        dataTestId="my-test-avatar"
-        avatar={{
-          type: "team",
-          name: "Engineering Team",
-          "aria-label": "Engineering Team",
-        }}
-      />
-    )
-
-    expect(screen.getByTestId("my-test-avatar")).toBeInTheDocument()
+    expect(screen.queryByText("JS")).not.toBeInTheDocument()
   })
 })

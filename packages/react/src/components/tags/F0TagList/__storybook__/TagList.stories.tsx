@@ -76,6 +76,27 @@ export const OverflowPopoverLongLabels: Story = {
   },
 }
 
+/**
+ * In a narrow container a visible tag that does not fit truncates in place — hover
+ * it for OneEllipsis' full-text tooltip — instead of overflowing and painting over
+ * the `+N` counter, which stays visible. This is the Job Catalog Roles-table cell
+ * case (Competencies / Devices), where a node's own long attribute leads the cell.
+ */
+export const LongTagTruncatesInNarrowCell: Story = {
+  args: {
+    type: "dot",
+    max: 3,
+    tags: longLabelDotTags,
+  },
+  decorators: [
+    (Story) => (
+      <div className="w-[340px] overflow-hidden">
+        <Story />
+      </div>
+    ),
+  ],
+}
+
 export const Snapshot: Story = {
   parameters: withSnapshot({}),
   args: {

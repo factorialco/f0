@@ -237,6 +237,7 @@ const applyUpsertRecords = <R extends RecordType>({
   getId,
   getParentId,
   getChildrenCount,
+  stackNodes,
   hydrates,
 }: {
   records: R[]
@@ -245,6 +246,7 @@ const applyUpsertRecords = <R extends RecordType>({
   getId: (record: R) => string
   getParentId?: (record: R) => string | null
   getChildrenCount: (record: R) => number
+  stackNodes?: (record: R) => boolean
   /** Whether two-phase hydration (`loadNodeData`) is configured. */
   hydrates: boolean
 }): void => {
@@ -265,6 +267,7 @@ const applyUpsertRecords = <R extends RecordType>({
         data: record,
         parentId,
         childrenCount,
+        stackNodes: stackNodes?.(record),
         // We hold the full record now, so clear any hydration placeholder.
         dataLoaded: hydrates ? true : existing.dataLoaded,
       })
@@ -276,6 +279,7 @@ const applyUpsertRecords = <R extends RecordType>({
         data: record,
         childrenCount,
         childrenLoaded: false,
+        stackNodes: stackNodes?.(record),
         dataLoaded: hydrates ? true : undefined,
       })
     }
@@ -391,6 +395,7 @@ export function useDataCollectionTreeData<
       data: record,
       childrenCount: optionsRef.current.getChildrenCount(record),
       childrenLoaded: false,
+      stackNodes: optionsRef.current.stackNodes?.(record),
       // Two-phase hydration: mark unhydrated so F0Graph surfaces `dataLoading`.
       // `undefined` (not `false`) when the feature is off keeps the flag absent.
       dataLoaded: optionsRef.current.loadNodeData ? false : undefined,
@@ -660,6 +665,7 @@ export function useDataCollectionTreeData<
           getId,
           getParentId: opts.getParentId,
           getChildrenCount: opts.getChildrenCount,
+          stackNodes: opts.stackNodes,
           hydrates: Boolean(opts.loadNodeData),
         })
 

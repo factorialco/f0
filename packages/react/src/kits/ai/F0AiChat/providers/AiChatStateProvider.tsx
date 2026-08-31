@@ -33,6 +33,7 @@ import { usePersistedState } from "./usePersistedState"
 const AiChatStateContext = createContext<AiChatProviderReturnValue | null>(null)
 
 const CHAT_WIDTH_STORAGE_KEY = "ONE-ai-chat-width"
+const CHAT_WIDTH_PERSIST_DEBOUNCE_MS = 150
 const CHAT_OPEN_STORAGE_KEY = "ONE-ai-chat-open"
 const CHAT_VISUALIZATION_MODE_STORAGE_KEY = "ONE-ai-chat-visualization-mode"
 const CHAT_PANEL_CONTENT_ID_STORAGE_KEY = "ONE-ai-chat-panel-content-id"
@@ -98,8 +99,15 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
       typeof v === "number" &&
       !isNaN(v) &&
       v >= CHAT_WIDTH_MIN &&
-      v <= CHAT_WIDTH_MAX
+      v <= CHAT_WIDTH_MAX,
+    undefined,
+    // The only continuously-changing persisted value: a drag would otherwise
+    // mean one synchronous localStorage write per animation frame.
+    CHAT_WIDTH_PERSIST_DEBOUNCE_MS
   )
+
+  // Not persisted: this is the live state of a pointer drag, not a preference.
+  const [isResizing, setIsResizing] = useState(false)
 
   const [open, setOpen] = usePersistedState<boolean>(
     CHAT_OPEN_STORAGE_KEY,
@@ -208,6 +216,28 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     []
   )
 
+  // Focus bridge — callers can request focus before the chat has mounted.
+  // The textarea registers its local ref callback and consumes one buffered
+  // request as soon as it becomes available.
+  const focusChatInputRef = useRef<(() => void) | null>(null)
+  const pendingChatInputFocusRef = useRef(false)
+  const focusChatInput = useCallback((): boolean => {
+    if (focusChatInputRef.current) {
+      focusChatInputRef.current()
+      return true
+    }
+
+    pendingChatInputFocusRef.current = true
+    return false
+  }, [])
+  const setFocusChatInputFunction = useCallback((fn: (() => void) | null) => {
+    focusChatInputRef.current = fn
+    if (fn && pendingChatInputFocusRef.current) {
+      pendingChatInputFocusRef.current = false
+      fn()
+    }
+  }, [])
+
   const resetChatWidth = () => {
     setChatWidth(DEFAULT_CHAT_WIDTH)
   }
@@ -218,6 +248,10 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
 
   useEffect(() => {
     if (!open) {
+      // A focus request belongs to the interaction that opened the panel.
+      // Once that panel closes, replaying it on a later mount would steal
+      // focus from whatever the user moved on to.
+      pendingChatInputFocusRef.current = false
       setCanvasContent(null)
       setVisualizationMode("sidepanel")
       const prefersReducedMotion = window.matchMedia(
@@ -373,6 +407,8 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         chatWidth,
         setChatWidth,
         resetChatWidth,
+        isResizing,
+        setIsResizing,
         tracking,
         entityRefs,
         canvasActions,
@@ -394,6 +430,8 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         setFileDragOver,
         processDroppedFiles,
         setProcessDroppedFilesFunction,
+        focusChatInput,
+        setFocusChatInputFunction,
         pendingContext,
         setPendingContext,
         pendingQuote,
@@ -475,6 +513,7 @@ const REAL_VALUES: Partial<AiChatProviderReturnValue> = {
   placeholders: [],
   welcomeScreenSuggestions: [],
   welcomeScreenCards: [],
+  focusChatInput: () => false,
 }
 
 const NO_PROVIDER_CONTEXT = new Proxy({} as AiChatProviderReturnValue, {

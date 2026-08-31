@@ -176,3 +176,37 @@ describe("TableHead rich header info", () => {
     ).not.toBeInTheDocument()
   })
 })
+
+describe("TableHead and TableCell highlighted", () => {
+  it("emphasizes only the highlighted header and cell, and marks the header for scroll targeting", () => {
+    zeroRender(
+      <OneTable>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Name</TableHead>
+            <TableHead highlighted>Email</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <TableRow>
+            <TableCell>John</TableCell>
+            <TableCell highlighted>john@example.com</TableCell>
+          </TableRow>
+        </TableBody>
+      </OneTable>
+    )
+
+    // The header paints the tint as a gradient image, the cell as a bg color;
+    // both carry the same token, so the assertion targets that.
+    const highlightClass = "hsl(var(--neutral-2))"
+    const [plainHead, highlightedHead] = screen.getAllByRole("columnheader")
+    expect(highlightedHead.className).toContain(highlightClass)
+    expect(highlightedHead).toHaveAttribute("data-highlighted", "true")
+    expect(plainHead.className).not.toContain(highlightClass)
+    expect(plainHead).not.toHaveAttribute("data-highlighted")
+
+    const [plainCell, highlightedCell] = screen.getAllByRole("cell")
+    expect(highlightedCell.className).toContain(highlightClass)
+    expect(plainCell.className).not.toContain(highlightClass)
+  })
+})

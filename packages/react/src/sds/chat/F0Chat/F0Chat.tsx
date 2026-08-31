@@ -1,19 +1,25 @@
 import { type DragEvent, type ReactNode, useRef, useState } from "react"
 
+import { useReducedMotion } from "@/lib/a11y"
+
 import { ChatComposer } from "./components/ChatComposer"
+import { ChatDocumentPreview } from "./components/ChatDocumentPreview"
 import { ChatDropOverlay } from "./components/ChatDropOverlay"
 import { ChatHeader } from "./components/ChatHeader"
-import { ChatDocumentPreview } from "./components/ChatDocumentPreview"
 import { ChatImagePreview } from "./components/ChatImagePreview"
 import { ChatMessagesContainer } from "./components/ChatMessagesContainer"
+import { ChatReadOnlyNotice } from "./components/ChatReadOnlyNotice"
 import {
   ChatConnecting,
   ChatEmptyState,
   ChatError,
 } from "./components/ChatStates"
+import { useComposerOverlayLayout } from "./hooks/useComposerOverlayLayout"
+import { ChatRenderConfigProvider } from "./providers/ChatRenderConfigProvider"
 import { ChatUIProvider, useChatDrop } from "./providers/ChatUIProvider"
 import { useF0Chat } from "./providers/F0ChatProvider"
 import { type F0ChatChannel, type F0ChatHeaderAction } from "./types"
+import { chatPermission } from "./utils/capabilities"
 
 export type F0ChatProps = {
   /** Whether the hosting panel is in fullscreen (controls the header toggle icon). */
@@ -44,6 +50,8 @@ const ChatShell = ({
 }: F0ChatProps): ReactNode => {
   const { channel, status, messages, capabilities } = useF0Chat()
   const { dropFiles } = useChatDrop()
+  const canSend = chatPermission("canSend", channel.type, capabilities)
+  const { shellRef, composerOverlayRef } = useComposerOverlayLayout(canSend)
 
   // Whole-panel drag & drop, just like the AI chat: the overlay covers the
   // entire surface and a drop anywhere attaches to the composer. Stop file-drag
@@ -53,7 +61,11 @@ const ChatShell = ({
 
   return (
     <div
-      className="relative flex h-full min-h-0 w-full flex-col"
+      ref={shellRef}
+      // Opts the transcript into the metric-adjusted font fallback (styles.css)
+      // so rows measured before the Inter swap don't rewrap after it.
+      data-f0-chat-shell=""
+      className="relative flex h-full min-h-0 w-full flex-col overflow-x-hidden"
       onDragEnter={(e) => {
         if (!isFileDrag(e)) return
         e.preventDefault()
@@ -104,7 +116,7 @@ const ChatShell = ({
       ) : messages.length > 0 ? (
         // `reconnecting` / `offline` render the transcript exactly like
         // `ready` — per-message states communicate connectivity, no banner.
-        <ChatMessagesContainer />
+        <ChatMessagesContainer key={channel.id} />
       ) : status === "ready" ? (
         <ChatEmptyState />
       ) : (
@@ -112,9 +124,24 @@ const ChatShell = ({
         // from "not loaded" — show the skeleton until the transport settles.
         <ChatConnecting />
       )}
-      {/* A read-only channel (frozen, announcements…) hides the composer. */}
-      {capabilities?.canSend !== false && <ChatComposer />}
-      <ChatDropOverlay visible={dragging} />
+      {/* A read-only channel (frozen, announcements…) hides the composer and
+          says so in its place, so the surface doesn't just end in nothing. The
+          notice is a normal flex child, not an overlay: there is no composer
+          for the transcript to scroll under. */}
+      {canSend ? (
+        <div
+          ref={composerOverlayRef}
+          data-testid="chat-composer-overlay"
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-20"
+        >
+          <ChatComposer />
+        </div>
+      ) : (
+        <ChatReadOnlyNotice channel={channel} />
+      )}
+      {/* Without a composer the drop handler was never registered, so the
+          affordance promised something the panel could not do. */}
+      <ChatDropOverlay visible={dragging && canSend} />
       <ChatImagePreview />
       <ChatDocumentPreview />
     </div>
@@ -126,8 +153,14 @@ const ChatShell = ({
  * the {@link F0ChatRuntime} from a surrounding `F0ChatProvider`. Panel controls
  * (fullscreen / close) are wired by the host so F0Chat stays transport-agnostic.
  */
-export const F0Chat = (props: F0ChatProps): ReactNode => (
-  <ChatUIProvider>
-    <ChatShell {...props} />
-  </ChatUIProvider>
-)
+export const F0Chat = (props: F0ChatProps): ReactNode => {
+  const reducedMotion = useReducedMotion()
+
+  return (
+    <ChatRenderConfigProvider reducedMotion={reducedMotion}>
+      <ChatUIProvider>
+        <ChatShell {...props} />
+      </ChatUIProvider>
+    </ChatRenderConfigProvider>
+  )
+}

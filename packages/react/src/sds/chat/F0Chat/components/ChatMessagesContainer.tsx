@@ -1,3 +1,4 @@
+import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area"
 import {
   forwardRef,
   type HTMLAttributes,
@@ -5,44 +6,40 @@ import {
   type RefObject,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
 } from "react"
+import { type ItemProps, type ListProps, Virtuoso } from "react-virtuoso"
 
-import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area"
-import { AnimatePresence, motion } from "motion/react"
-import { Virtuoso } from "react-virtuoso"
-
-import { ButtonInternal } from "@/components/F0Button/internal"
-import { ArrowDown } from "@/icons/app"
-import { useReducedMotion } from "@/lib/a11y"
-import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { ScrollBar } from "@/ui/scrollarea"
-
-import { ScrollShadow } from "@/kits/ai/F0AiMessagesContainer/components/ScrollShadow"
 
 import {
   AT_BOTTOM_THRESHOLD_PX,
   useChatVirtuoso,
 } from "../hooks/useChatVirtuoso"
+import { useTranscriptReadiness } from "../hooks/useTranscriptReadiness"
+import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
 import { useChatJump } from "../providers/ChatUIProvider"
 import { useF0Chat } from "../providers/F0ChatProvider"
 import { isUserMessage, LATEST } from "../types"
-import { EASE_OUT_SWIFT } from "../utils/chat-motion"
+import { CHAT_COMPOSER_HEIGHT } from "../utils/chat-layout"
+import { deliveryState } from "../utils/delivery-status"
 import { type ChatRow, flattenChatRows, freshTailIds } from "../utils/grouping"
+import { chatHeightEstimates } from "../utils/virtuoso-chat"
 import { ChatMessageRowRenderer } from "./ChatMessageRowRenderer"
 import { type TypingEntryState } from "./ChatTypingBubble"
-import { DateTimeSeparator } from "./DateTimeSeparator"
+import { ChatViewportOverlays } from "./ChatViewportOverlays"
 
 /** How long the typing bubble fades before its row is removed — also the grace
  * window in which resumed typing keeps the same bubble (no re-enter). */
 const TYPING_EXIT_MS = 250
 
 /** Date of the row at the top of the viewport, for the sticky header. The
- * index comes from a DOM measurement that can lag a commit behind the rows —
- * clamp instead of trusting it. */
+ * index comes from Virtuoso's item measurements, which can lag a commit behind
+ * the rows — clamp instead of trusting it. */
 const dateForRow = (rows: ChatRow[], from: number): string | null => {
   for (let i = Math.max(0, from); i < rows.length; i++) {
     const row = rows[i]
@@ -57,6 +54,7 @@ const dateForRow = (rows: ChatRow[], from: number): string | null => {
 type ChatScrollerContext = {
   /** The scrollbar measure strip — see ChatVirtuosoScroller. */
   measureStripRef: RefObject<HTMLDivElement>
+  onListVisibilityChange: (visible: boolean) => void
 }
 
 /** Virtuoso's scroll container, backed by Radix ScrollArea so the scrollbar is
@@ -77,17 +75,25 @@ const ChatVirtuosoScroller = forwardRef<
 ) {
   return (
     <ScrollAreaPrimitive.Root
-      // `className` carries Virtuoso's className prop (sizing + reveal fade).
+      // `className` carries Virtuoso's sizing and entry-readiness state.
       className={cn("overflow-hidden", className)}
       scrollHideDelay={200}
     >
       <ScrollAreaPrimitive.Viewport
         ref={ref}
-        style={style}
+        // Virtuoso already retains its own anchor when measured rows change.
+        // Native scroll anchoring would apply a second correction when the
+        // Radix measure strip grows, which is perceived as a jump.
+        style={{
+          ...style,
+          overflowAnchor: "none",
+          scrollPaddingBottom: `calc(${CHAT_COMPOSER_HEIGHT} + 1.5rem)`,
+        }}
         // Radix wraps children in a `display: table` div — force block so the
         // list lays out full-width (same fix as @/ui/scrollarea).
         className="size-full [&>div]:!block"
         {...props}
+        data-testid="chat-message-viewport"
       >
         {/* Scrollbar measure strip. Radix sizes the thumb only when the
             ResizeObserver on its content wrapper fires — but Virtuoso's inner
@@ -99,7 +105,12 @@ const ChatVirtuosoScroller = forwardRef<
             totalListHeightChanged), so every virtual height change resizes
             the wrapper and Radix re-measures. Zero width — no visual
             footprint, and scrollHeight already equals that total. */}
-        <div ref={context.measureStripRef} aria-hidden="true" className="w-0" />
+        <div
+          ref={context.measureStripRef}
+          aria-hidden="true"
+          className="w-0"
+          style={{ overflowAnchor: "none" }}
+        />
         {children}
       </ScrollAreaPrimitive.Viewport>
       <ScrollBar orientation="vertical" />
@@ -116,27 +127,86 @@ const ChatVirtuosoScroller = forwardRef<
  * `content` token) on wide viewports. */
 const ChatVirtuosoList = forwardRef<
   HTMLDivElement,
-  HTMLAttributes<HTMLDivElement>
->(function ChatVirtuosoList(props, ref) {
+  ListProps & { context: ChatScrollerContext }
+>(function ChatVirtuosoList({ style, context, ...props }, ref) {
+  const visible = style?.visibility !== "hidden"
+  useLayoutEffect(() => {
+    context.onListVisibilityChange(visible)
+  }, [context, visible])
+
   return (
     <div
       {...props}
       ref={ref}
+      style={style}
       className="mx-auto w-full max-w-[calc(theme(maxWidth.content)+2rem)] px-4"
+    />
+  )
+})
+
+/** Virtuoso cannot account for collapsed margins or zero-height items. A
+ * stable formatting context contains any future child margins, while the 1px
+ * floor keeps even an empty transient row measurable. */
+const ChatVirtuosoItem = forwardRef<
+  HTMLDivElement,
+  ItemProps<ChatRow> & { context: ChatScrollerContext }
+>(function ChatVirtuosoItem({ item: _item, context: _context, ...props }, ref) {
+  return (
+    <div
+      {...props}
+      ref={ref}
+      className="flow-root min-h-px"
+      data-chat-virtuoso-item=""
     />
   )
 })
 
 /** Breathing room between the last row and the transcript's bottom edge —
  * rendered as Virtuoso's Footer so scrollHeight and end-alignment include it. */
-const ChatBottomGap = (): ReactNode => <div className="h-6" />
+const ChatBottomGap = (): ReactNode => (
+  <div
+    data-testid="chat-bottom-gap"
+    style={{ height: `calc(${CHAT_COMPOSER_HEIGHT} + 1.5rem)` }}
+  />
+)
+
+/** Breathing room above the first row, as a constant Header — the mirror of
+ * ChatBottomGap. It used to be a smaller top padding on whatever row happened
+ * to be first, which tied a row's measured height to its position: paginating
+ * then resized a row Virtuoso had already measured, in the very frame where it
+ * is applying a prepend correction and cannot compensate. */
+const ChatTopGap = (): ReactNode => (
+  <div data-testid="chat-top-gap" className="h-2" />
+)
+
+const CHAT_VIRTUOSO_COMPONENTS = {
+  Scroller: ChatVirtuosoScroller,
+  List: ChatVirtuosoList,
+  Item: ChatVirtuosoItem,
+  Header: ChatTopGap,
+  Footer: ChatBottomGap,
+}
+
+// Keep the next rows mounted far enough ahead for Virtuoso to measure them
+// before they enter the viewport. The top buffer is generous on purpose:
+// scrolling up through never-measured history is where estimate→real
+// corrections happen, and they only stay invisible when the row being measured
+// is still well above the viewport.
+//
+// Going down the pixel budget is smaller than a single media row, so the
+// item-count floor is the reader's whole runway there — and now that media
+// fetches on mount, that runway is what it gets to arrive in.
+const CHAT_VIEWPORT_INCREASE = { top: 1200, bottom: 200 }
+const CHAT_MIN_OVERSCAN_ITEMS = { top: 6, bottom: 5 }
+
+const chatRowKey = (index: number, row: ChatRow): string =>
+  row?.key ?? `chat-gap-${index}`
 
 /** Scrollable transcript: virtualized separators, messages, the unread divider,
  * a sticky date header, pagination and a jump-to-bottom / unread-count affordance.
  * Virtuoso owns the scroll physics (bottom follow, prepend retention, entry
  * positioning); useChatVirtuoso owns the bookkeeping around it. */
 export const ChatMessagesContainer = (): ReactNode => {
-  const i18n = useI18n()
   const {
     messages,
     channel,
@@ -152,7 +222,7 @@ export const ChatMessagesContainer = (): ReactNode => {
     firstUnreadId,
     markRead,
   } = useF0Chat()
-  const reducedMotion = useReducedMotion()
+  const { reducedMotion } = useChatRenderConfig()
   const isGroup = channel.type === "group"
 
   const { registerScrollToMessage } = useChatJump()
@@ -167,17 +237,7 @@ export const ChatMessagesContainer = (): ReactNode => {
   // (re-snapshotted from the new conversation's `firstUnreadId`). Reading the
   // messages — which zeroes `firstUnreadId` via `markRead` — must NOT move or
   // hide it.
-  const [dividerId, setDividerId] = useState<string | null>(firstUnreadId)
-  const dividerChannelRef = useRef(channel.id)
-
-  // Re-snapshot the unread anchor synchronously when the conversation changes
-  // (leaving and coming back). Done during render — not in an effect — so the
-  // new divider is in the rows before the scroll hook computes the new entry
-  // location (an effect would run a frame later and the entry would miss it).
-  if (dividerChannelRef.current !== channel.id) {
-    dividerChannelRef.current = channel.id
-    setDividerId(firstUnreadId)
-  }
+  const [dividerId] = useState<string | null>(firstUnreadId)
 
   // Rows keep their IDENTITY across appends (previousRows feeds the last
   // build back in): the row renderer is memoized on it, so a new message
@@ -195,15 +255,9 @@ export const ChatMessagesContainer = (): ReactNode => {
   // Fresh tail of this commit (transports coalesce bursts into ONE render):
   // every appended message animates in, staggered by its batch order — not
   // just the last one. Same Map instance forever (renderer prop stability);
-  // conversation switches reset it so a cross-channel tail never animates.
+  // the keyed transcript session prevents cross-channel animation state.
   const freshIdsRef = useRef<Map<string, number>>(new Map())
   const freshPrevLastRef = useRef<string | null>(null)
-  const freshChannelRef = useRef(channel.id)
-  if (freshChannelRef.current !== channel.id) {
-    freshChannelRef.current = channel.id
-    freshIdsRef.current.clear()
-    freshPrevLastRef.current = null
-  }
   const currentLastId = messages[messages.length - 1]?.id ?? null
   if (freshPrevLastRef.current !== currentLastId) {
     const fresh = freshTailIds(messages, freshPrevLastRef.current)
@@ -287,17 +341,24 @@ export const ChatMessagesContainer = (): ReactNode => {
     !lastMessage.isMine &&
     lastTypingUsersRef.current.some((u) => u.id === lastMessage.author.id)
 
-  if (prevTypingActiveRef.current !== typingActive) {
+  const shouldStartTypingExit =
+    prevTypingActiveRef.current &&
+    !typingActive &&
+    !reducedMotion &&
+    !appendedFromTyper
+  const effectiveTypingLeaving = shouldStartTypingExit
+    ? true
+    : typingLeaving && !appendedFromTyper
+
+  // Commit prop-driven state transitions before paint. The derived value above
+  // keeps the row continuous in this render without calling setState during it.
+  useLayoutEffect(() => {
     prevTypingActiveRef.current = typingActive
-    // Swap: the typer's message landed as (or just before) their dots cleared —
-    // remove the row in this same commit, no hysteresis.
-    setTypingLeaving(!typingActive && !reducedMotion && !appendedFromTyper)
-  } else if (typingLeaving && appendedFromTyper) {
-    // Staggered swap: typing_stop arrived a tick before the message (real
-    // backends do this) — cancel the leaving fade mid-window.
-    setTypingLeaving(false)
-  }
-  prevLastMsgIdRef.current = lastItem?.id ?? null
+    prevLastMsgIdRef.current = lastItem?.id ?? null
+    if (typingLeaving !== effectiveTypingLeaving) {
+      setTypingLeaving(effectiveTypingLeaving)
+    }
+  }, [effectiveTypingLeaving, lastItem?.id, typingActive, typingLeaving])
 
   useEffect(() => {
     if (!typingLeaving) return
@@ -311,7 +372,7 @@ export const ChatMessagesContainer = (): ReactNode => {
   // Both are DATA items on purpose: appearing means +1 item, which is what
   // triggers Virtuoso's followOutput — they slide the transcript up exactly
   // like a message would (a `components.Footer` would grow silently).
-  const showTypingRow = typingActive || typingLeaving
+  const showTypingRow = typingActive || effectiveTypingLeaving
   // Arm the bubble's entry pop only when the typing ROW is genuinely new — a
   // resume inside the grace window keeps the mounted bubble (no re-arm), and
   // the bubble consumes the flag at mount so scroll-back remounts mid-streak
@@ -324,7 +385,15 @@ export const ChatMessagesContainer = (): ReactNode => {
   }
   const displayRows = useMemo<ChatRow[]>(() => {
     const out = [...rows]
-    if (lastMessage) {
+    // Only when there is a delivery state to report — an incoming or in-flight
+    // last message would otherwise append an empty row for Virtuoso to measure.
+    if (
+      lastMessage &&
+      deliveryState(lastMessage, {
+        isGroup,
+        memberCount: channel.memberCount,
+      })
+    ) {
       out.push({ type: "footer", key: "status-footer", message: lastMessage })
     }
     if (showTypingRow) {
@@ -335,7 +404,25 @@ export const ChatMessagesContainer = (): ReactNode => {
       })
     }
     return out
-  }, [rows, lastMessage, visibleTypingUsers, typingActive, showTypingRow])
+  }, [
+    rows,
+    lastMessage,
+    isGroup,
+    channel.memberCount,
+    visibleTypingUsers,
+    typingActive,
+    showTypingRow,
+  ])
+
+  // Virtuoso only reads these while its size tree is empty (i.e. at mount), so
+  // recomputing them as rows change is harmless — and keeps the array right
+  // for the next remount without a second source of truth.
+  const heightEstimates = useMemo(
+    () => chatHeightEstimates(displayRows),
+    [displayRows]
+  )
+
+  const prefetchGateRef = useRef(false)
 
   const {
     virtuosoRef,
@@ -353,11 +440,11 @@ export const ChatMessagesContainer = (): ReactNode => {
     atBottom,
     atTop,
     scrolledUp,
-    revealed,
     stickyIndex,
     scrollToBottom,
     scrollToMessage,
     pendBottom,
+    reassertEntry,
   } = useChatVirtuoso({
     rows,
     indexById,
@@ -371,17 +458,53 @@ export const ChatMessagesContainer = (): ReactNode => {
     loadNewer,
     conversationKey: channel.id,
     reducedMotion,
+    canPrefetchRef: prefetchGateRef,
   })
 
+  const { ready, setViewport, setListVisible } = useTranscriptReadiness(listKey)
+
+  // Readiness is keyed by `listKey`, which the hook above produces — so the
+  // prefetch gate travels through a ref instead of a prop.
+  useEffect(() => {
+    prefetchGateRef.current = ready
+  }, [ready])
+
+  // One re-anchor per transcript session, while it is still hidden.
+  const entryAssertedRef = useRef<string | null>(null)
+  useLayoutEffect(() => {
+    if (!ready || entryAssertedRef.current === listKey) return
+    entryAssertedRef.current = listKey
+    reassertEntry()
+  }, [listKey, ready, reassertEntry])
+  const setScroller = useCallback(
+    (element: HTMLElement | Window | null) => {
+      handleScrollerRef(element)
+      setViewport(element instanceof HTMLElement ? element : null)
+    },
+    [handleScrollerRef, setViewport]
+  )
+
   // Scrollbar measure strip (see ChatVirtuosoScroller): mirror Virtuoso's
-  // total list height into it — imperatively, so the frequent height
-  // notifications never re-render the transcript.
+  // total list height into it.
+  //
+  // Written SYNCHRONOUSLY. Virtuoso reads this scroller's `scrollHeight` inside
+  // its own ResizeObserver, and the strip is what produces that height — so
+  // deferring the write by a microtask made Virtuoso publish the previous
+  // frame's height, and the late shrink then let the browser clamp `scrollTop`
+  // (a real scroll event, out of nowhere, mid-resize). The guard below already
+  // collapses repeated corrections within a task into a single DOM write.
   const measureStripRef = useRef<HTMLDivElement>(null)
-  const scrollerContext = useMemo(() => ({ measureStripRef }), [])
+  const scrollerContext = useMemo(
+    () => ({ measureStripRef, onListVisibilityChange: setListVisible }),
+    [setListVisible]
+  )
   const handleListHeightChanged = useCallback(
     (height: number) => {
       const strip = measureStripRef.current
-      if (strip) strip.style.height = `${height}px`
+      const nextHeight = `${height}px`
+      if (strip && strip.style.height !== nextHeight) {
+        strip.style.height = nextHeight
+      }
       handleTotalListHeightChanged(height)
     },
     [handleTotalListHeightChanged]
@@ -419,44 +542,52 @@ export const ChatMessagesContainer = (): ReactNode => {
   }
   const animatedIds = animatedIdsRef.current ?? EMPTY_SET
 
+  // No `index` in here on purpose: a row's rendering must not depend on where
+  // it currently sits, or a prepend resizes rows Virtuoso already measured.
+  // It also keeps this callback stable across pagination.
+  const renderItem = useCallback(
+    (_index: number, row: ChatRow) =>
+      row ? (
+        <ChatMessageRowRenderer
+          row={row}
+          isGroup={isGroup}
+          enterAnimation={!reducedMotion}
+          animatedIds={animatedIds}
+          freshIds={freshIdsRef.current}
+          typingLeaving={row.type === "typing" ? effectiveTypingLeaving : false}
+          typingEntry={typingEntryRef.current}
+        />
+      ) : null,
+    [animatedIds, effectiveTypingLeaving, isGroup, reducedMotion]
+  )
+
   // Sticky date pill: the date of the top-most visible row.
   const stickyDate =
     stickyIndex != null ? dateForRow(displayRows, stickyIndex) : null
 
   // Show the affordance when scrolled up, or whenever the live tail isn't loaded
   // (after a far-back jump) so there's always a way back to the latest messages.
-  const showButton = scrolledUp || hasMoreNewer
+  const showButton = scrolledUp || Boolean(hasMoreNewer)
 
   return (
     <div
-      className="relative min-h-0 flex-1 scrollbar-macos"
+      {...(!ready ? ({ inert: "" } as Record<string, string>) : {})}
+      className="scrollbar-macos relative min-h-0 flex-1"
+      aria-busy={!ready}
       onMouseEnter={() => setHovering(true)}
       onMouseLeave={() => setHovering(false)}
     >
       <Virtuoso<ChatRow, ChatScrollerContext>
         key={listKey}
         ref={virtuosoRef}
-        scrollerRef={handleScrollerRef}
+        scrollerRef={setScroller}
         data={displayRows}
         // `row` CAN transiently be undefined: a mid-list shrink (hard delete)
         // keeps the ends — and so the firstItemIndex — while the rendered
         // range still spans the old length for one pass. Self-corrects next
         // render; don't let it crash the frame.
-        computeItemKey={(index, row) => row?.key ?? `chat-gap-${index}`}
-        itemContent={(index, row) =>
-          row ? (
-            <ChatMessageRowRenderer
-              row={row}
-              isGroup={isGroup}
-              isFirstRow={index === firstItemIndex}
-              enterAnimation={!reducedMotion}
-              animatedIds={animatedIds}
-              freshIds={freshIdsRef.current}
-              typingLeaving={row.type === "typing" ? typingLeaving : false}
-              typingEntry={typingEntryRef.current}
-            />
-          ) : null
-        }
+        computeItemKey={chatRowKey}
+        itemContent={renderItem}
         firstItemIndex={firstItemIndex}
         initialTopMostItemIndex={initialLocation}
         followOutput={followOutput}
@@ -467,109 +598,45 @@ export const ChatMessagesContainer = (): ReactNode => {
         endReached={handleEndReached}
         itemsRendered={handleItemsRendered}
         totalListHeightChanged={handleListHeightChanged}
-        increaseViewportBy={{ top: 400, bottom: 200 }}
-        defaultItemHeight={48}
+        increaseViewportBy={CHAT_VIEWPORT_INCREASE}
+        minOverscanItemCount={CHAT_MIN_OVERSCAN_ITEMS}
+        // Per-row estimates beat one number for a list whose rows run from a
+        // 24px delivery footer to a 380px photo album: the entry position, the
+        // scrollbar and the render window are all picked from these before a
+        // single row is measured, and every pixel of error becomes a scroll
+        // correction later. Only read while Virtuoso's size tree is empty, so
+        // it never fights a real measurement.
+        heightEstimates={heightEstimates}
+        // Fallback for the same window (and what lets Virtuoso skip its probe
+        // render). NOT the estimate for prepended history — Virtuoso reserves
+        // those with `lastSize`, the height of the last measured row.
+        defaultItemHeight={64}
+        // Reporting measurements in the ResizeObserver callback avoids an
+        // extra provisional frame when a previously unseen row is mounted.
+        skipAnimationFrameInResizeObserver
         context={scrollerContext}
-        components={{
-          Scroller: ChatVirtuosoScroller,
-          List: ChatVirtuosoList,
-          Footer: ChatBottomGap,
-        }}
+        components={CHAT_VIRTUOSO_COMPONENTS}
         className={cn(
-          // Lands on the ScrollArea Root (see ChatVirtuosoScroller). Normal
-          // flow, not absolute: Radix hardcodes `position: relative` inline.
           "size-full",
-          // Hidden (opacity keeps layout + the a11y tree) until the entry
-          // positioning has painted, then a short fade — the transcript
-          // appears already in place, zero perceived motion.
           !reducedMotion && "transition-opacity duration-100",
-          revealed ? "opacity-100" : "opacity-0"
+          ready ? "visible opacity-100" : "invisible opacity-0"
         )}
       />
 
-      {/* Header shadow: a soft gradient at the top of the transcript whenever
-          it's scrolled away from the top (same affordance as the sidebar). */}
-      <AnimatePresence>
-        {!atTop && <ScrollShadow position="top" key="chat-header-shadow" />}
-      </AnimatePresence>
-
-      {/* Sticky date header: pinned date of the top-most visible group. While
-          older messages load, a spinner sits beside the date in the same pill.
-          Hidden only at the REAL top of the history (nothing older to load) —
-          the transcript's own first day separator is in view there and the two
-          pills would show the same date twice. Reaching the top mid-pagination
-          keeps it: that top is transient and the pill carries the spinner. */}
-      <AnimatePresence>
-        {scrolledUp &&
-          (!atTop || hasMoreOlder || loadingOlder) &&
-          stickyDate && (
-            <motion.div
-              className="pointer-events-none absolute inset-x-0 top-2 flex justify-center"
-              initial={{ opacity: 0, y: -4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.15 }}
-            >
-              <div
-                className="z-50"
-                aria-label={loadingOlder ? i18n.chat.loadingOlder : undefined}
-              >
-                {/* The pill (border, background, spinner) is the separator's
-                  own — same look as the in-transcript day rows. */}
-                <DateTimeSeparator
-                  at={stickyDate}
-                  withTime
-                  loading={loadingOlder}
-                />
-              </div>
-            </motion.div>
-          )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {showButton && (
-          // Centered via flex (inset-x-0 + justify-center) so the motion-driven
-          // `scale` transform doesn't fight a `-translate-x-1/2`.
-          <motion.div
-            className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            transition={{ duration: 0.15, ease: EASE_OUT_SWIFT }}
-          >
-            {/* Keyed by the count: each new unread remounts the pill with a
-                subtle scale settle — the signal that the number changed. */}
-            <motion.div
-              key={unreadCount}
-              className="pointer-events-auto rounded-md bg-f1-background"
-              initial={
-                reducedMotion || unreadCount === 0 ? false : { scale: 0.95 }
-              }
-              animate={{ scale: 1 }}
-              transition={{ duration: 0.15, ease: EASE_OUT_SWIFT }}
-            >
-              <ButtonInternal
-                onClick={jumpToBottom}
-                variant={"neutral"}
-                icon={ArrowDown}
-                label={
-                  unreadCount > 0
-                    ? i18n.t(
-                        unreadCount === 1
-                          ? "chat.unreadCount.one"
-                          : "chat.unreadCount.other",
-                        { count: unreadCount }
-                      )
-                    : hasMoreNewer
-                      ? i18n.chat.backToLatest
-                      : i18n.chat.scrollToBottom
-                }
-                hideLabel={unreadCount === 0 && !hasMoreNewer}
-              />
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {ready && (
+        <ChatViewportOverlays
+          atTop={atTop}
+          scrolledUp={scrolledUp}
+          hasMoreOlder={hasMoreOlder}
+          loadingOlder={loadingOlder}
+          stickyDate={stickyDate}
+          showJumpButton={showButton}
+          unreadCount={unreadCount}
+          hasMoreNewer={hasMoreNewer ?? false}
+          reducedMotion={reducedMotion}
+          onJumpToBottom={jumpToBottom}
+        />
+      )}
     </div>
   )
 }

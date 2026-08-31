@@ -14,6 +14,7 @@ const meta: Meta<typeof DaytimePage> = {
   tags: ["autodocs", "experimental"],
   parameters: {
     layout: "fullscreen",
+    docsFullWidth: true,
   },
   decorators: [
     (Story) => (

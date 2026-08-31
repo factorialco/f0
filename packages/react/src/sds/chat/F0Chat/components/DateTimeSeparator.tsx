@@ -39,7 +39,10 @@ export const DateTimeSeparator = ({
     : formatRelativeDay(date, now, labels)
 
   return (
-    <div className={cn("flex justify-center", padded ? "py-6" : "py-0")}>
+    <div
+      className={cn("flex justify-center", padded ? "py-6" : "py-0")}
+      data-testid="chat-date-separator"
+    >
       <span className="flex items-center gap-1.5 rounded-full border border-solid border-f1-border-secondary bg-f1-background px-2.5 py-0.5 backdrop-blur">
         {loading && <Spinner size="small" className="h-3.5 w-3.5" />}
         <span className="text-sm font-normal text-f1-foreground-secondary">

@@ -31,12 +31,14 @@ import type {
   GraphNode,
   LayoutDirection,
   PositionedNode,
+  ZoomLevel,
 } from "../../types"
 import type { F0GraphNodeTagColumn } from "../F0GraphNode"
 
 import {
   BACKGROUND_DOT_GAP,
   EMPTY_HIGHLIGHTED_NODES,
+  EMPTY_TAG_COLUMNS,
   FIT_VIEW_PADDING_LOOSE,
   FIT_VIEW_PADDING_TIGHT,
   FOCUS_SETTLE_DELAY_MS,
@@ -51,6 +53,7 @@ import {
   F0GraphFocusContext,
   F0GraphRenderConfigContext,
   F0GraphSelectionContext,
+  F0GraphStackHoverContext,
   F0GraphZoomContext,
   useF0GraphRenderConfigInternal,
 } from "../../contexts"
@@ -63,13 +66,17 @@ import { useLazyTree } from "../../hooks/useLazyTree"
 import { useSelectionFocus } from "../../hooks/useSelectionFocus"
 import { useTreeBuilder } from "../../hooks/useTreeBuilder"
 import { useViewportDataLoader } from "../../hooks/useViewportDataLoader"
-import { ClickSpark } from "../../internal/ClickSpark"
 import {
   F0GraphCollapserWrapper,
   F0GraphExpanderWrapper,
   F0GraphNodeWrapper,
+  F0GraphStackGroupWrapper,
 } from "../../internal/ReactFlowAdapters"
-import { resolveInitialFitViewNodes } from "../../utils"
+import {
+  findStackHoverZoneAt,
+  resolveInitialFitViewNodes,
+  type StackHoverZone,
+} from "../../utils"
 import { F0GraphControls } from "../F0GraphControls"
 import { type EdgeVariant, type F0GraphEdgeProps } from "../F0GraphEdge"
 import { F0GraphEdgeBase } from "../F0GraphEdge/F0GraphEdge"
@@ -123,6 +130,7 @@ const nodeTypes: NodeTypes = {
   graphNode: F0GraphNodeWrapper as unknown as NodeTypes[string],
   expanderNode: F0GraphExpanderWrapper as unknown as NodeTypes[string],
   collapserNode: F0GraphCollapserWrapper as unknown as NodeTypes[string],
+  stackGroup: F0GraphStackGroupWrapper as unknown as NodeTypes[string],
 }
 
 const defaultEdgeTypes: EdgeTypes = {
@@ -170,6 +178,8 @@ export function F0GraphView<T = unknown>(
     highlightedNodes: highlightedProp,
     nodeWidth: nodeWidthProp,
     nodeHeight: nodeHeightProp,
+    stackedNodeHeight: stackedNodeHeightProp,
+    stackedNodeGap: stackedNodeGapProp,
     canvasActions,
     canvasFooterActions,
     showControls = false,
@@ -197,12 +207,31 @@ export function F0GraphView<T = unknown>(
 
   const [hoveredEdgeId, setHoveredEdgeId] = useState<string | null>(null)
 
+  // Which stacked column the pointer is inside, so that column's parent can
+  // reveal its collapse affordance from anywhere within it. The ref mirrors the
+  // state so the pointer handler can drop the ~60 moves a second that stay inside
+  // one region without doing any React work at all.
+  const [hoveredStackParentId, setHoveredStackParentId] = useState<
+    string | null
+  >(null)
+  const hoveredStackRef = useRef<string | null>(null)
+  // Last known pointer position, so a camera move can re-run the same test from
+  // where the pointer already is. Cleared when the pointer leaves the canvas.
+  const lastPointerRef = useRef<{
+    x: number
+    y: number
+    pointerType?: string
+  } | null>(null)
+
   // Direction is hardcoded to TB; the layout engine still supports other values.
   const direction = "TB" as LayoutDirection
 
   // ── Per-type tag visibility (controlled by the consumer) ──
   const visibleTagTypesArr =
-    controlledVisibleTagTypes ?? defaultVisibleTagTypes ?? nodeTagTypes ?? []
+    controlledVisibleTagTypes ??
+    defaultVisibleTagTypes ??
+    nodeTagTypes ??
+    EMPTY_TAG_COLUMNS
   const visibleTagTypesSet = useMemo(
     () => new Set<F0GraphNodeTagColumn>(visibleTagTypesArr),
     [visibleTagTypesArr]
@@ -312,6 +341,8 @@ export function F0GraphView<T = unknown>(
   const getNodePositionRef = useRef<(id: string) => PositionedNode | undefined>(
     () => undefined
   )
+  const stackHoverZonesRef = useRef<StackHoverZone[]>([])
+  const zoomLevelRef = useRef<ZoomLevel>("detail")
   const getContentBounds = useMemo(() => () => contentBoundsRef.current, [])
   const getNodePositionStable = useMemo(
     () => (id: string) => getNodePositionRef.current(id),
@@ -402,8 +433,10 @@ export function F0GraphView<T = unknown>(
     reservedTagHeight,
     renderedNodeCount,
     renderedNodeIds,
+    treeRootNodeIds,
     contentBounds,
     getNodePosition,
+    stackHoverZones,
   } = useGraphRenderModel<T>({
     roots,
     nodeMap,
@@ -417,6 +450,8 @@ export function F0GraphView<T = unknown>(
     reserveTagRow,
     nodeWidthProp,
     nodeHeightProp,
+    stackedNodeHeightProp,
+    stackedNodeGapProp,
     layoutEngineProp,
     zoomLevel,
     direction,
@@ -431,6 +466,76 @@ export function F0GraphView<T = unknown>(
   // Expose the full layout to the windowing-aware navigation handlers above.
   contentBoundsRef.current = contentBounds
   getNodePositionRef.current = getNodePosition
+  stackHoverZonesRef.current = stackHoverZones
+  zoomLevelRef.current = zoomLevel
+
+  // Which stacked column the pointer is inside. Resolved from geometry rather
+  // than from a hover on the column itself: React Flow renders nodes flat, so no
+  // CSS relationship exists between a column's rows, its group node and the
+  // collapse affordance, and making the group hit-testable would let a click in
+  // the gap between two rows select the group (see [[findStackHoverZoneAt]]).
+  //
+  // One listener on the canvas covers everything — the group's own div is
+  // `pointer-events-none`, so a move over a gap targets the pane and still
+  // bubbles here, as do moves over the card, the rows and the affordance itself.
+  const resolveStackHover = useCallback(
+    (clientX: number, clientY: number, pointerType?: string) => {
+      // Hover affordances are for mouse and pen; a touch pan would otherwise
+      // reveal collapsers under the finger.
+      if (pointerType === "touch") return
+      // Before touching React Flow: a graph with no stacked column pays one
+      // comparison, and `screenToFlowPosition` is absent from the hand-written
+      // `useReactFlow` mocks in some tests.
+      const zones = stackHoverZonesRef.current
+      if (zones.length === 0) return
+      // The affordance does not render at dot zoom, so nothing can be revealed.
+      if (zoomLevelRef.current === "dot") return
+      const point = reactFlow.screenToFlowPosition({ x: clientX, y: clientY })
+      const next = findStackHoverZoneAt(zones, point.x, point.y)
+      if (hoveredStackRef.current === next) return
+      hoveredStackRef.current = next
+      setHoveredStackParentId(next)
+    },
+    [reactFlow]
+  )
+
+  const handleCanvasPointerMove = useCallback(
+    (e: React.PointerEvent) => {
+      lastPointerRef.current = {
+        x: e.clientX,
+        y: e.clientY,
+        pointerType: e.pointerType,
+      }
+      resolveStackHover(e.clientX, e.clientY, e.pointerType)
+    },
+    [resolveStackHover]
+  )
+
+  // A camera move slides the graph under a stationary pointer, so the same
+  // screen position now maps to a different flow point and the revealed column
+  // is stale. Re-resolving here covers every path that moves the camera —
+  // wheel, the zoom buttons, keyboard zoom and panning, fit-view and fly-to —
+  // rather than only the one (wheel) that is an event on this element. React
+  // Flow calls this on every camera frame, so the resolve is deliberately cheap:
+  // it bails before any measurement when there are no stacked columns, and the
+  // ref gate means a frame that does not change the answer does no React work.
+  const handleViewportChangeWithHover = useCallback(
+    (viewport: Parameters<typeof handleViewportChange>[0]) => {
+      handleViewportChange(viewport)
+      const last = lastPointerRef.current
+      if (last) resolveStackHover(last.x, last.y, last.pointerType)
+    },
+    [handleViewportChange, resolveStackHover]
+  )
+
+  // Fires only when the pointer genuinely leaves the canvas: `pointerleave` does
+  // not fire when moving between children.
+  const handleCanvasPointerLeave = useCallback(() => {
+    lastPointerRef.current = null
+    if (hoveredStackRef.current === null) return
+    hoveredStackRef.current = null
+    setHoveredStackParentId(null)
+  }, [])
 
   // Empty-canvas click: clear our own selection/focus and let the consumer
   // clear any controlled highlight/focus (e.g. a search/"find me" reveal).
@@ -475,59 +580,6 @@ export function F0GraphView<T = unknown>(
     debounceMs: visibleDataDebounceMs,
     enabled: !enableNodeWindowing || viewportReady,
   })
-
-  // Initial frame: when `initialFocusNodeId` is set, open framed on that node
-  // AND its direct children (capped zoom) so the first level is visible —
-  // instead of fit-to-all, and without zooming in on the single node. Frozen at
-  // the first render with nodes present so the fit reads a stable value; falls
-  // back to fit-all when the target isn't present.
-  const initialFitRef = useRef<
-    { nodes: Array<{ id: string }>; maxZoom: number } | undefined
-  >(undefined)
-  const initialFitResolvedRef = useRef(false)
-  if (!initialFitResolvedRef.current && renderedNodeIds.length > 0) {
-    initialFitResolvedRef.current = true
-    const childIds = initialFocusNodeId
-      ? (nodeMap.get(initialFocusNodeId)?.children.map((c) => c.id) ?? [])
-      : []
-    const nodes = resolveInitialFitViewNodes(
-      initialFocusNodeId,
-      childIds,
-      new Set(renderedNodeIds)
-    )
-    initialFitRef.current = nodes
-      ? { nodes, maxZoom: Math.min(INITIAL_FOCUS_MAX_ZOOM, maxZoom) }
-      : undefined
-  }
-  const initialFitViewOptions = initialFitRef.current
-
-  // Apply the initial frame exactly once, imperatively — never via React Flow's
-  // `fitView` prop. That prop queues a fit deferred until the container/nodes
-  // are measured, and once it fires it clears `fitViewOptions`; a later layout
-  // change (the first collapse/expand) then re-fires it as a fit-all, snapping
-  // the focused node away. Fitting ourselves, guarded by a ref, guarantees a
-  // single fit framed on `initialFitViewOptions` and no re-fit on any later
-  // layout change. Consumer-driven reveals still fly via the effect below.
-  const didInitialFitRef = useRef(false)
-  useEffect(() => {
-    if (didInitialFitRef.current || renderedNodeIds.length === 0) return
-    didInitialFitRef.current = true
-    // Honor the inset on the first frame too, so an already-open panel never
-    // opens the graph with the focus target behind it. When there's no inset the
-    // options are passed through untouched (identical to before).
-    reactFlow.fitView(
-      hasViewportInset
-        ? {
-            ...initialFitViewOptions,
-            // Base matches React Flow's own default fitView padding (0.1), so
-            // with no inset this stays byte-identical to the untouched call.
-            padding: getFitPadding(FIT_VIEW_PADDING_TIGHT),
-          }
-        : initialFitViewOptions
-    )
-    // Guarded by `didInitialFitRef` so it runs once; `hasViewportInset` /
-    // `getFitPadding` are read fresh at that point and intentionally omitted.
-  }, [renderedNodeIds.length, initialFitViewOptions, reactFlow])
 
   // ── Fly to the consumer-controlled focused node ──
   // Latest fly-to logic, read via a ref so the effect below depends ONLY on
@@ -634,6 +686,52 @@ export function F0GraphView<T = unknown>(
     return () => clearTimeout(timer)
   }, [focusedNode])
 
+  // ── Initial frame (entry) ──
+  // When `initialFocusNodeId` is set, arrive framed on that node in the same
+  // state a node click leaves: fly to it via the click path (`flyToNodeClickRef`,
+  // centered at the node-click zoom, `viewportInset`-aware). The fly is DEFERRED
+  // by the same settle delay the click/focused paths use — an immediate fly runs
+  // before React Flow has measured its container and never takes (which is why a
+  // mount-time frame missed while re-clicking the node worked). With no focus
+  // target it is a plain whole-graph fit (unchanged), applied immediately.
+  //
+  // The deferred fly is scheduled ONCE (ref-guarded) and is NOT torn down on
+  // re-render: the first renders after mount churn `renderedNodeIds` (two-phase
+  // hydration, an entry side panel opening), and an effect cleanup keyed on that
+  // would clear the pending timer while the ref-guard blocks re-scheduling — so
+  // the fly would silently never run. The timer is cleared only on unmount.
+  const initialFrameTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  )
+  const didInitialFrameRef = useRef(false)
+  useEffect(() => {
+    if (didInitialFrameRef.current || renderedNodeIds.length === 0) return
+    didInitialFrameRef.current = true
+    if (!initialFocusNodeId) {
+      reactFlow.fitView(
+        hasViewportInset
+          ? { padding: getFitPadding(FIT_VIEW_PADDING_TIGHT) }
+          : undefined
+      )
+      return
+    }
+    const target = initialFocusNodeId
+    initialFrameTimerRef.current = setTimeout(
+      () => flyToNodeClickRef.current(target),
+      FOCUS_SETTLE_DELAY_MS
+    )
+    // One-shot (ref-guarded); `hasViewportInset` / `getFitPadding` are read fresh
+    // and the timer is torn down on unmount (below), so deps stay minimal.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [renderedNodeIds.length, initialFocusNodeId, reactFlow])
+  useEffect(
+    () => () => {
+      if (initialFrameTimerRef.current)
+        clearTimeout(initialFrameTimerRef.current)
+    },
+    []
+  )
+
   // Imperative API: `focusNode` fires on every call, independent of prop
   // values, so a consumer's search can re-center on the same node the user
   // picks twice (the `focusedNode` prop can't — an unchanged value never
@@ -665,6 +763,12 @@ export function F0GraphView<T = unknown>(
     [selectedNodes, highlightedNodes]
   )
 
+  // Read by the collapse affordance only — see the note on the context itself.
+  const stackHoverContextValue = useMemo(
+    () => ({ hoveredStackParentId }),
+    [hoveredStackParentId]
+  )
+
   const actionsContextValue = useMemo(
     () => ({ toggleExpand, selectNode, expandAll, collapseAll }),
     [toggleExpand, selectNode, expandAll, collapseAll]
@@ -689,6 +793,7 @@ export function F0GraphView<T = unknown>(
       deferredLoading: isDeferredLoading || undefined,
       dataLoadingEnabled: loadVisibleNodeData !== undefined || undefined,
       tagRowHeight: reservedTagHeight,
+      stackedNodeHeight: stackedNodeHeightProp,
       largeGraph: isLargeGraph,
     }),
     [
@@ -699,12 +804,31 @@ export function F0GraphView<T = unknown>(
       loadVisibleNodeData,
       isLargeGraph,
       reservedTagHeight,
+      stackedNodeHeightProp,
     ]
   )
 
   const focusContextValue = useMemo(
     () => ({ focusedNodeId, setFocusedNodeId, registerNodeRef }),
     [focusedNodeId, setFocusedNodeId, registerNodeRef]
+  )
+
+  // React Flow wraps its content in a hardcoded `role="application"` div, which
+  // sits between this `role="tree"` container and the `role="treeitem"` nodes
+  // and severs the ARIA tree relationship. Reconnect it with `aria-owns`: the
+  // tree owns the rendered forest-root treeitems (`treeRootNodeIds`), and each
+  // in-window parent node re-owns its own children (see `visibleChildIds`), so
+  // every rendered treeitem has exactly one owner. While the tree renders no
+  // treeitems (deferred / staged / viewport data loading, or an empty graph),
+  // `aria-busy` keeps the empty tree valid instead of failing
+  // `aria-required-children`.
+  const treeIsEmpty = treeRootNodeIds.length === 0
+  const treeAriaOwns = useMemo(
+    () =>
+      treeRootNodeIds.length > 0
+        ? treeRootNodeIds.map((id) => `f0-graph-node-${id}`).join(" ")
+        : undefined,
+    [treeRootNodeIds]
   )
 
   return (
@@ -714,12 +838,8 @@ export function F0GraphView<T = unknown>(
           <F0GraphZoomContext.Provider value={zoomContextValue}>
             <F0GraphExpandContext.Provider value={expandContextValue}>
               <F0GraphSelectionContext.Provider value={selectionContextValue}>
-                <ClickSpark
-                  sparkColor="var(--f0-graph-spark)"
-                  sparkSize={10}
-                  sparkRadius={15}
-                  sparkCount={8}
-                  duration={400}
+                <F0GraphStackHoverContext.Provider
+                  value={stackHoverContextValue}
                 >
                   <div
                     ref={canvasRef}
@@ -733,7 +853,11 @@ export function F0GraphView<T = unknown>(
                       ref={containerRef}
                       role="tree"
                       aria-label={controlLabels?.graphView ?? i18n.graph.view}
+                      aria-owns={treeAriaOwns}
+                      aria-busy={treeIsEmpty || undefined}
                       onKeyDown={handleTreeKeyDown}
+                      onPointerMove={handleCanvasPointerMove}
+                      onPointerLeave={handleCanvasPointerLeave}
                       onPointerDown={(e) => {
                         pointerDownRef.current = {
                           x: e.clientX,
@@ -784,7 +908,7 @@ export function F0GraphView<T = unknown>(
                         minZoom={minZoom}
                         maxZoom={maxZoom}
                         defaultViewport={{ x: 0, y: 0, zoom: defaultZoom }}
-                        onViewportChange={handleViewportChange}
+                        onViewportChange={handleViewportChangeWithHover}
                         onPaneClick={handlePaneClick}
                         onEdgeMouseEnter={(_, edge) => {
                           const ge = (edge.data as GraphEdgeData | undefined)
@@ -830,28 +954,19 @@ export function F0GraphView<T = unknown>(
                     </div>
 
                     {canvasActions && (
-                      <div
-                        className="absolute left-6 top-3 z-10 flex flex-col gap-2 rounded-md backdrop-blur-[140px]"
-                        data-no-spark
-                      >
+                      <div className="absolute left-6 top-3 z-10 flex flex-col gap-2 rounded-md backdrop-blur-[140px]">
                         {canvasActions}
                       </div>
                     )}
 
                     {canvasFooterActions && (
-                      <div
-                        className="absolute bottom-6 right-6 z-10 flex flex-col items-end gap-2"
-                        data-no-spark
-                      >
+                      <div className="absolute bottom-6 right-6 z-10 flex flex-col items-end gap-2">
                         {canvasFooterActions}
                       </div>
                     )}
 
                     {showControls && (
-                      <div
-                        className="absolute bottom-6 left-6 z-10"
-                        data-no-spark
-                      >
+                      <div className="absolute bottom-6 left-6 z-10">
                         <F0GraphControls
                           onZoomIn={handleZoomIn}
                           onZoomOut={handleZoomOut}
@@ -873,7 +988,7 @@ export function F0GraphView<T = unknown>(
                       </div>
                     )}
                   </div>
-                </ClickSpark>
+                </F0GraphStackHoverContext.Provider>
               </F0GraphSelectionContext.Provider>
             </F0GraphExpandContext.Provider>
           </F0GraphZoomContext.Provider>

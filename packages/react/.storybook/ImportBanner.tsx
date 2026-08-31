@@ -4,6 +4,7 @@ import { createPortal } from "react-dom"
 
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { Code } from "@/icons/app"
+import { ButtonCopy } from "@/ui/ButtonCopy"
 import {
   Tooltip,
   TooltipContent,
@@ -11,47 +12,30 @@ import {
   TooltipTrigger,
 } from "@/ui/tooltip"
 
-import { extractComponentName, resolveImportPath } from "./resolveImportPath.ts"
+import { ProductUsageTag } from "./ProductUsageTag.tsx"
+import {
+  extractComponentName,
+  resolveImportPath,
+  storyComponentPath,
+  usageLookupNames,
+} from "./resolveImportPath.ts"
 
 /**
  * A single-line import statement with a copy button, styled for the dark
  * tooltip surface. Rendered directly (instead of Storybook's `Source` block)
  * so the padding stays tight and the text is readable regardless of the docs
  * page theme.
+ *
+ * The copy affordance is F0's own `ButtonCopy` — the docs should use the
+ * design system they document rather than a hand-rolled button.
  */
 function ImportSnippet({ code }: { code: string }) {
-  const [copied, setCopied] = useState(false)
-
-  const onCopy = () => {
-    try {
-      void navigator.clipboard?.writeText(code)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 1500)
-    } catch {
-      // Clipboard may be unavailable (e.g. insecure context) — ignore.
-    }
-  }
-
   return (
-    <div className="sb-unstyled flex items-center gap-3 px-3 py-2 text-f1-foreground-inverse">
+    <div className="sb-unstyled flex items-center gap-2 py-2 pl-3 pr-2 text-f1-foreground-inverse">
       <div className="min-w-0 overflow-x-auto">
         <code className="whitespace-pre font-mono text-base">{code}</code>
       </div>
-      {/* Colors are inline (not Tailwind) because Storybook's Tailwind build
-          doesn't scan `.storybook/` for one-off utilities like `text-white`,
-          which would silently fall back to the default (black) text. */}
-      <button
-        type="button"
-        onClick={onCopy}
-        className="shrink-0 rounded-md px-2 py-1 text-sm font-medium transition-colors"
-        style={{
-          color: "#fff",
-          backgroundColor: "rgba(255,255,255,0.1)",
-          border: "1px solid rgba(255,255,255,0.25)",
-        }}
-      >
-        {copied ? "Copied" : "Copy"}
-      </button>
+      <ButtonCopy valueToCopy={code} />
     </div>
   )
 }
@@ -100,6 +84,11 @@ function usePortalInTitle() {
     if (!containerRef.current) {
       const el = document.createElement("span")
       el.style.whiteSpace = "nowrap"
+      // The h1's own flex gap only separates this container from the title —
+      // the tags inside it need their own row layout.
+      el.style.display = "inline-flex"
+      el.style.alignItems = "center"
+      el.style.gap = "0.5rem"
       containerRef.current = el
     }
     titleEl.append(containerRef.current)
@@ -149,6 +138,10 @@ export function ImportBanner() {
 
   const importPath = resolveImportPath(fileName)
   const componentName = extractComponentName(fileName, title)
+  // Both checks matter: the path tells us which entry point *would* serve the
+  // component, but a component can sit under an exported prefix and still be
+  // absent from its group's `exports.ts`. Only when we resolved a real export
+  // name do we render a copyable import.
   const isInternal = !importPath || !componentName
 
   if (!portalTarget) {
@@ -184,6 +177,13 @@ export function ImportBanner() {
           )}
         </TooltipContent>
       </Tooltip>
+      {/* Shown for internal components too: several of them (Spinner, Select…)
+          are re-exported and used by product code, and for the rest "not used"
+          is still the answer people came for. */}
+      <ProductUsageTag
+        names={usageLookupNames(fileName, title)}
+        componentPath={storyComponentPath(fileName)}
+      />
     </TooltipProvider>
   )
 

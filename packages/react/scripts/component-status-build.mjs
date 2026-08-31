@@ -43,8 +43,18 @@ const DOC_TIER_ORDER = ["none", "stub", "acceptable", "good", "gold"]
  * JS, no virtual module) so Node contexts like `.storybook/main.ts` can compute
  * the effective status for the sidebar.
  */
+/**
+ * Naming convention: the component folder (and exported symbol) is "F0"
+ * followed by an uppercase letter. Mirrors componentFolderName +
+ * F0_NAME_PATTERN in src/component-status/component-status.ts.
+ */
+export function isF0Named(storyFile) {
+  return /^F0[A-Z]/.test(basename(componentDirOf(storyFile)))
+}
+
 export function meetsStableBar(c) {
   return (
+    isF0Named(c.storyFile) &&
     c.hasStories &&
     c.hasUnitTests &&
     c.hasPlayFunction &&

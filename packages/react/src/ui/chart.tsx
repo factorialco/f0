@@ -23,6 +23,17 @@ export type ChartConfig = {
   [k in string]: {
     label?: React.ReactNode
     icon?: React.ComponentType
+    /**
+     * Render this series dashed where the chart draws it as a line, e.g. for
+     * projected or planned series. Ignored by bar-only series.
+     */
+    dashed?: boolean
+    /**
+     * Mark this series as projected (provisional, not yet actual) data. Where
+     * the chart draws it as bars they fade toward the zero line with a
+     * gradient instead of using a solid fill.
+     */
+    projected?: boolean
   } & (
     | { color?: string; theme?: never }
     | { color?: never; theme: Record<keyof typeof THEMES, string> }
@@ -324,6 +335,13 @@ const ChartTooltipContent = React.forwardRef<
 
 ChartTooltipContent.displayName = "ChartTooltip"
 
+/**
+ * Opacity ramp shared by everything that renders a projected series: bars
+ * fade from `strong` at the tip to `faint` at the zero line, and the legend
+ * swatch mirrors the same gradient.
+ */
+const projectedFade = { strong: 0.4, faint: 0.05 } as const
+
 const ChartLegend = RechartsPrimitive.Legend
 
 const ChartLegendContent = React.forwardRef<
@@ -386,9 +404,13 @@ const ChartLegendContent = React.forwardRef<
                 itemConfig && (
                   <div
                     className="h-2 w-2 shrink-0 rounded-full"
-                    style={{
-                      backgroundColor: item.color,
-                    }}
+                    style={
+                      itemConfig.projected
+                        ? {
+                            background: `linear-gradient(to bottom, color-mix(in srgb, ${item.color} ${projectedFade.strong * 100}%, transparent), color-mix(in srgb, ${item.color} ${projectedFade.faint * 100}%, transparent))`,
+                          }
+                        : { backgroundColor: item.color }
+                    }
                   />
                 )
               )}
@@ -453,4 +475,5 @@ export {
   ChartStyle,
   ChartTooltip,
   ChartTooltipContent,
+  projectedFade,
 }

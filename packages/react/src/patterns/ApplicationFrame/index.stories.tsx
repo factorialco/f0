@@ -8,10 +8,8 @@ import {
   useRef,
   useState,
 } from "react"
-import { expect, userEvent, waitFor, within } from "storybook/test"
+import { expect, waitFor, within } from "storybook/test"
 
-import { F0Button } from "@/components/F0Button"
-import { F0Icon, IconType } from "@/components/F0Icon"
 import { PageHeader } from "@/experimental/Navigation/Header/PageHeader"
 import One from "@/icons/ai/One"
 import {
@@ -25,7 +23,6 @@ import {
   Comment,
 } from "@/icons/app"
 import * as Icons from "@/icons/app"
-import ArrowRight from "@/icons/app/ArrowRight"
 import ExternalLink from "@/icons/app/ExternalLink"
 import Marketplace from "@/icons/app/Marketplace"
 import { useAiChat } from "@/kits/ai/F0AiChat"
@@ -55,8 +52,6 @@ import {
 import { WelcomeScreenCardsRow } from "@/kits/ai/F0AiChatTextArea/components/WelcomeScreenCardsRow"
 import { HomeLayout } from "@/layouts/HomeLayout"
 import * as HomeLayoutStories from "@/layouts/HomeLayout/index.stories"
-import { getEmojiLabel } from "@/lib/emojis"
-import { F0Box } from "@/lib/F0Box"
 import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { Page } from "@/patterns/Navigation/Page"
@@ -73,7 +68,6 @@ import { SidebarFooter } from "@/patterns/Navigation/Sidebar/Footer"
 import * as SidebarFooterStories from "@/patterns/Navigation/Sidebar/Footer/index.stories"
 import { SidebarHeader } from "@/patterns/Navigation/Sidebar/Header"
 import * as SidebarHeaderStories from "@/patterns/Navigation/Sidebar/Header/index.stories"
-import * as SidebarStories from "@/patterns/Navigation/Sidebar/index.stories"
 import { TabbedSidebar } from "@/patterns/Navigation/Sidebar/index.stories"
 import { Menu, type MenuCategory } from "@/patterns/Navigation/Sidebar/Menu"
 import { SearchBar } from "@/patterns/Navigation/Sidebar/Searchbar"
@@ -87,7 +81,6 @@ import {
   type F0ChatRuntime,
 } from "@/sds/chat/F0Chat"
 import { MessageStatus } from "@/sds/chat/F0Chat/components/MessageStatus"
-import { MOCK_MAX_FILE_SIZE_BYTES } from "@/sds/chat/F0Chat/mocks/constants"
 import {
   MockChatAppProvider,
   useConversationRuntime,
@@ -96,7 +89,6 @@ import {
 import { SEED_BY_ID } from "@/sds/chat/F0Chat/mocks/mockSeeds"
 import { useDemoHeaderActions } from "@/sds/chat/F0Chat/mocks/useDemoHeaderActions"
 import { DaytimePage } from "@/sds/Home/DaytimePage"
-import { Action } from "@/ui/Action"
 
 import { ApplicationFrame } from "./index"
 
@@ -415,73 +407,6 @@ const mockUploadFiles = (files: File[]): Promise<UploadedFile[]> =>
     }, 1000)
   })
 
-const QuickActions = () => {
-  const { sendMessage } = useMockAiChatRuntime()
-
-  const buttonWithMessage = (action: {
-    label: string
-    message: string
-    icon: IconType
-  }) => {
-    return (
-      <F0Button
-        variant="outline"
-        label={action.label}
-        onClick={() => {
-          sendMessage(action.message)
-        }}
-        icon={action.icon}
-      />
-    )
-  }
-
-  const actions = [
-    {
-      label: "All templates",
-      message: "Give me a summary of my pending time-off requests",
-      icon: Lightbulb,
-    },
-    {
-      label: "Empty survey",
-      message: "Give me a summary of my pending time-off requests",
-      icon: Lightbulb,
-    },
-    {
-      label: "Q4 Employee Satisfaction",
-      message: "Give me a summary of my pending time-off requests",
-      icon: Lightbulb,
-    },
-    {
-      label: "Team Effectiveness",
-      message: "Give me a summary of my pending time-off requests",
-      icon: Lightbulb,
-    },
-  ]
-
-  return (
-    <div className="flex w-full flex-col gap-4 rounded-md border-2 border-dotted border-f1-border p-4">
-      <div className="flex items-center justify-between gap-4">
-        <p className="whitespace-nowrap text-sm text-f1-foreground-secondary">
-          Or start from
-        </p>
-        <div className="flex items-center gap-2">
-          <Action
-            variant="ghost"
-            prepend={<F0Icon icon={Marketplace} size="sm" />}
-            append={<ArrowRight className="h-3.5 w-3.5" />}
-            onClick={() => {}}
-          >
-            All templates
-          </Action>
-        </div>
-      </div>
-      <F0Box display="grid" columns="4" gap="sm">
-        {actions.map((action) => buttonWithMessage(action))}
-      </F0Box>
-    </div>
-  )
-}
-
 const WELCOME_CARDS: F0AiChatWelcomeCard[] = [
   {
     id: "empty-survey",
@@ -539,6 +464,7 @@ const meta = {
   tags: ["autodocs", "experimental"],
   parameters: {
     layout: "fullscreen",
+    docsFullWidth: true,
   },
   args: {
     ai: {
@@ -852,29 +778,45 @@ export const Default: Story = {
 }
 
 /**
- * The previous communications layout, kept as the configurable alternative:
- * ONE panel docked left shared by conversations and the AI chat (`side:
- * "left"`, no `panelContentSide`), a third "One" sidebar tab instead of the
- * page-header switch, and the compact in-panel chat header.
+ * Everything at once, in one channel, inside the real resizable side panel.
+ *
+ * This is the manual-QA surface for the transcript work: it opens
+ * `grp-everything-stress` — a year of history, ten extra pages, every message
+ * shape (albums of 1/2/3/4/7, a 1:10 tower, a dimensionless photo, video,
+ * voice, location, pdf/sheet/docx/text cards, file chips, link previews,
+ * replies, mentions, reactions, edits, deletions, failures, system rows) and a
+ * live typing indicator.
+ *
+ * What to exercise here:
+ * - drag the panel's resize handle across its whole range while reading history
+ *   with albums and video above the fold — the message under the cursor must
+ *   stay put, and the sticky date pill must keep showing the right day;
+ * - toggle fullscreen (150ms in, 400ms out) and cross the `md` breakpoint;
+ * - close the panel, pick a different conversation, reopen — no jump on entry;
+ * - scroll up fast through the reaction-heavy stretch — no pill may drift;
+ * - check the in-bubble time against every shape, and its legibility over the
+ *   brightest and darkest photos in light and dark.
  */
-export const CommunicationsPanelLeft: Story = {
-  name: "Communications — everything left",
+export const EverythingChannel: Story = {
   render: (args) => (
     <MockAiChatRuntimeProvider>
       <MockChatAppProvider>
         <ApplicationFrame
           ai={{
             ...withMockChatSlots(args.ai),
-            side: "left",
-            historyEnabled: false,
-            chatHeader: <MockConnectedChatHeader compact />,
+            panelContentSide: "left",
           }}
           aiPromotion={args.aiPromotion}
-          sidebar={<ConversationsSidebar />}
+          sidebar={
+            <ConversationsSidebar
+              withOneTab={false}
+              autoOpenConvId="grp-everything-stress"
+              tabsPersistKey="communications-everything"
+            />
+          }
         >
           <DaytimePage
             period="morning"
-            hideOneSwitch
             header={{
               employeeFirstName: "Jordan",
               employeeLastName: "Avery",
@@ -891,152 +833,57 @@ export const CommunicationsPanelLeft: Story = {
 }
 
 /**
- * A group without an emoji or uploaded image uses the same ＃ fallback in the
- * conversations sidebar and the open chat header.
+ * The announcement channel — Factorial's own noticeboard, and the welcome
+ * screen a new employee lands on. A `type: "announcement"` channel, so every
+ * capability defaults to off with no configuration at all.
+ *
+ * What it demonstrates, top to bottom:
+ * - a header with just the identity and the close button: no ellipsis, because
+ *   a fixed two-message transcript has nothing to search;
+ * - the day separator carrying the time ("Yesterday 22:14") while the messages
+ *   themselves carry none — their timestamp is seeded, not sent;
+ * - a card attachment (`kind: "card"`) rendered as an `F0Card`, the one thing
+ *   in here that IS interactive;
+ * - no hover ellipsis on either message: no reply, no reaction, no copy;
+ * - the read-only notice where the composer would be.
+ *
+ * What to exercise: hover both messages, drag a file over the panel (no drop
+ * affordance), and check the sidebar — badge of 2, no pin on hover, and no
+ * unread divider inside once opened.
  */
-export const CommunicationsGroupAvatarFallback: Story = {
-  name: "Communications — group avatar fallback",
-  tags: ["f0chat-group-avatar-fallback"],
+export const AnnouncementChannel: Story = {
   render: (args) => (
     <MockAiChatRuntimeProvider>
       <MockChatAppProvider>
         <ApplicationFrame
           ai={{
             ...withMockChatSlots(args.ai),
-            side: "left",
-            historyEnabled: false,
-            chatHeader: <MockConnectedChatHeader compact />,
+            panelContentSide: "left",
           }}
           aiPromotion={args.aiPromotion}
           sidebar={
             <ConversationsSidebar
-              initialTab="messages"
-              autoOpenConvId="grp-reporting"
+              withOneTab={false}
+              autoOpenConvId="dm-factorial"
+              tabsPersistKey="communications-announcement"
             />
           }
         >
-          <Page
-            {...PageStories.Default.args}
-            header={communicationsPageHeader}
-          />
+          <DaytimePage
+            period="morning"
+            header={{
+              employeeFirstName: "Jordan",
+              employeeLastName: "Avery",
+              title: "Good morning, Jordan!",
+              employeeAvatar: "/avatars/person05.jpg",
+            }}
+          >
+            <HomeLayout {...HomeLayoutStories.Default.args} />
+          </DaytimePage>
         </ApplicationFrame>
       </MockChatAppProvider>
     </MockAiChatRuntimeProvider>
   ),
-  play: async ({ canvasElement, step }) => {
-    const page = within(canvasElement.closest("body")!)
-
-    await step("Use the same fallback in the sidebar and header", async () => {
-      for (const groupName of [
-        "Quarterly Reporting",
-        "Release War Room",
-        "Leadership",
-      ]) {
-        const group = await page.findByRole("button", { name: groupName })
-        const sidebarFallback = within(group).getByTestId(
-          "sidebar-group-avatar-fallback"
-        )
-
-        await expect(
-          sidebarFallback.getBoundingClientRect().width
-        ).toBeGreaterThan(0)
-        await expect(sidebarFallback).toHaveTextContent("＃")
-      }
-
-      const headerFallback = await page.findByTestId(
-        "chat-group-avatar-fallback"
-      )
-      await expect(
-        headerFallback.getBoundingClientRect().width
-      ).toBeGreaterThan(0)
-      await expect(headerFallback).toHaveTextContent("＃")
-    })
-  },
-}
-
-/**
- * The standalone AI assistant: no communications sidebar, the chat docked on the
- * right as a resizable side panel, with the full feature set (credits, file
- * attachments, dictation, entity refs, disclaimer + quick actions footer).
- */
-export const WithAiAssistant: Story = {
-  render: (args) => (
-    <MockAiChatRuntimeProvider>
-      <ApplicationFrame
-        ai={withMockChatSlots(args.ai)}
-        aiPromotion={args.aiPromotion}
-        sidebar={<Sidebar {...SidebarStories.default.args} />}
-      >
-        <Page {...PageStories.Default.args} />
-      </ApplicationFrame>
-    </MockAiChatRuntimeProvider>
-  ),
-  args: {
-    ai: {
-      enabled: true,
-      resizable: true,
-      onThumbsUp: (message, { threadId, feedback }) => {
-        console.log("thumbs up", { message, threadId, feedback })
-      },
-      onThumbsDown: (message, { threadId, feedback }) => {
-        console.log("thumbs down", { message, threadId, feedback })
-      },
-      initialMessage: [
-        "Operational work, automated by One",
-        "Ask anything about your company",
-        "Skip the boring part of your job",
-        "Ask anything about your people, policies, or payroll",
-        "Turn months of data into a one-line answer",
-      ],
-      footer: <QuickActions />,
-      entityRefs: {
-        resolvers: {
-          person: mockPersonResolver,
-          candidate: mockCandidateResolver,
-          expense: mockExpenseResolver,
-          jobPosting: mockJobPostingResolver,
-          vacancy: mockVacancyResolver,
-          requisition: mockRequisitionResolver,
-          searchPersons: mockSearchPersons,
-        },
-        urls: {
-          person: (id) => `/employees/${id}`,
-          candidate: (id) => `/recruitment/candidates/${id}/applications`,
-          expense: (id) => `/expenses/${id}`,
-          jobPosting: (id) => `/recruitment/jobs/${id}/applications`,
-          vacancy: (id) => `/recruitment/hiring-plan/vacancies/${id}`,
-          requisition: (id) => `/recruitment/hiring-plan/requisitions/${id}`,
-        },
-      },
-      credits: {
-        fetchUsage: mockFetchCreditsUsage,
-        upgradePlanUrl: "https://example.com/upgrade",
-        companyName: "Factorial",
-        companyLogoUrl: "/avatars/factorial.png",
-        planName: "Free plan",
-      },
-      // When both are set the employee-only popover wins (see
-      // CreditsPopoverPicker in F0AiChatHeader). The classic `credits` above
-      // stays as a documented fallback for hosts that haven't opted into
-      // per-employee allocations.
-      employeeCredits: {
-        fetchUsage: mockFetchEmployeeCreditsUsage,
-        companyName: "Factorial",
-        companyLogoUrl: "/avatars/factorial.png",
-        planName: "Free plan",
-      },
-      fileAttachments: {
-        onUploadFiles: mockUploadFiles,
-        maxFiles: 5,
-      },
-      onTranscribe: mockTranscribe,
-      disclaimer: {
-        text: "One works within your permissions.",
-        link: "/permissions",
-        linkText: "See more",
-      },
-    },
-  },
 }
 
 /**
@@ -1478,12 +1325,23 @@ const ConversationsSidebarInner = ({
   useEffect(() => {
     if (!restoringPanelContentId || restored.current) return
     restored.current = true
+    // An explicit story target is deterministic fixture setup, so it must win
+    // over panel content persisted by a previously visited story.
+    if (autoOpenConvId) {
+      cancelPanelContentRestore()
+      return
+    }
     if (SEED_BY_ID.has(restoringPanelContentId)) {
       onSelect(restoringPanelContentId)
     } else {
       cancelPanelContentRestore()
     }
-  }, [restoringPanelContentId, onSelect, cancelPanelContentRestore])
+  }, [
+    autoOpenConvId,
+    restoringPanelContentId,
+    onSelect,
+    cancelPanelContentRestore,
+  ])
 
   // Groups come from the shared mock store, so unread badges / presence / mute
   // are live and clear as conversations are read.
@@ -1595,601 +1453,6 @@ const ConversationsSidebar = ({
   )
 }
 
-/**
- * Both conversation lists **empty**, side by side in the frame. The Messages tab
- * and the One tab share the same compact blank state (`SidebarChatBlankState`):
- * title + description + a CTA button, no emoji. The host (factorial) supplies the
- * copy and the action per surface; F0 owns the layout so the two read
- * identically. Lands on Messages; the play function also opens One to reveal the
- * AI blank state.
- */
-export const CommunicationsBlankStates: Story = {
-  name: "Communications — blank states",
-  render: (args) => (
-    <MockAiChatRuntimeProvider>
-      <MockChatAppProvider>
-        <ApplicationFrame
-          ai={{
-            ...withMockChatSlots(args.ai),
-            side: "left",
-            historyEnabled: false,
-            chatHeader: <MockConnectedChatHeader compact />,
-          }}
-          aiPromotion={args.aiPromotion}
-          sidebar={<ConversationsSidebar initialTab="messages" forceEmpty />}
-        >
-          <Page
-            {...PageStories.Default.args}
-            header={communicationsPageHeader}
-          />
-        </ApplicationFrame>
-      </MockChatAppProvider>
-    </MockAiChatRuntimeProvider>
-  ),
-}
-
-/**
- * The communications composer is configured with the mock runtime's 100 MB
- * per-file limit. Selecting an oversized file rejects it before upload and
- * keeps the composer usable.
- */
-export const CommunicationsFileSizeLimit: Story = {
-  name: "Communications — 100 MB file limit",
-  tags: ["f0chat-files"],
-  render: (args) => (
-    <MockAiChatRuntimeProvider>
-      <MockChatAppProvider>
-        <ApplicationFrame
-          ai={{
-            ...withMockChatSlots(args.ai),
-            side: "left",
-            historyEnabled: false,
-            chatHeader: <MockConnectedChatHeader compact />,
-          }}
-          aiPromotion={args.aiPromotion}
-          sidebar={
-            <ConversationsSidebar
-              initialTab="messages"
-              autoOpenConvId="grp-reporting"
-            />
-          }
-        >
-          <Page
-            {...PageStories.Default.args}
-            header={communicationsPageHeader}
-          />
-        </ApplicationFrame>
-      </MockChatAppProvider>
-    </MockAiChatRuntimeProvider>
-  ),
-  play: async ({ canvasElement, step }) => {
-    const page = within(canvasElement.closest("body")!)
-
-    await step("Reject a file over the 100 MB limit", async () => {
-      await page.findByRole("button", { name: /attach file/i })
-      const fileInput = canvasElement
-        .closest("body")!
-        .querySelector<HTMLInputElement>('input[type="file"]')!
-      const tooLarge = new File(["small"], "oversized-archive.zip", {
-        type: "application/zip",
-      })
-      Object.defineProperty(tooLarge, "size", {
-        value: MOCK_MAX_FILE_SIZE_BYTES + 1,
-      })
-
-      await userEvent.upload(fileInput, tooLarge)
-
-      await page.findByText("Each file must be 100 MB or smaller")
-      await waitFor(() =>
-        expect(
-          page.getByText("Each file must be 100 MB or smaller")
-        ).toBeVisible()
-      )
-      const validationAlert = page
-        .getByText("Each file must be 100 MB or smaller")
-        .closest('[role="alert"]')!
-      await expect(validationAlert).toHaveTextContent(
-        "Each file must be 100 MB or smaller"
-      )
-      await expect(
-        page.queryByText("oversized-archive.zip")
-      ).not.toBeInTheDocument()
-    })
-
-    await step("Paste a file into the composer", async () => {
-      const textarea = page.getByPlaceholderText("Write something here..")
-      const pastedFile = new File(["pasted"], "pasted-notes.txt", {
-        type: "text/plain",
-      })
-      const clipboardData = new DataTransfer()
-      clipboardData.items.add(pastedFile)
-      textarea.focus()
-
-      const pasteEvent = new ClipboardEvent("paste", {
-        bubbles: true,
-        cancelable: true,
-        clipboardData,
-      })
-      await expect(textarea.dispatchEvent(pasteEvent)).toBe(false)
-      await expect(textarea).toHaveFocus()
-
-      await page.findByText("pasted-notes.txt", {}, { timeout: 3_000 })
-      await waitFor(() =>
-        expect(page.getByText("pasted-notes.txt")).toBeVisible()
-      )
-    })
-  },
-}
-
-/**
- * The final group message combines two inline videos and a regular file. Each
- * F0VideoPlayer takes the full conversation width up to its 36rem media limit,
- * stacks vertically, and exposes its own playback and fullscreen controls.
- */
-export const CommunicationsVideoAttachments: Story = {
-  name: "Communications — inline video attachments",
-  tags: ["f0chat-videos"],
-  render: (args) => (
-    <MockAiChatRuntimeProvider>
-      <MockChatAppProvider>
-        <ApplicationFrame
-          ai={{
-            ...withMockChatSlots(args.ai),
-            side: "left",
-            historyEnabled: false,
-            chatHeader: <MockConnectedChatHeader compact />,
-          }}
-          aiPromotion={args.aiPromotion}
-          sidebar={
-            <ConversationsSidebar
-              initialTab="messages"
-              autoOpenConvId="grp-reporting"
-            />
-          }
-        >
-          <Page
-            {...PageStories.Default.args}
-            header={communicationsPageHeader}
-          />
-        </ApplicationFrame>
-      </MockChatAppProvider>
-    </MockAiChatRuntimeProvider>
-  ),
-  play: async ({ canvas, step }) => {
-    await step("Render both videos as wide inline players", async () => {
-      const players = await canvas.findAllByRole(
-        "region",
-        { name: /Video player:/ },
-        { timeout: 5_000 }
-      )
-      await expect(players).toHaveLength(2)
-
-      // The transcript keeps its subtree in the a11y tree while it's still
-      // `opacity-0` (it fades in once Virtuoso has positioned the entry row),
-      // so `findBy*` resolves before anything inside is actually visible. Gate
-      // on the region itself becoming visible — a starved frame budget on CI
-      // otherwise lets the video's `loadeddata` mount the controls first and
-      // every `toBeVisible()` below asserts against a hidden transcript.
-      await waitFor(() => expect(players[0]).toBeVisible())
-
-      const widths = players.map(
-        (player) => player.getBoundingClientRect().width
-      )
-      for (const width of widths) {
-        await expect(width).toBeGreaterThan(0)
-        await expect(width).toBeLessThanOrEqual(576)
-      }
-      await expect(Math.abs(widths[0] - widths[1])).toBeLessThanOrEqual(1)
-
-      const cards = players.map(
-        (player) =>
-          player.closest<HTMLElement>('[data-testid="chat-video-attachment"]')!
-      )
-      for (const [index, player] of players.entries()) {
-        const card = cards[index]
-        const column = card.parentElement!
-        await expect(
-          Math.abs(
-            card.getBoundingClientRect().width -
-              Math.min(column.getBoundingClientRect().width, 576)
-          )
-        ).toBeLessThanOrEqual(1)
-
-        const controls = within(player)
-        const playButton = await controls.findByRole(
-          "button",
-          { name: "Play" },
-          { timeout: 5_000 }
-        )
-        await waitFor(() => expect(playButton).toBeVisible())
-        const fullscreenButton = await controls.findByRole(
-          "button",
-          { name: "Enter fullscreen" },
-          { timeout: 5_000 }
-        )
-        await waitFor(() => expect(fullscreenButton).toBeVisible())
-        const video = player.querySelector("video")
-        await expect(video).not.toBeNull()
-        await expect(video!).toHaveAttribute("src", "/Big_Buck_Bunny_alt.webm")
-        await expect(video!).toHaveAttribute("poster", "/video-poster.webp")
-      }
-      await expect(cards[1].getBoundingClientRect().top).toBeGreaterThanOrEqual(
-        cards[0].getBoundingClientRect().bottom
-      )
-
-      await waitFor(() =>
-        expect(canvas.getByText("kickoff-deck.pptx")).toBeVisible()
-      )
-    })
-  },
-}
-
-/**
- * Composer attachment gallery. Selecting seven files at once shows immediate
- * local previews for image, video, PDF, spreadsheet, Word and text content
- * while a regular PowerPoint keeps a file icon fallback. Files use the same
- * compact square footprint as an image; video keeps that height but uses a
- * wider 16:9 thumbnail. Each shape remains stable when local URLs are replaced.
- */
-export const CommunicationsComposerAttachmentPreviews: Story = {
-  name: "Communications — composer attachment previews",
-  tags: ["f0chat-composer-attachments"],
-  render: (args) => (
-    <MockAiChatRuntimeProvider>
-      <MockChatAppProvider>
-        <ApplicationFrame
-          ai={{
-            ...withMockChatSlots(args.ai),
-            side: "left",
-            historyEnabled: false,
-            chatHeader: <MockConnectedChatHeader compact />,
-          }}
-          aiPromotion={args.aiPromotion}
-          sidebar={
-            <ConversationsSidebar
-              initialTab="messages"
-              autoOpenConvId="grp-reporting"
-            />
-          }
-        >
-          <Page
-            {...PageStories.Default.args}
-            header={communicationsPageHeader}
-          />
-        </ApplicationFrame>
-      </MockChatAppProvider>
-    </MockAiChatRuntimeProvider>
-  ),
-  play: async ({ canvasElement, step }) => {
-    const page = within(canvasElement.closest("body")!)
-
-    await step("Preview every supported composer attachment", async () => {
-      await page.findByRole("button", { name: /attach file/i })
-      const [videoBlob, imageBlob, pdfBlob, sheetBlob, docxBlob, textBlob] =
-        await Promise.all(
-          [
-            "/Big_Buck_Bunny_alt.webm",
-            "/video-poster.webp",
-            "/f0-pdf-viewer-sample.pdf",
-            "/f0-document-sample.xlsx",
-            "/f0-document-sample.docx",
-            "/f0-document-sample.md",
-          ].map(async (url) => (await fetch(url)).blob())
-        )
-      const files = [
-        new File([videoBlob], "walkthrough.webm", { type: "video/webm" }),
-        new File([imageBlob], "cover.webp", { type: "image/webp" }),
-        new File([pdfBlob], "quarterly-report.pdf", {
-          type: "application/pdf",
-        }),
-        new File([sheetBlob], "raw-data.xlsx", {
-          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        }),
-        new File([docxBlob], "offer-letter.docx", {
-          type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        }),
-        new File([textBlob], "RELEASE-NOTES.md", { type: "text/markdown" }),
-        new File(["deck"], "kickoff-deck.pptx", {
-          type: "application/vnd.ms-powerpoint",
-        }),
-      ]
-      const fileInput = canvasElement
-        .closest("body")!
-        .querySelector<HTMLInputElement>('input[type="file"]')!
-
-      await userEvent.upload(fileInput, files)
-
-      await expect(
-        await page.findByTestId("chat-composer-image-preview")
-      ).toBeVisible()
-      await expect(
-        page.getByTestId("chat-composer-video-preview")
-      ).toBeVisible()
-      await expect(
-        page.getAllByTestId("chat-composer-document-preview")
-      ).toHaveLength(4)
-      await expect(
-        page.getByTestId("chat-composer-file-preview")
-      ).toHaveTextContent("kickoff-deck.pptx")
-      await expect(
-        page.getAllByTestId("chat-composer-attachment-uploading")
-      ).toHaveLength(7)
-
-      await waitFor(
-        () =>
-          expect(
-            page.queryAllByTestId("chat-composer-attachment-uploading")
-          ).toHaveLength(0),
-        { timeout: 4_000 }
-      )
-      await expect(
-        page.getAllByTestId("chat-composer-image-preview")
-      ).toHaveLength(1)
-      await expect(
-        page.getAllByTestId("chat-composer-video-preview")
-      ).toHaveLength(1)
-      await expect(
-        page.getAllByTestId("chat-composer-document-preview")
-      ).toHaveLength(4)
-      await expect(
-        page.getAllByTestId("chat-composer-file-preview")
-      ).toHaveLength(1)
-      await expect(
-        page.getAllByRole("button", { name: /^Remove /i })
-      ).toHaveLength(7)
-
-      const strip = page.getByTestId("chat-composer-attachments")
-      const squarePreviews = [
-        page.getByTestId("chat-composer-image-preview"),
-        ...page.getAllByTestId("chat-composer-document-preview"),
-        page.getByTestId("chat-composer-file-preview"),
-      ]
-      for (const preview of squarePreviews) {
-        await expect(preview.getBoundingClientRect().width).toBe(64)
-        await expect(preview.getBoundingClientRect().height).toBe(64)
-      }
-      const videoPreview = page.getByTestId("chat-composer-video-preview")
-      await expect(videoPreview.getBoundingClientRect().width).toBe(112)
-      await expect(videoPreview.getBoundingClientRect().height).toBe(64)
-      await expect(strip.scrollWidth).toBeGreaterThan(strip.clientWidth)
-      strip.scrollLeft = strip.scrollWidth
-      await expect(strip.scrollLeft).toBeGreaterThan(0)
-      const lastAttachment = page.getByTestId("chat-composer-file-preview")
-      const stripRect = strip.getBoundingClientRect()
-      const lastAttachmentRect = lastAttachment.getBoundingClientRect()
-      await expect(lastAttachmentRect.left).toBeGreaterThanOrEqual(
-        stripRect.left
-      )
-      await expect(lastAttachmentRect.right).toBeLessThanOrEqual(
-        stripRect.right
-      )
-    })
-  },
-}
-
-/**
- * The final group message has only two of the expected 45 receipts. The footer
- * remains "Sent · time"; reader identities stay available from message Info.
- */
-export const CommunicationsPartialReceipts: Story = {
-  name: "Communications — partial readers (sent)",
-  tags: ["f0chat-receipts"],
-  render: (args) => (
-    <MockAiChatRuntimeProvider>
-      <MockChatAppProvider>
-        <ApplicationFrame
-          ai={{
-            ...withMockChatSlots(args.ai),
-            side: "left",
-            historyEnabled: false,
-            chatHeader: <MockConnectedChatHeader compact />,
-          }}
-          aiPromotion={args.aiPromotion}
-          sidebar={
-            <ConversationsSidebar
-              initialTab="messages"
-              autoOpenConvId="grp-reporting"
-              receiptPreview="partial"
-            />
-          }
-        >
-          <Page
-            {...PageStories.Default.args}
-            header={communicationsPageHeader}
-          />
-        </ApplicationFrame>
-      </MockChatAppProvider>
-    </MockAiChatRuntimeProvider>
-  ),
-  play: async ({ canvas, canvasElement, step }) => {
-    const page = within(canvasElement.closest("body")!)
-    await step("Keep an incomplete group receipt at sent", async () => {
-      const receiptLabel = await canvas.findByText(
-        /^Sent · /i,
-        {},
-        { timeout: 3_000 }
-      )
-      const status = receiptLabel.closest<HTMLElement>('[role="status"]')!
-      await expect(status).toHaveTextContent(/^Sent · /i)
-      await expect(status).toHaveAttribute("aria-live", "polite")
-      await expect(status).toHaveAttribute("aria-atomic", "true")
-      await expect(canvas.queryByText(/^Read by 2$/i)).not.toBeInTheDocument()
-    })
-
-    await step("Keep partial reader identities in message Info", async () => {
-      const message = await canvas.findByText(/And the kickoff deck/)
-      await userEvent.hover(message)
-      const actionButtons = await canvas.findAllByRole("button", {
-        name: /message actions/i,
-      })
-      await userEvent.click(actionButtons.at(-1)!)
-      await userEvent.click(
-        await page.findByRole("button", {
-          name: /^Info$/i,
-        })
-      )
-
-      const readers = await page.findByRole("list", { name: /Read by 2/i })
-      await expect(readers).toHaveTextContent("Grace Liang")
-      await expect(readers).toHaveTextContent("Marcus Bennett")
-    })
-  },
-}
-
-/**
- * A group conversation with real-world message receipts and reactions. The
- * final message is mine and carries 45 reader identities, forcing the reader
- * info panel to scroll as a whole, plus three reaction users.
- */
-export const CommunicationsReceiptsAndReactions: Story = {
-  name: "Communications — 40+ readers and reaction users",
-  tags: ["f0chat-receipts"],
-  render: (args) => (
-    <MockAiChatRuntimeProvider>
-      <MockChatAppProvider>
-        <ApplicationFrame
-          ai={{
-            ...withMockChatSlots(args.ai),
-            side: "left",
-            historyEnabled: false,
-            chatHeader: <MockConnectedChatHeader compact />,
-          }}
-          aiPromotion={args.aiPromotion}
-          sidebar={
-            <ConversationsSidebar
-              initialTab="messages"
-              autoOpenConvId="grp-reporting"
-            />
-          }
-        >
-          <Page
-            {...PageStories.Default.args}
-            header={communicationsPageHeader}
-          />
-        </ApplicationFrame>
-      </MockChatAppProvider>
-    </MockAiChatRuntimeProvider>
-  ),
-  play: async ({ canvas, canvasElement, step }) => {
-    const page = within(canvasElement.closest("body")!)
-    await step("Summarize the completed group receipt", async () => {
-      const receiptLabel = await canvas.findByText(
-        /^Read · /i,
-        {},
-        { timeout: 3_000 }
-      )
-      const status = receiptLabel.closest<HTMLElement>('[role="status"]')!
-      await expect(status).toHaveTextContent(/^Read · /i)
-      await expect(status).toHaveAttribute("aria-live", "polite")
-      await expect(status).toHaveAttribute("aria-atomic", "true")
-      await expect(canvas.queryByText(/^Read by 45$/i)).not.toBeInTheDocument()
-    })
-
-    await step("Show the people behind a reaction", async () => {
-      const reaction = await canvas.findByRole("button", {
-        name: `${getEmojiLabel("🎉")}: 3`,
-      })
-      const addReaction = canvas.getByRole("button", { name: /add reaction/i })
-
-      addReaction.focus()
-      await userEvent.tab({ shift: true })
-      await expect(reaction).toHaveFocus()
-      const reactionTooltips = (
-        await page.findAllByRole("tooltip", {}, { timeout: 3_000 })
-      ).filter((tooltip) =>
-        tooltip.textContent?.includes("Grace Liang, Marcus Bennett, Sam Okafor")
-      )
-      const tooltipId = reaction.getAttribute("aria-describedby")
-      const describedTooltip = tooltipId
-        ? canvasElement.ownerDocument.getElementById(tooltipId)
-        : null
-      await expect(reactionTooltips.length).toBeGreaterThan(0)
-      await expect(tooltipId).toBeTruthy()
-      await expect(describedTooltip).toHaveTextContent(
-        "Grace Liang, Marcus Bennett, Sam Okafor"
-      )
-      await waitFor(() => {
-        const visibleReactionTooltip = page
-          .getAllByRole("tooltip")
-          .filter((tooltip) =>
-            tooltip.textContent?.includes(
-              "Grace Liang, Marcus Bennett, Sam Okafor"
-            )
-          )
-          .find((tooltip) => {
-            const rect = tooltip.getBoundingClientRect()
-            return rect.width > 0 && rect.height > 0
-          })
-        expect(visibleReactionTooltip).toBeDefined()
-        expect(visibleReactionTooltip!).toBeVisible()
-      })
-      await userEvent.tab()
-    })
-
-    await step("Show static reader identities", async () => {
-      const message = await canvas.findByText(/And the kickoff deck/)
-      await userEvent.hover(message)
-      const actionButtons = await canvas.findAllByRole("button", {
-        name: /message actions/i,
-      })
-      await userEvent.click(actionButtons.at(-1)!)
-      await userEvent.click(
-        await page.findByRole("button", {
-          name: /^Info$/i,
-        })
-      )
-
-      const readers = await page.findByRole(
-        "list",
-        { name: /Read by 45/i },
-        { timeout: 3_000 }
-      )
-      const infoPanel = page.getByRole("region", { name: /^Info$/i })
-      await expect(readers.children).toHaveLength(45)
-      await expect(infoPanel.scrollHeight).toBeGreaterThan(
-        infoPanel.clientHeight
-      )
-      await expect(readers.scrollHeight).toBe(readers.clientHeight)
-      await expect(readers).not.toHaveAttribute("tabindex")
-      const graceRow = within(readers).getByText("Grace Liang").parentElement!
-      await expect(graceRow).toBeVisible()
-      await expect(within(readers).getByText("Marcus Bennett")).toBeVisible()
-      await expect(within(readers).getByText("Sam Okafor")).toBeVisible()
-      await expect(within(readers).queryByRole("link")).not.toBeInTheDocument()
-      await expect(
-        readers.querySelector(
-          '[tabindex], button, a, input, select, textarea, [role="button"], [role="link"], [contenteditable="true"]'
-        )
-      ).not.toBeInTheDocument()
-      const backButton = page.getByRole("button", { name: /^back$/i })
-      await expect(backButton).toHaveFocus()
-
-      await userEvent.hover(graceRow)
-      await new Promise((resolve) => setTimeout(resolve, 200))
-      await expect(page.queryByText("Data Analyst")).not.toBeInTheDocument()
-      await expect(
-        page.queryByRole("link", { name: /view profile/i })
-      ).not.toBeInTheDocument()
-
-      await userEvent.tab()
-      await expect(infoPanel).toHaveFocus()
-      await userEvent.tab()
-      await expect(readers.contains(readers.ownerDocument.activeElement)).toBe(
-        false
-      )
-      infoPanel.scrollTop = infoPanel.scrollHeight
-      await expect(infoPanel.scrollTop).toBeGreaterThan(0)
-      const lastReader = within(readers).getByText("Demo Reader 42")
-      const infoPanelRect = infoPanel.getBoundingClientRect()
-      const lastReaderRect = lastReader.getBoundingClientRect()
-      await expect(lastReaderRect.top).toBeGreaterThanOrEqual(infoPanelRect.top)
-      await expect(lastReaderRect.bottom).toBeLessThanOrEqual(
-        infoPanelRect.bottom
-      )
-    })
-  },
-}
-
 const ReceiptStatusComparison = () => {
   const runtime = useConversationRuntime("grp-reporting")
   const message = [...runtime.messages]
@@ -2294,11 +1557,13 @@ export const Snapshot: Story = {
         await canvas.findByRole("region", { name: "Completed group receipts" })
       )
 
+      // Delivery only: the clock moved onto the bubble itself, so the footer no
+      // longer repeats it.
       await waitFor(() =>
-        expect(partial.getByRole("status")).toHaveTextContent(/^Sent · /i)
+        expect(partial.getByRole("status")).toHaveTextContent(/^Sent$/i)
       )
       await waitFor(() =>
-        expect(completed.getByRole("status")).toHaveTextContent(/^Read · /i)
+        expect(completed.getByRole("status")).toHaveTextContent(/^Read$/i)
       )
     })
   },

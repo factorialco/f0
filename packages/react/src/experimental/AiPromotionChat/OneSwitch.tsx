@@ -1,5 +1,4 @@
 import * as SwitchPrimitive from "@radix-ui/react-switch"
-import { motion } from "motion/react"
 import { useState } from "react"
 
 import { useI18n } from "@/lib/providers/i18n"
@@ -31,23 +30,7 @@ export const OneSwitch = ({
       <TooltipProvider>
         <Tooltip delayDuration={850} disableHoverableContent>
           <TooltipTrigger asChild>
-            <motion.div
-              animate={{
-                "--gradient-angle": ["0deg", "360deg"],
-              }}
-              transition={{
-                default: {
-                  duration: 8,
-                  ease: "linear",
-                  repeat: Infinity,
-                },
-              }}
-              style={
-                {
-                  "--gradient-angle": "180deg",
-                } as React.CSSProperties
-              }
-            >
+            <div>
               <SwitchPrimitive.Root
                 onCheckedChange={(val) => {
                   setOpen(val)
@@ -61,6 +44,7 @@ export const OneSwitch = ({
                   "shadow-[0_2px_6px_-1px_rgba(13,22,37,.04),inset_0_0_4px_rgba(13,22,37,.04)] data-[state=checked]:shadow-[0_2px_6px_-1px_rgba(13,22,37,.04),inset_0_0_4px_rgba(13,22,37,.6)]",
                   "after:pointer-events-none after:absolute after:inset-0 after:rounded-full after:ring-1 after:ring-inset after:ring-f1-border after:transition-all after:content-[''] data-[state=checked]:after:ring-f1-border-inverse",
                   "before:absolute before:inset-0 before:rounded-full before:bg-[conic-gradient(from_var(--gradient-angle),hsla(229,57%,76%,0.7),hsla(348,80%,50%,0.7),hsla(348,80%,50%,0.7),hsla(18,80%,50%,0.7),hsla(229,57%,76%,0.7),hsla(229,57%,76%,0.7))] before:opacity-0 before:transition-all before:duration-300 before:content-[''] data-[state=checked]:before:opacity-100",
+                  "before:[animation:rotate-gradient_8s_linear_infinite_paused] data-[state=checked]:before:[animation:rotate-gradient_8s_linear_infinite_running] motion-reduce:before:[animation:none]",
                   disabled && "cursor-not-allowed opacity-50",
                   focusRing(),
                   className
@@ -87,7 +71,7 @@ export const OneSwitch = ({
                   </div>
                 </SwitchPrimitive.Thumb>
               </SwitchPrimitive.Root>
-            </motion.div>
+            </div>
           </TooltipTrigger>
           {!open && (
             <TooltipContent side="left" className="font-medium">

@@ -13,7 +13,6 @@
     "Avatars/AvatarModule",
     "Avatars/AvatarPerson",
     "Avatars/AvatarTeam",
-    "Card",
     "Charts/RadarChart",
     "DatePicker",
     "EmptyState",
@@ -28,7 +27,6 @@
     "Inputs/Search input",
     "Inputs/Text area input",
     "Inputs/Text input",
-    "Primitives/F0InputField",
-    "Resource header"
+    "Primitives/F0InputField"
   ]
 }

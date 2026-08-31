@@ -1,3 +1,4 @@
+import { waitFor } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 
 import { Add, Pencil } from "@/icons/app"
@@ -95,6 +96,49 @@ describe("Dropdown (experimental) — disabled", () => {
     expect(screen.queryByText("Create")).not.toBeInTheDocument()
     rerender(<Dropdown items={items} />)
     expect(screen.queryByText("Create")).not.toBeInTheDocument()
+  })
+})
+
+describe("Dropdown (experimental) — per-item disabled", () => {
+  it("renders an item with `disabled` as a disabled menu item, leaving siblings enabled", async () => {
+    render(
+      <Dropdown
+        items={[
+          { label: "Create", onClick: vi.fn(), icon: Add },
+          { label: "Delete", onClick: vi.fn(), icon: Pencil, disabled: true },
+        ]}
+      />
+    )
+    await userEvent.click(screen.getByRole("button"))
+    const deleteItem = (await screen.findByText("Delete")).closest(
+      '[role="menuitem"]'
+    )
+    expect(deleteItem).toHaveAttribute("data-disabled")
+    const createItem = screen.getByText("Create").closest('[role="menuitem"]')
+    expect(createItem).not.toHaveAttribute("data-disabled")
+  })
+
+  it("shows `disabledTooltip` on hover over a disabled item", async () => {
+    render(
+      <Dropdown
+        items={[
+          {
+            label: "Delete",
+            onClick: vi.fn(),
+            icon: Pencil,
+            disabled: true,
+            disabledTooltip: "People on active contracts can't be deleted",
+          },
+        ]}
+      />
+    )
+    await userEvent.click(screen.getByRole("button"))
+    await userEvent.hover(await screen.findByText("Delete"))
+    await waitFor(() => {
+      expect(screen.getByRole("tooltip")).toHaveTextContent(
+        "People on active contracts can't be deleted"
+      )
+    })
   })
 })
 

@@ -29,7 +29,7 @@ const InfoRow = ({
 
 const ReaderIdentity = ({ user }: { user: F0ChatUser }): ReactNode => {
   return (
-    <div className="flex w-full items-center gap-2 px-0 py-1.5 text-f1-foreground">
+    <div className="flex w-full items-center gap-2 px-0 py-1 text-f1-foreground">
       <F0Avatar
         size="sm"
         avatar={

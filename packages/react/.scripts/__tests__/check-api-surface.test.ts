@@ -260,6 +260,128 @@ describe("check-api-surface — external type resolution", () => {
     expect(f0(surface, surface).breaking).toHaveLength(0)
   })
 
+  const wrapped = (props: string, statics = "{}") => `
+    import { ForwardRefExoticComponent, PropsWithoutRef, RefAttributes } from "react";
+    export declare type WidgetProps = ${props};
+    export declare const Widget: ForwardRefExoticComponent<
+      PropsWithoutRef<WidgetProps> & RefAttributes<HTMLDivElement>
+    > & ${statics};
+  `
+
+  it("treats an optional prop added to a withDataTestId-shaped component as safe", () => {
+    expect(
+      f0(wrapped(`{ id: string }`), wrapped(`{ id: string; tone?: "a" | "b" }`))
+        .breaking
+    ).toHaveLength(0)
+  })
+
+  it("still flags a required prop added to one", () => {
+    expect(
+      names(
+        f0(wrapped(`{ id: string }`), wrapped(`{ id: string; tone: string }`))
+      )
+    ).toContain("Widget")
+  })
+
+  it("still flags a prop removed from one", () => {
+    expect(
+      names(
+        f0(wrapped(`{ id: string; tone?: string }`), wrapped(`{ id: string }`))
+      )
+    ).toContain("Widget")
+  })
+
+  it("still flags a prop retyped on one", () => {
+    expect(
+      names(f0(wrapped(`{ id: string }`), wrapped(`{ id: number }`)))
+    ).toContain("Widget")
+  })
+
+  it("still flags a static removed from one", () => {
+    expect(
+      names(
+        f0(
+          wrapped(`{ id: string }`, `{ Skeleton: () => null }`),
+          wrapped(`{ id: string }`, `{}`)
+        )
+      )
+    ).toContain("Widget")
+  })
+
+  const viaAlias = (params: string) => `
+    import { ComponentProps, ComponentType, ForwardRefExoticComponent, PropsWithoutRef, RefAttributes } from "react";
+    export declare type WithDataTestIdProps = { "data-testid"?: string };
+    export declare type WithDataTestIdReturnType<T extends ComponentType<any>> =
+      ForwardRefExoticComponent<
+        PropsWithoutRef<ComponentProps<T> & WithDataTestIdProps> &
+          RefAttributes<unknown>
+      > &
+        Pick<T, Exclude<keyof T, keyof ForwardRefExoticComponent<unknown>>>;
+    export declare type WidgetProps = { id: string; tone?: string };
+    export declare const Widget: WithDataTestIdReturnType<(${params}: WidgetProps) => Element>;
+  `
+
+  it("reproduces the real wrapper: renaming destructured params is not breaking", () => {
+    expect(
+      f0(viaAlias("{ id }"), viaAlias("{ id, tone }")).breaking
+    ).toHaveLength(0)
+  })
+
+  const aliased = (props: string, statics = "unknown") => `
+    import { ComponentProps, ComponentType, ForwardRefExoticComponent, PropsWithoutRef, RefAttributes } from "react";
+    export declare type WithDataTestIdProps = { "data-testid"?: string };
+    export declare type WithDataTestIdReturnType<T extends ComponentType<any>> =
+      ForwardRefExoticComponent<
+        PropsWithoutRef<ComponentProps<T> & WithDataTestIdProps> &
+          RefAttributes<unknown>
+      > &
+        Pick<T, Exclude<keyof T, keyof ForwardRefExoticComponent<unknown>>>;
+    export declare type WidgetProps = ${props};
+    export declare const Widget: (WithDataTestIdReturnType<(p: WidgetProps) => Element>) & ${statics};
+  `
+
+  it.fails("still flags a prop removed behind the wrapper", () => {
+    expect(
+      names(
+        f0(aliased(`{ id: string; tone?: string }`), aliased(`{ id: string }`))
+      )
+    ).toContain("Widget")
+  })
+
+  it.fails("still flags a prop retyped behind the wrapper", () => {
+    expect(
+      names(f0(aliased(`{ id: string }`), aliased(`{ id: number }`)))
+    ).toContain("Widget")
+  })
+
+  it.fails("still flags a required prop added behind the wrapper", () => {
+    expect(
+      names(
+        f0(aliased(`{ id: string }`), aliased(`{ id: string; tone: string }`))
+      )
+    ).toContain("Widget")
+  })
+
+  it("still flags a static removed from behind the wrapper", () => {
+    expect(
+      names(
+        f0(
+          aliased(`{ id: string }`, `{ Skeleton: () => Element }`),
+          aliased(`{ id: string }`, `unknown`)
+        )
+      )
+    ).toContain("Widget")
+  })
+
+  it("does not flag an optional static added behind the wrapper", () => {
+    expect(
+      f0(
+        aliased(`{ id: string }`, `unknown`),
+        aliased(`{ id: string }`, `{ Skeleton?: () => Element }`)
+      ).breaking
+    ).toHaveLength(0)
+  })
+
   it("does not flag reordered unions nested in opaque external types", () => {
     const surface = (refType: string) => `
       import { RefAttributes } from "react";

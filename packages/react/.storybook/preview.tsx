@@ -59,8 +59,15 @@ export const withTheme = () => {
   }
 }
 
-export const F0 = (Story: StoryFn, { parameters }: StoryContext) => {
+export const F0 = (Story: StoryFn, { parameters, viewMode }: StoryContext) => {
   const [currentPath, setCurrentPath] = useState(parameters.currentPath ?? "/")
+
+  // Docs pages are capped to a readable measure (see preview-head.html). Page
+  // shells — the Home layouts, ApplicationFrame — are about the whole canvas
+  // and have nothing to do with reading, so they opt out with
+  // `parameters: { docsFullWidth: true }` and the measure steps aside there.
+  const optOutOfDocsMeasure =
+    viewMode === "docs" && parameters.docsFullWidth === true
 
   return (
     <F0Provider
@@ -117,6 +124,13 @@ export const F0 = (Story: StoryFn, { parameters }: StoryContext) => {
       dataCollectionStorageHandler={dataCollectionLocalStorageHandler}
       renderDataTestIdAttribute={true}
     >
+      {optOutOfDocsMeasure && (
+        <span
+          data-docs-full-width
+          aria-hidden="true"
+          style={{ display: "none" }}
+        />
+      )}
       <Story />
     </F0Provider>
   )

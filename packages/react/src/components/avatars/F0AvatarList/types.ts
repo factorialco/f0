@@ -66,8 +66,16 @@ export type F0AvatarListProps = {
   noTooltip?: boolean
 
   /**
-   * The maximum number of avatars to display.
-   * @default 3
+   * The exact number of avatars to keep visible; the rest collapse into the
+   * `+N` counter. Not a soft cap — a provided `max` is forwarded as
+   * `OverflowList`'s `min` as well, so exactly this many avatars render even in
+   * a container too narrow to fit them (see `F0AvatarList.tsx`).
+   *
+   * There is no numeric default. Left unset, the visible count is
+   * container-driven: `OverflowList` measures the available width and shows as
+   * many avatars as fit, collapsing the remainder into the counter. So passing
+   * a number opts into a fixed footprint, and omitting it opts into filling
+   * the row.
    */
   max?: number
 
@@ -77,10 +85,17 @@ export type F0AvatarListProps = {
   remainingCount?: number
 
   /**
-   * The layout of the avatar list.
-   * - "fill" - Avatars will expand to fill the available width, with overflow items shown in a counter
-   * - "compact" - Avatars will be stacked tightly together up to the max limit, with remaining shown in counter
-   * @default "compact"
+   * @deprecated Never implemented — `F0AvatarList` has always ignored this
+   * prop — and not needed, because `max` already selects between the two
+   * layouts it described. Omit `max` for what this called `"fill"`:
+   * `OverflowList` measures the row and shows as many avatars as fit. Pass a
+   * `max` for `"compact"`: it doubles as `min`, so exactly that many stay
+   * visible. A separate switch could only contradict `max` — `layout="fill"`
+   * with `max={3}` has no coherent meaning — which is why this is going rather
+   * than getting an implementation.
+   * @removeIn 7.0.0
+   * @migration Remove the prop. If you were passing `layout="compact"` to cap
+   * the row, add `max={n}`: `"compact"` never capped anything.
    */
   layout?: "fill" | "compact"
 

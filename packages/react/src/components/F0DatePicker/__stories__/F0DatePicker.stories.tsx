@@ -3,14 +3,16 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { addMonths, subDays } from "date-fns"
 import MockDate from "mockdate"
 import { useState } from "react"
-import { expect, fn, within } from "storybook/test"
+import { expect, fn, screen, userEvent, within } from "storybook/test"
 
+import { F0Dialog } from "@/patterns/F0Dialog"
 import { Placeholder } from "@/icons/app"
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
 import { getInputFieldArgs } from "@/components/F0InputField/__stories__/F0InputField.args"
 
-import { CalendarView, DateRange } from "@/components/OneCalendar/types"
+import { DateRange } from "@/components/OneCalendar/types"
+import { GranularityDefinitionKey } from "@/components/OneCalendar/granularities"
 import { F0DatePicker } from "../index"
 import { predefinedPresets } from "../presets"
 import { datepickerSizes, DatePickerValue } from "../types"
@@ -141,7 +143,7 @@ const presets = [
   predefinedPresets.lastYear,
   {
     label: "Last 7 days",
-    granularity: "day" as CalendarView,
+    granularity: "day" as GranularityDefinitionKey,
     value: {
       from: subDays(today, 7),
       to: today,
@@ -165,6 +167,49 @@ export const WithDataTestId: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     await expect(canvas.getByTestId("my-test-date-picker")).toBeInTheDocument()
+  },
+}
+
+export const InsideDialog: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Inside a dialog the month and year dropdowns portal their listbox into the dialog container, outside the calendar's popover — so the calendar has to stay open while one is used, or neither is pickable. The play function covers the composition; the dismissal it guards against only reproduces with real OS-level input, so it is verified manually rather than here.",
+      },
+    },
+  },
+  args: {
+    label: "Effective date",
+    placeholder: "Select a date",
+  },
+  render: (args) => (
+    <F0Dialog
+      isOpen
+      title="Add employees"
+      description="Pick when the assignment starts."
+      onClose={fn()}
+      primaryAction={{ label: "Save", onClick: fn() }}
+    >
+      <F0DatePicker {...args} />
+    </F0Dialog>
+  ),
+  play: async ({ step }) => {
+    const dialog = within(await screen.findByRole("dialog"))
+
+    await step("open the calendar", async () => {
+      await userEvent.click(dialog.getByRole("textbox"))
+      await expect(await screen.findByRole("grid")).toBeInTheDocument()
+    })
+
+    // Stops at "the dropdown opens". Whether the calendar survives that — the
+    // behaviour this composition exists for — cannot be asserted here: the test
+    // runner drives synthetic events in a headless shell, where focus does not
+    // move the way it does for a real click, and the calendar closes either way.
+    await step("open the month dropdown", async () => {
+      await userEvent.click(screen.getByRole("combobox", { name: /month/i }))
+      await expect(await screen.findByRole("listbox")).toBeInTheDocument()
+    })
   },
 }
 

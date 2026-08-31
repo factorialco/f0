@@ -1,4 +1,4 @@
-import { format, isAfter, isBefore, isEqual } from "date-fns"
+import { format, isAfter, isBefore, isEqual, max, min } from "date-fns"
 import { Matcher } from "react-day-picker"
 
 import { GranularityDefinition } from "./granularities"
@@ -18,6 +18,16 @@ export const formatToPlaceholder = (formatStr: string): string => {
     .replace(/I/g, "nn") // ISO week number → nn
     .replace(/Q/g, "n") // Quarter number → n
 }
+
+/**
+ * The tighter of two optional bounds: the later of two lower bounds, the
+ * earlier of two upper ones. An absent bound constrains nothing.
+ */
+export const latestDate = (a?: Date, b?: Date): Date | undefined =>
+  a && b ? max([a, b]) : (a ?? b)
+
+export const earliestDate = (a?: Date, b?: Date): Date | undefined =>
+  a && b ? min([a, b]) : (a ?? b)
 
 export const toDateRange = (
   value: Date | DateRange | undefined | null

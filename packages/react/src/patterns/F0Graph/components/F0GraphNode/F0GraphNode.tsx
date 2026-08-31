@@ -17,6 +17,7 @@ import type { F0GraphNodeProps } from "./types"
 
 import { useF0GraphRenderConfigInternal } from "../../contexts"
 import { F0GraphNodeHoverCard } from "./F0GraphNodeHoverCard"
+import { F0GraphNodeStackedRow } from "./F0GraphNodeStackedRow"
 import { F0GraphNodeTags } from "./F0GraphNodeTags"
 import { tagColumn } from "./types"
 import { graphNodeContainerVariants } from "./variants"
@@ -56,6 +57,9 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
       actions,
       loading,
       hoverCard,
+      stacked,
+      trailing,
+      stackedHeight,
     },
     ref
   ) => {
@@ -119,20 +123,95 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
       }
     }
 
+    // Semantics shared by both shapes. A stacked row is a different silhouette
+    // of the same node, so role, ARIA, roving tabindex and keyboard handling
+    // come from here rather than being re-declared per shape. `aria-expanded`
+    // resolves to undefined for a row on its own, since a stacked group is only
+    // ever formed from leaf children.
+    const shellProps = {
+      ref: combinedRef,
+      id: nodeId ? `f0-graph-node-${nodeId}` : undefined,
+      role: "treeitem",
+      tabIndex: tabIndexProp,
+      "aria-expanded": hasChildren ? expanded : undefined,
+      "aria-level": level,
+      "aria-setsize": setSize,
+      "aria-posinset": posInSet,
+      "aria-selected": state === "selected",
+      "aria-owns": ariaOwns || undefined,
+      onClick,
+      onKeyDown: handleKeyDown,
+    }
+
     const isCompact = variant === "compact"
     const isDot = variant === "dot"
     const isDetail = variant === "detail"
-    // Node silhouette follows the avatar's own shape (see F0Avatar): a `person`
-    // avatar is a circle, so the node stays a circular dot / pill; every other
-    // avatar (`team`, `company`, `icon`, …) is a rounded square, so the node
-    // becomes a rounded-square card. No avatar → keep the circular default.
-    const isSquareAvatar = avatar != null && avatar.type !== "person"
     const filteredTags = tags
       ? visibleTagTypes
         ? tags.filter((t) => visibleTagTypes.has(tagColumn(t)))
         : tags
       : undefined
     const tagsVisible = isDetail && !!filteredTags && filteredTags.length > 0
+
+    /**
+     * The metadata row, shared verbatim by both shapes: a card hangs it under
+     * its pill, a stacked row under its strip. Only the width cap differs —
+     * a card caps at its own 256px box, a row at its (narrower) own width —
+     * so the tags centre under whichever shape they belong to.
+     */
+    const tagRow = (maxWidthClass: string) =>
+      tagsVisible ? (
+        <motion.div
+          key="tags"
+          initial={noMotion ? false : { opacity: 0, filter: "blur(3px)" }}
+          animate={{ opacity: 1, filter: "blur(0px)" }}
+          transition={
+            noMotion
+              ? { duration: 0 }
+              : { duration: 0.12, ease: [0.23, 1, 0.32, 1] }
+          }
+          className={maxWidthClass}
+          // Tags are informational: clicking a tag must not select the node.
+          // Two paths select a node: the node-level `onClick` (selection, plus
+          // any consumer `itemOnClick`) — swallowed here via stopPropagation —
+          // and the canvas `onPointerUp` handler, which selects and (by
+          // default) flies to the node, and fires on pointerup regardless of
+          // this click handler. `data-no-node-select` tells that handler to
+          // skip selection when the pointer went down on a tag.
+          data-no-node-select
+          onClick={(e) => e.stopPropagation()}
+        >
+          <F0GraphNodeTags tags={filteredTags!} />
+        </motion.div>
+      ) : null
+
+    // A row has no pill chrome, no dot↔compact avatar growth and no hover card,
+    // so it short-circuits every layer below. Its tags are not its own: the row
+    // renders the strip and the shared `tagRow` sits under it, capped at the
+    // row's width rather than the card's 256px.
+    if (stacked) {
+      return (
+        <div className="flex w-full flex-col items-center gap-1.5">
+          <F0GraphNodeStackedRow
+            shellProps={shellProps}
+            variant={variant}
+            state={state}
+            avatar={avatar}
+            title={title}
+            trailing={trailing}
+            loading={loading}
+            height={stackedHeight}
+          />
+          {tagRow("max-w-full")}
+        </div>
+      )
+    }
+
+    // Node silhouette follows the avatar's own shape (see F0Avatar): a `person`
+    // avatar is a circle, so the node stays a circular dot / pill; every other
+    // avatar (`team`, `company`, `icon`, …) is a rounded square, so the node
+    // becomes a rounded-square card. No avatar → keep the circular default.
+    const isSquareAvatar = avatar != null && avatar.type !== "person"
 
     // The hover card only makes sense in the compacted modes, where part of the
     // node's info is not on screen. In detail everything is already visible, so
@@ -146,24 +225,13 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
 
     const node = (
       <div
-        ref={combinedRef}
-        id={nodeId ? `f0-graph-node-${nodeId}` : undefined}
-        role="treeitem"
-        tabIndex={tabIndexProp}
-        aria-expanded={hasChildren ? expanded : undefined}
-        aria-level={level}
-        aria-setsize={setSize}
-        aria-posinset={posInSet}
-        aria-selected={state === "selected"}
-        aria-owns={ariaOwns || undefined}
+        {...shellProps}
         data-zoom-level={variant}
         className={cn(
           graphNodeContainerVariants({ variant, state }),
           "flex-col gap-1.5",
           "group outline-none"
         )}
-        onClick={onClick}
-        onKeyDown={handleKeyDown}
       >
         {/* Pill wrapper — variant-driven layout box for xyflow.
             Padding/dimensions snap once on variant change (no transition),
@@ -392,30 +460,7 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
           </NodeToolbar>
         )}
 
-        {tagsVisible && (
-          <motion.div
-            key="tags"
-            initial={noMotion ? false : { opacity: 0, filter: "blur(3px)" }}
-            animate={{ opacity: 1, filter: "blur(0px)" }}
-            transition={
-              noMotion
-                ? { duration: 0 }
-                : { duration: 0.12, ease: [0.23, 1, 0.32, 1] }
-            }
-            className="max-w-[256px]"
-            // Tags are informational: clicking a tag must not select the node.
-            // Two paths select a node: the node-level `onClick` (selection, plus
-            // any consumer `itemOnClick`) — swallowed here via stopPropagation —
-            // and the canvas `onPointerUp` handler, which selects and (by
-            // default) flies to the node, and fires on pointerup regardless of
-            // this click handler. `data-no-node-select` tells that handler to
-            // skip selection when the pointer went down on a tag.
-            data-no-node-select
-            onClick={(e) => e.stopPropagation()}
-          >
-            <F0GraphNodeTags tags={filteredTags!} />
-          </motion.div>
-        )}
+        {tagRow("max-w-[256px]")}
       </div>
     )
 

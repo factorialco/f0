@@ -10,6 +10,7 @@ import type {
 } from "../../internal/ReactFlowAdapters"
 import type { LayoutEngine, TreeNode } from "../../types"
 import type { ViewportRect } from "../../utils"
+import { STACKED_GROUP_PADDING, STACKED_NODE_GAP } from "../../constants"
 import { useGraphRenderModel } from "../useGraphRenderModel"
 
 // Stub the viewport rect so windowing is deterministic without a real canvas.
@@ -77,8 +78,8 @@ describe("useGraphRenderModel — expander affordance", () => {
 
     const expander = expanderFor(result.current.rfNodes, "cto")
     expect(expander?.type).toBe("expanderNode")
-    expect((expander?.data as ExpanderNodeData).count).toBe(81)
-    expect((expander?.data as ExpanderNodeData).loading).toBe(false)
+    expect((expander!.data as ExpanderNodeData).count).toBe(81)
+    expect((expander!.data as ExpanderNodeData).loading).toBe(false)
   })
 
   it("keeps the expander with a loading flag while an expanded node waits for children", () => {
@@ -89,7 +90,7 @@ describe("useGraphRenderModel — expander affordance", () => {
 
     const expander = expanderFor(result.current.rfNodes, "cto")
     expect(expander).toBeDefined()
-    expect((expander?.data as ExpanderNodeData).loading).toBe(true)
+    expect((expander!.data as ExpanderNodeData).loading).toBe(true)
   })
 
   it("removes the expander once an expanded node's children are loaded", () => {
@@ -279,6 +280,62 @@ describe("useGraphRenderModel — node windowing", () => {
   })
 })
 
+describe("useGraphRenderModel — tree forest roots (aria-owns)", () => {
+  beforeEach(() => {
+    mockViewportRect = null
+  })
+
+  it("returns only the parentless root; nested children are owned by their parent", () => {
+    // root → child → grandchild, all expanded and on-window. The `role="tree"`
+    // container owns just the forest root; child/grandchild are re-owned by their
+    // in-window parent node's own aria-owns (visibleChildIds).
+    const grandchild = treeNode("grandchild", "child", 0, [], 2)
+    const child = treeNode("child", "root", 1, [grandchild], 1)
+    const root = treeNode("root", null, 1, [child])
+    const { result } = renderModel(baseOptions([root], ["root", "child"]))
+
+    expect(result.current.treeRootNodeIds).toEqual(["root"])
+  })
+
+  it("returns every top-level root of a multi-root forest", () => {
+    const a = treeNode("a", null, 0)
+    const b = treeNode("b", null, 0)
+    const c = treeNode("c", null, 0)
+    const { result } = renderModel(baseOptions([a, b, c], []))
+
+    expect([...result.current.treeRootNodeIds].sort()).toEqual(["a", "b", "c"])
+  })
+
+  it("gives every rendered treeitem exactly one owner under windowing", () => {
+    // Only `leaf` is inside the viewport; its ancestors are materialized to keep
+    // the reporting line connected. Each rendered node is a forest root iff its
+    // parent is not itself rendered — so no treeitem is left orphaned and none is
+    // double-owned.
+    const leaf = treeNode("leaf", "mid", 0, [], 2)
+    const mid = treeNode("mid", "root", 1, [leaf], 1)
+    const root = treeNode("root", null, 1, [mid])
+    mockViewportRect = { minX: -10, minY: 4900, maxX: 200, maxY: 5200 }
+    const { result } = renderModel({
+      ...baseOptions([root], ["root", "mid"]),
+      enableNodeWindowing: true,
+      layoutEngineProp: fixedLayout({
+        root: { x: 0, y: 0 },
+        mid: { x: 0, y: 2500 },
+        leaf: { x: 0, y: 5000 },
+      }),
+    })
+
+    const rendered = new Set(result.current.renderedNodeIds)
+    for (const id of result.current.renderedNodeIds) {
+      const parentId = graphNodeData(result.current.rfNodes, id)?.graphNode
+        .parentId
+      const ownedByTree = result.current.treeRootNodeIds.includes(id)
+      expect(ownedByTree).toBe(parentId == null || !rendered.has(parentId))
+    }
+    expect(result.current.treeRootNodeIds).toContain("root")
+  })
+})
+
 describe("useGraphRenderModel — anchor viewport compensation", () => {
   beforeEach(() => {
     mockViewportRect = null
@@ -344,5 +401,210 @@ describe("useGraphRenderModel — anchor viewport compensation", () => {
     })
 
     expect(onAnchorReflow).not.toHaveBeenCalled()
+  })
+})
+
+describe("useGraphRenderModel — stacked nodes", () => {
+  const stackedRole = () => {
+    const levels = [
+      treeNode("l1", "role", 0, [], 2),
+      treeNode("l2", "role", 0, [], 2),
+      treeNode("l3", "role", 0, [], 2),
+    ]
+    const role: TreeNode<null> = {
+      ...treeNode("role", "root", 3, levels, 1),
+      stackNodes: true,
+    }
+    return { root: treeNode("root", null, 1, [role]), role, levels }
+  }
+
+  it("chains the rows to each other instead of fanning out from the parent", () => {
+    const { root } = stackedRole()
+    const { result } = renderModel(baseOptions([root], ["root", "role"]))
+
+    const edges = result.current.rfEdges
+
+    // One line from the parent into the first row, then row to row.
+    const fromParent = edges.filter((e) => e.source === "role")
+    expect(fromParent).toHaveLength(1)
+    expect(fromParent[0].target).toBe("l1")
+    expect(edges.find((e) => e.target === "l2")?.source).toBe("l1")
+    expect(edges.find((e) => e.target === "l3")?.source).toBe("l2")
+    // The spine carries no midpoint dots — those mark a relationship, and a
+    // row-to-row link is not one.
+    expect(edges.find((e) => e.target === "l2")?.data?.showDot).toBe(false)
+  })
+
+  it("wraps the rows in a group node they are children of", () => {
+    const { root } = stackedRole()
+    const { result } = renderModel(baseOptions([root], ["root", "role"]))
+
+    const nodes = result.current.rfNodes
+    const group = nodes.find((n) => n.id === "stack-role")
+    const rows = nodes.filter((n) => ["l1", "l2", "l3"].includes(n.id))
+
+    expect(group?.type).toBe("stackGroup")
+    // React Flow requires a parent to precede its children in the array.
+    expect(nodes.findIndex((n) => n.id === "stack-role")).toBeLessThan(
+      Math.min(...rows.map((r) => nodes.findIndex((n) => n.id === r.id)))
+    )
+    for (const row of rows) {
+      expect(row.parentId).toBe("stack-role")
+      // No `extent`, on purpose: nothing can drag these nodes, so the only thing
+      // it would constrain is a row taller than its reserved band — and it does
+      // that by clamping the row's position, which jumps it onto the row above.
+      expect(row.extent).toBeUndefined()
+    }
+  })
+
+  it("publishes one hover zone per stacked parent, spanning card to column", () => {
+    const { root } = stackedRole()
+    const { result } = renderModel(baseOptions([root], ["root", "role"]))
+
+    const zones = result.current.stackHoverZones
+    const nodes = result.current.rfNodes
+    const group = nodes.find((n) => n.id === "stack-role")!
+    const card = nodes.find((n) => n.id === "role")!
+
+    // Keyed by the parent itself, not by the group node's synthetic id: the
+    // affordance that reads this knows only its parent.
+    expect(zones).toHaveLength(1)
+    expect(zones[0].parentId).toBe("role")
+    // Asserted against the emitted group node rather than against constants, so
+    // the zone cannot silently drift from the box it is meant to cover.
+    expect(zones[0].y).toBe(Math.min(card.position.y, group.position.y))
+    expect(zones[0].y + zones[0].height).toBe(
+      group.position.y + (group.height ?? 0)
+    )
+    expect(zones[0].width).toBeGreaterThanOrEqual(group.width ?? 0)
+  })
+
+  it("publishes no hover zone when the group is not stacked", () => {
+    const { root, role } = stackedRole()
+    role.stackNodes = false
+    const { result } = renderModel(baseOptions([root], ["root", "role"]))
+
+    expect(result.current.stackHoverZones).toEqual([])
+  })
+
+  it("keeps the hover zones referentially stable across a re-render", () => {
+    const { root } = stackedRole()
+    const options = baseOptions([root], ["root", "role"])
+    const { result, rerender } = renderModel(options)
+
+    const first = result.current.stackHoverZones
+    rerender(options)
+
+    // The pointer handler reads these through a ref, so a re-render that changes
+    // nothing must not hand it a fresh array.
+    expect(result.current.stackHoverZones).toBe(first)
+  })
+
+  it("keeps a windowed row's spine neighbour so its connector still renders", () => {
+    const { root } = stackedRole()
+    // First pass without windowing, to learn where the built-in engine put the
+    // rows (a fixed layout engine cannot be used here: a custom engine turns
+    // stacking off, since only the built-in one can produce a column).
+    const probe = renderModel(baseOptions([root], ["root", "role"]))
+    const last = probe.result.current.getNodePosition("l3")!
+
+    // A window covering only the LAST row: the two rows above it fall outside,
+    // and neither the ancestry walk (they are siblings, not ancestors) nor the
+    // edge-crossing pass (the parent card is off-viewport too) would rescue them.
+    mockViewportRect = {
+      minX: last.x - 5,
+      minY: last.y - 5,
+      maxX: last.x + last.width + 5,
+      maxY: last.y + last.height + 5,
+    }
+    const { result } = renderModel({
+      ...baseOptions([root], ["root", "role"]),
+      enableNodeWindowing: true,
+    })
+    const ids = new Set(result.current.rfNodes.map((n) => n.id))
+
+    // The invariant: React Flow can route every edge it is handed. An edge whose
+    // source is missing from the store is dropped silently, which is what made
+    // the connector into the topmost visible row disappear.
+    for (const edge of result.current.rfEdges) {
+      expect(ids.has(edge.source)).toBe(true)
+      expect(ids.has(edge.target)).toBe(true)
+    }
+    // And specifically: l3 hangs off l2, so l2 had to come along.
+    expect(ids.has("l2")).toBe(true)
+    expect(result.current.rfEdges.find((e) => e.target === "l3")?.source).toBe(
+      "l2"
+    )
+    mockViewportRect = null
+  })
+
+  it("pads the wrapper by 8px around the rows it holds", () => {
+    const { root } = stackedRole()
+    const { result } = renderModel(baseOptions([root], ["root", "role"]))
+
+    const nodes = result.current.rfNodes
+    const group = nodes.find((n) => n.id === "stack-role")!
+    const rows = nodes
+      .filter((n) => ["l1", "l2", "l3"].includes(n.id))
+      .sort((a, b) => a.position.y - b.position.y)
+
+    // Positions are relative to the group, so the first row starts at the
+    // padding on both axes and the last one ends a padding short of the box.
+    expect(rows[0].position).toEqual({
+      x: STACKED_GROUP_PADDING,
+      y: STACKED_GROUP_PADDING,
+    })
+    // Row height is not seeded on the node (React Flow measures it), so read it
+    // back off the row-to-row spacing, which is one row plus the gap.
+    const rowHeight = rows[1].position.y - rows[0].position.y - STACKED_NODE_GAP
+    const last = rows[rows.length - 1]
+    expect(group.height).toBe(
+      last.position.y + rowHeight + STACKED_GROUP_PADDING
+    )
+    expect((group.width ?? 0) - (rows[0].width ?? 0)).toBe(
+      2 * STACKED_GROUP_PADDING
+    )
+  })
+
+  it("keeps an edge per child when the group is not stacked", () => {
+    const { root, role } = stackedRole()
+    role.stackNodes = false
+    const { result } = renderModel(baseOptions([root], ["root", "role"]))
+
+    expect(
+      result.current.rfEdges.filter((e) => e.source === "role")
+    ).toHaveLength(3)
+  })
+
+  it("flags the rows on the node data so renderNode can switch presentation", () => {
+    const { root } = stackedRole()
+    const { result } = renderModel(baseOptions([root], ["root", "role"]))
+
+    const stackedOf = (id: string) =>
+      (result.current.rfNodes.find((n) => n.id === id)!.data as GraphNodeData)
+        .stacked
+
+    expect(stackedOf("l1")).toBe(true)
+    expect(stackedOf("l3")).toBe(true)
+    expect(stackedOf("role")).toBeUndefined()
+  })
+
+  it("gives the rows the layout's shorter box, not the node card's", () => {
+    const { root } = stackedRole()
+    // Windowing only seeds dimensions when a viewport has been measured, so the
+    // rect has to cover the tree — without it the model leaves sizing to the DOM
+    // and there is nothing to assert.
+    mockViewportRect = { minX: -1000, minY: -1000, maxX: 1000, maxY: 1000 }
+    const { result } = renderModel({
+      ...baseOptions([root], ["root", "role"]),
+      enableNodeWindowing: true,
+    })
+
+    const row = result.current.rfNodes.find((n) => n.id === "l1")
+    const card = result.current.rfNodes.find((n) => n.id === "role")
+
+    expect(row?.height).toBeDefined()
+    expect(card?.height).toBeDefined()
+    expect(row!.height!).toBeLessThan(card!.height!)
   })
 })

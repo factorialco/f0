@@ -7,7 +7,23 @@ import { F0Heading } from "../index"
 
 # F0Heading
 
-Renders a page, section, or card title on the shared typographic scale, keeping visual size (`variant`) independent from document structure (`as`). For body copy, descriptions, and labels use `F0Text`; for the header of an entity page (employee, team, company) use `ResourceHeader`; for a titled section inside a page or form use `SectionHeader` — it already handles description, help center link, separator, and action.
+Renders a page, section, or card title on the shared typographic scale, keeping visual size (`variant`) independent from document structure (`as`). For body copy, descriptions, and labels use `F0Text`; for the header of an entity page (employee, team, company) use `F0ResourceHeader`; for a titled section inside a page or form use `SectionHeader` — it already handles description, help center link, separator, and action.
+
+> **Before using this component**, check if a higher-level component covers your use case:
+>
+> - **`F0ResourceHeader`** — entity pages (employee, team, company). Includes avatar, metadata, status, and actions.
+> - **`SectionHeader`** — sections inside a page or form. Includes description, help center link, separator, and action button.
+>
+> `F0Heading` is a low-level typography primitive. Use it only when neither of the above fits.
+
+## Overview
+
+### Purpose
+
+- Establishes visual hierarchy in pages, panels, and cards through a two-level size scale
+- Decouples visual weight from HTML semantics — the same visual style can render as any `h1`–`h6` tag
+- Keeps headings aligned with the design tokens regardless of context
+- Provides ellipsis truncation for headings in space-constrained layouts
 
 ## Anatomy
 
@@ -68,7 +84,7 @@ Renders a page, section, or card title on the shared typographic scale, keeping 
 **When not to use**
 
 - Body copy, descriptions, field labels, or table cell text — use `F0Text`
-- The header of an entity page (employee, team, company) — use `ResourceHeader`, which handles avatar, metadata, status, and actions
+- The header of an entity page (employee, team, company) — use `F0ResourceHeader`, which handles avatar, metadata, status, and actions
 - A section header inside a page or form — use `SectionHeader`, which handles description, help center link, separator, and action button
 - A short status or count next to a title (for example "3 pending") — use `F0TagStatus` alongside the heading, not a second heading
 

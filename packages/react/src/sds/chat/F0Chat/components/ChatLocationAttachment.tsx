@@ -1,16 +1,26 @@
+// The map's stylesheet loads eagerly with the chat: injecting a stylesheet at
+// runtime (when the lazy maplibre chunk lands mid-scroll) invalidates styles
+// document-wide, which is felt as a hitch on the first location attachment.
+import "maplibre-gl/dist/maplibre-gl.css"
+
 import { lazy, type ReactNode, Suspense } from "react"
 
 import { useI18n } from "@/lib/providers/i18n"
-import { cn } from "@/lib/utils"
+import { cn, focusRing } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
 
+import { useMountOnVisible } from "../hooks/useMountOnVisible"
+import { useChatSurface } from "../providers/ChatSurfaceProvider"
+import { useF0ChatEmit } from "../providers/F0ChatProvider"
 import { type F0ChatLocationAttachment } from "../types"
+import { CHAT_MEDIA_WIDE_WIDTH_CLASS } from "../utils/media-layout"
 
 // maplibre-gl is heavy — it lives in its own chunk, fetched on first render of
 // a location attachment (see LocationMap).
-const LocationMap = lazy(() => import("./LocationMap"))
+const loadLocationMap = () => import("./LocationMap")
+const LocationMap = lazy(loadLocationMap)
 
-const MAP_HEIGHT = 200
+const MAP_ASPECT_RATIO = 3 / 2
 
 const mapsUrl = ({ latitude, longitude }: F0ChatLocationAttachment): string =>
   `https://www.google.com/maps?q=${latitude},${longitude}`
@@ -26,38 +36,58 @@ const mapsUrl = ({ latitude, longitude }: F0ChatLocationAttachment): string =>
 export const ChatLocationAttachment = ({
   location,
   cornerClass = "rounded-xl",
+  surfaceClassName,
+  meta,
 }: {
   location: F0ChatLocationAttachment
   /** Chained-corner classes mirroring the bubble (see `bubbleCornerClass`). */
   cornerClass?: string
+  /** Sender-aware surface supplied by a transcript message. */
+  surfaceClassName?: string
+  /** Scrim + timestamp, when this card is the last thing in its message. */
+  meta?: ReactNode
 }): ReactNode => {
   const i18n = useI18n()
+  const emit = useF0ChatEmit()
+  const surface = useChatSurface()
+  const { ref, shouldMount } = useMountOnVisible()
   return (
     <a
+      ref={ref}
       href={mapsUrl(location)}
+      onClick={() => {
+        if (surface === "transcript") emit.onLocationOpened()
+      }}
       target="_blank"
       rel="noopener noreferrer"
       aria-label={location.name ?? i18n.chat.location}
       className={cn(
-        "flex w-96 min-w-0 max-w-full flex-col overflow-hidden no-underline",
-        "border border-solid border-f1-border-secondary bg-f1-background-tertiary",
-        "transition-colors hover:bg-f1-background-secondary",
-        cornerClass
+        "flex min-w-0 max-w-full flex-col overflow-hidden no-underline",
+        CHAT_MEDIA_WIDE_WIDTH_CLASS,
+        "border border-solid border-f1-border bg-f1-background-tertiary",
+        "transition-shadow hover:ring-1 hover:ring-inset hover:ring-f1-border-secondary",
+        focusRing("focus-visible:ring-inset"),
+        cornerClass,
+        surfaceClassName
       )}
       data-testid="chat-location-attachment"
     >
+      {/* 3:2 like mobile, so the map scales with the panel instead of holding a
+          fixed pixel height. Placeholder and mounted map share this box. */}
       <div
         className="pointer-events-none relative w-full"
-        style={{ height: MAP_HEIGHT }}
+        style={{ aspectRatio: MAP_ASPECT_RATIO }}
       >
-        <Suspense
-          fallback={<Skeleton className="h-full w-full rounded-none" />}
-        >
-          <LocationMap
-            latitude={location.latitude}
-            longitude={location.longitude}
-          />
-        </Suspense>
+        {shouldMount ? (
+          <Suspense fallback={<MapPlaceholder surface={surfaceClassName} />}>
+            <LocationMap
+              latitude={location.latitude}
+              longitude={location.longitude}
+            />
+          </Suspense>
+        ) : (
+          <MapPlaceholder surface={surfaceClassName} />
+        )}
         <div
           className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-full drop-shadow-md"
           data-testid="chat-location-pin"
@@ -72,7 +102,17 @@ export const ChatLocationAttachment = ({
             <circle cx={12} cy={12} r={4.5} fill="black" fillOpacity={0.3} />
           </svg>
         </div>
+        {meta}
       </div>
     </a>
   )
 }
+
+const MapPlaceholder = ({ surface }: { surface?: string }): ReactNode => (
+  <Skeleton
+    className={cn(
+      "h-full w-full rounded-none motion-reduce:animate-none",
+      surface
+    )}
+  />
+)

@@ -53,6 +53,7 @@ function buildTree<T>(nodes: GraphNode<T>[]): TreeBuilderResult<T> {
       childrenCount: node.childrenCount ?? 0,
       childrenLoaded: node.childrenLoaded ?? false,
       dataLoaded: node.dataLoaded,
+      stackNodes: node.stackNodes,
     }
     if (dagParentIds) {
       treeNode.dagParentIds = dagParentIds

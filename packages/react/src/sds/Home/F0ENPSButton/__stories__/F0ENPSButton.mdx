@@ -1,0 +1,167 @@
+import { Canvas, Controls, Meta } from "@storybook/addon-docs/blocks"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+import { I18nProvider, defaultTranslations } from "@/lib/providers/i18n"
+import { F0ENPSButton } from "../index"
+import * as Stories from "./F0ENPSButton.stories"
+
+<Meta of={Stories} />
+
+# ENPSButton
+
+Asks one eNPS question and takes the answer in a single press: five faces,
+worst to best, each already in the colour of the mood it stands for — and once
+one is pressed, it is the only one that keeps it.
+
+It is the answer control for Home's engagement widgets — the pulse check, the
+recommendation question — and a sibling of
+[AvatarPulse](/docs/domain-specific-home-avatarpulse--documentation), which shows an answer that has
+already been given.
+
+## Anatomy
+
+<Canvas of={Stories.Default} />
+
+<Controls of={Stories.Default} />
+
+Five faces from `pulses`, in scale order, drawn by `F0ButtonToggleGroup` as one
+single-select group.
+
+`labels` is required, and required in full: a face carries no text, so its label
+is the accessible name **and** the tooltip, and it has to read as the answer
+being given ("Very bad"), never as a number or a position. The component holds no
+copy of its own — the wording belongs to the question, so pass it already
+translated. `icons` is the same override for the glyphs, and defaults to the mood
+faces.
+
+The face is sized past `F0Icon`'s scale — 28px at `lg`, 24px at `md` — because
+it **is** the control: there is no label beside it to carry the meaning, so it
+takes the button, leaving 4px of room around it (6px at `lg`).
+
+Colour arrives in two steps, through `F0ButtonToggle`'s `color`: each face asks
+for its own mood (`mood-super-negative` through `mood-super-positive`) and the
+toggle draws what that colour means — a 0.1 fill, a 0.6 border and the glyph on
+the face that is chosen, a muted glyph on the ones that are not.
+
+**While the question is unanswered the row overrides the muting and colours every
+glyph** — the glyph only, never the fill or the border. Read cold, five grey
+faces are five buttons; in colour they are a scale, and the answer you are
+looking for is findable by its colour before its shape resolves. Fills and
+borders stay off because those are how a _chosen_ answer is drawn, and five
+tinted boxes would leave nothing for the answer to stand out against.
+
+The moment there is an answer the answered face keeps its fill, border and
+glyph, and the other four step back to `f1-icon-secondary` — one stop further
+than `F0ButtonToggle`'s own muting, because coming off five coloured glyphs that
+stop is not far enough for the answer to be the obvious one. They stay legible,
+though: any of them can still be pressed to change the answer.
+
+<Canvas of={Stories.Answered} />
+
+## Guidelines
+
+### When to use
+
+- A single eNPS or pulse question, answered on a five-point scale, where the
+  press **is** the answer — no separate submit.
+- The answer needs to stay visible afterwards, so the person can see what they
+  said (and change it, unless `required`).
+
+### When not to use
+
+- **A survey.** More than one question, validation, or a submit step is
+  `SurveyAnsweringForm`'s job — it owns the form, the schema and the rating
+  field.
+- **A rating that isn't a mood.** A 0–10 scale, stars, or a satisfaction number
+  are not faces; use the survey rating field so the scale stays legible.
+- **Showing an answer without taking one.** A pulse already given belongs on
+  `F0AvatarPulse` or in a chart, not on a control that invites a press.
+- **A general toggle group.** Anything that isn't the eNPS scale should use
+  `F0ButtonToggleGroup` directly — this component exists to fix the five faces,
+  their order and their colours in one place.
+
+### Do's and don'ts
+
+<DoDonts
+  do={{
+    description:
+      "Word each face as the answer the person is giving, and let the question above it carry the subject.",
+    guidelines: [
+      "Keep the five labels on one scale, worst to best",
+      "Leave the answer pressable so it can be corrected",
+      "Let the widget's heading ask the question",
+    ],
+    children: (
+      <I18nProvider translations={defaultTranslations}>
+        <div className="w-[360px]">
+          <F0ENPSButton
+            value="positive"
+            labels={{
+              superNegative: "Very bad",
+              negative: "Bad",
+              neutral: "Okay",
+              positive: "Good",
+              superPositive: "Very good",
+            }}
+          />
+        </div>
+      </I18nProvider>
+    ),
+  }}
+  dont={{
+    description:
+      'Don\'t label the faces with positions or scores — a tooltip that says "4 out of 5" tells the person nothing about what they are answering.',
+    guidelines: [
+      'Don\'t mix scales ("Bad" next to "Extremely likely")',
+      "Don't disable the answer the moment it is given, unless it really is final",
+      "Don't restate the question in the labels",
+    ],
+    children: (
+      <I18nProvider translations={defaultTranslations}>
+        <div className="w-[360px]">
+          <F0ENPSButton
+            value="positive"
+            labels={{
+              superNegative: "1",
+              negative: "2",
+              neutral: "3",
+              positive: "4",
+              superPositive: "5",
+            }}
+          />
+        </div>
+      </I18nProvider>
+    ),
+  }}
+/>
+
+## Examples
+
+A recommendation question brings its own wording:
+
+<Canvas of={Stories.Recommendation} />
+
+And a question that isn't about mood brings its own glyphs — a set that still
+reads worst-to-best:
+
+<Canvas of={Stories.CustomFaces} />
+
+An answer that has been sent stays coloured and stops being pressable:
+
+<Canvas of={Stories.Submitted} />
+
+## Accessibility
+
+- The scale is a single-select group, so each face is a `radio` carrying
+  `aria-checked` and named by its label — a screen reader announces "Bad, radio
+  button, not checked", not a glyph.
+- The tooltip repeats that name for sighted pointer users and opens on keyboard
+  focus too; it never carries information the label doesn't already have. It is
+  `instant` (100ms, not the default 700ms) — it is the only place a face's name
+  is written, and a wait per face makes the scale something you have to stop and
+  ask for.
+- The faces share one roving tab stop: `Tab` reaches the scale, the arrow keys
+  move along it, `Space` answers.
+- Colour is never the only signal — the answer carries `aria-checked`, and the
+  face itself changes shape from a frown to a smile.
+- Give the group a visible question of its own (the widget's heading); this
+  component renders the scale, not the prompt.
