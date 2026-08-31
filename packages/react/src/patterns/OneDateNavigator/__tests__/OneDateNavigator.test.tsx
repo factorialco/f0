@@ -43,6 +43,22 @@ describe("OneDateNavigator", () => {
     expect(trigger).toBeDefined()
   })
 
+  it("renders a periods value when no periods are supplied", () => {
+    render(
+      <OneDateNavigator
+        onSelect={vi.fn()}
+        granularities={["periods"]}
+        value={{
+          granularity: "periods",
+          value: { from: new Date(2026, 0, 25), to: new Date(2026, 1, 24) },
+        }}
+      />
+    )
+
+    expect(screen.getByRole("button", { name: "Next" })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Previous" })).toBeInTheDocument()
+  })
+
   it("handles disabled state", () => {
     const onSelect = vi.fn()
 

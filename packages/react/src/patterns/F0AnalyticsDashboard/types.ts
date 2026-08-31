@@ -9,6 +9,7 @@ import type {
   F0DataChartRadarSeries,
   F0DataChartScatterSeries,
 } from "@/kits/F0DataChart"
+import type { PendingQuote } from "@/kits/ai/F0AiChat/types"
 import type { InfoHintContent } from "@/lib/InfoHint"
 import type { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import type {
@@ -417,6 +418,41 @@ export type DashboardItem<
   | DashboardMetricItem<Filters>
   | DashboardCollectionItem<Filters>
 
+/** Report-style definitions accepted by a dashboard item's filter control. */
+export type DashboardItemFiltersDefinition<Keys extends string = string> =
+  FiltersDefinition<Keys>
+
+/** Controlled state emitted by a dashboard item's filter control. */
+export type DashboardItemFiltersState<
+  Definitions extends DashboardItemFiltersDefinition,
+> = FiltersState<Definitions>
+
+/**
+ * Per-widget filter configuration resolved by the host.
+ *
+ * Every item type shows the same filter control in its header on hover or
+ * keyboard focus, while touch-only devices keep it available without hover.
+ * Applied filters are signalled by the trigger counter without exposing their
+ * selected values in the widget header.
+ *
+ * The picker holds a draft state; `onChange` fires only when the user applies,
+ * with cleared or incomplete entries stripped from the emitted state.
+ *
+ * This lives on `F0AnalyticsDashboardProps` — not on the serializable item
+ * definition — so dashboard configs remain JSON-compatible.
+ */
+export interface DashboardItemFiltersConfig<
+  ItemFilters extends DashboardItemFiltersDefinition =
+    DashboardItemFiltersDefinition,
+> {
+  /** Filter definitions available for this widget. */
+  filters: ItemFilters
+  /** Currently applied filter state for this widget. */
+  value: DashboardItemFiltersState<ItemFilters>
+  /** Called with the new state when the user applies changes. */
+  onChange: (value: DashboardItemFiltersState<ItemFilters>) => void
+}
+
 // ---------------------------------------------------------------------------
 // Layout change descriptor — emitted by edit mode callbacks
 // ---------------------------------------------------------------------------
@@ -463,6 +499,18 @@ export interface F0AnalyticsDashboardAskAiTarget {
   title: string
   point?: F0AnalyticsDashboardPointClick
 }
+
+/**
+ * A built-in Ask One interaction together with the exact quote F0 staged.
+ *
+ * The quote object is kept by the chat composer until it is submitted or
+ * dismissed. Hosts can therefore associate hidden analytical context with
+ * this exact interaction without replacing F0's quote/open/focus behavior.
+ */
+export type F0AnalyticsDashboardAskAiTargetWithQuote =
+  F0AnalyticsDashboardAskAiTarget & {
+    quote: PendingQuote
+  }
 
 /**
  * Props for the F0AnalyticsDashboard component.
@@ -516,6 +564,16 @@ export interface F0AnalyticsDashboardProps<
    */
   items: DashboardItem<Filters>[]
   /**
+   * Resolve the per-widget filter configuration for each dashboard item.
+   *
+   * Return a config to show a filter icon in that widget's header (next to
+   * the fullscreen and menu buttons) opening a compact filter popover; return
+   * `undefined` to hide the control for that item.
+   */
+  itemFilters?: (
+    item: DashboardItem<Filters>
+  ) => DashboardItemFiltersConfig | undefined
+  /**
    * When true, enables drag-and-drop reordering, resize, and delete controls.
    */
   editMode?: boolean
@@ -567,6 +625,19 @@ export interface F0AnalyticsDashboardProps<
    * them apart by anything other than its presence.
    */
   onAskAi?: (item: F0AnalyticsDashboardAskAiTarget) => void
+  /**
+   * Observes built-in Ask One interactions without replacing them.
+   *
+   * Called immediately before F0 stages the quoted widget or point in the
+   * mounted chat. `quote` is the same object the composer later submits or
+   * dismisses, so a host can bind structured analytical context to the exact
+   * pending interaction and clean it up by quote identity.
+   *
+   * This observer does not make Ask One available by itself. A mounted,
+   * enabled AI chat still owns the built-in behavior; use `onAskAi` instead
+   * when the host must replace that behavior entirely.
+   */
+  onAskAiTarget?: (item: F0AnalyticsDashboardAskAiTargetWithQuote) => void
   /**
    * Navigation filter definitions (e.g. date-navigator).
    * Rendered above the grid alongside the regular filter bar.

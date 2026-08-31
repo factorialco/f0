@@ -10,7 +10,11 @@ import type {
   F0DataChartBarSeries,
 } from "../../types"
 
-import { paletteColor, resolveChartColorToken } from "../../utils/colors"
+import {
+  darkenChartColor,
+  paletteColor,
+  resolveChartColorToken,
+} from "../../utils/colors"
 import {
   buildBaseChartOptions,
   buildItemTooltip,
@@ -201,6 +205,51 @@ function resolveColor(series: F0DataChartBarSeries, index: number): string {
   return series.color
     ? resolveChartColorToken(series.color)
     : paletteColor(index)
+}
+
+/**
+ * Fill for a bar that ran past its target: the stretch beyond the target in a
+ * darker shade of the bar's own colour, split at the exact target.
+ *
+ * One gradient with a hard stop rather than a second stacked series, so the bar
+ * stays a single mark — its label, its tooltip, its rounded end and its share
+ * of a stack all keep counting the whole value.
+ */
+function overachievementFill(
+  color: string,
+  value: number,
+  target: number,
+  isVertical: boolean
+): echarts.graphic.LinearGradient {
+  // Offset 0 is the far end from the axis (top of a column, right of a row),
+  // so the darker stretch runs from there down to the target.
+  const split = (value - target) / value
+  const darker = darkenChartColor(color)
+  return new echarts.graphic.LinearGradient(
+    ...(isVertical
+      ? ([0, 0, 0, 1] as [number, number, number, number])
+      : ([1, 0, 0, 0] as [number, number, number, number])),
+    [
+      { offset: 0, color: darker },
+      { offset: split, color: darker },
+      { offset: split, color },
+      { offset: 1, color },
+    ]
+  )
+}
+
+/**
+ * The part of a point that passed its target, or `undefined` when it didn't.
+ * Negative bars are left alone: they grow away from zero, so "past the target"
+ * has no single reading.
+ */
+function overachievesTarget(
+  point: F0DataChartBarDataPoint
+): number | undefined {
+  const value = getValue(point)
+  const target = getTarget(point)
+  if (target === undefined || value <= 0 || value <= target) return undefined
+  return target
 }
 
 /** Check whether a series contains any target values */
@@ -464,6 +513,7 @@ function buildSeriesEntries(
   isVertical: boolean,
   showLabels: boolean,
   stacked: boolean,
+  highlightOverachievement: boolean,
   labelColor: string,
   stackGapColor: string,
   labelFontSize: number,
@@ -489,13 +539,25 @@ function buildSeriesEntries(
     const value = getValue(point)
     const pointColor = getPointColor(point)
     const pointBorderRadius = resolveBorderRadius?.(index, dataIndex, value)
-    if (pointColor === undefined && pointBorderRadius === undefined) {
+    const passedTarget = highlightOverachievement
+      ? overachievesTarget(point)
+      : undefined
+    const fill =
+      passedTarget === undefined
+        ? pointColor
+        : overachievementFill(
+            pointColor ?? color,
+            value,
+            passedTarget,
+            isVertical
+          )
+    if (fill === undefined && pointBorderRadius === undefined) {
       return value
     }
     return {
       value,
       itemStyle: {
-        ...(pointColor !== undefined && { color: pointColor }),
+        ...(fill !== undefined && { color: fill }),
         ...(pointBorderRadius !== undefined && {
           borderRadius: pointBorderRadius,
         }),
@@ -848,6 +910,8 @@ export function useBarChartOptions(
     series,
     orientation = "vertical",
     stacked = false,
+    highlightOverachievement = false,
+    showTargetProgress = false,
     showLegend = true,
     showGrid = true,
     showLabels = false,
@@ -1019,6 +1083,7 @@ export function useBarChartOptions(
         isVertical,
         showLabels,
         stacked,
+        highlightOverachievement,
         theme.colors.foregroundSecondary,
         theme.colors.containerBackground ?? theme.colors.background,
         resolvedLabelFontSize,
@@ -1273,6 +1338,12 @@ export function useBarChartOptions(
                   value: formatTooltipValue(target),
                   label: i18n.dataChart.tooltip.target,
                 },
+                showTargetProgress &&
+                  target !== undefined &&
+                  target !== 0 && {
+                    value: `${((value / target) * 100).toFixed(1)}%`,
+                    label: i18n.dataChart.tooltip.ofTarget,
+                  },
               ],
             },
             theme
@@ -1361,6 +1432,8 @@ export function useBarChartOptions(
     series,
     orientation,
     stacked,
+    highlightOverachievement,
+    showTargetProgress,
     showLegend,
     showGrid,
     showLabels,

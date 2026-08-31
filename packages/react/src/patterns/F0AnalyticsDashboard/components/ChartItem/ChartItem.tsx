@@ -38,7 +38,9 @@ import type {
   DashboardChartConfig,
   DashboardChartData,
   DashboardChartItem,
+  DashboardItemFiltersConfig,
   F0AnalyticsDashboardAskAiTarget,
+  F0AnalyticsDashboardAskAiTargetWithQuote,
   F0AnalyticsDashboardPointClick,
 } from "../../types"
 
@@ -799,9 +801,11 @@ interface ChartItemProps<Filters extends FiltersDefinition> {
   item: DashboardChartItem<Filters>
   filters: FiltersState<Filters>
   actions?: DropdownItem[]
+  itemFilters?: DashboardItemFiltersConfig
   editMode?: boolean
   handleDelete?: (itemId: string) => void
   onAskAi?: (item: F0AnalyticsDashboardAskAiTarget) => void
+  onAskAiTarget?: (item: F0AnalyticsDashboardAskAiTargetWithQuote) => void
   onTransformChart?: (
     itemId: string,
     newType: string,
@@ -815,9 +819,11 @@ export function ChartItem<Filters extends FiltersDefinition>({
   item,
   filters,
   actions,
+  itemFilters,
   editMode,
   handleDelete,
   onAskAi,
+  onAskAiTarget,
   onTransformChart,
   isFullscreen,
   onFullscreenChange,
@@ -851,10 +857,11 @@ export function ChartItem<Filters extends FiltersDefinition>({
     Record<string, boolean> | undefined
   >()
   const enabled = item.useDashboardFilters !== false
+  const itemFiltersKey = JSON.stringify(itemFilters?.value ?? {})
   const { data, isLoading, error, retry } = useDashboardItemData<
     Filters,
     DashboardChartData
-  >(item.fetchData, filters, enabled)
+  >(item.fetchData, filters, enabled, itemFiltersKey)
   const chartContainerRef = useRef<HTMLDivElement>(null)
   const keyboardPointTriggerRef = useRef<HTMLButtonElement | null>(null)
 
@@ -913,9 +920,11 @@ export function ChartItem<Filters extends FiltersDefinition>({
 
       if (!chartProps) return
 
-      setPendingQuote({
+      const quote = {
         text: buildPointQuoteText(item.title, chartProps, point),
-      })
+      }
+      onAskAiTarget?.({ id: item.id, title: item.title, point, quote })
+      setPendingQuote(quote)
       // Fullscreen covers the chat, matching the widget-level Ask One action.
       if (isFullscreen) onFullscreenChange?.(false)
       // Without this the quote would land in a panel the user cannot see.
@@ -927,6 +936,7 @@ export function ChartItem<Filters extends FiltersDefinition>({
       item,
       chartProps,
       onAskAi,
+      onAskAiTarget,
       isFullscreen,
       onFullscreenChange,
       setPendingQuote,
@@ -1141,9 +1151,11 @@ export function ChartItem<Filters extends FiltersDefinition>({
       onRetry={unrenderableChart ? undefined : retry}
       skeleton={chartSkeleton(safeChart)}
       actions={allActions}
+      itemFilters={itemFilters}
       editMode={editMode}
       handleDelete={handleDelete}
       onAskAi={onAskAi}
+      onAskAiTarget={onAskAiTarget}
       itemId={item.id}
       chartTypeOptions={chartTypeOptions}
       isFullscreen={isFullscreen}

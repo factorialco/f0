@@ -32,6 +32,8 @@ const virtuosoHarness = vi.hoisted(() => ({
   minOverscanItemCount: undefined as
     | { top: number; bottom: number }
     | undefined,
+  heightEstimates: undefined as number[] | undefined,
+  defaultItemHeight: undefined as number | undefined,
   skipAnimationFrameInResizeObserver: false,
 }))
 
@@ -46,6 +48,8 @@ type MockVirtuosoProps = {
   data?: ChatRow[]
   context: MockScrollerProps["context"]
   components?: {
+    Header?: ComponentType<Record<string, never>>
+    Footer?: ComponentType<Record<string, never>>
     Scroller?: ComponentType<MockScrollerProps>
     List?: ComponentType<
       HTMLAttributes<HTMLDivElement> & {
@@ -70,6 +74,8 @@ type MockVirtuosoProps = {
   className?: string
   increaseViewportBy?: { top: number; bottom: number }
   minOverscanItemCount?: { top: number; bottom: number }
+  heightEstimates?: number[]
+  defaultItemHeight?: number
   skipAnimationFrameInResizeObserver?: boolean
 }
 
@@ -88,6 +94,8 @@ vi.mock("react-virtuoso", () => ({
       className,
       increaseViewportBy,
       minOverscanItemCount,
+      heightEstimates,
+      defaultItemHeight,
       skipAnimationFrameInResizeObserver,
     }: MockVirtuosoProps,
     _ref
@@ -99,6 +107,8 @@ vi.mock("react-virtuoso", () => ({
     virtuosoHarness.itemsRendered = itemsRendered
     virtuosoHarness.increaseViewportBy = increaseViewportBy
     virtuosoHarness.minOverscanItemCount = minOverscanItemCount
+    virtuosoHarness.heightEstimates = heightEstimates
+    virtuosoHarness.defaultItemHeight = defaultItemHeight
     virtuosoHarness.skipAnimationFrameInResizeObserver = Boolean(
       skipAnimationFrameInResizeObserver
     )
@@ -154,13 +164,17 @@ vi.mock("react-virtuoso", () => ({
     })
     const Scroller = components?.Scroller
     const List = components?.List
+    const Header = components?.Header
+    const Footer = components?.Footer
     const list = List ? (
       <List
         context={context}
         data-testid="virtuoso-item-list"
         style={{ visibility: listVisible ? "visible" : "hidden" }}
       >
+        {Header ? <Header /> : null}
         {content}
+        {Footer ? <Footer /> : null}
       </List>
     ) : (
       content
@@ -244,6 +258,8 @@ afterEach(() => {
   virtuosoHarness.revealList = undefined
   virtuosoHarness.increaseViewportBy = undefined
   virtuosoHarness.minOverscanItemCount = undefined
+  virtuosoHarness.heightEstimates = undefined
+  virtuosoHarness.defaultItemHeight = undefined
   virtuosoHarness.skipAnimationFrameInResizeObserver = false
 })
 
@@ -300,11 +316,31 @@ describe("chat scrolling performance wiring", () => {
       top: 1200,
       bottom: 200,
     })
+    // The downward pixel budget is smaller than one media row, so the item
+    // floor is the reader's whole runway there — and now that media fetches on
+    // mount, that runway is what it gets to arrive in.
     expect(virtuosoHarness.minOverscanItemCount).toEqual({
       top: 6,
-      bottom: 3,
+      bottom: 5,
     })
     expect(virtuosoHarness.skipAnimationFrameInResizeObserver).toBe(true)
+
+    // One estimate per rendered row, not one number for every row: this list
+    // runs from a 24px delivery footer to a ~380px photo album, and Virtuoso
+    // positions the entry and picks its render window from these.
+    expect(virtuosoHarness.heightEstimates).toHaveLength(
+      virtuosoHarness.itemCount
+    )
+    expect(virtuosoHarness.heightEstimates?.every((value) => value > 0)).toBe(
+      true
+    )
+    expect(virtuosoHarness.defaultItemHeight).toBe(64)
+
+    // The transcript's top breathing room is a constant Header, mirroring the
+    // bottom gap — never a smaller padding on whatever row is currently first,
+    // which would make a row's measured height depend on its position.
+    expect(screen.getByTestId("chat-top-gap")).toBeInTheDocument()
+    expect(screen.getByTestId("chat-bottom-gap")).toBeInTheDocument()
 
     const viewport = container.querySelector<HTMLElement>(
       "[data-radix-scroll-area-viewport]"
@@ -409,7 +445,7 @@ describe("chat scrolling performance wiring", () => {
     expect(screen.getAllByTestId("skeleton")).toHaveLength(2)
   })
 
-  it("coalesces a burst of measure-strip corrections before paint", async () => {
+  it("writes measure-strip corrections synchronously, skipping no-op repeats", async () => {
     const { container } = render(
       <F0ChatProvider runtime={makeRuntime([locationMessage("m1", 41.3894)])}>
         <F0Chat />
@@ -430,14 +466,19 @@ describe("chat scrolling performance wiring", () => {
       set: heightSetter,
     })
 
+    // Virtuoso reads this scroller's scrollHeight synchronously inside its own
+    // ResizeObserver, and the strip is what produces that height — deferring
+    // the write made it publish a stale one, and the late shrink then let the
+    // browser clamp scrollTop mid-resize.
     await act(async () => {
       virtuosoHarness.setHeight?.(100)
       virtuosoHarness.setHeight?.(200)
       virtuosoHarness.setHeight?.(300)
+      virtuosoHarness.setHeight?.(300)
       await Promise.resolve()
     })
 
-    expect(heightSetter).toHaveBeenCalledOnce()
-    expect(heightSetter).toHaveBeenCalledWith("300px")
+    expect(heightSetter).toHaveBeenCalledTimes(3)
+    expect(heightSetter).toHaveBeenLastCalledWith("300px")
   })
 })

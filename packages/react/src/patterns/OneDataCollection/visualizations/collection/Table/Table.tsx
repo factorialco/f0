@@ -448,7 +448,12 @@ export const TableCollection = <
   // whenever a consumer passed an inline `defaultExpanded` predicate.
   return (
     <div className="flex h-full min-h-0 flex-col gap-4">
-      <NestedDataProvider defaultExpanded={defaultExpanded}>
+      <NestedDataProvider
+        defaultExpanded={defaultExpanded}
+        currentFilters={source.currentFilters}
+        currentSortings={source.currentSortings}
+        currentNavigationFilters={source.currentNavigationFilters}
+      >
         <div
           ref={tableContainerRef}
           className={cn(

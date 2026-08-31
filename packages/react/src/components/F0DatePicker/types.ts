@@ -1,3 +1,4 @@
+import { GranularityDefinitionKey } from "@/components/OneCalendar/granularities"
 import { DateStringFormat } from "@/components/OneCalendar/granularities/types"
 import {
   DatePickerPopupProps,
@@ -13,7 +14,6 @@ export type DatePickerValue = DatePickerPopupValue
 
 export type F0DatePickerProps = Pick<
   DatePickerPopupProps,
-  | "granularities"
   | "minDate"
   | "maxDate"
   | "presets"
@@ -21,6 +21,8 @@ export type F0DatePickerProps = Pick<
   | "onOpenChange"
   | "selectOnCellOnly"
 > & {
+  /** The picker has no `periods` prop, so it can only offer the calendar granularities. */
+  granularities?: GranularityDefinitionKey[]
   showIcon?: boolean
   /** Controls how the selected date is displayed in the input. Defaults to "long" (e.g. "01 Aug 2025"). Use "default" for dd/MM/yyyy. */
   displayFormat?: DateStringFormat

@@ -38,6 +38,7 @@ function _OneDateNavigator({
   onCompareToChange,
   value,
   dataTestId,
+  periods,
   ...props
 }: OneDatePickerProps) {
   // A `value`/`defaultValue` restored from persisted storage (e.g. a
@@ -74,9 +75,12 @@ function _OneDateNavigator({
 
   const granularityDefinition = useMemo(() => {
     const granularityKey = localValue?.granularity ?? "day"
-    const definitions = getGranularityDefinitions(effectiveWeekStartsOn)
+    const definitions = getGranularityDefinitions({
+      weekStartsOn: effectiveWeekStartsOn,
+      periods,
+    })
     return definitions[granularityKey]
-  }, [localValue?.granularity, effectiveWeekStartsOn])
+  }, [localValue?.granularity, effectiveWeekStartsOn, periods])
 
   const handleSelect = (value: DatePickerValue | undefined) => {
     setLocalValue(value)
@@ -113,6 +117,7 @@ function _OneDateNavigator({
         defaultCompareTo={defaultCompareTo}
         onCompareToChange={handleCompareToChange}
         weekStartsOn={effectiveWeekStartsOn}
+        periods={periods}
         asChild
       >
         <DatePickerTrigger

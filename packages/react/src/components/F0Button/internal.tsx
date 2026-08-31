@@ -31,6 +31,7 @@ const ButtonInternal = forwardRef<
     icon,
     iconPosition = "left",
     emoji,
+    emojiMode,
     variant = "default",
     size = "md",
     fontSize,
@@ -76,6 +77,15 @@ const ButtonInternal = forwardRef<
   const shouldHideLabel = hideLabel || emoji
 
   const buttonLabel = (label ?? "").toString()
+  // A count of 0 (or no value) shows nothing: no pill, no padding change.
+  const hasCounter = counterValue !== undefined && counterValue > 0
+  // The counter matches the button height — 20px on md/lg, 16px on sm.
+  const counterSize = size === "sm" ? "sm" : "md"
+  // A dark counter pill: always on the primary (default) solid field, and on
+  // critical only while hovered, where the field darkens enough to wash out the
+  // light pill. Other variants (including promote) keep the neutral counter.
+  const counterIsDark =
+    variant === "default" || (variant === "critical" && isHovered)
   const buttonFontSize = fontSize ?? size
 
   const iconNode = icon ? (
@@ -123,6 +133,17 @@ const ButtonInternal = forwardRef<
       className={cn(
         "max-w-full",
         block && "w-full",
+        // A trailing counter has its own bordered edge, so the button's right
+        // padding tightens 4px (Figma "ButtonCounter"); the left is unchanged.
+        // Important because the override and the size variant's `px` both target
+        // `.main` as arbitrary variants, which tailwind-merge leaves unmerged —
+        // so the cascade, not class order, has to decide, and `!` guarantees it.
+        hasCounter &&
+          {
+            sm: "[&_.main]:!pr-1",
+            md: "[&_.main]:!pr-2",
+            lg: "[&_.main]:!pr-3",
+          }[size],
         withoutDisabledAppearance &&
           disabled &&
           "disabled:pointer-events-none disabled:opacity-100 disabled:cursor-default [&[aria-disabled=true]]:opacity-100 [&[aria-disabled=true]]:cursor-default",
@@ -152,6 +173,7 @@ const ButtonInternal = forwardRef<
         {emoji && (
           <EmojiImage
             emoji={emoji}
+            mode={emojiMode}
             size={size === "sm" ? "sm" : "md"}
             alt={""}
           />
@@ -171,8 +193,17 @@ const ButtonInternal = forwardRef<
         )}
         {iconPosition === "right" && iconNode}
         {append}{" "}
-        {counterValue && (
-          <Counter value={counterValue} size="sm" type="selected" />
+        {hasCounter && (
+          <span
+            className={cn(
+              "ml-1 inline-flex items-center",
+              // Scoping the dark theme to just the counter gives it a dark
+              // pill regardless of the app theme.
+              counterIsDark && "dark"
+            )}
+          >
+            <Counter value={counterValue} size={counterSize} type="default" />
+          </span>
         )}
       </div>
     </Action>

@@ -11,17 +11,19 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
 
-import { useTranscriptHeavyPreview } from "../hooks/useTranscriptHeavyPreview"
 import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
 import { useChatDocumentPreview } from "../providers/ChatUIProvider"
+import { useChatSurface } from "../providers/ChatSurfaceProvider"
+import { useF0ChatEmit } from "../providers/F0ChatProvider"
 import { type F0ChatFileAttachment } from "../types"
-import { type ChatDocumentKind } from "../utils/attachments"
+import { attachedKindOf, type ChatDocumentKind } from "../utils/attachments"
 import { triggerDownload } from "../utils/download"
 import { ClampText } from "./ClampText"
 
 // Every snapshot renderer is heavy in its own way (pdf.js, SheetJS,
-// docx-preview) — each lives in its own chunk, fetched the first time a card
-// of that kind scrolls into view.
+// docx-preview) — each stays in its own chunk. The card itself mounts with its
+// row: Suspense covers the chunk, and the skeleton under the snapshot covers
+// the renderers, which mount fast but PAINT asynchronously.
 const loadPdfThumbnail = () => import("./ChatPdfThumbnail")
 const loadSheetThumbnail = () => import("./ChatSheetThumbnail")
 const loadDocxThumbnail = () => import("./ChatDocxThumbnail")
@@ -31,14 +33,8 @@ const ChatSheetThumbnail = lazy(loadSheetThumbnail)
 const ChatDocxThumbnail = lazy(loadDocxThumbnail)
 const ChatTextThumbnail = lazy(loadTextThumbnail)
 
-const DOCUMENT_LOADERS: Record<ChatDocumentKind, () => Promise<unknown>> = {
-  pdf: loadPdfThumbnail,
-  sheet: loadSheetThumbnail,
-  docx: loadDocxThumbnail,
-  text: loadTextThumbnail,
-}
-
-const CARD_WIDTH = 288
+/** Matches the transcript's shared media width at its cap (see media-layout). */
+const CARD_WIDTH = 384
 const THUMB_HEIGHT = 160
 
 /**
@@ -77,13 +73,17 @@ export const ChatDocumentAttachmentCard = ({
   const i18n = useI18n()
   const { reducedMotion } = useChatRenderConfig()
   const { openDocumentPreview } = useChatDocumentPreview()
+  const emit = useF0ChatEmit()
+  const surface = useChatSurface()
   const [failed, setFailed] = useState(false)
   const [rendered, setRendered] = useState(false)
-  const { ref, shouldMount } = useTranscriptHeavyPreview(DOCUMENT_LOADERS[kind])
   const fallbackAction = action ?? {
     label: i18n.t("chat.downloadNamedFile", { name: file.name }),
     icon: Download,
-    onClick: () => triggerDownload(file.url, file.name),
+    onClick: () => {
+      triggerDownload(file.url, file.name)
+      emit.onAttachmentDownloaded({ kind: attachedKindOf(file) })
+    },
   }
   const cardWidth = compact ? 64 : CARD_WIDTH
   const thumbHeight = compact ? "100%" : THUMB_HEIGHT
@@ -129,7 +129,6 @@ export const ChatDocumentAttachmentCard = ({
 
   return (
     <div
-      ref={ref}
       className={cn(
         "group/attachment relative flex max-w-full flex-col overflow-hidden border border-solid border-f1-border-secondary bg-f1-background",
         compact && "box-border h-16 w-16",
@@ -162,7 +161,11 @@ export const ChatDocumentAttachmentCard = ({
       )}
       <button
         type="button"
-        onClick={() => openDocumentPreview(file)}
+        onClick={() => {
+          openDocumentPreview(file)
+          // Opening your own not-yet-sent draft is not consuming shared content.
+          if (surface === "transcript") emit.onDocumentOpened({ kind })
+        }}
         disabled={previewDisabled}
         aria-busy={!rendered ? true : undefined}
         aria-label={i18n.t("chat.openNamedDocument", { name: file.name })}
@@ -179,53 +182,50 @@ export const ChatDocumentAttachmentCard = ({
         <Skeleton
           className={cn(
             "absolute inset-0 h-full w-full rounded-none motion-reduce:animate-none",
-            !shouldMount && "animate-none",
             surfaceClassName
           )}
         />
-        {shouldMount && (
-          <div
-            className={cn(
-              "relative",
-              !reducedMotion && "transition-opacity duration-200",
-              rendered ? "opacity-100" : "opacity-0"
+        <div
+          className={cn(
+            "relative",
+            !reducedMotion && "transition-opacity duration-200",
+            rendered ? "opacity-100" : "opacity-0"
+          )}
+          data-testid="chat-document-snapshot"
+        >
+          <Suspense fallback={null}>
+            {kind === "pdf" && (
+              <ChatPdfThumbnail
+                url={file.url}
+                width={cardWidth - 2}
+                onError={() => setFailed(true)}
+                onRendered={() => setRendered(true)}
+              />
             )}
-            data-testid="chat-document-snapshot"
-          >
-            <Suspense fallback={null}>
-              {kind === "pdf" && (
-                <ChatPdfThumbnail
-                  url={file.url}
-                  width={cardWidth - 2}
-                  onError={() => setFailed(true)}
-                  onRendered={() => setRendered(true)}
-                />
-              )}
-              {kind === "sheet" && (
-                <ChatSheetThumbnail
-                  url={file.url}
-                  onError={() => setFailed(true)}
-                  onRendered={() => setRendered(true)}
-                />
-              )}
-              {kind === "docx" && (
-                <ChatDocxThumbnail
-                  url={file.url}
-                  width={cardWidth - 2}
-                  onError={() => setFailed(true)}
-                  onRendered={() => setRendered(true)}
-                />
-              )}
-              {kind === "text" && (
-                <ChatTextThumbnail
-                  url={file.url}
-                  onError={() => setFailed(true)}
-                  onRendered={() => setRendered(true)}
-                />
-              )}
-            </Suspense>
-          </div>
-        )}
+            {kind === "sheet" && (
+              <ChatSheetThumbnail
+                url={file.url}
+                onError={() => setFailed(true)}
+                onRendered={() => setRendered(true)}
+              />
+            )}
+            {kind === "docx" && (
+              <ChatDocxThumbnail
+                url={file.url}
+                width={cardWidth - 2}
+                onError={() => setFailed(true)}
+                onRendered={() => setRendered(true)}
+              />
+            )}
+            {kind === "text" && (
+              <ChatTextThumbnail
+                url={file.url}
+                onError={() => setFailed(true)}
+                onRendered={() => setRendered(true)}
+              />
+            )}
+          </Suspense>
+        </div>
       </button>
       {compact && action && (
         <>

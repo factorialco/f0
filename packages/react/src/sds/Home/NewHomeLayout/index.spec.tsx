@@ -57,6 +57,11 @@ const RAIL = [
   widget("events", { hasUpdates: true }),
 ]
 
+const DWELL_MS = 250
+
+const holdHover = () =>
+  act(() => new Promise<void>((resolve) => setTimeout(resolve, DWELL_MS)))
+
 /**
  * An icon a test can NAME. The real ones are anonymous paths, and a glyph that
  * flashes between two of them is only testable if the two can be told apart.
@@ -192,6 +197,24 @@ describe("NewHomeLayout", () => {
       expect(screen.queryByLabelText("Edit Home")).not.toBeInTheDocument()
     })
 
+    test("names the collapse toggle with f0's tooltip, not a native title", async () => {
+      renderLayout(1400)
+
+      const toggle = screen.getByLabelText("Collapse widgets panel")
+      // The browser's own late, unstyled tooltip is gone — f0's is the name.
+      expect(toggle).not.toHaveAttribute("title")
+
+      await userEvent.hover(toggle)
+
+      expect(
+        await screen.findByRole(
+          "tooltip",
+          { name: /Collapse widgets panel/ },
+          { timeout: 3000 }
+        )
+      ).toBeInTheDocument()
+    })
+
     /**
      * Arranging is always available, so the chrome for it is on the widgets
      * themselves: the unlocked one carries a menu, the pinned one carries none.
@@ -210,6 +233,65 @@ describe("NewHomeLayout", () => {
       expect(screen.getByLabelText("Expand widgets panel")).toBeInTheDocument()
       // Collapsed, each widget is a button rather than a card.
       expect(screen.getByRole("button", { name: "clock" })).toBeInTheDocument()
+    })
+  })
+
+  /**
+   * A column's catalog can RUN OUT — a main column that only takes one kind of
+   * widget has nothing left to offer once that widget is on it — and a "+" that
+   * opens an empty picker is an offer the app cannot keep. Naming the sides that
+   * still take widgets withdraws the offer without withdrawing the arranging.
+   */
+  describe("addableWidgetContainers", () => {
+    /** Both columns' add affordances, by the name the provider gives them. */
+    const addOffers = () => screen.queryAllByLabelText("Add widget")
+
+    test("offers both columns when it is not given", () => {
+      renderLayout(1400, { leftWidgets: [widget("communities")] })
+
+      expect(addOffers()).toHaveLength(2)
+    })
+
+    test("withdraws the offer from a column it leaves out", () => {
+      renderLayout(1400, {
+        leftWidgets: [widget("communities")],
+        addableWidgetContainers: ["right"],
+      })
+
+      expect(addOffers()).toHaveLength(1)
+    })
+
+    test("leaves that column arrangeable — only the offer goes", () => {
+      renderLayout(1400, {
+        leftWidgets: [widget("communities")],
+        addableWidgetContainers: ["right"],
+        onRemoveWidget: () => {},
+      })
+
+      // The main widget keeps its own menu (where "Remove widget" lives), as
+      // does the rail's unlocked one: two menus, one add offer.
+      expect(screen.getAllByRole("button", { name: "Actions" })).toHaveLength(2)
+    })
+
+    test("withdraws it from the collapsed strip too", async () => {
+      renderLayout(1400, { addableWidgetContainers: ["main"] })
+
+      await userEvent.click(screen.getByLabelText("Collapse widgets panel"))
+
+      // The strip carries the rail's only add affordance while collapsed, and
+      // the rail is not addable — so the one left is the main column's.
+      expect(addOffers()).toHaveLength(1)
+    })
+
+    test("is a NARROWING of editableWidgetContainers, never a widening", () => {
+      renderLayout(1400, {
+        leftWidgets: [widget("communities")],
+        editableWidgetContainers: ["right"],
+        addableWidgetContainers: ["main", "right"],
+      })
+
+      // Main is not arrangeable, so naming it addable cannot conjure the offer.
+      expect(addOffers()).toHaveLength(1)
     })
   })
 
@@ -337,6 +419,7 @@ describe("NewHomeLayout", () => {
       renderLayout(1000, { rightWidgets: ACTION_RAIL })
 
       await userEvent.hover(glyph())
+      await holdHover()
 
       expect(screen.getByText("tracked today")).toBeVisible()
       expect(resumes).toBe(0)
@@ -371,6 +454,7 @@ describe("NewHomeLayout", () => {
       renderLayout(1000, { rightWidgets: ACTION_RAIL })
 
       await userEvent.hover(glyph())
+      await holdHover()
 
       vi.useFakeTimers()
       try {
@@ -473,6 +557,7 @@ describe("NewHomeLayout", () => {
         const before = paint()
 
         await userEvent.hover(button())
+        await holdHover()
 
         expect(screen.getByText("tracked today")).toBeVisible()
         expect(pill()).not.toHaveTextContent("7:12")
@@ -680,6 +765,7 @@ describe("NewHomeLayout", () => {
       await renderDeferredRail(1000)
 
       await userEvent.hover(screen.getByRole("button", { name: "clock" }))
+      await holdHover()
 
       expect(screen.getByText("08:00")).toBeVisible()
       // The rail's other widget is mounted beside it, not shown.
@@ -691,6 +777,7 @@ describe("NewHomeLayout", () => {
       await renderDeferredRail(1000)
 
       await userEvent.hover(screen.getByRole("button", { name: "clock" }))
+      await holdHover()
 
       expect(screen.queryByText("clocking in…")).not.toBeInTheDocument()
       expect(clockMounts).toBe(1)

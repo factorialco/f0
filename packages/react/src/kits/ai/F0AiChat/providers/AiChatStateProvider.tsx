@@ -33,6 +33,7 @@ import { usePersistedState } from "./usePersistedState"
 const AiChatStateContext = createContext<AiChatProviderReturnValue | null>(null)
 
 const CHAT_WIDTH_STORAGE_KEY = "ONE-ai-chat-width"
+const CHAT_WIDTH_PERSIST_DEBOUNCE_MS = 150
 const CHAT_OPEN_STORAGE_KEY = "ONE-ai-chat-open"
 const CHAT_VISUALIZATION_MODE_STORAGE_KEY = "ONE-ai-chat-visualization-mode"
 const CHAT_PANEL_CONTENT_ID_STORAGE_KEY = "ONE-ai-chat-panel-content-id"
@@ -98,7 +99,11 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
       typeof v === "number" &&
       !isNaN(v) &&
       v >= CHAT_WIDTH_MIN &&
-      v <= CHAT_WIDTH_MAX
+      v <= CHAT_WIDTH_MAX,
+    undefined,
+    // The only continuously-changing persisted value: a drag would otherwise
+    // mean one synchronous localStorage write per animation frame.
+    CHAT_WIDTH_PERSIST_DEBOUNCE_MS
   )
 
   // Not persisted: this is the live state of a pointer drag, not a preference.

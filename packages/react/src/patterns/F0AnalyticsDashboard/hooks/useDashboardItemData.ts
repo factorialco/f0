@@ -29,7 +29,8 @@ export interface DashboardItemDataState<T> {
 export function useDashboardItemData<Filters extends FiltersDefinition, T>(
   fetchData: (filters: FiltersState<Filters>) => Promise<T>,
   filters: FiltersState<Filters>,
-  enabled: boolean
+  enabled: boolean,
+  refreshKey = ""
 ): DashboardItemDataState<T> {
   const [data, setData] = useState<T | undefined>(undefined)
   const [isLoading, setIsLoading] = useState(true)
@@ -72,14 +73,19 @@ export function useDashboardItemData<Filters extends FiltersDefinition, T>(
       })
   }, [enabled])
 
-  // Re-fetch whenever effective filters change (deep comparison via JSON).
-  // When disabled, use a static key so filter changes don't trigger refetch.
+  // Re-fetch whenever effective dashboard filters or the caller's semantic
+  // dependency changes. `fetchData` itself intentionally stays behind a ref:
+  // consumers frequently recreate it while rendering, which must not produce
+  // a request loop. Dashboard items pass their controlled item-filter state as
+  // `refreshKey`, so rebuilding the closure after an item filter applies does
+  // fetch fresh data without remounting the dashboard.
+  // When disabled, use a static key so dashboard filter changes don't refetch.
   const filtersKey = enabled ? JSON.stringify(filters) : "disabled"
 
   useEffect(() => {
     doFetch()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filtersKey, doFetch])
+  }, [filtersKey, refreshKey, doFetch])
 
   const retry = useCallback(() => {
     doFetch()

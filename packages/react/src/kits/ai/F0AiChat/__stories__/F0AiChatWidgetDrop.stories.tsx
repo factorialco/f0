@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { expect, fireEvent, waitFor, within } from "storybook/test"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 
 import { F0AnalyticsDashboard } from "@/patterns/F0AnalyticsDashboard"
 import {
@@ -26,6 +26,7 @@ import {
  */
 const WidgetDropLayout = () => {
   const { setOpen } = useAiChat()
+  const [observedTarget, setObservedTarget] = useState("No target observed")
 
   useEffect(() => {
     setOpen(true)
@@ -37,12 +38,18 @@ const WidgetDropLayout = () => {
     // `min-height: auto`, so the tall dashboard would otherwise stretch the row
     // (and with it the chat card) far past the viewport.
     <div className="flex h-full w-full gap-2 overflow-hidden">
-      <div className="min-h-0 min-w-0 flex-1 overflow-auto">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-2 overflow-auto">
+        <output className="text-sm" data-widget-drop-target>
+          {observedTarget}
+        </output>
         <F0AnalyticsDashboard
           filters={dashboardFilters}
           presets={dashboardPresets}
           items={mixedItems}
           editMode
+          onAskAiTarget={({ id, quote }) => {
+            setObservedTarget(`${id}: quote=${quote.text}`)
+          }}
         />
       </div>
       <div className="flex min-h-0 w-[420px] shrink-0">
@@ -145,6 +152,9 @@ export const DragWidgetToQuote: Story = {
       })
       await expect(removeQuote.parentElement).toHaveTextContent(
         "Total Headcount"
+      )
+      await expect(canvas.getByText(/headcount: quote=/)).toHaveTextContent(
+        "headcount: quote=Total Headcount"
       )
       await waitFor(() => expect(canvas.getByRole("textbox")).toHaveFocus())
       await expect(

@@ -1,0 +1,215 @@
+name: Storybook Docs Index
+on:
+  pull_request:
+    branches: [main]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  # Detect which packages changed (reused across quality workflows)
+  detect-changes:
+    uses: ./.github/workflows/_check-workspaces-changes.yaml
+
+  # Snapshot the Storybook index — every docs page and story, with the tags that
+  # decide whether it reaches the sidebar — for both sides of the comparison in
+  # parallel.
+  #
+  # `storybook index` only runs the indexers, not a preview build: no Vite, no
+  # bundling, no `f0-core` build needed. It costs seconds, which is why this can
+  # afford to run on every PR where `packages/react` changed.
+  snapshot:
+    needs: detect-changes
+    if: |
+      needs.detect-changes.outputs.package_react == 'true' &&
+      github.head_ref != 'release-please--branches--master' &&
+      !contains(github.event.pull_request.labels.*.name, 'autorelease')
+    name: "[⚛️ REACT] Snapshot docs index (${{ matrix.side }})"
+    runs-on: ubuntu-22.04
+    # One side failing must not wedge the run; the diff job reports a missing
+    # artifact as "comparison unavailable" rather than as a phantom deletion.
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        side: [head, base]
+    env:
+      # Snapshot the *public* Storybook — the one at f0.factorial.dev that the
+      # links in the comment point at. This also excludes `.storybook/local-docs`
+      # exactly as the deployed build does.
+      PUBLIC_BUILD: true
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Both sides derive from the PR *merge commit* (github.sha for
+          # pull_request events: the PR head merged into the current tip of
+          # main), so the PR is synced with main before the index is snapshotted.
+          # Snapshotting the PR branch as-is would falsely flag every page that
+          # landed on main after the branch point as "removed".
+          #   head: the merge commit itself (PR + latest main).
+          #   base: the merge commit's first parent — the exact main tip the
+          #         head side was merged with.
+          # Depth 2 makes both parents of the merge commit available.
+          fetch-depth: 2
+      - name: Record the merge commit
+        id: refs
+        # Captured before the base leg moves off it, so the snapshot tool can be
+        # restored from it below.
+        run: echo "merge_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - name: Check out base side (first parent of the merge commit)
+        if: matrix.side == 'base'
+        run: |
+          git checkout HEAD^1
+
+          # Normalize both sides with the *same* snapshot tool. Without this the
+          # base side would use whatever version of the script exists on main —
+          # or none at all, on the PR that introduces it — and every change to
+          # the tool would masquerade as a change to the docs.
+          git checkout ${{ steps.refs.outputs.merge_sha }} -- \
+            packages/react/.scripts/check-docs-index.ts
+      - uses: ./.github/actions/setup-node-pnpm
+        with:
+          node-version: "22.x"
+      - name: Build the Storybook index
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/_docs"
+          pnpm --filter @factorialco/f0-react exec \
+            storybook index -o "$GITHUB_WORKSPACE/_docs/raw-index.json" --quiet
+      - name: Normalize into a snapshot
+        # `--repo-root` is where the index's `./src/...` paths resolve from; the
+        # script hashes those files so a content edit is distinguishable from a
+        # page that moved.
+        run: |
+          pnpm --filter @factorialco/f0-react exec \
+            tsx .scripts/check-docs-index.ts \
+              --from-index "$GITHUB_WORKSPACE/_docs/raw-index.json" \
+              --out "$GITHUB_WORKSPACE/_docs/snapshot.json" \
+              --repo-root "$GITHUB_WORKSPACE/packages/react"
+      - name: Upload docs index snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-index-${{ matrix.side }}
+          path: _docs/snapshot.json
+          if-no-files-found: error
+          retention-days: 1
+
+  docs-diff:
+    needs: [detect-changes, snapshot]
+    if: |
+      needs.detect-changes.outputs.package_react == 'true' &&
+      github.head_ref != 'release-please--branches--master' &&
+      !contains(github.event.pull_request.labels.*.name, 'autorelease')
+    name: "[⚛️ REACT] Storybook docs index check"
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-node-pnpm
+        with:
+          node-version: "22.x"
+      - name: Download head docs index snapshot
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: docs-index-head
+          path: _docs/head
+      - name: Download base docs index snapshot
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: docs-index-base
+          path: _docs/base
+      - name: Compare the docs index against main
+        id: compare
+        env:
+          # Where the links in the comment point. Override with a repository
+          # variable if the public Storybook ever moves.
+          STORYBOOK_URL: ${{ vars.STORYBOOK_PUBLIC_URL || 'https://f0.factorial.dev' }}
+        run: |
+          cd packages/react
+
+          pnpm exec tsx .scripts/check-docs-index.ts \
+            --base "$GITHUB_WORKSPACE/_docs/base/snapshot.json" \
+            --head "$GITHUB_WORKSPACE/_docs/head/snapshot.json" \
+            --storybook-url "$STORYBOOK_URL" \
+            --json > /tmp/docs-output.txt 2>&1 || true
+
+          # Extract the last complete JSON object (the script prints pretty
+          # JSON; same extraction pattern as the API surface check).
+          LAST_JSON_LINE=$(grep -n '^{' /tmp/docs-output.txt | tail -n 1 | cut -d: -f1)
+          if [ -z "$LAST_JSON_LINE" ]; then
+            echo "ERROR: No JSON output found from the docs index check"
+            cat /tmp/docs-output.txt
+            exit 1
+          fi
+          sed -n "${LAST_JSON_LINE},\$p" /tmp/docs-output.txt > /tmp/docs-data-raw.json
+
+          if ! jq . /tmp/docs-data-raw.json > /tmp/docs-data.json 2>/tmp/jq-error.txt; then
+            echo "ERROR: Failed to parse JSON from the docs index check"
+            cat /tmp/docs-data-raw.json
+            cat /tmp/jq-error.txt
+            exit 1
+          fi
+
+          HAS_LOSSES=$(jq -r '.hasLosses // false' /tmp/docs-data.json)
+          LOSS_TOTAL=$(jq -r '.lossTotal // 0' /tmp/docs-data.json)
+          echo "has_losses=$HAS_LOSSES" >> "$GITHUB_OUTPUT"
+          echo "loss_total=$LOSS_TOTAL" >> "$GITHUB_OUTPUT"
+
+          # Log the headline counts so the run is readable without the comment.
+          jq -r '"added=\(.added|length) removed=\(.removed|length) hidden=\(.hidden|length) moved=\(.moved|length) updated=\(.updated|length) revealed=\(.revealed|length) retagged=\(.retagged|length)"' \
+            /tmp/docs-data.json
+
+          # The script renders the ready-to-post comment body.
+          jq -r '.commentMarkdown // ""' /tmp/docs-data.json > /tmp/docs-comment.md
+          {
+            echo "body<<DOCS_COMMENT_EOF"
+            cat /tmp/docs-comment.md
+            echo "DOCS_COMMENT_EOF"
+          } >> "$GITHUB_OUTPUT"
+
+          if [ "$HAS_LOSSES" = "true" ]; then
+            echo "::warning::$LOSS_TOTAL Storybook page(s) reachable on main are no longer reachable on this branch — see the PR comment."
+          fi
+      - name: Comment on PR with the docs index diff
+        uses: ./.github/actions/add-or-update-pr-comment
+        with:
+          comment-type: storybook_docs_index
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          comment-body: ${{ steps.compare.outputs.body }}
+
+  # Single check to gate the branch on. It collapses this workflow's jobs into
+  # one status, so branch protection lists one stable name and never needs
+  # editing when jobs are added, removed, renamed or sharded.
+  #
+  # `if: always()` is load-bearing. Without it a failing dependency leaves this
+  # job *skipped* rather than *failed*, and GitHub counts a skipped required
+  # check as satisfied — the gate would go green over a red run.
+  #
+  # `skipped` is accepted on purpose: detect-changes skips the jobs when the PR
+  # does not touch the React package. Only failure/cancellation is fatal.
+  #
+  # Losing a docs page does NOT fail this gate. Deleting a page is often
+  # deliberate, and a check that blocks merges on it would be routinely
+  # overridden until it was ignored. It reports instead: a PR comment and a
+  # workflow warning annotation.
+  storybook-docs-index-passed:
+    needs: [detect-changes, snapshot, docs-diff]
+    name: "✅ Storybook Docs Index"
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Confirm every Storybook Docs Index check passed
+        run: |
+          echo "Dependency results: ${{ join(needs.*.result, ' ') }}"
+          if ${{ contains(needs.*.result, 'failure') }}; then
+            echo "::error::A Storybook Docs Index check failed."
+            exit 1
+          fi
+          if ${{ contains(needs.*.result, 'cancelled') }}; then
+            echo "::error::A Storybook Docs Index check was cancelled."
+            exit 1
+          fi
+          echo "All Storybook Docs Index checks passed (or were skipped as not applicable)."

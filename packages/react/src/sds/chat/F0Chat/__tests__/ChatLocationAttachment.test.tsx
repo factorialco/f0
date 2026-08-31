@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest"
+import { beforeAll, describe, expect, it, vi } from "vitest"
 
 import { zeroRender as render, screen } from "@/testing/test-utils"
 
@@ -15,6 +15,30 @@ vi.mock("maplibre-gl", () => ({
     },
   },
 }))
+
+// The map is the one attachment still gated on visibility — each instance takes
+// a live WebGL context and browsers cap how many can exist at once. jsdom's
+// shared observer stub never calls back, so give this suite one that does.
+beforeAll(() => {
+  vi.stubGlobal(
+    "IntersectionObserver",
+    class {
+      private readonly callback: IntersectionObserverCallback
+      constructor(callback: IntersectionObserverCallback) {
+        this.callback = callback
+      }
+      observe(target: Element) {
+        this.callback(
+          [{ isIntersecting: true, target } as IntersectionObserverEntry],
+          this as unknown as IntersectionObserver
+        )
+      }
+      unobserve() {}
+      disconnect() {}
+      takeRecords = () => []
+    }
+  )
+})
 
 const LOCATION: F0ChatLocationAttachment = {
   kind: "location",
@@ -35,13 +59,15 @@ describe("ChatLocationAttachment", () => {
     expect(link).toHaveAttribute("rel", "noopener noreferrer")
   })
 
+  // The 3:2 box is declared on the wrapper, so the placeholder and the mounted
+  // map occupy exactly the same space and the row never re-measures.
   it("renders the lazy MapLibre map with the teardrop marker", async () => {
     render(<ChatLocationAttachment location={LOCATION} />)
     const previewRectangle = screen.getByRole("link").firstElementChild
-    expect(previewRectangle).toHaveStyle({ height: "200px" })
+    expect(previewRectangle).toHaveStyle({ aspectRatio: "1.5" })
     // The map module is lazy-loaded — wait for the chunk to resolve.
     expect(await screen.findByTestId("chat-location-map")).toBeInTheDocument()
-    expect(previewRectangle).toHaveStyle({ height: "200px" })
+    expect(previewRectangle).toHaveStyle({ aspectRatio: "1.5" })
     expect(screen.getByTestId("chat-location-pin")).toBeInTheDocument()
   })
 

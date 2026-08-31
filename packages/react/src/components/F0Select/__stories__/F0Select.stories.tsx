@@ -4,6 +4,7 @@ import { useState } from "react"
 import { expect, fn, within } from "storybook/test"
 
 import { IconType } from "@/components/F0Icon"
+import { inputFieldStatus } from "@/components/F0InputField"
 import {
   createDataSourceDefinition,
   FiltersDefinition,
@@ -12,10 +13,9 @@ import {
 import { SelectedItemsDetailedStatus } from "@/hooks/datasource/types/selection.typings"
 import { Appearance, Circle, Desktop, Placeholder, Plus } from "@/icons/app"
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
-import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
-import { inputFieldStatus } from "@/components/F0InputField"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
-import { F0Select, selectSizes } from "../index"
+import { F0Select, selectSizes, selectVariants } from "../index"
 import {
   Employee,
   employeeNestedPaginatedSource,
@@ -56,18 +56,29 @@ const meta: Meta = {
   component: F0Select,
   parameters: {
     a11y: {
-      skipCi: true,
+      test: "todo",
     },
     docs: {
       description: {
         component:
-          "<p>Renders an select input field with a list of options to choose from.</p>" +
-          "<p>The list is virtualized so can handle large amount of items</p>" +
+          "<p>Renders a select input field with a list of options to choose from.</p>" +
+          "<p>The list is virtualized so it can handle a large number of items.</p>" +
+          '<p>Use <code>variant="field"</code> for forms and labeled inputs. Use <code>variant="inline"</code> for compact desktop row controls such as roles, statuses, and access levels. Inline selects are single-value and non-clearable; their required <code>label</code> provides the accessible name and becomes the visible empty-state fallback when no <code>placeholder</code> is provided.</p>' +
           "<p>Options support three kinds of annotations: <code>description</code> for prose rendered as a second line, <code>metadata</code> for a short typed token rendered next to the label (e.g. a dial code), and <code>tag</code> for chips rendered at the end of the row.</p>",
       },
     },
   },
   argTypes: {
+    variant: {
+      control: "radio",
+      options: selectVariants,
+      description:
+        "Field renders the standard form control. Inline renders a compact, borderless single-value row control and does not support clearing, multiple selection, list mode, preview/apply behavior, custom triggers, or field validation props.",
+      table: {
+        type: { summary: selectVariants.join(" | ") },
+        defaultValue: { summary: "field" },
+      },
+    },
     label: {
       description: "Label of the select",
       required: true,
@@ -83,9 +94,11 @@ const meta: Meta = {
     },
     size: {
       control: "select",
-      options: ["sm", "md"],
-      defaultValue: "sm",
-      description: "Size of the select",
+      options: selectSizes,
+      if: { arg: "variant", neq: "inline" },
+      description:
+        "Size of the field select. Inline selects use a fixed 32px trigger.",
+      table: { defaultValue: { summary: "sm" } },
     },
     disabled: {
       control: "boolean",
@@ -197,6 +210,7 @@ const meta: Meta = {
         "  onClick: () => void\n" +
         "  icon?: IconType\n" +
         "  variant?: 'ghost' | 'critical'\n" +
+        "  disabled?: boolean\n" +
         "}```",
     },
     loading: {
@@ -1208,7 +1222,7 @@ export const MultiplePaginatedAsList: Story = {
   },
   render: (args) => {
     return (
-      <div className="flex h-[400px] flex-row w-[600px]">
+      <div className="flex h-[400px] w-[600px] flex-row">
         <F0Select {...(args as any)} />
       </div>
     )
@@ -1483,7 +1497,11 @@ export const WithOnCreate: Story = {
 }
 
 export const Snapshot: Story = {
-  parameters: withSkipA11y(withSnapshot({})),
+  parameters: withSnapshot({
+    a11y: {
+      test: "error",
+    },
+  }),
   args: {
     label: "Label text here",
   },
@@ -1496,38 +1514,52 @@ export const Snapshot: Story = {
       label: "Label text here",
     }
     const snapshotVariants = [
-      { ...base },
-      { ...base, disabled: true },
-      { ...base, readonly: true },
-      { ...base, required: true },
-      { ...base, hideLabel: true },
-      { ...base, error: true },
-      { ...base, status: { type: "error" as const, message: "Error message" } },
+      { name: "Default", props: { ...base } },
+      { name: "Disabled", props: { ...base, disabled: true } },
+      { name: "Required", props: { ...base, required: true } },
+      { name: "Hidden label", props: { ...base, hideLabel: true } },
+      { name: "Legacy error", props: { ...base, error: "Error message" } },
       {
-        ...base,
-        status: { type: "warning" as const, message: "Warning message" },
+        name: "Error status",
+        props: {
+          ...base,
+          status: { type: "error" as const, message: "Error message" },
+        },
       },
-      { ...base, status: { type: "info" as const, message: "Info message" } },
-      { ...base, hint: "Hint message" },
-      { ...base },
+      {
+        name: "Warning status",
+        props: {
+          ...base,
+          status: { type: "warning" as const, message: "Warning message" },
+        },
+      },
+      {
+        name: "Info status",
+        props: {
+          ...base,
+          status: { type: "info" as const, message: "Info message" },
+        },
+      },
+      { name: "Hint", props: { ...base, hint: "Hint message" } },
     ]
     return (
       <div className="flex flex-col gap-4">
         {selectSizes.map((size) => (
           <section key={size}>
-            <h4 className="mb-3 text-lg font-semibold">Size: {size}</h4>
+            <h2 className="mb-3 text-lg font-semibold">Size: {size}</h2>
             <div className="flex flex-col gap-4">
               <F0Select
                 size={size}
-                label="Label text here"
+                label={`Empty select, ${size}`}
                 onChange={fn()}
                 options={[]}
               />
-              {snapshotVariants.map((variant, index) => (
+              {snapshotVariants.map((variant) => (
                 <F0Select
-                  key={`${size}-${index}`}
+                  key={`${size}-${variant.name}`}
                   size={size}
-                  {...variant}
+                  {...variant.props}
+                  label={`${variant.name} select, ${size}`}
                   onChange={fn()}
                   options={[]}
                 />

@@ -21,69 +21,84 @@ const user = (
 ): F0ChatUser => ({ id, name, avatar })
 
 const darkNameWhiteMix: Record<F0ChatSenderColor, number> = {
-  viridian: 15,
-  malibu: 15,
+  viridian: 30,
+  malibu: 20,
   yellow: 10,
-  purple: 25,
-  lilac: 20,
-  barbie: 20,
-  smoke: 15,
-  army: 30,
+  purple: 35,
+  lilac: 30,
+  barbie: 25,
+  smoke: 25,
+  army: 45,
   flubber: 10,
-  indigo: 30,
-  camel: 20,
-  radical: 30,
-  orange: 10,
-  red: 15,
-  grass: 10,
+  indigo: 45,
+  camel: 25,
+  radical: 45,
+  orange: 15,
+  red: 25,
+  grass: 15,
 }
 
+// Solved per hue so the mix lands on the mobile app's bubble palette (the
+// values in mobile/…/communications/lib/senderColor.ts).
 const lightBubbleColorMix: Record<F0ChatSenderColor, number> = {
-  viridian: 8,
-  malibu: 11,
-  yellow: 8,
-  purple: 11,
-  lilac: 8,
-  barbie: 8,
-  smoke: 11,
-  army: 11,
-  flubber: 8,
-  indigo: 11,
-  camel: 8,
-  radical: 8,
-  orange: 8,
-  red: 8,
-  grass: 8,
+  viridian: 16.5,
+  malibu: 24,
+  yellow: 20.5,
+  purple: 26.5,
+  lilac: 20,
+  barbie: 22.5,
+  smoke: 20,
+  army: 17,
+  flubber: 18.5,
+  indigo: 22,
+  camel: 18.5,
+  radical: 19.5,
+  orange: 19,
+  red: 21.5,
+  grass: 17.5,
 }
 
+// Solved per hue so every dark bubble lands on the same OKLab lightness (0.30)
+// against the achromatic base — see the recipe in `sender-color.ts`.
 const darkBubbleColorMix: Record<F0ChatSenderColor, number> = {
-  viridian: 11,
-  malibu: 14,
-  yellow: 11,
-  purple: 14,
-  lilac: 11,
-  barbie: 11,
-  smoke: 14,
-  army: 14,
-  flubber: 11,
-  indigo: 14,
-  camel: 11,
-  radical: 11,
-  orange: 11,
-  red: 11,
-  grass: 11,
+  viridian: 39,
+  malibu: 37,
+  yellow: 31,
+  purple: 41,
+  lilac: 39.5,
+  barbie: 37,
+  smoke: 38,
+  army: 49.5,
+  flubber: 31.5,
+  indigo: 47,
+  camel: 38.5,
+  radical: 43,
+  orange: 35,
+  red: 36,
+  grass: 36,
 }
 
-const bubbleColorMixClass = (
+// Assembled by `join` rather than interpolated: a template literal that looks
+// like a utility makes Tailwind's scanner treat it as a real candidate, and it
+// warns about the unresolvable `theme()` on every build.
+const lightBubbleColorMixClass = (
   color: F0ChatSenderColor,
-  mix: number,
-  dark = false
+  mix: number
 ): string =>
   [
-    dark ? "dark:bg-[" : "bg-[",
-    "color-mix(in_oklch,hsl(theme(colors.",
+    "bg-[color-mix(in_oklch,hsl(theme(colors.",
     color,
     `.50))_${mix}%,hsl(var(--neutral-0)))]`,
+  ].join("")
+
+const darkBubbleColorMixClass = (
+  color: F0ChatSenderColor,
+  mix: number
+): string =>
+  [
+    "dark:bg-[color-mix(in_oklab,hsl(theme(colors.",
+    color,
+    `.50))_${mix}%,oklab(0.08_0_0))]`,
   ].join("")
 
 describe("f0ChatSenderColors", () => {
@@ -151,10 +166,10 @@ describe("senderBubbleColorClass", () => {
     if (!nameHue) throw new Error("Expected the sender name hue")
     expect(bubbleClass).toContain(`colors.${nameHue}.50`)
     expect(bubbleClass).toContain(
-      bubbleColorMixClass(nameHue, lightBubbleColorMix[nameHue])
+      lightBubbleColorMixClass(nameHue, lightBubbleColorMix[nameHue])
     )
     expect(bubbleClass).toContain(
-      bubbleColorMixClass(nameHue, darkBubbleColorMix[nameHue], true)
+      darkBubbleColorMixClass(nameHue, darkBubbleColorMix[nameHue])
     )
     expect(bubbleClass).not.toContain("--neutral-100")
   })
@@ -264,10 +279,10 @@ describe("senderBubbleColorClass", () => {
       )
       expect(senderBubbleColorClass(sender)).toContain(`colors.${color}.50`)
       expect(senderBubbleColorClass(sender)).toContain(
-        bubbleColorMixClass(color, darkBubbleColorMix[color], true)
+        darkBubbleColorMixClass(color, darkBubbleColorMix[color])
       )
       expect(senderBubbleColorClass(sender)).toContain(
-        bubbleColorMixClass(color, lightBubbleColorMix[color])
+        lightBubbleColorMixClass(color, lightBubbleColorMix[color])
       )
       expect(senderBubbleColorClass(sender)).not.toContain("--neutral-100")
       if (color === "orange" || color === "grass") {
@@ -291,11 +306,31 @@ describe("message surface colour", () => {
     }
   )
 
-  it("keeps my message surface neutral, softened in dark mode", () => {
+  it("keeps my message surface neutral in both themes", () => {
     const sender = user("me", "Me")
 
     expect(messageSurfaceColorClass(sender, true)).toBe(
-      "bg-f1-background-tertiary dark:bg-f1-background-secondary"
+      "bg-f1-background-secondary"
     )
   })
+
+  it.each(f0ChatSenderColors)(
+    "tints the %s dark bubble against an achromatic base, not the navy surface",
+    (color: F0ChatSenderColor) => {
+      const dark = senderBubbleColorClass({
+        ...user(`u-${color}`, `Sender ${color}`),
+        avatarColor: color,
+      })
+        .split(" ")
+        .find((cls) => cls.startsWith("dark:bg-"))
+
+      // Mixing into `--neutral-0` (a chromatic navy) is what flattened every
+      // sender into the same blue and sent the warm hues round the wheel.
+      expect(dark).not.toContain("--neutral-0")
+      expect(dark).toContain("oklab(0.08_0_0)")
+      // OKLCH would interpolate the hue; with an achromatic endpoint OKLab
+      // can't, which is the whole point.
+      expect(dark).toContain("color-mix(in_oklab,")
+    }
+  )
 })

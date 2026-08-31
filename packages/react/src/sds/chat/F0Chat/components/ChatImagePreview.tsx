@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogTitle } from "@/ui/Dialog"
 
 import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
 import { useChatImagePreview } from "../providers/ChatUIProvider"
+import { useF0ChatEmit } from "../providers/F0ChatProvider"
 import { EASE_OUT_SWIFT } from "../utils/chat-motion"
 import { triggerDownload } from "../utils/download"
 import { FadeInImage } from "./FadeInImage"
@@ -54,6 +55,7 @@ export const ChatImagePreview = (): ReactNode => {
   const { reducedMotion } = useChatRenderConfig()
   const { imagePreview, closeImagePreview, setImagePreviewIndex } =
     useChatImagePreview()
+  const emit = useF0ChatEmit()
 
   // Portal above the whole app: the chat panel owns the top stacking context, so
   // the dialog's default `#content` target renders the lightbox behind it. `body`
@@ -148,7 +150,10 @@ export const ChatImagePreview = (): ReactNode => {
             <PreviewControl
               icon={Download}
               label={i18n.chat.download}
-              onClick={() => triggerDownload(current.url, current.name)}
+              onClick={() => {
+                triggerDownload(current.url, current.name)
+                emit.onAttachmentDownloaded({ kind: "image" })
+              }}
             />
             <PreviewControl
               icon={Cross}

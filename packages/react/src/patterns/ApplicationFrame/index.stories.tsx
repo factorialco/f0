@@ -778,6 +778,115 @@ export const Default: Story = {
 }
 
 /**
+ * Everything at once, in one channel, inside the real resizable side panel.
+ *
+ * This is the manual-QA surface for the transcript work: it opens
+ * `grp-everything-stress` — a year of history, ten extra pages, every message
+ * shape (albums of 1/2/3/4/7, a 1:10 tower, a dimensionless photo, video,
+ * voice, location, pdf/sheet/docx/text cards, file chips, link previews,
+ * replies, mentions, reactions, edits, deletions, failures, system rows) and a
+ * live typing indicator.
+ *
+ * What to exercise here:
+ * - drag the panel's resize handle across its whole range while reading history
+ *   with albums and video above the fold — the message under the cursor must
+ *   stay put, and the sticky date pill must keep showing the right day;
+ * - toggle fullscreen (150ms in, 400ms out) and cross the `md` breakpoint;
+ * - close the panel, pick a different conversation, reopen — no jump on entry;
+ * - scroll up fast through the reaction-heavy stretch — no pill may drift;
+ * - check the in-bubble time against every shape, and its legibility over the
+ *   brightest and darkest photos in light and dark.
+ */
+export const EverythingChannel: Story = {
+  render: (args) => (
+    <MockAiChatRuntimeProvider>
+      <MockChatAppProvider>
+        <ApplicationFrame
+          ai={{
+            ...withMockChatSlots(args.ai),
+            panelContentSide: "left",
+          }}
+          aiPromotion={args.aiPromotion}
+          sidebar={
+            <ConversationsSidebar
+              withOneTab={false}
+              autoOpenConvId="grp-everything-stress"
+              tabsPersistKey="communications-everything"
+            />
+          }
+        >
+          <DaytimePage
+            period="morning"
+            header={{
+              employeeFirstName: "Jordan",
+              employeeLastName: "Avery",
+              title: "Good morning, Jordan!",
+              employeeAvatar: "/avatars/person05.jpg",
+            }}
+          >
+            <HomeLayout {...HomeLayoutStories.Default.args} />
+          </DaytimePage>
+        </ApplicationFrame>
+      </MockChatAppProvider>
+    </MockAiChatRuntimeProvider>
+  ),
+}
+
+/**
+ * The announcement channel — Factorial's own noticeboard, and the welcome
+ * screen a new employee lands on. A `type: "announcement"` channel, so every
+ * capability defaults to off with no configuration at all.
+ *
+ * What it demonstrates, top to bottom:
+ * - a header with just the identity and the close button: no ellipsis, because
+ *   a fixed two-message transcript has nothing to search;
+ * - the day separator carrying the time ("Yesterday 22:14") while the messages
+ *   themselves carry none — their timestamp is seeded, not sent;
+ * - a card attachment (`kind: "card"`) rendered as an `F0Card`, the one thing
+ *   in here that IS interactive;
+ * - no hover ellipsis on either message: no reply, no reaction, no copy;
+ * - the read-only notice where the composer would be.
+ *
+ * What to exercise: hover both messages, drag a file over the panel (no drop
+ * affordance), and check the sidebar — badge of 2, no pin on hover, and no
+ * unread divider inside once opened.
+ */
+export const AnnouncementChannel: Story = {
+  render: (args) => (
+    <MockAiChatRuntimeProvider>
+      <MockChatAppProvider>
+        <ApplicationFrame
+          ai={{
+            ...withMockChatSlots(args.ai),
+            panelContentSide: "left",
+          }}
+          aiPromotion={args.aiPromotion}
+          sidebar={
+            <ConversationsSidebar
+              withOneTab={false}
+              autoOpenConvId="dm-factorial"
+              tabsPersistKey="communications-announcement"
+            />
+          }
+        >
+          <DaytimePage
+            period="morning"
+            header={{
+              employeeFirstName: "Jordan",
+              employeeLastName: "Avery",
+              title: "Good morning, Jordan!",
+              employeeAvatar: "/avatars/person05.jpg",
+            }}
+          >
+            <HomeLayout {...HomeLayoutStories.Default.args} />
+          </DaytimePage>
+        </ApplicationFrame>
+      </MockChatAppProvider>
+    </MockAiChatRuntimeProvider>
+  ),
+}
+
+/**
  * A fully-mocked conversation hosted in the side panel, driven by the shared
  * `MockChatApp` store (so reads/unreads stay in sync with the sidebar). Wires
  * fullscreen/close to the panel via `useAiChat()`.
@@ -1448,11 +1557,13 @@ export const Snapshot: Story = {
         await canvas.findByRole("region", { name: "Completed group receipts" })
       )
 
+      // Delivery only: the clock moved onto the bubble itself, so the footer no
+      // longer repeats it.
       await waitFor(() =>
-        expect(partial.getByRole("status")).toHaveTextContent(/^Sent · /i)
+        expect(partial.getByRole("status")).toHaveTextContent(/^Sent$/i)
       )
       await waitFor(() =>
-        expect(completed.getByRole("status")).toHaveTextContent(/^Read · /i)
+        expect(completed.getByRole("status")).toHaveTextContent(/^Read$/i)
       )
     })
   },

@@ -3,7 +3,6 @@ import { type RefObject } from "react"
 import { cn } from "@/lib/utils"
 
 import { type HighlightSegment } from "../hooks/highlight-utils"
-import { renderTextWithEmojis } from "../utils/render-body"
 
 type ChatTextareaFieldProps = {
   textareaRef: RefObject<HTMLTextAreaElement>
@@ -90,28 +89,39 @@ export const ChatTextareaField = ({
             "overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           )}
         >
+          {/* Plain text. The overlay and the textarea beneath it now lay out
+              the same glyphs with the same font, so emoji line up on their own
+              — the invisible-twin trick that used to reserve each twemoji
+              image's width is gone with it. */}
           {highlightSegments.map((seg, i) =>
             seg.type === "mention" ? (
               // Same colour pattern as the bubble: you / @here amber, others
-              // info. No padding or weight change so the overlay stays aligned
-              // to the (transparent) textarea text character-for-character.
+              // info. Tone and background carry the whole distinction: no
+              // padding, and — load-bearing — no weight change. A `<textarea>`
+              // lays its entire run out at one weight, so a heavier mention
+              // here paints wider than the transparent glyphs the caret is
+              // positioned from, and every character from the mention onward
+              // sits off its boundary. Measured at 14px Inter, `font-medium`
+              // cost ~0.1px per mention character, plateauing at 1.25px (8.9%
+              // of an em) across the rest of the line — enough to park the
+              // caret inside a glyph instead of between two.
               <span
                 key={i}
                 className={cn(
-                  "rounded-xs font-medium",
+                  "rounded-xs",
                   seg.tone === "self" || seg.tone === "everyone"
                     ? "bg-f1-background-warning text-f1-foreground-warning"
                     : "bg-f1-background-info text-f1-foreground-info"
                 )}
               >
-                {renderTextWithEmojis(seg.text)}
+                {seg.text}
               </span>
             ) : seg.type === "ghost" ? (
               <span key={i} className="text-f1-foreground-secondary opacity-50">
-                {renderTextWithEmojis(seg.text)}
+                {seg.text}
               </span>
             ) : (
-              <span key={i}>{renderTextWithEmojis(seg.text)}</span>
+              <span key={i}>{seg.text}</span>
             )
           )}
         </div>

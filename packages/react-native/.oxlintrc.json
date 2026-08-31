@@ -2,7 +2,7 @@
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "plugins": ["react", "typescript"],
   "categories": {
-    "correctness": "off"
+    "correctness": "error"
   },
   "env": {
     "builtin": true,
@@ -46,6 +46,7 @@
         "**/*.stories.*",
         "**/__stories__/**",
         "**/*.test.*",
+        "**/*.spec.*",
         "**/__tests__/**"
       ],
       "rules": {

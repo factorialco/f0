@@ -18,4 +18,10 @@ export type WidgetDragStartDetail = {
   title: string
   /** Host override for Ask One. When present, chat must not mutate its quote. */
   onAskAi?: (item: { id: string; title: string }) => void
+  /** Observes the built-in quote without replacing the chat behavior. */
+  onAskAiTarget?: (item: {
+    id: string
+    title: string
+    quote: { text: string }
+  }) => void
 }
