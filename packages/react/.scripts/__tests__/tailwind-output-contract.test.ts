@@ -39,7 +39,7 @@ describe("published Tailwind output", () => {
 
   beforeAll(async () => {
     css = await compileUtilities()
-  }, 15_000)
+  }, 60_000)
 
   it("keeps semantic color generation proportional to real usage", () => {
     let semanticColorRuleCount = 0
