@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.78.4](https://github.com/factorialco/f0/compare/f0-react-v6.78.3...f0-react-v6.78.4) (2026-09-01)
+
+
+### Bug Fixes
+
+* **Tooltip:** even out content padding to 8px ([#4992](https://github.com/factorialco/f0/issues/4992)) ([917c2fc](https://github.com/factorialco/f0/commit/917c2fcc516b1ec7e3a67680bcef148ed3cf6f63))
+
 ## [6.78.3](https://github.com/factorialco/f0/compare/f0-react-v6.78.2...f0-react-v6.78.3) (2026-09-01)
 
 
