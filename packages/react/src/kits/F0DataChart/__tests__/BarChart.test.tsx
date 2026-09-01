@@ -1038,7 +1038,7 @@ describe("BarChart — item tooltip", () => {
     expect(html).not.toContain("107505.8632") // no raw float precision
   })
 
-  it("formats and escapes values in target tooltips, and hides ghost series", () => {
+  it("formats and escapes values in target tooltips, gradient included", () => {
     render(
       <F0DataChart
         type="bar"
@@ -1071,14 +1071,47 @@ describe("BarChart — item tooltip", () => {
     expect(html).toContain("&lt;em&gt;107,505&lt;/em&gt;")
     expect(html).toContain("&lt;em&gt;125,000&lt;/em&gt;") // target row
     expect(html).not.toContain("<script>")
-    // Hovering the ghost gradient bar renders no tooltip.
-    expect(
-      formatter?.({
-        seriesName: "<strong>Revenue</strong> (target)",
-        value: 17495,
-        dataIndex: 0,
-      })
-    ).toBe("")
+    // Hovering the gradient reads as hovering its bar: same card, and the
+    // value is the bar's, not the height of the gap.
+    const overGradient = formatter?.({
+      name: "<script>category</script>",
+      seriesName: "<strong>Revenue</strong> (target)",
+      value: 17495,
+      dataIndex: 0,
+    })
+    expect(overGradient).toContain("&lt;strong&gt;Revenue&lt;/strong&gt;")
+    expect(overGradient).toContain("&lt;em&gt;107,505&lt;/em&gt;")
+    expect(overGradient).not.toContain("17,495")
+  })
+
+  it("answers over a bar that has attained nothing, where the gradient is all there is", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        categories={["Q3"]}
+        series={[{ name: "Attainment", data: [{ value: 0, target: 185_000 }] }]}
+        showTargetProgress
+        valueFormatter={(value) => (value === 0 ? "nothing yet" : `${value}!`)}
+      />
+    )
+
+    // A zero-height bar has no rectangle to hover, so ECharts reports the
+    // gradient — the whole column, in this case.
+    const html = getTooltipFormatter()?.({
+      name: "Q3",
+      seriesName: "Attainment (target)",
+      value: 185_000,
+      dataIndex: 0,
+    })
+
+    expect(html).toContain("Attainment")
+    expect(html).toContain("Q3")
+    expect(html).toContain("nothing yet")
+    expect(html).toContain("185000!")
+    expect(html).toContain("0.0%")
+    // The dot is drawn from the series colour: ECharts' own marker for the
+    // gradient item is not a colour the card can use.
+    expect(html).toContain("background-color:#")
   })
 
   it("shows share of total only for multi-series charts", () => {
