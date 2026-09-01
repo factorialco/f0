@@ -48,13 +48,12 @@ interface CarouselProps {
   /**
    * The slides are ONE PAGE of a longer list. Reaching the end then fetches the
    * rest instead of going dead — see {@link CarouselPaging}, and append the new
-   * records to `children` as they arrive.
+   * records to `children` as they arrive. Dragging past the last slide fetches
+   * in either placement.
    *
-   * DRAGGING past the last slide asks for the next page whatever the arrows are
-   * doing: it is the reader's own gesture, and nothing about it is hidden. The
-   * ARROW that fetches, though, is `arrowsPlacement: "bottom"`'s only — the
-   * overlay arrows are a hover affordance over the slides, and a fetch you can't
-   * see you triggered is worse than no fetch at all.
+   * The ARROW that fetches is `arrowsPlacement: "bottom"`'s only: the overlay
+   * arrows are a hover affordance over the slides, and a fetch you can't see you
+   * triggered is worse than no fetch at all.
    */
   paging?: CarouselPaging
   autoplay?: boolean

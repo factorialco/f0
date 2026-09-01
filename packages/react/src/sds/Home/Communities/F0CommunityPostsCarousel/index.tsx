@@ -477,18 +477,13 @@ export interface F0CommunityPostsCarouselProps {
    * blank the tiles you are already reading.
    */
   loading?: boolean
-  /**
-   * How many placeholder tiles are drawn. Defaults to 2 — one screenful.
-   *
-   * It is the count for both kinds of wait: the whole row while `loading`, and
-   * the page at the end of the row that a reader asked for and is waiting on.
-   */
+  /** How many placeholder tiles are drawn. Defaults to 2 — one screenful. */
   expectedItemsCount?: number
   /**
-   * THE POSTS ARE A PAGE, not the whole feed. Pass this and the end of the row
-   * stops being the end of the feed: the Next arrow stays live past the last
-   * mounted tile, DRAGGING past it asks too, and the new posts are appended to
-   * `posts` by whoever owns them.
+   * THE POSTS ARE A PAGE, not the whole feed. Pass this and the Next arrow stays
+   * live past the last mounted tile — as does dragging past it: reaching the end
+   * asks for the next page, and the new posts are appended to `posts` by whoever
+   * owns them.
    *
    * It is `useData`'s infinite-scroll return, field for field — `hasMore` off
    * `paginationInfo`, `isLoadingMore`, `loadMore` — because that is where these
@@ -501,22 +496,10 @@ export interface F0CommunityPostsCarouselProps {
   pagination?: CarouselPaging
 }
 
-/**
- * THE WIDTH OF ONE TILE — the whole card under 480px of CARD (`@lg`), half of it
- * above, which is the same width at which the `Widget` frame itself decides it is
- * wide. Shared, because a placeholder tile that took a different width would
- * change how many fit and move the page boundaries under the reader.
- */
+// `basis-full` under 480px of CARD (`@lg`), half above it — the same width at
+// which the `Widget` frame itself decides it is wide.
 const TILE_WIDTH = "basis-full @lg:basis-1/2"
 
-/**
- * THE ROW ITSELF: a tile per post, and placeholders for whatever page has not
- * arrived.
- *
- * Its own component because of the question in the middle of it — is a page THE
- * READER IS STANDING ON in flight? That is the carousel's answer, not this
- * widget's, and it can only be asked from inside one.
- */
 const CommunityPostsSlides = ({
   posts,
   loading,
@@ -528,22 +511,6 @@ const CommunityPostsSlides = ({
 }) => {
   const { isPageInFlight } = useCarouselPaging()
 
-  /**
-   * PLACEHOLDER TILES, for two quite different waits:
-   *
-   * - `loading` — the FIRST posts. There is nothing else in the row, so these
-   *   ARE the row, and their job is to give the card the height it will have.
-   * - `isPageInFlight` — a LATER page, asked for by the reader: the Next arrow
-   *   at the end of the feed, or a drag thrown past it. The posts already in
-   *   hand stay exactly where they are and the placeholders go after them, which
-   *   is what the gesture then moves onto — a page in the shape of the posts
-   *   that are coming, rather than a rubber band that springs back and a row
-   *   that never went anywhere.
-   *
-   * A page pulled in AHEAD of the reader draws none of this. Most fetches here
-   * are that prefetch, asked for by nobody, and work done ahead of the reader
-   * should pass unnoticed instead of inviting them to wait for it.
-   */
   const placeholders = loading || isPageInFlight ? expectedItemsCount : 0
 
   return (
@@ -594,13 +561,6 @@ const CommunityPostsSlides = ({
  * a longer carousel, it is a carousel that holds a PAGE and asks for the next
  * one when you reach the end — so what is mounted is bounded by how far the
  * reader actually walked rather than by how much the server has.
- *
- * AND THE END IS REACHED BY HAND AS OFTEN AS BY ARROW. A row of tiles that
- * scrolls under the finger is a row people throw, so a drag past the last tile
- * asks for the next page exactly as the arrow does, and both are answered the
- * same way: placeholder tiles at the end of the row, which the row then moves
- * onto and which become the posts. Anything less and the gesture is a rubber
- * band that springs back on a carousel that did nothing.
  */
 export const F0CommunityPostsCarousel = ({
   posts,
@@ -630,9 +590,6 @@ export const F0CommunityPostsCarousel = ({
       // not the window's: the same widget sits in a 712px main column and in a
       // 396px rail, and a viewport media query cannot tell those apart.
       className="@container"
-      // ON THE CAROUSEL, not on the paging row: the arrow is one of the ways to
-      // reach the next page and the drag is another, and the tiles have to know
-      // about the fetch either way to stand in for it.
       paging={pagination}
     >
       <CommunityPostsSlides
