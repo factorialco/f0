@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.74.3](https://github.com/factorialco/f0/compare/f0-react-v6.74.2...f0-react-v6.74.3) (2026-09-01)
+
+
+### Bug Fixes
+
+* **F0DataChart:** show tooltip over a bar's target gradient to see target ([#5319](https://github.com/factorialco/f0/issues/5319)) ([2919ca8](https://github.com/factorialco/f0/commit/2919ca888c9f39f6c1ef25a0f2fcfd7b611f4fbb))
+
 ## [6.74.2](https://github.com/factorialco/f0/compare/f0-react-v6.74.1...f0-react-v6.74.2) (2026-08-31)
 
 
