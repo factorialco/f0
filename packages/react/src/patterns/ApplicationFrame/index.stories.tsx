@@ -736,7 +736,7 @@ const communicationsPageHeader = (
 
 export const Default: Story = {
   render: (args) => (
-    <MockAiChatRuntimeProvider>
+    <MockAiChatRuntimeProvider pace={5}>
       <MockChatAppProvider>
         <ApplicationFrame
           // Transitional communications layout: conversations dock LEFT
@@ -799,7 +799,7 @@ export const Default: Story = {
  */
 export const EverythingChannel: Story = {
   render: (args) => (
-    <MockAiChatRuntimeProvider>
+    <MockAiChatRuntimeProvider pace={5}>
       <MockChatAppProvider>
         <ApplicationFrame
           ai={{
@@ -853,7 +853,7 @@ export const EverythingChannel: Story = {
  */
 export const AnnouncementChannel: Story = {
   render: (args) => (
-    <MockAiChatRuntimeProvider>
+    <MockAiChatRuntimeProvider pace={5}>
       <MockChatAppProvider>
         <ApplicationFrame
           ai={{
