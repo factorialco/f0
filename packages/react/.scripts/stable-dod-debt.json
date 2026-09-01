@@ -16,7 +16,6 @@
     "BigNumber",
     "Charts/RadarChart",
     "Checkbox",
-    "DatePicker",
     "EmptyState",
     "Filters/FilterPicker",
     "Graph/F0Graph",

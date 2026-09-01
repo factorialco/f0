@@ -8,7 +8,7 @@ import { expect, fn, screen, userEvent, within } from "storybook/test"
 import { F0Dialog } from "@/patterns/F0Dialog"
 import { Placeholder } from "@/icons/app"
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
-import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { getInputFieldArgs } from "@/components/F0InputField/__stories__/F0InputField.args"
 
 import { DateRange } from "@/components/OneCalendar/types"
@@ -31,20 +31,7 @@ const meta = {
     }
   },
   parameters: {
-    docs: {
-      description: {
-        component: [
-          "The `F0DatePicker` component is a date picker that allows the user to select a <strong>range of time</strong> (from a start datetime to an end datetime). With different granularities (day, week, month, quarter, halfyear, year, range). When the user select an item in a granularity is selecting that range of time, e.g. when the user select a day, the range start of the day (30/07/2025 00:00:00) to the end of the day (30/07/2025 23:59:59) is selected.",
-          "The component allows you to define the available granularities for the user (if not defined the default ones is day).",
-          "The component also allows you to define presets that will be displayed in the component. Check the presets section for more information.",
-          "For each granularity the input selector will show a button to navigate to the current date in the granularity, you can hide that via props",
-          "The component also allows you navigation arrows to allow user to navigate to the next or previous item in the granularity.",
-          "Note the value and defaultValue are objects with the following shape: `{ value: { from: Date, to: Date }, granularity: GranularityDefinitionKey }`",
-        ]
-          .map((text) => `<p>${text}.</p>`)
-          .join(""),
-      },
-    },
+    a11y: { test: "error" },
   },
   argTypes: {
     value: {
@@ -98,7 +85,7 @@ const meta = {
     ...getInputFieldArgs(inputFieldInheritedProps),
     ...dataTestIdArgs,
   },
-  tags: ["autodocs", "stable"],
+  tags: ["stable", "!autodocs"],
   decorators: [
     (Story, { args, parameters }) => {
       const width = parameters?.width || "300px"
@@ -357,7 +344,7 @@ export const WithClearable: Story = {
 }
 
 export const Snapshot: Story = {
-  parameters: withSkipA11y(withSnapshot({ width: "100%" })),
+  parameters: withSnapshot({ width: "100%" }),
   args: {
     label: "Label text here",
   },

@@ -23,7 +23,6 @@ export function F0DatePicker({
   selectOnCellOnly,
   ...inputProps
 }: F0DatePickerProps) {
-  const [localValue, setLocalValue] = useState<DatePickerValue | undefined>()
   const [isOpen, setIsOpen] = useState(open)
 
   useEffect(() => {
@@ -68,6 +67,12 @@ export function F0DatePicker({
       return { value: range, granularity: value.granularity }
     },
     [getGranularity]
+  )
+
+  // Initialize with the resolved value: syncing it in an effect paints one
+  // frame of empty input, flashing the placeholder over the value
+  const [localValue, setLocalValue] = useState<DatePickerValue | undefined>(
+    () => toSafeRange(value)
   )
 
   const granularity = useMemo(() => {
@@ -145,6 +150,8 @@ export function F0DatePicker({
         {...inputProps}
         value={localValue}
         granularity={granularity}
+        minDate={minDate}
+        maxDate={maxDate}
         onDateChange={handleChangeDate}
         showIcon={showIcon}
         displayFormat={displayFormat}

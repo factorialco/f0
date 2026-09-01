@@ -45,9 +45,13 @@ const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
     },
     ref
   ) => {
-    const [inputValue, setInputValue] = useState("")
-    const [error, setError] = useState(false)
     const i18n = useI18n()
+    // Initialize with the formatted value: waiting for the sync effect paints
+    // one frame of empty input, flashing the placeholder over the value
+    const [inputValue, setInputValue] = useState(() =>
+      granularity.toString(value?.value, i18n, displayFormat ?? "long")
+    )
+    const [error, setError] = useState(false)
 
     useEffect(() => {
       setInputValue(
