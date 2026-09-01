@@ -4,7 +4,7 @@ import {
   type Node as RFNode,
   type NodeProps,
 } from "@xyflow/react"
-import { type ReactNode, memo } from "react"
+import { type CSSProperties, type ReactNode, memo } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { Minimize } from "@/icons/app"
@@ -61,6 +61,39 @@ const flushHandleStyle = (
   position === Position.Bottom || position === Position.Top
     ? { transform: `translate(-${HANDLE_HALF}px, 0px)` }
     : undefined
+
+/**
+ * Moves an endpoint onto the edge the node PAINTS rather than the edge of its
+ * layout box. The box carries the tag reservation whether or not this node fills
+ * it, so an endpoint left on the box either hangs below the metadata — the
+ * reservation is sized for the fully-wrapped block, and at compact/dot zoom the
+ * tags are not drawn at all — or crosses it, when wide pills wrap past the
+ * estimate. Anchoring on the pill is what makes a connector run node-to-node;
+ * the tag block's own backdrop blur crops whatever passes behind it.
+ *
+ * Only the leaving edge needs correcting: the reservation hangs below the
+ * content, so a `Top` endpoint is already on the pill, and a side endpoint is
+ * off-centre by half of it.
+ *
+ * Expressed as `bottom` / `top` rather than a transform on purpose — React
+ * Flow's own centering translate has to survive, and `flushHandleStyle` above
+ * already owns that channel.
+ */
+const paintedHandleStyle = (
+  position: Position,
+  reserved: number
+): CSSProperties | undefined => {
+  if (reserved <= 0) return undefined
+  switch (position) {
+    case Position.Bottom:
+      return { bottom: reserved }
+    case Position.Left:
+    case Position.Right:
+      return { top: `calc(50% - ${reserved / 2}px)` }
+    default:
+      return undefined
+  }
+}
 
 function handlePositions(direction: LayoutDirection): {
   source: Position
@@ -276,15 +309,23 @@ function F0GraphNodeWrapperInner({ data, id }: NodeProps<GraphRFNode>) {
       : undefined,
   }
 
+  // A card and a stacked row both carry the tag reservation in their box, so
+  // both anchor their connectors on what they paint.
+  const handleStyle = (position: Position): CSSProperties | undefined => {
+    const painted = paintedHandleStyle(position, renderCfg?.tagRowHeight ?? 0)
+    // Rows are chained to each other over an 8px gap, so their endpoints have
+    // to sit exactly on the box edge to leave a visible line.
+    const flush = stacked ? flushHandleStyle(position) : undefined
+    return painted || flush ? { ...painted, ...flush } : undefined
+  }
+
   return (
     <>
       <Handle
         type="target"
         position={targetPos}
         className="!invisible"
-        // Rows are chained to each other over an 8px gap, so their endpoints
-        // have to sit exactly on the box edge to leave a visible line.
-        style={stacked ? flushHandleStyle(targetPos) : undefined}
+        style={handleStyle(targetPos)}
       />
       <div
         className="pointer-events-none flex items-start justify-center"
@@ -308,7 +349,7 @@ function F0GraphNodeWrapperInner({ data, id }: NodeProps<GraphRFNode>) {
         type="source"
         position={sourcePos}
         className="!invisible"
-        style={stacked ? flushHandleStyle(sourcePos) : undefined}
+        style={handleStyle(sourcePos)}
       />
     </>
   )

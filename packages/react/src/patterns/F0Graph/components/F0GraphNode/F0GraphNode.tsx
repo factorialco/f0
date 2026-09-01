@@ -161,16 +161,19 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
      */
     const tagRow = (maxWidthClass: string) =>
       tagsVisible ? (
-        <motion.div
+        <div
           key="tags"
-          initial={noMotion ? false : { opacity: 0, filter: "blur(3px)" }}
-          animate={{ opacity: 1, filter: "blur(0px)" }}
-          transition={
-            noMotion
-              ? { duration: 0 }
-              : { duration: 0.12, ease: [0.23, 1, 0.32, 1] }
-          }
-          className={maxWidthClass}
+          className={cn(
+            maxWidthClass,
+            // A connector leaves the pill above and runs the whole way to the
+            // node it points at, so it passes behind this block. A blur radius
+            // this wide averages the strip of canvas behind the pills down to a
+            // flat wash, which reads as the line being cropped where the
+            // metadata starts — the same trick the collapse affordance uses to
+            // sit on a line. The rounding is the pills' own, so the cropped
+            // region hugs them instead of showing as a rectangle.
+            "rounded-[13px] backdrop-blur-[400px]"
+          )}
           // Tags are informational: clicking a tag must not select the node.
           // Two paths select a node: the node-level `onClick` (selection, plus
           // any consumer `itemOnClick`) — swallowed here via stopPropagation —
@@ -181,8 +184,22 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
           data-no-node-select
           onClick={(e) => e.stopPropagation()}
         >
-          <F0GraphNodeTags tags={filteredTags!} />
-        </motion.div>
+          {/* The reveal lives on a child: `filter` on an element makes it the
+              backdrop root for everything inside it, so animating it on the
+              blurred wrapper would leave that wrapper with nothing to sample
+              and the connector would run straight through the pills. */}
+          <motion.div
+            initial={noMotion ? false : { opacity: 0, filter: "blur(3px)" }}
+            animate={{ opacity: 1, filter: "blur(0px)" }}
+            transition={
+              noMotion
+                ? { duration: 0 }
+                : { duration: 0.12, ease: [0.23, 1, 0.32, 1] }
+            }
+          >
+            <F0GraphNodeTags tags={filteredTags!} />
+          </motion.div>
+        </div>
       ) : null
 
     // A row has no pill chrome, no dot↔compact avatar growth and no hover card,
