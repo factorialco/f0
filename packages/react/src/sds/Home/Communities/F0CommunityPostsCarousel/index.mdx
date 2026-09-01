@@ -19,27 +19,36 @@ with the pagination dots between them.
 
 <Canvas of={Stories.Default} />
 
-| Element    | Description                                                         | Required |
-| ---------- | ------------------------------------------------------------------- | -------- |
-| Cover      | The post's image, always in a 2:1 box sized from the column's width | No       |
-| Title      | The post's name, and the tile's only click target                   | Yes      |
-| Body       | The opening of the post, clamped to five lines                      | No       |
-| Author     | Avatar, name, and the date and counters on one line                 | No       |
-| Paging row | Previous / Next and the dots, always present, disabled at the ends  | Yes      |
+| Element    | Description                                                          | Required |
+| ---------- | -------------------------------------------------------------------- | -------- |
+| Cover      | The post's image, always in a 16:9 box sized from the column's width | No       |
+| Title      | The post's name, and the tile's only click target                    | Yes      |
+| Body       | The opening of the post, in the lines the tile has room for          | No       |
+| Author     | Avatar, name, and the date and counters on one line                  | No       |
+| Paging row | Previous / Next and the dots, always present, disabled at the ends   | Yes      |
 
 <Controls of={Stories.Default} />
 
 ## Guidelines
 
 **It is a wide-column widget.** Two tiles side by side is the whole reason it
-exists rather than a `list` slot — a post needs a title, four lines of its body
+exists rather than a `list` slot — a post needs a title, a few lines of its body
 and its author to be worth previewing, and that does not fit a 396px rail. In the
 `WidgetCatalog`, give it `areas: ["main"]`.
 
-**Covers are cropped, never fitted.** Every image is drawn at 2:1 (1200×600, the
-size these are authored at) with the height taken from the column's width. A tile
-that sized itself to its own image would put every title in the row on a different
-line and move them all when the page turned.
+**Every tile is 384px tall, and the body is what gives.** The height is declared
+rather than grown, so the widget is the same height on every page of the feed
+instead of taking the tallest post in the row. The cover keeps its ratio, the
+title is its own type and the author line is an avatar row — the body takes
+whatever those three leave and previews the whole lines that fit there. That is
+why a post with no cover shows more of itself than one with a picture, in a tile
+the same height as its neighbour.
+
+**Covers are cropped, never fitted.** Every image is drawn at 16:9 with the
+height taken from the column's width. A tile that sized itself to its own image
+would put every title in the row on a different line and move them all when the
+page turned — and since the cover and the body divide one fixed budget, it would
+change how much of every post you could read, too.
 
 **It pages, it does not virtualize.** Embla lays its slides out in a flex row and
 measures them, so every mounted tile stays in the DOM. What keeps that bounded is
@@ -61,7 +70,7 @@ reaches the end, so the DOM follows how far they actually walked.
     description: "Hand it the whole feed and hope.",
     guidelines: [
       "Don't pass two hundred posts as one array — that is two hundred tiles in the DOM.",
-      "Don't crop covers yourself; the tile's 2:1 box already does it.",
+      "Don't crop covers yourself; the tile's 16:9 box already does it.",
       "Don't use it in the rail, where a single tile is cramped and the point is lost.",
     ],
   }}

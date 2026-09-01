@@ -143,7 +143,7 @@ export const Loading: Story = {
 
 /**
  * COVER IMAGES, and the case that matters: a post WITH one beside a post
- * WITHOUT. Every cover is drawn in the same 2:1 box, sized from the column's
+ * WITHOUT. Every cover is drawn in the same 16:9 box, sized from the column's
  * width and cropped to fit, so the tiles in a row stay the same shape however
  * the pictures were authored — and the tile with no picture simply gives its
  * body the room instead.

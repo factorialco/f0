@@ -92,14 +92,28 @@ const GradientWash = ({
 /** Collapsed-rail geometry (mirrors the prototype's railMode). */
 const COLLAPSED_RAIL_WIDTH = 40
 /**
- * `max-w-content` in px — the reading column every F0 surface shares (the chat's
- * own composer and message list are capped by the same token). The layout needs
- * the NUMBER, not the class: the same width decides when the rail can no longer
- * have its column (`autoCollapsed`) and how wide a params preview is drawn, and
- * neither is a place a utility class can be read from. Keep it in step with
- * `maxWidth.content` in `packages/react/tailwind.config.ts`.
+ * HOW WIDE THE MAIN COLUMN IS — 672px. The layout needs the NUMBER, not a class:
+ * the same width decides when the rail can no longer have its column
+ * (`autoCollapsed`) and how wide a params preview is drawn, and neither is a
+ * place a utility class can be read from.
+ *
+ * ⚠️ IT WAS `max-w-content` (712px) AND IS NOT ANY MORE. A widget's content is
+ * sized from the column it lives in, so the column's width is a decision about
+ * WIDGETS; the reading column is a decision about PROSE — the measure a composer
+ * or a message list is comfortable at, and the one the chat caps itself to. The
+ * two were the same number by inheritance rather than by intent, and the
+ * two-tile widgets are what made the difference visible: at 712 the Communities
+ * carousel drew 331px tiles against the design's 311, because every tile is
+ * `(column − 32 padding + 16 gutter) / 2 − 16`. The column moved to the width
+ * the design is drawn at; the reading column stayed where the chat needs it.
+ *
+ * So a main-column surface that must line up with the chat now caps ITSELF at
+ * `max-w-content` rather than assuming the column is it.
+ *
+ * Still a DEFAULT and not a constant of the layout: `mainWidth` overrides it for
+ * a Home that wants another measure.
  */
-const CONTENT_WIDTH = 712
+const MAIN_WIDTH = 672
 /**
  * THE GLYPH'S SECOND — how long each face of a flashing glyph is up, and how long
  * a ticking readout's separator stays lit. One period, not two half-periods: a
@@ -617,9 +631,14 @@ export interface NewHomeLayoutProps {
   /** Fixed px width of the side rail. */
   asideWidth?: number
   /**
-   * Max px width of the (centered) main-column content. Defaults to
-   * `max-w-content` (712px), so a composer or a message list in the main column
-   * lines up with the same reading column the chat uses.
+   * Max px width of the (centered) main-column content. Defaults to 672px, the
+   * width the Home widgets are designed at — it is what decides a two-tile
+   * widget's tile size, since every tile is
+   * `(column − 32 padding + 16 gutter) / 2 − 16`.
+   *
+   * ⚠️ NOT `max-w-content` (712px) any more. A surface in the main column that
+   * has to line up with the chat's composer or message list should cap ITSELF at
+   * the reading column rather than assume the column is it.
    */
   mainWidth?: number
   /**
@@ -685,7 +704,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
       onReorderWidgets,
       period = "morning",
       asideWidth = 396,
-      mainWidth = CONTENT_WIDTH,
+      mainWidth = MAIN_WIDTH,
       bleed = 24,
       stackedPinsAfter = 2,
       ctx = {},
@@ -1183,8 +1202,9 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
           <WidgetContainer
             side="main"
             className="relative mx-auto w-full"
-            // `mainWidth` rather than the `max-w-content` utility, at the same
-            // 712px by default: the cap is a prop, and a class cannot take one.
+            // `mainWidth` rather than a utility class: the cap is a prop, and a
+            // class cannot take one. 672px by default (`MAIN_WIDTH`) — the
+            // column's own width, no longer the reading column's.
             style={{ maxWidth: `${mainWidth}px` }}
             widgets={
               stacked ? [...leftWidgets, ...loosePins.rest] : leftWidgets

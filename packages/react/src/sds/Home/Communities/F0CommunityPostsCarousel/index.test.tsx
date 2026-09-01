@@ -98,7 +98,7 @@ describe("F0CommunityPostsCarousel", () => {
     expect(screen.getByRole("button", { name: "More posts" })).toBeDisabled()
   })
 
-  test("a cover image is drawn in a fixed 2:1 box, whatever its own shape", () => {
+  test("a cover image is drawn in a fixed 16:9 box, whatever its own shape", () => {
     render({
       posts: [{ ...POSTS[0], imageUrl: "/landscape01.jpg" }, POSTS[1]],
     })
@@ -108,7 +108,7 @@ describe("F0CommunityPostsCarousel", () => {
     // The BOX is what holds the ratio; the picture fills it and is cropped. A
     // tile that took its height from its own image would put every title in a
     // row on a different line.
-    expect(image.parentElement).toHaveClass("aspect-[2/1]")
+    expect(image.parentElement).toHaveClass("aspect-video")
     expect(image).toHaveClass("object-cover")
   })
 
@@ -116,6 +116,34 @@ describe("F0CommunityPostsCarousel", () => {
     render({ posts: [POSTS[1]] })
 
     expect(screen.queryByRole("presentation")).not.toBeInTheDocument()
+  })
+
+  test("every tile is the same declared height, cover or no cover", () => {
+    render({
+      posts: [{ ...POSTS[0], imageUrl: "/landscape01.jpg" }, POSTS[1]],
+    })
+
+    // THE REGRESSION: the tiles were `h-full`, so the row took the tallest post
+    // in it and the widget changed height every time the page turned. The
+    // height is declared now and the BODY is what gives — which is only true
+    // while every tile carries the same one.
+    const tiles = screen.getAllByRole("article")
+    expect(tiles).toHaveLength(2)
+    for (const tile of tiles) expect(tile).toHaveClass("h-96")
+  })
+
+  test("the body takes the room the rest of the tile left, not a fixed count", () => {
+    render({ posts: [POSTS[0]] })
+
+    // The wrapper is the mechanism: it claims the leftover height (`flex-1`,
+    // shrinkable via `min-h-0`) and clips, and the clamp inside it is measured
+    // against that box at runtime. A flat five-line clamp — which is what this
+    // replaced — overflows a tile with a cover and leaves a picture's worth of
+    // white in one without.
+    const body = screen.getByText("There is no deck to read afterwards.")
+    const room = body.closest("div.flex-1")
+    expect(room).not.toBeNull()
+    expect(room).toHaveClass("min-h-0", "overflow-hidden")
   })
 
   test("loading draws placeholder tiles instead of posts, as many as expected", () => {
@@ -128,11 +156,11 @@ describe("F0CommunityPostsCarousel", () => {
   })
 
   describe("the cover's seat in a placeholder tile", () => {
-    /** The 2:1 box a placeholder keeps for a cover, if it keeps one. */
+    /** The 16:9 box a placeholder keeps for a cover, if it keeps one. */
     const seats = () =>
       screen
         .getAllByTestId("skeleton")
-        .filter((el) => el.className.includes("aspect-[2/1]"))
+        .filter((el) => el.className.includes("aspect-video"))
 
     test("is kept while the FIRST page loads, when nothing is known yet", () => {
       render({ posts: [], loading: true, expectedItemsCount: 2 })
