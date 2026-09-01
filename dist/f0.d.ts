@@ -1054,6 +1054,8 @@ export declare const aiTranslations: {
         readonly thoughtsGroupTitle: "Reasoning";
         readonly resourcesGroupTitle: "Resources";
         readonly thinking: "Thinking...";
+        readonly thinkingElapsedSeconds: "{{seconds}}s";
+        readonly thinkingElapsedMinutes: "{{minutes}}m {{seconds}}s";
         readonly feedbackModal: {
             readonly positive: {
                 readonly title: "What did you like about this response?";
@@ -5340,6 +5342,8 @@ export declare const defaultTranslations: {
         readonly thoughtsGroupTitle: "Reasoning";
         readonly resourcesGroupTitle: "Resources";
         readonly thinking: "Thinking...";
+        readonly thinkingElapsedSeconds: "{{seconds}}s";
+        readonly thinkingElapsedMinutes: "{{minutes}}m {{seconds}}s";
         readonly feedbackModal: {
             readonly positive: {
                 readonly title: "What did you like about this response?";
@@ -6871,7 +6875,7 @@ export declare interface F0ActionBarRef {
     wiggle: (options?: WiggleOptions) => void;
 }
 
-export declare const F0ActionItem: ({ title, status, inGroup }: F0ActionItemProps) => JSX_2.Element;
+export declare const F0ActionItem: ({ title, suffix, status, inGroup, }: F0ActionItemProps) => JSX_2.Element;
 
 /**
  * Props for the F0ActionItem component
@@ -6881,6 +6885,14 @@ export declare interface F0ActionItemProps {
      * The title text displayed next to the status icon
      */
     title?: string;
+    /**
+     * Rendered inline after the title — used for the elapsed-time counter.
+     *
+     * A node rather than a string so that whatever ticks inside it owns its own
+     * state: passing a composed label would re-render this item, and everything
+     * above it, on every tick.
+     */
+    suffix?: ReactNode;
     /**
      * Current status of the action item
      */
@@ -17255,6 +17267,14 @@ export declare type RenderableTurn = {
          * the last item is `executing` while the rest are `completed`.
          */
         isWriting?: boolean;
+        /**
+         * Epoch ms for when the turn actually started thinking, if the host knows.
+         *
+         * Optional anchor, not a requirement: turns arrive with no timestamps, so
+         * by default the elapsed counter starts when F0 first saw the signal.
+         * Supplying this makes it survive a reload mid-stream.
+         */
+        startedAt?: number;
     };
     /** Messages rendered after the thinking section (assistant replies). */
     assistantMessages: Message_2[];
@@ -18848,6 +18868,12 @@ export declare type ThinkingProps = {
      * every item renders as `completed` regardless of `inProgress`.
      */
     isWriting?: boolean;
+    /**
+     * When the turn started thinking, from `useThinkingClock`. Drives the
+     * elapsed counter on whichever step is executing. `null` means no clock is
+     * running, and nothing is rendered.
+     */
+    startedAt?: number | null;
 };
 
 export declare interface ThreadActionHandlers {
@@ -20572,10 +20598,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        indent: {
-            setIndent: (level: number) => ReturnType;
-            unsetIndent: () => ReturnType;
-            outdent: () => ReturnType;
+        fontSize: {
+            setFontSize: (fontSize: string) => ReturnType;
+            unsetFontSize: () => ReturnType;
         };
     }
 }
@@ -20583,9 +20608,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        fontSize: {
-            setFontSize: (fontSize: string) => ReturnType;
-            unsetFontSize: () => ReturnType;
+        indent: {
+            setIndent: (level: number) => ReturnType;
+            unsetIndent: () => ReturnType;
+            outdent: () => ReturnType;
         };
     }
 }

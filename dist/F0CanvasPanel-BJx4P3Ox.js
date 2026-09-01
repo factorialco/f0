@@ -133846,43 +133846,48 @@ const pW = {
   initial: { opacity: 0 },
   animate: { opacity: 1 },
   exit: { opacity: 0 }
-}, e93 = ({ title: e, status: t, inGroup: n }) => {
-  const a = {
+}, e93 = ({
+  title: e,
+  suffix: t,
+  status: n,
+  inGroup: r
+}) => {
+  const o = {
     duration: St() ? 0 : 0.18,
     ease: [0.33, 1, 0.68, 1]
-  }, o = t === "inProgress", s = t === "executing", l = t === "completed", u = t === "writing";
+  }, s = n === "inProgress", l = n === "executing", u = n === "completed", c = n === "writing";
   return /* @__PURE__ */ $("div", { className: "flex w-full items-start gap-1 text-f1-foreground-secondary", children: [
     /* @__PURE__ */ i("div", { className: "flex h-5 w-6 shrink-0 items-center justify-start", children: /* @__PURE__ */ $(F3, { mode: "wait", children: [
-      o && /* @__PURE__ */ i(
+      s && /* @__PURE__ */ i(
         V1.div,
         {
           className: "flex h-5 w-5 shrink-0 items-center justify-center",
           ...pW,
-          transition: a,
+          transition: o,
           children: /* @__PURE__ */ i(
             m1,
             {
               state: "animate",
-              size: n ? "md" : "lg",
+              size: r ? "md" : "lg",
               icon: hp2
             }
           )
         },
         "inProgress"
       ),
-      (s || u) && /* @__PURE__ */ i("div", { className: "flex h-5 w-5 shrink-0 items-center justify-center", children: /* @__PURE__ */ i(J42, { variant: s ? "default" : "continuous" }) }),
-      l && /* @__PURE__ */ i(
+      (l || c) && /* @__PURE__ */ i("div", { className: "flex h-5 w-5 shrink-0 items-center justify-center", children: /* @__PURE__ */ i(J42, { variant: l ? "default" : "continuous" }) }),
+      u && /* @__PURE__ */ i(
         V1.div,
         {
           ...pW,
           className: "flex h-5 w-5 shrink-0 items-center justify-center",
-          transition: a,
+          transition: o,
           children: /* @__PURE__ */ i(
             m1,
             {
               color: "secondary",
               state: "animate",
-              size: n ? "md" : "lg",
+              size: r ? "md" : "lg",
               icon: U42
             }
           )
@@ -133895,11 +133900,12 @@ const pW = {
       {
         className: X(
           "text-pretty leading-5",
-          (s || u) && "shine-text"
+          (l || c) && "shine-text"
         ),
         children: e
       }
-    )
+    ),
+    t && /* @__PURE__ */ i("span", { className: "shrink-0 leading-5", children: t })
   ] });
 }, Re3 = ex().use(GM).use(Hq).use(QM).use(RM), Ie3 = O(function({ content: t, className: n, format: r = "html", ...a }, o) {
   const s = Z2(

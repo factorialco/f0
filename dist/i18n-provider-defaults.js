@@ -639,6 +639,11 @@ const e = {
     thoughtsGroupTitle: "Reasoning",
     resourcesGroupTitle: "Resources",
     thinking: "Thinking...",
+    // How long the turn has been thinking, shown beside the step that is
+    // running. Two keys rather than one unbounded second count, because "137s"
+    // reads badly past a couple of minutes — the consumer picks.
+    thinkingElapsedSeconds: "{{seconds}}s",
+    thinkingElapsedMinutes: "{{minutes}}m {{seconds}}s",
     feedbackModal: {
       positive: {
         title: "What did you like about this response?",
