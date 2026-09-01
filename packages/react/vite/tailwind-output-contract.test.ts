@@ -2,7 +2,7 @@ import postcss from "postcss"
 import tailwindcss from "tailwindcss"
 import { beforeAll, describe, expect, it } from "vitest"
 
-import tailwindConfig from "../../tailwind.config"
+import tailwindConfig from "../tailwind.config"
 
 async function compileUtilities(): Promise<string> {
   const result = await postcss([tailwindcss(tailwindConfig)]).process(

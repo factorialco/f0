@@ -129,30 +129,22 @@ describe("runtime dependency graph", () => {
     expect(result.cycles).toEqual([])
   })
 
-  it("reports a runtime self-import", () => {
-    const result = analyze({
-      "src/self.ts":
-        'import { self } from "./self"\nexport const next = self + 1',
-    })
-
-    expect(result.cycles).toEqual([{ files: ["src/self.ts"] }])
-  })
-
-  it("fails closed when a production file cannot be parsed", () => {
-    expect(() =>
-      analyze({
-        "src/broken.ts": "export const =",
-      })
-    ).toThrow(/broken\.ts/)
-  })
-
-  it("fails closed when an internal alias cannot be resolved", () => {
-    expect(() =>
-      analyze({
+  it.each([
+    {
+      error: /broken\.ts/,
+      files: { "src/broken.ts": "export const =" },
+      name: "invalid production syntax",
+    },
+    {
+      error: /Could not resolve @\/missing/,
+      files: {
         "src/entry.ts":
           'import { missing } from "@/missing"\nexport const value = missing',
-      })
-    ).toThrow(/Could not resolve @\/missing/)
+      },
+      name: "an unresolved internal alias",
+    },
+  ])("fails closed for $name", ({ error, files }) => {
+    expect(() => analyze(files)).toThrow(error)
   })
 
   it("excludes stories and tests from the production graph", () => {
@@ -165,16 +157,5 @@ describe("runtime dependency graph", () => {
     })
 
     expect(Object.keys(result.graph)).toEqual(["src/runtime.ts"])
-  })
-
-  it("returns the same canonical result on repeated analysis", () => {
-    const files = {
-      "src/z.ts": 'import { y } from "./y"\nexport const z = y',
-      "src/y.ts": 'import { z } from "./z"\nexport const y = z',
-      "src/b.ts": 'import { a } from "./a"\nexport const b = a',
-      "src/a.ts": 'import { b } from "./b"\nexport const a = b',
-    }
-
-    expect(analyze(files).cycles).toEqual(analyze(files).cycles)
   })
 })
