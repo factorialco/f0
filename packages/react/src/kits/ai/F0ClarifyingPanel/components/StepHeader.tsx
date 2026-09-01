@@ -40,6 +40,7 @@ export const StepHeader = ({
           <F0Button
             variant="ghost"
             size="sm"
+            type="button"
             onClick={onBack}
             disabled={isFirstStep}
             label={translation.ai.clarifyingQuestion.back}
@@ -52,6 +53,7 @@ export const StepHeader = ({
           <F0Button
             variant="ghost"
             size="sm"
+            type="button"
             onClick={onNext}
             disabled={isFinalStep || !canProceed}
             label={translation.ai.clarifyingQuestion.next}
@@ -63,6 +65,7 @@ export const StepHeader = ({
       <F0Button
         variant="ghost"
         size="sm"
+        type="button"
         onClick={onCancel}
         label={translation.actions.cancel}
         hideLabel
