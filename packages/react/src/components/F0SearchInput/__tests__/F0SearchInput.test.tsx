@@ -1,3 +1,4 @@
+import { userEvent } from "@testing-library/user-event"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import {
@@ -11,7 +12,129 @@ import { F0SearchInput } from "../index"
 
 describe("F0SearchInput", () => {
   beforeEach(() => {
-    vi.useFakeTimers()
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  describe("focus behavior", () => {
+    it("is skipped with the Tab key by default", async () => {
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+      render(
+        <>
+          <F0SearchInput placeholder="Search" />
+          <button type="button">Next action</button>
+        </>
+      )
+
+      await user.tab()
+
+      // `tabIndex` defaults to -1: the search box of a list that is already
+      // reachable some other way is not a tab stop of its own.
+      expect(screen.getByRole("button", { name: "Next action" })).toHaveFocus()
+    })
+
+    it("is reachable with the Tab key when tabIndex is 0", async () => {
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+      render(
+        <>
+          <F0SearchInput placeholder="Search" tabIndex={0} />
+          <button type="button">Next action</button>
+        </>
+      )
+
+      await user.tab()
+
+      expect(screen.getByRole("searchbox")).toHaveFocus()
+    })
+
+    it("is skipped with the Tab key when disabled", async () => {
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+      render(
+        <>
+          <F0SearchInput placeholder="Search" disabled />
+          <button type="button">Next action</button>
+        </>
+      )
+
+      await user.tab()
+
+      expect(screen.getByRole("button", { name: "Next action" })).toHaveFocus()
+    })
+
+    it("allows focus to leave an auto-focused input", async () => {
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+      render(
+        <>
+          <F0SearchInput placeholder="Search" autoFocus />
+          <button type="button">Next action</button>
+        </>
+      )
+
+      const nextAction = screen.getByRole("button", { name: "Next action" })
+      // autoFocus lands through a 50ms timeout, not on the first frame.
+      act(() => {
+        vi.advanceTimersByTime(50)
+      })
+      expect(screen.getByRole("searchbox")).toHaveFocus()
+
+      await user.tab()
+      act(() => {
+        vi.advanceTimersByTime(100)
+      })
+
+      expect(nextAction).toHaveFocus()
+    })
+
+    it("does not restore focus after a debounced change", () => {
+      const onChange = vi.fn()
+      render(
+        <>
+          <F0SearchInput
+            placeholder="Search"
+            debounceTime={500}
+            onChange={onChange}
+          />
+          <button type="button">Next action</button>
+        </>
+      )
+
+      const input = screen.getByRole("searchbox")
+      const nextAction = screen.getByRole("button", { name: "Next action" })
+      input.focus()
+      fireEvent.change(input, { target: { value: "engineering" } })
+      nextAction.focus()
+
+      act(() => {
+        vi.advanceTimersByTime(500)
+      })
+
+      expect(onChange).toHaveBeenCalledWith("engineering")
+      expect(nextAction).toHaveFocus()
+    })
+
+    it("returns focus to the input after clearing", async () => {
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+      const onChange = vi.fn()
+      render(
+        <F0SearchInput
+          placeholder="Search"
+          value="engineering"
+          clearable
+          onChange={onChange}
+        />
+      )
+
+      await user.click(screen.getByRole("button", { name: "Clear" }))
+      act(() => {
+        vi.runAllTimers()
+      })
+
+      expect(onChange).toHaveBeenCalledWith("")
+      expect(screen.getByRole("searchbox")).toHaveFocus()
+    })
   })
 
   afterEach(() => {

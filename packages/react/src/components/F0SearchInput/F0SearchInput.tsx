@@ -6,9 +6,9 @@ import {
   useRef,
 } from "react"
 
+import { InputFieldProps } from "@/components/F0InputField"
 import { Search } from "@/icons/app"
 import { Input } from "@/ui/input"
-import { InputFieldProps } from "@/components/F0InputField"
 
 export type F0SearchInputProps = {
   value?: string
@@ -154,6 +154,7 @@ const F0SearchInput = forwardRef<HTMLInputElement, F0SearchInputProps>(
         aria-autocomplete={ariaAutocomplete}
         size={size}
         clearable={clearable}
+        onClear={() => input.current?.focus()}
         onBlur={onBlur}
         onFocus={onFocus}
         name={props.name}
@@ -164,7 +165,7 @@ const F0SearchInput = forwardRef<HTMLInputElement, F0SearchInputProps>(
 
 /**
  * F0SearchInput is the writable search field — a single-line text input
- * pre-configured with a search icon, `role="searchbox"`, debouncing, and
+ * pre-configured with a search icon, `role="searchbox"`, delayed updates, and
  * an optional minimum-length threshold before emitting changes.
  */
 F0SearchInput.displayName = "F0SearchInput"
