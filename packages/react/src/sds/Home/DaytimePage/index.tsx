@@ -7,6 +7,7 @@ import { OneSwitch as OnePromotionSwitch } from "@/experimental/AiPromotionChat/
 import Menu from "@/icons/app/Menu"
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { useSidebar } from "@/patterns/ApplicationFrame/FrameProvider"
 import { F0OneSwitch } from "@/kits/ai/F0OneSwitch"
@@ -58,6 +59,7 @@ function _DaytimePage({
   hideOneSwitch = false,
 }: DaytimePageProps) {
   const { sidebarState, toggleSidebar, isSmallScreen } = useSidebar()
+  const i18n = useI18n()
 
   return (
     <div
@@ -73,9 +75,10 @@ function _DaytimePage({
               <F0Button
                 variant="ghost"
                 onClick={() => toggleSidebar()}
-                label="Open main menu"
+                label={i18n.navigation.sidebar.expand}
                 icon={Menu}
                 hideLabel
+                aria-expanded={false}
               />
             )}
             <div

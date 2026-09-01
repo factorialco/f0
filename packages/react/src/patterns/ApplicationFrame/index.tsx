@@ -28,7 +28,7 @@ import { useAiChat } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
 import { DEFAULT_CHAT_WIDTH } from "@/kits/ai/F0AiChat/utils/constants"
 import { F0CanvasPanel } from "@/kits/ai/F0CanvasPanel"
 
-import { FrameProvider, SidebarState, useSidebar } from "./FrameProvider"
+import { FrameProvider, useSidebar } from "./FrameProvider"
 
 const CONTENT_TRANSITION = { duration: 0.3, ease: [0, 0, 0.1, 1] }
 // Module-level so the reference is stable across renders. Motion cancels an
@@ -123,49 +123,22 @@ const SkipToContentButton = ({ contentId }: { contentId?: string }) => {
   )
 }
 
-function shouldToggleSidebar(
-  isChatOpen: boolean,
-  previousIsChatOpen: boolean,
-  sidebarState: SidebarState
-): boolean {
-  const isChatOpening = !previousIsChatOpen && isChatOpen
-  if (isChatOpening) {
-    return sidebarState === "hidden"
-  }
-
-  const isChatClosing = previousIsChatOpen && !isChatOpen
-  if (isChatClosing) {
-    return sidebarState !== "hidden"
-  }
-
-  return false
-}
-
-/**
- * Custom hook to automatically close sidebar when AI chat opens on smaller screens
+/*
+ * `useAutoCloseSidebar` used to live here: an effect that toggled the sidebar
+ * when the chat opened or closed. It is gone, and nothing replaced it, because
+ * it never did what its name said.
+ *
+ * It read `sidebarState` in the same commit that `floatsOverSidebar` flipped —
+ * one render before `forceFloat` had moved the breakpoint — and advanced its
+ * "was the chat open" ref on that same pass. On desktop the transition it was
+ * watching for had therefore always already happened: dead code. On a small
+ * screen it did fire, and because the sidebar is `hidden` there to begin with,
+ * "toggle" meant OPEN — sliding the navigation over the chat that had just
+ * opened, scrim and all. The exact opposite of the intent.
+ *
+ * Yielding to the panel is now purely `forceFloat` widening the breakpoint,
+ * which is what actually produced the behaviour people saw all along.
  */
-function useAutoCloseSidebar(
-  isAiChatOpen: boolean,
-  shouldAutoCloseSidebar: boolean
-) {
-  const { sidebarState, toggleSidebar } = useSidebar()
-  const previousAiChatOpenRef = useRef(isAiChatOpen)
-
-  useEffect(() => {
-    if (
-      shouldAutoCloseSidebar &&
-      shouldToggleSidebar(
-        isAiChatOpen,
-        previousAiChatOpenRef.current,
-        sidebarState
-      )
-    ) {
-      toggleSidebar({ isInvokedByUser: false })
-    }
-
-    previousAiChatOpenRef.current = isAiChatOpen
-  }, [isAiChatOpen, shouldAutoCloseSidebar, sidebarState, toggleSidebar])
-}
 
 /**
  * Z-index layers (within the isolate stacking context):
@@ -270,11 +243,6 @@ function ApplicationFrameContent({
     ? INSTANT_TRANSITION
     : CONTENT_TRANSITION
 
-  const shouldAutoCloseSidebar = useMediaQuery(
-    `(max-width: ${breakpoints.xl}px)`,
-    { initializeWithValue: true }
-  )
-
   const isSmallViewport = useMediaQuery(`(max-width: ${breakpoints.md}px)`, {
     initializeWithValue: true,
   })
@@ -285,15 +253,13 @@ function ApplicationFrameContent({
   // conversation coexists with the sidebar while the right AI chat floats it.
   const floatsOverSidebar = isAiChatOpen && !isActiveLeft
 
+  // One effect, one value. Two effects writing the same setter with unrelated
+  // values meant the second overwrote the first on mount — so a reload with
+  // the chat persisted open left the sidebar planted beside it, while opening
+  // the same chat by hand moved it aside. Same state, two behaviours.
   useEffect(() => {
-    setForceFloat(floatsOverSidebar)
-  }, [floatsOverSidebar, setForceFloat])
-
-  useEffect(() => {
-    setForceFloat(isAiPromotionChatOpen)
-  }, [isAiPromotionChatOpen, setForceFloat])
-
-  useAutoCloseSidebar(floatsOverSidebar, shouldAutoCloseSidebar)
+    setForceFloat(floatsOverSidebar || isAiPromotionChatOpen)
+  }, [floatsOverSidebar, isAiPromotionChatOpen, setForceFloat])
 
   return (
     <MotionConfig
@@ -309,12 +275,18 @@ function ApplicationFrameContent({
           <div className="relative isolate flex h-full">
             {/* Sidebar backdrop */}
             <AnimatePresence>
-              {sidebarState === "unlocked" && (
-                <motion.nav
-                  className={cn(
-                    "fixed inset-0 z-20 bg-f1-background-inverse",
-                    !isSmallScreen && "hidden"
-                  )}
+              {/* Scrim for the drawer. Rendered only when there IS a drawer:
+                  it used to mount and animate on every desktop hover too, kept
+                  out of sight with a `hidden` class.
+
+                  A div, not a `nav`: a scrim is not a navigation landmark, and
+                  announcing an empty one was noise. It stays click-to-dismiss
+                  and aria-hidden — the keyboard path is Escape, handled by the
+                  frame provider, so there is nothing here to reach by tab. */}
+              {sidebarState === "unlocked" && isSmallScreen && (
+                <motion.div
+                  aria-hidden="true"
+                  className="fixed inset-0 z-20 bg-f1-background-inverse"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 0.1 }}
                   exit={{ opacity: 0 }}
@@ -323,6 +295,14 @@ function ApplicationFrameContent({
                 />
               )}
             </AnimatePresence>
+
+            {/* Skip link. Deliberately OUTSIDE the sidebar wrapper: that
+                wrapper goes `inert` whenever the navigation is hidden, which
+                is the default for anyone who collapsed it and for every small
+                screen. Bypassing blocks is precisely what a keyboard user
+                needs at that moment, so it cannot live in a region that
+                disappears from the tab order. */}
+            <SkipToContentButton contentId="content" />
 
             {/* Sidebar */}
             <div
@@ -339,7 +319,6 @@ function ApplicationFrameContent({
                 }
               }}
             >
-              <SkipToContentButton contentId="content" />
               {sidebar}
             </div>
 

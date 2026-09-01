@@ -1,6 +1,6 @@
 {
   "note": "Untranslated user-visible copy in packages/react/src — string literals that should come from the i18n layer (src/lib/providers/i18n) instead. Enforced by .scripts/check-untranslated-copy.ts. This list may only shrink: translate a string and remove it from here (or run \"--update\"), never add one.",
-  "total": 133,
+  "total": 128,
   "files": {
     "src/components/F0Card/components/CardMetadata.tsx": [
       "Unsupported property type:"
@@ -77,10 +77,7 @@
     "src/experimental/Navigation/F0TableOfContent/Item/PrimitiveItem.tsx": [
       "Drag to reorder"
     ],
-    "src/experimental/Navigation/Header/PageHeader/index.tsx": [
-      "Back",
-      "Open main menu"
-    ],
+    "src/experimental/Navigation/Header/PageHeader/index.tsx": ["Back"],
     "src/experimental/Navigation/Header/PageNavigation/index.tsx": [
       "Next",
       "Previous"
@@ -124,10 +121,6 @@
     ],
     "src/patterns/F0Form/fields/date/DateTimeFieldRenderer.tsx": ["Time"],
     "src/patterns/F0Form/fields/file/FileFieldRenderer.tsx": ["Text files"],
-    "src/patterns/Navigation/Sidebar/Icon/index.tsx": [
-      "Close Sidebar",
-      "Close Sidebar"
-    ],
     "src/patterns/OneDataCollection/components/CollectionActions/CollectionActions.tsx": [
       "Actions"
     ],
@@ -160,8 +153,6 @@
       "Select break type",
       "Select location"
     ],
-    "src/sds/Home/DaytimePage/index.tsx": ["Open main menu"],
-    "src/sds/Home/NewHomeLayout/index.tsx": ["Open main menu"],
     "src/sds/Home/WidgetCatalog/index.tsx": [
       "Add widget",
       "Add widget",
