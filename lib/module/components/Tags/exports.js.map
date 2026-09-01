@@ -1,0 +1,1 @@
+{"version":3,"names":["AlertTag","DotTag","dotTagColors","legacyDotTagColors","RawTag","Tag"],"sourceRoot":"../../../../src","sources":["components/Tags/exports.ts"],"mappings":"AAGA,OAASA,QAAQ,KAAQ,YAAY,CAKrC,OAASC,MAAM,KAAQ,UAAU,CAKjC,OAASC,YAAY,KAAQ,UAAU,CAIvC,OAASA,YAAY,GAAI,CAAAC,kBAAkB,KAAQ,UAAU,CAK7D,OAASC,MAAM,KAAQ,UAAU,CAKjC,OAASC,GAAG,KAAQ,OAAO","ignoreList":[]}
