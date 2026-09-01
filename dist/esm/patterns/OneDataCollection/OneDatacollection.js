@@ -23,10 +23,10 @@ import { useDataCollectionSettings as xe } from "./Settings/SettingsProvider.js"
 import { useExportAction as Se } from "./hooks/useExportAction.js";
 import { useDataCollectionUrlSync as Ce } from "./hooks/useDataCollectionUrlSync.js";
 import { usePerVisualizationFilters as we } from "./hooks/usePerVisualizationFilters.js";
-import { VisualizationRenderer as Te } from "./visualizations/collection/VisualizationRenderer.js";
-import { getDefaultDataCollectionSettings as Ee } from "./internal/isSettingsDefault.js";
-import { derivePresetId as De } from "./internal/presetId.js";
-import { SHARED_PRESET_PARAM as Oe, buildSharedPresetUrl as ke, decodeSharedPreset as Ae } from "./internal/sharedPreset.js";
+import { getDefaultDataCollectionSettings as Te } from "./internal/isSettingsDefault.js";
+import { derivePresetId as Ee } from "./internal/presetId.js";
+import { SHARED_PRESET_PARAM as De, buildSharedPresetUrl as Oe, decodeSharedPreset as ke } from "./internal/sharedPreset.js";
+import { VisualizationRenderer as Ae } from "./visualizations/collection/VisualizationRenderer.js";
 import { Settings as je } from "./Settings/Settings.js";
 import { useHeaderActionsCollapse as Me } from "./components/useHeaderActionsCollapse.js";
 import { VisualizationSwitcher as Ne } from "./components/VisualizationSwitcher.js";
@@ -41,7 +41,7 @@ var Be = 1500, Ve = 2e3, d = ({ source: d, visualizations: f, onSelectItems: He,
 	let { filters: $e, currentFilters: et, setCurrentFilters: tt, presets: nt, presetsLoading: rt, currentNavigationFilters: g, navigationFilters: it, setCurrentNavigationFilters: at, search: _, currentSearch: v, setCurrentSearch: ot, isLoading: st, primaryActions: ct, primaryActionsLabel: lt, secondaryActions: y, upsellAction: ut, totalItemSummary: dt, currentGrouping: b, setCurrentGrouping: ft, grouping: x, currentSortings: S, setCurrentSortings: C, sortings: pt } = d, [w, mt] = c(Qe), [T, E] = c(void 0), [D, ht] = c([]), [O, k] = c(null), [gt] = c(() => {
 		if (typeof window > "u") return null;
 		let e = new URLSearchParams(window.location.search);
-		return Ae(e.get(Oe));
+		return ke(e.get(De));
 	}), A = he(d.searchPreview, d.debouncedCurrentSearch), { effectiveFilters: j, effectivePresets: _t, currentFilters: M, setCurrentFilters: N, allVisualizationFilters: vt, setAllVisualizationFilters: yt, hasPerVisualizationFilters: P } = we({
 		sourceFilters: $e,
 		sourcePresets: nt,
@@ -214,13 +214,13 @@ var Be = 1500, Ve = 2e3, d = ({ source: d, visualizations: f, onSelectItems: He,
 		sortings: e.sortings === void 0 ? I.current : e.sortings,
 		grouping: e.grouping === void 0 ? Ot.current : e.grouping,
 		visualization: e.visualization ?? 0,
-		settings: e.settings === void 0 ? Ee() : e.settings
+		settings: e.settings === void 0 ? Te() : e.settings
 	}), []), Y = s(null), Dn = s(!1), On = s(null), kn = i(() => ({
 		filters: kt.current,
 		sortings: I.current,
 		grouping: Ot.current,
 		visualization: 0,
-		settings: Ee()
+		settings: Te()
 	}), []), An = i((e) => {
 		C(e.sortings), ft(e.grouping), wn(e.settings), e.visualization === w ? N(e.filters) : (On.current = {
 			filters: e.filters,
@@ -303,7 +303,7 @@ var Be = 1500, Ve = 2e3, d = ({ source: d, visualizations: f, onSelectItems: He,
 			visualization: w,
 			settings: K
 		}, r = {
-			id: De(e.title, q.map((e) => e.id ?? e.label)),
+			id: Ee(e.title, q.map((e) => e.id ?? e.label)),
 			label: e.title,
 			description: e.description,
 			...n
@@ -320,7 +320,7 @@ var Be = 1500, Ve = 2e3, d = ({ source: d, visualizations: f, onSelectItems: He,
 	]), Fn = i((e) => {
 		let t = O?.mode === "update" ? O.presetId : void 0;
 		if (!t) return;
-		let n = De(e.title, q.filter((e) => e.id !== t).map((e) => e.id ?? e.label));
+		let n = Ee(e.title, q.filter((e) => e.id !== t).map((e) => e.id ?? e.label));
 		ht((r) => r.map((r) => r.id === t ? {
 			...r,
 			id: n,
@@ -338,7 +338,7 @@ var Be = 1500, Ve = 2e3, d = ({ source: d, visualizations: f, onSelectItems: He,
 	}), []), Bn = i((e) => {
 		let t = D.find((t) => t.id === e);
 		if (!t) return;
-		let n = ke({
+		let n = Oe({
 			label: t.label,
 			description: t.description,
 			filter: t.filter,
@@ -359,7 +359,7 @@ var Be = 1500, Ve = 2e3, d = ({ source: d, visualizations: f, onSelectItems: He,
 			shared: gt
 		}), typeof window < "u")) {
 			let e = new URLSearchParams(window.location.search);
-			e.delete(Oe);
+			e.delete(De);
 			let t = e.toString();
 			window.history.replaceState(null, "", t ? `${window.location.pathname}?${t}` : window.location.pathname);
 		}
@@ -569,7 +569,7 @@ var Be = 1500, Ve = 2e3, d = ({ source: d, visualizations: f, onSelectItems: He,
 			/* @__PURE__ */ l("div", {
 				ref: bt,
 				className: e(W && "hidden", m && "h-full min-h-0 flex-1"),
-				children: (!F || Tt !== void 0) && /* @__PURE__ */ l(Te, {
+				children: (!F || Tt !== void 0) && /* @__PURE__ */ l(Ae, {
 					visualization: f[w],
 					source: Dt,
 					onSelectItems: fn,

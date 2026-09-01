@@ -31,6 +31,9 @@ export type SecondaryActionItem = Pick<DropdownItemObject, "label" | "icon" | "d
         disabled: boolean;
         loading: boolean;
     }) => string | undefined;
+    /** A count shown to the right of the label, e.g. how many items the action
+     * concerns. Ignored while the action is collapsed into the overflow menu. */
+    counterValue?: number;
 };
 export type SecondaryActionGroup = {
     label?: string;

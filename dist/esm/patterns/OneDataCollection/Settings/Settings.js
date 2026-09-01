@@ -7,8 +7,8 @@ import { Popover as a, PopoverContent as o, PopoverTrigger as s } from "../../..
 import { GroupingSelector as c } from "./components/GroupingSelector.js";
 import { F0SelectStatic as l } from "../../../components/F0Select/F0Select.js";
 import { useDataCollectionSettings as u } from "./SettingsProvider.js";
-import { collectionVisualizations as d } from "../visualizations/collection/collectionViewRegistry.js";
-import { isVisualizationSettingsDefault as f } from "../internal/isSettingsDefault.js";
+import { isVisualizationSettingsDefault as d } from "../internal/isSettingsDefault.js";
+import { collectionVisualizations as f } from "../visualizations/collection/collectionViewRegistry.js";
 import { SortingSelector as p } from "./components/SortingSelector.js";
 import { VisualizationSettingsRenderer as m, hasVisualizacionSettings as h } from "./VisualizationSettingsRenderer.js";
 import { useMemo as g, useState as _ } from "react";
@@ -25,7 +25,7 @@ var b = ({ visualizations: b, currentVisualization: x, grouping: S, currentGroup
 	}, [x]), V = u(), H = g(() => {
 		if (JSON.stringify(E) !== JSON.stringify(D)) return !0;
 		let e = b[x]?.type;
-		return !f(V.settings, e);
+		return !d(V.settings, e);
 	}, [
 		V.settings.visualization,
 		b,
@@ -88,7 +88,7 @@ var b = ({ visualizations: b, currentVisualization: x, grouping: S, currentGroup
 							icon: e,
 							label: k.collections.visualizations.reset,
 							onClick: () => {
-								Object.values(d).forEach((e) => {
+								Object.values(f).forEach((e) => {
 									e.settings.resetHandler?.(V);
 								}), O(D);
 							}

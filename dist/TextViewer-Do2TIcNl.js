@@ -1,7 +1,7 @@
 import { r as e } from "./OneEllipsis-DuhKMtYp.js";
 import { f as t } from "./variants-D_OHTcOj.js";
 import { l as n } from "./F0Button-B67qxFBP.js";
-import { n as r, t as i } from "./DocumentToolbar-CkcalFPT.js";
+import { n as r, t as i } from "./DocumentToolbar-D02WuIoE.js";
 import { useEffect as a, useState as o } from "react";
 import { jsx as s, jsxs as c } from "react/jsx-runtime";
 //#region src/components/F0PdfViewer/components/TextViewer.tsx

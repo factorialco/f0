@@ -530,7 +530,7 @@ var V = t(B), H = ({ text: e }) => /* @__PURE__ */ T("div", {
 										animate: { opacity: 1 },
 										exit: { opacity: 0 },
 										transition: { duration: .2 },
-										className: u("flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded-full p-0", ee()),
+										className: u("flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded-full p-0", ee()),
 										"aria-label": "Clear",
 										type: "button",
 										tabIndex: 0,

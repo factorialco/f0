@@ -66,6 +66,7 @@ var f = ({ primaryActions: f, primaryActionsLabel: p, secondaryActions: m, other
 					variant: "outline",
 					hideLabel: e.hideLabelWhenExpanded,
 					label: e.label,
+					counterValue: e.counterValue,
 					disabled: e.disabled,
 					loading: e.loading
 				});

@@ -5,7 +5,7 @@ import { jsx as l, jsxs as u } from "react/jsx-runtime";
 //#endregion
 //#region src/component-status/component-status.ts
 var d = {
-	generatedAt: "2026-09-01T09:54:38.942Z",
+	generatedAt: "2026-09-01T10:39:43.029Z",
 	stats: {
 		total: 265,
 		byStatus: {
@@ -28,9 +28,9 @@ var d = {
 		byDocQuality: {
 			none: 161,
 			stub: 47,
-			acceptable: 27,
-			good: 6,
-			gold: 24
+			acceptable: 24,
+			good: 7,
+			gold: 26
 		},
 		withUnitTests: 132,
 		withMdxDocs: 104
@@ -923,19 +923,19 @@ var d = {
 			tags: ["stable", "!autodocs"],
 			hasStories: !0,
 			hasUnitTests: !0,
-			hasPlayFunction: !1,
+			hasPlayFunction: !0,
 			hasSnapshot: !0,
 			hasMdxDocs: !0,
-			docQuality: "acceptable",
+			docQuality: "gold",
 			docSignals: {
-				sectionsCount: 2,
+				sectionsCount: 3,
 				hasProps: !0,
 				hasWhenToUse: !0,
 				hasWhenNotToUse: !0,
-				hasDoDonts: !1,
-				exampleCount: 1
+				hasDoDonts: !0,
+				exampleCount: 4
 			},
-			a11yTier: "skipped",
+			a11yTier: "enforced",
 			storyFile: "components/F0TextAreaInput/__stories__/F0TextAreaInput.stories.tsx"
 		},
 		{
@@ -945,19 +945,19 @@ var d = {
 			tags: ["stable", "!autodocs"],
 			hasStories: !0,
 			hasUnitTests: !0,
-			hasPlayFunction: !1,
+			hasPlayFunction: !0,
 			hasSnapshot: !0,
 			hasMdxDocs: !0,
-			docQuality: "acceptable",
+			docQuality: "good",
 			docSignals: {
 				sectionsCount: 2,
 				hasProps: !0,
 				hasWhenToUse: !0,
 				hasWhenNotToUse: !0,
-				hasDoDonts: !1,
+				hasDoDonts: !0,
 				exampleCount: 3
 			},
-			a11yTier: "skipped",
+			a11yTier: "enforced",
 			storyFile: "components/F0TextInput/__stories__/F0TextInput.stories.tsx"
 		},
 		{
@@ -989,19 +989,19 @@ var d = {
 			tags: ["stable", "!autodocs"],
 			hasStories: !0,
 			hasUnitTests: !0,
-			hasPlayFunction: !1,
+			hasPlayFunction: !0,
 			hasSnapshot: !0,
 			hasMdxDocs: !0,
-			docQuality: "acceptable",
+			docQuality: "gold",
 			docSignals: {
-				sectionsCount: 2,
+				sectionsCount: 3,
 				hasProps: !0,
 				hasWhenToUse: !0,
 				hasWhenNotToUse: !0,
-				hasDoDonts: !1,
+				hasDoDonts: !0,
 				exampleCount: 12
 			},
-			a11yTier: "skipped",
+			a11yTier: "enforced",
 			storyFile: "components/F0InputField/__stories__/F0InputField.stories.tsx"
 		},
 		{

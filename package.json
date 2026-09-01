@@ -1,6 +1,6 @@
 {
   "name": "@factorialco/f0-react",
-  "version": "6.74.3",
+  "version": "6.75.0",
   "private": false,
   "repository": {
     "type": "git",
@@ -141,7 +141,6 @@
     "start": "pnpm run dev",
     "check:consumer-bundle": "tsx .scripts/check-consumer-bundle.ts",
     "build": "tsc --project ./tsconfig-build.json && run-p build-icons && NODE_OPTIONS=--max-old-space-size=8192 vite build -- --tailwind && BUILD_PRESERVED_ESM=true NODE_OPTIONS=--max-old-space-size=8192 vite build && NODE_OPTIONS=--max-old-space-size=8192 BUILD_TYPES=true BUILD_DECLARATIONS_ONLY=true vite build && pnpm run check:publication",
-    "build:tsup": "tsup && pnpm run build:tailwind && run-p build-icons",
     "build-icons": "tsc --project ./tsconfig-build-icons.json",
     "build:tailwind": "NODE_ENV=production tailwindcss -i src/styles.css -o ./dist/styles.css --postcss --minify",
     "build:watch": "pnpm run build && run-p --race build:watch:runtime build:watch:esm build:watch:declarations",
@@ -342,7 +341,6 @@
     "react-syntax-highlighter": "^15.6.1",
     "rollup-plugin-jsx-remove-attributes": "^3.1.1",
     "storybook": "^10.5.10",
-    "tsup": "^8.5.1",
     "typescript": "npm:@typescript/typescript6@6.0.2",
     "user-agent-data-types": "^0.4.2",
     "vite": "^8.2.2",

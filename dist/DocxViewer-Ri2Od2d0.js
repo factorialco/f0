@@ -1,7 +1,7 @@
 import { f as e } from "./variants-D_OHTcOj.js";
 import { l as t } from "./F0Button-B67qxFBP.js";
 import { t as n } from "./docx-preview-BDrVn7Yf.js";
-import { n as r, t as i } from "./DocumentToolbar-CkcalFPT.js";
+import { n as r, t as i } from "./DocumentToolbar-D02WuIoE.js";
 import { useEffect as a, useRef as o, useState as s } from "react";
 import { jsx as c, jsxs as l } from "react/jsx-runtime";
 //#region src/components/F0PdfViewer/components/DocxViewer.tsx

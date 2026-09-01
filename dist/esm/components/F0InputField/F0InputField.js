@@ -239,7 +239,7 @@ var d = ["sm", "md"], f = "", de = (e) => e === f || e ? e.toString().length ===
 										animate: { opacity: 1 },
 										exit: { opacity: 0 },
 										transition: { duration: .2 },
-										className: e("flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded-full p-0", t()),
+										className: e("flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded-full p-0", t()),
 										"aria-label": "Clear",
 										type: "button",
 										tabIndex: 0,

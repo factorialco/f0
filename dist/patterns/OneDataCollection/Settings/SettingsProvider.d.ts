@@ -1,15 +1,6 @@
 import { default as React } from 'react';
-import { EditableTableVisualizationSettings } from '../visualizations/collection/EditableTable/types';
-import { GraphVisualizationSettings } from '../visualizations/collection/Graph/types';
-import { TableVisualizationSettings } from '../visualizations/collection/Table/types';
-export type VisualizationSettings = {
-    table: TableVisualizationSettings;
-    editableTable: EditableTableVisualizationSettings;
-    list: Record<string, never>;
-    card: Record<string, never>;
-    kanban: Record<string, never>;
-    graph: GraphVisualizationSettings;
-};
+import { VisualizationSettings } from './visualizationSettings';
+export type { VisualizationSettings } from './visualizationSettings';
 export type DataCollectionSettings = {
     visualization: VisualizationSettings;
 };
