@@ -1,11 +1,11 @@
 import { o as e } from "./rolldown-runtime-CEFd7nDs.js";
-import { i as t, n, r, t as i } from "./tooltip-BPSwDQpD.js";
+import { i as t, n, r, t as i } from "./tooltip-BbudvOFU.js";
 import { useCallback as a, useEffect as o, useRef as s, useState as c } from "react";
 import { jsx as l, jsxs as u } from "react/jsx-runtime";
 //#endregion
 //#region src/component-status/component-status.ts
 var d = {
-	generatedAt: "2026-09-01T14:18:08.274Z",
+	generatedAt: "2026-09-01T16:38:41.151Z",
 	stats: {
 		total: 265,
 		byStatus: {
@@ -32,7 +32,7 @@ var d = {
 			good: 7,
 			gold: 26
 		},
-		withUnitTests: 132,
+		withUnitTests: 133,
 		withMdxDocs: 104
 	},
 	components: [
@@ -5333,7 +5333,7 @@ var d = {
 				hasWhenToUse: !1,
 				hasWhenNotToUse: !0,
 				hasDoDonts: !0,
-				exampleCount: 4
+				exampleCount: 5
 			},
 			a11yTier: "enforced",
 			storyFile: "sds/Home/Communities/F0CommunityPostsCarousel/index.stories.tsx"
@@ -5520,7 +5520,7 @@ var d = {
 			apiStatus: "experimental",
 			tags: ["experimental"],
 			hasStories: !0,
-			hasUnitTests: !1,
+			hasUnitTests: !0,
 			hasPlayFunction: !1,
 			hasSnapshot: !1,
 			hasMdxDocs: !0,

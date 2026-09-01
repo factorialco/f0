@@ -612,6 +612,19 @@ export declare const SLOT_ROW_BLEED = "-m-2";
  * widget's last slot, where the bleed should reach the card's bottom edge.
  */
 export declare const slotRowBleed: (ctx: HomeRenderCtx) => string;
+/**
+ * WHERE "View more" SITS. Not where the rows above it start: a row-based slot
+ * bleeds 8px past the card's content box (`SLOT_ROW_BLEED`), and a button left
+ * in that bleed hangs its whole filled rectangle 8px to the left of the
+ * widget's TITLE — visible as a rectangle that overhangs the card's text.
+ *
+ * It sits exactly where the frame's own footer button sits instead, because it
+ * is the same button one slot higher (`SlotWidget`'s footer class): 8px back to
+ * the content box, then 2px out again — the nudge that makes a filled or
+ * bordered box read as aligned with the text above it rather than measuring
+ * 2px shy of it.
+ */
+export declare const LIST_MORE_BUTTON_CLASS = "ml-1.5 mt-1 self-start";
 /** The gap between rows of the `event-list` slot. */
 export declare const EVENT_LIST_GAP = "gap-2";
 /**

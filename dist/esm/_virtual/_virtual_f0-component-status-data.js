@@ -1,6 +1,6 @@
 //#region \0virtual:f0-component-status-data
 var e = {
-	generatedAt: "2026-09-01T14:18:20.092Z",
+	generatedAt: "2026-09-01T16:38:56.390Z",
 	stats: {
 		total: 265,
 		byStatus: {
@@ -27,7 +27,7 @@ var e = {
 			good: 7,
 			gold: 26
 		},
-		withUnitTests: 132,
+		withUnitTests: 133,
 		withMdxDocs: 104
 	},
 	components: [
@@ -5328,7 +5328,7 @@ var e = {
 				hasWhenToUse: !1,
 				hasWhenNotToUse: !0,
 				hasDoDonts: !0,
-				exampleCount: 4
+				exampleCount: 5
 			},
 			a11yTier: "enforced",
 			storyFile: "sds/Home/Communities/F0CommunityPostsCarousel/index.stories.tsx"
@@ -5515,7 +5515,7 @@ var e = {
 			apiStatus: "experimental",
 			tags: ["experimental"],
 			hasStories: !0,
-			hasUnitTests: !1,
+			hasUnitTests: !0,
 			hasPlayFunction: !1,
 			hasSnapshot: !1,
 			hasMdxDocs: !0,

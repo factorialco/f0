@@ -29,13 +29,8 @@ type CarouselProps = {
     plugins?: CarouselPlugin;
     orientation?: "horizontal" | "vertical";
     setApi?: (api: CarouselApi) => void;
+    paging?: CarouselPaging;
 };
-declare const Carousel: React.ForwardRefExoticComponent<React.HTMLAttributes<HTMLDivElement> & CarouselProps & React.RefAttributes<HTMLDivElement>>;
-declare const CarouselContent: React.ForwardRefExoticComponent<React.HTMLAttributes<HTMLDivElement> & React.RefAttributes<HTMLDivElement>>;
-declare const CarouselItem: React.ForwardRefExoticComponent<React.HTMLAttributes<HTMLDivElement> & React.RefAttributes<HTMLDivElement>>;
-declare const CarouselPrevious: React.ForwardRefExoticComponent<ButtonInternalProps & React.RefAttributes<HTMLButtonElement>>;
-declare const CarouselNext: React.ForwardRefExoticComponent<ButtonInternalProps & React.RefAttributes<HTMLButtonElement>>;
-declare const CarouselDots: React.ForwardRefExoticComponent<React.HTMLAttributes<HTMLDivElement> & React.RefAttributes<HTMLDivElement>>;
 /**
  * A carousel whose slides are ONE PAGE of a longer list.
  *
@@ -65,6 +60,19 @@ export type CarouselPaging = {
      */
     total?: number;
 };
+export type CarouselPagingState = {
+    canGoNext: boolean;
+    goNext: () => void;
+    isAwaitingPage: boolean;
+    isPageInFlight: boolean;
+};
+declare const useCarouselPaging: () => CarouselPagingState;
+declare const Carousel: React.ForwardRefExoticComponent<React.HTMLAttributes<HTMLDivElement> & CarouselProps & React.RefAttributes<HTMLDivElement>>;
+declare const CarouselContent: React.ForwardRefExoticComponent<React.HTMLAttributes<HTMLDivElement> & React.RefAttributes<HTMLDivElement>>;
+declare const CarouselItem: React.ForwardRefExoticComponent<React.HTMLAttributes<HTMLDivElement> & React.RefAttributes<HTMLDivElement>>;
+declare const CarouselPrevious: React.ForwardRefExoticComponent<ButtonInternalProps & React.RefAttributes<HTMLButtonElement>>;
+declare const CarouselNext: React.ForwardRefExoticComponent<ButtonInternalProps & React.RefAttributes<HTMLButtonElement>>;
+declare const CarouselDots: React.ForwardRefExoticComponent<React.HTMLAttributes<HTMLDivElement> & React.RefAttributes<HTMLDivElement>>;
 /**
  * THE PAGING ROW: an arrow on each end, the dots between them, under the slides.
  *
@@ -95,10 +103,5 @@ declare const CarouselControls: React.ForwardRefExoticComponent<React.HTMLAttrib
     };
     /** Whether the dots sit between the arrows. Defaults to true. */
     showDots?: boolean;
-    /**
-     * The slides are a PAGE of a longer list: Next then stays live at the end and
-     * fetches the rest. See {@link CarouselPaging}.
-     */
-    paging?: CarouselPaging;
 } & React.RefAttributes<HTMLDivElement>>;
-export { Carousel, CarouselContent, CarouselControls, CarouselDots, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi, };
+export { Carousel, CarouselContent, CarouselControls, CarouselDots, CarouselItem, CarouselNext, CarouselPrevious, useCarouselPaging, type CarouselApi, };

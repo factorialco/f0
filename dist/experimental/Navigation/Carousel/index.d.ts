@@ -26,13 +26,14 @@ interface CarouselProps {
         next?: string;
     };
     /**
-     * The slides are ONE PAGE of a longer list. Next then stays live at the end
-     * and fetches the rest instead of going dead — see {@link CarouselPaging}, and
-     * append the new records to `children` as they arrive.
+     * The slides are ONE PAGE of a longer list. Reaching the end then fetches the
+     * rest instead of going dead — see {@link CarouselPaging}, and append the new
+     * records to `children` as they arrive. Dragging past the last slide fetches
+     * in either placement.
      *
-     * `arrowsPlacement: "bottom"` only: the overlay arrows are a hover affordance
-     * over the slides, and a fetch you can't see you triggered is worse than no
-     * fetch at all.
+     * The ARROW that fetches is `arrowsPlacement: "bottom"`'s only: the overlay
+     * arrows are a hover affordance over the slides, and a fetch you can't see you
+     * triggered is worse than no fetch at all.
      */
     paging?: CarouselPaging;
     autoplay?: boolean;

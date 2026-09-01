@@ -30,6 +30,7 @@ var y = e(t("Carousel", ({ children: e, columns: t, showArrows: y = !0, showDots
 			containScroll: !1
 		},
 		plugins: [A.current, _()].filter(Boolean),
+		paging: C,
 		onMouseEnter: w ? () => {
 			A.current && A.current.stop();
 		} : void 0,
@@ -56,8 +57,7 @@ var y = e(t("Carousel", ({ children: e, columns: t, showArrows: y = !0, showDots
 				}) }), y && !k && /* @__PURE__ */ h(p, { children: [/* @__PURE__ */ m(l, { label: S?.previous ?? "Previous" }), /* @__PURE__ */ m(c, { label: S?.next ?? "Next" })] })]
 			}), k ? /* @__PURE__ */ m(a, {
 				labels: S,
-				showDots: b,
-				paging: C
+				showDots: b
 			}) : b && /* @__PURE__ */ m(o, {})]
 		})
 	}) : /* @__PURE__ */ m(u, { children: e });

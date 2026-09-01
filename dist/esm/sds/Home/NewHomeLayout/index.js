@@ -196,17 +196,17 @@ var pe = {
 	}), Ke = y(), qe = y(), Je = y(), Ye = (e) => E.includes(e) ? {
 		...ve,
 		scrollElement: e === "main" ? Ke.element : qe.element
-	} : !1, Xe = g != null || p.length > 0 || j != null && G("right"), Ze = z > 0 && z < P + be + N, K = Xe && p.length > 0 && (Ze || (He ?? !1)), Qe = K ? he : N, $e = K ? "Expand widgets panel" : "Collapse widgets panel", q = Xe && Be, J = z > 0 && z < xe, et = {
+	} : !1, Xe = g != null || p.length > 0 || j != null && G("right"), Ze = z > 0 && z < P + be + N, K = Xe && p.length > 0 && (Ze || (He ?? !1)), Qe = K ? he : N, $e = K ? "Expand widgets panel" : "Collapse widgets panel", q = Xe && Be, J = z > 0 && z < xe, et = q && !J && (K || z >= xe), tt = {
 		pinned: J ? p.filter((e) => e.locked) : [],
 		rest: J ? p.filter((e) => !e.locked) : []
-	}, tt = se.toArray(ne), nt = (J ? [
-		...tt.slice(0, Ee),
-		...et.pinned.map((e) => /* @__PURE__ */ C(ce, { children: Ge(e) }, e.id)),
-		...tt.slice(Ee)
-	] : tt).map((e, t) => /* @__PURE__ */ C(f, {
+	}, nt = se.toArray(ne), rt = (J ? [
+		...nt.slice(0, Ee),
+		...tt.pinned.map((e) => /* @__PURE__ */ C(ce, { children: Ge(e) }, e.id)),
+		...nt.slice(Ee)
+	] : nt).map((e, t) => /* @__PURE__ */ C(f, {
 		order: t,
 		children: e
-	}, le(e) && e.key != null ? e.key : t)), rt = K ? p.find((e) => e.id === B) : void 0;
+	}, le(e) && e.key != null ? e.key : t)), it = K ? p.find((e) => e.id === B) : void 0;
 	ue(() => {
 		K || (W.current && clearTimeout(W.current), W.current = null, V(null));
 	}, [K]), ue(() => () => {
@@ -214,21 +214,21 @@ var pe = {
 	}, []);
 	let Y = oe({
 		collapsed: K,
-		open: rt != null,
+		open: it != null,
 		glide: Re,
 		drawn: q,
 		width: Qe
-	}), X = Y.mode === "panel", it = x(null);
-	B && (it.current = B);
-	let at = x(null);
-	at.current = B;
-	let ot = B ?? (Y.panelHidden ? null : it.current), st = X ? {
+	}), X = Y.mode === "panel", at = x(null);
+	B && (at.current = B);
+	let ot = x(null);
+	ot.current = B;
+	let st = B ?? (Y.panelHidden ? null : at.current), ct = X ? {
 		transformOrigin: u,
 		top: 0,
 		right: 48,
 		width: N,
 		maxHeight: `calc(100% - ${H}px)`,
-		pointerEvents: rt ? void 0 : "none"
+		pointerEvents: it ? void 0 : "none"
 	} : {
 		transformOrigin: u,
 		gridColumn: 2,
@@ -247,21 +247,21 @@ var pe = {
 		W.current && clearTimeout(W.current), W.current = null;
 	}, $ = () => {
 		Z(), Q(), U.current = setTimeout(() => V(null), Se);
-	}, ct = (e, t) => {
+	}, lt = (e, t) => {
 		Q();
 		let n = R.current;
 		if (n) {
 			let e = t.getBoundingClientRect().top - n.getBoundingClientRect().top;
 			Le(Math.max(0, e));
 		}
-		ze(at.current != null), V(e);
-	}, lt = (e, t, n = !1) => {
-		if (Z(), Q(), at.current !== e) {
+		ze(ot.current != null), V(e);
+	}, ut = (e, t, n = !1) => {
+		if (Z(), Q(), ot.current !== e) {
 			if (n) {
-				ct(e, t);
+				lt(e, t);
 				return;
 			}
-			W.current = setTimeout(() => ct(e, t), Ce);
+			W.current = setTimeout(() => lt(e, t), Ce);
 		}
 	};
 	return /* @__PURE__ */ w(T.div, {
@@ -273,7 +273,7 @@ var pe = {
 			"--home-aside-w": Y.widthPx,
 			height: "100%",
 			maxHeight: `calc(100svh - ${2 * F}px)`,
-			gridTemplateColumns: q && !J && (K || z >= xe) ? `minmax(0, 1fr) var(--home-aside-w, ${Qe}px)` : "minmax(0, 1fr)"
+			gridTemplateColumns: et ? `minmax(0, 1fr) var(--home-aside-w, ${Qe}px)` : "minmax(0, 1fr)"
 		},
 		children: [
 			/* @__PURE__ */ C("div", {
@@ -325,13 +325,17 @@ var pe = {
 					marginBottom: -F,
 					paddingTop: F,
 					paddingBottom: F,
+					marginLeft: -F,
+					paddingLeft: F,
+					marginRight: et ? -16 : -F,
+					paddingRight: et ? be : F,
 					...Ke.style
 				},
 				children: /* @__PURE__ */ C(ae, {
 					side: "main",
 					className: "relative mx-auto w-full",
 					style: { maxWidth: `${P}px` },
-					widgets: J ? [...l, ...et.rest] : l,
+					widgets: J ? [...l, ...tt.rest] : l,
 					slotRenderers: _,
 					renderWidget: b,
 					ctx: I,
@@ -345,8 +349,8 @@ var pe = {
 					renderWidgetPreview: we,
 					paramsPreviewWidth: P,
 					onClickAddNewWidget: j && G("main") ? () => j("main") : void 0,
-					entrance: { order: nt.length },
-					children: nt
+					entrance: { order: rt.length },
+					children: rt
 				})
 			}),
 			/* @__PURE__ */ C(fe, { children: J || !q || !K ? null : /* @__PURE__ */ w(T.aside, {
@@ -370,7 +374,7 @@ var pe = {
 					order: t,
 					open: B === e.id,
 					delayMs: Y.glyphDelayMs,
-					onOpen: lt,
+					onOpen: ut,
 					onCancelOpen: Q,
 					onClose: () => V(null)
 				}, e.id)), G("right") && j ? /* @__PURE__ */ C(o, {
@@ -396,7 +400,7 @@ var pe = {
 				ref: qe.ref,
 				hidden: X && Y.panelHidden,
 				className: e("min-h-0 overflow-y-auto", k, X && "absolute z-10 rounded-xl bg-f1-background dark:bg-f1-background-secondary dark:backdrop-blur-[100px] dark:backdrop-saturate-150", Y.mode === "retracting" && "relative z-10"),
-				style: st,
+				style: ct,
 				initial: !1,
 				animate: {
 					opacity: +!!Y.bodyOut,
@@ -410,7 +414,7 @@ var pe = {
 				children: /* @__PURE__ */ C(ae, {
 					side: "right",
 					widgets: p,
-					visibleWidgetId: X ? ot : void 0,
+					visibleWidgetId: X ? st : void 0,
 					stow: { stowed: K },
 					slotRenderers: _,
 					renderWidget: b,
@@ -430,7 +434,7 @@ var pe = {
 					children: K ? null : g
 				})
 			}),
-			X && rt ? /* @__PURE__ */ C("div", {
+			X && it ? /* @__PURE__ */ C("div", {
 				"aria-hidden": !0,
 				className: "absolute z-10",
 				style: {

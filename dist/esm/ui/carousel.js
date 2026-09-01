@@ -15,49 +15,112 @@ function f() {
 	if (!e) throw Error("useCarousel must be used within a <Carousel />");
 	return e;
 }
-var p = o.forwardRef(({ orientation: t = "horizontal", opts: n, setApi: r, plugins: i, className: a, children: c, ...u }, f) => {
-	let [p, m] = l({
+var p = (e) => e?.containerNode()?.childElementCount ?? 0, m = 5, h = (e, t, n, r) => {
+	let i = r?.hasMore ?? !1, a = r?.isLoading ?? !1, s = r?.onLoadMore, [c, l] = o.useState(!1), [u, d] = o.useState(!1), f = o.useRef(a), h = o.useRef(0), g = o.useRef({
+		hasMore: i,
+		isLoading: a,
+		onLoadMore: s,
+		owedNext: c
+	});
+	g.current = {
+		hasMore: i,
+		isLoading: a,
+		onLoadMore: s,
+		owedNext: c
+	};
+	let _ = o.useCallback(() => {
+		let { hasMore: t, isLoading: n, onLoadMore: r, owedNext: i } = g.current;
+		!t || !r || i || (h.current = p(e), l(!0), d(!0), n || r());
+	}, [e]);
+	return o.useEffect(() => {
+		if (!e) return;
+		let t = () => {
+			let { hasMore: t, isLoading: n, onLoadMore: r } = g.current;
+			if (!t || n || !r) return;
+			let i = e.scrollSnapList().length;
+			e.selectedScrollSnap() < i - 1 || (d(!1), r());
+		}, n = !1, r = () => {
+			let { dragHandler: t, limit: r, location: i, percentOfView: a } = e.internalEngine();
+			t.pointerDown() && (r.min - i.get() < a.measure(m) || (n = !0));
+		}, i = () => {
+			n && (n = !1, _());
+		}, a = () => {
+			n = !1;
+		};
+		return e.on("select", t), e.on("scroll", r), e.on("pointerDown", a), e.on("pointerUp", i), () => {
+			e.off("select", t), e.off("scroll", r), e.off("pointerDown", a), e.off("pointerUp", i);
+		};
+	}, [e, _]), o.useEffect(() => {
+		let r = f.current && !a;
+		if (f.current = a, r && d(!1), c) {
+			if (t) {
+				l(!1), n();
+				return;
+			}
+			r && p(e) <= h.current && l(!1);
+		}
+	}, [
+		c,
+		t,
+		a,
+		n,
+		e
+	]), {
+		canGoNext: t || i && !a,
+		isAwaitingPage: c,
+		isPageInFlight: u && a,
+		goNext: () => {
+			if (t) {
+				n();
+				return;
+			}
+			_();
+		}
+	};
+}, g = () => f().pagingState, _ = o.forwardRef(({ orientation: t = "horizontal", opts: n, setApi: r, plugins: i, paging: a, className: c, children: u, ...f }, p) => {
+	let [m, g] = l({
 		...n,
 		axis: t === "horizontal" ? "x" : "y"
-	}, i), [h, g] = o.useState(!1), [_, v] = o.useState(!1), y = o.useCallback((e) => {
-		e && (g(e.canScrollPrev()), v(e.canScrollNext()));
-	}, []), b = o.useCallback(() => {
-		m?.scrollPrev();
-	}, [m]), x = o.useCallback(() => {
-		m?.scrollNext();
-	}, [m]), S = o.useCallback((e) => {
-		e.key === "ArrowLeft" ? (e.preventDefault(), b()) : e.key === "ArrowRight" && (e.preventDefault(), x());
-	}, [b, x]);
+	}, i), [_, v] = o.useState(!1), [y, b] = o.useState(!1), x = o.useCallback((e) => {
+		e && (v(e.canScrollPrev()), b(e.canScrollNext()));
+	}, []), S = o.useCallback(() => {
+		g?.scrollPrev();
+	}, [g]), C = o.useCallback(() => {
+		g?.scrollNext();
+	}, [g]), w = h(g, y, C, a), T = o.useCallback((e) => {
+		e.key === "ArrowLeft" ? (e.preventDefault(), S()) : e.key === "ArrowRight" && (e.preventDefault(), C());
+	}, [S, C]);
 	return o.useEffect(() => {
-		!m || !r || r(m);
-	}, [m, r]), o.useEffect(() => {
-		if (m) return y(m), m.on("reInit", y), m.on("select", y), () => {
-			m?.off("select", y);
+		!g || !r || r(g);
+	}, [g, r]), o.useEffect(() => {
+		if (g) return x(g), g.on("reInit", x), g.on("select", x), () => {
+			g?.off("select", x);
 		};
-	}, [m, y]), /* @__PURE__ */ s(d.Provider, {
+	}, [g, x]), /* @__PURE__ */ s(d.Provider, {
 		value: {
-			carouselRef: p,
-			api: m,
+			carouselRef: m,
+			api: g,
 			opts: n,
 			orientation: t || (n?.axis === "y" ? "vertical" : "horizontal"),
-			scrollPrev: b,
-			scrollNext: x,
-			canScrollPrev: h,
-			canScrollNext: _
+			scrollPrev: S,
+			scrollNext: C,
+			canScrollPrev: _,
+			canScrollNext: y,
+			pagingState: w
 		},
 		children: /* @__PURE__ */ s("div", {
-			ref: f,
-			onKeyDownCapture: S,
-			className: e("group/carousel relative", a),
+			ref: p,
+			onKeyDownCapture: T,
+			className: e("group/carousel relative", c),
 			role: "region",
 			"aria-roledescription": "carousel",
-			...u,
-			children: c
+			...f,
+			children: u
 		})
 	});
 });
-p.displayName = "Carousel";
-var m = o.forwardRef(({ className: t, ...n }, r) => {
+_.displayName = "Carousel";
+var v = o.forwardRef(({ className: t, ...n }, r) => {
 	let { carouselRef: i, orientation: a } = f();
 	return /* @__PURE__ */ s("div", {
 		ref: i,
@@ -69,8 +132,8 @@ var m = o.forwardRef(({ className: t, ...n }, r) => {
 		})
 	});
 });
-m.displayName = "CarouselContent";
-var h = o.forwardRef(({ className: t, ...n }, r) => {
+v.displayName = "CarouselContent";
+var y = o.forwardRef(({ className: t, ...n }, r) => {
 	let { orientation: i } = f();
 	return /* @__PURE__ */ s("div", {
 		ref: r,
@@ -80,8 +143,8 @@ var h = o.forwardRef(({ className: t, ...n }, r) => {
 		...n
 	});
 });
-h.displayName = "CarouselItem";
-var g = o.forwardRef(({ className: n, variant: r = "outline", ...i }, o) => {
+y.displayName = "CarouselItem";
+var b = o.forwardRef(({ className: n, variant: r = "outline", ...i }, o) => {
 	let { orientation: c, scrollPrev: l, canScrollPrev: u } = f();
 	return /* @__PURE__ */ s("div", {
 		className: e("absolute flex h-6 w-6 items-center justify-center rounded-sm bg-f1-background opacity-0 backdrop-blur-sm transition-opacity group-hover/carousel:opacity-100", !u && "opacity-0 group-hover/carousel:opacity-0", c === "horizontal" ? "-left-3 top-1/2 -translate-y-1/2" : "-top-3 left-1/2 -translate-x-1/2 rotate-90"),
@@ -100,8 +163,8 @@ var g = o.forwardRef(({ className: n, variant: r = "outline", ...i }, o) => {
 		})
 	});
 });
-g.displayName = "CarouselPrevious";
-var _ = o.forwardRef(({ className: t, variant: r = "outline", ...i }, o) => {
+b.displayName = "CarouselPrevious";
+var x = o.forwardRef(({ className: t, variant: r = "outline", ...i }, o) => {
 	let { orientation: c, scrollNext: l, canScrollNext: u } = f();
 	return /* @__PURE__ */ s("div", {
 		className: e("absolute flex h-6 w-6 items-center justify-center rounded-sm bg-f1-background opacity-0 backdrop-blur-sm transition-opacity group-hover/carousel:opacity-100", !u && "opacity-0 group-hover/carousel:opacity-0", c === "horizontal" ? "-right-3 top-1/2 -translate-y-1/2" : "-bottom-3 left-1/2 -translate-x-1/2 rotate-90"),
@@ -120,8 +183,8 @@ var _ = o.forwardRef(({ className: t, variant: r = "outline", ...i }, o) => {
 		})
 	});
 });
-_.displayName = "CarouselNext";
-var v = o.forwardRef(({ ...t }, n) => {
+x.displayName = "CarouselNext";
+var S = o.forwardRef(({ ...t }, n) => {
 	let { api: r } = f(), [, i] = o.useState(!1), a = o.useRef(null), c = o.useCallback(() => {
 		i((e) => !e);
 	}, []);
@@ -182,62 +245,13 @@ var v = o.forwardRef(({ ...t }, n) => {
 		})
 	});
 });
-v.displayName = "CarouselDots";
-var y = (e) => e?.containerNode()?.childElementCount ?? 0, b = (e) => {
-	let { api: t, canScrollNext: n, scrollNext: r } = f(), i = e?.hasMore ?? !1, a = e?.isLoading ?? !1, s = e?.onLoadMore, c = o.useRef({
-		hasMore: i,
-		isLoading: a,
-		onLoadMore: s
-	});
-	c.current = {
-		hasMore: i,
-		isLoading: a,
-		onLoadMore: s
-	}, o.useEffect(() => {
-		if (!t) return;
-		let e = () => {
-			let { hasMore: e, isLoading: n, onLoadMore: r } = c.current;
-			if (!e || n || !r) return;
-			let i = t.scrollSnapList().length;
-			t.selectedScrollSnap() < i - 1 || r();
-		};
-		return t.on("select", e), () => {
-			t.off("select", e);
-		};
-	}, [t]);
-	let [l, u] = o.useState(!1), d = o.useRef(a), p = o.useRef(0);
-	return o.useEffect(() => {
-		let e = d.current && !a;
-		if (d.current = a, l) {
-			if (n) {
-				u(!1), r();
-				return;
-			}
-			e && y(t) <= p.current && u(!1);
-		}
-	}, [
-		l,
-		n,
-		a,
-		r,
-		t
-	]), {
-		canGoNext: n || i && !a,
-		isAwaitingPage: l,
-		goNext: () => {
-			if (n) {
-				r();
-				return;
-			}
-			i && (p.current = y(t), u(!0), a || s?.());
-		}
-	};
-}, x = o.forwardRef(({ className: t, labels: n, showDots: o = !0, paging: l, ...u }, d) => {
-	let { scrollPrev: p, canScrollPrev: m } = f(), { canGoNext: h, goNext: g, isAwaitingPage: _ } = b(l);
+S.displayName = "CarouselDots";
+var C = o.forwardRef(({ className: t, labels: n, showDots: o = !0, ...l }, u) => {
+	let { scrollPrev: d, canScrollPrev: p } = f(), { canGoNext: m, goNext: h, isAwaitingPage: _ } = g();
 	return /* @__PURE__ */ c("div", {
-		ref: d,
+		ref: u,
 		className: e("flex flex-row items-center justify-between gap-2 pt-4", t),
-		...u,
+		...l,
 		children: [
 			/* @__PURE__ */ s(a, {
 				size: "md",
@@ -245,10 +259,10 @@ var y = (e) => e?.containerNode()?.childElementCount ?? 0, b = (e) => {
 				icon: r,
 				label: n?.previous ?? "Previous",
 				hideLabel: !0,
-				disabled: !m,
-				onClick: p
+				disabled: !p,
+				onClick: d
 			}),
-			o ? /* @__PURE__ */ s(v, { className: "grow" }) : null,
+			o ? /* @__PURE__ */ s(S, { className: "grow" }) : null,
 			/* @__PURE__ */ s(a, {
 				size: "md",
 				variant: "outline",
@@ -256,12 +270,12 @@ var y = (e) => e?.containerNode()?.childElementCount ?? 0, b = (e) => {
 				label: n?.next ?? "Next",
 				hideLabel: !0,
 				loading: _,
-				disabled: !h,
-				onClick: g
+				disabled: !m,
+				onClick: h
 			})
 		]
 	});
 });
-x.displayName = "CarouselControls";
+C.displayName = "CarouselControls";
 //#endregion
-export { u as CAROUSEL_SHADOW_BLEED, p as Carousel, m as CarouselContent, x as CarouselControls, v as CarouselDots, h as CarouselItem, _ as CarouselNext, g as CarouselPrevious };
+export { u as CAROUSEL_SHADOW_BLEED, _ as Carousel, v as CarouselContent, C as CarouselControls, S as CarouselDots, y as CarouselItem, x as CarouselNext, b as CarouselPrevious, g as useCarouselPaging };

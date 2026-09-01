@@ -139,7 +139,7 @@ import { F0AiFormRegistryProvider as Xn, defineAvailableForm as Zn, useF0AiFormR
 import { describeFormSchema as $n } from "./patterns/F0Form/describeFormSchema.js";
 import { createF0FormTester as er } from "./patterns/F0Form/testing/createF0FormTester.js";
 import { createF0FormDefinitionTester as tr } from "./patterns/F0Form/testing/createF0FormDefinitionTester.js";
-import { F0Form as nr } from "./F0Form.js";
+import { F0Form as nr } from "./patterns/F0Form/index.js";
 import { F0FormField as rr } from "./patterns/F0FormField/F0FormField.js";
 import { forms as ir } from "./patterns/forms/index.js";
 import { F0Heading as ar } from "./components/F0Heading/F0Heading.js";

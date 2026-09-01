@@ -5,7 +5,7 @@ import { F0Dialog as r } from "../../../../F0Dialog.js";
 import { useF0FormDefinition as i } from "../../../F0WizardForm/useF0FormDefinition.js";
 import { f0FormField as a } from "../../../F0Form/f0Schema.js";
 import { useF0Form as o } from "../../../F0Form/useF0Form.js";
-import { F0Form as s } from "../../../../F0Form.js";
+import { F0Form as s } from "../../../F0Form/index.js";
 import { jsx as c } from "react/jsx-runtime";
 import { z as l } from "zod";
 //#region src/patterns/OneDataCollection/components/PresetFormDialog/PresetFormDialog.tsx

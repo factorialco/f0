@@ -8,7 +8,7 @@ import { F0AvatarIcon as a } from "../../../components/avatars/F0AvatarIcon/inde
 import { F0Dialog as o } from "../../../F0Dialog.js";
 import { F0SearchInput as s } from "../../../components/F0SearchInput/F0SearchInput.js";
 import { useF0Form as te } from "../../../patterns/F0Form/useF0Form.js";
-import { F0Form as c } from "../../../F0Form.js";
+import { F0Form as c } from "../../../patterns/F0Form/index.js";
 import { resolveWidgetHeader as l, widgetChrome as u, widgetParamsAreComplete as ne } from "../slotRenderers.js";
 import { SlotWidget as d } from "../SlotWidget/index.js";
 import { WidgetPreviewPane as re, useWidgetDialogLayout as ie } from "../WidgetPreview/index.js";

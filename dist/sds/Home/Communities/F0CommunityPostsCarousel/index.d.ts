@@ -70,12 +70,13 @@ export interface F0CommunityPostsCarouselProps {
      * blank the tiles you are already reading.
      */
     loading?: boolean;
-    /** How many placeholder tiles `loading` draws. Defaults to 2 — one screenful. */
+    /** How many placeholder tiles are drawn. Defaults to 2 — one screenful. */
     expectedItemsCount?: number;
     /**
      * THE POSTS ARE A PAGE, not the whole feed. Pass this and the Next arrow stays
-     * live past the last mounted tile: reaching the end asks for the next page, and
-     * the new posts are appended to `posts` by whoever owns them.
+     * live past the last mounted tile — as does dragging past it: reaching the end
+     * asks for the next page, and the new posts are appended to `posts` by whoever
+     * owns them.
      *
      * It is `useData`'s infinite-scroll return, field for field — `hasMore` off
      * `paginationInfo`, `isLoadingMore`, `loadMore` — because that is where these

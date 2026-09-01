@@ -2,7 +2,7 @@ import { cn as e } from "../../../lib/utils.js";
 import { useI18n as t } from "../../../lib/providers/i18n/i18n-provider.js";
 import { F0Dialog as n } from "../../../F0Dialog.js";
 import { useF0Form as r } from "../../../patterns/F0Form/useF0Form.js";
-import { F0Form as i } from "../../../F0Form.js";
+import { F0Form as i } from "../../../patterns/F0Form/index.js";
 import { WidgetPreviewPane as a, useWidgetDialogLayout as o } from "../WidgetPreview/index.js";
 import { useEffect as s, useState as c } from "react";
 import { jsx as l, jsxs as u } from "react/jsx-runtime";

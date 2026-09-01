@@ -104,7 +104,7 @@ var b = (e) => e == null ? void 0 : typeof e == "function" ? { render: e } : e, 
 		...t,
 		status: "status" in e ? e.status : void 0
 	};
-}, R = "-m-2", z = (t) => e(R, "mt-0", !t.isLastSlot && "mb-0"), B = "gap-2", V = (e, t, n) => {
+}, R = "-m-2", z = (t) => e(R, "mt-0", !t.isLastSlot && "mb-0"), B = "ml-1.5 mt-1 self-start", V = "gap-2", H = (e, t, n) => {
 	if (e === "module" && t.module) return { left: /* @__PURE__ */ v(o, {
 		module: t.module,
 		size: n
@@ -128,7 +128,7 @@ var b = (e) => e == null ? void 0 : typeof e == "function" ? { render: e } : e, 
 		},
 		avatarSize: n
 	} : {};
-}, H = (e, t, n) => {
+}, U = (e, t, n) => {
 	if (e) return e === "counter" ? t.count == null ? void 0 : /* @__PURE__ */ v(i, { value: t.count }) : e.endsWith("-list") ? t.avatars && t.avatars.length > 0 ? /* @__PURE__ */ v(u, {
 		type: e.slice(0, -5),
 		size: n,
@@ -142,9 +142,9 @@ var b = (e) => e == null ? void 0 : typeof e == "function" ? { render: e } : e, 
 		},
 		size: n
 	}) : void 0;
-}, U = (e, t) => t ? e ? "lg" : "md" : e ? "md" : "sm";
-function W({ params: t, ctx: r }) {
-	let { schema: i, items: o } = t, s = o, [l, u] = _(!1), d = c(), f = i.maxVisibleItems, b = f != null && s.length > f, x = b && !l ? s.slice(0, f) : s, S = h(x.length), C = k(i, x.length), w = U((!!i.descriptionRequired || !!i.descriptionOptional) && !C, d), T = d ? "md" : "sm";
+}, W = (e, t) => t ? e ? "lg" : "md" : e ? "md" : "sm";
+function G({ params: t, ctx: r }) {
+	let { schema: i, items: o } = t, s = o, [l, u] = _(!1), d = c(), f = i.maxVisibleItems, b = f != null && s.length > f, x = b && !l ? s.slice(0, f) : s, S = h(x.length), C = k(i, x.length), w = W((!!i.descriptionRequired || !!i.descriptionOptional) && !C, d), T = d ? "md" : "sm";
 	return /* @__PURE__ */ y("div", {
 		className: e(z(r), "flex flex-col"),
 		children: [/* @__PURE__ */ v(m, { children: x.map(({ href: e, description: t, ...r }) => {
@@ -154,8 +154,8 @@ function W({ params: t, ctx: r }) {
 				subtitleCritical: r.subtitleCritical,
 				description: C ? void 0 : t,
 				unread: r.unread,
-				...V(i.left, r, w),
-				right: H(i.right, r, T),
+				...H(i.left, r, w),
+				right: U(i.right, r, T),
 				actions: r.actions,
 				href: i.clickBehavior === "link" ? e : void 0
 			});
@@ -170,7 +170,7 @@ function W({ params: t, ctx: r }) {
 				}) : a
 			}, r.id);
 		}) }), b ? /* @__PURE__ */ v("div", {
-			className: "mt-1 self-start",
+			className: B,
 			children: /* @__PURE__ */ v(a, {
 				variant: d ? "outline" : "neutral",
 				size: d ? "md" : "sm",
@@ -180,100 +180,100 @@ function W({ params: t, ctx: r }) {
 		}) : null]
 	});
 }
-function G({ params: t, ctx: n }) {
+function K({ params: t, ctx: n }) {
 	let { events: r } = t, i = h(r.length);
 	return /* @__PURE__ */ v("div", {
-		className: e(z(n), "flex flex-col", B),
+		className: e(z(n), "flex flex-col", V),
 		children: /* @__PURE__ */ v(m, { children: r.map((e) => /* @__PURE__ */ v(p, {
 			animated: !i,
 			children: /* @__PURE__ */ v(d, { ...e })
 		}, e.title)) })
 	});
 }
-var K = 3, q = "slot-skeleton-item", J = [
+var q = 3, J = "slot-skeleton-item", Y = [
 	"w-1/2",
 	"w-2/3",
 	"w-2/5",
 	"w-3/5"
-], Y = {
+], X = {
 	sm: "size-6",
 	md: "size-8",
 	lg: "size-10"
-}, X = (e) => J[e % J.length], Z = ({ className: t }) => /* @__PURE__ */ v("div", {
+}, Z = (e) => Y[e % Y.length], Q = ({ className: t }) => /* @__PURE__ */ v("div", {
 	className: "flex h-5 items-center",
 	children: /* @__PURE__ */ v(r, { className: e("h-3", t) })
-}), Q = ({ params: t, ctx: n }) => {
+}), $ = ({ params: t, ctx: n }) => {
 	let i = t.schema ?? {}, a = c(), o = Math.max(0, Math.min(n.expectedItemsCount, i.maxVisibleItems ?? Infinity)), s = k(i, o), l = (!!i.descriptionRequired || !!i.descriptionOptional) && !s, u = !!i.descriptionRequired && !s, d = n.expectedItemsCount > o;
 	return /* @__PURE__ */ y("div", {
 		className: e(z(n), "flex flex-col"),
 		children: [Array.from({ length: o }, (t, n) => /* @__PURE__ */ y("div", {
-			"data-testid": q,
+			"data-testid": J,
 			className: "flex w-full items-center gap-3 p-2",
 			children: [
-				i.left ? /* @__PURE__ */ v(r, { className: e("shrink-0", Y[U(l, a)], i.left === "person" ? "rounded-full" : "rounded-sm") }) : null,
+				i.left ? /* @__PURE__ */ v(r, { className: e("shrink-0", X[W(l, a)], i.left === "person" ? "rounded-full" : "rounded-sm") }) : null,
 				/* @__PURE__ */ y("div", {
 					className: "flex min-w-0 flex-1 flex-col",
-					children: [/* @__PURE__ */ v(Z, { className: X(n) }), u ? /* @__PURE__ */ v(Z, { className: "w-1/4" }) : null]
+					children: [/* @__PURE__ */ v(Q, { className: Z(n) }), u ? /* @__PURE__ */ v(Q, { className: "w-1/4" }) : null]
 				}),
 				i.right ? /* @__PURE__ */ v(r, { className: "h-4 w-10 shrink-0 rounded-sm" }) : null
 			]
 		}, n)), d ? /* @__PURE__ */ v("div", {
-			className: "mt-1 self-start",
+			className: B,
 			children: /* @__PURE__ */ v(r, { className: "h-6 w-24 rounded-sm" })
 		}) : null]
 	});
-}, $ = ({ ctx: t }) => /* @__PURE__ */ v("div", {
-	className: e(z(t), "flex flex-col", B),
+}, ee = ({ ctx: t }) => /* @__PURE__ */ v("div", {
+	className: e(z(t), "flex flex-col", V),
 	children: Array.from({ length: t.expectedItemsCount }, (e, t) => /* @__PURE__ */ y("div", {
-		"data-testid": q,
+		"data-testid": J,
 		className: "flex flex-row items-stretch gap-2.5 rounded-sm p-2",
 		children: [
 			/* @__PURE__ */ v(r, { className: "min-h-10 w-1 shrink-0 rounded-2xs" }),
 			/* @__PURE__ */ y("div", {
 				className: "flex flex-1 flex-col justify-center",
-				children: [/* @__PURE__ */ v(Z, { className: X(t) }), /* @__PURE__ */ v(Z, { className: "w-1/3" })]
+				children: [/* @__PURE__ */ v(Q, { className: Z(t) }), /* @__PURE__ */ v(Q, { className: "w-1/3" })]
 			}),
 			/* @__PURE__ */ v(r, { className: "size-10 shrink-0 rounded-md" })
 		]
 	}, t))
-}), ee = ({ ctx: e }) => /* @__PURE__ */ v("div", {
+}), te = ({ ctx: e }) => /* @__PURE__ */ v("div", {
 	className: "grid auto-cols-fr grid-flow-col items-end gap-x-3",
 	children: Array.from({ length: e.expectedItemsCount }, (e, t) => /* @__PURE__ */ y("div", {
-		"data-testid": q,
+		"data-testid": J,
 		className: "flex flex-col gap-1",
 		children: [/* @__PURE__ */ v("div", {
 			className: "flex h-8 items-center",
 			children: /* @__PURE__ */ v(r, { className: "h-6 w-10" })
-		}), /* @__PURE__ */ v(Z, { className: "w-3/4" })]
+		}), /* @__PURE__ */ v(Q, { className: "w-3/4" })]
 	}, t))
-}), te = (t, n) => /* @__PURE__ */ v("div", {
+}), ne = (t, n) => /* @__PURE__ */ v("div", {
 	className: "flex flex-col gap-2",
 	children: Array.from({ length: n.expectedItemsCount }, (t, n) => /* @__PURE__ */ v("div", {
-		"data-testid": q,
-		children: /* @__PURE__ */ v(r, { className: e("h-6", X(n)) })
+		"data-testid": J,
+		children: /* @__PURE__ */ v(r, { className: e("h-6", Z(n)) })
 	}, n))
-}), ne = {
+}), re = {
 	list: {
-		render: (e, t) => /* @__PURE__ */ v(W, {
+		render: (e, t) => /* @__PURE__ */ v(G, {
 			params: e,
 			ctx: t
 		}),
-		skeleton: (e, t) => /* @__PURE__ */ v(Q, {
+		skeleton: (e, t) => /* @__PURE__ */ v($, {
 			params: e ?? {},
 			ctx: t
 		})
 	},
 	"event-list": {
-		render: (e, t) => /* @__PURE__ */ v(G, {
+		render: (e, t) => /* @__PURE__ */ v(K, {
 			params: e,
 			ctx: t
 		}),
-		skeleton: (e, t) => /* @__PURE__ */ v($, { ctx: t })
+		skeleton: (e, t) => /* @__PURE__ */ v(ee, { ctx: t })
 	},
 	indicators: {
 		render: (e) => /* @__PURE__ */ v(f, { ...e }),
-		skeleton: (e, t) => /* @__PURE__ */ v(ee, { ctx: t })
+		skeleton: (e, t) => /* @__PURE__ */ v(te, { ctx: t })
 	}
 };
 //#endregion
-export { K as DEFAULT_EXPECTED_ITEMS_COUNT, B as EVENT_LIST_GAP, p as HomeSlotItem, m as HomeSlotItems, O as LIST_COMPACT_AFTER, R as SLOT_ROW_BLEED, q as SLOT_SKELETON_ITEM_TESTID, ne as defaultSlotRenderers, te as defaultSlotSkeleton, M as fromParams, A as homeSlot, x as listIconColors, j as listSlot, I as railActionTones, b as resolveSlotRenderer, N as resolveWidgetHeader, z as slotRowBleed, h as useIsBulkChange, L as widgetChrome, F as widgetParamsAreComplete, P as widgetTitle };
+export { q as DEFAULT_EXPECTED_ITEMS_COUNT, V as EVENT_LIST_GAP, p as HomeSlotItem, m as HomeSlotItems, O as LIST_COMPACT_AFTER, B as LIST_MORE_BUTTON_CLASS, R as SLOT_ROW_BLEED, J as SLOT_SKELETON_ITEM_TESTID, re as defaultSlotRenderers, ne as defaultSlotSkeleton, M as fromParams, A as homeSlot, x as listIconColors, j as listSlot, I as railActionTones, b as resolveSlotRenderer, N as resolveWidgetHeader, z as slotRowBleed, h as useIsBulkChange, L as widgetChrome, F as widgetParamsAreComplete, P as widgetTitle };

@@ -1,5 +1,5 @@
-import { d as e } from "./OneEllipsis-DuhKMtYp.js";
-import { t } from "./Text-CC14K9HA.js";
+import { d as e } from "./OneEllipsis-CJ3poPeP.js";
+import { t } from "./Text-DEutZ6xO.js";
 import { forwardRef as n } from "react";
 import { jsx as r } from "react/jsx-runtime";
 //#region src/components/F0Text/F0Text.tsx
