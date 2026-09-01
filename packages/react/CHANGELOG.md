@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.78.3](https://github.com/factorialco/f0/compare/f0-react-v6.78.2...f0-react-v6.78.3) (2026-09-01)
+
+
+### Bug Fixes
+
+* **NewHomeLayout:** stop clipping the composer's glow ([#5350](https://github.com/factorialco/f0/issues/5350)) ([2472c36](https://github.com/factorialco/f0/commit/2472c3610f265ec3face3a6f60c911d32f6d379c))
+
 ## [6.78.2](https://github.com/factorialco/f0/compare/f0-react-v6.78.1...f0-react-v6.78.2) (2026-09-01)
 
 
