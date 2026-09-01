@@ -4,6 +4,18 @@ export const defaultTranslations = {
   common: {
     selectPlaceholder: "Select",
   },
+  sharingDialog: {
+    peopleLabel: "People",
+    peoplePlaceholder: "Select people",
+    newPeopleAccessLevel: "Access level for selected people",
+    accessLevelFor: "Access level for {{name}}",
+    share: "Share",
+    whoHasAccess: "Who has access",
+    removeAccess: "Remove access for {{name}}",
+    updatingAccess: "Updating access",
+    accessSummary: "People with access: {{count}}",
+    noOneHasAccess: "No one has access yet",
+  },
   countries: i18nCountries,
   approvals: {
     history: "Approval history",
