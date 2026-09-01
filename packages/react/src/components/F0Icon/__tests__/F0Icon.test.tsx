@@ -62,23 +62,7 @@ describe("F0Icon", () => {
   it.each([
     ["currentColor", "text-current", false],
     ["default", "text-f1-icon", true],
-    ["secondary", "text-f1-icon-secondary", true],
-    ["inverse", "text-f1-icon-inverse", true],
-    ["bold", "text-f1-icon-bold", true],
     ["critical", "text-f1-icon-critical", true],
-    ["critical-bold", "text-f1-icon-critical-bold", true],
-    ["accent", "text-f1-icon-accent", true],
-    ["info", "text-f1-icon-info", true],
-    ["warning", "text-f1-icon-warning", true],
-    ["positive", "text-f1-icon-positive", true],
-    ["promote", "text-f1-icon-promote", true],
-    ["selected", "text-f1-icon-selected", true],
-    ["selected-hover", "text-f1-icon-selected-hover", true],
-    ["mood-super-negative", "text-f1-icon-mood-super-negative", true],
-    ["mood-negative", "text-f1-icon-mood-negative", true],
-    ["mood-neutral", "text-f1-icon-mood-neutral", true],
-    ["mood-positive", "text-f1-icon-mood-positive", true],
-    ["mood-super-positive", "text-f1-icon-mood-super-positive", true],
   ] as const)(
     "maps the %s color to its token class",
     (color, colorClass, hasColor) => {

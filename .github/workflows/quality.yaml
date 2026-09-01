@@ -86,7 +86,7 @@ jobs:
       - name: Check linting with oxlint
         run: pnpm --filter @factorialco/f0-react-native run lint
       - name: Check typescript
-        run: pnpm --filter @factorialco/f0-react-native exec tsc --noEmit
+        run: pnpm --filter @factorialco/f0-react-native run tsc
   stable-dod:
     needs: detect-changes
     # Prevents running on the release-please branch

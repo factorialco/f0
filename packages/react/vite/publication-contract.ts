@@ -36,12 +36,6 @@ const exportedRuntimeEntries = [
   componentEntry("F0TextInput", "tsx"),
 ] as const satisfies readonly EntryTuple[]
 
-const legacyRuntimeEntries = [
-  ["F0Form", "src/patterns/F0Form/index.tsx"],
-  ["OneDataCollection", "src/patterns/OneDataCollection/exports.ts"],
-  ["F0AiChat", "src/kits/ai/F0AiChat/index.ts"],
-] as const satisfies readonly EntryTuple[]
-
 function declarationPath(source: string): string {
   return `./dist/${source
     .replace(/^src\//, "")
@@ -66,7 +60,6 @@ function publicationEntry(
 export const publicationEntries = [
   ...declarationRoots.map((entry) => publicationEntry(entry, true)),
   ...exportedRuntimeEntries.map((entry) => publicationEntry(entry)),
-  ...legacyRuntimeEntries.map((entry) => publicationEntry(entry)),
 ]
 
 const iconFamilies = ["ai", "animated", "app", "modules", "special"]

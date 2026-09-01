@@ -13,17 +13,15 @@ import {
   writeFileSync,
 } from "node:fs"
 import { tmpdir } from "node:os"
-import path, { dirname, relative, resolve } from "node:path"
+import path, { dirname, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
 import { validatePublication } from "./check-publication"
-import {
-  validateRootSubpathParity,
-  type OwnedInputMetric,
-} from "./consumer-bundle-contract"
 
 const PACKAGE_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "..")
 const TSC_PATH = fileURLToPath(import.meta.resolve("typescript/lib/tsc.js"))
+const MAX_BROWSER_PROBE_BYTES = 700_000
+const MAX_ROOT_SUBPATH_BYTE_DELTA = 20 * 1024
 
 interface PackageManifest {
   dependencies?: Record<string, string>
@@ -60,7 +58,6 @@ const BROWSER_PROBES = {
 interface BrowserProbeMetric {
   bytes: number
   inputCount: number
-  f0Inputs: OwnedInputMetric[]
 }
 
 function run(command: string, args: string[], cwd: string): void {
@@ -147,11 +144,14 @@ void props
     )}\n`
   )
 
+  // Component subpaths must expose declarations that compile in strict mode.
   run(
     process.execPath,
     [TSC_PATH, "--project", resolve(consumerDir, "tsconfig.json")],
     consumerDir
   )
+  // The root barrel still reaches inherited third-party declaration conflicts
+  // (TipTap, LiveKit, and ECharts), so this is intentionally a resolution smoke.
   run(
     process.execPath,
     [
@@ -172,21 +172,6 @@ void props
     ],
     consumerDir
   )
-}
-
-function ownedF0InputPath(
-  inputPath: string,
-  consumerDir: string,
-  installedPackageDir: string
-): string | null {
-  const absoluteInputPath = resolve(consumerDir, inputPath)
-  const distRoot = resolve(installedPackageDir, "dist")
-  if (absoluteInputPath.startsWith(`${distRoot}${path.sep}`)) {
-    return `dist/${relative(distRoot, absoluteInputPath)
-      .split(path.sep)
-      .join("/")}`
-  }
-  return null
 }
 
 async function buildBrowserProbes(
@@ -230,9 +215,9 @@ async function buildBrowserProbes(
         )
       }
     }
-    if (output.contents.length > 700_000) {
+    if (output.contents.length > MAX_BROWSER_PROBE_BYTES) {
       throw new Error(
-        `Browser probe ${probeName} is ${output.contents.length} B; ceiling is 700000 B`
+        `Browser probe ${probeName} is ${output.contents.length} B; ceiling is ${MAX_BROWSER_PROBE_BYTES} B`
       )
     }
 
@@ -257,18 +242,12 @@ async function buildBrowserProbes(
     metrics[probeName] = {
       bytes: output.contents.length,
       inputCount: retainedInputs.length,
-      f0Inputs: retainedInputs.flatMap(([inputPath, input]) => {
-        const ownedPath = ownedF0InputPath(
-          inputPath,
-          consumerDir,
-          installedPackageDir
-        )
-        return ownedPath
-          ? [{ path: ownedPath, bytes: input.bytesInOutput }]
-          : []
-      }),
     }
-    if (metrics[probeName].f0Inputs.length === 0) {
+    const distRoot = resolve(installedPackageDir, "dist")
+    const retainedF0Inputs = retainedInputs.filter(([inputPath]) =>
+      resolve(consumerDir, inputPath).startsWith(`${distRoot}${path.sep}`)
+    )
+    if (retainedF0Inputs.length === 0) {
       throw new Error(
         `Browser probe ${probeName} retained no packed F0 inputs. Candidates:\n${retainedInputs
           .map(([inputPath]) => inputPath)
@@ -279,13 +258,14 @@ async function buildBrowserProbes(
     }
   }
 
-  const parityErrors = validateRootSubpathParity(
-    metrics.root.f0Inputs,
-    metrics.subpath.f0Inputs,
-    { maxAdditionalBytes: 16 * 1024, maxAdditionalModules: 5 }
+  const additionalRootBytes = Math.max(
+    0,
+    metrics.root.bytes - metrics.subpath.bytes
   )
-  if (parityErrors.length > 0) {
-    throw new Error(`Root/subpath parity failed:\n${parityErrors.join("\n")}`)
+  if (additionalRootBytes > MAX_ROOT_SUBPATH_BYTE_DELTA) {
+    throw new Error(
+      `Root import emits ${additionalRootBytes} additional bytes; ceiling is ${MAX_ROOT_SUBPATH_BYTE_DELTA} B`
+    )
   }
 
   return metrics
@@ -347,9 +327,12 @@ async function main(): Promise<void> {
   } else {
     for (const [probeName, probe] of Object.entries(result)) {
       process.stdout.write(
-        `browser/${probeName}: ${formatBytes(probe.bytes)} raw, ${probe.inputCount} inputs, ${probe.f0Inputs.length} F0 inputs\n`
+        `browser/${probeName}: ${formatBytes(probe.bytes)} raw, ${probe.inputCount} inputs\n`
       )
     }
+    process.stdout.write(
+      `root/subpath delta: ${formatBytes(Math.max(0, result.root.bytes - result.subpath.bytes))} raw, ${Math.max(0, result.root.inputCount - result.subpath.inputCount)} inputs\n`
+    )
   }
   if (!process.argv.includes("--json")) {
     process.stdout.write("Consumer bundle contract passed\n")

@@ -19,6 +19,7 @@ dotenv.config({
   path: [".env.local", ".env"],
 })
 const extraPlugins: Plugin[] = []
+const buildLibrary = process.env.F0_LIBRARY_BUILD === "true"
 const buildDeclarationsOnly = process.env.BUILD_DECLARATIONS_ONLY === "true"
 const buildPreservedEsm = process.env.BUILD_PRESERVED_ESM === "true"
 const buildWatch = process.argv.some((arg) => arg === "--watch" || arg === "-w")
@@ -117,13 +118,13 @@ const alias = {
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    ...(process.env.STORYBOOK_BUILD === "true"
-      ? []
-      : [
+    ...(buildLibrary
+      ? [
           esmExternalRequirePlugin({
             external: ["react/jsx-runtime", "react", "react-dom"],
           }),
-        ]),
+        ]
+      : []),
     react(),
     libInjectCss(),
     componentStatusVitePlugin(),

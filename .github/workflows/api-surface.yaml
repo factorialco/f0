@@ -11,9 +11,8 @@ jobs:
     uses: ./.github/workflows/_check-workspaces-changes.yaml
 
   # Build the rolled-up type declarations for both sides of the comparison in
-  # parallel. The head leg builds only the declarations consumed by the diff;
-  # the base leg uses main's existing build script because the declaration-only
-  # script does not exist there yet.
+  # parallel. The shared Vite command is declaration-only on the head; older
+  # base revisions ignore that flag but still emit the required declarations.
   build-dts:
     needs: detect-changes
     # React source or core (whose types ripple into the React surface) changed.
@@ -50,12 +49,8 @@ jobs:
       - uses: ./.github/actions/setup-node-pnpm
       - name: Build core package
         run: pnpm --filter @factorialco/f0-core build
-      - name: Build React types (head)
-        if: matrix.side == 'head'
-        run: pnpm --filter @factorialco/f0-react build:declarations
-      - name: Build React types (base)
-        if: matrix.side == 'base'
-        run: pnpm --filter @factorialco/f0-react build
+      - name: Build React types
+        run: BUILD_TYPES=true BUILD_DECLARATIONS_ONLY=true NODE_OPTIONS=--max-old-space-size=8192 pnpm --filter @factorialco/f0-react exec vite build
       - name: Upload type declarations
         uses: actions/upload-artifact@v4
         with:
