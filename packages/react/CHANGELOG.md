@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.78.1](https://github.com/factorialco/f0/compare/f0-react-v6.78.0...f0-react-v6.78.1) (2026-09-01)
+
+
+### Bug Fixes
+
+* **F0ClarifyingPanel:** prevent form submission ([#5332](https://github.com/factorialco/f0/issues/5332)) ([a61de49](https://github.com/factorialco/f0/commit/a61de492529d2c99577c595c2ee8399b5a987bac))
+
 ## [6.78.0](https://github.com/factorialco/f0/compare/f0-react-v6.77.0...f0-react-v6.78.0) (2026-09-01)
 
 
