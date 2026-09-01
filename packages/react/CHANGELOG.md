@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.78.0](https://github.com/factorialco/f0/compare/f0-react-v6.77.0...f0-react-v6.78.0) (2026-09-01)
+
+
+### Features
+
+* **F0CommunityPostsCarousel:** match the v3 tile height and spacing ([#5343](https://github.com/factorialco/f0/issues/5343)) ([e6a4d87](https://github.com/factorialco/f0/commit/e6a4d87c08aed36ede17fc2b9b07d89d67cefdb3))
+
 ## [6.77.0](https://github.com/factorialco/f0/compare/f0-react-v6.76.0...f0-react-v6.77.0) (2026-09-01)
 
 
