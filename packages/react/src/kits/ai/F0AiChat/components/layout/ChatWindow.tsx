@@ -1,9 +1,7 @@
 import type { ReactNode } from "react"
 
-import { breakpoints } from "@factorialco/f0-core"
 import { AnimatePresence, motion } from "motion/react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { useMediaQuery } from "usehooks-ts"
 
 import type { WidgetDragStartDetail } from "@/lib/dnd/widgetDragEvents"
 
@@ -49,6 +47,7 @@ export const SidebarWindow = ({
     setChatWidth,
     resetChatWidth,
     chatWidthBounds,
+    panelOverlays,
     setIsResizing,
     fileAttachments,
     isClarifying,
@@ -222,10 +221,6 @@ export const SidebarWindow = ({
     setIsResizing?.(true)
     return () => setIsResizing?.(false)
   }, [isDragging, setIsResizing])
-  const isSmallScreen = useMediaQuery(`(max-width: ${breakpoints.md}px)`, {
-    initializeWithValue: true,
-  })
-
   // Bounded by what the frame can currently give, not by the absolute range —
   // otherwise the handle keeps travelling after the main content has run out
   // of room. `chatWidthBounds` is optional on the context (see internal-types),
@@ -236,11 +231,15 @@ export const SidebarWindow = ({
   }
 
   // No seam to drag when the panel is covering the frame rather than sitting
-  // beside content. The viewport check is the mobile case; the measured one
-  // catches a wide window whose frame is still too narrow to split — a
-  // viewport query cannot see the sidebar eating into it.
-  const isCoveringFrame =
-    isSmallScreen || (chatWidthBounds?.shouldOverlay ?? false)
+  // beside content. Taken from the provider, which is also what the frame
+  // reserves against — computing it here from a media query is how the handle
+  // used to appear on a full-screen panel.
+  const isCoveringFrame = panelOverlays ?? false
+
+  // ...nor when the range has collapsed to a point. On a narrow frame the
+  // content's floor pins the panel to its minimum, and a handle that cannot
+  // travel is worse than no handle: it invites a drag and then refuses it.
+  const canResize = maxWidth > minWidth
 
   const handleResize = useCallback(
     (deltaX: number) => {
@@ -266,12 +265,17 @@ export const SidebarWindow = ({
         <motion.div
           key="chat-wrapper"
           className={cn(
-            "bg-f1-transparent pointer-events-auto relative flex h-full dark:bg-f1-background md:py-1",
+            // The seam is `xs:`-gated to match the card's own `xs:rounded-xl`.
+            // It used to be `md:` (768), which was invisible while the panel
+            // only ever split above that — now that a half-screen laptop
+            // window splits at 756, the mismatch would show as rounded corners
+            // pressed flat against the window edge.
+            "bg-f1-transparent pointer-events-auto relative flex h-full dark:bg-f1-background xs:py-1",
             // Right seam (against the viewport edge — no sidebar there) is owned
             // here: always wanted right-docked or filling the screen. The LEFT
             // seam depends on whether the app sidebar is present (it provides the
             // gap), which only the host frame knows, so ApplicationFrame owns it.
-            fullscreen ? "md:pr-1" : isLeft ? "mr-auto" : "ml-auto md:pr-1"
+            fullscreen ? "xs:pr-1" : isLeft ? "mr-auto" : "ml-auto xs:pr-1"
           )}
           initial={
             !reducedMotion &&
@@ -306,16 +310,20 @@ export const SidebarWindow = ({
         >
           {/* Resize seam: inner (left) edge for a right-docked panel, inner
               (right) edge for a left-docked one — so it renders after the card. */}
-          {resizable && !fullscreen && !isCoveringFrame && !isLeft && (
-            <ResizeHandle
-              onResize={handleResize}
-              onReset={resetChatWidth}
-              isResizing={isDragging}
-              setIsResizing={setIsDragging}
-              isCanvasMode={isCanvasMode}
-              side="right"
-            />
-          )}
+          {resizable &&
+            !fullscreen &&
+            !isCoveringFrame &&
+            canResize &&
+            !isLeft && (
+              <ResizeHandle
+                onResize={handleResize}
+                onReset={resetChatWidth}
+                isResizing={isDragging}
+                setIsResizing={setIsDragging}
+                isCanvasMode={isCanvasMode}
+                side="right"
+              />
+            )}
           <div
             ref={widgetDropZoneRef}
             aria-hidden={!isVisible}
@@ -365,16 +373,20 @@ export const SidebarWindow = ({
             )}
             {activeGame === "pong" && <F0AiPong onClose={closeGame} />}
           </div>
-          {resizable && !fullscreen && !isCoveringFrame && isLeft && (
-            <ResizeHandle
-              onResize={handleResize}
-              onReset={resetChatWidth}
-              isResizing={isDragging}
-              setIsResizing={setIsDragging}
-              isCanvasMode={isCanvasMode}
-              side="left"
-            />
-          )}
+          {resizable &&
+            !fullscreen &&
+            !isCoveringFrame &&
+            canResize &&
+            isLeft && (
+              <ResizeHandle
+                onResize={handleResize}
+                onReset={resetChatWidth}
+                isResizing={isDragging}
+                setIsResizing={setIsDragging}
+                isCanvasMode={isCanvasMode}
+                side="left"
+              />
+            )}
         </motion.div>
       )}
     </AnimatePresence>

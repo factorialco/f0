@@ -127,6 +127,14 @@ export type AiChatProviderReturnValue = {
   /** The range the panel may be dragged to at the frame's current width. */
   chatWidthBounds?: PanelBounds
   /**
+   * True when the panel covers the frame rather than sitting beside it.
+   *
+   * Read this instead of re-deriving it from a media query: the rule combines
+   * the measured frame with the pointer type, and two consumers computing it
+   * separately is how a resize handle ends up on a full-screen panel.
+   */
+  panelOverlays?: boolean
+  /**
    * Publishes the frame's content-box width. Called by ApplicationFrame, which
    * is the only thing that knows how much room is left beside the navigation.
    */
