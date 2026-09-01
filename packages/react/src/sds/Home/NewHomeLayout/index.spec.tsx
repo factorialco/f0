@@ -567,6 +567,25 @@ describe("NewHomeLayout", () => {
         expect(button().className).toContain("ring-1")
       })
 
+      /**
+       * …AND NEITHER DOES ANYTHING UNDER IT. The pill's `p-1` band is drawing, not
+       * layout: paid for in flow it made the pill a 48px item in a column of 40px
+       * ones, so dropping the reading on hover shrank it back to 40 and shunted
+       * every glyph below it up by 8px — the strip rearranging itself under the
+       * pointer aiming at it. The band is taken back out of the flow at each edge
+       * it overhangs, which is what holds the pill to the glyph's own slot.
+       *
+       * jsdom lays nothing out, so the margins themselves are what can be asserted
+       * here; the geometry they buy was measured in the browser.
+       */
+      test("keeps the pill inside the glyph's slot, so nothing below it moves", () => {
+        renderLayout(1000, { rightWidgets: TICKING_RAIL })
+
+        // Vertical for the strip's rhythm, horizontal for its right edge.
+        expect(pill().className).toContain("-my-1")
+        expect(pill().className).toContain("-mr-1")
+      })
+
       test("blinks the separator once a second, digits held still", () => {
         vi.useFakeTimers()
         try {
@@ -806,11 +825,11 @@ describe("NewHomeLayout", () => {
     })
 
     /**
-     * The cards have a JOURNEY TO MAKE when the rail collapses: each one scales
-     * down onto its own glyph (`WidgetMotion`'s stow). The panel's one-widget
+     * The cards have a FADE TO FINISH when the rail collapses — the whole of
+     * `GENIE_RETRACT_MS` of it (`WidgetMotion`'s stow). The panel's one-widget
      * filter therefore has to wait for the retract to finish — applied on the frame
      * the collapse begins, as it once was, every card is `display: none` before it
-     * has moved a pixel and the whole animation plays on an empty box.
+     * has faded at all, and the whole animation plays on an empty box.
      */
     test("keeps the cards drawn while they retract into the strip", async () => {
       await renderDeferredRail(1400)
