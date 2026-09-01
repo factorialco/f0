@@ -28,6 +28,7 @@ export const ConfirmFooter = ({
         {showSkip && onSkip && (
           <F0Button
             variant="outline"
+            type="button"
             label={translation.ai.clarifyingQuestion.skip}
             onClick={onSkip}
             disabled={submitDisabled}
@@ -37,6 +38,7 @@ export const ConfirmFooter = ({
       <F0Button
         disabled={!canProceed || submitDisabled}
         variant={"default"}
+        type="button"
         label={label}
         onClick={onConfirm}
       />

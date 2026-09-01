@@ -41,6 +41,58 @@ function buildState(
 }
 
 describe("F0ClarifyingPanel", () => {
+  describe("inside a form", () => {
+    const renderInsideForm = (state: ClarifyingQuestionState) => {
+      const onSubmit = vi.fn()
+
+      render(
+        <form
+          onSubmit={(event) => {
+            event.preventDefault()
+            onSubmit()
+          }}
+        >
+          <F0ClarifyingPanel clarifyingQuestion={state} />
+        </form>
+      )
+
+      return onSubmit
+    }
+
+    it("confirms with Enter without submitting the form", async () => {
+      const state = buildState({}, { selectedOptionIds: ["this-month"] })
+      const onSubmit = renderInsideForm(state)
+      const submitButton = screen.getByRole("button", { name: "Submit" })
+
+      submitButton.focus()
+      await userEvent.keyboard("{Enter}")
+
+      expect(state.confirm).toHaveBeenCalledOnce()
+      expect(onSubmit).not.toHaveBeenCalled()
+    })
+
+    it("does not submit the form from optional and navigation actions", async () => {
+      const state = buildState(
+        { currentStepIndex: 1, totalSteps: 3 },
+        { optional: true }
+      )
+      const onSubmit = renderInsideForm(state)
+      const nextButtons = screen.getAllByRole("button", { name: "Next" })
+
+      await userEvent.click(screen.getByRole("button", { name: "Skip" }))
+      await userEvent.click(screen.getByRole("button", { name: "Back" }))
+      await userEvent.click(nextButtons[0])
+      await userEvent.click(nextButtons[1])
+      await userEvent.click(screen.getByRole("button", { name: "Cancel" }))
+
+      expect(state.skip).toHaveBeenCalledOnce()
+      expect(state.back).toHaveBeenCalledOnce()
+      expect(state.confirm).toHaveBeenCalledTimes(2)
+      expect(state.cancel).toHaveBeenCalledOnce()
+      expect(onSubmit).not.toHaveBeenCalled()
+    })
+  })
+
   it("does not show Skip button when the step is required", () => {
     const state = buildState()
     render(<F0ClarifyingPanel clarifyingQuestion={state} />)
