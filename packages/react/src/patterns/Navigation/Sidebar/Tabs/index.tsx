@@ -9,16 +9,16 @@ import { actionVariants, buttonSizeVariants } from "@/ui/Action/variants"
 
 const UnreadDot = ({ isActive }: { isActive: boolean }) => {
   return (
-    <div className="absolute -right-0.5 -top-0.5 flex h-2.5 w-2.5 items-center justify-center rounded-full bg-f1-background">
+    <div className="absolute right-0 top-0 flex h-2 w-2 items-center justify-center rounded-full bg-f1-background">
       <div
         className={cn(
-          "flex h-2.5 w-2.5 items-center justify-center rounded-full",
+          "flex h-2 w-2 items-center justify-center rounded-full",
           isActive
             ? " bg-f1-background-secondary"
             : "bg-f1-background-secondary-hover"
         )}
       >
-        <span className="h-2 w-2 rounded-full bg-f1-special-highlight" />
+        <span className="h-1.5 w-1.5 rounded-full bg-f1-special-highlight" />
       </div>
     </div>
   )
