@@ -30,7 +30,7 @@ import {
   yAxisProps,
 } from "../utils/elements"
 import { fixedForwardRef } from "../utils/forwardRef"
-import { prepareData } from "../utils/muncher"
+import { bridgeContinuedSeries, prepareData } from "../utils/muncher"
 import { ProjectedBar } from "../utils/ProjectedBar"
 import { ChartPropsBase } from "../utils/types"
 
@@ -193,7 +193,7 @@ const _ComboChart = <K extends ChartConfig>(
   }: ComboChartProps<K>,
   ref: ForwardedRef<HTMLDivElement>
 ) => {
-  const preparedData = prepareData(data)
+  const preparedData = prepareData(bridgeContinuedSeries(data, dataConfig))
 
   const barCategories = bar?.categories
     ? Array.isArray(bar.categories)

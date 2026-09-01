@@ -34,6 +34,12 @@ export type ChartConfig = {
      * gradient instead of using a solid fill.
      */
     projected?: boolean
+    /**
+     * Key of the series this one continues, e.g. a forecast extending the
+     * actuals. The chart bridges the gap by giving this series the last value
+     * of the continued one, so both lines connect.
+     */
+    continues?: string
   } & (
     | { color?: string; theme?: never }
     | { color?: never; theme: Record<keyof typeof THEMES, string> }
@@ -44,6 +50,7 @@ type ChartConfigValue = {
   label?: React.ReactNode
   icon?: React.ComponentType
   dashed?: boolean
+  continues?: string
 } & (
   | { color?: string; theme?: never }
   | { color?: never; theme: Record<keyof typeof THEMES, string> }

@@ -29,7 +29,7 @@ import { fixedForwardRef } from "../utils/forwardRef"
 import { ChartConfig, ChartPropsBase } from "../utils/types"
 
 const getMaxValueByKey = (
-  data: ({ x: unknown } & Record<string, number>)[]
+  data: ({ x: unknown } & Record<string, number | null>)[]
 ): string => {
   const clonedData = cloneDeep(data)
 
@@ -39,9 +39,9 @@ const getMaxValueByKey = (
   clonedData.forEach((datapoint) => {
     delete datapoint.x
 
-    Object.entries(datapoint as Record<string, number>).forEach(
+    Object.entries(datapoint as Record<string, number | null>).forEach(
       ([newLabel, value]) => {
-        if (max < value) {
+        if (value !== null && max < value) {
           max = value
           label = newLabel
         }

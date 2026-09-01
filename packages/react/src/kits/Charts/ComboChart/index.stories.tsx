@@ -370,3 +370,92 @@ export const StackedBySignWithLine: Meta<
     legend: true,
   },
 }
+
+const continuationConfig = {
+  actuals: {
+    label: "Actuals",
+    color: "categorical-1",
+  },
+  forecast: {
+    label: "Forecast",
+    color: "categorical-1",
+    dashed: true,
+    continues: "actuals",
+  },
+  planned: {
+    label: "Planned",
+    color: "categorical-2",
+    dashed: true,
+  },
+}
+
+export const LineContinuation: Meta<
+  typeof ComboChart<typeof continuationConfig>
+> = {
+  args: {
+    dataConfig: continuationConfig,
+    data: [
+      {
+        label: "January",
+        values: { actuals: 27000, forecast: null, planned: 27000 },
+      },
+      {
+        label: "February",
+        values: { actuals: 22000, forecast: null, planned: 27000 },
+      },
+      {
+        label: "March",
+        values: { actuals: 25500, forecast: null, planned: 31500 },
+      },
+      {
+        label: "April",
+        values: { actuals: 31000, forecast: null, planned: 35500 },
+      },
+      {
+        label: "May",
+        values: { actuals: 35500, forecast: null, planned: 35500 },
+      },
+      {
+        label: "June",
+        values: { actuals: 49000, forecast: null, planned: 52500 },
+      },
+      {
+        label: "July",
+        values: { actuals: 51000, forecast: null, planned: 56000 },
+      },
+      {
+        label: "August",
+        values: { actuals: null, forecast: 60000, planned: 56000 },
+      },
+      {
+        label: "September",
+        values: { actuals: null, forecast: 42500, planned: 49000 },
+      },
+      {
+        label: "October",
+        values: { actuals: null, forecast: 27000, planned: 30000 },
+      },
+      {
+        label: "November",
+        values: { actuals: null, forecast: 11000, planned: 16500 },
+      },
+      {
+        label: "December",
+        values: { actuals: null, forecast: 11000, planned: 16500 },
+      },
+    ],
+    line: {
+      categories: ["actuals", "forecast", "planned"],
+      lineType: "linear",
+    },
+    xAxis: {
+      hide: false,
+      tickFormatter: (value: string) => value,
+    },
+    yAxis: {
+      hide: false,
+      tickFormatter: (value: string) => `${Number(value) / 1000}k`,
+    },
+    legend: true,
+  },
+}
