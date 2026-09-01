@@ -1580,13 +1580,7 @@ const CARD_TAG_LABELS = {
   devices: "Devices",
 }
 
-/**
- * Deliberately uneven: nought, one, two and three pills across five cards, and
- * one pill wide enough to wrap on its own. The reservation in the layout box is
- * the same for all of them, so this is the case that shows where a connector
- * leaves a node — every line has to start on its pill, no matter how much (or
- * how little) metadata hangs below it.
- */
+/** Deliberately uneven — the reservation is the same for all five, the pills are not. */
 const CARD_TAGS: Record<string, F0GraphNodeTag[]> = {
   "1": [{ type: "raw", icon: People, text: "Board", column: "team" }],
   "2": [

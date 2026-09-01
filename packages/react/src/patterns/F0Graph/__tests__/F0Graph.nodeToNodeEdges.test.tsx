@@ -7,14 +7,8 @@ import type { GraphNode } from "../types"
 import { F0Graph, type F0GraphNodeRenderContext } from "../F0Graph"
 import { F0GraphNode } from "../components/F0GraphNode"
 
-/**
- * A node's layout box carries the tag reservation; the node paints only as tall
- * as its pill. A connector has to leave the pill, so the endpoint sits on the
- * painted edge and the metadata crops the line with its own backdrop blur.
- */
-
-// `reserveTagRow` with no declared columns reserves one line: the block's gap to
-// the pill plus one chip row (see TAG_BLOCK_GAP / TAG_LINE_HEIGHT).
+// `reserveTagRow` with no declared columns reserves one line: TAG_BLOCK_GAP plus
+// one TAG_LINE_HEIGHT.
 const ONE_ROW_RESERVATION = 32
 
 const nodes: GraphNode<string>[] = [
@@ -28,10 +22,7 @@ const renderNode = (node: GraphNode<string>, ctx: F0GraphNodeRenderContext) => (
   </div>
 )
 
-/**
- * The leaving handles of the node cards only — the expander pill has one too,
- * and it sits in the lane rather than on a node.
- */
+/** Cards only — the expander pill has a leaving handle too, and it is not a node. */
 const sourceHandles = (): HTMLElement[] =>
   Array.from(
     document.querySelectorAll<HTMLElement>(

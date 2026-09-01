@@ -662,11 +662,8 @@ export function useGraphRenderModel<T>({
     // than a node card — seeding it with the card's height would anchor its
     // handles below the row and bend the trunk edge into it.
     //
-    // `reserved` is the tag band the box carries below its content. The seeded
-    // ports have to sit where the DOM handles will (see `paintedHandleStyle` in
-    // ReactFlowAdapters) — on the painted edge, not the box edge — or a node's
-    // connectors would jump the moment windowing hands routing back to the
-    // measured handles.
+    // `reserved` keeps these in step with the DOM handles (`paintedHandleStyle`),
+    // or a node's edges jump the frame windowing hands routing back to them.
     const handlesForBox = (
       w: number,
       h: number,

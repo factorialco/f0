@@ -165,13 +165,8 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
           key="tags"
           className={cn(
             maxWidthClass,
-            // A connector leaves the pill above and runs the whole way to the
-            // node it points at, so it passes behind this block. A blur radius
-            // this wide averages the strip of canvas behind the pills down to a
-            // flat wash, which reads as the line being cropped where the
-            // metadata starts — the same trick the collapse affordance uses to
-            // sit on a line. The rounding is the pills' own, so the cropped
-            // region hugs them instead of showing as a rectangle.
+            // The connector runs behind this block on its way to the next node.
+            // A radius this wide flattens it away — practically a crop.
             "rounded-[13px] backdrop-blur-[400px]"
           )}
           // Tags are informational: clicking a tag must not select the node.
@@ -184,10 +179,8 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
           data-no-node-select
           onClick={(e) => e.stopPropagation()}
         >
-          {/* The reveal lives on a child: `filter` on an element makes it the
-              backdrop root for everything inside it, so animating it on the
-              blurred wrapper would leave that wrapper with nothing to sample
-              and the connector would run straight through the pills. */}
+          {/* The reveal has to live on a child: `filter` makes an element the
+              backdrop root, leaving the blur above nothing to sample. */}
           <motion.div
             initial={noMotion ? false : { opacity: 0, filter: "blur(3px)" }}
             animate={{ opacity: 1, filter: "blur(0px)" }}

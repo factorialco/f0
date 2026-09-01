@@ -63,21 +63,10 @@ const flushHandleStyle = (
     : undefined
 
 /**
- * Moves an endpoint onto the edge the node PAINTS rather than the edge of its
- * layout box. The box carries the tag reservation whether or not this node fills
- * it, so an endpoint left on the box either hangs below the metadata — the
- * reservation is sized for the fully-wrapped block, and at compact/dot zoom the
- * tags are not drawn at all — or crosses it, when wide pills wrap past the
- * estimate. Anchoring on the pill is what makes a connector run node-to-node;
- * the tag block's own backdrop blur crops whatever passes behind it.
- *
- * Only the leaving edge needs correcting: the reservation hangs below the
- * content, so a `Top` endpoint is already on the pill, and a side endpoint is
- * off-centre by half of it.
- *
- * Expressed as `bottom` / `top` rather than a transform on purpose — React
- * Flow's own centering translate has to survive, and `flushHandleStyle` above
- * already owns that channel.
+ * Pulls an endpoint off the layout box and onto the edge the node paints: the box
+ * carries the tag reservation whether this node fills it or not. Written as
+ * `bottom` / `top` so React Flow's centering translate survives —
+ * `flushHandleStyle` already owns the transform.
  */
 const paintedHandleStyle = (
   position: Position,
@@ -309,12 +298,9 @@ function F0GraphNodeWrapperInner({ data, id }: NodeProps<GraphRFNode>) {
       : undefined,
   }
 
-  // A card and a stacked row both carry the tag reservation in their box, so
-  // both anchor their connectors on what they paint.
   const handleStyle = (position: Position): CSSProperties | undefined => {
     const painted = paintedHandleStyle(position, renderCfg?.tagRowHeight ?? 0)
-    // Rows are chained to each other over an 8px gap, so their endpoints have
-    // to sit exactly on the box edge to leave a visible line.
+    // A row's 8px gap to the next leaves no room for the half-handle overshoot.
     const flush = stacked ? flushHandleStyle(position) : undefined
     return painted || flush ? { ...painted, ...flush } : undefined
   }
