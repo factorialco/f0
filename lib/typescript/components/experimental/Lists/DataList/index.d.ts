@@ -10,7 +10,6 @@ export type DataListProps = {
     fullWidth?: boolean;
 };
 type Items = typeof Item | typeof PersonItem | typeof CompanyItem | typeof TeamItem | typeof CardItem;
-declare const _DataList: ({ children, label, isHorizontalItem, tableView, fullWidth, }: DataListProps) => React.JSX.Element;
 export type ItemProps = {
     text: string;
     icon?: IconType;
@@ -49,7 +48,6 @@ type TeamItemProps = {
 };
 declare const TeamItem: ({ action, name }: TeamItemProps) => React.JSX.Element;
 type DotTagItemProps = DotTagProps;
-declare const DotTagItem: ({ ...props }: DotTagItemProps) => React.JSX.Element;
 type CardMetadataStatus = F0TagStatusProps["variant"] | "completed";
 type CardMetadataProperty = {
     icon?: IconType;
@@ -65,13 +63,13 @@ type CardItemProps = {
     action?: ActionType;
 };
 declare const CardItem: ({ action, name, thumbnailUrl, metadata }: CardItemProps) => React.JSX.Element;
-export declare const DataList: typeof _DataList & {
-    Item: typeof Item;
-    CompanyItem: typeof CompanyItem;
-    PersonItem: typeof PersonItem;
-    TeamItem: typeof TeamItem;
-    DotTagItem: typeof DotTagItem;
-    CardItem: typeof CardItem;
+export declare const DataList: (({ children, label, isHorizontalItem, tableView, fullWidth, }: DataListProps) => React.JSX.Element) & {
+    Item: ({ text, icon, action }: ItemProps) => React.JSX.Element;
+    CompanyItem: ({ avatarUrl, name, action }: CompanyItemProps) => React.JSX.Element;
+    PersonItem: ({ action, avatarUrl, firstName, lastName, }: EmployeeItemProps) => React.JSX.Element;
+    TeamItem: ({ action, name }: TeamItemProps) => React.JSX.Element;
+    DotTagItem: ({ ...props }: DotTagItemProps) => React.JSX.Element;
+    CardItem: ({ action, name, thumbnailUrl, metadata }: CardItemProps) => React.JSX.Element;
 };
 export {};
 //# sourceMappingURL=index.d.ts.map

@@ -13,9 +13,9 @@ type Props = {
     text: string;
     right?: ReactNode;
 });
-export declare function BaseTag({ left, text, right, additionalAccesibleText, onClick, classNameContainer, classNameText, }: Props): import("node_modules/@types/react").JSX.Element;
-export declare namespace BaseTag {
-    var displayName: string;
-}
+export declare const BaseTag: {
+    ({ left, text, right, additionalAccesibleText, onClick, classNameContainer, classNameText, }: Props): import("node_modules/@types/react").JSX.Element;
+    displayName: string;
+};
 export {};
 //# sourceMappingURL=index.d.ts.map

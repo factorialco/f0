@@ -15,9 +15,9 @@ export type BaseAvatarProps = {
         color?: F0IconProps["color"];
     };
 } & Pick<ShadAvatarProps, "aria-label" | "aria-labelledby">;
-export declare function BaseAvatar({ src, name, size, type, color, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, badge, icon, }: BaseAvatarProps): import("node_modules/@types/react").JSX.Element;
-export declare namespace BaseAvatar {
-    var displayName: string;
-}
+export declare const BaseAvatar: {
+    ({ src, name, size, type, color, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, badge, icon, }: BaseAvatarProps): import("node_modules/@types/react").JSX.Element;
+    displayName: string;
+};
 export {};
 //# sourceMappingURL=F0AvatarBase.d.ts.map

@@ -31,9 +31,9 @@ export type ModuleAvatarProps = VariantProps<typeof moduleAvatarVariants> & ({
      */
     icon: IconType;
 });
-export declare function ModuleAvatar({ size, ...props }: ModuleAvatarProps): import("node_modules/@types/react").JSX.Element;
-export declare namespace ModuleAvatar {
-    var displayName: string;
-}
+export declare const ModuleAvatar: {
+    ({ size, ...props }: ModuleAvatarProps): import("node_modules/@types/react").JSX.Element;
+    displayName: string;
+};
 export {};
 //# sourceMappingURL=index.d.ts.map

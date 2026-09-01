@@ -10,9 +10,9 @@ export type PersonAvatarProps = {
     badge?: AvatarBadge;
     deactivated?: boolean;
 } & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
-export declare function PersonAvatar({ firstName, lastName, src, size, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, badge, deactivated, }: PersonAvatarProps): import("node_modules/@types/react").JSX.Element;
-export declare namespace PersonAvatar {
-    var displayName: string;
-}
+export declare const PersonAvatar: {
+    ({ firstName, lastName, src, size, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, badge, deactivated, }: PersonAvatarProps): import("node_modules/@types/react").JSX.Element;
+    displayName: string;
+};
 export {};
 //# sourceMappingURL=index.d.ts.map

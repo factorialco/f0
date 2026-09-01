@@ -11,10 +11,23 @@ import { F0AvatarList } from "./F0AvatarList";
 import { F0AvatarModule } from "./F0AvatarModule";
 import { F0AvatarPerson } from "./F0AvatarPerson";
 import { F0AvatarTeam } from "./F0AvatarTeam";
-declare function F0AvatarRoot({ avatar, size }: F0AvatarProps): ReactNode;
-declare namespace F0AvatarRoot {
-    var displayName: string;
-}
+/**
+ * F0AvatarRoot - Shared polymorphic avatar root.
+ *
+ * Dispatches the discriminated `avatar` payload to the matching semantic avatar
+ * variant so hosts can render a single entry point when the avatar type is dynamic.
+ * Prefer `F0Avatar.*` named variants in product code.
+ *
+ * @example
+ * Prefer named variants in product code
+ * <F0Avatar.Person firstName="Alice" lastName="Smith" size="md" />
+ * Use the root when the avatar type is determined at runtime
+ * <F0AvatarRoot avatar={{ type: "person", firstName: "Alice", lastName: "Smith" }} size="md" />
+ */
+declare const F0AvatarRoot: {
+    ({ avatar, size }: F0AvatarProps): ReactNode;
+    displayName: string;
+};
 type F0AvatarNamespace = typeof F0AvatarRoot & {
     Person: typeof F0AvatarPerson;
     Team: typeof F0AvatarTeam;

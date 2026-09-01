@@ -8,8 +8,8 @@ export type DotTagProps = {
 } | {
     customColor: string;
 });
-export declare function DotTag({ text, ...props }: DotTagProps): import("node_modules/@types/react").JSX.Element | null;
-export declare namespace DotTag {
-    var displayName: string;
-}
+export declare const DotTag: {
+    ({ text, ...props }: DotTagProps): import("node_modules/@types/react").JSX.Element | null;
+    displayName: string;
+};
 //# sourceMappingURL=index.d.ts.map

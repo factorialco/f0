@@ -1,1 +1,1 @@
-{"version":3,"file":"Split.d.ts","sourceRoot":"","sources":["../../../../src/icons/app/Split.tsx"],"names":[],"mappings":"AACA,OAAO,GAAa,MAAM,kBAAkB,CAAA;AAC5C,OAAO,KAAK,EAAE,QAAQ,EAAE,MAAM,kBAAkB,CAAA;AAehD,QAAA,MAAM,UAAU,kIAAuB,CAAA;eACxB,UAAU"}
+{"version":3,"file":"Split.d.ts","sourceRoot":"","sources":["../../../../src/icons/app/Split.tsx"],"names":[],"mappings":"AACA,OAAO,GAAa,MAAM,kBAAkB,CAAA;AAC5C,OAAO,KAAK,EAAE,QAAQ,EAAE,MAAM,kBAAkB,CAAA;AAehD,QAAA,MAAM,UAAU,kIAAuB,CAAA;AACvC,eAAe,UAAU,CAAA"}

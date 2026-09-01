@@ -6,8 +6,8 @@ export type RawTagProps = {
     noBorder?: boolean;
     className?: string;
 };
-export declare function RawTag({ text, additionalAccesibleText, icon, noBorder, className, }: RawTagProps): import("node_modules/@types/react").JSX.Element;
-export declare namespace RawTag {
-    var displayName: string;
-}
+export declare const RawTag: {
+    ({ text, additionalAccesibleText, icon, noBorder, className, }: RawTagProps): import("node_modules/@types/react").JSX.Element;
+    displayName: string;
+};
 //# sourceMappingURL=index.d.ts.map

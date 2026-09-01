@@ -1,1 +1,1 @@
-{"version":3,"file":"ArrowDown.d.ts","sourceRoot":"","sources":["../../../../src/icons/app/ArrowDown.tsx"],"names":[],"mappings":"AACA,OAAO,GAAa,MAAM,kBAAkB,CAAA;AAC5C,OAAO,KAAK,EAAE,QAAQ,EAAE,MAAM,kBAAkB,CAAA;AAehD,QAAA,MAAM,UAAU,kIAA2B,CAAA;eAC5B,UAAU"}
+{"version":3,"file":"ArrowDown.d.ts","sourceRoot":"","sources":["../../../../src/icons/app/ArrowDown.tsx"],"names":[],"mappings":"AACA,OAAO,GAAa,MAAM,kBAAkB,CAAA;AAC5C,OAAO,KAAK,EAAE,QAAQ,EAAE,MAAM,kBAAkB,CAAA;AAehD,QAAA,MAAM,UAAU,kIAA2B,CAAA;AAC3C,eAAe,UAAU,CAAA"}

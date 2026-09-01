@@ -1,1 +1,1 @@
-{"version":3,"file":"Payroll.d.ts","sourceRoot":"","sources":["../../../../src/icons/modules/Payroll.tsx"],"names":[],"mappings":"AACA,OAAO,GAAa,MAAM,kBAAkB,CAAA;AAC5C,OAAO,KAAK,EAAE,QAAQ,EAAE,MAAM,kBAAkB,CAAA;AAqBhD,QAAA,MAAM,UAAU,kIAAyB,CAAA;eAC1B,UAAU"}
+{"version":3,"file":"Payroll.d.ts","sourceRoot":"","sources":["../../../../src/icons/modules/Payroll.tsx"],"names":[],"mappings":"AACA,OAAO,GAAa,MAAM,kBAAkB,CAAA;AAC5C,OAAO,KAAK,EAAE,QAAQ,EAAE,MAAM,kBAAkB,CAAA;AAqBhD,QAAA,MAAM,UAAU,kIAAyB,CAAA;AACzC,eAAe,UAAU,CAAA"}

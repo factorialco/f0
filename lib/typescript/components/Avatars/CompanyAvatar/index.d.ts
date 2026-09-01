@@ -8,9 +8,9 @@ type Props = {
     size?: BaseAvatarProps["size"];
     badge?: AvatarBadge;
 } & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
-export declare function CompanyAvatar({ name, src, size, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, badge, }: Props): import("node_modules/@types/react").JSX.Element;
-export declare namespace CompanyAvatar {
-    var displayName: string;
-}
+export declare const CompanyAvatar: {
+    ({ name, src, size, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, badge, }: Props): import("node_modules/@types/react").JSX.Element;
+    displayName: string;
+};
 export {};
 //# sourceMappingURL=index.d.ts.map

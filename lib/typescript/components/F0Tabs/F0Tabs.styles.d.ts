@@ -40,11 +40,11 @@ export declare const f0TabsContainerVariants: import("node_modules/tailwind-vari
  * - `none`: 0px
  */
 export declare const f0TabsContentInsetVariants: import("node_modules/tailwind-variants/dist").TVReturnType<{
-    contentInset: Record<"lg" | "md" | "none" | "sm" | "xl", string>;
+    contentInset: Record<"none" | "md" | "xl" | "lg" | "sm", string>;
 }, undefined, undefined, {
-    contentInset: Record<"lg" | "md" | "none" | "sm" | "xl", string>;
+    contentInset: Record<"none" | "md" | "xl" | "lg" | "sm", string>;
 }, undefined, import("node_modules/tailwind-variants/dist").TVReturnType<{
-    contentInset: Record<"lg" | "md" | "none" | "sm" | "xl", string>;
+    contentInset: Record<"none" | "md" | "xl" | "lg" | "sm", string>;
 }, undefined, undefined, unknown, unknown, undefined>>;
 /**
  * The PressableFeedback IS the pill — same as web's `<span py-1.5 px-3 rounded-md bg-...>`.
@@ -131,10 +131,10 @@ export declare const f0TabSeparatorVariants: import("node_modules/tailwind-varia
  * Uses the same token map as `f0TabsContentInsetVariants`.
  */
 export declare const f0TabSeparatorContentInsetVariants: import("node_modules/tailwind-variants/dist").TVReturnType<{
-    contentInset: Record<"lg" | "md" | "none" | "sm" | "xl", string>;
+    contentInset: Record<"none" | "md" | "xl" | "lg" | "sm", string>;
 }, undefined, undefined, {
-    contentInset: Record<"lg" | "md" | "none" | "sm" | "xl", string>;
+    contentInset: Record<"none" | "md" | "xl" | "lg" | "sm", string>;
 }, undefined, import("node_modules/tailwind-variants/dist").TVReturnType<{
-    contentInset: Record<"lg" | "md" | "none" | "sm" | "xl", string>;
+    contentInset: Record<"none" | "md" | "xl" | "lg" | "sm", string>;
 }, undefined, undefined, unknown, unknown, undefined>>;
 //# sourceMappingURL=F0Tabs.styles.d.ts.map

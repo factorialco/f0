@@ -1,1 +1,1 @@
-{"version":3,"file":"ArrowLeft.d.ts","sourceRoot":"","sources":["../../../../src/icons/app/ArrowLeft.tsx"],"names":[],"mappings":"AACA,OAAO,GAAa,MAAM,kBAAkB,CAAA;AAC5C,OAAO,KAAK,EAAE,QAAQ,EAAE,MAAM,kBAAkB,CAAA;AAmBhD,QAAA,MAAM,UAAU,kIAA2B,CAAA;eAC5B,UAAU"}
+{"version":3,"file":"ArrowLeft.d.ts","sourceRoot":"","sources":["../../../../src/icons/app/ArrowLeft.tsx"],"names":[],"mappings":"AACA,OAAO,GAAa,MAAM,kBAAkB,CAAA;AAC5C,OAAO,KAAK,EAAE,QAAQ,EAAE,MAAM,kBAAkB,CAAA;AAmBhD,QAAA,MAAM,UAAU,kIAA2B,CAAA;AAC3C,eAAe,UAAU,CAAA"}
