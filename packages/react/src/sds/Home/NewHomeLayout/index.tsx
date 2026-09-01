@@ -821,6 +821,8 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
     // into the main column instead: the PINNED ones near the top, where a
     // mandatory widget belongs, and the rest at the very bottom.
     const stacked = rootWidth > 0 && rootWidth < TWO_COLUMN_MIN_PX
+    const hasRailColumn =
+      sideReady && !stacked && (collapsed || rootWidth >= TWO_COLUMN_MIN_PX)
     const loosePins = {
       pinned: stacked ? rightWidgets.filter((widget) => widget.locked) : [],
       rest: stacked ? rightWidgets.filter((widget) => !widget.locked) : [],
@@ -1055,12 +1057,9 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             // written the variable for the first time — an unresolvable `var()`
             // would invalidate the whole declaration and drop the rail's column
             // for that frame.
-            gridTemplateColumns:
-              sideReady &&
-              !stacked &&
-              (collapsed || rootWidth >= TWO_COLUMN_MIN_PX)
-                ? `minmax(0, 1fr) var(--home-aside-w, ${railWidth}px)`
-                : "minmax(0, 1fr)",
+            gridTemplateColumns: hasRailColumn
+              ? `minmax(0, 1fr) var(--home-aside-w, ${railWidth}px)`
+              : "minmax(0, 1fr)",
           } as CSSProperties
         }
       >
@@ -1177,6 +1176,10 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             marginBottom: -bleed,
             paddingTop: bleed,
             paddingBottom: bleed,
+            marginLeft: -bleed,
+            paddingLeft: bleed,
+            marginRight: hasRailColumn ? -COLUMN_GAP_PX : -bleed,
+            paddingRight: hasRailColumn ? COLUMN_GAP_PX : bleed,
             ...mainFade.style,
           }}
         >
