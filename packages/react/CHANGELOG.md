@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.77.0](https://github.com/factorialco/f0/compare/f0-react-v6.76.0...f0-react-v6.77.0) (2026-09-01)
+
+
+### Features
+
+* **SlotWidget:** let a row's subtitle go critical ([#5341](https://github.com/factorialco/f0/issues/5341)) ([9ad1015](https://github.com/factorialco/f0/commit/9ad101552d381a8fd73be18ca28a1960c736ce06))
+
 ## [6.76.0](https://github.com/factorialco/f0/compare/f0-react-v6.75.0...f0-react-v6.76.0) (2026-09-01)
 
 
