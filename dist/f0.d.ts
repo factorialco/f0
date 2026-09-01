@@ -770,6 +770,14 @@ declare type AiChatProviderReturnValue = {
     /** The range the panel may be dragged to at the frame's current width. */
     chatWidthBounds?: PanelBounds;
     /**
+     * True when the panel covers the frame rather than sitting beside it.
+     *
+     * Read this instead of re-deriving it from a media query: the rule combines
+     * the measured frame with the pointer type, and two consumers computing it
+     * separately is how a resize handle ends up on a full-screen panel.
+     */
+    panelOverlays?: boolean;
+    /**
      * Publishes the frame's content-box width. Called by ApplicationFrame, which
      * is the only thing that knows how much room is left beside the navigation.
      */
@@ -6948,7 +6956,9 @@ export declare const F0AiChatCreditsButton: ({ credits, employeeCredits, trigger
  * - legacy: title is static; a "new chat" button is shown when `hasMessages`.
  * Hosts can add header actions that F0 renders alongside the built-in controls.
  *
- * Decoupled from CopilotKit and `useAiChat()` — everything via props.
+ * Decoupled from CopilotKit, and prop-driven apart from one read: whether the
+ * panel is currently covering the frame, which decides if expanding means
+ * anything. Only the provider knows that, and it answers safely when absent.
  */
 export declare const F0AiChatHeader: ({ historyEnabled, title, currentThreadTitle, fullscreen, lockVisualizationMode, onToggleVisualizationMode, onClose, onNewChat, onOpenHistory, hasMessages, credits, employeeCredits, compact, actions, }: F0AiChatHeaderProps) => JSX_2.Element;
 
@@ -16579,7 +16589,16 @@ export declare type PaginationType = "pages" | "infinite-scroll" | "no-paginatio
 
 declare type PanelBounds = {
     min: number;
+    /** How far a deliberate drag may go — bounded by the content's hard floor. */
     max: number;
+    /**
+     * Where the panel sits when the user has not said otherwise: the content
+     * keeps `mainMin` and the panel takes what is left, down to `min`.
+     *
+     * Separate from `max` so that "served the content first" is the default
+     * without also being a cage — see `resolvePanelWidth`.
+     */
+    autoMax: number;
     /** The frame is too narrow to split: the panel should cover it instead. */
     shouldOverlay: boolean;
 };
