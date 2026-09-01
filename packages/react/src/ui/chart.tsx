@@ -42,9 +42,8 @@ export type ChartConfig = {
      */
     continues?: string
     /**
-     * Swatch drawn for this series in the legend: a round dot or a line
-     * stroke (dashed when the series is dashed). Overrides the chart's own
-     * mapping.
+     * Swatch drawn for this series in the legend: a round dot (the default)
+     * or a line stroke (dashed when the series is dashed).
      */
     legendIndicator?: "dot" | "line"
   } & (
@@ -366,11 +365,6 @@ const ChartLegendContent = React.forwardRef<
       nameKey?: string
       leftShift?: number
       hiddenKey?: string
-      /**
-       * Render line series with a line-stroke swatch (dashed when the series
-       * is dashed) instead of the round dot.
-       */
-      lineIndicators?: boolean
     }
 >(
   (
@@ -382,7 +376,6 @@ const ChartLegendContent = React.forwardRef<
       nameKey,
       hiddenKey,
       leftShift = 0,
-      lineIndicators = false,
     },
     ref
   ) => {
@@ -410,9 +403,7 @@ const ChartLegendContent = React.forwardRef<
             key,
             hiddenKey
           )
-          const indicator =
-            itemConfig?.legendIndicator ??
-            (lineIndicators && item.type === "line" ? "line" : "dot")
+          const indicator = itemConfig?.legendIndicator ?? "dot"
 
           return (
             <div

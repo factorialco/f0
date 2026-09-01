@@ -472,7 +472,7 @@ const _ComboChart = <K extends ChartConfig>(
         ))}
         {legend && (
           <ChartLegend
-            content={<ChartLegendContent nameKey="label" lineIndicators />}
+            content={<ChartLegendContent nameKey="label" />}
             align={"center"}
             verticalAlign={"bottom"}
             layout="vertical"

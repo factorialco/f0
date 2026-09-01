@@ -375,18 +375,20 @@ const continuationConfig = {
   actuals: {
     label: "Actuals",
     color: "categorical-1",
+    legendIndicator: "line" as const,
   },
   forecast: {
     label: "Forecast",
     color: "categorical-1",
     dashed: true,
     continues: "actuals",
+    legendIndicator: "line" as const,
   },
   planned: {
     label: "Planned",
     color: "categorical-2",
     dashed: true,
-    legendIndicator: "dot",
+    legendIndicator: "line" as const,
   },
 }
 
