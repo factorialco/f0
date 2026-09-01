@@ -100,6 +100,17 @@ describe("ImageProvider", () => {
     expect(img.getAttribute("src")).toEqual("original.jpg")
   })
 
+  test("a resolver returning undefined (missing return) renders the original props untouched", () => {
+    render(
+      <ImageProvider src={(() => undefined) as never}>
+        <Image src="original.jpg" alt="test" />
+      </ImageProvider>
+    )
+
+    const img = screen.getByAltText("test")
+    expect(img.getAttribute("src")).toEqual("original.jpg")
+  })
+
   test("an explicitly absent src key in the provider result preserves the original src", () => {
     render(
       <ImageProvider src={() => ({ sizes: "50vw" })}>

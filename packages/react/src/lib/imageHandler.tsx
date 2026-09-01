@@ -39,7 +39,8 @@ export const Image = forwardRef<HTMLImageElement, ImageProps>(
     const { src } = useImageContext()
 
     if (!src) return <img ref={ref} {...props} />
-    const extraProps = src(props)
+    // A misbehaving resolver (plain JS, missing return) may yield undefined
+    const extraProps = src(props) ?? {}
     const definedExtraProps = Object.fromEntries(
       Object.entries(extraProps).filter(([, value]) => value !== undefined)
     ) as SrcProps
