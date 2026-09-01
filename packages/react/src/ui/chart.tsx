@@ -37,7 +37,8 @@ export type ChartConfig = {
     /**
      * Key of the series this one continues, e.g. a forecast extending the
      * actuals. The chart bridges the gap by giving this series the last value
-     * of the continued one, so both lines connect.
+     * of the continued one, so both lines connect. Consumed by the chart
+     * kits via `bridgeContinuedSeries` before rendering.
      */
     continues?: string
   } & (
