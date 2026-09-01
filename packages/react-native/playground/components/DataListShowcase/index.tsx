@@ -79,10 +79,10 @@ export function DataListShowcase() {
             avatarUrl="https://avatars.githubusercontent.com/u/22561733?v=4"
           />
           <DataList.PersonItem
-            firstName="Dani"
-            lastName="Moreno"
+            firstName="Jordan"
+            lastName="Avery"
             avatarUrl="https://avatars.githubusercontent.com/u/96433370?s=60&v=4"
-            action={{ type: "copy", text: "Dani" }}
+            action={{ type: "copy", text: "Jordan" }}
           />
           <DataList.PersonItem
             firstName="Josep Jaume"

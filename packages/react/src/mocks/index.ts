@@ -46,7 +46,7 @@ export const MOCK_EMOJIS = [
 ]
 
 export const FIRST_NAMES_MOCK = [
-  "Dani",
+  "Jordan",
   "Desirée",
   "Eliseo",
   "Arnau",

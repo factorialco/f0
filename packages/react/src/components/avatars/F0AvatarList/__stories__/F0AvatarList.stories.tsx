@@ -32,8 +32,8 @@ const dummyPeople = [
     lastName: "Domínguez",
   },
   {
-    firstName: "Dani",
-    lastName: "Moreno",
+    firstName: "Jordan",
+    lastName: "Avery",
     src: "/avatars/person03.jpg",
   },
   {
