@@ -1,5 +1,33 @@
 # Changelog
 
+## [6.79.0](https://github.com/factorialco/f0/compare/f0-react-v6.78.4...f0-react-v6.79.0) (2026-09-01)
+
+
+### Features
+
+* **F0CommunityPostsCarousel:** load the next page on a drag ([#5351](https://github.com/factorialco/f0/issues/5351)) ([859e160](https://github.com/factorialco/f0/commit/859e1604650bc9db729157fafb6e85e43ab9fb5a))
+
+## [6.78.4](https://github.com/factorialco/f0/compare/f0-react-v6.78.3...f0-react-v6.78.4) (2026-09-01)
+
+
+### Bug Fixes
+
+* **Tooltip:** even out content padding to 8px ([#4992](https://github.com/factorialco/f0/issues/4992)) ([917c2fc](https://github.com/factorialco/f0/commit/917c2fcc516b1ec7e3a67680bcef148ed3cf6f63))
+
+## [6.78.3](https://github.com/factorialco/f0/compare/f0-react-v6.78.2...f0-react-v6.78.3) (2026-09-01)
+
+
+### Bug Fixes
+
+* **NewHomeLayout:** stop clipping the composer's glow ([#5350](https://github.com/factorialco/f0/issues/5350)) ([2472c36](https://github.com/factorialco/f0/commit/2472c3610f265ec3face3a6f60c911d32f6d379c))
+
+## [6.78.2](https://github.com/factorialco/f0/compare/f0-react-v6.78.1...f0-react-v6.78.2) (2026-09-01)
+
+
+### Bug Fixes
+
+* **SlotWidget:** align View more with the widget title ([#5344](https://github.com/factorialco/f0/issues/5344)) ([bd4f807](https://github.com/factorialco/f0/commit/bd4f807540b7e9c52d8fc7102bb64d4383cf6f2f))
+
 ## [6.78.1](https://github.com/factorialco/f0/compare/f0-react-v6.78.0...f0-react-v6.78.1) (2026-09-01)
 
 
