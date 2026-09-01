@@ -1,7 +1,5 @@
-import { breakpoints } from "@factorialco/f0-core"
 import { motion } from "motion/react"
 import { type ReactNode } from "react"
-import { useMediaQuery } from "usehooks-ts"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
@@ -14,6 +12,7 @@ import { useReducedMotion } from "@/lib/a11y"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
+import { useAiChat } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
 import { Action } from "@/ui/Action"
 
 import type { F0AiChatHeaderProps } from "./types"
@@ -62,7 +61,9 @@ export const F0AiChatCreditsButton = CreditsPopoverPicker
  * - legacy: title is static; a "new chat" button is shown when `hasMessages`.
  * Hosts can add header actions that F0 renders alongside the built-in controls.
  *
- * Decoupled from CopilotKit and `useAiChat()` — everything via props.
+ * Decoupled from CopilotKit, and prop-driven apart from one read: whether the
+ * panel is currently covering the frame, which decides if expanding means
+ * anything. Only the provider knows that, and it answers safely when absent.
  */
 export const F0AiChatHeader = ({
   historyEnabled = false,
@@ -82,11 +83,15 @@ export const F0AiChatHeader = ({
 }: F0AiChatHeaderProps) => {
   const translations = useI18n()
   const shouldReduceMotion = useReducedMotion()
-  const isSmallScreen = useMediaQuery(`(max-width: ${breakpoints.md}px)`, {
-    initializeWithValue: true,
-  })
+  // Expanding is only meaningful while the panel sits beside content — once it
+  // is covering the frame the button toggles nothing. That used to be read off
+  // the viewport, on the assumption that a narrow window always meant a
+  // covering panel. It no longer does: a half-screen laptop window splits, and
+  // the assumption was costing it the button. `useAiChat` answers with `false`
+  // when no provider is mounted, so a standalone header still shows it.
+  const { panelOverlays } = useAiChat()
 
-  const expandButton = !lockVisualizationMode && !isSmallScreen && (
+  const expandButton = !lockVisualizationMode && !panelOverlays && (
     <ButtonInternal
       variant="ghost"
       hideLabel

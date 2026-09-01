@@ -14,7 +14,8 @@ import {
   useState,
 } from "react"
 
-import { panelWidths } from "@factorialco/f0-core"
+import { breakpoints, panelWidths } from "@factorialco/f0-core"
+import { useMediaQuery } from "usehooks-ts"
 
 import { useI18n } from "@/lib/providers/i18n"
 
@@ -31,8 +32,8 @@ import {
 } from "../types"
 import { DEFAULT_CHAT_WIDTH } from "../utils/constants"
 import {
-  clampPanelWidth,
   panelBoundsFor,
+  resolvePanelWidth,
   type PanelBounds,
 } from "../utils/panelWidth"
 
@@ -131,9 +132,29 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   // deliberately on a wider one, so the clamp lives here and not in the
   // setter: widen the window again and the preference comes back untouched.
   const effectiveChatWidth = useMemo(
-    () => clampPanelWidth(chatWidth, frameWidth),
+    () => resolvePanelWidth(chatWidth, frameWidth),
     [chatWidth, frameWidth]
   )
+
+  // Whether the panel covers the frame instead of sitting beside it.
+  //
+  // Derived once, here, because two consumers need the same answer: the frame
+  // reserves (or doesn't) against it, and the window hides its resize handle
+  // against it. They each computed their own version before, which is how you
+  // end up dragging a seam on a panel that is already full-screen.
+  //
+  // Width alone decides it for a mouse — a half-screen laptop window is a
+  // legitimate place to want two columns. Touch is judged on the viewport
+  // instead, so a tablet still gets the drawer it expects rather than two
+  // columns nobody can hit.
+  const isCoarsePointer = useMediaQuery("(pointer: coarse)", {
+    initializeWithValue: true,
+  })
+  const isCompactViewport = useMediaQuery(`(max-width: ${breakpoints.md}px)`, {
+    initializeWithValue: true,
+  })
+  const panelOverlays =
+    (isCoarsePointer && isCompactViewport) || chatWidthBounds.shouldOverlay
 
   const [open, setOpen] = usePersistedState<boolean>(
     CHAT_OPEN_STORAGE_KEY,
@@ -435,6 +456,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         resetChatWidth,
         effectiveChatWidth,
         chatWidthBounds,
+        panelOverlays,
         setFrameWidth,
         isResizing,
         setIsResizing,
@@ -537,6 +559,7 @@ const REAL_VALUES: Partial<AiChatProviderReturnValue> = {
   effectiveChatWidth: DEFAULT_CHAT_WIDTH,
   // Unmeasured, so the absolute range — same fallback the provider starts on.
   chatWidthBounds: panelBoundsFor(0),
+  panelOverlays: false,
   panelSide: "right",
   panelContentSide: "right",
   visualizationMode: "sidepanel",

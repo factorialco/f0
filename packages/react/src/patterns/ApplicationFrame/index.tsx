@@ -29,13 +29,7 @@ import { DEFAULT_CHAT_WIDTH } from "@/kits/ai/F0AiChat/utils/constants"
 import { F0CanvasPanel } from "@/kits/ai/F0CanvasPanel"
 
 import { FrameProvider, SidebarState, useSidebar } from "./FrameProvider"
-
-const CONTENT_TRANSITION = { duration: 0.3, ease: [0, 0, 0.1, 1] }
-// Module-level so the reference is stable across renders. Motion cancels an
-// in-flight animation when it sees a different `transition` and does not
-// restart it, so handing it a fresh object literal each render is a way to
-// strand an animation part-way.
-const INSTANT_TRANSITION = { duration: 0 }
+import { LAYOUT_SETTLE_MS, resolveLayoutTransition } from "./layoutTransition"
 
 export interface ApplicationFrameProps {
   ai?: Omit<AiChatProviderProps, "children">
@@ -194,6 +188,7 @@ function ApplicationFrameContent({
     closeCanvas,
     effectiveChatWidth,
     chatWidthBounds,
+    panelOverlays,
     setFrameWidth,
     resizable,
     panelSide,
@@ -261,29 +256,10 @@ function ApplicationFrameContent({
     return { duration: 0 }
   }, [isEnteringFullscreen, isExitingFullscreen])
 
-  // Instant while the resize handle is being dragged, eased otherwise.
-  //
-  // The flag flips only on drag start / drag end, which is what makes this
-  // safe. Motion CANCELS an in-flight animation when `transition` changes and
-  // does not restart it (the target is unchanged), stranding the canvas
-  // mid-travel — verified in the browser: the canvas froze part-way across the
-  // chat and stayed there. Keying off the drag never swaps the transition while
-  // an animation is running: a drag holds `{ duration: 0 }` for its whole
-  // duration, and a `coversChat` flip holds the eased curve for its whole
-  // animation. Keying off "is `coversChat` changing" is what does not work — it
-  // swaps the transition one render after starting the animation.
-  const canvasInsetTransition = isResizing
-    ? INSTANT_TRANSITION
-    : CONTENT_TRANSITION
-
   const shouldAutoCloseSidebar = useMediaQuery(
     `(max-width: ${breakpoints.xl}px)`,
     { initializeWithValue: true }
   )
-
-  const isSmallViewport = useMediaQuery(`(max-width: ${breakpoints.md}px)`, {
-    initializeWithValue: true,
-  })
 
   // A left-docked panel normally keeps the sidebar in place (see
   // `floatsOverSidebar`), but three columns do not fit on a narrow viewport.
@@ -304,11 +280,18 @@ function ApplicationFrameContent({
   // so the content box is the thing being computed from the width; feeding it
   // back in would make the panel chase its own tail.
   const mainAreaRef = useRef<HTMLDivElement>(null)
+  // True while the frame's own width is moving — i.e. the user is dragging the
+  // window edge. Distinct from the handle drag: the panel's width changes the
+  // frame's PADDING, not its border box, so this never fires for a handle drag
+  // and the two signals stay orthogonal.
+  const [isWindowResizing, setIsWindowResizing] = useState(false)
   useEffect(() => {
     const element = mainAreaRef.current
     if (!element || !setFrameWidth) return
 
     let frame = 0
+    let lastWidth = 0
+    let settleTimer = 0
     const publish = (): void => {
       cancelAnimationFrame(frame)
       // Coalesced to one frame: a window drag fires these faster than the
@@ -318,7 +301,21 @@ function ApplicationFrameContent({
         const { width } = element.getBoundingClientRect()
         // A hidden container measures 0. Publishing that would read as "no
         // room" and collapse the panel, so leave the last good width standing.
-        if (width > 0) setFrameWidth(width)
+        if (width <= 0) return
+
+        // Only a CHANGE counts as a resize. The first measurement and the
+        // observer's own initial tick are not a gesture, and flagging them
+        // would suppress the opening animation on first paint.
+        if (lastWidth !== 0 && width !== lastWidth) {
+          setIsWindowResizing(true)
+          window.clearTimeout(settleTimer)
+          settleTimer = window.setTimeout(
+            () => setIsWindowResizing(false),
+            LAYOUT_SETTLE_MS
+          )
+        }
+        lastWidth = width
+        setFrameWidth(width)
       })
     }
 
@@ -328,17 +325,23 @@ function ApplicationFrameContent({
     window.addEventListener("resize", publish)
     return () => {
       cancelAnimationFrame(frame)
+      window.clearTimeout(settleTimer)
       observer.disconnect()
       window.removeEventListener("resize", publish)
     }
   }, [setFrameWidth])
 
-  // Too narrow to seat a panel beside the content at all: it covers the frame
-  // instead of splitting it. The viewport rule is the long-standing mobile
-  // case; the measured one additionally catches a frame narrowed by the
-  // sidebar, which a viewport query cannot see.
-  const shouldOverlayPanel =
-    isSmallViewport || (chatWidthBounds?.shouldOverlay ?? false)
+  // The layout is following an input rather than playing a move: a handle drag
+  // or a window resize. Everything laid out against the panel's edge reads this
+  // so they travel together instead of each easing on its own schedule.
+  const isLayoutTracking = Boolean(isResizing) || isWindowResizing
+  const layoutTransition = resolveLayoutTransition(isLayoutTracking)
+
+  // Too narrow to seat a panel beside the content: it covers the frame instead
+  // of splitting it. Decided in the provider, which knows both the measured
+  // frame and the pointer type — the window reads the same value for its
+  // resize handle, so the two can never disagree.
+  const shouldOverlayPanel = panelOverlays ?? false
 
   // A left-docked panel sits beside the navigation (not over it), so the chat
   // list stays usable — don't float / auto-close the sidebar in that case.
@@ -427,15 +430,24 @@ function ApplicationFrameContent({
                     ? reservedChatWidth
                     : 0,
               }}
+              // Instant while the layout is tracking an input, eased for a
+              // discrete change. Without this the panel edge snapped to the
+              // cursor while the content chased it through a fresh ease
+              // restarted every frame — the lag you could see between the two.
               transition={{
-                paddingRight: CONTENT_TRANSITION,
-                paddingLeft: CONTENT_TRANSITION,
+                paddingRight: layoutTransition,
+                paddingLeft: layoutTransition,
               }}
             >
               {/* Main content */}
+              {/* `layout`, not `layoutId`: nothing else in the tree carries
+                  that id, and a `layoutId` with no counterpart is
+                  shared-element machinery with nothing to share. Kept as a
+                  plain layout animation, still narrowed by `layoutDependency`
+                  to the sidebar change it was added for. */}
               <motion.main
                 id="content"
-                layoutId="main"
+                layout
                 className={cn(
                   "relative z-10 flex h-full max-w-full flex-1 xs:py-1",
                   isInFullscreenTransition
@@ -457,17 +469,24 @@ function ApplicationFrameContent({
                 )}
                 layoutDependency={sidebarState}
               >
-                <motion.div
+                {/* Deliberately NOT layout-animated. It used to carry
+                    `layout="position"` with no `layoutDependency`, so it
+                    re-measured on every render — every frame of a drag, since
+                    the width lives in context — and ran a FLIP over the whole
+                    application content on a different duration and curve than
+                    the padding beneath it. Two animations describing one
+                    movement, which by construction cannot stay in step. The
+                    padding already moves this; the FLIP only fought it. */}
+                <div
                   className={cn(
                     "flex max-w-full flex-1",
                     isInFullscreenTransition
                       ? "overflow-hidden"
                       : "overflow-x-hidden overflow-y-auto"
                   )}
-                  layout="position"
                 >
                   {children}
-                </motion.div>
+                </div>
               </motion.main>
 
               {/* Chat */}
@@ -489,12 +508,15 @@ function ApplicationFrameContent({
                           isPanelLeft ? "right-0" : "left-0"
                         )
                   )}
-                  // Animated on the same curve as the main content's padding, so
-                  // the canvas widens in step with the chat panel collapsing
-                  // instead of snapping across the gap it leaves behind. Both
-                  // edges are always written (motion retains the last animated
-                  // value, so leaving one out would strand a stale inset when
-                  // the viewport crosses the small breakpoint).
+                  // The same transition as the main content's padding — now
+                  // literally the same object, so the invariant this comment
+                  // has always claimed cannot drift again. It did: the canvas
+                  // gained the instant path for drags and the padding did not,
+                  // and the two spent every drag out of step.
+                  //
+                  // Both edges are always written (motion retains the last
+                  // animated value, so leaving one out would strand a stale
+                  // inset when the viewport crosses the small breakpoint).
                   animate={
                     shouldOverlayPanel
                       ? { left: 0, right: 0 }
@@ -502,7 +524,7 @@ function ApplicationFrameContent({
                         ? { left: reservedCanvasInset, right: 0 }
                         : { left: 0, right: reservedCanvasInset }
                   }
-                  transition={canvasInsetTransition}
+                  transition={layoutTransition}
                 >
                   <F0CanvasPanel
                     content={canvasContent}

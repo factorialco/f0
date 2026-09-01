@@ -10,12 +10,42 @@ import { ApplicationFrame } from ".."
 const { max: MAX } = panelWidths
 
 // Every media query answers `false` in this environment (see vitest.setup),
-// so the viewport-based rules are all off. Whatever these tests observe comes
-// from the MEASURED frame — which is the half that did not exist before.
+// so the viewport-based rules are all off and the pointer reads as fine.
+// Whatever these tests observe comes from the MEASURED frame — which is the
+// half that did not exist before. `setCoarsePointer` opts a test out.
 let frameWidth = 0
 
 const setFrameWidth = (width: number) => {
   frameWidth = width
+}
+
+const mediaStub = (matches: (query: string) => boolean) =>
+  ((query: string) => ({
+    matches: matches(query),
+    media: query,
+    onchange: null,
+    addListener: () => {},
+    removeListener: () => {},
+    addEventListener: () => {},
+    removeEventListener: () => {},
+    dispatchEvent: () => true,
+  })) as unknown as typeof window.matchMedia
+
+/**
+ * Answer `(pointer: coarse)` and the compact-viewport query as a tablet would.
+ *
+ * Assigned directly rather than through `vi.stubGlobal`: the suite-wide
+ * `matchMedia` in `vitest.setup` is itself a stubbed global, so unstubbing
+ * would take that with it and leave the query undefined.
+ */
+const setCoarsePointer = () => {
+  window.matchMedia = mediaStub(
+    (query) => /pointer:\s*coarse/.test(query) || /max-width/.test(query)
+  )
+}
+
+const resetPointer = () => {
+  window.matchMedia = mediaStub(() => false)
 }
 
 const Probe = () => {
@@ -94,6 +124,8 @@ describe("ApplicationFrame responsive side panel", () => {
 
   afterEach(() => {
     vi.restoreAllMocks()
+    // Without this the coarse pointer leaks into whatever test runs next.
+    resetPointer()
   })
 
   it("reserves the full preferred width when the frame has room", async () => {
@@ -110,20 +142,21 @@ describe("ApplicationFrame responsive side panel", () => {
     expect(screen.getByText(`effective:${MAX}`)).toBeInTheDocument()
   })
 
-  it("holds the panel back so the content keeps its minimum", async () => {
-    setFrameWidth(1200)
+  it("puts the panel at its minimum on a narrow frame, by default", async () => {
+    // Nobody has dragged anything, so the content is served first: 900 - 640
+    // is under the panel's own minimum, so it takes 300 and the content keeps
+    // the remaining 600. An even split would have given it only 450.
+    setFrameWidth(900)
     renderFrame("left")
     await openChat()
-    await act(async () => {
-      screen.getByText("widen-to-max").click()
-    })
 
-    // 1200 - 560: the panel yields rather than crush the content.
-    await waitFor(() => expect(mainArea().style.paddingLeft).toBe("640px"))
+    await waitFor(() => expect(mainArea().style.paddingLeft).toBe("300px"))
   })
 
-  it("splits the frame evenly when neither minimum fits", async () => {
-    setFrameWidth(1000)
+  it("honours a width the user dragged, up to the content's hard floor", async () => {
+    // The same frame, but now with an explicit preference. 712 is more than
+    // the frame can give, so it stops where the content would drop below 400.
+    setFrameWidth(900)
     renderFrame("left")
     await openChat()
     await act(async () => {
@@ -133,10 +166,8 @@ describe("ApplicationFrame responsive side panel", () => {
     await waitFor(() => expect(mainArea().style.paddingLeft).toBe("500px"))
   })
 
-  it("stops splitting a frame too narrow to seat both", async () => {
-    // The case that used to leave 60px of content: a left-docked panel beside
-    // a locked sidebar on a 1024px window.
-    setFrameWidth(772)
+  it("stops splitting a frame too narrow to read as two columns", async () => {
+    setFrameWidth(640)
     renderFrame("left")
     await openChat()
     await act(async () => {
@@ -146,6 +177,43 @@ describe("ApplicationFrame responsive side panel", () => {
     // Overlay: the panel covers the frame, so nothing is reserved.
     await waitFor(() => expect(mainArea().style.paddingLeft).toBe("0px"))
     expect(mainArea().style.paddingRight).toBe("0px")
+  })
+
+  it("splits a laptop window at half the screen", async () => {
+    // 756 is half of a 14" MacBook Pro at its default scaling. This used to
+    // overlay — the panel swallowed the page on a perfectly ordinary window.
+    setFrameWidth(756)
+    renderFrame("right")
+    await openChat()
+
+    // The panel takes its minimum and the content keeps 456 — an even split
+    // would have left it 378.
+    await waitFor(() => expect(mainArea().style.paddingRight).toBe("300px"))
+  })
+
+  it("still splits at the width that used to be the cut-off", async () => {
+    // The "More Space" scaling puts half the screen at exactly 900, which the
+    // old `max-width: 900px` rule caught by a hair.
+    setFrameWidth(900)
+    renderFrame("right")
+    await openChat()
+
+    await waitFor(() => {
+      const reserved = Number.parseFloat(mainArea().style.paddingRight || "0")
+      expect(reserved).toBeGreaterThan(0)
+    })
+  })
+
+  it("keeps the drawer on a touch device at the same width", async () => {
+    // Same 768 frame, coarse pointer: a tablet wants the drawer, not two
+    // columns nobody can hit.
+    setCoarsePointer()
+    setFrameWidth(768)
+    renderFrame("right")
+    await openChat()
+
+    await waitFor(() => expect(mainArea().style.paddingRight).toBe("0px"))
+    expect(mainArea().style.paddingLeft).toBe("0px")
   })
 
   it("never reserves more than the frame has", async () => {
@@ -173,10 +241,10 @@ describe("ApplicationFrame responsive side panel", () => {
     })
     await waitFor(() => expect(mainArea().style.paddingLeft).toBe(`${MAX}px`))
 
-    // Narrow it: the reservation shrinks...
+    // Narrow it: the reservation shrinks to what the content can spare...
     setFrameWidth(1000)
     await remeasure()
-    await waitFor(() => expect(mainArea().style.paddingLeft).toBe("500px"))
+    await waitFor(() => expect(mainArea().style.paddingLeft).toBe("600px"))
 
     // ...but the preference was not overwritten, so widening restores it.
     setFrameWidth(1600)
