@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.78.2](https://github.com/factorialco/f0/compare/f0-react-v6.78.1...f0-react-v6.78.2) (2026-09-01)
+
+
+### Bug Fixes
+
+* **SlotWidget:** align View more with the widget title ([#5344](https://github.com/factorialco/f0/issues/5344)) ([bd4f807](https://github.com/factorialco/f0/commit/bd4f807540b7e9c52d8fc7102bb64d4383cf6f2f))
+
 ## [6.78.1](https://github.com/factorialco/f0/compare/f0-react-v6.78.0...f0-react-v6.78.1) (2026-09-01)
 
 
