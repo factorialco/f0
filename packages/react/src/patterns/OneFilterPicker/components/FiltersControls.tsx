@@ -14,10 +14,10 @@ import {
 
 import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
+import { F0DialogContext } from "@/patterns/F0Dialog"
+import { FilterPickerInternal } from "@/patterns/F0FilterPickerContent/internal"
 import { Filter } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
-import { F0DialogContext } from "@/patterns/F0Dialog/components/F0DialogProvider"
-import { FilterPickerInternal } from "@/patterns/F0FilterPickerContent/internal"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 
 import type { FiltersDefinition, FiltersMode, FiltersState } from "../types"
@@ -25,9 +25,9 @@ import type { FiltersDefinition, FiltersMode, FiltersState } from "../types"
 import { ArrowLeft } from "../../../icons/app"
 import { getFilterType } from "../filterTypes"
 import { FilterTypeContext, FilterTypeSchema } from "../filterTypes/types"
+import { getClearedFiltersValue } from "../internal/getClearedFiltersValue"
 import { getActiveFilterKeys } from "../internal/getActiveFilterKeys"
 import { getActiveFiltersValue } from "../internal/getActiveFiltersValue"
-import { getClearedFiltersValue } from "../internal/getClearedFiltersValue"
 import { FilterContent } from "./FilterContent"
 import { FilterList } from "./FilterList"
 
@@ -292,7 +292,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
               transition={{ type: "spring", duration: 0.3, bounce: 0 }}
               className="absolute bottom-0 left-0 right-0 top-0 z-20 bg-f1-background"
             >
-              <div className="flex h-full max-h-full min-h-0 flex-1 flex-col">
+              <div className="flex h-full flex-col flex-1 min-h-0 max-h-full">
                 <div className="flex shrink-0 items-center gap-2 border-0 border-b border-solid border-f1-border-secondary px-2 py-1.5">
                   <ButtonInternal
                     variant="ghost"
@@ -306,7 +306,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
                     {i18n.filters.label}
                   </span>
                 </div>
-                <div className="flex max-h-full min-h-0 flex-1">
+                <div className="flex flex-1 min-h-0 max-h-full">
                   <FilterList
                     definition={filters}
                     tempFilters={localFiltersValue}
@@ -317,7 +317,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
                     onClickApplyFilters={handleApplyFilters}
                   />
                   {selectedFilterKey && (
-                    <div className="min-w-0 flex-1 overflow-hidden">
+                    <div className="flex-1 min-w-0 overflow-hidden">
                       <FilterContent
                         selectedFilterKey={selectedFilterKey}
                         definition={filters}
@@ -327,7 +327,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
                     </div>
                   )}
                 </div>
-                <div className="flex items-center justify-end gap-2 border border-solid border-transparent border-t-f1-border-secondary bg-f1-background p-2">
+                <div className="flex items-center justify-end gap-2 border border-solid border-transparent border-t-f1-border-secondary p-2 bg-f1-background">
                   <F0Button
                     onClick={handleApplyFilters}
                     label={i18n.filters.applyFilters}
@@ -352,7 +352,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
       : i18n.t("filters.availableFilters")
 
     const NavHeader = (
-      <div className="flex items-center gap-2 py-1.5 pl-1.5">
+      <div className="flex items-center gap-2 pl-1.5 py-1.5">
         <F0Button
           label="Back"
           icon={ArrowLeft}
@@ -368,7 +368,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
     const ApplySelectionButton = (
       <>
         {selectedFilterKey && (
-          <div className="sticky bottom-0 left-0 right-0 z-30 flex items-center justify-end gap-2 border border-solid border-transparent border-t-f1-border-secondary bg-f1-background p-2">
+          <div className="sticky bottom-0 left-0 right-0 z-30 flex items-center justify-end gap-2 border border-solid border-transparent border-t-f1-border-secondary p-2 bg-f1-background">
             <F0Button
               onClick={handleApplyFiltersSelection}
               label={i18n.filters.applySelection}
@@ -416,9 +416,9 @@ export function FiltersControls<Filters extends FiltersDefinition>({
               transition={{ type: "spring", duration: 0.3, bounce: 0 }}
               className="absolute bottom-0 left-0 right-0 top-0 z-20 bg-f1-background"
             >
-              <div className="flex h-full max-h-full min-h-0 flex-1 flex-col transition-all">
+              <div className="flex h-full flex-col transition-all flex-1 min-h-0 max-h-full">
                 {NavHeader}
-                <div className="flex max-h-full min-h-0 flex-1">
+                <div className="flex flex-1 min-h-0 max-h-full">
                   {selectedFilterKey ? (
                     <motion.div
                       key="filter-content"

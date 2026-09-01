@@ -9,7 +9,7 @@ import {
 import { useDebounceValue } from "usehooks-ts"
 
 import { cn } from "@/lib/utils"
-import { F0DialogContext } from "@/patterns/F0Dialog/components/F0DialogProvider"
+import { F0DialogContext } from "@/patterns/F0Dialog"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 
 import { Content } from "./Content"

@@ -1,13 +1,12 @@
 import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
-import { Add } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
+import { Add } from "@/icons/app"
 import { ScrollArea } from "@/ui/scrollarea"
 
+import { SortAndHideList } from "../visualizations/collection/Table/components/SortAndHideList"
 import type { SortAndHideListItem } from "../visualizations/collection/Table/components/SortAndHideList/types"
 import type { DataCollectionSettingsContextType } from "./SettingsProvider"
-
-import { SortAndHideList } from "../visualizations/collection/Table/components/SortAndHideList"
 import { useDataCollectionSettings } from "./SettingsProvider"
 
 type VisualizationSettingsKey = Parameters<

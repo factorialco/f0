@@ -1,18 +1,15 @@
 import { IconType } from "@/components/F0Icon"
+import { FiltersDefinition } from "@/patterns/OneFilterPicker"
+import { ItemActionsDefinition } from "@/patterns/OneDataCollection/item-actions"
+import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import {
   GroupingDefinition,
   RecordType,
   SortingsDefinition,
 } from "@/hooks/datasource"
 import { Kanban, List, Organization, Pencil, Table } from "@/icons/app"
-import { ItemActionsDefinition } from "@/patterns/OneDataCollection/item-actions"
-import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
-import { FiltersDefinition } from "@/patterns/OneFilterPicker"
 
-import type { DataCollectionSettingsContextType } from "../../Settings/SettingsProvider"
-import type { GraphVisualizationSettings } from "./Graph/types"
-
-import { createInitialVisualizationSettings } from "../../Settings/visualizationSettings"
+import { DataCollectionSettingsContextType } from "../../Settings/SettingsProvider"
 import { SummariesDefinition } from "../../types"
 import { CardCollection, CardCollectionProps } from "./Card"
 import {
@@ -21,7 +18,10 @@ import {
 } from "./EditableTable"
 import { EditableTableVisualizationSettings } from "./EditableTable/types"
 import { GraphCollection, GraphCollectionProps } from "./Graph"
-import { SettingsRenderer as graphSettingsRenderer } from "./Graph/settings/SettingsRenderer"
+import {
+  SettingsRenderer as graphSettingsRenderer,
+  type GraphVisualizationSettings,
+} from "./Graph/settings/SettingsRenderer"
 import { KanbanCollection, KanbanCollectionProps } from "./Kanban"
 import { ListCollection, ListCollectionProps } from "./List"
 import {
@@ -30,8 +30,6 @@ import {
   SettingsRenderer as tableSettingsRenderer,
   TableVisualizationSettings,
 } from "./Table"
-
-const defaultVisualizationSettings = createInitialVisualizationSettings()
 
 export type VisualizacionTypeDefinition<
   Props,
@@ -177,7 +175,7 @@ export const collectionVisualizations: CollectionVisualizations<
         tableSettingsRenderer({ ...props, visualizationKey: "table" }),
       resetHandler: (settings) =>
         settings.setVisualizationSettings("table", {}),
-      default: defaultVisualizationSettings.table,
+      default: {},
     },
   },
   editableTable: {
@@ -221,14 +219,14 @@ export const collectionVisualizations: CollectionVisualizations<
         tableSettingsRenderer({ ...props, visualizationKey: "editableTable" }),
       resetHandler: (settings) =>
         settings.setVisualizationSettings("editableTable", {}),
-      default: defaultVisualizationSettings.editableTable,
+      default: {},
     },
   },
   list: {
     name: "List",
     icon: List,
     settings: {
-      default: defaultVisualizationSettings.list,
+      default: {},
     },
     render: <
       Record extends RecordType,
@@ -268,7 +266,7 @@ export const collectionVisualizations: CollectionVisualizations<
     name: "Card",
     icon: Kanban,
     settings: {
-      default: defaultVisualizationSettings.card,
+      default: {},
     },
     render: <
       Record extends RecordType,
@@ -308,7 +306,7 @@ export const collectionVisualizations: CollectionVisualizations<
     name: "Kanban",
     icon: Kanban,
     settings: {
-      default: defaultVisualizationSettings.kanban,
+      default: {},
     },
     render: <
       Record extends RecordType,
@@ -348,7 +346,7 @@ export const collectionVisualizations: CollectionVisualizations<
     name: "Graph",
     icon: Organization,
     settings: {
-      default: defaultVisualizationSettings.graph,
+      default: {},
       renderer: (props) => graphSettingsRenderer(props),
       resetHandler: (settings) =>
         settings.setVisualizationSettings("graph", {}),

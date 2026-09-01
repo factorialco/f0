@@ -47,8 +47,8 @@ import { useLoadChildren } from "../hooks/useLoadChildren"
 import { useStickyParentRow } from "../hooks/useStickyParentRow"
 import { useNestedDataContext } from "../providers/NestedProvider"
 import { AddRowRow } from "./AddRow"
-import { FlatRow, type NestedRowProps } from "./FlatRow"
 import { LoadMoreRow } from "./LoadMore"
+import { NestedRowProps, Row } from "./Row"
 import { RowLoading } from "./RowLoading"
 
 const normalizeAddRowActions = (
@@ -261,7 +261,7 @@ const NestedRowContent = <
 
   return (
     <>
-      <FlatRow
+      <Row
         {...props}
         noBorder={shouldHideBorder}
         ref={combinedRowRef}
@@ -374,7 +374,7 @@ const NestedRowContent = <
               !childIsLastInTree && isTableVisualization
 
             const leafChild = (
-              <FlatRow
+              <Row
                 {...props}
                 key={`row-${props.groupIndex}-${props.index}-${childIndex}`}
                 index={childIndex}

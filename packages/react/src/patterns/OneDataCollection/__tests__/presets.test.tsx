@@ -216,7 +216,7 @@ describe("OneDataCollection - presets", () => {
     await user.click(await screen.findByRole("button", { name: "Save view" }))
 
     // Dialog opens; fill the title and submit.
-    const titleInput = await screen.findByRole("textbox", { name: "Title" })
+    const titleInput = await screen.findByLabelText("Title")
     await user.type(titleInput, "My view")
     await user.click(screen.getByRole("button", { name: "Save" }))
 
@@ -251,10 +251,7 @@ describe("OneDataCollection - presets", () => {
     // Create a custom view.
     await sortByName(user)
     await user.click(await screen.findByRole("button", { name: "Save view" }))
-    await user.type(
-      await screen.findByRole("textbox", { name: "Title" }),
-      "My view"
-    )
+    await user.type(await screen.findByLabelText("Title"), "My view")
     await user.click(screen.getByRole("button", { name: "Save" }))
     await waitFor(() =>
       expect(screen.getAllByText("My view").length).toBeGreaterThan(0)
@@ -293,10 +290,7 @@ describe("OneDataCollection - presets", () => {
     // Create a custom view (auto-selected) after a sorting change.
     await sortByName(user)
     await user.click(await screen.findByRole("button", { name: "Save view" }))
-    await user.type(
-      await screen.findByRole("textbox", { name: "Title" }),
-      "My view"
-    )
+    await user.type(await screen.findByLabelText("Title"), "My view")
     await user.click(screen.getByRole("button", { name: "Save" }))
 
     const chip = () =>
@@ -599,10 +593,7 @@ describe("OneDataCollection - presets", () => {
     // Create a custom preset.
     await sortByName(user)
     await user.click(await screen.findByRole("button", { name: "Save view" }))
-    await user.type(
-      await screen.findByRole("textbox", { name: "Title" }),
-      "My view"
-    )
+    await user.type(await screen.findByLabelText("Title"), "My view")
     await user.click(screen.getByRole("button", { name: "Save" }))
     await waitFor(() =>
       expect(screen.getAllByText("My view").length).toBeGreaterThan(0)
@@ -623,7 +614,7 @@ describe("OneDataCollection - presets", () => {
     )
 
     // Dialog is prefilled; rename and save.
-    const titleInput = await screen.findByRole("textbox", { name: "Title" })
+    const titleInput = await screen.findByLabelText("Title")
     expect(titleInput).toHaveValue("My view")
     await user.clear(titleInput)
     await user.type(titleInput, "Renamed view")
@@ -644,10 +635,7 @@ describe("OneDataCollection - presets", () => {
     // Create a custom view (auto-selected) → dc_view is its title-derived id.
     await sortByName(user)
     await user.click(await screen.findByRole("button", { name: "Save view" }))
-    await user.type(
-      await screen.findByRole("textbox", { name: "Title" }),
-      "My view"
-    )
+    await user.type(await screen.findByLabelText("Title"), "My view")
     await user.click(screen.getByRole("button", { name: "Save" }))
     await waitFor(() =>
       expect(new URLSearchParams(window.location.search).get("dc_view")).toBe(
@@ -667,7 +655,7 @@ describe("OneDataCollection - presets", () => {
         (el) => !el.closest('[aria-hidden="true"]')
       )!
     )
-    const titleInput = await screen.findByRole("textbox", { name: "Title" })
+    const titleInput = await screen.findByLabelText("Title")
     await user.clear(titleInput)
     await user.type(titleInput, "Renamed view")
     await user.click(screen.getByRole("button", { name: "Save" }))
@@ -689,10 +677,7 @@ describe("OneDataCollection - presets", () => {
     // Create a custom preset.
     await sortByName(user)
     await user.click(await screen.findByRole("button", { name: "Save view" }))
-    await user.type(
-      await screen.findByRole("textbox", { name: "Title" }),
-      "Temp view"
-    )
+    await user.type(await screen.findByLabelText("Title"), "Temp view")
     await user.click(screen.getByRole("button", { name: "Save" }))
     await waitFor(() =>
       expect(screen.getAllByText("Temp view").length).toBeGreaterThan(0)
@@ -761,10 +746,7 @@ describe("OneDataCollection - presets", () => {
     // Create a custom preset with a multi-word title.
     await sortByName(user)
     await user.click(await screen.findByRole("button", { name: "Save view" }))
-    await user.type(
-      await screen.findByRole("textbox", { name: "Title" }),
-      "My cool view"
-    )
+    await user.type(await screen.findByLabelText("Title"), "My cool view")
     await user.click(screen.getByRole("button", { name: "Save" }))
 
     // Spaces in the title render as '+' in the URL (standard query encoding)...
@@ -838,10 +820,7 @@ describe("OneDataCollection - share preset", () => {
     // Create a custom preset to share.
     await sortByName(user)
     await user.click(await screen.findByRole("button", { name: "Save view" }))
-    await user.type(
-      await screen.findByRole("textbox", { name: "Title" }),
-      "Shared view"
-    )
+    await user.type(await screen.findByLabelText("Title"), "Shared view")
     await user.click(screen.getByRole("button", { name: "Save" }))
     await waitFor(() =>
       expect(screen.getAllByText("Shared view").length).toBeGreaterThan(0)
@@ -892,7 +871,7 @@ describe("OneDataCollection - share preset", () => {
     await waitFor(() => expect(screen.getByText("John")).toBeInTheDocument())
 
     // The create dialog opens prefilled with the shared title...
-    const titleInput = await screen.findByRole("textbox", { name: "Title" })
+    const titleInput = await screen.findByLabelText("Title")
     expect(titleInput).toHaveValue("Imported view")
 
     // ...and the shared link param is stripped so a reload won't reopen it.

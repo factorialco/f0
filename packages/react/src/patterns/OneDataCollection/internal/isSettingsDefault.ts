@@ -1,18 +1,23 @@
-import type { DataCollectionSettings } from "../Settings/SettingsProvider"
-
-import {
-  createInitialVisualizationSettings,
-  type VisualizationSettings,
-} from "../Settings/visualizationSettings"
+import { DataCollectionSettings } from "../Settings/SettingsProvider"
+import { collectionVisualizations } from "../visualizations/collection"
 
 /**
- * Builds the same default shape produced by the settings provider on first
- * mount. Used both as the reset target and as the baseline for dirty detection.
+ * Builds the default `DataCollectionSettings` from the visualization registry —
+ * the same shape produced by the settings provider on first mount. Used both as
+ * the reset target and as the baseline for dirty detection.
  */
 export const getDefaultDataCollectionSettings = (): DataCollectionSettings => {
-  return {
-    visualization: createInitialVisualizationSettings(),
+  const visualization = {} as Record<string, unknown>
+
+  for (const [key, viz] of Object.entries(collectionVisualizations)) {
+    if (viz.settings.default) {
+      visualization[key] = { ...viz.settings.default }
+    }
   }
+
+  return {
+    visualization,
+  } as DataCollectionSettings
 }
 
 /**
@@ -23,17 +28,15 @@ export const isVisualizationSettingsDefault = (
   settings: DataCollectionSettings,
   visualizationType: string | undefined
 ): boolean => {
-  const defaultSettings = createInitialVisualizationSettings()
-  if (!visualizationType || !(visualizationType in defaultSettings)) {
+  if (!visualizationType || !(visualizationType in collectionVisualizations)) {
     return true
   }
 
-  const key = visualizationType as keyof VisualizationSettings
+  const key = visualizationType as keyof typeof collectionVisualizations
   const currentSettings = settings.visualization[key]
+  const defaultSettings = collectionVisualizations[key]?.settings.default
 
-  return (
-    JSON.stringify(currentSettings) === JSON.stringify(defaultSettings[key])
-  )
+  return JSON.stringify(currentSettings) === JSON.stringify(defaultSettings)
 }
 
 /**

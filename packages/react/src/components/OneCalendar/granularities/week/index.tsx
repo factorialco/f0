@@ -1,10 +1,16 @@
 import {
   addDays,
   addMonths,
+  endOfISOWeek,
+  endOfWeek,
   formatDate,
+  isSameISOWeek,
+  isSameWeek,
   isSameMonth,
   isSameYear,
   parse,
+  startOfISOWeek,
+  startOfWeek,
   startOfMonth,
 } from "date-fns"
 
@@ -24,12 +30,32 @@ import {
 } from "../../utils"
 import { rangeSeparator } from "../consts"
 import { DateStringFormat, GranularityDefinition } from "../types"
-import { getEndOfWeek, getIsSameWeek, getStartOfWeek } from "./weekUtils"
 import { WeekView } from "./WeekView"
 
-export { getEndOfWeek, getIsSameWeek, getStartOfWeek } from "./weekUtils"
-
 const WEEK_FORMAT = "'W'I yyyy"
+
+// Helper functions that use ISO week functions when weekStartsOn === WeekStartDay.Monday, otherwise use configurable versions
+export const getStartOfWeek = (date: Date, weekStartsOn: WeekStartsOn) => {
+  return weekStartsOn === WeekStartDay.Monday
+    ? startOfISOWeek(date)
+    : startOfWeek(date, { weekStartsOn })
+}
+
+export const getEndOfWeek = (date: Date, weekStartsOn: WeekStartsOn) => {
+  return weekStartsOn === WeekStartDay.Monday
+    ? endOfISOWeek(date)
+    : endOfWeek(date, { weekStartsOn })
+}
+
+export const getIsSameWeek = (
+  dateLeft: Date,
+  dateRight: Date,
+  weekStartsOn: WeekStartsOn
+) => {
+  return weekStartsOn === WeekStartDay.Monday
+    ? isSameISOWeek(dateLeft, dateRight)
+    : isSameWeek(dateLeft, dateRight, { weekStartsOn })
+}
 
 export function toWeekGranularityDateRange<
   T extends Date | DateRange | undefined | null,

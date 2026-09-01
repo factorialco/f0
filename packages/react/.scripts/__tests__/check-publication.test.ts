@@ -13,6 +13,8 @@ import {
   validateBuildArtifacts,
   validateExportTargets,
   validatePackageManifest,
+  validatePublishedFiles,
+  validatePublishedStyleAssets,
   validatePreservedEsm,
 } from "../check-publication"
 
@@ -88,6 +90,21 @@ describe("published package contract", () => {
     ])
   })
 
+  it("requires extension-complete icon barrel imports", () => {
+    const root = mkdtempSync(join(tmpdir(), "f0-publication-"))
+    temporaryDirectories.push(root)
+    mkdirSync(resolve(root, "icons/app"), { recursive: true })
+    writeFileSync(
+      resolve(root, "icons/app/index.js"),
+      'export { default as Add } from "./Add"'
+    )
+    writeFileSync(resolve(root, "icons/app/Add.js"), "export default 1")
+
+    expect(validatePreservedEsm(root, {})).toEqual([
+      "Missing preserved ESM import: icons/app/index.js -> ./Add",
+    ])
+  })
+
   it("reports undeclared packages imported by preserved ESM", () => {
     const root = mkdtempSync(join(tmpdir(), "f0-publication-"))
     temporaryDirectories.push(root)
@@ -114,5 +131,38 @@ describe("published package contract", () => {
         "Missing build artifact: dist/esm/components/F0Button/F0Button.js",
       ])
     )
+  })
+
+  it("rejects internal build machinery and duplicate source fonts", () => {
+    const root = mkdtempSync(join(tmpdir(), "f0-publication-"))
+    temporaryDirectories.push(root)
+    mkdirSync(resolve(root, "assets/fonts"), { recursive: true })
+    mkdirSync(resolve(root, "dist/components/__stories__"), { recursive: true })
+    writeFileSync(resolve(root, "postcss.config.js"), "export default {}")
+    writeFileSync(resolve(root, "assets/fonts/Inter.woff2"), "font")
+    writeFileSync(
+      resolve(root, "dist/components/__stories__/Example.stories.d.ts"),
+      "export {}"
+    )
+
+    expect(validatePublishedFiles(root)).toEqual([
+      "Internal build file is published: postcss.config.js",
+      "Non-production declaration is published: dist/components/__stories__/Example.stories.d.ts",
+      "Source font is duplicated in the package: assets/fonts/Inter.woff2",
+    ])
+  })
+
+  it("reports stylesheet references missing from the package", () => {
+    const root = mkdtempSync(join(tmpdir(), "f0-publication-"))
+    temporaryDirectories.push(root)
+    mkdirSync(resolve(root, "dist"), { recursive: true })
+    writeFileSync(
+      resolve(root, "dist/styles.css"),
+      '@font-face { src: url("fonts/missing.woff2") }'
+    )
+
+    expect(validatePublishedStyleAssets(root)).toEqual([
+      "Published styles reference missing or unpackable asset: fonts/missing.woff2",
+    ])
   })
 })

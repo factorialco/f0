@@ -1,7 +1,7 @@
 import react from "@vitejs/plugin-react"
 import { consola } from "consola"
 import dotenv from "dotenv"
-import { spawnSync } from "node:child_process"
+import { execFileSync } from "node:child_process"
 import { copyFileSync, existsSync } from "node:fs"
 import path, { resolve } from "path"
 import { defineConfig, esmExternalRequirePlugin, Plugin } from "vite"
@@ -37,8 +37,8 @@ const buildTailwind = process.argv.find((arg) => arg.startsWith("--tailwind"))
 if (buildTailwind) {
   extraPlugins.push({
     name: "build-tailwind",
-    async closeBundle() {
-      spawnSync("pnpm", ["build:tailwind"], {
+    closeBundle() {
+      execFileSync("pnpm", ["build:tailwind"], {
         stdio: "inherit",
       })
     },
@@ -81,7 +81,15 @@ if (process.env.BUILD_TYPES) {
   extraPlugins.push(
     dts({
       include: ["src"],
-      exclude: ["**/*.stories.tsx"],
+      tsconfigPath: resolve(import.meta.dirname, "tsconfig-build.json"),
+      exclude: [
+        "**/__mocks__/**",
+        "**/__stories__/**",
+        "**/__tests__/**",
+        "**/*.spec.*",
+        "**/*.stories.*",
+        "**/*.test.*",
+      ],
       entryRoot: resolve(import.meta.dirname, "src"),
       declarationOnly: buildDeclarationsOnly,
       afterDiagnostic: (diagnostics) => {

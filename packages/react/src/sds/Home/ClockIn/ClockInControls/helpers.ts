@@ -1,9 +1,18 @@
-import type { ClockInControlsProps } from "./index"
+import { CLOCK_IN_COLORS } from "../ClockInGraph"
+import { ClockInControlsProps } from "./index"
 
-import { CLOCK_IN_COLORS } from "../ClockInGraph/model"
-import { getNormalizedRemainingMinutes } from "../utils"
+// to prevent having an overtime greater that the total time that we're showing
+export const getNormalizedRemainingMinutes = (
+  trackedMinutes: ClockInControlsProps["trackedMinutes"],
+  remainingMinutes: ClockInControlsProps["remainingMinutes"]
+) => {
+  const res =
+    (remainingMinutes ?? 0) < -1 * (trackedMinutes ?? 0)
+      ? -1 * trackedMinutes
+      : remainingMinutes
 
-export { getNormalizedRemainingMinutes } from "../utils"
+  return res ?? 0
+}
 
 export const getInfo = ({
   data = [],

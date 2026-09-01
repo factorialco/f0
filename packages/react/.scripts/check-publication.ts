@@ -1,8 +1,7 @@
-#!/usr/bin/env tsx
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs"
 import { dirname, relative, resolve } from "node:path"
-import { fileURLToPath } from "node:url"
 import { isDeepStrictEqual } from "node:util"
+import valueParser from "postcss-value-parser"
 import ts from "typescript"
 
 import {
@@ -154,6 +153,84 @@ export function validateBuildArtifacts(packageRoot: string): string[] {
   )
 }
 
+export function validatePublishedFiles(packageRoot: string): string[] {
+  const internalFiles = [
+    "postcss.config.js",
+    "publish-font-assets.mjs",
+    "tailwind.config.ts",
+  ]
+  const sourceFonts = walkFiles(resolve(packageRoot, "assets/fonts")).filter(
+    (filePath) => /\.woff2?$/.test(filePath)
+  )
+  const nonProductionDeclarations = walkFiles(
+    resolve(packageRoot, "dist")
+  ).filter((filePath) =>
+    /(?:\/__(?:mocks|stories|tests)__\/|\.(?:spec|stories|test)\.d\.ts$)/.test(
+      filePath
+    )
+  )
+
+  return [
+    ...internalFiles.flatMap((filePath) =>
+      existsSync(resolve(packageRoot, filePath))
+        ? [`Internal build file is published: ${filePath}`]
+        : []
+    ),
+    ...nonProductionDeclarations.map(
+      (filePath) =>
+        `Non-production declaration is published: ${relative(
+          packageRoot,
+          filePath
+        )}`
+    ),
+    ...sourceFonts.map(
+      (filePath) =>
+        `Source font is duplicated in the package: ${relative(
+          packageRoot,
+          filePath
+        )}`
+    ),
+  ]
+}
+
+export function validatePublishedStyleAssets(packageRoot: string): string[] {
+  const stylesheetPath = resolve(packageRoot, "dist/styles.css")
+  if (!existsSync(stylesheetPath)) return []
+
+  const invalidReferences = new Set<string>()
+  valueParser(readFileSync(stylesheetPath, "utf8")).walk((node) => {
+    if (node.type !== "function" || node.value !== "url") return
+    if (node.nodes.length !== 1) return
+    const reference = node.nodes[0]
+    if (reference.type !== "string" && reference.type !== "word") return
+    if (
+      reference.value.includes(":") ||
+      reference.value.startsWith("#") ||
+      reference.value.startsWith("/")
+    ) {
+      return
+    }
+
+    const assetPath = resolve(
+      dirname(stylesheetPath),
+      reference.value.split(/[?#]/, 1)[0]
+    )
+    const packageRelativePath = relative(packageRoot, assetPath)
+    if (
+      packageRelativePath.startsWith("..") ||
+      !existsSync(assetPath) ||
+      !statSync(assetPath).isFile()
+    ) {
+      invalidReferences.add(reference.value)
+    }
+  })
+
+  return [...invalidReferences].map(
+    (reference) =>
+      `Published styles reference missing or unpackable asset: ${reference}`
+  )
+}
+
 export function validatePackageManifest(manifest: PackageManifest): string[] {
   const errors: string[] = []
 
@@ -188,17 +265,18 @@ export function validatePreservedEsm(
   packageRoot: string,
   manifest: PackageManifest
 ): string[] {
-  const esmRoot = resolve(packageRoot, "dist/esm")
   const declaredPackages = new Set([
     ...Object.keys(manifest.dependencies ?? {}),
     ...Object.keys(manifest.peerDependencies ?? {}),
     ...Object.keys(manifest.optionalDependencies ?? {}),
   ])
   const errors: string[] = []
+  const runtimeFiles = [
+    ...walkFiles(resolve(packageRoot, "dist/esm")),
+    ...walkFiles(resolve(packageRoot, "icons")),
+  ]
 
-  for (const filePath of walkFiles(esmRoot).filter((path) =>
-    path.endsWith(".js")
-  )) {
+  for (const filePath of runtimeFiles.filter((path) => path.endsWith(".js"))) {
     for (const specifier of runtimeSpecifiers(filePath)) {
       if (specifier.startsWith(".")) {
         const target = resolve(dirname(filePath), specifier)
@@ -243,22 +321,8 @@ export function validatePublication(packageRoot: string): string[] {
     ...validatePackageManifest(manifest),
     ...validateExportTargets(packageRoot, manifest.exports ?? {}),
     ...validateBuildArtifacts(packageRoot),
+    ...validatePublishedFiles(packageRoot),
+    ...validatePublishedStyleAssets(packageRoot),
     ...validatePreservedEsm(packageRoot, manifest),
   ]
-}
-
-function main(): void {
-  const packageRoot = resolve(import.meta.dirname, "..")
-  const errors = validatePublication(packageRoot)
-  if (errors.length > 0) {
-    throw new Error(`Publication contract failed:\n${errors.join("\n")}`)
-  }
-  process.stdout.write("Publication contract passed\n")
-}
-
-if (
-  process.argv[1] &&
-  resolve(process.argv[1]) === fileURLToPath(import.meta.url)
-) {
-  main()
 }

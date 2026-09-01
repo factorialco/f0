@@ -1,12 +1,26 @@
 {
   "name": "@factorialco/f0-core",
   "version": "2.2.0",
+  "description": "Core tokens and utilities for F0 Design System",
+  "keywords": [
+    "design-system",
+    "factorial",
+    "tokens"
+  ],
+  "license": "MIT",
+  "author": "Factorial",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/factorialco/f0.git",
     "directory": "packages/core"
   },
-  "description": "Core tokens and utilities for F0 Design System",
+  "files": [
+    "assets",
+    "base.css",
+    "dist",
+    "src",
+    "tailwind.ts"
+  ],
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -25,35 +39,20 @@
     "./assets/icons/app/*": "./assets/icons/app/*",
     "./assets/icons/app": "./assets/icons/app/index.ts"
   },
-  "files": [
-    "src",
-    "dist",
-    "assets",
-    "base.css",
-    "tailwind.ts"
-  ],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
     "lint": "eslint . --ext .ts,.tsx"
   },
-  "keywords": [
-    "factorial",
-    "design-system",
-    "tokens"
-  ],
-  "author": "Factorial",
-  "license": "MIT",
+  "devDependencies": {
+    "prettier": "^3.5.2",
+    "tsup": "^8.5.1",
+    "typescript": "npm:@typescript/typescript6@6.0.2"
+  },
   "peerDependencies": {
     "@tailwindcss/container-queries": "^0.1.1",
     "tailwindcss": "^3.4.3",
     "tailwindcss-animate": "^1.0.7",
     "typescript": ">=5.7.2 <8"
-  },
-  "devDependencies": {
-    "prettier": "^3.5.2",
-    "tsup": "^8.5.1",
-    "@typescript/native": "npm:typescript@7.0.2",
-    "typescript": "npm:@typescript/typescript6@6.0.2"
   }
 }

@@ -1,6 +1,5 @@
-import type { F0SelectInternal as F0SelectComponent } from "@/components/F0Select/F0Select"
-
 import { F0Button } from "@/components/F0Button"
+import { F0Select } from "@/components/F0Select"
 import {
   GroupingDefinition,
   GroupingState,
@@ -14,7 +13,6 @@ type GroupingSelectorProps<
   R extends RecordType,
   Grouping extends GroupingDefinition<R>,
 > = {
-  SelectComponent: typeof F0SelectComponent
   grouping?: Grouping
   currentGrouping?: GroupingState<R, Grouping>
   onGroupingChange?: (groupingState: GroupingState<R, Grouping>) => void
@@ -27,7 +25,6 @@ export const GroupingSelector = <
   R extends RecordType,
   Grouping extends GroupingDefinition<R>,
 >({
-  SelectComponent,
   grouping,
   currentGrouping,
   onGroupingChange,
@@ -69,7 +66,7 @@ export const GroupingSelector = <
     <div className="flex flex-col">
       <div className="flex items-end gap-2">
         <div className="shrink grow [&_button]:h-8 [&_button]:rounded">
-          <SelectComponent
+          <F0Select
             label={i18n.collections.grouping.groupBy}
             options={groupingOptions}
             hideLabel={hideLabel}

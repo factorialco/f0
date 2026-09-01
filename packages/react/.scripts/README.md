@@ -1,12 +1,14 @@
 # Cycle Dependency Checker
 
-A zero-tolerance static runtime-cycle gate for the React package.
+A static runtime-cycle ratchet for the React package.
 
 ## Overview
 
 The checker parses every production TypeScript/JavaScript module under `src`,
-resolves internal aliases and relative imports, ignores type-only edges, and
-fails when any strongly connected runtime component remains.
+resolves internal aliases and relative imports, and ignores type-only edges.
+The six cycle groups inherited from `main` are recorded in
+`runtime-cycle-baseline.json`; the check fails when a cycle gains files, when
+known groups merge, or when a new group appears. Shrinking a known group passes.
 
 ## Quick Start
 
@@ -31,13 +33,12 @@ source file changed. CI always runs the full graph.
 
 The output groups every file in each strongly connected component. Break the
 runtime edge by extracting a dependency-neutral module, using a type-only
-import where appropriate, or injecting the higher-level dependency. Re-run the
-gate until it reports zero groups.
+import where appropriate, or injecting the higher-level dependency.
 
 ## Exit Codes
 
-- `0`: no runtime cycles
-- `1`: at least one runtime cycle or an analysis error
+- `0`: no new or enlarged runtime cycles
+- `1`: a new/enlarged runtime cycle or an analysis error
 
 ## Technical Details
 

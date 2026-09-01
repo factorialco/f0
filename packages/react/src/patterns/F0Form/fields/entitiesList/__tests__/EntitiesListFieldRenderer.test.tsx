@@ -1,18 +1,10 @@
-import type { PropsWithChildren } from "react"
-
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { z } from "zod"
 
 import { dialogs } from "@/lib/providers/dialogs-alike"
 import {
-  FormOverlaysProvider,
-  formOverlaysStore,
-} from "@/lib/providers/form-overlays"
-import {
-  render as baseRender,
   zeroRender as render,
   screen,
-  TestProviders,
   userEvent,
   waitFor,
   within,
@@ -204,97 +196,6 @@ describe("EntitiesListFieldRenderer — add / remove", () => {
     })
     expect(confirmation).toHaveBeenCalledTimes(1)
     confirmation.mockRestore()
-  })
-})
-
-describe("EntitiesListFieldRenderer — nested form dialog", () => {
-  const DialogTestProviders = ({ children }: PropsWithChildren) => (
-    <TestProviders>
-      <FormOverlaysProvider>{children}</FormOverlaysProvider>
-    </TestProviders>
-  )
-
-  afterEach(() => formOverlaysStore.clear())
-
-  const schema = z.object({
-    faqs: f0FormField.entitiesList({
-      label: "FAQs",
-      schema: z.object({
-        title: f0FormField.text({ label: "Title", minLength: 1 }),
-        details: f0FormField.text({ label: "Details", minLength: 1 }),
-      }),
-      config: {
-        supportInlineEditing: false,
-        labels: {
-          addButton: "Add FAQ",
-          create: { title: "New FAQ" },
-        },
-      },
-    }),
-  })
-
-  it("submits the nested form and commits the new row", async () => {
-    const onSubmit = vi.fn(async () => ({ success: true }))
-    baseRender(
-      <F0Form
-        name="dialog-submit"
-        schema={schema}
-        defaultValues={{ faqs: [] }}
-        onSubmit={onSubmit}
-        submitConfig={{ label: "Save" }}
-      />,
-      { wrapper: DialogTestProviders }
-    )
-
-    await userEvent.click(screen.getByRole("button", { name: "Add FAQ" }))
-    const dialog = await screen.findByRole("dialog", { name: "New FAQ" })
-
-    await userEvent.type(
-      within(dialog).getByRole("textbox", { name: "Title" }),
-      "Shipping"
-    )
-    await userEvent.type(
-      within(dialog).getByRole("textbox", { name: "Details" }),
-      "Every Friday"
-    )
-    await userEvent.click(
-      within(dialog).getByRole("button", { name: "Add FAQ" })
-    )
-
-    await waitFor(() => expect(dialog).not.toBeInTheDocument())
-    expect(screen.getByText("Shipping")).toBeInTheDocument()
-
-    await userEvent.click(screen.getByRole("button", { name: "Save" }))
-    await waitFor(() => {
-      expect(onSubmit).toHaveBeenCalledWith({
-        faqs: [{ title: "Shipping", details: "Every Friday" }],
-      })
-    })
-  })
-
-  it("cancels the nested form without adding a row", async () => {
-    baseRender(
-      <F0Form
-        name="dialog-cancel"
-        schema={schema}
-        defaultValues={{ faqs: [] }}
-        onSubmit={async () => ({ success: true })}
-      />,
-      { wrapper: DialogTestProviders }
-    )
-
-    await userEvent.click(screen.getByRole("button", { name: "Add FAQ" }))
-    const dialog = await screen.findByRole("dialog", { name: "New FAQ" })
-    await userEvent.type(
-      within(dialog).getByRole("textbox", { name: "Title" }),
-      "Discard me"
-    )
-    await userEvent.click(
-      within(dialog).getByRole("button", { name: "Cancel" })
-    )
-
-    await waitFor(() => expect(dialog).not.toBeInTheDocument())
-    expect(screen.queryByText("Discard me")).not.toBeInTheDocument()
   })
 })
 

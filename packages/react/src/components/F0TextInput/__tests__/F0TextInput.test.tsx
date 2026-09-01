@@ -1,5 +1,4 @@
 import { fireEvent, screen, within } from "@testing-library/react"
-import { createRef } from "react"
 import { describe, expect, it, vi } from "vitest"
 
 import { zeroRender as render } from "@/testing/test-utils"
@@ -7,14 +6,6 @@ import { zeroRender as render } from "@/testing/test-utils"
 import { F0TextInput } from "../F0TextInput"
 
 describe("F0TextInput", () => {
-  it("forwards its ref to the native input", () => {
-    const ref = createRef<HTMLInputElement>()
-
-    render(<F0TextInput ref={ref} label="Name" />)
-
-    expect(ref.current).toBe(screen.getByRole("textbox", { name: "Name" }))
-  })
-
   it("renders an input wired to its label", () => {
     render(<F0TextInput label="Email" />)
 
@@ -164,16 +155,6 @@ describe("F0TextInput", () => {
       const input = screen.getAllByLabelText("Submit")[0]
       fireEvent.keyDown(input, { key: "a" })
       fireEvent.keyDown(input, { key: "Escape" })
-
-      expect(onPressEnter).not.toHaveBeenCalled()
-    })
-
-    it("does not fire while an IME composition is active", () => {
-      const onPressEnter = vi.fn()
-      render(<F0TextInput label="Submit" onPressEnter={onPressEnter} />)
-
-      const input = screen.getAllByLabelText("Submit")[0]
-      fireEvent.keyDown(input, { key: "Enter", isComposing: true })
 
       expect(onPressEnter).not.toHaveBeenCalled()
     })

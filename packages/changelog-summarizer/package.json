@@ -2,8 +2,8 @@
   "name": "@factorialco/f0-changelog-summarizer",
   "version": "0.1.0",
   "private": true,
-  "type": "module",
   "description": "CLI tool to generate AI-powered weekly summaries of F0 changelog entries and commits",
+  "type": "module",
   "scripts": {
     "start": "tsx src/index.ts",
     "typecheck": "tsc --noEmit"
@@ -18,7 +18,6 @@
   },
   "devDependencies": {
     "@types/node": "^24.13.3",
-    "@typescript/native": "npm:typescript@7.0.2",
     "tsx": "^4.19.2",
     "typescript": "npm:@typescript/typescript6@6.0.2"
   }

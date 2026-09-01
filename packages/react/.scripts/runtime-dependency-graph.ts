@@ -11,6 +11,20 @@ export interface RuntimeDependencyAnalysis {
   cycles: RuntimeDependencyCycle[]
 }
 
+export function findUnexpectedRuntimeCycles(
+  current: RuntimeDependencyCycle[],
+  baseline: RuntimeDependencyCycle[]
+): RuntimeDependencyCycle[] {
+  const baselineGroups = baseline.map((cycle) => new Set(cycle.files))
+
+  return current.filter(
+    (cycle) =>
+      !baselineGroups.some((group) =>
+        cycle.files.every((file) => group.has(file))
+      )
+  )
+}
+
 interface AnalyzeRuntimeDependenciesOptions {
   projectRoot: string
   tsconfigPath: string

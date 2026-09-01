@@ -1,14 +1,39 @@
 import React, { createContext, useContext, useState } from "react"
 
-import {
-  createInitialVisualizationSettings,
-  type VisualizationSettings,
-} from "./visualizationSettings"
+import { collectionVisualizations } from "../visualizations/collection/collectionViewRegistry"
 
-export type { VisualizationSettings } from "./visualizationSettings"
+// Utility type to extract settings from visualization definitions
+type ExtractVisualizationSettings<T> = T extends {
+  settings: {
+    default: infer S
+  }
+}
+  ? S
+  : never
+
+// Dynamic type that extracts settings from all visualizations
+type VisualizationSettings = {
+  [K in keyof typeof collectionVisualizations]: ExtractVisualizationSettings<
+    (typeof collectionVisualizations)[K]
+  >
+}
 
 export type DataCollectionSettings = {
+  // Dynamically generated from visualization definitions
   visualization: VisualizationSettings
+}
+
+// Helper function to generate initial settings from visualization registry
+const generateInitialVisualizationSettings = (): VisualizationSettings => {
+  const settings = {} as Record<string, unknown>
+
+  for (const [key, visualization] of Object.entries(collectionVisualizations)) {
+    if (visualization.settings.default) {
+      settings[key] = { ...visualization.settings.default }
+    }
+  }
+
+  return settings as VisualizationSettings
 }
 
 export interface DataCollectionSettingsContextType {
@@ -28,13 +53,20 @@ const DataCollectionSettingsContext =
   createContext<DataCollectionSettingsContextType>({
     setSettings: () => {},
     settings: {
-      visualization: createInitialVisualizationSettings(),
+      // To avoid circular dependency initializating the settings (the value is provided in the provider)
+      visualization: {} as VisualizationSettings,
     },
     setVisualizationSettings: () => {},
   })
 
 export const useDataCollectionSettings = () => {
-  return useContext(DataCollectionSettingsContext)
+  const context = useContext(DataCollectionSettingsContext)
+  if (!context) {
+    throw new Error(
+      "useTableSettings must be used within a TableSettingsProvider"
+    )
+  }
+  return context
 }
 
 export const DataCollectionSettingsProvider = ({
@@ -43,7 +75,7 @@ export const DataCollectionSettingsProvider = ({
   children: React.ReactNode
 }) => {
   const [settings, setSettings] = useState<DataCollectionSettings>({
-    visualization: createInitialVisualizationSettings(),
+    visualization: generateInitialVisualizationSettings(),
   })
 
   const setVisualizationSettings = (

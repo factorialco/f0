@@ -10,6 +10,13 @@ import type { GraphVisualizationOptions } from "../types"
 import { useDataCollectionSettings } from "../../../../Settings/SettingsProvider"
 import { SortAndHideSettings } from "../../../../Settings/SortAndHideSettings"
 
+export type GraphVisualizationSettings = {
+  /** Metadata order (tag-type ids), matching the table column settings shape. */
+  order?: string[]
+  /** Hidden metadata (tag-type ids). */
+  hidden?: string[]
+}
+
 type GraphSettingsProps = {
   tagTypes: ReadonlyArray<F0GraphNodeTagColumn>
   labels?: Partial<Record<F0GraphNodeTagColumn, string>>

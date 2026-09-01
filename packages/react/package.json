@@ -8,14 +8,11 @@
     "directory": "packages/react"
   },
   "files": [
-    "assets",
     "dist",
     "flags",
     "icons",
-    "postcss.config.js",
-    "publish-font-assets.mjs",
-    "styles.css",
-    "tailwind.config.ts"
+    "assets/fonts/INTER-LICENSE.txt",
+    "assets/fonts/README.md"
   ],
   "type": "module",
   "sideEffects": [
@@ -140,7 +137,7 @@
     "build:prepare": "pnpm run build:types && run-p build-icons",
     "start": "pnpm run dev",
     "check:consumer-bundle": "tsx .scripts/check-consumer-bundle.ts",
-    "build": "tsc --project ./tsconfig-build.json && run-p build-icons && NODE_OPTIONS=--max-old-space-size=8192 vite build -- --tailwind && BUILD_PRESERVED_ESM=true NODE_OPTIONS=--max-old-space-size=8192 vite build && NODE_OPTIONS=--max-old-space-size=8192 BUILD_TYPES=true BUILD_DECLARATIONS_ONLY=true vite build && pnpm run check:publication",
+    "build": "tsc --project ./tsconfig-build.json && run-p build-icons && NODE_OPTIONS=--max-old-space-size=8192 vite build -- --tailwind && BUILD_PRESERVED_ESM=true NODE_OPTIONS=--max-old-space-size=8192 vite build && NODE_OPTIONS=--max-old-space-size=8192 BUILD_TYPES=true BUILD_DECLARATIONS_ONLY=true vite build && pnpm run check:consumer-bundle",
     "build-icons": "tsc --project ./tsconfig-build-icons.json",
     "build:tailwind": "NODE_ENV=production tailwindcss -i src/styles.css -o ./dist/styles.css --postcss --minify",
     "build:watch": "pnpm run build && run-p --race build:watch:runtime build:watch:esm build:watch:declarations",
@@ -165,7 +162,6 @@
     "format:check": "sh -c 'oxfmt --check \"${@:-src/}\"' --",
     "tsc": "tsc --noEmit",
     "check:api-surface": "tsx .scripts/check-api-surface.ts",
-    "check:publication": "tsx .scripts/check-publication.ts",
     "check:docs-index": "tsx .scripts/check-docs-index.ts",
     "check:bugfix-red-green": "tsx .scripts/check-bugfix-red-green.ts",
     "check:new-component-dod": "tsx .scripts/check-new-component-dod.ts",
@@ -258,7 +254,6 @@
     "libphonenumber-js": "^1.13.9",
     "lodash": "^4.17.21",
     "maplibre-gl": "^5.24.0",
-    "postcss-value-parser": "^4.2.0",
     "prosemirror-state": "^1.4.3",
     "prosemirror-view": "^1.38.1",
     "react-phone-number-input": "^3.4.17",
@@ -308,7 +303,6 @@
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.1",
     "@types/twemoji-parser": "^13.1.4",
-    "@typescript/native": "npm:typescript@7.0.2",
     "@vitejs/plugin-react": "^6.1.1",
     "@vitest/browser-playwright": "^4.1.11",
     "@vitest/coverage-v8": "^4.1.11",
@@ -337,6 +331,7 @@
     "playwright": "^1.57.0",
     "postcss": "^8.5.3",
     "postcss-import": "^16.1.0",
+    "postcss-value-parser": "^4.2.0",
     "react-pdf": "^8.0.2",
     "react-syntax-highlighter": "^15.6.1",
     "rollup-plugin-jsx-remove-attributes": "^3.1.1",

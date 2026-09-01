@@ -18,13 +18,13 @@ import {
 import { ChevronLeft } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { useL10n } from "@/lib/providers/l10n"
-import { F0DialogContext } from "@/patterns/F0Dialog/components/F0DialogProvider"
+import { F0DialogContext } from "@/patterns/F0Dialog"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 
 import { getCompareToValue } from "./compareTo"
+import { createCalendarDismissalHandlers } from "./dismissal"
 import { GranularitySelector } from "./components/GranularitySelector"
 import { PresetList } from "./components/PresetList"
-import { createCalendarDismissalHandlers } from "./dismissal"
 import { DatePickerValue, DatePreset } from "./types"
 import { isSameDatePickerValue } from "./utils"
 

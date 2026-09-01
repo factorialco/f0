@@ -197,11 +197,9 @@ vi.mock("../components/LocationMap", () => ({
 }))
 
 let frameCallbacks: FrameRequestCallback[]
-let intersectionObserverIsVisible: boolean
 
 beforeEach(() => {
   frameCallbacks = []
-  intersectionObserverIsVisible = true
   vi.spyOn(globalThis, "requestAnimationFrame").mockImplementation(
     (callback: FrameRequestCallback) => {
       frameCallbacks.push(callback)
@@ -235,12 +233,7 @@ beforeEach(() => {
 
       observe = (target: Element) => {
         this.callback(
-          [
-            {
-              target,
-              isIntersecting: intersectionObserverIsVisible,
-            } as IntersectionObserverEntry,
-          ],
+          [{ target, isIntersecting: true } as IntersectionObserverEntry],
           this as unknown as IntersectionObserver
         )
       }
@@ -436,9 +429,7 @@ describe("chat scrolling performance wiring", () => {
     expect(virtuosoHarness.rootClassName).toContain("opacity-100")
   })
 
-  it("keeps heavy previews as placeholders before entering the viewport", () => {
-    intersectionObserverIsVisible = false
-
+  it("keeps heavy previews as placeholders before transcript readiness", () => {
     render(
       <F0ChatProvider
         runtime={makeRuntime([

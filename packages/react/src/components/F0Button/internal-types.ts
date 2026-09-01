@@ -1,3 +1,5 @@
+import type { DataAttributes } from "@/global.types"
+
 import { IconType } from "@/components/F0Icon"
 import { type EmojiRenderMode } from "@/lib/emojis"
 import {

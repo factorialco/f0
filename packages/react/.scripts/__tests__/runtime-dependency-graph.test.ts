@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it } from "vitest"
 
 import {
   analyzeRuntimeDependencies,
+  findUnexpectedRuntimeCycles,
   type RuntimeDependencyAnalysis,
 } from "../runtime-dependency-graph"
 
@@ -49,6 +50,36 @@ afterEach(() => {
 })
 
 describe("runtime dependency graph", () => {
+  it("allows known cycles to shrink but rejects new or merged cycle members", () => {
+    const baseline = [
+      { files: ["src/a.ts", "src/b.ts", "src/c.ts"] },
+      { files: ["src/d.ts", "src/e.ts"] },
+    ]
+
+    expect(
+      findUnexpectedRuntimeCycles(
+        [
+          { files: ["src/a.ts", "src/b.ts"] },
+          { files: ["src/d.ts", "src/e.ts"] },
+        ],
+        baseline
+      )
+    ).toEqual([])
+
+    expect(
+      findUnexpectedRuntimeCycles(
+        [
+          { files: ["src/a.ts", "src/b.ts", "src/new.ts"] },
+          { files: ["src/c.ts", "src/d.ts"] },
+        ],
+        baseline
+      )
+    ).toEqual([
+      { files: ["src/a.ts", "src/b.ts", "src/new.ts"] },
+      { files: ["src/c.ts", "src/d.ts"] },
+    ])
+  })
+
   it("reports static runtime cycles as canonical strongly connected groups", () => {
     const result = analyze({
       "src/a.ts": 'import { b } from "./b"\nexport const a = b + 1',

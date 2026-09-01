@@ -1,7 +1,8 @@
 #!/bin/bash
 # Generates barrel (index.ts) files for icon directories.
 # Scans for all .tsx files (excluding index.ts) and creates
-# `export { default as Name } from "./Name"` entries.
+# `export { default as Name } from "./Name.js"` entries so the emitted ESM is
+# directly loadable by Node and Workers without bundler-only extension lookup.
 #
 # Usage:
 #   ./scripts/generate-icon-barrels.sh src/icons/app src/icons/modules src/icons/ai src/flags/components
@@ -20,7 +21,7 @@ for dir in "$@"; do
   for file in "$dir"/*.tsx; do
     [[ -f "$file" ]] || continue
     name="$(basename "$file" .tsx)"
-    echo "export { default as $name } from \"./$name\"" >> "$tmp_file"
+    echo "export { default as $name } from \"./$name.js\"" >> "$tmp_file"
   done
 
   if [[ -s "$tmp_file" ]]; then

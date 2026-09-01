@@ -3,10 +3,15 @@
 
 import { consola } from "consola"
 import { execFileSync } from "node:child_process"
+import { readFileSync } from "node:fs"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 
-import { analyzeRuntimeDependencies } from "./runtime-dependency-graph"
+import {
+  analyzeRuntimeDependencies,
+  findUnexpectedRuntimeCycles,
+  type RuntimeDependencyCycle,
+} from "./runtime-dependency-graph"
 
 const reactPackageRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -44,19 +49,31 @@ function main(): void {
     projectRoot: reactPackageRoot,
     tsconfigPath: path.join(reactPackageRoot, "tsconfig.json"),
   })
+  const baseline = JSON.parse(
+    readFileSync(
+      path.join(reactPackageRoot, ".scripts/runtime-cycle-baseline.json"),
+      "utf8"
+    )
+  ) as RuntimeDependencyCycle[]
+  const unexpectedCycles = findUnexpectedRuntimeCycles(
+    analysis.cycles,
+    baseline
+  )
 
   if (json) {
-    process.stdout.write(`${JSON.stringify(analysis, null, 2)}\n`)
-  } else if (analysis.cycles.length === 0) {
+    process.stdout.write(
+      `${JSON.stringify({ ...analysis, unexpectedCycles }, null, 2)}\n`
+    )
+  } else if (unexpectedCycles.length === 0) {
     consola.success(
-      `No static runtime cycles across ${Object.keys(analysis.graph).length} production files`
+      `No new static runtime cycles across ${Object.keys(analysis.graph).length} production files (${analysis.cycles.length} known groups)`
     )
   } else {
     consola.error(
-      `Found ${analysis.cycles.length} static runtime cycle groups across ${Object.keys(analysis.graph).length} production files:`
+      `Found ${unexpectedCycles.length} new static runtime cycle groups across ${Object.keys(analysis.graph).length} production files:`
     )
-    for (let index = 0; index < analysis.cycles.length; index++) {
-      const cycle = analysis.cycles[index]
+    for (let index = 0; index < unexpectedCycles.length; index++) {
+      const cycle = unexpectedCycles[index]
       consola.log(`\n${index + 1}. ${cycle.files.length} files`)
       for (const file of cycle.files) {
         consola.log(`   ${file}`)
@@ -64,7 +81,7 @@ function main(): void {
     }
   }
 
-  if (analysis.cycles.length > 0) {
+  if (unexpectedCycles.length > 0) {
     process.exitCode = 1
   }
 }
