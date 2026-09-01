@@ -30,8 +30,7 @@ import { Action } from "@/ui/Action"
 import {
   entranceDelay,
   entranceTransition,
-  GENIE_GLYPH_ENTER_SCALE,
-  GENIE_GLYPH_EXIT_SCALE,
+  GENIE_GLYPH_SLIDE_PX,
   GENIE_GLYPH_TAP_SCALE,
   GENIE_ORIGIN,
   GENIE_RETRACTED_OFFSET_PX,
@@ -101,12 +100,6 @@ const COLLAPSED_RAIL_WIDTH = 40
  * `maxWidth.content` in `packages/react/tailwind.config.ts`.
  */
 const CONTENT_WIDTH = 712
-/**
- * The gap between the strip's glyphs — `gap-2` on the strip below, and the number
- * a stowing widget needs to know where its own glyph is. Keep the two in step.
- */
-const GLYPH_GAP_PX = 8
-
 /**
  * THE GLYPH'S SECOND — how long each face of a flashing glyph is up, and how long
  * a ticking readout's separator stays lit. One period, not two half-periods: a
@@ -329,20 +322,27 @@ const CollapsedGlyph = ({
   /**
    * The genie, identical whichever face the glyph wears.
    *
-   * EVERY SCALE HERE IS TRANSIENT — arriving, leaving, the press — and none of
-   * them is HELD. A held fractional scale is rasterized once and then stretched:
-   * the glyph's icon and a pill's figures go soft, and they stay soft for as long
-   * as you keep the pointer there, which is exactly when they are being read. The
-   * hover and open states say what they have to say with the panel they open, the
-   * tooltip, and the button's own hover border.
+   * THE ARRIVAL IS A SLIDE, NOT A SCALE. A glyph used to come in from 1.18 and
+   * leave at 1.3, which was the card's own retract read at glyph size — and that
+   * only meant anything while the cards were really shrinking onto them. They fade
+   * where they stand now (`WidgetMotion`), so the strip does the one thing left
+   * that says the two states are changing places rather than one replacing the
+   * other: it slides in off the column that is closing, and back out the same way.
+   *
+   * THE PRESS IS THE ONLY SCALE, and it is TRANSIENT. A held fractional scale is
+   * rasterized once and then stretched: the glyph's icon and a pill's figures go
+   * soft, and they stay soft for as long as you keep the pointer there, which is
+   * exactly when they are being read. The hover and open states say what they have
+   * to say with the panel they open, the tooltip, and the button's own hover
+   * border.
    */
   const glyphMotion = {
     initial: {
       opacity: 0,
-      scale: reducedMotion ? 1 : GENIE_GLYPH_ENTER_SCALE,
+      x: reducedMotion ? 0 : -GENIE_GLYPH_SLIDE_PX,
     },
-    animate: { opacity: 1, scale: 1 },
-    exit: { opacity: 0, scale: reducedMotion ? 1 : GENIE_GLYPH_EXIT_SCALE },
+    animate: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: reducedMotion ? 0 : -GENIE_GLYPH_SLIDE_PX },
     whileTap: reducedMotion ? undefined : { scale: GENIE_GLYPH_TAP_SCALE },
     transition: withReducedMotion(
       { ...glyphTransition, delay: entranceDelay(order, delayMs) },
@@ -366,9 +366,9 @@ const CollapsedGlyph = ({
     // to the widget's own controls — they are the next thing in the tab order.
     //
     // With a `text` the whole thing becomes a PILL: the reading, then the same
-    // button at the end of it. The pill keeps the strip's 40px HEIGHT — the one
-    // dimension the strip's rhythm and the cards' stow are built on — and takes
-    // the width it needs off the left, out over the feed.
+    // button at the end of it. The pill costs the strip NO ROOM it would not have
+    // spent on the plain glyph — 40px of the column's rhythm, and the width it
+    // needs taken off the left, out over the feed.
     //
     // The tooltip is `instant`: it is the only place the action's NAME is
     // written, and the glyph is a control you point at on your way past. The
@@ -385,14 +385,23 @@ const CollapsedGlyph = ({
             // `group` so the BUTTON can answer this whole box's hover — see its
             // border below.
             "group pointer-events-auto relative shrink-0",
-            // The pill is the GLYPH'S OWN geometry, grown sideways: the 40px
-            // height every glyph has, the button unchanged inside it, and
-            // `rounded-lg` — one step up from the button's `rounded-md`, which is
-            // what the radius scale says a container holding an `lg` control
-            // takes. Nothing here is a shape the strip doesn't already use.
+            // The pill is the GLYPH'S OWN geometry, grown sideways: the button
+            // unchanged inside it, a `p-1` band around it, and `rounded-lg` — one
+            // step up from the button's `rounded-md`, which is what the radius
+            // scale says a container holding an `lg` control takes. Nothing here
+            // is a shape the strip doesn't already use.
+            //
+            // `-my-1 -mr-1` IS WHAT KEEPS IT A GLYPH. That band is drawing, not
+            // layout: paid for in flow it made the pill a 48px item in a column of
+            // 40px ones, and since the reading is DROPPED while the widget floats
+            // (`text` above), pointing at the pill shrank it back to 40 and shunted
+            // every glyph under it up by 8px — the strip rearranging itself under
+            // the pointer that was aiming at it. Taken back out of the flow at each
+            // edge the band overhangs, the pill occupies exactly the glyph's slot
+            // whether it is carrying a reading or not, and nothing below it moves.
             text
               ? cn(
-                  "-mr-1 flex flex-row items-center gap-1 rounded-lg p-1",
+                  "-mr-1 -my-1 flex flex-row items-center gap-1 rounded-lg p-1",
                   tone.pill
                 )
               : "rounded-lg"
@@ -1227,6 +1236,15 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             // 4px (padding puts the glyphs back) so the dot stays inside it.
             // The bleed is where the fade starts, too, so it opens on the gap
             // above the first glyph rather than on the glyph itself.
+            //
+            // `-ml-3 pl-3` is the same trick at the width the GLYPHS' OWN ARRIVAL
+            // needs: they come in from `GENIE_GLYPH_SLIDE_PX` to the left, and a
+            // scrollport is not a scrollport on one axis only — `overflow-y-auto`
+            // makes the x axis `auto` too, and overflow to the LEFT of a box is
+            // the one direction that can never be scrolled to. At 4px the slide's
+            // first frames were clipped in half. The box grows leftward over the
+            // feed to make the room, which costs nothing: it takes no pointer
+            // events (below) and paints nothing of its own.
             <motion.aside
               key="collapsed-strip"
               ref={stripFade.ref}
@@ -1244,7 +1262,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
                 // pill's width it would otherwise be a dead margin down the side
                 // of the feed, eating clicks meant for the cards under it. Each
                 // glyph turns them back on for its own 40px (`pointer-events-auto`).
-                "-m-1 flex min-h-0 flex-col items-end gap-2 overflow-y-auto p-1",
+                "-m-1 -ml-3 flex min-h-0 flex-col items-end gap-2 overflow-y-auto p-1 pl-3",
                 // ABOVE THE PANEL (`z-10`): a glyph is what the floating card
                 // came out of, so it stays in front of it — and a pill overhangs
                 // far enough to be half-covered otherwise.
@@ -1378,16 +1396,13 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
               // cards were `display: none` before they had moved a pixel, and the
               // retract animated an empty box while they simply blinked out. The
               // panel's one-widget filter belongs to the panel; while the rail is
-              // still retracting the column is still a column, and its cards have a
-              // journey to make (`stow`).
+              // still retracting the column is still a column, and its cards have
+              // a fade to finish (`stow`).
               visibleWidgetId={railInPanel ? panelWidgetId : undefined}
-              // The strip they are going into: glyphs a fixed pitch apart, and how
-              // small a card has to get to be one of them.
-              stow={{
-                stowed: collapsed,
-                pitch: COLLAPSED_RAIL_WIDTH + GLYPH_GAP_PX,
-                scale: COLLAPSED_RAIL_WIDTH / asideWidth,
-              }}
+              // Whether the strip owns them yet. Nothing about the strip's
+              // geometry comes with it: the cards fade where they stand, so
+              // there is nothing for them to be mapped onto.
+              stow={{ stowed: collapsed }}
               slotRenderers={slotRenderers}
               renderWidget={renderWidget}
               ctx={ctx}
@@ -1436,6 +1451,39 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             </WidgetContainer>
           </motion.aside>
         )}
+        {/* THE BRIDGE. The panel stands `PANEL_GAP_PX` clear of the strip it came
+            out of, and that clearance was UNHOVERABLE GROUND: crossing it slowly
+            on the way from a glyph to its own widget took longer than
+            `PANEL_LEAVE_MS`, so the panel closed in front of the pointer that was
+            on its way into it. A leave delay cannot fix that — whatever the delay
+            is, it is a race against how fast the reader happens to be moving, and
+            the reader who loses is the one moving carefully.
+
+            So the gap stops being a gap: this covers it, and the strip's column
+            below it, with the panel's own hover handlers. It is the pointer's
+            floor from the glyph to the widget and back.
+
+            UNDER THE STRIP (`z-10`, against its `z-20`): the glyphs keep their own
+            hover and their own clicks — switching widgets from the strip has to go
+            on working while a panel is open, and it is a bridge, not a lid. It is
+            drawn only while there is something to reach, so nothing about a rail
+            with no panel open changes. */}
+        {railInPanel && openWidget ? (
+          <div
+            aria-hidden
+            className="absolute z-10"
+            style={{
+              // Level with the panel's top and down to the foot of the column:
+              // everything beside the widget, and nothing above it.
+              top: panelTop,
+              bottom: 0,
+              right: 0,
+              width: COLLAPSED_RAIL_WIDTH + PANEL_GAP_PX,
+            }}
+            onMouseEnter={cancelLeave}
+            onMouseLeave={scheduleLeave}
+          />
+        ) : null}
       </motion.div>
     )
   }
