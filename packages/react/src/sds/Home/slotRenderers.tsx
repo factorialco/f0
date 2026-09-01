@@ -899,6 +899,20 @@ export const SLOT_ROW_BLEED = "-m-2"
 export const slotRowBleed = (ctx: HomeRenderCtx) =>
   cn(SLOT_ROW_BLEED, "mt-0", !ctx.isLastSlot && "mb-0")
 
+/**
+ * WHERE "View more" SITS. Not where the rows above it start: a row-based slot
+ * bleeds 8px past the card's content box (`SLOT_ROW_BLEED`), and a button left
+ * in that bleed hangs its whole filled rectangle 8px to the left of the
+ * widget's TITLE — visible as a rectangle that overhangs the card's text.
+ *
+ * It sits exactly where the frame's own footer button sits instead, because it
+ * is the same button one slot higher (`SlotWidget`'s footer class): 8px back to
+ * the content box, then 2px out again — the nudge that makes a filled or
+ * bordered box read as aligned with the text above it rather than measuring
+ * 2px shy of it.
+ */
+export const LIST_MORE_BUTTON_CLASS = "ml-1.5 mt-1 self-start"
+
 /** The gap between rows of the `event-list` slot. */
 export const EVENT_LIST_GAP = "gap-2"
 
@@ -1074,7 +1088,7 @@ function ListSlot({ params, ctx }: { params: ListParams; ctx: HomeRenderCtx }) {
         })}
       </HomeSlotItems>
       {overflows ? (
-        <div className="mt-1 self-start">
+        <div className={LIST_MORE_BUTTON_CLASS}>
           {/* `neutral`, the same button a widget's own call to action is (the
               frame's `action`): "View more" is something you press, and a ghost
               button under a dense list of rows reads as another row. Past the
@@ -1241,7 +1255,7 @@ const ListSlotSkeleton = ({
         </div>
       ))}
       {overflows ? (
-        <div className="mt-1 self-start">
+        <div className={LIST_MORE_BUTTON_CLASS}>
           {/* An `sm` neutral button — what "View more (n)" will be. */}
           <Skeleton className="h-6 w-24 rounded-sm" />
         </div>

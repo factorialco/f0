@@ -31,6 +31,8 @@ const render = (props = {}) =>
     <F0CommunityPostsCarousel posts={POSTS} labels={LABELS} {...props} />
   )
 
+const slides = () => screen.getAllByRole("group")
+
 describe("F0CommunityPostsCarousel", () => {
   test("draws a tile per post: its title, its body, its author and its counters", () => {
     render()
@@ -249,6 +251,62 @@ describe("F0CommunityPostsCarousel", () => {
       })
 
       expect(screen.getByRole("button", { name: "More posts" })).toBeDisabled()
+    })
+
+    // The drag itself lives in the `LoadsMoreOnDrag` story: jsdom has no layout,
+    // so embla never wires its drag handler up here.
+    test("a page the reader is waiting on gets tiles to land on", async () => {
+      const onLoadMore = vi.fn()
+      const { rerender } = render({
+        pagination: { hasMore: true, isLoading: false, onLoadMore },
+        expectedItemsCount: 2,
+      })
+
+      await userEvent.click(screen.getByRole("button", { name: "More posts" }))
+      rerender(
+        <F0CommunityPostsCarousel
+          posts={POSTS}
+          labels={LABELS}
+          expectedItemsCount={2}
+          pagination={{ hasMore: true, isLoading: true, onLoadMore }}
+        />
+      )
+
+      expect(screen.getByText("Yusuf Adeyemi")).toBeInTheDocument()
+      expect(slides()).toHaveLength(POSTS.length + 2)
+    })
+
+    test("the placeholders give their places up when the posts arrive", async () => {
+      const onLoadMore = vi.fn()
+      const arrived = [
+        ...POSTS,
+        { ...POSTS[0], id: "third", title: "A third post" },
+      ]
+      const { rerender } = render({
+        pagination: { hasMore: true, isLoading: false, onLoadMore },
+        expectedItemsCount: 2,
+      })
+
+      await userEvent.click(screen.getByRole("button", { name: "More posts" }))
+      rerender(
+        <F0CommunityPostsCarousel
+          posts={POSTS}
+          labels={LABELS}
+          expectedItemsCount={2}
+          pagination={{ hasMore: true, isLoading: true, onLoadMore }}
+        />
+      )
+      rerender(
+        <F0CommunityPostsCarousel
+          posts={arrived}
+          labels={LABELS}
+          expectedItemsCount={2}
+          pagination={{ hasMore: true, isLoading: false, onLoadMore }}
+        />
+      )
+
+      expect(screen.getByText("A third post")).toBeInTheDocument()
+      expect(slides()).toHaveLength(arrived.length)
     })
 
     test("only the pages fetched are in the DOM", () => {
