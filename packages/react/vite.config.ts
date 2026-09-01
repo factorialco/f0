@@ -4,13 +4,16 @@ import dotenv from "dotenv"
 import { spawnSync } from "node:child_process"
 import { copyFileSync, existsSync } from "node:fs"
 import path, { resolve } from "path"
-import { defineConfig, Plugin } from "vite"
+import { defineConfig, esmExternalRequirePlugin, Plugin } from "vite"
 import dts from "vite-plugin-dts"
 import { libInjectCss } from "vite-plugin-lib-inject-css"
 
 import { componentStatusVitePlugin } from "./scripts/component-status-build.mjs"
 import { buildSyncPlugin } from "./vite/build-sync.plugin.ts"
-import { createReactExternalizationPlugins } from "./vite/react-externalization.ts"
+import {
+  declarationEntries,
+  runtimeEntries,
+} from "./vite/publication-contract.ts"
 
 dotenv.config({
   path: [".env.local", ".env"],
@@ -18,7 +21,7 @@ dotenv.config({
 const extraPlugins: Plugin[] = []
 const buildDeclarationsOnly = process.env.BUILD_DECLARATIONS_ONLY === "true"
 const buildPreservedEsm = process.env.BUILD_PRESERVED_ESM === "true"
-const buildWatch = process.env.BUILD_WATCH === "true"
+const buildWatch = process.argv.some((arg) => arg === "--watch" || arg === "-w")
 
 const isBareRuntimeImport = (id: string) =>
   !id.startsWith(".") &&
@@ -103,50 +106,16 @@ const alias = {
   "~": path.resolve(import.meta.dirname, "./"),
 }
 
-const declarationEntries = {
-  f0: resolve(import.meta.dirname, "src/f0.ts"),
-  experimental: resolve(import.meta.dirname, "src/experimental.ts"),
-  ai: resolve(import.meta.dirname, "src/ai.ts"),
-  "component-status": resolve(import.meta.dirname, "src/component-status.ts"),
-  "i18n-provider-defaults": resolve(
-    import.meta.dirname,
-    "src/lib/providers/i18n/i18n-provider-defaults.ts"
-  ),
-}
-
-const isolatedRuntimeEntries = {
-  F0Alert: resolve(import.meta.dirname, "src/components/F0Alert/index.ts"),
-  F0Button: resolve(import.meta.dirname, "src/components/F0Button/index.ts"),
-  F0Box: resolve(import.meta.dirname, "src/lib/F0Box/index.tsx"),
-  F0Card: resolve(import.meta.dirname, "src/components/F0Card/index.tsx"),
-  F0DatePicker: resolve(
-    import.meta.dirname,
-    "src/components/F0DatePicker/index.ts"
-  ),
-  F0Text: resolve(import.meta.dirname, "src/components/F0Text/index.tsx"),
-  F0Heading: resolve(import.meta.dirname, "src/components/F0Heading/index.tsx"),
-  F0NumberInput: resolve(
-    import.meta.dirname,
-    "src/components/F0NumberInput/index.tsx"
-  ),
-  F0Select: resolve(import.meta.dirname, "src/components/F0Select/index.tsx"),
-  F0TextInput: resolve(
-    import.meta.dirname,
-    "src/components/F0TextInput/index.tsx"
-  ),
-  F0Dialog: resolve(import.meta.dirname, "src/patterns/F0Dialog/index.tsx"),
-  F0Form: resolve(import.meta.dirname, "src/patterns/F0Form/index.tsx"),
-  OneDataCollection: resolve(
-    import.meta.dirname,
-    "src/patterns/OneDataCollection/exports.ts"
-  ),
-  F0AiChat: resolve(import.meta.dirname, "src/kits/ai/F0AiChat/index.ts"),
-}
-
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    ...createReactExternalizationPlugins(),
+    ...(process.env.STORYBOOK_BUILD === "true"
+      ? []
+      : [
+          esmExternalRequirePlugin({
+            external: ["react/jsx-runtime", "react", "react-dom"],
+          }),
+        ]),
     react(),
     libInjectCss(),
     componentStatusVitePlugin(),
@@ -164,9 +133,7 @@ export default defineConfig({
   build: {
     emptyOutDir: !buildDeclarationsOnly && !buildWatch,
     lib: {
-      entry: buildDeclarationsOnly
-        ? declarationEntries
-        : { ...declarationEntries, ...isolatedRuntimeEntries },
+      entry: buildDeclarationsOnly ? declarationEntries : runtimeEntries,
       fileName: (_, entryName) => {
         return `${entryName}.js`
       },

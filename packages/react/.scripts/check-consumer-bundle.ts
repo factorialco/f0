@@ -2,6 +2,7 @@
 import { build as buildWithEsbuild } from "esbuild"
 import { spawnSync } from "node:child_process"
 import {
+  cpSync,
   existsSync,
   mkdtempSync,
   mkdirSync,
@@ -14,38 +15,46 @@ import {
 } from "node:fs"
 import path, { dirname, relative, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
-import { brotliCompressSync, constants, gzipSync } from "node:zlib"
+import { brotliCompressSync, constants } from "node:zlib"
 import valueParser from "postcss-value-parser"
 import { build } from "vite"
 
 import {
-  compareBundleReport,
-  normalizeChunkName,
-  type AssetMetric,
-  type BundleReport,
-  type BundleVariantReport,
-} from "./consumer-bundle-baseline"
+  validateBundleCeiling,
+  validateLazyBoundary,
+  validateRootSubpathParity,
+  type BundleCeiling,
+  type BundleMetric,
+  type OwnedInputMetric,
+} from "./consumer-bundle-contract"
 
 const PACKAGE_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "..")
-const BASELINE_PATH = resolve(
-  PACKAGE_DIR,
-  ".scripts/consumer-bundle-baseline.json"
-)
 
-const VARIANTS: Record<string, string> = {
-  native: `
+interface ConsumerScenario {
+  source: string
+  forbiddenModules?: readonly string[]
+  lazyDependencies?: readonly string[]
+}
+
+const COMMON_FORBIDDEN_MODULES = [
+  "node_modules/docx-preview/",
+  "node_modules/maplibre-gl/",
+  "node_modules/pdfjs-dist/",
+  "node_modules/xlsx/",
+  "/F0AiChat/",
+  "/F0CanvasPanel/",
+] as const
+
+const SCENARIOS: Record<string, ConsumerScenario> = {
+  native: {
+    source: `
 export default function App() {
   return <button type="button">Save</button>
 }
 `,
-  f0Button: `
-import { F0Button } from "@factorialco/f0-react"
-
-export default function App() {
-  return <F0Button label="Save" />
-}
-`,
-  f0ButtonWithGlobalStyles: `
+  },
+  f0Button: {
+    source: `
 import { F0Button } from "@factorialco/f0-react"
 import "@factorialco/f0-react/dist/styles.css"
 
@@ -53,76 +62,97 @@ export default function App() {
   return <F0Button label="Save" />
 }
 `,
-  f0Box: retainRootExport("F0Box"),
-  f0Text: retainRootExport("F0Text"),
-  f0Dialog: retainRootExport("F0Dialog"),
-  f0Select: retainRootExport("F0Select"),
-  f0Form: retainRootExport("F0Form"),
-  oneDataCollection: retainExport(
-    "OneDataCollection",
-    "@factorialco/f0-react/dist/experimental"
-  ),
-  f0AiChat: retainRootExport("F0AiChat"),
-  f0PdfViewer: retainRootExport("F0PdfViewer"),
+    forbiddenModules: COMMON_FORBIDDEN_MODULES,
+  },
+  f0Form: {
+    source: retainRootExport("F0Form"),
+    forbiddenModules: COMMON_FORBIDDEN_MODULES,
+  },
+  oneDataCollection: {
+    source: retainExport(
+      "OneDataCollection",
+      "@factorialco/f0-react/dist/experimental"
+    ),
+    forbiddenModules: COMMON_FORBIDDEN_MODULES,
+  },
+  f0AiChat: {
+    source: retainRootExport("F0AiChat"),
+    forbiddenModules: [
+      "node_modules/docx-preview/",
+      "node_modules/maplibre-gl/",
+      "node_modules/pdfjs-dist/",
+      "/F0CanvasPanel/",
+      "/F0PdfViewer/",
+    ],
+  },
+  f0PdfViewer: {
+    source: retainRootExport("F0PdfViewer"),
+    forbiddenModules: [
+      "node_modules/maplibre-gl/",
+      "/F0AiChat/",
+      "/F0CanvasPanel/",
+    ],
+    lazyDependencies: ["node_modules/xlsx/", "node_modules/docx-preview/"],
+  },
 }
 
-const CLOUDFLARE_PROBES = {
+const BUNDLE_CEILINGS: Record<string, BundleCeiling> = {
   f0Button: {
-    maxBytes: 700_000,
-    source: `
-import React from "react"
-import { createRoot } from "react-dom/client"
-import { F0Button } from "@factorialco/f0-react/F0Button"
-
-function App() {
-  return <F0Button label="Save" onClick={() => undefined} />
+    maxInitialJsBrotli: 176 * 1024,
+    maxRetainedF0Modules: 35,
+    maxCssBrotli: 48 * 1024,
+  },
+  f0Form: {
+    maxInitialJsBrotli: 1_344 * 1024,
+    maxRetainedF0Modules: 1_050,
+  },
+  oneDataCollection: {
+    maxInitialJsBrotli: 1_024 * 1024,
+    maxRetainedF0Modules: 50,
+  },
+  f0AiChat: {
+    maxInitialJsBrotli: 176 * 1024,
+    maxRetainedF0Modules: 50,
+  },
+  f0PdfViewer: {
+    maxInitialJsBrotli: 1_296 * 1024,
+    maxRetainedF0Modules: 550,
+  },
 }
 
-createRoot(document.createElement("div")).render(<App />)
-`,
-  },
-  f0ButtonFromRoot: {
-    maxBytes: 700_000,
-    source: `
+function browserButtonSource(moduleSpecifier: string): string {
+  return `
 import React from "react"
 import { createRoot } from "react-dom/client"
-import { F0Button } from "@factorialco/f0-react"
+import { F0Button } from "${moduleSpecifier}"
 
-function App() {
-  return <F0Button label="Save" onClick={() => undefined} />
+createRoot(document.createElement("div")).render(
+  <F0Button label="Save" onClick={() => undefined} />
+)
+`
 }
 
-createRoot(document.createElement("div")).render(<App />)
-`,
-  },
-  f0DialogWithButton: {
-    // F0Dialog's public resourceHeader feature currently retains the complete
-    // F0Avatar flag map. Keep that real boundary visible while preventing the
-    // root barrel and unrelated document/map/AI features from returning.
-    maxBytes: 4_200_000,
-    source: `
-import React from "react"
-import { createRoot } from "react-dom/client"
-import { F0Button } from "@factorialco/f0-react/F0Button"
-import { F0Dialog } from "@factorialco/f0-react/F0Dialog"
-
-function App() {
-  return (
-    <F0Dialog isOpen title="Confirm action" onClose={() => undefined}>
-      <F0Button label="Continue" onClick={() => undefined} />
-    </F0Dialog>
-  )
-}
-
-createRoot(document.createElement("div")).render(<App />)
-`,
-  },
+const BROWSER_PROBES = {
+  subpath: browserButtonSource("@factorialco/f0-react/F0Button"),
+  root: browserButtonSource("@factorialco/f0-react"),
 } as const
 
-interface CloudflareProbeMetric {
+interface BrowserProbeMetric {
   bytes: number
   inputCount: number
-  retainedInputPaths: string[]
+  f0Inputs: OwnedInputMetric[]
+}
+
+interface EmittedOutput {
+  type: string
+  fileName: string
+}
+
+interface EmittedChunk extends EmittedOutput {
+  type: "chunk"
+  isEntry: boolean
+  imports: string[]
+  modules: Record<string, unknown>
 }
 
 function retainRootExport(exportName: string): string {
@@ -142,10 +172,7 @@ export default function App() {
 }
 
 function run(command: string, args: string[], cwd: string): void {
-  const result = spawnSync(command, args, {
-    cwd,
-    encoding: "utf8",
-  })
+  const result = spawnSync(command, args, { cwd, encoding: "utf8" })
   if (result.status !== 0) {
     throw new Error(
       [
@@ -166,87 +193,63 @@ function walkFiles(directory: string): string[] {
   })
 }
 
-function assetMetric(files: string[]): AssetMetric {
-  return files.reduce<AssetMetric>(
-    (total, filePath) => {
-      const contents = readFileSync(filePath)
-      return {
-        raw: total.raw + contents.length,
-        gzip: total.gzip + gzipSync(contents, { level: 9 }).length,
-        brotli:
-          total.brotli +
-          brotliCompressSync(contents, {
-            params: {
-              [constants.BROTLI_PARAM_QUALITY]: 11,
-            },
-          }).length,
-      }
-    },
-    { raw: 0, gzip: 0, brotli: 0 }
-  )
-}
-
-function retainedF0Modules(
-  sourceMapFiles: string[],
-  extractedPackageDir: string
-): string[] {
-  const packageDistRoots = [
-    resolve(extractedPackageDir, "dist") + path.sep,
-    resolve(PACKAGE_DIR, "dist") + path.sep,
-  ]
-  const modules = new Set<string>()
-
-  for (const sourceMapFile of sourceMapFiles) {
-    const sourceMap = JSON.parse(readFileSync(sourceMapFile, "utf8")) as {
-      sources?: string[]
+function linkConsumerDependencies(consumerNodeModules: string): void {
+  const packageNodeModules = resolve(PACKAGE_DIR, "node_modules")
+  mkdirSync(consumerNodeModules, { recursive: true })
+  for (const entry of readdirSync(packageNodeModules)) {
+    if (entry.startsWith(".")) continue
+    const source = resolve(packageNodeModules, entry)
+    const destination = resolve(consumerNodeModules, entry)
+    if (entry !== "@factorialco") {
+      symlinkSync(source, destination, "dir")
+      continue
     }
-    for (const source of sourceMap.sources ?? []) {
-      const sourcePath = resolve(dirname(sourceMapFile), source)
-      if (
-        packageDistRoots.some((root) => sourcePath.startsWith(root)) &&
-        sourcePath.endsWith(".js")
-      ) {
-        const packageDistRoot = packageDistRoots.find((root) =>
-          sourcePath.startsWith(root)
-        )!
-        const distPath = relative(packageDistRoot, sourcePath)
-        if (distPath.startsWith(`esm${path.sep}`)) {
-          const [area, feature] = distPath
-            .slice(`esm${path.sep}`.length)
-            .split(path.sep)
-          modules.add(feature ? `${area}/${feature}` : area)
-        } else {
-          modules.add(normalizeChunkName(path.basename(sourcePath)))
-        }
-      }
+    mkdirSync(destination)
+    for (const scopedEntry of readdirSync(source)) {
+      if (scopedEntry === "f0-react") continue
+      symlinkSync(
+        resolve(source, scopedEntry),
+        resolve(destination, scopedEntry),
+        "dir"
+      )
     }
   }
+}
 
-  return [...modules].sort()
+function brotliBytes(files: string[]): number {
+  return files.reduce(
+    (total, filePath) =>
+      total +
+      brotliCompressSync(readFileSync(filePath), {
+        params: { [constants.BROTLI_PARAM_QUALITY]: 11 },
+      }).length,
+    0
+  )
 }
 
 function validatePublishedStyleAssets(extractedPackageDir: string): void {
   const stylesheetPath = resolve(extractedPackageDir, "dist/styles.css")
   const css = readFileSync(stylesheetPath, "utf8")
   const invalidReferences = new Set<string>()
-  const parsedCss = valueParser(css)
-  parsedCss.walk((node) => {
+  valueParser(css).walk((node) => {
     if (node.type !== "function" || node.value !== "url") return
     if (node.nodes.length !== 1) return
     const reference = node.nodes[0]
     if (reference.type !== "string" && reference.type !== "word") return
-    if (reference.value.includes(":")) return
-    if (reference.value.startsWith("#")) return
-    if (reference.value.startsWith("/")) return
+    if (
+      reference.value.includes(":") ||
+      reference.value.startsWith("#") ||
+      reference.value.startsWith("/")
+    ) {
+      return
+    }
 
     const assetReference = reference.value.split(/[?#]/, 1)[0]
     const assetPath = resolve(dirname(stylesheetPath), assetReference)
     const packageRelativePath = relative(extractedPackageDir, assetPath)
-    const escapesPackage =
-      packageRelativePath.startsWith("..") ||
-      path.isAbsolute(packageRelativePath)
     if (
-      escapesPackage ||
+      packageRelativePath.startsWith("..") ||
+      path.isAbsolute(packageRelativePath) ||
       !existsSync(assetPath) ||
       !statSync(assetPath).isFile()
     ) {
@@ -263,19 +266,32 @@ function validatePublishedStyleAssets(extractedPackageDir: string): void {
   }
 }
 
-async function buildCloudflareProbes(
-  tempDir: string,
-  extractedPackageDir: string
-): Promise<Record<string, CloudflareProbeMetric>> {
-  const consumerDir = resolve(tempDir, "cloudflare-consumer")
-  const packageScopeDir = resolve(consumerDir, "node_modules/@factorialco")
-  mkdirSync(packageScopeDir, { recursive: true })
-  symlinkSync(extractedPackageDir, resolve(packageScopeDir, "f0-react"), "dir")
+function ownedF0InputPath(
+  inputPath: string,
+  consumerDir: string,
+  installedPackageDir: string
+): string | null {
+  const absoluteInputPath = resolve(consumerDir, inputPath)
+  const distRoot = resolve(installedPackageDir, "dist")
+  if (absoluteInputPath.startsWith(`${distRoot}${path.sep}`)) {
+    return `dist/${relative(distRoot, absoluteInputPath)
+      .split(path.sep)
+      .join("/")}`
+  }
+  return null
+}
 
-  const metrics: Record<string, CloudflareProbeMetric> = {}
-  for (const [probeName, probe] of Object.entries(CLOUDFLARE_PROBES)) {
+async function buildBrowserProbes(
+  consumerRoot: string,
+  installedPackageDir: string
+): Promise<Record<string, BrowserProbeMetric>> {
+  const consumerDir = resolve(consumerRoot, "browser")
+  mkdirSync(consumerDir, { recursive: true })
+
+  const metrics: Record<string, BrowserProbeMetric> = {}
+  for (const [probeName, source] of Object.entries(BROWSER_PROBES)) {
     const entryPath = resolve(consumerDir, `${probeName}.tsx`)
-    writeFileSync(entryPath, probe.source.trimStart())
+    writeFileSync(entryPath, source.trimStart())
     const result = await buildWithEsbuild({
       absWorkingDir: consumerDir,
       bundle: true,
@@ -292,26 +308,23 @@ async function buildCloudflareProbes(
     })
     const output = result.outputFiles.find((file) => file.path.endsWith(".js"))
     if (!output)
-      throw new Error(`Cloudflare probe emitted no output: ${probeName}`)
-    const source = output.text
-    const forbiddenRuntimePatterns = [
+      throw new Error(`Browser probe emitted no output: ${probeName}`)
+    for (const pattern of [
       "Dynamic require of",
       '__require("react")',
       "__require('react')",
       'require("react")',
       "require('react')",
-    ]
-    const runtimeFailure = forbiddenRuntimePatterns.find((pattern) =>
-      source.includes(pattern)
-    )
-    if (runtimeFailure) {
-      throw new Error(
-        `Cloudflare probe ${probeName} retained browser-unsafe React loading: ${runtimeFailure}`
-      )
+    ]) {
+      if (output.text.includes(pattern)) {
+        throw new Error(
+          `Browser probe ${probeName} retained unsafe React loading: ${pattern}`
+        )
+      }
     }
-    if (output.contents.length > probe.maxBytes) {
+    if (output.contents.length > 700_000) {
       throw new Error(
-        `Cloudflare probe ${probeName} is ${output.contents.length} bytes; budget is ${probe.maxBytes}`
+        `Browser probe ${probeName} is ${output.contents.length} B; ceiling is 700000 B`
       )
     }
 
@@ -319,69 +332,71 @@ async function buildCloudflareProbes(
       ([outputPath]) => outputPath.endsWith(".js")
     )?.[1]
     if (!javascriptOutput) {
-      throw new Error(
-        `Cloudflare probe emitted no JavaScript metadata: ${probeName}`
-      )
+      throw new Error(`Browser probe emitted no metadata: ${probeName}`)
     }
-    const retainedInputPaths = Object.entries(javascriptOutput.inputs)
-      .filter(([, input]) => input.bytesInOutput > 0)
-      .map(([inputPath]) => inputPath)
-    const forbiddenDependency = retainedInputPaths.find((inputPath) =>
-      /(?:pdfjs-dist|xlsx|maplibre-gl|F0AiChat|F0CanvasPanel)/.test(inputPath)
+    const retainedInputs = Object.entries(javascriptOutput.inputs).filter(
+      ([, input]) => input.bytesInOutput > 0
     )
+    const forbiddenDependency = retainedInputs.find(([inputPath]) =>
+      COMMON_FORBIDDEN_MODULES.some((pattern) => inputPath.includes(pattern))
+    )?.[0]
     if (forbiddenDependency) {
       throw new Error(
-        `Cloudflare probe ${probeName} retained unrelated dependency: ${forbiddenDependency}`
+        `Browser probe ${probeName} retained unrelated dependency: ${forbiddenDependency}`
       )
     }
 
     metrics[probeName] = {
       bytes: output.contents.length,
-      inputCount: retainedInputPaths.length,
-      retainedInputPaths,
+      inputCount: retainedInputs.length,
+      f0Inputs: retainedInputs.flatMap(([inputPath, input]) => {
+        const ownedPath = ownedF0InputPath(
+          inputPath,
+          consumerDir,
+          installedPackageDir
+        )
+        return ownedPath
+          ? [{ path: ownedPath, bytes: input.bytesInOutput }]
+          : []
+      }),
+    }
+    if (metrics[probeName].f0Inputs.length === 0) {
+      throw new Error(
+        `Browser probe ${probeName} retained no packed F0 inputs. Candidates:\n${retainedInputs
+          .map(([inputPath]) => inputPath)
+          .filter((inputPath) => inputPath.includes("dist/esm"))
+          .slice(0, 10)
+          .join("\n")}`
+      )
     }
   }
 
-  const subpathButton = metrics.f0Button
-  const rootButton = metrics.f0ButtonFromRoot
-  if (
-    rootButton.bytes > subpathButton.bytes * 1.05 ||
-    rootButton.inputCount > subpathButton.inputCount * 1.1
-  ) {
-    const subpathInputs = new Set(subpathButton.retainedInputPaths)
-    const rootOnlyInputs = rootButton.retainedInputPaths.filter(
-      (inputPath) => !subpathInputs.has(inputPath)
-    )
-    throw new Error(
-      [
-        "Root F0Button import is not equivalent to the component subpath:",
-        `root=${rootButton.bytes} bytes/${rootButton.inputCount} inputs`,
-        `subpath=${subpathButton.bytes} bytes/${subpathButton.inputCount} inputs`,
-        `root-only inputs:\n${rootOnlyInputs.join("\n")}`,
-      ].join(" ")
-    )
+  const parityErrors = validateRootSubpathParity(
+    metrics.root.f0Inputs,
+    metrics.subpath.f0Inputs,
+    { maxAdditionalBytes: 16 * 1024, maxAdditionalModules: 5 }
+  )
+  if (parityErrors.length > 0) {
+    throw new Error(`Root/subpath parity failed:\n${parityErrors.join("\n")}`)
   }
 
   return metrics
 }
 
-async function buildVariant(
-  tempDir: string,
-  extractedPackageDir: string,
-  variantName: string,
-  appSource: string
-): Promise<BundleVariantReport> {
-  const consumerDir = resolve(tempDir, `consumer-${variantName}`)
+async function buildScenario(
+  consumerRoot: string,
+  installedPackageDir: string,
+  scenarioName: string,
+  scenario: ConsumerScenario
+): Promise<BundleMetric> {
+  const consumerDir = resolve(consumerRoot, `scenario-${scenarioName}`)
   const srcDir = resolve(consumerDir, "src")
-  const packageScopeDir = resolve(consumerDir, "node_modules/@factorialco")
   mkdirSync(srcDir, { recursive: true })
-  mkdirSync(packageScopeDir, { recursive: true })
-  symlinkSync(extractedPackageDir, resolve(packageScopeDir, "f0-react"), "dir")
   writeFileSync(
     resolve(consumerDir, "index.html"),
     '<div id="root"></div><script type="module" src="/src/main.tsx"></script>\n'
   )
-  writeFileSync(resolve(srcDir, "App.tsx"), appSource.trimStart())
+  writeFileSync(resolve(srcDir, "App.tsx"), scenario.source.trimStart())
   writeFileSync(
     resolve(srcDir, "main.tsx"),
     `import { StrictMode } from "react"
@@ -400,14 +415,8 @@ createRoot(document.getElementById("root")!).render(
     root: consumerDir,
     configFile: false,
     logLevel: "silent",
-    build: {
-      emptyOutDir: true,
-      outDir: "dist",
-      sourcemap: true,
-    },
+    build: { emptyOutDir: true, outDir: "dist" },
   })) as { output: EmittedOutput[] } | Array<{ output: EmittedOutput[] }>
-
-  const outputFiles = walkFiles(resolve(consumerDir, "dist"))
   const emittedOutputs = Array.isArray(buildResult)
     ? buildResult.flatMap((result) => result.output)
     : buildResult.output
@@ -426,37 +435,71 @@ createRoot(document.getElementById("root")!).render(
     pendingChunkNames.push(...(chunksByName.get(chunkName)?.imports ?? []))
   }
 
-  return {
-    assets: {
-      js: assetMetric(outputFiles.filter((file) => file.endsWith(".js"))),
-      initialJs: assetMetric(
-        [...initialChunkNames].map((fileName) =>
-          resolve(consumerDir, "dist", fileName)
-        )
-      ),
-      css: assetMetric(outputFiles.filter((file) => file.endsWith(".css"))),
-    },
-    retainedF0Modules: retainedF0Modules(
-      outputFiles.filter((file) => file.endsWith(".js.map")),
-      extractedPackageDir
+  const initialModules = [
+    ...new Set(
+      [...initialChunkNames].flatMap((chunkName) =>
+        Object.keys(chunksByName.get(chunkName)?.modules ?? {})
+      )
     ),
+  ]
+  const allModules = [
+    ...new Set(chunks.flatMap((chunk) => Object.keys(chunk.modules))),
+  ]
+  const forbiddenModule = allModules.find((moduleId) =>
+    scenario.forbiddenModules?.some((pattern) => moduleId.includes(pattern))
+  )
+  if (forbiddenModule) {
+    throw new Error(
+      `${scenarioName} retained forbidden dependency: ${forbiddenModule}`
+    )
   }
-}
+  if (scenario.lazyDependencies) {
+    const lazyErrors = validateLazyBoundary(
+      scenarioName,
+      initialModules,
+      allModules,
+      [...scenario.lazyDependencies]
+    )
+    if (lazyErrors.length > 0) throw new Error(lazyErrors.join("\n"))
+  }
 
-interface EmittedOutput {
-  type: string
-  fileName: string
-}
+  const outputFiles = walkFiles(resolve(consumerDir, "dist"))
+  const metric: BundleMetric = {
+    totalJsBrotli: brotliBytes(
+      outputFiles.filter((file) => file.endsWith(".js"))
+    ),
+    initialJsBrotli: brotliBytes(
+      [...initialChunkNames].map((fileName) =>
+        resolve(consumerDir, "dist", fileName)
+      )
+    ),
+    cssBrotli: brotliBytes(outputFiles.filter((file) => file.endsWith(".css"))),
+    retainedF0Modules: new Set(
+      allModules.filter((moduleId) =>
+        moduleId.startsWith(
+          `${resolve(installedPackageDir, "dist")}${path.sep}`
+        )
+      )
+    ).size,
+  }
+  if (scenarioName !== "native" && metric.retainedF0Modules === 0) {
+    throw new Error(
+      `${scenarioName} retained no modules from the packed package`
+    )
+  }
+  if (
+    scenario.lazyDependencies &&
+    metric.totalJsBrotli <= metric.initialJsBrotli
+  ) {
+    throw new Error(`${scenarioName} emitted no asynchronous JavaScript`)
+  }
 
-interface EmittedChunk extends EmittedOutput {
-  type: "chunk"
-  isEntry: boolean
-  imports: string[]
+  return metric
 }
 
 async function measureBundle(): Promise<{
-  cloudflareProbes: Record<string, CloudflareProbeMetric>
-  report: BundleReport
+  browserProbes: Record<string, BrowserProbeMetric>
+  scenarios: Record<string, BundleMetric>
 }> {
   if (!existsSync(resolve(PACKAGE_DIR, "dist/f0.js"))) {
     throw new Error(
@@ -464,7 +507,10 @@ async function measureBundle(): Promise<{
     )
   }
 
-  const cacheDir = resolve(PACKAGE_DIR, ".cache")
+  // Keep consumers outside the @factorialco/f0-react package scope. Otherwise
+  // Node's package self-reference resolves imports back to the workspace copy
+  // instead of the extracted tarball installed below.
+  const cacheDir = resolve(PACKAGE_DIR, "../../node_modules/.cache")
   mkdirSync(cacheDir, { recursive: true })
   const tempDir = mkdtempSync(resolve(cacheDir, "consumer-bundle-"))
   try {
@@ -479,32 +525,29 @@ async function measureBundle(): Promise<{
     run("tar", ["-xzf", tarball, "-C", tempDir], PACKAGE_DIR)
     const extractedPackageDir = resolve(tempDir, "package")
     validatePublishedStyleAssets(extractedPackageDir)
-    const cloudflareProbes = await buildCloudflareProbes(
-      tempDir,
-      extractedPackageDir
+    const consumerRoot = resolve(tempDir, "consumer")
+    const installedPackageDir = resolve(
+      consumerRoot,
+      "node_modules/@factorialco/f0-react"
     )
-    const requestedVariant = process.argv
-      .find((argument) => argument.startsWith("--variant="))
-      ?.slice("--variant=".length)
-    if (requestedVariant && !VARIANTS[requestedVariant]) {
-      throw new Error(`Unknown consumer bundle variant: ${requestedVariant}`)
-    }
-    const variantsToBuild = requestedVariant
-      ? { [requestedVariant]: VARIANTS[requestedVariant] }
-      : VARIANTS
-    const variants: BundleReport["variants"] = {}
-    // Vite 8 uses Rolldown's in-process compiler. Running multiple builds in
-    // parallel can cross-contaminate their chunk graphs, so production bundle
-    // evidence must be collected sequentially.
-    for (const [variantName, appSource] of Object.entries(variantsToBuild)) {
-      variants[variantName] = await buildVariant(
-        tempDir,
-        extractedPackageDir,
-        variantName,
-        appSource
+    linkConsumerDependencies(resolve(consumerRoot, "node_modules"))
+    cpSync(extractedPackageDir, installedPackageDir, { recursive: true })
+    const browserProbes = await buildBrowserProbes(
+      consumerRoot,
+      installedPackageDir
+    )
+    const scenarios: Record<string, BundleMetric> = {}
+    // Rolldown builds share in-process compiler state. Keep these sequential to
+    // prevent one scenario's chunk graph from contaminating another.
+    for (const [scenarioName, scenario] of Object.entries(SCENARIOS)) {
+      scenarios[scenarioName] = await buildScenario(
+        consumerRoot,
+        installedPackageDir,
+        scenarioName,
+        scenario
       )
     }
-    return { cloudflareProbes, report: { variants } }
+    return { browserProbes, scenarios }
   } finally {
     rmSync(tempDir, { recursive: true, force: true })
   }
@@ -515,50 +558,45 @@ function formatBytes(bytes: number): string {
 }
 
 async function main(): Promise<void> {
-  const { cloudflareProbes, report } = await measureBundle()
+  const result = await measureBundle()
+  const errors: string[] = []
+
+  for (const [scenarioName, ceiling] of Object.entries(BUNDLE_CEILINGS)) {
+    errors.push(
+      ...validateBundleCeiling(
+        scenarioName,
+        result.scenarios[scenarioName],
+        ceiling
+      )
+    )
+  }
 
   if (process.argv.includes("--json")) {
-    process.stdout.write(`${JSON.stringify(report, null, 2)}\n`)
+    process.stdout.write(`${JSON.stringify(result, null, 2)}\n`)
   } else {
-    for (const [probeName, probe] of Object.entries(cloudflareProbes)) {
+    for (const [probeName, probe] of Object.entries(result.browserProbes)) {
       process.stdout.write(
-        `cloudflare/${probeName}: ${formatBytes(probe.bytes)} raw, ${probe.inputCount} inputs\n`
+        `browser/${probeName}: ${formatBytes(probe.bytes)} raw, ${probe.inputCount} inputs, ${probe.f0Inputs.length} F0 inputs\n`
       )
     }
-    for (const [variantName, variant] of Object.entries(report.variants)) {
+    for (const [scenarioName, metric] of Object.entries(result.scenarios)) {
       process.stdout.write(
-        `${variantName}: JS ${formatBytes(variant.assets.js.brotli)} brotli, ` +
-          `initial ${formatBytes(variant.assets.initialJs.brotli)} brotli, ` +
-          `CSS ${formatBytes(variant.assets.css.brotli)} brotli\n`
+        `${scenarioName}: initial JS ${formatBytes(
+          metric.initialJsBrotli
+        )} Brotli, total JS ${formatBytes(
+          metric.totalJsBrotli
+        )} Brotli, CSS ${formatBytes(
+          metric.cssBrotli
+        )} Brotli, ${metric.retainedF0Modules} F0 modules\n`
       )
     }
   }
 
-  if (!existsSync(BASELINE_PATH)) {
-    throw new Error(`Missing bundle baseline: ${BASELINE_PATH}`)
+  if (errors.length > 0) {
+    throw new Error(`Consumer bundle contract failed:\n${errors.join("\n")}`)
   }
-  const baseline = JSON.parse(
-    readFileSync(BASELINE_PATH, "utf8")
-  ) as BundleReport
-  const requestedVariant = process.argv
-    .find((argument) => argument.startsWith("--variant="))
-    ?.slice("--variant=".length)
-  const relevantBaseline = requestedVariant
-    ? {
-        variants: baseline.variants[requestedVariant]
-          ? { [requestedVariant]: baseline.variants[requestedVariant] }
-          : {},
-      }
-    : baseline
-  const failures = compareBundleReport(report, relevantBaseline)
-  if (failures.length > 0) {
-    console.error("Consumer bundle baseline failed:")
-    for (const failure of failures) console.error(`- ${failure}`)
-    process.exit(1)
-  }
-
   if (!process.argv.includes("--json")) {
-    process.stdout.write("Consumer bundle baseline passed\n")
+    process.stdout.write("Consumer bundle contract passed\n")
   }
 }
 

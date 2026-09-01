@@ -1,7 +1,7 @@
 import { expect, it } from "vitest"
 
-import { SemanticColorGroup } from "../../docs/components/SemanticColorGroup"
 import { zeroRender as render, screen } from "../../src/testing/test-utils"
+import { SemanticColorGroup } from "./SemanticColorGroup"
 
 it("renders semantic color swatches from their token values", () => {
   render(<SemanticColorGroup category="icon" />)

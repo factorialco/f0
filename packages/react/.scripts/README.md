@@ -39,18 +39,16 @@ gate until it reports zero groups.
 - `0`: no runtime cycles
 - `1`: at least one runtime cycle or an analysis error
 
-```
-
 ## Technical Details
 
 - **Parser**: TypeScript compiler API
 - **Scope**: production `.ts`, `.tsx`, `.js`, `.jsx`, `.mts`, `.cts`, `.mjs`,
   and `.cjs` files under `src`
-- **Edges**: static imports, re-exports, and literal dynamic imports
+- **Edges**: emitted static imports and re-exports. Dynamic imports are excluded
+  because they do not create eager module-evaluation cycles.
 - **Algorithm**: Tarjan strongly connected components
 
 ## Related Documentation
 
 - [Component Guidelines](../AGENTS.md)
 - [Project Overview](../../AGENTS.md)
-```
