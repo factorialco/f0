@@ -11,6 +11,7 @@ import {
   CarouselContent,
   CarouselControls,
   CarouselItem,
+  useCarouselPaging,
   type CarouselPaging,
 } from "@/ui/carousel"
 import { Skeleton } from "@/ui/skeleton"
@@ -476,12 +477,13 @@ export interface F0CommunityPostsCarouselProps {
    * blank the tiles you are already reading.
    */
   loading?: boolean
-  /** How many placeholder tiles `loading` draws. Defaults to 2 — one screenful. */
+  /** How many placeholder tiles are drawn. Defaults to 2 — one screenful. */
   expectedItemsCount?: number
   /**
    * THE POSTS ARE A PAGE, not the whole feed. Pass this and the Next arrow stays
-   * live past the last mounted tile: reaching the end asks for the next page, and
-   * the new posts are appended to `posts` by whoever owns them.
+   * live past the last mounted tile — as does dragging past it: reaching the end
+   * asks for the next page, and the new posts are appended to `posts` by whoever
+   * owns them.
    *
    * It is `useData`'s infinite-scroll return, field for field — `hasMore` off
    * `paginationInfo`, `isLoadingMore`, `loadMore` — because that is where these
@@ -492,6 +494,41 @@ export interface F0CommunityPostsCarouselProps {
    * "latest five" is.
    */
   pagination?: CarouselPaging
+}
+
+// `basis-full` under 480px of CARD (`@lg`), half above it — the same width at
+// which the `Widget` frame itself decides it is wide.
+const TILE_WIDTH = "basis-full @lg:basis-1/2"
+
+const CommunityPostsSlides = ({
+  posts,
+  loading,
+  expectedItemsCount,
+}: {
+  posts: CommunityPostSummary[]
+  loading: boolean
+  expectedItemsCount: number
+}) => {
+  const { isPageInFlight } = useCarouselPaging()
+
+  const placeholders = loading || isPageInFlight ? expectedItemsCount : 0
+
+  return (
+    <CarouselContent aria-busy={loading || isPageInFlight || undefined}>
+      {loading
+        ? null
+        : posts.map((post) => (
+            <CarouselItem key={post.id} className={TILE_WIDTH}>
+              <CommunityPostCard post={post} />
+            </CarouselItem>
+          ))}
+      {Array.from({ length: placeholders }, (_, index) => (
+        <CarouselItem key={`placeholder-${index}`} className={TILE_WIDTH}>
+          <CommunityPostCardSkeleton withImage={reservesImageSeat(posts)} />
+        </CarouselItem>
+      ))}
+    </CarouselContent>
+  )
 }
 
 /**
@@ -532,26 +569,6 @@ export const F0CommunityPostsCarousel = ({
   expectedItemsCount = 2,
   pagination,
 }: F0CommunityPostsCarouselProps) => {
-  const items = loading
-    ? Array.from({ length: expectedItemsCount }, (_, index) => (
-        <CommunityPostCardSkeleton
-          key={index}
-          withImage={reservesImageSeat(posts)}
-        />
-      ))
-    : // NO TILE FOR THE PAGE IN FLIGHT. There used to be one, to give the
-      // carousel somewhere to scroll to while a fetch ran — but most fetches
-      // here are PREFETCHES, pulled in when the reader reaches the last page and
-      // asked for by nobody. A placeholder tile made every one of them visible,
-      // which is the opposite of the point: work done ahead of the reader should
-      // pass unnoticed.
-      //
-      // A press that genuinely has to wait is answered instead by the arrow
-      // (`isAwaitingPage` puts the spinner there) and by the row moving on its
-      // own the moment the page lands, onto real posts rather than onto a grey
-      // rectangle that then becomes them.
-      posts.map((post) => <CommunityPostCard key={post.id} post={post} />)
-
   return (
     <Carousel
       opts={{
@@ -573,18 +590,14 @@ export const F0CommunityPostsCarousel = ({
       // not the window's: the same widget sits in a 712px main column and in a
       // 396px rail, and a viewport media query cannot tell those apart.
       className="@container"
-      {...(loading ? { "aria-busy": true } : {})}
+      paging={pagination}
     >
-      <CarouselContent>
-        {items.map((item, index) => (
-          // `basis-full` under 480px of CARD (`@lg`), half above it — the same
-          // width at which the `Widget` frame itself decides it is wide.
-          <CarouselItem key={index} className="basis-full @lg:basis-1/2">
-            {item}
-          </CarouselItem>
-        ))}
-      </CarouselContent>
-      <CarouselControls labels={labels} paging={pagination} />
+      <CommunityPostsSlides
+        posts={posts}
+        loading={loading}
+        expectedItemsCount={expectedItemsCount}
+      />
+      <CarouselControls labels={labels} />
     </Carousel>
   )
 }
