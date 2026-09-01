@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { fn } from "storybook/test"
+import { expect, fn, userEvent, waitFor, within } from "storybook/test"
 
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
@@ -54,8 +54,9 @@ const meta = {
   title: "AI/AiInsightCard",
   parameters: {
     layout: "centered",
+    a11y: { test: "error" },
   },
-  tags: ["autodocs", "stable"],
+  tags: ["!autodocs", "stable"],
   decorators: [
     (Story) => (
       <div className="p-8">
@@ -68,6 +69,27 @@ const meta = {
       control: "select",
       options: contentTypes,
       description: "Content type determining what renders in the card body",
+    },
+    heading: {
+      description: "Main insight text, clamped to 3 lines",
+    },
+    description: {
+      description: "Small secondary text above the heading",
+    },
+    label: {
+      description:
+        "Bottom label. Hidden for person, people, team, company, alert and balance content; required text for the sparkline pill",
+    },
+    selected: {
+      description: "Draws the animated gradient border around the card",
+    },
+    onClick: {
+      description:
+        'Makes the whole card an interactive role="button" target, activatable with Enter and Space',
+    },
+    onAskOne: {
+      description:
+        "Shows the Ask One action when the card is hovered or focused",
     },
   },
 } satisfies Meta<typeof F0AiInsightCard>
@@ -85,19 +107,35 @@ const textArgs: F0AiInsightCardProps = {
 }
 
 export const Text: Story = {
-  render: () => <F0AiInsightCard {...textArgs} />,
-}
+  args: textArgs,
+  play: async ({ args, canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    const card = canvas.getByRole("button", { name: /Total headcount/ })
 
-const textOnlyArgs: F0AiInsightCardProps = {
-  content: "text",
-  description: "Department",
-  heading: "Total headcount across all departments",
-  onClick: fn(),
-  onAskOne: fn(),
-}
+    await step("activates the card from the keyboard", async () => {
+      card.focus()
+      await userEvent.keyboard("{Enter}")
+      await expect(args.onClick).toHaveBeenCalled()
+    })
 
-export const TextOnly: Story = {
-  render: () => <F0AiInsightCard {...textOnlyArgs} />,
+    await step("asks One from the revealed action", async () => {
+      const askOne = await canvas.findByRole("button", { name: "Ask One" })
+      await expect(card.contains(askOne)).toBe(false)
+      await userEvent.click(askOne)
+      await expect(args.onAskOne).toHaveBeenCalled()
+      await expect(args.onClick).toHaveBeenCalledTimes(1)
+    })
+
+    await step("returns the card to rest", async () => {
+      // click(document.body) would land on the centered card itself, keeping
+      // it hovered — leave the hover and focus states explicitly instead.
+      ;(document.activeElement as HTMLElement | null)?.blur()
+      await userEvent.unhover(card.parentElement as HTMLElement)
+      await waitFor(() =>
+        expect(canvas.queryByRole("button", { name: "Ask One" })).toBeNull()
+      )
+    })
+  },
 }
 
 const personArgs: F0AiInsightCardProps = {
@@ -115,7 +153,7 @@ const personArgs: F0AiInsightCardProps = {
 }
 
 export const Person: Story = {
-  render: () => <F0AiInsightCard {...personArgs} />,
+  args: personArgs,
 }
 
 const peopleArgs: F0AiInsightCardProps = {
@@ -133,7 +171,7 @@ const peopleArgs: F0AiInsightCardProps = {
 }
 
 export const People: Story = {
-  render: () => <F0AiInsightCard {...peopleArgs} />,
+  args: peopleArgs,
 }
 
 const teamArgs: F0AiInsightCardProps = {
@@ -150,7 +188,7 @@ const teamArgs: F0AiInsightCardProps = {
 }
 
 export const Team: Story = {
-  render: () => <F0AiInsightCard {...teamArgs} />,
+  args: teamArgs,
 }
 
 const companyArgs: F0AiInsightCardProps = {
@@ -167,7 +205,7 @@ const companyArgs: F0AiInsightCardProps = {
 }
 
 export const Company: Story = {
-  render: () => <F0AiInsightCard {...companyArgs} />,
+  args: companyArgs,
 }
 
 const alertArgs: F0AiInsightCardProps = {
@@ -181,7 +219,7 @@ const alertArgs: F0AiInsightCardProps = {
 }
 
 export const Alert: Story = {
-  render: () => <F0AiInsightCard {...alertArgs} />,
+  args: alertArgs,
 }
 
 const balancePositiveArgs: F0AiInsightCardProps = {
@@ -203,7 +241,7 @@ const balancePositiveArgs: F0AiInsightCardProps = {
 }
 
 export const BalancePositive: Story = {
-  render: () => <F0AiInsightCard {...balancePositiveArgs} />,
+  args: balancePositiveArgs,
 }
 
 const balanceNegativeArgs: F0AiInsightCardProps = {
@@ -225,7 +263,7 @@ const balanceNegativeArgs: F0AiInsightCardProps = {
 }
 
 export const BalanceNegative: Story = {
-  render: () => <F0AiInsightCard {...balanceNegativeArgs} />,
+  args: balanceNegativeArgs,
 }
 
 const sparklinePositiveArgs: F0AiInsightCardProps = {
@@ -239,7 +277,7 @@ const sparklinePositiveArgs: F0AiInsightCardProps = {
 }
 
 export const SparklinePositive: Story = {
-  render: () => <F0AiInsightCard {...sparklinePositiveArgs} />,
+  args: sparklinePositiveArgs,
 }
 
 const sparklineNegativeArgs: F0AiInsightCardProps = {
@@ -253,7 +291,7 @@ const sparklineNegativeArgs: F0AiInsightCardProps = {
 }
 
 export const SparklineNegative: Story = {
-  render: () => <F0AiInsightCard {...sparklineNegativeArgs} />,
+  args: sparklineNegativeArgs,
 }
 
 const selectedArgs: F0AiInsightCardProps = {
@@ -266,7 +304,7 @@ const selectedArgs: F0AiInsightCardProps = {
 }
 
 export const Selected: Story = {
-  render: () => <F0AiInsightCard {...selectedArgs} />,
+  args: selectedArgs,
 }
 
 export const Skeleton: Story = {
@@ -279,7 +317,6 @@ export const Snapshot: Story = {
   render: () => {
     const stories = [
       { key: "Text", args: textArgs },
-      { key: "TextOnly", args: textOnlyArgs },
       { key: "Person", args: personArgs },
       { key: "People", args: peopleArgs },
       { key: "Team", args: teamArgs },

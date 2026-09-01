@@ -1,15 +1,20 @@
 import { motion } from "motion/react"
-import { forwardRef, useState, type KeyboardEvent } from "react"
+import {
+  forwardRef,
+  useState,
+  type FocusEvent,
+  type KeyboardEvent,
+} from "react"
 
 import { useReducedMotion } from "@/lib/a11y"
 import { cn, focusRing } from "@/lib/utils"
 
 import type { F0AiInsightCardProps } from "./types"
 
-import { CardHeader } from "./components/CardHeader"
+import { AskOneAction } from "./components/AskOneAction"
 import { CardMetadata } from "./components/CardMetadata"
 import { CardSparkline } from "./components/CardSparkline"
-import { cardVariants, headingVariants } from "./variants"
+import { cardVariants, descriptionVariants, headingVariants } from "./variants"
 
 export type CardInternalProps = F0AiInsightCardProps & {
   className?: string
@@ -51,8 +56,24 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
       }
     }
 
+    // Reveal/hide tracking lives on the wrapper so the Ask One action (a
+    // sibling of the card surface, see AskOneAction) keeps the reveal alive
+    // while hovered or focused. The relatedTarget check stops the button from
+    // unmounting mid-Tab when focus moves between the card and the action.
+    const handleBlur = (event: FocusEvent<HTMLDivElement>) => {
+      if (!event.currentTarget.contains(event.relatedTarget)) {
+        setIsFocused(false)
+      }
+    }
+
     return (
-      <div className="relative">
+      <div
+        className="relative"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        onFocus={() => setIsFocused(true)}
+        onBlur={handleBlur}
+      >
         {selected && (
           <>
             <div
@@ -88,16 +109,12 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
           )}
           onClick={onClick ? handleClick : undefined}
           onKeyDown={onClick ? handleKeyDown : undefined}
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
         >
-          <CardHeader
-            description={description}
-            isRevealed={isRevealed}
-            onAskOne={onAskOne}
-          />
+          {description && (
+            <span className={cn(descriptionVariants(), "truncate")}>
+              {description}
+            </span>
+          )}
 
           {contentProps.content === "sparkline" ? (
             <div className="flex flex-1 flex-col gap-2">
@@ -124,6 +141,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
             />
           )}
         </div>
+        <AskOneAction isRevealed={isRevealed} onAskOne={onAskOne} />
       </div>
     )
   }
