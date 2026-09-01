@@ -62,13 +62,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
       - uses: ./.github/actions/setup-node-pnpm
-        with:
-          node-version: "24.20.0"
-      - name: Install dependencies
-        run: pnpm install
       - name: Build core package
         run: pnpm --filter @factorialco/f0-core build
       - name: Check linting with oxlint
@@ -86,13 +80,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
       - uses: ./.github/actions/setup-node-pnpm
-        with:
-          node-version: "24.20.0"
-      - name: Install dependencies
-        run: pnpm install
       - name: Build core package
         run: pnpm --filter @factorialco/f0-core build
       - name: Check linting with oxlint
@@ -203,17 +191,28 @@ jobs:
       pull-requests: write
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
       - uses: ./.github/actions/setup-node-pnpm
-        with:
-          node-version: "24.20.0"
-      - name: Install dependencies
-        run: pnpm install
-      - name: Build core package
-        run: pnpm --filter @factorialco/f0-core build
       - name: Detect runtime cycle dependencies
         run: pnpm --filter @factorialco/f0-react cycle-deps
+
+  consumer-bundle:
+    needs: detect-changes
+    if: |
+      needs.detect-changes.outputs.package_react == 'true' &&
+      github.head_ref != 'release-please--branches--master' &&
+      !contains(github.event.pull_request.labels.*.name, 'autorelease')
+    name: "[⚛️ REACT] Consumer bundle contract"
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-node-pnpm
+      - name: Build core package
+        run: pnpm --filter @factorialco/f0-core build
+      - name: Build React package
+        run: pnpm --filter @factorialco/f0-react build
+      - name: Check packed consumer bundle
+        run: pnpm --filter @factorialco/f0-react check:consumer-bundle
 
   # Single check to gate the branch on. It collapses this workflow's jobs into
   # one status, so branch protection lists one stable name and never needs
@@ -226,7 +225,7 @@ jobs:
   # `skipped` is accepted on purpose: detect-changes skips the jobs for a
   # package that this PR did not touch. Only failure/cancellation is fatal.
   quality-passed:
-    needs: [detect-changes, format, format-react-native, lint, lint-react-native, stable-dod, new-component-dod, untranslated-copy, cycle-dependencies]
+    needs: [detect-changes, format, format-react-native, lint, lint-react-native, stable-dod, new-component-dod, untranslated-copy, cycle-dependencies, consumer-bundle]
     name: "✅ Quality"
     if: always()
     runs-on: ubuntu-latest

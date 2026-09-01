@@ -20,7 +20,6 @@
  *
  * Consumed by:
  * - vite.config.ts        → componentStatusVitePlugin()
- * - tsup.config.ts        → componentStatusEsbuildPlugin()
  * - src/component-status  → import rawStatusData from "virtual:f0-component-status-data"
  */
 
@@ -410,24 +409,6 @@ export function componentStatusVitePlugin() {
     load(id) {
       if (id === RESOLVED_VIRTUAL_ID) return virtualModuleSource()
       return null
-    },
-  }
-}
-
-/** esbuild plugin serving the same virtual module (for the tsup build path). */
-export function componentStatusEsbuildPlugin() {
-  return {
-    name: "f0-component-status",
-    setup(build) {
-      const namespace = "f0-component-status"
-      build.onResolve({ filter: new RegExp(`^${VIRTUAL_ID}$`) }, () => ({
-        path: VIRTUAL_ID,
-        namespace,
-      }))
-      build.onLoad({ filter: /.*/, namespace }, () => ({
-        contents: virtualModuleSource(),
-        loader: "js",
-      }))
     },
   }
 }

@@ -46,14 +46,7 @@ jobs:
       - name: Check out base side (first parent of the merge commit)
         if: matrix.side == 'base'
         run: git checkout HEAD^1
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
       - uses: ./.github/actions/setup-node-pnpm
-        with:
-          node-version: "24.20.0"
-          cache: pnpm
-      - name: Install dependencies
-        run: pnpm install
       - name: Build core package
         run: pnpm --filter @factorialco/f0-core build
       - name: Build React types
@@ -85,14 +78,7 @@ jobs:
       issues: write
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
       - uses: ./.github/actions/setup-node-pnpm
-        with:
-          node-version: "24.20.0"
-          cache: pnpm
-      - name: Install dependencies
-        run: pnpm install
       - name: Download head type declarations
         uses: actions/download-artifact@v4
         continue-on-error: true

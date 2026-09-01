@@ -51,9 +51,3 @@ export function componentStatusVitePlugin(): {
   resolveId(id: string): string | null
   load(id: string): string | null
 }
-
-/** esbuild plugin serving the same virtual module (tsup build path). */
-export function componentStatusEsbuildPlugin(): {
-  name: string
-  setup(build: unknown): void
-}

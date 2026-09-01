@@ -44,6 +44,16 @@ describe("consumer bundle contract", () => {
     ])
   })
 
+  it("reports total compressed delivery expansion when it has a ceiling", () => {
+    expect(
+      validateDeliveryCeiling(
+        "example",
+        { ...metric, totalJsBrotli: 221 },
+        { ...ceiling, maxTotalJsBrotli: 220 }
+      )
+    ).toEqual(["example total JS Brotli is 221 B; ceiling is 220 B"])
+  })
+
   it("reports root-only F0 expansion beyond component-subpath tolerance", () => {
     expect(
       validateRootSubpathParity(

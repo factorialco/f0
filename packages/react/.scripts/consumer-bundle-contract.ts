@@ -7,6 +7,7 @@ export interface BundleMetric {
 
 export interface DeliveryCeiling {
   maxInitialJsBrotli: number
+  maxTotalJsBrotli?: number
   maxCssBrotli?: number
 }
 
@@ -30,6 +31,14 @@ export function validateDeliveryCeiling(
   if (metric.initialJsBrotli > ceiling.maxInitialJsBrotli) {
     errors.push(
       `${scenario} initial JS Brotli is ${metric.initialJsBrotli} B; ceiling is ${ceiling.maxInitialJsBrotli} B`
+    )
+  }
+  if (
+    ceiling.maxTotalJsBrotli !== undefined &&
+    metric.totalJsBrotli > ceiling.maxTotalJsBrotli
+  ) {
+    errors.push(
+      `${scenario} total JS Brotli is ${metric.totalJsBrotli} B; ceiling is ${ceiling.maxTotalJsBrotli} B`
     )
   }
   if (

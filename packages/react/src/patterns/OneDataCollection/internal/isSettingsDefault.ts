@@ -1,23 +1,18 @@
-import { DataCollectionSettings } from "../Settings/SettingsProvider"
-import { collectionVisualizations } from "../visualizations/collection"
+import type { DataCollectionSettings } from "../Settings/SettingsProvider"
+
+import {
+  createInitialVisualizationSettings,
+  type VisualizationSettings,
+} from "../Settings/visualizationSettings"
 
 /**
- * Builds the default `DataCollectionSettings` from the visualization registry —
- * the same shape produced by the settings provider on first mount. Used both as
- * the reset target and as the baseline for dirty detection.
+ * Builds the same default shape produced by the settings provider on first
+ * mount. Used both as the reset target and as the baseline for dirty detection.
  */
 export const getDefaultDataCollectionSettings = (): DataCollectionSettings => {
-  const visualization = {} as Record<string, unknown>
-
-  for (const [key, viz] of Object.entries(collectionVisualizations)) {
-    if (viz.settings.default) {
-      visualization[key] = { ...viz.settings.default }
-    }
-  }
-
   return {
-    visualization,
-  } as DataCollectionSettings
+    visualization: createInitialVisualizationSettings(),
+  }
 }
 
 /**
@@ -28,15 +23,17 @@ export const isVisualizationSettingsDefault = (
   settings: DataCollectionSettings,
   visualizationType: string | undefined
 ): boolean => {
-  if (!visualizationType || !(visualizationType in collectionVisualizations)) {
+  const defaultSettings = createInitialVisualizationSettings()
+  if (!visualizationType || !(visualizationType in defaultSettings)) {
     return true
   }
 
-  const key = visualizationType as keyof typeof collectionVisualizations
+  const key = visualizationType as keyof VisualizationSettings
   const currentSettings = settings.visualization[key]
-  const defaultSettings = collectionVisualizations[key]?.settings.default
 
-  return JSON.stringify(currentSettings) === JSON.stringify(defaultSettings)
+  return (
+    JSON.stringify(currentSettings) === JSON.stringify(defaultSettings[key])
+  )
 }
 
 /**

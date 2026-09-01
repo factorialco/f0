@@ -8,7 +8,6 @@ import {
   DataCollectionSettingsProvider,
   useDataCollectionSettings,
 } from "./SettingsProvider"
-import { collectionVisualizations } from "../visualizations/collection/collectionViewRegistry"
 
 const wrapper = ({ children }: PropsWithChildren) => (
   <DataCollectionSettingsProvider>{children}</DataCollectionSettingsProvider>
@@ -30,8 +29,5 @@ describe("DataCollectionSettingsProvider", () => {
     expect(first.result.current.settings.visualization).not.toBe(
       second.result.current.settings.visualization
     )
-    expect(
-      Object.keys(first.result.current.settings.visualization).sort()
-    ).toEqual(Object.keys(collectionVisualizations).sort())
   })
 })

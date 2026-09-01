@@ -12,6 +12,7 @@ import { FiltersDefinition } from "@/patterns/OneFilterPicker"
 import type { DataCollectionSettingsContextType } from "../../Settings/SettingsProvider"
 import type { GraphVisualizationSettings } from "./Graph/types"
 
+import { createInitialVisualizationSettings } from "../../Settings/visualizationSettings"
 import { SummariesDefinition } from "../../types"
 import { CardCollection, CardCollectionProps } from "./Card"
 import {
@@ -29,6 +30,8 @@ import {
   SettingsRenderer as tableSettingsRenderer,
   TableVisualizationSettings,
 } from "./Table"
+
+const defaultVisualizationSettings = createInitialVisualizationSettings()
 
 export type VisualizacionTypeDefinition<
   Props,
@@ -174,7 +177,7 @@ export const collectionVisualizations: CollectionVisualizations<
         tableSettingsRenderer({ ...props, visualizationKey: "table" }),
       resetHandler: (settings) =>
         settings.setVisualizationSettings("table", {}),
-      default: {},
+      default: defaultVisualizationSettings.table,
     },
   },
   editableTable: {
@@ -218,14 +221,14 @@ export const collectionVisualizations: CollectionVisualizations<
         tableSettingsRenderer({ ...props, visualizationKey: "editableTable" }),
       resetHandler: (settings) =>
         settings.setVisualizationSettings("editableTable", {}),
-      default: {},
+      default: defaultVisualizationSettings.editableTable,
     },
   },
   list: {
     name: "List",
     icon: List,
     settings: {
-      default: {},
+      default: defaultVisualizationSettings.list,
     },
     render: <
       Record extends RecordType,
@@ -265,7 +268,7 @@ export const collectionVisualizations: CollectionVisualizations<
     name: "Card",
     icon: Kanban,
     settings: {
-      default: {},
+      default: defaultVisualizationSettings.card,
     },
     render: <
       Record extends RecordType,
@@ -305,7 +308,7 @@ export const collectionVisualizations: CollectionVisualizations<
     name: "Kanban",
     icon: Kanban,
     settings: {
-      default: {},
+      default: defaultVisualizationSettings.kanban,
     },
     render: <
       Record extends RecordType,
@@ -345,7 +348,7 @@ export const collectionVisualizations: CollectionVisualizations<
     name: "Graph",
     icon: Organization,
     settings: {
-      default: {},
+      default: defaultVisualizationSettings.graph,
       renderer: (props) => graphSettingsRenderer(props),
       resetHandler: (settings) =>
         settings.setVisualizationSettings("graph", {}),

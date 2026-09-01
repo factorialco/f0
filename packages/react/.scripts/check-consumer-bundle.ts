@@ -8,11 +8,13 @@ import {
   mkdirSync,
   readFileSync,
   readdirSync,
+  realpathSync,
   rmSync,
   statSync,
   symlinkSync,
   writeFileSync,
 } from "node:fs"
+import { tmpdir } from "node:os"
 import path, { dirname, relative, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 import { brotliCompressSync, constants } from "node:zlib"
@@ -73,7 +75,7 @@ export default function App() {
   oneDataCollection: {
     source: retainExport(
       "OneDataCollection",
-      "@factorialco/f0-react/dist/experimental"
+      "@factorialco/f0-react/experimental"
     ),
     forbiddenModules: COMMON_FORBIDDEN_MODULES,
     maxInitialJsBrotli: 1_024 * 1024,
@@ -98,6 +100,7 @@ export default function App() {
     ],
     lazyDependencies: ["node_modules/xlsx/", "node_modules/docx-preview/"],
     maxInitialJsBrotli: 1_296 * 1024,
+    maxTotalJsBrotli: 1_440 * 1024,
   },
 } as const satisfies Record<string, ConsumerScenario>
 
@@ -451,6 +454,7 @@ createRoot(document.getElementById("root")!).render(
   }
 
   const outputFiles = walkFiles(resolve(consumerDir, "dist"))
+  const installedDistRoot = realpathSync(resolve(installedPackageDir, "dist"))
   const metric: BundleMetric = {
     totalJsBrotli: brotliBytes(
       outputFiles.filter((file) => file.endsWith(".js"))
@@ -463,9 +467,7 @@ createRoot(document.getElementById("root")!).render(
     cssBrotli: brotliBytes(outputFiles.filter((file) => file.endsWith(".css"))),
     retainedF0Modules: new Set(
       allModules.filter((moduleId) =>
-        moduleId.startsWith(
-          `${resolve(installedPackageDir, "dist")}${path.sep}`
-        )
+        moduleId.startsWith(`${installedDistRoot}${path.sep}`)
       )
     ).size,
   }
@@ -494,12 +496,9 @@ async function measureBundle(): Promise<{
     )
   }
 
-  // Keep consumers outside the @factorialco/f0-react package scope. Otherwise
-  // Node's package self-reference resolves imports back to the workspace copy
-  // instead of the extracted tarball installed below.
-  const cacheDir = resolve(PACKAGE_DIR, "../../node_modules/.cache")
-  mkdirSync(cacheDir, { recursive: true })
-  const tempDir = mkdtempSync(resolve(cacheDir, "consumer-bundle-"))
+  // Keep consumers outside both the package scope and repository module
+  // resolution so only explicitly linked published dependencies are visible.
+  const tempDir = mkdtempSync(resolve(tmpdir(), "f0-consumer-bundle-"))
   try {
     const packedDir = resolve(tempDir, "packed")
     mkdirSync(packedDir)
