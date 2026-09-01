@@ -1,6 +1,8 @@
 import { Canvas, Controls, Meta, Unstyled } from "@storybook/addon-docs/blocks"
 
 import * as Stories from "./F0TextInput.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+import { F0TextInput } from "../index"
 
 <Meta of={Stories} />
 
@@ -110,6 +112,33 @@ The canonical writable text field — a single-line box where text, emails, pass
     </tbody>
   </table>
 </Unstyled>
+
+**Do's and don'ts**
+
+<DoDonts
+  do={{
+    description:
+      'Use type="private" for sensitive, non-credential data — SSNs, national IDs, account numbers, tokens — with a concrete label so the eye toggle\'s accessible name is unambiguous.',
+    children: (
+      <F0TextInput
+        type="private"
+        label="Social security number"
+        value="123-45-6789"
+      />
+    ),
+  }}
+  dont={{
+    description:
+      "Don't use type=\"password\" outside of an actual login password. It shows a lock icon and invites password managers to offer to save the value — the wrong signal for a one-time token or someone else's SSN.",
+    children: (
+      <F0TextInput
+        type="password"
+        label="API token"
+        placeholder="Paste your token"
+      />
+    ),
+  }}
+/>
 
 ### Content best practices
 

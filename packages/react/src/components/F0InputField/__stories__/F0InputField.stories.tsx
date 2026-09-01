@@ -1,8 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
+import { expect, userEvent, within } from "storybook/test"
 
 import * as icons from "@/icons/app"
 import { Placeholder, Search } from "@/icons/app"
-import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0InputField, INPUTFIELD_SIZES } from "../"
 
@@ -93,6 +94,9 @@ const meta = {
     },
   },
   tags: ["stable", "!autodocs"],
+  parameters: {
+    a11y: { test: "error" },
+  },
 } satisfies Meta<typeof F0InputField>
 
 export default meta
@@ -105,6 +109,16 @@ export const Default: Story = {
     placeholder: "This is the placeholder",
     onChange: () => {},
     children: <input type="text" className="w-full" />,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByRole("textbox", { name: "This is the label" })
+
+    await expect(input).toHaveValue("")
+
+    await userEvent.type(input, "Hello world")
+
+    await expect(input).toHaveValue("Hello world")
   },
 }
 
@@ -309,7 +323,7 @@ export const LongPlaceholder: Story = {
 }
 
 export const Snapshot: Story = {
-  parameters: withSkipA11y(withSnapshot({})),
+  parameters: withSnapshot({}),
   args: Default.args,
   render: () => {
     const base = {
