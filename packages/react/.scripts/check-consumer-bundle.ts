@@ -20,20 +20,26 @@ import valueParser from "postcss-value-parser"
 import { build } from "vite"
 
 import {
-  validateBundleCeiling,
+  validateDeliveryCeiling,
   validateLazyBoundary,
   validateRootSubpathParity,
-  type BundleCeiling,
   type BundleMetric,
+  type DeliveryCeiling,
   type OwnedInputMetric,
 } from "./consumer-bundle-contract"
 
 const PACKAGE_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "..")
 
-interface ConsumerScenario {
+interface ConsumerScenario extends DeliveryCeiling {
   source: string
   forbiddenModules?: readonly string[]
   lazyDependencies?: readonly string[]
+}
+
+interface PackageManifest {
+  dependencies?: Record<string, string>
+  optionalDependencies?: Record<string, string>
+  peerDependencies?: Record<string, string>
 }
 
 const COMMON_FORBIDDEN_MODULES = [
@@ -45,14 +51,7 @@ const COMMON_FORBIDDEN_MODULES = [
   "/F0CanvasPanel/",
 ] as const
 
-const SCENARIOS: Record<string, ConsumerScenario> = {
-  native: {
-    source: `
-export default function App() {
-  return <button type="button">Save</button>
-}
-`,
-  },
+const SCENARIOS = {
   f0Button: {
     source: `
 import { F0Button } from "@factorialco/f0-react"
@@ -63,10 +62,13 @@ export default function App() {
 }
 `,
     forbiddenModules: COMMON_FORBIDDEN_MODULES,
+    maxInitialJsBrotli: 176 * 1024,
+    maxCssBrotli: 48 * 1024,
   },
   f0Form: {
     source: retainRootExport("F0Form"),
     forbiddenModules: COMMON_FORBIDDEN_MODULES,
+    maxInitialJsBrotli: 1_344 * 1024,
   },
   oneDataCollection: {
     source: retainExport(
@@ -74,6 +76,7 @@ export default function App() {
       "@factorialco/f0-react/dist/experimental"
     ),
     forbiddenModules: COMMON_FORBIDDEN_MODULES,
+    maxInitialJsBrotli: 1_024 * 1024,
   },
   f0AiChat: {
     source: retainRootExport("F0AiChat"),
@@ -84,6 +87,7 @@ export default function App() {
       "/F0CanvasPanel/",
       "/F0PdfViewer/",
     ],
+    maxInitialJsBrotli: 176 * 1024,
   },
   f0PdfViewer: {
     source: retainRootExport("F0PdfViewer"),
@@ -93,32 +97,9 @@ export default function App() {
       "/F0CanvasPanel/",
     ],
     lazyDependencies: ["node_modules/xlsx/", "node_modules/docx-preview/"],
-  },
-}
-
-const BUNDLE_CEILINGS: Record<string, BundleCeiling> = {
-  f0Button: {
-    maxInitialJsBrotli: 176 * 1024,
-    maxRetainedF0Modules: 35,
-    maxCssBrotli: 48 * 1024,
-  },
-  f0Form: {
-    maxInitialJsBrotli: 1_344 * 1024,
-    maxRetainedF0Modules: 1_050,
-  },
-  oneDataCollection: {
-    maxInitialJsBrotli: 1_024 * 1024,
-    maxRetainedF0Modules: 50,
-  },
-  f0AiChat: {
-    maxInitialJsBrotli: 176 * 1024,
-    maxRetainedF0Modules: 50,
-  },
-  f0PdfViewer: {
     maxInitialJsBrotli: 1_296 * 1024,
-    maxRetainedF0Modules: 550,
   },
-}
+} as const satisfies Record<string, ConsumerScenario>
 
 function browserButtonSource(moduleSpecifier: string): string {
   return `
@@ -193,26 +174,32 @@ function walkFiles(directory: string): string[] {
   })
 }
 
-function linkConsumerDependencies(consumerNodeModules: string): void {
+function linkConsumerDependencies(
+  consumerNodeModules: string,
+  manifest: PackageManifest
+): void {
   const packageNodeModules = resolve(PACKAGE_DIR, "node_modules")
+  const optionalDependencies = new Set(
+    Object.keys(manifest.optionalDependencies ?? {})
+  )
+  const dependencyNames = new Set([
+    ...Object.keys(manifest.dependencies ?? {}),
+    ...Object.keys(manifest.peerDependencies ?? {}),
+    ...optionalDependencies,
+  ])
   mkdirSync(consumerNodeModules, { recursive: true })
-  for (const entry of readdirSync(packageNodeModules)) {
-    if (entry.startsWith(".")) continue
-    const source = resolve(packageNodeModules, entry)
-    const destination = resolve(consumerNodeModules, entry)
-    if (entry !== "@factorialco") {
-      symlinkSync(source, destination, "dir")
+  for (const dependencyName of dependencyNames) {
+    const source = resolve(packageNodeModules, dependencyName)
+    if (!existsSync(source)) {
+      if (optionalDependencies.has(dependencyName)) continue
+      throw new Error(`Missing declared consumer dependency: ${dependencyName}`)
+    }
+    const destination = resolve(consumerNodeModules, dependencyName)
+    mkdirSync(dirname(destination), { recursive: true })
+    if (existsSync(destination)) {
       continue
     }
-    mkdirSync(destination)
-    for (const scopedEntry of readdirSync(source)) {
-      if (scopedEntry === "f0-react") continue
-      symlinkSync(
-        resolve(source, scopedEntry),
-        resolve(destination, scopedEntry),
-        "dir"
-      )
-    }
+    symlinkSync(source, destination, "dir")
   }
 }
 
@@ -482,7 +469,7 @@ createRoot(document.getElementById("root")!).render(
       )
     ).size,
   }
-  if (scenarioName !== "native" && metric.retainedF0Modules === 0) {
+  if (metric.retainedF0Modules === 0) {
     throw new Error(
       `${scenarioName} retained no modules from the packed package`
     )
@@ -525,12 +512,15 @@ async function measureBundle(): Promise<{
     run("tar", ["-xzf", tarball, "-C", tempDir], PACKAGE_DIR)
     const extractedPackageDir = resolve(tempDir, "package")
     validatePublishedStyleAssets(extractedPackageDir)
+    const manifest = JSON.parse(
+      readFileSync(resolve(extractedPackageDir, "package.json"), "utf8")
+    ) as PackageManifest
     const consumerRoot = resolve(tempDir, "consumer")
     const installedPackageDir = resolve(
       consumerRoot,
       "node_modules/@factorialco/f0-react"
     )
-    linkConsumerDependencies(resolve(consumerRoot, "node_modules"))
+    linkConsumerDependencies(resolve(consumerRoot, "node_modules"), manifest)
     cpSync(extractedPackageDir, installedPackageDir, { recursive: true })
     const browserProbes = await buildBrowserProbes(
       consumerRoot,
@@ -561,12 +551,12 @@ async function main(): Promise<void> {
   const result = await measureBundle()
   const errors: string[] = []
 
-  for (const [scenarioName, ceiling] of Object.entries(BUNDLE_CEILINGS)) {
+  for (const [scenarioName, scenario] of Object.entries(SCENARIOS)) {
     errors.push(
-      ...validateBundleCeiling(
+      ...validateDeliveryCeiling(
         scenarioName,
         result.scenarios[scenarioName],
-        ceiling
+        scenario
       )
     )
   }

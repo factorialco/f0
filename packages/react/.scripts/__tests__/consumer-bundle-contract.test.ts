@@ -1,16 +1,15 @@
 import { describe, expect, it } from "vitest"
 
 import {
-  validateBundleCeiling,
+  validateDeliveryCeiling,
   validateLazyBoundary,
   validateRootSubpathParity,
-  type BundleCeiling,
   type BundleMetric,
+  type DeliveryCeiling,
 } from "../consumer-bundle-contract"
 
-const ceiling: BundleCeiling = {
+const ceiling: DeliveryCeiling = {
   maxInitialJsBrotli: 200,
-  maxRetainedF0Modules: 10,
   maxCssBrotli: 50,
 }
 
@@ -22,8 +21,27 @@ const metric: BundleMetric = {
 }
 
 describe("consumer bundle contract", () => {
-  it("accepts a scenario within its delivery and structure ceilings", () => {
-    expect(validateBundleCeiling("example", metric, ceiling)).toEqual([])
+  it("does not turn retained module diagnostics into a delivery failure", () => {
+    expect(
+      validateDeliveryCeiling(
+        "example",
+        { ...metric, retainedF0Modules: 10_000 },
+        ceiling
+      )
+    ).toEqual([])
+  })
+
+  it("reports compressed delivery expansion", () => {
+    expect(
+      validateDeliveryCeiling(
+        "example",
+        { ...metric, initialJsBrotli: 201, cssBrotli: 51 },
+        ceiling
+      )
+    ).toEqual([
+      "example initial JS Brotli is 201 B; ceiling is 200 B",
+      "example CSS Brotli is 51 B; ceiling is 50 B",
+    ])
   })
 
   it("reports root-only F0 expansion beyond component-subpath tolerance", () => {

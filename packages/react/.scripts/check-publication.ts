@@ -44,6 +44,20 @@ function wildcardCapture(pattern: string, filePath: string): string | null {
   return filePath.slice(prefix.length, filePath.length - suffix.length)
 }
 
+function wildcardFiles(packageRoot: string, pattern: string): string[] {
+  const normalizedPattern = pattern.replace(/^\.\//, "")
+  const prefix = normalizedPattern.slice(0, normalizedPattern.indexOf("*"))
+  const lastSeparator = prefix.lastIndexOf("/")
+  const searchRoot = resolve(
+    packageRoot,
+    lastSeparator === -1 ? "" : prefix.slice(0, lastSeparator)
+  )
+
+  return walkFiles(searchRoot).map((filePath) =>
+    relative(packageRoot, filePath).split("\\").join("/")
+  )
+}
+
 function runtimeSpecifiers(filePath: string): string[] {
   const sourceFile = ts.createSourceFile(
     filePath,
@@ -89,16 +103,13 @@ export function validateExportTargets(
   packageExports: PackageExports
 ): string[] {
   const errors: string[] = []
-  const packageFiles = walkFiles(packageRoot).map((filePath) =>
-    relative(packageRoot, filePath).split("\\").join("/")
-  )
 
   for (const [subpath, value] of Object.entries(packageExports)) {
     const targets = exportTargets(value)
     const wildcardTargets = targets.filter((target) => target.includes("*"))
     const captures = new Set(
       wildcardTargets.flatMap((target) =>
-        packageFiles.flatMap((filePath) => {
+        wildcardFiles(packageRoot, target).flatMap((filePath) => {
           const capture = wildcardCapture(target, filePath)
           return capture === null ? [] : [capture]
         })

@@ -4,58 +4,31 @@ type EntryTuple = readonly [
   name: string,
   source: string,
   exportSubpath?: string,
-  types?: string,
 ]
 
 const declarationRoots = [
-  ["f0", "src/f0.ts", ".", "./dist/f0.d.ts"],
-  [
-    "experimental",
-    "src/experimental.ts",
-    "./experimental",
-    "./dist/experimental.d.ts",
-  ],
-  ["ai", "src/ai.ts", "./ai", "./dist/ai.d.ts"],
-  [
-    "component-status",
-    "src/component-status.ts",
-    "./component-status",
-    "./dist/component-status.d.ts",
-  ],
+  ["f0", "src/f0.ts", "."],
+  ["experimental", "src/experimental.ts", "./experimental"],
+  ["ai", "src/ai.ts", "./ai"],
+  ["component-status", "src/component-status.ts", "./component-status"],
   [
     "i18n-provider-defaults",
     "src/lib/providers/i18n/i18n-provider-defaults.ts",
     "./i18n-provider-defaults",
-    "./dist/lib/providers/i18n/i18n-provider-defaults.d.ts",
   ],
 ] as const satisfies readonly EntryTuple[]
 
 function componentEntry(name: string, extension: "ts" | "tsx"): EntryTuple {
-  return [
-    name,
-    `src/components/${name}/index.${extension}`,
-    `./${name}`,
-    `./dist/components/${name}/index.d.ts`,
-  ]
+  return [name, `src/components/${name}/index.${extension}`, `./${name}`]
 }
 
 const exportedRuntimeEntries = [
   componentEntry("F0Alert", "ts"),
-  [
-    "F0Box",
-    "src/lib/F0Box/index.tsx",
-    "./F0Box",
-    "./dist/lib/F0Box/index.d.ts",
-  ],
+  ["F0Box", "src/lib/F0Box/index.tsx", "./F0Box"],
   componentEntry("F0Button", "ts"),
   componentEntry("F0Card", "tsx"),
   componentEntry("F0DatePicker", "ts"),
-  [
-    "F0Dialog",
-    "src/patterns/F0Dialog/index.tsx",
-    "./F0Dialog",
-    "./dist/patterns/F0Dialog/index.d.ts",
-  ],
+  ["F0Dialog", "src/patterns/F0Dialog/index.tsx", "./F0Dialog"],
   componentEntry("F0Heading", "tsx"),
   componentEntry("F0NumberInput", "tsx"),
   componentEntry("F0Select", "tsx"),
@@ -69,8 +42,14 @@ const legacyRuntimeEntries = [
   ["F0AiChat", "src/kits/ai/F0AiChat/index.ts"],
 ] as const satisfies readonly EntryTuple[]
 
+function declarationPath(source: string): string {
+  return `./dist/${source
+    .replace(/^src\//, "")
+    .replace(/\.(?:ts|tsx|mts|cts)$/, ".d.ts")}`
+}
+
 function publicationEntry(
-  [name, source, exportSubpath, types]: EntryTuple,
+  [name, source, exportSubpath]: EntryTuple,
   declarationRoot = false
 ) {
   return {
@@ -78,7 +57,9 @@ function publicationEntry(
     source,
     declarationRoot,
     export:
-      exportSubpath && types ? { subpath: exportSubpath, types } : undefined,
+      exportSubpath === undefined
+        ? undefined
+        : { subpath: exportSubpath, types: declarationPath(source) },
   }
 }
 

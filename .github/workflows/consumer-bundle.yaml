@@ -1,4 +1,4 @@
-name: Consumer Bundle Baseline
+name: Consumer Bundle Contract
 on:
   pull_request:
     branches: [main]
@@ -18,16 +18,16 @@ jobs:
       needs.detect-changes.outputs.package_react == 'true' &&
       github.head_ref != 'release-please--branches--master' &&
       !contains(github.event.pull_request.labels.*.name, 'autorelease')
-    name: "[⚛️ REACT] Consumer bundle baseline"
+    name: "[⚛️ REACT] Consumer bundle contract"
     runs-on: ubuntu-22.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
-      - uses: ./.github/actions/setup-node-pnpm
         with:
           node-version: "24.20.0"
+          cache: pnpm
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Build core package

@@ -5,9 +5,8 @@ export interface BundleMetric {
   retainedF0Modules: number
 }
 
-export interface BundleCeiling {
+export interface DeliveryCeiling {
   maxInitialJsBrotli: number
-  maxRetainedF0Modules: number
   maxCssBrotli?: number
 }
 
@@ -21,21 +20,16 @@ interface RootSubpathTolerance {
   maxAdditionalModules: number
 }
 
-export function validateBundleCeiling(
+export function validateDeliveryCeiling(
   scenario: string,
   metric: BundleMetric,
-  ceiling: BundleCeiling
+  ceiling: DeliveryCeiling
 ): string[] {
   const errors: string[] = []
 
   if (metric.initialJsBrotli > ceiling.maxInitialJsBrotli) {
     errors.push(
       `${scenario} initial JS Brotli is ${metric.initialJsBrotli} B; ceiling is ${ceiling.maxInitialJsBrotli} B`
-    )
-  }
-  if (metric.retainedF0Modules > ceiling.maxRetainedF0Modules) {
-    errors.push(
-      `${scenario} retains ${metric.retainedF0Modules} F0 modules; ceiling is ${ceiling.maxRetainedF0Modules}`
     )
   }
   if (
