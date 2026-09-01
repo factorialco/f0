@@ -1,6 +1,6 @@
 import { GroupingDefinition, RecordType } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
-import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
+import { FiltersDefinition } from "@/patterns/F0FilterPicker/types"
 import { F0SegmentedControl } from "@/experimental/Actions/F0SegmentedControl"
 
 import { ItemActionsDefinition } from "../item-actions"

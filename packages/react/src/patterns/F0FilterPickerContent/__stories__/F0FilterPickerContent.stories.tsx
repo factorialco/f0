@@ -8,9 +8,9 @@ import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import type {
   FiltersDefinition,
   FiltersState,
-} from "../../OneFilterPicker/types"
+} from "../../F0FilterPicker/types"
 
-import { filterDefinition } from "../../OneFilterPicker/__stories__/mockData"
+import { filterDefinition } from "../../F0FilterPicker/__stories__/mockData"
 import { F0FilterPickerContent } from "../index"
 
 const simpleFilterDefinition = {

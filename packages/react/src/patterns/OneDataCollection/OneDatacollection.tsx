@@ -15,7 +15,7 @@ import type {
   FiltersDefinition,
   FiltersState,
   PresetsDefinition,
-} from "@/patterns/OneFilterPicker/types"
+} from "@/patterns/F0FilterPicker/types"
 
 import { F0ActionBar } from "@/components/F0ActionBar"
 import { OneEmptyState } from "@/components/OneEmptyState"
@@ -30,8 +30,8 @@ import { useLayout } from "@/layouts/LayoutProvider"
 import { useI18n } from "@/lib/providers/i18n"
 import { useDebounceBoolean } from "@/lib/useDebounceBoolean"
 import { cn } from "@/lib/utils"
-import { OneFilterPicker } from "@/patterns/OneFilterPicker"
-import { getActiveFilterKeys } from "@/patterns/OneFilterPicker/internal/getActiveFilterKeys"
+import { F0FilterPicker } from "@/patterns/F0FilterPicker"
+import { getActiveFilterKeys } from "@/patterns/F0FilterPicker/internal/getActiveFilterKeys"
 import { Spinner } from "@/ui/Spinner"
 
 import type {
@@ -1668,7 +1668,7 @@ const OneDataCollectionComp = <
             </div>
           )}
           <div className="flex-1">
-            <OneFilterPicker
+            <F0FilterPicker
               filters={effectiveFilters}
               value={activeCurrentFilters}
               presets={mergedPresets}
@@ -1750,7 +1750,7 @@ const OneDataCollectionComp = <
                   />
                 )}
               </div>
-            </OneFilterPicker>
+            </F0FilterPicker>
           </div>
         </div>
       )}

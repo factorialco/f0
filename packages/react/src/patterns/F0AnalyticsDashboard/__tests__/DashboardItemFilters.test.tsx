@@ -6,7 +6,7 @@ import { DashboardItem } from "../components/DashboardItem/DashboardItem"
 
 import type { DashboardItemFiltersConfig } from "../types"
 
-vi.mock("@/patterns/OneFilterPicker/components/FilterChipButton", () => ({
+vi.mock("@/patterns/F0FilterPicker/components/FilterChipButton", () => ({
   FilterChipButton: () => <span data-testid="filter-chip-sentinel" />,
 }))
 

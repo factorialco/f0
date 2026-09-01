@@ -30,7 +30,7 @@ import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useData
 import { ItemActionsDefinition } from "@/patterns/OneDataCollection/item-actions"
 import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import { SummariesDefinition } from "@/patterns/OneDataCollection/summary"
-import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
+import { FiltersDefinition } from "@/patterns/F0FilterPicker/types"
 
 import type {
   CellRendererProps,

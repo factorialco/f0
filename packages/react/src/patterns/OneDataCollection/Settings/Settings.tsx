@@ -11,7 +11,7 @@ import {
 } from "@/hooks/datasource"
 import { Reset, Sliders } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
-import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
+import { FiltersDefinition } from "@/patterns/F0FilterPicker/types"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 
 import { ItemActionsDefinition } from "../item-actions"

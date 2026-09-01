@@ -334,7 +334,7 @@ export { F0MyComponent } from "./F0MyComponent"
 export type { F0MyComponentProps } from "./F0MyComponent"
 ```
 
-This pattern is used by: `F0Select`, `RichTextEditor`, `RadarChart`, `Await`, `OneFilterPicker`, `F0FilterPickerContent`, `F0AvatarFile`, `NotesTextEditor`, `OneDateNavigator`, `Dropdown`, `MobileDropdown`.
+This pattern is used by: `F0Select`, `RichTextEditor`, `RadarChart`, `Await`, `F0FilterPicker`, `F0FilterPickerContent`, `F0AvatarFile`, `NotesTextEditor`, `OneDateNavigator`, `Dropdown`, `MobileDropdown`.
 
 ### When to Use Each Pattern
 

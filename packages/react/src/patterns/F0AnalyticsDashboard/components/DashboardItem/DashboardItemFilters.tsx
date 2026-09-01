@@ -13,10 +13,10 @@ import { ButtonInternal } from "@/components/F0Button/internal"
 import { ArrowLeft, Filter } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { F0DialogContext } from "@/patterns/F0Dialog"
-import { FilterContent } from "@/patterns/OneFilterPicker/components/FilterContent"
-import { FilterList } from "@/patterns/OneFilterPicker/components/FilterList"
-import { getActiveFilterKeys } from "@/patterns/OneFilterPicker/internal/getActiveFilterKeys"
-import { getActiveFiltersValue } from "@/patterns/OneFilterPicker/internal/getActiveFiltersValue"
+import { FilterContent } from "@/patterns/F0FilterPicker/components/FilterContent"
+import { FilterList } from "@/patterns/F0FilterPicker/components/FilterList"
+import { getActiveFilterKeys } from "@/patterns/F0FilterPicker/internal/getActiveFilterKeys"
+import { getActiveFiltersValue } from "@/patterns/F0FilterPicker/internal/getActiveFiltersValue"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 
 import type {
@@ -31,7 +31,7 @@ import type {
  * filters.
  *
  * The popover is single-pane with drill-in navigation — a list of available
- * filters, then the selected filter's form — reusing the OneFilterPicker
+ * filters, then the selected filter's form — reusing the F0FilterPicker
  * building blocks. Edits are held as a draft and only emitted through
  * `onChange` when the user applies; dismissing the popover discards the
  * draft.
@@ -176,7 +176,7 @@ export function DashboardItemFilters<
 
   const handleApply = () => {
     // Emit only active filters so cleared/incomplete entries are stripped,
-    // mirroring OneFilterPicker's apply semantics.
+    // mirroring F0FilterPicker's apply semantics.
     onChange(getActiveFiltersValue(filters, draftValue, i18n))
     setIsOpen(false)
     onOpenChange?.(false)

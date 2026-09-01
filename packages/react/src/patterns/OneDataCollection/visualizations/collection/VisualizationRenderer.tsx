@@ -4,7 +4,7 @@ import {
   RecordType,
 } from "@/hooks/datasource"
 
-import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
+import { FiltersDefinition } from "@/patterns/F0FilterPicker/types"
 import { DataCollectionSource } from "../../hooks/useDataCollectionSource/types"
 import { ItemActionsDefinition } from "../../item-actions"
 import { NavigationFiltersDefinition } from "../../navigationFilters/types"

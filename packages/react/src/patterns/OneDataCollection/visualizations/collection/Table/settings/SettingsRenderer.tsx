@@ -1,4 +1,4 @@
-import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
+import { FiltersDefinition } from "@/patterns/F0FilterPicker/types"
 import { SummariesDefinition } from "@/patterns/OneDataCollection/summary"
 import { RecordType } from "@/hooks/datasource"
 import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"

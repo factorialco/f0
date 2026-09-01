@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useCallback, useEffect, useMemo } from "react"
 
-import type { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
+import type { FiltersDefinition } from "@/patterns/F0FilterPicker/types"
 import type { KanbanProps } from "@/ui/Kanban/types"
 
 import { useDataCollectionLanesData } from "@/patterns/OneDataCollection/hooks/useDataCollectionData/useDataCollectionLanesData"

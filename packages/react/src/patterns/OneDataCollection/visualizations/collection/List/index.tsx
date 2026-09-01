@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useEffect } from "react"
 
-import type { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
+import type { FiltersDefinition } from "@/patterns/F0FilterPicker/types"
 
 import {
   isInfiniteScrollPagination,

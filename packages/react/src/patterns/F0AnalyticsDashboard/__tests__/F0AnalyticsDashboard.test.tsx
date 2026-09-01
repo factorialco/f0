@@ -10,7 +10,7 @@ import {
 import type {
   FiltersDefinition,
   FiltersState,
-} from "@/patterns/OneFilterPicker/types"
+} from "@/patterns/F0FilterPicker/types"
 import {
   AiChatStateProvider,
   useAiChat,

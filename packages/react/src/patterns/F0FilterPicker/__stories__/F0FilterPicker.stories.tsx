@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { useEffect, useState } from "react"
-import { expect, fn, userEvent, within } from "storybook/test"
+import { expect, fn, userEvent, waitFor, within } from "storybook/test"
 
 import { Input } from "@/ui/input"
 import { Label } from "@/ui/label"
@@ -14,10 +14,10 @@ import type {
 } from "../types"
 
 import { InFilterOptions } from "../filterTypes/InFilter/types"
-import * as OneFilterPicker from "../index"
+import * as F0FilterPicker from "../index"
 import {
-  OneFilterPicker as OneFilterPickerComponent,
-  OneFilterPickerRootProps,
+  F0FilterPicker as F0FilterPickerComponent,
+  F0FilterPickerRootProps,
 } from "../index"
 import {
   deserializeFilters,
@@ -36,8 +36,12 @@ import {
 const meta = {
   title: "Filters/FilterPicker",
   tags: ["!autodocs", "stable"],
-  component: (props: OneFilterPickerRootProps<FiltersDefinition>) => {
-    return <OneFilterPickerComponent {...props} />
+  // Axe blocks on every story in this file. Stories that render applied-filter
+  // chips wait for the entry animation via `settleChips` first, so the scan
+  // measures the resting hit areas rather than a chip mid-flight.
+  parameters: { a11y: { test: "error" } },
+  component: (props: F0FilterPickerRootProps<FiltersDefinition>) => {
+    return <F0FilterPickerComponent {...props} />
   },
   decorators: [
     (Story, { args, parameters }) => {
@@ -66,6 +70,53 @@ const meta = {
 
 export default meta
 
+/**
+ * Wait until the applied-filter chips row has stopped moving.
+ *
+ * Two things make the row settle late: `in` filters resolve their options
+ * asynchronously to build each chip's label, so chips keep arriving after the
+ * first paint, and every chip animates in from a smaller box. Axe scans right
+ * after the story renders, so without this it catches a chip mid-flight and
+ * measures its close button at ~14×19px, failing `target-size` (WCAG 2.2
+ * SC 2.5.8) even though the resting button is 24×24 with a 24px offset.
+ *
+ * Waiting for "all buttons are big enough" is not sufficient on its own: it can
+ * be true between two chips arriving. Require the chip count to hold steady as
+ * well, for three consecutive polls.
+ */
+const settleChips = async ({
+  canvasElement,
+}: {
+  canvasElement: HTMLElement
+}) => {
+  const MIN_TARGET_PX = 24
+  const STABLE_POLLS = 3
+  const closeButtons = () => [
+    ...canvasElement.querySelectorAll<HTMLElement>(
+      'button[aria-label="Close"]'
+    ),
+  ]
+
+  let stablePolls = 0
+  let lastCount = -1
+  await waitFor(
+    () => {
+      const buttons = closeButtons()
+      const atRestingSize =
+        buttons.length > 0 &&
+        buttons.every((button) => {
+          const { width, height } = button.getBoundingClientRect()
+          return width >= MIN_TARGET_PX && height >= MIN_TARGET_PX
+        })
+      stablePolls =
+        atRestingSize && buttons.length === lastCount ? stablePolls + 1 : 0
+      lastCount = buttons.length
+      expect(stablePolls).toBeGreaterThanOrEqual(STABLE_POLLS)
+    },
+    { timeout: 15000, interval: 100 }
+  )
+}
+
 export const Interactive: StoryObj = {
   args: {
     filters: filterDefinition,
@@ -74,6 +125,7 @@ export const Interactive: StoryObj = {
       department: ["engineering"],
     },
   },
+  play: settleChips,
 }
 
 export const WithInitialFilters: StoryObj = {
@@ -85,6 +137,7 @@ export const WithInitialFilters: StoryObj = {
       manager: ["alice"],
     },
   },
+  play: settleChips,
 }
 
 export const WithPresets: StoryObj = {
@@ -147,7 +200,7 @@ const PresetsOverflowCounterConsistencyComponent = ({
         in visible pills and in the collapsed dropdown. Use the width control to
         force collapse/expand behavior.
       </p>
-      <OneFilterPickerComponent
+      <F0FilterPickerComponent
         filters={filterDefinition}
         value={filters}
         presets={presetsWithCount}
@@ -186,9 +239,10 @@ export const WithPresetsAndInitialFilters: StoryObj = {
     },
     presets: samplePresets,
   },
+  play: settleChips,
 }
 
-type Story = StoryObj<typeof OneFilterPicker.Root>
+type Story = StoryObj<typeof F0FilterPicker.Root>
 
 export const Default: Story = {
   args: {
@@ -236,6 +290,7 @@ export const Snapshot: Story = {
     onChange: fn(),
   },
   parameters: withSnapshot({}),
+  play: settleChips,
 }
 
 /**
@@ -313,12 +368,12 @@ export const WithUrlSerialization: Story = {
             in the URL. You can modify it to see how the filters update.
           </p>
         </div>
-        <OneFilterPickerComponent
+        <F0FilterPickerComponent
           {...args}
           filters={filterDefinition}
           value={filters}
           onChange={setFilters}
-        ></OneFilterPickerComponent>
+        ></F0FilterPickerComponent>
       </div>
     )
   },
@@ -375,13 +430,13 @@ export const WithPresetsAndUrlSerialization: Story = {
             in the URL. You can modify it to see how the filters update.
           </p>
         </div>
-        <OneFilterPickerComponent
+        <F0FilterPickerComponent
           {...args}
           filters={filterDefinition}
           value={filters}
           presets={samplePresets}
           onChange={setFilters}
-        ></OneFilterPickerComponent>
+        ></F0FilterPickerComponent>
       </div>
     )
   },
@@ -487,11 +542,11 @@ export const WithAsyncOptions: Story = {
 
     return (
       <div className="w-[600px]">
-        <OneFilterPickerComponent
+        <F0FilterPickerComponent
           filters={asyncDefinition}
           value={filters}
           onChange={setFilters}
-        ></OneFilterPickerComponent>
+        ></F0FilterPickerComponent>
       </div>
     )
   },
@@ -553,11 +608,11 @@ const LargeAsyncOptionsComponent = (props: { cache: boolean }) => {
           when the filter is opened.
         </p>
       )}
-      <OneFilterPickerComponent
+      <F0FilterPickerComponent
         filters={largeAsyncDefinition}
         value={filters}
         onChange={setFilters}
-      ></OneFilterPickerComponent>
+      ></F0FilterPickerComponent>
     </div>
   )
 }
@@ -577,7 +632,7 @@ const SourceBasedPaginationComponent = () => {
 
   return (
     <div className="w-96">
-      <OneFilterPickerComponent
+      <F0FilterPickerComponent
         filters={sourceBasedDefinition}
         value={filters}
         onChange={setFilters}

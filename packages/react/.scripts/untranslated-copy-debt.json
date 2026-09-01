@@ -118,6 +118,13 @@
     "src/patterns/F0AnalyticsDashboard/components/FilterBar/FilterBarSkeleton.tsx": [
       "Loading filters"
     ],
+    "src/patterns/F0FilterPicker/components/FiltersControls.tsx": ["Back"],
+    "src/patterns/F0FilterPicker/filterTypes/DateFilter/DateFilter.tsx": [
+      "Clear"
+    ],
+    "src/patterns/F0FilterPicker/filterTypes/InFilter/InFilter.tsx": [
+      "No options available"
+    ],
     "src/patterns/F0Form/components/ActionBar.tsx": [
       "Go to next error",
       "Go to previous error"
@@ -148,13 +155,6 @@
     "src/patterns/OneDateNavigator/components/DateNavigatorTrigger.tsx": [
       "Next",
       "Previous"
-    ],
-    "src/patterns/OneFilterPicker/components/FiltersControls.tsx": ["Back"],
-    "src/patterns/OneFilterPicker/filterTypes/DateFilter/DateFilter.tsx": [
-      "Clear"
-    ],
-    "src/patterns/OneFilterPicker/filterTypes/InFilter/InFilter.tsx": [
-      "No options available"
     ],
     "src/sds/Home/ClockIn/ClockInControls/index.tsx": [
       "Select break type",

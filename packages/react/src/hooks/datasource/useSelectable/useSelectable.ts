@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
-import type { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
+import type { FiltersDefinition } from "@/patterns/F0FilterPicker/types"
 
 import type { SortingsDefinition } from "../types/sortings.typings"
 

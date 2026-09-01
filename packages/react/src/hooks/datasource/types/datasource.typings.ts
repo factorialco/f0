@@ -4,7 +4,7 @@ import {
   FiltersDefinition,
   FiltersState,
   PresetsDefinition,
-} from "@/patterns/OneFilterPicker/types"
+} from "@/patterns/F0FilterPicker/types"
 import { PromiseState } from "@/lib/promise-to-observable"
 
 import { DataAdapter, PaginationInfo } from "./fetch.typings"

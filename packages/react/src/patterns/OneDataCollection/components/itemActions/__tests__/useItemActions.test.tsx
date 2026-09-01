@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest"
 
 import type { GroupingDefinition, SortingsDefinition } from "@/hooks/datasource"
-import type { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
+import type { FiltersDefinition } from "@/patterns/F0FilterPicker/types"
 import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource/types"
 import { ItemActionsDefinition } from "@/patterns/OneDataCollection/item-actions"
 import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"

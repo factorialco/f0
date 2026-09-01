@@ -408,7 +408,7 @@ export const WithDataSource: Story = {
 // like the office → floor hierarchy below.
 const GroupedOptionsExample = () => {
   // Parent selection (offices) lives in `value`; nested child selections
-  // (spaces) live under their own filter key, mirroring how OneFilterPicker
+  // (spaces) live under their own filter key, mirroring how F0FilterPicker
   // stores sibling-filter values.
   const [officeValues, setOfficeValues] = useState<string[]>([])
   const [allFiltersValue, setAllFiltersValue] = useState<

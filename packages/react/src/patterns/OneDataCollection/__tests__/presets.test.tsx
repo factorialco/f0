@@ -13,7 +13,7 @@ import {
   DataCollectionStorage,
   DataCollectionStorageHandler,
 } from "@/lib/providers/datacollection/types"
-import type { PresetsDefinition } from "@/patterns/OneFilterPicker/types"
+import type { PresetsDefinition } from "@/patterns/F0FilterPicker/types"
 
 import { useDataCollectionSource } from "../hooks/useDataCollectionSource"
 import {

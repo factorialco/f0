@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import type {
   FiltersDefinition,
   FiltersState,
-} from "@/patterns/OneFilterPicker/types"
+} from "@/patterns/F0FilterPicker/types"
 
 /**
  * Return type of the useDashboardItemData hook.

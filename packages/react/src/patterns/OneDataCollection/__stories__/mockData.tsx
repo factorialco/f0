@@ -57,7 +57,7 @@ import {
   FilterDefinition,
   FiltersState,
   PresetsDefinition,
-} from "@/patterns/OneFilterPicker"
+} from "@/patterns/F0FilterPicker"
 import { mockImage } from "@/testing/mocks/images"
 
 import { OneDataCollection } from ".."

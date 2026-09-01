@@ -7,7 +7,7 @@ import { defaultTranslations, I18nProvider } from "@/lib/providers/i18n"
 import { zeroRender as render } from "@/testing/test-utils"
 
 import type { OnSelectItemsCallback } from "@/hooks/datasource"
-import type { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
+import type { FiltersDefinition } from "@/patterns/F0FilterPicker/types"
 
 import { useDataCollectionSource } from "../hooks/useDataCollectionSource"
 import { OneDataCollection } from "../index"

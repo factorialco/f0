@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest"
 
 import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
 
-import type { FiltersDefinition } from "../../OneFilterPicker/types"
+import type { FiltersDefinition } from "../../F0FilterPicker/types"
 
 import { F0FilterPickerContent } from "../F0FilterPickerContent"
 
