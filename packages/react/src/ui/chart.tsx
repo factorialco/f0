@@ -360,6 +360,11 @@ const ChartLegendContent = React.forwardRef<
       nameKey?: string
       leftShift?: number
       hiddenKey?: string
+      /**
+       * Render line series with a line-stroke swatch (dashed when the series
+       * is dashed) instead of the round dot.
+       */
+      lineIndicators?: boolean
     }
 >(
   (
@@ -371,6 +376,7 @@ const ChartLegendContent = React.forwardRef<
       nameKey,
       hiddenKey,
       leftShift = 0,
+      lineIndicators = false,
     },
     ref
   ) => {
@@ -408,7 +414,7 @@ const ChartLegendContent = React.forwardRef<
             >
               {itemConfig?.icon && !hideIcon ? (
                 <itemConfig.icon />
-              ) : itemConfig && item.type === "line" ? (
+              ) : itemConfig && lineIndicators && item.type === "line" ? (
                 <div
                   className="w-4 shrink-0 border-t-2"
                   style={{
