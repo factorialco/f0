@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.75.0](https://github.com/factorialco/f0/compare/f0-react-v6.74.3...f0-react-v6.75.0) (2026-09-01)
+
+
+### Features
+
+* **OneDataCollection:** let secondary actions show a counter ([#5249](https://github.com/factorialco/f0/issues/5249)) ([d7c8230](https://github.com/factorialco/f0/commit/d7c8230a902e181c5e29d59521b29e07c093f80e))
+
 ## [6.74.3](https://github.com/factorialco/f0/compare/f0-react-v6.74.2...f0-react-v6.74.3) (2026-09-01)
 
 
