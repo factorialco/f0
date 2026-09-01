@@ -503,6 +503,64 @@ export const NeedsYouWide: Story = {
   parameters: { widgetWidth: "40rem" },
 }
 
+/**
+ * A SUBTITLE THAT CARRIES BAD NEWS. The subtitle is normally the muted half of
+ * the title's line; a row whose subtitle is what has gone WRONG with it —
+ * overdue, rejected, over budget — sets `subtitleCritical` and says it in red,
+ * the leading dot included.
+ *
+ * Per row, like `unread`: lateness is a state of that row's data, so the first
+ * row here reports it while the second one, with the same schema, still
+ * murmurs "Due Friday". The titles are the same colour in both — a title says
+ * what the row IS, not what's wrong with it.
+ *
+ * `subtitleOptional` is the other half of the story: the last row has nothing to
+ * add, so it carries no subtitle and no stray separator. Unlike an optional
+ * second line this changes no geometry — the subtitle shares the title's line,
+ * so the glyph column and the row heights are those of an even list.
+ *
+ * Keep the red for what the reader has to act on: a list where every subtitle is
+ * critical has said nothing.
+ */
+export const CriticalSubtitles: Story = {
+  args: {
+    header: { title: "Your tasks", count: 3 },
+    action: { label: "See all", onClick: () => {} },
+    slots: [
+      listSlot(
+        {
+          left: "icon",
+          subtitleOptional: true,
+          clickBehavior: "link",
+        },
+        [
+          {
+            id: "expenses",
+            title: "Expenses report",
+            subtitle: "2 days overdue",
+            subtitleCritical: true,
+            avatar: { icon: Receipt, color: "viridian" },
+            href: "/expenses",
+          },
+          {
+            id: "review",
+            title: "Performance review",
+            subtitle: "Due Friday",
+            avatar: { icon: Clock, color: "purple" },
+            href: "/reviews",
+          },
+          {
+            id: "onboarding",
+            title: "Onboarding checklist",
+            avatar: { icon: PersonPlus, color: "army" },
+            href: "/onboarding",
+          },
+        ]
+      ),
+    ],
+  },
+}
+
 /** The pool `ItemChurn` adds from, cycled so the button never runs out. */
 const CHURN_ITEMS = [
   { title: "You never clocked out yesterday", icon: Clock, color: "purple" },

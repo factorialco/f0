@@ -343,6 +343,37 @@ describe("list slot schema", () => {
     expect(container.querySelector(".size-6")).toBeNull()
   })
 
+  test("subtitleOptional lets only some rows carry an inline subtitle, each row deciding its tone", () => {
+    zeroRender(
+      <SlotWidget
+        slots={[
+          listSlot({ subtitleOptional: true }, [
+            {
+              id: "1",
+              title: "Expenses report",
+              subtitle: "2 days overdue",
+              subtitleCritical: true,
+            },
+            { id: "2", title: "Performance review", subtitle: "Due Friday" },
+            { id: "3", title: "Onboarding" },
+          ]),
+        ]}
+      />
+    )
+
+    // The late row alone is critical; its neighbour still murmurs.
+    expect(screen.getByText("· 2 days overdue")).toHaveClass(
+      "text-f1-foreground-critical"
+    )
+    expect(screen.getByText("· Due Friday")).toHaveClass(
+      "text-f1-foreground-secondary"
+    )
+    // And a row with nothing to add says nothing — no stray separator.
+    expect(screen.getByText("Onboarding").parentElement?.textContent).toBe(
+      "Onboarding"
+    )
+  })
+
   test("a mixed list does NOT auto-compact — folding its few second lines away would hide the only thing telling those rows apart", () => {
     const many = Array.from({ length: LIST_COMPACT_AFTER + 1 }, (_, i) => ({
       id: String(i),

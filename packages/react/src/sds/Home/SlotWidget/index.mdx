@@ -332,6 +332,7 @@ listSlot(
 | `right`               | `counter`, one avatar type (e.g. a sender), or `<type>-list` (a strip of faces) — or omitted                   | each row supplies `count`, `rightAvatar`, or `avatars` (+ `remainingCount`)         |
 | `rightOptional`       | `true`                                                                                                         | the `right` data is allowed but not demanded — rows without it trail nothing        |
 | `subtitleRequired`    | `true`                                                                                                         | every row carries a `subtitle`, inline after the title                              |
+| `subtitleOptional`    | `true`                                                                                                         | an inline subtitle is allowed but not demanded — only some rows carry one           |
 | `descriptionRequired` | `true`                                                                                                         | every row carries a `description` — the second line                                 |
 | `descriptionOptional` | `true`                                                                                                         | a second line is allowed but not demanded — some rows are two-line, some one        |
 | `clickBehavior`       | `"link"` — or omitted for inert rows                                                                           | every row carries an `href` and renders as a REAL anchor (see Click handling)       |
@@ -341,15 +342,61 @@ listSlot(
 Rows may also carry `unread` for the accent dot on the left glyph, and
 `actions` for what can be done to that row (see **Row actions**).
 
+### A subtitle that carries bad news
+
+A subtitle normally **murmurs**: it is the muted half of the title's line, the
+department behind a name or the date behind a task. When what it says is what has
+gone **wrong** with the row — overdue, rejected, over budget — the row sets
+`subtitleCritical` and the subtitle (its leading dot included) draws in
+`text-f1-foreground-critical` instead:
+
+```tsx
+listSlot({ left: "icon", subtitleOptional: true, clickBehavior: "link" }, [
+  {
+    id: "expenses",
+    title: "Expenses report",
+    subtitle: "2 days overdue", // ← in critical red
+    subtitleCritical: true,
+    avatar: { icon: Receipt, color: "viridian" },
+    href: "/expenses",
+  },
+  {
+    id: "review",
+    title: "Performance review",
+    subtitle: "Due Friday", // ← still muted
+    avatar: { icon: Clock, color: "purple" },
+    href: "/reviews",
+  },
+  // Nothing to add: no subtitle, no separator. That's `subtitleOptional`.
+  {
+    id: "onboarding",
+    title: "Onboarding checklist",
+    avatar: { icon: PersonPlus, color: "army" },
+    href: "/onboarding",
+  },
+])
+```
+
+It is a **per-row** flag, not a schema one, for the same reason `unread` is:
+lateness is a state of that row's data, so one list holds rows that report it
+beside rows that have nothing to report. The title never changes colour with it —
+it says what the row **is**, and the subtitle is what carries the news.
+
+Keep it for what the reader has to act on. A list where every subtitle is red has
+said nothing: red is only loud while the row beside it is quiet.
+
+<Canvas of={SlotWidgetStories.CriticalSubtitles} />
+
 ### Even rows, and rows that aren't
 
 The schema's default is **evenness**: declaring `right: "person"` means every
 row supplies a `rightAvatar`, and `descriptionRequired` means every row supplies
 a second line. That is what makes a list read as a list rather than a pile.
 
-A **feed** is the exception, and the two `…Optional` flags are how you say so.
-`rightOptional` and `descriptionOptional` keep the schema's type checking — the
-data still has to be the kind that was declared — while letting rows go without:
+A **feed** is the exception, and the `…Optional` flags are how you say so.
+`rightOptional`, `subtitleOptional` and `descriptionOptional` keep the schema's
+type checking — the data still has to be the kind that was declared — while
+letting rows go without:
 
 ```tsx
 listSlot(

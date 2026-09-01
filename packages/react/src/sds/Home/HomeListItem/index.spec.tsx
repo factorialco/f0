@@ -20,6 +20,33 @@ describe("HomeListItem", () => {
     expect(screen.getByText("Requested 3 days off")).toBeInTheDocument()
   })
 
+  test("says a subtitle carrying bad news in the critical colour — muted by default", () => {
+    const { rerender } = zeroRender(
+      <HomeListItem title="Expenses report" subtitle="Due Friday" />
+    )
+
+    const subtitle = () => screen.getByText("· Due Friday")
+
+    expect(subtitle()).toHaveClass("text-f1-foreground-secondary")
+    expect(subtitle()).not.toHaveClass("text-f1-foreground-critical")
+
+    rerender(
+      <HomeListItem
+        title="Expenses report"
+        subtitle="Due Friday"
+        subtitleCritical
+      />
+    )
+
+    // The dot goes critical with the text rather than staying muted.
+    expect(subtitle()).toHaveClass("text-f1-foreground-critical")
+    expect(subtitle()).not.toHaveClass("text-f1-foreground-secondary")
+    // The title is untouched: it says what the row IS, not what's wrong with it.
+    expect(screen.getByText("Expenses report")).toHaveClass(
+      "text-f1-foreground"
+    )
+  })
+
   test("draws a left slot when given an avatar, none otherwise", () => {
     const { container, rerender } = zeroRender(
       <HomeListItem

@@ -147,6 +147,28 @@ test("the OPTIONAL flags let a feed mix rows the schema would otherwise even out
     // @ts-expect-error a subtitle is still not allowed unless declared
     { id: 1, title: "x", subtitle: "y" },
   ])
+
+  // A subtitle only SOME rows have — the late ones say how late they are.
+  listSlot({ subtitleOptional: true }, [
+    { id: 1, title: "Expenses", subtitle: "2 days overdue" },
+    { id: 2, title: "Onboarding" },
+  ])
+})
+
+test("a row's subtitle may be critical — wherever a subtitle is declared at all", () => {
+  listSlot({ subtitleRequired: true }, [
+    { id: 1, title: "x", subtitle: "2 days overdue", subtitleCritical: true },
+    { id: 2, title: "y", subtitle: "Due Friday" },
+  ])
+  listSlot({ subtitleOptional: true }, [
+    { id: 1, title: "x", subtitle: "2 days overdue", subtitleCritical: true },
+    { id: 2, title: "y" },
+  ])
+
+  listSlot({}, [
+    // @ts-expect-error nothing to colour: this schema declares no subtitle
+    { id: 1, title: "x", subtitleCritical: true },
+  ])
 })
 
 test("an icon row may be tinted, and only with a colour from the palette", () => {

@@ -100,7 +100,9 @@ const ACTIONS_PINNED_CLASS = "pointer-events-auto opacity-100"
  * module glyph, an alert).
  *
  * The text stack is three optional voices: `title` leads, `subtitle` murmurs on
- * the same line after a dot, `description` takes the second line.
+ * the same line after a dot, `description` takes the second line. A subtitle
+ * carrying BAD NEWS about the row — overdue, rejected, over budget — stops
+ * murmuring and says so (`subtitleCritical`).
  *
  * A row can also carry `actions` — what you can DO to it without leaving the
  * widget (snooze it, dismiss it). They stay out of the way until the row is
@@ -119,6 +121,15 @@ export interface HomeListItemProps {
   title: string
   /** Muted, on the title's line, dot-separated. */
   subtitle?: string
+  /**
+   * Draws the `subtitle` CRITICAL rather than muted — the row is overdue,
+   * rejected, over budget. Per row, because it is a state of THAT row's data:
+   * one list holds rows whose subtitle is bad news and rows whose isn't.
+   *
+   * The title reads the same either way — it says what the row IS, and the
+   * subtitle is what has gone wrong with it. Inert without a `subtitle`.
+   */
+  subtitleCritical?: boolean
   /** The second line. */
   description?: string
   /** Trailing slot: a tag, a counter, people. */
@@ -152,6 +163,7 @@ export function HomeListItem({
   left,
   title,
   subtitle,
+  subtitleCritical = false,
   description,
   right,
   actions,
@@ -186,7 +198,17 @@ export function HomeListItem({
             {title}
           </span>
           {subtitle ? (
-            <span className="truncate text-f1-foreground-secondary">
+            // The dot takes the subtitle's colour with it: it is the subtitle's
+            // own punctuation, and a muted separator against a critical phrase
+            // reads as a rendering slip at this size.
+            <span
+              className={cn(
+                "truncate",
+                subtitleCritical
+                  ? "text-f1-foreground-critical"
+                  : "text-f1-foreground-secondary"
+              )}
+            >
               · {subtitle}
             </span>
           ) : null}
