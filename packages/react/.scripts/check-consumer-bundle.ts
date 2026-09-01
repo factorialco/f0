@@ -121,6 +121,14 @@ void props
 `
   )
   writeFileSync(
+    resolve(consumerDir, "root-consumer.ts"),
+    `import type { F0ButtonProps } from "@factorialco/f0-react"
+
+const props: F0ButtonProps = { label: "Save", "data-testid": "save" }
+void props
+`
+  )
+  writeFileSync(
     resolve(consumerDir, "tsconfig.json"),
     `${JSON.stringify(
       {
@@ -142,6 +150,26 @@ void props
   run(
     process.execPath,
     [TSC_PATH, "--project", resolve(consumerDir, "tsconfig.json")],
+    consumerDir
+  )
+  run(
+    process.execPath,
+    [
+      TSC_PATH,
+      "--ignoreConfig",
+      "--module",
+      "esnext",
+      "--moduleResolution",
+      "bundler",
+      "--noEmit",
+      "--skipLibCheck",
+      "--strict",
+      "--target",
+      "es2022",
+      "--types",
+      "react,react-dom",
+      resolve(consumerDir, "root-consumer.ts"),
+    ],
     consumerDir
   )
 }

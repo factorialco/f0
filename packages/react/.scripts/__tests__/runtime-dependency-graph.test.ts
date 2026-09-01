@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it } from "vitest"
 
 import {
   analyzeRuntimeDependencies,
-  findUnexpectedRuntimeCycles,
+  findRuntimeCycleDifferences,
   type RuntimeDependencyAnalysis,
 } from "../runtime-dependency-graph"
 
@@ -50,34 +50,40 @@ afterEach(() => {
 })
 
 describe("runtime dependency graph", () => {
-  it("allows known cycles to shrink but rejects new or merged cycle members", () => {
+  it("requires the current cycles to match the canonical baseline", () => {
     const baseline = [
       { files: ["src/a.ts", "src/b.ts", "src/c.ts"] },
       { files: ["src/d.ts", "src/e.ts"] },
     ]
 
     expect(
-      findUnexpectedRuntimeCycles(
+      findRuntimeCycleDifferences(
         [
           { files: ["src/a.ts", "src/b.ts"] },
           { files: ["src/d.ts", "src/e.ts"] },
         ],
         baseline
       )
-    ).toEqual([])
+    ).toEqual({
+      baselineOnly: [{ files: ["src/a.ts", "src/b.ts", "src/c.ts"] }],
+      currentOnly: [{ files: ["src/a.ts", "src/b.ts"] }],
+    })
 
     expect(
-      findUnexpectedRuntimeCycles(
+      findRuntimeCycleDifferences(
         [
           { files: ["src/a.ts", "src/b.ts", "src/new.ts"] },
           { files: ["src/c.ts", "src/d.ts"] },
         ],
         baseline
       )
-    ).toEqual([
-      { files: ["src/a.ts", "src/b.ts", "src/new.ts"] },
-      { files: ["src/c.ts", "src/d.ts"] },
-    ])
+    ).toEqual({
+      baselineOnly: baseline,
+      currentOnly: [
+        { files: ["src/a.ts", "src/b.ts", "src/new.ts"] },
+        { files: ["src/c.ts", "src/d.ts"] },
+      ],
+    })
   })
 
   it("reports static runtime cycles as canonical strongly connected groups", () => {

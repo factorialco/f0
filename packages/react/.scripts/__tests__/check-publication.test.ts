@@ -42,11 +42,18 @@ it("fails closed for an incomplete published package", () => {
   )
   writeFileSync(
     resolve(packageRoot, "dist/styles.css"),
-    '@font-face { src: url("fonts/missing.woff2") }'
+    `${Array.from(
+      { length: 10_000 },
+      (_, index) =>
+        `.c${index}{--x:${index.toString(36)}-${(
+          (index * 2_654_435_761) >>>
+          0
+        ).toString(36)}}`
+    ).join("")}@font-face { src: url("fonts/missing.woff2") }`
   )
   writeFileSync(
     resolve(packageRoot, "dist/esm/entry.js"),
-    'import "missing-package"\nimport "./missing.js"'
+    'import "missing-package"\nimport "./missing.js"\nmodule.exports = require("react")'
   )
   writeFileSync(
     resolve(packageRoot, "icons/app/index.js"),
@@ -64,6 +71,11 @@ it("fails closed for an incomplete published package", () => {
       "Non-production declaration is published: dist/components/__stories__/Example.stories.d.ts",
       "Source font is duplicated in the package: assets/fonts/Inter.woff2",
       "Published styles reference missing or unpackable asset: fonts/missing.woff2",
+      "Published styles are missing semantic icon class: text-f1-icon",
+      expect.stringMatching(
+        /^Published styles are \d+ B Brotli; ceiling is 49152 B$/
+      ),
+      "CommonJS syntax in preserved ESM: dist/esm/entry.js",
       "Undeclared preserved ESM import: dist/esm/entry.js -> missing-package",
       "Missing preserved ESM import: dist/esm/entry.js -> ./missing.js",
       "Missing preserved ESM import: icons/app/index.js -> ./Add",

@@ -5,8 +5,8 @@
   "type": "module",
   "main": "dist/src/functions/mcp.js",
   "scripts": {
-    "build": "tsc",
-    "build:watch": "tsc --watch"
+    "build": "tsc6",
+    "build:watch": "tsc6 --watch"
   },
   "dependencies": {
     "@azure/functions": "^4.6.0",

@@ -102,7 +102,7 @@
     "generate-icons:check": "node scripts/generate-icons.mjs --check",
     "format": "sh -c 'oxfmt \"${@:-src/}\"' --",
     "format:check": "sh -c 'oxfmt --check \"${@:-src/}\"' --",
-    "tsc": "tsc --noEmit"
+    "tsc": "tsc6 --noEmit"
   },
   "dependencies": {
     "tailwind-merge": "^3.4.0",

@@ -11,18 +11,22 @@ export interface RuntimeDependencyAnalysis {
   cycles: RuntimeDependencyCycle[]
 }
 
-export function findUnexpectedRuntimeCycles(
+export function findRuntimeCycleDifferences(
   current: RuntimeDependencyCycle[],
   baseline: RuntimeDependencyCycle[]
-): RuntimeDependencyCycle[] {
-  const baselineGroups = baseline.map((cycle) => new Set(cycle.files))
+): {
+  baselineOnly: RuntimeDependencyCycle[]
+  currentOnly: RuntimeDependencyCycle[]
+} {
+  const cycleKey = (cycle: RuntimeDependencyCycle): string =>
+    [...cycle.files].sort().join("\n")
+  const baselineKeys = new Set(baseline.map(cycleKey))
+  const currentKeys = new Set(current.map(cycleKey))
 
-  return current.filter(
-    (cycle) =>
-      !baselineGroups.some((group) =>
-        cycle.files.every((file) => group.has(file))
-      )
-  )
+  return {
+    baselineOnly: baseline.filter((cycle) => !currentKeys.has(cycleKey(cycle))),
+    currentOnly: current.filter((cycle) => !baselineKeys.has(cycleKey(cycle))),
+  }
 }
 
 interface AnalyzeRuntimeDependenciesOptions {

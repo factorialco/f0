@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url"
 
 import {
   analyzeRuntimeDependencies,
-  findUnexpectedRuntimeCycles,
+  findRuntimeCycleDifferences,
   type RuntimeDependencyCycle,
 } from "./runtime-dependency-graph"
 
@@ -55,33 +55,41 @@ function main(): void {
       "utf8"
     )
   ) as RuntimeDependencyCycle[]
-  const unexpectedCycles = findUnexpectedRuntimeCycles(
+  const cycleDifferences = findRuntimeCycleDifferences(
     analysis.cycles,
     baseline
   )
+  const hasDifferences =
+    cycleDifferences.currentOnly.length > 0 ||
+    cycleDifferences.baselineOnly.length > 0
 
   if (json) {
     process.stdout.write(
-      `${JSON.stringify({ ...analysis, unexpectedCycles }, null, 2)}\n`
+      `${JSON.stringify({ ...analysis, cycleDifferences }, null, 2)}\n`
     )
-  } else if (unexpectedCycles.length === 0) {
+  } else if (!hasDifferences) {
     consola.success(
-      `No new static runtime cycles across ${Object.keys(analysis.graph).length} production files (${analysis.cycles.length} known groups)`
+      `Runtime cycle baseline matches across ${Object.keys(analysis.graph).length} production files (${analysis.cycles.length} groups)`
     )
   } else {
     consola.error(
-      `Found ${unexpectedCycles.length} new static runtime cycle groups across ${Object.keys(analysis.graph).length} production files:`
+      `Runtime cycle baseline differs across ${Object.keys(analysis.graph).length} production files. Update the baseline in the same change that modifies a cycle.`
     )
-    for (let index = 0; index < unexpectedCycles.length; index++) {
-      const cycle = unexpectedCycles[index]
-      consola.log(`\n${index + 1}. ${cycle.files.length} files`)
+    for (const cycle of cycleDifferences.currentOnly) {
+      consola.log(`\nCurrent-only cycle (${cycle.files.length} files)`)
+      for (const file of cycle.files) {
+        consola.log(`   ${file}`)
+      }
+    }
+    for (const cycle of cycleDifferences.baselineOnly) {
+      consola.log(`\nBaseline-only cycle (${cycle.files.length} files)`)
       for (const file of cycle.files) {
         consola.log(`   ${file}`)
       }
     }
   }
 
-  if (unexpectedCycles.length > 0) {
+  if (hasDifferences) {
     process.exitCode = 1
   }
 }

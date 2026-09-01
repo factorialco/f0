@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "tsx src/index.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc6 --noEmit"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.50",

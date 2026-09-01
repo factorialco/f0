@@ -133,12 +133,13 @@
     "dev": "storybook dev -p 6006",
     "dev:docs": "DOCS_MODE=true pnpm run dev",
     "dev:sync": "pnpm build:prepare && tsx scripts/dev-sync.ts",
-    "build:types": "tsc --project ./tsconfig-build.json",
+    "build:types": "tsc6 --project ./tsconfig-build.json",
+    "build:declarations": "BUILD_TYPES=true BUILD_DECLARATIONS_ONLY=true NODE_OPTIONS=--max-old-space-size=8192 vite build",
     "build:prepare": "pnpm run build:types && run-p build-icons",
     "start": "pnpm run dev",
     "check:consumer-bundle": "tsx .scripts/check-consumer-bundle.ts",
-    "build": "tsc --project ./tsconfig-build.json && run-p build-icons && NODE_OPTIONS=--max-old-space-size=8192 vite build -- --tailwind && BUILD_PRESERVED_ESM=true NODE_OPTIONS=--max-old-space-size=8192 vite build && NODE_OPTIONS=--max-old-space-size=8192 BUILD_TYPES=true BUILD_DECLARATIONS_ONLY=true vite build && pnpm run check:consumer-bundle",
-    "build-icons": "tsc --project ./tsconfig-build-icons.json",
+    "build": "pnpm run build:types && run-p build-icons && NODE_OPTIONS=--max-old-space-size=8192 vite build -- --tailwind && BUILD_PRESERVED_ESM=true NODE_OPTIONS=--max-old-space-size=8192 vite build && pnpm run build:declarations && pnpm run check:consumer-bundle",
+    "build-icons": "tsc6 --project ./tsconfig-build-icons.json",
     "build:tailwind": "NODE_ENV=production tailwindcss -i src/styles.css -o ./dist/styles.css --postcss --minify",
     "build:watch": "pnpm run build && run-p --race build:watch:runtime build:watch:esm build:watch:declarations",
     "build:watch:runtime": "NODE_OPTIONS=--max-old-space-size=8192 vite build --watch -- --tailwind",
@@ -160,7 +161,7 @@
     "unused-components": "node scripts/unused-components.mjs",
     "format": "sh -c 'oxfmt \"${@:-src/}\"' --",
     "format:check": "sh -c 'oxfmt --check \"${@:-src/}\"' --",
-    "tsc": "tsc --noEmit",
+    "tsc": "tsc6 --noEmit",
     "check:api-surface": "tsx .scripts/check-api-surface.ts",
     "check:docs-index": "tsx .scripts/check-docs-index.ts",
     "check:bugfix-red-green": "tsx .scripts/check-bugfix-red-green.ts",
@@ -389,9 +390,6 @@
     "typescript": ">=5.7.2 <8",
     "usehooks-ts": "^3.1.1",
     "zod": "^3.23.8"
-  },
-  "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "^4.63.1"
   },
   "packageManager": "pnpm@10.34.5+sha512.a4ee05f2f73658255bd6a89859c065a45c28a57daefae2c893a168ee2b73168c37b91e83e57ea67654ad03f03031746430e8bce38e362e042605fb8abc80192e"
 }

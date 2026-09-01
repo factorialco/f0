@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs"
 import { dirname, relative, resolve } from "node:path"
 import { isDeepStrictEqual } from "node:util"
+import { brotliCompressSync, constants as zlibConstants } from "node:zlib"
 import valueParser from "postcss-value-parser"
 import ts from "typescript"
 
@@ -19,6 +20,28 @@ interface PackageManifest {
 }
 
 type PackageExports = Record<string, unknown>
+
+const PUBLISHED_STYLES_BROTLI_CEILING = 48 * 1024
+const SEMANTIC_ICON_CLASSES = [
+  "text-f1-icon",
+  "text-f1-icon-secondary",
+  "text-f1-icon-inverse",
+  "text-f1-icon-bold",
+  "text-f1-icon-critical",
+  "text-f1-icon-critical-bold",
+  "text-f1-icon-accent",
+  "text-f1-icon-info",
+  "text-f1-icon-warning",
+  "text-f1-icon-positive",
+  "text-f1-icon-promote",
+  "text-f1-icon-selected",
+  "text-f1-icon-selected-hover",
+  "text-f1-icon-mood-super-negative",
+  "text-f1-icon-mood-negative",
+  "text-f1-icon-mood-neutral",
+  "text-f1-icon-mood-positive",
+  "text-f1-icon-mood-super-positive",
+] as const
 
 function exportTargets(value: unknown): string[] {
   if (typeof value === "string") return [value]
@@ -57,7 +80,10 @@ function wildcardFiles(packageRoot: string, pattern: string): string[] {
   )
 }
 
-function runtimeSpecifiers(filePath: string): string[] {
+function analyzeRuntimeModule(filePath: string): {
+  hasCommonJs: boolean
+  specifiers: string[]
+} {
   const sourceFile = ts.createSourceFile(
     filePath,
     readFileSync(filePath, "utf8"),
@@ -66,6 +92,7 @@ function runtimeSpecifiers(filePath: string): string[] {
     ts.ScriptKind.JS
   )
   const specifiers: string[] = []
+  let hasCommonJs = false
 
   function visit(node: ts.Node): void {
     if (
@@ -83,11 +110,24 @@ function runtimeSpecifiers(filePath: string): string[] {
     ) {
       specifiers.push(node.arguments[0].text)
     }
+    if (
+      (ts.isCallExpression(node) &&
+        ts.isIdentifier(node.expression) &&
+        node.expression.text === "require") ||
+      (ts.isPropertyAccessExpression(node) &&
+        ((ts.isIdentifier(node.expression) &&
+          node.expression.text === "exports") ||
+          (ts.isIdentifier(node.expression) &&
+            node.expression.text === "module" &&
+            node.name.text === "exports")))
+    ) {
+      hasCommonJs = true
+    }
     ts.forEachChild(node, visit)
   }
 
   visit(sourceFile)
-  return specifiers
+  return { hasCommonJs, specifiers }
 }
 
 function packageName(specifier: string): string {
@@ -197,8 +237,10 @@ export function validatePublishedStyleAssets(packageRoot: string): string[] {
   const stylesheetPath = resolve(packageRoot, "dist/styles.css")
   if (!existsSync(stylesheetPath)) return []
 
+  const stylesheet = readFileSync(stylesheetPath, "utf8")
+  const errors: string[] = []
   const invalidReferences = new Set<string>()
-  valueParser(readFileSync(stylesheetPath, "utf8")).walk((node) => {
+  valueParser(stylesheet).walk((node) => {
     if (node.type !== "function" || node.value !== "url") return
     if (node.nodes.length !== 1) return
     const reference = node.nodes[0]
@@ -225,10 +267,31 @@ export function validatePublishedStyleAssets(packageRoot: string): string[] {
     }
   })
 
-  return [...invalidReferences].map(
-    (reference) =>
-      `Published styles reference missing or unpackable asset: ${reference}`
+  errors.push(
+    ...[...invalidReferences].map(
+      (reference) =>
+        `Published styles reference missing or unpackable asset: ${reference}`
+    )
   )
+
+  for (const className of SEMANTIC_ICON_CLASSES) {
+    if (!new RegExp(`\\.${className}(?=[^a-zA-Z0-9_-])`).test(stylesheet)) {
+      errors.push(
+        `Published styles are missing semantic icon class: ${className}`
+      )
+    }
+  }
+
+  const brotliBytes = brotliCompressSync(stylesheet, {
+    params: { [zlibConstants.BROTLI_PARAM_QUALITY]: 11 },
+  }).byteLength
+  if (brotliBytes > PUBLISHED_STYLES_BROTLI_CEILING) {
+    errors.push(
+      `Published styles are ${brotliBytes} B Brotli; ceiling is ${PUBLISHED_STYLES_BROTLI_CEILING} B`
+    )
+  }
+
+  return errors
 }
 
 export function validatePackageManifest(manifest: PackageManifest): string[] {
@@ -277,7 +340,13 @@ export function validatePreservedEsm(
   ]
 
   for (const filePath of runtimeFiles.filter((path) => path.endsWith(".js"))) {
-    for (const specifier of runtimeSpecifiers(filePath)) {
+    const analysis = analyzeRuntimeModule(filePath)
+    if (analysis.hasCommonJs) {
+      errors.push(
+        `CommonJS syntax in preserved ESM: ${relative(packageRoot, filePath)}`
+      )
+    }
+    for (const specifier of analysis.specifiers) {
       if (specifier.startsWith(".")) {
         const target = resolve(dirname(filePath), specifier)
         const packageRelativeTarget = relative(packageRoot, target)

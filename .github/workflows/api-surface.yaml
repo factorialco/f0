@@ -11,8 +11,9 @@ jobs:
     uses: ./.github/workflows/_check-workspaces-changes.yaml
 
   # Build the rolled-up type declarations for both sides of the comparison in
-  # parallel. Each leg only needs the existing `build` script, so the base
-  # build works even though this workflow does not exist on main.
+  # parallel. The head leg builds only the declarations consumed by the diff;
+  # the base leg uses main's existing build script because the declaration-only
+  # script does not exist there yet.
   build-dts:
     needs: detect-changes
     # React source or core (whose types ripple into the React surface) changed.
@@ -49,7 +50,11 @@ jobs:
       - uses: ./.github/actions/setup-node-pnpm
       - name: Build core package
         run: pnpm --filter @factorialco/f0-core build
-      - name: Build React types
+      - name: Build React types (head)
+        if: matrix.side == 'head'
+        run: pnpm --filter @factorialco/f0-react build:declarations
+      - name: Build React types (base)
+        if: matrix.side == 'base'
         run: pnpm --filter @factorialco/f0-react build
       - name: Upload type declarations
         uses: actions/upload-artifact@v4
