@@ -1,38 +1,24 @@
 import { cn as e } from "../../../lib/utils.js";
 import { useReducedMotion as t } from "../../../lib/a11y.js";
-import { GENIE_ORIGIN as n, INSTANT_TRANSITION as r, entranceTransition as i, stowInTransition as a, stowOutTransition as o } from "../home-motion.js";
-import { useLayoutEffect as s, useRef as c, useState as l } from "react";
-import { jsx as u } from "react/jsx-runtime";
-import { motion as d } from "motion/react";
+import { INSTANT_TRANSITION as n, entranceTransition as r, stowInTransition as i, stowOutTransition as a } from "../home-motion.js";
+import { jsx as o } from "react/jsx-runtime";
+import { motion as s } from "motion/react";
 //#region src/sds/Home/WidgetContainer/WidgetMotion.tsx
-var f = ({ arrival: f, stow: p, fullHeight: m, children: h }) => {
-	let g = t(), _ = c(null), [v, y] = l(0), b = p?.stowed ?? !1, x = f?.order ?? 0;
-	s(() => {
-		if (!p?.stowed) return;
-		let e = _.current;
-		e?.offsetParent && y(x * p.pitch - e.offsetTop);
-	}, [
-		p?.stowed,
-		p?.pitch,
-		x
-	]);
-	let S = g ? r : f?.arriving ? i(x, f.delayMs) : !p || p.instant ? r : b ? a : o;
-	return /* @__PURE__ */ u(d.div, {
-		ref: _,
-		className: e(m && "h-full"),
-		style: { transformOrigin: n },
-		initial: f?.arriving ? {
+var c = ({ arrival: c, stow: l, fullHeight: u, children: d }) => {
+	let f = t(), p = l?.stowed ?? !1, m = c?.order ?? 0, h = f ? n : c?.arriving ? r(m, c.delayMs) : !l || l.instant ? n : p ? i : a;
+	return /* @__PURE__ */ o(s.div, {
+		className: e(u && "h-full"),
+		initial: c?.arriving ? {
 			opacity: 0,
-			y: g ? 0 : 10
+			y: f ? 0 : 10
 		} : !1,
 		animate: {
-			opacity: +!b,
-			y: b ? v : 0,
-			scale: b ? p?.scale ?? 1 : 1
+			opacity: +!p,
+			y: 0
 		},
-		transition: S,
-		children: h
+		transition: h,
+		children: d
 	});
 };
 //#endregion
-export { f as WidgetMotion };
+export { c as WidgetMotion };

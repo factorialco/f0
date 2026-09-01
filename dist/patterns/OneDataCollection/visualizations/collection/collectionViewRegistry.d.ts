@@ -1,15 +1,15 @@
 import { IconType } from '../../../../components/F0Icon';
-import { GroupingDefinition, RecordType, SortingsDefinition } from '../../../../hooks/datasource';
+import { FiltersDefinition } from '../../../OneFilterPicker';
 import { ItemActionsDefinition } from '../../item-actions';
 import { NavigationFiltersDefinition } from '../../navigationFilters/types';
-import { FiltersDefinition } from '../../../OneFilterPicker';
+import { GroupingDefinition, RecordType, SortingsDefinition } from '../../../../hooks/datasource';
 import { DataCollectionSettingsContextType } from '../../Settings/SettingsProvider';
-import { GraphVisualizationSettings } from './Graph/types';
 import { SummariesDefinition } from '../../types';
 import { CardCollectionProps } from './Card';
 import { EditableTableCollectionProps } from './EditableTable';
 import { EditableTableVisualizationSettings } from './EditableTable/types';
 import { GraphCollectionProps } from './Graph';
+import { GraphVisualizationSettings } from './Graph/settings/SettingsRenderer';
 import { KanbanCollectionProps } from './Kanban';
 import { ListCollectionProps } from './List';
 import { TableCollectionProps, TableVisualizationSettings } from './Table';

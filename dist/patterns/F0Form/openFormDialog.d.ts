@@ -1,8 +1,7 @@
 import { z } from 'zod';
+import { F0DialogSize } from '../../components/dialog-alike/F0Dialog';
 import { DialogId, DialogModule } from '../../lib/providers/dialogs-alike';
 import { F0FormDefinitionSingleSchema, F0FormSchema } from '../F0WizardForm/types';
-import { F0DialogSize } from '../../components/dialog-alike/F0Dialog';
-import { F0FormRenderer } from './formRendererContext';
 export type OpenFormDialogResult<TSchema extends F0FormSchema> = {
     submitted: true;
     data: z.infer<TSchema>;
@@ -46,4 +45,4 @@ export type OpenFormDialogOptions<TSchema extends F0FormSchema> = {
  * const result = await forms.open({ formDefinition, mode: "dialog", title: "Add member" })
  * if (result.submitted) save(result.data)
  */
-export declare function openFormDialog<TSchema extends F0FormSchema>(options: OpenFormDialogOptions<TSchema>, FormView: F0FormRenderer): Promise<OpenFormDialogResult<TSchema>>;
+export declare function openFormDialog<TSchema extends F0FormSchema>(options: OpenFormDialogOptions<TSchema>): Promise<OpenFormDialogResult<TSchema>>;

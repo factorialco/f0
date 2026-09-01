@@ -2,90 +2,85 @@ import e from "../../../../icons/app/Delete.js";
 import t from "../../../../icons/app/Share.js";
 import { useI18n as n } from "../../../../lib/providers/i18n/i18n-provider.js";
 import { F0Dialog as r } from "../../../../F0Dialog.js";
-import { F0TextAreaInput as i } from "../../../../components/F0TextAreaInput/F0TextAreaInput.js";
-import { F0TextInput as a } from "../../../../components/F0TextInput/F0TextInput.js";
-import { useEffect as o, useId as s, useRef as c, useState as l } from "react";
-import { jsx as u, jsxs as d } from "react/jsx-runtime";
+import { useF0FormDefinition as i } from "../../../F0WizardForm/useF0FormDefinition.js";
+import { f0FormField as a } from "../../../F0Form/f0Schema.js";
+import { useF0Form as o } from "../../../F0Form/useF0Form.js";
+import { F0Form as s } from "../../../../F0Form.js";
+import { jsx as c } from "react/jsx-runtime";
+import { z as l } from "zod";
 //#region src/patterns/OneDataCollection/components/PresetFormDialog/PresetFormDialog.tsx
-function f({ isOpen: f, mode: p, initialValues: m, onClose: h, onSubmit: g, onDelete: _, onShare: v, existingNames: y = [] }) {
-	let b = n().collections.presets, [x, S] = l(m?.title ?? ""), [C, w] = l(m?.description ?? ""), [T, E] = l(), D = c(null), O = s();
-	o(() => {
-		f && (S(m?.title ?? ""), w(m?.description ?? ""), E(void 0));
-	}, [
-		m?.description,
-		m?.title,
-		f,
-		p
-	]);
-	let k = () => {
-		let e = x.trim().toLowerCase();
-		if (y.some((t) => t.trim().toLowerCase() === e)) {
-			E(b.duplicateName), D.current?.focus();
-			return;
-		}
-		e && g({
-			title: x,
-			description: C || void 0
+function u({ isOpen: u, mode: d, initialValues: f, onClose: p, onSubmit: m, onDelete: h, onShare: g, existingNames: _ = [] }) {
+	let v = n().collections.presets, { formRef: y, submit: b, isSubmitting: x, hasErrors: S } = o(), C = () => {
+		b().catch(() => {});
+	}, w = new Set(_.map((e) => e.trim().toLowerCase())), T = l.object({
+		title: a.text({
+			label: v.nameLabel,
+			placeholder: v.namePlaceholder,
+			minLength: 1
+		}),
+		description: a.textarea({
+			label: v.descriptionLabel,
+			placeholder: v.descriptionPlaceholder,
+			optional: !0,
+			rows: 4
+		})
+	}).superRefine((e, t) => {
+		let n = (e.title ?? "").trim().toLowerCase();
+		n && w.has(n) && t.addIssue({
+			code: l.ZodIssueCode.custom,
+			path: ["title"],
+			message: v.duplicateName
 		});
-	};
-	return /* @__PURE__ */ u(r, {
-		isOpen: f,
-		onClose: h,
-		title: p === "create" ? b.createTitle : b.updateTitle,
-		description: p === "create" ? b.createDescription : b.updateDescription,
+	}), E = i({
+		name: `preset-${d}-${f?.title ?? ""}`,
+		schema: T,
+		defaultValues: {
+			title: f?.title ?? "",
+			description: f?.description ?? ""
+		},
+		onSubmit: async ({ data: e }) => e.title ? (m({
+			title: e.title,
+			description: e.description || void 0
+		}), { success: !0 }) : { success: !1 },
+		submitConfig: {
+			type: "default",
+			hideSubmitButton: !0
+		}
+	});
+	return /* @__PURE__ */ c(r, {
+		isOpen: u,
+		onClose: p,
+		title: d === "create" ? v.createTitle : v.updateTitle,
+		description: d === "create" ? v.createDescription : v.updateDescription,
 		primaryAction: {
-			label: b.save,
-			onClick: k,
-			disabled: !x.trim()
+			label: v.save,
+			onClick: C,
+			loading: x,
+			disabled: S
 		},
 		secondaryAction: {
-			label: b.cancel,
-			onClick: h
+			label: v.cancel,
+			onClick: p
 		},
-		otherActions: p === "update" ? [...v ? [{
-			label: b.share,
-			onClick: v,
+		otherActions: d === "update" ? [...g ? [{
+			label: v.share,
+			onClick: g,
 			icon: t
-		}] : [], ..._ ? [{
-			label: b.delete,
-			onClick: _,
+		}] : [], ...h ? [{
+			label: v.delete,
+			onClick: h,
 			icon: e,
 			critical: !0
 		}] : []] : [],
 		disableContentPadding: !0,
-		children: /* @__PURE__ */ d("div", {
+		children: /* @__PURE__ */ c("div", {
 			className: "flex flex-col gap-4",
-			children: [
-				/* @__PURE__ */ u(a, {
-					ref: D,
-					label: b.nameLabel,
-					placeholder: b.namePlaceholder,
-					value: x,
-					onChange: (e) => {
-						S(e), E(void 0);
-					},
-					error: T,
-					required: !0,
-					onPressEnter: k,
-					"aria-invalid": T ? !0 : void 0,
-					"aria-describedby": T ? O : void 0
-				}),
-				T && /* @__PURE__ */ u("span", {
-					id: O,
-					className: "sr-only",
-					role: "alert",
-					children: T
-				}),
-				/* @__PURE__ */ u(i, {
-					label: b.descriptionLabel,
-					placeholder: b.descriptionPlaceholder,
-					value: C,
-					onChange: w,
-					rows: 4
-				})
-			]
+			children: /* @__PURE__ */ c(s, {
+				formDefinition: E,
+				formRef: y
+			})
 		})
 	});
 }
 //#endregion
-export { f as PresetFormDialog };
+export { u as PresetFormDialog };

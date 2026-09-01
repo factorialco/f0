@@ -1,5 +1,5 @@
 "use client";
-import { getFilterType as e } from "../filterTypes/getFilterType.js";
+import { getFilterType as e } from "../filterTypes/utils.js";
 import { jsx as t } from "react/jsx-runtime";
 //#region src/patterns/OneFilterPicker/components/FilterContent.tsx
 function n({ selectedFilterKey: n, definition: r, tempFilters: i, onFilterChange: a, isCompactMode: o }) {

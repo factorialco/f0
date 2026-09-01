@@ -4,12 +4,6 @@ import { RecordType } from '../../../../../hooks/datasource';
 import { SortingsDefinition } from '../../../../../hooks/datasource/types/sortings.typings';
 import { F0GraphNodeTag, F0GraphNodeTagColumn, ViewportInset, ZoomPreset } from '../../../../F0Graph';
 import { FiltersDefinition, FiltersState } from '../../../../OneFilterPicker/types';
-export type GraphVisualizationSettings = {
-    /** Metadata order (tag-type ids), matching the table column settings shape. */
-    order?: string[];
-    /** Hidden metadata (tag-type ids). */
-    hidden?: string[];
-};
 /**
  * Configuration for the "graph" visualization (org-chart style).
  *

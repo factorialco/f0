@@ -5,8 +5,8 @@ import r from "../../../icons/app/Star.js";
 import { useI18n as i } from "../../../lib/providers/i18n/i18n-provider.js";
 import { modules as ee } from "../../../components/avatars/F0AvatarModule/modules.js";
 import { F0AvatarIcon as a } from "../../../components/avatars/F0AvatarIcon/index.js";
-import { F0SearchInput as o } from "../../../components/F0SearchInput/F0SearchInput.js";
-import { F0Dialog as s } from "../../../F0Dialog.js";
+import { F0Dialog as o } from "../../../F0Dialog.js";
+import { F0SearchInput as s } from "../../../components/F0SearchInput/F0SearchInput.js";
 import { useF0Form as te } from "../../../patterns/F0Form/useF0Form.js";
 import { F0Form as c } from "../../../F0Form.js";
 import { resolveWidgetHeader as l, widgetChrome as u, widgetParamsAreComplete as ne } from "../slotRenderers.js";
@@ -16,7 +16,7 @@ import { Fragment as ae, isValidElement as f, useEffect as p, useMemo as m, useS
 import { Fragment as g, jsx as _, jsxs as v } from "react/jsx-runtime";
 //#region src/sds/Home/WidgetCatalog/index.tsx
 var y = {
-	main: 712,
+	main: 672,
 	right: 396
 }, b = 250, x = (e) => typeof e == "object" && !!e && !f(e) && Array.isArray(e.slots), oe = ({ preview: e, params: t, slotRenderers: n }) => x(e) ? /* @__PURE__ */ _(d, {
 	...u(e),
@@ -70,7 +70,7 @@ function T({ isOpen: t, onClose: l, widgets: u, onAdd: d, groups: f, area: x, pr
 		t && (L("pick"), z(!1), H(null));
 	}, [t]), p(() => {
 		I === "configure" && !X && L("pick");
-	}, [I, X]), /* @__PURE__ */ _(s, {
+	}, [I, X]), /* @__PURE__ */ _(o, {
 		isOpen: t,
 		onClose: l,
 		title: Z && J ? O.widgets.configureWidget.replace("{{title}}", J.title) : ce,
@@ -121,7 +121,7 @@ function T({ isOpen: t, onClose: l, widgets: u, onAdd: d, groups: f, area: x, pr
 							params: e
 						}), { success: !0 })
 					}, J.id)
-				}) : /* @__PURE__ */ v(g, { children: [/* @__PURE__ */ _(o, {
+				}) : /* @__PURE__ */ v(g, { children: [/* @__PURE__ */ _(s, {
 					value: M,
 					onChange: N,
 					placeholder: "Search widgets"

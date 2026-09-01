@@ -1,9 +1,9 @@
-import { useDataCollectionSettings as e } from "../../../../Settings/SettingsProvider.js";
-import { SortAndHideSettings as t } from "../../../../Settings/SortAndHideSettings.js";
+import { SortAndHideSettings as e } from "../../../../Settings/SortAndHideSettings.js";
+import { useDataCollectionSettings as t } from "../../../../Settings/SettingsProvider.js";
 import { jsx as n } from "react/jsx-runtime";
 //#region src/patterns/OneDataCollection/visualizations/collection/Graph/settings/SettingsRenderer.tsx
 var r = ({ tagTypes: r, labels: i, defaultVisibleTagTypes: a, pinnedTagTypes: o, lockedTagTypes: s }) => {
-	let { settings: c } = e(), l = c.visualization.graph ?? {}, u = new Set(a ?? r), d = new Set(o ?? []), f = s ?? {}, p = new Set(l.hidden ?? r.filter((e) => !u.has(e))), m = l.order ?? [], h = [...m.filter((e) => r.includes(e)), ...r.filter((e) => !m.includes(e))].map((e) => {
+	let { settings: c } = t(), l = c.visualization.graph ?? {}, u = new Set(a ?? r), d = new Set(o ?? []), f = s ?? {}, p = new Set(l.hidden ?? r.filter((e) => !u.has(e))), m = l.order ?? [], h = [...m.filter((e) => r.includes(e)), ...r.filter((e) => !m.includes(e))].map((e) => {
 		let t = f[e];
 		return t === void 0 ? {
 			id: e,
@@ -20,7 +20,7 @@ var r = ({ tagTypes: r, labels: i, defaultVisibleTagTypes: a, pinnedTagTypes: o,
 			disabledReason: t
 		};
 	});
-	return /* @__PURE__ */ n(t, {
+	return /* @__PURE__ */ n(e, {
 		items: h,
 		visualizationKey: "graph",
 		allowSorting: !0,

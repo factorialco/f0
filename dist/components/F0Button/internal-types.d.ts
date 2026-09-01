@@ -1,3 +1,4 @@
+import { DataAttributes } from '../../global.types';
 import { IconType } from '../F0Icon';
 import { EmojiRenderMode } from '../../lib/emojis';
 import { ActionButtonVariant, ActionProps, ButtonType, NavTarget } from '../../ui/Action';

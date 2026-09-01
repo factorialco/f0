@@ -16,10 +16,6 @@ export interface WidgetArrival {
 export interface WidgetStow {
     /** Whether this widget belongs in the strip rather than in the column. */
     stowed: boolean;
-    /** Vertical distance between the glyphs widgets stow onto. */
-    pitch: number;
-    /** How small a widget has to get to be a glyph. */
-    scale: number;
     /**
      * Whether to take the position without animating. True while the rail is
      * ALREADY collapsed, when a widget leaving or joining the strip means the
@@ -41,19 +37,23 @@ export interface WidgetMotionProps {
 }
 /**
  * Everything one widget does that isn't its content: how it ARRIVES, and how it
- * goes into and comes out of its glyph.
+ * goes into and comes out of the strip.
  *
- * THE STOW is what makes a card and its glyph read as one object. The card scales
- * down onto its OWN glyph — not toward the strip in general — and fades as the
- * glyph fades in underneath it; opening the rail runs it backwards, so each glyph
- * looks like it grows into the widget it stands for.
+ * THE STOW IS A FADE, IN PLACE. The card used to travel: it scaled down onto its
+ * OWN glyph, which meant measuring where the card sat (`offsetTop`) and being told
+ * the strip's geometry (a `pitch`, a target `scale`) so the two could be mapped
+ * onto each other. It read as the card being posted into the strip — but a card is
+ * an order of magnitude wider than the 40px glyph it was shrinking onto, so most
+ * of that journey was a widget's whole contents drawn at sizes nothing in it was
+ * laid out for, sliding across the column it was leaving.
  *
- * The mapping needs no measuring of the strip, because the strip's geometry is
- * known: glyphs are a fixed `pitch` apart from the top of this column, and their
- * right edge is this column's right edge (both are pinned there by
- * `NewHomeLayout`). So the widget's right edge is already where it needs to be —
- * scaling from that corner leaves only a vertical distance to cover, and the only
- * thing to look up is where this widget currently sits.
+ * What replaced it is the CROSSOVER: the cards fade out where they are while the
+ * glyphs slide into the strip on the same beat (`GENIE_GLYPH_DELAY_MS` starts them
+ * before this has finished), and neither state is ever drawn at a size it was not
+ * designed at. Expanding runs the same fade the other way.
+ *
+ * Nothing is measured here any more, and nothing about the strip is passed in:
+ * opacity is the whole of it, so there is no geometry left to get wrong.
  *
  * ONE wrapper, not one per behaviour: a second box would be a second flex item to
  * reason about, and adding or removing either of them mid-life would change the

@@ -3,8 +3,8 @@ import { useI18n as t } from "../../../lib/providers/i18n/i18n-provider.js";
 import { ButtonInternal as n } from "../../../components/F0Button/internal.js";
 import { F0Button as r } from "../../../components/F0Button/F0Button.js";
 import { ScrollArea as i } from "../../../ui/scrollarea.js";
-import { useDataCollectionSettings as a } from "./SettingsProvider.js";
-import { SortAndHideList as o } from "../visualizations/collection/Table/components/SortAndHideList/SortAndHideList.js";
+import { SortAndHideList as a } from "../visualizations/collection/Table/components/SortAndHideList/SortAndHideList.js";
+import { useDataCollectionSettings as o } from "./SettingsProvider.js";
 import { jsx as s, jsxs as c } from "react/jsx-runtime";
 //#region src/patterns/OneDataCollection/Settings/SortAndHideSettings.tsx
 var l = (e, t) => {
@@ -17,7 +17,7 @@ var l = (e, t) => {
 		visible: e.id === r?.id ? !0 : e.canHide ? t : e.visible
 	}));
 }, d = ({ items: d, visualizationKey: f, allowSorting: p, allowHiding: m, onAddColumn: h, onRemoveColumn: g, onLockedColumnChange: _, orderBaseline: v, keepOneUnlockedVisible: y = !1 }) => {
-	let b = t(), { setVisualizationSettings: x } = a(), S = (e) => {
+	let b = t(), { setVisualizationSettings: x } = o(), S = (e) => {
 		x(f, (t) => ({
 			...t,
 			order: v ? l(v, e) : e.map((e) => e.id),
@@ -39,7 +39,7 @@ var l = (e, t) => {
 			})
 		}), /* @__PURE__ */ c(i, {
 			className: "[&_[data-scroll-container]]:max-h-56",
-			children: [/* @__PURE__ */ s(o, {
+			children: [/* @__PURE__ */ s(a, {
 				items: d,
 				onChange: S,
 				onRemove: g ? (e) => g(e.id) : void 0,

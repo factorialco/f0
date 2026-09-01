@@ -1,21 +1,21 @@
 import { useAddRow as e } from "../../EditableTable/context/AddRowContext.js";
-import { FlatRow as t } from "./FlatRow.js";
-import { useCalculateConectorHeight as n } from "../hooks/useCalculateConectorHeight.js";
-import { useNestedDataContext as r } from "../providers/NestedProvider.js";
-import { useLoadChildren as i } from "../hooks/useLoadChildren.js";
-import { useStickyParentRow as a } from "../hooks/useStickyParentRow.js";
-import { AddRowRow as o } from "./AddRow/index.js";
-import { LoadMoreRow as s } from "./LoadMore/index.js";
-import { RowLoading as c } from "./RowLoading/index.js";
+import { useCalculateConectorHeight as t } from "../hooks/useCalculateConectorHeight.js";
+import { useNestedDataContext as n } from "../providers/NestedProvider.js";
+import { useLoadChildren as r } from "../hooks/useLoadChildren.js";
+import { useStickyParentRow as i } from "../hooks/useStickyParentRow.js";
+import { AddRowRow as a } from "./AddRow/index.js";
+import { LoadMoreRow as o } from "./LoadMore/index.js";
+import { RowLoading as s } from "./RowLoading/index.js";
+import { Row as c } from "./Row.js";
 import { createElement as l, forwardRef as u, useCallback as d, useEffect as f, useRef as p } from "react";
 import { Fragment as m, jsx as h, jsxs as g } from "react/jsx-runtime";
 //#region src/patterns/OneDataCollection/visualizations/collection/Table/components/NestedRow.tsx
 var _ = (e) => e ? (Array.isArray(e) ? e : [e]).filter((e) => e !== void 0) : [], v = (u, v) => {
-	let y = p(null), b = p(null), S = e(), C = `${u.nestedRowProps?.depth ?? 0}-${"id" in u.item ? u.item.id + "-" + u.index : u.index}`, { expandedRowIds: w, setRowExpanded: T, isExpandedByDefault: E, resetGeneration: D } = r(), O = w[C] ?? E(u.item, u.nestedRowProps?.depth ?? 0), { children: k, loadChildren: A, isLoading: j, childrenType: M, paginationInfo: N } = i({
+	let y = p(null), b = p(null), S = e(), C = `${u.nestedRowProps?.depth ?? 0}-${"id" in u.item ? u.item.id + "-" + u.index : u.index}`, { expandedRowIds: w, setRowExpanded: T, isExpandedByDefault: E, resetGeneration: D } = n(), O = w[C] ?? E(u.item, u.nestedRowProps?.depth ?? 0), { children: k, loadChildren: A, isLoading: j, childrenType: M, paginationInfo: N } = r({
 		rowId: C,
 		item: u.item,
 		source: u.source
-	}), P = O && j, F = O, I = O && N?.hasMore, L = O && !j ? _(S?.addNestedRowActions?.(u.item)) : [], R = L.length > 0, z = (u.nestedRowProps?.depth ?? 0) === 0, { isSticky: B } = a(O && z, y, b), { calculatedHeight: V, setFirstChildRef: H, setLastChildRef: U } = n({
+	}), P = O && j, F = O, I = O && N?.hasMore, L = O && !j ? _(S?.addNestedRowActions?.(u.item)) : [], R = L.length > 0, z = (u.nestedRowProps?.depth ?? 0) === 0, { isSticky: B } = i(O && z, y, b), { calculatedHeight: V, setFirstChildRef: H, setLastChildRef: U } = t({
 		nestedVariant: M,
 		withHasMore: !!I,
 		withAddRowActions: R,
@@ -42,7 +42,7 @@ var _ = (e) => e ? (Array.isArray(e) ? e : [e]).filter((e) => e !== void 0) : []
 		connectorHeight: V
 	}, J = u.fromVisualization === "table", Y = (u.nestedRowProps?.isLastChild || z) ?? !1, X = (O || !Y) && J;
 	return /* @__PURE__ */ g(m, { children: [
-		/* @__PURE__ */ h(t, {
+		/* @__PURE__ */ h(c, {
 			...u,
 			noBorder: X,
 			ref: W,
@@ -56,51 +56,51 @@ var _ = (e) => e ? (Array.isArray(e) ? e : [e]).filter((e) => e !== void 0) : []
 			tableWithChildren: u.tableWithChildren,
 			fromVisualization: u.fromVisualization
 		}),
-		F && k.map((e, n) => {
-			let r = e, i = u.source.itemsWithChildren?.(r), a = n === 0, o = n === k.length - 1, s = (u.nestedRowProps?.depth ?? 0) + 1, c = () => {
-				if (a) return (e) => {
+		F && k.map((e, t) => {
+			let n = e, r = u.source.itemsWithChildren?.(n), i = t === 0, a = t === k.length - 1, o = (u.nestedRowProps?.depth ?? 0) + 1, s = () => {
+				if (i) return (e) => {
 					H(e);
 				};
-				if (o && !I && !R) return (e) => {
+				if (a && !I && !R) return (e) => {
 					U(e);
 				};
-			}, d = o && Y && !I, f = u.rowWrapper;
-			if (i) {
-				let t = /* @__PURE__ */ l(x, {
+			}, d = a && Y && !I, f = u.rowWrapper;
+			if (r) {
+				let r = /* @__PURE__ */ l(x, {
 					...u,
-					key: `nested-row-${u.groupIndex}-${e.id}-${u.index}-${n}`,
-					index: n,
-					item: r,
+					key: `nested-row-${u.groupIndex}-${e.id}-${u.index}-${t}`,
+					index: t,
+					item: n,
 					onCheckedChange: (e) => {
-						u.onItemCheckedChange?.(r, e);
+						u.onItemCheckedChange?.(n, e);
 					},
 					tableWithChildren: u.tableWithChildren,
-					ref: c(),
+					ref: s(),
 					nestedRowProps: {
 						...u.nestedRowProps,
 						parentHasChildren: !0,
-						depth: s,
+						depth: o,
 						isLastChild: d
 					},
 					fromVisualization: u.fromVisualization
 				});
 				return f ? /* @__PURE__ */ h(f, {
-					item: r,
-					index: n,
-					children: t
-				}, `nested-row-${u.groupIndex}-${e.id}-${u.index}-${n}`) : t;
+					item: n,
+					index: t,
+					children: r
+				}, `nested-row-${u.groupIndex}-${e.id}-${u.index}-${t}`) : r;
 			}
 			{
-				let e = !d && J, i = /* @__PURE__ */ l(t, {
+				let e = !d && J, r = /* @__PURE__ */ l(c, {
 					...u,
-					key: `row-${u.groupIndex}-${u.index}-${n}`,
-					index: n,
-					item: r,
+					key: `row-${u.groupIndex}-${u.index}-${t}`,
+					index: t,
+					item: n,
 					onCheckedChange: (e) => {
-						u.onItemCheckedChange?.(r, e);
+						u.onItemCheckedChange?.(n, e);
 					},
 					noBorder: e,
-					ref: c(),
+					ref: s(),
 					nestedRowProps: {
 						...u.nestedRowProps,
 						depth: (u.nestedRowProps?.depth ?? 0) + 1,
@@ -113,13 +113,13 @@ var _ = (e) => e ? (Array.isArray(e) ? e : [e]).filter((e) => e !== void 0) : []
 					tableWithChildren: u.tableWithChildren
 				});
 				return f ? /* @__PURE__ */ h(f, {
-					item: r,
-					index: n,
-					children: i
-				}, `row-${u.groupIndex}-${u.index}-${n}`) : i;
+					item: n,
+					index: t,
+					children: r
+				}, `row-${u.groupIndex}-${u.index}-${t}`) : r;
 			}
 		}),
-		P && /* @__PURE__ */ h(c, {
+		P && /* @__PURE__ */ h(s, {
 			...u,
 			rowRef: y,
 			nestedRowProps: {
@@ -130,7 +130,7 @@ var _ = (e) => e ? (Array.isArray(e) ? e : [e]).filter((e) => e !== void 0) : []
 			ref: U,
 			shouldHideBorder: !Y
 		}),
-		I && !j && /* @__PURE__ */ h(s, {
+		I && !j && /* @__PURE__ */ h(o, {
 			...u,
 			disableHover: !0,
 			rowRef: y,
@@ -143,7 +143,7 @@ var _ = (e) => e ? (Array.isArray(e) ? e : [e]).filter((e) => e !== void 0) : []
 				isLastChild: Y
 			}
 		}),
-		R && /* @__PURE__ */ h(o, {
+		R && /* @__PURE__ */ h(a, {
 			...u,
 			disableHover: !0,
 			rowRef: y,

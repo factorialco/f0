@@ -1,6 +1,13 @@
 import { default as React } from 'react';
-import { VisualizationSettings } from './visualizationSettings';
-export type { VisualizationSettings } from './visualizationSettings';
+import { collectionVisualizations } from '../visualizations/collection/collectionViewRegistry';
+type ExtractVisualizationSettings<T> = T extends {
+    settings: {
+        default: infer S;
+    };
+} ? S : never;
+type VisualizationSettings = {
+    [K in keyof typeof collectionVisualizations]: ExtractVisualizationSettings<(typeof collectionVisualizations)[K]>;
+};
 export type DataCollectionSettings = {
     visualization: VisualizationSettings;
 };
@@ -13,3 +20,4 @@ export declare const useDataCollectionSettings: () => DataCollectionSettingsCont
 export declare const DataCollectionSettingsProvider: ({ children, }: {
     children: React.ReactNode;
 }) => React.JSX.Element;
+export {};

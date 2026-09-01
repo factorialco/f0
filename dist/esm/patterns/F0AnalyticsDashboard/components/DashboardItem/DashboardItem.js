@@ -11,17 +11,17 @@ import { useI18n as ne } from "../../../../lib/providers/i18n/i18n-provider.js";
 import { ButtonInternal as s } from "../../../../components/F0Button/internal.js";
 import { DropdownMenu as c, DropdownMenuContent as l, DropdownMenuGroup as u, DropdownMenuItem as d, DropdownMenuPortal as re, DropdownMenuSub as ie, DropdownMenuSubContent as ae, DropdownMenuSubTrigger as oe, DropdownMenuTrigger as f } from "../../../../ui/dropdown-menu.js";
 import p from "../../../../icons/ai/One.js";
-import { InfoHint as m } from "../../../../lib/InfoHint/InfoHint.js";
-import { OneEmptyState as h } from "../../../../components/OneEmptyState/OneEmptyState.js";
-import { F0RichTextDisplay as se } from "../../../../components/RichText/F0RichTextDisplay/F0RichTextDisplay.js";
-import { useAiChat as ce } from "../../../../kits/ai/F0AiChat/providers/AiChatStateProvider.js";
+import { useAiChat as m } from "../../../../kits/ai/F0AiChat/providers/AiChatStateProvider.js";
+import { InfoHint as h } from "../../../../lib/InfoHint/InfoHint.js";
+import { OneEmptyState as se } from "../../../../components/OneEmptyState/OneEmptyState.js";
+import { F0RichTextDisplay as ce } from "../../../../components/RichText/F0RichTextDisplay/F0RichTextDisplay.js";
 import { F0ButtonToggleGroup as le } from "../../../../components/F0ButtonToggleGroup/index.js";
 import { DashboardItemFilters as g } from "./DashboardItemFilters.js";
 import { useRef as _, useState as v } from "react";
 import { Fragment as y, jsx as b, jsxs as x } from "react/jsx-runtime";
 //#region src/patterns/F0AnalyticsDashboard/components/DashboardItem/DashboardItem.tsx
 function S({ title: S, description: C, info: w, isLoading: T, error: E, onRetry: D, skeleton: ue, children: de, actions: fe = [], itemFilters: O, editMode: pe, handleDelete: k, onAskAi: A, onAskAiTarget: me, itemId: j, chartTypeOptions: M, explanation: N, isFullscreen: P = !1, descriptionAction: F, fitContent: I = !1, onFullscreenChange: L }) {
-	let [R, he] = v(!1), [ge, z] = v(!1), B = _(!1), [V, H] = v(!1), U = ne(), { enabled: _e, setPendingQuote: ve, setOpen: ye, focusChatInput: be } = ce(), W = (e) => {
+	let [R, he] = v(!1), [ge, z] = v(!1), B = _(!1), [V, H] = v(!1), U = ne(), { enabled: _e, setPendingQuote: ve, setOpen: ye, focusChatInput: be } = m(), W = (e) => {
 		he(e), e || H(!1);
 	}, G = fe.filter((e) => !("type" in e) || e.type === "item" || e.type === void 0), K = G.length > 0, q = pe && k && j, J = M && M.length > 0, Y = !!N && N.trim().length > 0, xe = !!L, X = S.trim().length > 0 && (A ? !!j : _e), Se = X || K || q || J || Y, Z = e("flex flex-shrink-0 gap-0.5", !P && "opacity-100 transition-opacity delay-150 duration-150 focus-within:delay-0 group-hover/dashitem:delay-0 sm:[@media(hover:hover)]:opacity-0 focus-within:sm:opacity-100 group-hover/dashitem:sm:opacity-100", !P && (R || ge) && "delay-0 !opacity-100"), Ce = () => {
 		if (A) {
@@ -64,7 +64,7 @@ function S({ title: S, description: C, info: w, isLoading: T, error: E, onRetry:
 						children: S
 					}), w && /* @__PURE__ */ b("div", {
 						className: "flex shrink-0 items-center text-f1-foreground-secondary",
-						children: /* @__PURE__ */ b(m, { info: w })
+						children: /* @__PURE__ */ b(h, { info: w })
 					})]
 				}), C && /* @__PURE__ */ b("p", {
 					className: "text-base text-f1-foreground-secondary",
@@ -100,7 +100,7 @@ function S({ title: S, description: C, info: w, isLoading: T, error: E, onRetry:
 			})]
 		}), /* @__PURE__ */ b("div", {
 			className: "min-h-0 flex-1 overflow-auto",
-			children: /* @__PURE__ */ b(h, {
+			children: /* @__PURE__ */ b(se, {
 				variant: "critical",
 				title: U.ai.dashboardItem.errorTitle,
 				description: E.message,
@@ -127,7 +127,7 @@ function S({ title: S, description: C, info: w, isLoading: T, error: E, onRetry:
 						children: S
 					}), w && /* @__PURE__ */ b("div", {
 						className: "flex shrink-0 items-center text-f1-foreground-secondary",
-						children: /* @__PURE__ */ b(m, { info: w })
+						children: /* @__PURE__ */ b(h, { info: w })
 					})]
 				}), (C || F) && /* @__PURE__ */ x("div", {
 					className: "flex items-baseline gap-1",
@@ -182,7 +182,7 @@ function S({ title: S, description: C, info: w, isLoading: T, error: E, onRetry:
 							onCloseAutoFocus: Q,
 							children: V && Y ? /* @__PURE__ */ b("div", {
 								className: "px-3 py-2 text-base text-f1-foreground [&>div]:flex [&>div]:flex-col [&>div]:gap-2",
-								children: /* @__PURE__ */ b(se, {
+								children: /* @__PURE__ */ b(ce, {
 									content: N,
 									format: "markdown"
 								})

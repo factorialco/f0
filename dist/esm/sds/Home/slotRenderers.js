@@ -151,6 +151,7 @@ function W({ params: t, ctx: r }) {
 			let a = /* @__PURE__ */ v(g, {
 				title: r.title,
 				subtitle: r.subtitle,
+				subtitleCritical: r.subtitleCritical,
 				description: C ? void 0 : t,
 				unread: r.unread,
 				...V(i.left, r, w),

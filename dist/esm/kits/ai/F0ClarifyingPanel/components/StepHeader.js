@@ -22,6 +22,7 @@ var c = ({ question: c, stepLabel: l, isFirstStep: u, isFinalStep: d, canProceed
 					/* @__PURE__ */ o(a, {
 						variant: "ghost",
 						size: "sm",
+						type: "button",
 						onClick: p,
 						disabled: u,
 						label: g.ai.clarifyingQuestion.back,
@@ -35,6 +36,7 @@ var c = ({ question: c, stepLabel: l, isFirstStep: u, isFinalStep: d, canProceed
 					/* @__PURE__ */ o(a, {
 						variant: "ghost",
 						size: "sm",
+						type: "button",
 						onClick: m,
 						disabled: d || !f,
 						label: g.ai.clarifyingQuestion.next,
@@ -46,6 +48,7 @@ var c = ({ question: c, stepLabel: l, isFirstStep: u, isFinalStep: d, canProceed
 			/* @__PURE__ */ o(a, {
 				variant: "ghost",
 				size: "sm",
+				type: "button",
 				onClick: h,
 				label: g.actions.cancel,
 				hideLabel: !0,

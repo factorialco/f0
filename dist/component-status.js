@@ -5,7 +5,7 @@ import { jsx as l, jsxs as u } from "react/jsx-runtime";
 //#endregion
 //#region src/component-status/component-status.ts
 var d = {
-	generatedAt: "2026-09-01T10:39:43.029Z",
+	generatedAt: "2026-09-01T14:18:08.274Z",
 	stats: {
 		total: 265,
 		byStatus: {
@@ -5531,7 +5531,7 @@ var d = {
 				hasWhenToUse: !1,
 				hasWhenNotToUse: !1,
 				hasDoDonts: !1,
-				exampleCount: 6
+				exampleCount: 7
 			},
 			a11yTier: "todo",
 			storyFile: "sds/Home/SlotWidget/index.stories.tsx"

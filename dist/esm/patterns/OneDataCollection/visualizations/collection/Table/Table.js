@@ -20,21 +20,21 @@ import { TableHeader as ae } from "../../../../../experimental/OneTable/TableHea
 import { TableRow as m } from "../../../../../experimental/OneTable/TableRow/index.js";
 import { OneTable as oe } from "../../../../../experimental/OneTable/Table/index.js";
 import { TableFooter as se } from "../../../../../experimental/OneTable/TableFooter/index.js";
-import { useDataCollectionSettings as ce } from "../../../Settings/SettingsProvider.js";
-import { useDataCollectionData as le } from "../../../hooks/useDataCollectionData/useDataCollectionData.js";
-import { PagesPagination as ue } from "../../../components/PagesPagination/PagesPagination.js";
-import { useInfiniteScrollPagination as de } from "../../../hooks/useInfiniteScrollPagination.js";
-import { useAddRow as fe } from "../EditableTable/context/AddRowContext.js";
-import { statusToChecked as pe } from "../utils.js";
-import { getColumnId as me, useColumns as he } from "./hooks/useColums.js";
-import { groupBorderClass as ge, useHeaderGroups as _e } from "./hooks/useHeaderGroups.js";
-import { useSticky as ve } from "./useSticky.js";
-import { NestedDataProvider as ye } from "./providers/NestedProvider.js";
-import { Row as be } from "./components/Row.js";
-import { useAddedRowKeys as xe } from "./hooks/useAddedRowKeys.js";
-import { useColumnCollapseAnimation as Se } from "./hooks/useColumnCollapseAnimation.js";
-import { useCreateSelectionRegistry as Ce } from "./providers/SelectionRegistryProvider.js";
+import { useDataCollectionData as ce } from "../../../hooks/useDataCollectionData/useDataCollectionData.js";
+import { PagesPagination as le } from "../../../components/PagesPagination/PagesPagination.js";
+import { useInfiniteScrollPagination as ue } from "../../../hooks/useInfiniteScrollPagination.js";
+import { useAddRow as de } from "../EditableTable/context/AddRowContext.js";
+import { statusToChecked as fe } from "../utils.js";
+import { getColumnId as pe, useColumns as me } from "./hooks/useColums.js";
+import { groupBorderClass as he, useHeaderGroups as ge } from "./hooks/useHeaderGroups.js";
+import { useSticky as _e } from "./useSticky.js";
+import { NestedDataProvider as ve } from "./providers/NestedProvider.js";
+import { Row as ye } from "./components/Row.js";
+import { useAddedRowKeys as be } from "./hooks/useAddedRowKeys.js";
+import { useColumnCollapseAnimation as xe } from "./hooks/useColumnCollapseAnimation.js";
+import { useCreateSelectionRegistry as Se } from "./providers/SelectionRegistryProvider.js";
 import { SettingsRenderer as h } from "./settings/SettingsRenderer.js";
+import { useDataCollectionSettings as Ce } from "../../../Settings/SettingsProvider.js";
 import { Fragment as we, useEffect as Te, useMemo as g, useRef as Ee, useState as De } from "react";
 import { Fragment as _, jsx as v, jsxs as y } from "react/jsx-runtime";
 import { AnimatePresence as Oe, motion as ke } from "motion/react";
@@ -58,18 +58,18 @@ var Ae = (e) => e ? (Array.isArray(e) ? e : [e]).filter((e) => e !== void 0) : [
 		]
 	});
 }, b = ({ columns: h, source: b, frozenColumns: Me = 0, defaultExpanded: Ne, onSelectItems: Pe, onLoadData: Fe, onLoadError: Ie, allowColumnHiding: Le, allowColumnReordering: Re, lockedColumnIds: x, onLockedColumnIdsChange: ze, referenceRowType: S, boldRootRows: Be, headerGroups: Ve, onHeaderGroupCollapsedChange: He, bordered: Ue, rowWrapper: C, cellRenderer: w, showItemActions: T, visualizationSettings: We, fromVisualization: E = "table", summaryPlaceholder: Ge = "-" }) => {
-	let { t: D, ...O } = o(), k = fe(), [A] = De(() => ke.create(be)), { settings: Ke } = ce(), qe = x !== void 0 || !!ze, { columns: Je, stickyColumnIds: j } = he(h, Me, We ?? Ke.visualization?.table, Re, Le, x, qe), Ye = g(() => new Set(j), [j]), { columns: M, headerGroups: N, toggleHeaderGroup: Xe, collapsingCellClasses: P, collapseTransitions: Ze, settleHeaderGroup: Qe } = _e(Je, {
+	let { t: D, ...O } = o(), k = de(), [A] = De(() => ke.create(ye)), { settings: Ke } = Ce(), qe = x !== void 0 || !!ze, { columns: Je, stickyColumnIds: j } = me(h, Me, We ?? Ke.visualization?.table, Re, Le, x, qe), Ye = g(() => new Set(j), [j]), { columns: M, headerGroups: N, toggleHeaderGroup: Xe, collapsingCellClasses: P, collapseTransitions: Ze, settleHeaderGroup: Qe } = ge(Je, {
 		headerGroups: Ve,
 		onCollapsedChange: He,
 		preservedColumnIds: Ye
 	}), F = Ee(null);
-	Se(F, Ze, Qe);
-	let { data: I, paginationInfo: L, setPage: $e, isInitialLoading: et, isLoadingMore: tt, loadMore: nt, summaries: R, committedQuery: rt } = le(b, { onError: (e) => {
+	xe(F, Ze, Qe);
+	let { data: I, paginationInfo: L, setPage: $e, isInitialLoading: et, isLoadingMore: tt, loadMore: nt, summaries: R, committedQuery: rt } = ce(b, { onError: (e) => {
 		Ie(e);
 	} }), { currentSortings: z, setCurrentSortings: it, isLoading: at } = b, B = T !== !1 && !!b.itemActions, V = E === "editableTable", ot = V ? 1 : 2, st = g(() => T === !1 ? {
 		...b,
 		itemActions: void 0
-	} : b, [b, T]), { loadingIndicatorRef: ct } = de(L, at, tt, nt);
+	} : b, [b, T]), { loadingIndicatorRef: ct } = ue(L, at, tt, nt);
 	Te(() => {
 		Fe({
 			totalItems: L?.total || I.records.length,
@@ -79,7 +79,7 @@ var Ae = (e) => e ? (Array.isArray(e) ? e : [e]).filter((e) => e !== void 0) : [
 			data: I.records
 		});
 	}, [L?.total, I.records]);
-	let H = j.length, U = (e, t) => "id" in e && e.id !== void 0 && e.id !== null ? `id:${String(e.id)}` : `index:${String(t)}`, lt = I?.type === "flat" ? I.records.map((e, t) => `row-${U(e, t)}`) : [], ut = xe(lt, rt), W = Ce(), { selectedItems: G, allSelectedStatus: K, groupAllSelectedStatus: dt, handleSelectItemChange: q, handleSelectAll: ft, handleSelectAllItems: pt, handleSelectGroupChange: mt } = ne({
+	let H = j.length, U = (e, t) => "id" in e && e.id !== void 0 && e.id !== null ? `id:${String(e.id)}` : `index:${String(t)}`, lt = I?.type === "flat" ? I.records.map((e, t) => `row-${U(e, t)}`) : [], ut = be(lt, rt), W = Se(), { selectedItems: G, allSelectedStatus: K, groupAllSelectedStatus: dt, handleSelectItemChange: q, handleSelectAll: ft, handleSelectAllItems: pt, handleSelectGroupChange: mt } = ne({
 		data: I,
 		paginationInfo: L,
 		source: b,
@@ -102,7 +102,7 @@ var Ae = (e) => e ? (Array.isArray(e) ? e : [e]).filter((e) => e !== void 0) : [
 			field: e,
 			order: "desc"
 		} : null);
-	}, Y = b.grouping?.collapsible, yt = b.grouping?.defaultOpenGroups, { openGroups: bt, setGroupOpen: xt } = te(I?.type === "grouped" ? I.groups : [], yt), St = M.length + +!!B + +!!b.selectable, { getStickyPosition: X, checkColumnWidth: Z } = ve(H, M, !!b.selectable), Ct = I?.records.some((e) => b.itemsWithChildren?.(e));
+	}, Y = b.grouping?.collapsible, yt = b.grouping?.defaultOpenGroups, { openGroups: bt, setGroupOpen: xt } = te(I?.type === "grouped" ? I.groups : [], yt), St = M.length + +!!B + +!!b.selectable, { getStickyPosition: X, checkColumnWidth: Z } = _e(H, M, !!b.selectable), Ct = I?.records.some((e) => b.itemsWithChildren?.(e));
 	if (et) return /* @__PURE__ */ v(oe.Skeleton, { columns: St });
 	b.sortings || M.forEach((e) => {
 		e.sorting && console.warn("Sorting is defined on a column but no sortings are provided in the data source");
@@ -110,7 +110,7 @@ var Ae = (e) => e ? (Array.isArray(e) ? e : [e]).filter((e) => e !== void 0) : [
 	let wt = K.selectedCount > 0 || K.checked, Q = W.ids.length > 0 ? W.ids : (I?.records ?? []).map((e) => b.selectable?.(e)).filter((e) => e !== void 0), Tt = Q.length > 0 && Q.every((e) => G.has(e)), $ = Math.max(L?.total ?? 0, Q.length), Et = K.checked && !K.indeterminate || Tt, Dt = !!b.allPagesSelection && (!K.checked || K.indeterminate) && L?.total !== void 0 && $ > K.selectedCount, Ot = M.length + (B ? ot : 0), kt = K.selectedCount === 1 ? O.status.selected.singular : O.status.selected.plural;
 	return /* @__PURE__ */ v("div", {
 		className: "flex h-full min-h-0 flex-col gap-4",
-		children: /* @__PURE__ */ y(ye, {
+		children: /* @__PURE__ */ y(ve, {
 			defaultExpanded: Ne,
 			currentFilters: b.currentFilters,
 			currentSortings: b.currentSortings,
@@ -133,7 +133,7 @@ var Ae = (e) => e ? (Array.isArray(e) ? e : [e]).filter((e) => e !== void 0) : [
 										children: /* @__PURE__ */ v("div", { className: "ml-3.5 flex w-full items-center justify-start" })
 									}),
 									N.map((r, o) => {
-										let s = r.type === "group" && r.collapsible, c = e(ge, !s && "hover:after:bg-transparent"), l = r.columnIndices.every((e) => M[e].align === "right") ? "right" : "left";
+										let s = r.type === "group" && r.collapsible, c = e(he, !s && "hover:after:bg-transparent"), l = r.columnIndices.every((e) => M[e].align === "right") ? "right" : "left";
 										return r.type === "group" ? /* @__PURE__ */ v(p, {
 											align: l,
 											colSpan: r.colSpan,
@@ -205,7 +205,7 @@ var Ae = (e) => e ? (Array.isArray(e) ? e : [e]).filter((e) => e !== void 0) : [
 											sticky: X(i),
 											...r,
 											hidden: !1,
-											className: e(N && "[&>div:first-child]:hidden", o && "border-0 border-r border-solid border-f1-border-secondary", E === "editableTable" && (i !== M.length - 1 || B) && "border-0 border-r-[1px] border-solid border-f1-border-secondary", P.get(me({
+											className: e(N && "[&>div:first-child]:hidden", o && "border-0 border-r border-solid border-f1-border-secondary", E === "editableTable" && (i !== M.length - 1 || B) && "border-0 border-r-[1px] border-solid border-f1-border-secondary", P.get(pe({
 												id: r.id,
 												label: n
 											}))) || void 0,
@@ -260,8 +260,8 @@ var Ae = (e) => e ? (Array.isArray(e) ? e : [e]).filter((e) => e !== void 0) : [
 											children: /* @__PURE__ */ v("div", {
 												className: "pointer-events-auto ml-1.5 flex items-center justify-start",
 												children: /* @__PURE__ */ v(u, {
-													checked: !!pe(dt[e.key]),
-													indeterminate: pe(dt[e.key]) === "indeterminate",
+													checked: !!fe(dt[e.key]),
+													indeterminate: fe(dt[e.key]) === "indeterminate",
 													title: O.actions.selectAll,
 													hideLabel: !0,
 													onCheckedChange: (t) => mt(e, t)
@@ -380,7 +380,7 @@ var Ae = (e) => e ? (Array.isArray(e) ? e : [e]).filter((e) => e !== void 0) : [
 										width: t.width,
 										sticky: X(n),
 										highlighted: !!t.highlighted,
-										className: e(V && (n !== M.length - 1 || B) && "border-0 border-r-[1px] border-solid border-f1-border-secondary", P.get(me(t))),
+										className: e(V && (n !== M.length - 1 || B) && "border-0 border-r-[1px] border-solid border-f1-border-secondary", P.get(pe(t))),
 										children: n === 0 && !b.selectable && J.label ? /* @__PURE__ */ v("div", {
 											className: "font-medium text-f1-foreground-secondary",
 											children: J.label
@@ -468,7 +468,7 @@ var Ae = (e) => e ? (Array.isArray(e) ? e : [e]).filter((e) => e !== void 0) : [
 						})()
 					]
 				})
-			}), /* @__PURE__ */ v(ue, {
+			}), /* @__PURE__ */ v(le, {
 				paginationInfo: L,
 				setPage: $e,
 				className: "pb-4"

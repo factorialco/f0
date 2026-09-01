@@ -7,9 +7,9 @@ import a from "../../../../icons/app/SolidStop.js";
 import { F0Button as o } from "../../../../components/F0Button/F0Button.js";
 import { F0TagRaw as s } from "../../../../components/tags/F0TagRaw/index.js";
 import { F0Select as c } from "../../../../F0Select.js";
-import { getLabels as ee } from "../ClockInGraph/helpers.js";
+import { getInfo as ee } from "./helpers.js";
+import { getLabels as te } from "../ClockInGraph/helpers.js";
 import { ClockInGraph as l } from "../ClockInGraph/index.js";
-import { getInfo as te } from "./helpers.js";
 import { findLeaf as ne } from "./TreeSelector.js";
 import { LocationSelector as re, toLocationTree as ie } from "./LocationSelector.js";
 import { ProjectSelector as ae } from "./ProjectSelector.js";
@@ -46,7 +46,7 @@ var h = "[&_[data-testid=input-field-wrapper]]:bg-transparent", g = ({ color: e 
 	});
 };
 function _({ trackedMinutes: t, remainingMinutes: m, data: _ = [], labels: v, locationId: y, locations: b, canShowLocation: x = !0, locationSelectorDisabled: S = !1, onClockIn: C, onClockOut: w, onBreak: T, breakTypes: ce, onChangeBreakTypeId: E, canShowBreakButton: le = !0, canSeeGraph: D = !0, canSeeRemainingTime: O = !0, onChangeLocationId: k, canShowProject: A = !0, projectSelectorElement: ue, locationSelectorElement: de, projects: j, projectId: fe, onChangeProjectId: pe, projectSelectorDisabled: me = !1, projectRequired: he = !0, locationRequired: ge = !0, breakTypeName: M, onBreakPromote: _e, variant: N = "default", loading: ve = !1 }) {
-	let { status: P, statusText: F, subtitle: I, statusColor: L } = te({
+	let { status: P, statusText: F, subtitle: I, statusColor: L } = ee({
 		data: _,
 		labels: v,
 		trackedMinutes: t,
@@ -182,7 +182,7 @@ function _({ trackedMinutes: t, remainingMinutes: m, data: _ = [], labels: v, lo
 		canShowProject: A && !!(j?.length ?? J)
 	});
 	if (N === "horizontal-bar") {
-		let { primaryLabel: e, time: r } = ee({
+		let { primaryLabel: e, time: r } = te({
 			data: _,
 			trackedMinutes: t,
 			remainingMinutes: O ? m : 0

@@ -7,22 +7,22 @@ import a from "../../../../icons/app/Table.js";
 import { useI18n as o } from "../../../../lib/providers/i18n/i18n-provider.js";
 import { tooltipValueFormat as s } from "../../../../kits/F0DataChart/utils/options.js";
 import { DataChartEmptyStateView as c } from "../../../../kits/F0DataChart/components/EmptyState/DataChartEmptyStateView.js";
-import { BarChartSkeleton as l, FunnelChartSkeleton as u, GaugeChartSkeleton as d, HeatmapChartSkeleton as f, LineChartSkeleton as p, PieChartSkeleton as m, RadarChartSkeleton as h, ScatterChartSkeleton as ee } from "../../../../kits/F0DataChart/skeletons.js";
-import { F0DataChart as te } from "../../../../kits/F0DataChart/index.js";
-import { OneDataCollection as g } from "../../../OneDataCollection/index.js";
-import { useDataCollectionSource as _ } from "../../../OneDataCollection/hooks/useDataCollectionSource/useDataCollectionSource.js";
-import { useAiChat as ne } from "../../../../kits/ai/F0AiChat/providers/AiChatStateProvider.js";
-import { compatibleTargetTypes as re, defaultChartConfig as v, detectDataShape as y, fromCanonical as b, isRenderableChart as ie, toCanonical as x } from "../../utils/chartDataAdapter.js";
-import { chartDataToTabular as S } from "../../utils/chartDataToTabular.js";
-import { useChartDownloadActions as ae } from "../../hooks/useChartDownloadActions.js";
-import { useDashboardItemData as oe } from "../../hooks/useDashboardItemData.js";
-import { DashboardItem as se } from "../DashboardItem/DashboardItem.js";
-import { AccessiblePointActions as ce } from "./AccessiblePointActions.js";
-import { PointActionPopover as le } from "./PointActionPopover.js";
-import { useCallback as C, useEffect as w, useMemo as T, useRef as E, useState as D } from "react";
-import { jsx as O, jsxs as ue } from "react/jsx-runtime";
+import { BarChartSkeleton as l, FunnelChartSkeleton as u, GaugeChartSkeleton as d, HeatmapChartSkeleton as f, LineChartSkeleton as p, PieChartSkeleton as m, RadarChartSkeleton as h, ScatterChartSkeleton as g } from "../../../../kits/F0DataChart/skeletons.js";
+import { F0DataChart as ee } from "../../../../kits/F0DataChart/index.js";
+import { useAiChat as te } from "../../../../kits/ai/F0AiChat/providers/AiChatStateProvider.js";
+import { OneDataCollection as _ } from "../../../OneDataCollection/index.js";
+import { useDataCollectionSource as v } from "../../../OneDataCollection/hooks/useDataCollectionSource/useDataCollectionSource.js";
+import { compatibleTargetTypes as ne, defaultChartConfig as y, detectDataShape as b, fromCanonical as x, isRenderableChart as re, toCanonical as S } from "../../utils/chartDataAdapter.js";
+import { chartDataToTabular as C } from "../../utils/chartDataToTabular.js";
+import { useChartDownloadActions as ie } from "../../hooks/useChartDownloadActions.js";
+import { useDashboardItemData as ae } from "../../hooks/useDashboardItemData.js";
+import { DashboardItem as oe } from "../DashboardItem/DashboardItem.js";
+import { AccessiblePointActions as se } from "./AccessiblePointActions.js";
+import { PointActionPopover as ce } from "./PointActionPopover.js";
+import { useCallback as w, useEffect as T, useMemo as E, useRef as D, useState as O } from "react";
+import { jsx as k, jsxs as le } from "react/jsx-runtime";
 //#region src/patterns/F0AnalyticsDashboard/components/ChartItem/ChartItem.tsx
-function de(o) {
+function ue(o) {
 	return [
 		{
 			label: o.dataChart.barChartVertical,
@@ -64,39 +64,39 @@ function de(o) {
 		}
 	];
 }
-function k(e, t, n = "y") {
+function A(e, t, n = "y") {
 	return n === "x" && e.type === "scatter" ? s(e.xTooltipValueFormatter, e.xValueFormatter)(t) : s(e.tooltipValueFormatter, e.valueFormatter)(t);
 }
-function A(e, t, n) {
+function j(e, t, n) {
 	if (t.type === "scatter" && n.values.length >= 2) {
 		let r = n.category ? `${e} — ${n.category}` : e, i = t.xAxisName ?? "X", a = t.yAxisName ?? "Y";
-		return `${r}\n${n.seriesName ? `${n.seriesName}\n` : ""}${i}: ${k(t, n.values[0], "x")}\n${a}: ${k(t, n.values[1])}`;
+		return `${r}\n${n.seriesName ? `${n.seriesName}\n` : ""}${i}: ${A(t, n.values[0], "x")}\n${a}: ${A(t, n.values[1])}`;
 	}
 	if (t.type === "line" && n.series.length > 1) {
 		let r = t.categoryFormatter ? t.categoryFormatter(n.category) : n.category;
-		return `${r ? `${e} — ${r}` : e}\n${n.series.map(({ name: e, value: n }) => `${e}: ${k(t, n)}`).join("\n")}`;
+		return `${r ? `${e} — ${r}` : e}\n${n.series.map(({ name: e, value: n }) => `${e}: ${A(t, n)}`).join("\n")}`;
 	}
-	if (t.type === "radar" && t.indicators.length && n.values.length > 1) return `${n.category ? `${e} — ${n.category}` : e}\n${t.indicators.slice(0, n.values.length).map(({ name: e }, r) => `${e}: ${k(t, n.values[r])}`).join("\n")}`;
+	if (t.type === "radar" && t.indicators.length && n.values.length > 1) return `${n.category ? `${e} — ${n.category}` : e}\n${t.indicators.slice(0, n.values.length).map(({ name: e }, r) => `${e}: ${A(t, n.values[r])}`).join("\n")}`;
 	if (t.type === "heatmap" && n.values.length >= 3) {
 		let r = t.xCategories[n.values[0]], i = [t.yCategories[n.values[1]], r].filter(Boolean).join(" — ");
-		return `${i ? `${e} — ${i}` : e}\n${k(t, n.value)}`;
+		return `${i ? `${e} — ${i}` : e}\n${A(t, n.value)}`;
 	}
 	let r = "categoryFormatter" in t && t.categoryFormatter ? t.categoryFormatter(n.category) : n.category;
-	return `${r ? `${e} — ${r}` : e}\n${n.seriesName ? `${n.seriesName}: ` : ""}${k(t, n.value)}`;
+	return `${r ? `${e} — ${r}` : e}\n${n.seriesName ? `${n.seriesName}: ` : ""}${A(t, n.value)}`;
 }
-function j(e) {
+function M(e) {
 	let t = typeof e == "object" && e && "value" in e ? e.value : e;
 	if (t == null || t === "") return null;
 	let n = Number(t);
 	return Number.isFinite(n) ? n : null;
 }
-function M(e, t) {
+function N(e, t) {
 	return {
 		key: e,
 		point: t
 	};
 }
-function N(e, t = {}) {
+function P(e, t = {}) {
 	let n = {
 		source: "keyboard",
 		clientX: 0,
@@ -104,7 +104,7 @@ function N(e, t = {}) {
 	};
 	switch (e.type) {
 		case "bar": return e.series.flatMap((r, i) => t[r.name] === !1 ? [] : r.data.flatMap((t, a) => {
-			let o = j(t);
+			let o = M(t);
 			if (o === null) return [];
 			let s = {
 				seriesName: r.name,
@@ -120,12 +120,12 @@ function N(e, t = {}) {
 				seriesIndex: i,
 				...n
 			};
-			return [M(`bar-${i}-${a}`, s)];
+			return [N(`bar-${i}-${a}`, s)];
 		}));
 		case "line": return e.categories.flatMap((r, i) => {
 			let a = e.series.flatMap((e, n) => {
 				if (t[e.name] === !1) return [];
-				let r = j(e.data[i]);
+				let r = M(e.data[i]);
 				return r === null ? [] : [{
 					name: e.name,
 					seriesIndex: n,
@@ -143,11 +143,11 @@ function N(e, t = {}) {
 				seriesIndex: o.seriesIndex,
 				...n
 			};
-			return [M(`line-${i}`, s)];
+			return [N(`line-${i}`, s)];
 		});
 		case "funnel": return e.series.data.flatMap((r, i) => {
 			if (t[r.name] === !1) return [];
-			let a = j(r.value);
+			let a = M(r.value);
 			if (a === null) return [];
 			let o = {
 				seriesName: e.series.name,
@@ -163,11 +163,11 @@ function N(e, t = {}) {
 				seriesIndex: 0,
 				...n
 			};
-			return [M(`funnel-${i}`, o)];
+			return [N(`funnel-${i}`, o)];
 		});
 		case "pie": return e.series.data.flatMap((r, i) => {
 			if (t[r.name] === !1) return [];
-			let a = j(r.value);
+			let a = M(r.value);
 			if (a === null) return [];
 			let o = {
 				seriesName: e.series.name,
@@ -183,7 +183,7 @@ function N(e, t = {}) {
 				seriesIndex: 0,
 				...n
 			};
-			return [M(`pie-${i}`, o)];
+			return [N(`pie-${i}`, o)];
 		});
 		case "radar": return e.series.flatMap((e, r) => {
 			if (t[e.name] === !1) return [];
@@ -205,11 +205,11 @@ function N(e, t = {}) {
 				seriesIndex: 0,
 				...n
 			};
-			return [M(`radar-${r}`, o)];
+			return [N(`radar-${r}`, o)];
 		});
 		case "gauge": {
-			let t = j(e.value);
-			return t === null ? [] : [M("gauge-0", {
+			let t = M(e.value);
+			return t === null ? [] : [N("gauge-0", {
 				seriesName: "",
 				category: e.name ?? "",
 				value: t,
@@ -248,7 +248,7 @@ function N(e, t = {}) {
 				seriesIndex: 0,
 				...n
 			};
-			return [M(`heatmap-${i}`, a)];
+			return [N(`heatmap-${i}`, a)];
 		});
 		case "scatter": return e.series.flatMap((e, r) => t[e.name] === !1 ? [] : e.data.flatMap((t, i) => {
 			let [a, o] = Array.isArray(t) ? t : [t.x, t.y];
@@ -267,18 +267,18 @@ function N(e, t = {}) {
 				seriesIndex: r,
 				...n
 			};
-			return [M(`scatter-${r}-${i}`, c)];
+			return [N(`scatter-${r}-${i}`, c)];
 		}));
 	}
 }
-function P(e, t = {}) {
+function F(e, t = {}) {
 	switch (e.type) {
-		case "bar": return e.series.some((e) => t[e.name] !== !1 && e.data.some((e) => j(e) !== null));
-		case "line": return e.categories.some((n, r) => e.series.some((e) => t[e.name] !== !1 && j(e.data[r]) !== null));
-		case "funnel": return e.series.data.some((e) => t[e.name] !== !1 && j(e.value) !== null);
-		case "pie": return e.series.data.some((e) => t[e.name] !== !1 && j(e.value) !== null);
+		case "bar": return e.series.some((e) => t[e.name] !== !1 && e.data.some((e) => M(e) !== null));
+		case "line": return e.categories.some((n, r) => e.series.some((e) => t[e.name] !== !1 && M(e.data[r]) !== null));
+		case "funnel": return e.series.data.some((e) => t[e.name] !== !1 && M(e.value) !== null);
+		case "pie": return e.series.data.some((e) => t[e.name] !== !1 && M(e.value) !== null);
 		case "radar": return e.series.some((e) => t[e.name] !== !1 && e.data.length > 0 && e.data.every(Number.isFinite));
-		case "gauge": return j(e.value) !== null;
+		case "gauge": return M(e.value) !== null;
 		case "heatmap": return e.data.some(([e, t, n]) => [
 			e,
 			t,
@@ -290,39 +290,39 @@ function P(e, t = {}) {
 		}));
 	}
 }
-var fe = { type: "bar" };
-function pe(e) {
+var de = { type: "bar" };
+function fe(e) {
 	switch (e.type) {
-		case "bar": return /* @__PURE__ */ O(l, {
+		case "bar": return /* @__PURE__ */ k(l, {
 			orientation: e.orientation,
 			stacked: e.stacked,
 			showLegend: e.showLegend
 		});
-		case "line": return /* @__PURE__ */ O(p, {
+		case "line": return /* @__PURE__ */ k(p, {
 			lineType: e.lineType,
 			showArea: e.showArea,
 			showDots: e.showDots,
 			showLegend: e.showLegend
 		});
-		case "funnel": return /* @__PURE__ */ O(u, {
+		case "funnel": return /* @__PURE__ */ k(u, {
 			orient: e.orient,
 			sort: e.sort,
 			showLegend: e.showLegend
 		});
-		case "pie": return /* @__PURE__ */ O(m, {
+		case "pie": return /* @__PURE__ */ k(m, {
 			innerRadius: e.innerRadius,
 			showLegend: e.showLegend
 		});
-		case "radar": return /* @__PURE__ */ O(h, { showLegend: e.showLegend });
-		case "gauge": return /* @__PURE__ */ O(d, {});
-		case "heatmap": return /* @__PURE__ */ O(f, {});
-		case "scatter": return /* @__PURE__ */ O(ee, { showLegend: e.showLegend ?? !1 });
+		case "radar": return /* @__PURE__ */ k(h, { showLegend: e.showLegend });
+		case "gauge": return /* @__PURE__ */ k(d, {});
+		case "heatmap": return /* @__PURE__ */ k(f, {});
+		case "scatter": return /* @__PURE__ */ k(g, { showLegend: e.showLegend ?? !1 });
 	}
 }
-function F(e, t, n, r) {
+function I(e, t, n, r) {
 	let i = n ?? e.chart.type;
-	if (i === y(t, i) && i === e.chart.type && !r) return I(e, t);
-	let a = x(t), o = b(a, i), s = v(i), c = {};
+	if (i === b(t, i) && i === e.chart.type && !r) return L(e, t);
+	let a = S(t), o = x(a, i), s = y(i), c = {};
 	switch ("valueFormatter" in e.chart && e.chart.valueFormatter && (c.valueFormatter = e.chart.valueFormatter), "tooltipValueFormatter" in e.chart && e.chart.tooltipValueFormatter && (c.tooltipValueFormatter = e.chart.tooltipValueFormatter), "showLegend" in e.chart && (c.showLegend = e.chart.showLegend), i === "bar" && "showLabels" in e.chart && e.chart.showLabels !== void 0 && (c.showLabels = e.chart.showLabels), i) {
 		case "bar": {
 			let t = r ?? ("orientation" in e.chart ? e.chart.orientation : void 0) ?? s.orientation;
@@ -375,14 +375,14 @@ function F(e, t, n, r) {
 		};
 	}
 }
-function I(e, t) {
+function L(e, t) {
 	let { chart: n } = e;
 	switch (n.type) {
 		case "funnel": {
 			let e = t.series;
 			if (Array.isArray(t.series)) {
-				let n = x(t, "bar");
-				e = b(n, "funnel").series;
+				let n = S(t, "bar");
+				e = x(n, "funnel").series;
 			}
 			return {
 				...n,
@@ -416,7 +416,7 @@ function I(e, t) {
 		case "line": {
 			let { series: e } = t, r = t.categories ?? [];
 			if (e && !Array.isArray(e)) {
-				let i = x(t, "funnel"), a = b(i, n.type);
+				let i = S(t, "funnel"), a = x(i, n.type);
 				e = a.series, r = a.categories ?? [];
 			}
 			return {
@@ -428,167 +428,167 @@ function I(e, t) {
 		}
 	}
 }
-function me({ config: e, data: t }) {
-	let n = y(t, e.type), r = n === e.type ? e : {
+function pe({ config: e, data: t }) {
+	let n = b(t, e.type), r = n === e.type ? e : {
 		...e,
 		type: n
-	}, i = T(() => S(r, t), [r, t]), a = T(() => ({
+	}, i = E(() => C(r, t), [r, t]), a = E(() => ({
 		dataAdapter: { fetchData: () => ({ records: i.rows }) },
 		columns: i.columns.map((e) => ({
 			label: e,
 			id: e
 		}))
-	}), [i]), o = _(a, [i]), s = T(() => [{
+	}), [i]), o = v(a, [i]), s = E(() => [{
 		type: "table",
 		options: { columns: i.columns.map((e, t) => ({
 			label: e,
 			render: (n) => String(n[i.keys?.[t] ?? e] ?? "")
 		})) }
 	}], [i.columns]);
-	return /* @__PURE__ */ O(g, {
+	return /* @__PURE__ */ k(_, {
 		fullHeight: !0,
 		source: o,
 		visualizations: s
 	});
 }
-function L(e) {
-	return ie(e.chart) && e.chart.type === "bar" && "orientation" in e.chart && e.chart.orientation === "horizontal";
+function R(e) {
+	return re(e.chart) && e.chart.type === "bar" && "orientation" in e.chart && e.chart.orientation === "horizontal";
 }
-function R({ item: e, filters: t, actions: n, itemFilters: r, editMode: i, handleDelete: a, onAskAi: s, onAskAiTarget: l, onTransformChart: u, isFullscreen: d, onFullscreenChange: f }) {
-	let p = o(), [m, h] = D("chart"), { enabled: ee, setPendingQuote: g, setOpen: _, focusChatInput: v } = ne(), b = !ie(e.chart), x = b ? fe : e.chart, [S, k] = D(null), [j, M] = D(), I = e.useDashboardFilters !== !1, R = JSON.stringify(r?.value ?? {}), { data: z, isLoading: B, error: he, retry: ge } = oe(e.fetchData, t, I, R), V = E(null), H = E(null), U = T(() => z && !b ? F(e, z) : void 0, [
+function z({ item: e, filters: t, actions: n, itemFilters: r, editMode: i, handleDelete: a, onAskAi: s, onAskAiTarget: l, onTransformChart: u, isFullscreen: d, onFullscreenChange: f }) {
+	let p = o(), [m, h] = O("chart"), { enabled: g, setPendingQuote: _, setOpen: v, focusChatInput: y } = te(), x = !re(e.chart), S = x ? de : e.chart, [C, A] = O(null), [M, N] = O(), L = e.useDashboardFilters !== !1, z = JSON.stringify(r?.value ?? {}), { data: B, isLoading: V, error: me, retry: he } = ae(e.fetchData, t, L, z), H = D(null), U = D(null), W = E(() => B && !x ? I(e, B) : void 0, [
 		e,
-		z,
-		b
-	]);
-	w(() => {
-		k(null), M(void 0);
-	}, [
-		z,
 		B,
-		x.type
+		x
 	]);
-	let W = s ? "host" : ee ? "chat" : "none", G = W !== "none" && e.title.trim().length > 0;
-	w(() => {
-		k(null);
-	}, [W]);
-	let K = C((t) => {
+	T(() => {
+		A(null), N(void 0);
+	}, [
+		B,
+		V,
+		S.type
+	]);
+	let G = s ? "host" : g ? "chat" : "none", K = G !== "none" && e.title.trim().length > 0;
+	T(() => {
+		A(null);
+	}, [G]);
+	let q = w((t) => {
 		if (s) {
 			s({
 				id: e.id,
 				title: e.title,
 				point: t
-			}), k(null), requestAnimationFrame(() => {
+			}), A(null), requestAnimationFrame(() => {
 				let e = document.activeElement;
-				(!e || e === document.body || !e.isConnected) && H.current?.focus();
+				(!e || e === document.body || !e.isConnected) && U.current?.focus();
 			});
 			return;
 		}
-		if (!U) return;
-		let n = { text: A(e.title, U, t) };
+		if (!W) return;
+		let n = { text: j(e.title, W, t) };
 		l?.({
 			id: e.id,
 			title: e.title,
 			point: t,
 			quote: n
-		}), g(n), d && f?.(!1), _(!0), v(), k(null);
+		}), _(n), d && f?.(!1), v(!0), y(), A(null);
 	}, [
 		e,
-		U,
+		W,
 		s,
 		l,
 		d,
 		f,
-		g,
 		_,
-		v
-	]), _e = T(() => de(p), [p]), q = ae({
-		chartContainerRef: V,
-		chartConfig: x,
-		data: z,
+		v,
+		y
+	]), ge = E(() => ue(p), [p]), J = ie({
+		chartContainerRef: H,
+		chartConfig: S,
+		data: B,
 		title: e.title
-	}), ve = T(() => [...n ?? [], ...q], [n, q]), ye = T(() => !!U && G && P(U, j), [
-		U,
-		G,
-		j
-	]), be = C(() => U ? N(U, j).map(({ key: t, point: n }) => ({
+	}), _e = E(() => [...n ?? [], ...J], [n, J]), ve = E(() => !!W && K && F(W, M), [
+		W,
+		K,
+		M
+	]), ye = w(() => W ? P(W, M).map(({ key: t, point: n }) => ({
 		key: t,
-		getLabel: () => A(e.title, U, n).split("\n").join(", "),
-		onSelect: () => K(n)
+		getLabel: () => j(e.title, W, n).split("\n").join(", "),
+		onSelect: () => q(n)
 	})) : [], [
-		U,
+		W,
 		e.title,
-		j,
-		K
-	]), xe = C((e) => {
-		k(null), e !== "outside" && requestAnimationFrame(() => H.current?.focus());
-	}, []), J = x.type === "bar" ? "orientation" in x ? x.orientation ?? "vertical" : "vertical" : void 0, Y = z ? y(z, x.type) : x.type, Se = T(() => re(Y), [Y]), Ce = z && Array.isArray(z.series) ? z.series.length : 1, we = _e.filter((e) => {
+		M,
+		q
+	]), be = w((e) => {
+		A(null), e !== "outside" && requestAnimationFrame(() => U.current?.focus());
+	}, []), Y = S.type === "bar" ? "orientation" in S ? S.orientation ?? "vertical" : "vertical" : void 0, X = B ? b(B, S.type) : S.type, xe = E(() => ne(X), [X]), Se = B && Array.isArray(B.series) ? B.series.length : 1, Ce = ge.filter((e) => {
 		let t = e.type === "bar" ? "bar" : e.type;
-		return !(!Se.has(t) || e.type === "pie" && Ce > 1);
-	}), Te = u && Y !== "scatter" ? we.map((t) => {
-		let n = t.type === "table", r = n ? m === "table" : m === "chart" && x.type === t.type && (t.type !== "bar" || J === t.orientation);
+		return !(!xe.has(t) || e.type === "pie" && Se > 1);
+	}), we = u && X !== "scatter" ? Ce.map((t) => {
+		let n = t.type === "table", r = n ? m === "table" : m === "chart" && S.type === t.type && (t.type !== "bar" || Y === t.orientation);
 		return {
 			label: t.label,
 			value: t.value,
 			icon: t.icon,
 			isActive: r,
 			onSelect: () => {
-				n ? h("table") : (h("chart"), (x.type !== t.type || t.type === "bar" && J !== t.orientation) && u(e.id, t.type, t.orientation));
+				n ? h("table") : (h("chart"), (S.type !== t.type || t.type === "bar" && Y !== t.orientation) && u(e.id, t.type, t.orientation));
 			}
 		};
-	}) : void 0, X = !!d && L(e), [Z, Ee] = D(0), Q = !!f && L(e), De = Q && !d && Z > 0, Oe = Q && !!d, ke = z?.categories?.length ?? 0, Ae = De ? p.dataChart.windowedCategories.replace("{{count}}", String(Math.max(0, ke - Z))).replace("{{total}}", String(ke)) : void 0, $ = De ? {
+	}) : void 0, Z = !!d && R(e), [Te, Ee] = O(0), Q = !!f && R(e), De = Q && !d && Te > 0, Oe = Q && !!d, ke = B?.categories?.length ?? 0, Ae = De ? p.dataChart.windowedCategories.replace("{{count}}", String(Math.max(0, ke - Te))).replace("{{total}}", String(ke)) : void 0, $ = De ? {
 		label: p.actions.showAll,
 		onClick: () => f?.(!0)
 	} : Oe ? {
 		label: p.actions.showLess,
 		onClick: () => f?.(!1)
 	} : void 0;
-	return /* @__PURE__ */ O(se, {
+	return /* @__PURE__ */ k(oe, {
 		title: e.title,
 		description: Ae ?? e.description,
 		info: e.info,
 		...$ ? { descriptionAction: $ } : {},
 		explanation: e.explanation,
-		isLoading: B,
-		error: he ?? (b ? /* @__PURE__ */ Error() : void 0),
-		onRetry: b ? void 0 : ge,
-		skeleton: pe(x),
-		actions: ve,
+		isLoading: V,
+		error: me ?? (x ? /* @__PURE__ */ Error() : void 0),
+		onRetry: x ? void 0 : he,
+		skeleton: fe(S),
+		actions: _e,
 		itemFilters: r,
 		editMode: i,
 		handleDelete: a,
 		onAskAi: s,
 		onAskAiTarget: l,
 		itemId: e.id,
-		chartTypeOptions: Te,
+		chartTypeOptions: we,
 		isFullscreen: d,
-		fitContent: X,
+		fitContent: Z,
 		onFullscreenChange: f,
-		children: z && U ? m === "table" ? /* @__PURE__ */ O(me, {
-			config: x,
-			data: z
-		}) : /* @__PURE__ */ ue("div", {
-			ref: V,
+		children: B && W ? m === "table" ? /* @__PURE__ */ k(pe, {
+			config: S,
+			data: B
+		}) : /* @__PURE__ */ le("div", {
+			ref: H,
 			className: "relative h-full w-full px-4 py-3",
 			children: [
-				/* @__PURE__ */ O(te, {
-					...U,
-					...U.type !== "gauge" && U.type !== "heatmap" ? { onLegendSelectionChange: M } : {},
-					onPointClick: G ? (e) => k(e) : void 0,
+				/* @__PURE__ */ k(ee, {
+					...W,
+					...W.type !== "gauge" && W.type !== "heatmap" ? { onLegendSelectionChange: N } : {},
+					onPointClick: K ? (e) => A(e) : void 0,
 					...Q ? {
 						windowCategories: !0,
 						onHiddenCategoriesChange: Ee
 					} : {},
-					...X ? { showAllCategories: !0 } : {}
+					...Z ? { showAllCategories: !0 } : {}
 				}),
-				/* @__PURE__ */ O(ce, {
-					hasActions: ye,
-					getActions: be,
+				/* @__PURE__ */ k(se, {
+					hasActions: ve,
+					getActions: ye,
 					resetOn: {
-						data: z,
-						isLoading: B,
-						chartType: x.type,
-						legendSelection: j,
-						owner: W,
+						data: B,
+						isLoading: V,
+						chartType: S.type,
+						legendSelection: M,
+						owner: G,
 						title: e.title
 					},
 					label: p.ai.dashboardItem.askOne,
@@ -596,24 +596,24 @@ function R({ item: e, filters: t, actions: n, itemFilters: r, editMode: i, handl
 					previousLabel: p.navigation.previous,
 					nextLabel: p.navigation.next,
 					setTrigger: (e) => {
-						H.current = e;
+						U.current = e;
 					},
 					focusChatAfterSelect: !s,
-					focusChatInput: v
+					focusChatInput: y
 				}),
-				/* @__PURE__ */ O(le, {
-					anchor: S,
+				/* @__PURE__ */ k(ce, {
+					anchor: C,
 					onAsk: () => {
-						S && K(S);
+						C && q(C);
 					},
-					onDismiss: xe
+					onDismiss: be
 				})
 			]
-		}) : B ? null : /* @__PURE__ */ O("div", {
+		}) : V ? null : /* @__PURE__ */ k("div", {
 			className: "h-full w-full px-4 py-3",
-			children: /* @__PURE__ */ O(c, {})
+			children: /* @__PURE__ */ k(c, {})
 		})
 	});
 }
 //#endregion
-export { R as ChartItem, N as buildAccessibleChartPoints, F as buildChartProps, A as buildPointQuoteText, L as chartItemFitsContent, P as hasAccessibleChartPoint };
+export { z as ChartItem, P as buildAccessibleChartPoints, I as buildChartProps, j as buildPointQuoteText, R as chartItemFitsContent, F as hasAccessibleChartPoint };

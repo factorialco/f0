@@ -151,18 +151,6 @@ type F0SelectInlineProps<T extends string, R = unknown> = F0SelectPopupProps<T, 
  * @template R - The type of the record/item data (used with data source)
  */
 export type F0SelectProps<T extends string, R = unknown> = (F0SelectFieldProps<T, R> | F0SelectInlineProps<T, R>) & F0SelectDataProps<T, R>;
-/**
- * Static-options-only select props for dependency-leaf consumers.
- *
- * This intentionally excludes data sources, and therefore filters and
- * grouping, whose UI is injected by the configured public F0Select entry.
- */
-export type F0SelectStaticProps<T extends string> = (F0SelectFieldProps<T> | F0SelectInlineProps<T>) & {
-    source?: never;
-    mapOptions?: never;
-    searchFn?: (option: F0SelectItemProps<T, unknown>, search?: string) => boolean | undefined;
-    options: F0SelectItemProps<T, unknown>[];
-};
 export type F0SelectTagProp = string | {
     type: "dot";
     text: string;

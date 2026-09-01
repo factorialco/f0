@@ -10,5 +10,5 @@ export type InputInternalProps = Pick<ComponentProps<typeof ShadcnInput>, "ref" 
     type?: Exclude<HTMLInputTypeAttribute, "number"> | "private";
     onPressEnter?: () => void;
 };
-declare const InputInternal: import('react').ForwardRefExoticComponent<Omit<InputInternalProps, "ref"> & import('react').RefAttributes<HTMLInputElement>>;
+declare const InputInternal: ({ type, onPressEnter, ...props }: InputInternalProps) => import("react").JSX.Element;
 export { InputInternal };

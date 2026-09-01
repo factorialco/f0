@@ -1,4 +1,4 @@
-import { FlatRow as e } from "../FlatRow.js";
+import { Row as e } from "../Row.js";
 import { forwardRef as t, useLayoutEffect as n, useRef as r } from "react";
 import { jsx as i } from "react/jsx-runtime";
 var a = t((t, a) => {

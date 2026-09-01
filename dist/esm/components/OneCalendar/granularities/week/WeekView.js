@@ -3,7 +3,7 @@ import { useL10n as t } from "../../../../lib/providers/l10n/l10n-provider.js";
 import { useDateFnsLocale as n } from "../../../../lib/providers/l10n/use-date-fns-locale.js";
 import { toCalendarPickerMatcher as r } from "../../utils.js";
 import { Calendar as i } from "../../../../ui/calendar.js";
-import { getEndOfWeek as a, getStartOfWeek as o } from "./weekUtils.js";
+import { getEndOfWeek as a, getStartOfWeek as o } from "./index.js";
 import { useCallback as s, useMemo as c } from "react";
 import { jsx as l } from "react/jsx-runtime";
 import { AnimatePresence as u, motion as d } from "motion/react";

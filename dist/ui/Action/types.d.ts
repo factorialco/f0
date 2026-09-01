@@ -1,4 +1,5 @@
 import { HTMLAttributeAnchorTarget, ReactNode } from 'react';
+import { DataAttributes } from '../../global.types';
 export declare const actionButtonVariants: readonly ["default", "outline", "critical", "neutral", "ghost", "promote", "outlinePromote", "ai"];
 export type ActionButtonVariant = (typeof actionButtonVariants)[number];
 export declare const actionLinkVariants: readonly ["link", "unstyled", "mention"];

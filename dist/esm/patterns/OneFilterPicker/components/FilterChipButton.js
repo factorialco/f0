@@ -3,7 +3,7 @@ import { useReducedMotion as e } from "../../../lib/a11y.js";
 import { useI18n as t } from "../../../lib/providers/i18n/i18n-provider.js";
 import { Skeleton as n } from "../../../ui/skeleton.js";
 import { Chip as r } from "../../../components/OneChip/index.js";
-import { getFilterType as i } from "../filterTypes/getFilterType.js";
+import { getFilterType as i } from "../filterTypes/utils.js";
 import { useEffect as a, useState as o } from "react";
 import { Fragment as s, jsx as c } from "react/jsx-runtime";
 import { motion as l } from "motion/react";

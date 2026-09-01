@@ -2,9 +2,9 @@ import { useI18n as e } from "../../lib/providers/i18n/i18n-provider.js";
 import { F0ActionBar as t } from "../../components/F0ActionBar/index.js";
 import { getF0Config as n, unwrapToZodObject as r } from "../F0Form/f0Schema.js";
 import { useF0Form as i } from "../F0Form/useF0Form.js";
-import { F0FormSection as a } from "../F0Form/components/F0FormSection.js";
-import { F0Form as o } from "../F0Form/F0Form.js";
-import { F0Wizard as s } from "../../ui/F0Wizard/F0Wizard.js";
+import { F0Wizard as a } from "../../ui/F0Wizard/F0Wizard.js";
+import { F0FormSection as o } from "../F0Form/components/F0FormSection.js";
+import { F0Form as s } from "../F0Form/F0Form.js";
 import { useCallback as c, useEffect as l, useMemo as u, useRef as d, useState as f } from "react";
 import { Fragment as p, jsx as m, jsxs as h } from "react/jsx-runtime";
 import { z as g } from "zod";
@@ -82,7 +82,7 @@ function S(e, t, n) {
 	let r = t[e];
 	return r ? [r] : [];
 }
-function C({ formDefinition: e, steps: t, isOpen: n, onClose: r, title: i, width: a, size: o, defaultStepIndex: l, nextLabel: g, previousLabel: v, onStepChanged: y, allowStepSkipping: x, autoCloseOnLastStepSubmit: C, linkAfterLastStepSubmit: T, autoSkipCompletedSteps: E = !1, renderCustomField: D }) {
+function C({ formDefinition: e, steps: t, isOpen: n, onClose: r, title: i, width: o, size: s, defaultStepIndex: l, nextLabel: g, previousLabel: v, onStepChanged: y, allowStepSkipping: x, autoCloseOnLastStepSubmit: C, linkAfterLastStepSubmit: T, autoSkipCompletedSteps: E = !1, renderCustomField: D }) {
 	let { name: O, schema: k, sections: A, defaultValues: j, onSubmit: M, submitConfig: N, errorTriggerMode: P = "on-blur" } = e, F = N?.label, I = u(() => Object.keys(k), [k]), L = t ?? e.steps, R = u(() => {
 		if (L) return L.some((e) => e.sectionIds.length > 1) ? (process.env.NODE_ENV !== "production" && console.error("[F0WizardForm] Per-section schema mode does not support grouping multiple sections into a single step. Each section requires its own independent form and submit. Steps with multiple sectionIds will be automatically split into separate steps."), L.flatMap((e) => e.sectionIds.map((t) => ({
 			title: A?.[t]?.title ?? e.title,
@@ -178,12 +178,12 @@ function C({ formDefinition: e, steps: t, isOpen: n, onClose: r, title: i, width
 	]), oe = c((e) => {
 		$(), B.current = e, y?.(e);
 	}, [$, y]);
-	return /* @__PURE__ */ m(s, {
+	return /* @__PURE__ */ m(a, {
 		steps: re,
 		isOpen: n,
 		onClose: r,
 		title: i,
-		size: o ?? a,
+		size: s ?? o,
 		defaultStepIndex: ne,
 		nextLabel: g,
 		previousLabel: v,
@@ -223,7 +223,7 @@ function C({ formDefinition: e, steps: t, isOpen: n, onClose: r, title: i, width
 		}
 	});
 }
-function w({ sectionId: e, formName: t, schema: n, sectionConfig: r, defaultValues: o, onSubmit: s, submitConfig: c, errorTriggerMode: u, sectionForms: f, onErrorStateChange: p, renderCustomField: h, isLoading: g }) {
+function w({ sectionId: e, formName: t, schema: n, sectionConfig: r, defaultValues: a, onSubmit: s, submitConfig: c, errorTriggerMode: u, sectionForms: f, onErrorStateChange: p, renderCustomField: h, isLoading: g }) {
 	let _ = i();
 	l(() => (f[e] = _, () => {
 		f[e] = null;
@@ -235,12 +235,12 @@ function w({ sectionId: e, formName: t, schema: n, sectionConfig: r, defaultValu
 	let v = d(p);
 	return v.current = p, l(() => {
 		v.current(_.hasErrors);
-	}, [_.hasErrors]), /* @__PURE__ */ m(a, {
+	}, [_.hasErrors]), /* @__PURE__ */ m(o, {
 		formName: t,
 		sectionId: e,
 		schema: n,
 		sectionConfig: r,
-		defaultValues: o,
+		defaultValues: a,
 		onSubmit: s,
 		submitConfig: {
 			...c,
@@ -252,7 +252,7 @@ function w({ sectionId: e, formName: t, schema: n, sectionConfig: r, defaultValu
 		isLoading: g
 	});
 }
-function T({ formDefinition: e, steps: t, isOpen: n, onClose: a, title: l, width: f, size: g, defaultStepIndex: x, nextLabel: C, previousLabel: w, onStepChanged: T, allowStepSkipping: E, autoCloseOnLastStepSubmit: D, linkAfterLastStepSubmit: O, autoSkipCompletedSteps: k = !1, renderCustomField: A }) {
+function T({ formDefinition: e, steps: t, isOpen: n, onClose: o, title: l, width: f, size: g, defaultStepIndex: x, nextLabel: C, previousLabel: w, onStepChanged: T, allowStepSkipping: E, autoCloseOnLastStepSubmit: D, linkAfterLastStepSubmit: O, autoSkipCompletedSteps: k = !1, renderCustomField: A }) {
 	let { name: j, schema: M, sections: N, defaultValues: P, onSubmit: F, submitConfig: I, errorTriggerMode: L = "on-blur" } = e, R = I?.label, z = u(() => r(M), [M]), B = u(() => v(M, N), [M, N]), V = c((e) => _(y(z, e)), [z]), H = i(), U = d(P ? { ...P } : {}), W = d(x ?? 0), G = c((e) => async () => {
 		await H.submit();
 	}, [H]), K = c((e) => H.hasErrors, [H.hasErrors]), q = t ?? e.steps, J = u(() => q ?? B.map((e) => ({
@@ -304,21 +304,21 @@ function T({ formDefinition: e, steps: t, isOpen: n, onClose: a, title: l, width
 				window.location.href = e;
 				return;
 			}
-			D && a?.();
+			D && o?.();
 		}
 	}, [
 		D,
 		O,
-		a,
+		o,
 		Q
 	]), oe = c((e) => {
 		let t = H.getValues();
 		Object.assign(U.current, t), W.current = e, T?.(e);
 	}, [H, T]);
-	return /* @__PURE__ */ m(s, {
+	return /* @__PURE__ */ m(a, {
 		steps: re,
 		isOpen: n,
-		onClose: a,
+		onClose: o,
 		title: l,
 		size: g ?? f,
 		defaultStepIndex: ne,
@@ -332,7 +332,7 @@ function T({ formDefinition: e, steps: t, isOpen: n, onClose: a, title: l, width
 			let n = S(t, B, q), r = y(z, n), i = n.reduce((e, t) => (N?.[t] && (e[t] = N[t]), e), {});
 			return /* @__PURE__ */ h(p, { children: [/* @__PURE__ */ m("div", {
 				className: "pb-5",
-				children: /* @__PURE__ */ m(o, {
+				children: /* @__PURE__ */ m(s, {
 					name: `${j}-step-${t}`,
 					schema: r,
 					sections: i,

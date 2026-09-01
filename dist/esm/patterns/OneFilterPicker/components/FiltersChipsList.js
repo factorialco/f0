@@ -1,7 +1,7 @@
 import { useI18n as e } from "../../../lib/providers/i18n/i18n-provider.js";
 import { F0Button as t } from "../../../components/F0Button/F0Button.js";
 import { F0TagRaw as n } from "../../../components/tags/F0TagRaw/index.js";
-import { getFilterType as r } from "../filterTypes/getFilterType.js";
+import { getFilterType as r } from "../filterTypes/utils.js";
 import { getActiveFilterKeys as i } from "../internal/getActiveFilterKeys.js";
 import { FilterChipButton as a } from "./FilterChipButton.js";
 import { jsx as o, jsxs as s } from "react/jsx-runtime";

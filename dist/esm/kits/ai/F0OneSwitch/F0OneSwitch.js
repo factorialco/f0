@@ -1,14 +1,14 @@
 import { cn as e, focusRing as t } from "../../../lib/utils.js";
 import { Tooltip as n, TooltipContent as r, TooltipProvider as i, TooltipTrigger as a } from "../../../ui/tooltip.js";
 import { useI18n as o } from "../../../lib/providers/i18n/i18n-provider.js";
-import { F0OneIcon as s } from "../F0OneIcon/F0OneIcon.js";
-import { useAiChatToggle as c } from "../F0AiChat/providers/useAiChatToggle.js";
+import { useAiChatToggle as s } from "../F0AiChat/providers/useAiChatToggle.js";
+import { F0OneIcon as c } from "../F0OneIcon/F0OneIcon.js";
 import { useEffect as l, useState as u } from "react";
 import { jsx as d, jsxs as f } from "react/jsx-runtime";
 import * as p from "@radix-ui/react-switch";
 //#region src/kits/ai/F0OneSwitch/F0OneSwitch.tsx
 var m = ({ className: m, disabled: h, onVisible: g, tooltip: _, autoOpen: v = !1, onToggle: y }) => {
-	let { enabled: b, setOpen: x, open: S } = c(), C = o(), [w, T] = u(!1), [E, D] = u(!1), [O, k] = u(v), A = h && _?.whenDisabled ? _?.whenDisabled : _?.whenEnabled ?? C.ai.welcome, j = v ? O : E;
+	let { enabled: b, setOpen: x, open: S } = s(), C = o(), [w, T] = u(!1), [E, D] = u(!1), [O, k] = u(v), A = h && _?.whenDisabled ? _?.whenDisabled : _?.whenEnabled ?? C.ai.welcome, j = v ? O : E;
 	return l(() => {
 		v && k(!0);
 	}, [v]), l(() => {
@@ -39,7 +39,7 @@ var m = ({ className: m, disabled: h, onVisible: g, tooltip: _, autoOpen: v = !1
 					children: /* @__PURE__ */ d(p.Thumb, {
 						className: e("block h-[1.375rem] w-[1.375rem] translate-x-[0.3125rem] rounded-full transition-transform duration-300 data-[state=checked]:translate-x-[1.3125rem]"),
 						style: { transitionTimingFunction: "cubic-bezier(0.175,0.885,0.32,1.5)" },
-						children: /* @__PURE__ */ d("div", { children: /* @__PURE__ */ d(s, {
+						children: /* @__PURE__ */ d("div", { children: /* @__PURE__ */ d(c, {
 							size: "sm",
 							background: S ? "white" : void 0,
 							hover: w

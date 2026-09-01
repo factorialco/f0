@@ -13,7 +13,7 @@ import { jsx as d, jsxs as f } from "react/jsx-runtime";
 var p = 10;
 function m({ item: a, onDeselect: s }) {
 	return /* @__PURE__ */ f("div", {
-		className: "flex w-fit min-w-0 max-w-full items-center justify-between gap-1.5 rounded-md border border-solid border-f1-border-secondary p-1",
+		className: "flex w-fit max-w-full min-w-0 items-center justify-between gap-1.5 rounded-md border border-solid border-f1-border-secondary p-1",
 		children: [/* @__PURE__ */ f("div", {
 			className: "flex min-w-0 flex-1 items-center gap-1.5",
 			children: [

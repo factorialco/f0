@@ -1,7 +1,8 @@
 import { DataCollectionSettings } from '../Settings/SettingsProvider';
 /**
- * Builds the same default shape produced by the settings provider on first
- * mount. Used both as the reset target and as the baseline for dirty detection.
+ * Builds the default `DataCollectionSettings` from the visualization registry —
+ * the same shape produced by the settings provider on first mount. Used both as
+ * the reset target and as the baseline for dirty detection.
  */
 export declare const getDefaultDataCollectionSettings: () => DataCollectionSettings;
 /**

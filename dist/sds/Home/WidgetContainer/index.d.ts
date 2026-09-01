@@ -1,7 +1,6 @@
 import { CSSProperties, ReactNode } from 'react';
 import { HomeRenderCtx, HomeWidgetItem, SlotRenderers, WidgetParams } from '../slotRenderers';
 import { WidgetVirtualization } from './useWidgetVirtualizer';
-import { WidgetStow } from './WidgetMotion';
 export type { WidgetVirtualization } from './useWidgetVirtualizer';
 /** Which column a container is: the growing main one, or the fixed side rail. */
 export type WidgetContainerSide = "main" | "right";
@@ -79,15 +78,15 @@ export interface WidgetContainerProps {
      */
     virtualized?: boolean | WidgetVirtualization;
     /**
-     * THE STOW: where this column's widgets go when the rail collapses. Each card
-     * scales down onto its own glyph and fades, and grows back out of it when the
-     * rail opens, so a card and its glyph read as one object rather than two
-     * representations that replace each other. See `WidgetMotion`.
+     * THE STOW: whether this column's widgets belong to the collapsed strip rather
+     * than to the column. Stowed, each card fades out where it stands while the
+     * strip's glyphs slide in over the same beat, and fades back when the rail
+     * opens. See `WidgetMotion`.
      *
-     * `pitch` and `scale` describe the strip the widgets are going into — only
-     * `NewHomeLayout` knows those, which is why they come in from outside.
+     * `instant` is this component's own to decide (the floating panel is the case),
+     * so all that comes in from outside is the state of the rail.
      */
-    stow?: Omit<WidgetStow, "stowed" | "instant"> & {
+    stow?: {
         stowed: boolean;
     };
     /**

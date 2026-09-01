@@ -1,15 +1,15 @@
 import { useItemNeighbors as e } from "../../../../hooks/datasource/itemNeighbors/useItemNeighbors.js";
 import { useData as t } from "../../../../hooks/datasource/useData.js";
 import { defaultIdProvider as n, useDataSourceItemNavigation as r } from "../../../../hooks/datasource/useDataSourceItemNavigation/useDataSourceItemNavigation.js";
-import { useDataCollectionStorage as i } from "../../../../lib/providers/datacollection/DataCollectionStorageProvider.js";
-import { subscribeToDataCollectionStorageChanges as a } from "../../../../lib/providers/datacollection/dataCollectionStorageEvents.js";
-import { useDataCollectionSource as o } from "../useDataCollectionSource/useDataCollectionSource.js";
-import { usePageHeaderItemNavigation as s } from "../../../../experimental/Navigation/Header/PageHeader/usePageHeaderItemNavigation.js";
+import { usePageHeaderItemNavigation as i } from "../../../../experimental/Navigation/Header/PageHeader/usePageHeaderItemNavigation.js";
+import { useDataCollectionStorage as a } from "../../../../lib/providers/datacollection/DataCollectionStorageProvider.js";
+import { subscribeToDataCollectionStorageChanges as o } from "../../../../lib/providers/datacollection/dataCollectionStorageEvents.js";
+import { useDataCollectionSource as s } from "../useDataCollectionSource/useDataCollectionSource.js";
 import { seedFromStorage as c } from "./seedFromStorage.js";
 import { useEffect as l, useMemo as u, useRef as d, useState as ee } from "react";
 //#region src/patterns/OneDataCollection/hooks/useDataCollectionItemNavigation/useDataCollectionItemNavigation.ts
 function f(f) {
-	let { source: p, collectionId: m, activeItemId: h, defaultActiveItemId: te, onActiveItemChange: ne, idProvider: g, itemUrl: _, getItemTitle: v, enabled: y = !0, restorePersistedState: b = !0, currentFilters: x, navigationMode: S = "url", deps: re = [] } = f, C = i(), w = o(p, re), [T, E] = ee(null), D = T?.key === m && T.settled, O = d(w);
+	let { source: p, collectionId: m, activeItemId: h, defaultActiveItemId: te, onActiveItemChange: ne, idProvider: g, itemUrl: _, getItemTitle: v, enabled: y = !0, restorePersistedState: b = !0, currentFilters: x, navigationMode: S = "url", deps: re = [] } = f, C = a(), w = s(p, re), [T, E] = ee(null), D = T?.key === m && T.settled, O = d(w);
 	O.current = w;
 	let k = d(C);
 	k.current = C;
@@ -51,7 +51,7 @@ function f(f) {
 	]), l(() => {
 		!D || j === null || N.current !== j && P();
 	}, [D, j]), l(() => {
-		if (!(!y || !b)) return a(m, async () => {
+		if (!(!y || !b)) return o(m, async () => {
 			try {
 				let e = await k.current.get(m);
 				if (!e) return;
@@ -138,7 +138,7 @@ function f(f) {
 		U,
 		B,
 		Y
-	]), Z = s(X, {
+	]), Z = i(X, {
 		getItemTitle: v,
 		mode: S
 	}), Q = y && D && ae && K && J === null, $ = d(null), oe = Z ?? (Q ? $.current : null);

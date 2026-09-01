@@ -1,5 +1,5 @@
-import { secondsToFields as e } from "../../../../components/F0DurationInput/utils.js";
-import { useAiChat as t } from "../../F0AiChat/providers/AiChatStateProvider.js";
+import { useAiChat as e } from "../../F0AiChat/providers/AiChatStateProvider.js";
+import { secondsToFields as t } from "../../../../components/F0DurationInput/utils.js";
 import { DetailsItemsList as n } from "../../../../experimental/Lists/DetailsItemsList/index.js";
 import { F0CanvasCard as r } from "../../canvas/F0CanvasCard/F0CanvasCard.js";
 import { useFormCardValueFormatter as i } from "../../F0AiChat/providers/FormCardValueFormatterProvider.js";
@@ -13,8 +13,8 @@ function d(e) {
 function f(e) {
 	return e && e.charAt(0).toUpperCase() + e.slice(1);
 }
-function p(t) {
-	let { days: n, hours: r, minutes: i, seconds: a } = e(t), o = [];
+function p(e) {
+	let { days: n, hours: r, minutes: i, seconds: a } = t(e), o = [];
 	return n > 0 && o.push(`${n}d`), r > 0 && o.push(`${r}h`), i > 0 && o.push(`${i}m`), (a > 0 || o.length === 0) && o.push(`${a}s`), o.join(" ");
 }
 function m(e) {
@@ -88,18 +88,18 @@ function _(e, t) {
 		text: f(String(e))
 	};
 }
-function v({ formName: e, formDescription: d, module: f, cardTitle: p, cardDescription: m, fieldDescriptions: h, formValues: g, valueFormatter: v }) {
-	let { canvasContent: y, openCanvas: b, closeCanvas: x } = t(), S = i(e), C = v ?? S, w = o(() => {}), T = p ?? e, E = m ?? d ?? "", D = y?.type === "form" && y.formName === e, O = () => b({
+function v({ formName: t, formDescription: d, module: f, cardTitle: p, cardDescription: m, fieldDescriptions: h, formValues: g, valueFormatter: v }) {
+	let { canvasContent: y, openCanvas: b, closeCanvas: x } = e(), S = i(t), C = v ?? S, w = o(() => {}), T = p ?? t, E = m ?? d ?? "", D = y?.type === "form" && y.formName === t, O = () => b({
 		type: "form",
 		title: T,
 		description: E,
-		formName: e,
+		formName: t,
 		formDescription: d,
 		formModule: f
 	});
 	w.current = O, a(() => {
-		typeof window > "u" || window.innerWidth < l || u.has(e) || (u.add(e), w.current());
-	}, [e]);
+		typeof window > "u" || window.innerWidth < l || u.has(t) || (u.add(t), w.current());
+	}, [t]);
 	let k = h && g ? Object.entries(h).map(([e, t]) => {
 		let n = g[e], r = C?.(e, n, {
 			fieldType: t.fieldType,

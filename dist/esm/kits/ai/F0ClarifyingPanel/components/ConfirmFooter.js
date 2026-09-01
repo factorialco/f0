@@ -10,6 +10,7 @@ var i = ({ canProceed: i, submitDisabled: a, label: o, onConfirm: s, onSkip: c, 
 			className: "flex items-center",
 			children: l && c && /* @__PURE__ */ n(t, {
 				variant: "outline",
+				type: "button",
 				label: u.ai.clarifyingQuestion.skip,
 				onClick: c,
 				disabled: a
@@ -17,6 +18,7 @@ var i = ({ canProceed: i, submitDisabled: a, label: o, onConfirm: s, onSkip: c, 
 		}), /* @__PURE__ */ n(t, {
 			disabled: !i || a,
 			variant: "default",
+			type: "button",
 			label: o,
 			onClick: s
 		})]

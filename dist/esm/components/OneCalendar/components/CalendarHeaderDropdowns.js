@@ -1,5 +1,5 @@
 import { useI18n as e } from "../../../lib/providers/i18n/i18n-provider.js";
-import { F0SelectStatic as t } from "../../F0Select/F0Select.js";
+import { F0Select as t } from "../../../F0Select.js";
 import { useMemo as n } from "react";
 import { jsx as r, jsxs as i } from "react/jsx-runtime";
 import { endOfMonth as a, isAfter as o, isBefore as s, startOfMonth as c } from "date-fns";

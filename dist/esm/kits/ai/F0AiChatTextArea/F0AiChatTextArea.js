@@ -4,10 +4,10 @@ import { OneEllipsis as n } from "../../../lib/OneEllipsis/OneEllipsis.js";
 import { useI18n as r } from "../../../lib/providers/i18n/i18n-provider.js";
 import { Link as ee } from "../../../lib/linkHandler.js";
 import { F0AvatarAlert as te } from "../../../components/avatars/F0AvatarAlert/index.js";
-import { useAudioRecorder as ne } from "./useAudioRecorder.js";
+import { useAiChat as ne } from "../F0AiChat/providers/AiChatStateProvider.js";
 import { F0OneIcon as re } from "../F0OneIcon/F0OneIcon.js";
-import { useRevealOnChange as ie } from "../F0AiChat/hooks/useRevealOnChange.js";
-import { useAiChat as ae } from "../F0AiChat/providers/AiChatStateProvider.js";
+import { useAudioRecorder as ie } from "./useAudioRecorder.js";
+import { useRevealOnChange as ae } from "../F0AiChat/hooks/useRevealOnChange.js";
 import { DictationButton as oe } from "./components/DictationButton.js";
 import { SubmitButton as se } from "./components/SubmitButton.js";
 import { ActionBar as ce } from "./components/ActionBar.js";
@@ -30,7 +30,7 @@ var f = /[\\`*_{}[\]()#+\-.!|~>]/g, be = (e) => e.split(/(<entity-ref\b[^>]*>[\s
 	a(() => () => {
 		z.current && clearTimeout(z.current);
 	}, []);
-	let B = Te != null, { tracking: V, setFocusChatInputFunction: H } = ae(), Re = i((e, t) => {
+	let B = Te != null, { tracking: V, setFocusChatInputFunction: H } = ne(), Re = i((e, t) => {
 		V?.onWelcomeSuggestionClick?.({
 			item: e,
 			group: t,
@@ -49,7 +49,7 @@ var f = /[\\`*_{}[\]()#+\-.!|~>]/g, be = (e) => e.split(/(<entity-ref\b[^>]*>[\s
 		"permission-denied": w.ai.micPermissionDenied,
 		"device-error": w.ai.micError,
 		"transcription-failed": w.ai.transcriptionError
-	}, K = ne({
+	}, K = ie({
 		onTranscribe: je,
 		onPartial: Xe,
 		onFinal: (e) => {
@@ -181,7 +181,7 @@ var f = /[\\`*_{}[\]()#+\-.!|~>]/g, be = (e) => e.split(/(<entity-ref\b[^>]*>[\s
 		onStartRecording: $e,
 		onStopRecording: K.stop,
 		onCancelRecording: et
-	}), bt = v && y && !!C && C.length > 0, xt = y && v, { motionProps: St } = ie(v, 160, .5);
+	}), bt = v && y && !!C && C.length > 0, xt = y && v, { motionProps: St } = ae(v, 160, .5);
 	return /* @__PURE__ */ l(d.div, {
 		ref: Fe,
 		className: e("flex flex-col items-center gap-2", Pe === "default" && "px-4 pb-3 pt-2", xt && "min-h-0 flex-1 justify-start -mt-20"),

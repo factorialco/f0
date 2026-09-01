@@ -7,17 +7,17 @@ import { useI18n as a } from "../../../lib/providers/i18n/i18n-provider.js";
 import { ButtonInternal as o } from "../../../components/F0Button/internal.js";
 import { DropdownInternal as s } from "../../../experimental/Navigation/Dropdown/internal.js";
 import { DrawerDescription as c } from "../../../ui/drawer.js";
-import { useF0Dialog as l } from "./F0DialogProvider.js";
-import { DialogTitle as u } from "../../../ui/Dialog/components/DialogTitle.js";
+import { DialogTitle as l } from "../../../ui/Dialog/components/DialogTitle.js";
+import { useF0Dialog as u } from "./F0DialogProvider.js";
 import { BaseHeader as d } from "../../../experimental/Information/Headers/BaseHeader/index.js";
 import { BreadcrumbList as f } from "../../../ui/breadcrumb.js";
-import { BreadcrumbItem as p } from "../../../experimental/Navigation/Header/Breadcrumbs/internal/BreadcrumbItem.js";
-import { PageNavigation as m } from "../../../experimental/Navigation/Header/PageNavigation/index.js";
+import { PageNavigation as p } from "../../../experimental/Navigation/Header/PageNavigation/index.js";
+import { BreadcrumbItem as m } from "../../../experimental/Navigation/Header/Breadcrumbs/internal/BreadcrumbItem.js";
 import { Tabs as h } from "../../Navigation/Tabs/index.js";
 import { Fragment as g, jsx as _, jsxs as v } from "react/jsx-runtime";
 //#region src/patterns/F0Dialog/components/F0DialogHeader.tsx
 var y = ({ title: y, description: b, module: x, otherActions: S, navigation: C, resourceHeader: w, controls: T, headerStatus: E, dismissable: D = !0, tabs: O, activeTabId: k, setActiveTabId: A }) => {
-	let j = a(), { onClose: M } = l(), N = !!O, P = () => /* @__PURE__ */ _("div", { className: "h-4 w-px self-center bg-f1-background-secondary" }), F = S?.filter((e) => e.type !== "separator" && e.type !== "label") ?? [], I = () => {
+	let j = a(), { onClose: M } = u(), N = !!O, P = () => /* @__PURE__ */ _("div", { className: "h-4 w-px self-center bg-f1-background-secondary" }), F = S?.filter((e) => e.type !== "separator" && e.type !== "label") ?? [], I = () => {
 		if (!F.length || !S) return null;
 		let e = F.some((e) => e.critical);
 		return F.length <= 2 && !e ? /* @__PURE__ */ _("div", {
@@ -33,7 +33,7 @@ var y = ({ title: y, description: b, module: x, otherActions: S, navigation: C, 
 			items: S,
 			icon: r
 		});
-	}, L = () => x ? /* @__PURE__ */ _(f, { children: /* @__PURE__ */ _(p, {
+	}, L = () => x ? /* @__PURE__ */ _(f, { children: /* @__PURE__ */ _(m, {
 		item: {
 			id: x.id,
 			label: x.label,
@@ -85,7 +85,7 @@ var y = ({ title: y, description: b, module: x, otherActions: S, navigation: C, 
 						label: T.expand.label
 					})),
 					T.expand && T.navigation && /* @__PURE__ */ _(P, {}),
-					T.navigation && /* @__PURE__ */ _(m, { ...T.navigation })
+					T.navigation && /* @__PURE__ */ _(p, { ...T.navigation })
 				] }) : null, {})
 			}), /* @__PURE__ */ v("div", {
 				className: "flex flex-row items-center gap-2",
@@ -96,13 +96,13 @@ var y = ({ title: y, description: b, module: x, otherActions: S, navigation: C, 
 				]
 			})]
 		}),
-		w ? /* @__PURE__ */ v(g, { children: [/* @__PURE__ */ _(u, {
+		w ? /* @__PURE__ */ v(g, { children: [/* @__PURE__ */ _(l, {
 			className: "sr-only",
 			children: w.title
 		}), /* @__PURE__ */ _("div", {
 			className: "[&_.resource-header]:px-4",
 			children: /* @__PURE__ */ _(d, { ...w })
-		})] }) : y && /* @__PURE__ */ _(u, {
+		})] }) : y && /* @__PURE__ */ _(l, {
 			className: "sr-only",
 			children: y
 		}),
@@ -113,7 +113,7 @@ var y = ({ title: y, description: b, module: x, otherActions: S, navigation: C, 
 			className: "flex flex-row items-center gap-3",
 			children: (x || y || !!b) && /* @__PURE__ */ v("div", {
 				className: "flex flex-col gap-1",
-				children: [x ? /* @__PURE__ */ _(L, {}) : y && /* @__PURE__ */ _(u, {
+				children: [x ? /* @__PURE__ */ _(L, {}) : y && /* @__PURE__ */ _(l, {
 					className: "py-1 text-lg font-semibold text-f1-foreground",
 					children: y
 				}), !!b && /* @__PURE__ */ _(c, {
@@ -124,7 +124,7 @@ var y = ({ title: y, description: b, module: x, otherActions: S, navigation: C, 
 		}), /* @__PURE__ */ v("div", {
 			className: "flex flex-row items-center gap-2",
 			children: [
-				C && /* @__PURE__ */ _(m, { ...C }),
+				C && /* @__PURE__ */ _(p, { ...C }),
 				/* @__PURE__ */ _(R, {}),
 				/* @__PURE__ */ _(I, {}),
 				(C || S) && /* @__PURE__ */ _(P, {}),

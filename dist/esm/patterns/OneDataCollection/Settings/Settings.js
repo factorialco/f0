@@ -5,92 +5,90 @@ import { ButtonInternal as r } from "../../../components/F0Button/internal.js";
 import { F0Button as i } from "../../../components/F0Button/F0Button.js";
 import { Popover as a, PopoverContent as o, PopoverTrigger as s } from "../../../ui/popover.js";
 import { GroupingSelector as c } from "./components/GroupingSelector.js";
-import { F0SelectStatic as l } from "../../../components/F0Select/F0Select.js";
+import { collectionVisualizations as l } from "../visualizations/collection/collectionViewRegistry.js";
 import { useDataCollectionSettings as u } from "./SettingsProvider.js";
 import { isVisualizationSettingsDefault as d } from "../internal/isSettingsDefault.js";
-import { collectionVisualizations as f } from "../visualizations/collection/collectionViewRegistry.js";
-import { SortingSelector as p } from "./components/SortingSelector.js";
-import { VisualizationSettingsRenderer as m, hasVisualizacionSettings as h } from "./VisualizationSettingsRenderer.js";
-import { useMemo as g, useState as _ } from "react";
-import { jsx as v, jsxs as y } from "react/jsx-runtime";
+import { SortingSelector as f } from "./components/SortingSelector.js";
+import { VisualizationSettingsRenderer as p, hasVisualizacionSettings as m } from "./VisualizationSettingsRenderer.js";
+import { useMemo as h, useState as g } from "react";
+import { jsx as _, jsxs as v } from "react/jsx-runtime";
 //#region src/patterns/OneDataCollection/Settings/Settings.tsx
-var b = ({ visualizations: b, currentVisualization: x, grouping: S, currentGrouping: C, onGroupingChange: w, sortings: T, currentSortings: E, defaultSortings: D, onSortingsChange: O }) => {
-	let k = n(), A = S ? Object.keys(S.groupBy).length + +!!S.mandatory : 0, [j, M] = _(!1), N = (e) => {
-		w(e);
-	}, P = S && A > 0, F = b[x]?.sortings ?? T, I = F && Object.keys(F).length > 0, L = g(() => b[x], [x, b?.[x]]), R = g(() => /* @__PURE__ */ v(m, { visualization: L }, "visualization-settings"), [L]), z = g(() => h(L), [L]), B = g(() => {
-		let e = b[x]?.type;
+var y = ({ visualizations: y, currentVisualization: b, grouping: x, currentGrouping: S, onGroupingChange: C, sortings: w, currentSortings: T, defaultSortings: E, onSortingsChange: D }) => {
+	let O = n(), k = x ? Object.keys(x.groupBy).length + +!!x.mandatory : 0, [A, j] = g(!1), M = (e) => {
+		C(e);
+	}, N = x && k > 0, P = y[b]?.sortings ?? w, F = P && Object.keys(P).length > 0, I = h(() => y[b], [b, y?.[b]]), L = h(() => /* @__PURE__ */ _(p, { visualization: I }, "visualization-settings"), [I]), R = h(() => m(I), [I]), z = h(() => {
+		let e = y[b]?.type;
 		if (!e) return "-";
-		let t = k.collections.visualizations[e] ?? "-";
-		return k.collections.visualizations.settings.replace("{{visualizationName}}", t);
-	}, [x]), V = u(), H = g(() => {
-		if (JSON.stringify(E) !== JSON.stringify(D)) return !0;
-		let e = b[x]?.type;
-		return !d(V.settings, e);
+		let t = O.collections.visualizations[e] ?? "-";
+		return O.collections.visualizations.settings.replace("{{visualizationName}}", t);
+	}, [b]), B = u(), V = h(() => {
+		if (JSON.stringify(T) !== JSON.stringify(E)) return !0;
+		let e = y[b]?.type;
+		return !d(B.settings, e);
 	}, [
-		V.settings.visualization,
+		B.settings.visualization,
+		y,
 		b,
-		x,
-		E,
-		D
+		T,
+		E
 	]);
-	return /* @__PURE__ */ v("div", {
+	return /* @__PURE__ */ _("div", {
 		className: "flex gap-2",
-		children: /* @__PURE__ */ y(a, {
-			open: j,
-			onOpenChange: M,
-			children: [/* @__PURE__ */ v(s, {
+		children: /* @__PURE__ */ v(a, {
+			open: A,
+			onOpenChange: j,
+			children: [/* @__PURE__ */ _(s, {
 				asChild: !0,
-				onClick: () => M(!j),
-				children: /* @__PURE__ */ v(r, {
+				onClick: () => j(!A),
+				children: /* @__PURE__ */ _(r, {
 					variant: "outline",
 					label: "Settings",
 					icon: t,
 					onClick: () => {},
 					hideLabel: !0,
 					compact: !0,
-					pressed: j,
-					"aria-controls": j ? "settings" : void 0
+					pressed: A,
+					"aria-controls": A ? "settings" : void 0
 				})
-			}), /* @__PURE__ */ v(o, {
+			}), /* @__PURE__ */ _(o, {
 				className: "flex w-[280px] flex-col gap-0 rounded-md border border-solid border-f1-border-secondary p-0",
 				align: "end",
 				sideOffset: 8,
 				children: [
-					P && !S?.hideSelector && !(S.mandatory && Object.entries(S.groupBy).length < 2) && /* @__PURE__ */ v("div", {
+					N && !x?.hideSelector && !(x.mandatory && Object.entries(x.groupBy).length < 2) && /* @__PURE__ */ _("div", {
 						className: "p-3",
-						children: /* @__PURE__ */ v(c, {
-							SelectComponent: l,
-							grouping: S,
-							currentGrouping: C,
-							onGroupingChange: N
+						children: /* @__PURE__ */ _(c, {
+							grouping: x,
+							currentGrouping: S,
+							onGroupingChange: M
 						})
 					}, "grouping"),
-					I && /* @__PURE__ */ v("div", {
+					F && /* @__PURE__ */ _("div", {
 						className: "p-3",
-						children: /* @__PURE__ */ v(p, {
-							currentSortings: E,
-							onChange: O,
-							sortings: F
+						children: /* @__PURE__ */ _(f, {
+							currentSortings: T,
+							onChange: D,
+							sortings: P
 						})
 					}, "sorting"),
-					z && /* @__PURE__ */ y("section", {
+					R && /* @__PURE__ */ v("section", {
 						className: "p-3 pb-0",
-						children: [/* @__PURE__ */ v("h3", {
+						children: [/* @__PURE__ */ _("h3", {
 							className: "mb-2 text-sm font-medium text-f1-foreground-secondary",
-							children: B
-						}), R]
+							children: z
+						}), L]
 					}, "visualization-settings"),
-					H && /* @__PURE__ */ v("section", {
+					V && /* @__PURE__ */ _("section", {
 						className: "border-0 border-t border-solid border-t-f1-border p-3",
-						children: /* @__PURE__ */ v(i, {
+						children: /* @__PURE__ */ _(i, {
 							size: "sm",
 							variant: "ghost",
 							icon: e,
-							label: k.collections.visualizations.reset,
+							label: O.collections.visualizations.reset,
 							onClick: () => {
-								Object.values(f).forEach((e) => {
-									e.settings.resetHandler?.(V);
-								}), O(D);
+								Object.values(l).forEach((e) => {
+									e.settings.resetHandler?.(B);
+								}), D(E);
 							}
 						})
 					}, "reset")
@@ -100,4 +98,4 @@ var b = ({ visualizations: b, currentVisualization: x, grouping: S, currentGroup
 	});
 };
 //#endregion
-export { b as Settings };
+export { y as Settings };

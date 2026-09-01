@@ -1,10 +1,16 @@
-import "./model.js";
 import { getLabels as e, normalizeData as t } from "./helpers.js";
 import { HorizontalBar as n } from "./HorizontalBar.js";
 import { jsx as r, jsxs as i } from "react/jsx-runtime";
 import { Cell as a, Pie as o, PieChart as s } from "recharts";
 //#region src/sds/Home/ClockIn/ClockInGraph/index.tsx
-function c({ data: c = [], trackedMinutes: l = 0, remainingMinutes: u, variant: d = "ring" }) {
+var c = {
+	"clocked-in": "hsl(var(--positive-50))",
+	break: "hsl(var(--promote-50))",
+	empty: "hsl(var(--neutral-10))",
+	"clocked-out": "hsl(var(--neutral-10))",
+	overtime: "hsl(var(--warning-50))"
+};
+function l({ data: c = [], trackedMinutes: l = 0, remainingMinutes: u, variant: d = "ring" }) {
 	let f = t({
 		data: c,
 		trackedMinutes: l,
@@ -63,4 +69,4 @@ function c({ data: c = [], trackedMinutes: l = 0, remainingMinutes: u, variant: 
 	});
 }
 //#endregion
-export { c as ClockInGraph };
+export { c as CLOCK_IN_COLORS, l as ClockInGraph };

@@ -3,11 +3,11 @@ import { experimentalComponent as t } from "../../lib/experimental.js";
 import n from "../../icons/app/Check.js";
 import r from "../../icons/app/Cross.js";
 import { ButtonInternal as i } from "../../components/F0Button/internal.js";
-import { ChatTextarea as a } from "./components/ChatTextarea.js";
+import a from "./OneIcon.js";
 import { AiPromotionChatStateProvider as o, useAiPromotionChat as s } from "./providers/AiPromotionChatStateProvider.js";
-import { SidebarWindow as c } from "./components/ChatWindow.js";
-import { CustomButton as l } from "./components/CustomButton.js";
-import u from "./OneIcon.js";
+import { ChatTextarea as c } from "./components/ChatTextarea.js";
+import { SidebarWindow as l } from "./components/ChatWindow.js";
+import { CustomButton as u } from "./components/CustomButton.js";
 import { jsx as d, jsxs as f } from "react/jsx-runtime";
 //#region src/experimental/AiPromotionChat/index.tsx
 var p = ({ enabled: e = !1, greeting: t, title: n, description: r, benefits: i, actions: a, onShow: s, onHide: c, children: l }) => /* @__PURE__ */ d(o, {
@@ -22,7 +22,7 @@ var p = ({ enabled: e = !1, greeting: t, title: n, description: r, benefits: i, 
 	children: l
 }), m = e(t("AiPromotionChat", () => {
 	let { enabled: e, greeting: t, title: o, description: p, benefits: m, actions: h, setOpen: g, onHide: _ } = s();
-	return e ? /* @__PURE__ */ f(c, { children: [
+	return e ? /* @__PURE__ */ f(l, { children: [
 		/* @__PURE__ */ d("div", {
 			className: "flex items-center justify-end p-3 pb-0",
 			children: /* @__PURE__ */ d(i, {
@@ -42,7 +42,7 @@ var p = ({ enabled: e = !1, greeting: t, title: n, description: r, benefits: i, 
 				children: [
 					/* @__PURE__ */ f("div", {
 						className: "flex flex-col gap-4",
-						children: [/* @__PURE__ */ d(u, {
+						children: [/* @__PURE__ */ d(a, {
 							spin: !0,
 							size: "lg"
 						}), /* @__PURE__ */ f("div", { children: [/* @__PURE__ */ d("p", {
@@ -73,7 +73,7 @@ var p = ({ enabled: e = !1, greeting: t, title: n, description: r, benefits: i, 
 					}),
 					h?.length && /* @__PURE__ */ d("div", {
 						className: "flex flex-col gap-3 pt-2",
-						children: h.map((e, t) => /* @__PURE__ */ d(l, {
+						children: h.map((e, t) => /* @__PURE__ */ d(u, {
 							action: e,
 							onClose: () => g(!1)
 						}, t))
@@ -83,7 +83,7 @@ var p = ({ enabled: e = !1, greeting: t, title: n, description: r, benefits: i, 
 		}),
 		/* @__PURE__ */ d("div", {
 			className: "m-3 mt-2 flex-shrink-0",
-			children: /* @__PURE__ */ d(a, {})
+			children: /* @__PURE__ */ d(c, {})
 		})
 	] }) : null;
 })), h = e(t("AiPromotionChatProvider", p));

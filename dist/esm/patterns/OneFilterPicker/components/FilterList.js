@@ -7,7 +7,7 @@ import { useI18n as o } from "../../../lib/providers/i18n/i18n-provider.js";
 import { F0Button as s } from "../../../components/F0Button/F0Button.js";
 import { NonFocusableScrollArea as c, ScrollArea as l } from "../../../ui/scrollarea.js";
 import { collectNestedFilterKeys as u } from "../filterTypes/InFilter/components/option-utils.js";
-import { getFilterType as d } from "../filterTypes/getFilterType.js";
+import { getFilterType as d } from "../filterTypes/utils.js";
 import { useId as f, useMemo as p } from "react";
 import { jsx as m, jsxs as h } from "react/jsx-runtime";
 import { AnimatePresence as g, motion as _ } from "motion/react";

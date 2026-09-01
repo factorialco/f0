@@ -7,8 +7,8 @@ import { useI18n as a } from "../../../lib/providers/i18n/i18n-provider.js";
 import { F0Box as o } from "../../../F0Box.js";
 import { ProgressBarCell as s } from "../../../ui/value-display/types/progressBar/progressBar.js";
 import { F0Dialog as c } from "../../../F0Dialog.js";
-import { useF0Form as l } from "../../../patterns/F0Form/useF0Form.js";
-import { OneEmptyState as u } from "../../../components/OneEmptyState/OneEmptyState.js";
+import { OneEmptyState as l } from "../../../components/OneEmptyState/OneEmptyState.js";
+import { useF0Form as u } from "../../../patterns/F0Form/useF0Form.js";
 import { F0Form as d } from "../../../patterns/F0Form/F0Form.js";
 import { SurveyFormBuilderProvider as f } from "../SurveyFormBuilder/Context.js";
 import { TableOfContent as p } from "../SurveyFormBuilder/Form/TableOfContent/index.js";
@@ -24,7 +24,7 @@ function E(e) {
 	return e.inline ? /* @__PURE__ */ C(O, { ...e }) : /* @__PURE__ */ C(D, { ...e });
 }
 function D({ elements: E, onSubmit: D, mode: O, title: k, description: te, resourceHeader: ne, isOpen: re, onClose: A, position: j = "center", module: ie, allowToChangeFullscreen: ae = !1, defaultValues: M, errorTriggerMode: oe = "on-blur", loading: N = !1, labels: P, preview: F = !1, useUpload: se, datasets: I }) {
-	let { t: L } = a(), ce = j === "fullscreen", le = j === "fullscreen" ? "center" : j, [R, ue] = S(ce), { formRef: z, submit: B, isSubmitting: V, hasErrors: de } = l(), H = x({}), U = b(() => _(E), [E]), W = g(U), G = U.length > 0, K = {
+	let { t: L } = a(), ce = j === "fullscreen", le = j === "fullscreen" ? "center" : j, [R, ue] = S(ce), { formRef: z, submit: B, isSubmitting: V, hasErrors: de } = u(), H = x({}), U = b(() => _(E), [E]), W = g(U), G = U.length > 0, K = {
 		title: P?.empty?.title ?? L("surveyAnsweringForm.labels.empty.title"),
 		description: P?.empty?.description ?? L("surveyAnsweringForm.labels.empty.description"),
 		emoji: P?.empty?.emoji ?? L("surveyAnsweringForm.labels.empty.emoji")
@@ -157,7 +157,7 @@ function D({ elements: E, onSubmit: D, mode: O, title: k, description: te, resou
 								justifyContent: "center",
 								alignItems: "center",
 								paddingX: "lg",
-								children: /* @__PURE__ */ C(u, {
+								children: /* @__PURE__ */ C(l, {
 									emoji: K.emoji,
 									title: K.title,
 									description: K.description
@@ -190,12 +190,12 @@ function D({ elements: E, onSubmit: D, mode: O, title: k, description: te, resou
 		})
 	});
 }
-function O({ elements: e, title: t, description: n, resourceHeader: r, defaultValues: i, loading: s = !1, labels: c, useUpload: l, datasets: p, hideResourceHeader: ee = !1 }) {
+function O({ elements: e, title: t, description: n, resourceHeader: r, defaultValues: i, loading: s = !1, labels: c, useUpload: u, datasets: p, hideResourceHeader: ee = !1 }) {
 	let { t: g } = a(), y = b(() => _(e), [e]).length > 0, x = {
 		title: c?.empty?.title ?? g("surveyAnsweringForm.labels.empty.title"),
 		description: c?.empty?.description ?? g("surveyAnsweringForm.labels.empty.description"),
 		emoji: c?.empty?.emoji ?? g("surveyAnsweringForm.labels.empty.emoji")
-	}, { schema: S, defaultValues: E, sections: D } = v(e, "all-questions", g, i, void 0, void 0, !0, !0, l, p);
+	}, { schema: S, defaultValues: E, sections: D } = v(e, "all-questions", g, i, void 0, void 0, !0, !0, u, p);
 	return /* @__PURE__ */ C(f, {
 		answering: !0,
 		elements: e,
@@ -226,7 +226,7 @@ function O({ elements: e, title: t, description: n, resourceHeader: r, defaultVa
 				justifyContent: "center",
 				alignItems: "center",
 				paddingX: "lg",
-				children: /* @__PURE__ */ C(u, {
+				children: /* @__PURE__ */ C(l, {
 					emoji: x.emoji,
 					title: x.title,
 					description: x.description

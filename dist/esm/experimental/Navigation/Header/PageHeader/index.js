@@ -8,12 +8,12 @@ import { ButtonInternal as o } from "../../../../components/F0Button/internal.js
 import { F0Button as s } from "../../../../components/F0Button/F0Button.js";
 import { F0TagStatus as c } from "../../../../components/tags/F0TagStatus/index.js";
 import { Dropdown as l } from "../../Dropdown/index.js";
-import { PageNavigation as u } from "../PageNavigation/index.js";
-import { F0OneSwitch as d } from "../../../../kits/ai/F0OneSwitch/F0OneSwitch.js";
+import { Breadcrumbs as u } from "../Breadcrumbs/index.js";
+import { OneSwitch as d } from "../../../AiPromotionChat/OneSwitch.js";
 import { useSidebar as f } from "../../../../patterns/ApplicationFrame/FrameProvider.js";
-import { OneSwitch as p } from "../../../AiPromotionChat/OneSwitch.js";
-import { Breadcrumbs as m } from "../Breadcrumbs/index.js";
-import { FavoriteButton as h } from "../Favorites/index.js";
+import { F0OneSwitch as p } from "../../../../kits/ai/F0OneSwitch/F0OneSwitch.js";
+import { FavoriteButton as m } from "../Favorites/index.js";
+import { PageNavigation as h } from "../PageNavigation/index.js";
 import { ProductUpdates as g } from "../ProductUpdates/index.js";
 import { PageHeaderNavigationContext as _, PageHeaderNavigationProvider as v, usePageHeaderNavigation as y } from "./PageHeaderNavigationContext.js";
 import { usePageHeaderItemNavigation as b } from "./usePageHeaderItemNavigation.js";
@@ -69,9 +69,9 @@ function O({ module: i, statusTag: o = void 0, breadcrumbs: l = [], actions: v =
 				}), U || R ? /* @__PURE__ */ w("div", {
 					className: "text-lg font-semibold text-f1-foreground",
 					children: "loading" in V ? /* @__PURE__ */ w(a, { className: "h-4 w-24" }) : V.label
-				}) : /* @__PURE__ */ w(m, {
+				}) : /* @__PURE__ */ w(u, {
 					breadcrumbs: I,
-					append: C !== void 0 && /* @__PURE__ */ w(h, {
+					append: C !== void 0 && /* @__PURE__ */ w(m, {
 						label: C.label,
 						isMarked: C.isMarked,
 						onChange: C?.onChange
@@ -93,7 +93,7 @@ function O({ module: i, statusTag: o = void 0, breadcrumbs: l = [], actions: v =
 					variant: o.variant
 				}) }),
 				!y && L && (F || z || B) && /* @__PURE__ */ w("div", { className: "h-4 w-px bg-f1-border-secondary" }),
-				F && /* @__PURE__ */ w(u, { ...F }),
+				F && /* @__PURE__ */ w(h, { ...F }),
 				F && z && /* @__PURE__ */ w("div", { className: "h-4 w-px bg-f1-border-secondary" }),
 				(B || z) && /* @__PURE__ */ T("div", {
 					className: "flex items-center gap-2",
@@ -110,10 +110,10 @@ function O({ module: i, statusTag: o = void 0, breadcrumbs: l = [], actions: v =
 				}),
 				/* @__PURE__ */ T("div", {
 					className: "flex items-center gap-3",
-					children: [!j && /* @__PURE__ */ w(d, {
+					children: [!j && /* @__PURE__ */ w(p, {
 						tooltip: O,
 						autoOpen: A
-					}), /* @__PURE__ */ w(p, {})]
+					}), /* @__PURE__ */ w(d, {})]
 				})
 			]
 		})]

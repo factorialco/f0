@@ -5,7 +5,7 @@ import { jsx as n, jsxs as r } from "react/jsx-runtime";
 var i = ({ actions: i, showApplyButton: a, onApply: o, onCancel: s, showCancelButton: c, applyLabel: l }) => {
 	let u = e();
 	return !i && !a ? null : /* @__PURE__ */ r("div", {
-		className: "flex w-full flex-row items-center justify-between gap-2 border-0 border-t border-solid border-f1-border-secondary p-2",
+		className: "flex w-full flex-row justify-between items-center gap-2 border-0 border-t border-solid border-f1-border-secondary p-2",
 		children: [
 			i?.map((e) => /* @__PURE__ */ n(t, {
 				variant: e.variant,

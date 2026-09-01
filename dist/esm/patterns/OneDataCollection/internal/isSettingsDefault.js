@@ -1,10 +1,13 @@
-import { createInitialVisualizationSettings as e } from "../Settings/visualizationSettings.js";
+import { collectionVisualizations as e } from "../visualizations/collection/collectionViewRegistry.js";
 //#region src/patterns/OneDataCollection/internal/isSettingsDefault.ts
-var t = () => ({ visualization: e() }), n = (t, n) => {
-	let r = e();
-	if (!n || !(n in r)) return !0;
-	let i = n, a = t.visualization[i];
-	return JSON.stringify(a) === JSON.stringify(r[i]);
+var t = () => {
+	let t = {};
+	for (let [n, r] of Object.entries(e)) r.settings.default && (t[n] = { ...r.settings.default });
+	return { visualization: t };
+}, n = (t, n) => {
+	if (!n || !(n in e)) return !0;
+	let r = n, i = t.visualization[r], a = e[r]?.settings.default;
+	return JSON.stringify(i) === JSON.stringify(a);
 };
 //#endregion
 export { t as getDefaultDataCollectionSettings, n as isVisualizationSettingsDefault };

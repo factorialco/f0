@@ -9,13 +9,13 @@ import * as o from "react";
 import { jsx as s, jsxs as c } from "react/jsx-runtime";
 import l from "embla-carousel-react";
 //#region src/ui/carousel.tsx
-var u = o.createContext(null);
-function d() {
-	let e = o.useContext(u);
+var u = e("-m-7 h-[calc(100%_+_56px)] w-[calc(100%_+_56px)] p-7", "[mask-image:linear-gradient(to_right,transparent_0px,transparent_14px,black_28px,black_calc(100%_-_28px),transparent_calc(100%_-_14px),transparent_100%)]", "[-webkit-mask-image:linear-gradient(to_right,transparent_0px,transparent_14px,black_28px,black_calc(100%_-_28px),transparent_calc(100%_-_14px),transparent_100%)]"), d = o.createContext(null);
+function f() {
+	let e = o.useContext(d);
 	if (!e) throw Error("useCarousel must be used within a <Carousel />");
 	return e;
 }
-var f = o.forwardRef(({ orientation: t = "horizontal", opts: n, setApi: r, plugins: i, className: a, children: c, ...d }, f) => {
+var p = o.forwardRef(({ orientation: t = "horizontal", opts: n, setApi: r, plugins: i, className: a, children: c, ...u }, f) => {
 	let [p, m] = l({
 		...n,
 		axis: t === "horizontal" ? "x" : "y"
@@ -34,7 +34,7 @@ var f = o.forwardRef(({ orientation: t = "horizontal", opts: n, setApi: r, plugi
 		if (m) return y(m), m.on("reInit", y), m.on("select", y), () => {
 			m?.off("select", y);
 		};
-	}, [m, y]), /* @__PURE__ */ s(u.Provider, {
+	}, [m, y]), /* @__PURE__ */ s(d.Provider, {
 		value: {
 			carouselRef: p,
 			api: m,
@@ -51,37 +51,27 @@ var f = o.forwardRef(({ orientation: t = "horizontal", opts: n, setApi: r, plugi
 			className: e("group/carousel relative", a),
 			role: "region",
 			"aria-roledescription": "carousel",
-			...d,
+			...u,
 			children: c
 		})
 	});
 });
-f.displayName = "Carousel";
-var p = o.forwardRef(({ className: t, ...n }, r) => {
-	let i = "linear-gradient(to right, transparent 0px, transparent 14px, black 28px, black calc(100% - 28px), transparent calc(100% - 14px), transparent 100%)", { carouselRef: a, orientation: o } = d();
+p.displayName = "Carousel";
+var m = o.forwardRef(({ className: t, ...n }, r) => {
+	let { carouselRef: i, orientation: a } = f();
 	return /* @__PURE__ */ s("div", {
-		ref: a,
-		className: "overflow-hidden",
-		style: {
-			scrollbarWidth: "none",
-			msOverflowStyle: "none",
-			margin: "-28px",
-			padding: "28px",
-			height: "calc(100% + 56px)",
-			width: "calc(100% + 56px)",
-			maskImage: i,
-			WebkitMaskImage: i
-		},
+		ref: i,
+		className: e("overflow-hidden", u, "[scrollbar-width:none] [-ms-overflow-style:none]"),
 		children: /* @__PURE__ */ s("div", {
 			ref: r,
-			className: e("flex", o === "horizontal" ? "-ml-4" : "-mt-4 flex-col", t),
+			className: e("flex", a === "horizontal" ? "-ml-4" : "-mt-4 flex-col", t),
 			...n
 		})
 	});
 });
-p.displayName = "CarouselContent";
-var m = o.forwardRef(({ className: t, ...n }, r) => {
-	let { orientation: i } = d();
+m.displayName = "CarouselContent";
+var h = o.forwardRef(({ className: t, ...n }, r) => {
+	let { orientation: i } = f();
 	return /* @__PURE__ */ s("div", {
 		ref: r,
 		role: "group",
@@ -90,9 +80,9 @@ var m = o.forwardRef(({ className: t, ...n }, r) => {
 		...n
 	});
 });
-m.displayName = "CarouselItem";
-var h = o.forwardRef(({ className: n, variant: r = "outline", ...i }, o) => {
-	let { orientation: c, scrollPrev: l, canScrollPrev: u } = d();
+h.displayName = "CarouselItem";
+var g = o.forwardRef(({ className: n, variant: r = "outline", ...i }, o) => {
+	let { orientation: c, scrollPrev: l, canScrollPrev: u } = f();
 	return /* @__PURE__ */ s("div", {
 		className: e("absolute flex h-6 w-6 items-center justify-center rounded-sm bg-f1-background opacity-0 backdrop-blur-sm transition-opacity group-hover/carousel:opacity-100", !u && "opacity-0 group-hover/carousel:opacity-0", c === "horizontal" ? "-left-3 top-1/2 -translate-y-1/2" : "-top-3 left-1/2 -translate-x-1/2 rotate-90"),
 		children: /* @__PURE__ */ s(a, {
@@ -110,9 +100,9 @@ var h = o.forwardRef(({ className: n, variant: r = "outline", ...i }, o) => {
 		})
 	});
 });
-h.displayName = "CarouselPrevious";
-var g = o.forwardRef(({ className: t, variant: r = "outline", ...i }, o) => {
-	let { orientation: c, scrollNext: l, canScrollNext: u } = d();
+g.displayName = "CarouselPrevious";
+var _ = o.forwardRef(({ className: t, variant: r = "outline", ...i }, o) => {
+	let { orientation: c, scrollNext: l, canScrollNext: u } = f();
 	return /* @__PURE__ */ s("div", {
 		className: e("absolute flex h-6 w-6 items-center justify-center rounded-sm bg-f1-background opacity-0 backdrop-blur-sm transition-opacity group-hover/carousel:opacity-100", !u && "opacity-0 group-hover/carousel:opacity-0", c === "horizontal" ? "-right-3 top-1/2 -translate-y-1/2" : "-bottom-3 left-1/2 -translate-x-1/2 rotate-90"),
 		children: /* @__PURE__ */ s(a, {
@@ -130,9 +120,9 @@ var g = o.forwardRef(({ className: t, variant: r = "outline", ...i }, o) => {
 		})
 	});
 });
-g.displayName = "CarouselNext";
-var _ = o.forwardRef(({ ...t }, n) => {
-	let { api: r } = d(), [, i] = o.useState(!1), a = o.useRef(null), c = o.useCallback(() => {
+_.displayName = "CarouselNext";
+var v = o.forwardRef(({ ...t }, n) => {
+	let { api: r } = f(), [, i] = o.useState(!1), a = o.useRef(null), c = o.useCallback(() => {
 		i((e) => !e);
 	}, []);
 	o.useEffect(() => {
@@ -158,8 +148,8 @@ var _ = o.forwardRef(({ ...t }, n) => {
 			e.removeEventListener("wheel", t), e.removeEventListener("touchmove", t);
 		};
 	}, []), l <= 1) return null;
-	let f = l > 5 ? 5 : l, p = Array.from({ length: l }, (e, t) => t), m = Math.min(f, l) * 16, h = (e) => {
-		if (f === l) return null;
+	let d = l > 5 ? 5 : l, p = Array.from({ length: l }, (e, t) => t), m = Math.min(d, l) * 16, h = (e) => {
+		if (d === l) return null;
 		let t = Math.abs(e - u);
 		if (t === 0 || t === 1) return "scale-100";
 		if (t === 2) return u === 0 || u === l - 1 ? "scale-100" : "scale-75";
@@ -174,11 +164,7 @@ var _ = o.forwardRef(({ ...t }, n) => {
 			style: { width: `${m}px` },
 			children: /* @__PURE__ */ s("div", {
 				ref: a,
-				className: "flex w-full gap-0 overflow-x-scroll",
-				style: {
-					scrollbarWidth: "none",
-					overscrollBehavior: "none"
-				},
+				className: "flex w-full gap-0 overflow-x-scroll [overscroll-behavior:none] [scrollbar-width:none]",
 				tabIndex: 0,
 				"aria-label": "Carousel pagination",
 				onKeyDown: (e) => {
@@ -196,9 +182,9 @@ var _ = o.forwardRef(({ ...t }, n) => {
 		})
 	});
 });
-_.displayName = "CarouselDots";
-var v = (e) => e?.containerNode()?.childElementCount ?? 0, y = (e) => {
-	let { api: t, canScrollNext: n, scrollNext: r } = d(), i = e?.hasMore ?? !1, a = e?.isLoading ?? !1, s = e?.onLoadMore, c = o.useRef({
+v.displayName = "CarouselDots";
+var y = (e) => e?.containerNode()?.childElementCount ?? 0, b = (e) => {
+	let { api: t, canScrollNext: n, scrollNext: r } = f(), i = e?.hasMore ?? !1, a = e?.isLoading ?? !1, s = e?.onLoadMore, c = o.useRef({
 		hasMore: i,
 		isLoading: a,
 		onLoadMore: s
@@ -219,15 +205,15 @@ var v = (e) => e?.containerNode()?.childElementCount ?? 0, y = (e) => {
 			t.off("select", e);
 		};
 	}, [t]);
-	let [l, u] = o.useState(!1), f = o.useRef(a), p = o.useRef(0);
+	let [l, u] = o.useState(!1), d = o.useRef(a), p = o.useRef(0);
 	return o.useEffect(() => {
-		let e = f.current && !a;
-		if (f.current = a, l) {
+		let e = d.current && !a;
+		if (d.current = a, l) {
 			if (n) {
 				u(!1), r();
 				return;
 			}
-			e && v(t) <= p.current && u(!1);
+			e && y(t) <= p.current && u(!1);
 		}
 	}, [
 		l,
@@ -243,13 +229,13 @@ var v = (e) => e?.containerNode()?.childElementCount ?? 0, y = (e) => {
 				r();
 				return;
 			}
-			i && (p.current = v(t), u(!0), a || s?.());
+			i && (p.current = y(t), u(!0), a || s?.());
 		}
 	};
-}, b = o.forwardRef(({ className: t, labels: n, showDots: o = !0, paging: l, ...u }, f) => {
-	let { scrollPrev: p, canScrollPrev: m } = d(), { canGoNext: h, goNext: g, isAwaitingPage: v } = y(l);
+}, x = o.forwardRef(({ className: t, labels: n, showDots: o = !0, paging: l, ...u }, d) => {
+	let { scrollPrev: p, canScrollPrev: m } = f(), { canGoNext: h, goNext: g, isAwaitingPage: _ } = b(l);
 	return /* @__PURE__ */ c("div", {
-		ref: f,
+		ref: d,
 		className: e("flex flex-row items-center justify-between gap-2 pt-4", t),
 		...u,
 		children: [
@@ -262,20 +248,20 @@ var v = (e) => e?.containerNode()?.childElementCount ?? 0, y = (e) => {
 				disabled: !m,
 				onClick: p
 			}),
-			o ? /* @__PURE__ */ s(_, { className: "grow" }) : null,
+			o ? /* @__PURE__ */ s(v, { className: "grow" }) : null,
 			/* @__PURE__ */ s(a, {
 				size: "md",
 				variant: "outline",
 				icon: i,
 				label: n?.next ?? "Next",
 				hideLabel: !0,
-				loading: v,
+				loading: _,
 				disabled: !h,
 				onClick: g
 			})
 		]
 	});
 });
-b.displayName = "CarouselControls";
+x.displayName = "CarouselControls";
 //#endregion
-export { f as Carousel, p as CarouselContent, b as CarouselControls, _ as CarouselDots, m as CarouselItem, g as CarouselNext, h as CarouselPrevious };
+export { u as CAROUSEL_SHADOW_BLEED, p as Carousel, m as CarouselContent, x as CarouselControls, v as CarouselDots, h as CarouselItem, _ as CarouselNext, g as CarouselPrevious };

@@ -29,7 +29,7 @@ interface PresetFormDialogProps {
     existingNames?: string[];
 }
 /**
- * Dialog for editing a preset title and optional description, reused for both
+ * Dialog wrapping an F0Form (title + optional description), reused for both
  * creating a new custom view and renaming an existing one. The captured view
  * state (filters/sorting/view/grouping/columns) is owned by OneDataCollection;
  * this dialog only collects the title and description.

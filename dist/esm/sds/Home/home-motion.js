@@ -13,31 +13,31 @@ var c = [
 	duration: 320 / 1e3,
 	ease: c,
 	delay: u(e, t)
-}, f = "top right", p = .9, m = 1.18, h = 1.3, g = .94, _ = {
+}, f = "top right", p = .9, m = .94, h = {
 	type: "spring",
 	stiffness: 420,
 	damping: 32,
 	mass: .9
-}, v = {
+}, g = {
 	duration: 140 / 1e3,
 	ease: "easeIn"
-}, y = {
+}, _ = {
 	type: "spring",
 	stiffness: 420,
 	damping: 26,
 	mass: .7
-}, b = {
+}, v = {
 	type: "spring",
 	stiffness: 520,
 	damping: 38,
 	mass: .8
-}, x = {
+}, y = {
 	duration: 180 / 1e3,
 	ease: "easeIn"
-}, S = _, C = {
+}, b = h, x = {
 	duration: .28,
 	ease: c
-}, w = (e, t) => t ? l : e, T = (e, t) => {
+}, S = (e, t) => t ? l : e, C = (e, t) => {
 	let [r, a] = i(e);
 	return n(() => {
 		if (!e) {
@@ -51,7 +51,7 @@ var c = [
 		let n = setTimeout(() => a(!0), t);
 		return () => clearTimeout(n);
 	}, [e, t]), r;
-}, E = (e) => {
+}, w = (e) => {
 	let [t, r] = i(e <= 0);
 	return n(() => {
 		if (e <= 0) {
@@ -61,26 +61,26 @@ var c = [
 		let t = setTimeout(() => r(!0), e);
 		return () => clearTimeout(t);
 	}, [e]), t;
-}, D = (e = 0) => e + 330 + 320, O = {
+}, T = (e = 0) => e + 330 + 320, E = {
 	duration: 220 / 1e3,
 	ease: c
-}, k = {
+}, D = {
 	duration: 140 / 1e3,
 	ease: "easeIn"
-}, A = {
+}, O = {
 	type: "spring",
 	stiffness: 520,
 	damping: 40,
 	mass: .8
-}, j = (e, t = 4) => {
+}, k = (e, t = 4) => {
 	let i = r(e), a = Math.abs(e - i.current) > t;
 	return n(() => {
 		i.current = e;
 	}), a;
-}, M = ({ children: e }) => /* @__PURE__ */ a(o, {
+}, A = ({ children: e }) => /* @__PURE__ */ a(o, {
 	initial: !1,
 	children: e
-}), N = ({ className: e, animated: n = !0, children: r }) => {
+}), j = ({ className: e, animated: n = !0, children: r }) => {
 	let i = t() || !n;
 	return /* @__PURE__ */ a(s.div, {
 		className: e,
@@ -99,17 +99,17 @@ var c = [
 			opacity: 0,
 			height: 0,
 			transition: {
-				...w(k, i),
-				height: w(A, i)
+				...S(D, i),
+				height: S(O, i)
 			}
 		},
 		transition: {
-			...w(O, i),
-			height: w(A, i)
+			...S(E, i),
+			height: S(O, i)
 		},
 		children: r
 	});
-}, P = ({ order: n = 0, delayMs: r = 0, arriving: i = !0, fullHeight: o, className: c, children: l }) => {
+}, M = ({ order: n = 0, delayMs: r = 0, arriving: i = !0, fullHeight: o, className: c, children: l }) => {
 	let u = t();
 	return /* @__PURE__ */ a(s.div, {
 		className: e(o && "h-full", c),
@@ -126,4 +126,4 @@ var c = [
 	});
 };
 //#endregion
-export { m as GENIE_GLYPH_ENTER_SCALE, h as GENIE_GLYPH_EXIT_SCALE, g as GENIE_GLYPH_TAP_SCALE, f as GENIE_ORIGIN, p as GENIE_RETRACTED_SCALE, c as HOME_EASE, P as HomeEntrance, N as HomeSlotItem, M as HomeSlotItems, l as INSTANT_TRANSITION, D as arrivalWindowMs, u as entranceDelay, d as entranceTransition, v as genieCloseTransition, _ as genieOpenTransition, b as geniePanelGlideTransition, y as glyphTransition, O as itemEnterTransition, k as itemExitTransition, A as itemSizeTransition, C as railWidthTransition, x as stowInTransition, S as stowOutTransition, T as useDelayedTrue, E as useElapsed, j as useIsBulkChange, w as withReducedMotion };
+export { m as GENIE_GLYPH_TAP_SCALE, f as GENIE_ORIGIN, p as GENIE_RETRACTED_SCALE, c as HOME_EASE, M as HomeEntrance, j as HomeSlotItem, A as HomeSlotItems, l as INSTANT_TRANSITION, T as arrivalWindowMs, u as entranceDelay, d as entranceTransition, g as genieCloseTransition, h as genieOpenTransition, v as geniePanelGlideTransition, _ as glyphTransition, E as itemEnterTransition, D as itemExitTransition, O as itemSizeTransition, x as railWidthTransition, y as stowInTransition, b as stowOutTransition, C as useDelayedTrue, w as useElapsed, k as useIsBulkChange, S as withReducedMotion };

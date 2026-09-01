@@ -4,13 +4,13 @@ import n from "../../../icons/app/Cross.js";
 import { useI18n as r } from "../../../lib/providers/i18n/i18n-provider.js";
 import { Skeleton as i } from "../../../ui/skeleton.js";
 import { ButtonInternal as a } from "../../../components/F0Button/internal.js";
-import { useRevealOnChange as o } from "./hooks/useRevealOnChange.js";
-import { AiChatStateProvider as s, useAiChat as c } from "./providers/AiChatStateProvider.js";
+import { AiChatStateProvider as o, useAiChat as s } from "./providers/AiChatStateProvider.js";
+import { useRevealOnChange as c } from "./hooks/useRevealOnChange.js";
 import { SidebarWindow as l } from "./components/layout/ChatWindow.js";
 import { jsx as u, jsxs as d } from "react/jsx-runtime";
 import { AnimatePresence as f, motion as p } from "motion/react";
 //#region src/kits/ai/F0AiChat/F0AiChat.tsx
-var m = ({ enabled: e = !1, side: t, panelContentSide: n, initialMessage: r, chatHeader: i, chatMessages: a, chatInput: o, chatOverlay: c, welcomeScreenSuggestions: l, welcomeScreenCards: d, disclaimer: f, resizable: p = !1, defaultVisualizationMode: m, lockVisualizationMode: h, historyEnabled: g, footer: _, VoiceMode: v, entityRefs: y, canvasActions: b, canvasEntities: x, credits: S, employeeCredits: C, creditWarning: w, fileAttachments: T, onTranscribe: E, onThumbsUp: D, onThumbsDown: O, children: k, agent: A, tracking: j }) => /* @__PURE__ */ u(s, {
+var m = ({ enabled: e = !1, side: t, panelContentSide: n, initialMessage: r, chatHeader: i, chatMessages: a, chatInput: s, chatOverlay: c, welcomeScreenSuggestions: l, welcomeScreenCards: d, disclaimer: f, resizable: p = !1, defaultVisualizationMode: m, lockVisualizationMode: h, historyEnabled: g, footer: _, VoiceMode: v, entityRefs: y, canvasActions: b, canvasEntities: x, credits: S, employeeCredits: C, creditWarning: w, fileAttachments: T, onTranscribe: E, onThumbsUp: D, onThumbsDown: O, children: k, agent: A, tracking: j }) => /* @__PURE__ */ u(o, {
 	enabled: e,
 	side: t,
 	panelContentSide: n,
@@ -20,7 +20,7 @@ var m = ({ enabled: e = !1, side: t, panelContentSide: n, initialMessage: r, cha
 	initialMessage: r,
 	chatHeader: i,
 	chatMessages: a,
-	chatInput: o,
+	chatInput: s,
 	chatOverlay: c,
 	welcomeScreenSuggestions: l,
 	welcomeScreenCards: d,
@@ -41,8 +41,8 @@ var m = ({ enabled: e = !1, side: t, panelContentSide: n, initialMessage: r, cha
 	fileAttachments: T,
 	onTranscribe: E,
 	children: k
-}), h = e("F0AiChat", ({ header: e, messages: s, input: m, overlay: h }) => {
-	let { enabled: g, open: _, setOpen: v, mode: y, visualizationMode: b, VoiceMode: x, tracking: S, chatHeader: C, chatMessages: w, chatInput: T, chatOverlay: E, panelContent: D, panelSide: O, panelContentSide: k, restoringPanelContentId: A } = c(), j = r(), M = k !== O, { motionProps: N } = o(b === "fullscreen" ? "fullscreen" : "docked", (e, t) => t === "fullscreen" ? 220 : 460), P = t(), F = e ?? C, I = s ?? w, L = m ?? T, R = h ?? E;
+}), h = e("F0AiChat", ({ header: e, messages: o, input: m, overlay: h }) => {
+	let { enabled: g, open: _, setOpen: v, mode: y, visualizationMode: b, VoiceMode: x, tracking: S, chatHeader: C, chatMessages: w, chatInput: T, chatOverlay: E, panelContent: D, panelSide: O, panelContentSide: k, restoringPanelContentId: A } = s(), j = r(), M = k !== O, { motionProps: N } = c(b === "fullscreen" ? "fullscreen" : "docked", (e, t) => t === "fullscreen" ? 220 : 460), P = t(), F = e ?? C, I = o ?? w, L = m ?? T, R = h ?? E;
 	if (!g) return null;
 	let z, B;
 	return D && !M ? (z = `panel:${D.id}`, B = D.content) : A && !M ? (z = `restoring:${A}`, B = /* @__PURE__ */ u(i, {

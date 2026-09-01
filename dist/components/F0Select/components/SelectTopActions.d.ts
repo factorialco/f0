@@ -1,11 +1,5 @@
-import { OneFilterPicker as OneFilterPickerComponent } from '../../../patterns/OneFilterPicker';
 import { FiltersDefinition, FiltersState, GroupingDefinition, GroupingState, RecordType } from '../../../hooks/datasource';
-import { F0SelectStatic as F0SelectComponent } from '../F0Select';
-import { ActiveFiltersChips as ActiveFiltersChipsComponent } from './ActiveFiltersChips';
 interface SelectTopActionsProps<R extends RecordType = RecordType, Grouping extends GroupingDefinition<R> = GroupingDefinition<R>, Filters extends FiltersDefinition = FiltersDefinition> {
-    SelectComponent: typeof F0SelectComponent;
-    OneFilterPickerComponent: typeof OneFilterPickerComponent;
-    ActiveFiltersChipsComponent: typeof ActiveFiltersChipsComponent;
     showSearchBox?: boolean;
     filters?: Filters;
     currentFilters: FiltersState<Filters>;
@@ -21,5 +15,5 @@ interface SelectTopActionsProps<R extends RecordType = RecordType, Grouping exte
     onFiltersOpenChange?: (open: boolean) => void;
     showPreview?: boolean;
 }
-export declare const SelectTopActions: <R extends RecordType = RecordType>({ SelectComponent, OneFilterPickerComponent, ActiveFiltersChipsComponent, showSearchBox, searchBoxPlaceholder, onSearchChange, searchValue, grouping, currentGrouping, onGroupingChange, filters, currentFilters, onFiltersChange, asList, onFiltersOpenChange, showPreview, }: SelectTopActionsProps<R>) => import("react").JSX.Element | null;
+export declare const SelectTopActions: <R extends RecordType = RecordType>({ showSearchBox, searchBoxPlaceholder, onSearchChange, searchValue, grouping, currentGrouping, onGroupingChange, filters, currentFilters, onFiltersChange, asList, onFiltersOpenChange, showPreview, }: SelectTopActionsProps<R>) => import("react").JSX.Element | null;
 export {};

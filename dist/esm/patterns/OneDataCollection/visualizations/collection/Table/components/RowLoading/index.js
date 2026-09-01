@@ -1,4 +1,4 @@
-import { FlatRow as e } from "../FlatRow.js";
+import { Row as e } from "../Row.js";
 import { forwardRef as t, useLayoutEffect as n, useRef as r } from "react";
 import { Fragment as i, jsx as a } from "react/jsx-runtime";
 var o = t(({ rowRef: t, rowIndex: i, source: o, item: s, columns: c, frozenColumnsLeft: l, nestedRowProps: u, groupIndex: d, onCheckedChange: f, selectedItems: p, checkColumnWidth: m, tableWithChildren: h, shouldHideBorder: g, fromVisualization: _, headerGroups: v }, y) => {

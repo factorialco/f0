@@ -1,13 +1,15 @@
 import { useI18n as e } from "../../lib/providers/i18n/i18n-provider.js";
-import { F0Dialog as t } from "../../components/dialog-alike/F0Dialog/index.js";
-import { mountFormOverlay as n, unmountFormOverlay as r } from "../../lib/providers/form-overlays/imperative.js";
-import { useF0Form as i } from "./useF0Form.js";
-import { useMemo as a, useRef as o } from "react";
-import { jsx as s } from "react/jsx-runtime";
-import { nanoid as c } from "nanoid";
+import { useF0Form as t } from "./useF0Form.js";
+import { F0Dialog as n } from "../../components/dialog-alike/F0Dialog/index.js";
+import { mountFormOverlay as r, unmountFormOverlay as i } from "../../lib/providers/form-overlays/imperative.js";
+import { F0Form as a } from "./F0Form.js";
+import { useMemo as o, useRef as s } from "react";
+import { jsx as c } from "react/jsx-runtime";
+import { nanoid as l } from "nanoid";
 //#region src/patterns/F0Form/openFormDialog.tsx
-function l({ options: n, FormView: r, isOpen: c, onSubmitted: l, onCancel: u }) {
-	let { actions: d } = e(), { formDefinition: f, title: p, description: m, size: h, module: g, modal: _ = !0, labels: v } = n, { formRef: y, submit: b, isSubmitting: x, hasErrors: S } = i(), C = o(void 0), w = a(() => ({
+var u = a;
+function d({ options: r, isOpen: i, onSubmitted: a, onCancel: l }) {
+	let { actions: d } = e(), { formDefinition: f, title: p, description: m, size: h, module: g, modal: _ = !0, labels: v } = r, { formRef: y, submit: b, isSubmitting: x, hasErrors: S } = t(), C = s(void 0), w = o(() => ({
 		...f,
 		submitConfig: {
 			...f.submitConfig,
@@ -18,9 +20,9 @@ function l({ options: n, FormView: r, isOpen: c, onSubmitted: l, onCancel: u }) 
 			return t.success && (C.current = e.data), t;
 		}
 	}), [f]);
-	return /* @__PURE__ */ s(t, {
-		isOpen: c,
-		onClose: u,
+	return /* @__PURE__ */ c(n, {
+		isOpen: i,
+		onClose: l,
 		title: p,
 		description: m,
 		size: h,
@@ -35,42 +37,41 @@ function l({ options: n, FormView: r, isOpen: c, onSubmitted: l, onCancel: u }) 
 				} catch {
 					return;
 				}
-				C.current !== void 0 && l(C.current);
+				C.current !== void 0 && a(C.current);
 			},
 			loading: x,
 			disabled: S
 		},
 		secondaryAction: {
 			label: v?.cancel ?? d.cancel,
-			onClick: u
+			onClick: l
 		},
 		disableContentPadding: !0,
-		children: /* @__PURE__ */ s(r, {
+		children: /* @__PURE__ */ c(u, {
 			formDefinition: w,
 			formRef: y
 		})
 	});
 }
-function u(e, t) {
-	return new Promise((i) => {
-		let a = e.id ?? c(), o = !1, u = (e) => {
-			o || (o = !0, i(e), r(a));
+function f(e) {
+	return new Promise((t) => {
+		let n = e.id ?? l(), a = !1, o = (e) => {
+			a || (a = !0, t(e), i(n));
 		};
-		n({
-			id: a,
-			onDismiss: () => u({ submitted: !1 }),
-			render: ({ isOpen: n }) => /* @__PURE__ */ s(l, {
+		r({
+			id: n,
+			onDismiss: () => o({ submitted: !1 }),
+			render: ({ isOpen: t }) => /* @__PURE__ */ c(d, {
 				options: e,
-				FormView: t,
-				isOpen: n,
-				onSubmitted: (e) => u({
+				isOpen: t,
+				onSubmitted: (e) => o({
 					submitted: !0,
 					data: e
 				}),
-				onCancel: () => u({ submitted: !1 })
+				onCancel: () => o({ submitted: !1 })
 			})
 		});
 	});
 }
 //#endregion
-export { u as openFormDialog };
+export { f as openFormDialog };

@@ -13,7 +13,9 @@ export interface CommunityPostSummary {
     title: string;
     /**
      * The post's body as the editor stored it (an HTML string), clamped to the
-     * first few lines. Whatever links it contains are NOT clickable here: the
+     * lines the tile has room for — see {@link PostBody}, and note that a post
+     * with no cover therefore previews more of itself than one with a picture.
+     * Whatever links it contains are NOT clickable here: the
      * whole tile is one target (see {@link CommunityPostCard}), and a link inside
      * a link is neither valid nor operable.
      */
@@ -91,9 +93,14 @@ export interface F0CommunityPostsCarouselProps {
  * anything narrower.
  *
  * A WIDE-COLUMN WIDGET. Two tiles side by side is the whole reason this exists
- * rather than a `list` slot — a post needs a title, four lines of its body and
+ * rather than a `list` slot — a post needs a title, a few lines of its body and
  * its author to be worth previewing at all, and that does not fit a 396px rail.
  * Put it in the main column (`areas: ["main"]` in the catalog).
+ *
+ * THE HEIGHT IS DECLARED, NOT GROWN ({@link POST_CARD_HEIGHT}). Every tile is
+ * 384px, so the widget is the same height on every page of the feed, and the
+ * body is what gives: it takes whatever the cover, the title and the author line
+ * leave and previews the lines that fit there.
  *
  * THE PAGING IS UNDER THE TILES, not floating over them — `CarouselControls`,
  * the shared row: an arrow on each end, the dots between, its own `pt-4` above
@@ -104,7 +111,7 @@ export interface F0CommunityPostsCarouselProps {
  * transforms the track, so the slides off-screen are mounted and measured like
  * the ones you can see — there is no windowing here, and adding it would mean
  * the carousel could no longer measure its own snaps. That is the right trade
- * for what this shows: a handful of tiles, each one a title and four lines.
+ * for what this shows: a handful of tiles, each one a title and a few lines.
  *
  * It is `pagination` that keeps it a handful. A feed of two hundred posts is not
  * a longer carousel, it is a carousel that holds a PAGE and asks for the next

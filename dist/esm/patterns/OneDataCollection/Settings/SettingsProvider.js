@@ -1,19 +1,27 @@
-import { createInitialVisualizationSettings as e } from "./visualizationSettings.js";
+import { collectionVisualizations as e } from "../visualizations/collection/collectionViewRegistry.js";
 import { createContext as t, useContext as n, useState as r } from "react";
 import { jsx as i } from "react/jsx-runtime";
 //#region src/patterns/OneDataCollection/Settings/SettingsProvider.tsx
-var a = t({
+var a = () => {
+	let t = {};
+	for (let [n, r] of Object.entries(e)) r.settings.default && (t[n] = { ...r.settings.default });
+	return t;
+}, o = t({
 	setSettings: () => {},
-	settings: { visualization: e() },
+	settings: { visualization: {} },
 	setVisualizationSettings: () => {}
-}), o = () => n(a), s = ({ children: t }) => {
-	let [n, o] = r({ visualization: e() });
-	return /* @__PURE__ */ i(a.Provider, {
+}), s = () => {
+	let e = n(o);
+	if (!e) throw Error("useTableSettings must be used within a TableSettingsProvider");
+	return e;
+}, c = ({ children: e }) => {
+	let [t, n] = r({ visualization: a() });
+	return /* @__PURE__ */ i(o.Provider, {
 		value: {
-			settings: n,
-			setSettings: o,
+			settings: t,
+			setSettings: n,
 			setVisualizationSettings: (e, t) => {
-				o(typeof t == "function" ? (n) => ({
+				n(typeof t == "function" ? (n) => ({
 					...n,
 					visualization: {
 						...n.visualization,
@@ -28,8 +36,8 @@ var a = t({
 				}));
 			}
 		},
-		children: t
+		children: e
 	});
 };
 //#endregion
-export { s as DataCollectionSettingsProvider, o as useDataCollectionSettings };
+export { c as DataCollectionSettingsProvider, s as useDataCollectionSettings };

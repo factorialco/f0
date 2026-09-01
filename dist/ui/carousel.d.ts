@@ -1,6 +1,25 @@
 import { default as useEmblaCarousel, UseEmblaCarouselType } from 'embla-carousel-react';
 import { ButtonInternalProps } from '../components/F0Button/internal-types';
 import * as React from "react";
+/**
+ * THE SHADOW BLEED, as classes.
+ *
+ * The viewport clips its slides, and a widget card's shadow is drawn OUTSIDE its
+ * box — so the box is grown by `SPACE_FOR_WIDGET_SHADOW` (28px) on every side and
+ * pulled back by the same amount, giving the shadow somewhere to land inside the
+ * clip. The mask then fades that borrowed margin out, so a slide's shadow
+ * disappears at the edge instead of being cut off square.
+ *
+ * ⚠️ THE NUMBERS ARE WRITTEN OUT, and that is forced rather than sloppy:
+ * Tailwind's scanner never sees a class built from a variable, so `m-[${N}px]`
+ * emits no CSS at all — the quiet kind of broken, since the markup still looks
+ * right. `SPACE_FOR_WIDGET_SHADOW` remains the single source of truth and
+ * `carousel.test.tsx` fails if these drift from it: 28px is `-m-7` / `p-7`, 56px
+ * is the pair, 14px is the half.
+ *
+ * Exported for that test alone — nothing else should need it.
+ */
+export declare const CAROUSEL_SHADOW_BLEED: string;
 type CarouselApi = UseEmblaCarouselType[1];
 type UseCarouselParameters = Parameters<typeof useEmblaCarousel>;
 type CarouselOptions = UseCarouselParameters[0];

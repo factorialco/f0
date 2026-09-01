@@ -1,6 +1,6 @@
 import { formatTime24Hours as e } from "../../../../lib/date.js";
-import { getNormalizedRemainingMinutes as t } from "../utils.js";
-import { CLOCK_IN_COLORS as n } from "./model.js";
+import { getNormalizedRemainingMinutes as t } from "../ClockInControls/helpers.js";
+import { CLOCK_IN_COLORS as n } from "./index.js";
 //#region src/sds/Home/ClockIn/ClockInGraph/helpers.ts
 var r = "--:--", i = (e, t) => {
 	if (e && e > 0) return {

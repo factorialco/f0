@@ -2,7 +2,7 @@
 import { DataTestIdWrapper as e } from "../../lib/data-testid/index.js";
 import { cn as t } from "../../lib/utils.js";
 import { useI18n as n } from "../../lib/providers/i18n/i18n-provider.js";
-import { getFilterType as r } from "../OneFilterPicker/filterTypes/getFilterType.js";
+import { getFilterType as r } from "../OneFilterPicker/filterTypes/utils.js";
 import { FilterPickerInternal as i } from "./internal.js";
 import { useEffect as a, useMemo as o, useState as s } from "react";
 import { jsx as c } from "react/jsx-runtime";

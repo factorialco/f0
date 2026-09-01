@@ -1,4 +1,4 @@
-import { ClockInGraphProps } from './model';
+import { ClockInGraphProps } from './index';
 export declare const normalizeData: ({ data, trackedMinutes, remainingMinutes, }: {
     data: ClockInGraphProps["data"];
     trackedMinutes: number;

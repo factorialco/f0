@@ -4,9 +4,9 @@ import { cn as n } from "../../../lib/utils.js";
 import r from "../../../icons/app/Menu.js";
 import { F0Button as i } from "../../../components/F0Button/F0Button.js";
 import { F0AvatarPerson as a } from "../../../components/avatars/F0AvatarPerson/index.js";
-import { F0OneSwitch as o } from "../../../kits/ai/F0OneSwitch/F0OneSwitch.js";
+import { OneSwitch as o } from "../../../experimental/AiPromotionChat/OneSwitch.js";
 import { useSidebar as s } from "../../../patterns/ApplicationFrame/FrameProvider.js";
-import { OneSwitch as c } from "../../../experimental/AiPromotionChat/OneSwitch.js";
+import { F0OneSwitch as c } from "../../../kits/ai/F0OneSwitch/F0OneSwitch.js";
 import { F0AvatarPulse as l } from "../F0AvatarPulse/F0AvatarPulse.js";
 import { cva as u } from "cva";
 import { jsx as d, jsxs as f } from "react/jsx-runtime";
@@ -60,7 +60,7 @@ function m({ children: e, header: t, period: u, embedded: m = !1, hideOneSwitch:
 							})]
 						})]
 					})]
-				}), /* @__PURE__ */ f("div", { children: [!h && /* @__PURE__ */ d(o, {}), /* @__PURE__ */ d(c, {})] })]
+				}), /* @__PURE__ */ f("div", { children: [!h && /* @__PURE__ */ d(c, {}), /* @__PURE__ */ d(o, {})] })]
 			}),
 			/* @__PURE__ */ d("div", {
 				className: n("isolate flex w-full flex-1 flex-col overflow-y-auto overflow-x-hidden [&>*]:flex-1", v && "-mt-3"),

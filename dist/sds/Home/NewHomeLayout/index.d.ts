@@ -106,9 +106,14 @@ export interface NewHomeLayoutProps {
     /** Fixed px width of the side rail. */
     asideWidth?: number;
     /**
-     * Max px width of the (centered) main-column content. Defaults to
-     * `max-w-content` (712px), so a composer or a message list in the main column
-     * lines up with the same reading column the chat uses.
+     * Max px width of the (centered) main-column content. Defaults to 672px, the
+     * width the Home widgets are designed at — it is what decides a two-tile
+     * widget's tile size, since every tile is
+     * `(column − 32 padding + 16 gutter) / 2 − 16`.
+     *
+     * ⚠️ NOT `max-w-content` (712px) any more. A surface in the main column that
+     * has to line up with the chat's composer or message list should cap ITSELF at
+     * the reading column rather than assume the column is it.
      */
     mainWidth?: number;
     /**

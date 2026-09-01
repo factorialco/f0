@@ -54,7 +54,9 @@ export type HomeListItemAction = {
  * module glyph, an alert).
  *
  * The text stack is three optional voices: `title` leads, `subtitle` murmurs on
- * the same line after a dot, `description` takes the second line.
+ * the same line after a dot, `description` takes the second line. A subtitle
+ * carrying BAD NEWS about the row — overdue, rejected, over budget — stops
+ * murmuring and says so (`subtitleCritical`).
  *
  * A row can also carry `actions` — what you can DO to it without leaving the
  * widget (snooze it, dismiss it). They stay out of the way until the row is
@@ -73,6 +75,15 @@ export interface HomeListItemProps {
     title: string;
     /** Muted, on the title's line, dot-separated. */
     subtitle?: string;
+    /**
+     * Draws the `subtitle` CRITICAL rather than muted — the row is overdue,
+     * rejected, over budget. Per row, because it is a state of THAT row's data:
+     * one list holds rows whose subtitle is bad news and rows whose isn't.
+     *
+     * The title reads the same either way — it says what the row IS, and the
+     * subtitle is what has gone wrong with it. Inert without a `subtitle`.
+     */
+    subtitleCritical?: boolean;
     /** The second line. */
     description?: string;
     /** Trailing slot: a tag, a counter, people. */
@@ -99,4 +110,4 @@ export interface HomeListItemProps {
     /** A trailing chevron. Off — the row's link affordance is the row itself. */
     showChevron?: boolean;
 }
-export declare function HomeListItem({ avatar, avatarSize, left, title, subtitle, description, right, actions, unread, href, showChevron, }: HomeListItemProps): import("react").JSX.Element;
+export declare function HomeListItem({ avatar, avatarSize, left, title, subtitle, subtitleCritical, description, right, actions, unread, href, showChevron, }: HomeListItemProps): import("react").JSX.Element;

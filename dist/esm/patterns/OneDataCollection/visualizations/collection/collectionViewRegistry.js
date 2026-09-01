@@ -3,72 +3,71 @@ import t from "../../../../icons/app/List.js";
 import n from "../../../../icons/app/Organization.js";
 import r from "../../../../icons/app/Pencil.js";
 import i from "../../../../icons/app/Table.js";
-import { createInitialVisualizationSettings as a } from "../../Settings/visualizationSettings.js";
-import { CardCollection as o } from "./Card/index.js";
-import { SettingsRenderer as s } from "./Table/settings/SettingsRenderer.js";
-import { TableCollection as c } from "./Table/Table.js";
-import { EditableTableCollection as l } from "./EditableTable/EditableTable.js";
-import { GraphCollection as u } from "./Graph/index.js";
-import { SettingsRenderer as d } from "./Graph/settings/SettingsRenderer.js";
-import { KanbanCollection as f } from "./Kanban/Kanban.js";
-import { ListCollection as p } from "./List/index.js";
-import { jsx as m } from "react/jsx-runtime";
+import { CardCollection as a } from "./Card/index.js";
+import { SettingsRenderer as o } from "./Table/settings/SettingsRenderer.js";
+import { TableCollection as s } from "./Table/Table.js";
+import { EditableTableCollection as c } from "./EditableTable/EditableTable.js";
+import { GraphCollection as l } from "./Graph/index.js";
+import { SettingsRenderer as u } from "./Graph/settings/SettingsRenderer.js";
+import { KanbanCollection as d } from "./Kanban/Kanban.js";
+import { ListCollection as f } from "./List/index.js";
+import { jsx as p } from "react/jsx-runtime";
 //#region src/patterns/OneDataCollection/visualizations/collection/collectionViewRegistry.tsx
-var h = a(), g = {
+var m = {
 	table: {
 		name: "Table",
 		icon: i,
-		render: (e) => /* @__PURE__ */ m(c, { ...e }),
+		render: (e) => /* @__PURE__ */ p(s, { ...e }),
 		settings: {
-			renderer: (e) => s({
+			renderer: (e) => o({
 				...e,
 				visualizationKey: "table"
 			}),
 			resetHandler: (e) => e.setVisualizationSettings("table", {}),
-			default: h.table
+			default: {}
 		}
 	},
 	editableTable: {
 		name: "Editable table",
 		icon: r,
-		render: (e) => /* @__PURE__ */ m(l, { ...e }),
+		render: (e) => /* @__PURE__ */ p(c, { ...e }),
 		settings: {
-			renderer: (e) => s({
+			renderer: (e) => o({
 				...e,
 				visualizationKey: "editableTable"
 			}),
 			resetHandler: (e) => e.setVisualizationSettings("editableTable", {}),
-			default: h.editableTable
+			default: {}
 		}
 	},
 	list: {
 		name: "List",
 		icon: t,
-		settings: { default: h.list },
-		render: (e) => /* @__PURE__ */ m(p, { ...e })
+		settings: { default: {} },
+		render: (e) => /* @__PURE__ */ p(f, { ...e })
 	},
 	card: {
 		name: "Card",
 		icon: e,
-		settings: { default: h.card },
-		render: (e) => /* @__PURE__ */ m(o, { ...e })
+		settings: { default: {} },
+		render: (e) => /* @__PURE__ */ p(a, { ...e })
 	},
 	kanban: {
 		name: "Kanban",
 		icon: e,
-		settings: { default: h.kanban },
-		render: (e) => /* @__PURE__ */ m(f, { ...e })
+		settings: { default: {} },
+		render: (e) => /* @__PURE__ */ p(d, { ...e })
 	},
 	graph: {
 		name: "Graph",
 		icon: n,
 		settings: {
-			default: h.graph,
-			renderer: (e) => d(e),
+			default: {},
+			renderer: (e) => u(e),
 			resetHandler: (e) => e.setVisualizationSettings("graph", {})
 		},
-		render: (e) => /* @__PURE__ */ m(u, { ...e })
+		render: (e) => /* @__PURE__ */ p(l, { ...e })
 	}
 };
 //#endregion
-export { g as collectionVisualizations };
+export { m as collectionVisualizations };

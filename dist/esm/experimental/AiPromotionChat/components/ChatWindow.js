@@ -1,11 +1,11 @@
-import { useAutoClear as e } from "../hooks/useAutoClear.js";
-import { useAiPromotionChat as t } from "../providers/AiPromotionChatStateProvider.js";
+import { useAiPromotionChat as e } from "../providers/AiPromotionChatStateProvider.js";
+import { useAutoClear as t } from "../hooks/useAutoClear.js";
 import { jsx as n } from "react/jsx-runtime";
 import { AnimatePresence as r, motion as i } from "motion/react";
 //#region src/experimental/AiPromotionChat/components/ChatWindow.tsx
 var a = ({ children: a }) => {
-	let { open: o, shouldPlayEntranceAnimation: s, setShouldPlayEntranceAnimation: c, autoClearMinutes: l } = t();
-	return e({
+	let { open: o, shouldPlayEntranceAnimation: s, setShouldPlayEntranceAnimation: c, autoClearMinutes: l } = e();
+	return t({
 		reset: () => {},
 		isOpen: o,
 		autoClearMinutes: l

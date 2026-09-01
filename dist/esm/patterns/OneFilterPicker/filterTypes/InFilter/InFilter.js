@@ -5,8 +5,8 @@ import { useI18n as r } from "../../../../lib/providers/i18n/i18n-provider.js";
 import { ScrollArea as i } from "../../../../ui/scrollarea.js";
 import { Spinner as a } from "../../../../ui/Spinner/index.js";
 import { F0Checkbox as o } from "../../../../components/F0Checkbox/F0Checkbox.js";
-import { F0SearchInput as s } from "../../../../components/F0SearchInput/F0SearchInput.js";
-import { collectNestedFilterKeys as c, optionMatchesSearch as l } from "./components/option-utils.js";
+import { collectNestedFilterKeys as s, optionMatchesSearch as c } from "./components/option-utils.js";
+import { F0SearchInput as l } from "../../../../components/F0SearchInput/F0SearchInput.js";
 import { InFilterFlatOption as u } from "./components/InFilterFlatOption.js";
 import { cacheLabel as d, cacheNestedLabel as f, getCacheKey as p, useLoadOptions as m } from "./useLoadOptions.js";
 import { InFilterOptionRow as h } from "./components/InFilterOptionRow.js";
@@ -50,11 +50,11 @@ function x({ schema: x, value: S, onChange: C, isCompactMode: w, onFilterChange:
 	g(() => {
 		k("");
 	}, [x]);
-	let R = O.toLowerCase(), z = _(() => L ? j : j.filter((e) => l(e, R)), [
+	let R = O.toLowerCase(), z = _(() => L ? j : j.filter((e) => c(e, R)), [
 		L,
 		j,
 		R
-	]), B = _(() => c(x.options), [x.options]), V = _(() => B.reduce((e, t) => {
+	]), B = _(() => s(x.options), [x.options]), V = _(() => B.reduce((e, t) => {
 		let n = E?.[t];
 		return e + (Array.isArray(n) ? n.length : 0);
 	}, 0), [B, E]), H = V > 0;
@@ -103,7 +103,7 @@ function x({ schema: x, value: S, onChange: C, isCompactMode: w, onFilterChange:
 		children: [
 			U && /* @__PURE__ */ y("div", {
 				className: "rounded-tr-xl p-2",
-				children: /* @__PURE__ */ y(s, {
+				children: /* @__PURE__ */ y(l, {
 					placeholder: D.filters.inFilter.searchPlaceholder,
 					value: O,
 					onChange: k,
