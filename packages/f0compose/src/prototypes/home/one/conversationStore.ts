@@ -1,10 +1,8 @@
 import { useSyncExternalStore } from "react"
 
-import {
-  addSurveyQuestions,
-  resetSurveyDraft,
-} from "../windows/surveyDraft"
 import type { WindowId } from "../windows/types"
+
+import { addSurveyQuestions, resetSurveyDraft } from "../windows/surveyDraft"
 
 /**
  * Conversation state for the Home ONE experience, ported from the
@@ -28,16 +26,43 @@ export type QuestionCard = {
   intentKey: string
   text: string
   options: string[]
+  /**
+   * Checkboxes instead of radios (Figma 2732:462941): more than one
+   * option can be picked, and picking every one resolves to "Both" —
+   * which is the answer the intents already write copy for.
+   */
+  multi?: boolean
   /** Set once the user submits a choice (or free text via "Other"). */
   answer?: string
   /** Set when the user routed around the card by typing instead. */
   skipped?: boolean
 }
 
+/**
+ * What the user clicked to start the turn, rendered as a card above it.
+ *
+ * The One button on a metric card works the way X's Grok button works on
+ * a post: instead of typing, you point at something and the assistant
+ * answers about THAT. The card is what makes the answer legible — without
+ * it the reply floats free of what it is about.
+ *
+ * Plain data, because conversations persist to localStorage.
+ */
+export type MessageContext = {
+  kind: "metric"
+  /** What was clicked, e.g. "Total employees". */
+  title: string
+  stats: { label: string; value: string }[]
+  /** Sparkline series, drawn normalised to its own min/max. */
+  series?: number[]
+}
+
 export type ChatMessage = {
   id: string
   role: "user" | "assistant"
   content: string
+  /** The thing the user pointed at, if they clicked rather than typed. */
+  context?: MessageContext
   /** Follow-up question card (one-notch style) attached to this turn. */
   question?: QuestionCard
   /** Completed reasoning steps (F0AiChat "Reasoning" block) for this turn. */
@@ -58,6 +83,13 @@ export type Conversation = {
 type ConversationState = {
   conversations: Conversation[]
   activeId: string | null
+  /**
+   * Conversation shown in the RIGHT-HAND SPLIT PANEL (Figma 2730:458631,
+   * the People screen's One flow) — deliberately independent of
+   * `activeId`, because the canvas keeps showing its screen beside it.
+   * A conversation is in one place or the other, never both.
+   */
+  panelId: string | null
 }
 
 const STORAGE_KEY = "f0compose:home:conversations"
@@ -87,6 +119,7 @@ function loadPersisted(): Conversation[] {
 let state: ConversationState = {
   conversations: loadPersisted(),
   activeId: null,
+  panelId: null,
 }
 const listeners = new Set<() => void>()
 
@@ -135,12 +168,19 @@ export function onWindowRequest(listener: (id: WindowId) => void) {
   }
 }
 
+/** Ask Home to open a window — same channel One replies use, so callers
+ *  outside Home's tree (e.g. the nav panel rows) get the same behavior
+ *  (generic slide-in, no FLIP origin). */
+export function requestWindow(id: WindowId) {
+  windowListeners.forEach((listener) => listener(id))
+}
+
 /** Does this prompt name an audience/assignee? If not, a create-task is
  *  ambiguous and One asks first (ported from one-notch's needsFollowUp). */
 const NAMES_AUDIENCE =
   /\b(me|myself|my|team|teams|company|everyone|all|managers?|employees?|mi|mí|equipo|equipos|empresa|compañ|todos|emplead)\b/i
 
-type FollowUpSpec = { text: string; options: string[] }
+type FollowUpSpec = { text: string; options: string[]; multi?: boolean }
 
 /**
  * Intent corpus, after one-notch's oneScenarios: regex → title + reply,
@@ -167,6 +207,51 @@ const INTENTS: {
   /** Side effect when a clarifying answer resolves — live only. */
   onResolve?: (answer: string) => void
 }[] = [
+  {
+    // The One button on the headcount card lands here. Its prompt is
+    // generated, not typed, so the match only has to be unambiguous
+    // against the rest of the corpus.
+    key: "headcount",
+    // Both spellings stay matchable: the generated prompt is English now
+    // (see HEADCOUNT), but a typed "total empleados" should still land
+    // here, and conversations persisted before the rename carry the old
+    // wording.
+    match: (p) =>
+      /total emplea\w*|total employees|headcount|plantilla/i.test(p),
+    title: "Total employees",
+    reasoning: [
+      "Reading the headcount series for the last twelve months.",
+      "Comparing joiners and leavers against the same period last year.",
+      "Checking which teams account for the net change.",
+    ],
+    reply: [
+      "You are at **2.714 people**, up **85 net** this period — 122 joiners against 37 leavers. That is the steepest month in the series, and it is the third in a row above your hiring plan.",
+      "The leavers are the part worth a look: 37 is normal in absolute terms, but **19 of them are in their first year**, which is where the curve has been drifting since March. Everything else is stable — regretted attrition outside that cohort is flat.",
+      "Two things I can do from here: break the 37 down by team and tenure, or model what the next quarter looks like if first-year attrition holds at this rate.",
+    ],
+    // Checkboxes, two options, per Figma 2732:462941 — "Both" is not an
+    // option you pick, it is what ticking both MEANS, so the resolve
+    // branches below are unchanged.
+    followUp: () => ({
+      text: "Which one do you want?",
+      options: ["Break down the 37 leavers", "Model next quarter"],
+      multi: true,
+    }),
+    resolve: (answer) =>
+      answer.startsWith("Model")
+        ? [
+            "At this rate you end the quarter around **2.840**, with first-year attrition costing you roughly 44 people over the three months. Hitting the plan means either 30 more joiners or holding that cohort.",
+          ]
+        : answer === "Both"
+          ? [
+              "**The 37 leavers**: 19 in their first year — 11 of those in Sales, 5 in Support, 3 spread elsewhere. The remaining 18 are spread thin across tenures, which is what you would expect.",
+              "**Next quarter**: around **2.840** at this rate, with first-year attrition costing roughly 44 people. Sales is where the plan actually breaks.",
+            ]
+          : [
+              "**19 of the 37 are first-year**: 11 in Sales, 5 in Support, 3 spread elsewhere. The other 18 sit across tenures with no pattern worth chasing.",
+              "Sales is the signal — that team has hired 41 people this period and lost 11 of last year's intake.",
+            ],
+  },
   {
     key: "survey",
     match: (p) => /survey|encuesta|cuestionario|questionnaire|enps/i.test(p),
@@ -261,7 +346,8 @@ const INTENTS: {
   },
   {
     key: "analysis",
-    match: (p) => /analy[sz]e|report|dashboard|trend|metric|turnover|absen/i.test(p),
+    match: (p) =>
+      /analy[sz]e|report|dashboard|trend|metric|turnover|absen/i.test(p),
     title: "Workforce analysis",
     reply: [
       "Participation was 82%. eNPS is +24, up from +18. The strongest area is manager support (4.4/5) and the weakest is career growth (3.1/5).",
@@ -374,6 +460,15 @@ function buildTurnMessages(prompt: string): ChatMessage[] {
   return replies
 }
 
+/**
+ * Is this conversation ON SCREEN — in the canvas or in the split panel?
+ * Side effects (a window opening itself, the survey draft resetting) fire
+ * only for a conversation the user is actually looking at.
+ */
+function isVisible(conversationId: string): boolean {
+  return state.activeId === conversationId || state.panelId === conversationId
+}
+
 function deliverReply(conversationId: string, prompt: string) {
   const intent = intentFor(prompt)
   const steps = intent?.reasoning
@@ -388,7 +483,7 @@ function deliverReply(conversationId: string, prompt: string) {
     // Only when the reply lands in the OPEN conversation — a reply
     // finishing in the background shouldn't pop a window over whatever
     // the user moved on to.
-    if (state.activeId === conversationId) {
+    if (isVisible(conversationId)) {
       intent?.onReply?.()
       if (intent?.opensWindow) {
         windowListeners.forEach((listener) => listener(intent.opensWindow!))
@@ -414,8 +509,13 @@ function deliverReply(conversationId: string, prompt: string) {
   setTimeout(() => reveal(1), FIRST_STEP_MS)
 }
 
-/** Prompt-bar submit on the Home screen → new full-screen conversation. */
-export function startConversation(prompt: string): string {
+/**
+ * Where a new conversation shows up: the full-screen canvas (the prompt
+ * bar's own flow) or the split panel beside a module screen.
+ */
+type Target = "canvas" | "panel"
+
+function createConversation(prompt: string, target: Target): string {
   const id = `c${nextId++}`
   const conversation: Conversation = {
     id,
@@ -426,10 +526,75 @@ export function startConversation(prompt: string): string {
   }
   emit({
     conversations: [conversation, ...state.conversations],
-    activeId: id,
+    // A canvas conversation takes the screen over, so a panel left open
+    // beside it would be a second conversation with no context. The panel
+    // flow leaves `activeId` alone: the canvas keeps its module screen.
+    activeId: target === "canvas" ? id : state.activeId,
+    panelId: target === "panel" ? id : null,
   })
   deliverReply(id, prompt)
   return id
+}
+
+/**
+ * Start a conversation ABOUT something the user clicked. The prompt still
+ * drives intent matching — it is the question the click stands for — but
+ * the turn renders as the card instead of as typed text.
+ */
+function startWithContext(
+  context: MessageContext,
+  prompt: string,
+  target: Target
+): string {
+  const id = createConversation(prompt, target)
+  patchConversation(id, (c) => ({
+    ...c,
+    title: context.title,
+    messages: c.messages.map((m, i) =>
+      i === 0 ? { ...m, context, content: prompt } : m
+    ),
+  }))
+  return id
+}
+
+/** The One button on a widget's card — answers in the canvas. */
+export function startConversationWithContext(
+  context: MessageContext,
+  prompt: string
+): string {
+  return startWithContext(context, prompt, "canvas")
+}
+
+/**
+ * The One button on a module screen's banner (Figma 2729:450379) — the
+ * answer arrives in the split panel so the screen stays put beside it.
+ */
+export function startConversationInPanel(
+  context: MessageContext,
+  prompt: string
+): string {
+  return startWithContext(context, prompt, "panel")
+}
+
+/** Close the split panel; the conversation stays in Recents. */
+export function closeConversationPanel() {
+  if (state.panelId === null) return
+  emit({ ...state, panelId: null })
+}
+
+/**
+ * The panel's expand button: the SAME conversation takes over the canvas
+ * full-screen. Not a second surface — it moves, which is why the panel
+ * empties as the canvas fills.
+ */
+export function expandConversationPanel() {
+  if (state.panelId === null) return
+  emit({ ...state, activeId: state.panelId, panelId: null })
+}
+
+/** Prompt-bar submit on the Home screen → new full-screen conversation. */
+export function startConversation(prompt: string): string {
+  return createConversation(prompt, "canvas")
 }
 
 /** Lock any question card the user routed around by typing instead. */
@@ -444,9 +609,13 @@ function skipOpenQuestions(c: Conversation): Conversation {
   }
 }
 
-/** Prompt-bar submit while a conversation is open → next turn. */
-export function sendMessage(prompt: string) {
-  const id = state.activeId
+/**
+ * Prompt-bar submit while a conversation is open → next turn. The panel's
+ * own composer passes its conversation explicitly, since the panel is
+ * open BESIDE a screen rather than as the active canvas.
+ */
+export function sendMessage(prompt: string, conversationId?: string) {
+  const id = conversationId ?? state.activeId
   if (!id) return
   patchConversation(id, (c) => ({
     ...skipOpenQuestions(c),
@@ -523,17 +692,25 @@ export function skipQuestion(conversationId: string, messageId: string) {
 /** Open a conversation from the sidebar's Recents group. Reopening
  *  bumps it back into the "Active only" window. */
 export function openConversation(id: string) {
+  // A dangling activeId (e.g. a just-deleted conversation) would blank the
+  // canvas AND misroute the next prompt into sendMessage — ignore it.
+  if (!state.conversations.some((c) => c.id === id)) return
   emit({
     activeId: id,
+    // Recents opens into the CANVAS — the panel belongs to the screen that
+    // spawned it, so it goes with the navigation.
+    panelId: null,
     conversations: state.conversations.map((c) =>
       c.id === id ? { ...c, lastActiveAt: Date.now() } : c
     ),
   })
 }
 
-/** Back to the Home canvas; the conversation stays in Recents. */
+/** Back to the Home canvas; the conversation stays in Recents. The split
+ *  panel goes too — the nav is navigating away from the screen it belongs
+ *  to. */
 export function goHome() {
-  emit({ ...state, activeId: null })
+  emit({ ...state, activeId: null, panelId: null })
 }
 
 /** Rename from the Recents row menu. Empty titles are ignored. */
@@ -548,10 +725,11 @@ export function deleteConversation(id: string) {
   emit({
     conversations: state.conversations.filter((c) => c.id !== id),
     activeId: state.activeId === id ? null : state.activeId,
+    panelId: state.panelId === id ? null : state.panelId,
   })
 }
 
 /** "Clear recents" from the sliders menu — wipes the whole section. */
 export function clearConversations() {
-  emit({ conversations: [], activeId: null })
+  emit({ conversations: [], activeId: null, panelId: null })
 }

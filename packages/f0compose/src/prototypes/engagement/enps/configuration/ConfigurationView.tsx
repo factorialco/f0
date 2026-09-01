@@ -1,5 +1,5 @@
-import { useState } from "react"
 import type { IconType } from "@factorialco/f0-react"
+
 import {
   F0Box,
   F0Button,
@@ -13,6 +13,8 @@ import {
 } from "@factorialco/f0-react"
 import { Dialog } from "@factorialco/f0-react/dist/experimental"
 import { Settings, People, Add } from "@factorialco/f0-react/icons/app"
+import { useState } from "react"
+
 import { configEditors } from "./editorsFixtures"
 
 const frequencyOptions = [
@@ -37,8 +39,8 @@ function SectionRow({
   children: React.ReactNode
 }) {
   return (
-    <div className="flex gap-10 items-start">
-      <div className="w-[340px] shrink-0 flex flex-col gap-2">
+    <div className="flex items-start gap-10">
+      <div className="flex w-[340px] shrink-0 flex-col gap-2">
         <F0Icon icon={icon} size="md" />
         <F0Heading content={title} variant="heading" as="h3" />
         <F0Text content={description} variant="description" />

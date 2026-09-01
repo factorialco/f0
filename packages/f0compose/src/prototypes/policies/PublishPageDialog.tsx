@@ -1,5 +1,6 @@
 import { F0Box, F0Text } from "@factorialco/f0-react"
 import { useState } from "react"
+
 import type { Policy } from "@/fixtures"
 
 const FOLDERS = [
@@ -95,9 +96,7 @@ export function PublishPageDialog({
               style={{
                 padding: "8px 12px",
                 borderRadius: 8,
-                border: folderError
-                  ? "1px solid #dc2626"
-                  : "1px solid #e5e7eb",
+                border: folderError ? "1px solid #dc2626" : "1px solid #e5e7eb",
                 fontSize: 14,
               }}
             >

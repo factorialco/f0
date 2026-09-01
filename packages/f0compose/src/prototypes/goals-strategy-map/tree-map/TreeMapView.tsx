@@ -1,4 +1,3 @@
-import { useState, useRef, useEffect, useCallback, createContext } from "react"
 import {
   F0Avatar,
   F0AvatarList,
@@ -17,17 +16,16 @@ import {
   Organization,
   Calendar,
 } from "@factorialco/f0-react/icons/app"
+import { useState, useRef, useEffect, useCallback, createContext } from "react"
+
 import { employees } from "@/fixtures"
 
 import type { GoalNode } from "../shared/types"
-import { goalTree } from "../shared/buildTree"
-import {
-  levelToLabel,
-  statusToLabel,
-  statusToVariant,
-} from "../shared/helpers"
-import { NewGoalModal } from "../shared/NewGoalModal"
 import type { GoalLevel, GoalStatus } from "../shared/types"
+
+import { goalTree } from "../shared/buildTree"
+import { levelToLabel, statusToLabel, statusToVariant } from "../shared/helpers"
+import { NewGoalModal } from "../shared/NewGoalModal"
 
 const employeeMap = new Map(employees.map((e) => [e.id, e]))
 const tree = goalTree
@@ -38,7 +36,11 @@ function formatK(n: number): string {
 
 function formatDateES(dateStr: string): string {
   const d = new Date(dateStr)
-  return d.toLocaleDateString("es-ES", { day: "2-digit", month: "short", year: "numeric" })
+  return d.toLocaleDateString("es-ES", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  })
 }
 
 const ZOOM_STEPS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2]
@@ -78,20 +80,23 @@ export function TreeMapView() {
   const [pan, setPan] = useState({ x: 0, y: 0 })
   const dragStart = useRef({ x: 0, y: 0, panX: 0, panY: 0 })
 
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    if (e.button !== 0) return
-    const target = e.target as HTMLElement
-    if (target.closest("button") || target.closest("[data-card]")) return
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      if (e.button !== 0) return
+      const target = e.target as HTMLElement
+      if (target.closest("button") || target.closest("[data-card]")) return
 
-    setIsDragging(true)
-    dragStart.current = {
-      x: e.clientX,
-      y: e.clientY,
-      panX: pan.x,
-      panY: pan.y,
-    }
-    e.preventDefault()
-  }, [pan])
+      setIsDragging(true)
+      dragStart.current = {
+        x: e.clientX,
+        y: e.clientY,
+        panX: pan.x,
+        panY: pan.y,
+      }
+      e.preventDefault()
+    },
+    [pan]
+  )
 
   const handleMouseMove = useCallback(
     (e: React.MouseEvent) => {
@@ -109,19 +114,16 @@ export function TreeMapView() {
   }, [])
 
   // Pinch-to-zoom on trackpad (ctrl+wheel = pinch gesture on macOS)
-  const handleWheel = useCallback(
-    (e: React.WheelEvent) => {
-      if (e.ctrlKey || e.metaKey) {
-        e.preventDefault()
-        if (e.deltaY < 0) {
-          setZoomIndex((i) => Math.min(i + 1, ZOOM_STEPS.length - 1))
-        } else if (e.deltaY > 0) {
-          setZoomIndex((i) => Math.max(i - 1, 0))
-        }
+  const handleWheel = useCallback((e: React.WheelEvent) => {
+    if (e.ctrlKey || e.metaKey) {
+      e.preventDefault()
+      if (e.deltaY < 0) {
+        setZoomIndex((i) => Math.min(i + 1, ZOOM_STEPS.length - 1))
+      } else if (e.deltaY > 0) {
+        setZoomIndex((i) => Math.max(i - 1, 0))
       }
-    },
-    []
-  )
+    }
+  }, [])
 
   /** Pan so a given element is centered in the viewport */
   const panTo = useCallback(
@@ -182,7 +184,7 @@ export function TreeMapView() {
             transition: "none",
           }}
         >
-          <div className="flex items-start gap-10 pb-8 pt-16 justify-center">
+          <div className="flex items-start justify-center gap-10 pb-8 pt-16">
             <MapControlsCtx.Provider value={controls}>
               {treeData.map((root) => (
                 <TreeMapBranch key={root.id} node={root} />
@@ -193,15 +195,41 @@ export function TreeMapView() {
       </div>
 
       {/* Vertical toolbar — top-left, F0Button icon-only */}
-      <div className="absolute top-3 left-3 flex flex-col gap-2 z-10">
-        <F0Button label="Search" icon={Search} hideLabel variant="outline" onClick={() => {}} />
-        <F0Button label="Zoom in" icon={Plus} hideLabel variant="outline" onClick={zoomIn} disabled={zoomIndex === ZOOM_STEPS.length - 1} />
-        <F0Button label="Zoom out" icon={Minus} hideLabel variant="outline" onClick={zoomOut} disabled={zoomIndex === 0} />
-        <F0Button label="Fit to screen" icon={Organization} hideLabel variant="outline" onClick={resetZoom} />
+      <div className="absolute left-3 top-3 z-10 flex flex-col gap-2">
+        <F0Button
+          label="Search"
+          icon={Search}
+          hideLabel
+          variant="outline"
+          onClick={() => {}}
+        />
+        <F0Button
+          label="Zoom in"
+          icon={Plus}
+          hideLabel
+          variant="outline"
+          onClick={zoomIn}
+          disabled={zoomIndex === ZOOM_STEPS.length - 1}
+        />
+        <F0Button
+          label="Zoom out"
+          icon={Minus}
+          hideLabel
+          variant="outline"
+          onClick={zoomOut}
+          disabled={zoomIndex === 0}
+        />
+        <F0Button
+          label="Fit to screen"
+          icon={Organization}
+          hideLabel
+          variant="outline"
+          onClick={resetZoom}
+        />
       </div>
 
       {/* Add goal button — top-right */}
-      <div className="absolute top-3 right-3 z-10">
+      <div className="absolute right-3 top-3 z-10">
         <F0Button
           label="Add goal"
           icon={Plus}
@@ -274,22 +302,17 @@ function TreeMapBranch({ node }: { node: GoalNode }) {
       />
 
       {hasChildren && expanded && (
-        <div
-          className="flex flex-col items-center"
-        >
+        <div className="flex flex-col items-center">
           {/* Vertical line from parent card bottom to children rail */}
           <VerticalLine height={32} />
 
           {/* Children row */}
-          <div className="flex items-start relative" style={{ gap: "40px" }}>
+          <div className="relative flex items-start" style={{ gap: "40px" }}>
             {node.children.length > 1 && (
               <HorizontalConnector count={node.children.length} />
             )}
             {node.children.map((child) => (
-              <div
-                key={child.id}
-                className="flex flex-col items-center"
-              >
+              <div key={child.id} className="flex flex-col items-center">
                 {/* Vertical line from rail down to child card */}
                 <VerticalLine height={32} />
                 <TreeMapBranch node={child} />
@@ -378,15 +401,11 @@ function Tooltip({
   }
 
   return (
-    <div
-      className="relative"
-      onMouseEnter={show}
-      onMouseLeave={hide}
-    >
+    <div className="relative" onMouseEnter={show} onMouseLeave={hide}>
       {children}
       {visible && (
         <div
-          className="absolute left-1/2 bottom-full mb-1.5 px-2.5 py-1.5 rounded-lg text-xs whitespace-nowrap pointer-events-none z-50"
+          className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-1.5 whitespace-nowrap rounded-lg px-2.5 py-1.5 text-xs"
           style={{
             transform: "translateX(-50%)",
             backgroundColor: "#000",
@@ -425,7 +444,13 @@ function contributorAvatars(node: GoalNode) {
   const ownerEmp = employeeMap.get(node.ownerId)
   const all = [
     ...(ownerEmp
-      ? [{ firstName: ownerEmp.fullName.split(" ")[0] ?? "", lastName: ownerEmp.fullName.split(" ")[1] ?? "", src: ownerEmp.avatarUrl }]
+      ? [
+          {
+            firstName: ownerEmp.fullName.split(" ")[0] ?? "",
+            lastName: ownerEmp.fullName.split(" ")[1] ?? "",
+            src: ownerEmp.avatarUrl,
+          },
+        ]
       : []),
     ...node.contributorIds
       .map((id) => employeeMap.get(id))
@@ -456,19 +481,23 @@ function GoalCard({
       ? 0
       : ((node.measureCurrent - node.measureStart) /
           (node.measureTarget - node.measureStart)) *
-        100
+          100
   )
 
   return (
     <div
-      className="relative border border-f1-border rounded-xl shadow-md bg-f1-background p-4 flex flex-col gap-2"
-      style={{ width: "280px", minWidth: "280px", cursor: hasChildren ? "pointer" : "default" }}
+      className="relative flex flex-col gap-2 rounded-xl border border-f1-border bg-f1-background p-4 shadow-md"
+      style={{
+        width: "280px",
+        minWidth: "280px",
+        cursor: hasChildren ? "pointer" : "default",
+      }}
       onClick={hasChildren && onToggle ? onToggle : undefined}
     >
       {/* Header: level + status */}
       <F0Box display="flex" alignItems="center" justifyContent="between">
         <Tooltip label={`Level: ${levelToLabel(node.level)}`}>
-          <span className="rounded-full px-2 py-0.5 text-xs bg-f1-background-secondary text-f1-foreground-secondary">
+          <span className="rounded-full bg-f1-background-secondary px-2 py-0.5 text-xs text-f1-foreground-secondary">
             {levelToLabel(node.level)}
           </span>
         </Tooltip>
@@ -490,18 +519,27 @@ function GoalCard({
       </Tooltip>
 
       {/* Measure: current / target */}
-      <Tooltip label={`Start: ${formatK(node.measureStart)} · Actual: ${formatK(node.measureCurrent)} · Target: ${formatK(node.measureTarget)}`}>
+      <Tooltip
+        label={`Start: ${formatK(node.measureStart)} · Actual: ${formatK(node.measureCurrent)} · Target: ${formatK(node.measureTarget)}`}
+      >
         <div>
-          <span className="text-sm font-semibold text-f1-foreground">{formatK(node.measureCurrent)}</span>
-          <span className="text-sm text-f1-foreground-secondary"> / {formatK(node.measureTarget)}</span>
+          <span className="text-sm font-semibold text-f1-foreground">
+            {formatK(node.measureCurrent)}
+          </span>
+          <span className="text-sm text-f1-foreground-secondary">
+            {" "}
+            / {formatK(node.measureTarget)}
+          </span>
         </div>
       </Tooltip>
 
       {/* Progress bar with % */}
-      <Tooltip label={`Progress: ${Math.round(progressPercent)}% — Current: ${formatK(node.measureCurrent)} / Target: ${formatK(node.measureTarget)}`}>
+      <Tooltip
+        label={`Progress: ${Math.round(progressPercent)}% — Current: ${formatK(node.measureCurrent)} / Target: ${formatK(node.measureTarget)}`}
+      >
         <div>
           <F0Box display="flex" alignItems="center" gap="sm">
-            <div className="h-2 rounded-full bg-f1-background-secondary grow">
+            <div className="h-2 grow rounded-full bg-f1-background-secondary">
               <div
                 className="h-2 rounded-full"
                 style={{
@@ -510,15 +548,20 @@ function GoalCard({
                 }}
               />
             </div>
-            <F0Text content={`${Math.round(progressPercent)}%`} variant="small" />
+            <F0Text
+              content={`${Math.round(progressPercent)}%`}
+              variant="small"
+            />
           </F0Box>
         </div>
       </Tooltip>
 
       {/* Assignee + Owner — same row */}
       <div className="flex items-start gap-3 pt-1">
-        <div className="flex flex-col gap-1 flex-1 min-w-0">
-          <span className="text-[10px] text-f1-foreground-secondary">Assignee</span>
+        <div className="flex min-w-0 flex-1 flex-col gap-1">
+          <span className="text-[10px] text-f1-foreground-secondary">
+            Assignee
+          </span>
           <Tooltip label={`Assignee: ${node.assignation}`}>
             <div className="flex items-center gap-1.5">
               {contributorAvatars(node).length > 1 ? (
@@ -535,9 +578,13 @@ function GoalCard({
             </div>
           </Tooltip>
         </div>
-        <div className="flex flex-col gap-1 flex-1 min-w-0">
-          <span className="text-[10px] text-f1-foreground-secondary">Owner</span>
-          <Tooltip label={owner ? `Owner: ${owner.fullName}` : "No owner assigned"}>
+        <div className="flex min-w-0 flex-1 flex-col gap-1">
+          <span className="text-[10px] text-f1-foreground-secondary">
+            Owner
+          </span>
+          <Tooltip
+            label={owner ? `Owner: ${owner.fullName}` : "No owner assigned"}
+          >
             <div className="flex items-center gap-1.5">
               {owner && (
                 <>
@@ -559,8 +606,10 @@ function GoalCard({
       </div>
 
       {/* Due date */}
-      <div className="flex flex-col gap-1 pt-1 border-t border-f1-border-secondary">
-        <span className="text-[10px] text-f1-foreground-secondary">Due date</span>
+      <div className="flex flex-col gap-1 border-t border-f1-border-secondary pt-1">
+        <span className="text-[10px] text-f1-foreground-secondary">
+          Due date
+        </span>
         <Tooltip label={`Due date: ${node.dueDate}`}>
           <div className="flex items-center gap-1 text-f1-foreground-secondary">
             <F0Icon icon={Calendar} size="xs" />
@@ -572,14 +621,14 @@ function GoalCard({
       {/* Expand/collapse arrow — bottom right */}
       {hasChildren && onToggle && (
         <button
-          onClick={(e) => { e.stopPropagation(); onToggle() }}
-          className="absolute bottom-2 right-2 flex items-center justify-center w-6 h-6 rounded text-f1-foreground-secondary hover:bg-f1-background-hover cursor-pointer border-none bg-transparent"
+          onClick={(e) => {
+            e.stopPropagation()
+            onToggle()
+          }}
+          className="absolute bottom-2 right-2 flex h-6 w-6 cursor-pointer items-center justify-center rounded border-none bg-transparent text-f1-foreground-secondary hover:bg-f1-background-hover"
           aria-label={expanded ? "Collapse" : "Expand"}
         >
-          <F0Icon
-            icon={expanded ? ChevronDown : ChevronRight}
-            size="sm"
-          />
+          <F0Icon icon={expanded ? ChevronDown : ChevronRight} size="sm" />
         </button>
       )}
     </div>

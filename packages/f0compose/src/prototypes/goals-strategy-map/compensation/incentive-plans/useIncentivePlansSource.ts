@@ -1,9 +1,11 @@
 import { useDataCollectionSource } from "@factorialco/f0-react/dist/experimental"
 import { Add } from "@factorialco/f0-react/icons/app"
 
-import type { IncentivePlan } from "../compensationFixtures"
-import { incentivePlans } from "../compensationFixtures"
 import { applySort } from "@/lib/applySort"
+
+import type { IncentivePlan } from "../compensationFixtures"
+
+import { incentivePlans } from "../compensationFixtures"
 
 export function useIncentivePlansSource() {
   return useDataCollectionSource<IncentivePlan>(

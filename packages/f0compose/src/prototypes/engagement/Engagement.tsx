@@ -1,17 +1,14 @@
 import { F0Box, F0Heading, F0Text, StandardLayout } from "@factorialco/f0-react"
-import {
-  Page,
-  PageHeader,
-  Tabs,
-} from "@factorialco/f0-react/dist/experimental"
+import { Page, PageHeader, Tabs } from "@factorialco/f0-react/dist/experimental"
 import { useSearchParams } from "react-router-dom"
 
 import type { PrototypeMeta } from "../types"
-import { moduleTabs, type ModuleTabId } from "./tabs"
-import { enpsTabs, type EnpsTabId } from "./enps/enpsTabs"
-import { ResultsView } from "./enps/results/ResultsView"
+
 import { AnswersView } from "./enps/answers/AnswersView"
 import { ConfigurationView } from "./enps/configuration/ConfigurationView"
+import { enpsTabs, type EnpsTabId } from "./enps/enpsTabs"
+import { ResultsView } from "./enps/results/ResultsView"
+import { moduleTabs, type ModuleTabId } from "./tabs"
 
 export const meta: PrototypeMeta = {
   slug: "engagement",
@@ -21,7 +18,15 @@ export const meta: PrototypeMeta = {
   category: "Talent",
   module: "engagement",
   audience: ["admin"],
-  tags: ["engagement", "enps", "surveys", "1:1", "meetings", "pulse", "insights"],
+  tags: [
+    "engagement",
+    "enps",
+    "surveys",
+    "1:1",
+    "meetings",
+    "pulse",
+    "insights",
+  ],
   createdAt: "2026-05-11",
 }
 
@@ -100,21 +105,30 @@ export default function Engagement() {
     >
       <StandardLayout>
         {activeTab === "one-on-one" &&
-          placeholderTab("1:1 Meetings", "Manage and schedule one-on-one meetings with your team.")}
+          placeholderTab(
+            "1:1 Meetings",
+            "Manage and schedule one-on-one meetings with your team."
+          )}
         {activeTab === "pulse" &&
-          placeholderTab("Pulse", "Track employee pulse surveys and sentiment over time.")}
+          placeholderTab(
+            "Pulse",
+            "Track employee pulse surveys and sentiment over time."
+          )}
         {activeTab === "surveys" &&
           placeholderTab("Surveys", "Create and manage employee surveys.")}
         {activeTab === "insights" &&
-          placeholderTab("Insights", "Engagement analytics and trends across the organization.")}
-        {activeTab === "enps" && activeEnpsTab === "answers" && (
-          <AnswersView />
-        )}
-        {activeTab === "enps" && activeEnpsTab === "analytics" &&
-          placeholderTab("Analytics", "eNPS trends, breakdowns by department, and historical analysis.")}
-        {activeTab === "enps" && activeEnpsTab === "results" && (
-          <ResultsView />
-        )}
+          placeholderTab(
+            "Insights",
+            "Engagement analytics and trends across the organization."
+          )}
+        {activeTab === "enps" && activeEnpsTab === "answers" && <AnswersView />}
+        {activeTab === "enps" &&
+          activeEnpsTab === "analytics" &&
+          placeholderTab(
+            "Analytics",
+            "eNPS trends, breakdowns by department, and historical analysis."
+          )}
+        {activeTab === "enps" && activeEnpsTab === "results" && <ResultsView />}
         {activeTab === "enps" && activeEnpsTab === "configuration" && (
           <ConfigurationView />
         )}

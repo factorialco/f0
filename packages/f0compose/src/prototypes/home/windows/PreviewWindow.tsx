@@ -33,9 +33,21 @@ const AUTO_SIZE = { fieldSizing: "content" } as React.CSSProperties
  *  is time-based (~85 chars/s), so throttled timers only lower the
  *  frame rate, never stretch the total duration. */
 function useStreamedText(text: string, enabled: boolean) {
-  const [count, setCount] = useState(enabled ? 0 : text.length)
+  // Simulated typing is motion too: under reduced motion the text lands
+  // at once. `done` stays true, so the 150ms settle and the hand-off to
+  // the editable card still run in order.
+  const animate =
+    enabled &&
+    !(
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    )
+  const [count, setCount] = useState(animate ? 0 : text.length)
   useEffect(() => {
-    if (!enabled) return
+    if (!animate) {
+      setCount(text.length)
+      return
+    }
     const start = performance.now()
     const interval = setInterval(() => {
       const chars = Math.floor((performance.now() - start) / 12)
@@ -43,8 +55,20 @@ function useStreamedText(text: string, enabled: boolean) {
       if (chars >= text.length) clearInterval(interval)
     }, 24)
     return () => clearInterval(interval)
-  }, [enabled, text.length])
+  }, [animate, text.length])
   return { shown: text.slice(0, count), done: count >= text.length }
+}
+
+/** scrollIntoView with an explicit "smooth" is NOT downgraded by
+ *  prefers-reduced-motion — only CSS scroll-behavior is, and only in some
+ *  engines. Every scroll in this window goes through here. */
+function scrollCardIntoView(el: HTMLElement | null) {
+  el?.scrollIntoView({
+    behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      ? "auto"
+      : "smooth",
+    block: "center",
+  })
 }
 
 function MenuRow({
@@ -104,7 +128,7 @@ function QuestionActionsMenu({ question }: { question: SurveyQuestion }) {
           label="Required"
           trailing={
             question.required ? (
-              <F0Icon icon={Check} size="sm" color="positive" />
+              <F0Icon icon={Check} size="sm" color="info" />
             ) : undefined
           }
           onClick={() => {
@@ -226,14 +250,20 @@ function SurveyQuestionCard({ question }: { question: SurveyQuestion }) {
   // view while it streams, then hand over to the editable card.
   useEffect(() => {
     if (!streaming) return
-    cardRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })
+    scrollCardIntoView(cardRef.current)
   }, [streaming])
   useEffect(() => {
     if (streaming && title.done && description.done) {
-      const settle = setTimeout(() => setStreaming(false), 150)
+      const settle = setTimeout(() => {
+        setStreaming(false)
+        // The reveal is a ONE-TIME event. Nothing cleared this flag, so
+        // closing and reopening the Preview retyped the question every
+        // time — a first-time delight turned into repeated motion.
+        updateQuestion(question.id, { justAdded: undefined })
+      }, 150)
       return () => clearTimeout(settle)
     }
-  }, [streaming, title.done, description.done])
+  }, [streaming, title.done, description.done, question.id])
 
   return (
     <div
@@ -306,7 +336,7 @@ function SurveyQuestionCard({ question }: { question: SurveyQuestion }) {
 function AddingQuestionCard() {
   const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {
-    ref.current?.scrollIntoView({ behavior: "smooth", block: "center" })
+    scrollCardIntoView(ref.current)
   }, [])
   return (
     <div

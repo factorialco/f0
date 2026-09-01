@@ -1,9 +1,11 @@
 import { useDataCollectionSource } from "@factorialco/f0-react/dist/experimental"
 import { Add } from "@factorialco/f0-react/icons/app"
 
-import type { EquityGrant } from "../compensationFixtures"
-import { equityGrants } from "../compensationFixtures"
 import { applySort } from "@/lib/applySort"
+
+import type { EquityGrant } from "../compensationFixtures"
+
+import { equityGrants } from "../compensationFixtures"
 
 export function useEquitySource() {
   return useDataCollectionSource<EquityGrant>(

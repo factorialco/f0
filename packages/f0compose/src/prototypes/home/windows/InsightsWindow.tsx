@@ -1,6 +1,64 @@
 import { F0AvatarPerson } from "@factorialco/f0-react"
+import { F0OneIcon } from "@factorialco/f0-react/dist/ai"
 
 import { avatarFor } from "@/fixtures/helpers"
+
+import { HEADCOUNT } from "../fixtures"
+import { startConversationWithContext } from "../one/conversationStore"
+import { Sparkline } from "../Sparkline"
+
+/**
+ * The headcount banner with One's own button (per Oskar) — the X/Grok
+ * pattern: instead of typing a question, you point at a card and the
+ * assistant answers about THAT. The click carries the card into the
+ * conversation as context, so the reply has something to refer to.
+ */
+function HeadcountBanner() {
+  return (
+    <div className="relative flex flex-col gap-3 overflow-hidden rounded-lg border border-solid border-f1-border-secondary bg-f1-background px-4 pb-4 pt-4">
+      <div className="flex items-start justify-between gap-2">
+        <span className="truncate text-base font-medium text-f1-foreground">
+          {HEADCOUNT.title}
+        </span>
+        <button
+          onClick={() =>
+            startConversationWithContext(
+              {
+                kind: "metric",
+                title: HEADCOUNT.title,
+                stats: HEADCOUNT.stats,
+                series: HEADCOUNT.series,
+              },
+              // The question the click stands for — it drives intent
+              // matching, and it is never shown as typed text. Derived from
+              // the title so a rename cannot break the match.
+              `Analyse ${HEADCOUNT.title}`
+            )
+          }
+          aria-label={`Ask One about ${HEADCOUNT.title}`}
+          className="f0c-pressable -mr-1 -mt-1 shrink-0 cursor-pointer rounded-full"
+        >
+          <F0OneIcon size="sm" />
+        </button>
+      </div>
+      <div className="flex flex-wrap gap-8">
+        {HEADCOUNT.stats.map((stat) => (
+          <div key={stat.label} className="flex min-w-0 flex-col">
+            <span className="truncate text-base text-f1-foreground-secondary">
+              {stat.label}
+            </span>
+            <span className="truncate text-2xl font-semibold text-f1-foreground">
+              {stat.value}
+            </span>
+          </div>
+        ))}
+      </div>
+      <div className="-mx-4 -mb-4 bg-f1-background-secondary px-4 pb-3 pt-2 text-f1-icon-selected">
+        <Sparkline series={HEADCOUNT.series} className="h-12 w-full" />
+      </div>
+    </div>
+  )
+}
 
 function InsightCard({
   category,
@@ -39,7 +97,11 @@ function TurnoverChart() {
       <span className="absolute right-2 top-[-4px] rounded-full border border-solid border-f1-border-critical bg-f1-background px-2 py-0.5 text-sm font-medium text-f1-foreground-critical">
         +22%
       </span>
-      <svg viewBox="0 0 300 40" className="block h-14 w-full" preserveAspectRatio="none">
+      <svg
+        viewBox="0 0 300 40"
+        className="block h-14 w-full"
+        preserveAspectRatio="none"
+      >
         <defs>
           <linearGradient id="turnover-fill" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#E51943" stopOpacity="0.16" />
@@ -83,6 +145,7 @@ function AvatarStack({ seeds, extra }: { seeds: string[]; extra?: number }) {
 export function InsightsWindow() {
   return (
     <div className="flex flex-col gap-3 p-3">
+      <HeadcountBanner />
       <InsightCard
         category="Retention"
         headline="Turnover up 22% in Sales this quarter"
@@ -90,7 +153,10 @@ export function InsightsWindow() {
       >
         <TurnoverChart />
       </InsightCard>
-      <InsightCard category="Time" headline="6 people consistently over 45h/week">
+      <InsightCard
+        category="Time"
+        headline="6 people consistently over 45h/week"
+      >
         <AvatarStack seeds={["ot-1", "ot-2", "ot-3"]} extra={3} />
       </InsightCard>
       <InsightCard

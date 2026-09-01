@@ -1,15 +1,14 @@
 import { StandardLayout } from "@factorialco/f0-react"
-import {
-  Page,
-  PageHeader,
-} from "@factorialco/f0-react/dist/experimental"
+import { Page, PageHeader } from "@factorialco/f0-react/dist/experimental"
 import { useCallback, useState } from "react"
 import { useSearchParams } from "react-router-dom"
 
-import { avatarFor } from "@/fixtures"
 import type { Policy } from "@/fixtures"
 
+import { avatarFor } from "@/fixtures"
+
 import type { PrototypeMeta } from "../types"
+
 import { DeletePageDialog } from "./DeletePageDialog"
 import { MovePageDialog } from "./MovePageDialog"
 import { PageDetail } from "./PageDetail"
@@ -47,10 +46,7 @@ export default function Policies() {
   const [moveTarget, setMoveTarget] = useState<string | null>(null)
 
   // Navigation helpers
-  const goToList = useCallback(
-    () => setSearchParams({}),
-    [setSearchParams]
-  )
+  const goToList = useCallback(() => setSearchParams({}), [setSearchParams])
 
   const goToPage = useCallback(
     (id: string) => setSearchParams({ view: "page", id }),
@@ -111,9 +107,7 @@ export default function Policies() {
               name: "Policies",
               href: "/p/policies",
             }}
-            breadcrumbs={[
-              { id: "page", label: page.title || "Untitled" },
-            ]}
+            breadcrumbs={[{ id: "page", label: page.title || "Untitled" }]}
           />
         }
       >

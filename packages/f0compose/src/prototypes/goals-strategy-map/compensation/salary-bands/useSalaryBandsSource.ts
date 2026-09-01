@@ -1,9 +1,11 @@
 import { useDataCollectionSource } from "@factorialco/f0-react/dist/experimental"
 import { Add } from "@factorialco/f0-react/icons/app"
 
-import type { SalaryBand } from "../compensationFixtures"
-import { salaryBands } from "../compensationFixtures"
 import { applySort } from "@/lib/applySort"
+
+import type { SalaryBand } from "../compensationFixtures"
+
+import { salaryBands } from "../compensationFixtures"
 
 export function useSalaryBandsSource() {
   return useDataCollectionSource<SalaryBand>(

@@ -1,7 +1,9 @@
 import { useEffect } from "react"
 import { useParams } from "react-router-dom"
+
 import { NotFound } from "@/lib/notFound"
 import { prototypeRegistry } from "@/prototypes/registry"
+
 import { FactorialShell } from "./FactorialShell"
 
 /**
@@ -32,7 +34,10 @@ export function PrototypeRoute() {
 
   const Component = entry.component
   return (
-    <FactorialShell activeModule={entry.meta.module} sidebar={entry.meta.sidebar}>
+    <FactorialShell
+      activeModule={entry.meta.module}
+      sidebar={entry.meta.sidebar}
+    >
       <Component />
     </FactorialShell>
   )

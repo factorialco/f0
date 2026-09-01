@@ -1,7 +1,10 @@
 import { useDataCollectionSource } from "@factorialco/f0-react/dist/experimental"
 import { Add } from "@factorialco/f0-react/icons/app"
 
-import { performanceCycles, type PerformanceCycle } from "@/fixtures/performance"
+import {
+  performanceCycles,
+  type PerformanceCycle,
+} from "@/fixtures/performance"
 import { applySort } from "@/lib/applySort"
 
 /**

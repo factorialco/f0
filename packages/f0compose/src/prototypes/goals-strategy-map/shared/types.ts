@@ -1,6 +1,11 @@
 export type GoalLevel = "company" | "team" | "individual"
 
-export type GoalStatus = "on-track" | "not-started" | "at-risk" | "in-progress" | "overachieved"
+export type GoalStatus =
+  | "on-track"
+  | "not-started"
+  | "at-risk"
+  | "in-progress"
+  | "overachieved"
 
 export type StrategyGoal = {
   id: string

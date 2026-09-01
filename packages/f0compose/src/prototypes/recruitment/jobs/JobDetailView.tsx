@@ -1,10 +1,4 @@
-import { useCopilotAction, useCopilotReadable } from "@/copilot"
-import { useCallback, useState } from "react"
-import {
-  F0AvatarList,
-  F0TagStatus,
-  F0Text,
-} from "@factorialco/f0-react"
+import { F0AvatarList, F0TagStatus, F0Text } from "@factorialco/f0-react"
 import {
   Page,
   PageHeader,
@@ -12,6 +6,7 @@ import {
   Tabs,
   OneDataCollection,
 } from "@factorialco/f0-react/dist/experimental"
+import { useDataCollectionSource } from "@factorialco/f0-react/dist/experimental"
 import {
   Add,
   Archive,
@@ -22,24 +17,30 @@ import {
   Pencil,
   Sparkles,
 } from "@factorialco/f0-react/icons/app"
+import { useCallback, useState } from "react"
 import { useSearchParams } from "react-router-dom"
 
 import type { Job } from "@/fixtures"
+
+import { useCopilotAction, useCopilotReadable } from "@/copilot"
 import { employees } from "@/fixtures"
 import { applySort } from "@/lib/applySort"
-import { useDataCollectionSource } from "@factorialco/f0-react/dist/experimental"
 
-import { statusText, statusVariant } from "./jobStatus"
 import {
   getCandidatesForJob,
   pipelinePhases,
   type PipelineCandidate,
   type PipelinePhase,
 } from "../shared/pipelineData"
+import { statusText, statusVariant } from "./jobStatus"
 
 const employeeMap = new Map(employees.map((e) => [e.id, e]))
 
-type DetailTab = "applications" | "standard-portals" | "premium-portals" | "marketplace"
+type DetailTab =
+  | "applications"
+  | "standard-portals"
+  | "premium-portals"
+  | "marketplace"
 
 const detailTabs: { id: DetailTab; label: string }[] = [
   { id: "applications", label: "Applications" },
@@ -455,12 +456,16 @@ export function JobDetailView({
               { label: "Archive", icon: Archive, onClick: () => {} },
               { label: "Cancel", icon: Cross, onClick: () => {} },
               { label: "Copy URL", icon: LayersFront, onClick: () => {} },
-              { label: "Duplicate job opening", icon: LayersFront, onClick: () => {} },
+              {
+                label: "Duplicate job opening",
+                icon: LayersFront,
+                onClick: () => {},
+              },
             ]}
           />
 
           {/* Status + metadata row */}
-          <div className="flex items-center gap-3 px-6 pb-3 flex-wrap border-b border-f1-border-secondary">
+          <div className="flex flex-wrap items-center gap-3 border-b border-f1-border-secondary px-6 pb-3">
             <F0TagStatus
               text={statusText(job.status)}
               variant={statusVariant(job.status)}
@@ -487,68 +492,61 @@ export function JobDetailView({
             {job.departmentId && (
               <>
                 <span className="text-f1-foreground-secondary">|</span>
-                <F0Text
-                  content={`Team  ${job.departmentId}`}
-                  variant="body"
-                />
+                <F0Text content={`Team  ${job.departmentId}`} variant="body" />
               </>
             )}
             <span className="text-f1-foreground-secondary">|</span>
             <F0Text content="Preview" variant="body" />
-            <a className="text-f1-foreground-info cursor-pointer text-sm">
+            <a className="cursor-pointer text-sm text-f1-foreground-info">
               Link
             </a>
           </div>
 
-          <Tabs
-            key={activeTab}
-            tabs={tabsWithNav}
-            activeTabId={activeTab}
-          />
+          <Tabs key={activeTab} tabs={tabsWithNav} activeTabId={activeTab} />
         </>
       }
     >
       {activeTab === "applications" && (
         <div className="mt-4">
           <OneDataCollection
-          source={source}
-          visualizations={[
-            {
-              type: "kanban",
-              options: {
-                lanes: kanbanLanes,
-                onMove: handleMove,
-                title: (c: PipelineCandidate) => c.fullName,
-                description: (c: PipelineCandidate) => c.source,
-                avatar: (c: PipelineCandidate) => ({
-                  type: "person" as const,
-                  firstName: c.firstName,
-                  lastName: c.lastName,
-                  src: c.avatarUrl || undefined,
-                }),
-                metadata: (c: PipelineCandidate) => [
-                  {
-                    icon: ExternalLink,
-                    property: {
-                      type: "text" as const,
-                      label: "Source",
-                      value: c.source,
+            source={source}
+            visualizations={[
+              {
+                type: "kanban",
+                options: {
+                  lanes: kanbanLanes,
+                  onMove: handleMove,
+                  title: (c: PipelineCandidate) => c.fullName,
+                  description: (c: PipelineCandidate) => c.source,
+                  avatar: (c: PipelineCandidate) => ({
+                    type: "person" as const,
+                    firstName: c.firstName,
+                    lastName: c.lastName,
+                    src: c.avatarUrl || undefined,
+                  }),
+                  metadata: (c: PipelineCandidate) => [
+                    {
+                      icon: ExternalLink,
+                      property: {
+                        type: "text" as const,
+                        label: "Source",
+                        value: c.source,
+                      },
                     },
-                  },
-                  {
-                    icon: Calendar,
-                    property: {
-                      type: "text" as const,
-                      label: "Added",
-                      value: c.addedOn,
+                    {
+                      icon: Calendar,
+                      property: {
+                        type: "text" as const,
+                        label: "Added",
+                        value: c.addedOn,
+                      },
                     },
-                  },
-                ],
+                  ],
+                },
               },
-            },
-            { type: "table", options: { columns: candidateColumns } },
-          ]}
-        />
+              { type: "table", options: { columns: candidateColumns } },
+            ]}
+          />
         </div>
       )}
       {activeTab !== "applications" && (

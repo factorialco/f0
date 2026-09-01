@@ -1,6 +1,5 @@
-import { useState, useCallback, useRef, useEffect } from "react"
-
 import { F0Box, F0Text } from "@factorialco/f0-react"
+import { useState, useCallback, useRef, useEffect } from "react"
 
 import {
   jobCatalogTree,
@@ -189,7 +188,8 @@ function TreeLevel({
 
   useEffect(() => {
     if (!containerRef.current) return
-    const cards = containerRef.current.querySelectorAll<HTMLElement>("[data-card]")
+    const cards =
+      containerRef.current.querySelectorAll<HTMLElement>("[data-card]")
     const containerRect = containerRef.current.getBoundingClientRect()
     const positions = Array.from(cards).map((card) => {
       const rect = card.getBoundingClientRect()
@@ -199,10 +199,14 @@ function TreeLevel({
   }, [nodes, expandedIds])
 
   // Find which node is expanded at this level
-  const expandedChild = nodes.find((n) => expandedIds.has(n.id) && n.children.length > 0)
+  const expandedChild = nodes.find(
+    (n) => expandedIds.has(n.id) && n.children.length > 0
+  )
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+    <div
+      style={{ display: "flex", flexDirection: "column", alignItems: "center" }}
+    >
       {/* Connecting lines SVG */}
       {parentCenter !== null && cardPositions.length > 0 && (
         <svg
@@ -222,7 +226,15 @@ function TreeLevel({
           )}
           {/* Vertical drops to each card */}
           {cardPositions.map((x, i) => (
-            <line key={i} x1={x} y1={20} x2={x} y2={40} stroke="#d1d5db" strokeWidth={1.5} />
+            <line
+              key={i}
+              x1={x}
+              y1={20}
+              x2={x}
+              y2={40}
+              stroke="#d1d5db"
+              strokeWidth={1.5}
+            />
           ))}
           {/* Vertical line from parent center to horizontal bar */}
           <line
@@ -270,9 +282,7 @@ function TreeLevel({
       {expandedChild && (
         <TreeLevel
           nodes={expandedChild.children}
-          parentCenter={
-            cardPositions[nodes.indexOf(expandedChild)] ?? null
-          }
+          parentCenter={cardPositions[nodes.indexOf(expandedChild)] ?? null}
           onSelect={onSelect}
           selectedId={selectedId}
           expandedIds={expandedIds}
@@ -384,7 +394,13 @@ function NodeDetail({
                   {getInitials(child.name)}
                 </div>
                 <span style={{ flex: 1 }}>{child.name}</span>
-                <span style={{ color: "#9ca3af", fontSize: 10, textTransform: "uppercase" }}>
+                <span
+                  style={{
+                    color: "#9ca3af",
+                    fontSize: 10,
+                    textTransform: "uppercase",
+                  }}
+                >
                   {child.type}
                 </span>
               </div>
@@ -509,17 +525,18 @@ export function OrganizationTab() {
         </div>
 
         {/* Children levels */}
-        {expandedIds.has(jobCatalogTree.id) && jobCatalogTree.children.length > 0 && (
-          <TreeLevel
-            nodes={jobCatalogTree.children}
-            parentCenter={null}
-            onSelect={handleSelect}
-            selectedId={selectedNode?.id ?? null}
-            expandedIds={expandedIds}
-            onToggleExpand={handleToggleExpand}
-            depth={1}
-          />
-        )}
+        {expandedIds.has(jobCatalogTree.id) &&
+          jobCatalogTree.children.length > 0 && (
+            <TreeLevel
+              nodes={jobCatalogTree.children}
+              parentCenter={null}
+              onSelect={handleSelect}
+              selectedId={selectedNode?.id ?? null}
+              expandedIds={expandedIds}
+              onToggleExpand={handleToggleExpand}
+              depth={1}
+            />
+          )}
       </div>
 
       {/* Detail panel */}

@@ -1,4 +1,5 @@
 import type { Feedback } from "@/fixtures/performance"
+
 import { employees } from "@/fixtures/employees"
 
 const employeeMap = new Map(employees.map((e) => [e.id, e]))
@@ -58,9 +59,7 @@ export const feedbackColumns = [
     id: "content",
     label: "Content",
     render: (item: Feedback) =>
-      item.content.length > 80
-        ? item.content.slice(0, 80) + "…"
-        : item.content,
+      item.content.length > 80 ? item.content.slice(0, 80) + "…" : item.content,
   },
   {
     id: "createdAt",

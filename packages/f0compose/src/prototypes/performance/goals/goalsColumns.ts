@@ -1,4 +1,5 @@
 import type { Goal } from "@/fixtures/types"
+
 import { employees } from "@/fixtures/employees"
 
 const employeeMap = new Map(employees.map((e) => [e.id, e]))

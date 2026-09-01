@@ -29,60 +29,60 @@ export function PinnedJobCard({
   }))
 
   return (
-    <div className="transition-shadow rounded-xl hover:shadow-md cursor-pointer">
+    <div className="cursor-pointer rounded-xl transition-shadow hover:shadow-md">
       <F0Card
         title={job.title}
         onClick={onClick}
         otherActions={[{ label: "Unpin", icon: StarFilled, onClick: () => {} }]}
-      metadata={[
-        {
-          icon: CheckCircle,
-          property: {
-            type: "dotTag",
-            label: "Status",
-            value: {
-              label: statusText(job.status),
-              color: jobStatusDotColor(job.status),
-            },
-          },
-        },
-        {
-          icon: Marker,
-          property: {
-            type: "text",
-            label: "Location",
-            value: `${job.location}${job.jobType ? ` (${job.jobType})` : ""}`,
-          },
-        },
-        {
-          icon: Clock,
-          property: {
-            type: "text",
-            label: "Posted",
-            value: job.postedDaysAgo
-              ? `${Math.round(job.postedDaysAgo / 30)} months ago`
-              : "—",
-          },
-        },
-        candidateTags.length > 0
-          ? {
-              icon: People,
-              property: {
-                type: "tagList",
-                label: "Candidates",
-                value: { type: "dot", tags: candidateTags, max: 4 },
-              },
-            }
-          : {
-              icon: People,
-              property: {
-                type: "text",
-                label: "Candidates",
-                value: "No candidates",
+        metadata={[
+          {
+            icon: CheckCircle,
+            property: {
+              type: "dotTag",
+              label: "Status",
+              value: {
+                label: statusText(job.status),
+                color: jobStatusDotColor(job.status),
               },
             },
-      ]}
-    />
+          },
+          {
+            icon: Marker,
+            property: {
+              type: "text",
+              label: "Location",
+              value: `${job.location}${job.jobType ? ` (${job.jobType})` : ""}`,
+            },
+          },
+          {
+            icon: Clock,
+            property: {
+              type: "text",
+              label: "Posted",
+              value: job.postedDaysAgo
+                ? `${Math.round(job.postedDaysAgo / 30)} months ago`
+                : "—",
+            },
+          },
+          candidateTags.length > 0
+            ? {
+                icon: People,
+                property: {
+                  type: "tagList",
+                  label: "Candidates",
+                  value: { type: "dot", tags: candidateTags, max: 4 },
+                },
+              }
+            : {
+                icon: People,
+                property: {
+                  type: "text",
+                  label: "Candidates",
+                  value: "No candidates",
+                },
+              },
+        ]}
+      />
     </div>
   )
 }

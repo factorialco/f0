@@ -1,5 +1,6 @@
-import { F0AvatarPerson, F0Icon } from "@factorialco/f0-react"
 import type { ModuleId } from "@factorialco/f0-react"
+
+import { F0AvatarPerson, F0Icon } from "@factorialco/f0-react"
 import { CalendarArrowRight } from "@factorialco/f0-react/icons/app"
 
 import { avatarFor } from "@/fixtures/helpers"

@@ -9,9 +9,7 @@ export function EquityTab() {
   return (
     <OneDataCollection
       source={source}
-      visualizations={[
-        { type: "table", options: { columns: equityColumns } },
-      ]}
+      visualizations={[{ type: "table", options: { columns: equityColumns } }]}
     />
   )
 }

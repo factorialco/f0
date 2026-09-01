@@ -1,9 +1,11 @@
 import { useDataCollectionSource } from "@factorialco/f0-react/dist/experimental"
 import { Add } from "@factorialco/f0-react/icons/app"
 
-import type { Benefit } from "../compensationFixtures"
-import { benefits } from "../compensationFixtures"
 import { applySort } from "@/lib/applySort"
+
+import type { Benefit } from "../compensationFixtures"
+
+import { benefits } from "../compensationFixtures"
 
 export function useBenefitsSource() {
   return useDataCollectionSource<Benefit>(

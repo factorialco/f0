@@ -45,9 +45,7 @@ export function useRequestsSource() {
 
           const filtered = trainingRequests
             .filter((r) =>
-              statusFilter.length === 0
-                ? true
-                : statusFilter.includes(r.status)
+              statusFilter.length === 0 ? true : statusFilter.includes(r.status)
             )
             .filter((r) =>
               term === ""

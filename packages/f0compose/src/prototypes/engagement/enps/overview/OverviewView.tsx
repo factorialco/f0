@@ -1,4 +1,5 @@
 import { F0Box, F0Heading, F0Text, F0TagStatus } from "@factorialco/f0-react"
+
 import {
   enpsSurveys,
   type EnpsSurvey,
@@ -25,7 +26,7 @@ function ScoreGauge({ score, label }: { score: number; label: string }) {
       borderRadius="md"
     >
       <F0Text content={label} variant="label" />
-      <span className={`text-4xl font-bold ${color}`}>{score}</span>
+      <span className={`font-bold text-4xl ${color}`}>{score}</span>
       <F0Text content="eNPS Score" variant="description" />
     </F0Box>
   )
@@ -108,10 +109,7 @@ export function OverviewView() {
           score={activeSurvey?.enpsScore ?? 0}
           label="Current (Active)"
         />
-        <ScoreGauge
-          score={latestClosed?.enpsScore ?? 0}
-          label="Last closed"
-        />
+        <ScoreGauge score={latestClosed?.enpsScore ?? 0} label="Last closed" />
       </F0Box>
 
       <F0Box display="flex" flexDirection="column" gap="md">

@@ -1,9 +1,5 @@
 import { F0Icon } from "@factorialco/f0-react"
-import {
-  ChevronDown,
-  Pencil,
-  Search,
-} from "@factorialco/f0-react/icons/app"
+import { ChevronDown, Pencil, Search } from "@factorialco/f0-react/icons/app"
 import { useMemo, useState } from "react"
 import { createPortal } from "react-dom"
 
@@ -140,18 +136,46 @@ export const chatHistoryGroups: PickerGroup[] = [
   {
     label: "Yesterday",
     items: [
-      { id: "c1", title: "Employee turnover analysis", meta: "Yesterday at 7:59" },
-      { id: "c2", title: "Create a new onboarding workflow", meta: "Yesterday at 10:45" },
-      { id: "c3", title: "Summarize the time-off policy", meta: "Yesterday at 10:45" },
+      {
+        id: "c1",
+        title: "Employee turnover analysis",
+        meta: "Yesterday at 7:59",
+      },
+      {
+        id: "c2",
+        title: "Create a new onboarding workflow",
+        meta: "Yesterday at 10:45",
+      },
+      {
+        id: "c3",
+        title: "Summarize the time-off policy",
+        meta: "Yesterday at 10:45",
+      },
     ],
   },
   {
     label: "This month",
     items: [
-      { id: "c4", title: "Generate a team engagement survey", meta: "Apr 23 at 11:51" },
-      { id: "c5", title: "Review last quarter hiring metrics", meta: "Apr 20 at 11:51" },
-      { id: "c6", title: "Update remote work guidelines", meta: "Apr 14 at 11:51" },
-      { id: "c7", title: "Analyze overtime trends by department", meta: "Apr 6 at 11:51" },
+      {
+        id: "c4",
+        title: "Generate a team engagement survey",
+        meta: "Apr 23 at 11:51",
+      },
+      {
+        id: "c5",
+        title: "Review last quarter hiring metrics",
+        meta: "Apr 20 at 11:51",
+      },
+      {
+        id: "c6",
+        title: "Update remote work guidelines",
+        meta: "Apr 14 at 11:51",
+      },
+      {
+        id: "c7",
+        title: "Analyze overtime trends by department",
+        meta: "Apr 6 at 11:51",
+      },
     ],
   },
 ]

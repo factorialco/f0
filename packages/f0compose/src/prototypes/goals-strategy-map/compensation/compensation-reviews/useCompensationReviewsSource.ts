@@ -1,8 +1,10 @@
 import { useDataCollectionSource } from "@factorialco/f0-react/dist/experimental"
 
-import type { CompensationReview } from "../compensationFixtures"
-import { compensationReviews } from "../compensationFixtures"
 import { applySort } from "@/lib/applySort"
+
+import type { CompensationReview } from "../compensationFixtures"
+
+import { compensationReviews } from "../compensationFixtures"
 
 export function useCompensationReviewsSource() {
   return useDataCollectionSource<CompensationReview>(
@@ -49,7 +51,10 @@ export function useCompensationReviewsSource() {
             .filter((r) => {
               if (term === "") return true
               const emp = r.employeeId
-              return emp.toLowerCase().includes(term) || r.reason.toLowerCase().includes(term)
+              return (
+                emp.toLowerCase().includes(term) ||
+                r.reason.toLowerCase().includes(term)
+              )
             })
 
           const sorted = applySort(filtered, sortings, (r, field) => {

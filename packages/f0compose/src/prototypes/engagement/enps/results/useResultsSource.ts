@@ -1,5 +1,7 @@
 import { useDataCollectionSource } from "@factorialco/f0-react/dist/experimental"
+
 import { applySort } from "@/lib/applySort"
+
 import { enpsResponses, type EnpsResponse } from "../enpsFixtures"
 
 export function useResultsSource() {
@@ -54,9 +56,7 @@ export function useResultsSource() {
               return true
             })
             .filter((r) =>
-              term === ""
-                ? true
-                : r.feedback.toLowerCase().includes(term)
+              term === "" ? true : r.feedback.toLowerCase().includes(term)
             )
 
           const sorted = applySort(filtered, sortings, (r, field) => {

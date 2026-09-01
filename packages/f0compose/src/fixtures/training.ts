@@ -280,7 +280,8 @@ export const trainingRequests: TrainingRequest[] = [
     trainingName: "AWS Solutions Architect Certification",
     status: "pending",
     requestedAt: "2026-04-28",
-    reason: "Need cloud certification for upcoming infrastructure migration project",
+    reason:
+      "Need cloud certification for upcoming infrastructure migration project",
     estimatedCost: 1200,
     currency: "EUR",
   },

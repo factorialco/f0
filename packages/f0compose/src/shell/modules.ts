@@ -28,12 +28,7 @@ import {
  * - Payroll: Periods, Concepts, Settings (kept for prototype targets)
  */
 
-export type ModuleGroup =
-  | "root"
-  | "personal"
-  | "company"
-  | "talent"
-  | "payroll"
+export type ModuleGroup = "root" | "personal" | "company" | "talent" | "payroll"
 
 export type ModuleId =
   // Root

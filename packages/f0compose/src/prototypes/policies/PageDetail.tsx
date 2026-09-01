@@ -1,9 +1,10 @@
+import type { DropdownItem } from "@factorialco/f0-react/dist/experimental"
+
 import { F0Box, F0Text } from "@factorialco/f0-react"
 import {
   F0ActionBar,
   NotesTextEditor,
 } from "@factorialco/f0-react/dist/experimental"
-import type { DropdownItem } from "@factorialco/f0-react/dist/experimental"
 import {
   ArrowLeft,
   ClockBack,
@@ -13,13 +14,15 @@ import {
 import { useCallback, useState } from "react"
 
 import type { Policy } from "@/fixtures"
+
 import { relativeDate } from "@/fixtures"
+
+import type { PoliciesState } from "./usePoliciesState"
 
 import { DeletePageDialog } from "./DeletePageDialog"
 import { DiscardDraftDialog } from "./DiscardDraftDialog"
 import { MovePageDialog } from "./MovePageDialog"
 import { PublishPageDialog } from "./PublishPageDialog"
-import type { PoliciesState } from "./usePoliciesState"
 
 type PageDetailProps = {
   page: Policy

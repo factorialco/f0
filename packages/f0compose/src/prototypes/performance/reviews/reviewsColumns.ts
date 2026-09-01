@@ -18,7 +18,12 @@ export const reviewsColumns = [
     render: (item: PerformanceCycle) => ({
       type: "status" as const,
       value: {
-        label: item.status === "active" ? "Active" : item.status === "draft" ? "Draft" : "Finished",
+        label:
+          item.status === "active"
+            ? "Active"
+            : item.status === "draft"
+              ? "Draft"
+              : "Finished",
         status:
           item.status === "active"
             ? "positive"

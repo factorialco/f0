@@ -1,4 +1,5 @@
 import { Dialog } from "@factorialco/f0-react/dist/experimental"
+
 import type { Policy } from "@/fixtures"
 
 type DeleteDialogProps = {

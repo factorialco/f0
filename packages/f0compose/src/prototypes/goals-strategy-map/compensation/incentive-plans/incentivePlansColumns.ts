@@ -1,5 +1,7 @@
-import type { IncentivePlan } from "../compensationFixtures"
 import { employees } from "@/fixtures"
+
+import type { IncentivePlan } from "../compensationFixtures"
+
 import { strategyGoals } from "../../shared/strategyGoals"
 
 const employeeMap = new Map(employees.map((e) => [e.id, e]))

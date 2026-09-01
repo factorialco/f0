@@ -1,12 +1,15 @@
 import { F0Alert, F0Box, F0Heading, F0Text } from "@factorialco/f0-react"
 import { OneDataCollection } from "@factorialco/f0-react/dist/experimental"
+
 import { enpsSurveys } from "../enpsFixtures"
 import { resultsColumns } from "./resultsColumns"
 import { useResultsSource } from "./useResultsSource"
 
 export function ResultsView() {
   const source = useResultsSource()
-  const selectedSurvey = enpsSurveys.find((s) => s.status === "closed" && s.id === "enps-002")
+  const selectedSurvey = enpsSurveys.find(
+    (s) => s.status === "closed" && s.id === "enps-002"
+  )
 
   if (!selectedSurvey) return null
 

@@ -1,14 +1,11 @@
 import { F0Box, F0Heading, F0Text, StandardLayout } from "@factorialco/f0-react"
-import {
-  Page,
-  PageHeader,
-  Tabs,
-} from "@factorialco/f0-react/dist/experimental"
+import { Page, PageHeader, Tabs } from "@factorialco/f0-react/dist/experimental"
 import { useSearchParams } from "react-router-dom"
 
 import { trainingBudgets } from "@/fixtures"
 
 import type { PrototypeMeta } from "../types"
+
 import { RequestsTab } from "./requests/RequestsTab"
 import {
   moduleTabs,
@@ -52,7 +49,9 @@ export default function Training() {
       : "trainings"
   const rawSub = searchParams.get("sub")
   const trainingsSubTab: TrainingsSubTabId =
-    rawSub && VALID_SUB_TABS.has(rawSub) ? (rawSub as TrainingsSubTabId) : "list"
+    rawSub && VALID_SUB_TABS.has(rawSub)
+      ? (rawSub as TrainingsSubTabId)
+      : "list"
 
   const setActiveModuleTab = (id: string) => {
     const next = new URLSearchParams(searchParams)
@@ -114,12 +113,13 @@ export default function Training() {
           <TrainingsListTab />
         )}
 
-        {activeModuleTab === "trainings" && trainingsSubTab === "categories" && (
-          <F0Text
-            content="Categories management is part of the prototype scaffold but has no demo content yet."
-            variant="description"
-          />
-        )}
+        {activeModuleTab === "trainings" &&
+          trainingsSubTab === "categories" && (
+            <F0Text
+              content="Categories management is part of the prototype scaffold but has no demo content yet."
+              variant="description"
+            />
+          )}
 
         {activeModuleTab === "requests" && <RequestsTab />}
 
@@ -162,7 +162,12 @@ function BudgetsTab() {
                 />
               </F0Box>
               <F0Box display="flex" gap="lg" alignItems="center">
-                <F0Box display="flex" flexDirection="column" alignItems="end" gap="xs">
+                <F0Box
+                  display="flex"
+                  flexDirection="column"
+                  alignItems="end"
+                  gap="xs"
+                >
                   <F0Text
                     content={`${b.spent.toLocaleString()} / ${b.totalBudget.toLocaleString()} ${b.currency}`}
                     variant="body"

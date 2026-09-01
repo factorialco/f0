@@ -1,7 +1,7 @@
 import { F0Icon } from "@factorialco/f0-react"
 import { ChevronRight } from "@factorialco/f0-react/icons/app"
 
-type HomeEvent = {
+export type HomeEvent = {
   id: string
   title: string
   subtitle: string
@@ -12,8 +12,9 @@ type HomeEvent = {
   accent: string
 }
 
-// Same events as the "Home - Vision" feed design.
-const events: HomeEvent[] = [
+// Same events as the "Home - Vision" feed design. Exported so the nav's
+// Cal section can list the same upcoming events.
+export const homeEvents: HomeEvent[] = [
   {
     id: "sarah-birthday",
     title: "Sarah's birthday",
@@ -66,7 +67,7 @@ function DateChip({ month, day }: { month: string; day: string }) {
 export function EventsWindow() {
   return (
     <div className="flex flex-col gap-1 p-3">
-      {events.map((event) => (
+      {homeEvents.map((event) => (
         <div
           key={event.id}
           className="flex items-center gap-3 rounded-[10px] py-2 pl-2 pr-1 hover:bg-f1-background-secondary"

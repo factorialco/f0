@@ -1,4 +1,5 @@
 import type { GoalNode, StrategyGoal } from "./types"
+
 import { strategyGoals } from "./strategyGoals"
 
 export function buildTree(goals: StrategyGoal[]): GoalNode[] {

@@ -1,5 +1,6 @@
-import type { EquityGrant } from "../compensationFixtures"
 import { employees } from "@/fixtures"
+
+import type { EquityGrant } from "../compensationFixtures"
 
 const employeeMap = new Map(employees.map((e) => [e.id, e]))
 

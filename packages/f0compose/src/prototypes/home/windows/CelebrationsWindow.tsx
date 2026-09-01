@@ -81,7 +81,9 @@ function CelebrationCard({ celebration }: { celebration: Celebration }) {
           </span>
           <span className="flex items-center gap-1 text-base text-f1-foreground-secondary">
             {celebration.label}
-            <span className="text-[16px] leading-none">{celebration.emoji}</span>
+            <span className="text-[16px] leading-none">
+              {celebration.emoji}
+            </span>
           </span>
         </div>
         <AvatarDate month={celebration.month} day={celebration.day} />

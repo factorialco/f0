@@ -1,21 +1,13 @@
 import { F0Button, F0Icon } from "@factorialco/f0-react"
+import { F0AiChatTextArea } from "@factorialco/f0-react/dist/ai"
 import {
-  Add,
-  ArrowUp,
-  Clock,
-  Comment,
   Microphone,
+  Paperclip,
   Settings,
 } from "@factorialco/f0-react/icons/app"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { createPortal } from "react-dom"
 
-import {
-  buildSuggestions,
-  categorySuggestions,
-  ONE_ACTIONS,
-  type OneActionId,
-  type OneSuggestion,
-} from "./one/suggestions"
 import { ClarifyPanel } from "./one/ClarifyPanel"
 import {
   sendMessage as sendToConversation,
@@ -23,22 +15,47 @@ import {
   useConversations,
 } from "./one/conversationStore"
 import {
-  chatHistoryGroups,
-  OnePickerModal,
-  routineGroups,
-} from "./one/OnePickerModal"
+  buildSuggestions,
+  categorySuggestions,
+  CHIP_ACTIONS,
+  EMPLOYEE_CHIP_ACTIONS,
+  type OneActionId,
+  type OneSuggestion,
+} from "./one/suggestions"
+import { useProfile } from "./profileStore"
 
 /**
- * The Home "Hey One…" prompt bar (Figma nodes 1339:166817 default,
- * 1339:166926 focus, 1340:11978 typing+suggestions).
+ * The Home One composer (Figma 2639:45460 — f0's real One input, with
+ * Oskar's radius/padding tweaks applied from `FULL_BLEED_CSS`).
  *
- * Suggestion logic ported from the one-notch exploration (see
- * one/suggestions.ts); it forwards into the single global ONE panel —
- * this is not a second chat surface. The action chips (Create / Analyze /
- * Find / Automate) open the same suggestion panel filtered by category;
- * the right-side icons open the chat-history and routines modals.
+ * The input itself is **f0's `F0AiChatTextArea`**, not a bespoke one, so
+ * the prototype inherits the real autosize, focus gradient, Enter-to-send
+ * and attachment handling. That component owns its own value and exposes
+ * no `onChange`, so the suggestions engine (ported from one-notch, see
+ * one/suggestions.ts) reads the real `<textarea>` through a small bridge
+ * below — the alternative was losing type-ahead suggestions entirely.
+ *
+ * The action chips (Create / Automate / Analyze) sit BELOW the
+ * input and open the same suggestion panel filtered by category; the
+ * right side keeps only Settings (per Oskar / Figma 2640:51236).
  */
+
+/** Write into a React-controlled textarea from outside its tree. */
+function setNativeValue(el: HTMLTextAreaElement, value: string) {
+  const setter = Object.getOwnPropertyDescriptor(
+    window.HTMLTextAreaElement.prototype,
+    "value"
+  )?.set
+  setter?.call(el, value)
+  el.dispatchEvent(new Event("input", { bubbles: true }))
+}
+
 export function OnePromptBar() {
+  // Employee swaps the analyst chip for Find (Figma 2694:55469), and the
+  // suggestion catalog itself is role-gated (see ROLE_PROMPTS).
+  const profile = useProfile()
+  const chipActions =
+    profile === "employee" ? EMPLOYEE_CHIP_ACTIONS : CHIP_ACTIONS
   const { conversations, activeId } = useConversations()
   const inConversation = activeId !== null
   const activeConversation = conversations.find((c) => c.id === activeId)
@@ -51,75 +68,173 @@ export function OnePromptBar() {
           .reverse()
           .find((m) => m.question && !m.question.answer && !m.question.skipped)
       : undefined
-  const inputRef = useRef<HTMLInputElement>(null)
-  const gradientBorderRef = useRef<HTMLDivElement>(null)
-  const gradientGlowRef = useRef<HTMLDivElement>(null)
+
+  const rootRef = useRef<HTMLDivElement>(null)
+  const composerRef = useRef<HTMLDivElement>(null)
   const [value, setValue] = useState("")
-  const [focused, setFocused] = useState(false)
   const [activeChip, setActiveChip] = useState<OneActionId | null>(null)
   const [selectedIndex, setSelectedIndex] = useState(-1)
-  const [modal, setModal] = useState<"chats" | "routines" | null>(null)
+  /** Set when the panel is dismissed without changing what's typed. */
+  const [dismissed, setDismissed] = useState(false)
+  /** The action bar's two slots, for the portalled attach + mic buttons. */
+  const [actionSlots, setActionSlots] = useState<{
+    left: HTMLElement
+    right: HTMLElement
+  } | null>(null)
 
-  const typedSuggestions = useMemo(() => buildSuggestions(value), [value])
+  const typedSuggestions = useMemo(
+    () => buildSuggestions(value, profile),
+    [value, profile]
+  )
   const suggestions: OneSuggestion[] =
     value.trim().length >= 2
       ? typedSuggestions
       : activeChip
-        ? categorySuggestions(activeChip)
+        ? categorySuggestions(activeChip, profile)
         : []
-  const panelOpen = suggestions.length > 0
+  const panelOpen = suggestions.length > 0 && !dismissed
 
-  useEffect(() => {
-    for (const el of [gradientBorderRef.current, gradientGlowRef.current]) {
-      for (const animation of el?.getAnimations() ?? []) {
-        if (
-          animation instanceof CSSAnimation &&
-          animation.animationName === "f0c-one-orbit"
-        ) {
-          animation.updatePlaybackRate(focused ? 2 : 1)
-        }
-      }
-    }
-  }, [focused])
+  const textarea = () =>
+    composerRef.current?.querySelector<HTMLTextAreaElement>(
+      'textarea[name="one-ai-input"]'
+    ) ?? null
 
-  const submit = (text: string) => {
-    const trimmed = text.trim()
-    if (!trimmed) return
-    // Home screen → start a full-screen conversation (lands in Recents);
-    // conversation open → next turn in the same thread.
-    if (inConversation) sendToConversation(trimmed)
-    else startConversation(trimmed)
-    setValue("")
-    setActiveChip(null)
-    setSelectedIndex(-1)
-  }
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Escape") {
+  const submit = useCallback(
+    (text: string) => {
+      const trimmed = text.trim()
+      if (!trimmed) return
+      // Home screen → start a full-screen conversation (lands in Recents);
+      // conversation open → next turn in the same thread.
+      if (inConversation) sendToConversation(trimmed)
+      else startConversation(trimmed)
       setValue("")
       setActiveChip(null)
       setSelectedIndex(-1)
-      return
-    }
-    if (!panelOpen) {
-      if (e.key === "Enter") submit(value)
-      return
-    }
-    if (e.key === "ArrowDown") {
-      e.preventDefault()
-      setSelectedIndex((i) => (i + 1) % suggestions.length)
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault()
-      setSelectedIndex((i) => (i <= 0 ? suggestions.length - 1 : i - 1))
-    } else if (e.key === "Enter") {
-      submit(selectedIndex >= 0 ? suggestions[selectedIndex].text : value)
-    }
+    },
+    [inConversation]
+  )
+
+  /** Pick a suggestion: send it and empty the real textarea behind it. */
+  const pick = (text: string) => {
+    const el = textarea()
+    if (el) setNativeValue(el, "")
+    submit(text)
   }
+
+  // Bridge to f0's textarea: mirror its value into `value` (drives the
+  // suggestion panel) and steer the panel with ↑/↓/Enter/Esc before the
+  // component's own handler sees them. Listeners are attached once, so
+  // the live panel state is read through refs.
+  const panelStateRef = useRef({ suggestions, selectedIndex, panelOpen })
+  panelStateRef.current = { suggestions, selectedIndex, panelOpen }
+
+  useEffect(() => {
+    // Both listeners live on DOCUMENT and resolve the node per event —
+    // f0 re-mounts the textarea as its state changes, so a node-level
+    // listener silently goes stale.
+    //
+    // `input` must also stay in the BUBBLE phase: React delegates its own
+    // listener to the app root, so anything closer to the element runs
+    // FIRST — re-rendering there hands the controlled textarea its stale
+    // (empty) value, which wipes the DOM and defeats React's
+    // change-tracker, and every keystroke is swallowed.
+    const sync = (event: Event) => {
+      const el = textarea()
+      if (!el || event.target !== el) return
+      setValue(el.value)
+      setSelectedIndex(-1)
+      setDismissed(false)
+      // Typing takes over from a category: the chip must not stay lit
+      // while the panel is showing type-ahead results (or none at all).
+      if (el.value.trim().length > 0) setActiveChip(null)
+    }
+
+    const steer = (event: KeyboardEvent) => {
+      const el = textarea()
+      if (!el || event.target !== el) return
+      const {
+        suggestions: list,
+        selectedIndex: index,
+        panelOpen: open,
+      } = panelStateRef.current
+      if (event.key === "Escape") {
+        // First Esc just closes the panel; a second one clears the input.
+        if (panelStateRef.current.panelOpen) setDismissed(true)
+        else setNativeValue(el, "")
+        setActiveChip(null)
+        return
+      }
+      if (!open) return
+      if (event.key === "ArrowDown") {
+        event.preventDefault()
+        event.stopPropagation()
+        setSelectedIndex((i) => (i + 1) % list.length)
+      } else if (event.key === "ArrowUp") {
+        event.preventDefault()
+        event.stopPropagation()
+        setSelectedIndex((i) => (i <= 0 ? list.length - 1 : i - 1))
+      } else if (event.key === "Enter" && !event.shiftKey && index >= 0) {
+        event.preventDefault()
+        event.stopPropagation()
+        pick(list[index].text)
+      }
+    }
+
+    document.addEventListener("input", sync)
+    // Capture phase so the component's own keydown doesn't act on ↑/↓/
+    // Enter before the suggestion panel has had its say — and on document
+    // rather than the node, which f0 re-mounts as the input's state
+    // changes (a node-level listener silently goes stale).
+    document.addEventListener("keydown", steer, true)
+    return () => {
+      document.removeEventListener("input", sync)
+      document.removeEventListener("keydown", steer, true)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Click-away: anything outside the bar closes the panel but leaves what
+  // was typed alone. `mousedown` (not click) so it fires before focus moves.
+  useEffect(() => {
+    if (!panelOpen) return
+    const onDown = (event: MouseEvent) => {
+      if (rootRef.current?.contains(event.target as Node)) return
+      setDismissed(true)
+      setActiveChip(null)
+      setSelectedIndex(-1)
+    }
+    document.addEventListener("mousedown", onDown)
+    return () => document.removeEventListener("mousedown", onDown)
+  }, [panelOpen])
+
+  // f0 re-mounts the action bar's buttons as the input's state changes
+  // (send ↔ stop), so the portal targets are re-resolved on every mutation
+  // rather than captured once.
+  useEffect(() => {
+    const host = composerRef.current
+    if (!host) return
+    const resolve = () => {
+      const right = host.querySelector<HTMLElement>(
+        'form button[type="submit"]'
+      )?.parentElement
+      const left = right?.parentElement?.firstElementChild as HTMLElement | null
+      setActionSlots((current) =>
+        right && left && (current?.left !== left || current?.right !== right)
+          ? { left, right }
+          : current
+      )
+    }
+    resolve()
+    const observer = new MutationObserver(resolve)
+    observer.observe(host, { childList: true, subtree: true })
+    return () => observer.disconnect()
+  }, [])
 
   const toggleChip = (id: OneActionId) => {
     setActiveChip((current) => (current === id ? null : id))
     setSelectedIndex(-1)
-    inputRef.current?.focus()
+    setDismissed(false)
+    textarea()?.focus()
   }
 
   if (pendingQuestionMessage && activeConversation) {
@@ -132,7 +247,7 @@ export function OnePromptBar() {
   }
 
   return (
-    <div className="relative flex w-full flex-col gap-2">
+    <div ref={rootRef} className="relative flex w-full flex-col">
       {/* Suggestions panel — sits above the input, same width */}
       {panelOpen && (
         <div className="absolute bottom-full left-0 right-0 z-30 mb-2 overflow-hidden rounded-md bg-f1-background shadow-[0_4px_20px_0_rgba(13,22,37,0.08)]">
@@ -140,13 +255,17 @@ export function OnePromptBar() {
             {suggestions.map((suggestion, index) => (
               <button
                 key={`${suggestion.action.id}-${suggestion.text}`}
-                onClick={() => submit(suggestion.text)}
+                onClick={() => pick(suggestion.text)}
                 onMouseEnter={() => setSelectedIndex(index)}
                 className={`flex w-full cursor-pointer items-center gap-2 rounded-[10px] py-2 pl-2 pr-3 text-left ${
                   index === selectedIndex ? "bg-f1-background-secondary" : ""
                 }`}
               >
-                <F0Icon icon={suggestion.action.icon} size="sm" color="secondary" />
+                <F0Icon
+                  icon={suggestion.action.icon}
+                  size="sm"
+                  color="secondary"
+                />
                 <span className="min-w-0 flex-1 truncate text-base font-medium">
                   {suggestion.matchLen > 0 ? (
                     <>
@@ -158,7 +277,9 @@ export function OnePromptBar() {
                       </span>
                     </>
                   ) : (
-                    <span className="text-f1-foreground">{suggestion.text}</span>
+                    <span className="text-f1-foreground">
+                      {suggestion.text}
+                    </span>
                   )}
                 </span>
                 <span className="shrink-0 text-sm font-medium text-f1-foreground-tertiary">
@@ -170,42 +291,36 @@ export function OnePromptBar() {
         </div>
       )}
 
-      {/* Input — gradient border by default, subtle glow behind on focus.
-          Gradient runs orange → red → blue left-to-right (Figma `to-l`
-          from #A1ADE5 via #E51943 to #E55619, node 1339:166817). */}
-      <div className="relative">
-        <div
-          ref={gradientGlowRef}
-          aria-hidden
-          className={`f0c-one-gradient absolute -inset-0.5 rounded-md blur-[8px] transition-opacity duration-200 ${
-            focused ? "opacity-40" : "opacity-0"
-          }`}
+      <div ref={composerRef} data-one-composer>
+        <F0AiChatTextArea
+          inProgress={activeConversation?.thinking ?? false}
+          onSend={async (text: string) => {
+            submit(text)
+            // The component only awaits this; nothing reads the value.
+            return undefined as never
+          }}
         />
-        <div ref={gradientBorderRef} className="f0c-one-gradient relative rounded-md p-px">
-          <div className="flex h-[42px] items-center rounded-[11px] bg-f1-background px-1.5">
-            <div className="flex min-w-0 flex-1 items-center gap-[2px]">
-              <F0Button
-                variant="ghost"
-                size="md"
-                icon={Add}
-                hideLabel
-                label="Add context"
-              />
-              <input
-                ref={inputRef}
-                value={value}
-                onChange={(e) => {
-                  setValue(e.target.value)
-                  setSelectedIndex(-1)
-                }}
-                onFocus={() => setFocused(true)}
-                onBlur={() => setFocused(false)}
-                onKeyDown={handleKeyDown}
-                placeholder="Hey One…"
-                className="min-w-0 flex-1 border-0 bg-transparent text-base text-f1-foreground outline-none placeholder:text-f1-foreground-tertiary"
-              />
-            </div>
-            <div className="flex shrink-0 items-center gap-1">
+        {/* Attach + mic, portalled into f0's own action bar (Figma
+            2639:45460). f0 renders the attach button only when the chat
+            provider is given `fileAttachments`, and that provider lives in
+            the shell — turning it on there would enable uploads for every
+            prototype — and it has no mic at all. Both are visual-only
+            here, like the old bar's "+" and mic. `order` puts the mic
+            ahead of the send button inside the right-hand flex group. */}
+        {actionSlots &&
+          createPortal(
+            <F0Button
+              variant="outline"
+              size="md"
+              icon={Paperclip}
+              hideLabel
+              label="Attach a file"
+            />,
+            actionSlots.left
+          )}
+        {actionSlots &&
+          createPortal(
+            <span className="order-[-1] mr-2 flex items-center">
               <F0Button
                 variant="ghost"
                 size="md"
@@ -213,27 +328,16 @@ export function OnePromptBar() {
                 hideLabel
                 label="Use voice"
               />
-              {value.trim().length > 0 && (
-                <button
-                  onClick={() => submit(value)}
-                  aria-label="Send to ONE"
-                  className="f0c-pressable flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-[10px] bg-f1-background-accent-bold shadow-[0_2px_6px_-1px_rgba(13,22,37,0.08)]"
-                >
-                  <F0Icon icon={ArrowUp} size="md" color="#ffffff" />
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
+            </span>,
+            actionSlots.right
+          )}
       </div>
 
-      {/* Action chips + pickers */}
-      <div className="flex w-full items-center justify-between">
-        {/* The action chips always show. A collapsed single "Ideas" chip is
-            reserved for narrow (responsive) widths where they don't all
-            fit — behavior TBD. */}
-        <div className="flex items-center gap-2">
-          {ONE_ACTIONS.map((action) => (
+      {/* Action chips — below the input (Figma 2640:51198), with only
+          Settings on the right. */}
+      <div className="flex w-full items-center justify-between py-2">
+        <div className="flex items-center gap-1">
+          {chipActions.map((action) => (
             <button
               key={action.id}
               onClick={() => toggleChip(action.id)}
@@ -248,51 +352,14 @@ export function OnePromptBar() {
             </button>
           ))}
         </div>
-        <div className="flex items-center gap-1">
-          <F0Button
-            variant="ghost"
-            size="sm"
-            icon={Comment}
-            hideLabel
-            label="ONE chats"
-            onClick={() => setModal("chats")}
-          />
-          <F0Button
-            variant="ghost"
-            size="sm"
-            icon={Clock}
-            hideLabel
-            label="AI Routines"
-            onClick={() => setModal("routines")}
-          />
-          <F0Button
-            variant="ghost"
-            size="sm"
-            icon={Settings}
-            hideLabel
-            label="ONE settings"
-          />
-        </div>
+        <F0Button
+          variant="ghost"
+          size="sm"
+          icon={Settings}
+          hideLabel
+          label="ONE settings"
+        />
       </div>
-
-      {modal === "chats" && (
-        <OnePickerModal
-          newLabel="New conversation"
-          groups={chatHistoryGroups}
-          onClose={() => setModal(null)}
-          onPick={(title) => {
-            setModal(null)
-            submit(title)
-          }}
-        />
-      )}
-      {modal === "routines" && (
-        <OnePickerModal
-          newLabel="New routine"
-          groups={routineGroups}
-          onClose={() => setModal(null)}
-        />
-      )}
     </div>
   )
 }

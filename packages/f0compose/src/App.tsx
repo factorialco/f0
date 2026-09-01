@@ -1,5 +1,6 @@
 import { F0Provider } from "@factorialco/f0-react"
 import { Outlet, useLocation, useNavigate } from "react-router-dom"
+
 import { defaultI18nTranslations, defaultL10n } from "@/lib/providers"
 import { prototypeRegistry } from "@/prototypes/registry"
 import { FloatingControls } from "@/shell/FloatingControls"

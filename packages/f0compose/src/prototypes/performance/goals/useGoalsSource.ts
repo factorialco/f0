@@ -1,8 +1,9 @@
 import { useDataCollectionSource } from "@factorialco/f0-react/dist/experimental"
 import { Add } from "@factorialco/f0-react/icons/app"
 
-import { goals } from "@/fixtures/performance"
 import type { Goal } from "@/fixtures/types"
+
+import { goals } from "@/fixtures/performance"
 import { applySort } from "@/lib/applySort"
 
 export function useGoalsSource() {

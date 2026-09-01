@@ -1,22 +1,24 @@
 import { StandardLayout } from "@factorialco/f0-react"
-import { OneEmptyState, ProductBlankslate, UpsellingBanner, UpsellingButton } from "@factorialco/f0-react"
 import {
-  Page,
-  PageHeader,
-  Tabs,
-} from "@factorialco/f0-react/dist/experimental"
+  OneEmptyState,
+  ProductBlankslate,
+  UpsellingBanner,
+  UpsellingButton,
+} from "@factorialco/f0-react"
+import { Page, PageHeader, Tabs } from "@factorialco/f0-react/dist/experimental"
 import { Sparkles } from "@factorialco/f0-react/icons/app"
 import { useSearchParams } from "react-router-dom"
 
 import type { PrototypeMeta } from "../types"
-import { TreeListView } from "./tree-list/TreeListView"
-import { TreeMapView } from "./tree-map/TreeMapView"
+
 import { CompensationBody } from "./compensation/CompensationBody"
 import {
   compTabs,
   VALID_COMP_TABS,
   type CompTabId,
 } from "./compensation/compTabs"
+import { TreeListView } from "./tree-list/TreeListView"
+import { TreeMapView } from "./tree-map/TreeMapView"
 
 export const meta: PrototypeMeta = {
   slug: "goals-strategy-map",
@@ -192,22 +194,26 @@ export default function GoalsStrategyMap() {
           <CompensationBody activeTab={activeCompTab} />
         )}
         {activeSection === "training" && (
-          <div className="flex items-center justify-center py-16 px-8 min-h-[60vh] [&_img]:w-[280px] [&_img]:h-[328px] [&_img]:max-w-none">
+          <div className="flex min-h-[60vh] items-center justify-center px-8 py-16 [&_img]:h-[328px] [&_img]:w-[280px] [&_img]:max-w-none">
             <div className="w-full max-w-4xl">
               <ProductBlankslate
-              module="company_trainings"
-              moduleName="Training"
-              title="EU AI Act: train your team before August 2nd or get fined"
-              image="https://images.pexels.com/photos/12541596/pexels-photo-12541596.jpeg?auto=compress&fit=crop&w=480&h=320&crop=center"
-              tag={{ label: "Add-on", icon: Sparkles }}
-              promoTag={{ label: "New", variant: "positive" }}
-              benefits={[
-                "Give your team the AI literacy training required under Article 4. Built-in courses and an automated audit trail keep compliance covered without extra admin work.",
-              ]}
-              actions={
-                <UpsellingButton label="Learn more" variant="outline" onClick={() => {}} />
-              }
-            />
+                module="company_trainings"
+                moduleName="Training"
+                title="EU AI Act: train your team before August 2nd or get fined"
+                image="https://images.pexels.com/photos/12541596/pexels-photo-12541596.jpeg?auto=compress&fit=crop&w=480&h=320&crop=center"
+                tag={{ label: "Add-on", icon: Sparkles }}
+                promoTag={{ label: "New", variant: "positive" }}
+                benefits={[
+                  "Give your team the AI literacy training required under Article 4. Built-in courses and an automated audit trail keep compliance covered without extra admin work.",
+                ]}
+                actions={
+                  <UpsellingButton
+                    label="Learn more"
+                    variant="outline"
+                    onClick={() => {}}
+                  />
+                }
+              />
             </div>
           </div>
         )}

@@ -42,7 +42,15 @@ resp = post({"jsonrpc":"2.0","id":2,"method":"tools/call",
              "params":{"name":tool,"arguments":args}}, session, timeout=90)
 result = parse_sse(resp)
 print(json.dumps(result, indent=1)[:200], file=sys.stderr)
-# Print text contents
-for item in result.get("result", {}).get("content", []):
+# Print text contents; save images (get_screenshot returns base64 PNG,
+# which is useless on stdout — write it out and print the path instead).
+import base64, os
+out_dir = os.environ.get("FIGMA_BRIDGE_OUT", ".")
+for idx, item in enumerate(result.get("result", {}).get("content", [])):
     if item.get("type") == "text":
         print(item["text"])
+    elif item.get("type") == "image" and item.get("data"):
+        path = os.path.join(out_dir, f"figma-{tool}-{idx}.png")
+        with open(path, "wb") as fh:
+            fh.write(base64.b64decode(item["data"]))
+        print(f"[image saved] {path}")

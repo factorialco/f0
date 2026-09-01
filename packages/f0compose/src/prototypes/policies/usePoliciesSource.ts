@@ -59,9 +59,7 @@ export function usePoliciesSource() {
 
           const filtered = policies
             .filter((p) =>
-              folderFilter.length === 0
-                ? true
-                : folderFilter.includes(p.folder)
+              folderFilter.length === 0 ? true : folderFilter.includes(p.folder)
             )
             .filter((p) => {
               if (statusFilter.length === 0) return true
@@ -90,9 +88,7 @@ export function usePoliciesSource() {
 
           const perPage = pagination?.perPage ?? 20
           const currentPage =
-            pagination &&
-            "currentPage" in pagination &&
-            pagination.currentPage
+            pagination && "currentPage" in pagination && pagination.currentPage
               ? pagination.currentPage
               : 1
           const total = sorted.length
@@ -187,9 +183,7 @@ export function usePoliciesSourceWithState(
 
           const filtered = data
             .filter((p) =>
-              folderFilter.length === 0
-                ? true
-                : folderFilter.includes(p.folder)
+              folderFilter.length === 0 ? true : folderFilter.includes(p.folder)
             )
             .filter((p) => {
               if (statusFilter.length === 0) return true
@@ -218,9 +212,7 @@ export function usePoliciesSourceWithState(
 
           const perPage = pagination?.perPage ?? 20
           const currentPage =
-            pagination &&
-            "currentPage" in pagination &&
-            pagination.currentPage
+            pagination && "currentPage" in pagination && pagination.currentPage
               ? pagination.currentPage
               : 1
           const total = sorted.length

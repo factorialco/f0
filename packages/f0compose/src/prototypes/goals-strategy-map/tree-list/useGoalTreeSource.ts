@@ -14,10 +14,12 @@ import { useMemo } from "react"
 
 import { employees, teams } from "@/fixtures"
 import { applySort } from "@/lib/applySort"
-import { strategyGoals } from "../shared/strategyGoals"
-import { incentivePlans } from "../compensation/compensationFixtures"
+
 import type { GoalStatus } from "../shared/types"
+
+import { incentivePlans } from "../compensation/compensationFixtures"
 import { statusToLabel, statusToVariant, levelToLabel } from "../shared/helpers"
+import { strategyGoals } from "../shared/strategyGoals"
 
 const employeeMap = new Map(employees.map((e) => [e.id, e]))
 const teamMap = new Map(teams.map((t) => [t.id, t]))
@@ -181,10 +183,12 @@ export function useGoalTreeSource() {
           type: "in",
           label: "Person",
           options: {
-            options: [...new Set(allRows.map((r) => r.employeeName))].sort().map((n) => ({
-              value: n,
-              label: n,
-            })),
+            options: [...new Set(allRows.map((r) => r.employeeName))]
+              .sort()
+              .map((n) => ({
+                value: n,
+                label: n,
+              })),
           },
         },
         incentivePlanName: {
@@ -236,7 +240,10 @@ export function useGoalTreeSource() {
       },
       presets: [
         { label: "All Goals", filter: {} },
-        { label: "Direct reports", filter: { employeeName: directReportNames } },
+        {
+          label: "Direct reports",
+          filter: { employeeName: directReportNames },
+        },
         { label: "On track", filter: { status: ["on-track"] } },
         { label: "At risk", filter: { status: ["at-risk"] } },
         { label: "In progress", filter: { status: ["in-progress"] } },
@@ -302,10 +309,14 @@ export function useGoalTreeSource() {
               roleFilter.length === 0 ? true : roleFilter.includes(r.role)
             )
             .filter((r) =>
-              nameFilter.length === 0 ? true : nameFilter.includes(r.employeeName)
+              nameFilter.length === 0
+                ? true
+                : nameFilter.includes(r.employeeName)
             )
             .filter((r) =>
-              planFilter.length === 0 ? true : planFilter.includes(r.incentivePlanName)
+              planFilter.length === 0
+                ? true
+                : planFilter.includes(r.incentivePlanName)
             )
             .filter((r) =>
               term === ""
@@ -347,7 +358,13 @@ export function useGoalTreeSource() {
         },
       },
       itemActions: (item: PersonGoalRow) => [
-        { label: "Update", icon: Pencil, onClick: () => { alert(`Edit: ${item.goalTitle}`) } },
+        {
+          label: "Update",
+          icon: Pencil,
+          onClick: () => {
+            alert(`Edit: ${item.goalTitle}`)
+          },
+        },
         { label: "Link to incentive plan", icon: Link, onClick: () => {} },
         { label: "Duplicate", icon: LayersFront, onClick: () => {} },
         { label: "Delete", icon: Delete, onClick: () => {}, critical: true },

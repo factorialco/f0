@@ -161,7 +161,7 @@ export function FloatingControls() {
             userSelect: "none",
             boxShadow: "0 6px 24px rgba(0,0,0,0.18)",
           }}
-          className="bg-f1-background border-f1-border-secondary border border-solid"
+          className="border border-solid border-f1-border-secondary bg-f1-background"
         >
           <F0Icon icon={Sliders} size="md" />
         </div>

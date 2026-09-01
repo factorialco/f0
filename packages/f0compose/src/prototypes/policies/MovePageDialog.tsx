@@ -1,5 +1,6 @@
 import { F0Box, F0Text } from "@factorialco/f0-react"
 import { useState } from "react"
+
 import type { Policy } from "@/fixtures"
 
 const FOLDERS = [

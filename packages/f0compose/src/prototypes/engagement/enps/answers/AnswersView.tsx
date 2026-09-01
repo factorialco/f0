@@ -1,4 +1,3 @@
-import { useState } from "react"
 import {
   F0Box,
   F0Heading,
@@ -9,6 +8,8 @@ import {
 } from "@factorialco/f0-react"
 import { OneDataCollection } from "@factorialco/f0-react/dist/experimental"
 import { Heart } from "@factorialco/f0-react/icons/app"
+import { useState } from "react"
+
 import { answersColumns } from "./answersColumns"
 import { useAnswersSource } from "./useAnswersSource"
 
@@ -18,16 +19,22 @@ function SurveyBlock() {
   const [selectedScore, setSelectedScore] = useState<number | null>(null)
 
   return (
-    <div className="flex gap-10 items-start">
+    <div className="flex items-start gap-10">
       {/* Left: survey info */}
-      <div className="w-[340px] shrink-0 flex flex-col gap-2">
+      <div className="flex w-[340px] shrink-0 flex-col gap-2">
         <F0Icon icon={Heart} size="md" />
         <F0Heading content="Pesquisa eNPS" variant="heading-large" as="h2" />
         <F0Text content="Pesquisa Interna" variant="description" />
       </div>
 
       {/* Right: survey card */}
-      <F0Box grow display="flex" flexDirection="column" border="default" borderRadius="md">
+      <F0Box
+        grow
+        display="flex"
+        flexDirection="column"
+        border="default"
+        borderRadius="md"
+      >
         {/* Anonymous user header */}
         <F0Box
           display="flex"
@@ -69,7 +76,7 @@ function SurveyBlock() {
                       onClick={() => setSelectedScore(score)}
                       className={`flex h-10 w-10 items-center justify-center border-r border-f1-border text-sm last:border-r-0 ${
                         selectedScore === score
-                          ? "bg-f1-background-selected text-f1-foreground font-semibold"
+                          ? "bg-f1-background-selected font-semibold text-f1-foreground"
                           : "bg-f1-background text-f1-foreground hover:bg-f1-background-hover"
                       }`}
                     >
@@ -101,11 +108,7 @@ function SurveyBlock() {
 
           {/* Save button */}
           <F0Box display="flex" justifyContent="end">
-            <F0Button
-              label="Save"
-              variant="outline"
-              onClick={() => {}}
-            />
+            <F0Button label="Save" variant="outline" onClick={() => {}} />
           </F0Box>
         </F0Box>
       </F0Box>

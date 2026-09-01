@@ -1,9 +1,10 @@
 import { F0Box } from "@factorialco/f0-react"
 import { OneDataCollection } from "@factorialco/f0-react/dist/experimental"
 
+import type { PoliciesState } from "./usePoliciesState"
+
 import { policiesColumns } from "./policiesColumns"
 import { usePoliciesSourceWithState } from "./usePoliciesSource"
-import type { PoliciesState } from "./usePoliciesState"
 
 type PoliciesTabProps = {
   state: PoliciesState

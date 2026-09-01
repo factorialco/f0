@@ -1,11 +1,11 @@
-import { useState } from "react"
 import { F0Button } from "@factorialco/f0-react"
 import { OneDataCollection } from "@factorialco/f0-react/dist/experimental"
 import { Plus } from "@factorialco/f0-react/icons/app"
+import { useState } from "react"
 
+import { NewGoalModal } from "../shared/NewGoalModal"
 import { goalColumns } from "./goalColumns"
 import { useGoalTreeSource } from "./useGoalTreeSource"
-import { NewGoalModal } from "../shared/NewGoalModal"
 
 export function TreeListView() {
   const { addGoal: _addGoal, ...source } = useGoalTreeSource()

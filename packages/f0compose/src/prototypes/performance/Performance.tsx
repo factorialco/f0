@@ -1,12 +1,9 @@
 import { StandardLayout } from "@factorialco/f0-react"
-import {
-  Page,
-  PageHeader,
-  Tabs,
-} from "@factorialco/f0-react/dist/experimental"
+import { Page, PageHeader, Tabs } from "@factorialco/f0-react/dist/experimental"
 import { useSearchParams } from "react-router-dom"
 
 import type { PrototypeMeta } from "../types"
+
 import { CompetenciesTab } from "./competencies/CompetenciesTab"
 import { FeedbackTab } from "./feedback/FeedbackTab"
 import { GoalsTab } from "./goals/GoalsTab"
@@ -21,7 +18,14 @@ export const meta: PrototypeMeta = {
   category: "Talent",
   module: "performance",
   audience: ["admin", "manager"],
-  tags: ["performance", "reviews", "goals", "feedback", "competencies", "talent"],
+  tags: [
+    "performance",
+    "reviews",
+    "goals",
+    "feedback",
+    "competencies",
+    "talent",
+  ],
   createdAt: "2026-05-07",
 }
 
@@ -57,11 +61,7 @@ export default function Performance() {
               href: "/p/performance",
             }}
           />
-          <Tabs
-            key={activeTab}
-            tabs={tabsWithNav}
-            activeTabId={activeTab}
-          />
+          <Tabs key={activeTab} tabs={tabsWithNav} activeTabId={activeTab} />
         </>
       }
     >

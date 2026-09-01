@@ -41,12 +41,12 @@ export function OnboardingStepsCard({
   if (!status) {
     return (
       <div className={shellBase}>
-        <div className="px-3 pt-3 pb-0">
+        <div className="px-3 pb-0 pt-3">
           <span className="text-base font-semibold text-f1-foreground">
             {taskTitle}
           </span>
         </div>
-        <div className="flex flex-col px-3 pt-2 pb-3">
+        <div className="flex flex-col px-3 pb-3 pt-2">
           {steps.map((step, i) => {
             const isDone = activeStepIndex !== undefined && i < activeStepIndex
             return (
@@ -56,7 +56,7 @@ export function OnboardingStepsCard({
                 ) : (
                   <F0Icon icon={DottedCircle} color="secondary" size="md" />
                 )}
-                <span className="text-sm font-semibold text-f1-foreground leading-5 flex-1">
+                <span className="flex-1 text-sm font-semibold leading-5 text-f1-foreground">
                   {step}
                 </span>
               </div>
@@ -72,10 +72,10 @@ export function OnboardingStepsCard({
     return (
       <button
         onClick={onPlay}
-        className={`${shellBase} text-left transition-colors hover:border-f1-border-hover cursor-pointer`}
+        className={`${shellBase} cursor-pointer text-left transition-colors hover:border-f1-border-hover`}
       >
-        <div className="flex items-center justify-between px-3 pt-3 pb-3 gap-3">
-          <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+        <div className="flex items-center justify-between gap-3 px-3 pb-3 pt-3">
+          <div className="flex min-w-0 flex-1 flex-col gap-0.5">
             <span className="text-base font-semibold text-f1-foreground">
               {taskTitle}
             </span>
@@ -83,7 +83,14 @@ export function OnboardingStepsCard({
               Take the tour
             </span>
           </div>
-          <F0Button variant="neutral" icon={SolidPlay} hideLabel label="Take the tour" size="md" onClick={onPlay} />
+          <F0Button
+            variant="neutral"
+            icon={SolidPlay}
+            hideLabel
+            label="Take the tour"
+            size="md"
+            onClick={onPlay}
+          />
         </div>
       </button>
     )
@@ -100,8 +107,8 @@ export function OnboardingStepsCard({
   return (
     <div className={shellBase}>
       {/* Header */}
-      <div className="flex items-start justify-between px-3 pt-3 pb-0 gap-2">
-        <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+      <div className="flex items-start justify-between gap-2 px-3 pb-0 pt-3">
+        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
           <span className="text-base font-semibold text-f1-foreground">
             {taskTitle}
           </span>
@@ -109,7 +116,7 @@ export function OnboardingStepsCard({
             {subtitle}
           </span>
         </div>
-        <div className="flex items-center gap-1 shrink-0 self-start mt-0.5">
+        <div className="mt-0.5 flex shrink-0 items-center gap-1 self-start">
           <F0Button
             variant="ghost"
             icon={Reset}
@@ -133,7 +140,7 @@ export function OnboardingStepsCard({
       </div>
 
       {/* Step list */}
-      <div className="flex flex-col px-3 pt-2 pb-3">
+      <div className="flex flex-col px-3 pb-3 pt-2">
         {steps.map((step, i) => {
           const isDone = activeStepIndex !== undefined && i < activeStepIndex
           const isActive = status === "playing" && activeStepIndex === i
@@ -142,13 +149,13 @@ export function OnboardingStepsCard({
               {isDone ? (
                 <F0Icon icon={CheckCircleLine} color="positive" size="md" />
               ) : isActive ? (
-                <span className="flex h-4 w-4 shrink-0 items-center justify-center animate-spin">
+                <span className="flex h-4 w-4 shrink-0 animate-spin items-center justify-center">
                   <F0Icon icon={Spinner} color="secondary" size="md" />
                 </span>
               ) : (
                 <F0Icon icon={DottedCircle} color="secondary" size="md" />
               )}
-              <span className="text-sm font-semibold text-f1-foreground leading-5 flex-1">
+              <span className="flex-1 text-sm font-semibold leading-5 text-f1-foreground">
                 {step}
               </span>
             </div>

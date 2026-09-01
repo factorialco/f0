@@ -6,14 +6,12 @@ import type { Policy, PolicyStatus } from "./policiesData"
  * Renderers return strings or compound { type, value } objects — no JSX.
  */
 
-const STATUS_VARIANT: Record<
-  PolicyStatus,
-  "positive" | "neutral" | "warning"
-> = {
-  published: "positive",
-  draft: "neutral",
-  outdated: "warning",
-}
+const STATUS_VARIANT: Record<PolicyStatus, "positive" | "neutral" | "warning"> =
+  {
+    published: "positive",
+    draft: "neutral",
+    outdated: "warning",
+  }
 
 const STATUS_LABEL: Record<PolicyStatus, string> = {
   published: "Published",

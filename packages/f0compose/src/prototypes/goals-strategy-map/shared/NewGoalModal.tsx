@@ -1,5 +1,5 @@
-import { useState } from "react"
 import { F0Dialog, F0Select, F0Text } from "@factorialco/f0-react"
+import { useState } from "react"
 
 import type { GoalLevel, GoalStatus } from "./types"
 
@@ -102,7 +102,7 @@ export function NewGoalModal({
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Describe the goal..."
             rows={3}
-            className="w-full rounded-lg border border-f1-border bg-f1-background px-3 py-2 text-sm text-f1-foreground placeholder:text-f1-foreground-secondary focus:outline-none focus:ring-2 focus:ring-f1-border-selected resize-none"
+            className="w-full resize-none rounded-lg border border-f1-border bg-f1-background px-3 py-2 text-sm text-f1-foreground placeholder:text-f1-foreground-secondary focus:outline-none focus:ring-2 focus:ring-f1-border-selected"
           />
         </div>
 
@@ -116,7 +116,9 @@ export function NewGoalModal({
                 label: o.label,
               }))}
               selectedOption={level}
-              onChangeSelectedOption={(opt: { id: string; label: string } | undefined) => {
+              onChangeSelectedOption={(
+                opt: { id: string; label: string } | undefined
+              ) => {
                 if (opt) setLevel(opt.id as GoalLevel)
               }}
               placeholder="Select level"
@@ -130,7 +132,9 @@ export function NewGoalModal({
                 label: o.label,
               }))}
               selectedOption={status}
-              onChangeSelectedOption={(opt: { id: string; label: string } | undefined) => {
+              onChangeSelectedOption={(
+                opt: { id: string; label: string } | undefined
+              ) => {
                 if (opt) setStatus(opt.id as GoalStatus)
               }}
               placeholder="Select status"

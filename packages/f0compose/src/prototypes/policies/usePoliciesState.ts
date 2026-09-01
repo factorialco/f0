@@ -1,5 +1,7 @@
 import { useState, useCallback } from "react"
+
 import type { Policy } from "@/fixtures"
+
 import { policies as initialPolicies } from "@/fixtures"
 
 /** Mutable policy state for prototype interactions. */
@@ -15,9 +17,7 @@ export function usePoliciesState() {
   }, [])
 
   const updatePage = useCallback((id: string, patch: Partial<Policy>) => {
-    setPages((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, ...patch } : p))
-    )
+    setPages((prev) => prev.map((p) => (p.id === id ? { ...p, ...patch } : p)))
   }, [])
 
   const getPage = useCallback(

@@ -1,8 +1,9 @@
 import { useDataCollectionSource } from "@factorialco/f0-react/dist/experimental"
 
-import { allPrototypes } from "@/prototypes/registry"
 import type { Audience, Category, PrototypeMeta } from "@/prototypes/types"
+
 import { applySort } from "@/lib/applySort"
+import { allPrototypes } from "@/prototypes/registry"
 
 /**
  * Source for the catalog home — every registered prototype as a card.

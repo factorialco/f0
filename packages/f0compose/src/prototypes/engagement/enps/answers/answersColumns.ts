@@ -1,6 +1,8 @@
-import type { EnpsResponse } from "../enpsFixtures"
-import { typeLabel } from "../enpsFixtures"
 import type { NewColor } from "@factorialco/f0-react"
+
+import type { EnpsResponse } from "../enpsFixtures"
+
+import { typeLabel } from "../enpsFixtures"
 
 function typeColor(type: string): NewColor {
   switch (type) {

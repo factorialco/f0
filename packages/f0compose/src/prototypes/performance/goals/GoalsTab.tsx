@@ -12,9 +12,7 @@ export function GoalsTab() {
     <F0Box display="flex" flexDirection="column" gap="xl">
       <OneDataCollection
         source={source}
-        visualizations={[
-          { type: "table", options: { columns: goalsColumns } },
-        ]}
+        visualizations={[{ type: "table", options: { columns: goalsColumns } }]}
       />
     </F0Box>
   )

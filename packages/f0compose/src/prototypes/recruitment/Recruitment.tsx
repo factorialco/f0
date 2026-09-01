@@ -12,6 +12,7 @@ import { useSearchParams } from "react-router-dom"
 import { jobs } from "@/fixtures"
 
 import type { PrototypeMeta } from "../types"
+
 import { CandidatesTab } from "./candidates/CandidatesTab"
 import { InternalOpportunitiesTab } from "./internal-opportunities/InternalOpportunitiesTab"
 import { JobDetailView } from "./jobs/JobDetailView"

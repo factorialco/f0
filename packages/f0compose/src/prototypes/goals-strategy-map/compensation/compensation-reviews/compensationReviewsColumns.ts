@@ -1,5 +1,6 @@
-import type { CompensationReview } from "../compensationFixtures"
 import { employees } from "@/fixtures"
+
+import type { CompensationReview } from "../compensationFixtures"
 
 const employeeMap = new Map(employees.map((e) => [e.id, e]))
 

@@ -25,7 +25,8 @@ export const strategyGoals: StrategyGoal[] = [
   {
     id: "sg-001",
     title: "Factorial ARR - Product target",
-    description: "Achieve the annual recurring revenue target across all product domains.",
+    description:
+      "Achieve the annual recurring revenue target across all product domains.",
     level: "company",
     status: "in-progress",
     progress: 45,
@@ -57,7 +58,8 @@ export const strategyGoals: StrategyGoal[] = [
   {
     id: "sg-015",
     title: "Factorial ARR – CX target",
-    description: "Grow ARR through upsell, cross-sell and retention in the CX organization.",
+    description:
+      "Grow ARR through upsell, cross-sell and retention in the CX organization.",
     level: "company",
     status: "in-progress",
     progress: 40,
@@ -76,7 +78,8 @@ export const strategyGoals: StrategyGoal[] = [
   {
     id: "sg-002",
     title: "Talent Domain ARR",
-    description: "Drive ARR growth in the Talent product domain (Performance, Recruitment, Training).",
+    description:
+      "Drive ARR growth in the Talent product domain (Performance, Recruitment, Training).",
     level: "team",
     status: "on-track",
     progress: 60,
@@ -92,7 +95,8 @@ export const strategyGoals: StrategyGoal[] = [
   {
     id: "sg-003",
     title: "Finance Domain ARR",
-    description: "Drive ARR growth in the Finance product domain (Payroll, Expenses, Compensation).",
+    description:
+      "Drive ARR growth in the Finance product domain (Payroll, Expenses, Compensation).",
     level: "team",
     status: "at-risk",
     progress: 30,
@@ -108,7 +112,8 @@ export const strategyGoals: StrategyGoal[] = [
   {
     id: "sg-004",
     title: "Operation Domain ARR",
-    description: "Drive ARR growth in the Operations domain (Time Off, Shifts, Clock-in).",
+    description:
+      "Drive ARR growth in the Operations domain (Time Off, Shifts, Clock-in).",
     level: "team",
     status: "in-progress",
     progress: 50,
@@ -124,7 +129,8 @@ export const strategyGoals: StrategyGoal[] = [
   {
     id: "sg-005",
     title: "IT Domain ARR",
-    description: "Drive ARR growth in the IT domain (Assets, Software, Provisioning).",
+    description:
+      "Drive ARR growth in the IT domain (Assets, Software, Provisioning).",
     level: "team",
     status: "not-started",
     progress: 0,
@@ -140,7 +146,8 @@ export const strategyGoals: StrategyGoal[] = [
   {
     id: "sg-006",
     title: "Platform Domain ARR",
-    description: "Drive ARR growth in the Platform domain (API, Integrations, Workflows).",
+    description:
+      "Drive ARR growth in the Platform domain (API, Integrations, Workflows).",
     level: "team",
     status: "on-track",
     progress: 55,
@@ -159,7 +166,8 @@ export const strategyGoals: StrategyGoal[] = [
   {
     id: "sg-009",
     title: "Optimize sales performance",
-    description: "Improve conversion rates and reduce sales cycle in Finance products.",
+    description:
+      "Improve conversion rates and reduce sales cycle in Finance products.",
     level: "individual",
     status: "at-risk",
     progress: 40,
@@ -245,7 +253,8 @@ export const strategyGoals: StrategyGoal[] = [
   {
     id: "sg-019",
     title: "Optimize sales performance",
-    description: "Improve upsell conversion through better tooling and playbooks.",
+    description:
+      "Improve upsell conversion through better tooling and playbooks.",
     level: "individual",
     status: "not-started",
     progress: 0,
