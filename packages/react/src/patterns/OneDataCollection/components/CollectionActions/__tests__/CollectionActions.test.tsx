@@ -401,6 +401,27 @@ describe("CollectionActions", () => {
       expect(screen.getByText("Export")).toBeInTheDocument()
     })
 
+    it("forwards counterValue to the secondary action button", () => {
+      render(
+        <CollectionActions
+          secondaryActions={[
+            {
+              label: "To review",
+              icon: mockIcon,
+              onClick: vi.fn(),
+              counterValue: 3,
+            },
+          ]}
+        />
+      )
+
+      expect(screen.getByText("To review")).toBeInTheDocument()
+      expect(screen.getByTestId("f0-button")).toHaveAttribute(
+        "counterValue",
+        "3"
+      )
+    })
+
     it("renders secondary action without Tooltip when tooltip is not provided", () => {
       render(
         <CollectionActions
