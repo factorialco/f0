@@ -6,10 +6,20 @@ import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { actionVariants, buttonSizeVariants } from "@/ui/Action/variants"
-const UnreadDot = () => {
+
+const UnreadDot = ({ isActive }: { isActive: boolean }) => {
   return (
-    <div className="absolute -right-0.5 -top-0.5 flex h-3 w-3 items-center justify-center rounded-full">
-      <span className="h-2 w-2 rounded-full bg-f1-special-highlight" />
+    <div className="absolute -right-0.5 -top-0.5 flex h-2.5 w-2.5 items-center justify-center rounded-full bg-f1-background">
+      <div
+        className={cn(
+          "flex h-2.5 w-2.5 items-center justify-center rounded-full",
+          isActive
+            ? " bg-f1-background-secondary"
+            : "bg-f1-background-secondary-hover"
+        )}
+      >
+        <span className="h-2 w-2 rounded-full bg-f1-special-highlight" />
+      </div>
     </div>
   )
 }
@@ -158,6 +168,8 @@ const TabButton = ({
           <F0Icon icon={tab.icon} size="md" color="currentColor" />
           {/* The unread dot shows on an inactive tab (hover only darkens the
               icon now, so the dot no longer needs to hide). */}
+
+          {tab.badge && <UnreadDot isActive={isActive} />}
         </span>
         {/* The label reveals via an animated grid column (0fr → 1fr). Unlike a
             width:auto tween it interpolates cleanly and never resets at the
@@ -180,8 +192,6 @@ const TabButton = ({
           </span>
         </span>
       </div>
-
-      {tab.badge && <UnreadDot />}
     </button>
   )
 }
