@@ -2,7 +2,7 @@ import { useMemo, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
-import { F0SelectStatic } from "@/components/F0Select/F0Select"
+import { F0SelectInternal } from "@/components/F0Select/F0Select"
 import {
   GroupingDefinition,
   GroupingState,
@@ -209,7 +209,7 @@ export const Settings = <
               ) && (
                 <div key="grouping" className="p-3">
                   <GroupingSelector
-                    SelectComponent={F0SelectStatic}
+                    SelectComponent={F0SelectInternal}
                     grouping={grouping}
                     currentGrouping={currentGrouping}
                     onGroupingChange={handleGroupingChange}

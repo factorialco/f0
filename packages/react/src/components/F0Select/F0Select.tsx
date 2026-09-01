@@ -56,7 +56,6 @@ import type {
   F0SelectItemObject,
   F0SelectItemProps,
   F0SelectProps,
-  F0SelectStaticProps,
   ResolvedRecordType,
 } from "./types"
 
@@ -1205,7 +1204,7 @@ const F0SelectComponent = forwardRef(function Select<
       top={
         <>
           <SelectTopActions
-            SelectComponent={F0SelectStatic}
+            SelectComponent={F0SelectInternal}
             OneFilterPickerComponent={OneFilterPickerComponent}
             ActiveFiltersChipsComponent={ActiveFiltersChipsComponent}
             searchValue={currentSearch}
@@ -1487,20 +1486,21 @@ const F0SelectComponent = forwardRef(function Select<
   )
 })
 
-export const F0SelectInternal = F0SelectComponent as <
-  T extends string = string,
-  R = unknown,
->(
-  props: F0SelectProps<T, R> &
-    F0SelectRuntimeDependencies & {
+type F0SelectInternalComponent = {
+  <T extends string = string, R = unknown>(
+    props: F0SelectProps<T, R> &
+      F0SelectRuntimeDependencies & {
+        ref?: React.Ref<HTMLButtonElement>
+      }
+  ): React.ReactElement
+  <T extends string = string>(
+    props: F0SelectProps<T> & {
+      source?: never
+      mapOptions?: never
       ref?: React.Ref<HTMLButtonElement>
     }
-) => React.ReactElement
+  ): React.ReactElement
+}
 
-export const F0SelectStatic = F0SelectComponent as unknown as <
-  T extends string = string,
->(
-  props: F0SelectStaticProps<T> & {
-    ref?: React.Ref<HTMLButtonElement>
-  }
-) => React.ReactElement
+export const F0SelectInternal =
+  F0SelectComponent as unknown as F0SelectInternalComponent

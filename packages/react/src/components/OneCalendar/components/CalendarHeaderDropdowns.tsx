@@ -1,7 +1,7 @@
 import { endOfMonth, isAfter, isBefore, startOfMonth } from "date-fns"
 import { useMemo } from "react"
 
-import { F0SelectStatic } from "@/components/F0Select/F0Select"
+import { F0SelectInternal } from "@/components/F0Select/F0Select"
 import { useI18n } from "@/lib/providers/i18n"
 
 /**
@@ -175,7 +175,7 @@ export function CalendarHeaderDropdowns({
         // widest short month of the supported locales ("sept." fr) plus the
         // field's chrome.
         <div className={compact ? "w-[5.5rem]" : "w-[8.5rem]"}>
-          <F0SelectStatic
+          <F0SelectInternal
             size="sm"
             label={i18n.date.selectMonth}
             hideLabel
@@ -188,7 +188,7 @@ export function CalendarHeaderDropdowns({
         </div>
       )}
       <div className={compact ? "w-[5.5rem]" : "w-[6rem]"}>
-        <F0SelectStatic
+        <F0SelectInternal
           size="sm"
           label={i18n.date.selectYear}
           hideLabel

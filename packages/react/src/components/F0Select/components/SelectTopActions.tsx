@@ -14,7 +14,7 @@ import {
 import { useI18n } from "@/lib/providers/i18n"
 import { GroupingSelector } from "@/patterns/OneDataCollection/Settings/components/GroupingSelector"
 
-import type { F0SelectStatic as F0SelectComponent } from "../F0Select"
+import type { F0SelectInternal as F0SelectComponent } from "../F0Select"
 import type { ActiveFiltersChips as ActiveFiltersChipsComponent } from "./ActiveFiltersChips"
 
 interface SelectTopActionsProps<

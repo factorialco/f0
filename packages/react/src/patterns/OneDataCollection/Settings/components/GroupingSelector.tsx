@@ -1,4 +1,4 @@
-import type { F0SelectStatic as F0SelectComponent } from "@/components/F0Select/F0Select"
+import type { F0SelectInternal as F0SelectComponent } from "@/components/F0Select/F0Select"
 
 import { F0Button } from "@/components/F0Button"
 import {
