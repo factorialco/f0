@@ -407,6 +407,14 @@ const ChartLegendContent = React.forwardRef<
             >
               {itemConfig?.icon && !hideIcon ? (
                 <itemConfig.icon />
+              ) : itemConfig && item.type === "line" ? (
+                <div
+                  className="w-4 shrink-0 border-t-2"
+                  style={{
+                    borderColor: item.color,
+                    borderTopStyle: itemConfig.dashed ? "dashed" : "solid",
+                  }}
+                />
               ) : (
                 itemConfig && (
                   <div
