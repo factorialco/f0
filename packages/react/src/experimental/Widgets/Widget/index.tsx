@@ -189,11 +189,19 @@ const useIsWide = (ref: React.RefObject<HTMLElement | null>) => {
  * renders and cannot be told, but it renders INSIDE it and can therefore ask.
  * One observer on the card answers for everything in it.
  *
- * `false` outside a `Widget`, so a row rendered on its own is the narrow one.
+ * `undefined` outside a `Widget`: NOT the narrow card, just no card at all. The
+ * two differ for anything sizing itself off the answer — a row in a dialog has
+ * the room of a wide one, so it must not inherit the narrow card compromise.
  */
-const WidgetIsWideContext = React.createContext(false)
+const WidgetIsWideContext = React.createContext<boolean | undefined>(undefined)
 
-export const useWidgetIsWide = () => React.useContext(WidgetIsWideContext)
+/** Whether the surrounding card is wide; `false` when there is no card. */
+export const useWidgetIsWide = () =>
+  React.useContext(WidgetIsWideContext) ?? false
+
+/** As {@link useWidgetIsWide}, but `undefined` tells you there is NO card. */
+export const useWidgetIsWideOrUnset = () =>
+  React.useContext(WidgetIsWideContext)
 
 /**
  * The TITLE AS A LINK: title text plus a chevron, in one target that behaves like

@@ -28,7 +28,10 @@ import {
   IndicatorsListProps,
 } from "@/experimental/Widgets/Content/IndicatorsList"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
-import { useWidgetIsWide, WidgetProps } from "@/experimental/Widgets/Widget"
+import {
+  useWidgetIsWideOrUnset,
+  WidgetProps,
+} from "@/experimental/Widgets/Widget"
 import { type F0FormSchema } from "@/patterns/F0Form"
 
 import { HomeListItem, type HomeListItemAction } from "./HomeListItem"
@@ -989,8 +992,10 @@ function ListSlot({ params, ctx }: { params: ListParams; ctx: HomeRenderCtx }) {
   const [expanded, setExpanded] = useState(false)
   // ASKED, not measured: the slot is built before the frame renders but drawn
   // inside it, so the card it landed in is the one thing it can only learn from
-  // context. `false` for a list rendered outside a `Widget`.
-  const isWide = useWidgetIsWide()
+  // context.
+  // `undefined` = no card at all (a list drawn frameless, e.g. in a dialog):
+  // that has a wide card's room, so it must not take the narrow card compromise.
+  const isWide = useWidgetIsWideOrUnset() !== false
 
   const max = schema.maxVisibleItems
   const overflows = max != null && allRows.length > max
@@ -1161,7 +1166,9 @@ const ListSlotSkeleton = ({
   ctx: HomeSkeletonCtx
 }) => {
   const schema = params.schema ?? {}
-  const isWide = useWidgetIsWide()
+  // `undefined` = no card at all (a list drawn frameless, e.g. in a dialog):
+  // that has a wide card's room, so it must not take the narrow card compromise.
+  const isWide = useWidgetIsWideOrUnset() !== false
   // Rows past `maxVisibleItems` fold behind "View more", so the loaded list
   // never shows more than that — nor should the placeholder.
   const count = Math.max(

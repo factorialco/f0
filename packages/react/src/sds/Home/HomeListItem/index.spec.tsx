@@ -143,7 +143,7 @@ describe("HomeListItem", () => {
       expect(button).toBeInTheDocument()
       expect(button.closest("[class*='opacity-0']")).not.toBeNull()
       expect(
-        button.closest("[class*='group-focus-within:opacity-100']")
+        button.closest("[class*='group-focus-within/row:opacity-100']")
       ).not.toBeNull()
     })
 
@@ -204,7 +204,7 @@ describe("HomeListItem", () => {
         />
       )
 
-      // `classList`, not the class STRING: `group-hover:opacity-100` contains
+      // `classList`, not the class STRING: `group-hover/row:opacity-100` contains
       // "opacity-100" as a substring, and the unprefixed class is the pin.
       const pinned = () =>
         container
@@ -236,7 +236,7 @@ describe("HomeListItem", () => {
 
       expect(
         container.querySelector(
-          "[class*='group-hover:bg-f1-background-tertiary']"
+          "[class*='group-hover/row:bg-f1-background-tertiary']"
         )
       ).not.toBeNull()
 
