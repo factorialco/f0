@@ -7,9 +7,32 @@ import * as React from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { ButtonInternalProps } from "@/components/F0Button/internal-types"
-import { SPACE_FOR_WIDGET_SHADOW } from "@/experimental/Navigation/Carousel/DynamicCarousel"
 import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight } from "@/icons/app"
 import { cn } from "@/lib/utils"
+
+/**
+ * THE SHADOW BLEED, as classes.
+ *
+ * The viewport clips its slides, and a widget card's shadow is drawn OUTSIDE its
+ * box — so the box is grown by `SPACE_FOR_WIDGET_SHADOW` (28px) on every side and
+ * pulled back by the same amount, giving the shadow somewhere to land inside the
+ * clip. The mask then fades that borrowed margin out, so a slide's shadow
+ * disappears at the edge instead of being cut off square.
+ *
+ * ⚠️ THE NUMBERS ARE WRITTEN OUT, and that is forced rather than sloppy:
+ * Tailwind's scanner never sees a class built from a variable, so `m-[${N}px]`
+ * emits no CSS at all — the quiet kind of broken, since the markup still looks
+ * right. `SPACE_FOR_WIDGET_SHADOW` remains the single source of truth and
+ * `carousel.test.tsx` fails if these drift from it: 28px is `-m-7` / `p-7`, 56px
+ * is the pair, 14px is the half.
+ *
+ * Exported for that test alone — nothing else should need it.
+ */
+export const CAROUSEL_SHADOW_BLEED = cn(
+  "-m-7 h-[calc(100%_+_56px)] w-[calc(100%_+_56px)] p-7",
+  "[mask-image:linear-gradient(to_right,transparent_0px,transparent_14px,black_28px,black_calc(100%_-_28px),transparent_calc(100%_-_14px),transparent_100%)]",
+  "[-webkit-mask-image:linear-gradient(to_right,transparent_0px,transparent_14px,black_28px,black_calc(100%_-_28px),transparent_calc(100%_-_14px),transparent_100%)]"
+)
 
 type CarouselApi = UseEmblaCarouselType[1]
 type UseCarouselParameters = Parameters<typeof useEmblaCarousel>
@@ -156,24 +179,19 @@ const CarouselContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => {
-  const maskImageStyle = `linear-gradient(to right, transparent 0px, transparent ${SPACE_FOR_WIDGET_SHADOW / 2}px, black ${SPACE_FOR_WIDGET_SHADOW}px, black calc(100% - ${SPACE_FOR_WIDGET_SHADOW}px), transparent calc(100% - ${SPACE_FOR_WIDGET_SHADOW / 2}px), transparent 100%)`
-
   const { carouselRef, orientation } = useCarousel()
 
   return (
     <div
       ref={carouselRef}
-      className="overflow-hidden"
-      style={{
-        scrollbarWidth: "none", // For Firefox
-        msOverflowStyle: "none", // For IE and Edge
-        margin: `-${SPACE_FOR_WIDGET_SHADOW}px`,
-        padding: `${SPACE_FOR_WIDGET_SHADOW}px`,
-        height: `calc(100% + ${SPACE_FOR_WIDGET_SHADOW * 2}px)`,
-        width: `calc(100% + ${SPACE_FOR_WIDGET_SHADOW * 2}px)`,
-        maskImage: maskImageStyle,
-        WebkitMaskImage: maskImageStyle,
-      }}
+      className={cn(
+        "overflow-hidden",
+        CAROUSEL_SHADOW_BLEED,
+        // The viewport scrolls but never shows a bar: embla drives it, and a
+        // native one over the slides is chrome nobody asked for. Firefox reads
+        // the first, old Edge the second.
+        "[scrollbar-width:none] [-ms-overflow-style:none]"
+      )}
     >
       <div
         ref={ref}
@@ -373,11 +391,7 @@ const CarouselDots = React.forwardRef<
       >
         <div
           ref={dotsContainerRef}
-          className="flex w-full gap-0 overflow-x-scroll"
-          style={{
-            scrollbarWidth: "none",
-            overscrollBehavior: "none",
-          }}
+          className="flex w-full gap-0 overflow-x-scroll [overscroll-behavior:none] [scrollbar-width:none]"
           tabIndex={0}
           aria-label="Carousel pagination"
           onKeyDown={(e) => {
