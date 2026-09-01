@@ -2,7 +2,14 @@ import { useMemo } from "react"
 
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { expect, fn, userEvent, waitFor, within } from "storybook/test"
+import {
+  expect,
+  fireEvent,
+  fn,
+  userEvent,
+  waitFor,
+  within,
+} from "storybook/test"
 
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
@@ -255,6 +262,72 @@ const PagedCarousel = () => {
  */
 export const PagedFromDataSource: Story = {
   render: () => <PagedCarousel />,
+}
+
+/**
+ * THROW THE ROW FORWARD past its last tile, as a hand does: press, drag left,
+ * let go.
+ *
+ * MOUSE events, because that is what embla listens for, and the release goes to
+ * the document because that is where it moves its own listeners once it knows
+ * the gesture is a mouse.
+ *
+ * A STEP PER FRAME rather than one jump. Past the end there is nothing to scroll
+ * to, so embla answers with a rubber band whose stretch is worked out on its own
+ * animation frames — a pointer that teleports 300px is one frame of pull, not
+ * twenty, and one frame of pull is not a gesture. 15px a frame for 20 frames is
+ * about 300px of unhurried travel, comfortably past what the carousel asks for.
+ */
+const throwRowPastTheEnd = async (tile: HTMLElement) => {
+  const { left, top, width, height } = tile.getBoundingClientRect()
+  const y = top + height / 2
+  const from = left + width - 8
+  const steps = 20
+  const step = 15
+
+  fireEvent.mouseDown(tile, { clientX: from, clientY: y, button: 0 })
+  for (let index = 1; index <= steps; index++) {
+    fireEvent.mouseMove(document, { clientX: from - index * step, clientY: y })
+    await new Promise((resolve) => setTimeout(resolve, 20))
+  }
+  fireEvent.mouseUp(document, { clientX: from - steps * step, clientY: y })
+}
+
+/**
+ * DRAGGING IS A WAY FORWARD, not just the arrow.
+ *
+ * The first page of this feed is exactly one screenful, so there is no next snap
+ * to walk to and no arrival to prefetch on: the end of the row is the end of
+ * everything the carousel has. Thrown past it, it asks the source for the next
+ * page, puts placeholder tiles where that page will go, and moves onto them —
+ * and they become the posts. Before this, the same gesture was answered by a
+ * rubber band and nothing else.
+ */
+export const LoadsMoreOnDrag: Story = {
+  render: () => <PagedCarousel />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // The first page, once it has landed. `findBy` with room to spare rather
+    // than `getBy`: the source is deliberately slow so that the waiting is
+    // visible, and its delay is most of the default timeout on its own.
+    const firstTile = await canvas.findByText(
+      `${POSTS[0].title} (#1)`,
+      {},
+      {
+        timeout: 5000,
+      }
+    )
+
+    await throwRowPastTheEnd(firstTile.closest("[role='group']") as HTMLElement)
+
+    // A post from the SECOND page — the drag was the only thing that asked for
+    // it. `waitFor` spans the fetch and the row's own move onto it.
+    await waitFor(
+      () => expect(canvas.getByText(`${POSTS[2].title} (#3)`)).toBeVisible(),
+      { timeout: 5000 }
+    )
+  },
 }
 
 /**

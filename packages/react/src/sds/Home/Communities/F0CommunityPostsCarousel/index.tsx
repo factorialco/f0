@@ -11,6 +11,7 @@ import {
   CarouselContent,
   CarouselControls,
   CarouselItem,
+  useCarouselPaging,
   type CarouselPaging,
 } from "@/ui/carousel"
 import { Skeleton } from "@/ui/skeleton"
@@ -476,12 +477,18 @@ export interface F0CommunityPostsCarouselProps {
    * blank the tiles you are already reading.
    */
   loading?: boolean
-  /** How many placeholder tiles `loading` draws. Defaults to 2 — one screenful. */
+  /**
+   * How many placeholder tiles are drawn. Defaults to 2 — one screenful.
+   *
+   * It is the count for both kinds of wait: the whole row while `loading`, and
+   * the page at the end of the row that a reader asked for and is waiting on.
+   */
   expectedItemsCount?: number
   /**
-   * THE POSTS ARE A PAGE, not the whole feed. Pass this and the Next arrow stays
-   * live past the last mounted tile: reaching the end asks for the next page, and
-   * the new posts are appended to `posts` by whoever owns them.
+   * THE POSTS ARE A PAGE, not the whole feed. Pass this and the end of the row
+   * stops being the end of the feed: the Next arrow stays live past the last
+   * mounted tile, DRAGGING past it asks too, and the new posts are appended to
+   * `posts` by whoever owns them.
    *
    * It is `useData`'s infinite-scroll return, field for field — `hasMore` off
    * `paginationInfo`, `isLoadingMore`, `loadMore` — because that is where these
@@ -492,6 +499,69 @@ export interface F0CommunityPostsCarouselProps {
    * "latest five" is.
    */
   pagination?: CarouselPaging
+}
+
+/**
+ * THE WIDTH OF ONE TILE — the whole card under 480px of CARD (`@lg`), half of it
+ * above, which is the same width at which the `Widget` frame itself decides it is
+ * wide. Shared, because a placeholder tile that took a different width would
+ * change how many fit and move the page boundaries under the reader.
+ */
+const TILE_WIDTH = "basis-full @lg:basis-1/2"
+
+/**
+ * THE ROW ITSELF: a tile per post, and placeholders for whatever page has not
+ * arrived.
+ *
+ * Its own component because of the question in the middle of it — is a page THE
+ * READER IS STANDING ON in flight? That is the carousel's answer, not this
+ * widget's, and it can only be asked from inside one.
+ */
+const CommunityPostsSlides = ({
+  posts,
+  loading,
+  expectedItemsCount,
+}: {
+  posts: CommunityPostSummary[]
+  loading: boolean
+  expectedItemsCount: number
+}) => {
+  const { isPageInFlight } = useCarouselPaging()
+
+  /**
+   * PLACEHOLDER TILES, for two quite different waits:
+   *
+   * - `loading` — the FIRST posts. There is nothing else in the row, so these
+   *   ARE the row, and their job is to give the card the height it will have.
+   * - `isPageInFlight` — a LATER page, asked for by the reader: the Next arrow
+   *   at the end of the feed, or a drag thrown past it. The posts already in
+   *   hand stay exactly where they are and the placeholders go after them, which
+   *   is what the gesture then moves onto — a page in the shape of the posts
+   *   that are coming, rather than a rubber band that springs back and a row
+   *   that never went anywhere.
+   *
+   * A page pulled in AHEAD of the reader draws none of this. Most fetches here
+   * are that prefetch, asked for by nobody, and work done ahead of the reader
+   * should pass unnoticed instead of inviting them to wait for it.
+   */
+  const placeholders = loading || isPageInFlight ? expectedItemsCount : 0
+
+  return (
+    <CarouselContent aria-busy={loading || isPageInFlight || undefined}>
+      {loading
+        ? null
+        : posts.map((post) => (
+            <CarouselItem key={post.id} className={TILE_WIDTH}>
+              <CommunityPostCard post={post} />
+            </CarouselItem>
+          ))}
+      {Array.from({ length: placeholders }, (_, index) => (
+        <CarouselItem key={`placeholder-${index}`} className={TILE_WIDTH}>
+          <CommunityPostCardSkeleton withImage={reservesImageSeat(posts)} />
+        </CarouselItem>
+      ))}
+    </CarouselContent>
+  )
 }
 
 /**
@@ -524,6 +594,13 @@ export interface F0CommunityPostsCarouselProps {
  * a longer carousel, it is a carousel that holds a PAGE and asks for the next
  * one when you reach the end — so what is mounted is bounded by how far the
  * reader actually walked rather than by how much the server has.
+ *
+ * AND THE END IS REACHED BY HAND AS OFTEN AS BY ARROW. A row of tiles that
+ * scrolls under the finger is a row people throw, so a drag past the last tile
+ * asks for the next page exactly as the arrow does, and both are answered the
+ * same way: placeholder tiles at the end of the row, which the row then moves
+ * onto and which become the posts. Anything less and the gesture is a rubber
+ * band that springs back on a carousel that did nothing.
  */
 export const F0CommunityPostsCarousel = ({
   posts,
@@ -532,26 +609,6 @@ export const F0CommunityPostsCarousel = ({
   expectedItemsCount = 2,
   pagination,
 }: F0CommunityPostsCarouselProps) => {
-  const items = loading
-    ? Array.from({ length: expectedItemsCount }, (_, index) => (
-        <CommunityPostCardSkeleton
-          key={index}
-          withImage={reservesImageSeat(posts)}
-        />
-      ))
-    : // NO TILE FOR THE PAGE IN FLIGHT. There used to be one, to give the
-      // carousel somewhere to scroll to while a fetch ran — but most fetches
-      // here are PREFETCHES, pulled in when the reader reaches the last page and
-      // asked for by nobody. A placeholder tile made every one of them visible,
-      // which is the opposite of the point: work done ahead of the reader should
-      // pass unnoticed.
-      //
-      // A press that genuinely has to wait is answered instead by the arrow
-      // (`isAwaitingPage` puts the spinner there) and by the row moving on its
-      // own the moment the page lands, onto real posts rather than onto a grey
-      // rectangle that then becomes them.
-      posts.map((post) => <CommunityPostCard key={post.id} post={post} />)
-
   return (
     <Carousel
       opts={{
@@ -573,18 +630,17 @@ export const F0CommunityPostsCarousel = ({
       // not the window's: the same widget sits in a 712px main column and in a
       // 396px rail, and a viewport media query cannot tell those apart.
       className="@container"
-      {...(loading ? { "aria-busy": true } : {})}
+      // ON THE CAROUSEL, not on the paging row: the arrow is one of the ways to
+      // reach the next page and the drag is another, and the tiles have to know
+      // about the fetch either way to stand in for it.
+      paging={pagination}
     >
-      <CarouselContent>
-        {items.map((item, index) => (
-          // `basis-full` under 480px of CARD (`@lg`), half above it — the same
-          // width at which the `Widget` frame itself decides it is wide.
-          <CarouselItem key={index} className="basis-full @lg:basis-1/2">
-            {item}
-          </CarouselItem>
-        ))}
-      </CarouselContent>
-      <CarouselControls labels={labels} paging={pagination} />
+      <CommunityPostsSlides
+        posts={posts}
+        loading={loading}
+        expectedItemsCount={expectedItemsCount}
+      />
+      <CarouselControls labels={labels} />
     </Carousel>
   )
 }

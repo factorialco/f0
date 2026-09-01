@@ -46,13 +46,15 @@ interface CarouselProps {
   /** The arrows' accessible names. Defaults to "Previous" / "Next". */
   arrowLabels?: { previous?: string; next?: string }
   /**
-   * The slides are ONE PAGE of a longer list. Next then stays live at the end
-   * and fetches the rest instead of going dead — see {@link CarouselPaging}, and
-   * append the new records to `children` as they arrive.
+   * The slides are ONE PAGE of a longer list. Reaching the end then fetches the
+   * rest instead of going dead — see {@link CarouselPaging}, and append the new
+   * records to `children` as they arrive.
    *
-   * `arrowsPlacement: "bottom"` only: the overlay arrows are a hover affordance
-   * over the slides, and a fetch you can't see you triggered is worse than no
-   * fetch at all.
+   * DRAGGING past the last slide asks for the next page whatever the arrows are
+   * doing: it is the reader's own gesture, and nothing about it is hidden. The
+   * ARROW that fetches, though, is `arrowsPlacement: "bottom"`'s only — the
+   * overlay arrows are a hover affordance over the slides, and a fetch you can't
+   * see you triggered is worse than no fetch at all.
    */
   paging?: CarouselPaging
   autoplay?: boolean
@@ -126,6 +128,7 @@ const _Carousel = ({
         containScroll: false,
       }}
       plugins={[plugin.current, WheelGesturesPlugin()].filter(Boolean)}
+      paging={paging}
       onMouseEnter={autoplay ? handleMouseEnter : undefined}
       onMouseLeave={autoplay ? handleMouseLeave : undefined}
     >
@@ -181,11 +184,7 @@ const _Carousel = ({
           )}
         </div>
         {inRow ? (
-          <CarouselControls
-            labels={arrowLabels}
-            showDots={showDots}
-            paging={paging}
-          />
+          <CarouselControls labels={arrowLabels} showDots={showDots} />
         ) : (
           showDots && <CarouselDots />
         )}

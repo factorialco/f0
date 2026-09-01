@@ -31,6 +31,9 @@ const render = (props = {}) =>
     <F0CommunityPostsCarousel posts={POSTS} labels={LABELS} {...props} />
   )
 
+/** The tiles in the row, placeholders included — one `role="group"` each. */
+const slides = () => screen.getAllByRole("group")
+
 describe("F0CommunityPostsCarousel", () => {
   test("draws a tile per post: its title, its body, its author and its counters", () => {
     render()
@@ -249,6 +252,74 @@ describe("F0CommunityPostsCarousel", () => {
       })
 
       expect(screen.getByRole("button", { name: "More posts" })).toBeDisabled()
+    })
+
+    /**
+     * THE DRAG ITSELF IS NOT HERE, and cannot be: embla only wires its drag
+     * handler up when `container.offsetParent` is set, and jsdom has no layout,
+     * so `offsetParent` is forever `null` and a carousel in this environment
+     * cannot be dragged at all. What a drag past the end leads to — the ask, the
+     * placeholder page, the row moving onto it — is what these cover; that the
+     * gesture reaches it is `LoadsMoreOnDrag`, in a real browser.
+     */
+    test("a page the reader is waiting on gets tiles to land on", async () => {
+      const onLoadMore = vi.fn()
+      const { rerender } = render({
+        pagination: { hasMore: true, isLoading: false, onLoadMore },
+        expectedItemsCount: 2,
+      })
+
+      await userEvent.click(screen.getByRole("button", { name: "More posts" }))
+      // The source answers the ask the way a real one does: a tick later, with
+      // `isLoading` on.
+      rerender(
+        <F0CommunityPostsCarousel
+          posts={POSTS}
+          labels={LABELS}
+          expectedItemsCount={2}
+          pagination={{ hasMore: true, isLoading: true, onLoadMore }}
+        />
+      )
+
+      // The posts already being read stay put, and the page that was asked for
+      // is there as placeholders — which is what the move lands on. Without them
+      // the carousel has nowhere to go and answers a gesture by not moving.
+      expect(screen.getByText("Yusuf Adeyemi")).toBeInTheDocument()
+      expect(slides()).toHaveLength(POSTS.length + 2)
+    })
+
+    test("the placeholders give their places up when the posts arrive", async () => {
+      const onLoadMore = vi.fn()
+      const arrived = [
+        ...POSTS,
+        { ...POSTS[0], id: "third", title: "A third post" },
+      ]
+      const { rerender } = render({
+        pagination: { hasMore: true, isLoading: false, onLoadMore },
+        expectedItemsCount: 2,
+      })
+
+      await userEvent.click(screen.getByRole("button", { name: "More posts" }))
+      rerender(
+        <F0CommunityPostsCarousel
+          posts={POSTS}
+          labels={LABELS}
+          expectedItemsCount={2}
+          pagination={{ hasMore: true, isLoading: true, onLoadMore }}
+        />
+      )
+      rerender(
+        <F0CommunityPostsCarousel
+          posts={arrived}
+          labels={LABELS}
+          expectedItemsCount={2}
+          pagination={{ hasMore: true, isLoading: false, onLoadMore }}
+        />
+      )
+
+      expect(screen.getByText("A third post")).toBeInTheDocument()
+      // Not the posts PLUS the grey rectangles that stood in for them.
+      expect(slides()).toHaveLength(arrived.length)
     })
 
     test("only the pages fetched are in the DOM", () => {

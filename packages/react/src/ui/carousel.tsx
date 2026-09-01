@@ -44,6 +44,15 @@ type CarouselProps = {
   plugins?: CarouselPlugin
   orientation?: "horizontal" | "vertical"
   setApi?: (api: CarouselApi) => void
+  /**
+   * THE SLIDES ARE ONE PAGE of a longer list — see {@link CarouselPaging}.
+   *
+   * It belongs to the carousel rather than to its controls because two different
+   * things need the answer: the arrow that fetches when it has nowhere left to
+   * scroll, and the CONTENT, which draws the placeholder page a reader-driven
+   * fetch is answered with (see {@link useCarouselPaging}).
+   */
+  paging?: CarouselPaging
 }
 
 type CarouselContextProps = {
@@ -53,7 +62,9 @@ type CarouselContextProps = {
   scrollNext: () => void
   canScrollPrev: boolean
   canScrollNext: boolean
-} & CarouselProps
+  /** What this carousel's paging is doing — {@link useCarouselPaging}. */
+  pagingState: CarouselPagingState
+} & Omit<CarouselProps, "paging">
 
 const CarouselContext = React.createContext<CarouselContextProps | null>(null)
 
@@ -67,6 +78,291 @@ function useCarousel() {
   return context
 }
 
+/**
+ * A carousel whose slides are ONE PAGE of a longer list.
+ *
+ * A carousel can only reason about the slides it holds, so on its own it says
+ * "there is no next one" the moment it reaches the last one it was given — which
+ * is wrong when the list continues on the server. This is the missing half of
+ * that answer, and it is deliberately the shape `useData` already returns for an
+ * infinite-scroll source (`paginationInfo.hasMore`, `isLoadingMore`, `loadMore`),
+ * so wiring one to the other is passing three fields across.
+ */
+export type CarouselPaging = {
+  /** Whether the source has records past the slides currently mounted. */
+  hasMore: boolean
+  /**
+   * A fetch for the next page is in flight.
+   *
+   * It is also what puts a PLACEHOLDER PAGE at the end of the row: the carousel
+   * knows a page the reader is standing on is still coming only because of this
+   * field. A source that leaves it out still pages — the row simply has nothing
+   * to move onto until the records land.
+   */
+  isLoading?: boolean
+  /** Fetch the next page and APPEND it to the slides. */
+  onLoadMore: () => void
+  /**
+   * How many records the source holds ALTOGETHER, when it says — `useData`'s
+   * `totalItems`. For anything that reports a position out loud ("3 of 11"):
+   * without it the only number available is how many have been loaded, which
+   * moves every time another page arrives.
+   *
+   * The carousel itself ignores it. Its dots describe the slides that exist, and
+   * a dot for a page nobody has fetched would be a control that cannot be
+   * pressed.
+   */
+  total?: number
+}
+
+/** What the enclosing carousel's paging is doing — {@link useCarouselPaging}. */
+export type CarouselPagingState = {
+  /** Whether forward is possible at all: a next slide, or a next page. */
+  canGoNext: boolean
+  /** Forward — scroll if there is room, fetch the next page if there isn't. */
+  goNext: () => void
+  /**
+   * A MOVE THE READER ASKED FOR that has not happened yet. The Next arrow's
+   * spinner and nothing else: a page pulled in ahead of them is not a wait.
+   */
+  isAwaitingPage: boolean
+  /**
+   * A page THE READER IS STANDING ON is in flight, so the content should draw
+   * placeholder slides for it at the end of the row — that is what the move
+   * they asked for lands on while the records are still coming.
+   */
+  isPageInFlight: boolean
+}
+
+/**
+ * How many slides are IN THE DOM right now — React's view, not the carousel's
+ * cached one, which lags a re-measure behind.
+ */
+const countSlides = (api: CarouselApi) =>
+  api?.containerNode()?.childElementCount ?? 0
+
+/**
+ * HOW FAR PAST THE LAST SLIDE a drag has to pull before it counts as asking for
+ * the next page, as a percentage of the carousel's own width.
+ *
+ * There is nothing to scroll to at the end of the last page, so embla answers a
+ * forward drag there with a rubber band: the track follows the finger against a
+ * friction that grows with the distance, and springs back on release. That pull
+ * is all there is to read the gesture from — the events say nothing about how
+ * far the finger went, only where the row ended up.
+ *
+ * A PERCENTAGE, because the band itself is one: embla's resistance ramps up over
+ * half the view, so the same pull costs proportionally the same effort on a
+ * 752px card and on a phone. Measured on the real thing, 5% is around 80px of
+ * finger travel at an unhurried speed and far less when thrown — while a wobble
+ * of a tile or two under a click never leaves the first few pixels.
+ */
+const DRAG_PAST_END_PERCENT = 5
+
+/**
+ * Makes the Next arrow tell the truth when the slides are a page, and gives the
+ * content a way to show the page that is coming.
+ *
+ * THREE WAYS THE NEXT PAGE IS ASKED FOR, and they cover each other:
+ *
+ * - PRESSING NEXT at the end of what is mounted. `goNext` scrolls if there is
+ *   anywhere to scroll and fetches if there isn't, so the arrow always does
+ *   something as long as the feed continues.
+ * - DRAGGING PAST THE END. The row rubber-bands because there is no next slide
+ *   yet, which is a reader saying "further" with the only gesture they have. A
+ *   pull past {@link DRAG_PAST_END_PERCENT} fetches, exactly as the arrow does —
+ *   an arrow is not the only way forward on a surface built to be thrown.
+ * - ARRIVING at the last snap, which fetches the page after it. So walking
+ *   through a carousel stays smooth: the page you are about to need is usually
+ *   already in flight by the time you ask for it.
+ *
+ * ARRIVAL, not render. The prefetch is bound to embla's `select` — a real
+ * navigation — rather than run whenever the paging props change. That is what
+ * makes it loop-proof without a bookkeeping ref: a source that answers
+ * `hasMore: true` with no new records leaves you on the same snap, no `select`
+ * fires, and nothing asks again. It also means a carousel nobody touched fetches
+ * exactly the page it was given, which is the point of paging.
+ */
+const usePagingState = (
+  api: CarouselApi,
+  canScrollNext: boolean,
+  scrollNext: () => void,
+  paging?: CarouselPaging
+): CarouselPagingState => {
+  const hasMore = paging?.hasMore ?? false
+  const isLoading = paging?.isLoading ?? false
+  const onLoadMore = paging?.onLoadMore
+
+  /**
+   * THE MOVE THE READER ASKED FOR, still owed.
+   *
+   * Pressing Next — or throwing the row — at the end of a page cannot scroll
+   * yet, because the slides do not exist. So the ask is remembered and finished
+   * the moment there is somewhere to go: without it the carousel fetches, fills,
+   * and then just sits there, having moved nothing in answer to a gesture.
+   */
+  const [owedNext, setOwedNext] = React.useState(false)
+  /**
+   * WHETHER ANYBODY IS STANDING ON THE FETCH — kept apart from `owedNext`
+   * because the two stop being true at different moments. The owed move is spent
+   * as soon as there is a slide to scroll to, which is the PLACEHOLDER page; the
+   * wait lasts until the records themselves land, and so does the placeholder.
+   *
+   * A page pulled in ahead of the reader — the prefetch on arriving at the last
+   * page — is work nobody asked about, and announcing it invites them to wait
+   * for something that was never in their way. Only a fetch somebody is standing
+   * on says so.
+   */
+  const [awaitedPage, setAwaitedPage] = React.useState(false)
+  // Whether the load in flight is the one that just finished, so an owed move
+  // that turned out to have nowhere to go stops waiting instead of hanging.
+  const wasLoading = React.useRef(isLoading)
+  /** How many slides there were when the move was asked for. */
+  const slidesAtAsk = React.useRef(0)
+
+  // The listeners are bound ONCE per carousel and read the paging state through
+  // a ref: subscribing on every change of `hasMore`/`isLoading` would tear the
+  // handlers down and rebuild them in the middle of the very fetch they started.
+  const latest = React.useRef({ hasMore, isLoading, onLoadMore, owedNext })
+  latest.current = { hasMore, isLoading, onLoadMore, owedNext }
+
+  /** The reader wants the next page — from the arrow or from the drag. */
+  const askForNextPage = React.useCallback(() => {
+    const { hasMore, isLoading, onLoadMore, owedNext } = latest.current
+    if (!hasMore || !onLoadMore) return
+    // Already asked and still waiting: the move is on the books and the records
+    // are on their way. Asking again is not how they arrive sooner.
+    if (owedNext) return
+    slidesAtAsk.current = countSlides(api)
+    setOwedNext(true)
+    setAwaitedPage(true)
+    // Recorded whether or not we are the ones who ask: a gesture landing while a
+    // page is already in flight must still move the row when it lands, and
+    // asking twice for the same records is not the way to make that happen.
+    if (!isLoading) onLoadMore()
+  }, [api])
+
+  React.useEffect(() => {
+    if (!api) return
+
+    const prefetchIfAtEnd = () => {
+      const { hasMore, isLoading, onLoadMore } = latest.current
+      if (!hasMore || isLoading || !onLoadMore) return
+      const snaps = api.scrollSnapList().length
+      if (api.selectedScrollSnap() < snaps - 1) return
+      // THIS one is nobody's wait, whatever the last one was. A source that
+      // answers so fast it never reports `isLoading` leaves the previous ask
+      // with no settling to clear it, and the next page in flight would then
+      // draw a placeholder the reader never asked for. Reaching here says the
+      // carousel is idle and moving on, which is when that can be let go of.
+      setAwaitedPage(false)
+      onLoadMore()
+    }
+
+    /**
+     * A pull past the end that has gone far enough to be an ask.
+     *
+     * ARMED HERE, SENT ON RELEASE. Appending slides makes embla re-measure
+     * itself, and re-measuring mid-gesture drops the drag the reader is still in
+     * the middle of — so a pull that clears the threshold is only remembered
+     * while the finger is down. Nothing else can arm it: embla constrains the
+     * momentum of a throw to a snap it already has, so track past the last slide
+     * only ever exists under a pointer.
+     */
+    let pulledPastEnd = false
+
+    const watchPull = () => {
+      const { dragHandler, limit, location, percentOfView } =
+        api.internalEngine()
+      if (!dragHandler.pointerDown()) return
+      // Scroll positions run NEGATIVE as the row advances, so the far end is
+      // `limit.min` and anything below it is track the drag is holding open.
+      const pull = limit.min - location.get()
+      if (pull < percentOfView.measure(DRAG_PAST_END_PERCENT)) return
+      pulledPastEnd = true
+    }
+
+    const askIfPulledPastEnd = () => {
+      if (!pulledPastEnd) return
+      pulledPastEnd = false
+      askForNextPage()
+    }
+
+    const forgetPull = () => {
+      pulledPastEnd = false
+    }
+
+    api.on("select", prefetchIfAtEnd)
+    api.on("scroll", watchPull)
+    api.on("pointerDown", forgetPull)
+    api.on("pointerUp", askIfPulledPastEnd)
+
+    return () => {
+      api.off("select", prefetchIfAtEnd)
+      api.off("scroll", watchPull)
+      api.off("pointerDown", forgetPull)
+      api.off("pointerUp", askIfPulledPastEnd)
+    }
+  }, [api, askForNextPage])
+
+  React.useEffect(() => {
+    const settled = wasLoading.current && !isLoading
+    wasLoading.current = isLoading
+    // The page somebody was standing on has arrived — or come back empty. Either
+    // way the wait is over, and with it the placeholder that stood in for it.
+    if (settled) setAwaitedPage(false)
+    if (!owedNext) return
+    if (canScrollNext) {
+      setOwedNext(false)
+      scrollNext()
+      return
+    }
+    /**
+     * THE FETCH IS DONE, AND THE CAROUSEL HAS NOT CAUGHT UP.
+     *
+     * `isLoading` going false and the new slides arriving happen in one React
+     * commit, but `canScrollNext` does not: it comes from the carousel
+     * re-measuring itself, which is asynchronous. Clearing the owed move on
+     * `settled` alone therefore cancelled it a beat before there was anywhere to
+     * go — the page loaded, the arrow stopped spinning, and the row sat still.
+     *
+     * So the slide count decides. More slides than when we asked means the move
+     * is still coming and this is just the gap before the measurement; the same
+     * number means the fetch brought nothing and nobody should keep waiting.
+     *
+     * Counted off the DOM rather than asked of the carousel: at this exact
+     * moment the carousel's own list is the stale thing being worked around, so
+     * consulting it answers "still two" and cancels the move all over again.
+     */
+    if (settled && countSlides(api) <= slidesAtAsk.current) setOwedNext(false)
+  }, [owedNext, canScrollNext, isLoading, scrollNext, api])
+
+  return {
+    canGoNext: canScrollNext || (hasMore && !isLoading),
+    isAwaitingPage: owedNext,
+    isPageInFlight: awaitedPage && isLoading,
+    goNext: () => {
+      if (canScrollNext) {
+        scrollNext()
+        return
+      }
+      askForNextPage()
+    },
+  }
+}
+
+/**
+ * THE PAGING STATE of the enclosing carousel, for content that has to draw
+ * something while a page the reader asked for is on its way.
+ *
+ * A carousel whose slides are a page cannot answer a gesture past the last one
+ * by scrolling — the slide is not there yet. What it does instead is fetch, and
+ * `isPageInFlight` is the moment in between: append that many placeholder slides
+ * and the move the reader asked for has somewhere to land, in the shape of the
+ * records that are coming.
+ */
+const useCarouselPaging = (): CarouselPagingState => useCarousel().pagingState
+
 const Carousel = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & CarouselProps
@@ -77,6 +373,7 @@ const Carousel = React.forwardRef<
       opts,
       setApi,
       plugins,
+      paging,
       className,
       children,
       ...props
@@ -109,6 +406,8 @@ const Carousel = React.forwardRef<
     const scrollNext = React.useCallback(() => {
       api?.scrollNext()
     }, [api])
+
+    const pagingState = usePagingState(api, canScrollNext, scrollNext, paging)
 
     const handleKeyDown = React.useCallback(
       (event: React.KeyboardEvent<HTMLDivElement>) => {
@@ -157,6 +456,7 @@ const Carousel = React.forwardRef<
           scrollNext,
           canScrollPrev,
           canScrollNext,
+          pagingState,
         }}
       >
         <div
@@ -431,166 +731,6 @@ const CarouselDots = React.forwardRef<
 CarouselDots.displayName = "CarouselDots"
 
 /**
- * A carousel whose slides are ONE PAGE of a longer list.
- *
- * A carousel can only reason about the slides it holds, so on its own it says
- * "there is no next one" the moment it reaches the last one it was given — which
- * is wrong when the list continues on the server. This is the missing half of
- * that answer, and it is deliberately the shape `useData` already returns for an
- * infinite-scroll source (`paginationInfo.hasMore`, `isLoadingMore`, `loadMore`),
- * so wiring one to the other is passing three fields across.
- */
-export type CarouselPaging = {
-  /** Whether the source has records past the slides currently mounted. */
-  hasMore: boolean
-  /** A fetch for the next page is in flight. */
-  isLoading?: boolean
-  /** Fetch the next page and APPEND it to the slides. */
-  onLoadMore: () => void
-  /**
-   * How many records the source holds ALTOGETHER, when it says — `useData`'s
-   * `totalItems`. For anything that reports a position out loud ("3 of 11"):
-   * without it the only number available is how many have been loaded, which
-   * moves every time another page arrives.
-   *
-   * The carousel itself ignores it. Its dots describe the slides that exist, and
-   * a dot for a page nobody has fetched would be a control that cannot be
-   * pressed.
-   */
-  total?: number
-}
-
-/**
- * Makes the Next arrow tell the truth when the slides are a page.
- *
- * TWO WAYS THE NEXT PAGE IS ASKED FOR, and they cover each other:
- *
- * - PRESSING NEXT at the end of what is mounted. `goNext` scrolls if there is
- *   anywhere to scroll and fetches if there isn't, so the arrow always does
- *   something as long as the feed continues.
- * - ARRIVING at the last snap, which fetches the page after it. So walking
- *   through a carousel stays smooth: the page you are about to need is usually
- *   already in flight by the time you ask for it.
- *
- * ARRIVAL, not render. The prefetch is bound to embla's `select` — a real
- * navigation — rather than run whenever the paging props change. That is what
- * makes it loop-proof without a bookkeeping ref: a source that answers
- * `hasMore: true` with no new records leaves you on the same snap, no `select`
- * fires, and nothing asks again. It also means a carousel nobody touched fetches
- * exactly the page it was given, which is the point of paging.
- *
- * The trade is that a first page which fills the view exactly has no last snap to
- * arrive at, so its second page waits for the arrow. That is one press, and it
- * beats a fetch on mount that the reader never asked for.
- */
-/**
- * How many slides are IN THE DOM right now — React's view, not the carousel's
- * cached one, which lags a re-measure behind.
- */
-const countSlides = (api: CarouselApi) =>
-  api?.containerNode()?.childElementCount ?? 0
-
-const useCarouselPaging = (paging?: CarouselPaging) => {
-  const { api, canScrollNext, scrollNext } = useCarousel()
-  const hasMore = paging?.hasMore ?? false
-  const isLoading = paging?.isLoading ?? false
-  const onLoadMore = paging?.onLoadMore
-
-  // The listener is bound ONCE per carousel and reads the paging state through a
-  // ref: subscribing on every change of `hasMore`/`isLoading` would tear the
-  // handler down and rebuild it in the middle of the very fetch it started.
-  const latest = React.useRef({ hasMore, isLoading, onLoadMore })
-  latest.current = { hasMore, isLoading, onLoadMore }
-
-  React.useEffect(() => {
-    if (!api) return
-
-    const askIfAtEnd = () => {
-      const { hasMore, isLoading, onLoadMore } = latest.current
-      if (!hasMore || isLoading || !onLoadMore) return
-      const snaps = api.scrollSnapList().length
-      if (api.selectedScrollSnap() < snaps - 1) return
-      onLoadMore()
-    }
-
-    api.on("select", askIfAtEnd)
-    return () => {
-      api.off("select", askIfAtEnd)
-    }
-  }, [api])
-
-  /**
-   * THE MOVE THE READER ASKED FOR, still owed — and the only reason to show that
-   * anything is loading at all.
-   *
-   * Pressing Next at the end of a page cannot scroll yet, because the slides do
-   * not exist. So the press is remembered and finished the moment there is
-   * somewhere to go: without it the carousel fetches, fills, and then just sits
-   * there, having moved nothing in answer to an arrow.
-   *
-   * It is STATE rather than a ref because it is also the answer to "is anybody
-   * waiting on this fetch". A page pulled in ahead of the reader — the prefetch
-   * on arriving at the last page — is work nobody asked about, and announcing it
-   * with a spinner invites them to wait for something that was never in their
-   * way. Only a fetch somebody is standing on says so.
-   */
-  const [owedNext, setOwedNext] = React.useState(false)
-  // Whether the load in flight is the one that just finished, so an owed move
-  // that turned out to have nowhere to go stops waiting instead of hanging.
-  const wasLoading = React.useRef(isLoading)
-  /** How many slides there were when the move was asked for. */
-  const slidesAtAsk = React.useRef(0)
-
-  React.useEffect(() => {
-    const settled = wasLoading.current && !isLoading
-    wasLoading.current = isLoading
-    if (!owedNext) return
-    if (canScrollNext) {
-      setOwedNext(false)
-      scrollNext()
-      return
-    }
-    /**
-     * THE FETCH IS DONE, AND THE CAROUSEL HAS NOT CAUGHT UP.
-     *
-     * `isLoading` going false and the new slides arriving happen in one React
-     * commit, but `canScrollNext` does not: it comes from the carousel
-     * re-measuring itself, which is asynchronous. Clearing the owed move on
-     * `settled` alone therefore cancelled it a beat before there was anywhere to
-     * go — the page loaded, the arrow stopped spinning, and the row sat still.
-     *
-     * So the slide count decides. More slides than when we asked means the move
-     * is still coming and this is just the gap before the measurement; the same
-     * number means the fetch brought nothing and nobody should keep waiting.
-     *
-     * Counted off the DOM rather than asked of the carousel: at this exact
-     * moment the carousel's own list is the stale thing being worked around, so
-     * consulting it answers "still two" and cancels the move all over again.
-     */
-    if (settled && countSlides(api) <= slidesAtAsk.current) setOwedNext(false)
-  }, [owedNext, canScrollNext, isLoading, scrollNext, api])
-
-  return {
-    canGoNext: canScrollNext || (hasMore && !isLoading),
-    /** A fetch the reader is actually standing on. */
-    isAwaitingPage: owedNext,
-    goNext: () => {
-      if (canScrollNext) {
-        scrollNext()
-        return
-      }
-      if (!hasMore) return
-      // Recorded whether or not we are the ones who ask: a press landing while a
-      // page is already in flight must still move the row when it lands, and
-      // asking twice for the same records is not the way to make that happen.
-      slidesAtAsk.current = countSlides(api)
-      setOwedNext(true)
-      if (!isLoading) onLoadMore?.()
-    },
-  }
-}
-
-/**
  * THE PAGING ROW: an arrow on each end, the dots between them, under the slides.
  *
  * The alternative to `CarouselPrevious`/`CarouselNext`, which are absolutely
@@ -619,15 +759,13 @@ const CarouselControls = React.forwardRef<
     labels?: { previous?: string; next?: string }
     /** Whether the dots sit between the arrows. Defaults to true. */
     showDots?: boolean
-    /**
-     * The slides are a PAGE of a longer list: Next then stays live at the end and
-     * fetches the rest. See {@link CarouselPaging}.
-     */
-    paging?: CarouselPaging
   }
->(({ className, labels, showDots = true, paging, ...props }, ref) => {
+>(({ className, labels, showDots = true, ...props }, ref) => {
   const { scrollPrev, canScrollPrev } = useCarousel()
-  const { canGoNext, goNext, isAwaitingPage } = useCarouselPaging(paging)
+  // That the slides are a PAGE of a longer list is the CAROUSEL's `paging` prop
+  // rather than this row's: the content needs the same answer to draw the page
+  // in flight, and of two copies one is always the stale one.
+  const { canGoNext, goNext, isAwaitingPage } = useCarouselPaging()
 
   return (
     <div
@@ -678,5 +816,6 @@ export {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
+  useCarouselPaging,
   type CarouselApi,
 }
