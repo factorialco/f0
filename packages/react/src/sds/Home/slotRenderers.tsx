@@ -314,6 +314,15 @@ export interface ListSchema {
   rightOptional?: boolean
   /** Every row carries an inline subtitle (on the title's line, after a dot). */
   subtitleRequired?: boolean
+  /**
+   * An inline subtitle is ALLOWED but not demanded: some rows carry one and
+   * others don't — a list where only the late items say how late they are.
+   * Unlike a second line this changes no geometry (the subtitle shares the
+   * title's line), so such a list draws exactly like an even one.
+   *
+   * `subtitleRequired` wins when both are set: demanding it already allows it.
+   */
+  subtitleOptional?: boolean
   /** Every row carries a second line — this is what makes rows two-line. */
   descriptionRequired?: boolean
   /**
@@ -377,11 +386,30 @@ type ListRightData<R, Optional> = R extends "counter"
 
 type ListClickData<C> = C extends "link" ? { href: string } : object
 
+/**
+ * What a row may say ABOUT its subtitle — offered by every schema that declares
+ * a subtitle at all, required by none of them.
+ */
+type SubtitleTone = {
+  /**
+   * Draws THIS row's subtitle critical instead of muted — the row is overdue,
+   * rejected, over budget.
+   *
+   * Per ROW rather than per schema, like `unread` and `actions`: what has gone
+   * wrong is a state of the row's own data, so one list holds rows that say so
+   * beside rows that have nothing to report. The title reads the same either
+   * way — the subtitle is what carries the news.
+   */
+  subtitleCritical?: boolean
+}
+
 type ListTextData<S extends ListSchema> = {
   title: string
 } & (S["subtitleRequired"] extends true
-  ? { subtitle: string }
-  : { subtitle?: never }) &
+  ? { subtitle: string } & SubtitleTone
+  : S["subtitleOptional"] extends true
+    ? { subtitle?: string } & SubtitleTone
+    : { subtitle?: never; subtitleCritical?: never }) &
   (S["descriptionRequired"] extends true
     ? { description: string }
     : S["descriptionOptional"] extends true
@@ -879,6 +907,7 @@ type ListRow = {
   id: string | number
   title: string
   subtitle?: string
+  subtitleCritical?: boolean
   description?: string
   unread?: boolean
   avatar?: object & { icon?: IconType; color?: ListIconColor }
@@ -1020,6 +1049,7 @@ function ListSlot({ params, ctx }: { params: ListParams; ctx: HomeRenderCtx }) {
             <HomeListItem
               title={row.title}
               subtitle={row.subtitle}
+              subtitleCritical={row.subtitleCritical}
               description={compact ? undefined : description}
               unread={row.unread}
               {...listLeft(schema.left, row, avatarSize)}
