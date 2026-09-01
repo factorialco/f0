@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.79.0](https://github.com/factorialco/f0/compare/f0-react-v6.78.4...f0-react-v6.79.0) (2026-09-01)
+
+
+### Features
+
+* **F0CommunityPostsCarousel:** load the next page on a drag ([#5351](https://github.com/factorialco/f0/issues/5351)) ([859e160](https://github.com/factorialco/f0/commit/859e1604650bc9db729157fafb6e85e43ab9fb5a))
+
 ## [6.78.4](https://github.com/factorialco/f0/compare/f0-react-v6.78.3...f0-react-v6.78.4) (2026-09-01)
 
 
