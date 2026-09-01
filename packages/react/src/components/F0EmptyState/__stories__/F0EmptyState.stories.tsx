@@ -1,24 +1,27 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { Plus } from "lucide-react"
-import { expect, fn, within } from "storybook/test"
+import { expect, fn, userEvent, within } from "storybook/test"
 
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
-import { OneEmptyState } from "../OneEmptyState"
+import { F0EmptyState } from "../F0EmptyState"
 
 const meta = {
-  component: OneEmptyState,
+  component: F0EmptyState,
   title: "EmptyState",
-  tags: ["autodocs", "stable"],
+  tags: ["stable", "!autodocs"],
+  parameters: {
+    a11y: { test: "error" },
+  },
   argTypes: {
     ...dataTestIdArgs,
   },
-} satisfies Meta<typeof OneEmptyState>
+} satisfies Meta<typeof F0EmptyState>
 
 export default meta
-type Story = StoryObj<typeof OneEmptyState>
+type Story = StoryObj<typeof F0EmptyState>
 
 export const Basic: Story = {
   args: {
@@ -33,6 +36,11 @@ export const Basic: Story = {
         icon: Plus,
       },
     ],
+  },
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement)
+    await userEvent.click(canvas.getByRole("button", { name: "New item" }))
+    await expect(args.actions![0].onClick).toHaveBeenCalledOnce()
   },
 }
 
@@ -55,11 +63,11 @@ export const WithAlert: Story = {
     )
     return (
       <div className="flex flex-col items-center gap-4">
-        <OneEmptyState variant="warning" title="We couldn't load the data" />
+        <F0EmptyState variant="warning" title="We couldn't load the data" />
         <Divider />
-        <OneEmptyState variant="info" title="No items added yet" />
+        <F0EmptyState variant="info" title="No items added yet" />
         <Divider />
-        <OneEmptyState variant="critical" title="Unauthorized" />
+        <F0EmptyState variant="critical" title="Unauthorized" />
       </div>
     )
   },
@@ -112,7 +120,7 @@ export const Snapshot: Story = {
   parameters: withSnapshot({}),
   render: () => (
     <div className="flex flex-col items-center gap-8">
-      <OneEmptyState
+      <F0EmptyState
         variant="default"
         emoji="📄"
         title="No items added yet"
@@ -121,17 +129,17 @@ export const Snapshot: Story = {
           { label: "New item", onClick: fn(), variant: "outline", icon: Plus },
         ]}
       />
-      <OneEmptyState
+      <F0EmptyState
         variant="info"
         title="Nothing to show here"
         description="Items you add will appear in this list."
       />
-      <OneEmptyState
+      <F0EmptyState
         variant="warning"
         title="We couldn't load the data"
         description="Please try again in a moment."
       />
-      <OneEmptyState
+      <F0EmptyState
         variant="critical"
         title="Unauthorized"
         description="You don't have access to this resource."

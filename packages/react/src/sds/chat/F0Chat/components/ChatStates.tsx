@@ -1,7 +1,7 @@
 import { type ReactNode } from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
-import { OneEmptyState } from "@/components/OneEmptyState"
+import { F0EmptyState } from "@/components/F0EmptyState"
 import { ArrowCycle } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 
@@ -48,7 +48,7 @@ export const ChatEmptyState = (): ReactNode => {
   const i18n = useI18n()
   return (
     <div className="flex h-full flex-1 items-center justify-center p-6">
-      <OneEmptyState
+      <F0EmptyState
         emoji="💬"
         title={i18n.chat.emptyConversation}
         description={i18n.chat.emptyConversationDescription}

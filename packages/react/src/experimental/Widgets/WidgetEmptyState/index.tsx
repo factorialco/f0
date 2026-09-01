@@ -2,7 +2,7 @@ import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 
 import { IconType } from "../../../components/F0Icon"
-import { OneEmptyState } from "@/components/OneEmptyState/OneEmptyState"
+import { F0EmptyState } from "@/components/F0EmptyState"
 
 type Action = {
   label: string
@@ -31,7 +31,7 @@ function _WidgetEmptyState({
   }
 
   return (
-    <OneEmptyState
+    <F0EmptyState
       title={title}
       description={description}
       {...(emoji ? { emoji } : { variant: "warning" as const })}

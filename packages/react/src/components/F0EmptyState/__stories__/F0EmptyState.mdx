@@ -1,0 +1,104 @@
+import { Canvas, Controls, Meta } from "@storybook/addon-docs/blocks"
+
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+
+import * as EmptyStateStories from "./F0EmptyState.stories"
+
+<Meta of={EmptyStateStories} />
+
+# F0EmptyState
+
+Communicates that a view has no content to show and, when possible, offers the
+next step to fill it. It covers first-use blank slates ("no items added yet")
+as well as error-shaped states ("we couldn't load the data") through its
+`variant` prop.
+
+> Renamed from `OneEmptyState`. The old name still works as a deprecated alias,
+> but new code should import `F0EmptyState`.
+
+---
+
+## Anatomy
+
+A centered vertical stack with four slots:
+
+1. **Avatar** — an emoji avatar for the `default` variant (`emoji` prop, falls
+   back to 🤔 when omitted), or an alert avatar for the `warning`, `info` and
+   `critical` variants. The `positive` alert type is deliberately excluded: an
+   empty state never celebrates.
+2. **Title** — required, always rendered.
+3. **Description** — optional, capped at `max-w-96` and centered.
+4. **Actions** — optional row of buttons. Each action takes a `label`,
+   `onClick`, optional `icon` and a button `variant` (`default`, `outline`,
+   `neutral`, `promote`). An action with `type: "upsell"` renders an upselling
+   button instead, with its own `errorMessage`, `successMessage`,
+   `loadingState`, `nextSteps` and `closeLabel` config.
+
+<Canvas of={EmptyStateStories.Basic} />
+
+<Controls of={EmptyStateStories.Basic} />
+
+## Guidelines
+
+#### When to use
+
+- A list, table or collection has no rows yet and you want to point at the
+  action that creates the first one.
+- A fetch failed or access was denied and the whole content area is empty —
+  use the `warning`, `info` or `critical` variant so the avatar signals
+  severity.
+- A feature is gated behind a plan and the empty area is the natural place to
+  offer the upgrade — use an `upsell` action.
+
+#### When NOT to use
+
+- Inline validation or partial failures inside a populated view — use `F0Alert`
+  there; this component assumes it owns the whole content area.
+- Loading states — show a skeleton instead; an empty state that flashes before
+  data arrives reads as data loss.
+- Celebratory confirmations ("all done!") — the `positive` variant is excluded
+  on purpose; use a dedicated success view.
+
+<Canvas of={EmptyStateStories.WithAlert} />
+
+<DoDonts
+  do={{
+    description:
+      "Pair the title with the action that resolves the emptiness, and keep the description to one sentence.",
+    guidelines: [
+      "Lead the title with the state, not the feature name",
+      "Offer at most two actions, primary first",
+      "Match the variant to severity: info for neutral, warning for recoverable, critical for blocked",
+    ],
+  }}
+  dont={{
+    description:
+      "Stack several actions or reuse the empty state as a generic error banner inside populated views.",
+    guidelines: [
+      "Don't add more than two actions — the row wraps and competes with the title",
+      "Don't use an emoji avatar for error states — the alert variants carry the severity",
+      "Don't leave error variants without a way out when a retry exists",
+    ],
+  }}
+/>
+
+An `upsell` action swaps the plain button for the upselling flow, which opens a
+request dialog and reports back through `successMessage` / `errorMessage`:
+
+<Canvas of={EmptyStateStories.WithUpsell} />
+
+All four variants side by side:
+
+<Canvas of={EmptyStateStories.Snapshot} />
+
+## Accessibility
+
+- The emoji avatar renders as an image whose `alt` is the emoji itself, so it
+  is announced without extra work; pass a meaningful `emoji` when the default
+  🤔 fallback would be confusing.
+- The alert variants (`warning`, `info`, `critical`) render a live `role="alert"`
+  region, so screen readers announce the state as soon as it mounts.
+- The title is a paragraph, not a heading. When the empty state fills a whole
+  page, make sure the page still provides its own heading structure around it.
+- Actions are regular buttons and inherit `F0Button`'s focus handling; every
+  action needs a `label` — there are no icon-only actions here.

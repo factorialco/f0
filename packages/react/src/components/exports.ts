@@ -97,7 +97,7 @@ export * from "../lib/Await"
 export * from "../lib/F0GridStack"
 export * from "./F0TableOfContentPopover"
 export * from "./OneCalendar"
-export * from "./OneEmptyState"
+export * from "./F0EmptyState"
 export * from "./RichText/exports"
 /**
  * @deprecated Surveys has moved to @/kits/surveys. Import from there instead.

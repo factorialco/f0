@@ -6,14 +6,14 @@ import { UpsellingButton } from "@/sds/UpsellingKit/UpsellingButton"
 
 import * as Types from "./types"
 
-function _OneEmptyState({
+function _F0EmptyState({
   title,
   description,
   variant = "default",
   emoji,
   actions,
   ...rest
-}: Types.OneEmptyStateProps) {
+}: Types.F0EmptyStateProps) {
   return (
     <div
       className="flex flex-col items-center justify-center gap-5 p-8"
@@ -65,4 +65,4 @@ function _OneEmptyState({
   )
 }
 
-export const OneEmptyState = withDataTestId(_OneEmptyState)
+export const F0EmptyState = withDataTestId(_F0EmptyState)

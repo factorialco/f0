@@ -8,7 +8,7 @@ import type {
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0ButtonToggleGroup } from "@/components/F0ButtonToggleGroup"
 import { F0Icon, type IconType } from "@/components/F0Icon"
-import { OneEmptyState } from "@/components/OneEmptyState"
+import { F0EmptyState } from "@/components/F0EmptyState"
 import { F0RichTextDisplay } from "@/components/RichText/F0RichTextDisplay"
 import {
   type DropdownItem as DropdownItemType,
@@ -302,7 +302,7 @@ export function DashboardItem({
           )}
         </div>
         <div className="min-h-0 flex-1 overflow-auto">
-          <OneEmptyState
+          <F0EmptyState
             variant="critical"
             title={translations.ai.dashboardItem.errorTitle}
             description={error.message}

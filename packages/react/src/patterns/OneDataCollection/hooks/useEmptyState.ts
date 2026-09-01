@@ -2,10 +2,7 @@ import { useState } from "react"
 
 import { useI18n } from "@/lib/providers/i18n"
 
-import {
-  ActionProps,
-  OneEmptyStateProps,
-} from "@/components/OneEmptyState/types"
+import { ActionProps, F0EmptyStateProps } from "@/components/F0EmptyState/types"
 
 export type EmptyState = {
   emoji?: string
@@ -64,7 +61,7 @@ export const useEmptyState = (
 
   const [emptyState, setEmptyState] = useState<
     | (EmptyState & {
-        variant?: Exclude<OneEmptyStateProps["variant"], "positive">
+        variant?: Exclude<F0EmptyStateProps["variant"], "positive">
       })
     | undefined
   >(undefined)
