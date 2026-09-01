@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { useState } from "react"
-import { fn } from "storybook/test"
+import { expect, fn, userEvent, within } from "storybook/test"
 
 import { Placeholder } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
@@ -65,6 +65,7 @@ const meta = {
     },
   },
   parameters: {
+    a11y: { test: "error" },
     jsx: {
       filterProps: (_: unknown, propName: string) => propName !== "key",
     },
@@ -81,6 +82,18 @@ export const Primary: Story = {
   render: (props) => {
     const [value, setValue] = useState<number | null>(props.value ?? 1)
     return <F0NumberInput {...props} value={value} onChange={setValue} />
+  },
+  // The render above holds the value in its own state and overrides onChange,
+  // so the meta-level fn() never fires. Assert the DOM value instead.
+  play: async ({ canvasElement }) => {
+    const input = within(canvasElement).getByRole("textbox", {
+      name: "Label text here",
+    })
+
+    // Seeded at 1, so clear before typing or the field reads "142".
+    await userEvent.clear(input)
+    await userEvent.type(input, "42")
+    await expect(input).toHaveValue("42")
   },
 }
 
