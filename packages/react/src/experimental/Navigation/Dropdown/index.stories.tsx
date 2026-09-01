@@ -131,8 +131,8 @@ export const WithCustomTrigger: Story = {
       <button aria-label="Open user menu">
         <F0AvatarPerson
           src="/avatars/person04.jpg"
-          firstName="Dani"
-          lastName="Moreno"
+          firstName="Jordan"
+          lastName="Avery"
           size="lg"
         />
       </button>
@@ -286,8 +286,8 @@ export const DisabledWithCustomTrigger: Story = {
       <button aria-label="Open user menu">
         <F0AvatarPerson
           src="/avatars/person04.jpg"
-          firstName="Dani"
-          lastName="Moreno"
+          firstName="Jordan"
+          lastName="Avery"
           size="lg"
         />
       </button>
@@ -382,8 +382,8 @@ export const WithDataTestId: Story = {
       <button aria-label="Open user menu">
         <F0AvatarPerson
           src="/avatars/person04.jpg"
-          firstName="Dani"
-          lastName="Moreno"
+          firstName="Jordan"
+          lastName="Avery"
           size="lg"
         />
       </button>
@@ -411,8 +411,8 @@ export const Snapshot: Story = {
         <button aria-label="Open user menu">
           <F0AvatarPerson
             src="/avatars/person04.jpg"
-            firstName="Dani"
-            lastName="Moreno"
+            firstName="Jordan"
+            lastName="Avery"
             size="lg"
           />
         </button>

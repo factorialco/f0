@@ -18,8 +18,8 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   args: {
     user: {
-      firstName: "Dani",
-      lastName: "Moreno Frontend kind of long name",
+      firstName: "Jordan",
+      lastName: "Avery",
       avatarUrl: "/avatars/person04.jpg",
     },
     showActivityButton: true,

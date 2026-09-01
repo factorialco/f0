@@ -80,7 +80,7 @@ describe("canEditAction", () => {
         attachments: [
           kind === "voice"
             ? { kind: "voice", url: "/note.mp3" }
-            : { kind: "card", title: "Give your team access" },
+            : { kind: "card", title: "Set up the chat for your company" },
         ],
       }
       expect(

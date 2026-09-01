@@ -8,15 +8,17 @@ import { ChatCardAttachment } from "../ChatCardAttachment"
 
 const card: F0ChatCardAttachment = {
   kind: "card",
-  title: "Give your team access",
-  description: "One step. We've prepared 📣 General for when they join.",
+  title: "Set up the chat for your company",
+  description: "Choose who sees each channel and who can post 🔐",
 }
 
 describe("ChatCardAttachment", () => {
   it("renders the title and description the host described", () => {
     render(<ChatCardAttachment card={card} />)
-    expect(screen.getByText("Give your team access")).toBeInTheDocument()
-    expect(screen.getByText(/One step\./)).toBeInTheDocument()
+    expect(
+      screen.getByText("Set up the chat for your company")
+    ).toBeInTheDocument()
+    expect(screen.getByText(/Choose who sees each channel/)).toBeInTheDocument()
   })
 
   it("renders the action as a button that calls back", async () => {

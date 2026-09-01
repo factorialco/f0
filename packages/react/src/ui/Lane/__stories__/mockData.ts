@@ -31,7 +31,7 @@ export const mockTasks: MockTask[] = [
     id: "task-3",
     title: "Database Migration",
     description: "Migrate user data from old system to new PostgreSQL database",
-    assignee: "Daniel Moreno",
+    assignee: "Daniel Avery",
     priority: "Critical",
     dueDate: "2024-01-10",
     tags: ["Database", "Migration"],

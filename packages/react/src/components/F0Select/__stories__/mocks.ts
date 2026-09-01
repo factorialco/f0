@@ -252,7 +252,7 @@ const FIRST_NAMES = [
   "Scarlett",
   "Mateo",
   "Grace",
-  "Daniel",
+  "Jordan",
   "Chloe",
   "Michael",
   "Victoria",

@@ -172,11 +172,11 @@ export const Default: Story = {
   args: {
     avatar: {
       type: "person",
-      firstName: "Daniel",
-      lastName: "Moreno",
+      firstName: "Jordan",
+      lastName: "Avery",
     },
     compact: false,
-    title: "Daniel Moreno",
+    title: "Daniel Avery",
     description: "This is a cool description",
     metadata: [
       {

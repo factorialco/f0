@@ -28,8 +28,8 @@ type Story = StoryObj<typeof F0AvatarPerson>
 
 export const Default: Story = {
   args: {
-    firstName: "Dani",
-    lastName: "Moreno",
+    firstName: "Jordan",
+    lastName: "Avery",
     size: "lg",
   },
 }
