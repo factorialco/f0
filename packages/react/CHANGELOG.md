@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.76.0](https://github.com/factorialco/f0/compare/f0-react-v6.75.0...f0-react-v6.76.0) (2026-09-01)
+
+
+### Features
+
+* **NewHomeLayout:** fade the rail's cards into the strip ([#5336](https://github.com/factorialco/f0/issues/5336)) ([0629dfa](https://github.com/factorialco/f0/commit/0629dfa3e755c331397415e0f88a18eb36c4c8a7))
+
 ## [6.75.0](https://github.com/factorialco/f0/compare/f0-react-v6.74.3...f0-react-v6.75.0) (2026-09-01)
 
 
