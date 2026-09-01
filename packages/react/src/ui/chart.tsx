@@ -41,6 +41,12 @@ export type ChartConfig = {
      * kits via `bridgeContinuedSeries` before rendering.
      */
     continues?: string
+    /**
+     * Swatch drawn for this series in the legend: a round dot or a line
+     * stroke (dashed when the series is dashed). Overrides the chart's own
+     * mapping.
+     */
+    legendIndicator?: "dot" | "line"
   } & (
     | { color?: string; theme?: never }
     | { color?: never; theme: Record<keyof typeof THEMES, string> }
@@ -404,6 +410,9 @@ const ChartLegendContent = React.forwardRef<
             key,
             hiddenKey
           )
+          const indicator =
+            itemConfig?.legendIndicator ??
+            (lineIndicators && item.type === "line" ? "line" : "dot")
 
           return (
             <div
@@ -414,7 +423,7 @@ const ChartLegendContent = React.forwardRef<
             >
               {itemConfig?.icon && !hideIcon ? (
                 <itemConfig.icon />
-              ) : itemConfig && lineIndicators && item.type === "line" ? (
+              ) : itemConfig && indicator === "line" ? (
                 <div
                   className="w-4 shrink-0 border-t-2"
                   style={{

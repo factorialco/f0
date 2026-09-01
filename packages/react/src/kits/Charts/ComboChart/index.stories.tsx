@@ -386,6 +386,7 @@ const continuationConfig = {
     label: "Planned",
     color: "categorical-2",
     dashed: true,
+    legendIndicator: "dot",
   },
 }
 
