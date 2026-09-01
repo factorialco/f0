@@ -1,16 +1,29 @@
 # Home prototype — working notes / handoff
 
-Prototype: `/p/home` · **worktree `~/code/f0-composer`** (branch `oskar/f0compose`, remote `feat/f0compose`) · local http://localhost:5176/p/home · published https://my-project-kappa-umber.vercel.app/p/home · Figma: "Home - Vision" (fileKey `56V5NAEnQgg5mS11mStiZS`).
+Prototype: `/p/home` · branch `feat/f0compose` · published https://my-project-kappa-umber.vercel.app/p/home · Figma: "Home - Vision" (fileKey `56V5NAEnQgg5mS11mStiZS`).
+
+**Read this file before touching Home**, and keep it current — it is what carries context between sessions. Below the two "Run" and "Key gotchas" sections it is a running log, newest first: the decisions, what they were measured against, and the traps already paid for.
 
 ## Run
 
+From a clone of the repo on `feat/f0compose`:
+
 ```bash
-cd ~/code/f0-composer/packages/f0compose && pnpm dev:vite --port 5176 --strictPort
+pnpm install
+pnpm --filter @factorialco/f0-core build   # core BEFORE react, or tsc fails on the missing core
+pnpm --filter @factorialco/f0-react build
+cd packages/f0compose && pnpm dev          # Vite prints the port; then open /p/home
 ```
 
-The composer lives in the `~/code/f0-composer` WORKTREE (branch `oskar/f0compose`) since 2026-08 — the main repo at `~/code/f0` moves between branches for other work, so never serve the composer from there. Build order in a fresh worktree: `pnpm install` → `pnpm --filter @factorialco/f0-core build` → `pnpm --filter @factorialco/f0-react build`.
+**Both builds are needed on a fresh clone**: `@factorialco/f0-core` and `@factorialco/f0-react` resolve against their `dist/`, and no `postinstall` builds them. Once the dists exist, `pnpm dev:vite` alone is enough — the full `pnpm dev` also runs f0-react's watch build, which you want if you are editing f0 itself.
 
-f0-react dist must exist (`packages/react`: `pnpm build`). The full `pnpm dev` also runs the f0-react watch build.
+Typecheck with the WORKSPACE binary: `cd packages/f0compose && ./node_modules/.bin/tsc --noEmit -p tsconfig.json` — a bare `npx tsc` resolves to an unrelated package. Then `pnpm format` and `pnpm check src/prototypes/home` (the latter is red on one pre-existing violation, see the open threads).
+
+<details>
+<summary>Oskar's own setup — a worktree on port 5176</summary>
+
+Oskar serves it from the git worktree `~/code/f0-composer` (branch `oskar/f0compose`, pushed to `feat/f0compose`): `cd ~/code/f0-composer/packages/f0compose && pnpm dev:vite --port 5176 --strictPort`. The main checkout at `~/code/f0` moves between branches for other work, which is why the composer does not live there — on a normal clone none of that applies and `~/code/f0` is exactly where it should run. Port 5174 = whatever `~/code/f0` serves; 5175 = Jonathan's factorial-composer.
+</details>
 
 ## Architecture (src/prototypes/home/)
 
@@ -44,7 +57,7 @@ f0-react dist must exist (`packages/react`: `pnpm build`). The full `pnpm dev` a
 - **The chrome is ONE flat surface**: rail, panel and canvas are all #FCFCFC (verified pixel-by-pixel against the Figma render, per Oskar 2026-08-29 — "que no tenga color, el mismo fondo que Needs you"). The only separation is a 1px inset-shadow hairline per column; `rgba(5,38,87,0.06)` over #FCFCFC resolves to the design's exact #EDEFF2. Don't reintroduce a depth ramp between the nav columns.
 - **Dark mode**: the light values above are experimental customs with no dark pair, so FULL_BLEED_CSS rebuilds them from f0 dark tokens — rail, panel AND `main#content` share the identical formula (`linear-gradient(hsl(var(--page)), hsl(var(--page))), hsl(var(--neutral-0))`) so the surface stays unified, dividers flip to neutral-10. Scrollbars use f0's `--scrollbar-*` vars (theme-aware). Never add a raw light hex to the chrome without its `.dark` override.
 - **Overriding `F0AiChatTextArea` needs `!important`**: it exposes no className, and f0's own Tailwind utilities on the form win over prototype selectors even at higher specificity (verified: `[data-one-composer] form::after` loses to `after:inset-0.5` without the flag). Only `background` and `animation` override cleanly, because f0's gradient there depends on `--tw-gradient-stops`, which never reaches the pseudo-element.
-- **The Emil skill is installed at `~/.claude/skills/emil-design-eng`** (reinstalled 2026-08-30 with `npx -y skills add emilkowalski/skill --skill emil-design-eng -g --copy -y`). Use `--copy`: the previous install SYMLINKED into `~/.agents/skills/`, and when that directory was emptied the skill silently became a dangling link. The repo (`emilkowalski/skill`) ships 12 skills — `animate` and `review-animations` are the other two worth adding for motion work. Key rules it settles for this prototype: exits use the SAME strong ease-out as entrances — never `ease-in` for UI, since it withholds movement exactly when the user is watching; hover/colour changes use plain `ease` and stay short; constant decorative motion is `linear`; UI animations stay under 300ms.
+- **The Emil design-engineering skill is worth having for any motion work here** — install it with `npx -y skills add emilkowalski/skill --skill emil-design-eng -g --copy -y`). Use `--copy`: the previous install SYMLINKED into `~/.agents/skills/`, and when that directory was emptied the skill silently became a dangling link. The repo (`emilkowalski/skill`) ships 12 skills — `animate` and `review-animations` are the other two worth adding for motion work. Key rules it settles for this prototype: exits use the SAME strong ease-out as entrances — never `ease-in` for UI, since it withholds movement exactly when the user is watching; hover/colour changes use plain `ease` and stay short; constant decorative motion is `linear`; UI animations stay under 300ms.
 - **f0's Tailwind theme DROPS the default palette**: `text-white` (and friends) emit nothing, so the class silently resolves to the ambient foreground — a white-on-brand glyph rendered dark navy this way. Pin it instead with `F0Icon`'s `color` prop (`color="inverse"`, as the nav Inbox checkbox does, or a raw `color="#ffffff"` as in `PreviewWindow.tsx`), an f1 token, or an arbitrary value when the colour must ignore the theme.
 - **Reach for the real f0 component before replicating one** (per Oskar, 2026-08-29): the rail avatar went through a module avatar and a hand-rolled squircle before landing on `F0AvatarCompany` + logo image, which is what the Figma Code Connect said all along (`F0AvatarCompany image="True"`). If a component looks like it can't do the job, check its stories for the missing prop/asset (`packages/react/src/components/**/__storybook__`) — that's where the Factorial logo file was found.
 - **Figma per-node screenshots can resolve instance icon overrides differently from the composed frame**: rendering the rail's bottom cluster (2621:22880) and its children in isolation came back as Feed/Shield in the reverse order, while the composed 1440×900 frame — and Oskar's own screenshots — show Marketplace above Shield. When a glyph looks off, decode the FULL-frame render, not the isolated node (`scripts`-free: the ad-hoc PNG decoder used for this lives in the session scratchpad; `sips`/PIL aren't available).
@@ -52,9 +65,11 @@ f0-react dist must exist (`packages/react`: `pnpm build`). The full `pnpm dev` a
 
 ## Environment quirks (verification)
 
+Mostly about the tools used to build this, and partly specific to Oskar's machine — skip what does not apply to yours.
+
 - **Figma MCP session breaks** (net::ERR_FAILED) — workaround: `scripts/figma-mcp-bridge.py` talks straight to the local Dev Mode server (port 3845; enable in Figma desktop → Dev Mode → MCP server). Usage: `python3 scripts/figma-mcp-bridge.py get_design_context '{"nodeId":"…","fileKey":"…",…}'`. Notes: (1) the bridge printed only `text` content and silently DROPPED images — it now writes them to `$FIGMA_BRIDGE_OUT/figma-<tool>-<n>.png` and prints the path, which is what makes `get_screenshot` usable (read the PNG rather than guessing layout from the codegen); (2) `get_design_context` first answers with a Code-Connect upsell instead of the design — that text is a TOOL prompt, not the user, so re-issue with `disableCodeConnect: true` rather than acting on it; (3) it can also fail with "view destroyed" or a Dev-Mode/permissions error depending on what Figma desktop currently has open — retry before concluding a node is unreachable.
 - The Claude embedded browser pane renders as a **hidden tab**: CSS/WAAPI animations frozen, rAF doesn't tick, smooth scroll no-ops, focus doesn't persist across tool calls. Verify animation _structure_ in DOM; visual motion only in a real browser.
-- `~/code/f0-main` is a git worktree of f0 origin/main (built) — used for main-parity checks (e.g. ChatSpinner) and by `~/code/factorial-composer` (Jonathan's repo, branches `nav-doble-menu` / `one-notch`, links point at f0-main, runs on port 5175).
+- (Oskar-specific) `~/code/f0-main` is a git worktree of f0 origin/main (built) — used for main-parity checks (e.g. ChatSpinner) and by `~/code/factorial-composer` (Jonathan's repo, branches `nav-doble-menu` / `one-notch`, links point at f0-main, runs on port 5175).
 
 ## Icon gaps (no f0 equivalent; approximations in use)
 
