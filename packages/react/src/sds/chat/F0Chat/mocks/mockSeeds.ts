@@ -830,9 +830,11 @@ const everythingStressLines = (): Line[] => {
 
 export const SEEDS: Seed[] = [
   // ANNOUNCEMENT — the product's own noticeboard, and the welcome screen every
-  // employee lands on. Nothing here is sent: both messages are seeded, which is
+  // employee lands on. Nothing here is sent: every message is seeded, which is
   // why the timestamp is anchored (see `yesterdayAt`) and the per-message clock
   // doesn't render. Read-only comes from the channel TYPE, not `readOnly`.
+  // The copy is factorial's noticeboard verbatim (admin variant, the one with
+  // the permissions card) — keep both in sync.
   {
     id: "dm-factorial",
     type: "announcement",
@@ -841,27 +843,31 @@ export const SEEDS: Seed[] = [
     readOnlyNotice: "Only Factorial can send messages",
     participants: [FACTORIAL],
     // Badge in the sidebar, but no unread divider inside — see MockChatApp.
-    unread: 2,
+    unread: 3,
     myRole: "guest",
     lines: [
       {
         from: FACTORIAL,
         min: yesterdayAt(22, 14),
-        body: `👋 Hi ${ME.name.split(" ")[0]}. This is your team's chat — right now only administrators can see it.`,
+        body: `👋 Hi ${ME.name.split(" ")[0]}! Welcome to your company's chat.`,
       },
       {
         from: FACTORIAL,
         min: yesterdayAt(22, 14) - 1,
+        body: "No new app, no new password — everyone you work with is already here. Files, voice notes and more, from your computer or your phone 💬",
+      },
+      {
+        from: FACTORIAL,
+        min: yesterdayAt(22, 14) - 2,
         body: "",
         attachments: [
           {
             kind: "card",
             avatar: { type: "icon", icon: People },
-            title: "Give your team access",
-            description:
-              "One step. We've prepared 📣 General for when they join.",
+            title: "Set up the chat for your company",
+            description: "Choose who sees each channel and who can post 🔐",
             action: {
-              label: "Give your team access",
+              label: "Manage permissions",
               onClick: () => {},
             },
           },

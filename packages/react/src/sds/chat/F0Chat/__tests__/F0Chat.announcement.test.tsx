@@ -33,7 +33,7 @@ const FACTORIAL = { id: "factorial", name: "Factorial" }
 const welcome: F0ChatMessage = {
   id: "m1",
   author: FACTORIAL,
-  body: "Hi Jordan. This is your team's chat.",
+  body: "👋 Hi Jordan! Welcome to your company's chat.",
   createdAt: "2026-06-21T22:14:00",
   isMine: false,
 }
@@ -47,10 +47,10 @@ const cardMessage = (onClick?: () => void): F0ChatMessage => ({
   attachments: [
     {
       kind: "card",
-      title: "Give your team access",
-      description: "One step.",
+      title: "Set up the chat for your company",
+      description: "Choose who sees each channel and who can post 🔐",
       action: {
-        label: "Give your team access",
+        label: "Manage permissions",
         onClick: onClick ?? (() => {}),
       },
     },
@@ -99,7 +99,7 @@ describe("announcement channel", () => {
 
     // The messages are there…
     expect(
-      screen.getByText("Hi Jordan. This is your team's chat.")
+      screen.getByText("👋 Hi Jordan! Welcome to your company's chat.")
     ).toBeInTheDocument()
     // …and nothing to answer them with.
     expect(
@@ -150,10 +150,12 @@ describe("announcement channel", () => {
     renderChat(makeRuntime({ messages: [welcome, cardMessage(onClick)] }))
 
     const card = screen.getByTestId("chat-card-attachment")
-    expect(within(card).getByText("One step.")).toBeInTheDocument()
+    expect(
+      within(card).getByText("Choose who sees each channel and who can post 🔐")
+    ).toBeInTheDocument()
 
     await userEvent.click(
-      within(card).getByRole("button", { name: "Give your team access" })
+      within(card).getByRole("button", { name: "Manage permissions" })
     )
     expect(onClick).toHaveBeenCalledTimes(1)
   })

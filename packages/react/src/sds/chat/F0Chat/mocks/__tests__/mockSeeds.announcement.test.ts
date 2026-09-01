@@ -16,31 +16,32 @@ describe("the announcement seed", () => {
     expect(seed?.readOnlyNotice).toBe("Only Factorial can send messages")
   })
 
-  it("is the two messages in the design: a greeting and a card", () => {
+  // Same copy as factorial's noticeboard (admin variant).
+  it("is the three messages in the design: a greeting, the pitch and a card", () => {
     const messages = buildSeedMessages(seed!).filter(isUserMessage)
-    expect(messages).toHaveLength(2)
-    expect(messages[0]?.body).toContain("This is your team's chat")
+    expect(messages).toHaveLength(3)
+    expect(messages[0]?.body).toContain("Welcome to your company's chat")
     expect(messages[0]?.attachments).toBeUndefined()
+    expect(messages[1]?.body).toContain("No new app, no new password")
+    expect(messages[1]?.attachments).toBeUndefined()
 
-    const card = messages[1]?.attachments?.[0]
+    const card = messages[2]?.attachments?.[0]
     expect(card).toMatchObject({
       kind: "card",
-      title: "Give your team access",
+      title: "Set up the chat for your company",
     })
-    expect(messages[1]?.body).toBe("")
+    expect(messages[2]?.body).toBe("")
   })
 
-  // Both land on the same day, so the transcript shows exactly one separator.
-  it("anchors both posts to yesterday evening", () => {
+  // They all land on the same day, so the transcript shows exactly one separator.
+  it("anchors every post to yesterday evening", () => {
     const messages = buildSeedMessages(seed!)
     const days = messages.map((m) => new Date(m.createdAt).getDate())
     expect(new Set(days).size).toBe(1)
 
-    const [first, second] = messages
-    expect(new Date(first!.createdAt).getHours()).toBe(22)
-    // The card is the more recent of the two.
-    expect(new Date(second!.createdAt).getTime()).toBeGreaterThan(
-      new Date(first!.createdAt).getTime()
-    )
+    expect(new Date(messages[0]!.createdAt).getHours()).toBe(22)
+    // Oldest first, the card last.
+    const times = messages.map((m) => new Date(m.createdAt).getTime())
+    expect(times).toEqual([...times].sort((a, b) => a - b))
   })
 })
