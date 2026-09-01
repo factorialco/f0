@@ -6,10 +6,11 @@ import type { GraphNode } from "../types"
 
 import { F0Graph, type F0GraphNodeRenderContext } from "../F0Graph"
 import { F0GraphNode } from "../components/F0GraphNode"
+import { NODE_HEIGHT } from "../constants"
 
-// `reserveTagRow` with no declared columns reserves one line: TAG_BLOCK_GAP plus
-// one TAG_LINE_HEIGHT.
-const ONE_ROW_RESERVATION = 32
+// React Flow derives an endpoint from the far edge of the handle's box, so the
+// box sits this much above where the endpoint should land.
+const HANDLE_SIZE = 6
 
 const nodes: GraphNode<string>[] = [
   { id: "root", parentId: null, data: "Root", childrenCount: 1 },
@@ -39,13 +40,17 @@ beforeAll(() => {
 })
 
 describe("F0Graph connectors run node-to-node", () => {
-  it("anchors the leaving endpoint on the pill, not below the reserved tag band", () => {
+  // `reserveTagRow` with no rendered tags is the case that pins the anchor down:
+  // the box is a row taller than the card, and React Flow only gives the node
+  // element a height while windowing drives the render — so anything measured up
+  // from the bottom lands wherever this node's own content happens to end.
+  it("anchors the leaving endpoint on the pill's bottom edge", () => {
     zeroRender(<F0Graph nodes={nodes} renderNode={renderNode} reserveTagRow />)
 
     const handles = sourceHandles()
     expect(handles.length).toBeGreaterThan(0)
     for (const handle of handles) {
-      expect(handle.style.bottom).toBe(`${ONE_ROW_RESERVATION}px`)
+      expect(handle.style.top).toBe(`${NODE_HEIGHT - HANDLE_SIZE}px`)
     }
   })
 
@@ -53,6 +58,7 @@ describe("F0Graph connectors run node-to-node", () => {
     zeroRender(<F0Graph nodes={nodes} renderNode={renderNode} />)
 
     for (const handle of sourceHandles()) {
+      expect(handle.style.top).toBe("")
       expect(handle.style.bottom).toBe("")
     }
   })

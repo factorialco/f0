@@ -21,12 +21,17 @@ import type { GraphNode, LayoutDirection, ZoomLevel } from "../types"
 import {
   COLLAPSER_OFFSET_ADJUSTMENT_BY_ZOOM,
   NODE_BOX_INSET,
+  NODE_HEIGHT,
   NODE_RANK_SEP,
+  STACKED_NODE_HEIGHT,
   STACKED_RANK_SEP_RATIO,
 } from "../constants"
 
+/** A React Flow handle's default box, which is square. */
+const HANDLE_SIZE = 6
+
 /**
- * Half a React Flow handle (its default box is 6px square).
+ * Half a React Flow handle.
  *
  * React Flow derives an edge endpoint from the FAR edge of the handle box — the
  * bottom edge for a `Bottom` handle, the top edge for a `Top` one — and its
@@ -36,7 +41,7 @@ import {
  * leaving a 2px stub. Pinning the box just inside the node's edge puts the
  * endpoint exactly on it, so the line spans the whole gap.
  */
-const HANDLE_HALF = 3
+const HANDLE_HALF = HANDLE_SIZE / 2
 
 /**
  * How far the expand/collapse affordance has to move to sit on the lane the eye
@@ -63,22 +68,37 @@ const flushHandleStyle = (
     : undefined
 
 /**
- * Pulls an endpoint off the layout box and onto the edge the node paints: the box
- * carries the tag reservation whether this node fills it or not. Written as
- * `bottom` / `top` so React Flow's centering translate survives —
- * `flushHandleStyle` already owns the transform.
+ * Puts an endpoint on the edge the node paints. The box below `painted` is the
+ * tag reservation, which is sized for the fully-wrapped block and stays put at
+ * compact/dot zoom where the tags are not drawn at all — an endpoint left on the
+ * box hangs below the metadata, or crosses it when wide pills wrap past the
+ * estimate. Anchoring on the pill is what lets a connector run node-to-node; the
+ * tag block's own backdrop blur crops whatever passes behind it.
+ *
+ * Measured DOWN from the node's top, not up from its bottom: React Flow only
+ * gives the node element a `height` while windowing drives the render, so
+ * otherwise it is content-sized and the bottom is wherever this node's pills
+ * happen to end. The top is the pill's top in either case.
  */
 const paintedHandleStyle = (
   position: Position,
+  painted: number,
   reserved: number
 ): CSSProperties | undefined => {
   if (reserved <= 0) return undefined
   switch (position) {
     case Position.Bottom:
-      return { bottom: reserved }
+      // Flush like `flushHandleStyle`, free here since `top` is already set:
+      // the box goes fully inside the pill, so the endpoint lands on its edge
+      // rather than `HANDLE_HALF` past it — which would read as a hanging line.
+      return {
+        top: painted - HANDLE_SIZE,
+        bottom: "auto",
+        transform: `translate(-${HANDLE_HALF}px, 0px)`,
+      }
     case Position.Left:
     case Position.Right:
-      return { top: `calc(50% - ${reserved / 2}px)` }
+      return { top: painted / 2 }
     default:
       return undefined
   }
@@ -298,8 +318,16 @@ function F0GraphNodeWrapperInner({ data, id }: NodeProps<GraphRFNode>) {
       : undefined,
   }
 
+  const paintedHeight = stacked
+    ? (renderCfg?.stackedNodeHeight ?? STACKED_NODE_HEIGHT)
+    : (renderCfg?.nodeHeight ?? NODE_HEIGHT)
+
   const handleStyle = (position: Position): CSSProperties | undefined => {
-    const painted = paintedHandleStyle(position, renderCfg?.tagRowHeight ?? 0)
+    const painted = paintedHandleStyle(
+      position,
+      paintedHeight,
+      renderCfg?.tagRowHeight ?? 0
+    )
     // A row's 8px gap to the next leaves no room for the half-handle overshoot.
     const flush = stacked ? flushHandleStyle(position) : undefined
     return painted || flush ? { ...painted, ...flush } : undefined

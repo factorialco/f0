@@ -27,6 +27,7 @@ import type {
 import {
   BACKGROUND_DOT_GAP,
   COLLAPSER_OFFSET_ADJUSTMENT_BY_ZOOM,
+  NODE_HEIGHT,
   STACKED_NODE_HEIGHT,
 } from "../constants"
 import {
@@ -355,7 +356,8 @@ export function useGraphRenderModel<T>({
         tagRowCount * TAG_LINE_HEIGHT +
         (tagRowCount - 1) * TAG_LINE_GAP
       : 0
-  const effectiveNodeHeight = (nodeHeightProp ?? 56) + reservedTagHeight
+  const effectiveNodeHeight =
+    (nodeHeightProp ?? NODE_HEIGHT) + reservedTagHeight
   // A stacked row's band takes the same tag reservation as a card's rect. The
   // strip itself stays `stackedNodeHeight` (the render config publishes that
   // untouched); the extra room is where the tags below it go, so the next row
@@ -662,14 +664,15 @@ export function useGraphRenderModel<T>({
     // than a node card — seeding it with the card's height would anchor its
     // handles below the row and bend the trunk edge into it.
     //
-    // `reserved` keeps these in step with the DOM handles (`paintedHandleStyle`),
-    // or a node's edges jump the frame windowing hands routing back to them.
+    // `painted` is how tall the node draws; the rest of the box is the tag
+    // reservation. Keeps these in step with the DOM handles
+    // (`paintedHandleStyle`), or a node's edges jump the frame windowing hands
+    // routing back to them.
     const handlesForBox = (
       w: number,
       h: number,
-      reserved = 0
+      painted = h
     ): RFNode["handles"] => {
-      const painted = h - reserved
       const handleOffset = (p: Position): { x: number; y: number } =>
         p === Position.Top
           ? { x: w / 2, y: 0 }
@@ -695,7 +698,11 @@ export function useGraphRenderModel<T>({
         },
       ] as RFNode["handles"]
     }
-    const graphNodeHandles = handlesForBox(BASE_W, BASE_H, reservedTagHeight)
+    const graphNodeHandles = handlesForBox(
+      BASE_W,
+      BASE_H,
+      nodeHeightProp ?? NODE_HEIGHT
+    )
 
     // React Flow requires a parent node to appear BEFORE its children in the
     // nodes array, so the groups are collected separately and prepended below.
@@ -818,7 +825,11 @@ export function useGraphRenderModel<T>({
           ? {
               height: boxH,
               handles: isStacked
-                ? handlesForBox(boxW, boxH, reservedTagHeight)
+                ? handlesForBox(
+                    boxW,
+                    boxH,
+                    stackedNodeHeightProp ?? STACKED_NODE_HEIGHT
+                  )
                 : graphNodeHandles,
             }
           : null),
@@ -933,7 +944,8 @@ export function useGraphRenderModel<T>({
     stackedParentIds,
     nodeWidthProp,
     effectiveNodeHeight,
-    reservedTagHeight,
+    nodeHeightProp,
+    stackedNodeHeightProp,
     direction,
     ariaTreeInfo,
     stackedNodeIndex,
