@@ -25528,7 +25528,7 @@ const nX = o3(void 0), Z63 = ({ children: e, ...t }) => /* @__PURE__ */ i(nX.Pro
   function(t, n) {
     const { src: r } = rX();
     if (!r) return /* @__PURE__ */ i("img", { ref: n, ...t });
-    const a = r(t), o = Object.fromEntries(
+    const a = r(t) ?? {}, o = Object.fromEntries(
       Object.entries(a).filter(([, s]) => s !== void 0)
     );
     return /* @__PURE__ */ i("img", { ref: n, ...t, ...o });
