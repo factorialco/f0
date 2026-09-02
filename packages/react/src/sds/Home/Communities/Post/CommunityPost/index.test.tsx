@@ -90,6 +90,40 @@ test("expands the description when enabled", async () => {
   expect(onClick).not.toHaveBeenCalled()
 })
 
+test("shows the whole description, with no See more, when the clamp is off", async () => {
+  mockDescriptionDimensions({ scrollHeight: 120, clientHeight: 100 })
+
+  render(
+    <BaseCommunityPost
+      {...defaultProps}
+      noDescriptionClamp
+      // Expandable as well: a container that shows the body whole has nothing
+      // left to expand, and the button must not appear anyway.
+      descriptionExpandable
+    />
+  )
+
+  expect(document.querySelector(".FactorialOneTextEditor")).not.toHaveClass(
+    "line-clamp-5"
+  )
+  expect(screen.queryByRole("button", { name: "See more" })).toBeNull()
+})
+
+test("clamps the description again once the clamp comes back", () => {
+  mockDescriptionDimensions({ scrollHeight: 120, clientHeight: 100 })
+
+  const { rerender } = render(
+    <BaseCommunityPost {...defaultProps} noDescriptionClamp />
+  )
+
+  const description = document.querySelector(".FactorialOneTextEditor")
+  expect(description).not.toHaveClass("line-clamp-5")
+
+  rerender(<BaseCommunityPost {...defaultProps} />)
+
+  expect(description).toHaveClass("line-clamp-5")
+})
+
 test("does not show description expansion controls when the description fits", () => {
   mockDescriptionDimensions({ scrollHeight: 100, clientHeight: 100 })
 

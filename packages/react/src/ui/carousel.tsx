@@ -26,10 +26,16 @@ import { cn } from "@/lib/utils"
  * `carousel.test.tsx` fails if these drift from it: 28px is `-m-7` / `p-7`, 56px
  * is the pair, 14px is the half.
  *
+ * The borrowed band paints nothing but still hit-tests, so it takes no pointer
+ * events; the track turns them back on for the slides in {@link CarouselContent}.
+ * Embla's drag survives it — its listeners are on the viewport, but a drag
+ * starts on a slide and the events reach it by bubbling.
+ *
  * Exported for that test alone — nothing else should need it.
  */
 export const CAROUSEL_SHADOW_BLEED = cn(
   "-m-7 h-[calc(100%_+_56px)] w-[calc(100%_+_56px)] p-7",
+  "pointer-events-none",
   "[mask-image:linear-gradient(to_right,transparent_0px,transparent_14px,black_28px,black_calc(100%_-_28px),transparent_calc(100%_-_14px),transparent_100%)]",
   "[-webkit-mask-image:linear-gradient(to_right,transparent_0px,transparent_14px,black_28px,black_calc(100%_-_28px),transparent_calc(100%_-_14px),transparent_100%)]"
 )
@@ -415,6 +421,9 @@ const CarouselContent = React.forwardRef<
         ref={ref}
         className={cn(
           "flex",
+          // The slides take the pointer; the bleed band around them does not
+          // (see `CAROUSEL_SHADOW_BLEED`).
+          "pointer-events-auto",
           orientation === "horizontal" ? "-ml-4" : "-mt-4 flex-col",
           className
         )}
