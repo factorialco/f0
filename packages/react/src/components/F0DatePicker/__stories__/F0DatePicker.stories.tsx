@@ -36,13 +36,13 @@ const meta = {
   argTypes: {
     value: {
       description:
-        "The value of the date picker. You can pass a Date, a string, or a DatePickerValue object. If you pass a Date, it will be converted to a DatePickerValue object with the granularity 'day'.",
+        "The controlled value of the date picker. Pass a DatePickerValue object with a date range and granularity.",
       control: {
         type: "object",
       },
       table: {
         type: {
-          summary: "DatePickerValue | Date | string | undefined",
+          summary: "DatePickerValue | undefined",
           detail:
             "type DatePickerValue = { value: {from: Date, to: Date}, granularity: GranularityDefinitionKey }",
         },
