@@ -2232,13 +2232,14 @@ declare interface CarouselProps {
         next?: string;
     };
     /**
-     * The slides are ONE PAGE of a longer list. Next then stays live at the end
-     * and fetches the rest instead of going dead — see {@link CarouselPaging}, and
-     * append the new records to `children` as they arrive.
+     * The slides are ONE PAGE of a longer list. Reaching the end then fetches the
+     * rest instead of going dead — see {@link CarouselPaging}, and append the new
+     * records to `children` as they arrive. Dragging past the last slide fetches
+     * in either placement.
      *
-     * `arrowsPlacement: "bottom"` only: the overlay arrows are a hover affordance
-     * over the slides, and a fetch you can't see you triggered is worse than no
-     * fetch at all.
+     * The ARROW that fetches is `arrowsPlacement: "bottom"`'s only: the overlay
+     * arrows are a hover affordance over the slides, and a fetch you can't see you
+     * triggered is worse than no fetch at all.
      */
     paging?: CarouselPaging;
     autoplay?: boolean;
@@ -3169,7 +3170,9 @@ export declare interface CommunityPostSummary {
     title: string;
     /**
      * The post's body as the editor stored it (an HTML string), clamped to the
-     * first few lines. Whatever links it contains are NOT clickable here: the
+     * lines the tile has room for — see {@link PostBody}, and note that a post
+     * with no cover therefore previews more of itself than one with a picture.
+     * Whatever links it contains are NOT clickable here: the
      * whole tile is one target (see {@link CommunityPostCard}), and a link inside
      * a link is neither valid nor operable.
      */
@@ -7229,9 +7232,14 @@ export declare type F0ChatVoiceAttachment = {
  * anything narrower.
  *
  * A WIDE-COLUMN WIDGET. Two tiles side by side is the whole reason this exists
- * rather than a `list` slot — a post needs a title, four lines of its body and
+ * rather than a `list` slot — a post needs a title, a few lines of its body and
  * its author to be worth previewing at all, and that does not fit a 396px rail.
  * Put it in the main column (`areas: ["main"]` in the catalog).
+ *
+ * THE HEIGHT IS DECLARED, NOT GROWN ({@link POST_CARD_HEIGHT}). Every tile is
+ * 384px, so the widget is the same height on every page of the feed, and the
+ * body is what gives: it takes whatever the cover, the title and the author line
+ * leave and previews the lines that fit there.
  *
  * THE PAGING IS UNDER THE TILES, not floating over them — `CarouselControls`,
  * the shared row: an arrow on each end, the dots between, its own `pt-4` above
@@ -7242,7 +7250,7 @@ export declare type F0ChatVoiceAttachment = {
  * transforms the track, so the slides off-screen are mounted and measured like
  * the ones you can see — there is no windowing here, and adding it would mean
  * the carousel could no longer measure its own snaps. That is the right trade
- * for what this shows: a handful of tiles, each one a title and four lines.
+ * for what this shows: a handful of tiles, each one a title and a few lines.
  *
  * It is `pagination` that keeps it a handful. A feed of two hundred posts is not
  * a longer carousel, it is a carousel that holds a PAGE and asks for the next
@@ -7271,12 +7279,13 @@ export declare interface F0CommunityPostsCarouselProps {
      * blank the tiles you are already reading.
      */
     loading?: boolean;
-    /** How many placeholder tiles `loading` draws. Defaults to 2 — one screenful. */
+    /** How many placeholder tiles are drawn. Defaults to 2 — one screenful. */
     expectedItemsCount?: number;
     /**
      * THE POSTS ARE A PAGE, not the whole feed. Pass this and the Next arrow stays
-     * live past the last mounted tile: reaching the end asks for the next page, and
-     * the new posts are appended to `posts` by whoever owns them.
+     * live past the last mounted tile — as does dragging past it: reaching the end
+     * asks for the next page, and the new posts are appended to `posts` by whoever
+     * owns them.
      *
      * It is `useData`'s infinite-scroll return, field for field — `hasMore` off
      * `paginationInfo`, `isLoadingMore`, `loadMore` — because that is where these
@@ -10493,6 +10502,20 @@ declare type LinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
  */
 export declare const LIST_COMPACT_AFTER = 6;
 
+/**
+ * WHERE "View more" SITS. Not where the rows above it start: a row-based slot
+ * bleeds 8px past the card's content box (`SLOT_ROW_BLEED`), and a button left
+ * in that bleed hangs its whole filled rectangle 8px to the left of the
+ * widget's TITLE — visible as a rectangle that overhangs the card's text.
+ *
+ * It sits exactly where the frame's own footer button sits instead, because it
+ * is the same button one slot higher (`SlotWidget`'s footer class): 8px back to
+ * the content box, then 2px out again — the nudge that makes a filled or
+ * bordered box read as aligned with the text above it rather than measuring
+ * 2px shy of it.
+ */
+export declare const LIST_MORE_BUTTON_CLASS = "ml-1.5 mt-1 self-start";
+
 declare type ListClickData<C> = C extends "link" ? {
     href: string;
 } : object;
@@ -10611,6 +10634,15 @@ export declare interface ListSchema {
     rightOptional?: boolean;
     /** Every row carries an inline subtitle (on the title's line, after a dot). */
     subtitleRequired?: boolean;
+    /**
+     * An inline subtitle is ALLOWED but not demanded: some rows carry one and
+     * others don't — a list where only the late items say how late they are.
+     * Unlike a second line this changes no geometry (the subtitle shares the
+     * title's line), so such a list draws exactly like an even one.
+     *
+     * `subtitleRequired` wins when both are set: demanding it already allows it.
+     */
+    subtitleOptional?: boolean;
     /** Every row carries a second line — this is what makes rows two-line. */
     descriptionRequired?: boolean;
     /**
@@ -10658,8 +10690,11 @@ declare type ListTextData<S extends ListSchema> = {
     title: string;
 } & (S["subtitleRequired"] extends true ? {
     subtitle: string;
-} : {
+} & SubtitleTone : S["subtitleOptional"] extends true ? {
+    subtitle?: string;
+} & SubtitleTone : {
     subtitle?: never;
+    subtitleCritical?: never;
 }) & (S["descriptionRequired"] extends true ? {
     description: string;
 } : S["descriptionOptional"] extends true ? {
@@ -11211,9 +11246,14 @@ export declare interface NewHomeLayoutProps {
     /** Fixed px width of the side rail. */
     asideWidth?: number;
     /**
-     * Max px width of the (centered) main-column content. Defaults to
-     * `max-w-content` (712px), so a composer or a message list in the main column
-     * lines up with the same reading column the chat uses.
+     * Max px width of the (centered) main-column content. Defaults to 672px, the
+     * width the Home widgets are designed at — it is what decides a two-tile
+     * widget's tile size, since every tile is
+     * `(column − 32 padding + 16 gutter) / 2 − 16`.
+     *
+     * ⚠️ NOT `max-w-content` (712px) any more. A surface in the main column that
+     * has to line up with the chat's composer or message list should cap ITSELF at
+     * the reading column rather than assume the column is it.
      */
     mainWidth?: number;
     /**
@@ -12712,6 +12752,9 @@ export declare type SecondaryActionItem = Pick<DropdownItemObject, "label" | "ic
         disabled: boolean;
         loading: boolean;
     }) => string | undefined;
+    /** A count shown to the right of the label, e.g. how many items the action
+     * concerns. Ignored while the action is collapsed into the overflow menu. */
+    counterValue?: number;
 };
 
 export declare type SecondaryActionsDefinition = {
@@ -13521,6 +13564,23 @@ export declare type subActionType = {
     onClick: () => void;
     disabled?: boolean;
     icon?: IconType;
+};
+
+/**
+ * What a row may say ABOUT its subtitle — offered by every schema that declares
+ * a subtitle at all, required by none of them.
+ */
+declare type SubtitleTone = {
+    /**
+     * Draws THIS row's subtitle critical instead of muted — the row is overdue,
+     * rejected, over budget.
+     *
+     * Per ROW rather than per schema, like `unread` and `actions`: what has gone
+     * wrong is a state of the row's own data, so one list holds rows that say so
+     * beside rows that have nothing to report. The title reads the same either
+     * way — the subtitle is what carries the news.
+     */
+    subtitleCritical?: boolean;
 };
 
 declare interface SuccessMessageProps {
