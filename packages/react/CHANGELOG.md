@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.82.1](https://github.com/factorialco/f0/compare/f0-react-v6.82.0...f0-react-v6.82.1) (2026-09-02)
+
+
+### Bug Fixes
+
+* **ci:** count .spec.ts(x) files as unit tests ([#5364](https://github.com/factorialco/f0/issues/5364)) ([75a3cc3](https://github.com/factorialco/f0/commit/75a3cc326b5c07de89eb96a9d337bddf067c334f))
+
 ## [6.82.0](https://github.com/factorialco/f0/compare/f0-react-v6.81.3...f0-react-v6.82.0) (2026-09-02)
 
 
