@@ -3,8 +3,10 @@
 This folder contains the data and tooling that assign a **mandatory owner team**
 to every module in `packages/react/src/sds/`, generate the root `CODEOWNERS`
 file from those declarations, and enforce the **PR review policy** (which teams
-must approve each kind of PR). Everything else — including `kits/` — follows
-the regular component rules (no manifest).
+must approve each kind of PR). Everything else follows the regular component
+rules (no manifest) — except a handful of team-owned areas outside `sds/`
+(`kits/ai`, `kits/surveys`, `src/ai`), whose owners are declared by hand in
+[`CODEOWNERS.base`](CODEOWNERS.base).
 
 It is inspired by the `ownership/` system in `factorialco/factorial`.
 
@@ -55,6 +57,15 @@ membership. Keep it in sync with the GitHub org teams.
   rules override the global fallback: the owner team is the only required
   reviewer for its module.
 
+- Team-owned areas **outside** `sds/` (today `kits/ai`, `kits/surveys` and the
+  deprecated `src/ai` barrel) are declared by hand in
+  [`CODEOWNERS.base`](CODEOWNERS.base). Those paths are plain strings: GitHub
+  never validates them, so a rule pointing at a moved or renamed directory
+  keeps parsing while owning nothing, and its files quietly fall back to the
+  global owner. `pnpm ownership:check` fails on any such rule — **if you move
+  an owned directory, update the rule in the same PR**. Ownership declared
+  through a `package.yml` is immune: the manifest travels with the folder.
+
 - Nested manifests are supported: a deeper `package.yml` refines ownership of
   its subtree. Scoped reviewers (`reviewers[].include`) add extra teams for
   specific paths inside a module.
@@ -67,12 +78,17 @@ membership. Keep it in sync with the GitHub org teams.
 From the repo root:
 
 - `pnpm ownership` — regenerate `CODEOWNERS` from the manifests.
-- `pnpm ownership:check` — validate everything (run in CI on every PR):
+- `pnpm ownership:check` — validate everything (run in CI on every PR by the
+  `Ownership checks` workflow, and pre-commit by lefthook):
   1. every sds module has a manifest
   2. every manifest declares a valid `metadata.owner` (mandatory)
   3. all teams are in `teams.yml`
   4. reviewer `include` paths exist
-  5. `CODEOWNERS` is up to date with the manifests
+  5. every `CODEOWNERS` rule still matches a real path (catches moves and
+     renames that would otherwise drop a team's ownership silently)
+  6. every `CODEOWNERS` rule owner is a team from `teams.yml` (checks the
+     hand-maintained base rules too)
+  7. `CODEOWNERS` is up to date with the manifests
 
 ## Adding a new module
 
@@ -83,4 +99,14 @@ From the repo root:
 
 ## Changing ownership
 
-Edit the module's `package.yml`, run `pnpm ownership`, commit both files.
+Edit the module's `package.yml`, run `pnpm ownership`, commit both files. For a
+team-owned area outside `sds/`, edit [`CODEOWNERS.base`](CODEOWNERS.base)
+instead and regenerate the same way.
+
+## Moving an owned directory
+
+Move the folder, then update the rule that points at it — the module's
+`package.yml` moves with it, but a `CODEOWNERS.base` path does not — and run
+`pnpm ownership`. Check 5 fails while any rule points at a path that no longer
+exists, which is what stops a move from silently handing the files back to
+`@factorialco/f0-devs`.
