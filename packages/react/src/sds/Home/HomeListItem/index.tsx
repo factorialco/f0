@@ -100,9 +100,10 @@ const ACTIONS_PINNED_CLASS = "pointer-events-auto opacity-100"
  * module glyph, an alert).
  *
  * The text stack is three optional voices: `title` leads, `subtitle` murmurs on
- * the same line after a dot, `description` takes the second line. A subtitle
- * carrying BAD NEWS about the row — overdue, rejected, over budget — stops
- * murmuring and says so (`subtitleCritical`).
+ * the same line after a dot, `description` takes the second line. Either
+ * murmuring voice, when what it carries is BAD NEWS about the row — overdue,
+ * rejected, over budget — stops murmuring and says so (`subtitleCritical`,
+ * `descriptionCritical`).
  *
  * A row can also carry `actions` — what you can DO to it without leaving the
  * widget (snooze it, dismiss it). They stay out of the way until the row is
@@ -132,6 +133,15 @@ export interface HomeListItemProps {
   subtitleCritical?: boolean
   /** The second line. */
   description?: string
+  /**
+   * Draws the `description` CRITICAL rather than muted — the row is overdue,
+   * rejected, over budget. Per row, because it is a state of THAT row's data:
+   * one list holds rows whose second line is bad news and rows whose isn't.
+   *
+   * The title reads the same either way — it says what the row IS, and the
+   * description is what has gone wrong with it. Inert without a `description`.
+   */
+  descriptionCritical?: boolean
   /** Trailing slot: a tag, a counter, people. */
   right?: ReactNode
   /**
@@ -165,6 +175,7 @@ export function HomeListItem({
   subtitle,
   subtitleCritical = false,
   description,
+  descriptionCritical = false,
   right,
   actions,
   unread = false,
@@ -214,7 +225,14 @@ export function HomeListItem({
           ) : null}
         </div>
         {description ? (
-          <div className="truncate text-f1-foreground-secondary">
+          <div
+            className={cn(
+              "truncate",
+              descriptionCritical
+                ? "text-f1-foreground-critical"
+                : "text-f1-foreground-secondary"
+            )}
+          >
             {description}
           </div>
         ) : null}

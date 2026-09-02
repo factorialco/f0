@@ -387,6 +387,55 @@ said nothing: red is only loud while the row beside it is quiet.
 
 <Canvas of={SlotWidgetStories.CriticalSubtitles} />
 
+### …and a second line that does
+
+`descriptionCritical` is the same flag one line down. A `description` also
+murmurs by default; when the second line is what has gone **wrong** with the row
+rather than more about it, the row sets `descriptionCritical` and it draws in
+`text-f1-foreground-critical`:
+
+```tsx
+listSlot(
+  {
+    left: "icon",
+    subtitleOptional: true,
+    descriptionOptional: true,
+    clickBehavior: "link",
+  },
+  [
+    {
+      id: "expenses",
+      title: "Expenses report",
+      subtitle: "Travel", // ← still muted: the trip isn't what went wrong
+      description: "Rejected by Finance", // ← in critical red
+      descriptionCritical: true,
+      avatar: { icon: Receipt, color: "viridian" },
+      href: "/expenses",
+    },
+    {
+      id: "review",
+      title: "Performance review",
+      subtitle: "Q3",
+      description: "Due Friday", // ← still muted
+      avatar: { icon: Clock, color: "purple" },
+      href: "/reviews",
+    },
+  ]
+)
+```
+
+The two flags are **independent**: a row may redden its subtitle, its second
+line, or neither. Reddening both is almost always wrong — it is a red row, and a
+red row has no emphasis left to place. Colour the line that names the problem
+and leave the other one murmuring.
+
+One limit: in a **compact** list the second line has folded into the row's
+tooltip, so there is nothing left to colour and `descriptionCritical` goes
+silent. If the news matters at every density, put it in the subtitle, which
+shares the title's line and always shows.
+
+<Canvas of={SlotWidgetStories.CriticalDescriptions} />
+
 ### Even rows, and rows that aren't
 
 The schema's default is **evenness**: declaring `right: "person"` means every

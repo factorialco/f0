@@ -171,6 +171,51 @@ test("a row's subtitle may be critical — wherever a subtitle is declared at al
   ])
 })
 
+test("a row's second line may be critical — wherever a description is declared at all", () => {
+  listSlot({ descriptionRequired: true }, [
+    {
+      id: 1,
+      title: "x",
+      description: "Rejected by Finance",
+      descriptionCritical: true,
+    },
+    { id: 2, title: "y", description: "Due Friday" },
+  ])
+  listSlot({ descriptionOptional: true }, [
+    {
+      id: 1,
+      title: "x",
+      description: "Rejected by Finance",
+      descriptionCritical: true,
+    },
+    { id: 2, title: "y" },
+  ])
+
+  listSlot({}, [
+    // @ts-expect-error nothing to colour: this schema declares no description
+    { id: 1, title: "x", descriptionCritical: true },
+  ])
+})
+
+test("the two murmuring lines carry their tone independently", () => {
+  listSlot({ subtitleRequired: true, descriptionRequired: true }, [
+    {
+      id: 1,
+      title: "x",
+      subtitle: "Travel",
+      description: "Rejected by Finance",
+      descriptionCritical: true,
+    },
+    {
+      id: 2,
+      title: "y",
+      subtitle: "2 days overdue",
+      subtitleCritical: true,
+      description: "Submitted Monday",
+    },
+  ])
+})
+
 test("an icon row may be tinted, and only with a colour from the palette", () => {
   listSlot({ left: "icon" }, [
     { id: 1, title: "Row", avatar: { icon: PalmTree, color: "purple" } },

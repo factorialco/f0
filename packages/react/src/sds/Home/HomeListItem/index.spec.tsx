@@ -47,6 +47,50 @@ describe("HomeListItem", () => {
     )
   })
 
+  test("says a description carrying bad news in the critical colour — muted by default", () => {
+    const { rerender } = zeroRender(
+      <HomeListItem title="Expenses report" description="Rejected by Finance" />
+    )
+
+    const description = () => screen.getByText("Rejected by Finance")
+
+    expect(description()).toHaveClass("text-f1-foreground-secondary")
+    expect(description()).not.toHaveClass("text-f1-foreground-critical")
+
+    rerender(
+      <HomeListItem
+        title="Expenses report"
+        description="Rejected by Finance"
+        descriptionCritical
+      />
+    )
+
+    expect(description()).toHaveClass("text-f1-foreground-critical")
+    expect(description()).not.toHaveClass("text-f1-foreground-secondary")
+    // The title is untouched: it says what the row IS, not what's wrong with it.
+    expect(screen.getByText("Expenses report")).toHaveClass(
+      "text-f1-foreground"
+    )
+  })
+
+  test("colours the two murmuring lines independently — one can go critical without the other", () => {
+    zeroRender(
+      <HomeListItem
+        title="Expenses report"
+        subtitle="Travel"
+        description="Rejected by Finance"
+        descriptionCritical
+      />
+    )
+
+    expect(screen.getByText("Rejected by Finance")).toHaveClass(
+      "text-f1-foreground-critical"
+    )
+    expect(screen.getByText("· Travel")).toHaveClass(
+      "text-f1-foreground-secondary"
+    )
+  })
+
   test("draws a left slot when given an avatar, none otherwise", () => {
     const { container, rerender } = zeroRender(
       <HomeListItem

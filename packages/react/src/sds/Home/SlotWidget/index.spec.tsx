@@ -374,6 +374,43 @@ describe("list slot schema", () => {
     )
   })
 
+  test("a row's second line goes critical on its own, without touching its neighbours or its own subtitle", () => {
+    zeroRender(
+      <SlotWidget
+        slots={[
+          listSlot({ subtitleRequired: true, descriptionOptional: true }, [
+            {
+              id: "1",
+              title: "Expenses report",
+              subtitle: "Travel",
+              description: "Rejected by Finance",
+              descriptionCritical: true,
+            },
+            {
+              id: "2",
+              title: "Performance review",
+              subtitle: "Q3",
+              description: "Due Friday",
+            },
+            { id: "3", title: "Onboarding", subtitle: "Checklist" },
+          ]),
+        ]}
+      />
+    )
+
+    // The rejected row alone is critical; its neighbour still murmurs.
+    expect(screen.getByText("Rejected by Finance")).toHaveClass(
+      "text-f1-foreground-critical"
+    )
+    expect(screen.getByText("Due Friday")).toHaveClass(
+      "text-f1-foreground-secondary"
+    )
+    // The two lines are coloured independently — the subtitle stays muted.
+    expect(screen.getByText("· Travel")).toHaveClass(
+      "text-f1-foreground-secondary"
+    )
+  })
+
   test("a mixed list does NOT auto-compact — folding its few second lines away would hide the only thing telling those rows apart", () => {
     const many = Array.from({ length: LIST_COMPACT_AFTER + 1 }, (_, i) => ({
       id: String(i),

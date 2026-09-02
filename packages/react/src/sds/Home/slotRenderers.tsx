@@ -403,6 +403,25 @@ type SubtitleTone = {
   subtitleCritical?: boolean
 }
 
+/**
+ * What a row may say ABOUT its second line — offered by every schema that
+ * declares a `description` at all, required by none of them.
+ */
+type DescriptionTone = {
+  /**
+   * Draws THIS row's second line critical instead of muted — the row is
+   * overdue, rejected, over budget.
+   *
+   * Per ROW rather than per schema, for the same reason `subtitleCritical` is:
+   * what has gone wrong is a state of the row's own data, so one list holds
+   * rows that say so beside rows that have nothing to report.
+   *
+   * Silent in a COMPACT list, where the second line has folded into the row's
+   * tooltip and there is nothing left to colour — see {@link listCompacts}.
+   */
+  descriptionCritical?: boolean
+}
+
 type ListTextData<S extends ListSchema> = {
   title: string
 } & (S["subtitleRequired"] extends true
@@ -411,10 +430,10 @@ type ListTextData<S extends ListSchema> = {
     ? { subtitle?: string } & SubtitleTone
     : { subtitle?: never; subtitleCritical?: never }) &
   (S["descriptionRequired"] extends true
-    ? { description: string }
+    ? { description: string } & DescriptionTone
     : S["descriptionOptional"] extends true
-      ? { description?: string }
-      : { description?: never })
+      ? { description?: string } & DescriptionTone
+      : { description?: never; descriptionCritical?: never })
 
 /**
  * One HOVER ACTION on a `list` row: an icon button over the row's right edge
@@ -923,6 +942,7 @@ type ListRow = {
   subtitle?: string
   subtitleCritical?: boolean
   description?: string
+  descriptionCritical?: boolean
   unread?: boolean
   avatar?: object & { icon?: IconType; color?: ListIconColor }
   module?: ModuleId
@@ -1065,6 +1085,7 @@ function ListSlot({ params, ctx }: { params: ListParams; ctx: HomeRenderCtx }) {
               subtitle={row.subtitle}
               subtitleCritical={row.subtitleCritical}
               description={compact ? undefined : description}
+              descriptionCritical={row.descriptionCritical}
               unread={row.unread}
               {...listLeft(schema.left, row, avatarSize)}
               right={listRight(schema.right, row, rightAvatarSize)}
