@@ -206,13 +206,29 @@ export const createScreenShareBinding = ():
  * participant starts at a different offset so a room full of the same clip
  * still reads as several different people.
  */
+export type ClipVideoOptions = {
+  /** First frame, shown while the file buffers instead of a black rectangle. */
+  poster?: string
+  /**
+   * Taken over when the clip cannot load at all.
+   *
+   * Clips are hotlinked, so offline development, a sandboxed CI and a rotted URL
+   * all produce the same thing: a `<video>` that never gets a frame. Handing the
+   * SAME element to the synthetic binding degrades that to the initials tile,
+   * which reads as "camera off" rather than as a broken page.
+   */
+  fallback?: F0MeetingBinding
+}
+
 export const createClipVideoBinding = (
   url: string,
-  offsetSeconds: number
+  offsetSeconds: number,
+  { poster, fallback }: ClipVideoOptions = {}
 ): F0MeetingBinding => {
   return (element) => {
     if (!(element instanceof HTMLVideoElement)) return () => {}
 
+    if (poster) element.poster = poster
     element.src = url
     element.loop = true
     element.muted = true
@@ -229,9 +245,24 @@ export const createClipVideoBinding = (
     element.addEventListener("loadedmetadata", seek)
     if (element.readyState >= 1) seek()
 
+    let releaseFallback: (() => void) | undefined
+    const onError = (): void => {
+      if (releaseFallback || !fallback) return
+      // Clear the dead source first: leaving it set keeps the poster and the
+      // error state on an element the fallback is about to drive.
+      element.removeAttribute("poster")
+      element.removeAttribute("src")
+      element.load()
+      releaseFallback = fallback(element)
+    }
+    element.addEventListener("error", onError)
+
     return () => {
       element.removeEventListener("loadedmetadata", seek)
+      element.removeEventListener("error", onError)
+      releaseFallback?.()
       element.pause()
+      element.removeAttribute("poster")
       element.removeAttribute("src")
       element.load()
     }

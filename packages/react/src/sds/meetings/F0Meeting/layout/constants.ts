@@ -32,8 +32,33 @@ export const SPOTLIGHT_ONLY_WIDTH = 200
 export const GAP_COMPACT = 8
 export const GAP_REGULAR = 16
 
+/**
+ * Provisional gap, from the container.
+ *
+ * Only used for the first solve — see `gapForTile`, which is what actually
+ * lands. The grid needs *a* gap to work out how big the tiles are, and this is
+ * the cheapest guess.
+ */
 export const gapFor = (width: number): number =>
   width < COMPACT_WIDTH ? GAP_COMPACT : GAP_REGULAR
+
+const clamp = (value: number, min: number, max: number): number =>
+  Math.min(max, Math.max(min, value))
+
+/**
+ * The gap and the corner radius belong to the TILE, not to the window.
+ *
+ * Keyed off the container, a 90px tile in a wide window got the same 16px gutter
+ * and 12px radius as a 600px one — so the proportions of the grid changed
+ * depending on how many people were in it, which is exactly backwards. Scaling
+ * both with the tile keeps a room of four and a room of thirty looking like the
+ * same design at different sizes.
+ */
+export const gapForTile = (tileWidth: number): number =>
+  clamp(Math.round(tileWidth * 0.045), 4, GAP_REGULAR)
+
+export const radiusForTile = (tileWidth: number): number =>
+  clamp(Math.round(tileWidth * 0.055), 6, 16)
 
 /**
  * Smallest tile the grid will produce before pushing a participant into the

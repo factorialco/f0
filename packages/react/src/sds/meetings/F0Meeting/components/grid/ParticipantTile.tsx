@@ -15,6 +15,11 @@ export type ParticipantTileProps = {
   tile: F0MeetingTile
   /** Compact tiles drop the chip text and the hover controls. */
   compact?: boolean
+  /**
+   * Corner radius in px, scaled to the tile's width by the grid. Omitted, the
+   * tile falls back to square corners — always pass it from a laid-out grid.
+   */
+  radius?: number
   isFocused?: boolean
   canFocus?: boolean
   onToggleFocus?: (key: string) => void
@@ -23,6 +28,7 @@ export type ParticipantTileProps = {
 const ParticipantTileBase = ({
   tile,
   compact = false,
+  radius,
   isFocused = false,
   canFocus = false,
   onToggleFocus,
@@ -48,12 +54,16 @@ const ParticipantTileBase = ({
   return (
     <div
       className={cn(
-        "group relative h-full w-full overflow-hidden rounded-xl",
+        "group relative h-full w-full overflow-hidden",
         // A tile without video is a dark plate whatever the theme is, so the
         // room reads as one object rather than as holes in the surface. The
         // same colour carries the letterbox bands of a contained video.
         "bg-f1-background-inverse"
       )}
+      // Scaled to the tile rather than a fixed `rounded-xl`: at 90px wide a
+      // 12px radius eats the corners, and the grid stops looking like the same
+      // design at a different size.
+      style={radius !== undefined ? { borderRadius: radius } : undefined}
       data-testid="meeting-participant-tile"
       data-participant-id={participant.id}
     >

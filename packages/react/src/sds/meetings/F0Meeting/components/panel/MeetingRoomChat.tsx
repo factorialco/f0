@@ -105,7 +105,7 @@ export const MeetingRoomChat = ({ messages, onSend }: MeetingRoomChatProps) => {
         )}
       </div>
 
-      <div className="flex shrink-0 items-end gap-2 border-t border-solid border-f1-border-secondary p-3">
+      <div className="flex shrink-0 items-end gap-2 border-t border-solid border-f1-border-secondary p-3 border-0">
         <textarea
           value={draft}
           onChange={(event) => setDraft(event.target.value)}

@@ -42,6 +42,32 @@ export type MockMeetingSeed = {
   /** Synthesized voices and the turn-taking director. */
   audio?: boolean
   clipUrls?: string[]
+  /**
+   * A clip per person, keyed by participant id. Beats `clipUrls` because who
+   * gets which face stops being `hashId` roulette — the same person always has
+   * the same face, which is the whole point of a face.
+   *
+   * Falls back to `clipUrls` for anyone missing.
+   */
+  clips?: Record<string, { src: string; poster?: string }>
+  /**
+   * A written conversation driving the voices, the speaking ring and the
+   * transcript together.
+   *
+   * Present ⇒ the random turn-taking director does not run. The two are
+   * alternatives, not layers: both setting the floor would fight over it.
+   */
+  script?: {
+    lines: readonly {
+      at: number
+      participantId: string
+      durationMs: number
+      say?: string
+      chat?: string
+    }[]
+    /** Restart from the top once the last line ends. */
+    loop?: boolean
+  }
   seed?: number
   startStatus?: F0MeetingStatus
   screenShareBy?: string
@@ -121,18 +147,31 @@ export type MockAttendee = {
   avatar?: AvatarVariant
 }
 
-const fromAttendee = (attendee: MockAttendee, index: number): MockPerson => {
+const fromAttendee = (
+  attendee: MockAttendee,
+  index: number,
+  camera: boolean
+): MockPerson => {
   const [firstName = attendee.name, ...rest] = attendee.name.split(" ")
   return {
     id: attendee.id,
     firstName,
     lastName: rest.join(" "),
     avatar: attendee.avatar,
-    // A real room is a mix: not everyone joins with the camera on.
-    camera: index % 3 !== 1,
+    camera,
     muted: index % 4 === 3,
   }
 }
+
+/**
+ * How many people can be on camera at once.
+ *
+ * Not a stylistic cap. A 45-person channel huddle would otherwise mount ~30
+ * simultaneous `<video>` elements against hotlinked files, and "perf with ~25
+ * live videos" is already an open question in SPEC.md. It is also simply what a
+ * big call looks like: almost everyone is a name and an avatar.
+ */
+export const CAMERAS_ON_LIMIT = 8
 
 /**
  * Builds a room from people a host already has — the members of a conversation,
@@ -154,25 +193,37 @@ export const seedFromAttendees = ({
   presence?: "invited" | "joined"
 } & Partial<
   Omit<MockMeetingSeed, "room" | "me" | "others">
->): MockMeetingSeed =>
-  ({
+>): MockMeetingSeed => {
+  const others = attendees.filter((attendee) => attendee.id !== me.id)
+
+  // Who gets a camera. With per-person clips, "has a clip" is the honest
+  // answer — a tile whose source would be a stranger's face is worse than an
+  // avatar. Without them, fall back to the old every-third-person mix.
+  const clips = rest.clips
+  const eligible = clips
+    ? others.filter((attendee) => attendee.id in clips)
+    : others.filter((_, index) => index % 3 !== 1)
+  const camerasOn = new Set(
+    eligible.slice(0, CAMERAS_ON_LIMIT).map((attendee) => attendee.id)
+  )
+
+  return {
     room: {
       id: roomId,
       title,
       startedAt: new Date().toISOString(),
     },
-    me: { ...fromAttendee(me, 0), camera: false, muted: false },
-    others: attendees
-      .filter((attendee) => attendee.id !== me.id)
-      .map((attendee, index) => ({
-        ...fromAttendee(attendee, index),
-        ...(presence ? { presence } : {}),
-      })),
+    me: { ...fromAttendee(me, 0, false), camera: false, muted: false },
+    others: others.map((attendee, index) => ({
+      ...fromAttendee(attendee, index, camerasOn.has(attendee.id)),
+      ...(presence ? { presence } : {}),
+    })),
     videoSource: "echo",
     audio: true,
     seed: 7,
     ...rest,
-  })
+  }
+}
 
 export const soloSeed = seed("Huddle · Design", 0)
 export const oneToOneSeed = seed("Huddle · Marta", 1)

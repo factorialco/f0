@@ -48,13 +48,13 @@ export const MeetingMediaControl = ({
   return (
     <div
       className={cn(
-        "flex items-stretch overflow-hidden rounded-xl",
+        "flex items-stretch overflow-hidden rounded border border-f1-border-secondary border-solid",
         height,
         // Muted is a state you must be able to spot without reading an icon,
         // so it takes the critical surface rather than a generic "on" look.
         isOff
-          ? "bg-f1-background-critical text-f1-foreground-critical"
-          : "bg-f1-background-secondary text-f1-foreground"
+          ? "bg-f1-background-secondary text-f1-secondary"
+          : "bg-f1-background text-f1-foreground"
       )}
     >
       <button
@@ -67,9 +67,7 @@ export const MeetingMediaControl = ({
         className={cn(
           "flex items-center justify-center transition-colors duration-150 ease-out",
           compact ? "w-10" : "w-[52px]",
-          isOff
-            ? "hover:bg-f1-background-critical-bold/10"
-            : "hover:bg-f1-background-secondary-hover",
+          "hover:bg-f1-background-secondary-hover",
           disabled && "cursor-not-allowed opacity-50",
           focusRing()
         )}
@@ -79,10 +77,7 @@ export const MeetingMediaControl = ({
 
       {canPick && (
         <>
-          <span
-            aria-hidden
-            className="my-2 w-px shrink-0 bg-f1-border-secondary"
-          />
+          <span aria-hidden className="w-px shrink-0 bg-f1-border-secondary" />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
@@ -92,9 +87,7 @@ export const MeetingMediaControl = ({
                 className={cn(
                   "flex items-center justify-center transition-colors duration-150 ease-out",
                   compact ? "w-7" : "w-9",
-                  isOff
-                    ? "hover:bg-f1-background-critical-bold/10"
-                    : "hover:bg-f1-background-secondary-hover",
+                  "hover:bg-f1-background-secondary-hover",
                   action.disabled && "cursor-not-allowed opacity-50",
                   focusRing()
                 )}

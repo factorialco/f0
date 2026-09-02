@@ -18,7 +18,7 @@ export const MeetingActionButton = ({
   action,
   compact = false,
 }: MeetingActionButtonProps) => {
-  const size = compact ? "sm" : "md"
+  const size = compact ? "md" : "lg"
   // A disabled control explains itself: without the reason it is a dead end for
   // anyone who cannot see the state that caused it.
   const tooltip =
@@ -54,7 +54,7 @@ export const MeetingActionButton = ({
   if (action.variant === "critical") {
     return (
       <F0Button
-        variant="critical"
+        variant="default"
         size={size}
         label={action.label}
         disabled={action.disabled}
@@ -66,7 +66,7 @@ export const MeetingActionButton = ({
 
   return (
     <F0Button
-      variant="ghost"
+      variant="outline"
       size={size}
       hideLabel
       icon={action.icon}

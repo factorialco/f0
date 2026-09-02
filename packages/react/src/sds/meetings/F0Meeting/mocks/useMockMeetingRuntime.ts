@@ -45,6 +45,14 @@ type LocalShare = {
   generation: number
 }
 
+/** A line the script types into the call's own chat while it runs. */
+export type MockScriptChatMessage = {
+  id: string
+  participantId: string
+  text: string
+  at: string
+}
+
 export type MockMeetingDrivers = {
   /** Asks for the real camera. Must be called from a user gesture. */
   enableLocalCamera: () => Promise<void>
@@ -66,6 +74,24 @@ export type MockMeetingDrivers = {
   react: (id: string, emoji: string) => void
   hasLocalCamera: boolean
 }
+
+/**
+ * Stand-in hardware for when the browser will not name any.
+ *
+ * `enumerateDevices()` returns empty labels until a capture permission has been
+ * granted, so a faithful pass-through leaves the device menus blank or missing
+ * — which demonstrates nothing. These are only ever used when the real list
+ * comes back empty.
+ */
+const FALLBACK_MICROPHONES: F0MeetingDevice[] = [
+  { id: "default", label: "Built-in Microphone", isDefault: true },
+  { id: "mock-mic-external", label: "External USB Microphone" },
+]
+
+const FALLBACK_CAMERAS: F0MeetingDevice[] = [
+  { id: "default", label: "Built-in Camera", isDefault: true },
+  { id: "mock-cam-external", label: "External Webcam" },
+]
 
 const permissionFromError = (error: unknown): F0MeetingPermission => {
   const name = error instanceof DOMException ? error.name : ""
@@ -105,7 +131,12 @@ export const useMockMeetingRuntime = (
      */
     onLeave?: () => void
   } = {}
-): { runtime: F0MeetingRuntime; drivers: MockMeetingDrivers } => {
+): {
+  runtime: F0MeetingRuntime
+  drivers: MockMeetingDrivers
+  /** Lines the script typed into the call's chat. Empty without a script. */
+  scriptChat: MockScriptChatMessage[]
+} => {
   const onLeaveRef = useRef(options.onLeave)
   onLeaveRef.current = options.onLeave
   const [status, setStatus] = useState<F0MeetingStatus>(
@@ -129,15 +160,26 @@ export const useMockMeetingRuntime = (
     microphone: F0MeetingDevice[]
   }>({ camera: [], microphone: [] })
   const [selectedCameraId, setSelectedCameraId] = useState<string>()
+  const [selectedMicrophoneId, setSelectedMicrophoneId] = useState<string>()
   const [audioBlocked, setAudioBlocked] = useState(false)
   const [transcript, setTranscript] = useState<F0MeetingTranscriptSegment[]>([])
   const [notes, setNotes] = useState(seed.notes ?? "")
+  /** Chat lines the script types during the call, for the room's own chat tab. */
+  const [scriptChat, setScriptChat] = useState<MockScriptChatMessage[]>([])
   const [, forceRender] = useState(0)
 
   const signalsRef = useRef(createMeetingSignalStore())
   const audioRef = useRef<MockAudioEngine | null>(null)
   const echoRef = useRef<EchoSource | null>(null)
   const localStreamRef = useRef<MediaStream | null>(null)
+  /**
+   * The microphone, acquired separately from the camera.
+   *
+   * They used to share one `getUserMedia({ video, audio })` call, which meant
+   * turning the camera on silently opened the mic — and that is what fed the
+   * speaking-detection loop. Two sources, two lifetimes.
+   */
+  const localMicStreamRef = useRef<MediaStream | null>(null)
   const displayStreamRef = useRef<MediaStream | null>(null)
   const shareGenerationRef = useRef(0)
   const bindingsRef = useRef(new Map<string, F0MeetingBinding>())
@@ -158,6 +200,10 @@ export const useMockMeetingRuntime = (
 
   const memberIdsRef = useRef<string[]>([])
   memberIdsRef.current = members.map((member) => member.id)
+  // The roster as it stands right now, for timers that must not re-subscribe
+  // every time somebody walks in.
+  const membersRef = useRef<MemberState[]>([])
+  membersRef.current = members
 
   useEffect(() => {
     if (seed.audio === false) return
@@ -168,12 +214,21 @@ export const useMockMeetingRuntime = (
     // from an effect of its own only worked when audio existed at mount: a room
     // that starts silent (the app shell before a huddle) created its engine
     // later and nobody ever spoke in it.
-    engine.runDirector(() => memberIdsRef.current)
+    // A scripted room already knows who talks when; letting the director run
+    // too would mean two things fighting over the floor.
+    if (!seed.script) engine.runDirector(() => memberIdsRef.current)
+
+    // Keep asking. Sampled once at mount, the "Click to enable sound" prompt
+    // could never appear BEFORE the browser unblocked the context on your first
+    // gesture — so six synthesized voices arrived unannounced and the prompt
+    // showed up too late to warn anybody.
+    const poll = setInterval(() => setAudioBlocked(engine.blocked()), 500)
     return () => {
+      clearInterval(poll)
       engine.dispose()
       audioRef.current = null
     }
-  }, [seed.audio, seed.seed])
+  }, [seed.audio, seed.seed, seed.script])
 
   useEffect(() => {
     const engine = audioRef.current
@@ -185,6 +240,101 @@ export const useMockMeetingRuntime = (
       engine.setMuted(member.id, Boolean(member.muted))
     })
   }, [members])
+
+  /* ---------------- the script ---------------- */
+
+  /**
+   * What the current speaker is saying, so the transcript prints the words that
+   * are being spoken instead of a phrase drawn from a bag. Written just before
+   * the floor changes hands and read by the transcript driver below.
+   */
+  const scriptTextRef = useRef(new Map<string, string>())
+
+  useEffect(() => {
+    const script = seed.script
+    if (!script || script.lines.length === 0) return
+
+    setScriptChat([])
+    scriptTextRef.current = new Map()
+
+    // Through the engine when there is one so the synthesized voices follow the
+    // script, straight to the signals when there isn't — a room with
+    // `audio: false` (and jsdom) still needs the rings and the transcript.
+    const publish = (ids: string[]): void => {
+      const engine = audioRef.current
+      if (engine) engine.setSpeaking(ids)
+      else signalsRef.current.setSpeaking(ids)
+    }
+
+    const runsUntil = script.lines.reduce(
+      (longest, line) => Math.max(longest, line.at + line.durationMs),
+      0
+    )
+    // The clock starts when there is somebody to talk to, not when the room
+    // opens. A group huddle opens empty and fills over several seconds; without
+    // this the conversation would play to nobody and be half over by the time
+    // the first person walked in.
+    let started: number | null = null
+    const firedChat = new Set<number>()
+
+    const inTheRoom = (participantId: string): boolean =>
+      participantId === seed.me.id ||
+      membersRef.current.some(
+        (member) => member.id === participantId && member.presence !== "invited"
+      )
+
+    const tick = (): void => {
+      const others = membersRef.current.filter(
+        (member) => member.presence !== "invited"
+      )
+      if (started === null) {
+        if (others.length === 0) return
+        started = Date.now()
+      }
+
+      let elapsed = Date.now() - started
+      if (script.loop && runsUntil > 0 && elapsed > runsUntil + 2000) {
+        return
+      }
+      elapsed = Math.min(elapsed, Number.MAX_SAFE_INTEGER)
+
+      const speaking: string[] = []
+      for (const line of script.lines) {
+        if (!line.say) continue
+        // Someone who has not arrived cannot be speaking. Their line is skipped
+        // outright rather than queued: a transcript that attributes sentences to
+        // an empty tile is worse than a shorter conversation.
+        if (!inTheRoom(line.participantId)) continue
+        if (elapsed >= line.at && elapsed < line.at + line.durationMs) {
+          speaking.push(line.participantId)
+          scriptTextRef.current.set(line.participantId, line.say)
+        }
+      }
+      publish(speaking)
+
+      script.lines.forEach((line, index) => {
+        if (!line.chat || firedChat.has(index) || elapsed < line.at) return
+        firedChat.add(index)
+        setScriptChat((current) => [
+          ...current,
+          {
+            id: `script-chat-${index}`,
+            participantId: line.participantId,
+            text: line.chat as string,
+            at: new Date().toISOString(),
+          },
+        ])
+      })
+    }
+
+    const timer = setInterval(tick, 120)
+    tick()
+
+    return () => {
+      clearInterval(timer)
+      publish([])
+    }
+  }, [seed.script])
 
   /* ---------------- transcription ---------------- */
 
@@ -204,7 +354,9 @@ export const useMockMeetingRuntime = (
     const unsubscribe = signals.subscribeSpeakers(() => {
       const next = signals.getSpeakers()
       for (const id of next) {
-        if (!speaking.includes(id)) driver.start(id)
+        if (!speaking.includes(id)) {
+          driver.start(id, scriptTextRef.current.get(id))
+        }
       }
       for (const id of speaking) {
         if (!next.includes(id)) driver.stop(id)
@@ -221,13 +373,16 @@ export const useMockMeetingRuntime = (
   // Meter the real microphone into the same signals, so your own tile reacts to
   // your voice instead of sitting flat while everyone else animates. Keyed on
   // the generation, which is what changes when the stream is republished.
+  //
+  // Muting stops the metering outright rather than relying on `track.enabled`:
+  // a UI-muted mic must not be able to put you in the speaking set at all.
   useEffect(() => {
     const engine = audioRef.current
-    const stream = localStreamRef.current
-    if (!engine || !stream) return
+    const stream = localMicStreamRef.current
+    if (!engine || !stream || localMuted) return
     engine.monitor(seed.me.id, stream)
     return () => engine.unmonitor(seed.me.id)
-  }, [localGeneration, seed.me.id, seed.audio])
+  }, [localGeneration, localMuted, seed.me.id, seed.audio])
 
   /* ---------------- bindings ---------------- */
 
@@ -253,49 +408,96 @@ export const useMockMeetingRuntime = (
           return echoRef.current.createBinding(member.id)
         }
 
-        const clips = seed.clipUrls ?? []
-        if (source === "clip" && clips.length > 0) {
-          const offset = hashId(member.id)
-          return createClipVideoBinding(
-            clips[Math.floor(offset * clips.length) % clips.length] as string,
-            // Spread the starting points so the same file reads as different
-            // people rather than a wall of identical frames.
-            offset * 60
+        const synthetic = () =>
+          createSyntheticVideoBinding(
+            { id: member.id, name: fullName(member) },
+            { animated: seed.animateVideo !== false }
           )
+
+        if (source === "clip") {
+          const offset = hashId(member.id)
+          // A clip of their own beats a shared pool: the same person keeps the
+          // same face, which is what makes it read as a person at all.
+          const own = seed.clips?.[member.id]
+          if (own) {
+            return createClipVideoBinding(own.src, offset * 60, {
+              ...(own.poster ? { poster: own.poster } : {}),
+              // Hotlinked, so a dead network has to land on the initials tile
+              // rather than on a black rectangle.
+              ...(synthetic() ? { fallback: synthetic() } : {}),
+            })
+          }
+
+          const clips = seed.clipUrls ?? []
+          if (clips.length > 0) {
+            return createClipVideoBinding(
+              clips[Math.floor(offset * clips.length) % clips.length] as string,
+              // Spread the starting points so the same file reads as different
+              // people rather than a wall of identical frames.
+              offset * 60,
+              { ...(synthetic() ? { fallback: synthetic() } : {}) }
+            )
+          }
         }
 
-        return createSyntheticVideoBinding(
-          { id: member.id, name: fullName(member) },
-          { animated: seed.animateVideo !== false }
-        )
+        return synthetic()
       })
     },
-    [bindingFor, seed.videoSource, seed.animateVideo, seed.clipUrls]
+    [bindingFor, seed.videoSource, seed.animateVideo, seed.clipUrls, seed.clips]
   )
 
   /* ---------------- local camera ---------------- */
 
   const readDevices = useCallback(async () => {
-    if (!navigator.mediaDevices?.enumerateDevices) return
+    if (!navigator.mediaDevices?.enumerateDevices) {
+      setDevices({ camera: FALLBACK_CAMERAS, microphone: FALLBACK_MICROPHONES })
+      return
+    }
     try {
       const list = await navigator.mediaDevices.enumerateDevices()
-      const toDevice = (device: MediaDeviceInfo): F0MeetingDevice => ({
-        id: device.deviceId,
-        label: device.label || device.deviceId.slice(0, 8),
+      const toDevice = (
+        device: MediaDeviceInfo,
+        index: number,
+        kind: string
+      ): F0MeetingDevice => ({
+        id: device.deviceId || `${kind}-${index}`,
+        // Before permission is granted the browser reports empty labels, so a
+        // raw pass-through renders blank menu rows. A numbered name is at least
+        // pickable and honest about what it is.
+        label: device.label || `${kind} ${index + 1}`,
         isDefault: device.deviceId === "default",
       })
+      const camera = list
+        .filter((device) => device.kind === "videoinput")
+        .map((device, index) => toDevice(device, index, "Camera"))
+      const microphone = list
+        .filter((device) => device.kind === "audioinput")
+        .map((device, index) => toDevice(device, index, "Microphone"))
+
+      // A demo with an invisible chevron demonstrates nothing. Where the
+      // browser gives us nothing to show — no permission yet, a locked-down
+      // CI — stand in plausible hardware so the picker is still reachable.
       setDevices({
-        camera: list
-          .filter((device) => device.kind === "videoinput")
-          .map(toDevice),
-        microphone: list
-          .filter((device) => device.kind === "audioinput")
-          .map(toDevice),
+        camera: camera.length ? camera : FALLBACK_CAMERAS,
+        microphone: microphone.length ? microphone : FALLBACK_MICROPHONES,
       })
     } catch {
-      // Enumeration is best-effort: without it the pickers simply don't show.
+      setDevices({ camera: FALLBACK_CAMERAS, microphone: FALLBACK_MICROPHONES })
     }
   }, [])
+
+  // Enumerate up front, not only after the camera is granted: otherwise both
+  // chevrons stay hidden until you turn the camera on, and the microphone
+  // picker is unreachable for anyone who never does. `devicechange` covers
+  // plugging a headset in mid-call.
+  useEffect(() => {
+    void readDevices()
+    const media = navigator.mediaDevices
+    if (!media?.addEventListener) return
+    const onChange = () => void readDevices()
+    media.addEventListener("devicechange", onChange)
+    return () => media.removeEventListener("devicechange", onChange)
+  }, [readDevices])
 
   const openCamera = useCallback(
     async (deviceId?: string) => {
@@ -304,20 +506,39 @@ export const useMockMeetingRuntime = (
         return
       }
       try {
+        // Video ONLY. Asking for audio here was free to write and cost a
+        // feedback loop: on laptop speakers the mic picks up the synthesized
+        // voices, the monitor meters them, and you get added to the speaking
+        // set — your own tile lights up and the transcript starts attributing
+        // sentences to you. Nothing ever needed this stream's audio: the local
+        // microphone is never published, has no binding, and the tile is always
+        // muted.
         const stream = await navigator.mediaDevices.getUserMedia({
           video: deviceId ? { deviceId: { exact: deviceId } } : true,
-          audio: true,
         })
         localStreamRef.current?.getTracks().forEach((track) => track.stop())
         localStreamRef.current = stream
+
+        // The echo preview is decoration on top of a camera we already have.
+        // Letting it throw into the outer catch reported a *permission* failure
+        // for a camera that had in fact opened.
         echoRef.current?.dispose()
-        echoRef.current = createEchoSource(stream)
+        try {
+          echoRef.current = createEchoSource(stream)
+        } catch {
+          echoRef.current = null
+        }
+
         // Every echo binding is derived from the old stream, so they all have
         // to be rebuilt — bumping the generation is what tells F0 to re-attach.
         bindingsRef.current.clear()
         setCameraPermission("granted")
-        setMicrophonePermission("granted")
-        setSelectedCameraId(deviceId)
+        // The real device id, not the one we asked for: opening the default
+        // camera passes `undefined`, and without this the picker never ticks
+        // anything. The screen-share path already reads its settings this way.
+        setSelectedCameraId(
+          deviceId ?? stream.getVideoTracks()[0]?.getSettings().deviceId
+        )
         setLocalCamera(true)
         setLocalGeneration((generation) => generation + 1)
         setMembers((current) =>
@@ -328,23 +549,76 @@ export const useMockMeetingRuntime = (
         )
         void readDevices()
       } catch (error) {
-        const permission = permissionFromError(error)
-        setCameraPermission(permission)
-        setMicrophonePermission(permission)
+        setCameraPermission(permissionFromError(error))
         setLocalCamera(false)
       }
     },
     [readDevices]
   )
 
-  useEffect(
-    () => () => {
-      localStreamRef.current?.getTracks().forEach((track) => track.stop())
-      displayStreamRef.current?.getTracks().forEach((track) => track.stop())
-      echoRef.current?.dispose()
+  /**
+   * Gives the hardware back.
+   *
+   * Shared by the unmount cleanup and by `leave`, which is the case that was
+   * missing: hanging up does NOT unmount this hook — the frame keeps the runtime
+   * mounted and only flips `status` — so the camera light stayed on until you
+   * navigated away.
+   */
+  const releaseLocalMedia = useCallback(() => {
+    localStreamRef.current?.getTracks().forEach((track) => track.stop())
+    localStreamRef.current = null
+    localMicStreamRef.current?.getTracks().forEach((track) => track.stop())
+    localMicStreamRef.current = null
+    displayStreamRef.current?.getTracks().forEach((track) => track.stop())
+    displayStreamRef.current = null
+    echoRef.current?.dispose()
+    echoRef.current = null
+    bindingsRef.current.clear()
+  }, [])
+
+  /**
+   * Opens the real microphone, on its own.
+   *
+   * Switching device replaces only this stream — the camera is untouched — and
+   * bumps the generation so the metering effect re-subscribes to the new one.
+   */
+  const openMicrophone = useCallback(
+    async (deviceId?: string) => {
+      if (!navigator.mediaDevices?.getUserMedia) {
+        setMicrophonePermission("unavailable")
+        return
+      }
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: deviceId
+            ? {
+                deviceId: { exact: deviceId },
+                echoCancellation: true,
+                noiseSuppression: true,
+                autoGainControl: true,
+              }
+            : {
+                echoCancellation: true,
+                noiseSuppression: true,
+                autoGainControl: true,
+              },
+        })
+        localMicStreamRef.current?.getTracks().forEach((track) => track.stop())
+        localMicStreamRef.current = stream
+        setMicrophonePermission("granted")
+        setSelectedMicrophoneId(
+          deviceId ?? stream.getAudioTracks()[0]?.getSettings().deviceId
+        )
+        setLocalGeneration((generation) => generation + 1)
+        void readDevices()
+      } catch (error) {
+        setMicrophonePermission(permissionFromError(error))
+      }
     },
-    []
+    [readDevices]
   )
+
+  useEffect(() => () => releaseLocalMedia(), [releaseLocalMedia])
 
   /* ---------------- local screen share ---------------- */
 
@@ -530,8 +804,12 @@ export const useMockMeetingRuntime = (
           enabled: !localMuted,
           permission: microphonePermission,
           devices: devices.microphone.length ? devices.microphone : undefined,
+          selectedDeviceId: selectedMicrophoneId,
+          // Was a `() => Promise.resolve()` stub that existed only to satisfy
+          // the `Boolean(selectDevice)` gate that decides whether the chevron
+          // renders — picking a microphone did nothing at all.
           selectDevice: devices.microphone.length
-            ? () => Promise.resolve()
+            ? (deviceId: string) => openMicrophone(deviceId)
             : undefined,
         },
         camera: {
@@ -551,11 +829,24 @@ export const useMockMeetingRuntime = (
         },
       },
       leave: () => {
+        // Hardware first. Hanging up does not unmount this hook, so without
+        // this the camera light stays on after the call is over.
+        releaseLocalMedia()
+        setLocalCamera(false)
+        setLocalShare(null)
         setStatus("disconnected")
         onLeaveRef.current?.()
       },
       setMicrophoneEnabled: (enabled) => {
-        localStreamRef.current
+        // Unmuting with no stream yet is the gesture that asks for the mic —
+        // the same shape as the camera, and the only moment a permission
+        // prompt is expected.
+        if (enabled && !localMicStreamRef.current) {
+          setLocalMuted(false)
+          void openMicrophone(selectedMicrophoneId)
+          return
+        }
+        localMicStreamRef.current
           ?.getAudioTracks()
           .forEach((track) => (track.enabled = enabled))
         setLocalMuted(!enabled)
@@ -574,7 +865,11 @@ export const useMockMeetingRuntime = (
         if (enabled) return startLocalScreenShare()
         stopLocalScreenShare()
       },
-      setHandRaised: () => setMembers((current) => current),
+      // No `setHandRaised`: capability-by-presence is how the contract removes
+      // a control, so omitting it takes the raise-hand button out of the bar
+      // without the design system losing the capability for hosts that want it.
+      // `drivers.raiseHand` stays — it costs nothing and still exercises the
+      // `raisedHandAt` path.
       sendReaction: () => {},
       reconnect: () => setStatus("connected"),
       transcript: seed.transcript === false ? undefined : transcript,
@@ -715,5 +1010,5 @@ export const useMockMeetingRuntime = (
     return () => clearInterval(interval)
   }, [seed.churnEveryMs])
 
-  return { runtime, drivers }
+  return { runtime, drivers, scriptChat }
 }

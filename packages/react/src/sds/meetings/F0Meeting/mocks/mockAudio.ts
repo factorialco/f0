@@ -21,6 +21,12 @@ export type MockAudioEngine = {
    */
   runDirector: (getCandidateIds: () => string[]) => void
   /**
+   * Sets the floor directly, for when the caller already knows who is speaking
+   * (a script, or a real `activeSpeakersChanged`). Use instead of
+   * {@link runDirector}, never alongside it.
+   */
+  setSpeaking: (participantIds: readonly string[]) => void
+  /**
    * Meters a REAL stream (your microphone) into the same signals, so your own
    * waveform moves when you actually speak. Never routed to the speakers: that
    * would echo you back to yourself.
@@ -173,8 +179,22 @@ export const createMockAudioEngine = (
     }, 140)
   }
 
-  /** Above this a metered stream counts as speech rather than room noise. */
-  const SPEECH_LEVEL = 0.08
+  /**
+   * Above this a metered stream counts as speech rather than room noise.
+   *
+   * Raised from 0.08, which a laptop's speakers could clear on their own: the
+   * mock's synthesized voices came back in through the microphone and put YOU
+   * in the speaking set — your tile lit up and the transcript printed lines
+   * under your name.
+   */
+  const SPEECH_LEVEL = 0.16
+  /**
+   * How many consecutive samples (50ms each) have to agree before the speaking
+   * state flips. A single spike — a door, a cough, a burst of feedback — is not
+   * somebody taking the floor.
+   */
+  const SPEECH_HOLD = 4
+  const monitorRuns = new Map<string, { talking: boolean; count: number }>()
 
   const measure = (): void => {
     levelTimer = setInterval(() => {
@@ -186,9 +206,18 @@ export const createMockAudioEngine = (
       for (const [id, monitored] of monitors) {
         const level = rms(monitored.analyser, monitored.buffer)
         signals.setAudioLevel(id, level)
-        const talking = level > SPEECH_LEVEL
-        if (talking === monitoredSpeaking.has(id)) continue
-        if (talking) monitoredSpeaking.add(id)
+
+        const loud = level > SPEECH_LEVEL
+        const run = monitorRuns.get(id) ?? { talking: loud, count: 0 }
+        run.count = loud === run.talking ? 0 : run.count + 1
+        if (run.count >= SPEECH_HOLD) {
+          run.talking = loud
+          run.count = 0
+        }
+        monitorRuns.set(id, run)
+
+        if (run.talking === monitoredSpeaking.has(id)) continue
+        if (run.talking) monitoredSpeaking.add(id)
         else monitoredSpeaking.delete(id)
         changed = true
       }
@@ -229,18 +258,34 @@ export const createMockAudioEngine = (
     next()
   }
 
+  /**
+   * Hands the floor to exactly these people, for callers that already know who
+   * is talking — a script, or a real `activeSpeakersChanged`.
+   *
+   * Mutually exclusive with {@link runDirector} by construction: a seed either
+   * carries a script or it doesn't, and the runtime only starts one of the two.
+   */
+  const setSpeaking = (ids: readonly string[]): void => {
+    if (disposed) return
+    speakers.clear()
+    for (const id of ids) speakers.add(id)
+    publishSpeakers()
+  }
+
   scheduleSyllables()
   measure()
 
   const unmonitor = (participantId: string): void => {
     monitors.get(participantId)?.source.disconnect()
     monitors.delete(participantId)
+    monitorRuns.delete(participantId)
     if (monitoredSpeaking.delete(participantId)) publishSpeakers()
   }
 
   return {
     add,
     runDirector,
+    setSpeaking,
     monitor: (participantId, stream) => {
       if (!context || stream.getAudioTracks().length === 0) return
       unmonitor(participantId)

@@ -420,7 +420,10 @@ export type F0ChatCall = {
   startedAt: string
   /** ISO timestamp it ended. Drives the duration on `ended`. */
   endedAt?: string
-  /** Who is in the room right now. Only meaningful while `ringing` or `live`. */
+  /**
+   * Who is in the room right now while `ringing` or `live`, and who was in it
+   * once it has `ended`.
+   */
   participants?: F0ChatUser[]
   /**
    * Present only while the call can be joined. Its absence is what removes the
@@ -428,6 +431,22 @@ export type F0ChatCall = {
    * action. A host that omits it on an `ended` call needs no other flag.
    */
   join?: () => void
+  /**
+   * What the call was about, shown once it has `ended`. Plain text: the card
+   * renders it whole, and a transcript-sized block does not belong in a row of
+   * a conversation.
+   */
+  summary?: string
+  /**
+   * Footer buttons on the ended card. The transcript is the reason this exists
+   * — it is long, and where it opens (a drawer, a modal, a page) is the host's
+   * decision, not the card's.
+   */
+  actions?: {
+    label: string
+    icon?: IconType
+    onClick: () => void
+  }[]
 }
 
 /**

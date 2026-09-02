@@ -81,17 +81,30 @@ export const useWindowPlacement = (): {
     }
   }, [])
 
+  // `placementFromRect` builds a fresh placement and knows nothing about the
+  // panel, so both of these have to carry `panelWidth` over by hand — otherwise
+  // resizing or dragging the floating window silently resets the width the user
+  // chose for the side panel.
   const settle = useCallback(
-    (rect: F0Rect) => setPlacement(settlePlacement(rect, readViewport())),
+    (rect: F0Rect) =>
+      setPlacement((previous) => ({
+        ...settlePlacement(rect, readViewport()),
+        ...(previous.panelWidth !== undefined
+          ? { panelWidth: previous.panelWidth }
+          : {}),
+      })),
     [setPlacement]
   )
 
   // Resizing keeps the current anchor: only dragging re-decides the corner.
   const resize = useCallback(
     (rect: F0Rect) =>
-      setPlacement((previous) =>
-        placementFromRect(rect, previous.corner, readViewport())
-      ),
+      setPlacement((previous) => ({
+        ...placementFromRect(rect, previous.corner, readViewport()),
+        ...(previous.panelWidth !== undefined
+          ? { panelWidth: previous.panelWidth }
+          : {}),
+      })),
     [setPlacement]
   )
 

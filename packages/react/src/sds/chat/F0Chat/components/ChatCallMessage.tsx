@@ -35,12 +35,19 @@ const toAttendee = (user: F0ChatUser) => {
 }
 
 /**
- * The call row: a compact {@link F0MeetingCard} inside the transcript.
+ * The call row: an {@link F0MeetingCard} inside the transcript.
  *
  * Rendered natively rather than through a host render-prop. The transcript is
  * virtualized, and a node of unknown height injected by the host is exactly what
- * throws off Virtuoso's measurements — which is also why the card is `compact`,
- * so a call occupies one row's worth of space and not a block.
+ * throws off Virtuoso's measurements.
+ *
+ * That is also why a live call is `compact` — it occupies one row's worth of
+ * space, and it is rewritten on every room event, so its height would otherwise
+ * move under the reader. An ENDED call is the one exception: it is written once
+ * and never again, and its height is fixed at mount. Nothing in it is
+ * collapsible or lazy, which is precisely why the transcript stays OUT of the
+ * card and behind an action. Put anything expandable here and the measurement
+ * problem `compact` protects against comes straight back.
  */
 export const ChatCallMessage = ({ call }: { call: F0ChatCall }): ReactNode => {
   const i18n = useI18n()
@@ -57,17 +64,27 @@ export const ChatCallMessage = ({ call }: { call: F0ChatCall }): ReactNode => {
         ? i18n.chat.call.ended
         : i18n.t("chat.call.startedBy", { name: call.startedBy.name })
 
+  const isEnded = call.state === "ended"
+
   return (
     <div className="px-4 py-2">
       <F0MeetingCard
-        compact
+        compact={!isEnded}
         state={CARD_STATE[call.state]}
         title={title}
         startsAt={new Date(call.startedAt)}
         endsAt={call.endedAt ? new Date(call.endedAt) : undefined}
         attendees={participants.map(toAttendee)}
         presentCount={participants.length}
+        // `auto` reads a finished meeting as a count and labels it "guests",
+        // which is the invited wording — wrong for people who were actually in
+        // the call. A huddle's roster is small, so show the faces.
+        attendeesDisplay={isEnded ? "avatars" : undefined}
         join={join}
+        // The card only reads these once it is `finished`, so passing them
+        // unconditionally cannot leak a summary onto a ringing call.
+        summary={call.summary}
+        secondaryActions={call.actions}
       />
     </div>
   )

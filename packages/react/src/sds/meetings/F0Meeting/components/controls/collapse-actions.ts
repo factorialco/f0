@@ -2,7 +2,14 @@ import { type F0MeetingAction, type F0MeetingSurfaceMode } from "../../types"
 
 export const ACTION_SIZE = 40
 export const ACTION_GAP = 8
-/** The permanent "more" button, which never collapses. */
+/**
+ * The "more" button, drawn only when something actually collapsed into it.
+ *
+ * It used to be permanent — "the design gives the room a permanent 'more'
+ * affordance" — but a menu that is always there and usually empty is a control
+ * that teaches you to ignore it. Its slot is now reserved only once the bar has
+ * established that it is needed.
+ */
 export const OVERFLOW_SLOT = 40
 /** A mute toggle fused with its device chevron. */
 export const MEDIA_CONTROL_SIZE = 89
@@ -91,12 +98,18 @@ export const collapseActions = (
   }
 
   const present = new Set(applicable.map((action) => action.id))
-  // The "more" button is always drawn, so its slot is never available.
-  const budget = barWidth - OVERFLOW_SLOT - ACTION_GAP
 
-  if (barWidth <= 0 || measure(applicable, present) <= budget) {
+  // Ask first whether everything fits with NO overflow button at all. This has
+  // to come first because the question is circular: reserving the slot can be
+  // what forces something out, and then the button exists only to hold the
+  // thing its own reservation displaced.
+  if (barWidth <= 0 || measure(applicable, present) <= barWidth) {
     return { visible: applicable, overflow: [] }
   }
+
+  // Something genuinely has to go, so the button will be drawn and its slot is
+  // no longer available.
+  const budget = barWidth - OVERFLOW_SLOT - ACTION_GAP
 
   const ranked = [...applicable].sort((a, b) => {
     const pinned = Number(Boolean(b.pinned)) - Number(Boolean(a.pinned))

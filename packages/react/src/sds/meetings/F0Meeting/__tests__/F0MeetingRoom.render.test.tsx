@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
-import { screen, userEvent, zeroRender } from "@/testing/test-utils"
+import { screen, userEvent, within, zeroRender } from "@/testing/test-utils"
 
 import { F0Meeting } from "../F0Meeting"
 import { F0MeetingRoom } from "../F0MeetingRoom"
@@ -250,12 +250,13 @@ describe("mode switch", () => {
       </F0Meeting>
     )
 
-  // The switch is a toggle group, so its options are radios rather than
-  // buttons: exactly one is chosen at a time.
-  const modeOption = (name: RegExp) => screen.getByRole("radio", { name })
-  const toPanel = () => modeOption(/side panel/i)
-  const toFloating = () => modeOption(/floating window/i)
-  const toFullscreen = () => modeOption(/fill the screen/i)
+  // Destinations, not options: the mode you are in is not offered, so there is
+  // never a button that does nothing.
+  const modeButton = (name: RegExp) => screen.getByRole("button", { name })
+  const queryMode = (name: RegExp) => screen.queryByRole("button", { name })
+  const toPanel = () => modeButton(/side panel/i)
+  const toFloating = () => modeButton(/floating window/i)
+  const toFullscreen = () => modeButton(/fill the screen/i)
 
   it("moves the call between the three modes", async () => {
     renderSurface()
@@ -271,36 +272,30 @@ describe("mode switch", () => {
     expect(window).toHaveAttribute("data-mode", "floating")
   })
 
-  it("marks exactly one mode as the chosen one", async () => {
+  it("does not offer the mode you are already in", async () => {
     renderSurface()
-    expect(toFloating()).toHaveAttribute("aria-checked", "true")
-    expect(toPanel()).toHaveAttribute("aria-checked", "false")
+    // Starts floating, so floating is the one missing.
+    expect(queryMode(/floating window/i)).toBeNull()
+    expect(toPanel()).toBeVisible()
+    expect(toFullscreen()).toBeVisible()
 
     await userEvent.click(toPanel())
-    expect(toPanel()).toHaveAttribute("aria-checked", "true")
-    expect(toFloating()).toHaveAttribute("aria-checked", "false")
+    expect(queryMode(/side panel/i)).toBeNull()
+    expect(toFloating()).toBeVisible()
+    expect(toFullscreen()).toBeVisible()
   })
 
-  it("cannot be left with no mode at all", async () => {
-    // Clicking the active option in a toggle group would normally clear it.
+  it("always offers exactly the two places you are not", async () => {
     renderSurface()
-    await userEvent.click(toFloating())
-    expect(toFloating()).toHaveAttribute("aria-checked", "true")
-    expect(screen.getByTestId("meeting-window")).toHaveAttribute(
-      "data-mode",
-      "floating"
-    )
-  })
+    const group = screen.getByRole("group", { name: /meeting position/i })
+    expect(within(group).getAllByRole("button")).toHaveLength(2)
 
-  it("keeps one chrome size across every surface", async () => {
-    // The design gives the header's controls a 32px slot whatever the window
-    // is doing, so the switch does not change shape as the room resizes —
-    // moving between modes should not move the control you just used.
-    renderSurface()
-    const floating = toFloating().className
     await userEvent.click(toFullscreen())
-    expect(toFullscreen().className).toBe(floating)
-    expect(floating).toContain("h-8")
+    expect(
+      within(
+        screen.getByRole("group", { name: /meeting position/i })
+      ).getAllByRole("button")
+    ).toHaveLength(2)
   })
 
   it("has no button for the pill, which is derived rather than chosen", () => {

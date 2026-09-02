@@ -9,6 +9,8 @@ import {
   TILE_ASPECT_MAX,
   TILE_ASPECT_MIN,
   gapFor,
+  gapForTile,
+  radiusForTile,
   minTileWidthFor,
 } from "../../layout/constants"
 import { resolveAutoFocus } from "../../layout/auto-focus"
@@ -29,7 +31,13 @@ import {
 import { OverflowTile } from "./OverflowTile"
 import { ParticipantTile } from "./ParticipantTile"
 
-type PlacedTile = { tile: F0MeetingTile; rect: F0Rect; compact: boolean }
+type PlacedTile = {
+  tile: F0MeetingTile
+  rect: F0Rect
+  compact: boolean
+  /** Corner radius in px, scaled to this tile's own width. */
+  radius: number
+}
 
 type GridLayout = {
   placed: PlacedTile[]
@@ -99,23 +107,33 @@ export const MeetingGrid = () => {
       return EMPTY_LAYOUT
     }
 
-    const gap = gapFor(box.width)
     const minTileWidth = minTileWidthFor(box.width)
-    // Solve first, then decide. Whether the room needs a spotlight is a
-    // question about whether the grid can seat everyone, and the grid is the
-    // only thing that knows. Guessing from the container's aspect ratio — the
-    // old `SPOTLIGHT_ASPECT` — spotlighted a two-person call in a side panel,
-    // where stacking the two of them fills it perfectly well.
-    const solution = solveGrid({
-      count: tiles.length,
-      width: box.width,
-      height: box.height,
-      gap,
-      minAspect: TILE_ASPECT_MIN,
-      maxAspect: TILE_ASPECT_MAX,
-      preferredAspect: DEFAULT_ASPECT_RATIO,
-      minTileWidth,
-    })
+    const solveWith = (gap: number) =>
+      // Solve first, then decide. Whether the room needs a spotlight is a
+      // question about whether the grid can seat everyone, and the grid is the
+      // only thing that knows. Guessing from the container's aspect ratio — the
+      // old `SPOTLIGHT_ASPECT` — spotlighted a two-person call in a side panel,
+      // where stacking the two of them fills it perfectly well.
+      solveGrid({
+        count: tiles.length,
+        width: box.width,
+        height: box.height,
+        gap,
+        minAspect: TILE_ASPECT_MIN,
+        maxAspect: TILE_ASPECT_MAX,
+        preferredAspect: DEFAULT_ASPECT_RATIO,
+        minTileWidth,
+      })
+
+    // Two passes, and only two. The gap now depends on the tile size, and the
+    // tile size depends on the gap — so solve once with the container's guess,
+    // read the tile that produces, and re-solve with the gap that tile actually
+    // wants. `solveGrid` is pure and cheap, and stopping at two makes it
+    // deterministic rather than a settling loop.
+    const provisionalGap = gapFor(box.width)
+    const provisional = solveWith(provisionalGap)
+    const gap = gapForTile(provisional.tileWidth)
+    const solution = gap === provisionalGap ? provisional : solveWith(gap)
 
     const gridSeatsEveryone = solution.visibleCount >= tiles.length
     const forcedByFit = !gridSeatsEveryone && tiles.length > 1
@@ -174,11 +192,19 @@ export const MeetingGrid = () => {
         : spotlightSolution.strip.length
 
       const placed: PlacedTile[] = [
-        { tile: spotlight, rect: spotlightSolution.spotlight, compact: false },
+        {
+          tile: spotlight,
+          rect: spotlightSolution.spotlight,
+          compact: false,
+          radius: radiusForTile(spotlightSolution.spotlight.width),
+        },
         ...spotlightSolution.strip.slice(0, stripSlots).map((rect, index) => ({
           tile: rest[index] as F0MeetingTile,
           rect,
           compact: true,
+          // From each tile's OWN width, so the strip's thumbnails are rounded
+          // to their size and not to the spotlight's.
+          radius: radiusForTile(rect.width),
         })),
       ]
 
@@ -223,6 +249,7 @@ export const MeetingGrid = () => {
         tile,
         rect: rects[index] as F0Rect,
         compact: solution.tileWidth < 160,
+        radius: radiusForTile(solution.tileWidth),
       })),
       overflow: ordered.slice(visibleCount),
       overflowRect: hasOverflow ? (rects[visibleCount] ?? null) : null,
@@ -239,7 +266,7 @@ export const MeetingGrid = () => {
       data-testid="meeting-grid"
     >
       <AnimatePresence initial={false}>
-        {layout.placed.map(({ tile, rect, compact }) => (
+        {layout.placed.map(({ tile, rect, compact, radius }) => (
           <motion.div
             key={tile.key}
             className="absolute left-0 top-0"
@@ -273,6 +300,7 @@ export const MeetingGrid = () => {
             <ParticipantTile
               tile={tile}
               compact={compact}
+              radius={radius}
               isFocused={layout.focusKey === tile.key}
               canFocus={tiles.length > 1}
               onToggleFocus={handleToggleFocus}

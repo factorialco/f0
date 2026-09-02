@@ -1,15 +1,13 @@
 import { Fragment, useMemo } from "react"
 
-import { F0Icon } from "@/components/F0Icon"
+import { F0Button } from "@/components/F0Button"
+import {
+  Dropdown,
+  type DropdownItemObject,
+} from "@/experimental/Navigation/Dropdown"
 import { Ellipsis } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
-import { cn, focusRing } from "@/lib/utils"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/ui/dropdown-menu"
+import { cn } from "@/lib/utils"
 
 import { useMeasuredBox } from "../../layout/useMeasuredBox"
 import { useF0MeetingRoster } from "../../providers/F0MeetingProvider"
@@ -22,6 +20,23 @@ import { MeetingMediaControl } from "./MeetingMediaControl"
 export type MeetingControlBarProps = {
   actions: F0MeetingAction[]
 }
+
+/**
+ * A collapsed action, as a menu row.
+ *
+ * The hand-rolled menu this replaces dropped two things on the floor:
+ * `disabledReason` was never shown, so a disabled row gave no reason; and
+ * `variant: "critical"` was lost, so "Leave" turned into an ordinary item the
+ * moment the bar was narrow enough to collapse it.
+ */
+const toDropdownItem = (action: F0MeetingAction): DropdownItemObject => ({
+  label: action.label,
+  icon: action.pressed && action.activeIcon ? action.activeIcon : action.icon,
+  onClick: () => action.onClick?.(),
+  disabled: action.disabled,
+  ...(action.disabledReason ? { disabledTooltip: action.disabledReason } : {}),
+  ...(action.variant === "critical" ? { critical: true } : {}),
+})
 
 /**
  * The action bar. Everything about it is host-extensible: F0 only guarantees
@@ -58,7 +73,7 @@ export const MeetingControlBar = ({ actions }: MeetingControlBarProps) => {
       ref={containerRef}
       className={cn(
         "flex w-full items-center justify-center",
-        !isMinimized && "h-16"
+        !isMinimized && "h-20"
       )}
       data-testid="meeting-control-bar"
     >
@@ -110,50 +125,20 @@ export const MeetingControlBar = ({ actions }: MeetingControlBarProps) => {
           )
         })}
 
-        {/* Always present, not only when something has collapsed: the design
-            gives the room a permanent "more" affordance, and a control that
-            appears and disappears as the window resizes is worse than one that
-            is sometimes short. */}
-        {!isMinimized && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button
-                type="button"
-                aria-label={i18n.meeting.moreActions}
-                className={cn(
-                  "flex items-center justify-center rounded-xl bg-f1-background-secondary text-f1-foreground hover:bg-f1-background-secondary-hover",
-                  compact ? "h-8 w-8" : "h-10 w-10",
-                  focusRing()
-                )}
-              >
-                <F0Icon icon={Ellipsis} size={compact ? "sm" : "md"} />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" side="top">
-              {overflow.map((action) => (
-                <DropdownMenuItem
-                  key={action.id}
-                  onSelect={action.onClick}
-                  disabled={action.disabled}
-                >
-                  <F0Icon
-                    icon={
-                      action.pressed && action.activeIcon
-                        ? action.activeIcon
-                        : action.icon
-                    }
-                    size="sm"
-                  />
-                  {action.label}
-                </DropdownMenuItem>
-              ))}
-              {overflow.length === 0 && (
-                <DropdownMenuItem disabled>
-                  {i18n.meeting.noMoreActions}
-                </DropdownMenuItem>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+        {/* Only when something actually collapsed into it. A menu that is
+            always there and usually empty is a control that teaches you to
+            ignore it — and the empty state it used to need ("No more actions")
+            is gone with it. */}
+        {!isMinimized && overflow.length > 0 && (
+          <Dropdown items={overflow.map(toDropdownItem)} align="end">
+            <F0Button
+              variant="ghost"
+              size={compact ? "sm" : "md"}
+              hideLabel
+              icon={Ellipsis}
+              label={i18n.meeting.moreActions}
+            />
+          </Dropdown>
         )}
       </div>
     </div>

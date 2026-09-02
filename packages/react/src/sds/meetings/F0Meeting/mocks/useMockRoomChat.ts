@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 /** One line of the call's own chat. */
 export type MockRoomMessage = {
@@ -26,30 +26,52 @@ export type MockRoomChat = {
  * Wiring this tab to the conversation's transcript would quietly promise that
  * what you type here survives the call. It does not.
  */
-export const useMockRoomChat = (roomId: string): MockRoomChat => {
-  const [messages, setMessages] = useState<MockRoomMessage[]>([])
+export const useMockRoomChat = (
+  roomId: string,
+  /**
+   * Who "you" are in THIS room. Previously hard-coded to `"me"`, which happens
+   * to match the standalone seeds but not the huddle's local id — so in the
+   * frame demo your own messages resolved to nobody and rendered under the
+   * other person's name.
+   */
+  localParticipantId = "me",
+  /** Lines that arrive from elsewhere — the script typing during the call. */
+  incoming: readonly MockRoomMessage[] = []
+): MockRoomChat => {
+  const [sent, setSent] = useState<MockRoomMessage[]>([])
   const counter = useRef(0)
 
   // A new room is a new chat. Keeping the old lines would be the exact
   // misunderstanding this hook exists to prevent.
   useEffect(() => {
-    setMessages([])
+    setSent([])
     counter.current = 0
   }, [roomId])
 
-  const send = useCallback((text: string) => {
-    const trimmed = text.trim()
-    if (!trimmed) return
-    setMessages((current) => [
-      ...current,
-      {
-        id: `room-msg-${counter.current++}`,
-        participantId: "me",
-        text: trimmed,
-        at: new Date().toISOString(),
-      },
-    ])
-  }, [])
+  const send = useCallback(
+    (text: string) => {
+      const trimmed = text.trim()
+      if (!trimmed) return
+      setSent((current) => [
+        ...current,
+        {
+          id: `room-msg-${counter.current++}`,
+          participantId: localParticipantId,
+          text: trimmed,
+          at: new Date().toISOString(),
+        },
+      ])
+    },
+    [localParticipantId]
+  )
+
+  const messages = useMemo(
+    () =>
+      [...incoming, ...sent].sort((a, b) =>
+        a.at < b.at ? -1 : a.at > b.at ? 1 : 0
+      ),
+    [incoming, sent]
+  )
 
   return { messages, send }
 }

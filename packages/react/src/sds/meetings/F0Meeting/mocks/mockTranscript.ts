@@ -2,26 +2,35 @@ import { type F0MeetingTranscriptSegment } from "../types"
 import { mulberry32 } from "./rng"
 
 /**
- * Sentences the mock speakers "say". Deliberately mundane work talk: the point
- * is to exercise wrapping, long and short lines and the interim→final swap,
- * not to be read.
+ * Sentences the mock speakers "say" when nothing scripts them. Deliberately
+ * mundane work talk: the point is to exercise wrapping, long and short lines
+ * and the interim→final swap, not to be read.
+ *
+ * A seed carrying a script uses {@link createScriptedTranscriptDriver} instead,
+ * where the words are the ones actually being "spoken".
  */
 const PHRASES = [
-  "Vale, entonces lo dejamos para el sprint que viene.",
-  "¿Podéis verme la pantalla ahora?",
-  "Yo creo que eso lo cubre el caso de uso que comentaba Marta.",
-  "Perdona, se me ha cortado un momento, ¿puedes repetir la última parte?",
-  "Lo apunto y lo reviso esta tarde con el equipo de plataforma.",
-  "Sí, exacto, es justo lo que pasaba con el panel lateral.",
-  "Me parece bien, pero habría que medirlo antes de decidir.",
-  "Os paso el enlace por el chat cuando terminemos.",
-  "¿Alguien tiene contexto de por qué se hizo así originalmente?",
-  "Creo que con eso ya tenemos suficiente para empezar.",
+  "So that lands in next week's sprint, then.",
+  "Can everyone see my screen now?",
+  "I think the case you mentioned earlier already covers that.",
+  "Sorry, you cut out for a second — can you repeat the last part?",
+  "I'll note it down and go through it with platform this afternoon.",
+  "Yes, exactly, that is what was happening with the side panel.",
+  "Fine by me, but I'd want to measure it before we commit.",
+  "I'll drop the link in the chat when we're done.",
+  "Does anyone have context on why it was built that way?",
+  "I think that's enough for us to get started.",
 ] as const
 
 export type TranscriptDriver = {
-  /** Someone took the floor: opens an interim segment that grows word by word. */
-  start: (participantId: string) => void
+  /**
+   * Someone took the floor: opens an interim segment that grows word by word.
+   *
+   * `text` is what they are actually saying. Omit it and a phrase is drawn from
+   * {@link PHRASES} — which is the unscripted mode, where the words are filler
+   * and only the shape of the stream matters.
+   */
+  start: (participantId: string, text?: string) => void
   /** They stopped: the segment lands as final. */
   stop: (participantId: string) => void
   dispose: () => void
@@ -62,9 +71,10 @@ export const createTranscriptDriver = (
     })
   }
 
-  const start = (participantId: string) => {
+  const start = (participantId: string, text?: string) => {
     if (disposed || open.has(participantId)) return
-    const phrase = PHRASES[Math.floor(random() * PHRASES.length)] as string
+    const phrase =
+      text ?? (PHRASES[Math.floor(random() * PHRASES.length)] as string)
     const utterance = {
       id: `seg-${counter++}`,
       words: phrase.split(" "),

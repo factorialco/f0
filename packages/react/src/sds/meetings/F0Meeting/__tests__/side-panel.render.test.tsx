@@ -66,10 +66,13 @@ describe("the in-call side panel", () => {
   it("mounts only the selected tab", async () => {
     // The chat's transcript is virtualized: measuring its rows inside a hidden
     // subtree yields zero heights it then has to correct on reveal.
+    //
+    // The tabs are f0's `Tabs`, which renders a navigation of links rather than
+    // an ARIA tab widget — so this looks for a link, not a `role="tab"`.
     renderRoom("fullscreen", panel)
     await userEvent.click(chatButton())
     expect(screen.queryByText("the notes")).toBeNull()
-    await userEvent.click(screen.getByRole("tab", { name: "Notes" }))
+    await userEvent.click(screen.getByRole("link", { name: "Notes" }))
     expect(screen.getByText("the notes")).toBeInTheDocument()
     expect(screen.queryByText("the conversation")).toBeNull()
   })
