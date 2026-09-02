@@ -405,9 +405,7 @@ describe("F0SharingDialog", () => {
     const onRemoveAccess = vi.fn()
     renderDialog({ onRemoveAccess })
 
-    await userEvent.click(
-      screen.getByRole("button", { name: "Remove access for Blake Taylor" })
-    )
+    await userEvent.click(screen.getByRole("button", { name: "Remove access" }))
 
     expect(onRemoveAccess).toHaveBeenCalledWith(accesses[1])
     await waitFor(() => {
@@ -441,7 +439,7 @@ describe("F0SharingDialog", () => {
     })
 
     const removeButton = screen.getByRole("button", {
-      name: "Remove access for Blake Taylor",
+      name: "Remove access",
     })
     expect(removeButton).toBeDisabled()
     await userEvent.click(removeButton)
@@ -462,9 +460,7 @@ describe("F0SharingDialog", () => {
         name: "Access level for Blake Taylor",
       })
     ).toBeDisabled()
-    expect(
-      screen.getByRole("button", { name: "Remove access for Blake Taylor" })
-    ).toBeDisabled()
+    expect(screen.getByRole("button", { name: "Remove access" })).toBeDisabled()
   })
 
   it("disables access mutations while an update is in progress", async () => {
@@ -481,9 +477,7 @@ describe("F0SharingDialog", () => {
         name: "Access level for Blake Taylor",
       })
     ).toBeDisabled()
-    expect(
-      screen.getByRole("button", { name: "Remove access for Blake Taylor" })
-    ).toBeDisabled()
+    expect(screen.getByRole("button", { name: "Remove access" })).toBeDisabled()
   })
 
   it("shows an empty access state and exposes dataTestId", () => {

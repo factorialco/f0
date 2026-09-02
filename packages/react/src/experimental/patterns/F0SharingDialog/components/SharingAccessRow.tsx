@@ -37,7 +37,7 @@ export function SharingAccessRow<
         })),
     [roles]
   )
-  const removeAccessLabel = i18n.t("sharingDialog.removeAccess", {
+  const removeAccessForLabel = i18n.t("sharingDialog.removeAccessFor", {
     name: person.label,
   })
 
@@ -79,7 +79,7 @@ export function SharingAccessRow<
           actions={[
             {
               icon: Delete,
-              label: removeAccessLabel,
+              label: i18n.sharingDialog.removeAccess,
               onClick: handleRemoveAccess,
               variant: "critical",
               disabled: !access.canRemove || disabled,
@@ -109,7 +109,7 @@ export function SharingAccessRow<
               disabled={disabled}
               hideLabel
               icon={Delete}
-              label={removeAccessLabel}
+              label={removeAccessForLabel}
               onClick={handleRemoveAccess}
               variant="ghost"
             />

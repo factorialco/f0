@@ -125,7 +125,7 @@ export function F0SharingDialog<
     >
       <DataTestIdWrapper dataTestId={dataTestId}>
         <div className="flex flex-col gap-6">
-          <div className="flex flex-col gap-3 md:flex-row md:items-end">
+          <div className="flex min-w-0 flex-row items-end gap-3 max-[560px]:flex-col max-[560px]:items-stretch">
             <div className="min-w-0 flex-1" ref={peopleSelectorRef}>
               <SharingPeopleSelector
                 peopleSource={peopleSource}

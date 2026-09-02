@@ -47,6 +47,12 @@ const people: Person[] = [
     lastName: "Wilson",
     jobTitle: "Finance specialist",
   },
+  {
+    id: "person-5",
+    firstName: "Avery",
+    lastName: "Montgomery-Worthington",
+    jobTitle: "International people operations programme manager",
+  },
 ]
 
 const peopleSource = createDataSourceDefinition<Person>({
@@ -253,6 +259,135 @@ export const Default: Story = {
   },
 }
 
+export const NarrowViewport: Story = {
+  tags: ["no-sidebar"],
+  parameters: {
+    viewport: {
+      options: {
+        narrowSharingDialog: {
+          name: "Narrow sharing dialog",
+          styles: {
+            width: "668px",
+            height: "720px",
+          },
+        },
+      },
+    },
+  },
+  globals: {
+    viewport: {
+      value: "narrowSharingDialog",
+      isRotated: false,
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const page = within(canvasElement.closest("body")!)
+
+    await step("Select a person", async () => {
+      const peopleSelect = page.getByRole("combobox", { name: "People" })
+      await userEvent.click(peopleSelect)
+      await userEvent.click(
+        await page.findByRole("option", { name: /Casey Lee/ })
+      )
+      await userEvent.click(
+        page.getByRole("button", { name: "Apply selection" })
+      )
+      await userEvent.keyboard("{Escape}")
+      await waitFor(() => {
+        expect(
+          page.getByRole("combobox", {
+            name: "Access level for selected people",
+          })
+        ).toBeInTheDocument()
+      })
+    })
+
+    await step(
+      "Keep the sharing controls inline without overflow",
+      async () => {
+        const peopleSelect = page.getByRole("combobox", { name: "People" })
+        const shareButton = page.getByRole("button", { name: "Share" })
+        const scrollViewport =
+          canvasElement.ownerDocument.querySelector<HTMLElement>(
+            "[data-scroll-container]"
+          )
+
+        if (!scrollViewport) {
+          throw new Error("F0SharingDialog scroll viewport was not found")
+        }
+
+        expect(
+          Math.abs(
+            peopleSelect.getBoundingClientRect().top -
+              shareButton.getBoundingClientRect().top
+          )
+        ).toBeLessThanOrEqual(1)
+        expect(scrollViewport.scrollWidth).toBeLessThanOrEqual(
+          scrollViewport.clientWidth
+        )
+      }
+    )
+  },
+}
+
+export const MobileViewport: Story = {
+  tags: ["no-sidebar"],
+  parameters: {
+    // F0Select currently nests a checkbox inside each option. Keep axe running
+    // in todo mode while that inherited component debt is resolved.
+    a11y: { test: "todo" },
+    viewport: {
+      options: {
+        mobileSharingDialog: {
+          name: "Mobile sharing dialog",
+          styles: {
+            width: "320px",
+            height: "568px",
+          },
+        },
+      },
+    },
+  },
+  globals: {
+    viewport: {
+      value: "mobileSharingDialog",
+      isRotated: false,
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const page = within(canvasElement.closest("body")!)
+
+    await step("Open the people selector", async () => {
+      await userEvent.click(page.getByRole("combobox", { name: /^People$/ }))
+      await waitFor(() => {
+        expect(page.getByRole("listbox")).toBeVisible()
+        expect(
+          page.getByRole("option", {
+            name: /Avery Montgomery-Worthington/,
+          })
+        ).toBeVisible()
+        expect(
+          page.getByRole("button", { name: "Apply selection" })
+        ).toBeVisible()
+      })
+    })
+
+    await step("Keep the popup within the available width", async () => {
+      const popup = page
+        .getByRole("listbox")
+        .closest<HTMLElement>("[data-radix-popper-content-wrapper]")
+
+      if (!popup) {
+        throw new Error("People selector popup was not found")
+      }
+
+      expect(popup.getBoundingClientRect().right).toBeLessThanOrEqual(
+        canvasElement.ownerDocument.documentElement.clientWidth
+      )
+    })
+  },
+}
+
 export const EmptyAccessList: Story = {
   tags: ["no-sidebar"],
   args: {
@@ -273,6 +408,29 @@ export const FullConfiguration: Story = {
         canRemove: false,
       },
     ],
+  },
+  play: async ({ canvasElement, step }) => {
+    const page = within(canvasElement.closest("body")!)
+
+    await step("Show a compact remove action", async () => {
+      await userEvent.click(
+        page.getByRole("combobox", {
+          name: "Access level for Blake Taylor",
+        })
+      )
+
+      const removeAction = await page.findByRole("button", {
+        name: "Remove access",
+      })
+      expect(removeAction).toHaveTextContent(/^Remove access$/)
+      expect(
+        page.queryByRole("button", {
+          name: "Remove access for Blake Taylor",
+        })
+      ).not.toBeInTheDocument()
+
+      await userEvent.keyboard("{Escape}")
+    })
   },
 }
 
@@ -307,5 +465,7 @@ export const AmbiguousTitleExample: Story = {
 export const Snapshot: Story = {
   tags: ["no-sidebar"],
   args: FullConfiguration.args,
-  parameters: withSnapshot({}),
+  parameters: withSnapshot(MobileViewport.parameters ?? {}),
+  globals: MobileViewport.globals,
+  play: MobileViewport.play,
 }

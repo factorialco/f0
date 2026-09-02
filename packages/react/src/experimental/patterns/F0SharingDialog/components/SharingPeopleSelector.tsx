@@ -51,6 +51,7 @@ export function SharingPeopleSelector<
           "[&_[data-testid=clear-button]+div]:invisible",
           "[&_[data-testid=clear-button]+div]:w-0",
           "[&_[data-testid=clear-button]+div]:min-w-0",
+          "[&_[data-testid=clear-button]+div]:overflow-hidden",
         ]
       )}
     >
@@ -60,6 +61,7 @@ export function SharingPeopleSelector<
         clearable
         disableSelectAll
         disabled={disabled}
+        fitContentWidth
         hideLabel
         label={i18n.sharingDialog.peopleLabel}
         mapOptions={mapPerson}
