@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.83.0](https://github.com/factorialco/f0/compare/f0-react-v6.82.1...f0-react-v6.83.0) (2026-09-02)
+
+
+### Features
+
+* **CommunityPost:** show the body whole where the post is the destination ([#5263](https://github.com/factorialco/f0/issues/5263)) ([51df876](https://github.com/factorialco/f0/commit/51df87608f7d992971a19b2e4e2fcbb60d585ccf))
+
 ## [6.82.1](https://github.com/factorialco/f0/compare/f0-react-v6.82.0...f0-react-v6.82.1) (2026-09-02)
 
 
