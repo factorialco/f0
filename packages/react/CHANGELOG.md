@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.80.0](https://github.com/factorialco/f0/compare/f0-react-v6.79.0...f0-react-v6.80.0) (2026-09-02)
+
+
+### Features
+
+* **ChatSpinner:** exact One mark at rest, non-pixelated edge, reworked motion ([#5335](https://github.com/factorialco/f0/issues/5335)) ([842a689](https://github.com/factorialco/f0/commit/842a689a524bd7d12d6080015f37ed0d78acb90d))
+
 ## [6.79.0](https://github.com/factorialco/f0/compare/f0-react-v6.78.4...f0-react-v6.79.0) (2026-09-01)
 
 
