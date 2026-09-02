@@ -7,7 +7,7 @@ import {
   RecordType,
   SortingsDefinition,
 } from "@/hooks/datasource"
-import { Kanban, List, Organization, Pencil, Table } from "@/icons/app"
+import { Kanban, List, Masonry, Organization, Pencil, Table } from "@/icons/app"
 
 import { DataCollectionSettingsContextType } from "../../Settings/SettingsProvider"
 import { SummariesDefinition } from "../../types"
@@ -264,7 +264,10 @@ export const collectionVisualizations: CollectionVisualizations<
   },
   card: {
     name: "Card",
-    icon: Kanban,
+    // Distinct from `kanban`'s columns: the view switcher is icon-only, so two
+    // views sharing a glyph would render two identical, indistinguishable
+    // segments. Every view's icon is fixed here and never customizable.
+    icon: Masonry,
     settings: {
       default: {},
     },
