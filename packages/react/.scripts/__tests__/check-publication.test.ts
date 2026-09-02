@@ -71,6 +71,7 @@ it("fails closed for an incomplete published package", () => {
       "Non-production declaration is published: dist/components/__stories__/Example.stories.d.ts",
       "Source font is duplicated in the package: assets/fonts/Inter.woff2",
       "Published styles reference missing or unpackable asset: fonts/missing.woff2",
+      "Published styles are missing required font: fonts/InterVariable-latin-normal.woff2",
       "Published styles are missing semantic icon class: text-f1-icon",
       expect.stringMatching(
         /^Published styles are \d+ B Brotli; ceiling is 49152 B$/

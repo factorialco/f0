@@ -22,6 +22,7 @@ interface PackageManifest {
 type PackageExports = Record<string, unknown>
 
 const PUBLISHED_STYLES_BROTLI_CEILING = 48 * 1024
+const REQUIRED_PUBLISHED_FONT = "fonts/InterVariable-latin-normal.woff2"
 const SEMANTIC_ICON_CLASSES = [
   "text-f1-icon",
   "text-f1-icon-secondary",
@@ -240,6 +241,7 @@ export function validatePublishedStyleAssets(packageRoot: string): string[] {
   const stylesheet = readFileSync(stylesheetPath, "utf8")
   const errors: string[] = []
   const invalidReferences = new Set<string>()
+  const publishedReferences = new Set<string>()
   valueParser(stylesheet).walk((node) => {
     if (node.type !== "function" || node.value !== "url") return
     if (node.nodes.length !== 1) return
@@ -253,10 +255,9 @@ export function validatePublishedStyleAssets(packageRoot: string): string[] {
       return
     }
 
-    const assetPath = resolve(
-      dirname(stylesheetPath),
-      reference.value.split(/[?#]/, 1)[0]
-    )
+    const assetReference = reference.value.split(/[?#]/, 1)[0]
+    publishedReferences.add(assetReference)
+    const assetPath = resolve(dirname(stylesheetPath), assetReference)
     const packageRelativePath = relative(packageRoot, assetPath)
     if (
       packageRelativePath.startsWith("..") ||
@@ -273,6 +274,12 @@ export function validatePublishedStyleAssets(packageRoot: string): string[] {
         `Published styles reference missing or unpackable asset: ${reference}`
     )
   )
+
+  if (!publishedReferences.has(REQUIRED_PUBLISHED_FONT)) {
+    errors.push(
+      `Published styles are missing required font: ${REQUIRED_PUBLISHED_FONT}`
+    )
+  }
 
   for (const className of SEMANTIC_ICON_CLASSES) {
     if (!new RegExp(`\\.${className}(?=[^a-zA-Z0-9_-])`).test(stylesheet)) {

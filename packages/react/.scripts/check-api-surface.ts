@@ -1,8 +1,9 @@
+import consola from "consola"
 /**
  * Public API surface breaking-change detector.
  *
  * Snapshots the public TypeScript API of each shipped entry point
- * (`f0`, `experimental`, `ai`) from a set of rolled-up `.d.ts` files, then
+ * (`f0`, `experimental`, `ai`, `component-status`) from its declaration graph, then
  * compares two snapshots (a `--base` directory vs a `--head` directory) and
  * classifies every difference.
  *
@@ -23,11 +24,11 @@
  * A rename surfaces, correctly, as a BREAKING removal of the old name plus a
  * safe addition of the new name.
  *
- * Both sides are analyzed by the *same* TypeScript in a single process, so the
- * comparison is deterministic and immune to compiler-version drift. Structural
- * types are resolved through the checker, which normalizes away api-extractor's
- * rollup noise (the `F0TextInputProps_2` suffixes / dangling `./types` imports)
- * instead of diffing raw `.d.ts` text.
+ * CI emits both declaration graphs with the same TypeScript compiler, then
+ * analyzes them with the same checker process. This avoids compiler-version
+ * drift in inferred declaration types. Structural types are resolved through
+ * the checker instead of diffing raw `.d.ts` text, which also normalizes legacy
+ * api-extractor rollup noise such as suffixed aliases.
  *
  * Unions are compared as *sets* of structural variants, and intersections of
  * object shapes are flattened into one merged member set — so an optional
@@ -72,18 +73,16 @@
  * Usage:
  *   tsx .scripts/check-api-surface.ts --base <dir> --head <dir> [--json]
  *
- * `<dir>` is a directory containing the entry `.d.ts` files (f0.d.ts,
- * experimental.d.ts, ai.d.ts, plus global.d.ts so self-references resolve).
+ * `<dir>` is a directory containing the entry `.d.ts` files and their
+ * preserved declaration graph.
  *
- * The process always exits 0 (the check is non-blocking); whether breaking
- * changes were found is reported via the `hasBreaking` field of the `--json`
- * output and via the human-readable summary.
+ * Breaking changes do not fail the process; they are reported via the
+ * `hasBreaking` field and the human-readable summary. Missing or unreadable
+ * head declarations fail because a partial snapshot cannot be trusted.
  */
 import { existsSync } from "node:fs"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
-
-import consola from "consola"
 import ts from "typescript"
 
 /** Public entry points shipped in `dist/`. */
@@ -168,7 +167,7 @@ export interface EntryDiff {
   }>
   added: string[]
   translations?: TranslationChanges
-  skipped?: "no-base" | "no-head"
+  skipped?: "no-base"
 }
 
 export interface AnalysisResult {
@@ -266,7 +265,7 @@ function getCompilerHost(): ts.CompilerHost {
 }
 
 /**
- * Build a snapshot of the public exports of a single rolled `.d.ts` file.
+ * Build a snapshot of the public exports reachable from one entry `.d.ts`.
  * Returns `undefined` when the file does not exist (treated as "no baseline").
  */
 export function snapshotEntry(
@@ -286,16 +285,25 @@ export function snapshotEntry(
 
   const checker = program.getTypeChecker()
   const sourceFile = program.getSourceFile(dtsPath)
-  if (!sourceFile) return new Map()
+  if (!sourceFile) {
+    throw new Error(`Declaration entry could not be loaded: ${dtsPath}`)
+  }
 
   const moduleSymbol = checker.getSymbolAtLocation(sourceFile)
-  if (!moduleSymbol) return new Map()
+  if (!moduleSymbol) {
+    throw new Error(`Declaration entry has no module symbol: ${dtsPath}`)
+  }
 
   const snapshot: EntrySnapshot = new Map()
   for (const exp of checker.getExportsOfModule(moduleSymbol)) {
     const name = exp.getName()
     if (name === "default") continue
     snapshot.set(name, snapshotExport(exp, checker, sourceFile, dirAbsolute))
+  }
+  if (snapshot.size === 0) {
+    throw new Error(
+      `Declaration entry ${entry} resolved to zero exports: ${dtsPath}`
+    )
   }
   return snapshot
 }
@@ -1213,10 +1221,9 @@ function classifyItem(
 function diffEntry(
   entry: Entry,
   base: EntrySnapshot | undefined,
-  head: EntrySnapshot | undefined
+  head: EntrySnapshot
 ): EntryDiff {
   if (!base) return { entry, breaking: [], added: [], skipped: "no-base" }
-  if (!head) return { entry, breaking: [], added: [], skipped: "no-head" }
 
   const breaking: EntryDiff["breaking"] = []
   const added: string[] = []
@@ -1261,13 +1268,11 @@ function diffEntry(
 }
 
 export function analyze(baseDir: string, headDir: string): AnalysisResult {
-  const entries = ENTRIES.map((entry) =>
-    diffEntry(
-      entry,
-      snapshotEntry(baseDir, entry),
-      snapshotEntry(headDir, entry)
-    )
-  )
+  const entries = ENTRIES.map((entry) => {
+    const head = snapshotEntry(headDir, entry)
+    if (!head) throw new Error(`Missing head declaration entry: ${entry}`)
+    return diffEntry(entry, snapshotEntry(baseDir, entry), head)
+  })
   const txAdded = new Set<string>()
   const txRemoved = new Set<string>()
   for (const d of entries) {

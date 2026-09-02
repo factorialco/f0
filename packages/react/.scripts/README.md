@@ -7,8 +7,8 @@ A static runtime-cycle ratchet for the React package.
 The checker parses every production TypeScript/JavaScript module under `src`,
 resolves internal aliases and relative imports, and ignores type-only edges.
 The six cycle groups inherited from `main` are recorded in
-`runtime-cycle-baseline.json`; the check fails when a cycle gains files, when
-known groups merge, or when a new group appears. Shrinking a known group passes.
+`runtime-cycle-baseline.json`; the check fails whenever the current cycle groups
+differ from that baseline. Update the baseline alongside any intentional change.
 
 ## Quick Start
 
@@ -23,7 +23,7 @@ pnpm --filter @factorialco/f0-react cycle-deps -- --json
 ## Pre-commit mode
 
 ```bash
-./check-cycle-dependencies.ts --pre-commit
+pnpm --filter @factorialco/f0-react cycle-deps -- --pre-commit
 ```
 
 The git hook calls `--pre-commit`; the checker exits early when no staged React
@@ -37,8 +37,8 @@ import where appropriate, or injecting the higher-level dependency.
 
 ## Exit Codes
 
-- `0`: no new or enlarged runtime cycles
-- `1`: a new/enlarged runtime cycle or an analysis error
+- `0`: the runtime cycle baseline matches
+- `1`: the runtime cycle baseline differs or the analysis fails
 
 ## Technical Details
 

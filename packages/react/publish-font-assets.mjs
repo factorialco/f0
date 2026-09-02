@@ -32,27 +32,25 @@ export function publishFontAssets({ fontDirectory, outputDirectory }) {
         }
         if (!existsSync(fontPath) || !statSync(fontPath).isFile()) return
 
-        if (!outputDirectory) {
-          throw new Error("An output directory is required for local fonts")
+        if (outputDirectory) {
+          const outputRoot = resolve(outputDirectory)
+          const publishedFontRoot = resolve(outputRoot, "fonts")
+          const referencedPublishedPath = resolve(outputRoot, reference.value)
+          const publishedRelativePath = relative(
+            publishedFontRoot,
+            referencedPublishedPath
+          )
+          const isPublishedReference =
+            !publishedRelativePath.startsWith("..") &&
+            !isAbsolute(publishedRelativePath) &&
+            existsSync(referencedPublishedPath) &&
+            statSync(referencedPublishedPath).isFile()
+          if (isPublishedReference) return
+
+          const publishedPath = resolve(outputRoot, "fonts", relativeFontPath)
+          mkdirSync(dirname(publishedPath), { recursive: true })
+          copyFileSync(fontPath, publishedPath)
         }
-
-        const outputRoot = resolve(outputDirectory)
-        const publishedFontRoot = resolve(outputRoot, "fonts")
-        const referencedPublishedPath = resolve(outputRoot, reference.value)
-        const publishedRelativePath = relative(
-          publishedFontRoot,
-          referencedPublishedPath
-        )
-        const isPublishedReference =
-          !publishedRelativePath.startsWith("..") &&
-          !isAbsolute(publishedRelativePath) &&
-          existsSync(referencedPublishedPath) &&
-          statSync(referencedPublishedPath).isFile()
-        if (isPublishedReference) return
-
-        const publishedPath = resolve(outputRoot, "fonts", relativeFontPath)
-        mkdirSync(dirname(publishedPath), { recursive: true })
-        copyFileSync(fontPath, publishedPath)
 
         reference.type = "string"
         reference.quote = '"'

@@ -40,6 +40,23 @@ describe("publishFontAssets", () => {
     ).toEqual(Buffer.from([0, 1, 2, 3]))
   })
 
+  test("rewrites local font URLs without publishing during development", async () => {
+    const fontDirectory = mkdtempSync(join(tmpdir(), "f0-fonts-"))
+    temporaryDirectories.push(fontDirectory)
+    writeFileSync(
+      join(fontDirectory, "InterVariable.woff2"),
+      Buffer.from([0, 1, 2, 3])
+    )
+
+    const result = await postcss([
+      publishFontAssets({ fontDirectory }),
+    ]).process('@font-face { src: url("InterVariable.woff2"); }', {
+      from: undefined,
+    })
+
+    expect(result.css).toContain('url("fonts/InterVariable.woff2")')
+  })
+
   test("leaves remote and non-font URLs unchanged", async () => {
     const fontDirectory = mkdtempSync(join(tmpdir(), "f0-fonts-"))
     temporaryDirectories.push(fontDirectory)

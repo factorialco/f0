@@ -15,7 +15,10 @@ export default {
     autoprefixer(),
     publishFontAssets({
       fontDirectory: path.resolve(dirname, "assets/fonts"),
-      outputDirectory: path.resolve(dirname, "dist"),
+      outputDirectory:
+        process.env.F0_PUBLISH_FONT_ASSETS === "true"
+          ? path.resolve(dirname, "dist")
+          : undefined,
     }),
   ],
 }

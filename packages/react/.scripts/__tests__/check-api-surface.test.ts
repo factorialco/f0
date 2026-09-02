@@ -1,7 +1,6 @@
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import path from "node:path"
-
 import { afterEach, describe, expect, it, vi } from "vitest"
 
 import {
@@ -20,14 +19,20 @@ vi.setConfig({ testTimeout: 30000 })
 /**
  * Each test writes a minimal `f0.d.ts` for the "base" and "head" sides into
  * separate temp dirs and runs the real analyzer end-to-end (TypeScript program
- * + structural classification). The `experimental`/`ai` entries have no files
- * and are reported as skipped, so we assert only on the `f0` entry.
+ * + structural classification). The helper emits non-empty stubs for the other
+ * current entries, so we assert only on the `f0` entry.
  */
 const createdDirs: string[] = []
 
 function dirWith(f0Dts: string): string {
   const dir = mkdtempSync(path.join(tmpdir(), "api-surface-test-"))
   writeFileSync(path.join(dir, "f0.d.ts"), f0Dts)
+  for (const entry of ["experimental", "ai", "component-status"]) {
+    writeFileSync(
+      path.join(dir, `${entry}.d.ts`),
+      "export declare const EntrySentinel: true;"
+    )
+  }
   createdDirs.push(dir)
   return dir
 }
@@ -56,6 +61,21 @@ export declare const compute: (x: number, y: string) => boolean;
 `
 
 describe("check-api-surface — catches breaking changes", () => {
+  it("rejects a public barrel whose declaration graph is missing", () => {
+    expect(() =>
+      snapshotEntry(dirWith('export * from "./missing";'), "f0")
+    ).toThrow("resolved to zero exports")
+  })
+
+  it("rejects a comparison whose head is missing a public entry", () => {
+    const head = mkdtempSync(path.join(tmpdir(), "api-surface-test-"))
+    createdDirs.push(head)
+
+    expect(() => analyze(dirWith(BASE), head)).toThrow(
+      "Missing head declaration entry: f0"
+    )
+  })
+
   it("flags a removed export", () => {
     const diff = f0(
       BASE,

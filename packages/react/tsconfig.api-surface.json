@@ -1,0 +1,19 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "ignoreDeprecations": "6.0",
+    "noCheck": true,
+    "noEmit": false,
+    "outDir": "./dist/api-surface",
+    "rootDir": "../.."
+  },
+  "files": [
+    "src/f0.ts",
+    "src/experimental.ts",
+    "src/ai.ts",
+    "src/component-status.ts"
+  ],
+  "include": []
+}

@@ -10,9 +10,11 @@ jobs:
   detect-changes:
     uses: ./.github/workflows/_check-workspaces-changes.yaml
 
-  # Build the rolled-up type declarations for both sides of the comparison in
-  # parallel. The shared Vite command is declaration-only on the head; older
-  # base revisions ignore that flag but still emit the required declarations.
+  # Emit the public declaration graph for both sides in parallel. Both sides
+  # use the comparison config and TypeScript compiler from the merge commit,
+  # while their source and dependencies remain those of the revision under
+  # test. This keeps inferred types and declaration representation identical
+  # across compiler and build migrations (rolled-up main vs preserved head).
   build-dts:
     needs: detect-changes
     # React source or core (whose types ripple into the React surface) changed.
@@ -23,9 +25,6 @@ jobs:
       !contains(github.event.pull_request.labels.*.name, 'autorelease')
     name: "[⚛️ REACT] Build types (${{ matrix.side }})"
     runs-on: ubuntu-22.04
-    # One side failing must not wedge the run; the diff job handles a missing
-    # artifact gracefully.
-    continue-on-error: true
     strategy:
       fail-fast: false
       matrix:
@@ -46,20 +45,20 @@ jobs:
       - name: Check out base side (first parent of the merge commit)
         if: matrix.side == 'base'
         run: git checkout HEAD^1
+      - name: Use the shared API declaration config
+        run: git checkout "$GITHUB_SHA" -- packages/react/tsconfig.api-surface.json
       - uses: ./.github/actions/setup-node-pnpm
       - name: Build core package
         run: pnpm --filter @factorialco/f0-core build
       - name: Build React types
-        run: BUILD_TYPES=true BUILD_DECLARATIONS_ONLY=true NODE_OPTIONS=--max-old-space-size=8192 pnpm --filter @factorialco/f0-react exec vite build
+        run: |
+          TYPESCRIPT_SPEC=$(git show "$GITHUB_SHA:packages/react/package.json" | jq -r '.devDependencies.typescript')
+          pnpm dlx "$TYPESCRIPT_SPEC" --project packages/react/tsconfig.api-surface.json
       - name: Upload type declarations
         uses: actions/upload-artifact@v4
         with:
           name: dts-${{ matrix.side }}
-          path: |
-            packages/react/dist/f0.d.ts
-            packages/react/dist/experimental.d.ts
-            packages/react/dist/ai.d.ts
-            packages/react/dist/global.d.ts
+          path: packages/react/dist/api-surface/**/*.d.ts
           if-no-files-found: error
           retention-days: 1
 
@@ -81,13 +80,11 @@ jobs:
       - uses: ./.github/actions/setup-node-pnpm
       - name: Download head type declarations
         uses: actions/download-artifact@v4
-        continue-on-error: true
         with:
           name: dts-head
           path: _api/head
       - name: Download base type declarations
         uses: actions/download-artifact@v4
-        continue-on-error: true
         with:
           name: dts-base
           path: _api/base
@@ -96,10 +93,13 @@ jobs:
         run: |
           cd packages/react
 
-          pnpm exec tsx .scripts/check-api-surface.ts \
-            --base "$GITHUB_WORKSPACE/_api/base" \
-            --head "$GITHUB_WORKSPACE/_api/head" \
-            --json > /tmp/api-output.txt 2>&1 || true
+          if ! pnpm exec tsx .scripts/check-api-surface.ts \
+              --base "$GITHUB_WORKSPACE/_api/base/packages/react/src" \
+              --head "$GITHUB_WORKSPACE/_api/head/packages/react/src" \
+              --json > /tmp/api-output.txt 2>&1; then
+            cat /tmp/api-output.txt
+            exit 1
+          fi
 
           # Extract the last complete JSON object (the script prints pretty JSON;
           # same extraction pattern as the cycle-dependencies check).
