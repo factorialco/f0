@@ -21,9 +21,23 @@ export const F0OneSwitch = ({
   tooltip,
   autoOpen = false,
   onToggle,
+  checked,
+  onCheckedChange,
 }: F0OneSwitchProps) => {
-  const { enabled, setOpen, open } = useAiChatToggle()
+  const fromContext = useAiChatToggle()
   const translations = useI18n()
+
+  // Controlled mode. The props type has always inherited Radix's whole switch
+  // surface while the implementation dropped `checked` on the floor; honouring
+  // it is what lets the switch render somewhere the AI context does not reach —
+  // the meeting header, which is mounted above the provider on purpose.
+  //
+  // Passing a handler is also the caller asserting the switch should exist, so
+  // it bypasses the `enabled` gate that otherwise renders nothing at all.
+  const isControlled = onCheckedChange !== undefined
+  const enabled = isControlled ? true : fromContext.enabled
+  const open = isControlled ? Boolean(checked) : fromContext.open
+  const setOpen = isControlled ? onCheckedChange : fromContext.setOpen
   const [isHover, setIsHover] = useState(false)
   const [tooltipOpen, setTooltipOpen] = useState(false)
   const [autoTooltipVisible, setAutoTooltipVisible] = useState(autoOpen)

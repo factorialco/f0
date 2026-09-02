@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import {
   ComponentProps,
   createContext,
+  type ForwardedRef,
   useCallback,
   useContext,
   useEffect,
@@ -54,6 +55,7 @@ import {
 import { WelcomeScreenCardsRow } from "@/kits/ai/F0AiChatTextArea/components/WelcomeScreenCardsRow"
 import { HomeLayout } from "@/layouts/HomeLayout"
 import * as HomeLayoutStories from "@/layouts/HomeLayout/index.stories"
+import { type LinkProps, LinkProvider } from "@/lib/linkHandler"
 import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { Page } from "@/patterns/Navigation/Page"
@@ -91,13 +93,13 @@ import {
 } from "@/sds/chat/F0Chat/mocks/MockChatApp"
 import { SEED_BY_ID } from "@/sds/chat/F0Chat/mocks/mockSeeds"
 import { useDemoHeaderActions } from "@/sds/chat/F0Chat/mocks/useDemoHeaderActions"
-import {
-  MeetingNotes,
-  MeetingRoomChat,
-  MeetingTranscript,
-} from "@/sds/meetings/F0Meeting"
+import { MeetingRoomChat, MeetingTranscript } from "@/sds/meetings/F0Meeting"
+import { type MockScriptChatMessage } from "@/sds/meetings/F0Meeting/mocks/useMockMeetingRuntime"
 import { useMockRoomChat } from "@/sds/meetings/F0Meeting/mocks/useMockRoomChat"
 
+import { DemoPage } from "./mocks/demoPages"
+import { HuddleNotesTab } from "./mocks/HuddleNotesTab"
+import { HuddleTranscriptDrawer } from "./mocks/HuddleTranscriptDrawer"
 import { useMockHuddle } from "./mocks/useMockHuddle"
 import { DaytimePage } from "@/sds/Home/DaytimePage"
 
@@ -745,50 +747,103 @@ const communicationsPageHeader = (
   />
 )
 
+/**
+ * Plays the app's router, so the sidebar actually goes somewhere.
+ *
+ * `Menu` navigates by `href` through `LinkProvider`, and `useNavigation().isActive`
+ * highlights the current item from `currentPath` — so supplying both is all it
+ * takes to get real navigation with no router in the story. Same trick the
+ * PageHeader story uses for its breadcrumb jumps.
+ *
+ * This is here for the CALL, not for the pages: the meeting surface portals out
+ * of the frame so that replacing the whole main content cannot touch it, and a
+ * demo where every link lands on the same page never tests that.
+ */
+const WithFakeRouter = ({
+  children,
+}: {
+  children: (path: string) => React.ReactNode
+}) => {
+  const [path, setPath] = useState("/")
+
+  const linkComponent = useCallback(
+    (props: LinkProps, ref: ForwardedRef<HTMLAnchorElement>) => (
+      <a
+        ref={ref}
+        {...props}
+        onClick={(event) => {
+          props.onClick?.(event)
+          if (!props.href || props.href.startsWith("#")) return
+          event.preventDefault()
+          setPath(props.href)
+        }}
+      />
+    ),
+    []
+  )
+
+  return (
+    <LinkProvider component={linkComponent} currentPath={path}>
+      {children(path)}
+    </LinkProvider>
+  )
+}
+
 export const Default: Story = {
   render: (args) => (
     <MockAiChatRuntimeProvider>
       <MockChatAppProvider>
         <WithHuddle>
           {(meeting) => (
-            <ApplicationFrame
-              // Transitional communications layout: conversations dock LEFT
-              // (panelContentSide) while the AI chat keeps its classic right-side
-              // panel, full header and history, toggled from the page header's One
-              // switch. Opening one swaps the other out — only the main content
-              // moves, uncovering the incoming panel in place.
-              ai={{
-                ...withMockChatSlots(args.ai),
-                panelContentSide: "left",
-              }}
-              aiPromotion={args.aiPromotion}
-              // Open a conversation and hit the camera icon in its header: the
-              // huddle starts with everyone from that chat already in the room,
-              // floating over the app so you can keep working.
-              meeting={meeting}
-              sidebar={
-                <ConversationsSidebar
-                  withOneTab={false}
-                  // State parity across reloads, like the panel content restore.
-                  tabsPersistKey="communications-demo"
-                />
-              }
-            >
-              {/* Real-world main content: the home "daytime" page. The One switch
-              stays visible — it's how the AI chat opens (the sidebar only has
-              Home + Chat tabs here). */}
-              <DaytimePage
-                period="morning"
-                header={{
-                  employeeFirstName: "Jordan",
-                  employeeLastName: "Avery",
-                  title: "Good morning, Jordan!",
-                  employeeAvatar: "/avatars/person05.jpg",
-                }}
-              >
-                <HomeLayout {...HomeLayoutStories.Default.args} />
-              </DaytimePage>
-            </ApplicationFrame>
+            <WithFakeRouter>
+              {(path) => (
+                <ApplicationFrame
+                  // Transitional communications layout: conversations dock LEFT
+                  // (panelContentSide) while the AI chat keeps its classic right-side
+                  // panel, full header and history, toggled from the page header's One
+                  // switch. Opening one swaps the other out — only the main content
+                  // moves, uncovering the incoming panel in place.
+                  ai={{
+                    ...withMockChatSlots(args.ai),
+                    panelContentSide: "left",
+                  }}
+                  aiPromotion={args.aiPromotion}
+                  // Open a conversation and hit the camera icon in its header: the
+                  // huddle starts with everyone from that chat already in the room,
+                  // floating over the app so you can keep working.
+                  meeting={meeting}
+                  sidebar={
+                    <ConversationsSidebar
+                      withOneTab={false}
+                      // State parity across reloads, like the panel content restore.
+                      tabsPersistKey="communications-demo"
+                    />
+                  }
+                >
+                  {/* The dashboard is the home "daytime" page; everything else in
+              the sidebar is a real DataCollection page. Start a huddle, put it
+              in the floating window, then walk the sidebar: the call keeps its
+              video, its audio and its position while the whole main content is
+              swapped underneath it. The One switch stays visible throughout —
+              it's how the AI chat opens. */}
+                  {path === "/" ? (
+                    <DaytimePage
+                      period="morning"
+                      header={{
+                        employeeFirstName: "Jordan",
+                        employeeLastName: "Avery",
+                        title: "Good morning, Jordan!",
+                        employeeAvatar: "/avatars/person05.jpg",
+                      }}
+                    >
+                      <HomeLayout {...HomeLayoutStories.Default.args} />
+                    </DaytimePage>
+                  ) : (
+                    <DemoPage path={path} />
+                  )}
+                </ApplicationFrame>
+              )}
+            </WithFakeRouter>
           )}
         </WithHuddle>
       </MockChatAppProvider>
@@ -941,8 +996,20 @@ const useHuddle = () => useContext(HuddleContext)
  * Rendering the DM here would quietly promise that what you type during a call
  * survives it.
  */
-const HuddleChatTab = ({ roomId }: { roomId: string }) => {
-  const { messages, send } = useMockRoomChat(roomId)
+const HuddleChatTab = ({
+  roomId,
+  localParticipantId,
+  incoming,
+}: {
+  roomId: string
+  localParticipantId: string
+  incoming: MockScriptChatMessage[]
+}) => {
+  const { messages, send } = useMockRoomChat(
+    roomId,
+    localParticipantId,
+    incoming
+  )
   return <MeetingRoomChat messages={messages} onSend={send} />
 }
 
@@ -951,7 +1018,11 @@ const WithHuddle = ({
 }: {
   children: (meeting: ApplicationFrameProps["meeting"]) => React.ReactNode
 }) => {
-  const huddle = useMockHuddle()
+  const [transcriptOpen, setTranscriptOpen] = useState(false)
+  // The ended card's Transcript button has to reach a viewer that outlives the
+  // room, so the handler goes onto the call item as it is written.
+  const openTranscript = useCallback(() => setTranscriptOpen(true), [])
+  const huddle = useMockHuddle({ onOpenTranscript: openTranscript })
 
   const value = useMemo(
     () => ({
@@ -962,10 +1033,11 @@ const WithHuddle = ({
     [huddle.activeConvId, huddle.start, huddle.receive]
   )
 
-  const { runtime, activeConvId } = huddle
+  const { runtime, activeConvId, scriptChat } = huddle
   const transcript = runtime?.transcript
   const notes = runtime?.notes ?? ""
   const setNotes = runtime?.setNotes
+  const roomTitle = runtime?.room.title ?? "Huddle"
 
   const sidePanel = useMemo(() => {
     if (!activeConvId) return undefined
@@ -975,7 +1047,16 @@ const WithHuddle = ({
         {
           id: "chat",
           label: "Chat",
-          content: <HuddleChatTab roomId={runtime?.room.id ?? activeConvId} />,
+          content: (
+            <HuddleChatTab
+              roomId={runtime?.room.id ?? activeConvId}
+              localParticipantId={runtime?.localParticipantId ?? "me"}
+              incoming={scriptChat}
+            />
+          ),
+          // Lines land while the panel is closed, which is the only thing that
+          // makes the control bar's chat badge mean anything.
+          ...(scriptChat.length > 0 ? { badge: scriptChat.length } : {}),
         },
         // Absent transcript means no tab at all, the same capability-by-presence
         // rule the rest of the contract uses.
@@ -991,11 +1072,37 @@ const WithHuddle = ({
         {
           id: "notes",
           label: "Notes",
-          content: <MeetingNotes value={notes} onChange={setNotes} />,
+          content: (
+            <HuddleNotesTab
+              value={notes}
+              onChange={setNotes}
+              transcript={transcript ?? []}
+              title={roomTitle}
+            />
+          ),
         },
       ],
     }
-  }, [activeConvId, transcript, notes, setNotes])
+  }, [
+    activeConvId,
+    transcript,
+    notes,
+    setNotes,
+    runtime?.room.id,
+    runtime?.localParticipantId,
+    scriptChat,
+    roomTitle,
+  ])
+
+  const nameOf = useCallback(
+    (participantId: string) =>
+      runtime?.participants.find((p) => p.id === participantId)?.name ??
+      SEED_BY_ID.get(huddle.activeConvId ?? "")?.participants.find(
+        (p) => p.id === participantId
+      )?.name ??
+      participantId,
+    [runtime, huddle.activeConvId]
+  )
 
   return (
     <HuddleContext.Provider value={value}>
@@ -1004,6 +1111,14 @@ const WithHuddle = ({
         defaultMode: "fullscreen",
         sidePanel,
       })}
+      <HuddleTranscriptDrawer
+        isOpen={transcriptOpen}
+        onClose={() => setTranscriptOpen(false)}
+        title={huddle.lastTitle ? `Huddle · ${huddle.lastTitle}` : "Huddle"}
+        summary={huddle.lastSummary}
+        segments={huddle.lastTranscript}
+        nameOf={nameOf}
+      />
     </HuddleContext.Provider>
   )
 }
@@ -1053,8 +1168,9 @@ const MockChatPanel = ({
     { members: seed?.participants }
   )
   // Starting a call is just another host header action — F0Chat needs no
-  // knowledge of meetings for a huddle to exist. `channelTypes` is what keeps
-  // it to DMs: 1:1 only for now, and the contract already had the switch.
+  // knowledge of meetings for a huddle to exist. `channelTypes` covers both:
+  // a DM rings and is answered, a group opens straight into a room everyone
+  // else is invited to and walks into.
   const huddle = useHuddle()
   const actionsWithHuddle = useMemo<F0ChatHeaderAction[]>(
     () => [
@@ -1066,12 +1182,13 @@ const MockChatPanel = ({
         // that is the glyph the design uses in the conversation's header.
         icon: Icons.Headset,
         placement: "inline",
-        channelTypes: ["dm"],
+        channelTypes: ["dm", "group"],
         onClick: () => huddle.start(convId),
       },
       {
         // Demo affordance: the receiving side is half the experience and there
-        // is no second browser here to produce it.
+        // is no second browser here to produce it. DMs only — a group huddle
+        // has no incoming side to simulate, it just appears in the channel.
         id: "huddle-incoming",
         label: "Simulate incoming huddle",
         icon: Icons.Phone,
@@ -1120,6 +1237,10 @@ const homeMenuTree: MenuCategory[] = [
     isSortable: false,
     items: [
       { label: "Dashboard", icon: Icons.Hub, href: "/", exactMatch: true },
+      // The three that lead to a real DataCollection page — the ones worth
+      // clicking while a call is floating.
+      { label: "Team directory", icon: Icons.People, href: "/team" },
+      { label: "Expenses", icon: Icons.Receipt, href: "/expenses" },
       {
         label: "Communications",
         icon: Icons.Megaphone,

@@ -31,7 +31,9 @@ import { F0Meeting } from "@/sds/meetings/F0Meeting"
 import { useMeetingSurfaceOptional } from "@/sds/meetings/F0Meeting/providers/MeetingSurfaceProvider"
 import { type F0MeetingProviderProps } from "@/sds/meetings/F0Meeting/types"
 
+import { AiChatBridgeProvider, AiChatBridgePublisher } from "./AiChatBridge"
 import { FrameProvider, SidebarState, useSidebar } from "./FrameProvider"
+import { MeetingOneSwitch } from "./MeetingOneSwitch"
 
 const CONTENT_TRANSITION = { duration: 0.3, ease: [0, 0, 0.1, 1] }
 // Module-level so the reference is stable across renders. Motion cancels an
@@ -65,20 +67,36 @@ function _ApplicationFrame({
   aiPromotion,
   meeting,
 }: ApplicationFrameProps) {
+  // The call's header gets a way into the AI chat. It is composed here rather
+  // than left to the host because the header renders outside the AI provider —
+  // see `AiChatBridge` — so the host could not wire it even if it wanted to.
+  const headerContent = (
+    <>
+      {meeting?.headerContent}
+      <MeetingOneSwitch />
+    </>
+  )
+
   return (
     <FrameProvider>
-      {/* Above the AI provider: switching the call between fullscreen and a
-          floating window must not re-render the chat. */}
-      <F0Meeting {...meeting} runtime={meeting?.runtime ?? null}>
-        <ApplicationFrameWithProvider
-          ai={ai}
-          aiPromotion={aiPromotion}
-          sidebar={sidebar}
-          banner={banner}
+      <AiChatBridgeProvider>
+        {/* Above the AI provider: switching the call between fullscreen and a
+            floating window must not re-render the chat. */}
+        <F0Meeting
+          {...meeting}
+          runtime={meeting?.runtime ?? null}
+          headerContent={headerContent}
         >
-          {children}
-        </ApplicationFrameWithProvider>
-      </F0Meeting>
+          <ApplicationFrameWithProvider
+            ai={ai}
+            aiPromotion={aiPromotion}
+            sidebar={sidebar}
+            banner={banner}
+          >
+            {children}
+          </ApplicationFrameWithProvider>
+        </F0Meeting>
+      </AiChatBridgeProvider>
     </FrameProvider>
   )
 }
@@ -106,6 +124,9 @@ function ApplicationFrameWithProvider({
 
   return (
     <AiProvider {...aiProps}>
+      {/* Renders nothing: reads the AI toggle from inside the provider and
+          publishes it upward, where the meeting header can reach it. */}
+      <AiChatBridgePublisher />
       <ApplicationFrameContent
         ai={ai}
         aiPromotion={aiPromotion}
