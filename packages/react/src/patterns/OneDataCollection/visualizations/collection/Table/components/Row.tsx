@@ -1,5 +1,5 @@
 import { useIsPresent } from "motion/react"
-import { forwardRef, useCallback, useEffect, useState } from "react"
+import { forwardRef, useCallback, useEffect, useRef, useState } from "react"
 
 import type { IconType } from "@/components/F0Icon"
 import type { TableVisualizationType } from "@/patterns/OneDataCollection/types"
@@ -259,26 +259,30 @@ const RowComponentInner = <
   // Only the row that owns the rendered checkbox registers (not the one
   // delegating to NestedRow), so each selectable id is registered once.
   const willRenderOwnRow = !(rowWithChildren && hasChildrenLoaded)
+  const isRegistered =
+    id !== undefined && !selectionDisabled && willRenderOwnRow && isPresent
+
+  const itemRef = useRef(item)
+  itemRef.current = item
+
+  // Deliberately not keyed on `item`: a page append rebuilds the record of
+  // every row, and re-running this effect for that would take each row out of
+  // the registry and put it straight back in — a membership change per rendered
+  // row, on every page.
   useEffect(() => {
-    if (
-      id === undefined ||
-      selectionDisabled ||
-      !willRenderOwnRow ||
-      !registerSelectable ||
-      !isPresent
-    )
-      return
-    registerSelectable(id, item)
+    if (id === undefined || !isRegistered || !registerSelectable) return
+    registerSelectable(id, itemRef.current)
     return () => unregisterSelectable?.(id)
-  }, [
-    id,
-    item,
-    selectionDisabled,
-    willRenderOwnRow,
-    registerSelectable,
-    unregisterSelectable,
-    isPresent,
-  ])
+  }, [id, isRegistered, registerSelectable, unregisterSelectable])
+
+  // "Select all" is served the items the registry holds, so a row whose record
+  // is replaced has to refresh its entry. Re-registering an id already present
+  // only overwrites the item; membership, and the id list built from it, are
+  // untouched.
+  useEffect(() => {
+    if (id === undefined || !isRegistered || !registerSelectable) return
+    registerSelectable(id, item)
+  }, [id, item, isRegistered, registerSelectable])
 
   if (rowWithChildren && hasChildrenLoaded) {
     return (
