@@ -1055,8 +1055,12 @@ const findEmojiListbox = async (
       activeElement: document.activeElement?.tagName ?? null,
       documentHasFocus: document.hasFocus(),
     }
+    // Ahead of the original message, not after it: `findByRole` prints the
+    // whole canvas on failure, and anything appended to that lands so far down
+    // the panel that it may as well not exist. This is the line that says which
+    // failure mode it was.
     throw new Error(
-      `${(error as Error).message}\n\ncomposer state: ${JSON.stringify(state)}`
+      `composer state: ${JSON.stringify(state)}\n\n${(error as Error).message}`
     )
   }
 }
@@ -1196,6 +1200,13 @@ export const EmojiAutocomplete: Story = {
 
     await step("Search and select with the keyboard", async () => {
       const composer = findComposer(canvas)
+      // Clear first, like every step below. Storybook re-runs `play` on an HMR
+      // update by re-rendering rather than remounting, so the composer keeps
+      // whatever a person typed into it while the story was open — and a `:`
+      // that lands mid-word is deliberately not a trigger (`http://`, `12:30`).
+      // Typing onto leftover text reported a missing listbox from a component
+      // that was working perfectly.
+      await userEvent.clear(composer)
       await userEvent.type(composer, ":smil")
       const listbox = await findEmojiListbox(canvas, composer)
       const selectedOption = within(listbox).getByRole("option", {
