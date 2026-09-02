@@ -43,7 +43,11 @@ if (process.env.PUBLIC_BUILD) {
   process.env.STORYBOOK_PUBLIC_BUILD = process.env.PUBLIC_BUILD
 }
 
-// Mark that we're building for Storybook to preserve data-testid attributes
+// Mark that we're building for Storybook to preserve data-testid attributes.
+// Also read by vite.config.ts: Storybook merges that file's plugins into the
+// preview build, and the React-externalizing plugin must not run there (it
+// would leave bare `react` specifiers the browser cannot resolve). Keep this
+// assignment above the builder's config load.
 process.env.STORYBOOK_BUILD = "true"
 
 const config: StorybookConfig = {

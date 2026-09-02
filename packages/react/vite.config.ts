@@ -21,6 +21,16 @@ const extraPlugins: Plugin[] = []
 const buildDeclarationsOnly = process.env.BUILD_DECLARATIONS_ONLY === "true"
 const buildWatch = process.argv.some((arg) => arg === "--watch" || arg === "-w")
 
+// Storybook builds the preview with THIS file's `plugins`: its Vite builder
+// loads vite.config.ts, drops `build` from it and merges everything else. So a
+// plugin that externalizes React runs against the Storybook bundle too, leaving
+// bare `react` specifiers in `storybook-static` that the browser cannot resolve
+// ("Failed to resolve module specifier 'react'"). The preview then never
+// boots, so every story fails and Chromatic cannot extract stories.
+// `.storybook/main.ts` sets STORYBOOK_BUILD before the builder reads this file.
+const isStorybookBuild = process.env.STORYBOOK_BUILD === "true"
+const externalizeReactRuntime = !buildDeclarationsOnly && !isStorybookBuild
+
 const isBareRuntimeImport = (id: string) =>
   !id.startsWith(".") &&
   !id.startsWith("/") &&
@@ -102,7 +112,7 @@ const alias = {
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    ...(!buildDeclarationsOnly
+    ...(externalizeReactRuntime
       ? [
           esmExternalRequirePlugin({
             external: ["react/jsx-runtime", "react", "react-dom"],

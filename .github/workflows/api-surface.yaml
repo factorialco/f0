@@ -78,6 +78,12 @@ jobs:
         with:
           name: dts-base
           path: _api/base
+      # The snapshot resolver fails closed on any unresolved import, and the
+      # per-file declarations import `@factorialco/f0-core` by bare specifier.
+      # Its `exports` map points at `dist/index.d.ts`, which only exists once
+      # core is built.
+      - name: Build core package
+        run: pnpm --filter @factorialco/f0-core build
       - name: Compare public API surface
         id: compare
         run: |
