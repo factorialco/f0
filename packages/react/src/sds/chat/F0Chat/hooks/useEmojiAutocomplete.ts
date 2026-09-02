@@ -48,6 +48,10 @@ export type UseEmojiAutocompleteReturn = {
   selectCandidate: (candidate: EmojiAutocompleteCandidate) => void
   setSelectedIndex: (index: number) => void
   close: () => void
+  /** Focus left the composer: hide the list without dismissing the token. */
+  suspend: () => void
+  /** Focus came back: show the list again if the token is still live. */
+  resume: () => void
 }
 
 /**
@@ -130,6 +134,15 @@ export function useEmojiAutocomplete({
   const listboxId = `chat-emoji-autocomplete-${reactId.replace(/:/g, "")}`
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [dismissedTrigger, setDismissedTrigger] = useState<number | null>(null)
+  // Hidden because focus left, NOT because the reader dismissed the token.
+  // The two are deliberately separate state: a dismissal outlives every later
+  // keystroke on the same `:` — that is what Escape means, and
+  // `useEmojiAutocomplete.test.ts` pins it — while a blur must outlive nothing.
+  // The caret is still sitting inside the token, so the list has to be back the
+  // moment focus is. Folding blur into `close()` meant one stray focus change
+  // mid-token killed the list for the rest of that word, however much more the
+  // reader typed.
+  const [isSuspended, setIsSuspended] = useState(false)
 
   // The same localized layer the picker uses, so `:` and the picker's search
   // box agree in every language, not just in English.
@@ -145,6 +158,7 @@ export function useEmojiAutocomplete({
   )
   const isOpen =
     trigger !== null &&
+    !isSuspended &&
     trigger.colonIndex !== dismissedTrigger &&
     results.length > 0
   const effectiveSelectedIndex = results[selectedIndex] ? selectedIndex : 0
@@ -158,6 +172,11 @@ export function useEmojiAutocomplete({
     setDismissedTrigger(trigger?.colonIndex ?? null)
     setSelectedIndex(0)
   }, [trigger?.colonIndex])
+
+  // The highlighted row survives a blur on purpose: coming back to the composer
+  // should land where you left it, not on the first option.
+  const suspend = useCallback(() => setIsSuspended(true), [])
+  const resume = useCallback(() => setIsSuspended(false), [])
 
   const selectCandidate = useCallback(
     (candidate: EmojiAutocompleteCandidate) => {
@@ -280,5 +299,7 @@ export function useEmojiAutocomplete({
     selectCandidate,
     setSelectedIndex,
     close,
+    suspend,
+    resume,
   }
 }

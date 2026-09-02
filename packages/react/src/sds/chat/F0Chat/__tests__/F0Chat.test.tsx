@@ -687,6 +687,89 @@ describe("F0Chat", () => {
     )
   })
 
+  it("restores the emoji list when the composer is focused again", async () => {
+    renderChat(makeRuntime({}))
+    const input = screen.getByPlaceholderText(/write something here/i)
+
+    await userEvent.type(input, ":smi")
+    expect(
+      screen.getByRole("listbox", { name: /add emoji/i })
+    ).toBeInTheDocument()
+
+    // Focus moving somewhere else in the page hides the list: it is anchored to
+    // a caret the reader is no longer at.
+    fireEvent.blur(input, { relatedTarget: document.body })
+    expect(
+      screen.queryByRole("listbox", { name: /add emoji/i })
+    ).not.toBeInTheDocument()
+
+    // Coming back has to bring it back. It used to record the token as
+    // dismissed instead, so the list stayed gone for the rest of that word
+    // however much more the reader typed — which is also what made the
+    // Storybook play test flaky.
+    fireEvent.focus(input)
+    expect(
+      screen.getByRole("listbox", { name: /add emoji/i })
+    ).toBeInTheDocument()
+
+    await userEvent.type(input, "l")
+    expect(input).toHaveValue(":smil")
+    expect(
+      screen.getByRole("listbox", { name: /add emoji/i })
+    ).toBeInTheDocument()
+  })
+
+  it("brings the emoji list back on the next keystroke after a blur", async () => {
+    renderChat(makeRuntime({}))
+    const input = screen.getByPlaceholderText(
+      /write something here/i
+    ) as HTMLTextAreaElement
+
+    await userEvent.type(input, ":smi")
+    fireEvent.blur(input, { relatedTarget: document.body })
+    expect(
+      screen.queryByRole("listbox", { name: /add emoji/i })
+    ).not.toBeInTheDocument()
+
+    // No `focus` event on the way back in — the window regaining focus does not
+    // reliably send one, and that gap is what left the list stranded closed for
+    // the rest of the word. A keystroke is proof enough that the composer has
+    // focus, so it resumes on its own.
+    input.selectionStart = 5
+    fireEvent.change(input, { target: { value: ":smil" } })
+
+    expect(input).toHaveValue(":smil")
+    expect(
+      screen.getByRole("listbox", { name: /add emoji/i })
+    ).toBeInTheDocument()
+  })
+
+  it("keeps the best match highlighted when the list opens under a still pointer", async () => {
+    renderChat(makeRuntime({}))
+    const input = screen.getByPlaceholderText(/write something here/i)
+
+    await userEvent.type(input, ":smil")
+    const listbox = screen.getByRole("listbox", { name: /add emoji/i })
+    const options = within(listbox).getAllByRole("option")
+    const best = options[0]
+    expect(best).toHaveAttribute("aria-selected", "true")
+
+    // The list opens above the caret, which is often where the pointer already
+    // is. A row arriving under a cursor that never moved still gets
+    // `mouseenter`, and that used to hand it the highlight — so Enter inserted
+    // an emoji nobody picked.
+    fireEvent.mouseEnter(options[3])
+
+    expect(best).toHaveAttribute("aria-selected", "true")
+    expect(options[3]).toHaveAttribute("aria-selected", "false")
+    expect(input).toHaveAttribute("aria-activedescendant", best.id)
+
+    // A pointer that genuinely moves still drives the highlight.
+    fireEvent.pointerMove(options[3])
+    expect(options[3]).toHaveAttribute("aria-selected", "true")
+    expect(input).toHaveAttribute("aria-activedescendant", options[3].id)
+  })
+
   it("does not select or send when Enter confirms an IME composition", async () => {
     const sendMessage = vi.fn()
     renderChat(makeRuntime({ sendMessage }))

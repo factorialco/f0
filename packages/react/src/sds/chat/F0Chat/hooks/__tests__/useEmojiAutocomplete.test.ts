@@ -233,6 +233,35 @@ describe("useEmojiAutocomplete", () => {
     expect(result.current.isOpen).toBe(true)
   })
 
+  it("hides on blur without dismissing the token, and comes back on focus", () => {
+    const props = makeProps({ inputValue: ":fir", cursorPosition: 4 })
+    const { result, rerender } = renderHook(
+      (nextProps: Props) => useEmojiAutocomplete(nextProps),
+      { initialProps: props }
+    )
+
+    expect(result.current.isOpen).toBe(true)
+    const highlighted = result.current.results[1]
+    act(() => result.current.setSelectedIndex(1))
+
+    act(() => result.current.suspend())
+    expect(result.current.isOpen).toBe(false)
+    expect(result.current.activeDescendantId).toBeUndefined()
+
+    // The token is hidden, not dismissed: focus alone brings it back, with the
+    // row the reader had highlighted still highlighted. Escape is the gesture
+    // that survives further typing (see the test above); a blur is not.
+    act(() => result.current.resume())
+    expect(result.current.isOpen).toBe(true)
+    expect(result.current.results[result.current.selectedIndex]).toBe(
+      highlighted
+    )
+
+    // And typing on after the round trip keeps working.
+    rerender({ ...props, inputValue: ":fire", cursorPosition: 5 })
+    expect(result.current.isOpen).toBe(true)
+  })
+
   it("preserves backward focus navigation and IME composition", () => {
     const setInputValue = vi.fn()
     const { result } = renderHook(() =>

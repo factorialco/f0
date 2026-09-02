@@ -1020,6 +1020,51 @@ export const Default: Story = {
   render: () => <Conversation initialCount={40} />,
 }
 
+/** The composer's textarea. Re-read per step rather than held across the whole
+ * play: a node captured before a remount still takes events, it just no longer
+ * has React on the other end, and the resulting failure looks like the widget
+ * broke rather than like the handle went stale. */
+const findComposer = (scope: ReturnType<typeof within>): HTMLTextAreaElement =>
+  scope.getByRole("combobox", {
+    name: /write something here/i,
+  }) as HTMLTextAreaElement
+
+/**
+ * The emoji listbox, waited for rather than read once.
+ *
+ * `findBy*` covers the ordinary case where the commit lands a frame after
+ * `userEvent.type` resolves. The reporting is the other half: this list is
+ * derived from four separate pieces of state, and a bare "unable to find an
+ * accessible element" — which is all a CI failure here used to say — is
+ * every one of those failure modes at once. Reporting the value, the caret and
+ * where focus actually is turns the next occurrence into a diagnosis instead
+ * of a re-run.
+ */
+const findEmojiListbox = async (
+  scope: ReturnType<typeof within>,
+  composer: HTMLTextAreaElement
+): Promise<HTMLElement> => {
+  try {
+    return await scope.findByRole("listbox", { name: "Add emoji" })
+  } catch (error) {
+    const state = {
+      value: composer.value,
+      caret: composer.selectionStart,
+      ariaExpanded: composer.getAttribute("aria-expanded"),
+      composerHasFocus: document.activeElement === composer,
+      activeElement: document.activeElement?.tagName ?? null,
+      documentHasFocus: document.hasFocus(),
+    }
+    // Ahead of the original message, not after it: `findByRole` prints the
+    // whole canvas on failure, and anything appended to that lands so far down
+    // the panel that it may as well not exist. This is the line that says which
+    // failure mode it was.
+    throw new Error(
+      `composer state: ${JSON.stringify(state)}\n\n${(error as Error).message}`
+    )
+  }
+}
+
 export const Snapshot: Story = {
   render: () => (
     <div className="flex flex-col gap-8 bg-f1-background p-4">
@@ -1062,14 +1107,10 @@ export const Snapshot: Story = {
     const canvas = within(canvasElement)
     await step("Open emoji autocomplete", async () => {
       const defaultChat = within(canvas.getByTestId("snapshot-default-chat"))
-      const composer = defaultChat.getByRole("combobox", {
-        name: /write something here/i,
-      })
+      const composer = findComposer(defaultChat)
       await userEvent.clear(composer)
       await userEvent.type(composer, ":smil")
-      await expect(
-        defaultChat.getByRole("listbox", { name: "Add emoji" })
-      ).toBeVisible()
+      await expect(await findEmojiListbox(defaultChat, composer)).toBeVisible()
     })
 
     await step("Render the compact voice attachment", async () => {
@@ -1156,13 +1197,18 @@ export const EmojiAutocomplete: Story = {
   render: () => <Conversation initialCount={8} />,
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement)
-    const composer = canvas.getByRole("combobox", {
-      name: /write something here/i,
-    })
 
     await step("Search and select with the keyboard", async () => {
+      const composer = findComposer(canvas)
+      // Clear first, like every step below. Storybook re-runs `play` on an HMR
+      // update by re-rendering rather than remounting, so the composer keeps
+      // whatever a person typed into it while the story was open — and a `:`
+      // that lands mid-word is deliberately not a trigger (`http://`, `12:30`).
+      // Typing onto leftover text reported a missing listbox from a component
+      // that was working perfectly.
+      await userEvent.clear(composer)
       await userEvent.type(composer, ":smil")
-      const listbox = canvas.getByRole("listbox", { name: "Add emoji" })
+      const listbox = await findEmojiListbox(canvas, composer)
       const selectedOption = within(listbox).getByRole("option", {
         name: /:smile:.*Grinning Face with Smiling Eyes/,
       })
@@ -1186,16 +1232,40 @@ export const EmojiAutocomplete: Story = {
     })
 
     await step("Convert a complete alias", async () => {
+      const composer = findComposer(canvas)
       await userEvent.clear(composer)
       await userEvent.type(composer, ":thumbsup:")
       await expect(composer).toHaveValue("👍")
     })
 
+    // Regression guard for a real bug, and for the CI flake it caused: the list
+    // used to record the token as *dismissed* on blur, which meant one stray
+    // focus change mid-word killed it for the rest of that word — refocusing
+    // and typing on did not bring it back.
+    await step("Survive losing and regaining focus mid-token", async () => {
+      const composer = findComposer(canvas)
+      await userEvent.clear(composer)
+      await userEvent.type(composer, ":smi")
+      await findEmojiListbox(canvas, composer)
+
+      composer.blur()
+      await waitFor(() =>
+        expect(
+          canvas.queryByRole("listbox", { name: "Add emoji" })
+        ).not.toBeInTheDocument()
+      )
+
+      composer.focus()
+      await findEmojiListbox(canvas, composer)
+      await userEvent.type(composer, "l")
+      await expect(await findEmojiListbox(canvas, composer)).toBeVisible()
+    })
+
     await step("Leave the visual example open", async () => {
-      await userEvent.type(composer, " :joy")
-      await expect(
-        canvas.getByRole("listbox", { name: "Add emoji" })
-      ).toBeVisible()
+      const composer = findComposer(canvas)
+      await userEvent.clear(composer)
+      await userEvent.type(composer, "👍 :joy")
+      await expect(await findEmojiListbox(canvas, composer)).toBeVisible()
     })
   },
 }
