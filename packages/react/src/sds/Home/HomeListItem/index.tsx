@@ -89,6 +89,56 @@ const ACTIONS_CLASS = cn(
 const ACTIONS_PINNED_CLASS = "pointer-events-auto opacity-100"
 
 /**
+ * ONE FACT on a row's second line — the unit a `description` is made of when
+ * the row has more than one thing to say ("€340", "12 receipts", "2 days
+ * overdue"). Parts draw dot-separated, each carrying its OWN tone, so the one
+ * fact that has gone wrong goes red while the rest keep murmuring.
+ *
+ * Put the critical part FIRST. The second line is a single truncating line —
+ * about 306px at the rail's 24rem width, some 40 characters — and it is cut
+ * from the RIGHT, so a part marked critical in third place is the part most
+ * likely to vanish into the ellipsis. Marking a part critical claims it is the
+ * most important thing on the line; leading with it makes that claim true.
+ */
+export type DescriptionPart = {
+  text: string
+  /** Draws THIS part critical rather than muted. */
+  critical?: boolean
+}
+
+/** A row's second line, in either of the forms it may be given. */
+export type Description = string | DescriptionPart[]
+
+/**
+ * A `description` as the row draws it: a list of parts, whatever form it
+ * arrived in, with the empty ones dropped. Empty means there is no second line
+ * at all — an `[]` is as silent as an absent `description`, which a bare
+ * truthiness check would get wrong.
+ */
+export function descriptionParts(
+  description: Description | undefined,
+  descriptionCritical = false
+): DescriptionPart[] {
+  if (typeof description === "string") {
+    return description
+      ? [{ text: description, critical: descriptionCritical }]
+      : []
+  }
+  return (description ?? []).filter((part) => part.text)
+}
+
+/**
+ * A `description` flattened to PLAIN TEXT. What a compact row's tooltip can
+ * carry — `Tooltip`'s `label` takes a string — so a segmented second line
+ * arrives there dot-joined and untinted.
+ */
+export function descriptionText(description: Description | undefined): string {
+  return descriptionParts(description)
+    .map((part) => part.text)
+    .join(" · ")
+}
+
+/**
  * The BASE row every Home list draws: a LEFT slot, a text stack and a RIGHT
  * slot. A row that goes somewhere says so by being a link — hover state and
  * all — not with a trailing chevron: a column of arrows repeating "clickable"
@@ -131,15 +181,22 @@ export interface HomeListItemProps {
    * subtitle is what has gone wrong with it. Inert without a `subtitle`.
    */
   subtitleCritical?: boolean
-  /** The second line. */
-  description?: string
   /**
-   * Draws the `description` CRITICAL rather than muted — the row is overdue,
-   * rejected, over budget. Per row, because it is a state of THAT row's data:
-   * one list holds rows whose second line is bad news and rows whose isn't.
+   * The second line — one string, or {@link DescriptionPart}s when the row has
+   * several facts to state and only some of them are bad news. Parts draw
+   * dot-separated and each carries its own tone.
+   */
+  description?: Description
+  /**
+   * Draws the whole `description` CRITICAL rather than muted — the row is
+   * overdue, rejected, over budget. Per row, because it is a state of THAT
+   * row's data: one list holds rows whose second line is bad news and rows
+   * whose isn't.
    *
    * The title reads the same either way — it says what the row IS, and the
-   * description is what has gone wrong with it. Inert without a `description`.
+   * description is what has gone wrong with it. Inert without a
+   * `description`, and IGNORED when the description is already a list of
+   * parts: those carry their own `critical`.
    */
   descriptionCritical?: boolean
   /** Trailing slot: a tag, a counter, people. */
@@ -190,6 +247,7 @@ export function HomeListItem({
   const [openMenu, setOpenMenu] = useState<string | null>(null)
   const leading =
     left ?? (avatar ? <F0Avatar avatar={avatar} size={avatarSize} /> : null)
+  const parts = descriptionParts(description, descriptionCritical)
 
   const content = (
     <>
@@ -224,16 +282,29 @@ export function HomeListItem({
             </span>
           ) : null}
         </div>
-        {description ? (
-          <div
-            className={cn(
-              "truncate",
-              descriptionCritical
-                ? "text-f1-foreground-critical"
-                : "text-f1-foreground-secondary"
-            )}
-          >
-            {description}
+        {parts.length > 0 ? (
+          <div className="truncate">
+            {parts.map((part, i) => (
+              <Fragment key={i}>
+                {/* The separator belongs to NEITHER neighbour, so it stays
+                    muted between two parts of any tone — unlike the subtitle's
+                    leading dot, which is that subtitle's own punctuation and
+                    takes its colour. A red separator would read as a third,
+                    wordless piece of bad news. */}
+                {i > 0 ? (
+                  <span className="text-f1-foreground-secondary">{" · "}</span>
+                ) : null}
+                <span
+                  className={
+                    part.critical
+                      ? "text-f1-foreground-critical"
+                      : "text-f1-foreground-secondary"
+                  }
+                >
+                  {part.text}
+                </span>
+              </Fragment>
+            ))}
           </div>
         ) : null}
       </div>

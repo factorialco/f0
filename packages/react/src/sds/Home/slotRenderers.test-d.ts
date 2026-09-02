@@ -197,6 +197,51 @@ test("a row's second line may be critical — wherever a description is declared
   ])
 })
 
+test("a second line may be a LIST of facts, each with its own tone", () => {
+  listSlot({ descriptionRequired: true }, [
+    {
+      id: 1,
+      title: "Expenses",
+      description: [
+        { text: "2 days overdue", critical: true },
+        { text: "€340" },
+        { text: "12 receipts" },
+      ],
+    },
+    // The plain string form still works beside it, in the same list.
+    { id: 2, title: "Onboarding", description: "Due Friday" },
+  ])
+
+  listSlot({ descriptionOptional: true }, [
+    { id: 1, title: "x", description: [{ text: "Rejected", critical: true }] },
+    { id: 2, title: "y" },
+  ])
+
+  listSlot({ descriptionRequired: true }, [
+    {
+      id: 1,
+      title: "x",
+      // @ts-expect-error a part's tone is `critical`, not `descriptionCritical`
+      description: [{ text: "Rejected", descriptionCritical: true }],
+    },
+  ])
+
+  listSlot({ descriptionRequired: true }, [
+    // @ts-expect-error parts carry their own tone — the whole-line flag is not also allowed
+    {
+      id: 1,
+      title: "x",
+      description: [{ text: "Rejected", critical: true }],
+      descriptionCritical: true,
+    },
+  ])
+
+  listSlot({}, [
+    // @ts-expect-error nothing to say: this schema declares no description
+    { id: 1, title: "x", description: [{ text: "Rejected" }] },
+  ])
+})
+
 test("the two murmuring lines carry their tone independently", () => {
   listSlot({ subtitleRequired: true, descriptionRequired: true }, [
     {

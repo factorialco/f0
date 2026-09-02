@@ -429,12 +429,63 @@ line, or neither. Reddening both is almost always wrong — it is a red row, and
 red row has no emphasis left to place. Colour the line that names the problem
 and leave the other one murmuring.
 
-One limit: in a **compact** list the second line has folded into the row's
-tooltip, so there is nothing left to colour and `descriptionCritical` goes
-silent. If the news matters at every density, put it in the subtitle, which
-shares the title's line and always shows.
-
 <Canvas of={SlotWidgetStories.CriticalDescriptions} />
+
+### Several facts on one line
+
+When the second line states more than one thing and only some of it is bad news,
+`description` takes a list of **parts** instead of a string. Each carries its own
+`critical`, and they draw dot-separated:
+
+```tsx
+{
+  id: "travel",
+  title: "Q3 travel",
+  description: [
+    { text: "2 days overdue", critical: true }, // ← in critical red
+    { text: "€340" },
+    { text: "12 receipts" },
+  ],
+}
+```
+
+The separator between parts stays **muted** whatever its neighbours do. It
+belongs to neither of them — unlike the subtitle's leading dot, which is that
+subtitle's own punctuation and takes its colour — and a red separator would read
+as a third, wordless piece of bad news.
+
+Parts and the whole-line `descriptionCritical` are mutually exclusive, and the
+types enforce it: parts already carry their own tone, so a row passing both is
+saying the same thing twice and meaning different things by it. A plain string
+with `descriptionCritical` is still the right way to say the simple case, and
+the two forms can sit side by side in one list.
+
+#### Put the critical part first
+
+The second line is a single **truncating** line — about **306px** at the rail's
+24rem width, some 40 characters — and it is cut from the **right**:
+
+| Second line                                                 | Width | Fits |
+| ----------------------------------------------------------- | ----- | ---- |
+| `Rejected by Finance`                                       | 134px | ✅   |
+| `Submitted Monday · Rejected by Finance`                    | 271px | ✅   |
+| `€340 · 12 receipts · 2 days overdue`                       | 233px | ✅   |
+| `Submitted Monday · Rejected by Finance · €340 over budget` | 403px | ❌   |
+
+So two facts fit comfortably and three fit only if they are short. A part marked
+critical in third place is the part most likely to vanish into the ellipsis —
+which defeats the marking. Marking a part critical claims it is the most
+important thing on the line; leading with it makes that claim true.
+
+Past three facts the row is trying to be a detail view, and should link to one
+instead.
+
+<Canvas of={SlotWidgetStories.SegmentedDescriptions} />
+
+One limit shared with the whole-line flag: a **compact** list folds the second
+line into the row's tooltip, and `Tooltip`'s `label` takes a string — so parts
+arrive there dot-joined and untinted. If the news matters at every density, put
+it in the subtitle, which shares the title's line and always shows.
 
 ### Even rows, and rows that aren't
 

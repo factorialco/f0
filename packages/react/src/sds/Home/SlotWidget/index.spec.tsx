@@ -411,6 +411,67 @@ describe("list slot schema", () => {
     )
   })
 
+  test("a second line may be a list of facts, only the bad one red", () => {
+    zeroRender(
+      <SlotWidget
+        slots={[
+          listSlot({ descriptionRequired: true }, [
+            {
+              id: "1",
+              title: "Expenses report",
+              description: [
+                { text: "2 days overdue", critical: true },
+                { text: "€340" },
+                { text: "12 receipts" },
+              ],
+            },
+            { id: "2", title: "Onboarding", description: "Due Friday" },
+          ]),
+        ]}
+      />
+    )
+
+    expect(screen.getByText("2 days overdue")).toHaveClass(
+      "text-f1-foreground-critical"
+    )
+    expect(screen.getByText("€340")).toHaveClass("text-f1-foreground-secondary")
+    // The plain-string form still works in the same list.
+    expect(screen.getByText("Due Friday")).toHaveClass(
+      "text-f1-foreground-secondary"
+    )
+  })
+
+  test("a COMPACT row flattens its parts into the tooltip — dot-joined and untinted, all a label can carry", async () => {
+    const user = userEvent.setup()
+    zeroRender(
+      <SlotWidget
+        slots={[
+          listSlot({ descriptionRequired: true, compact: true }, [
+            {
+              id: "1",
+              title: "Expenses report",
+              description: [
+                { text: "2 days overdue", critical: true },
+                { text: "€340" },
+              ],
+            },
+          ]),
+        ]}
+      />
+    )
+
+    // Folded away: no part is drawn on the row itself.
+    expect(screen.queryByText("2 days overdue")).not.toBeInTheDocument()
+    expect(screen.queryByText("€340")).not.toBeInTheDocument()
+
+    await user.hover(screen.getByText("Expenses report"))
+
+    // The whole line arrives as ONE string, its separators intact.
+    expect(await screen.findByRole("tooltip")).toHaveTextContent(
+      "2 days overdue · €340"
+    )
+  })
+
   test("a mixed list does NOT auto-compact — folding its few second lines away would hide the only thing telling those rows apart", () => {
     const many = Array.from({ length: LIST_COMPACT_AFTER + 1 }, (_, i) => ({
       id: String(i),
