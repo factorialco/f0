@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.81.0](https://github.com/factorialco/f0/compare/f0-react-v6.80.0...f0-react-v6.81.0) (2026-09-02)
+
+
+### Features
+
+* **OneDataCollection:** add selectionDisabled and disableSelectAll to the source ([#5281](https://github.com/factorialco/f0/issues/5281)) ([1f4d901](https://github.com/factorialco/f0/commit/1f4d901c3e654761fce7221ccc69aaaa46328a17))
+
 ## [6.80.0](https://github.com/factorialco/f0/compare/f0-react-v6.79.0...f0-react-v6.80.0) (2026-09-02)
 
 
