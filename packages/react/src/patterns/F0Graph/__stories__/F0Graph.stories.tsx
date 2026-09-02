@@ -1570,6 +1570,62 @@ export const StackedNodesWithTags: Story = {
   render: () => <StackedNodesWithTagsDemo />,
 }
 
+// ─── Cards with tags ───────────────────────────────────────────
+
+const CARD_TAG_COLUMNS = ["team", "level", "devices"] as const
+
+const CARD_TAG_LABELS = {
+  team: "Team",
+  level: "Level",
+  devices: "Devices",
+}
+
+/** Deliberately uneven — the reservation is the same for all five, the pills are not. */
+const CARD_TAGS: Record<string, F0GraphNodeTag[]> = {
+  "1": [{ type: "raw", icon: People, text: "Board", column: "team" }],
+  "2": [
+    { type: "raw", icon: People, text: "Platform", column: "team" },
+    { type: "raw", icon: Laptop, text: "3", column: "devices" },
+  ],
+  "3": [],
+  "4": [
+    { type: "raw", icon: People, text: "Core Engineering", column: "team" },
+    { type: "raw", icon: Star, text: "Senior", column: "level" },
+    { type: "raw", icon: Laptop, text: "2", column: "devices" },
+  ],
+  "5": [{ type: "raw", icon: People, text: "Quality", column: "team" }],
+}
+
+export const CardsWithTags: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Tags under a node card, with a different number of pills per node. A connector runs the whole way from the pill it leaves to the node it points at; the tag block crops the part that would otherwise cross it, so the metadata reads as sitting on the line rather than being pierced by it. Use the controls popover to toggle a column and watch the connectors stay put.",
+      },
+    },
+  },
+  args: {
+    nodes: BASIC_NODES,
+    defaultExpandDepth: 2,
+    showControls: true,
+    nodeTagTypes: CARD_TAG_COLUMNS,
+    renderNode: (node, ctx) => {
+      const [firstName = "", lastName = ""] = node.data.name.split(" ")
+      return (
+        <F0GraphNode
+          {...ctx}
+          avatar={{ type: "person", firstName, lastName }}
+          title={node.data.name}
+          subtitle={node.data.title}
+          tags={CARD_TAGS[node.id]}
+          tagLabels={CARD_TAG_LABELS}
+        />
+      )
+    },
+  },
+}
+
 export const Snapshot: Story = {
   tags: ["no-sidebar"],
   parameters: withSnapshot({}),
