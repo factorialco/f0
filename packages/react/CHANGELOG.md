@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.81.1](https://github.com/factorialco/f0/compare/f0-react-v6.81.0...f0-react-v6.81.1) (2026-09-02)
+
+
+### Bug Fixes
+
+* **F0Checkbox:** remove the border hover state ([#5356](https://github.com/factorialco/f0/issues/5356)) ([49b4651](https://github.com/factorialco/f0/commit/49b4651055e80e7b293cbdc920e9da8eea96c6b8))
+
 ## [6.81.0](https://github.com/factorialco/f0/compare/f0-react-v6.80.0...f0-react-v6.81.0) (2026-09-02)
 
 
