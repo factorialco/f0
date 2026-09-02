@@ -1143,10 +1143,11 @@ export const SelectedOnEntry: Story = {
 }
 
 /**
- * The view-switcher chips are renamed per instance with the optional `label` on
- * each built-in visualization — here "Org chart" instead of the default "Graph"
- * and "Directory" instead of "Table". Omit `label` to keep the localized
- * built-in name. Icons are unchanged; only the text is overridden.
+ * The views are renamed per instance with the optional `label` on each built-in
+ * visualization — here "Org chart" instead of the default "Graph" and
+ * "Directory" instead of "Table". Omit `label` to keep the localized built-in
+ * name. The switcher is icon-only, so hover a segment to read the name. Icons
+ * are fixed per visualization type and never overridden.
  */
 export const CustomViewLabels: Story = {
   render: () => (
