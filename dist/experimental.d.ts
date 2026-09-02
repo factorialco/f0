@@ -8581,7 +8581,11 @@ export declare interface F0SegmentedControlProps {
     /**
      * Render segments icon-only, keeping the label accessible to screen readers
      * and showing it in a tooltip once the pointer rests on the segment.
-     * Segments without an icon still show their label. Useful in tight headers.
+     *
+     * The label is only hidden where the pointer can hover, since that is where
+     * the tooltip can recover it: on touch (`hover: none`) the text stays
+     * visible. Segments without an icon, and disabled segments (which can be
+     * neither hovered nor focused), also keep their label.
      * @default false
      */
     hideLabels?: boolean;
@@ -15031,12 +15035,15 @@ export declare type VisualizationFilterOverrides<Filters extends FiltersDefiniti
  * When omitted, the localized built-in label from
  * `i18n.collections.visualizations[type]` (e.g. "Table", "Graph") is used.
  *
- * Lets consumers rename the view switcher chip per instance, e.g. show "Org chart"
- * instead of "Graph" for employees, or "Teams" instead of "Table". The icon still
- * comes from the built-in registry for the visualization type.
+ * Lets consumers rename the view per instance, e.g. show "Org chart" instead of
+ * "Graph" for employees, or "Teams" instead of "Table". Only the text: the icon
+ * always comes from the built-in registry for the visualization type and is
+ * never customizable, so a given view looks the same in every collection.
  */
 declare type VisualizationLabelOverrides = {
-    /** Custom label shown in the view switcher chip and Settings selector.
+    /** Custom name for this view. The switcher renders icon-only on pointer
+     *  devices, so this is what the segment's tooltip and accessible name say
+     *  (and the visible text on touch).
      *  Defaults to the localized built-in label for this visualization type. */
     label?: string;
 };
@@ -15715,8 +15722,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        indent: {
+            setIndent: (level: number) => ReturnType;
+            unsetIndent: () => ReturnType;
+            outdent: () => ReturnType;
         };
     }
 }
@@ -15724,10 +15733,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        indent: {
-            setIndent: (level: number) => ReturnType;
-            unsetIndent: () => ReturnType;
-            outdent: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
