@@ -60,8 +60,6 @@ import type {
   secondaryActionsType,
 } from "./utils/types"
 
-// Declared next to the component (not in a sibling types.ts) so api-extractor
-// rolls them into the bundled d.ts instead of emitting a broken relative import.
 export interface F0RichTextEditorProps {
   mentionsConfig?: MentionsConfig
   enhanceConfig?: enhanceConfig

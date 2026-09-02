@@ -191,9 +191,14 @@ jobs:
       pull-requests: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
       - uses: ./.github/actions/setup-node-pnpm
       - name: Detect runtime cycle dependencies
-        run: pnpm --filter @factorialco/f0-react cycle-deps
+        run: |
+          git show HEAD^1:packages/react/.scripts/runtime-cycle-baseline.json > /tmp/runtime-cycle-base.json 2>/dev/null || \
+            cp packages/react/.scripts/runtime-cycle-baseline.json /tmp/runtime-cycle-base.json
+          pnpm --filter @factorialco/f0-react cycle-deps -- --base-baseline /tmp/runtime-cycle-base.json
 
   consumer-bundle:
     needs: detect-changes

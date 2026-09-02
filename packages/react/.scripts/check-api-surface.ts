@@ -3,7 +3,8 @@ import consola from "consola"
  * Public API surface breaking-change detector.
  *
  * Snapshots the public TypeScript API of each shipped entry point
- * (`f0`, `experimental`, `ai`, `component-status`) from its declaration graph, then
+ * (`f0`, `experimental`, `ai`, `component-status`,
+ * `i18n-provider-defaults`) from its declaration graph, then
  * compares two snapshots (a `--base` directory vs a `--head` directory) and
  * classifies every difference.
  *
@@ -24,11 +25,11 @@ import consola from "consola"
  * A rename surfaces, correctly, as a BREAKING removal of the old name plus a
  * safe addition of the new name.
  *
- * CI emits both declaration graphs with the same TypeScript compiler, then
- * analyzes them with the same checker process. This avoids compiler-version
+ * CI emits both declaration graphs with the same TypeScript compiler,
+ * configuration, and dependencies, varying only React source, then analyzes
+ * them with the same checker process. This avoids toolchain and dependency
  * drift in inferred declaration types. Structural types are resolved through
- * the checker instead of diffing raw `.d.ts` text, which also normalizes legacy
- * api-extractor rollup noise such as suffixed aliases.
+ * the checker instead of diffing raw `.d.ts` text.
  *
  * Unions are compared as *sets* of structural variants, and intersections of
  * object shapes are flattened into one merged member set — so an optional
@@ -85,9 +86,16 @@ import path from "node:path"
 import { fileURLToPath } from "node:url"
 import ts from "typescript"
 
-/** Public entry points shipped in `dist/`. */
-export const ENTRIES = ["f0", "experimental", "ai", "component-status"] as const
-export type Entry = (typeof ENTRIES)[number]
+/** Public declaration entry points shipped in `dist/`. */
+export const ENTRY_DECLARATION_PATHS = {
+  f0: "f0.d.ts",
+  experimental: "experimental.d.ts",
+  ai: "ai.d.ts",
+  "component-status": "component-status.d.ts",
+  "i18n-provider-defaults": "lib/providers/i18n/i18n-provider-defaults.d.ts",
+} as const
+export type Entry = keyof typeof ENTRY_DECLARATION_PATHS
+export const ENTRIES = Object.keys(ENTRY_DECLARATION_PATHS) as Entry[]
 
 /** How deep to expand object/signature types before treating them as opaque
  * leaves. Bounds the work while still reaching props nested a few containers
@@ -181,7 +189,7 @@ export interface AnalysisResult {
 /* ----------------------------- snapshotting ----------------------------- */
 
 function entryDtsPath(dir: string, entry: Entry): string | undefined {
-  const p = path.resolve(dir, `${entry}.d.ts`)
+  const p = path.resolve(dir, ENTRY_DECLARATION_PATHS[entry])
   return existsSync(p) ? p : undefined
 }
 
@@ -246,9 +254,13 @@ function getCompilerHost(options: ts.CompilerOptions): ts.CompilerHost {
       if (NON_TYPE_IMPORT_PATTERN.test(name)) return {}
       const isInternal =
         name.startsWith(".") || name.startsWith("@/") || name.startsWith("~/")
-      const importer = isInternal ? containingFile : MODULE_RESOLUTION_ANCHOR
+      const isSnapshotFile = containingFile.startsWith(`${options.baseUrl}/`)
+      const importer =
+        isInternal || !isSnapshotFile
+          ? containingFile
+          : MODULE_RESOLUTION_ANCHOR
       const resolution = ts.resolveModuleName(name, importer, options, host)
-      if (isInternal && !resolution.resolvedModule) {
+      if (!resolution.resolvedModule && (isInternal || isSnapshotFile)) {
         throw new Error(
           `Could not resolve ${name} imported by ${containingFile}`
         )
@@ -332,11 +344,7 @@ function snapshotExport(
 ): ExportSnapshot {
   let sym = symbol
   if (sym.flags & ts.SymbolFlags.Alias) {
-    try {
-      sym = checker.getAliasedSymbol(sym)
-    } catch {
-      // keep original
-    }
+    sym = checker.getAliasedSymbol(sym)
   }
 
   const kind = symbolKind(sym)
@@ -344,19 +352,13 @@ function snapshotExport(
   const isTypeOnly =
     !!(sym.flags & ts.SymbolFlags.Type) && !(sym.flags & ts.SymbolFlags.Value)
 
-  let item: ApiItem = { k: "opaque", text: "<unresolved>" }
-  let display = "<unresolved>"
-  try {
-    const type = isTypeOnly
-      ? checker.getDeclaredTypeOfSymbol(sym)
-      : checker.getTypeOfSymbolAtLocation(sym, location)
-    item = buildApiItem(type, checker, dirAbsolute, MAX_DEPTH, new Set())
-    display = normalize(
-      checker.typeToString(type, undefined, TYPE_TO_STRING_FLAGS)
-    )
-  } catch (err) {
-    display = `<unresolved: ${(err as Error).message}>`
-  }
+  const type = isTypeOnly
+    ? checker.getDeclaredTypeOfSymbol(sym)
+    : checker.getTypeOfSymbolAtLocation(sym, location)
+  const item = buildApiItem(type, checker, dirAbsolute, MAX_DEPTH, new Set())
+  const display = normalize(
+    checker.typeToString(type, undefined, TYPE_TO_STRING_FLAGS)
+  )
 
   return { kind, typeParams, display, item }
 }
@@ -1394,7 +1396,7 @@ export function buildCommentMarkdown(result: AnalysisResult): string {
   }
   lines.push("")
   lines.push(
-    "_Comparing `f0`, `experimental` and `ai` against `main`. Adding components, types, or optional props is safe. This check is non-blocking._"
+    `_Comparing ${ENTRIES.map((entry) => `\`${entry}\``).join(", ")} against \`main\`. Adding components, types, or optional props is safe. This check is non-blocking._`
   )
 
   const tx = result.translations

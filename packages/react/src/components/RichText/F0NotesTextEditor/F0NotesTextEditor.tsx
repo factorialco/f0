@@ -63,8 +63,6 @@ import type {
   NotesTextEditorSnapshot,
 } from "./types"
 
-// Declared next to the component (not in the sibling types.ts) so api-extractor
-// rolls them into the bundled d.ts instead of emitting a broken relative import.
 export interface F0NotesTextEditorProps {
   onChange: (value: { json: JSONContent | null; html: string | null }) => void
   placeholder: string

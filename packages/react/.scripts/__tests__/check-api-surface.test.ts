@@ -1,4 +1,4 @@
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs"
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import path from "node:path"
 import { afterEach, describe, expect, it, vi } from "vitest"
@@ -6,6 +6,8 @@ import { afterEach, describe, expect, it, vi } from "vitest"
 import {
   analyze,
   buildCommentMarkdown,
+  ENTRIES,
+  ENTRY_DECLARATION_PATHS,
   normalize,
   snapshotEntry,
   type AnalysisResult,
@@ -27,11 +29,10 @@ const createdDirs: string[] = []
 function dirWith(f0Dts: string): string {
   const dir = mkdtempSync(path.join(tmpdir(), "api-surface-test-"))
   writeFileSync(path.join(dir, "f0.d.ts"), f0Dts)
-  for (const entry of ["experimental", "ai", "component-status"]) {
-    writeFileSync(
-      path.join(dir, `${entry}.d.ts`),
-      "export declare const EntrySentinel: true;"
-    )
+  for (const entry of ENTRIES.filter((entry) => entry !== "f0")) {
+    const declarationPath = path.join(dir, ENTRY_DECLARATION_PATHS[entry])
+    mkdirSync(path.dirname(declarationPath), { recursive: true })
+    writeFileSync(declarationPath, "export declare const EntrySentinel: true;")
   }
   createdDirs.push(dir)
   return dir
@@ -86,6 +87,17 @@ describe("check-api-surface — catches breaking changes", () => {
         "f0"
       )
     ).toThrow("Could not resolve ./missing")
+  })
+
+  it("rejects an unresolved dependency in a public type", () => {
+    expect(() =>
+      snapshotEntry(
+        dirWith(
+          'import type { Missing } from "missing-package";\nexport interface Present { value: Missing }'
+        ),
+        "f0"
+      )
+    ).toThrow("Could not resolve missing-package")
   })
 
   it("ignores stylesheet imports that do not participate in the type graph", () => {

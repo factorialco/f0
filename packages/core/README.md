@@ -41,6 +41,13 @@ const styles = {
 - `letterSpacings`: Letter spacing values
 - `borderRadius`: Border radius values
 
+## Tailwind preset
+
+`@factorialco/f0-core/tailwind` provides the shared F0 theme and plugins. It
+does not safelist broad `bg-f1-*`, `text-f1-*`, or `border-f1-*` families.
+Consumers that construct class names dynamically must safelist the exact
+classes they generate in their own Tailwind configuration.
+
 ## Development
 
 ### Building

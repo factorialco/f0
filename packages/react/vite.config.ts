@@ -1,7 +1,6 @@
 import react from "@vitejs/plugin-react"
 import { consola } from "consola"
 import dotenv from "dotenv"
-import { execFileSync } from "node:child_process"
 import { copyFileSync, existsSync } from "node:fs"
 import path, { resolve } from "path"
 import { defineConfig, esmExternalRequirePlugin, Plugin } from "vite"
@@ -20,7 +19,6 @@ dotenv.config({
 })
 const extraPlugins: Plugin[] = []
 const buildDeclarationsOnly = process.env.BUILD_DECLARATIONS_ONLY === "true"
-const buildPreservedEsm = process.env.BUILD_PRESERVED_ESM === "true"
 const buildWatch = process.argv.some((arg) => arg === "--watch" || arg === "-w")
 
 const isBareRuntimeImport = (id: string) =>
@@ -31,19 +29,6 @@ const isBareRuntimeImport = (id: string) =>
   !id.startsWith("virtual:") &&
   !id.includes("?") &&
   !id.startsWith("\0")
-
-// Add tailwind build
-const buildTailwind = process.argv.find((arg) => arg.startsWith("--tailwind"))
-if (buildTailwind) {
-  extraPlugins.push({
-    name: "build-tailwind",
-    closeBundle() {
-      execFileSync("pnpm", ["build:tailwind"], {
-        stdio: "inherit",
-      })
-    },
-  })
-}
 
 /* Build sync */
 const buildSyncArg = process.argv.find((arg) => arg.startsWith("--buildSync"))
@@ -77,7 +62,7 @@ if (buildSync) {
 }
 /* ------------ Build sync end ------*/
 
-if (process.env.BUILD_TYPES) {
+if (process.env.BUILD_TYPES === "true") {
   extraPlugins.push(
     dts({
       include: ["src"],
@@ -117,7 +102,7 @@ const alias = {
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    ...(buildPreservedEsm
+    ...(!buildDeclarationsOnly
       ? [
           esmExternalRequirePlugin({
             external: ["react/jsx-runtime", "react", "react-dom"],
@@ -147,15 +132,15 @@ export default defineConfig({
       },
       formats: ["es"],
     },
-    outDir: buildPreservedEsm ? "dist/esm" : "dist",
+    outDir: buildDeclarationsOnly ? "dist" : "dist/esm",
     copyPublicDir: false,
     rollupOptions: {
-      external: buildPreservedEsm
-        ? isBareRuntimeImport
-        : [/@copilotkit\/.*/, /@livekit\/.*/, "livekit-client"],
+      external: buildDeclarationsOnly
+        ? [/@copilotkit\/.*/, /@livekit\/.*/, "livekit-client"]
+        : isBareRuntimeImport,
       // Workaround to fix rebuild https://github.com/vitejs/vite/issues/19410#issuecomment-2661835482
       output: {
-        entryFileNames: buildPreservedEsm
+        entryFileNames: !buildDeclarationsOnly
           ? (chunkInfo) =>
               chunkInfo.name.includes("node_modules/")
                 ? "_embedded/[hash].js"
@@ -164,8 +149,8 @@ export default defineConfig({
         globals: {
           react: "React",
         },
-        preserveModules: buildPreservedEsm,
-        preserveModulesRoot: buildPreservedEsm
+        preserveModules: !buildDeclarationsOnly,
+        preserveModulesRoot: !buildDeclarationsOnly
           ? resolve(import.meta.dirname, "src")
           : undefined,
       },

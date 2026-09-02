@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it } from "vitest"
 
 import {
   analyzeRuntimeDependencies,
+  findAddedRuntimeCycleEdges,
   findRuntimeCycleEdgeDifferences,
   type RuntimeDependencyAnalysis,
 } from "../runtime-dependency-graph"
@@ -50,6 +51,22 @@ afterEach(() => {
 })
 
 describe("runtime dependency graph", () => {
+  it("allows cycle debt to shrink but rejects additions to the baseline", () => {
+    expect(
+      findAddedRuntimeCycleEdges(
+        ["src/a.ts -> src/b.ts"],
+        ["src/a.ts -> src/b.ts", "src/b.ts -> src/a.ts"]
+      )
+    ).toEqual([])
+
+    expect(
+      findAddedRuntimeCycleEdges(
+        ["src/a.ts -> src/b.ts", "src/c.ts -> src/d.ts"],
+        ["src/a.ts -> src/b.ts"]
+      )
+    ).toEqual(["src/c.ts -> src/d.ts"])
+  })
+
   it("requires the current cycles to match the canonical baseline", () => {
     expect(
       findRuntimeCycleEdgeDifferences(

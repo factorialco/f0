@@ -26,7 +26,8 @@
     "src/f0.ts",
     "src/experimental.ts",
     "src/ai.ts",
-    "src/component-status.ts"
+    "src/component-status.ts",
+    "src/lib/providers/i18n/i18n-provider-defaults.ts"
   ],
   "include": []
 }

@@ -7,8 +7,10 @@ A static runtime-cycle ratchet for the React package.
 The checker parses every production TypeScript/JavaScript module under `src`,
 resolves internal aliases and relative imports, and ignores type-only edges.
 The cyclic edges inherited from `main` are recorded in
-`runtime-cycle-baseline.json`; the check fails whenever the current cyclic edges
-differ from that baseline. Update the baseline alongside any intentional change.
+`runtime-cycle-baseline.json`; the local check fails whenever the current cyclic
+edges differ from that baseline. CI also rejects additions to the baseline, so
+cycle debt can only shrink. Remove obsolete edges from the baseline alongside
+the code change that removes them.
 
 ## Quick Start
 

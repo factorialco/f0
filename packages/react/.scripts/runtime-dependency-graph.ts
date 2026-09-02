@@ -28,6 +28,13 @@ export function findRuntimeCycleEdgeDifferences(
   }
 }
 
+export function findAddedRuntimeCycleEdges(
+  current: string[],
+  baseline: string[]
+): string[] {
+  return findRuntimeCycleEdgeDifferences(current, baseline).currentOnly
+}
+
 interface AnalyzeRuntimeDependenciesOptions {
   projectRoot: string
   tsconfigPath: string

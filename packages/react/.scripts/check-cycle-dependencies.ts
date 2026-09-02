@@ -9,6 +9,7 @@ import { fileURLToPath } from "node:url"
 
 import {
   analyzeRuntimeDependencies,
+  findAddedRuntimeCycleEdges,
   findRuntimeCycleEdgeDifferences,
 } from "./runtime-dependency-graph"
 
@@ -38,6 +39,13 @@ function hasStagedReactSourceChanges(): boolean {
 function main(): void {
   const json = process.argv.includes("--json")
   const preCommit = process.argv.includes("--pre-commit")
+  const baseBaselineFlag = process.argv.indexOf("--base-baseline")
+  const baseBaselinePath =
+    baseBaselineFlag === -1 ? undefined : process.argv[baseBaselineFlag + 1]
+
+  if (baseBaselineFlag !== -1 && !baseBaselinePath) {
+    throw new Error("--base-baseline requires a file path")
+  }
 
   if (preCommit && !hasStagedReactSourceChanges()) {
     consola.info("No staged React source changes; skipping runtime cycle check")
@@ -58,31 +66,50 @@ function main(): void {
     analysis.cyclicEdges,
     baseline
   )
+  const baselineAdditions = baseBaselinePath
+    ? findAddedRuntimeCycleEdges(
+        baseline,
+        JSON.parse(readFileSync(baseBaselinePath, "utf8")) as string[]
+      )
+    : []
   const hasDifferences =
     cycleDifferences.currentOnly.length > 0 ||
     cycleDifferences.baselineOnly.length > 0
+  const hasBaselineAdditions = baselineAdditions.length > 0
 
   if (json) {
     process.stdout.write(
-      `${JSON.stringify({ ...analysis, cycleDifferences }, null, 2)}\n`
+      `${JSON.stringify(
+        { ...analysis, cycleDifferences, baselineAdditions },
+        null,
+        2
+      )}\n`
     )
-  } else if (!hasDifferences) {
+  } else if (!hasDifferences && !hasBaselineAdditions) {
     consola.success(
       `Runtime cycle baseline matches across ${Object.keys(analysis.graph).length} production files (${analysis.cyclicEdges.length} cyclic edges in ${analysis.cycles.length} groups)`
     )
   } else {
-    consola.error(
-      `Runtime cycle baseline differs across ${Object.keys(analysis.graph).length} production files. Update the baseline in the same change that modifies a cycle.`
-    )
+    if (hasDifferences) {
+      consola.error(
+        `Runtime cycle baseline differs across ${Object.keys(analysis.graph).length} production files. Update the baseline in the same change that removes a cycle.`
+      )
+    }
+    if (hasBaselineAdditions) {
+      consola.error("Runtime cycle baseline may only remove inherited edges.")
+    }
     for (const edge of cycleDifferences.currentOnly) {
       consola.log(`   current-only: ${edge}`)
     }
     for (const edge of cycleDifferences.baselineOnly) {
       consola.log(`   baseline-only: ${edge}`)
     }
+    for (const edge of baselineAdditions) {
+      consola.log(`   added to baseline: ${edge}`)
+    }
   }
 
-  if (hasDifferences) {
+  if (hasDifferences || hasBaselineAdditions) {
     process.exitCode = 1
   }
 }
