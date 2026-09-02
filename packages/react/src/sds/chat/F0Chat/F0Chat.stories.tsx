@@ -1243,8 +1243,10 @@ export const ComposerHotkeys: Story = {
           canvas.getByRole("button", { name: /remove quote/i })
         ).toBeVisible()
       )
-      await expect(composer).toHaveValue("")
-      await expect(composer).toHaveFocus()
+      // Dropping the edit draft and handing focus over are the quote's own
+      // follow-up effects, not part of the render that shows its chip.
+      await waitFor(() => expect(composer).toHaveValue(""))
+      await waitFor(() => expect(composer).toHaveFocus())
     })
 
     await step("The menu's Reply hands focus to the composer", async () => {
@@ -1255,11 +1257,25 @@ export const ComposerHotkeys: Story = {
       // The row defers its real popover until interaction intent — hover first,
       // or the click lands on the placeholder trigger instead.
       await userEvent.hover(row)
-      const menu = await waitFor(
-        () => canvas.getAllByRole("button", { name: /message actions/i })[0]
-      )
+      // Hovering only *starts* the swap: the row waits out any in-flight click
+      // before replacing the placeholder. Waiting for the button alone
+      // resolves on the placeholder still in place, and a click that lands
+      // mid-swap is lost — the detached node no longer reaches the React root.
+      // Only the armed trigger is a Radix PopoverTrigger, so `aria-expanded`
+      // is the swap's own signal.
+      const menu = await waitFor(() => {
+        const [trigger] = canvas.getAllByRole("button", {
+          name: /message actions/i,
+        })
+        expect(trigger).toHaveAttribute("aria-expanded", "false")
+        return trigger
+      })
       await userEvent.click(menu)
-      await userEvent.click(overlay.getByRole("button", { name: /^Reply$/i }))
+      // Radix portals the content on a later tick, so the menu's rows are
+      // never in the document on the click's own tick — find, don't get.
+      await userEvent.click(
+        await overlay.findByRole("button", { name: /^Reply$/i })
+      )
       // Radix keeps the popover mounted for its exit animation and only then
       // decides about focus — assert after that window, not before.
       await waitFor(() => expect(composer).toHaveFocus(), { timeout: 3000 })
