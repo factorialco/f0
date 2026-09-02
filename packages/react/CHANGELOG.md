@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.81.2](https://github.com/factorialco/f0/compare/f0-react-v6.81.1...f0-react-v6.81.2) (2026-09-02)
+
+
+### Bug Fixes
+
+* **F0Graph:** run the connectors node-to-node and crop them under the tags ([#5353](https://github.com/factorialco/f0/issues/5353)) ([5f28e2a](https://github.com/factorialco/f0/commit/5f28e2a857134ed54b36d4caf81b5a9cefd6a2a9))
+
 ## [6.81.1](https://github.com/factorialco/f0/compare/f0-react-v6.81.0...f0-react-v6.81.1) (2026-09-02)
 
 
