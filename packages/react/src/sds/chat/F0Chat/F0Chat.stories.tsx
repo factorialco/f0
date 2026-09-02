@@ -1067,8 +1067,11 @@ export const Snapshot: Story = {
       })
       await userEvent.clear(composer)
       await userEvent.type(composer, ":smil")
+      // Same rule as the dedicated autocomplete story: the list follows the
+      // composer's value, so wait for the value and then for the list.
+      await waitFor(() => expect(composer).toHaveValue(":smil"))
       await expect(
-        defaultChat.getByRole("listbox", { name: "Add emoji" })
+        await defaultChat.findByRole("listbox", { name: "Add emoji" })
       ).toBeVisible()
     })
 
@@ -1156,46 +1159,64 @@ export const EmojiAutocomplete: Story = {
   render: () => <Conversation initialCount={8} />,
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement)
-    const composer = canvas.getByRole("combobox", {
-      name: /write something here/i,
-    })
+    // Re-queried per use rather than captured once: the composer is a live
+    // node, and a story that holds the first reference types into a detached
+    // textarea if anything re-mounts the panel mid-play.
+    const composer = () =>
+      canvas.getByRole("combobox", { name: /write something here/i })
+    const emojiList = () => canvas.findByRole("listbox", { name: "Add emoji" })
+
+    /** Type a `:` trigger and wait for the state the list is *derived* from.
+     *
+     * The list is not a timed popover — it renders from the composer's own
+     * `value` + caret, so `expected` (the value once shortcode replacement has
+     * run) is the real precondition. Waiting on it also keeps the failure
+     * honest: a keystroke that never landed now reports the value it got
+     * instead of "the listbox is missing", which is how this story used to
+     * flake in CI. */
+    const typeTrigger = async (text: string, expected: string) => {
+      const field = composer()
+      await userEvent.click(field)
+      await waitFor(() => expect(field).toHaveFocus())
+      await userEvent.type(field, text, { skipClick: true })
+      await waitFor(() => expect(field).toHaveValue(expected))
+    }
 
     await step("Search and select with the keyboard", async () => {
-      await userEvent.type(composer, ":smil")
-      const listbox = canvas.getByRole("listbox", { name: "Add emoji" })
-      const selectedOption = within(listbox).getByRole("option", {
+      await typeTrigger(":smil", ":smil")
+      const listbox = await emojiList()
+      const selectedOption = await within(listbox).findByRole("option", {
         name: /:smile:.*Grinning Face with Smiling Eyes/,
       })
 
       await expect(listbox).toBeVisible()
-      await expect(composer).toHaveAttribute("aria-expanded", "true")
-      await expect(composer).toHaveAttribute("aria-controls", listbox.id)
-      await expect(composer).toHaveAttribute(
+      await expect(composer()).toHaveAttribute("aria-expanded", "true")
+      await expect(composer()).toHaveAttribute("aria-controls", listbox.id)
+      await expect(composer()).toHaveAttribute(
         "aria-activedescendant",
         selectedOption.id
       )
       await expect(selectedOption).toHaveAttribute("aria-selected", "true")
 
       await userEvent.keyboard("{Enter}")
-      await expect(composer).toHaveValue("😄 ")
-      await expect(
-        canvas.queryByRole("listbox", { name: "Add emoji" })
-      ).not.toBeInTheDocument()
-      await expect(composer).toHaveAttribute("aria-expanded", "false")
-      await expect(composer).toHaveFocus()
+      await waitFor(() => expect(composer()).toHaveValue("😄 "))
+      await waitFor(() =>
+        expect(
+          canvas.queryByRole("listbox", { name: "Add emoji" })
+        ).not.toBeInTheDocument()
+      )
+      await expect(composer()).toHaveAttribute("aria-expanded", "false")
+      await expect(composer()).toHaveFocus()
     })
 
     await step("Convert a complete alias", async () => {
-      await userEvent.clear(composer)
-      await userEvent.type(composer, ":thumbsup:")
-      await expect(composer).toHaveValue("👍")
+      await userEvent.clear(composer())
+      await typeTrigger(":thumbsup:", "👍")
     })
 
     await step("Leave the visual example open", async () => {
-      await userEvent.type(composer, " :joy")
-      await expect(
-        canvas.getByRole("listbox", { name: "Add emoji" })
-      ).toBeVisible()
+      await typeTrigger(" :joy", "👍 :joy")
+      await expect(await emojiList()).toBeVisible()
     })
   },
 }

@@ -160,6 +160,8 @@ export const ChatComposer = (): ReactNode => {
   })
   const closeEmojiAutocomplete = emojiAutocomplete.close
   const handleEmojiAutocompleteKeyDown = emojiAutocomplete.handleKeyDown
+  const handleEmojiAutocompleteFocus = emojiAutocomplete.handleFocus
+  const handleEmojiAutocompleteBlur = emojiAutocomplete.handleBlur
   const mentionReactId = useId()
   const mentionListboxId = `chat-mention-autocomplete-${mentionReactId.replace(/:/g, "")}`
   const activeMentionCandidate =
@@ -998,7 +1000,11 @@ export const ChatComposer = (): ReactNode => {
             onChange={handleChange}
             onKeyDown={handleKeyDown}
             onPaste={handlePaste}
-            onBlur={closeEmojiAutocomplete}
+            // Focus, not dismissal: the list belongs to the focused
+            // composer, but the `:token` under the caret stays live while you
+            // are away, so coming back shows it again.
+            onFocus={handleEmojiAutocompleteFocus}
+            onBlur={handleEmojiAutocompleteBlur}
             onCursorUpdate={updateCursorPosition}
             onScroll={syncHighlightScroll}
             highlightSegments={highlightSegments}
