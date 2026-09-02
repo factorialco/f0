@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.82.0](https://github.com/factorialco/f0/compare/f0-react-v6.81.3...f0-react-v6.82.0) (2026-09-02)
+
+
+### Features
+
+* **SlotWidget:** let a row's second line go critical ([#5360](https://github.com/factorialco/f0/issues/5360)) ([17f908f](https://github.com/factorialco/f0/commit/17f908fc91187fae0e6020fe74ee9358a7107cf7))
+
 ## [6.81.3](https://github.com/factorialco/f0/compare/f0-react-v6.81.2...f0-react-v6.81.3) (2026-09-02)
 
 
