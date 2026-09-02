@@ -879,6 +879,57 @@ export const WithSelectableAndBulkActions: Story = {
   ),
 }
 
+/**
+ * One department at a time: the first pick locks it and `selectionDisabled`
+ * greys out the rest, `disableSelectAll` removes the header checkbox that would
+ * break the rule before it can lock, and `selectionInherited` marks everyone
+ * reporting to a picked person as coming along without selecting them.
+ */
+export const WithDisabledSelection: Story = {
+  render: () => {
+    const [lockedDepartment, setLockedDepartment] = useState<string | null>(
+      null
+    )
+    const [selectedManagers, setSelectedManagers] = useState<string[]>([])
+
+    const mockVisualizations = getMockVisualizations({ frozenColumns: 0 })
+
+    const source = useDataCollectionSource({
+      filters,
+      sortings,
+      selectable: (item) => item.id,
+      selectionDisabled: (item) =>
+        lockedDepartment !== null && item.department !== lockedDepartment,
+      // Everyone reporting to a picked manager travels with them.
+      selectionInherited: (item) =>
+        selectedManagers.length > 0 && selectedManagers.includes(item.manager),
+      disableSelectAll: true,
+      bulkActions: () => ({
+        primary: [{ label: "Move", id: "move" }],
+      }),
+      dataAdapter: createDataAdapter({
+        data: generateMockUsers(10),
+        paginationType: "pages",
+      }),
+    })
+
+    return (
+      <OneDataCollection
+        source={source}
+        onSelectItems={(selectedItems) => {
+          const checked = selectedItems.itemsStatus.filter(
+            (status) => status.checked
+          )
+          setLockedDepartment(checked[0]?.item.department ?? null)
+          setSelectedManagers(checked.map((status) => status.item.name))
+        }}
+        onBulkAction={() => {}}
+        visualizations={[mockVisualizations.table]}
+      />
+    )
+  },
+}
+
 export const WithAsyncBulkActions: Story = {
   render: () => {
     const paginatedMockUsers = generateMockUsers(10)
