@@ -171,6 +171,96 @@ test("a row's subtitle may be critical — wherever a subtitle is declared at al
   ])
 })
 
+test("a row's second line may be critical — wherever a description is declared at all", () => {
+  listSlot({ descriptionRequired: true }, [
+    {
+      id: 1,
+      title: "x",
+      description: "Rejected by Finance",
+      descriptionCritical: true,
+    },
+    { id: 2, title: "y", description: "Due Friday" },
+  ])
+  listSlot({ descriptionOptional: true }, [
+    {
+      id: 1,
+      title: "x",
+      description: "Rejected by Finance",
+      descriptionCritical: true,
+    },
+    { id: 2, title: "y" },
+  ])
+
+  listSlot({}, [
+    // @ts-expect-error nothing to colour: this schema declares no description
+    { id: 1, title: "x", descriptionCritical: true },
+  ])
+})
+
+test("a second line may be a LIST of facts, each with its own tone", () => {
+  listSlot({ descriptionRequired: true }, [
+    {
+      id: 1,
+      title: "Expenses",
+      description: [
+        { text: "2 days overdue", critical: true },
+        { text: "€340" },
+        { text: "12 receipts" },
+      ],
+    },
+    // The plain string form still works beside it, in the same list.
+    { id: 2, title: "Onboarding", description: "Due Friday" },
+  ])
+
+  listSlot({ descriptionOptional: true }, [
+    { id: 1, title: "x", description: [{ text: "Rejected", critical: true }] },
+    { id: 2, title: "y" },
+  ])
+
+  listSlot({ descriptionRequired: true }, [
+    {
+      id: 1,
+      title: "x",
+      // @ts-expect-error a part's tone is `critical`, not `descriptionCritical`
+      description: [{ text: "Rejected", descriptionCritical: true }],
+    },
+  ])
+
+  listSlot({ descriptionRequired: true }, [
+    // @ts-expect-error parts carry their own tone — the whole-line flag is not also allowed
+    {
+      id: 1,
+      title: "x",
+      description: [{ text: "Rejected", critical: true }],
+      descriptionCritical: true,
+    },
+  ])
+
+  listSlot({}, [
+    // @ts-expect-error nothing to say: this schema declares no description
+    { id: 1, title: "x", description: [{ text: "Rejected" }] },
+  ])
+})
+
+test("the two murmuring lines carry their tone independently", () => {
+  listSlot({ subtitleRequired: true, descriptionRequired: true }, [
+    {
+      id: 1,
+      title: "x",
+      subtitle: "Travel",
+      description: "Rejected by Finance",
+      descriptionCritical: true,
+    },
+    {
+      id: 2,
+      title: "y",
+      subtitle: "2 days overdue",
+      subtitleCritical: true,
+      description: "Submitted Monday",
+    },
+  ])
+})
+
 test("an icon row may be tinted, and only with a colour from the palette", () => {
   listSlot({ left: "icon" }, [
     { id: 1, title: "Row", avatar: { icon: PalmTree, color: "purple" } },

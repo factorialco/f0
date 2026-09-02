@@ -47,6 +47,180 @@ describe("HomeListItem", () => {
     )
   })
 
+  test("says a description carrying bad news in the critical colour — muted by default", () => {
+    const { rerender } = zeroRender(
+      <HomeListItem title="Expenses report" description="Rejected by Finance" />
+    )
+
+    const description = () => screen.getByText("Rejected by Finance")
+
+    expect(description()).toHaveClass("text-f1-foreground-secondary")
+    expect(description()).not.toHaveClass("text-f1-foreground-critical")
+
+    rerender(
+      <HomeListItem
+        title="Expenses report"
+        description="Rejected by Finance"
+        descriptionCritical
+      />
+    )
+
+    expect(description()).toHaveClass("text-f1-foreground-critical")
+    expect(description()).not.toHaveClass("text-f1-foreground-secondary")
+    // The title is untouched: it says what the row IS, not what's wrong with it.
+    expect(screen.getByText("Expenses report")).toHaveClass(
+      "text-f1-foreground"
+    )
+  })
+
+  test("draws a list of description parts dot-separated, each with its own tone", () => {
+    zeroRender(
+      <HomeListItem
+        title="Expenses report"
+        description={[
+          { text: "2 days overdue", critical: true },
+          { text: "€340" },
+          { text: "12 receipts" },
+        ]}
+      />
+    )
+
+    expect(screen.getByText("2 days overdue")).toHaveClass(
+      "text-f1-foreground-critical"
+    )
+    expect(screen.getByText("€340")).toHaveClass("text-f1-foreground-secondary")
+    expect(screen.getByText("12 receipts")).toHaveClass(
+      "text-f1-foreground-secondary"
+    )
+  })
+
+  test("keeps the separator muted between parts of any tone — it belongs to neither", () => {
+    const { container } = zeroRender(
+      <HomeListItem
+        title="Expenses report"
+        description={[
+          { text: "2 days overdue", critical: true },
+          { text: "€340" },
+        ]}
+      />
+    )
+
+    const separators = [...container.querySelectorAll("span")].filter(
+      (node) => node.textContent === " · "
+    )
+
+    // One separator for two parts — not a leading or trailing one.
+    expect(separators).toHaveLength(1)
+    expect(separators[0]).toHaveClass("text-f1-foreground-secondary")
+    // The whole line still reads as one sentence.
+    expect(screen.getByText("2 days overdue").parentElement).toHaveTextContent(
+      "2 days overdue · €340"
+    )
+  })
+
+  test("gives the truncating line its OWN tone — the ellipsis is painted in the container's colour, not the last part's", () => {
+    // Left to inherit, a link row's second line ends in a browser-blue "…":
+    // the row is an anchor, and `truncate` paints its ellipsis in the colour of
+    // the element the class sits on.
+    const line = (container: HTMLElement) =>
+      container.querySelector("div.truncate:not([class*='font-medium'])")
+
+    const { container, rerender } = zeroRender(
+      <HomeListItem
+        title="Conference"
+        href="/expenses"
+        description={[
+          { text: "Submitted Monday" },
+          { text: "2 days overdue", critical: true },
+        ]}
+      />
+    )
+
+    // Several parts: muted, like the separators — the ellipsis stands for the
+    // line, not for whichever part it happened to cut.
+    expect(line(container)).toHaveClass("text-f1-foreground-secondary")
+
+    // A wholly critical line truncates in critical instead.
+    rerender(
+      <HomeListItem
+        title="Conference"
+        href="/expenses"
+        description={[{ text: "2 days overdue", critical: true }]}
+      />
+    )
+    expect(line(container)).toHaveClass("text-f1-foreground-critical")
+
+    // Same for the string form, which is the same line said another way.
+    rerender(
+      <HomeListItem
+        title="Conference"
+        href="/expenses"
+        description="2 days overdue"
+        descriptionCritical
+      />
+    )
+    expect(line(container)).toHaveClass("text-f1-foreground-critical")
+  })
+
+  test("says nothing for an EMPTY parts list — [] is as silent as no description", () => {
+    const { container, rerender } = zeroRender(
+      <HomeListItem title="Onboarding" description={[]} />
+    )
+
+    expect(container.textContent).toBe("Onboarding")
+
+    // And a part with no text is dropped rather than drawn as a stray dot.
+    rerender(
+      <HomeListItem
+        title="Onboarding"
+        description={[{ text: "" }, { text: "Due Friday" }]}
+      />
+    )
+
+    expect(
+      container.querySelector("span[class*='secondary']")
+    ).toHaveTextContent("Due Friday")
+    expect(container.textContent).not.toContain("·")
+  })
+
+  test("a plain string still takes the whole-line flag — the two forms agree", () => {
+    const { rerender } = zeroRender(
+      <HomeListItem title="x" description="Rejected" descriptionCritical />
+    )
+    expect(screen.getByText("Rejected")).toHaveClass(
+      "text-f1-foreground-critical"
+    )
+
+    // The same thing said the other way round renders identically.
+    rerender(
+      <HomeListItem
+        title="x"
+        description={[{ text: "Rejected", critical: true }]}
+      />
+    )
+    expect(screen.getByText("Rejected")).toHaveClass(
+      "text-f1-foreground-critical"
+    )
+  })
+
+  test("colours the two murmuring lines independently — one can go critical without the other", () => {
+    zeroRender(
+      <HomeListItem
+        title="Expenses report"
+        subtitle="Travel"
+        description="Rejected by Finance"
+        descriptionCritical
+      />
+    )
+
+    expect(screen.getByText("Rejected by Finance")).toHaveClass(
+      "text-f1-foreground-critical"
+    )
+    expect(screen.getByText("· Travel")).toHaveClass(
+      "text-f1-foreground-secondary"
+    )
+  })
+
   test("draws a left slot when given an avatar, none otherwise", () => {
     const { container, rerender } = zeroRender(
       <HomeListItem
