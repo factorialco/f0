@@ -1,16 +1,21 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { useId, useState } from "react"
+import { useId, useMemo, useState } from "react"
 import { expect, fn, userEvent, waitFor, within } from "storybook/test"
 
+import type { F0SelectItemProps } from "@/components/F0Select"
 import type { FiltersState } from "@/patterns/OneFilterPicker/types"
+
+import { F0Select } from "@/components/F0Select"
 
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import type {
+  DashboardChartData,
   DashboardItem,
   DashboardItemFiltersConfig,
   DashboardItemFiltersState,
+  DashboardMetricData,
 } from "../types"
 
 import { F0AnalyticsDashboard } from "../index"
@@ -1070,5 +1075,160 @@ export const HoverItemFilterSignal: Story = {
       await expect(trigger).toHaveFocus()
       await waitFor(() => expect(trigger).toBeVisible())
     })
+  },
+}
+
+// ---------------------------------------------------------------------------
+// Period comparison
+// ---------------------------------------------------------------------------
+
+type CompareTarget = "none" | "previous_period" | "previous_year"
+
+const comparisonOptions: F0SelectItemProps<CompareTarget>[] = [
+  { value: "none", label: "No comparison" },
+  { value: "previous_period", label: "Previous period" },
+  { value: "previous_year", label: "Previous year" },
+]
+
+const COMPARISON_MONTHS = ["Apr", "May", "Jun", "Jul", "Aug", "Sep"]
+
+const CURRENT_HEADCOUNT = [231, 236, 240, 243, 246, 248]
+const PREVIOUS_HEADCOUNT = [204, 209, 214, 219, 221, 224]
+
+/** Stands in for the host's comparison endpoint. */
+const withLatency = <T,>(value: T): Promise<T> =>
+  new Promise((resolve) => setTimeout(() => resolve(value), 400))
+
+const comparisonItems = (compareTo: CompareTarget): DashboardItem[] => {
+  const comparing = compareTo !== "none"
+  const comparisonLabel =
+    compareTo === "previous_year" ? "vs same period last year" : "vs Oct–Mar"
+
+  return [
+    {
+      id: "headcount",
+      type: "metric",
+      title: "Headcount",
+      fetchData: () =>
+        withLatency<DashboardMetricData>(
+          comparing
+            ? {
+                value: 248,
+                trend: { direction: "up", label: "+10.7%" },
+                comparisonLabel,
+              }
+            : { value: 248 }
+        ),
+    },
+    {
+      id: "voluntary-attrition",
+      type: "metric",
+      title: "Voluntary attrition",
+      format: { type: "percent" },
+      decimals: 1,
+      fetchData: () =>
+        withLatency<DashboardMetricData>(
+          comparing
+            ? {
+                value: 4.2,
+                // Percentage points, not a percentage of a percentage — the
+                // reason a host formats the label itself.
+                trend: { direction: "down", label: "−1.2 pp" },
+                comparisonLabel,
+              }
+            : { value: 4.2 }
+        ),
+    },
+    {
+      id: "offer-acceptance",
+      type: "metric",
+      title: "Offer acceptance",
+      format: { type: "percent" },
+      decimals: 0,
+      fetchData: () =>
+        withLatency<DashboardMetricData>(
+          comparing
+            ? {
+                value: 87,
+                trend: { direction: "flat", label: "No change" },
+                comparisonLabel,
+              }
+            : { value: 87 }
+        ),
+    },
+    {
+      id: "headcount-trend",
+      type: "chart",
+      title: "Headcount over time",
+      chart: {
+        type: "line",
+        showDots: true,
+        comparisonSeriesNames: ["Previous period"],
+      },
+      fetchData: () =>
+        withLatency<DashboardChartData>({
+          categories: COMPARISON_MONTHS,
+          series: comparing
+            ? [
+                { name: "This period", data: CURRENT_HEADCOUNT },
+                { name: "Previous period", data: PREVIOUS_HEADCOUNT },
+              ]
+            : [{ name: "This period", data: CURRENT_HEADCOUNT }],
+        }),
+    },
+  ]
+}
+
+const ComparisonDashboard = () => {
+  const [compareTo, setCompareTo] = useState<CompareTarget>("previous_period")
+  const items = useMemo(() => comparisonItems(compareTo), [compareTo])
+
+  return (
+    <F0AnalyticsDashboard
+      items={items}
+      dataKey={compareTo}
+      navigationActions={
+        <F0Select
+          variant="inline"
+          label="Compare to"
+          placeholder="No comparison"
+          options={comparisonOptions}
+          value={compareTo}
+          onChange={setCompareTo}
+        />
+      }
+      navigationFilters={{
+        date: {
+          type: "date-navigator",
+          defaultValue: new Date(),
+          granularity: ["month", "range"],
+        },
+      }}
+    />
+  )
+}
+
+/**
+ * A host-owned comparison picker beside the date navigator (`navigationActions`),
+ * driving every widget through `dataKey`: the grid is not remounted and the
+ * figures already on screen stay readable, dimmed, until the comparison arrives.
+ *
+ * The metrics render a server-computed `trend` verbatim — a percentage, a
+ * difference in percentage points, and a neutral "No change" — each with the
+ * `comparisonLabel` in a tooltip. The chart draws the previous period muted
+ * and dashed via `comparisonSeriesNames`, with its legend entry untouched.
+ */
+export const PeriodComparison: Story = {
+  tags: ["no-sidebar"],
+  render: () => <ComparisonDashboard />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    await expect(await canvas.findByText("+10.7%")).toBeInTheDocument()
+    await expect(canvas.getByText("No change")).toBeInTheDocument()
+    // The trend badge announces its own baseline, not just the change.
+    await expect(
+      canvas.getByText("−1.2 pp vs Oct–Mar", { selector: ".sr-only" })
+    ).toBeInTheDocument()
   },
 }

@@ -144,4 +144,45 @@ describe("useDashboardExport", () => {
     expect(filteredCreateSource).toHaveBeenCalledWith(activeFilters)
     expect(unfilteredCreateSource).toHaveBeenCalledWith({})
   })
+
+  it("adds a Change column carrying the trend label the widget renders", async () => {
+    await runExport([
+      {
+        id: "headcount",
+        title: "Headcount",
+        type: "metric",
+        fetchData: () =>
+          Promise.resolve({
+            value: 248,
+            previousValue: 224,
+            trend: { direction: "up", label: "+10.7%" },
+          }),
+      },
+    ])
+
+    const [sheets] = vi.mocked(downloadHelpers.downloadMultiSheetExcel).mock
+      .calls[0]
+    expect(sheets[0].columns).toEqual([
+      "Metric",
+      "Value",
+      "Previous Value",
+      "Change",
+    ])
+    expect(sheets[0].rows[0]).toMatchObject({ Change: "+10.7%" })
+  })
+
+  it("leaves the Change column out when no metric reports a trend", async () => {
+    await runExport([
+      {
+        id: "headcount",
+        title: "Headcount",
+        type: "metric",
+        fetchData: () => Promise.resolve({ value: 248, previousValue: 224 }),
+      },
+    ])
+
+    const [sheets] = vi.mocked(downloadHelpers.downloadMultiSheetExcel).mock
+      .calls[0]
+    expect(sheets[0].columns).toEqual(["Metric", "Value", "Previous Value"])
+  })
 })

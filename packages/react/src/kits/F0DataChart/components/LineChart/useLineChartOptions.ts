@@ -14,6 +14,7 @@ import { paletteColor, resolveChartColorToken } from "../../utils/colors"
 import {
   buildBaseChartOptions,
   deltaRow,
+  MUTED_SERIES_OPACITY,
   renderValueTooltip,
   tooltipValueFormat,
 } from "../../utils/options"
@@ -85,6 +86,7 @@ function buildSeriesEntry(
   const lineType = series.lineType ?? globalLineType
   const showArea = series.showArea ?? globalShowArea
   const { smooth, step } = resolveLineStyle(lineType)
+  const opacity = series.muted ? MUTED_SERIES_OPACITY : undefined
 
   return {
     name: series.name,
@@ -94,10 +96,12 @@ function buildSeriesEntry(
     step,
     itemStyle: {
       color,
+      opacity,
     },
     lineStyle: {
       width: 2,
       type: series.dashed ? "dashed" : "solid",
+      opacity,
     },
     areaStyle: showArea ? buildAreaStyle(color) : undefined,
     showSymbol: showDots,

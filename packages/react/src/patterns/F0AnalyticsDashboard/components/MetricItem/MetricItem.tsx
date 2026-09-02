@@ -6,6 +6,7 @@ import type {
 } from "@/patterns/OneFilterPicker/types"
 
 import { F0Icon } from "@/components/F0Icon"
+import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { ArrowUp, ArrowDown } from "@/icons/app"
 import { useContainerSize } from "@/kits/F0DataChart/utils/useContainerSize"
 import { cn, focusRing } from "@/lib/utils"
@@ -26,6 +27,8 @@ import { MetricSkeleton } from "../DashboardItem/DashboardItemSkeleton"
 interface MetricItemProps<Filters extends FiltersDefinition> {
   item: DashboardMetricItem<Filters>
   filters: FiltersState<Filters>
+  /** Refetch signal. See `F0AnalyticsDashboardProps.dataKey`. */
+  dataKey?: string
   actions?: import("@/experimental/Navigation/Dropdown").DropdownItem[]
   itemFilters?: DashboardItemFiltersConfig
   editMode?: boolean
@@ -73,7 +76,18 @@ function formatValue(
   }
 }
 
-type MetricTrend = { percent: number; direction: "up" | "down" | "flat" }
+type MetricTrend = {
+  direction: "up" | "down" | "flat"
+  /** Percentage change derived from `previousValue`. */
+  percent?: number
+  /**
+   * Host-supplied text, rendered verbatim in place of `percent` — the host
+   * owns sign, unit, locale and rounding.
+   */
+  label?: string
+  /** What the trend compares against, e.g. "vs previous month". */
+  comparisonLabel?: string
+}
 
 function computeTrend(
   value: number,
@@ -85,6 +99,86 @@ function computeTrend(
   const direction = percent > 0.5 ? "up" : percent < -0.5 ? "down" : "flat"
 
   return { percent: Math.abs(percent), direction }
+}
+
+/**
+ * The trend to render: the host's when it sent one, otherwise the percentage
+ * change against `previousValue`.
+ */
+function resolveTrend(data: DashboardMetricData): MetricTrend | undefined {
+  const trend = data.trend
+    ? { direction: data.trend.direction, label: data.trend.label }
+    : computeTrend(data.value, data.previousValue)
+
+  if (!trend) return undefined
+  return data.comparisonLabel
+    ? { ...trend, comparisonLabel: data.comparisonLabel }
+    : trend
+}
+
+/**
+ * The arrow + change beside the value, and the tooltip naming what it is
+ * compared against.
+ *
+ * A `flat` trend is only drawn when the host sent the copy for it: a computed
+ * one has nothing to say beyond "no meaningful change", which the absent badge
+ * already says, and drawing it would change what existing dashboards show.
+ */
+function MetricTrendBadge({ trend }: { trend?: MetricTrend }) {
+  if (!trend) return null
+
+  const { comparisonLabel, direction, label, percent } = trend
+
+  // The sign only reaches a screen reader through the text: the arrow that
+  // carries it visually is hidden from the accessibility tree.
+  const computed =
+    percent === undefined || direction === "flat"
+      ? undefined
+      : {
+          change: `${percent.toFixed(1)}%`,
+          signedChange: `${direction === "up" ? "+" : "−"}${percent.toFixed(1)}%`,
+        }
+  const text =
+    label === undefined ? computed : { change: label, signedChange: label }
+
+  if (!text) return null
+  const { change, signedChange } = text
+
+  const badge = (
+    <div className="flex shrink-0 items-center">
+      {direction === "up" && (
+        <F0Icon icon={ArrowUp} color="positive" size="sm" aria-hidden="true" />
+      )}
+      {direction === "down" && (
+        <F0Icon
+          icon={ArrowDown}
+          color="critical"
+          size="sm"
+          aria-hidden="true"
+        />
+      )}
+      <span className="sr-only">
+        {comparisonLabel ? `${signedChange} ${comparisonLabel}` : signedChange}
+      </span>
+      <span
+        aria-hidden="true"
+        className={cn(
+          "whitespace-nowrap text-base font-medium",
+          direction === "up" && "text-f1-foreground-positive",
+          direction === "down" && "text-f1-foreground-critical",
+          direction === "flat" && "text-f1-foreground-secondary"
+        )}
+      >
+        {change}
+      </span>
+    </div>
+  )
+
+  return comparisonLabel ? (
+    <Tooltip label={comparisonLabel}>{badge}</Tooltip>
+  ) : (
+    badge
+  )
 }
 
 /**
@@ -114,7 +208,7 @@ export function MetricValue({
         (element.scrollWidth > element.clientWidth ||
           element.scrollHeight > element.clientHeight)
     )
-  }, [height, trend?.direction, trend?.percent, value, width])
+  }, [height, trend?.direction, trend?.label, trend?.percent, value, width])
 
   return (
     <div
@@ -142,40 +236,7 @@ export function MetricValue({
         <span className="whitespace-nowrap text-3xl font-semibold leading-none tracking-tight text-f1-foreground">
           {value}
         </span>
-        {trend && trend.direction !== "flat" && (
-          <div className="flex shrink-0 items-center">
-            {trend.direction === "up" ? (
-              <F0Icon
-                icon={ArrowUp}
-                color="positive"
-                size="sm"
-                aria-hidden="true"
-              />
-            ) : (
-              <F0Icon
-                icon={ArrowDown}
-                color="critical"
-                size="sm"
-                aria-hidden="true"
-              />
-            )}
-            <span className="sr-only">
-              {trend.direction === "up" ? "+" : "−"}
-              {trend.percent.toFixed(1)}%
-            </span>
-            <span
-              aria-hidden="true"
-              className={cn(
-                "whitespace-nowrap text-base font-medium",
-                trend.direction === "up"
-                  ? "text-f1-foreground-positive"
-                  : "text-f1-foreground-critical"
-              )}
-            >
-              {trend.percent.toFixed(1)}%
-            </span>
-          </div>
-        )}
+        <MetricTrendBadge trend={trend} />
       </div>
     </div>
   )
@@ -190,6 +251,7 @@ export function MetricValue({
 export function MetricItem<Filters extends FiltersDefinition>({
   item,
   filters,
+  dataKey,
   actions,
   itemFilters,
   editMode,
@@ -199,12 +261,12 @@ export function MetricItem<Filters extends FiltersDefinition>({
 }: MetricItemProps<Filters>) {
   const enabled = item.useDashboardFilters !== false
   const itemFiltersKey = JSON.stringify(itemFilters?.value ?? {})
-  const { data, isLoading, error, retry } = useDashboardItemData<
+  const { data, isLoading, isRefreshing, error, retry } = useDashboardItemData<
     Filters,
     DashboardMetricData
-  >(item.fetchData, filters, enabled, itemFiltersKey)
+  >(item.fetchData, filters, enabled, itemFiltersKey, dataKey)
 
-  const trend = data ? computeTrend(data.value, data.previousValue) : undefined
+  const trend = data ? resolveTrend(data) : undefined
 
   return (
     <DashboardItem
@@ -213,6 +275,7 @@ export function MetricItem<Filters extends FiltersDefinition>({
       info={item.info}
       explanation={item.explanation}
       isLoading={isLoading}
+      isRefreshing={isRefreshing}
       error={error}
       onRetry={retry}
       skeleton={<MetricSkeleton />}

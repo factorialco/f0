@@ -514,6 +514,60 @@ export function buildChartProps(
   overrideType?: DashboardChartConfig["type"],
   overrideOrientation?: "vertical" | "horizontal"
 ): F0DataChartProps {
+  return muteComparisonSeries(
+    buildBaseChartProps(item, data, overrideType, overrideOrientation),
+    "comparisonSeriesNames" in item.chart
+      ? item.chart.comparisonSeriesNames
+      : undefined
+  )
+}
+
+/**
+ * Draw the series the item named as comparison baselines muted, so the current
+ * period stays the figure being read: reduced opacity on both, plus a dashed
+ * stroke on a line, where two solid lines in the same colour family are the
+ * hardest pair to tell apart. Legend entries are untouched — switching a
+ * comparison series off works like any other.
+ *
+ * Only bar and line carry named series that can pair up this way; the other
+ * types pass through.
+ */
+function muteComparisonSeries(
+  props: F0DataChartProps,
+  comparisonSeriesNames?: string[]
+): F0DataChartProps {
+  if (!comparisonSeriesNames?.length) return props
+  const names = new Set(comparisonSeriesNames)
+
+  if (props.type === "line") {
+    return {
+      ...props,
+      series: props.series.map((series) =>
+        names.has(series.name)
+          ? { ...series, muted: true, dashed: true }
+          : series
+      ),
+    }
+  }
+
+  if (props.type === "bar") {
+    return {
+      ...props,
+      series: props.series.map((series) =>
+        names.has(series.name) ? { ...series, muted: true } : series
+      ),
+    }
+  }
+
+  return props
+}
+
+function buildBaseChartProps(
+  item: DashboardChartItem,
+  data: DashboardChartData,
+  overrideType?: DashboardChartConfig["type"],
+  overrideOrientation?: "vertical" | "horizontal"
+): F0DataChartProps {
   const targetType = overrideType ?? item.chart.type
   // Detect actual data shape — after a transform, item.chart.type may have
   // changed but the data from fetchData still has its original shape.
@@ -800,6 +854,8 @@ export function chartItemFitsContent<Filters extends FiltersDefinition>(
 interface ChartItemProps<Filters extends FiltersDefinition> {
   item: DashboardChartItem<Filters>
   filters: FiltersState<Filters>
+  /** Refetch signal. See `F0AnalyticsDashboardProps.dataKey`. */
+  dataKey?: string
   actions?: DropdownItem[]
   itemFilters?: DashboardItemFiltersConfig
   editMode?: boolean
@@ -818,6 +874,7 @@ interface ChartItemProps<Filters extends FiltersDefinition> {
 export function ChartItem<Filters extends FiltersDefinition>({
   item,
   filters,
+  dataKey,
   actions,
   itemFilters,
   editMode,
@@ -858,10 +915,10 @@ export function ChartItem<Filters extends FiltersDefinition>({
   >()
   const enabled = item.useDashboardFilters !== false
   const itemFiltersKey = JSON.stringify(itemFilters?.value ?? {})
-  const { data, isLoading, error, retry } = useDashboardItemData<
+  const { data, isLoading, isRefreshing, error, retry } = useDashboardItemData<
     Filters,
     DashboardChartData
-  >(item.fetchData, filters, enabled, itemFiltersKey)
+  >(item.fetchData, filters, enabled, itemFiltersKey, dataKey)
   const chartContainerRef = useRef<HTMLDivElement>(null)
   const keyboardPointTriggerRef = useRef<HTMLButtonElement | null>(null)
 
@@ -1137,6 +1194,7 @@ export function ChartItem<Filters extends FiltersDefinition>({
       {...(descriptionAction ? { descriptionAction } : {})}
       explanation={item.explanation}
       isLoading={isLoading}
+      isRefreshing={isRefreshing}
       error={
         error ??
         // Deliberately message-less: the shared "Error loading data" title

@@ -19,6 +19,7 @@ import {
   buildBaseChartOptions,
   buildItemTooltip,
   labelWidthCap,
+  MUTED_SERIES_OPACITY,
   renderMarker,
   renderValueTooltip,
   tooltipValueFormat,
@@ -593,6 +594,7 @@ function buildSeriesEntries(
     itemStyle: {
       color,
       borderRadius,
+      ...(series.muted && { opacity: MUTED_SERIES_OPACITY }),
       // ECharts has no native gap between stacked segments — a border in the
       // container's background color is the standard way to separate them.
       ...(stacked && {

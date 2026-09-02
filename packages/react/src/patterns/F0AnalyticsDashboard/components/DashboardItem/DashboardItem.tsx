@@ -54,6 +54,12 @@ interface DashboardItemProps {
    */
   info?: string | InfoHintContent
   isLoading: boolean
+  /**
+   * A refetch is in flight while the previous data is still rendered. The
+   * content dims instead of collapsing to the skeleton, and the card reports
+   * itself busy.
+   */
+  isRefreshing?: boolean
   error?: Error
   onRetry?: () => void
   /** Content-area skeleton shown while loading. Each item type provides its own. */
@@ -129,6 +135,7 @@ export function DashboardItem({
   description,
   info,
   isLoading,
+  isRefreshing = false,
   error,
   onRetry,
   skeleton,
@@ -336,8 +343,8 @@ export function DashboardItem({
         // border stops at the fold while the chart keeps drawing below it.
         fitContent ? "min-h-full shrink-0" : "h-full"
       )}
-      aria-busy={isLoading ? "true" : undefined}
-      aria-live={isLoading ? "polite" : undefined}
+      aria-busy={isLoading || isRefreshing ? "true" : undefined}
+      aria-live={isLoading || isRefreshing ? "polite" : undefined}
     >
       <div className="flex items-start px-4 py-3">
         <div className="flex min-w-0 flex-1 flex-col">
@@ -547,7 +554,15 @@ export function DashboardItem({
           )}
         </div>
       </div>
-      <div className={cn("flex-1", !fitContent && "min-h-0")}>
+      <div
+        className={cn(
+          "flex-1",
+          !fitContent && "min-h-0",
+          // Still readable, visibly not the final answer. The card's aria-busy
+          // is what says so to a screen reader.
+          isRefreshing && "opacity-60 transition-opacity duration-150"
+        )}
+      >
         {isLoading ? skeleton : children}
       </div>
     </div>

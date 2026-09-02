@@ -1,3 +1,5 @@
+import type { ReactNode } from "react"
+
 import type {
   ChartColorToken,
   F0DataChartBarSeries,
@@ -47,6 +49,14 @@ interface ChartConfigBase {
   tooltipValueFormatter?: (value: number) => string
   /** Format category axis tick labels */
   categoryFormatter?: (value: string) => string
+  /**
+   * Names of series that carry a comparison baseline (e.g. the same measure
+   * over the previous period). They are drawn muted — reduced opacity, and
+   * dashed on a line chart — so the current period stays the figure being
+   * read. Their legend entries are untouched, so switching one off works the
+   * same way as for any other series.
+   */
+  comparisonSeriesNames?: string[]
 }
 
 export interface BarChartConfig extends ChartConfigBase {
@@ -336,12 +346,40 @@ export type MetricFormat =
   | { type: "percent" }
   | { type: "custom"; suffix?: string; prefix?: string }
 
+/**
+ * A trend the host computed itself, shown beside the metric value.
+ *
+ * Use it when the change is not a percentage of `previousValue` — a difference
+ * in percentage points, a server-side comparison against a target, a figure
+ * whose rounding must match a report elsewhere.
+ */
+export interface DashboardMetricTrend {
+  /** Which way the change points. `flat` renders neutrally, without an arrow. */
+  direction: "up" | "down" | "flat"
+  /**
+   * Rendered verbatim next to the arrow, so the host owns sign, unit, locale
+   * and rounding — "+1.2 pp", "−12.5%", "sin cambios".
+   */
+  label: string
+}
+
 /** Data returned by a metric item's fetchData */
 export interface DashboardMetricData {
   /** The main numeric value displayed in large text */
   value: number
   /** Optional previous value — used to compute a trend indicator */
   previousValue?: number
+  /**
+   * A ready-made trend. Takes precedence over the one derived from
+   * `previousValue`, which stays the default when this is absent.
+   */
+  trend?: DashboardMetricTrend
+  /**
+   * What the trend compares against, e.g. "vs previous month". Shown in a
+   * tooltip on the trend and announced with it, so the figure states its own
+   * baseline instead of relying on the widget title.
+   */
+  comparisonLabel?: string
 }
 
 /**
@@ -643,4 +681,19 @@ export interface F0AnalyticsDashboardProps<
    * Rendered above the grid alongside the regular filter bar.
    */
   navigationFilters?: NavigationFiltersDefinition
+  /**
+   * Host controls rendered in the header row, immediately left of the
+   * navigation filters — a comparison picker beside the date navigator.
+   * Nothing is rendered, and no row appears, when omitted.
+   */
+  navigationActions?: ReactNode
+  /**
+   * Changes when the host wants widgets to refetch with the same filters
+   * (e.g. a comparison target changed).
+   *
+   * Every item re-runs its `fetchData` in place: the grid is not remounted and
+   * the data already on screen stays visible, dimmed, until the new result
+   * arrives. A widget with nothing to keep shows its skeleton as usual.
+   */
+  dataKey?: string
 }

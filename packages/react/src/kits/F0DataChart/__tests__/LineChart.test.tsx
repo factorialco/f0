@@ -280,3 +280,49 @@ describe("LineChart — tooltip value formatting", () => {
     expect(hoverFirstPoint()).toContain("107,505 €")
   })
 })
+
+describe("LineChart — muted series", () => {
+  const optionSeries = () =>
+    getLatestOption().series as Array<{
+      lineStyle?: { opacity?: number; type?: string }
+      itemStyle?: { opacity?: number }
+    }>
+
+  it("fades a muted series and leaves the others at full strength", () => {
+    render(
+      <F0DataChart
+        type="line"
+        categories={["Jan", "Feb"]}
+        series={[
+          { name: "This period", data: [1, 2] },
+          { name: "Previous period", data: [3, 4], muted: true, dashed: true },
+        ]}
+      />
+    )
+
+    const [current, previous] = optionSeries()
+    expect(current.lineStyle?.opacity).toBeUndefined()
+    expect(current.itemStyle?.opacity).toBeUndefined()
+    expect(previous.lineStyle?.opacity).toBe(0.45)
+    expect(previous.itemStyle?.opacity).toBe(0.45)
+    expect(previous.lineStyle?.type).toBe("dashed")
+  })
+
+  it("keeps the legend entry at full strength", () => {
+    render(
+      <F0DataChart
+        type="line"
+        categories={["Jan", "Feb"]}
+        series={[
+          { name: "This period", data: [1, 2] },
+          { name: "Previous period", data: [3, 4], muted: true },
+        ]}
+      />
+    )
+
+    const legend = getLatestOption().legend as {
+      itemStyle?: { opacity?: number }
+    }
+    expect(legend.itemStyle?.opacity).toBe(1)
+  })
+})

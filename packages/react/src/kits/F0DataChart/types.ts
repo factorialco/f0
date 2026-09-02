@@ -155,6 +155,12 @@ export interface F0DataChartBarSeries {
   data: F0DataChartBarDataPoint[]
   /** Override color for this series. Must be an F0 design token name. Falls back to the theme palette. */
   color?: ChartColorToken
+  /**
+   * Draw this series faded, keeping its colour and its legend entry. For a
+   * secondary reading of the same measure — the previous period beside the
+   * current one — so the primary series stays the one being read.
+   */
+  muted?: boolean
 }
 
 // ---------------------------------------------------------------------------
@@ -190,6 +196,12 @@ export interface F0DataChartLineSeries {
   lineType?: F0DataChartLineType
   /** Override area fill for this series */
   showArea?: boolean
+  /**
+   * Draw this series faded, keeping its colour and its legend entry. For a
+   * secondary reading of the same measure — the previous period beside the
+   * current one — so the primary series stays the one being read.
+   */
+  muted?: boolean
 }
 
 // ---------------------------------------------------------------------------

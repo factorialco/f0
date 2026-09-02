@@ -23,6 +23,8 @@ import { DashboardItem } from "../DashboardItem/DashboardItem"
 interface CollectionItemProps<Filters extends FiltersDefinition> {
   item: DashboardCollectionItem<Filters>
   filters: FiltersState<Filters>
+  /** Refetch signal. See `F0AnalyticsDashboardProps.dataKey`. */
+  dataKey?: string
   actions?: DropdownItem[]
   itemFilters?: DashboardItemFiltersConfig
   editMode?: boolean
@@ -45,6 +47,7 @@ interface CollectionItemProps<Filters extends FiltersDefinition> {
 export function CollectionItem<Filters extends FiltersDefinition>({
   item,
   filters,
+  dataKey,
   actions,
   itemFilters,
   editMode,
@@ -63,11 +66,12 @@ export function CollectionItem<Filters extends FiltersDefinition>({
   const sourceDefinition = useMemo(
     () => item.createSource(effectiveFilters),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [filtersKey, itemFiltersKey]
+    [filtersKey, itemFiltersKey, dataKey]
   )
   const source = useDataCollectionSource<RecordType>(sourceDefinition, [
     filtersKey,
     itemFiltersKey,
+    dataKey,
   ])
 
   // We capture the current table visualization settings (hidden columns +

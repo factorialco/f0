@@ -15,6 +15,7 @@ export type {
   DashboardItemFiltersState,
   DashboardMetricData,
   DashboardMetricItem,
+  DashboardMetricTrend,
   F0AnalyticsDashboardAskAiTarget,
   F0AnalyticsDashboardAskAiTargetWithQuote,
   F0AnalyticsDashboardPointClick,

@@ -56,6 +56,7 @@ describe("CollectionItem", () => {
     expect(useDataCollectionSource).toHaveBeenLastCalledWith(firstDefinition, [
       "{}",
       "{}",
+      undefined,
     ])
 
     rerender(
@@ -74,6 +75,36 @@ describe("CollectionItem", () => {
     expect(useDataCollectionSource).toHaveBeenLastCalledWith(secondDefinition, [
       "{}",
       '{"employee":"Ada"}',
+      undefined,
+    ])
+  })
+
+  it("recreates the source when the dataKey changes", () => {
+    const createSource = vi.fn(() => ({ id: "source" }))
+
+    const { rerender } = render(
+      <CollectionItem
+        item={item(createSource) as never}
+        filters={{}}
+        dataKey="none"
+      />
+    )
+
+    expect(createSource).toHaveBeenCalledOnce()
+
+    rerender(
+      <CollectionItem
+        item={item(createSource) as never}
+        filters={{}}
+        dataKey="previous_period"
+      />
+    )
+
+    expect(createSource).toHaveBeenCalledTimes(2)
+    expect(useDataCollectionSource).toHaveBeenLastCalledWith({ id: "source" }, [
+      "{}",
+      "{}",
+      "previous_period",
     ])
   })
 })

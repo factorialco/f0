@@ -53,6 +53,7 @@ async function buildMetricsSheet<Filters extends FiltersDefinition>(
 
   const rows: Record<string, unknown>[] = []
   let hasPrevious = false
+  let hasChange = false
 
   for (const item of metricItems) {
     try {
@@ -67,6 +68,13 @@ async function buildMetricsSheet<Filters extends FiltersDefinition>(
         row["Previous Value"] = data.previousValue
         hasPrevious = true
       }
+      // The label as the widget renders it — the host already formatted the
+      // sign, unit and rounding, and the sheet should not disagree with the
+      // screen about what the change was.
+      if (data.trend?.label !== undefined) {
+        row.Change = data.trend.label
+        hasChange = true
+      }
       rows.push(row)
     } catch (err) {
       console.warn(
@@ -78,9 +86,12 @@ async function buildMetricsSheet<Filters extends FiltersDefinition>(
 
   if (rows.length === 0) return null
 
-  const columns = hasPrevious
-    ? ["Metric", "Value", "Previous Value"]
-    : ["Metric", "Value"]
+  const columns = [
+    "Metric",
+    "Value",
+    ...(hasPrevious ? ["Previous Value"] : []),
+    ...(hasChange ? ["Change"] : []),
+  ]
 
   return { name: "Metrics", columns, rows }
 }
