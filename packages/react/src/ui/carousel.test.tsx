@@ -46,4 +46,8 @@ describe("the carousel's shadow bleed", () => {
       expect(rule).toContain(`transparent_calc(100%_-_${bleed / 2}px)`)
     }
   })
+
+  test("takes no pointer events, so the band cannot cover its neighbours", () => {
+    expect(CAROUSEL_SHADOW_BLEED).toContain("pointer-events-none")
+  })
 })
