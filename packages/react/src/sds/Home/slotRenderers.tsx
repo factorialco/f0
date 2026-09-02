@@ -63,6 +63,14 @@ export interface HomeRenderCtx {
    */
   isLastSlot?: boolean
   /**
+   * Whether the widget draws a FOOTER under its slots (the frame's `action`).
+   * The last slot's bottom bleed is spent differently either way: with a footer
+   * it is what the footer's own `mt-2` buys back; without one, the slot's
+   * bottom IS the card's bottom edge — which is what a "View more" button
+   * sitting there needs to know (see {@link listMoreButtonClass}).
+   */
+  hasFooter?: boolean
+  /**
    * WHAT THE CARD IS SHOWING, when its header carries a `headerSelect`: the
    * option the reader is on. A slot renderer that owns its own data reads this
    * to fetch for it — the switcher is in the header, the fetching is here, and
@@ -913,6 +921,21 @@ export const slotRowBleed = (ctx: HomeRenderCtx) =>
  */
 export const LIST_MORE_BUTTON_CLASS = "ml-1.5 mt-1 self-start"
 
+/**
+ * The same edge on the OTHER axis, for when the button is the last thing on the
+ * card. The bleed a row-based slot keeps at its bottom is there so ROWS reach
+ * the card's bottom edge; the button is not a row, so left in that bleed it
+ * ends up 8px from the card's border while measuring 14px from its left — the
+ * corner reads as cropped. `mb-1.5` gives it the left edge's exact treatment
+ * (bleed cancelled, 2px nudge kept), so the gap below it equals the gap beside.
+ *
+ * Only when there is nothing after it: with a footer under the slots the bleed
+ * is already what the footer's own `mt-2` buys back, and padding here would
+ * push that footer 6px further down instead.
+ */
+export const listMoreButtonClass = (ctx: HomeRenderCtx) =>
+  cn(LIST_MORE_BUTTON_CLASS, ctx.isLastSlot && !ctx.hasFooter && "mb-1.5")
+
 /** The gap between rows of the `event-list` slot. */
 export const EVENT_LIST_GAP = "gap-2"
 
@@ -1088,7 +1111,7 @@ function ListSlot({ params, ctx }: { params: ListParams; ctx: HomeRenderCtx }) {
         })}
       </HomeSlotItems>
       {overflows ? (
-        <div className={LIST_MORE_BUTTON_CLASS}>
+        <div className={listMoreButtonClass(ctx)}>
           {/* `neutral`, the same button a widget's own call to action is (the
               frame's `action`): "View more" is something you press, and a ghost
               button under a dense list of rows reads as another row. Past the
@@ -1255,7 +1278,7 @@ const ListSlotSkeleton = ({
         </div>
       ))}
       {overflows ? (
-        <div className={LIST_MORE_BUTTON_CLASS}>
+        <div className={listMoreButtonClass(ctx)}>
           {/* An `sm` neutral button — what "View more (n)" will be. */}
           <Skeleton className="h-6 w-24 rounded-sm" />
         </div>
