@@ -39,6 +39,8 @@ pre-commit:
       glob: "packages/react/src/**/*.tsx"
       run: pnpm exec tsx packages/react/.scripts/check-animated-css-variables.ts --staged
 
+    # Globs cover every path CODEOWNERS points at, so moving or renaming an
+    # owned directory fails here instead of silently losing its owner team.
     ownership:
-      glob: "{CODEOWNERS,ownership/*,packages/react/src/sds/**}"
+      glob: "{CODEOWNERS,ownership/*,packages/react/src/sds/**,packages/react/src/kits/**,packages/react/src/ai/**}"
       run: pnpm --filter @factorialco/f0-ownership run check

@@ -35,14 +35,19 @@ import { useWidgetDialogLayout, WidgetPreviewPane } from "../WidgetPreview"
 
 /**
  * The width each area gives a widget, used to cap the preview when the picker is
- * opened for one. The rail is the layout's `asideWidth` and the main column is
- * its `mainWidth` — f0's `max-w-content` reading column — so a widget previews at
- * the width the column it is headed for will really give it.
+ * opened for one. These are the layout's own `mainWidth` and `asideWidth`
+ * defaults, so a widget previews at the width the column it is headed for will
+ * really give it — which matters most for the widgets that divide their column
+ * into tiles, where 40px of preview is a visibly different tile.
+ *
+ * ⚠️ `main` IS 672, NOT `max-w-content` (712). The main column stopped borrowing
+ * the reading column's measure — see `MAIN_WIDTH` in `NewHomeLayout`. Keep the
+ * two in step: a preview drawn at the wrong width is a preview that lies.
  *
  * Override either with `previewWidth` when the app's own columns differ.
  */
 const AREA_PREVIEW_WIDTH: Record<WidgetContainerSide, number> = {
-  main: 712,
+  main: 672,
   right: 396,
 }
 

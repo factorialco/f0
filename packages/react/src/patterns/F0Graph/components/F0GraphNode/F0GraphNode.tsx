@@ -161,16 +161,14 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
      */
     const tagRow = (maxWidthClass: string) =>
       tagsVisible ? (
-        <motion.div
+        <div
           key="tags"
-          initial={noMotion ? false : { opacity: 0, filter: "blur(3px)" }}
-          animate={{ opacity: 1, filter: "blur(0px)" }}
-          transition={
-            noMotion
-              ? { duration: 0 }
-              : { duration: 0.12, ease: [0.23, 1, 0.32, 1] }
-          }
-          className={maxWidthClass}
+          className={cn(
+            maxWidthClass,
+            // The connector runs behind this block on its way to the next node.
+            // A radius this wide flattens it away — practically a crop.
+            "rounded-[13px] backdrop-blur-[400px]"
+          )}
           // Tags are informational: clicking a tag must not select the node.
           // Two paths select a node: the node-level `onClick` (selection, plus
           // any consumer `itemOnClick`) — swallowed here via stopPropagation —
@@ -181,8 +179,20 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
           data-no-node-select
           onClick={(e) => e.stopPropagation()}
         >
-          <F0GraphNodeTags tags={filteredTags!} />
-        </motion.div>
+          {/* The reveal has to live on a child: `filter` makes an element the
+              backdrop root, leaving the blur above nothing to sample. */}
+          <motion.div
+            initial={noMotion ? false : { opacity: 0, filter: "blur(3px)" }}
+            animate={{ opacity: 1, filter: "blur(0px)" }}
+            transition={
+              noMotion
+                ? { duration: 0 }
+                : { duration: 0.12, ease: [0.23, 1, 0.32, 1] }
+            }
+          >
+            <F0GraphNodeTags tags={filteredTags!} />
+          </motion.div>
+        </div>
       ) : null
 
     // A row has no pill chrome, no dot↔compact avatar growth and no hover card,

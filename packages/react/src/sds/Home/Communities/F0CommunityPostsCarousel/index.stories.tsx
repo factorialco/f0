@@ -2,7 +2,14 @@ import { useMemo } from "react"
 
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { expect, fn, userEvent, waitFor, within } from "storybook/test"
+import {
+  expect,
+  fireEvent,
+  fn,
+  userEvent,
+  waitFor,
+  within,
+} from "storybook/test"
 
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
@@ -143,7 +150,7 @@ export const Loading: Story = {
 
 /**
  * COVER IMAGES, and the case that matters: a post WITH one beside a post
- * WITHOUT. Every cover is drawn in the same 2:1 box, sized from the column's
+ * WITHOUT. Every cover is drawn in the same 16:9 box, sized from the column's
  * width and cropped to fit, so the tiles in a row stay the same shape however
  * the pictures were authored — and the tile with no picture simply gives its
  * body the room instead.
@@ -183,19 +190,23 @@ const FEED = Array.from({ length: 12 }, (_, index) => {
  */
 type PostRecord = CommunityPostSummary & Record<string, unknown>
 
+const FIRST_PAGE_MS = 700
+
 /**
  * A CURSOR-PAGED SOURCE, the shape a real one has: an offset in, a slice out,
- * `hasMore` saying whether the feed continues. The delay is there so the
- * loading tile and the arrow's spinner are actually visible.
+ * `hasMore` saying whether the feed continues. The delays are there so the
+ * loading tiles and the arrow's spinner are actually visible.
  */
-const pagedPosts = () =>
+const pagedPosts = (nextPageMs: number) =>
   createDataSourceDefinition<PostRecord>({
     dataAdapter: {
       paginationType: "infinite-scroll",
       perPage: POSTS_PER_PAGE,
       fetchData: async ({ pagination }) => {
         const from = Number(pagination?.cursor ?? 0)
-        await new Promise((resolve) => setTimeout(resolve, 700))
+        await new Promise((resolve) =>
+          setTimeout(resolve, from === 0 ? FIRST_PAGE_MS : nextPageMs)
+        )
         const records = FEED.slice(from, from + POSTS_PER_PAGE) as PostRecord[]
         const next = from + records.length
         return {
@@ -215,8 +226,10 @@ const pagedPosts = () =>
  * accumulated plus the three fields `pagination` wants, and the carousel does the
  * rest. The component never learns what a data source is.
  */
-const PagedCarousel = () => {
-  const source = useDataSource(useMemo(pagedPosts, []))
+const PagedCarousel = ({ nextPageMs = 700 }: { nextPageMs?: number }) => {
+  const source = useDataSource(
+    useMemo(() => pagedPosts(nextPageMs), [nextPageMs])
+  )
   const { data, isInitialLoading, isLoadingMore, paginationInfo, loadMore } =
     useData(source)
 
@@ -246,15 +259,64 @@ const PagedCarousel = () => {
  * The carousel holds only the pages that have been asked for, so what is in the
  * DOM is bounded by how far you actually walked rather than by how long the feed
  * is. Reaching the last tile asks for the next page BEFORE the arrow is pressed
- * there, so pressing it usually just scrolls; press it early and you get the
- * spinner on the arrow and a placeholder tile to scroll onto while the fetch is
- * in flight. Next only goes dead once the source says `hasMore: false`.
+ * there, so pressing it usually just scrolls; press it early — or throw the row
+ * past the end — and you get the spinner on the arrow and placeholder tiles to
+ * move onto while the fetch is in flight. Next only goes dead once the source
+ * says `hasMore: false`.
+
  *
  * There is no windowing: every page fetched stays mounted (embla measures its
  * own slides, so it cannot page them out). Paging is what keeps that bounded.
  */
 export const PagedFromDataSource: Story = {
   render: () => <PagedCarousel />,
+}
+
+const throwRowPastTheEnd = async (tile: HTMLElement) => {
+  const { left, top, width, height } = tile.getBoundingClientRect()
+  const y = top + height / 2
+  const from = left + width - 8
+  const steps = 20
+  const step = 15
+
+  fireEvent.mouseDown(tile, { clientX: from, clientY: y, button: 0 })
+  for (let index = 1; index <= steps; index++) {
+    fireEvent.mouseMove(document, { clientX: from - index * step, clientY: y })
+    await new Promise((resolve) => setTimeout(resolve, 20))
+  }
+  fireEvent.mouseUp(document, { clientX: from - steps * step, clientY: y })
+}
+
+const SLOW_NEXT_PAGE_MS = 2500
+
+/**
+ * DRAGGING IS A WAY FORWARD, not just the arrow. Thrown past the last tile, the
+ * carousel asks for the next page, puts placeholder tiles where it will go and
+ * moves onto them. The next page takes 2.5s here, so that middle state is
+ * something you can watch.
+ */
+export const LoadsMoreOnDrag: Story = {
+  render: () => <PagedCarousel nextPageMs={SLOW_NEXT_PAGE_MS} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    const firstTile = await canvas.findByText(
+      `${POSTS[0].title} (#1)`,
+      {},
+      {
+        timeout: 5000,
+      }
+    )
+
+    await throwRowPastTheEnd(firstTile.closest("[role='group']") as HTMLElement)
+
+    await waitFor(() => expect(canvas.getAllByRole("group")).toHaveLength(4))
+
+    await waitFor(
+      () => expect(canvas.getByText(`${POSTS[2].title} (#3)`)).toBeVisible(),
+      { timeout: 15000 }
+    )
+  },
 }
 
 /**

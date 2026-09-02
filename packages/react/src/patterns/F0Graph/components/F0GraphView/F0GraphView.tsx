@@ -46,6 +46,7 @@ import {
   LARGE_GRAPH_SNAP_THRESHOLD,
   NODE_CLICK_DISTANCE_SQ,
   NODE_CLICK_ZOOM,
+  NODE_HEIGHT,
 } from "../../constants"
 import {
   F0GraphActionsContext,
@@ -793,6 +794,7 @@ export function F0GraphView<T = unknown>(
       deferredLoading: isDeferredLoading || undefined,
       dataLoadingEnabled: loadVisibleNodeData !== undefined || undefined,
       tagRowHeight: reservedTagHeight,
+      nodeHeight: nodeHeightProp ?? NODE_HEIGHT,
       stackedNodeHeight: stackedNodeHeightProp,
       largeGraph: isLargeGraph,
     }),
@@ -804,6 +806,7 @@ export function F0GraphView<T = unknown>(
       loadVisibleNodeData,
       isLargeGraph,
       reservedTagHeight,
+      nodeHeightProp,
       stackedNodeHeightProp,
     ]
   )

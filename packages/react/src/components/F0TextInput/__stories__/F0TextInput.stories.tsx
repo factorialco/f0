@@ -1,8 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { expect, userEvent, within } from "storybook/test"
+
 import * as Icons from "@/icons/app"
 import { Placeholder } from "@/icons/app"
-import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { inputFieldStatus } from "@/components/F0InputField"
 
 import { F0TextInput } from "../index"
@@ -57,7 +59,9 @@ const meta = {
       defaultValue: false,
     },
   },
-  parameters: {},
+  parameters: {
+    a11y: { test: "error" },
+  },
   decorators: [
     (Story) => (
       <div className="max-w-96">
@@ -74,6 +78,14 @@ export const Primary: Story = {
   args: {
     label: "Label text here",
     placeholder: "Placeholder text here",
+  },
+  play: async ({ canvasElement }) => {
+    const input = within(canvasElement).getByRole("textbox", {
+      name: "Label text here",
+    })
+
+    await userEvent.type(input, "Ada Lovelace")
+    await expect(input).toHaveValue("Ada Lovelace")
   },
 }
 
@@ -92,6 +104,24 @@ export const Password: Story = {
     type: "password",
     disabled: false,
     placeholder: "Placeholder text here",
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // A password input has no ARIA textbox role, so query it the same way
+    // the unit test does: by its aria-label (the field's label text).
+    const input = canvas.getAllByLabelText("Label text here")[0]
+
+    await expect(input).toHaveAttribute("type", "password")
+
+    await userEvent.click(
+      canvas.getByRole("button", { name: /show password/i })
+    )
+    await expect(input).toHaveAttribute("type", "text")
+
+    await userEvent.click(
+      canvas.getByRole("button", { name: /hide password/i })
+    )
+    await expect(input).toHaveAttribute("type", "password")
   },
 }
 
@@ -192,7 +222,7 @@ export const Clearable: Story = {
 }
 
 export const Snapshot: Story = {
-  parameters: withSkipA11y(withSnapshot({})),
+  parameters: withSnapshot({}),
   args: {
     label: "Label text here",
   },

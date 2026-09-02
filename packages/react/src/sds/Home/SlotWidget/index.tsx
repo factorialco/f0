@@ -315,8 +315,14 @@ export function SlotWidget({
     >
       <SlotWidgetContent
         // The selection goes DOWN, so a slot that owns its data fetches for
-        // whatever the header is showing.
-        ctx={selection === undefined ? ctx : { ...ctx, selection }}
+        // whatever the header is showing. So does whether this frame draws a
+        // FOOTER: the last slot's bottom bleed is the card's bottom edge only
+        // when nothing follows it (see `listMoreButtonClass`).
+        ctx={{
+          ...ctx,
+          hasFooter: Boolean(action),
+          ...(selection === undefined ? {} : { selection }),
+        }}
         loading={loading}
         slotRenderers={slotRenderers}
         slots={slots}

@@ -38,9 +38,9 @@ export interface RailMotion {
    * Whether the rail BODY should be at full size and opacity.
    *
    * Only the floating panel is ever anything else. Collapsing is not the body's
-   * animation to play: its cards go into their own glyphs one by one (see
-   * `WidgetMotion`'s stow), and a block that also shrank would be the same
-   * gesture happening twice at two scales.
+   * animation to play: its cards fade out where they stand as the strip's glyphs
+   * slide in (see `WidgetMotion`'s stow), and a block that also shrank would be a
+   * second gesture drawn on top of theirs.
    */
   bodyOut: boolean
   /** `display: none`, which arrives only once the retract has played out. */

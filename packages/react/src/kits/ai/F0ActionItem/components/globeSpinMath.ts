@@ -9,28 +9,26 @@
 export const VEL_X = 60
 export const VEL_Y = 40
 export const SPIN_MS = 2000
-export const PAUSE_MS = 500
+export const PAUSE_MS = 300
 // Period of the slow precession of the rotation axis. Long enough to be
 // imperceptible inside a single cycle, but breaks the visual loop over time.
 export const PRECESSION_MS = 12000
-const ROWS = 2
 const SEGS = 40
+// The One mark, measured off the official artwork. Each of its four lenses is
+// the intersection of the mark circle with a second circle of radius LENS_R
+// centred LENS_C away — both in units of the mark radius. LENS_C > 1 (that
+// centre falls OUTSIDE the mark) is why no spherical cap can reproduce the
+// lens, at any angle or tilt: a circle drawn on a sphere always projects to an
+// ellipse centred inside the disc. Hence LENS_EDGE below.
+const LENS_C = 1.5472
+const LENS_R = 0.9947
+// Each quad is grown slightly around its own centre so neighbours overlap and
+// their antialiased edges don't leave hairline seams. It must be RELATIVE:
+// a fixed offset in user units is ~5% of the whole mark at size 20, which
+// turns the silhouette into visible sawtooth.
+const QUAD_DILATE = 1.05
 const COLOR_A: [number, number, number] = [255, 60, 0]
 const COLOR_B: [number, number, number] = [160, 140, 220]
-
-const INIT_A = { x: -12, y: 0, z: 0 }
-const INIT_B = { x: -12, y: 12, z: 90 }
-
-// Calibrated latEdge factors per size (controls form vs gap ratio).
-// Interpolates automatically for unlisted sizes.
-const LAT_FACTORS: Record<number, number> = {
-  20: 0.72,
-  28: 0.66,
-  32: 0.72,
-  60: 0.77,
-  80: 0.8,
-  120: 0.85,
-}
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type Q = [number, number, number, number]
@@ -51,8 +49,6 @@ export type GlobeSpinState = {
 }
 
 // ─── Math helpers ─────────────────────────────────────────────────────────────
-const D2R = Math.PI / 180
-const LAT_BASE = (ROWS / 8) * Math.PI
 // Two full rotations per spin. Multiple of 2π → end orientation matches the
 // start, so the pause-to-spin loop has no visual jump.
 const TOTAL_ANGLE = 4 * Math.PI
@@ -64,11 +60,6 @@ function qMul(a: Q, b: Q): Q {
     a[0] * b[2] - a[1] * b[3] + a[2] * b[0] + a[3] * b[1],
     a[0] * b[3] + a[1] * b[2] - a[2] * b[1] + a[3] * b[0],
   ]
-}
-
-function qNorm(q: Q): Q {
-  const n = Math.sqrt(q[0] ** 2 + q[1] ** 2 + q[2] ** 2 + q[3] ** 2)
-  return [q[0] / n, q[1] / n, q[2] / n, q[3] / n]
 }
 
 function qRot(ax: number, ay: number, az: number, ang: number): Q {
@@ -93,17 +84,30 @@ function rotVecInto(q: Q, x: number, y: number, z: number, out: V): void {
   out[2] = z + w * tz + qx * ty - qy * tx
 }
 
-function eulerToQ(ex: number, ey: number, ez: number): Q {
-  const qx = qRot(1, 0, 0, ex * D2R)
-  const qy = qRot(0, 1, 0, ey * D2R)
-  const qz = qRot(0, 0, 1, ez * D2R)
-  return qNorm(qMul(qMul(qy, qx), qz))
-}
-
-// Cubic ease-in-out — smooth acceleration into the spin and gentle
-// deceleration into the pause, instead of a constant-velocity rotation.
-export function easeInOutCubic(t: number): number {
-  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
+// Trapezoidal velocity: ramp up over SPIN_RAMP, coast, ramp down. The mark
+// still settles into the resting logo instead of stopping dead, but it gets
+// there without the dead time a symmetric cubic ease produces — that one spent
+// ~380ms either side of the pause moving too slowly to see (35% of the cycle
+// reading as stopped) and then compensated with a 1080°/s whip. Same two
+// turns, same duration, peak velocity down to ~420°/s.
+const SPIN_RAMP = 0.15
+export function spinEase(t: number): number {
+  // Clamp first. Callers derive `t` from wall-clock deltas, and the ramp is
+  // quadratic: unclamped, a negative `t` comes back POSITIVE (t² / 2r / area),
+  // so a clock that briefly runs backwards would jump the mark most of a turn
+  // instead of holding it at rest.
+  if (t <= 0) return 0
+  if (t >= 1) return 1
+  // Area under the unit-height trapezoid; dividing by it makes spinEase(1) = 1.
+  // Numerically equal to where the ramp down starts, but a different quantity —
+  // they are spelled out separately on purpose.
+  const area = 1 - SPIN_RAMP
+  if (t <= SPIN_RAMP) return (t * t) / (2 * SPIN_RAMP) / area
+  if (t >= 1 - SPIN_RAMP) {
+    const u = 1 - t
+    return (area - (u * u) / (2 * SPIN_RAMP)) / area
+  }
+  return (t - SPIN_RAMP / 2) / area
 }
 
 // ─── Color LUT ───────────────────────────────────────────────────────────────
@@ -131,44 +135,54 @@ function colorFor(t: number): string {
   return COLOR_LUT[i]
 }
 
-// Hoist the sorted size list out of the hot path. `getLatFactor` runs once
-// per frame; computing this on every call was a small but avoidable cost.
-const LAT_FACTOR_SIZES = Object.keys(LAT_FACTORS)
-  .map(Number)
-  .sort((a, b) => a - b)
-
-function getLatFactor(size: number): number {
-  const sizes = LAT_FACTOR_SIZES
-  if (size <= sizes[0]) return LAT_FACTORS[sizes[0]]
-  if (size >= sizes[sizes.length - 1])
-    return LAT_FACTORS[sizes[sizes.length - 1]]
-  for (let i = 0; i < sizes.length - 1; i++) {
-    if (size >= sizes[i] && size <= sizes[i + 1]) {
-      const t = (size - sizes[i]) / (sizes[i + 1] - sizes[i])
-      return (
-        LAT_FACTORS[sizes[i]] +
-        (LAT_FACTORS[sizes[i + 1]] - LAT_FACTORS[sizes[i]]) * t
-      )
-    }
-  }
-  return 0.72
-}
-
 // ─── Frame builder ────────────────────────────────────────────────────────────
 const SPEED = Math.sqrt(VEL_X ** 2 + VEL_Y ** 2)
 const PATH_AXIS: V = [VEL_X / SPEED, VEL_Y / SPEED, 0]
-const Q_INIT_A = eulerToQ(INIT_A.x, INIT_A.y, INIT_A.z)
-const Q_INIT_B = eulerToQ(INIT_B.x, INIT_B.y, INIT_B.z)
-
-const LAT_STEPS = ROWS * 3
+// Rings of quads from the centre of a lens out to its edge.
+const LAT_STEPS = 6
 const GRID_STRIDE = SEGS + 1
 const GRID_SIZE = (LAT_STEPS + 1) * GRID_STRIDE
 export const QUAD_POOL_SIZE = 4 * LAT_STEPS * SEGS // 960
 
-// Per-component scratch arrays for the cap rotations. Allocated once at module
-// load — shared across all spinners because each call to `buildFrameInto`
-// fully overwrites them before reading.
+// Angular radius of a lens, per azimuth around its axis. Solving
+//   (cosθ − LENS_C)² + (sinθ·cosφ)² = LENS_R²
+// for cosθ gives the patch on the sphere that projects EXACTLY to the mark's
+// lens when it faces the viewer — 39.0° towards the tips, 56.5° towards the
+// waist. A cap would be a single constant here, which is precisely what it
+// cannot be. Azimuth-only, so it is built once at module load.
+const LENS_EDGE: number[] = (() => {
+  const a = LENS_C
+  const r2 = LENS_R * LENS_R
+  const out = new Array<number>(SEGS + 1)
+  for (let si = 0; si <= SEGS; si++) {
+    const lon = (si / SEGS) * Math.PI * 2
+    const k = Math.sin(lon) ** 2
+    const c =
+      k < 1e-9
+        ? (a * a + 1 - r2) / (2 * a)
+        : (a - Math.sqrt(a * a - k * (a * a + 1 - k - r2))) / k
+    out[si] = Math.acos(Math.max(-1, Math.min(1, c)))
+  }
+  return out
+})()
+
+// Azimuth trig, hoisted — it no longer depends on anything per-frame.
+const COS_LON: number[] = new Array(SEGS + 1)
+const SIN_LON: number[] = new Array(SEGS + 1)
+for (let si = 0; si <= SEGS; si++) {
+  const lon = (si / SEGS) * Math.PI * 2
+  COS_LON[si] = Math.cos(lon)
+  SIN_LON[si] = Math.sin(lon)
+}
+
+// The four lenses are one patch repeated at 0/90/180/270° about the view axis,
+// which is what makes the resting mark four-fold symmetric like the logo.
+const Q_LENS: Q[] = [0, 1, 2, 3].map((k) => qRot(0, 0, 1, (k * Math.PI) / 2))
+
+// Scratch for the per-frame lens rotations — overwritten before every read.
 const _capQs: Q[] = [
+  [0, 0, 0, 0],
+  [0, 0, 0, 0],
   [0, 0, 0, 0],
   [0, 0, 0, 0],
 ]
@@ -208,7 +222,6 @@ export function buildFrameInto(
   const R = size * 0.392
   const cx = size / 2
   const cy = size / 2
-  const latEdge = LAT_BASE * getLatFactor(size)
 
   const angle = progress * TOTAL_ANGLE
 
@@ -216,29 +229,30 @@ export function buildFrameInto(
   const precessQ = qRot(0, 0, 1, axisPhase * 2 * Math.PI)
   rotVecInto(precessQ, PATH_AXIS[0], PATH_AXIS[1], PATH_AXIS[2], _scratchV)
   const qDelta = qRot(_scratchV[0], _scratchV[1], _scratchV[2], angle)
-  const qA = qMul(qDelta, Q_INIT_A)
-  const qB = qMul(qDelta, Q_INIT_B)
-  // Pack into scratch array so the per-cap loop is a plain index lookup.
-  _capQs[0] = qA
-  _capQs[1] = qB
+  for (let k = 0; k < 4; k++) _capQs[k] = qMul(qDelta, Q_LENS[k])
 
   let count = 0
 
-  // Four caps: (qA,+1), (qA,-1), (qB,+1), (qB,-1).
   for (let capIdx = 0; capIdx < 4; capIdx++) {
-    const q = _capQs[capIdx >> 1]
-    const sign = capIdx & 1 ? -1 : 1
+    const q = _capQs[capIdx]
 
-    // Build the grid for this cap into the pool. Mutates `grid` in place.
+    // Build the grid for this lens into the pool. Mutates `grid` in place.
+    // Colatitude runs 0..LENS_EDGE[si], so the patch boundary follows the
+    // mark's lens instead of a circle of constant radius.
     for (let li = 0; li <= LAT_STEPS; li++) {
-      const lat = sign * (Math.PI / 2 - (li / LAT_STEPS) * latEdge)
-      const cl = Math.cos(lat)
-      const sl = Math.sin(lat)
-      const t = Math.sin((li / LAT_STEPS) * Math.PI)
+      const f = li / LAT_STEPS
+      const t = Math.sin(f * Math.PI)
       const row = li * GRID_STRIDE
       for (let si = 0; si <= SEGS; si++) {
-        const lon = (si / SEGS) * Math.PI * 2
-        rotVecInto(q, cl * Math.cos(lon), sl, cl * Math.sin(lon), _scratchV)
+        const colat = f * LENS_EDGE[si]
+        const sc = Math.sin(colat)
+        rotVecInto(
+          q,
+          sc * COS_LON[si],
+          Math.cos(colat),
+          sc * SIN_LON[si],
+          _scratchV
+        )
         const cell = grid[row + si]
         cell.x = _scratchV[0]
         cell.y = _scratchV[1]
@@ -266,35 +280,27 @@ export function buildFrameInto(
         const cxq = mx * R
         const cyq = my * R
 
-        // Inlined `ep` for each vertex — same math as before, no function-call
-        // overhead and no intermediate tuples in the hot path.
+        // Vertices, dilated from the quad centre. Inlined per vertex — no
+        // function-call overhead and no intermediate tuples in the hot path.
         const px0 = p00.x * R - cxq
         const py0 = p00.y * R - cyq
-        const d0 = Math.sqrt(px0 * px0 + py0 * py0)
-        const f0 = d0 > 0 ? (d0 + 0.9) / d0 : 1
-        const ax = cx + cxq + px0 * f0
-        const ay = cy - cyq - py0 * f0
+        const ax = cx + cxq + px0 * QUAD_DILATE
+        const ay = cy - cyq - py0 * QUAD_DILATE
 
         const px1 = p01.x * R - cxq
         const py1 = p01.y * R - cyq
-        const d1 = Math.sqrt(px1 * px1 + py1 * py1)
-        const f1 = d1 > 0 ? (d1 + 0.9) / d1 : 1
-        const bx = cx + cxq + px1 * f1
-        const by = cy - cyq - py1 * f1
+        const bx = cx + cxq + px1 * QUAD_DILATE
+        const by = cy - cyq - py1 * QUAD_DILATE
 
         const px2 = p11.x * R - cxq
         const py2 = p11.y * R - cyq
-        const d2 = Math.sqrt(px2 * px2 + py2 * py2)
-        const f2 = d2 > 0 ? (d2 + 0.9) / d2 : 1
-        const dxv = cx + cxq + px2 * f2
-        const dyv = cy - cyq - py2 * f2
+        const dxv = cx + cxq + px2 * QUAD_DILATE
+        const dyv = cy - cyq - py2 * QUAD_DILATE
 
         const px3 = p10.x * R - cxq
         const py3 = p10.y * R - cyq
-        const d3 = Math.sqrt(px3 * px3 + py3 * py3)
-        const f3 = d3 > 0 ? (d3 + 0.9) / d3 : 1
-        const ex = cx + cxq + px3 * f3
-        const ey = cy - cyq - py3 * f3
+        const ex = cx + cxq + px3 * QUAD_DILATE
+        const ey = cy - cyq - py3 * QUAD_DILATE
 
         const slot = quads[count]
         slot.points = `${ax},${ay} ${bx},${by} ${dxv},${dyv} ${ex},${ey}`

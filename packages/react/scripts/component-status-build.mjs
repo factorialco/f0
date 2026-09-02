@@ -13,7 +13,8 @@
  * - name (from the story `title` or the filename)
  * - zone (components, patterns, sds, kits, experimental, layouts, deprecated…)
  * - API status tag (stable / experimental / deprecated / internal — from tags)
- * - hasUnitTests  (a __tests__ folder or *.test.ts(x) near the story)
+ * - hasUnitTests  (a __tests__ folder, or a *.test.ts(x) / *.spec.ts(x) file,
+ *                  near the story)
  * - hasSnapshot   (a Chromatic snapshot story — `withSnapshot(...)`)
  * - hasMdxDocs    (an *.mdx file alongside the story)
  * - docQuality    (heuristic tier from the MDX structure)
@@ -266,9 +267,7 @@ export function a11yTierOf(content) {
 export function computeComponentStatusData(srcDir = SRC_DIR) {
   const allFiles = walk(srcDir)
   const storyFiles = allFiles.filter((f) => f.endsWith(".stories.tsx"))
-  const testFiles = allFiles.filter(
-    (f) => f.endsWith(".test.tsx") || f.endsWith(".test.ts")
-  )
+  const testFiles = allFiles.filter((f) => /\.(test|spec)\.(ts|tsx)$/.test(f))
   const mdxByDir = new Map()
   for (const f of allFiles) {
     if (!f.endsWith(".mdx")) continue

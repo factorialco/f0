@@ -19,6 +19,7 @@ import {
   buildBaseChartOptions,
   buildItemTooltip,
   labelWidthCap,
+  renderMarker,
   renderValueTooltip,
   tooltipValueFormat,
 } from "../../utils/options"
@@ -78,6 +79,13 @@ const INSIDE_LABEL_COLOR = "#ffffff"
  * renders as a hairline at 1x and a crisp single device pixel at 2x.
  */
 const STACK_GAP_BORDER_WIDTH = 0.5
+
+/**
+ * Suffix marking the internal series that draws the gap up to a target. It names
+ * a series ECharts needs but the reader never chose, so the legend leaves it out
+ * and the tooltip resolves it back to the bar it belongs to.
+ */
+const TARGET_SERIES_SUFFIX = " (target)"
 
 /** Opacity of the series that are *not* hovered, while one series has focus. */
 const BLUR_OPACITY = 0.4
@@ -667,15 +675,14 @@ function buildSeriesEntries(
   })
 
   const targetSeries: echarts.BarSeriesOption = {
-    name: `${series.name} (target)`,
+    name: `${series.name}${TARGET_SERIES_SUFFIX}`,
     type: "bar",
     data: targetData,
     stack: stackId,
-    // Hide from legend and tooltip
+    // Out of the legend, but not out of the tooltip: until a bar attains
+    // something, this gradient is all there is to hover, and the card it
+    // resolves to is the one for its own bar.
     legendHoverLink: false,
-    tooltip: {
-      show: false,
-    },
     itemStyle: {
       color: new echarts.graphic.LinearGradient(
         // Gradient direction: offset 0 is the far end from the solid bar
@@ -1131,6 +1138,13 @@ export function useBarChartOptions(
     // Legend should only show the main series (not the target ghost bars)
     const legendData = series.map((s) => s.name)
 
+    // The colour each series is actually painted in, for the dot on a card the
+    // gradient resolved: ECharts' own marker there is the gradient, not a colour.
+    const seriesColors = new Map<string, string>()
+    series.forEach((s, index) =>
+      seriesColors.set(s.name, resolveColor(s, index))
+    )
+
     // Build a lookup of targets per series/category for the tooltip
     const targetMap = new Map<string, (number | undefined)[]>()
     for (const s of series) {
@@ -1273,11 +1287,23 @@ export function useBarChartOptions(
             dataIndex?: number
             marker?: string
           }
-          const seriesName = String(p.seriesName ?? "")
-          if (seriesName.endsWith(" (target)")) return ""
-
-          const value = Number(p.value)
+          const hovered = String(p.seriesName ?? "")
           const dataIndex = p.dataIndex ?? 0
+          // Hovering the gradient reads as hovering the bar it tops, so the card
+          // is the bar's: its own name, its own value — not the gap's height.
+          const overTarget = hovered.endsWith(TARGET_SERIES_SUFFIX)
+          const seriesName = overTarget
+            ? hovered.slice(0, -TARGET_SERIES_SUFFIX.length)
+            : hovered
+          const point = overTarget
+            ? series.find((s) => s.name === seriesName)?.data[dataIndex]
+            : undefined
+          if (overTarget && point === undefined) return ""
+
+          const value = point === undefined ? Number(p.value) : getValue(point)
+          const marker = overTarget
+            ? renderMarker(seriesColors.get(seriesName) ?? "")
+            : p.marker
           const target = targetMap.get(seriesName)?.[dataIndex]
           // Only a stack has a total this component can be sure of: its
           // segments are parts of the very bar being hovered. Grouped bars
@@ -1318,7 +1344,7 @@ export function useBarChartOptions(
           // to its left is only meaningful on a trend — i.e. a line chart.
           return renderValueTooltip(
             {
-              marker: p.marker,
+              marker,
               title: seriesName,
               subtitle: String(p.name ?? ""),
               value: formatTooltipValue(value),

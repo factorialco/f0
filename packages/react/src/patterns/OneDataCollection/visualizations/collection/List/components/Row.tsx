@@ -86,6 +86,11 @@ export const Row = <
   const itemOnClick = source.itemOnClick ? source.itemOnClick(item) : undefined
   const isClickable = !!itemHref || !!itemOnClick
   const id = source.selectable ? source.selectable(item) : undefined
+  const selectionInherited =
+    id !== undefined && source.selectionInherited?.(item) === true
+  const selectionDisabled =
+    id !== undefined &&
+    (selectionInherited || source.selectionDisabled?.(item) === true)
   const itemDef = itemDefinition(item)
 
   const {
@@ -113,12 +118,19 @@ export const Row = <
       <div className="pointer-events-none flex flex-1 flex-row items-center gap-2">
         {source.selectable && id !== undefined && (
           // z-10 is needed here to prevent the checkbox from not being selectable when itemHref is provided
-          <div className="pointer-events-auto z-10 hidden items-center justify-end md:flex">
+          <div
+            className={cn(
+              "pointer-events-auto z-10 hidden items-center justify-end md:flex",
+              selectionDisabled && "cursor-not-allowed"
+            )}
+          >
             <F0Checkbox
-              checked={selectedItems.has(id)}
+              checked={selectionInherited || selectedItems.has(id)}
+              indeterminate={selectionInherited}
               onCheckedChange={(checked) =>
                 handleSelectItemChange(item, checked)
               }
+              disabled={selectionDisabled}
               title={`Select ${source.selectable(item)}`}
               hideLabel
             />
@@ -188,8 +200,10 @@ export const Row = <
           )}
         >
           <F0Checkbox
-            checked={selectedItems.has(id)}
+            checked={selectionInherited || selectedItems.has(id)}
+            indeterminate={selectionInherited}
             onCheckedChange={(checked) => handleSelectItemChange(item, checked)}
+            disabled={selectionDisabled}
             title={`Select ${source.selectable(item)}`}
             hideLabel
           />

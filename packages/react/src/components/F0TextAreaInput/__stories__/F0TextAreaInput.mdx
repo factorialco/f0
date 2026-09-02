@@ -1,6 +1,8 @@
 import { Canvas, Controls, Meta, Unstyled } from "@storybook/addon-docs/blocks"
 
 import * as Stories from "./F0TextAreaInput.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+import { F0TextAreaInput } from "../index"
 
 <Meta of={Stories} />
 
@@ -34,6 +36,37 @@ import * as Stories from "./F0TextAreaInput.stories"
 - The value is single-line free-form text. Use [F0TextInput](?path=/docs/components-inputs-text-input--documentation).
 - The text is rich (formatting, mentions, links). Use the dedicated rich-text editor.
 
+**Do's and don'ts**
+
+<DoDonts
+  do={{
+    description:
+      "Use F0TextAreaInput for free-form text that spans multiple lines — notes, descriptions, comments, feedback.",
+    children: (
+      <F0TextAreaInput
+        label="Notes"
+        value={
+          "Called the client this morning.\nThey confirmed the new billing address."
+        }
+        rows={3}
+      />
+    ),
+  }}
+  dont={{
+    description:
+      "Don't use F0TextAreaInput for a single-line value — it reserves more vertical space than the text needs. Use F0TextInput instead.",
+    children: <F0TextAreaInput label="Company name" value="Factorial HR" />,
+  }}
+/>
+
+### States
+
+`hint` renders a neutral helper message. Setting `error` replaces it with a critical one — only one status message renders at a time, so an active error never appears alongside a stale hint.
+
+<Canvas of={Stories.WithHint} />
+
+<Canvas of={Stories.WithError} />
+
 ---
 
 ## Behavior
@@ -49,6 +82,21 @@ The textarea grows in height as the user types, never forcing the user to scroll
 ### New lines
 
 `Enter` inserts a new line — there is no `onPressEnter` shortcut, because submitting a multi-line field with `Enter` would conflict with paragraph breaks. Wrap in `<form onSubmit>` and use a submit button.
+
+### Character limit
+
+Setting `maxLength` (inherited from `F0InputField`) shows a live `n/max` counter under the field and blocks further typing once the limit is reached — the value is truncated on change, not just visually capped.
+
+<Canvas of={Stories.WithMaxLength} />
+
+---
+
+## Accessibility
+
+- A `label` is required — omitting it logs a console error in development. Use `hideLabel` to hide it visually; the label still becomes the field's accessible name (its `aria-label`).
+- `Enter` inserts a new line instead of submitting — keyboard-only users must reach an actual submit button; there is no Enter-to-submit shortcut like `F0TextInput`'s `onPressEnter`.
+- Setting `error` overrides `hint`, so only one status message is ever rendered — screen readers never announce a stale hint next to an active error.
+- When `clearable` is set and the field has a value, a "Clear" button appears with its own accessible name and is reachable by `Tab` like any other control.
 
 ---
 

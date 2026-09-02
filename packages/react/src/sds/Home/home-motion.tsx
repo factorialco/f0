@@ -14,10 +14,11 @@ import { cn } from "@/lib/utils"
  * context that arrives with the content it is context for reads as noise.
  *
  * THE GENIE — collapsing the rail must not read as one thing being swapped for
- * another. The column of cards RETRACTS toward the strip — scaled from its top
- * right corner, which is exactly where the strip is — while the glyphs shrink
- * into place; hovering a glyph sends the same widget back out of that corner.
- * Expanding reverses it: the glyphs bloom outward as the cards grow back in.
+ * another. The cards FADE WHERE THEY STAND while the glyphs slide into the strip
+ * over the same beat, so the two states cross over in place rather than one of
+ * them being replaced by the other; hovering a glyph then sends that widget back
+ * out of the strip's corner. Expanding reverses it: the glyphs slide out as the
+ * cards come back up in their column.
  *
  * Every value here is a TRANSFORM or an OPACITY, so the whole gesture is
  * composited: nothing in this file animates a width, a height or an offset. Two
@@ -94,10 +95,22 @@ export const GENIE_GLYPH_DELAY_MS = 90
 export const GENIE_RETRACTED_SCALE = 0.9
 /** …and how far toward the strip it slides while it shrinks. */
 export const GENIE_RETRACTED_OFFSET_PX = 10
-/** A glyph arrives from LARGER than life: a card that just shrank into it. */
-export const GENIE_GLYPH_ENTER_SCALE = 1.18
-/** Expanding, it leaves the other way — blooming out into the card it becomes. */
-export const GENIE_GLYPH_EXIT_SCALE = 1.3
+/**
+ * How far a glyph travels on its way into the strip, and back out of it.
+ *
+ * The glyphs used to arrive SCALED — from 1.18, as though each one were the card
+ * that had just shrunk into it, and out again at 1.3. That reading only held
+ * while the cards really were shrinking onto them; now that a card simply fades
+ * where it stands (see `WidgetMotion`), a glyph blooming out of nothing was the
+ * only thing left on the page still playing the old gesture. What replaces it is
+ * a short slide along the axis the column is closing on: the strip arrives as the
+ * cards go, and nothing on either side of the swap is drawn at a size it was
+ * never designed at.
+ *
+ * NEGATIVE on the way in — the glyph comes from the cards' side of the rail and
+ * settles at its edge — and it leaves the same way.
+ */
+export const GENIE_GLYPH_SLIDE_PX = 8
 /** A glyph whose widget is floating, held slightly forward. */
 export const GENIE_GLYPH_OPEN_SCALE = 1.06
 /** …and the pointer's own feedback on it, under the open state. */
@@ -135,18 +148,19 @@ export const geniePanelGlideTransition: Transition = {
   mass: 0.8,
 }
 /**
- * A widget going INTO its glyph. It ACCELERATES away — a card being stowed should
- * leave, not be set down — and it has to be gone by the time the strip owns it
- * (`GENIE_RETRACT_MS`), because that is when the column stops drawing it at all.
+ * A widget going INTO the strip — the fade it leaves on. It ACCELERATES away — a
+ * card being stowed should leave, not be set down — and it has to be gone by the
+ * time the strip owns it (`GENIE_RETRACT_MS`), because that is when the column
+ * stops drawing it at all.
  */
 export const stowInTransition: Transition = {
   duration: GENIE_RETRACT_MS / 1000,
   ease: "easeIn",
 }
 /**
- * …and coming back OUT of it. The same spring the floating panel uses, so a
- * widget growing out of a glyph and a widget springing out of a glyph are visibly
- * the same gesture at two sizes.
+ * …and coming back OUT. Still the spring the floating panel uses: the card only
+ * fades back in now, but it does it on the beat a widget springs out of a glyph
+ * on, so opening the rail and floating one of its widgets stay the same page.
  */
 export const stowOutTransition: Transition = genieOpenTransition
 

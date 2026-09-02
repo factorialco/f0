@@ -139,6 +139,7 @@ export const CollectionActions = ({
             variant="outline"
             hideLabel={action.hideLabelWhenExpanded}
             label={action.label}
+            counterValue={action.counterValue}
             disabled={action.disabled}
             loading={action.loading}
           />

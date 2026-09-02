@@ -147,6 +147,118 @@ test("the OPTIONAL flags let a feed mix rows the schema would otherwise even out
     // @ts-expect-error a subtitle is still not allowed unless declared
     { id: 1, title: "x", subtitle: "y" },
   ])
+
+  // A subtitle only SOME rows have — the late ones say how late they are.
+  listSlot({ subtitleOptional: true }, [
+    { id: 1, title: "Expenses", subtitle: "2 days overdue" },
+    { id: 2, title: "Onboarding" },
+  ])
+})
+
+test("a row's subtitle may be critical — wherever a subtitle is declared at all", () => {
+  listSlot({ subtitleRequired: true }, [
+    { id: 1, title: "x", subtitle: "2 days overdue", subtitleCritical: true },
+    { id: 2, title: "y", subtitle: "Due Friday" },
+  ])
+  listSlot({ subtitleOptional: true }, [
+    { id: 1, title: "x", subtitle: "2 days overdue", subtitleCritical: true },
+    { id: 2, title: "y" },
+  ])
+
+  listSlot({}, [
+    // @ts-expect-error nothing to colour: this schema declares no subtitle
+    { id: 1, title: "x", subtitleCritical: true },
+  ])
+})
+
+test("a row's second line may be critical — wherever a description is declared at all", () => {
+  listSlot({ descriptionRequired: true }, [
+    {
+      id: 1,
+      title: "x",
+      description: "Rejected by Finance",
+      descriptionCritical: true,
+    },
+    { id: 2, title: "y", description: "Due Friday" },
+  ])
+  listSlot({ descriptionOptional: true }, [
+    {
+      id: 1,
+      title: "x",
+      description: "Rejected by Finance",
+      descriptionCritical: true,
+    },
+    { id: 2, title: "y" },
+  ])
+
+  listSlot({}, [
+    // @ts-expect-error nothing to colour: this schema declares no description
+    { id: 1, title: "x", descriptionCritical: true },
+  ])
+})
+
+test("a second line may be a LIST of facts, each with its own tone", () => {
+  listSlot({ descriptionRequired: true }, [
+    {
+      id: 1,
+      title: "Expenses",
+      description: [
+        { text: "2 days overdue", critical: true },
+        { text: "€340" },
+        { text: "12 receipts" },
+      ],
+    },
+    // The plain string form still works beside it, in the same list.
+    { id: 2, title: "Onboarding", description: "Due Friday" },
+  ])
+
+  listSlot({ descriptionOptional: true }, [
+    { id: 1, title: "x", description: [{ text: "Rejected", critical: true }] },
+    { id: 2, title: "y" },
+  ])
+
+  listSlot({ descriptionRequired: true }, [
+    {
+      id: 1,
+      title: "x",
+      // @ts-expect-error a part's tone is `critical`, not `descriptionCritical`
+      description: [{ text: "Rejected", descriptionCritical: true }],
+    },
+  ])
+
+  listSlot({ descriptionRequired: true }, [
+    // @ts-expect-error parts carry their own tone — the whole-line flag is not also allowed
+    {
+      id: 1,
+      title: "x",
+      description: [{ text: "Rejected", critical: true }],
+      descriptionCritical: true,
+    },
+  ])
+
+  listSlot({}, [
+    // @ts-expect-error nothing to say: this schema declares no description
+    { id: 1, title: "x", description: [{ text: "Rejected" }] },
+  ])
+})
+
+test("the two murmuring lines carry their tone independently", () => {
+  listSlot({ subtitleRequired: true, descriptionRequired: true }, [
+    {
+      id: 1,
+      title: "x",
+      subtitle: "Travel",
+      description: "Rejected by Finance",
+      descriptionCritical: true,
+    },
+    {
+      id: 2,
+      title: "y",
+      subtitle: "2 days overdue",
+      subtitleCritical: true,
+      description: "Submitted Monday",
+    },
+  ])
 })
 
 test("an icon row may be tinted, and only with a colour from the palette", () => {

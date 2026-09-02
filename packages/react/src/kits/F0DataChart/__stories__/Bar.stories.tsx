@@ -161,7 +161,9 @@ export const StackedWithMissingCategories: Story = {
 
 /**
  * Each bar has a `target` value — the gap between the actual value and the
- * target is rendered as a faded "ghost" bar above the solid one.
+ * target is rendered as a faded "ghost" bar above the solid one. A month with
+ * nothing attained yet is that gradient and nothing else, and hovering it
+ * reports the month's target all the same.
  */
 export const WithTargets: Story = {
   render: (args) => <F0DataChart {...args} />,
@@ -171,9 +173,9 @@ export const WithTargets: Story = {
     series: [
       {
         name: "Revenue",
-        data: [
-          9_200_000, 10_800_000, 8_100_000, 5_400_000, 3_200_000, 2_400_000,
-        ].map((value) => ({ value, target: 12_000_000 })),
+        data: [9_200_000, 10_800_000, 8_100_000, 5_400_000, 3_200_000, 0].map(
+          (value) => ({ value, target: 12_000_000 })
+        ),
       },
     ],
     showLegend: false,
@@ -182,11 +184,12 @@ export const WithTargets: Story = {
 }
 
 /**
- * `highlightOverachievement` splits a bar that ran past its target at the target
- * itself, drawing the stretch beyond it in a darker shade — without it, Q2 and
- * Q4 would read the same as a quarter that landed exactly on its number.
- * `showTargetProgress` adds what that comes to (`value / target`) to the
- * tooltip, under the target row.
+ * A year in progress, with every state a target can be in. `highlightOverachievement`
+ * splits a bar that ran past its target at the target itself, drawing the stretch
+ * beyond it in a darker shade — without it, Q2 and Q3 would read the same as a
+ * quarter that landed exactly on its number. `showTargetProgress` adds what that
+ * comes to (`value / target`) to the tooltip, under the target row. Q4 has not
+ * started, and hovering its gradient still reports the target it is measured against.
  */
 export const WithOverachievement: Story = {
   render: (args) => <F0DataChart {...args} />,
@@ -199,8 +202,8 @@ export const WithOverachievement: Story = {
         data: [
           { value: 125_000, target: 185_000 },
           { value: 200_000, target: 185_000 },
-          { value: 92_000, target: 185_000 },
           { value: 268_000, target: 185_000 },
+          { value: 0, target: 185_000 },
         ],
       },
     ],
