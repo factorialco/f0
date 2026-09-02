@@ -1,5 +1,13 @@
 # Changelog
 
+## [6.83.1](https://github.com/factorialco/f0/compare/f0-react-v6.83.0...f0-react-v6.83.1) (2026-09-02)
+
+
+### Bug Fixes
+
+* **carousel:** stop the shadow bleed eating pointer events ([#5370](https://github.com/factorialco/f0/issues/5370)) ([59ba711](https://github.com/factorialco/f0/commit/59ba7115e948f7dcfc23ba8e04e864b1a07902d5))
+* **F0Chat:** de-flake the composer hotkeys play test ([#5371](https://github.com/factorialco/f0/issues/5371)) ([9844caa](https://github.com/factorialco/f0/commit/9844caafcc4a75ade8cbdfd3609bddb9b9af9812))
+
 ## [6.83.0](https://github.com/factorialco/f0/compare/f0-react-v6.82.1...f0-react-v6.83.0) (2026-09-02)
 
 
