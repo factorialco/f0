@@ -12,7 +12,7 @@ const visualizations = [
 ] as unknown as Parameters<typeof VisualizationSwitcher>[0]["visualizations"]
 
 describe("VisualizationSwitcher", () => {
-  it("renders a segment per visualization with its label", () => {
+  it("renders an icon-only segment per visualization, label kept accessible", () => {
     render(
       <VisualizationSwitcher
         visualizations={visualizations}
@@ -20,8 +20,8 @@ describe("VisualizationSwitcher", () => {
         onVisualizationChange={vi.fn()}
       />
     )
-    expect(screen.getByText("Table")).toBeInTheDocument()
-    expect(screen.getByText("Graph")).toBeInTheDocument()
+    expect(screen.getByText("Table")).toHaveClass("sr-only")
+    expect(screen.getByText("Graph")).toHaveClass("sr-only")
   })
 
   it("marks the current visualization as selected", () => {
@@ -53,19 +53,6 @@ describe("VisualizationSwitcher", () => {
     )
     await userEvent.click(screen.getByText("Table"))
     expect(onVisualizationChange).toHaveBeenCalledWith(0)
-  })
-
-  it("renders icon-only segments (labels still accessible) when hideLabels is set", () => {
-    render(
-      <VisualizationSwitcher
-        visualizations={visualizations}
-        currentVisualization={0}
-        onVisualizationChange={vi.fn()}
-        hideLabels
-      />
-    )
-    expect(screen.getByText("Table")).toHaveClass("sr-only")
-    expect(screen.getByText("Graph")).toHaveClass("sr-only")
   })
 
   it("renders nothing when there is a single visualization", () => {
