@@ -1,5 +1,33 @@
 # Changelog
 
+## [6.81.2](https://github.com/factorialco/f0/compare/f0-react-v6.81.1...f0-react-v6.81.2) (2026-09-02)
+
+
+### Bug Fixes
+
+* **F0Graph:** run the connectors node-to-node and crop them under the tags ([#5353](https://github.com/factorialco/f0/issues/5353)) ([5f28e2a](https://github.com/factorialco/f0/commit/5f28e2a857134ed54b36d4caf81b5a9cefd6a2a9))
+
+## [6.81.1](https://github.com/factorialco/f0/compare/f0-react-v6.81.0...f0-react-v6.81.1) (2026-09-02)
+
+
+### Bug Fixes
+
+* **F0Checkbox:** remove the border hover state ([#5356](https://github.com/factorialco/f0/issues/5356)) ([49b4651](https://github.com/factorialco/f0/commit/49b4651055e80e7b293cbdc920e9da8eea96c6b8))
+
+## [6.81.0](https://github.com/factorialco/f0/compare/f0-react-v6.80.0...f0-react-v6.81.0) (2026-09-02)
+
+
+### Features
+
+* **OneDataCollection:** add selectionDisabled and disableSelectAll to the source ([#5281](https://github.com/factorialco/f0/issues/5281)) ([1f4d901](https://github.com/factorialco/f0/commit/1f4d901c3e654761fce7221ccc69aaaa46328a17))
+
+## [6.80.0](https://github.com/factorialco/f0/compare/f0-react-v6.79.0...f0-react-v6.80.0) (2026-09-02)
+
+
+### Features
+
+* **ChatSpinner:** exact One mark at rest, non-pixelated edge, reworked motion ([#5335](https://github.com/factorialco/f0/issues/5335)) ([842a689](https://github.com/factorialco/f0/commit/842a689a524bd7d12d6080015f37ed0d78acb90d))
+
 ## [6.79.0](https://github.com/factorialco/f0/compare/f0-react-v6.78.4...f0-react-v6.79.0) (2026-09-01)
 
 

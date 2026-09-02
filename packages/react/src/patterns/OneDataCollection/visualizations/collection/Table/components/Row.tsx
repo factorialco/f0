@@ -181,6 +181,13 @@ const RowComponentInner = <
   const itemHref = source.itemUrl ? source.itemUrl(item) : undefined
   const itemOnClick = source.itemOnClick ? source.itemOnClick(item) : undefined
   const id = source.selectable ? source.selectable(item) : undefined
+  // Out of the registry too, so "select all" can still reach fully-checked.
+  // Shown as included, but not a pick and not part of the selection.
+  const selectionInherited =
+    id !== undefined && source.selectionInherited?.(item) === true
+  const selectionDisabled =
+    id !== undefined &&
+    (selectionInherited || source.selectionDisabled?.(item) === true)
   const rowWithChildren = !!source.itemsWithChildren?.(item)
 
   const i18n = useI18n()
@@ -242,6 +249,7 @@ const RowComponentInner = <
   useEffect(() => {
     if (
       id === undefined ||
+      selectionDisabled ||
       !willRenderOwnRow ||
       !registerSelectable ||
       !isPresent
@@ -252,6 +260,7 @@ const RowComponentInner = <
   }, [
     id,
     item,
+    selectionDisabled,
     willRenderOwnRow,
     registerSelectable,
     unregisterSelectable,
@@ -333,10 +342,18 @@ const RowComponentInner = <
           referenceRowType={referenceRowType}
         >
           {id !== undefined && (
-            <div className="pointer-events-auto ml-3.5 flex h-full items-center justify-start">
+            <div
+              className={cn(
+                "pointer-events-auto ml-3.5 flex h-full items-center justify-start",
+                // The row is clickable, so the padding would show its hand.
+                selectionDisabled && "cursor-not-allowed"
+              )}
+            >
               <Checkbox
-                checked={selectedItems.has(id)}
+                checked={selectionInherited || selectedItems.has(id)}
+                indeterminate={selectionInherited}
                 onCheckedChange={onCheckedChange}
+                disabled={selectionDisabled}
                 title={`Select ${source.selectable(item)}`}
                 hideLabel
               />

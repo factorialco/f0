@@ -140,6 +140,25 @@ describe("F0Checkbox", () => {
     expect(checkbox).not.toBeDisabled()
   })
 
+  // Regression: hovering the checkbox darkened its border. The box is not an
+  // interactive-looking control on its own, so it must have no hover state:
+  // no `hover:` utility may reach it in any of its states.
+  it.each([
+    { name: "unchecked", props: {} },
+    { name: "checked", props: { checked: true } },
+    { name: "indeterminate", props: { indeterminate: true, checked: true } },
+    { name: "disabled", props: { disabled: true } },
+    { name: "checked and disabled", props: { checked: true, disabled: true } },
+  ])("has no hover styles when $name", ({ props }) => {
+    render(<F0Checkbox title="No hover" {...props} />)
+
+    const hoverClasses = Array.from(
+      screen.getByRole("checkbox").classList
+    ).filter((className) => className.includes("hover:"))
+
+    expect(hoverClasses).toEqual([])
+  })
+
   it("generates unique id when not provided", () => {
     render(
       <>

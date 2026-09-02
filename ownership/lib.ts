@@ -69,6 +69,63 @@ export function getManifestFiles(): string[] {
   })
 }
 
+export interface CodeownersRule {
+  /** Path pattern, exactly as written in the CODEOWNERS file */
+  pattern: string
+  teams: string[]
+}
+
+/** Ownership rules of a CODEOWNERS body, with comments and blank lines dropped */
+export function parseCodeowners(contents: string): CodeownersRule[] {
+  return contents
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0 && !line.startsWith("#"))
+    .map((line) => {
+      const [pattern, ...teams] = line.split(/\s+/)
+      return { pattern, teams }
+    })
+}
+
+/** Leading segments of a pattern, up to the first one holding a glob */
+function concretePrefix(pattern: string): string {
+  const segments: string[] = []
+  for (const segment of pattern.split("/")) {
+    if (/[*?[\]]/.test(segment)) break
+    segments.push(segment)
+  }
+  return segments.join("/")
+}
+
+export type PatternProblem = "unanchored" | "missing" | "not-a-directory"
+
+/**
+ * Why a CODEOWNERS path pattern can no longer own anything, or undefined when
+ * it is fine. Patterns are plain strings that GitHub never validates: when a
+ * directory is moved or renamed the rule keeps parsing but stops matching, and
+ * its files silently fall back to the global owner.
+ */
+export function checkCodeownersPattern(pattern: string): PatternProblem | undefined {
+  if (pattern === "*") return undefined // global fallback
+  if (!pattern.startsWith("/")) return "unanchored"
+
+  const relative = pattern.slice(1)
+  const expectsDirectory = relative.endsWith("/")
+  const target = expectsDirectory ? relative.slice(0, -1) : relative
+
+  // A glob can't be resolved to a single path, so validate its fixed prefix —
+  // enough to catch the directory it points into being moved away.
+  const probe = concretePrefix(target)
+  if (probe === "") return undefined
+
+  const absolute = path.join(REPO_ROOT, probe)
+  if (!fs.existsSync(absolute)) return "missing"
+  if (probe === target && expectsDirectory && !fs.statSync(absolute).isDirectory()) {
+    return "not-a-directory"
+  }
+  return undefined
+}
+
 export function loadManifest(manifestFile: string): Manifest {
   return parse(fs.readFileSync(path.join(REPO_ROOT, manifestFile), "utf8"))
 }
