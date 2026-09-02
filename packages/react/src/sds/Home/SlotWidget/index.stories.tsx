@@ -561,6 +561,128 @@ export const CriticalSubtitles: Story = {
   },
 }
 
+/**
+ * A SECOND LINE THAT CARRIES BAD NEWS. Same story as `subtitleCritical`, one
+ * line down: the description is normally the muted second line of a row, and a
+ * row whose second line is what has gone WRONG with it — rejected, overdue,
+ * over budget — sets `descriptionCritical` and says it in red.
+ *
+ * Per row, like `unread`: rejection is a state of that row's data, so the first
+ * row here reports it while the second one, with the same schema, still murmurs
+ * "Due Friday". The titles are the same colour in both — a title says what the
+ * row IS, not what's wrong with it.
+ *
+ * The two murmuring lines are coloured INDEPENDENTLY: the first row's subtitle
+ * ("Travel") stays muted under a critical second line, because what has gone
+ * wrong is the rejection and not the trip. Reddening both would just be a red
+ * row.
+ *
+ * Keep the red for what the reader has to act on: a list where every second
+ * line is critical has said nothing.
+ */
+export const CriticalDescriptions: Story = {
+  args: {
+    header: { title: "Your expenses", count: 3 },
+    action: { label: "See all", onClick: () => {} },
+    slots: [
+      listSlot(
+        {
+          left: "icon",
+          subtitleOptional: true,
+          descriptionOptional: true,
+          clickBehavior: "link",
+        },
+        [
+          {
+            id: "expenses",
+            title: "Expenses report",
+            subtitle: "Travel",
+            description: "Rejected by Finance",
+            descriptionCritical: true,
+            avatar: { icon: Receipt, color: "viridian" },
+            href: "/expenses",
+          },
+          {
+            id: "review",
+            title: "Performance review",
+            subtitle: "Q3",
+            description: "Due Friday",
+            avatar: { icon: Clock, color: "purple" },
+            href: "/reviews",
+          },
+          {
+            id: "onboarding",
+            title: "Onboarding checklist",
+            avatar: { icon: PersonPlus, color: "army" },
+            href: "/onboarding",
+          },
+        ]
+      ),
+    ],
+  },
+}
+
+/**
+ * SEVERAL FACTS ON ONE LINE, one of them bad. When a row's second line states
+ * more than one thing, `description` takes a list of parts instead of a string
+ * and each carries its own `critical`. They draw dot-separated, and the
+ * separator stays muted whatever its neighbours do — it belongs to neither, and
+ * a red one would read as a third, wordless piece of bad news.
+ *
+ * THE CRITICAL PART GOES FIRST. The second line is a single truncating line —
+ * about 306px at this 24rem rail width, some 40 characters — and it is cut from
+ * the RIGHT. The last row here is what that costs: its overdue notice sits
+ * third and the ellipsis eats it, which is why the first row leads with the
+ * same news instead. Marking a part critical claims it is the most important
+ * thing on the line; putting it first makes the claim true.
+ *
+ * Two facts fit comfortably; three fit only if they are short. Past that the
+ * row is trying to be a detail view, and should link to one.
+ */
+export const SegmentedDescriptions: Story = {
+  args: {
+    header: { title: "Your expenses", count: 3 },
+    action: { label: "See all", onClick: () => {} },
+    slots: [
+      listSlot(
+        { left: "icon", descriptionRequired: true, clickBehavior: "link" },
+        [
+          {
+            id: "overdue",
+            title: "Q3 travel",
+            description: [
+              { text: "2 days overdue", critical: true },
+              { text: "€340" },
+              { text: "12 receipts" },
+            ],
+            avatar: { icon: Receipt, color: "viridian" },
+            href: "/expenses/1",
+          },
+          {
+            id: "fine",
+            title: "Client dinner",
+            description: [{ text: "€82" }, { text: "3 receipts" }],
+            avatar: { icon: Receipt, color: "purple" },
+            href: "/expenses/2",
+          },
+          {
+            // What NOT to do: the news is third, so the ellipsis takes it.
+            id: "buried",
+            title: "Conference",
+            description: [
+              { text: "Submitted Monday" },
+              { text: "€1,240 for flights" },
+              { text: "2 days overdue", critical: true },
+            ],
+            avatar: { icon: Receipt, color: "army" },
+            href: "/expenses/3",
+          },
+        ]
+      ),
+    ],
+  },
+}
+
 /** The pool `ItemChurn` adds from, cycled so the button never runs out. */
 const CHURN_ITEMS = [
   { title: "You never clocked out yesterday", icon: Clock, color: "purple" },

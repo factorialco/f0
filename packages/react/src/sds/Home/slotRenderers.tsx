@@ -31,7 +31,12 @@ import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { useWidgetIsWide, WidgetProps } from "@/experimental/Widgets/Widget"
 import { type F0FormSchema } from "@/patterns/F0Form"
 
-import { HomeListItem, type HomeListItemAction } from "./HomeListItem"
+import {
+  descriptionText,
+  HomeListItem,
+  type DescriptionPart,
+  type HomeListItemAction,
+} from "./HomeListItem"
 import { HomeSlotItem, HomeSlotItems, useIsBulkChange } from "./home-motion"
 
 /**
@@ -411,6 +416,28 @@ type SubtitleTone = {
   subtitleCritical?: boolean
 }
 
+/**
+ * A row's SECOND LINE, in either of the two forms it may take.
+ *
+ * One string with `descriptionCritical` colours the whole line; a list of
+ * {@link DescriptionPart}s colours each fact on it separately. The two are
+ * mutually exclusive on purpose — parts already carry their own `critical`, so
+ * a row that passes both is saying the same thing twice and meaning different
+ * things by it.
+ *
+ * Whichever form, the tone is per ROW rather than per schema, for the same
+ * reason `subtitleCritical` is: what has gone wrong is a state of the row's
+ * own data, so one list holds rows that say so beside rows that have nothing
+ * to report.
+ *
+ * Both forms go untinted in a COMPACT list, where the second line has folded
+ * into the row's tooltip and there is nothing left to colour — see
+ * {@link listCompacts}.
+ */
+type DescribedRow =
+  | { description: string; descriptionCritical?: boolean }
+  | { description: DescriptionPart[]; descriptionCritical?: never }
+
 type ListTextData<S extends ListSchema> = {
   title: string
 } & (S["subtitleRequired"] extends true
@@ -419,10 +446,10 @@ type ListTextData<S extends ListSchema> = {
     ? { subtitle?: string } & SubtitleTone
     : { subtitle?: never; subtitleCritical?: never }) &
   (S["descriptionRequired"] extends true
-    ? { description: string }
+    ? DescribedRow
     : S["descriptionOptional"] extends true
-      ? { description?: string }
-      : { description?: never })
+      ? DescribedRow | { description?: undefined; descriptionCritical?: never }
+      : { description?: never; descriptionCritical?: never })
 
 /**
  * One HOVER ACTION on a `list` row: an icon button over the row's right edge
@@ -945,7 +972,8 @@ type ListRow = {
   title: string
   subtitle?: string
   subtitleCritical?: boolean
-  description?: string
+  description?: string | DescriptionPart[]
+  descriptionCritical?: boolean
   unread?: boolean
   avatar?: object & { icon?: IconType; color?: ListIconColor }
   module?: ModuleId
@@ -1082,12 +1110,19 @@ function ListSlot({ params, ctx }: { params: ListParams; ctx: HomeRenderCtx }) {
           animates out and the rest close the gap. */}
       <HomeSlotItems>
         {rows.map(({ href, description, ...row }) => {
+          // A compact row hides its second line and offers it on hover
+          // instead — as PLAIN TEXT, all `Tooltip`'s `label` can carry, so a
+          // segmented description arrives dot-joined and untinted. Computed
+          // rather than checking `description` for truthiness: an empty parts
+          // list is a row with nothing to say, and `[]` is truthy.
+          const tooltip = compact ? descriptionText(description) : ""
           const node = (
             <HomeListItem
               title={row.title}
               subtitle={row.subtitle}
               subtitleCritical={row.subtitleCritical}
               description={compact ? undefined : description}
+              descriptionCritical={row.descriptionCritical}
               unread={row.unread}
               {...listLeft(schema.left, row, avatarSize)}
               right={listRight(schema.right, row, rightAvatarSize)}
@@ -1097,10 +1132,10 @@ function ListSlot({ params, ctx }: { params: ListParams; ctx: HomeRenderCtx }) {
           )
           return (
             <HomeSlotItem key={row.id} animated={!isBulkChange}>
-              {compact && description ? (
+              {tooltip ? (
                 // The hidden second line surfaces on hover. The span is the
                 // tooltip's trigger — HomeListItem doesn't forward trigger props.
-                <Tooltip label={description}>
+                <Tooltip label={tooltip}>
                   <span className="block">{node}</span>
                 </Tooltip>
               ) : (
