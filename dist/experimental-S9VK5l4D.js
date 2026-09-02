@@ -1,8 +1,8 @@
-import { cQ as zb, cR as $B, cS as Hb, cT as Ob, cU as Jb, cV as jb, cW as bh, cX as e0, cY as Dc, cZ as vA, c_ as Lb, bY as Ht, ct as Us, u as _t, c$ as Xb, d0 as qb, d1 as _h, cF as tC, cG as iC, bX as An, bD as $b, bC as $F, V as gi, z as e_, A as t_, bQ as li, b9 as ey, K as i_, B as n_, m as Ci, ak as rC, S as Bt, c2 as xo, d2 as g_, d3 as a_, d4 as o_, _ as r_, d5 as s_, ar as Yg, ba as kh, aj as xh, bT as Da, c9 as hs, d6 as I_, e as Dh, c4 as cr, d7 as C_, a8 as Sh, cN as jA, w as Wn, r as $i, y as GA, t as dd, v as ud, bu as Rh, x as fd, aZ as ty, bO as A_, ah as iy, bV as Xn, s as og, cH as LA, d8 as _f, cv as XA, bN as t0, Y as l_, bW as Mn, d9 as ny, da as th, cM as Qs, db as Mh, dc as c_, ci as hd, dd as ws, aQ as d_, bH as u_, X as f_, i as h_, cE as m_, de as lr, df as Ph, dg as $g, bg as p_, dh as B_, ae as F_, ca as fr, di as md, dj as gy, dk as y_, dl as U_, b6 as Q_, dm as pd, dn as ay, j as Bd, dp as w_, as as v_, k as ko, dq as oy, bn as b_, dr as __, ds as k_, dt as x_, du as D_, dv as ih, dw as ry, cd as Fd, aa as sy, dx as S_, dy as R_, dz as M_, dA as P_, dB as Xa, dC as nh, cb as Vh, dD as Iy, cl as vs, dE as qc, dF as Cy, dG as Gh, ch as V_, dH as nC, dI as G_, dJ as E_, c3 as Zc, bm as T_, az as gh, ap as N_, dK as Ay, dL as Z_, b as ly, dM as K_, a as W_, dN as yd, dO as Y_, g as z_, F as H_, bs as cy, cm as O_, o as Ud, co as J_, bw as Eh, J as j_, br as L_, bq as X_, a5 as dy, cx as q_, al as uy, dP as $_, bf as ek, be as tk, at as gC, dQ as ik, dR as nk, dS as gk, dT as ak, dU as ok, dV as rk, dW as sk, dX as fy, by as Ik, dY as Ck, cc as ah, l as Qd, bS as Th, O as oh, Q as DA, aX as Ak, aN as lk, b7 as ck, bc as hy, bj as my, bk as py, an as dk, dZ as By, d_ as Fy, d$ as yy, e0 as Uy, cP as uk, cO as fk, e1 as Nh, bl as hk, b$ as mk, c1 as Zh, bR as pk, e2 as Qy, e3 as wy, e4 as vy, bK as Bk, n as Fk, c5 as yk, c6 as Uk, c7 as Qk, c8 as by, ay as wd, R as wk, U as vk, a6 as _y, $ as i0, a4 as ky, bv as bk, aO as _k, am as kk, cp as xk, e5 as qa, e6 as Dk, e7 as Sk, e8 as Rk, e9 as Mk, ea as Pk, cy as Vk, a_ as xy, eb as $c, ec as Gk, bo as Ek, bF as Tk, aw as Nk, bA as kf, av as Zk, aY as Kk, aq as Wk, ag as Yk, ed as zk, bz as Hk, cr as Ok, cs as Jk, ee as jk, ef as Dy, eg as Lk, eh as Xk } from "./F0CanvasPanel-B89tKqsJ.js";
+import { cQ as zb, cR as $B, cS as Hb, cT as Ob, cU as Jb, cV as jb, cW as bh, cX as e0, cY as Dc, cZ as vA, c_ as Lb, bY as Ht, ct as Us, u as _t, c$ as Xb, d0 as qb, d1 as _h, cF as tC, cG as iC, bX as An, bD as $b, bC as $F, V as gi, z as e_, A as t_, bQ as li, b9 as ey, K as i_, B as n_, m as Ci, ak as rC, S as Bt, c2 as xo, d2 as g_, d3 as a_, d4 as o_, _ as r_, d5 as s_, ar as Yg, ba as kh, aj as xh, bT as Da, c9 as hs, d6 as I_, e as Dh, c4 as cr, d7 as C_, a8 as Sh, cN as jA, w as Wn, r as $i, y as GA, t as dd, v as ud, bu as Rh, x as fd, aZ as ty, bO as A_, ah as iy, bV as Xn, s as og, cH as LA, d8 as _f, cv as XA, bN as t0, Y as l_, bW as Mn, d9 as ny, da as th, cM as Qs, db as Mh, dc as c_, ci as hd, dd as ws, aQ as d_, bH as u_, X as f_, i as h_, cE as m_, de as lr, df as Ph, dg as $g, bg as p_, dh as B_, ae as F_, ca as fr, di as md, dj as gy, dk as y_, dl as U_, b6 as Q_, dm as pd, dn as ay, j as Bd, dp as w_, as as v_, k as ko, dq as oy, bn as b_, dr as __, ds as k_, dt as x_, du as D_, dv as ih, dw as ry, cd as Fd, aa as sy, dx as S_, dy as R_, dz as M_, dA as P_, dB as Xa, dC as nh, cb as Vh, dD as Iy, cl as vs, dE as qc, dF as Cy, dG as Gh, ch as V_, dH as nC, dI as G_, dJ as E_, c3 as Zc, bm as T_, az as gh, ap as N_, dK as Ay, dL as Z_, b as ly, dM as K_, a as W_, dN as yd, dO as Y_, g as z_, F as H_, bs as cy, cm as O_, o as Ud, co as J_, bw as Eh, J as j_, br as L_, bq as X_, a5 as dy, cx as q_, al as uy, dP as $_, bf as ek, be as tk, at as gC, dQ as ik, dR as nk, dS as gk, dT as ak, dU as ok, dV as rk, dW as sk, dX as fy, by as Ik, dY as Ck, cc as ah, l as Qd, bS as Th, O as oh, Q as DA, aX as Ak, aN as lk, b7 as ck, bc as hy, bj as my, bk as py, an as dk, dZ as By, d_ as Fy, d$ as yy, e0 as Uy, cP as uk, cO as fk, e1 as Nh, bl as hk, b$ as mk, c1 as Zh, bR as pk, e2 as Qy, e3 as wy, e4 as vy, bK as Bk, n as Fk, c5 as yk, c6 as Uk, c7 as Qk, c8 as by, ay as wd, R as wk, U as vk, a6 as _y, $ as i0, a4 as ky, bv as bk, aO as _k, am as kk, cp as xk, e5 as qa, e6 as Dk, e7 as Sk, e8 as Rk, e9 as Mk, ea as Pk, cy as Vk, a_ as xy, eb as $c, ec as Gk, bo as Ek, bF as Tk, aw as Nk, bA as kf, av as Zk, aY as Kk, aq as Wk, ag as Yk, ed as zk, bz as Hk, cr as Ok, cs as Jk, ee as jk, ef as Dy, eg as Lk, eh as Xk } from "./F0CanvasPanel-DDvl6ZUw.js";
 import { jsx as m, jsxs as te, Fragment as Ai } from "react/jsx-runtime";
 import Zt, { forwardRef as yi, useRef as Pe, useTransition as qk, useState as Ne, useLayoutEffect as hg, useId as dr, useContext as wg, createContext as Yn, useEffect as et, useCallback as je, useMemo as vt, useImperativeHandle as $k, Fragment as Pg, isValidElement as Kh, cloneElement as Sy, Suspense as vd, lazy as bs, createElement as Kc, memo as Ry, Children as Wh } from "react";
 import { d as Ue, T as ex, a as tx, b as ix, f as qi, c as nx, g as gx } from "./tooltip-DTpaXpXW.js";
-import { C as ax, P as ox, c as bd, n as rx, E as sx, a as Ix, u as Cx, b as My, e as Ax, f as lx, g as cx, h as dx, M as ux, p as fx, i as Py, R as n0, j as Vy, k as hx, l as mx, m as px, o as Bx, q as Fx, F as SA, r as yx, O as Gy, s as Ey, t as Ux, W as Fs, A as Qx, B as wx, L as vx, v as bx, V as _x, w as kx, x as xx, y as Dx, z as Yh, S as Sx, D as Ty, G as Ny, H as Rx, I as Mx, J as Px, K as Vx, N as Gx, Q as Ex, T as Tx, U as Nx, X as Zx, Y as Kx, Z as g0, _ as Wx, $ as Yx } from "./CoachmarkProvider-3cv9NHNS.js";
+import { C as ax, P as ox, c as bd, n as rx, E as sx, a as Ix, u as Cx, b as My, e as Ax, f as lx, g as cx, h as dx, M as ux, p as fx, i as Py, R as n0, j as Vy, k as hx, l as mx, m as px, o as Bx, q as Fx, F as SA, r as yx, O as Gy, s as Ey, t as Ux, W as Fs, A as Qx, B as wx, L as vx, v as bx, V as _x, w as kx, x as xx, y as Dx, z as Yh, S as Sx, D as Ty, G as Ny, H as Rx, I as Mx, J as Px, K as Vx, N as Gx, Q as Ex, T as Tx, U as Nx, X as Zx, Y as Kx, Z as g0, _ as Wx, $ as Yx } from "./CoachmarkProvider-CWJHhnuO.js";
 import { g as zx } from "./_commonjsHelpers-ByX85dGu.js";
 import Hx, { createPortal as rh } from "react-dom";
 import './experimental.css';const Ox = zb("Search", [
@@ -33937,7 +33937,7 @@ function YR({
       description: j.description
     })),
     [C]
-  ), K = r.t("sharingDialog.removeAccess", {
+  ), K = r.t("sharingDialog.removeAccessFor", {
     name: R.label
   });
   if (!V)
@@ -33968,7 +33968,7 @@ function YR({
             actions: [
               {
                 icon: gC,
-                label: K,
+                label: r.sharingDialog.removeAccess,
                 onClick: J,
                 variant: "critical",
                 disabled: !a.canRemove || B
@@ -34095,7 +34095,8 @@ function OR({
           "[&_[data-testid=input-field-wrapper]_button[aria-label]:not([data-testid=clear-button])]:pr-28",
           "[&_[data-testid=clear-button]+div]:invisible",
           "[&_[data-testid=clear-button]+div]:w-0",
-          "[&_[data-testid=clear-button]+div]:min-w-0"
+          "[&_[data-testid=clear-button]+div]:min-w-0",
+          "[&_[data-testid=clear-button]+div]:overflow-hidden"
         ]
       ),
       children: [
@@ -34106,6 +34107,7 @@ function OR({
             clearable: !0,
             disableSelectAll: !0,
             disabled: k,
+            fitContentWidth: !0,
             hideLabel: !0,
             label: V.sharingDialog.peopleLabel,
             mapOptions: C,
@@ -34202,7 +34204,7 @@ function Z1({
       title: C,
       width: "md",
       children: /* @__PURE__ */ m(ws, { dataTestId: j, children: /* @__PURE__ */ te("div", { className: "flex flex-col gap-6", children: [
-        /* @__PURE__ */ te("div", { className: "flex flex-col gap-3 md:flex-row md:items-end", children: [
+        /* @__PURE__ */ te("div", { className: "flex min-w-0 flex-row items-end gap-3 max-[560px]:flex-col max-[560px]:items-stretch", children: [
           /* @__PURE__ */ m("div", { className: "min-w-0 flex-1", ref: he, children: /* @__PURE__ */ m(
             OR,
             {
@@ -35437,7 +35439,7 @@ const Rd = (a, C) => {
     ),
     children: a
   }
-), jM = () => import("./ChatPdfThumbnail-Cl1-SCkA.js"), LM = () => import("./ChatSheetThumbnail-CxGL5ukQ.js"), XM = () => import("./ChatDocxThumbnail-DzNPNFya.js"), qM = () => import("./ChatTextThumbnail-FVwMzn0I.js"), $M = bs(jM), eP = bs(LM), tP = bs(XM), iP = bs(qM), nP = 384, gP = 160, fU = ({
+), jM = () => import("./ChatPdfThumbnail-CeZB-Zwx.js"), LM = () => import("./ChatSheetThumbnail-CxGL5ukQ.js"), XM = () => import("./ChatDocxThumbnail-DzNPNFya.js"), qM = () => import("./ChatTextThumbnail-FVwMzn0I.js"), $M = bs(jM), eP = bs(LM), tP = bs(XM), iP = bs(qM), nP = 384, gP = 160, fU = ({
   file: a,
   kind: C,
   cornerClass: f = "rounded-xl",
@@ -35629,7 +35631,7 @@ const Rd = (a, C) => {
     });
     U.observe(k), f.current = U;
   }, []), shouldMount: a };
-}, Md = "w-[24rem] max-w-full", oP = "w-[32rem] max-w-full", rP = "gap-0.5", sP = "pointer-events-none absolute inset-x-0 bottom-0 h-[46%] bg-[linear-gradient(to_top,rgba(0,0,0,0.5),rgba(0,0,0,0.18)_45%,transparent)]", IP = "bg-[hsl(222_31%_11%)]", CP = "bg-[hsl(220_39%_6%/0.72)]", AP = "bg-[hsl(220_39%_6%/0.6)]", lP = "bg-[hsl(220_39%_6%/0.55)]", cP = () => import("./LocationMap-Dmzbr9H-.js"), dP = bs(cP), uP = 3 / 2, fP = ({ latitude: a, longitude: C }) => `https://www.google.com/maps?q=${a},${C}`, hU = ({
+}, Md = "w-[24rem] max-w-full", oP = "w-[32rem] max-w-full", rP = "gap-0.5", sP = "pointer-events-none absolute inset-x-0 bottom-0 h-[46%] bg-[linear-gradient(to_top,rgba(0,0,0,0.5),rgba(0,0,0,0.18)_45%,transparent)]", IP = "bg-[hsl(222_31%_11%)]", CP = "bg-[hsl(220_39%_6%/0.72)]", AP = "bg-[hsl(220_39%_6%/0.6)]", lP = "bg-[hsl(220_39%_6%/0.55)]", cP = () => import("./LocationMap-DOtsw6Qb.js"), dP = bs(cP), uP = 3 / 2, fP = ({ latitude: a, longitude: C }) => `https://www.google.com/maps?q=${a},${C}`, hU = ({
   location: a,
   cornerClass: C = "rounded-xl",
   surfaceClassName: f,
@@ -41032,7 +41034,7 @@ const pG = {
     }
   ) }) });
 }, bG = bs(
-  () => import("./index-Obi7Di4c.js").then((a) => a.i).then((a) => ({
+  () => import("./index-B7h4um_1.js").then((a) => a.i).then((a) => ({
     default: a.F0PdfViewer
   }))
 ), _G = () => {
@@ -42918,7 +42920,7 @@ const lQ = ({
       ]
     }
   );
-}, tE = () => import("./index-ka1AupLq.js").then((a) => ({
+}, tE = () => import("./index-DXc0imaS.js").then((a) => ({
   default: a.F0VideoPlayer
 })), iE = bs(tE), nE = ({
   file: a,

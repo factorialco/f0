@@ -256,7 +256,8 @@ const e = {
     accessLevelFor: "Access level for {{name}}",
     share: "Share",
     whoHasAccess: "Who has access",
-    removeAccess: "Remove access for {{name}}",
+    removeAccess: "Remove access",
+    removeAccessFor: "Remove access for {{name}}",
     updatingAccess: "Updating access",
     accessSummary: "People with access: {{count}}",
     noOneHasAccess: "No one has access yet"

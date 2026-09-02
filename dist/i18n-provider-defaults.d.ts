@@ -9,7 +9,8 @@ export declare const defaultTranslations: {
         readonly accessLevelFor: "Access level for {{name}}";
         readonly share: "Share";
         readonly whoHasAccess: "Who has access";
-        readonly removeAccess: "Remove access for {{name}}";
+        readonly removeAccess: "Remove access";
+        readonly removeAccessFor: "Remove access for {{name}}";
         readonly updatingAccess: "Updating access";
         readonly accessSummary: "People with access: {{count}}";
         readonly noOneHasAccess: "No one has access yet";
@@ -1369,9 +1370,11 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        fontSize: {
-            setFontSize: (fontSize: string) => ReturnType;
-            unsetFontSize: () => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -1379,11 +1382,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        fontSize: {
+            setFontSize: (fontSize: string) => ReturnType;
+            unsetFontSize: () => ReturnType;
         };
     }
 }
