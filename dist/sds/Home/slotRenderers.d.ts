@@ -10,7 +10,7 @@ import { CalendarEventProps } from '../../experimental/Widgets/Content/CalendarE
 import { IndicatorsListProps } from '../../experimental/Widgets/Content/IndicatorsList';
 import { WidgetProps } from '../../experimental/Widgets/Widget';
 import { F0FormSchema } from '../../patterns/F0Form';
-import { HomeListItemAction } from './HomeListItem';
+import { DescriptionPart, HomeListItemAction } from './HomeListItem';
 import { HomeSlotItem, HomeSlotItems, useIsBulkChange } from './home-motion';
 /**
  * The item-churn animation, re-exported so a BESPOKE renderer draws its items
@@ -38,6 +38,14 @@ export interface HomeRenderCtx {
      * { slotRowBleed}).
      */
     isLastSlot?: boolean;
+    /**
+     * Whether the widget draws a FOOTER under its slots (the frame's `action`).
+     * The last slot's bottom bleed is spent differently either way: with a footer
+     * it is what the footer's own `mt-2` buys back; without one, the slot's
+     * bottom IS the card's bottom edge — which is what a "View more" button
+     * sitting there needs to know (see {@link listMoreButtonClass}).
+     */
+    hasFooter?: boolean;
     /**
      * WHAT THE CARD IS SHOWING, when its header carries a `headerSelect`: the
      * option the reader is on. A slot renderer that owns its own data reads this
@@ -218,6 +226,31 @@ type SubtitleTone = {
      */
     subtitleCritical?: boolean;
 };
+/**
+ * A row's SECOND LINE, in either of the two forms it may take.
+ *
+ * One string with `descriptionCritical` colours the whole line; a list of
+ * {@link DescriptionPart}s colours each fact on it separately. The two are
+ * mutually exclusive on purpose — parts already carry their own `critical`, so
+ * a row that passes both is saying the same thing twice and meaning different
+ * things by it.
+ *
+ * Whichever form, the tone is per ROW rather than per schema, for the same
+ * reason `subtitleCritical` is: what has gone wrong is a state of the row's
+ * own data, so one list holds rows that say so beside rows that have nothing
+ * to report.
+ *
+ * Both forms go untinted in a COMPACT list, where the second line has folded
+ * into the row's tooltip and there is nothing left to colour — see
+ * {@link listCompacts}.
+ */
+type DescribedRow = {
+    description: string;
+    descriptionCritical?: boolean;
+} | {
+    description: DescriptionPart[];
+    descriptionCritical?: never;
+};
 type ListTextData<S extends ListSchema> = {
     title: string;
 } & (S["subtitleRequired"] extends true ? {
@@ -227,12 +260,12 @@ type ListTextData<S extends ListSchema> = {
 } & SubtitleTone : {
     subtitle?: never;
     subtitleCritical?: never;
-}) & (S["descriptionRequired"] extends true ? {
-    description: string;
-} : S["descriptionOptional"] extends true ? {
-    description?: string;
+}) & (S["descriptionRequired"] extends true ? DescribedRow : S["descriptionOptional"] extends true ? DescribedRow | {
+    description?: undefined;
+    descriptionCritical?: never;
 } : {
     description?: never;
+    descriptionCritical?: never;
 });
 /**
  * One HOVER ACTION on a `list` row: an icon button over the row's right edge
@@ -625,6 +658,19 @@ export declare const slotRowBleed: (ctx: HomeRenderCtx) => string;
  * 2px shy of it.
  */
 export declare const LIST_MORE_BUTTON_CLASS = "ml-1.5 mt-1 self-start";
+/**
+ * The same edge on the OTHER axis, for when the button is the last thing on the
+ * card. The bleed a row-based slot keeps at its bottom is there so ROWS reach
+ * the card's bottom edge; the button is not a row, so left in that bleed it
+ * ends up 8px from the card's border while measuring 14px from its left — the
+ * corner reads as cropped. `mb-1.5` gives it the left edge's exact treatment
+ * (bleed cancelled, 2px nudge kept), so the gap below it equals the gap beside.
+ *
+ * Only when there is nothing after it: with a footer under the slots the bleed
+ * is already what the footer's own `mt-2` buys back, and padding here would
+ * push that footer 6px further down instead.
+ */
+export declare const listMoreButtonClass: (ctx: HomeRenderCtx) => string;
 /** The gap between rows of the `event-list` slot. */
 export declare const EVENT_LIST_GAP = "gap-2";
 /**

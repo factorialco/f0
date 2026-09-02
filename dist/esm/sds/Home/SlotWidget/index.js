@@ -90,9 +90,10 @@ function T({ header: o, params: l, fullHeight: u, action: d, summaries: p, heade
 		...O ? { alert: O } : { status: k },
 		isDragging: I,
 		children: /* @__PURE__ */ v(w, {
-			ctx: G === void 0 ? L : {
+			ctx: {
 				...L,
-				selection: G
+				hasFooter: !!d,
+				...G === void 0 ? {} : { selection: G }
 			},
 			loading: j,
 			slotRenderers: M,

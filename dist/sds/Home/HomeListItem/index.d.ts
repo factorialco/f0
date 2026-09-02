@@ -43,6 +43,38 @@ export type HomeListItemAction = {
     onClick?: never;
 });
 /**
+ * ONE FACT on a row's second line — the unit a `description` is made of when
+ * the row has more than one thing to say ("€340", "12 receipts", "2 days
+ * overdue"). Parts draw dot-separated, each carrying its OWN tone, so the one
+ * fact that has gone wrong goes red while the rest keep murmuring.
+ *
+ * Put the critical part FIRST. The second line is a single truncating line —
+ * about 306px at the rail's 24rem width, some 40 characters — and it is cut
+ * from the RIGHT, so a part marked critical in third place is the part most
+ * likely to vanish into the ellipsis. Marking a part critical claims it is the
+ * most important thing on the line; leading with it makes that claim true.
+ */
+export type DescriptionPart = {
+    text: string;
+    /** Draws THIS part critical rather than muted. */
+    critical?: boolean;
+};
+/** A row's second line, in either of the forms it may be given. */
+export type Description = string | DescriptionPart[];
+/**
+ * A `description` as the row draws it: a list of parts, whatever form it
+ * arrived in, with the empty ones dropped. Empty means there is no second line
+ * at all — an `[]` is as silent as an absent `description`, which a bare
+ * truthiness check would get wrong.
+ */
+export declare function descriptionParts(description: Description | undefined, descriptionCritical?: boolean): DescriptionPart[];
+/**
+ * A `description` flattened to PLAIN TEXT. What a compact row's tooltip can
+ * carry — `Tooltip`'s `label` takes a string — so a segmented second line
+ * arrives there dot-joined and untinted.
+ */
+export declare function descriptionText(description: Description | undefined): string;
+/**
  * The BASE row every Home list draws: a LEFT slot, a text stack and a RIGHT
  * slot. A row that goes somewhere says so by being a link — hover state and
  * all — not with a trailing chevron: a column of arrows repeating "clickable"
@@ -54,9 +86,10 @@ export type HomeListItemAction = {
  * module glyph, an alert).
  *
  * The text stack is three optional voices: `title` leads, `subtitle` murmurs on
- * the same line after a dot, `description` takes the second line. A subtitle
- * carrying BAD NEWS about the row — overdue, rejected, over budget — stops
- * murmuring and says so (`subtitleCritical`).
+ * the same line after a dot, `description` takes the second line. Either
+ * murmuring voice, when what it carries is BAD NEWS about the row — overdue,
+ * rejected, over budget — stops murmuring and says so (`subtitleCritical`,
+ * `descriptionCritical`).
  *
  * A row can also carry `actions` — what you can DO to it without leaving the
  * widget (snooze it, dismiss it). They stay out of the way until the row is
@@ -84,8 +117,24 @@ export interface HomeListItemProps {
      * subtitle is what has gone wrong with it. Inert without a `subtitle`.
      */
     subtitleCritical?: boolean;
-    /** The second line. */
-    description?: string;
+    /**
+     * The second line — one string, or {@link DescriptionPart}s when the row has
+     * several facts to state and only some of them are bad news. Parts draw
+     * dot-separated and each carries its own tone.
+     */
+    description?: Description;
+    /**
+     * Draws the whole `description` CRITICAL rather than muted — the row is
+     * overdue, rejected, over budget. Per row, because it is a state of THAT
+     * row's data: one list holds rows whose second line is bad news and rows
+     * whose isn't.
+     *
+     * The title reads the same either way — it says what the row IS, and the
+     * description is what has gone wrong with it. Inert without a
+     * `description`, and IGNORED when the description is already a list of
+     * parts: those carry their own `critical`.
+     */
+    descriptionCritical?: boolean;
     /** Trailing slot: a tag, a counter, people. */
     right?: ReactNode;
     /**
@@ -110,4 +159,4 @@ export interface HomeListItemProps {
     /** A trailing chevron. Off — the row's link affordance is the row itself. */
     showChevron?: boolean;
 }
-export declare function HomeListItem({ avatar, avatarSize, left, title, subtitle, subtitleCritical, description, right, actions, unread, href, showChevron, }: HomeListItemProps): import("react").JSX.Element;
+export declare function HomeListItem({ avatar, avatarSize, left, title, subtitle, subtitleCritical, description, descriptionCritical, right, actions, unread, href, showChevron, }: HomeListItemProps): import("react").JSX.Element;
