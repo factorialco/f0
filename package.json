@@ -142,7 +142,7 @@
     "check:consumer-bundle": "tsx .scripts/check-consumer-bundle.ts",
     "build": "pnpm run build:types && pnpm run build-icons && pnpm run build:runtime && pnpm run build:esm && pnpm run build:declarations && pnpm run check:consumer-bundle",
     "build-icons": "tsc6 --project ./tsconfig-build-icons.json",
-    "build:tailwind": "NODE_ENV=production tailwindcss -i src/styles.css -o ./dist/styles.css --postcss --minify",
+    "build:tailwind": "F0_PUBLISH_FONT_ASSETS=true NODE_ENV=production tailwindcss -i src/styles.css -o ./dist/styles.css --postcss --minify",
     "build:watch": "rm -rf dist && run-p --race build:watch:runtime build:watch:esm build:watch:declarations build:watch:icons",
     "build:watch:runtime": "F0_LIBRARY_BUILD=true NODE_OPTIONS=--max-old-space-size=8192 vite build --watch -- --tailwind",
     "build:watch:esm": "F0_LIBRARY_BUILD=true BUILD_PRESERVED_ESM=true NODE_OPTIONS=--max-old-space-size=8192 vite build --watch",
