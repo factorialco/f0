@@ -381,10 +381,21 @@ describe("EmojiPicker", () => {
 
   it("hides emoji the platform cannot draw", () => {
     // Emoji 13 predates the melting face (14) and the shaking face (15).
-    render(<EmojiPicker onSelect={() => {}} emojiVersion={13} />)
+    const { container } = render(
+      <EmojiPicker onSelect={() => {}} emojiVersion={13} />
+    )
 
-    expect(screen.queryByLabelText("Melting Face")).not.toBeInTheDocument()
-    expect(screen.getByLabelText("Grinning Face")).toBeInTheDocument()
+    // Selected by attribute rather than `getByLabelText`. The grid mounts ~1800
+    // cells here, and testing-library resolves label association across every
+    // one of them: measured at 983ms for these two queries against 435ms for
+    // the render, and 9ms for the same two as selectors. That second was enough
+    // to time this test out on CI, where coverage instrumentation is on.
+    // `EmojiGrid` puts the name in an explicit `aria-label`, so the selector
+    // asks precisely what the assertion means.
+    expect(container.querySelector('[aria-label="Melting Face"]')).toBeNull()
+    expect(
+      container.querySelector('[aria-label="Grinning Face"]')
+    ).not.toBeNull()
   })
 
   it("offers a jump-to bar for every category", () => {
