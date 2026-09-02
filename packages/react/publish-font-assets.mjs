@@ -2,13 +2,25 @@ import { copyFileSync, existsSync, mkdirSync, statSync } from "node:fs"
 import { dirname, isAbsolute, relative, resolve, sep } from "node:path"
 import valueParser from "postcss-value-parser"
 
-export function publishFontAssets({ fontDirectory, outputDirectory }) {
+export function publishFontAssets({
+  fontDirectory,
+  outputDirectory,
+  sourceStylesheet,
+}) {
   const fontRoot = resolve(fontDirectory)
+  const outputRoot = resolve(outputDirectory)
+  const sourcePath = resolve(sourceStylesheet)
   const processedDeclarations = new WeakSet()
 
   return {
     postcssPlugin: "f0-publish-font-assets",
     Declaration(declaration) {
+      if (
+        !declaration.source?.input.file ||
+        resolve(declaration.source.input.file) !== sourcePath
+      ) {
+        return
+      }
       if (processedDeclarations.has(declaration)) return
       processedDeclarations.add(declaration)
       if (!declaration.value.includes("url(")) return
@@ -32,25 +44,9 @@ export function publishFontAssets({ fontDirectory, outputDirectory }) {
         }
         if (!existsSync(fontPath) || !statSync(fontPath).isFile()) return
 
-        if (outputDirectory) {
-          const outputRoot = resolve(outputDirectory)
-          const publishedFontRoot = resolve(outputRoot, "fonts")
-          const referencedPublishedPath = resolve(outputRoot, reference.value)
-          const publishedRelativePath = relative(
-            publishedFontRoot,
-            referencedPublishedPath
-          )
-          const isPublishedReference =
-            !publishedRelativePath.startsWith("..") &&
-            !isAbsolute(publishedRelativePath) &&
-            existsSync(referencedPublishedPath) &&
-            statSync(referencedPublishedPath).isFile()
-          if (isPublishedReference) return
-
-          const publishedPath = resolve(outputRoot, "fonts", relativeFontPath)
-          mkdirSync(dirname(publishedPath), { recursive: true })
-          copyFileSync(fontPath, publishedPath)
-        }
+        const publishedPath = resolve(outputRoot, "fonts", relativeFontPath)
+        mkdirSync(dirname(publishedPath), { recursive: true })
+        copyFileSync(fontPath, publishedPath)
 
         reference.type = "string"
         reference.quote = '"'

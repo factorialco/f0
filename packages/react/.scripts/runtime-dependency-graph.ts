@@ -9,23 +9,22 @@ export interface RuntimeDependencyCycle {
 export interface RuntimeDependencyAnalysis {
   graph: Record<string, string[]>
   cycles: RuntimeDependencyCycle[]
+  cyclicEdges: string[]
 }
 
-export function findRuntimeCycleDifferences(
-  current: RuntimeDependencyCycle[],
-  baseline: RuntimeDependencyCycle[]
+export function findRuntimeCycleEdgeDifferences(
+  current: string[],
+  baseline: string[]
 ): {
-  baselineOnly: RuntimeDependencyCycle[]
-  currentOnly: RuntimeDependencyCycle[]
+  baselineOnly: string[]
+  currentOnly: string[]
 } {
-  const cycleKey = (cycle: RuntimeDependencyCycle): string =>
-    [...cycle.files].sort().join("\n")
-  const baselineKeys = new Set(baseline.map(cycleKey))
-  const currentKeys = new Set(current.map(cycleKey))
+  const baselineEdges = new Set(baseline)
+  const currentEdges = new Set(current)
 
   return {
-    baselineOnly: baseline.filter((cycle) => !currentKeys.has(cycleKey(cycle))),
-    currentOnly: current.filter((cycle) => !baselineKeys.has(cycleKey(cycle))),
+    baselineOnly: baseline.filter((edge) => !currentEdges.has(edge)),
+    currentOnly: current.filter((edge) => !baselineEdges.has(edge)),
   }
 }
 
@@ -278,6 +277,22 @@ function findCycles(graph: Record<string, string[]>): RuntimeDependencyCycle[] {
     .sort((left, right) => left.files[0].localeCompare(right.files[0]))
 }
 
+function findCyclicEdges(
+  graph: Record<string, string[]>,
+  cycles: RuntimeDependencyCycle[]
+): string[] {
+  return cycles
+    .flatMap((cycle) => {
+      const members = new Set(cycle.files)
+      return cycle.files.flatMap((file) =>
+        (graph[file] ?? [])
+          .filter((dependency) => members.has(dependency))
+          .map((dependency) => `${file} -> ${dependency}`)
+      )
+    })
+    .sort()
+}
+
 export function analyzeRuntimeDependencies({
   projectRoot,
   tsconfigPath,
@@ -309,8 +324,6 @@ export function analyzeRuntimeDependencies({
     ).sort()
   }
 
-  return {
-    graph,
-    cycles: findCycles(graph),
-  }
+  const cycles = findCycles(graph)
+  return { graph, cycles, cyclicEdges: findCyclicEdges(graph, cycles) }
 }

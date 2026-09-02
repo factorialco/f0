@@ -188,11 +188,7 @@ const config: StorybookConfig = {
     // is kept out of the public Storybook the same way the usage tag is.
     ...(process.env.STORYBOOK_PUBLIC_BUILD ? [] : ["./local-docs/*.mdx"]),
   ],
-  staticDirs: [
-    "../public",
-    "./static",
-    { from: "../assets/fonts", to: "/assets/fonts" },
-  ],
+  staticDirs: ["../public", "./static"],
   addons: [
     getAbsolutePath("@storybook/addon-links"),
     getAbsolutePath("@storybook/addon-a11y"),

@@ -52,6 +52,10 @@ it("fails closed for an incomplete published package", () => {
     ).join("")}@font-face { src: url("fonts/missing.woff2") }`
   )
   writeFileSync(
+    resolve(packageRoot, "dist/f0.js"),
+    "export const legacy = true"
+  )
+  writeFileSync(
     resolve(packageRoot, "dist/esm/entry.js"),
     'import "missing-package"\nimport "./missing.js"\nmodule.exports = require("react")'
   )
@@ -63,12 +67,13 @@ it("fails closed for an incomplete published package", () => {
 
   expect(validatePublication(packageRoot)).toEqual(
     expect.arrayContaining([
-      "Expected main to be dist/f0.js, received undefined",
+      "Expected main to be dist/esm/f0.js, received undefined",
       "Missing package export: ./F0Button",
       "Missing wildcard export target: ./icons/app/* -> ./icons/app/Add.d.ts",
-      "Missing build artifact: dist/F0Button.js",
+      "Missing build artifact: dist/esm/F0Button.js",
       "Internal build file is published: postcss.config.js",
       "Non-production declaration is published: dist/components/__stories__/Example.stories.d.ts",
+      "Legacy runtime artifact is published: dist/f0.js",
       "Source font is duplicated in the package: assets/fonts/Inter.woff2",
       "Published styles reference missing or unpackable asset: fonts/missing.woff2",
       "Published styles are missing required font: fonts/InterVariable-latin-normal.woff2",

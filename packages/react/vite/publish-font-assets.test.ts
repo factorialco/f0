@@ -26,11 +26,15 @@ describe("publishFontAssets", () => {
     )
 
     const result = await postcss([
-      publishFontAssets({ fontDirectory, outputDirectory }),
+      publishFontAssets({
+        fontDirectory,
+        outputDirectory,
+        sourceStylesheet: join(fontDirectory, "style.css"),
+      }),
     ]).process(
       '@font-face { src: url("InterVariable.woff2") format("woff2") tech(variations); }',
       {
-        from: undefined,
+        from: join(fontDirectory, "style.css"),
       }
     )
 
@@ -40,70 +44,44 @@ describe("publishFontAssets", () => {
     ).toEqual(Buffer.from([0, 1, 2, 3]))
   })
 
-  test("rewrites local font URLs without publishing during development", async () => {
-    const fontDirectory = mkdtempSync(join(tmpdir(), "f0-fonts-"))
-    temporaryDirectories.push(fontDirectory)
-    writeFileSync(
-      join(fontDirectory, "InterVariable.woff2"),
-      Buffer.from([0, 1, 2, 3])
-    )
-
-    const result = await postcss([
-      publishFontAssets({ fontDirectory }),
-    ]).process('@font-face { src: url("InterVariable.woff2"); }', {
-      from: undefined,
-    })
-
-    expect(result.css).toContain('url("fonts/InterVariable.woff2")')
-  })
-
   test("leaves remote and non-font URLs unchanged", async () => {
     const fontDirectory = mkdtempSync(join(tmpdir(), "f0-fonts-"))
+    const outputDirectory = mkdtempSync(join(tmpdir(), "f0-dist-"))
     temporaryDirectories.push(fontDirectory)
+    temporaryDirectories.push(outputDirectory)
     const css =
       '.example { background: url("https://example.com/image.png"); mask: url("icon.svg"); }'
 
     const result = await postcss([
-      publishFontAssets({ fontDirectory }),
-    ]).process(css, { from: undefined })
+      publishFontAssets({
+        fontDirectory,
+        outputDirectory,
+        sourceStylesheet: join(fontDirectory, "style.css"),
+      }),
+    ]).process(css, { from: join(fontDirectory, "style.css") })
 
     expect(result.css).toBe(css)
   })
 
-  test("leaves fonts owned by imported stylesheets unchanged", async () => {
-    const fontDirectory = mkdtempSync(join(tmpdir(), "f0-fonts-"))
-    const outputDirectory = mkdtempSync(join(tmpdir(), "f0-dist-"))
-    temporaryDirectories.push(fontDirectory)
-    temporaryDirectories.push(outputDirectory)
-    const css =
-      '@font-face { src: url("sb-common-assets/nunito-sans-regular.woff2") format("woff2"); }'
-
-    const result = await postcss([
-      publishFontAssets({ fontDirectory, outputDirectory }),
-    ]).process(css, { from: undefined })
-
-    expect(result.css).toBe(css)
-  })
-
-  test("leaves already-published font references unchanged", async () => {
+  test("leaves matching font names from other stylesheets unchanged", async () => {
     const fontDirectory = mkdtempSync(join(tmpdir(), "f0-fonts-"))
     const outputDirectory = mkdtempSync(join(tmpdir(), "f0-dist-"))
     temporaryDirectories.push(fontDirectory)
     temporaryDirectories.push(outputDirectory)
     writeFileSync(
-      join(fontDirectory, "Inter-Regular.woff"),
+      join(fontDirectory, "InterVariable.woff2"),
       Buffer.from([0, 1, 2, 3])
     )
-    const source =
-      '@font-face { src: url("Inter-Regular.woff") format("woff"); }'
-    const firstPass = await postcss([
-      publishFontAssets({ fontDirectory, outputDirectory }),
-    ]).process(source, { from: undefined })
+    const css = '@font-face { src: url("InterVariable.woff2"); }'
 
-    const secondPass = await postcss([
-      publishFontAssets({ fontDirectory, outputDirectory }),
-    ]).process(firstPass.css, { from: undefined })
+    const result = await postcss([
+      publishFontAssets({
+        fontDirectory,
+        outputDirectory,
+        sourceStylesheet: join(fontDirectory, "style.css"),
+      }),
+    ]).process(css, { from: join(fontDirectory, "foreign.css") })
 
-    expect(secondPass.css).toBe(firstPass.css)
+    expect(result.css).toBe(css)
   })
 })

@@ -9,8 +9,7 @@ import { fileURLToPath } from "node:url"
 
 import {
   analyzeRuntimeDependencies,
-  findRuntimeCycleDifferences,
-  type RuntimeDependencyCycle,
+  findRuntimeCycleEdgeDifferences,
 } from "./runtime-dependency-graph"
 
 const reactPackageRoot = path.resolve(
@@ -54,9 +53,9 @@ function main(): void {
       path.join(reactPackageRoot, ".scripts/runtime-cycle-baseline.json"),
       "utf8"
     )
-  ) as RuntimeDependencyCycle[]
-  const cycleDifferences = findRuntimeCycleDifferences(
-    analysis.cycles,
+  ) as string[]
+  const cycleDifferences = findRuntimeCycleEdgeDifferences(
+    analysis.cyclicEdges,
     baseline
   )
   const hasDifferences =
@@ -69,23 +68,17 @@ function main(): void {
     )
   } else if (!hasDifferences) {
     consola.success(
-      `Runtime cycle baseline matches across ${Object.keys(analysis.graph).length} production files (${analysis.cycles.length} groups)`
+      `Runtime cycle baseline matches across ${Object.keys(analysis.graph).length} production files (${analysis.cyclicEdges.length} cyclic edges in ${analysis.cycles.length} groups)`
     )
   } else {
     consola.error(
       `Runtime cycle baseline differs across ${Object.keys(analysis.graph).length} production files. Update the baseline in the same change that modifies a cycle.`
     )
-    for (const cycle of cycleDifferences.currentOnly) {
-      consola.log(`\nCurrent-only cycle (${cycle.files.length} files)`)
-      for (const file of cycle.files) {
-        consola.log(`   ${file}`)
-      }
+    for (const edge of cycleDifferences.currentOnly) {
+      consola.log(`   current-only: ${edge}`)
     }
-    for (const cycle of cycleDifferences.baselineOnly) {
-      consola.log(`\nBaseline-only cycle (${cycle.files.length} files)`)
-      for (const file of cycle.files) {
-        consola.log(`   ${file}`)
-      }
+    for (const edge of cycleDifferences.baselineOnly) {
+      consola.log(`   baseline-only: ${edge}`)
     }
   }
 

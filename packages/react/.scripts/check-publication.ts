@@ -179,10 +179,7 @@ export function validateExportTargets(
 
 export function validateBuildArtifacts(packageRoot: string): string[] {
   const requiredArtifacts = [
-    ...publicationEntries.flatMap((entry) => [
-      `dist/${entry.name}.js`,
-      `dist/esm/${entry.name}.js`,
-    ]),
+    ...publicationEntries.map((entry) => `dist/esm/${entry.name}.js`),
     "dist/global.d.ts",
     "dist/esm/components/F0Button/F0Button.js",
   ]
@@ -195,20 +192,25 @@ export function validateBuildArtifacts(packageRoot: string): string[] {
 }
 
 export function validatePublishedFiles(packageRoot: string): string[] {
+  const distributionDirectory = resolve(packageRoot, "dist")
   const internalFiles = [
     "postcss.config.js",
+    "postcss.publish.config.js",
     "publish-font-assets.mjs",
     "tailwind.config.ts",
   ]
   const sourceFonts = walkFiles(resolve(packageRoot, "assets/fonts")).filter(
     (filePath) => /\.woff2?$/.test(filePath)
   )
-  const nonProductionDeclarations = walkFiles(
-    resolve(packageRoot, "dist")
-  ).filter((filePath) =>
-    /(?:\/__(?:mocks|stories|tests)__\/|\.(?:spec|stories|test)\.d\.ts$)/.test(
-      filePath
-    )
+  const nonProductionDeclarations = walkFiles(distributionDirectory).filter(
+    (filePath) =>
+      /(?:\/__(?:mocks|stories|tests)__\/|\.(?:spec|stories|test)\.d\.ts$)/.test(
+        filePath
+      )
+  )
+  const legacyRuntimeFiles = walkFiles(distributionDirectory).filter(
+    (filePath) =>
+      dirname(filePath) === distributionDirectory && /\.js$/.test(filePath)
   )
 
   return [
@@ -223,6 +225,10 @@ export function validatePublishedFiles(packageRoot: string): string[] {
           packageRoot,
           filePath
         )}`
+    ),
+    ...legacyRuntimeFiles.map(
+      (filePath) =>
+        `Legacy runtime artifact is published: ${relative(packageRoot, filePath)}`
     ),
     ...sourceFonts.map(
       (filePath) =>
@@ -304,8 +310,8 @@ export function validatePublishedStyleAssets(packageRoot: string): string[] {
 export function validatePackageManifest(manifest: PackageManifest): string[] {
   const errors: string[] = []
 
-  if (manifest.main !== "dist/f0.js") {
-    errors.push(`Expected main to be dist/f0.js, received ${manifest.main}`)
+  if (manifest.main !== "dist/esm/f0.js") {
+    errors.push(`Expected main to be dist/esm/f0.js, received ${manifest.main}`)
   }
   if (manifest.typings !== "dist/f0.d.ts") {
     errors.push(

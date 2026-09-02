@@ -11,16 +11,14 @@ jobs:
     uses: ./.github/workflows/_check-workspaces-changes.yaml
 
   # Emit the public declaration graph for both sides in parallel. Both sides
-  # use the comparison config and TypeScript compiler from the merge commit,
-  # while their source and dependencies remain those of the revision under
-  # test. This keeps inferred types and declaration representation identical
-  # across compiler and build migrations (rolled-up main vs preserved head).
+  # use the self-contained comparison config and TypeScript compiler from the
+  # merge commit, while React source remains that of the revision under test.
+  # Dependency types are intentionally resolved once in the comparison job,
+  # so this workflow owns React API changes rather than core API changes.
   build-dts:
     needs: detect-changes
-    # React source or core (whose types ripple into the React surface) changed.
     if: |
-      (needs.detect-changes.outputs.package_react == 'true' ||
-       needs.detect-changes.outputs.package_core == 'true') &&
+      needs.detect-changes.outputs.package_react == 'true' &&
       github.head_ref != 'release-please--branches--master' &&
       !contains(github.event.pull_request.labels.*.name, 'autorelease')
     name: "[⚛️ REACT] Build types (${{ matrix.side }})"
@@ -48,8 +46,6 @@ jobs:
       - name: Use the shared API declaration config
         run: git checkout "$GITHUB_SHA" -- packages/react/tsconfig.api-surface.json
       - uses: ./.github/actions/setup-node-pnpm
-      - name: Build core package
-        run: pnpm --filter @factorialco/f0-core build
       - name: Build React types
         run: |
           TYPESCRIPT_SPEC=$(git show "$GITHUB_SHA:packages/react/package.json" | jq -r '.devDependencies.typescript')
@@ -58,15 +54,14 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: dts-${{ matrix.side }}
-          path: packages/react/dist/api-surface/**/*.d.ts
+          path: packages/react/.cache/api-surface/**/*.d.ts
           if-no-files-found: error
           retention-days: 1
 
   api-diff:
     needs: [detect-changes, build-dts]
     if: |
-      (needs.detect-changes.outputs.package_react == 'true' ||
-       needs.detect-changes.outputs.package_core == 'true') &&
+      needs.detect-changes.outputs.package_react == 'true' &&
       github.head_ref != 'release-please--branches--master' &&
       !contains(github.event.pull_request.labels.*.name, 'autorelease')
     name: "[⚛️ REACT] Public API surface check"

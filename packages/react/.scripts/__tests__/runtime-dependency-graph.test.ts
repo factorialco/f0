@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it } from "vitest"
 
 import {
   analyzeRuntimeDependencies,
-  findRuntimeCycleDifferences,
+  findRuntimeCycleEdgeDifferences,
   type RuntimeDependencyAnalysis,
 } from "../runtime-dependency-graph"
 
@@ -51,38 +51,28 @@ afterEach(() => {
 
 describe("runtime dependency graph", () => {
   it("requires the current cycles to match the canonical baseline", () => {
-    const baseline = [
-      { files: ["src/a.ts", "src/b.ts", "src/c.ts"] },
-      { files: ["src/d.ts", "src/e.ts"] },
-    ]
-
     expect(
-      findRuntimeCycleDifferences(
-        [
-          { files: ["src/a.ts", "src/b.ts"] },
-          { files: ["src/d.ts", "src/e.ts"] },
-        ],
-        baseline
+      findRuntimeCycleEdgeDifferences(
+        ["src/a.ts -> src/b.ts", "src/d.ts -> src/e.ts"],
+        ["src/a.ts -> src/b.ts", "src/b.ts -> src/c.ts", "src/d.ts -> src/e.ts"]
       )
     ).toEqual({
-      baselineOnly: [{ files: ["src/a.ts", "src/b.ts", "src/c.ts"] }],
-      currentOnly: [{ files: ["src/a.ts", "src/b.ts"] }],
+      baselineOnly: ["src/b.ts -> src/c.ts"],
+      currentOnly: [],
     })
 
     expect(
-      findRuntimeCycleDifferences(
+      findRuntimeCycleEdgeDifferences(
         [
-          { files: ["src/a.ts", "src/b.ts", "src/new.ts"] },
-          { files: ["src/c.ts", "src/d.ts"] },
+          "src/a.ts -> src/b.ts",
+          "src/a.ts -> src/c.ts",
+          "src/d.ts -> src/e.ts",
         ],
-        baseline
+        ["src/a.ts -> src/b.ts", "src/d.ts -> src/e.ts"]
       )
     ).toEqual({
-      baselineOnly: baseline,
-      currentOnly: [
-        { files: ["src/a.ts", "src/b.ts", "src/new.ts"] },
-        { files: ["src/c.ts", "src/d.ts"] },
-      ],
+      baselineOnly: [],
+      currentOnly: ["src/a.ts -> src/c.ts"],
     })
   })
 
@@ -95,6 +85,11 @@ describe("runtime dependency graph", () => {
 
     expect(result.cycles).toEqual([
       { files: ["src/a.ts", "src/b.ts", "src/c.ts"] },
+    ])
+    expect(result.cyclicEdges).toEqual([
+      "src/a.ts -> src/b.ts",
+      "src/b.ts -> src/c.ts",
+      "src/c.ts -> src/a.ts",
     ])
   })
 

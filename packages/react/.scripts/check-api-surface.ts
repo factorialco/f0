@@ -202,7 +202,6 @@ const COMPILER_OPTIONS: ts.CompilerOptions = {
 // identical across every program. Share a compiler host that caches parsed
 // source files by name so the lib is parsed once instead of per program — this
 // keeps each program from blowing the test timeout on slower CI runners.
-let sharedHost: ts.CompilerHost | undefined
 const sourceFileCache = new Map<string, ts.SourceFile | undefined>()
 
 // Bare specifiers (`react`, `@radix-ui/*`, …) must resolve against THIS
@@ -219,13 +218,23 @@ const PACKAGE_ROOT = path.resolve(
   ".."
 )
 const MODULE_RESOLUTION_ANCHOR = path.join(PACKAGE_ROOT, "__api_anchor__.d.ts")
+const NON_TYPE_IMPORT_PATTERN = /\.css(?:\?.*)?$/i
 
-function getCompilerHost(): ts.CompilerHost {
-  if (sharedHost) return sharedHost
-  const host = ts.createCompilerHost(COMPILER_OPTIONS)
-  // Relative imports resolve from the importing file (api-extractor's dangling
-  // `./types` rollup noise stays unresolved, as before); bare imports resolve
-  // from the package root so React/DOM types are found.
+function compilerOptions(dirAbsolute: string): ts.CompilerOptions {
+  return {
+    ...COMPILER_OPTIONS,
+    baseUrl: dirAbsolute,
+    paths: {
+      "@/*": ["*"],
+      "~/*": ["../*"],
+    },
+  }
+}
+
+function getCompilerHost(options: ts.CompilerOptions): ts.CompilerHost {
+  const host = ts.createCompilerHost(options)
+  // Internal imports resolve from the declaration snapshot and fail closed;
+  // bare imports resolve from the package root so React/DOM types are found.
   host.resolveModuleNameLiterals = (
     moduleLiterals,
     containingFile,
@@ -234,10 +243,17 @@ function getCompilerHost(): ts.CompilerHost {
   ) =>
     moduleLiterals.map((literal) => {
       const name = literal.text
-      const importer = name.startsWith(".")
-        ? containingFile
-        : MODULE_RESOLUTION_ANCHOR
-      return ts.resolveModuleName(name, importer, options, host)
+      if (NON_TYPE_IMPORT_PATTERN.test(name)) return {}
+      const isInternal =
+        name.startsWith(".") || name.startsWith("@/") || name.startsWith("~/")
+      const importer = isInternal ? containingFile : MODULE_RESOLUTION_ANCHOR
+      const resolution = ts.resolveModuleName(name, importer, options, host)
+      if (isInternal && !resolution.resolvedModule) {
+        throw new Error(
+          `Could not resolve ${name} imported by ${containingFile}`
+        )
+      }
+      return resolution
     })
   const original = host.getSourceFile.bind(host)
   host.getSourceFile = (
@@ -260,7 +276,6 @@ function getCompilerHost(): ts.CompilerHost {
     sourceFileCache.set(fileName, sf)
     return sf
   }
-  sharedHost = host
   return host
 }
 
@@ -276,11 +291,12 @@ export function snapshotEntry(
   if (!dtsPath) return undefined
 
   const dirAbsolute = path.resolve(dir)
+  const options = compilerOptions(dirAbsolute)
 
   const program = ts.createProgram({
     rootNames: [dtsPath],
-    options: COMPILER_OPTIONS,
-    host: getCompilerHost(),
+    options,
+    host: getCompilerHost(options),
   })
 
   const checker = program.getTypeChecker()

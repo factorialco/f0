@@ -64,7 +64,37 @@ describe("check-api-surface — catches breaking changes", () => {
   it("rejects a public barrel whose declaration graph is missing", () => {
     expect(() =>
       snapshotEntry(dirWith('export * from "./missing";'), "f0")
-    ).toThrow("resolved to zero exports")
+    ).toThrow("Could not resolve ./missing")
+  })
+
+  it("resolves package aliases inside an emitted declaration graph", () => {
+    const dir = dirWith('export * from "@/Widget";')
+    writeFileSync(
+      path.join(dir, "Widget.d.ts"),
+      "export interface WidgetProps { id: string }"
+    )
+
+    expect([...snapshotEntry(dir, "f0")!.keys()]).toEqual(["WidgetProps"])
+  })
+
+  it("rejects a partially unresolved public declaration graph", () => {
+    expect(() =>
+      snapshotEntry(
+        dirWith(
+          'export declare const Present: true;\nexport * from "./missing";'
+        ),
+        "f0"
+      )
+    ).toThrow("Could not resolve ./missing")
+  })
+
+  it("ignores stylesheet imports that do not participate in the type graph", () => {
+    expect(() =>
+      snapshotEntry(
+        dirWith('import "./styles.css";\nexport declare const Present: true;'),
+        "f0"
+      )
+    ).not.toThrow()
   })
 
   it("rejects a comparison whose head is missing a public entry", () => {

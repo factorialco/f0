@@ -83,7 +83,6 @@ export const compatibilityExports = Object.fromEntries([
   ]),
   ["./styles.css", "./dist/styles.css"],
   ["./package.json", "./package.json"],
-  ["./dist/*", "./dist/*"],
 ])
 
 export const expectedPackageExports = Object.fromEntries([

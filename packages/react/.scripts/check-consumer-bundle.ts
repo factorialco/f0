@@ -16,6 +16,7 @@ import { tmpdir } from "node:os"
 import path, { dirname, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
+import { publicationEntries } from "../vite/publication-contract"
 import { validatePublication } from "./check-publication"
 
 const PACKAGE_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "..")
@@ -119,7 +120,17 @@ void props
   )
   writeFileSync(
     resolve(consumerDir, "root-consumer.ts"),
-    `import type { F0ButtonProps } from "@factorialco/f0-react"
+    `${publicationEntries
+      .flatMap((entry, index) => {
+        if (!entry.export) return []
+        const specifier =
+          entry.export.subpath === "."
+            ? "@factorialco/f0-react"
+            : `@factorialco/f0-react/${entry.export.subpath.slice(2)}`
+        return [`import * as Entry${index} from "${specifier}"`]
+      })
+      .join("\n")}
+import type { F0ButtonProps } from "@factorialco/f0-react"
 
 const props: F0ButtonProps = { label: "Save", "data-testid": "save" }
 void props
@@ -272,9 +283,9 @@ async function buildBrowserProbes(
 }
 
 async function measureBundle(): Promise<Record<string, BrowserProbeMetric>> {
-  if (!existsSync(resolve(PACKAGE_DIR, "dist/f0.js"))) {
+  if (!existsSync(resolve(PACKAGE_DIR, "dist/esm/f0.js"))) {
     throw new Error(
-      "Missing packages/react/dist/f0.js. Build @factorialco/f0-react before running the consumer bundle check."
+      "Missing packages/react/dist/esm/f0.js. Build @factorialco/f0-react before running the consumer bundle check."
     )
   }
 

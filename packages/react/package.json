@@ -18,7 +18,7 @@
   "sideEffects": [
     "**/*.css"
   ],
-  "main": "dist/f0.js",
+  "main": "dist/esm/f0.js",
   "typings": "dist/f0.d.ts",
   "exports": {
     ".": {
@@ -126,28 +126,26 @@
       "import": "./icons/special/*.js"
     },
     "./styles.css": "./dist/styles.css",
-    "./package.json": "./package.json",
-    "./dist/*": "./dist/*"
+    "./package.json": "./package.json"
   },
   "scripts": {
     "dev": "storybook dev -p 6006",
     "dev:docs": "DOCS_MODE=true pnpm run dev",
     "dev:sync": "pnpm build:prepare && tsx scripts/dev-sync.ts",
     "build:types": "tsc6 --project ./tsconfig-build.json",
-    "build:runtime": "F0_LIBRARY_BUILD=true NODE_OPTIONS=--max-old-space-size=8192 vite build -- --tailwind",
-    "build:esm": "F0_LIBRARY_BUILD=true BUILD_PRESERVED_ESM=true NODE_OPTIONS=--max-old-space-size=8192 vite build",
+    "build:esm": "BUILD_PRESERVED_ESM=true NODE_OPTIONS=--max-old-space-size=8192 vite build",
     "build:declarations": "BUILD_TYPES=true BUILD_DECLARATIONS_ONLY=true NODE_OPTIONS=--max-old-space-size=8192 vite build",
     "build:prepare": "pnpm run build:types && pnpm run build-icons",
     "start": "pnpm run dev",
     "check:consumer-bundle": "tsx .scripts/check-consumer-bundle.ts",
-    "build": "pnpm run build:types && pnpm run build-icons && pnpm run build:runtime && pnpm run build:esm && pnpm run build:declarations && pnpm run check:consumer-bundle",
+    "build": "rm -rf dist && pnpm run build:types && pnpm run build-icons && pnpm run build:esm && pnpm run build:declarations && pnpm run build:tailwind && pnpm run check:consumer-bundle",
     "build-icons": "tsc6 --project ./tsconfig-build-icons.json",
-    "build:tailwind": "F0_PUBLISH_FONT_ASSETS=true NODE_ENV=production tailwindcss -i src/styles.css -o ./dist/styles.css --postcss --minify",
-    "build:watch": "rm -rf dist && run-p --race build:watch:runtime build:watch:esm build:watch:declarations build:watch:icons",
-    "build:watch:runtime": "F0_LIBRARY_BUILD=true NODE_OPTIONS=--max-old-space-size=8192 vite build --watch -- --tailwind",
-    "build:watch:esm": "F0_LIBRARY_BUILD=true BUILD_PRESERVED_ESM=true NODE_OPTIONS=--max-old-space-size=8192 vite build --watch",
+    "build:tailwind": "NODE_ENV=production tailwindcss -i src/styles.css -o ./dist/styles.css --postcss ./postcss.publish.config.js --minify",
+    "build:watch": "rm -rf dist && run-p --race build:watch:esm build:watch:declarations build:watch:icons build:watch:styles",
+    "build:watch:esm": "BUILD_PRESERVED_ESM=true NODE_OPTIONS=--max-old-space-size=8192 vite build --watch",
     "build:watch:declarations": "BUILD_TYPES=true BUILD_DECLARATIONS_ONLY=true NODE_OPTIONS=--max-old-space-size=8192 vite build --watch",
     "build:watch:icons": "tsc6 --project ./tsconfig-build-icons.json --watch",
+    "build:watch:styles": "NODE_ENV=production tailwindcss -i src/styles.css -o ./dist/styles.css --postcss ./postcss.publish.config.js --watch",
     "lint": "sh -c 'oxlint \"${@:-src/}\" --max-warnings 0' --",
     "lint:fix": "sh -c 'oxlint \"${@:-src/}\" --fix --max-warnings 0' --",
     "preview": "vite preview",
