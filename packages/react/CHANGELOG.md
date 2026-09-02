@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.83.2](https://github.com/factorialco/f0/compare/f0-react-v6.83.1...f0-react-v6.83.2) (2026-09-02)
+
+
+### Bug Fixes
+
+* **EmojiPicker:** stop its tests mounting every emoji ([#5372](https://github.com/factorialco/f0/issues/5372)) ([640f521](https://github.com/factorialco/f0/commit/640f5218114953b43044de097fa92c9c777daf99))
+
 ## [6.83.1](https://github.com/factorialco/f0/compare/f0-react-v6.83.0...f0-react-v6.83.1) (2026-09-02)
 
 
