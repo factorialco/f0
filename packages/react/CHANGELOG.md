@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.81.3](https://github.com/factorialco/f0/compare/f0-react-v6.81.2...f0-react-v6.81.3) (2026-09-02)
+
+
+### Bug Fixes
+
+* **SlotWidget:** give View more the same gap below it as beside it ([#5363](https://github.com/factorialco/f0/issues/5363)) ([c35aa9b](https://github.com/factorialco/f0/commit/c35aa9b91d7c0dd2ff12eec190097dd94fee4652))
+
 ## [6.81.2](https://github.com/factorialco/f0/compare/f0-react-v6.81.1...f0-react-v6.81.2) (2026-09-02)
 
 
