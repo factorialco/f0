@@ -283,7 +283,23 @@ export function HomeListItem({
           ) : null}
         </div>
         {parts.length > 0 ? (
-          <div className="truncate">
+          // The ellipsis `truncate` adds is painted in THIS element's colour,
+          // not the last part's — so the container has to carry a tone of its
+          // own. Left to inherit, a link row's second line ends in a browser-
+          // blue "…" hanging off the end of the sentence.
+          //
+          // One part lends its own tone, so a wholly critical line truncates
+          // in critical. Several fall back to muted, like the separators: the
+          // ellipsis stands for the line rather than for whichever part it
+          // happened to cut.
+          <div
+            className={cn(
+              "truncate",
+              parts.length === 1 && parts[0].critical
+                ? "text-f1-foreground-critical"
+                : "text-f1-foreground-secondary"
+            )}
+          >
             {parts.map((part, i) => (
               <Fragment key={i}>
                 {/* The separator belongs to NEITHER neighbour, so it stays

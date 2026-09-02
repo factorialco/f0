@@ -118,6 +118,50 @@ describe("HomeListItem", () => {
     )
   })
 
+  test("gives the truncating line its OWN tone — the ellipsis is painted in the container's colour, not the last part's", () => {
+    // Left to inherit, a link row's second line ends in a browser-blue "…":
+    // the row is an anchor, and `truncate` paints its ellipsis in the colour of
+    // the element the class sits on.
+    const line = (container: HTMLElement) =>
+      container.querySelector("div.truncate:not([class*='font-medium'])")
+
+    const { container, rerender } = zeroRender(
+      <HomeListItem
+        title="Conference"
+        href="/expenses"
+        description={[
+          { text: "Submitted Monday" },
+          { text: "2 days overdue", critical: true },
+        ]}
+      />
+    )
+
+    // Several parts: muted, like the separators — the ellipsis stands for the
+    // line, not for whichever part it happened to cut.
+    expect(line(container)).toHaveClass("text-f1-foreground-secondary")
+
+    // A wholly critical line truncates in critical instead.
+    rerender(
+      <HomeListItem
+        title="Conference"
+        href="/expenses"
+        description={[{ text: "2 days overdue", critical: true }]}
+      />
+    )
+    expect(line(container)).toHaveClass("text-f1-foreground-critical")
+
+    // Same for the string form, which is the same line said another way.
+    rerender(
+      <HomeListItem
+        title="Conference"
+        href="/expenses"
+        description="2 days overdue"
+        descriptionCritical
+      />
+    )
+    expect(line(container)).toHaveClass("text-f1-foreground-critical")
+  })
+
   test("says nothing for an EMPTY parts list — [] is as silent as no description", () => {
     const { container, rerender } = zeroRender(
       <HomeListItem title="Onboarding" description={[]} />
