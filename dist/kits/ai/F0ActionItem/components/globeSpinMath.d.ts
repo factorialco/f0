@@ -1,7 +1,7 @@
 export declare const VEL_X = 60;
 export declare const VEL_Y = 40;
 export declare const SPIN_MS = 2000;
-export declare const PAUSE_MS = 500;
+export declare const PAUSE_MS = 300;
 export declare const PRECESSION_MS = 12000;
 export type Quad = {
     points: string;
@@ -18,7 +18,7 @@ export type GlobeSpinState = {
     quads: Quad[];
     grid: GridPoint[];
 };
-export declare function easeInOutCubic(t: number): number;
+export declare function spinEase(t: number): number;
 export declare const QUAD_POOL_SIZE: number;
 export declare function createGlobeSpinState(): GlobeSpinState;
 /**

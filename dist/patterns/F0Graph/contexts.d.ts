@@ -83,11 +83,16 @@ export interface F0GraphRenderConfigContextValue {
     /**
      * Height of the tag row reserved in the node rect by the layout engine.
      * `0` when tags don't affect layout (overflow mode) or when no tag types
-     * are configured. Used by the node wrapper to top-align the pill and
-     * offset the source Handle upward in compact/dot mode (where tags are
-     * hidden but the rect is still oversized).
+     * are configured. Used by the node wrapper to decide whether a node's box is
+     * taller than the node itself (see `paintedHandleStyle`).
      */
     tagRowHeight?: number;
+    /**
+     * How tall a node card paints, reservation excluded — the resolved
+     * `nodeHeight`, so the wrapper can put a connector's endpoint on the pill's
+     * own edge rather than on the box's.
+     */
+    nodeHeight?: number;
     /**
      * Height of one stacked row as reserved by the layout engine. Used by the node
      * wrapper to set `stackedHeight` on the render context, so a row always fills

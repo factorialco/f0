@@ -9,8 +9,19 @@ import { memo as m } from "react";
 import { Fragment as h, jsx as g, jsxs as _ } from "react/jsx-runtime";
 import { Handle as v, Position as y } from "@xyflow/react";
 //#region src/patterns/F0Graph/internal/ReactFlowAdapters.tsx
-var b = 3, x = (e) => e === y.Bottom || e === y.Top ? { transform: `translate(-${b}px, 0px)` } : void 0;
-function S(e) {
+var b = 6, x = b / 2, S = (e) => e === y.Bottom || e === y.Top ? { transform: `translate(-${x}px, 0px)` } : void 0, C = (e, t, n) => {
+	if (!(n <= 0)) switch (e) {
+		case y.Bottom: return {
+			top: t - b,
+			bottom: "auto",
+			transform: `translate(-${x}px, 0px)`
+		};
+		case y.Left:
+		case y.Right: return { top: t / 2 };
+		default: return;
+	}
+};
+function w(e) {
 	switch (e) {
 		case "BT": return {
 			source: y.Top,
@@ -30,46 +41,52 @@ function S(e) {
 		};
 	}
 }
-var C = 32, w = {
-	detail: (130 - C) / 2,
-	compact: (130 - C) / 2,
-	dot: (130 - C) / 2
-}, T = 130 * a, E = {
-	detail: (T - C) / 2,
-	compact: (T - C) / 2,
-	dot: (T - C) / 2
-}, D = (e) => Math.max(0, Math.floor(T - (E[e] + i[e])));
-function O({ data: e, id: t }) {
+var T = 32, E = {
+	detail: (130 - T) / 2,
+	compact: (130 - T) / 2,
+	dot: (130 - T) / 2
+}, D = 130 * a, O = {
+	detail: (D - T) / 2,
+	compact: (D - T) / 2,
+	dot: (D - T) / 2
+}, k = (e) => Math.max(0, Math.floor(D - (O[e] + i[e])));
+function A({ data: e, id: t }) {
 	let n = f(), r = s(), i = u(), a = o(), d = c(), p = l();
 	if (!n || !r || !i || !a) return null;
-	let { zoomLevel: m } = n, { expandedNodes: y } = r, { selectedNodes: b, highlightedNodes: C } = i, { toggleExpand: w, selectNode: T } = a, { graphNode: E, renderNode: D, ariaLevel: O, ariaSetSize: k, ariaPosInSet: A, visibleChildIds: j, stacked: M } = e, { source: N, target: P } = S(n.direction), F = y.has(t), I = b.has(t), L = C.has(t), R = I ? "selected" : L ? "highlighted" : "default", z = m === "dot" ? "dot" : m === "compact" ? "compact" : "detail", B = (E.childrenCount ?? 0) > 0, V = d?.focusedNodeId === t, H = d ? (e) => d.registerNodeRef(t, e) : () => {}, U = F && j && j.length > 0 ? j.map((e) => `f0-graph-node-${e}`).join(" ") : void 0, W = {
+	let { zoomLevel: m } = n, { expandedNodes: y } = r, { selectedNodes: b, highlightedNodes: x } = i, { toggleExpand: T, selectNode: E } = a, { graphNode: D, renderNode: O, ariaLevel: k, ariaSetSize: A, ariaPosInSet: j, visibleChildIds: M, stacked: N } = e, { source: P, target: F } = w(n.direction), I = y.has(t), L = b.has(t), R = x.has(t), z = L ? "selected" : R ? "highlighted" : "default", B = m === "dot" ? "dot" : m === "compact" ? "compact" : "detail", V = (D.childrenCount ?? 0) > 0, H = d?.focusedNodeId === t, U = d ? (e) => d.registerNodeRef(t, e) : () => {}, W = I && M && M.length > 0 ? M.map((e) => `f0-graph-node-${e}`).join(" ") : void 0, G = {
 		zoomLevel: m,
-		variant: z,
-		state: R,
-		expanded: F,
-		hasChildren: B,
-		childrenCount: E.childrenCount,
-		level: O,
-		tabIndex: V ? 0 : -1,
-		setSize: k,
-		posInSet: A,
+		variant: B,
+		state: z,
+		expanded: I,
+		hasChildren: V,
+		childrenCount: D.childrenCount,
+		level: k,
+		tabIndex: H ? 0 : -1,
+		setSize: A,
+		posInSet: j,
 		nodeId: t,
-		ariaOwns: U,
-		stacked: M ?? !1,
+		ariaOwns: W,
+		stacked: N ?? !1,
 		stackedHeight: p?.stackedNodeHeight,
-		onExpandToggle: () => w(t),
-		onClick: () => T(t),
-		nodeRef: H,
+		onExpandToggle: () => T(t),
+		onClick: () => E(t),
+		nodeRef: U,
 		visibleTagTypes: p?.visibleTagTypes,
 		deferredLoading: p?.deferredLoading,
-		dataLoading: p?.dataLoadingEnabled ? E.dataLoaded === !1 : void 0
+		dataLoading: p?.dataLoadingEnabled ? D.dataLoaded === !1 : void 0
+	}, K = N ? p?.stackedNodeHeight ?? 44 : p?.nodeHeight ?? 56, q = (e) => {
+		let t = C(e, K, p?.tagRowHeight ?? 0), n = N ? S(e) : void 0;
+		return t || n ? {
+			...t,
+			...n
+		} : void 0;
 	};
 	return /* @__PURE__ */ _(h, { children: [
 		/* @__PURE__ */ g(v, {
 			type: "target",
-			position: P,
+			position: F,
 			className: "!invisible",
-			style: M ? x(P) : void 0
+			style: q(F)
 		}),
 		/* @__PURE__ */ g("div", {
 			className: "pointer-events-none flex items-start justify-center",
@@ -77,30 +94,30 @@ function O({ data: e, id: t }) {
 			children: /* @__PURE__ */ g("div", {
 				className: "pointer-events-auto",
 				style: {
-					width: M ? "100%" : void 0,
-					maxWidth: M ? void 0 : "calc(100% - 20px)"
+					width: N ? "100%" : void 0,
+					maxWidth: N ? void 0 : "calc(100% - 20px)"
 				},
-				children: D(E, W)
+				children: O(D, G)
 			})
 		}),
 		/* @__PURE__ */ g(v, {
 			type: "source",
-			position: N,
+			position: P,
 			className: "!invisible",
-			style: M ? x(N) : void 0
+			style: q(P)
 		})
 	] });
 }
-O.displayName = "F0GraphNodeWrapper";
-var k = m(O, (e, t) => {
+A.displayName = "F0GraphNodeWrapper";
+var j = m(A, (e, t) => {
 	if (e.id !== t.id) return !1;
 	let n = e.data, r = t.data;
 	return n.graphNode === r.graphNode && n.ariaLevel === r.ariaLevel && n.ariaSetSize === r.ariaSetSize && n.ariaPosInSet === r.ariaPosInSet && n.stacked === r.stacked && (n.visibleChildIds?.join(",") ?? "") === (r.visibleChildIds?.join(",") ?? "") && e.positionAbsoluteX === t.positionAbsoluteX && e.positionAbsoluteY === t.positionAbsoluteY;
 });
-function A({ data: e, id: t }) {
-	let { count: r, parentId: i, parentWidth: a, loading: u } = e, d = f(), m = s(), y = o(), b = c(), x = l(), C = n();
+function M({ data: e, id: t }) {
+	let { count: r, parentId: i, parentWidth: a, loading: u } = e, d = f(), m = s(), y = o(), b = c(), x = l(), S = n();
 	if (!d || !m || !y) return null;
-	let w = m.expandedNodes.has(i), { source: T, target: E } = S(d.direction), D = b?.focusedNodeId === t, O = b ? (e) => b.registerNodeRef(t, e) : void 0, k = C.t("actions.expand");
+	let C = m.expandedNodes.has(i), { source: T, target: E } = w(d.direction), D = b?.focusedNodeId === t, O = b ? (e) => b.registerNodeRef(t, e) : void 0, k = S.t("actions.expand");
 	return /* @__PURE__ */ _(h, { children: [
 		/* @__PURE__ */ g(v, {
 			type: "target",
@@ -116,7 +133,7 @@ function A({ data: e, id: t }) {
 			children: /* @__PURE__ */ g(p, {
 				ref: O,
 				count: r,
-				expanded: w,
+				expanded: C,
 				tabIndex: D ? 0 : -1,
 				ariaLabel: k,
 				onClick: () => y.toggleExpand(i),
@@ -130,16 +147,16 @@ function A({ data: e, id: t }) {
 		})
 	] });
 }
-A.displayName = "F0GraphExpanderWrapper";
-var j = m(A, (e, t) => {
+M.displayName = "F0GraphExpanderWrapper";
+var N = m(M, (e, t) => {
 	if (e.id !== t.id) return !1;
 	let n = e.data, r = t.data;
 	return n.parentId === r.parentId && n.count === r.count && n.parentWidth === r.parentWidth && n.loading === r.loading && e.positionAbsoluteX === t.positionAbsoluteX && e.positionAbsoluteY === t.positionAbsoluteY;
 });
-function M({ data: i, id: a }) {
-	let { parentId: s, parentWidth: l, collapseLabel: u, stacked: p } = i, m = f(), y = o(), b = c(), x = d(), C = n();
+function P({ data: i, id: a }) {
+	let { parentId: s, parentWidth: l, collapseLabel: u, stacked: p } = i, m = f(), y = o(), b = c(), x = d(), S = n();
 	if (!m || !y || m.zoomLevel === "dot") return null;
-	let { source: w, target: T } = S(m.direction), E = b?.focusedNodeId === a, O = b ? (e) => b.registerNodeRef(a, e) : void 0, k = u ?? C.actions.collapse, A = E || p === !0 && x?.hoveredStackParentId === s;
+	let { source: C, target: T } = w(m.direction), E = b?.focusedNodeId === a, D = b ? (e) => b.registerNodeRef(a, e) : void 0, O = u ?? S.actions.collapse, A = E || p === !0 && x?.hoveredStackParentId === s;
 	return /* @__PURE__ */ _(h, { children: [
 		/* @__PURE__ */ g(v, {
 			type: "target",
@@ -150,19 +167,19 @@ function M({ data: i, id: a }) {
 			className: "group pointer-events-auto flex items-start justify-center pt-2",
 			style: {
 				width: l,
-				height: p ? D(m.zoomLevel) : 80
+				height: p ? k(m.zoomLevel) : 80
 			},
 			children: /* @__PURE__ */ g("div", {
 				"data-revealed": A ? "true" : "false",
 				className: e("backdrop-blur-[120px]", A ? "visible" : "invisible group-hover:visible"),
 				children: /* @__PURE__ */ g(r, {
-					ref: O,
+					ref: D,
 					variant: "neutral",
 					size: "md",
 					icon: t,
 					hideLabel: !0,
-					label: k,
-					"aria-label": k,
+					label: O,
+					"aria-label": O,
 					"aria-expanded": !0,
 					tabIndex: E ? 0 : -1,
 					onClick: () => y.toggleExpand(s)
@@ -171,24 +188,24 @@ function M({ data: i, id: a }) {
 		}),
 		/* @__PURE__ */ g(v, {
 			type: "source",
-			position: w,
+			position: C,
 			className: "!invisible"
 		})
 	] });
 }
-function N(e) {
+function F(e) {
 	return /* @__PURE__ */ g("div", {
 		"aria-hidden": !0,
 		className: "pointer-events-none h-full w-full"
 	});
 }
-N.displayName = "F0GraphStackGroupWrapper";
-var P = m(N);
-M.displayName = "F0GraphCollapserWrapper";
-var F = m(M, (e, t) => {
+F.displayName = "F0GraphStackGroupWrapper";
+var I = m(F);
+P.displayName = "F0GraphCollapserWrapper";
+var L = m(P, (e, t) => {
 	if (e.id !== t.id) return !1;
 	let n = e.data, r = t.data;
 	return n.parentId === r.parentId && n.parentWidth === r.parentWidth && n.collapseLabel === r.collapseLabel && e.positionAbsoluteX === t.positionAbsoluteX && e.positionAbsoluteY === t.positionAbsoluteY;
 });
 //#endregion
-export { w as EXPANDER_Y_OFFSET_BY_ZOOM, E as EXPANDER_Y_OFFSET_STACKED_BY_ZOOM, F as F0GraphCollapserWrapper, j as F0GraphExpanderWrapper, k as F0GraphNodeWrapper, P as F0GraphStackGroupWrapper, T as STACKED_RANK_SEP, D as collapserHoverHeightStacked };
+export { E as EXPANDER_Y_OFFSET_BY_ZOOM, O as EXPANDER_Y_OFFSET_STACKED_BY_ZOOM, L as F0GraphCollapserWrapper, N as F0GraphExpanderWrapper, j as F0GraphNodeWrapper, I as F0GraphStackGroupWrapper, D as STACKED_RANK_SEP, k as collapserHoverHeightStacked };

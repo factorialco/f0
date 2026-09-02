@@ -23,6 +23,11 @@ export type BulkActionDefinition = {
     critical?: boolean;
     description?: string;
     disabled?: boolean;
+    /**
+     * Why the action is disabled, shown on hover. Only rendered while `disabled`
+     * — an action the user can click explains itself by doing the thing.
+     */
+    disabledTooltip?: string;
 };
 /**
  * Extracts the property keys from a record type.

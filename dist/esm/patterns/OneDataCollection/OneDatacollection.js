@@ -151,6 +151,7 @@ var Be = 1500, Ve = 2e3, d = ({ source: d, visualizations: f, onSelectItems: He,
 			let r = n;
 			return {
 				...r,
+				tooltip: r.disabled ? r.disabledTooltip : void 0,
 				onClick: () => {
 					let n = Ue?.(r.id, e, t);
 					if (!(We && n !== void 0 && typeof n?.then == "function")) {

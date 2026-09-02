@@ -30,16 +30,16 @@ function v(e) {
 	});
 }
 v.displayName = "F0GraphEdgeWrapper";
-var y = d(v, (e, t) => e.id === t.id && e.data?.showDot === t.data?.showDot && e.data?.variant === t.data?.variant && e.data?.graphEdge === t.data?.graphEdge && e.sourceX === t.sourceX && e.sourceY === t.sourceY && e.targetX === t.targetX && e.targetY === t.targetY && e.sourcePosition === t.sourcePosition && e.targetPosition === t.targetPosition), Ee = {
+var Ee = d(v, (e, t) => e.id === t.id && e.data?.showDot === t.data?.showDot && e.data?.variant === t.data?.variant && e.data?.graphEdge === t.data?.graphEdge && e.sourceX === t.sourceX && e.sourceY === t.sourceY && e.targetX === t.targetX && e.targetY === t.targetY && e.sourcePosition === t.sourcePosition && e.targetPosition === t.targetPosition), De = {
 	graphNode: c,
 	expanderNode: s,
 	collapserNode: de,
 	stackGroup: l
-}, De = { graphEdge: u }, Oe = { graphEdge: y };
-function ke(ae) {
-	let { handleRef: de, nodes: s, edges: c, rootNodes: l, loadChildren: u, deferredNodes: d, onDeferredLoadComplete: g, onDeferredLoadError: v, renderNode: y, zoomPreset: ke, zoomThresholds: Ae, defaultZoom: je = 1, minZoom: Me = .05, maxZoom: b = 2, expandedNodes: Ne, defaultExpandedNodes: Pe, defaultExpandDepth: Fe, onExpandToggle: Ie, onExpandedNodesChange: Le, selectionMode: Re = "single", selectedNodes: ze, onNodeSelect: Be, onSelectedNodesChange: Ve, onPaneClick: He, focusedNode: x, initialFocusNodeId: S, centerOnNodeClick: Ue = !0, nodeClickZoom: We, viewportInset: Ge, highlightedNodes: Ke, nodeWidth: qe, nodeHeight: Je, stackedNodeHeight: C, stackedNodeGap: Ye, canvasActions: Xe, canvasFooterActions: Ze, showControls: Qe = !1, onZoomLevelChange: $e, onViewportChange: et, renderEdge: w, nodeTagTypes: T, visibleTagTypes: tt, defaultVisibleTagTypes: nt, reserveTagRow: rt, onVisibleNodesChange: it, onRenderedNodesChange: at, enableNodeWindowing: E, nodeWindowPadding: ot, loadVisibleNodeData: D, visibleDataDebounceMs: st, layoutEngine: ct, controlLabels: O, currentUserNodeId: k, onFocusUser: lt } = ae, ut = e(), A = Te(), [dt, ft] = be(null), [pt, mt] = be(null), j = h(null), M = h(null), ht = tt ?? nt ?? T ?? n, N = m(() => new Set(ht), [ht]), gt = h(y);
-	gt.current = y;
-	let _t = m(() => (e, t) => gt.current(e, t), []), vt = w ? Oe : De, P = l !== void 0 && u !== void 0, yt = h([]).current, bt = h(async () => []).current, xt = me({
+}, Oe = { graphEdge: u }, ke = { graphEdge: Ee };
+function Ae(ae) {
+	let { handleRef: de, nodes: s, edges: c, rootNodes: l, loadChildren: u, deferredNodes: d, onDeferredLoadComplete: g, onDeferredLoadError: v, renderNode: Ee, zoomPreset: Ae, zoomThresholds: je, defaultZoom: Me = 1, minZoom: Ne = .05, maxZoom: y = 2, expandedNodes: Pe, defaultExpandedNodes: Fe, defaultExpandDepth: Ie, onExpandToggle: Le, onExpandedNodesChange: Re, selectionMode: ze = "single", selectedNodes: Be, onNodeSelect: Ve, onSelectedNodesChange: He, onPaneClick: Ue, focusedNode: b, initialFocusNodeId: x, centerOnNodeClick: We = !0, nodeClickZoom: Ge, viewportInset: Ke, highlightedNodes: qe, nodeWidth: Je, nodeHeight: S, stackedNodeHeight: C, stackedNodeGap: Ye, canvasActions: Xe, canvasFooterActions: Ze, showControls: Qe = !1, onZoomLevelChange: $e, onViewportChange: et, renderEdge: w, nodeTagTypes: T, visibleTagTypes: tt, defaultVisibleTagTypes: nt, reserveTagRow: rt, onVisibleNodesChange: it, onRenderedNodesChange: at, enableNodeWindowing: E, nodeWindowPadding: ot, loadVisibleNodeData: D, visibleDataDebounceMs: st, layoutEngine: ct, controlLabels: O, currentUserNodeId: k, onFocusUser: lt } = ae, ut = e(), A = Te(), [dt, ft] = be(null), [pt, mt] = be(null), j = h(null), M = h(null), ht = tt ?? nt ?? T ?? n, N = m(() => new Set(ht), [ht]), gt = h(Ee);
+	gt.current = Ee;
+	let _t = m(() => (e, t) => gt.current(e, t), []), vt = w ? ke : Oe, P = l !== void 0 && u !== void 0, yt = h([]).current, bt = h(async () => []).current, xt = me({
 		rootNodes: P ? l : yt,
 		loadChildren: P ? u : bt
 	}), F = oe({
@@ -61,31 +61,31 @@ function ke(ae) {
 		nodeMap: L,
 		isLazyMode: P,
 		lazyTree: xt,
-		controlledExpanded: Ne,
-		defaultExpandedNodes: Pe,
-		defaultExpandDepth: Fe,
-		onExpandToggle: Ie,
-		onExpandedNodesChange: Le
+		controlledExpanded: Pe,
+		defaultExpandedNodes: Fe,
+		defaultExpandDepth: Ie,
+		onExpandToggle: Le,
+		onExpandedNodesChange: Re
 	}), jt = h(null), Mt = h(() => void 0), Nt = h([]), Pt = h("detail"), Ft = m(() => () => jt.current, []), It = m(() => (e) => Mt.current(e), []), { zoomLevel: V, viewportReady: Lt, handleViewportChange: Rt, handleZoomIn: zt, handleZoomOut: Bt, handleFitView: Vt, handleFocusUser: Ht, centerOnNode: Ut, getFitPadding: H, hasViewportInset: Wt } = pe({
-		defaultZoom: je,
-		zoomPreset: ke,
-		zoomThresholds: Ae,
+		defaultZoom: Me,
+		zoomPreset: Ae,
+		zoomThresholds: je,
 		currentUserNodeId: k,
 		onZoomLevelChange: $e,
 		onViewportChange: et,
 		nodeWindowingActive: E ?? !1,
 		getContentBounds: Ft,
 		getNodePosition: It,
-		viewportInset: Ge
+		viewportInset: Ke
 	}), Gt = (E ?? !1) && Lt, { selectedNodes: Kt, focusedNodeId: qt, setFocusedNodeId: U, focusedNodeIdRef: Jt, registerNodeRef: Yt, nodeRefsMapRef: Xt, flatVisibleOrderRef: Zt, selectNode: W, clearSelection: G } = he({
 		roots: I,
 		expandedNodes: z,
-		selectionMode: Re,
-		controlledSelected: ze,
-		onNodeSelect: Be,
-		onSelectedNodesChange: Ve,
+		selectionMode: ze,
+		controlledSelected: Be,
+		onNodeSelect: Ve,
+		onSelectedNodesChange: He,
 		canvasRef: Tt
-	}), Qt = Ke ?? t, $t = f((e, t) => {
+	}), Qt = qe ?? t, $t = f((e, t) => {
 		let n = A.getViewport();
 		A.setViewport({
 			x: n.x + e * n.zoom,
@@ -103,8 +103,8 @@ function ke(ae) {
 		nodeTagTypes: T,
 		visibleTagTypesSet: N,
 		reserveTagRow: rt,
-		nodeWidthProp: qe,
-		nodeHeightProp: Je,
+		nodeWidthProp: Je,
+		nodeHeightProp: S,
 		stackedNodeHeightProp: C,
 		stackedNodeGapProp: Ye,
 		layoutEngineProp: ct,
@@ -138,8 +138,8 @@ function ke(ae) {
 	}, [Rt, Y]), un = f(() => {
 		M.current = null, j.current !== null && (j.current = null, mt(null));
 	}, []), dn = m(() => () => {
-		G(), He?.();
-	}, [G, He]), { handleTreeKeyDown: fn, handleCanvasKeyDown: pn } = ue({
+		G(), Ue?.();
+	}, [G, Ue]), { handleTreeKeyDown: fn, handleCanvasKeyDown: pn } = ue({
 		nodeMap: L,
 		clearSelection: G,
 		toggleExpand: B,
@@ -168,12 +168,12 @@ function ke(ae) {
 			nodes: n ?? [{ id: e }],
 			duration: 300,
 			padding: H(r),
-			maxZoom: Math.min(1, b)
+			maxZoom: Math.min(1, y)
 		});
 	};
 	let Z = h(() => {});
 	Z.current = (e) => {
-		let t = Math.min(We ?? 1.5, b);
+		let t = Math.min(Ge ?? 1.5, y);
 		Ut(e, 300, t) || A.fitView({
 			nodes: [{ id: e }],
 			duration: 300,
@@ -186,29 +186,29 @@ function ke(ae) {
 		Q.current && clearTimeout(Q.current);
 	}, []);
 	let mn = f((e) => {
-		W(e), !(!Ue || !L.has(e)) && (Q.current && clearTimeout(Q.current), Q.current = setTimeout(() => Z.current(e), 100));
+		W(e), !(!We || !L.has(e)) && (Q.current && clearTimeout(Q.current), Q.current = setTimeout(() => Z.current(e), 100));
 	}, [
 		W,
-		Ue,
+		We,
 		L
 	]);
 	p(() => {
-		if (!x) return;
-		let e = x, t = setTimeout(() => X.current(e), 100);
+		if (!b) return;
+		let e = b, t = setTimeout(() => X.current(e), 100);
 		return () => clearTimeout(t);
-	}, [x]);
+	}, [b]);
 	let $ = h(null), hn = h(!1);
 	p(() => {
 		if (hn.current || q.length === 0) return;
-		if (hn.current = !0, !S) {
+		if (hn.current = !0, !x) {
 			A.fitView(Wt ? { padding: H(i) } : void 0);
 			return;
 		}
-		let e = S;
+		let e = x;
 		$.current = setTimeout(() => Z.current(e), 100);
 	}, [
 		q.length,
-		S,
+		x,
 		A
 	]), p(() => () => {
 		$.current && clearTimeout($.current);
@@ -240,6 +240,7 @@ function ke(ae) {
 		deferredLoading: Sn || void 0,
 		dataLoadingEnabled: D !== void 0 || void 0,
 		tagRowHeight: nn,
+		nodeHeight: S ?? 56,
 		stackedNodeHeight: C,
 		largeGraph: Cn
 	}), [
@@ -250,6 +251,7 @@ function ke(ae) {
 		D,
 		Cn,
 		nn,
+		S,
 		C
 	]), Tn = m(() => ({
 		focusedNodeId: qt,
@@ -314,15 +316,15 @@ function ke(ae) {
 											children: /* @__PURE__ */ _(we, {
 												nodes: en,
 												edges: tn,
-												nodeTypes: Ee,
+												nodeTypes: De,
 												edgeTypes: vt,
 												onlyRenderVisibleElements: !Gt,
-												minZoom: Me,
-												maxZoom: b,
+												minZoom: Ne,
+												maxZoom: y,
 												defaultViewport: {
 													x: 0,
 													y: 0,
-													zoom: je
+													zoom: Me
 												},
 												onViewportChange: ln,
 												onPaneClick: dn,
@@ -384,4 +386,4 @@ function ke(ae) {
 	});
 }
 //#endregion
-export { ke as F0GraphView };
+export { Ae as F0GraphView };

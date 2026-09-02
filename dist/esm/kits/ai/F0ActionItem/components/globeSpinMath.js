@@ -1,28 +1,13 @@
-var e = 2e3, t = 12e3, n = 2, r = [
+var e = 2e3, t = 12e3, n = 40, r = 1.05, i = [
 	255,
 	60,
 	0
-], i = [
+], a = [
 	160,
 	140,
 	220
-], a = {
-	x: -12,
-	y: 0,
-	z: 0
-}, o = {
-	x: -12,
-	y: 12,
-	z: 90
-}, s = {
-	20: .72,
-	28: .66,
-	32: .72,
-	60: .77,
-	80: .8,
-	120: .85
-}, c = Math.PI / 180, l = n / 8 * Math.PI, u = 4 * Math.PI;
-function d(e, t) {
+], o = 4 * Math.PI;
+function s(e, t) {
 	return [
 		e[0] * t[0] - e[1] * t[1] - e[2] * t[2] - e[3] * t[3],
 		e[0] * t[1] + e[1] * t[0] + e[2] * t[3] - e[3] * t[2],
@@ -30,16 +15,7 @@ function d(e, t) {
 		e[0] * t[3] + e[1] * t[2] - e[2] * t[1] + e[3] * t[0]
 	];
 }
-function f(e) {
-	let t = Math.sqrt(e[0] ** 2 + e[1] ** 2 + e[2] ** 2 + e[3] ** 2);
-	return [
-		e[0] / t,
-		e[1] / t,
-		e[2] / t,
-		e[3] / t
-	];
-}
-function p(e, t, n, r) {
+function c(e, t, n, r) {
 	let i = Math.sin(r / 2);
 	return [
 		Math.cos(r / 2),
@@ -48,68 +24,94 @@ function p(e, t, n, r) {
 		n * i
 	];
 }
-var m = [
+var l = [
 	0,
 	0,
 	0
 ];
-function h(e, t, n, r, i) {
+function u(e, t, n, r, i) {
 	let a = e[0], o = e[1], s = e[2], c = e[3], l = 2 * (s * r - c * n), u = 2 * (c * t - o * r), d = 2 * (o * n - s * t);
 	i[0] = t + a * l + s * d - c * u, i[1] = n + a * u + c * l - o * d, i[2] = r + a * d + o * u - s * l;
 }
-function g(e, t, n) {
-	let r = p(1, 0, 0, e * c), i = p(0, 1, 0, t * c), a = p(0, 0, 1, n * c);
-	return f(d(d(i, r), a));
+var d = .15;
+function f(e) {
+	if (e <= 0) return 0;
+	if (e >= 1) return 1;
+	let t = .85;
+	if (e <= d) return e * e / (2 * d) / t;
+	if (e >= .85) {
+		let n = 1 - e;
+		return (t - n * n / (2 * d)) / t;
+	}
+	return (e - d / 2) / t;
 }
-function _(e) {
-	return e < .5 ? 4 * e * e * e : 1 - (-2 * e + 2) ** 3 / 2;
-}
-var v = 256, y = (() => {
-	let e = Array(v);
-	for (let t = 0; t < v; t++) {
-		let n = t / 255, a = Math.round(r[0] + (i[0] - r[0]) * n), o = Math.round(r[1] + (i[1] - r[1]) * n), s = Math.round(r[2] + (i[2] - r[2]) * n);
-		e[t] = `rgb(${a},${o},${s})`;
+var p = 256, m = (() => {
+	let e = Array(p);
+	for (let t = 0; t < p; t++) {
+		let n = t / 255, r = Math.round(i[0] + (a[0] - i[0]) * n), o = Math.round(i[1] + (a[1] - i[1]) * n), s = Math.round(i[2] + (a[2] - i[2]) * n);
+		e[t] = `rgb(${r},${o},${s})`;
 	}
 	return e;
 })();
-function b(e) {
-	return y[e <= 0 ? 0 : e >= 1 ? 255 : e * 255 | 0];
+function h(e) {
+	return m[e <= 0 ? 0 : e >= 1 ? 255 : e * 255 | 0];
 }
-var x = Object.keys(s).map(Number).sort((e, t) => e - t);
-function S(e) {
-	let t = x;
-	if (e <= t[0]) return s[t[0]];
-	if (e >= t[t.length - 1]) return s[t[t.length - 1]];
-	for (let n = 0; n < t.length - 1; n++) if (e >= t[n] && e <= t[n + 1]) {
-		let r = (e - t[n]) / (t[n + 1] - t[n]);
-		return s[t[n]] + (s[t[n + 1]] - s[t[n]]) * r;
+var g = Math.sqrt(5200), _ = [
+	60 / g,
+	40 / g,
+	0
+], v = 6, y = 41, b = 287, x = (() => {
+	let e = 1.5472, t = Array(41);
+	for (let r = 0; r <= n; r++) {
+		let i = r / n * Math.PI * 2, a = Math.sin(i) ** 2, o = a < 1e-9 ? 2.4043997499999996 / (2 * e) : (e - Math.sqrt(e * e - a * (3.3938278399999997 - a - .9894280900000001))) / a;
+		t[r] = Math.acos(Math.max(-1, Math.min(1, o)));
 	}
-	return .72;
+	return t;
+})(), S = Array(41), C = Array(41);
+for (let e = 0; e <= n; e++) {
+	let t = e / n * Math.PI * 2;
+	S[e] = Math.cos(t), C[e] = Math.sin(t);
 }
-var C = Math.sqrt(5200), w = [
-	60 / C,
-	40 / C,
-	0
-], T = g(a.x, a.y, a.z), E = g(o.x, o.y, o.z), D = 6, O = 41, k = 287, A = [[
+var w = [
 	0,
-	0,
-	0,
-	0
-], [
-	0,
-	0,
-	0,
-	0
-]], j = (e, t) => e.avgZ - t.avgZ;
-function M() {
+	1,
+	2,
+	3
+].map((e) => c(0, 0, 1, e * Math.PI / 2)), T = [
+	[
+		0,
+		0,
+		0,
+		0
+	],
+	[
+		0,
+		0,
+		0,
+		0
+	],
+	[
+		0,
+		0,
+		0,
+		0
+	],
+	[
+		0,
+		0,
+		0,
+		0
+	]
+], E = (e, t) => e.avgZ - t.avgZ;
+function D() {
 	let e = Array(960);
 	for (let t = 0; t < 960; t++) e[t] = {
 		points: "",
 		color: "",
 		avgZ: Infinity
 	};
-	let t = Array(k);
-	for (let e = 0; e < k; e++) t[e] = {
+	let t = Array(b);
+	for (let e = 0; e < b; e++) t[e] = {
 		x: 0,
 		y: 0,
 		z: 0,
@@ -120,35 +122,35 @@ function M() {
 		grid: t
 	};
 }
-function N(e, t, n, r) {
-	let { quads: i, grid: a } = e, o = n * .392, s = n / 2, c = n / 2, f = l * S(n), g = t * u;
-	h(p(0, 0, 1, r * 2 * Math.PI), w[0], w[1], w[2], m);
-	let _ = p(m[0], m[1], m[2], g), v = d(_, T), y = d(_, E);
-	A[0] = v, A[1] = y;
-	let x = 0;
+function O(e, t, i, a) {
+	let { quads: d, grid: f } = e, p = i * .392, m = i / 2, g = i / 2, b = t * o;
+	u(c(0, 0, 1, a * 2 * Math.PI), _[0], _[1], _[2], l);
+	let D = c(l[0], l[1], l[2], b);
+	for (let e = 0; e < 4; e++) T[e] = s(D, w[e]);
+	let O = 0;
 	for (let e = 0; e < 4; e++) {
-		let t = A[e >> 1], n = e & 1 ? -1 : 1;
-		for (let e = 0; e <= D; e++) {
-			let r = n * (Math.PI / 2 - e / D * f), i = Math.cos(r), o = Math.sin(r), s = Math.sin(e / D * Math.PI), c = e * O;
-			for (let e = 0; e <= 40; e++) {
-				let n = e / 40 * Math.PI * 2;
-				h(t, i * Math.cos(n), o, i * Math.sin(n), m);
-				let r = a[c + e];
-				r.x = m[0], r.y = m[1], r.z = m[2], r.t = s;
+		let t = T[e];
+		for (let e = 0; e <= v; e++) {
+			let r = e / v, i = Math.sin(r * Math.PI), a = e * y;
+			for (let e = 0; e <= n; e++) {
+				let n = r * x[e], o = Math.sin(n);
+				u(t, o * S[e], Math.cos(n), o * C[e], l);
+				let s = f[a + e];
+				s.x = l[0], s.y = l[1], s.z = l[2], s.t = i;
 			}
 		}
-		for (let e = 0; e < D; e++) {
-			let t = e * O, n = (e + 1) * O;
-			for (let e = 0; e < 40; e++) {
-				let r = a[t + e], l = a[t + e + 1], u = a[n + e], d = a[n + e + 1];
-				if ((r.t + l.t + u.t + d.t) * .25 < .001) continue;
-				let f = (r.x + l.x + u.x + d.x) * .25, p = (r.y + l.y + u.y + d.y) * .25, m = (r.z + l.z + u.z + d.z) * .25, h = f * o, g = p * o, _ = r.x * o - h, v = r.y * o - g, y = Math.sqrt(_ * _ + v * v), S = y > 0 ? (y + .9) / y : 1, C = s + h + _ * S, w = c - g - v * S, T = l.x * o - h, E = l.y * o - g, D = Math.sqrt(T * T + E * E), O = D > 0 ? (D + .9) / D : 1, k = s + h + T * O, A = c - g - E * O, j = d.x * o - h, M = d.y * o - g, N = Math.sqrt(j * j + M * M), P = N > 0 ? (N + .9) / N : 1, F = s + h + j * P, I = c - g - M * P, L = u.x * o - h, R = u.y * o - g, z = Math.sqrt(L * L + R * R), B = z > 0 ? (z + .9) / z : 1, V = s + h + L * B, H = c - g - R * B, U = i[x];
-				U.points = `${C},${w} ${k},${A} ${F},${I} ${V},${H}`, U.color = b((f + 1) * .5), U.avgZ = m, x++;
+		for (let e = 0; e < v; e++) {
+			let t = e * y, i = (e + 1) * y;
+			for (let e = 0; e < n; e++) {
+				let n = f[t + e], a = f[t + e + 1], o = f[i + e], s = f[i + e + 1];
+				if ((n.t + a.t + o.t + s.t) * .25 < .001) continue;
+				let c = (n.x + a.x + o.x + s.x) * .25, l = (n.y + a.y + o.y + s.y) * .25, u = (n.z + a.z + o.z + s.z) * .25, _ = c * p, v = l * p, y = n.x * p - _, b = n.y * p - v, x = m + _ + y * r, S = g - v - b * r, C = a.x * p - _, w = a.y * p - v, T = m + _ + C * r, E = g - v - w * r, D = s.x * p - _, k = s.y * p - v, A = m + _ + D * r, j = g - v - k * r, M = o.x * p - _, N = o.y * p - v, P = m + _ + M * r, F = g - v - N * r, I = d[O];
+				I.points = `${x},${S} ${T},${E} ${A},${j} ${P},${F}`, I.color = h((c + 1) * .5), I.avgZ = u, O++;
 			}
 		}
 	}
-	for (let e = x; e < 960; e++) i[e].avgZ = Infinity;
-	return i.sort(j), x;
+	for (let e = O; e < 960; e++) d[e].avgZ = Infinity;
+	return d.sort(E), O;
 }
 //#endregion
-export { t as PRECESSION_MS, e as SPIN_MS, N as buildFrameInto, M as createGlobeSpinState, _ as easeInOutCubic };
+export { t as PRECESSION_MS, e as SPIN_MS, O as buildFrameInto, D as createGlobeSpinState, f as spinEase };

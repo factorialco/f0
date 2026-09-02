@@ -11,7 +11,7 @@ import { ItemTeaser as l } from "./ItemTeaser.js";
 import { Fragment as u, jsx as d, jsxs as f } from "react/jsx-runtime";
 //#region src/patterns/OneDataCollection/visualizations/collection/List/components/Row.tsx
 var p = ({ source: p, item: m, selectedItems: h, handleSelectItemChange: g, fields: _, itemDefinition: v }) => {
-	let y = t(), { actions: b } = y, x = (e, t) => i(e, t, "list", y), S = p.itemUrl ? p.itemUrl(m) : void 0, C = p.itemOnClick ? p.itemOnClick(m) : void 0, w = !!S || !!C, T = p.selectable ? p.selectable(m) : void 0, E = v(m), { hasMobileItemActions: D, primaryItemActions: O, dropdownItemActions: k, mobileDropdownItemActions: A, handleDropDownOpenChange: j, dropDownOpen: M } = s({
+	let y = t(), { actions: b } = y, x = (e, t) => i(e, t, "list", y), S = p.itemUrl ? p.itemUrl(m) : void 0, C = p.itemOnClick ? p.itemOnClick(m) : void 0, w = !!S || !!C, T = p.selectable ? p.selectable(m) : void 0, E = T !== void 0 && p.selectionInherited?.(m) === !0, D = T !== void 0 && (E || p.selectionDisabled?.(m) === !0), O = v(m), { hasMobileItemActions: k, primaryItemActions: A, dropdownItemActions: j, mobileDropdownItemActions: M, handleDropDownOpenChange: N, dropDownOpen: P } = s({
 		source: p,
 		item: m
 	});
@@ -26,10 +26,12 @@ var p = ({ source: p, item: m, selectedItems: h, handleSelectItemChange: g, fiel
 				className: "pointer-events-none flex flex-1 flex-row items-center gap-2",
 				children: [
 					p.selectable && T !== void 0 && /* @__PURE__ */ d("div", {
-						className: "pointer-events-auto z-10 hidden items-center justify-end md:flex",
+						className: e("pointer-events-auto z-10 hidden items-center justify-end md:flex", D && "cursor-not-allowed"),
 						children: /* @__PURE__ */ d(r, {
-							checked: h.has(T),
+							checked: E || h.has(T),
+							indeterminate: E,
 							onCheckedChange: (e) => g(m, e),
+							disabled: D,
 							title: `Select ${p.selectable(m)}`,
 							hideLabel: !0
 						})
@@ -45,9 +47,9 @@ var p = ({ source: p, item: m, selectedItems: h, handleSelectItemChange: g, fiel
 						})
 					}),
 					/* @__PURE__ */ d(l, {
-						title: E.title,
-						avatar: E.avatar,
-						description: E.description
+						title: O.title,
+						avatar: O.avatar,
+						description: O.description
 					})
 				]
 			}),
@@ -62,23 +64,25 @@ var p = ({ source: p, item: m, selectedItems: h, handleSelectItemChange: g, fiel
 				})
 			}),
 			p.itemActions && /* @__PURE__ */ f(u, { children: [/* @__PURE__ */ d(o, {
-				dropDownOpen: M,
+				dropDownOpen: P,
 				className: "pointer-events-auto hidden md:flex",
 				children: /* @__PURE__ */ d(c, {
-					primaryItemActions: O,
-					dropdownItemActions: k,
-					handleDropDownOpenChange: j
+					primaryItemActions: A,
+					dropdownItemActions: j,
+					handleDropDownOpenChange: N
 				})
-			}), D && /* @__PURE__ */ d(a, {
+			}), k && /* @__PURE__ */ d(a, {
 				className: "absolute -right-px bottom-0 top-0 z-20 items-center justify-end gap-2 py-2 pl-20 pr-3 md:hidden",
-				items: A,
-				onOpenChange: j
+				items: M,
+				onOpenChange: N
 			})] }),
 			p.selectable && T !== void 0 && /* @__PURE__ */ d("div", {
-				className: e("pointer-events-auto absolute right-3 top-3 flex h-8 w-8 items-center justify-center md:hidden", D && "right-12"),
+				className: e("pointer-events-auto absolute right-3 top-3 flex h-8 w-8 items-center justify-center md:hidden", k && "right-12"),
 				children: /* @__PURE__ */ d(r, {
-					checked: h.has(T),
+					checked: E || h.has(T),
+					indeterminate: E,
 					onCheckedChange: (e) => g(m, e),
+					disabled: D,
 					title: `Select ${p.selectable(m)}`,
 					hideLabel: !0
 				})

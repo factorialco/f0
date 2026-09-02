@@ -1,11 +1,10 @@
 import { IconType } from '../../../../components/F0Icon';
-export interface Company {
-    id: string;
-    name: string;
-    logo?: string;
-}
 export type CompanySelectorProps = {
-    companies: Company[];
+    companies: Array<{
+        id: string;
+        name: string;
+        logo?: string;
+    }>;
     selected?: string;
     onChange: (value: string) => void;
     isLoading?: boolean;

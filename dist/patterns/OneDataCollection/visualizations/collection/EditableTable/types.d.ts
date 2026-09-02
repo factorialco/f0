@@ -85,7 +85,7 @@ export type SelectCellConfig<R extends RecordType> = {
     source?: never;
     mapOptions?: never;
 } | {
-    source: Omit<DataSourceDefinition<RecordType, FiltersDefinition, SortingsDefinition, GroupingDefinition<RecordType>>, "selectable" | "grouping" | "defaultGrouping" | "currentGrouping" | "fetchChildren" | "itemsWithChildren" | "childrenCount">;
+    source: Omit<DataSourceDefinition<RecordType, FiltersDefinition, SortingsDefinition, GroupingDefinition<RecordType>>, "selectable" | "selectionDisabled" | "selectionInherited" | "disableSelectAll" | "grouping" | "defaultGrouping" | "currentGrouping" | "fetchChildren" | "itemsWithChildren" | "childrenCount">;
     mapOptions: (record: RecordType) => F0SelectItemProps<string, RecordType>;
     options?: never;
 });

@@ -7,6 +7,8 @@ type ActionType = {
     critical?: boolean;
     description?: string;
     loading?: boolean;
+    /** Shown on hover. Its reason for existing is a disabled action. */
+    tooltip?: string;
 };
 export type ActionBarGroup = {
     label?: string;

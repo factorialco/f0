@@ -8,424 +8,424 @@ import { Skeleton as s } from "../../../../../ui/skeleton.js";
 import { F0Button as c } from "../../../../../components/F0Button/F0Button.js";
 import { F0ButtonDropdown as l } from "../../../../../components/F0ButtonDropdown/F0ButtonDropdown.js";
 import "../../../../../ui/value-display/const.js";
-import { F0Checkbox as u } from "../../../../../components/F0Checkbox/F0Checkbox.js";
-import { isInfiniteScrollPagination as ee } from "../../../../../hooks/datasource/useData.js";
-import { getAnimationVariants as d, useGroups as te } from "../../../../../hooks/datasource/useGroups.js";
-import { useSelectable as ne } from "../../../../../hooks/datasource/useSelectable/useSelectable.js";
-import { GroupHeader as re } from "../../../../../ui/GroupHeader/GroupHeader.js";
-import { TableBody as ie } from "../../../../../experimental/OneTable/TableBody/index.js";
-import { TableCell as f } from "../../../../../experimental/OneTable/TableCell/index.js";
-import { TableHead as p } from "../../../../../experimental/OneTable/TableHead/index.js";
-import { TableHeader as ae } from "../../../../../experimental/OneTable/TableHeader/index.js";
-import { TableRow as m } from "../../../../../experimental/OneTable/TableRow/index.js";
-import { OneTable as oe } from "../../../../../experimental/OneTable/Table/index.js";
-import { TableFooter as se } from "../../../../../experimental/OneTable/TableFooter/index.js";
-import { useDataCollectionData as ce } from "../../../hooks/useDataCollectionData/useDataCollectionData.js";
-import { PagesPagination as le } from "../../../components/PagesPagination/PagesPagination.js";
-import { useInfiniteScrollPagination as ue } from "../../../hooks/useInfiniteScrollPagination.js";
-import { useAddRow as de } from "../EditableTable/context/AddRowContext.js";
-import { statusToChecked as fe } from "../utils.js";
-import { getColumnId as pe, useColumns as me } from "./hooks/useColums.js";
-import { groupBorderClass as he, useHeaderGroups as ge } from "./hooks/useHeaderGroups.js";
-import { useSticky as _e } from "./useSticky.js";
-import { NestedDataProvider as ve } from "./providers/NestedProvider.js";
-import { Row as ye } from "./components/Row.js";
-import { useAddedRowKeys as be } from "./hooks/useAddedRowKeys.js";
-import { useColumnCollapseAnimation as xe } from "./hooks/useColumnCollapseAnimation.js";
-import { useCreateSelectionRegistry as Se } from "./providers/SelectionRegistryProvider.js";
-import { SettingsRenderer as h } from "./settings/SettingsRenderer.js";
-import { useDataCollectionSettings as Ce } from "../../../Settings/SettingsProvider.js";
-import { Fragment as we, useEffect as Te, useMemo as g, useRef as Ee, useState as De } from "react";
-import { Fragment as _, jsx as v, jsxs as y } from "react/jsx-runtime";
-import { AnimatePresence as Oe, motion as ke } from "motion/react";
+import { F0Checkbox as ee } from "../../../../../components/F0Checkbox/F0Checkbox.js";
+import { isInfiniteScrollPagination as te } from "../../../../../hooks/datasource/useData.js";
+import { getAnimationVariants as ne, useGroups as re } from "../../../../../hooks/datasource/useGroups.js";
+import { useSelectable as ie } from "../../../../../hooks/datasource/useSelectable/useSelectable.js";
+import { GroupHeader as ae } from "../../../../../ui/GroupHeader/GroupHeader.js";
+import { TableBody as oe } from "../../../../../experimental/OneTable/TableBody/index.js";
+import { TableCell as u } from "../../../../../experimental/OneTable/TableCell/index.js";
+import { TableHead as d } from "../../../../../experimental/OneTable/TableHead/index.js";
+import { TableHeader as se } from "../../../../../experimental/OneTable/TableHeader/index.js";
+import { TableRow as f } from "../../../../../experimental/OneTable/TableRow/index.js";
+import { OneTable as p } from "../../../../../experimental/OneTable/Table/index.js";
+import { TableFooter as ce } from "../../../../../experimental/OneTable/TableFooter/index.js";
+import { useDataCollectionData as le } from "../../../hooks/useDataCollectionData/useDataCollectionData.js";
+import { PagesPagination as ue } from "../../../components/PagesPagination/PagesPagination.js";
+import { useInfiniteScrollPagination as de } from "../../../hooks/useInfiniteScrollPagination.js";
+import { useAddRow as fe } from "../EditableTable/context/AddRowContext.js";
+import { statusToChecked as pe } from "../utils.js";
+import { getColumnId as me, useColumns as he } from "./hooks/useColums.js";
+import { groupBorderClass as ge, useHeaderGroups as _e } from "./hooks/useHeaderGroups.js";
+import { useSticky as ve } from "./useSticky.js";
+import { NestedDataProvider as ye } from "./providers/NestedProvider.js";
+import { Row as be } from "./components/Row.js";
+import { useAddedRowKeys as xe } from "./hooks/useAddedRowKeys.js";
+import { useColumnCollapseAnimation as Se } from "./hooks/useColumnCollapseAnimation.js";
+import { useCreateSelectionRegistry as Ce } from "./providers/SelectionRegistryProvider.js";
+import { SettingsRenderer as m } from "./settings/SettingsRenderer.js";
+import { useDataCollectionSettings as we } from "../../../Settings/SettingsProvider.js";
+import { Fragment as Te, useEffect as Ee, useMemo as h, useRef as De, useState as Oe } from "react";
+import { Fragment as g, jsx as _, jsxs as v } from "react/jsx-runtime";
+import { AnimatePresence as ke, motion as Ae } from "motion/react";
 //#region src/patterns/OneDataCollection/visualizations/collection/Table/Table.tsx
-var Ae = (e) => e ? (Array.isArray(e) ? e : [e]).filter((e) => e !== void 0) : [], je = ({ text: e, count: t }) => {
+var je = (e) => e ? (Array.isArray(e) ? e : [e]).filter((e) => e !== void 0) : [], Me = ({ text: e, count: t }) => {
 	let n = String(t), r = e.indexOf(n);
-	if (r === -1) return /* @__PURE__ */ v("span", {
+	if (r === -1) return /* @__PURE__ */ _("span", {
 		className: "font-me text-base font-medium text-f1-foreground-secondary",
 		children: e
 	});
 	let i = e.slice(0, r), a = e.slice(r + n.length);
-	return /* @__PURE__ */ y("span", {
+	return /* @__PURE__ */ v("span", {
 		className: "text-base font-medium text-f1-foreground-secondary",
 		children: [
 			i,
-			/* @__PURE__ */ v("span", {
+			/* @__PURE__ */ _("span", {
 				className: "font-semibold text-f1-foreground",
 				children: n
 			}),
 			a
 		]
 	});
-}, b = ({ columns: h, source: b, frozenColumns: Me = 0, defaultExpanded: Ne, onSelectItems: Pe, onLoadData: Fe, onLoadError: Ie, allowColumnHiding: Le, allowColumnReordering: Re, lockedColumnIds: x, onLockedColumnIdsChange: ze, referenceRowType: S, boldRootRows: Be, headerGroups: Ve, onHeaderGroupCollapsedChange: He, bordered: Ue, rowWrapper: C, cellRenderer: w, showItemActions: T, visualizationSettings: We, fromVisualization: E = "table", summaryPlaceholder: Ge = "-" }) => {
-	let { t: D, ...O } = o(), k = de(), [A] = De(() => ke.create(ye)), { settings: Ke } = Ce(), qe = x !== void 0 || !!ze, { columns: Je, stickyColumnIds: j } = me(h, Me, We ?? Ke.visualization?.table, Re, Le, x, qe), Ye = g(() => new Set(j), [j]), { columns: M, headerGroups: N, toggleHeaderGroup: Xe, collapsingCellClasses: P, collapseTransitions: Ze, settleHeaderGroup: Qe } = ge(Je, {
-		headerGroups: Ve,
-		onCollapsedChange: He,
-		preservedColumnIds: Ye
-	}), F = Ee(null);
-	xe(F, Ze, Qe);
-	let { data: I, paginationInfo: L, setPage: $e, isInitialLoading: et, isLoadingMore: tt, loadMore: nt, summaries: R, committedQuery: rt } = ce(b, { onError: (e) => {
-		Ie(e);
-	} }), { currentSortings: z, setCurrentSortings: it, isLoading: at } = b, B = T !== !1 && !!b.itemActions, V = E === "editableTable", ot = V ? 1 : 2, st = g(() => T === !1 ? {
-		...b,
+}, y = ({ columns: m, source: y, frozenColumns: Ne = 0, defaultExpanded: Pe, onSelectItems: Fe, onLoadData: Ie, onLoadError: Le, allowColumnHiding: Re, allowColumnReordering: ze, lockedColumnIds: b, onLockedColumnIdsChange: Be, referenceRowType: x, boldRootRows: Ve, headerGroups: He, onHeaderGroupCollapsedChange: Ue, bordered: We, rowWrapper: S, cellRenderer: C, showItemActions: w, visualizationSettings: Ge, fromVisualization: T = "table", summaryPlaceholder: Ke = "-" }) => {
+	let { t: E, ...D } = o(), O = fe(), [k] = Oe(() => Ae.create(be)), { settings: qe } = we(), Je = b !== void 0 || !!Be, { columns: Ye, stickyColumnIds: A } = he(m, Ne, Ge ?? qe.visualization?.table, ze, Re, b, Je), Xe = h(() => new Set(A), [A]), { columns: j, headerGroups: M, toggleHeaderGroup: Ze, collapsingCellClasses: N, collapseTransitions: Qe, settleHeaderGroup: $e } = _e(Ye, {
+		headerGroups: He,
+		onCollapsedChange: Ue,
+		preservedColumnIds: Xe
+	}), et = De(null);
+	Se(et, Qe, $e);
+	let { data: P, paginationInfo: F, setPage: tt, isInitialLoading: nt, isLoadingMore: rt, loadMore: it, summaries: I, committedQuery: at } = le(y, { onError: (e) => {
+		Le(e);
+	} }), { currentSortings: L, setCurrentSortings: ot, isLoading: st } = y, R = w !== !1 && !!y.itemActions, z = T === "editableTable", ct = z ? 1 : 2, lt = h(() => w === !1 ? {
+		...y,
 		itemActions: void 0
-	} : b, [b, T]), { loadingIndicatorRef: ct } = ue(L, at, tt, nt);
-	Te(() => {
-		Fe({
-			totalItems: L?.total || I.records.length,
-			filters: b.currentFilters,
-			search: b.currentSearch,
-			isInitialLoading: et,
-			data: I.records
+	} : y, [y, w]), { loadingIndicatorRef: ut } = de(F, st, rt, it);
+	Ee(() => {
+		Ie({
+			totalItems: F?.total || P.records.length,
+			filters: y.currentFilters,
+			search: y.currentSearch,
+			isInitialLoading: nt,
+			data: P.records
 		});
-	}, [L?.total, I.records]);
-	let H = j.length, U = (e, t) => "id" in e && e.id !== void 0 && e.id !== null ? `id:${String(e.id)}` : `index:${String(t)}`, lt = I?.type === "flat" ? I.records.map((e, t) => `row-${U(e, t)}`) : [], ut = be(lt, rt), W = Se(), { selectedItems: G, allSelectedStatus: K, groupAllSelectedStatus: dt, handleSelectItemChange: q, handleSelectAll: ft, handleSelectAllItems: pt, handleSelectGroupChange: mt } = ne({
-		data: I,
-		paginationInfo: L,
-		source: b,
-		onSelectItems: Pe,
+	}, [F?.total, P.records]);
+	let B = A.length, V = (e, t) => "id" in e && e.id !== void 0 && e.id !== null ? `id:${String(e.id)}` : `index:${String(t)}`, dt = P?.type === "flat" ? P.records.map((e, t) => `row-${V(e, t)}`) : [], ft = xe(dt, at), H = Ce(), { selectedItems: U, allSelectedStatus: W, groupAllSelectedStatus: pt, handleSelectItemChange: G, handleSelectAll: mt, handleSelectAllItems: ht, handleSelectGroupChange: gt } = ie({
+		data: P,
+		paginationInfo: F,
+		source: y,
+		onSelectItems: Fe,
 		selectionMode: "multi",
-		selectedState: b.defaultSelectedItems,
-		getRenderedSelectableEntries: W.getEntries,
-		renderedSelectableCount: W.ids.length
-	}), J = g(() => !R || !b.summaries ? null : {
-		data: R,
+		selectedState: y.defaultSelectedItems,
+		getRenderedSelectableEntries: H.getEntries,
+		renderedSelectableCount: H.ids.length
+	}), K = h(() => !I || !y.summaries ? null : {
+		data: I,
 		sticky: !0,
-		label: b.summaries?.label
-	}, [R, b.summaries]), ht = (e, t, n) => {
+		label: y.summaries?.label
+	}, [I, y.summaries]), _t = (e, t, n) => {
 		if (!(!e || !t)) return n === null ? "none" : n.field === e ? n.order : "none";
-	}, gt = (e) => e == null || e === "", _t = (e) => e ?? Ge, vt = (e) => {
-		it(() => !z || z.field !== e ? {
+	}, vt = (e) => e == null || e === "", yt = (e) => e ?? Ke, bt = (e) => {
+		ot(() => !L || L.field !== e ? {
 			field: e,
 			order: "asc"
-		} : z.order === "asc" ? {
+		} : L.order === "asc" ? {
 			field: e,
 			order: "desc"
 		} : null);
-	}, Y = b.grouping?.collapsible, yt = b.grouping?.defaultOpenGroups, { openGroups: bt, setGroupOpen: xt } = te(I?.type === "grouped" ? I.groups : [], yt), St = M.length + +!!B + +!!b.selectable, { getStickyPosition: X, checkColumnWidth: Z } = _e(H, M, !!b.selectable), Ct = I?.records.some((e) => b.itemsWithChildren?.(e));
-	if (et) return /* @__PURE__ */ v(oe.Skeleton, { columns: St });
-	b.sortings || M.forEach((e) => {
+	}, q = y.grouping?.collapsible, xt = y.grouping?.defaultOpenGroups, { openGroups: St, setGroupOpen: Ct } = re(P?.type === "grouped" ? P.groups : [], xt), wt = j.length + +!!R + +!!y.selectable, { getStickyPosition: J, checkColumnWidth: Y } = ve(B, j, !!y.selectable), Tt = P?.records.some((e) => y.itemsWithChildren?.(e));
+	if (nt) return /* @__PURE__ */ _(p.Skeleton, { columns: wt });
+	y.sortings || j.forEach((e) => {
 		e.sorting && console.warn("Sorting is defined on a column but no sortings are provided in the data source");
 	});
-	let wt = K.selectedCount > 0 || K.checked, Q = W.ids.length > 0 ? W.ids : (I?.records ?? []).map((e) => b.selectable?.(e)).filter((e) => e !== void 0), Tt = Q.length > 0 && Q.every((e) => G.has(e)), $ = Math.max(L?.total ?? 0, Q.length), Et = K.checked && !K.indeterminate || Tt, Dt = !!b.allPagesSelection && (!K.checked || K.indeterminate) && L?.total !== void 0 && $ > K.selectedCount, Ot = M.length + (B ? ot : 0), kt = K.selectedCount === 1 ? O.status.selected.singular : O.status.selected.plural;
-	return /* @__PURE__ */ v("div", {
+	let Et = W.selectedCount > 0 || W.checked, X = H.ids.length > 0 ? H.ids : (P?.records ?? []).filter((e) => !y.selectionDisabled?.(e)).map((e) => y.selectable?.(e)).filter((e) => e !== void 0), Z = y.disableSelectAll ?? !1, Dt = X.length > 0 && X.every((e) => U.has(e)), Q = Math.max(F?.total ?? 0, X.length), $ = W.checked && !W.indeterminate || Dt, Ot = !Z && !!y.allPagesSelection && (!W.checked || W.indeterminate) && F?.total !== void 0 && Q > W.selectedCount, kt = j.length + (R ? ct : 0), At = W.selectedCount === 1 ? D.status.selected.singular : D.status.selected.plural;
+	return /* @__PURE__ */ _("div", {
 		className: "flex h-full min-h-0 flex-col gap-4",
-		children: /* @__PURE__ */ y(ve, {
-			defaultExpanded: Ne,
-			currentFilters: b.currentFilters,
-			currentSortings: b.currentSortings,
-			currentNavigationFilters: b.currentNavigationFilters,
-			children: [/* @__PURE__ */ v("div", {
-				ref: F,
-				className: e("min-h-0", Ue && "overflow-hidden rounded-lg border border-solid border-f1-border-secondary [&_thead::before]:!bg-transparent [&_thead_th>div:first-child]:!bg-transparent [&_tbody>tr:last-child::after]:!bg-transparent"),
-				children: /* @__PURE__ */ y(oe, {
-					loading: at,
+		children: /* @__PURE__ */ v(ye, {
+			defaultExpanded: Pe,
+			currentFilters: y.currentFilters,
+			currentSortings: y.currentSortings,
+			currentNavigationFilters: y.currentNavigationFilters,
+			children: [/* @__PURE__ */ _("div", {
+				ref: et,
+				className: e("min-h-0", We && "overflow-hidden rounded-lg border border-solid border-f1-border-secondary [&_thead::before]:!bg-transparent [&_thead_th>div:first-child]:!bg-transparent [&_tbody>tr:last-child::after]:!bg-transparent"),
+				children: /* @__PURE__ */ v(p, {
+					loading: st,
 					children: [
-						/* @__PURE__ */ y(ae, {
+						/* @__PURE__ */ v(se, {
 							sticky: !0,
 							children: [
-								N ? /* @__PURE__ */ y(m, { children: [
-									b.selectable && /* @__PURE__ */ v(p, {
+								M ? /* @__PURE__ */ v(f, { children: [
+									y.selectable && /* @__PURE__ */ _(d, {
 										align: "left",
 										sticky: { left: 0 },
-										width: Z,
+										width: Y,
 										className: e("border-0 border-r border-solid border-f1-border-secondary", "hover:after:bg-transparent"),
-										children: /* @__PURE__ */ v("div", { className: "ml-3.5 flex w-full items-center justify-start" })
+										children: /* @__PURE__ */ _("div", { className: "ml-3.5 flex w-full items-center justify-start" })
 									}),
-									N.map((r, o) => {
-										let s = r.type === "group" && r.collapsible, c = e(he, !s && "hover:after:bg-transparent"), l = r.columnIndices.every((e) => M[e].align === "right") ? "right" : "left";
-										return r.type === "group" ? /* @__PURE__ */ v(p, {
+									M.map((r, o) => {
+										let s = r.type === "group" && r.collapsible, c = e(ge, !s && "hover:after:bg-transparent"), l = r.columnIndices.every((e) => j[e].align === "right") ? "right" : "left";
+										return r.type === "group" ? /* @__PURE__ */ _(d, {
 											align: l,
 											colSpan: r.colSpan,
 											className: c,
-											highlighted: r.columnIndices.some((e) => M[e].highlighted),
-											onClick: r.collapsible ? () => Xe(r.id) : void 0,
-											children: r.collapsible ? /* @__PURE__ */ y("button", {
+											highlighted: r.columnIndices.some((e) => j[e].highlighted),
+											onClick: r.collapsible ? () => Ze(r.id) : void 0,
+											children: r.collapsible ? /* @__PURE__ */ v("button", {
 												type: "button",
 												"aria-expanded": !r.collapsed,
 												className: e("flex max-w-full items-center gap-1 rounded-xs font-medium text-f1-foreground-secondary", l === "right" && "flex-row-reverse", t()),
-												children: [/* @__PURE__ */ v("span", {
+												children: [/* @__PURE__ */ _("span", {
 													className: "truncate",
 													children: r.label
-												}), /* @__PURE__ */ v(n, {
+												}), /* @__PURE__ */ _(n, {
 													"aria-hidden": "true",
 													size: "sm",
 													icon: r.collapsed ? i : a
 												})]
 											}) : r.label
-										}, `header-group-${r.id}-${o}`) : /* @__PURE__ */ v(p, {
+										}, `header-group-${r.id}-${o}`) : /* @__PURE__ */ _(d, {
 											align: l,
 											className: c,
-											width: M[r.columnIndices[0]].width,
-											minWidth: M[r.columnIndices[0]].minWidth,
-											highlighted: !!M[r.columnIndices[0]].highlighted,
-											sticky: X(r.columnIndices[0]),
-											children: /* @__PURE__ */ v("span", {})
+											width: j[r.columnIndices[0]].width,
+											minWidth: j[r.columnIndices[0]].minWidth,
+											highlighted: !!j[r.columnIndices[0]].highlighted,
+											sticky: J(r.columnIndices[0]),
+											children: /* @__PURE__ */ _("span", {})
 										}, `header-ungrouped-${r.columnIndices[0]}`);
 									}),
-									B && (V ? /* @__PURE__ */ v(p, {
+									R && (z ? /* @__PURE__ */ _(d, {
 										width: "fit",
 										sticky: { right: 0 },
-										children: /* @__PURE__ */ v("span", {
+										children: /* @__PURE__ */ _("span", {
 											className: "sr-only",
-											children: O.collections.actions.actions
+											children: D.collections.actions.actions
 										})
-									}, "actions") : /* @__PURE__ */ y(_, { children: [/* @__PURE__ */ v("th", { className: "hidden md:table-cell" }), /* @__PURE__ */ v(p, {
+									}, "actions") : /* @__PURE__ */ v(g, { children: [/* @__PURE__ */ _("th", { className: "hidden md:table-cell" }), /* @__PURE__ */ _(d, {
 										hidden: !0,
 										width: 68,
 										sticky: { right: 0 },
 										className: "table-cell md:hidden",
-										children: /* @__PURE__ */ v("span", {})
+										children: /* @__PURE__ */ _("span", {})
 									}, "actions")] }))
 								] }) : null,
-								/* @__PURE__ */ y(m, { children: [
-									b.selectable && /* @__PURE__ */ v(p, {
-										width: Z,
+								/* @__PURE__ */ v(f, { children: [
+									y.selectable && /* @__PURE__ */ _(d, {
+										width: Y,
 										sticky: { left: 0 },
 										align: "left",
-										className: N ? e("[&>div:first-child]:hidden", "border-0 border-r border-solid border-f1-border-secondary") : void 0,
-										children: /* @__PURE__ */ v("div", {
+										className: M ? e("[&>div:first-child]:hidden", "border-0 border-r border-solid border-f1-border-secondary") : void 0,
+										children: !Z && /* @__PURE__ */ _("div", {
 											className: "ml-3.5 flex w-full items-center justify-start",
-											children: /* @__PURE__ */ v(u, {
-												checked: Et,
-												indeterminate: wt && !Et,
-												onCheckedChange: ft,
-												title: O.actions.selectAll,
+											children: /* @__PURE__ */ _(ee, {
+												checked: $,
+												indeterminate: Et && !$,
+												onCheckedChange: mt,
+												title: D.actions.selectAll,
 												hideLabel: !0,
-												disabled: I?.records.length === 0
+												disabled: P?.records.length === 0
 											})
 										})
 									}),
-									M.map(({ sorting: t, label: n, ...r }, i) => {
-										let a = N?.find((e) => e.type === "group" && e.columnIndices.includes(i)), o = !!N && (!a || a.columnIndices[a.columnIndices.length - 1] === i);
-										return /* @__PURE__ */ v(p, {
-											sortState: ht(t, b.sortings, z),
+									j.map(({ sorting: t, label: n, ...r }, i) => {
+										let a = M?.find((e) => e.type === "group" && e.columnIndices.includes(i)), o = !!M && (!a || a.columnIndices[a.columnIndices.length - 1] === i);
+										return /* @__PURE__ */ _(d, {
+											sortState: _t(t, y.sortings, L),
 											width: r.width,
 											align: r.align,
-											sticky: X(i),
+											sticky: J(i),
 											...r,
 											hidden: !1,
-											className: e(N && "[&>div:first-child]:hidden", o && "border-0 border-r border-solid border-f1-border-secondary", E === "editableTable" && (i !== M.length - 1 || B) && "border-0 border-r-[1px] border-solid border-f1-border-secondary", P.get(pe({
+											className: e(M && "[&>div:first-child]:hidden", o && "border-0 border-r border-solid border-f1-border-secondary", T === "editableTable" && (i !== j.length - 1 || R) && "border-0 border-r-[1px] border-solid border-f1-border-secondary", N.get(me({
 												id: r.id,
 												label: n
 											}))) || void 0,
 											onSortClick: t ? () => {
-												t && vt(t);
+												t && bt(t);
 											} : void 0,
 											children: n
 										}, `table-head-${i}`);
 									}),
-									B && (V ? /* @__PURE__ */ v(p, {
+									R && (z ? /* @__PURE__ */ _(d, {
 										width: "fit",
 										sticky: { right: 0 },
-										children: /* @__PURE__ */ v("span", {
+										children: /* @__PURE__ */ _("span", {
 											className: "sr-only",
-											children: O.collections.actions.actions
+											children: D.collections.actions.actions
 										})
-									}, "actions") : /* @__PURE__ */ y(_, { children: [/* @__PURE__ */ v("th", { className: "hidden md:table-cell" }), /* @__PURE__ */ v(p, {
+									}, "actions") : /* @__PURE__ */ v(g, { children: [/* @__PURE__ */ _("th", { className: "hidden md:table-cell" }), /* @__PURE__ */ _(d, {
 										width: 68,
 										hidden: !0,
 										sticky: { right: 0 },
 										className: "table-cell md:hidden",
-										children: O.collections.actions.actions
+										children: D.collections.actions.actions
 									}, "actions")] }))
 								] }),
-								wt && b.selectable && !!b.allPagesSelection && /* @__PURE__ */ v(m, { children: /* @__PURE__ */ v("th", {
-									colSpan: 1 + Ot,
+								Et && y.selectable && !!y.allPagesSelection && /* @__PURE__ */ _(f, { children: /* @__PURE__ */ _("th", {
+									colSpan: 1 + kt,
 									className: "h-11 border-0 border-t border-solid border-f1-border-secondary bg-f1-background-secondary px-5",
-									children: /* @__PURE__ */ y("div", {
+									children: /* @__PURE__ */ v("div", {
 										className: "flex items-center gap-3",
-										children: [/* @__PURE__ */ v(je, {
-											text: K.checked && !K.indeterminate ? D("status.selected.allItemsSelected", { total: $ }) : Tt ? D("status.selected.allOnPage", { count: K.selectedCount }) : `${K.selectedCount} ${kt}`,
-											count: K.checked && !K.indeterminate ? $ : K.selectedCount
-										}), Dt && /* @__PURE__ */ v(c, {
+										children: [/* @__PURE__ */ _(Me, {
+											text: W.checked && !W.indeterminate ? E("status.selected.allItemsSelected", { total: Q }) : Dt ? E("status.selected.allOnPage", { count: W.selectedCount }) : `${W.selectedCount} ${At}`,
+											count: W.checked && !W.indeterminate ? Q : W.selectedCount
+										}), Ot && /* @__PURE__ */ _(c, {
 											variant: "outline",
-											label: D("status.selected.selectAllItems", { total: $ }),
-											onClick: () => pt(!0),
+											label: E("status.selected.selectAllItems", { total: Q }),
+											onClick: () => ht(!0),
 											size: "sm"
 										})]
 									})
 								}) })
 							]
 						}),
-						/* @__PURE__ */ y(ie, { children: [
-							I?.type === "grouped" && I.groups.map((e, t) => {
+						/* @__PURE__ */ v(oe, { children: [
+							P?.type === "grouped" && P.groups.map((e, t) => {
 								let n = e.itemCount;
-								return /* @__PURE__ */ y(we, { children: [/* @__PURE__ */ y(m, {
+								return /* @__PURE__ */ v(Te, { children: [/* @__PURE__ */ v(f, {
 									sticky: !0,
 									children: [
-										b.selectable && /* @__PURE__ */ v(f, {
-											width: Z,
+										y.selectable && /* @__PURE__ */ _(u, {
+											width: Y,
 											sticky: { left: 0 },
-											children: /* @__PURE__ */ v("div", {
+											children: /* @__PURE__ */ _("div", {
 												className: "pointer-events-auto ml-1.5 flex items-center justify-start",
-												children: /* @__PURE__ */ v(u, {
-													checked: !!fe(dt[e.key]),
-													indeterminate: fe(dt[e.key]) === "indeterminate",
-													title: O.actions.selectAll,
+												children: !Z && /* @__PURE__ */ _(ee, {
+													checked: !!pe(pt[e.key]),
+													indeterminate: pe(pt[e.key]) === "indeterminate",
+													title: D.actions.selectAll,
 													hideLabel: !0,
-													onCheckedChange: (t) => mt(e, t)
+													onCheckedChange: (t) => gt(e, t)
 												})
 											})
 										}),
-										/* @__PURE__ */ v(f, {
-											sticky: { left: b.selectable ? Z : 0 },
-											colSpan: H || 1,
-											children: /* @__PURE__ */ v(re, {
+										/* @__PURE__ */ _(u, {
+											sticky: { left: y.selectable ? Y : 0 },
+											colSpan: B || 1,
+											children: /* @__PURE__ */ _(ae, {
 												selectable: !1,
-												showOpenChange: Y,
+												showOpenChange: q,
 												label: e.label,
 												itemCount: n,
-												open: bt[e.key],
-												onOpenChange: (t) => xt(e.key, t)
+												open: St[e.key],
+												onOpenChange: (t) => Ct(e.key, t)
 											})
 										}),
-										M.length - (H || 1) > 0 && /* @__PURE__ */ v(f, {
-											colSpan: M.length - (H || 1),
+										j.length - (B || 1) > 0 && /* @__PURE__ */ _(u, {
+											colSpan: j.length - (B || 1),
 											children: "\xA0"
 										})
 									]
-								}, `group-header-${e.key}`), /* @__PURE__ */ v(Oe, { children: A && (!Y || bt[e.key]) && e.records.map((e, n) => {
-									let r = `row-${t}-${U(e, n)}`, i = /* @__PURE__ */ v(A, {
-										variants: d(),
-										initial: Y ? "hidden" : "visible",
+								}, `group-header-${e.key}`), /* @__PURE__ */ _(ke, { children: k && (!q || St[e.key]) && e.records.map((e, n) => {
+									let r = `row-${t}-${V(e, n)}`, i = /* @__PURE__ */ _(k, {
+										variants: ne(),
+										initial: q ? "hidden" : "visible",
 										animate: "visible",
 										exit: "hidden",
 										custom: n,
 										layout: !0,
-										source: st,
+										source: lt,
 										item: e,
 										index: n,
 										groupIndex: t,
-										onItemCheckedChange: q,
-										onCheckedChange: (t) => q(e, t),
-										selectedItems: G,
-										columns: M,
-										frozenColumnsLeft: H,
-										checkColumnWidth: Z,
-										referenceRowType: S,
-										rowWrapper: C,
-										cellRenderer: w,
-										headerGroups: N,
-										collapsingCellClasses: P,
-										fromVisualization: E,
-										registerSelectable: W.register,
-										unregisterSelectable: W.unregister
+										onItemCheckedChange: G,
+										onCheckedChange: (t) => G(e, t),
+										selectedItems: U,
+										columns: j,
+										frozenColumnsLeft: B,
+										checkColumnWidth: Y,
+										referenceRowType: x,
+										rowWrapper: S,
+										cellRenderer: C,
+										headerGroups: M,
+										collapsingCellClasses: N,
+										fromVisualization: T,
+										registerSelectable: H.register,
+										unregisterSelectable: H.unregister
 									}, r);
-									return C ? /* @__PURE__ */ v(C, {
+									return S ? /* @__PURE__ */ _(S, {
 										item: e,
 										index: n,
 										children: i
 									}, r) : i;
 								}) }, `group-animate-${t}`)] }, `group-${e.key}`);
 							}),
-							I?.type === "flat" && I.records.map((e, t) => {
-								let n = `row-${U(e, t)}`, r = ut.has(n), i = /* @__PURE__ */ v(A, {
-									variants: d(),
+							P?.type === "flat" && P.records.map((e, t) => {
+								let n = `row-${V(e, t)}`, r = ft.has(n), i = /* @__PURE__ */ _(k, {
+									variants: ne(),
 									initial: r ? "hidden" : !1,
 									animate: "visible",
 									custom: t,
 									layout: !0,
 									isNew: r,
 									groupIndex: 0,
-									source: st,
+									source: lt,
 									item: e,
 									index: t,
-									onItemCheckedChange: q,
-									onCheckedChange: (t) => q(e, t),
-									selectedItems: G,
-									columns: M,
-									frozenColumnsLeft: H,
-									checkColumnWidth: Z,
-									tableWithChildren: Ct,
-									referenceRowType: S,
-									boldRootRows: Be,
-									rowWrapper: C,
-									cellRenderer: w,
-									fromVisualization: E,
-									headerGroups: N,
-									collapsingCellClasses: P,
-									registerSelectable: W.register,
-									unregisterSelectable: W.unregister
+									onItemCheckedChange: G,
+									onCheckedChange: (t) => G(e, t),
+									selectedItems: U,
+									columns: j,
+									frozenColumnsLeft: B,
+									checkColumnWidth: Y,
+									tableWithChildren: Tt,
+									referenceRowType: x,
+									boldRootRows: Ve,
+									rowWrapper: S,
+									cellRenderer: C,
+									fromVisualization: T,
+									headerGroups: M,
+									collapsingCellClasses: N,
+									registerSelectable: H.register,
+									unregisterSelectable: H.unregister
 								}, n);
-								return C ? /* @__PURE__ */ v(C, {
+								return S ? /* @__PURE__ */ _(S, {
 									item: e,
 									index: t,
 									children: i
 								}, n) : i;
 							}),
-							L?.type === "infinite-scroll" && tt && Array.from({ length: 5 }).map((e, t) => /* @__PURE__ */ v(m, { children: Array.from({ length: St }).map((e, n) => /* @__PURE__ */ v(f, { children: /* @__PURE__ */ v(s, { className: "h-4 w-full" }) }, `skeleton-cell-${t}-${n}`)) }, `skeleton-row-${t}`)),
-							ee(L) && L.hasMore && /* @__PURE__ */ v("tr", { children: /* @__PURE__ */ v("td", {
-								colSpan: M.length + +!!b.selectable + +!!B,
-								ref: ct,
+							F?.type === "infinite-scroll" && rt && Array.from({ length: 5 }).map((e, t) => /* @__PURE__ */ _(f, { children: Array.from({ length: wt }).map((e, n) => /* @__PURE__ */ _(u, { children: /* @__PURE__ */ _(s, { className: "h-4 w-full" }) }, `skeleton-cell-${t}-${n}`)) }, `skeleton-row-${t}`)),
+							te(F) && F.hasMore && /* @__PURE__ */ _("tr", { children: /* @__PURE__ */ _("td", {
+								colSpan: j.length + +!!y.selectable + +!!R,
+								ref: ut,
 								className: "h-10",
 								"aria-hidden": "true"
 							}) })
 						] }),
 						(() => {
-							let t = Ae(k?.addRowActions?.());
-							return !J && t.length === 0 ? null : /* @__PURE__ */ y(se, { children: [J && /* @__PURE__ */ y(m, {
-								className: e(J.sticky && "sticky bottom-0 z-30 bg-f1-background shadow-[0_-1px_0_0_var(--f1-border-secondary)] hover:bg-f1-background", "font-medium"),
+							let t = je(O?.addRowActions?.());
+							return !K && t.length === 0 ? null : /* @__PURE__ */ v(ce, { children: [K && /* @__PURE__ */ v(f, {
+								className: e(K.sticky && "sticky bottom-0 z-30 bg-f1-background shadow-[0_-1px_0_0_var(--f1-border-secondary)] hover:bg-f1-background", "font-medium"),
 								children: [
-									b.selectable && /* @__PURE__ */ v(f, {
-										width: Z,
+									y.selectable && /* @__PURE__ */ _(u, {
+										width: Y,
 										sticky: { left: 0 },
-										children: J.label && /* @__PURE__ */ v("div", {
+										children: K.label && /* @__PURE__ */ _("div", {
 											className: "font-medium text-f1-foreground-secondary",
-											children: J.label
+											children: K.label
 										})
 									}),
-									M.map((t, n) => /* @__PURE__ */ v(f, {
+									j.map((t, n) => /* @__PURE__ */ _(u, {
 										firstCell: n === 0,
 										width: t.width,
-										sticky: X(n),
+										sticky: J(n),
 										highlighted: !!t.highlighted,
-										className: e(V && (n !== M.length - 1 || B) && "border-0 border-r-[1px] border-solid border-f1-border-secondary", P.get(pe(t))),
-										children: n === 0 && !b.selectable && J.label ? /* @__PURE__ */ v("div", {
+										className: e(z && (n !== j.length - 1 || R) && "border-0 border-r-[1px] border-solid border-f1-border-secondary", N.get(me(t))),
+										children: n === 0 && !y.selectable && K.label ? /* @__PURE__ */ _("div", {
 											className: "font-medium text-f1-foreground-secondary",
-											children: J.label
-										}) : /* @__PURE__ */ v("div", {
+											children: K.label
+										}) : /* @__PURE__ */ _("div", {
 											className: e(t.align === "right" ? "justify-end" : "", "flex", "min-h-6 items-center"),
 											children: (() => {
-												let e = _t(t.summaryPlaceholder);
-												if (t.summary && b.summaries && b.summaries[t.summary]?.type === "sum") {
-													let n = J.data[t.summary];
-													return gt(n) ? /* @__PURE__ */ v("span", {
+												let e = yt(t.summaryPlaceholder);
+												if (t.summary && y.summaries && y.summaries[t.summary]?.type === "sum") {
+													let n = K.data[t.summary];
+													return vt(n) ? /* @__PURE__ */ _("span", {
 														className: "text-f1-foreground-secondary",
 														children: e
-													}) : /* @__PURE__ */ y("div", {
+													}) : /* @__PURE__ */ v("div", {
 														className: "flex gap-1",
-														children: [/* @__PURE__ */ v("span", {
+														children: [/* @__PURE__ */ _("span", {
 															className: "text-f1-foreground-secondary",
-															children: O.collections.summaries.types.sum
+															children: D.collections.summaries.types.sum
 														}), `${n}`]
 													});
 												}
-												return /* @__PURE__ */ v("span", {
+												return /* @__PURE__ */ _("span", {
 													className: "text-f1-foreground-secondary",
 													children: e
 												});
 											})()
 										})
 									}, `summary-${String(t.label)}`)),
-									B && (V ? /* @__PURE__ */ v(f, {
+									R && (z ? /* @__PURE__ */ _(u, {
 										sticky: { right: 0 },
 										children: ""
-									}, "summary-actions") : /* @__PURE__ */ y(_, { children: [/* @__PURE__ */ v("th", { className: "hidden md:table-cell" }), /* @__PURE__ */ v(f, {
+									}, "summary-actions") : /* @__PURE__ */ v(g, { children: [/* @__PURE__ */ _("th", { className: "hidden md:table-cell" }), /* @__PURE__ */ _(u, {
 										width: 68,
 										sticky: { right: 0 },
 										className: "table-cell md:hidden",
 										children: ""
 									}, "summary-actions")] }))
 								]
-							}), t.length > 0 && /* @__PURE__ */ v(m, { children: /* @__PURE__ */ v(f, {
-								colSpan: M.length + +!!b.selectable + (B ? ot : 0),
+							}), t.length > 0 && /* @__PURE__ */ _(f, { children: /* @__PURE__ */ _(u, {
+								colSpan: j.length + +!!y.selectable + (R ? ct : 0),
 								className: "h-[48px] align-middle",
-								children: /* @__PURE__ */ v("div", {
+								children: /* @__PURE__ */ _("div", {
 									className: "pointer-events-auto flex h-full items-center",
 									onClick: (e) => e.stopPropagation(),
 									onMouseDownCapture: (e) => e.stopPropagation(),
-									children: t.length === 1 ? /* @__PURE__ */ v(c, {
+									children: t.length === 1 ? /* @__PURE__ */ _(c, {
 										variant: "outline",
 										icon: t[0].icon ?? r,
 										label: t[0].label,
@@ -433,11 +433,11 @@ var Ae = (e) => e ? (Array.isArray(e) ? e : [e]).filter((e) => e !== void 0) : [
 										loading: t[0].loading,
 										disabled: t[0].disabled,
 										size: "sm"
-									}) : t.some((e) => e.description !== void 0) ? /* @__PURE__ */ v(l, {
+									}) : t.some((e) => e.description !== void 0) ? /* @__PURE__ */ _(l, {
 										mode: "dropdown",
 										variant: "outline",
 										size: "sm",
-										trigger: k?.addRowActionsLabel,
+										trigger: O?.addRowActionsLabel,
 										disabled: t.every((e) => e.disabled),
 										loading: t.some((e) => e.loading),
 										items: t.map((e, t) => ({
@@ -449,7 +449,7 @@ var Ae = (e) => e ? (Array.isArray(e) ? e : [e]).filter((e) => e !== void 0) : [
 										onClick: (e) => {
 											t[Number(e)]?.onClick?.();
 										}
-									}) : /* @__PURE__ */ v(l, {
+									}) : /* @__PURE__ */ _(l, {
 										variant: "outline",
 										size: "sm",
 										disabled: t.every((e) => e.disabled),
@@ -468,13 +468,13 @@ var Ae = (e) => e ? (Array.isArray(e) ? e : [e]).filter((e) => e !== void 0) : [
 						})()
 					]
 				})
-			}), /* @__PURE__ */ v(le, {
-				paginationInfo: L,
-				setPage: $e,
+			}), /* @__PURE__ */ _(ue, {
+				paginationInfo: F,
+				setPage: tt,
 				className: "pb-4"
 			})]
 		})
 	});
 };
 //#endregion
-export { h as SettingsRenderer, b as TableCollection };
+export { m as SettingsRenderer, y as TableCollection };

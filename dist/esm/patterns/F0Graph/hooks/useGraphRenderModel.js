@@ -7,10 +7,10 @@ import { useCallback as d, useLayoutEffect as f, useMemo as p, useRef as m } fro
 import { Position as h } from "@xyflow/react";
 //#region src/patterns/F0Graph/hooks/useGraphRenderModel.ts
 var g = 6, _ = 26, v = 4, y = 2;
-function b({ roots: b, nodeMap: x, expandedNodes: S, anchorNodeRef: C, onAnchorReflow: ee, resolvedEdgesProp: w, stableRenderNode: te, nodeTagTypes: ne, visibleTagTypesSet: re, reserveTagRow: ie, nodeWidthProp: T, nodeHeightProp: ae, stackedNodeHeightProp: oe, stackedNodeGapProp: se, layoutEngineProp: E, zoomLevel: D, direction: O, controlLabels: ce, hoveredEdgeId: k, enableNodeWindowing: A, nodeWindowPadding: le }) {
-	let j = p(() => t(b, S), [b, S]), M = p(() => {
+function b({ roots: b, nodeMap: x, expandedNodes: S, anchorNodeRef: C, onAnchorReflow: ee, resolvedEdgesProp: w, stableRenderNode: te, nodeTagTypes: ne, visibleTagTypesSet: re, reserveTagRow: ie, nodeWidthProp: T, nodeHeightProp: E, stackedNodeHeightProp: D, stackedNodeGapProp: ae, layoutEngineProp: O, zoomLevel: k, direction: A, controlLabels: oe, hoveredEdgeId: j, enableNodeWindowing: M, nodeWindowPadding: se }) {
+	let N = p(() => t(b, S), [b, S]), P = p(() => {
 		let e = /* @__PURE__ */ new Map(), t = /* @__PURE__ */ new Map();
-		for (let e of j) {
+		for (let e of N) {
 			let n = e.parentId;
 			t.has(n) || t.set(n, []), t.get(n).push(e);
 		}
@@ -20,9 +20,9 @@ function b({ roots: b, nodeMap: x, expandedNodes: S, anchorNodeRef: C, onAnchorR
 			posInSet: t + 1
 		});
 		return e;
-	}, [j]), N = p(() => {
+	}, [N]), F = p(() => {
 		let e = /* @__PURE__ */ new Map();
-		for (let t of j) {
+		for (let t of N) {
 			if (t.childrenCount === 0) continue;
 			let n = S.has(t.id), r = n && t.children.length === 0;
 			(!n || r) && e.set(t.id, {
@@ -33,12 +33,12 @@ function b({ roots: b, nodeMap: x, expandedNodes: S, anchorNodeRef: C, onAnchorR
 			});
 		}
 		return e;
-	}, [j, S]), { stackedParentIds: P, stackedNodeIndex: F } = p(() => E ? {
+	}, [N, S]), { stackedParentIds: I, stackedNodeIndex: L } = p(() => O ? {
 		stackedParentIds: /* @__PURE__ */ new Set(),
 		stackedNodeIndex: /* @__PURE__ */ new Map()
-	} : o(j), [j, E]), ue = p(() => w && w.length > 0 ? w : i(b), [w, b]), { visibleEdges: I, expanderNodes: L } = p(() => {
-		let e = new Set(j.map((e) => e.id)), t = [], n = [], r = new Set(N.keys());
-		for (let [r, i] of N) e.has(r) && (t.push({
+	} : o(N), [N, O]), ce = p(() => w && w.length > 0 ? w : i(b), [w, b]), { visibleEdges: R, expanderNodes: z } = p(() => {
+		let e = new Set(N.map((e) => e.id)), t = [], n = [], r = new Set(F.keys());
+		for (let [r, i] of F) e.has(r) && (t.push({
 			id: `${r}->${i.expanderId}`,
 			source: r,
 			target: i.expanderId
@@ -49,17 +49,17 @@ function b({ roots: b, nodeMap: x, expandedNodes: S, anchorNodeRef: C, onAnchorR
 			count: i.count,
 			loading: i.loading
 		}));
-		for (let n of ue) r.has(n.source) || e.has(n.source) && e.has(n.target) && t.push(n);
+		for (let n of ce) r.has(n.source) || e.has(n.source) && e.has(n.target) && t.push(n);
 		return {
 			visibleEdges: t,
 			expanderNodes: n
 		};
 	}, [
-		ue,
-		j,
-		N
-	]), R = p(() => {
-		let e = L.map((e) => ({
+		ce,
+		N,
+		F
+	]), le = p(() => {
+		let e = z.map((e) => ({
 			id: e.id,
 			parentId: e.parentId,
 			data: null,
@@ -68,33 +68,33 @@ function b({ roots: b, nodeMap: x, expandedNodes: S, anchorNodeRef: C, onAnchorR
 			childrenCount: 0,
 			childrenLoaded: !0
 		}));
-		return [...j.map((e) => {
-			let t = P.has(e.id);
+		return [...N.map((e) => {
+			let t = I.has(e.id);
 			return !!e.stackNodes === t ? e : {
 				...e,
 				stackNodes: t
 			};
 		}), ...e];
 	}, [
-		j,
-		L,
-		P
-	]), z = p(() => I, [I]), B = ie ?? (ne ? re.size > 0 : !1), de = ne ? re.size : 1, V = B ? Math.max(1, Math.ceil(de / y)) : 0, H = V > 0 ? g + V * _ + (V - 1) * v : 0, U = (ae ?? 56) + H, fe = (oe ?? 44) + H, pe = l({
+		N,
+		z,
+		I
+	]), ue = p(() => R, [R]), B = ie ?? (ne ? re.size > 0 : !1), de = ne ? re.size : 1, V = B ? Math.max(1, Math.ceil(de / y)) : 0, H = V > 0 ? g + V * _ + (V - 1) * v : 0, U = (E ?? 56) + H, fe = (D ?? 44) + H, pe = l({
 		nodeWidth: T,
 		nodeHeight: U,
 		stackedNodeHeight: fe,
-		stackedNodeGap: se,
+		stackedNodeGap: ae,
 		snapGrid: 32
-	}), me = E ?? pe, W = p(() => me.computeLayout(R, z, O), [
+	}), me = O ?? pe, W = p(() => me.computeLayout(le, ue, A), [
 		me,
-		R,
-		z,
-		O
-	]), G = p(() => new Map(W.nodes.map((e) => [e.id, e])), [W.nodes]), K = p(() => r(j, F, G, O), [
-		j,
-		F,
+		le,
+		ue,
+		A
+	]), G = p(() => new Map(W.nodes.map((e) => [e.id, e])), [W.nodes]), K = p(() => r(N, L, G, A), [
+		N,
+		L,
 		G,
-		O
+		A
 	]), he = p(() => {
 		let e = [];
 		for (let [t, n] of K.groups) {
@@ -111,9 +111,9 @@ function b({ roots: b, nodeMap: x, expandedNodes: S, anchorNodeRef: C, onAnchorR
 		}
 		return e;
 	}, [K, G]), ge = p(() => n(W.nodes), [W.nodes]), _e = d((e) => G.get(e), [G]), q = u({
-		enabled: A ?? !1,
-		padding: le
-	}), J = s[D], Y = c[D], X = e[D], ve = m(/* @__PURE__ */ new Map()), ye = p(() => {
+		enabled: M ?? !1,
+		padding: se
+	}), J = s[k], Y = c[k], X = e[k], ve = m(/* @__PURE__ */ new Map()), ye = p(() => {
 		let e = C.current;
 		if (!e) return {
 			dx: 0,
@@ -149,7 +149,7 @@ function b({ roots: b, nodeMap: x, expandedNodes: S, anchorNodeRef: C, onAnchorR
 		ee
 	]);
 	let Z = p(() => {
-		if (!A || !q) return null;
+		if (!M || !q) return null;
 		let e = T ?? 256, t = /* @__PURE__ */ new Set();
 		for (let n of W.nodes) a(n.x, n.y, n.width || e, n.height || U, q) && t.add(n.id);
 		let n = Array.from(t);
@@ -158,50 +158,50 @@ function b({ roots: b, nodeMap: x, expandedNodes: S, anchorNodeRef: C, onAnchorR
 			for (; n !== null && !t.has(n);) t.add(n), n = x.get(n)?.parentId ?? null;
 		}
 		let r = new Set(n);
-		for (let e of I) r.has(e.source) !== r.has(e.target) && (t.add(e.source), t.add(e.target));
+		for (let e of R) r.has(e.source) !== r.has(e.target) && (t.add(e.source), t.add(e.target));
 		for (let e of Array.from(t)) {
 			let n = K.previousRow.get(e);
 			n && t.add(n);
 		}
 		return t;
 	}, [
-		A,
+		M,
 		q,
-		I,
+		R,
 		W.nodes,
 		T,
 		U,
 		x,
 		K
 	]), be = m(/* @__PURE__ */ new Map()), Q = p(() => {
-		let e = T ?? 256, t = U, n = (e) => !Z || Z.has(e), r = Z !== null, i = O === "LR" || O === "RL", a = O === "TB" ? h.Bottom : O === "BT" ? h.Top : O === "LR" ? h.Right : h.Left, o = O === "TB" ? h.Top : O === "BT" ? h.Bottom : O === "LR" ? h.Left : h.Right, s = (e, t) => {
-			let n = (n) => n === h.Top ? {
+		let e = T ?? 256, t = U, n = (e) => !Z || Z.has(e), r = Z !== null, i = A === "LR" || A === "RL", a = A === "TB" ? h.Bottom : A === "BT" ? h.Top : A === "LR" ? h.Right : h.Left, o = A === "TB" ? h.Top : A === "BT" ? h.Bottom : A === "LR" ? h.Left : h.Right, s = (e, t, n = t) => {
+			let r = (t) => t === h.Top ? {
 				x: e / 2,
 				y: 0
-			} : n === h.Bottom ? {
+			} : t === h.Bottom ? {
 				x: e / 2,
-				y: t
-			} : n === h.Left ? {
+				y: n
+			} : t === h.Left ? {
 				x: 0,
-				y: t / 2
+				y: n / 2
 			} : {
 				x: e,
-				y: t / 2
+				y: n / 2
 			};
 			return [{
 				type: "source",
 				position: a,
-				...n(a),
+				...r(a),
 				width: 1,
 				height: 1
 			}, {
 				type: "target",
 				position: o,
-				...n(o),
+				...r(o),
 				width: 1,
 				height: 1
 			}];
-		}, c = s(e, t), l = [];
+		}, c = s(e, t, E ?? 56), l = [];
 		for (let e of K.groups.values()) [...e.rows.keys()].some(n) && l.push({
 			id: e.id,
 			type: "stackGroup",
@@ -217,10 +217,10 @@ function b({ roots: b, nodeMap: x, expandedNodes: S, anchorNodeRef: C, onAnchorR
 			zIndex: 0,
 			targetPosition: o,
 			...r ? { handles: s(e.width, e.height) } : null,
-			data: { direction: O }
+			data: { direction: A }
 		});
 		let u = [];
-		for (let i of j) {
+		for (let i of N) {
 			if (!n(i.id)) continue;
 			let l = G.get(i.id), d = be.current.get(i.id), f;
 			d !== void 0 && d.parentId === i.parentId && d.data === i.data && d.childrenCount === i.childrenCount && d.childrenLoaded === i.childrenLoaded && d.dataLoaded === i.dataLoaded ? f = d : (f = {
@@ -231,12 +231,12 @@ function b({ roots: b, nodeMap: x, expandedNodes: S, anchorNodeRef: C, onAnchorR
 				childrenLoaded: i.childrenLoaded,
 				dataLoaded: i.dataLoaded
 			}, be.current.set(i.id, f));
-			let p = M.get(i.id), m;
+			let p = P.get(i.id), m;
 			if (S.has(i.id) && i.children.length > 0) {
 				let e = i.children.map((e) => e.id).filter((e) => n(e));
 				m = e.length > 0 ? e : void 0;
 			}
-			let h = F.has(i.id), g = K.groupOf.get(i.id), _ = g ? K.groups.get(i.parentId ?? "")?.rows.get(i.id) : void 0, v = _ ? _.width : h ? l?.width ?? e : e, y = _ ? _.height : h ? l?.height ?? t : t;
+			let h = L.has(i.id), g = K.groupOf.get(i.id), _ = g ? K.groups.get(i.parentId ?? "")?.rows.get(i.id) : void 0, v = _ ? _.width : h ? l?.width ?? e : e, y = _ ? _.height : h ? l?.height ?? t : t;
 			u.push({
 				id: i.id,
 				type: "graphNode",
@@ -251,7 +251,7 @@ function b({ roots: b, nodeMap: x, expandedNodes: S, anchorNodeRef: C, onAnchorR
 				width: v,
 				...r ? {
 					height: y,
-					handles: h ? s(v, y) : c
+					handles: h ? s(v, y, D ?? 44) : c
 				} : null,
 				sourcePosition: a,
 				targetPosition: o,
@@ -266,14 +266,14 @@ function b({ roots: b, nodeMap: x, expandedNodes: S, anchorNodeRef: C, onAnchorR
 				}
 			});
 		}
-		for (let r of L) {
+		for (let r of z) {
 			if (!n(r.id)) continue;
 			let s = G.get(r.parentId) ?? {
 				x: 0,
 				y: 0,
 				width: e,
 				height: t
-			}, c = s.width ?? e, l = s.height ?? t, d = P.has(r.parentId) ? Y : J, f = i ? O === "LR" ? s.x + c + d : s.x - c : s.x, p = i ? s.y * 1 : O === "TB" ? s.y * 1 + l + d : s.y * 1 - l;
+			}, c = s.width ?? e, l = s.height ?? t, d = I.has(r.parentId) ? Y : J, f = i ? A === "LR" ? s.x + c + d : s.x - c : s.x, p = i ? s.y * 1 : A === "TB" ? s.y * 1 + l + d : s.y * 1 - l;
 			u.push({
 				id: r.id,
 				type: "expanderNode",
@@ -293,9 +293,9 @@ function b({ roots: b, nodeMap: x, expandedNodes: S, anchorNodeRef: C, onAnchorR
 				}
 			});
 		}
-		for (let r of j) {
+		for (let r of N) {
 			if (!S.has(r.id) || r.children.length === 0 || !n(r.id)) continue;
-			let s = G.get(r.id), c = s?.x ?? 0, l = s?.y ?? 0, d = s?.width ?? e, f = s?.height ?? t, p = P.has(r.id) ? Y : J, m = i ? O === "LR" ? c + d + p + X : c - d : c, h = i ? l * 1 : O === "TB" ? l * 1 + f + p + X : l * 1 - f;
+			let s = G.get(r.id), c = s?.x ?? 0, l = s?.y ?? 0, d = s?.width ?? e, f = s?.height ?? t, p = I.has(r.id) ? Y : J, m = i ? A === "LR" ? c + d + p + X : c - d : c, h = i ? l * 1 : A === "TB" ? l * 1 + f + p + X : l * 1 - f;
 			u.push({
 				id: `collapser-${r.id}`,
 				type: "collapserNode",
@@ -309,8 +309,8 @@ function b({ roots: b, nodeMap: x, expandedNodes: S, anchorNodeRef: C, onAnchorR
 				data: {
 					parentId: r.id,
 					parentWidth: e,
-					collapseLabel: ce?.collapseChildren,
-					stacked: P.has(r.id)
+					collapseLabel: oe?.collapseChildren,
+					stacked: I.has(r.id)
 				}
 			});
 		}
@@ -319,20 +319,22 @@ function b({ roots: b, nodeMap: x, expandedNodes: S, anchorNodeRef: C, onAnchorR
 		Z,
 		G,
 		K,
-		j,
-		L,
+		N,
+		z,
 		S,
 		te,
 		J,
 		Y,
 		X,
-		P,
+		I,
 		T,
 		U,
-		O,
-		M,
-		F,
-		ce?.collapseChildren
+		E,
+		D,
+		A,
+		P,
+		L,
+		oe?.collapseChildren
 	]), $ = p(() => Q.filter((e) => e.type === "graphNode").map((e) => e.id), [Q]), xe = p(() => {
 		let e = new Set($);
 		return Q.filter((e) => e.type === "graphNode").filter((t) => {
@@ -341,12 +343,12 @@ function b({ roots: b, nodeMap: x, expandedNodes: S, anchorNodeRef: C, onAnchorR
 		}).map((e) => e.id);
 	}, [Q, $]);
 	return {
-		visibleTreeNodes: j,
+		visibleTreeNodes: N,
 		rfNodes: Q,
 		rfEdges: p(() => {
-			let e = new Set(j.filter((e) => S.has(e.id) && e.children.length > 0).map((e) => e.id)), t = (e) => K.previousRow.get(e.target) ?? e.source;
-			return I.filter((e) => !Z || Z.has(t(e)) && Z.has(e.target)).map((n) => {
-				let r = K.previousRow.get(n.target), i = t(n), a = !!(n.onEdgeClick || n.onEdgeHover) && n.id === k, o = n.data;
+			let e = new Set(N.filter((e) => S.has(e.id) && e.children.length > 0).map((e) => e.id)), t = (e) => K.previousRow.get(e.target) ?? e.source;
+			return R.filter((e) => !Z || Z.has(t(e)) && Z.has(e.target)).map((n) => {
+				let r = K.previousRow.get(n.target), i = t(n), a = !!(n.onEdgeClick || n.onEdgeHover) && n.id === j, o = n.data;
 				return {
 					id: n.id,
 					source: i,
@@ -361,12 +363,12 @@ function b({ roots: b, nodeMap: x, expandedNodes: S, anchorNodeRef: C, onAnchorR
 				};
 			});
 		}, [
-			I,
-			j,
+			R,
+			N,
 			S,
-			k,
+			j,
 			Z,
-			F,
+			L,
 			K
 		]),
 		reservedTagHeight: H,

@@ -39,28 +39,30 @@ var oe = "opacity 120ms ease-out", se = "transform 120ms ease-out", ce = "opacit
 		onKeyDown: (e) => {
 			(e.key === "Enter" || e.key === " ") && (e.preventDefault(), C?.()), e.key === "ArrowRight" && x && !g && (e.preventDefault(), S?.()), e.key === "ArrowLeft" && x && g && (e.preventDefault(), S?.());
 		}
-	}, q = a === "compact", J = a === "dot", Y = a === "detail", X = A ? j ? A.filter((e) => j.has(ee(e))) : A : void 0, de = Y && !!X && X.length > 0, Z = (e) => de ? /* @__PURE__ */ u(p.div, {
-		initial: !U && {
-			opacity: 0,
-			filter: "blur(3px)"
-		},
-		animate: {
-			opacity: 1,
-			filter: "blur(0px)"
-		},
-		transition: U ? { duration: 0 } : {
-			duration: .12,
-			ease: [
-				.23,
-				1,
-				.32,
-				1
-			]
-		},
-		className: e,
+	}, q = a === "compact", J = a === "dot", Y = a === "detail", X = A ? j ? A.filter((e) => j.has(ee(e))) : A : void 0, de = Y && !!X && X.length > 0, Z = (t) => de ? /* @__PURE__ */ u("div", {
+		className: e(t, "rounded-[13px] backdrop-blur-[400px]"),
 		"data-no-node-select": !0,
 		onClick: (e) => e.stopPropagation(),
-		children: /* @__PURE__ */ u(ne, { tags: X })
+		children: /* @__PURE__ */ u(p.div, {
+			initial: !U && {
+				opacity: 0,
+				filter: "blur(3px)"
+			},
+			animate: {
+				opacity: 1,
+				filter: "blur(0px)"
+			},
+			transition: U ? { duration: 0 } : {
+				duration: .12,
+				ease: [
+					.23,
+					1,
+					.32,
+					1
+				]
+			},
+			children: /* @__PURE__ */ u(ne, { tags: X })
+		})
 	}, "tags") : null;
 	if (I) return /* @__PURE__ */ d("div", {
 		className: "flex w-full flex-col items-center gap-1.5",

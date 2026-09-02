@@ -3,6 +3,12 @@ export declare const EMPTY_HIGHLIGHTED_NODES: Set<string>;
 export declare const EMPTY_TAG_COLUMNS: readonly string[];
 export declare const COLLAPSER_OFFSET_ADJUSTMENT_BY_ZOOM: Record<ZoomLevel, number>;
 /**
+ * How tall a node paints — the pill, without the tag block hanging under it. The
+ * layout engine's default `nodeHeight`, and where a node's connectors leave from
+ * (the box below it is reservation, see `paintedHandleStyle`).
+ */
+export declare const NODE_HEIGHT = 56;
+/**
  * Vertical lane between a node's bottom and its children's top: the layout
  * engine's default `rankSep`, and the lane the expand/collapse affordance is
  * centred in. One definition on purpose — it used to be declared twice, in the

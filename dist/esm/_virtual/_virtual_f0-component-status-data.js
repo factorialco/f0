@@ -1,6 +1,6 @@
 //#region \0virtual:f0-component-status-data
 var e = {
-	generatedAt: "2026-09-02T09:05:39.098Z",
+	generatedAt: "2026-09-02T10:27:40.587Z",
 	stats: {
 		total: 265,
 		byStatus: {
@@ -27,7 +27,7 @@ var e = {
 			good: 7,
 			gold: 26
 		},
-		withUnitTests: 133,
+		withUnitTests: 135,
 		withMdxDocs: 104
 	},
 	components: [
@@ -2853,7 +2853,7 @@ var e = {
 			apiStatus: "unknown",
 			tags: [],
 			hasStories: !0,
-			hasUnitTests: !1,
+			hasUnitTests: !0,
 			hasPlayFunction: !1,
 			hasSnapshot: !1,
 			hasMdxDocs: !1,
@@ -2875,7 +2875,7 @@ var e = {
 			apiStatus: "unknown",
 			tags: [],
 			hasStories: !0,
-			hasUnitTests: !1,
+			hasUnitTests: !0,
 			hasPlayFunction: !1,
 			hasSnapshot: !1,
 			hasMdxDocs: !1,

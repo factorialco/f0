@@ -64,6 +64,23 @@ export type DataSourceDefinition<R extends RecordType = RecordType, Filters exte
     dataAdapter: DataAdapter<R, Filters>;
     /** Selectable items value under the checkbox column (undefined if not selectable) */
     selectable?: (item: R) => string | number | undefined;
+    /**
+     * Renders the row's checkbox disabled instead of hiding it. A disabled row is
+     * left out of "select all" and of the selection counts, so the header
+     * checkbox can still reach a fully-checked state.
+     */
+    selectionDisabled?: (item: R) => boolean;
+    /**
+     * A row selected through something else — a tree node picked above it, say.
+     * Renders indeterminate and disabled, and never enters the selection, so the
+     * payload keeps naming only real picks. Implies `selectionDisabled`.
+     */
+    selectionInherited?: (item: R) => boolean;
+    /**
+     * Removes the header select-all and the cross-page "Select all N items" CTA,
+     * forcing row-by-row selection. Mirrors `F0Select`'s prop of the same name.
+     */
+    disableSelectAll?: boolean;
     /** Default selected items */
     defaultSelectedItems?: SelectedItemsState<R>;
     /**
