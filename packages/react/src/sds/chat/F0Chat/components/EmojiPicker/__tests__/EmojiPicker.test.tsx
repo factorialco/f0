@@ -11,7 +11,20 @@ import { screen, zeroRender as render, within } from "@/testing/test-utils"
 
 // jsdom has no layout, so Virtuoso would render zero rows and every assertion
 // here would pass against an empty grid. The official mock context gives it a
-// viewport tall enough to mount everything.
+// viewport to measure against.
+//
+// 320px is the panel's real one — what the grid gets once the search box and
+// the jump bar have taken theirs — and it is deliberately not a viewport tall
+// enough to mount all ~1,870 emoji at once. Mounting the whole set cost seconds
+// per render under CI's coverage instrumentation, this file re-renders the grid
+// on the first keystroke of every search, and that is what pushed these tests
+// past the 5s default timeout. Ten rows instead of ~210 is the same coverage
+// for a twentieth of the work.
+//
+// The catch: jsdom cannot scroll, so a cell below the fold is genuinely absent
+// from the DOM. Nothing here may assert an *absence* without holding a mounted
+// neighbour up against it, and nothing may reach for a cell far down the list —
+// see "clamps at the ends", which narrows the list with a search instead.
 vi.mock("react-virtuoso", async (importOriginal) => {
   const actual = await importOriginal<typeof import("react-virtuoso")>()
   const Mocked = forwardRef<
@@ -20,7 +33,7 @@ vi.mock("react-virtuoso", async (importOriginal) => {
   >(function MockedGroupedVirtuoso(props, ref): ReactNode {
     return createElement(
       actual.VirtuosoMockContext.Provider,
-      { value: { viewportHeight: 100_000, itemHeight: 32 } },
+      { value: { viewportHeight: 320, itemHeight: 32 } },
       createElement(actual.GroupedVirtuoso, { ...props, ref })
     )
   })
@@ -276,12 +289,22 @@ describe("EmojiPicker", () => {
     const user = userEvent.setup()
     renderPicker()
 
+    // Against a search rather than the whole set: clamping doesn't care how
+    // long the list is, and `{End}` on 1,870 emoji would land on a cell far
+    // outside the viewport — which in jsdom means not in the DOM at all, so
+    // both sides of the comparison would be null and it would pass on nothing.
+    // Four rows, the last of them partial, exercise every edge.
+    await user.type(searchBox(), "clock")
+
     const first = activeOption()
+    expect(first).not.toBeNull()
     await user.keyboard("{ArrowLeft}{ArrowUp}")
     expect(activeOption()).toBe(first)
 
     await user.keyboard("{End}")
     const last = activeOption()
+    expect(last).not.toBeNull()
+    expect(last).not.toBe(first)
     await user.keyboard("{ArrowRight}{ArrowDown}")
     expect(activeOption()).toBe(last)
   })
@@ -357,8 +380,13 @@ describe("EmojiPicker", () => {
     // Emoji 13 predates the melting face (14) and the shaking face (15).
     render(<EmojiPicker onSelect={() => {}} emojiVersion={13} />)
 
-    expect(screen.queryByLabelText("Melting Face")).not.toBeInTheDocument()
+    // Melting Face sits eleventh in Smileys, two rows into a viewport that
+    // mounts ten — and Winking Face, the entry right after it, is here to prove
+    // the window reaches that far. So the absence below is the filter, not
+    // virtualization.
     expect(screen.getByLabelText("Grinning Face")).toBeInTheDocument()
+    expect(screen.getByLabelText("Winking Face")).toBeInTheDocument()
+    expect(screen.queryByLabelText("Melting Face")).not.toBeInTheDocument()
   })
 
   it("offers a jump-to bar for every category", () => {
@@ -375,9 +403,17 @@ describe("EmojiPicker", () => {
     renderPicker()
 
     await user.type(searchBox(), "tada")
+    const whileSearching = searchBox().getAttribute("aria-activedescendant")
     await user.click(screen.getByRole("tab", { name: "Food & drink" }))
 
+    // Browsing again, with the selection moved into the section you asked for.
     expect(searchBox()).toHaveValue("")
-    expect(screen.getByText("Food & drink")).toBeInTheDocument()
+    expect(screen.getByText("Frequently used")).toBeInTheDocument()
+    expect(searchBox().getAttribute("aria-activedescendant")).not.toBe(
+      whileSearching
+    )
+    // Where the scroller lands is Storybook's to verify: jsdom has no
+    // scrolling, so asserting a mounted "Food & drink" header here would only
+    // prove the section exists — which it does whether the jump worked or not.
   })
 })
