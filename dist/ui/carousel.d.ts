@@ -17,6 +17,11 @@ import * as React from "react";
  * `carousel.test.tsx` fails if these drift from it: 28px is `-m-7` / `p-7`, 56px
  * is the pair, 14px is the half.
  *
+ * The borrowed band paints nothing but still hit-tests, so it takes no pointer
+ * events; the track turns them back on for the slides in {@link CarouselContent}.
+ * Embla's drag survives it — its listeners are on the viewport, but a drag
+ * starts on a slide and the events reach it by bubbling.
+ *
  * Exported for that test alone — nothing else should need it.
  */
 export declare const CAROUSEL_SHADOW_BLEED: string;

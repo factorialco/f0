@@ -9,7 +9,7 @@ import * as o from "react";
 import { jsx as s, jsxs as c } from "react/jsx-runtime";
 import l from "embla-carousel-react";
 //#region src/ui/carousel.tsx
-var u = e("-m-7 h-[calc(100%_+_56px)] w-[calc(100%_+_56px)] p-7", "[mask-image:linear-gradient(to_right,transparent_0px,transparent_14px,black_28px,black_calc(100%_-_28px),transparent_calc(100%_-_14px),transparent_100%)]", "[-webkit-mask-image:linear-gradient(to_right,transparent_0px,transparent_14px,black_28px,black_calc(100%_-_28px),transparent_calc(100%_-_14px),transparent_100%)]"), d = o.createContext(null);
+var u = e("-m-7 h-[calc(100%_+_56px)] w-[calc(100%_+_56px)] p-7", "pointer-events-none", "[mask-image:linear-gradient(to_right,transparent_0px,transparent_14px,black_28px,black_calc(100%_-_28px),transparent_calc(100%_-_14px),transparent_100%)]", "[-webkit-mask-image:linear-gradient(to_right,transparent_0px,transparent_14px,black_28px,black_calc(100%_-_28px),transparent_calc(100%_-_14px),transparent_100%)]"), d = o.createContext(null);
 function f() {
 	let e = o.useContext(d);
 	if (!e) throw Error("useCarousel must be used within a <Carousel />");
@@ -127,7 +127,7 @@ var v = o.forwardRef(({ className: t, ...n }, r) => {
 		className: e("overflow-hidden", u, "[scrollbar-width:none] [-ms-overflow-style:none]"),
 		children: /* @__PURE__ */ s("div", {
 			ref: r,
-			className: e("flex", a === "horizontal" ? "-ml-4" : "-mt-4 flex-col", t),
+			className: e("flex", "pointer-events-auto", a === "horizontal" ? "-ml-4" : "-mt-4 flex-col", t),
 			...n
 		})
 	});

@@ -51,6 +51,16 @@ export type CommunityPostProps = {
     dropdownItems?: DropdownItem[];
     descriptionExpandable?: boolean;
     /**
+     * THE WHOLE BODY, unclamped and with no "See more" — for a container that IS
+     * the post rather than a way to it: a dialog, a page. There the body is what
+     * the reader came for, and a clamp with nothing behind it hides the end of
+     * what they opened.
+     *
+     * In a FEED, leave it off. Posts a page long each are what makes a feed
+     * unskimmable, which is what the clamp is for.
+     */
+    noDescriptionClamp?: boolean;
+    /**
      * Keeps the title as the post's ACCESSIBLE NAME but takes it out of the card —
      * for a container that already shows it, like a dialog carrying the post's
      * title in its own header. Without this the same words appear twice, an inch
@@ -62,12 +72,12 @@ export type CommunityPostProps = {
      */
     hideTitle?: boolean;
 };
-export declare const BaseCommunityPost: ({ id, author, group, createdAt, title, description, onClick, mediaUrl, event, counters, reactions, inLabel, comment, actions, dropdownItems, noReactionsButton, descriptionExpandable, hideTitle, }: CommunityPostProps) => import("react").JSX.Element;
+export declare const BaseCommunityPost: ({ id, author, group, createdAt, title, description, onClick, mediaUrl, event, counters, reactions, inLabel, comment, actions, dropdownItems, noReactionsButton, descriptionExpandable, noDescriptionClamp, hideTitle, }: CommunityPostProps) => import("react").JSX.Element;
 export type CommunityPostSkeletonProps = {
     withEvent?: boolean;
     withImage?: boolean;
 };
 export declare const CommunityPostSkeleton: ({ withEvent, withImage, }: CommunityPostSkeletonProps) => import("react").JSX.Element;
-export declare const CommunityPost: (({ id, author, group, createdAt, title, description, onClick, mediaUrl, event, counters, reactions, inLabel, comment, actions, dropdownItems, noReactionsButton, descriptionExpandable, hideTitle, }: CommunityPostProps) => import("react").JSX.Element) & {
+export declare const CommunityPost: (({ id, author, group, createdAt, title, description, onClick, mediaUrl, event, counters, reactions, inLabel, comment, actions, dropdownItems, noReactionsButton, descriptionExpandable, noDescriptionClamp, hideTitle, }: CommunityPostProps) => import("react").JSX.Element) & {
     Skeleton: ({ withEvent, withImage, }: CommunityPostSkeletonProps) => import("react").JSX.Element;
 };

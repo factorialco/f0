@@ -33,38 +33,38 @@ var E = ({ describedBy: n, controls: r, expanded: i, onClick: o }) => {
 			children: s.actions.seeMore
 		})
 	});
-}, D = ({ id: a, author: u, group: D, createdAt: O, title: k, description: A, onClick: j, mediaUrl: M, event: N, counters: P, reactions: F, inLabel: I, comment: L, actions: ee, dropdownItems: R, noReactionsButton: z = !1, descriptionExpandable: B = !1, hideTitle: V = !1 }) => {
-	let H = b(), U = b(), W = p(), G = x(null), [K, q] = S(null), [J, Y] = S(!1), X = [P.views, P.comments].filter(Boolean).join(" · "), Z = B && K?.id === a && K.description === A, Q = !Z, te = f(O, { locale: W }), ne = !!j, re = j ? () => j(a) : void 0, ie = (e) => {
+}, D = ({ id: a, author: u, group: D, createdAt: O, title: k, description: A, onClick: j, mediaUrl: M, event: N, counters: P, reactions: F, inLabel: I, comment: L, actions: R, dropdownItems: z, noReactionsButton: ee = !1, descriptionExpandable: B = !1, noDescriptionClamp: V = !1, hideTitle: H = !1 }) => {
+	let U = b(), W = b(), G = p(), K = x(null), [q, J] = S(null), [Y, X] = S(!1), Z = [P.views, P.comments].filter(Boolean).join(" · "), Q = B && q?.id === a && q.description === A, te = !Q && !V, ne = f(O, { locale: G }), re = !!j, ie = j ? () => j(a) : void 0, ae = (e) => {
 		e.stopPropagation();
-	}, $ = u ? `${u.firstName} ${u.lastName}` : void 0, ae = (e) => {
-		e.preventDefault(), e.stopPropagation(), A && q({
+	}, $ = u ? `${u.firstName} ${u.lastName}` : void 0, oe = (e) => {
+		e.preventDefault(), e.stopPropagation(), A && J({
 			id: a,
 			description: A
 		});
 	};
 	return y(() => {
-		Z && G.current?.focus();
-	}, [Z]), y(() => {
-		B || q(null);
+		Q && K.current?.focus();
+	}, [Q]), y(() => {
+		B || J(null);
 	}, [B]), y(() => {
-		let e = G.current;
-		if (!B || !e || Z) {
-			Y(!1);
+		let e = K.current;
+		if (!B || !e || Q) {
+			X(!1);
 			return;
 		}
 		let t = () => {
-			Y(e.scrollHeight > e.clientHeight);
+			X(e.scrollHeight > e.clientHeight);
 		};
 		if (t(), typeof ResizeObserver > "u") return;
 		let n = new ResizeObserver(t);
 		return n.observe(e), () => n.disconnect();
 	}, [
 		B,
-		Z,
+		Q,
 		A
 	]), /* @__PURE__ */ T("div", {
-		className: e("@container flex w-full flex-col gap-3 rounded-xl border border-solid border-transparent p-3 pt-2 md:pb-4 md:pt-3", ne && "cursor-pointer hover:bg-f1-background-hover focus:border-f1-border-secondary focus:outline focus:outline-1 focus:outline-offset-1 focus:outline-f1-border-selected-bold"),
-		onClick: re,
+		className: e("@container flex w-full flex-col gap-3 rounded-xl border border-solid border-transparent p-3 pt-2 md:pb-4 md:pt-3", re && "cursor-pointer hover:bg-f1-background-hover focus:border-f1-border-secondary focus:outline focus:outline-1 focus:outline-offset-1 focus:outline-f1-border-selected-bold"),
+		onClick: ie,
 		id: `community-post-${a}`,
 		children: [
 			/* @__PURE__ */ T("div", {
@@ -108,14 +108,14 @@ var E = ({ describedBy: n, controls: r, expanded: i, onClick: o }) => {
 							]
 						}), /* @__PURE__ */ w("span", {
 							className: "text-base text-f1-foreground-secondary",
-							children: te
+							children: ne
 						})]
 					}),
 					/* @__PURE__ */ T("div", {
 						className: "flex flex-row gap-2",
 						children: [/* @__PURE__ */ T("div", {
 							className: "hidden flex-row gap-2 md:flex",
-							children: [ee?.map((e) => /* @__PURE__ */ w(s, {
+							children: [R?.map((e) => /* @__PURE__ */ w(s, {
 								hideLabel: !e.label,
 								...e.icon && { icon: e.icon },
 								variant: "outline",
@@ -123,8 +123,8 @@ var E = ({ describedBy: n, controls: r, expanded: i, onClick: o }) => {
 								onClick: e.onClick,
 								label: e.label ?? "",
 								title: e.label ?? ""
-							}, e.label)), R?.length && /* @__PURE__ */ w(d, {
-								items: R,
+							}, e.label)), z?.length && /* @__PURE__ */ w(d, {
+								items: z,
 								icon: r,
 								size: "sm"
 							})]
@@ -134,7 +134,7 @@ var E = ({ describedBy: n, controls: r, expanded: i, onClick: o }) => {
 								items: [{
 									label: L.label,
 									onClick: L.onClick
-								}, ...R ?? []],
+								}, ...z ?? []],
 								icon: r,
 								size: "sm"
 							})
@@ -145,21 +145,21 @@ var E = ({ describedBy: n, controls: r, expanded: i, onClick: o }) => {
 			/* @__PURE__ */ T("div", {
 				className: "flex min-w-0 flex-col gap-1 text-f1-foreground",
 				children: [/* @__PURE__ */ w("p", {
-					id: H,
-					className: e(V ? "sr-only" : e("text-xl font-semibold", "line-clamp-2 break-words")),
+					id: U,
+					className: e(H ? "sr-only" : e("text-xl font-semibold", "line-clamp-2 break-words")),
 					children: k
 				}), A && /* @__PURE__ */ T(C, { children: [/* @__PURE__ */ w(g, {
-					ref: G,
-					id: U,
+					ref: K,
+					id: W,
 					content: A,
-					collapsed: Q,
-					tabIndex: Z ? -1 : void 0,
-					className: e(Z && t())
-				}), B && J && !Z && /* @__PURE__ */ w(E, {
-					describedBy: H,
-					controls: U,
-					expanded: Z,
-					onClick: ae
+					collapsed: te,
+					tabIndex: Q ? -1 : void 0,
+					className: e(Q && t())
+				}), B && !V && Y && !Q && /* @__PURE__ */ w(E, {
+					describedBy: U,
+					controls: W,
+					expanded: Q,
+					onClick: oe
 				})] })]
 			}),
 			M && !N && /* @__PURE__ */ w("div", {
@@ -167,7 +167,7 @@ var E = ({ describedBy: n, controls: r, expanded: i, onClick: o }) => {
 				children: _(M) ? /* @__PURE__ */ w("video", {
 					controls: !0,
 					className: "aspect-video h-full w-full bg-f1-background-secondary object-cover",
-					onClick: ie,
+					onClick: ae,
 					children: /* @__PURE__ */ w("source", { src: M })
 				}) : /* @__PURE__ */ T(C, { children: [/* @__PURE__ */ w("img", {
 					src: M,
@@ -182,9 +182,9 @@ var E = ({ describedBy: n, controls: r, expanded: i, onClick: o }) => {
 			}),
 			/* @__PURE__ */ w("p", {
 				className: "text-f1-foreground-secondary",
-				children: X
+				children: Z
 			}),
-			!z && /* @__PURE__ */ w(h, {
+			!ee && /* @__PURE__ */ w(h, {
 				items: F?.items ?? [],
 				onInteraction: F?.onInteraction,
 				action: {
