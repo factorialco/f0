@@ -1065,6 +1065,9 @@ const CommunityPostDetail = ({ post }: { post: CommunityPostSummary }) => (
     id={post.id}
     // The dialog's header carries the title, so the post doesn't repeat it.
     hideTitle
+    // Opened, not skimmed: the body is what the reader came for, so it is shown
+    // whole rather than clamped with nothing behind the clamp.
+    noDescriptionClamp
     author={post.author}
     group={{ title: "All company", onClick: () => {} }}
     createdAt={post.createdAt}

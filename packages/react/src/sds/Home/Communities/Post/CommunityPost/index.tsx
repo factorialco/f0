@@ -115,6 +115,17 @@ export type CommunityPostProps = {
   descriptionExpandable?: boolean
 
   /**
+   * THE WHOLE BODY, unclamped and with no "See more" — for a container that IS
+   * the post rather than a way to it: a dialog, a page. There the body is what
+   * the reader came for, and a clamp with nothing behind it hides the end of
+   * what they opened.
+   *
+   * In a FEED, leave it off. Posts a page long each are what makes a feed
+   * unskimmable, which is what the clamp is for.
+   */
+  noDescriptionClamp?: boolean
+
+  /**
    * Keeps the title as the post's ACCESSIBLE NAME but takes it out of the card —
    * for a container that already shows it, like a dialog carrying the post's
    * title in its own header. Without this the same words appear twice, an inch
@@ -145,6 +156,7 @@ export const BaseCommunityPost = ({
   dropdownItems,
   noReactionsButton = false,
   descriptionExpandable = false,
+  noDescriptionClamp = false,
   hideTitle = false,
 }: CommunityPostProps) => {
   const titleId = useId()
@@ -165,7 +177,7 @@ export const BaseCommunityPost = ({
     descriptionExpandable &&
     expandedDescription?.id === id &&
     expandedDescription.description === description
-  const descriptionCollapsed = !descriptionExpanded
+  const descriptionCollapsed = !descriptionExpanded && !noDescriptionClamp
   const date = getDisplayDateBasedOnDuration(createdAt, { locale })
 
   const isClickable = Boolean(onClick)
@@ -370,6 +382,7 @@ export const BaseCommunityPost = ({
               className={cn(descriptionExpanded && focusRing())}
             />
             {descriptionExpandable &&
+              !noDescriptionClamp &&
               isDescriptionOverflowing &&
               !descriptionExpanded && (
                 <ExpandDescriptionButton
