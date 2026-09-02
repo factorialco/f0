@@ -13,6 +13,7 @@ type ChatTextareaFieldProps = {
   onChange: (value: string, cursorPos: number) => void
   onKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void
   onPaste: (e: React.ClipboardEvent<HTMLTextAreaElement>) => void
+  onFocus?: (event: React.FocusEvent<HTMLTextAreaElement>) => void
   onBlur?: (event: React.FocusEvent<HTMLTextAreaElement>) => void
   onCursorUpdate: () => void
   onScroll: () => void
@@ -53,6 +54,7 @@ export const ChatTextareaField = ({
   onChange,
   onKeyDown,
   onPaste,
+  onFocus,
   onBlur,
   onCursorUpdate,
   onScroll,
@@ -136,6 +138,7 @@ export const ChatTextareaField = ({
         onChange={(e) => onChange(e.target.value, e.target.selectionStart ?? 0)}
         onKeyDown={onKeyDown}
         onPaste={onPaste}
+        onFocus={onFocus}
         onBlur={onBlur}
         onKeyUp={onCursorUpdate}
         onClick={onCursorUpdate}

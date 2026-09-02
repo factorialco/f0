@@ -47,6 +47,8 @@ export type UseEmojiAutocompleteReturn = {
   handleKeyDown: (event: React.KeyboardEvent<HTMLElement>) => boolean
   selectCandidate: (candidate: EmojiAutocompleteCandidate) => void
   setSelectedIndex: (index: number) => void
+  handleFocus: () => void
+  handleBlur: () => void
   close: () => void
 }
 
@@ -130,6 +132,13 @@ export function useEmojiAutocomplete({
   const listboxId = `chat-emoji-autocomplete-${reactId.replace(/:/g, "")}`
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [dismissedTrigger, setDismissedTrigger] = useState<number | null>(null)
+  // Leaving the composer HIDES the list; it does not dismiss the token under
+  // the caret. Blur used to route through `close()`, which parks the trigger in
+  // `dismissedTrigger` — and that is only released once the trigger disappears
+  // entirely, so a single focusout in the middle of `:smil` left the list
+  // unable to reopen however much more you typed. Escape and picking a
+  // candidate still dismiss the token for real.
+  const [isBlurred, setIsBlurred] = useState(false)
 
   // The same localized layer the picker uses, so `:` and the picker's search
   // box agree in every language, not just in English.
@@ -145,6 +154,7 @@ export function useEmojiAutocomplete({
   )
   const isOpen =
     trigger !== null &&
+    !isBlurred &&
     trigger.colonIndex !== dismissedTrigger &&
     results.length > 0
   const effectiveSelectedIndex = results[selectedIndex] ? selectedIndex : 0
@@ -158,6 +168,9 @@ export function useEmojiAutocomplete({
     setDismissedTrigger(trigger?.colonIndex ?? null)
     setSelectedIndex(0)
   }, [trigger?.colonIndex])
+
+  const handleFocus = useCallback(() => setIsBlurred(false), [])
+  const handleBlur = useCallback(() => setIsBlurred(true), [])
 
   const selectCandidate = useCallback(
     (candidate: EmojiAutocompleteCandidate) => {
@@ -279,6 +292,8 @@ export function useEmojiAutocomplete({
     handleKeyDown,
     selectCandidate,
     setSelectedIndex,
+    handleFocus,
+    handleBlur,
     close,
   }
 }
