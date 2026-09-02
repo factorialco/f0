@@ -90,7 +90,13 @@ export function ChatEmojiAutocomplete({
                 ? "bg-f1-background-secondary"
                 : "hover:bg-f1-background-secondary-hover"
             )}
-            onMouseEnter={() => onHighlight(index)}
+            // `pointermove`, not `mouseenter`: the list opens above the caret,
+            // which is often exactly where the pointer already is, and
+            // `mouseenter` fires on a row that arrives under a cursor that
+            // never moved. That handed the highlight to whatever happened to
+            // land under the mouse, so Enter inserted an emoji nobody picked.
+            // `pointermove` only fires when the pointer actually moves.
+            onPointerMove={() => onHighlight(index)}
             onMouseDown={(event) => event.preventDefault()}
             onClick={() => onSelect(candidate)}
           >

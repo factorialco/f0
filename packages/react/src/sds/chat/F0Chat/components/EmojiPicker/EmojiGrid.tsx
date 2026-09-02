@@ -212,7 +212,12 @@ export const EmojiGrid = forwardRef<GroupedVirtuosoHandle, EmojiGridProps>(
                     // The search box owns focus; stealing it on mousedown would
                     // close the caret's home and break type-then-click.
                     onMouseDown={(event) => event.preventDefault()}
-                    onMouseEnter={() => onActivate(index)}
+                    // `pointermove`, not `mouseenter`: this grid is
+                    // virtualized, so a scroll pulls fresh rows under a cursor
+                    // that never moved and every one of them fires
+                    // `mouseenter`. The active option would chase the scroll
+                    // instead of the reader. Same reason the `:` list uses it.
+                    onPointerMove={() => onActivate(index)}
                     onClick={() => onSelect(emoji)}
                     className={emojiButtonClass(isActive)}
                     style={{

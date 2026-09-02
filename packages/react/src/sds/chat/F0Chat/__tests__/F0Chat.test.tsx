@@ -744,6 +744,32 @@ describe("F0Chat", () => {
     ).toBeInTheDocument()
   })
 
+  it("keeps the best match highlighted when the list opens under a still pointer", async () => {
+    renderChat(makeRuntime({}))
+    const input = screen.getByPlaceholderText(/write something here/i)
+
+    await userEvent.type(input, ":smil")
+    const listbox = screen.getByRole("listbox", { name: /add emoji/i })
+    const options = within(listbox).getAllByRole("option")
+    const best = options[0]
+    expect(best).toHaveAttribute("aria-selected", "true")
+
+    // The list opens above the caret, which is often where the pointer already
+    // is. A row arriving under a cursor that never moved still gets
+    // `mouseenter`, and that used to hand it the highlight — so Enter inserted
+    // an emoji nobody picked.
+    fireEvent.mouseEnter(options[3])
+
+    expect(best).toHaveAttribute("aria-selected", "true")
+    expect(options[3]).toHaveAttribute("aria-selected", "false")
+    expect(input).toHaveAttribute("aria-activedescendant", best.id)
+
+    // A pointer that genuinely moves still drives the highlight.
+    fireEvent.pointerMove(options[3])
+    expect(options[3]).toHaveAttribute("aria-selected", "true")
+    expect(input).toHaveAttribute("aria-activedescendant", options[3].id)
+  })
+
   it("does not select or send when Enter confirms an IME composition", async () => {
     const sendMessage = vi.fn()
     renderChat(makeRuntime({ sendMessage }))

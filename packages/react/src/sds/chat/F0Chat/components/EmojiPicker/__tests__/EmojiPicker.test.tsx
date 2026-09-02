@@ -7,7 +7,12 @@ import {
 } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
-import { screen, zeroRender as render, within } from "@/testing/test-utils"
+import {
+  fireEvent,
+  screen,
+  zeroRender as render,
+  within,
+} from "@/testing/test-utils"
 
 // jsdom has no layout, so Virtuoso would render zero rows and every assertion
 // here would pass against an empty grid. The official mock context gives it a
@@ -284,6 +289,27 @@ describe("EmojiPicker", () => {
     const last = activeOption()
     await user.keyboard("{ArrowRight}{ArrowDown}")
     expect(activeOption()).toBe(last)
+  })
+
+  it("keeps the active cell where the keyboard left it under a still pointer", async () => {
+    const user = userEvent.setup()
+    renderPicker()
+
+    await user.keyboard("{ArrowRight}")
+    const active = activeOption()
+    const elsewhere = within(grid())
+      .getAllByRole("option")
+      .find((option) => option !== active)!
+
+    // The grid is virtualized: a scroll pulls fresh rows under a cursor that
+    // never moved, and each one fires `mouseenter`. The active cell would chase
+    // the scroll instead of the reader.
+    fireEvent.mouseEnter(elsewhere)
+    expect(activeOption()).toBe(active)
+
+    // A pointer that genuinely moves still drives it.
+    fireEvent.pointerMove(elsewhere)
+    expect(activeOption()).toBe(elsewhere)
   })
 
   it("selects the active emoji with Enter", async () => {
