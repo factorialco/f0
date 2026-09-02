@@ -2,7 +2,7 @@ import { userEvent } from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
 
 import { List, Table } from "@/icons/app"
-import { zeroRender as render, screen } from "@/testing/test-utils"
+import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
 
 import { F0SegmentedControl } from "../F0SegmentedControl"
 
@@ -88,6 +88,46 @@ describe("F0SegmentedControl", () => {
     expect(screen.getByText("Table")).toHaveClass("sr-only")
     // ...and the segment's accessible name is still the label.
     expect(screen.getByRole("radio", { name: "Table" })).toBeInTheDocument()
+  })
+
+  it("names an icon-only segment in a tooltip once the pointer rests on it", async () => {
+    const items = [
+      { value: "list", label: "List", icon: List },
+      { value: "table", label: "Table", icon: Table },
+    ]
+    render(<F0SegmentedControl items={items} hideLabels />)
+
+    await userEvent.hover(screen.getByRole("radio", { name: "Table" }))
+
+    await waitFor(() =>
+      expect(screen.getByRole("tooltip")).toHaveTextContent("Table")
+    )
+  })
+
+  it("keeps the selected segment marked while a tooltip wraps it", () => {
+    const items = [
+      { value: "list", label: "List", icon: List },
+      { value: "table", label: "Table", icon: Table },
+    ]
+    render(<F0SegmentedControl items={items} value="table" hideLabels />)
+
+    expect(screen.getByRole("radio", { name: "Table" })).toHaveAttribute(
+      "data-state",
+      "on"
+    )
+    expect(screen.getByRole("radio", { name: "List" })).toHaveAttribute(
+      "data-state",
+      "off"
+    )
+  })
+
+  it("shows no tooltip on a segment whose label is visible", async () => {
+    render(<F0SegmentedControl items={defaultItems} />)
+
+    await userEvent.hover(screen.getByRole("radio", { name: "Week" }))
+
+    await new Promise((resolve) => setTimeout(resolve, 300))
+    expect(screen.queryByRole("tooltip")).not.toBeInTheDocument()
   })
 
   it("keeps the label visible for items without an icon even with hideLabels", () => {

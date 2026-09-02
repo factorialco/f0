@@ -15,8 +15,8 @@ import { Visualization } from "../visualizations/collection"
  *
  * Segments are icon-only: the labelled variant carried too much visual weight
  * for a secondary header control and pulled the eye away from the content. The
- * labels stay in the accessibility tree, and the Settings popover selector
- * spells them out.
+ * labels stay in the accessibility tree, surface in a tooltip when the pointer
+ * rests on a segment, and the Settings popover selector spells them out.
  *
  * Renders nothing when there is a single visualization.
  */

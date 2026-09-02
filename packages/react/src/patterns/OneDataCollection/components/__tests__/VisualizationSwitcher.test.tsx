@@ -1,7 +1,7 @@
 import { userEvent } from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
 
-import { zeroRender as render, screen } from "@/testing/test-utils"
+import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
 
 import { VisualizationSwitcher } from "../VisualizationSwitcher"
 
@@ -53,6 +53,22 @@ describe("VisualizationSwitcher", () => {
     )
     await userEvent.click(screen.getByText("Table"))
     expect(onVisualizationChange).toHaveBeenCalledWith(0)
+  })
+
+  it("names the visualization in a tooltip on hover", async () => {
+    render(
+      <VisualizationSwitcher
+        visualizations={visualizations}
+        currentVisualization={0}
+        onVisualizationChange={vi.fn()}
+      />
+    )
+
+    await userEvent.hover(screen.getByRole("radio", { name: "Graph" }))
+
+    await waitFor(() =>
+      expect(screen.getByRole("tooltip")).toHaveTextContent("Graph")
+    )
   })
 
   it("renders nothing when there is a single visualization", () => {

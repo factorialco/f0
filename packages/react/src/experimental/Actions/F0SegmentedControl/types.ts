@@ -29,7 +29,8 @@ export interface F0SegmentedControlProps {
    */
   fullWidth?: boolean
   /**
-   * Render segments icon-only, keeping the label accessible to screen readers.
+   * Render segments icon-only, keeping the label accessible to screen readers
+   * and showing it in a tooltip once the pointer rests on the segment.
    * Segments without an icon still show their label. Useful in tight headers.
    * @default false
    */
