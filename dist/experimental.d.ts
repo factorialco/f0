@@ -8579,7 +8579,8 @@ export declare interface F0SegmentedControlProps {
      */
     fullWidth?: boolean;
     /**
-     * Render segments icon-only, keeping the label accessible to screen readers.
+     * Render segments icon-only, keeping the label accessible to screen readers
+     * and showing it in a tooltip once the pointer rests on the segment.
      * Segments without an icon still show their label. Useful in tight headers.
      * @default false
      */
@@ -15714,10 +15715,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        indent: {
-            setIndent: (level: number) => ReturnType;
-            unsetIndent: () => ReturnType;
-            outdent: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
@@ -15725,8 +15724,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        indent: {
+            setIndent: (level: number) => ReturnType;
+            unsetIndent: () => ReturnType;
+            outdent: () => ReturnType;
         };
     }
 }
