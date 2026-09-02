@@ -1,3 +1,4 @@
+import { startOfMonth } from "date-fns"
 import { AnimatePresence, motion } from "motion/react"
 import { useCallback } from "react"
 import {
@@ -97,6 +98,12 @@ export function DayView({
     [onSelect, selected]
   )
 
+  // Key the month transition on the month, not on the exact instant `month`
+  // holds: a `month` that moves to another day of the same month must not
+  // replay the exit/enter fade (CI's axe pass sampled that fade mid-flight and
+  // reported a false weekday-header contrast failure).
+  const monthKey = startOfMonth(month).getTime()
+
   const motionVariants = {
     hidden: (direction: number) => ({
       opacity: 0,
@@ -117,7 +124,7 @@ export function DayView({
         custom={motionDirection}
       >
         <motion.div
-          key={month.toISOString()}
+          key={monthKey}
           variants={motionVariants}
           custom={motionDirection}
           initial="hidden"
@@ -143,7 +150,7 @@ export function DayView({
   return (
     <AnimatePresence mode="popLayout" initial={false} custom={motionDirection}>
       <motion.div
-        key={month.toISOString()}
+        key={monthKey}
         variants={motionVariants}
         custom={motionDirection}
         initial="hidden"
@@ -152,7 +159,7 @@ export function DayView({
         transition={{ duration: 0.15, ease: [0.455, 0.03, 0.515, 0.955] }}
       >
         <Calendar
-          key={month.toISOString()}
+          key={monthKey}
           mode="range"
           disabled={disabled}
           selected={selected as DateRange}
