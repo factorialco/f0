@@ -64,6 +64,12 @@ export type DropdownInternalProps = {
    * @default false
    */
   disabled?: boolean
+  /**
+   * Extra classes merged onto the menu content, e.g. to cap its width
+   * (`max-w-[280px]`) when an item's `description` is long. Unset by
+   * default, so existing dropdowns keep their current sizing behavior.
+   */
+  contentClassName?: string
 } & DataAttributes
 
 const DropdownItem = ({ item }: { item: DropdownItemObject }) => {
@@ -169,6 +175,7 @@ export function DropdownInternal({
   onOpenChange: controlledOnOpenChange,
   label,
   disabled,
+  contentClassName,
   ...rest
 }: DropdownInternalProps) {
   const i18n = useI18n()
@@ -235,7 +242,7 @@ export function DropdownInternal({
       <DropdownMenuTrigger asChild disabled={disabled}>
         {trigger}
       </DropdownMenuTrigger>
-      <DropdownMenuContent align={align}>
+      <DropdownMenuContent align={align} className={contentClassName}>
         {items.map((item, index) => renderDropdownItem(item, index))}
       </DropdownMenuContent>
     </DropdownMenu>
