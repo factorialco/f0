@@ -27,7 +27,6 @@ import { MetricSkeleton } from "../DashboardItem/DashboardItemSkeleton"
 interface MetricItemProps<Filters extends FiltersDefinition> {
   item: DashboardMetricItem<Filters>
   filters: FiltersState<Filters>
-  /** Refetch signal. See `F0AnalyticsDashboardProps.dataKey`. */
   dataKey?: string
   actions?: import("@/experimental/Navigation/Dropdown").DropdownItem[]
   itemFilters?: DashboardItemFiltersConfig
@@ -78,71 +77,52 @@ function formatValue(
 
 type MetricTrend = {
   direction: "up" | "down" | "flat"
-  /** Percentage change derived from `previousValue`. */
-  percent?: number
-  /**
-   * Host-supplied text, rendered verbatim in place of `percent` — the host
-   * owns sign, unit, locale and rounding.
-   */
-  label?: string
-  /** What the trend compares against, e.g. "vs previous month". */
+  text: string
+  /** The same change signed: the arrow that carries the sign is aria-hidden. */
+  srText: string
   comparisonLabel?: string
 }
 
-function computeTrend(
-  value: number,
-  previousValue?: number
-): MetricTrend | undefined {
+function computeTrend(value: number, previousValue?: number) {
   if (previousValue === undefined || previousValue === 0) return undefined
 
   const percent = ((value - previousValue) / Math.abs(previousValue)) * 100
   const direction = percent > 0.5 ? "up" : percent < -0.5 ? "down" : "flat"
 
-  return { percent: Math.abs(percent), direction }
+  return { percent: Math.abs(percent), direction } as const
 }
 
-/**
- * The trend to render: the host's when it sent one, otherwise the percentage
- * change against `previousValue`.
- */
 function resolveTrend(data: DashboardMetricData): MetricTrend | undefined {
-  const trend = data.trend
-    ? { direction: data.trend.direction, label: data.trend.label }
-    : computeTrend(data.value, data.previousValue)
+  const comparisonLabel = data.comparisonLabel || undefined
+  // An empty label leaves nothing to draw, so it counts as no host trend.
+  const label = data.trend?.label
+  if (data.trend && label) {
+    return {
+      direction: data.trend.direction,
+      text: label,
+      srText: label,
+      comparisonLabel,
+    }
+  }
 
-  if (!trend) return undefined
-  return data.comparisonLabel
-    ? { ...trend, comparisonLabel: data.comparisonLabel }
-    : trend
+  const computed = computeTrend(data.value, data.previousValue)
+  // A computed flat trend stays hidden — drawing it would change what existing
+  // dashboards show.
+  if (!computed || computed.direction === "flat") return undefined
+
+  const change = `${computed.percent.toFixed(1)}%`
+  return {
+    direction: computed.direction,
+    text: change,
+    srText: `${computed.direction === "up" ? "+" : "−"}${change}`,
+    comparisonLabel,
+  }
 }
 
-/**
- * The arrow + change beside the value, and the tooltip naming what it is
- * compared against.
- *
- * A `flat` trend is only drawn when the host sent the copy for it: a computed
- * one has nothing to say beyond "no meaningful change", which the absent badge
- * already says, and drawing it would change what existing dashboards show.
- */
 function MetricTrendBadge({ trend }: { trend?: MetricTrend }) {
   if (!trend) return null
 
-  const { comparisonLabel, direction, label, percent } = trend
-
-  // The sign only reaches a screen reader through the text: the arrow that
-  // carries it visually is hidden from the accessibility tree.
-  const computed =
-    percent === undefined || direction === "flat"
-      ? undefined
-      : {
-          change: `${percent.toFixed(1)}%`,
-          signedChange: `${direction === "up" ? "+" : "−"}${percent.toFixed(1)}%`,
-        }
-  const text =
-    label === undefined ? computed : { change: label, signedChange: label }
-
-  if (!text) return null
-  const { change, signedChange } = text
+  const { comparisonLabel, direction, srText, text } = trend
 
   const badge = (
     <div className="flex shrink-0 items-center">
@@ -158,7 +138,7 @@ function MetricTrendBadge({ trend }: { trend?: MetricTrend }) {
         />
       )}
       <span className="sr-only">
-        {comparisonLabel ? `${signedChange} ${comparisonLabel}` : signedChange}
+        {comparisonLabel ? `${srText} ${comparisonLabel}` : srText}
       </span>
       <span
         aria-hidden="true"
@@ -169,7 +149,7 @@ function MetricTrendBadge({ trend }: { trend?: MetricTrend }) {
           direction === "flat" && "text-f1-foreground-secondary"
         )}
       >
-        {change}
+        {text}
       </span>
     </div>
   )
@@ -208,7 +188,7 @@ export function MetricValue({
         (element.scrollWidth > element.clientWidth ||
           element.scrollHeight > element.clientHeight)
     )
-  }, [height, trend?.direction, trend?.label, trend?.percent, value, width])
+  }, [height, trend?.direction, trend?.text, value, width])
 
   return (
     <div

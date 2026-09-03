@@ -2,12 +2,6 @@ import type * as echarts from "echarts"
 
 import type { ChartTheme } from "./theme"
 
-/**
- * Opacity of a series drawn as a secondary reading (`series.muted`). Faded
- * enough to recede behind the primary series, solid enough to still be read.
- */
-export const MUTED_SERIES_OPACITY = 0.45
-
 // ---------------------------------------------------------------------------
 // Category axis
 // ---------------------------------------------------------------------------
@@ -399,10 +393,6 @@ export function buildLegend({
     icon: "circle",
     itemWidth: 10,
     itemHeight: 10,
-    // The legend is a list of what the chart contains, not a preview of how
-    // each series is drawn: a muted series still gets a solid dot, so its
-    // entry stays as clickable and as legible as every other.
-    itemStyle: { opacity: 1 },
     selectedMode: true,
     textStyle: {
       fontWeight: theme.textStyle.fontWeight,

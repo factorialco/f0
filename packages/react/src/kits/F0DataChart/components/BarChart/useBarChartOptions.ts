@@ -12,6 +12,8 @@ import type {
 
 import {
   darkenChartColor,
+  fadeChartColor,
+  mutedChartColor,
   paletteColor,
   resolveChartColorToken,
 } from "../../utils/colors"
@@ -19,7 +21,6 @@ import {
   buildBaseChartOptions,
   buildItemTooltip,
   labelWidthCap,
-  MUTED_SERIES_OPACITY,
   renderMarker,
   renderValueTooltip,
   tooltipValueFormat,
@@ -211,9 +212,11 @@ function getPointColor(point: F0DataChartBarDataPoint): string | undefined {
 
 /** Resolve the color for a series to hex, falling back to the shared palette */
 function resolveColor(series: F0DataChartBarSeries, index: number): string {
-  return series.color
+  const color = series.color
     ? resolveChartColorToken(series.color)
     : paletteColor(index)
+  // Muting by colour, so bars, target ghosts and legend swatch fade alike.
+  return series.muted ? mutedChartColor(color) : color
 }
 
 /**
@@ -594,7 +597,6 @@ function buildSeriesEntries(
     itemStyle: {
       color,
       borderRadius,
-      ...(series.muted && { opacity: MUTED_SERIES_OPACITY }),
       // ECharts has no native gap between stacked segments — a border in the
       // container's background color is the standard way to separate them.
       ...(stacked && {
@@ -695,9 +697,9 @@ function buildSeriesEntries(
           : ([1, 0, 0, 0] as [number, number, number, number])),
         [
           // offset 0 = far end from the solid bar → more opaque (darker)
-          { offset: 0, color: `${color}33` },
+          { offset: 0, color: fadeChartColor(color, 0.2) },
           // offset 1 = near the solid bar → transparent
-          { offset: 1, color: `${color}00` },
+          { offset: 1, color: fadeChartColor(color, 0) },
         ]
       ),
       // Only round the far end (away from the solid bar)

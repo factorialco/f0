@@ -62,7 +62,6 @@ interface DashboardGridProps<Filters extends FiltersDefinition> {
   onLayoutChange?: (layout: DashboardItemLayout[]) => void
   /** Incrementing counter that forces the grid to reset rows to initial layout. */
   resetKey?: number
-  /** Refetch signal forwarded to every item. See `F0AnalyticsDashboardProps.dataKey`. */
   dataKey?: string
   /** Called when a chart item's type is changed */
   onTransformChart?: (

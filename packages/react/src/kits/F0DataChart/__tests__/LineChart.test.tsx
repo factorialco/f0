@@ -284,45 +284,35 @@ describe("LineChart — tooltip value formatting", () => {
 describe("LineChart — muted series", () => {
   const optionSeries = () =>
     getLatestOption().series as Array<{
+      itemStyle?: { color?: string; opacity?: number }
       lineStyle?: { opacity?: number; type?: string }
-      itemStyle?: { opacity?: number }
     }>
 
-  it("fades a muted series and leaves the others at full strength", () => {
-    render(
-      <F0DataChart
-        type="line"
-        categories={["Jan", "Feb"]}
-        series={[
-          { name: "This period", data: [1, 2] },
-          { name: "Previous period", data: [3, 4], muted: true, dashed: true },
-        ]}
-      />
-    )
+  const chart = (muted: boolean) => (
+    <F0DataChart
+      type="line"
+      categories={["Jan", "Feb"]}
+      series={[
+        { name: "This period", data: [1, 2] },
+        { name: "Previous period", data: [3, 4], muted, dashed: muted },
+      ]}
+    />
+  )
 
+  it("fades the muted series' colour and leaves its sibling identical", () => {
+    const { unmount } = render(chart(false))
+    const plain = optionSeries()
+    unmount()
+
+    render(chart(true))
     const [current, previous] = optionSeries()
-    expect(current.lineStyle?.opacity).toBeUndefined()
-    expect(current.itemStyle?.opacity).toBeUndefined()
-    expect(previous.lineStyle?.opacity).toBe(0.45)
-    expect(previous.itemStyle?.opacity).toBe(0.45)
+
+    expect(current).toEqual(plain[0])
+    // Same colour at 45% alpha (`73`), so the line, its dots, its area fill
+    // and its legend swatch all fade together without an opacity key.
+    expect(previous.itemStyle?.color).toBe(`${plain[1].itemStyle?.color}73`)
+    expect(previous.itemStyle).not.toHaveProperty("opacity")
+    expect(previous.lineStyle).not.toHaveProperty("opacity")
     expect(previous.lineStyle?.type).toBe("dashed")
-  })
-
-  it("keeps the legend entry at full strength", () => {
-    render(
-      <F0DataChart
-        type="line"
-        categories={["Jan", "Feb"]}
-        series={[
-          { name: "This period", data: [1, 2] },
-          { name: "Previous period", data: [3, 4], muted: true },
-        ]}
-      />
-    )
-
-    const legend = getLatestOption().legend as {
-      itemStyle?: { opacity?: number }
-    }
-    expect(legend.itemStyle?.opacity).toBe(1)
   })
 })

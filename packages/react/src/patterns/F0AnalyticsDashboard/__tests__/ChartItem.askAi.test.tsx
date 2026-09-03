@@ -23,10 +23,10 @@ import type { F0AnalyticsDashboardPointClick } from "../types"
 import {
   buildPointQuoteText,
   buildAccessibleChartPoints,
-  buildChartProps,
   ChartItem,
   hasAccessibleChartPoint,
 } from "../components/ChartItem/ChartItem"
+import { buildChartProps } from "../components/ChartItem/chartProps"
 
 /** The mark a click lands on, as `usePointClick` would report it. */
 const POINT: F0DataChartPointClick = {

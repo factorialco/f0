@@ -1,9 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import type {
-  F0DataChartBarProps,
-  F0DataChartLineProps,
-} from "@/kits/F0DataChart"
+import type { F0DataChartProps } from "@/kits/F0DataChart"
 
 import type {
   DashboardChartConfig,
@@ -11,7 +8,7 @@ import type {
   DashboardChartItem,
 } from "../types"
 
-import { buildChartProps } from "../components/ChartItem/ChartItem"
+import { buildChartProps } from "../components/ChartItem/chartProps"
 
 const seriesData: DashboardChartData = {
   categories: ["Jan", "Feb"],
@@ -31,6 +28,15 @@ function chartItem(chart: DashboardChartConfig): DashboardChartItem {
   }
 }
 
+function assertChartType<T extends F0DataChartProps["type"]>(
+  props: F0DataChartProps,
+  type: T
+): asserts props is Extract<F0DataChartProps, { type: T }> {
+  if (props.type !== type) {
+    throw new Error(`Expected a ${type} chart, got ${props.type}`)
+  }
+}
+
 describe("comparisonSeriesNames", () => {
   it("mutes and dashes the named series on a line chart", () => {
     const props = buildChartProps(
@@ -39,7 +45,8 @@ describe("comparisonSeriesNames", () => {
         comparisonSeriesNames: ["Previous period"],
       }),
       seriesData
-    ) as F0DataChartLineProps
+    )
+    assertChartType(props, "line")
 
     expect(props.series).toEqual([
       { name: "This period", data: [10, 12] },
@@ -51,7 +58,8 @@ describe("comparisonSeriesNames", () => {
     const props = buildChartProps(
       chartItem({ type: "bar", comparisonSeriesNames: ["Previous period"] }),
       seriesData
-    ) as F0DataChartBarProps
+    )
+    assertChartType(props, "bar")
 
     expect(props.series).toEqual([
       { name: "This period", data: [10, 12] },
@@ -59,11 +67,18 @@ describe("comparisonSeriesNames", () => {
     ])
   })
 
-  it("leaves series untouched when the config names none", () => {
+  it("keeps the names out of the chart props", () => {
     const props = buildChartProps(
-      chartItem({ type: "line" }),
+      chartItem({ type: "line", comparisonSeriesNames: ["Previous period"] }),
       seriesData
-    ) as F0DataChartLineProps
+    )
+
+    expect(props).not.toHaveProperty("comparisonSeriesNames")
+  })
+
+  it("leaves series untouched when the config names none", () => {
+    const props = buildChartProps(chartItem({ type: "line" }), seriesData)
+    assertChartType(props, "line")
 
     expect(props.series).toEqual(seriesData.series)
   })
@@ -72,7 +87,8 @@ describe("comparisonSeriesNames", () => {
     const props = buildChartProps(
       chartItem({ type: "line", comparisonSeriesNames: ["Last year"] }),
       seriesData
-    ) as F0DataChartLineProps
+    )
+    assertChartType(props, "line")
 
     expect(props.series).toEqual(seriesData.series)
   })

@@ -23,7 +23,6 @@ import { DashboardItem } from "../DashboardItem/DashboardItem"
 interface CollectionItemProps<Filters extends FiltersDefinition> {
   item: DashboardCollectionItem<Filters>
   filters: FiltersState<Filters>
-  /** Refetch signal. See `F0AnalyticsDashboardProps.dataKey`. */
   dataKey?: string
   actions?: DropdownItem[]
   itemFilters?: DashboardItemFiltersConfig

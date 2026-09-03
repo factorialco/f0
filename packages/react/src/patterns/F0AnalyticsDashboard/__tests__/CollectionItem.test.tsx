@@ -79,22 +79,19 @@ describe("CollectionItem", () => {
     ])
   })
 
-  it("recreates the source when the dataKey changes", () => {
+  it("re-creates its source on a dataKey change instead of refetching in place", () => {
     const createSource = vi.fn(() => ({ id: "source" }))
+    const collection = item(createSource)
 
     const { rerender } = render(
-      <CollectionItem
-        item={item(createSource) as never}
-        filters={{}}
-        dataKey="none"
-      />
+      <CollectionItem item={collection} filters={{}} dataKey="none" />
     )
 
     expect(createSource).toHaveBeenCalledOnce()
 
     rerender(
       <CollectionItem
-        item={item(createSource) as never}
+        item={collection}
         filters={{}}
         dataKey="previous_period"
       />

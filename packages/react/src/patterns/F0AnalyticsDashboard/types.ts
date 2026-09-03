@@ -50,11 +50,9 @@ interface ChartConfigBase {
   /** Format category axis tick labels */
   categoryFormatter?: (value: string) => string
   /**
-   * Names of series that carry a comparison baseline (e.g. the same measure
-   * over the previous period). They are drawn muted — reduced opacity, and
-   * dashed on a line chart — so the current period stays the figure being
-   * read. Their legend entries are untouched, so switching one off works the
-   * same way as for any other series.
+   * Names of the series carrying a comparison baseline — drawn faded, and
+   * dashed on a line chart. Matched after any chart-type transform, so a
+   * series the transform renamed or collapsed is not muted.
    */
   comparisonSeriesNames?: string[]
 }
@@ -347,19 +345,13 @@ export type MetricFormat =
   | { type: "custom"; suffix?: string; prefix?: string }
 
 /**
- * A trend the host computed itself, shown beside the metric value.
- *
- * Use it when the change is not a percentage of `previousValue` — a difference
- * in percentage points, a server-side comparison against a target, a figure
- * whose rounding must match a report elsewhere.
+ * A trend the host computed itself, for a change that is not a percentage of
+ * `previousValue` — percentage points, a target comparison, a rounding.
  */
 export interface DashboardMetricTrend {
-  /** Which way the change points. `flat` renders neutrally, without an arrow. */
+  /** `flat` renders neutrally, without an arrow. */
   direction: "up" | "down" | "flat"
-  /**
-   * Rendered verbatim next to the arrow, so the host owns sign, unit, locale
-   * and rounding — "+1.2 pp", "−12.5%", "sin cambios".
-   */
+  /** Rendered verbatim ("+1.2 pp"); empty falls back to `previousValue`. */
   label: string
 }
 
@@ -369,16 +361,9 @@ export interface DashboardMetricData {
   value: number
   /** Optional previous value — used to compute a trend indicator */
   previousValue?: number
-  /**
-   * A ready-made trend. Takes precedence over the one derived from
-   * `previousValue`, which stays the default when this is absent.
-   */
+  /** Takes precedence over the trend derived from `previousValue`. */
   trend?: DashboardMetricTrend
-  /**
-   * What the trend compares against, e.g. "vs previous month". Shown in a
-   * tooltip on the trend and announced with it, so the figure states its own
-   * baseline instead of relying on the widget title.
-   */
+  /** What the trend compares against, e.g. "vs previous month". Tooltip + screen reader. */
   comparisonLabel?: string
 }
 
@@ -681,19 +666,14 @@ export interface F0AnalyticsDashboardProps<
    * Rendered above the grid alongside the regular filter bar.
    */
   navigationFilters?: NavigationFiltersDefinition
-  /**
-   * Host controls rendered in the header row, immediately left of the
-   * navigation filters — a comparison picker beside the date navigator.
-   * Nothing is rendered, and no row appears, when omitted.
-   */
+  /** Host controls in the header row, left of the navigation filters. */
   navigationActions?: ReactNode
   /**
-   * Changes when the host wants widgets to refetch with the same filters
-   * (e.g. a comparison target changed).
-   *
-   * Every item re-runs its `fetchData` in place: the grid is not remounted and
-   * the data already on screen stays visible, dimmed, until the new result
-   * arrives. A widget with nothing to keep shows its skeleton as usual.
+   * Changes when the host wants widgets to refetch with the same filters. The
+   * grid is not remounted: metric and chart items re-run `fetchData` in place,
+   * keeping what is on screen visible but dimmed until the result arrives. A
+   * collection item instead re-creates its data source, which owns the fetch,
+   * so its page, sort and selection reset.
    */
   dataKey?: string
 }

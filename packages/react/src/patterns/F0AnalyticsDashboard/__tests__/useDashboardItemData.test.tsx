@@ -1,6 +1,11 @@
 import { act, waitFor } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 
+import type {
+  FiltersDefinition,
+  FiltersState,
+} from "@/patterns/OneFilterPicker/types"
+
 import { zeroRenderHook as renderHook } from "@/testing/test-utils"
 
 import { useDashboardItemData } from "../hooks/useDashboardItemData"
@@ -82,5 +87,25 @@ describe("useDashboardItemData", () => {
     await act(async () => resolveFirst?.({ value: 10 }))
 
     expect(result.current.data).toEqual({ value: 20 })
+  })
+
+  it("goes back to the skeleton on a filters change, dimming only for a dataKey", async () => {
+    const fetchData = vi
+      .fn()
+      .mockResolvedValueOnce({ value: 10 })
+      .mockImplementationOnce(() => new Promise(() => {}))
+    const { result, rerender } = renderHook(
+      ({ filters }) =>
+        useDashboardItemData(fetchData, filters, true, "{}", "none"),
+      { initialProps: { filters: {} as FiltersState<FiltersDefinition> } }
+    )
+
+    await waitFor(() => expect(result.current.data).toEqual({ value: 10 }))
+
+    rerender({ filters: { country: { operator: "equals", values: ["ES"] } } })
+
+    await waitFor(() => expect(fetchData).toHaveBeenCalledTimes(2))
+    expect(result.current.isLoading).toBe(true)
+    expect(result.current.isRefreshing).toBe(false)
   })
 })

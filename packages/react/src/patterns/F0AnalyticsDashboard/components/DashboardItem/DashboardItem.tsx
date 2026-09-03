@@ -54,11 +54,7 @@ interface DashboardItemProps {
    */
   info?: string | InfoHintContent
   isLoading: boolean
-  /**
-   * A refetch is in flight while the previous data is still rendered. The
-   * content dims instead of collapsing to the skeleton, and the card reports
-   * itself busy.
-   */
+  /** A refetch is in flight: dim the previous data instead of collapsing to the skeleton. */
   isRefreshing?: boolean
   error?: Error
   onRetry?: () => void
@@ -558,8 +554,6 @@ export function DashboardItem({
         className={cn(
           "flex-1",
           !fitContent && "min-h-0",
-          // Still readable, visibly not the final answer. The card's aria-busy
-          // is what says so to a screen reader.
           isRefreshing && "opacity-60 transition-opacity duration-150"
         )}
       >

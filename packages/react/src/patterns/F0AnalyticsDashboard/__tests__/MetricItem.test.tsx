@@ -161,7 +161,10 @@ describe("MetricItem", () => {
     expect(container).not.toHaveAttribute("tabindex")
 
     rerender(
-      <MetricValue value="100" trend={{ percent: 100, direction: "up" }} />
+      <MetricValue
+        value="100"
+        trend={{ direction: "up", text: "100.0%", srText: "+100.0%" }}
+      />
     )
 
     await screen.findByText("+100.0%")

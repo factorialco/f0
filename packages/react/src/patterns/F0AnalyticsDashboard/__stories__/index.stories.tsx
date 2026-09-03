@@ -1082,12 +1082,22 @@ export const HoverItemFilterSignal: Story = {
 // Period comparison
 // ---------------------------------------------------------------------------
 
-type CompareTarget = "none" | "previous_period" | "previous_year"
+const COMPARISON_PERIODS = {
+  previous_week: "week",
+  previous_month: "month",
+  previous_quarter: "quarter",
+  previous_half_year: "half year",
+  previous_year: "year",
+} as const
+
+type CompareTarget = "none" | keyof typeof COMPARISON_PERIODS
 
 const comparisonOptions: F0SelectItemProps<CompareTarget>[] = [
   { value: "none", label: "No comparison" },
-  { value: "previous_period", label: "Previous period" },
-  { value: "previous_year", label: "Previous year" },
+  ...Object.entries(COMPARISON_PERIODS).map(([value, period]) => ({
+    value: value as CompareTarget,
+    label: `Previous ${period}`,
+  })),
 ]
 
 const COMPARISON_MONTHS = ["Apr", "May", "Jun", "Jul", "Aug", "Sep"]
@@ -1101,8 +1111,9 @@ const withLatency = <T,>(value: T): Promise<T> =>
 
 const comparisonItems = (compareTo: CompareTarget): DashboardItem[] => {
   const comparing = compareTo !== "none"
-  const comparisonLabel =
-    compareTo === "previous_year" ? "vs same period last year" : "vs Oct–Mar"
+  const comparisonLabel = comparing
+    ? `vs previous ${COMPARISON_PERIODS[compareTo]}`
+    : ""
 
   return [
     {
@@ -1180,7 +1191,7 @@ const comparisonItems = (compareTo: CompareTarget): DashboardItem[] => {
 }
 
 const ComparisonDashboard = () => {
-  const [compareTo, setCompareTo] = useState<CompareTarget>("previous_period")
+  const [compareTo, setCompareTo] = useState<CompareTarget>("previous_month")
   const items = useMemo(() => comparisonItems(compareTo), [compareTo])
 
   return (
@@ -1215,8 +1226,8 @@ const ComparisonDashboard = () => {
  *
  * The metrics render a server-computed `trend` verbatim — a percentage, a
  * difference in percentage points, and a neutral "No change" — each with the
- * `comparisonLabel` in a tooltip. The chart draws the previous period muted
- * and dashed via `comparisonSeriesNames`, with its legend entry untouched.
+ * `comparisonLabel` in a tooltip. The chart draws the previous period faded
+ * and dashed via `comparisonSeriesNames`, still listed in the legend.
  */
 export const PeriodComparison: Story = {
   tags: ["no-sidebar"],
@@ -1228,7 +1239,9 @@ export const PeriodComparison: Story = {
     await expect(canvas.getByText("No change")).toBeInTheDocument()
     // The trend badge announces its own baseline, not just the change.
     await expect(
-      canvas.getByText("−1.2 pp vs Oct–Mar", { selector: ".sr-only" })
+      canvas.getByText("−1.2 pp vs previous month", {
+        selector: ".sr-only",
+      })
     ).toBeInTheDocument()
   },
 }

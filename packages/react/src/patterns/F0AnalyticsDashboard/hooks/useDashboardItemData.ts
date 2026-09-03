@@ -13,11 +13,7 @@ export interface DashboardItemDataState<T> {
   data: T | undefined
   /** Whether a fetch is in progress with nothing to show meanwhile */
   isLoading: boolean
-  /**
-   * Whether a fetch is in progress while the previous result stays on screen.
-   * Only a `dataKey` change fetches this way; everything else keeps showing
-   * the skeleton.
-   */
+  /** Whether a fetch is in progress while the previous result stays on screen */
   isRefreshing: boolean
   /** The most recent error, if any */
   error: Error | undefined
@@ -30,10 +26,8 @@ export interface DashboardItemDataState<T> {
  *
  * Calls `fetchData(filters)` whenever the filters change, managing
  * loading / error / data states and protecting against stale responses
- * via an incrementing request counter.
- *
- * `dataKey` refetches the same question — the previous result stays on screen
- * as `isRefreshing` instead of being replaced by a skeleton.
+ * via an incrementing request counter. A `dataKey` change refetches the same
+ * question, keeping the previous result on screen as `isRefreshing`.
  */
 export function useDashboardItemData<Filters extends FiltersDefinition, T>(
   fetchData: (filters: FiltersState<Filters>) => Promise<T>,
@@ -50,8 +44,6 @@ export function useDashboardItemData<Filters extends FiltersDefinition, T>(
   // Incrementing counter to discard stale responses
   const requestIdRef = useRef(0)
 
-  // Read inside `doFetch` to decide whether there is anything worth keeping on
-  // screen during a soft refetch, without making the callback depend on it.
   const dataRef = useRef(data)
   dataRef.current = data
 
@@ -66,10 +58,7 @@ export function useDashboardItemData<Filters extends FiltersDefinition, T>(
   const doFetch = useCallback(
     (soft = false) => {
       const id = ++requestIdRef.current
-      // A soft refetch answers the same question with a different comparison
-      // target, so the answer already on screen is still worth reading while the
-      // next one loads. With nothing fetched yet there is nothing to keep, and
-      // the skeleton is the honest state.
+      // Nothing fetched yet means nothing to keep.
       const keepPrevious = soft && dataRef.current !== undefined
       setIsLoading(!keepPrevious)
       setIsRefreshing(keepPrevious)
@@ -109,14 +98,11 @@ export function useDashboardItemData<Filters extends FiltersDefinition, T>(
   // When disabled, use a static key so dashboard filter changes don't refetch.
   const filtersKey = enabled ? JSON.stringify(filters) : "disabled"
 
-  // What the widget is asking about. A change here means the answer on screen
-  // is about to be replaced by a different one, so it goes back to a skeleton.
   const questionKey = `${filtersKey}|${refreshKey}`
   const previousQuestionKeyRef = useRef<string | null>(null)
 
   useEffect(() => {
-    // Same question, new `dataKey`: the only case that keeps the previous
-    // result visible. Mount included, since the ref starts unset.
+    // Mount included, since the ref starts unset.
     const soft = previousQuestionKeyRef.current === questionKey
     previousQuestionKeyRef.current = questionKey
     doFetch(soft)

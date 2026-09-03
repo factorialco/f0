@@ -2,15 +2,19 @@ import { describe, expect, it, vi } from "vitest"
 
 import { screen, waitFor, zeroRender as render } from "@/testing/test-utils"
 
-import type { DashboardMetricData, DashboardMetricItem } from "../types"
+import type {
+  DashboardChartItem,
+  DashboardMetricData,
+  DashboardMetricItem,
+} from "../types"
 
 import { F0AnalyticsDashboard } from "../F0AnalyticsDashboard"
 
-const containerSize = vi.hoisted(() => ({ width: 320, height: 0 }))
-
-vi.mock("@/kits/F0DataChart/utils/useContainerSize", () => ({
-  useContainerSize: () => containerSize,
-}))
+// jsdom has no canvas context; the refetch this pins is ordinary React state.
+vi.mock("@/kits/F0DataChart", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/kits/F0DataChart")>()
+  return { ...actual, F0DataChart: () => <div aria-label="Chart" role="img" /> }
+})
 
 function metricItem(
   fetchData: DashboardMetricItem["fetchData"]
@@ -120,5 +124,31 @@ describe("F0AnalyticsDashboard comparison props", () => {
 
     await screen.findByText("10")
     expect(screen.queryByRole("button", { name: "Compare to" })).toBeNull()
+  })
+
+  it("refetches a chart item on a dataKey change", async () => {
+    const fetchData = vi
+      .fn<DashboardChartItem["fetchData"]>()
+      .mockResolvedValue({
+        categories: ["Jan", "Feb"],
+        series: [{ name: "This period", data: [1, 2] }],
+      })
+    const chart: DashboardChartItem = {
+      id: "headcount-trend",
+      title: "Headcount over time",
+      type: "chart",
+      chart: { type: "line", comparisonSeriesNames: ["Previous period"] },
+      fetchData,
+    }
+
+    const { rerender } = render(
+      <F0AnalyticsDashboard items={[chart]} dataKey="none" />
+    )
+
+    await waitFor(() => expect(fetchData).toHaveBeenCalledTimes(1))
+
+    rerender(<F0AnalyticsDashboard items={[chart]} dataKey="previous_month" />)
+
+    await waitFor(() => expect(fetchData).toHaveBeenCalledTimes(2))
   })
 })

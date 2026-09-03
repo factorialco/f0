@@ -10,11 +10,15 @@ import type {
   F0DataChartLineType,
 } from "../../types"
 
-import { paletteColor, resolveChartColorToken } from "../../utils/colors"
+import {
+  fadeChartColor,
+  mutedChartColor,
+  paletteColor,
+  resolveChartColorToken,
+} from "../../utils/colors"
 import {
   buildBaseChartOptions,
   deltaRow,
-  MUTED_SERIES_OPACITY,
   renderValueTooltip,
   tooltipValueFormat,
 } from "../../utils/options"
@@ -29,9 +33,11 @@ function getValue(point: F0DataChartLineDataPoint): number {
 
 /** Resolve the color for a series to hex, falling back to the shared palette */
 function resolveColor(series: F0DataChartLineSeries, index: number): string {
-  return series.color
+  const color = series.color
     ? resolveChartColorToken(series.color)
     : paletteColor(index)
+  // Muting by colour, so line, dots, area fill and legend swatch fade alike.
+  return series.muted ? mutedChartColor(color) : color
 }
 
 /**
@@ -64,8 +70,8 @@ function resolveLineStyle(lineType: F0DataChartLineType): {
 function buildAreaStyle(color: string): echarts.LineSeriesOption["areaStyle"] {
   return {
     color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-      { offset: 0, color: `${color}59` },
-      { offset: 1, color: `${color}00` },
+      { offset: 0, color: fadeChartColor(color, 0.35) },
+      { offset: 1, color: fadeChartColor(color, 0) },
     ]),
   }
 }
@@ -86,7 +92,6 @@ function buildSeriesEntry(
   const lineType = series.lineType ?? globalLineType
   const showArea = series.showArea ?? globalShowArea
   const { smooth, step } = resolveLineStyle(lineType)
-  const opacity = series.muted ? MUTED_SERIES_OPACITY : undefined
 
   return {
     name: series.name,
@@ -96,12 +101,10 @@ function buildSeriesEntry(
     step,
     itemStyle: {
       color,
-      opacity,
     },
     lineStyle: {
       width: 2,
       type: series.dashed ? "dashed" : "solid",
-      opacity,
     },
     areaStyle: showArea ? buildAreaStyle(color) : undefined,
     showSymbol: showDots,
