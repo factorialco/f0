@@ -3896,6 +3896,8 @@ export declare interface DashboardCollectionItem<Filters extends FiltersDefiniti
      * ride here because its source owns its rows.
      */
     rowTrends?: DashboardRowTrends;
+    /** Sorting key of `createSource` that orders rows by their change; the column sorts only when the source can. */
+    rowTrendsSorting?: string;
 }
 
 export declare interface DashboardFetchSpec {
@@ -20651,11 +20653,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        fontSize: {
+            setFontSize: (fontSize: string) => ReturnType;
+            unsetFontSize: () => ReturnType;
         };
     }
 }
@@ -20663,9 +20663,11 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        fontSize: {
-            setFontSize: (fontSize: string) => ReturnType;
-            unsetFontSize: () => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }

@@ -66068,11 +66068,12 @@ function Nfe({
 function oF(r, e, t = p5) {
   return e[String(t(r))];
 }
-function Ife(r, e, t) {
+function Ife(r, e, t, n) {
   return {
     id: "dashboard-row-change",
     label: r,
-    render: (n) => kfe(oF(n, e, t))
+    sorting: n,
+    render: (i) => kfe(oF(i, e, t))
   };
 }
 function kfe(r) {
@@ -66130,7 +66131,8 @@ function Pfe({
     const A = Ife(
       C,
       r.rowTrends,
-      g?.idProvider
+      g?.idProvider,
+      r.rowTrendsSorting
     );
     return r.visualizations.map(
       (D) => D?.type === "table" ? {
@@ -66141,7 +66143,13 @@ function Pfe({
         }
       } : D
     );
-  }, [r.visualizations, r.rowTrends, g, C]);
+  }, [
+    r.visualizations,
+    r.rowTrends,
+    r.rowTrendsSorting,
+    g,
+    C
+  ]);
   return /* @__PURE__ */ x(
     fg,
     {
