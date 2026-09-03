@@ -357,6 +357,79 @@ describe("F0Map", () => {
       })
     })
 
+    it("carries a flight through to its zoom when a panel opens mid-way", () => {
+      // The reveal flies to zoom 15; the panel then opens and re-centres the
+      // selection. Without carrying the flight's target, that second move
+      // targets whatever the zoom had reached and abandons the zoom-in.
+      const ref = createRef<F0MapHandle>()
+      const { rerender } = render(
+        <F0Map ref={ref} markers={POINTS} selectedMarkerId="hq" />
+      )
+      ref.current?.focusMarker("hq")
+
+      rerender(
+        <F0Map
+          ref={ref}
+          markers={POINTS}
+          selectedMarkerId="hq"
+          viewportInset={{ right: 360 }}
+        />
+      )
+
+      const easeTo = mock.instances[0].calls.easeTo
+      expect(easeTo.at(-1)?.center).toEqual([2.19, 41.4])
+      expect(easeTo.at(-1)?.zoom).toBe(15)
+      expect(easeTo.at(-1)?.padding).toEqual({
+        top: 0,
+        right: 360,
+        bottom: 0,
+        left: 0,
+      })
+    })
+
+    it("leaves the zoom alone when the panel opens over a clicked selection", () => {
+      const { rerender } = render(
+        <F0Map markers={POINTS} centerOnMarkerClick selectedMarkerId="hq" />
+      )
+      const pin = mock.markerElements[0]?.querySelector("button")
+      if (!pin) throw new Error("no pin rendered")
+      fireEvent.click(pin)
+
+      rerender(
+        <F0Map
+          markers={POINTS}
+          centerOnMarkerClick
+          selectedMarkerId="hq"
+          viewportInset={{ right: 360 }}
+        />
+      )
+
+      // A click never zoomed, so the panel opening must not either.
+      expect(mock.instances[0].calls.easeTo.at(-1)?.zoom).toBeUndefined()
+    })
+
+    it("stops carrying a flight once the camera has been fitted", () => {
+      const ref = createRef<F0MapHandle>()
+      const { rerender } = render(
+        <F0Map ref={ref} markers={POINTS} selectedMarkerId="hq" />
+      )
+      ref.current?.focusMarker("hq")
+      ref.current?.fitToMarkers()
+
+      rerender(
+        <F0Map
+          ref={ref}
+          markers={POINTS}
+          selectedMarkerId="hq"
+          viewportInset={{ right: 360 }}
+        />
+      )
+
+      // The zoom-out already happened; re-applying the flight's zoom would
+      // silently undo it.
+      expect(mock.instances[0].calls.easeTo.at(-1)?.zoom).toBeUndefined()
+    })
+
     it("does not re-ease when the inset is rebuilt with the same values", () => {
       const { rerender } = render(
         <F0Map markers={POINTS} viewportInset={{ right: 360 }} />

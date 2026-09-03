@@ -244,19 +244,25 @@ const centerPoint = (
   })
 }
 
-/** Center on a single point, zooming in when the camera isn't already close. */
+/**
+ * Center on a single point, zooming in when the camera isn't already close.
+ * Returns the zoom it commanded, so a camera move that lands mid-flight can
+ * carry on to it instead of freezing wherever the animation had reached.
+ */
 const focusPoint = (
   map: maplibregl.Map,
   point: F0MapPoint,
   animate: boolean,
   inset?: F0MapViewportInset
 ) => {
+  const zoom = Math.max(map.getZoom(), 15)
   map.easeTo({
     center: point.coordinates,
-    zoom: Math.max(map.getZoom(), 15),
+    zoom,
     padding: cameraPadding(inset, 0),
     animate,
   })
+  return zoom
 }
 
 const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
@@ -340,6 +346,11 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
   insetRef.current = viewportInset
   const selectedIdRef = useRef(selectedId)
   selectedIdRef.current = selectedId
+  // Zoom a flight is heading to, or `null` when the camera is not flying
+  // anywhere. `easeTo` without a `zoom` targets whatever the zoom happens to be
+  // when it runs, so a move that lands mid-flight - the panel opening and
+  // re-centering the selection - would otherwise abandon the zoom halfway.
+  const flightZoomRef = useRef<number | null>(null)
   const routesRef = useRef(routes)
   routesRef.current = routes
   const arcsRef = useRef(arcs)
@@ -358,8 +369,11 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
         const point = markersRef.current.find(
           (candidate) => candidate.id === id
         )
-        if (map && point)
+        if (map && point) {
+          // A click has no zoom intent, so nothing is in flight afterwards.
+          flightZoomRef.current = null
           centerPoint(map, point, !reduceMotion, insetRef.current)
+        }
       }
       selectRef.current(id)
     },
@@ -391,6 +405,8 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
   const handleZoomIn = useCallback(() => mapRef.current?.zoomIn(), [])
   const handleZoomOut = useCallback(() => mapRef.current?.zoomOut(), [])
   const handleFit = useCallback(() => {
+    // A fit ends any flight: there is no single target zoom any more.
+    flightZoomRef.current = null
     if (mapRef.current)
       fitToPoints(
         mapRef.current,
@@ -419,7 +435,13 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
     (id: string) => {
       const map = mapRef.current
       const point = markersRef.current.find((p) => p.id === id)
-      if (map && point) focusPoint(map, point, !reduceMotion, insetRef.current)
+      if (map && point)
+        flightZoomRef.current = focusPoint(
+          map,
+          point,
+          !reduceMotion,
+          insetRef.current
+        )
       selectMarker(id)
     },
     [reduceMotion, selectMarker]
@@ -433,10 +455,16 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
         const map = mapRef.current
         const point = markersRef.current.find((p) => p.id === id)
         if (!map || !point) return
-        focusPoint(map, point, !reduceMotion, insetRef.current)
+        flightZoomRef.current = focusPoint(
+          map,
+          point,
+          !reduceMotion,
+          insetRef.current
+        )
         selectRef.current(id)
       },
       fitToMarkers: () => {
+        flightZoomRef.current = null
         if (mapRef.current)
           fitToPoints(
             mapRef.current,
@@ -572,7 +600,13 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
     if (!highlightedId) return
     const map = mapRef.current
     const point = markersRef.current.find((p) => p.id === highlightedId)
-    if (map && point) focusPoint(map, point, !reduceMotion, insetRef.current)
+    if (map && point)
+      flightZoomRef.current = focusPoint(
+        map,
+        point,
+        !reduceMotion,
+        insetRef.current
+      )
   }, [highlightedId, reduceMotion])
 
   // Re-centre when the panel covering the map opens, resizes or closes. Camera
@@ -600,11 +634,21 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
     const selected = markersRef.current.find(
       (point) => point.id === selectedIdRef.current
     )
-    map.easeTo(
-      selected
-        ? { center: selected.coordinates, padding, animate: !reduceMotion }
-        : { padding, animate: !reduceMotion }
-    )
+    if (!selected) {
+      map.easeTo({ padding, animate: !reduceMotion })
+      return
+    }
+
+    map.easeTo({
+      center: selected.coordinates,
+      padding,
+      // Carry on to the flight's target when one is in progress; otherwise leave
+      // the zoom alone, so opening a panel over a click-selection never zooms.
+      ...(flightZoomRef.current !== null
+        ? { zoom: flightZoomRef.current }
+        : {}),
+      animate: !reduceMotion,
+    })
   }, [viewportInset, reduceMotion])
 
   const hasLines = routes.length > 0 || arcs.length > 0
