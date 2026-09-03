@@ -34,6 +34,18 @@ export type ChartConfig = {
      * gradient instead of using a solid fill.
      */
     projected?: boolean
+    /**
+     * Key of the series this one continues, e.g. a forecast extending the
+     * actuals. The chart bridges the gap by giving this series the last value
+     * of the continued one, so both lines connect. Consumed by the chart
+     * kits via `bridgeContinuedSeries` before rendering.
+     */
+    continues?: string
+    /**
+     * Swatch drawn for this series in the legend: a round dot (the default)
+     * or a line stroke (dashed when the series is dashed).
+     */
+    legendIndicator?: "dot" | "line"
   } & (
     | { color?: string; theme?: never }
     | { color?: never; theme: Record<keyof typeof THEMES, string> }
@@ -44,6 +56,7 @@ type ChartConfigValue = {
   label?: React.ReactNode
   icon?: React.ComponentType
   dashed?: boolean
+  continues?: string
 } & (
   | { color?: string; theme?: never }
   | { color?: never; theme: Record<keyof typeof THEMES, string> }
@@ -390,6 +403,7 @@ const ChartLegendContent = React.forwardRef<
             key,
             hiddenKey
           )
+          const indicator = itemConfig?.legendIndicator ?? "dot"
 
           return (
             <div
@@ -400,6 +414,14 @@ const ChartLegendContent = React.forwardRef<
             >
               {itemConfig?.icon && !hideIcon ? (
                 <itemConfig.icon />
+              ) : itemConfig && indicator === "line" ? (
+                <div
+                  className="w-4 shrink-0 border-t-2"
+                  style={{
+                    borderColor: item.color,
+                    borderTopStyle: itemConfig.dashed ? "dashed" : "solid",
+                  }}
+                />
               ) : (
                 itemConfig && (
                   <div

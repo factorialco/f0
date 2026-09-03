@@ -23,7 +23,7 @@ import {
   yAxisProps,
 } from "../utils/elements"
 import { fixedForwardRef } from "../utils/forwardRef"
-import { prepareData } from "../utils/muncher"
+import { bridgeContinuedSeries, prepareData } from "../utils/muncher"
 import { LineChartPropsBase } from "../utils/types"
 
 export type LineChartProps<K extends LineChartConfig = LineChartConfig> =
@@ -45,7 +45,7 @@ export const _LineChart = <K extends LineChartConfig>(
   ref: ForwardedRef<HTMLDivElement>
 ) => {
   const lines = Object.keys(dataConfig) as (keyof LineChartConfig)[]
-  const preparedData = prepareData(data)
+  const preparedData = prepareData(bridgeContinuedSeries(data, dataConfig))
   const maxLabelWidth = Math.max(
     ...preparedData.flatMap((el) =>
       lines.map((key) =>

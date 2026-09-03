@@ -1,5 +1,26 @@
 # Changelog
 
+## [6.84.2](https://github.com/factorialco/f0/compare/f0-react-v6.84.1...f0-react-v6.84.2) (2026-09-03)
+
+
+### Bug Fixes
+
+* **F0Button:** tooltip behaviour on clipped labels ([#5386](https://github.com/factorialco/f0/issues/5386)) ([d5fa5e0](https://github.com/factorialco/f0/commit/d5fa5e0d111434b32e9047ca2f20dc2177279ba8))
+
+## [6.84.1](https://github.com/factorialco/f0/compare/f0-react-v6.84.0...f0-react-v6.84.1) (2026-09-03)
+
+
+### Bug Fixes
+
+* **OneEmptyState:** stack actions in a narrow container ([#5383](https://github.com/factorialco/f0/issues/5383)) ([46c0fae](https://github.com/factorialco/f0/commit/46c0faeef94a895085007e4c2f0a39c5747b55e2))
+
+## [6.84.0](https://github.com/factorialco/f0/compare/f0-react-v6.83.3...f0-react-v6.84.0) (2026-09-03)
+
+
+### Features
+
+* **charts:** connect line series that continue another ([#5331](https://github.com/factorialco/f0/issues/5331)) ([9656265](https://github.com/factorialco/f0/commit/96562659cd63bbfd73ffc5c0d219015eff38daf4))
+
 ## [6.83.3](https://github.com/factorialco/f0/compare/f0-react-v6.83.2...f0-react-v6.83.3) (2026-09-02)
 
 
