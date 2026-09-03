@@ -20,14 +20,22 @@ export const F0TagAvatar = forwardRef<HTMLDivElement, Props>(
       { componentName: "F0TagAvatar" }
     )
 
+    const isPerson = avatar.type === "person"
+
     return (
       <BaseTag
         ref={ref}
         deactivated={deactivated}
-        className="border-[1px] border-solid border-f1-border-secondary py-[1px] pl-[1px]"
-        left={<F0Avatar avatar={avatar} size="xs" />}
+        className={
+          isPerson
+            ? // Person tag: larger avatar in a 32px pill, using BaseTag's default
+              // padding (2px / 4px / 8px). Matches the Figma spec.
+              "h-8 border-[1px] border-solid border-f1-border-secondary"
+            : "border-[1px] border-solid border-f1-border-secondary py-[1px] pl-[1px]"
+        }
+        left={<F0Avatar avatar={avatar} size={isPerson ? "sm" : "xs"} />}
         text={text}
-        shape={avatar.type === "person" ? "rounded" : "square"}
+        shape={isPerson ? "rounded" : "square"}
       />
     )
   }
