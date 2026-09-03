@@ -88,6 +88,7 @@ const config: StorybookConfig = {
 
     // ── Patterns · Core compositions (layouts folded in) ─────────
     { directory: "../src/patterns", titlePrefix: "Patterns" },
+    { directory: "../src/experimental/patterns", titlePrefix: "Patterns" },
     { directory: "../src/experimental/CrudPatterns", titlePrefix: "Patterns" },
     { directory: "../src/layouts", titlePrefix: "Patterns/App shell" },
 

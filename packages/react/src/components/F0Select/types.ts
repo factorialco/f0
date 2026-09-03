@@ -62,9 +62,10 @@ type F0SelectPopupProps<T extends string, R = unknown> = {
    */
   preserveSelectionOnDatasetChange?: boolean
   /**
-   * When true, the dropdown sizes to its widest option (never narrower than
-   * the trigger) instead of the default 20rem minimum. Useful for compact
-   * value pickers like month/year selectors.
+   * When true, the dropdown sizes towards its widest option instead of the
+   * default 20rem minimum. It remains at least as wide as the trigger when
+   * space permits and never exceeds the available viewport width. Useful for
+   * compact value pickers like month/year selectors.
    *
    * @default false for field selects; true for inline selects
    */

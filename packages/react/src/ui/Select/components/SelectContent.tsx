@@ -80,9 +80,10 @@ type SelectContentProps = (
   taller?: boolean
   portalContainer?: HTMLElement | null
   /**
-   * When true, the dropdown sizes to its widest option (never narrower than
-   * the trigger) instead of the default 20rem minimum. Useful for compact
-   * value pickers like month/year selectors.
+   * When true, the dropdown sizes towards its widest option instead of the
+   * default 20rem minimum. It remains at least as wide as the trigger when
+   * space permits and never exceeds the available viewport width. Useful for
+   * compact value pickers like month/year selectors.
    */
   fitContentWidth?: boolean
 }
@@ -387,7 +388,7 @@ const SelectContent = forwardRef<
             position === "popper" &&
             !forceMinHeight &&
             (fitContentWidth
-              ? "w-max min-w-[var(--radix-select-trigger-width)]"
+              ? "w-max min-w-[var(--radix-select-trigger-width)] max-w-[var(--radix-select-content-available-width)]"
               : "min-w-80 w-[var(--radix-select-trigger-width)]"),
           !asList &&
             position === "popper" &&
