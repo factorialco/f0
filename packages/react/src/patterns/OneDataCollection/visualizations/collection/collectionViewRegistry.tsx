@@ -1,13 +1,16 @@
+import { lazy, Suspense } from "react"
+
 import { IconType } from "@/components/F0Icon"
 import {
   GroupingDefinition,
   RecordType,
   SortingsDefinition,
 } from "@/hooks/datasource"
-import { Kanban, List, Organization, Pencil, Table } from "@/icons/app"
+import { Kanban, List, Organization, Pencil, Pin, Table } from "@/icons/app"
 import { ItemActionsDefinition } from "@/patterns/OneDataCollection/item-actions"
 import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import { FiltersDefinition } from "@/patterns/OneFilterPicker"
+import { Skeleton } from "@/ui/skeleton"
 import { DataCollectionSettingsContextType } from "../../Settings/SettingsProvider"
 import { SummariesDefinition } from "../../types"
 import { CardCollection, CardCollectionProps } from "./Card"
@@ -23,12 +26,22 @@ import {
 } from "./Graph/settings/SettingsRenderer"
 import { KanbanCollection, KanbanCollectionProps } from "./Kanban"
 import { ListCollection, ListCollectionProps } from "./List"
+import type { MapCollectionProps } from "./Map"
 import {
   TableCollection,
   TableCollectionProps,
   SettingsRenderer as tableSettingsRenderer,
   TableVisualizationSettings,
 } from "./Table"
+
+/**
+ * The map view is loaded on demand: it pulls in the MapLibre GL engine, and
+ * every collection imports this registry. A static import would put the map
+ * engine in the bundle of consumers that only ever render a table.
+ */
+const LazyMapCollection = lazy(() =>
+  import("./Map").then((module) => ({ default: module.MapCollection }))
+)
 
 export type VisualizacionTypeDefinition<
   Props,
@@ -121,6 +134,17 @@ type CollectionVisualizations<
       Grouping
     >,
     GraphVisualizationSettings
+  >
+  map: VisualizacionTypeDefinition<
+    MapCollectionProps<
+      Record,
+      Filters,
+      Sortings,
+      Summaries,
+      ItemActions,
+      NavigationFilters,
+      Grouping
+    >
   >
 }
 
@@ -381,6 +405,48 @@ export const collectionVisualizations: CollectionVisualizations<
         >
           {...props}
         />
+      )
+    },
+  },
+  map: {
+    name: "Map",
+    icon: Pin,
+    settings: {
+      default: {},
+    },
+    render: <
+      Record extends RecordType,
+      Filters extends FiltersDefinition,
+      Sortings extends SortingsDefinition,
+      Summaries extends SummariesDefinition,
+      ItemActions extends ItemActionsDefinition<Record>,
+      NavigationFilters extends NavigationFiltersDefinition,
+      Grouping extends GroupingDefinition<Record>,
+    >(
+      props: MapCollectionProps<
+        Record,
+        Filters,
+        Sortings,
+        Summaries,
+        ItemActions,
+        NavigationFilters,
+        Grouping
+      >
+    ) => {
+      return (
+        <Suspense fallback={<Skeleton className="h-full w-full" />}>
+          <LazyMapCollection<
+            Record,
+            Filters,
+            Sortings,
+            Summaries,
+            ItemActions,
+            NavigationFilters,
+            Grouping
+          >
+            {...props}
+          />
+        </Suspense>
       )
     },
   },
