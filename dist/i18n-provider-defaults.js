@@ -721,7 +721,16 @@ const e = {
       comparison: {
         change: "Change",
         newCategory: "New",
-        notPresent: "Not present this period: {{categories}}"
+        goneCategory: "Gone",
+        newThisPeriod: "New this period",
+        previous: "Previous: {{value}}",
+        countUp: "{{count}} up",
+        countDown: "{{count}} down",
+        countNew: "{{count}} new",
+        countGone: "{{count}} gone",
+        showChange: "Show change",
+        showValues: "Show values",
+        more: "+{{count}} more"
       }
     },
     pong: {

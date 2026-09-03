@@ -721,7 +721,16 @@ export declare const defaultTranslations: {
             readonly comparison: {
                 readonly change: "Change";
                 readonly newCategory: "New";
-                readonly notPresent: "Not present this period: {{categories}}";
+                readonly goneCategory: "Gone";
+                readonly newThisPeriod: "New this period";
+                readonly previous: "Previous: {{value}}";
+                readonly countUp: "{{count}} up";
+                readonly countDown: "{{count}} down";
+                readonly countNew: "{{count}} new";
+                readonly countGone: "{{count}} gone";
+                readonly showChange: "Show change";
+                readonly showValues: "Show values";
+                readonly more: "+{{count}} more";
             };
         };
         readonly pong: {
@@ -1362,9 +1371,11 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        fontSize: {
-            setFontSize: (fontSize: string) => ReturnType;
-            unsetFontSize: () => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -1372,11 +1383,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        fontSize: {
+            setFontSize: (fontSize: string) => ReturnType;
+            unsetFontSize: () => ReturnType;
         };
     }
 }
