@@ -11,6 +11,9 @@ const meta = {
   component: F0Heading,
   title: "Heading",
   tags: ["!autodocs", "stable"],
+  parameters: {
+    a11y: { test: "error" },
+  },
   argTypes: {
     variant: {
       options: ["heading", "heading-large"],

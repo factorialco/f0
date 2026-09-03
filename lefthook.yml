@@ -15,7 +15,9 @@ commit-msg:
 pre-commit:
   commands:
     format-react:
-      glob: "packages/react/**/*.{js,jsx,ts,tsx,json,css,md,yml,yaml,md}"
+      # `mdx` matters: CI runs `oxfmt --check src/`, which covers .mdx, so
+      # leaving it out of this glob lets unformatted docs pages reach CI.
+      glob: "packages/react/**/*.{js,jsx,ts,tsx,json,css,md,mdx,yml,yaml}"
       run: sh -c 'pnpm --filter @factorialco/f0-react format $(echo "{staged_files}" | sed "s|packages/react/||g")'
       stage_fixed: true
     lint-react:
