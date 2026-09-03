@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.84.0](https://github.com/factorialco/f0/compare/f0-react-v6.83.3...f0-react-v6.84.0) (2026-09-03)
+
+
+### Features
+
+* **charts:** connect line series that continue another ([#5331](https://github.com/factorialco/f0/issues/5331)) ([9656265](https://github.com/factorialco/f0/commit/96562659cd63bbfd73ffc5c0d219015eff38daf4))
+
 ## [6.83.3](https://github.com/factorialco/f0/compare/f0-react-v6.83.2...f0-react-v6.83.3) (2026-09-02)
 
 
