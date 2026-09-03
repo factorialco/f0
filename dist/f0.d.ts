@@ -18276,6 +18276,9 @@ declare function TableHead({ children, width, minWidth, sortState, onSortClick, 
  * A table-specific name for a shape that is no longer table-specific: the
  * canonical export is `InfoHintContent`, and this stays as an alias so
  * existing imports keep working.
+ *
+ * `label` has no effect here. It names an ⓘ trigger, and a header cell has
+ * none — the cell itself is the trigger.
  */
 declare type TableHeaderInfo = InfoHintContent;
 
