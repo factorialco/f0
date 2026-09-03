@@ -8030,6 +8030,14 @@ export declare interface F0MapProps extends WithDataTestIdProps {
      */
     viewportInset?: F0MapViewportInset;
     /**
+     * Re-center the camera on a marker when it is clicked, at the current zoom,
+     * so a selection never sits behind a panel opened over the map (it lands in
+     * the free area left by `viewportInset`). Defaults to `false`, which leaves
+     * the camera where it is. Zoom is untouched - use the `focusMarker` handle for
+     * the "take me there" flight that also zooms in.
+     */
+    centerOnMarkerClick?: boolean;
+    /**
      * Frame all markers on load. Defaults to `true` when no `initialViewport` is
      * given, `false` otherwise (an explicit viewport wins).
      */
@@ -15777,11 +15785,9 @@ declare namespace Calendar {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        aiBlock: {
+            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
+            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
         };
     }
 }
@@ -15789,9 +15795,11 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        aiBlock: {
-            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
-            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
