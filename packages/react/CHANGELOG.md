@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.84.1](https://github.com/factorialco/f0/compare/f0-react-v6.84.0...f0-react-v6.84.1) (2026-09-03)
+
+
+### Bug Fixes
+
+* **OneEmptyState:** stack actions in a narrow container ([#5383](https://github.com/factorialco/f0/issues/5383)) ([46c0fae](https://github.com/factorialco/f0/commit/46c0faeef94a895085007e4c2f0a39c5747b55e2))
+
 ## [6.84.0](https://github.com/factorialco/f0/compare/f0-react-v6.83.3...f0-react-v6.84.0) (2026-09-03)
 
 
