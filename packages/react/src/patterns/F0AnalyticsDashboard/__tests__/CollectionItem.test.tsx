@@ -128,6 +128,40 @@ describe("CollectionItem", () => {
     expect(column.render({ id: "unknown" })).toBeUndefined()
   })
 
+  it("colours a Change cell by its sentiment and keeps the arrow on its direction", () => {
+    const collection = item(() => ({ id: "source" }), tableViz, {
+      "1": { direction: "down", label: "−1.2 pp", sentiment: "positive" },
+      "2": { direction: "up", label: "+0.8 pp", sentiment: "negative" },
+      "3": { direction: "flat", label: "0", sentiment: "neutral" },
+    })
+
+    render(<CollectionItem item={collection} filters={{}} />)
+
+    const column = changeColumnOf()
+    expect(column.render({ id: "1" })).toEqual({
+      type: "delta",
+      value: { label: "−1.2 pp", deltaStatus: "positive", arrow: "down" },
+    })
+    expect(column.render({ id: "2" })).toEqual({
+      type: "delta",
+      value: { label: "+0.8 pp", deltaStatus: "negative", arrow: "up" },
+    })
+    expect(column.render({ id: "3" })).toEqual({
+      type: "delta",
+      value: { label: "0", deltaStatus: "neutral", arrow: "none" },
+    })
+  })
+
+  it("renders a flat trend as plain text when no sentiment is given", () => {
+    const collection = item(() => ({ id: "source" }), tableViz, {
+      "1": { direction: "flat", label: "0" },
+    })
+
+    render(<CollectionItem item={collection} filters={{}} />)
+
+    expect(changeColumnOf().render({ id: "1" })).toBe("0")
+  })
+
   it("leaves the visualizations untouched when the item carries no rowTrends", () => {
     const collection = item(() => ({ id: "source" }), tableViz)
 

@@ -232,6 +232,14 @@ export interface DashboardMetricTrend {
   direction: "up" | "down" | "flat"
   /** Rendered verbatim ("+1.2 pp"); empty falls back to `previousValue`. */
   label: string
+  /**
+   * Whether the change is good news, for the measures where that does not
+   * follow its sign — attrition falling is positive. It decides the colour,
+   * `direction` still decides the arrow. Omitted, the colour follows the
+   * direction as before. Only read where there is a colour to set: a category
+   * mark is plain text in a chart label, so it takes the glyph and no tone.
+   */
+  sentiment?: "positive" | "negative" | "neutral"
 }
 
 /**

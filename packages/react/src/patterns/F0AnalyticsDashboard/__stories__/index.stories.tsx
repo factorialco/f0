@@ -1144,11 +1144,37 @@ const comparisonItems = (compareTo: CompareTarget): DashboardItem[] => {
             ? {
                 value: 4.2,
                 // Percentage points, not a percentage of a percentage — the
-                // reason a host formats the label itself.
-                trend: { direction: "down", label: "−1.2 pp" },
+                // reason a host formats the label itself. Attrition falling is
+                // good news, so the down arrow reads positive.
+                trend: {
+                  direction: "down",
+                  label: "−1.2 pp",
+                  sentiment: "positive",
+                },
                 comparisonLabel,
               }
             : { value: 4.2 }
+        ),
+    },
+    {
+      id: "absenteeism",
+      type: "metric",
+      title: "Absenteeism",
+      format: { type: "percent" },
+      decimals: 1,
+      fetchData: () =>
+        withLatency<DashboardMetricData>(
+          comparing
+            ? {
+                value: 3.1,
+                trend: {
+                  direction: "up",
+                  label: "+0.8 pp",
+                  sentiment: "negative",
+                },
+                comparisonLabel,
+              }
+            : { value: 3.1 }
         ),
     },
     {
@@ -1247,8 +1273,11 @@ const ComparisonDashboard = () => {
  *
  * The metrics render a server-computed `trend` verbatim — a percentage, a
  * difference in percentage points, and a neutral "No change" — each with the
- * `comparisonLabel` in a tooltip. The chart draws the previous period faded
- * and dashed via `comparisonSeriesNames`, still listed in the legend.
+ * `comparisonLabel` in a tooltip. Attrition and absenteeism also carry a
+ * `sentiment`, which colours the change against its sign: falling attrition is
+ * a green down arrow, rising absenteeism a red up one. The chart draws the
+ * previous period faded and dashed via `comparisonSeriesNames`, still listed
+ * in the legend.
  */
 export const PeriodComparison: Story = {
   tags: ["no-sidebar"],
@@ -1267,6 +1296,23 @@ export const PeriodComparison: Story = {
         selector: ".sr-only",
       })
     ).toBeInTheDocument()
+
+    // A sentiment overrides the colour the sign would have picked.
+    const change = async (text: string) =>
+      await canvas.findByText(
+        text,
+        { selector: "[aria-hidden='true']" },
+        {
+          timeout: 5000,
+        }
+      )
+
+    await expect(await change("−1.2 pp")).toHaveClass(
+      "text-f1-foreground-positive"
+    )
+    await expect(await change("+0.8 pp")).toHaveClass(
+      "text-f1-foreground-critical"
+    )
   },
 }
 

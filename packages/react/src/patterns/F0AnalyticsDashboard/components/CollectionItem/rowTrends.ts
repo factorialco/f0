@@ -23,7 +23,7 @@ export function rowTrendOf(
 /**
  * Rendered through the table's own `delta` cell rather than the widget's
  * `TrendBadge` — a column renders a value-display definition, not arbitrary
- * nodes. `delta` has no neutral state, so a flat trend renders as plain text.
+ * nodes.
  */
 export function changeColumn(
   label: string,
@@ -42,13 +42,26 @@ function renderTrend(
   trend: DashboardMetricTrend | undefined
 ): RendererDefinition | string | undefined {
   if (!trend?.label) return undefined
-  if (trend.direction === "flat") return trend.label
+
+  // No sentiment: the arrow follows the direction and carries its own colour,
+  // and a flat trend has neither, so it stays the plain text it always was.
+  if (!trend.sentiment) {
+    if (trend.direction === "flat") return trend.label
+    return {
+      type: "delta",
+      value: {
+        label: trend.label,
+        deltaStatus: trend.direction === "up" ? "positive" : "negative",
+      },
+    }
+  }
 
   return {
     type: "delta",
     value: {
       label: trend.label,
-      deltaStatus: trend.direction === "up" ? "positive" : "negative",
+      deltaStatus: trend.sentiment,
+      arrow: trend.direction === "flat" ? "none" : trend.direction,
     },
   }
 }
