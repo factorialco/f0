@@ -146,6 +146,14 @@ export const MapCollection = <
     [onSelect, records, recordId]
   )
 
+  // Leaving the map drops the selection. The consumer opens its panel from
+  // `onSelect`, and this component unmounts when the user switches to another
+  // visualization - without this the panel would stay open over that view, and
+  // come back on return.
+  const onSelectRef = useRef(onSelect)
+  onSelectRef.current = onSelect
+  useEffect(() => () => onSelectRef.current?.(null), [])
+
   // A reveal is a one-shot event, not a piece of state: fly to the marker and
   // select it. `searchSelectionNonce` is what lets the same record be revealed
   // twice in a row, since the id alone would not change.
