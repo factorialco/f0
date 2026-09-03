@@ -33,6 +33,14 @@ export type MapVisualizationOptions<
   /** A record's id. Defaults to `String(record.id)`, like the graph view. */
   getRecordId?: (record: R) => string
   /**
+   * Controlled selection: the id of the selected record, or `null` for none.
+   * Pass it whenever something outside the map can end the selection - closing
+   * the panel you opened from `onSelect`, most of all. Left out, the map keeps
+   * its own selection and nothing else can clear it, so the marker would stay
+   * marked after its panel was dismissed.
+   */
+  selectedRecordId?: string | null
+  /**
    * Fired when the selection changes: a marker click, a reveal, or `null` when
    * the selection is cleared. Open a side panel from here - and report the
    * region it covers through `viewportInset` so the marker stays visible.

@@ -56,6 +56,7 @@ export const MapCollection = <
   label,
   marker,
   getRecordId,
+  selectedRecordId,
   onSelect,
   revealRecordId,
   searchSelectionNonce,
@@ -133,18 +134,31 @@ export const MapCollection = <
     return markers
   }, [records, coordinates, label, marker, recordId])
 
-  // Selection lives here so a marker click can hand the consumer the whole
-  // record (for a side panel) while `F0Map` only ever deals in ids.
-  const [selectedId, setSelectedId] = useState<string | null>(null)
+  // Selection is tracked here so a marker click can hand the consumer the whole
+  // record (for a side panel) while `F0Map` only ever deals in ids. Controlled
+  // when `selectedRecordId` is passed - `null` means "nothing selected", not
+  // "uncontrolled" - so the consumer can end a selection its panel started.
+  const [internalSelectedId, setInternalSelectedId] = useState<string | null>(
+    null
+  )
+  const selectedId =
+    selectedRecordId !== undefined ? selectedRecordId : internalSelectedId
+
+  // Only a flight that zoomed in has a zoom level to undo. A click re-centers
+  // at the zoom the user was already on, so dropping it must not yank the
+  // camera back out.
+  const zoomedIntoSelectionRef = useRef(false)
+
   const selectRecord = useCallback(
     (id: string | null) => {
-      setSelectedId(id)
+      if (selectedRecordId === undefined) setInternalSelectedId(id)
+      zoomedIntoSelectionRef.current = false
       if (!onSelect) return
       onSelect(
         id ? (records.find((record) => recordId(record) === id) ?? null) : null
       )
     },
-    [onSelect, records, recordId]
+    [onSelect, records, recordId, selectedRecordId]
   )
 
   // Leaving the map drops the selection. The consumer opens its panel from
@@ -191,13 +205,18 @@ export const MapCollection = <
     mapRef.current?.fitToMarkers()
   }, [isLoading, markerKey])
 
-  // Zoom back out to the overview once the reason to be zoomed in is gone:
-  // the selection dropped (its panel closed) or the search cleared.
+  // Zoom back out once the reason to be zoomed in is gone: the selection
+  // dropped (its panel closed) or the search cleared. Only when the camera had
+  // actually flown in - after a plain click there is no zoom to undo, and
+  // reframing everything would be a jump the user never asked for.
   const previousSelectedRef = useRef<string | null>(null)
   useEffect(() => {
     const previous = previousSelectedRef.current
     previousSelectedRef.current = selectedId
-    if (previous && !selectedId) mapRef.current?.fitToMarkers()
+    if (!previous || selectedId) return
+
+    if (zoomedIntoSelectionRef.current) mapRef.current?.fitToMarkers()
+    zoomedIntoSelectionRef.current = false
   }, [selectedId])
 
   const search = source.currentSearch
@@ -205,7 +224,10 @@ export const MapCollection = <
   useEffect(() => {
     const previous = previousSearchRef.current
     previousSearchRef.current = search
-    if (previous && !search) mapRef.current?.fitToMarkers()
+    if (!previous || search) return
+
+    if (zoomedIntoSelectionRef.current) mapRef.current?.fitToMarkers()
+    zoomedIntoSelectionRef.current = false
   }, [search])
 
   // A reveal is a one-shot event, not a piece of state: fly to the marker and
@@ -221,6 +243,9 @@ export const MapCollection = <
     revealedRef.current = signature
     mapRef.current?.focusMarker(revealRecordId)
     selectRecord(revealRecordId)
+    // Set after `selectRecord`, which resets it: this selection was flown to,
+    // so dropping it has a zoom to undo.
+    zoomedIntoSelectionRef.current = true
   }, [revealRecordId, searchSelectionNonce, points, selectRecord])
 
   if (isInitialLoading) {
