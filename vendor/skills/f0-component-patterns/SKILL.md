@@ -39,3 +39,7 @@ Load this skill when you need to:
 6. **Tests use `zeroRender`** aliased as `render`, never `@testing-library/react`'s `render`.
 7. **All public exported components must expose a `dataTestId` prop** — either via the `withDataTestId` HOC (most components) or via the inline `DataTestIdWrapper` + `WithDataTestIdProps` pattern (generic components, discriminated union components, portal components). The key check: does the exported component accept `dataTestId` in its props? See `references/component-architecture.md` for patterns, composition order, and the decision table.
 8. **Deprecation requires three JSDoc tags**: `@deprecated`, `@removeIn`, `@migration`. See `packages/react/AGENTS.md` — Deprecation, and the [Deprecation & Removal policy](../../docs/development/release-and-versioning.mdx).
+
+## Tracking
+
+If any part of the work you assisted here lands in a PR, add `f0-component-patterns` to that PR's skills attribution block — see the **Skill Attribution** section in the repo root `AGENTS.md` for the exact format. Ad-hoc help counts, not just a full run of this workflow.
