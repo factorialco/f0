@@ -13,7 +13,10 @@ import {
   DataCollectionStorage,
   DataCollectionStorageHandler,
 } from "@/lib/providers/datacollection/types"
-import type { PresetsDefinition } from "@/patterns/OneFilterPicker/types"
+import type {
+  FiltersState,
+  PresetsDefinition,
+} from "@/patterns/OneFilterPicker/types"
 
 import { useDataCollectionSource } from "../hooks/useDataCollectionSource"
 import {
@@ -930,5 +933,130 @@ describe("OneDataCollection - presets render resilience", () => {
       "[f0-react] FiltersPresets failed to render; hiding the presets row",
       expect.any(Error)
     )
+  })
+})
+
+const SELECTED_PRESET_CLASS = "bg-f1-background-selected-secondary"
+
+const presetChip = (label: string): HTMLElement | null =>
+  screen
+    .getAllByText(label)
+    .map((el) => el.closest("label"))
+    .find((el): el is HTMLLabelElement => el !== null) ?? null
+
+const qualifiedFilters = {
+  qualified: {
+    type: "in",
+    label: "Status",
+    options: {
+      options: [
+        { value: true, label: "Active" },
+        { value: false, label: "Rejected" },
+      ],
+    },
+  },
+} as const
+
+function DefaultSelectedHarness({
+  defaultSelectedKey,
+  bootFilter = { qualified: ["true"] },
+  urlSync = false,
+}: {
+  defaultSelectedKey: "active" | "rejected"
+  bootFilter?: unknown
+  urlSync?: boolean
+}) {
+  const presets: PresetsDefinition<typeof qualifiedFilters> = [
+    {
+      id: "active",
+      label: "Active",
+      filter: { qualified: [true] },
+      defaultSelected: defaultSelectedKey === "active",
+    },
+    {
+      id: "rejected",
+      label: "Rejected",
+      filter: { qualified: [false] },
+      defaultSelected: defaultSelectedKey === "rejected",
+    },
+  ]
+
+  const source = useDataCollectionSource({
+    filters: qualifiedFilters,
+    sortings,
+    grouping,
+    defaultFilters: bootFilter as FiltersState<typeof qualifiedFilters>,
+    dataAdapter: { fetchData: async () => ({ records }) },
+  })
+
+  return (
+    <OneDataCollection
+      id="default-selected-test/v1"
+      source={source}
+      visualizations={[
+        {
+          type: "table",
+          presets,
+          options: {
+            columns: [
+              {
+                label: "Name",
+                sorting: "name",
+                render: (item: Row) => item.name,
+              },
+            ],
+          },
+        },
+      ]}
+      disableUrlParams={!urlSync}
+    />
+  )
+}
+
+const renderDefaultSelected = (
+  props: Parameters<typeof DefaultSelectedHarness>[0]
+) => {
+  const { handler } = createStorageSpy()
+  return zeroRender(
+    <DataCollectionStorageProvider handler={handler}>
+      <DefaultSelectedHarness {...props} />
+    </DataCollectionStorageProvider>
+  )
+}
+
+describe("OneDataCollection - defaultSelected preset", () => {
+  it("selects the preset on load, matching a boolean preset filter against the serialized (string) boot filter", async () => {
+    renderDefaultSelected({ defaultSelectedKey: "active" })
+
+    await waitFor(() => expect(screen.getByText("John")).toBeInTheDocument())
+
+    await waitFor(() =>
+      expect(presetChip("Active")).toHaveClass(SELECTED_PRESET_CLASS)
+    )
+    expect(presetChip("Rejected")).not.toHaveClass(SELECTED_PRESET_CLASS)
+  })
+
+  it("does not select the preset when the boot filter differs", async () => {
+    renderDefaultSelected({
+      defaultSelectedKey: "active",
+      bootFilter: { qualified: ["false"] },
+    })
+
+    await waitFor(() => expect(screen.getByText("John")).toBeInTheDocument())
+
+    expect(presetChip("Active")).not.toHaveClass(SELECTED_PRESET_CLASS)
+    expect(presetChip("Rejected")).not.toHaveClass(SELECTED_PRESET_CLASS)
+  })
+
+  it("lets a URL view (dc_view) win over defaultSelected", async () => {
+    window.history.replaceState({}, "", "/?dc_view=rejected")
+    renderDefaultSelected({ defaultSelectedKey: "active", urlSync: true })
+
+    await waitFor(() => expect(screen.getByText("John")).toBeInTheDocument())
+
+    await waitFor(() =>
+      expect(presetChip("Rejected")).toHaveClass(SELECTED_PRESET_CLASS)
+    )
+    expect(presetChip("Active")).not.toHaveClass(SELECTED_PRESET_CLASS)
   })
 })
