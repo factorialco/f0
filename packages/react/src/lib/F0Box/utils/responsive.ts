@@ -11,6 +11,7 @@ import type {
   DisplayToken,
   DividerToken,
   FlexDirectionToken,
+  FlexToken,
   FlexWrapToken,
   GapToken,
   InsetToken,
@@ -108,6 +109,7 @@ export interface ResponsiveStyleProps {
   justifyContent?: JustifyContentToken
   flexDirection?: FlexDirectionToken
   flexWrap?: FlexWrapToken
+  flex?: FlexToken
   grow?: boolean
   shrink?: boolean
 }
