@@ -198,6 +198,24 @@ describe("MapCollection — selection", () => {
     expect(mock.props.latest?.selectedMarkerId).toBeNull()
   })
 
+  it("clears the selection when the map view is left", async () => {
+    const onSelect = vi.fn()
+    const { unmount } = renderMap({ onSelect })
+    await waitForMap()
+
+    const onMarkerSelect = mock.props.latest?.onMarkerSelect as (
+      id: string | null
+    ) => void
+    act(() => onMarkerSelect("mad"))
+    onSelect.mockClear()
+
+    // Switching visualization unmounts this view; a panel opened from onSelect
+    // must not stay behind over the next one.
+    unmount()
+
+    expect(onSelect).toHaveBeenCalledWith(null)
+  })
+
   it("forwards the viewport inset so the camera clears a side panel", async () => {
     renderMap({ viewportInset: { right: 360 } })
     await waitForMap()
