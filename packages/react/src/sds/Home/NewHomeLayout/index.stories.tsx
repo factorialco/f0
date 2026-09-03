@@ -1,4 +1,10 @@
-import { useEffect, useRef, useState, type ReactNode } from "react"
+import {
+  type ComponentProps,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react"
 
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { z } from "zod"
@@ -12,6 +18,7 @@ import { F0Button } from "@/components/F0Button"
 import { F0Card } from "@/components/F0Card"
 import { F0Heading } from "@/components/F0Heading"
 import { F0Icon, type IconType } from "@/components/F0Icon"
+import { OneEmptyState } from "@/components/OneEmptyState/OneEmptyState"
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
 import { One } from "@/icons/ai"
 import {
@@ -826,6 +833,39 @@ const RIGHT_WIDGETS: HomeWidgetItem[] = [
   // carries "Edit params" — and its title, its info and the events it lists all
   // follow what you set there.
   eventsWidget(EVENTS_DEFAULTS),
+  {
+    id: "expenses",
+    icon: Receipt,
+    header: {
+      title: "Expenses",
+      info: "Receipts you submitted and what each one is waiting on.",
+      link: { title: "Go to Expenses", url: "/expenses" },
+    },
+    slots: [
+      {
+        visualization: "empty-state",
+        params: {
+          emoji: "🧾",
+          title: "No expenses yet",
+          description:
+            "Submit a receipt and it shows up here with whatever it is waiting on.",
+          actions: [
+            {
+              label: "Upload your first receipt",
+              icon: Plus,
+              onClick: () => {},
+            },
+            {
+              label: "Learn how expenses work",
+              variant: "outline",
+              icon: ExternalLink,
+              onClick: () => {},
+            },
+          ],
+        } satisfies EmptyStateParams,
+      },
+    ],
+  },
   // ANOTHER HOST, both flavors: the widget's link and every row's `href` point
   // off this site. These are the only links that open a new tab — the widgets
   // above navigate in place, fragment and all.
@@ -882,6 +922,9 @@ const RIGHT_WIDGETS: HomeWidgetItem[] = [
  * two are the SAME component, told whether its data has landed.
  */
 const SLOT_RENDERERS: SlotRenderers = {
+  "empty-state": (params) => (
+    <OneEmptyState {...(params as EmptyStateParams)} />
+  ),
   "clock-in": {
     render: () => <ClockInTile />,
     skeleton: () => <ClockInTile loading />,
@@ -923,9 +966,10 @@ const LOADING_RIGHT_WIDGETS: HomeWidgetItem[] = RIGHT_WIDGETS.map((widget) => ({
   slots: widget.slots.map((slot) => {
     const params = slot.params as { items?: unknown[]; events?: unknown[] }
     const items = params.items ?? params.events
+    if (!items) return slot
     return {
       ...slot,
-      expectedItemsCount: items?.length,
+      expectedItemsCount: items.length,
       params: params.events
         ? { ...params, events: [] }
         : { ...params, items: [] },
@@ -1151,6 +1195,17 @@ const communitiesWidget = ({
       },
     ],
   })
+
+interface EmptyStateParams {
+  emoji: string
+  title: string
+  description: string
+  actions: [OneEmptyStateAction, OneEmptyStateAction]
+}
+
+type OneEmptyStateAction = NonNullable<
+  ComponentProps<typeof OneEmptyState>["actions"]
+>[number]
 
 /** What the bespoke `community-posts` slot carries — which posts is `ctx`'s. */
 interface CommunityPostsParams {
