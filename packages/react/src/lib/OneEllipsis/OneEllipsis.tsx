@@ -24,6 +24,13 @@ export const tags = [
 ] as const
 export type Tag = (typeof tags)[number]
 
+/**
+ * Radix's own default open delay. Named here so a caller passing `delay` is
+ * changing a value this component owns rather than silently diverging from an
+ * upstream default.
+ */
+const DEFAULT_TOOLTIP_DELAY_MS = 700
+
 const checkForEllipsis = (element: HTMLElement | null, lines: number) => {
   if (!element) return false
   if (lines > 1) {
@@ -176,6 +183,13 @@ type OneEllipsisProps = {
    * @default false
    */
   markdown?: boolean
+  /**
+   * How long the pointer has to rest on the clipped text before the tooltip
+   * opens, in milliseconds. Lower it where the tooltip is the only way to read
+   * text the layout has cut off, so recovering it does not feel like a wait.
+   * @default 700
+   */
+  delay?: number
 }
 
 const OneEllipsis = forwardRef<HTMLElement, OneEllipsisProps>(
@@ -188,6 +202,7 @@ const OneEllipsis = forwardRef<HTMLElement, OneEllipsisProps>(
       disabled = false,
       markdown = false,
       tag = "span",
+      delay = DEFAULT_TOOLTIP_DELAY_MS,
       ...props
     },
     forwardedRef
@@ -222,7 +237,7 @@ const OneEllipsis = forwardRef<HTMLElement, OneEllipsisProps>(
     }, [children, markdown])
 
     return hasEllipsis && !noTooltip ? (
-      <TooltipProvider>
+      <TooltipProvider delayDuration={delay}>
         <Tooltip>
           {/*
            * `pointer-events-auto` on the trigger, not just via the wrapper's own

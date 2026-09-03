@@ -2,7 +2,7 @@ import { userEvent } from "@testing-library/user-event"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
 import { Add } from "@/icons/app"
-import { zeroRender as render, screen } from "@/testing/test-utils"
+import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
 
 import { ButtonInternal } from "../internal"
 import { F0Button } from "../index"
@@ -182,12 +182,12 @@ describe("F0Button", () => {
         document.querySelectorAll("[data-radix-popper-content-wrapper]")
       ).map((node) => node.textContent ?? "")
 
-    // Past the label tooltip's 700ms open delay by a wide margin, so what is on
-    // screen by now is the resting state: one that was going to open has, and
-    // one that is absent is absent for good. These are real timers, and a
-    // tighter window flakes under a loaded run.
+    // Several times the label tooltip's open delay, so what is on screen by now
+    // is the resting state: one that was going to open has, and one that is
+    // absent is absent for good. These are real timers, and a tighter window
+    // flakes under a loaded run.
     const settleAfterHover = () =>
-      new Promise((resolve) => setTimeout(resolve, 2500))
+      new Promise((resolve) => setTimeout(resolve, 1500))
 
     afterEach(() => {
       delete (HTMLElement.prototype as { scrollWidth?: number }).scrollWidth
@@ -202,6 +202,22 @@ describe("F0Button", () => {
       await settleAfterHover()
 
       expect(openTooltips().join("")).toContain(LONG_LABEL)
+    })
+
+    it("reveals a clipped label sooner than the default tooltip delay", async () => {
+      setLabelWidths(486, 253)
+      render(<F0Button label={LONG_LABEL} />)
+
+      await userEvent.hover(screen.getByText(LONG_LABEL))
+
+      // Opens at ~300ms. The window matters as much as the assertion: it sits
+      // under Radix's 700ms default, so a tooltip still on the old delay fails
+      // here. A loaded machine can only push an open later, never earlier, so
+      // the failing direction stays honest.
+      await waitFor(() => expect(openTooltips()).toHaveLength(1), {
+        timeout: 550,
+        interval: 25,
+      })
     })
 
     it("shows nothing when the label fits", async () => {

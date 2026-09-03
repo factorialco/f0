@@ -15,6 +15,12 @@ import { fontSizeVariants } from "./variants"
 const IconMotion = motion.create(F0Icon)
 
 /**
+ * Open delay for the tooltip that reveals a label too long to fit. Short on
+ * purpose — see where it is passed below.
+ */
+const CLIPPED_LABEL_TOOLTIP_DELAY_MS = 300
+
+/**
  * A button component internal that includes the private slots and props
  */
 const ButtonInternal = forwardRef<
@@ -193,6 +199,10 @@ const ButtonInternal = forwardRef<
             // together and then close each other for good, leaving the hover
             // showing nothing at all.
             noTooltip={noAutoTooltip || !!tooltip}
+            // Faster than the 700ms default: this tooltip is not a hint layered
+            // on top of a readable control, it is the only way to read a label
+            // the layout has cut off, so waiting on it reads as unresponsive.
+            delay={CLIPPED_LABEL_TOOLTIP_DELAY_MS}
           >
             {buttonLabel}
           </OneEllipsis>
