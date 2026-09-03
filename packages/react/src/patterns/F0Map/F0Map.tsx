@@ -107,6 +107,14 @@ export interface F0MapProps extends WithDataTestIdProps {
    */
   viewportInset?: F0MapViewportInset
   /**
+   * Re-center the camera on a marker when it is clicked, at the current zoom,
+   * so a selection never sits behind a panel opened over the map (it lands in
+   * the free area left by `viewportInset`). Defaults to `false`, which leaves
+   * the camera where it is. Zoom is untouched - use the `focusMarker` handle for
+   * the "take me there" flight that also zooms in.
+   */
+  centerOnMarkerClick?: boolean
+  /**
    * Frame all markers on load. Defaults to `true` when no `initialViewport` is
    * given, `false` otherwise (an explicit viewport wins).
    */
@@ -218,6 +226,24 @@ const fitToPoints = (
   map.fitBounds(bounds, { padding, maxZoom: 15, animate })
 }
 
+/**
+ * Center on a point at the current zoom. Separate from `focusPoint` because a
+ * click means "show me this in context", while a reveal from an external search
+ * means "take me there".
+ */
+const centerPoint = (
+  map: maplibregl.Map,
+  point: F0MapPoint,
+  animate: boolean,
+  inset?: F0MapViewportInset
+) => {
+  map.easeTo({
+    center: point.coordinates,
+    padding: cameraPadding(inset, 0),
+    animate,
+  })
+}
+
 /** Center on a single point, zooming in when the camera isn't already close. */
 const focusPoint = (
   map: maplibregl.Map,
@@ -245,6 +271,7 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
     onMarkerSelect,
     highlightedId = null,
     viewportInset,
+    centerOnMarkerClick = false,
     fitToMarkers,
     initialViewport,
     mapStyle = f0MapStyles,
@@ -311,6 +338,8 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
   markersRef.current = markers
   const insetRef = useRef(viewportInset)
   insetRef.current = viewportInset
+  const selectedIdRef = useRef(selectedId)
+  selectedIdRef.current = selectedId
   const routesRef = useRef(routes)
   routesRef.current = routes
   const arcsRef = useRef(arcs)
@@ -319,6 +348,23 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
   projectionRef.current = projection
   const selectRef = useRef(selectMarker)
   selectRef.current = selectMarker
+
+  // Only the marker-click path centers: the imperative handle and the marker
+  // list already fly to their target, and a background click deselects.
+  const handleMarkerClick = useCallback(
+    (id: string | null) => {
+      if (centerOnMarkerClick && id) {
+        const map = mapRef.current
+        const point = markersRef.current.find(
+          (candidate) => candidate.id === id
+        )
+        if (map && point)
+          centerPoint(map, point, !reduceMotion, insetRef.current)
+      }
+      selectRef.current(id)
+    },
+    [centerOnMarkerClick, reduceMotion]
+  )
   const shouldFit = fitToMarkers ?? initialViewport === undefined
 
   // DOM markers degrade beyond workplace scale; warn once so oversized
@@ -545,7 +591,20 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
     appliedInsetRef.current = signature
     if (isFirstRun) return
 
-    mapRef.current?.easeTo({ padding, animate: !reduceMotion })
+    const map = mapRef.current
+    if (!map) return
+
+    // With a marker selected, re-center on it: the point of the inset is to keep
+    // *that* marker clear of the panel, and the current view may have been
+    // panned since. Otherwise just slide the view into the free area.
+    const selected = markersRef.current.find(
+      (point) => point.id === selectedIdRef.current
+    )
+    map.easeTo(
+      selected
+        ? { center: selected.coordinates, padding, animate: !reduceMotion }
+        : { padding, animate: !reduceMotion }
+    )
   }, [viewportInset, reduceMotion])
 
   const hasLines = routes.length > 0 || arcs.length > 0
@@ -614,7 +673,7 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
               points={markers}
               selectedId={selectedId}
               highlightedId={highlightedId}
-              onSelect={selectMarker}
+              onSelect={handleMarkerClick}
             />
           )}
           {!webglFailed && mapInstance && showControls && interactive && (
