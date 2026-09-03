@@ -18,13 +18,17 @@ on:
 jobs:
   publish-react:
     name: "[⚛️ REACT] Publish to npm"
-    # Prevents running on the release-please branch
-    # For workflow_run trigger we need to check if the workflow_run was successful and if the new_version output was set to not run on it if no new version was released
+    # The per-event guards must stay parenthesised as one group: `&&` binds
+    # tighter than `||`, so flattening the chain applies the tag filter to the
+    # first branch only and silently skips every manual dispatch.
     if: |
-      contains(github.event.release.tag_name, 'react-v') &&
-      github.head_ref != 'release-please--branches--master' && !contains(github.event.pull_request.labels.*.name, 'autorelease') && 
-      github.event_name == 'workflow_dispatch' || github.event_name == 'release' || 
-      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.outputs.new_version)
+      github.head_ref != 'release-please--branches--master' &&
+      !contains(github.event.pull_request.labels.*.name, 'autorelease') &&
+      (
+        (github.event_name == 'release' && contains(github.event.release.tag_name, 'react-v')) ||
+        (github.event_name == 'workflow_dispatch' && contains(github.event.inputs.release_tag, 'react-v')) ||
+        (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.outputs.new_version)
+      )
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -85,13 +89,14 @@ jobs:
 
   publish-react-native:
     name: "[📱 REACT NATIVE] Publish to npm"
-    # Prevents running on the release-please branch
-    # For workflow_run trigger we need to check if the workflow_run was successful and if the new_version output was set to not run on it if no new version was released
     if: |
-      contains(github.event.release.tag_name, 'react-native-v') &&
-      github.head_ref != 'release-please--branches--master' && !contains(github.event.pull_request.labels.*.name, 'autorelease') && 
-      github.event_name == 'workflow_dispatch' || github.event_name == 'release' || 
-      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.outputs.new_version)
+      github.head_ref != 'release-please--branches--master' &&
+      !contains(github.event.pull_request.labels.*.name, 'autorelease') &&
+      (
+        (github.event_name == 'release' && contains(github.event.release.tag_name, 'react-native-v')) ||
+        (github.event_name == 'workflow_dispatch' && contains(github.event.inputs.release_tag, 'react-native-v')) ||
+        (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.outputs.new_version)
+      )
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -111,13 +116,14 @@ jobs:
 
   publish-core:
     name: "[🎯 CORE] Publish to npm"
-    # Prevents running on the release-please branch
-    # For workflow_run trigger we need to check if the workflow_run was successful and if the new_version output was set to not run on it if no new version was released
     if: |
-      contains(github.event.release.tag_name, 'core-v') &&
-      github.head_ref != 'release-please--branches--master' && !contains(github.event.pull_request.labels.*.name, 'autorelease') && 
-      github.event_name == 'workflow_dispatch' || github.event_name == 'release' || 
-      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.outputs.new_version)
+      github.head_ref != 'release-please--branches--master' &&
+      !contains(github.event.pull_request.labels.*.name, 'autorelease') &&
+      (
+        (github.event_name == 'release' && contains(github.event.release.tag_name, 'core-v')) ||
+        (github.event_name == 'workflow_dispatch' && contains(github.event.inputs.release_tag, 'core-v')) ||
+        (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.outputs.new_version)
+      )
     runs-on: ubuntu-latest
     permissions:
       contents: read
