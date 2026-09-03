@@ -89,14 +89,15 @@ export const MapCollection = <
     return { ...source.dataAdapter, perPage: markerPageSize }
   }, [source.dataAdapter, markerPageSize])
 
-  const { data, paginationInfo, isInitialLoading } = useDataCollectionData<
-    Record,
-    Filters,
-    Sortings,
-    Summaries,
-    NavigationFilters,
-    Grouping
-  >({ ...source, dataAdapter: mapDataAdapter }, { onError: onLoadError })
+  const { data, paginationInfo, isInitialLoading, isLoading } =
+    useDataCollectionData<
+      Record,
+      Filters,
+      Sortings,
+      Summaries,
+      NavigationFilters,
+      Grouping
+    >({ ...source, dataAdapter: mapDataAdapter }, { onError: onLoadError })
 
   const records = data.records
 
@@ -157,13 +158,19 @@ export const MapCollection = <
   const mapRef = useRef<F0MapHandle>(null)
 
   // Filters narrow the markers, so the camera reframes to what is left - with
-  // two filters applied at once that is the set matching both. The fit waits for
-  // the new markers instead of firing on the filter change, which lands a frame
-  // earlier while the old ones are still drawn. The first pass only records the
-  // filters: framing the initial load is F0Map's own job.
+  // two filters applied at once that is the set matching both.
+  //
+  // The fit cannot fire on the filter change itself: the records for the new
+  // filters are still being fetched, so the markers on screen are the previous
+  // ones and the camera would frame those. Waiting on a new `points` identity is
+  // not enough either — it changes within the same commit, while the contents
+  // are still stale. So the pending fit records the marker set that was on
+  // screen and waits for one that is actually different, with nothing in flight.
+  const markerKey = points.map((point) => point.id).join(",")
   const filterSignature = JSON.stringify(source.currentFilters ?? {})
+  // Starts unset so the initial load frames itself, which is F0Map's own job.
   const framedFiltersRef = useRef<string | null>(null)
-  const refitPendingRef = useRef(false)
+  const staleMarkerKeyRef = useRef<string | null>(null)
   useEffect(() => {
     if (framedFiltersRef.current === null) {
       framedFiltersRef.current = filterSignature
@@ -172,14 +179,17 @@ export const MapCollection = <
     if (framedFiltersRef.current === filterSignature) return
 
     framedFiltersRef.current = filterSignature
-    refitPendingRef.current = true
-  }, [filterSignature])
+    staleMarkerKeyRef.current = markerKey
+  }, [filterSignature, markerKey])
   useEffect(() => {
-    if (!refitPendingRef.current) return
+    if (staleMarkerKeyRef.current === null || isLoading) return
+    // Same markers as before the filter changed: they have not arrived yet, or
+    // the filter did not change what is shown and nothing needs reframing.
+    if (staleMarkerKeyRef.current === markerKey) return
 
-    refitPendingRef.current = false
+    staleMarkerKeyRef.current = null
     mapRef.current?.fitToMarkers()
-  }, [points])
+  }, [isLoading, markerKey])
 
   // Zoom back out to the overview once the reason to be zoomed in is gone:
   // the selection dropped (its panel closed) or the search cleared.

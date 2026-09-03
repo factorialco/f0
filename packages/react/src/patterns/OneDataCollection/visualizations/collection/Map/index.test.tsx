@@ -339,3 +339,90 @@ describe("MapCollection — framing", () => {
     expect(mock.props.latest?.centerOnMarkerClick).toBe(true)
   })
 })
+
+describe("MapCollection — framing while the new records are in flight", () => {
+  // The bug this covers: framing as soon as the filter changed, or as soon as
+  // `points` got a new identity, framed the markers the filter had just
+  // excluded — they are still the ones on screen until the fetch resolves.
+  const deferredSource = () => {
+    let resolveFetch: ((value: { records: Office[] }) => void) | null = null
+    const adapter = {
+      fetchData: vi.fn(
+        () =>
+          new Promise<{ records: Office[] }>((resolve) => {
+            resolveFetch = resolve
+          })
+      ),
+    }
+    const build = (filters: Record<string, unknown> = {}) =>
+      ({
+        currentFilters: filters,
+        setCurrentFilters: vi.fn(),
+        currentSortings: null,
+        setCurrentSortings: vi.fn(),
+        currentNavigationFilters: {},
+        setCurrentNavigationFilters: vi.fn(),
+        navigationFilters: undefined,
+        currentSearch: undefined,
+        debouncedCurrentSearch: undefined,
+        setCurrentSearch: vi.fn(),
+        isLoading: false,
+        setIsLoading: vi.fn(),
+        currentGrouping: undefined,
+        setCurrentGrouping: vi.fn(),
+        dataAdapter: adapter,
+        idProvider: (office: Office) => office.id,
+        // eslint-disable-next-line no-type-assertion/no-type-assertion -- test scaffolding for a structurally complete source
+      }) as unknown as DataCollectionSource<
+        Office,
+        FiltersDefinition,
+        SortingsDefinition,
+        SummariesDefinition,
+        ItemActionsDefinition<Office>,
+        NavigationFiltersDefinition,
+        GroupingDefinition<Office>
+      >
+
+    return {
+      build,
+      settle: async (records: Office[]) => {
+        await act(async () => {
+          resolveFetch?.({ records })
+          await Promise.resolve()
+        })
+      },
+    }
+  }
+
+  const element = (
+    source: ReturnType<ReturnType<typeof deferredSource>["build"]>
+  ) => (
+    <MapCollection
+      source={source}
+      onSelectItems={vi.fn()}
+      onLoadData={vi.fn()}
+      onLoadError={vi.fn()}
+      searchSelectionNonce={0}
+      {...baseOptions()}
+    />
+  )
+
+  it("does not frame the markers the filter just excluded", async () => {
+    const source = deferredSource()
+    const { rerender } = zeroRender(element(source.build()))
+    await source.settle(offices)
+    await waitFor(() => expect(markers()).toHaveLength(2))
+    mock.fitToMarkers.mockClear()
+
+    // Filter applied: the fetch is in flight, so Barcelona and Madrid are both
+    // still drawn. Framing now would frame exactly what the filter removed.
+    rerender(element(source.build({ country: ["bcn"] })))
+    await waitFor(() => expect(markers()).toHaveLength(2))
+    expect(mock.fitToMarkers).not.toHaveBeenCalled()
+
+    // Records arrive: now there is something new to frame.
+    await source.settle([offices[0]])
+    await waitFor(() => expect(markers()).toHaveLength(1))
+    expect(mock.fitToMarkers).toHaveBeenCalledTimes(1)
+  })
+})
