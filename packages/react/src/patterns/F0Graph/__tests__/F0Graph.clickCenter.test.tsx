@@ -9,11 +9,13 @@ import {
   vi,
 } from "vitest"
 
-import { screen, zeroRender } from "@/testing/test-utils"
+import { zeroRender } from "@/testing/test-utils"
 
 import type { GraphNode } from "../types"
 import { FOCUS_SETTLE_DELAY_MS } from "../constants"
 import { F0Graph } from "../F0Graph"
+
+import { graphContainer } from "./helpers"
 
 // Spy React Flow instance so we can observe the fly-to on click. Only the public
 // `useReactFlow` is mocked; the ReactFlow component itself renders normally.
@@ -61,7 +63,7 @@ afterEach(() => vi.restoreAllMocks())
 // exactly as it does with a real node). This exercises the click → select + fly
 // wiring without depending on React Flow's DOM output.
 function pressNode(id: string) {
-  const tree = screen.getByRole("tree", { name: "Graph view" })
+  const tree = graphContainer()
   const nodeEl = document.createElement("div")
   nodeEl.className = "react-flow__node"
   nodeEl.setAttribute("data-id", id)

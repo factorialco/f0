@@ -7,6 +7,8 @@ import type { GraphNode } from "../types"
 
 import { F0Graph, type F0GraphNodeRenderContext } from "../F0Graph"
 
+import { graphContainer } from "./helpers"
+
 // ─── Helpers ───────────────────────────────────────────────────
 
 function renderNodeFn(node: GraphNode<string>, ctx: F0GraphNodeRenderContext) {
@@ -77,7 +79,7 @@ describe("F0Graph lazy tree — loadChildren", () => {
       </div>
     )
 
-    const tree = screen.getByRole("tree", { name: "Graph view" })
+    const tree = graphContainer()
     // Expand root-1 via ArrowRight
     dispatchKey(tree, "ArrowRight")
 
@@ -105,7 +107,7 @@ describe("F0Graph lazy tree — loadChildren", () => {
       </div>
     )
 
-    const tree = screen.getByRole("tree", { name: "Graph view" })
+    const tree = graphContainer()
 
     // Expand
     dispatchKey(tree, "ArrowRight")
@@ -149,7 +151,7 @@ describe("F0Graph lazy tree — loadChildren", () => {
       </div>
     )
 
-    const tree = screen.getByRole("tree", { name: "Graph view" })
+    const tree = graphContainer()
     dispatchKey(tree, "ArrowRight")
 
     // Resolve the load
@@ -176,7 +178,7 @@ describe("F0Graph lazy tree — loadChildren", () => {
       </div>
     )
 
-    const tree = screen.getByRole("tree", { name: "Graph view" })
+    const tree = graphContainer()
     dispatchKey(tree, "ArrowRight")
 
     // Wait for the rejected promise to settle

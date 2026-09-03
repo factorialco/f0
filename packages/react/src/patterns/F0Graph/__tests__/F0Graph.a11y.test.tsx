@@ -6,6 +6,8 @@ import type { GraphNode } from "../../types"
 
 import { F0Graph, type F0GraphNodeRenderContext } from "../F0Graph"
 
+import { graphContainer } from "./helpers"
+
 // ─── Helpers ───────────────────────────────────────────────────
 
 function makeNodes(): GraphNode<string>[] {
@@ -150,7 +152,7 @@ describe("F0Graph a11y — arrow-key navigation", () => {
       </div>
     )
 
-    const tree = screen.getByRole("tree", { name: "Graph view" })
+    const tree = graphContainer()
     expect(tree).toBeTruthy()
   })
 
@@ -187,7 +189,14 @@ describe("F0Graph a11y — arrow-key navigation", () => {
 // ─── Task 3 — aria-owns ───────────────────────────────────────
 
 describe("F0Graph a11y — aria-owns", () => {
-  it("passes ariaOwns for expanded nodes with visible children", () => {
+  it("no longer hands renderNode an ariaOwns to nest the tree with", () => {
+    // The graph used to nest ownership: each expanded node `aria-owns`-ed its
+    // own visible children. React Flow culls painted nodes on a schedule F0 does
+    // not see, so a node whose parent got culled ended up with no owner at all
+    // (axe `aria-required-parent`, critical, measured on InitialFocus and
+    // StagedLoading). Ownership is flat now — the `role="tree"` element owns
+    // every painted treeitem and `aria-level` carries the depth — so the field
+    // is deprecated and always undefined.
     const capturedOwns = new Map<string, string | undefined>()
 
     const spyRenderNode = (
@@ -208,47 +217,30 @@ describe("F0Graph a11y — aria-owns", () => {
       </div>
     )
 
-    if (capturedOwns.size > 0) {
-      // Node 1 (CEO) is expanded with children 2 and 3 visible
-      const ceoOwns = capturedOwns.get("1")
-      expect(ceoOwns).toContain("f0-graph-node-2")
-      expect(ceoOwns).toContain("f0-graph-node-3")
-
-      // Node 2 (CTO) is expanded with children 4 and 5 visible
-      const ctoOwns = capturedOwns.get("2")
-      expect(ctoOwns).toContain("f0-graph-node-4")
-      expect(ctoOwns).toContain("f0-graph-node-5")
-
-      // Node 3 (CFO) has no children — no ariaOwns
-      expect(capturedOwns.get("3")).toBeUndefined()
+    for (const owns of capturedOwns.values()) {
+      expect(owns).toBeUndefined()
     }
   })
 
-  it("does not pass ariaOwns for collapsed nodes", () => {
-    const capturedOwns = new Map<string, string | undefined>()
-
-    const spyRenderNode = (
-      node: GraphNode<string>,
-      ctx: F0GraphNodeRenderContext
-    ) => {
-      capturedOwns.set(node.id, ctx.ariaOwns)
-      return <span>{node.data}</span>
-    }
-
+  it("owns the treeitems from the tree element, not from their parents", () => {
+    // React Flow renders no nodes under jsdom, so the end-to-end invariant is
+    // asserted in the browser by the `Tree` story's play function. What is
+    // checkable here is that the tree element is the one carrying `aria-owns`,
+    // and that it is not an ancestor of React Flow's `role="application"`
+    // wrapper — the placement axe rejects.
     zeroRender(
       <div style={{ width: 800, height: 600 }}>
         <F0Graph
           nodes={makeNodes()}
-          renderNode={spyRenderNode}
+          renderNode={renderNodeFn}
           defaultExpandedNodes={new Set(["1"])}
         />
       </div>
     )
 
-    if (capturedOwns.size > 0) {
-      // Node 2 (CTO) is collapsed — no ariaOwns even though it has children
-      expect(capturedOwns.get("2")).toBeUndefined()
-    }
+    const tree = screen.getByRole("tree", { name: "Graph view" })
+    expect(tree.querySelector(".react-flow")).toBeNull()
+    expect(tree.contains(graphContainer())).toBe(false)
   })
 })
 

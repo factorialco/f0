@@ -131,11 +131,6 @@ const fixedLayout = (
   },
 })
 
-const graphNodeData = (
-  rfNodes: ReturnType<typeof useGraphRenderModel>["rfNodes"],
-  id: string
-) => rfNodes.find((n) => n.id === id)?.data as GraphNodeData | undefined
-
 describe("useGraphRenderModel — node windowing", () => {
   beforeEach(() => {
     mockViewportRect = null
@@ -211,42 +206,6 @@ describe("useGraphRenderModel — node windowing", () => {
     expect(result.current.rfNodes.map((n) => n.id)).not.toContain("far")
   })
 
-  it("keeps aria-owns to an off-window child once its edge pulls it in", () => {
-    const child = treeNode("child", "root", 0, [], 1)
-    const root = treeNode("root", null, 1, [child])
-    mockViewportRect = { minX: -10, minY: -10, maxX: 200, maxY: 200 }
-    const { result } = renderModel({
-      ...baseOptions([root], ["root"]),
-      enableNodeWindowing: true,
-      layoutEngineProp: fixedLayout({
-        root: { x: 0, y: 0 },
-        child: { x: 0, y: 5000 },
-      }),
-    })
-    // The off-window child is materialized to keep the parent's edge, so it is a
-    // valid aria-owns target (not a dangling ref).
-    expect(
-      graphNodeData(result.current.rfNodes, "root")?.visibleChildIds
-    ).toEqual(["child"])
-  })
-
-  it("keeps aria-owns children that remain in the window", () => {
-    const child = treeNode("child", "root", 0, [], 1)
-    const root = treeNode("root", null, 1, [child])
-    mockViewportRect = { minX: -100, minY: -100, maxX: 5200, maxY: 5200 }
-    const { result } = renderModel({
-      ...baseOptions([root], ["root"]),
-      enableNodeWindowing: true,
-      layoutEngineProp: fixedLayout({
-        root: { x: 0, y: 0 },
-        child: { x: 0, y: 100 },
-      }),
-    })
-    expect(
-      graphNodeData(result.current.rfNodes, "root")?.visibleChildIds
-    ).toEqual(["child"])
-  })
-
   it("materializes a windowed node's ancestors so the reporting line stays connected", () => {
     // Deep chain root → mid → leaf. Only `leaf` sits inside the viewport; its
     // ancestors are far above it. Regression: a windowed node whose parent
@@ -277,62 +236,6 @@ describe("useGraphRenderModel — node windowing", () => {
       )
     expect(hasEdge("root", "mid")).toBe(true)
     expect(hasEdge("mid", "leaf")).toBe(true)
-  })
-})
-
-describe("useGraphRenderModel — tree forest roots (aria-owns)", () => {
-  beforeEach(() => {
-    mockViewportRect = null
-  })
-
-  it("returns only the parentless root; nested children are owned by their parent", () => {
-    // root → child → grandchild, all expanded and on-window. The `role="tree"`
-    // container owns just the forest root; child/grandchild are re-owned by their
-    // in-window parent node's own aria-owns (visibleChildIds).
-    const grandchild = treeNode("grandchild", "child", 0, [], 2)
-    const child = treeNode("child", "root", 1, [grandchild], 1)
-    const root = treeNode("root", null, 1, [child])
-    const { result } = renderModel(baseOptions([root], ["root", "child"]))
-
-    expect(result.current.treeRootNodeIds).toEqual(["root"])
-  })
-
-  it("returns every top-level root of a multi-root forest", () => {
-    const a = treeNode("a", null, 0)
-    const b = treeNode("b", null, 0)
-    const c = treeNode("c", null, 0)
-    const { result } = renderModel(baseOptions([a, b, c], []))
-
-    expect([...result.current.treeRootNodeIds].sort()).toEqual(["a", "b", "c"])
-  })
-
-  it("gives every rendered treeitem exactly one owner under windowing", () => {
-    // Only `leaf` is inside the viewport; its ancestors are materialized to keep
-    // the reporting line connected. Each rendered node is a forest root iff its
-    // parent is not itself rendered — so no treeitem is left orphaned and none is
-    // double-owned.
-    const leaf = treeNode("leaf", "mid", 0, [], 2)
-    const mid = treeNode("mid", "root", 1, [leaf], 1)
-    const root = treeNode("root", null, 1, [mid])
-    mockViewportRect = { minX: -10, minY: 4900, maxX: 200, maxY: 5200 }
-    const { result } = renderModel({
-      ...baseOptions([root], ["root", "mid"]),
-      enableNodeWindowing: true,
-      layoutEngineProp: fixedLayout({
-        root: { x: 0, y: 0 },
-        mid: { x: 0, y: 2500 },
-        leaf: { x: 0, y: 5000 },
-      }),
-    })
-
-    const rendered = new Set(result.current.renderedNodeIds)
-    for (const id of result.current.renderedNodeIds) {
-      const parentId = graphNodeData(result.current.rfNodes, id)?.graphNode
-        .parentId
-      const ownedByTree = result.current.treeRootNodeIds.includes(id)
-      expect(ownedByTree).toBe(parentId == null || !rendered.has(parentId))
-    }
-    expect(result.current.treeRootNodeIds).toContain("root")
   })
 })
 

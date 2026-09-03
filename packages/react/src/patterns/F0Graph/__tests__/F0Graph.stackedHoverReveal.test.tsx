@@ -1,10 +1,12 @@
 import { beforeAll, describe, expect, it, vi } from "vitest"
 
-import { fireEvent, screen, zeroRender } from "@/testing/test-utils"
+import { fireEvent, zeroRender } from "@/testing/test-utils"
 
 import type { GraphNode } from "../types"
 
 import { F0Graph, type F0GraphNodeRenderContext } from "../F0Graph"
+
+import { graphContainer } from "./helpers"
 
 /**
  * A stacked column's collapse affordance is revealed by its own narrow CSS hover
@@ -61,7 +63,7 @@ const revealFlags = (): string[] =>
     (el) => el.getAttribute("data-revealed") ?? ""
   )
 
-const tree = (): HTMLElement => screen.getByRole("tree")
+const tree = (): HTMLElement => graphContainer()
 
 describe("revealing a stacked parent's collapse button from inside its column", () => {
   beforeAll(() => {

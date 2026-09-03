@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { useCallback, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
+import { expect, userEvent, waitFor, within } from "storybook/test"
 import "@xyflow/react/dist/style.css"
 import { F0Button } from "@/components/F0Button"
 import { Laptop, Money, People, Star } from "@/icons/app"
@@ -15,10 +16,85 @@ import {
 } from "../F0Graph"
 import { F0GraphNode, type F0GraphNodeTag } from "../components/F0GraphNode"
 
+/**
+ * Waits for a story to stop moving before axe scans it.
+ *
+ * F0Graph fades cards in and cross-fades between zoom variants, and the
+ * test-runner scans after two animation frames, around 33ms. axe then composites
+ * part-faded text against whatever is behind it and reports contrast failures
+ * that do not exist in the settled story: a `StackedNodesWithTags` tag label
+ * measures 2.3:1 mid-fade and about 16:1 when it lands, and four `InitialFocus`
+ * node titles fail the same way.
+ *
+ * This has to be a convergence check rather than a single sample. Traced on
+ * `InitialFocus`, the story moves in two waves: nodes mount at ~320ms and go
+ * quiet, then the mount-time camera fly lands at ~900ms and cross-fades a second
+ * time, ending at ~1115ms. A gate that exits on the first quiet frame passes
+ * during the lull and axe scans the second wave. So quiet has to hold.
+ *
+ * The three signals are what actually moves. The rendered node count changes as
+ * windowing follows the camera; `getAnimations` covers CSS transitions; and a
+ * fractional opacity catches a cross-fade driven from React state rather than by
+ * a transition, which is what the zoom layers do. No element in any of these
+ * stories sits at a fractional opacity once settled, so the check converges
+ * rather than waiting out the cap.
+ */
+async function settleGraph(canvasElement: HTMLElement): Promise<void> {
+  const QUIET_MS = 400
+  const CAP_MS = 8000
+  const STEP_MS = 50
+
+  const reading = () => {
+    const nodes = canvasElement.querySelectorAll(".react-flow__node")
+    const fading = Array.from(canvasElement.querySelectorAll("*")).some(
+      (el) => {
+        const opacity = Number(getComputedStyle(el).opacity)
+        return opacity > 0 && opacity < 1
+      }
+    )
+    return {
+      count: nodes.length,
+      moving: nodes.length === 0 || fading,
+      animations: canvasElement.getAnimations({ subtree: true }).length,
+    }
+  }
+
+  const deadline = Date.now() + CAP_MS
+  let quietSince: number | null = null
+  let previousCount = -1
+
+  while (Date.now() < deadline) {
+    const now = reading()
+    const quiet =
+      !now.moving && now.animations === 0 && now.count === previousCount
+    previousCount = now.count
+
+    if (!quiet) {
+      quietSince = null
+    } else {
+      quietSince ??= Date.now()
+      if (Date.now() - quietSince >= QUIET_MS) return
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, STEP_MS))
+  }
+
+  throw new Error(
+    `settleGraph: story still moving after ${CAP_MS}ms (${JSON.stringify(reading())})`
+  )
+}
+
 const meta = {
   title: "Graph/F0Graph",
   component: F0Graph<Employee>,
   tags: ["stable", "!autodocs"],
+  parameters: {
+    a11y: { test: "error" },
+  },
+  // Every story fades its nodes in, and axe has to scan the settled result.
+  play: async ({ canvasElement }) => {
+    await settleGraph(canvasElement)
+  },
   decorators: [
     (Story) => (
       <div className="h-[600px] w-full bg-f1-background">
@@ -228,6 +304,85 @@ export const Tree: Story = {
     nodes: BASIC_NODES,
     renderNode: renderEmployee,
     defaultExpandDepth: 2,
+  },
+  // The primary flow: read the hierarchy, close a branch and reopen it from the
+  // keyboard, then select a person. The first block doubles as the regression
+  // guard for the accessible tree, which is the part of this component most
+  // easily broken without anyone noticing.
+  play: async ({ canvasElement }) => {
+    await settleGraph(canvasElement)
+
+    const canvas = within(canvasElement)
+    const tree = canvas.getByRole("tree", { name: "Graph view" })
+    const ownedIds = (el: Element): string[] =>
+      (el.getAttribute("aria-owns") ?? "").split(" ").filter(Boolean)
+
+    // React Flow mounts its nodes after the first commit, so the ownership map
+    // settles a frame or two later than the tree container itself.
+    await waitFor(() =>
+      expect(canvas.getAllByRole("treeitem")).toHaveLength(BASIC_NODES.length)
+    )
+
+    // Every painted treeitem is owned by the tree, exactly once, and carries its
+    // depth. React Flow lays every node out as a flat, absolutely positioned
+    // sibling behind its hardcoded `role="application"` wrapper, so DOM nesting
+    // carries no tree relationship and `aria-owns` is the only thing holding the
+    // structure together. A treeitem the tree does not own has no tree parent at
+    // all, which axe reports as `aria-required-parent`.
+    const items = canvas.getAllByRole("treeitem")
+    const owned = ownedIds(tree)
+    for (const item of items) {
+      await expect(owned.filter((id) => id === item.id)).toHaveLength(1)
+      await expect(item).toHaveAttribute("aria-level")
+    }
+    // And nothing is owned that is not in the DOM — a dangling reference is
+    // `aria-valid-attr-value`.
+    for (const id of owned) {
+      await expect(
+        canvasElement.ownerDocument.getElementById(id)
+      ).not.toBeNull()
+    }
+
+    // Collapse the focused branch and reopen it. Asserts `aria-expanded` on the
+    // node rather than whether a given child is on screen: the camera culls
+    // off-screen nodes, and which ones survive is not stable enough to assert.
+    const focused = canvasElement.querySelector<HTMLElement>(
+      '[role="treeitem"][tabindex="0"]'
+    )
+    if (!focused) throw new Error("no treeitem holds the roving tabindex")
+    focused.focus()
+    await expect(focused).toHaveAttribute("aria-expanded", "true")
+
+    await userEvent.keyboard("{ArrowLeft}")
+    await waitFor(() =>
+      expect(focused).toHaveAttribute("aria-expanded", "false")
+    )
+    await userEvent.keyboard("{ArrowRight}")
+    await waitFor(() =>
+      expect(focused).toHaveAttribute("aria-expanded", "true")
+    )
+
+    // The graph is one Tab stop, not one per node. React Flow marks its own node
+    // wrappers and edges focusable, which doubles every node and adds a stop per
+    // edge announced as "Edge from 1 to 2"; `nodesFocusable` / `edgesFocusable`
+    // turn that off so the roving tabindex is the only thing in the tab order.
+    // axe has no rule for this, so only an assertion catches a regression.
+    const tabbable = canvasElement.querySelectorAll(
+      '[tabindex="0"], button:not([tabindex]), a[href]'
+    )
+    await expect(tabbable).toHaveLength(2)
+    await expect(canvas.getByLabelText("Graph canvas")).toHaveAttribute(
+      "tabindex",
+      "0"
+    )
+
+    // Selecting a person, last, because the click flies the camera.
+    await userEvent.click(canvas.getByRole("treeitem", { name: /Sofia Reyes/ }))
+    await waitFor(() =>
+      expect(
+        canvas.getByRole("treeitem", { name: /Sofia Reyes/ })
+      ).toHaveAttribute("aria-selected", "true")
+    )
   },
 }
 
@@ -1276,6 +1431,36 @@ function makeDeferredPayload(count: number): DeferredNodesPayload<Employee> {
 }
 
 /** Demonstrates progressive payload loading with deferred batch merge. */
+/**
+ * Builds the deferred payload on mount instead of at module load.
+ *
+ * `deferredNodes: new Promise(...)` inside `args` runs when this CSF module is
+ * imported, so its timer fires while some other story is on screen. Two things
+ * went wrong because of that: the `StagedLoadingError` rejection arrived as an
+ * unhandled rejection attributed to whichever story happened to be running (it
+ * failed `LargeTree` in the Storybook test run), and by the time a reader opened
+ * either story the promise had usually already settled, so there was nothing to
+ * watch.
+ */
+function StagedLoadingDemo({
+  fail = false,
+  ...props
+}: { fail?: boolean } & Omit<F0GraphProps<Employee>, "deferredNodes">) {
+  const deferredNodes = useMemo(
+    () =>
+      new Promise<DeferredNodesPayload<Employee>>((resolve, reject) => {
+        if (fail) {
+          setTimeout(() => reject(new Error("Simulated network failure")), 1000)
+          return
+        }
+        setTimeout(() => resolve(makeDeferredPayload(500)), 2500)
+      }),
+    [fail]
+  )
+
+  return <F0Graph<Employee> {...props} deferredNodes={deferredNodes} />
+}
+
 export const StagedLoading: Story = {
   parameters: {
     docs: {
@@ -1287,9 +1472,6 @@ export const StagedLoading: Story = {
   },
   args: {
     nodes: INITIAL_STAGED_NODES,
-    deferredNodes: new Promise<DeferredNodesPayload<Employee>>((resolve) => {
-      setTimeout(() => resolve(makeDeferredPayload(500)), 2500)
-    }),
     renderNode: renderEmployee,
     showControls: true,
     defaultExpandDepth: 2,
@@ -1298,6 +1480,7 @@ export const StagedLoading: Story = {
       console.log("[StagedLoading] Deferred nodes merged")
     },
   },
+  render: (args) => <StagedLoadingDemo {...args} />,
 }
 
 /** Demonstrates error handling when the deferred payload rejects. */
@@ -1312,9 +1495,6 @@ export const StagedLoadingError: Story = {
   },
   args: {
     nodes: INITIAL_STAGED_NODES,
-    deferredNodes: new Promise<DeferredNodesPayload<Employee>>((_, reject) => {
-      setTimeout(() => reject(new Error("Simulated network failure")), 1000)
-    }),
     renderNode: renderEmployee,
     showControls: true,
     defaultExpandDepth: 2,
@@ -1323,6 +1503,7 @@ export const StagedLoadingError: Story = {
       console.error("[StagedLoadingError] Deferred load failed:", error.message)
     },
   },
+  render: (args) => <StagedLoadingDemo fail {...args} />,
 }
 
 // ─── Stacked nodes ──────────────────────────────────────────
