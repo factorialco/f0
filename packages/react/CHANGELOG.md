@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.84.2](https://github.com/factorialco/f0/compare/f0-react-v6.84.1...f0-react-v6.84.2) (2026-09-03)
+
+
+### Bug Fixes
+
+* **F0Button:** tooltip behaviour on clipped labels ([#5386](https://github.com/factorialco/f0/issues/5386)) ([d5fa5e0](https://github.com/factorialco/f0/commit/d5fa5e0d111434b32e9047ca2f20dc2177279ba8))
+
 ## [6.84.1](https://github.com/factorialco/f0/compare/f0-react-v6.84.0...f0-react-v6.84.1) (2026-09-03)
 
 
