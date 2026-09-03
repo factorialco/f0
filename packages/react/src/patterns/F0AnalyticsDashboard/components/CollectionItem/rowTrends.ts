@@ -1,4 +1,4 @@
-import type { RecordType } from "@/hooks/datasource"
+import type { RecordType, SortingsDefinition } from "@/hooks/datasource"
 import type { RendererDefinition } from "@/patterns/OneDataCollection/property-render"
 import type { TableColumnDefinition } from "@/patterns/OneDataCollection/visualizations/collection/Table/types"
 
@@ -28,11 +28,13 @@ export function rowTrendOf(
 export function changeColumn(
   label: string,
   rowTrends: DashboardRowTrends,
-  idProvider?: RowIdProvider
-): TableColumnDefinition<RecordType, never, never> {
+  idProvider?: RowIdProvider,
+  sorting?: string
+): TableColumnDefinition<RecordType, SortingsDefinition, never> {
   return {
     id: "dashboard-row-change",
     label,
+    sorting,
     render: (row: RecordType): RendererDefinition | string | undefined =>
       renderTrend(rowTrendOf(row, rowTrends, idProvider)),
   }

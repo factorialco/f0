@@ -36,7 +36,8 @@ vi.mock("../hooks/useCollectionDownloadActions", () => ({
 const item = (
   createSource: DashboardCollectionItem["createSource"],
   visualizations: DashboardCollectionItem["visualizations"] = [],
-  rowTrends?: DashboardCollectionItem["rowTrends"]
+  rowTrends?: DashboardCollectionItem["rowTrends"],
+  rowTrendsSorting?: string
 ): DashboardCollectionItem => ({
   id: "employees",
   type: "collection",
@@ -44,6 +45,7 @@ const item = (
   visualizations,
   createSource,
   rowTrends,
+  rowTrendsSorting,
 })
 
 const tableViz = [
@@ -57,6 +59,7 @@ function changeColumnOf() {
         columns: {
           id?: string
           label: string
+          sorting?: string
           render: (row: Record<string, unknown>) => unknown
         }[]
       }
@@ -126,6 +129,26 @@ describe("CollectionItem", () => {
       value: { label: "+2", deltaStatus: "positive" },
     })
     expect(column.render({ id: "unknown" })).toBeUndefined()
+  })
+
+  it("sorts the Change column only through a sorting the source declares", () => {
+    const trends = { "1": { direction: "up" as const, label: "+2" } }
+
+    render(
+      <CollectionItem
+        item={item(() => ({ id: "source" }), tableViz, trends)}
+        filters={{}}
+      />
+    )
+    expect(changeColumnOf().sorting).toBeUndefined()
+
+    render(
+      <CollectionItem
+        item={item(() => ({ id: "source" }), tableViz, trends, "change")}
+        filters={{}}
+      />
+    )
+    expect(changeColumnOf().sorting).toBe("change")
   })
 
   it("colours a Change cell by its sentiment and keeps the arrow on its direction", () => {

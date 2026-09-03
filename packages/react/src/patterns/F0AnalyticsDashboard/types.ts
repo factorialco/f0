@@ -475,6 +475,8 @@ export interface DashboardCollectionItem<
    * ride here because its source owns its rows.
    */
   rowTrends?: DashboardRowTrends
+  /** Sorting key of `createSource` that orders rows by their change; the column sorts only when the source can. */
+  rowTrendsSorting?: string
 }
 
 // ---------------------------------------------------------------------------

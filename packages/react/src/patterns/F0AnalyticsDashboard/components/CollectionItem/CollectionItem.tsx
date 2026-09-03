@@ -142,7 +142,8 @@ export function CollectionItem<Filters extends FiltersDefinition>({
     const column = changeColumn(
       changeLabel,
       item.rowTrends,
-      sourceDefinition?.idProvider
+      sourceDefinition?.idProvider,
+      item.rowTrendsSorting
     )
 
     return item.visualizations.map((visualization) =>
@@ -156,7 +157,13 @@ export function CollectionItem<Filters extends FiltersDefinition>({
           }
         : visualization
     )
-  }, [item.visualizations, item.rowTrends, sourceDefinition, changeLabel])
+  }, [
+    item.visualizations,
+    item.rowTrends,
+    item.rowTrendsSorting,
+    sourceDefinition,
+    changeLabel,
+  ])
 
   return (
     <DashboardItem
