@@ -6,6 +6,24 @@ import { InputFieldStatus, InputFieldStatusType } from "../types"
 
 type InputMessagesProps = {
   status?: InputFieldStatus
+  /**
+   * Applied to the message container, so a field can point `aria-describedby`
+   * at it and have the message actually announced.
+   */
+  id?: string
+}
+
+/**
+ * The messages a status will really render, empty entries dropped.
+ *
+ * Exported because a field needs to know whether the container exists before
+ * referencing it: an `aria-describedby` pointing at an element that never
+ * rendered is itself an accessibility failure, not a no-op.
+ */
+export function inputStatusMessages(status?: InputFieldStatus): string[] {
+  if (!status) return []
+  const raw = Array.isArray(status.message) ? status.message : [status.message]
+  return raw.filter((message): message is string => Boolean(message))
 }
 
 const statuses: Record<
@@ -33,18 +51,16 @@ const statuses: Record<
   },
 }
 
-const InputMessages = ({ status }: InputMessagesProps) => {
+const InputMessages = ({ status, id }: InputMessagesProps) => {
   if (!status) return null
 
-  const messages = (
-    Array.isArray(status.message) ? status.message : [status.message]
-  ).filter(Boolean)
+  const messages = inputStatusMessages(status)
 
   const icon = statuses[status.type].icon
 
   return (
     messages.length > 0 && (
-      <div className="flex gap-1">
+      <div className="flex gap-1" id={id}>
         {icon && (
           <F0Icon
             icon={icon}
