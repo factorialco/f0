@@ -34,6 +34,18 @@ const pieProps: F0DataChartProps = {
   },
 }
 
+const funnelProps: F0DataChartProps = {
+  type: "funnel",
+  series: {
+    name: "Pipeline",
+    data: [
+      { name: "Sales", value: 58 },
+      { name: "Legal", value: 4 },
+      { name: "Engineering", value: 96 },
+    ],
+  },
+}
+
 /** The label a bar chart draws for `category`, formatter and all. */
 function barLabel(props: F0DataChartProps, category: string): string {
   if (props.type !== "bar") throw new Error("not a bar chart")
@@ -46,7 +58,12 @@ describe("markCategoryComparison", () => {
 
     expect(barLabel(props, "Sales")).toBe("Sales ▲ +4.2%")
     expect(barLabel(props, "Operations")).toBe("Operations ▼ −3.0%")
-    expect(barLabel(props, "People")).toBe("People = 0%")
+  })
+
+  it("gives a flat category its change with no glyph", () => {
+    const props = markCategoryComparison(barProps, comparison, "New")
+
+    expect(barLabel(props, "People")).toBe("People 0%")
   })
 
   it("marks an added category as new and leaves an uncompared one plain", () => {
@@ -54,6 +71,12 @@ describe("markCategoryComparison", () => {
 
     expect(barLabel(props, "Legal")).toBe("Legal (New)")
     expect(barLabel(props, "Engineering")).toBe("Engineering")
+  })
+
+  it("marks a new category with the caller's own label", () => {
+    const props = markCategoryComparison(barProps, comparison, "Nuevo")
+
+    expect(barLabel(props, "Legal")).toBe("Legal (Nuevo)")
   })
 
   it("marks on top of the host's own category formatter", () => {
@@ -78,9 +101,24 @@ describe("markCategoryComparison", () => {
     expect(props.series.data.map((point) => point.value)).toEqual([58, 4, 96])
   })
 
+  it("marks a funnel chart through its stage names", () => {
+    const props = markCategoryComparison(funnelProps, comparison, "New")
+
+    if (props.type !== "funnel") throw new Error("not a funnel chart")
+    expect(props.series.data.map((point) => point.name)).toEqual([
+      "Sales ▲ +4.2%",
+      "Legal (New)",
+      "Engineering",
+    ])
+    expect(props.series.data.map((point) => point.value)).toEqual([58, 4, 96])
+  })
+
   it("returns the very same props when no comparison is given", () => {
     expect(markCategoryComparison(barProps, undefined, "New")).toBe(barProps)
     expect(markCategoryComparison(pieProps, undefined, "New")).toBe(pieProps)
+    expect(markCategoryComparison(funnelProps, undefined, "New")).toBe(
+      funnelProps
+    )
   })
 
   it("leaves a time series alone — its baseline is a faded series", () => {

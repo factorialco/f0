@@ -1334,18 +1334,15 @@ const deltaItems: DashboardItem[] = [
     itemHeight: 336,
     createSource: () => ({
       dataAdapter: {
-        fetchData: () =>
-          withLatency({
-            records: DEPARTMENT_ROWS,
-            rowTrends: {
-              engineering: { direction: "up", label: "+12" },
-              sales: { direction: "up", label: "+1" },
-              operations: { direction: "down", label: "−3" },
-              legal: { direction: "flat", label: "0" },
-            },
-          }),
+        fetchData: () => withLatency({ records: DEPARTMENT_ROWS }),
       },
     }),
+    rowTrends: {
+      engineering: { direction: "up", label: "+12" },
+      sales: { direction: "up", label: "+1" },
+      operations: { direction: "down", label: "−3" },
+      legal: { direction: "flat", label: "0" },
+    },
     visualizations: [
       {
         type: "table" as const,
@@ -1377,7 +1374,7 @@ const deltaItems: DashboardItem[] = [
  * also carries a `categoryComparison`: each department's change is drawn into
  * its label, the department the compared period lacked is marked as new, and
  * the one it had but this period does not — nothing draws it — is named in the
- * caption under the chart. The collection's fetch returns `rowTrends`, which
+ * caption under the chart. The collection item carries `rowTrends`, which
  * become a "Change" column.
  */
 export const PeriodComparisonDeltas: Story = {

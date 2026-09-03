@@ -171,7 +171,7 @@ describe("useDashboardExport", () => {
     expect(sheets[0].rows[0]).toMatchObject({ Change: "+10.7%" })
   })
 
-  it("carries a chart's own trend into its sheet, once", async () => {
+  it("keeps a chart's own trend out of its sheet — it describes no row", async () => {
     await runExport([
       {
         id: "headcount-by-department",
@@ -189,43 +189,21 @@ describe("useDashboardExport", () => {
 
     const [sheets] = vi.mocked(downloadHelpers.downloadMultiSheetExcel).mock
       .calls[0]
-    expect(sheets[0].columns).toEqual(["Category", "This period", "Change"])
+    expect(sheets[0].columns).toEqual(["Category", "This period"])
     expect(sheets[0].rows).toEqual([
-      { Category: "Engineering", "This period": 96, Change: "+10.7%" },
+      { Category: "Engineering", "This period": 96 },
       { Category: "Sales", "This period": 58 },
     ])
   })
 
-  it("leaves a chart sheet exactly as it was without a trend", async () => {
-    await runExport([
-      {
-        id: "headcount-by-department",
-        title: "Headcount by department",
-        type: "chart",
-        chart: { type: "bar" },
-        fetchData: () =>
-          Promise.resolve({
-            categories: ["Engineering"],
-            series: [{ name: "This period", data: [96] }],
-          }),
-      },
-    ])
-
-    const [sheets] = vi.mocked(downloadHelpers.downloadMultiSheetExcel).mock
-      .calls[0]
-    expect(sheets[0].columns).toEqual(["Category", "This period"])
-    expect(sheets[0].rows).toEqual([
-      { Category: "Engineering", "This period": 96 },
-    ])
-  })
-
-  it("exports a collection's rowTrends as a Change column", async () => {
+  it("exports a collection item's rowTrends as a Change column", async () => {
     await runExport([
       {
         id: "employees",
         title: "Employees",
         type: "collection",
         visualizations: [],
+        rowTrends: { "1": { direction: "up", label: "+2" } },
         createSource: () => ({
           dataAdapter: {
             fetchData: () =>
@@ -234,7 +212,6 @@ describe("useDashboardExport", () => {
                   { id: "1", name: "Ada" },
                   { id: "2", name: "Grace" },
                 ],
-                rowTrends: { "1": { direction: "up", label: "+2" } },
               }),
           },
         }),

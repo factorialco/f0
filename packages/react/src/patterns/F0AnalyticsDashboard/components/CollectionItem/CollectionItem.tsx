@@ -14,14 +14,13 @@ import { useDataCollectionSource } from "@/patterns/OneDataCollection/hooks/useD
 import type {
   DashboardCollectionItem,
   DashboardItemFiltersConfig,
-  DashboardRowTrends,
   F0AnalyticsDashboardAskAiTarget,
   F0AnalyticsDashboardAskAiTargetWithQuote,
 } from "../../types"
 
 import { useCollectionDownloadActions } from "../../hooks/useCollectionDownloadActions"
 import { DashboardItem } from "../DashboardItem/DashboardItem"
-import { changeColumn, tapRowTrends } from "./rowTrends"
+import { changeColumn } from "./rowTrends"
 
 interface CollectionItemProps<Filters extends FiltersDefinition> {
   item: DashboardCollectionItem<Filters>
@@ -63,26 +62,15 @@ export function CollectionItem<Filters extends FiltersDefinition>({
   const effectiveFilters = enabled ? filters : ({} as FiltersState<Filters>)
 
   const translations = useI18n()
-  const [rowTrends, setRowTrends] = useState<DashboardRowTrends>()
 
   // Memoize the source definition to avoid re-creating on every render.
   const filtersKey = JSON.stringify(effectiveFilters)
   const itemFiltersKey = JSON.stringify(itemFilters?.value ?? {})
-  const sourceDefinition = useMemo(() => {
-    const definition = item.createSource(effectiveFilters)
-    const fetchData = definition?.dataAdapter?.fetchData
-    if (typeof fetchData !== "function") return definition
-
-    return {
-      ...definition,
-      dataAdapter: {
-        ...definition.dataAdapter,
-        fetchData: (options: unknown) =>
-          tapRowTrends(fetchData(options), setRowTrends),
-      },
-    }
+  const sourceDefinition = useMemo(
+    () => item.createSource(effectiveFilters),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filtersKey, itemFiltersKey, dataKey])
+    [filtersKey, itemFiltersKey, dataKey]
+  )
   const source = useDataCollectionSource<RecordType>(sourceDefinition, [
     filtersKey,
     itemFiltersKey,
@@ -145,13 +133,15 @@ export function CollectionItem<Filters extends FiltersDefinition>({
     [actions, downloadActions]
   )
 
+  const changeLabel = translations.ai.dashboardItem.comparison.change
+
   // The table viz is the only one with columns to append to; the others show
   // whatever fields their own layout declares.
   const visualizations = useMemo(() => {
-    if (!rowTrends) return item.visualizations
+    if (!item.rowTrends) return item.visualizations
     const column = changeColumn(
-      translations.ai.dashboardItem.comparison.change,
-      rowTrends,
+      changeLabel,
+      item.rowTrends,
       sourceDefinition?.idProvider
     )
 
@@ -166,7 +156,7 @@ export function CollectionItem<Filters extends FiltersDefinition>({
           }
         : visualization
     )
-  }, [item.visualizations, rowTrends, sourceDefinition, translations])
+  }, [item.visualizations, item.rowTrends, sourceDefinition, changeLabel])
 
   return (
     <DashboardItem

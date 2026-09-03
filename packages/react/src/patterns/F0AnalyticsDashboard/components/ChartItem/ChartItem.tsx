@@ -670,13 +670,24 @@ export function ChartItem<Filters extends FiltersDefinition>({
   const chartProps = useMemo(
     () =>
       data && !unrenderableChart
-        ? markCategoryComparison(
-            buildChartProps(item as DashboardChartItem, data),
-            data.categoryComparison,
-            translations.ai.dashboardItem.comparison.newCategory
-          )
+        ? buildChartProps(item as DashboardChartItem, data)
         : undefined,
-    [item, data, unrenderableChart, translations]
+    [item, data, unrenderableChart]
+  )
+
+  // A category mark is decoration on the drawn label, so it is applied last,
+  // to the rendered props alone: `chartProps` above is what quotes, keyboard
+  // labels and downloads read, and none of them should say "Sales ▲ +4.2%".
+  const newCategoryLabel = translations.ai.dashboardItem.comparison.newCategory
+  const markedChartProps = useMemo(
+    () =>
+      chartProps &&
+      markCategoryComparison(
+        chartProps,
+        data?.categoryComparison,
+        newCategoryLabel
+      ),
+    [chartProps, data?.categoryComparison, newCategoryLabel]
   )
 
   // A point belongs to one exact data render. A filter/type/refetch transition
@@ -969,7 +980,7 @@ export function ChartItem<Filters extends FiltersDefinition>({
       fitContent={fitContent}
       onFullscreenChange={onFullscreenChange}
     >
-      {data && chartProps ? (
+      {data && markedChartProps ? (
         viewMode === "table" ? (
           <ChartTableView config={safeChart} data={data} />
         ) : (
@@ -984,8 +995,9 @@ export function ChartItem<Filters extends FiltersDefinition>({
             )}
           >
             <F0DataChart
-              {...chartProps}
-              {...(chartProps.type !== "gauge" && chartProps.type !== "heatmap"
+              {...markedChartProps}
+              {...(markedChartProps.type !== "gauge" &&
+              markedChartProps.type !== "heatmap"
                 ? { onLegendSelectionChange: setLegendSelection }
                 : {})}
               // Something has to be able to answer the click: the host, or
@@ -1012,8 +1024,6 @@ export function ChartItem<Filters extends FiltersDefinition>({
               {...(fitContent ? { showAllCategories: true } : {})}
             />
             {removedCategories.length > 0 && (
-              // The categories the comparison dropped: nothing draws them, so
-              // the widget says so rather than letting them vanish.
               <p className="absolute bottom-2 left-4 right-4 m-0 truncate text-base text-f1-foreground-secondary">
                 {translations.t("ai.dashboardItem.comparison.notPresent", {
                   categories: removedCategories.join(", "),

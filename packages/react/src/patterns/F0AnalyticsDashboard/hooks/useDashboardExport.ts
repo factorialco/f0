@@ -12,10 +12,7 @@ import type {
   DashboardMetricItem,
 } from "../types"
 
-import {
-  readRowTrends,
-  rowTrendOf,
-} from "../components/CollectionItem/rowTrends"
+import { rowTrendOf } from "../components/CollectionItem/rowTrends"
 import { isRenderableChart } from "../utils/chartDataAdapter"
 import { chartDataToTabular } from "../utils/chartDataToTabular"
 import { downloadMultiSheetExcel } from "../utils/downloadHelpers"
@@ -42,25 +39,6 @@ interface UseDashboardExportResult {
 
 /** Header the metrics sheet already uses for a trend, shared by the other sheets. */
 const CHANGE_COLUMN = "Change"
-
-/**
- * The chart's own trend as a sheet cell. It describes the whole chart rather
- * than any one row, so it lands once, on the first.
- */
-function withChartChange(
-  sheet: SheetData,
-  change: string | undefined
-): SheetData {
-  const [first, ...rest] = sheet.rows
-  if (!change || !first) return sheet
-
-  return {
-    ...sheet,
-    columns: [...sheet.columns, CHANGE_COLUMN],
-    keys: sheet.keys && [...sheet.keys, CHANGE_COLUMN],
-    rows: [{ ...first, [CHANGE_COLUMN]: change }, ...rest],
-  }
-}
 
 function getItemFilters<Filters extends FiltersDefinition>(
   item: { useDashboardFilters?: boolean },
@@ -97,7 +75,7 @@ async function buildMetricsSheet<Filters extends FiltersDefinition>(
       // The sheet must not disagree with the screen about the change: an empty
       // label falls back to `previousValue` there too.
       if (data.trend?.label) {
-        row.Change = data.trend.label
+        row[CHANGE_COLUMN] = data.trend.label
         hasChange = true
       }
       rows.push(row)
@@ -115,7 +93,7 @@ async function buildMetricsSheet<Filters extends FiltersDefinition>(
     "Metric",
     "Value",
     ...(hasPrevious ? ["Previous Value"] : []),
-    ...(hasChange ? ["Change"] : []),
+    ...(hasChange ? [CHANGE_COLUMN] : []),
   ]
 
   return { name: "Metrics", columns, rows }
@@ -153,16 +131,16 @@ async function buildAllSheets<Filters extends FiltersDefinition>(
             )
             return null
           }
+          // The chart's own trend describes the sheet, not any row in it, so
+          // it stays on screen: parked on row 0 it would follow that row the
+          // first time the reader sorts.
           const tabular = chartDataToTabular(item.chart, data)
-          return withChartChange(
-            {
-              name: item.title,
-              columns: tabular.columns,
-              rows: tabular.rows,
-              keys: tabular.keys,
-            },
-            data.trend?.label
-          )
+          return {
+            name: item.title,
+            columns: tabular.columns,
+            rows: tabular.rows,
+            keys: tabular.keys,
+          }
         } catch (err) {
           console.warn(
             `[useDashboardExport] Failed to export chart "${item.title}":`,
@@ -186,7 +164,7 @@ async function buildAllSheets<Filters extends FiltersDefinition>(
               : (result as Record<string, unknown>[])
           if (records.length === 0) return null
           const columns = extractColumns(records)
-          const rowTrends = readRowTrends(result)
+          const rowTrends = item.rowTrends
           if (!rowTrends) {
             return { name: item.title, columns, rows: records }
           }

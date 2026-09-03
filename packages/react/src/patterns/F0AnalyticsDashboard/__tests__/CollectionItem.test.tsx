@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
 
-import { act, zeroRender as render } from "@/testing/test-utils"
+import { zeroRender as render } from "@/testing/test-utils"
 
 import type { DashboardCollectionItem } from "../types"
 
@@ -35,28 +35,20 @@ vi.mock("../hooks/useCollectionDownloadActions", () => ({
 
 const item = (
   createSource: DashboardCollectionItem["createSource"],
-  visualizations: DashboardCollectionItem["visualizations"] = []
+  visualizations: DashboardCollectionItem["visualizations"] = [],
+  rowTrends?: DashboardCollectionItem["rowTrends"]
 ): DashboardCollectionItem => ({
   id: "employees",
   type: "collection",
   title: "Employees",
   visualizations,
   createSource,
+  rowTrends,
 })
 
 const tableViz = [
   { type: "table", options: { columns: [{ label: "Name", id: "name" }] } },
 ]
-
-/** Runs the source's own fetch, which is what carries `rowTrends` back. */
-async function fetchOnce() {
-  const definition = useDataCollectionSource.mock.lastCall?.[0] as {
-    dataAdapter: { fetchData: (options: unknown) => Promise<unknown> }
-  }
-  await act(async () => {
-    await definition.dataAdapter.fetchData({})
-  })
-}
 
 function changeColumnOf() {
   const [viz] = rendered.visualizations as [
@@ -120,45 +112,53 @@ describe("CollectionItem", () => {
     ])
   })
 
-  it("appends a Change column for the rowTrends its own fetch returns", async () => {
-    const records = [{ id: "1", name: "Ada" }]
-    const collection = item(
-      () => ({
-        dataAdapter: {
-          fetchData: () =>
-            Promise.resolve({
-              records,
-              rowTrends: { "1": { direction: "up", label: "+2" } },
-            }),
-        },
-      }),
-      tableViz
-    )
+  it("appends a Change column for the rowTrends the item carries", () => {
+    const collection = item(() => ({ id: "source" }), tableViz, {
+      "1": { direction: "up", label: "+2" },
+    })
 
     render(<CollectionItem item={collection} filters={{}} />)
-    await fetchOnce()
 
     const column = changeColumnOf()
     expect(column.label).toBe("Change")
-    expect(column.render(records[0])).toEqual({
+    expect(column.render({ id: "1", name: "Ada" })).toEqual({
       type: "delta",
       value: { label: "+2", deltaStatus: "positive" },
     })
     expect(column.render({ id: "unknown" })).toBeUndefined()
   })
 
-  it("leaves the visualizations untouched when the fetch carries no rowTrends", async () => {
-    const collection = item(
-      () => ({
-        dataAdapter: { fetchData: () => Promise.resolve({ records: [] }) },
-      }),
-      tableViz
-    )
+  it("leaves the visualizations untouched when the item carries no rowTrends", () => {
+    const collection = item(() => ({ id: "source" }), tableViz)
 
     render(<CollectionItem item={collection} filters={{}} />)
-    await fetchOnce()
 
     expect(rendered.visualizations).toBe(collection.visualizations)
+  })
+
+  it("keys trends by the source's idProvider, else by the record id", () => {
+    const trends = { "emp-7": { direction: "up" as const, label: "+2" } }
+    const withProvider = item(
+      () => ({ idProvider: (row: { code: number }) => `emp-${row.code}` }),
+      tableViz,
+      trends
+    )
+
+    render(<CollectionItem item={withProvider} filters={{}} />)
+    expect(changeColumnOf().render({ code: 7 })).toEqual({
+      type: "delta",
+      value: { label: "+2", deltaStatus: "positive" },
+    })
+
+    // No idProvider: the same lookup the datasource itself falls back to.
+    const withoutProvider = item(() => ({ id: "source" }), tableViz, trends)
+
+    render(<CollectionItem item={withoutProvider} filters={{}} />)
+    expect(changeColumnOf().render({ code: 7 })).toBeUndefined()
+    expect(changeColumnOf().render({ id: "emp-7" })).toEqual({
+      type: "delta",
+      value: { label: "+2", deltaStatus: "positive" },
+    })
   })
 
   it("re-creates its source on a dataKey change instead of refetching in place", () => {

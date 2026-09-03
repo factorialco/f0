@@ -256,7 +256,7 @@ export interface DashboardCategoryComparison {
 /**
  * Per-row trends for a collection item, keyed the way the collection itself
  * identifies rows: its source's `idProvider` when it has one, otherwise the
- * record's `id`. Returned by the source's `fetchData` alongside `records`.
+ * record's `id`.
  */
 export type DashboardRowTrends = Record<string, DashboardMetricTrend>
 
@@ -452,10 +452,6 @@ export interface DashboardCollectionItem<
    * Called whenever dashboard filters change.
    * The returned definition should NOT include its own filters/presets
    * (the dashboard provides those globally).
-   *
-   * Its `dataAdapter.fetchData` may return {@link DashboardRowTrends} as
-   * `rowTrends` alongside `records`; the widget then appends a "Change" column
-   * rendering each row's trend.
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   createSource: (filters: FiltersState<Filters>) => any
@@ -465,6 +461,12 @@ export interface DashboardCollectionItem<
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   visualizations: ReadonlyArray<any>
+  /**
+   * Per-row comparison, appended as a "Change" column. A chart's trends ride
+   * in its `fetchData` result because that fetch owns its data; a collection's
+   * ride here because its source owns its rows.
+   */
+  rowTrends?: DashboardRowTrends
 }
 
 // ---------------------------------------------------------------------------
