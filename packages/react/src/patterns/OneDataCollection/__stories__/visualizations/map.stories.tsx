@@ -24,7 +24,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Map view visualization. Projects each record onto a coordinate and renders it as a marker, driven by the same toolbar (filters, search, view switcher) as every other view. Reading a record's position is the only required option; everything about how a marker looks belongs to F0Map.",
+          "Map view visualization. Projects each record onto a coordinate and renders it as a marker, driven by the same toolbar (filters, search, view switcher) as every other view. Reading a record's position is the only required option; everything about how a marker looks belongs to F0Map. The camera follows the collection: applying a filter reframes to the markers left (the set matching every active filter), selecting a marker centres it at the current zoom, and dropping the selection or clearing the search returns to the overview.",
       },
     },
   },
@@ -33,7 +33,11 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** The map alongside a table, both driven by the shared toolbar. */
+/**
+ * The map alongside a table, both driven by the shared toolbar. Apply a filter
+ * and the camera reframes to what is left; clear it and it frames everything
+ * again.
+ */
 export const BasicMapVisualization: Story = {
   parameters: { chromatic: { disableSnapshot: true } },
   render: () => {
@@ -61,7 +65,8 @@ export const BasicMapVisualization: Story = {
  * Selecting a marker opens a side panel. The panel reports the region it covers
  * through `viewportInset`, so the camera keeps the selected marker centred in
  * the free area beside it instead of behind it — try selecting a marker on the
- * right-hand side of the map.
+ * right-hand side of the map, then closing the panel to zoom back out. A click
+ * centres at the current zoom; searching for a record flies to it.
  */
 export const WithSidePanel: Story = {
   parameters: { chromatic: { disableSnapshot: true } },

@@ -25,6 +25,7 @@ import type { MapVisualizationOptions } from "./types"
 // needs browser Workers that jsdom does not provide.
 const mock = vi.hoisted(() => ({
   focusMarker: vi.fn(),
+  fitToMarkers: vi.fn(),
   props: { latest: null as Record<string, unknown> | null },
 }))
 vi.mock("@/patterns/F0Map", () => ({
@@ -34,7 +35,7 @@ vi.mock("@/patterns/F0Map", () => ({
     mock.props.latest = props
     useImperativeHandle(ref, () => ({
       focusMarker: mock.focusMarker,
-      fitToMarkers: vi.fn(),
+      fitToMarkers: mock.fitToMarkers,
       clearSelection: vi.fn(),
       getMap: () => null,
     }))
@@ -56,23 +57,34 @@ const offices: Office[] = [
   { id: "remote", name: "Remote", longitude: null, latitude: null },
 ]
 
-const buildSource = () =>
+type SourceState = {
+  filters?: Record<string, unknown>
+  search?: string
+}
+
+const recordsFor = (state: SourceState) => {
+  const country = (state.filters?.country ?? undefined) as string[] | undefined
+  if (!country) return offices
+  return offices.filter((office) => country.includes(office.id))
+}
+
+const buildSource = (state: SourceState = {}) =>
   ({
-    currentFilters: {},
+    currentFilters: state.filters ?? {},
     setCurrentFilters: vi.fn(),
     currentSortings: null,
     setCurrentSortings: vi.fn(),
     currentNavigationFilters: {},
     setCurrentNavigationFilters: vi.fn(),
     navigationFilters: undefined,
-    currentSearch: undefined,
-    debouncedCurrentSearch: undefined,
+    currentSearch: state.search,
+    debouncedCurrentSearch: state.search,
     setCurrentSearch: vi.fn(),
     isLoading: false,
     setIsLoading: vi.fn(),
     currentGrouping: undefined,
     setCurrentGrouping: vi.fn(),
-    dataAdapter: { fetchData: vi.fn(() => ({ records: offices })) },
+    dataAdapter: { fetchData: vi.fn(() => ({ records: recordsFor(state) })) },
     idProvider: (office: Office) => office.id,
     // eslint-disable-next-line no-type-assertion/no-type-assertion -- test scaffolding for a structurally complete source
   }) as unknown as DataCollectionSource<
@@ -98,22 +110,30 @@ const baseOptions = (
   ...overrides,
 })
 
+const collection = (
+  overrides: Partial<
+    MapVisualizationOptions<Office, FiltersDefinition, SortingsDefinition>
+  > = {},
+  searchSelectionNonce = 0,
+  state: SourceState = {}
+) => (
+  <MapCollection
+    source={buildSource(state)}
+    onSelectItems={vi.fn()}
+    onLoadData={vi.fn()}
+    onLoadError={vi.fn()}
+    searchSelectionNonce={searchSelectionNonce}
+    {...baseOptions(overrides)}
+  />
+)
+
 const renderMap = (
   overrides: Partial<
     MapVisualizationOptions<Office, FiltersDefinition, SortingsDefinition>
   > = {},
-  searchSelectionNonce = 0
-) =>
-  zeroRender(
-    <MapCollection
-      source={buildSource()}
-      onSelectItems={vi.fn()}
-      onLoadData={vi.fn()}
-      onLoadError={vi.fn()}
-      searchSelectionNonce={searchSelectionNonce}
-      {...baseOptions(overrides)}
-    />
-  )
+  searchSelectionNonce = 0,
+  state: SourceState = {}
+) => zeroRender(collection(overrides, searchSelectionNonce, state))
 
 const waitForMap = () => waitFor(() => expect(mock.props.latest).not.toBeNull())
 
@@ -122,6 +142,7 @@ const markers = () => (mock.props.latest?.markers ?? []) as F0MapPoint[]
 beforeEach(() => {
   mock.props.latest = null
   mock.focusMarker.mockClear()
+  mock.fitToMarkers.mockClear()
 })
 
 describe("MapCollection — projecting records onto markers", () => {
@@ -248,17 +269,73 @@ describe("MapCollection — reveal", () => {
     await waitForMap()
     await waitFor(() => expect(mock.focusMarker).toHaveBeenCalledTimes(1))
 
-    rerender(
-      <MapCollection
-        source={buildSource()}
-        onSelectItems={vi.fn()}
-        onLoadData={vi.fn()}
-        onLoadError={vi.fn()}
-        searchSelectionNonce={2}
-        {...baseOptions({ revealRecordId: "mad" })}
-      />
-    )
+    rerender(collection({ revealRecordId: "mad" }, 2))
 
     await waitFor(() => expect(mock.focusMarker).toHaveBeenCalledTimes(2))
+  })
+})
+
+describe("MapCollection — framing", () => {
+  it("reframes to the markers left by a filter", async () => {
+    const { rerender } = renderMap()
+    await waitForMap()
+    expect(markers()).toHaveLength(2)
+    mock.fitToMarkers.mockClear()
+
+    rerender(collection({}, 0, { filters: { country: ["bcn"] } }))
+
+    await waitFor(() => expect(markers()).toHaveLength(1))
+    expect(mock.fitToMarkers).toHaveBeenCalled()
+  })
+
+  it("frames the union of two filters at once", async () => {
+    const { rerender } = renderMap({}, 0, { filters: { country: ["bcn"] } })
+    await waitForMap()
+    mock.fitToMarkers.mockClear()
+
+    rerender(collection({}, 0, { filters: { country: ["bcn", "mad"] } }))
+
+    // Both results have to be in frame, so the fit runs over the wider set.
+    await waitFor(() => expect(markers()).toHaveLength(2))
+    expect(mock.fitToMarkers).toHaveBeenCalled()
+  })
+
+  it("does not reframe on the initial load (F0Map frames that itself)", async () => {
+    renderMap()
+    await waitForMap()
+
+    expect(mock.fitToMarkers).not.toHaveBeenCalled()
+  })
+
+  it("zooms back out when the selection is dropped", async () => {
+    renderMap({ onSelect: vi.fn() })
+    await waitForMap()
+
+    const onMarkerSelect = mock.props.latest?.onMarkerSelect as (
+      id: string | null
+    ) => void
+    act(() => onMarkerSelect("mad"))
+    mock.fitToMarkers.mockClear()
+
+    act(() => onMarkerSelect(null))
+
+    expect(mock.fitToMarkers).toHaveBeenCalled()
+  })
+
+  it("zooms back out when the search is cleared", async () => {
+    const { rerender } = renderMap({}, 0, { search: "mad" })
+    await waitForMap()
+    mock.fitToMarkers.mockClear()
+
+    rerender(collection({}, 0, { search: undefined }))
+
+    await waitFor(() => expect(mock.fitToMarkers).toHaveBeenCalled())
+  })
+
+  it("centres a clicked marker so it clears the consumer's panel", async () => {
+    renderMap()
+    await waitForMap()
+
+    expect(mock.props.latest?.centerOnMarkerClick).toBe(true)
   })
 })
