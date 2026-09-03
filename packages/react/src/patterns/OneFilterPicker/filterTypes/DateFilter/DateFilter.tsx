@@ -9,6 +9,7 @@ import {
 } from "@/components/OneCalendar/types"
 
 import { FilterTypeComponentProps } from "../types"
+import { useI18n } from "@/lib/providers/i18n"
 
 export type DateFilterOptions = {
   minDate?: Date
@@ -34,6 +35,7 @@ export function DateFilter({
   schema,
   isCompactMode,
 }: DateFilterComponentProps) {
+  const i18n = useI18n()
   const options = {
     mode: "single" as const,
     view: "day" as const,
@@ -60,7 +62,7 @@ export function DateFilter({
         <div className="sticky bottom-0 left-0 right-0 z-20 flex items-center justify-end gap-2 border border-solid border-transparent border-t-f1-border-secondary bg-f1-background/80 p-2 backdrop-blur-[8px]">
           <F0Button
             variant="ghost"
-            label="Clear"
+            label={i18n.actions.clear}
             onClick={() => clear()}
             disabled={!value}
             size="sm"

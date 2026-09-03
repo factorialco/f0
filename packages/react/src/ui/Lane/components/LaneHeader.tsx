@@ -3,6 +3,7 @@ import { F0TagDot, NewColor } from "@/components/tags/F0TagDot"
 import { F0TagStatus, Variant } from "@/components/tags/F0TagStatus"
 import { Counter } from "@/ui/Counter"
 import { Plus } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 
 type LaneHeaderProps = {
   label: string
@@ -19,6 +20,7 @@ export const LaneHeader = ({
   count,
   onPrimaryAction,
 }: LaneHeaderProps) => {
+  const i18n = useI18n()
   const showPrimary = Boolean(onPrimaryAction)
 
   return (
@@ -34,7 +36,7 @@ export const LaneHeader = ({
           <F0Button
             variant="ghost"
             size="sm"
-            label="Add"
+            label={i18n.actions.add}
             icon={Plus}
             hideLabel
             onClick={onPrimaryAction}

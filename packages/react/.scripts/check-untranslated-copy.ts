@@ -237,6 +237,13 @@ export interface Finding {
    * turns "go write a key" into a one-line swap.
    */
   existingKey?: string
+  /**
+   * Whether `existingKey` sits in a domain-neutral namespace (`actions.*`,
+   * `navigation.*`, `common.*`) and so is safe to read from anywhere. When
+   * false the key belongs to another feature: proof the copy is translated
+   * somewhere, but not a licence to borrow it.
+   */
+  existingKeyIsGeneric?: boolean
 }
 
 /** English value (lowercased) → dot-notation keys that already hold it. */
@@ -259,19 +266,36 @@ export function buildKeyIndex(
 }
 
 /**
- * Pick the key to suggest when several hold the same English. Prefer the
- * shallowest, then the shortest — `actions.close` reads as the reusable one,
- * `chat.closePreview` as a local coincidence.
+ * Namespaces whose copy is deliberately domain-neutral, so any component may
+ * read them. Every other namespace is scoped to a feature, and borrowing across
+ * features is a bug waiting to happen: a product translating `chat.back` does
+ * not expect the filter picker's Back button to change with it.
+ */
+const GENERIC_NAMESPACE = /^(actions|navigation|common)\./
+
+/**
+ * Pick the key to suggest when several hold the same English, and say whether it
+ * is safe to reuse anywhere.
+ *
+ * A generic key always wins. Otherwise the shallowest feature key comes back
+ * with `generic: false` — still worth surfacing, since it proves the copy is
+ * already translated somewhere, but only reusable when it is the same feature.
+ * Depth alone is not enough to decide: it happily picked `ai.today` for a date
+ * preset and `wizard.previous` for a date navigator.
  */
 export function suggestKey(
   value: string,
   index: Map<string, string[]>
-): string | undefined {
+): { key: string; generic: boolean } | undefined {
   const candidates = index.get(value.toLowerCase())
   if (!candidates?.length) return undefined
-  return [...candidates].sort(
+  const byDepth = [...candidates].sort(
     (a, b) => a.split(".").length - b.split(".").length || a.length - b.length
-  )[0]
+  )
+  const generic = byDepth.find((k) => GENERIC_NAMESPACE.test(k))
+  return generic
+    ? { key: generic, generic: true }
+    : { key: byDepth[0], generic: false }
 }
 
 /** Strip HTML entities so `&nbsp;` does not read as a word. */
@@ -464,8 +488,14 @@ export function attachExistingKeys(
   index: Map<string, string[]> = buildKeyIndex()
 ): Finding[] {
   return findings.map((finding) => {
-    const existingKey = suggestKey(finding.value, index)
-    return existingKey ? { ...finding, existingKey } : finding
+    const match = suggestKey(finding.value, index)
+    return match
+      ? {
+          ...finding,
+          existingKey: match.key,
+          existingKeyIsGeneric: match.generic,
+        }
+      : finding
   })
 }
 
@@ -607,9 +637,12 @@ const repoPath = (f: Finding) => `packages/react/${f.file}`
 
 /** The one-line "what to do about it" for a single finding. */
 export function fixHint(finding: Finding): string {
-  return finding.existingKey
-    ? `A key for this already exists — read \`${finding.existingKey}\` instead of hardcoding it.`
-    : "Add a key to `i18n-provider-defaults.ts` and read it with `useI18n()`/`t()`."
+  if (!finding.existingKey) {
+    return "Add a key to `i18n-provider-defaults.ts` and read it with `useI18n()`/`t()`."
+  }
+  return finding.existingKeyIsGeneric
+    ? `A shared key already exists — read \`${finding.existingKey}\` instead of hardcoding it.`
+    : `\`${finding.existingKey}\` already holds this text, but in another feature's namespace. Reuse it only if that is the same feature; otherwise add a key in yours.`
 }
 
 /**
@@ -644,7 +677,10 @@ export function commentMarkdown(result: CheckResult): string {
     ].join("\n")
   }
 
-  const reusable = added.filter((f) => f.existingKey)
+  const reusable = added.filter((f) => f.existingKeyIsGeneric)
+  const elsewhere = added.filter(
+    (f) => f.existingKey && !f.existingKeyIsGeneric
+  )
   const fresh = added.filter((f) => !f.existingKey)
   const lines = [
     `## ❌ ${added.length} untranslated string${added.length === 1 ? "" : "s"} added`,
@@ -655,11 +691,27 @@ export function commentMarkdown(result: CheckResult): string {
 
   if (reusable.length > 0) {
     lines.push(
-      `### ${reusable.length} already have a key — swap, don't write`,
+      `### ${reusable.length} can reuse a shared key — swap, don't write`,
       "",
       "| Where | String | Read this instead |",
       "| --- | --- | --- |",
       ...reusable.map(
+        (f) =>
+          `| \`${f.file}:${f.line}\` | \`${f.value}\` | \`${f.existingKey}\` |`
+      ),
+      ""
+    )
+  }
+
+  if (elsewhere.length > 0) {
+    lines.push(
+      `### ${elsewhere.length} already translated in another feature — check before borrowing`,
+      "",
+      "These keys hold the same English, but under another feature's namespace. Reuse one only if it is the same feature; otherwise add a key in yours, or promote the copy to `actions.*`/`navigation.*` if it is genuinely shared.",
+      "",
+      "| Where | String | Same text lives at |",
+      "| --- | --- | --- |",
+      ...elsewhere.map(
         (f) =>
           `| \`${f.file}:${f.line}\` | \`${f.value}\` | \`${f.existingKey}\` |`
       ),
@@ -783,21 +835,26 @@ export function reportResult(result: CheckResult): boolean {
       `${result.added.length} new untranslated string(s) — copy must come from ` +
         "the i18n layer, not a literal:"
     )
-    const reusable = result.added.filter((f) => f.existingKey)
+    const reusable = result.added.filter((f) => f.existingKeyIsGeneric)
     for (const finding of result.added) {
       consola.log(
         `    ${finding.file}:${finding.line} — ${finding.name} = ` +
           `${JSON.stringify(finding.value)} (${KIND_LABEL[finding.kind]})`
       )
-      if (finding.existingKey) {
-        consola.log(`      ↳ already translated as "${finding.existingKey}"`)
+      if (finding.existingKeyIsGeneric) {
+        consola.log(`      ↳ read the shared key "${finding.existingKey}"`)
+      } else if (finding.existingKey) {
+        consola.log(
+          `      ? same text at "${finding.existingKey}" — another feature's ` +
+            "namespace, borrow only if it is the same feature"
+        )
       }
     }
     consola.log("")
     if (reusable.length > 0) {
       consola.log(
-        `  ${reusable.length} of these already have a key (marked ↳ above) — ` +
-          "read that key instead of hardcoding the English."
+        `  ${reusable.length} of these can read a shared key (marked ↳ above) — ` +
+          "use it instead of hardcoding the English."
       )
     }
     consola.log(

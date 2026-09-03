@@ -6,6 +6,7 @@ import { F0Icon, IconType } from "@/components/F0Icon"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { CheckCircle, Cross, InfoCircle, Warning } from "@/icons/app"
 import { cn } from "@/lib/utils"
+import { useI18n } from "@/lib/providers/i18n"
 import { Skeleton } from "@/ui/skeleton"
 
 import { CalloutInternalProps, CalloutSkeletonProps } from "./types"
@@ -43,6 +44,8 @@ export const CalloutInternal = forwardRef<HTMLDivElement, CalloutInternalProps>(
     { title, onClose, children, actions = [], variant },
     ref
   ) {
+    const i18n = useI18n()
+
     // Validate actions limit
     if (actions.length > 2) {
       throw new Error(
@@ -80,7 +83,7 @@ export const CalloutInternal = forwardRef<HTMLDivElement, CalloutInternalProps>(
               size="sm"
               hideLabel
               onClick={onClose}
-              label="Close"
+              label={i18n.actions.close}
             />
           )}
         </div>

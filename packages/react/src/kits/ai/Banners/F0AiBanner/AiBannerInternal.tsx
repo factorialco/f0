@@ -5,6 +5,7 @@ import { OneEllipsis } from "@/lib/OneEllipsis"
 import { F0RichTextDisplay } from "@/components/RichText/F0RichTextDisplay"
 import { Cross } from "@/icons/app"
 import { cn } from "@/lib/utils"
+import { useI18n } from "@/lib/providers/i18n"
 import { Skeleton } from "@/ui/skeleton"
 
 import { AiBannerInternalProps, AiBannerSkeletonProps } from "./types"
@@ -16,6 +17,8 @@ export const AiBannerInternal = forwardRef<
   { title, onClose, content, primaryAction, secondaryAction },
   ref
 ) {
+  const i18n = useI18n()
+
   return (
     <div
       ref={ref}
@@ -31,7 +34,7 @@ export const AiBannerInternal = forwardRef<
             size="sm"
             hideLabel
             onClick={onClose}
-            label="Close"
+            label={i18n.actions.close}
           />
         )}
       </div>
