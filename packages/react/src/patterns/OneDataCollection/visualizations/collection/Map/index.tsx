@@ -154,10 +154,53 @@ export const MapCollection = <
   onSelectRef.current = onSelect
   useEffect(() => () => onSelectRef.current?.(null), [])
 
+  const mapRef = useRef<F0MapHandle>(null)
+
+  // Filters narrow the markers, so the camera reframes to what is left - with
+  // two filters applied at once that is the set matching both. The fit waits for
+  // the new markers instead of firing on the filter change, which lands a frame
+  // earlier while the old ones are still drawn. The first pass only records the
+  // filters: framing the initial load is F0Map's own job.
+  const filterSignature = JSON.stringify(source.currentFilters ?? {})
+  const framedFiltersRef = useRef<string | null>(null)
+  const refitPendingRef = useRef(false)
+  useEffect(() => {
+    if (framedFiltersRef.current === null) {
+      framedFiltersRef.current = filterSignature
+      return
+    }
+    if (framedFiltersRef.current === filterSignature) return
+
+    framedFiltersRef.current = filterSignature
+    refitPendingRef.current = true
+  }, [filterSignature])
+  useEffect(() => {
+    if (!refitPendingRef.current) return
+
+    refitPendingRef.current = false
+    mapRef.current?.fitToMarkers()
+  }, [points])
+
+  // Zoom back out to the overview once the reason to be zoomed in is gone:
+  // the selection dropped (its panel closed) or the search cleared.
+  const previousSelectedRef = useRef<string | null>(null)
+  useEffect(() => {
+    const previous = previousSelectedRef.current
+    previousSelectedRef.current = selectedId
+    if (previous && !selectedId) mapRef.current?.fitToMarkers()
+  }, [selectedId])
+
+  const search = source.currentSearch
+  const previousSearchRef = useRef(search)
+  useEffect(() => {
+    const previous = previousSearchRef.current
+    previousSearchRef.current = search
+    if (previous && !search) mapRef.current?.fitToMarkers()
+  }, [search])
+
   // A reveal is a one-shot event, not a piece of state: fly to the marker and
   // select it. `searchSelectionNonce` is what lets the same record be revealed
   // twice in a row, since the id alone would not change.
-  const mapRef = useRef<F0MapHandle>(null)
   const revealedRef = useRef<string | null>(null)
   useEffect(() => {
     if (!revealRecordId) return
@@ -185,6 +228,9 @@ export const MapCollection = <
         markers={points}
         selectedMarkerId={selectedId}
         onMarkerSelect={selectRecord}
+        // A selection opens the consumer's panel, so the marker it refers to has
+        // to stay visible beside it.
+        centerOnMarkerClick
         viewportInset={viewportInset}
         initialViewport={initialViewport}
         showControls={showControls}
