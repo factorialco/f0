@@ -170,6 +170,7 @@ export default defineConfig({
         /@copilotkit\/.*/,
         /@livekit\/.*/,
         "livekit-client",
+        /^recharts(\/.*)?$/,
       ],
       maxParallelFileOps: 100,
       // Workaround to fix rebuild https://github.com/vitejs/vite/issues/19410#issuecomment-2661835482
@@ -177,6 +178,8 @@ export default defineConfig({
         globals: {
           react: "React",
         },
+        preserveModules: true,
+        preserveModulesRoot: "src",
       },
     },
   },
