@@ -416,38 +416,25 @@ export const collectionVisualizations: CollectionVisualizations<
     settings: {
       default: {},
     },
-    render: <
-      Record extends RecordType,
-      Filters extends FiltersDefinition,
-      Sortings extends SortingsDefinition,
-      Summaries extends SummariesDefinition,
-      ItemActions extends ItemActionsDefinition<Record>,
-      NavigationFilters extends NavigationFiltersDefinition,
-      Grouping extends GroupingDefinition<Record>,
-    >(
+    // Not generic, unlike the eagerly imported views: a `lazy` component cannot
+    // carry type parameters, so the record type is erased at this boundary and
+    // re-applied by the `Visualization` union, which is what consumers type
+    // their options against. The registry itself is declared over the base
+    // types anyway.
+    render: (
       props: MapCollectionProps<
-        Record,
-        Filters,
-        Sortings,
-        Summaries,
-        ItemActions,
-        NavigationFilters,
-        Grouping
+        RecordType,
+        FiltersDefinition,
+        SortingsDefinition,
+        SummariesDefinition,
+        ItemActionsDefinition<RecordType>,
+        NavigationFiltersDefinition,
+        GroupingDefinition<RecordType>
       >
     ) => {
       return (
         <Suspense fallback={<Skeleton className="h-full w-full" />}>
-          <LazyMapCollection<
-            Record,
-            Filters,
-            Sortings,
-            Summaries,
-            ItemActions,
-            NavigationFilters,
-            Grouping
-          >
-            {...props}
-          />
+          <LazyMapCollection {...props} />
         </Suspense>
       )
     },
