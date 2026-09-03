@@ -5742,7 +5742,29 @@ function withBar(value: string, pinned: number, current: number) {
   return pinned === current ? value : `${value} (min ${pinned}%)`
 }
 
-function GroupParticipantsTable({ rows }: { rows: ParticipantRow[] }) {
+const COURSE_HAS_SESSIONS = true
+const COURSE_HAS_TEST = true
+const COURSE_HAS_MODULES = true
+
+function GroupParticipantsTable({
+  rows,
+  groupMins,
+  courseMins,
+}: {
+  rows: ParticipantRow[]
+  /** the minimums THIS group is judged with (old ones if the change was not applied here) */
+  groupMins: { attendance: number; kt: number }
+  /** the course's current minimums; when they differ from the group's, the header explains why */
+  courseMins: { attendance: number; kt: number }
+}) {
+  const attInfo =
+    groupMins.attendance !== courseMins.attendance
+      ? `This group is measured with ${groupMins.attendance}%. The course now requires ${courseMins.attendance}%.`
+      : undefined
+  const ktInfo =
+    groupMins.kt !== courseMins.kt
+      ? `This group is measured with ${groupMins.kt}%. The course now requires ${courseMins.kt}%.`
+      : undefined
   // No hardcoded widths: sizing them by hand meant sizing them for the HEADERS,
   // so a column holding "84%" ended up 200px wide. Without widths the table
   // distributes by content. The bar of each condition goes in its own header, in
@@ -5793,31 +5815,11 @@ function GroupParticipantsTable({ rows }: { rows: ParticipantRow[] }) {
         {
           type: "table",
           options: {
+            frozenColumns: 1,
             columns: [
-              // The three columns the real table has today, verbatim
-              // (ParticipantsTable/index.tsx:163-200): person, team, job title.
-              {
-                id: "who",
-                label: "Name",
-                render: (row: ParticipantRow) => personValue(row.name),
-              },
-              {
-                id: "team",
-                label: "Team",
-                render: (row: ParticipantRow) => ({
-                  type: "text" as const,
-                  value: row.team,
-                }),
-              },
-              {
-                id: "job",
-                label: "Job title",
-                render: (row: ParticipantRow) => ({
-                  type: "text" as const,
-                  value: row.jobTitle,
-                }),
-              },
-              // What this initiative proposes to add.
+              { id: "who", label: "Participant", render: (row: ParticipantRow) => personValue(row.name) },
+              { id: "team", label: "Team", render: (row: ParticipantRow) => ({ type: "text" as const, value: row.team }) },
+              { id: "job", label: "Job title", hidden: true, render: (row: ParticipantRow) => ({ type: "text" as const, value: row.jobTitle }) },
               {
                 id: "status",
                 label: "Status",
@@ -5829,46 +5831,57 @@ function GroupParticipantsTable({ rows }: { rows: ParticipantRow[] }) {
                   },
                 }),
               },
-              {
-                id: "lms",
-                label: "LMS modules",
-                render: (row: ParticipantRow) => ({
-                  type: "text" as const,
-                  value: `${row.modules}/${COURSE_MODULES}`,
-                }),
-              },
-              {
-                id: "quiz",
-                label: "Quiz score",
-                render: (row: ParticipantRow) => ({
-                  type: "text" as const,
-                  value: withBar(`${row.quiz}%`, row.quizMin, GROUP_SCENARIO.quizMinimum),
-                }),
-              },
-              {
-                id: "attendance",
-                label: "Attendance",
-                render: (row: ParticipantRow) => ({
-                  type: "text" as const,
-                  value: `${withBar(`${row.attendance}%`, row.attMin, GROUP_SCENARIO.attendanceMinimum)}${row.sessionsLeft > 0 ? ` · ${row.sessionsLeft} left` : ""}`,
-                }),
-              },
-              {
-                // Without this column a row contradicts itself: modules complete,
-                // attendance fine, and still "In progress" — because the test is
-                // what they miss. Last column keeps no width.
-                id: "kt",
-                label: "Knowledge test",
-                render: (row: ParticipantRow) =>
-                  row.ktPending
-                    ? // Not taken yet is not a zero.
-                      { type: "status" as const, value: { status: "neutral" as const, label: "Pending" } }
-                    : {
-                        type: "text" as const,
-                        value: withBar(`${row.score}%`, row.ktMin, GROUP_SCENARIO.knowledgeMinimum),
-                      },
-              },
-            ],
+              { id: "certificate", label: "Certificate", render: (row: ParticipantRow) => ({ type: "text" as const, value: row.status === "Completed" ? "1 file" : "-" }) },
+              { id: "completion", label: "Completion date", render: (row: ParticipantRow) => ({ type: "text" as const, value: row.status === "Completed" ? CHANGE_STAMP.date : "—" }) },
+              // Always a column; the cell decides. This course does not expire →
+              // N/A (not a criterion here), distinct from — (no value yet).
+              { id: "validity", label: "Course validity", render: () => ({ type: "text" as const, value: "N/A" }) },
+              // Criterion columns are conditional on the course HAVING the thing
+              // (retake's rule: presence, not the completion toggle). Min in the
+              // header once, per the 10-Aug decision.
+              ...(COURSE_HAS_SESSIONS
+                ? [
+                    {
+                      id: "attendance",
+                      label: `Session attendance · min ${groupMins.attendance}%`,
+                      info: attInfo,
+                      render: (row: ParticipantRow) => ({
+                        type: "percentage" as const,
+                        value: { percentage: row.attendance, label: `${row.attendance}%` },
+                      }),
+                    },
+                  ]
+                : []),
+              ...(COURSE_HAS_TEST
+                ? [
+                    {
+                      id: "kt",
+                      label: `Knowledge test · min ${groupMins.kt}%`,
+                      info: ktInfo,
+                      render: (row: ParticipantRow) =>
+                        row.ktPending
+                          ? { type: "status" as const, value: { status: "neutral" as const, label: "Pending" } }
+                          : row.score >= groupMins.kt
+                            ? { type: "status" as const, value: { status: "positive" as const, label: "Passed" } }
+                            : { type: "status" as const, value: { status: "critical" as const, label: "Failed" } },
+                    },
+                  ]
+                : []),
+              ...(COURSE_HAS_MODULES
+                ? [
+                    {
+                      id: "modules",
+                      label: "Module progress",
+                      render: (row: ParticipantRow) => ({
+                        type: "percentage" as const,
+                        value: {
+                          percentage: Math.round((row.modules / COURSE_MODULES) * 100),
+                          label: `${row.modules}/${COURSE_MODULES}`,
+                        },
+                      }),
+                    },
+                  ]
+                : []),            ],
           },
         },
       ]}
@@ -5931,13 +5944,11 @@ function ChangedPeopleTable({ rows }: { rows: ParticipantRow[] }) {
               {
                 id: "who",
                 label: "Participant",
-                width: 170,
                 render: (row: ParticipantRow) => personValue(row.name),
               },
               {
                 id: "change",
                 label: "Status change",
-                width: 190,
                 render: (row: ParticipantRow) => ({
                   type: "alertTag" as const,
                   value: {
@@ -5983,14 +5994,20 @@ function TrainingGroupDetail(props: Record<string, unknown>) {
   const meta = GROUP_META[groupId]
   const activeTab = (searchParams.get("gtab") as GroupDetailTabId) || "participants"
 
-  const rows = participantsOfGroup(groupId, GROUP_SCENARIO)
-  // The bars this group was judged with (they are the same for everybody in it).
-  const bars = {
-    quiz: rows[0]?.quizMin ?? COMPLETION_BASELINE.quizMinimum,
-    kt: rows[0]?.ktMin ?? COMPLETION_BASELINE.knowledgeMinimum,
-    attendance: rows[0]?.attMin ?? COMPLETION_BASELINE.attendanceMinimum,
+  // ?applied=no → the change was NOT applied to this group: it keeps the old
+  // minimums, nobody changed status, and the header explains the divergence.
+  const notApplied = searchParams.get("applied") === "no"
+  const after = notApplied ? COMPLETION_BASELINE : GROUP_SCENARIO
+  const rows = participantsOfGroup(groupId, after)
+  const courseMins = {
+    attendance: GROUP_SCENARIO.attendanceMinimum,
+    kt: GROUP_SCENARIO.knowledgeMinimum,
   }
-  const changed = rows.filter((r) => r.change)
+  const groupMins = {
+    attendance: after.attendanceMinimum,
+    kt: after.knowledgeMinimum,
+  }
+  const changed = notApplied ? [] : rows.filter((r) => r.change)
   // The movements themselves, without repeating one per person.
   const movements = changeDetails(FINISHED_PEOPLE[0], COMPLETION_BASELINE, GROUP_SCENARIO)
   const lost = changed.filter((r) => r.change === "lose").length
@@ -6066,6 +6083,14 @@ function TrainingGroupDetail(props: Record<string, unknown>) {
           <F0Box display="flex" flexDirection="column" gap="lg">
             {/* The banner only informs — a re-check leaves no trail in v1, so this
                 is the one place that says the conditions moved under this group. */}
+            {notApplied && !noticeRead && (
+              <F0Alert
+                variant="info"
+                title="Completion conditions changed on 6 Aug 2026"
+                description={`This group keeps its previous requirements — the change was not applied here. Changed by ${CHANGE_STAMP.by}.`}
+                onClose={() => setNoticeRead(true)}
+              />
+            )}
             {changed.length > 0 && !noticeRead && (
               <F0Alert
                 variant="info"
@@ -6084,7 +6109,7 @@ function TrainingGroupDetail(props: Record<string, unknown>) {
               />
             )}
 
-            <GroupParticipantsTable rows={rows} />
+            <GroupParticipantsTable rows={rows} groupMins={groupMins} courseMins={courseMins} />
           </F0Box>
         )}
       </StandardLayout>
