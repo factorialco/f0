@@ -427,6 +427,70 @@ describe("F0AiInsightCard", () => {
       expect(screen.queryByText("Ask One")).not.toBeInTheDocument()
     })
 
+    it("does not nest the Ask One button inside the card's button role", async () => {
+      const user = userEvent.setup()
+
+      render(
+        <F0AiInsightCard
+          content="text"
+          heading="Both handlers"
+          onClick={vi.fn()}
+          onAskOne={vi.fn()}
+        />
+      )
+
+      const card = screen.getByRole("button", { name: /Both handlers/ })
+      await user.hover(card)
+
+      const askOne = await screen.findByRole("button", { name: "Ask One" })
+      expect(card.contains(askOne)).toBe(false)
+    })
+
+    it("keeps Ask One reachable by keyboard from the focused card", async () => {
+      const user = userEvent.setup()
+      const handleAskOne = vi.fn()
+
+      render(
+        <F0AiInsightCard
+          content="text"
+          heading="Tab target"
+          onClick={vi.fn()}
+          onAskOne={handleAskOne}
+        />
+      )
+
+      await user.tab()
+      expect(screen.getByRole("button", { name: /Tab target/ })).toHaveFocus()
+
+      const askOne = await screen.findByRole("button", { name: "Ask One" })
+      await user.tab()
+      expect(askOne).toHaveFocus()
+
+      await user.keyboard("{Enter}")
+      expect(handleAskOne).toHaveBeenCalledTimes(1)
+    })
+
+    it("does not trigger the card onClick when Ask One is clicked", async () => {
+      const user = userEvent.setup()
+      const handleClick = vi.fn()
+      const handleAskOne = vi.fn()
+
+      render(
+        <F0AiInsightCard
+          content="text"
+          heading="Independent actions"
+          onClick={handleClick}
+          onAskOne={handleAskOne}
+        />
+      )
+
+      await user.hover(screen.getByText("Independent actions"))
+      await user.click(await screen.findByRole("button", { name: "Ask One" }))
+
+      expect(handleAskOne).toHaveBeenCalledTimes(1)
+      expect(handleClick).not.toHaveBeenCalled()
+    })
+
     it("has button role when onClick is provided", () => {
       render(
         <F0AiInsightCard
