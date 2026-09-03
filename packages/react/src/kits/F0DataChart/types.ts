@@ -234,6 +234,24 @@ export interface F0DataChartBarProps extends F0DataChartBaseProps {
   /** Stack all series into a single bar per category. @default false */
   stacked?: boolean
   /**
+   * One target per category, for the bar as a whole — the counterpart of a data
+   * point's own `target` when the bar is a stack of several series.
+   *
+   * A stacked bar answers "how much did all of this add up to", and a target
+   * for it belongs to the category, not to any one series: the parts of a goal
+   * measured by its sub-goals are each a series, and the number they are all
+   * working towards is one.
+   *
+   * Drawn as a faded column behind the bars and a little wider than them, so a
+   * stack that has grown past its target still shows where the target was — in
+   * the margin either side of it.
+   *
+   * Only read on a stacked chart — a grouped category has several bars and no
+   * single one to measure. `null` leaves a category without a target.
+   * @default undefined
+   */
+  targets?: (number | null)[]
+  /**
    * Draw the stretch of a bar that ran past its `target` in a darker shade of
    * the bar's own colour, split at the target.
    *
@@ -242,6 +260,12 @@ export interface F0DataChartBarProps extends F0DataChartBaseProps {
    * it — the reader has to eye its height against the ghosts beside it. Turn it
    * on wherever passing the target is itself the news: attainment against a
    * quota, a goal, a budget.
+   *
+   * On a stacked chart this marks each segment against the target on its own
+   * data point, not against {@link F0DataChartBarProps.targets}: a sub-goal that
+   * beat its own number is worth seeing whether or not the stack it belongs to
+   * has reached the one they all add up to. That the stack cleared its own
+   * target is already visible without colour, in the bar rising past the column.
    *
    * Ignored by points with no target, and by negative values — "past the
    * target" has no single reading when the bar grows downwards.

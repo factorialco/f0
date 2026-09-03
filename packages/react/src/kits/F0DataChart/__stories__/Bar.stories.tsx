@@ -214,6 +214,60 @@ export const WithOverachievement: Story = {
   },
 }
 
+/**
+ * A goal measured by its sub-goals: each series is one sub-goal's contribution
+ * to the quarter, and `targets` is what the parent goal is measured against —
+ * one number per category, for the stack as a whole rather than any one series.
+ *
+ * The target is drawn as a column behind the bars and a little wider than them,
+ * so it stays readable once a stack has grown past it: Q2 clears the line, and
+ * where the line was is still there in the margin either side of the bar.
+ *
+ * Each sub-goal also has a target of its own, and `highlightOverachievement`
+ * marks a segment against that one: Expansion beat its 100k in both Q2 and Q3,
+ * so the part of it past that number is darker in each — including Q3, where
+ * the quarter as a whole is nowhere near the 300k the parent is measured by.
+ * Q4 has not started, and hovering its column reports the target it is
+ * measured against.
+ */
+export const StackedWithTargets: Story = {
+  render: (args) => <F0DataChart {...args} />,
+  args: {
+    type: "bar",
+    categories: ["Q1", "Q2", "Q3", "Q4"],
+    stacked: true,
+    series: [
+      {
+        name: "New logos",
+        data: [120_000, 130_000, 90_000, 0].map((value) => ({
+          value,
+          target: 150_000,
+        })),
+      },
+      {
+        name: "Expansion",
+        // Q2 and Q3 beat this sub-goal's own number even where the parent's is
+        // still out of reach.
+        data: [80_000, 140_000, 120_000, 0].map((value) => ({
+          value,
+          target: 100_000,
+        })),
+      },
+      {
+        name: "Renewals",
+        data: [40_000, 90_000, 45_000, 0].map((value) => ({
+          value,
+          target: 50_000,
+        })),
+      },
+    ],
+    targets: [300_000, 300_000, 300_000, 300_000],
+    highlightOverachievement: true,
+    showTargetProgress: true,
+    valueFormatter: (v) => `${v / 1000}k €`,
+  },
+}
+
 /** Multiple series stacked into a single bar per category. */
 export const Stacked: Story = {
   render: (args) => <F0DataChart {...args} />,

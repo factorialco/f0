@@ -127,6 +127,17 @@ export function paletteColor(index: number): string {
  */
 const DARKEN_AMOUNT = 0.12
 
+/**
+ * The same color at a given alpha, as hex ECharts can parse.
+ *
+ * Concatenating `"33"` onto a color string only works while every color is a
+ * 6-digit hex; theme colors are not — several already carry an alpha channel,
+ * and `#011b4b73` + `33` is not a color at all.
+ */
+export function chartColorAlpha(color: string, alpha: number): string {
+  return colord(color).alpha(alpha).toHex()
+}
+
 /** Darker variant of a hex color, for the part of a mark that passed its target */
 export function darkenChartColor(color: string): string {
   return colord(color).darken(DARKEN_AMOUNT).toHex()
