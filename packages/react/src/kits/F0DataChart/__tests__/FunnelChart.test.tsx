@@ -235,3 +235,22 @@ describe("FunnelChart — tooltip", () => {
     expect(html).not.toContain("undefined")
   })
 })
+
+describe("FunnelChart — category comparison", () => {
+  it("adds the stage's comparison line after its conversion rows", () => {
+    render(
+      <F0DataChart
+        {...funnelProps}
+        showConversion
+        categoryComparison={{
+          Screened: { label: "−40 (−7.7%)", tone: "negative" },
+        }}
+      />
+    )
+
+    const html = hover({ name: "Screened", value: 480 })
+    expect(html).toContain("of total")
+    expect(html.indexOf("of total")).toBeLessThan(html.indexOf("−40 (−7.7%)"))
+    expect(hover({ name: "Applied", value: 1200 })).not.toContain("−40")
+  })
+})

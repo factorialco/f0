@@ -161,3 +161,35 @@ describe("PieChart — tooltip", () => {
     expect(html).not.toContain("NaN")
   })
 })
+
+describe("PieChart — category comparison", () => {
+  it("adds the slice's comparison line, and none for a slice without one", () => {
+    render(
+      <F0DataChart
+        {...pieProps}
+        categoryComparison={{
+          Engineering: { label: "+14.3%", tone: "positive" },
+          Design: { label: "New this period" },
+        }}
+      />
+    )
+
+    expect(hover({ name: "Engineering", value: 45, percent: 53.6 })).toContain(
+      "+14.3%"
+    )
+    expect(hover({ name: "Design", value: 18, percent: 21.2 })).toContain(
+      "New this period"
+    )
+    expect(hover({ name: "Product", value: 22, percent: 25.2 })).not.toContain(
+      "+14.3%"
+    )
+  })
+
+  it("reads the same without the prop", () => {
+    render(<F0DataChart {...pieProps} />)
+
+    expect(
+      hover({ name: "Engineering", value: 45, percent: 53.6 })
+    ).not.toContain("+14.3%")
+  })
+})

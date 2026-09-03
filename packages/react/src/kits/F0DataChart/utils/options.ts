@@ -1,5 +1,7 @@
 import type * as echarts from "echarts"
 
+import type { F0DataChartCategoryComparison } from "../types"
+
 import type { ChartTheme } from "./theme"
 
 // ---------------------------------------------------------------------------
@@ -602,6 +604,27 @@ export function deltaRow(
     value: `${change >= 0 ? "+" : ""}${change.toFixed(1)}%`,
     label,
     color: change >= 0 ? theme.colors.positive : theme.colors.critical,
+  }
+}
+
+/** The tooltip line for a consumer-computed comparison, in the tone it asked for. */
+export function comparisonRow(
+  comparison: F0DataChartCategoryComparison | undefined,
+  theme: ChartTheme
+): ValueTooltipRow | undefined {
+  if (!comparison) return undefined
+  const { tone } = comparison
+  return {
+    value: comparison.label,
+    label: comparison.description ?? "",
+    color:
+      tone === "positive"
+        ? theme.colors.positive
+        : tone === "negative"
+          ? theme.colors.critical
+          : tone === "neutral"
+            ? theme.colors.foregroundSecondary
+            : undefined,
   }
 }
 

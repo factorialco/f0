@@ -14,6 +14,7 @@ import { formatPercent } from "../../utils/formatters"
 import {
   buildGrid,
   buildItemTooltip,
+  comparisonRow,
   renderValueTooltip,
   buildLegend,
   DEFAULT_EMPHASIS,
@@ -35,6 +36,7 @@ export function useFunnelChartOptions(
     colorScale = true,
     valueFormatter,
     tooltipValueFormatter,
+    categoryComparison,
     echartsOptions,
   }: F0DataChartFunnelProps
 ): echarts.EChartsOption {
@@ -173,7 +175,10 @@ export function useFunnelChartOptions(
             marker: p.marker,
             title: name,
             value: formattedValue,
-            rows: conversionRows,
+            rows: [
+              ...conversionRows,
+              comparisonRow(categoryComparison?.[name], theme),
+            ],
           },
           theme
         )
@@ -216,6 +221,7 @@ export function useFunnelChartOptions(
     colorScale,
     valueFormatter,
     tooltipValueFormatter,
+    categoryComparison,
     echartsOptions,
     theme,
     i18n,

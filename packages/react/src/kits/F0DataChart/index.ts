@@ -6,6 +6,7 @@ export type {
   F0DataChartBarDataPoint,
   F0DataChartBarProps,
   F0DataChartBarSeries,
+  F0DataChartCategoryComparison,
   F0DataChartEmptyStateProps,
   F0DataChartFunnelDataPoint,
   F0DataChartFunnelProps,

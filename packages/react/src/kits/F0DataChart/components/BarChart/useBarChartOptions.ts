@@ -20,6 +20,7 @@ import {
 import {
   buildBaseChartOptions,
   buildItemTooltip,
+  comparisonRow,
   labelWidthCap,
   renderMarker,
   renderValueTooltip,
@@ -936,6 +937,7 @@ export function useBarChartOptions(
     categoryFormatter,
     labelFontSize,
     valueAxisSplitNumber = 2,
+    categoryComparison,
     echartsOptions,
   }: F0DataChartBarProps,
   size: BarChartSize,
@@ -1342,6 +1344,9 @@ export function useBarChartOptions(
             categoryValues.some((v) => v < 0)
           const total = categoryValues.reduce((sum, v) => sum + v, 0)
           const showTotal = stackHasTotal && !hasMixedSigns
+          // A muted series is itself the baseline, so the comparison line
+          // would only restate the bar beside it.
+          const isBaseline = series.find((s) => s.name === seriesName)?.muted
 
           // No "from previous" row here: bar categories are not necessarily a
           // sequence (locations, departments), so comparing a bar with the one
@@ -1374,6 +1379,8 @@ export function useBarChartOptions(
                     value: `${((value / target) * 100).toFixed(1)}%`,
                     label: i18n.dataChart.tooltip.ofTarget,
                   },
+                !isBaseline &&
+                  comparisonRow(categoryComparison?.[String(p.name)], theme),
               ],
             },
             theme
@@ -1477,6 +1484,7 @@ export function useBarChartOptions(
     categoryFormatter,
     labelFontSize,
     valueAxisSplitNumber,
+    categoryComparison,
     echartsOptions,
     theme,
     i18n,
