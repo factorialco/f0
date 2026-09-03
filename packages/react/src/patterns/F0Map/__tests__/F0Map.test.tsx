@@ -408,6 +408,39 @@ describe("F0Map", () => {
       expect(mock.instances[0].calls.easeTo.at(-1)?.zoom).toBeUndefined()
     })
 
+    it("re-fits when the covered region changes after a fit", () => {
+      // Dismissing a panel drops the selection (which fits, zooming out) and
+      // then frees the space, in that order. Sliding the padding for that second
+      // step would freeze the camera mid-fit and abandon the zoom-out.
+      const ref = createRef<F0MapHandle>()
+      const { rerender } = render(
+        <F0Map ref={ref} markers={POINTS} viewportInset={{ right: 360 }} />
+      )
+      ref.current?.fitToMarkers()
+      const fitsBefore = mock.instances[0].calls.fitBounds.length
+
+      rerender(<F0Map ref={ref} markers={POINTS} />)
+
+      expect(mock.instances[0].calls.fitBounds.length).toBe(fitsBefore + 1)
+      const [, opts] = mock.instances[0].calls.fitBounds.at(-1) as [
+        unknown,
+        { padding: Record<string, number> },
+      ]
+      // Re-framed with the space the panel gave back.
+      expect(opts.padding.right).toBe(64)
+    })
+
+    it("slides the view when the padding changes with no camera intent", () => {
+      const { rerender } = render(<F0Map markers={POINTS} />)
+      const fitsBefore = mock.instances[0].calls.fitBounds.length
+      const easesBefore = mock.instances[0].calls.easeTo.length
+
+      rerender(<F0Map markers={POINTS} viewportInset={{ right: 360 }} />)
+
+      expect(mock.instances[0].calls.fitBounds.length).toBe(fitsBefore)
+      expect(mock.instances[0].calls.easeTo.length).toBe(easesBefore + 1)
+    })
+
     it("stops carrying a flight once the camera has been fitted", () => {
       const ref = createRef<F0MapHandle>()
       const { rerender } = render(
