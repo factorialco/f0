@@ -185,6 +185,14 @@ const ButtonInternal = forwardRef<
               fontSizeVariants({ fontSize: buttonFontSize })
             )}
             tag="span"
+            // A clipped label's own ellipsis tooltip is the only way a sighted
+            // mouse user recovers the hidden text, so it stays on by default.
+            // It has to stand down in two cases: `noAutoTooltip` opts out of
+            // every automatic tooltip, and an explicit `tooltip` already wraps
+            // the whole button — two Radix tooltips over one pointer open
+            // together and then close each other for good, leaving the hover
+            // showing nothing at all.
+            noTooltip={noAutoTooltip || !!tooltip}
           >
             {buttonLabel}
           </OneEllipsis>
