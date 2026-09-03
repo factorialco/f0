@@ -8,6 +8,7 @@ import { f0FormField } from "@/patterns/F0Form/f0Schema"
 import { ApplicationFrame } from "@/patterns/ApplicationFrame"
 import ApplicationFrameStoryMeta from "@/patterns/ApplicationFrame/index.stories"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
+import { expect, userEvent, waitFor, within } from "storybook/test"
 
 import { forms } from "@/patterns/forms"
 
@@ -905,7 +906,11 @@ const manyFieldsSchema = z.object({
   }),
 })
 
-function ManyFieldsStory() {
+function ManyFieldsStory({
+  extraDefaultValues,
+}: {
+  extraDefaultValues?: Partial<z.input<typeof manyFieldsSchema>>
+} = {}) {
   const [open, setOpen] = useState(true)
 
   const definition = useF0FormDefinition({
@@ -917,6 +922,7 @@ function ManyFieldsStory() {
       healthInsurance: true,
       mealAllowance: true,
       accessCard: true,
+      ...extraDefaultValues,
     },
     sections: {
       personal: {
@@ -967,6 +973,87 @@ function ManyFieldsStory() {
 
 export const ManyFieldsPerSection: Story = {
   render: () => <ManyFieldsStory />,
+}
+
+// =============================================================================
+// Scroll reset on step change
+//
+// The step-content pane is one DOM node reused across every step, so scrollTop
+// survives the children swap unless F0Wizard resets it. This needs real layout
+// (jsdom reports zero heights and nothing is scrollable), hence a play test.
+// =============================================================================
+
+const getStepContent = (canvasElement: HTMLElement): HTMLElement => {
+  const content = canvasElement.ownerDocument.body.querySelector<HTMLElement>(
+    '[data-testid="wizard-step-content"]'
+  )
+  if (!content) throw new Error("Wizard step content pane not found")
+  return content
+}
+
+export const ScrollResetOnStepChange: Story = {
+  // The personal section must be valid up front so "Continue" actually advances.
+  render: () => <ManyFieldsStory extraDefaultValues={{ gender: "female" }} />,
+  play: async ({ canvasElement, step }) => {
+    const page = within(canvasElement.closest("body")!)
+
+    // The wizard dialog mounts through a portal and animates in, so the pane is
+    // not in the DOM yet when the play function starts.
+    const content = await page.findByTestId(
+      "wizard-step-content",
+      {},
+      { timeout: 10000 }
+    )
+
+    await step("The step content pane actually overflows", async () => {
+      await waitFor(() =>
+        expect(content.scrollHeight).toBeGreaterThan(content.clientHeight)
+      )
+    })
+
+    await step("Forward: scroll to the bottom, then Continue", async () => {
+      content.scrollTop = content.scrollHeight
+      await waitFor(() => expect(content.scrollTop).toBeGreaterThan(0))
+
+      // Continue starts disabled until the section's validation settles, and
+      // userEvent.click on a disabled button is a silent no-op.
+      const nextButton = page.getByRole("button", { name: /Continue/ })
+      await waitFor(() => expect(nextButton).toBeEnabled(), { timeout: 10000 })
+      await userEvent.click(nextButton)
+      // "Job title" only exists in the employment step. Advancing runs the
+      // section's async validation, so this needs more than the 1s default.
+      await waitFor(
+        () =>
+          expect(within(content).getByText("Job title")).toBeInTheDocument(),
+        { timeout: 10000 }
+      )
+
+      // Same DOM node across the step change, and back at the top.
+      expect(getStepContent(canvasElement)).toBe(content)
+      await waitFor(() => expect(content.scrollTop).toBe(0))
+    })
+
+    await step("Backward: scroll to the bottom, then Previous", async () => {
+      content.scrollTop = content.scrollHeight
+      await waitFor(() => expect(content.scrollTop).toBeGreaterThan(0))
+
+      const previousButton = page.getByRole("button", { name: /Previous/ })
+      await waitFor(() => expect(previousButton).toBeEnabled(), {
+        timeout: 10000,
+      })
+      await userEvent.click(previousButton)
+      // "Emergency contact name" only exists in the personal step.
+      await waitFor(
+        () =>
+          expect(
+            within(content).getByText("Emergency contact name")
+          ).toBeInTheDocument(),
+        { timeout: 10000 }
+      )
+
+      await waitFor(() => expect(content.scrollTop).toBe(0))
+    })
+  },
 }
 
 // =============================================================================
