@@ -42,6 +42,7 @@ import {
 
 import type { DashboardItemFiltersConfig } from "../../types"
 
+import { TrendBadge, type TrendBadgeTrend } from "../TrendBadge/TrendBadge"
 import { DashboardItemFilters } from "./DashboardItemFilters"
 
 interface DashboardItemProps {
@@ -53,6 +54,12 @@ interface DashboardItemProps {
    * and `explanation`.
    */
   info?: string | InfoHintContent
+  /**
+   * How this widget compares to the compared period, rendered as a badge
+   * beside the title. Where a metric puts the same badge next to its number,
+   * every other widget type has no single figure to sit beside.
+   */
+  trend?: TrendBadgeTrend
   isLoading: boolean
   /** A refetch is in flight: dim the previous data instead of collapsing to the skeleton. */
   isRefreshing?: boolean
@@ -130,6 +137,7 @@ export function DashboardItem({
   title,
   description,
   info,
+  trend,
   isLoading,
   isRefreshing = false,
   error,
@@ -358,6 +366,7 @@ export function DashboardItem({
                 <InfoHint info={info} />
               </div>
             )}
+            <TrendBadge trend={trend} />
           </div>
           {(description || descriptionAction) && (
             // Baseline-aligned row so the link sits on the description's own

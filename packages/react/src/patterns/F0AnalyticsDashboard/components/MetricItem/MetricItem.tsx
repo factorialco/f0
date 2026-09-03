@@ -5,9 +5,6 @@ import type {
   FiltersState,
 } from "@/patterns/OneFilterPicker/types"
 
-import { F0Icon } from "@/components/F0Icon"
-import { Tooltip } from "@/experimental/Overlays/Tooltip"
-import { ArrowUp, ArrowDown } from "@/icons/app"
 import { useContainerSize } from "@/kits/F0DataChart/utils/useContainerSize"
 import { cn, focusRing } from "@/lib/utils"
 
@@ -23,6 +20,11 @@ import type {
 import { useDashboardItemData } from "../../hooks/useDashboardItemData"
 import { DashboardItem } from "../DashboardItem/DashboardItem"
 import { MetricSkeleton } from "../DashboardItem/DashboardItemSkeleton"
+import {
+  toTrendBadge,
+  TrendBadge,
+  type TrendBadgeTrend,
+} from "../TrendBadge/TrendBadge"
 
 interface MetricItemProps<Filters extends FiltersDefinition> {
   item: DashboardMetricItem<Filters>
@@ -75,14 +77,6 @@ function formatValue(
   }
 }
 
-type MetricTrend = {
-  direction: "up" | "down" | "flat"
-  text: string
-  /** The same change signed: the arrow that carries the sign is aria-hidden. */
-  srText: string
-  comparisonLabel?: string
-}
-
 function computeTrend(value: number, previousValue?: number) {
   if (previousValue === undefined || previousValue === 0) return undefined
 
@@ -92,18 +86,9 @@ function computeTrend(value: number, previousValue?: number) {
   return { percent: Math.abs(percent), direction } as const
 }
 
-function resolveTrend(data: DashboardMetricData): MetricTrend | undefined {
-  const comparisonLabel = data.comparisonLabel || undefined
-  // An empty label leaves nothing to draw, so it counts as no host trend.
-  const label = data.trend?.label
-  if (data.trend && label) {
-    return {
-      direction: data.trend.direction,
-      text: label,
-      srText: label,
-      comparisonLabel,
-    }
-  }
+function resolveTrend(data: DashboardMetricData): TrendBadgeTrend | undefined {
+  const hostTrend = toTrendBadge(data.trend, data.comparisonLabel)
+  if (hostTrend) return hostTrend
 
   const computed = computeTrend(data.value, data.previousValue)
   // A computed flat trend stays hidden — drawing it would change what existing
@@ -115,50 +100,8 @@ function resolveTrend(data: DashboardMetricData): MetricTrend | undefined {
     direction: computed.direction,
     text: change,
     srText: `${computed.direction === "up" ? "+" : "−"}${change}`,
-    comparisonLabel,
+    comparisonLabel: data.comparisonLabel || undefined,
   }
-}
-
-function MetricTrendBadge({ trend }: { trend?: MetricTrend }) {
-  if (!trend) return null
-
-  const { comparisonLabel, direction, srText, text } = trend
-
-  const badge = (
-    <div className="flex shrink-0 items-center">
-      {direction === "up" && (
-        <F0Icon icon={ArrowUp} color="positive" size="sm" aria-hidden="true" />
-      )}
-      {direction === "down" && (
-        <F0Icon
-          icon={ArrowDown}
-          color="critical"
-          size="sm"
-          aria-hidden="true"
-        />
-      )}
-      <span className="sr-only">
-        {comparisonLabel ? `${srText} ${comparisonLabel}` : srText}
-      </span>
-      <span
-        aria-hidden="true"
-        className={cn(
-          "whitespace-nowrap text-base font-medium",
-          direction === "up" && "text-f1-foreground-positive",
-          direction === "down" && "text-f1-foreground-critical",
-          direction === "flat" && "text-f1-foreground-secondary"
-        )}
-      >
-        {text}
-      </span>
-    </div>
-  )
-
-  return comparisonLabel ? (
-    <Tooltip label={comparisonLabel}>{badge}</Tooltip>
-  ) : (
-    badge
-  )
 }
 
 /**
@@ -174,7 +117,7 @@ export function MetricValue({
   trend,
 }: {
   value: string
-  trend?: MetricTrend
+  trend?: TrendBadgeTrend
 }) {
   const ref = useRef<HTMLDivElement>(null)
   const { height, width } = useContainerSize(ref)
@@ -216,7 +159,7 @@ export function MetricValue({
         <span className="whitespace-nowrap text-3xl font-semibold leading-none tracking-tight text-f1-foreground">
           {value}
         </span>
-        <MetricTrendBadge trend={trend} />
+        <TrendBadge trend={trend} />
       </div>
     </div>
   )

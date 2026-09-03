@@ -475,6 +475,11 @@ export const defaultTranslations = {
       errorTitle: "Error loading data",
       retry: "Retry",
       dataExplanation: "Where does this data come from?",
+      comparison: {
+        change: "Change",
+        newCategory: "New",
+        notPresent: "Not present this period: {{categories}}",
+      },
     },
     pong: {
       title: "Pong",

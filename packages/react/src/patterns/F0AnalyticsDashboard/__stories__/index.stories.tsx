@@ -11,6 +11,7 @@ import { F0Select } from "@/components/F0Select"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import type {
+  DashboardCategoryComparison,
   DashboardChartData,
   DashboardItem,
   DashboardItemFiltersConfig,
@@ -1266,5 +1267,138 @@ export const PeriodComparison: Story = {
         selector: ".sr-only",
       })
     ).toBeInTheDocument()
+  },
+}
+
+const DEPARTMENT_COMPARISON: DashboardCategoryComparison = {
+  byCategory: {
+    Engineering: { direction: "up", label: "+14.3%" },
+    Sales: { direction: "up", label: "+1.8%" },
+    Operations: { direction: "down", label: "−4.6%" },
+    People: { direction: "flat", label: "0%" },
+  },
+  added: ["Legal"],
+  removed: ["Support"],
+}
+
+const DEPARTMENT_ROWS = [
+  { id: "engineering", name: "Engineering", headcount: 96 },
+  { id: "sales", name: "Sales", headcount: 58 },
+  { id: "operations", name: "Operations", headcount: 61 },
+  { id: "legal", name: "Legal", headcount: 4 },
+]
+
+const deltaItems: DashboardItem[] = [
+  {
+    id: "headcount-by-department",
+    type: "chart",
+    title: "Headcount by department",
+    chart: { type: "bar", orientation: "horizontal" },
+    fetchData: () =>
+      withLatency<DashboardChartData>({
+        categories: ["Engineering", "Sales", "Operations", "People", "Legal"],
+        series: [{ name: "This period", data: [96, 58, 61, 33, 4] }],
+        trend: { direction: "up", label: "+10.7%" },
+        comparisonLabel: "vs previous month",
+        categoryComparison: DEPARTMENT_COMPARISON,
+      }),
+  },
+  {
+    id: "headcount-share",
+    type: "chart",
+    title: "Headcount share",
+    chart: { type: "pie", innerRadius: 60 },
+    fetchData: () =>
+      withLatency<DashboardChartData>({
+        series: {
+          name: "Headcount",
+          data: [
+            { name: "Engineering", value: 96 },
+            { name: "Sales", value: 58 },
+            { name: "Operations", value: 61 },
+            { name: "Legal", value: 4 },
+          ],
+        },
+        trend: { direction: "up", label: "+3.1 pp" },
+        comparisonLabel: "vs previous month",
+        categoryComparison: {
+          byCategory: DEPARTMENT_COMPARISON.byCategory,
+          added: DEPARTMENT_COMPARISON.added,
+        },
+      }),
+  },
+  {
+    id: "departments",
+    type: "collection",
+    title: "Departments",
+    itemHeight: 336,
+    createSource: () => ({
+      dataAdapter: {
+        fetchData: () =>
+          withLatency({
+            records: DEPARTMENT_ROWS,
+            rowTrends: {
+              engineering: { direction: "up", label: "+12" },
+              sales: { direction: "up", label: "+1" },
+              operations: { direction: "down", label: "−3" },
+              legal: { direction: "flat", label: "0" },
+            },
+          }),
+      },
+    }),
+    visualizations: [
+      {
+        type: "table" as const,
+        options: {
+          columns: [
+            {
+              id: "name",
+              label: "Department",
+              render: (row: (typeof DEPARTMENT_ROWS)[number]) => row.name,
+            },
+            {
+              id: "headcount",
+              label: "Headcount",
+              render: (row: (typeof DEPARTMENT_ROWS)[number]) =>
+                String(row.headcount),
+            },
+          ],
+        },
+      },
+    ],
+  },
+]
+
+/**
+ * The same host-computed trend on the widgets that have no single number to
+ * put it beside.
+ *
+ * Both charts show their own `trend` as a badge in the header. The bar chart
+ * also carries a `categoryComparison`: each department's change is drawn into
+ * its label, the department the compared period lacked is marked as new, and
+ * the one it had but this period does not — nothing draws it — is named in the
+ * caption under the chart. The collection's fetch returns `rowTrends`, which
+ * become a "Change" column.
+ */
+export const PeriodComparisonDeltas: Story = {
+  tags: ["no-sidebar"],
+  render: () => <F0AnalyticsDashboard items={deltaItems} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // Every widget fetches with the same fake latency, so each affordance is
+    // awaited on its own rather than assumed to have landed with the first.
+    const find = (text: string) =>
+      canvas.findByText(text, undefined, { timeout: 5000 })
+
+    await expect(await find("+10.7%")).toBeInTheDocument()
+    await expect(await find("+3.1 pp")).toBeInTheDocument()
+    await expect(
+      await find("Not present this period: Support")
+    ).toBeInTheDocument()
+    // The category marks themselves are drawn on the chart canvas; the column
+    // the collection gains is the one that lands in the DOM.
+    await expect(await find("Change")).toBeInTheDocument()
+    await expect(await find("+12")).toBeInTheDocument()
   },
 }

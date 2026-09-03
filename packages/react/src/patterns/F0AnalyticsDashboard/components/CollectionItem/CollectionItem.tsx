@@ -7,18 +7,21 @@ import type {
 import type { DropdownItem } from "@/experimental/Navigation/Dropdown"
 import type { RecordType } from "@/hooks/datasource"
 
+import { useI18n } from "@/lib/providers/i18n"
 import { OneDataCollection } from "@/patterns/OneDataCollection"
 import { useDataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
 
 import type {
   DashboardCollectionItem,
   DashboardItemFiltersConfig,
+  DashboardRowTrends,
   F0AnalyticsDashboardAskAiTarget,
   F0AnalyticsDashboardAskAiTargetWithQuote,
 } from "../../types"
 
 import { useCollectionDownloadActions } from "../../hooks/useCollectionDownloadActions"
 import { DashboardItem } from "../DashboardItem/DashboardItem"
+import { changeColumn, tapRowTrends } from "./rowTrends"
 
 interface CollectionItemProps<Filters extends FiltersDefinition> {
   item: DashboardCollectionItem<Filters>
@@ -59,14 +62,27 @@ export function CollectionItem<Filters extends FiltersDefinition>({
   const enabled = item.useDashboardFilters !== false
   const effectiveFilters = enabled ? filters : ({} as FiltersState<Filters>)
 
+  const translations = useI18n()
+  const [rowTrends, setRowTrends] = useState<DashboardRowTrends>()
+
   // Memoize the source definition to avoid re-creating on every render.
   const filtersKey = JSON.stringify(effectiveFilters)
   const itemFiltersKey = JSON.stringify(itemFilters?.value ?? {})
-  const sourceDefinition = useMemo(
-    () => item.createSource(effectiveFilters),
+  const sourceDefinition = useMemo(() => {
+    const definition = item.createSource(effectiveFilters)
+    const fetchData = definition?.dataAdapter?.fetchData
+    if (typeof fetchData !== "function") return definition
+
+    return {
+      ...definition,
+      dataAdapter: {
+        ...definition.dataAdapter,
+        fetchData: (options: unknown) =>
+          tapRowTrends(fetchData(options), setRowTrends),
+      },
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [filtersKey, itemFiltersKey, dataKey]
-  )
+  }, [filtersKey, itemFiltersKey, dataKey])
   const source = useDataCollectionSource<RecordType>(sourceDefinition, [
     filtersKey,
     itemFiltersKey,
@@ -129,6 +145,29 @@ export function CollectionItem<Filters extends FiltersDefinition>({
     [actions, downloadActions]
   )
 
+  // The table viz is the only one with columns to append to; the others show
+  // whatever fields their own layout declares.
+  const visualizations = useMemo(() => {
+    if (!rowTrends) return item.visualizations
+    const column = changeColumn(
+      translations.ai.dashboardItem.comparison.change,
+      rowTrends,
+      sourceDefinition?.idProvider
+    )
+
+    return item.visualizations.map((visualization) =>
+      visualization?.type === "table"
+        ? {
+            ...visualization,
+            options: {
+              ...visualization.options,
+              columns: [...(visualization.options?.columns ?? []), column],
+            },
+          }
+        : visualization
+    )
+  }, [item.visualizations, rowTrends, sourceDefinition, translations])
+
   return (
     <DashboardItem
       title={item.title}
@@ -149,7 +188,7 @@ export function CollectionItem<Filters extends FiltersDefinition>({
       <OneDataCollection
         fullHeight
         source={source}
-        visualizations={item.visualizations}
+        visualizations={visualizations}
         // We deliberately do NOT enable `csvExport` here — the dashboard
         // surface already exposes Excel + CSV downloads from the
         // DashboardItem 3-dot menu (`downloadActions` above) and both

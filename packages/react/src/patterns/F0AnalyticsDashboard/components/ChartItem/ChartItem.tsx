@@ -31,6 +31,7 @@ import {
 } from "@/kits/F0DataChart"
 import { useAiChat } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
 import { useI18n } from "@/lib/providers/i18n"
+import { cn } from "@/lib/utils"
 import { OneDataCollection } from "@/patterns/OneDataCollection"
 import { useDataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
 
@@ -53,10 +54,12 @@ import {
 } from "../../utils/chartDataAdapter"
 import { chartDataToTabular } from "../../utils/chartDataToTabular"
 import { DashboardItem } from "../DashboardItem/DashboardItem"
+import { toTrendBadge } from "../TrendBadge/TrendBadge"
 import {
   AccessiblePointActions,
   type AccessiblePointAction,
 } from "./AccessiblePointActions"
+import { markCategoryComparison } from "./categoryComparison"
 import { buildChartProps } from "./chartProps"
 import { PointActionPopover } from "./PointActionPopover"
 
@@ -667,9 +670,13 @@ export function ChartItem<Filters extends FiltersDefinition>({
   const chartProps = useMemo(
     () =>
       data && !unrenderableChart
-        ? buildChartProps(item as DashboardChartItem, data)
+        ? markCategoryComparison(
+            buildChartProps(item as DashboardChartItem, data),
+            data.categoryComparison,
+            translations.ai.dashboardItem.comparison.newCategory
+          )
         : undefined,
-    [item, data, unrenderableChart]
+    [item, data, unrenderableChart, translations]
   )
 
   // A point belongs to one exact data render. A filter/type/refetch transition
@@ -893,6 +900,8 @@ export function ChartItem<Filters extends FiltersDefinition>({
   // it duplicates the header's collapse button rather than inventing anything.
   const canCollapseCategories = canRevealCategories && !!isFullscreen
 
+  const removedCategories = data?.categoryComparison?.removed ?? []
+
   // While rows are windowed, the item's own description is replaced by what the
   // reader is actually looking at: a subset. Both counts come from the data and
   // the chart's reported hidden count, so they track resizes without a second
@@ -930,6 +939,7 @@ export function ChartItem<Filters extends FiltersDefinition>({
       title={item.title}
       description={windowedDescription ?? item.description}
       info={item.info}
+      trend={toTrendBadge(data?.trend, data?.comparisonLabel)}
       {...(descriptionAction ? { descriptionAction } : {})}
       explanation={item.explanation}
       isLoading={isLoading}
@@ -965,7 +975,13 @@ export function ChartItem<Filters extends FiltersDefinition>({
         ) : (
           <div
             ref={chartContainerRef}
-            className="relative h-full w-full px-4 py-3"
+            className={cn(
+              "relative h-full w-full px-4 py-3",
+              // The caption sits in reserved padding rather than in the flow:
+              // an expanded chart takes its own intrinsic height, which a flex
+              // row above the caption would fight.
+              removedCategories.length > 0 && "pb-8"
+            )}
           >
             <F0DataChart
               {...chartProps}
@@ -995,6 +1011,15 @@ export function ChartItem<Filters extends FiltersDefinition>({
               // category at a fixed row height, growing the widget.
               {...(fitContent ? { showAllCategories: true } : {})}
             />
+            {removedCategories.length > 0 && (
+              // The categories the comparison dropped: nothing draws them, so
+              // the widget says so rather than letting them vanish.
+              <p className="absolute bottom-2 left-4 right-4 m-0 truncate text-base text-f1-foreground-secondary">
+                {translations.t("ai.dashboardItem.comparison.notPresent", {
+                  categories: removedCategories.join(", "),
+                })}
+              </p>
+            )}
             <AccessiblePointActions
               hasActions={hasAccessiblePointActions}
               getActions={getAccessiblePointActions}

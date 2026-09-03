@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest"
 import { screen, waitFor, zeroRender as render } from "@/testing/test-utils"
 
 import type {
+  DashboardChartData,
   DashboardChartItem,
   DashboardMetricData,
   DashboardMetricItem,
@@ -20,6 +21,16 @@ function metricItem(
   fetchData: DashboardMetricItem["fetchData"]
 ): DashboardMetricItem {
   return { id: "headcount", title: "Headcount", type: "metric", fetchData }
+}
+
+function chartItem(data: DashboardChartData): DashboardChartItem {
+  return {
+    id: "headcount-by-department",
+    title: "Headcount by department",
+    type: "chart",
+    chart: { type: "bar" },
+    fetchData: () => Promise.resolve(data),
+  }
 }
 
 /** The widget card, which must survive a `dataKey` change untouched. */
@@ -124,6 +135,63 @@ describe("F0AnalyticsDashboard comparison props", () => {
 
     await screen.findByText("10")
     expect(screen.queryByRole("button", { name: "Compare to" })).toBeNull()
+  })
+
+  it("shows a chart's own trend as a badge in its header", async () => {
+    render(
+      <F0AnalyticsDashboard
+        items={[
+          chartItem({
+            categories: ["Jan"],
+            series: [{ name: "This period", data: [1] }],
+            trend: { direction: "up", label: "+10.7%" },
+            comparisonLabel: "vs previous month",
+          }),
+        ]}
+      />
+    )
+
+    expect(await screen.findByText("+10.7%")).toBeInTheDocument()
+    expect(
+      screen.getByText("+10.7% vs previous month", { selector: ".sr-only" })
+    ).toBeInTheDocument()
+  })
+
+  it("shows no header badge when the chart data carries no trend", async () => {
+    render(
+      <F0AnalyticsDashboard
+        items={[
+          chartItem({
+            categories: ["Jan"],
+            series: [{ name: "This period", data: [1] }],
+          }),
+        ]}
+      />
+    )
+
+    await screen.findByLabelText("Chart")
+    expect(screen.queryByText(/%/)).toBeNull()
+  })
+
+  it("names the categories the compared period had and this one does not", async () => {
+    render(
+      <F0AnalyticsDashboard
+        items={[
+          chartItem({
+            categories: ["Sales"],
+            series: [{ name: "This period", data: [1] }],
+            categoryComparison: {
+              byCategory: {},
+              removed: ["Legal", "Support"],
+            },
+          }),
+        ]}
+      />
+    )
+
+    expect(
+      await screen.findByText("Not present this period: Legal, Support")
+    ).toBeInTheDocument()
   })
 
   it("refetches a chart item on a dataKey change", async () => {

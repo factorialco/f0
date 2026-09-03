@@ -220,6 +220,47 @@ export type DashboardChartConfig =
   | ScatterChartConfig
 
 // ---------------------------------------------------------------------------
+// Trends — a comparison the host computed, rendered verbatim by every widget
+// ---------------------------------------------------------------------------
+
+/**
+ * A trend the host computed itself, for a change that is not a percentage of
+ * `previousValue` — percentage points, a target comparison, a rounding.
+ */
+export interface DashboardMetricTrend {
+  /** `flat` renders neutrally, without an arrow. */
+  direction: "up" | "down" | "flat"
+  /** Rendered verbatim ("+1.2 pp"); empty falls back to `previousValue`. */
+  label: string
+}
+
+/**
+ * Per-category comparison for a chart whose categories are things rather than
+ * moments — bar, pie, funnel. Time series show their baseline as a faded
+ * series instead (see {@link BarChartConfig.comparisonSeriesNames}) and read
+ * their overall direction off {@link DashboardChartData.trend}.
+ */
+export interface DashboardCategoryComparison {
+  /** Keyed by the category label, as it appears in `categories` or a point's `name`. */
+  byCategory: Record<string, DashboardMetricTrend>
+  /** Categories the compared period did not have. Marked as new. */
+  added?: string[]
+  /**
+   * Categories the compared period had and this one does not. They have no
+   * mark to carry — nothing draws them — so the widget names them in a caption
+   * under the chart.
+   */
+  removed?: string[]
+}
+
+/**
+ * Per-row trends for a collection item, keyed the way the collection itself
+ * identifies rows: its source's `idProvider` when it has one, otherwise the
+ * record's `id`. Returned by the source's `fetchData` alongside `records`.
+ */
+export type DashboardRowTrends = Record<string, DashboardMetricTrend>
+
+// ---------------------------------------------------------------------------
 // Chart data — the shape returned by a chart item's fetchData
 // ---------------------------------------------------------------------------
 
@@ -248,6 +289,15 @@ export interface DashboardChartData {
    * can never confuse it with a bar/line series array or the heatmap grid.
    */
   scatterSeries?: F0DataChartScatterSeries[]
+  /**
+   * How the chart as a whole compares to the compared period. Rendered as a
+   * badge beside the widget title, the same one a metric shows.
+   */
+  trend?: DashboardMetricTrend
+  /** What `trend` compares against, e.g. "vs previous month". Tooltip + screen reader. */
+  comparisonLabel?: string
+  /** Per-category comparison, drawn into the category labels of bar/pie/funnel charts. */
+  categoryComparison?: DashboardCategoryComparison
 }
 
 // ---------------------------------------------------------------------------
@@ -344,17 +394,6 @@ export type MetricFormat =
   | { type: "percent" }
   | { type: "custom"; suffix?: string; prefix?: string }
 
-/**
- * A trend the host computed itself, for a change that is not a percentage of
- * `previousValue` — percentage points, a target comparison, a rounding.
- */
-export interface DashboardMetricTrend {
-  /** `flat` renders neutrally, without an arrow. */
-  direction: "up" | "down" | "flat"
-  /** Rendered verbatim ("+1.2 pp"); empty falls back to `previousValue`. */
-  label: string
-}
-
 /** Data returned by a metric item's fetchData */
 export interface DashboardMetricData {
   /** The main numeric value displayed in large text */
@@ -413,6 +452,10 @@ export interface DashboardCollectionItem<
    * Called whenever dashboard filters change.
    * The returned definition should NOT include its own filters/presets
    * (the dashboard provides those globally).
+   *
+   * Its `dataAdapter.fetchData` may return {@link DashboardRowTrends} as
+   * `rowTrends` alongside `records`; the widget then appends a "Change" column
+   * rendering each row's trend.
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   createSource: (filters: FiltersState<Filters>) => any

@@ -12,6 +12,10 @@ import type {
   DashboardMetricItem,
 } from "../types"
 
+import {
+  readRowTrends,
+  rowTrendOf,
+} from "../components/CollectionItem/rowTrends"
 import { isRenderableChart } from "../utils/chartDataAdapter"
 import { chartDataToTabular } from "../utils/chartDataToTabular"
 import { downloadMultiSheetExcel } from "../utils/downloadHelpers"
@@ -34,6 +38,28 @@ interface UseDashboardExportOptions<Filters extends FiltersDefinition> {
 interface UseDashboardExportResult {
   exportAsExcel: () => Promise<void>
   isExporting: boolean
+}
+
+/** Header the metrics sheet already uses for a trend, shared by the other sheets. */
+const CHANGE_COLUMN = "Change"
+
+/**
+ * The chart's own trend as a sheet cell. It describes the whole chart rather
+ * than any one row, so it lands once, on the first.
+ */
+function withChartChange(
+  sheet: SheetData,
+  change: string | undefined
+): SheetData {
+  const [first, ...rest] = sheet.rows
+  if (!change || !first) return sheet
+
+  return {
+    ...sheet,
+    columns: [...sheet.columns, CHANGE_COLUMN],
+    keys: sheet.keys && [...sheet.keys, CHANGE_COLUMN],
+    rows: [{ ...first, [CHANGE_COLUMN]: change }, ...rest],
+  }
 }
 
 function getItemFilters<Filters extends FiltersDefinition>(
@@ -128,12 +154,15 @@ async function buildAllSheets<Filters extends FiltersDefinition>(
             return null
           }
           const tabular = chartDataToTabular(item.chart, data)
-          return {
-            name: item.title,
-            columns: tabular.columns,
-            rows: tabular.rows,
-            keys: tabular.keys,
-          }
+          return withChartChange(
+            {
+              name: item.title,
+              columns: tabular.columns,
+              rows: tabular.rows,
+              keys: tabular.keys,
+            },
+            data.trend?.label
+          )
         } catch (err) {
           console.warn(
             `[useDashboardExport] Failed to export chart "${item.title}":`,
@@ -157,7 +186,23 @@ async function buildAllSheets<Filters extends FiltersDefinition>(
               : (result as Record<string, unknown>[])
           if (records.length === 0) return null
           const columns = extractColumns(records)
-          return { name: item.title, columns, rows: records }
+          const rowTrends = readRowTrends(result)
+          if (!rowTrends) {
+            return { name: item.title, columns, rows: records }
+          }
+
+          return {
+            name: item.title,
+            columns: [...columns, CHANGE_COLUMN],
+            rows: records.map((record) => ({
+              ...record,
+              [CHANGE_COLUMN]: rowTrendOf(
+                record,
+                rowTrends,
+                sourceDef.idProvider
+              )?.label,
+            })),
+          }
         } catch (err) {
           console.warn(
             `[useDashboardExport] Failed to export collection "${item.title}":`,
