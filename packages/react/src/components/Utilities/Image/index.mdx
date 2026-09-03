@@ -1,0 +1,93 @@
+import { Canvas, Controls, Meta } from "@storybook/addon-docs/blocks"
+import * as ImageStories from "./index.stories"
+
+<Meta of={ImageStories} />
+
+# Image
+
+A drop-in replacement for the native `<img>` element. It accepts every
+`img` attribute and renders one, so `<Image>` can be swapped for `<img>`
+anywhere without changing markup or styles.
+
+Its one added capability is a context hook: a host app can wrap a subtree in
+`ImageProvider` and rewrite `src`, `srcSet` and `sizes` for every `Image`
+inside it — the escape hatch F0 components use to get CDN-resolved and
+responsive sources without each component knowing about the host's image
+pipeline.
+
+## Anatomy
+
+<Canvas of={ImageStories.Basic} />
+<Controls of={ImageStories.Basic} />
+
+## Guidelines
+
+### Usage examples
+
+#### With `ImageProvider`
+
+Wrap any subtree in `ImageProvider` and pass a `src` transform. It receives the
+props the `Image` was rendered with and returns the source props to apply.
+Here the transform ignores the incoming `src`, returns a different asset, and
+adds `srcSet` / `sizes` — so the heart renders as a star.
+
+<Canvas of={ImageStories.WithProvider} />
+
+In an app, you do not mount `ImageProvider` yourself: `F0Provider` already
+renders it, and you configure it once through its `image` prop.
+
+```tsx
+const cdn = ({ src, width }) => ({
+  src: `https://cdn.example.com/${src}?w=${width}`,
+  srcSet: `https://cdn.example.com/${src}?w=100 1x, https://cdn.example.com/${src}?w=200 2x`,
+  sizes: "100px",
+})
+
+<F0Provider image={{ src: cdn }}>
+  <App />
+</F0Provider>
+```
+
+Every `Image` below it — including the ones rendered inside F0 components —
+picks the transform up. It is optional: with no transform configured, `Image`
+renders the props it was given and nothing else.
+
+### Behavior
+
+- **The transform contract.** `src` receives the full `ImageProps` (every
+  `img` attribute the element was rendered with) and returns `SrcProps` —
+  `{ src?, srcSet?, sizes? }`, all optional. Return only what needs changing.
+- **Provider props win.** The returned props are spread _after_ the component's
+  own props, so a returned `src`, `srcSet` or `sizes` overrides the same-named
+  prop passed at the call site. An explicit `undefined` from the transform is
+  ignored rather than erasing the original prop — only a defined value
+  overrides. Props the transform does not return are left untouched.
+- **No provider, no change.** With no `ImageProvider` above it, `Image` is a
+  pure passthrough — no wrapper element, no extra attributes, no re-render cost.
+- **Nesting.** The nearest `ImageProvider` wins; an inner provider fully
+  replaces an outer one rather than composing with it.
+- **Refs.** `Image` forwards its ref to the underlying `HTMLImageElement`.
+- **`alt` is standard `img` semantics.** The type makes it optional, as
+  `ImgHTMLAttributes` does, but always pass one — use `alt=""` for decorative
+  images so assistive technology skips them.
+- **`useImageContext` is internal.** `lib/imageHandler` exports it for F0's own
+  components (for example `Avatar`, which resolves its source through the same
+  transform), but it is not part of the public package surface. The public
+  surface is `Image` plus the transform configured through `F0Provider`'s
+  `image` prop.
+
+### Content best practices
+
+- Always pass an `alt`. Describe what the image conveys, not the file.
+  - **Correct:** `alt="Team photo"`, `alt="Heart"`
+  - **Incorrect:** `alt="image"`, `alt="heart.svg"`, `alt="picture of a heart"`
+- Use `alt=""` for purely decorative images so screen readers skip them.
+- Describe the image the reader sees. When a provider swaps the asset, the alt
+  must match what is rendered, not what was requested.
+
+## Accessibility
+
+`Image` renders a plain `<img>`, so the native accessibility rules apply: an
+image with a non-empty `alt` is exposed as `role="img"` with that accessible
+name, and `alt=""` removes it from the accessibility tree. Set `width` and
+`height` to reserve layout space and avoid content shifting as images load.
