@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { fn } from "storybook/test"
+import { expect, fn, userEvent, within } from "storybook/test"
 
 import { modules } from "@/components/avatars/F0AvatarModule"
 import Check from "@/icons/app/Check"
@@ -14,6 +14,11 @@ const longDescription = `The employee cannot access payroll documents from their
 
 They already tried refreshing the browser, logging out, and using another device, but the payslip download still fails.`
 
+// Lives in meta.args, so every story shares this one spy. Collapsed.play
+// asserts an exact call count, and a CI retry or a second visit to the story
+// would otherwise inflate it, hence the mockClear in beforeEach below.
+const onPrimaryAction = fn()
+
 const defaultArgs: F0AiProposalCardProps = {
   module: "tasks",
   heading: "Review this ticket",
@@ -24,7 +29,7 @@ const defaultArgs: F0AiProposalCardProps = {
   primaryActionLabel: "Send ticket",
   primaryActionIcon: Check,
   showActions: true,
-  onPrimaryAction: fn(),
+  onPrimaryAction,
 } satisfies F0AiProposalCardProps
 
 const meta: Meta<F0AiProposalCardProps> = {
@@ -32,8 +37,12 @@ const meta: Meta<F0AiProposalCardProps> = {
   component: F0AiProposalCard,
   parameters: {
     layout: "centered",
+    a11y: { test: "error" },
   },
-  tags: ["autodocs", "stable"],
+  tags: ["!autodocs", "stable"],
+  beforeEach: () => {
+    onPrimaryAction.mockClear()
+  },
   argTypes: {
     module: {
       control: "select",
@@ -85,6 +94,30 @@ export const Snapshot: Story = {
 export const Collapsed: Story = {
   args: {
     maxCollapsedDescriptionLength: 90,
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+
+    await step(
+      "Reveals the full description and moves focus to it",
+      async () => {
+        await userEvent.click(canvas.getByRole("button", { name: "See more" }))
+
+        // getNodeText only joins an element's *direct* child text nodes, so this
+        // resolves to the description <p> alone and not to its ancestors.
+        const description = canvas.getByText(/using another device/)
+        await expect(description).toHaveFocus()
+        // The reveal is one-way: the control unmounts rather than toggling back.
+        await expect(
+          canvas.queryByRole("button", { name: "See more" })
+        ).not.toBeInTheDocument()
+      }
+    )
+
+    await step("Invokes the primary action", async () => {
+      await userEvent.click(canvas.getByRole("button", { name: "Send ticket" }))
+      await expect(onPrimaryAction).toHaveBeenCalledOnce()
+    })
   },
 }
 
