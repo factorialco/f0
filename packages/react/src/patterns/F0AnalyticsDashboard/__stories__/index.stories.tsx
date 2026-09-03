@@ -1187,6 +1187,26 @@ const comparisonItems = (compareTo: CompareTarget): DashboardItem[] => {
             : [{ name: "This period", data: CURRENT_HEADCOUNT }],
         }),
     },
+    {
+      id: "headcount-by-department",
+      type: "chart",
+      title: "Headcount by department",
+      chart: {
+        type: "bar",
+        showLegend: true,
+        comparisonSeriesNames: ["Previous period"],
+      },
+      fetchData: () =>
+        withLatency<DashboardChartData>({
+          categories: ["Engineering", "Sales", "Operations", "People"],
+          series: comparing
+            ? [
+                { name: "This period", data: [96, 58, 61, 33] },
+                { name: "Previous period", data: [84, 57, 55, 28] },
+              ]
+            : [{ name: "This period", data: [96, 58, 61, 33] }],
+        }),
+    },
   ]
 }
 
@@ -1235,7 +1255,10 @@ export const PeriodComparison: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
 
-    await expect(await canvas.findByText("+10.7%")).toBeInTheDocument()
+    // Fake latency plus the grid's size measurement outlast the default wait.
+    await expect(
+      await canvas.findByText("+10.7%", undefined, { timeout: 5000 })
+    ).toBeInTheDocument()
     await expect(canvas.getByText("No change")).toBeInTheDocument()
     // The trend badge announces its own baseline, not just the change.
     await expect(
