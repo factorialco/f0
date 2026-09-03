@@ -4034,7 +4034,7 @@ function LearnerCourseScreen() {
   const [searchParams, setSearchParams] = useSearchParams()
   const allDone = searchParams.get("done") === "1"
   // Evaluations ya no vive dentro de Course content: tiene su propia pestaña.
-  const learnerTab = searchParams.get("ltab") === "evaluations" ? "evaluations" : "content"
+  const learnerTab = searchParams.get("ltab") === "surveys" ? "surveys" : "content"
   const learnerStatus: Record<string, "Completed" | "Pending"> = {
     "m1-1": "Completed",
     "m1-2": "Completed",
@@ -4081,10 +4081,50 @@ function LearnerCourseScreen() {
 
   const evaluationsSource = useDataCollectionSource<LearnerEvaluation>(
     {
+      filters: {
+        status: {
+          type: "in",
+          label: "Status",
+          options: {
+            options: [
+              { value: "Not started", label: "Not started" },
+              { value: "Passed", label: "Passed" },
+              { value: "Failed", label: "Failed" },
+              { value: "Completed", label: "Completed" },
+            ],
+          },
+        },
+        kind: {
+          type: "in",
+          label: "Type",
+          options: {
+            options: [
+              { value: "Knowledge test", label: "Knowledge test" },
+              { value: "Satisfaction", label: "Satisfaction survey" },
+            ],
+          },
+        },
+        group: {
+          type: "in",
+          label: "Group",
+          options: {
+            options: [
+              { value: "Edición Q2 2026", label: "Edición Q2 2026" },
+              { value: "Edición Q1 2026", label: "Edición Q1 2026" },
+            ],
+          },
+        },
+      },
       dataAdapter: {
         paginationType: "pages",
         perPage: 10,
-        fetchData: ({ pagination }: FetchOptions) => paginateRecords(evaluations, pagination, 10),
+        fetchData: ({ filters, pagination }: FetchOptions) => {
+          const rows = evaluations
+            .filter((e) => matchArray(filters?.status, e.status))
+            .filter((e) => matchArray(filters?.kind, e.kind))
+            .filter((e) => matchArray(filters?.group, e.group))
+          return paginateRecords(rows, pagination, 10)
+        },
       },
       itemUrl: (evaluation) =>
         SCHEDULED_IDS.has(evaluation.id) && evVariant === "info"
@@ -4094,7 +4134,7 @@ function LearnerCourseScreen() {
     [evVariant]
   )
 
-  const goToTab = (tab: "content" | "evaluations") => {
+  const goToTab = (tab: "content" | "surveys") => {
     const params = new URLSearchParams(window.location.search)
     if (tab === "content") params.delete("ltab")
     else params.set("ltab", tab)
@@ -4106,7 +4146,7 @@ function LearnerCourseScreen() {
     { id: "content", label: "Course content", onClick: () => goToTab("content") },
     { id: "materials", label: "Materials", onClick: () => {} },
     { id: "sessions", label: "Sessions", onClick: () => {} },
-    { id: "evaluations", label: "Evaluations", onClick: () => goToTab("evaluations") },
+    { id: "surveys", label: "Surveys", onClick: () => goToTab("surveys") },
     { id: "certificates", label: "Certificates", onClick: () => {} },
   ]
 
@@ -4139,7 +4179,6 @@ function LearnerCourseScreen() {
         <F0Box display="flex" flexDirection="column" gap="2xl">
           {learnerTab === "content" && (
           <F0BoxWithClassName className="px-12 flex flex-col gap-4">
-          <F0Heading content="Modules" variant="heading" as="h2" />
           <OneDataCollection
             id={`${SLUG}/learner-content/v1`}
             storage={false}
@@ -4172,7 +4211,7 @@ function LearnerCourseScreen() {
           </F0BoxWithClassName>
           )}
 
-          {learnerTab === "evaluations" && (
+          {learnerTab === "surveys" && (
           <F0BoxWithClassName className="px-12 flex flex-col gap-4">
             {evaluations.length === 0 ? (
               <OneEmptyState
@@ -4182,7 +4221,6 @@ function LearnerCourseScreen() {
               />
             ) : (
             <>
-            <F0Heading content="Evaluations" variant="heading" as="h2" />
             <div style={{ position: "relative" }}>
             <OneDataCollection
               id={`${SLUG}/learner-evaluations/v1`}
@@ -6479,6 +6517,7 @@ type LearnerEvaluation = {
   status: "Not started" | "Passed" | "Failed" | "Completed"
   opensAt?: string
   required?: boolean
+  group: string
 }
 
 type TeamEvaluationRow = {
@@ -6496,16 +6535,16 @@ const OLD_MINIMUM = 50
 const TOTAL_FINISHED = 25
 
 const LEARNER_EVALUATIONS: LearnerEvaluation[] = [
-  { id: "kt-1", name: "Knowledge check", kind: "Knowledge test", minutes: 8, questions: 11, status: "Not started", required: true },
-  { id: "kt-4", name: "Data protection knowledge test", kind: "Knowledge test", minutes: 12, questions: 9, status: "Passed", required: true },
-  { id: "kt-3", name: "Compliance knowledge test", kind: "Knowledge test", minutes: 15, questions: 8, status: "Failed", required: true },
-  { id: "sat-1", name: "Satisfaction survey", kind: "Satisfaction", minutes: 2, questions: 4, status: "Completed" },
+  { id: "kt-1", name: "Knowledge check", kind: "Knowledge test", minutes: 8, questions: 11, status: "Not started", required: true, group: "Edición Q2 2026" },
+  { id: "kt-4", name: "Data protection knowledge test", kind: "Knowledge test", minutes: 12, questions: 9, status: "Passed", required: true, group: "Edición Q2 2026" },
+  { id: "kt-3", name: "Compliance knowledge test", kind: "Knowledge test", minutes: 15, questions: 8, status: "Failed", required: true, group: "Edición Q1 2026" },
+  { id: "sat-1", name: "Satisfaction survey", kind: "Satisfaction", minutes: 2, questions: 4, status: "Completed", group: "Edición Q1 2026" },
 ]
 
 /** Scheduled (not materialized yet): shown with the date it opens, not actionable. */
 const SCHEDULED_EVALUATIONS: LearnerEvaluation[] = [
-  { id: "kt-2", name: "Quality standards knowledge test", kind: "Knowledge test", minutes: 22, questions: 11, status: "Not started", opensAt: "Opens 4 Aug", required: true },
-  { id: "sat-2", name: "Satisfaction survey", kind: "Satisfaction", minutes: 2, questions: 4, status: "Not started", opensAt: "Opens when you finish the course" },
+  { id: "kt-2", name: "Quality standards knowledge test", kind: "Knowledge test", minutes: 22, questions: 11, status: "Not started", opensAt: "Opens 4 Aug", required: true, group: "Edición Q2 2026" },
+  { id: "sat-2", name: "Satisfaction survey", kind: "Satisfaction", minutes: 2, questions: 4, status: "Not started", opensAt: "Opens when you finish the course", group: "Edición Q2 2026" },
 ]
 const SCHEDULED_IDS = new Set(["kt-2", "sat-2"])
 
