@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "motion/react"
-import { useState } from "react"
+import { useId, useState } from "react"
 
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/ui/hover-card"
 import { TableHead as TableHeadRoot } from "@/ui/table"
@@ -26,6 +26,9 @@ import { useTable } from "../utils/TableContext"
  * A table-specific name for a shape that is no longer table-specific: the
  * canonical export is `InfoHintContent`, and this stays as an alias so
  * existing imports keep working.
+ *
+ * `label` has no effect here. It names an ⓘ trigger, and a header cell has
+ * none — the cell itself is the trigger.
  */
 export type TableHeaderInfo = InfoHintContent
 
@@ -176,7 +179,12 @@ export function TableHead({
   const stickyLeft = sticky?.left ?? 0
   const stickyRight = sticky?.right ?? 0
 
-  const hasInfo = info !== undefined && !hidden
+  // Truthiness, not a `!== undefined` check: consumers map a nullable catalog
+  // description straight into `info`, and an empty string must stay "no help
+  // copy" rather than open an empty bubble and take a tab stop.
+  const hasInfo = !!info && !hidden
+  const structuredInfo = typeof info === "object" ? info : undefined
+  const descriptionId = useId()
 
   // The whole cell is the click target, not just the control drawn inside it:
   // a 20px icon that only appears on hover is a small thing to aim at, and the
@@ -214,6 +222,16 @@ export function TableHead({
           {children}
         </div>
       )}
+      {structuredInfo && (
+        // The card Radix portals on hover carries no `aria-describedby` of its
+        // own (its tooltip package does; the hover-card one does not), so the
+        // copy would exist for sighted users only. Referenced by the cell and
+        // `hidden`, this is used for the description and skipped when the
+        // header's name is computed, so the column still announces its label.
+        <span hidden id={descriptionId}>
+          {`${structuredInfo.title}. ${structuredInfo.description}`}
+        </span>
+      )}
       {onSortClick && (
         // Laid over the label rather than beside it, so the label keeps the
         // whole cell width while nobody is pointing at it. Once hovered the
@@ -236,11 +254,12 @@ export function TableHead({
         // covers bleed back through as a smudge.
         <motion.button
           className={cn(
-            "absolute inset-y-0 right-0 my-auto h-5 w-5 rounded-xs bg-f1-background p-1 text-f1-foreground-secondary opacity-0 transition-opacity focus-visible:opacity-100 group-hover/head:opacity-100",
+            "absolute inset-y-0 right-0 my-auto h-5 w-5 rounded-xs bg-f1-background p-1 text-f1-foreground-secondary opacity-0 transition-opacity focus:opacity-100 focus-visible:opacity-100 group-hover/head:opacity-100",
             "before:pointer-events-none before:absolute before:inset-y-0 before:-left-3 before:w-3 before:bg-gradient-to-r before:from-transparent before:to-f1-background before:content-['']",
             "after:pointer-events-none after:absolute after:inset-0 after:rounded-xs after:bg-transparent after:transition-colors after:content-[''] hover:after:bg-f1-background-hover",
             focusRing()
           )}
+          type="button"
           aria-label="Sort"
           whileTap={{ scale: 0.8 }}
           transition={{ duration: 0.1 }}
@@ -291,6 +310,7 @@ export function TableHead({
       className={cn(
         "group/head group h-11",
         "bg-f1-background",
+        (sticky || (hasInfo && !onSortClick)) && focusRing(),
         isSticky &&
           (isScrolled || isScrolledRight) &&
           "relative bg-f1-background z-10 before:absolute before:inset-x-0 before:bottom-0 before:h-px before:w-full before:bg-f1-border-secondary before:content-['']",
@@ -305,6 +325,7 @@ export function TableHead({
         className
       )}
       data-highlighted={highlighted ? "true" : undefined}
+      aria-describedby={structuredInfo ? descriptionId : undefined}
       onClick={handleCellClick}
       // A cell with help copy but no control inside it needs a tab stop of
       // its own for keyboard users to reach the hover card; a sortable one

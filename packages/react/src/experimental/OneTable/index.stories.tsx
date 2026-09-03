@@ -1,6 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import React, { useState } from "react"
+import { expect, fn, waitFor, within } from "storybook/test"
+
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0Button } from "@/components/F0Button"
@@ -254,12 +257,11 @@ export const RichInfoHeader: Story = {
           <TableHead>Name</TableHead>
           <TableHead
             info={{
-              label: "About base salary",
               title: "Annual base salary",
               description: "Per employee · Per year · In Euro",
               link: {
                 label: "Learn more",
-                onClick: () => alert("Open data catalog on this field"),
+                onClick: fn(),
               },
             }}
           >
@@ -377,6 +379,7 @@ export const Sortable: Story = {
  * end only while the pointer is on the cell.
  */
 export const CompactHeaders: Story = {
+  parameters: withSnapshot({}),
   render: () => {
     const [sortConfig, setSortConfig] = React.useState<{
       column: SortColumn | null
@@ -415,7 +418,7 @@ export const CompactHeaders: Story = {
                   "Legal name of the employee as it appears on the contract.",
                 link: {
                   label: "Learn more",
-                  onClick: () => alert("Open data catalog on this field"),
+                  onClick: fn(),
                 },
               }}
             >
@@ -460,6 +463,37 @@ export const CompactHeaders: Story = {
         </TableBody>
       </OneTable>
     )
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    // The card is portalled out of the story canvas.
+    const page = within(canvasElement.closest("body")!)
+    const [fullName, email] = canvas.getAllByRole("button", { name: "Sort" })
+
+    // Focus, not hover: the synthetic pointer events `userEvent.hover` emits
+    // never reach Radix's `pointerenter` in a real browser, so the card would
+    // stay shut. Focusing the sort control works because `focusin` bubbles to
+    // the cell that carries the trigger. jsdom covers the hover path.
+    await step("A column's help copy opens from the cell itself", async () => {
+      fullName.focus()
+
+      await waitFor(
+        () =>
+          expect(
+            page.getByText(
+              "Legal name of the employee as it appears on the contract."
+            )
+          ).toBeInTheDocument(),
+        { timeout: 5000 }
+      )
+    })
+
+    // This is the one venue with real CSS, so it is the only place the
+    // cell-scoped reveal can be checked for real rather than by class name.
+    await step("Only the pointed-at column shows its control", async () => {
+      await expect(getComputedStyle(fullName).opacity).toBe("1")
+      await expect(getComputedStyle(email).opacity).toBe("0")
+    })
   },
 }
 
