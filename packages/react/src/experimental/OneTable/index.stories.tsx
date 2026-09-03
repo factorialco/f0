@@ -370,6 +370,99 @@ export const Sortable: Story = {
   },
 }
 
+/**
+ * Header cells with help copy and sorting, squeezed into narrow columns. The
+ * label owns the whole cell width: the help copy opens when the cell itself is
+ * hovered or focused, and the sort control is drawn over the label's trailing
+ * end only while the pointer is on the cell.
+ */
+export const CompactHeaders: Story = {
+  render: () => {
+    const [sortConfig, setSortConfig] = React.useState<{
+      column: SortColumn | null
+      order: SortState
+    }>({
+      column: "name",
+      order: "asc",
+    })
+
+    const handleSort = (column: SortColumn) => {
+      setSortConfig((current) => ({
+        column,
+        order:
+          current.column === column
+            ? current.order === "asc"
+              ? "desc"
+              : "asc"
+            : "asc",
+      }))
+    }
+
+    const sortStateOf = (column: SortColumn) =>
+      sortConfig.column === column ? sortConfig.order : undefined
+
+    return (
+      <OneTable>
+        <TableHeader>
+          <TableRow>
+            <TableHead
+              width={140}
+              onSortClick={() => handleSort("name")}
+              sortState={sortStateOf("name")}
+              info={{
+                title: "Full name",
+                description:
+                  "Legal name of the employee as it appears on the contract.",
+                link: {
+                  label: "Learn more",
+                  onClick: () => alert("Open data catalog on this field"),
+                },
+              }}
+            >
+              Full name
+            </TableHead>
+            <TableHead
+              width={120}
+              onSortClick={() => handleSort("email")}
+              sortState={sortStateOf("email")}
+              info="Work email address"
+            >
+              Email address
+            </TableHead>
+            <TableHead
+              width={120}
+              align="right"
+              onSortClick={() => handleSort("role")}
+              sortState={sortStateOf("role")}
+              info={{
+                title: "Access level",
+                description: "Access level assigned to the employee account.",
+              }}
+            >
+              Access level
+            </TableHead>
+            <TableHead width={140} info="Direct manager of the employee">
+              Direct manager
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {sampleData.map((row) => (
+            <TableRow key={row.id}>
+              <TableCell>{row.name}</TableCell>
+              <TableCell>{row.email}</TableCell>
+              <TableCell>
+                <div className="text-right">{row.role}</div>
+              </TableCell>
+              <TableCell>{row.manager}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </OneTable>
+    )
+  },
+}
+
 export const StickyColumn: Story = {
   render: () => (
     <OneTable>

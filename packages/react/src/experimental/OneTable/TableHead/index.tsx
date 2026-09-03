@@ -1,10 +1,18 @@
 import { AnimatePresence, motion } from "motion/react"
+import { useState } from "react"
 
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/ui/hover-card"
 import { TableHead as TableHeadRoot } from "@/ui/table"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/ui/tooltip"
 
-import { F0Icon, IconType } from "../../../components/F0Icon"
-import { ArrowDown, InfoCircleLine } from "../../../icons/app"
-import { InfoHint, type InfoHintContent } from "../../../lib/InfoHint"
+import { F0Icon } from "../../../components/F0Icon"
+import { ArrowDown } from "../../../icons/app"
+import { InfoHintBody, type InfoHintContent } from "../../../lib/InfoHint"
 import { OneEllipsis } from "../../../lib/OneEllipsis"
 import { cn, focusRing } from "../../../lib/utils"
 import { getColWidth } from "../utils/colWidth"
@@ -13,14 +21,58 @@ import { useTable } from "../utils/TableContext"
 
 /**
  * Structured help copy for a column header. The same shape every other
- * ⓘ affordance takes — see {@link InfoHintContent}, where `label` defaults to
- * the column label when the header's children are a string.
+ * ⓘ affordance takes — see {@link InfoHintContent}.
  *
  * A table-specific name for a shape that is no longer table-specific: the
  * canonical export is `InfoHintContent`, and this stays as an alias so
  * existing imports keep working.
  */
 export type TableHeaderInfo = InfoHintContent
+
+/**
+ * Reveals the column's help copy when the whole header cell is hovered or
+ * focused, instead of from a dedicated ⓘ trigger drawn beside the label. The
+ * cell is the trigger (`asChild`), so the table markup stays `tr > th`.
+ *
+ * A string gets a plain tooltip; structured content gets a hoverable card
+ * that can carry a link — the same split {@link InfoHint} makes.
+ */
+function HeaderInfoHover({
+  info,
+  children,
+}: {
+  info: string | InfoHintContent
+  children: React.ReactElement
+}) {
+  const [open, setOpen] = useState(false)
+
+  if (typeof info === "string") {
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>{children}</TooltipTrigger>
+          <TooltipContent className="max-w-xs whitespace-normal">
+            {info}
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    )
+  }
+
+  return (
+    <HoverCard
+      open={open}
+      onOpenChange={setOpen}
+      openDelay={300}
+      closeDelay={100}
+    >
+      <HoverCardTrigger asChild>{children}</HoverCardTrigger>
+      <HoverCardContent className="w-auto max-w-xs px-3 py-2 shadow-md">
+        <InfoHintBody info={info} onLinkClick={() => setOpen(false)} />
+      </HoverCardContent>
+    </HoverCard>
+  )
+}
 
 interface TableHeadProps {
   children: React.ReactNode
@@ -65,17 +117,11 @@ interface TableHeadProps {
   onClick?: () => void
 
   /**
-   * Optional header info. When provided, displays an info icon next to the
-   * header content. Pass a string for a short text tooltip, or a
-   * {@link TableHeaderInfo} object for a structured hoverable card.
+   * Optional header info, revealed when the header cell is hovered or focused.
+   * Pass a string for a short text tooltip, or a {@link TableHeaderInfo}
+   * object for a structured hoverable card.
    */
   info?: string | TableHeaderInfo
-
-  /**
-   * Icon to display when info is provided.
-   * @default InfoCircleLine
-   */
-  infoIcon?: IconType
 
   /**
    * When true, the header cell will not be visible.
@@ -115,7 +161,6 @@ export function TableHead({
   onSortClick,
   onClick,
   info,
-  infoIcon = InfoCircleLine,
   sticky,
   hidden = false,
   highlighted = false,
@@ -131,14 +176,14 @@ export function TableHead({
   const stickyLeft = sticky?.left ?? 0
   const stickyRight = sticky?.right ?? 0
 
-  const hasContent = onSortClick || info
+  const hasInfo = info !== undefined && !hidden
 
   // The whole cell is the click target, not just the control drawn inside it:
   // a 20px icon that only appears on hover is a small thing to aim at, and the
-  // cell already lights up on hover to advertise the hit area. The controls
-  // stay real buttons — for focus, `aria-*` and AT — but hold no handler of
-  // their own; their click bubbles up to here, so pointer and keyboard both
-  // arrive through one path. Anything else interactive in the cell has to stop
+  // cell already lights up on hover to advertise the hit area. The control
+  // stays a real button — for focus, `aria-*` and AT — but holds no handler of
+  // its own; its click bubbles up to here, so pointer and keyboard both arrive
+  // through one path. Anything else interactive in the cell has to stop
   // propagation, or it would trigger this on the way out.
   const handleCellClick =
     onSortClick || onClick
@@ -149,98 +194,102 @@ export function TableHead({
       : undefined
 
   const content = (
-    <>
-      <div
-        className={cn(
-          "flex items-center whitespace-nowrap",
-          hasContent && "gap-1",
-          align === "right" && "flex-row-reverse"
-        )}
-      >
-        {typeof children === "string" ? (
-          <OneEllipsis className={cn(width !== "auto" && "overflow-hidden")}>
-            {children}
-          </OneEllipsis>
-        ) : (
-          <div
-            className={cn("truncate", width !== "auto" && "overflow-hidden")}
-          >
-            {children}
-          </div>
-        )}
-        {hasContent && (
-          <div className="flex items-center">
-            {info && (
-              <div
-                className="flex h-6 w-6 items-center justify-center text-f1-foreground-secondary"
-                // Reading the column's help text is not asking to sort by it.
-                onClick={(event) => event.stopPropagation()}
+    <div
+      className={cn(
+        "relative flex items-center whitespace-nowrap",
+        align === "right" && "flex-row-reverse"
+      )}
+    >
+      {typeof children === "string" ? (
+        <OneEllipsis
+          className={cn(width !== "auto" && "overflow-hidden")}
+          // The cell already reveals its help copy on hover; a second tooltip
+          // with the clipped label would fight it for the same gesture.
+          noTooltip={hasInfo}
+        >
+          {children}
+        </OneEllipsis>
+      ) : (
+        <div className={cn("truncate", width !== "auto" && "overflow-hidden")}>
+          {children}
+        </div>
+      )}
+      {onSortClick && (
+        // Laid over the label rather than beside it, so the label keeps the
+        // whole cell width while nobody is pointing at it. Once hovered the
+        // control covers the label's last glyphs, backed by the cell
+        // background and a short fade so it reads as a control, not a smudge.
+        //
+        // Always the right edge, whatever the column's alignment: the control
+        // is chrome, and a row whose sort icons sat now left, now right would
+        // read as two different kinds of header. Right-aligned labels end
+        // there too, so it still lands on the text's tail.
+        //
+        // The hover is scoped to this cell (`group/head`): the row is a plain
+        // `group` too, and keying off it would uncover every column's control
+        // — and hide every column's tail — while the pointer is on one of them.
+        //
+        // Its own hover tint rides in an `after` layer over the opaque plate,
+        // the same way the header cell paints its hover state, rather than
+        // swapping the plate's background-color: the hover token is 4% alpha,
+        // so as a background-color it replaced the plate and let the glyphs it
+        // covers bleed back through as a smudge.
+        <motion.button
+          className={cn(
+            "absolute inset-y-0 right-0 my-auto h-5 w-5 rounded-xs bg-f1-background p-1 text-f1-foreground-secondary opacity-0 transition-opacity focus-visible:opacity-100 group-hover/head:opacity-100",
+            "before:pointer-events-none before:absolute before:inset-y-0 before:-left-3 before:w-3 before:bg-gradient-to-r before:from-transparent before:to-f1-background before:content-['']",
+            "after:pointer-events-none after:absolute after:inset-0 after:rounded-xs after:bg-transparent after:transition-colors after:content-[''] hover:after:bg-f1-background-hover",
+            focusRing()
+          )}
+          aria-label="Sort"
+          whileTap={{ scale: 0.8 }}
+          transition={{ duration: 0.1 }}
+        >
+          <AnimatePresence>
+            <motion.div
+              key="sort-arrow"
+              className="absolute left-1 top-1 flex h-3 w-3 items-center justify-center"
+              animate={{
+                rotate: sortState === "desc" ? 0 : 180,
+                x: sortState === "none" ? -3 : 0,
+                y: sortState === "none" ? -1 : 0,
+                scale: sortState === "none" ? 0.9 : 1,
+              }}
+              transition={{
+                duration: 0.2,
+                ease: [0.175, 0.885, 0.32, 1.275],
+              }}
+            >
+              <F0Icon icon={ArrowDown} size="xs" />
+            </motion.div>
+            {sortState === "none" && (
+              <motion.div
+                key="sort-arrow-secondary"
+                className="absolute left-1 top-1 flex h-3 w-3 items-center justify-center"
+                initial={{ opacity: 0, x: 0, y: 0, scale: 0.9 }}
+                animate={{ opacity: 1, x: 3, y: 1, scale: 0.9 }}
+                exit={{ opacity: 0, x: 0, y: 0, scale: 0.9 }}
+                transition={{
+                  duration: 0.2,
+                  ease: [0.175, 0.885, 0.32, 1.275],
+                }}
               >
-                <InfoHint
-                  info={info}
-                  icon={infoIcon}
-                  label={typeof children === "string" ? children : undefined}
-                />
-              </div>
+                <F0Icon icon={ArrowDown} size="xs" />
+              </motion.div>
             )}
-            {onSortClick && (
-              <motion.button
-                className={cn(
-                  "relative h-5 w-5 rounded-xs p-1 text-f1-foreground-secondary opacity-0 transition-all focus-within:opacity-100 hover:bg-f1-background-hover group-hover:opacity-100",
-                  focusRing()
-                )}
-                aria-label="Sort"
-                whileTap={{ scale: 0.8 }}
-                transition={{ duration: 0.1 }}
-              >
-                <AnimatePresence>
-                  <motion.div
-                    key="sort-arrow"
-                    className="absolute left-1 top-1 flex h-3 w-3 items-center justify-center"
-                    animate={{
-                      rotate: sortState === "desc" ? 0 : 180,
-                      x: sortState === "none" ? -3 : 0,
-                      y: sortState === "none" ? -1 : 0,
-                      scale: sortState === "none" ? 0.9 : 1,
-                    }}
-                    transition={{
-                      duration: 0.2,
-                      ease: [0.175, 0.885, 0.32, 1.275],
-                    }}
-                  >
-                    <F0Icon icon={ArrowDown} size="xs" />
-                  </motion.div>
-                  {sortState === "none" && (
-                    <motion.div
-                      key="sort-arrow-secondary"
-                      className="absolute left-1 top-1 flex h-3 w-3 items-center justify-center"
-                      initial={{ opacity: 0, x: 0, y: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, x: 3, y: 1, scale: 0.9 }}
-                      exit={{ opacity: 0, x: 0, y: 0, scale: 0.9 }}
-                      transition={{
-                        duration: 0.2,
-                        ease: [0.175, 0.885, 0.32, 1.275],
-                      }}
-                    >
-                      <F0Icon icon={ArrowDown} size="xs" />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.button>
-            )}
-          </div>
-        )}
-      </div>
-    </>
+          </AnimatePresence>
+        </motion.button>
+      )}
+    </div>
   )
 
   const colWidth = getColWidth(width)
   const colMinWidth = minWidth !== undefined ? getColWidth(minWidth) : colWidth
 
-  return (
+  const cell = (
     <TableHeadRoot
       className={cn(
-        "group h-11",
+        "group/head group h-11",
         "bg-f1-background",
         isSticky &&
           (isScrolled || isScrolledRight) &&
@@ -257,7 +306,10 @@ export function TableHead({
       )}
       data-highlighted={highlighted ? "true" : undefined}
       onClick={handleCellClick}
-      tabIndex={sticky ? 0 : undefined}
+      // A cell with help copy but no control inside it needs a tab stop of
+      // its own for keyboard users to reach the hover card; a sortable one
+      // already has the sort button, whose focus bubbles up to the trigger.
+      tabIndex={sticky || (hasInfo && !onSortClick) ? 0 : undefined}
       colSpan={colSpan}
       // Min and max width is needed to prevent the cell from shrinking or expanding when the table is scrolled
       style={{
@@ -298,4 +350,6 @@ export function TableHead({
       {!hidden && content}
     </TableHeadRoot>
   )
+
+  return hasInfo ? <HeaderInfoHover info={info}>{cell}</HeaderInfoHover> : cell
 }

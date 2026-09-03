@@ -31,6 +31,11 @@ const renderHeader = (
     </OneTable>
   )
 
+const structuredInfo: TableHeaderInfo = {
+  title: "Active employees",
+  description: "Distinct active employees in the selected snapshot.",
+}
+
 describe("TableHead sorting", () => {
   const renderSortableHeader = (
     onSortClick: () => void,
@@ -75,18 +80,15 @@ describe("TableHead sorting", () => {
     expect(onSortClick).toHaveBeenCalledTimes(1)
   })
 
-  it("does not sort when the info trigger is clicked", async () => {
+  it("still sorts when the cell also carries header info", async () => {
     const onSortClick = vi.fn()
-    renderSortableHeader(onSortClick, {
-      title: "Active employees",
-      description: "Body",
-    })
+    renderSortableHeader(onSortClick, structuredInfo)
 
-    await userEvent.click(
-      screen.getByRole("button", { name: "Active headcount" })
-    )
+    // The help copy is hover-revealed; there is no separate trigger left in
+    // the cell that a click could land on instead of sorting.
+    await userEvent.click(screen.getByRole("columnheader"))
 
-    expect(onSortClick).not.toHaveBeenCalled()
+    expect(onSortClick).toHaveBeenCalledTimes(1)
   })
 
   it("leaves a header without a sort callback inert", async () => {
@@ -98,36 +100,17 @@ describe("TableHead sorting", () => {
   })
 })
 
-describe("TableHead rich header info", () => {
-  it("uses the column label as the info trigger's accessible name by default", () => {
-    renderHeader({ title: "Active employees", description: "Body" })
+describe("TableHead header info", () => {
+  it("draws no info trigger beside the label", () => {
+    renderHeader(structuredInfo)
 
-    expect(
-      screen.getByRole("button", { name: "Active headcount" })
-    ).toBeInTheDocument()
+    expect(screen.queryByRole("button")).not.toBeInTheDocument()
   })
 
-  it("uses info.label as the accessible name when provided", () => {
-    renderHeader({
-      label: "About active headcount",
-      title: "Active employees",
-      description: "Body",
-    })
+  it("reveals the structured title and description when the cell is hovered", async () => {
+    renderHeader(structuredInfo)
 
-    expect(
-      screen.getByRole("button", { name: "About active headcount" })
-    ).toBeInTheDocument()
-  })
-
-  it("renders the structured title and description on hover", async () => {
-    renderHeader({
-      title: "Active employees",
-      description: "Distinct active employees in the selected snapshot.",
-    })
-
-    await userEvent.hover(
-      screen.getByRole("button", { name: "Active headcount" })
-    )
+    await userEvent.hover(screen.getByRole("columnheader"))
 
     expect(
       await screen.findByText("Active employees", {}, { timeout: 2000 })
@@ -141,17 +124,25 @@ describe("TableHead rich header info", () => {
     ).toBeInTheDocument()
   })
 
+  it("reveals the card when the cell receives keyboard focus", async () => {
+    renderHeader(structuredInfo)
+
+    await userEvent.tab()
+
+    expect(screen.getByRole("columnheader")).toHaveFocus()
+    expect(
+      await screen.findByText("Active employees", {}, { timeout: 2000 })
+    ).toBeInTheDocument()
+  })
+
   it("dismisses the card when the link action is clicked", async () => {
     const onAction = vi.fn()
     renderHeader({
-      title: "Active employees",
-      description: "Distinct active employees in the selected snapshot.",
+      ...structuredInfo,
       link: { label: "Learn more", onClick: onAction },
     })
 
-    await userEvent.hover(
-      screen.getByRole("button", { name: "Active headcount" })
-    )
+    await userEvent.hover(screen.getByRole("columnheader"))
     const learnMore = await screen.findByRole(
       "button",
       { name: "Learn more" },
@@ -165,15 +156,20 @@ describe("TableHead rich header info", () => {
     )
   })
 
-  it("renders a plain text tooltip when info is a string (backward compatible)", () => {
+  it("shows a plain text tooltip on hover when info is a string", async () => {
     renderHeader("Short helper text", "Country")
 
-    // The header label still renders and the rich hover-card trigger (a button
-    // whose accessible name is the info text) is not used for the string path.
     expect(screen.getByText("Country")).toBeInTheDocument()
+    expect(screen.queryByText("Short helper text")).not.toBeInTheDocument()
+
+    await userEvent.hover(screen.getByRole("columnheader"))
+
+    // Radix renders the copy twice — once visible, once for AT — so the
+    // assertion is on presence, not on a single node.
     expect(
-      screen.queryByRole("button", { name: "Short helper text" })
-    ).not.toBeInTheDocument()
+      (await screen.findAllByText("Short helper text", {}, { timeout: 2000 }))
+        .length
+    ).toBeGreaterThan(0)
   })
 })
 
