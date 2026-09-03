@@ -1384,7 +1384,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             // cards instead of letting them go into the glyphs.
             hidden={railInPanel && rail.panelHidden}
             className={cn(
-              "min-h-0 overflow-y-auto",
+              "min-h-0 overflow-y-auto overflow-x-hidden",
               SCROLLBAR_HIDDEN,
               railInPanel &&
                 "absolute z-10 rounded-xl bg-f1-background dark:bg-f1-background-secondary dark:backdrop-blur-[100px] dark:backdrop-saturate-150",
