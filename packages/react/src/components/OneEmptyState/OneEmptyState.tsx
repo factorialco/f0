@@ -16,7 +16,7 @@ function _OneEmptyState({
 }: Types.OneEmptyStateProps) {
   return (
     <div
-      className="flex flex-col items-center justify-center gap-5 p-8"
+      className="@container flex flex-col items-center justify-center gap-5 p-8"
       {...rest}
     >
       {variant === "default" && <F0AvatarEmoji emoji={emoji!} size="lg" />}
@@ -32,7 +32,7 @@ function _OneEmptyState({
         )}
       </div>
       {actions && (
-        <div className="flex w-full flex-col items-center justify-center gap-2 sm:w-fit sm:flex-row sm:gap-3 [&>div]:w-full">
+        <div className="flex w-full max-w-full flex-col items-center justify-center gap-2 @sm:w-fit @sm:flex-row @sm:flex-wrap @sm:gap-3 [&>div]:w-full">
           {actions.map((action) => {
             if (action.type === "upsell") {
               return (
