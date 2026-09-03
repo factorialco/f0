@@ -37,6 +37,11 @@ export type InFilterOptionItem<T = unknown> = {
 export type InFilterOptions<T, _R extends RecordType = RecordType> = {
   cache?: boolean
   /**
+   * Filter keys holding nested child selections. Only needed for async or
+   * `source` options, which the picker can't walk to discover them.
+   */
+  nestedFilterKeys?: string[]
+  /**
    * Optional function to resolve labels for specific values without fetching all options.
    * This is useful when you have a dynamic source and want to avoid fetching all options
    * just to display labels for selected values.

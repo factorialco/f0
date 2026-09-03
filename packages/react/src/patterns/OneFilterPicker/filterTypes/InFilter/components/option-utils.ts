@@ -1,4 +1,6 @@
+import { FilterTypeSchema } from "../../types"
 import { InFilterOptionItem, InFilterOptions } from "../types"
+import { getCacheKey, getCachedOptions } from "../useLoadOptions"
 
 /**
  * Recursively checks whether an option or any of its nested children
@@ -35,13 +37,9 @@ export function hasSelectedDescendant<T>(
   return false
 }
 
-/**
- * Collects all nested child filter keys from an InFilter's options.
- * Used to determine if a parent filter should show an active indicator
- * when any of its nested children have selections.
- */
-export function collectNestedFilterKeys<T>(
-  filterOptions: InFilterOptions<T>
+/** Nested child filter keys reachable from an option tree. */
+export function collectNestedFilterKeysFromOptions<T>(
+  options: InFilterOptionItem<T>[] | undefined
 ): string[] {
   const keys = new Set<string>()
 
@@ -54,8 +52,30 @@ export function collectNestedFilterKeys<T>(
     }
   }
 
-  if ("options" in filterOptions && Array.isArray(filterOptions.options)) {
-    collect(filterOptions.options)
+  collect(options ?? [])
+
+  return [...keys]
+}
+
+/**
+ * Nested child filter keys of an InFilter. The filter list and the chips render
+ * before the filter is ever opened, so the keys have to be resolvable without
+ * the options: declared in the schema, listed literally, or left over in the
+ * cache from a previous load.
+ */
+export function collectNestedFilterKeys<T>(
+  schema: FilterTypeSchema<InFilterOptions<T>>
+): string[] {
+  const filterOptions = schema.options
+  const keys = new Set<string>(filterOptions.nestedFilterKeys ?? [])
+
+  const resolvedOptions =
+    "options" in filterOptions && Array.isArray(filterOptions.options)
+      ? filterOptions.options
+      : getCachedOptions<T>(getCacheKey(schema))
+
+  for (const key of collectNestedFilterKeysFromOptions(resolvedOptions)) {
+    keys.add(key)
   }
 
   return [...keys]

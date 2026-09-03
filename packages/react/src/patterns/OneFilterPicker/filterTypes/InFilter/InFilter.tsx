@@ -16,6 +16,7 @@ import { InFilterFlatOption } from "./components/InFilterFlatOption"
 import { InFilterOptionRow } from "./components/InFilterOptionRow"
 import {
   collectNestedFilterKeys,
+  collectNestedFilterKeysFromOptions,
   optionMatchesSearch,
 } from "./components/option-utils"
 import { InFilterOptionItem, InFilterOptions } from "./types"
@@ -168,8 +169,13 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
   )
 
   const nestedFilterKeys = useMemo(
-    () => collectNestedFilterKeys(schema.options),
-    [schema.options]
+    () => [
+      ...new Set([
+        ...collectNestedFilterKeys(schema),
+        ...collectNestedFilterKeysFromOptions(options),
+      ]),
+    ],
+    [schema, options]
   )
 
   const nestedSelectionsCount = useMemo(
