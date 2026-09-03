@@ -498,6 +498,7 @@ export const CompactHeaders: Story = {
 }
 
 export const StickyColumn: Story = {
+  parameters: withSnapshot({}),
   render: () => (
     <OneTable>
       <TableHeader>
@@ -597,6 +598,7 @@ const summatoryData = [
 ]
 
 export const Summatory: Story = {
+  parameters: withSnapshot({}),
   render: () => (
     <OneTable>
       <TableHeader>

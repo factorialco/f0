@@ -31,6 +31,28 @@ const renderHeader = (
     </OneTable>
   )
 
+// JSDOM ships no `PointerEvent`, and `motion` synthesises one when a
+// `whileTap` element is activated from the keyboard — so the Enter/Space test
+// below would fail the run with an unhandled `ReferenceError` however well its
+// assertions pass. Scoped to this file on purpose: defining the constructor
+// globally would flip `typeof window.PointerEvent` feature detection for every
+// library in every other suite.
+if (!("PointerEvent" in window)) {
+  class PointerEventPolyfill extends window.MouseEvent {
+    readonly pointerId: number
+    readonly pointerType: string
+
+    constructor(type: string, params: PointerEventInit = {}) {
+      super(type, params)
+      this.pointerId = params.pointerId ?? 0
+      this.pointerType = params.pointerType ?? ""
+    }
+  }
+
+  window.PointerEvent =
+    PointerEventPolyfill as unknown as typeof window.PointerEvent
+}
+
 const structuredInfo: TableHeaderInfo = {
   title: "Active employees",
   description: "Distinct active employees in the selected snapshot.",
@@ -89,6 +111,24 @@ describe("TableHead sorting", () => {
     await userEvent.click(screen.getByRole("columnheader"))
 
     expect(onSortClick).toHaveBeenCalledTimes(1)
+  })
+
+  it("sorts from the keyboard, on Enter and on Space", async () => {
+    const onSortClick = vi.fn()
+    renderSortableHeader(onSortClick)
+
+    const control = screen.getByRole("button", { name: "Sort" })
+    control.focus()
+
+    // The control deliberately carries no handler of its own — a native
+    // button's activation is what reaches the cell. Swap it for a div, or stop
+    // the click from bubbling, and keyboard sorting dies silently while every
+    // pointer test above still passes.
+    await userEvent.keyboard("{Enter}")
+    expect(onSortClick).toHaveBeenCalledTimes(1)
+
+    await userEvent.keyboard(" ")
+    expect(onSortClick).toHaveBeenCalledTimes(2)
   })
 
   it("leaves a header without a sort callback inert", async () => {
