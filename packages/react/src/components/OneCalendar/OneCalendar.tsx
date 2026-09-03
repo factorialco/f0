@@ -131,7 +131,14 @@ const OneCalendarInternal = ({
           : date?.from || date?.to || effectiveDefaultMonth
       )
 
-      if (newViewDate !== granularity.getViewDateFromDate(viewDate)) {
+      // Compare instants, not Date identities: `!==` on two Date objects is
+      // always true, which rewrote `viewDate` on every mount (today, or the
+      // nearest bound, to the first of its month) and re-keyed the day grid's
+      // month transition for a same-month change.
+      if (
+        newViewDate.getTime() !==
+        granularity.getViewDateFromDate(viewDate).getTime()
+      ) {
         setViewDate(newViewDate)
       }
     },
