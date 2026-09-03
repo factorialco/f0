@@ -3,10 +3,13 @@ export { F0Map } from "./F0Map"
 export type { F0MapProps, F0MapHandle, F0MapProjection } from "./F0Map"
 /** Loading placeholder for the map. */
 export { F0MapSkeleton } from "./F0MapSkeleton"
+/** Soft ceiling for how many markers a map should draw. */
+export { RECOMMENDED_MAX_MARKERS } from "./constants"
 export type { F0MapSkeletonProps } from "./F0MapSkeleton"
 /** Core public types. */
 export type {
   F0MapViewport,
+  F0MapViewportInset,
   F0MapPoint,
   F0MapRoute,
   F0MapArc,
