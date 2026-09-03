@@ -21,7 +21,13 @@ import { FLY_OPTS, RECOMMENDED_MAX_MARKERS } from "./constants"
 import { useCurrentLocation } from "./hooks/useCurrentLocation"
 import { useIsDarkContext } from "./hooks/useIsDarkContext"
 import { f0MapStyles, type F0MapStylePair } from "./styles"
-import type { F0MapArc, F0MapPoint, F0MapRoute, F0MapViewport } from "./types"
+import type {
+  F0MapArc,
+  F0MapPoint,
+  F0MapRoute,
+  F0MapViewport,
+  F0MapViewportInset,
+} from "./types"
 import {
   F0MapControls,
   type F0MapControlLabels,
@@ -92,6 +98,14 @@ export interface F0MapProps extends WithDataTestIdProps {
    * grown pin) stays driven by `selectedMarkerId`.
    */
   highlightedId?: string | null
+  /**
+   * Region of the map covered by external chrome, typically a side panel opened
+   * over it. Every camera move re-targets so the point lands centred in the free
+   * area beside the panel, and changing the value re-centres the current view -
+   * so opening, resizing or closing a panel keeps the selection visible. The
+   * consumer supplies it; the map has no notion of the panel.
+   */
+  viewportInset?: F0MapViewportInset
   /**
    * Frame all markers on load. Defaults to `true` when no `initialViewport` is
    * given, `false` otherwise (an explicit viewport wins).
@@ -166,18 +180,35 @@ const framedCoords = (
   ...arcs.flatMap((a) => [a.from, a.to]),
 ]
 
+/**
+ * MapLibre camera padding: the inset a side panel covers, plus a uniform base
+ * so a fit never puts markers flush against the edges. Passed on every camera
+ * move, which is also what keeps a still camera shifted while a panel is open.
+ */
+const cameraPadding = (
+  inset: F0MapViewportInset | undefined,
+  base: number
+): Required<F0MapViewportInset> => ({
+  top: base + (inset?.top ?? 0),
+  right: base + (inset?.right ?? 0),
+  bottom: base + (inset?.bottom ?? 0),
+  left: base + (inset?.left ?? 0),
+})
+
 const fitToPoints = (
   map: maplibregl.Map,
   points: F0MapPoint[],
   animate: boolean,
   routes: F0MapRoute[] = [],
   arcs: F0MapArc[] = [],
-  padding = 64
+  inset?: F0MapViewportInset,
+  base = 64
 ) => {
   const coords = framedCoords(points, routes, arcs)
   if (coords.length === 0) return
+  const padding = cameraPadding(inset, base)
   if (coords.length === 1) {
-    const opts = { center: coords[0], zoom: 14 }
+    const opts = { center: coords[0], zoom: 14, padding }
     if (animate) map.easeTo(opts)
     else map.jumpTo(opts)
     return
@@ -191,11 +222,13 @@ const fitToPoints = (
 const focusPoint = (
   map: maplibregl.Map,
   point: F0MapPoint,
-  animate: boolean
+  animate: boolean,
+  inset?: F0MapViewportInset
 ) => {
   map.easeTo({
     center: point.coordinates,
     zoom: Math.max(map.getZoom(), 15),
+    padding: cameraPadding(inset, 0),
     animate,
   })
 }
@@ -211,6 +244,7 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
     defaultSelectedMarkerId = null,
     onMarkerSelect,
     highlightedId = null,
+    viewportInset,
     fitToMarkers,
     initialViewport,
     mapStyle = f0MapStyles,
@@ -275,6 +309,8 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
   // Latest values read by map event handlers without re-binding.
   const markersRef = useRef(markers)
   markersRef.current = markers
+  const insetRef = useRef(viewportInset)
+  insetRef.current = viewportInset
   const routesRef = useRef(routes)
   routesRef.current = routes
   const arcsRef = useRef(arcs)
@@ -315,7 +351,8 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
         markersRef.current,
         !reduceMotion,
         routesRef.current,
-        arcsRef.current
+        arcsRef.current,
+        insetRef.current
       )
   }, [reduceMotion])
   const handleLocate = useCallback(() => {
@@ -324,6 +361,7 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
         ...FLY_OPTS,
         center: c,
         zoom: Math.max(mapRef.current.getZoom(), 13),
+        padding: cameraPadding(insetRef.current, 0),
         animate: !reduceMotion,
       })
     )
@@ -335,7 +373,7 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
     (id: string) => {
       const map = mapRef.current
       const point = markersRef.current.find((p) => p.id === id)
-      if (map && point) focusPoint(map, point, !reduceMotion)
+      if (map && point) focusPoint(map, point, !reduceMotion, insetRef.current)
       selectMarker(id)
     },
     [reduceMotion, selectMarker]
@@ -349,7 +387,7 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
         const map = mapRef.current
         const point = markersRef.current.find((p) => p.id === id)
         if (!map || !point) return
-        focusPoint(map, point, !reduceMotion)
+        focusPoint(map, point, !reduceMotion, insetRef.current)
         selectRef.current(id)
       },
       fitToMarkers: () => {
@@ -359,7 +397,8 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
             markersRef.current,
             !reduceMotion,
             routesRef.current,
-            arcsRef.current
+            arcsRef.current,
+            insetRef.current
           )
       },
       clearSelection: () => selectRef.current(null),
@@ -429,7 +468,8 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
           markersRef.current,
           false,
           routesRef.current,
-          arcsRef.current
+          arcsRef.current,
+          insetRef.current
         )
       map.setProjection({ type: projectionRef.current })
     })
@@ -486,8 +526,27 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
     if (!highlightedId) return
     const map = mapRef.current
     const point = markersRef.current.find((p) => p.id === highlightedId)
-    if (map && point) focusPoint(map, point, !reduceMotion)
+    if (map && point) focusPoint(map, point, !reduceMotion, insetRef.current)
   }, [highlightedId, reduceMotion])
+
+  // Re-centre when the panel covering the map opens, resizes or closes. Camera
+  // padding is part of MapLibre's transform, so easing it with no `center`
+  // slides the current view into the free area and holds it there. Skipped on
+  // mount: the creation effect's fit already frames with the inset applied.
+  // Compared by value, not identity: a consumer that rebuilds the inset object
+  // every render must not re-ease the camera on each one.
+  const appliedInsetRef = useRef<string | null>(null)
+  useEffect(() => {
+    const padding = cameraPadding(viewportInset, 0)
+    const signature = JSON.stringify(padding)
+    if (signature === appliedInsetRef.current) return
+
+    const isFirstRun = appliedInsetRef.current === null
+    appliedInsetRef.current = signature
+    if (isFirstRun) return
+
+    mapRef.current?.easeTo({ padding, animate: !reduceMotion })
+  }, [viewportInset, reduceMotion])
 
   const hasLines = routes.length > 0 || arcs.length > 0
 

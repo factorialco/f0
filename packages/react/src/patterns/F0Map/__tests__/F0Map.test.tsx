@@ -268,6 +268,69 @@ describe("F0Map", () => {
     })
   })
 
+  describe("viewportInset", () => {
+    it("keeps the focus target clear of the covered region", () => {
+      const ref = createRef<F0MapHandle>()
+      render(
+        <F0Map ref={ref} markers={POINTS} viewportInset={{ right: 360 }} />
+      )
+      ref.current?.focusMarker("hq")
+      expect(mock.instances[0].calls.easeTo.at(-1)?.padding).toEqual({
+        top: 0,
+        right: 360,
+        bottom: 0,
+        left: 0,
+      })
+    })
+
+    it("adds the covered region on top of the fit padding", () => {
+      const ref = createRef<F0MapHandle>()
+      render(
+        <F0Map ref={ref} markers={POINTS} viewportInset={{ right: 360 }} />
+      )
+      ref.current?.fitToMarkers()
+      const [, opts] = mock.instances[0].calls.fitBounds.at(-1) as [
+        unknown,
+        { padding: Record<string, number> },
+      ]
+      expect(opts.padding).toEqual({
+        top: 64,
+        right: 424,
+        bottom: 64,
+        left: 64,
+      })
+    })
+
+    it("re-centres the current view when the covered region changes", () => {
+      const { rerender } = render(<F0Map markers={POINTS} />)
+      const before = mock.instances[0].calls.easeTo.length
+
+      rerender(<F0Map markers={POINTS} viewportInset={{ right: 360 }} />)
+
+      const easeTo = mock.instances[0].calls.easeTo
+      expect(easeTo.length).toBe(before + 1)
+      // No `center`: easing the padding alone slides the current view.
+      expect(easeTo.at(-1)?.center).toBeUndefined()
+      expect(easeTo.at(-1)?.padding).toEqual({
+        top: 0,
+        right: 360,
+        bottom: 0,
+        left: 0,
+      })
+    })
+
+    it("does not re-ease when the inset is rebuilt with the same values", () => {
+      const { rerender } = render(
+        <F0Map markers={POINTS} viewportInset={{ right: 360 }} />
+      )
+      const before = mock.instances[0].calls.easeTo.length
+
+      rerender(<F0Map markers={POINTS} viewportInset={{ right: 360 }} />)
+
+      expect(mock.instances[0].calls.easeTo.length).toBe(before)
+    })
+  })
+
   describe("list interaction", () => {
     it("activating a list item selects that marker", () => {
       const onMarkerSelect = vi.fn()
