@@ -37394,7 +37394,7 @@ const r0 = ({
     }
   );
 }, xde = y$(
-  () => import("./index-BEyKcyt4.js").then((e) => ({ default: e.MapCollection }))
+  () => import("./index-7AGOUFJ1.js").then((e) => ({ default: e.MapCollection }))
 ), Hs = {
   table: {
     name: "Table",
