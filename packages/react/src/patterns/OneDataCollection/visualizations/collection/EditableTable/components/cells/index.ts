@@ -24,6 +24,11 @@ export type EditableCellProps<R extends RecordType> = {
   ) => void
   item: R
   isLastColumn?: boolean
+  /**
+   * Called when the cell's input loses focus. Currently only wired for
+   * number/money cells with `numberConfig.commitOn: "blur"`.
+   */
+  onBlur?: () => void
   hint?: {
     icon: IconType
     message: string

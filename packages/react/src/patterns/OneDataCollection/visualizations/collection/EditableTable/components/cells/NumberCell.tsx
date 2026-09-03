@@ -16,6 +16,7 @@ export function NumberCell<R extends RecordType>({
   error,
   loading,
   onChange,
+  onBlur,
   item,
   hint,
 }: EditableCellProps<R>) {
@@ -85,6 +86,7 @@ export function NumberCell<R extends RecordType>({
             value={numericValue}
             placeholder={inputPlaceholder ?? editableColumn.inputPlaceholder}
             onChange={handleChange}
+            onBlur={onBlur}
             loading={loading}
             transparent
             hint=""
