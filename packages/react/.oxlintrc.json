@@ -5,13 +5,24 @@
     "correctness": "error"
   },
   "rules": {
-    "react-hooks/exhaustive-deps": "off"
+    "react-hooks/exhaustive-deps": "off",
+    "f0-security/no-spread-after-inner-html": "error",
+    "f0-security/require-sanitized-inner-html": "error",
+    "f0-security/require-style-nonce": [
+      "error",
+      {
+        "allow": ["src/ui/chart.tsx", "src/kits/ai/F0AiPong/F0AiPong.tsx"]
+      }
+    ]
   },
   "env": {
     "builtin": true,
     "browser": true
   },
-  "jsPlugins": ["eslint-plugin-react-refresh"],
+  "jsPlugins": [
+    "eslint-plugin-react-refresh",
+    "./.oxlint-plugins/f0-security/index.js"
+  ],
   "overrides": [
     {
       "files": ["**/*.{js,jsx,ts,tsx}"],
