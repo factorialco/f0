@@ -12,23 +12,37 @@ export type DialogPosition = (typeof dialogPositions)[number]
 export const dialogWidths = ["sm", "md", "lg", "xl"] as const
 export type DialogWidth = (typeof dialogWidths)[number]
 
+/**
+ * A FOOTER ACTION IS A ROUTE OR A HANDLER.
+ *
+ * `href` makes the button a real link — cmd/middle-clickable, openable in a new
+ * tab, routed through the app's link provider — which is what an action that
+ * LEAVES the dialog should be: "Go to post", "Open in Contracts". `onClick` is
+ * for the ones that act on what the dialog is showing and stay put.
+ *
+ * Both together is a link that also reports the press (analytics, closing the
+ * dialog behind it). The same shape `DialogControls`' resource `url` already
+ * takes, for the same reason.
+ */
+type F0DialogActionTarget =
+  | { href: string; onClick?: () => void }
+  | { href?: never; onClick: () => void }
+
 export type F0DialogPrimaryAction = {
   label: string
   icon?: IconType
   iconPosition?: "left" | "right"
-  onClick: () => void
   disabled?: boolean
   loading?: boolean
-}
+} & F0DialogActionTarget
 
 export type F0DialogSecondaryAction = {
   label: string
   icon?: IconType
   iconPosition?: "left" | "right"
-  onClick: () => void
   disabled?: boolean
   loading?: boolean
-}
+} & F0DialogActionTarget
 
 // Shared base for action items used in multi-action dropdowns.
 // Note: disabled/loading on items are reserved for future use —
