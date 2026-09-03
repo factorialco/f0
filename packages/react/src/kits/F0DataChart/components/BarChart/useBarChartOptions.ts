@@ -1564,18 +1564,11 @@ export function useBarChartOptions(
               title: seriesName,
               subtitle: String(p.name ?? ""),
               value: formatTooltipValue(value),
+              // Two subjects, in this order: how the hovered mark did against
+              // the target it was set, then what it amounts to inside the bar
+              // it sits in. The rule between them keeps the reader from taking
+              // a percentage for the other subject's.
               rows: [
-                showTotal &&
-                  total !== 0 && {
-                    // Same sign on both sides, so the ratio is positive even
-                    // when the whole category is negative.
-                    value: `${((value / total) * 100).toFixed(1)}%`,
-                    label: i18n.dataChart.tooltip.ofTotal,
-                  },
-                showTotal && {
-                  value: formatTooltipValue(total),
-                  label: i18n.dataChart.tooltip.total,
-                },
                 target !== undefined && {
                   value: formatTooltipValue(target),
                   label: i18n.dataChart.tooltip.target,
@@ -1587,6 +1580,18 @@ export function useBarChartOptions(
                     // against the stack's, what counts is the whole stack.
                     value: `${(((ownTarget !== undefined ? value : (heights?.[dataIndex] ?? value)) / target) * 100).toFixed(1)}%`,
                     label: i18n.dataChart.tooltip.ofTarget,
+                  },
+                showTotal && {
+                  value: formatTooltipValue(total),
+                  label: i18n.dataChart.tooltip.total,
+                  separator: target !== undefined,
+                },
+                showTotal &&
+                  total !== 0 && {
+                    // Same sign on both sides, so the ratio is positive even
+                    // when the whole category is negative.
+                    value: `${((value / total) * 100).toFixed(1)}%`,
+                    label: i18n.dataChart.tooltip.ofTotal,
                   },
               ],
             },

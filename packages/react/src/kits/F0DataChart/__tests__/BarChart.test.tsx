@@ -2478,6 +2478,41 @@ describe("BarChart — a target for the whole stack", () => {
     expect(b.itemStyle.color).toBeUndefined()
   })
 
+  it("puts the segment's own numbers before the stack's, and rules between", () => {
+    render(
+      <F0DataChart
+        {...base}
+        showTargetProgress
+        series={[
+          { name: "A", data: [{ value: 60, target: 50 }, 180] },
+          { name: "B", data: [{ value: 40, target: 50 }, 120] },
+        ]}
+      />
+    )
+
+    const call = setOptionMock.mock.calls.at(-1)
+    if (!call) throw new Error("setOption was never called")
+    const formatter = (
+      call[0] as { tooltip?: { formatter?: (p: unknown) => string } }
+    ).tooltip?.formatter
+    const html =
+      formatter?.({ seriesName: "A", name: "Q1", value: 60, dataIndex: 0 }) ??
+      ""
+
+    // How this segment did against its own target, then what it comes to inside
+    // the bar: reading them the other way round invites taking one subject's
+    // percentage for the other's.
+    const order = ["50", "120.0%", "100", "60.0%"].map((text) =>
+      html.indexOf(text)
+    )
+    expect(order.every((i) => i >= 0)).toBe(true)
+    expect([...order].sort((a, b) => a - b)).toEqual(order)
+
+    // The rule sits on the first row of the second group, not anywhere else.
+    expect(html.match(/border-top/g)).toHaveLength(1)
+    expect(html.indexOf("border-top")).toBeGreaterThan(html.indexOf("120.0%"))
+  })
+
   it("reports the stack against its target when the gradient is hovered", () => {
     render(<F0DataChart {...base} showTargetProgress />)
 

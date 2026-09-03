@@ -489,6 +489,14 @@ export interface ValueTooltipRow {
    * point is two coordinates, neither subordinate to the other.
    */
   size?: "large"
+  /**
+   * Draw a rule above this row, splitting the list where it changes subject.
+   *
+   * A stacked segment's card answers two questions at once — how this part did
+   * against its own target, and what it contributes to the bar it sits in — and
+   * read as one run of numbers the two blur into each other.
+   */
+  separator?: boolean
 }
 
 export interface ValueTooltipContent {
@@ -524,14 +532,17 @@ export function renderValueTooltip(
   const renderRow = (row: ValueTooltipRow): string => {
     const color = row.color ?? theme.colors.foreground
     const marker = String(row.marker ?? "")
+    const rule = row.separator
+      ? `border-top: 1px solid ${theme.colors.borderSecondary}; margin-top: 6px; padding-top: 6px`
+      : ""
 
     if (row.size === "large") {
       // Label sits under its value rather than beside it: with two stacked
       // large rows, trailing labels would leave the numbers ragged.
-      return `<div style="margin-top: 6px">${marker}<div style="${headline}; color: ${color}">${escapeTooltipText(row.value)}</div><div style="${secondary}">${escapeTooltipText(row.label)}</div></div>`
+      return `<div style="margin-top: 6px; ${rule}">${marker}<div style="${headline}; color: ${color}">${escapeTooltipText(row.value)}</div><div style="${secondary}">${escapeTooltipText(row.label)}</div></div>`
     }
 
-    return `<div style="${secondary}">${marker}<strong style="color: ${color}">${escapeTooltipText(row.value)}</strong> ${escapeTooltipText(row.label)}</div>`
+    return `<div style="${secondary}; ${rule}">${marker}<strong style="color: ${color}">${escapeTooltipText(row.value)}</strong> ${escapeTooltipText(row.label)}</div>`
   }
 
   const html = [
