@@ -10,6 +10,25 @@ export interface F0MapViewport {
 }
 
 /**
+ * Region of the map (in screen px) covered by external chrome - typically a
+ * side panel the consumer opens over it. Every camera move (fit, focus, reveal)
+ * shifts its target so the point lands centred in the *free* area beside the
+ * panel instead of behind it. The side is encoded by which key is set: a
+ * right-hand panel sets `right`, a left-hand one or RTL sets `left`.
+ *
+ * The consumer supplies the value - `F0Map` has no notion of the panel. For a
+ * fixed-width drawer pass its width while it is open (e.g. `{ right: 480 }`)
+ * and `undefined` / `{}` while it is closed. Omitted or `0` on every side
+ * behaves exactly as if there were no inset.
+ */
+export interface F0MapViewportInset {
+  top?: number
+  right?: number
+  bottom?: number
+  left?: number
+}
+
+/**
  * Palette hue for a drawn line (route or arc). Reuses the marker categorical
  * palette so lines and pins share one set of on-brand colors.
  */

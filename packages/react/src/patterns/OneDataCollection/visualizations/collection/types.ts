@@ -17,6 +17,7 @@ import type { CardVisualizationOptions } from "./Card"
 import type { EditableTableVisualizationOptions } from "./EditableTable"
 import type { GraphVisualizationOptions } from "./Graph/types"
 import type { KanbanVisualizationOptions } from "./Kanban"
+import type { MapVisualizationOptions } from "./Map/types"
 import type { TableVisualizationOptions } from "./Table"
 
 import { DataCollectionSource } from "../../hooks/useDataCollectionSource/types"
@@ -126,6 +127,13 @@ export type Visualization<
       type: "graph"
       /** Configuration options for graph visualization */
       options: GraphVisualizationOptions<R, Filters, Sortings>
+    } & VisualizationFilterOverrides<Filters, Sortings> &
+      VisualizationLabelOverrides)
+  | ({
+      /** Map-based visualization type */
+      type: "map"
+      /** Configuration options for map visualization */
+      options: MapVisualizationOptions<R, Filters, Sortings>
     } & VisualizationFilterOverrides<Filters, Sortings> &
       VisualizationLabelOverrides)
   | ({

@@ -237,6 +237,7 @@ export const defaultTranslations = {
       list: "List",
       kanban: "Kanban",
       graph: "Graph",
+      map: "Map",
       pagination: {
         of: "of",
       },

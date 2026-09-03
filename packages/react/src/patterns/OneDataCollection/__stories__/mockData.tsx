@@ -1004,6 +1004,18 @@ export const getMockVisualizations = (options?: {
         childrenFilters: () => ({}),
       },
     },
+    map: {
+      type: "map",
+      options: {
+        // Mock users carry no location, so spread them deterministically across
+        // Europe by index. The story is about the view, not the geography.
+        coordinates: (u) => [
+          -9 + ((u.index * 37) % 42),
+          37 + ((u.index * 17) % 19),
+        ],
+        label: (u) => u.name,
+      },
+    },
   }) as const
 // Example of using the object-based approach (recommended)
 export const sortings = {

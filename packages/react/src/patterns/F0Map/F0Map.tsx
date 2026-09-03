@@ -21,7 +21,13 @@ import { FLY_OPTS, RECOMMENDED_MAX_MARKERS } from "./constants"
 import { useCurrentLocation } from "./hooks/useCurrentLocation"
 import { useIsDarkContext } from "./hooks/useIsDarkContext"
 import { f0MapStyles, type F0MapStylePair } from "./styles"
-import type { F0MapArc, F0MapPoint, F0MapRoute, F0MapViewport } from "./types"
+import type {
+  F0MapArc,
+  F0MapPoint,
+  F0MapRoute,
+  F0MapViewport,
+  F0MapViewportInset,
+} from "./types"
 import {
   F0MapControls,
   type F0MapControlLabels,
@@ -92,6 +98,22 @@ export interface F0MapProps extends WithDataTestIdProps {
    * grown pin) stays driven by `selectedMarkerId`.
    */
   highlightedId?: string | null
+  /**
+   * Region of the map covered by external chrome, typically a side panel opened
+   * over it. Every camera move re-targets so the point lands centred in the free
+   * area beside the panel, and changing the value re-centres the current view -
+   * so opening, resizing or closing a panel keeps the selection visible. The
+   * consumer supplies it; the map has no notion of the panel.
+   */
+  viewportInset?: F0MapViewportInset
+  /**
+   * Re-center the camera on a marker when it is clicked, at the current zoom,
+   * so a selection never sits behind a panel opened over the map (it lands in
+   * the free area left by `viewportInset`). Defaults to `false`, which leaves
+   * the camera where it is. Zoom is untouched - use the `focusMarker` handle for
+   * the "take me there" flight that also zooms in.
+   */
+  centerOnMarkerClick?: boolean
   /**
    * Frame all markers on load. Defaults to `true` when no `initialViewport` is
    * given, `false` otherwise (an explicit viewport wins).
@@ -166,18 +188,35 @@ const framedCoords = (
   ...arcs.flatMap((a) => [a.from, a.to]),
 ]
 
+/**
+ * MapLibre camera padding: the inset a side panel covers, plus a uniform base
+ * so a fit never puts markers flush against the edges. Passed on every camera
+ * move, which is also what keeps a still camera shifted while a panel is open.
+ */
+const cameraPadding = (
+  inset: F0MapViewportInset | undefined,
+  base: number
+): Required<F0MapViewportInset> => ({
+  top: base + (inset?.top ?? 0),
+  right: base + (inset?.right ?? 0),
+  bottom: base + (inset?.bottom ?? 0),
+  left: base + (inset?.left ?? 0),
+})
+
 const fitToPoints = (
   map: maplibregl.Map,
   points: F0MapPoint[],
   animate: boolean,
   routes: F0MapRoute[] = [],
   arcs: F0MapArc[] = [],
-  padding = 64
+  inset?: F0MapViewportInset,
+  base = 64
 ) => {
   const coords = framedCoords(points, routes, arcs)
   if (coords.length === 0) return
+  const padding = cameraPadding(inset, base)
   if (coords.length === 1) {
-    const opts = { center: coords[0], zoom: 14 }
+    const opts = { center: coords[0], zoom: 14, padding }
     if (animate) map.easeTo(opts)
     else map.jumpTo(opts)
     return
@@ -187,18 +226,61 @@ const fitToPoints = (
   map.fitBounds(bounds, { padding, maxZoom: 15, animate })
 }
 
-/** Center on a single point, zooming in when the camera isn't already close. */
-const focusPoint = (
+/**
+ * The camera's last commanded state: framing every marker, flying to a point at
+ * a known zoom, or nothing in particular (a click, which only re-centers).
+ */
+type CameraIntent = { kind: "fit" } | { kind: "flight"; zoom: number } | null
+
+/**
+ * Center on a point at the current zoom. Separate from `focusPoint` because a
+ * click means "show me this in context", while a reveal from an external search
+ * means "take me there".
+ */
+const centerPoint = (
   map: maplibregl.Map,
   point: F0MapPoint,
-  animate: boolean
+  animate: boolean,
+  inset?: F0MapViewportInset
 ) => {
   map.easeTo({
     center: point.coordinates,
-    zoom: Math.max(map.getZoom(), 15),
+    padding: cameraPadding(inset, 0),
     animate,
   })
 }
+
+/**
+ * Center on a single point, zooming in when the camera isn't already close.
+ * Returns the zoom it commanded, so a camera move that lands mid-flight can
+ * carry on to it instead of freezing wherever the animation had reached.
+ */
+const focusPoint = (
+  map: maplibregl.Map,
+  point: F0MapPoint,
+  animate: boolean,
+  inset?: F0MapViewportInset
+) => {
+  const zoom = Math.max(map.getZoom(), 15)
+  map.easeTo({
+    center: point.coordinates,
+    zoom,
+    padding: cameraPadding(inset, 0),
+    animate,
+  })
+  return zoom
+}
+
+/** Fly to a point and report the intent, for a later padding change to redo. */
+const flightIntent = (
+  map: maplibregl.Map,
+  point: F0MapPoint,
+  animate: boolean,
+  inset?: F0MapViewportInset
+): CameraIntent => ({
+  kind: "flight",
+  zoom: focusPoint(map, point, animate, inset),
+})
 
 const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
   {
@@ -211,6 +293,8 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
     defaultSelectedMarkerId = null,
     onMarkerSelect,
     highlightedId = null,
+    viewportInset,
+    centerOnMarkerClick = false,
     fitToMarkers,
     initialViewport,
     mapStyle = f0MapStyles,
@@ -275,6 +359,15 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
   // Latest values read by map event handlers without re-binding.
   const markersRef = useRef(markers)
   markersRef.current = markers
+  const insetRef = useRef(viewportInset)
+  insetRef.current = viewportInset
+  const selectedIdRef = useRef(selectedId)
+  selectedIdRef.current = selectedId
+  // What the camera was last told to do. A padding change has to *redo* that
+  // with the new free area: `easeTo` without a `zoom` targets whatever the zoom
+  // happens to be when it runs, so a padding change landing mid-animation would
+  // freeze the camera there and abandon the flight (or the fit) halfway.
+  const cameraIntentRef = useRef<CameraIntent>(null)
   const routesRef = useRef(routes)
   routesRef.current = routes
   const arcsRef = useRef(arcs)
@@ -283,6 +376,26 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
   projectionRef.current = projection
   const selectRef = useRef(selectMarker)
   selectRef.current = selectMarker
+
+  // Only the marker-click path centers: the imperative handle and the marker
+  // list already fly to their target, and a background click deselects.
+  const handleMarkerClick = useCallback(
+    (id: string | null) => {
+      if (centerOnMarkerClick && id) {
+        const map = mapRef.current
+        const point = markersRef.current.find(
+          (candidate) => candidate.id === id
+        )
+        if (map && point) {
+          // A click has no zoom intent: nothing to redo but the centering.
+          cameraIntentRef.current = null
+          centerPoint(map, point, !reduceMotion, insetRef.current)
+        }
+      }
+      selectRef.current(id)
+    },
+    [centerOnMarkerClick, reduceMotion]
+  )
   const shouldFit = fitToMarkers ?? initialViewport === undefined
 
   // DOM markers degrade beyond workplace scale; warn once so oversized
@@ -309,13 +422,15 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
   const handleZoomIn = useCallback(() => mapRef.current?.zoomIn(), [])
   const handleZoomOut = useCallback(() => mapRef.current?.zoomOut(), [])
   const handleFit = useCallback(() => {
+    cameraIntentRef.current = { kind: "fit" }
     if (mapRef.current)
       fitToPoints(
         mapRef.current,
         markersRef.current,
         !reduceMotion,
         routesRef.current,
-        arcsRef.current
+        arcsRef.current,
+        insetRef.current
       )
   }, [reduceMotion])
   const handleLocate = useCallback(() => {
@@ -324,6 +439,7 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
         ...FLY_OPTS,
         center: c,
         zoom: Math.max(mapRef.current.getZoom(), 13),
+        padding: cameraPadding(insetRef.current, 0),
         animate: !reduceMotion,
       })
     )
@@ -335,7 +451,13 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
     (id: string) => {
       const map = mapRef.current
       const point = markersRef.current.find((p) => p.id === id)
-      if (map && point) focusPoint(map, point, !reduceMotion)
+      if (map && point)
+        cameraIntentRef.current = flightIntent(
+          map,
+          point,
+          !reduceMotion,
+          insetRef.current
+        )
       selectMarker(id)
     },
     [reduceMotion, selectMarker]
@@ -349,17 +471,24 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
         const map = mapRef.current
         const point = markersRef.current.find((p) => p.id === id)
         if (!map || !point) return
-        focusPoint(map, point, !reduceMotion)
+        cameraIntentRef.current = flightIntent(
+          map,
+          point,
+          !reduceMotion,
+          insetRef.current
+        )
         selectRef.current(id)
       },
       fitToMarkers: () => {
+        cameraIntentRef.current = { kind: "fit" }
         if (mapRef.current)
           fitToPoints(
             mapRef.current,
             markersRef.current,
             !reduceMotion,
             routesRef.current,
-            arcsRef.current
+            arcsRef.current,
+            insetRef.current
           )
       },
       clearSelection: () => selectRef.current(null),
@@ -429,7 +558,8 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
           markersRef.current,
           false,
           routesRef.current,
-          arcsRef.current
+          arcsRef.current,
+          insetRef.current
         )
       map.setProjection({ type: projectionRef.current })
     })
@@ -486,8 +616,70 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
     if (!highlightedId) return
     const map = mapRef.current
     const point = markersRef.current.find((p) => p.id === highlightedId)
-    if (map && point) focusPoint(map, point, !reduceMotion)
+    if (map && point)
+      cameraIntentRef.current = flightIntent(
+        map,
+        point,
+        !reduceMotion,
+        insetRef.current
+      )
   }, [highlightedId, reduceMotion])
+
+  // Re-centre when the panel covering the map opens, resizes or closes. Camera
+  // padding is part of MapLibre's transform, so easing it with no `center`
+  // slides the current view into the free area and holds it there. Skipped on
+  // mount: the creation effect's fit already frames with the inset applied.
+  // Compared by value, not identity: a consumer that rebuilds the inset object
+  // every render must not re-ease the camera on each one.
+  const appliedInsetRef = useRef<string | null>(null)
+  useEffect(() => {
+    const padding = cameraPadding(viewportInset, 0)
+    const signature = JSON.stringify(padding)
+    if (signature === appliedInsetRef.current) return
+
+    const isFirstRun = appliedInsetRef.current === null
+    appliedInsetRef.current = signature
+    if (isFirstRun) return
+
+    const map = mapRef.current
+    if (!map) return
+
+    // With a marker selected, re-center on it: the point of the inset is to keep
+    // *that* marker clear of the panel, and the current view may have been
+    // panned since. Otherwise just slide the view into the free area.
+    const selected = markersRef.current.find(
+      (point) => point.id === selectedIdRef.current
+    )
+    const intent = cameraIntentRef.current
+    if (selected) {
+      map.easeTo({
+        center: selected.coordinates,
+        padding,
+        // Carry on to a flight's target; otherwise leave the zoom alone, so
+        // opening a panel over a click-selection never zooms.
+        ...(intent?.kind === "flight" ? { zoom: intent.zoom } : {}),
+        animate: !reduceMotion,
+      })
+      return
+    }
+
+    // Nothing selected any more. If the camera was last framing every marker -
+    // the zoom-out that follows dismissing a panel - frame them again with the
+    // freed-up space, rather than freezing that fit part-way through.
+    if (intent?.kind === "fit") {
+      fitToPoints(
+        map,
+        markersRef.current,
+        !reduceMotion,
+        routesRef.current,
+        arcsRef.current,
+        viewportInset
+      )
+      return
+    }
+
+    map.easeTo({ padding, animate: !reduceMotion })
+  }, [viewportInset, reduceMotion])
 
   const hasLines = routes.length > 0 || arcs.length > 0
 
@@ -555,7 +747,7 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
               points={markers}
               selectedId={selectedId}
               highlightedId={highlightedId}
-              onSelect={selectMarker}
+              onSelect={handleMarkerClick}
             />
           )}
           {!webglFailed && mapInstance && showControls && interactive && (

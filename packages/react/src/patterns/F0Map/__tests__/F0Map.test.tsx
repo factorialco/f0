@@ -11,6 +11,7 @@ import type { F0MapArc, F0MapPoint, F0MapRoute } from "../types"
 // a machine without WebGL (the map constructor throwing).
 const mock = vi.hoisted(() => {
   const instances: MockMap[] = []
+  const markerElements: HTMLElement[] = []
   const state = { throwOnCreate: false }
 
   class MockMap {
@@ -139,13 +140,24 @@ const mock = vi.hoisted(() => {
     }
   }
   class MockMarker {
+    element: HTMLElement | undefined
+    constructor(opts?: { element?: HTMLElement }) {
+      this.element = opts?.element
+      if (opts?.element) markerElements.push(opts.element)
+    }
     setLngLat() {
       return this
     }
     addTo() {
+      // Real MapLibre attaches the marker element to the map container. Do the
+      // same so a pin click is reachable from a test - pins are `aria-hidden`,
+      // so they never collide with the accessible list's buttons.
+      if (this.element) document.body.appendChild(this.element)
       return this
     }
-    remove() {}
+    remove() {
+      this.element?.remove()
+    }
   }
   class MockLngLatBounds {
     extend() {
@@ -156,6 +168,7 @@ const mock = vi.hoisted(() => {
 
   return {
     instances,
+    markerElements,
     state,
     Map: MockMap,
     Marker: MockMarker,
@@ -202,6 +215,7 @@ const LINE_LAYERS = ["f0-map-lines-solid", "f0-map-lines-dashed"]
 describe("F0Map", () => {
   beforeEach(() => {
     mock.instances.length = 0
+    mock.markerElements.length = 0
     mock.state.throwOnCreate = false
   })
 
@@ -265,6 +279,259 @@ describe("F0Map", () => {
       const ref = createRef<F0MapHandle>()
       render(<F0Map ref={ref} markers={POINTS} />)
       expect(ref.current?.getMap()).toBe(mock.instances[0])
+    })
+  })
+
+  describe("viewportInset", () => {
+    it("keeps the focus target clear of the covered region", () => {
+      const ref = createRef<F0MapHandle>()
+      render(
+        <F0Map ref={ref} markers={POINTS} viewportInset={{ right: 360 }} />
+      )
+      ref.current?.focusMarker("hq")
+      expect(mock.instances[0].calls.easeTo.at(-1)?.padding).toEqual({
+        top: 0,
+        right: 360,
+        bottom: 0,
+        left: 0,
+      })
+    })
+
+    it("adds the covered region on top of the fit padding", () => {
+      const ref = createRef<F0MapHandle>()
+      render(
+        <F0Map ref={ref} markers={POINTS} viewportInset={{ right: 360 }} />
+      )
+      ref.current?.fitToMarkers()
+      const [, opts] = mock.instances[0].calls.fitBounds.at(-1) as [
+        unknown,
+        { padding: Record<string, number> },
+      ]
+      expect(opts.padding).toEqual({
+        top: 64,
+        right: 424,
+        bottom: 64,
+        left: 64,
+      })
+    })
+
+    it("re-centres the current view when the covered region changes", () => {
+      const { rerender } = render(<F0Map markers={POINTS} />)
+      const before = mock.instances[0].calls.easeTo.length
+
+      rerender(<F0Map markers={POINTS} viewportInset={{ right: 360 }} />)
+
+      const easeTo = mock.instances[0].calls.easeTo
+      expect(easeTo.length).toBe(before + 1)
+      // No `center`: easing the padding alone slides the current view.
+      expect(easeTo.at(-1)?.center).toBeUndefined()
+      expect(easeTo.at(-1)?.padding).toEqual({
+        top: 0,
+        right: 360,
+        bottom: 0,
+        left: 0,
+      })
+    })
+
+    it("re-centres on the selected marker when the inset changes", () => {
+      const { rerender } = render(
+        <F0Map markers={POINTS} selectedMarkerId="hq" />
+      )
+      rerender(
+        <F0Map
+          markers={POINTS}
+          selectedMarkerId="hq"
+          viewportInset={{ right: 360 }}
+        />
+      )
+
+      const easeTo = mock.instances[0].calls.easeTo
+      // The point of the inset is to keep *that* marker clear of the panel, so
+      // the camera re-targets it instead of sliding the current view.
+      expect(easeTo.at(-1)?.center).toEqual([2.19, 41.4])
+      expect(easeTo.at(-1)?.padding).toEqual({
+        top: 0,
+        right: 360,
+        bottom: 0,
+        left: 0,
+      })
+    })
+
+    it("carries a flight through to its zoom when a panel opens mid-way", () => {
+      // The reveal flies to zoom 15; the panel then opens and re-centres the
+      // selection. Without carrying the flight's target, that second move
+      // targets whatever the zoom had reached and abandons the zoom-in.
+      const ref = createRef<F0MapHandle>()
+      const { rerender } = render(
+        <F0Map ref={ref} markers={POINTS} selectedMarkerId="hq" />
+      )
+      ref.current?.focusMarker("hq")
+
+      rerender(
+        <F0Map
+          ref={ref}
+          markers={POINTS}
+          selectedMarkerId="hq"
+          viewportInset={{ right: 360 }}
+        />
+      )
+
+      const easeTo = mock.instances[0].calls.easeTo
+      expect(easeTo.at(-1)?.center).toEqual([2.19, 41.4])
+      expect(easeTo.at(-1)?.zoom).toBe(15)
+      expect(easeTo.at(-1)?.padding).toEqual({
+        top: 0,
+        right: 360,
+        bottom: 0,
+        left: 0,
+      })
+    })
+
+    it("leaves the zoom alone when the panel opens over a clicked selection", () => {
+      const { rerender } = render(
+        <F0Map markers={POINTS} centerOnMarkerClick selectedMarkerId="hq" />
+      )
+      const pin = mock.markerElements[0]?.querySelector("button")
+      if (!pin) throw new Error("no pin rendered")
+      fireEvent.click(pin)
+
+      rerender(
+        <F0Map
+          markers={POINTS}
+          centerOnMarkerClick
+          selectedMarkerId="hq"
+          viewportInset={{ right: 360 }}
+        />
+      )
+
+      // A click never zoomed, so the panel opening must not either.
+      expect(mock.instances[0].calls.easeTo.at(-1)?.zoom).toBeUndefined()
+    })
+
+    it("re-fits when the covered region changes after a fit", () => {
+      // Dismissing a panel drops the selection (which fits, zooming out) and
+      // then frees the space, in that order. Sliding the padding for that second
+      // step would freeze the camera mid-fit and abandon the zoom-out.
+      const ref = createRef<F0MapHandle>()
+      const { rerender } = render(
+        <F0Map ref={ref} markers={POINTS} viewportInset={{ right: 360 }} />
+      )
+      ref.current?.fitToMarkers()
+      const fitsBefore = mock.instances[0].calls.fitBounds.length
+
+      rerender(<F0Map ref={ref} markers={POINTS} />)
+
+      expect(mock.instances[0].calls.fitBounds.length).toBe(fitsBefore + 1)
+      const [, opts] = mock.instances[0].calls.fitBounds.at(-1) as [
+        unknown,
+        { padding: Record<string, number> },
+      ]
+      // Re-framed with the space the panel gave back.
+      expect(opts.padding.right).toBe(64)
+    })
+
+    it("slides the view when the padding changes with no camera intent", () => {
+      const { rerender } = render(<F0Map markers={POINTS} />)
+      const fitsBefore = mock.instances[0].calls.fitBounds.length
+      const easesBefore = mock.instances[0].calls.easeTo.length
+
+      rerender(<F0Map markers={POINTS} viewportInset={{ right: 360 }} />)
+
+      expect(mock.instances[0].calls.fitBounds.length).toBe(fitsBefore)
+      expect(mock.instances[0].calls.easeTo.length).toBe(easesBefore + 1)
+    })
+
+    it("stops carrying a flight once the camera has been fitted", () => {
+      const ref = createRef<F0MapHandle>()
+      const { rerender } = render(
+        <F0Map ref={ref} markers={POINTS} selectedMarkerId="hq" />
+      )
+      ref.current?.focusMarker("hq")
+      ref.current?.fitToMarkers()
+
+      rerender(
+        <F0Map
+          ref={ref}
+          markers={POINTS}
+          selectedMarkerId="hq"
+          viewportInset={{ right: 360 }}
+        />
+      )
+
+      // The zoom-out already happened; re-applying the flight's zoom would
+      // silently undo it.
+      expect(mock.instances[0].calls.easeTo.at(-1)?.zoom).toBeUndefined()
+    })
+
+    it("does not re-ease when the inset is rebuilt with the same values", () => {
+      const { rerender } = render(
+        <F0Map markers={POINTS} viewportInset={{ right: 360 }} />
+      )
+      const before = mock.instances[0].calls.easeTo.length
+
+      rerender(<F0Map markers={POINTS} viewportInset={{ right: 360 }} />)
+
+      expect(mock.instances[0].calls.easeTo.length).toBe(before)
+    })
+  })
+
+  describe("centerOnMarkerClick", () => {
+    // Pins render into the marker elements MapLibre hosts, in `markers` order,
+    // as `aria-hidden` buttons (keyboard users get `F0MapList` instead).
+    const clickPin = (index: number) => {
+      const pin = mock.markerElements[index]?.querySelector("button")
+      if (!pin) throw new Error(`no pin rendered at index ${index}`)
+      fireEvent.click(pin)
+    }
+
+    it("centres a clicked pin without touching the zoom", () => {
+      render(<F0Map markers={POINTS} centerOnMarkerClick />)
+      clickPin(0)
+
+      const easeTo = mock.instances[0].calls.easeTo
+      expect(easeTo.at(-1)?.center).toEqual([2.19, 41.4])
+      // No `zoom`: a click shows the pin in context, it does not fly there.
+      expect(easeTo.at(-1)?.zoom).toBeUndefined()
+    })
+
+    it("keeps the clicked pin clear of the covered region", () => {
+      render(
+        <F0Map
+          markers={POINTS}
+          centerOnMarkerClick
+          viewportInset={{ right: 360 }}
+        />
+      )
+      clickPin(0)
+
+      expect(mock.instances[0].calls.easeTo.at(-1)?.padding).toEqual({
+        top: 0,
+        right: 360,
+        bottom: 0,
+        left: 0,
+      })
+    })
+
+    it("still reports the selection", () => {
+      const onMarkerSelect = vi.fn()
+      render(
+        <F0Map
+          markers={POINTS}
+          centerOnMarkerClick
+          onMarkerSelect={onMarkerSelect}
+        />
+      )
+      clickPin(0)
+
+      expect(onMarkerSelect).toHaveBeenCalledWith("hq")
+    })
+
+    it("leaves the camera alone when it is off (the default)", () => {
+      render(<F0Map markers={POINTS} />)
+      const before = mock.instances[0].calls.easeTo.length
+      clickPin(0)
+
+      expect(mock.instances[0].calls.easeTo.length).toBe(before)
     })
   })
 
