@@ -1433,16 +1433,8 @@ export declare interface ChatDashboardConfig {
     items: ChatDashboardItem[];
     /** Fetch specs for server-side data retrieval, keyed by datasetId */
     fetchSpecs: Record<string, DashboardFetchSpec>;
-    /**
-     * What every item in this dashboard is compared against, as the user picked
-     * it. Dashboard-level: one comparison target, applied to the whole canvas.
-     *
-     * The host decides how to honour it — it owns the fetch, so it is the one
-     * that can resolve "previous period" against the dashboard's current date
-     * window and return the baseline figures. `"none"` and an absent value both
-     * mean no comparison.
-     */
-    compareTo?: "none" | "previous_period" | "previous_month" | "previous_quarter" | "previous_year";
+    /** Dashboard-wide comparison target; the host owns resolving the shifted window. */
+    compareTo?: "none" | "previous_period" | "previous_week" | "previous_month" | "previous_quarter" | "previous_half_year" | "previous_year";
 }
 
 /** Granularity options exposed by F0's `OneDateNavigator`. */
@@ -5799,11 +5791,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        fontSize: {
+            setFontSize: (fontSize: string) => ReturnType;
+            unsetFontSize: () => ReturnType;
         };
     }
 }
@@ -5811,9 +5801,11 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        fontSize: {
-            setFontSize: (fontSize: string) => ReturnType;
-            unsetFontSize: () => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }

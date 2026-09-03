@@ -2121,7 +2121,9 @@ declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "clas
     pressed?: boolean;
     /**
      * @private
-     * If true, the button will not automatically add a tooltip based on the hideLabel and label properties.
+     * If true, the button adds no automatic tooltip — neither the one derived
+     * from `hideLabel` + `label`, nor the one the label shows when it is too
+     * long and gets clipped to an ellipsis.
      */
     noAutoTooltip?: boolean;
     /**
@@ -2827,11 +2829,9 @@ declare interface ChartConfigBase {
     /** Format category axis tick labels */
     categoryFormatter?: (value: string) => string;
     /**
-     * Names of series that carry a comparison baseline (e.g. the same measure
-     * over the previous period). They are drawn muted — reduced opacity, and
-     * dashed on a line chart — so the current period stays the figure being
-     * read. Their legend entries are untouched, so switching one off works the
-     * same way as for any other series.
+     * Names of the series carrying a comparison baseline — drawn faded, and
+     * dashed on a line chart. Matched after any chart-type transform, so a
+     * series the transform renamed or collapsed is not muted.
      */
     comparisonSeriesNames?: string[];
 }
@@ -2989,16 +2989,8 @@ export declare interface ChatDashboardConfig {
     items: ChatDashboardItem[];
     /** Fetch specs for server-side data retrieval, keyed by datasetId */
     fetchSpecs: Record<string, DashboardFetchSpec>;
-    /**
-     * What every item in this dashboard is compared against, as the user picked
-     * it. Dashboard-level: one comparison target, applied to the whole canvas.
-     *
-     * The host decides how to honour it — it owns the fetch, so it is the one
-     * that can resolve "previous period" against the dashboard's current date
-     * window and return the baseline figures. `"none"` and an absent value both
-     * mean no comparison.
-     */
-    compareTo?: "none" | "previous_period" | "previous_month" | "previous_quarter" | "previous_year";
+    /** Dashboard-wide comparison target; the host owns resolving the shifted window. */
+    compareTo?: "none" | "previous_period" | "previous_week" | "previous_month" | "previous_quarter" | "previous_half_year" | "previous_year";
 }
 
 /** Granularity options exposed by F0's `OneDateNavigator`. */
@@ -4033,16 +4025,9 @@ export declare interface DashboardMetricData {
     value: number;
     /** Optional previous value — used to compute a trend indicator */
     previousValue?: number;
-    /**
-     * A ready-made trend. Takes precedence over the one derived from
-     * `previousValue`, which stays the default when this is absent.
-     */
+    /** Takes precedence over the trend derived from `previousValue`. */
     trend?: DashboardMetricTrend;
-    /**
-     * What the trend compares against, e.g. "vs previous month". Shown in a
-     * tooltip on the trend and announced with it, so the figure states its own
-     * baseline instead of relying on the widget title.
-     */
+    /** What the trend compares against, e.g. "vs previous month". Tooltip + screen reader. */
     comparisonLabel?: string;
 }
 
@@ -4070,19 +4055,13 @@ export declare interface DashboardMetricItem<Filters extends FiltersDefinition =
 }
 
 /**
- * A trend the host computed itself, shown beside the metric value.
- *
- * Use it when the change is not a percentage of `previousValue` — a difference
- * in percentage points, a server-side comparison against a target, a figure
- * whose rounding must match a report elsewhere.
+ * A trend the host computed itself, for a change that is not a percentage of
+ * `previousValue` — percentage points, a target comparison, a rounding.
  */
 export declare interface DashboardMetricTrend {
-    /** Which way the change points. `flat` renders neutrally, without an arrow. */
+    /** `flat` renders neutrally, without an arrow. */
     direction: "up" | "down" | "flat";
-    /**
-     * Rendered verbatim next to the arrow, so the host owns sign, unit, locale
-     * and rounding — "+1.2 pp", "−12.5%", "sin cambios".
-     */
+    /** Rendered verbatim ("+1.2 pp"); empty falls back to `previousValue`. */
     label: string;
 }
 
@@ -7924,19 +7903,14 @@ export declare interface F0AnalyticsDashboardProps<Filters extends FiltersDefini
      * Rendered above the grid alongside the regular filter bar.
      */
     navigationFilters?: NavigationFiltersDefinition;
-    /**
-     * Host controls rendered in the header row, immediately left of the
-     * navigation filters — a comparison picker beside the date navigator.
-     * Nothing is rendered, and no row appears, when omitted.
-     */
+    /** Host controls in the header row, left of the navigation filters. */
     navigationActions?: ReactNode;
     /**
-     * Changes when the host wants widgets to refetch with the same filters
-     * (e.g. a comparison target changed).
-     *
-     * Every item re-runs its `fetchData` in place: the grid is not remounted and
-     * the data already on screen stays visible, dimmed, until the new result
-     * arrives. A widget with nothing to keep shows its skeleton as usual.
+     * Changes when the host wants widgets to refetch with the same filters. The
+     * grid is not remounted: metric and chart items re-run `fetchData` in place,
+     * keeping what is on screen visible but dimmed until the result arrives. A
+     * collection item instead re-creates its data source, which owns the fetch,
+     * so its page, sort and selection reset.
      */
     dataKey?: string;
 }
@@ -9304,11 +9278,7 @@ export declare interface F0DataChartBarSeries {
     data: F0DataChartBarDataPoint[];
     /** Override color for this series. Must be an F0 design token name. Falls back to the theme palette. */
     color?: ChartColorToken;
-    /**
-     * Draw this series faded, keeping its colour and its legend entry. For a
-     * secondary reading of the same measure — the previous period beside the
-     * current one — so the primary series stays the one being read.
-     */
+    /** Draw faded (keeps colour and legend entry) for a secondary reading of the same measure. */
     muted?: boolean;
 }
 
@@ -9571,11 +9541,7 @@ export declare interface F0DataChartLineSeries {
     lineType?: F0DataChartLineType;
     /** Override area fill for this series */
     showArea?: boolean;
-    /**
-     * Draw this series faded, keeping its colour and its legend entry. For a
-     * secondary reading of the same measure — the previous period beside the
-     * current one — so the primary series stays the one being read.
-     */
+    /** Draw faded (keeps colour and legend entry) for a secondary reading of the same measure. */
     muted?: boolean;
 }
 
@@ -16368,6 +16334,13 @@ declare type OneEllipsisProps = {
      * @default false
      */
     markdown?: boolean;
+    /**
+     * How long the pointer has to rest on the clipped text before the tooltip
+     * opens, in milliseconds. Lower it where the tooltip is the only way to read
+     * text the layout has cut off, so recovering it does not feel like a wait.
+     * @default 700
+     */
+    delay?: number;
 };
 
 export declare const OneEmptyState: WithDataTestIdReturnType_3<typeof _OneEmptyState>;
@@ -20617,11 +20590,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        fontSize: {
+            setFontSize: (fontSize: string) => ReturnType;
+            unsetFontSize: () => ReturnType;
         };
     }
 }
@@ -20629,9 +20600,11 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        fontSize: {
-            setFontSize: (fontSize: string) => ReturnType;
-            unsetFontSize: () => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
