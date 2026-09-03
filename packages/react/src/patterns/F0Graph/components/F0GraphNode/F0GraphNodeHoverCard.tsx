@@ -1,4 +1,4 @@
-import { type ReactNode } from "react"
+import { type ReactNode, useState } from "react"
 
 import type { AvatarVariant } from "@/components/avatars/F0Avatar"
 import { F0Card } from "@/components/F0Card"
@@ -110,17 +110,24 @@ export function F0GraphNodeHoverCard({
   tags,
   tagLabels,
 }: F0GraphNodeHoverCardProps) {
+  const [open, setOpen] = useState(false)
   const metadata = tags
     ?.map((tag) => tagToMetadata(tag, tagLabels?.[tagColumn(tag)] ?? ""))
     .filter((item): item is CardMetadata => item !== null)
 
   return (
-    <HoverCard openDelay={300} closeDelay={100}>
+    <HoverCard
+      open={open}
+      onOpenChange={setOpen}
+      openDelay={300}
+      closeDelay={100}
+    >
       <HoverCardTrigger asChild>{trigger}</HoverCardTrigger>
       <HoverCardContent
         side="top"
         align="center"
         className="w-64 rounded-2xl border-none p-0 text-f1-foreground shadow-md"
+        onEscapeKeyDown={() => setOpen(false)}
       >
         <F0Card
           avatar={avatar}

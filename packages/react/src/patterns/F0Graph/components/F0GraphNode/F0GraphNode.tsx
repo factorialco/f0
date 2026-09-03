@@ -48,6 +48,7 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
       nodeRef,
       nodeId,
       ariaOwns,
+      ariaLabel,
       avatar,
       title,
       subtitle,
@@ -139,6 +140,12 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
       "aria-posinset": posInSet,
       "aria-selected": state === "selected",
       "aria-owns": ariaOwns || undefined,
+      "aria-busy": loading || undefined,
+      // A loading node renders skeletons instead of its title, so the
+      // accessible name has to come from the prop (or the title string,
+      // when there is one) rather than from the rendered content.
+      "aria-label":
+        ariaLabel ?? (loading && typeof title === "string" ? title : undefined),
       onClick,
       onKeyDown: handleKeyDown,
     }
