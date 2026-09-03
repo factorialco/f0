@@ -4087,10 +4087,11 @@ function LearnerCourseScreen() {
           label: "Status",
           options: {
             options: [
+              { value: "Locked", label: "Locked" },
               { value: "Not started", label: "Not started" },
+              { value: "Completed", label: "Completed" },
               { value: "Passed", label: "Passed" },
               { value: "Failed", label: "Failed" },
-              { value: "Completed", label: "Completed" },
             ],
           },
         },
@@ -4109,8 +4110,8 @@ function LearnerCourseScreen() {
           label: "Group",
           options: {
             options: [
-              { value: "Edición Q2 2026", label: "Edición Q2 2026" },
-              { value: "Edición Q1 2026", label: "Edición Q1 2026" },
+              { value: "Edición 2026", label: "Edición 2026" },
+              { value: "Edición 2025", label: "Edición 2025" },
             ],
           },
         },
@@ -4119,8 +4120,10 @@ function LearnerCourseScreen() {
         paginationType: "pages",
         perPage: 10,
         fetchData: ({ filters, pagination }: FetchOptions) => {
+          // A scheduled (opensAt) evaluation reads as "Locked" in the list, so
+          // the Status filter matches that display state, not the raw status.
           const rows = evaluations
-            .filter((e) => matchArray(filters?.status, e.status))
+            .filter((e) => matchArray(filters?.status, e.opensAt ? "Locked" : e.status))
             .filter((e) => matchArray(filters?.kind, e.kind))
             .filter((e) => matchArray(filters?.group, e.group))
           return paginateRecords(rows, pagination, 10)
@@ -6517,6 +6520,7 @@ type LearnerEvaluation = {
   status: "Not started" | "Passed" | "Failed" | "Completed"
   opensAt?: string
   required?: boolean
+  /** the retake edition/group this evaluation belongs to */
   group: string
 }
 
@@ -6535,16 +6539,16 @@ const OLD_MINIMUM = 50
 const TOTAL_FINISHED = 25
 
 const LEARNER_EVALUATIONS: LearnerEvaluation[] = [
-  { id: "kt-1", name: "Knowledge check", kind: "Knowledge test", minutes: 8, questions: 11, status: "Not started", required: true, group: "Edición Q2 2026" },
-  { id: "kt-4", name: "Data protection knowledge test", kind: "Knowledge test", minutes: 12, questions: 9, status: "Passed", required: true, group: "Edición Q2 2026" },
-  { id: "kt-3", name: "Compliance knowledge test", kind: "Knowledge test", minutes: 15, questions: 8, status: "Failed", required: true, group: "Edición Q1 2026" },
-  { id: "sat-1", name: "Satisfaction survey", kind: "Satisfaction", minutes: 2, questions: 4, status: "Completed", group: "Edición Q1 2026" },
+  { id: "kt-1", name: "Knowledge check", kind: "Knowledge test", minutes: 8, questions: 11, status: "Not started", required: true, group: "Edición 2026" },
+  { id: "kt-4", name: "Data protection knowledge test", kind: "Knowledge test", minutes: 12, questions: 9, status: "Passed", required: true, group: "Edición 2025" },
+  { id: "kt-3", name: "Compliance knowledge test", kind: "Knowledge test", minutes: 15, questions: 8, status: "Failed", required: true, group: "Edición 2025" },
+  { id: "sat-1", name: "Satisfaction survey", kind: "Satisfaction", minutes: 2, questions: 4, status: "Completed", group: "Edición 2025" },
 ]
 
 /** Scheduled (not materialized yet): shown with the date it opens, not actionable. */
 const SCHEDULED_EVALUATIONS: LearnerEvaluation[] = [
-  { id: "kt-2", name: "Quality standards knowledge test", kind: "Knowledge test", minutes: 22, questions: 11, status: "Not started", opensAt: "Opens 4 Aug", required: true, group: "Edición Q2 2026" },
-  { id: "sat-2", name: "Satisfaction survey", kind: "Satisfaction", minutes: 2, questions: 4, status: "Not started", opensAt: "Opens when you finish the course", group: "Edición Q2 2026" },
+  { id: "kt-2", name: "Quality standards knowledge test", kind: "Knowledge test", minutes: 22, questions: 11, status: "Not started", opensAt: "Opens 4 Aug", required: true, group: "Edición 2026" },
+  { id: "sat-2", name: "Satisfaction survey", kind: "Satisfaction", minutes: 2, questions: 4, status: "Not started", opensAt: "Opens when you finish the course", group: "Edición 2026" },
 ]
 const SCHEDULED_IDS = new Set(["kt-2", "sat-2"])
 
