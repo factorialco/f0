@@ -237,6 +237,30 @@ describe("MapCollection — selection", () => {
     expect(onSelect).toHaveBeenCalledWith(null)
   })
 
+  it("lets the consumer end the selection its panel started", async () => {
+    const { rerender } = renderMap({ selectedRecordId: "mad" })
+    await waitForMap()
+    expect(mock.props.latest?.selectedMarkerId).toBe("mad")
+
+    rerender(collection({ selectedRecordId: null }))
+
+    // Without a controlled selection the marker would stay marked after its
+    // panel was dismissed: nothing outside the map could clear it.
+    await waitFor(() => expect(mock.props.latest?.selectedMarkerId).toBeNull())
+  })
+
+  it("keeps its own selection when none is passed", async () => {
+    renderMap()
+    await waitForMap()
+
+    const onMarkerSelect = mock.props.latest?.onMarkerSelect as (
+      id: string | null
+    ) => void
+    act(() => onMarkerSelect("mad"))
+
+    expect(mock.props.latest?.selectedMarkerId).toBe("mad")
+  })
+
   it("forwards the viewport inset so the camera clears a side panel", async () => {
     renderMap({ viewportInset: { right: 360 } })
     await waitForMap()
@@ -307,7 +331,22 @@ describe("MapCollection — framing", () => {
     expect(mock.fitToMarkers).not.toHaveBeenCalled()
   })
 
-  it("zooms back out when the selection is dropped", async () => {
+  it("zooms back out when a selection it flew to is dropped", async () => {
+    const { rerender } = renderMap({
+      revealRecordId: "mad",
+      selectedRecordId: "mad",
+    })
+    await waitForMap()
+    await waitFor(() => expect(mock.focusMarker).toHaveBeenCalled())
+    mock.fitToMarkers.mockClear()
+
+    // The consumer closes the panel it opened, ending the selection.
+    rerender(collection({ revealRecordId: "mad", selectedRecordId: null }))
+
+    await waitFor(() => expect(mock.fitToMarkers).toHaveBeenCalled())
+  })
+
+  it("leaves the camera where it is when a clicked selection is dropped", async () => {
     renderMap({ onSelect: vi.fn() })
     await waitForMap()
 
@@ -319,17 +358,32 @@ describe("MapCollection — framing", () => {
 
     act(() => onMarkerSelect(null))
 
-    expect(mock.fitToMarkers).toHaveBeenCalled()
+    // A click only re-centred at the zoom the user was already on, so there is
+    // no zoom to undo and reframing would be an unasked-for jump.
+    expect(mock.fitToMarkers).not.toHaveBeenCalled()
   })
 
-  it("zooms back out when the search is cleared", async () => {
-    const { rerender } = renderMap({}, 0, { search: "mad" })
+  it("zooms back out when the search that flew there is cleared", async () => {
+    const { rerender } = renderMap({ revealRecordId: "mad" }, 0, {
+      search: "mad",
+    })
+    await waitForMap()
+    await waitFor(() => expect(mock.focusMarker).toHaveBeenCalled())
+    mock.fitToMarkers.mockClear()
+
+    rerender(collection({ revealRecordId: "mad" }, 0, { search: undefined }))
+
+    await waitFor(() => expect(mock.fitToMarkers).toHaveBeenCalled())
+  })
+
+  it("leaves the camera alone when a search that never flew is cleared", async () => {
+    const { rerender } = renderMap({}, 0, { search: "zzz" })
     await waitForMap()
     mock.fitToMarkers.mockClear()
 
     rerender(collection({}, 0, { search: undefined }))
 
-    await waitFor(() => expect(mock.fitToMarkers).toHaveBeenCalled())
+    expect(mock.fitToMarkers).not.toHaveBeenCalled()
   })
 
   it("centres a clicked marker so it clears the consumer's panel", async () => {
