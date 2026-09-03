@@ -19,6 +19,10 @@ import type {
 } from "../../types"
 
 import { useCollectionDownloadActions } from "../../hooks/useCollectionDownloadActions"
+import {
+  ComparisonChip,
+  comparisonSummary,
+} from "../ComparisonChip/ComparisonChip"
 import { DashboardItem } from "../DashboardItem/DashboardItem"
 import { changeColumn } from "./rowTrends"
 
@@ -135,8 +139,10 @@ export function CollectionItem<Filters extends FiltersDefinition>({
 
   const changeLabel = translations.ai.dashboardItem.comparison.change
 
-  // The table viz is the only one with columns to append to; the others show
-  // whatever fields their own layout declares.
+  // The table viz is the only one with columns to add to; the others show
+  // whatever fields their own layout declares. The change sits right after
+  // the row's name, where the eye reads it against the row rather than after
+  // every other figure.
   const visualizations = useMemo(() => {
     if (!item.rowTrends) return item.visualizations
     const column = changeColumn(
@@ -146,17 +152,17 @@ export function CollectionItem<Filters extends FiltersDefinition>({
       item.rowTrendsSorting
     )
 
-    return item.visualizations.map((visualization) =>
-      visualization?.type === "table"
-        ? {
-            ...visualization,
-            options: {
-              ...visualization.options,
-              columns: [...(visualization.options?.columns ?? []), column],
-            },
-          }
-        : visualization
-    )
+    return item.visualizations.map((visualization) => {
+      if (visualization?.type !== "table") return visualization
+      const [first, ...rest] = visualization.options?.columns ?? []
+      return {
+        ...visualization,
+        options: {
+          ...visualization.options,
+          columns: first ? [first, column, ...rest] : [column],
+        },
+      }
+    })
   }, [
     item.visualizations,
     item.rowTrends,
@@ -170,6 +176,14 @@ export function CollectionItem<Filters extends FiltersDefinition>({
       title={item.title}
       description={item.description}
       info={item.info}
+      comparison={
+        <ComparisonChip
+          summary={comparisonSummary(
+            item.rowTrends && { byCategory: item.rowTrends }
+          )}
+          names={false}
+        />
+      }
       explanation={item.explanation}
       isLoading={false}
       actions={allActions}

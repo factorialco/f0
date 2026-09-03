@@ -15,6 +15,7 @@ import {
   ChartLine,
   ChartPie,
   ChartVerticalBars,
+  Swap,
   Table as TableIcon,
 } from "@/icons/app"
 import { DataChartEmptyStateView, F0DataChart } from "@/kits/F0DataChart"
@@ -31,7 +32,6 @@ import {
 } from "@/kits/F0DataChart"
 import { useAiChat } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
 import { useI18n } from "@/lib/providers/i18n"
-import { cn } from "@/lib/utils"
 import { OneDataCollection } from "@/patterns/OneDataCollection"
 import { useDataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
 
@@ -53,13 +53,18 @@ import {
   compatibleTargetTypes,
 } from "../../utils/chartDataAdapter"
 import { chartDataToTabular } from "../../utils/chartDataToTabular"
+import {
+  ComparisonChip,
+  comparisonSummary,
+} from "../ComparisonChip/ComparisonChip"
 import { DashboardItem } from "../DashboardItem/DashboardItem"
 import { toTrendBadge } from "../TrendBadge/TrendBadge"
 import {
   AccessiblePointActions,
   type AccessiblePointAction,
 } from "./AccessiblePointActions"
-import { markCategoryComparison } from "./categoryComparison"
+import { withTooltipComparison } from "./categoryComparison"
+import { ChangeView } from "./ChangeView"
 import { buildChartProps } from "./chartProps"
 import { PointActionPopover } from "./PointActionPopover"
 
@@ -629,6 +634,7 @@ export function ChartItem<Filters extends FiltersDefinition>({
 }: ChartItemProps<Filters>) {
   const translations = useI18n()
   const [viewMode, setViewMode] = useState<"chart" | "table">("chart")
+  const [showChange, setShowChange] = useState(false)
   const {
     enabled: aiEnabled,
     setPendingQuote,
@@ -675,19 +681,12 @@ export function ChartItem<Filters extends FiltersDefinition>({
     [item, data, unrenderableChart]
   )
 
-  // A category mark is decoration on the drawn label, so it is applied last,
-  // to the rendered props alone: `chartProps` above is what quotes, keyboard
-  // labels and downloads read, and none of them should say "Sales ▲ +4.2%".
-  const newCategoryLabel = translations.ai.dashboardItem.comparison.newCategory
-  const markedChartProps = useMemo(
+  // Hover copy on the rendered props alone: quotes, keyboard labels and downloads read `chartProps`.
+  const comparison = data?.categoryComparison
+  const renderedChartProps = useMemo(
     () =>
-      chartProps &&
-      markCategoryComparison(
-        chartProps,
-        data?.categoryComparison,
-        newCategoryLabel
-      ),
-    [chartProps, data?.categoryComparison, newCategoryLabel]
+      chartProps && withTooltipComparison(chartProps, comparison, translations),
+    [chartProps, comparison, translations]
   )
 
   // A point belongs to one exact data render. A filter/type/refetch transition
@@ -775,6 +774,16 @@ export function ChartItem<Filters extends FiltersDefinition>({
     () => [...(actions ?? []), ...downloadActions],
     [actions, downloadActions]
   )
+
+  const viewActions = comparison && [
+    {
+      label: showChange
+        ? translations.ai.dashboardItem.comparison.showValues
+        : translations.ai.dashboardItem.comparison.showChange,
+      icon: Swap,
+      onClick: () => setShowChange((on) => !on),
+    },
+  ]
 
   const hasAccessiblePointActions = useMemo(
     () =>
@@ -911,8 +920,6 @@ export function ChartItem<Filters extends FiltersDefinition>({
   // it duplicates the header's collapse button rather than inventing anything.
   const canCollapseCategories = canRevealCategories && !!isFullscreen
 
-  const removedCategories = data?.categoryComparison?.removed ?? []
-
   // While rows are windowed, the item's own description is replaced by what the
   // reader is actually looking at: a subset. Both counts come from the data and
   // the chart's reported hidden count, so they track resizes without a second
@@ -951,6 +958,7 @@ export function ChartItem<Filters extends FiltersDefinition>({
       description={windowedDescription ?? item.description}
       info={item.info}
       trend={toTrendBadge(data?.trend, data?.comparisonLabel)}
+      comparison={<ComparisonChip summary={comparisonSummary(comparison)} />}
       {...(descriptionAction ? { descriptionAction } : {})}
       explanation={item.explanation}
       isLoading={isLoading}
@@ -969,6 +977,7 @@ export function ChartItem<Filters extends FiltersDefinition>({
       onRetry={unrenderableChart ? undefined : retry}
       skeleton={chartSkeleton(safeChart)}
       actions={allActions}
+      viewActions={viewActions}
       itemFilters={itemFilters}
       editMode={editMode}
       handleDelete={handleDelete}
@@ -980,24 +989,22 @@ export function ChartItem<Filters extends FiltersDefinition>({
       fitContent={fitContent}
       onFullscreenChange={onFullscreenChange}
     >
-      {data && markedChartProps ? (
+      {data && chartProps && renderedChartProps ? (
         viewMode === "table" ? (
           <ChartTableView config={safeChart} data={data} />
+        ) : showChange && comparison ? (
+          <div ref={chartContainerRef} className="h-full w-full px-4 py-3">
+            <ChangeView chart={chartProps} comparison={comparison} />
+          </div>
         ) : (
           <div
             ref={chartContainerRef}
-            className={cn(
-              "relative h-full w-full px-4 py-3",
-              // The caption sits in reserved padding rather than in the flow:
-              // an expanded chart takes its own intrinsic height, which a flex
-              // row above the caption would fight.
-              removedCategories.length > 0 && "pb-8"
-            )}
+            className="relative h-full w-full px-4 py-3"
           >
             <F0DataChart
-              {...markedChartProps}
-              {...(markedChartProps.type !== "gauge" &&
-              markedChartProps.type !== "heatmap"
+              {...renderedChartProps}
+              {...(renderedChartProps.type !== "gauge" &&
+              renderedChartProps.type !== "heatmap"
                 ? { onLegendSelectionChange: setLegendSelection }
                 : {})}
               // Something has to be able to answer the click: the host, or
@@ -1023,13 +1030,6 @@ export function ChartItem<Filters extends FiltersDefinition>({
               // category at a fixed row height, growing the widget.
               {...(fitContent ? { showAllCategories: true } : {})}
             />
-            {removedCategories.length > 0 && (
-              <p className="absolute bottom-2 left-4 right-4 m-0 truncate text-base text-f1-foreground-secondary">
-                {translations.t("ai.dashboardItem.comparison.notPresent", {
-                  categories: removedCategories.join(", "),
-                })}
-              </p>
-            )}
             <AccessiblePointActions
               hasActions={hasAccessiblePointActions}
               getActions={getAccessiblePointActions}

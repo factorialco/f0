@@ -233,11 +233,17 @@ export interface DashboardMetricTrend {
   /** Rendered verbatim ("+1.2 pp"); empty falls back to `previousValue`. */
   label: string
   /**
+   * The change as a number in the measure's own unit, for what draws or ranks
+   * it: a chart's change view sizes its bars by it, and the tooltip states the
+   * baseline (value − delta) beside the label. Without it the change view can
+   * only list categories by their label text, ordered by that text.
+   */
+  delta?: number
+  /**
    * Whether the change is good news, for the measures where that does not
    * follow its sign — attrition falling is positive. It decides the colour,
    * `direction` still decides the arrow. Omitted, the colour follows the
-   * direction as before. Only read where there is a colour to set: a category
-   * mark is plain text in a chart label, so it takes the glyph and no tone.
+   * direction as before.
    */
   sentiment?: "positive" | "negative" | "neutral"
 }
@@ -251,12 +257,12 @@ export interface DashboardMetricTrend {
 export interface DashboardCategoryComparison {
   /** Keyed by the category label, as it appears in `categories` or a point's `name`. */
   byCategory: Record<string, DashboardMetricTrend>
-  /** Categories the compared period did not have. Marked as new. */
+  /** Categories the compared period did not have. Their tooltip says so; the change view pins them first. */
   added?: string[]
   /**
-   * Categories the compared period had and this one does not. They have no
-   * mark to carry — nothing draws them — so the widget names them in a caption
-   * under the chart.
+   * Categories the compared period had and this one does not. Nothing draws
+   * them, so they show only as a count in the header chip and as the last
+   * rows of the change view.
    */
   removed?: string[]
 }
@@ -304,7 +310,11 @@ export interface DashboardChartData {
   trend?: DashboardMetricTrend
   /** What `trend` compares against, e.g. "vs previous month". Tooltip + screen reader. */
   comparisonLabel?: string
-  /** Per-category comparison, drawn into the category labels of bar/pie/funnel charts. */
+  /**
+   * Per-category comparison for bar/pie/funnel charts: a line in each
+   * category's tooltip, a summary chip beside `trend`, and a "Show change"
+   * view in the widget menu. Labels stay as they are.
+   */
   categoryComparison?: DashboardCategoryComparison
 }
 

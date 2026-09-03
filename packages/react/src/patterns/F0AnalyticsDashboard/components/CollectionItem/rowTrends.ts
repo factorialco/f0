@@ -35,6 +35,8 @@ export function changeColumn(
     id: "dashboard-row-change",
     label,
     sorting,
+    // Sized for its arrow and a short figure, so it never takes a data column's share.
+    width: 144,
     render: (row: RecordType): RendererDefinition | string | undefined =>
       renderTrend(rowTrendOf(row, rowTrends, idProvider)),
   }

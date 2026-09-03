@@ -1,6 +1,11 @@
 import { describe, expect, it, vi } from "vitest"
 
-import { screen, waitFor, zeroRender as render } from "@/testing/test-utils"
+import {
+  screen,
+  userEvent,
+  waitFor,
+  zeroRender as render,
+} from "@/testing/test-utils"
 
 import type {
   DashboardChartData,
@@ -173,16 +178,21 @@ describe("F0AnalyticsDashboard comparison props", () => {
     expect(screen.queryByText(/%/)).toBeNull()
   })
 
-  it("names the categories the compared period had and this one does not", async () => {
+  it("sums the per-category comparison into a chip beside the title", async () => {
     render(
       <F0AnalyticsDashboard
         items={[
           chartItem({
-            categories: ["Sales"],
-            series: [{ name: "This period", data: [1] }],
+            categories: ["Sales", "Operations", "Legal"],
+            series: [{ name: "This period", data: [58, 61, 4] }],
             categoryComparison: {
-              byCategory: {},
-              removed: ["Legal", "Support"],
+              byCategory: {
+                Sales: { direction: "up", label: "+4.2%" },
+                Operations: { direction: "down", label: "−3.0%" },
+                People: { direction: "flat", label: "0%" },
+              },
+              added: ["Legal"],
+              removed: ["Support"],
             },
           }),
         ]}
@@ -190,8 +200,27 @@ describe("F0AnalyticsDashboard comparison props", () => {
     )
 
     expect(
-      await screen.findByText("Not present this period: Legal, Support")
+      await screen.findByText("1 up · 1 down · 1 new · 1 gone")
     ).toBeInTheDocument()
+    expect(screen.queryByText(/Not present/)).toBeNull()
+  })
+
+  it("adds neither chip nor change view when the data carries no comparison", async () => {
+    render(
+      <F0AnalyticsDashboard
+        items={[
+          chartItem({
+            categories: ["Sales"],
+            series: [{ name: "This period", data: [1] }],
+          }),
+        ]}
+      />
+    )
+
+    await screen.findByLabelText("Chart")
+    expect(screen.queryByText(/\d+ (up|down|new|gone)/)).toBeNull()
+    await userEvent.click(screen.getByLabelText("Other actions"))
+    expect(screen.queryByText("Show change")).toBeNull()
   })
 
   it("refetches a chart item on a dataKey change", async () => {

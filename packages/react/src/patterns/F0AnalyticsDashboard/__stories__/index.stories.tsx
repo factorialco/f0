@@ -17,6 +17,7 @@ import type {
   DashboardItemFiltersConfig,
   DashboardItemFiltersState,
   DashboardMetricData,
+  DashboardMetricTrend,
 } from "../types"
 
 import { F0AnalyticsDashboard } from "../index"
@@ -1316,35 +1317,120 @@ export const PeriodComparison: Story = {
   },
 }
 
-const DEPARTMENT_COMPARISON: DashboardCategoryComparison = {
-  byCategory: {
-    Engineering: { direction: "up", label: "+14.3%" },
-    Sales: { direction: "up", label: "+1.8%" },
-    Operations: { direction: "down", label: "−4.6%" },
-    People: { direction: "flat", label: "0%" },
-  },
-  added: ["Legal"],
-  removed: ["Support"],
+/** The host's own change text, as a metric trend carries it. */
+const change = (
+  value: number,
+  delta: number,
+  sentiment?: DashboardMetricTrend["sentiment"]
+): DashboardMetricTrend => {
+  const previous = value - delta
+  const percent = previous === 0 ? 0 : (delta / previous) * 100
+  const sign = delta > 0 ? "+" : delta < 0 ? "−" : ""
+  return {
+    direction: delta > 0 ? "up" : delta < 0 ? "down" : "flat",
+    label:
+      delta === 0
+        ? "0"
+        : `${sign}${Math.abs(delta)} (${sign}${Math.abs(percent).toFixed(1)}%)`,
+    delta,
+    sentiment,
+  }
 }
 
-const DEPARTMENT_ROWS = [
-  { id: "engineering", name: "Engineering", headcount: 96 },
-  { id: "sales", name: "Sales", headcount: 58 },
-  { id: "operations", name: "Operations", headcount: 61 },
-  { id: "legal", name: "Legal", headcount: 4 },
+/** Real-shaped departments: long names, a wide spread, two new and one gone. */
+const DEPARTMENTS: {
+  id: string
+  name: string
+  headcount: number
+  delta: number
+}[] = [
+  {
+    id: "eng-platform",
+    name: "Engineering — Platform",
+    headcount: 96,
+    delta: 12,
+  },
+  { id: "eng-product", name: "Engineering — Product", headcount: 74, delta: 6 },
+  { id: "cs-emea", name: "Customer Success — EMEA", headcount: 58, delta: 9 },
+  {
+    id: "cs-americas",
+    name: "Customer Success — Americas",
+    headcount: 41,
+    delta: -3,
+  },
+  { id: "sales-ent", name: "Sales — Enterprise", headcount: 37, delta: 4 },
+  { id: "sales-mm", name: "Sales — Mid-market", headcount: 29, delta: -5 },
+  {
+    id: "mkt-brand",
+    name: "Marketing — Brand & Content",
+    headcount: 18,
+    delta: 2,
+  },
+  { id: "mkt-growth", name: "Marketing — Growth", headcount: 14, delta: 0 },
+  { id: "people", name: "People & Talent", headcount: 22, delta: 1 },
+  { id: "finance", name: "Finance & Legal", headcount: 16, delta: 0 },
+  {
+    id: "ops-facilities",
+    name: "Operations — Facilities",
+    headcount: 12,
+    delta: -2,
+  },
+  { id: "ops-it", name: "Operations — IT & Security", headcount: 15, delta: 3 },
+  { id: "data", name: "Data & Analytics", headcount: 11, delta: 5 },
+  { id: "design", name: "Design — Product & Brand", headcount: 13, delta: -1 },
+  { id: "research", name: "Research — Applied AI", headcount: 6, delta: 6 },
+  {
+    id: "partnerships",
+    name: "Partnerships — Channel",
+    headcount: 4,
+    delta: 4,
+  },
 ]
+const NEW_DEPARTMENTS = ["Research — Applied AI", "Partnerships — Channel"]
+const GONE_DEPARTMENT = "Support — Tier 1"
+
+const DEPARTMENT_COMPARISON: DashboardCategoryComparison = {
+  byCategory: Object.fromEntries([
+    ...DEPARTMENTS.filter((d) => !NEW_DEPARTMENTS.includes(d.name)).map((d) => [
+      d.name,
+      change(d.headcount, d.delta),
+    ]),
+    [GONE_DEPARTMENT, change(0, -9)],
+  ]),
+  added: NEW_DEPARTMENTS,
+  removed: [GONE_DEPARTMENT],
+}
+
+/** Share of headcount in percentage points: no `delta` in the measure's unit, so no baseline. */
+const SHARE_COMPARISON: DashboardCategoryComparison = {
+  byCategory: {
+    Engineering: { direction: "up", label: "+0.9 pp" },
+    "Customer Success": { direction: "up", label: "+0.6 pp" },
+    Sales: { direction: "down", label: "−0.7 pp", sentiment: "neutral" },
+    Marketing: { direction: "down", label: "−0.3 pp", sentiment: "neutral" },
+    "People & Talent": { direction: "flat", label: "0.0 pp" },
+    "Finance & Legal": { direction: "down", label: "−0.1 pp" },
+    Operations: { direction: "down", label: "−0.2 pp" },
+    Other: { direction: "up", label: "+1.4 pp" },
+  },
+}
+
+const DEPARTMENT_ROWS = DEPARTMENTS.slice(0, 12)
 
 const deltaItems: DashboardItem[] = [
   {
     id: "headcount-by-department",
     type: "chart",
     title: "Headcount by department",
+    itemHeight: 520,
     chart: { type: "bar", orientation: "horizontal" },
     fetchData: () =>
       withLatency<DashboardChartData>({
-        categories: ["Engineering", "Sales", "Operations", "People", "Legal"],
-        series: [{ name: "This period", data: [96, 58, 61, 33, 4] }],
-        trend: { direction: "up", label: "+10.7%" },
+        categories: DEPARTMENTS.map((d) => d.name),
+        series: [
+          { name: "This period", data: DEPARTMENTS.map((d) => d.headcount) },
+        ],
+        trend: { direction: "up", label: "+32 (+7.4%)" },
         comparisonLabel: "vs previous month",
         categoryComparison: DEPARTMENT_COMPARISON,
       }),
@@ -1353,42 +1439,41 @@ const deltaItems: DashboardItem[] = [
     id: "headcount-share",
     type: "chart",
     title: "Headcount share",
+    itemHeight: 520,
     chart: { type: "pie", innerRadius: 60 },
     fetchData: () =>
       withLatency<DashboardChartData>({
         series: {
           name: "Headcount",
           data: [
-            { name: "Engineering", value: 96 },
-            { name: "Sales", value: 58 },
-            { name: "Operations", value: 61 },
-            { name: "Legal", value: 4 },
+            { name: "Engineering", value: 170 },
+            { name: "Customer Success", value: 99 },
+            { name: "Sales", value: 66 },
+            { name: "Other", value: 34 },
+            { name: "Marketing", value: 32 },
+            { name: "Operations", value: 27 },
+            { name: "People & Talent", value: 22 },
+            { name: "Finance & Legal", value: 16 },
           ],
         },
-        trend: { direction: "up", label: "+3.1 pp" },
+        trend: { direction: "up", label: "+0.9 pp" },
         comparisonLabel: "vs previous month",
-        categoryComparison: {
-          byCategory: DEPARTMENT_COMPARISON.byCategory,
-          added: DEPARTMENT_COMPARISON.added,
-        },
+        categoryComparison: SHARE_COMPARISON,
       }),
   },
   {
     id: "departments",
     type: "collection",
     title: "Departments",
-    itemHeight: 336,
+    itemHeight: 560,
     createSource: () => ({
       dataAdapter: {
         fetchData: () => withLatency({ records: DEPARTMENT_ROWS }),
       },
     }),
-    rowTrends: {
-      engineering: { direction: "up", label: "+12" },
-      sales: { direction: "up", label: "+1" },
-      operations: { direction: "down", label: "−3" },
-      legal: { direction: "flat", label: "0" },
-    },
+    rowTrends: Object.fromEntries(
+      DEPARTMENT_ROWS.map((d) => [d.id, change(d.headcount, d.delta)])
+    ),
     visualizations: [
       {
         type: "table" as const,
@@ -1414,34 +1499,56 @@ const deltaItems: DashboardItem[] = [
 
 /**
  * The same host-computed trend on the widgets that have no single number to
- * put it beside.
+ * put it beside, at a realistic size: sixteen departments with long names,
+ * eight pie slices, twelve table rows.
  *
- * Both charts show their own `trend` as a badge in the header. The bar chart
- * also carries a `categoryComparison`: each department's change is drawn into
- * its label, the department the compared period lacked is marked as new, and
- * the one it had but this period does not — nothing draws it — is named in the
- * caption under the chart. The collection item carries `rowTrends`, which
- * become a "Change" column.
+ * Every widget shows its own `trend` as a badge in the header, and beside it
+ * a chip summing the per-category outcome — how many rose, fell, appeared or
+ * vanished, with the names on hover. Category labels stay clean: each
+ * category's change is a line in its tooltip, with the baseline value where
+ * the trend carries a numeric `delta`. The widget menu offers "Show change",
+ * which redraws the chart as diverging bars of those deltas — new departments
+ * first, the vanished one last, the rest by size of move, folded past ten
+ * rows. The share pie has no deltas in its unit, so its change view lists the
+ * labels instead. The collection carries `rowTrends`, which become a compact
+ * "Change" column right after the name.
  */
 export const PeriodComparisonDeltas: Story = {
   tags: ["no-sidebar"],
   render: () => <F0AnalyticsDashboard items={deltaItems} />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
+    // Menus open in a portal, outside the story's own element.
+    const page = within(document.body)
 
     // Every widget fetches with the same fake latency, so each affordance is
     // awaited on its own rather than assumed to have landed with the first.
     const find = (text: string) =>
       canvas.findByText(text, undefined, { timeout: 5000 })
 
-    await expect(await find("+10.7%")).toBeInTheDocument()
-    await expect(await find("+3.1 pp")).toBeInTheDocument()
+    // Header trend badges.
+    await expect(await find("+32 (+7.4%)")).toBeInTheDocument()
+    await expect(await find("+0.9 pp")).toBeInTheDocument()
+    // Header chips: chart, pie (no added/removed parts), table (up/down only).
     await expect(
-      await find("Not present this period: Support")
+      await find("8 up · 4 down · 2 new · 1 gone")
     ).toBeInTheDocument()
-    // The category marks themselves are drawn on the chart canvas; the column
-    // the collection gains is the one that lands in the DOM.
+    await expect(await find("3 up · 4 down")).toBeInTheDocument()
+    await expect(await find("7 up · 3 down")).toBeInTheDocument()
+    // The Change column, right after the department name.
     await expect(await find("Change")).toBeInTheDocument()
-    await expect(await find("+12")).toBeInTheDocument()
+    await expect(await find("+12 (+14.3%)")).toBeInTheDocument()
+
+    // The change view toggles from the widget menu and offers the way back.
+    const widget = within(
+      (await find("Headcount by department")).closest<HTMLElement>(
+        "[class*='dashitem']"
+      )!
+    )
+    await userEvent.click(widget.getByLabelText("Other actions"))
+    await userEvent.click(await page.findByText("Show change"))
+    await userEvent.click(widget.getByLabelText("Other actions"))
+    await expect(await page.findByText("Show values")).toBeInTheDocument()
+    await userEvent.keyboard("{Escape}")
   },
 }

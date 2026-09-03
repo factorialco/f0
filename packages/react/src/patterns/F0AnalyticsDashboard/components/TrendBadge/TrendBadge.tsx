@@ -24,16 +24,17 @@ const TONES = {
   neutral: { icon: "secondary", text: "text-f1-foreground-secondary" },
 } as const
 
-function trendTone({
+/** The tone a trend reads in: its sentiment, else its direction read as one. */
+export function trendSentiment({
   direction,
   sentiment,
-}: Pick<TrendBadgeTrend, "direction" | "sentiment">) {
-  if (sentiment) return TONES[sentiment]
+}: Pick<DashboardMetricTrend, "direction" | "sentiment">): keyof typeof TONES {
+  if (sentiment) return sentiment
   return direction === "up"
-    ? TONES.positive
+    ? "positive"
     : direction === "down"
-      ? TONES.negative
-      : TONES.neutral
+      ? "negative"
+      : "neutral"
 }
 
 /**
@@ -60,7 +61,7 @@ export function TrendBadge({ trend }: { trend?: TrendBadgeTrend }) {
   if (!trend) return null
 
   const { comparisonLabel, direction, srText, text } = trend
-  const tone = trendTone(trend)
+  const tone = TONES[trendSentiment(trend)]
 
   const badge = (
     <div className="flex shrink-0 items-center">

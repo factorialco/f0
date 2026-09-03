@@ -60,6 +60,8 @@ interface DashboardItemProps {
    * every other widget type has no single figure to sit beside.
    */
   trend?: TrendBadgeTrend
+  /** Rendered after the trend badge: the per-category outcome, as a chip. */
+  comparison?: ReactNode
   isLoading: boolean
   /** A refetch is in flight: dim the previous data instead of collapsing to the skeleton. */
   isRefreshing?: boolean
@@ -70,6 +72,8 @@ interface DashboardItemProps {
   children: ReactNode
   /** Download actions shown inside a "Download" submenu */
   actions?: DropdownItemType[]
+  /** Other readings of the same data — "Show change" — listed under the chart types. */
+  viewActions?: DropdownItemObject[]
   /**
    * Per-widget filter configuration. When set, a filter icon appears with the
    * other header actions on hover or keyboard focus (and remains available on
@@ -138,6 +142,7 @@ export function DashboardItem({
   description,
   info,
   trend,
+  comparison,
   isLoading,
   isRefreshing = false,
   error,
@@ -145,6 +150,7 @@ export function DashboardItem({
   skeleton,
   children,
   actions = [],
+  viewActions = [],
   itemFilters,
   editMode,
   handleDelete,
@@ -189,6 +195,7 @@ export function DashboardItem({
       !("type" in a) || a.type === "item" || a.type === undefined
   )
   const hasDownloads = downloadActions.length > 0
+  const hasViewActions = viewActions.length > 0
   const hasDelete = editMode && handleDelete && itemId
   const hasChartTypes = chartTypeOptions && chartTypeOptions.length > 0
   const hasExplanation = !!explanation && explanation.trim().length > 0
@@ -199,7 +206,12 @@ export function DashboardItem({
   // whose setters are no-ops, so offering the action would do nothing.
   const hasAskOne = title.trim().length > 0 && (onAskAi ? !!itemId : aiEnabled)
   const showMenu =
-    hasAskOne || hasDownloads || hasDelete || hasChartTypes || hasExplanation
+    hasAskOne ||
+    hasDownloads ||
+    hasViewActions ||
+    hasDelete ||
+    hasChartTypes ||
+    hasExplanation
   const actionsClassName = cn(
     "flex flex-shrink-0 gap-0.5",
     !isFullscreen &&
@@ -235,6 +247,15 @@ export function DashboardItem({
     // mounting. The buffered request moves focus once registration completes.
     if (focusChatInput()) event.preventDefault()
   }
+
+  const menuEntry = (action: DropdownItemObject) => (
+    <DropdownMenuItem key={action.label} onClick={action.onClick}>
+      <div className="flex w-full flex-row items-center gap-2">
+        {action.icon && <F0Icon icon={action.icon} />}
+        <span className="flex-1">{action.label}</span>
+      </div>
+    </DropdownMenuItem>
+  )
 
   const askOneMenuItem = hasAskOne ? (
     <DropdownMenuGroup>
@@ -367,6 +388,7 @@ export function DashboardItem({
               </div>
             )}
             <TrendBadge trend={trend} />
+            {comparison}
           </div>
           {(description || descriptionAction) && (
             // Baseline-aligned row so the link sits on the description's own
@@ -481,6 +503,11 @@ export function DashboardItem({
                         />
                       </div>
                     )}
+                    {hasViewActions && (
+                      <DropdownMenuGroup>
+                        {viewActions.map(menuEntry)}
+                      </DropdownMenuGroup>
+                    )}
                     {hasExplanation && (
                       <DropdownMenuGroup>
                         <DropdownMenuItem
@@ -514,21 +541,7 @@ export function DashboardItem({
                           </DropdownMenuSubTrigger>
                           <DropdownMenuPortal>
                             <DropdownMenuSubContent>
-                              {downloadActions.map((action) => (
-                                <DropdownMenuItem
-                                  key={action.label}
-                                  onClick={action.onClick}
-                                >
-                                  <div className="flex w-full flex-row items-center gap-2">
-                                    {action.icon && (
-                                      <F0Icon icon={action.icon} />
-                                    )}
-                                    <span className="flex-1">
-                                      {action.label}
-                                    </span>
-                                  </div>
-                                </DropdownMenuItem>
-                              ))}
+                              {downloadActions.map(menuEntry)}
                             </DropdownMenuSubContent>
                           </DropdownMenuPortal>
                         </DropdownMenuSub>

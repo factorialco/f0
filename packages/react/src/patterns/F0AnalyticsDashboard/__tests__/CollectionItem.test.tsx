@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
 
-import { zeroRender as render } from "@/testing/test-utils"
+import { screen, zeroRender as render } from "@/testing/test-utils"
 
 import type { DashboardCollectionItem } from "../types"
 
@@ -60,12 +60,20 @@ function changeColumnOf() {
           id?: string
           label: string
           sorting?: string
+          width?: number
           render: (row: Record<string, unknown>) => unknown
         }[]
       }
     },
   ]
-  return viz.options.columns.at(-1)!
+  return viz.options.columns.find((c) => c.id === "dashboard-row-change")!
+}
+
+function columnIdsOf() {
+  const [viz] = rendered.visualizations as [
+    { options: { columns: { id?: string }[] } },
+  ]
+  return viz.options.columns.map((c) => c.id)
 }
 
 describe("CollectionItem", () => {
@@ -129,6 +137,36 @@ describe("CollectionItem", () => {
       value: { label: "+2", deltaStatus: "positive" },
     })
     expect(column.render({ id: "unknown" })).toBeUndefined()
+  })
+
+  it("places the Change column right after the first and keeps it narrow", () => {
+    const columns = [
+      { label: "Name", id: "name" },
+      { label: "Headcount", id: "headcount" },
+    ]
+    const collection = item(
+      () => ({ id: "source" }),
+      [{ type: "table", options: { columns } }],
+      { "1": { direction: "up", label: "+2" } }
+    )
+
+    render(<CollectionItem item={collection} filters={{}} />)
+
+    expect(columnIdsOf()).toEqual(["name", "dashboard-row-change", "headcount"])
+    expect(changeColumnOf().width).toBe(144)
+  })
+
+  it("counts the rows that rose and fell in a chip beside the title", () => {
+    const collection = item(() => ({ id: "source" }), tableViz, {
+      "1": { direction: "up", label: "+2" },
+      "2": { direction: "up", label: "+1" },
+      "3": { direction: "down", label: "−4" },
+      "4": { direction: "flat", label: "0" },
+    })
+
+    render(<CollectionItem item={collection} filters={{}} />)
+
+    expect(screen.getByText("2 up · 1 down")).toBeInTheDocument()
   })
 
   it("sorts the Change column only through a sorting the source declares", () => {

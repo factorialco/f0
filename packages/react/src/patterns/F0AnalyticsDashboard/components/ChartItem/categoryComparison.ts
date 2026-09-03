@@ -1,93 +1,85 @@
 import type {
-  F0DataChartPieDataPoint,
+  F0DataChartCategoryComparison,
   F0DataChartProps,
 } from "@/kits/F0DataChart"
+import type { I18nContextType } from "@/lib/providers/i18n/i18n-provider"
+
+import { tooltipValueFormat } from "@/kits/F0DataChart/utils/options"
 
 import type { DashboardCategoryComparison } from "../../types"
 
-/**
- * Glyphs, not copy: the arrow is the mark, the label beside it is the host's.
- * Flat gets none, matching the trend badge, which draws no arrow for it.
- */
-const DIRECTION_GLYPH = { up: "▲", down: "▼", flat: "" } as const
+import { trendSentiment } from "../TrendBadge/TrendBadge"
 
-function markCategory(
-  category: string,
-  label: string,
-  comparison: DashboardCategoryComparison,
-  newLabel: string
-): string {
-  const trend = comparison.byCategory[category]
-  if (trend?.label) {
-    return [label, DIRECTION_GLYPH[trend.direction], trend.label]
-      .filter(Boolean)
-      .join(" ")
-  }
-  return comparison.added?.includes(category) ? `${label} (${newLabel})` : label
-}
+type CategoryChart = Extract<
+  F0DataChartProps,
+  { type: "bar" | "pie" | "funnel" }
+>
 
-/** Pie and funnel differ only in their discriminant: both name their points. */
-function markSeriesNames<S extends { data: F0DataChartPieDataPoint[] }>(
-  series: S,
-  comparison: DashboardCategoryComparison,
-  newLabel: string
-): S {
-  return {
-    ...series,
-    data: series.data.map((point) => ({
-      ...point,
-      name: markCategory(point.name, point.name, comparison, newLabel),
-    })),
-  }
+/** The chart types whose marks are categories, which is what a comparison is keyed by. */
+export function isCategoryChart(
+  chart: F0DataChartProps
+): chart is CategoryChart {
+  return chart.type === "bar" || chart.type === "pie" || chart.type === "funnel"
 }
 
 /**
- * Draw a per-category comparison into the labels a chart renders.
- *
- * A bar chart gets it through its `categoryFormatter` — the seam every drawn
- * category label and axis tick goes through — composed on top of the host's
- * own formatter so a formatted category stays formatted. Pie and funnel have
- * no such formatter: their labels, legend and tooltip all read a data point's
- * `name`, so the mark goes there instead.
- *
- * Every other type passes through untouched, as the same object: line and its
- * kin are time series, where the faded baseline series carries the comparison
- * and a mark per bucket would only crowd the axis.
+ * The value each category currently shows. A bar chart reads its first drawn
+ * series — a muted one is the baseline, not the reading — and pie and funnel
+ * read their points.
  */
-export function markCategoryComparison(
-  props: F0DataChartProps,
+export function categoryValues(chart: CategoryChart): Map<string, number> {
+  if (chart.type !== "bar") {
+    return new Map(chart.series.data.map((point) => [point.name, point.value]))
+  }
+  const series = chart.series.find((s) => !s.muted) ?? chart.series[0]
+  return new Map(
+    chart.categories.flatMap((category, index) => {
+      const point = series?.data[index]
+      const value = typeof point === "number" ? point : point?.value
+      return value === undefined ? [] : [[category, value]]
+    })
+  )
+}
+
+/**
+ * Hand the chart its comparison as a tooltip line per category: the host's
+ * label in the trend's tone, with the baseline value when the trend carries a
+ * numeric delta. Added categories say they are new. Any other chart type is
+ * returned as the same object.
+ */
+export function withTooltipComparison(
+  chart: F0DataChartProps,
   comparison: DashboardCategoryComparison | undefined,
-  newLabel: string
+  i18n: I18nContextType
 ): F0DataChartProps {
-  if (!comparison) return props
+  if (!comparison || !isCategoryChart(chart)) return chart
 
-  if (props.type === "bar") {
-    const { categoryFormatter } = props
-    return {
-      ...props,
-      categoryFormatter: (value) =>
-        markCategory(
-          value,
-          categoryFormatter ? categoryFormatter(value) : value,
-          comparison,
-          newLabel
-        ),
+  const values = categoryValues(chart)
+  const format = tooltipValueFormat(
+    chart.tooltipValueFormatter,
+    chart.valueFormatter
+  )
+  const categoryComparison: Record<string, F0DataChartCategoryComparison> = {}
+
+  for (const [name, trend] of Object.entries(comparison.byCategory)) {
+    if (!trend.label) continue
+    const entry: F0DataChartCategoryComparison = {
+      label: trend.label,
+      tone: trendSentiment(trend),
+    }
+    const value = values.get(name)
+    if (trend.delta !== undefined && value !== undefined) {
+      entry.description = i18n.t("ai.dashboardItem.comparison.previous", {
+        value: format(value - trend.delta),
+      })
+    }
+    categoryComparison[name] = entry
+  }
+  for (const name of comparison.added ?? []) {
+    categoryComparison[name] ??= {
+      label: i18n.ai.dashboardItem.comparison.newThisPeriod,
     }
   }
 
-  if (props.type === "pie") {
-    return {
-      ...props,
-      series: markSeriesNames(props.series, comparison, newLabel),
-    }
-  }
-
-  if (props.type === "funnel") {
-    return {
-      ...props,
-      series: markSeriesNames(props.series, comparison, newLabel),
-    }
-  }
-
-  return props
+  return { ...chart, categoryComparison }
 }
