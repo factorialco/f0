@@ -1098,6 +1098,11 @@ export declare const aiTranslations: {
             readonly errorTitle: "Error loading data";
             readonly retry: "Retry";
             readonly dataExplanation: "Where does this data come from?";
+            readonly comparison: {
+                readonly change: "Change";
+                readonly newCategory: "New";
+                readonly notPresent: "Not present this period: {{categories}}";
+            };
         };
         readonly pong: {
             readonly title: "Pong";
@@ -3793,6 +3798,25 @@ export declare type DashboardCanvasContent = CanvasContentBase & {
 };
 
 /**
+ * Per-category comparison for a chart whose categories are things rather than
+ * moments — bar, pie, funnel. Time series show their baseline as a faded
+ * series instead (see {@link BarChartConfig.comparisonSeriesNames}) and read
+ * their overall direction off {@link DashboardChartData.trend}.
+ */
+export declare interface DashboardCategoryComparison {
+    /** Keyed by the category label, as it appears in `categories` or a point's `name`. */
+    byCategory: Record<string, DashboardMetricTrend>;
+    /** Categories the compared period did not have. Marked as new. */
+    added?: string[];
+    /**
+     * Categories the compared period had and this one does not. They have no
+     * mark to carry — nothing draws them — so the widget names them in a caption
+     * under the chart.
+     */
+    removed?: string[];
+}
+
+/**
  * Chart display configuration — discriminated on `type`.
  * This object is JSON-serializable (no functions, except optional formatters).
  */
@@ -3820,6 +3844,15 @@ export declare interface DashboardChartData {
      * can never confuse it with a bar/line series array or the heatmap grid.
      */
     scatterSeries?: F0DataChartScatterSeries[];
+    /**
+     * How the chart as a whole compares to the compared period. Rendered as a
+     * badge beside the widget title, the same one a metric shows.
+     */
+    trend?: DashboardMetricTrend;
+    /** What `trend` compares against, e.g. "vs previous month". Tooltip + screen reader. */
+    comparisonLabel?: string;
+    /** Per-category comparison, drawn into the category labels of bar/pie/funnel charts. */
+    categoryComparison?: DashboardCategoryComparison;
 }
 
 export declare interface DashboardChartItem<Filters extends FiltersDefinition = FiltersDefinition> extends DashboardItemBase {
@@ -3857,6 +3890,12 @@ export declare interface DashboardCollectionItem<Filters extends FiltersDefiniti
      * Same shape as OneDataCollection's `visualizations` prop.
      */
     visualizations: ReadonlyArray<any>;
+    /**
+     * Per-row comparison, appended as a "Change" column. A chart's trends ride
+     * in its `fetchData` result because that fetch owns its data; a collection's
+     * ride here because its source owns its rows.
+     */
+    rowTrends?: DashboardRowTrends;
 }
 
 export declare interface DashboardFetchSpec {
@@ -4066,6 +4105,13 @@ export declare interface DashboardMetricTrend {
 }
 
 export declare type DashboardProps = GroupGridProps<DashboardWidget>;
+
+/**
+ * Per-row trends for a collection item, keyed the way the collection itself
+ * identifies rows: its source's `idProvider` when it has one, otherwise the
+ * record's `id`.
+ */
+export declare type DashboardRowTrends = Record<string, DashboardMetricTrend>;
 
 export declare type DashboardWidget = GroupGridWidget<{
     title: string;
@@ -4722,6 +4768,8 @@ declare type DefaultAction = BannerAction;
 declare type DefaultExpandedPolicy<R extends RecordType> = boolean | number | ((record: R, context: {
     depth: number;
 }) => boolean);
+
+export declare const defaultIdProvider: (item: RecordType, index?: number) => string | number;
 
 export declare const defaultTranslations: {
     readonly common: {
@@ -5443,6 +5491,11 @@ export declare const defaultTranslations: {
             readonly errorTitle: "Error loading data";
             readonly retry: "Retry";
             readonly dataExplanation: "Where does this data come from?";
+            readonly comparison: {
+                readonly change: "Change";
+                readonly newCategory: "New";
+                readonly notPresent: "Not present this period: {{categories}}";
+            };
         };
         readonly pong: {
             readonly title: "Pong";
@@ -20632,8 +20685,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData) => ReturnType;
+        videoEmbed: {
+            setVideoEmbed: (options: {
+                src: string;
+            }) => ReturnType;
         };
     }
 }
@@ -20641,10 +20696,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        videoEmbed: {
-            setVideoEmbed: (options: {
-                src: string;
-            }) => ReturnType;
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
 }

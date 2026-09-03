@@ -4669,6 +4669,11 @@ declare const defaultTranslations: {
             readonly errorTitle: "Error loading data";
             readonly retry: "Retry";
             readonly dataExplanation: "Where does this data come from?";
+            readonly comparison: {
+                readonly change: "Change";
+                readonly newCategory: "New";
+                readonly notPresent: "Not present this period: {{categories}}";
+            };
         };
         readonly pong: {
             readonly title: "Pong";
@@ -15738,8 +15743,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData) => ReturnType;
+        videoEmbed: {
+            setVideoEmbed: (options: {
+                src: string;
+            }) => ReturnType;
         };
     }
 }
@@ -15747,10 +15754,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        videoEmbed: {
-            setVideoEmbed: (options: {
-                src: string;
-            }) => ReturnType;
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
 }
