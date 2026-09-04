@@ -187,18 +187,25 @@ export const CoachmarkSpotlight = ({
           around it drew a box around a box: two rounded rectangles a few pixels
           apart, neither of them the card.
 
-          TWO SHADOWS, GLOW FIRST. The glow is the page's own surface colour
-          (`--neutral-0`: white in light, the dark ground in dark) blurred
-          outward over the dim, so the lit element reads as GLOWING rather than
-          as a hole cut in a sheet — the same thing a focused field does, for an
-          element that may not have a focus state to lend us. It is also the only
-          thing separating the light from the dim now, which is why it is soft
-          rather than tight. It has to come first in the list: shadows paint
-          first over last, and the 100vmax dim would otherwise bury it. */}
+          TWO SHADOWS, GLOW FIRST — and NEITHER OF THEM FLIPS WITH THE THEME.
+          `--shadow` (the colour f0 casts every elevation shadow in, identical in
+          light and dark) for the dim, and white for the glow: turning the lights
+          down has a direction, and `background-overlay` does not have it —
+          being white/40 in dark, it FOGS a dark app rather than dimming it,
+          washing the page up towards the panel instead of away from it. The
+          panel is a translucent surface over whatever is behind it, so a scrim
+          that lightens takes the panel with it and the thing meant to be read
+          ends up the same value as the page it is covering.
+
+          The glow is light spilling off the lit element — the same thing a
+          focused field does, for an element that may not have a focus state to
+          lend us — and it is the only edge the light has now, which is why it
+          is soft rather than tight. It has to come first in the list: shadows
+          paint first over last, and the 100vmax dim would otherwise bury it. */}
       <div
         className={cn(
           "absolute rounded-xl",
-          "shadow-[0_0_24px_6px_hsl(var(--neutral-0)/0.7),0_0_0_100vmax_hsl(var(--neutral-40))]",
+          "shadow-[0_0_24px_6px_hsl(var(--white-100)/0.45),0_0_0_100vmax_hsl(var(--shadow)/0.5)]",
           // Only while it has somewhere to go — see `useTravelling`. The dim
           // itself never fades: the light travels to the next step's element,
           // rather than the page coming up to full brightness in between.
