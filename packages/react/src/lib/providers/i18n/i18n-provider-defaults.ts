@@ -293,6 +293,56 @@ export const defaultTranslations = {
     },
   },
   shortcut: "Shortcut",
+  commandPalette: {
+    label: "Command palette",
+    placeholder: "Search, or type a name then / to act",
+    placeholderScoped: "Run an action",
+    groups: {
+      recent: "Recent",
+      suggestions: "Suggestions",
+      actions: "Actions",
+      goTo: "Go to",
+      suggested: "Suggested",
+      unavailable: "Not available here",
+    },
+    empty: {
+      title: "No results",
+      description: "Try a different search.",
+    },
+    footer: {
+      act: "Act on a result",
+      rowActions: "Row actions",
+      ask: "Ask",
+      leaveScope: "Leave scope",
+      goBack: "Go back",
+    },
+    scope: {
+      remove: "Remove scope, {{name}}",
+    },
+    rowActions: {
+      openInNewTab: "Open in a new tab",
+      copyLink: "Copy link",
+      linkCopied: "Link copied",
+    },
+    announce: {
+      scoped: {
+        one: "Scoped to {{name}}. 1 action.",
+        other: "Scoped to {{name}}. {{count}} actions.",
+      },
+      scopedEmpty: "Scoped to {{name}}. No actions available.",
+      cleared: "Scope cleared.",
+      unavailable: "{{label}} is not available. {{reason}}",
+      linkCopied: "Link copied. {{url}}",
+    },
+    row: {
+      open: "Open {{label}}",
+      run: "Run {{label}}",
+      select: "Select {{label}}",
+      unavailable: "Not available here",
+      impact: "{{eligible}} of {{total}}",
+      impactWithReason: "{{eligible}} of {{total}} · {{reason}}",
+    },
+  },
   date: {
     from: "From",
     to: "To",
