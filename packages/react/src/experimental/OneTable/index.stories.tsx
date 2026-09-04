@@ -1,6 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import React, { useState } from "react"
+import { expect, fn, waitFor, within } from "storybook/test"
+
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0Button } from "@/components/F0Button"
@@ -254,12 +257,11 @@ export const RichInfoHeader: Story = {
           <TableHead>Name</TableHead>
           <TableHead
             info={{
-              label: "About base salary",
               title: "Annual base salary",
               description: "Per employee · Per year · In Euro",
               link: {
                 label: "Learn more",
-                onClick: () => alert("Open data catalog on this field"),
+                onClick: fn(),
               },
             }}
           >
@@ -370,7 +372,133 @@ export const Sortable: Story = {
   },
 }
 
+/**
+ * Header cells with help copy and sorting, squeezed into narrow columns. The
+ * label owns the whole cell width: the help copy opens when the cell itself is
+ * hovered or focused, and the sort control is drawn over the label's trailing
+ * end only while the pointer is on the cell.
+ */
+export const CompactHeaders: Story = {
+  parameters: withSnapshot({}),
+  render: () => {
+    const [sortConfig, setSortConfig] = React.useState<{
+      column: SortColumn | null
+      order: SortState
+    }>({
+      column: "name",
+      order: "asc",
+    })
+
+    const handleSort = (column: SortColumn) => {
+      setSortConfig((current) => ({
+        column,
+        order:
+          current.column === column
+            ? current.order === "asc"
+              ? "desc"
+              : "asc"
+            : "asc",
+      }))
+    }
+
+    const sortStateOf = (column: SortColumn) =>
+      sortConfig.column === column ? sortConfig.order : undefined
+
+    return (
+      <OneTable>
+        <TableHeader>
+          <TableRow>
+            <TableHead
+              width={140}
+              onSortClick={() => handleSort("name")}
+              sortState={sortStateOf("name")}
+              info={{
+                title: "Full name",
+                description:
+                  "Legal name of the employee as it appears on the contract.",
+                link: {
+                  label: "Learn more",
+                  onClick: fn(),
+                },
+              }}
+            >
+              Full name
+            </TableHead>
+            <TableHead
+              width={120}
+              onSortClick={() => handleSort("email")}
+              sortState={sortStateOf("email")}
+              info="Work email address"
+            >
+              Email address
+            </TableHead>
+            <TableHead
+              width={120}
+              align="right"
+              onSortClick={() => handleSort("role")}
+              sortState={sortStateOf("role")}
+              info={{
+                title: "Access level",
+                description: "Access level assigned to the employee account.",
+              }}
+            >
+              Access level
+            </TableHead>
+            <TableHead width={140} info="Direct manager of the employee">
+              Direct manager
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {sampleData.map((row) => (
+            <TableRow key={row.id}>
+              <TableCell>{row.name}</TableCell>
+              <TableCell>{row.email}</TableCell>
+              <TableCell>
+                <div className="text-right">{row.role}</div>
+              </TableCell>
+              <TableCell>{row.manager}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </OneTable>
+    )
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    // The card is portalled out of the story canvas.
+    const page = within(canvasElement.closest("body")!)
+    const [fullName, email] = canvas.getAllByRole("button", { name: "Sort" })
+
+    // Focus, not hover: the synthetic pointer events `userEvent.hover` emits
+    // never reach Radix's `pointerenter` in a real browser, so the card would
+    // stay shut. Focusing the sort control works because `focusin` bubbles to
+    // the cell that carries the trigger. jsdom covers the hover path.
+    await step("A column's help copy opens from the cell itself", async () => {
+      fullName.focus()
+
+      await waitFor(
+        () =>
+          expect(
+            page.getByText(
+              "Legal name of the employee as it appears on the contract."
+            )
+          ).toBeInTheDocument(),
+        { timeout: 5000 }
+      )
+    })
+
+    // This is the one venue with real CSS, so it is the only place the
+    // cell-scoped reveal can be checked for real rather than by class name.
+    await step("Only the pointed-at column shows its control", async () => {
+      await expect(getComputedStyle(fullName).opacity).toBe("1")
+      await expect(getComputedStyle(email).opacity).toBe("0")
+    })
+  },
+}
+
 export const StickyColumn: Story = {
+  parameters: withSnapshot({}),
   render: () => (
     <OneTable>
       <TableHeader>
@@ -470,6 +598,7 @@ const summatoryData = [
 ]
 
 export const Summatory: Story = {
+  parameters: withSnapshot({}),
   render: () => (
     <OneTable>
       <TableHeader>

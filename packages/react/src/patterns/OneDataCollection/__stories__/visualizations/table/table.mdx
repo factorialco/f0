@@ -213,14 +213,11 @@ type TableColumnDefinition<T> = {
   summary?: string
 
   /**
-   * Additional information to display in the column header
+   * Help copy for the column, revealed when the header cell is hovered or
+   * focused. A string shows a tooltip; a structured object shows a card that
+   * can carry a link.
    */
-  info?: string
-
-  /**
-   * Icon to display next to the info text
-   */
-  infoIcon?: IconType
+  info?: string | TableHeaderInfo
 }
 ```
 

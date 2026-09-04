@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest"
 
 import { screen, userEvent, waitFor, zeroRender } from "@/testing/test-utils"
 
@@ -30,6 +30,33 @@ const renderHeader = (
       </TableBody>
     </OneTable>
   )
+
+// JSDOM ships no `PointerEvent`, and `motion` synthesises one when a
+// `whileTap` element is activated from the keyboard — so the Enter/Space test
+// below would fail the run with an unhandled `ReferenceError` however well its
+// assertions pass. Scoped to this file on purpose: defining the constructor
+// globally would flip `typeof window.PointerEvent` feature detection for every
+// library in every other suite.
+if (!("PointerEvent" in window)) {
+  class PointerEventPolyfill extends window.MouseEvent {
+    readonly pointerId: number
+    readonly pointerType: string
+
+    constructor(type: string, params: PointerEventInit = {}) {
+      super(type, params)
+      this.pointerId = params.pointerId ?? 0
+      this.pointerType = params.pointerType ?? ""
+    }
+  }
+
+  window.PointerEvent =
+    PointerEventPolyfill as unknown as typeof window.PointerEvent
+}
+
+const structuredInfo: TableHeaderInfo = {
+  title: "Active employees",
+  description: "Distinct active employees in the selected snapshot.",
+}
 
 describe("TableHead sorting", () => {
   const renderSortableHeader = (
@@ -75,18 +102,33 @@ describe("TableHead sorting", () => {
     expect(onSortClick).toHaveBeenCalledTimes(1)
   })
 
-  it("does not sort when the info trigger is clicked", async () => {
+  it("still sorts when the cell also carries header info", async () => {
     const onSortClick = vi.fn()
-    renderSortableHeader(onSortClick, {
-      title: "Active employees",
-      description: "Body",
-    })
+    renderSortableHeader(onSortClick, structuredInfo)
 
-    await userEvent.click(
-      screen.getByRole("button", { name: "Active headcount" })
-    )
+    // The help copy is hover-revealed; there is no separate trigger left in
+    // the cell that a click could land on instead of sorting.
+    await userEvent.click(screen.getByRole("columnheader"))
 
-    expect(onSortClick).not.toHaveBeenCalled()
+    expect(onSortClick).toHaveBeenCalledTimes(1)
+  })
+
+  it("sorts from the keyboard, on Enter and on Space", async () => {
+    const onSortClick = vi.fn()
+    renderSortableHeader(onSortClick)
+
+    const control = screen.getByRole("button", { name: "Sort" })
+    control.focus()
+
+    // The control deliberately carries no handler of its own — a native
+    // button's activation is what reaches the cell. Swap it for a div, or stop
+    // the click from bubbling, and keyboard sorting dies silently while every
+    // pointer test above still passes.
+    await userEvent.keyboard("{Enter}")
+    expect(onSortClick).toHaveBeenCalledTimes(1)
+
+    await userEvent.keyboard(" ")
+    expect(onSortClick).toHaveBeenCalledTimes(2)
   })
 
   it("leaves a header without a sort callback inert", async () => {
@@ -98,36 +140,30 @@ describe("TableHead sorting", () => {
   })
 })
 
-describe("TableHead rich header info", () => {
-  it("uses the column label as the info trigger's accessible name by default", () => {
-    renderHeader({ title: "Active employees", description: "Body" })
+describe("TableHead header info", () => {
+  it("draws no info trigger beside the label", () => {
+    renderHeader(structuredInfo)
 
-    expect(
-      screen.getByRole("button", { name: "Active headcount" })
-    ).toBeInTheDocument()
+    expect(screen.queryByRole("button")).not.toBeInTheDocument()
   })
 
-  it("uses info.label as the accessible name when provided", () => {
-    renderHeader({
-      label: "About active headcount",
-      title: "Active employees",
-      description: "Body",
-    })
+  it("describes the cell with the structured copy, so it is not sighted-only", () => {
+    renderHeader(structuredInfo)
 
-    expect(
-      screen.getByRole("button", { name: "About active headcount" })
-    ).toBeInTheDocument()
-  })
+    const description = screen
+      .getByRole("columnheader")
+      .getAttribute("aria-describedby")
 
-  it("renders the structured title and description on hover", async () => {
-    renderHeader({
-      title: "Active employees",
-      description: "Distinct active employees in the selected snapshot.",
-    })
-
-    await userEvent.hover(
-      screen.getByRole("button", { name: "Active headcount" })
+    expect(description).toBeTruthy()
+    expect(document.getElementById(description as string)?.textContent).toBe(
+      `${structuredInfo.title}. ${structuredInfo.description}`
     )
+  })
+
+  it("reveals the structured title and description when the cell is hovered", async () => {
+    renderHeader(structuredInfo)
+
+    await userEvent.hover(screen.getByRole("columnheader"))
 
     expect(
       await screen.findByText("Active employees", {}, { timeout: 2000 })
@@ -141,17 +177,25 @@ describe("TableHead rich header info", () => {
     ).toBeInTheDocument()
   })
 
+  it("reveals the card when the cell receives keyboard focus", async () => {
+    renderHeader(structuredInfo)
+
+    await userEvent.tab()
+
+    expect(screen.getByRole("columnheader")).toHaveFocus()
+    expect(
+      await screen.findByText("Active employees", {}, { timeout: 2000 })
+    ).toBeInTheDocument()
+  })
+
   it("dismisses the card when the link action is clicked", async () => {
     const onAction = vi.fn()
     renderHeader({
-      title: "Active employees",
-      description: "Distinct active employees in the selected snapshot.",
+      ...structuredInfo,
       link: { label: "Learn more", onClick: onAction },
     })
 
-    await userEvent.hover(
-      screen.getByRole("button", { name: "Active headcount" })
-    )
+    await userEvent.hover(screen.getByRole("columnheader"))
     const learnMore = await screen.findByRole(
       "button",
       { name: "Learn more" },
@@ -165,14 +209,224 @@ describe("TableHead rich header info", () => {
     )
   })
 
-  it("renders a plain text tooltip when info is a string (backward compatible)", () => {
+  it("shows a plain text tooltip on hover when info is a string", async () => {
     renderHeader("Short helper text", "Country")
 
-    // The header label still renders and the rich hover-card trigger (a button
-    // whose accessible name is the info text) is not used for the string path.
     expect(screen.getByText("Country")).toBeInTheDocument()
+    expect(screen.queryByText("Short helper text")).not.toBeInTheDocument()
+
+    await userEvent.hover(screen.getByRole("columnheader"))
+
+    // Radix renders the copy twice — once visible, once for AT — so the
+    // assertion is on presence, not on a single node.
     expect(
-      screen.queryByRole("button", { name: "Short helper text" })
+      (await screen.findAllByText("Short helper text", {}, { timeout: 2000 }))
+        .length
+    ).toBeGreaterThan(0)
+  })
+})
+
+describe("TableHead label tooltip", () => {
+  // OneEllipsis only offers its tooltip once the text is actually clipped, and
+  // jsdom does no layout — so the clipped state has to be stubbed.
+  const clipTheLabel = () => {
+    vi.spyOn(HTMLElement.prototype, "scrollWidth", "get").mockReturnValue(500)
+    vi.spyOn(HTMLElement.prototype, "clientWidth", "get").mockReturnValue(200)
+  }
+
+  const longLabel = "Average annual base salary per employee"
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it("gives a clipped label its own tooltip when the cell has no help copy", () => {
+    clipTheLabel()
+    zeroRender(
+      <OneTable>
+        <TableHeader>
+          <TableRow>
+            <TableHead width={120}>{longLabel}</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <TableRow>
+            <TableCell>1</TableCell>
+          </TableRow>
+        </TableBody>
+      </OneTable>
+    )
+
+    // Radix marks its own trigger with `data-state`, and OneEllipsis only
+    // wraps the label in one once the text is clipped — so the attribute is
+    // the label owning a tooltip, without waiting on Radix's open delay.
+    expect(screen.getByText(longLabel)).toHaveAttribute("data-state", "closed")
+  })
+
+  it("suppresses the label tooltip when the cell reveals help copy instead", async () => {
+    clipTheLabel()
+    zeroRender(
+      <OneTable>
+        <TableHeader>
+          <TableRow>
+            <TableHead width={120} info={structuredInfo}>
+              {longLabel}
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <TableRow>
+            <TableCell>1</TableCell>
+          </TableRow>
+        </TableBody>
+      </OneTable>
+    )
+
+    // The cell took the tooltip's place, so the label is a plain node again.
+    expect(screen.getByText(longLabel)).not.toHaveAttribute("data-state")
+
+    await userEvent.hover(screen.getByRole("columnheader"))
+
+    // The help copy opens on the same gesture the label tooltip would have
+    // used, and the label stays a single node — no competing tooltip.
+    expect(
+      await screen.findByText(structuredInfo.description, {}, { timeout: 2000 })
+    ).toBeInTheDocument()
+    expect(screen.getAllByText(longLabel)).toHaveLength(1)
+  })
+})
+
+describe("TableHead empty help copy", () => {
+  it("treats an empty info string as no help copy at all", async () => {
+    const { container } = zeroRender(
+      <OneTable>
+        <TableHeader>
+          <TableRow>
+            <TableHead info="">Country</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <TableRow>
+            <TableCell>Spain</TableCell>
+          </TableRow>
+        </TableBody>
+      </OneTable>
+    )
+
+    await userEvent.hover(screen.getByRole("columnheader"))
+
+    // A nullable catalog description mapped straight into `info` used to open
+    // an empty bubble over the header and take a tab stop with it.
+    expect(
+      container.ownerDocument.querySelectorAll(
+        "[data-radix-popper-content-wrapper]"
+      )
+    ).toHaveLength(0)
+    expect(screen.getByRole("columnheader")).not.toHaveAttribute("tabindex")
+  })
+})
+
+describe("TableHead sort control placement", () => {
+  const renderTwoAlignments = () =>
+    zeroRender(
+      <OneTable>
+        <TableHeader>
+          <TableRow>
+            <TableHead onSortClick={vi.fn()}>Name</TableHead>
+            <TableHead align="right" onSortClick={vi.fn()}>
+              Salary
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <TableRow>
+            <TableCell>Ada</TableCell>
+            <TableCell>1</TableCell>
+          </TableRow>
+        </TableBody>
+      </OneTable>
+    )
+
+  // jsdom loads no stylesheet and does no layout, so neither the overlay's
+  // position nor its opacity is observable here. These assertions pin the
+  // utilities that encode the behaviour — a proxy, and a deliberate one: the
+  // real geometry is exercised by the CompactHeaders story.
+  it("keeps the control on the right edge whatever the column's alignment", () => {
+    renderTwoAlignments()
+
+    for (const control of screen.getAllByRole("button", { name: "Sort" })) {
+      expect(control).toHaveClass("absolute", "right-0")
+      expect(control.className).not.toContain("left-0")
+    }
+  })
+
+  it("reveals the control from its own cell, not from the row", () => {
+    renderTwoAlignments()
+
+    const [name, salary] = screen.getAllByRole("columnheader")
+    expect(name).toHaveClass("group/head")
+    expect(salary).toHaveClass("group/head")
+
+    for (const control of screen.getAllByRole("button", { name: "Sort" })) {
+      expect(control).toHaveClass("opacity-0", "group-hover/head:opacity-100")
+      // The regression this guards: `TableRow` carries a bare `group`, so an
+      // unscoped `group-hover:` matched the whole header row and uncovered
+      // every column's control at once.
+      expect(control.className).not.toContain("group-hover:opacity-100")
+    }
+  })
+})
+
+describe("TableHead keyboard reach", () => {
+  it("leaves the tab stop to the sort control when the cell has both", async () => {
+    zeroRender(
+      <OneTable>
+        <TableHeader>
+          <TableRow>
+            <TableHead onSortClick={vi.fn()} info={structuredInfo}>
+              Active headcount
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <TableRow>
+            <TableCell>37</TableCell>
+          </TableRow>
+        </TableBody>
+      </OneTable>
+    )
+
+    await userEvent.tab()
+
+    expect(screen.getByRole("button", { name: "Sort" })).toHaveFocus()
+    expect(screen.getByRole("columnheader")).not.toHaveAttribute("tabindex")
+  })
+
+  it("gives a hidden cell no trigger and no tab stop, even with help copy", async () => {
+    const { container } = zeroRender(
+      <OneTable>
+        <TableHeader>
+          <TableRow>
+            <TableHead hidden info={structuredInfo}>
+              Active headcount
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <TableRow>
+            <TableCell>37</TableCell>
+          </TableRow>
+        </TableBody>
+      </OneTable>
+    )
+
+    const cell = container.querySelector("th")
+    expect(cell).not.toHaveAttribute("tabindex")
+
+    await userEvent.hover(cell as HTMLElement)
+
+    expect(
+      screen.queryByText(structuredInfo.description)
     ).not.toBeInTheDocument()
   })
 })
