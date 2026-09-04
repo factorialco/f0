@@ -60,6 +60,29 @@ describe("coachmarks API", () => {
       )
     })
 
+    it("takes any CSS selector — an id, a class, an attribute", async () => {
+      render(
+        <CoachmarkProvider>
+          <button className="js-filters">Filters</button>
+          <button data-add-widget="right">Add widget</button>
+        </CoachmarkProvider>
+      )
+
+      open({ targetElement: ".js-filters", title: "By class" })
+      await waitFor(() =>
+        expect(screen.getByRole("dialog")).toHaveAccessibleName("By class")
+      )
+
+      coachmarks.closeAll()
+      open({
+        targetElement: '[data-add-widget="right"]',
+        title: "By attribute",
+      })
+      await waitFor(() =>
+        expect(screen.getByRole("dialog")).toHaveAccessibleName("By attribute")
+      )
+    })
+
     it("accepts an element instead of a selector", async () => {
       renderApp()
 

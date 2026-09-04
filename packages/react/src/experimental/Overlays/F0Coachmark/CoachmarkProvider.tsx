@@ -1,9 +1,27 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react"
 
+import { useReducedMotion } from "@/lib/a11y"
+
 import { F0Coachmark } from "./F0Coachmark"
 import { coachmarkStore } from "./store"
-import type { CoachmarkItem } from "./types"
+import type { CoachmarkEndReason, CoachmarkItem } from "./types"
 import { useTargetElement } from "./useTargetElement"
+
+/**
+ * HOW MANY PRESSES ON THE DIM PAGE END THE WALKTHROUGH. Five is well past a
+ * mis-click and well short of a user who is simply reading with the mouse in
+ * hand: by the fifth the wiggle has answered four times and the answer has
+ * stopped being information.
+ */
+const DEFAULT_SKIP_AFTER_OUTSIDE_CLICKS = 5
+
+/**
+ * HOW LONG THE OUTGOING STEP TAKES TO GO, and how long after the action the next
+ * one is committed. Matches the panel's own `duration-150` fade-out (the
+ * fade-IN it comes back with is longer): leaving should feel like a dismissal
+ * and arriving like an arrival, and the reader is only waiting on the second.
+ */
+const STEP_FADE_OUT_MS = 150
 
 type CoachmarkProviderProps = {
   children: React.ReactNode
@@ -34,6 +52,11 @@ const ActiveCoachmark = ({
   container: HTMLElement | null
 }) => {
   const [index, setIndex] = useState(0)
+  // THE HANDOVER BETWEEN TWO STEPS. `true` for the fade-out that runs before the
+  // next step is committed — see `advanceTo`.
+  const [leaving, setLeaving] = useState(false)
+  const handover = useRef<ReturnType<typeof setTimeout>>()
+  const reducedMotion = useReducedMotion()
 
   // Clamped rather than indexed directly: `coachmarks.open({ id })` can replace
   // this coachmark with a shorter sequence while it is on screen.
@@ -41,9 +64,63 @@ const ActiveCoachmark = ({
   const step = item.steps[stepIndex]
   const isLastStep = stepIndex === item.steps.length - 1
 
+  useEffect(() => () => clearTimeout(handover.current), [])
+
+  /**
+   * Moves to the next step THROUGH A FADE, and commits it while the panel is
+   * invisible: everything about a step changes at once — its copy, the element
+   * it is anchored to, the page's scroll — and committing all of that on a
+   * visible panel reads as a glitch rather than as a step. Faded out, the
+   * reposition happens where nobody can see it, and the new step fades up
+   * already in place.
+   *
+   * The step index is the ONLY thing the timer defers. Nothing here can leave
+   * the coachmark stuck mid-fade: the close button and the shield's own ending
+   * remove the item outright, and the timeout is cleared on unmount.
+   */
+  const advanceTo = (nextIndex: number) => {
+    if (reducedMotion) {
+      setIndex(nextIndex)
+      return
+    }
+    setLeaving(true)
+    handover.current = setTimeout(() => {
+      setIndex(nextIndex)
+      setLeaving(false)
+    }, STEP_FADE_OUT_MS)
+  }
+
   const target = useTargetElement(step.targetElement)
 
+  // Presses on the shield, counted ACROSS THE WHOLE COACHMARK rather than per
+  // step: someone pressing past the panel on every step is the exact user this
+  // is for, and a per-step count would never reach the threshold. A ref, not
+  // state — the panel owns the wiggle, so nothing here re-renders on a press.
+  const outsidePresses = useRef(0)
+  const skipAfter =
+    item.skipAfterOutsideClicks ?? DEFAULT_SKIP_AFTER_OUTSIDE_CLICKS
+
   const close = () => coachmarkStore.removeItem(item.id)
+
+  /**
+   * ENDS THE COACHMARK AND SAYS HOW. The one place all three endings go through,
+   * so `onEnd` cannot get out of step with what actually happened — and so the
+   * step the reader got to is read at the moment they left rather than
+   * reconstructed afterwards.
+   *
+   * `coachmarkStore.removeItem` from anywhere else (a `coachmarks.close`, a
+   * guidance's `stop()`) deliberately does NOT come through here: nobody ended
+   * it, so there is no outcome.
+   */
+  const endWith = (reason: CoachmarkEndReason) => {
+    item.onEnd?.({
+      reason,
+      step: stepIndex + 1,
+      totalSteps: item.steps.length,
+      outsidePresses: outsidePresses.current,
+    })
+    close()
+  }
 
   // `null` while the step's target is not in the DOM — see useTargetElement.
   if (!target) return null
@@ -68,14 +145,26 @@ const ActiveCoachmark = ({
         step.action?.onClick?.()
         if (isLastStep) {
           item.onComplete?.()
-          close()
+          endWith("completed")
         } else {
-          setIndex(stepIndex + 1)
+          advanceTo(stepIndex + 1)
         }
       }}
       onClose={() => {
         item.onDismiss?.()
-        close()
+        endWith("dismissed")
+      }}
+      overlay={item.overlay}
+      leaving={leaving}
+      focusTarget={step.focusTarget}
+      onOutsideInteraction={() => {
+        outsidePresses.current += 1
+        if (skipAfter <= 0 || outsidePresses.current < skipAfter) return
+        // A dismissal to the app's bookkeeping — the reader asked to be out of
+        // the way of the page — and its own `reason` to whoever is tracking,
+        // because "pressed past it until it went away" is not "closed it".
+        item.onDismiss?.()
+        endWith("skipped")
       }}
     />
   )

@@ -66,6 +66,7 @@ export const resolveSteps = (options: CoachmarkOptions): CoachmarkStep[] => {
         action: step.action,
         targetElement,
         arrow: step.arrow ?? options.arrow,
+        focusTarget: step.focusTarget ?? options.focusTarget,
         side: step.side ?? options.side,
         align: step.align ?? options.align,
         sideOffset: step.sideOffset ?? options.sideOffset,
@@ -90,8 +91,11 @@ const open = (options: CoachmarkOptions): CoachmarkId => {
   coachmarkStore.addItem({
     id,
     steps,
+    onEnd: options.onEnd,
     onDismiss: options.onDismiss,
     onComplete: options.onComplete,
+    overlay: options.overlay,
+    skipAfterOutsideClicks: options.skipAfterOutsideClicks,
   })
 
   return id

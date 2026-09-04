@@ -1,7 +1,15 @@
-import { useEffect, useId, useMemo, useRef } from "react"
+import {
+  type RefObject,
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+} from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { Cross } from "@/icons/app"
+import { useReducedMotion } from "@/lib/a11y"
 import { experimentalComponent } from "@/lib/experimental"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
@@ -12,10 +20,65 @@ import {
   PopoverContent,
 } from "@/ui/popover"
 
+import { CoachmarkSpotlight } from "./CoachmarkSpotlight"
 import type { F0CoachmarkProps } from "./types"
 
 const ARROW_WIDTH = 12
 const ARROW_HEIGHT = 6
+
+/**
+ * THE PANEL SAYING "OVER HERE": a press that the shield swallowed produces
+ * nothing on the page, so the panel is what has to answer for it — a short jump
+ * back and forth, the gesture a modal makes when you click its scrim.
+ *
+ * `translate` rather than `transform`: Radix positions the panel by writing a
+ * `transform` on its wrapper, and the tailwindcss-animate classes on the panel
+ * itself animate the same property when it opens. `translate` is its own
+ * property, so this composes with both instead of fighting them.
+ */
+const WIGGLE_OFFSETS = ["0px", "-6px", "6px", "-4px", "4px", "0px"]
+const WIGGLE_MS = 320
+
+/**
+ * WHAT A READER WOULD HAVE CLICKED INTO. Fields first and every other focusable
+ * second, in two passes rather than one selector list: a composer is a text area
+ * with a row of buttons under it, and in document order one of those buttons can
+ * come first — a step that says "ask One for it" and lands the caret on a
+ * toolbar chip has focused the wrong thing while looking like it worked.
+ */
+const FIELDS = "textarea, input:not([type='hidden']), [contenteditable='true']"
+const FOCUSABLE = `${FIELDS}, select, button, a[href], [tabindex]:not([tabindex='-1'])`
+
+/**
+ * The element a `focusTarget` step should focus: the target itself when it is
+ * focusable, otherwise the field (or failing that, the control) inside it —
+ * a step points at the box it is describing, and the box is regularly a wrapper
+ * around the thing you actually type into.
+ */
+const fieldIn = (target: HTMLElement): HTMLElement | null => {
+  if (target.matches(FOCUSABLE)) return target
+  return (
+    target.querySelector<HTMLElement>(FIELDS) ??
+    target.querySelector<HTMLElement>(FOCUSABLE)
+  )
+}
+
+const useWiggle = (ref: RefObject<HTMLElement>) => {
+  const reducedMotion = useReducedMotion()
+
+  return useCallback(() => {
+    const element = ref.current
+    // No `Element.animate` in jsdom, and nothing to say to someone who asked
+    // for less motion — the press is still counted either way.
+    if (!element || reducedMotion || typeof element.animate !== "function") {
+      return
+    }
+    element.animate(
+      WIGGLE_OFFSETS.map((translate) => ({ translate })),
+      { duration: WIGGLE_MS, easing: "ease-in-out" }
+    )
+  }, [ref, reducedMotion])
+}
 
 /**
  * The coachmark panel. Rendered by `CoachmarkProvider` for whichever coachmark
@@ -36,10 +99,28 @@ const CoachmarkPanel = ({
   align = "center",
   sideOffset = arrow ? ARROW_HEIGHT + 2 : 4,
   container,
+  overlay = false,
+  onOutsideInteraction,
+  leaving = false,
+  focusTarget = false,
 }: F0CoachmarkProps) => {
   const i18n = useI18n()
   const contentRef = useRef<HTMLDivElement>(null)
   const previouslyFocused = useRef<HTMLElement | null>(null)
+  const wiggle = useWiggle(contentRef)
+
+  /**
+   * WHERE FOCUS BELONGS FOR THIS STEP. The panel, so the step is announced and
+   * Enter cannot fire the action unread — unless the step asked for its own
+   * element (`focusTarget`), in which case the field it is pointing at, which is
+   * how a composer gets its cursor and its own focus glow. Falls back to the
+   * panel when the target holds nothing focusable at all, so a step that asked
+   * for something impossible still behaves like every other step.
+   */
+  const focusForStep = () => {
+    const field = focusTarget ? fieldIn(target) : null
+    ;(field ?? contentRef.current)?.focus()
+  }
 
   const id = useId()
   const titleId = `${id}-title`
@@ -53,13 +134,14 @@ const CoachmarkPanel = ({
 
   // Advancing keeps the panel mounted, so focus would stay on the action button
   // — where a second Enter fires the NEXT step's action before the user has read
-  // it, and where the new copy is never announced. Pulling focus back to the
-  // panel on each step is what makes a step read like a new message.
+  // it, and where the new copy is never announced. Moving focus on each step is
+  // what makes a step read like a new message; `focusForStep` decides whether
+  // that is the panel or the element the new step points at.
   const announcedStep = useRef(step?.current)
   useEffect(() => {
     if (announcedStep.current === step?.current) return
     announcedStep.current = step?.current
-    contentRef.current?.focus()
+    focusForStep()
   }, [step?.current])
 
   // On the last step (or a single-step coachmark) the action ends the coachmark,
@@ -78,6 +160,19 @@ const CoachmarkPanel = ({
       }}
     >
       <PopoverAnchor virtualRef={anchorRef} />
+      {/* Under the panel and over everything else. Rendered from here rather
+          than by the provider so the two always agree on which element is lit:
+          the panel points at `target`, and so does the hole. */}
+      {overlay && (
+        <CoachmarkSpotlight
+          target={target}
+          container={container}
+          onOutsideInteraction={() => {
+            wiggle()
+            onOutsideInteraction?.()
+          }}
+        />
+      )}
       <PopoverContent
         ref={contentRef}
         container={container}
@@ -96,7 +191,7 @@ const CoachmarkPanel = ({
           event.preventDefault()
           previouslyFocused.current =
             document.activeElement as HTMLElement | null
-          contentRef.current?.focus()
+          focusForStep()
         }}
         // Radix restores focus to the Trigger on close, but a coachmark
         // anchors instead of triggering, so nothing owns the restore.
@@ -135,11 +230,26 @@ const CoachmarkPanel = ({
         // block for absolutely-positioned descendants — which pulls the arrow
         // inside that scroll box and clips it away entirely. A coachmark is a
         // few lines tall and never needs to scroll, so the clip buys nothing.
+        // THE STEP-TO-STEP CROSSFADE. `leaving` is the outgoing half: the panel
+        // fades down and the provider commits the next step while it is
+        // invisible, so the copy swapping and the panel jumping to another
+        // element both happen unseen — then the same element fades back up,
+        // already in its new place. Two durations rather than one, matched to
+        // the provider's own fade-out: going takes less time than arriving.
+        //
+        // A transition rather than an animation: it has to be interruptible
+        // (a second step can start while this one is still fading), and it must
+        // not compete with the entrance animation PopoverContent brings, which
+        // owns `animation` on this same element. `duration-150` is the provider's
+        // own `STEP_FADE_OUT_MS`, so the commit lands on a panel that has just
+        // finished going.
         className={cn(
           "w-72 overflow-visible rounded-lg border-none p-4",
           "shadow-lg backdrop-blur-sm",
           "bg-f1-background-inverse text-f1-foreground-inverse",
-          "dark:bg-f1-background-tertiary"
+          "dark:bg-f1-background-tertiary",
+          "transition-opacity",
+          leaving ? "opacity-0 duration-150" : "opacity-100 duration-200"
         )}
       >
         {/* `dark` so every control inside resolves the tokens that suit a dark

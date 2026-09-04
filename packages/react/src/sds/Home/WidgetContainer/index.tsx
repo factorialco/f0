@@ -211,15 +211,19 @@ const WidgetSlot = ({
 const AddWidgetPlaceholder = ({
   onClick,
   label,
+  side,
 }: {
   onClick: () => void
   label: string
+  side: WidgetContainerSide
 }) => (
   <Tooltip label={label}>
     <button
       type="button"
       onClick={onClick}
       aria-label={label}
+      // Which column's offer this is, so a page can point at one of them.
+      data-add-widget={side}
       className="flex w-full items-center justify-center rounded-xl border border-dashed border-f1-border py-4 text-f1-foreground-secondary hover:border-f1-border-hover hover:text-f1-foreground"
     >
       <F0Icon size="md" icon={Plus} />
@@ -983,6 +987,7 @@ export function WidgetContainer({
             <AddWidgetPlaceholder
               onClick={onClickAddNewWidget}
               label={addWidgetLabel ?? t.widgets.addWidget}
+              side={side}
             />
           )
         : null}

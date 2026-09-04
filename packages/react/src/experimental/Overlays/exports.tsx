@@ -3,7 +3,13 @@ export { Dialog } from "../../deprecated/Dialog"
 export {
   coachmarks,
   CoachmarkProvider,
+  defineStepByStepCoachmarkGuidance,
   type CoachmarkAction,
+  type CoachmarkEnd,
+  type CoachmarkEndReason,
+  type CoachmarkGuidance,
+  type CoachmarkGuidanceOptions,
+  type CoachmarkGuidanceStep,
   type CoachmarkId,
   type CoachmarkOptions,
   type CoachmarkSequenceOptions,
