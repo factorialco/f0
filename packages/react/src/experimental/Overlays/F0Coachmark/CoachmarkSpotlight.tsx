@@ -25,6 +25,25 @@ const isSameRect = (a: Rect, b: Rect) =>
   a.width === b.width &&
   a.height === b.height
 
+const litRadius = (target: HTMLElement): number => {
+  const radiusOf = (element: Element) =>
+    parseFloat(getComputedStyle(element).borderTopLeftRadius) || 0
+
+  const own = radiusOf(target)
+  if (own > 0) return own + HIGHLIGHT_PADDING
+
+  const box = target.getBoundingClientRect()
+  for (const element of [...target.querySelectorAll("*")].slice(0, 24)) {
+    const radius = radiusOf(element)
+    if (radius === 0) continue
+    const inner = element.getBoundingClientRect()
+    if (inner.width < box.width * 0.8) continue
+    return radius + (inner.left - box.left) + HIGHLIGHT_PADDING
+  }
+
+  return HIGHLIGHT_PADDING
+}
+
 /**
  * The target's box in viewport coordinates, kept current FRAME BY FRAME.
  *
@@ -62,6 +81,12 @@ const useTargetRect = (target: HTMLElement): Rect => {
   }, [target])
 
   return rect
+}
+
+const useLitRadius = (target: HTMLElement): number => {
+  const [radius, setRadius] = useState(() => litRadius(target))
+  useEffect(() => setRadius(litRadius(target)), [target])
+  return radius
 }
 
 /** How long the light takes to travel from one step's element to the next's. */
@@ -124,6 +149,7 @@ export const CoachmarkSpotlight = ({
   onOutsideInteraction,
 }: CoachmarkSpotlightProps) => {
   const rect = useTargetRect(target)
+  const radius = useLitRadius(target)
   const reducedMotion = useReducedMotion()
   const travelling = useTravelling(target, !reducedMotion)
 
@@ -182,30 +208,15 @@ export const CoachmarkSpotlight = ({
       // focus glow with it, on the reader's first press anywhere on the page.
       onMouseDown={(event) => event.preventDefault()}
     >
-      {/* The lit region: a clear box with no edge of its own. NO BORDER — the
-          element inside already has whatever border it has, and a second line
-          around it drew a box around a box: two rounded rectangles a few pixels
-          apart, neither of them the card.
-
-          TWO SHADOWS, GLOW FIRST. The glow is the page's own surface colour
-          (`--neutral-0`: white in light, the dark ground in dark) blurred
-          outward over the dim, so the lit element reads as GLOWING rather than
-          as a hole cut in a sheet — the same thing a focused field does, for an
-          element that may not have a focus state to lend us. It is also the only
-          thing separating the light from the dim now, which is why it is soft
-          rather than tight. It has to come first in the list: shadows paint
-          first over last, and the 100vmax dim would otherwise bury it. */}
       <div
         className={cn(
-          "absolute rounded-xl",
-          "shadow-[0_0_24px_6px_hsl(var(--neutral-0)/0.7),0_0_0_100vmax_hsl(var(--neutral-40))]",
-          // Only while it has somewhere to go — see `useTravelling`. The dim
-          // itself never fades: the light travels to the next step's element,
-          // rather than the page coming up to full brightness in between.
+          "absolute",
+          "shadow-[0_0_0_100vmax_hsl(var(--shadow)/0.5)]",
+          "dark:shadow-[0_0_0_100vmax_hsl(var(--shadow)/0.85)]",
           travelling &&
             "transition-[top,left,width,height] duration-300 ease-out"
         )}
-        style={rect}
+        style={{ ...rect, borderRadius: radius }}
       />
     </div>,
     container ?? document.body
