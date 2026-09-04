@@ -174,6 +174,13 @@ export const CoachmarkSpotlight = ({
         event.preventDefault()
         onOutsideInteraction()
       }}
+      // AND MOUSE DOWN, which is the one that moves focus. Preventing the
+      // pointer event does not stop the mouse event that follows it, and its
+      // default action is "focus what was pressed" — which, on a shield, means
+      // blurring whatever held focus and leaving it on the body. A step that
+      // focused its own field (`focusTarget`) lost that field's focus, and its
+      // focus glow with it, on the reader's first press anywhere on the page.
+      onMouseDown={(event) => event.preventDefault()}
     >
       {/* The lit region: clear box, dim cast outwards, and a hairline around it
           in `foreground-tertiary` — the emphasis the design asks for on a

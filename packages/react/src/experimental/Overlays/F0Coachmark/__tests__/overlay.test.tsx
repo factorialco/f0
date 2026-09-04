@@ -352,3 +352,41 @@ describe("a step that focuses what it points at", () => {
     await waitFor(() => expect(before).toHaveFocus())
   })
 })
+
+describe("what the shield does to focus", () => {
+  beforeEach(() => {
+    coachmarks.closeAll()
+  })
+
+  /**
+   * A press on the shield must not take focus off the page.
+   *
+   * Preventing the POINTER event is not enough: the mouse event that follows it
+   * has its own default action — "focus what was pressed" — and on a shield that
+   * means blurring whatever held focus and leaving it on the body. A step that
+   * focused its own field lost that field's focus glow on the reader's first
+   * press anywhere on the page.
+   *
+   * `defaultPrevented` is the observable here rather than `document.activeElement`:
+   * jsdom does not move focus on a mouse press at all, so only the real browser
+   * can show the blur — and only the prevention can be asserted here.
+   */
+  it("swallows the press without moving focus", async () => {
+    renderApp()
+    open({
+      targetElement: "#filters",
+      title: "Filters got smarter",
+      overlay: true,
+    })
+    await screen.findByRole("dialog")
+
+    const shield = blocker()
+    const press = new MouseEvent("mousedown", {
+      bubbles: true,
+      cancelable: true,
+    })
+    shield?.dispatchEvent(press)
+
+    expect(press.defaultPrevented).toBe(true)
+  })
+})
