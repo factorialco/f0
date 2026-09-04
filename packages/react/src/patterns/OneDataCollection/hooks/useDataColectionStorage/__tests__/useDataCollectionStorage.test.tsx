@@ -16,6 +16,7 @@ import {
 } from "@/lib/providers/datacollection/types"
 import { TestProviders, zeroRenderHook } from "@/testing/test-utils"
 
+import { StoredStatusDefinition } from "../pruneStoredStatus"
 import { useDataCollectionStorage } from "../useDataCollectionStorage"
 import {
   DataCollectionStorageFeaturesDefinition,
@@ -126,6 +127,16 @@ const buildFeatureProviders = (
   }
 }
 
+/**
+ * Declares every filter key and visualization these tests persist, so hydration
+ * validation is a no-op here and the assertions stay about the write race.
+ * `pruneStoredStatus` is covered on its own.
+ */
+const definition: StoredStatusDefinition = {
+  filters: { x: {}, y: {}, seeded: {}, fromA: {}, fromB: {} },
+  visualizationCount: 2,
+}
+
 const wrapperWith = (handler: DataCollectionStorageHandler) => {
   const Wrapper = ({ children }: { children: React.ReactNode }) => (
     <TestProviders>
@@ -186,7 +197,8 @@ describe("useDataCollectionStorage — pre-hydration write race", () => {
         useDataCollectionStorage(
           "test/v1",
           features,
-          providers as AnyFeatureProviders
+          providers as AnyFeatureProviders,
+          definition
         ),
       {
         wrapper: wrapperWith(handler),
@@ -242,7 +254,8 @@ describe("useDataCollectionStorage — pre-hydration write race", () => {
         useDataCollectionStorage(
           "test/v1",
           features,
-          providers as AnyFeatureProviders
+          providers as AnyFeatureProviders,
+          definition
         ),
       {
         wrapper: wrapperWith(handler),
@@ -284,7 +297,8 @@ describe("useDataCollectionStorage — pre-hydration write race", () => {
         useDataCollectionStorage(
           "test/v1",
           features,
-          providers as AnyFeatureProviders
+          providers as AnyFeatureProviders,
+          definition
         ),
       {
         wrapper: wrapperWith(handler),
@@ -331,7 +345,8 @@ describe("useDataCollectionStorage — pre-hydration write race", () => {
         useDataCollectionStorage(
           undefined,
           features,
-          buildProviders() as AnyFeatureProviders
+          buildProviders() as AnyFeatureProviders,
+          definition
         ),
       {
         wrapper: wrapperWith(handler),
@@ -356,6 +371,7 @@ describe("useDataCollectionStorage — pre-hydration write race", () => {
           "test/v1",
           features,
           buildProviders() as AnyFeatureProviders,
+          definition,
           true
         ),
       {
@@ -393,7 +409,8 @@ describe("useDataCollectionStorage — pre-hydration write race", () => {
         useDataCollectionStorage(
           storageKey,
           features,
-          providers as AnyFeatureProviders
+          providers as AnyFeatureProviders,
+          definition
         ),
       {
         wrapper: wrapperWith(handler),

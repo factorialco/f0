@@ -80,11 +80,14 @@ const visualizations = [
 function Harness({
   presets,
   id = "presets-test/v1",
+  storage,
   onState,
   urlSync = false,
 }: {
   presets?: PresetsDefinition<typeof filters>
-  id?: string
+  /** `null` drops the storage key entirely, as a collection with no `id` does. */
+  id?: string | null
+  storage?: false
   onState?: (state: {
     filters: unknown
     sortings: unknown
@@ -104,7 +107,8 @@ function Harness({
 
   return (
     <OneDataCollection
-      id={id}
+      id={id ?? undefined}
+      storage={storage}
       source={source}
       visualizations={visualizations}
       onStateChange={(state) =>
@@ -204,6 +208,32 @@ describe("OneDataCollection - presets", () => {
     expect(
       await screen.findByRole("button", { name: "Save view" })
     ).toBeInTheDocument()
+  })
+
+  it("does not offer 'Save view' without a storage key, since nothing could be persisted", async () => {
+    const user = userEvent.setup()
+    renderHarness({ id: null })
+
+    await waitFor(() => expect(screen.getByText("John")).toBeInTheDocument())
+
+    await sortByName(user)
+
+    expect(
+      screen.queryByRole("button", { name: "Save view" })
+    ).not.toBeInTheDocument()
+  })
+
+  it("does not offer 'Save view' when storage is disabled", async () => {
+    const user = userEvent.setup()
+    renderHarness({ storage: false })
+
+    await waitFor(() => expect(screen.getByText("John")).toBeInTheDocument())
+
+    await sortByName(user)
+
+    expect(
+      screen.queryByRole("button", { name: "Save view" })
+    ).not.toBeInTheDocument()
   })
 
   it("creates a custom preset via the dialog, selecting it and persisting to storage", async () => {
@@ -854,6 +884,27 @@ describe("OneDataCollection - share preset", () => {
     expect(
       await screen.findByText("Copied to your clipboard")
     ).toBeInTheDocument()
+  })
+
+  it("ignores a shared link without a storage key, still stripping the param", async () => {
+    const encoded = encodeSharedPreset({
+      label: "Imported view",
+      filter: { department: ["eng"] },
+      visualization: 0,
+    })
+    window.history.replaceState({}, "", `/?${SHARED_PRESET_PARAM}=${encoded}`)
+
+    renderHarness({ id: null })
+    await waitFor(() => expect(screen.getByText("John")).toBeInTheDocument())
+
+    // Saving is what materializes a shared view, and there is nowhere to save
+    // it — so no dialog is offered...
+    expect(screen.queryByLabelText("Title")).not.toBeInTheDocument()
+
+    // ...and the param is dropped anyway, so a reload does not retry.
+    expect(
+      new URLSearchParams(window.location.search).has(SHARED_PRESET_PARAM)
+    ).toBe(false)
   })
 
   it("opens the prefilled create dialog from a shared link and saves the shared config", async () => {
