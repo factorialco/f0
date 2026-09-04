@@ -26,13 +26,22 @@ export const useGroups = <R extends RecordType>(
     computeDefaultOpenGroups(groups, defaultOpenGroups)
   )
 
+  const groupKeys = groups.map((group) => group.key).join("|")
+
   useEffect(() => {
     const defaultValue = computeDefaultOpenGroups(groups, defaultOpenGroups)
-    if (Object.values(defaultValue).length > 0) {
-      setOpenGroups(defaultValue)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- only run on deep changes
-  }, [JSON.stringify(groups), JSON.stringify(defaultOpenGroups)])
+    if (Object.values(defaultValue).length === 0) return
+
+    setOpenGroups((prev) =>
+      Object.fromEntries(
+        Object.entries(defaultValue).map(([key, isOpen]) => [
+          key,
+          prev[key] ?? isOpen,
+        ])
+      )
+    )
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [groupKeys, JSON.stringify(defaultOpenGroups)])
 
   const setGroupOpen = (key: string, open: boolean) => {
     setOpenGroups((prev) => ({ ...prev, [key]: open }))

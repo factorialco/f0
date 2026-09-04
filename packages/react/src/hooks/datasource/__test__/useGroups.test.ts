@@ -6,12 +6,15 @@ import { useGroups } from "../useGroups"
 
 type TestRecord = { id: number; name: string }
 
-const buildGroups = (keys: string[]): GroupRecord<TestRecord>[] =>
+const buildGroups = (
+  keys: string[],
+  records: TestRecord[] = []
+): GroupRecord<TestRecord>[] =>
   keys.map((key) => ({
     key,
     label: key,
-    itemCount: 0,
-    records: [],
+    itemCount: records.length,
+    records,
   }))
 
 describe("useGroups", () => {
@@ -84,6 +87,42 @@ describe("useGroups", () => {
       rerender({ groups: buildGroups(["x", "y"]) })
 
       expect(result.current.openGroups).toEqual({ x: true, y: true })
+    })
+  })
+
+  describe("when the records of the same groups change", () => {
+    it("keeps the groups the user toggled", () => {
+      const { result, rerender } = renderHook(
+        ({ groups }) => useGroups(groups, false),
+        {
+          initialProps: {
+            groups: buildGroups(["a", "b"], [{ id: 1, name: "one" }]),
+          },
+        }
+      )
+
+      act(() => {
+        result.current.setGroupOpen("a", true)
+      })
+
+      rerender({ groups: buildGroups(["a", "b"], [{ id: 2, name: "two" }]) })
+
+      expect(result.current.openGroups).toEqual({ a: true, b: false })
+    })
+
+    it("seeds only the groups that were not known before", () => {
+      const { result, rerender } = renderHook(
+        ({ groups }) => useGroups(groups, false),
+        { initialProps: { groups: buildGroups(["a"]) } }
+      )
+
+      act(() => {
+        result.current.setGroupOpen("a", true)
+      })
+
+      rerender({ groups: buildGroups(["a", "b"]) })
+
+      expect(result.current.openGroups).toEqual({ a: true, b: false })
     })
   })
 })
