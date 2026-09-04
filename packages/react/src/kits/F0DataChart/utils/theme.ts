@@ -1,4 +1,5 @@
-import { baseColors } from "../../../../../core/src/tokens/colors"
+import { baseColors } from "@factorialco/f0-core"
+
 import { chartColor, echartsColorPalette, resolveCssColor } from "./colors"
 
 // ---------------------------------------------------------------------------

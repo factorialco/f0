@@ -1,12 +1,9 @@
-import { fileURLToPath } from "node:url"
 import path from "path"
 import { defineConfig } from "vitest/config"
-import viteConfig from "./vite.config"
 
-const dirname =
-  typeof __dirname !== "undefined"
-    ? __dirname
-    : path.dirname(fileURLToPath(import.meta.url))
+import viteConfig from "./vite.config.ts"
+
+const dirname = import.meta.dirname
 
 const alias = {
   "@": path.resolve(dirname, "./src"),
@@ -23,10 +20,6 @@ export default defineConfig({
     setupFiles: ["./vite/vitest.setup.ts"],
     alias: {
       ...alias,
-      // axe-core is only a transitive (Storybook) dependency, so the a11y
-      // audit's dynamic `import("axe-core")` isn't resolvable from this package
-      // under Vitest. Point it at a stub; audit tests mock it anyway.
-      "axe-core": path.resolve(dirname, "./vite/axe-core.stub.ts"),
     },
     typecheck: {
       tsconfig: "./tsconfig.tests.json",

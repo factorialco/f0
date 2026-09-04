@@ -14,7 +14,7 @@ jobs:
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: "22.x"
+          node-version: "24.20.0"
           cache: pnpm
       # Only the ownership package is needed — skips the full monorepo install
       - name: Install ownership dependencies

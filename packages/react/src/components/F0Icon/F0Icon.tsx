@@ -41,16 +41,40 @@ type NestedKeyOf<T> = {
       : `${K}`
 }[keyof T & string]
 
+type SemanticIconColor = Lowercase<NestedKeyOf<typeof f1Colors.icon>>
+
+const semanticIconColorClasses: {
+  [Color in SemanticIconColor]: `text-f1-icon-${Color}`
+} = {
+  secondary: "text-f1-icon-secondary",
+  inverse: "text-f1-icon-inverse",
+  bold: "text-f1-icon-bold",
+  critical: "text-f1-icon-critical",
+  "critical-bold": "text-f1-icon-critical-bold",
+  accent: "text-f1-icon-accent",
+  info: "text-f1-icon-info",
+  warning: "text-f1-icon-warning",
+  positive: "text-f1-icon-positive",
+  promote: "text-f1-icon-promote",
+  selected: "text-f1-icon-selected",
+  "selected-hover": "text-f1-icon-selected-hover",
+  "mood-super-negative": "text-f1-icon-mood-super-negative",
+  "mood-negative": "text-f1-icon-mood-negative",
+  "mood-neutral": "text-f1-icon-mood-neutral",
+  "mood-positive": "text-f1-icon-mood-positive",
+  "mood-super-positive": "text-f1-icon-mood-super-positive",
+}
+
+function isCustomColor(value: string): value is `#${string}` {
+  return value.startsWith("#")
+}
+
 export interface F0IconProps
   extends SVGProps<SVGSVGElement>, VariantProps<typeof iconVariants> {
   icon: IconType
   size?: "lg" | "md" | "sm" | "xs"
   state?: "normal" | "animate"
-  color?:
-    | "default"
-    | "currentColor"
-    | `#${string}`
-    | Lowercase<NestedKeyOf<typeof f1Colors.icon>>
+  color?: "default" | "currentColor" | `#${string}` | SemanticIconColor
 }
 
 export type IconType = ForwardRefExoticComponent<
@@ -67,13 +91,13 @@ export const F0Icon = forwardRef<SVGSVGElement, F0IconProps>(function F0Icon(
   const Component = icon
   const isAnimated = icon.displayName?.includes("Animated")
 
-  const isHexColor = color.startsWith("#")
+  const isHexColor = isCustomColor(color)
 
-  const getColorClass = (colorValue: string) => {
+  const getColorClass = (colorValue: NonNullable<F0IconProps["color"]>) => {
     if (colorValue === "currentColor") return "text-current"
     if (colorValue === "default") return "text-f1-icon"
-    if (colorValue.startsWith("#")) return ""
-    return `text-f1-icon-${colorValue}`
+    if (isCustomColor(colorValue)) return ""
+    return semanticIconColorClasses[colorValue]
   }
 
   const colorClass = getColorClass(color)

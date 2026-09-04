@@ -4,7 +4,7 @@ inputs:
   node-version:
     description: "Node.js version"
     required: false
-    default: "22.x"
+    default: "24.20.0"
   registry:
     description: "Registry URL"
     required: false
@@ -29,5 +29,5 @@ runs:
         cache: pnpm
 
     - name: Install dependencies
-      run: pnpm install
+      run: pnpm install --frozen-lockfile
       shell: bash

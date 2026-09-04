@@ -2,12 +2,11 @@
   "name": "@factorialco/f0-monorepo",
   "version": "0.0.0",
   "private": false,
-  "type": "module",
-  "packageManager": "pnpm@10.34.5+sha512.a4ee05f2f73658255bd6a89859c065a45c28a57daefae2c893a168ee2b73168c37b91e83e57ea67654ad03f03031746430e8bce38e362e042605fb8abc80192e",
   "workspaces": [
     "packages/*",
     "packages/examples/*"
   ],
+  "type": "module",
   "scripts": {
     "prepare": "lefthook install",
     "postinstall": "tsx scripts/install-skills.ts",
@@ -18,21 +17,23 @@
   "devDependencies": {
     "@commitlint/cli": "^19.7.1",
     "@commitlint/config-conventional": "^19.7.1",
+    "consola": "^3.4.0",
     "eslint": "^9.39.2",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.26",
-    "eslint-plugin-storybook": "^10.3.3",
+    "eslint-plugin-storybook": "^10.5.10",
     "lefthook": "^1.11.3",
     "npm-run-all": "^4.1.5",
+    "oxfmt": "^0.26.0",
+    "oxlint": "^1.41.0",
     "prettier": "^3.5.2",
     "prettier-plugin-organize-imports": "^4.1.0",
     "prettier-plugin-tailwindcss": "^0.6.10",
     "tsx": "^4.8.1",
-    "consola": "^3.4.0",
-    "oxfmt": "^0.26.0",
-    "oxlint": "^1.41.0"
+    "typescript": "npm:@typescript/typescript6@6.0.2"
   },
+  "packageManager": "pnpm@10.34.5+sha512.a4ee05f2f73658255bd6a89859c065a45c28a57daefae2c893a168ee2b73168c37b91e83e57ea67654ad03f03031746430e8bce38e362e042605fb8abc80192e",
   "pnpm": {
     "onlyBuiltDependencies": [
       "@swc/core",

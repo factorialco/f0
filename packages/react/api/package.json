@@ -5,14 +5,15 @@
   "type": "module",
   "main": "dist/src/functions/mcp.js",
   "scripts": {
-    "build": "tsc",
-    "build:watch": "tsc --watch"
+    "build": "tsc6",
+    "build:watch": "tsc6 --watch"
   },
   "dependencies": {
     "@azure/functions": "^4.6.0",
     "@storybook/mcp": "^0.6.2"
   },
   "devDependencies": {
-    "typescript": "^5.0.0"
+    "@types/node": "^24.13.3",
+    "typescript": "npm:@typescript/typescript6@6.0.2"
   }
 }

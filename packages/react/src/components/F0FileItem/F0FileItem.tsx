@@ -17,8 +17,6 @@ import type { FileDef } from "@/components/avatars/F0AvatarFile/types"
 import type { IconType } from "@/components/F0Icon"
 import type { HTMLAttributes } from "react"
 
-// Declared next to the component (not in a sibling types.ts) so api-extractor
-// rolls them into the bundled d.ts instead of emitting a broken relative import.
 export type F0FileAction = {
   icon?: IconType
   label: string

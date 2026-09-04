@@ -1,5 +1,7 @@
 import { HTMLAttributeAnchorTarget, ReactNode } from "react"
 
+import type { DataAttributes } from "@/global.types"
+
 export const actionButtonVariants = [
   "default",
   "outline",

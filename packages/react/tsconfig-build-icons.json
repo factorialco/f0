@@ -12,6 +12,7 @@
     // next to the .js files
     "jsx": "react-jsx",
     "noEmit": false,
+    "rootDir": "src/icons",
     "outDir": "icons",
     "allowImportingTsExtensions": false,
     // go to js file when using IDE functions like

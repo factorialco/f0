@@ -1,8 +1,10 @@
+import consola from "consola"
 /**
  * Public API surface breaking-change detector.
  *
  * Snapshots the public TypeScript API of each shipped entry point
- * (`f0`, `experimental`, `ai`) from a set of rolled-up `.d.ts` files, then
+ * (`f0`, `experimental`, `ai`, `component-status`,
+ * `i18n-provider-defaults`) from its declaration graph, then
  * compares two snapshots (a `--base` directory vs a `--head` directory) and
  * classifies every difference.
  *
@@ -23,11 +25,11 @@
  * A rename surfaces, correctly, as a BREAKING removal of the old name plus a
  * safe addition of the new name.
  *
- * Both sides are analyzed by the *same* TypeScript in a single process, so the
- * comparison is deterministic and immune to compiler-version drift. Structural
- * types are resolved through the checker, which normalizes away api-extractor's
- * rollup noise (the `F0TextInputProps_2` suffixes / dangling `./types` imports)
- * instead of diffing raw `.d.ts` text.
+ * CI emits both declaration graphs with the same TypeScript compiler,
+ * configuration, and dependencies, varying only React source, then analyzes
+ * them with the same checker process. This avoids toolchain and dependency
+ * drift in inferred declaration types. Structural types are resolved through
+ * the checker instead of diffing raw `.d.ts` text.
  *
  * Unions are compared as *sets* of structural variants, and intersections of
  * object shapes are flattened into one merged member set — so an optional
@@ -72,23 +74,28 @@
  * Usage:
  *   tsx .scripts/check-api-surface.ts --base <dir> --head <dir> [--json]
  *
- * `<dir>` is a directory containing the entry `.d.ts` files (f0.d.ts,
- * experimental.d.ts, ai.d.ts, plus global.d.ts so self-references resolve).
+ * `<dir>` is a directory containing the entry `.d.ts` files and their
+ * preserved declaration graph.
  *
- * The process always exits 0 (the check is non-blocking); whether breaking
- * changes were found is reported via the `hasBreaking` field of the `--json`
- * output and via the human-readable summary.
+ * Breaking changes do not fail the process; they are reported via the
+ * `hasBreaking` field and the human-readable summary. Missing or unreadable
+ * head declarations fail because a partial snapshot cannot be trusted.
  */
 import { existsSync } from "node:fs"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
-
-import consola from "consola"
 import ts from "typescript"
 
-/** Public entry points shipped in `dist/`. */
-export const ENTRIES = ["f0", "experimental", "ai", "component-status"] as const
-export type Entry = (typeof ENTRIES)[number]
+/** Public declaration entry points shipped in `dist/`. */
+export const ENTRY_DECLARATION_PATHS = {
+  f0: "f0.d.ts",
+  experimental: "experimental.d.ts",
+  ai: "ai.d.ts",
+  "component-status": "component-status.d.ts",
+  "i18n-provider-defaults": "lib/providers/i18n/i18n-provider-defaults.d.ts",
+} as const
+export type Entry = keyof typeof ENTRY_DECLARATION_PATHS
+export const ENTRIES = Object.keys(ENTRY_DECLARATION_PATHS) as Entry[]
 
 /** How deep to expand object/signature types before treating them as opaque
  * leaves. Bounds the work while still reaching props nested a few containers
@@ -168,7 +175,7 @@ export interface EntryDiff {
   }>
   added: string[]
   translations?: TranslationChanges
-  skipped?: "no-base" | "no-head"
+  skipped?: "no-base"
 }
 
 export interface AnalysisResult {
@@ -182,7 +189,7 @@ export interface AnalysisResult {
 /* ----------------------------- snapshotting ----------------------------- */
 
 function entryDtsPath(dir: string, entry: Entry): string | undefined {
-  const p = path.resolve(dir, `${entry}.d.ts`)
+  const p = path.resolve(dir, ENTRY_DECLARATION_PATHS[entry])
   return existsSync(p) ? p : undefined
 }
 
@@ -203,7 +210,6 @@ const COMPILER_OPTIONS: ts.CompilerOptions = {
 // identical across every program. Share a compiler host that caches parsed
 // source files by name so the lib is parsed once instead of per program — this
 // keeps each program from blowing the test timeout on slower CI runners.
-let sharedHost: ts.CompilerHost | undefined
 const sourceFileCache = new Map<string, ts.SourceFile | undefined>()
 
 // Bare specifiers (`react`, `@radix-ui/*`, …) must resolve against THIS
@@ -220,13 +226,23 @@ const PACKAGE_ROOT = path.resolve(
   ".."
 )
 const MODULE_RESOLUTION_ANCHOR = path.join(PACKAGE_ROOT, "__api_anchor__.d.ts")
+const NON_TYPE_IMPORT_PATTERN = /\.css(?:\?.*)?$/i
 
-function getCompilerHost(): ts.CompilerHost {
-  if (sharedHost) return sharedHost
-  const host = ts.createCompilerHost(COMPILER_OPTIONS)
-  // Relative imports resolve from the importing file (api-extractor's dangling
-  // `./types` rollup noise stays unresolved, as before); bare imports resolve
-  // from the package root so React/DOM types are found.
+function compilerOptions(dirAbsolute: string): ts.CompilerOptions {
+  return {
+    ...COMPILER_OPTIONS,
+    baseUrl: dirAbsolute,
+    paths: {
+      "@/*": ["*"],
+      "~/*": ["../*"],
+    },
+  }
+}
+
+function getCompilerHost(options: ts.CompilerOptions): ts.CompilerHost {
+  const host = ts.createCompilerHost(options)
+  // Internal imports resolve from the declaration snapshot and fail closed;
+  // bare imports resolve from the package root so React/DOM types are found.
   host.resolveModuleNameLiterals = (
     moduleLiterals,
     containingFile,
@@ -235,10 +251,21 @@ function getCompilerHost(): ts.CompilerHost {
   ) =>
     moduleLiterals.map((literal) => {
       const name = literal.text
-      const importer = name.startsWith(".")
-        ? containingFile
-        : MODULE_RESOLUTION_ANCHOR
-      return ts.resolveModuleName(name, importer, options, host)
+      if (NON_TYPE_IMPORT_PATTERN.test(name)) return {}
+      const isInternal =
+        name.startsWith(".") || name.startsWith("@/") || name.startsWith("~/")
+      const isSnapshotFile = containingFile.startsWith(`${options.baseUrl}/`)
+      const importer =
+        isInternal || !isSnapshotFile
+          ? containingFile
+          : MODULE_RESOLUTION_ANCHOR
+      const resolution = ts.resolveModuleName(name, importer, options, host)
+      if (!resolution.resolvedModule && (isInternal || isSnapshotFile)) {
+        throw new Error(
+          `Could not resolve ${name} imported by ${containingFile}`
+        )
+      }
+      return resolution
     })
   const original = host.getSourceFile.bind(host)
   host.getSourceFile = (
@@ -261,12 +288,11 @@ function getCompilerHost(): ts.CompilerHost {
     sourceFileCache.set(fileName, sf)
     return sf
   }
-  sharedHost = host
   return host
 }
 
 /**
- * Build a snapshot of the public exports of a single rolled `.d.ts` file.
+ * Build a snapshot of the public exports reachable from one entry `.d.ts`.
  * Returns `undefined` when the file does not exist (treated as "no baseline").
  */
 export function snapshotEntry(
@@ -277,25 +303,35 @@ export function snapshotEntry(
   if (!dtsPath) return undefined
 
   const dirAbsolute = path.resolve(dir)
+  const options = compilerOptions(dirAbsolute)
 
   const program = ts.createProgram({
     rootNames: [dtsPath],
-    options: COMPILER_OPTIONS,
-    host: getCompilerHost(),
+    options,
+    host: getCompilerHost(options),
   })
 
   const checker = program.getTypeChecker()
   const sourceFile = program.getSourceFile(dtsPath)
-  if (!sourceFile) return new Map()
+  if (!sourceFile) {
+    throw new Error(`Declaration entry could not be loaded: ${dtsPath}`)
+  }
 
   const moduleSymbol = checker.getSymbolAtLocation(sourceFile)
-  if (!moduleSymbol) return new Map()
+  if (!moduleSymbol) {
+    throw new Error(`Declaration entry has no module symbol: ${dtsPath}`)
+  }
 
   const snapshot: EntrySnapshot = new Map()
   for (const exp of checker.getExportsOfModule(moduleSymbol)) {
     const name = exp.getName()
     if (name === "default") continue
     snapshot.set(name, snapshotExport(exp, checker, sourceFile, dirAbsolute))
+  }
+  if (snapshot.size === 0) {
+    throw new Error(
+      `Declaration entry ${entry} resolved to zero exports: ${dtsPath}`
+    )
   }
   return snapshot
 }
@@ -308,11 +344,7 @@ function snapshotExport(
 ): ExportSnapshot {
   let sym = symbol
   if (sym.flags & ts.SymbolFlags.Alias) {
-    try {
-      sym = checker.getAliasedSymbol(sym)
-    } catch {
-      // keep original
-    }
+    sym = checker.getAliasedSymbol(sym)
   }
 
   const kind = symbolKind(sym)
@@ -320,19 +352,13 @@ function snapshotExport(
   const isTypeOnly =
     !!(sym.flags & ts.SymbolFlags.Type) && !(sym.flags & ts.SymbolFlags.Value)
 
-  let item: ApiItem = { k: "opaque", text: "<unresolved>" }
-  let display = "<unresolved>"
-  try {
-    const type = isTypeOnly
-      ? checker.getDeclaredTypeOfSymbol(sym)
-      : checker.getTypeOfSymbolAtLocation(sym, location)
-    item = buildApiItem(type, checker, dirAbsolute, MAX_DEPTH, new Set())
-    display = normalize(
-      checker.typeToString(type, undefined, TYPE_TO_STRING_FLAGS)
-    )
-  } catch (err) {
-    display = `<unresolved: ${(err as Error).message}>`
-  }
+  const type = isTypeOnly
+    ? checker.getDeclaredTypeOfSymbol(sym)
+    : checker.getTypeOfSymbolAtLocation(sym, location)
+  const item = buildApiItem(type, checker, dirAbsolute, MAX_DEPTH, new Set())
+  const display = normalize(
+    checker.typeToString(type, undefined, TYPE_TO_STRING_FLAGS)
+  )
 
   return { kind, typeParams, display, item }
 }
@@ -1213,10 +1239,9 @@ function classifyItem(
 function diffEntry(
   entry: Entry,
   base: EntrySnapshot | undefined,
-  head: EntrySnapshot | undefined
+  head: EntrySnapshot
 ): EntryDiff {
   if (!base) return { entry, breaking: [], added: [], skipped: "no-base" }
-  if (!head) return { entry, breaking: [], added: [], skipped: "no-head" }
 
   const breaking: EntryDiff["breaking"] = []
   const added: string[] = []
@@ -1261,13 +1286,11 @@ function diffEntry(
 }
 
 export function analyze(baseDir: string, headDir: string): AnalysisResult {
-  const entries = ENTRIES.map((entry) =>
-    diffEntry(
-      entry,
-      snapshotEntry(baseDir, entry),
-      snapshotEntry(headDir, entry)
-    )
-  )
+  const entries = ENTRIES.map((entry) => {
+    const head = snapshotEntry(headDir, entry)
+    if (!head) throw new Error(`Missing head declaration entry: ${entry}`)
+    return diffEntry(entry, snapshotEntry(baseDir, entry), head)
+  })
   const txAdded = new Set<string>()
   const txRemoved = new Set<string>()
   for (const d of entries) {
@@ -1373,7 +1396,7 @@ export function buildCommentMarkdown(result: AnalysisResult): string {
   }
   lines.push("")
   lines.push(
-    "_Comparing `f0`, `experimental` and `ai` against `main`. Adding components, types, or optional props is safe. This check is non-blocking._"
+    `_Comparing ${ENTRIES.map((entry) => `\`${entry}\``).join(", ")} against \`main\`. Adding components, types, or optional props is safe. This check is non-blocking._`
   )
 
   const tx = result.translations

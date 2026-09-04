@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "baseUrl": ".",
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "ignoreDeprecations": "6.0",
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "noCheck": true,
+    "noEmit": false,
+    "outDir": "./.cache/api-surface",
+    "paths": {
+      "@/*": ["./src/*"],
+      "~/*": ["./*"]
+    },
+    "resolveJsonModule": true,
+    "rootDir": "../..",
+    "target": "ESNext",
+    "types": ["vite/client", "@testing-library/jest-dom", "vitest/globals"]
+  },
+  "files": [
+    "src/f0.ts",
+    "src/experimental.ts",
+    "src/ai.ts",
+    "src/component-status.ts",
+    "src/lib/providers/i18n/i18n-provider-defaults.ts"
+  ],
+  "include": []
+}

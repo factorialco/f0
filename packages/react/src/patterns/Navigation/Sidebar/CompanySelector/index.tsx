@@ -5,20 +5,18 @@ import { AvatarVariant } from "@/components/avatars/F0Avatar"
 import { F0AvatarCompany } from "@/components/avatars/F0AvatarCompany"
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { F0Select } from "@/components/F0Select"
-import { OneEllipsis } from "@/lib/OneEllipsis"
 import { ChevronDown, Circle } from "@/icons/app"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
 
-interface Company {
-  id: string
-  name: string
-  logo?: string
-}
-
 export type CompanySelectorProps = {
-  companies: Company[]
+  companies: Array<{
+    id: string
+    name: string
+    logo?: string
+  }>
   selected?: string
   onChange: (value: string) => void
   isLoading?: boolean
@@ -89,8 +87,8 @@ const Selector = ({
   children,
   additionalOptions = [],
 }: {
-  companies: Company[]
-  selected: Company
+  companies: CompanySelectorProps["companies"]
+  selected: CompanySelectorProps["companies"][number]
   onChange: (value: string) => void
   children: ReactNode
   additionalOptions?: CompanySelectorProps["additionalOptions"]

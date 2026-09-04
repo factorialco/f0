@@ -1,12 +1,13 @@
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs"
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import path from "node:path"
-
 import { afterEach, describe, expect, it, vi } from "vitest"
 
 import {
   analyze,
   buildCommentMarkdown,
+  ENTRIES,
+  ENTRY_DECLARATION_PATHS,
   normalize,
   snapshotEntry,
   type AnalysisResult,
@@ -20,14 +21,19 @@ vi.setConfig({ testTimeout: 30000 })
 /**
  * Each test writes a minimal `f0.d.ts` for the "base" and "head" sides into
  * separate temp dirs and runs the real analyzer end-to-end (TypeScript program
- * + structural classification). The `experimental`/`ai` entries have no files
- * and are reported as skipped, so we assert only on the `f0` entry.
+ * + structural classification). The helper emits non-empty stubs for the other
+ * current entries, so we assert only on the `f0` entry.
  */
 const createdDirs: string[] = []
 
 function dirWith(f0Dts: string): string {
   const dir = mkdtempSync(path.join(tmpdir(), "api-surface-test-"))
   writeFileSync(path.join(dir, "f0.d.ts"), f0Dts)
+  for (const entry of ENTRIES.filter((entry) => entry !== "f0")) {
+    const declarationPath = path.join(dir, ENTRY_DECLARATION_PATHS[entry])
+    mkdirSync(path.dirname(declarationPath), { recursive: true })
+    writeFileSync(declarationPath, "export declare const EntrySentinel: true;")
+  }
   createdDirs.push(dir)
   return dir
 }
@@ -56,6 +62,62 @@ export declare const compute: (x: number, y: string) => boolean;
 `
 
 describe("check-api-surface — catches breaking changes", () => {
+  it("rejects a public barrel whose declaration graph is missing", () => {
+    expect(() =>
+      snapshotEntry(dirWith('export * from "./missing";'), "f0")
+    ).toThrow("Could not resolve ./missing")
+  })
+
+  it("resolves package aliases inside an emitted declaration graph", () => {
+    const dir = dirWith('export * from "@/Widget";')
+    writeFileSync(
+      path.join(dir, "Widget.d.ts"),
+      "export interface WidgetProps { id: string }"
+    )
+
+    expect([...snapshotEntry(dir, "f0")!.keys()]).toEqual(["WidgetProps"])
+  })
+
+  it("rejects a partially unresolved public declaration graph", () => {
+    expect(() =>
+      snapshotEntry(
+        dirWith(
+          'export declare const Present: true;\nexport * from "./missing";'
+        ),
+        "f0"
+      )
+    ).toThrow("Could not resolve ./missing")
+  })
+
+  it("rejects an unresolved dependency in a public type", () => {
+    expect(() =>
+      snapshotEntry(
+        dirWith(
+          'import type { Missing } from "missing-package";\nexport interface Present { value: Missing }'
+        ),
+        "f0"
+      )
+    ).toThrow("Could not resolve missing-package")
+  })
+
+  it("ignores stylesheet imports that do not participate in the type graph", () => {
+    expect(() =>
+      snapshotEntry(
+        dirWith('import "./styles.css";\nexport declare const Present: true;'),
+        "f0"
+      )
+    ).not.toThrow()
+  })
+
+  it("rejects a comparison whose head is missing a public entry", () => {
+    const head = mkdtempSync(path.join(tmpdir(), "api-surface-test-"))
+    createdDirs.push(head)
+
+    expect(() => analyze(dirWith(BASE), head)).toThrow(
+      "Missing head declaration entry: f0"
+    )
+  })
+
   it("flags a removed export", () => {
     const diff = f0(
       BASE,

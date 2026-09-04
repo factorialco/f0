@@ -27,7 +27,7 @@ export function buildSyncPlugin(pluginConfig: CoderSyncPluginConfig) {
   // If no sources are defined, use the package.json files attribute
   if (!sources) {
     consola.info("Using package.json files attribute as source")
-    const packageJsonPath = resolve(__dirname, "../package.json")
+    const packageJsonPath = resolve(import.meta.dirname, "../package.json")
     const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf-8"))
     sources = [...packageJson.files, packageJsonPath]
   }

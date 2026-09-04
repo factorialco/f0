@@ -11,8 +11,6 @@ import { experimentalComponent } from "@/lib/experimental"
 
 import "../index.css"
 
-// Declared next to the component (not in a sibling types.ts) so api-extractor
-// rolls them into the bundled d.ts instead of emitting a broken './types' import.
 export interface F0RichTextDisplayProps extends HTMLAttributes<HTMLDivElement> {
   content: string
   className?: string

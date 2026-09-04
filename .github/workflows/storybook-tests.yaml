@@ -217,7 +217,7 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
-          node-version: "22.x"
+          node-version: "24.20.0"
       # No `merge-multiple` — every shard names its file `a11y-violations.jsonl`,
       # so merging would have them overwrite each other. Downloading into
       # per-artifact subdirectories keeps all four, and `cat` concatenates them

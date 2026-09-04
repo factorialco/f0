@@ -2,14 +2,17 @@
   "extends": "./tsconfig.json",
   "include": ["src"],
   "exclude": [
-    "**/*.stories.tsx",
+    "**/__mocks__/**",
+    "**/__stories__/**",
+    "**/__tests__/**",
+    "**/*.spec.*",
+    "**/*.stories.*",
+    "**/*.test.*",
     "node_modules",
     "dist",
     ".husky",
     "coverage",
     "src/testing/*",
-    "storybook-static",
-    "**/*.test.ts",
-    "**/*.test.tsx"
+    "storybook-static"
   ]
 }

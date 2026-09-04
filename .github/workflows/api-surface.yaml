@@ -10,22 +10,18 @@ jobs:
   detect-changes:
     uses: ./.github/workflows/_check-workspaces-changes.yaml
 
-  # Build the rolled-up type declarations for both sides of the comparison in
-  # parallel. Each leg only needs the existing `build` script, so the base
-  # build works even though this workflow does not exist on main.
+  # Emit the public declaration graph for both sides in parallel. Both sides
+  # use the compiler, config, and dependency graph from the merge commit; only
+  # React source varies. This keeps the check focused on React source changes
+  # instead of reporting dependency-version drift as an API change.
   build-dts:
     needs: detect-changes
-    # React source or core (whose types ripple into the React surface) changed.
     if: |
-      (needs.detect-changes.outputs.package_react == 'true' ||
-       needs.detect-changes.outputs.package_core == 'true') &&
+      needs.detect-changes.outputs.package_react == 'true' &&
       github.head_ref != 'release-please--branches--master' &&
       !contains(github.event.pull_request.labels.*.name, 'autorelease')
     name: "[⚛️ REACT] Build types (${{ matrix.side }})"
     runs-on: ubuntu-22.04
-    # One side failing must not wedge the run; the diff job handles a missing
-    # artifact gracefully.
-    continue-on-error: true
     strategy:
       fail-fast: false
       matrix:
@@ -43,38 +39,24 @@ jobs:
           #         head side was merged with (checked out in the next step).
           # Depth 2 makes both parents of the merge commit available.
           fetch-depth: 2
-      - name: Check out base side (first parent of the merge commit)
-        if: matrix.side == 'base'
-        run: git checkout HEAD^1
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
       - uses: ./.github/actions/setup-node-pnpm
-        with:
-          node-version: "22.x"
-          cache: pnpm
-      - name: Install dependencies
-        run: pnpm install
-      - name: Build core package
-        run: pnpm --filter @factorialco/f0-core build
+      - name: Use base React source (first parent of the merge commit)
+        if: matrix.side == 'base'
+        run: git checkout HEAD^1 -- packages/react/src
       - name: Build React types
-        run: pnpm --filter @factorialco/f0-react build
+        run: pnpm --filter @factorialco/f0-react exec tsc6 --project tsconfig.api-surface.json
       - name: Upload type declarations
         uses: actions/upload-artifact@v4
         with:
           name: dts-${{ matrix.side }}
-          path: |
-            packages/react/dist/f0.d.ts
-            packages/react/dist/experimental.d.ts
-            packages/react/dist/ai.d.ts
-            packages/react/dist/global.d.ts
+          path: packages/react/.cache/api-surface/**/*.d.ts
           if-no-files-found: error
           retention-days: 1
 
   api-diff:
     needs: [detect-changes, build-dts]
     if: |
-      (needs.detect-changes.outputs.package_react == 'true' ||
-       needs.detect-changes.outputs.package_core == 'true') &&
+      needs.detect-changes.outputs.package_react == 'true' &&
       github.head_ref != 'release-please--branches--master' &&
       !contains(github.event.pull_request.labels.*.name, 'autorelease')
     name: "[⚛️ REACT] Public API surface check"
@@ -85,35 +67,35 @@ jobs:
       issues: write
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
       - uses: ./.github/actions/setup-node-pnpm
-        with:
-          node-version: "22.x"
-          cache: pnpm
-      - name: Install dependencies
-        run: pnpm install
       - name: Download head type declarations
         uses: actions/download-artifact@v4
-        continue-on-error: true
         with:
           name: dts-head
           path: _api/head
       - name: Download base type declarations
         uses: actions/download-artifact@v4
-        continue-on-error: true
         with:
           name: dts-base
           path: _api/base
+      # The snapshot resolver fails closed on any unresolved import, and the
+      # per-file declarations import `@factorialco/f0-core` by bare specifier.
+      # Its `exports` map points at `dist/index.d.ts`, which only exists once
+      # core is built.
+      - name: Build core package
+        run: pnpm --filter @factorialco/f0-core build
       - name: Compare public API surface
         id: compare
         run: |
           cd packages/react
 
-          pnpm exec tsx .scripts/check-api-surface.ts \
-            --base "$GITHUB_WORKSPACE/_api/base" \
-            --head "$GITHUB_WORKSPACE/_api/head" \
-            --json > /tmp/api-output.txt 2>&1 || true
+          if ! pnpm exec tsx .scripts/check-api-surface.ts \
+              --base "$GITHUB_WORKSPACE/_api/base/packages/react/src" \
+              --head "$GITHUB_WORKSPACE/_api/head/packages/react/src" \
+              --json > /tmp/api-output.txt 2>&1; then
+            cat /tmp/api-output.txt
+            exit 1
+          fi
 
           # Extract the last complete JSON object (the script prints pretty JSON;
           # same extraction pattern as the cycle-dependencies check).
