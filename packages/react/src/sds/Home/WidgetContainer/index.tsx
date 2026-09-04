@@ -55,6 +55,7 @@ import {
   type WidgetVirtualization,
 } from "./useWidgetVirtualizer"
 import { verticalOnly } from "./verticalOnly"
+import { Footnote } from "./Footnote"
 import { WidgetMotion, type WidgetStow } from "./WidgetMotion"
 
 export type { WidgetVirtualization } from "./useWidgetVirtualizer"
@@ -233,6 +234,25 @@ export interface WidgetContainerProps {
   side?: WidgetContainerSide
   /** Freeform content above the widgets (the main column's greeting, feed, …). */
   children?: ReactNode
+  /**
+   * THE COLUMN'S FOOTNOTE, as a string: one sentence below the widgets and above
+   * the add placeholder — the column's last word rather than a widget ("you are
+   * viewing the new Home, [go back to the old one](/home?legacy=1)").
+   *
+   * A STRING, NOT A NODE, on purpose. The one piece of markdown it honours is
+   * the inline link, `[label](href)`; the column decides everything else about
+   * how the sentence is drawn (centered, secondary, one paragraph), so no Home
+   * grows a second layout at the foot of its column. Text that isn't that
+   * pattern is printed as the literal text it is, and a link that points
+   * somewhere a sentence has no business pointing (`javascript:`) keeps its
+   * label and loses its href.
+   *
+   * It is NOT part of the arrangement: no card, no drag, no "Remove widget",
+   * and it stays at the foot of the column whatever the widgets above it do.
+   * It arrives on the same stagger they do, one beat after the last of them, so
+   * it lands as part of the column rather than on top of it.
+   */
+  footnote?: string
   /** Per-visualization renderers, MERGED OVER the kit's `defaultSlotRenderers`. */
   slotRenderers?: SlotRenderers
   /** Full override of how a whole widget is drawn. Defaults to `SlotWidget`. */
@@ -366,7 +386,7 @@ export interface WidgetContainerProps {
  * how a column is arranged.
  *
  * It renders its `children` (freeform content) followed by each widget through
- * `SlotWidget`, ending in an "Add widget" placeholder. THERE IS NO EDIT MODE:
+ * `SlotWidget`, then any `footnote`, ending in an "Add widget" placeholder. THERE IS NO EDIT MODE:
  * every widget is draggable (the whole card, no handle) and carries "Remove
  * widget" in its own overflow menu, so rearranging a Home is something you just
  * do rather than something you switch into. `disableEdition` opts a column out
@@ -380,6 +400,7 @@ export function WidgetContainer({
   widgets = [],
   side = "main",
   children,
+  footnote,
   slotRenderers,
   renderWidget,
   disableEdition = false,
@@ -947,11 +968,18 @@ export function WidgetContainer({
       ) : (
         list
       )}
+      {/* THE COLUMN'S FOOTNOTE: under every widget, above the offer to add
+          another. It takes the beat after the last widget and the placeholder
+          takes the one after it, so the arrival still runs straight down the
+          column. */}
+      {footnote == null
+        ? null
+        : enter(widgets.length, <Footnote text={footnote} />)}
       {/* Adding, like removing and reordering, is always on offer.
           `disableEdition` columns never offer any of it. */}
       {!disableEdition && onClickAddNewWidget
         ? enter(
-            widgets.length,
+            widgets.length + (footnote == null ? 0 : 1),
             <AddWidgetPlaceholder
               onClick={onClickAddNewWidget}
               label={addWidgetLabel ?? t.widgets.addWidget}
