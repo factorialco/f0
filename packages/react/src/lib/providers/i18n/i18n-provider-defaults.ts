@@ -460,8 +460,26 @@ export const defaultTranslations = {
     dataDownload: {
       title: "Download",
       download: "Download {{format}}",
+      downloadPreparing: "Preparing export",
+      downloadSuccess: "Download started",
+      downloadFailed: "Couldn't export data",
       exportDashboard: "Export dashboard as {{format}}",
       exporting: "Exporting…",
+      exportPreparing: "Preparing dashboard export",
+      exportSuccess: "Dashboard exported",
+      exportEmpty: "No data to export",
+      exportEmptyDescription: "Change your filters and try again",
+      exportTooLarge: "Too much data to export",
+      exportTooLargeDescription: "Narrow your filters and try again",
+      exportFailed: "Couldn't export dashboard",
+      exportFailedDescription: "Try again",
+      exportOverviewSheetName: "Dashboard overview",
+      exportOverviewDescription:
+        "Preview every dashboard widget here. Use each widget sheet for its full exported data.",
+      exportRowsExported: "{{amount}} rows exported",
+      exportPreviewTruncated:
+        "Showing the first {{amount}} rows here. Open the widget sheet for the full export.",
+      exportFullDataSheet: "Full data: {{sheetName}}",
     },
     dashboardItem: {
       /**

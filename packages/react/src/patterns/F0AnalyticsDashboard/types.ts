@@ -584,7 +584,7 @@ export interface F0AnalyticsDashboardProps<
    */
   onLayoutChange?: (layout: DashboardItemLayout[]) => void
   /**
-   * Show a dashboard-level export button (PDF/Excel).
+   * Show a dashboard-level Excel export button.
    * @default false
    */
   enableExport?: boolean

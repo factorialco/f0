@@ -1,60 +1,27 @@
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useMemo, useRef, useState } from "react"
 
 import type { DropdownItem } from "@/experimental/Navigation/Dropdown"
 
+import { toasts } from "@/hooks/toast"
 import { Table } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 
-import type {
-  BaseResponse,
-  PaginatedResponse,
-  RecordType,
-  SortingsStateMultiple,
-} from "@/hooks/datasource"
-
-import { extractDisplayValue } from "@/patterns/OneDataCollection/utils/csvExport"
-
+import {
+  ExportRowLimitExceededError,
+  fetchAllStateAwareRecords,
+  type DownloadableSource,
+} from "../utils/collectionExport"
+import {
+  type DownloadableColumn,
+  transformCollectionRows,
+} from "../utils/collectionColumns"
 import { downloadAsCsv, downloadAsExcel } from "../utils/downloadHelpers"
-
-// Mirrors the caps used by OneDataCollection's own `useExportAction` so the
-// dashboard-item download has identical rollover behaviour (safety limit on
-// huge tables, modest page size while paginating).
-const MAX_EXPORT_ROWS = 10_000
-const EXPORT_PAGE_SIZE = 100
-
-/**
- * Minimum source shape we need to honour the view state at click-time.
- * Purposely loose (`unknown`) — this hook sits in dashboard land and must
- * accept any `DataCollectionSource` without dragging every generic
- * through the component tree.
- */
-type DownloadableSource = {
-  dataAdapter: {
-    paginationType?: "pages" | "infinite-scroll" | undefined
-    fetchData: (params: Record<string, unknown>) => unknown
-    exportFetchData?: (params: Record<string, unknown>) => unknown
-  }
-  currentFilters?: unknown
-  currentSortings?: { field: string; order: "asc" | "desc" } | null
-  currentGrouping?: { field: string; order?: "asc" | "desc" } | null
-  currentSearch?: string
-  currentNavigationFilters?: unknown
-}
 
 /**
  * Optional per-column metadata declared by the dashboard collection item.
  * Used to (a) produce human-readable headers and (b) anchor the export
  * column order when the user has not tweaked visualization settings.
  */
-export type DownloadableColumn = {
-  id: string
-  label: string
-  /** Optional renderer from the table visualization. When present, its output
-   *  is funneled through `extractDisplayValue` so typed cells (person, status,
-   *  tag, …) export as human-readable strings instead of raw objects. */
-  render?: (item: RecordType) => unknown
-}
-
 interface UseCollectionDownloadActionsOptions {
   /** Active data source — read at click-time to respect latest state. */
   source: DownloadableSource | null | undefined
@@ -69,97 +36,6 @@ interface UseCollectionDownloadActionsOptions {
    * `TableVisualizationSettings`.
    */
   tableSettings?: { hidden?: string[]; order?: string[] }
-}
-
-async function resolvePromiseLike<T>(value: T | Promise<T>): Promise<T> {
-  return value instanceof Promise ? await value : value
-}
-
-/**
- * Walk every page of the source using its declared pagination type and
- * the user's current filters/sortings/search. Mirrors the loop in
- * OneDataCollection's `useExportAction` so the dashboard-item download
- * returns the same full record set that the collection's built-in export
- * would return.
- */
-async function fetchAllStateAwareRecords(
-  source: DownloadableSource
-): Promise<RecordType[]> {
-  const { dataAdapter } = source
-
-  const sortings: SortingsStateMultiple = [
-    ...(source.currentSortings
-      ? [
-          {
-            field: source.currentSortings.field,
-            order: source.currentSortings.order,
-          },
-        ]
-      : []),
-    ...(source.currentGrouping
-      ? [
-          {
-            field: source.currentGrouping.field,
-            order: source.currentGrouping.order ?? "asc",
-          },
-        ]
-      : []),
-  ]
-
-  const baseParams = {
-    filters: source.currentFilters,
-    sortings,
-    search: source.currentSearch,
-    navigationFilters: source.currentNavigationFilters,
-  }
-
-  const fetchFn = dataAdapter.exportFetchData ?? dataAdapter.fetchData
-
-  if (!dataAdapter.paginationType) {
-    const response = (await resolvePromiseLike(
-      fetchFn(baseParams) as unknown
-    )) as BaseResponse<RecordType>
-    return (response.records ?? []).slice(0, MAX_EXPORT_ROWS)
-  }
-
-  if (dataAdapter.paginationType === "pages") {
-    const all: RecordType[] = []
-    let currentPage = 1
-    while (all.length < MAX_EXPORT_ROWS) {
-      const response = (await resolvePromiseLike(
-        fetchFn({
-          ...baseParams,
-          pagination: { currentPage, perPage: EXPORT_PAGE_SIZE },
-        }) as unknown
-      )) as PaginatedResponse<RecordType>
-      if (!response.records || response.records.length === 0) break
-      all.push(...response.records)
-      if ("pagesCount" in response && currentPage >= response.pagesCount) break
-      currentPage++
-    }
-    return all.slice(0, MAX_EXPORT_ROWS)
-  }
-
-  // infinite-scroll
-  const all: RecordType[] = []
-  let cursor: string | null = null
-  while (all.length < MAX_EXPORT_ROWS) {
-    const response = (await resolvePromiseLike(
-      fetchFn({
-        ...baseParams,
-        pagination: { cursor, perPage: EXPORT_PAGE_SIZE },
-      }) as unknown
-    )) as PaginatedResponse<RecordType>
-    if (!response.records || response.records.length === 0) break
-    all.push(...response.records)
-    if ("hasMore" in response && !response.hasMore) break
-    if ("cursor" in response) {
-      cursor = (response.cursor as string | null) ?? null
-    } else {
-      break
-    }
-  }
-  return all.slice(0, MAX_EXPORT_ROWS)
 }
 
 /**
@@ -210,44 +86,79 @@ export function useCollectionDownloadActions({
 }: UseCollectionDownloadActionsOptions): DropdownItem[] {
   const { t } = useI18n()
   const [isExporting, setIsExporting] = useState(false)
+  const exportPromiseRef = useRef<Promise<void> | null>(null)
 
   const runDownload = useCallback(
     async (fmt: "excel" | "csv") => {
-      if (!source || isExporting) return
-      setIsExporting(true)
-      try {
-        const records = await fetchAllStateAwareRecords(source)
-        const exportColumns = resolveExportColumns(columns, tableSettings)
-        if (exportColumns.length === 0 || records.length === 0) return
+      if (!source) return
+      if (exportPromiseRef.current) return exportPromiseRef.current
 
-        // Pass labels (header row) and ids (row lookup keys) separately so
-        // collections with two columns sharing the same label don't collide
-        // when re-shaping the row payload.
-        const headerLabels = exportColumns.map((c) => c.label)
-        const rowKeys = exportColumns.map((c) => c.id)
-
-        // Pre-resolve each cell: when the column has a renderer, use it (and
-        // extract the display value) so typed cells like `{ type: "person",
-        // value: { firstName, lastName } }` come out as plain text. Otherwise
-        // fall back to the raw field lookup keyed by column id.
-        const transformedRows = records.map((record) => {
-          const row: Record<string, unknown> = {}
-          for (const col of exportColumns) {
-            row[col.id] = col.render
-              ? extractDisplayValue(col.render(record))
-              : record[col.id]
-          }
-          return row
+      const exportPromise = (async () => {
+        setIsExporting(true)
+        const toastId = toasts.open({
+          variant: "loading",
+          title: t("ai.dataDownload.downloadPreparing"),
+          persistent: true,
         })
+        try {
+          const records = await fetchAllStateAwareRecords(source)
+          const exportColumns = resolveExportColumns(columns, tableSettings)
+          if (exportColumns.length === 0 || records.length === 0) {
+            toasts.open({
+              id: toastId,
+              variant: "default",
+              title: t("ai.dataDownload.exportEmpty"),
+              description: t("ai.dataDownload.exportEmptyDescription"),
+            })
+            return
+          }
 
-        if (fmt === "excel")
-          downloadAsExcel(headerLabels, transformedRows, title, rowKeys)
-        else downloadAsCsv(headerLabels, transformedRows, title, rowKeys)
+          const headerLabels = exportColumns.map((column) => column.label)
+          const rowKeys = exportColumns.map((column) => column.id)
+          const transformedRows = transformCollectionRows(
+            records,
+            exportColumns
+          )
+
+          if (fmt === "excel")
+            downloadAsExcel(headerLabels, transformedRows, title, rowKeys)
+          else downloadAsCsv(headerLabels, transformedRows, title, rowKeys)
+          toasts.open({
+            id: toastId,
+            variant: "success",
+            title: t("ai.dataDownload.downloadSuccess"),
+          })
+        } catch (error) {
+          const isTooLarge = error instanceof ExportRowLimitExceededError
+          toasts.open({
+            id: toastId,
+            variant: isTooLarge ? "default" : "error",
+            title: t(
+              isTooLarge
+                ? "ai.dataDownload.exportTooLarge"
+                : "ai.dataDownload.downloadFailed"
+            ),
+            description: t(
+              isTooLarge
+                ? "ai.dataDownload.exportTooLargeDescription"
+                : "ai.dataDownload.exportFailedDescription"
+            ),
+          })
+        } finally {
+          setIsExporting(false)
+        }
+      })()
+
+      exportPromiseRef.current = exportPromise
+      try {
+        await exportPromise
       } finally {
-        setIsExporting(false)
+        if (exportPromiseRef.current === exportPromise) {
+          exportPromiseRef.current = null
+        }
       }
     },
-    [source, columns, tableSettings, title, isExporting]
+    [source, columns, tableSettings, title, t]
   )
 
   const handleExcel = useCallback(() => runDownload("excel"), [runDownload])
@@ -257,15 +168,21 @@ export function useCollectionDownloadActions({
     if (!source) return []
     return [
       {
-        label: t("ai.dataDownload.download", { format: "Excel" }),
+        label: isExporting
+          ? t("ai.dataDownload.exporting")
+          : t("ai.dataDownload.download", { format: "Excel" }),
         icon: Table,
         onClick: handleExcel,
+        disabled: isExporting,
       },
       {
-        label: t("ai.dataDownload.download", { format: "CSV" }),
+        label: isExporting
+          ? t("ai.dataDownload.exporting")
+          : t("ai.dataDownload.download", { format: "CSV" }),
         icon: Table,
         onClick: handleCsv,
+        disabled: isExporting,
       },
     ]
-  }, [source, t, handleExcel, handleCsv])
+  }, [source, t, handleExcel, handleCsv, isExporting])
 }
