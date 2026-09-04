@@ -49,6 +49,7 @@ import { WidgetUpdateDialog } from "../WidgetUpdateDialog"
 import { takeCardGhost, takePageSurface } from "./dragGhost"
 import { lockedCeiling, noHigherThan, topPins } from "./lockedCeiling"
 import { SortableWidget } from "./SortableWidget"
+import { WidgetStage } from "./WidgetStage"
 import {
   useWidgetVirtualizer,
   type WidgetPlacement,
@@ -270,6 +271,29 @@ export interface WidgetContainerProps {
   /** Disables dragging without changing the tree: the sortables stay mounted. */
   disableDrag?: boolean
   /**
+   * WHERE A WIDGET'S CARD SHOULD BE DRAWN, when that is not this column. Return
+   * an element to draw that widget into, or nothing for the ordinary case — its
+   * own place in the column.
+   *
+   * The widget stays THIS container's either way: same render, same state, same
+   * timers, only drawn elsewhere (see `WidgetStage`). It is how `NewHomeLayout`
+   * folds the rail into the main column when it stacks below `md` without
+   * rebuilding a single card.
+   */
+  widgetHostFor?: (widget: HomeWidgetItem) => HTMLElement | null | undefined
+  /**
+   * Content of the column's that belongs UNDER its widgets and OVER its
+   * footnote — the counterpart to `children`, which is the freeform content
+   * above them.
+   *
+   * It exists for one caller: stacked, `NewHomeLayout` draws the rail's loose
+   * widgets at the foot of the main column, and they have to land inside the
+   * column rather than after it. The footnote is the COLUMN's, so it stays at
+   * the column's foot — below everything the column draws, folded-in cards
+   * included.
+   */
+  afterWidgets?: ReactNode
+  /**
    * Marks the element a dragged card should carry a copy of behind it — the
    * page's own surface, so the card the pointer holds is the colour it was.
    */
@@ -409,6 +433,8 @@ export function WidgetContainer({
   renderWidget,
   disableEdition = false,
   disableDrag = false,
+  widgetHostFor,
+  afterWidgets,
   dragSurfaceSelector,
   onRemoveWidget,
   onClickAddNewWidget,
@@ -433,16 +459,34 @@ export function WidgetContainer({
   const isHidden = (widget: HomeWidgetItem) =>
     visibleWidgetId !== undefined && widget.id !== visibleWidgetId
   /**
+   * WHETHER THIS COLUMN IS AN ARRANGEABLE ONE AT ALL — a question about the
+   * COLUMN, answered from its props alone. It decides the tree's SHAPE (an
+   * arrangeable column is wrapped in a DndContext and its cards in sortables),
+   * so it must not depend on what is currently IN the column: a shape that
+   * changes as widgets come and go rebuilds every card in the column when they
+   * do.
+   *
+   * That is not hypothetical. `NewHomeLayout` folds the rail's loose widgets
+   * into this column when it stacks below `md`, and while this read the widget
+   * list a main column of one free card among pinned ones crossed from
+   * "nothing to arrange" to "arrangeable" on the resize alone — swapping the
+   * tree and remounting cards that had not moved and were not even draggable.
+   */
+  const arrangeable = canEdit && onReorder != null
+  /**
    * WHETHER THERE IS AN ARRANGEMENT TO MAKE — two widgets that can actually
    * move, not merely two widgets. A column of one free card among pinned ones
-   * has a single legal order, so its card is given no grab cursor and no drag:
-   * offering a gesture whose every outcome is the arrangement you already have
-   * is offering a refusal.
+   * has a single legal order, so its cards are given no grab cursor and no
+   * drag: offering a gesture whose every outcome is the arrangement you already
+   * have is offering a refusal.
+   *
+   * This is the AFFORDANCE and not the shape (see `arrangeable`): it turns each
+   * sortable off rather than taking the sortables away, so the answer can change
+   * with the widget list without costing a remount. With every card disabled the
+   * DndContext is inert — no listeners are attached, so there is no gesture to
+   * start.
    */
-  const canDrag =
-    canEdit &&
-    onReorder != null &&
-    widgets.filter((widget) => !widget.locked).length > 1
+  const hasArrangement = widgets.filter((widget) => !widget.locked).length > 1
   // The widget being dragged: its in-list card hides while a copy of it rides
   // the pointer in the DragOverlay (see below).
   const [activeId, setActiveId] = useState<string | null>(null)
@@ -807,17 +851,31 @@ export function WidgetContainer({
       placement={placement}
       measureRef={virtual.measureRef}
     >
-      {canDrag ? (
-        <SortableWidget id={widget.id} disabled={widget.locked || disableDrag}>
-          {/* The arrival wrapper sits INSIDE the sortable rather than around it:
-              dnd-kit measures the element it holds the ref to, and a transformed
-              ancestor would offset every rect it reads while a drag is in
-              flight. */}
-          {(state) => enter(order, render(widget, state), widget)}
-        </SortableWidget>
-      ) : (
-        enter(order, render(widget), widget)
-      )}
+      {/* THE CARD'S OWN PIECE OF DOM, so the layout can draw it somewhere else
+          without this container losing it. Always here, never conditional: the
+          stage is what keeps the widget's position in the tree constant, and a
+          wrapper that came and went would be the very remount it prevents. */}
+      <WidgetStage host={widgetHostFor?.(widget)}>
+        {arrangeable ? (
+          <SortableWidget
+            id={widget.id}
+            // EVERY reason a card cannot be picked up, in one place: it is
+            // pinned, the column has withdrawn dragging for now (a collapsed
+            // rail), or there is no arrangement to make. A disabled sortable
+            // keeps its place in the tree and simply offers nothing — no grab
+            // cursor, no listeners.
+            disabled={widget.locked || disableDrag || !hasArrangement}
+          >
+            {/* The arrival wrapper sits INSIDE the sortable rather than around
+                it: dnd-kit measures the element it holds the ref to, and a
+                transformed ancestor would offset every rect it reads while a
+                drag is in flight. */}
+            {(state) => enter(order, render(widget, state), widget)}
+          </SortableWidget>
+        ) : (
+          enter(order, render(widget), widget)
+        )}
+      </WidgetStage>
     </WidgetSlot>
   )
 
@@ -877,7 +935,7 @@ export function WidgetContainer({
       style={style}
     >
       {children}
-      {canDrag ? (
+      {arrangeable ? (
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
@@ -972,6 +1030,7 @@ export function WidgetContainer({
       ) : (
         list
       )}
+      {afterWidgets}
       {/* THE COLUMN'S FOOTNOTE: under every widget, above the offer to add
           another. It takes the beat after the last widget and the placeholder
           takes the one after it, so the arrival still runs straight down the

@@ -36,7 +36,7 @@ const Counted = ({ id }: { id: string }) => {
     const settle = setTimeout(() => setSettled(true), 0)
     return () => clearTimeout(settle)
   }, [id])
-  return <span>{`${id} ${settled ? "settled" : "loading"}`}</span>
+  return <span data-card>{`${id} ${settled ? "settled" : "loading"}`}</span>
 }
 
 const widget = (id: string, extra: Partial<HomeWidgetItem> = {}) => ({
@@ -168,5 +168,51 @@ describe("resizing down to a stacked (mobile) width", () => {
       clock: 1,
       events: 1,
     })
+  })
+})
+
+/**
+ * WHOSE WIDGETS THEY ARE, once they are drawn in the main column. They are still
+ * the RAIL's: the rail's container owns them, so what the layout reports about
+ * them is reported for the side they belong to.
+ */
+describe("the rail's widgets while the layout is stacked", () => {
+  test("are drawn in the main column, pins interleaved and the rest at the foot", async () => {
+    const { container } = await renderLayout(700)
+
+    const order = [...container.querySelectorAll("p, [data-card]")]
+      .map((node) => node.textContent?.trim())
+      .filter(Boolean)
+
+    // The pin lands between the shortcuts and the feed; the loose one at the end.
+    expect(order).toEqual([
+      "greeting",
+      "shortcuts",
+      "clock settled",
+      "feed",
+      "main-a settled",
+      "main-b settled",
+      "events settled",
+    ])
+  })
+
+  /**
+   * THEY OFFER NO DRAG, and the main column's own cards still do. A folded-in
+   * card is scattered through content the main column owns, so a drag on it
+   * would be a reorder of a list that is not on screen as a list. The main
+   * column is still a column, and its own cards are unaffected — which is the
+   * point of the rail keeping them rather than handing them over.
+   */
+  test("offer no drag, while the main column's still do", async () => {
+    const { container } = await renderLayout(700)
+    const grabbable = (id: string) =>
+      container
+        .querySelector(`[data-widget-id='${id}']`)
+        ?.className.includes("cursor-grab")
+
+    expect(grabbable("clock")).toBe(false)
+    expect(grabbable("events")).toBe(false)
+    expect(grabbable("main-a")).toBe(true)
+    expect(grabbable("main-b")).toBe(true)
   })
 })
