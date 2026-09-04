@@ -183,6 +183,19 @@ See `f0-component-patterns` skill for code examples.
 - Export component prop interfaces
 - No circular imports
 
+## Injecting HTML
+
+- `dangerouslySetInnerHTML` needs a sanitizer — `parseMarkdown()` /
+  `parseMarkdownDocument()` from `@/lib/markdown`, or `DOMPurify.sanitize()`
+- Put the props spread **before** `dangerouslySetInnerHTML`, never after: it is a
+  legal DOM prop, so spreading after it lets a caller replace the sanitized HTML
+- A component that sanitizes should `Omit<..., "dangerouslySetInnerHTML">` from
+  its props type, so the mistake is a type error rather than a silent bypass
+- Inline `<style>` needs a `nonce` or a strict CSP drops it silently
+
+Enforced by the `f0-security` rules in `.oxlint-plugins/` (they run in
+`pnpm lint`, but oxc does not surface JS plugins in editors yet).
+
 ## Testing
 
 - Test files: `.test.tsx` / `.test.ts` — never `.spec.ts`

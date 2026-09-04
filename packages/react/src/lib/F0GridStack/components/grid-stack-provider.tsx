@@ -6,6 +6,7 @@ import type {
 } from "gridstack"
 
 import { useDeepCompareEffect } from "@reactuses/core"
+import DOMPurify from "dompurify"
 import { motion } from "motion/react"
 import React, {
   type PropsWithChildren,
@@ -334,8 +335,15 @@ export function GridStackProvider({
             // Capture the static HTML and dimensions from the DOM before wrapping
             let staticHTML = ""
             if (widgetElement) {
-              // Clone the element with canvas content preserved
-              staticHTML = cloneElementWithCanvas(widgetElement)
+              // Clone the element with canvas content preserved, then sanitize:
+              // this markup came out of already-rendered DOM, so it is only as
+              // trustworthy as whatever the widget rendered, and it is about to
+              // go back through dangerouslySetInnerHTML. DOMPurify keeps
+              // everything the snapshot needs — data: URI images, inline
+              // styles, classes, SVG — and drops handlers.
+              staticHTML = DOMPurify.sanitize(
+                cloneElementWithCanvas(widgetElement)
+              )
             }
 
             next.set(
