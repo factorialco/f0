@@ -1339,6 +1339,10 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
                   <motion.button
                     type="button"
                     aria-label={t.widgets.addWidget}
+                    // The same handle the column's own placeholder carries, so
+                    // "the rail's add button" is one selector whether the rail
+                    // is a column or a strip.
+                    data-add-widget="right"
                     onClick={() => onClickAddNewWidget("right")}
                     className="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-lg border border-dashed border-f1-border text-f1-foreground-secondary hover:border-f1-border-hover hover:text-f1-foreground"
                     initial={{ opacity: 0 }}

@@ -125,6 +125,30 @@ describe("WidgetContainer", () => {
     ).toBeInTheDocument()
   })
 
+  test("names the add control by its column, so a page can point at one", () => {
+    zeroRender(
+      <>
+        <WidgetContainer
+          side="main"
+          widgets={WIDGETS}
+          onClickAddNewWidget={() => {}}
+        />
+        <WidgetContainer
+          side="right"
+          widgets={WIDGETS}
+          onClickAddNewWidget={() => {}}
+        />
+      </>
+    )
+
+    // Both are named "Add widget", so the label cannot tell them apart — which
+    // is what this handle is for (a coachmark pointing at the rail's offer).
+    expect(document.querySelectorAll("[data-add-widget]")).toHaveLength(2)
+    expect(
+      document.querySelector('[data-add-widget="right"]')
+    ).toHaveAccessibleName("Add widget")
+  })
+
   test("disableEdition opts the column out of everything, adding included", () => {
     zeroRender(
       <WidgetContainer

@@ -210,15 +210,23 @@ const WidgetSlot = ({
 const AddWidgetPlaceholder = ({
   onClick,
   label,
+  side,
 }: {
   onClick: () => void
   label: string
+  side: WidgetContainerSide
 }) => (
   <Tooltip label={label}>
     <button
       type="button"
       onClick={onClick}
       aria-label={label}
+      // WHICH COLUMN'S OFFER THIS IS, addressable from outside: a page that
+      // wants to point a coachmark (or a test) at "the rail's add button" has
+      // no other handle on it — the control is named by its tooltip, and both
+      // columns' are named the same. `data-` rather than an `id`, because a
+      // page can hold more than one of these columns.
+      data-add-widget={side}
       className="flex w-full items-center justify-center rounded-xl border border-dashed border-f1-border py-4 text-f1-foreground-secondary hover:border-f1-border-hover hover:text-f1-foreground"
     >
       <F0Icon size="md" icon={Plus} />
@@ -955,6 +963,7 @@ export function WidgetContainer({
             <AddWidgetPlaceholder
               onClick={onClickAddNewWidget}
               label={addWidgetLabel ?? t.widgets.addWidget}
+              side={side}
             />
           )
         : null}

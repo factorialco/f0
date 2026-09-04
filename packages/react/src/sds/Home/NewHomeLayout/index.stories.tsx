@@ -53,6 +53,7 @@ import {
   Target,
   Timer,
 } from "@/icons/app"
+import { defineStepByStepCoachmarkGuidance } from "@/experimental/Overlays/F0Coachmark"
 import { F0AiChatTextArea } from "@/kits/ai/F0AiChatTextArea"
 import { type WelcomeScreenSuggestion } from "@/kits/ai/F0AiChat/types"
 import { F0Box } from "@/lib/F0Box"
@@ -90,6 +91,64 @@ import { Menu as SidebarMenu } from "@/patterns/Navigation/Sidebar/Menu"
 import * as SidebarMenuStories from "@/patterns/Navigation/Sidebar/Menu/index.stories"
 
 import { NewHomeLayout } from "./index"
+
+/* ============================ guided walkthrough =========================== */
+
+/**
+ * THE FIRST-RUN WALKTHROUGH OF THIS HOME — three steps, each NAMING the element
+ * it points at. `HOME_WALKTHROUGH.anchor(…)` marks those elements further down,
+ * and the names are a union the compiler holds both halves to: renaming a step
+ * is a type error at the anchor rather than a coachmark waiting for an element
+ * that is never coming.
+ *
+ * The copy is the prototype's own (factorial-composer's `custom-home` Feed,
+ * where this tour was designed), down to the third step having no description —
+ * its title is the whole sentence.
+ *
+ * The third step points at something THE LAYOUT renders rather than this story,
+ * so it names the handle directly: `data-add-widget="right"`, which the rail's
+ * add control carries as a column AND as a collapsed strip — the step lands on
+ * the same offer either way.
+ *
+ * The overlay comes with the walkthrough (`overlay` defaults to `true`): the
+ * page is dimmed except the step's element, the pointer is shielded from it, and
+ * a reader who keeps pressing past the panel gets out after five presses.
+ */
+const HOME_WALKTHROUGH = defineStepByStepCoachmarkGuidance({
+  id: "new-home-walkthrough",
+  // Longer than the 2s default, for Storybook rather than for Home: the rail's
+  // add control only exists once the layout has measured its own columns, and a
+  // canvas that is still compiling its story takes several times longer to get
+  // there than the app does. Without this the story regularly opens as a
+  // two-step walkthrough — correct behaviour (see `lookForTargetsMs`), wrong
+  // demonstration.
+  lookForTargetsMs: 5000,
+  steps: [
+    {
+      element: "ask-one",
+      title: "Let One do it for you",
+      description:
+        "Ask One to analyse, find information, process expenses, or request holidays; and focus on making decisions.",
+      side: "bottom",
+    },
+    {
+      element: "needs-you",
+      title: "Important things come first",
+      description:
+        "View and complete all the updates and tasks that require your attention at a glance.",
+      side: "right",
+      align: "start",
+    },
+    {
+      // No description: the title is the whole sentence.
+      targetElement: '[data-add-widget="right"]',
+      title: "Customise the Home by adding, reordering, and removing widgets",
+      side: "left",
+    },
+  ],
+  onComplete: () => console.log("walkthrough: finished"),
+  onDismiss: () => console.log("walkthrough: abandoned"),
+})
 
 /* =============================== main column =============================== */
 
@@ -285,7 +344,14 @@ const HomeComposer = () => {
 const HomeHero = () => (
   <F0Box display="flex" flexDirection="column">
     <Greeting />
-    <HomeComposer />
+    {/* The walkthrough's first step points at THE FIELD, not at the whole
+        block: the composer is what the step is about, and the greeting above it
+        is context the reader already has. The anchor goes on this wrapper
+        rather than inside `HomeComposer` so it takes the field's own focus-glow
+        inset with it — the lit region ends where the glow does. */}
+    <div {...HOME_WALKTHROUGH.anchor("ask-one")}>
+      <HomeComposer />
+    </div>
   </F0Box>
 )
 
@@ -376,42 +442,50 @@ const FeedSection = ({
 
 // An ARRAY, not a fragment: the layout inserts pinned widgets BETWEEN these
 // blocks when it stacks, and `Children.toArray` only sees seams in an array.
+//
+// The "Needs you" block is WRAPPED so the walkthrough can point at it: the
+// wrapper is what carries the anchor, since the block's own root is not a DOM
+// element this file can put an attribute on (the composer's own anchor is
+// inside `HomeHero`, on the field). A bare `div` in a flex column changes
+// nothing about how it draws — and an anchor is inert markup, so every story
+// keeps the same blocks whether or not the walkthrough ever runs.
 const mainColumnBlocks = () => [
   <HomeHero key="hero" />,
   <ShortcutCards key="shortcuts" />,
-  <FeedSection
-    key="needs-you"
-    label="Needs you"
-    viewMore={12}
-    rows={[
-      {
-        icon: PalmTree,
-        title: "Request time off",
-        subtitle: "You have 5 days of leave expiring next month.",
-      },
-      {
-        icon: Clock,
-        title: "Missing clock-out",
-        subtitle: "You clocked in but never clocked out yesterday.",
-      },
-      {
-        icon: Receipt,
-        title: "Submit an expense",
-        subtitle: "Snap a receipt and I'll file the expense.",
-      },
-      {
-        icon: Comment,
-        title: "Ask HR anything",
-        subtitle: "Get a policy answer, or have it raised with HR.",
-      },
-      {
-        icon: Target,
-        title: "Draft my self-review",
-        subtitle: "Turn your bullet points into review-ready text.",
-      },
-      { icon: File, title: "Contract to sign", subtitle: "Q3 addendum" },
-    ]}
-  />,
+  <div key="needs-you" {...HOME_WALKTHROUGH.anchor("needs-you")}>
+    <FeedSection
+      label="Needs you"
+      viewMore={12}
+      rows={[
+        {
+          icon: PalmTree,
+          title: "Request time off",
+          subtitle: "You have 5 days of leave expiring next month.",
+        },
+        {
+          icon: Clock,
+          title: "Missing clock-out",
+          subtitle: "You clocked in but never clocked out yesterday.",
+        },
+        {
+          icon: Receipt,
+          title: "Submit an expense",
+          subtitle: "Snap a receipt and I'll file the expense.",
+        },
+        {
+          icon: Comment,
+          title: "Ask HR anything",
+          subtitle: "Get a policy answer, or have it raised with HR.",
+        },
+        {
+          icon: Target,
+          title: "Draft my self-review",
+          subtitle: "Turn your bullet points into review-ready text.",
+        },
+        { icon: File, title: "Contract to sign", subtitle: "Q3 addendum" },
+      ]}
+    />
+  </div>,
   <FeedSection
     key="one-working"
     label="One working for you"
@@ -1740,6 +1814,67 @@ export const Loading: Story = {
       </NewHomeLayout>
     </div>
   ),
+}
+
+/* =========================== guided walkthrough =========================== */
+
+/**
+ * The same Home, walked through: `HOME_WALKTHROUGH.start()` on mount, and a
+ * control to see it again — a walkthrough is over once it is finished or
+ * skipped, and reloading the story is a poor way to review it.
+ */
+const GuidedHome = () => {
+  // A first-run tour is not something the reader asks for, so it starts with the
+  // page. `stop()` on the way out, or the walkthrough would outlive the story
+  // it is describing — Storybook keeps the coachmark store between stories.
+  useEffect(() => {
+    HOME_WALKTHROUGH.start()
+    return () => HOME_WALKTHROUGH.stop()
+  }, [])
+
+  return (
+    <>
+      <Home />
+      {/* Under the shield (`z-[1249]`) on purpose: while the walkthrough is up
+          this is part of the page, dimmed and unpressable like everything else
+          in it. */}
+      <div className="fixed bottom-6 left-6">
+        <F0Button
+          variant="outline"
+          label="Restart the walkthrough"
+          onClick={() => {
+            HOME_WALKTHROUGH.start()
+          }}
+        />
+      </div>
+    </>
+  )
+}
+
+/**
+ * A THREE-STEP WALKTHROUGH of this Home, declared with
+ * `defineStepByStepCoachmarkGuidance` (see `HOME_WALKTHROUGH` at the top of this
+ * file): the composer block, then the "Needs you" list, then the rail's own
+ * add-widget control.
+ *
+ * WHAT THE WALKTHROUGH DOES BEYOND POINTING:
+ * - the page is dimmed except the step's element, which stays lit at full
+ *   strength — the hole is the real element, not a copy of it;
+ * - a shield (`data-f0-coachmark-blocker`) swallows every press on the page, the
+ *   lit element included, so the only way on is the panel's own button;
+ * - a press that went nowhere makes the panel WIGGLE, which is the panel
+ *   answering for it;
+ * - five of those and the walkthrough gives up (`skipAfterOutsideClicks`) and
+ *   reports a dismissal: a reader pressing past it five times is telling us they
+ *   want out, and the way out cannot be the button they are ignoring.
+ *
+ * The first two steps name elements this file anchors (`anchor("ask-one")`,
+ * `anchor("needs-you")`); the third points at `[data-add-widget="right"]`, the
+ * handle the LAYOUT puts on the rail's add control — as a column and as a
+ * collapsed strip, so a narrow window walks the same three steps.
+ */
+export const GuidedWalkthrough: Story = {
+  render: () => <GuidedHome />,
 }
 
 /* ============================= glyph actions ============================= */
