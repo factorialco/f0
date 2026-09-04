@@ -530,14 +530,18 @@ export const F0CommandPalette = ({
           from the top edge rather than swelling out of its own middle.
           `withTranslateAnimation={false}` drops the wrapper's default slide,
           which on top of the scale reads as two separate movements.
-          `duration-[400ms]` overrides the 200ms the wrapper ships with —
-          tailwind-merge keeps the later of two durations.
+          The timing is written as arbitrary PROPERTIES rather than as an
+          arbitrary-value `duration` utility. That utility is ambiguous here —
+          Tailwind core maps `duration` to `transition-duration` while
+          tailwindcss-animate maps it to `animation-duration` — and Tailwind warns
+          at build time and then picks one for you. Naming the property leaves
+          nothing to pick, and it overrides the 200ms the wrapper ships with.
 
           `motion-reduce:animate-none` is the whole concession to
           `prefers-reduced-motion`: the panel simply appears.
         */
         withTranslateAnimation={false}
-        wrapperClassName="items-start justify-center pt-[12vh] origin-top duration-[400ms] ease-out motion-reduce:animate-none"
+        wrapperClassName="origin-top items-start justify-center pt-[12vh] [animation-duration:400ms] [animation-timing-function:cubic-bezier(0.16,1,0.3,1)] motion-reduce:animate-none"
         /*
           NO SCRIM. The page behind keeps its exact brightness; depth comes from
           the panel's own frost and shadow, so only what is directly behind the
