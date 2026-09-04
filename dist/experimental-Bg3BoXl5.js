@@ -34689,7 +34689,7 @@ const YI = ({ keys: a, label: C }) => /* @__PURE__ */ te("span", { className: "i
       "aria-label": V.commandPalette.label,
       "aria-describedby": void 0,
       withTranslateAnimation: !1,
-      wrapperClassName: "items-start justify-center pt-[12vh] origin-top duration-[400ms] ease-out motion-reduce:animate-none",
+      wrapperClassName: "origin-top items-start justify-center pt-[12vh] [animation-duration:400ms] [animation-timing-function:cubic-bezier(0.16,1,0.3,1)] motion-reduce:animate-none",
       overlayClassName: "bg-transparent",
       className: Ue(
         // Wide enough for a result and its context to share one line. Narrower,
@@ -36243,7 +36243,7 @@ const Pd = (a, C) => {
     });
     U.observe(k), f.current = U;
   }, []), shouldMount: a };
-}, Vd = "w-[24rem] max-w-full", SP = "w-[32rem] max-w-full", RP = "gap-0.5", MP = "pointer-events-none absolute inset-x-0 bottom-0 h-[46%] bg-[linear-gradient(to_top,rgba(0,0,0,0.5),rgba(0,0,0,0.18)_45%,transparent)]", PP = "bg-[hsl(222_31%_11%)]", VP = "bg-[hsl(220_39%_6%/0.72)]", GP = "bg-[hsl(220_39%_6%/0.6)]", EP = "bg-[hsl(220_39%_6%/0.55)]", TP = () => import("./LocationMap-z28heUfO.js"), NP = Qs(TP), ZP = 3 / 2, KP = ({ latitude: a, longitude: C }) => `https://www.google.com/maps?q=${a},${C}`, SU = ({
+}, Vd = "w-[24rem] max-w-full", SP = "w-[32rem] max-w-full", RP = "gap-0.5", MP = "pointer-events-none absolute inset-x-0 bottom-0 h-[46%] bg-[linear-gradient(to_top,rgba(0,0,0,0.5),rgba(0,0,0,0.18)_45%,transparent)]", PP = "bg-[hsl(222_31%_11%)]", VP = "bg-[hsl(220_39%_6%/0.72)]", GP = "bg-[hsl(220_39%_6%/0.6)]", EP = "bg-[hsl(220_39%_6%/0.55)]", TP = () => import("./LocationMap-9TWsagTs.js"), NP = Qs(TP), ZP = 3 / 2, KP = ({ latitude: a, longitude: C }) => `https://www.google.com/maps?q=${a},${C}`, SU = ({
   location: a,
   cornerClass: C = "rounded-xl",
   surfaceClassName: f,
