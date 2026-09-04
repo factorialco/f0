@@ -299,3 +299,90 @@ describe("steps whose element is not there", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
   })
 })
+
+describe("what a guidance's onEnd reports", () => {
+  beforeEach(() => {
+    coachmarks.closeAll()
+  })
+
+  it("says the walkthrough never ran when it had nothing to point at", async () => {
+    const onEnd = vi.fn()
+    const guidance = defineStepByStepCoachmarkGuidance({
+      lookForTargetsMs: 0,
+      steps: [{ targetElement: "#nowhere", title: "Never mounted" }],
+      onEnd,
+    })
+    renderPage(guidance)
+
+    act(() => {
+      guidance.start()
+    })
+
+    // Silence on screen is not silence to whoever is counting: "nobody finished
+    // the tour" and "the tour never ran" want opposite fixes.
+    await waitFor(() =>
+      expect(onEnd).toHaveBeenCalledWith({
+        reason: "unavailable",
+        step: 0,
+        totalSteps: 0,
+        outsidePresses: 0,
+      })
+    )
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+  })
+
+  it("counts only the steps the reader was offered", async () => {
+    const onEnd = vi.fn()
+    const guidance = defineStepByStepCoachmarkGuidance({
+      lookForTargetsMs: 0,
+      steps: [
+        { element: "composer", title: "Ask for it" },
+        { targetElement: "#nowhere", title: "Never mounted" },
+        { element: "feed", title: "What needs you" },
+      ],
+      onEnd,
+    })
+    renderPage(guidance)
+
+    act(() => {
+      guidance.start()
+    })
+    await screen.findByRole("dialog")
+    await next()
+    await userEvent.click(await screen.findByRole("button", { name: "Got it" }))
+
+    // 2 of 2, not 3: the dropped step was never part of what was walked, so it
+    // cannot be part of what is measured.
+    await waitFor(() =>
+      expect(onEnd).toHaveBeenCalledWith({
+        reason: "completed",
+        step: 2,
+        totalSteps: 2,
+        outsidePresses: 0,
+      })
+    )
+  })
+
+  it("says nothing when the page stops the walkthrough", async () => {
+    const onEnd = vi.fn()
+    const guidance = defineStepByStepCoachmarkGuidance({
+      steps: [{ element: "composer", title: "Ask for it" }],
+      onEnd,
+    })
+    renderPage(guidance)
+
+    act(() => {
+      guidance.start()
+    })
+    await screen.findByRole("dialog")
+
+    act(() => {
+      guidance.stop()
+    })
+
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    )
+    expect(onEnd).not.toHaveBeenCalled()
+  })
+})

@@ -14,6 +14,8 @@ export type {
 } from "./guidance"
 export type {
   CoachmarkAction,
+  CoachmarkEnd,
+  CoachmarkEndReason,
   CoachmarkId,
   CoachmarkOptions,
   CoachmarkSequenceOptions,

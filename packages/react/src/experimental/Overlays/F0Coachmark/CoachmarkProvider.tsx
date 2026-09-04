@@ -4,7 +4,7 @@ import { useReducedMotion } from "@/lib/a11y"
 
 import { F0Coachmark } from "./F0Coachmark"
 import { coachmarkStore } from "./store"
-import type { CoachmarkItem } from "./types"
+import type { CoachmarkEndReason, CoachmarkItem } from "./types"
 import { useTargetElement } from "./useTargetElement"
 
 /**
@@ -102,6 +102,26 @@ const ActiveCoachmark = ({
 
   const close = () => coachmarkStore.removeItem(item.id)
 
+  /**
+   * ENDS THE COACHMARK AND SAYS HOW. The one place all three endings go through,
+   * so `onEnd` cannot get out of step with what actually happened — and so the
+   * step the reader got to is read at the moment they left rather than
+   * reconstructed afterwards.
+   *
+   * `coachmarkStore.removeItem` from anywhere else (a `coachmarks.close`, a
+   * guidance's `stop()`) deliberately does NOT come through here: nobody ended
+   * it, so there is no outcome.
+   */
+  const endWith = (reason: CoachmarkEndReason) => {
+    item.onEnd?.({
+      reason,
+      step: stepIndex + 1,
+      totalSteps: item.steps.length,
+      outsidePresses: outsidePresses.current,
+    })
+    close()
+  }
+
   // `null` while the step's target is not in the DOM — see useTargetElement.
   if (!target) return null
 
@@ -125,14 +145,14 @@ const ActiveCoachmark = ({
         step.action?.onClick?.()
         if (isLastStep) {
           item.onComplete?.()
-          close()
+          endWith("completed")
         } else {
           advanceTo(stepIndex + 1)
         }
       }}
       onClose={() => {
         item.onDismiss?.()
-        close()
+        endWith("dismissed")
       }}
       overlay={item.overlay}
       leaving={leaving}
@@ -140,10 +160,11 @@ const ActiveCoachmark = ({
       onOutsideInteraction={() => {
         outsidePresses.current += 1
         if (skipAfter <= 0 || outsidePresses.current < skipAfter) return
-        // The same ending as the close button: the user asked to be out of the
-        // way of the page, which is what dismissing is.
+        // A dismissal to the app's bookkeeping — the reader asked to be out of
+        // the way of the page — and its own `reason` to whoever is tracking,
+        // because "pressed past it until it went away" is not "closed it".
         item.onDismiss?.()
-        close()
+        endWith("skipped")
       }}
     />
   )

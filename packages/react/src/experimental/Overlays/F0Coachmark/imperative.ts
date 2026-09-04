@@ -91,6 +91,7 @@ const open = (options: CoachmarkOptions): CoachmarkId => {
   coachmarkStore.addItem({
     id,
     steps,
+    onEnd: options.onEnd,
     onDismiss: options.onDismiss,
     onComplete: options.onComplete,
     overlay: options.overlay,

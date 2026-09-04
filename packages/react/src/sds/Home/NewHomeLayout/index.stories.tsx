@@ -151,8 +151,14 @@ const HOME_WALKTHROUGH = defineStepByStepCoachmarkGuidance({
       side: "left",
     },
   ],
-  onComplete: () => console.log("walkthrough: finished"),
-  onDismiss: () => console.log("walkthrough: abandoned"),
+  // ONE CALLBACK FOR THE WHOLE OUTCOME — what an app would send to analytics:
+  // which way out the reader took, how far they got, and how many times they
+  // pressed past the panel on the way. `completed` / `dismissed` / `skipped`,
+  // plus `unavailable` for the run where nothing it points at was on the page.
+  onEnd: ({ reason, step, totalSteps, outsidePresses }) =>
+    console.log(
+      `walkthrough: ${reason} at ${step}/${totalSteps} (${outsidePresses} presses outside)`
+    ),
 })
 
 /* =============================== main column =============================== */

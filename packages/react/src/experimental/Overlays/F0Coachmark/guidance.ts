@@ -1,7 +1,12 @@
 import { nanoid } from "nanoid"
 
 import { coachmarks } from "./imperative"
-import type { CoachmarkId, CoachmarkStep, CoachmarkTarget } from "./types"
+import type {
+  CoachmarkEnd,
+  CoachmarkId,
+  CoachmarkStep,
+  CoachmarkTarget,
+} from "./types"
 
 /**
  * The attribute a guidance's `anchor()` writes, and the one its steps are
@@ -75,6 +80,12 @@ export type CoachmarkGuidanceOptions<TElement extends string> = {
    * has no permission for) would mean no walkthrough at all.
    */
   lookForTargetsMs?: number
+  /**
+   * HOW IT ENDED, IN ONE PLACE: finished, left part-way through, pressed past
+   * until it gave up — or never opened at all, because nothing it points at was
+   * on the page. One event with a `reason`, which is what a funnel wants.
+   */
+  onEnd?: (end: CoachmarkEnd) => void
   /** Abandoned: closed, escaped, or skipped by pressing past it. */
   onDismiss?: () => void
   /** Finished: the action on the last step. */
@@ -133,7 +144,9 @@ export type CoachmarkGuidance<TElement extends string> = {
  *     // Something f0 renders: point at it directly.
  *     { targetElement: '[data-add-widget="right"]', title: "Add a widget" },
  *   ],
- *   onComplete: () => track("home-tour-finished"),
+ *   // Finished, dropped out at step N, pressed past it, or never shown.
+ *   onEnd: ({ reason, step, totalSteps }) =>
+ *     track("home-tour-ended", { reason, step, totalSteps }),
  * })
  *
  * // In the page
@@ -190,7 +203,19 @@ export const defineStepByStepCoachmarkGuidance = <
     // steps about elements that are not there is worse than silence. No warning
     // either — an absent element is a legitimate state (a control this user has
     // no permission for), not a mistake to report.
-    if (present.length === 0) return
+    //
+    // REPORTED, THOUGH. Silence on screen is not silence to whoever is counting:
+    // without this a funnel cannot tell "nobody finished the tour" from "the
+    // tour never ran", and those want opposite fixes.
+    if (present.length === 0) {
+      options.onEnd?.({
+        reason: "unavailable",
+        step: 0,
+        totalSteps: 0,
+        outsidePresses: 0,
+      })
+      return
+    }
 
     coachmarks.open({
       id,
@@ -203,6 +228,7 @@ export const defineStepByStepCoachmarkGuidance = <
       steps: present,
       overlay: options.overlay ?? true,
       skipAfterOutsideClicks: options.skipAfterOutsideClicks,
+      onEnd: options.onEnd,
       onDismiss: options.onDismiss,
       onComplete: options.onComplete,
     })

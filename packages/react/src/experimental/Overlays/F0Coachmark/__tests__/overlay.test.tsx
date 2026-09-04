@@ -10,7 +10,7 @@ import {
 
 import { CoachmarkProvider } from "../CoachmarkProvider"
 import { coachmarks } from "../imperative"
-import type { CoachmarkOptions } from "../types"
+import type { CoachmarkEnd, CoachmarkOptions } from "../types"
 
 const renderApp = () =>
   render(
@@ -388,5 +388,121 @@ describe("what the shield does to focus", () => {
     shield?.dispatchEvent(press)
 
     expect(press.defaultPrevented).toBe(true)
+  })
+})
+
+/**
+ * ONE CALLBACK FOR THE WHOLE OUTCOME. Every ending arrives at `onEnd` exactly
+ * once, carrying which way out the reader took and how far they got — the shape
+ * a funnel is read off, rather than two callbacks to join up afterwards.
+ */
+describe("what onEnd reports", () => {
+  beforeEach(() => {
+    coachmarks.closeAll()
+  })
+
+  const twoSteps = (onEnd: (end: CoachmarkEnd) => void): CoachmarkOptions => ({
+    steps: [
+      { targetElement: "#filters", title: "First" },
+      { targetElement: "#outside", title: "Second" },
+    ],
+    overlay: true,
+    onEnd,
+  })
+
+  it("reports reaching the end, on the last step", async () => {
+    const onEnd = vi.fn()
+    renderApp()
+    open(twoSteps(onEnd))
+    await screen.findByRole("dialog")
+
+    await userEvent.click(screen.getByRole("button", { name: "Next" }))
+    await userEvent.click(await screen.findByRole("button", { name: "Got it" }))
+
+    await waitFor(() => expect(onEnd).toHaveBeenCalledOnce())
+    expect(onEnd).toHaveBeenCalledWith({
+      reason: "completed",
+      step: 2,
+      totalSteps: 2,
+      outsidePresses: 0,
+    })
+  })
+
+  it("reports where the reader dropped out", async () => {
+    const onEnd = vi.fn()
+    renderApp()
+    open(twoSteps(onEnd))
+    await screen.findByRole("dialog")
+
+    // Left on the FIRST step, which is the part a funnel cannot infer.
+    await userEvent.click(screen.getByRole("button", { name: "Close" }))
+
+    await waitFor(() => expect(onEnd).toHaveBeenCalledOnce())
+    expect(onEnd).toHaveBeenCalledWith({
+      reason: "dismissed",
+      step: 1,
+      totalSteps: 2,
+      outsidePresses: 0,
+    })
+  })
+
+  it("tells a skip apart from a dismissal, and counts the presses", async () => {
+    const onEnd = vi.fn()
+    const onDismiss = vi.fn()
+    renderApp()
+    open({ ...twoSteps(onEnd), onDismiss })
+    await screen.findByRole("dialog")
+
+    for (let press = 0; press < 5; press++) await pressOutside()
+
+    await waitFor(() => expect(onEnd).toHaveBeenCalledOnce())
+    expect(onEnd).toHaveBeenCalledWith({
+      reason: "skipped",
+      step: 1,
+      totalSteps: 2,
+      outsidePresses: 5,
+    })
+    // The narrow pair still fires: a skip is an abandonment to the app's own
+    // bookkeeping, and `onEnd` is what says which kind it was.
+    expect(onDismiss).toHaveBeenCalledOnce()
+  })
+
+  it("counts presses the reader made and then carried on past", async () => {
+    const onEnd = vi.fn()
+    renderApp()
+    open(twoSteps(onEnd))
+    await screen.findByRole("dialog")
+
+    await pressOutside()
+    await pressOutside()
+    await userEvent.click(screen.getByRole("button", { name: "Next" }))
+    await userEvent.click(await screen.findByRole("button", { name: "Got it" }))
+
+    await waitFor(() =>
+      expect(onEnd).toHaveBeenCalledWith({
+        reason: "completed",
+        step: 2,
+        totalSteps: 2,
+        outsidePresses: 2,
+      })
+    )
+  })
+
+  it("says nothing when the app closes the coachmark itself", async () => {
+    const onEnd = vi.fn()
+    renderApp()
+    open({ ...twoSteps(onEnd), id: "tour" })
+    await screen.findByRole("dialog")
+
+    act(() => {
+      coachmarks.close("tour")
+    })
+
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    )
+    // Nobody ended it, so there is no outcome — counting this as a drop-off
+    // would blame the reader for a navigation.
+    expect(onEnd).not.toHaveBeenCalled()
   })
 })

@@ -5,6 +5,8 @@ export {
   CoachmarkProvider,
   defineStepByStepCoachmarkGuidance,
   type CoachmarkAction,
+  type CoachmarkEnd,
+  type CoachmarkEndReason,
   type CoachmarkGuidance,
   type CoachmarkGuidanceOptions,
   type CoachmarkGuidanceStep,

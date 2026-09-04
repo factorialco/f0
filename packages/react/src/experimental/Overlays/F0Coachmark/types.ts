@@ -47,6 +47,48 @@ type CoachmarkPlacement = {
   sideOffset?: number
 }
 
+/**
+ * HOW A COACHMARK ENDED. One value per way out, so a funnel can be read off it
+ * without joining two callbacks together:
+ *
+ * - `completed` — the action on the last step. The reader saw the whole thing.
+ * - `dismissed` — the close button or Escape, before the last step. They left
+ *   part-way through, and `step` says where.
+ * - `skipped` — it gave up after `skipAfterOutsideClicks` presses on the dimmed
+ *   page. Not the same as dismissing: the reader never used the way out they
+ *   were offered, they pressed past it until it went away.
+ * - `unavailable` — it never opened, because nothing it points at was on the
+ *   page (only `defineStepByStepCoachmarkGuidance` reports this). The reason a
+ *   funnel can be missing readers who were never shown anything.
+ */
+export type CoachmarkEndReason =
+  | "completed"
+  | "dismissed"
+  | "skipped"
+  | "unavailable"
+
+/** What `onEnd` is told. */
+export type CoachmarkEnd = {
+  reason: CoachmarkEndReason
+  /**
+   * The step it ended on, 1-based — how far the reader got. `0` when it never
+   * opened (`unavailable`).
+   */
+  step: number
+  /**
+   * How many steps the reader was actually offered. Not necessarily how many
+   * were declared: a guidance leaves out the steps whose element was not there.
+   */
+  totalSteps: number
+  /**
+   * Presses on the dimmed page over the whole coachmark — the wiggles. A tour
+   * that completed with six of these was fought with; one that completed with
+   * none was followed. Always `0` without `overlay`, which has no shield to
+   * press.
+   */
+  outsidePresses: number
+}
+
 type CoachmarkContent = {
   /** Headline. Also the accessible name of the panel. */
   title: string
@@ -98,9 +140,25 @@ type CoachmarkBase = CoachmarkPlacement &
      */
     id?: CoachmarkId
     /**
+     * HOW IT ENDED, IN ONE PLACE — reached the end, left part-way through, or
+     * pressed past until it gave up, and how far the reader got either way. The
+     * callback to reach for when tracking a walkthrough: every ending comes
+     * through here exactly once, so a funnel is one event carrying a `reason`
+     * rather than two callbacks to join up afterwards.
+     *
+     * NOT called when the app itself closes the coachmark (`coachmarks.close`, a
+     * guidance's `stop()`, the page unmounting): nobody ended it, so there is no
+     * outcome to report.
+     */
+    onEnd?: (end: CoachmarkEnd) => void
+    /**
      * Called when the user closes the coachmark with the close button or Escape,
      * before the last step is reached. For tracking only — the coachmark closes
      * itself either way.
+     *
+     * Also fires when a walkthrough gives up after too many presses on the
+     * dimmed page, which is a dismissal by any other name. `onEnd` is what tells
+     * those two apart.
      */
     onDismiss?: () => void
     /**
@@ -161,6 +219,7 @@ export type CoachmarkOptions = CoachmarkSingleOptions | CoachmarkSequenceOptions
 export type CoachmarkItem = {
   id: CoachmarkId
   steps: CoachmarkStep[]
+  onEnd?: (end: CoachmarkEnd) => void
   onDismiss?: () => void
   onComplete?: () => void
   overlay?: boolean
