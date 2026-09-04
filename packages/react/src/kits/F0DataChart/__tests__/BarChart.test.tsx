@@ -2363,3 +2363,89 @@ describe("BarChart — target progress row", () => {
     expect(html).not.toContain("Infinity")
   })
 })
+
+// ---------------------------------------------------------------------------
+// Category comparison — a consumer-computed line under the hovered value.
+// ---------------------------------------------------------------------------
+
+describe("BarChart — category comparison", () => {
+  function hover(params: unknown) {
+    const call = setOptionMock.mock.calls.at(-1)
+    if (!call) throw new Error("setOption was never called")
+    const formatter = (
+      call[0] as { tooltip?: { formatter?: (p: unknown) => string } }
+    ).tooltip?.formatter
+    if (!formatter) throw new Error("the chart built no tooltip formatter")
+    return formatter(params)
+  }
+
+  const chart = (withComparison: boolean) => (
+    <F0DataChart
+      type="bar"
+      categories={["Engineering", "Sales"]}
+      series={[
+        { name: "This period", data: [96, 58] },
+        { name: "Previous period", data: [84, 57], muted: true },
+      ]}
+      categoryComparison={
+        withComparison
+          ? {
+              Engineering: {
+                label: "+12 (+14.3%)",
+                description: "Previous: 84",
+                tone: "positive",
+              },
+            }
+          : undefined
+      }
+    />
+  )
+
+  it("adds the category's comparison line under the value", () => {
+    render(chart(true))
+
+    const html = hover({
+      seriesName: "This period",
+      name: "Engineering",
+      value: 96,
+      dataIndex: 0,
+    })
+    expect(html).toContain("+12 (+14.3%)")
+    expect(html).toContain("Previous: 84")
+    expect(html).toContain(resolveChartTheme().colors.positive)
+  })
+
+  it("adds no line for a category without an entry, nor on a muted baseline bar", () => {
+    render(chart(true))
+
+    expect(
+      hover({
+        seriesName: "This period",
+        name: "Sales",
+        value: 58,
+        dataIndex: 1,
+      })
+    ).not.toContain("Previous")
+    expect(
+      hover({
+        seriesName: "Previous period",
+        name: "Engineering",
+        value: 84,
+        dataIndex: 0,
+      })
+    ).not.toContain("+12 (+14.3%)")
+  })
+
+  it("changes nothing without the prop", () => {
+    render(chart(false))
+
+    const html = hover({
+      seriesName: "This period",
+      name: "Engineering",
+      value: 96,
+      dataIndex: 0,
+    })
+    expect(html).toContain("96")
+    expect(html).not.toContain("Previous")
+  })
+})

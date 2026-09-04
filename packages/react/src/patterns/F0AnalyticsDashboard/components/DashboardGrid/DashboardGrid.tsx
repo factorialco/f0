@@ -62,6 +62,7 @@ interface DashboardGridProps<Filters extends FiltersDefinition> {
   onLayoutChange?: (layout: DashboardItemLayout[]) => void
   /** Incrementing counter that forces the grid to reset rows to initial layout. */
   resetKey?: number
+  dataKey?: string
   /** Called when a chart item's type is changed */
   onTransformChart?: (
     itemId: string,
@@ -98,6 +99,7 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
   editMode,
   onLayoutChange,
   resetKey,
+  dataKey,
   onTransformChart,
   onAskAi,
   onAskAiTarget,
@@ -549,6 +551,7 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
           item={soleItem}
           itemFilters={itemFilters?.(soleItem)}
           filters={filters}
+          dataKey={dataKey}
           editMode={editMode}
           onDelete={handleDelete}
           onTransformChart={onTransformChart}
@@ -590,6 +593,7 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
             item={fullscreenItem}
             itemFilters={itemFilters?.(fullscreenItem)}
             filters={filters}
+            dataKey={dataKey}
             editMode={editMode}
             onDelete={handleDelete}
             onTransformChart={onTransformChart}
@@ -679,6 +683,7 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
                       item={item}
                       itemFilters={itemFilters?.(item)}
                       filters={filters}
+                      dataKey={dataKey}
                       editMode={editMode}
                       onDelete={handleDelete}
                       onTransformChart={onTransformChart}
@@ -1098,11 +1103,13 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
   onAskAiTarget,
   isFullscreen,
   onFullscreenChange,
+  dataKey,
 }: {
   item: DashboardItemType<Filters>
   filters: FiltersState<Filters>
   actions?: DropdownItemType[]
   itemFilters?: DashboardItemFiltersConfig
+  dataKey?: string
   editMode?: boolean
   onDelete?: (id: string) => void
   onTransformChart?: (
@@ -1121,6 +1128,7 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
         <ChartItem
           item={item}
           filters={filters}
+          dataKey={dataKey}
           actions={actions}
           itemFilters={itemFilters}
           editMode={editMode}
@@ -1137,6 +1145,7 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
         <MetricItem
           item={item}
           filters={filters}
+          dataKey={dataKey}
           actions={actions}
           itemFilters={itemFilters}
           editMode={editMode}
@@ -1152,6 +1161,7 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
         <CollectionItem
           item={item}
           filters={filters}
+          dataKey={dataKey}
           actions={actions}
           itemFilters={itemFilters}
           editMode={editMode}

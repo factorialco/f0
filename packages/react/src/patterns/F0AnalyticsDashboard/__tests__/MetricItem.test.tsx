@@ -1,9 +1,10 @@
 import { waitFor } from "@testing-library/react"
+import { userEvent } from "@testing-library/user-event"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { zeroRender as render, screen } from "@/testing/test-utils"
 
-import type { DashboardMetricItem } from "../types"
+import type { DashboardMetricData, DashboardMetricItem } from "../types"
 
 import { MetricItem, MetricValue } from "../components/MetricItem/MetricItem"
 
@@ -160,7 +161,10 @@ describe("MetricItem", () => {
     expect(container).not.toHaveAttribute("tabindex")
 
     rerender(
-      <MetricValue value="100" trend={{ percent: 100, direction: "up" }} />
+      <MetricValue
+        value="100"
+        trend={{ direction: "up", text: "100.0%", srText: "+100.0%" }}
+      />
     )
 
     await screen.findByText("+100.0%")
@@ -191,5 +195,96 @@ describe("MetricItem", () => {
     containerSize.width = 600
     rerender(<MetricValue value="100" />)
     await waitFor(() => expect(container).not.toHaveAttribute("tabindex"))
+  })
+
+  describe("comparison trend", () => {
+    const withTrend = (data: Partial<DashboardMetricData>) =>
+      metricItem({
+        fetchData: () =>
+          Promise.resolve({ value: 123, previousValue: 100, ...data }),
+      })
+
+    /** The visible half of the trend; its screen-reader twin repeats the text. */
+    const findTrendText = (text: string) =>
+      screen.findByText(text, { selector: "[aria-hidden='true']" })
+
+    it("prefers the trend from data over the one derived from previousValue", async () => {
+      render(
+        <MetricItem
+          item={withTrend({ trend: { direction: "down", label: "-1.2 pp" } })}
+          filters={{}}
+        />
+      )
+
+      expect(await findTrendText("-1.2 pp")).toBeInTheDocument()
+      expect(screen.queryByText("23.0%")).toBeNull()
+    })
+
+    it("renders a flat trend without an arrow, in muted text", async () => {
+      render(
+        <MetricItem
+          item={withTrend({ trend: { direction: "flat", label: "No change" } })}
+          filters={{}}
+        />
+      )
+
+      const label = await findTrendText("No change")
+      expect(label).toHaveClass("text-f1-foreground-secondary")
+      expect(label.parentElement?.querySelector("svg")).toBeNull()
+    })
+
+    it("keeps a computed flat trend hidden", async () => {
+      render(
+        <MetricItem
+          item={metricItem({
+            fetchData: () =>
+              Promise.resolve({ value: 100, previousValue: 100 }),
+          })}
+          filters={{}}
+        />
+      )
+
+      await screen.findByText("100")
+      expect(screen.queryByText("0.0%")).toBeNull()
+    })
+
+    it("announces the comparison label with the trend", async () => {
+      render(
+        <MetricItem
+          item={withTrend({
+            trend: { direction: "up", label: "+10.7%" },
+            comparisonLabel: "vs previous month",
+          })}
+          filters={{}}
+        />
+      )
+
+      expect(
+        await screen.findByText("+10.7% vs previous month")
+      ).toBeInTheDocument()
+    })
+
+    it("shows the comparison label in a tooltip on the trend", async () => {
+      const user = userEvent.setup()
+      render(
+        <MetricItem
+          item={withTrend({
+            trend: { direction: "up", label: "+10.7%" },
+            comparisonLabel: "vs previous month",
+          })}
+          filters={{}}
+        />
+      )
+
+      await user.hover(await findTrendText("+10.7%"))
+
+      await waitFor(
+        () =>
+          expect(screen.getByRole("tooltip")).toHaveTextContent(
+            "vs previous month"
+          ),
+        { timeout: 3000 }
+      )
+    })
   })
 })

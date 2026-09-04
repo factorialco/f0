@@ -12,6 +12,7 @@ import {
 } from "../../utils/colors"
 import {
   buildItemTooltip,
+  comparisonRow,
   buildLegend,
   DEFAULT_EMPHASIS,
   renderValueTooltip,
@@ -49,6 +50,7 @@ export function usePieChartOptions(
     showPercentage = false,
     valueFormatter,
     tooltipValueFormatter,
+    categoryComparison,
     echartsOptions,
   }: F0DataChartPieProps,
   size: PieChartSize
@@ -191,6 +193,7 @@ export function usePieChartOptions(
                   value: formatTooltipValue(total),
                   label: i18n.dataChart.tooltip.total,
                 },
+                comparisonRow(categoryComparison?.[String(p.name)], theme),
               ],
             },
             theme
@@ -213,6 +216,7 @@ export function usePieChartOptions(
     showPercentage,
     valueFormatter,
     tooltipValueFormatter,
+    categoryComparison,
     echartsOptions,
     theme,
     i18n,

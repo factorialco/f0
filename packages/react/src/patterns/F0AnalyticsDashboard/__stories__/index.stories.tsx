@@ -1,16 +1,23 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { useId, useState } from "react"
+import { useId, useMemo, useState } from "react"
 import { expect, fn, userEvent, waitFor, within } from "storybook/test"
 
+import type { F0SelectItemProps } from "@/components/F0Select"
 import type { FiltersState } from "@/patterns/OneFilterPicker/types"
+
+import { F0Select } from "@/components/F0Select"
 
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import type {
+  DashboardCategoryComparison,
+  DashboardChartData,
   DashboardItem,
   DashboardItemFiltersConfig,
   DashboardItemFiltersState,
+  DashboardMetricData,
+  DashboardMetricTrend,
 } from "../types"
 
 import { F0AnalyticsDashboard } from "../index"
@@ -1070,5 +1077,478 @@ export const HoverItemFilterSignal: Story = {
       await expect(trigger).toHaveFocus()
       await waitFor(() => expect(trigger).toBeVisible())
     })
+  },
+}
+
+// ---------------------------------------------------------------------------
+// Period comparison
+// ---------------------------------------------------------------------------
+
+const COMPARISON_PERIODS = {
+  previous_week: "week",
+  previous_month: "month",
+  previous_quarter: "quarter",
+  previous_half_year: "half year",
+  previous_year: "year",
+} as const
+
+type CompareTarget = "none" | keyof typeof COMPARISON_PERIODS
+
+const comparisonOptions: F0SelectItemProps<CompareTarget>[] = [
+  { value: "none", label: "No comparison" },
+  ...Object.entries(COMPARISON_PERIODS).map(([value, period]) => ({
+    value: value as CompareTarget,
+    label: `Previous ${period}`,
+  })),
+]
+
+const COMPARISON_MONTHS = ["Apr", "May", "Jun", "Jul", "Aug", "Sep"]
+
+const CURRENT_HEADCOUNT = [231, 236, 240, 243, 246, 248]
+const PREVIOUS_HEADCOUNT = [204, 209, 214, 219, 221, 224]
+
+/** Stands in for the host's comparison endpoint. */
+const withLatency = <T,>(value: T): Promise<T> =>
+  new Promise((resolve) => setTimeout(() => resolve(value), 400))
+
+const comparisonItems = (compareTo: CompareTarget): DashboardItem[] => {
+  const comparing = compareTo !== "none"
+  const comparisonLabel = comparing
+    ? `vs previous ${COMPARISON_PERIODS[compareTo]}`
+    : ""
+
+  return [
+    {
+      id: "headcount",
+      type: "metric",
+      title: "Headcount",
+      fetchData: () =>
+        withLatency<DashboardMetricData>(
+          comparing
+            ? {
+                value: 248,
+                trend: { direction: "up", label: "+10.7%" },
+                comparisonLabel,
+              }
+            : { value: 248 }
+        ),
+    },
+    {
+      id: "voluntary-attrition",
+      type: "metric",
+      title: "Voluntary attrition",
+      format: { type: "percent" },
+      decimals: 1,
+      fetchData: () =>
+        withLatency<DashboardMetricData>(
+          comparing
+            ? {
+                value: 4.2,
+                // Percentage points, not a percentage of a percentage — the
+                // reason a host formats the label itself. Attrition falling is
+                // good news, so the down arrow reads positive.
+                trend: {
+                  direction: "down",
+                  label: "−1.2 pp",
+                  sentiment: "positive",
+                },
+                comparisonLabel,
+              }
+            : { value: 4.2 }
+        ),
+    },
+    {
+      id: "absenteeism",
+      type: "metric",
+      title: "Absenteeism",
+      format: { type: "percent" },
+      decimals: 1,
+      fetchData: () =>
+        withLatency<DashboardMetricData>(
+          comparing
+            ? {
+                value: 3.1,
+                trend: {
+                  direction: "up",
+                  label: "+0.8 pp",
+                  sentiment: "negative",
+                },
+                comparisonLabel,
+              }
+            : { value: 3.1 }
+        ),
+    },
+    {
+      id: "offer-acceptance",
+      type: "metric",
+      title: "Offer acceptance",
+      format: { type: "percent" },
+      decimals: 0,
+      fetchData: () =>
+        withLatency<DashboardMetricData>(
+          comparing
+            ? {
+                value: 87,
+                trend: { direction: "flat", label: "No change" },
+                comparisonLabel,
+              }
+            : { value: 87 }
+        ),
+    },
+    {
+      id: "headcount-trend",
+      type: "chart",
+      title: "Headcount over time",
+      chart: {
+        type: "line",
+        showDots: true,
+        comparisonSeriesNames: ["Previous period"],
+      },
+      fetchData: () =>
+        withLatency<DashboardChartData>({
+          categories: COMPARISON_MONTHS,
+          series: comparing
+            ? [
+                { name: "This period", data: CURRENT_HEADCOUNT },
+                { name: "Previous period", data: PREVIOUS_HEADCOUNT },
+              ]
+            : [{ name: "This period", data: CURRENT_HEADCOUNT }],
+        }),
+    },
+    {
+      id: "headcount-by-department",
+      type: "chart",
+      title: "Headcount by department",
+      chart: {
+        type: "bar",
+        showLegend: true,
+        comparisonSeriesNames: ["Previous period"],
+      },
+      fetchData: () =>
+        withLatency<DashboardChartData>({
+          categories: ["Engineering", "Sales", "Operations", "People"],
+          series: comparing
+            ? [
+                { name: "This period", data: [96, 58, 61, 33] },
+                { name: "Previous period", data: [84, 57, 55, 28] },
+              ]
+            : [{ name: "This period", data: [96, 58, 61, 33] }],
+        }),
+    },
+  ]
+}
+
+const ComparisonDashboard = () => {
+  const [compareTo, setCompareTo] = useState<CompareTarget>("previous_month")
+  const items = useMemo(() => comparisonItems(compareTo), [compareTo])
+
+  return (
+    <F0AnalyticsDashboard
+      items={items}
+      dataKey={compareTo}
+      navigationActions={
+        <F0Select
+          variant="inline"
+          label="Compare to"
+          placeholder="No comparison"
+          options={comparisonOptions}
+          value={compareTo}
+          onChange={setCompareTo}
+        />
+      }
+      navigationFilters={{
+        date: {
+          type: "date-navigator",
+          defaultValue: new Date(),
+          granularity: ["month", "range"],
+        },
+      }}
+    />
+  )
+}
+
+/**
+ * A host-owned comparison picker beside the date navigator (`navigationActions`),
+ * driving every widget through `dataKey`: the grid is not remounted and the
+ * figures already on screen stay readable, dimmed, until the comparison arrives.
+ *
+ * The metrics render a server-computed `trend` verbatim — a percentage, a
+ * difference in percentage points, and a neutral "No change" — each with the
+ * `comparisonLabel` in a tooltip. Attrition and absenteeism also carry a
+ * `sentiment`, which colours the change against its sign: falling attrition is
+ * a green down arrow, rising absenteeism a red up one. The chart draws the
+ * previous period faded and dashed via `comparisonSeriesNames`, still listed
+ * in the legend.
+ */
+export const PeriodComparison: Story = {
+  tags: ["no-sidebar"],
+  render: () => <ComparisonDashboard />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // Fake latency plus the grid's size measurement outlast the default wait.
+    await expect(
+      await canvas.findByText("+10.7%", undefined, { timeout: 5000 })
+    ).toBeInTheDocument()
+    await expect(canvas.getByText("No change")).toBeInTheDocument()
+    // The trend badge announces its own baseline, not just the change.
+    await expect(
+      canvas.getByText("−1.2 pp vs previous month", {
+        selector: ".sr-only",
+      })
+    ).toBeInTheDocument()
+
+    // A sentiment overrides the colour the sign would have picked.
+    const change = async (text: string) =>
+      await canvas.findByText(
+        text,
+        { selector: "[aria-hidden='true']" },
+        {
+          timeout: 5000,
+        }
+      )
+
+    await expect(await change("−1.2 pp")).toHaveClass(
+      "text-f1-foreground-positive"
+    )
+    await expect(await change("+0.8 pp")).toHaveClass(
+      "text-f1-foreground-critical"
+    )
+  },
+}
+
+/** The host's own change text, as a metric trend carries it. */
+const change = (
+  value: number,
+  delta: number,
+  sentiment?: DashboardMetricTrend["sentiment"]
+): DashboardMetricTrend => {
+  const previous = value - delta
+  const percent = previous === 0 ? 0 : (delta / previous) * 100
+  const sign = delta > 0 ? "+" : delta < 0 ? "−" : ""
+  return {
+    direction: delta > 0 ? "up" : delta < 0 ? "down" : "flat",
+    label:
+      delta === 0
+        ? "0"
+        : `${sign}${Math.abs(delta)} (${sign}${Math.abs(percent).toFixed(1)}%)`,
+    delta,
+    sentiment,
+  }
+}
+
+/** Real-shaped departments: long names, a wide spread, two new and one gone. */
+const DEPARTMENTS: {
+  id: string
+  name: string
+  headcount: number
+  delta: number
+}[] = [
+  {
+    id: "eng-platform",
+    name: "Engineering — Platform",
+    headcount: 96,
+    delta: 12,
+  },
+  { id: "eng-product", name: "Engineering — Product", headcount: 74, delta: 6 },
+  { id: "cs-emea", name: "Customer Success — EMEA", headcount: 58, delta: 9 },
+  {
+    id: "cs-americas",
+    name: "Customer Success — Americas",
+    headcount: 41,
+    delta: -3,
+  },
+  { id: "sales-ent", name: "Sales — Enterprise", headcount: 37, delta: 4 },
+  { id: "sales-mm", name: "Sales — Mid-market", headcount: 29, delta: -5 },
+  {
+    id: "mkt-brand",
+    name: "Marketing — Brand & Content",
+    headcount: 18,
+    delta: 2,
+  },
+  { id: "mkt-growth", name: "Marketing — Growth", headcount: 14, delta: 0 },
+  { id: "people", name: "People & Talent", headcount: 22, delta: 1 },
+  { id: "finance", name: "Finance & Legal", headcount: 16, delta: 0 },
+  {
+    id: "ops-facilities",
+    name: "Operations — Facilities",
+    headcount: 12,
+    delta: -2,
+  },
+  { id: "ops-it", name: "Operations — IT & Security", headcount: 15, delta: 3 },
+  { id: "data", name: "Data & Analytics", headcount: 11, delta: 5 },
+  { id: "design", name: "Design — Product & Brand", headcount: 13, delta: -1 },
+  { id: "research", name: "Research — Applied AI", headcount: 6, delta: 6 },
+  {
+    id: "partnerships",
+    name: "Partnerships — Channel",
+    headcount: 4,
+    delta: 4,
+  },
+]
+const NEW_DEPARTMENTS = ["Research — Applied AI", "Partnerships — Channel"]
+const GONE_DEPARTMENT = "Support — Tier 1"
+
+const DEPARTMENT_COMPARISON: DashboardCategoryComparison = {
+  byCategory: Object.fromEntries([
+    ...DEPARTMENTS.filter((d) => !NEW_DEPARTMENTS.includes(d.name)).map((d) => [
+      d.name,
+      change(d.headcount, d.delta),
+    ]),
+    [GONE_DEPARTMENT, change(0, -9)],
+  ]),
+  added: NEW_DEPARTMENTS,
+  removed: [GONE_DEPARTMENT],
+}
+
+/** Share of headcount in percentage points: no `delta` in the measure's unit, so no baseline. */
+const SHARE_COMPARISON: DashboardCategoryComparison = {
+  byCategory: {
+    Engineering: { direction: "up", label: "+0.9 pp" },
+    "Customer Success": { direction: "up", label: "+0.6 pp" },
+    Sales: { direction: "down", label: "−0.7 pp", sentiment: "neutral" },
+    Marketing: { direction: "down", label: "−0.3 pp", sentiment: "neutral" },
+    "People & Talent": { direction: "flat", label: "0.0 pp" },
+    "Finance & Legal": { direction: "down", label: "−0.1 pp" },
+    Operations: { direction: "down", label: "−0.2 pp" },
+    Other: { direction: "up", label: "+1.4 pp" },
+  },
+}
+
+const DEPARTMENT_ROWS = DEPARTMENTS.slice(0, 12)
+
+const deltaItems: DashboardItem[] = [
+  {
+    id: "headcount-by-department",
+    type: "chart",
+    title: "Headcount by department",
+    itemHeight: 520,
+    chart: { type: "bar", orientation: "horizontal" },
+    fetchData: () =>
+      withLatency<DashboardChartData>({
+        categories: DEPARTMENTS.map((d) => d.name),
+        series: [
+          { name: "This period", data: DEPARTMENTS.map((d) => d.headcount) },
+        ],
+        trend: { direction: "up", label: "+32 (+7.4%)" },
+        comparisonLabel: "vs previous month",
+        categoryComparison: DEPARTMENT_COMPARISON,
+      }),
+  },
+  {
+    id: "headcount-share",
+    type: "chart",
+    title: "Headcount share",
+    itemHeight: 520,
+    chart: { type: "pie", innerRadius: 60 },
+    fetchData: () =>
+      withLatency<DashboardChartData>({
+        series: {
+          name: "Headcount",
+          data: [
+            { name: "Engineering", value: 170 },
+            { name: "Customer Success", value: 99 },
+            { name: "Sales", value: 66 },
+            { name: "Other", value: 34 },
+            { name: "Marketing", value: 32 },
+            { name: "Operations", value: 27 },
+            { name: "People & Talent", value: 22 },
+            { name: "Finance & Legal", value: 16 },
+          ],
+        },
+        trend: { direction: "up", label: "+0.9 pp" },
+        comparisonLabel: "vs previous month",
+        categoryComparison: SHARE_COMPARISON,
+      }),
+  },
+  {
+    id: "departments",
+    type: "collection",
+    title: "Departments",
+    itemHeight: 560,
+    createSource: () => ({
+      dataAdapter: {
+        fetchData: () => withLatency({ records: DEPARTMENT_ROWS }),
+      },
+    }),
+    rowTrends: Object.fromEntries(
+      DEPARTMENT_ROWS.map((d) => [d.id, change(d.headcount, d.delta)])
+    ),
+    visualizations: [
+      {
+        type: "table" as const,
+        options: {
+          columns: [
+            {
+              id: "name",
+              label: "Department",
+              render: (row: (typeof DEPARTMENT_ROWS)[number]) => row.name,
+            },
+            {
+              id: "headcount",
+              label: "Headcount",
+              render: (row: (typeof DEPARTMENT_ROWS)[number]) =>
+                String(row.headcount),
+            },
+          ],
+        },
+      },
+    ],
+  },
+]
+
+/**
+ * The same host-computed trend on the widgets that have no single number to
+ * put it beside, at a realistic size: sixteen departments with long names,
+ * eight pie slices, twelve table rows.
+ *
+ * Every widget shows its own `trend` as a badge in the header, and beside it
+ * a chip summing the per-category outcome — how many rose, fell, appeared or
+ * vanished, with the names on hover. Category labels stay clean: each
+ * category's change is a line in its tooltip, with the baseline value where
+ * the trend carries a numeric `delta`. The widget menu offers "Show change",
+ * which redraws the chart as diverging bars of those deltas — new departments
+ * first, the vanished one last, the rest by size of move, folded past ten
+ * rows. The share pie has no deltas in its unit, so its change view lists the
+ * labels instead. The collection carries `rowTrends`, which become a compact
+ * "Change" column right after the name.
+ */
+export const PeriodComparisonDeltas: Story = {
+  tags: ["no-sidebar"],
+  render: () => <F0AnalyticsDashboard items={deltaItems} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // Menus open in a portal, outside the story's own element.
+    const page = within(document.body)
+
+    // Every widget fetches with the same fake latency, so each affordance is
+    // awaited on its own rather than assumed to have landed with the first.
+    const find = (text: string) =>
+      canvas.findByText(text, undefined, { timeout: 5000 })
+
+    // Header trend badges.
+    await expect(await find("+32 (+7.4%)")).toBeInTheDocument()
+    await expect(await find("+0.9 pp")).toBeInTheDocument()
+    // Header chips: chart, pie (no added/removed parts), table (up/down only).
+    await expect(
+      await find("8 up · 4 down · 2 new · 1 gone")
+    ).toBeInTheDocument()
+    await expect(await find("3 up · 4 down")).toBeInTheDocument()
+    await expect(await find("7 up · 3 down")).toBeInTheDocument()
+    // The Change column, right after the department name.
+    await expect(await find("Change")).toBeInTheDocument()
+    await expect(await find("+12 (+14.3%)")).toBeInTheDocument()
+
+    // The change view toggles from the widget menu and offers the way back.
+    const widget = within(
+      (await find("Headcount by department")).closest<HTMLElement>(
+        "[class*='dashitem']"
+      )!
+    )
+    await userEvent.click(widget.getByLabelText("Other actions"))
+    await userEvent.click(await page.findByText("Show change"))
+    await userEvent.click(widget.getByLabelText("Other actions"))
+    await expect(await page.findByText("Show values")).toBeInTheDocument()
+    await userEvent.keyboard("{Escape}")
   },
 }

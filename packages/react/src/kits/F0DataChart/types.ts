@@ -117,6 +117,29 @@ interface F0DataChartCommonProps {
   onPointClick?: (point: F0DataChartPointClick) => void
 }
 
+/**
+ * How one category compares to a baseline the consumer computed. The tooltip
+ * adds a line for it under the value; nothing drawn on the chart changes.
+ */
+export interface F0DataChartCategoryComparison {
+  /** The change as the consumer wrote it — "+12 (+14.3%)", or a note such as "New". */
+  label: string
+  /** Trailing context for the label, e.g. the baseline it compares against. */
+  description?: string
+  /** Colours the label; omitted, it takes the plain foreground. */
+  tone?: "positive" | "negative" | "neutral"
+}
+
+/** Props shared by the variants whose marks are categories rather than moments. */
+interface F0DataChartCategoryComparisonProps {
+  /**
+   * Per-category comparison, keyed the way the chart names its marks: the
+   * category label for bars, the point `name` for pie slices and funnel stages.
+   * Categories without an entry get no line.
+   */
+  categoryComparison?: Record<string, F0DataChartCategoryComparison>
+}
+
 /** Props shared only by variants with an interactive legend. */
 interface F0DataChartLegendInteractionProps {
   /**
@@ -155,6 +178,8 @@ export interface F0DataChartBarSeries {
   data: F0DataChartBarDataPoint[]
   /** Override color for this series. Must be an F0 design token name. Falls back to the theme palette. */
   color?: ChartColorToken
+  /** Draw faded (keeps colour and legend entry) for a secondary reading of the same measure. */
+  muted?: boolean
 }
 
 // ---------------------------------------------------------------------------
@@ -190,6 +215,8 @@ export interface F0DataChartLineSeries {
   lineType?: F0DataChartLineType
   /** Override area fill for this series */
   showArea?: boolean
+  /** Draw faded (keeps colour and legend entry) for a secondary reading of the same measure. */
+  muted?: boolean
 }
 
 // ---------------------------------------------------------------------------
@@ -224,7 +251,8 @@ interface F0DataChartBaseProps
 /**
  * Bar chart variant props.
  */
-export interface F0DataChartBarProps extends F0DataChartBaseProps {
+export interface F0DataChartBarProps
+  extends F0DataChartBaseProps, F0DataChartCategoryComparisonProps {
   /** Chart type */
   type: "bar"
   /** One or more data series to render as bars */
@@ -408,7 +436,10 @@ export interface F0DataChartFunnelSeries {
  * points themselves. This interface is separate from `F0DataChartBaseProps`.
  */
 export interface F0DataChartFunnelProps
-  extends F0DataChartCommonProps, F0DataChartLegendInteractionProps {
+  extends
+    F0DataChartCommonProps,
+    F0DataChartLegendInteractionProps,
+    F0DataChartCategoryComparisonProps {
   /** Chart type */
   type: "funnel"
   /** The funnel series to render */
@@ -487,7 +518,10 @@ export interface F0DataChartPieSeries {
  * points themselves. This interface is separate from `F0DataChartBaseProps`.
  */
 export interface F0DataChartPieProps
-  extends F0DataChartCommonProps, F0DataChartLegendInteractionProps {
+  extends
+    F0DataChartCommonProps,
+    F0DataChartLegendInteractionProps,
+    F0DataChartCategoryComparisonProps {
   /** Chart type */
   type: "pie"
   /** The pie series to render */

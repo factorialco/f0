@@ -23,10 +23,10 @@ import type { F0AnalyticsDashboardPointClick } from "../types"
 import {
   buildPointQuoteText,
   buildAccessibleChartPoints,
-  buildChartProps,
   ChartItem,
   hasAccessibleChartPoint,
 } from "../components/ChartItem/ChartItem"
+import { buildChartProps } from "../components/ChartItem/chartProps"
 
 /** The mark a click lands on, as `usePointClick` would report it. */
 const POINT: F0DataChartPointClick = {
@@ -194,6 +194,39 @@ describe("ChartItem — asking about a mark", () => {
     expect(onFullscreenChange).not.toHaveBeenCalled()
     await waitFor(() =>
       expect(screen.getByRole("button", { name: "Host chat" })).toHaveFocus()
+    )
+  })
+
+  it("quotes a marked category by its plain label", async () => {
+    const compared: DashboardChartItem = {
+      ...item,
+      fetchData: () =>
+        Promise.resolve({
+          categories: ["Barcelona office"],
+          series: [{ name: "Male", data: [18] }],
+          categoryComparison: {
+            byCategory: {
+              "Barcelona office": { direction: "up", label: "+4.2%" },
+            },
+          },
+        }),
+    }
+    render(
+      <AiChatStateProvider enabled>
+        <ChatProbe />
+        <ChartItem item={compared} filters={filters} />
+      </AiChatStateProvider>
+    )
+
+    await pickAMark()
+
+    // The category mark is drawn on the chart. What the reader asked about is
+    // the category, so that is what the quote says.
+    await waitFor(() =>
+      expect(screen.getByTestId("probe")).toHaveAttribute(
+        "data-quote",
+        "Headcount by workplace — Barcelona office\nMale: 18"
+      )
     )
   })
 

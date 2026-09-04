@@ -53,7 +53,9 @@ export const F0AnalyticsDashboard = <
   onAskAi,
   onAskAiTarget,
   navigationFilters,
+  navigationActions,
   filtersLoading,
+  dataKey,
 }: F0AnalyticsDashboardProps<Filters>) => {
   const i18n = useI18n()
 
@@ -127,7 +129,11 @@ export const F0AnalyticsDashboard = <
     <div
       className={cn("flex flex-col gap-5 pb-10", fillHeight && "h-full pb-0")}
     >
-      {(filters || filtersLoading || enableExport || navigationFilters) && (
+      {(filters ||
+        filtersLoading ||
+        enableExport ||
+        navigationFilters ||
+        navigationActions) && (
         <div className="flex items-center justify-between gap-4 px-5">
           <div className="w-full">
             {filters ? (
@@ -142,6 +148,7 @@ export const F0AnalyticsDashboard = <
             ) : null}
           </div>
           <div className="flex shrink-0 items-center gap-2">
+            {navigationActions}
             {navigationFilters && (
               <NavigationFilters
                 navigationFilters={navigationFilters}
@@ -179,6 +186,7 @@ export const F0AnalyticsDashboard = <
           onAskAi={onAskAi}
           onAskAiTarget={onAskAiTarget}
           resetKey={resetKey}
+          dataKey={dataKey}
           onFullscreenChange={setIsItemFullscreen}
         />
       </div>

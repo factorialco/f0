@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 
 import {
+  comparisonRow,
   buildValueAxis,
   computeCategoryAxisLayout,
   computeLabelInterval,
@@ -267,5 +268,41 @@ describe("tooltipValueFormat", () => {
     expect(tooltipValueFormat(undefined, undefined)(0)).toBe(
       (0).toLocaleString()
     )
+  })
+})
+
+describe("comparisonRow", () => {
+  const theme = resolveChartTheme()
+
+  it("puts the consumer's label first, in the colour of its tone", () => {
+    expect(
+      comparisonRow(
+        {
+          label: "+12 (+14.3%)",
+          description: "Previous: 84",
+          tone: "positive",
+        },
+        theme
+      )
+    ).toEqual({
+      value: "+12 (+14.3%)",
+      label: "Previous: 84",
+      color: theme.colors.positive,
+    })
+    expect(comparisonRow({ label: "−3", tone: "negative" }, theme)?.color).toBe(
+      theme.colors.critical
+    )
+    expect(comparisonRow({ label: "0", tone: "neutral" }, theme)?.color).toBe(
+      theme.colors.foregroundSecondary
+    )
+  })
+
+  it("leaves an untoned note in the default colour and draws nothing for no entry", () => {
+    expect(comparisonRow({ label: "New this period" }, theme)).toEqual({
+      value: "New this period",
+      label: "",
+      color: undefined,
+    })
+    expect(comparisonRow(undefined, theme)).toBeUndefined()
   })
 })

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
 
-import { zeroRender as render } from "@/testing/test-utils"
+import { screen, zeroRender as render } from "@/testing/test-utils"
 
 import type { DashboardCollectionItem } from "../types"
 
@@ -14,8 +14,19 @@ vi.mock("@/patterns/OneDataCollection/hooks/useDataCollectionSource", () => ({
   useDataCollectionSource,
 }))
 
+const rendered = vi.hoisted(() => ({
+  visualizations: undefined as ReadonlyArray<unknown> | undefined,
+}))
+
 vi.mock("@/patterns/OneDataCollection", () => ({
-  OneDataCollection: () => <div>Collection</div>,
+  OneDataCollection: ({
+    visualizations,
+  }: {
+    visualizations: ReadonlyArray<unknown>
+  }) => {
+    rendered.visualizations = visualizations
+    return <div>Collection</div>
+  },
 }))
 
 vi.mock("../hooks/useCollectionDownloadActions", () => ({
@@ -23,14 +34,47 @@ vi.mock("../hooks/useCollectionDownloadActions", () => ({
 }))
 
 const item = (
-  createSource: DashboardCollectionItem["createSource"]
+  createSource: DashboardCollectionItem["createSource"],
+  visualizations: DashboardCollectionItem["visualizations"] = [],
+  rowTrends?: DashboardCollectionItem["rowTrends"],
+  rowTrendsSorting?: string
 ): DashboardCollectionItem => ({
   id: "employees",
   type: "collection",
   title: "Employees",
-  visualizations: [],
+  visualizations,
   createSource,
+  rowTrends,
+  rowTrendsSorting,
 })
+
+const tableViz = [
+  { type: "table", options: { columns: [{ label: "Name", id: "name" }] } },
+]
+
+function changeColumnOf() {
+  const [viz] = rendered.visualizations as [
+    {
+      options: {
+        columns: {
+          id?: string
+          label: string
+          sorting?: string
+          width?: number
+          render: (row: Record<string, unknown>) => unknown
+        }[]
+      }
+    },
+  ]
+  return viz.options.columns.find((c) => c.id === "dashboard-row-change")!
+}
+
+function columnIdsOf() {
+  const [viz] = rendered.visualizations as [
+    { options: { columns: { id?: string }[] } },
+  ]
+  return viz.options.columns.map((c) => c.id)
+}
 
 describe("CollectionItem", () => {
   it("recreates the source with the latest item closure when widget filters change", () => {
@@ -56,6 +100,7 @@ describe("CollectionItem", () => {
     expect(useDataCollectionSource).toHaveBeenLastCalledWith(firstDefinition, [
       "{}",
       "{}",
+      undefined,
     ])
 
     rerender(
@@ -74,6 +119,166 @@ describe("CollectionItem", () => {
     expect(useDataCollectionSource).toHaveBeenLastCalledWith(secondDefinition, [
       "{}",
       '{"employee":"Ada"}',
+      undefined,
+    ])
+  })
+
+  it("appends a Change column for the rowTrends the item carries", () => {
+    const collection = item(() => ({ id: "source" }), tableViz, {
+      "1": { direction: "up", label: "+2" },
+    })
+
+    render(<CollectionItem item={collection} filters={{}} />)
+
+    const column = changeColumnOf()
+    expect(column.label).toBe("Change")
+    expect(column.render({ id: "1", name: "Ada" })).toEqual({
+      type: "delta",
+      value: { label: "+2", deltaStatus: "positive" },
+    })
+    expect(column.render({ id: "unknown" })).toBeUndefined()
+  })
+
+  it("places the Change column right after the first and keeps it narrow", () => {
+    const columns = [
+      { label: "Name", id: "name" },
+      { label: "Headcount", id: "headcount" },
+    ]
+    const collection = item(
+      () => ({ id: "source" }),
+      [{ type: "table", options: { columns } }],
+      { "1": { direction: "up", label: "+2" } }
+    )
+
+    render(<CollectionItem item={collection} filters={{}} />)
+
+    expect(columnIdsOf()).toEqual(["name", "dashboard-row-change", "headcount"])
+    expect(changeColumnOf().width).toBe(144)
+  })
+
+  it("counts the rows that rose and fell in a chip beside the title", () => {
+    const collection = item(() => ({ id: "source" }), tableViz, {
+      "1": { direction: "up", label: "+2" },
+      "2": { direction: "up", label: "+1" },
+      "3": { direction: "down", label: "−4" },
+      "4": { direction: "flat", label: "0" },
+    })
+
+    render(<CollectionItem item={collection} filters={{}} />)
+
+    expect(screen.getByText("2 up · 1 down")).toBeInTheDocument()
+  })
+
+  it("sorts the Change column only through a sorting the source declares", () => {
+    const trends = { "1": { direction: "up" as const, label: "+2" } }
+
+    render(
+      <CollectionItem
+        item={item(() => ({ id: "source" }), tableViz, trends)}
+        filters={{}}
+      />
+    )
+    expect(changeColumnOf().sorting).toBeUndefined()
+
+    render(
+      <CollectionItem
+        item={item(() => ({ id: "source" }), tableViz, trends, "change")}
+        filters={{}}
+      />
+    )
+    expect(changeColumnOf().sorting).toBe("change")
+  })
+
+  it("colours a Change cell by its sentiment and keeps the arrow on its direction", () => {
+    const collection = item(() => ({ id: "source" }), tableViz, {
+      "1": { direction: "down", label: "−1.2 pp", sentiment: "positive" },
+      "2": { direction: "up", label: "+0.8 pp", sentiment: "negative" },
+      "3": { direction: "flat", label: "0", sentiment: "neutral" },
+    })
+
+    render(<CollectionItem item={collection} filters={{}} />)
+
+    const column = changeColumnOf()
+    expect(column.render({ id: "1" })).toEqual({
+      type: "delta",
+      value: { label: "−1.2 pp", deltaStatus: "positive", arrow: "down" },
+    })
+    expect(column.render({ id: "2" })).toEqual({
+      type: "delta",
+      value: { label: "+0.8 pp", deltaStatus: "negative", arrow: "up" },
+    })
+    expect(column.render({ id: "3" })).toEqual({
+      type: "delta",
+      value: { label: "0", deltaStatus: "neutral", arrow: "none" },
+    })
+  })
+
+  it("renders a flat trend as plain text when no sentiment is given", () => {
+    const collection = item(() => ({ id: "source" }), tableViz, {
+      "1": { direction: "flat", label: "0" },
+    })
+
+    render(<CollectionItem item={collection} filters={{}} />)
+
+    expect(changeColumnOf().render({ id: "1" })).toBe("0")
+  })
+
+  it("leaves the visualizations untouched when the item carries no rowTrends", () => {
+    const collection = item(() => ({ id: "source" }), tableViz)
+
+    render(<CollectionItem item={collection} filters={{}} />)
+
+    expect(rendered.visualizations).toBe(collection.visualizations)
+  })
+
+  it("keys trends by the source's idProvider, else by the record id", () => {
+    const trends = { "emp-7": { direction: "up" as const, label: "+2" } }
+    const withProvider = item(
+      () => ({ idProvider: (row: { code: number }) => `emp-${row.code}` }),
+      tableViz,
+      trends
+    )
+
+    render(<CollectionItem item={withProvider} filters={{}} />)
+    expect(changeColumnOf().render({ code: 7 })).toEqual({
+      type: "delta",
+      value: { label: "+2", deltaStatus: "positive" },
+    })
+
+    // No idProvider: the same lookup the datasource itself falls back to.
+    const withoutProvider = item(() => ({ id: "source" }), tableViz, trends)
+
+    render(<CollectionItem item={withoutProvider} filters={{}} />)
+    expect(changeColumnOf().render({ code: 7 })).toBeUndefined()
+    expect(changeColumnOf().render({ id: "emp-7" })).toEqual({
+      type: "delta",
+      value: { label: "+2", deltaStatus: "positive" },
+    })
+  })
+
+  it("re-creates its source on a dataKey change instead of refetching in place", () => {
+    const createSource = vi.fn(() => ({ id: "source" }))
+    const collection = item(createSource)
+
+    const { rerender } = render(
+      <CollectionItem item={collection} filters={{}} dataKey="none" />
+    )
+
+    expect(createSource).toHaveBeenCalledOnce()
+
+    rerender(
+      <CollectionItem
+        item={collection}
+        filters={{}}
+        dataKey="previous_period"
+      />
+    )
+
+    expect(createSource).toHaveBeenCalledTimes(2)
+    expect(useDataCollectionSource).toHaveBeenLastCalledWith({ id: "source" }, [
+      "{}",
+      "{}",
+      "previous_period",
     ])
   })
 })
