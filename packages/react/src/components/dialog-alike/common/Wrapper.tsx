@@ -237,7 +237,6 @@ export const DialogWrapper = ({
           </DrawerContent>
         </Drawer>
       ) : (
-        // We force the modal as we dont want to allow the user to click outside the dialog to close it
         <Dialog
           open={isOpen}
           onOpenChange={handleOpenChange}
