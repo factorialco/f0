@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.86.2](https://github.com/factorialco/f0/compare/f0-react-v6.86.1...f0-react-v6.86.2) (2026-09-04)
+
+
+### Bug Fixes
+
+* **F0Coachmark:** dim the page, and keep the panel on it ([#5399](https://github.com/factorialco/f0/issues/5399)) ([303e582](https://github.com/factorialco/f0/commit/303e5827b3137abfe85a300181bf205b3896684e))
+
 ## [6.86.1](https://github.com/factorialco/f0/compare/f0-react-v6.86.0...f0-react-v6.86.1) (2026-09-04)
 
 
