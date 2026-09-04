@@ -2363,3 +2363,175 @@ describe("BarChart — target progress row", () => {
     expect(html).not.toContain("Infinity")
   })
 })
+
+describe("BarChart — a target for the whole stack", () => {
+  const base = {
+    type: "bar" as const,
+    stacked: true,
+    categories: ["Q1", "Q2"],
+    series: [
+      { name: "A", data: [60, 180] },
+      { name: "B", data: [40, 120] },
+    ],
+    // Q1 falls short of 200, Q2 reaches 300 against it.
+    targets: [200, 200],
+  }
+
+  function series() {
+    const call = setOptionMock.mock.calls.at(-1)
+    if (!call) throw new Error("setOption was never called")
+    return (
+      call[0] as {
+        series: {
+          name?: string
+          stack?: string
+          type?: string
+          z?: number
+          data: unknown[]
+        }[]
+      }
+    ).series
+  }
+
+  it("keeps every series in one stack and marks the target behind them", () => {
+    render(<F0DataChart {...base} />)
+
+    const drawn = series()
+    // Per-point targets split a stacked chart into a stack per series; a target
+    // for the stack must not — the parts still add up into one bar.
+    expect(drawn.slice(0, 2).map((s) => s.stack)).toEqual([
+      "stacked",
+      "stacked",
+    ])
+
+    // The column is drawn by hand, under the bars, at the full height of the
+    // target: what stays visible once a stack passes it is the margin around it.
+    const column = drawn.at(-1)
+    expect(column?.type).toBe("custom")
+    expect(column?.z).toBe(1)
+    expect(column?.data).toEqual([
+      [0, 200],
+      [1, 200],
+    ])
+    expect(drawn.slice(0, 2).every((s) => s.z === 3)).toBe(true)
+  })
+
+  it("leaves a category without a target alone", () => {
+    render(<F0DataChart {...base} targets={[200, null]} />)
+
+    // A zero draws nothing: `renderItem` returns no shape for it.
+    expect(series().at(-1)?.data).toEqual([
+      [0, 200],
+      [1, 0],
+    ])
+  })
+
+  it("says so and ignores them when the bars are not stacked", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+    render(<F0DataChart {...base} stacked={false} />)
+
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining("stacked"))
+    // No column: the last series drawn is still the last one configured.
+    expect(series().at(-1)?.name).toBe("B")
+    warn.mockRestore()
+  })
+
+  it("marks a segment against its own target, not the stack's", () => {
+    render(
+      <F0DataChart
+        {...base}
+        highlightOverachievement
+        series={[
+          // Short of its own 100, so nothing to mark.
+          { name: "A", data: [{ value: 60, target: 100 }, 180] },
+          // Past its own 100 by 20, in a stack that never reaches 200.
+          { name: "B", data: [{ value: 120, target: 100 }, 120] },
+        ]}
+        targets={[200, 200]}
+      />
+    )
+
+    const [first, second] = series()
+    const short = first?.data?.[0] as { itemStyle: { color?: unknown } }
+    const beat = second?.data?.[0] as { itemStyle: { color?: unknown } }
+    expect(short.itemStyle.color).toBeUndefined()
+    expect(beat.itemStyle.color).toBeDefined()
+
+    // 20 of its 120 sit past its target, so the gradient breaks at 1/6.
+    const split = linearGradientMock.mock.calls.find(
+      (args) => (args[4] as unknown[]).length === 4
+    )
+    const stops = split?.[4] as { offset: number }[]
+    expect(stops.map((s) => s.offset)).toEqual([0, 20 / 120, 20 / 120, 1])
+  })
+
+  it("leaves the stack alone when only the stack has a target", () => {
+    render(<F0DataChart {...base} highlightOverachievement />)
+
+    // Q2 stacks 180 + 120 well past the stack's 200, but no segment was given a
+    // number of its own to beat, so nothing is marked: the bar rising past the
+    // column already says the stack cleared it.
+    const [first, second] = series()
+    const a = first?.data?.[1] as { itemStyle: { color?: unknown } }
+    const b = second?.data?.[1] as { itemStyle: { color?: unknown } }
+    expect(a.itemStyle.color).toBeUndefined()
+    expect(b.itemStyle.color).toBeUndefined()
+  })
+
+  it("puts the segment's own numbers before the stack's, and rules between", () => {
+    render(
+      <F0DataChart
+        {...base}
+        showTargetProgress
+        series={[
+          { name: "A", data: [{ value: 60, target: 50 }, 180] },
+          { name: "B", data: [{ value: 40, target: 50 }, 120] },
+        ]}
+      />
+    )
+
+    const call = setOptionMock.mock.calls.at(-1)
+    if (!call) throw new Error("setOption was never called")
+    const formatter = (
+      call[0] as { tooltip?: { formatter?: (p: unknown) => string } }
+    ).tooltip?.formatter
+    const html =
+      formatter?.({ seriesName: "A", name: "Q1", value: 60, dataIndex: 0 }) ??
+      ""
+
+    // How this segment did against its own target, then what it comes to inside
+    // the bar: reading them the other way round invites taking one subject's
+    // percentage for the other's.
+    const order = ["50", "120.0%", "100", "60.0%"].map((text) =>
+      html.indexOf(text)
+    )
+    expect(order.every((i) => i >= 0)).toBe(true)
+    expect([...order].sort((a, b) => a - b)).toEqual(order)
+
+    // The rule sits on the first row of the second group, not anywhere else.
+    expect(html.match(/border-top/g)).toHaveLength(1)
+    expect(html.indexOf("border-top")).toBeGreaterThan(html.indexOf("120.0%"))
+  })
+
+  it("reports the stack against its target when the gradient is hovered", () => {
+    render(<F0DataChart {...base} showTargetProgress />)
+
+    const call = setOptionMock.mock.calls.at(-1)
+    if (!call) throw new Error("setOption was never called")
+    const formatter = (
+      call[0] as { tooltip?: { formatter?: (p: unknown) => string } }
+    ).tooltip?.formatter
+    const html = formatter?.({
+      seriesName: "__stack__ (target)",
+      name: "Q1",
+      value: 100,
+      dataIndex: 0,
+    })
+
+    // The card is the bar's, so it carries what the stack stands at — not the
+    // height of the gap ECharts reports for that item.
+    expect(html).toContain("100")
+    expect(html).toContain("200")
+    expect(html).toContain("50.0%")
+  })
+})

@@ -92,6 +92,12 @@ Renders a gradient fade from the bar top up to the target value. Hovering that g
 
 <Canvas of={BarStories.WithTargets} />
 
+### Stacked With Targets
+
+`targets` sets one target per category for the bar as a whole — the counterpart of a point's own `target` when the bar is a stack. The gap up to it is drawn over the whole stack in a neutral gradient, and with `highlightOverachievement` the part of the stack beyond the target is darkened, splitting whichever segment the target falls inside.
+
+<Canvas of={BarStories.StackedWithTargets} />
+
 ### Overachievement
 
 `highlightOverachievement` draws the stretch of a bar that passed its target in a darker shade of its own color, split at the target — otherwise a bar that beat its target looks like one that landed exactly on it. `showTargetProgress` adds `value / target` to the tooltip, under the target row.
