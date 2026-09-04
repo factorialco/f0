@@ -8,6 +8,18 @@ import type { ClarifyingOption, ClarifyingSelectionMode } from "../types"
 import { CustomAnswerRow } from "./CustomAnswerRow"
 import { OptionRow } from "./OptionRow"
 
+// Las filas ENTRAN, así que ease-out fuerte: en 200ms lo único que se percibe
+// es el arranque, y la curva estándar de Material ([0.4,0,0.2,1]) es un
+// ease-in-out que lo retrasa.
+const ROW_EASE: [number, number, number, number] = [0.23, 1, 0.32, 1]
+const ROW_DURATION = 0.2
+// Sin retardo base: los 120ms que había eran tiempo muerto con la pregunta ya
+// visible y la lista en blanco. 30ms por fila mantiene la cascada sin que la
+// última llegue tarde. Si el desplazamiento deja de ser 4px, el pb-1 del
+// contenedor va con él.
+const ROW_STAGGER = 0.03
+const ROW_OFFSET_Y = 4
+
 interface OptionsListProps {
   mode: ClarifyingSelectionMode
   question: string
@@ -102,23 +114,35 @@ export const OptionsList = ({
     // "no selection" enables Skip / Esc).
   }
 
+  // Una sola definición para todas las filas: la de respuesta libre quedaba
+  // fuera del escalonado y aparecía de golpe a opacidad plena justo donde la
+  // cascada terminaba. Ahora es la fila `options.length`, la siguiente.
+  const rowEnter = (idx: number) => ({
+    initial: shouldReduceMotion
+      ? (false as const)
+      : { opacity: 0, y: ROW_OFFSET_Y },
+    animate: { opacity: 1, y: 0 },
+    transition: {
+      duration: shouldReduceMotion ? 0 : ROW_DURATION,
+      ease: ROW_EASE,
+      delay: shouldReduceMotion ? 0 : idx * ROW_STAGGER,
+    },
+  })
+
   return (
     <div
-      className="flex flex-col gap-0 overflow-y-auto px-1.5 py-0.5"
+      // pb-1 (4px) y no py-0.5: las opciones entran desplazadas 4px hacia
+      // abajo, y con este contenedor en overflow-y-auto esos 4px producían
+      // desbordamiento real durante ~100ms — una barra de scroll que aparecía
+      // y desaparecía en cada cambio de paso. El padding-bottom cuenta dentro
+      // de scrollHeight, así que absorbe el desplazamiento sin tocar la
+      // animación. Si cambia el `y` del enter, este 4 va con él.
+      className="flex flex-col gap-0 overflow-y-auto px-1.5 pb-1 pt-0.5"
       role={mode === "single" ? "radiogroup" : "group"}
       aria-label={question}
     >
       {options.map((option, idx) => (
-        <motion.div
-          key={option.id}
-          initial={shouldReduceMotion ? false : { opacity: 0, y: 4 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{
-            duration: shouldReduceMotion ? 0 : 0.2,
-            ease: [0.4, 0, 0.2, 1],
-            delay: shouldReduceMotion ? 0 : 0.12 + idx * 0.06,
-          }}
-        >
+        <motion.div key={option.id} {...rowEnter(idx)}>
           <OptionRow
             ref={(el) => {
               itemRefs.current[idx] = el
@@ -134,19 +158,21 @@ export const OptionsList = ({
       ))}
 
       {allowCustomAnswer && (
-        <CustomAnswerRow
-          mode={mode}
-          hasSelection={hasSelection}
-          hasCustomText={hasCustomText}
-          customAnswerText={customAnswerText}
-          isCustomAnswerActive={isCustomAnswerActive}
-          canProceed={canProceed}
-          inputRef={customInputRef}
-          onActivate={onActivateCustom}
-          onChangeText={onChangeCustomText}
-          onToggleActive={onToggleCustomActive}
-          onConfirm={onConfirm}
-        />
+        <motion.div {...rowEnter(options.length)}>
+          <CustomAnswerRow
+            mode={mode}
+            hasSelection={hasSelection}
+            hasCustomText={hasCustomText}
+            customAnswerText={customAnswerText}
+            isCustomAnswerActive={isCustomAnswerActive}
+            canProceed={canProceed}
+            inputRef={customInputRef}
+            onActivate={onActivateCustom}
+            onChangeText={onChangeCustomText}
+            onToggleActive={onToggleCustomActive}
+            onConfirm={onConfirm}
+          />
+        </motion.div>
       )}
     </div>
   )
