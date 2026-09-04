@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.86.1](https://github.com/factorialco/f0/compare/f0-react-v6.86.0...f0-react-v6.86.1) (2026-09-04)
+
+
+### Bug Fixes
+
+* **F0ClarifyingPanel:** lighter type, header alignment and motion timings ([#5397](https://github.com/factorialco/f0/issues/5397)) ([7a5e78a](https://github.com/factorialco/f0/commit/7a5e78a8bb0db5978443a97427bc2f89e01bf32a))
+
 ## [6.86.0](https://github.com/factorialco/f0/compare/f0-react-v6.85.0...f0-react-v6.86.0) (2026-09-04)
 
 
