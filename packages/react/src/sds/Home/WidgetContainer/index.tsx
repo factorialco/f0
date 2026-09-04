@@ -221,11 +221,7 @@ const AddWidgetPlaceholder = ({
       type="button"
       onClick={onClick}
       aria-label={label}
-      // WHICH COLUMN'S OFFER THIS IS, addressable from outside: a page that
-      // wants to point a coachmark (or a test) at "the rail's add button" has
-      // no other handle on it — the control is named by its tooltip, and both
-      // columns' are named the same. `data-` rather than an `id`, because a
-      // page can hold more than one of these columns.
+      // Which column's offer this is, so a page can point at one of them.
       data-add-widget={side}
       className="flex w-full items-center justify-center rounded-xl border border-dashed border-f1-border py-4 text-f1-foreground-secondary hover:border-f1-border-hover hover:text-f1-foreground"
     >
