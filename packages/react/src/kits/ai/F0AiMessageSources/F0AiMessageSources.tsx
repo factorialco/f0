@@ -1,5 +1,4 @@
-import { F0Icon, type IconType } from "@/components/F0Icon"
-import * as Icons from "@/icons/app"
+import { F0Icon, resolveIconName } from "@/components/F0Icon"
 import { ExternalLink, Search } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { Action } from "@/ui/Action/Action"
@@ -11,7 +10,11 @@ import { CollapsibleMessage } from "./components/CollapsibleMessage"
 export type F0AiMessageSource = {
   title: string
   link?: string
-  /** Name of an icon exported by `@factorialco/f0-react/icons/app`. */
+  /**
+   * Kebab-case icon name, e.g. `"link"` or `"alert-circle-line"`. Stays a
+   * `string` rather than an `IconName` because hosts populate it from their own
+   * data. Unknown names fall back to the external-link icon.
+   */
   icon?: string
   targetBlank?: boolean
 }
@@ -25,17 +28,15 @@ export type F0AiMessageSourcesProps = {
   title?: string
 }
 
-const getIconComponent = (iconName: string): IconType => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const IconFromName = (Icons as unknown as Record<string, IconType>)[iconName]
-  return IconFromName ?? ExternalLink
-}
-
 const SourceIcon = ({ iconName }: { iconName?: string }) => {
   if (!iconName) return null
   return (
     <div className="mr-1 flex items-center justify-center">
-      <F0Icon icon={getIconComponent(iconName)} size="md" color="default" />
+      <F0Icon
+        icon={resolveIconName(iconName) ?? ExternalLink}
+        size="md"
+        color="default"
+      />
     </div>
   )
 }
