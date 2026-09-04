@@ -141,8 +141,13 @@ const HOME_WALKTHROUGH = defineStepByStepCoachmarkGuidance({
       title: "Important things come first",
       description:
         "View and complete all the updates and tasks that require your attention at a glance.",
-      side: "right",
-      align: "start",
+      // BESIDE A 672px CARD THERE IS NO ROOM. `side: "right"` asked for a
+      // 288px panel next to a card that already takes two thirds of the
+      // window: Radix only ever flips to the OPPOSITE side, and the left has no
+      // room either, so the panel stayed where it was asked to go — half of it,
+      // and its arrow, off the right edge of the screen. Under a wide target
+      // there is always room, and the arrow can point at the middle of it.
+      side: "bottom",
     },
     {
       // No description: the title is the whole sentence.
