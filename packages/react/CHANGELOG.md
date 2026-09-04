@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.86.0](https://github.com/factorialco/f0/compare/f0-react-v6.85.0...f0-react-v6.86.0) (2026-09-04)
+
+
+### Features
+
+* **F0Coachmark:** walk a page step by step, with a spotlight ([#5393](https://github.com/factorialco/f0/issues/5393)) ([de1513f](https://github.com/factorialco/f0/commit/de1513f46bd809d9bcb7e1c329bb6c714d378d39))
+
 ## [6.85.0](https://github.com/factorialco/f0/compare/f0-react-v6.84.3...f0-react-v6.85.0) (2026-09-04)
 
 
