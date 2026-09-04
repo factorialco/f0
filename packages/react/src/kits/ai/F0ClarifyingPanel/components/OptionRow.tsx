@@ -28,7 +28,7 @@ export const OptionRow = forwardRef<HTMLDivElement, OptionRowProps>(
           aria-checked={isSelected}
           tabIndex={isTabStop ? 0 : -1}
           className={cn(
-            "flex cursor-pointer items-center gap-2 rounded-md px-2 py-2 transition-colors hover:bg-f1-background-secondary",
+            "flex cursor-pointer items-center gap-2 rounded-md px-2 py-2 transition-[background-color,transform] hover:bg-f1-background-secondary active:scale-[0.99]",
             focusRing()
           )}
           onClick={() => onToggle(option.id)}
@@ -42,7 +42,7 @@ export const OptionRow = forwardRef<HTMLDivElement, OptionRowProps>(
           }}
         >
           <RadioIndicator isSelected={isSelected} />
-          <span className="text-base font-medium text-f1-foreground">
+          <span className="text-base font-normal text-f1-foreground">
             {option.label}
           </span>
         </div>
@@ -53,7 +53,7 @@ export const OptionRow = forwardRef<HTMLDivElement, OptionRowProps>(
       <div
         ref={ref}
         className={cn(
-          "flex cursor-pointer items-center rounded-md pl-2 transition-colors hover:bg-f1-background-secondary"
+          "flex cursor-pointer items-center rounded-md pl-2 transition-[background-color,transform] hover:bg-f1-background-secondary active:scale-[0.99]"
         )}
       >
         <F0Checkbox
@@ -63,7 +63,7 @@ export const OptionRow = forwardRef<HTMLDivElement, OptionRowProps>(
           hideLabel
         />
         <span
-          className="w-full py-2 pl-2 pr-2 text-base font-medium text-f1-foreground"
+          className="w-full py-2 pl-2 pr-2 text-base font-normal text-f1-foreground"
           onClick={() => onToggle(option.id)}
         >
           {option.label}
