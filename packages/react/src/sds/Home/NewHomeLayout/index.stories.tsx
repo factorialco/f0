@@ -141,8 +141,7 @@ const HOME_WALKTHROUGH = defineStepByStepCoachmarkGuidance({
       title: "Important things come first",
       description:
         "View and complete all the updates and tasks that require your attention at a glance.",
-      side: "right",
-      align: "start",
+      side: "bottom",
     },
     {
       // No description: the title is the whole sentence.
