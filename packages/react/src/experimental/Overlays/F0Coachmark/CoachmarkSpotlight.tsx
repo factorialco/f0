@@ -182,22 +182,22 @@ export const CoachmarkSpotlight = ({
       // focus glow with it, on the reader's first press anywhere on the page.
       onMouseDown={(event) => event.preventDefault()}
     >
-      {/* The lit region: clear box, dim cast outwards, and a hairline around it
-          in `foreground-tertiary` — the emphasis the design asks for on a
-          spotlighted card's border, drawn on the light's own edge rather than
-          written onto an element this component does not own (and which may not
-          have a border to recolour in the first place).
+      {/* The lit region: a clear box with no edge of its own. NO BORDER — the
+          element inside already has whatever border it has, and a second line
+          around it drew a box around a box: two rounded rectangles a few pixels
+          apart, neither of them the card.
 
           TWO SHADOWS, GLOW FIRST. The glow is the page's own surface colour
           (`--neutral-0`: white in light, the dark ground in dark) blurred
           outward over the dim, so the lit element reads as GLOWING rather than
           as a hole cut in a sheet — the same thing a focused field does, for an
-          element that may not have a focus state to lend us. It has to come
-          first in the list: shadows paint first over last, and the 100vmax dim
-          would otherwise bury it. */}
+          element that may not have a focus state to lend us. It is also the only
+          thing separating the light from the dim now, which is why it is soft
+          rather than tight. It has to come first in the list: shadows paint
+          first over last, and the 100vmax dim would otherwise bury it. */}
       <div
         className={cn(
-          "absolute rounded-xl border border-solid border-f1-foreground-tertiary",
+          "absolute rounded-xl",
           "shadow-[0_0_24px_6px_hsl(var(--neutral-0)/0.7),0_0_0_100vmax_hsl(var(--neutral-40))]",
           // Only while it has somewhere to go — see `useTravelling`. The dim
           // itself never fades: the light travels to the next step's element,
