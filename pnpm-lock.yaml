@@ -16,7 +16,7 @@ overrides:
 
 patchedDependencies:
   react-virtuoso@4.18.11:
-    hash: 2579300c53bb851a64763d34c95dd4fb7d52c57d24b846cd192b480f13d0d852
+    hash: 569197f359405782672f6be75b86ca9e056899d093310ad38389369e98676812
     path: patches/react-virtuoso@4.18.11.patch
 
 importers:
@@ -465,7 +465,7 @@ importers:
         version: 2.7.1(@types/react@18.3.18)(react@18.3.1)
       react-virtuoso:
         specifier: ^4.18.10
-        version: 4.18.11(patch_hash=2579300c53bb851a64763d34c95dd4fb7d52c57d24b846cd192b480f13d0d852)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 4.18.11(patch_hash=569197f359405782672f6be75b86ca9e056899d093310ad38389369e98676812)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       recharts:
         specifier: ^2.12.7
         version: 2.15.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -24049,7 +24049,7 @@ snapshots:
     optionalDependencies:
       '@types/react': 18.3.18
 
-  react-virtuoso@4.18.11(patch_hash=2579300c53bb851a64763d34c95dd4fb7d52c57d24b846cd192b480f13d0d852)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  react-virtuoso@4.18.11(patch_hash=569197f359405782672f6be75b86ca9e056899d093310ad38389369e98676812)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
