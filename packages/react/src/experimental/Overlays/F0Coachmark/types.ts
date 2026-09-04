@@ -75,6 +75,26 @@ type CoachmarkBase = CoachmarkPlacement & {
    * — the coachmark closes itself either way.
    */
   onComplete?: () => void
+  /**
+   * SPOTLIGHT THE TARGET: dims the whole page except the element this step
+   * points at, and swallows every press on the page while the coachmark is up
+   * (see `skipAfterOutsideClicks` for how a user who keeps pressing gets out).
+   *
+   * Off by default — one coachmark pointing something out should not take the
+   * page hostage. Turn it on for a walkthrough that has to be followed in order.
+   */
+  overlay?: boolean
+  /**
+   * HOW MANY PRESSES ON THE DIMMED PAGE END THE COACHMARK. The panel wiggles at
+   * each one to say the press went nowhere, and gives up at this many: a user
+   * pressing outside over and over is telling us they want out, and the way out
+   * cannot be the button they are ignoring. Reported to `onDismiss` like any
+   * other abandonment. Defaults to 5; `0` never gives up.
+   *
+   * Only has an effect alongside `overlay` — without the shield there are no
+   * presses to count, because they reach the page.
+   */
+  skipAfterOutsideClicks?: number
 }
 
 /** One coachmark: its own copy, anchored to one element. */
@@ -110,6 +130,8 @@ export type CoachmarkItem = {
   steps: CoachmarkStep[]
   onDismiss?: () => void
   onComplete?: () => void
+  overlay?: boolean
+  skipAfterOutsideClicks?: number
 }
 
 /**
@@ -128,6 +150,22 @@ export interface F0CoachmarkProps extends CoachmarkPlacement {
   onAction: () => void
   /** Fired by the close button and by Escape. Never by an outside click. */
   onClose: () => void
+  /**
+   * Dims the page except the target and shields it from the pointer. See
+   * `CoachmarkSpotlight`.
+   */
+  overlay?: boolean
+  /**
+   * Fired for every press the shield swallows — only while `overlay` is on. The
+   * panel wiggles on its own; this is for whoever is counting them.
+   */
+  onOutsideInteraction?: () => void
+  /**
+   * The panel is on its way out of the step it is showing: it fades down and
+   * waits there while the next step is committed underneath it. Set by
+   * `CoachmarkProvider`, which owns the handover between two steps.
+   */
+  leaving?: boolean
   /**
    * Position within a sequence, rendered as `current/total` beside the action.
    * Omitted for a single-step coachmark, which shows no indicator.

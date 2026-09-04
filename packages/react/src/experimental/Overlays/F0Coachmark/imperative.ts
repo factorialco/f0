@@ -92,6 +92,8 @@ const open = (options: CoachmarkOptions): CoachmarkId => {
     steps,
     onDismiss: options.onDismiss,
     onComplete: options.onComplete,
+    overlay: options.overlay,
+    skipAfterOutsideClicks: options.skipAfterOutsideClicks,
   })
 
   return id

@@ -1,12 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { expect, screen, userEvent, waitFor, within } from "storybook/test"
 
 import { F0Button } from "@/components/F0Button"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0Coachmark } from "../F0Coachmark"
+import { defineStepByStepCoachmarkGuidance } from "../guidance"
 import { coachmarks } from "../imperative"
 import type { F0CoachmarkProps } from "../types"
 
@@ -254,6 +255,86 @@ export const Imperative: Story = {
               })
             }}
           />
+        </div>
+      </div>
+    )
+  },
+}
+
+/**
+ * A WALKTHROUGH DECLARED IN ONE PLACE. The steps name the elements they point
+ * at, `anchor()` marks them, and the names are a union the compiler holds both
+ * sides to — no selectors written against someone else's markup.
+ *
+ * It also brings what walking someone through a page needs: the page dimmed
+ * except the step's element, a shield over it (`data-f0-coachmark-blocker`) that
+ * swallows presses, a wiggle when one lands, and a way out for the reader who
+ * keeps pressing — five of them and the walkthrough gives up.
+ */
+export const Guidance: Story = {
+  // Same reason as `Imperative`: it fires real coachmarks into the shared
+  // document-level overlay. A playground, not a visit target.
+  tags: ["!test", "no-sidebar"],
+  parameters: {
+    layout: "fullscreen",
+    docs: { story: { inline: false, height: "520px" } },
+  },
+  decorators: [(Story) => <>{Story()}</>],
+  render: function Guidance() {
+    const tour = useMemo(
+      () =>
+        defineStepByStepCoachmarkGuidance({
+          id: "story-guidance",
+          steps: [
+            {
+              element: "filters",
+              title: "Start with a filter",
+              description: "Narrow the list down to what you care about.",
+            },
+            {
+              element: "views",
+              title: "Then save it as a view",
+              description: "Your whole team can reuse it.",
+            },
+            {
+              element: "list",
+              title: "That is the list you get",
+              description: "Filtered, saved, and shared — in that order.",
+              side: "top",
+            },
+          ],
+        }),
+      []
+    )
+
+    // Leave nothing behind for the next story on the docs page.
+    useEffect(() => () => tour.stop(), [tour])
+
+    return (
+      <div className="flex flex-col items-start gap-6 p-8">
+        <F0Button
+          variant="outline"
+          label="Start the walkthrough"
+          onClick={() => {
+            tour.start()
+          }}
+        />
+        <div className="flex flex-row gap-2">
+          <span {...tour.anchor("filters")} className="inline-flex">
+            <F0Button variant="outline" label="Filters" />
+          </span>
+          <span {...tour.anchor("views")} className="inline-flex">
+            <F0Button variant="outline" label="Views" />
+          </span>
+        </div>
+        <div
+          {...tour.anchor("list")}
+          className="flex w-80 flex-col gap-2 rounded-md border border-solid border-f1-border bg-f1-background p-4"
+        >
+          <p className="m-0 font-medium">Candidates</p>
+          <p className="m-0 text-f1-foreground-secondary">
+            Three rows, one of them yours.
+          </p>
         </div>
       </div>
     )
