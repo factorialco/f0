@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.85.0](https://github.com/factorialco/f0/compare/f0-react-v6.84.3...f0-react-v6.85.0) (2026-09-04)
+
+
+### Features
+
+* **NewHomeLayout:** add mainFootnote to the main column ([#5395](https://github.com/factorialco/f0/issues/5395)) ([b0563e2](https://github.com/factorialco/f0/commit/b0563e243eb3b6c2355a45ebf2e5265a6a95343a))
+
 ## [6.84.3](https://github.com/factorialco/f0/compare/f0-react-v6.84.2...f0-react-v6.84.3) (2026-09-04)
 
 
