@@ -1,5 +1,5 @@
 import { useIsPresent } from "motion/react"
-import { forwardRef, useEffect, useState } from "react"
+import { forwardRef, useCallback, useEffect, useRef, useState } from "react"
 
 import type { IconType } from "@/components/F0Icon"
 import type { TableVisualizationType } from "@/patterns/OneDataCollection/types"
@@ -61,9 +61,14 @@ export type RowProps<
   item: R
   index: number
   groupIndex: number
-  onCheckedChange: (checked: boolean) => void
   onItemCheckedChange?: (item: R, checked: boolean) => void
-  selectedItems: Map<string | number, R>
+  /** This row's own selected state. Passed as a scalar so a selection change
+   * only alters the prop of the row that changed, not of every row. */
+  isSelected?: boolean
+  /** Only supplied for rows that render nested children, which need it to derive
+   * their own children's state. Absent for flat rows, so their props stay
+   * identical across a selection change. */
+  selectedItems?: Map<string | number, R>
   columns: ReadonlyArray<TableColumnDefinition<R, Sortings, Summaries>>
   frozenColumnsLeft: number
   checkColumnWidth: number
@@ -144,8 +149,8 @@ const RowComponentInner = <
   {
     source,
     item,
-    onCheckedChange,
     onItemCheckedChange,
+    isSelected: isSelectedProp,
     selectedItems,
     columns,
     frozenColumnsLeft,
@@ -189,6 +194,14 @@ const RowComponentInner = <
     id !== undefined &&
     (selectionInherited || source.selectionDisabled?.(item) === true)
   const rowWithChildren = !!source.itemsWithChildren?.(item)
+
+  // Derived here rather than passed in: as a prop it was an inline arrow built
+  // per row per render, which alone made the row's memo comparison fail every
+  // time (measured: 50 mismatches for 25 rows across two commits).
+  const onCheckedChange = useCallback(
+    (checked: boolean) => onItemCheckedChange?.(item, checked),
+    [onItemCheckedChange, item]
+  )
 
   const i18n = useI18n()
 
@@ -246,33 +259,36 @@ const RowComponentInner = <
   // Only the row that owns the rendered checkbox registers (not the one
   // delegating to NestedRow), so each selectable id is registered once.
   const willRenderOwnRow = !(rowWithChildren && hasChildrenLoaded)
+  const isRegistered =
+    id !== undefined && !selectionDisabled && willRenderOwnRow && isPresent
+
+  const itemRef = useRef(item)
+  itemRef.current = item
+
+  // Deliberately not keyed on `item`: a page append rebuilds the record of
+  // every row, and re-running this effect for that would take each row out of
+  // the registry and put it straight back in — a membership change per rendered
+  // row, on every page.
   useEffect(() => {
-    if (
-      id === undefined ||
-      selectionDisabled ||
-      !willRenderOwnRow ||
-      !registerSelectable ||
-      !isPresent
-    )
-      return
-    registerSelectable(id, item)
+    if (id === undefined || !isRegistered || !registerSelectable) return
+    registerSelectable(id, itemRef.current)
     return () => unregisterSelectable?.(id)
-  }, [
-    id,
-    item,
-    selectionDisabled,
-    willRenderOwnRow,
-    registerSelectable,
-    unregisterSelectable,
-    isPresent,
-  ])
+  }, [id, isRegistered, registerSelectable, unregisterSelectable])
+
+  // "Select all" is served the items the registry holds, so a row whose record
+  // is replaced has to refresh its entry. Re-registering an id already present
+  // only overwrites the item; membership, and the id list built from it, are
+  // untouched.
+  useEffect(() => {
+    if (id === undefined || !isRegistered || !registerSelectable) return
+    registerSelectable(id, item)
+  }, [id, item, isRegistered, registerSelectable])
 
   if (rowWithChildren && hasChildrenLoaded) {
     return (
       <NestedRow
         source={source}
         item={item}
-        onCheckedChange={onCheckedChange}
         onItemCheckedChange={onItemCheckedChange}
         selectedItems={selectedItems}
         columns={columns}
@@ -296,7 +312,7 @@ const RowComponentInner = <
     )
   }
 
-  const isSelected = id !== undefined && selectedItems.has(id)
+  const isSelected = isSelectedProp ?? false
   const referenceRowType = referenceRowTypeFn?.(item) ?? "none"
 
   const cellRenderedClass = CellRenderer
@@ -350,7 +366,7 @@ const RowComponentInner = <
               )}
             >
               <Checkbox
-                checked={selectionInherited || selectedItems.has(id)}
+                checked={selectionInherited || isSelected}
                 indeterminate={selectionInherited}
                 onCheckedChange={onCheckedChange}
                 disabled={selectionDisabled}
