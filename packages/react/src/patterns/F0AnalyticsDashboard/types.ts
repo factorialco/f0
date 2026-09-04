@@ -453,6 +453,37 @@ export interface DashboardItemFiltersConfig<
   onChange: (value: DashboardItemFiltersState<ItemFilters>) => void
 }
 
+/**
+ * Consumer-owned metadata rendered as a neutral badge in a widget header.
+ *
+ * When `onClick` is present, F0 renders a native button and uses
+ * `accessibilityLabel` as its accessible name. Without it, the badge is
+ * informational text only.
+ */
+export interface DashboardItemBadge {
+  /** Compact visible text, for example a count or a signed delta. */
+  label: string
+  /** Describes the badge in the context of its widget. */
+  accessibilityLabel: string
+  /** Optional action invoked from pointer or keyboard activation. */
+  onClick?: () => void
+}
+
+export const dashboardItemRenderStates = ["loading", "ready", "error"] as const
+
+/** A widget's committed render state for one consumer-defined data cycle. */
+export type DashboardItemRenderState =
+  (typeof dashboardItemRenderStates)[number]
+
+export interface DashboardItemRenderStateChange {
+  /** ID of the dashboard item whose UI committed. */
+  itemId: string
+  /** Opaque cycle identity supplied through `renderCycleKey`. */
+  renderCycleKey: string
+  /** State visible in the committed widget UI. */
+  state: DashboardItemRenderState
+}
+
 // ---------------------------------------------------------------------------
 // Layout change descriptor — emitted by edit mode callbacks
 // ---------------------------------------------------------------------------
@@ -573,6 +604,30 @@ export interface F0AnalyticsDashboardProps<
   itemFilters?: (
     item: DashboardItem<Filters>
   ) => DashboardItemFiltersConfig | undefined
+  /**
+   * Resolves optional consumer-owned metadata for a widget header.
+   *
+   * F0 always renders this with neutral styling. When `onClick` is present,
+   * the badge is a native keyboard-operable button; otherwise it is static
+   * text. Directional or health meaning remains the consumer's responsibility.
+   */
+  itemBadge?: (item: DashboardItem<Filters>) => DashboardItemBadge | undefined
+  /**
+   * Opaque identity for the active dashboard data cycle.
+   *
+   * Change this whenever the consumer starts a new logical execution, even if
+   * the filters are unchanged. It is also a refresh dependency for every item.
+   * Render-state events are emitted only when this and
+   * `onItemRenderStateChange` are both provided.
+   */
+  renderCycleKey?: string
+  /**
+   * Called after an item's loading, content, or error UI has committed.
+   *
+   * Events carry the consumer's cycle key. Stale responses are discarded and
+   * never emit `ready` or `error`.
+   */
+  onItemRenderStateChange?: (event: DashboardItemRenderStateChange) => void
   /**
    * When true, enables drag-and-drop reordering, resize, and delete controls.
    */

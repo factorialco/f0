@@ -12,6 +12,7 @@ import { useDataCollectionSource } from "@/patterns/OneDataCollection/hooks/useD
 
 import type {
   DashboardCollectionItem,
+  DashboardItemBadge,
   DashboardItemFiltersConfig,
   F0AnalyticsDashboardAskAiTarget,
   F0AnalyticsDashboardAskAiTargetWithQuote,
@@ -25,6 +26,7 @@ interface CollectionItemProps<Filters extends FiltersDefinition> {
   filters: FiltersState<Filters>
   actions?: DropdownItem[]
   itemFilters?: DashboardItemFiltersConfig
+  badge?: DashboardItemBadge
   editMode?: boolean
   handleDelete?: (itemId: string) => void
   onAskAi?: (item: F0AnalyticsDashboardAskAiTarget) => void
@@ -47,6 +49,7 @@ export function CollectionItem<Filters extends FiltersDefinition>({
   filters,
   actions,
   itemFilters,
+  badge,
   editMode,
   handleDelete,
   onAskAi,
@@ -132,6 +135,7 @@ export function CollectionItem<Filters extends FiltersDefinition>({
       description={item.description}
       info={item.info}
       explanation={item.explanation}
+      badge={badge}
       isLoading={false}
       actions={allActions}
       itemFilters={itemFilters}

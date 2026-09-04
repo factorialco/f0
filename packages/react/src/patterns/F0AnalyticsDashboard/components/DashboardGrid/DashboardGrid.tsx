@@ -13,8 +13,10 @@ import { cn } from "@/lib/utils"
 
 import type {
   DashboardItem as DashboardItemType,
+  DashboardItemBadge,
   DashboardItemFiltersConfig,
   DashboardItemLayout,
+  DashboardItemRenderStateChange,
   F0AnalyticsDashboardAskAiTarget,
   F0AnalyticsDashboardAskAiTargetWithQuote,
 } from "../../types"
@@ -57,6 +59,11 @@ interface DashboardGridProps<Filters extends FiltersDefinition> {
   itemFilters?: (
     item: DashboardItemType<Filters>
   ) => DashboardItemFiltersConfig | undefined
+  itemBadge?: (
+    item: DashboardItemType<Filters>
+  ) => DashboardItemBadge | undefined
+  renderCycleKey?: string
+  onItemRenderStateChange?: (event: DashboardItemRenderStateChange) => void
   filters: FiltersState<Filters>
   editMode?: boolean
   onLayoutChange?: (layout: DashboardItemLayout[]) => void
@@ -94,6 +101,9 @@ interface DashboardGridProps<Filters extends FiltersDefinition> {
 export function DashboardGrid<Filters extends FiltersDefinition>({
   items,
   itemFilters,
+  itemBadge,
+  renderCycleKey,
+  onItemRenderStateChange,
   filters,
   editMode,
   onLayoutChange,
@@ -548,6 +558,9 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
         <DashboardGridItem
           item={soleItem}
           itemFilters={itemFilters?.(soleItem)}
+          badge={itemBadge?.(soleItem)}
+          renderCycleKey={renderCycleKey}
+          onItemRenderStateChange={onItemRenderStateChange}
           filters={filters}
           editMode={editMode}
           onDelete={handleDelete}
@@ -589,6 +602,9 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
           <DashboardGridItem
             item={fullscreenItem}
             itemFilters={itemFilters?.(fullscreenItem)}
+            badge={itemBadge?.(fullscreenItem)}
+            renderCycleKey={renderCycleKey}
+            onItemRenderStateChange={onItemRenderStateChange}
             filters={filters}
             editMode={editMode}
             onDelete={handleDelete}
@@ -678,6 +694,9 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
                     <DashboardGridItem
                       item={item}
                       itemFilters={itemFilters?.(item)}
+                      badge={itemBadge?.(item)}
+                      renderCycleKey={renderCycleKey}
+                      onItemRenderStateChange={onItemRenderStateChange}
                       filters={filters}
                       editMode={editMode}
                       onDelete={handleDelete}
@@ -1091,6 +1110,9 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
   filters,
   actions,
   itemFilters,
+  badge,
+  renderCycleKey,
+  onItemRenderStateChange,
   editMode,
   onDelete,
   onTransformChart,
@@ -1103,6 +1125,9 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
   filters: FiltersState<Filters>
   actions?: DropdownItemType[]
   itemFilters?: DashboardItemFiltersConfig
+  badge?: DashboardItemBadge
+  renderCycleKey?: string
+  onItemRenderStateChange?: (event: DashboardItemRenderStateChange) => void
   editMode?: boolean
   onDelete?: (id: string) => void
   onTransformChart?: (
@@ -1123,6 +1148,9 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
           filters={filters}
           actions={actions}
           itemFilters={itemFilters}
+          badge={badge}
+          renderCycleKey={renderCycleKey}
+          onItemRenderStateChange={onItemRenderStateChange}
           editMode={editMode}
           handleDelete={onDelete}
           onAskAi={onAskAi}
@@ -1139,6 +1167,9 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
           filters={filters}
           actions={actions}
           itemFilters={itemFilters}
+          badge={badge}
+          renderCycleKey={renderCycleKey}
+          onItemRenderStateChange={onItemRenderStateChange}
           editMode={editMode}
           handleDelete={onDelete}
           onAskAi={onAskAi}
@@ -1154,6 +1185,7 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
           filters={filters}
           actions={actions}
           itemFilters={itemFilters}
+          badge={badge}
           editMode={editMode}
           handleDelete={onDelete}
           onAskAi={onAskAi}
