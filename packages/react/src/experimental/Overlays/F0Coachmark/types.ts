@@ -3,9 +3,19 @@ import type { PopoverContentProps } from "@/ui/popover"
 export type CoachmarkId = string
 
 /**
- * What the coachmark points at: a CSS selector that must match exactly one
- * element, or the element itself. A selector is re-resolved while the coachmark
- * is queued, so it may point at something that mounts later.
+ * What the coachmark points at: ANY CSS SELECTOR, or the element itself.
+ *
+ * An id (`"#filters-button"`), a class (`".js-filters"`), an attribute
+ * (`'[data-add-widget="right"]'`), or anything else `querySelector` takes — the
+ * string is handed straight to the DOM, so the choice is about what the page
+ * can promise to keep stable, not about what this accepts. It must match
+ * exactly ONE element: a selector that matches several anchors to the first and
+ * warns in development, because a coachmark pointing at "one of these six
+ * cards" is pointing at nothing in particular.
+ *
+ * A selector is re-resolved while the coachmark is queued, so it may point at
+ * something that mounts later. An ELEMENT is not re-resolved (there is nothing
+ * to re-run), so one that unmounts takes its coachmark off screen with it.
  */
 export type CoachmarkTarget = string | HTMLElement
 
@@ -46,56 +56,79 @@ type CoachmarkContent = {
   action?: CoachmarkAction
 }
 
+type CoachmarkFocus = {
+  /**
+   * PUT THE CARET WHERE THE STEP IS POINTING. Focus goes to the target — or to
+   * the first field inside it — instead of to the panel, so the element the
+   * coachmark is explaining lights up the way it does when the reader lands on
+   * it themselves: a composer with its cursor in it and its own focus glow,
+   * rather than a box being described.
+   *
+   * OFF BY DEFAULT, and worth being deliberate about. The panel takes focus
+   * precisely so a screen reader reads the step out and so Enter cannot fire
+   * the action unread; handing focus to a field instead trades that away —
+   * the step is no longer announced, and typing goes into the page. Use it on a
+   * step whose whole point is the field (a composer, a search box), and leave
+   * every other step to the panel.
+   *
+   * Escape still closes the coachmark from anywhere, and the action button is
+   * still one Tab away.
+   */
+  focusTarget?: boolean
+}
+
 /**
  * One step of a walkthrough. Each step can point at its own element and carry
  * its own placement; anything it leaves out falls back to the value passed
  * alongside `steps`.
  */
 export type CoachmarkStep = CoachmarkContent &
-  CoachmarkPlacement & {
+  CoachmarkPlacement &
+  CoachmarkFocus & {
     /** Falls back to the `targetElement` passed alongside `steps`. */
     targetElement?: CoachmarkTarget
   }
 
-type CoachmarkBase = CoachmarkPlacement & {
-  /**
-   * Stable identity. Opening again with the same id replaces that coachmark
-   * instead of queueing a second one, so an effect that runs twice shows one
-   * coachmark. Defaults to a generated id.
-   */
-  id?: CoachmarkId
-  /**
-   * Called when the user closes the coachmark with the close button or Escape,
-   * before the last step is reached. For tracking only — the coachmark closes
-   * itself either way.
-   */
-  onDismiss?: () => void
-  /**
-   * Called when the user presses the action on the last step. For tracking only
-   * — the coachmark closes itself either way.
-   */
-  onComplete?: () => void
-  /**
-   * SPOTLIGHT THE TARGET: dims the whole page except the element this step
-   * points at, and swallows every press on the page while the coachmark is up
-   * (see `skipAfterOutsideClicks` for how a user who keeps pressing gets out).
-   *
-   * Off by default — one coachmark pointing something out should not take the
-   * page hostage. Turn it on for a walkthrough that has to be followed in order.
-   */
-  overlay?: boolean
-  /**
-   * HOW MANY PRESSES ON THE DIMMED PAGE END THE COACHMARK. The panel wiggles at
-   * each one to say the press went nowhere, and gives up at this many: a user
-   * pressing outside over and over is telling us they want out, and the way out
-   * cannot be the button they are ignoring. Reported to `onDismiss` like any
-   * other abandonment. Defaults to 5; `0` never gives up.
-   *
-   * Only has an effect alongside `overlay` — without the shield there are no
-   * presses to count, because they reach the page.
-   */
-  skipAfterOutsideClicks?: number
-}
+type CoachmarkBase = CoachmarkPlacement &
+  CoachmarkFocus & {
+    /**
+     * Stable identity. Opening again with the same id replaces that coachmark
+     * instead of queueing a second one, so an effect that runs twice shows one
+     * coachmark. Defaults to a generated id.
+     */
+    id?: CoachmarkId
+    /**
+     * Called when the user closes the coachmark with the close button or Escape,
+     * before the last step is reached. For tracking only — the coachmark closes
+     * itself either way.
+     */
+    onDismiss?: () => void
+    /**
+     * Called when the user presses the action on the last step. For tracking only
+     * — the coachmark closes itself either way.
+     */
+    onComplete?: () => void
+    /**
+     * SPOTLIGHT THE TARGET: dims the whole page except the element this step
+     * points at, and swallows every press on the page while the coachmark is up
+     * (see `skipAfterOutsideClicks` for how a user who keeps pressing gets out).
+     *
+     * Off by default — one coachmark pointing something out should not take the
+     * page hostage. Turn it on for a walkthrough that has to be followed in order.
+     */
+    overlay?: boolean
+    /**
+     * HOW MANY PRESSES ON THE DIMMED PAGE END THE COACHMARK. The panel wiggles at
+     * each one to say the press went nowhere, and gives up at this many: a user
+     * pressing outside over and over is telling us they want out, and the way out
+     * cannot be the button they are ignoring. Reported to `onDismiss` like any
+     * other abandonment. Defaults to 5; `0` never gives up.
+     *
+     * Only has an effect alongside `overlay` — without the shield there are no
+     * presses to count, because they reach the page.
+     */
+    skipAfterOutsideClicks?: number
+  }
 
 /** One coachmark: its own copy, anchored to one element. */
 export type CoachmarkSingleOptions = CoachmarkBase &
@@ -150,6 +183,8 @@ export interface F0CoachmarkProps extends CoachmarkPlacement {
   onAction: () => void
   /** Fired by the close button and by Escape. Never by an outside click. */
   onClose: () => void
+  /** Focus the target rather than the panel — see `CoachmarkStep.focusTarget`. */
+  focusTarget?: boolean
   /**
    * Dims the page except the target and shields it from the pointer. See
    * `CoachmarkSpotlight`.

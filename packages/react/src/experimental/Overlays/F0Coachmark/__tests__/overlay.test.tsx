@@ -245,3 +245,110 @@ describe("the handover between two steps", () => {
     }
   })
 })
+
+/**
+ * `focusTarget` on a step whose whole point is a field: the caret starts in it,
+ * so it wears its own focus state instead of being described from outside.
+ */
+describe("a step that focuses what it points at", () => {
+  beforeEach(() => {
+    coachmarks.closeAll()
+  })
+
+  /** A composer: a field with a row of controls under it, inside one box. */
+  const renderComposer = () =>
+    render(
+      <CoachmarkProvider>
+        <div id="composer">
+          <textarea aria-label="Ask One" />
+          <button>Analyse</button>
+        </div>
+        <button id="views">Views</button>
+      </CoachmarkProvider>
+    )
+
+  it("puts the caret in the field inside the target, not on the panel", async () => {
+    renderComposer()
+    open({
+      targetElement: "#composer",
+      title: "Let One do it for you",
+      focusTarget: true,
+    })
+
+    await screen.findByRole("dialog")
+    await waitFor(() =>
+      expect(screen.getByRole("textbox", { name: "Ask One" })).toHaveFocus()
+    )
+    // And the way on is still one Tab away, not lost with the focus.
+    expect(screen.getByRole("button", { name: "Got it" })).toBeInTheDocument()
+  })
+
+  it("keeps focus on the panel for a step that did not ask", async () => {
+    renderComposer()
+    open({ targetElement: "#composer", title: "Let One do it for you" })
+
+    const dialog = await screen.findByRole("dialog")
+    await waitFor(() => expect(dialog).toHaveFocus())
+  })
+
+  it("hands focus over per step, not once for the walkthrough", async () => {
+    renderComposer()
+    open({
+      steps: [
+        {
+          targetElement: "#composer",
+          title: "Ask One",
+          focusTarget: true,
+        },
+        { targetElement: "#views", title: "Then save a view" },
+      ],
+    })
+    await screen.findByRole("dialog")
+    await waitFor(() =>
+      expect(screen.getByRole("textbox", { name: "Ask One" })).toHaveFocus()
+    )
+
+    await userEvent.click(screen.getByRole("button", { name: "Next" }))
+
+    // The second step never asked for its element, so the panel takes focus
+    // back and the step is announced like any other.
+    await waitFor(() =>
+      expect(screen.getByRole("dialog")).toHaveAccessibleName(
+        "Then save a view"
+      )
+    )
+    await waitFor(() => expect(screen.getByRole("dialog")).toHaveFocus())
+  })
+
+  it("falls back to the panel when the target holds nothing to focus", async () => {
+    render(
+      <CoachmarkProvider>
+        <p id="prose">Nothing focusable in here.</p>
+      </CoachmarkProvider>
+    )
+    open({ targetElement: "#prose", title: "Read this", focusTarget: true })
+
+    const dialog = await screen.findByRole("dialog")
+    await waitFor(() => expect(dialog).toHaveFocus())
+  })
+
+  it("restores focus to what had it, the way any other coachmark does", async () => {
+    renderComposer()
+    const before = screen.getByRole("button", { name: "Views" })
+    before.focus()
+
+    open({
+      targetElement: "#composer",
+      title: "Let One do it for you",
+      focusTarget: true,
+    })
+    await screen.findByRole("dialog")
+    await waitFor(() =>
+      expect(screen.getByRole("textbox", { name: "Ask One" })).toHaveFocus()
+    )
+
+    await userEvent.click(screen.getByRole("button", { name: "Got it" }))
+
+    await waitFor(() => expect(before).toHaveFocus())
+  })
+})

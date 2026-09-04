@@ -39,6 +39,30 @@ const ARROW_HEIGHT = 6
 const WIGGLE_OFFSETS = ["0px", "-6px", "6px", "-4px", "4px", "0px"]
 const WIGGLE_MS = 320
 
+/**
+ * WHAT A READER WOULD HAVE CLICKED INTO. Fields first and every other focusable
+ * second, in two passes rather than one selector list: a composer is a text area
+ * with a row of buttons under it, and in document order one of those buttons can
+ * come first — a step that says "ask One for it" and lands the caret on a
+ * toolbar chip has focused the wrong thing while looking like it worked.
+ */
+const FIELDS = "textarea, input:not([type='hidden']), [contenteditable='true']"
+const FOCUSABLE = `${FIELDS}, select, button, a[href], [tabindex]:not([tabindex='-1'])`
+
+/**
+ * The element a `focusTarget` step should focus: the target itself when it is
+ * focusable, otherwise the field (or failing that, the control) inside it —
+ * a step points at the box it is describing, and the box is regularly a wrapper
+ * around the thing you actually type into.
+ */
+const fieldIn = (target: HTMLElement): HTMLElement | null => {
+  if (target.matches(FOCUSABLE)) return target
+  return (
+    target.querySelector<HTMLElement>(FIELDS) ??
+    target.querySelector<HTMLElement>(FOCUSABLE)
+  )
+}
+
 const useWiggle = (ref: RefObject<HTMLElement>) => {
   const reducedMotion = useReducedMotion()
 
@@ -78,11 +102,25 @@ const CoachmarkPanel = ({
   overlay = false,
   onOutsideInteraction,
   leaving = false,
+  focusTarget = false,
 }: F0CoachmarkProps) => {
   const i18n = useI18n()
   const contentRef = useRef<HTMLDivElement>(null)
   const previouslyFocused = useRef<HTMLElement | null>(null)
   const wiggle = useWiggle(contentRef)
+
+  /**
+   * WHERE FOCUS BELONGS FOR THIS STEP. The panel, so the step is announced and
+   * Enter cannot fire the action unread — unless the step asked for its own
+   * element (`focusTarget`), in which case the field it is pointing at, which is
+   * how a composer gets its cursor and its own focus glow. Falls back to the
+   * panel when the target holds nothing focusable at all, so a step that asked
+   * for something impossible still behaves like every other step.
+   */
+  const focusForStep = () => {
+    const field = focusTarget ? fieldIn(target) : null
+    ;(field ?? contentRef.current)?.focus()
+  }
 
   const id = useId()
   const titleId = `${id}-title`
@@ -96,13 +134,14 @@ const CoachmarkPanel = ({
 
   // Advancing keeps the panel mounted, so focus would stay on the action button
   // — where a second Enter fires the NEXT step's action before the user has read
-  // it, and where the new copy is never announced. Pulling focus back to the
-  // panel on each step is what makes a step read like a new message.
+  // it, and where the new copy is never announced. Moving focus on each step is
+  // what makes a step read like a new message; `focusForStep` decides whether
+  // that is the panel or the element the new step points at.
   const announcedStep = useRef(step?.current)
   useEffect(() => {
     if (announcedStep.current === step?.current) return
     announcedStep.current = step?.current
-    contentRef.current?.focus()
+    focusForStep()
   }, [step?.current])
 
   // On the last step (or a single-step coachmark) the action ends the coachmark,
@@ -152,7 +191,7 @@ const CoachmarkPanel = ({
           event.preventDefault()
           previouslyFocused.current =
             document.activeElement as HTMLElement | null
-          contentRef.current?.focus()
+          focusForStep()
         }}
         // Radix restores focus to the Trigger on close, but a coachmark
         // anchors instead of triggering, so nothing owns the restore.

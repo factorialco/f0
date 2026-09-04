@@ -55,9 +55,12 @@ coachmarks.open({
         <td>—</td>
         <td>Yes*</td>
         <td>
-          What the panel points at: a CSS selector matching exactly one element,
-          or the element itself. With <code>steps</code> it is the fallback for
-          steps that do not name their own.
+          What the panel points at: ANY CSS selector — an id (
+          <code>#filters-button</code>), a class (<code>.js-filters</code>), an
+          attribute (<code>{'[data-add-widget="right"]'}</code>) — or the
+          element itself. It must match exactly one element. With{" "}
+          <code>steps</code> it is the fallback for steps that do not name their
+          own.
         </td>
       </tr>
       <tr>
@@ -180,6 +183,25 @@ coachmarks.open({
       </tr>
       <tr>
         <td>
+          <code>focusTarget</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          <code>false</code>
+        </td>
+        <td>—</td>
+        <td>
+          Puts the caret in the element the step points at — or in the first
+          field inside it — instead of on the panel, so a composer starts with
+          its cursor in it and its own focus glow. Per step. Trades the step's
+          announcement for the caret, so use it only where the field <em>is</em>{" "}
+          the step (see Accessibility).
+        </td>
+      </tr>
+      <tr>
+        <td>
           <code>skipAfterOutsideClicks</code>
         </td>
         <td>
@@ -258,6 +280,21 @@ coachmarks.open({
 </Unstyled>
 
 \* `title` and a `targetElement` are required for a single coachmark. With `steps`, each step brings its own `title` and either its own `targetElement` or the shared one.
+
+### Naming the element
+
+`targetElement` is handed straight to `querySelector`, so anything the DOM understands works — the question is only what the page can promise to keep stable:
+
+```tsx
+targetElement: "#filters-button" // an id
+targetElement: ".js-onboarding-filters" // a class
+targetElement: '[data-add-widget="right"]' // an attribute (f0's own handles)
+targetElement: buttonRef.current // the element itself
+```
+
+It must match **exactly one** element. A selector that matches several anchors to the first and warns in development — a coachmark pointing at "one of these six cards" is pointing at nothing in particular. A selector is re-resolved while the coachmark is queued, so it can name something that mounts a moment later; an element cannot be re-resolved, so one that unmounts takes its coachmark off screen with it.
+
+For a walkthrough, prefer `defineStepByStepCoachmarkGuidance`'s `anchor()` over hand-written selectors: it marks the elements for you and the compiler holds the two sides together.
 
 `coachmarks.close(id)` removes a coachmark whether it is on screen or still queued, and `coachmarks.closeAll()` clears the lot. Both are for the app's own bookkeeping — the user never needs them, because the panel closes itself.
 
@@ -462,6 +499,7 @@ Reach for a coachmark when a feature is already on screen but users are walking 
 - **Outside clicks do not dismiss.** A coachmark stays until it is acknowledged. By default the page behind stays interactive; the panel is not modal and does not trap focus.
 - **`overlay` makes the page unpressable, not the coachmark modal.** The dim and its shield stop presses reaching the page and wiggle the panel instead, and give up after `skipAfterOutsideClicks` of them. Focus is still not trapped, and <kbd>Escape</kbd> still closes — the shield is about the pointer.
 - **Focus moves to the panel on open,** not to the close button, so a screen reader announces the message and Enter does not immediately discard it. On close, focus returns to whatever had it before.
+- **`focusTarget` moves it to the step's own element instead.** For a step whose subject is a field: the caret lands in it, so it wears its own focus state rather than being described from outside, and the reader can start typing the thing the panel is describing. The panel stays one Tab away and Escape still closes from anywhere — but the step is no longer announced, so this is per step and off by default.
 - **The target is an anchor, not a trigger.** It is never made clickable and never wrapped — clicking it does whatever it already did.
 
 ### Usage examples
@@ -557,5 +595,6 @@ The panel is a non-modal `dialog`, named by `title` and described by `descriptio
 - Opening moves focus to the panel itself, so the title and description are announced as a unit. The dismiss button is reached by tabbing, which keeps <kbd>Enter</kbd> from discarding the message the moment it appears.
 - Because focus is moved, only open a coachmark in response to something the user did or at a natural pause. One appearing mid-task pulls focus away from what they were doing.
 - Advancing a sequence pulls focus back to the panel, so the new step is announced as a message of its own and a second <kbd>Enter</kbd> cannot fire the next action before it has been read.
+- A step with `focusTarget` moves focus to its own element rather than to the panel, so THAT step is not announced — a screen reader reads the field the reader just landed in instead of the coachmark. It is a real trade, and it is the page's to make: take it where the field IS the step (a composer the reader is being invited to type into), and leave every other step to the panel. The panel is still one Tab away and Escape still closes, so the way on is never lost.
 - The close button is icon-only and carries a translated `Close` label for screen readers.
 - The arrow is decorative and conveys no information beyond the anchoring already implied by focus order.

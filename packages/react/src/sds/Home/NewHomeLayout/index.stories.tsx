@@ -130,6 +130,11 @@ const HOME_WALKTHROUGH = defineStepByStepCoachmarkGuidance({
       description:
         "Ask One to analyse, find information, process expenses, or request holidays; and focus on making decisions.",
       side: "bottom",
+      // THE ONE STEP THAT TAKES FOCUS: the field is the step, so the caret
+      // starts in it and it wears its own focus glow — the reader can begin
+      // typing the question the panel is describing. Every other step leaves
+      // focus on the panel, where it is announced.
+      focusTarget: true,
     },
     {
       element: "needs-you",

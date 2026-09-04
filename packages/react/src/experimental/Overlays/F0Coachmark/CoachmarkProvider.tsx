@@ -136,6 +136,7 @@ const ActiveCoachmark = ({
       }}
       overlay={item.overlay}
       leaving={leaving}
+      focusTarget={step.focusTarget}
       onOutsideInteraction={() => {
         outsidePresses.current += 1
         if (skipAfter <= 0 || outsidePresses.current < skipAfter) return
