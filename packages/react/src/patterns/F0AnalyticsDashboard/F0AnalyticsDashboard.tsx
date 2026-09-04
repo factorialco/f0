@@ -26,12 +26,13 @@ import { useDashboardExport } from "./hooks/useDashboardExport"
 /**
  * F0AnalyticsDashboard — a declarative, config-driven analytics dashboard.
  *
- * Renders a shared filter bar at the top and a 3-column grid of chart
- * and collection widgets below. Each widget independently fetches its data,
- * receiving the dashboard-level filters in its `fetchData` function.
+ * Renders a shared filter bar at the top and a responsive grid of metric,
+ * chart, collection, and location widgets below. Each data-backed widget
+ * independently fetches its data, receiving the dashboard-level filters.
  *
  * The entire dashboard structure is defined via optional `filters` / `presets`
- * and an `items` array — making it fully LLM-generatable.
+ * and an `items` array. Built-in item configuration is serializable; hosts can
+ * also attach exceptional host-owned renderers through custom items.
  */
 export const F0AnalyticsDashboard = <
   Filters extends FiltersDefinition = FiltersDefinition,

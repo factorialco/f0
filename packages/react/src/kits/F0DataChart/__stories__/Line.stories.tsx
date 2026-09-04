@@ -2,7 +2,11 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import type { F0DataChartProps } from "../types"
 
-import { F0DataChart } from "../index"
+import {
+  F0DataChart,
+  f0DataChartGridLineContrasts,
+  f0DataChartGridLineTypes,
+} from "../index"
 import { ChartDecorator, ResponsiveSnapshot } from "./decorators"
 
 const meta = {
@@ -10,6 +14,18 @@ const meta = {
   title: "F0DataChart/Line",
   tags: ["autodocs", "experimental"],
   decorators: [ChartDecorator],
+  argTypes: {
+    gridLineContrast: {
+      control: "select",
+      options: f0DataChartGridLineContrasts,
+      table: { type: { summary: f0DataChartGridLineContrasts.join(" | ") } },
+    },
+    gridLineType: {
+      control: "select",
+      options: f0DataChartGridLineTypes,
+      table: { type: { summary: f0DataChartGridLineTypes.join(" | ") } },
+    },
+  },
 } satisfies Meta<typeof F0DataChart>
 
 export default meta
@@ -158,6 +174,22 @@ export const WithDots: Story = {
     showDots: true,
     showArea: true,
     valueFormatter: (v) => `${(v / 1000).toFixed(1)}k`,
+  },
+}
+
+/**
+ * Custom value-axis grid patterns keep dense dashboard charts legible while
+ * preserving the theme-aware grid color.
+ */
+export const SparseGrid: Story = {
+  render: (args) => <F0DataChart {...args} />,
+  args: {
+    type: "line",
+    categories: [...MONTHS_SHORT],
+    series: [{ name: "Clock ins", data: [8, 21, 47, 32, 41, 19] }],
+    gridLineType: [1, 5],
+    gridLineContrast: "strong",
+    lineType: "smooth",
   },
 }
 

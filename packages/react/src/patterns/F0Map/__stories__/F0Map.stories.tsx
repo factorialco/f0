@@ -1,8 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import { expect, userEvent, within } from "storybook/test"
 
-import { F0Map } from "../F0Map"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
+
 import type { F0MapPoint } from "../types"
+
+import { F0MapMarker } from "../components/F0MapMarker"
+import { F0Map } from "../F0Map"
 
 // Barcelona-area points: the four product-semantic marker variants.
 const BARCELONA: F0MapPoint[] = [
@@ -80,6 +85,7 @@ const meta = {
     selectedMarkerId: { table: { disable: true } },
     defaultSelectedMarkerId: { table: { disable: true } },
     onMarkerSelect: { table: { disable: true } },
+    onFallbackChange: { table: { disable: true } },
     fitToMarkers: { table: { disable: true } },
   },
 } satisfies Meta<typeof F0Map>
@@ -159,12 +165,46 @@ const ALL_VARIANTS: F0MapPoint[] = [
     letter: "A",
     label: "Stop",
   },
+  {
+    id: "density-low",
+    coordinates: [-1.13, 37.99],
+    variant: "density",
+    value: 4,
+    level: "low",
+    label: "Low density",
+  },
+  {
+    id: "density-medium",
+    coordinates: [-0.88, 41.65],
+    variant: "density",
+    value: 12,
+    level: "medium",
+    label: "Medium density",
+  },
+  {
+    id: "density-high",
+    coordinates: [-2.93, 43.26],
+    variant: "density",
+    value: 42,
+    level: "high",
+    label: "High density",
+  },
+  {
+    id: "density-custom",
+    coordinates: [-3.7, 40.42],
+    variant: "density",
+    value: 28,
+    level: "high",
+    style: { color: "purple", colorStep: 70 },
+    label: "Custom density palette",
+  },
 ]
 
 /**
  * Every product-semantic marker variant on one map: `default`, `workplace`,
- * `employee`, `company` and `stop`. Workplace and company render as rounded
- * squares (the entity shape); default, employee and stop stay circular.
+ * `employee`, `company`, `stop` and default/custom `density`. Workplace and
+ * company render as rounded squares (the entity shape); the remaining
+ * variants stay circular.
  */
 export const MarkerVariants: Story = {
   args: { markers: ALL_VARIANTS },
@@ -375,13 +415,54 @@ export const Loading: Story = {
 
 /**
  * Chromatic visual-regression target. The live map is non-deterministic
- * (WebGL + network tiles), so this snapshots the deterministic skeleton - the
- * one stable frame worth regressing. Re-enables Chromatic (disabled on the meta
- * for the map stories).
+ * (WebGL + network tiles), so this snapshots the deterministic skeleton and a
+ * static light and dark rows of the three density levels. Re-enables Chromatic
+ * (disabled on the meta for the map stories).
  */
 export const Snapshot: Story = {
   args: { loading: true },
-  parameters: { chromatic: { disableSnapshot: false } },
+  parameters: withSnapshot({}),
+  render: (args) => (
+    <div className="flex h-full flex-col gap-3">
+      <div className="flex shrink-0 items-center gap-8 rounded-lg border border-solid border-f1-border-secondary bg-f1-background p-4">
+        <F0MapMarker variant="density" value={4} level="low" label="Low" />
+        <F0MapMarker
+          variant="density"
+          value={12}
+          level="medium"
+          label="Medium"
+        />
+        <F0MapMarker variant="density" value={42} level="high" label="High" />
+        <F0MapMarker
+          variant="density"
+          value={28}
+          level="high"
+          style={{ color: "purple", colorStep: 70 }}
+          label="Custom"
+        />
+      </div>
+      <div className="dark flex shrink-0 items-center gap-8 rounded-lg border border-solid border-f1-border-secondary bg-f1-background p-4">
+        <F0MapMarker variant="density" value={4} level="low" label="Low" />
+        <F0MapMarker
+          variant="density"
+          value={12}
+          level="medium"
+          label="Medium"
+        />
+        <F0MapMarker variant="density" value={42} level="high" label="High" />
+        <F0MapMarker
+          variant="density"
+          value={28}
+          level="high"
+          style={{ color: "purple", colorStep: 70 }}
+          label="Custom"
+        />
+      </div>
+      <div className="min-h-0 flex-1">
+        <F0Map {...args} />
+      </div>
+    </div>
+  ),
 }
 
 /**

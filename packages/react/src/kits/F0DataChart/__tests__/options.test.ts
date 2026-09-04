@@ -119,12 +119,42 @@ describe("buildValueAxis", () => {
     expect(axis).not.toHaveProperty("scale")
     expect(axis.axisLabel).not.toHaveProperty("alignMinLabel")
     expect(axis.axisLabel).not.toHaveProperty("alignMaxLabel")
+    expect(axis.splitLine.lineStyle).toEqual({
+      type: "solid",
+      color: theme.colors.borderSecondary,
+    })
   })
 
   it("fits the axis to its data range when scaled", () => {
     expect(
       buildValueAxis({ theme, showGrid: true, scale: true })
     ).toMatchObject({ scale: true })
+  })
+
+  it("keeps the theme grid color when changing the line pattern", () => {
+    const axis = buildValueAxis({
+      theme,
+      showGrid: true,
+      gridLineType: [1, 5],
+    })
+
+    expect(axis.splitLine.lineStyle).toEqual({
+      type: [1, 5],
+      color: theme.colors.borderSecondary,
+    })
+  })
+
+  it("uses the stronger theme border when requested", () => {
+    const axis = buildValueAxis({
+      theme,
+      showGrid: true,
+      gridLineContrast: "strong",
+    })
+
+    expect(axis.splitLine.lineStyle).toEqual({
+      type: "solid",
+      color: theme.colors.border,
+    })
   })
 
   it("anchors the end labels so they cannot overflow the container", () => {

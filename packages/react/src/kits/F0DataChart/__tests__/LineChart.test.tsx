@@ -66,7 +66,10 @@ function getLatestOption() {
     series: Array<{ areaStyle?: unknown }>
     legend?: { show?: boolean }
     xAxis: { axisLabel: { show: boolean } }
-    yAxis: { axisLabel: { show: boolean } }
+    yAxis: {
+      axisLabel: { show: boolean }
+      splitLine?: { lineStyle?: { type?: string; color?: string } }
+    }
     tooltip?: {
       formatter?: (params: unknown) => string
     }
@@ -194,6 +197,25 @@ describe("LineChart — area mode", () => {
     for (const s of option.series) {
       expect(s.areaStyle).toBeUndefined()
     }
+  })
+})
+
+describe("LineChart — grid styling", () => {
+  it("uses the requested line pattern without losing the theme color", () => {
+    render(
+      <F0DataChart
+        type="line"
+        categories={["Jan", "Feb", "Mar"]}
+        series={[{ name: "Revenue", data: [1, 2, 3] }]}
+        gridLineType={[1, 5]}
+        gridLineContrast="strong"
+      />
+    )
+
+    expect(getLatestOption().yAxis.splitLine?.lineStyle).toMatchObject({
+      type: [1, 5],
+      color: expect.any(String),
+    })
   })
 })
 

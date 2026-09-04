@@ -1,6 +1,6 @@
 {
   "note": "Untranslated user-visible copy in packages/react/src — string literals that should come from the i18n layer (src/lib/providers/i18n) instead. Enforced by .scripts/check-untranslated-copy.ts. This list may only shrink: translate a string and remove it from here (or run \"--update\"), never add one.",
-  "total": 133,
+  "total": 132,
   "files": {
     "src/components/F0Card/components/CardMetadata.tsx": [
       "Unsupported property type:"
@@ -112,9 +112,6 @@
     ],
     "src/lib/F0GridStack/components/grid-stack-provider.tsx": ["No content"],
     "src/lib/xray.tsx": ["XRay"],
-    "src/patterns/F0AnalyticsDashboard/components/DashboardGrid/DashboardGrid.tsx": [
-      "Drag to reorder"
-    ],
     "src/patterns/F0AnalyticsDashboard/components/FilterBar/FilterBarSkeleton.tsx": [
       "Loading filters"
     ],

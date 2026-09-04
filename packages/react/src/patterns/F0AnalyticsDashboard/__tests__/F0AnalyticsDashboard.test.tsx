@@ -1,27 +1,47 @@
 import { userEvent } from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
 
+import type {
+  FiltersDefinition,
+  FiltersState,
+} from "@/patterns/OneFilterPicker/types"
+
+import {
+  AiChatStateProvider,
+  useAiChat,
+} from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
 import {
   screen,
   waitFor,
   within,
   zeroRender as render,
 } from "@/testing/test-utils"
-import type {
-  FiltersDefinition,
-  FiltersState,
-} from "@/patterns/OneFilterPicker/types"
-import {
-  AiChatStateProvider,
-  useAiChat,
-} from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
 
-import { F0AnalyticsDashboard } from "../F0AnalyticsDashboard"
 import type {
   DashboardChartItem,
+  DashboardCustomItem,
   DashboardItem,
   DashboardMetricItem,
 } from "../types"
+
+import { F0AnalyticsDashboard } from "../F0AnalyticsDashboard"
+
+// Keep this dashboard integration test at the map boundary: jsdom has no
+// browser Worker, while location behavior has its own focused test suite.
+vi.mock("@/patterns/F0Map", () => ({
+  f0MapDensityColors: { low: "red", medium: "red", high: "red" },
+  f0MapDensityColorSteps: { low: 10, medium: 50, high: 70 },
+  f0MapDensityPalette: {
+    low: { color: "red", colorStep: 10 },
+    medium: { color: "red", colorStep: 50 },
+    high: { color: "red", colorStep: 70 },
+  },
+  f0MapStyles: {
+    light: { version: 8, sources: {}, layers: [] },
+    dark: { version: 8, sources: {}, layers: [] },
+  },
+  F0Map: () => <div aria-label="Map" role="img" />,
+}))
 
 // Keep this dashboard integration test at the chart boundary: jsdom has no
 // canvas context, while ChartItem's keyboard point surface is ordinary DOM.
@@ -248,7 +268,7 @@ describe("F0AnalyticsDashboard report filters", () => {
 })
 
 describe("F0AnalyticsDashboard item filters", () => {
-  it("resolves metric controls without enabling fullscreen and preserves single-item and undefined opt-outs", () => {
+  it("keeps metric filters and fullscreen independent while preserving single-item and undefined opt-outs", () => {
     const headcount = metricItem(vi.fn().mockResolvedValue({ value: 42 }))
     const turnover: DashboardMetricItem<typeof filters> = {
       ...metricItem(vi.fn().mockResolvedValue({ value: 7 })),
@@ -287,11 +307,11 @@ describe("F0AnalyticsDashboard item filters", () => {
       within(turnoverCard).queryByRole("button", { name: "Filters" })
     ).toBeNull()
     expect(
-      within(headcountCard).queryByRole("button", { name: "Expand" })
-    ).toBeNull()
+      within(headcountCard).getByRole("button", { name: "Expand" })
+    ).toBeVisible()
     expect(
-      within(turnoverCard).queryByRole("button", { name: "Expand" })
-    ).toBeNull()
+      within(turnoverCard).getByRole("button", { name: "Expand" })
+    ).toBeVisible()
 
     view.rerender(
       <F0AnalyticsDashboard items={[headcount]} itemFilters={resolver} />
@@ -303,6 +323,7 @@ describe("F0AnalyticsDashboard item filters", () => {
           .closest("[class*='dashitem']") as HTMLElement
       ).getByRole("button", { name: "Filters" })
     ).toBeVisible()
+    expect(screen.queryByRole("button", { name: "Expand" })).toBeNull()
     expect(resolver).toHaveBeenCalledWith(
       expect.objectContaining({ id: "headcount" })
     )
@@ -438,6 +459,114 @@ describe("F0AnalyticsDashboard item filters", () => {
       quote: { text: "Headcount" },
     })
     expect(screen.getByTestId("pending-quote")).toHaveTextContent("Headcount")
+  })
+})
+
+describe("F0AnalyticsDashboard custom items", () => {
+  it("renders host content in the standard item shell with applied filters", async () => {
+    const user = userEvent.setup()
+    const renderContent = vi.fn((currentFilters: DashboardFilters) => (
+      <div>Mapped locations: {currentFilters.department?.join(", ")}</div>
+    ))
+    const item: DashboardCustomItem<typeof filters> = {
+      id: "clock-activity",
+      type: "custom",
+      title: "Clock activity by location",
+      description: "Last 30 days · Europe",
+      explanation: "Clock events grouped by workplace.",
+      renderContent,
+    }
+
+    render(
+      <F0AnalyticsDashboard
+        filters={filters}
+        defaultFilters={{ department: ["engineering"] }}
+        items={[item]}
+      />
+    )
+
+    expect(
+      screen.getByRole("heading", { name: "Clock activity by location" })
+    ).toBeVisible()
+    expect(screen.getByText("Last 30 days · Europe")).toBeVisible()
+    expect(screen.getByText("Mapped locations: engineering")).toBeVisible()
+    expect(renderContent).toHaveBeenLastCalledWith({
+      department: ["engineering"],
+    })
+
+    await user.click(screen.getByRole("button", { name: "Other actions" }))
+    expect(
+      screen.getByRole("menuitem", {
+        name: "Where does this data come from?",
+      })
+    ).toBeVisible()
+  })
+
+  it("withholds dashboard filters from an opted-out custom item", () => {
+    const renderContent = vi.fn(() => <div>Custom content</div>)
+
+    render(
+      <F0AnalyticsDashboard
+        filters={filters}
+        defaultFilters={{ department: ["engineering"] }}
+        items={[
+          {
+            id: "unfiltered-custom",
+            type: "custom",
+            title: "Global activity",
+            useDashboardFilters: false,
+            renderContent,
+          },
+        ]}
+      />
+    )
+
+    expect(renderContent).toHaveBeenLastCalledWith({})
+  })
+
+  it("updates custom content when controlled dashboard filters change", () => {
+    const filteredContent = vi.fn(() => <div>Filtered content</div>)
+    const unfilteredContent = vi.fn(() => <div>Global content</div>)
+    const items: DashboardCustomItem<typeof filters>[] = [
+      {
+        id: "filtered-custom",
+        type: "custom",
+        title: "Filtered activity",
+        renderContent: filteredContent,
+      },
+      {
+        id: "unfiltered-custom",
+        type: "custom",
+        title: "Global activity",
+        useDashboardFilters: false,
+        renderContent: unfilteredContent,
+      },
+    ]
+    const { rerender } = render(
+      <F0AnalyticsDashboard
+        filters={filters}
+        filtersValue={{ department: ["engineering"] }}
+        items={items}
+      />
+    )
+
+    rerender(
+      <F0AnalyticsDashboard
+        filters={filters}
+        filtersValue={{ department: ["product"] }}
+        items={items}
+      />
+    )
+
+    expect(filteredContent).toHaveBeenLastCalledWith({
+      department: ["product"],
+    })
+    expect(unfilteredContent.mock.calls).not.toHaveLength(0)
+    expect(
+      unfilteredContent.mock.calls.every(
+        ([value]) => Object.keys(value).length === 0
+      )
+    ).toBe(true)
   })
 })
 

@@ -1,5 +1,9 @@
 import type * as echarts from "echarts"
 
+import type {
+  F0DataChartGridLineContrast,
+  F0DataChartGridLineType,
+} from "../types"
 import type { ChartTheme } from "./theme"
 
 // ---------------------------------------------------------------------------
@@ -270,6 +274,8 @@ export function buildCategoryAxis({
 interface ValueAxisOptions {
   theme: ChartTheme
   showGrid: boolean
+  gridLineType?: F0DataChartGridLineType
+  gridLineContrast?: F0DataChartGridLineContrast
   formatter?: (value: number) => string
   /** Max label width in pixels — when set, labels are truncated with ellipsis */
   maxLabelWidth?: number
@@ -301,10 +307,12 @@ interface ValueAxisOptions {
   alignEdgeLabels?: boolean
 }
 
-/** Build a styled value axis with optional solid grid lines */
+/** Build a styled value axis with optional theme-aware grid lines */
 export function buildValueAxis({
   theme,
   showGrid,
+  gridLineType = "solid",
+  gridLineContrast = "subtle",
   formatter,
   maxLabelWidth,
   show = true,
@@ -352,8 +360,11 @@ export function buildValueAxis({
     splitLine: {
       show: showGrid,
       lineStyle: {
-        type: "solid" as const,
-        color: theme.colors.borderSecondary,
+        type: gridLineType,
+        color:
+          gridLineContrast === "strong"
+            ? theme.colors.border
+            : theme.colors.borderSecondary,
       },
     },
   }
@@ -750,6 +761,8 @@ export function buildAxes({
   categories,
   theme,
   showGrid,
+  gridLineType,
+  gridLineContrast,
   valueFormatter,
   categoryFormatter,
   containerWidth,
@@ -766,6 +779,8 @@ export function buildAxes({
   categories: string[]
   theme: ChartTheme
   showGrid: boolean
+  gridLineType?: F0DataChartGridLineType
+  gridLineContrast?: F0DataChartGridLineContrast
   valueFormatter?: (value: number) => string
   categoryFormatter?: (value: string) => string
   containerWidth?: number
@@ -838,6 +853,8 @@ export function buildAxes({
   const valueAxis = buildValueAxis({
     theme,
     showGrid,
+    gridLineType,
+    gridLineContrast,
     formatter: valueFormatter,
     show: showValueAxis,
     splitNumber: valueAxisSplitNumber,
@@ -882,6 +899,10 @@ interface BaseChartOptionsParams {
   isVertical: boolean
   /** Show grid lines on the value axis */
   showGrid: boolean
+  /** Pattern used for value-axis grid lines. */
+  gridLineType?: F0DataChartGridLineType
+  /** Theme-aware contrast used for value-axis grid lines. */
+  gridLineContrast?: F0DataChartGridLineContrast
   /** Show the legend below the chart */
   showLegend: boolean
   /** Format value axis labels */
@@ -936,6 +957,8 @@ export function buildBaseChartOptions({
   legendData,
   isVertical,
   showGrid,
+  gridLineType,
+  gridLineContrast,
   showLegend,
   valueFormatter,
   categoryFormatter,
@@ -958,6 +981,8 @@ export function buildBaseChartOptions({
     categories,
     theme,
     showGrid,
+    gridLineType,
+    gridLineContrast,
     valueFormatter,
     categoryFormatter,
     containerWidth,

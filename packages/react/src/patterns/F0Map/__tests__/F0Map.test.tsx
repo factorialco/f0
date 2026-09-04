@@ -1,7 +1,12 @@
 import { createRef } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
-import { fireEvent, screen, zeroRender as render } from "@/testing/test-utils"
+import {
+  fireEvent,
+  screen,
+  waitFor,
+  zeroRender as render,
+} from "@/testing/test-utils"
 
 import { F0Map, type F0MapHandle } from "../F0Map"
 import type { F0MapArc, F0MapPoint, F0MapRoute } from "../types"
@@ -11,6 +16,7 @@ import type { F0MapArc, F0MapPoint, F0MapRoute } from "../types"
 // a machine without WebGL (the map constructor throwing).
 const mock = vi.hoisted(() => {
   const instances: MockMap[] = []
+  const markerElements: HTMLElement[] = []
   const state = { throwOnCreate: false }
 
   class MockMap {
@@ -23,6 +29,7 @@ const mock = vi.hoisted(() => {
       fitBounds: [] as unknown[],
       setStyle: [] as unknown[],
       setProjection: [] as unknown[],
+      resize: 0,
       zoomIn: 0,
       zoomOut: 0,
     }
@@ -61,7 +68,9 @@ const mock = vi.hoisted(() => {
       return this
     }
     remove() {}
-    resize() {}
+    resize() {
+      this.calls.resize++
+    }
     setStyle(s: unknown) {
       this.calls.setStyle.push(s)
     }
@@ -139,6 +148,14 @@ const mock = vi.hoisted(() => {
     }
   }
   class MockMarker {
+    constructor({ element }: { element: HTMLElement }) {
+      // Match the accessibility attributes MapLibre adds to custom marker
+      // wrappers so the component has to remove them in this test too.
+      element.setAttribute("role", "button")
+      element.setAttribute("tabindex", "0")
+      element.setAttribute("aria-label", "Map marker")
+      markerElements.push(element)
+    }
     setLngLat() {
       return this
     }
@@ -156,6 +173,7 @@ const mock = vi.hoisted(() => {
 
   return {
     instances,
+    markerElements,
     state,
     Map: MockMap,
     Marker: MockMarker,
@@ -202,6 +220,7 @@ const LINE_LAYERS = ["f0-map-lines-solid", "f0-map-lines-dashed"]
 describe("F0Map", () => {
   beforeEach(() => {
     mock.instances.length = 0
+    mock.markerElements.length = 0
     mock.state.throwOnCreate = false
   })
 
@@ -221,6 +240,60 @@ describe("F0Map", () => {
       expect(screen.getByRole("button", { name: "Office" })).toBeInTheDocument()
     })
 
+    it("removes MapLibre button semantics from visual marker wrappers", async () => {
+      render(<F0Map markers={POINTS} />)
+
+      await waitFor(() => expect(mock.markerElements).toHaveLength(2))
+      for (const marker of mock.markerElements) {
+        expect(marker).toHaveAttribute("aria-hidden", "true")
+        expect(marker).not.toHaveAttribute("role")
+        expect(marker).not.toHaveAttribute("tabindex")
+        expect(marker).not.toHaveAttribute("aria-label")
+      }
+    })
+
+    it("normalizes an unlabeled density marker in the accessible list", () => {
+      render(
+        <F0Map
+          markers={[
+            {
+              id: "density",
+              coordinates: [2.19, 41.4],
+              variant: "density",
+              value: 128.4,
+              level: "high",
+            },
+          ]}
+        />
+      )
+
+      expect(
+        screen.getByRole("button", { name: "Location · 99+" })
+      ).toBeInTheDocument()
+    })
+
+    it("keeps a concise map label while exposing richer list context", () => {
+      render(
+        <F0Map
+          markers={[
+            {
+              id: "density",
+              coordinates: [2.19, 41.4],
+              variant: "density",
+              value: 42,
+              level: "high",
+              label: "Barcelona HQ",
+              ariaLabel: "Barcelona HQ · Density: 42",
+            },
+          ]}
+        />
+      )
+
+      expect(
+        screen.getByRole("button", { name: "Barcelona HQ · Density: 42" })
+      ).toBeInTheDocument()
+    })
+
     it("announces the marker count in a live region", () => {
       render(<F0Map markers={POINTS} />)
       expect(screen.getByRole("status")).toHaveTextContent("2 locations")
@@ -231,6 +304,18 @@ describe("F0Map", () => {
       const skip = screen.getByRole("link", { name: /skip to location list/i })
       const list = screen.getByRole("navigation", { name: "Locations" })
       expect(skip.getAttribute("href")).toBe(`#${list.id}`)
+    })
+
+    it("removes the skip link when the visible fallback already owns focus", () => {
+      mock.state.throwOnCreate = true
+      render(<F0Map markers={POINTS} />)
+
+      expect(
+        screen.queryByRole("link", { name: /skip to location list/i })
+      ).not.toBeInTheDocument()
+      expect(
+        screen.getByRole("navigation", { name: "Locations" })
+      ).toBeVisible()
     })
   })
 
@@ -268,6 +353,57 @@ describe("F0Map", () => {
     })
   })
 
+  describe("container resizing", () => {
+    it("resizes the map and disconnects its observer on unmount", () => {
+      const observe = vi.fn()
+      const disconnect = vi.fn()
+      let resizeCallback: ResizeObserverCallback | undefined
+      const originalResizeObserver = Object.getOwnPropertyDescriptor(
+        globalThis,
+        "ResizeObserver"
+      )
+
+      class TestResizeObserver {
+        constructor(callback: ResizeObserverCallback) {
+          resizeCallback = callback
+        }
+
+        observe = observe
+        unobserve = vi.fn()
+        disconnect = disconnect
+      }
+
+      Object.defineProperty(globalThis, "ResizeObserver", {
+        configurable: true,
+        writable: true,
+        value: TestResizeObserver,
+      })
+
+      try {
+        const { unmount } = render(<F0Map markers={POINTS} />)
+        const map = mock.instances[0]
+        const resizeCallsBeforeObserver = map.calls.resize
+
+        resizeCallback?.([], {} as ResizeObserver)
+
+        expect(observe).toHaveBeenCalledOnce()
+        expect(map.calls.resize).toBe(resizeCallsBeforeObserver + 1)
+        unmount()
+        expect(disconnect).toHaveBeenCalledOnce()
+      } finally {
+        if (originalResizeObserver) {
+          Object.defineProperty(
+            globalThis,
+            "ResizeObserver",
+            originalResizeObserver
+          )
+        } else {
+          Reflect.deleteProperty(globalThis, "ResizeObserver")
+        }
+      }
+    })
+  })
+
   describe("list interaction", () => {
     it("activating a list item selects that marker", () => {
       const onMarkerSelect = vi.fn()
@@ -287,6 +423,33 @@ describe("F0Map", () => {
       const list = screen.getByRole("navigation", { name: "Locations" })
       expect(list).not.toHaveClass("sr-only")
       expect(screen.getByRole("button", { name: "HQ" })).toBeInTheDocument()
+    })
+
+    it("reports when the visible fallback replaces the map", async () => {
+      const onFallbackChange = vi.fn()
+      mock.state.throwOnCreate = true
+
+      const result = render(
+        <F0Map markers={POINTS} onFallbackChange={onFallbackChange} />
+      )
+
+      await waitFor(() =>
+        expect(onFallbackChange).toHaveBeenLastCalledWith(true)
+      )
+
+      result.rerender(
+        <F0Map markers={POINTS} loading onFallbackChange={onFallbackChange} />
+      )
+      await waitFor(() =>
+        expect(onFallbackChange).toHaveBeenLastCalledWith(false)
+      )
+
+      mock.state.throwOnCreate = false
+      result.rerender(
+        <F0Map markers={POINTS} onFallbackChange={onFallbackChange} />
+      )
+      await waitFor(() => expect(mock.instances).toHaveLength(1))
+      expect(onFallbackChange).toHaveBeenLastCalledWith(false)
     })
   })
 

@@ -50,13 +50,27 @@ export interface F0MapClusterProps extends WithDataTestIdProps {
   members: F0MapMarkerVariantProps[]
   onClick?: () => void
   ariaLabel?: string
+  /**
+   * Render outside the tab order and accessibility tree while preserving the
+   * pointer target. F0Map uses this for canvas clusters because F0MapList is
+   * the single operable representation of map content.
+   */
+  presentational?: boolean
   /** @private */
   className?: string
 }
 
 const F0MapClusterBase = forwardRef<HTMLDivElement, F0MapClusterProps>(
   function F0MapCluster(
-    { count, members, onClick, ariaLabel, dataTestId, className },
+    {
+      count,
+      members,
+      onClick,
+      ariaLabel,
+      presentational = false,
+      dataTestId,
+      className,
+    },
     ref
   ) {
     const i18n = useI18n()
@@ -85,20 +99,29 @@ const F0MapClusterBase = forwardRef<HTMLDivElement, F0MapClusterProps>(
       <DataTestIdWrapper dataTestId={dataTestId}>
         <div
           ref={ref}
-          role="button"
-          tabIndex={0}
-          aria-label={ariaLabel ?? i18n.t("map.cluster", { count })}
+          role={presentational ? undefined : "button"}
+          tabIndex={presentational ? undefined : 0}
+          aria-hidden={presentational || undefined}
+          aria-label={
+            presentational
+              ? undefined
+              : (ariaLabel ?? i18n.t("map.cluster", { count }))
+          }
           onClick={onClick}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault()
-              onClick?.()
-            }
-          }}
+          onKeyDown={
+            presentational
+              ? undefined
+              : (e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault()
+                    onClick?.()
+                  }
+                }
+          }
           onPointerEnter={() => setActive(true)}
           onPointerLeave={() => setActive(false)}
-          onFocus={() => setActive(true)}
-          onBlur={() => setActive(false)}
+          onFocus={presentational ? undefined : () => setActive(true)}
+          onBlur={presentational ? undefined : () => setActive(false)}
           // `group`: the div is the focusable element but it is 0x0, so the
           // focus ring renders on the sized target span below via
           // `group-focus-visible:` (a ring on the div itself would be invisible).
@@ -126,7 +149,7 @@ const F0MapClusterBase = forwardRef<HTMLDivElement, F0MapClusterProps>(
               className="absolute left-0 top-0 flex leading-none"
               style={{ zIndex: i, ...place(i) }}
             >
-              <F0MapMarker {...m} showLabel={false} />
+              <F0MapMarker {...m} showLabel={false} presentational />
             </span>
           ))}
           {/* Overflow counter: f0's avatar-list "+N" circle (secondary surface,

@@ -184,6 +184,14 @@ const MapMarkerPortal = ({
     const marker = new maplibregl.Marker({ element: el, anchor: "center" })
       .setLngLat(coordinates)
       .addTo(map)
+    // MapLibre adds button semantics to every custom marker wrapper. F0Map's
+    // operable text alternative is the bounded F0MapList, so leaving those
+    // generated roles in place duplicates each location and restores focus to
+    // a map-canvas element that has no keyboard contract of its own.
+    el.removeAttribute("role")
+    el.removeAttribute("tabindex")
+    el.removeAttribute("aria-label")
+    el.setAttribute("aria-hidden", "true")
     markerRef.current = marker
     return () => {
       el.removeEventListener("click", stop)
@@ -276,6 +284,7 @@ export const F0MapMarkersLayer = ({
           >
             <F0MapCluster
               count={c.count}
+              presentational
               members={c.pointIds
                 .map((id) => pointById.get(id))
                 .filter((p): p is F0MapPoint => Boolean(p))
@@ -342,7 +351,9 @@ export const F0MapMarkersLayer = ({
                     // pins stay out of the tab order and AT tree rather than
                     // duplicating every point as both a button and a list item.
                     presentational
-                    ariaLabel={point.label ?? i18n.map.unnamedLocation}
+                    ariaLabel={
+                      point.ariaLabel ?? point.label ?? i18n.map.unnamedLocation
+                    }
                   />
                 </motion.span>
               </AnimatePresence>

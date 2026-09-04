@@ -81,8 +81,9 @@ A Map is composed of:
 2. **Markers** - DOM pins from your `markers`, one per record, by variant.
 3. **Clusters** - nearby markers gathered into a pile that expands on click.
 4. **Controls** - locate, fit-to-markers, zoom in / out (bottom-left).
-5. **List** - a synchronized, screen-reader-operable list of every marker,
-   which also becomes the visible fallback if the map can't render.
+5. **List** - a synchronized, keyboard- and screen-reader-operable list of
+   every marker, which appears over the map when keyboard focus enters it and
+   becomes the visible fallback if the map can't render.
 
 ---
 
@@ -96,10 +97,24 @@ size, label placement, selection) stays uniform across the map.
 - **`company`** - a company avatar.
 - **`default`** - a plain colored pin.
 - **`stop`** - a lettered route stop (A, B, C…) matching the route/arc lines.
+- **`density`** - an aggregate marker that requires a numeric `value` and a
+  `level` of `low`, `medium`, or `high` for the Factorial heat scale. The
+  levels use one sequential red scale: the Factorial critical tint, `red.50`,
+  and `red.70`. Composing analytical patterns may pass a `style` with an F0
+  `color` and `colorStep`; raw CSS colors are not accepted. Count ink is
+  resolved from the actual opaque palette tone. If the requested step cannot
+  reach AA contrast with sanctioned F0 ink, it resolves to the nearest
+  accessible step of the same hue. Use that resolved palette for markers and
+  any accompanying legend.
+  Values are rounded, negative or non-finite values become `0`, and visible
+  counts above 99 are capped at `99+`. Keep `label` concise for the map and use
+  `ariaLabel` when the operable list needs richer location-and-count context.
 - **`current_location`** - the "you are here" dot (see below).
 
 Selecting a marker grows it to a pinned, lifted state; neighbors it would cover
 fold to a dot until it's deselected.
+
+<Canvas of={F0MapStories.MarkerVariants} />
 
 ---
 
@@ -262,17 +277,18 @@ Clustering is automatic (no prop) - see [Clustering](#clustering).
 
 ### Presentation & interaction
 
-| Prop                  | Type                        | Default         | Description                                               |
-| --------------------- | --------------------------- | --------------- | --------------------------------------------------------- |
-| `mapStyle`            | `F0MapStylePair`            | f0 styles       | Light/dark style pair override.                           |
-| `interactive`         | `boolean`                   | `true`          | Allow pan/zoom.                                           |
-| `gestureHandling`     | `"cooperative" \| "greedy"` | `"cooperative"` | Cooperative requires Ctrl/⌘ + wheel to zoom (embed-safe). |
-| `fullScreen`          | `boolean`                   | `false`         | `false` frames as a card; `true` is edge-to-edge.         |
-| `projection`          | `"mercator" \| "globe"`     | `"mercator"`    | `"globe"` renders the world as a 3D sphere.               |
-| `showControls`        | `boolean`                   | `true`          | Show the locate / fit / zoom toolbar (when interactive).  |
-| `showCurrentLocation` | `boolean`                   | `false`         | Show the "you are here" dot when location is granted.     |
-| `loading`             | `boolean`                   | `false`         | Show the skeleton instead of the map.                     |
-| `ariaLabel`           | `string`                    | `"Map"` (i18n)  | Accessible name for the map region.                       |
+| Prop                  | Type                         | Default         | Description                                               |
+| --------------------- | ---------------------------- | --------------- | --------------------------------------------------------- |
+| `mapStyle`            | `F0MapStylePair`             | f0 styles       | Light/dark style pair override.                           |
+| `interactive`         | `boolean`                    | `true`          | Allow pan/zoom.                                           |
+| `gestureHandling`     | `"cooperative" \| "greedy"`  | `"cooperative"` | Cooperative requires Ctrl/⌘ + wheel to zoom (embed-safe). |
+| `fullScreen`          | `boolean`                    | `false`         | `false` frames as a card; `true` is edge-to-edge.         |
+| `projection`          | `"mercator" \| "globe"`      | `"mercator"`    | `"globe"` renders the world as a 3D sphere.               |
+| `showControls`        | `boolean`                    | `true`          | Show the locate / fit / zoom toolbar (when interactive).  |
+| `showCurrentLocation` | `boolean`                    | `false`         | Show the "you are here" dot when location is granted.     |
+| `loading`             | `boolean`                    | `false`         | Show the skeleton instead of the map.                     |
+| `onFallbackChange`    | `(visible: boolean) => void` | —               | Reports when the HTML list replaces unavailable WebGL.    |
+| `ariaLabel`           | `string`                     | `"Map"` (i18n)  | Accessible name for the map region.                       |
 
 ### Imperative handle (`ref`)
 
