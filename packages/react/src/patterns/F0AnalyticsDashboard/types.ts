@@ -479,12 +479,12 @@ export type DashboardItemLayout = {
 // Root component props
 // ---------------------------------------------------------------------------
 
-/** A point selected from either the chart canvas or its keyboard companion. */
+/** A mark the reader clicked on the chart canvas. */
 export type F0AnalyticsDashboardPointClick = Omit<
   F0DataChartPointClick,
   "source"
 > & {
-  source: "pointer" | "keyboard"
+  source: "pointer"
 }
 
 /**
