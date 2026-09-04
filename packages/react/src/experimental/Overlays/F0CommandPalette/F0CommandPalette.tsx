@@ -3,6 +3,7 @@ import {
   useCallback,
   useEffect,
   useId,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -14,6 +15,7 @@ import { cn } from "@/lib/utils"
 import { Dialog, DialogContent, DialogTitle } from "@/ui/Dialog/dialog"
 
 import { CommandFooter } from "./components/CommandFooter"
+import { CommandRowActions } from "./components/CommandRowActions"
 import { CommandRowItem } from "./components/CommandRowItem"
 import { CommandSearchBar } from "./components/CommandSearchBar"
 import type { CommandStage } from "./internal-types"
@@ -89,7 +91,14 @@ export const F0CommandPalette = ({
   const [announcement, setAnnouncement] = useState("")
 
   const inputRef = useRef<HTMLInputElement>(null)
+  /** The scroller — the element whose `scrollTop` the cluster is measured against. */
   const listRef = useRef<HTMLDivElement>(null)
+  /**
+   * The list AND the cluster drawn over it. The cluster is deliberately not
+   * inside the listbox, so anything looking for a row action button has to search
+   * from their common parent rather than from the list.
+   */
+  const bodyRef = useRef<HTMLDivElement>(null)
 
   const close = useCallback(() => onOpenChange(false), [onOpenChange])
 
@@ -121,10 +130,10 @@ export const F0CommandPalette = ({
     inputRef.current?.focus()
   }, [])
 
-  /** Focus one of the active row's action pills. They are always in the DOM
-   *  (only their opacity changes), so this is a plain focus call. */
+  /** Focus one of the active row's action pills. Only the ACTIVE row's cluster is
+   *  rendered, which is the only row this is ever called for. */
   const focusRowAction = useCallback((row: number, index: number) => {
-    const button = listRef.current?.querySelector<HTMLButtonElement>(
+    const button = bodyRef.current?.querySelector<HTMLButtonElement>(
       `[data-row="${row}"][data-action="${index}"] button`
     )
     if (!button) return
@@ -291,6 +300,47 @@ export const F0CommandPalette = ({
       ?.querySelector<HTMLElement>(`[data-index="${active}"]`)
       ?.scrollIntoView({ block: "nearest" })
   }, [active])
+
+  /**
+   * Where to draw the active row's controls.
+   *
+   * They cannot live inside the list at all — a control inside a `role="option"`
+   * is `nested-interactive`, and one anywhere else inside a `role="listbox"` is
+   * `aria-required-children` — so they are drawn over the list from outside it,
+   * at the active row's own position.
+   *
+   * Measured in a layout effect so they land in the same paint as the selection
+   * moving rather than a frame behind it, and re-measured on scroll because the
+   * row moves under them while the cluster does not. `null` means draw nothing:
+   * there is no row, or the row has scrolled out of the visible band and its
+   * buttons would otherwise float over the bar or the footer.
+   */
+  const activeRow = rows[active]
+  const [clusterTop, setClusterTop] = useState<number | null>(null)
+  useLayoutEffect(() => {
+    const list = listRef.current
+    if (!list) return
+
+    const measure = () => {
+      const element = list.querySelector<HTMLElement>(
+        `[data-index="${active}"]`
+      )
+      if (!element) {
+        setClusterTop(null)
+        return
+      }
+      const centre =
+        element.offsetTop - list.scrollTop + element.offsetHeight / 2
+      const half = element.offsetHeight / 2
+      setClusterTop(
+        centre < half || centre > list.clientHeight - half ? null : centre
+      )
+    }
+
+    measure()
+    list.addEventListener("scroll", measure, { passive: true })
+    return () => list.removeEventListener("scroll", measure)
+  }, [active, rows])
 
   const activateRow = useCallback(
     (index: number) => {
@@ -569,29 +619,34 @@ export const F0CommandPalette = ({
           {announcement}
         </div>
 
-        <div
-          ref={listRef}
-          id={listboxId}
-          role="listbox"
-          aria-label={i18n.commandPalette.label}
-          /*
+        {/*
+          The positioning context the active row's controls are placed against.
+          They sit OUTSIDE the listbox, and the empty state does too, because a
+          `role="listbox"` may own only options and groups — a button or a block
+          of prose in there is `aria-required-children`.
+        */}
+        <div ref={bodyRef} className="relative flex min-h-0 flex-1 flex-col">
+          {/*
             The bottom edge fades content as it scrolls off, softer than a hard
             cut. The bottom padding is what keeps that fade over empty space at
             the end of the list, so the last row is never dimmed by it.
-          */
-          className="flex-1 overflow-y-auto px-1.5 pb-5 pt-1.5 [mask-image:linear-gradient(to_bottom,#000_calc(100%-16px),transparent_100%)]"
-        >
-          {rows.length === 0 ? (
-            <div className="flex flex-col gap-0.5 p-7 text-center">
-              <span className="text-lg text-f1-foreground">
-                {i18n.commandPalette.empty.title}
-              </span>
-              <span className="text-base text-f1-foreground-secondary">
-                {i18n.commandPalette.empty.description}
-              </span>
-            </div>
-          ) : (
-            rows.map((row, index) => {
+
+            `tabIndex={-1}` is for the scroll container, not for the reader: a
+            scrollable region has to be reachable by keyboard
+            (`scrollable-region-focusable`), and now that no control lives inside
+            the list there is nothing in it to reach. `-1` makes it
+            programmatically focusable without putting it in the tab order, which
+            would break the palette's single-focus-trap model.
+          */}
+          <div
+            ref={listRef}
+            id={listboxId}
+            role="listbox"
+            aria-label={i18n.commandPalette.label}
+            tabIndex={-1}
+            className="flex-1 overflow-y-auto px-1.5 pb-5 pt-1.5 outline-none [mask-image:linear-gradient(to_bottom,#000_calc(100%-16px),transparent_100%)]"
+          >
+            {rows.map((row, index) => {
               const previous = rows[index - 1]
               // The assistant row is self-labelling, so it needs no heading.
               const showHeading =
@@ -608,19 +663,37 @@ export const F0CommandPalette = ({
                     row={row}
                     index={index}
                     active={index === active}
-                    focusedAction={index === active ? focusedAction : null}
+                    clustered={index === active && clusterTop !== null}
                     onActivate={() => activateRow(index)}
                     onHover={() => setActive(index)}
-                    onActionKeyDown={handleActionKeyDown}
-                    onActionFocus={(actionIndex) => {
-                      setActive(index)
-                      setFocusedAction(actionIndex)
-                    }}
                   />
                 </div>
               )
-            })
-          )}
+            })}
+          </div>
+
+          {rows.length === 0 ? (
+            <div className="flex flex-col gap-0.5 p-7 text-center">
+              <span className="text-lg text-f1-foreground">
+                {i18n.commandPalette.empty.title}
+              </span>
+              <span className="text-base text-f1-foreground-secondary">
+                {i18n.commandPalette.empty.description}
+              </span>
+            </div>
+          ) : null}
+
+          {activeRow && clusterTop !== null ? (
+            <CommandRowActions
+              row={activeRow}
+              index={active}
+              top={clusterTop}
+              focusedAction={focusedAction}
+              onActivate={() => activateRow(active)}
+              onActionKeyDown={handleActionKeyDown}
+              onActionFocus={setFocusedAction}
+            />
+          ) : null}
         </div>
 
         <CommandFooter

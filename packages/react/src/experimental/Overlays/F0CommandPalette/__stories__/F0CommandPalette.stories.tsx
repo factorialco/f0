@@ -511,12 +511,13 @@ export const NoMatchesWithAnAssistant: Story = {
  */
 export const ClosesOnOutsideClick: Story = {
   play: async ({ canvasElement }) => {
-    const { input } = await openPalette(canvasElement)
+    const { body, input } = await openPalette(canvasElement)
 
-    // Straight at the body, which is what a press on the page outside the panel
-    // resolves to: the overlay is transparent but still mounted, and Radix hangs
-    // the dismiss-on-outside-press off it.
-    await userEvent.click(document.body)
+    // The dialog node Radix renders is the viewport-sized wrapper AROUND the
+    // panel, so pressing it directly is what a press on the page resolves to.
+    // Not the body: Radix sets `pointer-events: none` on it in modal mode, and
+    // user-event refuses to click through that.
+    await userEvent.click(body.getByRole("dialog"))
     await waitFor(() => expect(input).not.toBeInTheDocument())
   },
 }
