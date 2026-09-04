@@ -1,0 +1,17 @@
+diff --git a/dist/index.mjs b/dist/index.mjs
+index b1ccd3a27eeabe74abd770b5e2d03bf8552942b8..218767ed6dd7d254719c90b81448790e772d801e 100644
+--- a/dist/index.mjs
++++ b/dist/index.mjs
+@@ -2129,10 +2129,8 @@ const rr = no(() => /iP(ad|od|hone)/i.test(navigator.userAgent) && /WebKit/i.tes
+         })
+       ),
+       (f) => {
+-        M(t, f), requestAnimationFrame(() => {
+-          M(e, { top: f }), requestAnimationFrame(() => {
+-            M(t, 0), M(w, !1);
+-          });
++        M(t, f), M(e, { top: f }), requestAnimationFrame(() => {
++          M(t, 0), M(w, !1);
+         });
+       }
+     ), { deviation: t };
