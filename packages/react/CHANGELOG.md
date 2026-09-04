@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.84.3](https://github.com/factorialco/f0/compare/f0-react-v6.84.2...f0-react-v6.84.3) (2026-09-04)
+
+
+### Bug Fixes
+
+* **OneDataCollection:** keep collapsed groups collapsed across data changes ([#5391](https://github.com/factorialco/f0/issues/5391)) ([c53c0d5](https://github.com/factorialco/f0/commit/c53c0d54b4da9f8547bdc38ff3ae712988fd2dac))
+
 ## [6.84.2](https://github.com/factorialco/f0/compare/f0-react-v6.84.1...f0-react-v6.84.2) (2026-09-03)
 
 
