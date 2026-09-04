@@ -686,6 +686,69 @@ describe("NewHomeLayout", () => {
     })
   })
 
+  /**
+   * The main column's FOOTNOTE — a sentence at the foot of the column that is
+   * not a widget. What these tests pin is its POSITION: under every widget the
+   * column is drawing and above the offer to add another, whichever of those
+   * two the layout is currently doing. What the string itself may say is
+   * `Footnote`'s own test.
+   */
+  describe("mainFootnote", () => {
+    /** Whether `later` comes after `earlier` in the document. */
+    const comesAfter = (earlier: Element, later: Element) =>
+      Boolean(
+        earlier.compareDocumentPosition(later) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+      )
+
+    /**
+     * The three things whose order is the whole point: the last widget the main
+     * column draws, the footnote, and that column's own add placeholder. The
+     * main column comes before the rail in the document, so the FIRST
+     * placeholder is this column's.
+     */
+    const footOfColumn = (lastWidget: string) => ({
+      widget: screen.getAllByText(lastWidget)[0]!,
+      footnote: screen.getByText(/footnote/),
+      add: screen.getAllByRole("button", { name: "Add widget" })[0]!,
+    })
+
+    test("sits under the main column's widgets and over the add placeholder", () => {
+      renderLayout(1400, {
+        leftWidgets: [widget("left-a")],
+        mainFootnote: "footnote",
+      })
+      const foot = footOfColumn("left-a")
+
+      expect(comesAfter(foot.widget, foot.footnote)).toBe(true)
+      expect(comesAfter(foot.footnote, foot.add)).toBe(true)
+    })
+
+    test("stays at the foot when the rail's widgets fold into the column", () => {
+      renderLayout(700, {
+        leftWidgets: [widget("left-a")],
+        mainFootnote: "footnote",
+      })
+      // Stacked, the loose pin (`events`) is the column's last widget — the
+      // footnote still comes after it, and the placeholder after the footnote.
+      const foot = footOfColumn("events")
+
+      expect(comesAfter(foot.widget, foot.footnote)).toBe(true)
+      expect(comesAfter(foot.footnote, foot.add)).toBe(true)
+    })
+
+    test("draws the string's markdown link as a link", () => {
+      renderLayout(1400, {
+        mainFootnote: "You can [go back](/home?legacy=1) any time.",
+      })
+
+      expect(screen.getByRole("link", { name: "go back" })).toHaveAttribute(
+        "href",
+        "/home?legacy=1"
+      )
+    })
+  })
+
   describe("stacked, below md", () => {
     test("drops the rail entirely — not even the strip", () => {
       renderLayout(700)

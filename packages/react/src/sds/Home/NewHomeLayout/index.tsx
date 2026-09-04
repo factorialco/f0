@@ -535,6 +535,28 @@ export interface NewHomeLayoutProps {
   children?: ReactNode
   /** Main column: widget slots stacked below `children`. */
   leftWidgets?: HomeWidgetItem[]
+  /**
+   * THE MAIN COLUMN'S FOOTNOTE: one sentence under every widget and above the
+   * "+ Add widget" placeholder — Home's last word rather than a widget.
+   *
+   * `"You are viewing Factorial's new home, if you want you can [go back to the
+   * old home.](/home?legacy=1)"`
+   *
+   * A STRING, NOT A NODE. The one piece of markdown it honours is the inline
+   * link, `[label](href)`; f0 decides the rest — centered, secondary, one
+   * paragraph — so the foot of the column cannot become a second layout. Text
+   * that isn't a link is printed as written, and an href a sentence has no
+   * business carrying (`javascript:`) keeps its label and loses its link.
+   *
+   * It is not part of the arrangement: no card, no drag, no "Remove widget",
+   * and it stays at the bottom whatever the widgets above it do. It arrives on
+   * the same stagger they do, one beat after the last of them.
+   *
+   * STACKED (below `md`) the rail's pinned widgets fold into the main column,
+   * and this still comes after all of them — it is the column's foot, not the
+   * widgets' end.
+   */
+  mainFootnote?: string
   /** Side rail: spec-conforming widgets. */
   rightWidgets?: HomeWidgetItem[]
   /** Freeform side-rail content, rendered above `rightWidgets` (expanded rail only). */
@@ -687,6 +709,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
   function NewHomeLayout(
     {
       children,
+      mainFootnote,
       leftWidgets = [],
       rightWidgets = [],
       aside,
@@ -1212,6 +1235,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             widgets={
               stacked ? [...leftWidgets, ...loosePins.rest] : leftWidgets
             }
+            footnote={mainFootnote}
             slotRenderers={slotRenderers}
             renderWidget={renderWidget}
             ctx={ctx}

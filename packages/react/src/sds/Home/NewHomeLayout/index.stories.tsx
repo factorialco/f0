@@ -1490,7 +1490,7 @@ const CATALOG = CATALOG_ITEMS.map((item) => ({
   areas: CATALOG_AREAS[item.id],
 }))
 
-const Home = () => {
+const Home = ({ mainFootnote }: { mainFootnote?: string }) => {
   const [open, setOpen] = useState(false)
   const [side, setSide] = useState<WidgetContainerSide>("main")
   // The configurable widget's params live with the app, next to the rail's
@@ -1559,6 +1559,7 @@ const Home = () => {
           setSide(s)
           setOpen(true)
         }}
+        mainFootnote={mainFootnote}
       >
         {mainColumnBlocks()}
       </NewHomeLayout>
@@ -1712,6 +1713,30 @@ export const Default: Story = {
 export const BannerAboveLayout: Story = {
   parameters: { frameBanner: true },
   render: () => <Home />,
+}
+
+/**
+ * A NOTE AT THE FOOT OF THE COLUMN, which is not a widget: `mainFootnote` puts
+ * one sentence under every main-column widget and above the "+ Add widget"
+ * placeholder — Home's last word rather than content.
+ *
+ * IT IS A STRING, and the only markdown in it is the inline link
+ * `[label](href)`. f0 draws it: centered, secondary, one paragraph. Nothing
+ * about how it looks is the caller's to pass, which is the point — the foot of
+ * the column is a sentence everywhere, not a place a Home can grow a second
+ * layout in.
+ *
+ * It has no card, cannot be dragged, removed or reordered, and stays at the foot
+ * of the column however the widgets above it are arranged. It arrives on the
+ * same stagger they do, one beat after the last of them.
+ *
+ * `children` is still the other end of the same column: freeform content ABOVE
+ * the widgets, where a Home really does compose its own blocks.
+ */
+export const MainFootnote: Story = {
+  render: () => (
+    <Home mainFootnote="You are viewing Factorial's new home, if you want you can [go back to the old home.](/home?legacy=1)" />
+  ),
 }
 
 /**
