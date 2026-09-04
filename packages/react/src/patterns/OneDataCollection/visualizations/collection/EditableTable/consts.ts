@@ -42,7 +42,9 @@ export const editableCellMap: Record<
  * Edit types backed by free-typing inputs. Changes coming from these cells
  * are debounced so onCellChange fires once when the user stops typing,
  * instead of on every keystroke. Discrete cells (select, date...) save
- * immediately.
+ * immediately. Number/money columns with `numberConfig.commitOn: "blur"`
+ * opt out of this debounce in favor of committing on blur instead (see
+ * EditableCellRenderer).
  */
 export const typingEditTypes: ReadonlySet<EditableTableCellEditType> = new Set([
   "text",

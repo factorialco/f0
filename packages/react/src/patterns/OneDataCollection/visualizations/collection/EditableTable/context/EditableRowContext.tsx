@@ -21,11 +21,21 @@ export type CellChangeOptions = {
    * so a save is not triggered on every keystroke.
    */
   debounce?: boolean
+  /**
+   * Commit strategy for this update. When "blur", the value updates the
+   * local item immediately but the save to onCellChange waits until
+   * flushPendingChanges() is called explicitly (e.g. on input blur)
+   * instead of the CELL_CHANGE_DEBOUNCE_MS timer or an immediate save.
+   * Defaults to the behavior driven by `debounce`.
+   */
+  commitOn?: "change" | "blur"
 }
 
 /** A change already applied locally whose save is still waiting for the user to stop typing. */
 type PendingChange = {
-  timer: ReturnType<typeof setTimeout>
+  timer?: ReturnType<typeof setTimeout>
+  /** Whether this pending change waits for an explicit flushPendingChanges() call instead of a timer. */
+  deferred?: boolean
   /** Value of each column before the user started typing */
   previousValues: Record<string, unknown>
   /** Latest typed values, re-applied if the item prop reloads mid-typing */
@@ -50,6 +60,11 @@ type EditableRowContextValue<R extends RecordType> = {
     updates: Record<string, unknown>,
     options?: CellChangeOptions
   ) => void
+  /**
+   * Saves any pending change immediately, e.g. called on input blur when a
+   * column commits on blur instead of on debounce.
+   */
+  flushPendingChanges: () => void
 }
 
 // React's createContext does not support per-usage generics.
@@ -150,7 +165,7 @@ export function EditableRowProvider<R extends RecordType>({
     const pending = pendingRef.current
     if (!pending) return
 
-    clearTimeout(pending.timer)
+    if (pending.timer) clearTimeout(pending.timer)
     pendingRef.current = null
     save(pending.previousValues)
   }
@@ -178,7 +193,7 @@ export function EditableRowProvider<R extends RecordType>({
     setLocalItem(updatedItem)
     setErrors(columnIds, undefined)
 
-    if (!options?.debounce) {
+    if (!options?.debounce && options?.commitOn !== "blur") {
       // Save any pending typing first so changes reach the parent in order
       flushPending()
       save(previousValues)
@@ -189,15 +204,20 @@ export function EditableRowProvider<R extends RecordType>({
     // from before the first keystroke so the reported change covers the
     // whole typing session, not just the last keystroke.
     const pending = pendingRef.current
-    if (pending) clearTimeout(pending.timer)
+    if (pending?.timer) clearTimeout(pending.timer)
+
+    // Once any change in this row is waiting for an explicit flush (e.g. a
+    // commitOn: "blur" column), keep the whole row deferred so another
+    // column's debounce timer can't save it early.
+    const deferred = pending?.deferred || options?.commitOn === "blur"
 
     pendingRef.current = {
       previousValues: { ...previousValues, ...pending?.previousValues },
       updates: { ...pending?.updates, ...updates },
-      timer: setTimeout(
-        () => flushPendingRef.current(),
-        CELL_CHANGE_DEBOUNCE_MS
-      ),
+      deferred,
+      timer: deferred
+        ? undefined
+        : setTimeout(() => flushPendingRef.current(), CELL_CHANGE_DEBOUNCE_MS),
     }
   }
 
@@ -220,6 +240,7 @@ export function EditableRowProvider<R extends RecordType>({
         cellLoading,
         handleCellChange,
         batchCellChanges,
+        flushPendingChanges: flushPending,
       }}
     >
       {children}
