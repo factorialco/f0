@@ -268,6 +268,31 @@ var f1Colors = {
   }
 };
 
+// src/tokens/motion.ts
+var motionTokens = {
+  duration: {
+    /** Micro-presences: chips, dots, hover affordances. */
+    micro: 0.12,
+    /** Row entries and crossfades. */
+    fast: 0.16,
+    /** The shell's default — anything moving the panel/content seam. */
+    base: 0.22,
+    /** A surface changing what it is: entering or leaving fullscreen. */
+    reveal: 0.3
+  },
+  ease: {
+    /** Fast start, soft landing, no overshoot (Material "emphasized decelerate"). */
+    outSwift: [0.05, 0.7, 0.1, 1],
+    /** Pure disappearances, where nothing has to be tracked on the way out. */
+    in: [0.32, 0, 0.67, 0]
+  },
+  /**
+   * How long a continuous gesture (a window drag) must hold still before it
+   * counts as settled rather than mid-flight.
+   */
+  settleMs: 120
+};
+
 // src/tokens/panels.ts
 var panelWidths = {
   min: 300,
@@ -456,6 +481,7 @@ export {
   fontSize,
   fontWeight,
   interactiveHeights,
+  motionTokens,
   pageSpacing,
   panelWidths,
   relativeSpacing

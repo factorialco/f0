@@ -290,6 +290,44 @@ declare const f1Colors: {
 type F1Color = keyof typeof f1Colors;
 
 /**
+ * The motion vocabulary — durations and easings shared by everything that
+ * moves as part of the application shell.
+ *
+ * One token because a single gesture is almost never drawn by a single
+ * animation: opening the side panel moves the main content's padding, the
+ * panel's own width and the canvas inset, and collapsing the sidebar moves
+ * its slot and the nav itself. When those carry their own durations and curves
+ * they cannot stay in step, and the seam between them is exactly where the
+ * mismatch shows.
+ *
+ * Calibrated the same way as the chat's own vocabulary: short ease-out tweens
+ * with NO overshoot — underdamped springs read as bounce.
+ */
+declare const motionTokens: {
+    duration: {
+        /** Micro-presences: chips, dots, hover affordances. */
+        micro: number;
+        /** Row entries and crossfades. */
+        fast: number;
+        /** The shell's default — anything moving the panel/content seam. */
+        base: number;
+        /** A surface changing what it is: entering or leaving fullscreen. */
+        reveal: number;
+    };
+    ease: {
+        /** Fast start, soft landing, no overshoot (Material "emphasized decelerate"). */
+        outSwift: [number, number, number, number];
+        /** Pure disappearances, where nothing has to be tracked on the way out. */
+        in: [number, number, number, number];
+    };
+    /**
+     * How long a continuous gesture (a window drag) must hold still before it
+     * counts as settled rather than mid-flight.
+     */
+    settleMs: number;
+};
+
+/**
  * Widths for the application frame's side panel — the slot the AI chat, hosted
  * conversations and the meeting panel all take turns occupying.
  *
@@ -442,4 +480,4 @@ declare const fontWeight: {
     readonly semibold: "600";
 };
 
-export { type BaseColor, type F1Color, absoluteSpacing, baseColors, betweenSpacing, borderRadius, boxShadow, breakpoints, f1Colors, fontFamily, fontSize, fontWeight, interactiveHeights, pageSpacing, panelWidths, relativeSpacing };
+export { type BaseColor, type F1Color, absoluteSpacing, baseColors, betweenSpacing, borderRadius, boxShadow, breakpoints, f1Colors, fontFamily, fontSize, fontWeight, interactiveHeights, motionTokens, pageSpacing, panelWidths, relativeSpacing };
