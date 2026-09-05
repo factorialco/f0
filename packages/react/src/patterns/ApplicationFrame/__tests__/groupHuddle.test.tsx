@@ -7,7 +7,10 @@ import { useMockChatApp } from "@/sds/chat/F0Chat/mocks/useMockChatApp"
 import { isCallMessage, type F0ChatCall } from "@/sds/chat/F0Chat/types"
 import { renderHook } from "@/testing/test-utils"
 
-import { useMockHuddle } from "../mocks/useMockHuddle"
+import { GROUP_ARRIVAL_MS, useMockHuddle } from "../mocks/useMockHuddle"
+
+/** Just past the nth arrival. */
+const afterArrival = (nth: number): number => GROUP_ARRIVAL_MS * nth + 100
 
 /** Four people, the most ordinary group huddle there is. */
 const GROUP = "grp-design"
@@ -61,7 +64,7 @@ describe("group huddles", () => {
     ).toBe(false)
   })
 
-  it("lets them walk in one at a time, slowly", async () => {
+  it("lets them walk in one at a time", async () => {
     const { result } = setup()
     act(() => result.current.huddle.start(GROUP))
 
@@ -73,14 +76,31 @@ describe("group huddles", () => {
     expect(others()).toBe(0)
 
     await act(async () => {
-      vi.advanceTimersByTime(6100)
+      vi.advanceTimersByTime(afterArrival(1))
     })
     expect(others()).toBe(1)
 
     await act(async () => {
-      vi.advanceTimersByTime(6100)
+      vi.advanceTimersByTime(GROUP_ARRIVAL_MS)
     })
     expect(others()).toBe(2)
+  })
+
+  it("has the room filled before the conversation is underway", async () => {
+    // The pace is a judgement call, but not a free one: the script clock starts
+    // on the first arrival and skips lines from anyone not yet in the room, so a
+    // slow fill eats the opening of the conversation.
+    const { result } = setup()
+    act(() => result.current.huddle.start(GROUP))
+
+    await act(async () => {
+      vi.advanceTimersByTime(10_000)
+    })
+
+    const others = (result.current.huddle.runtime?.participants ?? []).filter(
+      (person) => !person.isLocal
+    )
+    expect(others.length).toBeGreaterThanOrEqual(4)
   })
 
   it("counts them onto the card as they arrive", async () => {
@@ -91,7 +111,7 @@ describe("group huddles", () => {
     expect(callIn(result.current.chat, GROUP)?.participants).toHaveLength(1)
 
     await act(async () => {
-      vi.advanceTimersByTime(12500)
+      vi.advanceTimersByTime(afterArrival(2))
     })
     expect(
       (callIn(result.current.chat, GROUP)?.participants ?? []).length
@@ -102,7 +122,7 @@ describe("group huddles", () => {
     const { result } = setup()
     act(() => result.current.huddle.start(GROUP))
     await act(async () => {
-      vi.advanceTimersByTime(12500)
+      vi.advanceTimersByTime(afterArrival(2))
     })
     act(() => result.current.huddle.runtime?.leave())
 

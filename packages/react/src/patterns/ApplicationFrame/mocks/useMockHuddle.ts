@@ -22,14 +22,19 @@ import { HUDDLE_SCRIPT, resolveScript, resolveSummary } from "./huddleScript"
 const ANSWER_DELAY_MS = 3000
 
 /**
- * How long each extra person in a group takes to wander in.
+ * The gap between arrivals in a group huddle.
  *
  * A group huddle does not ring — see the phase comment below — so this stagger
- * is the whole arrival experience: tiles that say "Waiting…" filling in one at a
- * time, which is what a huddle actually looks like and what makes `invited` →
- * `admit` worth having.
+ * is the whole arrival experience: tiles appearing one at a time, which is what
+ * a huddle actually looks like.
+ *
+ * Long enough to read as separate people deciding to join, short enough that the
+ * room is full before the conversation is underway. That second half is not just
+ * comfort: the script clock starts on the first arrival and skips lines from
+ * people who are not in the room yet, so a slow fill silently eats the opening
+ * of the conversation.
  */
-const GROUP_ARRIVAL_MS = 6000
+export const GROUP_ARRIVAL_MS = 2200
 
 /**
  * How many people actually turn up.
@@ -371,11 +376,9 @@ export const useMockHuddle = ({
       return
     }
 
-    // Slow on purpose. At 1.6s it read as a list loading; several seconds apart
-    // reads as people deciding to join. Only the first few are spaced out —
-    // staggering all 45 members of a channel would be a minute of watching
-    // nothing happen — and only a handful come at all, because a channel huddle
-    // is not a meeting the whole channel attends.
+    // Staggered on purpose, but only a handful come at all: a channel huddle is
+    // not a meeting the whole channel attends, and staggering all 45 members
+    // would be a minute of watching nothing happen.
     const arriving = others.slice(0, GROUP_ARRIVALS)
     const timers = arriving.map((participant, index) =>
       setTimeout(
