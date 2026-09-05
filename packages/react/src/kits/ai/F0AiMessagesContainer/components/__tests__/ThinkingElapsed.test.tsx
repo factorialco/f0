@@ -1,6 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-import { act, screen, zeroRender as render } from "@/testing/test-utils"
+import {
+  act,
+  CLOCKS_ONLY,
+  screen,
+  zeroRender as render,
+} from "@/testing/test-utils"
 
 import { Thinking } from "../Thinking"
 import { ThinkingElapsed } from "../ThinkingElapsed"
@@ -24,7 +29,7 @@ const advanceBy = (ms: number) =>
 
 describe("ThinkingElapsed", () => {
   beforeEach(() => {
-    vi.useFakeTimers()
+    vi.useFakeTimers({ toFake: CLOCKS_ONLY })
     vi.setSystemTime(START)
   })
   afterEach(() => {
@@ -78,7 +83,7 @@ describe("ThinkingElapsed", () => {
 
 describe("Thinking — where the counter goes", () => {
   beforeEach(() => {
-    vi.useFakeTimers()
+    vi.useFakeTimers({ toFake: CLOCKS_ONLY })
     vi.setSystemTime(START)
   })
   afterEach(() => {

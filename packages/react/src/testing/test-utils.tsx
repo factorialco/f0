@@ -26,6 +26,26 @@ import { DataCollectionStorageProvider } from "@/lib/providers/datacollection/Da
 import { L10nProvider } from "@/lib/providers/l10n"
 MotionGlobalConfig.skipAnimations = true
 
+/**
+ * The clocks a test about elapsed TIME needs faked, and nothing else.
+ *
+ * `vi.useFakeTimers()` also fakes `requestAnimationFrame`, so advancing the
+ * clock by a few seconds makes the runner execute every animation frame in
+ * that span — hundreds of them, each re-rendering the tree. A test that walks
+ * a counter to eight seconds then costs seconds of real time, which is fine on
+ * an idle laptop and blows the 5s timeout on CI.
+ *
+ * Pass this to `vi.useFakeTimers({ toFake: CLOCKS_ONLY })` whenever the test
+ * drives an interval or a timeout and does not care about frames.
+ */
+export const CLOCKS_ONLY = [
+  "setTimeout",
+  "clearTimeout",
+  "setInterval",
+  "clearInterval",
+  "Date",
+] as const
+
 const TestProviders = ({ children }: { children: React.ReactNode }) => {
   return (
     <DataCollectionStorageProvider

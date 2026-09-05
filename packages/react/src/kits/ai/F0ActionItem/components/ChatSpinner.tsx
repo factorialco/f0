@@ -1,5 +1,6 @@
 import type { CSSProperties, Ref } from "react"
 
+import { MotionGlobalConfig } from "motion"
 import { forwardRef, useEffect, useMemo, useRef } from "react"
 
 import { cn } from "@/lib/utils"
@@ -184,6 +185,15 @@ const ChatSpinnerComponent = (
     // Initial paint so the spinner shows static geometry before the first
     // RAF tick fires (eliminates a flash of empty SVG on mount).
     paint(buildFrameInto(state, 0, size, 0))
+
+    // Animations off globally — leave the static frame above and never start
+    // the loop. This is the switch the test environment sets, and the loop is
+    // not cheap to leave running there: every frame rebuilds and writes 960
+    // polygons, and the off-screen pause below cannot help because
+    // `IntersectionObserver` is an inert mock under jsdom. A test that walked
+    // a per-second counter to eight seconds was paying for ~500 of those
+    // frames, which is how three of them ended up over the 5s CI timeout.
+    if (MotionGlobalConfig.skipAnimations) return
 
     // Pause the animation while off-screen. On resume, shift the time origin
     // forward by the elapsed gap so the spinner picks up where it left off

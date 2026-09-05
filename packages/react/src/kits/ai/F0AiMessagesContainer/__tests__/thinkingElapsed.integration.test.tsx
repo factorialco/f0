@@ -1,6 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-import { act, screen, zeroRender as render } from "@/testing/test-utils"
+import {
+  act,
+  CLOCKS_ONLY,
+  screen,
+  zeroRender as render,
+} from "@/testing/test-utils"
 
 import { F0AiMessagesContainer } from "../F0AiMessagesContainer"
 import { type RenderableTurn } from "../types"
@@ -49,7 +54,7 @@ const PHASE_STEPS_2 = userTurn({
 
 describe("elapsed counter across a turn", () => {
   beforeEach(() => {
-    vi.useFakeTimers()
+    vi.useFakeTimers({ toFake: CLOCKS_ONLY })
     vi.setSystemTime(START)
   })
   afterEach(() => {
