@@ -17,7 +17,7 @@ const NODES: GraphNode<Person>[] = [
   {
     id: "a",
     parentId: null,
-    data: { name: "Alice Moreno", title: "Manager" },
+    data: { name: "Alice Avery", title: "Manager" },
     childrenCount: 1,
   },
   {

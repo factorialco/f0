@@ -375,6 +375,13 @@ export type MockAiChatRuntimeProviderProps = {
    * Falls back to a random phrase when the script is exhausted or absent.
    */
   script?: string[]
+  /**
+   * Multiplier on the thinking beats. The default pace answers in under two
+   * seconds, which is fine for laying out a story but too fast to watch the
+   * agent reason — the elapsed counter barely reaches "1s". Raise it where the
+   * point of the story is the thinking itself.
+   */
+  pace?: number
 }
 
 export const MockAiChatRuntimeProvider = ({
@@ -382,7 +389,10 @@ export const MockAiChatRuntimeProvider = ({
   seedMessages,
   seedThreads,
   script,
+  pace = 1,
 }: MockAiChatRuntimeProviderProps) => {
+  const thinkingDelayMs = THINKING_DELAY_MS * pace
+  const thinkingStepMs = THINKING_STEP_MS * pace
   const [messages, setMessages] = useState<F0Message[]>(seedMessages ?? [])
   const [inProgress, setInProgress] = useState(false)
   const [composerHidden, setComposerHidden] = useState(false)
@@ -474,14 +484,14 @@ export const MockAiChatRuntimeProvider = ({
               },
             ])
           },
-          THINKING_STEP_MS * (i + 1)
+          thinkingStepMs * (i + 1)
         )
         timersRef.current.push(t)
       })
 
-      return THINKING_STEP_MS * thinkingSteps.length
+      return thinkingStepMs * thinkingSteps.length
     },
-    []
+    [thinkingStepMs]
   )
 
   const streamAssistantResponse = useCallback(() => {
@@ -523,10 +533,10 @@ export const MockAiChatRuntimeProvider = ({
         intervalsRef.current.push(streamInterval)
       }, totalThinkingMs)
       timersRef.current.push(startText)
-    }, THINKING_DELAY_MS)
+    }, thinkingDelayMs)
 
     timersRef.current.push(startThinking)
-  }, [emitThinkingSteps])
+  }, [emitThinkingSteps, thinkingDelayMs])
 
   const sendMessage = useCallback(
     (text: string, options?: { replyQuote?: string }) => {
@@ -571,11 +581,11 @@ export const MockAiChatRuntimeProvider = ({
           onComplete?.()
         }, totalThinkingMs)
         timersRef.current.push(done)
-      }, THINKING_DELAY_MS)
+      }, thinkingDelayMs)
 
       timersRef.current.push(startThinking)
     },
-    [emitThinkingSteps]
+    [emitThinkingSteps, thinkingDelayMs]
   )
 
   const sendMessageWithThinkingOnly = useCallback(

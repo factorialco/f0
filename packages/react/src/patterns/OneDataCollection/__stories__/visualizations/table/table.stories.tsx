@@ -2216,7 +2216,7 @@ export const RowActionsKeepTagListHoverable: Story = {
 const ALIGNMENT_PEOPLE = [
   {
     id: 1,
-    firstName: "Dani",
+    firstName: "Jordan",
     lastName: "Smith",
     role: "Senior Engineer",
     department: "Engineering",

@@ -6,6 +6,7 @@ import { useI18n } from "@/lib/providers/i18n"
 import { F0ActionItem } from "../../F0ActionItem"
 
 import { CollapsibleMessage } from "./CollapsibleMessage"
+import { ThinkingElapsed } from "./ThinkingElapsed"
 
 import { ThinkingProps } from "../types"
 
@@ -14,6 +15,7 @@ export const Thinking = ({
   title,
   inProgress,
   isWriting,
+  startedAt = null,
 }: ThinkingProps) => {
   const translations = useI18n()
   // Force-open while the turn is in progress. Once `inProgress` flips to
@@ -52,6 +54,14 @@ export const Thinking = ({
             <F0ActionItem
               title={stepTitle}
               status={itemStatus(index)}
+              // The counter rides the step that is running, and only that one.
+              // It keeps its value as the executing step moves down the list,
+              // because the clock is sealed once per turn above this component.
+              suffix={
+                itemStatus(index) === "executing" ? (
+                  <ThinkingElapsed startedAt={startedAt} />
+                ) : undefined
+              }
               inGroup
             />
             {index < titles.length - 1 && (

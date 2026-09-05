@@ -22,6 +22,8 @@ import {
 import { TurnFeedback } from "./components/feedback/TurnFeedback"
 import { ScrollShadow } from "./components/ScrollShadow"
 import { Thinking } from "./components/Thinking"
+import { ThinkingElapsed } from "./components/ThinkingElapsed"
+import { useThinkingClock } from "./hooks/useThinkingClock"
 import {
   UserMessage as F0UserMessage,
   type F0UserMessageExtraProps,
@@ -173,6 +175,21 @@ const Messages = ({
     freezeTurnMinHeight: freezeLayout,
   })
 
+  // One clock for the whole container. Only the last turn can be running —
+  // both `endIndicator` and `thinking.inProgress` are derived upstream from
+  // `inProgress && isLastTurn` — so there is no per-turn identity to track.
+  // Sealing it here, above every indicator, is what makes the number carry
+  // over as the active step moves instead of restarting on each hand-off.
+  const activeTurn = turns[turns.length - 1]
+  const isThinking = Boolean(
+    activeTurn &&
+    (activeTurn.endIndicator === "thinking" || activeTurn.thinking?.inProgress)
+  )
+  const thinkingStartedAt = useThinkingClock(
+    isThinking,
+    activeTurn?.thinking?.startedAt
+  )
+
   const renderTurn = (turn: RenderableTurn, turnIndex: number) => {
     const isLastTurn = turnIndex === turns.length - 1
 
@@ -256,13 +273,18 @@ const Messages = ({
             title={translations.ai.thoughtsGroupTitle}
             inProgress={turn.thinking.inProgress}
             isWriting={turn.thinking.isWriting}
+            startedAt={isLastTurn ? thinkingStartedAt : null}
           />
         )}
         {turn.assistantMessages.map((message, index) =>
           renderAssistantMessage(message, index)
         )}
         {turn.endIndicator === "thinking" && (
-          <F0ActionItem title={translations.ai.thinking} status="executing" />
+          <F0ActionItem
+            title={translations.ai.thinking}
+            status="executing"
+            suffix={<ThinkingElapsed startedAt={thinkingStartedAt} />}
+          />
         )}
         {turn.endIndicator === "activity" && <F0ActionItem status="writing" />}
         {turn.feedback && (

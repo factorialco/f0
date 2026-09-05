@@ -1,5 +1,6 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest"
 
+import { F0AiChatProvider } from "@/kits/ai/F0AiChat"
 import { zeroRender as render, screen } from "@/testing/test-utils"
 
 import { F0Chat } from "../F0Chat"
@@ -15,7 +16,7 @@ vi.mock("react-virtuoso", async (importOriginal) => {
   )
 })
 
-/** Drive `useMediaQuery((max-width: …))` to a given match value. */
+/** Answer every media query with `matches`. */
 const setSmallScreen = (matches: boolean) =>
   vi.stubGlobal("matchMedia", (query: string) => ({
     matches,
@@ -73,15 +74,45 @@ describe("F0Chat fullscreen toggle", () => {
     expect(screen.getByRole("button", { name: /expand/i })).toBeInTheDocument()
   })
 
-  it("hides the fullscreen toggle on mobile (it would do nothing)", () => {
+  it("hides it when the panel is already covering the frame", () => {
+    // A touch device on a compact viewport: the panel is a full-screen drawer,
+    // so expanding would toggle nothing.
+    setSmallScreen(true)
+    render(
+      <F0AiChatProvider enabled>
+        <F0ChatProvider runtime={makeRuntime()}>
+          <F0Chat onToggleFullscreen={vi.fn()} />
+        </F0ChatProvider>
+      </F0AiChatProvider>
+    )
+    expect(
+      screen.queryByRole("button", { name: /expand/i })
+    ).not.toBeInTheDocument()
+  })
+
+  it("keeps it on a narrow window where the panel still splits", () => {
+    // The regression this guards: the button used to be hidden on viewport
+    // width alone, which took it away from a half-screen laptop window — a
+    // panel sitting beside content, with somewhere real to expand into.
+    setSmallScreen(false)
+    render(
+      <F0AiChatProvider enabled>
+        <F0ChatProvider runtime={makeRuntime()}>
+          <F0Chat onToggleFullscreen={vi.fn()} />
+        </F0ChatProvider>
+      </F0AiChatProvider>
+    )
+    expect(screen.getByRole("button", { name: /expand/i })).toBeInTheDocument()
+  })
+
+  it("shows it for a chat mounted outside any panel", () => {
+    // Standalone hosts have their own chrome; F0 should not second-guess them.
     setSmallScreen(true)
     render(
       <F0ChatProvider runtime={makeRuntime()}>
         <F0Chat onToggleFullscreen={vi.fn()} />
       </F0ChatProvider>
     )
-    expect(
-      screen.queryByRole("button", { name: /expand/i })
-    ).not.toBeInTheDocument()
+    expect(screen.getByRole("button", { name: /expand/i })).toBeInTheDocument()
   })
 })

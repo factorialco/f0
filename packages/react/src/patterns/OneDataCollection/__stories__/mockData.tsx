@@ -733,8 +733,8 @@ export const getMockVisualizations = (options?: {
                   },
                   {
                     type: "person",
-                    firstName: "Dani",
-                    lastName: "Moreno",
+                    firstName: "Jordan",
+                    lastName: "Avery",
                     src: "/avatars/person04.jpg",
                   },
                   {
@@ -829,8 +829,8 @@ export const getMockVisualizations = (options?: {
                   },
                   {
                     type: "person",
-                    firstName: "Dani",
-                    lastName: "Moreno",
+                    firstName: "Jordan",
+                    lastName: "Avery",
                     src: "/avatars/person04.jpg",
                   },
                   {

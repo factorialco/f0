@@ -63,6 +63,14 @@ export type RenderableTurn = {
      * the last item is `executing` while the rest are `completed`.
      */
     isWriting?: boolean
+    /**
+     * Epoch ms for when the turn actually started thinking, if the host knows.
+     *
+     * Optional anchor, not a requirement: turns arrive with no timestamps, so
+     * by default the elapsed counter starts when F0 first saw the signal.
+     * Supplying this makes it survive a reload mid-stream.
+     */
+    startedAt?: number
   }
   /** Messages rendered after the thinking section (assistant replies). */
   assistantMessages: Message[]
@@ -105,4 +113,10 @@ export type ThinkingProps = {
    * every item renders as `completed` regardless of `inProgress`.
    */
   isWriting?: boolean
+  /**
+   * When the turn started thinking, from `useThinkingClock`. Drives the
+   * elapsed counter on whichever step is executing. `null` means no clock is
+   * running, and nothing is rendered.
+   */
+  startedAt?: number | null
 }

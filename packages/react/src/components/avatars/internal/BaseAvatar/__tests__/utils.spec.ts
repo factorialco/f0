@@ -23,7 +23,7 @@ describe("getInitials", () => {
 
   test("returns a letter from the first two names if an array is passed", () => {
     expect(getInitials(["John", "Doe"])).eq("JD")
-    expect(getInitials(["Daniel", "Moreno", "Roldán"])).eq("DM")
+    expect(getInitials(["Jordan", "Avery", "Roldán"])).eq("JA")
   })
 
   test("returns an empty string if name is an empty array or an empty string", () => {

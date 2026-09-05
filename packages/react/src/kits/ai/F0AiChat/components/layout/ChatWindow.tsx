@@ -1,9 +1,8 @@
 import type { ReactNode } from "react"
 
-import { breakpoints } from "@factorialco/f0-core"
+import { motionTokens } from "@factorialco/f0-core"
 import { AnimatePresence, motion } from "motion/react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { useMediaQuery } from "usehooks-ts"
 
 import type { WidgetDragStartDetail } from "@/lib/dnd/widgetDragEvents"
 
@@ -16,6 +15,57 @@ import { F0AiPong } from "../../../F0AiPong"
 import { useAiChat } from "../../providers/AiChatStateProvider"
 import { MAX_CHAT_WIDTH, MIN_CHAT_WIDTH } from "../../utils/constants"
 import { ResizeHandle } from "./ResizeHandle"
+
+const { duration: DURATION, ease: EASE } = motionTokens
+
+/**
+ * Why the window is going away, resolved AT THE MOMENT IT GOES.
+ *
+ * This has to travel through `AnimatePresence`'s `custom` rather than sit in an
+ * `exit` prop, and that is not a stylistic choice. `AnimatePresence` keeps the
+ * element from the last render in which it was PRESENT, so any prop describing
+ * the exit is captured one render before the change that causes it — an
+ * `exitStyle` computed from `open` can only ever report what `open` was while
+ * the window was still there, i.e. never "closing".
+ *
+ * The cost of that was a real defect: closing a panel in split mode picked the
+ * swap's exit, which holds still at full opacity and then vanishes in a single
+ * frame. Correct when the main content is sliding over the window to cover it;
+ * a hard cut when nothing is.
+ */
+export type WindowExitCustom = {
+  /**
+   * "hold" — something else is covering this window on its way out (the swap).
+   * "shrink" — nothing is: it has to take itself off the screen.
+   */
+  exitStyle: "shrink" | "hold"
+  /** Collapsed toward the edge the window is docked to. */
+  closedClipPath: string
+  reducedMotion: boolean
+}
+
+export const resolveWindowExit = ({
+  exitStyle,
+  closedClipPath,
+  reducedMotion,
+}: WindowExitCustom) => {
+  if (reducedMotion) return { opacity: 0, transition: { duration: 0 } }
+  if (exitStyle === "hold") {
+    // Stay put until the main content has finished sliding over this window,
+    // then leave. The delay is DERIVED from the content's own duration rather
+    // than written down beside it — it was `0.25`, calibrated against a 300ms
+    // tween that has since become 220ms, which left this window uncovered and
+    // visibly fading for ~80ms in the middle of every swap.
+    return { opacity: 0, transition: { delay: DURATION.base, duration: 0 } }
+  }
+  return { opacity: 0, clipPath: closedClipPath }
+}
+
+/**
+ * Named `leaving` rather than `exit` so the label cannot collide with a variant
+ * of that name in the chat content below, which motion would propagate to.
+ */
+const windowVariants = { leaving: resolveWindowExit }
 
 export const SidebarWindow = ({
   children,
@@ -48,6 +98,8 @@ export const SidebarWindow = ({
     resizable,
     setChatWidth,
     resetChatWidth,
+    chatWidthBounds,
+    panelOverlays,
     setIsResizing,
     fileAttachments,
     isClarifying,
@@ -221,45 +273,103 @@ export const SidebarWindow = ({
     setIsResizing?.(true)
     return () => setIsResizing?.(false)
   }, [isDragging, setIsResizing])
-  const isSmallScreen = useMediaQuery(`(max-width: ${breakpoints.md}px)`, {
-    initializeWithValue: true,
-  })
+  // Bounded by what the frame can currently give, not by the absolute range —
+  // otherwise the handle keeps travelling after the main content has run out
+  // of room. `chatWidthBounds` is optional on the context (see internal-types),
+  // so fall back to the absolute range when no provider is mounted.
+  const { min: minWidth, max: maxWidth } = chatWidthBounds ?? {
+    min: MIN_CHAT_WIDTH,
+    max: MAX_CHAT_WIDTH,
+  }
+
+  // No seam to drag when the panel is covering the frame rather than sitting
+  // beside content. Taken from the provider, which is also what the frame
+  // reserves against — computing it here from a media query is how the handle
+  // used to appear on a full-screen panel.
+  const isCoveringFrame = panelOverlays ?? false
+
+  // ...nor when the range has collapsed to a point. On a narrow frame the
+  // content's floor pins the panel to its minimum, and a handle that cannot
+  // travel is worse than no handle: it invites a drag and then refuses it.
+  const canResize = maxWidth > minWidth
 
   const handleResize = useCallback(
     (deltaX: number) => {
       setChatWidth((prev) => {
         const newWidth = prev + deltaX
-        return Math.max(MIN_CHAT_WIDTH, Math.min(MAX_CHAT_WIDTH, newWidth))
+        return Math.max(minWidth, Math.min(maxWidth, newWidth))
       })
     },
-    [setChatWidth]
+    [setChatWidth, minWidth, maxWidth]
   )
 
-  const wrapperTransition = useMemo(() => {
-    if (isDragging || reducedMotion) return { duration: 0 }
-    if (shouldPlayEntranceAnimation)
-      return { duration: 0.3, ease: [0, 0, 0.1, 1] as const }
-    return { duration: 0.3, ease: [0, 0, 0.1, 1] as const }
-  }, [isDragging, reducedMotion, shouldPlayEntranceAnimation])
+  // The window's own reveal shares the frame's clock. It used to run 300ms on
+  // `[0,0,0.1,1]` while the main content's padding ran 220ms on the system
+  // curve — two halves of one seam, arriving 80ms apart with the frame showing
+  // through the gap between them. (Both branches of the old `useMemo` returned
+  // the same object, so the `shouldPlayEntranceAnimation` test decided
+  // nothing.)
+  const wrapperTransition = useMemo(
+    () =>
+      isDragging || reducedMotion
+        ? { duration: 0 }
+        : { duration: DURATION.base, ease: EASE.outSwift },
+    [isDragging, reducedMotion]
+  )
   const closedClipPath = isLeft ? "inset(0 100% 0 0)" : "inset(0 0 0 100%)"
+  const exitCustom: WindowExitCustom = {
+    exitStyle,
+    closedClipPath,
+    reducedMotion,
+  }
+
+  // Closing is ONE animation, whatever size the panel happens to be.
+  //
+  // A fullscreen panel used to leave by a different route — it shrank back to
+  // its docked width first, over its own longer duration, on top of a main
+  // content that had already re-expanded behind it — so the same button did
+  // two visibly different things depending on where you pressed it. It leaves
+  // the way a docked panel leaves now: the same clip toward the same edge, the
+  // same duration, the same curve. It is simply wider.
+  //
+  // What makes that read cleanly rather than as a curtain is what the FRAME
+  // does underneath: the layout it was covering is re-applied instantly, while
+  // it is still hidden, so the wipe uncovers a settled page instead of one
+  // still sliding out from under it (see `contentTransition` in
+  // ApplicationFrame).
+  //
+  // The entrance is the same animation too — with one difference: it always
+  // plays. `prevOpenRef` suppresses it for a swap between two docked windows,
+  // where the incoming panel is meant to be revealed in place by the main
+  // content sliding off it. A cover has nothing revealing it, so suppressing
+  // its entrance just means it appears in a single frame.
+  const shouldAnimateEntrance =
+    !reducedMotion &&
+    (fullscreen || (shouldPlayEntranceAnimation && !prevOpenRef.current))
 
   return (
-    <AnimatePresence>
+    // `custom` is what makes the exit above readable at exit time: this
+    // component re-renders when the panel closes, the frozen child does not.
+    <AnimatePresence custom={exitCustom}>
       {isVisible && (
         <motion.div
           key="chat-wrapper"
+          variants={windowVariants}
           className={cn(
-            "bg-f1-transparent pointer-events-auto relative flex h-full dark:bg-f1-background md:py-1",
+            // The seam is `xs:`-gated to match the card's own `xs:rounded-xl`.
+            // It used to be `md:` (768), which was invisible while the panel
+            // only ever split above that — now that a half-screen laptop
+            // window splits at 756, the mismatch would show as rounded corners
+            // pressed flat against the window edge.
+            "bg-f1-transparent pointer-events-auto relative flex h-full dark:bg-f1-background xs:py-1",
             // Right seam (against the viewport edge — no sidebar there) is owned
             // here: always wanted right-docked or filling the screen. The LEFT
             // seam depends on whether the app sidebar is present (it provides the
             // gap), which only the host frame knows, so ApplicationFrame owns it.
-            fullscreen ? "md:pr-1" : isLeft ? "mr-auto" : "ml-auto md:pr-1"
+            fullscreen ? "xs:pr-1" : isLeft ? "mr-auto" : "ml-auto xs:pr-1"
           )}
           initial={
-            !reducedMotion &&
-            shouldPlayEntranceAnimation &&
-            !prevOpenRef.current
+            shouldAnimateEntrance
               ? { opacity: 0, clipPath: closedClipPath }
               : false
           }
@@ -267,15 +377,7 @@ export const SidebarWindow = ({
             opacity: 1,
             clipPath: "inset(0 0 0 0)",
           }}
-          exit={
-            reducedMotion
-              ? { opacity: 0, transition: { duration: 0 } }
-              : exitStyle === "hold"
-                ? // Swap: stay put while the main content slides over (300ms),
-                  // then a blink of fade right before unmounting.
-                  { opacity: 0, transition: { delay: 0.25, duration: 0.05 } }
-                : { opacity: 0, clipPath: closedClipPath }
-          }
+          exit="leaving"
           transition={wrapperTransition}
           style={{
             width: "100%",
@@ -289,16 +391,20 @@ export const SidebarWindow = ({
         >
           {/* Resize seam: inner (left) edge for a right-docked panel, inner
               (right) edge for a left-docked one — so it renders after the card. */}
-          {resizable && !fullscreen && !isSmallScreen && !isLeft && (
-            <ResizeHandle
-              onResize={handleResize}
-              onReset={resetChatWidth}
-              isResizing={isDragging}
-              setIsResizing={setIsDragging}
-              isCanvasMode={isCanvasMode}
-              side="right"
-            />
-          )}
+          {resizable &&
+            !fullscreen &&
+            !isCoveringFrame &&
+            canResize &&
+            !isLeft && (
+              <ResizeHandle
+                onResize={handleResize}
+                onReset={resetChatWidth}
+                isResizing={isDragging}
+                setIsResizing={setIsDragging}
+                isCanvasMode={isCanvasMode}
+                side="right"
+              />
+            )}
           <div
             ref={widgetDropZoneRef}
             aria-hidden={!isVisible}
@@ -348,16 +454,20 @@ export const SidebarWindow = ({
             )}
             {activeGame === "pong" && <F0AiPong onClose={closeGame} />}
           </div>
-          {resizable && !fullscreen && !isSmallScreen && isLeft && (
-            <ResizeHandle
-              onResize={handleResize}
-              onReset={resetChatWidth}
-              isResizing={isDragging}
-              setIsResizing={setIsDragging}
-              isCanvasMode={isCanvasMode}
-              side="left"
-            />
-          )}
+          {resizable &&
+            !fullscreen &&
+            !isCoveringFrame &&
+            canResize &&
+            isLeft && (
+              <ResizeHandle
+                onResize={handleResize}
+                onReset={resetChatWidth}
+                isResizing={isDragging}
+                setIsResizing={setIsDragging}
+                isCanvasMode={isCanvasMode}
+                side="left"
+              />
+            )}
         </motion.div>
       )}
     </AnimatePresence>

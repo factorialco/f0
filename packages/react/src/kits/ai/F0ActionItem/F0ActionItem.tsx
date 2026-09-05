@@ -16,7 +16,12 @@ const ICON_MOTION = {
   exit: { opacity: 0 },
 }
 
-export const F0ActionItem = ({ title, status, inGroup }: F0ActionItemProps) => {
+export const F0ActionItem = ({
+  title,
+  suffix,
+  status,
+  inGroup,
+}: F0ActionItemProps) => {
   const shouldReduceMotion = useReducedMotion()
   const transition = {
     duration: shouldReduceMotion ? 0 : 0.18,
@@ -78,6 +83,11 @@ export const F0ActionItem = ({ title, status, inGroup }: F0ActionItemProps) => {
           {title}
         </p>
       )}
+      {/* Sibling of the title, not a child: `shine-text` paints through
+          `-webkit-text-fill-color: transparent`, which children inherit — the
+          counter would shimmer along with the label instead of sitting still
+          beside it. */}
+      {suffix && <span className="shrink-0 leading-5">{suffix}</span>}
     </div>
   )
 }

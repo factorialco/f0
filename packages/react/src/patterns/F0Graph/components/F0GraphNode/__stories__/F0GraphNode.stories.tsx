@@ -60,12 +60,12 @@ type Story = StoryObj<typeof meta>
 const personAvatar = {
   type: "person",
   firstName: "Alice",
-  lastName: "Moreno",
+  lastName: "Avery",
 } as const
 
 const baseProps = {
   avatar: personAvatar,
-  title: "Alice Moreno",
+  title: "Alice Avery",
   subtitle: "Staff Designer",
 } as const
 
@@ -125,7 +125,7 @@ export const ZoomLevels: Story = {
         <div key={variant} className="flex flex-col items-center gap-2">
           <F0GraphNode
             avatar={personAvatar}
-            title="Alice Moreno"
+            title="Alice Avery"
             subtitle="Staff Designer"
             variant={variant}
           />
@@ -148,8 +148,8 @@ export const Avatars: Story = {
       {
         key: "person",
         label: "person",
-        avatar: { type: "person", firstName: "Alice", lastName: "Moreno" },
-        title: "Alice Moreno",
+        avatar: { type: "person", firstName: "Alice", lastName: "Avery" },
+        title: "Alice Avery",
         subtitle: "Staff Designer",
       },
       {

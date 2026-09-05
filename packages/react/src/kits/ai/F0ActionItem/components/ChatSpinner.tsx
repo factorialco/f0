@@ -1,5 +1,6 @@
 import type { CSSProperties, Ref } from "react"
 
+import { MotionGlobalConfig } from "motion"
 import { forwardRef, useEffect, useMemo, useRef } from "react"
 
 import { cn } from "@/lib/utils"
@@ -88,7 +89,15 @@ const ChatSpinnerComponent = (
       typeof window !== "undefined" && window.matchMedia
         ? window.matchMedia("(prefers-reduced-motion: reduce)")
         : null
-    let reduced = motionQuery?.matches ?? false
+    // `skipAnimations` belongs on the same switch, and for the same reason:
+    // this loop rebuilds and writes 960 polygons per frame. The off-screen
+    // pause below cannot help under jsdom, where `IntersectionObserver` is an
+    // inert mock — so a test that walked a per-second counter to eight seconds
+    // was paying for ~500 of these frames, which is how three of them ended up
+    // over the 5s CI timeout.
+    const shouldRest = () =>
+      MotionGlobalConfig.skipAnimations || (motionQuery?.matches ?? false)
+    let reduced = shouldRest()
 
     const paint = (count: number) => {
       const quads = state.quads
@@ -215,7 +224,7 @@ const ChatSpinnerComponent = (
     }
 
     const onMotionPref = () => {
-      reduced = motionQuery?.matches ?? false
+      reduced = shouldRest()
       if (reduced) {
         stopLoop()
         paint(buildFrameInto(state, 0, size, 0))

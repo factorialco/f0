@@ -31,8 +31,12 @@ export function useRevealOnChange<T>(
     const prev = prevRef.current
     prevRef.current = value
     if (shouldReduceMotion) return
-    setVisible(false)
     const ms = typeof hold === "function" ? hold(prev, value) : hold
+    // A hold of 0 means "this change needs no reveal at all". Hiding for a
+    // single frame would be worse than not hiding: the content blinks with
+    // nothing to cover it.
+    if (ms <= 0) return
+    setVisible(false)
     const t = setTimeout(() => setVisible(true), ms)
     return () => clearTimeout(t)
   }, [value, shouldReduceMotion])
