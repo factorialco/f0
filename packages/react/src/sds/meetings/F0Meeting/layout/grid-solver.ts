@@ -16,6 +16,11 @@ export type GridSolverInput = {
   preferredAspect: number
   /** Below this a tile stops being useful; the solver overflows instead. */
   minTileWidth: number
+  /**
+   * The same floor for height. Optional, and 0 means "no floor" — a caller with
+   * only a width in mind gets exactly the old behaviour.
+   */
+  minTileHeight?: number
 }
 
 /** One row of the grid. Rows may hold different counts, so also different widths. */
@@ -96,6 +101,7 @@ export const solveGrid = ({
   maxAspect,
   preferredAspect,
   minTileWidth,
+  minTileHeight = 0,
 }: GridSolverInput): GridSolution => {
   let remaining = Math.max(1, Math.floor(count))
 
@@ -142,6 +148,19 @@ export const solveGrid = ({
 
       if (!viable || !worst) continue
 
+      // The minimum belongs INSIDE the search, not after it.
+      //
+      // Choosing the largest-area split first and rejecting it afterwards for
+      // being too small is what pushed people into the chip who fit perfectly
+      // well: at 1912x852, sixteen people have a clean 4x4 at 358px wide, but
+      // 6+5+5 wins on area at 305px, fails the 320px floor, and takes the whole
+      // count down with it — so the room showed 14 and a "+2". It also made
+      // capacity non-monotonic, where twenty people all fitted and sixteen did
+      // not, which is impossible to read as anything but a bug.
+      if (worst.tileWidth < minTileWidth || worst.tileHeight < minTileHeight) {
+        continue
+      }
+
       const averageShape = shape / specs.length
       const bigger = worstArea > bestArea
       const tiedAndBetterShaped =
@@ -161,8 +180,10 @@ export const solveGrid = ({
       }
     }
 
-    if (best && best.tileWidth >= minTileWidth) return best
-    // Too cramped: one more participant moves to the overflow chip, re-solve.
+    // `best` is now the best VIABLE split, so there is nothing left to check.
+    if (best) return best
+    // No split of this many clears the floor: one more participant moves to the
+    // overflow chip, re-solve.
     remaining--
   }
 

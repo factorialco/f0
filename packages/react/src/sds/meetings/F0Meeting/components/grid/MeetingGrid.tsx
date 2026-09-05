@@ -11,6 +11,7 @@ import {
   gapFor,
   gapForTile,
   radiusForTile,
+  minTileHeightFor,
   minTileWidthFor,
 } from "../../layout/constants"
 import { resolveAutoFocus } from "../../layout/auto-focus"
@@ -43,6 +44,8 @@ type GridLayout = {
   placed: PlacedTile[]
   overflow: F0MeetingTile[]
   overflowRect: F0Rect | null
+  /** Matched to whatever the chip ends up sitting next to. */
+  overflowRadius: number
   focusKey: string | null
 }
 
@@ -50,8 +53,25 @@ const EMPTY_LAYOUT: GridLayout = {
   placed: [],
   overflow: [],
   overflowRect: null,
+  overflowRadius: 0,
   focusKey: null,
 }
+
+/**
+ * Where the chip goes when the layout has no cell to give it: the corner.
+ *
+ * It still has to exist — vanishing takes the people it stands for with it.
+ */
+const CORNER_CHIP = { width: 88, height: 44 }
+
+const cornerChipRect = (
+  box: { width: number; height: number },
+  gap: number
+): F0Rect => ({
+  x: Math.max(0, box.width - CORNER_CHIP.width - gap),
+  y: Math.max(0, box.height - CORNER_CHIP.height - gap),
+  ...CORNER_CHIP,
+})
 
 /**
  * Lays the room out with absolute rects computed in JS rather than CSS grid.
@@ -107,13 +127,9 @@ export const MeetingGrid = () => {
       return EMPTY_LAYOUT
     }
 
-    const minTileWidth = minTileWidthFor(box.width)
-    const solveWith = (gap: number) =>
-      // Solve first, then decide. Whether the room needs a spotlight is a
-      // question about whether the grid can seat everyone, and the grid is the
-      // only thing that knows. Guessing from the container's aspect ratio — the
-      // old `SPOTLIGHT_ASPECT` — spotlighted a two-person call in a side panel,
-      // where stacking the two of them fills it perfectly well.
+    // `floor: 0` drops both minimums — see the "never +1" case below, the one
+    // place a tile under the comfort floor beats the alternative.
+    const solveWith = (gap: number, floor = 1) =>
       solveGrid({
         count: tiles.length,
         width: box.width,
@@ -122,7 +138,8 @@ export const MeetingGrid = () => {
         minAspect: TILE_ASPECT_MIN,
         maxAspect: TILE_ASPECT_MAX,
         preferredAspect: DEFAULT_ASPECT_RATIO,
-        minTileWidth,
+        minTileWidth: floor * minTileWidthFor(box.width),
+        minTileHeight: floor * minTileHeightFor(box.height),
       })
 
     // Two passes, and only two. The gap now depends on the tile size, and the
@@ -135,8 +152,18 @@ export const MeetingGrid = () => {
     const gap = gapForTile(provisional.tileWidth)
     const solution = gap === provisionalGap ? provisional : solveWith(gap)
 
-    const gridSeatsEveryone = solution.visibleCount >= tiles.length
-    const forcedByFit = !gridSeatsEveryone && tiles.length > 1
+    // A spotlight is for something the room is FOCUSED on — a pin, or a screen
+    // share the auto-focus picked up. It used to be forced whenever the grid
+    // could not seat everyone, and that is the bug behind "with lots of people
+    // the tiles float around in odd places": a 30-person room threw away a
+    // perfectly good 16-up grid to show one big tile beside a column of 42px
+    // slivers. The grid has its own overflow cell, so 15 faces plus a "+15"
+    // chip is both the better room and what §Capacity already describes.
+    //
+    // The exception is a container so small the grid cannot seat even two. There
+    // a spotlight is the only honest layout, and it is what keeps the room from
+    // rendering nothing but a chip.
+    const forcedByFit = solution.visibleCount <= 1 && tiles.length > 1
     const speakingTile = forcedByFit
       ? tiles.find(
           (tile) =>
@@ -208,30 +235,39 @@ export const MeetingGrid = () => {
         })),
       ]
 
-      // Too narrow for a strip at all: the chip still has to exist, so it sits
-      // in the corner of the spotlight rather than vanishing with the people
-      // it represents.
-      const cornerChip = { width: 88, height: 44 }
+      // Too narrow for a strip at all: the chip sits in the corner of the
+      // spotlight rather than vanishing with the people it represents.
       const overflowRect = hasOverflow
-        ? (spotlightSolution.strip[stripSlots] ?? {
-            x: Math.max(0, box.width - cornerChip.width - gap),
-            y: Math.max(0, box.height - cornerChip.height - gap),
-            ...cornerChip,
-          })
+        ? (spotlightSolution.strip[stripSlots] ?? cornerChipRect(box, gap))
         : null
 
       return {
         placed,
         overflow: rest.slice(stripSlots),
         overflowRect,
+        // From its own width, like the thumbnail whose slot it took — so it is
+        // rounded exactly like the ones beside it.
+        overflowRadius: radiusForTile(overflowRect?.width ?? 0),
         focusKey,
       }
     }
 
     const capacity = solution.visibleCount
-    const hasOverflow = capacity < tiles.length
-    // The chip is a cell like any other, so it simply takes the last one.
-    const visibleCount = hasOverflow ? Math.max(0, capacity - 1) : capacity
+    // The chip is a cell like any other, so it simply takes the last one —
+    // except when that is the only cell there is. A room showing nobody and a
+    // "+2" is worse than either half of it, so the last face keeps its place
+    // and the chip goes in the corner instead.
+    const seats = capacity < tiles.length ? Math.max(1, capacity - 1) : capacity
+
+    // Never "+1" (SPEC §Never "+1"): a chip standing for one person costs the
+    // same cell as their tile and tells you less. The only way to get there is a
+    // container that seats a single tile, and what the spec promises there is
+    // the plain two-up grid — so the floor is dropped for that one case rather
+    // than hiding a person behind a number.
+    const twoUp = tiles.length - seats === 1 ? solveWith(gap, 0) : null
+    const grid = twoUp ?? solution
+    const visibleCount = twoUp ? tiles.length : seats
+    const hasOverflow = visibleCount < tiles.length
 
     const ordered = reorderForSpeakers({
       tiles,
@@ -242,17 +278,22 @@ export const MeetingGrid = () => {
       holdMs: SPEAKER_PROMOTION_HOLD_MS,
     })
 
-    const rects = layoutGrid(solution, box, gap)
+    const rects = layoutGrid(grid, box, gap)
 
     return {
       placed: ordered.slice(0, visibleCount).map((tile, index) => ({
         tile,
         rect: rects[index] as F0Rect,
-        compact: solution.tileWidth < 160,
-        radius: radiusForTile(solution.tileWidth),
+        compact: grid.tileWidth < 160,
+        radius: radiusForTile(grid.tileWidth),
       })),
       overflow: ordered.slice(visibleCount),
-      overflowRect: hasOverflow ? (rects[visibleCount] ?? null) : null,
+      overflowRect: hasOverflow
+        ? (rects[visibleCount] ?? cornerChipRect(box, gap))
+        : null,
+      // The chip is one of these cells, so it takes the tiles' radius rather
+      // than deriving its own: same number, by construction.
+      overflowRadius: radiusForTile(grid.tileWidth),
       focusKey: null,
     }
   }, [box, tiles, speakers, focus.focusKey])
@@ -323,7 +364,11 @@ export const MeetingGrid = () => {
             exit={{ opacity: 0 }}
             transition={transition}
           >
-            <OverflowTile tiles={layout.overflow} compact={box.width < 480} />
+            <OverflowTile
+              tiles={layout.overflow}
+              compact={box.width < 480}
+              radius={layout.overflowRadius}
+            />
           </motion.div>
         )}
       </AnimatePresence>

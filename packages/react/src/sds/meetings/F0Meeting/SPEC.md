@@ -116,14 +116,27 @@ would introduce an accessibility regression that a fixed 16:9 did not have.
 ### Spotlight (`layout/spotlight-solver.ts`)
 
 A camera spotlight takes the shape of its box (clamped). A **screen share takes the whole box**
-and letterboxes inside its own tile on `bg-f1-background-inverse`, so the black is exactly the
-part of the picture that is missing — the room around it stays light. Cropping a presentation
-hides content, which is a worse failure than a band.
+and letterboxes inside its own tile, so the bands are exactly the part of the picture that is
+missing — the room around it is untouched. Cropping a presentation hides content, which is a worse
+failure than a band. The bands take the tile's own plate — see §Theme.
 
-Spotlight is forced, with nobody pinned, when **the grid cannot seat everyone** — `solveGrid` runs
-first and the room falls back to a spotlight only if it overflows. An earlier version guessed from
-the container's aspect ratio (`SPOTLIGHT_ASPECT`, 0.85) and forced a two-person call in a side
-panel into a spotlight, where stacking the two of them fills the column perfectly well. See §8.
+A spotlight means **the room is focused on something** — a pin, or a screen share the auto-focus
+picked up. It is _not_ a fallback for a big room. It used to be forced whenever the grid could not
+seat everyone, and that threw away a perfectly good 16-up grid at thirty people to show one large
+tile beside a column of 42px slivers; the grid has its own overflow cell, so fifteen faces and a
+"+15" is both the better room and what §Capacity already promised. The one exception is a container
+so small the grid cannot seat even two, where a spotlight is the only honest layout.
+
+The strip caps at `STRIP_MAX_TILES` (6). The width floor alone is not a limit: a fullscreen room
+seated sixteen thumbnails at 76px across, and a mosaic of smudges tells you less than a number.
+
+The **side** strip (containers past `STRIP_SIDE_ASPECT`) had two faults of its own. Its floor was
+checked as `slotHeight * maxAspect >= STRIP_MIN_TILE_WIDTH` — whether a thumbnail _could_ be 72px
+wide, which a 299px column can always satisfy — so twenty people got twenty slots 42px tall; it now
+requires the thumbnail to FILL the column, which is the rule the bottom strip gets for free from
+`STRIP_HEIGHT_MIN`. And it reserved the column budget while centring narrower thumbnails inside it,
+leaving 170–450px of unusable void between the spotlight and the strip. The column is now the
+thumbnails' actual width, flush to the edge, and the leftover goes to the spotlight.
 
 ### Never "+1"
 
@@ -191,10 +204,18 @@ from `isDragging`, which means "a gesture owns the DOM"; here the rect still com
 ### Theme
 
 The surface is light, on `bg-f1-special-page` — the same token as the chat panel it sits flush
-against. **The exception is anything painted on top of video**: the name chip stays dark and
-translucent, because it fights arbitrary imagery rather than the theme. When the camera is off
-there is no imagery to fight and the chip follows the surface instead; the connection bars use
-`bg-current` for the same reason.
+against.
+
+Every cell of the room — participant tile and "+N" chip alike — is one plate: `bg-f1-background`
+in light, `bg-f1-background-secondary` in dark, with a `border-f1-border-secondary` outline, which
+is what separates a tile from the surface now that neither is dark. **The exception is a tile with
+no video**: an avatar floating on the light surface reads as a hole in the grid, so in light mode
+that tile keeps a dark plate (`bg-f1-foreground`) and the name on it goes light.
+
+**Anything painted on top of video** is the other exception: the name chip takes the dark plate
+because it fights arbitrary imagery rather than the theme. When the camera is off there is no
+imagery to fight, the chip drops its plate, and the dark tile underneath carries the contrast. The
+connection bars use `bg-current` so they inherit whichever of the two the chip is in.
 
 ---
 
@@ -406,10 +427,21 @@ The aspect clamp is the one thing allowed to leave space. Where filling complete
 tile flatter than `TILE_ASPECT_MAX`, the row widens as far as the clamp allows and the remainder is
 centred — the alternative is `object-cover` taking the sides off someone's face.
 
-Whether the room needs a spotlight is now decided by **evidence**: `solveGrid` is run first, and a
-spotlight happens only when the grid cannot seat everyone. The old `SPOTLIGHT_ASPECT` constant
-guessed from the container's shape and forced a two-person call in a side panel into a spotlight,
-where stacking the two of them fills it perfectly well.
+Whether the room needs a spotlight is decided by **focus**, not by head count: a pin or a screen
+share. The old `SPOTLIGHT_ASPECT` constant guessed from the container's shape and forced a
+two-person call in a side panel into a spotlight; the version after it forced one on any room the
+grid could not seat whole, which was worse in the other direction. See §Spotlight.
+
+The floor is checked **inside** the search, not after it. Picking the largest-area split and then
+rejecting it for being too small is what pushed people into the chip who fit perfectly well: at
+1912x852 sixteen people have a clean 4x4 at 358px, but 6+5+5 wins on area at 305px, fails the 320px
+floor, and took the whole count down with it — so the room showed fourteen and a "+2". It also made
+capacity non-monotonic, twenty people fitting in a room that could not seat sixteen.
+
+The floor has a **height** as well as a width (`minTileHeightFor`). A width-only floor let a tall
+narrow panel stack 45 tiles of 97x55 — a 16:9 tile 97 across _is_ 55 tall, so every one of them
+passed. Its ceiling is lower than the width's (180 vs 320) because a room is usually wider than it
+is tall, and matching them would make height the only constraint that ever bites.
 
 ### The side panel
 

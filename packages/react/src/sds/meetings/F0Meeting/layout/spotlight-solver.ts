@@ -5,6 +5,7 @@ import {
   STRIP_HEIGHT_MAX,
   STRIP_HEIGHT_MIN,
   STRIP_HEIGHT_RATIO,
+  STRIP_MAX_TILES,
   STRIP_MIN_TILE_WIDTH,
   STRIP_SIDE_ASPECT,
 } from "./constants"
@@ -114,7 +115,7 @@ export const solveSpotlight = ({
     // The strip is a row of the grid: the thumbnails span its full width and
     // take the shape that follows, which is what the design does at both
     // sizes — four across, edge to edge, square-ish wide and portrait narrow.
-    let visible = Math.max(1, stripCount)
+    let visible = Math.min(Math.max(1, stripCount), STRIP_MAX_TILES)
     let slotWidth = (width - gap * (visible - 1)) / visible
     while (visible > 1 && slotWidth < STRIP_MIN_TILE_WIDTH) {
       visible--
@@ -148,35 +149,51 @@ export const solveSpotlight = ({
     }
   }
 
-  const stripWidth = clamp(
+  const columnWidth = clamp(
     width * STRIP_HEIGHT_RATIO,
     STRIP_HEIGHT_MIN * stripRange.max,
     STRIP_HEIGHT_MAX * stripRange.max
   )
-  // The mirror of the bottom strip: a column that spans the full height, with
-  // the thumbnails taking the shape their slot gives them.
-  let visible = Math.max(1, stripCount)
+  /**
+   * The mirror of the bottom strip: a column that spans the full height, with
+   * the thumbnails taking the shape their slot gives them.
+   *
+   * The floor is a HEIGHT, and it has to be — this is where the column broke.
+   * Testing `slotHeight * maxAspect` only asks whether a thumbnail could be
+   * `STRIP_MIN_TILE_WIDTH` wide, which a 299px column can always satisfy, so 20
+   * people got 20 slots of 42px and the column filled with slivers. Requiring
+   * the thumbnail to FILL the column instead — a slot at least as tall as a
+   * column-wide 16:9 tile — is the same rule the bottom strip gets for free
+   * from `STRIP_HEIGHT_MIN`, and it is what makes this four down, edge to edge.
+   */
+  const minSlotHeight = columnWidth / stripRange.max
+  let visible = Math.min(Math.max(1, stripCount), STRIP_MAX_TILES)
   let slotHeight = (height - gap * (visible - 1)) / visible
-  while (visible > 1 && slotHeight * stripRange.max < STRIP_MIN_TILE_WIDTH) {
+  while (visible > 1 && slotHeight < minSlotHeight) {
     visible--
     slotHeight = (height - gap * (visible - 1)) / visible
   }
   visible = Math.min(stripCount, visible)
 
-  const aspect = stripAspectFor(stripWidth, slotHeight)
+  const aspect = stripAspectFor(columnWidth, slotHeight)
   let tileHeight = slotHeight
   let tileWidth = tileHeight * aspect
-  if (tileWidth > stripWidth) {
-    tileWidth = stripWidth
+  if (tileWidth > columnWidth) {
+    tileWidth = columnWidth
     tileHeight = tileWidth / aspect
   }
   const columnHeight = visible * tileHeight + gap * (visible - 1)
   const startY = (height - columnHeight) / 2
 
   return {
-    spotlight: fitSpotlight({ width: width - stripWidth - gap, height }),
+    // Against the thumbnails' ACTUAL width, not the column budget. Reserving
+    // the budget and then centring narrower thumbnails inside it is what left a
+    // 170–450px void between the spotlight and a column of slivers: space
+    // nobody was using and the spotlight could not have.
+    spotlight: fitSpotlight({ width: width - tileWidth - gap, height }),
     strip: Array.from({ length: visible }, (_, index) => ({
-      x: width - stripWidth + (stripWidth - tileWidth) / 2,
+      // Flush to the edge, so the seam is between the spotlight and the strip.
+      x: width - tileWidth,
       y: startY + index * (tileHeight + gap),
       width: tileWidth,
       height: tileHeight,

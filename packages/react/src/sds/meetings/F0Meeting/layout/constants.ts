@@ -61,6 +61,19 @@ export const radiusForTile = (tileWidth: number): number =>
   clamp(Math.round(tileWidth * 0.055), 6, 16)
 
 /**
+ * The corner of a cell of the room, as an inline style.
+ *
+ * Participant tiles and the overflow chip both go through here on purpose. They
+ * sit side by side in the same grid, and the chip carrying its own `rounded-lg`
+ * while the tiles scaled 6→16px was plainly visible as soon as the room got
+ * small or large enough. One function, so they cannot drift apart again.
+ */
+export const cellRadiusStyle = (
+  radius: number | undefined
+): { borderRadius: number } | undefined =>
+  radius === undefined ? undefined : { borderRadius: radius }
+
+/**
  * Smallest tile the grid will produce before pushing a participant into the
  * overflow chip.
  *
@@ -77,6 +90,25 @@ export const MIN_TILE_CEILING = 320
 export const minTileWidthFor = (width: number): number =>
   Math.max(MIN_TILE_FLOOR, Math.min(MIN_TILE_CEILING, width / MIN_TILE_DIVISOR))
 
+/**
+ * The same rule for height, which a width floor cannot express.
+ *
+ * A tall narrow panel seated 45 tiles at 97x55: the floor was only ever a
+ * WIDTH, and a 16:9 tile 97 across IS 55 tall, so every one of them passed.
+ * Eleven stacked rows of slivers is precisely what the overflow chip is for.
+ *
+ * The ceiling is lower than the width's because a room is usually wider than it
+ * is tall — matching them would make height the only constraint that ever bites.
+ */
+export const MIN_TILE_FLOOR_HEIGHT = 48
+export const MIN_TILE_CEILING_HEIGHT = 180
+
+export const minTileHeightFor = (height: number): number =>
+  Math.max(
+    MIN_TILE_FLOOR_HEIGHT,
+    Math.min(MIN_TILE_CEILING_HEIGHT, height / MIN_TILE_DIVISOR)
+  )
+
 /** Thumbnail strip height as a fraction of the container, clamped. */
 export const STRIP_HEIGHT_RATIO = 0.18
 /** Small enough that a floating window still gets a strip instead of a chip. */
@@ -88,6 +120,16 @@ export const STRIP_HEIGHT_MAX = 168
  * in the overflow chip instead. A face below this is a smudge, not a face.
  */
 export const STRIP_MIN_TILE_WIDTH = 72
+
+/**
+ * Most thumbnails a strip will ever show, however much room there is.
+ *
+ * The width floor alone is not a limit: a fullscreen room seated 16 thumbnails
+ * at 76px across, which is a mosaic of smudges rather than the "four across,
+ * edge to edge" the design asks for. A strip is a glance at who else is here;
+ * past this the honest answer is the "+N" chip, which at least says how many.
+ */
+export const STRIP_MAX_TILES = 6
 
 /**
  * Above this container aspect ratio the strip moves to the right edge, so the

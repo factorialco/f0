@@ -5,6 +5,7 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/ui/hover-card"
 
+import { cellRadiusStyle } from "../../layout/constants"
 import { type F0MeetingTile } from "../../layout/tiles"
 
 const hasLiveCamera = (tile: F0MeetingTile): boolean =>
@@ -27,9 +28,16 @@ const isMuted = (tile: F0MeetingTile): boolean =>
 export const OverflowTile = ({
   tiles,
   compact = false,
+  radius,
 }: {
   tiles: F0MeetingTile[]
   compact?: boolean
+  /**
+   * Corner radius in px. Required, unlike the tile's: the chip is only ever
+   * rendered as a cell of a laid-out room, so there is no case where it should
+   * fall back to anything.
+   */
+  radius: number
 }) => {
   const i18n = useI18n()
 
@@ -38,16 +46,22 @@ export const OverflowTile = ({
   return (
     <HoverCard openDelay={120} closeDelay={100}>
       <HoverCardTrigger asChild>
-        <div className="bg-f1-background rounded-lg h-full w-full flex">
+        <div
+          className="bg-f1-background flex h-full w-full"
+          style={cellRadiusStyle(radius)}
+        >
           <button
             type="button"
             className={cn(
               "border border-solid border-f1-border-secondary",
-              "flex h-full w-full items-center justify-center gap-2 overflow-hidden rounded-lg",
+              "flex h-full w-full items-center justify-center gap-2 overflow-hidden",
               "bg-f1-background-secondary transition-colors duration-150 ease-out",
               "hover:bg-f1-background-secondary-hover focus-visible:bg-f1-background-secondary-hover",
               focusRing()
             )}
+            // The plate behind it is rounded too, so both have to follow the
+            // same number or the corners show a sliver of the wrong colour.
+            style={cellRadiusStyle(radius)}
             data-testid="meeting-overflow-tile"
           >
             <span

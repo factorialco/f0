@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest"
 
-import { TILE_ASPECT_MAX, TILE_ASPECT_MIN } from "../layout/constants"
+import {
+  STRIP_MAX_TILES,
+  TILE_ASPECT_MAX,
+  TILE_ASPECT_MIN,
+} from "../layout/constants"
 import { solveSpotlight } from "../layout/spotlight-solver"
 
 const RANGE = { min: TILE_ASPECT_MIN, max: TILE_ASPECT_MAX }
@@ -106,6 +110,23 @@ describe("solveSpotlight strip", () => {
     expect(strip.length).toBeGreaterThan(1)
   })
 
+  it("stops at a handful however much room there is", () => {
+    // A fullscreen room seated sixteen thumbnails at 76px across. The width
+    // floor is not a limit at that size, and a mosaic of smudges is not what a
+    // strip is for: past the cap the honest answer is the chip, which at least
+    // says how many.
+    const { strip, stripOverflow } = solve({
+      stripCount: 44,
+      width: 1440,
+      height: 780,
+      spotlightRange: RANGE,
+    })
+
+    expect(strip.length).toBe(STRIP_MAX_TILES)
+    expect(stripOverflow).toBe(44 - STRIP_MAX_TILES)
+    expect(strip[0]?.width).toBeGreaterThan(160)
+  })
+
   it("keeps the spotlight from going vertical once the strip fits", () => {
     // A strip that gives up is what forced the spotlight to take the whole
     // height and turn into a column.
@@ -116,5 +137,78 @@ describe("solveSpotlight strip", () => {
       spotlightRange: RANGE,
     })
     expect(spotlight.width / spotlight.height).toBeGreaterThan(1)
+  })
+})
+
+/**
+ * A container past `STRIP_SIDE_ASPECT`, which is where the strip becomes a
+ * column — and the shape the One switch resizes a call to on a wide display, so
+ * this is not an exotic case.
+ */
+const WIDE = { width: 1912, height: 852 }
+
+const solveSide = (stripCount: number) =>
+  solveSpotlight({
+    stripCount,
+    width: WIDE.width,
+    height: WIDE.height,
+    gap: 16,
+    stripRange: RANGE,
+    spotlightRange: RANGE,
+  })
+
+describe("solveSpotlight side strip", () => {
+  it("goes to the right edge in a wide container", () => {
+    expect(solveSide(4).stripSide).toBe("right")
+  })
+
+  it("drops thumbnails rather than stacking slivers", () => {
+    // The bug. The loop asked whether a thumbnail COULD be 72px wide, which a
+    // 299px column can always satisfy, so twenty people got twenty slots 42px
+    // tall. A thumbnail now has to fill the column to earn a slot.
+    const { strip, stripOverflow } = solveSide(20)
+
+    expect(strip.length).toBeLessThanOrEqual(STRIP_MAX_TILES)
+    expect(stripOverflow).toBe(20 - strip.length)
+    for (const thumb of strip) {
+      expect(thumb.height).toBeGreaterThan(120)
+      expect(thumb.width).toBeGreaterThan(160)
+    }
+  })
+
+  it("leaves no void between the spotlight and the thumbnails", () => {
+    // It reserved a 299px column, centred 74px thumbnails inside it, and left
+    // 170–450px of nothing in between: space the spotlight could not have and
+    // nobody was using. Tiles floating in the middle of a room is exactly what
+    // that looks like.
+    const { spotlight, strip } = solveSide(4)
+    const thumb = strip[0]
+
+    expect(thumb).toBeDefined()
+    // Flush to the right edge…
+    expect(thumb!.x + thumb!.width).toBeCloseTo(WIDE.width, 5)
+    // …and the only gap in the room is the seam.
+    expect(thumb!.x - (spotlight.x + spotlight.width)).toBeLessThanOrEqual(
+      16 + spotlight.x + 0.001
+    )
+  })
+
+  it("hands the column's leftovers to the spotlight", () => {
+    const { spotlight, strip } = solveSide(4)
+    const thumb = strip[0]
+    expect(spotlight.width).toBeLessThanOrEqual(
+      WIDE.width - (thumb?.width ?? 0) - 16 + 0.001
+    )
+  })
+
+  it("keeps the column inside the container", () => {
+    for (const count of [1, 2, 5, 20, 200]) {
+      const { strip } = solveSide(count)
+      for (const thumb of strip) {
+        expect(thumb.y).toBeGreaterThanOrEqual(-0.001)
+        expect(thumb.y + thumb.height).toBeLessThanOrEqual(WIDE.height + 0.001)
+        expect(thumb.x + thumb.width).toBeLessThanOrEqual(WIDE.width + 0.001)
+      }
+    }
   })
 })
