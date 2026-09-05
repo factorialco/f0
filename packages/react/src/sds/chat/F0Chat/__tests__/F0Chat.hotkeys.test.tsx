@@ -569,3 +569,140 @@ describe("F0Chat compose target lifecycle", () => {
     )
   })
 })
+
+describe("F0Chat composer escape", () => {
+  const typeInComposer = async (text: string) => {
+    await userEvent.click(composer())
+    await userEvent.type(composer(), text)
+  }
+
+  /** Escape is read off Date.now, so the presses are fired synchronously with
+   * the clock pinned — no fake timers to fight userEvent over. */
+  const pressEscape = (at?: number) => {
+    const clock =
+      at === undefined ? null : vi.spyOn(Date, "now").mockReturnValue(at)
+    const notPrevented = fireEvent.keyDown(composer(), { key: "Escape" })
+    clock?.mockRestore()
+    return notPrevented
+  }
+
+  it("backs out of an edit in progress", async () => {
+    renderChat(editable())
+    await pressArrowUp()
+    expect(
+      screen.getByRole("button", { name: /cancel edit/i })
+    ).toBeInTheDocument()
+
+    pressEscape()
+
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("button", { name: /cancel edit/i })
+      ).not.toBeInTheDocument()
+    )
+  })
+
+  it("backs out of a pending reply quote", async () => {
+    renderChat(makeRuntime())
+    await userEvent.dblClick(bubbleAround("Hello there"))
+    expect(
+      screen.getByRole("button", { name: /remove quote/i })
+    ).toBeInTheDocument()
+
+    pressEscape()
+
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("button", { name: /remove quote/i })
+      ).not.toBeInTheDocument()
+    )
+  })
+
+  it("keeps the typed draft when it dismisses the quote", async () => {
+    renderChat(makeRuntime())
+    await typeInComposer("ya lo miro")
+    await userEvent.dblClick(bubbleAround("Hello there"))
+
+    pressEscape()
+
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("button", { name: /remove quote/i })
+      ).not.toBeInTheDocument()
+    )
+    expect(composer()).toHaveValue("ya lo miro")
+  })
+
+  it("clears the composer on a second press", async () => {
+    renderChat(makeRuntime())
+    await typeInComposer("un borrador")
+
+    pressEscape(1_000)
+    expect(composer()).toHaveValue("un borrador")
+
+    pressEscape(1_300)
+    await waitFor(() => expect(composer()).toHaveValue(""))
+  })
+
+  it("leaves the draft alone when the two presses are far apart", async () => {
+    renderChat(makeRuntime())
+    await typeInComposer("un borrador")
+
+    pressEscape(1_000)
+    pressEscape(1_401)
+
+    expect(composer()).toHaveValue("un borrador")
+  })
+
+  it("does not carry a dismissed chip into a clear", async () => {
+    renderChat(makeRuntime())
+    await typeInComposer("ya lo miro")
+    await userEvent.dblClick(bubbleAround("Hello there"))
+
+    pressEscape(1_000)
+    pressEscape(1_100)
+
+    expect(composer()).toHaveValue("ya lo miro")
+  })
+
+  it("closes the mention popover before it dismisses anything", async () => {
+    renderChat(
+      makeRuntime({
+        channel: {
+          id: "group-1",
+          type: "group",
+          title: "Product",
+          avatar: { type: "team", name: "Product" },
+        },
+        searchMembers: async () => [{ id: "ana", name: "Ana García" }],
+      })
+    )
+    await typeInComposer("@Ana")
+    await screen.findByRole("option", { name: "Ana García" })
+
+    pressEscape(1_000)
+
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("option", { name: "Ana García" })
+      ).not.toBeInTheDocument()
+    )
+    // The press that closed the popover is not the opening half of a clear.
+    pressEscape(1_100)
+    expect(composer()).toHaveValue("@Ana")
+  })
+
+  it("leaves Escape to the host when there is nothing to lose", async () => {
+    renderChat(makeRuntime())
+    await userEvent.click(composer())
+
+    expect(pressEscape(1_000)).toBe(true)
+  })
+
+  it("claims Escape once there is a draft to protect", async () => {
+    renderChat(makeRuntime())
+    await typeInComposer("un borrador")
+
+    expect(pressEscape(1_000)).toBe(false)
+  })
+})

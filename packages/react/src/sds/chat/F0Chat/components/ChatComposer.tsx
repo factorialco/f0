@@ -65,6 +65,11 @@ import {
 import { ChatReplyChip } from "./ChatReplyChip"
 import { ChatTextareaField } from "./ChatTextareaField"
 
+/** How long after an Escape a second one still means "clear the composer".
+ * Long enough to be a deliberate double-tap, short enough that an Escape
+ * minutes later starts over rather than wiping a draft. */
+const DOUBLE_ESCAPE_MS = 400
+
 type UploadingAttachment = {
   id: string
   status: "uploading"
@@ -136,6 +141,7 @@ export const ChatComposer = (): ReactNode => {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const attachmentStripRef = useRef<HTMLDivElement>(null)
   const localPreviewUrlsRef = useRef(new Set<string>())
+  const lastEscapeAtRef = useRef(0)
 
   const emojiAutocomplete = useEmojiAutocomplete({
     inputValue: value,
@@ -543,21 +549,20 @@ export const ChatComposer = (): ReactNode => {
   const editingMessage = target.kind === "edit" ? target.message : null
   const replyTo = target.kind === "reply" ? target.message : null
 
-  // Must not touch the target: the provider owns it, and calling back would
-  // recurse through `retarget`.
-  const discardDraft = useCallback(() => {
+  const clearComposerText = useCallback(() => {
     mentions.close()
     mentions.seedMentions([], "")
     setValue("")
     setCursorPosition(0)
+  }, [mentions.close, mentions.seedMentions])
+
+  // Must not touch the target: the provider owns it, and calling back would
+  // recurse through `retarget`.
+  const discardDraft = useCallback(() => {
+    clearComposerText()
     releaseUploadingPreviews(attachments)
     setAttachments([])
-  }, [
-    mentions.close,
-    mentions.seedMentions,
-    releaseUploadingPreviews,
-    attachments,
-  ])
+  }, [clearComposerText, releaseUploadingPreviews, attachments])
 
   const loadEditDraft = useCallback(
     (message: F0ChatMessage) => {
@@ -745,10 +750,29 @@ export const ChatComposer = (): ReactNode => {
       if (handleEmojiAutocompleteKeyDown(e)) return
       // The mention popover consumes navigation keys first (↑↓/Enter/Tab/Esc).
       if (mentions.handleKeyDown(e)) return
-      // Escape backs out of an edit (when the popover didn't claim it).
-      if (e.key === "Escape" && isEditing) {
+      // Escape, once neither autocomplete claimed it: back out of an edit or a
+      // reply, else clear the text on a second press. The composer only takes
+      // the key when it has something to lose — with nothing pending, Escape
+      // belongs to whatever the chat is mounted in.
+      if (e.key === "Escape") {
+        if (target.kind !== "none") {
+          e.preventDefault()
+          // Backing out of a chip is not the opening half of a clear.
+          lastEscapeAtRef.current = 0
+          if (isEditing) dismissEdit()
+          else dismissReply()
+          return
+        }
+        if (value.length === 0) return
         e.preventDefault()
-        dismissEdit()
+        const now = Date.now()
+        if (now - lastEscapeAtRef.current <= DOUBLE_ESCAPE_MS) {
+          lastEscapeAtRef.current = 0
+          clearComposerText()
+          void stopTyping?.()
+          return
+        }
+        lastEscapeAtRef.current = now
         return
       }
       // A modifier makes ↑ a selection gesture, never this shortcut; and with
@@ -776,6 +800,11 @@ export const ChatComposer = (): ReactNode => {
       mentions,
       isEditing,
       dismissEdit,
+      dismissReply,
+      target.kind,
+      value.length,
+      clearComposerText,
+      stopTyping,
       isComposerIdle,
       editLastOwnMessage,
     ]

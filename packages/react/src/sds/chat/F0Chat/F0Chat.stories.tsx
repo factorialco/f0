@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { Profiler, type ReactNode, useEffect, useRef, useState } from "react"
-import { expect, userEvent, waitFor, within } from "storybook/test"
+import { expect, fireEvent, userEvent, waitFor, within } from "storybook/test"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
@@ -1300,6 +1300,25 @@ export const ComposerHotkeys: Story = {
       // Radix keeps the popover mounted for its exit animation and only then
       // decides about focus — assert after that window, not before.
       await waitFor(() => expect(composer).toHaveFocus(), { timeout: 3000 })
+    })
+
+    await step("Escape backs out of the quote, keeping the draft", async () => {
+      await userEvent.type(composer, "ya lo miro")
+      await userEvent.keyboard("{Escape}")
+      await waitFor(() =>
+        expect(
+          canvas.queryByRole("button", { name: /remove quote/i })
+        ).not.toBeInTheDocument()
+      )
+      await expect(composer).toHaveValue("ya lo miro")
+    })
+
+    await step("A second Escape clears the composer", async () => {
+      // Fired directly: the window between the two presses is what the feature
+      // measures, and userEvent's own pacing would race a loaded browser.
+      fireEvent.keyDown(composer, { key: "Escape" })
+      fireEvent.keyDown(composer, { key: "Escape" })
+      await waitFor(() => expect(composer).toHaveValue(""))
     })
   },
 }
