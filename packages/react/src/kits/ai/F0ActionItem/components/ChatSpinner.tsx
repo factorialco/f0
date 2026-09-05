@@ -89,7 +89,15 @@ const ChatSpinnerComponent = (
       typeof window !== "undefined" && window.matchMedia
         ? window.matchMedia("(prefers-reduced-motion: reduce)")
         : null
-    let reduced = motionQuery?.matches ?? false
+    // `skipAnimations` belongs on the same switch, and for the same reason:
+    // this loop rebuilds and writes 960 polygons per frame. The off-screen
+    // pause below cannot help under jsdom, where `IntersectionObserver` is an
+    // inert mock — so a test that walked a per-second counter to eight seconds
+    // was paying for ~500 of these frames, which is how three of them ended up
+    // over the 5s CI timeout.
+    const shouldRest = () =>
+      MotionGlobalConfig.skipAnimations || (motionQuery?.matches ?? false)
+    let reduced = shouldRest()
 
     const paint = (count: number) => {
       const quads = state.quads
@@ -186,15 +194,6 @@ const ChatSpinnerComponent = (
     // RAF tick fires (eliminates a flash of empty SVG on mount).
     paint(buildFrameInto(state, 0, size, 0))
 
-    // Animations off globally — leave the static frame above and never start
-    // the loop. This is the switch the test environment sets, and the loop is
-    // not cheap to leave running there: every frame rebuilds and writes 960
-    // polygons, and the off-screen pause below cannot help because
-    // `IntersectionObserver` is an inert mock under jsdom. A test that walked
-    // a per-second counter to eight seconds was paying for ~500 of those
-    // frames, which is how three of them ended up over the 5s CI timeout.
-    if (MotionGlobalConfig.skipAnimations) return
-
     // Pause the animation while off-screen. On resume, shift the time origin
     // forward by the elapsed gap so the spinner picks up where it left off
     // instead of jumping to "current time".
@@ -225,7 +224,7 @@ const ChatSpinnerComponent = (
     }
 
     const onMotionPref = () => {
-      reduced = motionQuery?.matches ?? false
+      reduced = shouldRest()
       if (reduced) {
         stopLoop()
         paint(buildFrameInto(state, 0, size, 0))
