@@ -1,4 +1,4 @@
-import type { ReactElement } from "react"
+import type { ReactElement, ReactNode } from "react"
 import { useContext, useEffect, useMemo, useRef, useState } from "react"
 
 import { useEventEmitter } from "@/patterns/OneDataCollection/useEventEmitter"
@@ -367,22 +367,49 @@ FiltersChipsList.displayName = "OneFilterPicker.ChipsList"
  * OneFiltersPicker component to use as a single component
  */
 const _OneFilterPicker = <Definition extends FiltersDefinition>(
-  props: OneFilterPickerRootProps<Definition> & { dataTestId?: string }
+  props: OneFilterPickerRootProps<Definition> & {
+    dataTestId?: string
+    /**
+     * Content rendered at the start of the controls row, before the filters
+     * button and presets (the Data Collection search lives here). Kept off
+     * `OneFilterPickerRootProps` on purpose: `FiltersRoot` spreads its props
+     * into `FiltersContext`, and this slot is layout-only.
+     */
+    leadingActions?: ReactNode
+  }
 ) => {
-  const { dataTestId, ...rootProps } = props
+  const { dataTestId, leadingActions, ...rootProps } = props
+  const hasLeadingGroup = Boolean(leadingActions || rootProps.filters)
   return (
     <DataTestIdWrapper dataTestId={dataTestId}>
       <FiltersRoot {...rootProps}>
         <div
           className={cn(
             "flex items-center justify-between gap-4",
-            !rootProps.filters && "justify-end"
+            !hasLeadingGroup && "justify-end"
           )}
         >
-          {rootProps.filters && (
-            <div className="flex min-w-0 flex-1 gap-1">
-              <FiltersControls />
-              <FiltersPresets />
+          {hasLeadingGroup && (
+            <div className="flex min-w-0 flex-1 items-center gap-1">
+              {/* shrink-0 so the search keeps its width and the filters and
+                  presets group absorbs the squeeze instead. mr-1 tops the row's
+                  gap-1 up to the 8px used between the actions on the right. */}
+              {leadingActions && (
+                <div
+                  className={cn(
+                    "flex shrink-0 items-center",
+                    rootProps.filters && "mr-1"
+                  )}
+                >
+                  {leadingActions}
+                </div>
+              )}
+              {rootProps.filters && (
+                <>
+                  <FiltersControls />
+                  <FiltersPresets />
+                </>
+              )}
             </div>
           )}
           {rootProps.children && (
@@ -403,7 +430,10 @@ _OneFilterPicker.displayName = "OneFilterPicker"
 const OneFilterPicker = _OneFilterPicker as <
   Definition extends FiltersDefinition,
 >(
-  props: OneFilterPickerRootProps<Definition> & { dataTestId?: string }
+  props: OneFilterPickerRootProps<Definition> & {
+    dataTestId?: string
+    leadingActions?: ReactNode
+  }
 ) => ReactElement | null
 
 /**

@@ -96,7 +96,7 @@ import {
   DataCollectionSettings,
   useDataCollectionSettings,
 } from "./Settings/SettingsProvider"
-import { useHeaderActionsCollapse } from "./components/useHeaderActionsCollapse"
+import { useHeaderCollapse } from "./components/useHeaderCollapse"
 import { VisualizationSwitcher } from "./components/VisualizationSwitcher"
 import { SummariesDefinition } from "./summary"
 import { useEventEmitter } from "./useEventEmitter"
@@ -674,16 +674,19 @@ const OneDataCollectionComp = <
   const actionBarRef = useRef<F0ActionBarRef>(null)
   const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // When the header row runs out of room, collapse the view switcher to
-  // icon-only so it keeps fitting next to the rest of the header controls.
+  // As the header row runs out of room it degrades in two steps: the view
+  // switcher drops its labels, and the search gives up its permanent input.
   const toolbarRef = useRef<HTMLDivElement>(null)
   const headerActionsRef = useRef<HTMLDivElement>(null)
   const headerSummaryRef = useRef<HTMLDivElement>(null)
-  const collapseHeaderActions = useHeaderActionsCollapse(
-    toolbarRef,
-    headerActionsRef,
-    headerSummaryRef
-  )
+  const headerSearchRef = useRef<HTMLDivElement>(null)
+  const { collapseActions: collapseHeaderActions, collapseSearch } =
+    useHeaderCollapse(
+      toolbarRef,
+      headerActionsRef,
+      headerSummaryRef,
+      headerSearchRef
+    )
   // isControlledModeActive: true when controlled status is non-idle and not
   // an already-dismissed success. Drives the auto-manage bail-out in onClick.
   // Repeated for resolvedBulkActionStatus and isControlledModeActive — helper
@@ -893,9 +896,11 @@ const OneDataCollectionComp = <
   const [totalItems, setTotalItems] = useState<undefined | number>(undefined)
   const [isInitialLoading, setIsInitialLoading] = useState(true)
 
+  // Search is excluded on purpose: it renders at the start of the controls row,
+  // not in the right-hand cluster this flag describes.
   const elementsRightActions = useMemo(
-    () => [search?.enabled, visualizations.length > 1].some(Boolean),
-    [search, visualizations]
+    () => visualizations.length > 1,
+    [visualizations]
   )
 
   /**
@@ -1578,6 +1583,9 @@ const OneDataCollectionComp = <
     )
   }, [visualizations, grouping, sortings])
 
+  // Search still counts here even though it now renders on the left: this flag
+  // gates whether the bottom toolbar exists at all and pushes the navigation
+  // filters up to the top row, and both of those should stay as they were.
   const bottomRightHasItems = useMemo(() => {
     return (
       elementsRightActions ||
@@ -1683,6 +1691,23 @@ const OneDataCollectionComp = <
               onEditPreset={onEditPreset}
               presetActionState={presetActionState}
               onPresetAction={onPresetAction}
+              leadingActions={
+                search && (
+                  <div ref={headerSearchRef} className="flex items-center">
+                    <Search
+                      onChange={setCurrentSearch}
+                      value={currentSearch}
+                      results={searchPreview.results}
+                      resultsLoading={searchPreview.loading}
+                      onResultSelect={searchPreview.onSelect}
+                      hasMore={searchPreview.hasMore}
+                      loadingMore={searchPreview.loadingMore}
+                      onLoadMore={searchPreview.onLoadMore}
+                      collapsible={collapseSearch}
+                    />
+                  </div>
+                )
+              }
             >
               <div ref={headerActionsRef} className="flex items-center gap-2">
                 {isLoading && (
@@ -1696,18 +1721,6 @@ const OneDataCollectionComp = <
                   >
                     <Spinner size="small" />
                   </motion.div>
-                )}
-                {search && (
-                  <Search
-                    onChange={setCurrentSearch}
-                    value={currentSearch}
-                    results={searchPreview.results}
-                    resultsLoading={searchPreview.loading}
-                    onResultSelect={searchPreview.onSelect}
-                    hasMore={searchPreview.hasMore}
-                    loadingMore={searchPreview.loadingMore}
-                    onLoadMore={searchPreview.onLoadMore}
-                  />
                 )}
                 {visualizations && visualizations.length > 1 && (
                   <VisualizationSwitcher

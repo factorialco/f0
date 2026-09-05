@@ -1,6 +1,13 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
 
-import { ExampleComponent, SubfiltersExampleComponent } from "../mockData"
+import { Add } from "@/icons/app"
+
+import {
+  ExampleComponent,
+  getMockVisualizations,
+  mockUsers,
+  SubfiltersExampleComponent,
+} from "../mockData"
 
 const meta = {
   title: "Data Collection/Filters",
@@ -133,6 +140,54 @@ export const PresetsExample: Story = {
                   { label: "Engineering Only", filter: { department: ["Engineering"] } },
                   { label: "Product Team", filter: { department: ["Product"] } },
               ],
+              //...
+          })
+          `,
+      },
+    },
+  },
+}
+
+// Full controls row: search first, then the filters button and the quick
+// filter chips, with the settings and the primary action pinned to the right.
+export const SearchWithFiltersAndActions: Story = {
+  render: () => (
+    <ExampleComponent
+      searchBar={{ enabled: true, sync: true }}
+      usePresets
+      visualizations={[getMockVisualizations().table]}
+      grouping={{
+        groupBy: {
+          department: {
+            name: "Department",
+            label: (groupId) => groupId,
+            itemCount: (groupId) =>
+              mockUsers.filter((user) => user.department === groupId).length,
+          },
+        },
+      }}
+      primaryActions={() => ({
+        label: "Create user",
+        icon: Add,
+        onClick: () => console.log("Creating a user"),
+      })}
+    />
+  ),
+  parameters: {
+    docs: {
+      source: {
+        code: `
+           const source = useDataCollectionSource({
+              //...
+              search: { enabled: true, sync: true },
+              filters: { department: { type: "in", label: "Department", options: { options: [...] } } },
+              presets: [
+                  { label: "Engineering Only", filter: { department: ["Engineering"] } },
+                  { label: "Product Team", filter: { department: ["Product"] } },
+              ],
+              sortings: { name: { label: "Name" } },
+              grouping: { groupBy: { department: { name: "Department", label: (groupId) => groupId } } },
+              primaryActions: () => ({ label: "Create user", icon: Add, onClick: () => {} }),
               //...
           })
           `,
