@@ -37,12 +37,28 @@ type AiChatBridgeValue = {
   open: boolean
   setOpen: (open: boolean) => void
   /**
+   * Open the chat AS A SIDE PANEL, whatever it was doing before.
+   *
+   * `setOpen(true)` is not enough for a caller that then sizes itself around the
+   * chat, and the reason is the case that looks least likely: a chat that is
+   * ALREADY open. Expanded (`fullscreen`) or showing a canvas, it spans the
+   * frame — there is no side to leave room beside — and `setOpen(true)` is a
+   * no-op, so it stays that way over the window just sized for it. Both states
+   * survive a reload too: closing resets the mode
+   * (`AiChatStateProvider`), but `open` and `visualizationMode` are
+   * persisted together, so a chat left open and expanded comes back that way.
+   */
+  openAsSidePanel: () => void
+  /**
    * How much room the chat panel takes, and which edge it takes it from.
    *
    * The meeting needs this to size itself around the chat, and cannot read it
    * itself: `panelArea` is the frame's border box, and the frame reserves the
    * chat with PADDING rather than by shrinking that box — deliberately, so the
    * reservation cannot feed back into the measurement.
+   *
+   * Both describe where the chat lands AFTER `openAsSidePanel`, not where the
+   * panel is now.
    */
   chatWidth: number
   chatSide: "left" | "right"
@@ -54,6 +70,7 @@ const AiChatBridgeContext = createContext<AiChatBridgeValue>({
   enabled: false,
   open: false,
   setOpen: noop,
+  openAsSidePanel: noop,
   chatWidth: 0,
   chatSide: "right",
 })
@@ -68,6 +85,12 @@ type PublishedState = {
   chatSide: "left" | "right"
 }
 
+/** What the publisher hands up: the state, plus the callbacks kept in refs. */
+type PublishedActions = PublishedState & {
+  setOpen: (open: boolean) => void
+  openAsSidePanel: () => void
+}
+
 export const AiChatBridgeProvider = ({ children }: { children: ReactNode }) => {
   const [state, setState] = useState<PublishedState>({
     enabled: false,
@@ -75,29 +98,28 @@ export const AiChatBridgeProvider = ({ children }: { children: ReactNode }) => {
     chatWidth: 0,
     chatSide: "right",
   })
-  // A ref, not state: the publisher writes the setter on every render and we
-  // must not re-render the whole frame each time its identity changes.
+  // Refs, not state: the publisher writes the callbacks on every render and we
+  // must not re-render the whole frame each time an identity changes.
   const setOpenRef = useRef<(open: boolean) => void>(noop)
+  const openAsSidePanelRef = useRef<() => void>(noop)
 
-  const publish = useCallback(
-    (next: PublishedState & { setOpen: (v: boolean) => void }) => {
-      setOpenRef.current = next.setOpen
-      setState((current) =>
-        current.enabled === next.enabled &&
-        current.open === next.open &&
-        current.chatWidth === next.chatWidth &&
-        current.chatSide === next.chatSide
-          ? current
-          : {
-              enabled: next.enabled,
-              open: next.open,
-              chatWidth: next.chatWidth,
-              chatSide: next.chatSide,
-            }
-      )
-    },
-    []
-  )
+  const publish = useCallback((next: PublishedActions) => {
+    setOpenRef.current = next.setOpen
+    openAsSidePanelRef.current = next.openAsSidePanel
+    setState((current) =>
+      current.enabled === next.enabled &&
+      current.open === next.open &&
+      current.chatWidth === next.chatWidth &&
+      current.chatSide === next.chatSide
+        ? current
+        : {
+            enabled: next.enabled,
+            open: next.open,
+            chatWidth: next.chatWidth,
+            chatSide: next.chatSide,
+          }
+    )
+  }, [])
 
   const value = useMemo<AiChatBridgeValue>(
     () => ({
@@ -106,6 +128,7 @@ export const AiChatBridgeProvider = ({ children }: { children: ReactNode }) => {
       chatWidth: state.chatWidth,
       chatSide: state.chatSide,
       setOpen: (open: boolean) => setOpenRef.current(open),
+      openAsSidePanel: () => openAsSidePanelRef.current(),
     }),
     [state.enabled, state.open, state.chatWidth, state.chatSide]
   )
@@ -120,9 +143,7 @@ export const AiChatBridgeProvider = ({ children }: { children: ReactNode }) => {
 }
 
 const AiChatBridgePublisherContext =
-  createContext<
-    (next: PublishedState & { setOpen: (open: boolean) => void }) => void
-  >(noop)
+  createContext<(next: PublishedActions) => void>(noop)
 
 /**
  * Renders nothing. Mount it INSIDE the AI provider — its only job is to read the
@@ -131,22 +152,48 @@ const AiChatBridgePublisherContext =
 export const AiChatBridgePublisher = () => {
   const publish = useContext(AiChatBridgePublisherContext)
   const { enabled, open, setOpen } = useAiChatToggle()
-  const { chatWidth, panelSide, panelContentSide, panelContent } = useAiChat()
+  const { chatWidth, resizable, panelSide, setVisualizationMode } = useAiChat()
 
-  // Which edge the panel will actually occupy: hosted content can dock to the
-  // opposite side from the chat, and whichever is showing is the one that takes
-  // the space.
-  const chatSide = panelContent ? panelContentSide : panelSide
+  // The edge the CHAT takes — `panelSide`, not the side hosted content happens
+  // to be docked to. Opening the chat clears that content (see
+  // `useAiChatToggle`), so a content side never survives the press, and sizing
+  // against it would leave the gap on the wrong edge.
+  const chatSide = panelSide
+
+  // Mirror the frame's own reservation exactly: with `resizable` off it reserves
+  // the default and ignores the persisted width. They share a localStorage key,
+  // so that persisted value can be a width some other host chose.
+  const reservedWidth = resizable
+    ? chatWidth || DEFAULT_CHAT_WIDTH
+    : DEFAULT_CHAT_WIDTH
+
+  const openAsSidePanel = useCallback(() => {
+    // Mode first, then open. Only `fullscreen` forces the panel open from a mode
+    // change, so this order can never leave the panel showing in a mode the
+    // caller did not ask for; and `setOpen` from the toggle is what swaps out
+    // hosted content in favour of the chat.
+    setVisualizationMode("sidepanel")
+    setOpen(true)
+  }, [setVisualizationMode, setOpen])
 
   useEffect(() => {
     publish({
       enabled,
       open,
       setOpen,
-      chatWidth: chatWidth || DEFAULT_CHAT_WIDTH,
+      openAsSidePanel,
+      chatWidth: reservedWidth,
       chatSide,
     })
-  }, [publish, enabled, open, setOpen, chatWidth, chatSide])
+  }, [
+    publish,
+    enabled,
+    open,
+    setOpen,
+    openAsSidePanel,
+    reservedWidth,
+    chatSide,
+  ])
 
   return null
 }

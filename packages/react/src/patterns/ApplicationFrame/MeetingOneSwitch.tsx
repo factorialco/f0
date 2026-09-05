@@ -17,10 +17,14 @@ import { useAiChatBridge } from "./AiChatBridge"
  * The mode change is not a nicety either. `F0MeetingSurface` marks every sibling
  * of its portal `inert` while full screen, so a chat opened without leaving that
  * mode would be visibly there and completely unreachable.
+ *
+ * Both sides are forced, and neither is negotiable: the chat to `sidepanel`
+ * (`openAsSidePanel` — a full-screen chat spans the frame and there is no side
+ * to sit beside), and the call to a window filling what is left.
  */
 export const MeetingOneSwitch = () => {
   const surface = useMeetingSurfaceOptional()
-  const { enabled, setOpen, chatWidth, chatSide } = useAiChatBridge()
+  const { enabled, openAsSidePanel, chatWidth, chatSide } = useAiChatBridge()
 
   if (!surface || surface.effectiveMode !== "fullscreen") return null
   if (!enabled) return null
@@ -32,13 +36,29 @@ export const MeetingOneSwitch = () => {
       // receive.
       checked={false}
       onCheckedChange={() => {
-        setOpen(true)
+        // Opens it *as a side panel* whatever state it was in — closed, already
+        // open, full screen, or showing someone else's content.
+        openAsSidePanel()
         // Straight to `floating`, never `panel`: the frame's exclusivity effect
         // resolves a contested slot in favour of whoever just arrived, so a call
         // moved to `panel` with the chat freshly open gets bounced here anyway,
         // one render later.
         surface.setMode("floating")
-        surface.resizeRect(fitToContent(surface.panelArea, chatWidth, chatSide))
+        // Sized against the area the chat is about to leave the call. Both state
+        // changes are read from the same `panelArea` measured here, which is
+        // safe: it is the frame's border box, and neither the chat opening nor
+        // the call leaving full screen moves it — the chat is reserved with
+        // padding INSIDE that box, and the call's window lives in a portal.
+        //
+        // Skipped on a compact viewport, and not as a shortcut: there `floating`
+        // renders minimized and the chat covers the content instead of docking
+        // beside it, so the rect would reserve an edge nothing occupies and get
+        // persisted for the next desktop session.
+        if (!surface.isCompactViewport) {
+          surface.resizeRect(
+            fitToContent(surface.panelArea, chatWidth, chatSide)
+          )
+        }
       }}
     />
   )
