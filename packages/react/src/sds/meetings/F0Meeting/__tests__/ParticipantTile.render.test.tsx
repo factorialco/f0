@@ -87,23 +87,33 @@ describe("ParticipantTile video fit", () => {
     expect(video?.className).toContain("object-contain")
   })
 
-  it("puts a shared screen on black, so the bands read as the screen", () => {
-    // What Meet does: whatever the shared screen does not cover is black, not
-    // a light gap in the UI.
+  it("backs a video tile with the surface, and outlines it", () => {
+    // A tile carrying video no longer paints its own dark plate: the picture
+    // covers it, and the border is what keeps the cell readable where the
+    // letterbox bands leave the surface showing.
     const { element } = renderTile(build({ tracks: [share("a")] }))
-    expect(element.className).toContain("bg-f1-background-inverse")
+    expect(element.className).toContain("bg-f1-background")
+    expect(element.className).toContain("border-f1-border-secondary")
+  })
+
+  it("keeps a camera tile on the same surface", () => {
+    const { element } = renderTile(build())
+    expect(element.className).toContain("bg-f1-background")
+    expect(element.className).toContain("dark:bg-f1-background-secondary")
   })
 
   // The room reads as one object. A tile that followed the light surface when
   // the camera was off looked like a hole in the grid instead.
-  it("puts a filled camera tile on the dark plate", () => {
-    const { element } = renderTile(build())
-    expect(element.className).toContain("bg-f1-background-inverse")
+  it("puts the dark plate under a tile with no video", () => {
+    const { element } = renderTile(build({ tracks: [] }))
+    expect(element.className).toContain("bg-f1-foreground")
   })
 
-  it("keeps the same dark plate when the camera is off", () => {
+  it("holds the same dark-mode surface with the camera off", () => {
+    // The light/dark plate split is a light-mode fix; in dark mode both cells
+    // are the same secondary surface, so the room still reads as one object.
     const { element } = renderTile(build({ tracks: [] }))
-    expect(element.className).toContain("bg-f1-background-inverse")
+    expect(element.className).toContain("dark:bg-f1-background-secondary")
   })
 })
 
@@ -111,7 +121,7 @@ describe("ParticipantTile name contrast", () => {
   it("goes light on a dark chip over video, which can be any imagery", () => {
     const { chip } = renderTile(build())
     expect(chip.className).toContain("text-f1-foreground-inverse")
-    expect(chip.className).toContain("bg-f1-background-inverse/80")
+    expect(chip.className).toContain("bg-f1-foreground")
   })
 
   it("drops the chip's plate over the placeholder, keeping the light text", () => {
@@ -119,6 +129,6 @@ describe("ParticipantTile name contrast", () => {
     // read as a smudge — but the text still has to be light against it.
     const { chip } = renderTile(build({ tracks: [] }))
     expect(chip.className).toContain("text-f1-foreground-inverse")
-    expect(chip.className).not.toContain("bg-f1-background-inverse/80")
+    expect(chip.className).not.toContain("bg-f1-foreground")
   })
 })

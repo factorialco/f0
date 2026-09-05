@@ -6,6 +6,7 @@ import { Desktop, MicrophoneNegative, PushPin, PushPinSolid } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 
+import { cellRadiusStyle } from "../../layout/constants"
 import { type F0MeetingTile } from "../../layout/tiles"
 import { ConnectionQualityBars } from "./ConnectionQualityBars"
 import { SpeakingIndicator } from "./SpeakingIndicator"
@@ -55,15 +56,19 @@ const ParticipantTileBase = ({
     <div
       className={cn(
         "group relative h-full w-full overflow-hidden",
-        // A tile without video is a dark plate whatever the theme is, so the
-        // room reads as one object rather than as holes in the surface. The
-        // same colour carries the letterbox bands of a contained video.
-        "bg-f1-background-inverse"
+        // In dark mode every cell is the same secondary surface. In light mode
+        // a tile with no video keeps a dark plate — an avatar on the light
+        // surface reads as a hole in the grid — while one carrying video sits
+        // on the surface itself, with the border doing the work instead.
+        "dark:bg-f1-background-secondary",
+        hasVideo ? "bg-f1-background" : "bg-f1-foreground",
+        "border border-solid border-f1-border-secondary"
       )}
       // Scaled to the tile rather than a fixed `rounded-xl`: at 90px wide a
       // 12px radius eats the corners, and the grid stops looking like the same
-      // design at a different size.
-      style={radius !== undefined ? { borderRadius: radius } : undefined}
+      // design at a different size. Shared with the overflow chip — see
+      // `cellRadiusStyle`.
+      style={cellRadiusStyle(radius)}
       data-testid="meeting-participant-tile"
       data-participant-id={participant.id}
     >
@@ -102,7 +107,7 @@ const ParticipantTileBase = ({
             // Room for the pin control in the opposite corner, so a long name
             // runs out of space before it runs under the button.
             canFocus ? "max-w-[calc(100%-4rem)]" : "max-w-[calc(100%-1.5rem)]",
-            hasVideo && "bg-f1-background-inverse/80",
+            hasVideo && "bg-f1-foreground dark:bg-f1-background",
             compact ? "left-1.5 top-1.5 px-2 py-1" : "px-3 py-2"
           )}
         >

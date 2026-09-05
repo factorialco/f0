@@ -52,9 +52,7 @@ export const MeetingMediaControl = ({
         height,
         // Muted is a state you must be able to spot without reading an icon,
         // so it takes the critical surface rather than a generic "on" look.
-        isOff
-          ? "bg-f1-background-secondary text-f1-secondary"
-          : "bg-f1-background text-f1-foreground"
+        isOff ? "bg-f1-background-secondary" : "bg-f1-background"
       )}
     >
       <button
@@ -72,7 +70,7 @@ export const MeetingMediaControl = ({
           focusRing()
         )}
       >
-        <F0Icon icon={icon} size={compact ? "sm" : "md"} />
+        <F0Icon icon={icon} size={compact ? "sm" : "md"} color="bold" />
       </button>
 
       {canPick && (
@@ -92,7 +90,7 @@ export const MeetingMediaControl = ({
                   focusRing()
                 )}
               >
-                <F0Icon icon={ChevronDown} size="sm" />
+                <F0Icon icon={ChevronDown} size="sm" color="bold" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="center" side="top">

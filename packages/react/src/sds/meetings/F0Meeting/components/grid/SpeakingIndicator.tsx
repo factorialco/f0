@@ -46,7 +46,7 @@ export const SpeakingIndicator = ({
         <div
           key={index}
           className={cn(
-            "rounded-full bg-current transition-[height] duration-100 ease-out",
+            "rounded-full bg-f1-foreground-selected transition-[height] duration-100 ease-out",
             compact ? "w-[3px]" : "w-1"
           )}
           style={{

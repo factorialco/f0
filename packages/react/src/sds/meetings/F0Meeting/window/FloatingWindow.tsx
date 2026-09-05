@@ -222,7 +222,7 @@ export const FloatingWindow = ({ header, children }: FloatingWindowProps) => {
         className={cn(
           // Same surface token as the chat's side panel, which is what the call
           // sits flush against in panel mode.
-          "pointer-events-auto fixed overflow-hidden bg-f1-special-page shadow-lg",
+          "pointer-events-auto fixed overflow-hidden bg-f1-background shadow-lg",
           // The panel is a card inset in its slot, exactly like the chat's, so
           // it is rounded and bordered all the way round like the rest.
           isFullscreen || isInline
