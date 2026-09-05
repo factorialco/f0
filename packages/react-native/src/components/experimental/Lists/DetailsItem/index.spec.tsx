@@ -25,7 +25,7 @@ describe("DetailsItem", () => {
   it("Snapshot type person", () => {
     const content: Content = {
       type: "person",
-      firstName: "Jordan",
+      firstName: "Daniel",
       lastName: "Maza",
       action: {
         type: "copy",

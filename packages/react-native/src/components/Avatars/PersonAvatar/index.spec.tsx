@@ -6,7 +6,7 @@ import { PersonAvatar } from "./"
 describe("PersonAvatar", () => {
   it("Snapshot", () => {
     const { toJSON } = render(
-      <PersonAvatar firstName="Jordan" lastName="Maza" />
+      <PersonAvatar firstName="Daniel" lastName="Maza" />
     )
 
     expect(toJSON()).toMatchSnapshot()
