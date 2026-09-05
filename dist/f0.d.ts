@@ -419,6 +419,8 @@ declare type ActionType_2 = {
     critical?: boolean;
     description?: string;
     loading?: boolean;
+    /** Shown on hover. Its reason for existing is a disabled action. */
+    tooltip?: string;
 };
 
 declare type ActionVariant = (typeof actionVariants)[number];
@@ -1325,12 +1327,18 @@ export declare interface AudioPlayerContent {
      */
     summary?: Localized<string>;
     /**
-     * Plain-text transcription of the recording, shown in the "Transcription"
-     * tab. Line breaks are preserved. When omitted, the card attempts to derive
-     * a transcription from the audio file's embedded/attached text tracks.
-     * Localizable.
+     * Transcription of the recording, shown in the "Transcription" tab.
+     *
+     * Pass a **string** for a plain transcript (line breaks are preserved), or a
+     * list of {@link TranscriptCue} to get a timed one: the card then marks the
+     * cue being spoken, keeps it in view, and moves playback to a cue when it is
+     * clicked. Pass a referentially stable array — a new identity on every
+     * render defeats the memoisation that keeps a playing transcript cheap.
+     *
+     * When omitted, the card attempts to derive a transcription from the audio
+     * file's embedded/attached text tracks. Localizable.
      */
-    transcription?: Localized<string>;
+    transcription?: Localized<string | TranscriptCue[]>;
 }
 
 export declare interface AudioPlayerControls extends AudioPlayerState {
@@ -1954,6 +1962,11 @@ declare type BulkActionDefinition = {
     critical?: boolean;
     description?: string;
     disabled?: boolean;
+    /**
+     * Why the action is disabled, shown on hover. Only rendered while `disabled`
+     * — an action the user can click explains itself by doing the thing.
+     */
+    disabledTooltip?: string;
 };
 
 declare type BulkActionsDefinition<R extends RecordType, Filters extends FiltersDefinition> = (selectedItems: Parameters<OnBulkActionCallback<R, Filters>>[1]) => {
@@ -3129,10 +3142,16 @@ declare interface ChatSpinnerProps {
     style?: CSSProperties;
     /**
      * "default" → spins 2 rotations, pauses, repeats.
-     * "continuous" → 2 rotations forward, then 2 backward, no pause. Used for
-     * "writing"-style activity where the indicator should never rest.
+     * "continuous" → rotates forward at a constant rate, never pausing. Used
+     * for "writing"-style activity where the indicator should never rest.
      */
     variant?: "default" | "continuous";
+    /**
+     * When false, the spinner rests at its base orientation (the static One
+     * mark). A spin already in progress completes its current cycle before
+     * resting, so toggling mid-spin never jumps. Only affects "default".
+     */
+    playing?: boolean;
 }
 
 export declare type ChatThread = {
@@ -4384,6 +4403,23 @@ export declare type DataSourceDefinition<R extends RecordType = RecordType, Filt
     dataAdapter: DataAdapter<R, Filters>;
     /** Selectable items value under the checkbox column (undefined if not selectable) */
     selectable?: (item: R) => string | number | undefined;
+    /**
+     * Renders the row's checkbox disabled instead of hiding it. A disabled row is
+     * left out of "select all" and of the selection counts, so the header
+     * checkbox can still reach a fully-checked state.
+     */
+    selectionDisabled?: (item: R) => boolean;
+    /**
+     * A row selected through something else — a tree node picked above it, say.
+     * Renders indeterminate and disabled, and never enters the selection, so the
+     * payload keeps naming only real picks. Implies `selectionDisabled`.
+     */
+    selectionInherited?: (item: R) => boolean;
+    /**
+     * Removes the header select-all and the cross-page "Select all N items" CTA,
+     * forcing row-by-row selection. Mirrors `F0Select`'s prop of the same name.
+     */
+    disableSelectAll?: boolean;
     /** Default selected items */
     defaultSelectedItems?: SelectedItemsState<R>;
     /**
@@ -4972,6 +5008,8 @@ export declare const defaultTranslations: {
         readonly details: "Recording details";
         readonly summary: "Summary";
         readonly transcription: "Transcription";
+        readonly jumpTo: "Jump to {{time}}";
+        readonly transcriptHint: "Select a line to move the recording to that moment";
         readonly language: "Language";
         readonly audio: "Audio";
     };
@@ -12116,7 +12154,7 @@ export declare interface F0OneIconProps extends SVGProps<SVGSVGElement> {
     size?: "xs" | "sm" | "md" | "lg";
 }
 
-export declare const F0OneSwitch: ({ className, disabled, onVisible, tooltip, autoOpen, onToggle, }: F0OneSwitchProps) => JSX_2.Element | null;
+export declare const F0OneSwitch: ({ className, disabled, onVisible, tooltip, autoOpen, onToggle, checked, onCheckedChange, }: F0OneSwitchProps) => JSX_2.Element | null;
 
 /**
  * Props for the F0OneSwitch component
@@ -12133,6 +12171,19 @@ export declare type F0OneSwitchProps = React.ComponentPropsWithoutRef<typeof Swi
     };
     /** When true, the tooltip is opened automatically for 3 seconds*/
     autoOpen?: boolean;
+    /**
+     * Drives the switch from the outside instead of from the AI chat context.
+     *
+     * Passing `onCheckedChange` puts the switch in CONTROLLED mode: `checked` is
+     * the state, the handler is the toggle, and the `enabled` gate that normally
+     * renders `null` is bypassed — you have already decided it should be there.
+     *
+     * This exists for surfaces mounted outside `F0AiChatProvider`, where
+     * `useAiChat()` silently returns a no-op proxy and the switch would otherwise
+     * render nothing with no error. Omit both and nothing changes.
+     */
+    checked?: boolean;
+    onCheckedChange?: (open: boolean) => void;
 };
 
 declare type F0PdfRotation = 0 | 90 | 180 | 270;
@@ -17717,6 +17768,9 @@ declare type SecondaryActionItem = Pick<DropdownItemObject, "label" | "icon" | "
         disabled: boolean;
         loading: boolean;
     }) => string | undefined;
+    /** A count shown to the right of the label, e.g. how many items the action
+     * concerns. Ignored while the action is collapsed into the overflow menu. */
+    counterValue?: number;
 };
 
 declare type SecondaryActionsDefinition = {
@@ -17785,7 +17839,7 @@ declare type SelectCellConfig<R extends RecordType> = {
     source?: never;
     mapOptions?: never;
 } | {
-    source: Omit<DataSourceDefinition<RecordType, FiltersDefinition, SortingsDefinition, GroupingDefinition<RecordType>>, "selectable" | "grouping" | "defaultGrouping" | "currentGrouping" | "fetchChildren" | "itemsWithChildren" | "childrenCount">;
+    source: Omit<DataSourceDefinition<RecordType, FiltersDefinition, SortingsDefinition, GroupingDefinition<RecordType>>, "selectable" | "selectionDisabled" | "selectionInherited" | "disableSelectAll" | "grouping" | "defaultGrouping" | "currentGrouping" | "fetchChildren" | "itemsWithChildren" | "childrenCount">;
     mapOptions: (record: RecordType) => F0SelectItemProps<string, RecordType>;
     options?: never;
 });
@@ -19114,6 +19168,25 @@ declare type TranscribeOptions = {
     signal?: AbortSignal;
 };
 
+/**
+ * One utterance of a transcript. Give it a `startTime` and the card syncs it
+ * with playback: the cue being spoken is marked while the recording plays, and
+ * clicking it moves playback to that moment. Without a `startTime` the cue is
+ * plain text — no mark, no click target — so a transcript that carries no
+ * timings renders as a plain dialogue.
+ */
+export declare interface TranscriptCue {
+    /**
+     * What was said, as a single inline run. Rendered as markdown limited to
+     * bold and italic, which is how a speaker gets its label —
+     * `"**Recruiter:** How did you hear about us?"`. Escape `*` and `_` in text
+     * you didn't write yourself.
+     */
+    text: string;
+    /** Where the utterance starts, in seconds from the start of the recording. */
+    startTime?: number;
+}
+
 declare type TranslationKey = Join<PathsToStringProps<typeof defaultTranslations>, ".">;
 
 declare type TranslationShape<T> = {
@@ -20045,7 +20118,7 @@ export declare function useSchemaDefinition(schema: F0FormSchema, sections?: Rec
  * Custom hook to manage selection state for items and groups in a data table
  * Supports single/multi selection, grouped data, pagination, and filtering
  */
-export declare function useSelectable<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Grouping extends GroupingDefinition<R>>({ data, paginationInfo, source, selectionMode, selectedState, onSelectItems, disableSelectAll, isSearchActive, allPagesSelection, resetOnPageChange, preserveSelectionOnDatasetChange, getRenderedSelectableEntries, renderedSelectableCount, }: UseSelectableProps<R, Filters, Sortings, Grouping>): UseSelectableReturn<R, Filters>;
+export declare function useSelectable<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Grouping extends GroupingDefinition<R>>({ data, paginationInfo, source, selectionMode, selectedState, onSelectItems, disableSelectAll: disableSelectAllProp, isSearchActive, allPagesSelection, resetOnPageChange, preserveSelectionOnDatasetChange, getRenderedSelectableEntries, renderedSelectableCount, }: UseSelectableProps<R, Filters, Sortings, Grouping>): UseSelectableReturn<R, Filters>;
 
 export declare type UseSelectableProps<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Grouping extends GroupingDefinition<R>> = {
     data: Data<R>;
@@ -20552,9 +20625,11 @@ declare namespace Calendar {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        aiBlock: {
-            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
-            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -20562,11 +20637,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        aiBlock: {
+            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
+            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
         };
     }
 }

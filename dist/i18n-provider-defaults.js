@@ -308,6 +308,8 @@ const e = {
     details: "Recording details",
     summary: "Summary",
     transcription: "Transcription",
+    jumpTo: "Jump to {{time}}",
+    transcriptHint: "Select a line to move the recording to that moment",
     language: "Language",
     audio: "Audio"
   },

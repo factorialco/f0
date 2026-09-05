@@ -1594,10 +1594,16 @@ declare interface ChatSpinnerProps {
     style?: CSSProperties;
     /**
      * "default" → spins 2 rotations, pauses, repeats.
-     * "continuous" → 2 rotations forward, then 2 backward, no pause. Used for
-     * "writing"-style activity where the indicator should never rest.
+     * "continuous" → rotates forward at a constant rate, never pausing. Used
+     * for "writing"-style activity where the indicator should never rest.
      */
     variant?: "default" | "continuous";
+    /**
+     * When false, the spinner rests at its base orientation (the static One
+     * mark). A spin already in progress completes its current cycle before
+     * resting, so toggling mid-spin never jumps. Only affects "default".
+     */
+    playing?: boolean;
 }
 
 export declare type ChatThread = {
@@ -2202,6 +2208,8 @@ export declare const defaultTranslations: {
         readonly details: "Recording details";
         readonly summary: "Summary";
         readonly transcription: "Transcription";
+        readonly jumpTo: "Jump to {{time}}";
+        readonly transcriptHint: "Select a line to move the recording to that moment";
         readonly language: "Language";
         readonly audio: "Audio";
     };
@@ -4610,7 +4618,7 @@ export declare interface F0OneIconProps extends SVGProps<SVGSVGElement> {
     size?: "xs" | "sm" | "md" | "lg";
 }
 
-export declare const F0OneSwitch: ({ className, disabled, onVisible, tooltip, autoOpen, onToggle, }: F0OneSwitchProps) => JSX_2.Element | null;
+export declare const F0OneSwitch: ({ className, disabled, onVisible, tooltip, autoOpen, onToggle, checked, onCheckedChange, }: F0OneSwitchProps) => JSX_2.Element | null;
 
 /**
  * Props for the F0OneSwitch component
@@ -4627,6 +4635,19 @@ export declare type F0OneSwitchProps = React.ComponentPropsWithoutRef<typeof Swi
     };
     /** When true, the tooltip is opened automatically for 3 seconds*/
     autoOpen?: boolean;
+    /**
+     * Drives the switch from the outside instead of from the AI chat context.
+     *
+     * Passing `onCheckedChange` puts the switch in CONTROLLED mode: `checked` is
+     * the state, the handler is the toggle, and the `enabled` gate that normally
+     * renders `null` is bypassed — you have already decided it should be there.
+     *
+     * This exists for surfaces mounted outside `F0AiChatProvider`, where
+     * `useAiChat()` silently returns a no-op proxy and the switch would otherwise
+     * render nothing with no error. Omit both and nothing changes.
+     */
+    checked?: boolean;
+    onCheckedChange?: (open: boolean) => void;
 };
 
 declare const F0TagAlert: WithDataTestIdReturnType_2<ForwardRefExoticComponent<Props_3 & RefAttributes<HTMLDivElement>>>;
@@ -5849,9 +5870,11 @@ declare namespace Calendar {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        aiBlock: {
-            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
-            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -5859,11 +5882,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        aiBlock: {
+            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
+            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
         };
     }
 }
