@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils"
 
 import { ChatUserHoverCard } from "../components/ChatUserHoverCard"
 import { type F0ChatLinkPreview, type F0ChatUser } from "../types"
+import { locateMentions } from "./mention-ranges"
 import { sanitizeDisplayText } from "./sanitize-text"
 
 /** URLs in a body render as clickable links (matches the mobile bubble). */
@@ -104,29 +105,7 @@ export const renderBodyWithMentions = (
   const body = sanitizeDisplayText(rawBody)
   if (tokens.length === 0) return renderBodyWithLinks(body, previews)
 
-  // Collect every `@name` occurrence (longest names first so "@Ana María" wins
-  // over "@Ana"), then drop overlaps left-to-right.
-  const ranges: { start: number; end: number; token: MentionToken }[] = []
-  const byLength = [...tokens].sort((a, b) => b.name.length - a.name.length)
-  for (const token of byLength) {
-    const pattern = `@${token.name}`
-    let from = 0
-    while (true) {
-      const idx = body.indexOf(pattern, from)
-      if (idx === -1) break
-      ranges.push({ start: idx, end: idx + pattern.length, token })
-      from = idx + pattern.length
-    }
-  }
-  ranges.sort((a, b) => a.start - b.start)
-
-  const clean: typeof ranges = []
-  let lastEnd = 0
-  for (const range of ranges) {
-    if (range.start < lastEnd) continue
-    clean.push(range)
-    lastEnd = range.end
-  }
+  const clean = locateMentions(body, tokens)
   if (clean.length === 0) return renderBodyWithLinks(body, previews)
 
   const nodes: ReactNode[] = []
@@ -139,7 +118,7 @@ export const renderBodyWithMentions = (
         </Fragment>
       )
     }
-    const { token } = range
+    const token = range.entry
     const chip = (
       <span
         className={cn(

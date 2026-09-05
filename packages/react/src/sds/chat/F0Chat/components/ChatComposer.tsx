@@ -152,6 +152,7 @@ export const ChatComposer = (): ReactNode => {
     inputValue: value,
     setInputValue: setValue,
     cursorPosition,
+    setCursorPosition,
     textareaRef,
     enabled: mentionsEnabled && !emojiAutocomplete.isOpen,
     searchMembers,
@@ -546,7 +547,7 @@ export const ChatComposer = (): ReactNode => {
   // recurse through `retarget`.
   const discardDraft = useCallback(() => {
     mentions.close()
-    mentions.seedMentions([])
+    mentions.seedMentions([], "")
     setValue("")
     setCursorPosition(0)
     releaseUploadingPreviews(attachments)
@@ -575,18 +576,21 @@ export const ChatComposer = (): ReactNode => {
             attachment,
           }))
       })
-      mentions.seedMentions([
-        ...(message.mentions ?? []).map((m) => ({
-          id: m.id,
-          name: m.name,
-          avatar: m.avatar,
-          subtitle: m.subtitle,
-          profileHref: m.profileHref,
-        })),
-        ...(message.mentionedEveryone && channel.type === "group"
-          ? [{ id: MENTION_EVERYONE_ID, name: i18n.chat.mentionEveryone }]
-          : []),
-      ])
+      mentions.seedMentions(
+        [
+          ...(message.mentions ?? []).map((m) => ({
+            id: m.id,
+            name: m.name,
+            avatar: m.avatar,
+            subtitle: m.subtitle,
+            profileHref: m.profileHref,
+          })),
+          ...(message.mentionedEveryone && channel.type === "group"
+            ? [{ id: MENTION_EVERYONE_ID, name: i18n.chat.mentionEveryone }]
+            : []),
+        ],
+        message.body
+      )
     },
     [
       channel.type,
@@ -676,6 +680,7 @@ export const ChatComposer = (): ReactNode => {
       mentionedEveryone: mentionedEveryone || undefined,
     })
     mentions.close()
+    mentions.seedMentions([], "")
     setValue("")
     setCursorPosition(0)
     setAttachments([])

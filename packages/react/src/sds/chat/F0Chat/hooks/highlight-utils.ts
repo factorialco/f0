@@ -1,4 +1,8 @@
-import { MENTION_EVERYONE_ID, type MentionEntry } from "./useMentions"
+import {
+  type AnchoredMention,
+  MENTION_EVERYONE_ID,
+  mentionEnd,
+} from "./useMentions"
 
 /** Same tone classification the bubble uses, so the in-composer highlight
  * matches: a mention of you / `@here` is amber, anyone else is info. */
@@ -29,7 +33,7 @@ const toneOf = (id: string, currentUserId?: string): MentionTone =>
  */
 export function buildHighlightSegments(
   text: string,
-  mentions: MentionEntry[],
+  mentions: AnchoredMention[],
   options?: {
     cursorPosition?: number
     inlineCompletion?: string | null
@@ -41,22 +45,16 @@ export function buildHighlightSegments(
   const ghost = options?.inlineCompletion ?? null
   const currentUserId = options?.currentUserId
 
-  // Build a list of { start, end, tone } ranges for each @Name occurrence.
-  const ranges: { start: number; end: number; tone: MentionTone }[] = []
-
-  for (const mention of mentions) {
-    const pattern = `@${mention.name}`
-    const tone = toneOf(mention.id, currentUserId)
-    let searchFrom = 0
-    while (true) {
-      const idx = text.indexOf(pattern, searchFrom)
-      if (idx === -1) break
-      ranges.push({ start: idx, end: idx + pattern.length, tone })
-      searchFrom = idx + pattern.length
-    }
-  }
-
-  ranges.sort((a, b) => a.start - b.start)
+  // The composer owns the anchors, so the overlay paints exactly the spans the
+  // composer considers mentions — no second, independently-drifting match.
+  const ranges = mentions
+    .map((mention) => ({
+      start: mention.start,
+      end: mentionEnd(mention),
+      tone: toneOf(mention.id, currentUserId),
+    }))
+    .filter((range) => range.start >= 0 && range.end <= text.length)
+    .sort((a, b) => a.start - b.start)
 
   const segments: HighlightSegment[] = []
   let pos = 0
