@@ -75,4 +75,78 @@ const zeroRenderHook = <
 ): RenderHookResult<Result, Props> =>
   renderHook(render, { wrapper: TestProviders, ...options })
 
+// ─── Viewport ────────────────────────────────────────────────────────────
+// The suite-wide stub in `vite/vitest.setup.ts` answers `false` to every media
+// query, which makes every viewport-driven branch unreachable from a test —
+// the responsive half of the app shell is untestable without this.
+//
+// Opt in when the behaviour under test IS the responsive one, and call
+// `resetTestViewport()` afterwards so the suite-wide default stands again.
+
+type MediaListener = (event: { matches: boolean; media: string }) => void
+
+const listeners = new Set<{ query: string; notify: MediaListener }>()
+let currentViewport: number | null = null
+
+const queryMatches = (query: string, width: number): boolean => {
+  const max = /max-width:\s*(\d+(?:\.\d+)?)px/.exec(query)
+  const min = /min-width:\s*(\d+(?:\.\d+)?)px/.exec(query)
+  if (max && width > Number(max[1])) return false
+  if (min && width < Number(min[1])) return false
+  return Boolean(max || min)
+}
+
+/**
+ * Make `matchMedia` answer width queries against `width`. Call it again to
+ * simulate a resize — registered listeners are notified, so `useMediaQuery`
+ * re-renders the way it would in a browser.
+ */
+export const setTestViewport = (width: number): void => {
+  currentViewport = width
+  window.matchMedia = ((query: string) => {
+    const entry = { query, notify: (() => {}) as MediaListener }
+    return {
+      get matches() {
+        return queryMatches(query, currentViewport ?? width)
+      },
+      media: query,
+      onchange: null,
+      addListener: (fn: MediaListener) => {
+        entry.notify = fn
+        listeners.add(entry)
+      },
+      removeListener: () => listeners.delete(entry),
+      addEventListener: (_: string, fn: MediaListener) => {
+        entry.notify = fn
+        listeners.add(entry)
+      },
+      removeEventListener: () => listeners.delete(entry),
+      dispatchEvent: () => true,
+    } as unknown as MediaQueryList
+  }) as typeof window.matchMedia
+
+  for (const entry of listeners) {
+    entry.notify({
+      matches: queryMatches(entry.query, width),
+      media: entry.query,
+    })
+  }
+}
+
+/** Restore the suite-wide "nothing matches" stub. */
+export const resetTestViewport = (): void => {
+  listeners.clear()
+  currentViewport = null
+  window.matchMedia = ((query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: () => {},
+    removeListener: () => {},
+    addEventListener: () => {},
+    removeEventListener: () => {},
+    dispatchEvent: () => true,
+  })) as unknown as typeof window.matchMedia
+}
+
 export { screen, TestProviders, userEvent, within, zeroRender, zeroRenderHook }

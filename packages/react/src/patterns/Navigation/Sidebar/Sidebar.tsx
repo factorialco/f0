@@ -1,3 +1,4 @@
+import { FocusScope } from "@radix-ui/react-focus-scope"
 import { AnimatePresence, motion } from "motion/react"
 import { ReactElement, ReactNode, cloneElement, isValidElement } from "react"
 import { useIntersectionObserver } from "usehooks-ts"
@@ -87,63 +88,74 @@ function _Sidebar({
     return footer
   }
 
-  return (
-    <motion.aside
-      initial={false}
-      aria-label={i18n.navigation.sidebar.label}
-      className={cn(
-        "absolute bottom-0 left-0 top-0 z-10 flex w-[var(--ds-sidebar-width)] flex-col transition-[background-color]",
-        sidebarState === "locked"
-          ? "h-full"
-          : cn(
-              "shadow-lg ring-1 ring-f1-border-secondary backdrop-blur-2xl",
-              isSmallScreen
-                ? "h-full border-y-transparent border-l-transparent bg-f1-background/90"
-                : "h-[calc(100%-16px)] bg-f1-background/60"
-            )
-      )}
-      animate={{
-        top: sidebarState === "locked" ? 0 : isSmallScreen ? 0 : "8px",
-        borderRadius:
-          sidebarState === "locked" ? "0" : isSmallScreen ? "0" : "12px",
-        left: sidebarState === "locked" ? "0" : isSmallScreen ? 0 : "8px",
-        x: sidebarState === "hidden" ? -260 : 0,
-        opacity: sidebarState === "hidden" ? (isSmallScreen ? 0.7 : 0) : 1,
-        pointerEvents: sidebarState === "hidden" ? "none" : "auto",
-      }}
-      transition={transition}
-    >
-      <header className="flex-shrink-0">{header}</header>
-      {body && (
-        <nav className="relative flex-grow overflow-y-hidden">
-          <ScrollArea className="h-full">
-            <div
-              ref={topRef}
-              className="h-px"
-              aria-hidden="true"
-              key="top-ref"
-            />
-            <div className="w-[var(--ds-sidebar-width)]">{body}</div>
-            <div
-              ref={bottomRef}
-              className="h-px"
-              aria-hidden="true"
-              key="bottom-ref"
-            />
-          </ScrollArea>
+  // On a small screen this is a drawer: it covers the page behind a scrim, so
+  // it owes the user the behaviour of one. Tab stays inside it, and closing
+  // hands focus back to whatever opened it.
+  const isDrawer = isSmallScreen && sidebarState === "unlocked"
 
-          <AnimatePresence>
-            {!isAtTop && (
-              <ScrollShadow position="top" key="shadow-scroll-top" />
-            )}
-            {!isAtBottom && (
-              <ScrollShadow position="bottom" key="shadow-scroll-bottom" />
-            )}
-          </AnimatePresence>
-        </nav>
-      )}
-      <footer className="flex-shrink-0">{renderFooter()}</footer>
-    </motion.aside>
+  return (
+    <FocusScope asChild trapped={isDrawer} loop={isDrawer}>
+      <motion.nav
+        initial={false}
+        aria-label={i18n.navigation.sidebar.label}
+        aria-modal={isDrawer || undefined}
+        className={cn(
+          "absolute bottom-0 left-0 top-0 z-10 flex w-[var(--ds-sidebar-width)] flex-col transition-[background-color]",
+          sidebarState === "locked"
+            ? "h-full"
+            : cn(
+                "shadow-lg ring-1 ring-f1-border-secondary backdrop-blur-2xl",
+                isSmallScreen
+                  ? "h-full border-y-transparent border-l-transparent bg-f1-background/90"
+                  : "h-[calc(100%-16px)] bg-f1-background/60"
+              )
+        )}
+        animate={{
+          top: sidebarState === "locked" ? 0 : isSmallScreen ? 0 : "8px",
+          borderRadius:
+            sidebarState === "locked" ? "0" : isSmallScreen ? "0" : "12px",
+          left: sidebarState === "locked" ? "0" : isSmallScreen ? 0 : "8px",
+          x: sidebarState === "hidden" ? -260 : 0,
+          opacity: sidebarState === "hidden" ? (isSmallScreen ? 0.7 : 0) : 1,
+          pointerEvents: sidebarState === "hidden" ? "none" : "auto",
+        }}
+        transition={transition}
+      >
+        <header className="flex-shrink-0">{header}</header>
+        {body && (
+          // A plain scroll region, not a second landmark: the navigation is
+          // the labelled element above, and nesting an unnamed `nav` inside it
+          // announced two navigations where there is one.
+          <div className="relative flex-grow overflow-y-hidden">
+            <ScrollArea className="h-full">
+              <div
+                ref={topRef}
+                className="h-px"
+                aria-hidden="true"
+                key="top-ref"
+              />
+              <div className="w-[var(--ds-sidebar-width)]">{body}</div>
+              <div
+                ref={bottomRef}
+                className="h-px"
+                aria-hidden="true"
+                key="bottom-ref"
+              />
+            </ScrollArea>
+
+            <AnimatePresence>
+              {!isAtTop && (
+                <ScrollShadow position="top" key="shadow-scroll-top" />
+              )}
+              {!isAtBottom && (
+                <ScrollShadow position="bottom" key="shadow-scroll-bottom" />
+              )}
+            </AnimatePresence>
+          </div>
+        )}
+        <footer className="flex-shrink-0">{renderFooter()}</footer>
+      </motion.nav>
+    </FocusScope>
   )
 }
 

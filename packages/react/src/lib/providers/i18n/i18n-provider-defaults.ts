@@ -22,6 +22,9 @@ export const defaultTranslations = {
     sidebar: {
       label: "Main navigation",
       search: "Search",
+      /** The toggle names the action it will perform, so it flips with state. */
+      expand: "Open navigation",
+      collapse: "Collapse navigation",
       tabs: {
         label: "Sidebar sections",
       },

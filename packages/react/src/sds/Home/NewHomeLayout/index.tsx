@@ -1142,9 +1142,10 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             <F0Button
               variant="ghost"
               onClick={() => toggleSidebar()}
-              label="Open main menu"
+              label={t.navigation.sidebar.expand}
               icon={Menu}
               hideLabel
+              aria-expanded={false}
             />
           ) : (
             <span />

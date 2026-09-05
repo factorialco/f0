@@ -13,6 +13,7 @@ import { Dropdown } from "@/experimental/Navigation/Dropdown"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { ChevronLeft, Menu } from "@/icons/app"
 import { Link } from "@/lib/linkHandler"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { useSidebar } from "@/patterns/ApplicationFrame/FrameProvider"
 import { F0OneSwitch } from "@/kits/ai/F0OneSwitch"
@@ -101,6 +102,7 @@ export function PageHeader({
   hideOneSwitch = false,
 }: HeaderProps) {
   const { sidebarState, toggleSidebar } = useSidebar()
+  const i18n = useI18n()
   const contextNavigation = useContext(PageHeaderNavigationContext)
   // The prop always wins; context is the fallback for pages that inject
   // navigation from below (e.g. useDataCollectionItemNavigation).
@@ -145,8 +147,9 @@ export function PageHeader({
                   variant="ghost"
                   hideLabel
                   onClick={() => toggleSidebar()}
-                  label="Open main menu"
+                  label={i18n.navigation.sidebar.expand}
                   icon={Menu}
+                  aria-expanded={false}
                 />
               </div>
             </motion.div>

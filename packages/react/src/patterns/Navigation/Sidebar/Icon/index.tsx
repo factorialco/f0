@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react"
 
 import { F0Icon } from "@/components/F0Icon"
 import { Cross } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Action } from "@/ui/Action"
 
@@ -68,6 +69,7 @@ export function SidebarIconSvg({ isExpanded }: SidebarIconProps) {
 export function SidebarIcon() {
   const { prevSidebarState, sidebarState, toggleSidebar, isSmallScreen } =
     useSidebar()
+  const i18n = useI18n()
   const buttonRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
@@ -76,16 +78,25 @@ export function SidebarIcon() {
     }
   }, [prevSidebarState, sidebarState])
 
+  // The button was named "Close Sidebar" in every state, including the ones
+  // where it opens — and in English, in a component whose own landmark is
+  // translated. Name the action it will actually perform.
+  const isOpen = sidebarState !== "hidden"
+  const label = isOpen
+    ? i18n.navigation.sidebar.collapse
+    : i18n.navigation.sidebar.expand
+
   return (
     <Action
       variant="ghost"
       size="md"
       onClick={() => toggleSidebar()}
       className="group hover:bg-f1-background-hover"
-      title="Close Sidebar"
+      title={label}
       ref={buttonRef}
       compact
-      aria-label="Close Sidebar"
+      aria-label={label}
+      aria-expanded={isOpen}
     >
       <div className={cn("hidden", { flex: !isSmallScreen })}>
         <SidebarIconSvg isExpanded={sidebarState === "locked"} />
