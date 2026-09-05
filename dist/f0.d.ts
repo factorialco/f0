@@ -419,6 +419,8 @@ declare type ActionType_2 = {
     critical?: boolean;
     description?: string;
     loading?: boolean;
+    /** Shown on hover. Its reason for existing is a disabled action. */
+    tooltip?: string;
 };
 
 declare type ActionVariant = (typeof actionVariants)[number];
@@ -1993,6 +1995,11 @@ declare type BulkActionDefinition = {
     critical?: boolean;
     description?: string;
     disabled?: boolean;
+    /**
+     * Why the action is disabled, shown on hover. Only rendered while `disabled`
+     * — an action the user can click explains itself by doing the thing.
+     */
+    disabledTooltip?: string;
 };
 
 declare type BulkActionsDefinition<R extends RecordType, Filters extends FiltersDefinition> = (selectedItems: Parameters<OnBulkActionCallback<R, Filters>>[1]) => {
@@ -2147,7 +2154,9 @@ declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "clas
     pressed?: boolean;
     /**
      * @private
-     * If true, the button will not automatically add a tooltip based on the hideLabel and label properties.
+     * If true, the button adds no automatic tooltip — neither the one derived
+     * from `hideLabel` + `label`, nor the one the label shows when it is too
+     * long and gets clipped to an ellipsis.
      */
     noAutoTooltip?: boolean;
     /**
@@ -3168,10 +3177,16 @@ declare interface ChatSpinnerProps {
     style?: CSSProperties;
     /**
      * "default" → spins 2 rotations, pauses, repeats.
-     * "continuous" → 2 rotations forward, then 2 backward, no pause. Used for
-     * "writing"-style activity where the indicator should never rest.
+     * "continuous" → rotates forward at a constant rate, never pausing. Used
+     * for "writing"-style activity where the indicator should never rest.
      */
     variant?: "default" | "continuous";
+    /**
+     * When false, the spinner rests at its base orientation (the static One
+     * mark). A spin already in progress completes its current cycle before
+     * resting, so toggling mid-spin never jumps. Only affects "default".
+     */
+    playing?: boolean;
 }
 
 export declare type ChatThread = {
@@ -4423,6 +4438,23 @@ export declare type DataSourceDefinition<R extends RecordType = RecordType, Filt
     dataAdapter: DataAdapter<R, Filters>;
     /** Selectable items value under the checkbox column (undefined if not selectable) */
     selectable?: (item: R) => string | number | undefined;
+    /**
+     * Renders the row's checkbox disabled instead of hiding it. A disabled row is
+     * left out of "select all" and of the selection counts, so the header
+     * checkbox can still reach a fully-checked state.
+     */
+    selectionDisabled?: (item: R) => boolean;
+    /**
+     * A row selected through something else — a tree node picked above it, say.
+     * Renders indeterminate and disabled, and never enters the selection, so the
+     * payload keeps naming only real picks. Implies `selectionDisabled`.
+     */
+    selectionInherited?: (item: R) => boolean;
+    /**
+     * Removes the header select-all and the cross-page "Select all N items" CTA,
+     * forcing row-by-row selection. Mirrors `F0Select`'s prop of the same name.
+     */
+    disableSelectAll?: boolean;
     /** Default selected items */
     defaultSelectedItems?: SelectedItemsState<R>;
     /**
@@ -16310,6 +16342,13 @@ declare type OneEllipsisProps = {
      * @default false
      */
     markdown?: boolean;
+    /**
+     * How long the pointer has to rest on the clipped text before the tooltip
+     * opens, in milliseconds. Lower it where the tooltip is the only way to read
+     * text the layout has cut off, so recovering it does not feel like a wait.
+     * @default 700
+     */
+    delay?: number;
 };
 
 export declare const OneEmptyState: WithDataTestIdReturnType_3<typeof _OneEmptyState>;
@@ -17716,6 +17755,9 @@ declare type SecondaryActionItem = Pick<DropdownItemObject, "label" | "icon" | "
         disabled: boolean;
         loading: boolean;
     }) => string | undefined;
+    /** A count shown to the right of the label, e.g. how many items the action
+     * concerns. Ignored while the action is collapsed into the overflow menu. */
+    counterValue?: number;
 };
 
 declare type SecondaryActionsDefinition = {
@@ -17784,7 +17826,7 @@ declare type SelectCellConfig<R extends RecordType> = {
     source?: never;
     mapOptions?: never;
 } | {
-    source: Omit<DataSourceDefinition<RecordType, FiltersDefinition, SortingsDefinition, GroupingDefinition<RecordType>>, "selectable" | "grouping" | "defaultGrouping" | "currentGrouping" | "fetchChildren" | "itemsWithChildren" | "childrenCount">;
+    source: Omit<DataSourceDefinition<RecordType, FiltersDefinition, SortingsDefinition, GroupingDefinition<RecordType>>, "selectable" | "selectionDisabled" | "selectionInherited" | "disableSelectAll" | "grouping" | "defaultGrouping" | "currentGrouping" | "fetchChildren" | "itemsWithChildren" | "childrenCount">;
     mapOptions: (record: RecordType) => F0SelectItemProps<string, RecordType>;
     options?: never;
 });
@@ -20069,7 +20111,7 @@ export declare function useSchemaDefinition(schema: F0FormSchema, sections?: Rec
  * Custom hook to manage selection state for items and groups in a data table
  * Supports single/multi selection, grouped data, pagination, and filtering
  */
-export declare function useSelectable<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Grouping extends GroupingDefinition<R>>({ data, paginationInfo, source, selectionMode, selectedState, onSelectItems, disableSelectAll, isSearchActive, allPagesSelection, resetOnPageChange, preserveSelectionOnDatasetChange, getRenderedSelectableEntries, renderedSelectableCount, }: UseSelectableProps<R, Filters, Sortings, Grouping>): UseSelectableReturn<R, Filters>;
+export declare function useSelectable<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Grouping extends GroupingDefinition<R>>({ data, paginationInfo, source, selectionMode, selectedState, onSelectItems, disableSelectAll: disableSelectAllProp, isSearchActive, allPagesSelection, resetOnPageChange, preserveSelectionOnDatasetChange, getRenderedSelectableEntries, renderedSelectableCount, }: UseSelectableProps<R, Filters, Sortings, Grouping>): UseSelectableReturn<R, Filters>;
 
 export declare type UseSelectableProps<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Grouping extends GroupingDefinition<R>> = {
     data: Data<R>;

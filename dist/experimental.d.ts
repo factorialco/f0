@@ -367,6 +367,8 @@ declare type ActionType = {
     critical?: boolean;
     description?: string;
     loading?: boolean;
+    /** Shown on hover. Its reason for existing is a disabled action. */
+    tooltip?: string;
 };
 
 export declare type actionType = {
@@ -797,6 +799,15 @@ declare type AlertVariant = (typeof alertVariantOptions)[number];
 declare const alertVariantOptions: readonly ["info", "warning", "critical", "neutral", "positive"];
 
 /**
+ * The attribute a guidance's `anchor()` writes, and the one its steps are
+ * resolved through. A data attribute rather than the `id` attribute: an id is
+ * the page's own namespace — one per document, handed out by whatever renders
+ * the element — and a walkthrough that claimed ids would collide with the app's
+ * own the first time two of them named the same thing.
+ */
+declare const ANCHOR_ATTRIBUTE = "data-f0-coachmark";
+
+/**
  * @experimental This is an experimental component use it at your own risk
  */
 export declare const ApplicationFrame: typeof _ApplicationFrame;
@@ -1081,7 +1092,7 @@ declare interface BaseChipProps extends VariantProps<typeof chipVariants> {
 
 declare type BaseColor = keyof typeof baseColors;
 
-export declare const BaseCommunityPost: ({ id, author, group, createdAt, title, description, onClick, mediaUrl, event, counters, reactions, inLabel, comment, actions, dropdownItems, noReactionsButton, descriptionExpandable, hideTitle, }: CommunityPostProps) => JSX_2.Element;
+export declare const BaseCommunityPost: ({ id, author, group, createdAt, title, description, onClick, mediaUrl, event, counters, reactions, inLabel, comment, actions, dropdownItems, noReactionsButton, descriptionExpandable, noDescriptionClamp, hideTitle, }: CommunityPostProps) => JSX_2.Element;
 
 /**
  * Base data adapter configuration for non-paginated collections
@@ -1373,6 +1384,11 @@ export declare type BulkActionDefinition = {
     critical?: boolean;
     description?: string;
     disabled?: boolean;
+    /**
+     * Why the action is disabled, shown on hover. Only rendered while `disabled`
+     * — an action the user can click explains itself by doing the thing.
+     */
+    disabledTooltip?: string;
 };
 
 export declare type BulkActionsDefinition<R extends RecordType, Filters extends FiltersDefinition> = (selectedItems: Parameters<OnBulkActionCallback<R, Filters>>[1]) => {
@@ -1510,7 +1526,9 @@ declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "clas
     pressed?: boolean;
     /**
      * @private
-     * If true, the button will not automatically add a tooltip based on the hideLabel and label properties.
+     * If true, the button adds no automatic tooltip — neither the one derived
+     * from `hideLabel` + `label`, nor the one the label shows when it is too
+     * long and gets clipped to an ellipsis.
      */
     noAutoTooltip?: boolean;
     /**
@@ -2239,13 +2257,14 @@ declare interface CarouselProps {
         next?: string;
     };
     /**
-     * The slides are ONE PAGE of a longer list. Next then stays live at the end
-     * and fetches the rest instead of going dead — see {@link CarouselPaging}, and
-     * append the new records to `children` as they arrive.
+     * The slides are ONE PAGE of a longer list. Reaching the end then fetches the
+     * rest instead of going dead — see {@link CarouselPaging}, and append the new
+     * records to `children` as they arrive. Dragging past the last slide fetches
+     * in either placement.
      *
-     * `arrowsPlacement: "bottom"` only: the overlay arrows are a hover affordance
-     * over the slides, and a fetch you can't see you triggered is worse than no
-     * fetch at all.
+     * The ARROW that fetches is `arrowsPlacement: "bottom"`'s only: the overlay
+     * arrows are a hover affordance over the slides, and a fetch you can't see you
+     * triggered is worse than no fetch at all.
      */
     paging?: CarouselPaging;
     autoplay?: boolean;
@@ -2836,7 +2855,7 @@ export declare type CoachmarkAction = {
     onClick?: () => void;
 };
 
-declare type CoachmarkBase = CoachmarkPlacement & {
+declare type CoachmarkBase = CoachmarkPlacement & CoachmarkFocus & {
     /**
      * Stable identity. Opening again with the same id replaces that coachmark
      * instead of queueing a second one, so an effect that runs twice shows one
@@ -2844,9 +2863,25 @@ declare type CoachmarkBase = CoachmarkPlacement & {
      */
     id?: CoachmarkId;
     /**
+     * HOW IT ENDED, IN ONE PLACE — reached the end, left part-way through, or
+     * pressed past until it gave up, and how far the reader got either way. The
+     * callback to reach for when tracking a walkthrough: every ending comes
+     * through here exactly once, so a funnel is one event carrying a `reason`
+     * rather than two callbacks to join up afterwards.
+     *
+     * NOT called when the app itself closes the coachmark (`coachmarks.close`, a
+     * guidance's `stop()`, the page unmounting): nobody ended it, so there is no
+     * outcome to report.
+     */
+    onEnd?: (end: CoachmarkEnd) => void;
+    /**
      * Called when the user closes the coachmark with the close button or Escape,
      * before the last step is reached. For tracking only — the coachmark closes
      * itself either way.
+     *
+     * Also fires when a walkthrough gives up after too many presses on the
+     * dimmed page, which is a dismissal by any other name. `onEnd` is what tells
+     * those two apart.
      */
     onDismiss?: () => void;
     /**
@@ -2854,6 +2889,26 @@ declare type CoachmarkBase = CoachmarkPlacement & {
      * — the coachmark closes itself either way.
      */
     onComplete?: () => void;
+    /**
+     * SPOTLIGHT THE TARGET: dims the whole page except the element this step
+     * points at, and swallows every press on the page while the coachmark is up
+     * (see `skipAfterOutsideClicks` for how a user who keeps pressing gets out).
+     *
+     * Off by default — one coachmark pointing something out should not take the
+     * page hostage. Turn it on for a walkthrough that has to be followed in order.
+     */
+    overlay?: boolean;
+    /**
+     * HOW MANY PRESSES ON THE DIMMED PAGE END THE COACHMARK. The panel wiggles at
+     * each one to say the press went nowhere, and gives up at this many: a user
+     * pressing outside over and over is telling us they want out, and the way out
+     * cannot be the button they are ignoring. Reported to `onDismiss` like any
+     * other abandonment. Defaults to 5; `0` never gives up.
+     *
+     * Only has an effect alongside `overlay` — without the shield there are no
+     * presses to count, because they reach the page.
+     */
+    skipAfterOutsideClicks?: number;
 };
 
 declare type CoachmarkContent = {
@@ -2864,6 +2919,144 @@ declare type CoachmarkContent = {
     /** The single call to action, rendered at the bottom right. */
     action?: CoachmarkAction;
 };
+
+/** What `onEnd` is told. */
+export declare type CoachmarkEnd = {
+    reason: CoachmarkEndReason;
+    /**
+     * The step it ended on, 1-based — how far the reader got. `0` when it never
+     * opened (`unavailable`).
+     */
+    step: number;
+    /**
+     * How many steps the reader was actually offered. Not necessarily how many
+     * were declared: a guidance leaves out the steps whose element was not there.
+     */
+    totalSteps: number;
+    /**
+     * Presses on the dimmed page over the whole coachmark — the wiggles. A tour
+     * that completed with six of these was fought with; one that completed with
+     * none was followed. Always `0` without `overlay`, which has no shield to
+     * press.
+     */
+    outsidePresses: number;
+};
+
+/**
+ * HOW A COACHMARK ENDED. One value per way out, so a funnel can be read off it
+ * without joining two callbacks together:
+ *
+ * - `completed` — the action on the last step. The reader saw the whole thing.
+ * - `dismissed` — the close button or Escape, before the last step. They left
+ *   part-way through, and `step` says where.
+ * - `skipped` — it gave up after `skipAfterOutsideClicks` presses on the dimmed
+ *   page. Not the same as dismissing: the reader never used the way out they
+ *   were offered, they pressed past it until it went away.
+ * - `unavailable` — it never opened, because nothing it points at was on the
+ *   page (only `defineStepByStepCoachmarkGuidance` reports this). The reason a
+ *   funnel can be missing readers who were never shown anything.
+ */
+export declare type CoachmarkEndReason = "completed" | "dismissed" | "skipped" | "unavailable";
+
+declare type CoachmarkFocus = {
+    /**
+     * PUT THE CARET WHERE THE STEP IS POINTING. Focus goes to the target — or to
+     * the first field inside it — instead of to the panel, so the element the
+     * coachmark is explaining lights up the way it does when the reader lands on
+     * it themselves: a composer with its cursor in it and its own focus glow,
+     * rather than a box being described.
+     *
+     * OFF BY DEFAULT, and worth being deliberate about. The panel takes focus
+     * precisely so a screen reader reads the step out and so Enter cannot fire
+     * the action unread; handing focus to a field instead trades that away —
+     * the step is no longer announced, and typing goes into the page. Use it on a
+     * step whose whole point is the field (a composer, a search box), and leave
+     * every other step to the panel.
+     *
+     * Escape still closes the coachmark from anywhere, and the action button is
+     * still one Tab away.
+     */
+    focusTarget?: boolean;
+};
+
+export declare type CoachmarkGuidance<TElement extends string> = {
+    /** The id every `start()` opens under, and the one `stop()` closes. */
+    id: CoachmarkId;
+    /**
+     * MARKS AN ELEMENT AS A STEP'S TARGET. Spread onto the element (or onto any
+     * component that forwards unknown props to its DOM node):
+     *
+     * `<section {...guidance.anchor("needs-you")}>`
+     *
+     * Only names declared by a step type-check, so a renamed step breaks at the
+     * anchor rather than at run time — where a missing target is a coachmark that
+     * silently waits for an element that is never coming.
+     */
+    anchor: (element: TElement) => Record<typeof ANCHOR_ATTRIBUTE, TElement>;
+    /** The selector `anchor(element)` is found by. For tests and edge cases. */
+    selector: (element: TElement) => string;
+    /**
+     * Start the walkthrough — once the elements it points at are actually on the
+     * page (see `lookForTargetsMs`). Steps whose element never turns up are left
+     * out, and a walkthrough with nothing left to point at never opens at all.
+     * Returns the id it will open under, whether it has opened yet or not.
+     */
+    start: () => CoachmarkId;
+    /** End it wherever it is. Reports nothing: nobody dismissed it. */
+    stop: () => void;
+};
+
+export declare type CoachmarkGuidanceOptions<TElement extends string> = {
+    /**
+     * Stable identity, so starting the same guidance twice shows ONE walkthrough.
+     * Defaults to a generated id.
+     */
+    id?: CoachmarkId;
+    /** The walkthrough, in order. */
+    steps: readonly CoachmarkGuidanceStep<TElement>[];
+    /**
+     * Spotlight each step's element and shield the page from the pointer.
+     * Defaults to `true` — a walkthrough is a sequence, and a page you can act on
+     * mid-sequence is a sequence the user has already left.
+     */
+    overlay?: boolean;
+    /** Presses on the dimmed page that end the walkthrough. Defaults to 5. */
+    skipAfterOutsideClicks?: number;
+    /**
+     * HOW LONG `start()` KEEPS LOOKING for the steps whose elements are not on the
+     * page yet, before running the walkthrough without them. Defaults to 2000ms.
+     *
+     * A walkthrough is started on mount, and the things it walks arrive over the
+     * next few hundred milliseconds — a rail that is still measuring itself, a
+     * widget waiting on its data. Opening on the first frame would drop those
+     * steps; waiting forever on one that is genuinely absent (a control this user
+     * has no permission for) would mean no walkthrough at all.
+     */
+    lookForTargetsMs?: number;
+    /**
+     * HOW IT ENDED, IN ONE PLACE: finished, left part-way through, pressed past
+     * until it gave up — or never opened at all, because nothing it points at was
+     * on the page. One event with a `reason`, which is what a funnel wants.
+     */
+    onEnd?: (end: CoachmarkEnd) => void;
+    /** Abandoned: closed, escaped, or skipped by pressing past it. */
+    onDismiss?: () => void;
+    /** Finished: the action on the last step. */
+    onComplete?: () => void;
+};
+
+/**
+ * One step of a walkthrough. It points either at a NAME the guidance knows —
+ * marked on the element with `anchor()` — or, for an element you cannot put
+ * props on (something a library renders), straight at a selector or an element.
+ */
+export declare type CoachmarkGuidanceStep<TElement extends string> = Omit<CoachmarkStep, "targetElement"> & ({
+    element: TElement;
+    targetElement?: never;
+} | {
+    element?: never;
+    targetElement: CoachmarkTarget;
+});
 
 export declare type CoachmarkId = string;
 
@@ -2974,15 +3167,25 @@ export declare type CoachmarkSingleOptions = CoachmarkBase & CoachmarkContent & 
  * its own placement; anything it leaves out falls back to the value passed
  * alongside `steps`.
  */
-export declare type CoachmarkStep = CoachmarkContent & CoachmarkPlacement & {
+export declare type CoachmarkStep = CoachmarkContent & CoachmarkPlacement & CoachmarkFocus & {
     /** Falls back to the `targetElement` passed alongside `steps`. */
     targetElement?: CoachmarkTarget;
 };
 
 /**
- * What the coachmark points at: a CSS selector that must match exactly one
- * element, or the element itself. A selector is re-resolved while the coachmark
- * is queued, so it may point at something that mounts later.
+ * What the coachmark points at: ANY CSS SELECTOR, or the element itself.
+ *
+ * An id (`"#filters-button"`), a class (`".js-filters"`), an attribute
+ * (`'[data-add-widget="right"]'`), or anything else `querySelector` takes — the
+ * string is handed straight to the DOM, so the choice is about what the page
+ * can promise to keep stable, not about what this accepts. It must match
+ * exactly ONE element: a selector that matches several anchors to the first and
+ * warns in development, because a coachmark pointing at "one of these six
+ * cards" is pointing at nothing in particular.
+ *
+ * A selector is re-resolved while the coachmark is queued, so it may point at
+ * something that mounts later. An ELEMENT is not re-resolved (there is nothing
+ * to re-run), so one that unmounts takes its coachmark off screen with it.
  */
 export declare type CoachmarkTarget = string | HTMLElement;
 
@@ -3090,7 +3293,7 @@ values: {
 }) => void) | undefined;
 } & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
 
-export declare const CommunityPost: (({ id, author, group, createdAt, title, description, onClick, mediaUrl, event, counters, reactions, inLabel, comment, actions, dropdownItems, noReactionsButton, descriptionExpandable, hideTitle, }: CommunityPostProps) => JSX_2.Element) & {
+export declare const CommunityPost: (({ id, author, group, createdAt, title, description, onClick, mediaUrl, event, counters, reactions, inLabel, comment, actions, dropdownItems, noReactionsButton, descriptionExpandable, noDescriptionClamp, hideTitle, }: CommunityPostProps) => JSX_2.Element) & {
     Skeleton: ({ withEvent, withImage, }: CommunityPostSkeletonProps) => JSX_2.Element;
 };
 
@@ -3143,6 +3346,16 @@ export declare type CommunityPostProps = {
     dropdownItems?: DropdownItem[];
     descriptionExpandable?: boolean;
     /**
+     * THE WHOLE BODY, unclamped and with no "See more" — for a container that IS
+     * the post rather than a way to it: a dialog, a page. There the body is what
+     * the reader came for, and a clamp with nothing behind it hides the end of
+     * what they opened.
+     *
+     * In a FEED, leave it off. Posts a page long each are what makes a feed
+     * unskimmable, which is what the clamp is for.
+     */
+    noDescriptionClamp?: boolean;
+    /**
      * Keeps the title as the post's ACCESSIBLE NAME but takes it out of the card —
      * for a container that already shows it, like a dialog carrying the post's
      * title in its own header. Without this the same words appear twice, an inch
@@ -3176,7 +3389,9 @@ export declare interface CommunityPostSummary {
     title: string;
     /**
      * The post's body as the editor stored it (an HTML string), clamped to the
-     * first few lines. Whatever links it contains are NOT clickable here: the
+     * lines the tile has room for — see {@link PostBody}, and note that a post
+     * with no cover therefore previews more of itself than one with a picture.
+     * Whatever links it contains are NOT clickable here: the
      * whole tile is one target (see {@link CommunityPostCard}), and a link inside
      * a link is neither valid nor operable.
      */
@@ -3669,6 +3884,23 @@ export declare type DataSourceDefinition<R extends RecordType = RecordType, Filt
     dataAdapter: DataAdapter<R, Filters>;
     /** Selectable items value under the checkbox column (undefined if not selectable) */
     selectable?: (item: R) => string | number | undefined;
+    /**
+     * Renders the row's checkbox disabled instead of hiding it. A disabled row is
+     * left out of "select all" and of the selection counts, so the header
+     * checkbox can still reach a fully-checked state.
+     */
+    selectionDisabled?: (item: R) => boolean;
+    /**
+     * A row selected through something else — a tree node picked above it, say.
+     * Renders indeterminate and disabled, and never enters the selection, so the
+     * payload keeps naming only real picks. Implies `selectionDisabled`.
+     */
+    selectionInherited?: (item: R) => boolean;
+    /**
+     * Removes the header select-all and the cross-page "Select all N items" CTA,
+     * forcing row-by-row selection. Mirrors `F0Select`'s prop of the same name.
+     */
+    disableSelectAll?: boolean;
     /** Default selected items */
     defaultSelectedItems?: SelectedItemsState<R>;
     /**
@@ -5205,6 +5437,48 @@ declare const defaultTranslations: {
     };
 };
 
+/**
+ * A STEP-BY-STEP WALKTHROUGH OF A PAGE, declared in one place.
+ *
+ * `coachmarks.open({ steps })` already shows steps one at a time; what it takes
+ * is a CSS selector per step, which means every walkthrough invents its own
+ * convention for marking the elements it walks — and a selector written against
+ * someone else's markup breaks the next time that markup is refactored, without
+ * a single type error to say so.
+ *
+ * This closes that loop: the steps name their targets, `anchor()` marks them,
+ * and the names are a union the compiler holds both sides to. The walkthrough
+ * also arrives with the manners a walkthrough needs — the page dimmed to the
+ * step's element, the pointer shielded, and a way out for the user who keeps
+ * pressing past it — because those are properties of walking someone through a
+ * page rather than of one coachmark.
+ *
+ * @example
+ * const tour = defineStepByStepCoachmarkGuidance({
+ *   id: "home-tour",
+ *   steps: [
+ *     { element: "composer", title: "Let One do it for you", side: "bottom" },
+ *     { element: "needs-you", title: "What needs you", side: "right" },
+ *     // Something f0 renders: point at it directly.
+ *     { targetElement: '[data-add-widget="right"]', title: "Add a widget" },
+ *   ],
+ *   // Finished, dropped out at step N, pressed past it, or never shown.
+ *   onEnd: ({ reason, step, totalSteps }) =>
+ *     track("home-tour-ended", { reason, step, totalSteps }),
+ * })
+ *
+ * // In the page
+ * <div {...tour.anchor("composer")}>…</div>
+ * <section {...tour.anchor("needs-you")}>…</section>
+ *
+ * // Whenever it should run
+ * useEffect(() => {
+ *   tour.start()
+ *   return () => tour.stop()
+ * }, [tour])
+ */
+export declare const defineStepByStepCoachmarkGuidance: <const TElement extends string>(options: CoachmarkGuidanceOptions<TElement>) => CoachmarkGuidance<TElement>;
+
 export declare interface DeleteBlockNotesTextEditorPageDocumentPatch {
     type: "delete_block";
     targetId: string;
@@ -5212,6 +5486,50 @@ export declare interface DeleteBlockNotesTextEditorPageDocumentPatch {
 
 /** The row data a schema field demands, or merely allows under `rightOptional`. */
 declare type Demanded<T, Optional> = Optional extends true ? Partial<T> : T;
+
+/**
+ * A row's SECOND LINE, in either of the two forms it may take.
+ *
+ * One string with `descriptionCritical` colours the whole line; a list of
+ * {@link DescriptionPart}s colours each fact on it separately. The two are
+ * mutually exclusive on purpose — parts already carry their own `critical`, so
+ * a row that passes both is saying the same thing twice and meaning different
+ * things by it.
+ *
+ * Whichever form, the tone is per ROW rather than per schema, for the same
+ * reason `subtitleCritical` is: what has gone wrong is a state of the row's
+ * own data, so one list holds rows that say so beside rows that have nothing
+ * to report.
+ *
+ * Both forms go untinted in a COMPACT list, where the second line has folded
+ * into the row's tooltip and there is nothing left to colour — see
+ * {@link listCompacts}.
+ */
+declare type DescribedRow = {
+    description: string;
+    descriptionCritical?: boolean;
+} | {
+    description: DescriptionPart[];
+    descriptionCritical?: never;
+};
+
+/**
+ * ONE FACT on a row's second line — the unit a `description` is made of when
+ * the row has more than one thing to say ("€340", "12 receipts", "2 days
+ * overdue"). Parts draw dot-separated, each carrying its OWN tone, so the one
+ * fact that has gone wrong goes red while the rest keep murmuring.
+ *
+ * Put the critical part FIRST. The second line is a single truncating line —
+ * about 306px at the rail's 24rem width, some 40 characters — and it is cut
+ * from the RIGHT, so a part marked critical in third place is the part most
+ * likely to vanish into the ellipsis. Marking a part critical claims it is the
+ * most important thing on the line; leading with it makes that claim true.
+ */
+declare type DescriptionPart = {
+    text: string;
+    /** Draws THIS part critical rather than muted. */
+    critical?: boolean;
+};
 
 /**
  * @experimental This is an experimental component use it at your own risk
@@ -7238,9 +7556,14 @@ export declare type F0ChatVoiceAttachment = {
  * anything narrower.
  *
  * A WIDE-COLUMN WIDGET. Two tiles side by side is the whole reason this exists
- * rather than a `list` slot — a post needs a title, four lines of its body and
+ * rather than a `list` slot — a post needs a title, a few lines of its body and
  * its author to be worth previewing at all, and that does not fit a 396px rail.
  * Put it in the main column (`areas: ["main"]` in the catalog).
+ *
+ * THE HEIGHT IS DECLARED, NOT GROWN ({@link POST_CARD_HEIGHT}). Every tile is
+ * 384px, so the widget is the same height on every page of the feed, and the
+ * body is what gives: it takes whatever the cover, the title and the author line
+ * leave and previews the lines that fit there.
  *
  * THE PAGING IS UNDER THE TILES, not floating over them — `CarouselControls`,
  * the shared row: an arrow on each end, the dots between, its own `pt-4` above
@@ -7251,7 +7574,7 @@ export declare type F0ChatVoiceAttachment = {
  * transforms the track, so the slides off-screen are mounted and measured like
  * the ones you can see — there is no windowing here, and adding it would mean
  * the carousel could no longer measure its own snaps. That is the right trade
- * for what this shows: a handful of tiles, each one a title and four lines.
+ * for what this shows: a handful of tiles, each one a title and a few lines.
  *
  * It is `pagination` that keeps it a handful. A feed of two hundred posts is not
  * a longer carousel, it is a carousel that holds a PAGE and asks for the next
@@ -7280,12 +7603,13 @@ export declare interface F0CommunityPostsCarouselProps {
      * blank the tiles you are already reading.
      */
     loading?: boolean;
-    /** How many placeholder tiles `loading` draws. Defaults to 2 — one screenful. */
+    /** How many placeholder tiles are drawn. Defaults to 2 — one screenful. */
     expectedItemsCount?: number;
     /**
      * THE POSTS ARE A PAGE, not the whole feed. Pass this and the Next arrow stays
-     * live past the last mounted tile: reaching the end asks for the next page, and
-     * the new posts are appended to `posts` by whoever owns them.
+     * live past the last mounted tile — as does dragging past it: reaching the end
+     * asks for the next page, and the new posts are appended to `posts` by whoever
+     * owns them.
      *
      * It is `useData`'s infinite-scroll return, field for field — `hasMore` off
      * `paginationInfo`, `isLoadingMore`, `loadMore` — because that is where these
@@ -9749,6 +10073,14 @@ export declare interface HomeRenderCtx {
      */
     isLastSlot?: boolean;
     /**
+     * Whether the widget draws a FOOTER under its slots (the frame's `action`).
+     * The last slot's bottom bleed is spent differently either way: with a footer
+     * it is what the footer's own `mt-2` buys back; without one, the slot's
+     * bottom IS the card's bottom edge — which is what a "View more" button
+     * sitting there needs to know (see {@link listMoreButtonClass}).
+     */
+    hasFooter?: boolean;
+    /**
      * WHAT THE CARD IS SHOWING, when its header carries a `headerSelect`: the
      * option the reader is on. A slot renderer that owns its own data reads this
      * to fetch for it — the switcher is in the header, the fetching is here, and
@@ -10502,6 +10834,20 @@ declare type LinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
  */
 export declare const LIST_COMPACT_AFTER = 6;
 
+/**
+ * WHERE "View more" SITS. Not where the rows above it start: a row-based slot
+ * bleeds 8px past the card's content box (`SLOT_ROW_BLEED`), and a button left
+ * in that bleed hangs its whole filled rectangle 8px to the left of the
+ * widget's TITLE — visible as a rectangle that overhangs the card's text.
+ *
+ * It sits exactly where the frame's own footer button sits instead, because it
+ * is the same button one slot higher (`SlotWidget`'s footer class): 8px back to
+ * the content box, then 2px out again — the nudge that makes a filled or
+ * bordered box read as aligned with the text above it rather than measuring
+ * 2px shy of it.
+ */
+export declare const LIST_MORE_BUTTON_CLASS = "ml-1.5 mt-1 self-start";
+
 declare type ListClickData<C> = C extends "link" ? {
     href: string;
 } : object;
@@ -10567,6 +10913,20 @@ declare type ListLeftData<L> = L extends "module" ? {
 /** What every row of a `list` slot draws on its LEFT. */
 export declare type ListLeftKind = AvatarVariant["type"] | "module" | "alert";
 
+/**
+ * The same edge on the OTHER axis, for when the button is the last thing on the
+ * card. The bleed a row-based slot keeps at its bottom is there so ROWS reach
+ * the card's bottom edge; the button is not a row, so left in that bleed it
+ * ends up 8px from the card's border while measuring 14px from its left — the
+ * corner reads as cropped. `mb-1.5` gives it the left edge's exact treatment
+ * (bleed cancelled, 2px nudge kept), so the gap below it equals the gap beside.
+ *
+ * Only when there is nothing after it: with a footer under the slots the bleed
+ * is already what the footer's own `mt-2` buys back, and padding here would
+ * push that footer 6px further down instead.
+ */
+export declare const listMoreButtonClass: (ctx: HomeRenderCtx) => string;
+
 /** `list` params: the schema, then items shaped by it. Build with {@link listSlot}. */
 export declare interface ListParams<S extends ListSchema = ListSchema> {
     schema: S;
@@ -10620,6 +10980,15 @@ export declare interface ListSchema {
     rightOptional?: boolean;
     /** Every row carries an inline subtitle (on the title's line, after a dot). */
     subtitleRequired?: boolean;
+    /**
+     * An inline subtitle is ALLOWED but not demanded: some rows carry one and
+     * others don't — a list where only the late items say how late they are.
+     * Unlike a second line this changes no geometry (the subtitle shares the
+     * title's line), so such a list draws exactly like an even one.
+     *
+     * `subtitleRequired` wins when both are set: demanding it already allows it.
+     */
+    subtitleOptional?: boolean;
     /** Every row carries a second line — this is what makes rows two-line. */
     descriptionRequired?: boolean;
     /**
@@ -10667,14 +11036,17 @@ declare type ListTextData<S extends ListSchema> = {
     title: string;
 } & (S["subtitleRequired"] extends true ? {
     subtitle: string;
-} : {
+} & SubtitleTone : S["subtitleOptional"] extends true ? {
+    subtitle?: string;
+} & SubtitleTone : {
     subtitle?: never;
-}) & (S["descriptionRequired"] extends true ? {
-    description: string;
-} : S["descriptionOptional"] extends true ? {
-    description?: string;
+    subtitleCritical?: never;
+}) & (S["descriptionRequired"] extends true ? DescribedRow : S["descriptionOptional"] extends true ? DescribedRow | {
+    description?: undefined;
+    descriptionCritical?: never;
 } : {
     description?: never;
+    descriptionCritical?: never;
 });
 
 declare type ListVisualizationOptions<R extends RecordType, _Filters extends FiltersDefinition, Sortings extends SortingsDefinition> = {
@@ -11130,6 +11502,28 @@ export declare interface NewHomeLayoutProps {
     children?: ReactNode;
     /** Main column: widget slots stacked below `children`. */
     leftWidgets?: HomeWidgetItem[];
+    /**
+     * THE MAIN COLUMN'S FOOTNOTE: one sentence under every widget and above the
+     * "+ Add widget" placeholder — Home's last word rather than a widget.
+     *
+     * `"You are viewing Factorial's new home, if you want you can [go back to the
+     * old home.](/home?legacy=1)"`
+     *
+     * A STRING, NOT A NODE. The one piece of markdown it honours is the inline
+     * link, `[label](href)`; f0 decides the rest — centered, secondary, one
+     * paragraph — so the foot of the column cannot become a second layout. Text
+     * that isn't a link is printed as written, and an href a sentence has no
+     * business carrying (`javascript:`) keeps its label and loses its link.
+     *
+     * It is not part of the arrangement: no card, no drag, no "Remove widget",
+     * and it stays at the bottom whatever the widgets above it do. It arrives on
+     * the same stagger they do, one beat after the last of them.
+     *
+     * STACKED (below `md`) the rail's pinned widgets fold into the main column,
+     * and this still comes after all of them — it is the column's foot, not the
+     * widgets' end.
+     */
+    mainFootnote?: string;
     /** Side rail: spec-conforming widgets. */
     rightWidgets?: HomeWidgetItem[];
     /** Freeform side-rail content, rendered above `rightWidgets` (expanded rail only). */
@@ -11220,9 +11614,14 @@ export declare interface NewHomeLayoutProps {
     /** Fixed px width of the side rail. */
     asideWidth?: number;
     /**
-     * Max px width of the (centered) main-column content. Defaults to
-     * `max-w-content` (712px), so a composer or a message list in the main column
-     * lines up with the same reading column the chat uses.
+     * Max px width of the (centered) main-column content. Defaults to 672px, the
+     * width the Home widgets are designed at — it is what decides a two-tile
+     * widget's tile size, since every tile is
+     * `(column − 32 padding + 16 gutter) / 2 − 16`.
+     *
+     * ⚠️ NOT `max-w-content` (712px) any more. A surface in the main column that
+     * has to line up with the chat's composer or message list should cap ITSELF at
+     * the reading column rather than assume the column is it.
      */
     mainWidth?: number;
     /**
@@ -12721,6 +13120,9 @@ export declare type SecondaryActionItem = Pick<DropdownItemObject, "label" | "ic
         disabled: boolean;
         loading: boolean;
     }) => string | undefined;
+    /** A count shown to the right of the label, e.g. how many items the action
+     * concerns. Ignored while the action is collapsed into the overflow menu. */
+    counterValue?: number;
 };
 
 export declare type SecondaryActionsDefinition = {
@@ -12811,7 +13213,7 @@ declare type SelectCellConfig<R extends RecordType> = {
     source?: never;
     mapOptions?: never;
 } | {
-    source: Omit<DataSourceDefinition<RecordType, FiltersDefinition, SortingsDefinition, GroupingDefinition<RecordType>>, "selectable" | "grouping" | "defaultGrouping" | "currentGrouping" | "fetchChildren" | "itemsWithChildren" | "childrenCount">;
+    source: Omit<DataSourceDefinition<RecordType, FiltersDefinition, SortingsDefinition, GroupingDefinition<RecordType>>, "selectable" | "selectionDisabled" | "selectionInherited" | "disableSelectAll" | "grouping" | "defaultGrouping" | "currentGrouping" | "fetchChildren" | "itemsWithChildren" | "childrenCount">;
     mapOptions: (record: RecordType) => F0SelectItemProps<string, RecordType>;
     options?: never;
 });
@@ -13530,6 +13932,23 @@ export declare type subActionType = {
     onClick: () => void;
     disabled?: boolean;
     icon?: IconType;
+};
+
+/**
+ * What a row may say ABOUT its subtitle — offered by every schema that declares
+ * a subtitle at all, required by none of them.
+ */
+declare type SubtitleTone = {
+    /**
+     * Draws THIS row's subtitle critical instead of muted — the row is overdue,
+     * rejected, over budget.
+     *
+     * Per ROW rather than per schema, like `unread` and `actions`: what has gone
+     * wrong is a state of the row's own data, so one list holds rows that say so
+     * beside rows that have nothing to report. The title reads the same either
+     * way — the subtitle is what carries the news.
+     */
+    subtitleCritical?: boolean;
 };
 
 declare interface SuccessMessageProps {
