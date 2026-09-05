@@ -13,6 +13,12 @@ import { Visualization } from "../visualizations/collection"
  * Header control that lets the user switch between the available visualizations
  * with a single click. This is the only place visualizations are switched.
  *
+ * Segments are icon-only: the labelled variant carried too much visual weight
+ * for a secondary header control and pulled the eye away from the content. The
+ * labels stay in the accessibility tree and surface in a tooltip when the
+ * pointer rests on a segment. Where there is no pointer to rest (touch), they
+ * stay visible, because nothing else in the header names the current view.
+ *
  * Renders nothing when there is a single visualization.
  */
 export const VisualizationSwitcher = <
@@ -27,7 +33,6 @@ export const VisualizationSwitcher = <
   visualizations,
   currentVisualization,
   onVisualizationChange,
-  hideLabels,
 }: {
   visualizations: ReadonlyArray<
     Visualization<
@@ -42,8 +47,6 @@ export const VisualizationSwitcher = <
   >
   currentVisualization: number
   onVisualizationChange: (index: number) => void
-  /** Show segments icon-only (e.g. when the header runs out of room). */
-  hideLabels?: boolean
 }): JSX.Element | null => {
   const i18n = useI18n()
   const getVisualizationMeta = useVisualizationMeta()
@@ -62,7 +65,7 @@ export const VisualizationSwitcher = <
       items={items}
       value={String(currentVisualization)}
       onChange={(value) => onVisualizationChange(Number(value))}
-      hideLabels={hideLabels}
+      hideLabels
       ariaLabel={i18n.collections.visualizations.viewSelectorLabel}
     />
   )

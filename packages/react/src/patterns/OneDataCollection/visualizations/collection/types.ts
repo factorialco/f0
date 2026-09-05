@@ -54,12 +54,15 @@ export type VisualizationFilterOverrides<
  * When omitted, the localized built-in label from
  * `i18n.collections.visualizations[type]` (e.g. "Table", "Graph") is used.
  *
- * Lets consumers rename the view switcher chip per instance, e.g. show "Org chart"
- * instead of "Graph" for employees, or "Teams" instead of "Table". The icon still
- * comes from the built-in registry for the visualization type.
+ * Lets consumers rename the view per instance, e.g. show "Org chart" instead of
+ * "Graph" for employees, or "Teams" instead of "Table". Only the text: the icon
+ * always comes from the built-in registry for the visualization type and is
+ * never customizable, so a given view looks the same in every collection.
  */
 export type VisualizationLabelOverrides = {
-  /** Custom label shown in the view switcher chip and Settings selector.
+  /** Custom name for this view. The switcher renders icon-only on pointer
+   *  devices, so this is what the segment's tooltip and accessible name say
+   *  (and the visible text on touch).
    *  Defaults to the localized built-in label for this visualization type. */
   label?: string
 }

@@ -1,10 +1,31 @@
 import { userEvent } from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
 
+import { ICON_ONLY_TOOLTIP_DELAY_MS } from "@/experimental/Overlays/Tooltip"
 import { List, Table } from "@/icons/app"
-import { zeroRender as render, screen } from "@/testing/test-utils"
+import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
 
 import { F0SegmentedControl } from "../F0SegmentedControl"
+
+const iconItems = [
+  { value: "list", label: "List", icon: List },
+  { value: "table", label: "Table", icon: Table },
+]
+
+/**
+ * Real timers on purpose: fake ones deadlock `userEvent.hover` (see
+ * `Tooltip.emptyContent.test.tsx`). The early assertion has to land inside the
+ * delay window, so this margin is what makes a shorter delay — the 700ms
+ * `TooltipInternal` default, or `instant`'s 100ms — fail the test.
+ */
+const EARLY_MARGIN_MS = 200
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
+/** Radix's tooltip trigger merges this class onto whatever it wraps. */
+const TOOLTIP_TRIGGER_CLASS = "pointer-events-auto"
+/** `sr-only`, but only where the pointer can hover. */
+const HOVER_ONLY_HIDDEN_LABEL = "[@media(hover:hover)]:sr-only"
 
 const defaultItems = [
   { value: "day", label: "Day" },
@@ -78,23 +99,75 @@ describe("F0SegmentedControl", () => {
     expect(screen.getByText("Day").closest("button")).not.toBeDisabled()
   })
 
-  it("renders icon-only but keeps labels accessible when hideLabels is set", () => {
-    const items = [
-      { value: "list", label: "List", icon: List },
-      { value: "table", label: "Table", icon: Table },
-    ]
-    render(<F0SegmentedControl items={items} hideLabels />)
-    // Label stays in the DOM for screen readers, just visually hidden...
-    expect(screen.getByText("Table")).toHaveClass("sr-only")
-    // ...and the segment's accessible name is still the label.
+  it("hides the label only where the pointer can hover when hideLabels is set", () => {
+    render(<F0SegmentedControl items={iconItems} hideLabels />)
+    // Visually hidden on hover-capable pointers, on screen on touch, and in
+    // the accessibility tree either way.
+    expect(screen.getByText("Table")).toHaveClass(HOVER_ONLY_HIDDEN_LABEL)
     expect(screen.getByRole("radio", { name: "Table" })).toBeInTheDocument()
+  })
+
+  it("waits for the pointer to rest before naming an icon-only segment", async () => {
+    render(<F0SegmentedControl items={iconItems} hideLabels />)
+
+    await userEvent.hover(screen.getByRole("radio", { name: "Table" }))
+
+    // A pointer sweeping across the control must open nothing.
+    await sleep(ICON_ONLY_TOOLTIP_DELAY_MS - EARLY_MARGIN_MS)
+    expect(screen.queryByRole("tooltip")).not.toBeInTheDocument()
+
+    await waitFor(
+      () => expect(screen.getByRole("tooltip")).toHaveTextContent("Table"),
+      { timeout: EARLY_MARGIN_MS * 3 }
+    )
+  })
+
+  it("keeps the selected segment marked while a tooltip wraps it", () => {
+    render(<F0SegmentedControl items={iconItems} value="table" hideLabels />)
+
+    expect(screen.getByRole("radio", { name: "Table" })).toHaveAttribute(
+      "data-state",
+      "on"
+    )
+    expect(screen.getByRole("radio", { name: "List" })).toHaveAttribute(
+      "data-state",
+      "off"
+    )
+  })
+
+  it("wraps only the segments whose label is hidden in a tooltip", () => {
+    const { unmount } = render(
+      <F0SegmentedControl items={iconItems} hideLabels />
+    )
+    expect(screen.getByRole("radio", { name: "Table" })).toHaveClass(
+      TOOLTIP_TRIGGER_CLASS
+    )
+    unmount()
+
+    render(<F0SegmentedControl items={defaultItems} />)
+    expect(screen.getByRole("radio", { name: "Week" })).not.toHaveClass(
+      TOOLTIP_TRIGGER_CLASS
+    )
   })
 
   it("keeps the label visible for items without an icon even with hideLabels", () => {
     render(
       <F0SegmentedControl items={[{ value: "a", label: "Alpha" }]} hideLabels />
     )
-    expect(screen.getByText("Alpha")).not.toHaveClass("sr-only")
+    expect(screen.getByText("Alpha")).not.toHaveClass(HOVER_ONLY_HIDDEN_LABEL)
+  })
+
+  it("keeps the label visible on a disabled icon-only segment", () => {
+    // A disabled segment can be neither hovered nor focused, so a tooltip
+    // could never recover its name.
+    render(
+      <F0SegmentedControl
+        items={[{ ...iconItems[0], disabled: true }, iconItems[1]]}
+        hideLabels
+      />
+    )
+    expect(screen.getByText("List")).not.toHaveClass(HOVER_ONLY_HIDDEN_LABEL)
+    expect(screen.getByText("Table")).toHaveClass(HOVER_ONLY_HIDDEN_LABEL)
   })
 
   it("renders icons when provided", () => {

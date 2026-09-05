@@ -61,13 +61,20 @@ etc.) and the visualization, of the data at item level (visualization) and
 ## Switching between visualizations
 
 When you pass more than one visualization, Data Collection renders a view
-switcher (a segmented control) in the header. Each chip shows the
-visualization's icon and label.
+switcher (a segmented control) in the header. Each segment shows the
+visualization's icon only: the label carried too much visual weight for a
+secondary header control. The name is still available everywhere it matters —
+in the segment's tooltip after a moment's hover, as its accessible name for
+screen readers, and as visible text on touch devices, where there is no pointer
+to hover with.
 
-## Renaming the switcher chips
+Each view's icon is fixed in the built-in registry and is not customizable, so
+the same view is recognisable across every collection.
+
+## Renaming a view
 
 By default each built-in visualization uses its localized name — "Table",
-"Graph", "List", etc. To rename a chip for a specific collection, pass an
+"Graph", "List", etc. To rename a view for a specific collection, pass an
 optional `label` on the visualization. Different collections can label the same
 type differently — e.g. the `graph` view as "Org chart" for employees, or the
 `table` view as "Teams" for teams.
@@ -76,7 +83,7 @@ type differently — e.g. the `graph` view as "Org chart" for employees, or the
 <OneDataCollection
   source={dataSource}
   visualizations={[
-    // Renames the chip to "Org chart"; the built-in graph icon is kept.
+    // Renames the view to "Org chart"; the built-in graph icon is kept.
     { type: "graph", label: "Org chart", options: {} },
     // Omit `label` to keep the default localized name ("Table").
     { type: "table", options: {} },
@@ -85,11 +92,11 @@ type differently — e.g. the `graph` view as "Org chart" for employees, or the
 ```
 
 - `label` is optional; when omitted the localized built-in label is used, so
-  existing collections keep showing "Table" and "Graph".
-- Only the text is customizable — the icon still comes from the visualization
+  existing collections keep saying "Table" and "Graph".
+- Only the text is customizable — the icon always comes from the visualization
   type. For a fully custom icon and label, use a `type: "custom"` visualization.
 
-In the example below the two chips read "Org chart" and "Directory" instead of
-the defaults "Graph" and "Table":
+In the example below the two views are named "Org chart" and "Directory" instead
+of the defaults "Graph" and "Table". Hover a segment in the header to see it:
 
 <Canvas of={GraphStories.CustomViewLabels} />

@@ -11,8 +11,13 @@ const visualizations = [
   { type: "graph", options: {} },
 ] as unknown as Parameters<typeof VisualizationSwitcher>[0]["visualizations"]
 
+/** Radix's tooltip trigger merges this class onto whatever it wraps. */
+const TOOLTIP_TRIGGER_CLASS = "pointer-events-auto"
+/** `sr-only`, but only where the pointer can hover. */
+const HOVER_ONLY_HIDDEN_LABEL = "[@media(hover:hover)]:sr-only"
+
 describe("VisualizationSwitcher", () => {
-  it("renders a segment per visualization with its label", () => {
+  it("renders an icon-only segment per visualization, label kept accessible", () => {
     render(
       <VisualizationSwitcher
         visualizations={visualizations}
@@ -20,8 +25,10 @@ describe("VisualizationSwitcher", () => {
         onVisualizationChange={vi.fn()}
       />
     )
-    expect(screen.getByText("Table")).toBeInTheDocument()
-    expect(screen.getByText("Graph")).toBeInTheDocument()
+    // Hidden where the pointer can hover, visible on touch, named either way.
+    expect(screen.getByText("Table")).toHaveClass(HOVER_ONLY_HIDDEN_LABEL)
+    expect(screen.getByText("Graph")).toHaveClass(HOVER_ONLY_HIDDEN_LABEL)
+    expect(screen.getByRole("radio", { name: "Graph" })).toBeInTheDocument()
   })
 
   it("marks the current visualization as selected", () => {
@@ -55,17 +62,20 @@ describe("VisualizationSwitcher", () => {
     expect(onVisualizationChange).toHaveBeenCalledWith(0)
   })
 
-  it("renders icon-only segments (labels still accessible) when hideLabels is set", () => {
+  it("wires every segment up to a tooltip that can name it", () => {
+    // The delay and the tooltip copy are pinned in F0SegmentedControl's own
+    // suite; here it only matters that the switcher opts into it.
     render(
       <VisualizationSwitcher
         visualizations={visualizations}
         currentVisualization={0}
         onVisualizationChange={vi.fn()}
-        hideLabels
       />
     )
-    expect(screen.getByText("Table")).toHaveClass("sr-only")
-    expect(screen.getByText("Graph")).toHaveClass("sr-only")
+
+    expect(screen.getByRole("radio", { name: "Graph" })).toHaveClass(
+      TOOLTIP_TRIGGER_CLASS
+    )
   })
 
   it("renders nothing when there is a single visualization", () => {
