@@ -1,5 +1,7 @@
 import {
+  isCallMessage,
   isUserMessage,
+  type F0ChatCallMessage,
   type F0ChatItem,
   type F0ChatMessage,
   type F0ChatSystemMessage,
@@ -39,6 +41,9 @@ export type ChatRow =
   // A centered system row (membership events). Breaks author runs on both
   // sides and never carries run flags, footer or interactions.
   | { type: "system"; key: string; message: F0ChatSystemMessage }
+  // A call card. Breaks author runs like a system row, but it is interactive
+  // and its message MUTATES in place as the call progresses.
+  | { type: "call"; key: string; message: F0ChatCallMessage }
   | {
       type: "message"
       key: string
@@ -75,6 +80,10 @@ const sameRow = (a: ChatRow, b: ChatRow): boolean => {
   if (a.type !== b.type) return false
   if (a.type === "separator" && b.type === "separator") return a.at === b.at
   if (a.type === "system" && b.type === "system") return a.message === b.message
+  // Identity by message reference: a call whose state changed is a NEW object,
+  // so the row rebuilds and the card re-renders. That is the whole mechanism
+  // behind the card mutating in place.
+  if (a.type === "call" && b.type === "call") return a.message === b.message
   if (a.type === "message" && b.type === "message") {
     return (
       a.message === b.message &&
@@ -146,7 +155,11 @@ export function flattenChatRows(
     }
 
     if (!isUserMessage(item)) {
-      rows.push({ type: "system", key: item.id, message: item })
+      rows.push(
+        isCallMessage(item)
+          ? { type: "call", key: item.id, message: item }
+          : { type: "system", key: item.id, message: item }
+      )
       indexById.set(item.id, rows.length - 1)
       previousUser = undefined
       return

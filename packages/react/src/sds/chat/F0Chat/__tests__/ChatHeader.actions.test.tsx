@@ -243,4 +243,26 @@ describe("ChatHeader host actions", () => {
       screen.queryByRole("button", { name: "Edit group" })
     ).not.toBeInTheDocument()
   })
+
+  it("puts the ellipsis before the inline actions", () => {
+    // The ellipsis is the fixed landmark of the header, so it keeps its place
+    // whatever inline actions a channel does or does not offer. This is a plain
+    // flex with no `order`, so DOM order is what decides.
+    renderChat(makeRuntime(), [
+      {
+        id: "huddle",
+        label: "Start huddle",
+        icon: Pencil,
+        placement: "inline",
+        onClick: vi.fn(),
+      },
+    ])
+
+    const options = screen.getByRole("button", { name: "Options" })
+    const huddle = screen.getByRole("button", { name: "Start huddle" })
+
+    expect(
+      options.compareDocumentPosition(huddle) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy()
+  })
 })

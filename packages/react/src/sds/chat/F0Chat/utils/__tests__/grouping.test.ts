@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest"
 
-import { type F0ChatMessage, type F0ChatSystemMessage } from "../../types"
+import {
+  type F0ChatCallMessage,
+  type F0ChatMessage,
+  type F0ChatSystemMessage,
+} from "../../types"
 import { type ChatRow, flattenChatRows } from "../grouping"
 
 const user = (id: string) => ({ id, name: id })
@@ -23,6 +27,18 @@ const sys = (id: string, iso: string): F0ChatSystemMessage => ({
   id,
   createdAt: iso,
   system: { event: "member.added", members: [user("newbie")] },
+})
+
+const call = (id: string, iso: string): F0ChatCallMessage => ({
+  type: "call",
+  id,
+  createdAt: iso,
+  call: {
+    id,
+    state: "ringing",
+    startedBy: user("u1"),
+    startedAt: iso,
+  },
 })
 
 describe("flattenChatRows", () => {
@@ -203,5 +219,68 @@ describe("flattenChatRows", () => {
       (r): r is Extract<ChatRow, { type: "message" }> => r.type === "message"
     )
     expect(messageRow?.isLastMessage).toBe(true)
+  })
+
+  describe("call items", () => {
+    it("emits a call row, not a message bubble", () => {
+      // The regression this guards: `isUserMessage` used to be "not system", so
+      // a third item kind would have rendered as somebody's message.
+      const { rows, indexById } = flattenChatRows([
+        call("c1", "2026-06-21T10:00:00"),
+      ])
+      expect(types(rows)).toEqual(["separator", "call"])
+      expect(indexById.get("c1")).toBe(1)
+    })
+
+    it("breaks a same-author run on both sides, like a system row", () => {
+      const { rows } = flattenChatRows([
+        msg("a", "u1", "2026-06-21T10:00:00"),
+        msg("b", "u1", "2026-06-21T10:01:00"),
+        call("c1", "2026-06-21T10:02:00"),
+        msg("c", "u1", "2026-06-21T10:03:00"),
+      ])
+      const messages = rows.filter(
+        (r): r is Extract<ChatRow, { type: "message" }> => r.type === "message"
+      )
+      expect(messages.map((r) => r.isFirstOfRun)).toEqual([true, false, true])
+      expect(messages.map((r) => r.isLastOfRun)).toEqual([false, true, true])
+    })
+
+    it("keeps the delivery footer on the last USER message", () => {
+      const { rows } = flattenChatRows([
+        msg("a", "u1", "2026-06-21T10:00:00"),
+        call("c1", "2026-06-21T10:01:00"),
+      ])
+      const messageRow = rows.find(
+        (r): r is Extract<ChatRow, { type: "message" }> => r.type === "message"
+      )
+      expect(messageRow?.isLastMessage).toBe(true)
+    })
+
+    it("participates in day separators", () => {
+      const { rows } = flattenChatRows([
+        msg("a", "u1", "2026-06-21T10:00:00"),
+        call("c1", "2026-06-22T09:00:00"),
+      ])
+      expect(types(rows)).toEqual(["separator", "message", "separator", "call"])
+    })
+
+    it("rebuilds the row when the call state changes, and only then", () => {
+      // This is the whole mechanism behind the card mutating in place: same
+      // object → same row (memo holds); new object → new row (card re-renders).
+      const ringing = call("c1", "2026-06-21T10:00:00")
+      const first = flattenChatRows([ringing])
+      const unchanged = flattenChatRows([ringing], {
+        previousRows: first.rowCache,
+      })
+      expect(unchanged.rows[1]).toBe(first.rows[1])
+
+      const live = {
+        ...ringing,
+        call: { ...ringing.call, state: "live" as const },
+      }
+      const changed = flattenChatRows([live], { previousRows: first.rowCache })
+      expect(changed.rows[1]).not.toBe(first.rows[1])
+    })
   })
 })

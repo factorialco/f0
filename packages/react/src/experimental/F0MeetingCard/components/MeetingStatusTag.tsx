@@ -47,6 +47,13 @@ export const MeetingStatusTag = ({
   switch (state) {
     case "inProgress":
       return <LiveTag text={meetingCard.inProgress} />
+    case "ringing":
+      // The same pulse as a live call — something is happening right now — but
+      // amber, because it is waiting on someone rather than under way.
+      return <F0TagStatus text={meetingCard.ringing} variant="warning" />
+    case "missed":
+      // `critical` would read as an error; a missed call is a fact, not a fault.
+      return <F0TagStatus text={meetingCard.missed} variant="neutral" />
     case "summarizing":
       // The recap is AI-generated, so the tag carries F0's AI mark instead of the
       // default status dot. `icons/ai/Summary` is closer in meaning but its text

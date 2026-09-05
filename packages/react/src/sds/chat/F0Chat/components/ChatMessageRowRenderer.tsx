@@ -8,6 +8,7 @@ import { useF0ChatChannelType } from "../providers/F0ChatProvider"
 import { type F0ChatUser } from "../types"
 import { rowEntryTransition } from "../utils/chat-motion"
 import { type ChatRow } from "../utils/grouping"
+import { ChatCallMessage } from "./ChatCallMessage"
 import { ChatMessageItem } from "./ChatMessageItem"
 import { ChatSystemMessage } from "./ChatSystemMessage"
 import { ChatTypingBubble, type TypingEntryState } from "./ChatTypingBubble"
@@ -86,7 +87,11 @@ const ChatMessageRowRendererComponent = ({
   // never animates (it only (re)appears on conversation entry).
   const [entry] = useState(() => {
     if (!enterAnimation) return null
-    if (row.type === "message" || row.type === "system") {
+    if (
+      row.type === "message" ||
+      row.type === "system" ||
+      row.type === "call"
+    ) {
       const order = freshIds.get(row.message.id)
       if (order === undefined || animatedIds.has(row.message.id)) return null
       return { order }
@@ -102,15 +107,23 @@ const ChatMessageRowRendererComponent = ({
   // Mark as "seen" after commit (not during render) so render stays pure and a
   // Strict-Mode double render can't wrongly flag a fresh arrival as already shown.
   useEffect(() => {
-    if (row.type === "message" || row.type === "system") {
+    if (
+      row.type === "message" ||
+      row.type === "system" ||
+      row.type === "call"
+    ) {
       animatedIds.add(row.message.id)
     } else if (row.type === "separator") {
       animatedIds.add(row.key)
     }
   }, [row, animatedIds])
 
-  if (row.type === "separator" || row.type === "system") {
-    // Centered, author-less rows — same fast opacity-only entry as messages.
+  if (
+    row.type === "separator" ||
+    row.type === "system" ||
+    row.type === "call"
+  ) {
+    // Author-less rows — same fast opacity-only entry as messages.
     const inner =
       row.type === "separator" ? (
         // On a noticeboard the separator is the ONLY clock: the posts are
@@ -120,6 +133,8 @@ const ChatMessageRowRendererComponent = ({
           padded
           withTime={channelType === "announcement"}
         />
+      ) : row.type === "call" ? (
+        <ChatCallMessage call={row.message.call} />
       ) : (
         <ChatSystemMessage message={row.message} />
       )

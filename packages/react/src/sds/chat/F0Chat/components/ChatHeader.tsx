@@ -163,6 +163,23 @@ export const ChatHeader = ({
             identity
           )}
           <div className="flex shrink-0 items-center gap-0.5">
+            {/* Search + the host's menu actions live behind the ellipsis menu,
+                which only exists while it holds something.
+
+                It comes FIRST in the row: the ellipsis is the fixed landmark,
+                so it keeps the same place whatever inline actions a channel
+                does or does not offer. This is a plain flex with no `order`, so
+                DOM order is visual order. */}
+            {menuItems.length > 0 && (
+              <Dropdown items={menuItems} align="end" label={i18n.chat.options}>
+                <ButtonInternal
+                  variant="ghost"
+                  hideLabel
+                  label={i18n.chat.options}
+                  icon={Ellipsis}
+                />
+              </Dropdown>
+            )}
             {/* Host actions promoted out of the overflow menu (placement: "inline"). */}
             {inlineActions.map((action) => (
               <ButtonInternal
@@ -174,18 +191,6 @@ export const ChatHeader = ({
                 onClick={() => action.onClick(channel)}
               />
             ))}
-            {/* Search + the host's menu actions live behind the ellipsis menu,
-                which only exists while it holds something. */}
-            {menuItems.length > 0 && (
-              <Dropdown items={menuItems} align="end" label={i18n.chat.options}>
-                <ButtonInternal
-                  variant="ghost"
-                  hideLabel
-                  label={i18n.chat.options}
-                  icon={Ellipsis}
-                />
-              </Dropdown>
-            )}
             {onToggleFullscreen && !isSmallScreen && (
               <ButtonInternal
                 variant="ghost"

@@ -106,6 +106,27 @@ describe("isJoinRelevant", () => {
     expect(isJoinRelevant("finished")).toBe(false)
     expect(isJoinRelevant("cancelled")).toBe(false)
   })
+
+  it("covers a ringing call but not a missed one", () => {
+    // A ringing call is joinable by definition — the room already exists — and
+    // a missed one is over.
+    expect(isJoinRelevant("ringing")).toBe(true)
+    expect(isJoinRelevant("missed")).toBe(false)
+  })
+})
+
+describe("ringing", () => {
+  it("is joinable regardless of the window, since it is happening now", () => {
+    // Unlike `scheduled`, a ringing call has no agreed start time to count
+    // down to, so the window must not gate it.
+    expect(
+      isWithinJoinWindow({
+        state: "ringing",
+        startsAt: new Date("2026-06-21T09:00:00"),
+        now: new Date("2026-06-21T12:00:00"),
+      })
+    ).toBe(true)
+  })
 })
 
 describe("shouldShowCountdown", () => {
