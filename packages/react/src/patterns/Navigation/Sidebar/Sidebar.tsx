@@ -1,3 +1,4 @@
+import { motionTokens } from "@factorialco/f0-core"
 import { AnimatePresence, motion } from "motion/react"
 import { ReactElement, ReactNode, cloneElement, isValidElement } from "react"
 import { useIntersectionObserver } from "usehooks-ts"
@@ -54,23 +55,25 @@ function _Sidebar({
   const [bottomRef, isAtBottom] = useIntersectionObserver({ threshold: 1 })
   const i18n = useI18n()
 
+  // The nav slides on the frame's own curve, in every state.
+  //
+  // It used to pick between three: `[0.175, 0.885, 0.32, 1.1]` for the
+  // floating case — which ends at 1.1, i.e. it overshoots and springs back —
+  // and two others for the rest. The bounce is what a desktop collapse played,
+  // and it is exactly the thing the chat's motion vocabulary is calibrated
+  // against; and the room this nav leaves behind is animated by the frame on
+  // `outSwift`, so a different curve here means the slot and its occupant
+  // travel apart.
   const transition = {
     x: {
-      ease:
-        sidebarState !== "locked"
-          ? isSmallScreen
-            ? [0.25, 0.46, 0.45, 0.94]
-            : [0.175, 0.885, 0.32, 1.1]
-          : [0, 0, 0.58, 1],
-      duration: shouldReduceMotion
-        ? 0
-        : sidebarState !== "locked" && !isSmallScreen
-          ? 0.3
-          : 0.2,
+      ease: motionTokens.ease.outSwift,
+      duration: shouldReduceMotion ? 0 : motionTokens.duration.base,
     },
     top: { duration: shouldReduceMotion ? 0 : 0.1 },
     left: { duration: shouldReduceMotion ? 0 : 0.1 },
-    default: { duration: shouldReduceMotion ? 0 : 0.2 },
+    default: {
+      duration: shouldReduceMotion ? 0 : motionTokens.duration.base,
+    },
   }
 
   const renderFooter = () => {

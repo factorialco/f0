@@ -1,3 +1,4 @@
+import { motionTokens } from "@factorialco/f0-core"
 import { AnimatePresence, motion } from "motion/react"
 import { type ReactNode } from "react"
 
@@ -13,6 +14,12 @@ import { SidebarWindow } from "./components/layout/ChatWindow"
 import { useRevealOnChange } from "./hooks/useRevealOnChange"
 import { AiChatStateProvider, useAiChat } from "./providers/AiChatStateProvider"
 import { AiChatProviderProps, type WelcomeScreenSuggestion } from "./types"
+
+/**
+ * How long the transcript stays hidden across a fullscreen change: exactly as
+ * long as the window takes to resize, since they are the same movement.
+ */
+const FULLSCREEN_REVEAL_MS = motionTokens.duration.reveal * 1000
 
 /**
  * Slot composition for the F0 AI chat shell. F0 ships the shell + UI
@@ -139,13 +146,21 @@ const F0AiChatComponent = ({
   // Mode-change reveal: only fullscreen transitions change the layout enough to
   // warrant a re-fade. Sidepanel + canvas are treated as one "docked" state, so
   // opening/closing the canvas beside the docked chat doesn't re-fade it;
-  // fullscreen still reveals. Hold ≈ the chat window's resize animation (see
-  // ApplicationFrame: ~0.15s entering, ~0.4s exiting).
-  const revealValue: "docked" | "fullscreen" =
-    visualizationMode === "fullscreen" ? "fullscreen" : "docked"
+  // fullscreen still reveals.
+  //
+  // Held for exactly as long as the window's own resize (they are the same
+  // movement), and — crucially — NOT while the panel is closing. Closing resets
+  // the mode to "sidepanel" one commit after `open` goes false, which the hook
+  // used to read as a mode change: it blanked the transcript instantly and held
+  // it for 460ms, so what the user saw leaving the screen was an empty card.
+  const revealValue: "docked" | "fullscreen" | "closed" = !open
+    ? "closed"
+    : visualizationMode === "fullscreen"
+      ? "fullscreen"
+      : "docked"
   const { motionProps: contentReveal } = useRevealOnChange(
     revealValue,
-    (_prev, next) => (next === "fullscreen" ? 220 : 460)
+    (_prev, next) => (next === "closed" ? 0 : FULLSCREEN_REVEAL_MS)
   )
   const reducedMotion = useReducedMotion()
 

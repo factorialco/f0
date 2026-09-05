@@ -78,12 +78,27 @@ const renderFrame = (side: "left" | "right" = "left") =>
     </ApplicationFrame>
   )
 
-/** The box the frame measures and pads — the parent of `<main id="content">`. */
+/** The box the frame pads — the parent of `<main id="content">`. */
 const mainArea = (): HTMLElement => {
   const element = document.getElementById("content")?.parentElement
   if (!element) throw new Error("main area not found")
   return element
 }
+
+/**
+ * The frame measures the ROW holding the nav and the content, and subtracts
+ * the nav's own room — measuring the content side directly would mean reading
+ * a new width on every frame of the sidebar's animation.
+ *
+ * So the row has to report the frame under test PLUS the nav's slot. The
+ * sidebar stays locked throughout this file (every media query answers
+ * `false`), which makes the frame these tests are written against exactly
+ * `frameWidth`. Harness only — no expectation below changes.
+ */
+const SIDEBAR_SLOT_WIDTH = 240
+
+const isMainArea = (element: HTMLElement): boolean =>
+  document.getElementById("content")?.parentElement === element
 
 /** Re-runs the frame's publish path with the current stubbed width. */
 const remeasure = async () => {
@@ -107,14 +122,17 @@ describe("ApplicationFrame responsive side panel", () => {
     frameWidth = 0
     vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(
       function (this: HTMLElement) {
+        const width = isMainArea(this)
+          ? frameWidth
+          : frameWidth + SIDEBAR_SLOT_WIDTH
         return {
           x: 0,
           y: 0,
           top: 0,
           left: 0,
-          right: frameWidth,
+          right: width,
           bottom: 900,
-          width: frameWidth,
+          width,
           height: 900,
           toJSON: () => ({}),
         } as DOMRect
