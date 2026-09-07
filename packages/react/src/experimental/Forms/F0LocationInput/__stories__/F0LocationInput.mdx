@@ -75,7 +75,7 @@ Use **simple mode** when a picked suggestion is the whole job: search boxes, fil
 
 - Keep the group `label` about the thing, not the action: "Office address", not "Enter address".
 - Leave the address `placeholder` unset unless you have a good reason: the default ("Enter an address") is translated and already says what to do.
-- Part labels are generic on purpose ("State / region", "Postal code"). Override them through `partLabels` when the product knows the country ("ZIP code", "Province").
+- Part labels are generic on purpose ("Region", "Postal code"). Override them through `partLabels` when the product knows the country ("ZIP code", "Province").
 - Validation is consumer-side: the component reports `isResolved` but never blocks input.
 
 <DoDonts
@@ -330,7 +330,7 @@ Omit `searchPlaces` and the address line is a plain [F0TextInput](?path=/docs/co
         </td>
         <td>
           Overrides for the per-part labels, which default to translated copy
-          ("Country", "Address", "City", "State / region", "Postal code").
+          ("Country", "Address", "City", "Region", "Postal code").
         </td>
       </tr>
       <tr>

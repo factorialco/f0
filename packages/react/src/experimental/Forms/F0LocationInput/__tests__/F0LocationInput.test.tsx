@@ -300,7 +300,7 @@ describe("F0LocationInput", () => {
         "Country",
         "Address",
         "City",
-        "State / region",
+        "Region",
         "Postal code",
       ])
       expect(screen.getByRole("group", { name: "Office" })).toBeInTheDocument()
