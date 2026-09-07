@@ -218,6 +218,23 @@ export type DataCollectionSource<
     NavigationFilters,
     Grouping
   > & {
+    /**
+     * The definition the consumer passed, memoized on the hook's `deps`.
+     *
+     * The source itself changes identity on every render of the consumer — it
+     * carries live filter, search and sorting state, so it has to. Anything
+     * rendered per record takes this instead, so a memo boundary around a row
+     * can survive a consumer render.
+     */
+    definition?: DataCollectionSourceDefinition<
+      R,
+      Filters,
+      Sortings,
+      Summaries,
+      ItemActions,
+      NavigationFilters,
+      Grouping
+    >
     currentNavigationFilters: NavigationFiltersState<NavigationFilters>
     setCurrentNavigationFilters: React.Dispatch<
       React.SetStateAction<NavigationFiltersState<NavigationFilters>>

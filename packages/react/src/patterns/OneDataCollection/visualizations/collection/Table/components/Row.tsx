@@ -14,7 +14,10 @@ import { cn } from "@/lib/utils"
 import { ItemActionsMobile } from "@/patterns/OneDataCollection/components/itemActions/ItemActionsMobile/ItemActionsMobile"
 import { ItemActionsRowContainer } from "@/patterns/OneDataCollection/components/itemActions/ItemActionsRowContainer"
 import { useItemActions } from "@/patterns/OneDataCollection/components/itemActions/useItemActions"
-import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource/types"
+import {
+  DataCollectionSource,
+  DataCollectionSourceDefinition,
+} from "@/patterns/OneDataCollection/hooks/useDataCollectionSource/types"
 import { ItemActionsDefinition } from "@/patterns/OneDataCollection/item-actions"
 import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import { renderProperty } from "@/patterns/OneDataCollection/property-render"
@@ -45,7 +48,27 @@ export type RowProps<
   NavigationFilters extends NavigationFiltersDefinition,
   Grouping extends GroupingDefinition<R>,
 > = {
-  source: DataCollectionSource<
+  /**
+   * The consumer's definition, not the live source. Memoized by
+   * `useDataCollectionSource` on its `deps`, so this row's memo survives a
+   * consumer render — which the live source, carrying filter and search state,
+   * can never allow.
+   */
+  source: DataCollectionSourceDefinition<
+    R,
+    Filters,
+    Sortings,
+    Summaries,
+    ItemActions,
+    NavigationFilters,
+    Grouping
+  >
+  /**
+   * The live source. Supplied only to rows that render nested children, which
+   * need the current filters and sortings to fetch them. Absent — and so
+   * stable — for flat rows.
+   */
+  liveSource?: DataCollectionSource<
     R,
     Filters,
     Sortings,
@@ -144,6 +167,7 @@ const RowComponentInner = <
 >(
   {
     source,
+    liveSource,
     item,
     onItemCheckedChange,
     isSelected: isSelectedProp,
@@ -254,9 +278,17 @@ const RowComponentInner = <
   // clicked mid-exit must not reach them. `true` outside AnimatePresence.
   const isPresent = useIsPresent()
 
+  // A row delegates to NestedRow only if it was handed the live source: fetching
+  // children reads the current filters and sortings. Table supplies it to
+  // exactly the rows whose `itemsWithChildren` says they have children, so this
+  // is the same condition seen from here — and if it ever were not, the row
+  // renders flat rather than throwing.
+  const delegatesToNestedRow =
+    rowWithChildren && hasChildrenLoaded && !!liveSource
+
   // Only the row that owns the rendered checkbox registers (not the one
   // delegating to NestedRow), so each selectable id is registered once.
-  const willRenderOwnRow = !(rowWithChildren && hasChildrenLoaded)
+  const willRenderOwnRow = !delegatesToNestedRow
   const isRegistered =
     id !== undefined && !selectionDisabled && willRenderOwnRow && isPresent
 
@@ -286,10 +318,10 @@ const RowComponentInner = <
     registerSelectable(id, item)
   }, [id, item, isRegistered, registerSelectable])
 
-  if (rowWithChildren && hasChildrenLoaded) {
+  if (delegatesToNestedRow && liveSource) {
     return (
       <NestedRow
-        source={source}
+        source={liveSource}
         item={item}
         onItemCheckedChange={onItemCheckedChange}
         selectedItems={selectedItems}

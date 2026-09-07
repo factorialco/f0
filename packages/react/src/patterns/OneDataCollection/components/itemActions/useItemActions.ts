@@ -8,7 +8,7 @@ import {
   RecordType,
   SortingsDefinition,
 } from "@/hooks/datasource"
-import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource/types"
+import { DataCollectionSourceDefinition } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource/types"
 import {
   ActionDefinition,
   filterItemActions,
@@ -28,7 +28,11 @@ type UseItemActionProps<
   NavigationFilters extends NavigationFiltersDefinition,
   Grouping extends GroupingDefinition<R>,
 > = {
-  source: DataCollectionSource<
+  /**
+   * Only `itemActions` is read, so this takes the definition rather than the
+   * live source — a row that holds the live source cannot memoize.
+   */
+  source: DataCollectionSourceDefinition<
     R,
     Filters,
     Sortings,
