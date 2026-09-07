@@ -1,5 +1,7 @@
 import { useCallback, useRef, useState } from "react"
 
+import { toasts } from "@/hooks/toast"
+import { useI18n } from "@/lib/providers/i18n"
 import type {
   FiltersDefinition,
   FiltersState,
@@ -14,6 +16,14 @@ import type {
 
 import { isRenderableChart } from "../utils/chartDataAdapter"
 import { chartDataToTabular } from "../utils/chartDataToTabular"
+import {
+  getDownloadableColumns,
+  transformCollectionRows,
+} from "../utils/collectionColumns"
+import {
+  ExportRowLimitExceededError,
+  fetchAllStateAwareRecords,
+} from "../utils/collectionExport"
 import { downloadMultiSheetExcel } from "../utils/downloadHelpers"
 import { extractColumns } from "../utils/extractColumns"
 
@@ -36,6 +46,13 @@ interface UseDashboardExportResult {
   isExporting: boolean
 }
 
+class EmptyDashboardExportError extends Error {
+  constructor() {
+    super("The dashboard has no data to export")
+    this.name = "EmptyDashboardExportError"
+  }
+}
+
 function getItemFilters<Filters extends FiltersDefinition>(
   item: { useDashboardFilters?: boolean },
   filters: FiltersState<Filters>
@@ -55,28 +72,19 @@ async function buildMetricsSheet<Filters extends FiltersDefinition>(
   let hasPrevious = false
 
   for (const item of metricItems) {
-    try {
-      const data: DashboardMetricData = await item.fetchData(
-        getItemFilters(item, filters)
-      )
-      const row: Record<string, unknown> = {
-        Metric: item.title,
-        Value: data.value,
-      }
-      if (data.previousValue !== undefined) {
-        row["Previous Value"] = data.previousValue
-        hasPrevious = true
-      }
-      rows.push(row)
-    } catch (err) {
-      console.warn(
-        `[useDashboardExport] Failed to export metric "${item.title}":`,
-        err
-      )
+    const data: DashboardMetricData = await item.fetchData(
+      getItemFilters(item, filters)
+    )
+    const row: Record<string, unknown> = {
+      Metric: item.title,
+      Value: data.value,
     }
+    if (data.previousValue !== undefined) {
+      row["Previous Value"] = data.previousValue
+      hasPrevious = true
+    }
+    rows.push(row)
   }
-
-  if (rows.length === 0) return null
 
   const columns = hasPrevious
     ? ["Metric", "Value", "Previous Value"]
@@ -103,57 +111,40 @@ async function buildAllSheets<Filters extends FiltersDefinition>(
   const sheetPromises = nonMetricItems.map(
     async (item): Promise<SheetData | null> => {
       if (item.type === "chart") {
-        try {
-          const data: DashboardChartData = await item.fetchData(
-            getItemFilters(item, filters)
+        const data: DashboardChartData = await item.fetchData(
+          getItemFilters(item, filters)
+        )
+        if (!isRenderableChart(item.chart)) {
+          throw new Error(
+            `[useDashboardExport] Chart "${item.id}" cannot be exported`
           )
-          // Same guard `ChartItem` applies when rendering: without it an
-          // unrenderable config throws inside the converter and the sheet is
-          // dropped by the catch below, which reads as a silent omission
-          // rather than a stated one.
-          if (!isRenderableChart(item.chart)) {
-            console.warn(
-              `[useDashboardExport] Skipped chart "${item.title}": unsupported chart type`
-            )
-            return null
-          }
-          const tabular = chartDataToTabular(item.chart, data)
-          return {
-            name: item.title,
-            columns: tabular.columns,
-            rows: tabular.rows,
-            keys: tabular.keys,
-          }
-        } catch (err) {
-          console.warn(
-            `[useDashboardExport] Failed to export chart "${item.title}":`,
-            err
-          )
-          return null
+        }
+        const tabular = chartDataToTabular(item.chart, data)
+        return {
+          name: item.title,
+          columns: tabular.columns,
+          rows: tabular.rows,
+          keys: tabular.keys,
         }
       }
 
       if (item.type === "collection") {
-        try {
-          const sourceDef = item.createSource(getItemFilters(item, filters))
-          const result = await sourceDef.dataAdapter.fetchData({
-            filters: {},
-            sortings: [],
-            pagination: { currentPage: 1, perPage: 100000 },
-          })
-          const records: Record<string, unknown>[] =
-            "records" in result
-              ? result.records
-              : (result as Record<string, unknown>[])
-          if (records.length === 0) return null
-          const columns = extractColumns(records)
-          return { name: item.title, columns, rows: records }
-        } catch (err) {
-          console.warn(
-            `[useDashboardExport] Failed to export collection "${item.title}":`,
-            err
-          )
-          return null
+        const sourceDef = item.createSource(getItemFilters(item, filters))
+        const records = await fetchAllStateAwareRecords(sourceDef)
+        const configuredColumns = getDownloadableColumns(item.visualizations)
+        if (configuredColumns.length > 0) {
+          return {
+            name: item.title,
+            columns: configuredColumns.map((column) => column.label),
+            keys: configuredColumns.map((column) => column.id),
+            rows: transformCollectionRows(records, configuredColumns),
+          }
+        }
+
+        return {
+          name: item.title,
+          columns: extractColumns(records),
+          rows: records,
         }
       }
 
@@ -174,6 +165,7 @@ export function useDashboardExport<Filters extends FiltersDefinition>({
   filters,
   filename = "dashboard",
 }: UseDashboardExportOptions<Filters>): UseDashboardExportResult {
+  const { t } = useI18n()
   const [isExporting, setIsExporting] = useState(false)
 
   // The export callback must keep a STABLE identity across renders. It is
@@ -187,16 +179,88 @@ export function useDashboardExport<Filters extends FiltersDefinition>({
   filtersRef.current = filters
   const filenameRef = useRef(filename)
   filenameRef.current = filename
+  const tRef = useRef(t)
+  tRef.current = t
+  const exportPromiseRef = useRef<Promise<void> | null>(null)
 
   const exportAsExcel = useCallback(async () => {
-    setIsExporting(true)
-    try {
-      const sheets = await buildAllSheets(itemsRef.current, filtersRef.current)
-      if (sheets.length > 0) {
-        downloadMultiSheetExcel(sheets, filenameRef.current)
+    if (exportPromiseRef.current) return exportPromiseRef.current
+
+    const exportPromise = (async () => {
+      setIsExporting(true)
+      const toastId = toasts.open({
+        variant: "loading",
+        title: tRef.current("ai.dataDownload.exportPreparing"),
+        persistent: true,
+      })
+
+      try {
+        const sheets = await buildAllSheets(
+          itemsRef.current,
+          filtersRef.current
+        )
+        if (
+          sheets.length === 0 ||
+          sheets.every((sheet) => sheet.rows.length === 0)
+        ) {
+          throw new EmptyDashboardExportError()
+        }
+
+        downloadMultiSheetExcel(sheets, filenameRef.current, {
+          sheetName: tRef.current("ai.dataDownload.exportOverviewSheetName"),
+          description: tRef.current(
+            "ai.dataDownload.exportOverviewDescription"
+          ),
+          rowsExported: (amount) =>
+            tRef.current("ai.dataDownload.exportRowsExported", { amount }),
+          previewTruncated: (amount) =>
+            tRef.current("ai.dataDownload.exportPreviewTruncated", {
+              amount,
+            }),
+          fullDataSheet: (sheetName) =>
+            tRef.current("ai.dataDownload.exportFullDataSheet", {
+              sheetName,
+            }),
+        })
+        toasts.open({
+          id: toastId,
+          variant: "success",
+          title: tRef.current("ai.dataDownload.exportSuccess"),
+        })
+      } catch (error) {
+        const isEmpty = error instanceof EmptyDashboardExportError
+        const isTooLarge = error instanceof ExportRowLimitExceededError
+        toasts.open({
+          id: toastId,
+          variant: isEmpty || isTooLarge ? "default" : "error",
+          title: tRef.current(
+            isEmpty
+              ? "ai.dataDownload.exportEmpty"
+              : isTooLarge
+                ? "ai.dataDownload.exportTooLarge"
+                : "ai.dataDownload.exportFailed"
+          ),
+          description: tRef.current(
+            isEmpty
+              ? "ai.dataDownload.exportEmptyDescription"
+              : isTooLarge
+                ? "ai.dataDownload.exportTooLargeDescription"
+                : "ai.dataDownload.exportFailedDescription"
+          ),
+        })
+        throw error
+      } finally {
+        setIsExporting(false)
       }
+    })()
+
+    exportPromiseRef.current = exportPromise
+    try {
+      await exportPromise
     } finally {
-      setIsExporting(false)
+      if (exportPromiseRef.current === exportPromise) {
+        exportPromiseRef.current = null
+      }
     }
   }, [])
 

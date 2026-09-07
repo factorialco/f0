@@ -1,18 +1,78 @@
 import * as XLSX from "xlsx"
 
+type SpreadsheetValue = string | number | boolean
+
+export interface DashboardOverviewCopy {
+  sheetName: string
+  description: string
+  rowsExported: (amount: number) => string
+  previewTruncated: (amount: number) => string
+  fullDataSheet: (sheetName: string) => string
+}
+
+const DASHBOARD_OVERVIEW_PREVIEW_ROWS = 50
+
 /**
- * Serialize a cell value to a string suitable for spreadsheet/CSV export.
+ * Serialize a cell value for spreadsheet/CSV export.
  * - null/undefined → ""
- * - booleans → "true"/"false"
+ * - numbers/booleans retain their native type for Excel
  * - Dates → ISO string
  * - objects/arrays → JSON string
+ * - user-authored strings that could execute as spreadsheet formulas are
+ *   prefixed with an apostrophe
  */
-function serializeValue(value: unknown): string {
+export function serializeValue(value: unknown): SpreadsheetValue {
   if (value == null) return ""
-  if (typeof value === "boolean") return String(value)
+  if (typeof value === "number" || typeof value === "boolean") return value
   if (value instanceof Date) return value.toISOString()
   if (typeof value === "object") return JSON.stringify(value)
-  return String(value)
+  const serialized = String(value)
+  return /^[\s\u0000-\u001F]*[=+\-@]/.test(serialized)
+    ? `'${serialized}`
+    : serialized
+}
+
+/**
+ * Keep downloads portable across Windows, macOS, mobile browsers, and shared
+ * drives. The browser may accept reserved characters that the destination
+ * filesystem cannot persist.
+ */
+export function sanitizeDownloadFilename(
+  filename: string,
+  fallback = "download"
+): string {
+  const sanitized = filename
+    .trim()
+    .replace(/[<>:"/\\|?*\u0000-\u001F]/g, "-")
+    .slice(0, 180)
+    .replace(/[. ]+$/g, "")
+
+  if (!sanitized) return fallback
+  const basename = sanitized.split(".", 1)[0]
+  if (/^(con|prn|aux|nul|com[1-9]|lpt[1-9])$/i.test(basename)) {
+    return `_${sanitized}`
+  }
+  return sanitized
+}
+
+/** Excel sheet names are case-insensitively unique and limited to 31 chars. */
+export function uniqueExcelSheetName(
+  requestedName: string,
+  usedNames: Set<string>
+): string {
+  const sanitized = requestedName.replace(/[\\/?*:[\]]/g, "-").trim()
+  const base = sanitized || "Sheet"
+  let candidate = base.slice(0, 31)
+  let suffixNumber = 2
+
+  while (usedNames.has(candidate.toLowerCase())) {
+    const suffix = ` (${suffixNumber})`
+    candidate = `${base.slice(0, 31 - suffix.length).trimEnd()}${suffix}`
+    suffixNumber += 1
+  }
+
+  usedNames.add(candidate.toLowerCase())
+  return candidate
 }
 
 /**
@@ -20,10 +80,19 @@ function serializeValue(value: unknown): string {
  */
 function triggerDownload(blob: Blob, filename: string): void {
   const link = document.createElement("a")
-  link.href = URL.createObjectURL(blob)
+  const objectUrl = URL.createObjectURL(blob)
+  link.href = objectUrl
   link.download = filename
-  link.click()
-  URL.revokeObjectURL(link.href)
+  link.style.display = "none"
+  document.body.appendChild(link)
+  try {
+    link.click()
+  } finally {
+    link.remove()
+    // Safari and Chromium can cancel the download if the Blob URL is revoked
+    // synchronously in the click stack.
+    setTimeout(() => URL.revokeObjectURL(objectUrl), 0)
+  }
 }
 
 /**
@@ -51,7 +120,7 @@ export function downloadAsExcel(
   const blob = new Blob([buffer], {
     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   })
-  triggerDownload(blob, `${filename}.xlsx`)
+  triggerDownload(blob, `${sanitizeDownloadFilename(filename)}.xlsx`)
 }
 
 /**
@@ -66,7 +135,7 @@ export function downloadAsCsv(
 ): void {
   const rowKeys = keys ?? columns
   const escapeCsv = (value: unknown): string => {
-    const str = serializeValue(value)
+    const str = String(serializeValue(value))
     if (str.includes(",") || str.includes('"') || str.includes("\n")) {
       return `"${str.replace(/"/g, '""')}"`
     }
@@ -81,7 +150,7 @@ export function downloadAsCsv(
   const blob = new Blob([lines.join("\n")], {
     type: "text/csv;charset=utf-8;",
   })
-  triggerDownload(blob, `${filename}.csv`)
+  triggerDownload(blob, `${sanitizeDownloadFilename(filename)}.csv`)
 }
 
 /**
@@ -94,7 +163,7 @@ export function downloadAsImage(
 ): void {
   const link = document.createElement("a")
   link.href = dataUrl
-  link.download = `${filename}.${ext}`
+  link.download = `${sanitizeDownloadFilename(filename)}.${ext}`
   link.click()
 }
 
@@ -110,11 +179,76 @@ export function downloadMultiSheetExcel(
     /** Row-lookup keys parallel to `columns`; see {@link downloadAsExcel}. */
     keys?: string[]
   }[],
-  filename: string
+  filename: string,
+  overview?: DashboardOverviewCopy
 ): void {
   const workbook = XLSX.utils.book_new()
+  const usedSheetNames = new Set<string>()
 
-  for (const sheet of sheets) {
+  const overviewSheetName = overview
+    ? uniqueExcelSheetName(overview.sheetName, usedSheetNames)
+    : undefined
+  const namedSheets = sheets.map((sheet) => ({
+    ...sheet,
+    safeName: uniqueExcelSheetName(sheet.name, usedSheetNames),
+  }))
+
+  if (overview && overviewSheetName && namedSheets.length > 1) {
+    const overviewRows: SpreadsheetValue[][] = [
+      [serializeValue(filename)],
+      [overview.description],
+      [],
+    ]
+    const linkedRows: Array<{ row: number; sheetName: string }> = []
+
+    for (const sheet of namedSheets) {
+      const rowKeys = sheet.keys ?? sheet.columns
+      linkedRows.push({ row: overviewRows.length, sheetName: sheet.safeName })
+      overviewRows.push([
+        serializeValue(sheet.name),
+        overview.rowsExported(sheet.rows.length),
+      ])
+      overviewRows.push(sheet.columns.map(serializeValue))
+      overviewRows.push(
+        ...sheet.rows
+          .slice(0, DASHBOARD_OVERVIEW_PREVIEW_ROWS)
+          .map((row) => rowKeys.map((key) => serializeValue(row[key])))
+      )
+      if (sheet.rows.length > DASHBOARD_OVERVIEW_PREVIEW_ROWS) {
+        overviewRows.push([
+          overview.previewTruncated(DASHBOARD_OVERVIEW_PREVIEW_ROWS),
+        ])
+      }
+      overviewRows.push([overview.fullDataSheet(sheet.safeName)])
+      linkedRows.push({
+        row: overviewRows.length - 1,
+        sheetName: sheet.safeName,
+      })
+      overviewRows.push([])
+    }
+
+    const overviewWorksheet = XLSX.utils.aoa_to_sheet(overviewRows)
+    for (const link of linkedRows) {
+      const cell = overviewWorksheet[`A${link.row + 1}`]
+      if (cell) {
+        cell.l = {
+          Target: `#'${link.sheetName.replace(/'/g, "''")}'!A1`,
+        }
+      }
+    }
+    overviewWorksheet["!cols"] = Array.from(
+      {
+        length: Math.max(
+          2,
+          ...namedSheets.map((sheet) => sheet.columns.length)
+        ),
+      },
+      (_, index) => ({ wch: index === 0 ? 36 : 24 })
+    )
+    XLSX.utils.book_append_sheet(workbook, overviewWorksheet, overviewSheetName)
+  }
+
+  for (const sheet of namedSheets) {
     const rowKeys = sheet.keys ?? sheet.columns
     const wsData = [
       sheet.columns,
@@ -123,14 +257,12 @@ export function downloadMultiSheetExcel(
       ),
     ]
     const worksheet = XLSX.utils.aoa_to_sheet(wsData)
-    // Sheet names are limited to 31 chars in Excel
-    const safeName = sheet.name.slice(0, 31)
-    XLSX.utils.book_append_sheet(workbook, worksheet, safeName)
+    XLSX.utils.book_append_sheet(workbook, worksheet, sheet.safeName)
   }
 
   const buffer = XLSX.write(workbook, { type: "array", bookType: "xlsx" })
   const blob = new Blob([buffer], {
     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   })
-  triggerDownload(blob, `${filename}.xlsx`)
+  triggerDownload(blob, `${sanitizeDownloadFilename(filename)}.xlsx`)
 }

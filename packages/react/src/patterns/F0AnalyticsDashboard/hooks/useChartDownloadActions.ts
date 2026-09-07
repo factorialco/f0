@@ -5,6 +5,7 @@ import { useCallback, useMemo } from "react"
 
 import type { DropdownItem } from "@/experimental/Navigation/Dropdown"
 
+import { toasts } from "@/hooks/toast"
 import { Table, Image } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 
@@ -40,19 +41,47 @@ export function useChartDownloadActions({
 }: UseChartDownloadActionsOptions): DropdownItem[] {
   const { t } = useI18n()
 
+  const runDownload = useCallback(
+    (download: () => void) => {
+      const toastId = toasts.open({
+        variant: "loading",
+        title: t("ai.dataDownload.downloadPreparing"),
+        persistent: true,
+      })
+      try {
+        download()
+        toasts.open({
+          id: toastId,
+          variant: "success",
+          title: t("ai.dataDownload.downloadSuccess"),
+        })
+      } catch {
+        toasts.open({
+          id: toastId,
+          variant: "error",
+          title: t("ai.dataDownload.downloadFailed"),
+          description: t("ai.dataDownload.exportFailedDescription"),
+        })
+      }
+    },
+    [t]
+  )
+
   const handleImage = useCallback(
     (type: "png" | "jpg") => {
-      const instance = getEChartsInstance(chartContainerRef)
-      if (!instance) return
-      const echartsType = type === "jpg" ? "jpeg" : "png"
-      const dataUrl = instance.getDataURL({
-        type: echartsType,
-        pixelRatio: 2,
-        ...(type === "jpg" ? { backgroundColor: "#fff" } : {}),
+      runDownload(() => {
+        const instance = getEChartsInstance(chartContainerRef)
+        if (!instance) throw new Error("The chart is not ready to export")
+        const echartsType = type === "jpg" ? "jpeg" : "png"
+        const dataUrl = instance.getDataURL({
+          type: echartsType,
+          pixelRatio: 2,
+          ...(type === "jpg" ? { backgroundColor: "#fff" } : {}),
+        })
+        downloadAsImage(dataUrl, title, type)
       })
-      downloadAsImage(dataUrl, title, type)
     },
-    [chartContainerRef, title]
+    [chartContainerRef, title, runDownload]
   )
 
   const effectiveConfig = useMemo(() => {
@@ -65,15 +94,19 @@ export function useChartDownloadActions({
 
   const handleExcel = useCallback(() => {
     if (!data) return
-    const tabular = chartDataToTabular(effectiveConfig, data)
-    downloadAsExcel(tabular.columns, tabular.rows, title, tabular.keys)
-  }, [effectiveConfig, data, title])
+    runDownload(() => {
+      const tabular = chartDataToTabular(effectiveConfig, data)
+      downloadAsExcel(tabular.columns, tabular.rows, title, tabular.keys)
+    })
+  }, [effectiveConfig, data, title, runDownload])
 
   const handleCsv = useCallback(() => {
     if (!data) return
-    const tabular = chartDataToTabular(effectiveConfig, data)
-    downloadAsCsv(tabular.columns, tabular.rows, title, tabular.keys)
-  }, [effectiveConfig, data, title])
+    runDownload(() => {
+      const tabular = chartDataToTabular(effectiveConfig, data)
+      downloadAsCsv(tabular.columns, tabular.rows, title, tabular.keys)
+    })
+  }, [effectiveConfig, data, title, runDownload])
 
   return useMemo(() => {
     if (!data) return []

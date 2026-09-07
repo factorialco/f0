@@ -306,6 +306,15 @@ The export control uses the applied report filter value for participating
 items. Items with `useDashboardFilters=false` are exported with an empty filter
 object, matching their on-screen fetch behavior.
 
+Dashboard export is all-or-nothing: every metric, chart, and collection must be
+fetched successfully before the workbook is downloaded. The control reports a
+preparing state, then a success, empty-data, too-large, or failure status. Empty
+dashboards do not download a blank workbook, and failures do not download a
+partial workbook. Collection exports are limited to 10,000 rows; when more data
+matches the current filters, the status asks the user to narrow those filters
+instead of silently truncating the file. The same status behavior applies to
+the Excel and CSV actions on individual collections and to chart downloads.
+
 <Canvas of={Stories.WithExport} />
 
 **With no report data**

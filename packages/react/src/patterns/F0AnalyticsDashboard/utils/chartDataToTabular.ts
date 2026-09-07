@@ -31,9 +31,13 @@ interface TabularResult {
  */
 function numericValue(point: unknown): number | null {
   if (point == null) return null
-  if (typeof point === "number") return point
+  if (typeof point === "number") return Number.isFinite(point) ? point : null
+  if (typeof point === "string" && point.trim() !== "") {
+    const parsed = Number(point)
+    return Number.isFinite(parsed) ? parsed : null
+  }
   if (typeof point === "object" && "value" in point) {
-    return (point as { value: number }).value
+    return numericValue((point as { value: unknown }).value)
   }
   return null
 }
@@ -97,7 +101,7 @@ function funnelToTabular(data: DashboardChartData): TabularResult {
     const categories = data.categories ?? []
     const rows = categories.map((cat, i) => ({
       Stage: cat,
-      Value: (firstSeries as { data: number[] }).data[i] ?? 0,
+      Value: numericValue((firstSeries as { data: unknown[] }).data[i]) ?? 0,
     }))
     return { columns: ["Stage", "Value"], rows }
   }
@@ -106,7 +110,7 @@ function funnelToTabular(data: DashboardChartData): TabularResult {
   const rows = (funnelSeries?.data ?? []).map(
     (d: { name: string; value: number }) => ({
       Stage: d.name,
-      Value: d.value,
+      Value: numericValue(d.value),
     })
   )
   return { columns: ["Stage", "Value"], rows }
@@ -117,7 +121,7 @@ function pieToTabular(data: DashboardChartData): TabularResult {
   const rows = (series?.data ?? []).map(
     (d: { name: string; value: number }) => ({
       Name: d.name,
-      Value: d.value,
+      Value: numericValue(d.value),
     })
   )
   return { columns: ["Name", "Value"], rows }
@@ -137,7 +141,7 @@ function radarToTabular(data: DashboardChartData): TabularResult {
       Indicator: typeof ind === "string" ? ind : ind.name,
     }
     for (const s of series) {
-      row[s.name] = s.data[i] ?? null
+      row[s.name] = numericValue(s.data[i])
     }
     return row
   })
@@ -149,7 +153,12 @@ function gaugeToTabular(data: DashboardChartData): TabularResult {
   const gauge = data.series as { value: number; name?: string }
   return {
     columns: ["Name", "Value"],
-    rows: [{ Name: gauge?.name ?? "Value", Value: gauge?.value ?? 0 }],
+    rows: [
+      {
+        Name: gauge?.name ?? "Value",
+        Value: numericValue(gauge?.value) ?? 0,
+      },
+    ],
   }
 }
 
@@ -161,7 +170,7 @@ function heatmapToTabular(data: DashboardChartData): TabularResult {
   const rows = points.map(([x, y, value]) => ({
     X: xCats[x] ?? x,
     Y: yCats[y] ?? y,
-    Value: value,
+    Value: numericValue(value),
   }))
 
   return { columns: ["X", "Y", "Value"], rows }
@@ -186,8 +195,8 @@ function scatterToTabular(
     series.data.map((point) => ({
       series: series.name,
       label: Array.isArray(point) ? "" : (point.label ?? ""),
-      x: Array.isArray(point) ? point[0] : point.x,
-      y: Array.isArray(point) ? point[1] : point.y,
+      x: numericValue(Array.isArray(point) ? point[0] : point.x),
+      y: numericValue(Array.isArray(point) ? point[1] : point.y),
     }))
   )
 
