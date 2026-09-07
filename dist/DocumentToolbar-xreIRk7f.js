@@ -1,13 +1,13 @@
 import { jsxs as i, jsx as l } from "react/jsx-runtime";
-import { useState as u, useCallback as m, useMemo as x } from "react";
-import { u as p, i as w, j as S, k, l as h } from "./F0CanvasPanel-BUVscEq0.js";
-import { n as C, a as g, f as v, T as r, d as F } from "./index-CKs4d2Y3.js";
+import { useState as u, useCallback as m, useMemo as p } from "react";
+import { u as x, i as w, j as k, k as S, l as C } from "./F0CanvasPanel-CS3L_4u4.js";
+import { n as g, a as h, f as v, T as r, d as F } from "./index-DaA-iZiS.js";
 const D = () => {
   const [t, a] = u(1), n = m(
-    () => a((e) => C(e) ?? e),
+    () => a((e) => g(e) ?? e),
     []
   ), c = m(
-    () => a((e) => g(e) ?? e),
+    () => a((e) => h(e) ?? e),
     []
   );
   return { scale: t, zoomIn: n, zoomOut: c, setScale: a };
@@ -19,7 +19,7 @@ const D = () => {
   zoom: e,
   children: f
 }) => {
-  const { pdfViewer: s } = p(), d = x(
+  const { pdfViewer: s } = x(), d = p(
     () => v.map((o) => ({
       value: o,
       label: `${Number(o) * 100}%`
@@ -48,15 +48,14 @@ const D = () => {
             {
               label: s.zoomIn,
               onClick: e.zoomIn,
-              icon: S
+              icon: k
             }
           ),
           /* @__PURE__ */ l(
-            k,
+            S,
             {
               hideLabel: !0,
               label: s.scaleSelector,
-              showSearchBox: !1,
               options: d,
               value: String(e.scale),
               onChange: (o) => e.setScale(Number(o))
@@ -71,7 +70,7 @@ const D = () => {
               onClick: () => {
                 F(t, a, n);
               },
-              icon: h
+              icon: C
             }
           ),
           c?.map((o, b) => /* @__PURE__ */ l(

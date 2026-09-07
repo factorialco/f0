@@ -8946,12 +8946,11 @@ declare type F0SelectPopupProps<T extends string, R = unknown> = {
     onChangeSelectedOption?: (option: F0SelectItemObject<T, ResolvedRecordType<R>> | undefined, checked: boolean) => void;
     open?: boolean;
     /**
-     * Whether the list can be searched. Defaults to true for a field select over
-     * static `options`, where filtering is local; a `source` is opt-in.
+     * Whether the list can be searched.
      *
-     * With no filters the trigger itself is the search field. With filters, and
-     * for `variant="inline"`, `asList` and custom triggers, the search box stays
-     * in the dropdown's top row.
+     * With no filters the trigger itself is the search field: you type where the
+     * value shows. With filters, and for `variant="inline"`, `asList` and custom
+     * triggers, the search box stays in the dropdown's top row.
      */
     showSearchBox?: boolean;
     /**
