@@ -4,6 +4,8 @@ import { MentionList } from "./MentionList"
 import { MentionPopover } from "./MentionPopover"
 import { MentionedUser, MentionListRef } from "./types"
 
+export const MENTION_SUGGESTION_DEBOUNCE_MS = 150
+
 export function createSuggestionConfig(
   mentionSuggestions: MentionedUser[],
   setMentionSuggestions: (suggestions: MentionedUser[]) => void,
@@ -25,30 +27,118 @@ export function createSuggestionConfig(
     search: user.label.toLowerCase(),
   }))
 
-  return {
-    char: "@",
-    minLength: 0,
-    items: async ({ query }: { query: string }) => {
-      if (onMentionQueryStringChanged) {
+  const searchUsers = onMentionQueryStringChanged
+    ? async (query: string): Promise<MentionedUser[]> => {
         try {
-          const suggestions = await onMentionQueryStringChanged(query)
-          setMentionSuggestions(suggestions || [])
-          return suggestions || []
+          return (await onMentionQueryStringChanged(query)) || []
         } catch {
           return []
         }
-      } else if (searchableUsers) {
-        const normalizedQuery = query.toLowerCase().trim()
-        const filtered = normalizedQuery
-          ? searchableUsers
-              .filter(({ search }) => search.includes(normalizedQuery))
-              .map(({ user }) => user)
-          : searchableUsers.map(({ user }) => user)
-        setMentionSuggestions(filtered)
-        return filtered
       }
-      return mentionSuggestions
-    },
+    : searchableUsers
+      ? (query: string): MentionedUser[] => {
+          const normalizedQuery = query.toLowerCase().trim()
+          return normalizedQuery
+            ? searchableUsers
+                .filter(({ search }) => search.includes(normalizedQuery))
+                .map(({ user }) => user)
+            : searchableUsers.map(({ user }) => user)
+        }
+      : undefined
+
+  let generation = 0
+  let sessionStarted = false
+  let cachedQuery: string | null = null
+  let cachedItems: MentionedUser[] = []
+  let debounceTimer: ReturnType<typeof setTimeout> | null = null
+  let queued: {
+    query: string
+    promise: Promise<MentionedUser[]>
+    resolve: (items: MentionedUser[]) => void
+  } | null = null
+
+  const run = (query: string): Promise<MentionedUser[]> => {
+    const mine = ++generation
+    return Promise.resolve(searchUsers?.(query) ?? mentionSuggestions).then(
+      (items) => {
+        // tiptap hands `items` no cancellation signal and discards no late
+        // result, so a superseded pass must drop its own answer here.
+        if (mine !== generation) {
+          return cachedItems
+        }
+        cachedQuery = query
+        cachedItems = items
+        setMentionSuggestions(items)
+        return items
+      }
+    )
+  }
+
+  const abandonQueued = () => {
+    if (debounceTimer !== null) {
+      clearTimeout(debounceTimer)
+      debounceTimer = null
+    }
+    const pending = queued
+    queued = null
+    pending?.resolve(cachedItems)
+  }
+
+  const requestItems = (query: string): Promise<MentionedUser[]> => {
+    if (query === cachedQuery) {
+      abandonQueued()
+      generation++
+      return Promise.resolve(cachedItems)
+    }
+
+    // tiptap awaits `items` before it calls `onStart`, so delaying the first
+    // answer of a session would delay the popover itself.
+    const immediate = query === "" || !sessionStarted
+    sessionStarted = true
+
+    if (immediate) {
+      abandonQueued()
+      return run(query)
+    }
+
+    if (queued) {
+      queued.query = query
+    } else {
+      let resolve: (items: MentionedUser[]) => void = () => {}
+      const promise = new Promise<MentionedUser[]>((settle) => {
+        resolve = settle
+      })
+      queued = { query, promise, resolve }
+    }
+
+    if (debounceTimer !== null) {
+      clearTimeout(debounceTimer)
+    }
+    debounceTimer = setTimeout(() => {
+      debounceTimer = null
+      const pending = queued
+      queued = null
+      if (pending) {
+        void run(pending.query).then(pending.resolve)
+      }
+    }, MENTION_SUGGESTION_DEBOUNCE_MS)
+
+    return queued.promise
+  }
+
+  const resetSuggestionState = () => {
+    abandonQueued()
+    generation++
+    sessionStarted = false
+    cachedQuery = null
+    cachedItems = []
+  }
+
+  return {
+    char: "@",
+    minLength: 0,
+    items: ({ query }: { query: string }): Promise<MentionedUser[]> =>
+      searchUsers ? requestItems(query) : Promise.resolve(mentionSuggestions),
     render: () => {
       let component: ReactRenderer | null = null
       let popoverRoot: Root | null = null
@@ -178,6 +268,7 @@ export function createSuggestionConfig(
         },
         onExit() {
           latestProps = null
+          resetSuggestionState()
           if (popoverRoot && container) {
             popoverRoot.unmount()
             container.remove()
