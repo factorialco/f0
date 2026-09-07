@@ -384,10 +384,6 @@ const Container = forwardRef<
                   )}
                   {header.subtitle && (
                     <div className="flex flex-row items-center gap-1">
-                      {/* The dot separates the title from the subtitle — unless
-                        the title is a LINK, which already ends in a chevron:
-                        the two together read as a stray glyph between them
-                        ("Wellness programs › · Boosting workplace health"). */}
                       {!header.link && <InlineDot />}
                       <CardSubtitle className="truncate">
                         {header.subtitle}
