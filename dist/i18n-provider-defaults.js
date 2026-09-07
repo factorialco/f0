@@ -1010,6 +1010,7 @@ const e = {
     searchCountry: "Search country",
     noCountryResults: "No country found",
     noResults: "No addresses found",
+    searchHint: "Type an address to search",
     searching: "Searching addresses"
   },
   imageUpload: {
