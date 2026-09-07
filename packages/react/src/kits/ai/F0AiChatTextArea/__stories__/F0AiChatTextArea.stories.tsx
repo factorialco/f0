@@ -17,6 +17,7 @@ import {
   Receipt,
   Search,
   Settings,
+  Upsell,
 } from "@/icons/app"
 import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
 
@@ -104,6 +105,7 @@ const FILE_UPLOAD_CONFIG: AiChatFileAttachmentConfig = {
 const CREDIT_WARNING: AiChatCreditWarning = {
   level: "soft",
   onGetCredits: () => console.log("get credits clicked"),
+  getCreditsIcon: Upsell,
   onDismiss: () => console.log("dismiss clicked"),
 }
 
