@@ -5,7 +5,6 @@ import type { CountryCode } from "@/lib/countries"
 
 import { InputMessages } from "@/components/F0InputField/components/InputMessages"
 import { useI18n } from "@/lib/providers/i18n"
-import { cn } from "@/lib/utils"
 
 import type { EditableLocationPart } from "./internal-types"
 import type {
@@ -199,21 +198,11 @@ export const F0LocationInput = forwardRef<
   return (
     <fieldset
       className="m-0 flex min-w-0 flex-col gap-3 border-0 p-0"
+      // The group is named for assistive tech only: each part carries its own
+      // visible label, and a heading above them reads as a second form title
+      aria-label={label}
       aria-busy={resolving || undefined}
     >
-      <legend
-        className={cn(
-          "text-md mb-2 flex gap-1 p-0 font-medium text-f1-foreground-secondary",
-          hideLabel && "sr-only"
-        )}
-      >
-        {label}
-        {required && (
-          <span className="text-f1-foreground-critical" aria-hidden="true">
-            *
-          </span>
-        )}
-      </legend>
       {visibleFields.has("country") && (
         <CountrySelect
           label={labels.country}
