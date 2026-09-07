@@ -6,13 +6,7 @@ import { act, zeroRender } from "@/testing/test-utils"
 
 import { WidgetStage } from "./WidgetStage"
 
-/**
- * WHAT A STAGE IS FOR: drawing one widget's card somewhere its container is not,
- * without the card being built again. `stackedRemount.test.tsx` holds the
- * behaviour a reader would notice; these hold the three properties it rests on.
- */
 describe("WidgetStage", () => {
-  /** How many times the card has been built, and what it could measure. */
   let mounts = 0
   let parentOnMount: string | null = null
 
@@ -20,8 +14,6 @@ describe("WidgetStage", () => {
     const ref = useRef<HTMLSpanElement>(null)
     useLayoutEffect(() => {
       mounts += 1
-      // What the card's own layout effect can see of the document — where a
-      // widget that measures itself would do it.
       parentOnMount =
         ref.current?.closest("[data-where]")?.getAttribute("data-where") ?? null
     }, [])
@@ -38,9 +30,6 @@ describe("WidgetStage", () => {
     move = setHosted
     return (
       <>
-        {/* The host FIRST, and the card only once it is known. That is the
-            layout's own order too: it draws its hosts at every width precisely
-            so a card is never asking for one that does not exist yet. */}
         <div data-where="elsewhere" ref={setHost} />
         <div data-where="column">
           {host || !startHosted ? (
@@ -67,19 +56,12 @@ describe("WidgetStage", () => {
       ?.closest("[data-where]")
       ?.getAttribute("data-where")
 
-  /**
-   * THE STAGE IS ATTACHED IN THE COMMIT, before the card's own layout effects.
-   * Appended from an effect instead, this one would run AFTER the card's, and
-   * every widget that measures itself on mount would measure a detached tree —
-   * a height of zero, from a card that is really on screen.
-   */
   test("has the card in the document by the time the card's effects run", () => {
     setup()
 
     expect(parentOnMount).toBe("column")
   })
 
-  /** …including when it starts out hosted somewhere else. */
   test("and in the host when it starts there", () => {
     setup(true)
 
@@ -93,12 +75,6 @@ describe("WidgetStage", () => {
     expect(mounts).toBe(1)
   })
 
-  /**
-   * THE ONE THAT MATTERS. React cannot be handed a different portal container —
-   * it rebuilds the subtree into it — so the container never changes and the
-   * DOM node moves instead. Moving a node does not touch a fiber, so the card
-   * is the same render on the other side.
-   */
   test("moves the card to its host without building it again", () => {
     const { container } = setup()
     expect(whereIsCard(container)).toBe("column")
@@ -119,12 +95,6 @@ describe("WidgetStage", () => {
     expect(mounts).toBe(1)
   })
 
-  /**
-   * The stage is OURS, not React's: React empties it when the portal goes, but
-   * the div itself was appended by hand and has to be taken out by hand — left
-   * behind, every unmounted widget would leak an empty box into whatever it was
-   * drawn in.
-   */
   test("takes its own box out of the document when the widget goes", () => {
     const { container, unmount } = setup()
     expect(container.querySelector("[data-widget-stage]")).not.toBeNull()

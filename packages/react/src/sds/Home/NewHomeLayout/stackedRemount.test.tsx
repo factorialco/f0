@@ -8,10 +8,6 @@ import { act, screen, zeroRender } from "@/testing/test-utils"
 import { type HomeWidgetItem } from "../slotRenderers"
 import { NewHomeLayout } from "./index"
 
-/**
- * The layout decides everything responsive from its OWN measured width, so these
- * tests drive that width rather than the viewport.
- */
 let layoutWidth = 1400
 let resizeCallbacks: Array<(entries: ResizeObserverEntry[]) => void> = []
 
@@ -20,13 +16,6 @@ const resizeLayoutTo = (width: number) => {
   act(() => resizeCallbacks.forEach((notify) => notify([])))
 }
 
-/**
- * A WIDGET WHOSE RENDER IS NOT FREE, and the instrument for every test here: it
- * has nothing to show on its first frame and only settles once its deferred read
- * lands, exactly as the real tiles do (a running total, a fetch, a timer). So a
- * remount is visible twice over — the count goes up, and the tile drops back to
- * "loading" on screen.
- */
 let mounts: Record<string, number> = {}
 
 const Counted = ({ id }: { id: string }) => {
@@ -47,7 +36,6 @@ const widget = (id: string, extra: Partial<HomeWidgetItem> = {}) => ({
   ...extra,
 })
 
-/** Two free cards in the main column, a pinned one and a free one in the rail. */
 const MAIN = [widget("main-a"), widget("main-b")]
 const RAIL = [widget("clock", { locked: true }), widget("events")]
 
@@ -68,8 +56,6 @@ const renderLayout = async (width: number, props = {}) => {
       ]}
     </NewHomeLayout>
   )
-  // Everything has settled before the resize, so anything that reads "loading"
-  // afterwards was built again.
   await screen.findByText("main-a settled")
   return result
 }
@@ -81,8 +67,6 @@ beforeEach(() => {
   })
   resizeCallbacks = []
   mounts = {}
-  // jsdom has no ResizeObserver. This one keeps its callback so a test can fire
-  // it (`resizeLayoutTo`) instead of only serving the initial read.
   vi.stubGlobal(
     "ResizeObserver",
     class {
@@ -96,15 +80,6 @@ beforeEach(() => {
   )
 })
 
-/**
- * STACKING IS A PRESENTATION CHANGE, on the same terms as collapsing: below `md`
- * the rail's widgets fold into the main column. A move is not a rebuild — a tile
- * that had loaded has to still be loaded on the other side of the resize, in
- * the main column and in the rail alike.
- *
- * `index.spec.tsx` covers the collapse threshold (1400 → 1000). These cover the
- * STACK threshold (→ 700), which is where the rail stops existing.
- */
 describe("resizing down to a stacked (mobile) width", () => {
   test("keeps the main column's widgets as they are", async () => {
     await renderLayout(1400)
@@ -117,14 +92,6 @@ describe("resizing down to a stacked (mobile) width", () => {
     expect(mounts["main-b"]).toBe(1)
   })
 
-  /**
-   * The one that bites in practice. Stacked, the rail's LOOSE widgets join the
-   * main container's own `widgets` — and `WidgetContainer` decides whether the
-   * column is draggable from how many unlocked widgets are in that array. A main
-   * column with one free card among pinned ones therefore crosses from
-   * "nothing to arrange" to "draggable" purely because the rail folded in, which
-   * swaps the column's tree for the DndContext one and rebuilds every card in it.
-   */
   test("keeps them even when the fold-in makes the column draggable", async () => {
     await renderLayout(1400, {
       leftWidgets: [widget("main-a", { locked: true }), widget("main-b")],
@@ -149,11 +116,6 @@ describe("resizing down to a stacked (mobile) width", () => {
     expect(mounts["events"]).toBe(1)
   })
 
-  /**
-   * THE WHOLE JOURNEY A WINDOW MAKES, one step at a time — column, strip,
-   * stacked, and back out again. Nothing about it is a new widget, so nothing in
-   * it may be built twice.
-   */
   test("survives the whole way down and back", async () => {
     await renderLayout(1400)
 
@@ -171,11 +133,6 @@ describe("resizing down to a stacked (mobile) width", () => {
   })
 })
 
-/**
- * WHOSE WIDGETS THEY ARE, once they are drawn in the main column. They are still
- * the RAIL's: the rail's container owns them, so what the layout reports about
- * them is reported for the side they belong to.
- */
 describe("the rail's widgets while the layout is stacked", () => {
   test("are drawn in the main column, pins interleaved and the rest at the foot", async () => {
     const { container } = await renderLayout(700)
@@ -184,7 +141,6 @@ describe("the rail's widgets while the layout is stacked", () => {
       .map((node) => node.textContent?.trim())
       .filter(Boolean)
 
-    // The pin lands between the shortcuts and the feed; the loose one at the end.
     expect(order).toEqual([
       "greeting",
       "shortcuts",
@@ -196,13 +152,6 @@ describe("the rail's widgets while the layout is stacked", () => {
     ])
   })
 
-  /**
-   * THEY OFFER NO DRAG, and the main column's own cards still do. A folded-in
-   * card is scattered through content the main column owns, so a drag on it
-   * would be a reorder of a list that is not on screen as a list. The main
-   * column is still a column, and its own cards are unaffected — which is the
-   * point of the rail keeping them rather than handing them over.
-   */
   test("offer no drag, while the main column's still do", async () => {
     const { container } = await renderLayout(700)
     const grabbable = (id: string) =>

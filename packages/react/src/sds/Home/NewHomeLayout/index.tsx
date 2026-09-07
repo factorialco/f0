@@ -520,11 +520,6 @@ const SCROLLBAR_HIDDEN = "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
 const COLUMN_GAP_PX = 16
 /** Tailwind's `md` — below it the layout is one column unless the rail is collapsed. */
 const TWO_COLUMN_MIN_PX = 768
-/**
- * A HOST THAT IS NOT A BOX. `display: contents` so an empty host costs nothing
- * where it is unused, and a host holding a card leaves the card as the flex item
- * the column's gap was written for.
- */
 const NO_BOX = { display: "contents" } as const
 const PANEL_LEAVE_MS = 150
 const PANEL_OPEN_MS = 150
@@ -857,32 +852,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
       pinned: rightWidgets.filter((widget) => widget.locked),
       rest: rightWidgets.filter((widget) => !widget.locked),
     }
-    /**
-     * WHERE EACH RAIL WIDGET IS DRAWN while the layout is stacked — one empty
-     * box per widget, placed where that widget belongs in the main column, and
-     * handed to the rail's container as the card's `widgetHostFor`.
-     *
-     * The rail's widgets STAY THE RAIL'S. It used to hand the pinned ones to the
-     * main column as a second render and append the loose ones to the main
-     * container's own widget list, which built every one of them again on the
-     * resize — a clock-in tile going back to "clocking in…" is the whole reason
-     * this exists — and reordering the main column reported the rail's ids under
-     * side `"main"` into the bargain. Now nothing moves but the DOM (see
-     * `WidgetStage`).
-     *
-     * DRAWN AT EVERY WIDTH, not only stacked, and empty (`display: contents`) so
-     * they cost nothing where they are not used. Rendering them with the
-     * threshold would put them a commit BEHIND it: the hosts would not exist on
-     * the render that first stacks, so every card would have nowhere to go for a
-     * frame.
-     */
     const [hosts, setHosts] = useState<Record<string, HTMLElement | null>>({})
-    /**
-     * ONE ref callback per widget, kept for as long as the layout lives. A fresh
-     * closure each render would be a DIFFERENT ref to React, which calls the old
-     * one with `null` and the new one with the node on every single render — two
-     * state updates per render, which is a loop rather than a layout.
-     */
     const hostRefs = useRef(
       new Map<string, (node: HTMLElement | null) => void>()
     )
@@ -902,21 +872,14 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
     // them — because "just under the shortcuts" is a place inside content this
     // layout doesn't own. Splitting the children is the only way to reach it.
     const childBlocks = Children.toArray(children)
-    /**
-     * ARRIVAL, in reading order: each block of the main column rises in one beat
-     * after the one above it, and the widgets under them (the container's own
-     * `entrance.order`) carry the same count on rather than restarting it — a
-     * widget below the feed arrives AFTER the feed, not alongside it.
-     *
-     * Each block keeps the key `Children.toArray` gave it, so the wrapper is
-     * identified by the block it wraps: keyed by index instead, reordering the
-     * content would re-key every wrapper below the change and replay its
-     * entrance.
-     *
-     * A HOST IS NOT A BLOCK. It takes no beat of the stagger and no wrapper: the
-     * card that lands in it brings its own arrival from the container that owns
-     * it, and animating the host as well would play that arrival twice.
-     */
+    // ARRIVAL, in reading order: each block of the main column rises in one beat
+    // after the one above it, and the widgets under them (the container's own
+    // `entrance.order`) carry the same count on rather than restarting it — a
+    // widget below the feed arrives AFTER the feed, not alongside it.
+    //
+    // Each block keeps the key `Children.toArray` gave it, so the wrapper is
+    // identified by the block it wraps: keyed by index instead, reordering the
+    // content would re-key every wrapper below the change and replay its entrance.
     const asBlock = (block: ReactNode, order: number) => (
       <HomeEntrance
         key={isValidElement(block) && block.key != null ? block.key : order}
@@ -1273,14 +1236,6 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             // column's own width, no longer the reading column's.
             style={{ maxWidth: `${mainWidth}px` }}
             widgets={leftWidgets}
-            // AND THE REST OF THE RAIL, at the very bottom of the column: one
-            // host per loose widget, in the rail's own order. A host each rather
-            // than one for all of them, so the order is the order they are
-            // written in rather than the order their effects happened to run.
-            //
-            // Inside the container and not after it, because the footnote and
-            // the add placeholder are the COLUMN's and belong under everything
-            // the column draws — a folded-in card included.
             afterWidgets={loosePins.rest.map((widget) => (
               <div
                 key={`loose-host-${widget.id}`}
@@ -1310,8 +1265,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
                 ? () => onClickAddNewWidget("main")
                 : undefined
             }
-            // The widgets pick the stagger up where the freeform blocks left
-            // it. The hosts among them are not blocks and take no beat.
+            // The widgets pick the stagger up where the freeform blocks left it.
             entrance={{ order: childBlocks.length }}
           >
             {mainChildren}
@@ -1453,14 +1407,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             built the rail's widgets again from nothing: a tile that had loaded
             went back to loading, a running clock restarted, an animation
             replayed. Presentation changes now move ONE render around instead of
-            replacing it.
-
-            STACKED IS NO LONGER THE EXCEPTION. Below `md` the rail's widgets
-            belong to the main column's flow, interleaved with content this
-            layout doesn't own — but they get there by being DRAWN there
-            (`widgetHostFor`) rather than by being handed over, so this element
-            stays mounted and keeps owning them. All that changes is that it has
-            nothing left to draw and hides itself. */}
+            replacing it. */}
         {!sideReady ? null : (
           <motion.aside
             ref={railFade.ref}
@@ -1469,10 +1416,6 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             // waits for the retract, because `display: none` cannot be animated
             // out of: applied on the frame the rail collapses, it would delete the
             // cards instead of letting them go into the glyphs.
-            //
-            // STACKED it is hidden outright: every card it owns is drawn in the
-            // main column, so what is left here is an empty box. Hiding it does
-            // not hide them — they are not in it any more (`WidgetStage`).
             hidden={stacked || (railInPanel && rail.panelHidden)}
             className={cn(
               "min-h-0 overflow-y-auto overflow-x-hidden",
@@ -1512,14 +1455,6 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
               // panel's one-widget filter belongs to the panel; while the rail is
               // still retracting the column is still a column, and its cards have
               // a fade to finish (`stow`).
-              //
-              // STACKED, none of that applies: the cards are in the main column,
-              // where every one of them is simply itself. The panel's filter and
-              // the strip's stow are both about a rail that is on screen as a
-              // rail, and left on they would hide or fade cards that are now
-              // ordinary content. (`collapsed` is true whenever the layout is
-              // stacked — a 700px window is far too narrow for both columns — so
-              // these have to say so explicitly.)
               visibleWidgetId={
                 !stacked && railInPanel ? panelWidgetId : undefined
               }
@@ -1527,8 +1462,6 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
               // geometry comes with it: the cards fade where they stand, so
               // there is nothing for them to be mapped onto.
               stow={{ stowed: !stacked && collapsed }}
-              // WHERE EACH CARD IS DRAWN. Stacked, that is the main column's
-              // hosts; otherwise it is right here, in the rail.
               widgetHostFor={widgetHostFor}
               slotRenderers={slotRenderers}
               renderWidget={renderWidget}
@@ -1536,13 +1469,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
               // The rail virtualizes only while it is a COLUMN — as a floating
               // panel it is one card in a box of its own, and the container reads
               // that off `visibleWidgetId` by itself, mounting only the card the
-              // panel shows. The setting stays put through the change: it decides
-              // how the widgets are drawn, and a prop that came and went would be
-              // one more thing moving mid-gesture.
-              // …and not at all while stacked: a virtualized column places its
-              // cards from its own scroll region, and stacked there is no rail
-              // scroll region to place them in — each card is in a host in the
-              // main column's flow, where the flow is what places it.
+              // panel shows.
               virtualized={stacked ? false : virtualizationFor("right")}
               // NOT gated on `collapsed`: whether the column is arrangeable
               // decides its tree's SHAPE (a draggable column is wrapped in a
@@ -1550,9 +1477,6 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
               // would rebuild every widget in it — the one thing this rail
               // exists to avoid.
               disableEdition={!canEditSide("right")}
-              // Stacked too: the cards are scattered through the main column's
-              // flow, so a drag among them would be a reorder of a list that is
-              // not on screen as a list.
               disableDrag={collapsed || stacked}
               dragSurfaceSelector="[data-page-surface]"
               onReorder={
