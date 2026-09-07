@@ -23,8 +23,18 @@ export type LocatedMention<T> = {
  */
 const BASE_WITH_MARKS = /[\s\S]\p{M}*/uy
 
-/** Marks never open a name, so one sitting after a match extends the letter. */
-const COMBINING_MARK = /\p{M}/u
+/**
+ * Marks never open a name, so one sitting after a match extends the letter.
+ * Sticky rather than a single-character test: a mark outside the BMP is two
+ * code units and a lone surrogate is not `\p{M}`, so reading one unit would
+ * wave an astral mark straight past the guard.
+ */
+const COMBINING_MARK = /\p{M}/uy
+
+const startsWithMark = (text: string, at: number): boolean => {
+  COMBINING_MARK.lastIndex = at
+  return COMBINING_MARK.test(text)
+}
 
 /**
  * No ASCII character carries an accent or composes with a neighbour, so in a
@@ -82,9 +92,7 @@ const literalMatchEnd = (
   needle: string
 ): number => {
   const end = from + needle.length
-  return text.startsWith(needle, from) && !COMBINING_MARK.test(text.charAt(end))
-    ? end
-    : -1
+  return text.startsWith(needle, from) && !startsWithMark(text, end) ? end : -1
 }
 
 /**

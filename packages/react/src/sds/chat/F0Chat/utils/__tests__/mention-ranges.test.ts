@@ -140,6 +140,12 @@ describe("locateMentions", () => {
     expect(locateMentions("hi @Ana\u0301!", [{ name: "Ana" }])).toEqual([])
   })
 
+  // A mark outside the BMP is two code units, and a lone surrogate is not
+  // `\p{M}`, so reading one unit at the end of a match waves it straight past.
+  it("does not swallow an astral combining mark either", () => {
+    expect(locateMentions("hi @Ana\u{1D167} x", [{ name: "Ana" }])).toEqual([])
+  })
+
   // `hooks/useMentions.ts` (`seedMentions`) calls this with bare `{ name }`
   // objects and reads back `{ entry: { name }, start }` to anchor a saved
   // message's mentions on its text. That shape has to keep resolving.
