@@ -814,7 +814,7 @@ describe("Select", () => {
     })
   })
 
-  it("renders search box when showSearchBox is true", async () => {
+  it("searches from the trigger itself, with no second box in the dropdown", async () => {
     const user = userEvent.setup()
     render(
       <F0Select
@@ -828,7 +828,194 @@ describe("Select", () => {
 
     await openSelect(user)
 
+    const trigger = screen.getByRole("combobox")
+    expect(trigger.tagName).toBe("INPUT")
+    expect(trigger).toHaveAttribute("aria-autocomplete", "list")
+    expect(trigger).toHaveAttribute(
+      "aria-controls",
+      screen.getByRole("listbox").id
+    )
+    expect(screen.queryByRole("searchbox")).not.toBeInTheDocument()
+    expect(screen.queryByText("Search options")).not.toBeInTheDocument()
+  })
+
+  it("keeps the trigger in the accessibility tree while the list is open", async () => {
+    const user = userEvent.setup()
+    render(
+      <F0Select
+        {...defaultSelectProps}
+        options={mockOptions}
+        onChange={() => {}}
+      />
+    )
+
+    await openSelect(user)
+
+    // An open select aria-hides the rest of the page. The field the user is
+    // typing into cannot be part of that: hiding it takes the combobox that
+    // the listbox is paired with out of the tree entirely.
+    const trigger = screen.getByRole("combobox")
+    expect(trigger).not.toHaveAttribute("aria-hidden")
+    expect(trigger.closest("[data-aria-hidden]")).toBeNull()
+  })
+
+  it("searches the options without being asked to", async () => {
+    const user = userEvent.setup()
+    render(
+      <F0Select
+        {...defaultSelectProps}
+        options={mockOptions}
+        onChange={() => {}}
+      />
+    )
+
+    await openSelect(user)
+    await user.type(screen.getByRole("combobox"), "1")
+
+    expect(screen.getByText("Option 1")).toBeInTheDocument()
+    await waitFor(() =>
+      expect(screen.queryByText("Option 2")).not.toBeInTheDocument()
+    )
+  })
+
+  it("leaves the trigger a plain button when search is turned off", async () => {
+    const user = userEvent.setup()
+    render(
+      <F0Select
+        {...defaultSelectProps}
+        options={mockOptions}
+        onChange={() => {}}
+        showSearchBox={false}
+      />
+    )
+
+    await openSelect(user)
+
+    // Aria-hidden while the popup is open — the point is that it was never
+    // swapped for an input.
+    expect(screen.getByRole("combobox", { hidden: true }).tagName).toBe(
+      "BUTTON"
+    )
+    expect(screen.queryByRole("searchbox")).not.toBeInTheDocument()
+  })
+
+  it("keeps the search box in the dropdown when the select has filters", async () => {
+    const user = userEvent.setup()
+    render(
+      <F0Select
+        {...defaultSelectProps}
+        source={createDataSourceDefinition<RecordType>({
+          filters: {
+            department: {
+              type: "in",
+              label: "Department",
+              options: { options: [{ value: "design", label: "Design" }] },
+            },
+          },
+          dataAdapter: {
+            paginationType: "infinite-scroll",
+            fetchData: () => ({
+              type: "infinite-scroll" as const,
+              cursor: undefined,
+              perPage: 100,
+              hasMore: false,
+              records: [{ id: "option1", name: "Option 1" }],
+              total: 1,
+            }),
+          },
+        })}
+        mapOptions={(item) => ({
+          value: item.id as string,
+          label: item.name as string,
+        })}
+        showSearchBox
+        searchBoxPlaceholder="Search options"
+      />
+    )
+
+    await openSelect(user)
+
+    expect(screen.getByRole("searchbox")).toBeInTheDocument()
     expect(screen.getByText("Search options")).toBeInTheDocument()
+    expect(screen.getByRole("combobox", { hidden: true }).tagName).toBe(
+      "BUTTON"
+    )
+  })
+
+  it("picks the first standing option on Enter", async () => {
+    const user = userEvent.setup()
+    const onChange = vi.fn()
+    render(
+      <F0Select
+        {...defaultSelectProps}
+        options={mockOptions}
+        onChange={onChange}
+      />
+    )
+
+    await openSelect(user)
+    await user.type(screen.getByRole("combobox"), "3")
+    await waitFor(() =>
+      expect(screen.queryByText("Option 1")).not.toBeInTheDocument()
+    )
+    await user.keyboard("{Enter}")
+
+    await waitFor(() =>
+      expect(onChange).toHaveBeenCalledWith(
+        "option3",
+        expect.anything(),
+        expect.anything()
+      )
+    )
+  })
+
+  it("hands focus to the list on ArrowDown", async () => {
+    const user = userEvent.setup()
+    render(
+      <F0Select
+        {...defaultSelectProps}
+        options={mockOptions}
+        onChange={() => {}}
+      />
+    )
+
+    await openSelect(user)
+    await user.keyboard("{ArrowDown}")
+
+    await waitFor(() =>
+      expect(
+        within(screen.getByRole("listbox")).getByRole("option", {
+          name: /Option 1/,
+        })
+      ).toHaveFocus()
+    )
+  })
+
+  it("drops the query when the dropdown closes", async () => {
+    const user = userEvent.setup()
+    const onSearchChange = vi.fn()
+    render(
+      <F0Select
+        {...defaultSelectProps}
+        options={mockOptions}
+        onChange={() => {}}
+        onSearchChange={onSearchChange}
+      />
+    )
+
+    await openSelect(user)
+    await user.type(screen.getByRole("combobox"), "1")
+    await waitFor(() => expect(onSearchChange).toHaveBeenCalledWith("1"))
+
+    await user.keyboard("{Escape}{Escape}")
+
+    await waitFor(() =>
+      expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
+    )
+    expect(screen.getByRole("combobox")).toHaveValue("")
+
+    await openSelect(user)
+    expect(screen.getByText("Option 2")).toBeInTheDocument()
   })
 
   it("renders icon tags with text", async () => {
@@ -1025,7 +1212,7 @@ describe("Select", () => {
     )
 
     await openSelect(user)
-    await user.type(screen.getByRole("searchbox"), "1")
+    await user.type(screen.getByRole("combobox"), "1")
 
     expect(screen.getByText("Option 1")).toBeInTheDocument()
     await waitFor(() =>
@@ -1047,7 +1234,7 @@ describe("Select", () => {
     )
 
     await openSelect(user)
-    const searchInput = screen.getByRole("searchbox")
+    const searchInput = screen.getByRole("combobox")
     await user.type(searchInput, "Option 1")
 
     await waitFor(() =>
@@ -1079,7 +1266,7 @@ describe("Select", () => {
     )
 
     await openSelect(user)
-    const searchInput = screen.getByRole("searchbox")
+    const searchInput = screen.getByRole("combobox")
     await waitFor(() => expect(searchInput).toHaveFocus())
 
     deferredOptions.resolve()
@@ -1114,11 +1301,11 @@ describe("Select", () => {
     )
 
     await openSelect(user)
-    const searchInput = screen.getByRole("searchbox")
+    const searchInput = screen.getByRole("combobox")
     const footerAction = screen.getByRole("button", { name: "Manage options" })
     await waitFor(() => expect(searchInput).toHaveFocus())
 
-    await user.tab()
+    footerAction.focus()
     expect(footerAction).toHaveFocus()
 
     deferredOptions.resolve()
@@ -1146,7 +1333,7 @@ describe("Select", () => {
     )
 
     await openSelect(user)
-    await user.type(screen.getByRole("searchbox"), "xyz")
+    await user.type(screen.getByRole("combobox"), "xyz")
 
     await waitFor(async () => {
       const emptyMessage = await screen.findByText("No results found")
@@ -1172,7 +1359,7 @@ describe("Select", () => {
 
     await openSelect(user)
 
-    const searchInput = screen.getByRole("searchbox")
+    const searchInput = screen.getByRole("combobox")
 
     // Focus the search input
     await user.click(searchInput)
@@ -1874,7 +2061,7 @@ describe("Select", () => {
 
       await openSelect(user)
 
-      const searchInput = screen.getByRole("searchbox")
+      const searchInput = screen.getByRole("combobox")
       await user.type(searchInput, "nonexistent")
 
       await waitFor(() => {
@@ -1921,7 +2108,7 @@ describe("Select", () => {
 
       await openSelect(user)
 
-      const searchInput = screen.getByRole("searchbox")
+      const searchInput = screen.getByRole("combobox")
       await user.type(searchInput, "new item")
 
       await waitFor(() => {
@@ -1958,7 +2145,7 @@ describe("Select", () => {
 
       await openSelect(user)
 
-      const searchInput = screen.getByRole("searchbox")
+      const searchInput = screen.getByRole("combobox")
       await user.type(searchInput, "new item")
 
       await waitFor(() => {

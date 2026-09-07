@@ -113,7 +113,11 @@ describe("DatePickerPopup portal container", () => {
 
     const yearList = await screen.findByRole("listbox")
     expect(portalContainer).toContainElement(yearList)
-    expect(yearSelector).toHaveAttribute("aria-expanded", "true")
+    // Re-queried: an open searchable select swaps the trigger button for its
+    // search input, so the node captured above is no longer the combobox.
+    expect(
+      screen.getByRole("combobox", { name: "Select year" })
+    ).toHaveAttribute("aria-expanded", "true")
     expect(portalContainer).toContainElement(document.activeElement)
   })
 })

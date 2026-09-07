@@ -595,6 +595,17 @@ interface SelectContentImplProps
    * Useful for "list" mode where the select is always open.
    */
   disableScrollLock?: boolean
+
+  /**
+   * Keeps the TRIGGER in the accessibility tree while the content is open.
+   *
+   * An open select aria-hides everything but its content, which is right while
+   * the trigger is only a button. It is wrong when the trigger is where the
+   * user is typing: a select whose search box lives in its own field keeps
+   * focus there, and hiding it takes both the field and its
+   * combobox/listbox pairing out of the tree the screen reader is reading.
+   */
+  retainTrigger?: boolean
 }
 
 const Slot = createSlot("SelectContent.RemoveScroll")
@@ -631,6 +642,7 @@ const SelectContentImpl = React.forwardRef<
     onEscapeKeyDown,
     onPointerDownOutside,
     disableScrollLock = false,
+    retainTrigger = false,
     //
     // PopperContent props
     side,
@@ -679,7 +691,9 @@ const SelectContentImpl = React.forwardRef<
     // Skip in item-aligned mode (list mode) where content is always visible
     if (context.open && position === "popper") {
       // Only hide others when open and ensure cleanup runs properly
-      const cleanup = hideOthers(content)
+      const cleanup = hideOthers(
+        retainTrigger && context.trigger ? [content, context.trigger] : content
+      )
       hideOthersCleanupRef.current = cleanup
       return () => {
         if (cleanup) {
@@ -688,7 +702,7 @@ const SelectContentImpl = React.forwardRef<
         hideOthersCleanupRef.current = null
       }
     }
-  }, [content, context.open, position])
+  }, [content, context.open, context.trigger, position, retainTrigger])
 
   // Make sure the whole tree has focus guards as our `Select` may be
   // the last element in the DOM (because of the `Portal`)
