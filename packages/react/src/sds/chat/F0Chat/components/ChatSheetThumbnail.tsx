@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState, type ReactNode } from "react"
-
 import { fetchWorkbook } from "@/components/F0PdfViewer/sheetPreview"
 
 // Enough cells to fill the 160px crop; the parse range is capped too, so a

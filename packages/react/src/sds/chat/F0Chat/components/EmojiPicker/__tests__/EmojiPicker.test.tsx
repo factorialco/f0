@@ -6,7 +6,6 @@ import {
   type ReactNode,
 } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import { screen, zeroRender as render, within } from "@/testing/test-utils"
 
 // jsdom has no layout, so Virtuoso would render zero rows and every assertion

@@ -1,5 +1,4 @@
 import { useCallback, useRef } from "react"
-
 import {
   SortingsDefinition,
   SortingsState,
@@ -8,7 +7,6 @@ import {
   FiltersDefinition,
   FiltersState,
 } from "@/patterns/OneFilterPicker/types"
-
 import { useF0EventCatcher } from "../../lib/providers/events"
 import { normalizeEventValue } from "../../lib/providers/events/normalize"
 

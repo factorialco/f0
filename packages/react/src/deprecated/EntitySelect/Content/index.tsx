@@ -1,11 +1,9 @@
 import { Action } from "@/components/F0Select/components/SelectBottomActions"
-
 import {
   EntitySelectEntity,
   EntitySelectNamedGroup,
   EntitySelectSubEntity,
 } from "../types"
-
 import { MainContent } from "./MainContent"
 import { SecondaryContent } from "./SecondaryContent"
 

@@ -6,7 +6,6 @@ import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { SelectItem as SelectItemPrimitive } from "@/ui/Select"
-
 import { F0SelectItemMetadata, F0SelectItemObject } from "../types"
 
 const DIAL_CODE_PATTERN = /^\+\d{1,4}$/

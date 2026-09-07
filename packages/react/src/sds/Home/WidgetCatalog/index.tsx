@@ -6,7 +6,6 @@ import {
   useMemo,
   useState,
 } from "react"
-
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import {
   modules,
@@ -19,7 +18,6 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { F0Dialog } from "@/patterns/F0Dialog"
 import { F0Form, useF0Form } from "@/patterns/F0Form"
-
 import {
   resolveWidgetHeader,
   widgetChrome,

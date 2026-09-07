@@ -1,8 +1,6 @@
 import "@/sds/social/Reactions/Picker/index.css"
-
 import data from "@emoji-mart/data/sets/15/twitter.json"
 import { useEffect, useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { EmojiPicker } from "@/lib/EmojiPicker"
 import { cn } from "@/lib/utils"

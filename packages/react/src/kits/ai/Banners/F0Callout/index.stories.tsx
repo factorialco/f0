@@ -1,11 +1,8 @@
 import { StoryFn, StoryObj } from "@storybook/react-vite"
 import { expect, within } from "storybook/test"
-
 import { CheckDouble, ExternalLink } from "@/icons/app"
 import { WithDataTestIdProps } from "@/lib/data-testid"
-
 import { CalloutSkeleton } from "./CalloutInternal"
-
 import { F0Callout, F0CalloutProps } from "."
 
 const meta = {

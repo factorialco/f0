@@ -1,6 +1,5 @@
 import { AnimatePresence, motion } from "motion/react"
 import { ReactElement, useContext, useRef, useState } from "react"
-
 import { ModuleId } from "@/components/avatars/F0AvatarModule"
 import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
@@ -17,12 +16,10 @@ import { cn } from "@/lib/utils"
 import { useSidebar } from "@/patterns/ApplicationFrame/FrameProvider"
 import { ActionButtonVariant } from "@/ui/Action"
 import { Skeleton } from "@/ui/skeleton"
-
 import { Breadcrumbs, BreadcrumbsProps } from "../Breadcrumbs"
 import { FavoriteButton } from "../Favorites"
 import { NavigationProps, PageNavigation } from "../PageNavigation"
 import { ProductUpdates, ProductUpdatesProp } from "../ProductUpdates"
-
 import { PageHeaderNavigationContext } from "./PageHeaderNavigationContext"
 
 export {

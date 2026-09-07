@@ -1,10 +1,8 @@
 import { useId } from "react"
 import type { ControllerRenderProps, FieldValues } from "react-hook-form"
-
 import { InputMessages } from "@/components/F0InputField/components/InputMessages"
 import { renderFieldInput } from "@/patterns/F0Form/fields/renderFieldInput"
 import { isFieldRequired } from "@/patterns/F0Form/fields/schema"
-
 import type { F0FormFieldProps } from "./types"
 
 /**

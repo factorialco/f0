@@ -2,12 +2,10 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useCallback, useEffect, useState } from "react"
 import { action } from "storybook/actions"
 import { expect, userEvent, waitFor, within } from "storybook/test"
-
 import { F0Button } from "@/components/F0Button"
 import { BellOff, Clock, New, PalmTree, People } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { ScrollArea } from "@/ui/scrollarea"
-
 import { SidebarChatList, type SidebarChatEmptyState } from "./SidebarChatList"
 import {
   SidebarChatProvider,

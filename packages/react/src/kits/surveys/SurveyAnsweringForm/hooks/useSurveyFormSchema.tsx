@@ -1,6 +1,5 @@
 import { useMemo } from "react"
 import { z, type ZodTypeAny } from "zod"
-
 import type { TranslationKey } from "@/lib/providers/i18n/i18n-provider-defaults"
 import { f0FormField } from "@/patterns/F0Form/f0Schema"
 import type { F0CheckboxField } from "@/patterns/F0Form/fields/checkbox/types"
@@ -11,7 +10,6 @@ import type {
 import type { F0Field, F0FileField } from "@/patterns/F0Form/fields/types"
 import type { F0SectionConfig } from "@/patterns/F0Form/types"
 import { F0FormField } from "@/patterns/F0FormField"
-
 import { BaseQuestion } from "../../SurveyFormBuilder/QuestionTypes/BaseQuestion"
 import { DEFAULT_FILE_ACCEPT } from "../../SurveyFormBuilder/QuestionTypes/FileQuestion"
 import type {

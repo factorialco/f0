@@ -1,7 +1,5 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
-
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
 import { Cell, mockItem } from "../../../__stories__/shared"
 import { CompoundCellValue } from "../compound"
 

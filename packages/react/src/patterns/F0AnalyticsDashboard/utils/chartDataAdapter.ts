@@ -7,7 +7,6 @@ import type {
   F0DataChartRadarSeries,
   F0DataChartScatterDataPoint,
 } from "@/kits/F0DataChart"
-
 import type { DashboardChartConfig, DashboardChartData } from "../types"
 
 // ---------------------------------------------------------------------------

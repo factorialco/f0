@@ -1,9 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
-
 import { SurveyFormBuilderProvider } from "../../Context"
 import { SurveyFormBuilderElement, QuestionElement } from "../../types"
-
 import { BaseQuestion } from "."
 
 const meta: Meta<typeof BaseQuestion> = {

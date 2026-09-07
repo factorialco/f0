@@ -1,7 +1,6 @@
 import { act, waitFor } from "@testing-library/react"
 import { forwardRef } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import {
   FiltersDefinition,
   GroupingDefinition,
@@ -9,15 +8,12 @@ import {
   SortingsDefinition,
 } from "@/hooks/datasource"
 import { zeroRender } from "@/testing/test-utils"
-
 import { DataCollectionSource } from "../../../hooks/useDataCollectionSource/types"
 import { ItemActionsDefinition } from "../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
 import { DataCollectionSettingsProvider } from "../../../Settings/SettingsProvider"
 import { SummariesDefinition } from "../../../summary"
-
 import type { GraphVisualizationOptions } from "./types"
-
 import { GraphCollection } from "./index"
 
 // Stub F0Graph so we can read the props `GraphCollection` hands it — the entry

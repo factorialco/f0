@@ -1,15 +1,12 @@
 import "@testing-library/jest-dom/vitest"
-
 import type { ReactNode } from "react"
 import { describe, expect, it, vi } from "vitest"
-
 import {
   zeroRender as render,
   screen,
   userEvent,
   waitFor,
 } from "@/testing/test-utils"
-
 import { F0AiInsightCard } from "../F0AiInsightCard"
 
 // Mock Recharts since JSDOM does not support SVG layout

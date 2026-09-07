@@ -1,10 +1,8 @@
 import { act } from "@testing-library/react"
 import { userEvent } from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import { Menu, Messages } from "@/icons/app"
 import { zeroRender as render, screen } from "@/testing/test-utils"
-
 import { SidebarTab, SidebarTabs } from "../index"
 
 // jsdom has no layout and the suite-wide ResizeObserver mock never fires, so

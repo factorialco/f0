@@ -2,7 +2,6 @@ import { renderHook } from "@testing-library/react"
 import { ReactFlowProvider } from "@xyflow/react"
 import { createElement, type MutableRefObject, type ReactNode } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import { STACKED_GROUP_PADDING, STACKED_NODE_GAP } from "../../constants"
 import type {
   ExpanderNodeData,

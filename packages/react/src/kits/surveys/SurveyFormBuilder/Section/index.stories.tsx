@@ -1,7 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { SurveyFormBuilderProvider } from "../Context"
-
 import { Section } from "."
 
 const meta: Meta = {

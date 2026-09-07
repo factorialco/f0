@@ -7,7 +7,6 @@ import {
   type ReactNode,
 } from "react"
 import { z } from "zod"
-
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { F0Button } from "@/components/F0Button"
@@ -64,7 +63,6 @@ import * as SidebarHeaderStories from "@/patterns/Navigation/Sidebar/Header/inde
 import { Menu as SidebarMenu } from "@/patterns/Navigation/Sidebar/Menu"
 import * as SidebarMenuStories from "@/patterns/Navigation/Sidebar/Menu/index.stories"
 import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
-
 import {
   ClockInControls,
   type ClockInProject,
@@ -87,7 +85,6 @@ import {
 } from "../slotRenderers"
 import { WidgetCatalog, type WidgetCatalogGroup } from "../WidgetCatalog"
 import { type WidgetContainerSide } from "../WidgetContainer"
-
 import { NewHomeLayout } from "./index"
 
 /* ============================ guided walkthrough =========================== */

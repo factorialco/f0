@@ -1,7 +1,5 @@
 import "@testing-library/jest-dom/vitest"
-
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import { zeroRender as render } from "../../../../../../testing/test-utils"
 import type { EditableCellProps } from "../components/cells"
 import { DateCell } from "../components/cells/DateCell"

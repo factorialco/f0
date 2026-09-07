@@ -1,5 +1,4 @@
 import { forwardRef, useCallback, useState } from "react"
-
 import {
   F0AvatarAlert,
   type AlertAvatarProps,

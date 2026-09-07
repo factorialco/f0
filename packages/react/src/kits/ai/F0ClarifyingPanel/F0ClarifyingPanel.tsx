@@ -1,9 +1,7 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useRef } from "react"
-
 import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
-
 import { ConfirmFooter } from "./components/ConfirmFooter"
 import { OptionsList } from "./components/OptionsList"
 import { StepHeader } from "./components/StepHeader"

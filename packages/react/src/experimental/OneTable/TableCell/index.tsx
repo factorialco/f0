@@ -1,18 +1,15 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useRef } from "react"
-
 import type { TableVisualizationType } from "@/patterns/OneDataCollection/types"
 import { ReferenceType } from "@/patterns/OneDataCollection/visualizations/collection/Table"
 import { NestedRowProps } from "@/patterns/OneDataCollection/visualizations/collection/Table/components/Row"
 import { Skeleton } from "@/ui/skeleton"
 import { TableCell as TableCellRoot } from "@/ui/table"
-
 import { Link } from "../../../lib/linkHandler"
 import { useI18n } from "../../../lib/providers/i18n"
 import { cn } from "../../../lib/utils"
 import { getColWidth } from "../utils/colWidth"
 import { useTable } from "../utils/TableContext"
-
 import { NestedCell } from "./NestedCell"
 import { TreeConnector } from "./TreeConnector"
 import {

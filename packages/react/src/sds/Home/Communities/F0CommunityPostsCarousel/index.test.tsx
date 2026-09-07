@@ -1,7 +1,5 @@
 import { describe, expect, test, vi } from "vitest"
-
 import { screen, userEvent, zeroRender } from "@/testing/test-utils"
-
 import { F0CommunityPostsCarousel, type CommunityPostSummary } from "./index"
 
 const LABELS = { previous: "Previous posts", next: "More posts" }

@@ -1,8 +1,6 @@
 import { useRef } from "react"
-
 import { Tag } from "@/components/tags/F0Tag/F0Tag"
 import { OneEllipsis } from "@/lib/OneEllipsis"
-
 import type {
   F0DataChartFunnelDataPoint,
   F0DataChartFunnelProps,
@@ -11,7 +9,6 @@ import { formatPercent } from "../../utils/formatters"
 import { useEChartsInstance } from "../../utils/useEChartsInstance"
 import { useLegendInteraction } from "../../utils/useLegendInteraction"
 import { usePointClick } from "../../utils/usePointClick"
-
 import { useFunnelChartOptions } from "./useFunnelChartOptions"
 
 /** Sort funnel data points according to the sort prop */

@@ -6,7 +6,6 @@ import {
   useEffect,
   useState,
 } from "react"
-
 import { ModuleId } from "@/components/avatars/F0AvatarModule"
 import { F0Button, F0ButtonProps } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"

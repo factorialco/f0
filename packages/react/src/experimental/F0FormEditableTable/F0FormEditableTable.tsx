@@ -17,7 +17,6 @@ import {
 } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import { ReactNode } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
 import {
@@ -41,7 +40,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/ui/tooltip"
-
 import type {
   EditableColumn,
   F0FormEditableTableColumn,

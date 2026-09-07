@@ -10,7 +10,6 @@ import {
   useState,
 } from "react"
 import { createPortal } from "react-dom"
-
 import { F0ActionBar } from "@/components/F0ActionBar"
 import { OneEmptyState } from "@/components/OneEmptyState"
 import {
@@ -32,7 +31,6 @@ import type {
   PresetsDefinition,
 } from "@/patterns/OneFilterPicker/types"
 import { Spinner } from "@/ui/Spinner"
-
 import {
   filterActions,
   getPrimaryActions,

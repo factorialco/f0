@@ -1,5 +1,4 @@
 import { useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { F0Icon, IconType } from "@/components/F0Icon"
 import {
@@ -13,7 +12,6 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import type { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
-
 import { DataCollectionSource } from "./hooks/useDataCollectionSource/types"
 import { ItemActionsDefinition } from "./item-actions"
 import { NavigationFiltersDefinition } from "./navigationFilters/types"

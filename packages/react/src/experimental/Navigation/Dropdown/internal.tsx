@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react"
-
 import { AvatarVariant } from "@/components/avatars/F0Avatar"
 import { F0ButtonProps } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
@@ -18,9 +17,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/ui/dropdown-menu"
-
 import { NavigationItem } from "../utils"
-
 import { DropdownItemContent } from "./DropdownItem"
 
 export type DropdownItemSeparator = { type: "separator" }

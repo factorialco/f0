@@ -1,7 +1,6 @@
 "use client"
 
 import { type ReactElement, useEffect, useMemo, useState } from "react"
-
 /**
  * Public implementation of the FilterPickerInternal component.
  * F0FilterPickerContent component.
@@ -9,14 +8,12 @@ import { type ReactElement, useEffect, useMemo, useState } from "react"
 import { DataTestIdWrapper } from "@/lib/data-testid"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { getFilterType } from "../OneFilterPicker/filterTypes"
 import type {
   FilterTypeContext,
   FilterTypeSchema,
 } from "../OneFilterPicker/filterTypes/types"
 import type { FiltersDefinition, FiltersState } from "../OneFilterPicker/types"
-
 import { FilterPickerInternal } from "./internal"
 import type { F0FilterPickerContentProps } from "./types"
 

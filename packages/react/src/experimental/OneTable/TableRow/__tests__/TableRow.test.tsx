@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest"
-
 import { screen, zeroRender } from "@/testing/test-utils"
-
 import { OneTable, TableBody, TableCell, TableRow } from "../../index"
 
 // A hover utility Tailwind v3 actually compiles: the trailing-`!` v4 form

@@ -3,7 +3,6 @@ import {
   FiltersDefinition,
   FiltersState,
 } from "@/patterns/OneFilterPicker/types"
-
 import { RecordType } from "./records.typings"
 import { SortOrder } from "./sortings.typings"
 

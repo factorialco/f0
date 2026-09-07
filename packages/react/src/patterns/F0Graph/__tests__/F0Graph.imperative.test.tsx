@@ -1,9 +1,7 @@
 import { act } from "@testing-library/react"
 import { createRef } from "react"
 import { beforeAll, describe, expect, it, vi } from "vitest"
-
 import { zeroRender, screen } from "@/testing/test-utils"
-
 import {
   F0Graph,
   type F0GraphHandle,

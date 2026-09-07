@@ -10,7 +10,6 @@ import {
   SortingsDefinition,
 } from "@/hooks/datasource"
 import { FiltersDefinition, FiltersState } from "@/patterns/OneFilterPicker"
-
 import { BreadcrumbSelectProps } from "./internal/BreadcrumbSelect"
 
 type BreadcrumbBaseItemType = NavigationItem & {

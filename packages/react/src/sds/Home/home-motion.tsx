@@ -1,6 +1,5 @@
 import { AnimatePresence, motion, type Transition } from "motion/react"
 import { type ReactNode, useEffect, useRef, useState } from "react"
-
 import { useReducedMotion } from "@/lib/a11y"
 import { cn } from "@/lib/utils"
 

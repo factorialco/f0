@@ -1,13 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useEffect, useState } from "react"
-
 import { F0SearchInput } from "@/components/F0SearchInput"
 import { createDataSourceDefinition } from "@/hooks/datasource"
 import {
   generateMockUsers,
   MockUser,
 } from "@/patterns/OneDataCollection/__stories__/mockData"
-
 import { InFilter } from "../InFilter"
 import type { InFilterOptionItem, InFilterOptions } from "../types"
 

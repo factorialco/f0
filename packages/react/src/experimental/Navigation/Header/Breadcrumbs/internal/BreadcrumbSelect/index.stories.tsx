@@ -1,18 +1,15 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import {
   FIRST_NAMES_MOCK,
   MOCK_ICONS,
   SURNAMES_MOCK,
   getMockValue,
 } from "@/mocks"
-
 import {
   F0SelectItemObject,
   F0SelectItemProps,
 } from "../../../../../../components/F0Select"
 import { Search } from "../../../../../../icons/app"
-
 import { BreadcrumbSelect } from "./index"
 const meta: Meta<typeof BreadcrumbSelect> = {
   title: "Navigation/BreadcrumbSelect",

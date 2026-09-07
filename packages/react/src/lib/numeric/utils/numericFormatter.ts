@@ -1,5 +1,4 @@
 import { Numeric, NumericFormatter, NumericFormatterOptions } from "../types"
-
 import { isEmptyNumeric } from "./isEmptyNumeric"
 import { numericFinalValue } from "./numericFinalValue"
 

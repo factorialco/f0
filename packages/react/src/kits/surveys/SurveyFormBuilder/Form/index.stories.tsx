@@ -1,9 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
-
 import { mockDatasets } from "../../__stories__/mocks"
 import { SurveyFormBuilderElement } from "../types"
-
 import { SurveyFormBuilder } from "."
 
 const meta: Meta<typeof SurveyFormBuilder> = {

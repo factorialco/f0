@@ -5,7 +5,6 @@ import {
 } from "@/components/F0ButtonDropdown"
 import { ToolbarDivider } from "@/components/RichText/internal"
 import { Switch } from "@/experimental/Forms/Fields/Switch"
-
 import {
   primaryActionType,
   secondaryActionType,

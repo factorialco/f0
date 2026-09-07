@@ -1,11 +1,8 @@
 import { type VariantProps, cva } from "cva"
 import { type ComponentProps, useMemo } from "react"
-
 import { cn } from "@/lib/utils"
-
 import { useAuraVoiceAnimation } from "../hooks/useAuraVoiceAnimation"
 import type { F0AuraVoiceAnimationProps } from "../types"
-
 import { ReactShaderToy } from "./ReactShaderToy"
 import { shaderSource } from "./shaderSource"
 

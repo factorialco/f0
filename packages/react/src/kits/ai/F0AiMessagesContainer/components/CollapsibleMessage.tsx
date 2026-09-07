@@ -1,6 +1,5 @@
 import { motion } from "motion/react"
 import { useState, ReactNode } from "react"
-
 import { F0Icon, IconType } from "@/components/F0Icon"
 import ChevronRight from "@/icons/app/ChevronRight"
 import { useReducedMotion } from "@/lib/a11y"

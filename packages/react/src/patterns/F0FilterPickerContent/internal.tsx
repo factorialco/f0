@@ -3,11 +3,9 @@
 import { F0Button } from "@/components/F0Button"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { FilterContent } from "../OneFilterPicker/components/FilterContent"
 import { FilterList } from "../OneFilterPicker/components/FilterList"
 import type { FiltersDefinition } from "../OneFilterPicker/types"
-
 import type { FilterPickerInternalProps } from "./internal-types"
 
 /**

@@ -10,14 +10,12 @@ import {
 import type { ZodRawShape, ZodType } from "zod"
 import { z } from "zod"
 import { zodToJsonSchema } from "zod-to-json-schema"
-
 import type { ModuleId } from "@/components/avatars/F0AvatarModule"
 import type {
   F0FormDefinitionSingleSchema,
   F0FormDefinitionPerSection,
   F0WizardFormStep,
 } from "@/patterns/F0WizardForm/types"
-
 import { getF0Config, inferFieldType, unwrapZodSchema } from "./f0Schema"
 import type {
   F0FormErrorTriggerMode,

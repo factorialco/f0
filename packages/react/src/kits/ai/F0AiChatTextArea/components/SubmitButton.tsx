@@ -1,7 +1,6 @@
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { ArrowUp, SolidStop } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
-
 import { type RecorderStatus } from "../useAudioRecorder"
 
 interface SubmitButtonProps {

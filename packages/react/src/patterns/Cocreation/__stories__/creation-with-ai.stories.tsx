@@ -12,7 +12,6 @@ import {
 } from "react"
 import { expect, userEvent, waitFor, within } from "storybook/test"
 import { z } from "zod"
-
 import { F0Alert } from "@/components/F0Alert"
 import { F0Button } from "@/components/F0Button"
 import { F0Heading } from "@/components/F0Heading"
@@ -71,7 +70,6 @@ import { Tabs } from "@/patterns/Navigation/Tabs"
 import { OneDataCollection } from "@/patterns/OneDataCollection"
 import { useDataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
 import { ButtonGroup, ButtonGroupSeparator } from "@/ui/ButtonGroup"
-
 import {
   FLOW_CONFIGS,
   guidedTemplatesTitle,

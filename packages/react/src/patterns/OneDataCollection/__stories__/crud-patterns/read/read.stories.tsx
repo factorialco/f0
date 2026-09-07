@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { ComponentProps, useState } from "react"
-
 import { PageHeader } from "@/experimental/Navigation/Header/PageHeader"
 import { ArrowRight, Download, Files, Pencil } from "@/icons/app"
 import { StandardLayout } from "@/layouts/StandardLayout"
@@ -11,7 +10,6 @@ import { F0ResourceHeader } from "@/patterns/F0ResourceHeader"
 import { Page as NavigationPage } from "@/patterns/Navigation/Page"
 import * as SidebarStories from "@/patterns/Navigation/Sidebar/index.stories"
 import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
-
 import { useDataCollectionSource } from "../../../hooks/useDataCollectionSource"
 import { OneDataCollection } from "../../../index"
 import {

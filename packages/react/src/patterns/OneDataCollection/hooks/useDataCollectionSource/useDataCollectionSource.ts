@@ -5,7 +5,6 @@
 
 import { useDeepCompareEffect } from "@reactuses/core"
 import { useMemo, useState } from "react"
-
 import {
   DataAdapter,
   FiltersDefinition,
@@ -15,7 +14,6 @@ import {
   useDataSource,
 } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
-
 import { ItemActionsDefinition } from "../../item-actions"
 import { navigationFilterTypes } from "../../navigationFilters"
 import {
@@ -23,7 +21,6 @@ import {
   NavigationFiltersState,
 } from "../../navigationFilters/types"
 import { SummariesDefinition } from "../../summary"
-
 import { DataCollectionSource, DataCollectionSourceDefinition } from "./types"
 
 export const useDataCollectionSource = <

@@ -1,9 +1,7 @@
 import { motion } from "motion/react"
 import { type ReactNode } from "react"
-
 import { useReducedMotion } from "@/lib/a11y"
 import { cn } from "@/lib/utils"
-
 import {
   ENTRANCE_RISE_PX,
   entranceTransition,

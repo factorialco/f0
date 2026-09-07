@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { ComponentProps, useEffect } from "react"
 import { z } from "zod"
-
 import { PageHeader } from "@/experimental/Navigation/Header/PageHeader"
 import { ApplicationFrame } from "@/patterns/ApplicationFrame"
 import ApplicationFrameStoryMeta from "@/patterns/ApplicationFrame/index.stories"
@@ -16,9 +15,7 @@ import { useF0FormDefinition } from "@/patterns/F0WizardForm"
 import { Page } from "@/patterns/Navigation/Page"
 import * as SidebarStories from "@/patterns/Navigation/Sidebar/index.stories"
 import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
-
 import { F0AiChatProvider, useAiChat } from ".."
-
 import {
   MockAiChatRuntimeProvider,
   MockConnectedChatHeader,

@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useRef, useState } from "react"
 import { expect, userEvent, waitFor, within } from "storybook/test"
-
 import { F0SegmentedControl } from "@/experimental/Actions/F0SegmentedControl"
 import {
   Calendar,
@@ -16,7 +15,6 @@ import {
   Settings,
 } from "@/icons/app"
 import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
-
 import type {
   AiChatCreditWarning,
   AiChatDisclaimer,

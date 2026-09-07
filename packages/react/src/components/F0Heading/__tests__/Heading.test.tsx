@@ -1,9 +1,6 @@
 import "@testing-library/jest-dom/vitest"
-
 import { describe, expect, it } from "vitest"
-
 import { zeroRender as render, screen } from "@/testing/test-utils"
-
 import { F0Heading } from "../F0Heading"
 
 describe("F0Heading Component", () => {

@@ -1,11 +1,8 @@
 import { forwardRef } from "react"
-
 import { F0Icon } from "@/components/F0Icon"
 import { useTextFormatEnforcer } from "@/lib/text"
 import { cn } from "@/lib/utils"
-
 import { BaseTag } from "../internal/BaseTag"
-
 import type { F0TagRawProps } from "./types"
 
 export const F0TagRaw = forwardRef<HTMLDivElement, F0TagRawProps>(

@@ -1,5 +1,4 @@
 import { forwardRef } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
 import {
@@ -8,7 +7,6 @@ import {
   type BaseBannerProps,
 } from "@/kits/ai/Banners/BaseBanner"
 import { withDataTestId } from "@/lib/data-testid"
-
 import { UpsellingButton, type UpsellingButtonProps } from "../UpsellingButton"
 
 type DefaultAction = BannerAction

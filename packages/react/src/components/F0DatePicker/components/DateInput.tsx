@@ -1,5 +1,4 @@
 import { forwardRef, useEffect, useState } from "react"
-
 import { InputFieldProps } from "@/components/F0InputField"
 import type {
   GranularityDefinition,
@@ -10,7 +9,6 @@ import { isActiveDate } from "@/components/OneCalendar/utils"
 import { getFieldInputIcon } from "@/lib/field-input-icons"
 import { useI18n } from "@/lib/providers/i18n"
 import { Input } from "@/ui/input"
-
 import { DatePickerValue } from "../types"
 import { InputFieldInheritedProps } from "../types.internal"
 

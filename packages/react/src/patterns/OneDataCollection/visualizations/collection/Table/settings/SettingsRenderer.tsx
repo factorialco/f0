@@ -2,7 +2,6 @@ import { RecordType } from "@/hooks/datasource"
 import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
 import { SummariesDefinition } from "@/patterns/OneDataCollection/summary"
 import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
-
 import {
   TableSettings,
   type TableVisualizationSettingsKey,

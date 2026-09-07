@@ -1,10 +1,7 @@
 import { describe, expect, it } from "vitest"
-
 import { defaultTranslations } from "@/lib/providers/i18n/i18n-provider-defaults"
 import { zeroRender as render, screen } from "@/testing/test-utils"
-
 import { ValueDisplayRendererContext } from "../../renderers"
-
 import { ProgressSeriesCell, ProgressSeriesCellValue } from "./progressSeries"
 
 const defaultMeta: ValueDisplayRendererContext = {

@@ -1,9 +1,7 @@
 import type { ComponentPropsWithRef, ReactNode } from "react"
-
 import { F0Avatar, type AvatarVariant } from "@/components/avatars/F0Avatar"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
-
 import {
   STACKED_NODE_AVATAR,
   STACKED_NODE_HEIGHT,
@@ -11,7 +9,6 @@ import {
   STACKED_NODE_TITLE_BY_ZOOM,
   STACKED_NODE_TITLE_GAP,
 } from "../../constants"
-
 import type { GraphNodeState, GraphNodeVariant } from "./types"
 
 interface F0GraphNodeStackedRowProps {

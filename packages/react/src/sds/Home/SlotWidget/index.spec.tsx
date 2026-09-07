@@ -1,8 +1,6 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
-
 import { Clock, Cross } from "@/icons/app"
 import { screen, userEvent, waitFor, zeroRender } from "@/testing/test-utils"
-
 import {
   DEFAULT_EXPECTED_ITEMS_COUNT,
   LIST_COMPACT_AFTER,
@@ -11,7 +9,6 @@ import {
   type SlotRenderers,
   widgetChrome,
 } from "../slotRenderers"
-
 import { SlotWidget } from "./index"
 
 describe("SlotWidget", () => {

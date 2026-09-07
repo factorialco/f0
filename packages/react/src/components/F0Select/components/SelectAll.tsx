@@ -5,7 +5,6 @@ import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
-
 import type { F0SelectItemObject } from "../types"
 
 export type SelectAllProps = {

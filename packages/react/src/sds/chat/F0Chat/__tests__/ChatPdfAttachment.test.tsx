@@ -1,6 +1,5 @@
 import { type ReactNode, useEffect, useRef } from "react"
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest"
-
 import {
   act,
   fireEvent,
@@ -8,7 +7,6 @@ import {
   screen,
   waitFor,
 } from "@/testing/test-utils"
-
 import { F0Chat } from "../F0Chat"
 import { F0ChatProvider } from "../providers/F0ChatProvider"
 import { type F0ChatAttachment, type F0ChatRuntime } from "../types"

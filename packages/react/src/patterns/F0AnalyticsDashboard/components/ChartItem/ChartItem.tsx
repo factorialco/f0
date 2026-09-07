@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-
 import type { IconType } from "@/components/F0Icon"
 import type { DropdownItem } from "@/experimental/Navigation/Dropdown"
 import type { RecordType } from "@/hooks/datasource"
@@ -32,7 +31,6 @@ import type {
   FiltersDefinition,
   FiltersState,
 } from "@/patterns/OneFilterPicker/types"
-
 import { useChartDownloadActions } from "../../hooks/useChartDownloadActions"
 import { useDashboardItemData } from "../../hooks/useDashboardItemData"
 import type {
@@ -54,7 +52,6 @@ import {
 } from "../../utils/chartDataAdapter"
 import { chartDataToTabular } from "../../utils/chartDataToTabular"
 import { DashboardItem } from "../DashboardItem/DashboardItem"
-
 import {
   AccessiblePointActions,
   type AccessiblePointAction,

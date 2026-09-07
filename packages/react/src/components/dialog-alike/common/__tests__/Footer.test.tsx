@@ -1,10 +1,7 @@
 import "@testing-library/jest-dom/vitest"
-
 import { act, screen, waitFor } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-
 import { userEvent, zeroRender } from "@/testing/test-utils"
-
 import { Footer } from "../Footer"
 
 describe("Footer", () => {

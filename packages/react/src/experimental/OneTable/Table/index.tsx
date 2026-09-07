@@ -1,11 +1,9 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
-
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
 import { Spinner } from "@/ui/Spinner"
 import { Table as TableRoot } from "@/ui/table"
-
 import { withSkeleton } from "../../../lib/skeleton"
 import { TableBody } from "../TableBody"
 import { TableCell } from "../TableCell"

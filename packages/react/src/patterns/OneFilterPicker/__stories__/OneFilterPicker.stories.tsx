@@ -1,11 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useEffect, useState } from "react"
 import { expect, fn, userEvent, within } from "storybook/test"
-
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { Input } from "@/ui/input"
 import { Label } from "@/ui/label"
-
 import { InFilterOptions } from "../filterTypes/InFilter/types"
 import * as OneFilterPicker from "../index"
 import {
@@ -23,7 +21,6 @@ import {
   serializeFilters,
   updateUrlWithFilters,
 } from "../utils"
-
 import {
   filterDefinition,
   generateCountries,

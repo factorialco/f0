@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { ComponentProps } from "react"
-
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0Button } from "@/components/F0Button"
 import { F0Heading } from "@/components/F0Heading"
@@ -22,7 +21,6 @@ import {
 } from "@/icons/app"
 import { snapshotMatrix } from "@/lib/storybook-utils/snapshotMatrix"
 import { Badge } from "@/ui/badge"
-
 import { F0Box } from "../index"
 
 // ─── Option arrays for controls ──────────────────────────────────

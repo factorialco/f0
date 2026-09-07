@@ -1,9 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { expect, within } from "storybook/test"
-
 import { PageDecorator } from "@/lib/storybook-utils/pageDecorator"
 import { Placeholder } from "@/lib/storybook-utils/placeholder"
-
 import { StandardLayout } from "../index"
 
 const meta = {

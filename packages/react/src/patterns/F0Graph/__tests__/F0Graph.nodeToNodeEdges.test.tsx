@@ -1,7 +1,5 @@
 import { beforeAll, describe, expect, it } from "vitest"
-
 import { zeroRender } from "@/testing/test-utils"
-
 import { F0GraphNode } from "../components/F0GraphNode"
 import { NODE_HEIGHT } from "../constants"
 import { F0Graph, type F0GraphNodeRenderContext } from "../F0Graph"

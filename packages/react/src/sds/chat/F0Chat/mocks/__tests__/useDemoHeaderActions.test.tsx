@@ -1,8 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
-
 import { Bell, BellOff } from "@/icons/app"
 import { zeroRenderHook as renderHook } from "@/testing/test-utils"
-
 import { type F0ChatChannel } from "../../types"
 import { useDemoHeaderActions } from "../useDemoHeaderActions"
 

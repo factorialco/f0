@@ -8,7 +8,6 @@ import {
   useState,
 } from "react"
 import { type ListItem, type VirtuosoHandle } from "react-virtuoso"
-
 import { type ChatRow } from "../utils/grouping"
 import {
   createMediaWarmer,
@@ -25,7 +24,6 @@ import {
   shouldPrefetchOlder,
   shouldRepinOnGrowth,
 } from "../utils/virtuoso-chat"
-
 import { useTranscriptResizeAnchor } from "./useTranscriptResizeAnchor"
 
 type ScrollMessage = { id: string; isMine?: boolean }

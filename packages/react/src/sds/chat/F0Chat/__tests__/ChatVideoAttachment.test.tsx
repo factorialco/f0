@@ -1,5 +1,4 @@
 import { beforeAll, describe, expect, it, vi } from "vitest"
-
 import {
   fireEvent,
   zeroRender as render,
@@ -7,7 +6,6 @@ import {
   waitFor,
   within,
 } from "@/testing/test-utils"
-
 import { ChatVideoAttachment } from "../components/ChatVideoAttachment"
 import { F0Chat } from "../F0Chat"
 import { F0ChatProvider } from "../providers/F0ChatProvider"

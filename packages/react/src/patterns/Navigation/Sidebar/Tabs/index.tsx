@@ -1,6 +1,5 @@
 import { LayoutGroup, motion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
-
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"

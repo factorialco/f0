@@ -1,8 +1,6 @@
 import React from "react"
 import { describe, expect, it, vi } from "vitest"
-
 import { zeroRender as render, screen } from "@/testing/test-utils"
-
 import { PageHeader } from "../index"
 
 // The real switch renders null unless the AI toggle context is enabled, so we

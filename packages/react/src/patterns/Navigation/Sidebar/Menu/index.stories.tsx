@@ -1,8 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { expect, within } from "storybook/test"
-
 import * as Icons from "../../../../icons/app"
-
 import { Menu } from "./index"
 
 const meta = {

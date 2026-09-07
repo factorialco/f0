@@ -1,6 +1,5 @@
 import { AnimatePresence, motion } from "motion/react"
 import { ReactNode, useEffect, useState } from "react"
-
 import { F0Icon } from "../../../../components/F0Icon"
 import { CheckCircle, LayersFront } from "../../../../icons/app"
 import { cn } from "../../../../lib/utils"

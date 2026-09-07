@@ -1,5 +1,4 @@
 import { expect, it, vi } from "vitest"
-
 import { getEmojiLabel } from "@/lib/emojis"
 import {
   zeroRender as render,
@@ -7,7 +6,6 @@ import {
   userEvent,
   waitFor,
 } from "@/testing/test-utils"
-
 import { Reactions } from "./index"
 
 it("forwards the lazy user loader and shows the resolved identities", async () => {

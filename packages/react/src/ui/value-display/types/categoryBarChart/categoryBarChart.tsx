@@ -1,5 +1,4 @@
 import { CSSProperties, useState } from "react"
-
 import {
   buildCategoryBarSegments,
   CATEGORY_BAR_TOOLTIP_DELAY_MS,
@@ -16,7 +15,6 @@ import {
 import { cn, focusRing } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
 import { Tooltip, TooltipProvider, TooltipTrigger } from "@/ui/tooltip"
-
 import { tableDisplayClassNames } from "../../const"
 import { ValueDisplayRendererContext } from "../../renderers"
 

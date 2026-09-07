@@ -1,14 +1,11 @@
 import "@xyflow/react/dist/style.css"
-
 import { Meta, StoryObj } from "@storybook/react-vite"
 import { useRef, useState } from "react"
-
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0Button } from "@/components/F0Button"
 import { Calendar, Office } from "@/icons/app"
 import { F0Dialog } from "@/patterns/F0Dialog"
 import type { F0GraphNodeTag } from "@/patterns/F0Graph"
-
 import { useDataCollectionSource } from "../../hooks/useDataCollectionSource"
 import { OneDataCollection } from "../../index"
 

@@ -7,7 +7,6 @@ import {
 } from "motion/react"
 import { Fragment, useEffect, useMemo, useRef, useState } from "react"
 import { useMediaQuery } from "usehooks-ts"
-
 import {
   AiPromotionChat,
   AiPromotionChatProvider,
@@ -27,7 +26,6 @@ import { useReducedMotion } from "@/lib/a11y"
 import { experimentalComponent } from "@/lib/experimental"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
-
 import { FrameProvider, SidebarState, useSidebar } from "./FrameProvider"
 
 const CONTENT_TRANSITION = { duration: 0.3, ease: [0, 0, 0.1, 1] }

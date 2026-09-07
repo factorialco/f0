@@ -4,10 +4,8 @@ import {
   SelectRangeEventHandler,
   SelectSingleEventHandler,
 } from "react-day-picker"
-
 import { useDateFnsLocale, useL10n } from "@/lib/providers/l10n"
 import { Calendar } from "@/ui/calendar"
-
 import {
   CalendarMode,
   DateRange,

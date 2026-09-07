@@ -1,7 +1,5 @@
 import { Metadata } from "@/experimental/Information/Headers/Metadata"
-
 import type { F0TimelineRowTaskProps } from "../types"
-
 import { Actions } from "./Actions"
 
 export const TaskDetails = ({ props }: { props: F0TimelineRowTaskProps }) => {

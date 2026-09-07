@@ -4,7 +4,6 @@ import {
   SortingsDefinition,
   GroupingDefinition,
 } from "@/hooks/datasource"
-
 import { ItemActionsDefinition } from "../item-actions"
 import { NavigationFiltersDefinition } from "../navigationFilters/types"
 import { SummariesDefinition } from "../summary"

@@ -1,9 +1,6 @@
 import "@testing-library/jest-dom/vitest"
-
 import { describe, expect, it, vi } from "vitest"
-
 import { screen, userEvent, zeroRender as render } from "@/testing/test-utils"
-
 import { F0MeetingCard } from "../F0MeetingCard"
 import type { MeetingAttendee } from "../types"
 

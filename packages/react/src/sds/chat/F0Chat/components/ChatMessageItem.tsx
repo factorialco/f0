@@ -7,12 +7,10 @@ import {
   useRef,
   useState,
 } from "react"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { Ellipsis } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
 import {
   useChatComposeActions,
@@ -22,7 +20,6 @@ import { useF0ChatStable } from "../providers/F0ChatProvider"
 import { type F0ChatMessage, type F0ChatUser } from "../types"
 import { microEnterTransition } from "../utils/chat-motion"
 import { hasAnyMessageAction } from "../utils/message-actions"
-
 import { bubbleCornerClass, ChatBubble } from "./ChatBubble"
 import { ChatMessageActions } from "./ChatMessageActions"
 import { ChatMessageAttachments } from "./ChatMessageAttachments"

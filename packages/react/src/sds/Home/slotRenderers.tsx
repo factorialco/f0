@@ -1,6 +1,5 @@
 import { type CSSProperties, ReactNode, useState } from "react"
 import { type z } from "zod"
-
 import { F0Avatar, type AvatarVariant } from "@/components/avatars/F0Avatar"
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import {
@@ -29,7 +28,6 @@ import { cn } from "@/lib/utils"
 import { type F0FormSchema } from "@/patterns/F0Form"
 import { Counter } from "@/ui/Counter"
 import { Skeleton } from "@/ui/skeleton"
-
 import { HomeSlotItem, HomeSlotItems, useIsBulkChange } from "./home-motion"
 import {
   descriptionText,

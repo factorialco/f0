@@ -1,8 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { expect, within } from "storybook/test"
-
 import { Download, Upsell } from "@/icons/app"
-
 import { BaseBanner } from "./index"
 
 const meta = {

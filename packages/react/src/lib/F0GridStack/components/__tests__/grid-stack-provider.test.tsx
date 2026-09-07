@@ -1,9 +1,7 @@
 import type { GridStack, GridStackOptions, GridStackWidget } from "gridstack"
 import React from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import { zeroRender } from "@/testing/test-utils"
-
 import type { GridStackReactWidget } from "../../F0GridStack"
 import { GridStackProvider } from "../grid-stack-provider"
 

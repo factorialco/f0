@@ -8,7 +8,6 @@ import {
   parse,
   startOfMonth,
 } from "date-fns"
-
 import { DateRange, DateRangeComplete } from "../../types"
 import {
   formatDateRange,
@@ -21,7 +20,6 @@ import {
 } from "../../utils"
 import { rangeSeparator } from "../consts"
 import { DateStringFormat, GranularityDefinition } from "../types"
-
 import { MonthView } from "./MonthView"
 
 const MONTH_FORMAT = "MM/yyyy"

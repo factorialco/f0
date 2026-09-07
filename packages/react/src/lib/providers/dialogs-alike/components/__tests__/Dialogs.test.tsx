@@ -1,11 +1,8 @@
 import "@testing-library/jest-dom/vitest"
-
 import { act, screen, waitFor } from "@testing-library/react"
 import React from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import { zeroRender } from "@/testing/test-utils"
-
 import type { DialogDefinitionInternal } from "../../internal-types"
 import { DialogsAlike } from "../DialogsAlike"
 

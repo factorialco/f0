@@ -1,11 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { ComponentProps } from "react"
 import { fn } from "storybook/test"
-
 import * as Icon from "@/icons/app"
 import { StandardLayout } from "@/layouts/StandardLayout"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
 import { SectionHeader } from "./index"
 
 const meta: Meta<typeof SectionHeader> = {

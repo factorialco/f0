@@ -4,7 +4,6 @@ import {
   RecordType,
 } from "@/hooks/datasource"
 import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
-
 import { DataCollectionSource } from "../../hooks/useDataCollectionSource/types"
 import { ItemActionsDefinition } from "../../item-actions"
 import { NavigationFiltersDefinition } from "../../navigationFilters/types"
@@ -14,7 +13,6 @@ import {
   OnLoadErrorCallback,
 } from "../../types"
 import { SortingsDefinition, SummariesDefinition } from "../../types"
-
 import {
   collectionVisualizations,
   VisualizacionTypeDefinition,

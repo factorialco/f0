@@ -2,7 +2,6 @@ import * as Popover from "@radix-ui/react-popover"
 import { Editor } from "@tiptap/react"
 import { AnimatePresence, motion } from "motion/react"
 import { useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0ButtonToggle } from "@/components/F0ButtonToggle"

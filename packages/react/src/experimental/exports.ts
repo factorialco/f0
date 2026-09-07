@@ -1,13 +1,11 @@
 import { Component } from "@/lib/component"
 import { withDataTestId } from "@/lib/data-testid"
-
 import {
   F0Select as Select,
   type F0SelectItemObject as SelectItemObject,
   type F0SelectItemProps as SelectItemProps,
   type F0SelectProps as SelectProps,
 } from "../components/F0Select"
-
 import { ScrollArea as ScrollAreaComponent } from "./Utilities/ScrollArea"
 
 export * from "./AiPromotionChat/exports"

@@ -1,6 +1,5 @@
 import { userEvent } from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
-
 import {
   AiChatStateProvider,
   useAiChat,
@@ -15,7 +14,6 @@ import {
   within,
   zeroRender as render,
 } from "@/testing/test-utils"
-
 import { F0AnalyticsDashboard } from "../F0AnalyticsDashboard"
 import type {
   DashboardChartItem,

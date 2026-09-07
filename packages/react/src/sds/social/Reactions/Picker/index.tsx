@@ -1,8 +1,6 @@
 import "./index.css"
-
 import data from "@emoji-mart/data/sets/15/twitter.json"
 import { useState } from "react"
-
 import { F0ButtonProps } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { type IconType } from "@/components/F0Icon"

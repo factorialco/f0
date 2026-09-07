@@ -1,7 +1,6 @@
 import type { MutableRefObject, ReactNode } from "react"
 import { ComponentProps } from "react"
 import { z } from "zod"
-
 import { PageHeader } from "@/experimental/Navigation/Header/PageHeader"
 import type { GroupingDefinition, SortingsDefinition } from "@/hooks/datasource"
 import { Add, Download, EllipsisHorizontal } from "@/icons/app"
@@ -15,7 +14,6 @@ import * as SidebarStories from "@/patterns/Navigation/Sidebar/index.stories"
 import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
 import { Tabs, TabItem } from "@/patterns/Navigation/Tabs"
 import type { FiltersDefinition } from "@/patterns/OneFilterPicker"
-
 import type { ItemActionsDefinition } from "../../item-actions"
 import type { NavigationFiltersDefinition } from "../../navigationFilters/types"
 import type { SummariesDefinition } from "../../summary"

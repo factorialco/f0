@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
-
 import {
   Data,
   FiltersDefinition,
@@ -15,7 +14,6 @@ import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useData
 import { ItemActionsDefinition } from "@/patterns/OneDataCollection/item-actions"
 import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import { SummariesDefinition } from "@/patterns/OneDataCollection/types"
-
 import { mergeLanesSelectItemsStatus } from "./utils"
 
 type LaneSelectProviderProps<

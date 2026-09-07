@@ -1,5 +1,4 @@
 import { beforeAll, describe, expect, it, vi } from "vitest"
-
 import { getEmojiLabel } from "@/lib/emojis"
 import {
   act,
@@ -11,7 +10,6 @@ import {
   waitFor,
   within,
 } from "@/testing/test-utils"
-
 import { F0Chat } from "../F0Chat"
 import { resolveMockReactionUsers } from "../mocks/MockChatApp"
 import {

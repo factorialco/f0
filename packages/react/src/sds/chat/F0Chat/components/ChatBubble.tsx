@@ -1,9 +1,7 @@
 import { motion } from "motion/react"
 import { memo, type ReactNode, useMemo, useRef } from "react"
-
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
 import { type F0ChatMessage, type F0ChatUser } from "../types"
 import { type MentionToken, renderBodyWithMentions } from "../utils/render-body"
@@ -11,7 +9,6 @@ import {
   messageSurfaceColorClass,
   senderNameColorClass,
 } from "../utils/sender-color"
-
 import { ChatLinkPreview } from "./ChatLinkPreview"
 import { ChatMessageMeta, ChatMessageMetaLabel } from "./ChatMessageMeta"
 import { ChatUserHoverCard } from "./ChatUserHoverCard"

@@ -1,6 +1,5 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useEffect, useMemo } from "react"
-
 import {
   F0Card,
   type CardImageAspectRatio,
@@ -24,7 +23,6 @@ import type { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/Card"
 import { GroupHeader } from "@/ui/GroupHeader/GroupHeader"
 import { Skeleton } from "@/ui/skeleton"
-
 import { PagesPagination } from "../../../components/PagesPagination"
 import { ItemActionsDefinition } from "../../../item-actions"
 import { PropertyDefinition } from "../../../property-render"

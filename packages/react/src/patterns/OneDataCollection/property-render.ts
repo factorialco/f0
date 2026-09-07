@@ -1,5 +1,4 @@
 import { ReactNode } from "react"
-
 import type { TableHeaderInfo } from "@/experimental/OneTable"
 import { RecordType } from "@/hooks/datasource"
 import { TranslationsType } from "@/lib/providers/i18n/i18n-provider-defaults"
@@ -8,7 +7,6 @@ import {
   ValueDisplayRendererDefinition,
   type ValueDisplayTableAlignment,
 } from "@/ui/value-display"
-
 import { VisualizationType } from "./visualizations/collection/types"
 
 export type { TableHeaderInfo }

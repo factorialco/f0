@@ -13,13 +13,11 @@ import { ItemActionsRow } from "@/patterns/OneDataCollection/components/itemActi
 import { ItemActionsRowContainer } from "@/patterns/OneDataCollection/components/itemActions/ItemActionsRowContainer"
 import { useItemActions } from "@/patterns/OneDataCollection/components/itemActions/useItemActions"
 import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource/types"
-
 import { ItemActionsDefinition } from "../../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../../navigationFilters/types"
 import { renderProperty } from "../../../../property-render"
 import { SummariesDefinition } from "../../../../summary"
 import { ItemDefinition, ListPropertyDefinition } from "../types"
-
 import { ItemTeaser } from "./ItemTeaser"
 
 type RowProps<

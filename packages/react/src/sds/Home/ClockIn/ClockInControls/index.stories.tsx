@@ -1,12 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import {
   Home as HomeIcon,
   Office as OfficeIcon,
   Suitcase as SuitcaseIcon,
 } from "@/icons/app"
-
 import {
   ClockInControls,
   type ClockInControlsProps,

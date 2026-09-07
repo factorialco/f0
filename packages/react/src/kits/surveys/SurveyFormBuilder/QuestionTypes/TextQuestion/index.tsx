@@ -1,9 +1,7 @@
 import { useMemo } from "react"
-
 import { useI18n } from "@/lib/providers/i18n"
 import type { F0Field } from "@/patterns/F0Form/fields/types"
 import { F0FormField } from "@/patterns/F0FormField"
-
 import { useSurveyFormBuilderContext } from "../../Context"
 import { BaseQuestionOnChangeParams } from "../../types"
 import {

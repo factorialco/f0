@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useId, useState } from "react"
-
 import { OneEllipsis, Tag, tags } from "../OneEllipsis"
 
 const meta = {

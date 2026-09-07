@@ -1,7 +1,5 @@
 import { ControllerRenderProps, FieldError, FieldValues } from "react-hook-form"
-
 import type { InputFieldStatus } from "@/components/F0InputField/types"
-
 import { CardSelectFieldRenderer } from "./cardSelect/CardSelectFieldRenderer"
 import { CheckboxFieldRenderer } from "./checkbox/CheckboxFieldRenderer"
 import { CustomFieldRenderer } from "./custom/CustomFieldRenderer"

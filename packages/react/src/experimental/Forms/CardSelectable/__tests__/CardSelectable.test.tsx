@@ -1,5 +1,4 @@
 import { describe, expect, it, vi } from "vitest"
-
 import { CardSelectableContainer } from "@/components/CardSelectable/index"
 import type { CardSelectableItem } from "@/components/CardSelectable/types"
 import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"

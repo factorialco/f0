@@ -1,19 +1,16 @@
 import { renderHook, screen, waitFor } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-
 import {
   FiltersDefinition,
   GroupingDefinition,
   SortingsDefinition,
 } from "@/hooks/datasource"
 import { zeroRender } from "@/testing/test-utils"
-
 import { useDataCollectionData } from "../../../hooks/useDataCollectionData"
 import { DataCollectionSource } from "../../../hooks/useDataCollectionSource"
 import { ItemActionsDefinition } from "../../../item-actions.tsx"
 import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
 import { SummariesDefinition } from "../../../summary.ts"
-
 import { CardCollection } from "./index"
 
 type Person = {

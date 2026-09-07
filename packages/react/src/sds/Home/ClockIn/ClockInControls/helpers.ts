@@ -1,5 +1,4 @@
 import { CLOCK_IN_COLORS } from "../ClockInGraph"
-
 import { ClockInControlsProps } from "./index"
 
 // to prevent having an overtime greater that the total time that we're showing

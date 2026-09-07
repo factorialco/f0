@@ -1,11 +1,9 @@
 import type { ReactElement } from "react"
 import { useContext, useEffect, useMemo, useRef, useState } from "react"
-
 import { DataTestIdWrapper } from "@/lib/data-testid"
 import { RenderErrorBoundary } from "@/lib/RenderErrorBoundary"
 import { cn } from "@/lib/utils"
 import { useEventEmitter } from "@/patterns/OneDataCollection/useEventEmitter"
-
 import { FiltersChipsList as FiltersChipsListComponent } from "./components/FiltersChipsList"
 import { FiltersControls as FiltersControlsComponent } from "./components/FiltersControls"
 import { FiltersPresets as FiltersPresetsComponent } from "./components/FiltersPresets"

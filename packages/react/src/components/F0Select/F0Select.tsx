@@ -12,7 +12,6 @@ import {
   useRef,
   useState,
 } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
 import { F0InputField } from "@/components/F0InputField"
@@ -48,7 +47,6 @@ import {
   VirtualItem,
 } from "@/ui/Select"
 import { textVariants } from "@/ui/Text"
-
 import { Arrow } from "./components/Arrow"
 import { SelectAll } from "./components/SelectAll"
 import { SelectBottomActions } from "./components/SelectBottomActions"

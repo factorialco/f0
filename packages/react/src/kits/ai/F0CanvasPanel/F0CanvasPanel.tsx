@@ -1,9 +1,7 @@
 import { AnimatePresence, motion } from "motion/react"
 import { type ReactNode, useEffect, useRef, useState } from "react"
-
 import { useReducedMotion } from "@/lib/a11y"
 import { cn } from "@/lib/utils"
-
 import type { CanvasContent, CanvasEntityDefinition } from "../canvas/types"
 
 export type F0CanvasPanelProps = {

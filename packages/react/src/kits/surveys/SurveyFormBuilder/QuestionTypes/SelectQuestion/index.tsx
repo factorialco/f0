@@ -1,16 +1,13 @@
 import { Reorder } from "motion/react"
 import { nanoid } from "nanoid"
 import { useEffect, useMemo } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { Add } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
-
 import { useSurveyFormBuilderContext } from "../../Context"
 import { DragProvider } from "../../DragContext"
 import { SelectQuestionOption } from "../../types"
 import { BaseQuestion } from "../BaseQuestion"
-
 import { SelectOption } from "./SelectOption"
 import {
   OnChangeLabelParams,

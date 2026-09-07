@@ -1,6 +1,5 @@
 import { motion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon/F0Icon"
 import { ArrowUp, SolidStop } from "@/icons/app"
@@ -16,7 +15,6 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/ui/dropdown-menu"
-
 import { EnhancementOption } from "./types"
 
 interface AIEnhanceMenuProps {

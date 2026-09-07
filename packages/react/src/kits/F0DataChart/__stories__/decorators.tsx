@@ -1,5 +1,4 @@
 import type { StoryFn } from "@storybook/react-vite"
-
 import { F0DataChart } from "../F0DataChart"
 import type { F0DataChartProps } from "../types"
 

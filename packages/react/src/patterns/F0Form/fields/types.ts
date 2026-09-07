@@ -1,7 +1,5 @@
 import { ZodTypeAny } from "zod"
-
 import type { InputFieldStatus } from "@/components/F0InputField/types"
-
 import type { F0FieldAlert } from "../f0Schema"
 
 // ============================================================================

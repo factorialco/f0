@@ -1,17 +1,14 @@
 import { useCallback, useContext } from "react"
-
 import { F0TableOfContentPopover } from "@/components/F0TableOfContentPopover/F0TableOfContentPopover"
 import { IdStructure } from "@/experimental/Navigation/F0TableOfContent/types"
 import { useI18n } from "@/lib/providers/i18n"
 import { F0DialogContext } from "@/patterns/F0Dialog/components/F0DialogProvider"
-
 import { useSurveyFormBuilderContext } from "../../Context"
 import {
   SurveyFormBuilderElement,
   QuestionElement,
   SectionElement,
 } from "../../types"
-
 import { useTableOfContentItems } from "./useTableOfContentItems"
 
 const SECTION_PREFIX = "co-creation-section-"

@@ -6,7 +6,6 @@ import {
   useEffect,
   useRef,
 } from "react"
-
 import { FIT_VIEW_PADDING_LOOSE, FIT_VIEW_PADDING_TIGHT } from "../constants"
 import type { TreeNode } from "../types"
 

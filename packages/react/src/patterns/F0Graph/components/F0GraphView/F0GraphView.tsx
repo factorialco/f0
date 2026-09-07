@@ -18,9 +18,7 @@ import {
   useRef,
   useState,
 } from "react"
-
 import { useI18n } from "@/lib/providers/i18n"
-
 import {
   BACKGROUND_DOT_GAP,
   EMPTY_HIGHLIGHTED_NODES,

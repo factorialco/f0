@@ -10,7 +10,6 @@ import {
   useRef,
   useState,
 } from "react"
-
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { ArrowUp, Check, Cross, Microphone, Paperclip } from "@/icons/app"
@@ -21,7 +20,6 @@ import {
 } from "@/kits/ai/F0AiChatTextArea/useAudioRecorder"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { buildHighlightSegments } from "../hooks/highlight-utils"
 import { useEditLastOwnMessage } from "../hooks/useEditLastOwnMessage"
 import {
@@ -54,7 +52,6 @@ import {
   microEnterTransition,
   microExitTransition,
 } from "../utils/chat-motion"
-
 import { ChatComposerAttachmentPreview } from "./ChatComposerAttachmentPreview"
 import { ChatEditChip } from "./ChatEditChip"
 import { ChatEmojiAutocomplete } from "./ChatEmojiAutocomplete"

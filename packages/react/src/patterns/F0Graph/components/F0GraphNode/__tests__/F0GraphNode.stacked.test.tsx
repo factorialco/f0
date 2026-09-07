@@ -1,7 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
-
 import { fireEvent, screen, zeroRender } from "@/testing/test-utils"
-
 import { STACKED_NODE_HEIGHT } from "../../../constants"
 import { F0GraphNode } from "../F0GraphNode"
 

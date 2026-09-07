@@ -2,7 +2,6 @@ import { cva } from "cva"
 import { motion } from "motion/react"
 import type { SVGProps } from "react"
 import { Ref, forwardRef, useId } from "react"
-
 import { cn } from "@/lib/utils"
 
 interface OneIconProps extends SVGProps<SVGSVGElement> {

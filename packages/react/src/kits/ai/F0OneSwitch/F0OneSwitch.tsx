@@ -1,6 +1,5 @@
 import * as SwitchPrimitive from "@radix-ui/react-switch"
 import { useEffect, useState } from "react"
-
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import {
@@ -9,10 +8,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/ui/tooltip"
-
 import { useAiChatToggle } from "../F0AiChat/providers/useAiChatToggle"
 import { F0OneIcon } from "../F0OneIcon"
-
 import { F0OneSwitchProps } from "./types"
 
 export const F0OneSwitch = ({

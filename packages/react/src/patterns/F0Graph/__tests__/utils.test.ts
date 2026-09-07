@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import type { TreeNode } from "../types"
 import type { PositionedNode } from "../types"
 import {

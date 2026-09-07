@@ -1,9 +1,7 @@
 import { cva } from "cva"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-
 import { cn } from "@/lib/utils"
 import { Drawer, DrawerContent, DrawerOverlay } from "@/ui/drawer"
-
 import { Dialog, DialogContent } from "./dialog-primitive"
 import { DialogWrapperProvider } from "./DialogWrapperProvider"
 import { DialogAlikeSize } from "./types"

@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { ComponentProps, FC, useState } from "react"
 import { expect, within } from "storybook/test"
-
 import { F0Button } from "@/components/F0Button"
 import {
   OnePersonListItem,
@@ -28,7 +27,6 @@ import { Default as ResourceHeaderDefault } from "@/patterns/F0ResourceHeader/in
 import { useDataCollectionItemNavigation } from "@/patterns/OneDataCollection/hooks/useDataCollectionItemNavigation"
 import { ActivityItemList } from "@/sds/inbox/Activity/ActivityItemList"
 import { Default as ActivityItemListDefault } from "@/sds/inbox/Activity/ActivityItemList/index.stories"
-
 import { F0Dialog } from "../index"
 import { dialogPositions, dialogWidths } from "../types"
 

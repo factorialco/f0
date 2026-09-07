@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-
 import type { PersonProfile } from "../F0AiChat/types"
-
 import { escapeXml } from "./highlight-utils"
 
 /**

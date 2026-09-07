@@ -1,10 +1,8 @@
 import { AnimatePresence, motion } from "motion/react"
-
 import { AIButton } from "@/kits/ai/AIButton"
 import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { descriptionVariants } from "../variants"
 
 type CardHeaderProps = {

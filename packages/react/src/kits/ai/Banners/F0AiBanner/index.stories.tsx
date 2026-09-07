@@ -1,11 +1,8 @@
 import { StoryFn, StoryObj } from "@storybook/react-vite"
 import { expect, within } from "storybook/test"
-
 import { CheckDouble, ExternalLink } from "@/icons/app"
 import { WithDataTestIdProps } from "@/lib/data-testid"
-
 import { AiBannerSkeleton } from "./AiBannerInternal"
-
 import { F0AiBanner, F0AiBannerProps } from "."
 
 const meta = {

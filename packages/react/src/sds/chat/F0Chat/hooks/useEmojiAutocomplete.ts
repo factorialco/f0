@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useId, useMemo, useState } from "react"
-
 import { useF0ChatEmit } from "../providers/F0ChatProvider"
 import {
   type EmojiEntry,
@@ -8,7 +7,6 @@ import {
 } from "../utils/emoji-index"
 import { type EmojiLocaleTerms } from "../utils/emoji-locale"
 import { detectMaxEmojiVersion } from "../utils/emoji-support"
-
 import { useEmojiLocaleTerms } from "./useEmojiLocaleTerms"
 import {
   getTextareaCaretCoordinates,

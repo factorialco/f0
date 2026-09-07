@@ -1,6 +1,5 @@
 import { useEffect, useRef } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import {
   AiChatStateProvider,
   useAiChat,
@@ -15,7 +14,6 @@ import {
   waitFor,
   zeroRender as render,
 } from "@/testing/test-utils"
-
 import {
   buildPointQuoteText,
   buildAccessibleChartPoints,

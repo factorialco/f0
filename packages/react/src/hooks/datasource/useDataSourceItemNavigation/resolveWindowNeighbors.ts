@@ -1,5 +1,4 @@
 import { RecordType } from "../types/records.typings"
-
 import { DataSourceItemId } from "./types"
 
 export type NeighborResolution<R extends RecordType> = {

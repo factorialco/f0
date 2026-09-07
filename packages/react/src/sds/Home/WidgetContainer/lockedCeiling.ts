@@ -1,5 +1,4 @@
 import type { Modifier } from "@dnd-kit/core"
-
 import type { HomeWidgetItem } from "../slotRenderers"
 
 /**

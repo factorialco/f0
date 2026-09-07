@@ -1,5 +1,4 @@
 import { ComponentProps } from "react"
-
 import { PersonAvatarVariant } from "@/components/avatars/F0Avatar"
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import { F0AvatarEmoji } from "@/components/avatars/F0AvatarEmoji"

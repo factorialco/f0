@@ -7,14 +7,12 @@ import {
   useState,
 } from "react"
 import { Observable } from "zen-observable-ts"
-
 import { getValueByPath } from "@/lib/objectPaths"
 import { PromiseState, promiseToObservable } from "@/lib/promise-to-observable"
 import type {
   FiltersDefinition,
   FiltersState,
 } from "@/patterns/OneFilterPicker/types"
-
 import {
   BaseFetchOptions,
   GroupingDefinition,

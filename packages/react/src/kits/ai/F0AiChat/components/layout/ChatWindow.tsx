@@ -3,17 +3,14 @@ import { AnimatePresence, motion } from "motion/react"
 import type { ReactNode } from "react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useMediaQuery } from "usehooks-ts"
-
 import { useReducedMotion } from "@/lib/a11y"
 import type { WidgetDragStartDetail } from "@/lib/dnd/widgetDragEvents"
 import { WIDGET_DRAG_END, WIDGET_DRAG_START } from "@/lib/dnd/widgetDragEvents"
 import { cn } from "@/lib/utils"
-
 import { DropOverlay } from "../../../F0AiChatTextArea"
 import { F0AiPong } from "../../../F0AiPong"
 import { useAiChat } from "../../providers/AiChatStateProvider"
 import { MAX_CHAT_WIDTH, MIN_CHAT_WIDTH } from "../../utils/constants"
-
 import { ResizeHandle } from "./ResizeHandle"
 
 export const SidebarWindow = ({

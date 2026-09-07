@@ -11,7 +11,6 @@ import {
   useState,
   type ReactNode,
 } from "react"
-
 import {
   isUserMessage,
   type F0ChatFileAttachment,
@@ -22,7 +21,6 @@ import {
   documentPreviewKind,
   type ChatDocumentKind,
 } from "../utils/attachments"
-
 import { useF0Chat, useF0ChatEmit } from "./F0ChatProvider"
 
 /** Debounce before running a search as the user types. */

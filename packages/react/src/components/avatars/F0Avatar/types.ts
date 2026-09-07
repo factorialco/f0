@@ -1,7 +1,6 @@
 import { ModuleId } from "@/components/avatars/F0AvatarModule"
 import { DistributiveOmit } from "@/lib/typescript-utils/distributive-omit"
 import { BadgeProps } from "@/ui/IconBadge"
-
 import { F0AvatarCompanyProps } from "../F0AvatarCompany"
 import { F0AvatarEmojiProps } from "../F0AvatarEmoji"
 import { F0AvatarFileProps } from "../F0AvatarFile"

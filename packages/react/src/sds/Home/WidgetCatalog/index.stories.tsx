@@ -1,10 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
 import { z } from "zod"
-
 import { Calendar, Clock, File, PalmTree, Receipt, Target } from "@/icons/app"
 import { f0FormField } from "@/patterns/F0Form"
-
 import {
   fromParams,
   homeSlot,
@@ -13,7 +11,6 @@ import {
   type WidgetParams,
 } from "../slotRenderers"
 import { SlotWidget } from "../SlotWidget"
-
 import {
   WidgetCatalog,
   type WidgetCatalogGroup,

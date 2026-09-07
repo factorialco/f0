@@ -9,12 +9,10 @@ import {
   FormProvider,
   useFormContext,
 } from "react-hook-form"
-
 import { F0Icon } from "../components/F0Icon"
 import { AlertCircle } from "../icons/app"
 import { useI18n } from "../lib/providers/i18n/i18n-provider"
 import { cn } from "../lib/utils"
-
 import { Label } from "./label"
 
 const Form = FormProvider

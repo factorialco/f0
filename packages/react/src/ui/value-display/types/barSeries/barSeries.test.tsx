@@ -1,8 +1,6 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
-
 import { ValueDisplayRendererContext } from "../../renderers"
-
 import { BarSeriesCell, BarSeriesCellValue } from "./barSeries"
 
 const defaultMeta: ValueDisplayRendererContext = {

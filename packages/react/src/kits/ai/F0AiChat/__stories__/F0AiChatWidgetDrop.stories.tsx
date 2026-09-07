@@ -1,16 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useEffect, useState } from "react"
 import { expect, fireEvent, waitFor, within } from "storybook/test"
-
 import { F0AnalyticsDashboard } from "@/patterns/F0AnalyticsDashboard"
 import {
   dashboardFilters,
   dashboardPresets,
   mixedItems,
 } from "@/patterns/F0AnalyticsDashboard/__stories__/mockDataMixed"
-
 import { F0AiChat, F0AiChatProvider, useAiChat } from ".."
-
 import {
   MockAiChatRuntimeProvider,
   MockConnectedChatHeader,

@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react"
-
 import type { DropdownItem } from "@/experimental/Navigation/Dropdown"
 import type { RecordType } from "@/hooks/datasource"
 import { OneDataCollection } from "@/patterns/OneDataCollection"
@@ -8,7 +7,6 @@ import type {
   FiltersDefinition,
   FiltersState,
 } from "@/patterns/OneFilterPicker/types"
-
 import { useCollectionDownloadActions } from "../../hooks/useCollectionDownloadActions"
 import type {
   DashboardCollectionItem,

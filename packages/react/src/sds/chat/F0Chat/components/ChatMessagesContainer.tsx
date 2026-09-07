@@ -12,10 +12,8 @@ import {
   useState,
 } from "react"
 import { type ItemProps, type ListProps, Virtuoso } from "react-virtuoso"
-
 import { cn } from "@/lib/utils"
 import { ScrollBar } from "@/ui/scrollarea"
-
 import {
   AT_BOTTOM_THRESHOLD_PX,
   useChatVirtuoso,
@@ -29,7 +27,6 @@ import { CHAT_COMPOSER_HEIGHT } from "../utils/chat-layout"
 import { deliveryState } from "../utils/delivery-status"
 import { type ChatRow, flattenChatRows, freshTailIds } from "../utils/grouping"
 import { chatHeightEstimates } from "../utils/virtuoso-chat"
-
 import { ChatMessageRowRenderer } from "./ChatMessageRowRenderer"
 import { type TypingEntryState } from "./ChatTypingBubble"
 import { ChatViewportOverlays } from "./ChatViewportOverlays"

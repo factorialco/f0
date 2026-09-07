@@ -1,9 +1,6 @@
 import { describe, expect, test } from "vitest"
-
 import { screen, userEvent, zeroRender } from "@/testing/test-utils"
-
 import { listSlot } from "../slotRenderers"
-
 import { SlotWidget } from "./index"
 
 /**

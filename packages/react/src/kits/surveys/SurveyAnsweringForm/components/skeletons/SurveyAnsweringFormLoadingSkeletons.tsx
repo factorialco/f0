@@ -1,5 +1,4 @@
 import type { ReactNode } from "react"
-
 import { Skeleton } from "@/ui/skeleton"
 
 function SkeletonQuestionCard({

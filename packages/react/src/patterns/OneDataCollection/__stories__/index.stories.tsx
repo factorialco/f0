@@ -1,6 +1,5 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
 import { useEffect, useState } from "react"
-
 import { GroupingDefinition } from "@/hooks/datasource"
 import {
   Add,
@@ -39,14 +38,12 @@ import {
 } from "@/mocks"
 import { SummariesDefinition } from "@/patterns/OneDataCollection/summary.ts"
 import { mockImage } from "@/testing/mocks/images"
-
 import { useDataCollectionData } from "../hooks/useDataCollectionData/useDataCollectionData"
 import { useDataCollectionSource } from "../hooks/useDataCollectionSource"
 import { OneDataCollection } from "../index"
 import { ItemActionsDefinition } from "../item-actions"
 import { NavigationFiltersDefinition } from "../navigationFilters/types"
 import type { CustomVisualizationProps } from "../visualizations/collection"
-
 import {
   createDataAdapter,
   createPromiseDataFetch,

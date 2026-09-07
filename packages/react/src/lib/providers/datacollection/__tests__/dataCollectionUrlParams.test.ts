@@ -1,7 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest"
-
 import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
-
 import { getDataCollectionStorageKey } from "../dataCollectionStorageKey"
 import {
   buildDataCollectionUrlParams,

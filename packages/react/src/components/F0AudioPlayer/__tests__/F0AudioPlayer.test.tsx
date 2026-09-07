@@ -1,9 +1,7 @@
 import { fireEvent, waitFor } from "@testing-library/react"
 import { type ComponentProps } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
 import { screen, userEvent, zeroRender as render } from "@/testing/test-utils"
-
 import { F0AudioPlayer, F0AudioPlayerCard } from ".."
 
 const getAudio = (): HTMLAudioElement => {

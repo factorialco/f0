@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from "react"
-
 import type { F0DataChartBarProps } from "../../types"
 import { resolveChartSize } from "../../utils/responsive"
 import { useAxisLabelTooltip } from "../../utils/useAxisLabelTooltip"
@@ -9,7 +8,6 @@ import { useEChartsInstance } from "../../utils/useEChartsInstance"
 import { useLegendInteraction } from "../../utils/useLegendInteraction"
 import { useLegendSelection } from "../../utils/useLegendSelection"
 import { usePointClick } from "../../utils/usePointClick"
-
 import {
   expandedHorizontalChartHeight,
   horizontalCategoryWindow,

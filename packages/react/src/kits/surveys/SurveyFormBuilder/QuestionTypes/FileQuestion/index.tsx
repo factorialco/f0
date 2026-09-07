@@ -5,7 +5,6 @@ import type {
 } from "@/patterns/F0Form/fields/file/types"
 import type { F0FileField } from "@/patterns/F0Form/fields/types"
 import { F0FormField } from "@/patterns/F0FormField"
-
 import { useSurveyFormBuilderContext } from "../../Context"
 import { BaseQuestionOnChangeParams } from "../../types"
 import {

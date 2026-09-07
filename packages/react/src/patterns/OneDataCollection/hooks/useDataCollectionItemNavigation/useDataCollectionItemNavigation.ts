@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from "react"
-
 import { usePageHeaderItemNavigation } from "@/experimental/Navigation/Header/PageHeader"
 import type { NavigationProps } from "@/experimental/Navigation/Header/PageNavigation"
 import {
@@ -19,12 +18,10 @@ import {
   useDataCollectionStorage,
 } from "@/lib/providers/datacollection"
 import { subscribeToDataCollectionStorageChanges } from "@/lib/providers/datacollection/dataCollectionStorageEvents"
-
 import { ItemActionsDefinition } from "../../item-actions"
 import { NavigationFiltersDefinition } from "../../navigationFilters/types"
 import { SummariesDefinition } from "../../summary"
 import { useDataCollectionSource } from "../useDataCollectionSource"
-
 import { seedFromStorage } from "./seedFromStorage"
 import {
   AppliedCollectionState,

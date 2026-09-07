@@ -1,5 +1,4 @@
 import "./types"
-
 import type { GridStack, GridStackOptions, GridStackWidget } from "gridstack"
 import { createContext, useContext } from "react"
 

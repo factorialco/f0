@@ -1,7 +1,5 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react"
-
 import { useReducedMotion } from "@/lib/a11y"
-
 import { F0Coachmark } from "./F0Coachmark"
 import { coachmarkStore } from "./store"
 import type { CoachmarkEndReason, CoachmarkItem } from "./types"

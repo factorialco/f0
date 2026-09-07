@@ -1,13 +1,10 @@
 import { useCallback, useEffect, useRef } from "react"
 import { ControllerRenderProps, FieldValues } from "react-hook-form"
-
 import {
   F0RichTextEditor,
   type RichTextEditorHandle,
 } from "@/components/RichText/F0RichTextEditor"
-
 import type { ResolvedField } from "../types"
-
 import type { F0RichTextField, RichTextValue } from "./types"
 
 interface RichTextFieldRendererProps {

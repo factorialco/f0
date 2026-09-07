@@ -1,13 +1,10 @@
 import { type ComponentProps } from "react"
-
 import {
   internalAvatarColors as AvatarColors,
   Avatar as AvatarComponent,
 } from "@/ui/Avatar"
 import { BadgeProps } from "@/ui/IconBadge"
-
 import { F0AvatarModuleProps } from "../../F0AvatarModule"
-
 import { AvatarSize } from "./types"
 
 type ShadAvatarProps = ComponentProps<typeof AvatarComponent>

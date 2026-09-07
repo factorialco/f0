@@ -1,11 +1,8 @@
 import "@testing-library/jest-dom/vitest"
-
 import userEvent from "@testing-library/user-event"
 import { useState } from "react"
 import { describe, expect, it, vi } from "vitest"
-
 import { zeroRender as render, screen } from "@/testing/test-utils"
-
 import { InFilter } from "../InFilter"
 
 vi.mock("../useLoadOptions", async (importOriginal) => {

@@ -1,5 +1,4 @@
 import { useCallback } from "react"
-
 import { SEEK_STEP_SECONDS, VOLUME_STEP } from "../utils"
 
 export interface UseKeyboardShortcutsOptions {

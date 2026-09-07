@@ -7,7 +7,6 @@ import {
   useRef,
   useState,
 } from "react"
-
 import { F0SearchInput } from "@/components/F0SearchInput"
 import { withDataTestId } from "@/lib/data-testid"
 import { createAtlaskitDriver } from "@/lib/dnd/atlaskitDriver"
@@ -18,7 +17,6 @@ import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { ScrollArea } from "@/ui/scrollarea"
-
 import { Item } from "./Item"
 import { ItemSectionHeader } from "./ItemSectionHeader"
 import { TOCFooter } from "./TOCFooter"

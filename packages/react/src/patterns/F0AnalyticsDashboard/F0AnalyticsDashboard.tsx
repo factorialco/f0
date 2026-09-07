@@ -1,6 +1,5 @@
 import { useControllableState } from "@radix-ui/react-use-controllable-state"
 import { useEffect, useMemo, useState } from "react"
-
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { NavigationFilters } from "@/patterns/OneDataCollection/components/NavigationFilters/NavigationFilters"
@@ -13,7 +12,6 @@ import type {
   FiltersDefinition,
   FiltersState,
 } from "@/patterns/OneFilterPicker/types"
-
 import { DashboardGrid } from "./components/DashboardGrid/DashboardGrid"
 import { ExportDropdown } from "./components/ExportDropdown/ExportDropdown"
 import { FilterBar } from "./components/FilterBar/FilterBar"

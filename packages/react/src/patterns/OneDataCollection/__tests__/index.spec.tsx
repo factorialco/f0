@@ -3,7 +3,6 @@ import { userEvent } from "@testing-library/user-event"
 import { LayoutGrid } from "lucide-react"
 import { describe, expect, test, vi } from "vitest"
 import { Observable } from "zen-observable-ts"
-
 import {
   BaseFetchOptions,
   BaseResponse,
@@ -22,7 +21,6 @@ import {
   zeroRender as render,
   zeroRenderHook as renderHook,
 } from "@/testing/test-utils"
-
 import { useDataCollectionData } from "../hooks/useDataCollectionData/useDataCollectionData"
 import {
   DataCollectionSource,

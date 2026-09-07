@@ -1,9 +1,6 @@
 import "@testing-library/jest-dom/vitest"
-
 import { describe, expect, it } from "vitest"
-
 import { zeroRender as render, screen } from "@/testing/test-utils"
-
 import { EntityRefDetails } from "../EntityRefDetails"
 
 describe("EntityRefDetails", () => {

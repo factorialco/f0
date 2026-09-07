@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { AreaChartWidget } from "@/experimental/Widgets/Charts/AreaChartWidget"
 import AreaChartWidgetStoriesMeta from "@/experimental/Widgets/Charts/AreaChartWidget/index.stories"
 import { BarChartWidget } from "@/experimental/Widgets/Charts/BarChartWidget"
@@ -19,7 +18,6 @@ import { Default as WidgetInboxListDefaultStory } from "@/experimental/Widgets/C
 import { Widget } from "@/experimental/Widgets/Widget"
 import { AreaChartProps } from "@/kits/Charts/AreaChart"
 import { Placeholder } from "@/lib/storybook-utils/placeholder"
-
 import { HomeLayout } from "./index"
 
 const widgets = [

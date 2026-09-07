@@ -1,9 +1,7 @@
 import * as echarts from "echarts"
 import { type RefObject, useMemo } from "react"
-
 import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
-
 import type {
   F0DataChartBarDataPoint,
   F0DataChartBarProps,

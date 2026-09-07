@@ -1,11 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 // packages/react/src/experimental/ProductBlankslate/ProductBlankslate.stories.tsx
 import { F0Button } from "@/components/F0Button"
 import SalesIcon from "@/icons/modules/Sales"
-
 import { UpsellingButton } from "../UpsellingButton"
-
 import { ProductBlankslate } from "."
 
 const meta: Meta<typeof ProductBlankslate> = {

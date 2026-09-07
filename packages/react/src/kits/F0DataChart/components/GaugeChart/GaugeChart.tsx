@@ -1,11 +1,9 @@
 import { useRef } from "react"
-
 import type { F0DataChartGaugeProps } from "../../types"
 import { resolveChartSize } from "../../utils/responsive"
 import { useContainerSize } from "../../utils/useContainerSize"
 import { useEChartsInstance } from "../../utils/useEChartsInstance"
 import { usePointClick } from "../../utils/usePointClick"
-
 import { useGaugeChartOptions } from "./useGaugeChartOptions"
 
 export const GaugeChart = (props: F0DataChartGaugeProps) => {

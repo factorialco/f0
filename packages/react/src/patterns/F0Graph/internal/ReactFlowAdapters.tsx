@@ -5,12 +5,10 @@ import {
   type NodeProps,
 } from "@xyflow/react"
 import { type CSSProperties, type ReactNode, memo } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { Minimize } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import type {
   GraphNodeState,
   GraphNodeVariant,

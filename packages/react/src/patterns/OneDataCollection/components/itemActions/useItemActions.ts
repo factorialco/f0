@@ -1,5 +1,4 @@
 import { useState } from "react"
-
 import {
   DropdownItem,
   DropdownItemSeparator,
@@ -18,7 +17,6 @@ import {
 import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import { SummariesDefinition } from "@/patterns/OneDataCollection/summary"
 import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
-
 import { actionsToDropdownItems } from "../../visualizations/collection/utils"
 
 type UseItemActionProps<

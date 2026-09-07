@@ -8,7 +8,6 @@ import {
   waitFor,
   within,
 } from "storybook/test"
-
 import { F0Button } from "@/components/F0Button"
 import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import {
@@ -18,9 +17,7 @@ import {
 } from "@/hooks/datasource"
 import { Plus } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
 import { SlotWidget } from "../../SlotWidget"
-
 import { F0CommunityPostsCarousel, type CommunityPostSummary } from "./index"
 
 const POSTS: CommunityPostSummary[] = [

@@ -2,7 +2,6 @@ import { extractClosestEdge } from "@atlaskit/pragmatic-drag-and-drop-hitbox/clo
 import { getReorderDestinationIndex } from "@atlaskit/pragmatic-drag-and-drop-hitbox/util/get-reorder-destination-index"
 import { monitorForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter"
 import { useEffect, useRef } from "react"
-
 import { useDroppableList } from "@/lib/dnd/hooks"
 
 export function DropLaneReorder({

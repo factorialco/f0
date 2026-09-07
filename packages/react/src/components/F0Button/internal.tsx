@@ -1,6 +1,5 @@
 import { motion } from "motion/react"
 import { forwardRef, useState } from "react"
-
 import { F0Icon } from "@/components/F0Icon"
 import { EmojiImage } from "@/lib/emojis"
 import { OneEllipsis } from "@/lib/OneEllipsis"
@@ -8,7 +7,6 @@ import { useTextFormatEnforcer } from "@/lib/text"
 import { cn } from "@/lib/utils"
 import { Action } from "@/ui/Action"
 import { Counter } from "@/ui/Counter"
-
 import { ButtonInternalProps } from "./internal-types"
 import { fontSizeVariants } from "./variants"
 

@@ -1,5 +1,4 @@
 import { Dispatch, SetStateAction } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { F0Icon, IconType } from "@/components/F0Icon/F0Icon"
 import { Switch } from "@/experimental/Forms/Fields/Switch"
@@ -28,12 +27,10 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/ui/dropdown-menu"
-
 import { useSurveyFormBuilderContext } from "../../../Context"
 import { RatingOptionType } from "../../../lib"
 import { QuestionType } from "../../../types"
 import { HiddenAction, HiddenActions } from "../types"
-
 import { RATING_OPTIONS, useQuestionActions } from "./useQuestionActions"
 
 const ToggleItem = ({

@@ -1,9 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
-
 import { Placeholder } from "@/icons/app"
 import CrossIcon from "@/icons/app/Cross"
-
 import { getDialogAlikeArgTypes } from "../../common/__stories__/argsTypes"
 import { DialogNotificationInternal } from "../internal/DialogNotification"
 import { dialogNotificationTypes } from "../types"

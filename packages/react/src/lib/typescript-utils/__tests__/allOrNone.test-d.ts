@@ -1,5 +1,4 @@
 import { assertType, expectTypeOf } from "vitest"
-
 import type { AllOrNone } from "../allOrNone"
 
 test("should accept all properties", () => {

@@ -1,9 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
-
 import { createAtlaskitDriver } from "@/lib/dnd/atlaskitDriver"
 import { DndProvider } from "@/lib/dnd/context"
-
 import { KanbanCard } from "../KanbanCard"
 import { KanbanLane } from "../KanbanLane"
 

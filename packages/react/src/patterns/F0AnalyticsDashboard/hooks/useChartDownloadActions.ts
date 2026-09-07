@@ -1,11 +1,9 @@
 import * as echarts from "echarts"
 import type { RefObject } from "react"
 import { useCallback, useMemo } from "react"
-
 import type { DropdownItem } from "@/experimental/Navigation/Dropdown"
 import { Table, Image } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
-
 import type { DashboardChartConfig, DashboardChartData } from "../types"
 import { detectDataShape } from "../utils/chartDataAdapter"
 import { chartDataToTabular } from "../utils/chartDataToTabular"

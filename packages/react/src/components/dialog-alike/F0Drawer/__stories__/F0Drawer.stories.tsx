@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { ComponentProps, FC, useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import {
   OnePersonListItem,
@@ -13,7 +12,6 @@ import ShareIcon from "@/icons/app/Share"
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { F0ResourceHeader } from "@/patterns/F0ResourceHeader"
 import { Default as ResourceHeaderDefault } from "@/patterns/F0ResourceHeader/index.stories"
-
 import { getDialogAlikeArgTypes } from "../../common/__stories__/argsTypes"
 import { OTHER_ACTIONS, TABS } from "../../common/__stories__/mocks"
 import { F0Drawer } from "../index"

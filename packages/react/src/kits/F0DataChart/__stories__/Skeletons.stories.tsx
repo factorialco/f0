@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import {
   BarChartSkeleton,
   FunnelChartSkeleton,
@@ -10,7 +9,6 @@ import {
   RadarChartSkeleton,
   ScatterChartSkeleton,
 } from "../skeletons"
-
 import { ChartDecorator } from "./decorators"
 
 const meta = {

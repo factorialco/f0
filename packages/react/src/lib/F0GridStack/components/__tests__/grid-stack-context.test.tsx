@@ -1,8 +1,6 @@
 import type { GridStack } from "gridstack"
 import { describe, expect, it, vi } from "vitest"
-
 import { zeroRender } from "@/testing/test-utils"
-
 import { GridStackContext, useGridStackContext } from "../grid-stack-context"
 
 // Mock gridstack

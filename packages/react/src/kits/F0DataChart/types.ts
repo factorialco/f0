@@ -1,6 +1,5 @@
 import type * as echarts from "echarts"
 import type { ReactNode } from "react"
-
 import type { ChartColorToken } from "./utils/colors"
 
 // ---------------------------------------------------------------------------

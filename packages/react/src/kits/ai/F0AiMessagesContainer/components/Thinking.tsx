@@ -1,11 +1,8 @@
 import { useEffect, useRef, useState } from "react"
-
 import Lightbulb from "@/icons/app/Lightbulb"
 import { useI18n } from "@/lib/providers/i18n"
-
 import { F0ActionItem } from "../../F0ActionItem"
 import { ThinkingProps } from "../types"
-
 import { CollapsibleMessage } from "./CollapsibleMessage"
 
 export const Thinking = ({

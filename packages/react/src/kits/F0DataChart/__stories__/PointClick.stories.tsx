@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
-
 import { F0DataChart } from "../index"
 import type { F0DataChartPointClick, F0DataChartProps } from "../types"
 

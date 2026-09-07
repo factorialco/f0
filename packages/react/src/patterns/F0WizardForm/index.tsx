@@ -1,7 +1,5 @@
 import React from "react"
-
 import { withDataTestId } from "@/lib/data-testid"
-
 import { F0WizardForm as F0WizardFormComponent } from "./F0WizardForm"
 import type {
   F0FormSchema,

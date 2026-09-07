@@ -9,7 +9,6 @@ import React, {
   useState,
 } from "react"
 import { useMediaQuery } from "usehooks-ts"
-
 import { useNavigation } from "@/lib/linkHandler"
 
 const PREFERRED_INITIAL_STATE_KEY = "one_sidebar_locked"

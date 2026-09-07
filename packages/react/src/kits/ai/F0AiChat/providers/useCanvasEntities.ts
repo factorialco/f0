@@ -2,7 +2,6 @@ import type {
   CanvasContentBase,
   CanvasEntityDefinition,
 } from "../../canvas/types"
-
 import { useAiChat } from "./AiChatStateProvider"
 
 /**

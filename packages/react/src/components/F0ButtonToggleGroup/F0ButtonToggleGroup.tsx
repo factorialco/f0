@@ -1,10 +1,7 @@
 import { ToggleGroup, ToggleGroupItem } from "@radix-ui/react-toggle-group"
 import { useEffect, useMemo, useState } from "react"
-
 import { cn } from "@/lib/utils"
-
 import { F0ButtonToggleInternal } from "../F0ButtonToggle/internal/F0ButtonToggle.internal"
-
 import { F0ButtonToggleGroupProps } from "./types"
 
 export const F0ButtonToggleGroup = (props: F0ButtonToggleGroupProps) => {

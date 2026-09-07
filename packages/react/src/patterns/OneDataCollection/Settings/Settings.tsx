@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import {
@@ -13,7 +12,6 @@ import { Reset, Sliders } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
-
 import { isVisualizationSettingsDefault } from "../internal/isSettingsDefault"
 import { ItemActionsDefinition } from "../item-actions"
 import { NavigationFiltersDefinition } from "../navigationFilters/types"
@@ -22,7 +20,6 @@ import {
   collectionVisualizations,
   Visualization,
 } from "../visualizations/collection"
-
 import { GroupingSelector } from "./components/GroupingSelector"
 import { SortingSelector } from "./components/SortingSelector"
 import { useDataCollectionSettings } from "./SettingsProvider"

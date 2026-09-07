@@ -10,7 +10,6 @@ import {
   RecordType,
   SortingsDefinition,
 } from "@/hooks/datasource"
-
 import { PrimaryActionItemDefinition } from "../../../actions"
 import { ItemActionsDefinition } from "../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
@@ -21,7 +20,6 @@ import type {
   TableVisualizationOptions,
   TableVisualizationSettings,
 } from "../Table/types"
-
 import { EditableTableCellEditType } from "./components/cells"
 
 export type AddRowActionsResult =

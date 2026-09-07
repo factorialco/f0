@@ -1,7 +1,5 @@
 import "@testing-library/jest-dom/vitest"
-
 import { afterEach, describe, expect, it, vi } from "vitest"
-
 import { DataCollectionStorageProvider } from "@/lib/providers/datacollection/DataCollectionStorageProvider"
 import {
   DataCollectionStorage,
@@ -15,7 +13,6 @@ import {
   waitFor,
   zeroRender,
 } from "@/testing/test-utils"
-
 import { useDataCollectionSource } from "../hooks/useDataCollectionSource"
 import { OneDataCollection } from "../index"
 import {

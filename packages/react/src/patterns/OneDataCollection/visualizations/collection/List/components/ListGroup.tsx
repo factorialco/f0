@@ -5,13 +5,11 @@ import {
 } from "@/hooks/datasource"
 import { cn } from "@/lib/utils"
 import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
-
 import { DataCollectionSource } from "../../../../hooks/useDataCollectionSource"
 import { ItemActionsDefinition } from "../../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../../navigationFilters/types"
 import { SummariesDefinition } from "../../../../summary"
 import { ItemDefinition, ListPropertyDefinition } from "../types"
-
 import { Row } from "./Row"
 
 type ListGroupProps<

@@ -1,5 +1,4 @@
 import { forwardRef } from "react"
-
 import {
   type CardPrimaryAction,
   type CardSecondaryAction,
@@ -23,7 +22,6 @@ import { cn, focusRing } from "@/lib/utils"
 import { Card } from "@/ui/Card"
 import { Skeleton } from "@/ui/skeleton"
 import { Text } from "@/ui/Text"
-
 import {
   CardHorizontalActions,
   type CardHorizontalConfirmAction,

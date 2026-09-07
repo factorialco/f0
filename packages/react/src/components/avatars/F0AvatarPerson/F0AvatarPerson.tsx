@@ -1,7 +1,5 @@
 import { PersonNegative, SearchPerson } from "@/icons/app"
-
 import { BaseAvatar } from "../internal/BaseAvatar"
-
 import { F0AvatarPersonProps } from "./types"
 
 export const F0AvatarPerson = ({

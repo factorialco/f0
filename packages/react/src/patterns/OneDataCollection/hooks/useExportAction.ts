@@ -1,5 +1,4 @@
 import { useState, useCallback } from "react"
-
 import {
   RecordType,
   FiltersDefinition,
@@ -12,7 +11,6 @@ import {
 import { Download } from "@/icons/app"
 import { PromiseState } from "@/lib/promise-to-observable"
 import { useI18n } from "@/lib/providers/i18n"
-
 import { SecondaryActionItem } from "../actions"
 import { DataCollectionSource } from "../hooks/useDataCollectionSource/types"
 import { ItemActionsDefinition } from "../item-actions"

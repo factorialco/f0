@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { ForwardedRef, useCallback, useState } from "react"
-
 import {
   BaseFetchOptions,
   ItemNeighborsFetchOptions,
@@ -16,10 +15,8 @@ import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { FIRST_NAMES_MOCK, getMockValue, SURNAMES_MOCK } from "@/mocks"
 import { useDataCollectionItemNavigation } from "@/patterns/OneDataCollection/hooks/useDataCollectionItemNavigation"
 import { FiltersDefinition, FiltersState } from "@/patterns/OneFilterPicker"
-
 import { ChartLine } from "../../../../icons/ai"
 import { EllipsisHorizontal, Settings } from "../../../../icons/app"
-
 import { PageHeader } from "./index"
 
 const meta = {

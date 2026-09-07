@@ -1,5 +1,4 @@
 import "./types"
-
 import { useDeepCompareEffect } from "@reactuses/core"
 import DOMPurify from "dompurify"
 import type {
@@ -17,9 +16,7 @@ import React, {
   useRef,
   useState,
 } from "react"
-
 import { GridStackReactWidget } from "../F0GridStack"
-
 import { GridStackContext } from "./grid-stack-context"
 import { convertWidgetRecursive } from "./widget-utils"
 

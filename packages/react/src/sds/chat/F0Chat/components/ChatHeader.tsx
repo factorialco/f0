@@ -1,7 +1,6 @@
 import { breakpoints } from "@factorialco/f0-core"
 import { type ReactNode } from "react"
 import { useMediaQuery } from "usehooks-ts"
-
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon, type IconType } from "@/components/F0Icon"
@@ -10,10 +9,8 @@ import { Cross, Ellipsis, Maximize, Minimize, Search } from "@/icons/app"
 import { EmojiImage } from "@/lib/emojis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { useChatSearch } from "../providers/ChatUIProvider"
 import { type F0ChatChannel, type F0ChatHeaderAction } from "../types"
-
 import { ChatHeaderSearch } from "./ChatHeaderSearch"
 import { ChatUserHoverCard } from "./ChatUserHoverCard"
 

@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { type ReactNode } from "react"
-
 import { F0CardHorizontal } from "@/experimental/F0CardHorizontal"
 import { Check, Cross } from "@/icons/app"
 

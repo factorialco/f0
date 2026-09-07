@@ -3,9 +3,7 @@ import avatar02 from "@storybook-static/avatars/person02.jpg"
 import avatar03 from "@storybook-static/avatars/person03.jpg"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { expect, within } from "storybook/test"
-
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
-
 import { F0ChipList } from "./index"
 
 const meta = {

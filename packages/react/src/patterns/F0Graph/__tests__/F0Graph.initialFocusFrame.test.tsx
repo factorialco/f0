@@ -8,9 +8,7 @@ import {
   it,
   vi,
 } from "vitest"
-
 import { zeroRender } from "@/testing/test-utils"
-
 import { FOCUS_SETTLE_DELAY_MS } from "../constants"
 import { F0Graph } from "../F0Graph"
 import type { GraphNode } from "../types"

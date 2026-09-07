@@ -1,6 +1,5 @@
 import { render } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
-
 import { F0RichTextDisplay } from "./F0RichTextDisplay"
 
 describe("F0RichTextDisplay sanitization", () => {

@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
-
 import {
   Clock,
   Comment,
@@ -13,14 +12,12 @@ import {
   Sparkles,
 } from "@/icons/app"
 import { Skeleton } from "@/ui/skeleton"
-
 import {
   homeSlot,
   listSlot,
   type HomeWidgetSlot,
   type SlotRenderers,
 } from "../slotRenderers"
-
 import { SlotWidget } from "./index"
 
 const meta = {

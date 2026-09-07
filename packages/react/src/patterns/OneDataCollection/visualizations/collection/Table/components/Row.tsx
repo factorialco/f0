@@ -1,6 +1,5 @@
 import { useIsPresent } from "motion/react"
 import { forwardRef, useEffect, useState } from "react"
-
 import type { IconType } from "@/components/F0Icon"
 import { TableCell, TableRow } from "@/experimental/OneTable"
 import {
@@ -24,7 +23,6 @@ import type { TableVisualizationType } from "@/patterns/OneDataCollection/types"
 import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import { Checkbox } from "@/ui/checkbox"
 import { tableCellContentClassName } from "@/ui/value-display/const"
-
 import { ItemActionsRow } from "../../../../components/itemActions/ItemActionsRow/ItemActionsRow"
 import { getColumnId } from "../hooks/useColums"
 import { groupBorderClass, HeaderGroupEntry } from "../hooks/useHeaderGroups"
@@ -36,7 +34,6 @@ import type {
   TableColumnDefinition,
 } from "../types"
 import { useSticky } from "../useSticky"
-
 import { NestedRow } from "./NestedRow"
 
 export type RowProps<

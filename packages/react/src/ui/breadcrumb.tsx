@@ -2,7 +2,6 @@ import { Slot } from "@radix-ui/react-slot"
 import { ChevronRight, MoreHorizontal } from "lucide-react"
 import { AnimatePresence, LayoutGroup } from "motion/react"
 import { ComponentProps, forwardRef, useId } from "react"
-
 import { Link } from "../lib/linkHandler"
 import { cn } from "../lib/utils"
 

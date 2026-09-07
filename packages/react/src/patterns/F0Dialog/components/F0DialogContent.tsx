@@ -1,10 +1,8 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useCallback, useEffect, useRef, useState } from "react"
-
 import { LayoutProvider } from "@/layouts/LayoutProvider"
 import { cn } from "@/lib/utils"
 import { ScrollArea, ScrollBar } from "@/ui/scrollarea"
-
 import { useF0Dialog } from "./F0DialogProvider"
 
 export type F0DialogContentProps = {

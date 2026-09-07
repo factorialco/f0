@@ -5,7 +5,6 @@ import ChevronDown from "@/icons/app/ChevronDown"
 import ChevronUp from "@/icons/app/ChevronUp"
 import { cn, focusRing } from "@/lib/utils"
 import { Progress } from "@/ui/progress"
-
 import type { F0TimelineRowNestedtaskProps } from "../types"
 
 export const NestedtaskHeader = ({

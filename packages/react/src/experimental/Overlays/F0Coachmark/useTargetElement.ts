@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react"
-
 import type { CoachmarkTarget } from "./types"
 
 const isDev = process.env.NODE_ENV !== "production"

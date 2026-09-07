@@ -1,11 +1,8 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
-
 import { GroupingDefinition } from "@/hooks/datasource"
 import { Delete, Download, Pencil, Star } from "@/icons/app"
 import { useDataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
-
 import { OneDataCollection } from ".."
-
 import {
   createDataAdapter,
   ExampleComponent,

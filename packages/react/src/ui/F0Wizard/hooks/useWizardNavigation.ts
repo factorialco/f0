@@ -1,5 +1,4 @@
 import { useCallback, useRef, useState } from "react"
-
 import type { F0WizardStep } from "../types"
 
 interface UseWizardNavigationOptions {

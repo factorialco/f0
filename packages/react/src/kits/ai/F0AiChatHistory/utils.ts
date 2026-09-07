@@ -6,7 +6,6 @@ import {
   isYesterday,
   type Locale,
 } from "date-fns"
-
 import type { DateGroup, ThreadGroup } from "./types"
 import type { ChatThread } from "./useChatHistory"
 

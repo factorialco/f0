@@ -1,5 +1,4 @@
 import { Editor } from "@tiptap/react"
-
 import { IconType } from "@/components/F0Icon"
 import {
   CheckDouble,
@@ -16,7 +15,6 @@ import {
   Video,
 } from "@/icons/app"
 import { I18nContextType } from "@/lib/providers/i18n"
-
 import { AIBlockConfig } from "../AIBlock"
 import {
   DEFAULT_ACCEPTED_TYPES,

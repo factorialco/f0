@@ -1,8 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { ComponentProps } from "react"
-
 import { Placeholder } from "@/icons/app"
-
 import { Trigger } from "./index"
 
 const meta: Meta = {

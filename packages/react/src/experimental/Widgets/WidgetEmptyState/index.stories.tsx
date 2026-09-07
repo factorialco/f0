@@ -1,8 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { expect, within } from "storybook/test"
-
 import { Placeholder as PlaceholderIcon } from "../../../icons/app"
-
 import { WidgetEmptyState } from "./index"
 
 const meta: Meta<typeof WidgetEmptyState> = {

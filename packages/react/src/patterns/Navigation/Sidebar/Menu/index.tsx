@@ -7,7 +7,6 @@ import {
   useRef,
   useState,
 } from "react"
-
 import { AvatarVariant, F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
@@ -21,9 +20,7 @@ import { useI18n } from "@/lib/providers/i18n"
 import { useTouchScreen } from "@/lib/useTouchScreen"
 import { cn, focusRing } from "@/lib/utils"
 import { Counter } from "@/ui/Counter"
-
 import { SidebarCollapsibleSection } from "../CollapsibleSection"
-
 import { DragProvider, useDragContext } from "./DragContext"
 
 export interface MenuItem extends NavigationItem {

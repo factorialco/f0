@@ -1,13 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useRef } from "react"
 import { DefaultValues, Path, useForm } from "react-hook-form"
 import { z } from "zod"
-
 import { F0Button } from "@/components/F0Button"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { cn } from "@/lib/utils"
 import { SectionHeader } from "@/patterns/SectionHeader"
 import { Form as FormProvider } from "@/ui/form"
-
 import { createConditionalResolver } from "../conditionalResolver"
 import { FIELD_GAP } from "../constants"
 import { F0FormContext } from "../context"
@@ -28,7 +26,6 @@ import type {
 import type { F0FormRef, F0FormStateCallback } from "../useF0Form"
 import { useSchemaDefinition } from "../useSchemaDefinition"
 import { createZodErrorMap } from "../zodErrorMap"
-
 import { RowRenderer } from "./RowRenderer"
 import { SwitchGroupRenderer } from "./SwitchGroupRenderer"
 

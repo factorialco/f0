@@ -1,7 +1,5 @@
 import { AnimatePresence, motion } from "motion/react"
-
 import { F0FileItem } from "@/components/F0FileItem"
-
 import { UPLOAD_INPUT_ID } from "../../utils/constants"
 import {
   getAcceptFileTypeString,

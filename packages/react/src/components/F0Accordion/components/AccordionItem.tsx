@@ -1,5 +1,4 @@
 import { AnimatePresence, motion } from "motion/react"
-
 import { F0Button } from "@/components/F0Button"
 import { ChevronDown, ChevronUp } from "@/icons/app"
 import { useReducedMotion } from "@/lib/a11y"
@@ -10,9 +9,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/ui/collapsible"
-
 import { F0AccordionItem } from "../types"
-
 import { AccordionActions } from "./AccordionActions"
 
 interface AccordionItemProps {

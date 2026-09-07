@@ -1,6 +1,5 @@
 import type * as echarts from "echarts"
 import { type RefObject, useEffect } from "react"
-
 import type { ChartTheme } from "./theme"
 
 // Shared offscreen canvas used to measure label text widths. Created lazily

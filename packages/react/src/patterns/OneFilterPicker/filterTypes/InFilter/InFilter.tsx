@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useMemo, useRef, useState } from "react"
-
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { F0SearchInput } from "@/components/F0SearchInput"
 import { RecordType } from "@/hooks/datasource"
@@ -10,9 +9,7 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { ScrollArea } from "@/ui/scrollarea"
 import { Spinner } from "@/ui/Spinner"
-
 import { FilterTypeComponentProps } from "../types"
-
 import { InFilterFlatOption } from "./components/InFilterFlatOption"
 import { InFilterOptionRow } from "./components/InFilterOptionRow"
 import {

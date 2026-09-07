@@ -1,9 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { Calendar, Clock } from "@/icons/app"
-
 import { type HomeWidgetItem, listSlot, widgetTitle } from "../slotRenderers"
-
 import { WidgetContainer } from "./index"
 
 const WIDGETS: HomeWidgetItem[] = [

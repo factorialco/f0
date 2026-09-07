@@ -1,8 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
-
 import { Download } from "@/icons/app"
 import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
-
 import { F0ResourceHeader } from "../index"
 
 describe("F0ResourceHeader", () => {

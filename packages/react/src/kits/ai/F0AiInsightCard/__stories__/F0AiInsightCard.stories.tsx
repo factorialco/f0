@@ -1,8 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { fn } from "storybook/test"
-
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
 import { F0AiInsightCard } from ".."
 import type { F0AiInsightCardProps, SparklineDataPoint } from "../types"
 import { contentTypes } from "../types"

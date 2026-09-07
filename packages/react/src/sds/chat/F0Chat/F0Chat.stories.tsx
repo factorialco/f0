@@ -1,10 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { Profiler, type ReactNode, useEffect, useRef, useState } from "react"
 import { expect, userEvent, waitFor, within } from "storybook/test"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
 import { ChatBubble } from "./components/ChatBubble"
 import { ChatMessageAttachments } from "./components/ChatMessageAttachments"
 import { F0Chat } from "./F0Chat"

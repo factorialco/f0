@@ -1,15 +1,12 @@
 import { AnimatePresence, motion } from "motion/react"
 import { ReactElement, ReactNode, cloneElement, isValidElement } from "react"
 import { useIntersectionObserver } from "usehooks-ts"
-
 import { withDataTestId } from "@/lib/data-testid"
 import { useSidebar } from "@/patterns/ApplicationFrame/FrameProvider"
 import { ScrollArea } from "@/ui/scrollarea"
-
 import { useReducedMotion } from "../../../lib/a11y"
 import { useI18n } from "../../../lib/providers/i18n"
 import { cn } from "../../../lib/utils"
-
 import { SidebarFooter } from "./Footer"
 
 const ScrollShadow = ({ position }: { position: "top" | "bottom" }) => (

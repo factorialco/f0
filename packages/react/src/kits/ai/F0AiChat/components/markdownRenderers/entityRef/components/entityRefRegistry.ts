@@ -1,5 +1,4 @@
 import type { ComponentType } from "react"
-
 import { CandidateEntityRef } from "../entities/candidate/CandidateEntityRef"
 import { ExpenseEntityRef } from "../entities/expense/ExpenseEntityRef"
 import { JobPostingEntityRef } from "../entities/jobPosting/JobPostingEntityRef"

@@ -1,5 +1,4 @@
 import { cn } from "@/lib/utils"
-
 /**
  * Hour distribution cell type for displaying worked hours per day as a compact bar chart.
  * Thin preset over barSeries: maps date + value (+ optional plannedValue) to bar-series

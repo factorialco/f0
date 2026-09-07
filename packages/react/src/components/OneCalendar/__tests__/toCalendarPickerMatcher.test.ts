@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import { toCalendarPickerMatcher } from "../utils"
 
 describe("toCalendarPickerMatcher", () => {

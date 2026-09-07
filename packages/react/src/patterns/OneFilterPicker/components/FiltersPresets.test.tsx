@@ -1,15 +1,11 @@
 import "@testing-library/jest-dom/vitest"
-
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
 import { screen, userEvent, zeroRender } from "@/testing/test-utils"
-
 import type {
   FiltersDefinition,
   FiltersState,
   PresetsDefinition,
 } from "../types"
-
 import { FiltersPresets } from "./FiltersPresets"
 
 /**

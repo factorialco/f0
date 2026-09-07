@@ -1,6 +1,5 @@
 import { motion } from "motion/react"
 import { forwardRef, PropsWithChildren, ReactNode } from "react"
-
 import { F0AvatarModule } from "@/components/avatars/F0AvatarModule"
 import { BreadcrumbSelect } from "@/experimental/Navigation/Header"
 import { getBreadcrumbKey } from "@/experimental/Navigation/Header/Breadcrumbs/getBreadcrumbKey"
@@ -13,7 +12,6 @@ import {
   BreadcrumbItem as ShadBreadcrumbItem,
   BreadcrumbLink as ShadBreadcrumbLink,
 } from "@/ui/breadcrumb"
-
 import { BreadcrumbCollectionSelect } from "./BreadcrumbCollectionSelect"
 import { BreadcrumbSeparator } from "./BreadcrumbSeparator"
 

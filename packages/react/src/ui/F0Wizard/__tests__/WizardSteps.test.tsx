@@ -1,9 +1,7 @@
 import userEvent from "@testing-library/user-event"
 import React from "react"
 import { describe, expect, it, vi } from "vitest"
-
 import { zeroRender as render, screen } from "@/testing/test-utils"
-
 import { WizardProvider } from "../components/WizardProvider"
 import { WizardSteps } from "../components/WizardSteps"
 import type { F0WizardStep } from "../types"

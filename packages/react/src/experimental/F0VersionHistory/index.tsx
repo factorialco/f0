@@ -4,7 +4,6 @@ import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 import { ScrollArea } from "@/ui/scrollarea"
-
 import { CurrentVersionIndicator } from "./CurrentVersionIndicator"
 import { F0VersionHistoryProps } from "./types"
 import { VersionItem } from "./VersionItem"

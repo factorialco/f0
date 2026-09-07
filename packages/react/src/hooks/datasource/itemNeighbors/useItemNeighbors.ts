@@ -1,10 +1,8 @@
 import { useEffect, useRef, useState } from "react"
-
 import {
   FiltersDefinition,
   FiltersState,
 } from "@/patterns/OneFilterPicker/types"
-
 import {
   BaseFetchOptions,
   DataAdapter,
@@ -14,7 +12,6 @@ import {
 import { RecordType } from "../types/records.typings"
 import { SortingsStateMultiple } from "../types/sortings.typings"
 import { DataError } from "../useData"
-
 import { resolveItemNeighbors } from "./resolveItemNeighbors"
 
 export interface UseItemNeighborsOptions<

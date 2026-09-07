@@ -1,9 +1,7 @@
 import { type ReactNode } from "react"
 import { describe, expect, it, vi } from "vitest"
-
 import { Bell, BellOff } from "@/icons/app"
 import { act, zeroRenderHook as renderHook } from "@/testing/test-utils"
-
 import {
   MockChatAppProvider,
   useConversationRuntime,

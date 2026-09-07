@@ -1,12 +1,10 @@
 import { format, isValid, type Locale } from "date-fns"
 import { type MouseEvent, useMemo } from "react"
-
 import type { IconType } from "@/components/F0Icon"
 import { ChevronRight, Delete, Pencil } from "@/icons/app"
 import { useDateFnsLocale } from "@/lib/providers/l10n"
 import { OneDataCollection } from "@/patterns/OneDataCollection"
 import { useDataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
-
 import type {
   EntitiesListItem,
   F0EntitiesListFieldTag,

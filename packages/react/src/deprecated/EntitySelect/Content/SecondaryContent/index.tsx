@@ -1,7 +1,5 @@
 import { useMemo } from "react"
-
 import { VirtualList } from "@/lib/VirtualList"
-
 import { ListTag } from "../../ListTag"
 import {
   EntityId,

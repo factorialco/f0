@@ -1,5 +1,4 @@
 import { addYears, endOfDay, parse, startOfDay } from "date-fns"
-
 import { DateRange, DateRangeComplete } from "../../types"
 import {
   formatDateRange,
@@ -12,7 +11,6 @@ import {
   toDateRangeString,
 } from "../../utils"
 import { GranularityDefinition } from "../types"
-
 import { PeriodsView } from "./PeriodsView"
 import { DatePeriod, DatePeriodsDefinition } from "./types"
 import {

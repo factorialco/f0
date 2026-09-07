@@ -1,6 +1,5 @@
 import type { GridStackWidget } from "gridstack"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import type { GridStackReactWidget } from "../../F0GridStack"
 import {
   convertWidgetForGridStack,

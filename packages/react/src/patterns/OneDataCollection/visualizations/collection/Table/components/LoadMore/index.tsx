@@ -1,5 +1,4 @@
 import { forwardRef } from "react"
-
 import {
   FiltersDefinition,
   GroupingDefinition,
@@ -9,7 +8,6 @@ import {
 import { ItemActionsDefinition } from "@/patterns/OneDataCollection/item-actions"
 import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import { SummariesDefinition } from "@/patterns/OneDataCollection/summary"
-
 import { NestedActionRow } from "../NestedActionRow"
 import { type RowProps } from "../Row"
 

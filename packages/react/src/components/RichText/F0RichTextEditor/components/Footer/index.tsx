@@ -1,7 +1,6 @@
 import { Editor, useEditorState } from "@tiptap/react"
 import { motion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { Toolbar } from "@/components/RichText/internal"
 import {
@@ -14,10 +13,8 @@ import { RecordingWaveform } from "@/kits/ai/F0AiChatTextArea/components/Recordi
 import { type RecorderStatus } from "@/kits/ai/F0AiChatTextArea/useAudioRecorder"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { cn } from "@/lib/utils"
-
 import { UPLOAD_INPUT_ID } from "../../utils/constants"
 import { primaryActionType, secondaryActionsType } from "../../utils/types"
-
 import { ActionsMenu } from "./ActionsMenu"
 
 interface FooterProps {

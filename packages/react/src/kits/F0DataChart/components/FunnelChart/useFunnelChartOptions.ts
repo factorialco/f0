@@ -1,8 +1,6 @@
 import type * as echarts from "echarts"
 import { type RefObject, useMemo } from "react"
-
 import { useI18n } from "@/lib/providers/i18n"
-
 import type { F0DataChartFunnelProps } from "../../types"
 import {
   resolveChartColorToken,

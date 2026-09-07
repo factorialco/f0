@@ -1,5 +1,4 @@
 import { useEffect, useId, useRef, useState } from "react"
-
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0Button } from "@/components/F0Button"
@@ -18,10 +17,8 @@ import { withSkeleton } from "@/lib/skeleton"
 import { cn, focusRing } from "@/lib/utils"
 import { Reactions, ReactionsProps } from "@/sds/social/Reactions"
 import { Skeleton } from "@/ui/skeleton"
-
 import { PostDescription, PostDescriptionProps } from "../PostDescription"
 import { PostEvent, PostEventProps } from "../PostEvent"
-
 import { isVideo } from "./video"
 
 const ExpandDescriptionButton = ({

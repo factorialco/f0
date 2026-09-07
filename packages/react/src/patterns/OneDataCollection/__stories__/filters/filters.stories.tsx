@@ -1,5 +1,4 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
-
 import { ExampleComponent, SubfiltersExampleComponent } from "../mockData"
 
 const meta = {

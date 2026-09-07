@@ -1,8 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
 import { Comment } from "@/icons/app"
-
 import { HomeListItem } from "./index"
 
 const meta = {

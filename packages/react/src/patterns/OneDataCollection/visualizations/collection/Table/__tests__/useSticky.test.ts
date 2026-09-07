@@ -1,6 +1,5 @@
 import { renderHook } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
-
 import { useSticky } from "../useSticky"
 
 const CHECK_COL = 56

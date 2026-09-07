@@ -1,11 +1,9 @@
 import { forwardRef } from "react"
-
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0Icon } from "@/components/F0Icon"
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
-
 import type { F0SelectItemObject } from "../types"
 import { LABEL_SEPARATOR, useLabelsOverflow } from "../utils"
 

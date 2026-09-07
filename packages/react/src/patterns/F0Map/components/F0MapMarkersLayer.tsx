@@ -2,10 +2,8 @@ import maplibregl from "maplibre-gl"
 import { AnimatePresence, motion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
 import { createPortal } from "react-dom"
-
 import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
-
 import { FLY_OPTS } from "../constants"
 import { useClusters } from "../hooks/useClusters"
 import {
@@ -16,7 +14,6 @@ import {
 } from "../hooks/useLabelCollision"
 import { useZoomAtLeast } from "../hooks/useZoomAtLeast"
 import type { F0MapPoint } from "../types"
-
 import { F0MapMarker, type F0MapMarkerVariantProps } from "./F0MapMarker"
 import {
   getMarkerMetrics,

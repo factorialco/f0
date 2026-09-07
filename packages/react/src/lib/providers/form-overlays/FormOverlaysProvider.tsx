@@ -7,7 +7,6 @@ import {
   useSyncExternalStore,
 } from "react"
 import { createPortal } from "react-dom"
-
 import { formOverlaysStore, FormOverlayStoreItem } from "./store"
 
 type FormOverlaysProviderProps = {

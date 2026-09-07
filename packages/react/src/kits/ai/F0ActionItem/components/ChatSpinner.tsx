@@ -1,8 +1,6 @@
 import type { CSSProperties, Ref } from "react"
 import { forwardRef, useEffect, useMemo, useRef } from "react"
-
 import { cn } from "@/lib/utils"
-
 import type { GlobeSpinState } from "./globeSpinMath"
 import {
   buildFrameInto,

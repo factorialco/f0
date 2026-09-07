@@ -1,5 +1,4 @@
 import React from "react"
-
 import { AvatarBadge } from "@/components/avatars/F0Avatar/types"
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0Button } from "@/components/F0Button"

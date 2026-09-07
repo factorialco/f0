@@ -1,6 +1,5 @@
 import { getAbbreviateMonth, getDayOfMonth } from "@/lib/date"
 import { useDateFnsLocale } from "@/lib/providers/l10n"
-
 import { BaseAvatarProps } from "../internal/BaseAvatar"
 
 export type F0AvatarDateProps = {

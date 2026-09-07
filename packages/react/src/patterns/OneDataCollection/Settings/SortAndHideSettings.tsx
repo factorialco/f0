@@ -3,10 +3,8 @@ import { ButtonInternal } from "@/components/F0Button/internal"
 import { Add } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { ScrollArea } from "@/ui/scrollarea"
-
 import { SortAndHideList } from "../visualizations/collection/Table/components/SortAndHideList"
 import type { SortAndHideListItem } from "../visualizations/collection/Table/components/SortAndHideList/types"
-
 import type { DataCollectionSettingsContextType } from "./SettingsProvider"
 import { useDataCollectionSettings } from "./SettingsProvider"
 

@@ -1,12 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
 import {
   fireEvent,
   zeroRender as render,
   screen,
   waitFor,
 } from "@/testing/test-utils"
-
 import { ChatVoiceAttachment } from "../components/ChatVoiceAttachment"
 import { type F0ChatVoiceAttachment } from "../types"
 import { CHAT_MEDIA_WIDTH_CLASS } from "../utils/media-layout"

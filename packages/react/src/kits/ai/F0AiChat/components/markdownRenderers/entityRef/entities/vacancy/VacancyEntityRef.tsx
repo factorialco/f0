@@ -1,12 +1,9 @@
 import { forwardRef, useMemo } from "react"
-
 import type { F0CardProps } from "@/components/F0Card"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
-
 import { useAiChat } from "../../../../../providers/AiChatStateProvider"
 import { EntityRefHoverCard } from "../../components/EntityRefHoverCard"
-
 import type { VacancyProfile } from "./types"
 
 const VacancyTrigger = forwardRef<HTMLButtonElement, { label: string }>(

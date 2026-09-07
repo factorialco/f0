@@ -1,7 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { ProgressBarDuo } from "../ProgressBarDuo"
-
 import { TwoColumnsList } from "./index"
 
 const meta: Meta = {

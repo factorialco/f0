@@ -1,5 +1,4 @@
 import "../index.css"
-
 import { FocusScope } from "@radix-ui/react-focus-scope"
 import { Editor, EditorContent, useEditor } from "@tiptap/react"
 import { AnimatePresence, motion } from "motion/react"
@@ -14,7 +13,6 @@ import {
   useState,
 } from "react"
 import ReactDOM from "react-dom"
-
 import { F0Button } from "@/components/F0Button"
 import {
   EditorBubbleMenu,
@@ -40,7 +38,6 @@ import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { withSkeleton } from "@/lib/skeleton"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
-
 import { FileList } from "./components/FileList"
 import { Footer } from "./components/Footer"
 import { Head } from "./components/Head"

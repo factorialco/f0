@@ -1,11 +1,9 @@
 import { Fragment, Slice } from "@tiptap/pm/model"
 import type { Editor, JSONContent } from "@tiptap/react"
-
 import {
   getBlockById,
   isBlockNodeType,
 } from "../internal/Extensions/BlockIdExtension"
-
 import type {
   NotesTextEditorPageDocumentPatch,
   NotesTextEditorSnapshot,

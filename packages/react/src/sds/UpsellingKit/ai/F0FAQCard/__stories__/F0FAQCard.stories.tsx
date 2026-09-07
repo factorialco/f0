@@ -1,8 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { fn } from "storybook/test"
-
 import { I18nProvider, defaultTranslations } from "@/lib/providers/i18n"
-
 import { F0FAQCard } from ".."
 import type { F0FAQItem } from "../types"
 

@@ -1,15 +1,12 @@
 import { AnimatePresence, motion } from "motion/react"
 import { type ReactNode } from "react"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { ArrowDown } from "@/icons/app"
 import { ScrollShadow } from "@/kits/ai/F0AiMessagesContainer/components/ScrollShadow"
 import { useI18n } from "@/lib/providers/i18n"
-
 import { useF0ChatEmit } from "../providers/F0ChatProvider"
 import { CHAT_COMPOSER_HEIGHT } from "../utils/chat-layout"
 import { EASE_OUT_SWIFT } from "../utils/chat-motion"
-
 import { DateTimeSeparator } from "./DateTimeSeparator"
 
 export const ChatViewportOverlays = ({

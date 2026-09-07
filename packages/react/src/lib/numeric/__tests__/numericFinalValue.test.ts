@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import type { NumericValue } from "../types"
 import { numericFinalValue } from "../utils/numericFinalValue"
 

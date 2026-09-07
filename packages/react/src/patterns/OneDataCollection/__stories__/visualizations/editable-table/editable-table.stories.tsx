@@ -2,12 +2,10 @@ import { Meta, StoryObj } from "@storybook/react-vite"
 import { format, parseISO } from "date-fns"
 import { useMemo, useRef, useState } from "react"
 import { action } from "storybook/actions"
-
 import type { StatusVariant } from "@/components/tags/F0TagStatus/types"
 import { createDataSourceDefinition, RecordType } from "@/hooks/datasource"
 import { Delete, InfoCircleLine, Pencil } from "@/icons/app"
 import { ROLES_MOCK } from "@/mocks"
-
 import { OneDataCollection } from "../../.."
 import { useDataCollectionSource } from "../../../hooks/useDataCollectionSource"
 import {

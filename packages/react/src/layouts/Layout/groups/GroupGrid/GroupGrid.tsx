@@ -1,6 +1,5 @@
 import { motion } from "motion/react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-
 import {
   F0GridStack,
   GridStackReactOptions,
@@ -8,9 +7,7 @@ import {
 } from "@/lib/F0GridStack/F0GridStack"
 import { Optional } from "@/lib/typescript-utils/optional"
 import { cn } from "@/lib/utils"
-
 import { PageLayoutGroupComponent } from "../../types"
-
 import { GroupGridWidget } from "./typings"
 
 export interface GroupGridProps<

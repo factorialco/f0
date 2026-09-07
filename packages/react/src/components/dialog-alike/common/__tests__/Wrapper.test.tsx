@@ -1,8 +1,6 @@
 import { forwardRef, type ReactNode } from "react"
 import { describe, expect, it, vi, beforeEach } from "vitest"
-
 import { zeroRender as render } from "@/testing/test-utils"
-
 import { DialogWrapper } from "../Wrapper"
 
 // Spy on the props DialogWrapper hands to DialogContent. Hoisted so the vi.mock

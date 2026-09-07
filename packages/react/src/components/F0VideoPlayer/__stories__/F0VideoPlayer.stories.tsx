@@ -1,11 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { ReactNode, useEffect, useRef } from "react"
 import { fn } from "storybook/test"
-
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
 import { F0VideoPlayer } from "../F0VideoPlayer"
-
 import { bigBuckBunnyCaptions } from "./bigBuckBunnyCaptions"
 
 // Big Buck Bunny, served locally from `public/` (Storybook's staticDirs) so the

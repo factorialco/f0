@@ -1,7 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
 import { RadarChart } from "./index"
 
 const meta: Meta = {

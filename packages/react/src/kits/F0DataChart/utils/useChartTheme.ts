@@ -1,5 +1,4 @@
 import { type RefObject, useCallback, useEffect, useState } from "react"
-
 import { type ChartTheme, resolveChartTheme } from "./theme"
 
 /**

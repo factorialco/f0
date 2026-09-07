@@ -1,6 +1,5 @@
 import { AnimatePresence, motion } from "motion/react"
 import { ComponentProps, useState } from "react"
-
 import { BaseAvatar } from "@/components/avatars/internal/BaseAvatar"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"

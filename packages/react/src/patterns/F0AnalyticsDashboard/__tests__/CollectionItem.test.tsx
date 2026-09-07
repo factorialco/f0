@@ -1,7 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
-
 import { zeroRender as render } from "@/testing/test-utils"
-
 import { CollectionItem } from "../components/CollectionItem/CollectionItem"
 import type { DashboardCollectionItem } from "../types"
 

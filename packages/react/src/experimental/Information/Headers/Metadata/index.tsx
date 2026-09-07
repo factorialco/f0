@@ -1,6 +1,5 @@
 import { AnimatePresence, motion } from "motion/react"
 import { Fragment, memo, useState } from "react"
-
 import {
   AvatarVariant,
   CompanyAvatarVariant,
@@ -17,7 +16,6 @@ import { InfoCircleLine } from "@/icons/app"
 import { experimentalComponent } from "@/lib/experimental"
 import { cn } from "@/lib/utils"
 import { ButtonCopy } from "@/ui/ButtonCopy"
-
 import { MetadataValue } from "./MetadataValue"
 
 type MetadataItemValue =

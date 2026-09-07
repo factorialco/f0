@@ -2,7 +2,6 @@ import {
   type CanvasActions,
   type CanvasEntityDefinition,
 } from "../canvas/types"
-
 import {
   type AiChatDisclaimer,
   type AiChatMode,

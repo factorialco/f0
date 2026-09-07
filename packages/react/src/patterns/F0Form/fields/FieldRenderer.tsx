@@ -1,6 +1,5 @@
 import { useEffect, useRef } from "react"
 import { useFormContext } from "react-hook-form"
-
 import { F0Alert } from "@/components/F0Alert"
 import { InputMessages } from "@/components/F0InputField/components/InputMessages"
 import { F0Link } from "@/components/F0Link"
@@ -12,10 +11,8 @@ import {
   FormItem,
   FormMessage,
 } from "@/ui/form"
-
 import { generateAnchorId, useF0FormContext } from "../context"
 import type { RenderCustomFieldSelectConfig } from "../types"
-
 import { renderFieldInput } from "./renderFieldInput"
 import { isFieldRequired } from "./schema"
 import type { F0Field } from "./types"

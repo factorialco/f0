@@ -1,17 +1,14 @@
 import { describe, expect, test, vi } from "vitest"
 import { z } from "zod"
-
 import { Calendar, Clock, File } from "@/icons/app"
 import { f0FormField } from "@/patterns/F0Form"
 import { screen, userEvent, waitFor, zeroRender } from "@/testing/test-utils"
-
 import {
   EVENT_LIST_GAP,
   homeSlot,
   type HomeWidgetItem,
   type WidgetParams,
 } from "../slotRenderers"
-
 import { WidgetCatalog, type WidgetCatalogGroup } from "./index"
 
 const GROUPS: WidgetCatalogGroup[] = [

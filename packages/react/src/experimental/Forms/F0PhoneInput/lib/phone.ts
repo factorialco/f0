@@ -5,9 +5,7 @@ import {
   parsePhoneNumberFromString,
 } from "libphonenumber-js"
 import metadata from "libphonenumber-js/min/metadata"
-
 import type { CountryCode } from "@/lib/countries"
-
 import type { F0PhoneInputChangeMeta, F0PhoneInputValue } from "../types"
 
 const DIAL_CODE_PATTERN = /^\+\d{1,4}$/

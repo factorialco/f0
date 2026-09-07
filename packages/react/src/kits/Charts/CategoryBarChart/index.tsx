@@ -1,11 +1,8 @@
 import { ForwardedRef, useState } from "react"
-
 import { cn, focusRing } from "@/lib/utils"
 import { Tooltip, TooltipProvider, TooltipTrigger } from "@/ui/tooltip"
-
 import { getCategoricalColor, getColor } from "../utils/colors"
 import { fixedForwardRef } from "../utils/forwardRef"
-
 import {
   buildCategoryBarSegments,
   CATEGORY_BAR_TOOLTIP_DELAY_MS,

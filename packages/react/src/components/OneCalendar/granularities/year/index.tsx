@@ -1,5 +1,4 @@
 import { addYears, endOfYear, parse, startOfYear } from "date-fns"
-
 import { DateRange, DateRangeComplete } from "../../types"
 import {
   formatDateRange,
@@ -12,7 +11,6 @@ import {
 } from "../../utils"
 import { rangeSeparator } from "../consts"
 import { DateStringFormat, GranularityDefinition } from "../types"
-
 import { YearView } from "./YearView"
 
 const YEAR_FORMAT = "yyyy"

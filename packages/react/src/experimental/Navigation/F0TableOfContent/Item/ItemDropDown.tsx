@@ -16,7 +16,6 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/ui/dropdown-menu"
-
 import { TOCItemAction } from "../types"
 
 interface ItemDropDownProps {

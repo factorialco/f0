@@ -1,6 +1,5 @@
 import { ComponentProps, ReactNode, useState } from "react"
 import { expect, waitFor, within } from "storybook/test"
-
 import {
   MockAiChatRuntimeProvider,
   MockConnectedChatHeader,

@@ -10,7 +10,6 @@ import {
   startOfMonth,
   startOfYear,
 } from "date-fns"
-
 import { DateRange, DateRangeComplete } from "../../types"
 import {
   isAfterOrEqual,
@@ -20,7 +19,6 @@ import {
 } from "../../utils"
 import { rangeSeparator } from "../consts"
 import { DateStringFormat, GranularityDefinition } from "../types"
-
 import { HalfYearView } from "./HalfyearView"
 
 // Halfyear uses a custom format (not a date-fns pattern): "H1 yyyy" or "H2 yyyy"

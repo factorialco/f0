@@ -1,6 +1,5 @@
 import "maplibre-gl/dist/maplibre-gl.css"
 import "./F0Map.css"
-
 import maplibregl from "maplibre-gl"
 import {
   forwardRef,
@@ -11,12 +10,10 @@ import {
   useRef,
   useState,
 } from "react"
-
 import { useReducedMotion } from "@/lib/a11y"
 import { DataTestIdWrapper, type WithDataTestIdProps } from "@/lib/data-testid"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import {
   F0MapControls,
   type F0MapControlLabels,

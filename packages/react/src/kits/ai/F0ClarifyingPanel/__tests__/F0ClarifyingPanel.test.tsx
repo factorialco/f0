@@ -1,9 +1,6 @@
 import "@testing-library/jest-dom/vitest"
-
 import { describe, expect, it, vi } from "vitest"
-
 import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
-
 import { F0ClarifyingPanel } from "../F0ClarifyingPanel"
 import type { ClarifyingQuestionState } from "../types"
 

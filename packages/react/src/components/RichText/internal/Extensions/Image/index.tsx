@@ -8,7 +8,6 @@ import {
   type NodeViewProps,
 } from "@tiptap/react"
 import { useCallback, useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { Delete } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"

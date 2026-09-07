@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest"
-
 import { DataCollectionSettings } from "../Settings/SettingsProvider"
-
 import {
   getDefaultDataCollectionSettings,
   isSettingsDefault,

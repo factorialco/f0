@@ -3,7 +3,6 @@ import { F0Text } from "@/components/F0Text"
 import { Metadata } from "@/experimental/Information/Headers/Metadata"
 import Marker from "@/icons/app/Marker"
 import { cn } from "@/lib/utils"
-
 import type { F0TimelineRowTaskProps } from "../types"
 
 export const TaskHeader = ({ props }: { props: F0TimelineRowTaskProps }) => {

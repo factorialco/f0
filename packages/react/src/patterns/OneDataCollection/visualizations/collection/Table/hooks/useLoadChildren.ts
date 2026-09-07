@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { Observable } from "zen-observable-ts"
-
 import {
   FiltersDefinition,
   GroupingDefinition,
@@ -18,7 +17,6 @@ import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useData
 import { ItemActionsDefinition } from "@/patterns/OneDataCollection/item-actions"
 import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import { SummariesDefinition } from "@/patterns/OneDataCollection/summary"
-
 import { useNestedDataContext } from "../providers/NestedProvider"
 
 interface UseLoadChildrenProps<

@@ -14,9 +14,7 @@ import { Tabs } from "@/patterns/Navigation/Tabs"
 import { BreadcrumbList } from "@/ui/breadcrumb"
 import { DialogTitle } from "@/ui/Dialog/dialog"
 import { DrawerDescription } from "@/ui/drawer"
-
 import { F0DialogHeaderProps } from "../internal-types"
-
 import { useF0Dialog } from "./F0DialogProvider"
 
 export const F0DialogHeader = ({

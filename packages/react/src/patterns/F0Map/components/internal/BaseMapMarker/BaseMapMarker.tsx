@@ -1,7 +1,6 @@
 import { baseColors } from "@factorialco/f0-core"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import { forwardRef } from "react"
-
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { getAvatarColor } from "@/components/avatars/internal/BaseAvatar/utils"
 import { F0Icon, type IconType } from "@/components/F0Icon"

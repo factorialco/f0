@@ -1,5 +1,4 @@
 import { ComponentProps, ComponentType, ReactNode } from "react"
-
 import { TableHead } from "@/experimental/OneTable"
 import {
   FiltersDefinition,
@@ -8,13 +7,11 @@ import {
   SortingKey,
   SortingsDefinition,
 } from "@/hooks/datasource"
-
 import { ItemActionsDefinition } from "../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
 import { PropertyDefinition } from "../../../property-render"
 import { SummariesDefinition, SummaryKey } from "../../../summary"
 import { CollectionProps } from "../../../types"
-
 import { DefaultExpandedPolicy } from "./providers/NestedProvider"
 
 export type TableVisualizationSettings = {

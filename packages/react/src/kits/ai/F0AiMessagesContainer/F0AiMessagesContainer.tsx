@@ -1,14 +1,11 @@
 import { AnimatePresence, motion } from "motion/react"
 import { type ComponentType, type ReactNode, useMemo, useRef } from "react"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { ArrowDown } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
-
 import { F0ActionItem } from "../F0ActionItem"
-
 import { ActiveFormCard } from "./components/ActiveFormCard"
 import {
   AssistantMessage as F0AssistantMessage,

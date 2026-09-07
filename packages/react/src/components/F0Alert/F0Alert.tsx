@@ -1,6 +1,5 @@
 import { cva } from "cva"
 import { useRef } from "react"
-
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { F0Button } from "@/components/F0Button"
@@ -9,7 +8,6 @@ import { Cross, Placeholder } from "@/icons/app"
 import { withDataTestId } from "@/lib/data-testid"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { cn } from "@/lib/utils"
-
 import type { F0AlertProps } from "./types"
 
 const alertVariants = cva({

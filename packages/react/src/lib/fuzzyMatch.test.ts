@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import { fuzzyMatch } from "./fuzzyMatch"
 
 describe("fuzzyMatch", () => {

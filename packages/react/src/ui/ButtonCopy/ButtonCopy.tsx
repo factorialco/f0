@@ -1,6 +1,5 @@
 import { AnimatePresence, motion } from "motion/react"
 import { forwardRef, MouseEventHandler, useEffect, useState } from "react"
-
 import { F0Icon } from "@/components/F0Icon"
 import { Check, LayersFront } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"

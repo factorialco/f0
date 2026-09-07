@@ -1,6 +1,5 @@
 import { Reorder } from "motion/react"
 import { useEffect, useMemo, useRef, useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { Dropdown } from "@/experimental/Navigation/Dropdown"
@@ -8,11 +7,9 @@ import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { Delete, Ellipsis, LayersFront, LockLocked } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { useSurveyFormBuilderContext } from "../Context"
 import { DragProvider } from "../DragContext"
 import { OnChangeSectionParams, QuestionElement } from "../types"
-
 import { Item } from "./Item"
 import { SectionProps } from "./types"
 

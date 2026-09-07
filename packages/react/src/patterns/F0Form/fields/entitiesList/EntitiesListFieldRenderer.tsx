@@ -6,7 +6,6 @@ import {
   useFormContext,
 } from "react-hook-form"
 import { z, ZodTypeAny } from "zod"
-
 import { F0Button } from "@/components/F0Button"
 import type { F0FormEditableTableColumn } from "@/experimental/F0FormEditableTable"
 import { F0FormEditableTable } from "@/experimental/F0FormEditableTable"
@@ -21,7 +20,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/ui/tooltip"
-
 import {
   f0FormField,
   getF0Config,
@@ -31,7 +29,6 @@ import {
 import { openFormDialog } from "../../openFormDialog"
 import { isFieldRequired } from "../schema"
 import type { ResolvedField } from "../types"
-
 import type { EntitiesListViewAction } from "./EntitiesListView"
 import { EntitiesListView } from "./EntitiesListView"
 import { resolveEntitiesListCell } from "./resolveCell"

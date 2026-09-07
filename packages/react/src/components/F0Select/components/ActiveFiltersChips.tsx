@@ -1,6 +1,5 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useEffect, useState } from "react"
-
 import { Chip } from "@/components/OneChip"
 import { FiltersDefinition, FiltersState } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"

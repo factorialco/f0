@@ -1,5 +1,4 @@
 import "@xyflow/react/dist/style.css"
-
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import {
   ReactFlow,
@@ -7,11 +6,9 @@ import {
   type Node,
   type NodeTypes,
 } from "@xyflow/react"
-
 import { F0Button } from "@/components/F0Button"
 import { Building, Delete, Files, Pencil } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
 import { F0GraphNode } from ".."
 import { graphNodeStates, graphNodeVariants } from "../types"
 

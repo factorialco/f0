@@ -1,9 +1,7 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useCallback, useEffect, useRef, useState } from "react"
-
 import { cn } from "@/lib/utils"
 import { ScrollArea, ScrollBar } from "@/ui/scrollarea"
-
 import { useDialogWrapperContext as useF0Dialog } from "./DialogWrapperProvider"
 
 export type ContentProps = {

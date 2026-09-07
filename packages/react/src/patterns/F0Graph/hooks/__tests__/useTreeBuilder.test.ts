@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest"
-
 import { zeroRenderHook } from "@/testing/test-utils"
-
 import type { GraphNode } from "../../types"
 import { useTreeBuilder } from "../useTreeBuilder"
 

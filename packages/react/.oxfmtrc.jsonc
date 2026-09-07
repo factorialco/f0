@@ -19,7 +19,7 @@
       ["index", "type-index"]
     ],
     "internalPattern": ["@/", "~/"],
-    "newlinesBetween": true
+    "newlinesBetween": false
   },
 
   /*

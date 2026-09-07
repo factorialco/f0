@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-
 import { type AvatarVariant } from "@/components/avatars/F0Avatar"
-
 import { useF0ChatEmit } from "../providers/F0ChatProvider"
 import { type F0ChatUser } from "../types"
 

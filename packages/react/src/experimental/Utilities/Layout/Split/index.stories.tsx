@@ -1,7 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { Placeholder } from "../../../../lib/storybook-utils/placeholder"
-
 import { Split } from "./index"
 
 const meta = {

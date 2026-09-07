@@ -1,13 +1,9 @@
 import { useState } from "react"
 import { beforeEach, describe, expect, test } from "vitest"
-
 import { Calendar } from "@/icons/app"
 import { zeroRender } from "@/testing/test-utils"
-
 import { type HomeWidgetItem, type SlotRenderers } from "../slotRenderers"
-
 import { takeCardGhost, takePageSurface } from "./dragGhost"
-
 import { WidgetContainer } from "./index"
 
 /**

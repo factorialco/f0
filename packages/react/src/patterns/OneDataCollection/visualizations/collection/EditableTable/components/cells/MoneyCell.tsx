@@ -1,11 +1,8 @@
 import { useMemo } from "react"
-
 import { RecordType } from "@/hooks/datasource/types/records.typings"
 import { useL10n } from "@/lib/providers/l10n"
-
 import { resolveUnits } from "./hooks/useNumberCellLayout"
 import { NumberCell } from "./NumberCell"
-
 import type { EditableCellProps } from "."
 
 const resolveCurrencyInfo = (

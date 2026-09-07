@@ -1,11 +1,9 @@
 import type { RecordType, SortingsDefinition } from "@/hooks/datasource"
-
 import type { SummariesDefinition } from "../../../../summary"
 import type { CellRendererProps } from "../../Table/types"
 import { editableCellMap, typingEditTypes } from "../consts"
 import { useEditableRow } from "../context/EditableRowContext"
 import type { EditableTableColumnDefinition } from "../types"
-
 import { NonEditableCell } from "./cells/status/NonEditableCell"
 
 /**

@@ -1,10 +1,8 @@
 import type React from "react"
 import { createElement, forwardRef } from "react"
-
 import { parseMarkdown } from "@/lib/markdown"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { cn } from "@/lib/utils"
-
 import { type AsAllowedList } from "./types"
 import {
   defaultTag,

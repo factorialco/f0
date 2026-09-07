@@ -2,12 +2,10 @@ import { act, fireEvent, screen, waitFor } from "@testing-library/react"
 import { MotionGlobalConfig } from "motion"
 import { useState } from "react"
 import { afterAll, beforeAll, describe, expect, test } from "vitest"
-
 import type { OnSelectItemsCallback } from "@/hooks/datasource"
 import { defaultTranslations, I18nProvider } from "@/lib/providers/i18n"
 import type { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import { zeroRender as render } from "@/testing/test-utils"
-
 import { useDataCollectionSource } from "../hooks/useDataCollectionSource"
 import { OneDataCollection } from "../index"
 

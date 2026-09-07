@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { FieldErrors } from "react-hook-form"
-
 import { generateAnchorId } from "./context"
 
 const errorNavigateClassName = "f0-form-error-navigate"

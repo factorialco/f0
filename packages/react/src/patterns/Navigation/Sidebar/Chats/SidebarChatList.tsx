@@ -1,13 +1,10 @@
 import { useMemo, useRef } from "react"
 import { createPortal } from "react-dom"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { ArrowDown, ArrowUp } from "@/icons/app"
 import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
-
 import { SidebarTabPanel, SidebarTabPanelGroup } from "../TabPanel"
-
 import {
   SidebarChatBlankState,
   type SidebarChatBlankStateAction,

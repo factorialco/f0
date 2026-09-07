@@ -1,6 +1,5 @@
 import { waitFor } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-
 import {
   FiltersDefinition,
   GroupingDefinition,
@@ -13,7 +12,6 @@ import { ItemActionsDefinition } from "@/patterns/OneDataCollection/item-actions
 import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import { SummariesDefinition } from "@/patterns/OneDataCollection/summary"
 import { zeroRender } from "@/testing/test-utils"
-
 import { KanbanCollection } from "../../../visualizations/collection/Kanban/Kanban"
 
 type Person = RecordType & {

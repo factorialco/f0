@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useMemo, useState } from "react"
 import { expect, userEvent, within } from "storybook/test"
-
 import { F0Button } from "@/components/F0Button"
 import {
   createDataSourceDefinition,
@@ -11,7 +10,6 @@ import {
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { F0CommunityPostsCarousel } from "@/sds/Home/Communities/F0CommunityPostsCarousel"
 import { CommunityPost } from "@/sds/Home/Communities/Post/CommunityPost"
-
 import { F0CarouselDialog, type F0CarouselDialogItem } from "./index"
 
 /**

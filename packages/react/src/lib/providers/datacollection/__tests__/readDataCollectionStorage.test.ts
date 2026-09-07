@@ -1,5 +1,4 @@
 import { afterEach, describe, expect, it } from "vitest"
-
 import { getDataCollectionStorageKey } from "../dataCollectionStorageKey"
 import {
   mergeDataCollectionFilters,

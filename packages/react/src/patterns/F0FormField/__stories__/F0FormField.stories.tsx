@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useCallback, useRef, useState } from "react"
-
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import type {
   F0Field,
@@ -8,7 +7,6 @@ import type {
   FileUploadResult,
   FileUploadStatus,
 } from "@/patterns/F0Form/fields/types"
-
 import { F0FormField } from "../F0FormField"
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))

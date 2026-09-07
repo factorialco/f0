@@ -1,7 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
 import { act, zeroRender as render, screen } from "@/testing/test-utils"
-
 import { CHAT_COMPOSER_HEIGHT_PROPERTY } from "../../utils/chat-layout"
 import { useComposerOverlayLayout } from "../useComposerOverlayLayout"
 

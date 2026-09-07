@@ -1,10 +1,7 @@
 import "@testing-library/jest-dom/vitest"
-
 import { screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
-
 import { zeroRender as render } from "@/testing/test-utils"
-
 import { F0Select } from "../index"
 
 const OPTIONS = [

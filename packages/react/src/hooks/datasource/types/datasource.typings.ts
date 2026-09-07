@@ -1,12 +1,10 @@
 import { Observable } from "zen-observable-ts"
-
 import { PromiseState } from "@/lib/promise-to-observable"
 import {
   FiltersDefinition,
   FiltersState,
   PresetsDefinition,
 } from "@/patterns/OneFilterPicker/types"
-
 import { DataAdapter, PaginationInfo } from "./fetch.typings"
 import { GroupingDefinition, GroupingState } from "./grouping.typings"
 import { ChildrenPaginationInfo, ChildrenResponse } from "./nested.typings"

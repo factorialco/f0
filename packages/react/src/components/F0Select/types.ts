@@ -14,7 +14,6 @@ import type {
   SortingsDefinition,
 } from "@/hooks/datasource"
 import { WithDataTestIdProps } from "@/lib/data-testid"
-
 import { Action } from "./components/SelectBottomActions"
 
 // Helper type to resolve the actual record type

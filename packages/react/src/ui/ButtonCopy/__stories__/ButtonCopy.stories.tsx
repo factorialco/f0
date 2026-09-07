@@ -1,9 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import React, { useEffect } from "react"
 import { expect, userEvent, within } from "storybook/test"
-
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
 import { ButtonCopy } from "../ButtonCopy"
 import { buttonCopySizes } from "../types"
 

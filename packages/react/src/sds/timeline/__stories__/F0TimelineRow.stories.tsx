@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useMemo, useState } from "react"
-
 import { EyeVisible } from "@/icons/app"
 import Briefcase from "@/icons/app/Briefcase"
 import Calendar from "@/icons/app/Calendar"
@@ -17,7 +16,6 @@ import ThumbsUp from "@/icons/app/ThumbsUp"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { OneDataCollection } from "@/patterns/OneDataCollection"
 import { useDataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
-
 import { F0TimelineRow } from "../"
 import { timelineRowStatuses } from "../types"
 

@@ -1,10 +1,7 @@
 import { fireEvent, waitFor } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
-
 import { screen, zeroRender as render } from "@/testing/test-utils"
-
 import { ValueDisplayRendererContext } from "../../renderers"
-
 import {
   CategoryBarChartCell,
   CategoryBarChartCellValue,

@@ -2,7 +2,6 @@ import { Chip, type ChipProps } from "@/components/OneChip"
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import { OverflowList } from "@/ui/OverflowList"
-
 import { ChipCounter } from "./ChipCounter"
 
 type Props = {

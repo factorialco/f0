@@ -3,10 +3,8 @@ import { Editor } from "@tiptap/core"
 import StarterKit from "@tiptap/starter-kit"
 import { ReactNode } from "react"
 import { describe, expect, it, vi } from "vitest"
-
 import { EnhanceHighlight } from "@/components/RichText/internal/Extensions/EnhanceHighlight"
 import { I18nProvider, defaultTranslations } from "@/lib/providers/i18n"
-
 import { useEnhance } from "../useEnhance"
 
 const wrapper = ({ children }: { children: ReactNode }) => (

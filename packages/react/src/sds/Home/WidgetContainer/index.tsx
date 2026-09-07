@@ -21,7 +21,6 @@ import {
   useRef,
   useState,
 } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
 import {
@@ -33,7 +32,6 @@ import { toasts } from "@/hooks/toast"
 import { Delete, Ellipsis, InfoCircleLine, Plus, Sliders } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { arrivalWindowMs, useElapsed } from "../home-motion"
 import {
   resolveWidgetHeader,
@@ -46,7 +44,6 @@ import {
 } from "../slotRenderers"
 import { SlotWidget } from "../SlotWidget"
 import { WidgetUpdateDialog } from "../WidgetUpdateDialog"
-
 import { takeCardGhost, takePageSurface } from "./dragGhost"
 import { Footnote } from "./Footnote"
 import { lockedCeiling, noHigherThan, topPins } from "./lockedCeiling"

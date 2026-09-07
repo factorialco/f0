@@ -8,11 +8,9 @@ import {
   useState,
 } from "react"
 import { type GroupedVirtuosoHandle } from "react-virtuoso"
-
 import { F0SearchInput } from "@/components/F0SearchInput"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { useEmojiLocaleTerms } from "../../hooks/useEmojiLocaleTerms"
 import {
   EMOJI_CATEGORIES,
@@ -20,7 +18,6 @@ import {
   searchEmoji,
 } from "../../utils/emoji-index"
 import { detectMaxEmojiVersion } from "../../utils/emoji-support"
-
 import {
   CategoryBar,
   type EmojiSectionId,

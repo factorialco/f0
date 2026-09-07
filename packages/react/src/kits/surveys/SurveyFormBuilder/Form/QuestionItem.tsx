@@ -1,16 +1,13 @@
 import { Reorder, useDragControls } from "motion/react"
-
 import { F0Icon } from "@/components/F0Icon"
 import { Handle } from "@/icons/app"
 import { cn } from "@/lib/utils"
-
 import { useSurveyFormBuilderContext } from "../Context"
 import { useDragContext } from "../DragContext"
 import {
   Question as QuestionComponent,
   QuestionProps,
 } from "../QuestionTypes/Question"
-
 import { EndOfSectionDivider } from "./EndOfSectionDivider"
 import { FlatFormItem } from "./utils"
 

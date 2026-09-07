@@ -5,7 +5,6 @@ import type {
   FiltersDefinition,
   PresetsDefinition,
 } from "@/patterns/OneFilterPicker/types"
-
 import type { DataCollectionDataAdapter } from "../../hooks/useDataCollectionSource/types"
 import { DataCollectionSource } from "../../hooks/useDataCollectionSource/types"
 import { ItemActionsDefinition } from "../../item-actions"
@@ -16,7 +15,6 @@ import type {
   OnLoadDataCallback,
   OnLoadErrorCallback,
 } from "../../types"
-
 import type { CardVisualizationOptions } from "./Card"
 import type { EditableTableVisualizationOptions } from "./EditableTable"
 import type { GraphVisualizationOptions } from "./Graph/types"

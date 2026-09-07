@@ -5,7 +5,6 @@ import {
   NumericWithFormatter,
   RelaxedNumericWithFormatter,
 } from "../types"
-
 import { numericFormatter } from "./numericFormatter"
 import { toNumericValue } from "./toNumericValue"
 

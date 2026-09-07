@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
 import { F0SelectItemProps } from "@/components/F0Select/types"
@@ -16,7 +15,6 @@ import {
   SURNAMES_MOCK,
 } from "@/mocks"
 import { FiltersDefinition } from "@/patterns/OneFilterPicker"
-
 import { Breadcrumbs, BreadcrumbsProps } from "./index"
 
 const meta: Meta<typeof Breadcrumbs> = {

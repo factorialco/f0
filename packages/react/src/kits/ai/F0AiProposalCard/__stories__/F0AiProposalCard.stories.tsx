@@ -1,10 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { fn } from "storybook/test"
-
 import { modules } from "@/components/avatars/F0AvatarModule"
 import Check from "@/icons/app/Check"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
 import { F0AiProposalCard } from ".."
 import type { F0AiProposalCardProps } from "../types"
 

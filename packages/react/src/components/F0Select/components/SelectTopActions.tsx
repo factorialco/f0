@@ -1,6 +1,5 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useCallback, useState } from "react"
-
 import { F0SearchInput } from "@/components/F0SearchInput"
 import {
   FiltersDefinition,
@@ -12,7 +11,6 @@ import {
 import { useI18n } from "@/lib/providers/i18n"
 import { GroupingSelector } from "@/patterns/OneDataCollection/Settings/components/GroupingSelector"
 import { OneFilterPicker } from "@/patterns/OneFilterPicker"
-
 import { ActiveFiltersChips } from "./ActiveFiltersChips"
 
 interface SelectTopActionsProps<

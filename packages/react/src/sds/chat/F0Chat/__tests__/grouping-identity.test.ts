@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import { type F0ChatMessage, type F0ChatSystemMessage } from "../types"
 import { flattenChatRows, freshTailIds } from "../utils/grouping"
 

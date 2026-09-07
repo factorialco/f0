@@ -8,10 +8,8 @@ type PointerDownOutsideEvent = CustomEvent<{
 }>
 
 import { animate } from "motion"
-
 import { cn } from "@/lib/utils"
 import { DialogPortal } from "@/ui/Dialog/components/DialogPortal"
-
 import { useDialogPrimitiveContext } from "./context"
 import { DialogOverlay } from "./DialogOverlay"
 import { DialogAnimation } from "./types"

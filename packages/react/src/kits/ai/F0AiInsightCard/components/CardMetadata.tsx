@@ -1,5 +1,4 @@
 import { motion, type Transition } from "motion/react"
-
 import { F0AvatarCompany } from "@/components/avatars/F0AvatarCompany"
 import { F0AvatarList } from "@/components/avatars/F0AvatarList"
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
@@ -7,7 +6,6 @@ import { F0AvatarTeam } from "@/components/avatars/F0AvatarTeam"
 import { F0TagAlert } from "@/components/tags/F0TagAlert"
 import { F0TagBalance } from "@/components/tags/F0TagBalance"
 import { cn } from "@/lib/utils"
-
 import type { ContentType, AiInsightCardContent, BalanceConfig } from "../types"
 import { headingVariants, labelVariants } from "../variants"
 

@@ -1,10 +1,7 @@
 import "@testing-library/jest-dom/vitest"
-
 import { screen } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
 import { zeroRender } from "@/testing/test-utils"
-
 import { F0BigNumber } from "../F0BigNumber"
 import type { BigNumberProps } from "../types"
 

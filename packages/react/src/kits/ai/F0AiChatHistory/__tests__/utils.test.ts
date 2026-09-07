@@ -1,6 +1,5 @@
 import { enUS, es } from "date-fns/locale"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
 import { formatThreadDate, getDateGroup } from "../utils"
 
 const labels = { today: "Today", yesterday: "Yesterday" }

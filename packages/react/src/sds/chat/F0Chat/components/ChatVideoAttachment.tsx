@@ -1,12 +1,10 @@
 import { lazy, Suspense, type ReactNode, useState } from "react"
-
 import { F0FileItem } from "@/components/F0FileItem"
 import { Download } from "@/icons/app"
 import { SolidPlay } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
-
 import { useF0ChatEmit } from "../providers/F0ChatProvider"
 import { type F0ChatFileAttachment } from "../types"
 import { formatFileSize } from "../utils/attachments"
@@ -17,7 +15,6 @@ import {
   CHAT_MEDIA_WIDTH_CLASS,
   CHAT_VIDEO_SURFACE_CLASS,
 } from "../utils/media-layout"
-
 import { FadeInImage } from "./FadeInImage"
 
 const loadVideoPlayer = () =>

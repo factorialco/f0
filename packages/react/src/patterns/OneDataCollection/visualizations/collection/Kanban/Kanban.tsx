@@ -1,6 +1,5 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useCallback, useEffect, useMemo } from "react"
-
 import {
   InfiniteScrollPaginatedResponse,
   PaginationInfo,
@@ -16,7 +15,6 @@ import type { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import { GroupHeader } from "@/ui/GroupHeader/GroupHeader"
 import { KanbanCard } from "@/ui/Kanban/components/KanbanCard"
 import type { KanbanProps } from "@/ui/Kanban/types"
-
 import { ItemActionsDefinition } from "../../../item-actions"
 import type { NavigationFiltersDefinition } from "../../../navigationFilters/types"
 import type {
@@ -24,7 +22,6 @@ import type {
   SortingsDefinition,
   SummariesDefinition,
 } from "../../../types"
-
 import { KanbanBoard } from "./KanbanBoard"
 import { KanbanCollectionProps } from "./types"
 

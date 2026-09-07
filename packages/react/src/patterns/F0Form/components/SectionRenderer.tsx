@@ -1,10 +1,8 @@
 import React from "react"
 import { useFormContext } from "react-hook-form"
-
 import { F0Button } from "@/components/F0Button"
 import { cn } from "@/lib/utils"
 import { SectionHeader } from "@/patterns/SectionHeader"
-
 import { FIELD_GAP } from "../constants"
 import { generateAnchorId, useF0FormContext } from "../context"
 import { CardSelectDepsContext } from "../fields/cardSelect/CardSelectDepsContext"
@@ -15,7 +13,6 @@ import {
   groupContiguousSwitches,
 } from "../groupingUtils"
 import type { SectionDefinition } from "../types"
-
 import { RowRenderer } from "./RowRenderer"
 import { SwitchGroupRenderer } from "./SwitchGroupRenderer"
 

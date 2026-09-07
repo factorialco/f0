@@ -1,6 +1,5 @@
 import type { CountryCode as PhoneCountry } from "libphonenumber-js"
 import { useEffect, useMemo, useState } from "react"
-
 import { F0Icon } from "@/components/F0Icon"
 import type { F0SelectItemProps } from "@/components/F0Select"
 import { F0Select } from "@/components/F0Select"
@@ -9,10 +8,8 @@ import { ChevronDown } from "@/icons/app"
 import type { CountryCode } from "@/lib/countries"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { dialCodeFor, toCountryCode } from "../lib/phone"
 import type { PhoneInputSize } from "../types"
-
 import { CountryFlag } from "./CountryFlag"
 
 /**

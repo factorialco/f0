@@ -1,13 +1,10 @@
 import { useState } from "react"
-
 import { F0Select } from "@/components/F0Select"
 import { RecordType } from "@/hooks/datasource/types/records.typings"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { cn } from "@/lib/utils"
 import { renderProperty } from "@/patterns/OneDataCollection/property-render"
-
 import { BaseCell } from "./BaseCell"
-
 import { EditableCellProps } from "."
 
 const warnedColumns = new Set<string>()

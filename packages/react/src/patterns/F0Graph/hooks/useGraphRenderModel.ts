@@ -11,7 +11,6 @@ import {
   useMemo,
   useRef,
 } from "react"
-
 import type { F0GraphNodeTagColumn } from "../components/F0GraphNode"
 import {
   BACKGROUND_DOT_GAP,
@@ -46,7 +45,6 @@ import {
   resolveStackedParents,
   type StackHoverZone,
 } from "../utils"
-
 import { useLayoutEngine } from "./useLayoutEngine"
 import { useViewportGeometry } from "./useViewportGeometry"
 

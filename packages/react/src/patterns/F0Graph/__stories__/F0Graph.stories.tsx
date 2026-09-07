@@ -1,12 +1,9 @@
 import "@xyflow/react/dist/style.css"
-
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useCallback, useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { Laptop, Money, People, Star } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
 import { F0GraphNode, type F0GraphNodeTag } from "../components/F0GraphNode"
 import {
   F0Graph,

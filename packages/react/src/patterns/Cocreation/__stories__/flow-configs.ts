@@ -20,7 +20,6 @@ import { Files } from "@/icons/app"
 import type { ClarifyingOption } from "@/kits/ai/F0ClarifyingPanel"
 import type { SurveyAnswers } from "@/kits/surveys/SurveyAnsweringForm"
 import type { SurveyFormBuilderElement } from "@/kits/surveys/SurveyFormBuilder/types"
-
 import {
   ENGAGEMENT_RESOURCES,
   ENGAGEMENT_TEMPLATE_CATEGORIES,

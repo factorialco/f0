@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { type DropdownItem } from "@/experimental/Navigation/Dropdown"
 import {
   Archive,
@@ -14,7 +13,6 @@ import {
   Share,
 } from "@/icons/app"
 import { cn } from "@/lib/utils"
-
 import { ButtonGroup } from "../ButtonGroup"
 
 const noop = () => {}

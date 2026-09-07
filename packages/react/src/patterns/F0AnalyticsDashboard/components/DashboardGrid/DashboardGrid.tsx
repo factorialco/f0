@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-
 import { F0Icon } from "@/components/F0Icon"
 import type { DropdownItem as DropdownItemType } from "@/experimental/Navigation/Dropdown"
 import Handle from "@/icons/app/Handle"
@@ -9,7 +8,6 @@ import type {
   FiltersDefinition,
   FiltersState,
 } from "@/patterns/OneFilterPicker/types"
-
 import type {
   DashboardItem as DashboardItemType,
   DashboardItemFiltersConfig,

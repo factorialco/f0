@@ -4,7 +4,6 @@ import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { AlertCircle, Cross } from "@/icons/app"
 import { focusRing } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
-
 import { type AttachedFile } from "../types"
 
 interface AttachedFilesListProps {

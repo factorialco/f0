@@ -1,7 +1,6 @@
 import { cva } from "cva"
 import { forwardRef } from "react"
 import type { HTMLAttributes } from "react"
-
 import { F0AvatarFile } from "@/components/avatars/F0AvatarFile"
 import type { FileDef } from "@/components/avatars/F0AvatarFile/types"
 import { F0Button } from "@/components/F0Button"

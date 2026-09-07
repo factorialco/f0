@@ -1,9 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { fn } from "storybook/test"
-
 import { Cross } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
 import { F0PdfViewer, pdfScales } from ".."
 
 const SAMPLE_URL = "/f0-pdf-viewer-sample.pdf"

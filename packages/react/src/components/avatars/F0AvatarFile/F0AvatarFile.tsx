@@ -1,15 +1,12 @@
 import { ElementRef, forwardRef, useMemo } from "react"
-
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { DataTestIdWrapper, WithDataTestIdProps } from "@/lib/data-testid"
 import { cn } from "@/lib/utils"
 import { Avatar, AvatarFallback, InternalAvatarProps } from "@/ui/Avatar"
 import { Badge } from "@/ui/IconBadge"
-
 import { AvatarBadge } from "../F0Avatar/types"
 import { F0AvatarModule } from "../F0AvatarModule"
 import { BaseAvatarProps, sizesMapping } from "../internal/BaseAvatar"
-
 import { AvatarFileSize, FileDef } from "./types"
 import { getAvatarSize, getBadgeSize, getFileTypeInfo } from "./utils"
 

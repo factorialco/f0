@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import type { DashboardChartData, ScatterChartConfig } from "../types"
 import { chartDataToTabular } from "../utils/chartDataToTabular"
 

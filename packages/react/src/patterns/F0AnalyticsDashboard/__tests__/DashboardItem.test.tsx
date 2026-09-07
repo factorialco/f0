@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import {
   AiChatStateProvider,
   useAiChat,
@@ -11,7 +10,6 @@ import {
   waitFor,
   zeroRender as render,
 } from "@/testing/test-utils"
-
 import { DashboardItem } from "../components/DashboardItem/DashboardItem"
 
 describe("DashboardItem", () => {

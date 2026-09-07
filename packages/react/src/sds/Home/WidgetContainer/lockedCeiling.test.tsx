@@ -1,13 +1,9 @@
 import type { DragStartEvent, Modifier } from "@dnd-kit/core"
 import { afterEach, describe, expect, test, vi } from "vitest"
-
 import { Clock } from "@/icons/app"
 import { act, zeroRender } from "@/testing/test-utils"
-
 import type { HomeWidgetItem } from "../slotRenderers"
-
 import { lockedCeiling, noHigherThan, topPins } from "./lockedCeiling"
-
 import { WidgetContainer } from "./index"
 
 /**

@@ -1,11 +1,8 @@
 import type { ReactNode } from "react"
-
 import { F0Icon } from "@/components/F0Icon"
 import { DottedCircle, PartiallyCompleted } from "@/icons/app"
 import CheckCircle from "@/icons/app/CheckCircle"
-
 import type { TimelineRowStatus } from "../types"
-
 import { F0TimelineConnector } from "./F0TimelineConnector"
 
 const statusIcons = {

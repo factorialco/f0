@@ -6,7 +6,6 @@ import {
   useRef,
   useState,
 } from "react"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
 import { ArrowUp } from "@/icons/app"
@@ -14,7 +13,6 @@ import { useReducedMotion } from "@/lib/a11y"
 import { focusRing } from "@/lib/utils"
 import { cn } from "@/lib/utils"
 import { Popover, PopoverAnchor, PopoverContent } from "@/ui/popover"
-
 import type {
   WelcomeScreenSuggestion,
   WelcomeScreenSuggestionItem,

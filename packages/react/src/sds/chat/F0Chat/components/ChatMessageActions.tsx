@@ -1,5 +1,4 @@
 import { type ReactNode, useRef, useState } from "react"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon, type IconType } from "@/components/F0Icon"
 import {
@@ -17,7 +16,6 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { Action } from "@/ui/Action"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
-
 import { useChatComposeActions } from "../providers/ChatUIProvider"
 import { useF0ChatEmit, useF0ChatStable } from "../providers/F0ChatProvider"
 import { type F0ChatMessage, type F0ChatReactionSource } from "../types"
@@ -32,7 +30,6 @@ import {
 } from "../utils/message-actions"
 import { formatClock } from "../utils/natural-time"
 import { emitReactionToggle } from "../utils/reactions"
-
 import { ChatEmojiPickerButton } from "./ChatEmojiPickerButton"
 import { ChatMessageInfoView } from "./ChatMessageInfo"
 

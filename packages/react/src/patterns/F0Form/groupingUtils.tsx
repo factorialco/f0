@@ -1,5 +1,4 @@
 import React from "react"
-
 import { RowRenderer } from "./components/RowRenderer"
 import { FieldRenderer } from "./fields/FieldRenderer"
 import type { F0SwitchField } from "./fields/switch/types"

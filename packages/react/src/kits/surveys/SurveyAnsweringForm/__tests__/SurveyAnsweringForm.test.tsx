@@ -1,7 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
-
 import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
-
 import { SurveyAnsweringForm } from "../SurveyAnsweringForm"
 import type { SurveyFormBuilderElement, SurveyFormSubmitResult } from "../types"
 

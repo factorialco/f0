@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { CompanySelector } from "./index"
 
 const meta: Meta<typeof CompanySelector> = {

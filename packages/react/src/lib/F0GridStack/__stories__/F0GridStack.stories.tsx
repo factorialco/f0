@@ -1,13 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { cloneElement, useCallback, useState } from "react"
 import { expect, within } from "storybook/test"
-
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import { F0Button } from "@/components/F0Button"
 import { OneCalendar } from "@/components/OneCalendar"
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { getMockValue } from "@/mocks"
-
 import { F0GridStack, GridStackReactWidget } from "../index"
 
 const meta = {

@@ -1,6 +1,5 @@
 import { beforeAll, describe, expect, it, vi } from "vitest"
 import * as XLSX from "xlsx"
-
 import { Cross as CrossIcon } from "@/icons/app"
 import {
   fireEvent,
@@ -8,7 +7,6 @@ import {
   screen,
   waitFor,
 } from "@/testing/test-utils"
-
 import { F0PdfViewer } from "../index"
 
 // The kind="pdf" path (default) is covered by F0PdfViewer.test — these tests

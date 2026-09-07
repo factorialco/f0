@@ -1,6 +1,5 @@
 import { readdirSync, readFileSync } from "fs"
 import { join, relative } from "path"
-
 import ts from "typescript"
 import { describe, expect, it } from "vitest"
 

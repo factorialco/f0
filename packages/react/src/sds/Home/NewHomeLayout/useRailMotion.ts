@@ -6,9 +6,7 @@ import {
   useTransform,
 } from "motion/react"
 import { useEffect, useLayoutEffect, useState } from "react"
-
 import { useReducedMotion } from "@/lib/a11y"
-
 import {
   GENIE_CLOSE_MS,
   GENIE_GLYPH_DELAY_MS,

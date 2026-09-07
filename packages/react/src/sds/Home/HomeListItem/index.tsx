@@ -1,5 +1,4 @@
 import { Fragment, ReactNode, useState } from "react"
-
 import { F0Avatar, type AvatarVariant } from "@/components/avatars/F0Avatar"
 import type { AvatarSize } from "@/components/avatars/internal/BaseAvatar"
 import { F0Button } from "@/components/F0Button"

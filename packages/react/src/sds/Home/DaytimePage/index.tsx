@@ -1,6 +1,5 @@
 import { cva, type VariantProps } from "cva"
 import { ComponentProps } from "react"
-
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0Button } from "@/components/F0Button"
 import { OneSwitch as OnePromotionSwitch } from "@/experimental/AiPromotionChat/OneSwitch"

@@ -1,5 +1,4 @@
 import "./index.css"
-
 import DragHandle from "@tiptap/extension-drag-handle-react"
 import { Node } from "@tiptap/pm/model"
 import {
@@ -19,7 +18,6 @@ import {
   useRef,
   useState,
 } from "react"
-
 import { F0Alert } from "@/components/F0Alert"
 import type { F0AlertProps } from "@/components/F0Alert"
 import { ButtonInternal } from "@/components/F0Button/internal"
@@ -39,7 +37,6 @@ import { useI18n } from "@/lib/providers/i18n"
 import { withSkeleton } from "@/lib/skeleton"
 import { ScrollArea } from "@/ui/scrollarea"
 import { Skeleton } from "@/ui/skeleton"
-
 import type { enhanceConfig } from "../internal/Enhance/types"
 import { EnhanceErrorBanner } from "../internal/Error"
 import type { AIBlockConfig } from "../internal/Extensions/AIBlock"
@@ -50,7 +47,6 @@ import {
   insertImageFromFile,
 } from "../internal/Extensions/Image"
 import type { Message, User } from "../internal/Extensions/Transcript"
-
 import {
   applyPageDocumentPatch,
   getNotesTextEditorSnapshot,

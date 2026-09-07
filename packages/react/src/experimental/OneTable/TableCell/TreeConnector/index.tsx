@@ -1,7 +1,6 @@
 import { cn } from "@/lib/utils"
 import type { TableVisualizationType } from "@/patterns/OneDataCollection/types"
 import { NestedRowProps } from "@/patterns/OneDataCollection/visualizations/collection/Table/components/Row"
-
 import {
   BUTTON_HEIGHT,
   CHEVRON_PARENT_SIZE,

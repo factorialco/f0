@@ -1,6 +1,5 @@
 import { F0AvatarList } from "@/components/avatars/F0AvatarList"
 import { useI18n } from "@/lib/providers/i18n"
-
 import type { MeetingAttendee } from "../types"
 import { DEFAULT_MAX_AVATARS, normalizeAttendees } from "../utils"
 

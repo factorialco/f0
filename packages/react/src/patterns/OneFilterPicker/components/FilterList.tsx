@@ -1,6 +1,5 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useId, useMemo } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
 import { ChevronRight } from "@/icons/app"
@@ -9,7 +8,6 @@ import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { NonFocusableScrollArea, ScrollArea } from "@/ui/scrollarea"
-
 import { FilterDefinitionsByType, getFilterType } from "../filterTypes"
 import { collectNestedFilterKeys } from "../filterTypes/InFilter/components/option-utils"
 import type {

@@ -7,7 +7,6 @@ import {
   it,
   vi,
 } from "vitest"
-
 import { getEmojiLabel } from "@/lib/emojis"
 import {
   act,
@@ -16,7 +15,6 @@ import {
   screen,
   waitFor,
 } from "@/testing/test-utils"
-
 import { F0Chat } from "../F0Chat"
 import { F0ChatProvider } from "../providers/F0ChatProvider"
 import {

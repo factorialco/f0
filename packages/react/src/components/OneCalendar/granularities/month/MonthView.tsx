@@ -7,10 +7,8 @@ import {
   startOfMonth,
 } from "date-fns"
 import { AnimatePresence, motion } from "motion/react"
-
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
-
 import { CalendarMode, DateRange } from "../../types"
 
 interface MonthViewProps {

@@ -1,8 +1,6 @@
 import { ReactElement } from "react"
-
 import { withDataTestId, WithDataTestIdProps } from "@/lib/data-testid"
 import { cn } from "@/lib/utils"
-
 import { CardSelectable } from "./CardSelectable"
 import type {
   CardSelectableContainerProps,

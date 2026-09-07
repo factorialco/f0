@@ -1,9 +1,7 @@
 import { act, renderHook } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
 import { I18nProvider } from "@/lib/providers/i18n"
 import { defaultTranslations } from "@/lib/providers/i18n/i18n-provider-defaults"
-
 import { type AiChatFileAttachmentConfig } from "../../F0AiChat/types"
 import { useFileAttachments } from "../useFileAttachments"
 

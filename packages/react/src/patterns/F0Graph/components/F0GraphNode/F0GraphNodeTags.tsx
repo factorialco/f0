@@ -1,5 +1,4 @@
 import { Tag } from "@/components/tags/F0Tag/F0Tag"
-
 import type { F0GraphNodeTag } from "./types"
 
 interface F0GraphNodeTagsProps {

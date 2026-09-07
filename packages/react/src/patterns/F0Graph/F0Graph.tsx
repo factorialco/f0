@@ -1,8 +1,6 @@
 import "./F0Graph.css"
-
 import { ReactFlowProvider } from "@xyflow/react"
 import { forwardRef, type ForwardedRef, type ReactNode, type Ref } from "react"
-
 import type { EdgeVariant } from "./components/F0GraphEdge"
 import type {
   F0GraphNodeTagColumn,

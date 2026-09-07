@@ -1,9 +1,7 @@
 import React from "react"
-
 import { F0Icon } from "@/components/F0Icon"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { valueDisplayRenderers } from "@/ui/value-display"
-
 import { CardMetadata as CardMetadataType } from "../types"
 
 export const cardPropertyRenderers = {

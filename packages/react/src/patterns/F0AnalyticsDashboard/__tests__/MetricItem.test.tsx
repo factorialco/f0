@@ -1,8 +1,6 @@
 import { waitFor } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
 import { zeroRender as render, screen } from "@/testing/test-utils"
-
 import { MetricItem, MetricValue } from "../components/MetricItem/MetricItem"
 import type { DashboardMetricItem } from "../types"
 

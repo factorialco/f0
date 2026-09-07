@@ -1,5 +1,4 @@
 import { getAvatarColor } from "@/components/avatars/internal/BaseAvatar/utils"
-
 import { type F0ChatSenderColor, type F0ChatUser } from "../types"
 
 /**

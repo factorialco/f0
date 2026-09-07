@@ -1,7 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { Placeholder } from "../../../../lib/storybook-utils/placeholder"
-
 import { AutoGrid } from "./index"
 
 const meta = {

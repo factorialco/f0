@@ -11,7 +11,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/ui/tooltip"
-
 import { tableDisplayClassNames } from "../../const"
 import { ValueDisplayRendererContext } from "../../renderers"
 

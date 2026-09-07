@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import type { Numeric, NumericValue } from "../types"
 import { numericFormatter } from "../utils/numericFormatter"
 

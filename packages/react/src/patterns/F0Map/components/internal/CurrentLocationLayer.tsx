@@ -1,7 +1,6 @@
 import { baseColors } from "@factorialco/f0-core"
 import type { GeoJSONSource, Map as MaplibreMap } from "maplibre-gl"
 import { useEffect, useRef } from "react"
-
 import { LINES_BOTTOM_LAYER_ID } from "../F0MapVectorLayer"
 
 // The "you are here" dot, drawn as a GL circle layer - NOT a DOM marker - so it

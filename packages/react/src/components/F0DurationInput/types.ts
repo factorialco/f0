@@ -1,5 +1,4 @@
 import type { AriaAttributes } from "react"
-
 import type { InputFieldStatus } from "@/components/F0InputField/types"
 
 export const durationUnits = ["days", "hours", "minutes", "seconds"] as const

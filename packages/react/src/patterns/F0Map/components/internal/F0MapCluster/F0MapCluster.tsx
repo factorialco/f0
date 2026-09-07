@@ -1,9 +1,7 @@
 import { forwardRef, useState } from "react"
-
 import { DataTestIdWrapper, type WithDataTestIdProps } from "@/lib/data-testid"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { F0MapMarker, type F0MapMarkerVariantProps } from "../../F0MapMarker"
 
 // The 2x2 grid fits four items. Up to four members every head is shown (a

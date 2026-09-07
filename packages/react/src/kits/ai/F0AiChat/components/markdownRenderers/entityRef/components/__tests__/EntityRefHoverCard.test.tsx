@@ -1,15 +1,12 @@
 import "@testing-library/jest-dom/vitest"
-
 import { forwardRef } from "react"
 import { describe, expect, it, vi, beforeEach } from "vitest"
-
 import {
   zeroRender as render,
   screen,
   userEvent,
   waitFor,
 } from "@/testing/test-utils"
-
 import { EntityRefHoverCard } from "../EntityRefHoverCard"
 
 type TestEntity = {

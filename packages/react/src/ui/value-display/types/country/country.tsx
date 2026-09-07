@@ -5,7 +5,6 @@
 import { F0AvatarFlag } from "@/components/avatars/F0AvatarFlag"
 import { CountryCode } from "@/lib/countries"
 import { OneEllipsis } from "@/lib/OneEllipsis"
-
 import { ValueDisplayRendererContext } from "../../renderers"
 
 interface CountryValue {

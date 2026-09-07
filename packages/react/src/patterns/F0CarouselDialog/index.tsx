@@ -6,13 +6,11 @@ import {
   useState,
   type ReactNode,
 } from "react"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { ChevronLeft, ChevronRight } from "@/icons/app"
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import type { CarouselPaging } from "@/ui/carousel"
-
 import { F0Dialog } from "../F0Dialog"
 import type { F0DialogInternalProps } from "../F0Dialog/internal-types"
 import { useIsSmallScreen } from "../F0Dialog/utils"

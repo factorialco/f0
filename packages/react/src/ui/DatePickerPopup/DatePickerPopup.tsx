@@ -1,5 +1,4 @@
 import { useContext, useEffect, useMemo, useRef, useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { F0Select } from "@/components/F0Select"
 import { OneCalendar } from "@/components/OneCalendar"
@@ -20,7 +19,6 @@ import { useI18n } from "@/lib/providers/i18n"
 import { useL10n } from "@/lib/providers/l10n"
 import { F0DialogContext } from "@/patterns/F0Dialog"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
-
 import { getCompareToValue } from "./compareTo"
 import { GranularitySelector } from "./components/GranularitySelector"
 import { PresetList } from "./components/PresetList"

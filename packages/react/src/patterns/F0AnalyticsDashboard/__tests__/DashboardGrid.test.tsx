@@ -1,5 +1,4 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
-
 import { AiChatStateProvider } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
 import {
   WIDGET_DRAG_START,
@@ -13,7 +12,6 @@ import {
   within,
   zeroRender as render,
 } from "@/testing/test-utils"
-
 import { DashboardGrid } from "../components/DashboardGrid/DashboardGrid"
 import type { DashboardItem } from "../types"
 

@@ -1,8 +1,6 @@
 import { Search } from "lucide-react"
-
 import { F0Icon } from "@/components/F0Icon"
 import { CrossedCircle } from "@/icons/app"
-
 import { focusNextFocusable, focusPreviousFocusable } from "../../ListItem"
 
 export const Searcher = ({

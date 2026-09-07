@@ -11,7 +11,6 @@ import {
   useRef,
   useState,
 } from "react"
-
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { F0Button } from "@/components/F0Button"
 import { F0Icon, type F0IconProps } from "@/components/F0Icon"
@@ -26,7 +25,6 @@ import { cn } from "@/lib/utils"
 import { useSidebar } from "@/patterns/ApplicationFrame/FrameProvider"
 import { SidebarIconSvg } from "@/patterns/Navigation/Sidebar/Icon"
 import { Action } from "@/ui/Action"
-
 import {
   entranceDelay,
   entranceTransition,
@@ -55,7 +53,6 @@ import {
   type WidgetContainerSide,
   type WidgetVirtualization,
 } from "../WidgetContainer"
-
 import { useRailMotion } from "./useRailMotion"
 
 /**

@@ -1,7 +1,6 @@
 "use client"
 
 import "./F0PdfViewer.styles.css"
-
 import {
   type BaseSyntheticEvent,
   forwardRef,
@@ -13,11 +12,9 @@ import {
   useRef,
   useState,
 } from "react"
-
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { Document, Page, type PDFDocumentProxy } from "@/ui/pdf"
 import { Skeleton } from "@/ui/skeleton"
-
 import { PdfLoadingState } from "./components/PdfLoadingState"
 import { PdfToolbar } from "./components/PdfToolbar"
 import { downloadPdf, printPdf } from "./pdfActions"

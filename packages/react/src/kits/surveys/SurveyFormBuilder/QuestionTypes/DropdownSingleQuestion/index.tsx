@@ -1,11 +1,9 @@
 import { useI18n } from "@/lib/providers/i18n"
 import type { F0SelectField } from "@/patterns/F0Form/fields/select/types"
 import { F0FormField } from "@/patterns/F0FormField"
-
 import { useSurveyFormBuilderContext } from "../../Context"
 import { BaseQuestion, useQuestionDisabled } from "../BaseQuestion"
 import type { DropdownMultiQuestionProps } from "../DropdownMultiQuestion/types"
-
 import type { DropdownSingleQuestionProps } from "./types"
 
 /**

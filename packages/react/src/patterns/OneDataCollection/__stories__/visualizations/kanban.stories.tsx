@@ -1,10 +1,8 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
 import { useMemo, useRef, useState } from "react"
 import { expect, fn, within } from "storybook/test"
-
 import { granularityDefinitions } from "@/components/OneCalendar/granularities"
 import { Delete, Pencil, Plus } from "@/icons/app"
-
 import {
   createDataAdapter,
   ExampleComponent,

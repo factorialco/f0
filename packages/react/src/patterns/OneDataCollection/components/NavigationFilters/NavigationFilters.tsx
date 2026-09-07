@@ -1,5 +1,4 @@
 import React from "react"
-
 import { navigationFilterTypes } from "../../navigationFilters"
 import {
   NavigationFiltersDefinition,

@@ -1,5 +1,4 @@
 import { useRef, useState, type ReactNode } from "react"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0ButtonToggleGroup } from "@/components/F0ButtonToggleGroup"
 import { F0Icon, type IconType } from "@/components/F0Icon"
@@ -34,13 +33,11 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/ui/dropdown-menu"
-
 import type {
   F0AnalyticsDashboardAskAiTarget,
   F0AnalyticsDashboardAskAiTargetWithQuote,
 } from "../../types"
 import type { DashboardItemFiltersConfig } from "../../types"
-
 import { DashboardItemFilters } from "./DashboardItemFilters"
 
 interface DashboardItemProps {

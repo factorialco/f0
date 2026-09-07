@@ -1,7 +1,6 @@
 import { nanoid } from "nanoid"
 import { useMemo, useRef } from "react"
 import { z } from "zod"
-
 import { F0Dialog, F0DialogSize } from "@/components/dialog-alike/F0Dialog"
 import type { DialogId, DialogModule } from "@/lib/providers/dialogs-alike"
 import {
@@ -13,7 +12,6 @@ import type {
   F0FormDefinitionSingleSchema,
   F0FormSchema,
 } from "@/patterns/F0WizardForm/types"
-
 import { F0Form } from "./F0Form"
 import type { F0FormPropsWithSingleSchemaDefinition } from "./types"
 import { useF0Form } from "./useF0Form"

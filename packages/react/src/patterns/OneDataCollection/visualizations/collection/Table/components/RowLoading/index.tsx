@@ -1,5 +1,4 @@
 import { forwardRef, useLayoutEffect, useRef } from "react"
-
 import {
   FiltersDefinition,
   GroupingDefinition,
@@ -12,7 +11,6 @@ import { ItemActionsDefinition } from "@/patterns/OneDataCollection/item-actions
 import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import { SummariesDefinition } from "@/patterns/OneDataCollection/summary"
 import type { TableVisualizationType } from "@/patterns/OneDataCollection/types"
-
 import { Row, RowProps } from "../Row"
 
 export const DEFAULT_LOADING_ROWS_COUNT = 5

@@ -1,6 +1,5 @@
 import { Editor, ReactRenderer } from "@tiptap/react"
 import { createRoot, Root } from "react-dom/client"
-
 import { MentionList } from "./MentionList"
 import { MentionPopover } from "./MentionPopover"
 import { MentionedUser, MentionListRef } from "./types"

@@ -1,7 +1,6 @@
 import { screen, waitFor } from "@testing-library/react"
 import { useState } from "react"
 import { afterEach, describe, expect, it, vi } from "vitest"
-
 import { F0Button } from "@/components/F0Button"
 import {
   DataAdapter,
@@ -15,10 +14,8 @@ import {
 } from "@/lib/providers/datacollection"
 import { subscribeToDataCollectionStorageChanges } from "@/lib/providers/datacollection/dataCollectionStorageEvents"
 import { userEvent, zeroRender as render } from "@/testing/test-utils"
-
 import { Breadcrumbs } from "../../index"
 import { BreadcrumbCollectionSelectItemType } from "../../types"
-
 import { BreadcrumbCollectionSelect } from "./index"
 
 // Mock ResizeObserver - must be a class constructor for 'new ResizeObserver()' to work

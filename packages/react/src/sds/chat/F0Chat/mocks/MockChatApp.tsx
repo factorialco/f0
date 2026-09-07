@@ -1,12 +1,10 @@
 "use client"
 
 import { useCallback, useMemo, type ReactNode } from "react"
-
 import { BellOff, PalmTree } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
 import { type SidebarChatGroup } from "@/patterns/Navigation/Sidebar/Chats/types"
-
 import {
   isUserMessage,
   type F0ChatComposableAttachment,
@@ -17,7 +15,6 @@ import {
   type F0ChatSendInput,
   type F0ChatUser,
 } from "../types"
-
 import { MOCK_MAX_FILE_SIZE_BYTES } from "./constants"
 import {
   type Seed,

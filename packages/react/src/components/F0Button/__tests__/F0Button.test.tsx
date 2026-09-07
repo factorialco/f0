@@ -1,9 +1,7 @@
 import { userEvent } from "@testing-library/user-event"
 import { afterEach, describe, expect, it, vi } from "vitest"
-
 import { Add } from "@/icons/app"
 import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
-
 import { F0Button } from "../index"
 import { ButtonInternal } from "../internal"
 

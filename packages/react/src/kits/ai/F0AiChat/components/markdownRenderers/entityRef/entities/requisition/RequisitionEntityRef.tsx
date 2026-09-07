@@ -1,16 +1,13 @@
 import { forwardRef, useMemo } from "react"
-
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import type { F0CardProps } from "@/components/F0Card"
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
-
 import { useAiChat } from "../../../../../providers/AiChatStateProvider"
 import type { EntityRefDetailRow } from "../../components/EntityRefDetails"
 import { EntityRefDetails } from "../../components/EntityRefDetails"
 import { EntityRefHoverCard } from "../../components/EntityRefHoverCard"
-
 import type { RequisitionProfile } from "./types"
 
 const RequisitionTrigger = forwardRef<HTMLButtonElement, { label: string }>(

@@ -1,5 +1,4 @@
 import { FC, useMemo } from "react"
-
 import type { F0DialogAction } from "@/components/dialog-alike/F0Dialog"
 // Import the unwrapped component directly to avoid the experimental-usage
 // console warning that the public (experimentalComponent-wrapped) export emits.
@@ -7,7 +6,6 @@ import { F0Dialog } from "@/components/dialog-alike/F0Dialog/F0Dialog"
 import ArrowLeft from "@/icons/app/ArrowLeft"
 import ArrowRight from "@/icons/app/ArrowRight"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
-
 import { WizardProvider } from "./components/WizardProvider"
 import { WizardSteps } from "./components/WizardSteps"
 import { useWizardNavigation } from "./hooks/useWizardNavigation"

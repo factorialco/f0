@@ -1,8 +1,6 @@
 import { forwardRef } from "react"
-
 import { withDataTestId } from "@/lib/data-testid"
 import { withSkeleton } from "@/lib/skeleton"
-
 import { CalloutInternal, CalloutSkeleton } from "./CalloutInternal"
 import { CalloutInternalProps, CalloutSkeletonProps } from "./types"
 

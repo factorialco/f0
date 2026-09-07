@@ -1,7 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
-
 import { zeroRender as render } from "@/testing/test-utils"
-
 import { F0AiChatTextArea } from "../F0AiChatTextArea"
 
 const GUTTER = ["px-4", "pb-3", "pt-2"]

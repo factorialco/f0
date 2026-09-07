@@ -1,10 +1,8 @@
 import { useCallback, useRef, useState } from "react"
-
 import type {
   FiltersDefinition,
   FiltersState,
 } from "@/patterns/OneFilterPicker/types"
-
 import type {
   DashboardChartData,
   DashboardItem,

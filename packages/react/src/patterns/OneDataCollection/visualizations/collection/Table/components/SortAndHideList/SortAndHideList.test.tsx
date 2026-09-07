@@ -1,12 +1,10 @@
 import { describe, expect, it, vi } from "vitest"
-
 import {
   screen,
   userEvent,
   within,
   zeroRender as render,
 } from "@/testing/test-utils"
-
 import { mergeReorderedItems, SortAndHideList } from "./SortAndHideList"
 import type { SortAndHideListItem } from "./types"
 

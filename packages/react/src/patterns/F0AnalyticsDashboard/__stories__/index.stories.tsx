@@ -1,17 +1,14 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useId, useState } from "react"
 import { expect, fn, userEvent, waitFor, within } from "storybook/test"
-
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import type { FiltersState } from "@/patterns/OneFilterPicker/types"
-
 import { F0AnalyticsDashboard } from "../index"
 import type {
   DashboardItem,
   DashboardItemFiltersConfig,
   DashboardItemFiltersState,
 } from "../types"
-
 import {
   dashboardFilters,
   dashboardPresets,

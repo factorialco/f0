@@ -5,7 +5,6 @@ import {
   DatePickerPopupProps,
   DatePickerValue as DatePickerPopupValue,
 } from "@/ui/DatePickerPopup"
-
 import { InputFieldInheritedProps } from "./types.internal"
 
 export * from "@/ui/DatePickerPopup/types"

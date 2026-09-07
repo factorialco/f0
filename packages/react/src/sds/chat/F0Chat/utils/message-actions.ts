@@ -3,7 +3,6 @@ import {
   type F0ChatChannelType,
   type F0ChatMessage,
 } from "../types"
-
 import { chatPermission } from "./capabilities"
 
 /**

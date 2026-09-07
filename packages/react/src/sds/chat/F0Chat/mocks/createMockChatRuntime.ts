@@ -1,9 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-
 import { BellOff } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
-
 import {
   isUserMessage,
   type F0ChatComposableAttachment,
@@ -16,7 +14,6 @@ import {
   type F0ChatSystemEvent,
   type F0ChatUser,
 } from "../types"
-
 import { MOCK_MAX_FILE_SIZE_BYTES } from "./constants"
 
 /** Seed describing a fake conversation the mock runtime should simulate. */

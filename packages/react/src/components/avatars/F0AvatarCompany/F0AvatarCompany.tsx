@@ -1,5 +1,4 @@
 import { BaseAvatar } from "../internal/BaseAvatar"
-
 import { F0AvatarCompanyProps } from "./types"
 
 export const F0AvatarCompany = ({

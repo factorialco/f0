@@ -1,7 +1,6 @@
 import { act, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
-
 import type {
   GroupingDefinition,
   GroupingState,
@@ -18,7 +17,6 @@ import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useData
 import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import { zeroRender as render, zeroRenderHook } from "@/testing/test-utils"
 import { TextCell } from "@/ui/value-display/types/text"
-
 import { ItemActionsDefinition } from "../../../../item-actions"
 import { SummariesDefinition } from "../../../../summary"
 import { TableCollection } from "../index"

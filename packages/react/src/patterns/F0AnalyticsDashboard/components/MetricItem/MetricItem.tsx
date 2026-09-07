@@ -1,5 +1,4 @@
 import { useLayoutEffect, useRef, useState } from "react"
-
 import { F0Icon } from "@/components/F0Icon"
 import { ArrowUp, ArrowDown } from "@/icons/app"
 import { useContainerSize } from "@/kits/F0DataChart/utils/useContainerSize"
@@ -8,7 +7,6 @@ import type {
   FiltersDefinition,
   FiltersState,
 } from "@/patterns/OneFilterPicker/types"
-
 import { useDashboardItemData } from "../../hooks/useDashboardItemData"
 import type {
   DashboardItemFiltersConfig,

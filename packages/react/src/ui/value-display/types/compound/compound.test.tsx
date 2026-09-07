@@ -1,10 +1,7 @@
 import { describe, expect, it } from "vitest"
-
 import { defaultTranslations } from "@/lib/providers/i18n"
 import { screen, zeroRender as render } from "@/testing/test-utils"
-
 import { ValueDisplayRendererContext } from "../../renderers"
-
 import { CompoundCell, CompoundCellValue } from "./compound"
 
 const tableMeta: ValueDisplayRendererContext = {

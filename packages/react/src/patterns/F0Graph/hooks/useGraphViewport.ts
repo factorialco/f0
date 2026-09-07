@@ -5,7 +5,6 @@ import {
   useStoreApi,
 } from "@xyflow/react"
 import { useCallback, useEffect, useRef, useState } from "react"
-
 import { FIT_VIEW_PADDING_LOOSE, FIT_VIEW_PADDING_TIGHT } from "../constants"
 import type {
   PositionedNode,
@@ -14,7 +13,6 @@ import type {
   ZoomPreset,
   ZoomThresholds,
 } from "../types"
-
 import { useGraphZoomLevel } from "./useGraphZoomLevel"
 
 interface UseGraphViewportOptions {

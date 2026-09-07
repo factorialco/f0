@@ -1,5 +1,4 @@
 import { cn } from "@/lib/utils"
-
 import type { TimelineRowStatus } from "../types"
 
 interface F0TimelineConnectorProps {

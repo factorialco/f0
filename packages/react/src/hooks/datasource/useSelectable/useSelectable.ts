@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-
 import type { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
-
 import {
   GroupingDefinition,
   RecordType,
@@ -11,7 +9,6 @@ import {
 } from "../types"
 import type { SortingsDefinition } from "../types/sortings.typings"
 import { GROUP_ID_SYMBOL, GroupRecord, WithGroupId } from "../useData"
-
 import {
   AllSelectionStatus,
   SelectionStatus,

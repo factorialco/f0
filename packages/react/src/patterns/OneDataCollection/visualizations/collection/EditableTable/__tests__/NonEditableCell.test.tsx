@@ -1,11 +1,8 @@
 import "@testing-library/jest-dom/vitest"
-
 import { screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
-
 import InfoCircleLine from "@/icons/app/InfoCircleLine"
-
 import { zeroRender as render } from "../../../../../../testing/test-utils"
 import { EditableCellProps } from "../components/cells"
 import { NonEditableCell } from "../components/cells/status/NonEditableCell"

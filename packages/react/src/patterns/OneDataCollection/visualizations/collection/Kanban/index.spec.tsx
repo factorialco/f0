@@ -1,7 +1,6 @@
 import { screen, waitFor, within } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { Observable } from "zen-observable-ts"
-
 import {
   FiltersDefinition,
   GroupingDefinition,
@@ -10,11 +9,9 @@ import {
 } from "@/hooks/datasource"
 import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource/types"
 import { userEvent, zeroRender } from "@/testing/test-utils"
-
 import { ItemActionsDefinition } from "../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
 import { SummariesDefinition } from "../../../summary"
-
 import { KanbanCollection } from "./Kanban"
 
 type Person = RecordType & {

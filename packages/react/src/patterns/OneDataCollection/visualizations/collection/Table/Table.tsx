@@ -1,6 +1,5 @@
 import { AnimatePresence, motion } from "motion/react"
 import { Fragment, useEffect, useMemo, useRef, useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import { F0Checkbox } from "@/components/F0Checkbox"
@@ -35,7 +34,6 @@ import { useDataCollectionSettings } from "@/patterns/OneDataCollection/Settings
 import { GroupHeader } from "@/ui/GroupHeader/index"
 import { Skeleton } from "@/ui/skeleton.tsx"
 import { tableCellContentClassName } from "@/ui/value-display/const"
-
 import { PrimaryActionItemDefinition } from "../../../actions"
 import { useDataCollectionData } from "../../../hooks/useDataCollectionData"
 import { useInfiniteScrollPagination } from "../../../hooks/useInfiniteScrollPagination"
@@ -45,7 +43,6 @@ import { SummariesDefinition } from "../../../summary"
 import { CollectionProps } from "../../../types"
 import { useAddRow } from "../EditableTable/context/AddRowContext"
 import { statusToChecked } from "../utils"
-
 import { Row } from "./components/Row"
 import { useAddedRowKeys } from "./hooks/useAddedRowKeys"
 import { useColumnCollapseAnimation } from "./hooks/useColumnCollapseAnimation"

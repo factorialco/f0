@@ -17,7 +17,6 @@
  */
 
 import { forwardRef, useCallback, useEffect, useRef } from "react"
-
 import {
   GroupingDefinition,
   RecordType,
@@ -30,7 +29,6 @@ import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/naviga
 import { SummariesDefinition } from "@/patterns/OneDataCollection/summary"
 import type { TableVisualizationType } from "@/patterns/OneDataCollection/types"
 import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
-
 import { PrimaryActionItemDefinition } from "../../../../actions"
 import { useAddRow } from "../../EditableTable/context/AddRowContext"
 import { useCalculateConectorHeight } from "../hooks/useCalculateConectorHeight"
@@ -44,7 +42,6 @@ import type {
   RowWrapperProps,
   TableColumnDefinition,
 } from "../types"
-
 import { AddRowRow } from "./AddRow"
 import { LoadMoreRow } from "./LoadMore"
 import { NestedRowProps, Row } from "./Row"

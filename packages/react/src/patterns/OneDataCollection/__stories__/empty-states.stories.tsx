@@ -1,16 +1,13 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
 import { Observable } from "zen-observable-ts"
-
 import { BaseResponse } from "@/hooks/datasource/types"
 import { PromiseState } from "@/lib/promise-to-observable"
 import { useDataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
 import { DataCollectionDataAdapter } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource/types"
 import { FiltersState } from "@/patterns/OneFilterPicker/types"
-
 import { CustomEmptyStates } from "../hooks/useEmptyState"
 import { OneDataCollection } from "../index"
 import { NavigationFiltersDefinition } from "../navigationFilters/types"
-
 import {
   createPromiseDataFetch,
   filters,

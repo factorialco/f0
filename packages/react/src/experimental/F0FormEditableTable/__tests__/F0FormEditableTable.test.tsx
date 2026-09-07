@@ -1,7 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
-
 import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
-
 import { F0FormEditableTable } from "../F0FormEditableTable"
 import type { F0FormEditableTableColumn } from "../types"
 

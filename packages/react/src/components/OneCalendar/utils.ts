@@ -1,6 +1,5 @@
 import { format, isAfter, isBefore, isEqual, max, min } from "date-fns"
 import { Matcher } from "react-day-picker"
-
 import { GranularityDefinition } from "./granularities"
 import { rangeSeparator } from "./granularities/consts"
 import { DateRange, DateRangeComplete, DateRangeString } from "./types"

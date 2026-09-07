@@ -1,5 +1,4 @@
 import { baseColors } from "../../../../../core/src/tokens/colors"
-
 import { chartColor, echartsColorPalette, resolveCssColor } from "./colors"
 
 // ---------------------------------------------------------------------------

@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react"
-
 import { getGranularityDefinitions } from "@/components/OneCalendar/granularities"
 import {
   DateRange,
@@ -16,7 +15,6 @@ import {
   isSameDatePickerValue,
   reviveDatePickerValue,
 } from "@/ui/DatePickerPopup/utils"
-
 import { DatePickerTrigger } from "./components/DateNavigatorTrigger"
 import { DatePickerValue } from "./types"
 

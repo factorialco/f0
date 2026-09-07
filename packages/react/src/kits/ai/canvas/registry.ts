@@ -1,5 +1,4 @@
 import { useCanvasEntities } from "../F0AiChat/providers/useCanvasEntities"
-
 import type { CanvasEntityDefinition } from "./types"
 
 /**

@@ -1,5 +1,4 @@
 import { format, isValid, parseISO } from "date-fns"
-
 import type { F0IconProps } from "@/components/F0Icon"
 import { F0Icon } from "@/components/F0Icon"
 import { Arrow } from "@/components/F0Select/components/Arrow"
@@ -9,10 +8,8 @@ import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { useDateFnsLocale } from "@/lib/providers/l10n"
 import { cn } from "@/lib/utils"
 import { renderProperty } from "@/patterns/OneDataCollection/property-render"
-
 import { resolveUnits } from "./hooks/useNumberCellLayout"
 import { resolveTextCellIcon } from "./textIcon"
-
 import type { EditableCellProps } from "."
 
 type ReadOnlyCellContentProps<R extends RecordType> = Pick<

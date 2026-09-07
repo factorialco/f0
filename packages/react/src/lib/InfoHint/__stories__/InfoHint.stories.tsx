@@ -1,9 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import type { ReactNode } from "react"
 import { expect, fn, userEvent, waitFor, within } from "storybook/test"
-
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
 import { InfoHint, type InfoHintContent } from "../InfoHint"
 
 /**
