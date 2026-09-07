@@ -34,13 +34,13 @@ export type AnchoredMention = MentionEntry & {
   start: number
 }
 
-/** Index just past the last character of an anchored mention's name. */
-export const mentionEnd = anchorEnd
-
 export type UseMentionsOptions = {
   /** Current textarea value (controlled) */
   inputValue: string
-  /** Setter for the textarea value */
+  /** Setter for the textarea value. Writes are assumed to land: the anchors are
+   * re-indexed against the value the hook just asked for, so a parent that
+   * rejects or rewrites one would leave them indexed against a string that
+   * never reached the textarea. */
   setInputValue: (value: string) => void
   /** Cursor position (selectionStart) in the textarea */
   cursorPosition: number
@@ -228,8 +228,8 @@ export function useMentions({
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [mentions, setMentions] = useState<AnchoredMention[]>([])
 
-  // The anchors are read from event handlers and effects that must not depend
-  // on them, so state and ref are written together and the ref is the source.
+  // The reconciler and `selectPerson` read the anchors without depending on
+  // them, so state and ref are written together and the ref is the source.
   const mentionsRef = useRef<AnchoredMention[]>(mentions)
   // Re-anchoring runs on every keystroke and usually produces the same anchors
   // in a new array. Keeping the old reference when nothing moved saves a state
@@ -272,23 +272,24 @@ export function useMentions({
     },
     []
   )
+  // Every commit, not only the ones that change the value: picking a person the
+  // composer had already spelled out in full writes the same string back, and
+  // that request still has to return focus from the clicked popover row. A
+  // request waits until its own text is on screen rather than being spent on
+  // the first commit that is not it, so a parent that applies the write a
+  // render later still gets its caret.
   useLayoutEffect(() => {
     const pending = pendingSelectionRef.current
-    if (!pending) {
-      return
-    }
-    // Whether it applies or was superseded by a later write, this request is
-    // spent — nothing is left scheduled that could fire against a dead owner.
-    pendingSelectionRef.current = null
     const textarea = textareaRef.current
-    if (pending.forText !== inputValue || !textarea) {
+    if (!pending || !textarea || pending.forText !== inputValue) {
       return
     }
+    pendingSelectionRef.current = null
     if (pending.focus) {
       textarea.focus()
     }
     textarea.setSelectionRange(pending.caret, pending.caret)
-  }, [inputValue, textareaRef])
+  })
 
   // Track the position of the @ that triggered the current search
   const atIndexRef = useRef<number>(-1)
@@ -400,7 +401,7 @@ export function useMentions({
       // so anchors past it slide and any the trigger overlapped are gone.
       const shift = insertedText.length - (cursorPosition - atIndex)
       const anchored = mentionsRef.current
-        .filter((m) => mentionEnd(m) <= atIndex || m.start >= cursorPosition)
+        .filter((m) => anchorEnd(m) <= atIndex || m.start >= cursorPosition)
         .map((m) =>
           m.start >= cursorPosition ? { ...m, start: m.start + shift } : m
         )
@@ -490,9 +491,9 @@ export function useMentions({
    *
    * It takes no text on purpose: the anchors index the raw value, so a caller
    * handing in a trimmed or otherwise derived copy would silently read them at
-   * the wrong offsets. An anchor that does not sit on its own `@name` is
-   * skipped rather than applied, so a desync can only cost a tag — never
-   * mislabel somebody else's name.
+   * the wrong offsets. An anchor is verified against the text before it is
+   * applied — the same test the overlay uses, so the two cannot disagree about
+   * which glyphs are a mention.
    */
   const transformMentions = useCallback((): string => {
     const text = inputValue

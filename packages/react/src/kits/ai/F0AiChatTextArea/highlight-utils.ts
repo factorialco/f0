@@ -37,11 +37,14 @@ export function buildHighlightSegments(
   const cursorPos = options?.cursorPosition ?? text.length
   const ghost = options?.inlineCompletion ?? null
 
-  // The textarea owns the anchors, so the overlay paints exactly the spans it
-  // considers mentions — no second, independently-drifting match.
+  // Paint the anchors the textarea owns, but only where one still sits on its
+  // own `@name` — the same test the sent payload applies. The anchors are
+  // reconciled in an effect, so they trail the text by a commit whenever an
+  // edit moves them; without this the overlay would paint a pill over glyphs
+  // that will not be tagged, which is worse than painting none for a frame.
   const ranges = mentions
+    .filter((mention) => text.startsWith(`@${mention.name}`, mention.start))
     .map((mention) => ({ start: mention.start, end: anchorEnd(mention) }))
-    .filter((range) => range.start >= 0 && range.end <= text.length)
     .sort((a, b) => a.start - b.start)
 
   // Collect all "split points": mention ranges + the ghost insertion point

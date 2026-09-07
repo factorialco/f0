@@ -49,14 +49,21 @@ export const diffSpan = (prev: string, next: string): TextEdit => {
 
 /**
  * Re-anchor `anchored` after the composer text went from `prev` to `next`, and
- * report which mentions the edit landed inside.
+ * report what is left of the mentions the change ran into.
  *
- * A mention the change partly overlaps is *touched*: its remaining text is
- * reported so the caller can erase it whole. Adjacency is not overlap, so
- * typing a comma right after a mention — or deleting the space that followed
- * it — leaves the mention alone. A mention the change swallowed entirely is
- * simply dropped: its text is already gone, and the span that replaced it is
- * whatever the user just typed or pasted.
+ * A mention the change missed is kept, shifted. One the change ran into is
+ * *touched*: the spans it still occupies in `next` are reported so the caller
+ * can erase them and take the token out whole. Three rules make that safe:
+ *
+ * - Adjacency is not overlap, on either side. Typing a comma right after a
+ *   mention, deleting the space that followed it, or typing immediately in
+ *   front of the `@` all leave the mention alone — the last of those is a pure
+ *   insertion at the anchor's own index, which moves the mention rather than
+ *   editing it.
+ * - A change strictly inside a mention takes the whole token, including what
+ *   was typed in its place: a half-typed name was never a state the user meant.
+ * - A change that swallowed a mention outright erases nothing. Its text is
+ *   already gone, and what replaced it is the user's own keystroke or paste.
  */
 export const reanchor = <T extends Anchored>(
   prev: string,
@@ -66,26 +73,29 @@ export const reanchor = <T extends Anchored>(
   const { start: prefix, prevEnd, nextEnd } = diffSpan(prev, next)
   const delta = next.length - prev.length
 
-  // Positions inside the changed span have no image in `next`; clamp a start
-  // down and an end up so an erased range covers the whole disturbed region.
-  const mapStart = (pos: number): number =>
-    pos <= prefix ? pos : pos >= prevEnd ? pos + delta : prefix
-  const mapEnd = (pos: number): number =>
-    pos <= prefix ? pos : pos >= prevEnd ? pos + delta : nextEnd
-
   const kept: T[] = []
   const touched: Span[] = []
   for (const mention of anchored) {
     const start = mention.start
     const end = anchorEnd(mention)
+
     if (prefix >= end || prevEnd <= start) {
-      kept.push({ ...mention, start: mapStart(start) })
+      kept.push({ ...mention, start: start < prefix ? start : start + delta })
       continue
     }
-    if (start >= prefix && end <= prevEnd) {
+
+    const headSurvives = start < prefix
+    const tailSurvives = end > prevEnd
+    if (headSurvives && tailSurvives) {
+      touched.push({ start, end: end + delta })
       continue
     }
-    touched.push({ start: mapStart(start), end: mapEnd(end) })
+    if (headSurvives) {
+      touched.push({ start, end: prefix })
+    }
+    if (tailSurvives) {
+      touched.push({ start: nextEnd, end: end + delta })
+    }
   }
   return { kept, touched }
 }

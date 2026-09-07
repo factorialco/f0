@@ -25,22 +25,32 @@ const fullName = (person: PersonProfile): string =>
 const refFor = (person: PersonProfile): string =>
   `<entity-ref type="person" id="${person.id}">${fullName(person)}</entity-ref>`
 
-/** Drives the hook the way the composer does: one controlled value plus caret. */
+/**
+ * Drives the hook the way the composer does: one controlled value plus caret,
+ * with the hook's own writes fed back through `flush` so a rewrite it makes can
+ * be observed settling instead of only being recorded.
+ */
 const mountComposer = (people: PersonProfile[]) => {
   const textarea = document.createElement("textarea")
   document.body.appendChild(textarea)
 
-  const setInputValue = vi.fn<(next: string) => void>()
-  const setCursorPosition = vi.fn<(next: number) => void>()
+  let value = ""
+  let caret = 0
+  const setInputValue = vi.fn<(next: string) => void>((next) => {
+    value = next
+  })
+  const setCursorPosition = vi.fn<(next: number) => void>((next) => {
+    caret = next
+  })
   const searchPersons = vi.fn((query: string) =>
     Promise.resolve(
       people.filter((person) =>
-        fullName(person).toLowerCase().includes(query.toLowerCase())
+        fullName(person).toLowerCase().includes(query.trim().toLowerCase())
       )
     )
   )
 
-  const props = (value: string, caret = value.length): Props => ({
+  const props = (): Props => ({
     inputValue: value,
     setInputValue,
     cursorPosition: caret,
@@ -50,16 +60,26 @@ const mountComposer = (people: PersonProfile[]) => {
   })
 
   const harness = renderHook((next: Props) => useMentions(next), {
-    initialProps: props(""),
+    initialProps: props(),
   })
 
   return {
     ...harness,
     setInputValue,
     setCursorPosition,
+    textarea,
     /** Hand the hook a new composer value, as the textarea's onChange would. */
-    type: (value: string, caret?: number) =>
-      harness.rerender(props(value, caret)),
+    type: (next: string, at?: number) => {
+      value = next
+      caret = at ?? next.length
+      textarea.value = value
+      harness.rerender(props())
+    },
+    /** Re-render with whatever the hook wrote back, as the composer would. */
+    flush: () => {
+      textarea.value = value
+      harness.rerender(props())
+    },
   }
 }
 
@@ -139,6 +159,16 @@ describe("useMentions — a mention is a token, not a substring", () => {
     )
     expect(composer.setCursorPosition).toHaveBeenLastCalledWith(5)
     expect(composer.result.current.mentions).toHaveLength(0)
+
+    // Applying the hook's own rewrite settles: no second erase, and no
+    // half-typed name left for the popover to reopen on.
+    composer.setInputValue.mockClear()
+    composer.flush()
+    expect(composer.setInputValue).not.toHaveBeenCalled()
+    expect(composer.result.current.isOpen).toBe(false)
+    // The caret is where the mention was, in the textarea and not only in the
+    // component's state.
+    expect(composer.textarea.selectionStart).toBe(5)
   })
 
   it("keeps the tag on the name when the message starts with whitespace", async () => {
@@ -151,6 +181,56 @@ describe("useMentions — a mention is a token, not a substring", () => {
     expect(composer.result.current.transformMentions()).toBe(
       `  ${refFor(ANA)},`
     )
+  })
+
+  it("slides the anchor when the user types immediately before a mention", async () => {
+    const composer = mountComposer([ANA, BRUNO])
+    composer.type("@Ana")
+    await pick(composer, 0, "@Ana García ")
+    composer.setInputValue.mockClear()
+
+    // Caret at 0, type "H". The insertion point and the anchor are the same
+    // index: the mention moves, it is not edited.
+    composer.type("H@Ana García ", 1)
+
+    expect(composer.setInputValue).not.toHaveBeenCalled()
+    expect(composer.result.current.mentions).toEqual([
+      { id: "ana-g", name: "Ana García", start: 1 },
+    ])
+    expect(composer.result.current.transformMentions()).toBe(`H${refFor(ANA)} `)
+    // The trigger sits on a resolved mention, so the popover stays shut.
+    expect(composer.result.current.isOpen).toBe(false)
+  })
+
+  it("escapes a name and an id on the way into the tag", async () => {
+    const AWKWARD: PersonProfile = {
+      id: 'a&b"c',
+      firstName: "<Ana>",
+      lastName: "García",
+    }
+    const composer = mountComposer([AWKWARD])
+    composer.type("@<Ana")
+    await pick(composer, 0, "@<Ana> García ")
+
+    expect(composer.result.current.transformMentions()).toBe(
+      '<entity-ref type="person" id="a&amp;b&quot;c">&lt;Ana&gt; García</entity-ref> '
+    )
+  })
+
+  it("returns focus to the textarea when the pick rewrites nothing", async () => {
+    // Typing the name out in full and then picking it writes the same string
+    // back, so nothing about the value changes — but the row may have been
+    // clicked, and the caret and focus still have to come home.
+    const composer = mountComposer([ANA])
+    composer.type("@Ana García ")
+    await waitFor(() => expect(composer.result.current.results).toHaveLength(1))
+    composer.textarea.blur()
+
+    act(() => composer.result.current.selectPerson(ANA))
+
+    expect(composer.setInputValue).toHaveBeenLastCalledWith("@Ana García ")
+    expect(document.activeElement).toBe(composer.textarea)
+    expect(composer.textarea.selectionStart).toBe(12)
   })
 
   it("keeps what the user types when a selection replaces the whole mention", async () => {
