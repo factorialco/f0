@@ -651,6 +651,44 @@ describe("F0Chat composer escape", () => {
     expect(composer()).toHaveValue("@Ana")
   })
 
+  it("keeps the caret where a removed mention was", async () => {
+    renderChat(
+      makeRuntime({
+        channel: {
+          id: "group-1",
+          type: "group",
+          title: "Product",
+          avatar: { type: "team", name: "Product" },
+        },
+        searchMembers: async () => [{ id: "ana", name: "Ana García" }],
+      })
+    )
+    const input = composer() as HTMLTextAreaElement
+
+    await typeInComposer("Hola @Ana")
+    await screen.findByRole("option", { name: "Ana García" })
+    await userEvent.keyboard("{Enter}")
+    await waitFor(() => expect(input).toHaveValue("Hola @Ana García "))
+    // A second line — shift+Enter, since plain Enter sends. A caret dropped at
+    // the end would land on the wrong line entirely, not one character off.
+    await userEvent.type(input, "{Shift>}{Enter}{/Shift}y mañana")
+    await waitFor(() =>
+      expect(input).toHaveValue("Hola @Ana García \ny mañana")
+    )
+
+    // Put the caret inside the name and delete one character: the whole
+    // mention goes, and the caret must stay where it started.
+    input.setSelectionRange(14, 14)
+    fireEvent.select(input)
+    await userEvent.keyboard("{Backspace}")
+
+    // The space the mention inserted after itself is not part of the mention,
+    // so it survives — hence two spaces before the newline.
+    await waitFor(() => expect(input).toHaveValue("Hola  \ny mañana"))
+    expect(input.selectionStart).toBe(5)
+    expect(input.selectionEnd).toBe(5)
+  })
+
   it("never clears the draft, and leaves the key to the host", async () => {
     renderChat(makeRuntime())
     await typeInComposer("un borrador")
@@ -660,11 +698,119 @@ describe("F0Chat composer escape", () => {
     expect(pressEscape()).toBe(true)
     expect(composer()).toHaveValue("un borrador")
   })
+})
 
-  it("leaves Escape to the host when there is nothing to lose", async () => {
+describe("F0Chat composer undo/redo", () => {
+  const group = (overrides: Partial<F0ChatRuntime> = {}) =>
+    makeRuntime({
+      channel: {
+        id: "group-1",
+        type: "group",
+        title: "Product",
+        avatar: { type: "team", name: "Product" },
+      },
+      searchMembers: async () => [{ id: "ana", name: "Ana García" }],
+      ...overrides,
+    })
+
+  const composerEl = () => composer() as HTMLTextAreaElement
+
+  /** Inserts "@Ana García " at the caret through the popover, as a user would. */
+  const insertMention = async () => {
+    await userEvent.type(composerEl(), "@Ana")
+    await screen.findByRole("option", { name: "Ana García" })
+    await userEvent.keyboard("{Enter}")
+    await waitFor(() => expect(composerEl().value).toMatch(/@Ana García $/))
+  }
+
+  it("puts back a whole word at a time", async () => {
     renderChat(makeRuntime())
-    await userEvent.click(composer())
+    await userEvent.click(composerEl())
+    await userEvent.type(composerEl(), "hola mundo")
 
-    expect(pressEscape(1_000)).toBe(true)
+    await userEvent.keyboard("{Meta>}z{/Meta}")
+
+    // A step boundary falls at the space, so the last word goes, not everything.
+    await waitFor(() => expect(composerEl()).toHaveValue("hola "))
+  })
+
+  it("redoes with shift+z and with y", async () => {
+    renderChat(makeRuntime())
+    await userEvent.click(composerEl())
+    await userEvent.type(composerEl(), "hola mundo")
+
+    await userEvent.keyboard("{Meta>}z{/Meta}")
+    await waitFor(() => expect(composerEl()).toHaveValue("hola "))
+
+    await userEvent.keyboard("{Meta>}{Shift>}z{/Shift}{/Meta}")
+    await waitFor(() => expect(composerEl()).toHaveValue("hola mundo"))
+
+    await userEvent.keyboard("{Meta>}z{/Meta}")
+    await waitFor(() => expect(composerEl()).toHaveValue("hola "))
+
+    await userEvent.keyboard("{Meta>}y{/Meta}")
+    await waitFor(() => expect(composerEl()).toHaveValue("hola mundo"))
+  })
+
+  it("works with ctrl as well as meta", async () => {
+    renderChat(makeRuntime())
+    await userEvent.click(composerEl())
+    await userEvent.type(composerEl(), "hola mundo")
+
+    await userEvent.keyboard("{Control>}z{/Control}")
+    await waitFor(() => expect(composerEl()).toHaveValue("hola "))
+    await userEvent.keyboard("{Control>}y{/Control}")
+    await waitFor(() => expect(composerEl()).toHaveValue("hola mundo"))
+  })
+
+  it("restores a removed mention in one step, anchored", async () => {
+    const sendMessage = vi.fn()
+    renderChat(group({ sendMessage }))
+    await userEvent.click(composerEl())
+    await insertMention()
+    await userEvent.type(composerEl(), "hola")
+
+    // Delete a character inside the name: the whole mention goes.
+    const input = composerEl()
+    input.setSelectionRange(9, 9)
+    fireEvent.select(input)
+    await userEvent.keyboard("{Backspace}")
+    await waitFor(() => expect(input).toHaveValue(" hola"))
+
+    // One undo, not two — the half-typed name in between was never a state the
+    // user saw.
+    await userEvent.keyboard("{Meta>}z{/Meta}")
+    await waitFor(() => expect(input).toHaveValue("@Ana García hola"))
+
+    // And it came back as a real mention, not plain text: sending carries the id.
+    await userEvent.keyboard("{Enter}")
+    expect(sendMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        mentions: [expect.objectContaining({ id: "ana" })],
+      })
+    )
+  })
+
+  it("undoes an inserted mention as its own step", async () => {
+    renderChat(group())
+    await userEvent.click(composerEl())
+    await userEvent.type(composerEl(), "hola ")
+    await insertMention()
+
+    await userEvent.keyboard("{Meta>}z{/Meta}")
+
+    await waitFor(() => expect(composerEl()).toHaveValue("hola @Ana"))
+  })
+
+  it("drops the stack once the draft is sent", async () => {
+    renderChat(makeRuntime())
+    await userEvent.click(composerEl())
+    await userEvent.type(composerEl(), "hola mundo")
+    await userEvent.keyboard("{Enter}")
+    await waitFor(() => expect(composerEl()).toHaveValue(""))
+
+    await userEvent.keyboard("{Meta>}z{/Meta}")
+
+    expect(composerEl()).toHaveValue("")
   })
 })

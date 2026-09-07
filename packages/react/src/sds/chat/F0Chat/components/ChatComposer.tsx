@@ -6,6 +6,7 @@ import {
   useCallback,
   useEffect,
   useId,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -27,6 +28,10 @@ import {
   replaceClosedEmojiShortcode,
   useEmojiAutocomplete,
 } from "../hooks/useEmojiAutocomplete"
+import {
+  type ComposerSnapshot,
+  useComposerHistory,
+} from "../hooks/useComposerHistory"
 import { MENTION_EVERYONE_ID, useMentions } from "../hooks/useMentions"
 import { useEditLastOwnMessage } from "../hooks/useEditLastOwnMessage"
 import { useTransientError } from "../hooks/useTransientError"
@@ -136,6 +141,24 @@ export const ChatComposer = (): ReactNode => {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const attachmentStripRef = useRef<HTMLDivElement>(null)
   const localPreviewUrlsRef = useRef(new Set<string>())
+  // Where the caret belongs once React has written `forText`. A rAF is too
+  // early — it can land before the commit, so the selection is set on the old
+  // string and React's own value write then drops the caret at the end. The
+  // layout effect below runs after the write and before paint.
+  const pendingSelectionRef = useRef<{
+    caret: number
+    forText: string
+    focus: boolean
+  } | null>(null)
+  const history = useComposerHistory()
+  const lastSnapshotRef = useRef<ComposerSnapshot>({
+    value: "",
+    caret: 0,
+    mentions: [],
+  })
+  const restoringRef = useRef(false)
+  const erasedTextRef = useRef<string | null>(null)
+  const historyBreakRef = useRef(false)
 
   const emojiAutocomplete = useEmojiAutocomplete({
     inputValue: value,
@@ -148,11 +171,22 @@ export const ChatComposer = (): ReactNode => {
   // DMs (mention either person) and groups. Emoji lookup owns the active token
   // while open, so member searches pause until it closes.
   const mentionsEnabled = !!searchMembers
+  const requestSelection = useCallback(
+    (caret: number, forText: string, focus = false) => {
+      pendingSelectionRef.current = { caret, forText, focus }
+    },
+    []
+  )
+  const onMentionErased = useCallback((text: string) => {
+    erasedTextRef.current = text
+  }, [])
   const mentions = useMentions({
     inputValue: value,
     setInputValue: setValue,
     cursorPosition,
     setCursorPosition,
+    requestSelection,
+    onMentionErased,
     textareaRef,
     enabled: mentionsEnabled && !emojiAutocomplete.isOpen,
     searchMembers,
@@ -371,6 +405,64 @@ export const ChatComposer = (): ReactNode => {
     [onInputActivity, stopTyping]
   )
 
+  useLayoutEffect(
+    function applyPendingSelection() {
+      const pending = pendingSelectionRef.current
+      if (!pending) return
+      // A request whose text never got committed is stale; drop it rather than
+      // aim it at whatever the textarea holds now.
+      pendingSelectionRef.current = null
+      if (pending.forText !== value) return
+      const node = textareaRef.current
+      if (!node) return
+      if (pending.focus) node.focus()
+      node.setSelectionRange(pending.caret, pending.caret)
+    },
+    [value]
+  )
+
+  // Every writer to the composer's text goes through state, so watching it is
+  // the only way to catch them all — typing, paste, an inserted mention, an
+  // emoji swap, a transcript append.
+  useEffect(
+    function recordHistory() {
+      const previous = lastSnapshotRef.current
+      if (previous.value === value && previous.mentions === mentions.mentions) {
+        // Caret-only move: keep it, so an undo restores where the user was
+        // before the edit rather than where the last edit left them.
+        lastSnapshotRef.current = { ...previous, caret: cursorPosition }
+        return
+      }
+      const current = {
+        value,
+        caret: cursorPosition,
+        mentions: mentions.mentions,
+      }
+      lastSnapshotRef.current = current
+
+      if (restoringRef.current) {
+        restoringRef.current = false
+        return
+      }
+      // The tail of a mention removal: the keystroke that triggered it is
+      // already recorded, and undo has to put the whole mention back at once.
+      if (erasedTextRef.current === value) {
+        erasedTextRef.current = null
+        return
+      }
+      // The draft the stack described is gone — sent, discarded, or replaced by
+      // an edit. Adopt this state as the new baseline instead of recording a
+      // step that would undo back into it.
+      if (historyBreakRef.current) {
+        historyBreakRef.current = false
+        history.reset()
+        return
+      }
+      history.record(previous, current)
+    },
+    [value, cursorPosition, mentions.mentions, history]
+  )
+
   // Leaving the conversation mid-type must also drop the dots immediately.
   useEffect(
     () => () => {
@@ -552,6 +644,7 @@ export const ChatComposer = (): ReactNode => {
     setCursorPosition(0)
     releaseUploadingPreviews(attachments)
     setAttachments([])
+    historyBreakRef.current = true
   }, [
     mentions.close,
     mentions.seedMentions,
@@ -591,6 +684,9 @@ export const ChatComposer = (): ReactNode => {
         ],
         message.body
       )
+      // Opening an edit is a fresh context; undo must not walk back into the
+      // draft that was in the composer before it.
+      historyBreakRef.current = true
     },
     [
       channel.type,
@@ -684,6 +780,8 @@ export const ChatComposer = (): ReactNode => {
     setValue("")
     setCursorPosition(0)
     setAttachments([])
+    // The message is out; undo must not put the sent draft back.
+    historyBreakRef.current = true
     clearComposeTarget()
   }, [
     attachments,
@@ -735,11 +833,65 @@ export const ChatComposer = (): ReactNode => {
     clearComposeTarget()
   }, [clearComposeTarget, emit, replyTo])
 
+  const applySnapshot = useCallback(
+    (snapshot: ComposerSnapshot) => {
+      restoringRef.current = true
+      lastSnapshotRef.current = snapshot
+      mentions.close()
+      mentions.restoreMentions(snapshot.mentions, snapshot.value)
+      setValue(snapshot.value)
+      setCursorPosition(snapshot.caret)
+      requestSelection(snapshot.caret, snapshot.value)
+    },
+    [mentions.close, mentions.restoreMentions, requestSelection]
+  )
+
+  const undo = useCallback(() => {
+    const snapshot = history.undo({
+      value,
+      caret: cursorPosition,
+      mentions: mentions.mentions,
+    })
+    if (!snapshot) return false
+    applySnapshot(snapshot)
+    return true
+  }, [history, value, cursorPosition, mentions.mentions, applySnapshot])
+
+  const redo = useCallback(() => {
+    const snapshot = history.redo({
+      value,
+      caret: cursorPosition,
+      mentions: mentions.mentions,
+    })
+    if (!snapshot) return false
+    applySnapshot(snapshot)
+    return true
+  }, [history, value, cursorPosition, mentions.mentions, applySnapshot])
+
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLTextAreaElement>) => {
       // Enter confirms the active IME composition. It must never select an
       // autocomplete option or send the message while composition is active.
       if (e.nativeEvent.isComposing) return
+      // Undo/redo before anything else: the composer rewrites its own value
+      // (inserting a mention, removing one whole, swapping an emoji shortcode)
+      // and each write clears the textarea's native undo stack, so the
+      // browser's own Cmd+Z has nothing useful left. Always preventDefault, or
+      // that empty native stack fires too and wipes what we just restored.
+      if ((e.metaKey || e.ctrlKey) && !e.altKey) {
+        const key = e.key.toLowerCase()
+        if (key === "z") {
+          e.preventDefault()
+          if (e.shiftKey) redo()
+          else undo()
+          return
+        }
+        if (key === "y") {
+          e.preventDefault()
+          redo()
+          return
+        }
+      }
       // Emoji shortcode suggestions take precedence when the active caret token
       // starts with `:`; Enter/Tab select instead of sending the message.
       if (handleEmojiAutocompleteKeyDown(e)) return
@@ -782,6 +934,8 @@ export const ChatComposer = (): ReactNode => {
       dismissEdit,
       dismissReply,
       target.kind,
+      undo,
+      redo,
       isComposerIdle,
       editLastOwnMessage,
     ]

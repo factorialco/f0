@@ -5,6 +5,7 @@ import { type AvatarVariant } from "@/components/avatars/F0Avatar"
 import { useF0ChatEmit } from "../providers/F0ChatProvider"
 import { type F0ChatUser } from "../types"
 import { locateMentions } from "../utils/mention-ranges"
+import { diffSpan } from "../utils/text-diff"
 
 /** Sentinel id for the "everyone" (`@here`) option — never a real user id. */
 export const MENTION_EVERYONE_ID = "@everyone"
@@ -60,6 +61,20 @@ export type UseMentionsOptions = {
   cursorPosition: number
   /** Setter for the cursor position — used when removing a mention moves it. */
   setCursorPosition: (position: number) => void
+  /**
+   * Ask the composer to put the textarea caret at `caret` once it has written
+   * `forText`. The composer owns the textarea, so it owns the timing: setting a
+   * selection before React writes the value aims it at the old string and the
+   * write then drops the caret at the end.
+   */
+  requestSelection: (caret: number, forText: string, focus?: boolean) => void
+  /**
+   * Called with the text the hook just wrote when it removed a mention itself.
+   * That write is the tail of the keystroke that caused it, not a new edit —
+   * undo has to put the whole mention back in one step. The text identifies the
+   * write, because a flag would be read a commit too early.
+   */
+  onMentionErased?: (text: string) => void
   /** Ref to the textarea element for reading selection + caret position. */
   textareaRef: React.RefObject<HTMLTextAreaElement | null>
   /**
@@ -101,6 +116,9 @@ export type UseMentionsReturn = {
    * `forText` is the body they belong to; it arrives with them because the
    * composer sets its value in the same commit. */
   seedMentions: (entries: MentionEntry[], forText?: string) => void
+  /** Put back an exact set of anchors for `forText`. Undo/redo carries the
+   * anchors in its snapshot, so it restores rather than re-resolves. */
+  restoreMentions: (anchored: AnchoredMention[], forText: string) => void
   /** Close the popover. */
   close: () => void
   /** Dismiss the current `@` trigger until the caret leaves it. */
@@ -152,19 +170,7 @@ const reanchorMentions = (
   next: string,
   anchored: AnchoredMention[]
 ): { kept: AnchoredMention[]; touched: { start: number; end: number }[] } => {
-  const max = Math.min(prev.length, next.length)
-  let prefix = 0
-  while (prefix < max && prev[prefix] === next[prefix]) prefix++
-  let suffix = 0
-  while (
-    suffix < max - prefix &&
-    prev[prev.length - 1 - suffix] === next[next.length - 1 - suffix]
-  ) {
-    suffix++
-  }
-
-  const prevEnd = prev.length - suffix
-  const nextEnd = next.length - suffix
+  const { start: prefix, prevEnd, nextEnd } = diffSpan(prev, next)
   const delta = next.length - prev.length
 
   // Positions inside the changed span have no image in `next`; clamp a start
@@ -319,6 +325,8 @@ export function useMentions({
   setInputValue,
   cursorPosition,
   setCursorPosition,
+  requestSelection,
+  onMentionErased,
   textareaRef,
   enabled,
   searchMembers,
@@ -335,7 +343,23 @@ export function useMentions({
   // The anchors are read from event handlers and effects that must not depend
   // on them, so state and ref are written together and the ref is the source.
   const mentionsRef = useRef<AnchoredMention[]>(mentions)
+  // Re-anchoring runs on every keystroke and usually produces the same anchors
+  // in a new array. Keeping the old reference when nothing moved saves a state
+  // write per character, and lets callers treat a new identity as real news.
   const commitMentions = useCallback((next: AnchoredMention[]) => {
+    const current = mentionsRef.current
+    const unchanged =
+      current.length === next.length &&
+      current.every((mention, i) => {
+        const candidate = next[i]
+        return (
+          candidate !== undefined &&
+          candidate.id === mention.id &&
+          candidate.name === mention.name &&
+          candidate.start === mention.start
+        )
+      })
+    if (unchanged) return
     mentionsRef.current = next
     setMentions(next)
   }, [])
@@ -495,13 +519,9 @@ export function useMentions({
       emit.onMentionInserted({ isEveryone: candidate.kind === "everyone" })
       close()
 
-      requestAnimationFrame(() => {
-        const textarea = textareaRef.current
-        if (textarea) {
-          textarea.focus()
-          textarea.setSelectionRange(newCursorPos, newCursorPos)
-        }
-      })
+      // Focus too: the candidate may have been clicked, which took focus to
+      // the popover row.
+      requestSelection(newCursorPos, newValue, true)
     },
     [
       inputValue,
@@ -511,6 +531,7 @@ export function useMentions({
       close,
       emit,
       commitMentions,
+      requestSelection,
     ]
   )
 
@@ -608,6 +629,14 @@ export function useMentions({
     [commitMentions]
   )
 
+  const restoreMentions = useCallback(
+    (anchored: AnchoredMention[], forText: string) => {
+      prevValueRef.current = forText
+      commitMentions(anchored)
+    },
+    [commitMentions]
+  )
+
   // Keep the anchors on the text as it changes, and take a mention out whole
   // when an edit lands inside it — a half-typed name is not a mention, and
   // leaving one behind is what silently dropped the id before.
@@ -630,16 +659,19 @@ export function useMentions({
     commitMentions(erased.mentions)
     setInputValue(erased.text)
     setCursorPosition(erased.caret)
-    requestAnimationFrame(() => {
-      textareaRef.current?.setSelectionRange(erased.caret, erased.caret)
-    })
+    // Removing a mention leaves the caret where the mention was, not at the end
+    // of the text — the edit happened here, and the rest of a multi-line draft
+    // is not where the user was looking.
+    requestSelection(erased.caret, erased.text)
+    onMentionErased?.(erased.text)
   }, [
     inputValue,
     cursorPosition,
     setInputValue,
     setCursorPosition,
-    textareaRef,
     commitMentions,
+    requestSelection,
+    onMentionErased,
   ])
 
   const popoverPosition: PopoverPosition = useMemo(() => {
@@ -682,6 +714,7 @@ export function useMentions({
     selectCandidate,
     getMentions,
     seedMentions,
+    restoreMentions,
     close,
     dismissCurrentTrigger,
   }

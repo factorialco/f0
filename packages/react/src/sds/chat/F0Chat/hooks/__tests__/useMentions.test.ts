@@ -28,6 +28,7 @@ const makeProps = (over: Partial<Props> = {}): Props => {
     setInputValue: () => {},
     cursorPosition: 0,
     setCursorPosition: () => {},
+    requestSelection: () => {},
     textareaRef: { current: textarea },
     enabled: true,
     searchMembers: (q: string) =>
@@ -245,6 +246,39 @@ describe("useMentions — a mention survives an edit", () => {
       expect(setInputValue).toHaveBeenCalledWith("Hola , ¿vienes?")
     )
     expect(result.current.getMentions().mentions).toEqual([])
+  })
+
+  it("leaves the caret where the mention was, not at the end", async () => {
+    // A multi-line draft is where this shows: dropping the caret at the end
+    // moves it to another line entirely.
+    let value = "Hola @Ana García, ¿vienes?\nY mañana también\nGracias"
+    const setInputValue = vi.fn((next: string) => {
+      value = next
+    })
+    const setCursorPosition = vi.fn()
+    const { rerender } = openForEditing(value, [ANA], {
+      setInputValue,
+      setCursorPosition,
+    })
+
+    // Backspace the "c" of "García" — the caret lands at 13.
+    value = "Hola @Ana Garía, ¿vienes?\nY mañana también\nGracias"
+    rerender(
+      makeProps({
+        inputValue: value,
+        cursorPosition: 13,
+        setInputValue,
+        setCursorPosition,
+      })
+    )
+
+    await waitFor(() =>
+      expect(setInputValue).toHaveBeenCalledWith(
+        "Hola , ¿vienes?\nY mañana también\nGracias"
+      )
+    )
+    // 5 is where the "@" was; the end of that text is 40.
+    expect(setCursorPosition).toHaveBeenCalledWith(5)
   })
 
   it("tracks two people who share a display name independently", async () => {
