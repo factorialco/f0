@@ -128,7 +128,7 @@ Editing a part that moves the pin - the address line, city, state, postal code o
 
 ### Picking a suggestion
 
-Typing happens in the select's search box: two or more characters search after a 250 ms debounce, out-of-order responses are discarded, and results are listed exactly as the provider returned them (no local filtering, which would drop accent variants).
+Typing happens in the select's search box: two or more characters search after a 250 ms debounce, out-of-order responses are discarded, and results are listed exactly as the provider returned them (no local filtering, which would drop accent variants). Each suggestion is one line: a `description` is appended to the `label` rather than shown under it, so a list of addresses stays scannable.
 
 A pick shows the suggestion on the trigger right away but emits nothing until `resolvePlace` returns; the resolved value replaces the whole value, country included, with `{ source: "picked", isResolved: true }`. If `resolvePlace` is missing, rejects or returns nothing, the suggestion label is kept as the address line and the change is reported as typed.
 

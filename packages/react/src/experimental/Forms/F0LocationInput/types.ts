@@ -57,6 +57,7 @@ export type F0LocationInputValue = {
 export type F0LocationSuggestion = {
   id: string
   label: string
+  /** Appended to the label, so each suggestion reads as one line */
   description?: string
 }
 

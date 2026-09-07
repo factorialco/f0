@@ -141,7 +141,9 @@ describe("F0LocationInput", () => {
       expect(searchPlaces).toHaveBeenCalledTimes(1)
       expect(searchPlaces).toHaveBeenCalledWith("Colon", { country: undefined })
       // No local filtering: the accent-insensitive match is the provider's job
-      expect(screen.getByText("Calle Colón 3")).toBeInTheDocument()
+      expect(screen.getByText("Calle Colón 3, Valencia")).toBeInTheDocument()
+      // Label and description read as one line, not two
+      expect(screen.queryByText("Valencia")).not.toBeInTheDocument()
     })
 
     it("scopes the search to a single allowed country", async () => {
