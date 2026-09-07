@@ -10579,7 +10579,8 @@ declare type InputFieldProps<T> = {
     name?: string;
     onClickPlaceholder?: () => void;
     onClickChildren?: () => void;
-    onClickContent?: () => void;
+    /** Receives the click, so a caller can tell where inside the field it landed. */
+    onClickContent?: (event: React.MouseEvent<Element>) => void;
     value?: T | undefined;
     onChange?: (value: T) => void;
     size?: InputFieldSize;
