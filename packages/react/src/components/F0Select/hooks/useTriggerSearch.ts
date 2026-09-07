@@ -18,6 +18,8 @@ type UseTriggerSearchOptions = {
   onActiveMove: (direction: "next" | "previous") => void
   /** Takes the active option. Returns false when there was nothing to take. */
   onSelectActive: () => boolean
+  /** Backspace with nothing typed: removes the selection instead. */
+  onBackspaceOnEmpty: () => boolean
   /** The field's root element, for deciding where focus came from. */
   triggerRef: React.RefObject<HTMLElement | null>
 }
@@ -42,6 +44,7 @@ export const useTriggerSearch = ({
   onSearchReset,
   onActiveMove,
   onSelectActive,
+  onBackspaceOnEmpty,
   triggerRef,
 }: UseTriggerSearchOptions) => {
   const [draft, setDraft] = useState("")
@@ -56,6 +59,7 @@ export const useTriggerSearch = ({
     onSearchReset,
     onActiveMove,
     onSelectActive,
+    onBackspaceOnEmpty,
   })
   useEffect(() => {
     callbacksRef.current = {
@@ -64,8 +68,16 @@ export const useTriggerSearch = ({
       onSearchReset,
       onActiveMove,
       onSelectActive,
+      onBackspaceOnEmpty,
     }
-  }, [onActiveMove, onOpen, onSearchChange, onSearchReset, onSelectActive])
+  }, [
+    onActiveMove,
+    onBackspaceOnEmpty,
+    onOpen,
+    onSearchChange,
+    onSearchReset,
+    onSelectActive,
+  ])
 
   /**
    * Whether the list is open, as far as the KEYS are concerned: `open` is a
@@ -154,6 +166,14 @@ export const useTriggerSearch = ({
       const isArrowDown = event.key === "ArrowDown"
       const isArrowUp = event.key === "ArrowUp"
       const isEnter = event.key === "Enter"
+
+      // With nothing to delete, backspace deletes the selection: the
+      // selection sits where the text would be. Not consumed — there is
+      // nothing for the input to do with it anyway.
+      if (event.key === "Backspace" && event.currentTarget.value === "") {
+        callbacksRef.current.onBackspaceOnEmpty()
+        return
+      }
 
       if (!isArrowDown && !isArrowUp && !isEnter) return
 

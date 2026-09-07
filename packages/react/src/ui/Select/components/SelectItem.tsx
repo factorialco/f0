@@ -39,6 +39,13 @@ const SelectItem = React.forwardRef<
          * caret has to stay in the field that is driving it.
          */
         "data-[active=true]:after:bg-f1-background-hover data-[active=true]:after:text-f1-foreground data-[active=true]:after:opacity-100",
+        /**
+         * A selected option stays selected-looking whatever else happens to
+         * it: hovering it, arrowing onto it or focusing it must not swap its
+         * colour for the plain highlight.
+         */
+        "focus:data-[state=checked]:after:bg-f1-background-selected-bold/10 dark:focus:data-[state=checked]:after:bg-f1-background-selected-bold/20",
+        "data-[active=true]:data-[state=checked]:after:bg-f1-background-selected-bold/10 dark:data-[active=true]:data-[state=checked]:after:bg-f1-background-selected-bold/20",
         "[&>*]:translate-y-0.5",
         !multiple &&
           "data-[state=checked]:after:bg-f1-background-selected-bold/10 data-[state=checked]:after:opacity-100",

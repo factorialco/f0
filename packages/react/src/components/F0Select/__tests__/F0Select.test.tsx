@@ -2732,6 +2732,104 @@ describe("Select", () => {
       expect(screen.getByText("Option 1")).toBeInTheDocument()
     })
 
+    it("starts the arrows from what is already selected", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          options={mockOptions}
+          value="option2"
+          onChange={() => {}}
+        />
+      )
+
+      const trigger = getTriggerSearchInput()
+      trigger.focus()
+      await user.keyboard("{ArrowDown}")
+      await settleList()
+
+      // Opening lands on the selection, so Enter confirms it and the arrows
+      // move away from it rather than from the top of the list.
+      await waitFor(() => expect(activeOptionText()).toContain("Option 2"))
+    })
+
+    it("keeps the selected look on the option the arrows are on", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          options={mockOptions}
+          value="option2"
+          onChange={() => {}}
+        />
+      )
+
+      getTriggerSearchInput().focus()
+      await user.keyboard("{ArrowDown}")
+      await settleList()
+      await waitFor(() => expect(activeOptionText()).toContain("Option 2"))
+
+      const selected = within(screen.getByRole("listbox"))
+        .getByText("Option 2")
+        .closest("[role='option']")!
+      expect(selected).toHaveAttribute("data-state", "checked")
+      expect(selected).toHaveAttribute("data-active", "true")
+      // The checked colour outranks the plain highlight on the same row.
+      expect(selected.className).toContain(
+        "data-[active=true]:data-[state=checked]:after:bg-f1-background-selected-bold/10"
+      )
+    })
+
+    it("takes the selection back on backspace when there is nothing typed", async () => {
+      const user = userEvent.setup()
+      const handleChange = vi.fn()
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          options={mockOptions}
+          value="option1"
+          clearable
+          onChange={handleChange}
+        />
+      )
+
+      const trigger = getTriggerSearchInput()
+      await waitFor(() =>
+        expect(screen.getByText("Option 1")).toBeInTheDocument()
+      )
+
+      // The caret sits after the selection; backspace with no text is aimed
+      // at the selection itself.
+      trigger.focus()
+      await user.keyboard("{Backspace}")
+
+      await waitFor(() =>
+        expect(screen.queryByText("Option 1")).not.toBeInTheDocument()
+      )
+      await waitFor(() => expect(handleChange).toHaveBeenCalled())
+      expect(trigger).toHaveFocus()
+    })
+
+    it("only deletes text on backspace while there is text", async () => {
+      const user = userEvent.setup()
+      const handleChange = vi.fn()
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          options={mockOptions}
+          value="option1"
+          onChange={handleChange}
+        />
+      )
+
+      const trigger = getTriggerSearchInput()
+      await user.type(trigger, "ab")
+      await user.keyboard("{Backspace}")
+
+      expect(trigger).toHaveValue("a")
+      expect(handleChange).not.toHaveBeenCalled()
+    })
+
     it("describes nothing when nothing is selected", () => {
       render(
         <F0Select

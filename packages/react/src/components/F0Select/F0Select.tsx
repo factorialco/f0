@@ -969,9 +969,11 @@ const F0SelectComponent = forwardRef(function Select<
   const listNavRef = useRef<{
     move: (direction: "next" | "previous") => void
     take: () => boolean
+    removeLast: () => boolean
   }>({
     move: () => {},
     take: () => false,
+    removeLast: () => false,
   })
   const moveActiveThroughRef = useCallback(
     (direction: "next" | "previous") => listNavRef.current.move(direction),
@@ -979,6 +981,10 @@ const F0SelectComponent = forwardRef(function Select<
   )
   const selectActiveThroughRef = useCallback(
     () => listNavRef.current.take(),
+    []
+  )
+  const removeLastSelectedThroughRef = useCallback(
+    () => listNavRef.current.removeLast(),
     []
   )
 
@@ -1001,6 +1007,7 @@ const F0SelectComponent = forwardRef(function Select<
     onOpen: openNow,
     onActiveMove: moveActiveThroughRef,
     onSelectActive: selectActiveThroughRef,
+    onBackspaceOnEmpty: removeLastSelectedThroughRef,
     onSearchChange: onSearchChangeLocal,
     // Clearing the query means NO query, not an empty one: an empty string is
     // a new dataset identity, and a "select all" is scoped to the query it was
@@ -1277,11 +1284,15 @@ const F0SelectComponent = forwardRef(function Select<
       setActiveValue(undefined)
       return
     }
-    setActiveValue((current) =>
-      current && navigableValues.includes(current)
-        ? current
-        : navigableValues[0]
-    )
+    setActiveValue((current) => {
+      if (current && navigableValues.includes(current)) return current
+      // Opening lands on what is already selected, so Enter confirms it and
+      // the arrows start from it. First option otherwise.
+      const selected = localValue.find((value) =>
+        navigableValues.includes(value)
+      )
+      return selected ?? navigableValues[0]
+    })
     // navigableKey stands in for the list's identity
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inlineSearch, openLocal, navigableKey])
@@ -1312,9 +1323,40 @@ const F0SelectComponent = forwardRef(function Select<
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeValue, localValue, multiple, onItemCheckChange])
 
+  /**
+   * Backspace on an empty field takes the selection back, the way it takes the
+   * last token in a tag field: the selection sits where the text would be, so
+   * it is what the key is pointing at.
+   */
+  const removeLastSelected = useCallback(() => {
+    const last = localValue[localValue.length - 1]
+    if (!last) return false
+    hasUserInteracted.current = true
+    if (multiple) {
+      onItemCheckChange(last, false)
+    } else {
+      clearSelection()
+      selectedItemsCache.current.clear()
+      ;(
+        onChangeSelectedOption as (option: undefined, checked: boolean) => void
+      )?.(undefined, false)
+    }
+    return true
+  }, [
+    clearSelection,
+    localValue,
+    multiple,
+    onChangeSelectedOption,
+    onItemCheckChange,
+  ])
+
   useEffect(() => {
-    listNavRef.current = { move: moveActive, take: selectActive }
-  }, [moveActive, selectActive])
+    listNavRef.current = {
+      move: moveActive,
+      take: selectActive,
+      removeLast: removeLastSelected,
+    }
+  }, [moveActive, removeLastSelected, selectActive])
 
   /**
    * A virtualized list only renders what is in view, so the active row has to
