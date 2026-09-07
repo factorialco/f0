@@ -12,7 +12,11 @@ import {
 import { act, zeroRenderHook as renderHook } from "@/testing/test-utils"
 
 import { type ChatRow } from "../../utils/grouping"
-import { topVisibleRowIndex, useChatVirtuoso } from "../useChatVirtuoso"
+import {
+  lastSeenRowIndex,
+  topVisibleRowIndex,
+  useChatVirtuoso,
+} from "../useChatVirtuoso"
 
 let frameCallbacks: FrameRequestCallback[]
 
@@ -143,6 +147,41 @@ describe("useChatVirtuoso wheel takeover", () => {
     expect(topVisibleRowIndex(items, 159, 100)).toBe(1)
     expect(topVisibleRowIndex(items, 160, 100)).toBe(2)
     expect(topVisibleRowIndex(items, 184, 100)).toBeNull()
+  })
+
+  describe("lastSeenRowIndex", () => {
+    // Rows: 0 → [0,40), 1 → [40,160), 2 → [160,184).
+    const items = [
+      { index: 100, offset: 0, size: 40 },
+      { index: 101, offset: 40, size: 120 },
+      { index: 102, offset: 160, size: 24 },
+    ]
+
+    it("counts a row once its midpoint has passed the fold", () => {
+      // Viewport 100px tall at the top: row 0's midpoint (20) is in, row 1's
+      // (100) is exactly at the fold, row 2's is far below.
+      expect(lastSeenRowIndex(items, 0, 100, 100)).toBe(1)
+    })
+
+    it("stops at the row still mostly below the fold", () => {
+      // Viewport 50px: row 0 is past (midpoint 20), row 1 needs 100px of
+      // scrolling before half of it has been on screen.
+      expect(lastSeenRowIndex(items, 0, 50, 100)).toBe(0)
+    })
+
+    it("counts every row once the reader is at the bottom", () => {
+      expect(lastSeenRowIndex(items, 84, 100, 100)).toBe(2)
+    })
+
+    it("still counts a row taller than the viewport", () => {
+      // Half, not all: a post that never fits would otherwise never be read.
+      const tall = [{ index: 100, offset: 0, size: 900 }]
+      expect(lastSeenRowIndex(tall, 0, 500, 100)).toBe(0)
+    })
+
+    it("returns local indices, so a prepend cannot shift the pointer", () => {
+      expect(lastSeenRowIndex(items, 84, 100, 90)).toBe(12)
+    })
   })
 
   it("does not read DOM geometry in the scroll hot path", () => {

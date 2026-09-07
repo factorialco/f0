@@ -6,7 +6,10 @@ import { ArrowDown } from "@/icons/app"
 import { ScrollShadow } from "@/kits/ai/F0AiMessagesContainer/components/ScrollShadow"
 import { useI18n } from "@/lib/providers/i18n"
 
-import { useF0ChatEmit } from "../providers/F0ChatProvider"
+import {
+  useF0ChatChannelType,
+  useF0ChatEmit,
+} from "../providers/F0ChatProvider"
 import { CHAT_COMPOSER_HEIGHT } from "../utils/chat-layout"
 import { EASE_OUT_SWIFT } from "../utils/chat-motion"
 import { DateTimeSeparator } from "./DateTimeSeparator"
@@ -36,6 +39,7 @@ export const ChatViewportOverlays = ({
 }): ReactNode => {
   const i18n = useI18n()
   const emit = useF0ChatEmit()
+  const isCommunity = useF0ChatChannelType() === "community"
   const transitionDuration = reducedMotion ? 0 : 0.15
 
   return (
@@ -104,10 +108,17 @@ export const ChatViewportOverlays = ({
                 icon={ArrowDown}
                 label={
                   unreadCount > 0
-                    ? i18n.t(
-                        unreadCount === 1
-                          ? "chat.unreadCount.one"
-                          : "chat.unreadCount.other",
+                    ? // A community counts POSTS, and the pill is where the
+                      // count is actually read aloud — it is the control's
+                      // accessible name.
+                      i18n.t(
+                        isCommunity
+                          ? unreadCount === 1
+                            ? "chat.newPostsCount.one"
+                            : "chat.newPostsCount.other"
+                          : unreadCount === 1
+                            ? "chat.unreadCount.one"
+                            : "chat.unreadCount.other",
                         { count: unreadCount }
                       )
                     : hasMoreNewer

@@ -4,6 +4,17 @@ import { IconType } from "@/components/F0Icon"
 export type SidebarChatPresence = "online" | "offline"
 
 /**
+ * What a row stands for. `community` is a channel whose contents are POSTS
+ * rather than messages: its badge counts posts and says so, and the row never
+ * carries presence, typing or a mention prefix — none of which mean anything
+ * for a place rather than a person.
+ *
+ * Purely semantic. The layout is identical, so a host can set it without
+ * redesigning anything.
+ */
+export type SidebarChatKind = "conversation" | "community"
+
+/**
  * Status shown as a small icon to the right of a conversation name. The
  * consumer fully controls it — pass any icon with an accessible label. F0
  * does not hardcode any set of statuses.
@@ -26,6 +37,11 @@ export type SidebarChatAction = {
 export type SidebarChat = {
   id: string
   label: string
+  /**
+   * What the row stands for — see {@link SidebarChatKind}.
+   * @default "conversation"
+   */
+  kind?: SidebarChatKind
   /**
    * Person / team / company avatar (F0Avatar variant). Optional: omit it for
    * avatar-less rows (e.g. an AI chat history that shows titles only).

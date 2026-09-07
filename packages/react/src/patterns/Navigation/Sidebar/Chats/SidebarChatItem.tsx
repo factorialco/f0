@@ -185,6 +185,7 @@ export const SidebarChatItem = ({
               <UnreadBadge
                 count={chat.unreadCount}
                 hasMention={!!chat.mentionCount}
+                kind={chat.kind}
               />
             ) : null}
           </div>

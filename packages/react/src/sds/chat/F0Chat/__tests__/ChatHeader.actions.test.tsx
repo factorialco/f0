@@ -69,6 +69,26 @@ describe("ChatHeader host actions", () => {
     expect(screen.queryByRole("img", { name: "Product Team" })).toBeNull()
   })
 
+  it("uses the same hash glyph for a community", () => {
+    // The rule is about the AVATAR, not the channel type: a community with a
+    // name-derived team avatar used to land on an empty initials box here
+    // while the sidebar, one panel away, drew it as ＃.
+    renderChat(
+      makeRuntime({
+        channel: {
+          id: "c1",
+          type: "community",
+          title: "Barcelona office",
+          avatar: { type: "team", name: "Barcelona office" },
+        },
+      })
+    )
+
+    expect(screen.getByTestId("chat-group-avatar-fallback")).toHaveTextContent(
+      "＃"
+    )
+  })
+
   it("keeps an explicit group emoji instead of the hash fallback", () => {
     renderChat(
       makeRuntime({

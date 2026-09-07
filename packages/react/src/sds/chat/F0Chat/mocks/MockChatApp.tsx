@@ -2,21 +2,39 @@
 
 import { useCallback, useMemo, type ReactNode } from "react"
 
-import { BellOff, PalmTree } from "@/icons/app"
+import {
+  BellOff,
+  Delete,
+  PalmTree,
+  Pencil,
+  PushPin,
+  PushPinSolid,
+  Megaphone,
+} from "@/icons/app"
+import { LinkProvider } from "@/lib/linkHandler"
 import { useI18n } from "@/lib/providers/i18n"
 import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
 import { type SidebarChatGroup } from "@/patterns/Navigation/Sidebar/Chats/types"
 
 import {
+  isPost,
   isUserMessage,
   type F0ChatComposableAttachment,
+  type F0ChatCreatePostInput,
   type F0ChatEditInput,
   type F0ChatItem,
+  type F0ChatPost,
+  type F0ChatPinnedPost,
+  type F0ChatPostAction,
   type F0ChatRuntime,
+  type F0ChatShelfAction,
+  type F0ChatScheduledPost,
+  type F0ChatDraftPost,
   type F0ChatSearchResult,
   type F0ChatSendInput,
   type F0ChatUser,
 } from "../types"
+import { stripHtml } from "../utils/posts"
 import { MOCK_MAX_FILE_SIZE_BYTES } from "./constants"
 import {
   type Seed,
@@ -31,7 +49,31 @@ import {
   MockChatAppContext,
   useMockChatApp,
   useMockChatStore,
+  type MockOpenSurface,
 } from "./useMockChatApp"
+
+/**
+ * The URL the mock would be at. Opening a post, previewing a scheduled one and
+ * writing a new one are ROUTES in the product — the three the surfaces are
+ * named after — so the mock has to change its address when they open.
+ *
+ * It is not cosmetic. F0 collapses a fullscreen panel whenever the route
+ * changes, because a fullscreen chat covers the very page the reader is being
+ * sent to. Without a path that moves, opening a post from a fullscreen panel
+ * puts it behind the chat and looks like nothing happened.
+ *
+ * `/dashboard` rather than `/` for the resting state: `/` is the demo menu's
+ * Dashboard entry, and matching it would light that row up in every story.
+ */
+const mockPathFor = (surface: MockOpenSurface | null): string => {
+  if (!surface) return "/dashboard"
+  if (surface.kind === "post") return `/communities/post/${surface.postId}`
+  if (surface.kind === "scheduled")
+    return `/communities/scheduled/${surface.postId}`
+  return surface.postId
+    ? `/dashboard/post/${surface.postId}/edit`
+    : "/dashboard/post/new"
+}
 
 export const MockChatAppProvider = ({
   children,
@@ -41,7 +83,12 @@ export const MockChatAppProvider = ({
   const value = useMockChatStore()
   return (
     <MockChatAppContext.Provider value={value}>
-      {children}
+      {/* ABOVE whatever mounts the panel, so the AI chat state can see the
+          path change. A `LinkProvider` deeper in the tree — the post header's,
+          for instance — is invisible from up there. */}
+      <LinkProvider currentPath={mockPathFor(value.openSurface)}>
+        {children}
+      </LinkProvider>
     </MockChatAppContext.Provider>
   )
 }
@@ -64,7 +111,15 @@ export const resolveMockReactionUsers = (
   return seed.participants.slice(0, reaction.count)
 }
 
-/** F0ChatRuntime for one conversation, backed by the shared store. */
+/**
+ * F0ChatRuntime for one conversation, backed by the shared store.
+ *
+ * A community's post surfaces are wired straight to that store rather than
+ * handed in by the caller. They used to be props, and every story that forgot
+ * them got a feed whose cards did nothing — a failure mode with no error and no
+ * visible cause. There is exactly one mock host, so there is no reason for it
+ * to be configurable.
+ */
 export const useConversationRuntime = (convId: string): F0ChatRuntime => {
   const app = useMockChatApp()
   const i18n = useI18n()
@@ -79,7 +134,14 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
     (messageId: string) => app.retry(convId, messageId),
     [app, convId]
   )
-  const markRead = useCallback(() => app.markRead(convId), [app, convId])
+  const markRead = useCallback(
+    (untilId?: string) => app.markRead(convId, untilId),
+    [app, convId]
+  )
+  const createPost = useCallback(
+    (input: F0ChatCreatePostInput) => app.publishPost(convId, input),
+    [app, convId]
+  )
   const togglePin = useCallback(() => app.togglePin(convId), [app, convId])
   const toggleMute = useCallback(() => app.toggleMute(convId), [app, convId])
   const reconnect = useCallback(() => app.reconnect(convId), [app, convId])
@@ -181,7 +243,203 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
     [seed]
   )
 
+  const isCommunity = seed?.type === "community"
+
+  const openPost = useCallback(
+    (postId: string, context: { source: "card" | "comment" | "pinned" }) =>
+      // Opening a post is also READING it — `openPostSurface` records the visit
+      // and materialises the thread before the page mounts.
+      app.openPostSurface(convId, postId, context.source === "comment"),
+    [app, convId]
+  )
+
+  const composePost = useCallback(
+    () => app.openComposerSurface(convId),
+    [app, convId]
+  )
+
+  const postActions = useCallback(
+    (post: F0ChatPost): F0ChatPostAction[] => {
+      // Pinning is a MODERATION verb, not an authorship one: whoever may post
+      // here may decide what stays at the top, including someone else's post.
+      // That is the host's call to make, which is exactly why F0 asks for the
+      // menu instead of building it.
+      const pin: F0ChatPostAction[] = seed?.canPost
+        ? [
+            {
+              id: "pin",
+              label: post.pinnedAt
+                ? i18n.t("chat.community.unpinPost")
+                : i18n.t("chat.community.pinPost"),
+              icon: post.pinnedAt ? PushPinSolid : PushPin,
+              onClick: () => app.togglePostPin(convId, post.id),
+            },
+          ]
+        : []
+
+      return post.isMine
+        ? [
+            ...pin,
+            {
+              id: "edit",
+              label: i18n.t("communities.composer.editPost"),
+              icon: Pencil,
+              onClick: () => app.openComposerSurface(convId, post.id),
+            },
+            {
+              id: "delete",
+              label: i18n.t("communities.detail.delete"),
+              icon: Delete,
+              critical: true,
+              onClick: () => app.deletePost(convId, post.id),
+            },
+          ]
+        : [
+            ...pin,
+            // Reporting is the one thing a reader can do to someone else's
+            // post, and the mock has nowhere to report it to — so it stays a
+            // no-op with a real label rather than pretending to be more.
+            { id: "report", label: "Report post", onClick: () => {} },
+          ]
+    },
+    [app, convId, i18n, seed]
+  )
+
+  const unpinPost = useCallback(
+    (postId: string) => app.togglePostPin(convId, postId),
+    [app, convId]
+  )
+
+  const openScheduledPost = useCallback(
+    (postId: string) => app.openScheduledSurface(convId, postId),
+    [app, convId]
+  )
+
+  const scheduledActions = useCallback(
+    (post: F0ChatScheduledPost): F0ChatShelfAction[] => [
+      {
+        id: "publish-now",
+        label: i18n.t("chat.community.publishNow"),
+        icon: Megaphone,
+        onClick: () => app.publishScheduledNow(convId, post.id),
+      },
+      {
+        id: "edit",
+        label: i18n.t("communities.composer.editPost"),
+        icon: Pencil,
+        onClick: () => app.openComposerSurface(convId, post.id),
+      },
+      {
+        id: "cancel",
+        label: i18n.t("chat.community.cancelScheduled"),
+        icon: Delete,
+        critical: true,
+        onClick: () => app.cancelScheduled(convId, post.id),
+      },
+    ],
+    [app, convId, i18n]
+  )
+
+  const openDraftPost = useCallback(
+    // Into the composer with it loaded, not into a preview: there is nothing
+    // to preview about something half-written.
+    (postId: string) => app.openComposerSurface(convId, postId),
+    [app, convId]
+  )
+
+  const draftActions = useCallback(
+    (post: F0ChatDraftPost): F0ChatShelfAction[] => [
+      {
+        id: "publish",
+        // "Publish", not "Publish now": there is no later for it to be moved
+        // forward from.
+        label: i18n.t("chat.community.publishDraft"),
+        icon: Megaphone,
+        onClick: () => app.publishScheduledNow(convId, post.id),
+      },
+      {
+        id: "delete",
+        label: i18n.t("chat.community.deleteDraft"),
+        icon: Delete,
+        critical: true,
+        onClick: () => app.cancelScheduled(convId, post.id),
+      },
+    ],
+    [app, convId, i18n]
+  )
+
   const messages = state?.messages ?? []
+
+  // A pin whose post has since been deleted is dropped rather than left
+  // pointing nowhere — the bar would name a post the jump could never reach.
+  const pinnedPosts = useMemo<F0ChatPinnedPost[]>(
+    () =>
+      (app.pinnedPostIds[convId] ?? [])
+        .map((id) =>
+          (state?.messages ?? []).find(
+            (item): item is F0ChatPost => isPost(item) && item.id === id
+          )
+        )
+        .filter((post): post is F0ChatPost => !!post)
+        .map((post) => ({
+          id: post.id,
+          title: post.title,
+          pinnedAt: post.pinnedAt ?? post.createdAt,
+          // Plain text: the row clamps it to two lines, and a preview is no
+          // place to render (and then have to clamp) the post's markup.
+          excerpt: post.description ? stripHtml(post.description) : undefined,
+          // The cover, or an event's own image when it takes the cover's place.
+          thumbnailUrl: post.mediaUrl ?? post.event?.mediaUrl,
+        })),
+    [app.pinnedPostIds, convId, state]
+  )
+
+  // The store keeps one list of "written but not visible", and `at` splits it:
+  // an ISO string is scheduled, `null` is a draft. They part company HERE
+  // rather than in the store, because it is the panel that shows them as two
+  // different things — the store's job is only to remember them.
+  const scheduledPosts = useMemo<F0ChatScheduledPost[]>(
+    () =>
+      (app.scheduled[convId] ?? [])
+        .filter(
+          (post): post is typeof post & { at: string } => post.at !== null
+        )
+        .map((post) => ({
+          id: post.id,
+          title: post.input.title,
+          scheduledFor: post.at,
+          event: post.input.event,
+          excerpt: post.input.description
+            ? stripHtml(post.input.description)
+            : undefined,
+          // `coverUrl` is the one already uploaded when it was written.
+          thumbnailUrl: post.coverUrl ?? post.input.event?.mediaUrl,
+        }))
+        // Soonest first: the one about to go out is the one you may still want
+        // to stop.
+        .sort((a, b) => (a.scheduledFor < b.scheduledFor ? -1 : 1)),
+    [app.scheduled, convId]
+  )
+
+  const draftPosts = useMemo<F0ChatDraftPost[]>(
+    () =>
+      (app.scheduled[convId] ?? [])
+        .filter((post) => post.at === null)
+        .map((post) => ({
+          id: post.id,
+          title: post.input.title,
+          savedAt: post.savedAt,
+          excerpt: post.input.description
+            ? stripHtml(post.input.description)
+            : undefined,
+          thumbnailUrl: post.coverUrl ?? post.input.event?.mediaUrl,
+        }))
+        // NEWEST first, the opposite of scheduled: what you were writing last
+        // is what you came back for.
+        .sort((a, b) => (a.savedAt < b.savedAt ? 1 : -1)),
+    [app.scheduled, convId]
+  )
+
   const typingUsers =
     seed && state ? state.typingIds.map((id) => resolveUser(seed, id)) : []
   const idx = state?.lastReadId
@@ -219,6 +477,16 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
       user:
         seed?.type === "dm" ? (seed.participants[0] ?? undefined) : undefined,
       readOnlyNotice: seed?.readOnlyNotice,
+      // Summaries resolved from the store: the pin order lives there, and the
+      // title comes from whichever post it names — so a pinned post that has
+      // since been edited says what it says NOW.
+      // Pins are for READING: they are the channel's own table of contents, and
+      // everyone gets them. What is still unpublished is not — a reader has no
+      // business seeing what the Communications team has queued for Monday.
+      pinnedPosts: isCommunity ? pinnedPosts : undefined,
+      scheduledPosts: isCommunity && seed?.canPost ? scheduledPosts : undefined,
+      // Yours alone — and only where you may publish at all.
+      draftPosts: isCommunity && seed?.canPost ? draftPosts : undefined,
     },
     status: app.loadState[convId] ?? "ready",
     messages,
@@ -255,12 +523,50 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
     searchMessages,
     togglePin,
     toggleMute,
-    searchMembers: seed ? searchMembers : undefined,
+    // Nobody @-mentions anyone into a feed, and the post composer resolves its
+    // own mentions through this same function — so it stays wired for
+    // communities the user can post in, and off for the ones they can't.
+    searchMembers:
+      seed && (!isCommunity || seed.canPost) ? searchMembers : undefined,
+    // Community wiring: publishing, opening a post, and the per-post menu.
+    // `openPost` is only offered when the host has somewhere to open it —
+    // otherwise the card correctly stops being clickable.
+    createPost: isCommunity ? createPost : undefined,
+    openPost: isCommunity ? openPost : undefined,
+    // The mock owns the composer, so F0's built-in dialog never mounts: the
+    // CTA opens the full `/dashboard/post/new` replica instead.
+    composePost: isCommunity ? composePost : undefined,
+    postActions: isCommunity ? postActions : undefined,
+    // Which card is drawn selected: the one whose PAGE is open, and only while
+    // the page open is this community's post — the composer and a scheduled
+    // preview are other surfaces, and neither is a post in this feed.
+    activePostId:
+      isCommunity &&
+      app.openSurface?.kind === "post" &&
+      app.openSurface.convId === convId
+        ? app.openSurface.postId
+        : undefined,
+    // Unpinning from the pinned list. Only where the user may pin at all —
+    // otherwise the list is a way to FIND them, and nothing more.
+    unpinPost: isCommunity && seed?.canPost ? unpinPost : undefined,
+    scheduledActions:
+      isCommunity && seed?.canPost ? scheduledActions : undefined,
+    // Opening one shows the PREVIEW — the page it will be — rather than the
+    // editor. Seeing it as the community will is the point of having it.
+    openScheduledPost:
+      isCommunity && seed?.canPost ? openScheduledPost : undefined,
+    draftActions: isCommunity && seed?.canPost ? draftActions : undefined,
+    openDraftPost: isCommunity && seed?.canPost ? openDraftPost : undefined,
     // Read-only channels (frozen / announcements): composer, reactions and
     // uploads disappear; existing pills stay visible.
-    capabilities: seed?.readOnly
-      ? { canSend: false, canReact: false, canUpload: false }
-      : undefined,
+    //
+    // A community expresses only the ONE verb its type doesn't already get
+    // right: `canSend` is off by default there, and `canPost` turns it back on.
+    capabilities: isCommunity
+      ? { canSend: !!seed?.canPost, canUpload: !!seed?.canPost }
+      : seed?.readOnly
+        ? { canSend: false, canReact: false, canUpload: false }
+        : undefined,
     // Failed-to-load conversations recover through the error state's Retry.
     reconnect: seed?.failsToLoad ? reconnect : undefined,
   }
@@ -306,10 +612,33 @@ export const useMockChatGroups = (
         ],
       }
     }
-    // Pinned (favourite) chats — both people and groups — surface in their own
-    // group at the top and are removed from Direct messages / Groups below.
+    /** A community row: no presence, no typing, no mention prefix — none of
+     * those mean anything for a place rather than a person. It IS pinnable
+     * though: you belong to a handful of communities and read two of them. */
+    const toCommunity = (seed: Seed) => {
+      const state = states[seed.id]
+      return {
+        id: seed.id,
+        label: seed.title,
+        avatar: seed.avatar,
+        kind: "community" as const,
+        onClick: () => onSelect(seed.id),
+        unreadCount: (state ? unreadCountOf(state) : 0) || undefined,
+        pinned: !!pinned[seed.id],
+        onTogglePin: () => togglePin(seed.id),
+      }
+    }
+    // Pinned (favourite) conversations — people, groups AND communities —
+    // surface in their own group at the top and are removed from the groups
+    // below. Only the product's own noticeboard is exempt: it isn't yours to
+    // curate.
     const isPinned = (s: Seed) => s.type !== "announcement" && !!pinned[s.id]
-    const pinnedChats = SEEDS.filter(isPinned).map(toChat)
+    // The pinned group is MIXED, so each row keeps its own kind — a pinned
+    // community still counts posts, while the group's collapsed total falls
+    // back to the conversation wording (see `SidebarChatList`).
+    const pinnedChats = SEEDS.filter(isPinned).map((seed) =>
+      seed.type === "community" ? toCommunity(seed) : toChat(seed)
+    )
     // Announcement channels live among the direct messages — they read as a
     // one-to-one conversation with the product, which is what they are.
     const dms = SEEDS.filter(
@@ -318,6 +647,9 @@ export const useMockChatGroups = (
     const groups = SEEDS.filter((s) => s.type === "group" && !isPinned(s)).map(
       toChat
     )
+    const communities = SEEDS.filter(
+      (s) => s.type === "community" && !isPinned(s)
+    ).map(toCommunity)
     return [
       ...(pinnedChats.length > 0
         ? [{ id: "pinned", title: "Pinned", chats: pinnedChats }]
@@ -327,6 +659,12 @@ export const useMockChatGroups = (
         : []),
       ...(groups.length > 0
         ? [{ id: "groups", title: "Groups", chats: groups }]
+        : []),
+      // LAST, under the conversations. A community is not a conversation of
+      // yours — it is a place you go to read. The order is simply the array's:
+      // `SidebarChatList` renders what it's given and never sorts.
+      ...(communities.length > 0
+        ? [{ id: "communities", title: "Communities", chats: communities }]
         : []),
     ]
   }, [states, pinned, togglePin, muted, onSelect])

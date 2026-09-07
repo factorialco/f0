@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest"
 
-import { flattenChatRows, freshTailIds } from "../utils/grouping"
-import { type F0ChatMessage, type F0ChatSystemMessage } from "../types"
+import { flattenChatRows, freshTailIds, rowItem } from "../utils/grouping"
+import {
+  type F0ChatMessage,
+  type F0ChatPost,
+  type F0ChatSystemMessage,
+} from "../types"
 
 const msg = (
   id: string,
@@ -159,5 +163,111 @@ describe("freshTailIds", () => {
   it("prepends alone never count as fresh", () => {
     // Older page loaded above; tail unchanged.
     expect(freshTailIds([a, b, c], "c")).toEqual([])
+  })
+})
+
+const communityPost = (
+  id: string,
+  authorId: string,
+  minute: number
+): F0ChatPost => ({
+  type: "post",
+  id,
+  author: { id: authorId, name: authorId },
+  createdAt: new Date(2026, 0, 10, 10, minute).toISOString(),
+  title: `title ${id}`,
+  commentCount: 0,
+})
+
+describe("posts in the flattened rows", () => {
+  it("emits one post row per post, with no run flags", () => {
+    const { rows } = flattenChatRows([communityPost("p1", "ana", 0)])
+
+    const postRows = rows.filter((row) => row.type === "post")
+    expect(postRows).toHaveLength(1)
+    expect(postRows[0]).toMatchObject({ type: "post", key: "p1" })
+  })
+
+  it("breaks an author run on both sides", () => {
+    // Joining two bubbles across a full-width card would read as a stray
+    // bubble, so the post resets the run like a system row does.
+    const rows = flattenChatRows([
+      msg("a", "ana", 0),
+      communityPost("p1", "ana", 1),
+      msg("b", "ana", 2),
+    ]).rows
+
+    const messageRows = rows.filter((row) => row.type === "message")
+    expect(messageRows.every((row) => row.isFirstOfRun)).toBe(true)
+    expect(messageRows.every((row) => row.isLastOfRun)).toBe(true)
+  })
+
+  it("never gives a post the delivery-status flag", () => {
+    // A post is published, not delivered — a trailing post must not steal
+    // `isLastMessage` from the message before it either.
+    const rows = flattenChatRows([
+      msg("a", "me", 0),
+      communityPost("p1", "ana", 1),
+    ]).rows
+
+    const lastMessage = rows.find((row) => row.type === "message")
+    expect(lastMessage).toMatchObject({ isLastMessage: true })
+    expect(rows.some((row) => row.type === "footer")).toBe(false)
+  })
+
+  it("keeps day separators around posts", () => {
+    const rows = flattenChatRows([
+      communityPost("p1", "ana", 0),
+      {
+        ...communityPost("p2", "ana", 0),
+        createdAt: new Date(2026, 0, 11, 10, 0).toISOString(),
+      },
+    ]).rows
+
+    expect(rows.filter((row) => row.type === "separator")).toHaveLength(2)
+  })
+
+  it("reuses a post row object when the post did not change", () => {
+    const p = communityPost("p1", "ana", 0)
+    const first = flattenChatRows([p])
+    const second = flattenChatRows([p, communityPost("p2", "ana", 1)], {
+      previousRows: first.rowCache,
+    })
+
+    expect(second.rows[1]).toBe(first.rows[1])
+  })
+
+  it("indexes a post so it can be jumped to", () => {
+    const { indexById } = flattenChatRows([communityPost("p1", "ana", 0)])
+
+    expect(indexById.get("p1")).toBe(1)
+  })
+})
+
+describe("rowItem", () => {
+  it("resolves the item behind a message row", () => {
+    const a = msg("a", "ana", 0)
+    expect(
+      rowItem({
+        type: "message",
+        key: "a",
+        message: a,
+        isFirstOfRun: true,
+        isLastOfRun: true,
+        isLastMessage: true,
+      })
+    ).toBe(a)
+  })
+
+  it("resolves the item behind a post row", () => {
+    const p = communityPost("p1", "ana", 0)
+    expect(rowItem({ type: "post", key: "p1", post: p })).toBe(p)
+  })
+
+  it("resolves nothing for rows that stand for no item", () => {
+    expect(rowItem({ type: "divider", key: "d" })).toBeNull()
+    expect(
+      rowItem({ type: "separator", key: "s", at: "x", forId: "a" })
+    ).toBeNull()
   })
 })

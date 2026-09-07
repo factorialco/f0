@@ -8,6 +8,8 @@ import { ChatDropOverlay } from "./components/ChatDropOverlay"
 import { ChatHeader } from "./components/ChatHeader"
 import { ChatImagePreview } from "./components/ChatImagePreview"
 import { ChatMessagesContainer } from "./components/ChatMessagesContainer"
+import { ChatPostComposer } from "./components/ChatPostComposer"
+import { ChatCommunityShelf } from "./components/ChatCommunityShelf"
 import { ChatReadOnlyNotice } from "./components/ChatReadOnlyNotice"
 import {
   ChatConnecting,
@@ -51,6 +53,9 @@ const ChatShell = ({
   const { channel, status, messages, capabilities } = useF0Chat()
   const { dropFiles } = useChatDrop()
   const canSend = chatPermission("canSend", channel.type, capabilities)
+  const isCommunity = channel.type === "community"
+  const hasTranscript =
+    status !== "connecting" && status !== "error" && messages.length > 0
   const { shellRef, composerOverlayRef } = useComposerOverlayLayout(canSend)
 
   // Whole-panel drag & drop, just like the AI chat: the overlay covers the
@@ -109,11 +114,15 @@ const ChatShell = ({
             : headerActions
         }
       />
+      {/* Under the header and OUTSIDE the transcript: chrome, not a row, and
+          the virtualizer must not have to measure around it. Its sheet opens
+          OVER the transcript for the same reason. */}
+      {isCommunity && <ChatCommunityShelf />}
       {status === "connecting" ? (
         <ChatConnecting />
       ) : status === "error" ? (
         <ChatError />
-      ) : messages.length > 0 ? (
+      ) : hasTranscript ? (
         // `reconnecting` / `offline` render the transcript exactly like
         // `ready` — per-message states communicate connectivity, no banner.
         <ChatMessagesContainer key={channel.id} />
@@ -125,23 +134,32 @@ const ChatShell = ({
         <ChatConnecting />
       )}
       {/* A read-only channel (frozen, announcements…) hides the composer and
-          says so in its place, so the surface doesn't just end in nothing. The
-          notice is a normal flex child, not an overlay: there is no composer
-          for the transcript to scroll under. */}
+          says so in its place, so the surface doesn't just end in nothing.
+          With a transcript the notice rides INSIDE it, as the last thing in the
+          scroll (see `ChatBottomGap`) — it is worth reading once, and a fixed
+          strip charged every screen for it. With no transcript to end there is
+          nowhere to put it but here. */}
       {canSend ? (
         <div
           ref={composerOverlayRef}
           data-testid="chat-composer-overlay"
           className="pointer-events-none absolute inset-x-0 bottom-0 z-20"
         >
-          <ChatComposer />
+          {/* Publishing is not sending: a post has a title, a body with
+              formatting and media, and it is written somewhere the size of what
+              is being written. The bar that replaces the composer takes the SAME
+              floating slot, so `useComposerOverlayLayout` keeps publishing its
+              height and the transcript's bottom gap keeps adding up. */}
+          {isCommunity ? <ChatPostComposer /> : <ChatComposer />}
         </div>
-      ) : (
+      ) : hasTranscript ? null : (
         <ChatReadOnlyNotice channel={channel} />
       )}
       {/* Without a composer the drop handler was never registered, so the
-          affordance promised something the panel could not do. */}
-      <ChatDropOverlay visible={dragging && canSend} />
+          affordance promised something the panel could not do. The post
+          composer is a button, not a drop target — a post's cover belongs in
+          its dialog, not in the transcript. */}
+      <ChatDropOverlay visible={dragging && canSend && !isCommunity} />
       <ChatImagePreview />
       <ChatDocumentPreview />
     </div>

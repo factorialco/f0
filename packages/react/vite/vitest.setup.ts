@@ -72,6 +72,23 @@ vi.stubGlobal(
   }
 )
 
+// Mock canvas-confetti - it wants a real canvas (OffscreenCanvas, 2D contexts,
+// transferToImageBitmap), none of which jsdom has. Adding a reaction fires it
+// AFTER the click resolves, so the throw lands as an unhandled error: the run
+// goes red with every test still passing. Confetti is decoration; no test
+// asserts on it.
+vi.mock("canvas-confetti", () => {
+  const confetti = Object.assign(vi.fn(), {
+    // `create` hands back a fire function that also carries `reset` — F0AiPong
+    // calls it on unmount.
+    create: vi.fn(() => Object.assign(vi.fn(), { reset: vi.fn() })),
+    shapeFromText: vi.fn(() => ({})),
+    shapeFromPath: vi.fn(() => ({})),
+    reset: vi.fn(),
+  })
+  return { default: confetti }
+})
+
 // Mock IntersectionObserver - required by @emoji-mart/react and other libs
 vi.stubGlobal(
   "IntersectionObserver",

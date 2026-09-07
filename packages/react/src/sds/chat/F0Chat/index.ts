@@ -20,6 +20,14 @@ export type {
   F0ChatMessageReply,
   F0ChatMention,
   F0ChatItem,
+  F0ChatPost,
+  F0ChatPostEvent,
+  F0ChatPostAction,
+  F0ChatPostAttachment,
+  F0ChatPostRequiredAction,
+  F0ChatPostComment,
+  F0ChatPostVisit,
+  F0ChatCreatePostInput,
   F0ChatSystemMessage,
   F0ChatSystemPayload,
   F0ChatSystemEvent,
@@ -40,6 +48,7 @@ export {
   f0ChatSenderColors,
   isSystemMessage,
   isUserMessage,
+  isPost,
   LATEST,
 } from "./types"
 // Re-exported because `F0ChatRuntime.transcribe` is typed as `TranscribeFn`;

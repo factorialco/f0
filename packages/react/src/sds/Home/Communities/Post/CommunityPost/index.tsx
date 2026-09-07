@@ -1,7 +1,7 @@
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0Button } from "@/components/F0Button"
-import { IconType } from "@/components/F0Icon"
+import { F0Icon, IconType } from "@/components/F0Icon"
 import { F0Link } from "@/components/F0Link"
 import { Reactions, ReactionsProps } from "@/sds/social/Reactions"
 import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
@@ -9,6 +9,7 @@ import {
   Comment as CommentIcon,
   EllipsisHorizontal,
   Person as PersonIcon,
+  PushPinSolid,
 } from "@/icons/app"
 import { getDisplayDateBasedOnDuration } from "@/lib/date"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
@@ -126,6 +127,17 @@ export type CommunityPostProps = {
   noDescriptionClamp?: boolean
 
   /**
+   * Drops "in <community>" from the header — for a container that already names
+   * the community, like a single community's feed, whose channel header carries
+   * that name an inch above every card. Without this the link repeats what you
+   * are already reading and leads nowhere you aren't.
+   *
+   * `group` stays required: it is still the post's community, and a caller that
+   * hides the line today may show it tomorrow without changing what it passes.
+   */
+  hideGroup?: boolean
+
+  /**
    * Keeps the title as the post's ACCESSIBLE NAME but takes it out of the card —
    * for a container that already shows it, like a dialog carrying the post's
    * title in its own header. Without this the same words appear twice, an inch
@@ -136,6 +148,18 @@ export type CommunityPostProps = {
    * break that as well as the post's name.
    */
   hideTitle?: boolean
+
+  /**
+   * Marks the post as pinned in its community: a pin beside the date.
+   *
+   * A BADGE, not a control — pinning and unpinning are decisions the container
+   * owns (they need to know who may), and this only says what is already true.
+   */
+  pinned?: boolean
+
+  /** Accessible name for the pin badge, e.g. "Pinned post". Required with
+   * `pinned`, since the icon alone says nothing to a screen reader. */
+  pinnedLabel?: string
 }
 
 export const BaseCommunityPost = ({
@@ -158,6 +182,9 @@ export const BaseCommunityPost = ({
   descriptionExpandable = false,
   noDescriptionClamp = false,
   hideTitle = false,
+  hideGroup = false,
+  pinned = false,
+  pinnedLabel,
 }: CommunityPostProps) => {
   const titleId = useId()
   const descriptionId = useId()
@@ -293,29 +320,48 @@ export const BaseCommunityPost = ({
                 {authorFullName}
               </F0Link>
             ) : null}
-            <span
-              className={cn(
-                "text-f1-foreground-secondary",
-                !author && "capitalize"
-              )}
-            >
-              {inLabel}
-            </span>
-            <F0Link
-              onClick={group.onClick}
-              title={group.title}
-              className="font-medium text-f1-foreground no-underline visited:text-f1-foreground"
-              stopPropagation
-              href="#"
-            >
-              {group.title}
-            </F0Link>
+            {/* `inLabel` goes with the group link, not the author: on its own
+                it is a dangling "in" (or, with no author at all, a capitalised
+                "In" followed by nothing). */}
+            {!hideGroup && (
+              <>
+                <span
+                  className={cn(
+                    "text-f1-foreground-secondary",
+                    !author && "capitalize"
+                  )}
+                >
+                  {inLabel}
+                </span>
+                <F0Link
+                  onClick={group.onClick}
+                  title={group.title}
+                  className="font-medium text-f1-foreground no-underline visited:text-f1-foreground"
+                  stopPropagation
+                  href="#"
+                >
+                  {group.title}
+                </F0Link>
+              </>
+            )}
           </div>
 
           {/* `text-base`, like the author line above it: the two are one
               header, and a smaller size made the date read as a footnote to the
               line it sits under. */}
-          <span className="text-base text-f1-foreground-secondary">{date}</span>
+          <span className="flex flex-row items-center gap-1.5 text-base text-f1-foreground-secondary">
+            {date}
+            {/* Beside the date rather than by the title: it is a fact about the
+                post's standing, not part of what it says. */}
+            {pinned && (
+              <F0Icon
+                icon={PushPinSolid}
+                size="xs"
+                aria-label={pinnedLabel}
+                role={pinnedLabel ? "img" : undefined}
+              />
+            )}
+          </span>
         </div>
         {/* THE ACTIONS SIT ON THE AVATAR'S ROW, not on the first line of the
             heading. Inside that line they were a 32px control on a 21px line,

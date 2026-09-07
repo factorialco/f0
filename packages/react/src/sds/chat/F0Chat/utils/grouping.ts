@@ -1,7 +1,9 @@
 import {
+  isPost,
   isUserMessage,
   type F0ChatItem,
   type F0ChatMessage,
+  type F0ChatPost,
   type F0ChatSystemMessage,
   type F0ChatUser,
 } from "../types"
@@ -39,6 +41,11 @@ export type ChatRow =
   // A centered system row (membership events). Breaks author runs on both
   // sides and never carries run flags, footer or interactions.
   | { type: "system"; key: string; message: F0ChatSystemMessage }
+  // A POST row: full width, no avatar gutter, no bubble, no run flags. Its own
+  // `type` rather than reusing `message` on purpose — the three places that
+  // read "the item behind this row" (the sticky date, the animation gate,
+  // `sameRow`) then fail to COMPILE instead of silently skipping posts.
+  | { type: "post"; key: string; post: F0ChatPost }
   | {
       type: "message"
       key: string
@@ -60,6 +67,21 @@ export type ChatRow =
   // while someone is typing — an incoming dots bubble.
   | { type: "typing"; key: string; users: F0ChatUser[] }
 
+/**
+ * The transcript ITEM a row stands for, when it stands for one. Exists so
+ * "any item's id / timestamp" has ONE definition instead of a two-branch `||`
+ * repeated at every call site — each of which would have to be remembered when
+ * the item union grows.
+ */
+export const rowItem = (row: ChatRow): F0ChatItem | null => {
+  if (row.type === "message" || row.type === "system") return row.message
+  if (row.type === "post") return row.post
+  // `footer` is excluded deliberately: it carries a message but IS not one —
+  // it's a derived row under the last one, and the callers here mean "the item
+  // this row is", not "an item this row mentions".
+  return null
+}
+
 export type FlattenedChat = {
   rows: ChatRow[]
   /** item id → index of its row (for jump-to-message + scroll anchor). */
@@ -75,6 +97,7 @@ const sameRow = (a: ChatRow, b: ChatRow): boolean => {
   if (a.type !== b.type) return false
   if (a.type === "separator" && b.type === "separator") return a.at === b.at
   if (a.type === "system" && b.type === "system") return a.message === b.message
+  if (a.type === "post" && b.type === "post") return a.post === b.post
   if (a.type === "message" && b.type === "message") {
     return (
       a.message === b.message &&
@@ -143,6 +166,16 @@ export function flattenChatRows(
 
     if (dividerHere) {
       rows.push({ type: "divider", key: "unread-divider" })
+    }
+
+    if (isPost(item)) {
+      // A post BREAKS the run on both sides, like a system row: two messages
+      // from the same author with a post between them are two stacks, not one —
+      // joining them across a full-width card would read as a stray bubble.
+      rows.push({ type: "post", key: item.id, post: item })
+      indexById.set(item.id, rows.length - 1)
+      previousUser = undefined
+      return
     }
 
     if (!isUserMessage(item)) {

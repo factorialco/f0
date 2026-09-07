@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { Profiler, type ReactNode, useEffect, useRef, useState } from "react"
+import { Profiler, useEffect, useRef, useState, type ReactNode } from "react"
 import { expect, userEvent, waitFor, within } from "storybook/test"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
@@ -10,6 +10,11 @@ import { F0Chat } from "./F0Chat"
 import { ChatBubble } from "./components/ChatBubble"
 import { ChatMessageAttachments } from "./components/ChatMessageAttachments"
 import { MOCK_VIDEO_CAPTIONS, MOCK_VIDEO_DESCRIPTIONS } from "./mocks/constants"
+import {
+  MockChatAppProvider,
+  useConversationRuntime,
+} from "./mocks/MockChatApp"
+import { MockCommunitySurface } from "./mocks/MockCommunitySurface"
 import { useMockChatRuntime } from "./mocks/createMockChatRuntime"
 import { useChatStorm } from "./mocks/useChatStorm"
 import { useDemoHeaderActions } from "./mocks/useDemoHeaderActions"
@@ -1489,4 +1494,217 @@ export const FirstLoadSkeleton: Story = {
       </Frame>
     )
   },
+}
+
+// ---------------------------------------------------------------------------
+// Community channels
+// ---------------------------------------------------------------------------
+
+/**
+ * One community from the shared mock store, beside the page its posts open
+ * into — the arrangement the product has, and the one that makes the feed
+ * usable: clicking a post replaces the PAGE, not the conversation.
+ *
+ * Without a host to open posts into, the cards would (correctly) not be
+ * clickable at all, so the story ships one.
+ */
+const CommunityConversation = ({ convId }: { convId: string }): ReactNode => (
+  <MockChatAppProvider>
+    <div className="flex h-[680px] w-full gap-4">
+      <div className="min-w-0 flex-1 overflow-hidden rounded-xl border border-solid border-f1-border-secondary">
+        <CommunityMain />
+      </div>
+      <div className="w-[420px] shrink-0">
+        <CommunityPanel convId={convId} />
+      </div>
+    </div>
+  </MockChatAppProvider>
+)
+
+/** The page beside the feed: the open post or composer, or a placeholder. */
+const CommunityMain = (): ReactNode => (
+  <MockCommunitySurface
+    fallback={
+      <div className="grid h-full place-items-center p-6 text-center text-f1-foreground-secondary">
+        Pick a post from the feed — it opens here, with the conversation still
+        open beside it.
+      </div>
+    }
+  />
+)
+
+const CommunityPanel = ({ convId }: { convId: string }): ReactNode => {
+  const runtime = useConversationRuntime(convId)
+  const { headerActions } = useDemoHeaderActions(runtime)
+  return (
+    <div className="flex h-full">
+      <F0ChatProvider runtime={runtime}>
+        <F0Chat headerActions={headerActions} />
+      </F0ChatProvider>
+    </div>
+  )
+}
+
+/**
+ * A community: a channel whose items are POSTS. Full-width cards with a title,
+ * a formatted body, a cover, counters and reactions — no bubbles, no avatar
+ * gutter, no delivery footer.
+ *
+ * Three posts start unread, so the "New posts" divider sits above the first of
+ * them and the jump pill reads "3 new posts". Reading is the scroll itself:
+ * each post clears once it has been past the fold for a moment, so the count
+ * comes down one at a time rather than all at once at the bottom.
+ */
+export const Community: Story = {
+  name: "Community (read-only)",
+  render: () => <CommunityConversation convId="com-company-news" />,
+}
+
+/**
+ * The same surface for someone who may publish. The message composer is
+ * replaced by a bar that OPENS a post composer — a title, a rich text body and
+ * an explicit Publish. Enter never publishes: a post reaches the whole
+ * community, and the cost of sending one by accident is not a typo.
+ */
+export const CommunityCanPost: Story = {
+  name: "Community (can post)",
+  render: () => <CommunityConversation convId="com-barcelona-office" />,
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    await step("the composer is a button, not a textarea", async () => {
+      const cta = await canvas.findByTestId("chat-post-composer")
+      await expect(cta).toBeVisible()
+      await userEvent.click(cta)
+    })
+    await step("publishing needs a title, and never a key", async () => {
+      const title = await within(document.body).findByRole("textbox", {
+        name: /title/i,
+      })
+      await expect(title).toBeVisible()
+      await userEvent.type(title, "Hello everyone{Enter}")
+      // Enter did not submit: the dialog is still open with the draft in it.
+      await expect(title).toHaveValue("Hello everyone")
+    })
+  },
+}
+
+/**
+ * A reader without permission. The composer is not disabled — it is GONE, and
+ * its place says who *can* post. A disabled composer promises an affordance
+ * most readers will never have, and says nothing about who does.
+ */
+export const CommunityReadOnly: Story = {
+  name: "Community (who can post)",
+  render: () => <CommunityConversation convId="com-people-ops" />,
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    await step("the notice takes the composer's place", async () => {
+      await expect(
+        await canvas.findByTestId("chat-read-only-notice")
+      ).toHaveTextContent(/only people ops can post here/i)
+      await expect(canvas.queryByTestId("chat-post-composer")).toBeNull()
+    })
+  },
+}
+
+/**
+ * Twelve unread posts: a two-figure badge, and the divider naming POSTS rather
+ * than messages. The divider is frozen for the whole visit — a post you are
+ * still reading must not slide above the line while you read it.
+ */
+export const CommunityUnreadPosts: Story = {
+  name: "Community with unread posts",
+  render: () => <CommunityConversation convId="com-people-ops" />,
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    await step("the divider counts posts", async () => {
+      await expect(await canvas.findByText("New posts")).toBeVisible()
+    })
+  },
+}
+
+/** Every post read: no badge, no divider — and reaction-heavy posts, which is
+ * what a community mostly is once the news has been read. */
+export const CommunityAllRead: Story = {
+  name: "Community (all read)",
+  render: () => <CommunityConversation convId="com-kudos" />,
+}
+
+/**
+ * THE SHELF — a community's two lists, as chips under the header.
+ *
+ * Barcelona office opens with one post pinned and four scheduled, so both chips
+ * are there with their counts. What to exercise:
+ *
+ * - press a chip: a POPOVER opens over the feed, wider than the panel and
+ *   floating free of it. The header is still the channel, the composer is still
+ *   there, and the transcript keeps its scroll;
+ * - press the other chip: crossing is one press, on the chips themselves.
+ *   There are no tabs inside — the chips already are the switch;
+ * - the third chip is **Drafts**, and it is yours alone: two posts nobody else
+ *   can see, one of them with no title at all. A draft opens into the COMPOSER
+ *   (there is nothing to preview about something half-written) and its menu is
+ *   Publish / Delete — it has no moment to bring forward and nothing to cancel.
+ *   Save one from the composer's "Save as draft" and it lands here, newest
+ *   first;
+ * - rows carry two lines of the post and a thumbnail of its cover, so what you
+ *   are looking for is recognisable before you open it;
+ * - a pinned row opens the post's page; its ⋯ offers "Go to post", which takes
+ *   you to it IN the feed with a ring around it, and "Unpin post";
+ * - a scheduled row says when it goes out and tags the events, and opens a
+ *   PREVIEW — the page it will be, with no comments, no reactions and no
+ *   visits, because none of them have happened — with Publish now / Edit /
+ *   Cancel on a bar;
+ * - Escape and a press outside close it. There is no ✕: leaving a popover by
+ *   pressing away from it is what everyone already does.
+ */
+export const CommunityPinnedAndScheduled: Story = {
+  name: "Community (pinned + scheduled + drafts)",
+  render: () => <CommunityConversation convId="com-barcelona-office" />,
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    await step("both shelves announce themselves", async () => {
+      const shelf = await canvas.findByTestId("chat-community-shelf")
+      await expect(shelf).toHaveTextContent("Pinned 1")
+      await expect(shelf).toHaveTextContent("Scheduled 4")
+      await expect(shelf).toHaveTextContent("Drafts 2")
+    })
+  },
+}
+
+/**
+ * A pinned post in a channel you CANNOT post in — which is most of them, for
+ * most people.
+ *
+ * Pinning is moderation; reading what was pinned is not. Company news keeps two
+ * posts at the top and offers every reader the chip and the list, but the ⋯ on
+ * a row only offers "Go to post": there is no unpinning someone else's pin, and
+ * no Scheduled chip at all, because what has not been published is the
+ * publisher's business.
+ */
+export const CommunityPinnedReadOnly: Story = {
+  name: "Community (pinned, no permission)",
+  render: () => <CommunityConversation convId="com-company-news" />,
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    await step("the pins are there, the queue is not", async () => {
+      const shelf = await canvas.findByTestId("chat-community-shelf")
+      await expect(shelf).toHaveTextContent("Pinned 2")
+      await expect(shelf).not.toHaveTextContent("Scheduled")
+    })
+  },
+}
+
+/**
+ * A COMUNICADO: the post a company needs everyone to have read.
+ *
+ * The security policy in Company news carries its documents, and asks to be
+ * acknowledged — open it from the feed and the bar at the bottom asks, then
+ * confirms with the moment it happened and never disappears again. Further down
+ * the same feed, the legal notice has comments and reactions switched off: a
+ * notice board, not a conversation.
+ */
+export const CommunityAnnouncements: Story = {
+  name: "Community (comunicados)",
+  render: () => <CommunityConversation convId="com-company-news" />,
 }

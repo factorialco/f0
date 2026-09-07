@@ -69,8 +69,11 @@ export const ChatHeader = ({
   const { panelOverlays } = useAiChat()
   // DMs show a presence dot (green online / grey offline).
   const showPresence = channel.type === "dm" && channel.presence !== undefined
+  // No emoji and no picture ⇒ the ＃ glyph, the same rule the sidebar applies
+  // (see `SidebarChatItem`) and for the same reason: an initials avatar for a
+  // PLACE reads as a person who isn't there. Not restricted to groups — a
+  // community is a channel too, and used to arrive here as an empty avatar box.
   const showGroupFallback =
-    channel.type === "group" &&
     (channel.avatar.type === "team" || channel.avatar.type === "company") &&
     !channel.avatar.src
   const identityEmoji =
