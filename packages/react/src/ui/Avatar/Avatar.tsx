@@ -6,6 +6,7 @@ import * as React from "react"
 
 import { useImageContext } from "../../lib/imageHandler"
 import { cn } from "../../lib/utils"
+
 import {
   internalAvatarColors,
   internalAvatarSizes,

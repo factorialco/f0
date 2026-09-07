@@ -11,6 +11,7 @@ import {
   type SlotRenderers,
   widgetChrome,
 } from "../slotRenderers"
+
 import { SlotWidget } from "./index"
 
 describe("SlotWidget", () => {

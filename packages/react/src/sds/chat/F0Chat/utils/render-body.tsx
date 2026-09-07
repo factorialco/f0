@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils"
 
 import { ChatUserHoverCard } from "../components/ChatUserHoverCard"
 import { type F0ChatLinkPreview, type F0ChatUser } from "../types"
+
 import { sanitizeDisplayText } from "./sanitize-text"
 
 /** URLs in a body render as clickable links (matches the mobile bubble). */

@@ -12,6 +12,7 @@ import {
 } from "../../utils"
 import { rangeSeparator } from "../consts"
 import { DateStringFormat, GranularityDefinition } from "../types"
+
 import { YearView } from "./YearView"
 
 const YEAR_FORMAT = "yyyy"

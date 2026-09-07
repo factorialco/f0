@@ -4,6 +4,7 @@ import {
   Default as DefaultWidgetSimpleListItemStory,
   WithLongTitle as WithLongTitleWidgetSimpleListItemStory,
 } from "../../ListItems/WidgetSimpleListItem/index.stories"
+
 import { WidgetSimpleList, WidgetSimpleListProps } from "./index"
 
 const meta: Meta<WidgetSimpleListProps> = {

@@ -1,8 +1,10 @@
-import { describe, expect, it, vi } from "vitest"
 import "@testing-library/jest-dom/vitest"
-import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
+
 import { fireEvent } from "@testing-library/react"
 import { useState } from "react"
+import { describe, expect, it, vi } from "vitest"
+
+import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
 
 import { F0DurationInput } from ".."
 import {

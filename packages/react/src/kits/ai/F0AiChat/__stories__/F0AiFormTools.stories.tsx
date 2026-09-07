@@ -1,13 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { ComponentProps, useEffect } from "react"
 import { z } from "zod"
-
-import type { F0AiAvailableFormDefinition } from "@/patterns/F0Form"
 
 import { PageHeader } from "@/experimental/Navigation/Header/PageHeader"
 import { ApplicationFrame } from "@/patterns/ApplicationFrame"
 import ApplicationFrameStoryMeta from "@/patterns/ApplicationFrame/index.stories"
+import type { F0AiAvailableFormDefinition } from "@/patterns/F0Form"
 import {
   f0FormField,
   F0Form,

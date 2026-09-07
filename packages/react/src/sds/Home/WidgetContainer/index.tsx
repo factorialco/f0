@@ -46,18 +46,19 @@ import {
 } from "../slotRenderers"
 import { SlotWidget } from "../SlotWidget"
 import { WidgetUpdateDialog } from "../WidgetUpdateDialog"
+
 import { takeCardGhost, takePageSurface } from "./dragGhost"
+import { Footnote } from "./Footnote"
 import { lockedCeiling, noHigherThan, topPins } from "./lockedCeiling"
 import { SortableWidget } from "./SortableWidget"
-import { WidgetStage } from "./WidgetStage"
 import {
   useWidgetVirtualizer,
   type WidgetPlacement,
   type WidgetVirtualization,
 } from "./useWidgetVirtualizer"
 import { verticalOnly } from "./verticalOnly"
-import { Footnote } from "./Footnote"
 import { WidgetMotion, type WidgetStow } from "./WidgetMotion"
+import { WidgetStage } from "./WidgetStage"
 
 export type { WidgetVirtualization } from "./useWidgetVirtualizer"
 

@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { useState } from "react"
 import { expect, fn, userEvent, within } from "storybook/test"
 
 import * as Icons from "../../icons/app"
 import { withSnapshot } from "../../lib/storybook-utils/parameters"
+
 import { Chip } from "./index"
 
 const meta = {

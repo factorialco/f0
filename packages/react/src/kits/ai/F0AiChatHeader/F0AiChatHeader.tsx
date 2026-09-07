@@ -16,10 +16,9 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Action } from "@/ui/Action"
 
-import type { F0AiChatHeaderProps } from "./types"
-
 import { CreditsPopover } from "./components/CreditsPopover"
 import { EmployeeCreditsPopover } from "./components/EmployeeCreditsPopover"
+import type { F0AiChatHeaderProps } from "./types"
 
 /**
  * Picks the right credits popover to render based on which prop the host

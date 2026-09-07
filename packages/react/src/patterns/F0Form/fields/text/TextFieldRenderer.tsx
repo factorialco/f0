@@ -1,11 +1,13 @@
 import { ControllerRenderProps, FieldValues } from "react-hook-form"
 
+import type { InputFieldStatus } from "@/components/F0InputField/types"
 import { F0TextInput } from "@/components/F0TextInput"
 import { getFieldInputIcon } from "@/lib/field-input-icons"
-import type { InputFieldStatus } from "@/components/F0InputField/types"
-import type { F0TextConfig, F0TextField } from "./types"
-import type { ResolvedField } from "../types"
+
 import { FORM_SIZE } from "../../constants"
+import type { ResolvedField } from "../types"
+
+import type { F0TextConfig, F0TextField } from "./types"
 
 interface TextFieldRendererProps {
   field: ResolvedField<F0TextField>

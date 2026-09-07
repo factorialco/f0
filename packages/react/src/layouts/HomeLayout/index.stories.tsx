@@ -17,9 +17,9 @@ import {
 } from "@/experimental/Widgets/Content/Lists/WidgetInboxList"
 import { Default as WidgetInboxListDefaultStory } from "@/experimental/Widgets/Content/Lists/WidgetInboxList/index.stories"
 import { Widget } from "@/experimental/Widgets/Widget"
+import { AreaChartProps } from "@/kits/Charts/AreaChart"
 import { Placeholder } from "@/lib/storybook-utils/placeholder"
 
-import { AreaChartProps } from "@/kits/Charts/AreaChart"
 import { HomeLayout } from "./index"
 
 const widgets = [

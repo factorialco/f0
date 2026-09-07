@@ -11,7 +11,6 @@ import { ButtonInternal } from "@/components/F0Button/internal"
 import { ChevronLeft, ChevronRight } from "@/icons/app"
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
-
 import type { CarouselPaging } from "@/ui/carousel"
 
 import { F0Dialog } from "../F0Dialog"

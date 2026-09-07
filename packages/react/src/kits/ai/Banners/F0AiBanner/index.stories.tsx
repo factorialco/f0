@@ -4,8 +4,9 @@ import { expect, within } from "storybook/test"
 import { CheckDouble, ExternalLink } from "@/icons/app"
 import { WithDataTestIdProps } from "@/lib/data-testid"
 
-import { F0AiBanner, F0AiBannerProps } from "."
 import { AiBannerSkeleton } from "./AiBannerInternal"
+
+import { F0AiBanner, F0AiBannerProps } from "."
 
 const meta = {
   title: "AI/AiBanner",

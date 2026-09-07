@@ -1,6 +1,6 @@
+import { act, renderHook, waitFor } from "@testing-library/react"
 import { Editor } from "@tiptap/core"
 import StarterKit from "@tiptap/starter-kit"
-import { act, renderHook, waitFor } from "@testing-library/react"
 import { ReactNode } from "react"
 import { describe, expect, it, vi } from "vitest"
 

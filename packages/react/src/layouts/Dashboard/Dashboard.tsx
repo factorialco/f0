@@ -1,5 +1,6 @@
 import { GroupGrid, GroupGridProps } from "../Layout/groups/GroupGrid"
 import { createPageLayoutBlockGroup } from "../Layout/utils"
+
 import { DashboardWidget } from "./components/DashboardWidget"
 import { DashboardWidget as DashboardWidgetType } from "./typings"
 export type DashboardProps = GroupGridProps<DashboardWidgetType>

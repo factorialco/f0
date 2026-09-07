@@ -2,6 +2,7 @@ import {
   FiltersDefinition,
   FiltersState,
 } from "@/patterns/OneFilterPicker/types"
+
 import { getDataCollectionStorageKey } from "./dataCollectionStorageKey"
 import { DataCollectionStorage } from "./types"
 

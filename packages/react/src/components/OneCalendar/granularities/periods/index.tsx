@@ -12,6 +12,7 @@ import {
   toDateRangeString,
 } from "../../utils"
 import { GranularityDefinition } from "../types"
+
 import { PeriodsView } from "./PeriodsView"
 import { DatePeriod, DatePeriodsDefinition } from "./types"
 import {

@@ -20,6 +20,7 @@ import {
 } from "../../utils"
 import { rangeSeparator } from "../consts"
 import { DateStringFormat, GranularityDefinition } from "../types"
+
 import { QuarterView } from "./QuarterView"
 
 const QUARTER_FORMAT = "'Q'Q yyyy"

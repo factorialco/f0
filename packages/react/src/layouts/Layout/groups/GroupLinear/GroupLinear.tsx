@@ -9,6 +9,7 @@ import {
 
 import { validLayoutChildrenGuard } from "../../internal/utils"
 import { PageLayoutGroupComponent } from "../../types"
+
 import { GroupLinearProps } from "./types"
 
 export const GroupLinear = forwardRef<HTMLDivElement, GroupLinearProps>(

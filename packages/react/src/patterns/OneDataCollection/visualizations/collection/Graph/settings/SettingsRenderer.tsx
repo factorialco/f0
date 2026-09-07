@@ -1,14 +1,12 @@
-import type { F0GraphNodeTagColumn } from "@/patterns/F0Graph"
-
 import { RecordType } from "@/hooks/datasource"
 import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
+import type { F0GraphNodeTagColumn } from "@/patterns/F0Graph"
 import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
-
-import type { SortAndHideListItem } from "../../Table/components/SortAndHideList/types"
-import type { GraphVisualizationOptions } from "../types"
 
 import { useDataCollectionSettings } from "../../../../Settings/SettingsProvider"
 import { SortAndHideSettings } from "../../../../Settings/SortAndHideSettings"
+import type { SortAndHideListItem } from "../../Table/components/SortAndHideList/types"
+import type { GraphVisualizationOptions } from "../types"
 
 export type GraphVisualizationSettings = {
   /** Metadata order (tag-type ids), matching the table column settings shape. */

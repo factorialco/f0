@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react"
 import { expect, test } from "vitest"
 
 import { ImageProvider } from "../../../lib/imageHandler"
+
 import { Image } from "./index"
 
 test("allows ImageProvider to change src", async () => {

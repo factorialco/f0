@@ -1,14 +1,13 @@
 import { ControllerRenderProps, FieldValues } from "react-hook-form"
 
 import type { InputFieldStatus } from "@/components/F0InputField/types"
-
 import { F0Select } from "@/components/F0Select"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 
-import type { ResolvedField } from "../types"
-import type { F0SelectField } from "./types"
-
 import { FORM_SIZE } from "../../constants"
+import type { ResolvedField } from "../types"
+
+import type { F0SelectField } from "./types"
 
 interface SelectFieldRendererProps {
   field: ResolvedField<F0SelectField>

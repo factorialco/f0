@@ -1,5 +1,6 @@
-import userEvent from "@testing-library/user-event"
 import "@testing-library/jest-dom/vitest"
+
+import userEvent from "@testing-library/user-event"
 import { useState } from "react"
 import { describe, expect, it, vi } from "vitest"
 

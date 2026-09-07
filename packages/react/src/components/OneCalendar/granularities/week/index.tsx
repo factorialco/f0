@@ -30,6 +30,7 @@ import {
 } from "../../utils"
 import { rangeSeparator } from "../consts"
 import { DateStringFormat, GranularityDefinition } from "../types"
+
 import { WeekView } from "./WeekView"
 
 const WEEK_FORMAT = "'W'I yyyy"

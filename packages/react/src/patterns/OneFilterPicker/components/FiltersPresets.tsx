@@ -10,8 +10,8 @@ import { Preset } from "@/ui/OnePreset"
 import { OverflowList } from "@/ui/OverflowList"
 import { Skeleton } from "@/ui/skeleton"
 
-import { FiltersDefinition, FiltersState, PresetsDefinition } from "../types"
 import { isPresetSelected } from "../internal/isPresetSelected"
+import { FiltersDefinition, FiltersState, PresetsDefinition } from "../types"
 
 interface FilterPresetsProps<Filters extends FiltersDefinition> {
   value: FiltersState<Filters>

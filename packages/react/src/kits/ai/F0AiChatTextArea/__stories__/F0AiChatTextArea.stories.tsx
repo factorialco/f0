@@ -2,9 +2,6 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useRef, useState } from "react"
 import { expect, userEvent, waitFor, within } from "storybook/test"
 
-import { F0AiChatTextArea } from "../F0AiChatTextArea"
-import type { F0AiChatTextAreaSubmitPayload } from "../types"
-
 import { F0SegmentedControl } from "@/experimental/Actions/F0SegmentedControl"
 import {
   Calendar,
@@ -20,8 +17,6 @@ import {
 } from "@/icons/app"
 import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
 
-import { F0ClarifyingPanel } from "../../F0ClarifyingPanel"
-import type { ClarifyingQuestionState } from "../../F0ClarifyingPanel/types"
 import type {
   AiChatCreditWarning,
   AiChatDisclaimer,
@@ -34,6 +29,10 @@ import type {
   UploadedFile,
   WelcomeScreenSuggestion,
 } from "../../F0AiChat/types"
+import { F0ClarifyingPanel } from "../../F0ClarifyingPanel"
+import type { ClarifyingQuestionState } from "../../F0ClarifyingPanel/types"
+import { F0AiChatTextArea } from "../F0AiChatTextArea"
+import type { F0AiChatTextAreaSubmitPayload } from "../types"
 
 const ROTATING_PLACEHOLDERS = [
   "Ask about location, directions, or travel details…",

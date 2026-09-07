@@ -16,11 +16,11 @@ import {
 } from "@/lib/providers/datacollection/types"
 import { TestProviders, zeroRenderHook } from "@/testing/test-utils"
 
-import { useDataCollectionStorage } from "../useDataCollectionStorage"
 import {
   DataCollectionStorageFeaturesDefinition,
   FeatureProviders,
 } from "../types"
+import { useDataCollectionStorage } from "../useDataCollectionStorage"
 
 /* ------------------------------------------------------------------ */
 /* Helpers                                                             */

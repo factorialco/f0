@@ -5,11 +5,11 @@ import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0Button } from "@/components/F0Button"
 import { OneSwitch as OnePromotionSwitch } from "@/experimental/AiPromotionChat/OneSwitch"
 import Menu from "@/icons/app/Menu"
+import { F0OneSwitch } from "@/kits/ai/F0OneSwitch"
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import { cn } from "@/lib/utils"
 import { useSidebar } from "@/patterns/ApplicationFrame/FrameProvider"
-import { F0OneSwitch } from "@/kits/ai/F0OneSwitch"
 import { F0AvatarPulse } from "@/sds/Home/F0AvatarPulse"
 
 const daytimePageVariants = cva({

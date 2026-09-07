@@ -1,7 +1,6 @@
-import type { ReactElement } from "react"
-
 import { fireEvent } from "@testing-library/react"
 import { ReactFlowProvider } from "@xyflow/react"
+import type { ReactElement } from "react"
 import { describe, expect, it, vi } from "vitest"
 
 import { screen, zeroRender } from "@/testing/test-utils"

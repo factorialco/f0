@@ -3,8 +3,8 @@ import type { ComponentType } from "react"
 import { CandidateEntityRef } from "../entities/candidate/CandidateEntityRef"
 import { ExpenseEntityRef } from "../entities/expense/ExpenseEntityRef"
 import { JobPostingEntityRef } from "../entities/jobPosting/JobPostingEntityRef"
-import { RequisitionEntityRef } from "../entities/requisition/RequisitionEntityRef"
 import { PersonEntityRef } from "../entities/person/PersonEntityRef"
+import { RequisitionEntityRef } from "../entities/requisition/RequisitionEntityRef"
 import { VacancyEntityRef } from "../entities/vacancy/VacancyEntityRef"
 
 export type EntityRefRendererProps = { id: string; label: string }

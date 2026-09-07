@@ -1,9 +1,9 @@
 import { userEvent } from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
+
 import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
 
 import { DashboardItem } from "../components/DashboardItem/DashboardItem"
-
 import type { DashboardItemFiltersConfig } from "../types"
 
 vi.mock("@/patterns/OneFilterPicker/components/FilterChipButton", () => ({

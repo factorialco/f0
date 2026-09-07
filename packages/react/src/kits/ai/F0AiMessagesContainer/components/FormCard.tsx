@@ -1,9 +1,8 @@
 import { useEffect, useRef } from "react"
 
 import type { ModuleId } from "@/components/avatars/F0AvatarModule"
-import type { DetailsItemContent } from "@/experimental/Lists/DetailsItem"
-
 import { secondsToFields } from "@/components/F0DurationInput/utils"
+import type { DetailsItemContent } from "@/experimental/Lists/DetailsItem"
 import { DetailsItemsList } from "@/experimental/Lists/DetailsItemsList"
 import { F0CanvasCard } from "@/kits/ai/canvas/F0CanvasCard"
 

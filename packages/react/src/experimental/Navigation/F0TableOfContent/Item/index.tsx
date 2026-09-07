@@ -10,6 +10,7 @@ import { useDraggable } from "@/lib/dnd/hooks"
 import { cn } from "@/lib/utils"
 
 import { TOCItem } from "../types"
+
 import { PrimitiveItem } from "./PrimitiveItem"
 
 interface TOCItemProps {

@@ -1,5 +1,3 @@
-import { useEffect, useLayoutEffect, useState } from "react"
-
 import {
   animate,
   type MotionValue,
@@ -7,6 +5,7 @@ import {
   useMotionValue,
   useTransform,
 } from "motion/react"
+import { useEffect, useLayoutEffect, useState } from "react"
 
 import { useReducedMotion } from "@/lib/a11y"
 

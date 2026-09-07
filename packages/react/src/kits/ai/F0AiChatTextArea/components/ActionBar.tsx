@@ -6,6 +6,7 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
 import { type RecorderStatus } from "../useAudioRecorder"
+
 import { DictationButton } from "./DictationButton"
 import { RecordingWaveform } from "./RecordingWaveform"
 import { SubmitButton } from "./SubmitButton"

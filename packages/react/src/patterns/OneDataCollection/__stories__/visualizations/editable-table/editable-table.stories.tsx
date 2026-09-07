@@ -4,7 +4,6 @@ import { useMemo, useRef, useState } from "react"
 import { action } from "storybook/actions"
 
 import type { StatusVariant } from "@/components/tags/F0TagStatus/types"
-
 import { createDataSourceDefinition, RecordType } from "@/hooks/datasource"
 import { Delete, InfoCircleLine, Pencil } from "@/icons/app"
 import { ROLES_MOCK } from "@/mocks"

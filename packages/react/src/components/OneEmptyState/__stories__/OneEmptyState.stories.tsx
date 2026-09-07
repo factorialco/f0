@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { Plus } from "lucide-react"
 import { expect, fn, within } from "storybook/test"
 

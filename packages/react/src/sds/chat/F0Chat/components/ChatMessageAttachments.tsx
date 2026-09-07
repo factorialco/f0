@@ -17,6 +17,7 @@ import {
   CHAT_MEDIA_WIDTH_CLASS,
 } from "../utils/media-layout"
 import { messageSurfaceColorClass } from "../utils/sender-color"
+
 import { bubbleCornerClass } from "./ChatBubble"
 import { ChatCardAttachment } from "./ChatCardAttachment"
 import { ChatDocumentAttachmentCard } from "./ChatDocumentAttachmentCard"

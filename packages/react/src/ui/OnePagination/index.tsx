@@ -2,6 +2,7 @@ import { useCallback, useMemo } from "react"
 
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
+import { cn } from "@/lib/utils"
 import {
   PaginationContent,
   PaginationEllipsis,
@@ -11,8 +12,6 @@ import {
   PaginationPrevious,
   Pagination as PaginationRoot,
 } from "@/ui/pagination"
-
-import { cn } from "@/lib/utils"
 
 interface OnePaginationProps {
   /**

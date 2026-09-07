@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { ComponentProps, useState } from "react"
 import { expect, within } from "storybook/test"
 

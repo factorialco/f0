@@ -1,6 +1,5 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import image from "@storybook-static/avatars/person04.jpg"
+import type { Meta, StoryObj } from "@storybook/react-vite"
 import { fn } from "storybook/test"
 
 import { F0Card } from "@/components/F0Card"

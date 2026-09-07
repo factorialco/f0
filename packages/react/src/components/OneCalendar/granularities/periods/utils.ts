@@ -3,6 +3,7 @@ import { endOfDay, isWithinInterval, startOfDay } from "date-fns"
 import { DateRange, DateRangeComplete } from "../../types"
 import { toDateRange } from "../../utils"
 import { rangeSeparator } from "../consts"
+
 import { DatePeriod } from "./types"
 
 export const sortPeriods = (periods: DatePeriod[]): DatePeriod[] =>

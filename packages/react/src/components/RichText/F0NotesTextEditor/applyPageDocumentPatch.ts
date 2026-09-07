@@ -5,6 +5,7 @@ import {
   getBlockById,
   isBlockNodeType,
 } from "../internal/Extensions/BlockIdExtension"
+
 import type {
   NotesTextEditorPageDocumentPatch,
   NotesTextEditorSnapshot,

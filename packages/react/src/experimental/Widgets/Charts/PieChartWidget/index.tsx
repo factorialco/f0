@@ -1,8 +1,8 @@
 import { forwardRef } from "react"
 
+import { PieChart, PieChartProps } from "@/kits/Charts/PieChart"
 import { experimentalComponent } from "@/lib/experimental"
 
-import { PieChart, PieChartProps } from "@/kits/Charts/PieChart"
 import { withSkeleton } from "../../../../lib/skeleton"
 import { ChartContainer, ComposeChartContainerProps } from "../ChartContainer"
 

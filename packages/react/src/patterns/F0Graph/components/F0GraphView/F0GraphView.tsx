@@ -21,20 +21,6 @@ import {
 
 import { useI18n } from "@/lib/providers/i18n"
 
-import type {
-  F0GraphHandle,
-  F0GraphNodeRenderContext,
-  F0GraphProps,
-} from "../../F0Graph"
-import type {
-  GraphEdge,
-  GraphNode,
-  LayoutDirection,
-  PositionedNode,
-  ZoomLevel,
-} from "../../types"
-import type { F0GraphNodeTagColumn } from "../F0GraphNode"
-
 import {
   BACKGROUND_DOT_GAP,
   EMPTY_HIGHLIGHTED_NODES,
@@ -58,6 +44,11 @@ import {
   F0GraphZoomContext,
   useF0GraphRenderConfigInternal,
 } from "../../contexts"
+import type {
+  F0GraphHandle,
+  F0GraphNodeRenderContext,
+  F0GraphProps,
+} from "../../F0Graph"
 import { useDeferredMerge } from "../../hooks/useDeferredMerge"
 import { useExpandState } from "../../hooks/useExpandState"
 import { useGraphKeyboard } from "../../hooks/useGraphKeyboard"
@@ -73,6 +64,13 @@ import {
   F0GraphNodeWrapper,
   F0GraphStackGroupWrapper,
 } from "../../internal/ReactFlowAdapters"
+import type {
+  GraphEdge,
+  GraphNode,
+  LayoutDirection,
+  PositionedNode,
+  ZoomLevel,
+} from "../../types"
 import {
   findStackHoverZoneAt,
   resolveInitialFitViewNodes,
@@ -81,6 +79,7 @@ import {
 import { F0GraphControls } from "../F0GraphControls"
 import { type EdgeVariant, type F0GraphEdgeProps } from "../F0GraphEdge"
 import { F0GraphEdgeBase } from "../F0GraphEdge/F0GraphEdge"
+import type { F0GraphNodeTagColumn } from "../F0GraphNode"
 
 // ─── Custom Edge Wrapper (supports renderEdge override via context) ────────
 interface GraphEdgeData extends Record<string, unknown> {

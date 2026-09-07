@@ -12,6 +12,7 @@ import {
   type FixedScale,
 } from "../scales"
 import { type F0PdfViewerAction } from "../types"
+
 import { ToolbarButton } from "./ToolbarButton"
 
 export type DocumentZoom = {

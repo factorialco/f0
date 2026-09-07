@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { action } from "storybook/actions"
 
 import { SearchBar } from "./index"

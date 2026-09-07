@@ -4,6 +4,7 @@ import { RecordType } from "@/hooks/datasource/types/records.typings"
 import { useL10n } from "@/lib/providers/l10n"
 
 import { NumberCellConfig } from "../../../types"
+
 import { useInputTextWidth } from "./useInputTextWidth"
 
 /**

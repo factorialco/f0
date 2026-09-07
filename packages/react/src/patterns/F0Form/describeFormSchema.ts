@@ -1,7 +1,5 @@
 import { ZodTypeAny } from "zod"
 
-import type { F0FormSchema } from "./types"
-
 import {
   F0FieldType,
   getF0Config,
@@ -9,6 +7,7 @@ import {
   unwrapToZodObject,
 } from "./f0Schema"
 import { isFieldRequired } from "./fields/schema"
+import type { F0FormSchema } from "./types"
 
 /**
  * Serializable description of a single form field,

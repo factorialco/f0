@@ -13,17 +13,17 @@ import {
 
 import { F0Button } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
-import { Calculator, Check } from "@/icons/app"
-import { useI18n } from "@/lib/providers/i18n"
-import { Input as ShadcnInput } from "@/ui/input"
-import { cn } from "@/lib/utils"
-import { Input } from "@/ui/input"
+import { InputFieldProps } from "@/components/F0InputField"
 import { InputMessages } from "@/components/F0InputField/components/InputMessages"
 import { Label } from "@/components/F0InputField/components/Label"
 import { InputFieldStatus } from "@/components/F0InputField/types"
+import { Calculator, Check } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
+import { cn } from "@/lib/utils"
+import { Input as ShadcnInput } from "@/ui/input"
+import { Input } from "@/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 
-import { InputFieldProps } from "@/components/F0InputField"
 import { Arrows } from "./components/Arrows"
 import { extractNumber } from "./internal/extractNumber"
 

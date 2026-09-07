@@ -1,5 +1,4 @@
 import type { GridStack } from "gridstack"
-
 import { describe, expect, it, vi } from "vitest"
 
 import { zeroRender } from "@/testing/test-utils"

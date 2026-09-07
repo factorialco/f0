@@ -14,7 +14,6 @@ import type {
   ClarifyingQuestionState,
   ClarifyingSelectionMode,
 } from "../../../F0ClarifyingPanel"
-
 import { type F0Message } from "../../types"
 
 import { pickRandomResponse, pickRandomThinkingSteps } from "./mockPhrases"

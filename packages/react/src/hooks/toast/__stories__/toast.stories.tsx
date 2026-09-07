@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { useEffect } from "react"
 
 import { F0Button } from "@/components/F0Button"

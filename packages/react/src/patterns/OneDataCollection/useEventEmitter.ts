@@ -4,11 +4,11 @@ import {
   SortingsDefinition,
   SortingsState,
 } from "@/hooks/datasource/types/sortings.typings"
-
 import {
   FiltersDefinition,
   FiltersState,
 } from "@/patterns/OneFilterPicker/types"
+
 import { useF0EventCatcher } from "../../lib/providers/events"
 import { normalizeEventValue } from "../../lib/providers/events/normalize"
 

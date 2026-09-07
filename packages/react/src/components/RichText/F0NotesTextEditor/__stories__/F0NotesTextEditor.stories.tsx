@@ -3,8 +3,8 @@ import { fn } from "storybook/test"
 
 import { NewColor } from "@/components/tags/F0TagDot"
 import { Summary } from "@/icons/ai"
-import { mockEnhanceText } from "@/lib/storybook-utils/ai-mocks"
 import { AcademicCap, Alert, Globe, List, Placeholder } from "@/icons/app"
+import { mockEnhanceText } from "@/lib/storybook-utils/ai-mocks"
 
 import {
   EnhancementOption,

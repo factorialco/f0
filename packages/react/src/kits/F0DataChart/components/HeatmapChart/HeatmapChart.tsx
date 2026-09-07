@@ -3,13 +3,13 @@ import { useRef } from "react"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 
 import type { F0DataChartHeatmapProps } from "../../types"
-
 import { resolveChartSize } from "../../utils/responsive"
 import { useAxisLabelTooltip } from "../../utils/useAxisLabelTooltip"
 import { useChartTheme } from "../../utils/useChartTheme"
 import { useContainerSize } from "../../utils/useContainerSize"
 import { useEChartsInstance } from "../../utils/useEChartsInstance"
 import { usePointClick } from "../../utils/usePointClick"
+
 import { useHeatmapChartOptions } from "./useHeatmapChartOptions"
 
 export const HeatmapChart = (props: F0DataChartHeatmapProps) => {

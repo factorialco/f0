@@ -6,9 +6,9 @@ import {
   useRef,
 } from "react"
 
+import { InputFieldProps } from "@/components/F0InputField"
 import { Search } from "@/icons/app"
 import { Input } from "@/ui/input"
-import { InputFieldProps } from "@/components/F0InputField"
 
 export type F0SearchInputProps = {
   value?: string

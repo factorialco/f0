@@ -11,15 +11,14 @@ import {
   fireEvent,
 } from "@/testing/test-utils"
 
+import { F0Form } from "../../../F0Form"
+import { f0FormField } from "../../../f0Schema"
 import type {
   FileUploadResult,
   FileUploadStatus,
   InitialFile,
   UseFileUpload,
 } from "../types"
-
-import { F0Form } from "../../../F0Form"
-import { f0FormField } from "../../../f0Schema"
 
 function createMockUploadHook(
   options: {

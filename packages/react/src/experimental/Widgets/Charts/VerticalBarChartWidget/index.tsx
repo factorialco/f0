@@ -1,11 +1,11 @@
 import { forwardRef } from "react"
 
-import { experimentalComponent } from "@/lib/experimental"
-
 import {
   VerticalBarChart,
   VerticalBarChartProps,
 } from "@/kits/Charts/VerticalBarChart"
+import { experimentalComponent } from "@/lib/experimental"
+
 import { withSkeleton } from "../../../../lib/skeleton"
 import { ChartContainer, ComposeChartContainerProps } from "../ChartContainer"
 

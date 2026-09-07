@@ -1,6 +1,7 @@
+import "@testing-library/jest-dom/vitest"
+
 import { forwardRef } from "react"
 import { describe, expect, it, vi, beforeEach } from "vitest"
-import "@testing-library/jest-dom/vitest"
 
 import {
   zeroRender as render,

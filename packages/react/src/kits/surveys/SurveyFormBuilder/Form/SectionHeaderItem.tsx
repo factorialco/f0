@@ -11,6 +11,7 @@ import {
   QuestionProps,
 } from "../QuestionTypes/Question"
 import { Section as SectionComponent } from "../Section"
+
 import { EndOfSectionDivider } from "./EndOfSectionDivider"
 import { FlatFormItem } from "./utils"
 

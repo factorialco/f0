@@ -11,6 +11,7 @@ import {
 
 import { BreadcrumbCollectionSelectItemType } from "../../types"
 import { BreadcrumbSelect } from "../BreadcrumbSelect"
+
 import { buildCollectionBoundSource } from "./buildCollectionBoundSource"
 
 /**

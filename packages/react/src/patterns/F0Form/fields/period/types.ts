@@ -1,12 +1,12 @@
 import type { DatePreset } from "@/components/F0DatePicker"
 import type { DateStringFormat } from "@/components/OneCalendar/granularities/types"
 
+import type { DateGranularity, F0DateConstraintProp } from "../date/types"
 import type {
   F0BaseField,
   F0BaseFieldRenderIfFunction,
   CommonRenderIfCondition,
 } from "../types"
-import type { DateGranularity, F0DateConstraintProp } from "../date/types"
 
 // ============================================================================
 // Period Field RenderIf Conditions

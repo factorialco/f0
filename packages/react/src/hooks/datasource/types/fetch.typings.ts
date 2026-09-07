@@ -1,11 +1,11 @@
 import { Observable } from "zen-observable-ts"
 
+import { SortingsStateMultiple } from "@/hooks/datasource/types/sortings.typings"
+import { PromiseState } from "@/lib/promise-to-observable"
 import {
   FiltersDefinition,
   FiltersState,
 } from "@/patterns/OneFilterPicker/types"
-import { SortingsStateMultiple } from "@/hooks/datasource/types/sortings.typings"
-import { PromiseState } from "@/lib/promise-to-observable"
 
 import { RecordType } from "./records.typings"
 

@@ -1,5 +1,6 @@
 import { Component } from "../../lib/component/component"
 import { withDataTestId } from "../../lib/data-testid"
+
 import { AreaChart as AreaChartComponent } from "./AreaChart"
 import { BarChart as BarChartComponent } from "./BarChart"
 import { CategoryBarChart as CategoryBarChartComponent } from "./CategoryBarChart"

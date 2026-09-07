@@ -4,13 +4,12 @@ import { motion } from "motion/react"
 import { ReactElement, useEffect, useState } from "react"
 
 import { Chip } from "@/components/OneChip"
-import { I18nContextType, useI18n } from "@/lib/providers/i18n"
 import { useReducedMotion } from "@/lib/a11y"
+import { I18nContextType, useI18n } from "@/lib/providers/i18n"
 import { Skeleton } from "@/ui/skeleton"
 
-import type { FilterValue, FiltersDefinition } from "../types"
-
 import { type ChipLabel, getFilterType } from "../filterTypes"
+import type { FilterValue, FiltersDefinition } from "../types"
 
 /**
  * Animated chip component that displays an active filter with its current value.

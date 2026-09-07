@@ -1,10 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { Observable } from "zen-observable-ts"
 
-import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource/types"
-import { ItemActionsDefinition } from "@/patterns/OneDataCollection/item-actions"
-import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
-import { SummariesDefinition } from "@/patterns/OneDataCollection/summary"
 import {
   FiltersDefinition,
   GroupingDefinition,
@@ -18,6 +14,10 @@ import {
   NestedVariant,
 } from "@/hooks/datasource/types/nested.typings"
 import { promiseToObservable, PromiseState } from "@/lib/promise-to-observable"
+import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource/types"
+import { ItemActionsDefinition } from "@/patterns/OneDataCollection/item-actions"
+import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
+import { SummariesDefinition } from "@/patterns/OneDataCollection/summary"
 
 import { useNestedDataContext } from "../providers/NestedProvider"
 

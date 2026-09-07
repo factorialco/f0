@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils"
 
 import { useChatSearch } from "../providers/ChatUIProvider"
 import { type F0ChatChannel, type F0ChatHeaderAction } from "../types"
+
 import { ChatHeaderSearch } from "./ChatHeaderSearch"
 import { ChatUserHoverCard } from "./ChatUserHoverCard"
 

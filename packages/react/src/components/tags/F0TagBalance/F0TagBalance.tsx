@@ -11,9 +11,9 @@ import {
 import { useNormalizeNumericValueWithFormatter } from "@/lib/numeric/hooks/useNormalizeNumericValueWithFormatter"
 import { cn } from "@/lib/utils"
 
-import type { BalanceStatus, F0TagBalanceProps } from "./types"
-
 import { BaseTag } from "../internal/BaseTag"
+
+import type { BalanceStatus, F0TagBalanceProps } from "./types"
 
 const iconMap: Record<string, IconType> = {
   "-1": ArrowDown,

@@ -1,8 +1,8 @@
-import { useEffect, useRef } from "react"
-
 // Side-effect import: registers the <em-emoji-picker> custom element so
 // document.createElement returns the registered class.
 import "emoji-mart"
+
+import { useEffect, useRef } from "react"
 
 import { RenderErrorBoundary } from "@/lib/RenderErrorBoundary"
 

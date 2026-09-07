@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from "react"
-
 import type { Observable } from "zen-observable-ts"
 
 import {
@@ -19,6 +18,7 @@ import type { ItemActionsDefinition } from "../../../item-actions"
 import type { NavigationFiltersDefinition } from "../../../navigationFilters/types"
 import type { SummariesDefinition } from "../../../summary"
 import type { OnLoadDataCallback, OnLoadErrorCallback } from "../../../types"
+
 import type { GraphVisualizationOptions } from "./types"
 
 const DEFAULT_TREE_PER_PAGE = 200

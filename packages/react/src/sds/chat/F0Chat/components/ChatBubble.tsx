@@ -11,6 +11,7 @@ import {
   messageSurfaceColorClass,
   senderNameColorClass,
 } from "../utils/sender-color"
+
 import { ChatLinkPreview } from "./ChatLinkPreview"
 import { ChatMessageMeta, ChatMessageMetaLabel } from "./ChatMessageMeta"
 import { ChatUserHoverCard } from "./ChatUserHoverCard"

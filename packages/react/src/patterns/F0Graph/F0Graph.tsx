@@ -1,13 +1,15 @@
+import "./F0Graph.css"
+
 import { ReactFlowProvider } from "@xyflow/react"
 import { forwardRef, type ForwardedRef, type ReactNode, type Ref } from "react"
 
-import "./F0Graph.css"
 import type { EdgeVariant } from "./components/F0GraphEdge"
 import type {
   F0GraphNodeTagColumn,
   GraphNodeState,
   GraphNodeVariant,
 } from "./components/F0GraphNode"
+import { F0GraphView } from "./components/F0GraphView"
 import type {
   DeferredNodesPayload,
   GraphEdge,
@@ -18,8 +20,6 @@ import type {
   ZoomPreset,
   ZoomThresholds,
 } from "./types"
-
-import { F0GraphView } from "./components/F0GraphView"
 
 // ─── Props ─────────────────────────────────────────────────────
 export interface F0GraphProps<T = unknown> {

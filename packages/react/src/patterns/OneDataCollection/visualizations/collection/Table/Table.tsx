@@ -36,11 +36,6 @@ import { GroupHeader } from "@/ui/GroupHeader/index"
 import { Skeleton } from "@/ui/skeleton.tsx"
 import { tableCellContentClassName } from "@/ui/value-display/const"
 
-import type {
-  TableCustomizationProps,
-  TableVisualizationOptions,
-} from "./types"
-
 import { PrimaryActionItemDefinition } from "../../../actions"
 import { useDataCollectionData } from "../../../hooks/useDataCollectionData"
 import { useInfiniteScrollPagination } from "../../../hooks/useInfiniteScrollPagination"
@@ -50,13 +45,18 @@ import { SummariesDefinition } from "../../../summary"
 import { CollectionProps } from "../../../types"
 import { useAddRow } from "../EditableTable/context/AddRowContext"
 import { statusToChecked } from "../utils"
+
 import { Row } from "./components/Row"
 import { useAddedRowKeys } from "./hooks/useAddedRowKeys"
-import { getColumnId, useColumns } from "./hooks/useColums"
 import { useColumnCollapseAnimation } from "./hooks/useColumnCollapseAnimation"
+import { getColumnId, useColumns } from "./hooks/useColums"
 import { groupBorderClass, useHeaderGroups } from "./hooks/useHeaderGroups"
 import { NestedDataProvider } from "./providers/NestedProvider"
 import { useCreateSelectionRegistry } from "./providers/SelectionRegistryProvider"
+import type {
+  TableCustomizationProps,
+  TableVisualizationOptions,
+} from "./types"
 import { useSticky } from "./useSticky"
 export * from "./settings/SettingsRenderer"
 

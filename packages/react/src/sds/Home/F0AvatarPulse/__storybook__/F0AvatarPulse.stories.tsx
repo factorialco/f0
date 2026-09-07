@@ -1,10 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { withSnapshot } from "@/lib/storybook-utils/parameters"
-import { mockImage } from "@/testing/mocks/images"
-
 import { getBaseAvatarArgTypes } from "@/components/avatars/internal/BaseAvatar/__stories__/utils"
 import { pulses } from "@/lib/mood"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
+import { mockImage } from "@/testing/mocks/images"
 
 import { F0AvatarPulse, F0AvatarPulseProps } from "../F0AvatarPulse"
 

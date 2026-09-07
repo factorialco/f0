@@ -1,8 +1,8 @@
 import { ReactNode } from "react"
 
 import { IconType } from "@/components/F0Icon/F0Icon"
-import { TabsProps } from "@/patterns/Navigation/Tabs"
 import { DialogModule } from "@/lib/providers/dialogs-alike/module-types"
+import { TabsProps } from "@/patterns/Navigation/Tabs"
 
 import { HeaderProps } from "./Header"
 

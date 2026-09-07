@@ -10,6 +10,7 @@ import { useSurveyFormBuilderContext } from "../../Context"
 import { DragProvider } from "../../DragContext"
 import { SelectQuestionOption } from "../../types"
 import { BaseQuestion } from "../BaseQuestion"
+
 import { SelectOption } from "./SelectOption"
 import {
   OnChangeLabelParams,

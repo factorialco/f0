@@ -1,10 +1,10 @@
+import { F0AvatarFile } from "@/components/avatars/F0AvatarFile"
+import type { FileDef } from "@/components/avatars/F0AvatarFile/types"
+import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import {
   F0AvatarModule,
   type ModuleId,
 } from "@/components/avatars/F0AvatarModule"
-import { F0AvatarFile } from "@/components/avatars/F0AvatarFile"
-import type { FileDef } from "@/components/avatars/F0AvatarFile/types"
-import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { F0Button } from "@/components/F0Button"
 import type { IconType } from "@/components/F0Icon"
 import { OneEllipsis } from "@/lib/OneEllipsis"

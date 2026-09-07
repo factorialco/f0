@@ -4,9 +4,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import { zeroRender } from "@/testing/test-utils"
 
-import type { F0ButtonToggleGroupProps } from "../types"
-
 import { F0ButtonToggleGroup } from "../F0ButtonToggleGroup"
+import type { F0ButtonToggleGroupProps } from "../types"
 
 // Mock icons for easier testing
 const MockIcon = React.forwardRef<SVGSVGElement>((props, ref) => (

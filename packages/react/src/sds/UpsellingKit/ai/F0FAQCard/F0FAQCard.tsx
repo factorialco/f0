@@ -3,8 +3,8 @@ import { useCallback, useState } from "react"
 import { F0Icon } from "@/components/F0Icon"
 import { ChevronDown, ChevronRight, Question } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
-import { Card, CardContent, CardHeader } from "@/ui/Card"
 import { cn } from "@/lib/utils"
+import { Card, CardContent, CardHeader } from "@/ui/Card"
 
 import type { F0FAQCardProps, F0FAQItem } from "./types"
 

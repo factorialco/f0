@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest"
 
 import type { DashboardChartConfig, DashboardChartData } from "../types"
-
 import {
   compatibleTargetTypes,
   detectDataShape,

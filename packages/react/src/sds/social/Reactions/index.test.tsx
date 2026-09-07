@@ -1,12 +1,12 @@
 import { expect, it, vi } from "vitest"
 
+import { getEmojiLabel } from "@/lib/emojis"
 import {
   zeroRender as render,
   screen,
   userEvent,
   waitFor,
 } from "@/testing/test-utils"
-import { getEmojiLabel } from "@/lib/emojis"
 
 import { Reactions } from "./index"
 

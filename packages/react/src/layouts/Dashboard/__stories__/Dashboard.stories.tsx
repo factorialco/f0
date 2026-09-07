@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { useEffect, useState } from "react"
 import { expect, within } from "storybook/test"
 
@@ -11,6 +10,7 @@ import { withSkipA11y } from "@/lib/storybook-utils/parameters"
 import { Optional } from "@/lib/typescript-utils/optional"
 
 import { Dashboard, DashboardWidget } from "../"
+
 import { ChartWidget, KpiWidget, TableWidget, TextWidget } from "./mockWidgets"
 
 const availableSizes = [

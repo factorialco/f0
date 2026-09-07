@@ -1,8 +1,8 @@
 import { forwardRef } from "react"
 
+import { AreaChart, AreaChartProps } from "@/kits/Charts/AreaChart"
 import { experimentalComponent } from "@/lib/experimental"
 
-import { AreaChart, AreaChartProps } from "@/kits/Charts/AreaChart"
 import { withSkeleton } from "../../../../lib/skeleton"
 import { ChartContainer, ComposeChartContainerProps } from "../ChartContainer"
 

@@ -6,11 +6,9 @@ import type {
   F0FormDefinitionSingleSchema,
   F0FormDefinitionPerSection,
 } from "@/patterns/F0WizardForm/types"
-
 import { zeroRender as render, waitFor, act } from "@/testing/test-utils"
 
 import type { F0AiAvailableFormDefinition } from "../F0AiFormRegistry"
-
 import {
   F0AiFormRegistryProvider,
   useF0AiFormRegistry,

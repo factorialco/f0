@@ -6,8 +6,8 @@ import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
 
 import { F0Form } from "../../../F0Form"
 import { f0FormField } from "../../../f0Schema"
-import { isFieldRequired } from "../../schema"
 import { getSchemaDefinition } from "../../../useSchemaDefinition"
+import { isFieldRequired } from "../../schema"
 
 const quarter2026Q2 = {
   value: { from: new Date(2026, 3, 1), to: new Date(2026, 5, 30) },

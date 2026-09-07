@@ -1,4 +1,5 @@
 import avatar from "../../../storybook-assets/avatar.jpeg"
+
 import { famousEmployeesAsSubItems } from "./entity-select-name.factory"
 import { EntitySelectEntity } from "./types"
 

@@ -1,6 +1,7 @@
 import { useState } from "react"
 
 import { F0Button, F0ButtonProps } from "@/components/F0Button"
+import UpsellIcon from "@/icons/app/Upsell"
 import { withDataTestId } from "@/lib/data-testid"
 import {
   ErrorMessageProps,
@@ -8,7 +9,6 @@ import {
   SuccessMessageProps,
   UpsellRequestResponseDialog,
 } from "@/sds/UpsellingKit/UpsellRequestResponseDialog"
-import UpsellIcon from "@/icons/app/Upsell"
 
 export interface LoadingStateProps {
   label: string

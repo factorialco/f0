@@ -1,6 +1,5 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import heart from "@factorialco/f0-core/assets/icons/app/heart.svg"
+import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 

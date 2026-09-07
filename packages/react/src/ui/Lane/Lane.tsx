@@ -1,11 +1,10 @@
 import { AnimatePresence, motion } from "motion/react"
 import React from "react"
 
-import type { RecordType } from "@/hooks/datasource"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Card } from "@/components/F0Card"
 import { ScrollArea } from "@/experimental/Utilities/ScrollArea"
+import type { RecordType } from "@/hooks/datasource"
 import { Plus } from "@/icons/app"
 import { cn } from "@/lib/utils"
 import { useInfiniteScrollPagination } from "@/patterns/OneDataCollection/hooks/useInfiniteScrollPagination"

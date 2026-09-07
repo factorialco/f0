@@ -1,16 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import {
-  screen,
-  userEvent,
-  waitFor,
-  zeroRender as render,
-} from "@/testing/test-utils"
 
 import {
   AiChatStateProvider,
   useAiChat,
 } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
 import type { PendingQuote } from "@/kits/ai/F0AiChat/types"
+import {
+  screen,
+  userEvent,
+  waitFor,
+  zeroRender as render,
+} from "@/testing/test-utils"
 
 import { DashboardItem } from "../components/DashboardItem/DashboardItem"
 

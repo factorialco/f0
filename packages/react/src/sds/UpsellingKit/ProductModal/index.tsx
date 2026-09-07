@@ -1,13 +1,14 @@
 import { useState } from "react"
 
 import { ModuleId } from "@/components/avatars/F0AvatarModule"
-import { withDataTestId } from "@/lib/data-testid"
 import { ButtonVariant, F0Button } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
 import { Variant } from "@/components/tags/F0TagStatus"
+import { withDataTestId } from "@/lib/data-testid"
 
 import { ProductBlankslate } from "../ProductBlankslate"
 import { UpsellRequestResponseDialog } from "../UpsellRequestResponseDialog"
+
 import { CustomModal } from "./components/CustomModal"
 
 type ProductModalProps = {

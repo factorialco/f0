@@ -4,10 +4,10 @@ import { F0NumberInput } from "@/components/F0NumberInput"
 import { RecordType } from "@/hooks/datasource/types/records.typings"
 import { cn } from "@/lib/utils"
 
-import type { EditableCellProps } from "."
-
 import { BaseCell } from "./BaseCell"
 import { useNumberCellLayout } from "./hooks/useNumberCellLayout"
+
+import type { EditableCellProps } from "."
 
 export function NumberCell<R extends RecordType>({
   editableColumn,

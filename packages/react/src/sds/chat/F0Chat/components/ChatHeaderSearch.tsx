@@ -4,9 +4,9 @@ import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0SearchInput } from "@/components/F0SearchInput"
 import { ChevronDown, ChevronUp, Cross } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
+import { cn } from "@/lib/utils"
 
 import { useChatSearch } from "../providers/ChatUIProvider"
-import { cn } from "@/lib/utils"
 
 /**
  * Inline search bar that replaces the whole header in search mode: F0SearchInput

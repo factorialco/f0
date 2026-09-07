@@ -1,5 +1,4 @@
 import type { Decorator, Meta, StoryObj } from "@storybook/react-vite"
-
 import { useState } from "react"
 import { expect, fn, within } from "storybook/test"
 
@@ -16,6 +15,7 @@ import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0Select, selectSizes, selectVariants } from "../index"
+
 import {
   Employee,
   employeeNestedPaginatedSource,

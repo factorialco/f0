@@ -3,14 +3,13 @@ import { ReactElement } from "react"
 import { withDataTestId, WithDataTestIdProps } from "@/lib/data-testid"
 import { cn } from "@/lib/utils"
 
+import { CardSelectable } from "./CardSelectable"
 import type {
   CardSelectableContainerProps,
   CardSelectableMultipleProps,
   CardSelectableSingleProps,
   CardSelectableValue,
 } from "./types"
-
-import { CardSelectable } from "./CardSelectable"
 
 function _CardSelectableContainer<T extends CardSelectableValue>(
   props: CardSelectableContainerProps<T>

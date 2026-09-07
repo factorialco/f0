@@ -11,7 +11,6 @@ import type {
   DashboardMetricData,
   DashboardMetricItem,
 } from "../types"
-
 import { isRenderableChart } from "../utils/chartDataAdapter"
 import { chartDataToTabular } from "../utils/chartDataToTabular"
 import { downloadMultiSheetExcel } from "../utils/downloadHelpers"

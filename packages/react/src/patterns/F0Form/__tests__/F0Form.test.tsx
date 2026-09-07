@@ -11,13 +11,10 @@ import {
   act,
 } from "@/testing/test-utils"
 
-import type { F0FieldAlertProps } from "../f0Schema"
-import type { F0SectionConfig } from "../types"
-import type { F0FormRef } from "../useF0Form"
-
 import { createConditionalResolver } from "../conditionalResolver"
 import { generateAnchorId } from "../context"
 import { F0Form } from "../F0Form"
+import type { F0FieldAlertProps } from "../f0Schema"
 import {
   f0FormField,
   getF0Config,
@@ -26,6 +23,8 @@ import {
 } from "../f0Schema"
 import { isFieldRequired, isOptionalOrNullable } from "../fields/schema"
 import { evaluateDisabled, evaluateRenderIf } from "../fields/utils"
+import type { F0SectionConfig } from "../types"
+import type { F0FormRef } from "../useF0Form"
 import { getSchemaDefinition } from "../useSchemaDefinition"
 
 describe("F0Form", () => {

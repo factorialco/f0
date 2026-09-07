@@ -7,12 +7,11 @@ import type {
   DurationUnit,
 } from "@/components/F0DurationInput/types"
 import type { InputFieldStatus } from "@/components/F0InputField/types"
-import type { F0FormDefinitionSingleSchema } from "@/patterns/F0WizardForm/types"
-
 import {
   isPossiblePhoneValue,
   isValidPhoneValue,
 } from "@/experimental/Forms/F0PhoneInput/lib/phone"
+import type { F0FormDefinitionSingleSchema } from "@/patterns/F0WizardForm/types"
 
 import type { F0CardSelectConfig } from "./fields/cardSelect/types"
 import type { F0CheckboxConfig } from "./fields/checkbox/types"

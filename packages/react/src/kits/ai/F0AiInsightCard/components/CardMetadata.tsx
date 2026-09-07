@@ -9,7 +9,6 @@ import { F0TagBalance } from "@/components/tags/F0TagBalance"
 import { cn } from "@/lib/utils"
 
 import type { ContentType, AiInsightCardContent, BalanceConfig } from "../types"
-
 import { headingVariants, labelVariants } from "../variants"
 
 const hiddenBottomLabelTypes = new Set<ContentType>([

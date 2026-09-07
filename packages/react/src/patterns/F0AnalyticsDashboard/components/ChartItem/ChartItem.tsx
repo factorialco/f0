@@ -3,12 +3,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import type { IconType } from "@/components/F0Icon"
 import type { DropdownItem } from "@/experimental/Navigation/Dropdown"
 import type { RecordType } from "@/hooks/datasource"
-import type { F0DataChartProps } from "@/kits/F0DataChart"
-import type {
-  FiltersDefinition,
-  FiltersState,
-} from "@/patterns/OneFilterPicker/types"
-
 import {
   ChartFunnel,
   ChartHorizontalBars,
@@ -17,8 +11,9 @@ import {
   ChartVerticalBars,
   Table as TableIcon,
 } from "@/icons/app"
+import { useAiChat } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
+import type { F0DataChartProps } from "@/kits/F0DataChart"
 import { DataChartEmptyStateView, F0DataChart } from "@/kits/F0DataChart"
-import { tooltipValueFormat } from "@/kits/F0DataChart/utils/options"
 import {
   BarChartSkeleton,
   FunnelChartSkeleton,
@@ -29,11 +24,17 @@ import {
   RadarChartSkeleton,
   ScatterChartSkeleton,
 } from "@/kits/F0DataChart"
-import { useAiChat } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
+import { tooltipValueFormat } from "@/kits/F0DataChart/utils/options"
 import { useI18n } from "@/lib/providers/i18n"
 import { OneDataCollection } from "@/patterns/OneDataCollection"
 import { useDataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
+import type {
+  FiltersDefinition,
+  FiltersState,
+} from "@/patterns/OneFilterPicker/types"
 
+import { useChartDownloadActions } from "../../hooks/useChartDownloadActions"
+import { useDashboardItemData } from "../../hooks/useDashboardItemData"
 import type {
   DashboardChartConfig,
   DashboardChartData,
@@ -43,9 +44,6 @@ import type {
   F0AnalyticsDashboardAskAiTargetWithQuote,
   F0AnalyticsDashboardPointClick,
 } from "../../types"
-
-import { useChartDownloadActions } from "../../hooks/useChartDownloadActions"
-import { useDashboardItemData } from "../../hooks/useDashboardItemData"
 import {
   defaultChartConfig,
   detectDataShape,
@@ -56,6 +54,7 @@ import {
 } from "../../utils/chartDataAdapter"
 import { chartDataToTabular } from "../../utils/chartDataToTabular"
 import { DashboardItem } from "../DashboardItem/DashboardItem"
+
 import {
   AccessiblePointActions,
   type AccessiblePointAction,

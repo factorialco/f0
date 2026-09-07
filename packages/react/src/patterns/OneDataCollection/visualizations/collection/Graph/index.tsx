@@ -19,6 +19,7 @@ import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
 import { useDataCollectionSettings } from "../../../Settings/SettingsProvider"
 import { SummariesDefinition } from "../../../summary"
 import { CollectionProps } from "../../../types"
+
 import { resolveGraphReveal } from "./reveal"
 import { GraphVisualizationOptions } from "./types"
 import { useDataCollectionTreeData } from "./useDataCollectionTreeData"

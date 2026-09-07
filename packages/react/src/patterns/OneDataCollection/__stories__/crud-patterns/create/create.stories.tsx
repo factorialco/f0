@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { useState } from "react"
 
 import { F0Text } from "@/components/F0Text"

@@ -4,6 +4,7 @@ import { screen, zeroRender as render } from "@/testing/test-utils"
 
 import { tableDisplayClassNames } from "../../const"
 import { ValueDisplayRendererContext } from "../../renderers"
+
 import { LongTextCell } from "./longText"
 
 const TEXT = "Leads the payroll integrations squad."

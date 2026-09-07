@@ -14,6 +14,7 @@ import { useI18n } from "@/lib/providers/i18n"
 import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 
+import { isVisualizationSettingsDefault } from "../internal/isSettingsDefault"
 import { ItemActionsDefinition } from "../item-actions"
 import { NavigationFiltersDefinition } from "../navigationFilters/types"
 import { SummariesDefinition } from "../summary"
@@ -21,7 +22,7 @@ import {
   collectionVisualizations,
   Visualization,
 } from "../visualizations/collection"
-import { isVisualizationSettingsDefault } from "../internal/isSettingsDefault"
+
 import { GroupingSelector } from "./components/GroupingSelector"
 import { SortingSelector } from "./components/SortingSelector"
 import { useDataCollectionSettings } from "./SettingsProvider"

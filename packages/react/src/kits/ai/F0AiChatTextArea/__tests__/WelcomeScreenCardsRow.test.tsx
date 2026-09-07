@@ -1,8 +1,9 @@
-import { describe, expect, it, vi } from "vitest"
 import "@testing-library/jest-dom/vitest"
-import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
+
+import { describe, expect, it, vi } from "vitest"
 
 import { File, Marketplace } from "@/icons/app"
+import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
 
 import { type F0AiChatWelcomeCard } from "../../F0AiChat/types"
 import {

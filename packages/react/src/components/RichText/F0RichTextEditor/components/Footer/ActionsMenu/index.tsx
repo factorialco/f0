@@ -3,8 +3,8 @@ import {
   ButtonDropdownItem,
   F0ButtonDropdown,
 } from "@/components/F0ButtonDropdown"
-import { Switch } from "@/experimental/Forms/Fields/Switch"
 import { ToolbarDivider } from "@/components/RichText/internal"
+import { Switch } from "@/experimental/Forms/Fields/Switch"
 
 import {
   primaryActionType,

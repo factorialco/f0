@@ -1,4 +1,5 @@
 import { Component } from "../../../lib/component/component"
+
 import { AreaChartWidget as AreaChartWidgetComponent } from "./AreaChartWidget"
 import { BarChartWidget as BarChartWidgetComponent } from "./BarChartWidget"
 import { LineChartWidget as LineChartWidgetComponent } from "./LineChartWidget"

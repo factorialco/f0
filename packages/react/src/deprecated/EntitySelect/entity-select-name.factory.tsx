@@ -1,4 +1,5 @@
 import avatar from "../../../storybook-assets/avatar.jpeg"
+
 import { EntitySelectEntity, EntitySelectSubEntity } from "./types"
 
 export const famousEmployees: EntitySelectEntity[] = [

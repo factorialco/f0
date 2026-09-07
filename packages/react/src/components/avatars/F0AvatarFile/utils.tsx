@@ -1,6 +1,7 @@
 import { BadgeProps } from "@/ui/IconBadge"
 
 import { F0AvatarModuleProps } from "../F0AvatarModule"
+
 import { AvatarFileSize, FileDef } from "./types"
 
 type FileTypeInfo = {

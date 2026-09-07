@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import React, { useEffect } from "react"
 
 import { F0ActionItem } from "../F0ActionItem"

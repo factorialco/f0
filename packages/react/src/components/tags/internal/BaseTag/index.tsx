@@ -1,9 +1,9 @@
 import { forwardRef, ReactNode } from "react"
 
 import { F0Icon } from "@/components/F0Icon"
-import { OneEllipsis } from "@/lib/OneEllipsis"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { InfoCircleLine } from "@/icons/app"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { cn } from "@/lib/utils"
 
 type BaseTagProps = {

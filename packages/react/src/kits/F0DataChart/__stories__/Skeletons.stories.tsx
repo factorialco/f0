@@ -10,6 +10,7 @@ import {
   RadarChartSkeleton,
   ScatterChartSkeleton,
 } from "../skeletons"
+
 import { ChartDecorator } from "./decorators"
 
 const meta = {

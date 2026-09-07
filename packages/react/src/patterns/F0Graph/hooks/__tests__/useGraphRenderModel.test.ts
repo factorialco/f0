@@ -1,16 +1,15 @@
-import { ReactFlowProvider } from "@xyflow/react"
 import { renderHook } from "@testing-library/react"
+import { ReactFlowProvider } from "@xyflow/react"
+import { createElement, type MutableRefObject, type ReactNode } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
-import { createElement, type MutableRefObject, type ReactNode } from "react"
-
+import { STACKED_GROUP_PADDING, STACKED_NODE_GAP } from "../../constants"
 import type {
   ExpanderNodeData,
   GraphNodeData,
 } from "../../internal/ReactFlowAdapters"
 import type { LayoutEngine, TreeNode } from "../../types"
 import type { ViewportRect } from "../../utils"
-import { STACKED_GROUP_PADDING, STACKED_NODE_GAP } from "../../constants"
 import { useGraphRenderModel } from "../useGraphRenderModel"
 
 // Stub the viewport rect so windowing is deterministic without a real canvas.

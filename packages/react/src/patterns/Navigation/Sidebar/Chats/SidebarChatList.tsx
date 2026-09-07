@@ -7,6 +7,7 @@ import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 
 import { SidebarTabPanel, SidebarTabPanelGroup } from "../TabPanel"
+
 import {
   SidebarChatBlankState,
   type SidebarChatBlankStateAction,

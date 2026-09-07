@@ -9,6 +9,7 @@ import { cn, focusRing } from "@/lib/utils"
 import { actionVariants, buttonSizeVariants } from "@/ui/Action/variants"
 
 import { ButtonToggleColor } from "../types"
+
 import { F0ButtonToggleInternalProps } from "./types.internal"
 
 const buttonToggleVariants = cva({

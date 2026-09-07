@@ -4,6 +4,7 @@ import { Content } from "../../common/Content"
 import { Footer } from "../../common/Footer"
 import { Header } from "../../common/Header"
 import { DialogWrapper } from "../../common/Wrapper"
+
 import { DialogInternalProps } from "./internal-types"
 
 export const DialogInternal: FC<DialogInternalProps> = ({

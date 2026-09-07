@@ -4,10 +4,9 @@ import { beforeAll, describe, expect, it, vi } from "vitest"
 
 import { zeroRender } from "@/testing/test-utils"
 
-import type { GraphNode } from "../types"
-
 import { useF0GraphActions, type F0GraphActionsContextValue } from "../contexts"
 import { F0Graph, type F0GraphNodeRenderContext } from "../F0Graph"
+import type { GraphNode } from "../types"
 
 // ─── Test helpers ──────────────────────────────────────────────
 

@@ -1,16 +1,14 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { useState } from "react"
 import { expect, within } from "storybook/test"
 
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 
+import { filterDefinition } from "../../OneFilterPicker/__stories__/mockData"
 import type {
   FiltersDefinition,
   FiltersState,
 } from "../../OneFilterPicker/types"
-
-import { filterDefinition } from "../../OneFilterPicker/__stories__/mockData"
 import { F0FilterPickerContent } from "../index"
 
 const simpleFilterDefinition = {

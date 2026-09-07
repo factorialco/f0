@@ -15,8 +15,8 @@ import {
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { F0SearchInput } from "@/components/F0SearchInput"
 import { ArrowLeft, Star } from "@/icons/app"
-import { cn } from "@/lib/utils"
 import { useI18n } from "@/lib/providers/i18n"
+import { cn } from "@/lib/utils"
 import { F0Dialog } from "@/patterns/F0Dialog"
 import { F0Form, useF0Form } from "@/patterns/F0Form"
 

@@ -6,8 +6,8 @@ import type {
 } from "maplibre-gl"
 import { useEffect, useMemo, useRef } from "react"
 
-import { arcLineString } from "../utils/arc"
 import type { F0MapArc, F0MapLineStyle, F0MapRoute } from "../types"
+import { arcLineString } from "../utils/arc"
 
 import { markerColorTriplet } from "./internal/BaseMapMarker"
 

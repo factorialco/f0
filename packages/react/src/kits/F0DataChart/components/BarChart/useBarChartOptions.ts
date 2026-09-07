@@ -9,7 +9,6 @@ import type {
   F0DataChartBarProps,
   F0DataChartBarSeries,
 } from "../../types"
-
 import {
   darkenChartColor,
   paletteColor,

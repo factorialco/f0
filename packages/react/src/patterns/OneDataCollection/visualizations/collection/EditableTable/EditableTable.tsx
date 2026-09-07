@@ -7,14 +7,14 @@ import {
   SortingsDefinition,
 } from "@/hooks/datasource"
 
-import type { RowWrapperProps } from "../Table/types"
-
 import { ItemActionsDefinition } from "../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
 import { useDataCollectionSettings } from "../../../Settings/SettingsProvider"
 import { SummariesDefinition } from "../../../summary"
 import { CollectionProps } from "../../../types"
 import { TableCollection } from "../Table/Table"
+import type { RowWrapperProps } from "../Table/types"
+
 import { EditableCellRenderer } from "./components/EditableCellRenderer"
 import { AddRowProvider } from "./context/AddRowContext"
 import { EditableRowProvider } from "./context/EditableRowContext"

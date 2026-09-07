@@ -15,8 +15,10 @@ import { ItemActionsDefinition } from "../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
 import { DataCollectionSettingsProvider } from "../../../Settings/SettingsProvider"
 import { SummariesDefinition } from "../../../summary"
-import { GraphCollection } from "./index"
+
 import type { GraphVisualizationOptions } from "./types"
+
+import { GraphCollection } from "./index"
 
 // Stub F0Graph so we can read the props `GraphCollection` hands it — the entry
 // selection is wired here (controlled `selectedNodes` seeded with

@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { type ReactNode } from "react"
 
 import { F0Icon } from "@/components/F0Icon"

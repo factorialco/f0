@@ -7,7 +7,6 @@ import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0ButtonToggle } from "@/components/F0ButtonToggle"
 import { F0Icon } from "@/components/F0Icon"
-import { Badge } from "@/ui/IconBadge"
 import {
   Alert,
   Check,
@@ -17,6 +16,7 @@ import {
 } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
+import { Badge } from "@/ui/IconBadge"
 
 interface LinkPopupProps {
   editor: Editor

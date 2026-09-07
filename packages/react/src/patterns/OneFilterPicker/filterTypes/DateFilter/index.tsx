@@ -4,6 +4,7 @@ import { DateRange } from "@/components/OneCalendar/types"
 import { type BaseFilterDefinition } from "../filters"
 import { FilterTypeContext, FilterTypeDefinition } from "../types"
 import { getOptionsWithDefaults } from "../utils"
+
 import { DateFilter, DateFilterOptions } from "./DateFilter"
 
 const isEmpty = (

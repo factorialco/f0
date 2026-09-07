@@ -1,6 +1,6 @@
-import { describe, expect, it, vi } from "vitest"
 import { useEffect, useState } from "react"
 import { flushSync } from "react-dom"
+import { describe, expect, it, vi } from "vitest"
 
 import {
   act,

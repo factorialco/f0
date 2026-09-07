@@ -7,7 +7,6 @@ import type {
   NumericWithFormatter,
   RelaxedNumericWithFormatter,
 } from "../types"
-
 import { normalizeNumericWithFormatter } from "../utils/normalizeValueWithFormatter"
 import { numericFormatter } from "../utils/numericFormatter"
 

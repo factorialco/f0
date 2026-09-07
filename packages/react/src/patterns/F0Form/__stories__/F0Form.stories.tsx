@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { useState, useCallback, useId, useMemo, useRef } from "react"
 import { expect, userEvent, waitFor, within } from "storybook/test"
 import { z } from "zod"
@@ -16,8 +15,6 @@ import type {
   FileUploadResult,
   FileUploadStatus,
 } from "../fields/types"
-import type { RenderCustomFieldSelectConfig } from "../types"
-
 import {
   f0FormField,
   F0Form,
@@ -25,6 +22,7 @@ import {
   RenderCustomFieldProps,
   F0FormRef,
 } from "../index"
+import type { RenderCustomFieldSelectConfig } from "../types"
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 

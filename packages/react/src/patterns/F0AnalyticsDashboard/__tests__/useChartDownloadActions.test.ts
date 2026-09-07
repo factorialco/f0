@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest"
+
 import { zeroRenderHook } from "@/testing/test-utils"
 
-import type { DashboardChartConfig, DashboardChartData } from "../types"
-
 import { useChartDownloadActions } from "../hooks/useChartDownloadActions"
+import type { DashboardChartConfig, DashboardChartData } from "../types"
 
 const chartConfig: DashboardChartConfig = {
   type: "bar",

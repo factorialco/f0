@@ -14,6 +14,7 @@ import {
 import { RecordType } from "../types/records.typings"
 import { SortingsStateMultiple } from "../types/sortings.typings"
 import { DataError } from "../useData"
+
 import { resolveItemNeighbors } from "./resolveItemNeighbors"
 
 export interface UseItemNeighborsOptions<

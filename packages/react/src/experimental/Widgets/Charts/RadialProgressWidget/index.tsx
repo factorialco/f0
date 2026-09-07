@@ -1,11 +1,11 @@
 import { forwardRef } from "react"
 
-import { experimentalComponent } from "@/lib/experimental"
-
 import {
   RadialProgressChart,
   RadialProgressProps,
 } from "@/kits/Charts/RadialProgressChart"
+import { experimentalComponent } from "@/lib/experimental"
+
 import { withSkeleton } from "../../../../lib/skeleton"
 import { Widget } from "../../Widget"
 

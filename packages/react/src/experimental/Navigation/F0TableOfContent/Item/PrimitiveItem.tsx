@@ -3,13 +3,14 @@ import { ReactNode } from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
-import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
-import { Counter } from "@/ui/Counter"
 import { ChevronDown, Handle } from "@/icons/app"
+import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
+import { Counter } from "@/ui/Counter"
 
 import { TOCItem } from "../types"
+
 import { ItemDropDown } from "./ItemDropDown"
 
 interface PrimitiveItemProps {

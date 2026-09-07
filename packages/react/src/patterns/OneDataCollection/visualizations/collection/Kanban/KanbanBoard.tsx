@@ -1,11 +1,10 @@
 import { useMemo, useState } from "react"
 
-import type { KanbanOnMove, KanbanProps } from "@/ui/Kanban/types"
-
 import { type RecordType } from "@/hooks/datasource"
 import { createAtlaskitDriver } from "@/lib/dnd/atlaskitDriver"
 import { DndProvider } from "@/lib/dnd/context"
 import { Kanban } from "@/ui/Kanban"
+import type { KanbanOnMove, KanbanProps } from "@/ui/Kanban/types"
 
 type KanbanBoardProps<R extends RecordType> = {
   lanes: KanbanProps<R>["lanes"]

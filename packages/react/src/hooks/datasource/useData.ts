@@ -8,13 +8,12 @@ import {
 } from "react"
 import { Observable } from "zen-observable-ts"
 
+import { getValueByPath } from "@/lib/objectPaths"
+import { PromiseState, promiseToObservable } from "@/lib/promise-to-observable"
 import type {
   FiltersDefinition,
   FiltersState,
 } from "@/patterns/OneFilterPicker/types"
-
-import { getValueByPath } from "@/lib/objectPaths"
-import { PromiseState, promiseToObservable } from "@/lib/promise-to-observable"
 
 import {
   BaseFetchOptions,

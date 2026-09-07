@@ -1,5 +1,7 @@
-import { describe, expect, it, vi } from "vitest"
 import "@testing-library/jest-dom/vitest"
+
+import { describe, expect, it, vi } from "vitest"
+
 import { Briefcase } from "@/icons/app"
 import {
   zeroRender as render,
@@ -9,7 +11,6 @@ import {
 } from "@/testing/test-utils"
 
 import type { CardSecondaryLink } from "../components/CardActions"
-
 import { F0Card } from "../F0Card"
 
 describe("F0Card Component", () => {

@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { expect, fireEvent, waitFor, within } from "storybook/test"
-
 import { useEffect, useState } from "react"
+import { expect, fireEvent, waitFor, within } from "storybook/test"
 
 import { F0AnalyticsDashboard } from "@/patterns/F0AnalyticsDashboard"
 import {

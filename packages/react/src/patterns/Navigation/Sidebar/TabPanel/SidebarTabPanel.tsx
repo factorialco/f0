@@ -8,6 +8,7 @@ import { fuzzyMatch } from "@/lib/fuzzyMatch"
 import { cn, focusRing } from "@/lib/utils"
 
 import { SidebarCollapsibleSection } from "../CollapsibleSection"
+
 import { SidebarTabPanelAction, SidebarTabPanelProps } from "./types"
 
 /**

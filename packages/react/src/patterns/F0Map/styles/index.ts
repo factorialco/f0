@@ -1,7 +1,7 @@
-import maplibregl, { type StyleSpecification } from "maplibre-gl"
 // Bundled with the package as a same-origin URL asset (not a runtime CDN
 // fetch), so it works offline and adds no third-party dependency.
 import rtlTextPluginUrl from "@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.js?url"
+import maplibregl, { type StyleSpecification } from "maplibre-gl"
 
 import darkStyle from "./f0-dark.json"
 import lightStyle from "./f0-light.json"

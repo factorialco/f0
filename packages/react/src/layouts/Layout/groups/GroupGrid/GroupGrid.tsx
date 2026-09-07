@@ -10,6 +10,7 @@ import { Optional } from "@/lib/typescript-utils/optional"
 import { cn } from "@/lib/utils"
 
 import { PageLayoutGroupComponent } from "../../types"
+
 import { GroupGridWidget } from "./typings"
 
 export interface GroupGridProps<

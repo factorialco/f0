@@ -10,6 +10,7 @@ import React, {
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import { stripNativeTitle } from "@/lib/strip-native-title"
+import { Shortcut } from "@/ui/Shortcut"
 import {
   TooltipContent,
   Tooltip as TooltipPrimitive,
@@ -18,7 +19,6 @@ import {
 } from "@/ui/tooltip"
 
 import { cn } from "../../../lib/utils"
-import { Shortcut } from "@/ui/Shortcut"
 
 /**
  * One bullet of a tooltip's list. The object form gets a semibold lead so a

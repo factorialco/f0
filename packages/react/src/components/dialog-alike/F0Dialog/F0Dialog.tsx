@@ -1,4 +1,5 @@
 import { dialogAlikePrivateProps } from "../common/types"
+
 import { DialogInternal } from "./internal/DialogInternal"
 import { DialogInternalProps } from "./internal/internal-types"
 

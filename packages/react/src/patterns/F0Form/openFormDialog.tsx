@@ -3,12 +3,12 @@ import { useMemo, useRef } from "react"
 import { z } from "zod"
 
 import { F0Dialog, F0DialogSize } from "@/components/dialog-alike/F0Dialog"
-import { useI18n } from "@/lib/providers/i18n"
+import type { DialogId, DialogModule } from "@/lib/providers/dialogs-alike"
 import {
   mountFormOverlay,
   unmountFormOverlay,
 } from "@/lib/providers/form-overlays"
-import type { DialogId, DialogModule } from "@/lib/providers/dialogs-alike"
+import { useI18n } from "@/lib/providers/i18n"
 import type {
   F0FormDefinitionSingleSchema,
   F0FormSchema,

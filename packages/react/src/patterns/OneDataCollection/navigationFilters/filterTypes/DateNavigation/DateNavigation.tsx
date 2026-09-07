@@ -1,6 +1,6 @@
 import { getGranularityDefinitions } from "@/components/OneCalendar/granularities"
-import { OneDateNavigator } from "@/patterns/OneDateNavigator"
 import { useI18n } from "@/lib/providers/i18n"
+import { OneDateNavigator } from "@/patterns/OneDateNavigator"
 import { type DatePickerValue } from "@/ui/DatePickerPopup"
 
 import { DateNavigationProps } from "./types"

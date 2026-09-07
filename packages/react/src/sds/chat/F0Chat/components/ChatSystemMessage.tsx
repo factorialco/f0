@@ -6,6 +6,7 @@ import {
   type F0ChatSystemEvent,
   type F0ChatSystemMessage as F0ChatSystemMessageType,
 } from "../types"
+
 import { ChatUserHoverCard } from "./ChatUserHoverCard"
 
 /** How many names appear before collapsing the rest into "and N more". */

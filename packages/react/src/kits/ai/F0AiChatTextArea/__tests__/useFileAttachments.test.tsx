@@ -5,7 +5,6 @@ import { I18nProvider } from "@/lib/providers/i18n"
 import { defaultTranslations } from "@/lib/providers/i18n/i18n-provider-defaults"
 
 import { type AiChatFileAttachmentConfig } from "../../F0AiChat/types"
-
 import { useFileAttachments } from "../useFileAttachments"
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (

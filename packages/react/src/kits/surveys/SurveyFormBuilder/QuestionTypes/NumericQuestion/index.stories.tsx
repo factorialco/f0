@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { useState } from "react"
 
-import { NumericQuestion } from "."
 import { SurveyFormBuilderProvider } from "../../Context"
 import { SurveyFormBuilderElement, QuestionElement } from "../../types"
+
+import { NumericQuestion } from "."
 
 const meta: Meta<typeof NumericQuestion> = {
   title: "Surveys/SurveyFormBuilder/NumericQuestion",

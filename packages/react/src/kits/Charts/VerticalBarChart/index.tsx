@@ -1,6 +1,3 @@
-import type { Props as LabelProps } from "recharts/types/component/Label"
-import type { CartesianViewBox } from "recharts/types/util/types"
-
 import { cloneDeep } from "lodash"
 import { ForwardedRef } from "react"
 import {
@@ -13,6 +10,8 @@ import {
   YAxis,
   YAxisProps,
 } from "recharts"
+import type { Props as LabelProps } from "recharts/types/component/Label"
+import type { CartesianViewBox } from "recharts/types/util/types"
 
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/ui/chart"
 

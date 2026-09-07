@@ -29,6 +29,7 @@ import { CHAT_COMPOSER_HEIGHT } from "../utils/chat-layout"
 import { deliveryState } from "../utils/delivery-status"
 import { type ChatRow, flattenChatRows, freshTailIds } from "../utils/grouping"
 import { chatHeightEstimates } from "../utils/virtuoso-chat"
+
 import { ChatMessageRowRenderer } from "./ChatMessageRowRenderer"
 import { type TypingEntryState } from "./ChatTypingBubble"
 import { ChatViewportOverlays } from "./ChatViewportOverlays"

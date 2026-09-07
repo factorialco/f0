@@ -1,5 +1,4 @@
 import type { Meta } from "@storybook/react-vite"
-
 import { ChevronDown, ChevronRight } from "lucide-react"
 import { ComponentProps, useState } from "react"
 import { expect, fn, userEvent, within } from "storybook/test"
@@ -12,13 +11,14 @@ import {
   teamsWithEmployees,
   workplaceWithEmployees,
 } from "./groups-avatar-name.factory"
-import { EntitySelect } from "./index"
 import {
   EntityId,
   EntitySelectEntity,
   EntitySelectNamedGroup,
   EntitySelectProps,
 } from "./types"
+
+import { EntitySelect } from "./index"
 
 const GROUP_DATA = {
   all: famousEmployees,

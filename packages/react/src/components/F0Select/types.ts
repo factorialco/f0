@@ -1,5 +1,6 @@
 import type { AvatarVariant } from "@/components/avatars/F0Avatar"
 import type { IconType } from "@/components/F0Icon"
+import { INPUTFIELD_SIZES, InputFieldProps } from "@/components/F0InputField"
 import type { NewColor } from "@/components/tags/F0TagDot/types"
 import type { StatusVariant } from "@/components/tags/F0TagStatus/types"
 import type {
@@ -12,8 +13,6 @@ import type {
   SelectedItemsState,
   SortingsDefinition,
 } from "@/hooks/datasource"
-
-import { INPUTFIELD_SIZES, InputFieldProps } from "@/components/F0InputField"
 import { WithDataTestIdProps } from "@/lib/data-testid"
 
 import { Action } from "./components/SelectBottomActions"

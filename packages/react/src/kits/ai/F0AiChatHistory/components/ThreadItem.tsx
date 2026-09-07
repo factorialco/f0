@@ -18,7 +18,6 @@ import { Spinner } from "@/ui/Spinner"
 
 import type { ThreadActionHandlers } from "../types"
 import type { ChatThread } from "../useChatHistory"
-
 import { formatThreadDate } from "../utils"
 
 interface ThreadItemProps extends ThreadActionHandlers {

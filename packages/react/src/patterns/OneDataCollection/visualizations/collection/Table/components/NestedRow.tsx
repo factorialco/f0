@@ -18,8 +18,6 @@
 
 import { forwardRef, useCallback, useEffect, useRef } from "react"
 
-import type { TableVisualizationType } from "@/patterns/OneDataCollection/types"
-
 import {
   GroupingDefinition,
   RecordType,
@@ -30,14 +28,8 @@ import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useData
 import { ItemActionsDefinition } from "@/patterns/OneDataCollection/item-actions"
 import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import { SummariesDefinition } from "@/patterns/OneDataCollection/summary"
+import type { TableVisualizationType } from "@/patterns/OneDataCollection/types"
 import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
-
-import type {
-  CellRendererProps,
-  ColId,
-  RowWrapperProps,
-  TableColumnDefinition,
-} from "../types"
 
 import { PrimaryActionItemDefinition } from "../../../../actions"
 import { useAddRow } from "../../EditableTable/context/AddRowContext"
@@ -46,6 +38,13 @@ import { HeaderGroupEntry } from "../hooks/useHeaderGroups"
 import { useLoadChildren } from "../hooks/useLoadChildren"
 import { useStickyParentRow } from "../hooks/useStickyParentRow"
 import { useNestedDataContext } from "../providers/NestedProvider"
+import type {
+  CellRendererProps,
+  ColId,
+  RowWrapperProps,
+  TableColumnDefinition,
+} from "../types"
+
 import { AddRowRow } from "./AddRow"
 import { LoadMoreRow } from "./LoadMore"
 import { NestedRowProps, Row } from "./Row"

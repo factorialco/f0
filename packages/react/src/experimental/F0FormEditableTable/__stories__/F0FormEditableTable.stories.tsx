@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { useRef, useState } from "react"
 import { action } from "storybook/actions"
 

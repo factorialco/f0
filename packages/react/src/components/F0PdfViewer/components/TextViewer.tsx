@@ -5,6 +5,7 @@ import { useI18n } from "@/lib/providers/i18n"
 import { Skeleton } from "@/ui/skeleton"
 
 import { type F0PdfViewerAction } from "../types"
+
 import { DocumentToolbar, useDocumentZoom } from "./DocumentToolbar"
 
 /** Matches the chat's text-preview size cap — hosts shouldn't offer a preview

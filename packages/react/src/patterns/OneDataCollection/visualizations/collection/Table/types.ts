@@ -14,6 +14,7 @@ import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
 import { PropertyDefinition } from "../../../property-render"
 import { SummariesDefinition, SummaryKey } from "../../../summary"
 import { CollectionProps } from "../../../types"
+
 import { DefaultExpandedPolicy } from "./providers/NestedProvider"
 
 export type TableVisualizationSettings = {

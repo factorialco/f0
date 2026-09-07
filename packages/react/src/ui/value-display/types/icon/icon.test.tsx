@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest"
 import { Placeholder } from "@/icons/app"
 
 import { ValueDisplayRendererContext } from "../../renderers"
+
 import { IconCell, IconCellValue } from "./icon"
 
 const defaultMeta: ValueDisplayRendererContext = {

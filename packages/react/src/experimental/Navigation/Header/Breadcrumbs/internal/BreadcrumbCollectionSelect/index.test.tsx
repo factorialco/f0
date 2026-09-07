@@ -18,6 +18,7 @@ import { userEvent, zeroRender as render } from "@/testing/test-utils"
 
 import { Breadcrumbs } from "../../index"
 import { BreadcrumbCollectionSelectItemType } from "../../types"
+
 import { BreadcrumbCollectionSelect } from "./index"
 
 // Mock ResizeObserver - must be a class constructor for 'new ResizeObserver()' to work

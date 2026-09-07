@@ -1,13 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { expect, within } from "storybook/test"
 
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
-import type { BigNumberProps } from "../types"
-
 import { F0BigNumber } from ".."
+import type { BigNumberProps } from "../types"
 
 const meta: Meta<typeof F0BigNumber> = {
   component: F0BigNumber,

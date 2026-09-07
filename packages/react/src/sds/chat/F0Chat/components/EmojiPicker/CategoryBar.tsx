@@ -5,6 +5,7 @@ import { ClockBack } from "@/icons/app"
 import { EmojiImage } from "@/lib/emojis"
 
 import { type EmojiCategoryId } from "../../utils/emoji-index"
+
 import { emojiButtonClass, EMOJI_BUTTON_SIZE } from "./button"
 
 /** The frequently-used block sits above the categories and is jumped to the

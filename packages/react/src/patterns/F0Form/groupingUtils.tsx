@@ -1,5 +1,7 @@
 import React from "react"
 
+import { RowRenderer } from "./components/RowRenderer"
+import { FieldRenderer } from "./fields/FieldRenderer"
 import type { F0SwitchField } from "./fields/switch/types"
 import type { F0Field } from "./fields/types"
 import type {
@@ -8,9 +10,6 @@ import type {
   RowDefinition,
   SectionDefinition,
 } from "./types"
-
-import { RowRenderer } from "./components/RowRenderer"
-import { FieldRenderer } from "./fields/FieldRenderer"
 
 /**
  * Checks if a field has an object-form renderIf that targets a specific switch

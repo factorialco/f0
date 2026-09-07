@@ -1,6 +1,5 @@
 import { ModuleId } from "@/components/avatars/F0AvatarModule"
 import { F0SelectItemObject, F0SelectItemProps } from "@/components/F0Select"
-import { FiltersDefinition, FiltersState } from "@/patterns/OneFilterPicker"
 import { DropdownItemObject } from "@/experimental/Navigation/Dropdown"
 import { NavigationItem } from "@/experimental/Navigation/utils"
 import {
@@ -10,6 +9,7 @@ import {
   RecordType,
   SortingsDefinition,
 } from "@/hooks/datasource"
+import { FiltersDefinition, FiltersState } from "@/patterns/OneFilterPicker"
 
 import { BreadcrumbSelectProps } from "./internal/BreadcrumbSelect"
 

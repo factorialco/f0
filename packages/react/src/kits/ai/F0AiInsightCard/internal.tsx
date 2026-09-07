@@ -4,11 +4,10 @@ import { forwardRef, useState, type KeyboardEvent } from "react"
 import { useReducedMotion } from "@/lib/a11y"
 import { cn, focusRing } from "@/lib/utils"
 
-import type { F0AiInsightCardProps } from "./types"
-
 import { CardHeader } from "./components/CardHeader"
 import { CardMetadata } from "./components/CardMetadata"
 import { CardSparkline } from "./components/CardSparkline"
+import type { F0AiInsightCardProps } from "./types"
 import { cardVariants, headingVariants } from "./variants"
 
 export type CardInternalProps = F0AiInsightCardProps & {

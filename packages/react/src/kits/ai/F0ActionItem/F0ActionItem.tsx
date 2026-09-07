@@ -1,3 +1,5 @@
+import "./styles.css"
+
 import { AnimatePresence, motion } from "motion/react"
 
 import { F0Icon } from "@/components/F0Icon"
@@ -7,7 +9,6 @@ import { useReducedMotion } from "@/lib/a11y"
 import { cn } from "@/lib/utils"
 
 import { ChatSpinner } from "./components/ChatSpinner"
-import "./styles.css"
 import { F0ActionItemProps } from "./types"
 
 const ICON_MOTION = {

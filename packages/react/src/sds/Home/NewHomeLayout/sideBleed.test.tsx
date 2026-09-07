@@ -4,6 +4,7 @@ import { Calendar, Clock } from "@/icons/app"
 import { act, zeroRender } from "@/testing/test-utils"
 
 import { type HomeWidgetItem } from "../slotRenderers"
+
 import { NewHomeLayout } from "./index"
 
 let layoutWidth = 1400

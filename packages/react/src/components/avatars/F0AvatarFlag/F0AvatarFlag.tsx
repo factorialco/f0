@@ -3,6 +3,7 @@ import { CountryCode } from "@/lib/countries"
 import { useI18n } from "@/lib/providers/i18n"
 
 import { BaseAvatar } from "../internal/BaseAvatar"
+
 import { F0AvatarFlagProps } from "./types"
 
 export const F0AvatarFlag = ({

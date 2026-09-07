@@ -1,5 +1,5 @@
-import { F0Icon } from "@/components/F0Icon"
 import { F0FileItem } from "@/components/F0FileItem"
+import { F0Icon } from "@/components/F0Icon"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { AlertCircle, Cross } from "@/icons/app"
 import { focusRing } from "@/lib/utils"

@@ -1,23 +1,21 @@
 import { useMemo, useState } from "react"
 
+import type { DropdownItem } from "@/experimental/Navigation/Dropdown"
+import type { RecordType } from "@/hooks/datasource"
+import { OneDataCollection } from "@/patterns/OneDataCollection"
+import { useDataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
 import type {
   FiltersDefinition,
   FiltersState,
 } from "@/patterns/OneFilterPicker/types"
-import type { DropdownItem } from "@/experimental/Navigation/Dropdown"
-import type { RecordType } from "@/hooks/datasource"
 
-import { OneDataCollection } from "@/patterns/OneDataCollection"
-import { useDataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
-
+import { useCollectionDownloadActions } from "../../hooks/useCollectionDownloadActions"
 import type {
   DashboardCollectionItem,
   DashboardItemFiltersConfig,
   F0AnalyticsDashboardAskAiTarget,
   F0AnalyticsDashboardAskAiTargetWithQuote,
 } from "../../types"
-
-import { useCollectionDownloadActions } from "../../hooks/useCollectionDownloadActions"
 import { DashboardItem } from "../DashboardItem/DashboardItem"
 
 interface CollectionItemProps<Filters extends FiltersDefinition> {

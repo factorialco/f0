@@ -1,11 +1,11 @@
 import type { DatePreset } from "@/components/F0DatePicker"
 
+import type { DateGranularity } from "../date/types"
 import type {
   F0BaseField,
   F0BaseFieldRenderIfFunction,
   CommonRenderIfCondition,
 } from "../types"
-import type { DateGranularity } from "../date/types"
 
 // ============================================================================
 // Date Range Field RenderIf Conditions

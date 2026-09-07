@@ -2,9 +2,8 @@ import { describe, expect, it, vi } from "vitest"
 
 import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
 
-import type { F0FormEditableTableColumn } from "../types"
-
 import { F0FormEditableTable } from "../F0FormEditableTable"
+import type { F0FormEditableTableColumn } from "../types"
 
 type Row = { id: string; title: string; archived?: boolean }
 

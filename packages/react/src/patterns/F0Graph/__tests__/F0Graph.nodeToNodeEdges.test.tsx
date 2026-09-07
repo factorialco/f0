@@ -2,11 +2,10 @@ import { beforeAll, describe, expect, it } from "vitest"
 
 import { zeroRender } from "@/testing/test-utils"
 
-import type { GraphNode } from "../types"
-
-import { F0Graph, type F0GraphNodeRenderContext } from "../F0Graph"
 import { F0GraphNode } from "../components/F0GraphNode"
 import { NODE_HEIGHT } from "../constants"
+import { F0Graph, type F0GraphNodeRenderContext } from "../F0Graph"
+import type { GraphNode } from "../types"
 
 // React Flow derives an endpoint from the far edge of the handle's box, so the
 // box sits this much above where the endpoint should land.

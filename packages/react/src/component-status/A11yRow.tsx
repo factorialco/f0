@@ -2,6 +2,7 @@ import type { AxeResults, Result, TagValue } from "axe-core"
 import React, { useCallback, useEffect, useRef, useState } from "react"
 
 import { A11Y_WCAG_TAGS } from "../lib/storybook-utils/a11yAxeConfig"
+
 import type { A11yTier } from "./component-status"
 
 /**

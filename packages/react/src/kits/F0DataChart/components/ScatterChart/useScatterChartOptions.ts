@@ -1,5 +1,4 @@
 import type * as echarts from "echarts"
-
 import { type RefObject, useMemo } from "react"
 
 import type {
@@ -7,7 +6,6 @@ import type {
   F0DataChartScatterProps,
   F0DataChartScatterSeries,
 } from "../../types"
-
 import { paletteColor, resolveChartColorToken } from "../../utils/colors"
 import {
   DEFAULT_EMPHASIS,

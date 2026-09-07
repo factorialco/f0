@@ -8,11 +8,10 @@ import ArrowLeft from "@/icons/app/ArrowLeft"
 import ArrowRight from "@/icons/app/ArrowRight"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 
-import type { F0WizardProps } from "./types"
-
 import { WizardProvider } from "./components/WizardProvider"
 import { WizardSteps } from "./components/WizardSteps"
 import { useWizardNavigation } from "./hooks/useWizardNavigation"
+import type { F0WizardProps } from "./types"
 
 const noop = () => {}
 

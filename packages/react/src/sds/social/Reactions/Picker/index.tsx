@@ -1,3 +1,5 @@
+import "./index.css"
+
 import data from "@emoji-mart/data/sets/15/twitter.json"
 import { useState } from "react"
 
@@ -7,8 +9,6 @@ import { type IconType } from "@/components/F0Icon"
 import { Reaction } from "@/icons/app"
 import { EmojiPicker } from "@/lib/EmojiPicker"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
-
-import "./index.css"
 
 const EMOJI_BUTTON_SIZE = 36
 const EMOJI_BUTTON_RADIUS = "10px"

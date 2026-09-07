@@ -4,14 +4,14 @@ import { F0Avatar, type AvatarVariant } from "@/components/avatars/F0Avatar"
 import type { AvatarSize } from "@/components/avatars/internal/BaseAvatar"
 import { F0Button } from "@/components/F0Button"
 import { F0Icon, type IconType } from "@/components/F0Icon"
-import { ChevronRight } from "@/icons/app"
-import { isExternalHref, Link } from "@/lib/linkHandler"
-import { cn } from "@/lib/utils"
-import { useWidgetIsWide } from "@/experimental/Widgets/Widget"
 import {
   DropdownInternal,
   type DropdownItem,
 } from "@/experimental/Navigation/Dropdown/internal.tsx"
+import { useWidgetIsWide } from "@/experimental/Widgets/Widget"
+import { ChevronRight } from "@/icons/app"
+import { isExternalHref, Link } from "@/lib/linkHandler"
+import { cn } from "@/lib/utils"
 
 /**
  * One of a row's hover actions: a button at the row's right that acts on THAT

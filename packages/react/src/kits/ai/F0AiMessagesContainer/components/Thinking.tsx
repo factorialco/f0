@@ -4,10 +4,9 @@ import Lightbulb from "@/icons/app/Lightbulb"
 import { useI18n } from "@/lib/providers/i18n"
 
 import { F0ActionItem } from "../../F0ActionItem"
+import { ThinkingProps } from "../types"
 
 import { CollapsibleMessage } from "./CollapsibleMessage"
-
-import { ThinkingProps } from "../types"
 
 export const Thinking = ({
   titles,

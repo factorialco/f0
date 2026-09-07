@@ -1,17 +1,17 @@
 import { forwardRef } from "react"
 
-import { ItemActionsDefinition } from "@/patterns/OneDataCollection/item-actions"
-import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
-import { SummariesDefinition } from "@/patterns/OneDataCollection/summary"
 import {
   FiltersDefinition,
   GroupingDefinition,
   RecordType,
   SortingsDefinition,
 } from "@/hooks/datasource"
+import { ItemActionsDefinition } from "@/patterns/OneDataCollection/item-actions"
+import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
+import { SummariesDefinition } from "@/patterns/OneDataCollection/summary"
 
-import { type RowProps } from "../Row"
 import { NestedActionRow } from "../NestedActionRow"
+import { type RowProps } from "../Row"
 
 export const DEFAULT_LOADING_ROWS_COUNT = 3
 

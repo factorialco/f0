@@ -1,10 +1,9 @@
+import { ControlledOneFilterPicker } from "@/patterns/OneFilterPicker/internal/ControlledOneFilterPicker"
 import type {
   FiltersDefinition,
   FiltersState,
   PresetsDefinition,
 } from "@/patterns/OneFilterPicker/types"
-
-import { ControlledOneFilterPicker } from "@/patterns/OneFilterPicker/internal/ControlledOneFilterPicker"
 
 interface FilterBarProps<Filters extends FiltersDefinition> {
   filters?: Filters

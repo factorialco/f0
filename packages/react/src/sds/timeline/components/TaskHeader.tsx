@@ -1,11 +1,10 @@
+import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon/F0AvatarIcon"
+import { F0Text } from "@/components/F0Text"
 import { Metadata } from "@/experimental/Information/Headers/Metadata"
 import Marker from "@/icons/app/Marker"
 import { cn } from "@/lib/utils"
 
 import type { F0TimelineRowTaskProps } from "../types"
-
-import { F0Text } from "@/components/F0Text"
-import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon/F0AvatarIcon"
 
 export const TaskHeader = ({ props }: { props: F0TimelineRowTaskProps }) => {
   const { status, icon = Marker, title, description, metadata } = props

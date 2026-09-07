@@ -6,7 +6,6 @@ import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
 
 import { PersonProfile } from "../../F0AiChat/components/markdownRenderers/entityRef/entities/person/types"
-
 import type { PopoverPosition } from "../useMentions"
 
 export type MentionPopoverProps = {

@@ -8,16 +8,6 @@ import { cn } from "@/lib/utils"
 import { SectionHeader } from "@/patterns/SectionHeader"
 import { Form as FormProvider } from "@/ui/form"
 
-import type {
-  F0FormErrorTriggerMode,
-  F0FormSchema,
-  F0FormSubmitResult,
-  F0PerSectionSectionConfig,
-  F0PerSectionSubmitConfig,
-  RenderCustomFieldFunction,
-} from "../types"
-import type { F0FormRef, F0FormStateCallback } from "../useF0Form"
-
 import { createConditionalResolver } from "../conditionalResolver"
 import { FIELD_GAP } from "../constants"
 import { F0FormContext } from "../context"
@@ -27,8 +17,18 @@ import {
   buildCardSelectContentMap,
   groupContiguousSwitches,
 } from "../groupingUtils"
+import type {
+  F0FormErrorTriggerMode,
+  F0FormSchema,
+  F0FormSubmitResult,
+  F0PerSectionSectionConfig,
+  F0PerSectionSubmitConfig,
+  RenderCustomFieldFunction,
+} from "../types"
+import type { F0FormRef, F0FormStateCallback } from "../useF0Form"
 import { useSchemaDefinition } from "../useSchemaDefinition"
 import { createZodErrorMap } from "../zodErrorMap"
+
 import { RowRenderer } from "./RowRenderer"
 import { SwitchGroupRenderer } from "./SwitchGroupRenderer"
 

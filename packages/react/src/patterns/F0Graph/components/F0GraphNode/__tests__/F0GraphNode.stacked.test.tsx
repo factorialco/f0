@@ -2,9 +2,8 @@ import { describe, expect, it, vi } from "vitest"
 
 import { fireEvent, screen, zeroRender } from "@/testing/test-utils"
 
-import { F0GraphNode } from "../F0GraphNode"
-
 import { STACKED_NODE_HEIGHT } from "../../../constants"
+import { F0GraphNode } from "../F0GraphNode"
 
 describe("F0GraphNode (stacked)", () => {
   it("renders the title as a tree item with its ARIA position", () => {

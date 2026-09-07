@@ -1,11 +1,11 @@
 import type { ReactElement } from "react"
 
-import type { FiltersDefinition } from "../types"
-
 import {
   OneFilterPicker,
   type OneFilterPickerRootProps,
 } from "../OneFilterPicker"
+import type { FiltersDefinition } from "../types"
+
 import { FilterPickerStateModeContext } from "./stateMode"
 
 type ControlledOneFilterPickerProps<Definition extends FiltersDefinition> =

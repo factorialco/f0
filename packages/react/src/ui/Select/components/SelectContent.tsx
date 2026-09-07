@@ -19,6 +19,7 @@ import { Spinner } from "@/ui/Spinner"
 
 import { VirtualItem } from "../index"
 import { SelectContext } from "../SelectContext"
+
 import * as SelectPrimitive from "./radix-ui"
 
 const VIEWBOX_VERTICAL_PADDING = 8

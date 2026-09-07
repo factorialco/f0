@@ -1,15 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 
 import type { F0DataChartBarProps } from "../../types"
-
 import { resolveChartSize } from "../../utils/responsive"
 import { useAxisLabelTooltip } from "../../utils/useAxisLabelTooltip"
 import { useChartTheme } from "../../utils/useChartTheme"
 import { useContainerSize } from "../../utils/useContainerSize"
 import { useEChartsInstance } from "../../utils/useEChartsInstance"
-import { usePointClick } from "../../utils/usePointClick"
 import { useLegendInteraction } from "../../utils/useLegendInteraction"
 import { useLegendSelection } from "../../utils/useLegendSelection"
+import { usePointClick } from "../../utils/usePointClick"
+
 import {
   expandedHorizontalChartHeight,
   horizontalCategoryWindow,

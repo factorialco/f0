@@ -1,9 +1,7 @@
 import type * as echarts from "echarts"
-
 import { type RefObject, useMemo } from "react"
 
 import type { F0DataChartHeatmapProps } from "../../types"
-
 import { lerpColor, paletteColor } from "../../utils/colors"
 import {
   buildCategoryAxis,

@@ -2,9 +2,10 @@ import { F0TextInput } from "@/components/F0TextInput"
 import { RecordType } from "@/hooks/datasource/types/records.typings"
 import { cn } from "@/lib/utils"
 
-import { EditableCellProps } from "."
 import { BaseCell } from "./BaseCell"
 import { resolveTextCellIcon } from "./textIcon"
+
+import { EditableCellProps } from "."
 
 export function TextCell<R extends RecordType>({
   editableColumn,

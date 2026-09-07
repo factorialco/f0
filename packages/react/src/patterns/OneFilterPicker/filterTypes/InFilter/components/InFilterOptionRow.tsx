@@ -3,13 +3,14 @@
 import { useCallback, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
-import { OneEllipsis } from "@/lib/OneEllipsis"
 import { ChevronDown, ChevronRight } from "@/icons/app"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 
 import { InFilterOptionItem } from "../types"
 import { cacheLabel, cacheNestedLabel } from "../useLoadOptions"
+
 import { InFilterOptionCheckbox } from "./InFilterOptionCheckbox"
 import { hasSelectedDescendant, optionMatchesSearch } from "./option-utils"
 

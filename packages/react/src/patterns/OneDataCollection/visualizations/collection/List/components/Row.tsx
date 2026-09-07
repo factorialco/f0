@@ -1,10 +1,5 @@
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { F0Link } from "@/components/F0Link"
-import { ItemActionsMobile } from "@/patterns/OneDataCollection/components/itemActions/ItemActionsMobile/ItemActionsMobile"
-import { ItemActionsRow } from "@/patterns/OneDataCollection/components/itemActions/ItemActionsRow/ItemActionsRow"
-import { ItemActionsRowContainer } from "@/patterns/OneDataCollection/components/itemActions/ItemActionsRowContainer"
-import { useItemActions } from "@/patterns/OneDataCollection/components/itemActions/useItemActions"
-import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource/types"
 import {
   FiltersDefinition,
   GroupingDefinition,
@@ -13,12 +8,18 @@ import {
 } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
+import { ItemActionsMobile } from "@/patterns/OneDataCollection/components/itemActions/ItemActionsMobile/ItemActionsMobile"
+import { ItemActionsRow } from "@/patterns/OneDataCollection/components/itemActions/ItemActionsRow/ItemActionsRow"
+import { ItemActionsRowContainer } from "@/patterns/OneDataCollection/components/itemActions/ItemActionsRowContainer"
+import { useItemActions } from "@/patterns/OneDataCollection/components/itemActions/useItemActions"
+import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource/types"
 
 import { ItemActionsDefinition } from "../../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../../navigationFilters/types"
 import { renderProperty } from "../../../../property-render"
 import { SummariesDefinition } from "../../../../summary"
 import { ItemDefinition, ListPropertyDefinition } from "../types"
+
 import { ItemTeaser } from "./ItemTeaser"
 
 type RowProps<

@@ -23,6 +23,7 @@ import {
 } from "../../utils"
 import { rangeSeparator } from "../consts"
 import { DateStringFormat, GranularityDefinition } from "../types"
+
 import { DayView } from "./DayView"
 
 export const DAY_FORMAT = "dd/MM/yyyy"

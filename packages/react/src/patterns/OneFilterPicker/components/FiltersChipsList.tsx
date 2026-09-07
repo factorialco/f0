@@ -4,8 +4,6 @@ import { F0Button } from "@/components/F0Button"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { useI18n } from "@/lib/providers/i18n"
 
-import type { FiltersDefinition, FiltersState, FilterValue } from "../types"
-
 import {
   FilterDefinitionsByType,
   FilterTypeDefinition,
@@ -13,6 +11,8 @@ import {
   getFilterType,
 } from "../filterTypes"
 import { getActiveFilterKeys } from "../internal/getActiveFilterKeys"
+import type { FiltersDefinition, FiltersState, FilterValue } from "../types"
+
 import { FilterChipButton } from "./FilterChipButton"
 
 interface FiltersChipsListProps<Filters extends FiltersDefinition> {

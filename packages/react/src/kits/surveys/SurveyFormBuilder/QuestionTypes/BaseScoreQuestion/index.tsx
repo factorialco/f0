@@ -4,6 +4,7 @@ import {
   BaseQuestion,
   BaseQuestionPropsForOtherQuestionComponents,
 } from "../BaseQuestion"
+
 import { ScoreEditOption } from "./ScoreEditOption"
 
 export type BaseScoreQuestionProps =

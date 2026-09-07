@@ -1,8 +1,6 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useEffect } from "react"
 
-import type { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
-
 import {
   isInfiniteScrollPagination,
   RecordType,
@@ -15,12 +13,14 @@ import { cn } from "@/lib/utils"
 import { useDataCollectionData } from "@/patterns/OneDataCollection/hooks/useDataCollectionData"
 import { useInfiniteScrollPagination } from "@/patterns/OneDataCollection/hooks/useInfiniteScrollPagination"
 import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
+import type { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import { GroupHeader } from "@/ui/GroupHeader/GroupHeader"
 
 import { PagesPagination } from "../../../components/PagesPagination"
 import { ItemActionsDefinition } from "../../../item-actions"
 import { SummariesDefinition } from "../../../summary"
 import { CollectionProps, GroupingDefinition } from "../../../types"
+
 import { ListGroup } from "./components/ListGroup"
 import { ListSkeleton } from "./components/ListSkeleton"
 import { ListVisualizationOptions } from "./types"

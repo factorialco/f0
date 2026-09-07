@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest"
 
 import type { Numeric, NumericValue } from "../types"
-
 import { isEmptyNumeric } from "../utils/isEmptyNumeric"
 
 describe("isEmptyNumeric", () => {

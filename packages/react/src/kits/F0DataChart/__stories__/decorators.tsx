@@ -1,8 +1,7 @@
 import type { StoryFn } from "@storybook/react-vite"
 
-import type { F0DataChartProps } from "../types"
-
 import { F0DataChart } from "../F0DataChart"
+import type { F0DataChartProps } from "../types"
 
 export const ChartDecorator = (Story: StoryFn) => (
   <div className="h-[360px] w-[600px]">

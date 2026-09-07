@@ -1,8 +1,7 @@
-import type { GridStack, GridStackOptions, GridStackWidget } from "gridstack"
-
-import { createContext, useContext } from "react"
-
 import "./types"
+
+import type { GridStack, GridStackOptions, GridStackWidget } from "gridstack"
+import { createContext, useContext } from "react"
 
 export type GridStackWidgetWithRequiredId = GridStackWidget & {
   id: Required<GridStackWidget>["id"]

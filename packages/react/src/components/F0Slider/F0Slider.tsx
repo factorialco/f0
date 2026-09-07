@@ -9,9 +9,9 @@ import {
   useState,
 } from "react"
 
-import { cn, focusRing } from "@/lib/utils"
 import { InputMessages } from "@/components/F0InputField/components/InputMessages"
 import { Label } from "@/components/F0InputField/components/Label"
+import { cn, focusRing } from "@/lib/utils"
 import { Slider, SliderRange, SliderThumb, SliderTrack } from "@/ui/slider"
 
 import { SliderRangeLabels } from "./components/SliderRangeLabels"

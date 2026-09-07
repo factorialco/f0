@@ -1,12 +1,12 @@
 import { act, renderHook } from "@testing-library/react"
 import { ReactNode } from "react"
-import { Observable } from "zen-observable-ts"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import { Observable } from "zen-observable-ts"
 
 import { RecordType } from "@/hooks/datasource"
 import { ChildrenResponse } from "@/hooks/datasource/types/nested.typings"
-import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource/types"
 import { PromiseState } from "@/lib/promise-to-observable"
+import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource/types"
 
 import { NestedDataProvider } from "../../providers/NestedProvider"
 import { useLoadChildren } from "../useLoadChildren"

@@ -28,11 +28,11 @@ const meta: Meta = {
 export default meta
 
 import { Await } from "@/lib/Await"
+import { DEPARTMENTS_MOCK } from "@/mocks"
 import {
   generateMockUsers,
   MockUser,
 } from "@/patterns/OneDataCollection/__stories__/mockData"
-import { DEPARTMENTS_MOCK } from "@/mocks"
 
 const mockUsers: MockUser[] = generateMockUsers(30)
 

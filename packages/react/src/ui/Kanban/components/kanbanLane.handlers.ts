@@ -1,6 +1,5 @@
-import type { DropTargetRecord } from "@atlaskit/pragmatic-drag-and-drop/dist/types/internal-types"
-
 import { extractClosestEdge } from "@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge"
+import type { DropTargetRecord } from "@atlaskit/pragmatic-drag-and-drop/dist/types/internal-types"
 
 import type { KanbanOnMoveParam } from "../types"
 

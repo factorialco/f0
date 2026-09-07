@@ -14,8 +14,8 @@
 // carries the fields it actually uses. The story wires it up via
 // `FlowConfigProvider` / `useFlowConfig`.
 
-import type { IconType } from "@/components/F0Icon"
 import type { ModuleId } from "@/components/avatars/F0AvatarModule/modules"
+import type { IconType } from "@/components/F0Icon"
 import { Files } from "@/icons/app"
 import type { ClarifyingOption } from "@/kits/ai/F0ClarifyingPanel"
 import type { SurveyAnswers } from "@/kits/surveys/SurveyAnsweringForm"

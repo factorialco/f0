@@ -25,6 +25,7 @@ import {
   shouldPrefetchOlder,
   shouldRepinOnGrowth,
 } from "../utils/virtuoso-chat"
+
 import { useTranscriptResizeAnchor } from "./useTranscriptResizeAnchor"
 
 type ScrollMessage = { id: string; isMine?: boolean }

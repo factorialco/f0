@@ -7,6 +7,7 @@ import {
 } from "@/components/RichText/F0RichTextEditor"
 
 import type { ResolvedField } from "../types"
+
 import type { F0RichTextField, RichTextValue } from "./types"
 
 interface RichTextFieldRendererProps {

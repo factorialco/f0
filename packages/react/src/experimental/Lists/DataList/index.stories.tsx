@@ -1,6 +1,7 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
 
 import { Check } from "../../../icons/app"
+
 import { DataList } from "./index"
 
 const meta: Meta<typeof DataList> = {

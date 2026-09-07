@@ -5,8 +5,9 @@ import { ChevronUp } from "@/icons/app"
 import ChevronDown from "@/icons/app/ChevronDown"
 import { cn, focusRing } from "@/lib/utils"
 
-import type { ChatThread } from "../useChatHistory"
 import type { ThreadActionHandlers } from "../types"
+import type { ChatThread } from "../useChatHistory"
+
 import { ThreadItem } from "./ThreadItem"
 
 interface CollapsibleGroupProps extends ThreadActionHandlers {

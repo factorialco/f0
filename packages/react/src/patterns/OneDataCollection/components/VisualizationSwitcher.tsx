@@ -1,7 +1,7 @@
+import { F0SegmentedControl } from "@/experimental/Actions/F0SegmentedControl"
 import { GroupingDefinition, RecordType } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
 import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
-import { F0SegmentedControl } from "@/experimental/Actions/F0SegmentedControl"
 
 import { ItemActionsDefinition } from "../item-actions"
 import { NavigationFiltersDefinition } from "../navigationFilters/types"

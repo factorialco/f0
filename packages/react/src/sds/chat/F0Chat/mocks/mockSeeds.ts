@@ -16,6 +16,7 @@ import {
   type F0ChatSystemEvent,
   type F0ChatUser,
 } from "../types"
+
 import { MOCK_VIDEO_CAPTIONS, MOCK_VIDEO_DESCRIPTIONS } from "./constants"
 
 // ---------------------------------------------------------------------------

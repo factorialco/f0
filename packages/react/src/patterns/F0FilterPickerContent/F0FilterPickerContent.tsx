@@ -10,15 +10,15 @@ import { DataTestIdWrapper } from "@/lib/data-testid"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
+import { getFilterType } from "../OneFilterPicker/filterTypes"
 import type {
   FilterTypeContext,
   FilterTypeSchema,
 } from "../OneFilterPicker/filterTypes/types"
 import type { FiltersDefinition, FiltersState } from "../OneFilterPicker/types"
-import type { F0FilterPickerContentProps } from "./types"
 
-import { getFilterType } from "../OneFilterPicker/filterTypes"
 import { FilterPickerInternal } from "./internal"
+import type { F0FilterPickerContentProps } from "./types"
 
 const DEFAULT_FORM_HEIGHT = 388
 

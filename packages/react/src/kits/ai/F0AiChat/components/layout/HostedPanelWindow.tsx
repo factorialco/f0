@@ -5,6 +5,7 @@ import { useReducedMotion } from "@/lib/a11y"
 import { Skeleton } from "@/ui/skeleton"
 
 import { useAiChat } from "../../providers/AiChatStateProvider"
+
 import { SidebarWindow } from "./ChatWindow"
 
 /**

@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { useState } from "react"
 
-import { CheckboxQuestion } from "."
-import { SurveyFormBuilderElement, QuestionElement } from "../../types"
 import { SurveyFormBuilderProvider } from "../../Context"
+import { SurveyFormBuilderElement, QuestionElement } from "../../types"
+
+import { CheckboxQuestion } from "."
 
 const meta: Meta<typeof CheckboxQuestion> = {
   title: "Surveys/SurveyFormBuilder/CheckboxQuestion",

@@ -1,4 +1,5 @@
 import type { FiltersDefinition, FiltersState } from "../OneFilterPicker/types"
+
 import type { FilterPickerBaseProps } from "./internal-types"
 
 /**

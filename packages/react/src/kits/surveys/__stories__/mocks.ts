@@ -1,5 +1,4 @@
 import type { RecordType } from "@/hooks/datasource"
-
 import { createDataSourceDefinition } from "@/hooks/datasource"
 import { Building, Money as MoneyIcon, People as PeopleIcon } from "@/icons/app"
 

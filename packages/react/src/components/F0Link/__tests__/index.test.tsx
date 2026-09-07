@@ -1,7 +1,7 @@
-import { screen, zeroRender as render } from "@/testing/test-utils"
 import { describe, expect, it, vi } from "vitest"
 
 import { useNavigation } from "@/lib/linkHandler"
+import { screen, zeroRender as render } from "@/testing/test-utils"
 
 import { F0Link } from ".."
 

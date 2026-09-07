@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { useCallback, useRef, useState } from "react"
 
+import { F0Button } from "@/components/F0Button"
 import type {
   FileUploadHookReturn,
   FileUploadResult,
@@ -9,13 +9,10 @@ import type {
   UseFileUpload,
 } from "@/patterns/F0Form/fields/file/types"
 
-import { F0Button } from "@/components/F0Button"
-
-import type { SurveyAnsweringFormProps } from "../types"
-
 import { mockDatasets } from "../../__stories__/mocks"
 import { SurveyFormBuilderElement } from "../../SurveyFormBuilder/types"
 import { SurveyAnsweringForm } from "../SurveyAnsweringForm"
+import type { SurveyAnsweringFormProps } from "../types"
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 

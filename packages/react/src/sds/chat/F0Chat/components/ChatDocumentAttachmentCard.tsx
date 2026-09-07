@@ -12,12 +12,13 @@ import { cn, focusRing } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
 
 import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
-import { useChatDocumentPreview } from "../providers/ChatUIProvider"
 import { useChatSurface } from "../providers/ChatSurfaceProvider"
+import { useChatDocumentPreview } from "../providers/ChatUIProvider"
 import { useF0ChatEmit } from "../providers/F0ChatProvider"
 import { type F0ChatFileAttachment } from "../types"
 import { attachedKindOf, type ChatDocumentKind } from "../utils/attachments"
 import { triggerDownload } from "../utils/download"
+
 import { ClampText } from "./ClampText"
 
 // Every snapshot renderer is heavy in its own way (pdf.js, SheetJS,

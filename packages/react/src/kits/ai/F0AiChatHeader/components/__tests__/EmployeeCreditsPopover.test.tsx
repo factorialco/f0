@@ -1,12 +1,14 @@
-import { describe, expect, it, vi } from "vitest"
 import "@testing-library/jest-dom/vitest"
+
 import { userEvent } from "@testing-library/user-event"
+import { describe, expect, it, vi } from "vitest"
+
+import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
 
 import type {
   AiChatEmployeeCredits,
   EmployeeCreditsUsage,
 } from "../../../F0AiChat/types"
-import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
 
 // Mock reduced motion to true so motion skips the gradient animation in jsdom
 // (jsdom's cssstyle parser throws on animated linear-gradient backgroundImage)

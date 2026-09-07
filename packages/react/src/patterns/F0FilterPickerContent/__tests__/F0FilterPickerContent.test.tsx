@@ -1,11 +1,11 @@
-import userEvent from "@testing-library/user-event"
 import "@testing-library/jest-dom/vitest"
+
+import userEvent from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
 
 import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
 
 import type { FiltersDefinition } from "../../OneFilterPicker/types"
-
 import { F0FilterPickerContent } from "../F0FilterPickerContent"
 
 const definition = {

@@ -1,12 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { fn } from "storybook/test"
 
 import { I18nProvider, defaultTranslations } from "@/lib/providers/i18n"
 
-import type { F0QuestionCardOption } from "../types"
-
 import { F0QuestionCardMultiStep } from ".."
+import type { F0QuestionCardOption } from "../types"
 
 const multiSteps = [
   {

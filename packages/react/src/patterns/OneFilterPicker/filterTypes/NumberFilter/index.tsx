@@ -1,6 +1,7 @@
 import { type BaseFilterDefinition } from "../filters"
 import { FilterTypeDefinition } from "../types"
 import { getOptionsWithDefaults } from "../utils"
+
 import {
   NumberFilter,
   NumberFilterOptions,

@@ -22,6 +22,7 @@ import { useF0ChatStable } from "../providers/F0ChatProvider"
 import { type F0ChatMessage, type F0ChatUser } from "../types"
 import { microEnterTransition } from "../utils/chat-motion"
 import { hasAnyMessageAction } from "../utils/message-actions"
+
 import { bubbleCornerClass, ChatBubble } from "./ChatBubble"
 import { ChatMessageActions } from "./ChatMessageActions"
 import { ChatMessageAttachments } from "./ChatMessageAttachments"

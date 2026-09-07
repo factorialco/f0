@@ -17,7 +17,6 @@ import {
 import { useZoomAtLeast } from "../hooks/useZoomAtLeast"
 import type { F0MapPoint } from "../types"
 
-import { F0MapCluster } from "./internal/F0MapCluster"
 import { F0MapMarker, type F0MapMarkerVariantProps } from "./F0MapMarker"
 import {
   getMarkerMetrics,
@@ -25,6 +24,7 @@ import {
   SELECTED_DOT_R,
   type BaseMapMarkerSize,
 } from "./internal/BaseMapMarker"
+import { F0MapCluster } from "./internal/F0MapCluster"
 
 // At/above this zoom the basemap starts drawing individual POI names, so the
 // markers step up a size to keep their weight against the busier map.

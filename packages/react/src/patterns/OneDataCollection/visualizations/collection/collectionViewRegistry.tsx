@@ -1,16 +1,17 @@
 import { IconType } from "@/components/F0Icon"
-import { FiltersDefinition } from "@/patterns/OneFilterPicker"
-import { ItemActionsDefinition } from "@/patterns/OneDataCollection/item-actions"
-import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import {
   GroupingDefinition,
   RecordType,
   SortingsDefinition,
 } from "@/hooks/datasource"
 import { Kanban, List, Organization, Pencil, Table } from "@/icons/app"
+import { ItemActionsDefinition } from "@/patterns/OneDataCollection/item-actions"
+import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
+import { FiltersDefinition } from "@/patterns/OneFilterPicker"
 
 import { DataCollectionSettingsContextType } from "../../Settings/SettingsProvider"
 import { SummariesDefinition } from "../../types"
+
 import { CardCollection, CardCollectionProps } from "./Card"
 import {
   EditableTableCollection,

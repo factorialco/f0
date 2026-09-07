@@ -1,14 +1,14 @@
 import { useRef } from "react"
 
 import type { F0DataChartScatterProps } from "../../types"
-
 import { resolveChartSize } from "../../utils/responsive"
 import { useAxisLabelTooltip } from "../../utils/useAxisLabelTooltip"
 import { useChartTheme } from "../../utils/useChartTheme"
 import { useContainerSize } from "../../utils/useContainerSize"
 import { useEChartsInstance } from "../../utils/useEChartsInstance"
-import { usePointClick } from "../../utils/usePointClick"
 import { useLegendInteraction } from "../../utils/useLegendInteraction"
+import { usePointClick } from "../../utils/usePointClick"
+
 import { useScatterChartOptions } from "./useScatterChartOptions"
 
 export const ScatterChart = (props: F0DataChartScatterProps) => {

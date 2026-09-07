@@ -1,11 +1,9 @@
 import type * as echarts from "echarts"
-
 import { type RefObject, useMemo } from "react"
 
 import { useI18n } from "@/lib/providers/i18n"
 
 import type { F0DataChartPieProps } from "../../types"
-
 import {
   resolveChartColorToken,
   resolveDataPointColor,

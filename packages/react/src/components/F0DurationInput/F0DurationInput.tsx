@@ -11,10 +11,10 @@ import {
 } from "react"
 
 import { F0Icon } from "@/components/F0Icon"
-import { Bullet } from "@/icons/app"
-import { cn } from "@/lib/utils"
 import { InputMessages } from "@/components/F0InputField/components/InputMessages"
 import { Label } from "@/components/F0InputField/components/Label"
+import { Bullet } from "@/icons/app"
+import { cn } from "@/lib/utils"
 
 import type {
   DurationFields,

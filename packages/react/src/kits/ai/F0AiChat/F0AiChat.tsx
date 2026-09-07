@@ -6,7 +6,6 @@ import Cross from "@/icons/app/Cross"
 import { useReducedMotion } from "@/lib/a11y"
 import { experimentalComponent } from "@/lib/experimental"
 import { useI18n } from "@/lib/providers/i18n"
-
 import { Skeleton } from "@/ui/skeleton"
 
 import { SidebarWindow } from "./components/layout/ChatWindow"

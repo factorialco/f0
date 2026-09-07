@@ -9,7 +9,6 @@ import type {
   F0DataChartLineSeries,
   F0DataChartLineType,
 } from "../../types"
-
 import { paletteColor, resolveChartColorToken } from "../../utils/colors"
 import {
   buildBaseChartOptions,

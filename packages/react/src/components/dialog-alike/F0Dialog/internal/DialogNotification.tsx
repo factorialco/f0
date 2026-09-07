@@ -5,6 +5,7 @@ import {
 import { DialogDescription, DialogTitle } from "@/ui/Dialog"
 
 import { F0DialogAction } from "../types"
+
 import { DialogInternal } from "./DialogInternal"
 
 type F0DialogNotificationProps = {

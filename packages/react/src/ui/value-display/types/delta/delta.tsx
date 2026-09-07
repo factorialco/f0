@@ -1,9 +1,9 @@
+import { F0Icon, type IconType } from "@/components/F0Icon"
 /**
  * Delta cell type for displaying single delta values.
  * Used for displaying changes or differences in data collections.
  */
 import { ArrowDown, ArrowUp } from "@/icons/app"
-import { F0Icon, type IconType } from "@/components/F0Icon"
 
 type DeltaStatus = "positive" | "negative"
 

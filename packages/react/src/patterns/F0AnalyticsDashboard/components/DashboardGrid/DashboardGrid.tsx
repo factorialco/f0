@@ -1,15 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
+import { F0Icon } from "@/components/F0Icon"
 import type { DropdownItem as DropdownItemType } from "@/experimental/Navigation/Dropdown"
+import Handle from "@/icons/app/Handle"
+import { WIDGET_DRAG_END, WIDGET_DRAG_START } from "@/lib/dnd/widgetDragEvents"
+import { cn } from "@/lib/utils"
 import type {
   FiltersDefinition,
   FiltersState,
 } from "@/patterns/OneFilterPicker/types"
-
-import { F0Icon } from "@/components/F0Icon"
-import Handle from "@/icons/app/Handle"
-import { WIDGET_DRAG_END, WIDGET_DRAG_START } from "@/lib/dnd/widgetDragEvents"
-import { cn } from "@/lib/utils"
 
 import type {
   DashboardItem as DashboardItemType,
@@ -18,7 +17,6 @@ import type {
   F0AnalyticsDashboardAskAiTarget,
   F0AnalyticsDashboardAskAiTargetWithQuote,
 } from "../../types"
-
 import { ChartItem, chartItemFitsContent } from "../ChartItem/ChartItem"
 import { CollectionItem } from "../CollectionItem/CollectionItem"
 import { DashboardItem } from "../DashboardItem/DashboardItem"

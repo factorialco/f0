@@ -11,18 +11,19 @@ import {
 import { AvatarVariant, F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
-import { OneEllipsis } from "@/lib/OneEllipsis"
-import { Counter } from "@/ui/Counter"
 import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
 import { NavigationItem } from "@/experimental/Navigation/utils"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { Delete, EllipsisHorizontal, MoveDown, MoveUp } from "@/icons/app"
 import { Link, useNavigation } from "@/lib/linkHandler"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { useTouchScreen } from "@/lib/useTouchScreen"
 import { cn, focusRing } from "@/lib/utils"
+import { Counter } from "@/ui/Counter"
 
 import { SidebarCollapsibleSection } from "../CollapsibleSection"
+
 import { DragProvider, useDragContext } from "./DragContext"
 
 export interface MenuItem extends NavigationItem {

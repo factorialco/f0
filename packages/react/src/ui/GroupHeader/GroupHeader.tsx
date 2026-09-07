@@ -2,9 +2,9 @@ import { useEffect, useState } from "react"
 
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { Await } from "@/lib/Await"
-import { Counter } from "@/ui/Counter"
 import { cn, focusRing } from "@/lib/utils"
 import { ChevronToggle } from "@/ui/ChevronToggle/ChevronToggle"
+import { Counter } from "@/ui/Counter"
 import { Skeleton } from "@/ui/skeleton"
 
 type GroupHeaderProps = {

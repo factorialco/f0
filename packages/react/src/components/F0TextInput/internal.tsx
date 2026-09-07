@@ -5,10 +5,10 @@ import {
   useState,
 } from "react"
 
+import { InputFieldProps } from "@/components/F0InputField"
 import { EyeInvisible, EyeVisible, LockLocked } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { Input as ShadcnInput } from "@/ui/input"
-import { InputFieldProps } from "@/components/F0InputField"
 
 export type InputInternalProps = Pick<
   ComponentProps<typeof ShadcnInput>,

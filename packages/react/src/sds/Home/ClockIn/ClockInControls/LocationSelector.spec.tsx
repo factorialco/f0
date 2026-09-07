@@ -6,8 +6,8 @@ import { Office as OfficeIcon } from "@/icons/app"
 import { screen, zeroRender as render } from "@/testing/test-utils"
 
 import { type ClockInLocation, LocationSelector } from "./LocationSelector"
-import { flattenTree } from "./TreeSelector"
 import { toLocationTree } from "./LocationSelector"
+import { flattenTree } from "./TreeSelector"
 
 /** Three levels: type → city → work area, plus one type with nothing below it. */
 const NESTED: ClockInLocation[] = [

@@ -6,6 +6,7 @@ import {
   Platform,
   UserPlatformProvider,
 } from "@/lib/providers/user-platafform/UserPlatformProvider"
+
 import { Shortcut } from "./index"
 
 const renderShortcut = (

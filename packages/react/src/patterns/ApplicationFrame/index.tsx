@@ -14,10 +14,6 @@ import {
   AiPromotionChatProviderProps,
 } from "@/experimental/AiPromotionChat"
 import { useAiPromotionChat } from "@/experimental/AiPromotionChat/providers/AiPromotionChatStateProvider"
-import { useReducedMotion } from "@/lib/a11y"
-import { experimentalComponent } from "@/lib/experimental"
-import { useI18n } from "@/lib/providers/i18n"
-import { cn, focusRing } from "@/lib/utils"
 import {
   F0AiChat,
   F0AiChatProvider,
@@ -27,6 +23,10 @@ import { HostedPanelWindow } from "@/kits/ai/F0AiChat/components/layout/HostedPa
 import { useAiChat } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
 import { DEFAULT_CHAT_WIDTH } from "@/kits/ai/F0AiChat/utils/constants"
 import { F0CanvasPanel } from "@/kits/ai/F0CanvasPanel"
+import { useReducedMotion } from "@/lib/a11y"
+import { experimentalComponent } from "@/lib/experimental"
+import { useI18n } from "@/lib/providers/i18n"
+import { cn, focusRing } from "@/lib/utils"
 
 import { FrameProvider, SidebarState, useSidebar } from "./FrameProvider"
 

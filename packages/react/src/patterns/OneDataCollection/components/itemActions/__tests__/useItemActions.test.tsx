@@ -1,11 +1,11 @@
 import { describe, expect, it, vi } from "vitest"
 
 import type { GroupingDefinition, SortingsDefinition } from "@/hooks/datasource"
-import type { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource/types"
 import { ItemActionsDefinition } from "@/patterns/OneDataCollection/item-actions"
 import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import { SummariesDefinition } from "@/patterns/OneDataCollection/summary"
+import type { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import { zeroRenderHook as renderHook } from "@/testing/test-utils"
 
 import { useItemActions } from "../useItemActions"

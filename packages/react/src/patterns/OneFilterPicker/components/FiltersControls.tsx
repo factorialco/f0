@@ -14,20 +14,20 @@ import {
 
 import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
-import { F0DialogContext } from "@/patterns/F0Dialog"
-import { FilterPickerInternal } from "@/patterns/F0FilterPickerContent/internal"
 import { Filter } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
+import { F0DialogContext } from "@/patterns/F0Dialog"
+import { FilterPickerInternal } from "@/patterns/F0FilterPickerContent/internal"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
-
-import type { FiltersDefinition, FiltersMode, FiltersState } from "../types"
 
 import { ArrowLeft } from "../../../icons/app"
 import { getFilterType } from "../filterTypes"
 import { FilterTypeContext, FilterTypeSchema } from "../filterTypes/types"
-import { getClearedFiltersValue } from "../internal/getClearedFiltersValue"
 import { getActiveFilterKeys } from "../internal/getActiveFilterKeys"
 import { getActiveFiltersValue } from "../internal/getActiveFiltersValue"
+import { getClearedFiltersValue } from "../internal/getClearedFiltersValue"
+import type { FiltersDefinition, FiltersMode, FiltersState } from "../types"
+
 import { FilterContent } from "./FilterContent"
 import { FilterList } from "./FilterList"
 

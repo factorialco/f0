@@ -1,5 +1,13 @@
-import { afterEach, describe, expect, it, vi } from "vitest"
 import "@testing-library/jest-dom/vitest"
+
+import { afterEach, describe, expect, it, vi } from "vitest"
+
+import { DataCollectionStorageProvider } from "@/lib/providers/datacollection/DataCollectionStorageProvider"
+import {
+  DataCollectionStorage,
+  DataCollectionStorageHandler,
+} from "@/lib/providers/datacollection/types"
+import type { PresetsDefinition } from "@/patterns/OneFilterPicker/types"
 import {
   cleanup,
   screen,
@@ -8,19 +16,12 @@ import {
   zeroRender,
 } from "@/testing/test-utils"
 
-import { DataCollectionStorageProvider } from "@/lib/providers/datacollection/DataCollectionStorageProvider"
-import {
-  DataCollectionStorage,
-  DataCollectionStorageHandler,
-} from "@/lib/providers/datacollection/types"
-import type { PresetsDefinition } from "@/patterns/OneFilterPicker/types"
-
 import { useDataCollectionSource } from "../hooks/useDataCollectionSource"
+import { OneDataCollection } from "../index"
 import {
   encodeSharedPreset,
   SHARED_PRESET_PARAM,
 } from "../internal/sharedPreset"
-import { OneDataCollection } from "../index"
 
 type Row = { name: string; department: string }
 

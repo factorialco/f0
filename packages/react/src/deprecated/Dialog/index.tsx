@@ -5,6 +5,7 @@ import {
   type AlertAvatarProps,
 } from "@/components/avatars/F0AvatarAlert"
 import { F0Button, F0ButtonProps } from "@/components/F0Button"
+import { Component } from "@/lib/component/component"
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import {
@@ -15,7 +16,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/ui/Dialog/dialog"
-import { Component } from "@/lib/component/component"
 
 type BaseAction = Pick<F0ButtonProps, "label" | "onClick" | "icon" | "disabled">
 

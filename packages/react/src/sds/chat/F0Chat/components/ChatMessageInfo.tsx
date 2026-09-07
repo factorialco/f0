@@ -1,9 +1,9 @@
 import { useEffect, useRef, type ReactNode } from "react"
 
-import { ArrowLeft } from "@/icons/app"
-import { useI18n } from "@/lib/providers/i18n"
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { ButtonInternal } from "@/components/F0Button/internal"
+import { ArrowLeft } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 
 import { useF0Chat } from "../providers/F0ChatProvider"

@@ -1,6 +1,5 @@
-import { useState } from "react"
-
 import type { Meta, StoryObj } from "@storybook/react-vite"
+import { useState } from "react"
 
 import {
   Clock,
@@ -21,6 +20,7 @@ import {
   type HomeWidgetSlot,
   type SlotRenderers,
 } from "../slotRenderers"
+
 import { SlotWidget } from "./index"
 
 const meta = {

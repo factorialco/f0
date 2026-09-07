@@ -1,5 +1,7 @@
-import { describe, expect, it, vi } from "vitest"
 import "@testing-library/jest-dom/vitest"
+
+import { describe, expect, it, vi } from "vitest"
+
 import { Briefcase, Check, Cross } from "@/icons/app"
 import {
   zeroRender as render,

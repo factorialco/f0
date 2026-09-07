@@ -6,10 +6,10 @@ import {
   findEmojiByShortcode,
   searchEmoji,
 } from "../utils/emoji-index"
-import { detectMaxEmojiVersion } from "../utils/emoji-support"
 import { type EmojiLocaleTerms } from "../utils/emoji-locale"
-import { useEmojiLocaleTerms } from "./useEmojiLocaleTerms"
+import { detectMaxEmojiVersion } from "../utils/emoji-support"
 
+import { useEmojiLocaleTerms } from "./useEmojiLocaleTerms"
 import {
   getTextareaCaretCoordinates,
   type PopoverPosition,

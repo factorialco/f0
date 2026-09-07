@@ -4,8 +4,9 @@ import { ZodTypeAny } from "zod"
 import { F0Checkbox } from "@/components/F0Checkbox"
 
 import { isZodType, unwrapZodSchema } from "../../f0Schema"
-import type { F0CheckboxField } from "./types"
 import type { ResolvedField } from "../types"
+
+import type { F0CheckboxField } from "./types"
 
 interface CheckboxFieldRendererProps {
   field: ResolvedField<F0CheckboxField>

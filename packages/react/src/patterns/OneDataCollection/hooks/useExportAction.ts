@@ -10,10 +10,8 @@ import {
   PaginatedResponse,
 } from "@/hooks/datasource"
 import { Download } from "@/icons/app"
-import { useI18n } from "@/lib/providers/i18n"
 import { PromiseState } from "@/lib/promise-to-observable"
-
-import type { Visualization } from "../visualizations/collection"
+import { useI18n } from "@/lib/providers/i18n"
 
 import { SecondaryActionItem } from "../actions"
 import { DataCollectionSource } from "../hooks/useDataCollectionSource/types"
@@ -22,6 +20,7 @@ import { NavigationFiltersDefinition } from "../navigationFilters/types"
 import { useDataCollectionSettings } from "../Settings/SettingsProvider"
 import { SummariesDefinition } from "../summary"
 import { downloadAsCSV } from "../utils/csvExport"
+import type { Visualization } from "../visualizations/collection"
 
 /** Maximum number of records to export as a safety cap */
 const MAX_EXPORT_ROWS = 10_000

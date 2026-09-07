@@ -1,3 +1,5 @@
+import "@testing-library/jest-dom/vitest"
+
 import {
   afterAll,
   afterEach,
@@ -8,7 +10,7 @@ import {
   it,
   vi,
 } from "vitest"
-import "@testing-library/jest-dom/vitest"
+
 import { act, zeroRender as render } from "@/testing/test-utils"
 
 import { F0DataChart } from "../F0DataChart"

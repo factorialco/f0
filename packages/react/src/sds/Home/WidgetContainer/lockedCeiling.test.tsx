@@ -5,8 +5,10 @@ import { Clock } from "@/icons/app"
 import { act, zeroRender } from "@/testing/test-utils"
 
 import type { HomeWidgetItem } from "../slotRenderers"
-import { WidgetContainer } from "./index"
+
 import { lockedCeiling, noHigherThan, topPins } from "./lockedCeiling"
+
+import { WidgetContainer } from "./index"
 
 /**
  * WHAT THE COLUMN HANDED DND-KIT. There is nothing in the DOM to read a

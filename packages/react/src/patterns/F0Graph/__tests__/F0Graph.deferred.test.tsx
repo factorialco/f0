@@ -3,9 +3,8 @@ import { beforeAll, describe, expect, it, vi } from "vitest"
 
 import { zeroRender, screen } from "@/testing/test-utils"
 
-import type { DeferredNodesPayload, GraphNode } from "../types"
-
 import { F0Graph, type F0GraphNodeRenderContext } from "../F0Graph"
+import type { DeferredNodesPayload, GraphNode } from "../types"
 
 // ─── Helpers ───────────────────────────────────────────────────
 

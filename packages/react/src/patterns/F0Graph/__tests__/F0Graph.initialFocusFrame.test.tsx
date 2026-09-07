@@ -11,9 +11,9 @@ import {
 
 import { zeroRender } from "@/testing/test-utils"
 
-import type { GraphNode } from "../types"
 import { FOCUS_SETTLE_DELAY_MS } from "../constants"
 import { F0Graph } from "../F0Graph"
+import type { GraphNode } from "../types"
 
 // The initial `initialFocusNodeId` frame flies to the node the same way a node
 // click does — a DEFERRED fly (so React Flow has measured its container by then;

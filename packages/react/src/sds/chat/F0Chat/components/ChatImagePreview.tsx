@@ -14,6 +14,7 @@ import { useChatImagePreview } from "../providers/ChatUIProvider"
 import { useF0ChatEmit } from "../providers/F0ChatProvider"
 import { EASE_OUT_SWIFT } from "../utils/chat-motion"
 import { triggerDownload } from "../utils/download"
+
 import { FadeInImage } from "./FadeInImage"
 
 /** A control pill — a neutral icon button on an opaque chip so it reads over the

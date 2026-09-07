@@ -17,6 +17,7 @@ import {
   CHAT_MEDIA_WIDTH_CLASS,
   CHAT_VIDEO_SURFACE_CLASS,
 } from "../utils/media-layout"
+
 import { FadeInImage } from "./FadeInImage"
 
 const loadVideoPlayer = () =>

@@ -11,6 +11,7 @@ import {
   type HomeWidgetItem,
   type WidgetParams,
 } from "../slotRenderers"
+
 import { WidgetCatalog, type WidgetCatalogGroup } from "./index"
 
 const GROUPS: WidgetCatalogGroup[] = [

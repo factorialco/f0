@@ -1,8 +1,6 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useEffect, useMemo } from "react"
 
-import type { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
-
 import {
   F0Card,
   type CardImageAspectRatio,
@@ -22,6 +20,7 @@ import { cn } from "@/lib/utils"
 import { useDataCollectionData } from "@/patterns/OneDataCollection/hooks/useDataCollectionData"
 import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
 import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
+import type { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/Card"
 import { GroupHeader } from "@/ui/GroupHeader/GroupHeader"
 import { Skeleton } from "@/ui/skeleton"

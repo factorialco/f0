@@ -7,6 +7,7 @@ import type {
   SearchPreview,
   SearchPreviewPage,
 } from "../../hooks/useDataCollectionSource/types"
+
 import { useSearchPreview } from "./useSearchPreview"
 
 type Person = RecordType & { id: string; name: string; role: string }

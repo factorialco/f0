@@ -1,5 +1,7 @@
-import { describe, expect, it, vi, beforeEach } from "vitest"
 import "@testing-library/jest-dom/vitest"
+
+import { describe, expect, it, vi, beforeEach } from "vitest"
+
 import {
   zeroRender as render,
   screen,

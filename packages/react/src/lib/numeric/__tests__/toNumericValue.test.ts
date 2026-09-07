@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest"
 
 import type { NumericValue } from "../types"
-
 import { toNumericValue } from "../utils/toNumericValue"
 
 describe("toNumericValue", () => {

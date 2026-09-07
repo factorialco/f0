@@ -1,13 +1,13 @@
 import { forwardRef } from "react"
 
 import { F0Button } from "@/components/F0Button"
-import { withDataTestId } from "@/lib/data-testid"
 import { IconType } from "@/components/F0Icon"
 import {
   BaseBanner,
   type BannerAction,
   type BaseBannerProps,
 } from "@/kits/ai/Banners/BaseBanner"
+import { withDataTestId } from "@/lib/data-testid"
 
 import { UpsellingButton, type UpsellingButtonProps } from "../UpsellingButton"
 

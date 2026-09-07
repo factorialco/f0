@@ -23,12 +23,12 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
 import { buildHighlightSegments } from "../hooks/highlight-utils"
+import { useEditLastOwnMessage } from "../hooks/useEditLastOwnMessage"
 import {
   replaceClosedEmojiShortcode,
   useEmojiAutocomplete,
 } from "../hooks/useEmojiAutocomplete"
 import { MENTION_EVERYONE_ID, useMentions } from "../hooks/useMentions"
-import { useEditLastOwnMessage } from "../hooks/useEditLastOwnMessage"
 import { useTransientError } from "../hooks/useTransientError"
 import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
 import {
@@ -54,10 +54,11 @@ import {
   microEnterTransition,
   microExitTransition,
 } from "../utils/chat-motion"
+
 import { ChatComposerAttachmentPreview } from "./ChatComposerAttachmentPreview"
 import { ChatEditChip } from "./ChatEditChip"
-import { ChatEmojiPickerButton } from "./ChatEmojiPickerButton"
 import { ChatEmojiAutocomplete } from "./ChatEmojiAutocomplete"
+import { ChatEmojiPickerButton } from "./ChatEmojiPickerButton"
 import {
   ChatMentionPopover,
   getChatMentionOptionId,

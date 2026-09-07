@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils"
 
 import { createPageLayoutBlock } from "../utils"
+
 import { Block, BlockProps } from "./Block"
 
 // Make the additional props optional for the helper function

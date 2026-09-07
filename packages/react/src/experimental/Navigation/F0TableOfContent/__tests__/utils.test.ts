@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest"
 
 import type { TOCItem } from "../types"
-
 import { filterTree, findExpandedPath } from "../utils"
 
 describe("filterTree", () => {

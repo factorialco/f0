@@ -1,14 +1,13 @@
 import { ReactNode } from "react"
 
+import type { TableHeaderInfo } from "@/experimental/OneTable"
+import { RecordType } from "@/hooks/datasource"
+import { TranslationsType } from "@/lib/providers/i18n/i18n-provider-defaults"
 import {
   metadataRenderer,
   ValueDisplayRendererDefinition,
   type ValueDisplayTableAlignment,
 } from "@/ui/value-display"
-import { RecordType } from "@/hooks/datasource"
-import { TranslationsType } from "@/lib/providers/i18n/i18n-provider-defaults"
-
-import type { TableHeaderInfo } from "@/experimental/OneTable"
 
 import { VisualizationType } from "./visualizations/collection/types"
 

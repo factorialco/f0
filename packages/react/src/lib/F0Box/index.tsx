@@ -1,4 +1,5 @@
 import { Component } from "../../lib/component/component"
+
 import { F0Box as BoxComponent, type F0BoxProps } from "./F0Box"
 
 export const F0Box = Component(

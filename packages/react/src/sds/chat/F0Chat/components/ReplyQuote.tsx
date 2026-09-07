@@ -9,6 +9,7 @@ import { useChatJump } from "../providers/ChatUIProvider"
 import { useF0ChatEmit, useF0ChatStable } from "../providers/F0ChatProvider"
 import { type F0ChatMessage } from "../types"
 import { senderNameColorClass } from "../utils/sender-color"
+
 import { ClampText } from "./ClampText"
 
 /**

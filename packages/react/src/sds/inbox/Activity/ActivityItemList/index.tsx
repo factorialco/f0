@@ -8,6 +8,7 @@ import { useI18n } from "@/lib/providers/i18n"
 import { withSkeleton } from "@/lib/skeleton"
 
 import { ActivityItem } from "../ActivityItem"
+
 import { Section, SectionProps } from "./Section"
 
 const MORE_ITEMS_LOADING_COUNT = 3

@@ -3,6 +3,7 @@ import { beforeAll, describe, expect, it, vi } from "vitest"
 
 import { zeroRender, screen } from "@/testing/test-utils"
 
+import { F0Graph, type F0GraphNodeRenderContext } from "../F0Graph"
 import type {
   GraphNode,
   LayoutEngine,
@@ -11,8 +12,6 @@ import type {
   LayoutResult,
   LayoutDirection,
 } from "../types"
-
-import { F0Graph, type F0GraphNodeRenderContext } from "../F0Graph"
 
 // ─── Helpers ───────────────────────────────────────────────────
 

@@ -1,7 +1,8 @@
-import { beforeEach, describe, expect, it, vi } from "vitest"
 import type { ReactNode } from "react"
 import { useEffect, useRef } from "react"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 
+import { WIDGET_DRAG_END, WIDGET_DRAG_START } from "@/lib/dnd/widgetDragEvents"
 import {
   act,
   fireEvent,
@@ -9,8 +10,6 @@ import {
   userEvent,
   zeroRender as render,
 } from "@/testing/test-utils"
-
-import { WIDGET_DRAG_END, WIDGET_DRAG_START } from "@/lib/dnd/widgetDragEvents"
 
 import { F0AiChat } from "../F0AiChat"
 import {

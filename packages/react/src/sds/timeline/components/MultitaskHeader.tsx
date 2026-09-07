@@ -1,10 +1,9 @@
+import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon/F0AvatarIcon"
+import { F0TagStatus } from "@/components/tags/F0TagStatus"
 import List from "@/icons/app/List"
 import { GroupHeader } from "@/ui/GroupHeader/GroupHeader"
 
 import type { F0TimelineRowMultitaskProps } from "../types"
-
-import { F0TagStatus } from "@/components/tags/F0TagStatus"
-import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon/F0AvatarIcon"
 
 export const MultitaskHeader = ({
   props,

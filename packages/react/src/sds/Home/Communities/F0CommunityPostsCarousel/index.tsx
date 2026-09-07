@@ -1,6 +1,5 @@
-import { useCallback, useRef } from "react"
-
 import { format } from "date-fns"
+import { useCallback, useRef } from "react"
 
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { isExternalHref, Link } from "@/lib/linkHandler"

@@ -3,20 +3,21 @@ import { motion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
-import { cn } from "@/lib/utils"
 import { Toolbar } from "@/components/RichText/internal"
-import { Check, Cross, Microphone, Paperclip, TextSize } from "@/icons/app"
-import { useI18n } from "@/lib/providers/i18n/i18n-provider"
-
 import {
   AIEnhanceMenu,
   EnhanceActivator,
 } from "@/components/RichText/internal/Enhance"
 import type { UseEnhanceReturn } from "@/components/RichText/internal/Enhance"
+import { Check, Cross, Microphone, Paperclip, TextSize } from "@/icons/app"
 import { RecordingWaveform } from "@/kits/ai/F0AiChatTextArea/components/RecordingWaveform"
 import { type RecorderStatus } from "@/kits/ai/F0AiChatTextArea/useAudioRecorder"
+import { useI18n } from "@/lib/providers/i18n/i18n-provider"
+import { cn } from "@/lib/utils"
+
 import { UPLOAD_INPUT_ID } from "../../utils/constants"
 import { primaryActionType, secondaryActionsType } from "../../utils/types"
+
 import { ActionsMenu } from "./ActionsMenu"
 
 interface FooterProps {

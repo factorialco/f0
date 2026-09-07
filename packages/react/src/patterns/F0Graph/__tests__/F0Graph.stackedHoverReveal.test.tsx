@@ -2,9 +2,8 @@ import { beforeAll, describe, expect, it, vi } from "vitest"
 
 import { fireEvent, screen, zeroRender } from "@/testing/test-utils"
 
-import type { GraphNode } from "../types"
-
 import { F0Graph, type F0GraphNodeRenderContext } from "../F0Graph"
+import type { GraphNode } from "../types"
 
 /**
  * A stacked column's collapse affordance is revealed by its own narrow CSS hover

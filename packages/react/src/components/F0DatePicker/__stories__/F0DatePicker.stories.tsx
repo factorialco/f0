@@ -1,18 +1,17 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { addMonths, subDays } from "date-fns"
 import MockDate from "mockdate"
 import { useState } from "react"
 import { expect, fn, screen, userEvent, within } from "storybook/test"
 
-import { F0Dialog } from "@/patterns/F0Dialog"
+import { getInputFieldArgs } from "@/components/F0InputField/__stories__/F0InputField.args"
+import { GranularityDefinitionKey } from "@/components/OneCalendar/granularities"
+import { DateRange } from "@/components/OneCalendar/types"
 import { Placeholder } from "@/icons/app"
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
-import { getInputFieldArgs } from "@/components/F0InputField/__stories__/F0InputField.args"
+import { F0Dialog } from "@/patterns/F0Dialog"
 
-import { DateRange } from "@/components/OneCalendar/types"
-import { GranularityDefinitionKey } from "@/components/OneCalendar/granularities"
 import { F0DatePicker } from "../index"
 import { predefinedPresets } from "../presets"
 import { datepickerSizes, DatePickerValue } from "../types"

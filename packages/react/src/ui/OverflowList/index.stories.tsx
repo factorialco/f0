@@ -1,12 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { motion } from "motion/react"
 import { useState } from "react"
 
-import { F0Icon } from "../../components/F0Icon"
 import { Counter } from "@/ui/Counter"
 import { Preset } from "@/ui/OnePreset"
+
+import { F0Icon } from "../../components/F0Icon"
 import { ChevronDown } from "../../icons/app"
+
 import { OverflowList } from "./index"
 
 const meta = {

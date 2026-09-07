@@ -29,8 +29,8 @@ import {
   type F0ChatMessage,
   type F0ChatRuntime,
 } from "../types"
-import { messageSurfaceColorClass } from "../utils/sender-color"
 import { CHAT_COMPOSER_HEIGHT_PROPERTY } from "../utils/chat-layout"
+import { messageSurfaceColorClass } from "../utils/sender-color"
 
 // jsdom has no layout — wrap Virtuoso in its official mock context so every
 // row renders (see mocks/virtuoso-jsdom).
