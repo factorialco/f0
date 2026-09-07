@@ -351,8 +351,8 @@ export const SearchAndPick: Story = {
 }
 
 /**
- * An address the provider does not return is kept through the create action in
- * the empty state, and reported as typed rather than picked.
+ * A stored address that no suggestion covers still reads on the trigger: the
+ * value it came from is what gets displayed, not a matching option.
  */
 export const UnlistedAddress: Story = {
   args: {

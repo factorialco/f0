@@ -35,7 +35,6 @@ type Props = {
   country: CountryCode | undefined
   searchPlaces: NonNullable<F0LocationInputProps["searchPlaces"]>
   onPick: (suggestion: F0LocationSuggestion) => void
-  onTyped: (text: string) => void
   onClear: () => void
   status?: InputFieldStatus
   required?: boolean
@@ -49,8 +48,8 @@ type Props = {
 
 /**
  * The address line as an `F0Select` whose options are the provider's
- * suggestions: searching happens in the dropdown's own search box, and the
- * create action keeps an address the provider does not know.
+ * suggestions: searching happens in the dropdown's own search box, and only a
+ * suggestion can be chosen.
  */
 export const AddressSelect = ({
   label,
@@ -62,7 +61,6 @@ export const AddressSelect = ({
   country,
   searchPlaces,
   onPick,
-  onTyped,
   onClear,
   status,
   required,
@@ -121,7 +119,6 @@ export const AddressSelect = ({
     searchBoxPlaceholder: i18n.locationInput.placeholder,
     searchEmptyMessage: emptyMessage,
     onSearchChange: search,
-    onCreate: (value: string) => onTyped(value),
     status,
     required,
     disabled: noEdit,
