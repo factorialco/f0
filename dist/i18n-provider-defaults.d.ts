@@ -979,7 +979,7 @@ export declare const defaultTranslations: {
         readonly city: "City";
         readonly state: "State / region";
         readonly postalCode: "Postal code";
-        readonly searchPlaceholder: "Start typing an address";
+        readonly placeholder: "Enter an address";
         readonly searchCountry: "Search country";
         readonly noCountryResults: "No country found";
         readonly noResults: "No addresses found";
@@ -1392,8 +1392,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        indent: {
+            setIndent: (level: number) => ReturnType;
+            unsetIndent: () => ReturnType;
+            outdent: () => ReturnType;
         };
     }
 }
@@ -1401,10 +1403,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        indent: {
-            setIndent: (level: number) => ReturnType;
-            unsetIndent: () => ReturnType;
-            outdent: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }

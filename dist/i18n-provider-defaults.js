@@ -1006,7 +1006,7 @@ const e = {
     city: "City",
     state: "State / region",
     postalCode: "Postal code",
-    searchPlaceholder: "Start typing an address",
+    placeholder: "Enter an address",
     searchCountry: "Search country",
     noCountryResults: "No country found",
     noResults: "No addresses found",
