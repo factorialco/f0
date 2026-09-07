@@ -10,12 +10,19 @@ const EXCESS_COMBINING_MARKS = /(\p{M}{3})\p{M}+/gu
 const BIDI_CONTROLS = /[\u202A-\u202E\u2066-\u2069]/g
 
 /**
+ * The one Unicode form displayed text is folded into. Exported because mention
+ * matching has to fold names the same way: two spellings of the same name
+ * compare equal only in a shared form.
+ */
+export const CANONICAL_FORM = "NFC"
+
+/**
  * Make an untrusted message string safe to DISPLAY: normalize to NFC, cap
  * combining-mark stacks (zalgo) and drop bidi overrides. Emojis (ZWJ
  * sequences, variation selectors, skin tones) pass through untouched.
  */
 export const sanitizeDisplayText = (text: string): string =>
   text
-    .normalize("NFC")
+    .normalize(CANONICAL_FORM)
     .replace(EXCESS_COMBINING_MARKS, "$1")
     .replace(BIDI_CONTROLS, "")

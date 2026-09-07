@@ -74,6 +74,29 @@ describe("renderBodyWithMentions", () => {
     zeroRender(<div>{renderBodyWithMentions("hey @Ana María", tokens)}</div>)
     expect(screen.getByText("@Ana María")).toBeInTheDocument()
   })
+
+  // The body is composed before the ranges are taken, so a name carrying the
+  // decomposed spelling reaches a chip only if matching folds both sides.
+  // Escapes, not literal characters: the two spellings are the point here and
+  // are indistinguishable on screen.
+  it("chips a name whose accent is stored decomposed", () => {
+    const decomposed = "Garci\u0301a"
+    const composed = "Garc\u00EDa"
+    const tokens: MentionToken[] = [
+      {
+        name: decomposed,
+        isSelf: false,
+        isEveryone: false,
+        user: { id: "1", name: decomposed },
+      },
+    ]
+    zeroRender(
+      <div>{renderBodyWithMentions(`hi @${decomposed}!`, tokens)}</div>
+    )
+    expect(screen.getByText(`@${composed}`).className).toContain(
+      "text-f1-foreground-secondary"
+    )
+  })
 })
 
 describe("renderBodyWithLinks (preview titles)", () => {
