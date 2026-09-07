@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
+import { expect, userEvent, waitFor } from "storybook/test"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import type { GraphEdge, GraphNode } from "../../../types"
@@ -27,6 +27,28 @@ const NODES: GraphNode<Person>[] = [
   },
 ]
 
+// A single centred child puts source and target within `crossAxisDelta < 2`,
+// where F0GraphEdge snaps every path type straight. Two children offset the
+// edges so the path algorithms actually differ on screen.
+const FORKED_NODES: GraphNode<Person>[] = [
+  {
+    id: "a",
+    parentId: null,
+    data: { name: "Alice Moreno", title: "Manager" },
+    childrenCount: 2,
+  },
+  {
+    id: "b",
+    parentId: "a",
+    data: { name: "Bob Smith", title: "Engineer" },
+  },
+  {
+    id: "c",
+    parentId: "a",
+    data: { name: "Carol Diaz", title: "Designer" },
+  },
+]
+
 function renderPerson(node: GraphNode<Person>, ctx: F0GraphNodeRenderContext) {
   const [firstName = "", lastName = ""] = node.data.name.split(" ")
   return (
@@ -44,31 +66,35 @@ function EdgeStory({
   width = 400,
   height = 220,
   interactive = false,
+  pathType,
+  nodes = NODES,
 }: {
   variant?: "default" | "hover" | "highlighted" | "dimmed"
   width?: number
   height?: number
   interactive?: boolean
+  pathType?: "smoothstep" | "straight" | "bezier"
+  nodes?: GraphNode<Person>[]
 }) {
-  const edges: GraphEdge[] = [
-    {
-      id: "a-b",
-      source: "a",
-      target: "b",
-      data: { variant },
+  const edges: GraphEdge[] = nodes
+    .filter((n) => n.parentId !== null)
+    .map((n) => ({
+      id: `${n.parentId}-${n.id}`,
+      source: n.parentId!,
+      target: n.id,
+      data: { variant, ...(pathType ? { pathType } : {}) },
       ...(interactive
         ? {
             onEdgeClick: () => {},
             onEdgeHover: () => {},
           }
         : {}),
-    },
-  ]
+    }))
 
   return (
     <div style={{ width, height }} className="bg-f1-background">
       <F0Graph
-        nodes={NODES}
+        nodes={nodes}
         edges={edges}
         renderNode={renderPerson}
         defaultExpandDepth={1}
@@ -135,6 +161,54 @@ export const NonInteractive: Story = {
         </span>
         <EdgeStory width={320} height={200} interactive />
       </div>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    // Edges reach the DOM only after React Flow measures both nodes and the
+    // initial fitView settles, so the query has to be retried.
+    const paths = await waitFor(() => {
+      const found = canvasElement.querySelectorAll<SVGPathElement>(
+        ".react-flow__edge-path"
+      )
+      expect(found).toHaveLength(2)
+      return found
+    })
+    // Panel order is left (no handlers) then right (handlers), matching the JSX.
+    const plain = paths[0]!
+    const interactive = paths[1]!
+
+    await userEvent.hover(interactive.closest(".react-flow__edge")!)
+
+    await waitFor(() =>
+      expect(interactive.style.stroke).toBe("var(--f0-graph-edge-hover)")
+    )
+    await expect(plain.style.stroke).toBe("var(--f0-graph-edge-default)")
+  },
+}
+
+/**
+ * `data.pathType` picks the path algorithm. It survives F0Graph's render model
+ * untouched, so it is the supported route for a consumer edge; the `pathType`
+ * prop only applies to a standalone `renderEdge` mount.
+ *
+ * Two children per parent here on purpose: with a single centred child the
+ * source and target fall inside `crossAxisDelta < 2` and every path type snaps
+ * straight, so the three would look identical.
+ */
+export const PathTypes: Story = {
+  render: () => (
+    <div className="flex flex-wrap gap-4">
+      {(["smoothstep", "straight", "bezier"] as const).map((p) => (
+        <div key={p} className="flex flex-col gap-2">
+          <span className="text-sm text-f1-foreground-secondary">{p}</span>
+          <EdgeStory
+            pathType={p}
+            nodes={FORKED_NODES}
+            width={260}
+            height={180}
+          />
+        </div>
+      ))}
     </div>
   ),
 }
