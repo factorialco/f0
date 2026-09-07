@@ -382,15 +382,24 @@ export function useMentions({
     [everyoneLabel]
   )
 
+  // The query reaches the rows only as this boolean, which lets the row memo
+  // below keep its array across the keystrokes between two searches. Memoized
+  // rather than called inline so a re-render that leaves the query alone still
+  // costs nothing.
+  const everyoneMatches = useMemo(
+    () => matchesEveryone(query),
+    [matchesEveryone, query]
+  )
+
   // The "everyone" row (when it matches) followed by member matches.
   const results = useMemo<MentionCandidate[]>(() => {
     const out: MentionCandidate[] = []
-    if (everyoneLabel && matchesEveryone(query)) {
+    if (everyoneLabel && everyoneMatches) {
       out.push({ kind: "everyone", label: everyoneLabel })
     }
     for (const user of memberResults) out.push({ kind: "user", user })
     return out
-  }, [everyoneLabel, matchesEveryone, query, memberResults])
+  }, [everyoneLabel, everyoneMatches, memberResults])
 
   // Detect the `@` trigger on every input/cursor change and search.
   useEffect(() => {
@@ -463,10 +472,21 @@ export function useMentions({
   ])
 
   const close = useCallback(() => {
+    // Escape closes without touching the composer text, so the search effect
+    // keeps its dependencies and never runs the cleanup that would cancel a
+    // pending search. Retiring the id matters even once one is in flight: an
+    // empty late result sets `dismissedAtIndexRef`, which would keep the
+    // popover from reopening at this same `@`.
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current)
+      debounceRef.current = null
+    }
+    searchIdRef.current++
     setIsOpen(false)
     setQuery("")
     setMemberResults([])
     setSelectedIndex(0)
+    setIsLoading(false)
     atIndexRef.current = -1
   }, [])
 
