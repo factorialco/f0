@@ -1,6 +1,5 @@
 import { renderHook } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
 import { useColumnCollapseAnimation } from "../useColumnCollapseAnimation"
 
 const CELL_CLASS = "f0-collapsing-group-0"

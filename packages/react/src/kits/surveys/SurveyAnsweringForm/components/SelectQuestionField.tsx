@@ -2,7 +2,6 @@ import { F0Checkbox } from "@/components/F0Checkbox"
 import { F0Icon } from "@/components/F0Icon"
 import { CheckCircleLine, Cross } from "@/icons/app"
 import { cn } from "@/lib/utils"
-
 import type { SelectQuestionOption } from "../../SurveyFormBuilder/types"
 
 export interface SelectFieldConfig {

@@ -1,7 +1,5 @@
 import { type DragEvent, type ReactNode, useRef, useState } from "react"
-
 import { useReducedMotion } from "@/lib/a11y"
-
 import { ChatComposer } from "./components/ChatComposer"
 import { ChatDocumentPreview } from "./components/ChatDocumentPreview"
 import { ChatDropOverlay } from "./components/ChatDropOverlay"

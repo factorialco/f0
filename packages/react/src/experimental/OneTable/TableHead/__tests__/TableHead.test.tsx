@@ -1,7 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
-
 import { screen, userEvent, waitFor, zeroRender } from "@/testing/test-utils"
-
 import {
   OneTable,
   TableBody,

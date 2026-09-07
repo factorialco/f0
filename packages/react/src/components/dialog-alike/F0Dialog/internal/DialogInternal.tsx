@@ -1,5 +1,4 @@
 import { FC, useEffect, useMemo, useState } from "react"
-
 import { Content } from "../../common/Content"
 import { Footer } from "../../common/Footer"
 import { Header } from "../../common/Header"

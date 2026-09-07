@@ -8,7 +8,6 @@ import {
   useState,
 } from "react"
 import { type ListItem, type VirtuosoHandle } from "react-virtuoso"
-
 import { type ChatRow } from "../utils/grouping"
 import {
   createMediaWarmer,

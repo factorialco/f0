@@ -1,9 +1,7 @@
 import { useCallback, useMemo, useState } from "react"
-
 import { F0AiChatHeader } from "../../../F0AiChatHeader"
 import { F0AiChatHistory, useChatHistory } from "../../../F0AiChatHistory"
 import { useAiChat } from "../../providers/AiChatStateProvider"
-
 import { useMockAiChatRuntime } from "./MockAiChatRuntime"
 import { filterNonRenderableMessages } from "./turn-utils"
 

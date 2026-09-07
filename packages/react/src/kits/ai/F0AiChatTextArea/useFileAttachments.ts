@@ -1,9 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-
 import { useI18n } from "@/lib/providers/i18n"
-
 import { type AiChatFileAttachmentConfig } from "../F0AiChat/types"
-
 import { filterByMimeType } from "./file-utils"
 import { type AttachedFile } from "./types"
 

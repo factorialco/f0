@@ -1,7 +1,5 @@
 import { Observable } from "zen-observable-ts"
-
 import { isObservableLike, PromiseState } from "@/lib/promise-to-observable"
-
 import { ItemNeighborsResponse } from "../types/fetch.typings"
 
 export type ItemNeighborsResult<R> =

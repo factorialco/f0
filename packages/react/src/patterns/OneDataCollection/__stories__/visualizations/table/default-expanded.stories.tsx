@@ -1,8 +1,7 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
 import { expect, within } from "storybook/test"
-
-import { useDataCollectionSource } from "../../../hooks/useDataCollectionSource"
 import { OneDataCollection } from "../../.."
+import { useDataCollectionSource } from "../../../hooks/useDataCollectionSource"
 
 /**
  * `defaultExpanded` decides which rows of a nested table start out open before

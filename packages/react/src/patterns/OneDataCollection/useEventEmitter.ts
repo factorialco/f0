@@ -1,10 +1,8 @@
 import { useCallback, useRef } from "react"
-
 import {
   SortingsDefinition,
   SortingsState,
 } from "@/hooks/datasource/types/sortings.typings"
-
 import {
   FiltersDefinition,
   FiltersState,

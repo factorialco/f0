@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { One as OneIcon } from "@/icons/ai"
 import { cn } from "@/lib/utils"

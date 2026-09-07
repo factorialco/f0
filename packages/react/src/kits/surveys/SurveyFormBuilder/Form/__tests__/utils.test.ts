@@ -1,6 +1,4 @@
 import { describe, expect, it } from "vitest"
-
-import { SurveyFormBuilderElement } from "../../types"
 import {
   flattenElements,
   reconstructElements,
@@ -8,6 +6,7 @@ import {
   injectSectionEnds,
   FlatFormItem,
 } from ".."
+import { SurveyFormBuilderElement } from "../../types"
 
 // --- Test fixtures ---
 

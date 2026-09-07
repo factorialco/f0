@@ -7,16 +7,13 @@ import {
   useRef,
   useState,
 } from "react"
-
 import { type ChatThread } from "../../../F0AiChatHistory"
 import type {
   ClarifyingOption,
   ClarifyingQuestionState,
   ClarifyingSelectionMode,
 } from "../../../F0ClarifyingPanel"
-
 import { type F0Message } from "../../types"
-
 import { pickRandomResponse, pickRandomThinkingSteps } from "./mockPhrases"
 
 /**

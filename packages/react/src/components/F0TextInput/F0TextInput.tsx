@@ -1,5 +1,4 @@
 import { forwardRef } from "react"
-
 import { InputInternal, type InputInternalProps } from "./internal"
 
 const privateProps = ["buttonToggle"] as const

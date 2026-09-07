@@ -1,8 +1,6 @@
 import { createRef } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import { fireEvent, screen, zeroRender as render } from "@/testing/test-utils"
-
 import { F0Map, type F0MapHandle } from "../F0Map"
 import type { F0MapArc, F0MapPoint, F0MapRoute } from "../types"
 

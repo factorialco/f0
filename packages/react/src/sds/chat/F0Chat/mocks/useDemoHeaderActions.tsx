@@ -1,11 +1,9 @@
 import { useState, type ReactNode } from "react"
-
 import { F0TextInput } from "@/components/F0TextInput"
 import { F0TagPerson } from "@/components/tags/F0TagPerson"
 import { Bell, BellOff, Pencil, PushPin, PushPinSolid } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { F0Dialog } from "@/patterns/F0Dialog"
-
 import {
   type F0ChatHeaderAction,
   type F0ChatRuntime,

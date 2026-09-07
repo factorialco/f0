@@ -2,7 +2,6 @@ import * as CheckboxPrimitive from "@radix-ui/react-checkbox"
 import { AnimatePresence } from "motion/react"
 import * as React from "react"
 import { useId } from "react"
-
 import { F0Icon } from "../components/F0Icon"
 import { Check, Minus } from "../icons/app"
 import { cn, focusRing } from "../lib/utils"

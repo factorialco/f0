@@ -1,5 +1,5 @@
-import { useAiChat } from "./AiChatStateProvider"
 import type { CanvasEntityDefinition } from "../../canvas/types"
+import { useAiChat } from "./AiChatStateProvider"
 
 /**
  * Narrow read of the AiChat context for the canvas registry. Reduces

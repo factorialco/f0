@@ -1,7 +1,5 @@
-import { useCallback, useRef } from "react"
-
 import { format } from "date-fns"
-
+import { useCallback, useRef } from "react"
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { isExternalHref, Link } from "@/lib/linkHandler"
 import { useDateFnsLocale } from "@/lib/providers/l10n"
@@ -15,7 +13,6 @@ import {
   type CarouselPaging,
 } from "@/ui/carousel"
 import { Skeleton } from "@/ui/skeleton"
-
 import { PostDescription } from "../Post/PostDescription"
 
 /**

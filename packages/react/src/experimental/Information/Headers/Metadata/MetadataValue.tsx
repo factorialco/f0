@@ -1,15 +1,14 @@
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0AvatarList } from "@/components/avatars/F0AvatarList"
 import { F0AvatarListProps } from "@/components/avatars/F0AvatarList/types"
-import { getColor } from "@/kits/Charts/utils/colors"
 import { F0Icon } from "@/components/F0Icon"
 import { F0TagDot } from "@/components/tags/F0TagDot"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
 import { AlertCircle, Warning } from "@/icons/app"
+import { getColor } from "@/kits/Charts/utils/colors"
 import { cn } from "@/lib/utils"
 import { Progress } from "@/ui/progress"
-
 import { MetadataItem } from "."
 
 const DATE_ICON_STYLES = {

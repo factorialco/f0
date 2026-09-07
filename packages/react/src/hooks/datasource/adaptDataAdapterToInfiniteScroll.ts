@@ -1,12 +1,10 @@
 import { Observable } from "zen-observable-ts"
-
 import {
   isObservableLike,
   isPromiseLike,
   PromiseState,
 } from "@/lib/promise-to-observable"
 import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
-
 import {
   DataAdapter,
   InfiniteScrollPaginatedResponse,

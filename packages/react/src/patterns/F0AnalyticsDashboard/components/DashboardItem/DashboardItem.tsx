@@ -1,11 +1,4 @@
 import { useRef, useState, type ReactNode } from "react"
-
-import type {
-  F0AnalyticsDashboardAskAiTarget,
-  F0AnalyticsDashboardAskAiTargetWithQuote,
-  DashboardItemFiltersConfig,
-} from "../../types"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0ButtonToggleGroup } from "@/components/F0ButtonToggleGroup"
 import { F0Icon, type IconType } from "@/components/F0Icon"
@@ -15,6 +8,7 @@ import {
   type DropdownItem as DropdownItemType,
   type DropdownItemObject,
 } from "@/experimental/Navigation/Dropdown"
+import { One as OneIcon } from "@/icons/ai"
 import {
   Delete,
   Download,
@@ -23,9 +17,8 @@ import {
   Minimize,
   InfoCircleLine,
 } from "@/icons/app"
-import { InfoHint, type InfoHintContent } from "@/lib/InfoHint"
-import { One as OneIcon } from "@/icons/ai"
 import { useAiChat } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
+import { InfoHint, type InfoHintContent } from "@/lib/InfoHint"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
@@ -40,7 +33,11 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/ui/dropdown-menu"
-
+import type {
+  F0AnalyticsDashboardAskAiTarget,
+  F0AnalyticsDashboardAskAiTargetWithQuote,
+  DashboardItemFiltersConfig,
+} from "../../types"
 import { DashboardItemFilters } from "./DashboardItemFilters"
 
 interface DashboardItemProps {

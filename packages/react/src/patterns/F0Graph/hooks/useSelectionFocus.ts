@@ -6,7 +6,6 @@ import {
   useRef,
   useState,
 } from "react"
-
 import type { TreeNode } from "../types"
 import { collectVisibleNodes } from "../utils"
 

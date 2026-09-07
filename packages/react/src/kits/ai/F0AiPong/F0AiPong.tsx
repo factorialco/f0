@@ -1,13 +1,11 @@
 import confetti from "canvas-confetti"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { createPortal } from "react-dom"
-
 import { F0Button } from "@/components/F0Button"
 import { Cross } from "@/icons/app"
 import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { PongBall } from "./components/PongBall"
 
 // Layout

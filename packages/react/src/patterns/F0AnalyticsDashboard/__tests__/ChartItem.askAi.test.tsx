@@ -1,28 +1,19 @@
 import { useEffect, useRef } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
+import {
+  AiChatStateProvider,
+  useAiChat,
+} from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
+import type {
+  F0DataChartPointClick,
+  F0DataChartProps,
+} from "@/kits/F0DataChart"
 import {
   screen,
   userEvent,
   waitFor,
   zeroRender as render,
 } from "@/testing/test-utils"
-
-import type {
-  F0DataChartPointClick,
-  F0DataChartProps,
-} from "@/kits/F0DataChart"
-import {
-  AiChatStateProvider,
-  useAiChat,
-} from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
-
-import type {
-  DashboardChartConfig,
-  DashboardChartItem,
-  F0AnalyticsDashboardPointClick,
-} from "../types"
-
 import {
   buildPointQuoteText,
   buildAccessibleChartPoints,
@@ -30,6 +21,11 @@ import {
   ChartItem,
   hasAccessibleChartPoint,
 } from "../components/ChartItem/ChartItem"
+import type {
+  DashboardChartConfig,
+  DashboardChartItem,
+  F0AnalyticsDashboardPointClick,
+} from "../types"
 
 /** The mark a click lands on, as `usePointClick` would report it. */
 const POINT: F0DataChartPointClick = {

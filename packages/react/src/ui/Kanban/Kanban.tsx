@@ -1,19 +1,15 @@
 import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter"
 import { useEffect, useRef, useState } from "react"
-
-import type { RecordType } from "@/hooks/datasource"
-
 import { ScrollArea } from "@/experimental/Utilities/ScrollArea"
+import type { RecordType } from "@/hooks/datasource"
 import { useDndEvents } from "@/lib/dnd/hooks"
 import { cn } from "@/lib/utils"
-
+import { KanbanLane } from "./components/KanbanLane.tsx"
 import type {
   KanbanLaneAttributes,
   KanbanOnMoveParam,
   KanbanProps,
 } from "./types.ts"
-
-import { KanbanLane } from "./components/KanbanLane.tsx"
 
 export function Kanban<TRecord extends RecordType>(
   props: KanbanProps<TRecord>

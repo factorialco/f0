@@ -1,11 +1,9 @@
 import { useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { Check } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
-
 import { PlaybackRate, formatPlaybackRate, playbackRates } from "../utils"
 
 export interface PlaybackRateMenuProps {

@@ -1,14 +1,11 @@
 import { useMemo } from "react"
-
 import { useNormalizeValueWithFormatter } from "@/lib/numeric"
 import { numericFinalValue } from "@/lib/numeric/utils/numericFinalValue"
 import { numericFormatter } from "@/lib/numeric/utils/numericFormatter"
 import { withSkeleton } from "@/lib/skeleton"
 import { Skeleton } from "@/ui/skeleton"
-
-import type { BigNumberProps, TrendConfig } from "./types"
-
 import { F0TagBalance } from "../tags/F0TagBalance"
+import type { BigNumberProps, TrendConfig } from "./types"
 
 const normalizeTrend = (
   trend: BigNumberProps["trend"]

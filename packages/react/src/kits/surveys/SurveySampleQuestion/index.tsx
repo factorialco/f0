@@ -1,5 +1,4 @@
 import { F0Box, type F0BoxProps } from "@/lib/F0Box"
-
 import { SurveySampleQuestionProps } from "./types"
 
 export type { SurveySampleQuestionProps } from "./types"

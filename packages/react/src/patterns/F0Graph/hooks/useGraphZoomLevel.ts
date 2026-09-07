@@ -1,7 +1,5 @@
 import { useEffect, useMemo, useRef } from "react"
-
 import type { ZoomLevel, ZoomPreset, ZoomThresholds } from "../types"
-
 import { zoomPresets } from "../types"
 
 const DEFAULT_HYSTERESIS = 0.05

@@ -1,9 +1,7 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { ChevronLeft, ChevronRight } from "@/icons/app"
-
 import {
   DataAdapter,
   ItemNeighborsFetchOptions,

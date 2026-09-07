@@ -1,7 +1,5 @@
 import { describe, expect, test } from "vitest"
-
 import { zeroRender } from "@/testing/test-utils"
-
 import { Widget } from "."
 
 /**

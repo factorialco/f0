@@ -6,12 +6,11 @@ import {
   ReactNodeViewRenderer,
 } from "@tiptap/react"
 import React, { useState } from "react"
-
-import { Pulse, pulseIcon, pulseIconColor } from "@/lib/mood"
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
 import { Dropdown } from "@/experimental/Navigation/Dropdown"
 import { ChevronDown, ChevronUp, Delete } from "@/icons/app"
+import { Pulse, pulseIcon, pulseIconColor } from "@/lib/mood"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 
 interface MoodTrackerData {

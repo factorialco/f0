@@ -1,6 +1,5 @@
 import type * as echarts from "echarts"
 import { type RefObject, useEffect, useRef } from "react"
-
 import type {
   F0DataChartPointClick,
   F0DataChartPointClickSeries,

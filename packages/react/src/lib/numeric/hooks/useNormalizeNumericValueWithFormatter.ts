@@ -1,7 +1,5 @@
 import { useCallback } from "react"
-
 import { useL10n } from "@/lib/providers/l10n"
-
 import {
   Numeric,
   NumericFormatterOptions,

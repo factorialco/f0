@@ -6,9 +6,8 @@ import {
   isYesterday,
   type Locale,
 } from "date-fns"
-
-import type { ChatThread } from "./useChatHistory"
 import type { DateGroup, ThreadGroup } from "./types"
+import type { ChatThread } from "./useChatHistory"
 
 export function getDateGroup(dateString: string): DateGroup {
   const date = new Date(dateString)

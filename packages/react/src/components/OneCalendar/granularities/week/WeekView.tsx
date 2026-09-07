@@ -5,9 +5,7 @@ import {
   SelectRangeEventHandler,
   DateRange as DayPickerDateRange,
 } from "react-day-picker"
-
 import { Calendar } from "@/ui/calendar"
-
 import { useDateFnsLocale, useL10n } from "../../../../lib/providers/l10n"
 import { DateRange, WeekStartDay, WeekStartsOn } from "../../types"
 import { toCalendarPickerMatcher } from "../../utils"

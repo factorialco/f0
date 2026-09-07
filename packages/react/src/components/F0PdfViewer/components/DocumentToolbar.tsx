@@ -1,9 +1,7 @@
 import { useCallback, useMemo, useState, type ReactNode } from "react"
-
 import { F0Select } from "@/components/F0Select"
 import { Download, Minus, Plus } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
-
 import { downloadFromUrl } from "../pdfActions"
 import {
   fixedScales,

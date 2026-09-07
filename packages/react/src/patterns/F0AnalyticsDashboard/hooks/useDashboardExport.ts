@@ -1,17 +1,14 @@
 import { useCallback, useRef, useState } from "react"
-
 import type {
   FiltersDefinition,
   FiltersState,
 } from "@/patterns/OneFilterPicker/types"
-
 import type {
   DashboardChartData,
   DashboardItem,
   DashboardMetricData,
   DashboardMetricItem,
 } from "../types"
-
 import { isRenderableChart } from "../utils/chartDataAdapter"
 import { chartDataToTabular } from "../utils/chartDataToTabular"
 import { downloadMultiSheetExcel } from "../utils/downloadHelpers"

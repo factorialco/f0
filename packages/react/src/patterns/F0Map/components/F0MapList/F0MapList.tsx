@@ -1,9 +1,7 @@
 import { forwardRef } from "react"
-
 import { DataTestIdWrapper, type WithDataTestIdProps } from "@/lib/data-testid"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import type { F0MapPoint } from "../../types"
 
 /** Human-readable name for a point, for the accessible list / fallback. */

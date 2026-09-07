@@ -1,11 +1,9 @@
 import type { CountryCode as PhoneCountry } from "libphonenumber-js"
-
 import { F0AvatarFlag } from "@/components/avatars/F0AvatarFlag"
 import { F0Icon } from "@/components/F0Icon"
 import { flagsMap } from "@/flags"
 import { Globe } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
-
 import { toCountryCode } from "../lib/phone"
 
 export const CountryFlag = ({ country }: { country?: PhoneCountry }) => {

@@ -1,7 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { PalmTree as PalmTreeIcon } from "@/icons/app"
-
 import { ActivityItem } from "."
 
 const meta: Meta<typeof ActivityItem> = {

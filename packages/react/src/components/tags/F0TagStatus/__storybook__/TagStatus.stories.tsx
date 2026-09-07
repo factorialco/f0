@@ -1,9 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { Phone } from "@/icons/app"
 import * as Icons from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
 import { F0TagStatus } from ".."
 import { statuses } from "../types"
 

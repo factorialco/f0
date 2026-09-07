@@ -1,6 +1,5 @@
 import { useRef, useState } from "react"
 import { useIsomorphicLayoutEffect } from "usehooks-ts"
-
 import { useReducedMotion } from "@/lib/a11y"
 
 type Hold<T> = number | ((prev: T, next: T) => number)

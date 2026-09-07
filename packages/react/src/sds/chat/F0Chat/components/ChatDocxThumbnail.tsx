@@ -1,6 +1,5 @@
-import { useEffect, useRef, useState, type ReactNode } from "react"
-
 import { renderAsync } from "docx-preview"
+import { useEffect, useRef, useState, type ReactNode } from "react"
 
 /**
  * First-page snapshot for the chat's Word card: docx-preview renders the

@@ -1,9 +1,7 @@
 import { useControllableState } from "@radix-ui/react-use-controllable-state"
-
 import { F0Icon } from "@/components/F0Icon"
 import { cn, focusRing } from "@/lib/utils"
 import { ToggleGroup, ToggleGroupItem } from "@/ui/ToggleGroup"
-
 import { F0SegmentedControlProps } from "./types"
 
 export const F0SegmentedControl = ({

@@ -1,11 +1,9 @@
 import { beforeAll, describe, expect, it } from "vitest"
-
 import { screen, zeroRender, zeroRenderHook } from "@/testing/test-utils"
-
 import { F0Graph, type F0GraphNodeRenderContext } from "../F0Graph"
-import { resolveStackedParents } from "../utils"
 import { useLayoutEngine } from "../hooks/useLayoutEngine"
-import type { GraphEdge, GraphNode, TreeNode } from "../types"
+import type { GraphNode, GraphEdge, TreeNode } from "../types"
+import { resolveStackedParents } from "../utils"
 
 // ─── Helpers ───────────────────────────────────────────────────
 

@@ -13,7 +13,6 @@ import { Tabs, TabsProps } from "@/patterns/Navigation/Tabs"
 import { BreadcrumbList } from "@/ui/breadcrumb"
 import { DialogTitle } from "@/ui/Dialog/dialog"
 import { DrawerDescription } from "@/ui/drawer"
-
 import { useDialogWrapperContext } from "./DialogWrapperProvider"
 
 export type HeaderProps = {

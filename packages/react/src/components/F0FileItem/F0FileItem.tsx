@@ -1,8 +1,10 @@
 import { cva } from "cva"
 import { forwardRef } from "react"
-
+import type { HTMLAttributes } from "react"
 import { F0AvatarFile } from "@/components/avatars/F0AvatarFile"
+import type { FileDef } from "@/components/avatars/F0AvatarFile/types"
 import { F0Button } from "@/components/F0Button"
+import type { IconType } from "@/components/F0Icon"
 import {
   DropdownInternal,
   DropdownItem,
@@ -12,10 +14,6 @@ import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 import { cn } from "@/lib/utils"
-
-import type { FileDef } from "@/components/avatars/F0AvatarFile/types"
-import type { IconType } from "@/components/F0Icon"
-import type { HTMLAttributes } from "react"
 
 // Declared next to the component (not in a sibling types.ts) so api-extractor
 // rolls them into the bundled d.ts instead of emitting a broken relative import.

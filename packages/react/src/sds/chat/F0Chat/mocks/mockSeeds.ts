@@ -1,7 +1,6 @@
 import { type AvatarVariant } from "@/components/avatars/F0Avatar"
 import { BellOff, People } from "@/icons/app"
 import { mockImage } from "@/testing/mocks/images"
-
 import {
   isUserMessage,
   type F0ChatAttachment,

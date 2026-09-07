@@ -11,7 +11,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
-
 import {
   ChartConfig,
   ChartContainer,
@@ -20,7 +19,6 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/ui/chart"
-
 import { getCategoricalColor, getColor } from "../utils/colors"
 import {
   cartesianGridProps,

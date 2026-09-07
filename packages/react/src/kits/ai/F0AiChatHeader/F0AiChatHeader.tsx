@@ -2,7 +2,6 @@ import { breakpoints } from "@factorialco/f0-core"
 import { motion } from "motion/react"
 import { type ReactNode } from "react"
 import { useMediaQuery } from "usehooks-ts"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
 import { New } from "@/icons/app"
@@ -15,11 +14,9 @@ import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Action } from "@/ui/Action"
-
-import type { F0AiChatHeaderProps } from "./types"
-
 import { CreditsPopover } from "./components/CreditsPopover"
 import { EmployeeCreditsPopover } from "./components/EmployeeCreditsPopover"
+import type { F0AiChatHeaderProps } from "./types"
 
 /**
  * Picks the right credits popover to render based on which prop the host

@@ -1,8 +1,6 @@
 import { useRef, useState } from "react"
-
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
-
 import { SEEK_EPSILON, SEEK_STEP_SECONDS, formatTime } from "../utils"
 
 export interface SeekbarProps {

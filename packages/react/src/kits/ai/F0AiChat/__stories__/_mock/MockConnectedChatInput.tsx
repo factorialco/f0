@@ -1,5 +1,4 @@
 import { useCallback, useMemo, useRef } from "react"
-
 import { F0AiChatTextArea } from "../../../F0AiChatTextArea"
 import { type F0AiChatTextAreaSubmitPayload } from "../../../F0AiChatTextArea/types"
 import { F0ClarifyingPanel } from "../../../F0ClarifyingPanel"
@@ -8,7 +7,6 @@ import type {
   WelcomeScreenSuggestion,
   WelcomeScreenSuggestionItem,
 } from "../../types"
-
 import { useMockAiChatRuntime } from "./MockAiChatRuntime"
 import { filterNonRenderableMessages } from "./turn-utils"
 

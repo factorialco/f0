@@ -1,5 +1,4 @@
 import type { ReactNode, RefObject } from "react"
-
 import type {
   AiChatCreditWarning,
   AiChatDisclaimer,

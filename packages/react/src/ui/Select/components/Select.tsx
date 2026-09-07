@@ -1,7 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
-
 import { toArray } from "@/lib/toArray.ts"
-
 import { SelectContext, SelectContextType } from "../SelectContext.tsx"
 import * as SelectPrimitive from "./radix-ui"
 import { SelectPrimitiveProps } from "./radix-ui/select.tsx"

@@ -7,7 +7,6 @@ import {
   useRef,
   useState,
 } from "react"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { Cross } from "@/icons/app"
 import { useReducedMotion } from "@/lib/a11y"
@@ -20,7 +19,6 @@ import {
   PopoverArrow,
   PopoverContent,
 } from "@/ui/popover"
-
 import { CoachmarkSpotlight } from "./CoachmarkSpotlight"
 import type { F0CoachmarkProps } from "./types"
 

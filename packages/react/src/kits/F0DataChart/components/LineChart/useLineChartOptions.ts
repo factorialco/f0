@@ -1,15 +1,12 @@
 import * as echarts from "echarts"
 import { type RefObject, useMemo } from "react"
-
 import { useI18n } from "@/lib/providers/i18n"
-
 import type {
   F0DataChartLineDataPoint,
   F0DataChartLineProps,
   F0DataChartLineSeries,
   F0DataChartLineType,
 } from "../../types"
-
 import { paletteColor, resolveChartColorToken } from "../../utils/colors"
 import {
   buildBaseChartOptions,

@@ -1,5 +1,4 @@
 import type { Meta } from "@storybook/react-vite"
-
 import { LineChart } from "."
 
 const meta: Meta = {

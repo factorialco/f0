@@ -1,7 +1,6 @@
 import { useDeepCompareEffect } from "@reactuses/core"
 import { useCallback, useEffect, useState } from "react"
 import { useDebounceCallback } from "usehooks-ts"
-
 import {
   FiltersDefinition,
   FiltersState,

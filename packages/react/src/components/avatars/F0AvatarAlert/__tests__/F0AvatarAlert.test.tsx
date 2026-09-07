@@ -1,8 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
-
 import { AlertCircle, CheckCircle, InfoCircle, Warning } from "@/icons/app"
 import { screen, zeroRender } from "@/testing/test-utils"
-
 import { F0AvatarAlert } from "../F0AvatarAlert"
 
 // Mock F0Icon component to capture the icon prop

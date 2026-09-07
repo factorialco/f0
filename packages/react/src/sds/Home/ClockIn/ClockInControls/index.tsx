@@ -1,6 +1,5 @@
 import { motion } from "motion/react"
 import { Dispatch, useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { F0Select } from "@/components/F0Select"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
@@ -8,7 +7,6 @@ import { SolidPause, SolidPlay, SolidStop } from "@/icons/app"
 import { useReducedMotion } from "@/lib/a11y"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { cn } from "@/lib/utils"
-
 import { ClockInGraph, ClockInGraphProps } from "../ClockInGraph"
 import { getLabels } from "../ClockInGraph/helpers"
 import { getInfo } from "./helpers"

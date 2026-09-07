@@ -11,9 +11,7 @@ import {
   useRef,
   useState,
 } from "react"
-
 import { useI18n } from "@/lib/providers/i18n"
-
 import { AiChatProviderReturnValue, AiChatState } from "../internal-types"
 import {
   type AiChatMode,
@@ -26,7 +24,6 @@ import {
   WelcomeScreenSuggestion,
 } from "../types"
 import { DEFAULT_CHAT_WIDTH } from "../utils/constants"
-
 import { usePersistedState } from "./usePersistedState"
 
 const AiChatStateContext = createContext<AiChatProviderReturnValue | null>(null)

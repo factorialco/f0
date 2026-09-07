@@ -24,7 +24,6 @@ import type {
   SpacingToken,
   ZIndexToken,
 } from "../types"
-
 import { backgroundVariants } from "./background"
 import { borderVariants } from "./border"
 import { dimensionVariants } from "./dimensions"

@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import { createSuggestionConfig } from "../suggestion"
 import { MentionedUser } from "../types"
 

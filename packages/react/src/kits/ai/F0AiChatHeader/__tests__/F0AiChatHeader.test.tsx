@@ -1,9 +1,7 @@
 import { userEvent } from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
-
 import { Clock } from "@/icons/app"
 import { zeroRender as render, screen } from "@/testing/test-utils"
-
 import { F0AiChatHeader } from "../F0AiChatHeader"
 import type { F0AiChatHeaderProps } from "../types"
 

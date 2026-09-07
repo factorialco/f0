@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { CalendarEventList } from "."
 
 const meta: Meta = {

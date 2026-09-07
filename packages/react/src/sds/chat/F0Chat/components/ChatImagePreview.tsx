@@ -2,13 +2,11 @@
 
 import { AnimatePresence, motion } from "motion/react"
 import { type ReactNode, useCallback, useEffect, useState } from "react"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { type IconType } from "@/components/F0Icon"
 import { ChevronLeft, ChevronRight, Cross, Download } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { Dialog, DialogContent, DialogTitle } from "@/ui/Dialog"
-
 import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
 import { useChatImagePreview } from "../providers/ChatUIProvider"
 import { useF0ChatEmit } from "../providers/F0ChatProvider"

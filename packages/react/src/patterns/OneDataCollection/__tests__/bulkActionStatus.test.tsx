@@ -2,17 +2,15 @@ import { act, screen, waitFor } from "@testing-library/react"
 import { userEvent } from "@testing-library/user-event"
 import { useState } from "react"
 import { afterEach, describe, expect, test, vi } from "vitest"
-
+import type { ActionBarStatus } from "@/components/F0ActionBar"
 import { aiTranslations } from "@/kits/ai/F0AiChat"
 import { defaultTranslations, I18nProvider } from "@/lib/providers/i18n"
 import {
   zeroRender as render,
   zeroRenderHook as renderHook,
 } from "@/testing/test-utils"
-import type { ActionBarStatus } from "@/components/F0ActionBar"
-
-import { useDataCollectionSource } from "../hooks/useDataCollectionSource"
 import { OneDataCollection } from ".."
+import { useDataCollectionSource } from "../hooks/useDataCollectionSource"
 
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (
   <I18nProvider

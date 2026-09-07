@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest"
-
 import { zeroRender as render } from "@/testing/test-utils"
-
 import { BaseTag } from "."
 
 describe("BaseTag", () => {

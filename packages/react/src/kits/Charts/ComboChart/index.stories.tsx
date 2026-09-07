@@ -1,5 +1,4 @@
 import { Meta } from "@storybook/react-vite"
-
 import { ComboChart } from "."
 
 const meta: Meta = {

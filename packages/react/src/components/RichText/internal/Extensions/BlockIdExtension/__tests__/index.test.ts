@@ -1,12 +1,11 @@
 import { Editor, type JSONContent } from "@tiptap/core"
 import { afterEach, describe, expect, it } from "vitest"
-
-import { StarterKitExtension } from "../../configured"
 import {
   BlockIdExtension,
   documentHasMissingBlockIds,
   isBlockNodeType,
 } from ".."
+import { StarterKitExtension } from "../../configured"
 
 describe("isBlockNodeType", () => {
   it("returns true for supported block-id node types", () => {

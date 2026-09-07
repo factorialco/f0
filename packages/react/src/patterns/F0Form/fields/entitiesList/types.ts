@@ -1,12 +1,10 @@
 import { z } from "zod"
-
 import type { AvatarVariant } from "@/components/avatars/F0Avatar"
 import type { IconType } from "@/components/F0Icon"
 import type { NewColor } from "@/components/tags/F0TagDot"
 import type { StatusVariant } from "@/components/tags/F0TagStatus"
 import type { ConfirmDialogOptions } from "@/lib/providers/dialogs-alike/types"
 import type { F0FormDefinitionSingleSchema } from "@/patterns/F0WizardForm/types"
-
 import type {
   F0BaseField,
   F0BaseFieldRenderIfFunction,

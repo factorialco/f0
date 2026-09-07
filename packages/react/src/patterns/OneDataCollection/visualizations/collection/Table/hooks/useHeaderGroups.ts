@@ -1,8 +1,6 @@
 import { useCallback, useMemo, useState } from "react"
-
 import { RecordType, SortingsDefinition } from "@/hooks/datasource"
 import { useReducedMotion } from "@/lib/a11y"
-
 import { SummariesDefinition } from "../../../../summary"
 import { ColId, HeaderGroupDefinition, TableColumnDefinition } from "../types"
 import { ColumnCollapseTransition } from "./useColumnCollapseAnimation"

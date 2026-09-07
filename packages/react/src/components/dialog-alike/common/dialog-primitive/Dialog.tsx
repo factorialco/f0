@@ -1,7 +1,6 @@
 "use client"
 
 import * as DialogPrimitive from "@radix-ui/react-dialog"
-
 import { DialogPrimitiveContext } from "./context"
 import { DialogProps } from "./types"
 

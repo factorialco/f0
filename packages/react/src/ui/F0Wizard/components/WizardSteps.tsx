@@ -1,9 +1,7 @@
 import { cva } from "cva"
-
 import Check from "@/icons/app/Check"
 import { cn, focusRing } from "@/lib/utils"
 import { Counter } from "@/ui/Counter"
-
 import { useF0Wizard } from "./WizardProvider"
 
 const stepLabelVariants = cva({

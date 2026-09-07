@@ -1,8 +1,6 @@
 import { type ReactNode } from "react"
-
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { useF0ChatChannelType } from "../providers/F0ChatProvider"
 import { type F0ChatMessage } from "../types"
 import { CHAT_MEDIA_SCRIM_CLASS } from "../utils/media-layout"

@@ -1,6 +1,5 @@
 import { Editor } from "@tiptap/react"
 import { RefObject } from "react"
-
 import { heightType, resultType } from "./types"
 
 const checkContainerHeight = (

@@ -1,5 +1,4 @@
 import { forwardRef } from "react"
-
 import { getColor } from "@/kits/Charts/utils/colors"
 
 interface DualProgressBarProps {

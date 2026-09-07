@@ -5,7 +5,6 @@ import {
   useRef,
   useState,
 } from "react"
-
 import type { GraphNode, TreeNode } from "../types"
 import { collectExpandableNodeIds, computeExpandedByDepth } from "../utils"
 

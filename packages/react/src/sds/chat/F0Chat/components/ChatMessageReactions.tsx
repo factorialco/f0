@@ -1,9 +1,7 @@
 import { AnimatePresence, motion } from "motion/react"
 import { type ReactNode } from "react"
-
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { useChatPermission } from "../hooks/useChatPermission"
 import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
 import { useF0ChatEmit, useF0ChatStable } from "../providers/F0ChatProvider"

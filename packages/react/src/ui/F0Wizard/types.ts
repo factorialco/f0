@@ -1,5 +1,4 @@
 import { ReactNode } from "react"
-
 import { F0DialogSize } from "@/components/dialog-alike/F0Dialog"
 
 export interface F0WizardStep {

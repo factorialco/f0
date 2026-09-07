@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { SidebarIcon } from "."
 
 const meta: Meta<typeof SidebarIcon> = {

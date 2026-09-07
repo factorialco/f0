@@ -1,17 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { ComponentProps } from "react"
-
-import { snapshotMatrix } from "@/lib/storybook-utils/snapshotMatrix"
-
-import { F0Box } from ".."
-import { F0Text } from "@/components/F0Text"
-import { F0Heading } from "@/components/F0Heading"
-import { F0Button } from "@/components/F0Button"
-import { F0Icon } from "@/components/F0Icon"
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
-import { F0TagStatus } from "@/components/tags/F0TagStatus"
+import { F0Button } from "@/components/F0Button"
+import { F0Heading } from "@/components/F0Heading"
+import { F0Icon } from "@/components/F0Icon"
+import { F0Text } from "@/components/F0Text"
 import { F0TagDot } from "@/components/tags/F0TagDot"
-import { Badge } from "@/ui/badge"
+import { F0TagStatus } from "@/components/tags/F0TagStatus"
 import {
   ChartLine,
   Clock,
@@ -24,6 +19,9 @@ import {
   Briefcase,
   Person,
 } from "@/icons/app"
+import { snapshotMatrix } from "@/lib/storybook-utils/snapshotMatrix"
+import { Badge } from "@/ui/badge"
+import { F0Box } from ".."
 
 // ─── Option arrays for controls ──────────────────────────────────
 

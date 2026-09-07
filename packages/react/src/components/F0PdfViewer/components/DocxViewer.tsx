@@ -1,10 +1,7 @@
-import { useEffect, useRef, useState, type ReactNode } from "react"
-
 import { renderAsync } from "docx-preview"
-
+import { useEffect, useRef, useState, type ReactNode } from "react"
 import { useI18n } from "@/lib/providers/i18n"
 import { Skeleton } from "@/ui/skeleton"
-
 import { type F0PdfViewerAction } from "../types"
 import { DocumentToolbar, useDocumentZoom } from "./DocumentToolbar"
 

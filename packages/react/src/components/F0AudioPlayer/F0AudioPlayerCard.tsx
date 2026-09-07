@@ -9,7 +9,6 @@ import {
   useState,
   type CSSProperties,
 } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { F0SegmentedControl } from "@/experimental/Actions/F0SegmentedControl"
 import { useReducedMotion } from "@/lib/a11y"
@@ -21,7 +20,6 @@ import {
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { ScrollArea } from "@/ui/scrollarea"
-
 import { AudioScrubber } from "./components/AudioScrubber"
 import { LanguageSelect } from "./components/LanguageSelect"
 import { PlaybackMenu } from "./components/PlaybackMenu"

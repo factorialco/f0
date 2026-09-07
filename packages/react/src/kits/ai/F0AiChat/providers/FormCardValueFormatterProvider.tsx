@@ -7,7 +7,6 @@ import {
   useState,
   type ReactNode,
 } from "react"
-
 import type { DetailsItemContent } from "@/experimental/Lists/DetailsItem"
 
 export interface FormCardValueFormatterEntry<T = unknown> {

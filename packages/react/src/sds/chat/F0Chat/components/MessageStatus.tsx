@@ -1,9 +1,7 @@
 import { motion } from "motion/react"
 import { type ReactNode } from "react"
-
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
 import { useF0Chat } from "../providers/F0ChatProvider"
 import { type F0ChatMessage } from "../types"

@@ -1,5 +1,4 @@
 import { type F0DocumentKind } from "@/components/F0PdfViewer"
-
 import {
   type F0ChatAttachedKind,
   type F0ChatAttachment,

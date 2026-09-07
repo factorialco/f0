@@ -6,7 +6,6 @@ import {
   useRef,
   useState,
 } from "react"
-
 import { type SidebarChatGroup } from "./types"
 
 type Direction = "above" | "below"

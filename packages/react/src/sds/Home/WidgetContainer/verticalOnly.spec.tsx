@@ -1,11 +1,9 @@
 import type { Modifier } from "@dnd-kit/core"
 import { describe, expect, test, vi } from "vitest"
-
 import { Clock } from "@/icons/app"
 import { zeroRender } from "@/testing/test-utils"
-
-import { WidgetContainer } from "."
 import { verticalOnly } from "./verticalOnly"
+import { WidgetContainer } from "."
 
 /**
  * The one prop this file is about: dnd-kit's own DndContext is what applies a

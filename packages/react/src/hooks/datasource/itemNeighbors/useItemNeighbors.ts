@@ -1,10 +1,8 @@
 import { useEffect, useRef, useState } from "react"
-
 import {
   FiltersDefinition,
   FiltersState,
 } from "@/patterns/OneFilterPicker/types"
-
 import {
   BaseFetchOptions,
   DataAdapter,

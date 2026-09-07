@@ -1,12 +1,11 @@
+import { MultitaskRow } from "./components/MultitaskRow"
+import { NestedtaskRow } from "./components/NestedtaskRow"
+import { TaskRow } from "./components/TaskRow"
 import type {
   F0TimelineRowMultitaskProps,
   F0TimelineRowNestedtaskProps,
   F0TimelineRowProps,
 } from "./types"
-
-import { MultitaskRow } from "./components/MultitaskRow"
-import { NestedtaskRow } from "./components/NestedtaskRow"
-import { TaskRow } from "./components/TaskRow"
 
 const isNestedtask = (
   props: F0TimelineRowProps

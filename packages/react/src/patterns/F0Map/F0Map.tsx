@@ -1,6 +1,5 @@
 import "maplibre-gl/dist/maplibre-gl.css"
 import "./F0Map.css"
-
 import maplibregl from "maplibre-gl"
 import {
   forwardRef,
@@ -11,17 +10,10 @@ import {
   useRef,
   useState,
 } from "react"
-
 import { useReducedMotion } from "@/lib/a11y"
 import { DataTestIdWrapper, type WithDataTestIdProps } from "@/lib/data-testid"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
-import { FLY_OPTS, RECOMMENDED_MAX_MARKERS } from "./constants"
-import { useCurrentLocation } from "./hooks/useCurrentLocation"
-import { useIsDarkContext } from "./hooks/useIsDarkContext"
-import { f0MapStyles, type F0MapStylePair } from "./styles"
-import type { F0MapArc, F0MapPoint, F0MapRoute, F0MapViewport } from "./types"
 import {
   F0MapControls,
   type F0MapControlLabels,
@@ -30,7 +22,12 @@ import { F0MapList } from "./components/F0MapList"
 import { F0MapMarkersLayer } from "./components/F0MapMarkersLayer"
 import { F0MapVectorLayer } from "./components/F0MapVectorLayer"
 import { CurrentLocationLayer } from "./components/internal/CurrentLocationLayer"
+import { FLY_OPTS, RECOMMENDED_MAX_MARKERS } from "./constants"
 import { F0MapSkeleton } from "./F0MapSkeleton"
+import { useCurrentLocation } from "./hooks/useCurrentLocation"
+import { useIsDarkContext } from "./hooks/useIsDarkContext"
+import { f0MapStyles, type F0MapStylePair } from "./styles"
+import type { F0MapArc, F0MapPoint, F0MapRoute, F0MapViewport } from "./types"
 
 /** City-level default view (Barcelona) used when no `initialViewport` is given. */
 const DEFAULT_VIEWPORT: Required<F0MapViewport> = {

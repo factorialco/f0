@@ -1,5 +1,4 @@
 import type { ReactNode } from "react"
-
 import type { AvatarVariant } from "@/components/avatars/F0Avatar"
 import type { RecordType } from "@/hooks/datasource"
 import type { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"

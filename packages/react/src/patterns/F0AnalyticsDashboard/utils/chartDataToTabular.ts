@@ -5,7 +5,6 @@ import type {
   F0DataChartPieSeries,
   F0DataChartRadarSeries,
 } from "@/kits/F0DataChart"
-
 import type {
   DashboardChartConfig,
   DashboardChartData,

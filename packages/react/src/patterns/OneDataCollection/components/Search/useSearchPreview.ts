@@ -1,7 +1,5 @@
 import { useEffect, useRef, useState } from "react"
-
 import type { RecordType } from "@/hooks/datasource"
-
 import type {
   SearchPreview,
   SearchPreviewPage,

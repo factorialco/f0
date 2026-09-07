@@ -1,19 +1,14 @@
 import { useCallback, useMemo, useState } from "react"
-
 import type { DropdownItem } from "@/experimental/Navigation/Dropdown"
-
-import { Table } from "@/icons/app"
-import { useI18n } from "@/lib/providers/i18n"
-
 import type {
   BaseResponse,
   PaginatedResponse,
   RecordType,
   SortingsStateMultiple,
 } from "@/hooks/datasource"
-
+import { Table } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 import { extractDisplayValue } from "@/patterns/OneDataCollection/utils/csvExport"
-
 import { downloadAsCsv, downloadAsExcel } from "../utils/downloadHelpers"
 
 // Mirrors the caps used by OneDataCollection's own `useExportAction` so the

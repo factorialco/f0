@@ -1,5 +1,4 @@
 import { type ReactNode } from "react"
-
 import { getEntityRefRenderer } from "./entityRefRegistry"
 
 /**

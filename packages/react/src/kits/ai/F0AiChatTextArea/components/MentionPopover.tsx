@@ -1,12 +1,9 @@
 import { useEffect, useLayoutEffect, useRef } from "react"
-
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson/F0AvatarPerson"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
-
 import { PersonProfile } from "../../F0AiChat/components/markdownRenderers/entityRef/entities/person/types"
-
 import type { PopoverPosition } from "../useMentions"
 
 export type MentionPopoverProps = {

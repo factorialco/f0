@@ -1,8 +1,6 @@
 import { Editor } from "@tiptap/react"
 import { useCallback, useEffect, useMemo, useState } from "react"
-
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
-
 import { handleEnhanceWithAIFunction } from "./enhance"
 import { enhanceConfig, lastIntentType } from "./types"
 

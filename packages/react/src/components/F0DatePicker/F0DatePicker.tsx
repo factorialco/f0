@@ -1,12 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-
 import {
   NavigationGranularityKey,
   resolveGranularityDefinition,
 } from "@/components/OneCalendar"
 import { useI18n } from "@/lib/providers/i18n"
 import { DatePickerPopup, isSameDatePickerValue } from "@/ui/DatePickerPopup"
-
 import { DateInput } from "./components/DateInput"
 import { DatePickerValue, F0DatePickerProps } from "./types"
 

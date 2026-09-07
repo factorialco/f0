@@ -1,27 +1,16 @@
 import { useCallback, useRef, useState, useMemo } from "react"
-
-import type { DialogPosition } from "@/patterns/F0Dialog/types"
-import type { F0FormSubmitResult } from "@/patterns/F0Form/types"
-
 import { OneEmptyState } from "@/components/OneEmptyState"
 import { ArrowLeft, ArrowRight, Maximize, Minimize } from "@/icons/app"
 import { F0Box } from "@/lib/F0Box"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { F0Dialog } from "@/patterns/F0Dialog"
+import type { DialogPosition } from "@/patterns/F0Dialog/types"
 import { F0Form } from "@/patterns/F0Form/F0Form"
+import type { F0FormSubmitResult } from "@/patterns/F0Form/types"
 import { useF0Form } from "@/patterns/F0Form/useF0Form"
 import { F0ResourceHeader } from "@/patterns/F0ResourceHeader"
 import { ProgressBarCell } from "@/ui/value-display/types/progressBar"
-
-import type {
-  SurveyAnsweringFormDefaultProps,
-  SurveyAnsweringFormInlineReadonlyProps,
-  SurveyAnsweringFormPreviewProps,
-  SurveyAnsweringFormProps,
-  SurveySubmitAnswers,
-} from "./types"
-
 import { SurveyFormBuilderProvider } from "../SurveyFormBuilder/Context"
 import { TableOfContent } from "../SurveyFormBuilder/Form/TableOfContent"
 import {
@@ -33,6 +22,13 @@ import {
   extractFlatQuestions,
   useSurveyFormSchema,
 } from "./hooks/useSurveyFormSchema"
+import type {
+  SurveyAnsweringFormDefaultProps,
+  SurveyAnsweringFormInlineReadonlyProps,
+  SurveyAnsweringFormPreviewProps,
+  SurveyAnsweringFormProps,
+  SurveySubmitAnswers,
+} from "./types"
 
 const noop = () => {}
 

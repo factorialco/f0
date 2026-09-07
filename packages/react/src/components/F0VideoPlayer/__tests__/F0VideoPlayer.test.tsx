@@ -1,5 +1,4 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
 import { VolumeHigh, VolumeMid, VolumeMuted } from "@/icons/app"
 import {
   fireEvent,
@@ -7,7 +6,6 @@ import {
   userEvent,
   zeroRender as render,
 } from "@/testing/test-utils"
-
 import { volumeIcon } from "../components/VolumeControl"
 import { F0VideoPlayer } from "../F0VideoPlayer"
 

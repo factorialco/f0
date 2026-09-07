@@ -1,13 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { ComponentProps, useCallback, useEffect, useState } from "react"
 import { expect, within } from "storybook/test"
-
 import { F0Button } from "@/components/F0Button"
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { Skeleton } from "@/ui/skeleton"
-
 import { Await } from ".."
 
 // Deterministic promise states for the snapshot.

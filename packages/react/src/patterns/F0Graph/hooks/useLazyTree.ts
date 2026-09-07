@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-
 import type { GraphNode } from "../types"
 
 interface UseLazyTreeOptions<T> {

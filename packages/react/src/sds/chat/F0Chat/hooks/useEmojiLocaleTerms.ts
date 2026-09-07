@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react"
-
 import {
   browserEmojiLocale,
   type EmojiLocaleTerms,

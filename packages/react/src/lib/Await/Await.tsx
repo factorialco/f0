@@ -1,5 +1,4 @@
 import { ReactNode, useEffect, useState } from "react"
-
 import { DataTestIdWrapper } from "@/lib/data-testid"
 
 export type AwaitProps<T> = {

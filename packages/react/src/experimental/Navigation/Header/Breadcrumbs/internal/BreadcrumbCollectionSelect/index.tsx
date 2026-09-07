@@ -1,5 +1,4 @@
 import { useCallback, useLayoutEffect, useRef, useState } from "react"
-
 import { FiltersDefinition, FiltersState, RecordType } from "@/hooks/datasource"
 import { Link } from "@/lib/linkHandler"
 import { useDataCollectionStorage } from "@/lib/providers/datacollection"
@@ -8,7 +7,6 @@ import {
   mergeDataCollectionFilters,
   readDataCollectionStorage,
 } from "@/lib/providers/datacollection/readDataCollectionStorage"
-
 import { BreadcrumbCollectionSelectItemType } from "../../types"
 import { BreadcrumbSelect } from "../BreadcrumbSelect"
 import { buildCollectionBoundSource } from "./buildCollectionBoundSource"

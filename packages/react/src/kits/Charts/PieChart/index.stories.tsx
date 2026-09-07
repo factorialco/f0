@@ -1,5 +1,4 @@
 import type { Meta } from "@storybook/react-vite"
-
 import { PieChart } from "."
 
 const meta: Meta<typeof PieChart> = {

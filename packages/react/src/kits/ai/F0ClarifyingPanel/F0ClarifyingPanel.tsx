@@ -1,14 +1,11 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useRef } from "react"
-
 import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
-
-import type { ClarifyingQuestionState } from "./types"
-
 import { ConfirmFooter } from "./components/ConfirmFooter"
 import { OptionsList } from "./components/OptionsList"
 import { StepHeader } from "./components/StepHeader"
+import type { ClarifyingQuestionState } from "./types"
 
 // Curva compartida por el panel. Ojo: OptionsList usa la suya para el
 // escalonado de las opciones, que es una entrada y pide otra curva.

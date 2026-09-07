@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react"
-
 import { cn } from "@/lib/utils"
 
 const BAR_WIDTH = 2 // px

@@ -1,10 +1,8 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useEffect, useRef } from "react"
-
 import { useI18n } from "@/lib/providers/i18n"
 import { useL10n } from "@/lib/providers/l10n"
 import { cn, focusRing } from "@/lib/utils"
-
 import { DateRange } from "../../types"
 import { isAfterOrEqual, isBeforeOrEqual, toDateRange } from "../../utils"
 import { DatePeriod } from "./types"

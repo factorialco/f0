@@ -1,5 +1,4 @@
 import React, { forwardRef, memo, type ReactNode } from "react"
-
 import { useRenderDataTestIdAttribute } from "../providers/user-platafform/UserPlatformProvider"
 
 const ignoredStaticProps = ["prototype", "length", "name", "$$typeof", "render"]

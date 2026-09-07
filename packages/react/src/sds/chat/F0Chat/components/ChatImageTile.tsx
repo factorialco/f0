@@ -1,7 +1,5 @@
 import { type ReactNode, useState } from "react"
-
 import { cn, focusRing } from "@/lib/utils"
-
 import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
 import { type F0ChatImageAttachment } from "../types"
 import { FadeInImage } from "./FadeInImage"

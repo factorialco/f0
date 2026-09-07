@@ -1,9 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react"
-
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Slider, SliderThumb, SliderTrack } from "@/ui/slider"
-
 import { formatPlaybackTime } from "../utils"
 
 interface AudioScrubberProps {

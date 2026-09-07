@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import {
   EASE_OUT_SWIFT,
   entryStaggerDelay,

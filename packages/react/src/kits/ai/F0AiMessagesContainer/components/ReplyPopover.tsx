@@ -1,11 +1,9 @@
 import { useLayoutEffect, useRef, useState } from "react"
 import { createPortal } from "react-dom"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { Quote } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import type { ReplySelectionAnchor } from "../useReplySelection"
 
 const GAP = 8

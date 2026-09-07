@@ -1,11 +1,10 @@
 import { useCallback, useState } from "react"
-
+import { readFromLocalStorage, writeToLocalStorage } from "@/lib/local-storage"
 import {
   DEFAULT_EMOJI_IDS,
   type EmojiEntry,
   findEmojiById,
 } from "../../utils/emoji-index"
-import { readFromLocalStorage, writeToLocalStorage } from "@/lib/local-storage"
 
 const STORAGE_KEY = "f0.emoji-picker.frequent"
 

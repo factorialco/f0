@@ -1,16 +1,14 @@
 "use client"
 
 import { useEffect, useRef } from "react"
-
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0Icon } from "@/components/F0Icon"
-import { OneEllipsis } from "@/lib/OneEllipsis"
 import { CrossedCircle } from "@/icons/app"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { ScrollArea } from "@/ui/scrollarea"
 import { Spinner } from "@/ui/Spinner"
-
 import type { F0SelectItemObject } from "../types"
 
 interface SelectionPreviewProps<T extends string> {

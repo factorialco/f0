@@ -1,9 +1,7 @@
 import { cva } from "cva"
 import { forwardRef } from "react"
-
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { AudioScrubber } from "./components/AudioScrubber"
 import { LanguageSelect } from "./components/LanguageSelect"
 import { PlaybackTime } from "./components/PlaybackTime"

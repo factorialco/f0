@@ -1,5 +1,4 @@
 import { useCallback, useRef } from "react"
-
 import { diffSpan } from "../utils/text-diff"
 import { type AnchoredMention } from "./useMentions"
 

@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import { formatPercent } from "../utils/formatters"
 
 describe("formatPercent", () => {

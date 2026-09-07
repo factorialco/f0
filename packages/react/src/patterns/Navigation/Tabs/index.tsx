@@ -1,10 +1,8 @@
 import { Dispatch, useEffect, useState } from "react"
-
 import { DataAttributes } from "@/global.types"
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import { TabNavigation, TabNavigationLink } from "@/ui/tab-navigation"
-
 import { F0Icon } from "../../../components/F0Icon"
 import { Upsell } from "../../../icons/app"
 import { Link, useNavigation } from "../../../lib/linkHandler"

@@ -1,9 +1,7 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useRef } from "react"
-
 import { useReducedMotion } from "@/lib/a11y"
 import { Skeleton } from "@/ui/skeleton"
-
 import { useAiChat } from "../../providers/AiChatStateProvider"
 import { SidebarWindow } from "./ChatWindow"
 

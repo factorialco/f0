@@ -1,5 +1,4 @@
 import { useStore } from "@xyflow/react"
-
 import {
   DEFAULT_NODE_WINDOW_PADDING,
   NODE_WINDOW_QUANTIZE_STEP,

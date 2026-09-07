@@ -1,16 +1,13 @@
-import { Meta, StoryObj } from "@storybook/react-vite"
 import "@xyflow/react/dist/style.css"
+import { Meta, StoryObj } from "@storybook/react-vite"
 import { useRef, useState } from "react"
-
-import type { F0GraphNodeTag } from "@/patterns/F0Graph"
-
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0Button } from "@/components/F0Button"
 import { Calendar, Office } from "@/icons/app"
 import { F0Dialog } from "@/patterns/F0Dialog"
-
-import { useDataCollectionSource } from "../../hooks/useDataCollectionSource"
+import type { F0GraphNodeTag } from "@/patterns/F0Graph"
 import { OneDataCollection } from "../.."
+import { useDataCollectionSource } from "../../hooks/useDataCollectionSource"
 
 type Employee = {
   id: string

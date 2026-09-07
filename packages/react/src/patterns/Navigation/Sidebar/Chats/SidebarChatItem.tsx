@@ -7,7 +7,6 @@ import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { Spinner } from "@/ui/Spinner"
-
 import { SidebarChatItemSkeleton } from "./SidebarChatSkeleton"
 import { SidebarChat, SidebarChatPresence } from "./types"
 import { UnreadBadge } from "./UnreadBadge"

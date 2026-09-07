@@ -1,18 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { ComponentProps, FC, useState } from "react"
 import { expect, within } from "storybook/test"
-
 import { F0Button } from "@/components/F0Button"
-import { ApplicationFrame } from "@/patterns/ApplicationFrame"
-import ApplicationFrameStoryMeta from "@/patterns/ApplicationFrame/index.stories"
-import { F0ResourceHeader } from "@/patterns/F0ResourceHeader"
-import { Default as ResourceHeaderDefault } from "@/patterns/F0ResourceHeader/index.stories"
 import {
   OnePersonListItem,
   OnePersonListItemProps,
 } from "@/experimental/Lists/OnePersonListItem"
 import { Default as OnePersonListItemDefault } from "@/experimental/Lists/OnePersonListItem/index.stories"
+import { PaginatedFetchOptions, RecordType } from "@/hooks/datasource"
 import { Placeholder } from "@/icons/app"
 import CheckDoubleIcon from "@/icons/app/CheckDouble"
 import CrossIcon from "@/icons/app/Cross"
@@ -21,16 +16,17 @@ import PencilIcon from "@/icons/app/Pencil"
 import SaveIcon from "@/icons/app/Save"
 import ShareIcon from "@/icons/app/Share"
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
-import { ActivityItemList } from "@/sds/inbox/Activity/ActivityItemList"
-import { Default as ActivityItemListDefault } from "@/sds/inbox/Activity/ActivityItemList/index.stories"
-
-import { PaginatedFetchOptions, RecordType } from "@/hooks/datasource"
 import {
   expectDialogPaintsAboveChat,
   FullscreenChatFrame,
 } from "@/lib/storybook-utils/aiChatStacking"
+import { ApplicationFrame } from "@/patterns/ApplicationFrame"
+import ApplicationFrameStoryMeta from "@/patterns/ApplicationFrame/index.stories"
+import { F0ResourceHeader } from "@/patterns/F0ResourceHeader"
+import { Default as ResourceHeaderDefault } from "@/patterns/F0ResourceHeader/index.stories"
 import { useDataCollectionItemNavigation } from "@/patterns/OneDataCollection/hooks/useDataCollectionItemNavigation"
-
+import { ActivityItemList } from "@/sds/inbox/Activity/ActivityItemList"
+import { Default as ActivityItemListDefault } from "@/sds/inbox/Activity/ActivityItemList/index.stories"
 import { F0Dialog } from ".."
 import { dialogPositions, dialogWidths } from "../types"
 

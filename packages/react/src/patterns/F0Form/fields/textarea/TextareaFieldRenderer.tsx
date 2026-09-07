@@ -1,13 +1,9 @@
 import { ControllerRenderProps } from "react-hook-form"
-
 import type { InputFieldStatus } from "@/components/F0InputField/types"
-
 import { F0TextAreaInput } from "@/components/F0TextAreaInput"
-
+import { FORM_SIZE } from "../../constants"
 import type { ResolvedField } from "../types"
 import type { F0TextareaField } from "./types"
-
-import { FORM_SIZE } from "../../constants"
 
 interface TextareaFieldRendererProps {
   field: ResolvedField<F0TextareaField>

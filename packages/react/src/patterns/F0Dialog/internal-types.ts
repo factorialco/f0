@@ -1,11 +1,9 @@
 import { ReactNode } from "react"
-
 import { ModuleId } from "@/components/avatars/F0AvatarModule"
 import { DropdownInternalProps } from "@/experimental/Navigation/Dropdown/internal"
 import { NavigationProps } from "@/experimental/Navigation/Header/PageNavigation"
-import { TabsProps } from "@/patterns/Navigation/Tabs"
 import { F0ResourceHeaderProps } from "@/patterns/F0ResourceHeader"
-
+import { TabsProps } from "@/patterns/Navigation/Tabs"
 import {
   DialogControls,
   DialogPosition,

@@ -1,7 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { ComponentProps, FC, useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import {
   OnePersonListItem,
@@ -17,10 +15,9 @@ import {
   expectDialogPaintsAboveChat,
   FullscreenChatFrame,
 } from "@/lib/storybook-utils/aiChatStacking"
-
+import { F0Dialog } from ".."
 import { getDialogAlikeArgTypes } from "../../common/__stories__/argsTypes.ts"
 import { OTHER_ACTIONS, TABS } from "../../common/__stories__/mocks.ts"
-import { F0Dialog } from ".."
 import { DialogNotificationInternal } from "../internal/DialogNotification"
 import { dialogSizes } from "../types"
 

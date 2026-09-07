@@ -1,3 +1,4 @@
+import type { AvatarVariant } from "@/components/avatars/F0Avatar"
 import {
   BaseDataAdapter,
   BaseFetchOptions,
@@ -13,9 +14,6 @@ import {
   RecordType,
   SortingsDefinition,
 } from "@/hooks/datasource/types"
-
-import type { AvatarVariant } from "@/components/avatars/F0Avatar"
-
 import {
   PrimaryActionsDefinitionFn,
   SecondaryActionsDefinition,

@@ -1,9 +1,6 @@
 import { useIsPresent } from "motion/react"
 import { forwardRef, useCallback, useEffect, useRef, useState } from "react"
-
 import type { IconType } from "@/components/F0Icon"
-import type { TableVisualizationType } from "@/patterns/OneDataCollection/types"
-
 import { TableCell, TableRow } from "@/experimental/OneTable"
 import {
   GroupingDefinition,
@@ -22,10 +19,13 @@ import { ItemActionsDefinition } from "@/patterns/OneDataCollection/item-actions
 import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import { renderProperty } from "@/patterns/OneDataCollection/property-render"
 import { SummariesDefinition } from "@/patterns/OneDataCollection/summary"
+import type { TableVisualizationType } from "@/patterns/OneDataCollection/types"
 import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import { Checkbox } from "@/ui/checkbox"
 import { tableCellContentClassName } from "@/ui/value-display/const"
-
+import { ItemActionsRow } from "../../../../components/itemActions/ItemActionsRow/ItemActionsRow"
+import { getColumnId } from "../hooks/useColums"
+import { groupBorderClass, HeaderGroupEntry } from "../hooks/useHeaderGroups"
 import type {
   CellRendererProps,
   ColId,
@@ -33,10 +33,6 @@ import type {
   RowWrapperProps,
   TableColumnDefinition,
 } from "../types"
-
-import { ItemActionsRow } from "../../../../components/itemActions/ItemActionsRow/ItemActionsRow"
-import { getColumnId } from "../hooks/useColums"
-import { groupBorderClass, HeaderGroupEntry } from "../hooks/useHeaderGroups"
 import { useSticky } from "../useSticky"
 import { NestedRow } from "./NestedRow"
 

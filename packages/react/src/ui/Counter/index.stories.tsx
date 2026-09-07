@@ -1,8 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { ComponentProps } from "react"
 import { expect, within } from "storybook/test"
-
 import { Counter } from "."
 
 const meta = {

@@ -1,8 +1,6 @@
 import { Fragment, type ReactNode } from "react"
-
 import { F0Link } from "@/components/F0Link"
 import { cn } from "@/lib/utils"
-
 import { ChatUserHoverCard } from "../components/ChatUserHoverCard"
 import { type F0ChatLinkPreview, type F0ChatUser } from "../types"
 import { locateMentions } from "./mention-ranges"

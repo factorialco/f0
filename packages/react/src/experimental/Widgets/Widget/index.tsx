@@ -7,7 +7,6 @@ import React, {
   useRef,
   useState,
 } from "react"
-
 import { F0Button, type F0ButtonProps } from "@/components/F0Button"
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { F0TagAlert } from "@/components/tags/F0TagAlert"
@@ -16,6 +15,7 @@ import {
   DropdownInternal,
   DropdownItem,
 } from "@/experimental/Navigation/Dropdown/internal.tsx"
+import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { One as OneIcon } from "@/icons/ai"
 import {
   Ellipsis,
@@ -26,16 +26,14 @@ import {
   InfoCircleLine,
 } from "@/icons/app"
 import { AIButton as AIButtonComponent } from "@/kits/ai/AIButton"
-import { useI18n } from "@/lib/providers/i18n"
-import { Counter } from "@/ui/Counter"
-import { Tooltip } from "@/experimental/Overlays/Tooltip"
-import { PrivateBox } from "@/sds/Profile/PrivateBox"
 import { withDataTestId } from "@/lib/data-testid"
-import { isExternalHref, Link } from "@/lib/linkHandler"
 import { experimentalComponent } from "@/lib/experimental"
+import { isExternalHref, Link } from "@/lib/linkHandler"
 import { usePrivacyMode } from "@/lib/privacyMode"
+import { useI18n } from "@/lib/providers/i18n"
 import { withSkeleton } from "@/lib/skeleton"
 import { cn } from "@/lib/utils"
+import { PrivateBox } from "@/sds/Profile/PrivateBox"
 import {
   Card,
   CardComment,
@@ -45,6 +43,7 @@ import {
   CardSubtitle,
   CardTitle,
 } from "@/ui/Card"
+import { Counter } from "@/ui/Counter"
 import { Separator } from "@/ui/separator"
 import { Skeleton as SkeletonPrimitive } from "@/ui/skeleton"
 

@@ -1,6 +1,5 @@
 import { addDays, differenceInDays, endOfDay, startOfDay } from "date-fns"
 import { describe, expect, it } from "vitest"
-
 import { rangeGranularity } from ".."
 
 describe("rangeGranularity", () => {

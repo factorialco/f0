@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from "react"
-
 import { useVttSource } from "./useVttSource"
 
 const DESCRIPTION_TRACK_KIND: TextTrackKind = "descriptions"

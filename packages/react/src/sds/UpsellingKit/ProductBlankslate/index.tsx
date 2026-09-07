@@ -1,5 +1,4 @@
 import { forwardRef } from "react"
-
 // packages/react/src/experimental/ProductBlankslate/index.tsx
 import { F0AvatarModule, ModuleId } from "@/components/avatars/F0AvatarModule"
 import { F0Icon, IconType } from "@/components/F0Icon"

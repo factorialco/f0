@@ -1,5 +1,4 @@
 import { Settings } from "lucide-react"
-
 import { mockImage } from "@/testing/mocks/images"
 
 // Sample dot tags

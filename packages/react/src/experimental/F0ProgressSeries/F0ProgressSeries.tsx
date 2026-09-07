@@ -1,5 +1,4 @@
 import { forwardRef } from "react"
-
 import { getColor } from "@/kits/Charts/utils/colors"
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
@@ -13,7 +12,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/ui/tooltip"
-
 import {
   F0ProgressSeriesBar,
   F0ProgressSeriesColor,

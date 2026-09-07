@@ -10,7 +10,6 @@ import {
   startOfMonth,
   startOfYear,
 } from "date-fns"
-
 import { DateRange, DateRangeComplete } from "../../types"
 import {
   isAfterOrEqual,

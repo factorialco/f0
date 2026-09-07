@@ -1,7 +1,5 @@
 import { ZodTypeAny } from "zod"
-
 import type { InputFieldStatus } from "@/components/F0InputField/types"
-
 import type { F0FieldAlert } from "../f0Schema"
 
 // ============================================================================
@@ -248,13 +246,13 @@ import type {
   F0DateRangeField,
 } from "./daterange/types"
 import type { F0DurationField } from "./duration/types"
+import type { F0EntitiesListField } from "./entitiesList/types"
 import type { F0FileField } from "./file/types"
 import type { F0NumberField, NumberRenderIfCondition } from "./number/types"
 import type { F0PeriodField, PeriodRenderIfCondition } from "./period/types"
 import type { F0PhoneField } from "./phone/types"
 import type { F0RichTextField } from "./richtext/types"
 import type { F0SelectField, SelectRenderIfCondition } from "./select/types"
-import type { F0EntitiesListField } from "./entitiesList/types"
 import type { F0SwitchField } from "./switch/types"
 // Import for union type
 import type { F0TextField, TextRenderIfCondition } from "./text/types"

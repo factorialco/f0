@@ -1,15 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { ComponentProps, FC, useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { ApplicationFrame } from "@/patterns/ApplicationFrame"
 import ApplicationFrameStoryMeta from "@/patterns/ApplicationFrame/index.stories"
-import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
-import type { F0WizardStep } from "../types"
-
 import { F0Wizard } from ".."
+import type { F0WizardStep } from "../types"
 
 const meta: Meta<typeof F0Wizard> = {
   title: "Wizard",

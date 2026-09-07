@@ -1,11 +1,9 @@
 import { type ReactNode, useCallback, useEffect, useRef, useState } from "react"
-
 import { useAudioPlayer } from "@/components/F0AudioPlayer"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { SolidPause, SolidPlay } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
-
 import { useChatSurface } from "../providers/ChatSurfaceProvider"
 import {
   useF0ChatEmit,

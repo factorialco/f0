@@ -1,5 +1,4 @@
 import { ComponentProps, FC, forwardRef } from "react"
-
 import { F0AvatarList } from "@/components/avatars/F0AvatarList"
 import { F0AvatarListProps } from "@/components/avatars/F0AvatarList/types"
 import { F0FileItem } from "@/components/F0FileItem"
@@ -12,7 +11,6 @@ import { Weekdays } from "@/experimental/Widgets/Content/Weekdays"
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import { cn } from "@/lib/utils"
-
 import { DataList } from "../DataList"
 
 export type DetailsItemContent =

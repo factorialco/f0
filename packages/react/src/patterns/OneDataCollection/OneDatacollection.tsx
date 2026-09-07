@@ -10,13 +10,6 @@ import {
   useState,
 } from "react"
 import { createPortal } from "react-dom"
-
-import type {
-  FiltersDefinition,
-  FiltersState,
-  PresetsDefinition,
-} from "@/patterns/OneFilterPicker/types"
-
 import { F0ActionBar } from "@/components/F0ActionBar"
 import { OneEmptyState } from "@/components/OneEmptyState"
 import {
@@ -32,17 +25,12 @@ import { useDebounceBoolean } from "@/lib/useDebounceBoolean"
 import { cn } from "@/lib/utils"
 import { OneFilterPicker } from "@/patterns/OneFilterPicker"
 import { getActiveFilterKeys } from "@/patterns/OneFilterPicker/internal/getActiveFilterKeys"
-import { Spinner } from "@/ui/Spinner"
-
 import type {
-  BulkActionDefinition,
-  GroupingState,
-  OnBulkActionCallback,
-  OnLoadDataCallback,
-  SortingsState,
-} from "./types"
-import type { Visualization } from "./visualizations/collection"
-
+  FiltersDefinition,
+  FiltersState,
+  PresetsDefinition,
+} from "@/patterns/OneFilterPicker/types"
+import { Spinner } from "@/ui/Spinner"
 import {
   filterActions,
   getPrimaryActions,
@@ -65,21 +53,23 @@ import {
 import { Search } from "./components/Search"
 import { useSearchPreview } from "./components/Search/useSearchPreview"
 import { TotalItemsSummary } from "./components/TotalItemsSummary"
-import {
-  DataCollectionStatusComplete,
-  DataCollectionStorageFeaturesDefinition,
-} from "./hooks/useDataColectionStorage/types"
-import { useDataCollectionStorage } from "./hooks/useDataColectionStorage/useDataCollectionStorage"
-import { DataCollectionSource } from "./hooks/useDataCollectionSource"
+import { useHeaderActionsCollapse } from "./components/useHeaderActionsCollapse"
+import { VisualizationSwitcher } from "./components/VisualizationSwitcher"
 import {
   ESTIMATED_LIST_ROW_HEIGHT,
   ESTIMATED_ROW_HEIGHT,
   shouldAutoSizePerPage,
   useAutoPerPage,
 } from "./hooks/useAutoPerPage"
+import {
+  DataCollectionStatusComplete,
+  DataCollectionStorageFeaturesDefinition,
+} from "./hooks/useDataColectionStorage/types"
+import { useDataCollectionStorage } from "./hooks/useDataColectionStorage/useDataCollectionStorage"
+import { DataCollectionSource } from "./hooks/useDataCollectionSource"
+import { useDataCollectionUrlSync } from "./hooks/useDataCollectionUrlSync"
 import { CustomEmptyStates, useEmptyState } from "./hooks/useEmptyState"
 import { useExportAction } from "./hooks/useExportAction"
-import { useDataCollectionUrlSync } from "./hooks/useDataCollectionUrlSync"
 import { usePerVisualizationFilters } from "./hooks/usePerVisualizationFilters"
 import { getDefaultDataCollectionSettings } from "./internal/isSettingsDefault"
 import { derivePresetId } from "./internal/presetId"
@@ -96,10 +86,16 @@ import {
   DataCollectionSettings,
   useDataCollectionSettings,
 } from "./Settings/SettingsProvider"
-import { useHeaderActionsCollapse } from "./components/useHeaderActionsCollapse"
-import { VisualizationSwitcher } from "./components/VisualizationSwitcher"
 import { SummariesDefinition } from "./summary"
+import type {
+  BulkActionDefinition,
+  GroupingState,
+  OnBulkActionCallback,
+  OnLoadDataCallback,
+  SortingsState,
+} from "./types"
 import { useEventEmitter } from "./useEventEmitter"
+import type { Visualization } from "./visualizations/collection"
 import { VisualizationRenderer } from "./visualizations/collection"
 
 const SUCCESS_DISMISS_MS = 1500

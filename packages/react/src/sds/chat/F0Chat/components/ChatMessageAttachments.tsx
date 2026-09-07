@@ -1,10 +1,8 @@
 import { type ReactNode } from "react"
-
 import { F0FileItem } from "@/components/F0FileItem"
 import { Download } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { useChatImagePreview } from "../providers/ChatUIProvider"
 import { useF0ChatEmit } from "../providers/F0ChatProvider"
 import { type F0ChatMessage } from "../types"

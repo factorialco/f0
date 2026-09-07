@@ -1,5 +1,4 @@
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react"
-
 import {
   FiltersDefinition,
   FiltersState,

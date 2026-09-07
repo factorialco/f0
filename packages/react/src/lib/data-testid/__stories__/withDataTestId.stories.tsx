@@ -1,11 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import type { ComponentProps, HTMLAttributes } from "react"
-
 import { useState } from "react"
 import { expect, userEvent, within } from "storybook/test"
-
-import { F0Button } from "../../../components/F0Button"
 import { DataTestIdWrapper, WithDataTestIdProps, withDataTestId } from ".."
+import { F0Button } from "../../../components/F0Button"
 
 const WrappedButton = withDataTestId(F0Button)
 

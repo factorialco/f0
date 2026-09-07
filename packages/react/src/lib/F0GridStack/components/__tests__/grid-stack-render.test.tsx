@@ -1,7 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import { zeroRender } from "@/testing/test-utils"
-
 import { GridStackRender } from "../grid-stack-render"
 
 // Mock react-dom

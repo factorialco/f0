@@ -9,7 +9,6 @@ import {
   useRef,
   useState,
 } from "react"
-
 import { ActionProps } from "../components/CustomButton"
 
 export interface AiPromotionChatState {

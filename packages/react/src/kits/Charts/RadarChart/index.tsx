@@ -6,10 +6,8 @@ import {
   Radar,
   RadarChart as RadarChartPrimitive,
 } from "recharts"
-
 import { DataTestIdWrapper } from "@/lib/data-testid"
 import { cn, focusRing } from "@/lib/utils"
-
 import {
   ChartContainer,
   ChartLegend,

@@ -1,6 +1,5 @@
 import { endOfQuarter, startOfQuarter } from "date-fns"
 import { describe, expect, it } from "vitest"
-
 import { quarterGranularity } from ".."
 
 describe("quarterGranularity", () => {

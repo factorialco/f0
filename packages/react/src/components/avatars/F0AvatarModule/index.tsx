@@ -1,5 +1,4 @@
 import { withDataTestId } from "@/lib/data-testid"
-
 import { F0AvatarModule as _F0AvatarModule } from "./F0AvatarModule"
 
 export * from "./modules"

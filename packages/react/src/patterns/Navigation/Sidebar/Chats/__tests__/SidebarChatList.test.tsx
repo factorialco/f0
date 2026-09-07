@@ -1,6 +1,5 @@
 import { userEvent } from "@testing-library/user-event"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
 import { BellOff, Clock, PalmTree } from "@/icons/app"
 import {
   act,
@@ -8,7 +7,6 @@ import {
   zeroRender as render,
   screen,
 } from "@/testing/test-utils"
-
 import { SidebarChatList } from "../SidebarChatList"
 import {
   SidebarChatProvider,

@@ -1,11 +1,10 @@
-import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import {
   GroupingDefinition,
   RecordType,
   SortingsDefinition,
 } from "@/hooks/datasource"
 import { cn } from "@/lib/utils"
-
+import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import { DataCollectionSource } from "../../../../hooks/useDataCollectionSource"
 import { ItemActionsDefinition } from "../../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../../navigationFilters/types"

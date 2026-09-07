@@ -1,13 +1,11 @@
 import { cva } from "cva"
 import { useEffect, useRef, useState } from "react"
-
 import { F0Icon } from "@/components/F0Icon"
 import { EllipsisHorizontal } from "@/icons/app"
 import { cn, focusRing } from "@/lib/utils"
 import { internalAvatarTypes } from "@/ui/Avatar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 import { ScrollArea, ScrollBar } from "@/ui/scrollarea"
-
 import { AvatarVariant, AvatarVariants, F0Avatar } from "../../F0Avatar"
 import { type AvatarListSize, type F0AvatarListExtras } from "../types"
 import { getAvatarDisplayName } from "../utils"

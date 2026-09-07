@@ -1,5 +1,4 @@
 import type { ReactNode } from "react"
-
 import type { ModuleId } from "@/components/avatars/F0AvatarModule"
 
 // ---------------------------------------------------------------------------

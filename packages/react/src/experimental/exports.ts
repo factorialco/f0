@@ -1,6 +1,5 @@
 import { Component } from "@/lib/component"
 import { withDataTestId } from "@/lib/data-testid"
-
 import {
   F0Select as Select,
   type F0SelectItemObject as SelectItemObject,

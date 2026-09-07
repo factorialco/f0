@@ -1,11 +1,8 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import image from "@storybook-static/avatars/person04.jpg"
+import type { Meta, StoryObj } from "@storybook/react-vite"
 import { fn } from "storybook/test"
-
 import { F0Card } from "@/components/F0Card"
 import { Briefcase, Check, Cross, Delete, Envelope } from "@/icons/app"
-
 import { F0CardHorizontal } from "../F0CardHorizontal"
 
 // Story handlers alert which control fired (on top of the Actions-panel spy),

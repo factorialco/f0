@@ -2,13 +2,10 @@
 // runtime (when the lazy maplibre chunk lands mid-scroll) invalidates styles
 // document-wide, which is felt as a hitch on the first location attachment.
 import "maplibre-gl/dist/maplibre-gl.css"
-
 import { lazy, type ReactNode, Suspense } from "react"
-
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
-
 import { useMountOnVisible } from "../hooks/useMountOnVisible"
 import { useChatSurface } from "../providers/ChatSurfaceProvider"
 import { useF0ChatEmit } from "../providers/F0ChatProvider"

@@ -1,7 +1,5 @@
 import { useI18n } from "@/lib/providers/i18n"
-
 import type { F0DataChartEmptyStateProps, F0DataChartProps } from "../../types"
-
 import { DataChartEmptyState } from "./EmptyState"
 
 interface DataChartEmptyStateViewProps {

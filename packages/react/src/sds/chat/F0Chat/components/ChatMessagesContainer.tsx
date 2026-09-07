@@ -12,10 +12,8 @@ import {
   useState,
 } from "react"
 import { type ItemProps, type ListProps, Virtuoso } from "react-virtuoso"
-
 import { cn } from "@/lib/utils"
 import { ScrollBar } from "@/ui/scrollarea"
-
 import {
   AT_BOTTOM_THRESHOLD_PX,
   useChatVirtuoso,

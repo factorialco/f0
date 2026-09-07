@@ -1,9 +1,8 @@
+import "@testing-library/jest-dom/vitest"
 import { fireEvent, screen } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import "@testing-library/jest-dom/vitest"
 import { Archive } from "@/icons/app"
 import { zeroRender as render } from "@/testing/test-utils"
-
 import { F0InputField, InputFieldStatusType } from "../F0InputField"
 
 describe("F0InputField", () => {

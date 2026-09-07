@@ -8,7 +8,6 @@ import {
   useState,
 } from "react"
 import { Masonry } from "react-masonry"
-
 import { Blend, withSkeleton } from "../../../../lib/skeleton"
 import { Widget } from "../../Widget"
 

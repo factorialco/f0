@@ -4,7 +4,6 @@ import { Cross } from "@/icons/app"
 import { withDataTestId } from "@/lib/data-testid"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { cn } from "@/lib/utils"
-
 import { UpsellingButton, type UpsellingButtonProps } from "../UpsellingButton"
 
 type AlertAction = {

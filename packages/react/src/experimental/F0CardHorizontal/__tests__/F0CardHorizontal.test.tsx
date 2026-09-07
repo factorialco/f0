@@ -1,5 +1,5 @@
-import { describe, expect, it, vi } from "vitest"
 import "@testing-library/jest-dom/vitest"
+import { describe, expect, it, vi } from "vitest"
 import { Briefcase, Check, Cross } from "@/icons/app"
 import {
   zeroRender as render,
@@ -25,7 +25,6 @@ vi.mock("@/ui/OverflowList/useOverflowCalculation", () => ({
 
 import type { CardSecondaryLink } from "@/components/F0Card/components/CardActions"
 import type { CardAvatarVariant } from "@/components/F0Card/components/CardAvatar"
-
 import { F0CardHorizontal } from "../F0CardHorizontal"
 
 describe("F0CardHorizontal", () => {

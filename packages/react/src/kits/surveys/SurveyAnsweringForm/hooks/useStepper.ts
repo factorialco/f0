@@ -1,5 +1,4 @@
 import { useCallback, useState } from "react"
-
 import type { FlatQuestion } from "../types"
 
 export function useStepper(questions: FlatQuestion[]) {

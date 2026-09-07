@@ -9,7 +9,6 @@ import {
   useRef,
   useState,
 } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import {
   ButtonDropdownGroup,
@@ -18,7 +17,6 @@ import {
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { Dropdown, MobileDropdown } from "@/experimental/Navigation/Dropdown"
 import { TooltipInternal } from "@/experimental/Overlays/Tooltip"
-
 import CheckCircleAnimated from "@/icons/animated/CheckCircle"
 import { AlertCircle, AlertCircleLine } from "@/icons/app"
 import { withDataTestId } from "@/lib/data-testid"

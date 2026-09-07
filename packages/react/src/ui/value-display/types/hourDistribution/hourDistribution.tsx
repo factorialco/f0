@@ -1,16 +1,16 @@
+import { cn } from "@/lib/utils"
 /**
  * Hour distribution cell type for displaying worked hours per day as a compact bar chart.
  * Thin preset over barSeries: maps date + value (+ optional plannedValue) to bar-series
  * with date/hours formatters and current colors (underworked = orange, planned/overtime = teal).
  */
 import { tableDisplayClassNames } from "../../const"
+import { ValueDisplayRendererContext } from "../../renderers"
 import {
   BarSeriesCell,
   BarSeriesCellValue,
   BarSeriesDataPoint,
 } from "../barSeries"
-import { ValueDisplayRendererContext } from "../../renderers"
-import { cn } from "@/lib/utils"
 
 export interface HourDistributionDataPoint {
   date: string

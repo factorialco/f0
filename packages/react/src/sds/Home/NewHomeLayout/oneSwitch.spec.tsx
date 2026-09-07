@@ -1,8 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from "vitest"
-
 import { Calendar } from "@/icons/app"
 import { screen, zeroRender } from "@/testing/test-utils"
-
 import { type HomeWidgetItem } from "../slotRenderers"
 import { NewHomeLayout } from "."
 

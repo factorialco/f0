@@ -1,15 +1,13 @@
 import { ChevronDown, ChevronRight } from "lucide-react"
 import { useState } from "react"
-
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
-import { Counter } from "@/ui/Counter"
 import { CheckCircle } from "@/icons/app"
 import LogoAvatar from "@/icons/app/LogoAvatar"
 import { cn } from "@/lib/utils"
 import { Checkbox } from "@/ui/checkbox"
-
+import { Counter } from "@/ui/Counter"
 import { HighlightText } from "../HighLightText"
 import { EntitySelectEntity } from "../types"
 

@@ -1,6 +1,6 @@
 import type { IconType } from "@/components/F0Icon"
-import type { DropdownItem } from "@/experimental/Navigation/Dropdown"
 import type { MetadataItem } from "@/experimental/Information/Headers/Metadata"
+import type { DropdownItem } from "@/experimental/Navigation/Dropdown"
 
 export const timelineRowStatuses = [
   "completed",

@@ -4,7 +4,6 @@ import useEmblaCarousel, {
   type UseEmblaCarouselType,
 } from "embla-carousel-react"
 import * as React from "react"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { ButtonInternalProps } from "@/components/F0Button/internal-types"
 import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight } from "@/icons/app"

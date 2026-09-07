@@ -1,5 +1,4 @@
 import type * as echarts from "echarts"
-
 import type { ChartTheme } from "./theme"
 
 // ---------------------------------------------------------------------------

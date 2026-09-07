@@ -1,13 +1,11 @@
-import { describe, expect, it, vi, beforeEach } from "vitest"
 import "@testing-library/jest-dom/vitest"
-
+import { describe, expect, it, vi, beforeEach } from "vitest"
 import {
   zeroRender as render,
   screen,
   userEvent,
   waitFor,
 } from "@/testing/test-utils"
-
 import type { PersonProfile } from "../types"
 
 const mockResolver = vi.fn<(id: string) => Promise<PersonProfile>>()

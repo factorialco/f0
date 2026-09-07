@@ -1,7 +1,5 @@
 import { AnimatePresence, motion } from "motion/react"
-
 import { TableHead as TableHeadRoot } from "@/ui/table"
-
 import { F0Icon, IconType } from "../../../components/F0Icon"
 import { ArrowDown, InfoCircleLine } from "../../../icons/app"
 import { InfoHint, type InfoHintContent } from "../../../lib/InfoHint"

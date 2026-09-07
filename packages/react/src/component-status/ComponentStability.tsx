@@ -1,12 +1,10 @@
 import React from "react"
-
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/ui/tooltip"
-
 import { A11yRow, A11yTooltipRow } from "./A11yRow"
 import {
   getComponentStatus,

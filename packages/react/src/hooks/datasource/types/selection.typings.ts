@@ -2,7 +2,6 @@ import {
   FiltersDefinition,
   FiltersState,
 } from "@/patterns/OneFilterPicker/types"
-
 import { WithGroupId } from "../useData"
 import { RecordType } from "./records.typings"
 

@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest"
-
 import { userEvent, waitFor, zeroRender as render } from "@/testing/test-utils"
-
 import { TagCounter, TagCounterItem } from "./TagCounter"
 
 const longLabelTags: TagCounterItem[] = [

@@ -1,5 +1,4 @@
 import { ReactNode } from "react"
-
 import { DialogId } from "../dialogs-alike/types"
 
 /**

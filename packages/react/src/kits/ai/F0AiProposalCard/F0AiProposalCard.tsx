@@ -1,10 +1,8 @@
 import { useEffect, useId, useRef, useState } from "react"
-
 import { F0AvatarModule } from "@/components/avatars/F0AvatarModule"
 import { F0Button } from "@/components/F0Button"
 import type { DataAttributes } from "@/global.types"
 import { cn, focusRing } from "@/lib/utils"
-
 import type { F0AiProposalCardActions, F0AiProposalCardProps } from "./types"
 
 const DEFAULT_MAX_COLLAPSED_DESCRIPTION_LENGTH = 180

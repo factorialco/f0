@@ -1,7 +1,5 @@
 import type { IconType } from "@/components/F0Icon"
-
 import { getFieldInputIcon } from "@/lib/field-input-icons"
-
 import type { TextCellConfig } from "../../types"
 
 /**

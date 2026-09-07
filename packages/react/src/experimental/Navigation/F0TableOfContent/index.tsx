@@ -1,3 +1,4 @@
+import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter"
 import {
   ReactElement,
   useCallback,
@@ -6,20 +7,16 @@ import {
   useRef,
   useState,
 } from "react"
-
-import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 import { F0SearchInput } from "@/components/F0SearchInput"
-import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter"
-
+import { withDataTestId } from "@/lib/data-testid"
 import { createAtlaskitDriver } from "@/lib/dnd/atlaskitDriver"
 import { DndProvider } from "@/lib/dnd/context"
 import { useDndEvents } from "@/lib/dnd/hooks"
-import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
+import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { ScrollArea } from "@/ui/scrollarea"
-
 import { Item } from "./Item"
 import { ItemSectionHeader } from "./ItemSectionHeader"
 import { TOCFooter } from "./TOCFooter"

@@ -1,15 +1,13 @@
 import { useCallback, useEffect, useId, useMemo, useState } from "react"
-
 import { useF0ChatEmit } from "../providers/F0ChatProvider"
 import {
   type EmojiEntry,
   findEmojiByShortcode,
   searchEmoji,
 } from "../utils/emoji-index"
-import { detectMaxEmojiVersion } from "../utils/emoji-support"
 import { type EmojiLocaleTerms } from "../utils/emoji-locale"
+import { detectMaxEmojiVersion } from "../utils/emoji-support"
 import { useEmojiLocaleTerms } from "./useEmojiLocaleTerms"
-
 import {
   getTextareaCaretCoordinates,
   type PopoverPosition,

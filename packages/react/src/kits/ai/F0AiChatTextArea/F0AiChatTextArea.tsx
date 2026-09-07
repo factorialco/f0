@@ -1,15 +1,17 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import { useReducedMotion } from "@/lib/a11y"
 import { Link } from "@/lib/linkHandler"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { useRevealOnChange } from "../F0AiChat/hooks/useRevealOnChange"
 import { useAiChat } from "../F0AiChat/providers/AiChatStateProvider"
+import type {
+  WelcomeScreenSuggestion,
+  WelcomeScreenSuggestionItem,
+} from "../F0AiChat/types"
 import { F0OneIcon } from "../F0OneIcon"
 import { ActionBar } from "./components/ActionBar"
 import { AttachedFilesList } from "./components/AttachedFilesList"
@@ -21,10 +23,6 @@ import { SubmitButton } from "./components/SubmitButton"
 import { TextareaField } from "./components/TextareaField"
 import { WelcomeScreenCardsRow } from "./components/WelcomeScreenCardsRow"
 import { WelcomeScreenSuggestionsRow } from "./components/WelcomeScreenSuggestionsRow"
-import type {
-  WelcomeScreenSuggestion,
-  WelcomeScreenSuggestionItem,
-} from "../F0AiChat/types"
 import { buildHighlightSegments } from "./highlight-utils"
 import { type F0AiChatTextAreaProps } from "./types"
 import { type RecorderError, useAudioRecorder } from "./useAudioRecorder"

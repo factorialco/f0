@@ -1,7 +1,5 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
-
 import { forwardRef, useEffect, useState, type SVGProps } from "react"
-
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
 import { type IconType } from "@/components/F0Icon"
 import { Calendar, Clock } from "@/icons/app"
 import {
@@ -13,7 +11,6 @@ import {
   within,
   zeroRender,
 } from "@/testing/test-utils"
-
 import { type HomeWidgetItem, type SlotRenderers } from "../slotRenderers"
 import { NewHomeLayout } from "."
 

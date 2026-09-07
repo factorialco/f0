@@ -1,6 +1,5 @@
 import { userEvent } from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
 
 const recorderState = vi.hoisted(() => ({

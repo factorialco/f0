@@ -1,11 +1,9 @@
 import { useControllableState } from "@radix-ui/react-use-controllable-state"
 import { Fragment, forwardRef, useMemo } from "react"
-
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import { withSkeleton } from "@/lib/skeleton"
 import { cn } from "@/lib/utils"
-
 import { AccordionItem } from "./components/AccordionItem"
 import { F0AccordionSkeleton } from "./F0AccordionSkeleton"
 import { F0AccordionProps } from "./types"

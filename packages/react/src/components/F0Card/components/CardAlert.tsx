@@ -1,5 +1,4 @@
 import { forwardRef } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { F0Icon, type IconType } from "@/components/F0Icon"
 import {
@@ -11,7 +10,6 @@ import {
 } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { cn } from "@/lib/utils"
-
 import type { CardAlertProps, CardAlertVariant } from "../types"
 
 /**

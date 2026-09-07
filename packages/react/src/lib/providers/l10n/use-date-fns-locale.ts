@@ -1,6 +1,5 @@
 import { type Locale } from "date-fns"
 import * as locales from "date-fns/locale"
-
 import { useL10n } from "./l10n-provider"
 
 /** Every date-fns locale by its own `code` (`pt-BR`, `sr-Latn`, …), lowercased. */

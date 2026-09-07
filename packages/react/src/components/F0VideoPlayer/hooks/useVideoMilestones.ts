@@ -1,5 +1,4 @@
 import { useEffect, useRef } from "react"
-
 import { DEFAULT_MILESTONES } from "../utils"
 
 export interface UseVideoMilestonesOptions {

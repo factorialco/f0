@@ -1,5 +1,4 @@
 import { useMemo } from "react"
-
 import type { GraphNode, TreeNode } from "../types"
 
 interface TreeBuilderResult<T> {

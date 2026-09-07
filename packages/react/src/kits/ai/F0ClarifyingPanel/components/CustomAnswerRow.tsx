@@ -1,12 +1,9 @@
 import { useComposedRefs } from "@radix-ui/react-compose-refs"
 import { useLayoutEffect, useRef, type Ref } from "react"
-
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import type { ClarifyingSelectionMode } from "../types"
-
 import { RadioIndicator } from "./RadioIndicator"
 
 // Cap on auto-growth: beyond this the textarea scrolls internally instead of

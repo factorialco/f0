@@ -1,10 +1,8 @@
 import { type ReactNode } from "react"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { OneEmptyState } from "@/components/OneEmptyState"
 import { ArrowCycle } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
-
 import { useF0Chat } from "../providers/F0ChatProvider"
 import { ChatMessageSkeleton } from "./ChatMessageSkeleton"
 

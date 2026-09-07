@@ -1,5 +1,4 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
 import type { DialogDefinitionProviderItem } from "../internal-types"
 import { dialogsAlikeStore } from "../store"
 

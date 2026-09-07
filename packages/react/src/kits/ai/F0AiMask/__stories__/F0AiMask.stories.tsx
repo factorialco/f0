@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useEffect, useRef } from "react"
-
 import { F0AiMask } from "@/kits/ai/F0AiMask"
 
 type F0AiMaskWrapperProps = {

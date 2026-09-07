@@ -6,7 +6,6 @@ import {
 } from "motion/react"
 import { useEffect, useId, useRef, useState } from "react"
 import { useOnClickOutside } from "usehooks-ts"
-
 import { F0Avatar } from "../../../../components/avatars/F0Avatar"
 import type { AvatarVariant } from "../../../../components/avatars/F0Avatar"
 import { F0Icon } from "../../../../components/F0Icon"

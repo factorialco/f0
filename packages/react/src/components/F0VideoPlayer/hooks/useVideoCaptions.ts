@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react"
-
 import { useVttSource } from "./useVttSource"
 
 // Text-track kinds that count as captions for display and for the a11y check.

@@ -1,5 +1,4 @@
 import { Skeleton } from "@/ui/skeleton"
-
 import type { ClockInControlsVariant } from "."
 
 type ClockInControlsSkeletonProps = {

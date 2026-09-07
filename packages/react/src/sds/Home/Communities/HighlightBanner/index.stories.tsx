@@ -1,7 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { fn } from "storybook/test"
-
 import { HighlightBanner } from "."
 
 const meta: Meta<typeof HighlightBanner> = {

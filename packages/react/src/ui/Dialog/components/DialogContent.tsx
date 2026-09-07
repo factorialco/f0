@@ -2,7 +2,6 @@
 
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { forwardRef, useEffect, useState } from "react"
-
 import { cn } from "../../../lib/utils"
 import { DialogOverlay } from "./DialogOverlay"
 import { DialogPortal } from "./DialogPortal"

@@ -1,8 +1,6 @@
 import { userEvent } from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
-
 import { screen, zeroRender as render } from "@/testing/test-utils"
-
 import { F0Alert } from "../F0Alert"
 
 describe("F0Alert", () => {

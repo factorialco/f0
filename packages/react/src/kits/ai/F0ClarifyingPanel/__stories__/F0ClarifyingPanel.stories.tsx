@@ -1,7 +1,6 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
 import { AnimatePresence, motion } from "motion/react"
 import { useCallback, useMemo, useState } from "react"
-
 import { F0ClarifyingPanel } from "../F0ClarifyingPanel"
 import type { ClarifyingQuestionState, ClarifyingSelectionMode } from "../types"
 

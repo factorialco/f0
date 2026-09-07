@@ -1,8 +1,6 @@
 import { createRef } from "react"
 import { describe, expect, it, vi } from "vitest"
-
 import { zeroRender } from "@/testing/test-utils"
-
 import { type HighlightSegment } from "../../hooks/highlight-utils"
 import { ChatTextareaField } from "../ChatTextareaField"
 

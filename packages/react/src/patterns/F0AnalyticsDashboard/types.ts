@@ -1,3 +1,4 @@
+import type { PendingQuote } from "@/kits/ai/F0AiChat/types"
 import type {
   ChartColorToken,
   F0DataChartBarSeries,
@@ -9,7 +10,6 @@ import type {
   F0DataChartRadarSeries,
   F0DataChartScatterSeries,
 } from "@/kits/F0DataChart"
-import type { PendingQuote } from "@/kits/ai/F0AiChat/types"
 import type { InfoHintContent } from "@/lib/InfoHint"
 import type { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import type {

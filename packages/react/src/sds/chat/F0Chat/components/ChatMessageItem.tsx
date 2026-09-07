@@ -7,12 +7,10 @@ import {
   useRef,
   useState,
 } from "react"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { Ellipsis } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
 import {
   useChatComposeActions,

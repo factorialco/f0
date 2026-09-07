@@ -1,7 +1,6 @@
 "use client"
 
 import { lazy, type ReactNode, Suspense, useState } from "react"
-
 import { F0AvatarFile } from "@/components/avatars/F0AvatarFile"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0FileItem } from "@/components/F0FileItem"
@@ -10,10 +9,9 @@ import { Download } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
-
 import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
-import { useChatDocumentPreview } from "../providers/ChatUIProvider"
 import { useChatSurface } from "../providers/ChatSurfaceProvider"
+import { useChatDocumentPreview } from "../providers/ChatUIProvider"
 import { useF0ChatEmit } from "../providers/F0ChatProvider"
 import { type F0ChatFileAttachment } from "../types"
 import { attachedKindOf, type ChatDocumentKind } from "../utils/attachments"

@@ -1,10 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react"
-
 import { F0AvatarFile } from "@/components/avatars/F0AvatarFile"
 import { F0Button } from "@/components/F0Button"
 import { Cross } from "@/icons/app"
 import { cn } from "@/lib/utils"
-
 import type { FileAttachmentProps } from "./types"
 
 function formatFileSize(bytes: number): string {

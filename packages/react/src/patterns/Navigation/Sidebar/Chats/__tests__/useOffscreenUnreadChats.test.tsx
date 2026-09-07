@@ -1,8 +1,6 @@
 import { type ReactNode, useRef } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
 import { act, zeroRender as render } from "@/testing/test-utils"
-
 import { type SidebarChatGroup } from "../types"
 import { useOffscreenUnreadChats } from "../useOffscreenUnreadChats"
 

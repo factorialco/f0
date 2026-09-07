@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from "react"
-
 import { type TranscribeFn } from "../F0AiChat/types"
 
 export type RecorderStatus = "idle" | "recording" | "transcribing"

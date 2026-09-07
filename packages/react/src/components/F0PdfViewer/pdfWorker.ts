@@ -1,5 +1,4 @@
 import workerSrc from "pdfjs-dist/build/pdf.worker.min.js?url"
-
 import { pdfjs } from "@/ui/pdf"
 
 let configured = false

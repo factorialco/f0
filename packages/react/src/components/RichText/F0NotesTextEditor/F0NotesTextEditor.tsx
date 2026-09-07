@@ -1,3 +1,4 @@
+import "./index.css"
 import DragHandle from "@tiptap/extension-drag-handle-react"
 import { Node } from "@tiptap/pm/model"
 import {
@@ -17,36 +18,12 @@ import {
   useRef,
   useState,
 } from "react"
-
 import { F0Alert } from "@/components/F0Alert"
+import type { F0AlertProps } from "@/components/F0Alert"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
 import { EditorBubbleMenu } from "@/components/RichText/internal"
 import { useEnhance } from "@/components/RichText/internal/Enhance"
-import { Handle, Plus } from "@/icons/app"
-import { experimentalComponent } from "@/lib/experimental"
-import { useI18n } from "@/lib/providers/i18n"
-import { withSkeleton } from "@/lib/skeleton"
-import { ScrollArea } from "@/ui/scrollarea"
-import { Skeleton } from "@/ui/skeleton"
-
-import { documentHasMissingBlockIds } from "../internal/Extensions/BlockIdExtension"
-import {
-  type ImageUploadConfig,
-  ImageUploadErrorType,
-  insertImageFromFile,
-} from "../internal/Extensions/Image"
-import { EnhanceErrorBanner } from "../internal/Error"
-import "./index.css"
-import {
-  applyPageDocumentPatch,
-  getNotesTextEditorSnapshot,
-} from "./applyPageDocumentPatch"
-import { createNotesTextEditorExtensions } from "./extensions"
-import { Header } from "./components/Header"
-import { ImageUploadError } from "./components/ImageUploadError"
-import { Title } from "./components/Title"
-import type { F0AlertProps } from "@/components/F0Alert"
 import type { HeaderSecondaryAction } from "@/experimental/Information/Headers/BaseHeader"
 import type { MetadataItem } from "@/experimental/Information/Headers/Metadata"
 import type {
@@ -54,10 +31,31 @@ import type {
   PrimaryDropdownAction,
 } from "@/experimental/Information/utils"
 import type { DropdownItem } from "@/experimental/Navigation/Dropdown"
+import { Handle, Plus } from "@/icons/app"
+import { experimentalComponent } from "@/lib/experimental"
+import { useI18n } from "@/lib/providers/i18n"
+import { withSkeleton } from "@/lib/skeleton"
+import { ScrollArea } from "@/ui/scrollarea"
+import { Skeleton } from "@/ui/skeleton"
 import type { enhanceConfig } from "../internal/Enhance/types"
+import { EnhanceErrorBanner } from "../internal/Error"
 import type { AIBlockConfig } from "../internal/Extensions/AIBlock"
+import { documentHasMissingBlockIds } from "../internal/Extensions/BlockIdExtension"
+import {
+  type ImageUploadConfig,
+  ImageUploadErrorType,
+  insertImageFromFile,
+} from "../internal/Extensions/Image"
 import type { Message, User } from "../internal/Extensions/Transcript"
+import {
+  applyPageDocumentPatch,
+  getNotesTextEditorSnapshot,
+} from "./applyPageDocumentPatch"
+import { Header } from "./components/Header"
 import type { HeaderStatusProps } from "./components/Header"
+import { ImageUploadError } from "./components/ImageUploadError"
+import { Title } from "./components/Title"
+import { createNotesTextEditorExtensions } from "./extensions"
 import type {
   NotesTextEditorPageDocumentPatch,
   NotesTextEditorSnapshot,

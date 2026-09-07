@@ -1,8 +1,6 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
 import { useRef } from "react"
-
 import { cn } from "@/lib/utils"
-
 import { Cell, mockItem } from "../../../__stories__/shared"
 
 /**
