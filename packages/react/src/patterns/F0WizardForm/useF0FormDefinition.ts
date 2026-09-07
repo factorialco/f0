@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { z, type ZodType } from "zod"
-
 import type { ModuleId } from "@/components/avatars/F0AvatarModule"
 import type { InitialFile } from "@/patterns/F0Form/fields/file/types"
 import type {
@@ -11,7 +10,6 @@ import type {
   F0SectionConfig,
   F0PerSectionSectionConfig,
 } from "@/patterns/F0Form/types"
-
 import type {
   F0FormDefinitionPerSection,
   F0FormDefinitionSingleSchema,

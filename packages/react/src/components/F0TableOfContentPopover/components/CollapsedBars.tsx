@@ -1,8 +1,6 @@
 import { cva } from "cva"
 import { useMemo } from "react"
-
 import { cn } from "@/lib/utils"
-
 import { TOCItem } from "../../../experimental/Navigation/F0TableOfContent"
 import { TableOfContentPopoverVariant } from "../internal-types"
 

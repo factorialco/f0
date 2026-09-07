@@ -1,11 +1,8 @@
 import { waitFor } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
 import { zeroRender as render, screen } from "@/testing/test-utils"
-
-import type { DashboardMetricItem } from "../types"
-
 import { MetricItem, MetricValue } from "../components/MetricItem/MetricItem"
+import type { DashboardMetricItem } from "../types"
 
 const containerSize = vi.hoisted(() => ({ width: 320, height: 0 }))
 

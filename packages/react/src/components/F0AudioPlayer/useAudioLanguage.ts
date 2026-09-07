@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react"
-
 import {
   collectLanguages,
   defaultLocale,

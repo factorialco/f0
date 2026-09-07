@@ -1,8 +1,6 @@
 import NumberFlow from "@number-flow/react"
 import { forwardRef, useEffect, useMemo, useRef } from "react"
-
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
-import { F0Button } from "@/components/F0Button"
 import {
   type ActionBarGroup,
   type ActionBarItem,
@@ -10,6 +8,7 @@ import {
   F0ActionBar,
   type F0ActionBarRef,
 } from "@/components/F0ActionBar"
+import { F0Button } from "@/components/F0Button"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 

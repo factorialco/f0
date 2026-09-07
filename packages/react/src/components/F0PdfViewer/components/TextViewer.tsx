@@ -1,9 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react"
-
 import { parseMarkdownDocument } from "@/lib/markdown"
 import { useI18n } from "@/lib/providers/i18n"
 import { Skeleton } from "@/ui/skeleton"
-
 import { type F0PdfViewerAction } from "../types"
 import { DocumentToolbar, useDocumentZoom } from "./DocumentToolbar"
 

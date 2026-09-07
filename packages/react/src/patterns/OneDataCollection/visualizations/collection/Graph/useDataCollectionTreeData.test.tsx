@@ -1,6 +1,5 @@
 import { act, renderHook, waitFor } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-
 import {
   FiltersDefinition,
   GroupingDefinition,
@@ -11,7 +10,6 @@ import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useData
 import { ItemActionsDefinition } from "@/patterns/OneDataCollection/item-actions"
 import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import { SummariesDefinition } from "@/patterns/OneDataCollection/summary"
-
 import type { GraphVisualizationOptions } from "./types"
 import { useDataCollectionTreeData } from "./useDataCollectionTreeData"
 

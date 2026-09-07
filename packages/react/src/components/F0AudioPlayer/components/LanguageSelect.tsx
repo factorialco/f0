@@ -1,5 +1,4 @@
 import { useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { Check } from "@/icons/app"
 import { type LanguageOption, languageLabel } from "@/lib/localized"

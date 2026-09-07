@@ -7,9 +7,7 @@ import React, {
   useMemo,
   useRef,
 } from "react"
-
 import type { UseFileUpload } from "@/patterns/F0Form/fields/file/types"
-
 import {
   getDefaultParamsForQuestionType,
   getDefaultQuestionTypeToAdd,

@@ -11,7 +11,6 @@ import {
   useState,
   type AutoFill,
 } from "react"
-
 import { F0Avatar } from "@/components/avatars/F0Avatar/F0Avatar"
 import { AvatarVariant } from "@/components/avatars/F0Avatar/types"
 import { F0ButtonToggle } from "@/components/F0ButtonToggle/F0ButtonToggle"
@@ -19,7 +18,6 @@ import { F0Icon, IconType } from "@/components/F0Icon"
 import { CrossedCircle } from "@/icons/app"
 import { cn, focusRing } from "@/lib/utils.ts"
 import { Spinner } from "@/ui/Spinner"
-
 import { AppendTag } from "./AppendTag"
 import { InputMessages } from "./components/InputMessages"
 import { Label } from "./components/Label"

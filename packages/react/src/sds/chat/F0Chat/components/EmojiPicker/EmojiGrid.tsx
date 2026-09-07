@@ -9,14 +9,11 @@ import {
   useRef,
 } from "react"
 import { GroupedVirtuoso, type GroupedVirtuosoHandle } from "react-virtuoso"
-
 import { EmojiImage } from "@/lib/emojis"
 import { cn } from "@/lib/utils"
-
+import { ScrollBar } from "@/ui/scrollarea"
 import { type EmojiEntry } from "../../utils/emoji-index"
 import { emojiButtonClass, EMOJI_BUTTON_SIZE } from "./button"
-import { ScrollBar } from "@/ui/scrollarea"
-
 import { type EmojiLayout, type EmojiSection } from "./layout"
 
 /**

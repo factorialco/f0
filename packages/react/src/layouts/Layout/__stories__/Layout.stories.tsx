@@ -1,8 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { ComponentProps, useCallback, useMemo, useState } from "react"
 import { expect, within } from "storybook/test"
-
 import { F0Button } from "@/components/F0Button"
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { DetailsItemsList } from "@/experimental/Lists/DetailsItemsList"
@@ -11,7 +9,6 @@ import { Dashboard } from "@/experimental/Widgets/Layout/Dashboard"
 import * as DashboardStories from "@/experimental/Widgets/Layout/Dashboard/index.stories"
 import { PageDecorator } from "@/lib/storybook-utils/pageDecorator"
 import { withSkipA11y } from "@/lib/storybook-utils/parameters"
-
 import { Layout } from "../index"
 
 const FocusableElement = () => {

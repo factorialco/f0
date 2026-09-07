@@ -1,7 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
 import { getBaseAvatarArgTypes } from "../../internal/BaseAvatar/__stories__/utils"
 import { avatarEmojiSizes, F0AvatarEmoji } from "../F0AvatarEmoji"
 

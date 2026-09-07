@@ -6,12 +6,10 @@ import {
   useEffect,
   useState,
 } from "react"
-
 import { ModuleId } from "@/components/avatars/F0AvatarModule"
 import { F0Button, F0ButtonProps } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
-import { ProductCard } from "@/sds/UpsellingKit/ProductCard"
 import { Carousel } from "@/experimental/Navigation/Carousel"
 import AlertCircle from "@/icons/app/AlertCircle"
 import ChevronRight from "@/icons/app/ChevronRight"
@@ -20,6 +18,7 @@ import Megaphone from "@/icons/app/Megaphone"
 import { Image } from "@/lib/imageHandler"
 import { Link } from "@/lib/linkHandler"
 import { cn } from "@/lib/utils"
+import { ProductCard } from "@/sds/UpsellingKit/ProductCard"
 import {
   DropdownMenu,
   DropdownMenuContent,

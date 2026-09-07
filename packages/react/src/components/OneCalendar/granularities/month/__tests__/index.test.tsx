@@ -1,6 +1,5 @@
 import { endOfMonth, startOfMonth } from "date-fns"
 import { describe, expect, it } from "vitest"
-
 import { monthGranularity } from "../index"
 
 describe("monthGranularity", () => {

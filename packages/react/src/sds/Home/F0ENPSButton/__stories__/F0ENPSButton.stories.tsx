@@ -1,8 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { useState } from "react"
 import { expect, userEvent, waitFor, within } from "storybook/test"
-
 import {
   FaceNeutral,
   ThumbsDown,
@@ -12,7 +10,6 @@ import {
 } from "@/icons/app"
 import { pulses, type Pulse } from "@/lib/mood"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
 import { F0ENPSButton } from "../index"
 import type { F0ENPSButtonProps } from "../types"
 

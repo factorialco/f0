@@ -3,7 +3,6 @@ import { F0AvatarEmoji } from "@/components/avatars/F0AvatarEmoji"
 import { F0Button } from "@/components/F0Button"
 import { withDataTestId } from "@/lib/data-testid"
 import { UpsellingButton } from "@/sds/UpsellingKit/UpsellingButton"
-
 import * as Types from "./types"
 
 function _OneEmptyState({

@@ -1,12 +1,10 @@
 import { type KeyboardEvent } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
 import {
   act,
   waitFor,
   zeroRenderHook as renderHook,
 } from "@/testing/test-utils"
-
 import {
   findEmojiTrigger,
   getEmojiAutocompleteOptionId,

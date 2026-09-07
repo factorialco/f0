@@ -1,7 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
-
 import { fireEvent, zeroRender as render, screen } from "@/testing/test-utils"
-
 import { ChatImageTile } from "../ChatImageTile"
 
 const IMAGE = {

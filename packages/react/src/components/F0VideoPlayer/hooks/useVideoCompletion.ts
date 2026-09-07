@@ -1,5 +1,4 @@
 import { useEffect, useRef } from "react"
-
 import { COMPLETION_TAIL_RATIO, COMPLETION_TAIL_SECONDS } from "../utils"
 
 export interface UseVideoCompletionOptions {

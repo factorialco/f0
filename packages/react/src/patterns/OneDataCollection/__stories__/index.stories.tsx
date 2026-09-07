@@ -1,7 +1,5 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
 import { useEffect, useState } from "react"
-
-import { SummariesDefinition } from "@/patterns/OneDataCollection/summary.ts"
 import { GroupingDefinition } from "@/hooks/datasource"
 import {
   Add,
@@ -38,15 +36,14 @@ import {
   TEAMS_MOCK,
   YEARS_OF_EXPERIENCIE_MOCK,
 } from "@/mocks"
+import { SummariesDefinition } from "@/patterns/OneDataCollection/summary.ts"
 import { mockImage } from "@/testing/mocks/images"
-
-import type { CustomVisualizationProps } from "../visualizations/collection"
-
 import { useDataCollectionData } from "../hooks/useDataCollectionData/useDataCollectionData"
 import { useDataCollectionSource } from "../hooks/useDataCollectionSource"
 import { OneDataCollection } from "../index"
 import { ItemActionsDefinition } from "../item-actions"
 import { NavigationFiltersDefinition } from "../navigationFilters/types"
+import type { CustomVisualizationProps } from "../visualizations/collection"
 import {
   createDataAdapter,
   createPromiseDataFetch,

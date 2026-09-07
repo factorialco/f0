@@ -1,5 +1,4 @@
 import type { Meta } from "@storybook/react-vite"
-
 import { BarChartProps } from "@/kits/Charts/BarChart"
 import { Default as BarChartDefault } from "@/kits/Charts/BarChart/index.stories"
 import { containerStoryArgs, WidgetDecorator } from "../storybook-utils"

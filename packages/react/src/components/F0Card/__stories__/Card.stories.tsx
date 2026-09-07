@@ -1,9 +1,7 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import image from "@storybook-static/avatars/person04.jpg"
+import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
 import { expect, fn, within } from "storybook/test"
-
 import { F0Link } from "@/components/F0Link"
 import {
   Add,
@@ -26,7 +24,6 @@ import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { mockImage } from "@/testing/mocks/images"
 import { Switch } from "@/ui/switch"
 import { Text } from "@/ui/Text"
-
 import {
   cardAlertVariants,
   cardImageFits,

@@ -1,8 +1,6 @@
 import { waitFor } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
-
 import { zeroRender as render } from "@/testing/test-utils"
-
 import { EmojiPicker } from "./EmojiPicker"
 
 const realCreateElement = document.createElement.bind(document)

@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import {
   ComponentProps,
   useCallback,
@@ -9,7 +8,6 @@ import {
   useState,
 } from "react"
 import { expect, waitFor, within } from "storybook/test"
-
 import { PageHeader } from "@/experimental/Navigation/Header/PageHeader"
 import One from "@/icons/ai/One"
 import {
@@ -89,7 +87,6 @@ import {
 import { SEED_BY_ID } from "@/sds/chat/F0Chat/mocks/mockSeeds"
 import { useDemoHeaderActions } from "@/sds/chat/F0Chat/mocks/useDemoHeaderActions"
 import { DaytimePage } from "@/sds/Home/DaytimePage"
-
 import { ApplicationFrame } from "./index"
 
 /**

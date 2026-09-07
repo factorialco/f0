@@ -1,5 +1,5 @@
 import type { Ref } from "react"
-
+import { F0Select } from "@/components/F0Select"
 import {
   ChevronDown,
   ChevronUp,
@@ -11,8 +11,6 @@ import {
 } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { cn } from "@/lib/utils"
-import { F0Select } from "@/components/F0Select"
-
 import type { F0PdfScale, F0PdfViewerAction } from "../types"
 import { ToolbarButton } from "./ToolbarButton"
 

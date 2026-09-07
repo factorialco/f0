@@ -1,8 +1,6 @@
 import { act } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-
 import { zeroRenderHook as renderHook } from "@/testing/test-utils"
-
 import { usePerVisualizationFilters } from "../usePerVisualizationFilters"
 
 const departmentFilter = {

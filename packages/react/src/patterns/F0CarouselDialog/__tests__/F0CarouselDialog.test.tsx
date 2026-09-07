@@ -1,9 +1,6 @@
 import { useState } from "react"
-
 import { describe, expect, test, vi } from "vitest"
-
 import { screen, userEvent, zeroRender } from "@/testing/test-utils"
-
 import { F0CarouselDialog, type F0CarouselDialogItem } from "../index"
 
 const ITEMS: F0CarouselDialogItem[] = [

@@ -21,7 +21,6 @@ import {
   useRef,
   useState,
 } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
 import {
@@ -33,7 +32,6 @@ import { toasts } from "@/hooks/toast"
 import { Delete, Ellipsis, InfoCircleLine, Plus, Sliders } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { arrivalWindowMs, useElapsed } from "../home-motion"
 import {
   resolveWidgetHeader,
@@ -47,17 +45,17 @@ import {
 import { SlotWidget } from "../SlotWidget"
 import { WidgetUpdateDialog } from "../WidgetUpdateDialog"
 import { takeCardGhost, takePageSurface } from "./dragGhost"
+import { Footnote } from "./Footnote"
 import { lockedCeiling, noHigherThan, topPins } from "./lockedCeiling"
 import { SortableWidget } from "./SortableWidget"
-import { WidgetStage } from "./WidgetStage"
 import {
   useWidgetVirtualizer,
   type WidgetPlacement,
   type WidgetVirtualization,
 } from "./useWidgetVirtualizer"
 import { verticalOnly } from "./verticalOnly"
-import { Footnote } from "./Footnote"
 import { WidgetMotion, type WidgetStow } from "./WidgetMotion"
+import { WidgetStage } from "./WidgetStage"
 
 export type { WidgetVirtualization } from "./useWidgetVirtualizer"
 

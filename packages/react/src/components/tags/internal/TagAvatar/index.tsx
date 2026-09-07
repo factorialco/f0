@@ -1,8 +1,6 @@
 import { forwardRef } from "react"
-
 import { AvatarVariant, F0Avatar } from "@/components/avatars/F0Avatar"
 import { useTextFormatEnforcer } from "@/lib/text"
-
 import { BaseTag } from "../BaseTag"
 
 type Props = {

@@ -1,14 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { ComponentProps } from "react"
 import { expect, within } from "storybook/test"
-
 import { DetailsItemsList } from "@/experimental/Lists/DetailsItemsList"
 import * as DetailsItemsListStories from "@/experimental/Lists/DetailsItemsList/index.stories"
 import { Dashboard } from "@/experimental/Widgets/Layout/Dashboard"
 import * as DashboardStories from "@/experimental/Widgets/Layout/Dashboard/index.stories"
 import { PageDecorator } from "@/lib/storybook-utils/pageDecorator"
-
 import { TwoColumnLayout } from "../index"
 
 const FocusableElement = () => {

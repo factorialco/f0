@@ -1,8 +1,6 @@
 import { forwardRef } from "react"
-
 import { Office } from "@/icons/app"
 import type { WithDataTestIdProps } from "@/lib/data-testid"
-
 import {
   BaseMapMarker,
   markerLabelPlacements,

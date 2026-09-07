@@ -1,16 +1,13 @@
 import { useId } from "react"
-
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon/F0AvatarIcon"
 import { F0Text } from "@/components/F0Text"
 import { Metadata } from "@/experimental/Information/Headers/Metadata"
 import Marker from "@/icons/app/Marker"
 import { cn } from "@/lib/utils"
-
 import type {
   F0TimelineRowNestedtaskProps,
   F0TimelineRowTaskProps,
 } from "../types"
-
 import { Actions } from "./Actions"
 import { NestedtaskHeader } from "./NestedtaskHeader"
 import { TimelineRowLayout } from "./TimelineRowLayout"

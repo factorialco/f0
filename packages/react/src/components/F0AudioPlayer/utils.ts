@@ -1,5 +1,4 @@
 import { DataAttributes } from "@/global.types"
-
 import type { TranscriptCue } from "./types"
 
 export const getDataAttributes = <T extends object>(props: T): DataAttributes =>

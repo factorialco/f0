@@ -1,5 +1,4 @@
 import { type VariantProps, cva } from "cva"
-
 import { F0Icon, F0IconProps } from "@/components/F0Icon"
 import { Windows } from "@/icons/app"
 import { withDataTestId } from "@/lib/data-testid"

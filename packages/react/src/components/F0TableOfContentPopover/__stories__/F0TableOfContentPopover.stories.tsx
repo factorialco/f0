@@ -1,8 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import type { ComponentType, ReactNode } from "react"
-
 import { useState } from "react"
-
 import { TOCItem } from "../../../experimental/Navigation/F0TableOfContent"
 import { F0TableOfContentPopover } from "../index"
 import { courseModulesData, mockTOCData } from "./mocks"

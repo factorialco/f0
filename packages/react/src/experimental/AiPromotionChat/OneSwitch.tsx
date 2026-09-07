@@ -1,6 +1,5 @@
 import * as SwitchPrimitive from "@radix-ui/react-switch"
 import { useState } from "react"
-
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import {
@@ -9,7 +8,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/ui/tooltip"
-
 import OneIcon from "./OneIcon"
 import { useAiPromotionChat } from "./providers/AiPromotionChatStateProvider"
 

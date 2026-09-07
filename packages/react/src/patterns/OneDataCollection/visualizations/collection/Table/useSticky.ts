@@ -1,9 +1,7 @@
 import { useCallback } from "react"
-
 import { RecordType } from "@/hooks/datasource"
 import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
 import { SummariesDefinition } from "@/patterns/OneDataCollection/summary"
-
 import { TableColumnDefinition } from "./types"
 
 export const useSticky = <

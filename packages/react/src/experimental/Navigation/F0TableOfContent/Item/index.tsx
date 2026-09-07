@@ -5,10 +5,8 @@ import {
 import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter"
 import { motion } from "motion/react"
 import { ReactNode, useEffect, useMemo, useRef, useState } from "react"
-
 import { useDraggable } from "@/lib/dnd/hooks"
 import { cn } from "@/lib/utils"
-
 import { TOCItem } from "../types"
 import { PrimitiveItem } from "./PrimitiveItem"
 

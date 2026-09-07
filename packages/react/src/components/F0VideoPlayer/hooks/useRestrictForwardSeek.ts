@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from "react"
-
 import { NATURAL_PROGRESS_DELTA, SEEK_EPSILON } from "../utils"
 
 export interface UseRestrictForwardSeekOptions {

@@ -1,13 +1,11 @@
 import { act, renderHook } from "@testing-library/react"
 import { ReactNode } from "react"
 import { describe, expect, it, vi } from "vitest"
-
 import { F0EventCatcherProvider } from "@/lib/providers/events"
 import {
   FiltersDefinition,
   FiltersState,
 } from "@/patterns/OneFilterPicker/types"
-
 import { useEventEmitter } from "./useEventEmitter"
 
 type Filters = FiltersState<FiltersDefinition>

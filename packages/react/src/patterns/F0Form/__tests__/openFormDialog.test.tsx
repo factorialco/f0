@@ -1,12 +1,13 @@
+import "@testing-library/jest-dom/vitest"
 import React, { useState } from "react"
 import { afterEach, beforeEach, describe, expect, it } from "vitest"
 import { z } from "zod"
-import "@testing-library/jest-dom/vitest"
-
 import {
   FormOverlaysProvider,
   formOverlaysStore,
 } from "@/lib/providers/form-overlays"
+import { useF0FormDefinition } from "@/patterns/F0WizardForm"
+import { forms } from "@/patterns/forms"
 import {
   render,
   screen,
@@ -14,11 +15,6 @@ import {
   userEvent,
   waitFor,
 } from "@/testing/test-utils"
-
-import { useF0FormDefinition } from "@/patterns/F0WizardForm"
-
-import { forms } from "@/patterns/forms"
-
 import { f0FormField } from "../f0Schema"
 
 const Wrapper = ({ children }: { children: React.ReactNode }) => (

@@ -1,6 +1,5 @@
 import { endOfYear, startOfYear } from "date-fns"
 import { describe, expect, it } from "vitest"
-
 import { yearGranularity } from "../index"
 
 describe("yearGranularity", () => {

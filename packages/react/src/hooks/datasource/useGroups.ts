@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react"
-
 import { RecordType } from "./types/records.typings"
 import { GroupRecord } from "./useData"
 

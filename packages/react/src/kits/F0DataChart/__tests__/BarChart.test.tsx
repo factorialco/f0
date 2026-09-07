@@ -1,3 +1,4 @@
+import "@testing-library/jest-dom/vitest"
 import {
   afterAll,
   afterEach,
@@ -8,9 +9,7 @@ import {
   it,
   vi,
 } from "vitest"
-import "@testing-library/jest-dom/vitest"
 import { act, zeroRender as render } from "@/testing/test-utils"
-
 import { F0DataChart } from "../F0DataChart"
 import { MD_MAX_WIDTH, SM_MAX_WIDTH } from "../utils/responsive"
 import { resolveChartTheme } from "../utils/theme"

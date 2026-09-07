@@ -1,7 +1,6 @@
 import { waitFor } from "@testing-library/react"
 import { ReactNode } from "react"
 import { describe, expect, it, vi } from "vitest"
-
 import {
   ItemNeighborsFetchOptions,
   ItemNeighborsResponse,
@@ -16,7 +15,6 @@ import {
 } from "@/lib/providers/datacollection"
 import { notifyDataCollectionStorageChange } from "@/lib/providers/datacollection/dataCollectionStorageEvents"
 import { TestProviders, zeroRenderHook } from "@/testing/test-utils"
-
 import { DataCollectionSourceDefinition } from "../../useDataCollectionSource"
 import { useDataCollectionItemNavigation } from "../useDataCollectionItemNavigation"
 

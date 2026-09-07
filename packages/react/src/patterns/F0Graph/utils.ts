@@ -1,15 +1,14 @@
+import {
+  NODE_BOX_INSET,
+  STACKED_GROUP_PADDING,
+  STACKED_NODE_WIDTH_INSET,
+} from "./constants"
 import type {
   GraphEdge,
   LayoutDirection,
   PositionedNode,
   TreeNode,
 } from "./types"
-
-import {
-  NODE_BOX_INSET,
-  STACKED_GROUP_PADDING,
-  STACKED_NODE_WIDTH_INSET,
-} from "./constants"
 
 /**
  * React Flow `fitViewOptions.nodes` for the initial frame: `[{ id }]` to open

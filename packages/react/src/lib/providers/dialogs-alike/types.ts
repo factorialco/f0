@@ -1,5 +1,4 @@
 import { ReactNode } from "react"
-
 import {
   DialogNotificationType,
   F0DialogSize,
@@ -10,7 +9,6 @@ import {
 } from "@/components/dialog-alike/F0Drawer/types"
 import { F0ButtonProps } from "@/components/F0Button"
 import { Optional } from "@/lib/typescript-utils/optional"
-
 import { DialogModule } from "./module-types"
 
 export type { DialogModule }

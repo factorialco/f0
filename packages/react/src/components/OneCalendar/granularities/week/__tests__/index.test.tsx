@@ -6,7 +6,6 @@ import {
   startOfWeek,
 } from "date-fns"
 import { describe, expect, it } from "vitest"
-
 import { WeekStartDay } from "../../../types"
 import { createWeekGranularity, weekGranularity } from "../index"
 

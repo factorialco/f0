@@ -1,8 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
-import type { F0DataChartProps } from "../types"
-
 import { F0DataChart } from "../index"
+import type { F0DataChartProps } from "../types"
 import { ChartDecorator, ResponsiveSnapshot } from "./decorators"
 
 const meta = {

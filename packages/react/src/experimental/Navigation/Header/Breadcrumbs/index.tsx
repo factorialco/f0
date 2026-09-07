@@ -5,9 +5,7 @@ import {
   useState,
   useTransition,
 } from "react"
-
 import { Breadcrumb, BreadcrumbList } from "@/ui/breadcrumb"
-
 import { getBreadcrumbKey } from "./getBreadcrumbKey"
 import { BreadcrumbItem } from "./internal/BreadcrumbItem"
 import { CollapsedBreadcrumbItem } from "./internal/CollapsedBreadcrumbItem"

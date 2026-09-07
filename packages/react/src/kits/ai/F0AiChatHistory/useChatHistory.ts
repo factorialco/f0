@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useState } from "react"
-
 import type { IconType } from "@/components/F0Icon"
-
 import {
   readFromLocalStorage,
   writeToLocalStorage,

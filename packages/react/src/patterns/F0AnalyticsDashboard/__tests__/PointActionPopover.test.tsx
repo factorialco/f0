@@ -1,12 +1,10 @@
 import { describe, expect, it, vi } from "vitest"
-
 import {
   fireEvent,
   screen,
   userEvent,
   zeroRender as render,
 } from "@/testing/test-utils"
-
 import { PointActionPopover } from "../components/ChartItem/PointActionPopover"
 
 const anchor = { clientX: 400, clientY: 300 }

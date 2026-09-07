@@ -3,7 +3,6 @@ import type {
   F0SelectItemObject,
   F0SelectItemProps,
 } from "@/components/F0Select"
-
 import {
   DataSourceDefinition,
   FiltersDefinition,
@@ -11,18 +10,16 @@ import {
   RecordType,
   SortingsDefinition,
 } from "@/hooks/datasource"
-
-import type {
-  TableColumnDefinition,
-  TableVisualizationOptions,
-  TableVisualizationSettings,
-} from "../Table/types"
-
 import { PrimaryActionItemDefinition } from "../../../actions"
 import { ItemActionsDefinition } from "../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
 import { SummariesDefinition } from "../../../summary"
 import { CollectionProps } from "../../../types"
+import type {
+  TableColumnDefinition,
+  TableVisualizationOptions,
+  TableVisualizationSettings,
+} from "../Table/types"
 import { EditableTableCellEditType } from "./components/cells"
 
 export type AddRowActionsResult =

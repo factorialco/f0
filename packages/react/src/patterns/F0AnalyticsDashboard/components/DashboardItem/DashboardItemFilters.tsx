@@ -7,7 +7,6 @@ import {
   useRef,
   useState,
 } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { ArrowLeft, Filter } from "@/icons/app"
@@ -18,7 +17,6 @@ import { FilterList } from "@/patterns/OneFilterPicker/components/FilterList"
 import { getActiveFilterKeys } from "@/patterns/OneFilterPicker/internal/getActiveFilterKeys"
 import { getActiveFiltersValue } from "@/patterns/OneFilterPicker/internal/getActiveFiltersValue"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
-
 import type {
   DashboardItemFiltersConfig,
   DashboardItemFiltersDefinition,

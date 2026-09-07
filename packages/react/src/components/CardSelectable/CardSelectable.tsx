@@ -1,6 +1,5 @@
 import { motion } from "motion/react"
 import { ReactElement } from "react"
-
 import { AvatarVariant, F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0AvatarEmoji } from "@/components/avatars/F0AvatarEmoji"
 import { F0AvatarFile } from "@/components/avatars/F0AvatarFile"
@@ -12,7 +11,6 @@ import { useReducedMotion } from "@/lib/a11y"
 import { withDataTestId, WithDataTestIdProps } from "@/lib/data-testid"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { cn } from "@/lib/utils"
-
 import type {
   CardSelectableAvatarVariant,
   CardSelectableItem,

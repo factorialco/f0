@@ -1,6 +1,5 @@
 import { ComponentProps } from "react"
 import { XAxis, YAxis } from "recharts"
-
 import { AxisConfig } from "./types"
 
 export function measureTextWidth(

@@ -1,11 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { expect, userEvent, within } from "storybook/test"
-
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import * as Icons from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
 import { Dropdown, MobileDropdown as MobileDropdownComponent } from "./index"
 
 const meta = {

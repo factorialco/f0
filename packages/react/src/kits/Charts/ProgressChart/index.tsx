@@ -1,7 +1,5 @@
 import { ForwardedRef } from "react"
-
 import { Progress } from "@/ui/progress"
-
 import { getColor } from "../utils/colors"
 import { fixedForwardRef } from "../utils/forwardRef"
 import { ChartConfig, ChartPropsBase } from "../utils/types"

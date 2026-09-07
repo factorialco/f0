@@ -1,12 +1,10 @@
 import { AnimatePresence, LayoutGroup, motion } from "motion/react"
 import { Fragment, useState } from "react"
-
 import { F0Icon } from "@/components/F0Icon"
 import { Search } from "@/icons/app"
 import { useReducedMotion } from "@/lib/a11y"
 import { fuzzyMatch } from "@/lib/fuzzyMatch"
 import { cn, focusRing } from "@/lib/utils"
-
 import { SidebarCollapsibleSection } from "../CollapsibleSection"
 import { SidebarTabPanelAction, SidebarTabPanelProps } from "./types"
 

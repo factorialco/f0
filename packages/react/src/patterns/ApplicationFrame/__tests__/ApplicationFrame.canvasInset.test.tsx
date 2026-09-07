@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it } from "vitest"
-
 import type { CanvasContent } from "@/kits/ai/canvas/types"
 import { useAiChat } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
 import { DEFAULT_CHAT_WIDTH } from "@/kits/ai/F0AiChat/utils/constants"
@@ -10,7 +9,6 @@ import {
   userEvent,
   waitFor,
 } from "@/testing/test-utils"
-
 import { ApplicationFrame } from ".."
 
 // "note" is not part of the SDS `CanvasContent` union — hosts register their own

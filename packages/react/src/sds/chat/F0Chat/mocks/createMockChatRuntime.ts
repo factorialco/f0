@@ -1,9 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-
 import { BellOff } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
-
 import {
   isUserMessage,
   type F0ChatComposableAttachment,

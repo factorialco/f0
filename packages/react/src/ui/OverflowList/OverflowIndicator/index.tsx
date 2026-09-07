@@ -1,6 +1,5 @@
 import { motion } from "motion/react"
 import { FC } from "react"
-
 import { F0Icon } from "@/components/F0Icon"
 import { ChevronDown } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"

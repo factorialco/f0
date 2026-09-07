@@ -1,7 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { useState } from "react"
-
 import { Image } from "../../../../icons/app"
 import { SidebarHeader } from "./index"
 

@@ -5,19 +5,14 @@ import {
   type NodeProps,
 } from "@xyflow/react"
 import { type CSSProperties, type ReactNode, memo } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { Minimize } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
-import type { F0GraphNodeRenderContext } from "../F0Graph"
 import type {
   GraphNodeState,
   GraphNodeVariant,
 } from "../components/F0GraphNode"
-import type { GraphNode, LayoutDirection, ZoomLevel } from "../types"
-
 import {
   COLLAPSER_OFFSET_ADJUSTMENT_BY_ZOOM,
   NODE_BOX_INSET,
@@ -26,6 +21,8 @@ import {
   STACKED_NODE_HEIGHT,
   STACKED_RANK_SEP_RATIO,
 } from "../constants"
+import type { F0GraphNodeRenderContext } from "../F0Graph"
+import type { GraphNode, LayoutDirection, ZoomLevel } from "../types"
 
 /** A React Flow handle's default box, which is square. */
 const HANDLE_SIZE = 6
@@ -121,6 +118,7 @@ function handlePositions(direction: LayoutDirection): {
   }
 }
 
+import { F0GraphExpander } from "../components/F0GraphExpander"
 import {
   useF0GraphZoomInternal,
   useF0GraphExpandInternal,
@@ -130,7 +128,6 @@ import {
   useF0GraphRenderConfigInternal,
   useF0GraphStackHoverInternal,
 } from "../contexts"
-import { F0GraphExpander } from "../components/F0GraphExpander"
 
 // ─── Shared types ──────────────────────────────────────────────
 

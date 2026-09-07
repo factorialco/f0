@@ -1,8 +1,6 @@
 import { useId } from "react"
 import { Area, AreaChart, ResponsiveContainer, YAxis } from "recharts"
-
 import { cn } from "@/lib/utils"
-
 import type { SparklineDataPoint } from "../types"
 
 type CardSparklineProps = {

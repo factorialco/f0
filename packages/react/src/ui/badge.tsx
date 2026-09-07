@@ -1,6 +1,5 @@
 import { cva, type VariantProps } from "cva"
 import * as React from "react"
-
 import { cn, focusRing } from "../lib/utils"
 
 const badgeVariants = cva({

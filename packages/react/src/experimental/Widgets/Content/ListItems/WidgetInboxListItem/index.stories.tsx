@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { WidgetInboxListItem, WidgetInboxListItemProps } from "./index"
 
 const meta: Meta<WidgetInboxListItemProps> = {

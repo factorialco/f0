@@ -1,5 +1,4 @@
 import type { Editor } from "@tiptap/core"
-
 import { mergeAttributes } from "@tiptap/core"
 import { FileHandler } from "@tiptap/extension-file-handler"
 import { Image } from "@tiptap/extension-image"
@@ -9,12 +8,11 @@ import {
   type NodeViewProps,
 } from "@tiptap/react"
 import { useCallback, useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
-import { Spinner } from "@/ui/Spinner"
 import { Delete } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
+import { Spinner } from "@/ui/Spinner"
 
 export type ImageUploadErrorType =
   | "file-too-large"

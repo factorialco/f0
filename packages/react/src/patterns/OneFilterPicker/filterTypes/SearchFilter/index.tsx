@@ -1,7 +1,5 @@
 import { AlertCircle } from "@/icons/app"
-
 import type { BaseFilterDefinition } from ".."
-
 import { FilterTypeDefinition } from "../types"
 import { SearchFilter, SearchFilterOptions } from "./SearchFilter"
 

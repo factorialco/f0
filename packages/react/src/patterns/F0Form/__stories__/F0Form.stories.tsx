@@ -1,23 +1,18 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { useState, useCallback, useId, useMemo, useRef } from "react"
 import { expect, userEvent, waitFor, within } from "storybook/test"
 import { z } from "zod"
-
 import { F0Button } from "@/components/F0Button"
 import { createDataSourceDefinition } from "@/hooks/datasource"
 import { Archive, ArchiveOpen, ExternalLink, Plus, Settings } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { useF0FormDefinition } from "@/patterns/F0WizardForm"
 import { forms } from "@/patterns/forms"
-
 import type {
   FileUploadHookReturn,
   FileUploadResult,
   FileUploadStatus,
 } from "../fields/types"
-import type { RenderCustomFieldSelectConfig } from "../types"
-
 import {
   f0FormField,
   F0Form,
@@ -25,6 +20,7 @@ import {
   RenderCustomFieldProps,
   F0FormRef,
 } from "../index"
+import type { RenderCustomFieldSelectConfig } from "../types"
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 

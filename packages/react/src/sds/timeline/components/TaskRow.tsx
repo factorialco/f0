@@ -1,5 +1,4 @@
 import type { F0TimelineRowTaskProps } from "../types"
-
 import { TaskDetails } from "./TaskDetails"
 import { TaskHeader } from "./TaskHeader"
 import { TimelineRowLayout } from "./TimelineRowLayout"

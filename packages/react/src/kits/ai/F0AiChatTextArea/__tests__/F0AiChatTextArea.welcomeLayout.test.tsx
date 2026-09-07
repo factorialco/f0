@@ -1,8 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
-
 import { ChartVerticalBars, File } from "@/icons/app"
 import { zeroRender as render, screen } from "@/testing/test-utils"
-
 import {
   type F0AiChatWelcomeCard,
   type WelcomeScreenSuggestion,

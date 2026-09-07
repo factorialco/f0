@@ -1,20 +1,17 @@
 import type { ReactElement } from "react"
 import { useContext, useEffect, useMemo, useRef, useState } from "react"
-
-import { useEventEmitter } from "@/patterns/OneDataCollection/useEventEmitter"
 import { DataTestIdWrapper } from "@/lib/data-testid"
 import { RenderErrorBoundary } from "@/lib/RenderErrorBoundary"
 import { cn } from "@/lib/utils"
-
-import type { FiltersDefinition, FiltersMode, FiltersState } from "./types"
-
-import { collectNestedFilterKeys } from "./filterTypes/InFilter/components/option-utils"
+import { useEventEmitter } from "@/patterns/OneDataCollection/useEventEmitter"
 import { FiltersChipsList as FiltersChipsListComponent } from "./components/FiltersChipsList"
 import { FiltersControls as FiltersControlsComponent } from "./components/FiltersControls"
 import { FiltersPresets as FiltersPresetsComponent } from "./components/FiltersPresets"
 import { FiltersContext } from "./context"
+import { collectNestedFilterKeys } from "./filterTypes/InFilter/components/option-utils"
 import { isPresetSelected } from "./internal/isPresetSelected"
 import { FilterPickerStateModeContext } from "./internal/stateMode"
+import type { FiltersDefinition, FiltersMode, FiltersState } from "./types"
 import { PresetsDefinition } from "./types"
 
 /**

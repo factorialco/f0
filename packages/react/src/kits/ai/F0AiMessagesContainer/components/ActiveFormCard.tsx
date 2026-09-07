@@ -1,7 +1,5 @@
 import type { ReactNode } from "react"
-
 import { useF0AiFormRegistry } from "@/patterns/F0Form/F0AiFormRegistry"
-
 import { FormCard } from "./FormCard.tsx"
 
 /**

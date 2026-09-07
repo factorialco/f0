@@ -1,5 +1,4 @@
 import { differenceInMinutes, format, isSameDay, type Locale } from "date-fns"
-
 import type { AttendeesDisplay, MeetingAttendee, MeetingState } from "./types"
 
 export const DEFAULT_JOIN_WINDOW_MINUTES = 10

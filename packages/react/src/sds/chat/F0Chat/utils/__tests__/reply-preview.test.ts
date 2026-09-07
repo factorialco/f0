@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import { type F0ChatAttachment } from "../../types"
 import { replyThumbnailUrl, summariseAttachments } from "../reply-preview"
 

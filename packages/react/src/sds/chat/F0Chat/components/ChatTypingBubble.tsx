@@ -1,11 +1,9 @@
 import { motion } from "motion/react"
 import { type ReactNode, useEffect, useState } from "react"
-
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0AvatarList } from "@/components/avatars/F0AvatarList"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
 import { type F0ChatUser } from "../types"
 import { EASE_OUT_SWIFT } from "../utils/chat-motion"

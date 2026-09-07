@@ -1,16 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { ControllerRenderProps, FieldValues } from "react-hook-form"
-
 import type { InputFieldStatus } from "@/components/F0InputField/types"
-
 import { F0TextInput } from "@/components/F0TextInput"
 import { getFieldInputIcon } from "@/lib/field-input-icons"
 import { useHourCycle } from "@/lib/providers/user-platafform"
 import type { HourCycle } from "@/lib/providers/user-platafform/types"
-
-import type { ResolvedTimeField } from "./types"
-
 import { FORM_SIZE } from "../../constants"
+import type { ResolvedTimeField } from "./types"
 import {
   dateToDisplayTime,
   dateToTimeString,

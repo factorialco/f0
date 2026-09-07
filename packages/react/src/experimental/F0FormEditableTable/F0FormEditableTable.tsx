@@ -17,9 +17,6 @@ import {
 } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import { ReactNode } from "react"
-
-import type { RecordType } from "@/hooks/datasource"
-
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
 import {
@@ -30,6 +27,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/experimental/OneTable"
+import type { RecordType } from "@/hooks/datasource"
 import { Add, Delete, Handle, Pencil } from "@/icons/app"
 import { experimentalComponent } from "@/lib/experimental"
 import { useI18n } from "@/lib/providers/i18n"
@@ -42,7 +40,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/ui/tooltip"
-
 import type {
   EditableColumn,
   F0FormEditableTableColumn,

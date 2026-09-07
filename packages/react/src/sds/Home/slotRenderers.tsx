@@ -1,7 +1,5 @@
 import { type CSSProperties, ReactNode, useState } from "react"
-
 import { type z } from "zod"
-
 import { F0Avatar, type AvatarVariant } from "@/components/avatars/F0Avatar"
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import {
@@ -16,9 +14,7 @@ import type { AvatarSize } from "@/components/avatars/internal/BaseAvatar"
 import { F0Button } from "@/components/F0Button"
 import { type F0ButtonProps } from "@/components/F0Button"
 import { F0Icon, type IconType } from "@/components/F0Icon"
-import { cn } from "@/lib/utils"
-import { Counter } from "@/ui/Counter"
-import { Skeleton } from "@/ui/skeleton"
+import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import {
   CalendarEvent,
   type CalendarEventProps,
@@ -27,17 +23,18 @@ import {
   IndicatorsList,
   IndicatorsListProps,
 } from "@/experimental/Widgets/Content/IndicatorsList"
-import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { useWidgetIsWide, WidgetProps } from "@/experimental/Widgets/Widget"
+import { cn } from "@/lib/utils"
 import { type F0FormSchema } from "@/patterns/F0Form"
-
+import { Counter } from "@/ui/Counter"
+import { Skeleton } from "@/ui/skeleton"
+import { HomeSlotItem, HomeSlotItems, useIsBulkChange } from "./home-motion"
 import {
   descriptionText,
   HomeListItem,
   type DescriptionPart,
   type HomeListItemAction,
 } from "./HomeListItem"
-import { HomeSlotItem, HomeSlotItems, useIsBulkChange } from "./home-motion"
 
 /**
  * The item-churn animation, re-exported so a BESPOKE renderer draws its items

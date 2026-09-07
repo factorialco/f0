@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from "react"
-
 import { type F0ChatUser } from "../types"
 
 /** The mock-runtime surface the storm drives (see createMockChatRuntime). */

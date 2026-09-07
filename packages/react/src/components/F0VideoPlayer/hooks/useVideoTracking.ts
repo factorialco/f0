@@ -1,5 +1,4 @@
 import { useEffect, useRef } from "react"
-
 import { TRACKING_INTERVAL_MS } from "../utils"
 
 export interface UseVideoTrackingOptions {

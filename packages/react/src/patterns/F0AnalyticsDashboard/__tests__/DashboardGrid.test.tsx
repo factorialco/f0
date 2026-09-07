@@ -1,5 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
-
+import { AiChatStateProvider } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
+import {
+  WIDGET_DRAG_START,
+  type WidgetDragStartDetail,
+} from "@/lib/dnd/widgetDragEvents"
 import {
   fireEvent,
   screen,
@@ -8,16 +12,8 @@ import {
   within,
   zeroRender as render,
 } from "@/testing/test-utils"
-
-import { AiChatStateProvider } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
-import {
-  WIDGET_DRAG_START,
-  type WidgetDragStartDetail,
-} from "@/lib/dnd/widgetDragEvents"
-
-import type { DashboardItem } from "../types"
-
 import { DashboardGrid } from "../components/DashboardGrid/DashboardGrid"
+import type { DashboardItem } from "../types"
 
 type ExpenseRecord = {
   employee: string

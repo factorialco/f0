@@ -1,8 +1,7 @@
-import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@testing-library/jest-dom/vitest"
 import { screen } from "@testing-library/react"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 import { zeroRender as render } from "@/testing/test-utils"
-
 import { F0DataChart } from "../F0DataChart"
 
 const setOptionMock = vi.fn()

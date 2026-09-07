@@ -1,8 +1,6 @@
 import { describe, expect, it } from "vitest"
-
 import { getAvatarColor } from "@/components/avatars/internal/BaseAvatar/utils"
 import { internalAvatarColors } from "@/ui/Avatar"
-
 import {
   f0ChatSenderColors,
   type F0ChatSenderColor,

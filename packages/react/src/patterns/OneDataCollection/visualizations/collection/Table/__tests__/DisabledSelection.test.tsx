@@ -1,19 +1,16 @@
 import { waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
-
 import type {
   BaseFetchOptions,
   GroupingDefinition,
   SortingsDefinition,
 } from "@/hooks/datasource"
-
 import { FiltersDefinition } from "@/hooks/datasource"
-import { screen, zeroRender as render } from "@/testing/test-utils"
-import { TextCell } from "@/ui/value-display/types/text"
 import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource/types"
 import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
-
+import { screen, zeroRender as render } from "@/testing/test-utils"
+import { TextCell } from "@/ui/value-display/types/text"
 import { ItemActionsDefinition } from "../../../../item-actions"
 import { SummariesDefinition } from "../../../../summary"
 import { TableCollection } from "../index"

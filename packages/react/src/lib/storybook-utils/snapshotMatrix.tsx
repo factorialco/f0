@@ -1,6 +1,5 @@
 import type { StoryObj } from "@storybook/react-vite"
 import { ComponentType, Fragment, ReactNode } from "react"
-
 import { withSnapshot } from "./parameters"
 
 /**

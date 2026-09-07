@@ -1,5 +1,4 @@
 import { forwardRef, ReactNode } from "react"
-
 import { Widget, WidgetProps } from "../Widget"
 
 export type ChartContainerPropsBase = WidgetProps

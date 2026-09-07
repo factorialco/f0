@@ -1,5 +1,4 @@
 import { forwardRef } from "react"
-
 import ExternalLink from "@/icons/app/ExternalLink"
 import { withDataTestId } from "@/lib/data-testid"
 import {
@@ -8,7 +7,6 @@ import {
   ActionLinkVariant,
   ActionProps,
 } from "@/ui/Action"
-
 import { F0Icon } from "../F0Icon"
 
 export type F0LinkProps = Omit<ActionLinkProps, "variant" | "href"> & {

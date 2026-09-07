@@ -1,5 +1,4 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
-
 import { coachmarkStore } from "../store"
 import type { CoachmarkItem } from "../types"
 

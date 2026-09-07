@@ -1,5 +1,4 @@
 import { useEffect, useRef } from "react"
-
 import { DEFAULT_VISIBLE_DATA_DEBOUNCE_MS } from "../constants"
 
 interface UseViewportDataLoaderOptions {

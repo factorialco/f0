@@ -1,8 +1,6 @@
 import { ReactNode } from "react"
 import { describe, expect, it } from "vitest"
-
 import { act, renderHook } from "@/testing/test-utils"
-
 import { SidebarChatProvider, useSidebarChats } from "../SidebarChatProvider"
 import { SidebarChatGroup } from "../types"
 

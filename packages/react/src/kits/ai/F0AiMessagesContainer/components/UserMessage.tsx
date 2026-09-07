@@ -1,13 +1,10 @@
 import { type ReactNode, useEffect, useRef } from "react"
-
-import { F0Icon } from "@/components/F0Icon"
 import { F0FileItem } from "@/components/F0FileItem"
+import { F0Icon } from "@/components/F0Icon"
 import { F0RichTextDisplay } from "@/components/RichText/F0RichTextDisplay"
 import { Reply } from "@/icons/app"
-
 import { type Message } from "../types"
 import { useReplySelection } from "../useReplySelection"
-
 import { ReplyPopover } from "./ReplyPopover"
 
 type UploadedFile = {

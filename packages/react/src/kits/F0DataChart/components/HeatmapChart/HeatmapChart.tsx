@@ -1,9 +1,6 @@
 import { useRef } from "react"
-
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
-
 import type { F0DataChartHeatmapProps } from "../../types"
-
 import { resolveChartSize } from "../../utils/responsive"
 import { useAxisLabelTooltip } from "../../utils/useAxisLabelTooltip"
 import { useChartTheme } from "../../utils/useChartTheme"

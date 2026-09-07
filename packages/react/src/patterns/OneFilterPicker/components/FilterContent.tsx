@@ -1,13 +1,12 @@
 "use client"
 
+import { FilterDefinitionsByType, getFilterType } from "../filterTypes"
 import type {
   FilterDefinition,
   FiltersDefinition,
   FiltersState,
   FilterValue,
 } from "../types"
-
-import { FilterDefinitionsByType, getFilterType } from "../filterTypes"
 
 /**
  * Props for the FilterContent component.

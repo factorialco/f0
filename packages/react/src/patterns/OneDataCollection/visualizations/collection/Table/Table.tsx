@@ -1,6 +1,5 @@
 import { AnimatePresence, motion } from "motion/react"
 import { Fragment, memo, useEffect, useMemo, useRef, useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import { F0Checkbox } from "@/components/F0Checkbox"
@@ -35,12 +34,6 @@ import { useDataCollectionSettings } from "@/patterns/OneDataCollection/Settings
 import { GroupHeader } from "@/ui/GroupHeader/index"
 import { Skeleton } from "@/ui/skeleton.tsx"
 import { tableCellContentClassName } from "@/ui/value-display/const"
-
-import type {
-  TableCustomizationProps,
-  TableVisualizationOptions,
-} from "./types"
-
 import { PrimaryActionItemDefinition } from "../../../actions"
 import { useDataCollectionData } from "../../../hooks/useDataCollectionData"
 import { useInfiniteScrollPagination } from "../../../hooks/useInfiniteScrollPagination"
@@ -52,11 +45,15 @@ import { useAddRow } from "../EditableTable/context/AddRowContext"
 import { statusToChecked } from "../utils"
 import { Row } from "./components/Row"
 import { useAddedRowKeys } from "./hooks/useAddedRowKeys"
-import { getColumnId, useColumns } from "./hooks/useColums"
 import { useColumnCollapseAnimation } from "./hooks/useColumnCollapseAnimation"
+import { getColumnId, useColumns } from "./hooks/useColums"
 import { groupBorderClass, useHeaderGroups } from "./hooks/useHeaderGroups"
 import { NestedDataProvider } from "./providers/NestedProvider"
 import { useCreateSelectionRegistry } from "./providers/SelectionRegistryProvider"
+import type {
+  TableCustomizationProps,
+  TableVisualizationOptions,
+} from "./types"
 import { useSticky } from "./useSticky"
 export * from "./settings/SettingsRenderer"
 

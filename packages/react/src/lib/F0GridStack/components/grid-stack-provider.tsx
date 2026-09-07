@@ -1,12 +1,12 @@
+import "./types"
+import { useDeepCompareEffect } from "@reactuses/core"
+import DOMPurify from "dompurify"
 import type {
   GridItemHTMLElement,
   GridStack,
   GridStackOptions,
   GridStackWidget,
 } from "gridstack"
-
-import { useDeepCompareEffect } from "@reactuses/core"
-import DOMPurify from "dompurify"
 import { motion } from "motion/react"
 import React, {
   type PropsWithChildren,
@@ -16,10 +16,8 @@ import React, {
   useRef,
   useState,
 } from "react"
-
 import { GridStackReactWidget } from "../F0GridStack"
 import { GridStackContext } from "./grid-stack-context"
-import "./types"
 import { convertWidgetRecursive } from "./widget-utils"
 
 interface GridStackProviderProps {

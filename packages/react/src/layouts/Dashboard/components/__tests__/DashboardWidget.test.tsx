@@ -1,9 +1,7 @@
-import React from "react"
 import "@testing-library/jest-dom/vitest"
+import React from "react"
 import { describe, expect, it, vi } from "vitest"
-
 import { screen, userEvent, zeroRender } from "@/testing/test-utils"
-
 import { DashboardWidget } from "../DashboardWidget"
 
 const _ = React

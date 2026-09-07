@@ -1,6 +1,5 @@
 import { AnimatePresence, motion } from "motion/react"
 import { type MouseEvent, useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { Pencil } from "@/icons/app"
 import { Await } from "@/lib/Await"

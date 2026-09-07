@@ -1,6 +1,5 @@
 import type maplibregl from "maplibre-gl"
 import { useEffect, useState } from "react"
-
 import {
   getMarkerMetrics,
   type BaseMapMarkerLabelPlacement,

@@ -1,5 +1,4 @@
 import { Editor, JSONContent } from "@tiptap/react"
-
 import { enhancedTextResponse, enhanceTextParams } from "./types"
 
 /** Maximum characters sent to the AI for enhancement */

@@ -2,7 +2,6 @@ import { IconType } from "@/components/F0Icon"
 import { GroupingDefinition, RecordType } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
 import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
-
 import { ItemActionsDefinition } from "../../item-actions"
 import { NavigationFiltersDefinition } from "../../navigationFilters/types"
 import { SortingsDefinition, SummariesDefinition } from "../../types"

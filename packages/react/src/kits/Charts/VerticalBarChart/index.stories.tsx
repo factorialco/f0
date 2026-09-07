@@ -1,5 +1,4 @@
 import { Meta } from "@storybook/react-vite"
-
 import { VerticalBarChart } from "./index"
 
 const meta: Meta = {

@@ -3,7 +3,6 @@ import {
   OnSelectItemsCallback,
   RecordType,
 } from "@/hooks/datasource"
-
 import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import { DataCollectionSource } from "../../hooks/useDataCollectionSource/types"
 import { ItemActionsDefinition } from "../../item-actions"

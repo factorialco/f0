@@ -1,7 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
 import { useDebounceCallback } from "usehooks-ts"
-
-import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import {
   FiltersDefinition,
   FiltersState,
@@ -10,7 +8,7 @@ import {
   SortingsDefinition,
 } from "@/hooks/datasource"
 import { useDataCollectionStorage as useDataCollectionStorageProvider } from "@/lib/providers/datacollection/DataCollectionStorageProvider"
-
+import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import { getFeatures } from "./getFeatures"
 import {
   DataCollectionStatus,

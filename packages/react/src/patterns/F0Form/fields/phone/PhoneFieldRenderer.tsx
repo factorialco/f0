@@ -1,8 +1,6 @@
 import { ControllerRenderProps, FieldValues } from "react-hook-form"
-
-import { F0PhoneInput } from "@/experimental/Forms/F0PhoneInput"
 import type { InputFieldStatus } from "@/components/F0InputField/types"
-
+import { F0PhoneInput } from "@/experimental/Forms/F0PhoneInput"
 import { FORM_SIZE } from "../../constants"
 import type { ResolvedField } from "../types"
 import type { F0PhoneField } from "./types"

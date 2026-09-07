@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import {
   Default as DefaultWidgetSimpleListItemStory,
   WithLongTitle as WithLongTitleWidgetSimpleListItemStory,

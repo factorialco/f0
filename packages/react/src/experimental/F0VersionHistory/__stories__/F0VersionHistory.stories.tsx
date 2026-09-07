@@ -1,7 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { useState } from "react"
-
 import { F0VersionHistory } from "../index"
 import { Version } from "../types"
 

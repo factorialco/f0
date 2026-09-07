@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState } from "react"
-
 import { collectionVisualizations } from "../visualizations/collection/collectionViewRegistry"
 
 // Utility type to extract settings from visualization definitions

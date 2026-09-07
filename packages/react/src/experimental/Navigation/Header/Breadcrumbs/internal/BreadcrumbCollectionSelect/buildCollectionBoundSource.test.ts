@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest"
-
 import { DataAdapter } from "@/hooks/datasource"
-
 import { buildCollectionBoundSource } from "./buildCollectionBoundSource"
 
 type TestRecord = { id: string; name: string }

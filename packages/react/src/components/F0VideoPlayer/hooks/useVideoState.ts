@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from "react"
-
 import {
   CURRENT_TIME_THROTTLE_MS,
   DEFAULT_PLAYBACK_RATE,

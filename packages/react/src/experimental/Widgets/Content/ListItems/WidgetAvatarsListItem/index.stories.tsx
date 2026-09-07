@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { WidgetAvatarsListItem, WidgetAvatarsListItemProps } from "./index"
 
 const meta: Meta<WidgetAvatarsListItemProps> = {

@@ -1,5 +1,4 @@
 import { cva } from "cva"
-
 import { mentionClasses } from "@/lib/recipes"
 import { cn } from "@/lib/utils"
 

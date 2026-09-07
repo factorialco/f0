@@ -1,10 +1,7 @@
 import { motion } from "motion/react"
 import { useEffect, useRef, useState, type Ref } from "react"
-
 import { useReducedMotion } from "@/lib/a11y"
-
 import type { ClarifyingOption, ClarifyingSelectionMode } from "../types"
-
 import { CustomAnswerRow } from "./CustomAnswerRow"
 import { OptionRow } from "./OptionRow"
 

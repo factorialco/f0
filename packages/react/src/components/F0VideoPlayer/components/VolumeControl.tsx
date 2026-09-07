@@ -1,10 +1,8 @@
 import { useRef, useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { VolumeHigh, VolumeMid, VolumeMuted } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
-
 import { VOLUME_SLIDER_THUMB_SIZE, VOLUME_STEP } from "../utils"
 
 export interface VolumeControlProps {

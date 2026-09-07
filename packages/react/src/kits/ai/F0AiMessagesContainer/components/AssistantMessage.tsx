@@ -5,12 +5,9 @@ import {
   useEffect,
   useRef,
 } from "react"
-
 import { F0RichTextDisplay } from "@/components/RichText/F0RichTextDisplay"
-
 import { type Message } from "../types"
 import { useReplySelection } from "../useReplySelection"
-
 import { ReplyPopover } from "./ReplyPopover"
 
 /**

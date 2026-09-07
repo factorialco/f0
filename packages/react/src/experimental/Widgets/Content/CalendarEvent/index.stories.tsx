@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { Building, Coffee, Comment, Pin, Replace } from "../../../../icons/app"
 import { CalendarEvent } from "./index"
 

@@ -1,7 +1,4 @@
 import { z, type ZodErrorMap, type ZodTypeAny } from "zod"
-
-import type { F0FormSchema, F0FormSubmitResult } from "../types"
-
 import { buildDynamicSchema } from "../conditionalResolver"
 import {
   describeFormSchema,
@@ -9,6 +6,7 @@ import {
 } from "../describeFormSchema"
 import { getF0Config, unwrapToZodObject } from "../f0Schema"
 import { evaluateRenderIf } from "../fields/utils"
+import type { F0FormSchema, F0FormSubmitResult } from "../types"
 
 // =============================================================================
 // Public types

@@ -1,5 +1,4 @@
 import type { ReactNode } from "react"
-
 import type { NewColor } from "@/components/tags/F0TagDot"
 import type { Variant } from "@/components/tags/F0TagStatus"
 import type { RecordType } from "@/hooks/datasource"

@@ -1,9 +1,8 @@
-import type { Scope } from "@radix-ui/react-context"
-
 import { clamp } from "@radix-ui/number"
 import { composeEventHandlers } from "@radix-ui/primitive"
 import { createCollection } from "@radix-ui/react-collection"
 import { useComposedRefs } from "@radix-ui/react-compose-refs"
+import type { Scope } from "@radix-ui/react-context"
 import { createContextScope } from "@radix-ui/react-context"
 import { useDirection } from "@radix-ui/react-direction"
 import { DismissableLayer } from "@radix-ui/react-dismissable-layer"

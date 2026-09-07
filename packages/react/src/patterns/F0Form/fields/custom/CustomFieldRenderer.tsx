@@ -1,9 +1,7 @@
 import { ControllerRenderProps, FieldValues } from "react-hook-form"
-
+import { useOptionalF0FormContext } from "../../context"
 import type { ResolvedField } from "../types"
 import type { F0CustomField, CustomFieldRenderPropsBase } from "./types"
-
-import { useOptionalF0FormContext } from "../../context"
 
 interface CustomFieldRendererProps {
   field: ResolvedField<F0CustomField>

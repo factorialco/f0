@@ -1,5 +1,4 @@
 import Mention from "@tiptap/extension-mention"
-
 import { mentionFocusableClasses } from "@/lib/recipes"
 import { cn } from "@/lib/utils"
 import { createSuggestionConfig } from "./suggestion"

@@ -1,6 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { createPortal } from "react-dom"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { One as OneIcon } from "@/icons/ai"
 import { useI18n } from "@/lib/providers/i18n"

@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from "react"
-
 import {
   GroupingDefinition,
   RecordType,
@@ -13,7 +12,6 @@ import {
   tagColumn,
 } from "@/patterns/F0Graph"
 import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
-
 import { ItemActionsDefinition } from "../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
 import { useDataCollectionSettings } from "../../../Settings/SettingsProvider"

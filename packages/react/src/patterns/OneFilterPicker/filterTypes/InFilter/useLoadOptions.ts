@@ -1,10 +1,8 @@
 import { useCallback, useEffect, useState } from "react"
-
 import { RecordType, useData, useDataSource } from "@/hooks/datasource"
-
-import { InFilterDefinition } from "."
 import { FilterTypeSchema } from "../types"
 import { InFilterOptionItem, InFilterOptions } from "./types"
+import { InFilterDefinition } from "."
 
 const optionsCache = new Map<string, InFilterOptionItem<unknown>[]>()
 

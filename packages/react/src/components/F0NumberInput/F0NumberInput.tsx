@@ -1,5 +1,4 @@
 import { forwardRef } from "react"
-
 import {
   NumberInputInternal,
   NumberInputInternalProps,

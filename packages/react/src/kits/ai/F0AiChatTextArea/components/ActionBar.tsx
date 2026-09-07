@@ -1,10 +1,8 @@
 import { type ReactNode, type RefObject } from "react"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { Check, Cross, Paperclip } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { type RecorderStatus } from "../useAudioRecorder"
 import { DictationButton } from "./DictationButton"
 import { RecordingWaveform } from "./RecordingWaveform"

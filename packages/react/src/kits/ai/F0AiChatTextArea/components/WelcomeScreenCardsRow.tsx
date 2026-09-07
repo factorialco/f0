@@ -1,5 +1,4 @@
 import { F0CardHorizontal } from "@/experimental/F0CardHorizontal"
-
 import type { F0AiChatWelcomeCard } from "../../F0AiChat/types"
 
 /**

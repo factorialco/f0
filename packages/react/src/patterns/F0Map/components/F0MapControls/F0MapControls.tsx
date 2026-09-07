@@ -1,11 +1,9 @@
 import { forwardRef } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { Add, FitView, Minus, Target } from "@/icons/app"
 import { DataTestIdWrapper } from "@/lib/data-testid"
 import { F0Box } from "@/lib/F0Box"
 import { useI18n } from "@/lib/providers/i18n"
-
 import type { F0MapControlsProps } from "./types"
 
 /**

@@ -10,7 +10,6 @@ import {
   XAxisProps,
   YAxis,
 } from "recharts"
-
 import {
   ChartContainer,
   ChartLegend,
@@ -19,7 +18,6 @@ import {
   ChartTooltipContent,
   LineChartConfig,
 } from "@/ui/chart"
-
 import { usePrivacyMode } from "../../../lib/privacyMode"
 import { getCategoricalColor, getColor } from "../utils/colors"
 import {

@@ -1,19 +1,15 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react"
 import { ControllerRenderProps, FieldValues } from "react-hook-form"
-
-import type { InputFieldStatusType } from "@/components/F0InputField/types"
-
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { F0Icon } from "@/components/F0Icon"
+import type { InputFieldStatusType } from "@/components/F0InputField/types"
 import { AlertCircle, Upload } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { cn, focusRing } from "@/lib/utils"
-
-import type { ResolvedField } from "../types"
-import type { F0FileField, FileEntry, InitialFile } from "./types"
-
 import { useOptionalF0FormContext } from "../../context"
+import type { ResolvedField } from "../types"
 import { FileAttachment } from "./FileAttachment"
+import type { F0FileField, FileEntry, InitialFile } from "./types"
 
 const BARE_CATEGORIES = new Set([
   "image",

@@ -1,5 +1,4 @@
 import { I18nContextType } from "@/lib/providers/i18n"
-
 import { FilterTypeSchema, getFilterType } from "../filterTypes"
 import { FiltersDefinition, FiltersState } from "../types"
 

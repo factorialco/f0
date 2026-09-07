@@ -1,7 +1,5 @@
 import { forwardRef } from "react"
-
 import { experimentalComponent } from "@/lib/experimental"
-
 import { ItemContainer } from "../ItemContainer"
 import type { ItemProps } from "../types"
 import { getInternalAction } from "../utils"

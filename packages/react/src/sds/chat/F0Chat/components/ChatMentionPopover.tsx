@@ -1,12 +1,10 @@
 import { useEffect, useLayoutEffect, useRef } from "react"
-
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0Icon } from "@/components/F0Icon"
 import { People } from "@/icons/app"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
-
 import {
   type MentionCandidate,
   type PopoverPosition,

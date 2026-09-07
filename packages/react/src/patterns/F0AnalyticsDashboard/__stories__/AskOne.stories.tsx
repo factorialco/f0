@@ -1,9 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { useState } from "react"
-
 import { expect, userEvent, waitFor, within } from "storybook/test"
-
 import { F0AiChat, F0AiChatProvider } from "@/kits/ai/F0AiChat"
 import {
   MockAiChatRuntimeProvider,
@@ -12,7 +9,6 @@ import {
   MockConnectedMessagesContainer,
 } from "@/kits/ai/F0AiChat/__stories__/_mock"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
 import { F0AnalyticsDashboard } from "../index"
 import type { DashboardItem } from "../types"
 import { mixedItems } from "./mockDataMixed"

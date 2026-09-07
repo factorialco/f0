@@ -1,11 +1,5 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useCallback, useEffect, useMemo } from "react"
-
-import type { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
-import type { KanbanProps } from "@/ui/Kanban/types"
-
-import { useDataCollectionLanesData } from "@/patterns/OneDataCollection/hooks/useDataCollectionData/useDataCollectionLanesData"
-import { useSelectableLanes } from "@/patterns/OneDataCollection/hooks/useSelectableLanes"
 import {
   InfiniteScrollPaginatedResponse,
   PaginationInfo,
@@ -15,17 +9,19 @@ import { useGroups } from "@/hooks/datasource/useGroups"
 import { useReducedMotion } from "@/lib/a11y"
 import { useIsDev } from "@/lib/providers/user-platafform"
 import { cn } from "@/lib/utils"
+import { useDataCollectionLanesData } from "@/patterns/OneDataCollection/hooks/useDataCollectionData/useDataCollectionLanesData"
+import { useSelectableLanes } from "@/patterns/OneDataCollection/hooks/useSelectableLanes"
+import type { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import { GroupHeader } from "@/ui/GroupHeader/GroupHeader"
 import { KanbanCard } from "@/ui/Kanban/components/KanbanCard"
-
+import type { KanbanProps } from "@/ui/Kanban/types"
+import { ItemActionsDefinition } from "../../../item-actions"
 import type { NavigationFiltersDefinition } from "../../../navigationFilters/types"
 import type {
   GroupingDefinition,
   SortingsDefinition,
   SummariesDefinition,
 } from "../../../types"
-
-import { ItemActionsDefinition } from "../../../item-actions"
 import { KanbanBoard } from "./KanbanBoard"
 import { KanbanCollectionProps } from "./types"
 

@@ -1,7 +1,5 @@
 import { describe, expect, test } from "vitest"
-
 import { effectiveStatusOf as mjsEffectiveStatusOf } from "../../scripts/component-status-build.mjs"
-
 import {
   componentStatusData,
   evaluateComponentStatus,

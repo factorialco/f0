@@ -5,7 +5,6 @@ import {
 import { DropIndicator } from "@atlaskit/pragmatic-drag-and-drop-react-drop-indicator/box"
 import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter"
 import { useEffect, useRef, useState } from "react"
-
 import { CardInternal } from "@/components/F0Card/CardInternal"
 import { F0Link } from "@/components/F0Link"
 import { useDraggable } from "@/lib/dnd/hooks"

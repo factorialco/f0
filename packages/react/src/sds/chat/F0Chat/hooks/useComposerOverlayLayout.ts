@@ -1,5 +1,4 @@
 import { useLayoutEffect, useRef } from "react"
-
 import { CHAT_COMPOSER_HEIGHT_PROPERTY } from "../utils/chat-layout"
 
 const isResizeObserverSizeList = (

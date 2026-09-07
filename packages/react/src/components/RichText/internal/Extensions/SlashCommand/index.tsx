@@ -3,9 +3,7 @@ import { Editor, Extension, ReactRenderer } from "@tiptap/react"
 import { Suggestion } from "@tiptap/suggestion"
 import React from "react"
 import { createRoot, Root } from "react-dom/client"
-
 import { I18nContextType } from "@/lib/providers/i18n"
-
 import { ImageUploadConfig } from "../Image"
 import {
   AIBlockConfig,

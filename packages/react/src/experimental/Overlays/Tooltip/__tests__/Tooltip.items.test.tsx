@@ -1,10 +1,8 @@
+import "@testing-library/jest-dom/vitest"
 import { screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import "@testing-library/jest-dom/vitest"
 import { describe, expect, it } from "vitest"
-
 import { zeroRender as render } from "@/testing/test-utils"
-
 import { TooltipInternal } from "../index"
 
 describe("TooltipInternal with a bulleted list", () => {

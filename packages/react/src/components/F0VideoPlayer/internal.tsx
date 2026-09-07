@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-
 import { F0Icon } from "@/components/F0Icon"
 import { SolidPlay } from "@/icons/app"
 import {
@@ -9,7 +8,6 @@ import {
 } from "@/lib/localized"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
-
 import { Controls } from "./components/Controls"
 import { useAudioDescription } from "./hooks/useAudioDescription"
 import { useFullscreen } from "./hooks/useFullscreen"

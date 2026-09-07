@@ -1,6 +1,5 @@
 import type { heightType } from "@/components/RichText/F0RichTextEditor"
 import type { MentionsConfig } from "@/components/RichText/internal"
-
 import type {
   F0BaseField,
   F0BaseFieldRenderIfFunction,

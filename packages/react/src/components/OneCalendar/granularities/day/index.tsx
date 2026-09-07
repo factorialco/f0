@@ -9,7 +9,6 @@ import {
   startOfDay,
   startOfMonth,
 } from "date-fns"
-
 import { DateRange, DateRangeComplete } from "../../types"
 import {
   formatDate,

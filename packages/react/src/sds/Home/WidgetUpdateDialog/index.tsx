@@ -1,16 +1,14 @@
 import { ReactNode, useEffect, useState } from "react"
-
-import { cn } from "@/lib/utils"
 import { useI18n } from "@/lib/providers/i18n"
+import { cn } from "@/lib/utils"
 import { F0Dialog } from "@/patterns/F0Dialog"
 import { F0Form, useF0Form } from "@/patterns/F0Form"
-
-import { useWidgetDialogLayout, WidgetPreviewPane } from "../WidgetPreview"
 import {
   type FromWidgetParams,
   type WidgetParams,
   type WidgetParamsSchema,
 } from "../slotRenderers"
+import { useWidgetDialogLayout, WidgetPreviewPane } from "../WidgetPreview"
 
 /** The info line for the params in hand — it may be fixed or computed. */
 const resolveInfo = (

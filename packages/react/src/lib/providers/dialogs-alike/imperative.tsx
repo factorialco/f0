@@ -1,7 +1,5 @@
 import { nanoid } from "nanoid"
-
 import { Optional } from "@/lib/typescript-utils/optional"
-
 import { DialogDefinitionProviderItem } from "./internal-types"
 import { dialogsAlikeStore } from "./store"
 import {

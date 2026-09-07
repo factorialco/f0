@@ -3,10 +3,6 @@ import { userEvent } from "@testing-library/user-event"
 import { LayoutGrid } from "lucide-react"
 import { describe, expect, test, vi } from "vitest"
 import { Observable } from "zen-observable-ts"
-
-import type { FiltersDefinition } from "@/patterns/OneFilterPicker"
-
-import { aiTranslations } from "@/kits/ai/F0AiChat"
 import {
   BaseFetchOptions,
   BaseResponse,
@@ -17,13 +13,14 @@ import {
   SortingsState,
   WithGroupId,
 } from "@/hooks/datasource"
+import { aiTranslations } from "@/kits/ai/F0AiChat"
 import { PromiseState } from "@/lib/promise-to-observable"
 import { defaultTranslations, I18nProvider } from "@/lib/providers/i18n"
+import type { FiltersDefinition } from "@/patterns/OneFilterPicker"
 import {
   zeroRender as render,
   zeroRenderHook as renderHook,
 } from "@/testing/test-utils"
-
 import { useDataCollectionData } from "../hooks/useDataCollectionData/useDataCollectionData"
 import {
   DataCollectionSource,

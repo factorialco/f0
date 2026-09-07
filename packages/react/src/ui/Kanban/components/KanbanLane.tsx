@@ -8,15 +8,11 @@ import {
   useRef,
   useState,
 } from "react"
-
 import type { RecordType } from "@/hooks/datasource"
-
 import { useDndEvents, useDroppableList } from "@/lib/dnd/hooks"
 import { cn } from "@/lib/utils"
-
-import type { LaneProps } from "../../Lane/types"
-
 import { Lane } from "../../Lane"
+import type { LaneProps } from "../../Lane/types"
 import { KanbanOnMoveParam } from "../types"
 import {
   findTypeOfDropForLane,

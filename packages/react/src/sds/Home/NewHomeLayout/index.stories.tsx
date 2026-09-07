@@ -1,3 +1,4 @@
+import type { Meta, StoryObj } from "@storybook/react-vite"
 import {
   type ComponentProps,
   useEffect,
@@ -5,13 +6,7 @@ import {
   useState,
   type ReactNode,
 } from "react"
-
-import type { Meta, StoryObj } from "@storybook/react-vite"
 import { z } from "zod"
-
-import { createDataSourceDefinition } from "@/hooks/datasource"
-import { f0FormField } from "@/patterns/F0Form"
-
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { F0Button } from "@/components/F0Button"
@@ -20,14 +15,9 @@ import { F0Heading } from "@/components/F0Heading"
 import { F0Icon, type IconType } from "@/components/F0Icon"
 import { OneEmptyState } from "@/components/OneEmptyState/OneEmptyState"
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
+import { defineStepByStepCoachmarkGuidance } from "@/experimental/Overlays/F0Coachmark"
+import { createDataSourceDefinition } from "@/hooks/datasource"
 import { One } from "@/icons/ai"
-import {
-  MockAiChatRuntimeProvider,
-  MockConnectedChatHeader,
-  MockConnectedChatInput,
-  MockConnectedMessagesContainer,
-} from "@/kits/ai/F0AiChat/__stories__/_mock"
-import ApplicationFrameStories from "@/patterns/ApplicationFrame/index.stories"
 import {
   Building,
   Calendar,
@@ -53,11 +43,26 @@ import {
   Target,
   Timer,
 } from "@/icons/app"
-import { defineStepByStepCoachmarkGuidance } from "@/experimental/Overlays/F0Coachmark"
-import { F0AiChatTextArea } from "@/kits/ai/F0AiChatTextArea"
+import {
+  MockAiChatRuntimeProvider,
+  MockConnectedChatHeader,
+  MockConnectedChatInput,
+  MockConnectedMessagesContainer,
+} from "@/kits/ai/F0AiChat/__stories__/_mock"
 import { type WelcomeScreenSuggestion } from "@/kits/ai/F0AiChat/types"
+import { F0AiChatTextArea } from "@/kits/ai/F0AiChatTextArea"
 import { F0Box } from "@/lib/F0Box"
-
+import { ApplicationFrame } from "@/patterns/ApplicationFrame"
+import ApplicationFrameStories from "@/patterns/ApplicationFrame/index.stories"
+import { F0CarouselDialog } from "@/patterns/F0CarouselDialog"
+import { f0FormField } from "@/patterns/F0Form"
+import { SidebarFooter } from "@/patterns/Navigation/Sidebar/Footer"
+import * as SidebarFooterStories from "@/patterns/Navigation/Sidebar/Footer/index.stories"
+import { SidebarHeader } from "@/patterns/Navigation/Sidebar/Header"
+import * as SidebarHeaderStories from "@/patterns/Navigation/Sidebar/Header/index.stories"
+import { Menu as SidebarMenu } from "@/patterns/Navigation/Sidebar/Menu"
+import * as SidebarMenuStories from "@/patterns/Navigation/Sidebar/Menu/index.stories"
+import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
 import {
   ClockInControls,
   type ClockInProject,
@@ -78,18 +83,8 @@ import {
   type SlotRenderers,
   widgetTitle,
 } from "../slotRenderers"
-import { type WidgetContainerSide } from "../WidgetContainer"
 import { WidgetCatalog, type WidgetCatalogGroup } from "../WidgetCatalog"
-import { F0CarouselDialog } from "@/patterns/F0CarouselDialog"
-import { ApplicationFrame } from "@/patterns/ApplicationFrame"
-import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
-import { SidebarFooter } from "@/patterns/Navigation/Sidebar/Footer"
-import * as SidebarFooterStories from "@/patterns/Navigation/Sidebar/Footer/index.stories"
-import { SidebarHeader } from "@/patterns/Navigation/Sidebar/Header"
-import * as SidebarHeaderStories from "@/patterns/Navigation/Sidebar/Header/index.stories"
-import { Menu as SidebarMenu } from "@/patterns/Navigation/Sidebar/Menu"
-import * as SidebarMenuStories from "@/patterns/Navigation/Sidebar/Menu/index.stories"
-
+import { type WidgetContainerSide } from "../WidgetContainer"
 import { NewHomeLayout } from "./index"
 
 /* ============================ guided walkthrough =========================== */

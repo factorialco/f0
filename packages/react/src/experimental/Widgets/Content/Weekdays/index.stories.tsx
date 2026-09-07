@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { Weekdays } from "./index"
 
 const meta: Meta = {

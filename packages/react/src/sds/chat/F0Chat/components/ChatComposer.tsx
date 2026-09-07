@@ -11,7 +11,6 @@ import {
   useRef,
   useState,
 } from "react"
-
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { ArrowUp, Check, Cross, Microphone, Paperclip } from "@/icons/app"
@@ -22,18 +21,17 @@ import {
 } from "@/kits/ai/F0AiChatTextArea/useAudioRecorder"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { buildHighlightSegments } from "../hooks/highlight-utils"
-import {
-  replaceClosedEmojiShortcode,
-  useEmojiAutocomplete,
-} from "../hooks/useEmojiAutocomplete"
 import {
   type ComposerSnapshot,
   useComposerHistory,
 } from "../hooks/useComposerHistory"
-import { MENTION_EVERYONE_ID, useMentions } from "../hooks/useMentions"
 import { useEditLastOwnMessage } from "../hooks/useEditLastOwnMessage"
+import {
+  replaceClosedEmojiShortcode,
+  useEmojiAutocomplete,
+} from "../hooks/useEmojiAutocomplete"
+import { MENTION_EVERYONE_ID, useMentions } from "../hooks/useMentions"
 import { useTransientError } from "../hooks/useTransientError"
 import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
 import {
@@ -61,8 +59,8 @@ import {
 } from "../utils/chat-motion"
 import { ChatComposerAttachmentPreview } from "./ChatComposerAttachmentPreview"
 import { ChatEditChip } from "./ChatEditChip"
-import { ChatEmojiPickerButton } from "./ChatEmojiPickerButton"
 import { ChatEmojiAutocomplete } from "./ChatEmojiAutocomplete"
+import { ChatEmojiPickerButton } from "./ChatEmojiPickerButton"
 import {
   ChatMentionPopover,
   getChatMentionOptionId,

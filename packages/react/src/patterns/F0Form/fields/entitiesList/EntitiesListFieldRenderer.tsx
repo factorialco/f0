@@ -6,30 +6,20 @@ import {
   useFormContext,
 } from "react-hook-form"
 import { z, ZodTypeAny } from "zod"
-
-import type { F0FormEditableTableColumn } from "@/experimental/F0FormEditableTable"
-
 import { F0Button } from "@/components/F0Button"
+import type { F0FormEditableTableColumn } from "@/experimental/F0FormEditableTable"
 import { F0FormEditableTable } from "@/experimental/F0FormEditableTable"
 import { Add } from "@/icons/app"
 import { dialogs } from "@/lib/providers/dialogs-alike"
 import type { ConfirmDialogOptions } from "@/lib/providers/dialogs-alike/types"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
+import { useF0FormDefinition } from "@/patterns/F0WizardForm/useF0FormDefinition"
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/ui/tooltip"
-import { useF0FormDefinition } from "@/patterns/F0WizardForm/useF0FormDefinition"
-
-import type { ResolvedField } from "../types"
-import type { F0EntitiesListField, EntitiesListItem } from "./types"
-
-import type { EntitiesListViewAction } from "./EntitiesListView"
-
-import { EntitiesListView } from "./EntitiesListView"
-
 import {
   f0FormField,
   getF0Config,
@@ -38,7 +28,11 @@ import {
 } from "../../f0Schema"
 import { openFormDialog } from "../../openFormDialog"
 import { isFieldRequired } from "../schema"
+import type { ResolvedField } from "../types"
+import type { EntitiesListViewAction } from "./EntitiesListView"
+import { EntitiesListView } from "./EntitiesListView"
 import { resolveEntitiesListCell } from "./resolveCell"
+import type { F0EntitiesListField, EntitiesListItem } from "./types"
 
 /**
  * With more than this many item-schema properties, adding and editing happen

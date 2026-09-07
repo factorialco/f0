@@ -1,7 +1,5 @@
 import { assertType } from "vitest"
-
 import { PalmTree } from "@/icons/app"
-
 import { type HomeWidgetSlot, listSlot } from "./slotRenderers"
 
 /**

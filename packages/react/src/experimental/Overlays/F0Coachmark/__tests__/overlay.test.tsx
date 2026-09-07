@@ -1,13 +1,11 @@
 import { userEvent } from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import {
   act,
   screen,
   waitFor,
   zeroRender as render,
 } from "@/testing/test-utils"
-
 import { CoachmarkProvider } from "../CoachmarkProvider"
 import { coachmarks } from "../imperative"
 import type { CoachmarkEnd, CoachmarkOptions } from "../types"

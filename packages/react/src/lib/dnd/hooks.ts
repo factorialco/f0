@@ -1,8 +1,6 @@
 import { useEffect } from "react"
-
-import type { DragPayload } from "./types"
-
 import { useDndContextOptional } from "./context"
+import type { DragPayload } from "./types"
 
 export function useDraggable<T = unknown>(args: {
   ref: React.RefObject<HTMLElement>

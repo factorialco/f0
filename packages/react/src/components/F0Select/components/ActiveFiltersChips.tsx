@@ -1,16 +1,14 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useEffect, useState } from "react"
-
 import { Chip } from "@/components/OneChip"
 import { FiltersDefinition, FiltersState } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
-import { ScrollArea } from "@/ui/scrollarea"
-
 import {
   FilterDefinition,
   FilterTypeKey,
   filterTypes,
 } from "@/patterns/OneFilterPicker/filterTypes/filters"
+import { ScrollArea } from "@/ui/scrollarea"
 
 type ActiveFiltersChipsProps<Filters extends FiltersDefinition> = {
   filters: Filters

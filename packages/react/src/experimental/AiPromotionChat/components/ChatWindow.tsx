@@ -1,6 +1,5 @@
 import { AnimatePresence, motion } from "motion/react"
 import type { ReactNode } from "react"
-
 import { useAutoClear } from "../hooks/useAutoClear"
 import { useAiPromotionChat } from "../providers/AiPromotionChatStateProvider"
 

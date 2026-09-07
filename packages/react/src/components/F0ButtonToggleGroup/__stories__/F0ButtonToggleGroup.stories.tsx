@@ -1,18 +1,14 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { useState } from "react"
 import { expect, within } from "storybook/test"
-
 import { buttonToggleVariants } from "@/components/F0ButtonToggle"
 import { Archive, Delete, Microphone, MicrophoneNegative } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
+import { buttonToggleGroupSizes, F0ButtonToggleGroup } from "../index"
 import type {
   F0ButtonToggleGroupItem,
   F0ButtonToggleGroupProps,
 } from "../types"
-
-import { buttonToggleGroupSizes, F0ButtonToggleGroup } from "../index"
 
 const meta = {
   title: "Button/ButtonToggleGroup",
