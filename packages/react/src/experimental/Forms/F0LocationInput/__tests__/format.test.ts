@@ -1,0 +1,72 @@
+import { describe, expect, it } from "vitest"
+
+import {
+  formatLocationValue,
+  invalidateResolution,
+  isLocationValueEmpty,
+  isResolvedValue,
+} from "../lib/format"
+
+const resolved = {
+  formatted: "Carrer de Colón 12, 08001 Barcelona, Spain",
+  addressLine1: "Carrer de Colón 12",
+  city: "Barcelona",
+  postalCode: "08001",
+  state: "Catalonia",
+  country: "es" as const,
+  placeId: "place-1",
+  latitude: 41.38,
+  longitude: 2.17,
+  timezone: "Europe/Madrid",
+}
+
+describe("formatLocationValue", () => {
+  it("joins the typed parts with postal code and city on one segment", () => {
+    expect(formatLocationValue(resolved, "Spain")).toBe(
+      "Carrer de Colón 12, 08001 Barcelona, Catalonia, Spain"
+    )
+  })
+
+  it("skips empty and whitespace-only parts", () => {
+    expect(
+      formatLocationValue({ addressLine1: " Main St ", city: "  " }, undefined)
+    ).toBe("Main St")
+  })
+
+  it("returns undefined when nothing is set", () => {
+    expect(formatLocationValue({})).toBeUndefined()
+  })
+})
+
+describe("invalidateResolution", () => {
+  it("drops place id, coordinates and timezone but keeps the text", () => {
+    expect(invalidateResolution(resolved)).toEqual({
+      formatted: resolved.formatted,
+      addressLine1: resolved.addressLine1,
+      city: resolved.city,
+      postalCode: resolved.postalCode,
+      state: resolved.state,
+      country: "es",
+    })
+  })
+})
+
+describe("isLocationValueEmpty", () => {
+  it("is empty for undefined and for blank parts", () => {
+    expect(isLocationValueEmpty(undefined)).toBe(true)
+    expect(isLocationValueEmpty({ addressLine1: "  ", city: "" })).toBe(true)
+  })
+
+  it("is not empty when a country is selected", () => {
+    expect(isLocationValueEmpty({ country: "es" })).toBe(false)
+  })
+})
+
+describe("isResolvedValue", () => {
+  it("requires a place id and both coordinates", () => {
+    expect(isResolvedValue(resolved)).toBe(true)
+    expect(isResolvedValue({ ...resolved, latitude: undefined })).toBe(false)
+    expect(isResolvedValue(invalidateResolution(resolved))).toBe(false)
+    expect(isResolvedValue(undefined)).toBe(false)
+  })
+})
