@@ -1,4 +1,5 @@
 import { F0TextInput } from "@/components/F0TextInput"
+import { cn } from "@/lib/utils"
 
 import type { EditableLocationPart } from "../internal-types"
 import type {
@@ -19,8 +20,8 @@ type Props = {
 }
 
 /**
- * City and state / region share a row; the postal code takes its own, so it
- * never fights a long region name for width.
+ * City, state / region and postal code share one row; only address line 2
+ * takes the full width above them.
  */
 export const AddressParts = ({
   fields,
@@ -45,24 +46,24 @@ export const AddressParts = ({
     />
   )
 
-  const rowParts = (["city", "state"] as const).filter((key) => fields.has(key))
+  const rowParts = (["city", "state", "postalCode"] as const).filter((key) =>
+    fields.has(key)
+  )
+  // Tailwind needs the column count as a literal class
+  const rowColumns = {
+    1: "sm:grid-cols-1",
+    2: "sm:grid-cols-2",
+    3: "sm:grid-cols-3",
+  }[rowParts.length]
 
   return (
     <>
       {fields.has("addressLine2") && part("addressLine2")}
       {rowParts.length > 0 && (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          {rowParts.map((key) => (
-            <div
-              key={key}
-              className={rowParts.length === 1 ? "sm:col-span-2" : undefined}
-            >
-              {part(key)}
-            </div>
-          ))}
+        <div className={cn("grid grid-cols-1 gap-3", rowColumns)}>
+          {rowParts.map(part)}
         </div>
       )}
-      {fields.has("postalCode") && part("postalCode")}
     </>
   )
 }
