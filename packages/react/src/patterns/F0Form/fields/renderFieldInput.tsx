@@ -11,6 +11,7 @@ import { DurationFieldRenderer } from "./duration/DurationFieldRenderer"
 import { EntitiesListFieldRenderer } from "./entitiesList/EntitiesListFieldRenderer"
 import { FileFieldRenderer } from "./file/FileFieldRenderer"
 import type { InitialFile } from "./file/types"
+import { LocationFieldRenderer } from "./location/LocationFieldRenderer"
 import { NumberFieldRenderer } from "./number/NumberFieldRenderer"
 import { PeriodFieldRenderer } from "./period/PeriodFieldRenderer"
 import { PhoneFieldRenderer } from "./phone/PhoneFieldRenderer"
@@ -204,6 +205,15 @@ export function renderFieldInput({
     case "phone":
       return (
         <PhoneFieldRenderer
+          field={{ ...field, disabled: isDisabled }}
+          formField={formField}
+          {...errorAndLoadingProps}
+          status={visualStatus}
+        />
+      )
+    case "location":
+      return (
+        <LocationFieldRenderer
           field={{ ...field, disabled: isDisabled }}
           formField={formField}
           {...errorAndLoadingProps}
