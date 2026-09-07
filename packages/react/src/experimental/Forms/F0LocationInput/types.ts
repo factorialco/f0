@@ -38,7 +38,7 @@ export type F0LocationInputValue = {
   addressLine1?: string
   addressLine2?: string
   city?: string
-  /** State, province or region, as free text */
+  /** Region, state or province, as free text */
   state?: string
   postalCode?: string
   country?: CountryCode
