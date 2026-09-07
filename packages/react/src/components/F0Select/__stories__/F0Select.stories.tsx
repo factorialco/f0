@@ -1391,9 +1391,9 @@ export const MultipleSelectAllWithFilters: Story = {
  * the dropdown and filters it; the selected item is drawn where the text goes
  * until the user types over it.
  *
- * Keys: ArrowDown or Enter makes the first option active, and the option takes
- * the Enter that selects it. The arrow closes the list again, since a field
- * you type in cannot toggle on click.
+ * Keys: the caret never leaves the field, so every text key keeps working.
+ * The arrows move the active option, Enter takes it, and Escape or the arrow
+ * glyph closes the list — a field you type in cannot toggle on click.
  */
 export const SearchInTheTrigger: Story = {
   args: {
@@ -1425,9 +1425,8 @@ export const SearchInTheTrigger: Story = {
     await waitFor(async () => expect(body.getByRole("combobox")).toBe(trigger))
 
     /**
-     * Generous waits: the query is debounced, the dropdown's own open is
-     * debounced after that, and the list is virtualized, so the filtered rows
-     * are several beats behind the last keystroke.
+     * The query applies on the keystroke, but the list is virtualized behind
+     * the dropdown's entrance animation, so the rows still arrive a beat late.
      */
     await waitFor(
       async () => {
@@ -1438,17 +1437,14 @@ export const SearchInTheTrigger: Story = {
       { timeout: 5000 }
     )
 
-    // The field never commits a row on the user's behalf: the keys make one
-    // active, and the option takes the Enter that selects it.
-    await userEvent.keyboard("{ArrowDown}")
-    await waitFor(
-      async () =>
-        expect(canvasElement.ownerDocument.activeElement).toHaveAttribute(
-          "role",
-          "option"
-        ),
-      { timeout: 5000 }
+    /**
+     * The active option is named on the FIELD rather than focused, which is
+     * what lets the caret stay put while the arrows walk the list.
+     */
+    await waitFor(async () =>
+      expect(trigger).toHaveAttribute("aria-activedescendant")
     )
+    expect(canvasElement.ownerDocument.activeElement).toBe(trigger)
   },
 }
 

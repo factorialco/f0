@@ -235,6 +235,20 @@ const F0SelectComponent = forwardRef(function Select<
   type ActualRecordType = ResolvedRecordType<R>
 
   const [openLocal, setOpenLocal] = useState(open)
+
+  /**
+   * The keyboard model for a field that IS the search box.
+   *
+   * Focus never leaves the input, so every text key keeps working — Home, End,
+   * the arrows within the word, backspace. The list is driven from here
+   * instead: the arrows move an ACTIVE option, `aria-activedescendant` names
+   * it for a screen reader, and Enter takes it.
+   */
+  const [activeValue, setActiveValue] = useState<string | undefined>(undefined)
+  const optionIdFor = useCallback(
+    (value: string) => `${id}-option-${value}`,
+    [id]
+  )
   // Holds whichever element the trigger renders: the inline variant's button,
   // or the field chrome's root.
   const inlineTriggerRef = useRef<HTMLElement>(null)
@@ -947,6 +961,27 @@ const F0SelectComponent = forwardRef(function Select<
    * Typing has nothing to race: the wait would just be 100ms of nothing
    * happening after the first character.
    */
+  /**
+   * The arrows and Enter act on the LIST, which is assembled further down (it
+   * needs the fetched records), so they are reached through a ref rather than
+   * by moving the whole keyboard handler down there.
+   */
+  const listNavRef = useRef<{
+    move: (direction: "next" | "previous") => void
+    take: () => boolean
+  }>({
+    move: () => {},
+    take: () => false,
+  })
+  const moveActiveThroughRef = useCallback(
+    (direction: "next" | "previous") => listNavRef.current.move(direction),
+    []
+  )
+  const selectActiveThroughRef = useCallback(
+    () => listNavRef.current.take(),
+    []
+  )
+
   const openNow = useCallback(() => {
     debouncedHandleChangeOpenLocal.cancel()
     applyOpenChangeRef.current(true)
@@ -964,6 +999,8 @@ const F0SelectComponent = forwardRef(function Select<
     enabled: inlineSearch,
     open: !!openLocal,
     onOpen: openNow,
+    onActiveMove: moveActiveThroughRef,
+    onSelectActive: selectActiveThroughRef,
     onSearchChange: onSearchChangeLocal,
     // Clearing the query means NO query, not an empty one: an empty string is
     // a new dataset identity, and a "select all" is scoped to the query it was
@@ -1102,6 +1139,14 @@ const F0SelectComponent = forwardRef(function Select<
                 <SelectItem
                   key={String(mappedOption.value)}
                   item={mappedOption}
+                  optionId={
+                    inlineSearch
+                      ? optionIdFor(String(mappedOption.value))
+                      : undefined
+                  }
+                  active={
+                    inlineSearch && activeValue === String(mappedOption.value)
+                  }
                 />
               ),
               // Convert to string to ensure consistent comparison with selectedItemsValues
@@ -1110,7 +1155,7 @@ const F0SelectComponent = forwardRef(function Select<
             }
       })
     },
-    [optionMapper]
+    [optionMapper, inlineSearch, activeValue, optionIdFor]
   )
 
   const items: VirtualItem[] = useMemo(() => {
@@ -1167,6 +1212,7 @@ const F0SelectComponent = forwardRef(function Select<
   const handleScrollBottom = () => {
     loadMore()
   }
+
   const i18n = useI18n()
 
   /**
@@ -1203,6 +1249,83 @@ const F0SelectComponent = forwardRef(function Select<
         multiple: false as const,
         as: asList ? ("list" as const) : undefined,
       } as const)
+
+  /**
+   * The values the arrows walk, in the order they are drawn. Separators and
+   * group headers are not options, and a disabled row cannot be taken.
+   */
+  const navigableValues = useMemo(
+    () =>
+      inlineSearch
+        ? items
+            .filter((item) => item.type === "item" && item.value !== undefined)
+            .map((item) => item.value as string)
+        : [],
+    [inlineSearch, items]
+  )
+
+  const navigableKey = navigableValues.join("\u0000")
+
+  /**
+   * The first option is active as soon as there is a list, and again whenever
+   * the list changes under it. Enter always has a target, and the target is
+   * always one the user can see and hear.
+   */
+  useEffect(() => {
+    if (!inlineSearch) return
+    if (!openLocal) {
+      setActiveValue(undefined)
+      return
+    }
+    setActiveValue((current) =>
+      current && navigableValues.includes(current)
+        ? current
+        : navigableValues[0]
+    )
+    // navigableKey stands in for the list's identity
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inlineSearch, openLocal, navigableKey])
+
+  const moveActive = useCallback(
+    (direction: "next" | "previous") => {
+      setActiveValue((current) => {
+        if (navigableValues.length === 0) return undefined
+        const at = current ? navigableValues.indexOf(current) : -1
+        const next =
+          direction === "next"
+            ? Math.min(at + 1, navigableValues.length - 1)
+            : Math.max(at - 1, 0)
+        return navigableValues[at === -1 ? 0 : next]
+      })
+    },
+    [navigableValues]
+  )
+
+  /** Takes the active option: what Enter does. */
+  const selectActive = useCallback(() => {
+    if (!activeValue) return false
+    const isSelected = localValue.includes(activeValue)
+    hasUserInteracted.current = true
+    onItemCheckChange(activeValue, multiple ? !isSelected : true)
+    if (!multiple) handleChangeOpenLocal(false)
+    return true
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeValue, localValue, multiple, onItemCheckChange])
+
+  useEffect(() => {
+    listNavRef.current = { move: moveActive, take: selectActive }
+  }, [moveActive, selectActive])
+
+  /**
+   * A virtualized list only renders what is in view, so the active row has to
+   * be brought into it — the field cannot rely on focus doing it.
+   */
+  useEffect(() => {
+    if (!inlineSearch || !activeValue) return
+    document
+      .getElementById(optionIdFor(activeValue))
+      ?.scrollIntoView({ block: "nearest" })
+  }, [activeValue, inlineSearch, optionIdFor])
 
   const handleCreate = onCreate
     ? (value: string) => {
@@ -1366,10 +1489,14 @@ const F0SelectComponent = forwardRef(function Select<
       }
       allSelected={selectedState.allSelected}
       selection={getDisplayItemsForSelection}
-      // The field's own icon already occupies the trigger's glyph slot, and the
-      // two are drawn in different places — showing both put two icons 4px
-      // apart on one trigger. Options keep their icons for the rows regardless.
-      hideItemIcon={!!icon}
+      /**
+       * No glyph beside the caret: a field you write in reads as text, and the
+       * selected item's icon there competes with the query that replaces it.
+       * (For a plain trigger the reason is different but the effect is the
+       * same when the field carries its own `icon`: two glyphs 4px apart.)
+       * Options keep their icons for the rows either way.
+       */
+      hideItemIcon={inlineSearch || !!icon}
     />
   )
 
@@ -1534,15 +1661,28 @@ const F0SelectComponent = forwardRef(function Select<
               }
               isEmpty={(value) =>
                 inlineSearch
-                  ? // Empty means "nothing to clear": no query AND nothing
-                    // selected, or the clear button would vanish the moment a
-                    // selection is shown with no text typed.
-                    !value && !hasSelection
+                  ? // The placeholder follows the TEXT, so it goes as soon as
+                    // the user starts writing. What can be cleared is a
+                    // different question, answered by `canClear` below.
+                    !value
                   : multiple
                     ? !value || +(value ?? 0) === 0
                     : !value
               }
+              // The button clears the SELECTION, so it is there exactly when
+              // there is one, whether or not anything is typed.
+              canClear={inlineSearch ? hasSelection : undefined}
               onChange={inlineSearch ? handleSearchDraftChange : undefined}
+              // The button clears the selection. What the user typed is
+              // theirs, and backspace is right there.
+              clearKeepsText={inlineSearch}
+              aria-activedescendant={
+                // Names the option the arrows are on, which is the only way to
+                // announce it while the caret stays in the field.
+                inlineSearch && openLocal && activeValue
+                  ? optionIdFor(activeValue)
+                  : undefined
+              }
               aria-describedby={
                 // Only while the node it points at is rendered: the slot goes
                 // as soon as there is text, and a dangling reference is an
@@ -1570,12 +1710,6 @@ const F0SelectComponent = forwardRef(function Select<
                 ) : undefined
               }
               onClear={() => {
-                // One button, two jobs, in the order the user sees them: the
-                // query sits on top of the selection, so it goes first.
-                if (inlineSearch && searchDraft) {
-                  clearSearchDraft()
-                  return
-                }
                 hasUserInteracted.current = true
                 clearSelection()
                 // Clear the cache when clearing selection
@@ -1648,7 +1782,7 @@ const F0SelectComponent = forwardRef(function Select<
                   // of props onto its child, and a key handler is not one of
                   // them.
                   onKeyDown={handleSearchKeyDown}
-                  className="w-full shrink bg-transparent placeholder:-z-10 disabled:cursor-not-allowed"
+                  className="w-full shrink cursor-text bg-transparent placeholder:-z-10 disabled:cursor-not-allowed"
                 />
               ) : (
                 <button

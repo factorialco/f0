@@ -1,19 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 
-/** Same wait as the popover search box, so both feel identical to type in. */
-const SEARCH_DEBOUNCE_MS = 400
-
-/**
- * How long a key that reaches into the list waits for the list to catch up.
- *
- * A keystroke flushes the pending query, but the rows are re-rendered (and for
- * a remote source, refetched) after that, so the option to focus does not
- * exist yet in the same tick. These bound the wait rather than guessing one
- * delay: give up quietly if the list never settles.
- */
-const OPTION_POLL_INTERVAL_MS = 16
-const OPTION_POLL_TIMEOUT_MS = 600
-
 type UseTriggerSearchOptions = {
   /** False for every select whose trigger is not the search field. */
   enabled: boolean
@@ -28,6 +14,10 @@ type UseTriggerSearchOptions = {
   onSearchChange: (value: string) => void
   /** Clears the query, rather than setting it to an empty one. */
   onSearchReset: () => void
+  /** Moves the list's active option. Focus stays in the field. */
+  onActiveMove: (direction: "next" | "previous") => void
+  /** Takes the active option. Returns false when there was nothing to take. */
+  onSelectActive: () => boolean
   /** The field's root element, for deciding where focus came from. */
   triggerRef: React.RefObject<HTMLElement | null>
 }
@@ -50,22 +40,32 @@ export const useTriggerSearch = ({
   onOpen,
   onSearchChange,
   onSearchReset,
+  onActiveMove,
+  onSelectActive,
   triggerRef,
 }: UseTriggerSearchOptions) => {
   const [draft, setDraft] = useState("")
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const pendingValueRef = useRef<string | null>(null)
-  const pollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
   // Read the callbacks through refs so the returned handlers stay stable: they
   // are cloned onto the input by the field chrome, and a new identity on every
   // keystroke would remount it.
-  const callbacksRef = useRef({ onSearchChange, onOpen, onSearchReset })
+  const callbacksRef = useRef({
+    onSearchChange,
+    onOpen,
+    onSearchReset,
+    onActiveMove,
+    onSelectActive,
+  })
   useEffect(() => {
-    callbacksRef.current = { onSearchChange, onOpen, onSearchReset }
-  }, [onOpen, onSearchChange, onSearchReset])
+    callbacksRef.current = {
+      onSearchChange,
+      onOpen,
+      onSearchReset,
+      onActiveMove,
+      onSelectActive,
+    }
+  }, [onActiveMove, onOpen, onSearchChange, onSearchReset, onSelectActive])
 
   /**
    * Whether the list is open, as far as the KEYS are concerned: `open` is a
@@ -83,72 +83,30 @@ export const useTriggerSearch = ({
     callbacksRef.current.onOpen()
   }, [])
 
-  const cancelPending = useCallback(() => {
-    if (timerRef.current !== null) {
-      clearTimeout(timerRef.current)
-      timerRef.current = null
-    }
-    pendingValueRef.current = null
-  }, [])
-
-  const cancelPolling = useCallback(() => {
-    if (pollTimerRef.current !== null) {
-      clearTimeout(pollTimerRef.current)
-      pollTimerRef.current = null
-    }
-  }, [])
-
-  // A trailing timer must not fire against an unmounted component (in tests,
-  // after jsdom is torn down).
-  useEffect(() => {
-    return () => {
-      cancelPending()
-      cancelPolling()
-    }
-  }, [cancelPending, cancelPolling])
-
-  const emit = useCallback(
-    (value: string) => {
-      cancelPending()
-      pendingValueRef.current = value
-      timerRef.current = setTimeout(() => {
-        timerRef.current = null
-        pendingValueRef.current = null
-        callbacksRef.current.onSearchChange(value)
-      }, SEARCH_DEBOUNCE_MS)
-    },
-    [cancelPending]
-  )
-
-  /** Sends the query now, so what happens next happens to the right list. */
-  const flushPendingSearch = useCallback(() => {
-    const pending = pendingValueRef.current
-    cancelPending()
-    if (pending !== null) {
-      callbacksRef.current.onSearchChange(pending)
-      return true
-    }
-    return false
-  }, [cancelPending])
-
+  /**
+   * The query goes out on the keystroke, with no wait of its own.
+   *
+   * Static options filter in the same render, so any wait is just the list
+   * lagging behind the text. A `source` still has the data layer's own
+   * debounce in front of the network, which is where that belongs.
+   */
   const handleChange = useCallback(
     (value: string) => {
       setDraft(value)
-      emit(value)
+      callbacksRef.current.onSearchChange(value)
       // Typing is how you open it. Clearing is not: the clear button routes
       // through the same change handler with an empty value.
       if (value && !requestedOpenRef.current) {
         requestOpen()
       }
     },
-    [emit, requestOpen]
+    [requestOpen]
   )
 
   const clearDraft = useCallback(() => {
     setDraft("")
-    cancelPending()
     callbacksRef.current.onSearchReset()
-  }, [cancelPending])
+  }, [])
 
   const focusInput = useCallback(() => {
     inputRef.current?.focus({ preventScroll: true })
@@ -171,8 +129,6 @@ export const useTriggerSearch = ({
     if (!enabled || !wasOpen || open) return
 
     setDraft("")
-    cancelPending()
-    cancelPolling()
     callbacksRef.current.onSearchReset()
 
     const active = document.activeElement
@@ -184,55 +140,13 @@ export const useTriggerSearch = ({
     if (!focusLeftTheSelect) {
       inputRef.current?.focus({ preventScroll: true })
     }
-  }, [cancelPending, cancelPolling, enabled, open, triggerRef])
+  }, [enabled, open, triggerRef])
 
   /**
-   * The options live in a portal, so they are reachable only through the
-   * `aria-controls` the select primitive puts on this field.
+   * Keys that belong to the LIST, and only those. Everything else is text
+   * editing and is left to the input: the caret keys, Home, End, backspace,
+   * and every printable character.
    */
-  const getEnabledOptions = useCallback((): HTMLElement[] => {
-    const contentId = inputRef.current?.getAttribute("aria-controls")
-    const content = contentId ? document.getElementById(contentId) : null
-    return content
-      ? Array.from(
-          content.querySelectorAll<HTMLElement>(
-            '[role="option"]:not([aria-disabled="true"])'
-          )
-        )
-      : []
-  }, [])
-
-  /**
-   * Moves focus onto the first or last option ONCE THE LIST IS THE ONE THE
-   * QUERY ASKED FOR — never onto whatever row happens to be rendered while the
-   * query is still on its way, which would hand the user a different option
-   * from the one they are looking at.
-   */
-  const focusOption = useCallback(
-    (edge: "first" | "last") => {
-      cancelPolling()
-      const startedAt = Date.now()
-
-      const attempt = () => {
-        pollTimerRef.current = null
-        const options = getEnabledOptions()
-        const target =
-          edge === "last" ? options[options.length - 1] : options[0]
-
-        if (target) {
-          target.focus({ preventScroll: true })
-          return
-        }
-        if (Date.now() - startedAt >= OPTION_POLL_TIMEOUT_MS) return
-
-        pollTimerRef.current = setTimeout(attempt, OPTION_POLL_INTERVAL_MS)
-      }
-
-      pollTimerRef.current = setTimeout(attempt, OPTION_POLL_INTERVAL_MS)
-    },
-    [cancelPolling, getEnabledOptions]
-  )
-
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
       if (event.defaultPrevented) return
@@ -243,30 +157,23 @@ export const useTriggerSearch = ({
 
       if (!isArrowDown && !isArrowUp && !isEnter) return
 
-      // Every one of these keys reaches into the list, so the list has to be
-      // the one the current text asked for first.
-      flushPendingSearch()
-
       if (!requestedOpenRef.current) {
         event.preventDefault()
         requestOpen()
-        focusOption(isArrowUp ? "last" : "first")
         return
       }
 
-      /**
-       * Enter does NOT pick an option. It makes one active, the same as the
-       * arrows, and the option itself takes the next Enter.
-       *
-       * Selecting the first row straight from the field would commit an option
-       * whose name was never announced: focus is in the input, so a screen
-       * reader has read no row. Announcing it instead needs the active option
-       * exposed on the field, which the list primitive cannot do yet.
-       */
+      if (isEnter) {
+        // Consumed only if it took something, so a form can still be
+        // submitted from a field whose list has nothing in it.
+        if (callbacksRef.current.onSelectActive()) event.preventDefault()
+        return
+      }
+
       event.preventDefault()
-      focusOption(isArrowUp ? "last" : "first")
+      callbacksRef.current.onActiveMove(isArrowDown ? "next" : "previous")
     },
-    [flushPendingSearch, focusOption, requestOpen]
+    [requestOpen]
   )
 
   return {

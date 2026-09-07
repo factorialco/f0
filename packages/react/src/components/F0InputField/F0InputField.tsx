@@ -171,6 +171,24 @@ export type InputFieldProps<T> = {
    * placeholder while shown.
    */
   valueSlot?: React.ReactNode
+  /**
+   * Leaves the typed text alone when the clear button is pressed, so `onClear`
+   * is the whole behavior.
+   *
+   * For a field whose value is not its text (see `valueSlot`): there, the
+   * button clears the VALUE, and the text is a query that belongs to the
+   * person typing it.
+   */
+  clearKeepsText?: boolean
+  /**
+   * Whether there is anything to clear, when that is not the same question as
+   * whether the field has text.
+   *
+   * `isEmpty` answers both by default. A field whose value is not its text
+   * (see `valueSlot`) needs them apart: the placeholder follows the text, and
+   * the clear button follows the value.
+   */
+  canClear?: boolean
   name?: string
   onClickPlaceholder?: () => void
   onClickChildren?: () => void
@@ -284,6 +302,8 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
       append,
       hidePlaceholder = false,
       valueSlot,
+      clearKeepsText = false,
+      canClear,
       onClickPlaceholder,
       onClickChildren,
       onClickContent,
@@ -358,7 +378,9 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
     }
 
     const handleClear = () => {
-      handleChange(emptyValue)
+      if (!clearKeepsText) {
+        handleChange(emptyValue)
+      }
       props.onClear?.()
     }
 
@@ -433,6 +455,7 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
     /**********************/
 
     const hasAppend = append || appendTag || buttonToggle
+    const hasSomethingToClear = canClear ?? !isEmpty(localValue)
     // The slot stands in for typed text, so any text wins over it.
     const showValueSlot =
       valueSlot !== undefined &&
@@ -524,6 +547,26 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                 {avatar && <F0Avatar avatar={avatar} size="xs" />}
               </div>
             )}
+            {showValueSlot && (
+              <div
+                data-slot="value"
+                className={cn(
+                  /**
+                   * In the flow rather than over the input, so the caret sits
+                   * AFTER the value instead of on top of its first letter.
+                   * `pointer-events-none` keeps the click going through to the
+                   * field, which is what focuses the input.
+                   */
+                  "pointer-events-none flex min-w-0 shrink items-center pr-0",
+                  "pl-3",
+                  (icon || avatar) && "pl-8",
+                  (icon || avatar) && size === "md" && "pl-9",
+                  inputElementVariants({ size })
+                )}
+              >
+                {valueSlot}
+              </div>
+            )}
             <div
               onClick={handleClickChildren}
               className="w-full min-w-0 flex-1"
@@ -555,6 +598,8 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                 name,
                 className: cn(
                   "h-full w-full min-w-0 px-3 text-f1-foreground",
+                  // The value in front of it already carries the left inset.
+                  showValueSlot && "pl-0",
                   "[&::-webkit-search-cancel-button]:hidden",
                   (icon || avatar) && "pl-8",
                   (icon || avatar) && size === "md" && "pl-9",
@@ -587,19 +632,6 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
             >
               {placeholder}
             </div>
-            {showValueSlot && (
-              <div
-                data-slot="value"
-                className={cn(
-                  "pointer-events-none absolute inset-y-0 left-0 z-10 flex min-w-0 max-w-full items-center px-3",
-                  (icon || avatar) && "pl-8",
-                  (icon || avatar) && size === "md" && "pl-9",
-                  hasAppend || clearable ? "right-8" : "right-0"
-                )}
-              >
-                {valueSlot}
-              </div>
-            )}
             {(clearable || hasAppend || loading) && (
               <div
                 className={cn(
@@ -609,8 +641,8 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                 )}
               >
                 {clearable && !noEdit && (
-                  <AnimatePresence initial={!isEmpty(localValue)}>
-                    {!isEmpty(localValue) && (
+                  <AnimatePresence initial={hasSomethingToClear}>
+                    {hasSomethingToClear && (
                       <motion.button
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}

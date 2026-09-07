@@ -32,14 +32,28 @@ const metadataText = (metadata: F0SelectItemMetadata): string => {
 
 export const SelectItem = <T extends string, R>({
   item,
+  optionId,
+  active,
 }: {
   item: F0SelectItemObject<T, R>
+  /**
+   * Set when the field drives this list from outside it: the option needs an
+   * id for `aria-activedescendant` to point at, and a way to look active
+   * without taking focus.
+   */
+  optionId?: string
+  active?: boolean
 }) => {
   const isStatusTag =
     item.tag && typeof item.tag !== "string" && item.tag.type === "status"
 
   return (
-    <SelectItemPrimitive value={String(item.value)} disabled={item.disabled}>
+    <SelectItemPrimitive
+      value={String(item.value)}
+      disabled={item.disabled}
+      id={optionId}
+      data-active={active ? "true" : undefined}
+    >
       <div
         className={`flex w-full gap-1.5 ${item.description ? "items-start" : "items-center"}`}
       >
