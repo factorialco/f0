@@ -383,7 +383,7 @@ const Container = forwardRef<
                   )}
                   {header.subtitle && (
                     <div className="flex flex-row items-center gap-1">
-                      <InlineDot />
+                      {!header.link && <InlineDot />}
                       <CardSubtitle className="truncate">
                         {header.subtitle}
                       </CardSubtitle>

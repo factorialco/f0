@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { type AvatarVariant } from "@/components/avatars/F0Avatar"
 import { useF0ChatEmit } from "../providers/F0ChatProvider"
 import { type F0ChatUser } from "../types"
+import { locateMentions } from "../utils/mention-ranges"
+import { diffSpan } from "../utils/text-diff"
 
 /** Sentinel id for the "everyone" (`@here`) option — never a real user id. */
 export const MENTION_EVERYONE_ID = "@everyone"
@@ -18,6 +20,24 @@ export type MentionEntry = {
   subtitle?: string
   profileHref?: string
 }
+
+/**
+ * A tracked mention plus where its `@name` sits in the composer text.
+ *
+ * The anchor is what makes a mention a token rather than a substring: it is
+ * maintained across edits instead of being re-derived from the text, so a
+ * mention survives whatever follows it (a comma, the end of the message) and
+ * an edit that lands inside it removes the whole thing rather than silently
+ * dropping the id and leaving a broken name behind.
+ */
+export type AnchoredMention = MentionEntry & {
+  /** Index of the `@` in the composer text. */
+  start: number
+}
+
+/** Index just past the last character of an anchored mention's name. */
+export const mentionEnd = (mention: AnchoredMention): number =>
+  mention.start + mention.name.length + 1
 
 /** A row in the mention popover: a group member, or the "everyone" option. */
 export type MentionCandidate =
@@ -37,6 +57,22 @@ export type UseMentionsOptions = {
   setInputValue: (value: string) => void
   /** Cursor position (selectionStart) in the textarea. */
   cursorPosition: number
+  /** Setter for the cursor position — used when removing a mention moves it. */
+  setCursorPosition: (position: number) => void
+  /**
+   * Ask the composer to put the textarea caret at `caret` once it has written
+   * `forText`. The composer owns the textarea, so it owns the timing: setting a
+   * selection before React writes the value aims it at the old string and the
+   * write then drops the caret at the end.
+   */
+  requestSelection: (caret: number, forText: string, focus?: boolean) => void
+  /**
+   * Called with the text the hook just wrote when it removed a mention itself.
+   * That write is the tail of the keystroke that caused it, not a new edit —
+   * undo has to put the whole mention back in one step. The text identifies the
+   * write, because a flag would be read a commit too early.
+   */
+  onMentionErased?: (text: string) => void
   /** Ref to the textarea element for reading selection + caret position. */
   textareaRef: React.RefObject<HTMLTextAreaElement | null>
   /**
@@ -62,8 +98,8 @@ export type UseMentionsReturn = {
   results: MentionCandidate[]
   isLoading: boolean
   selectedIndex: number
-  /** Tracked mentions in the current text (drives overlay highlighting). */
-  mentions: MentionEntry[]
+  /** Tracked mentions, anchored in the current text (drives overlay highlighting). */
+  mentions: AnchoredMention[]
   popoverPosition: PopoverPosition
   /** Ghost-text completion for the selected row, or null. */
   inlineCompletion: string | null
@@ -74,8 +110,13 @@ export type UseMentionsReturn = {
   /** Resolve the mentions/everyone payload to attach when sending. */
   getMentions: () => MentionPayload
   /** Replace the tracked mentions wholesale — used to rehydrate an existing
-   * message's mentions when it's reloaded into the composer for editing. */
-  seedMentions: (entries: MentionEntry[]) => void
+   * message's mentions when it's reloaded into the composer for editing.
+   * `forText` is the body they belong to; it arrives with them because the
+   * composer sets its value in the same commit. */
+  seedMentions: (entries: MentionEntry[], forText?: string) => void
+  /** Put back an exact set of anchors for `forText`. Undo/redo carries the
+   * anchors in its snapshot, so it restores rather than re-resolves. */
+  restoreMentions: (anchored: AnchoredMention[], forText: string) => void
   /** Close the popover. */
   close: () => void
   /** Dismiss the current `@` trigger until the caret leaves it. */
@@ -84,14 +125,13 @@ export type UseMentionsReturn = {
 
 /**
  * Finds the active `@` trigger near the cursor — start index of `@` and the
- * query — or null. Skips `@`s that belong to already-completed mentions so a
- * finished "@Name " doesn't keep re-opening the popover. Cloned verbatim from
- * the AI chat composer.
+ * query — or null. An `@` that starts an anchored mention never re-opens the
+ * popover: that token is already resolved.
  */
 function findAtTrigger(
   text: string,
   cursorPos: number,
-  mentions: MentionEntry[]
+  anchored: AnchoredMention[]
 ): { atIndex: number; query: string } | null {
   const textBeforeCursor = text.slice(0, cursorPos)
   const atIndex = textBeforeCursor.lastIndexOf("@")
@@ -107,22 +147,90 @@ function findAtTrigger(
   const query = text.slice(atIndex + 1, cursorPos)
   if (query.includes("\n")) return null
 
-  for (const mention of mentions) {
-    const afterAt = text.slice(atIndex + 1)
-    const mentionEnd = atIndex + 1 + mention.name.length
-    if (afterAt.startsWith(mention.name) && cursorPos >= mentionEnd) {
-      const charAfterMention = text[mentionEnd]
-      if (
-        charAfterMention === " " ||
-        charAfterMention === "\n" ||
-        charAfterMention === "\t"
-      ) {
-        return null
-      }
-    }
-  }
+  if (anchored.some((mention) => mention.start === atIndex)) return null
 
   return { atIndex, query }
+}
+
+/**
+ * Re-anchor `anchored` after the composer text went from `prev` to `next`, and
+ * report which mentions the edit landed inside.
+ *
+ * The change is read as the single contiguous span between the common prefix
+ * and the common suffix — enough for typing, deletion, paste and the emoji
+ * shortcode swap alike. A mention whose span the change overlaps is *touched*:
+ * its remaining text is reported so the caller can erase it whole. Adjacency
+ * is not overlap, so typing a comma right after a mention (or deleting the
+ * space that followed it) leaves the mention alone.
+ */
+const reanchorMentions = (
+  prev: string,
+  next: string,
+  anchored: AnchoredMention[]
+): { kept: AnchoredMention[]; touched: { start: number; end: number }[] } => {
+  const { start: prefix, prevEnd, nextEnd } = diffSpan(prev, next)
+  const delta = next.length - prev.length
+
+  // Positions inside the changed span have no image in `next`; clamp a start
+  // down and an end up so an erased range covers the whole disturbed region.
+  const mapStart = (pos: number): number =>
+    pos <= prefix ? pos : pos >= prevEnd ? pos + delta : prefix
+  const mapEnd = (pos: number): number =>
+    pos <= prefix ? pos : pos >= prevEnd ? pos + delta : nextEnd
+
+  const kept: AnchoredMention[] = []
+  const touched: { start: number; end: number }[] = []
+  for (const mention of anchored) {
+    const start = mention.start
+    const end = mentionEnd(mention)
+    if (prefix < end && prevEnd > start) {
+      touched.push({ start: mapStart(start), end: mapEnd(end) })
+    } else {
+      kept.push({ ...mention, start: mapStart(start) })
+    }
+  }
+  return { kept, touched }
+}
+
+/** Cut `spans` out of `text`, sliding the anchors and the caret left to match. */
+const eraseSpans = (
+  text: string,
+  spans: { start: number; end: number }[],
+  anchored: AnchoredMention[],
+  caret: number
+): { text: string; mentions: AnchoredMention[]; caret: number } => {
+  const merged: { start: number; end: number }[] = []
+  for (const span of [...spans].sort((a, b) => a.start - b.start)) {
+    const last = merged[merged.length - 1]
+    if (last && span.start <= last.end) last.end = Math.max(last.end, span.end)
+    else merged.push({ ...span })
+  }
+
+  const removedBefore = (pos: number): number => {
+    let removed = 0
+    for (const span of merged) {
+      if (span.end <= pos) removed += span.end - span.start
+      else if (span.start < pos) removed += pos - span.start
+    }
+    return removed
+  }
+
+  let out = ""
+  let cursor = 0
+  for (const span of merged) {
+    out += text.slice(cursor, span.start)
+    cursor = span.end
+  }
+  out += text.slice(cursor)
+
+  return {
+    text: out,
+    mentions: anchored.map((mention) => ({
+      ...mention,
+      start: mention.start - removedBefore(mention.start),
+    })),
+    caret: caret - removedBefore(caret),
+  }
 }
 
 const MIRROR_PROPERTIES = [
@@ -214,6 +322,9 @@ export function useMentions({
   inputValue,
   setInputValue,
   cursorPosition,
+  setCursorPosition,
+  requestSelection,
+  onMentionErased,
   textareaRef,
   enabled,
   searchMembers,
@@ -225,7 +336,36 @@ export function useMentions({
   const [memberResults, setMemberResults] = useState<F0ChatUser[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(0)
-  const [mentions, setMentions] = useState<MentionEntry[]>([])
+  const [mentions, setMentions] = useState<AnchoredMention[]>([])
+
+  // The anchors are read from event handlers and effects that must not depend
+  // on them, so state and ref are written together and the ref is the source.
+  const mentionsRef = useRef<AnchoredMention[]>(mentions)
+  // Re-anchoring runs on every keystroke and usually produces the same anchors
+  // in a new array. Keeping the old reference when nothing moved saves a state
+  // write per character, and lets callers treat a new identity as real news.
+  const commitMentions = useCallback((next: AnchoredMention[]) => {
+    const current = mentionsRef.current
+    const unchanged =
+      current.length === next.length &&
+      current.every((mention, i) => {
+        const candidate = next[i]
+        return (
+          candidate !== undefined &&
+          candidate.id === mention.id &&
+          candidate.name === mention.name &&
+          candidate.start === mention.start
+        )
+      })
+    if (unchanged) return
+    mentionsRef.current = next
+    setMentions(next)
+  }, [])
+  // The text the anchors are valid for. Every writer to the composer value
+  // goes through the reconciler below, which compares against this.
+  const prevValueRef = useRef(inputValue)
+  const inputValueRef = useRef(inputValue)
+  inputValueRef.current = inputValue
 
   const atIndexRef = useRef<number>(-1)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -361,23 +501,36 @@ export function useMentions({
               subtitle: candidate.user.subtitle,
               profileHref: candidate.user.profileHref,
             }
-      setMentions((prev) => {
-        const filtered = prev.filter((m) => !(m.id === id && m.name === name))
-        return [...filtered, entry]
-      })
+      // The trigger span [atIndex, cursorPosition) becomes the inserted token,
+      // so anchors past it slide and any the trigger overlapped are gone.
+      const shift = insertedText.length - (cursorPosition - atIndex)
+      const anchored = mentionsRef.current
+        .filter((m) => mentionEnd(m) <= atIndex || m.start >= cursorPosition)
+        .map((m) =>
+          m.start >= cursorPosition ? { ...m, start: m.start + shift } : m
+        )
+      anchored.push({ ...entry, start: atIndex })
+      anchored.sort((a, b) => a.start - b.start)
+      prevValueRef.current = newValue
+      commitMentions(anchored)
 
       emit.onMentionInserted({ isEveryone: candidate.kind === "everyone" })
       close()
 
-      requestAnimationFrame(() => {
-        const textarea = textareaRef.current
-        if (textarea) {
-          textarea.focus()
-          textarea.setSelectionRange(newCursorPos, newCursorPos)
-        }
-      })
+      // Focus too: the candidate may have been clicked, which took focus to
+      // the popover row.
+      requestSelection(newCursorPos, newValue, true)
     },
-    [inputValue, cursorPosition, setInputValue, textareaRef, close, emit]
+    [
+      inputValue,
+      cursorPosition,
+      setInputValue,
+      textareaRef,
+      close,
+      emit,
+      commitMentions,
+      requestSelection,
+    ]
   )
 
   const handleKeyDown = useCallback(
@@ -431,27 +584,93 @@ export function useMentions({
 
   const getMentions = useCallback((): MentionPayload => {
     const mentionedEveryone = mentions.some((m) => m.id === MENTION_EVERYONE_ID)
-    const users = mentions.filter((m) => m.id !== MENTION_EVERYONE_ID)
-    return { mentions: users, mentionedEveryone }
+    // Anchors are per occurrence; the payload is a set of people, so the same
+    // person mentioned twice is sent once.
+    const users = new Map<string, MentionEntry>()
+    for (const { start: _start, ...entry } of mentions) {
+      if (entry.id === MENTION_EVERYONE_ID) continue
+      if (!users.has(entry.id)) users.set(entry.id, entry)
+    }
+    return { mentions: [...users.values()], mentionedEveryone }
   }, [mentions])
 
-  const seedMentions = useCallback((entries: MentionEntry[]) => {
-    setMentions(entries)
-  }, [])
+  const seedMentions = useCallback(
+    (entries: MentionEntry[], forText?: string) => {
+      const text = forText ?? inputValueRef.current
+      prevValueRef.current = text
 
-  // Drop mentions the user has edited away (deleted, or backspaced into,
-  // removing the trailing separator) so the trigger can fire again.
+      // A saved message carries a set of people, not positions, so the text is
+      // what says where they are. Occurrences of one `@name` are handed out to
+      // the entries sharing that name in order — two people with the same
+      // display name get one each, while one person named twice keeps both.
+      const byName = new Map<string, MentionEntry[]>()
+      for (const entry of entries) {
+        const group = byName.get(entry.name)
+        if (group) group.push(entry)
+        else byName.set(entry.name, [entry])
+      }
+
+      const taken = new Map<string, number>()
+      commitMentions(
+        locateMentions(
+          text,
+          [...byName.keys()].map((name) => ({ name }))
+        ).flatMap(({ entry: { name }, start }) => {
+          const group = byName.get(name) ?? []
+          const index = taken.get(name) ?? 0
+          taken.set(name, index + 1)
+          const picked = group[Math.min(index, group.length - 1)]
+          return picked ? [{ ...picked, start }] : []
+        })
+      )
+    },
+    [commitMentions]
+  )
+
+  const restoreMentions = useCallback(
+    (anchored: AnchoredMention[], forText: string) => {
+      prevValueRef.current = forText
+      commitMentions(anchored)
+    },
+    [commitMentions]
+  )
+
+  // Keep the anchors on the text as it changes, and take a mention out whole
+  // when an edit lands inside it — a half-typed name is not a mention, and
+  // leaving one behind is what silently dropped the id before.
   useEffect(() => {
-    setMentions((prev) =>
-      prev.filter((m) => {
-        const pattern = `@${m.name}`
-        const idx = inputValue.indexOf(pattern)
-        if (idx === -1) return false
-        const charAfter = inputValue[idx + pattern.length]
-        return charAfter === " " || charAfter === "\n" || charAfter === "\t"
-      })
-    )
-  }, [inputValue])
+    const prev = prevValueRef.current
+    if (prev === inputValue) return
+    prevValueRef.current = inputValue
+
+    const anchored = mentionsRef.current
+    if (anchored.length === 0) return
+
+    const { kept, touched } = reanchorMentions(prev, inputValue, anchored)
+    if (touched.length === 0) {
+      commitMentions(kept)
+      return
+    }
+
+    const erased = eraseSpans(inputValue, touched, kept, cursorPosition)
+    prevValueRef.current = erased.text
+    commitMentions(erased.mentions)
+    setInputValue(erased.text)
+    setCursorPosition(erased.caret)
+    // Removing a mention leaves the caret where the mention was, not at the end
+    // of the text — the edit happened here, and the rest of a multi-line draft
+    // is not where the user was looking.
+    requestSelection(erased.caret, erased.text)
+    onMentionErased?.(erased.text)
+  }, [
+    inputValue,
+    cursorPosition,
+    setInputValue,
+    setCursorPosition,
+    commitMentions,
+    requestSelection,
+    onMentionErased,
+  ])
 
   const popoverPosition: PopoverPosition = useMemo(() => {
     if (!isOpen || atIndexRef.current === -1) return null
@@ -493,6 +712,7 @@ export function useMentions({
     selectCandidate,
     getMentions,
     seedMentions,
+    restoreMentions,
     close,
     dismissCurrentTrigger,
   }

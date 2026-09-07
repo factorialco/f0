@@ -33,6 +33,7 @@ import {
   Pencil,
   Settings,
   SolidPlay,
+  Upsell,
 } from "@/icons/app"
 import {
   type CanvasContent,
@@ -3099,6 +3100,7 @@ function CreationWithAIFlow({
                 title: "Redirecting you to billing to top up credits…",
                 variant: "default",
               }),
+            getCreditsIcon: Upsell,
             onDismiss: () => setCreditWarningDismissed(true),
           }
         : undefined,

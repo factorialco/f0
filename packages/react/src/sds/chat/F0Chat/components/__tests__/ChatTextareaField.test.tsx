@@ -90,10 +90,10 @@ describe("ChatTextareaField overlay/textarea metric parity", () => {
   // positioned from, and every character from there on sits off its boundary.
   // Measured at 14px Inter: `font-medium` on the chip cost ~0.1px per mention
   // character, plateauing at 1.25px (8.9% of an em) across the rest of the line.
-  const withMention = (tone: "other" | "self") => {
+  const withMention = () => {
     const segments: HighlightSegment[] = [
       { type: "text", text: "Hi " },
-      { type: "mention", text: "@Nora Vidal", tone },
+      { type: "mention", text: "@Nora Vidal" },
       { type: "text", text: " and then a tail" },
     ]
     return zeroRender(
@@ -106,22 +106,28 @@ describe("ChatTextareaField overlay/textarea metric parity", () => {
     )
   }
 
-  it("gives an info-toned mention chip no weight of its own", () => {
-    const { container } = withMention("other")
-    const chip = container.querySelector('[class*="bg-f1-background-info"]')
+  it("gives the mention chip no weight of its own", () => {
+    const { container } = withMention()
+    const chip = container.querySelector(
+      '[class*="text-f1-foreground-secondary"]'
+    )
     expect(chip).not.toBeNull()
     expect(chip?.className).not.toMatch(OFF_WEIGHT)
   })
 
-  it("gives a warning-toned mention chip no weight of its own", () => {
-    const { container } = withMention("self")
-    const chip = container.querySelector('[class*="bg-f1-background-warning"]')
-    expect(chip).not.toBeNull()
-    expect(chip?.className).not.toMatch(OFF_WEIGHT)
+  // The bubble paints a mention with `font-medium`; the overlay must take the
+  // colour and leave the weight, or the caret drifts (see above).
+  it("paints the chip in the same colour as the bubble, with no background", () => {
+    const { container } = withMention()
+    const chip = container.querySelector(
+      '[class*="text-f1-foreground-secondary"]'
+    )
+    expect(chip?.textContent).toBe("@Nora Vidal")
+    expect(chip?.className).not.toMatch(/\bbg-/)
   })
 
   it("leaves the textarea itself on the inherited weight", () => {
-    const { container } = withMention("other")
+    const { container } = withMention()
     expect(container.querySelector("textarea")?.className).not.toMatch(
       OFF_WEIGHT
     )
