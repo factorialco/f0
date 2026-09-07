@@ -102,6 +102,23 @@ describe("Select", () => {
     fireEvent.animationStart(teaser)
   }
 
+  /**
+   * A field select over static options searches from its own trigger, so the
+   * search field IS the combobox. Only a select with filters (or an inline /
+   * asList / custom-trigger one) keeps a separate `searchbox` in the popover.
+   */
+  const getTriggerSearchInput = () => screen.getByRole("combobox")
+
+  /**
+   * Typing into the trigger opens the dropdown, but the virtualized list only
+   * renders its rows once the open animation has started — which jsdom never
+   * does on its own.
+   */
+  const settleList = async () => {
+    await waitFor(() => expect(screen.getByRole("listbox")).toBeInTheDocument())
+    fireEvent.animationStart(screen.getByRole("listbox"))
+  }
+
   const createDeferredOptionsSource = () => {
     let resolveFetch: (() => void) | undefined
     const source = createDataSourceDefinition<RecordType>({
@@ -828,6 +845,8 @@ describe("Select", () => {
 
     await openSelect(user)
 
+    // The field IS the search box, so the search placeholder is the field's.
+    expect(getTriggerSearchInput()).toBeInTheDocument()
     expect(screen.getByText("Search options")).toBeInTheDocument()
   })
 
@@ -875,8 +894,9 @@ describe("Select", () => {
       />
     )
 
-    const combobox = screen.getByRole("combobox")
-    const selectedLabel = within(combobox).getByText("Approved")
+    // The trigger is an input, so the pill is drawn beside the caret rather
+    // than inside the field's own element.
+    const selectedLabel = screen.getByText("Approved")
 
     await waitFor(() => {
       expect(selectedLabel.closest(".bg-f1-background-positive")).toBeTruthy()
@@ -1025,7 +1045,7 @@ describe("Select", () => {
     )
 
     await openSelect(user)
-    await user.type(screen.getByRole("searchbox"), "1")
+    await user.type(getTriggerSearchInput(), "1")
 
     expect(screen.getByText("Option 1")).toBeInTheDocument()
     await waitFor(() =>
@@ -1047,7 +1067,7 @@ describe("Select", () => {
     )
 
     await openSelect(user)
-    const searchInput = screen.getByRole("searchbox")
+    const searchInput = getTriggerSearchInput()
     await user.type(searchInput, "Option 1")
 
     await waitFor(() =>
@@ -1079,7 +1099,7 @@ describe("Select", () => {
     )
 
     await openSelect(user)
-    const searchInput = screen.getByRole("searchbox")
+    const searchInput = getTriggerSearchInput()
     await waitFor(() => expect(searchInput).toHaveFocus())
 
     deferredOptions.resolve()
@@ -1114,11 +1134,12 @@ describe("Select", () => {
     )
 
     await openSelect(user)
-    const searchInput = screen.getByRole("searchbox")
     const footerAction = screen.getByRole("button", { name: "Manage options" })
-    await waitFor(() => expect(searchInput).toHaveFocus())
+    await waitFor(() => expect(getTriggerSearchInput()).toHaveFocus())
 
-    await user.tab()
+    // The search field is the trigger, outside the portaled popover, so the
+    // footer is focused directly rather than tabbed to from inside it.
+    footerAction.focus()
     expect(footerAction).toHaveFocus()
 
     deferredOptions.resolve()
@@ -1146,7 +1167,7 @@ describe("Select", () => {
     )
 
     await openSelect(user)
-    await user.type(screen.getByRole("searchbox"), "xyz")
+    await user.type(getTriggerSearchInput(), "xyz")
 
     await waitFor(async () => {
       const emptyMessage = await screen.findByText("No results found")
@@ -1172,7 +1193,7 @@ describe("Select", () => {
 
     await openSelect(user)
 
-    const searchInput = screen.getByRole("searchbox")
+    const searchInput = getTriggerSearchInput()
 
     // Focus the search input
     await user.click(searchInput)
@@ -1874,7 +1895,7 @@ describe("Select", () => {
 
       await openSelect(user)
 
-      const searchInput = screen.getByRole("searchbox")
+      const searchInput = getTriggerSearchInput()
       await user.type(searchInput, "nonexistent")
 
       await waitFor(() => {
@@ -1921,7 +1942,7 @@ describe("Select", () => {
 
       await openSelect(user)
 
-      const searchInput = screen.getByRole("searchbox")
+      const searchInput = getTriggerSearchInput()
       await user.type(searchInput, "new item")
 
       await waitFor(() => {
@@ -1958,7 +1979,7 @@ describe("Select", () => {
 
       await openSelect(user)
 
-      const searchInput = screen.getByRole("searchbox")
+      const searchInput = getTriggerSearchInput()
       await user.type(searchInput, "new item")
 
       await waitFor(() => {
@@ -1981,6 +2002,264 @@ describe("Select", () => {
       await waitFor(() => {
         expect(searchInput).toHaveValue("")
       })
+    })
+  })
+
+  /**
+   * Where the search field goes, and what typing into the trigger does.
+   * Agreed with Foundations: with no filters the field IS the search box.
+   */
+  describe("search in the trigger", () => {
+    const filteredSource = createDataSourceDefinition<RecordType>({
+      filters: {
+        kind: {
+          type: "in" as const,
+          label: "Kind",
+          options: { options: [{ value: "a", label: "A" }] },
+        },
+      },
+      dataAdapter: {
+        fetchData: () => ({
+          records: [{ id: "option1", name: "Option 1" }],
+        }),
+      },
+    })
+
+    it("searches from the trigger by default over static options", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          options={mockOptions}
+          onChange={() => {}}
+        />
+      )
+
+      const trigger = screen.getByRole("combobox")
+      expect(trigger.tagName).toBe("INPUT")
+      expect(trigger).toHaveAttribute("aria-autocomplete", "list")
+
+      await user.type(trigger, "1")
+
+      await settleList()
+      await waitFor(() =>
+        expect(screen.getByText("Option 1")).toBeInTheDocument()
+      )
+      await waitFor(() =>
+        expect(screen.queryByText("Option 2")).not.toBeInTheDocument()
+      )
+      expect(screen.queryByRole("searchbox")).not.toBeInTheDocument()
+    })
+
+    it("keeps a plain trigger when search is turned off", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          options={mockOptions}
+          onChange={() => {}}
+          showSearchBox={false}
+        />
+      )
+
+      expect(screen.getByRole("combobox").tagName).toBe("BUTTON")
+
+      await openSelect(user)
+      expect(screen.queryByRole("searchbox")).not.toBeInTheDocument()
+    })
+
+    it("keeps the search box in the popover when the source has filters", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          source={filteredSource}
+          mapOptions={(item: RecordType) => ({
+            value: item.id as string,
+            label: item.name as string,
+          })}
+          onChange={() => {}}
+          showSearchBox
+        />
+      )
+
+      expect(screen.getByRole("combobox").tagName).toBe("BUTTON")
+
+      await openSelect(user)
+      expect(screen.getByRole("searchbox")).toBeInTheDocument()
+    })
+
+    it("keeps the search box in the popover behind a custom trigger", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          options={mockOptions}
+          onChange={() => {}}
+          showSearchBox
+        >
+          <span>Pick something</span>
+        </F0Select>
+      )
+
+      await openSelect(user)
+      expect(screen.getByRole("searchbox")).toBeInTheDocument()
+    })
+
+    it("drops the query when the dropdown closes", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          multiple
+          options={mockOptions}
+          value={[]}
+          onChange={() => {}}
+        />
+      )
+
+      const trigger = screen.getByRole("combobox")
+      await user.type(trigger, "1")
+      await settleList()
+      await waitFor(() =>
+        expect(screen.queryByText("Option 2")).not.toBeInTheDocument()
+      )
+
+      await user.keyboard("{Escape}")
+
+      await waitFor(() => expect(trigger).toHaveValue(""))
+      await openSelect(user)
+      await waitFor(() =>
+        expect(screen.getByText("Option 2")).toBeInTheDocument()
+      )
+    })
+
+    it("clears the query first and the selection second", async () => {
+      const user = userEvent.setup()
+      const handleChange = vi.fn()
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          options={mockOptions}
+          value="option1"
+          clearable
+          onChange={handleChange}
+        />
+      )
+
+      const trigger = screen.getByRole("combobox")
+      await waitFor(() =>
+        expect(screen.getByText("Option 1")).toBeInTheDocument()
+      )
+
+      await user.type(trigger, "Opt")
+      await user.click(screen.getByTestId("clear-button"))
+
+      // First click took the text, not the selection.
+      expect(trigger).toHaveValue("")
+      expect(handleChange).not.toHaveBeenCalled()
+
+      await user.click(screen.getByTestId("clear-button"))
+      expect(handleChange).toHaveBeenCalled()
+    })
+
+    it("moves focus into the list on ArrowDown and picks the first match on Enter", async () => {
+      const user = userEvent.setup()
+      const handleChange = vi.fn()
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          options={mockOptions}
+          onChange={handleChange}
+        />
+      )
+
+      const trigger = screen.getByRole("combobox")
+      await user.type(trigger, "Option 3")
+      await settleList()
+      // Wait for the debounced query to actually narrow the list, or "the
+      // first option" is still the first of the whole list.
+      await waitFor(() =>
+        expect(screen.queryByText("Option 1")).not.toBeInTheDocument()
+      )
+      expect(screen.getByText("Option 3")).toBeInTheDocument()
+
+      await user.keyboard("{ArrowDown}")
+      await waitFor(() =>
+        expect(document.activeElement).toHaveAttribute("role", "option")
+      )
+
+      trigger.focus()
+      await user.keyboard("{Enter}")
+
+      await waitFor(() =>
+        expect(handleChange).toHaveBeenCalledWith(
+          "option3",
+          expect.anything(),
+          expect.anything()
+        )
+      )
+    })
+
+    it("stays open when the pointer lands back in the field", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          options={mockOptions}
+          onChange={() => {}}
+        />
+      )
+
+      const trigger = screen.getByRole("combobox")
+      await user.type(trigger, "Option")
+      await settleList()
+
+      await user.click(trigger)
+
+      // Give the debounced open/close change its window to fire.
+      await new Promise((resolve) => setTimeout(resolve, 200))
+      expect(screen.getByRole("listbox")).toBeInTheDocument()
+    })
+
+    it("describes the selection it draws beside the caret", async () => {
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          options={mockOptions}
+          value="option1"
+          onChange={() => {}}
+        />
+      )
+
+      const trigger = screen.getByRole("combobox")
+      await waitFor(() =>
+        expect(trigger).toHaveAccessibleDescription("Option 1")
+      )
+    })
+
+    it("shows the count for a multiple selection until the user types", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          multiple
+          options={mockOptions}
+          value={["option1", "option2"]}
+          onChange={() => {}}
+        />
+      )
+
+      await waitFor(() =>
+        expect(screen.getByText("2 selected")).toBeInTheDocument()
+      )
+
+      await user.type(screen.getByRole("combobox"), "Option 1")
+      await settleList()
+
+      await waitFor(() =>
+        expect(screen.queryByText("2 selected")).not.toBeInTheDocument()
+      )
     })
   })
 

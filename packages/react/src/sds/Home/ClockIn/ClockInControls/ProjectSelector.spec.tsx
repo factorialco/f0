@@ -138,7 +138,8 @@ describe("ProjectSelector", () => {
     await waitFor(() => expect(screen.getByText("Alpha 1")).toBeInTheDocument())
 
     // "Kilo" names no leaf — only a parent — and its children must still show.
-    await user.type(screen.getByRole("searchbox"), "Kilo")
+    // The picker searches from its own trigger, so the field IS the combobox.
+    await user.type(screen.getByRole("combobox"), "Kilo")
 
     await waitFor(() => expect(screen.getByText("Kilo 1")).toBeInTheDocument())
     expect(screen.queryByText("Alpha 1")).not.toBeInTheDocument()

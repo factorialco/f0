@@ -100,6 +100,8 @@ export const DocumentToolbar = ({
           <F0Select
             hideLabel
             label={pdfViewer.scaleSelector}
+            // A handful of fixed zoom levels.
+            showSearchBox={false}
             options={scaleOptions}
             value={String(zoom.scale) as FixedScale}
             onChange={(value: FixedScale) => zoom.setScale(Number(value))}

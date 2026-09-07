@@ -180,6 +180,8 @@ export function CalendarHeaderDropdowns({
             label={i18n.date.selectMonth}
             hideLabel
             placeholder={i18n.date.selectMonth}
+            // Twelve fixed options in a narrow field: nothing to search.
+            showSearchBox={false}
             options={monthOptions}
             value={String(viewDate.getMonth())}
             onChange={handleMonthChange}

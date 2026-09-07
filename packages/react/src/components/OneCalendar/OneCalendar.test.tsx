@@ -103,7 +103,9 @@ describe("OneCalendar", () => {
       // Exactly one dropdown (year); the month picker is the grid itself.
       const comboboxes = screen.getAllByRole("combobox")
       expect(comboboxes).toHaveLength(1)
-      expect(comboboxes[0]).toHaveTextContent("2024")
+      // The year picker is searchable, so its trigger is an input and the year
+      // is drawn beside the caret — it is the field's description, not its text.
+      expect(comboboxes[0]).toHaveAccessibleDescription("2024")
     })
 
     it("keeps the plain label (no dropdowns) in quarter view", () => {

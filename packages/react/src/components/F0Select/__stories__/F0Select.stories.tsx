@@ -64,6 +64,7 @@ const meta: Meta = {
           "<p>Renders a select input field with a list of options to choose from.</p>" +
           "<p>The list is virtualized so it can handle a large number of items.</p>" +
           '<p>Use <code>variant="field"</code> for forms and labeled inputs. Use <code>variant="inline"</code> for compact desktop row controls such as roles, statuses, and access levels. Inline selects are single-value and non-clearable; their required <code>label</code> provides the accessible name and becomes the visible empty-state fallback when no <code>placeholder</code> is provided.</p>' +
+          "<p>A field select over static options is searched from its own trigger: the field is the search box, so there is one place to look and one place to type. A select whose <code>source</code> carries filters keeps its search box in the dropdown, beside the filter picker. Pass <code>showSearchBox={false}</code> for a short list that reads better without it.</p>" +
           "<p>Options support three kinds of annotations: <code>description</code> for prose rendered as a second line, <code>metadata</code> for a short typed token rendered next to the label (e.g. a dial code), and <code>tag</code> for chips rendered at the end of the row.</p>",
       },
     },
@@ -144,7 +145,10 @@ const meta: Meta = {
     },
     showSearchBox: {
       description:
-        "Shows a search box. The component will filter the items by name and by description unless searchFunc will be in use",
+        "Whether the list can be searched. Defaults to **true** for a field select over static `options`, where the filtering is local. " +
+        "A `source` stays opt-in, because its search is a query parameter its adapter has to implement. " +
+        "Where the search field lands depends on the filters: with no filters the trigger itself becomes the search field, and with filters it stays in the dropdown's top row beside the filter picker. " +
+        '`variant="inline"`, `asList` and custom triggers always use the row. Filtering matches label and description unless `searchFn` is in use.',
     },
     searchValue: {
       description: "Default value for the search box",
@@ -236,7 +240,6 @@ const meta: Meta = {
       }
     }),
     disabled: false,
-    showSearchBox: false,
   },
   decorators: [
     ((Story, { args }) => {
@@ -1343,6 +1346,47 @@ export const MultipleClearSelectionsOnDatasetChange: Story = {
  *    keeps those rows selected — `preserveSelectionOnDatasetChange` governs
  *    manual selection only.
  */
+/**
+ * The default for a static list: the trigger IS the search field. Typing opens
+ * the dropdown and filters it; the selected item is drawn where the text goes
+ * until the user types over it.
+ */
+export const SearchInTheTrigger: Story = {
+  args: {
+    label: "Select a theme",
+    placeholder: "Search themes",
+    value: undefined,
+    clearable: true,
+  },
+}
+
+/**
+ * Multiple selection keeps the same field. Closed, it says how many are
+ * selected; typing replaces that with the query, and clearing gives it back.
+ */
+export const SearchInTheTriggerMultiple: Story = {
+  args: {
+    label: "Select themes",
+    placeholder: "Search themes",
+    multiple: true,
+    clearable: true,
+    value: undefined,
+  },
+}
+
+/**
+ * A short list reads better as a plain select. `showSearchBox={false}` opts out
+ * and restores the button trigger.
+ */
+export const SearchDisabled: Story = {
+  args: {
+    label: "Select a theme",
+    showSearchBox: false,
+    value: undefined,
+    placeholder: undefined,
+  },
+}
+
 export const MultipleSelectAllWithFilters: Story = {
   args: {
     label: "Select Team Members (preserve + select all)",

@@ -595,6 +595,18 @@ interface SelectContentImplProps
    * Useful for "list" mode where the select is always open.
    */
   disableScrollLock?: boolean
+
+  /**
+   * Keeps the TRIGGER out of the aria-hidden sweep the open content applies to
+   * the rest of the page.
+   *
+   * The sweep treats the content as modal, which is right when the trigger is
+   * a button: there is nothing to do with it while the list is open. It is
+   * wrong when the trigger is a text field the user types in to filter that
+   * list — hiding it leaves a screen reader on a field that no longer exists,
+   * and takes the field out of every role query with it.
+   */
+  keepTriggerAccessible?: boolean
 }
 
 const Slot = createSlot("SelectContent.RemoveScroll")
@@ -631,6 +643,7 @@ const SelectContentImpl = React.forwardRef<
     onEscapeKeyDown,
     onPointerDownOutside,
     disableScrollLock = false,
+    keepTriggerAccessible = false,
     //
     // PopperContent props
     side,
@@ -679,7 +692,11 @@ const SelectContentImpl = React.forwardRef<
     // Skip in item-aligned mode (list mode) where content is always visible
     if (context.open && position === "popper") {
       // Only hide others when open and ensure cleanup runs properly
-      const cleanup = hideOthers(content)
+      const cleanup = hideOthers(
+        keepTriggerAccessible && context.trigger
+          ? [content, context.trigger]
+          : content
+      )
       hideOthersCleanupRef.current = cleanup
       return () => {
         if (cleanup) {
@@ -688,7 +705,7 @@ const SelectContentImpl = React.forwardRef<
         hideOthersCleanupRef.current = null
       }
     }
-  }, [content, context.open, position])
+  }, [content, context.open, context.trigger, keepTriggerAccessible, position])
 
   // Make sure the whole tree has focus guards as our `Select` may be
   // the last element in the DOM (because of the `Portal`)

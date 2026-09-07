@@ -50,7 +50,9 @@ export function SelectCell<R extends RecordType>({
     loading,
     size: "sm" as const,
     placeholder: config.placeholder ?? i18n.t("common.selectPlaceholder"),
-    showSearchBox: config.showSearchBox,
+    // A grid cell keeps the keys it already owns: search is opt-in per column
+    // rather than inherited from the select's own default.
+    showSearchBox: config.showSearchBox ?? false,
     defaultItem: config.defaultItem?.(item),
     multiple: false as const,
     onOpenChange: setIsOpen,

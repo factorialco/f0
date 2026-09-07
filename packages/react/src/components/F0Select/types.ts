@@ -36,7 +36,24 @@ type F0SelectPopupProps<T extends string, R = unknown> = {
     checked: boolean
   ) => void
   open?: boolean
+  /**
+   * Whether the list can be searched.
+   *
+   * Defaults to TRUE for a field select over static `options`, where the
+   * filtering is local and therefore always works. A `source` stays opt-in:
+   * its search is a query parameter its adapter has to implement.
+   *
+   * Where the search field lands depends on the filters. With no filters the
+   * trigger itself becomes the search field — you type where the value shows.
+   * With filters it stays in the dropdown's top row, beside the filter picker.
+   * `variant="inline"`, `asList` and custom triggers always use the row.
+   */
   showSearchBox?: boolean
+  /**
+   * Placeholder for the search field. When the trigger IS the search field,
+   * the select's own `placeholder` wins and this stands in only if there is
+   * none.
+   */
   searchBoxPlaceholder?: string
   onSearchChange?: (value: string) => void
   searchValue?: string

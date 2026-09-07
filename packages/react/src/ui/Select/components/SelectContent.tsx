@@ -85,6 +85,11 @@ type SelectContentProps = (
    * value pickers like month/year selectors.
    */
   fitContentWidth?: boolean
+  /**
+   * Leaves the trigger reachable while the content is open. Set it for a
+   * trigger that is a text field driving this list, never for a plain one.
+   */
+  keepTriggerAccessible?: boolean
 }
 const SelectContent = forwardRef<
   ElementRef<typeof SelectPrimitive.Content>,

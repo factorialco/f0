@@ -356,6 +356,8 @@ export function DatePickerPopup({
                     label={i18n.date.compareTo}
                     hideLabel
                     placeholder={i18n.date.compareTo}
+                    // A handful of fixed choices.
+                    showSearchBox={false}
                     options={compareToOptions.map((option) => ({
                       label: option.label,
                       value: option.value,

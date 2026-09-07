@@ -163,6 +163,14 @@ export type InputFieldProps<T> = {
   labelIcon?: IconType
   hideLabel?: boolean
   hidePlaceholder?: boolean
+  /**
+   * Rich content drawn where the typed text would be while the field is empty
+   * (icons, avatars, a count). Lets a field whose value is not text, like a
+   * select whose trigger is typeable, show what is chosen without putting it
+   * in the input. Hidden as soon as there is text, and it hides the
+   * placeholder while shown.
+   */
+  valueSlot?: React.ReactNode
   name?: string
   onClickPlaceholder?: () => void
   onClickChildren?: () => void
@@ -191,6 +199,13 @@ export type InputFieldProps<T> = {
    * selection moves elsewhere, so a screen reader hears nothing. */
   "aria-activedescendant"?: AriaAttributes["aria-activedescendant"]
   "aria-autocomplete"?: AriaAttributes["aria-autocomplete"]
+  /**
+   * For a field whose visible value is NOT its text — a select whose trigger is
+   * typeable draws the selection beside the caret — this is how that value
+   * reaches a screen reader: the input's own value is the query, so the
+   * selection has to be described.
+   */
+  "aria-describedby"?: AriaAttributes["aria-describedby"]
   onClear?: () => void
   onFocus?: () => void
   onBlur?: () => void
@@ -267,6 +282,7 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
       hideMaxLength = false,
       append,
       hidePlaceholder = false,
+      valueSlot,
       onClickPlaceholder,
       onClickChildren,
       onClickContent,
@@ -278,6 +294,7 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
       "aria-expanded": ariaExpanded,
       "aria-activedescendant": ariaActiveDescendant,
       "aria-autocomplete": ariaAutocomplete,
+      "aria-describedby": ariaDescribedBy,
       buttonToggle,
       transparent,
       ...props
@@ -415,6 +432,12 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
     /**********************/
 
     const hasAppend = append || appendTag || buttonToggle
+    // The slot stands in for typed text, so any text wins over it.
+    const showValueSlot =
+      valueSlot !== undefined &&
+      valueSlot !== null &&
+      defaultIsEmpty(localValue) &&
+      !isAutofilled
 
     return (
       <div
@@ -522,6 +545,7 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                 "aria-expanded": role === "combobox" ? ariaExpanded : undefined,
                 "aria-activedescendant": ariaActiveDescendant,
                 "aria-autocomplete": ariaAutocomplete,
+                "aria-describedby": ariaDescribedBy,
                 id,
                 value: localValue ?? "",
                 "aria-label": label || placeholder || "no-label",
@@ -550,6 +574,7 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                 inputElementVariants({ size }),
                 placeholder &&
                   !hidePlaceholder &&
+                  !showValueSlot &&
                   isEmpty(localValue) &&
                   !isAutofilled
                   ? "opacity-100"
@@ -561,6 +586,19 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
             >
               {placeholder}
             </div>
+            {showValueSlot && (
+              <div
+                data-slot="value"
+                className={cn(
+                  "pointer-events-none absolute inset-y-0 left-0 z-10 flex min-w-0 max-w-full items-center px-3",
+                  (icon || avatar) && "pl-8",
+                  (icon || avatar) && size === "md" && "pl-9",
+                  hasAppend || clearable ? "right-8" : "right-0"
+                )}
+              >
+                {valueSlot}
+              </div>
+            )}
             {(clearable || hasAppend || loading) && (
               <div
                 className={cn(
