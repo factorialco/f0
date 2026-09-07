@@ -985,7 +985,7 @@ export declare type AiInsightCardContent = {
     avatar: Pick<F0AvatarPersonProps, "firstName" | "lastName" | "src">;
 } | {
     content: "people";
-    avatars: Array<Pick<F0AvatarPersonProps, "firstName" | "lastName" | "src">>;
+    avatars: Pick<F0AvatarPersonProps, "firstName" | "lastName" | "src">[];
 } | {
     content: "team";
     avatar: Pick<F0AvatarTeamProps, "name" | "src">;
@@ -1787,10 +1787,24 @@ declare type BaseQuestionProps = {
      */
     locked?: boolean;
     /**
+     * Freezes only the named fields, leaving the rest of the question editable —
+     * the actions menu included, so it can still be made optional, duplicated or
+     * removed. Use it when the wording is what the consumer depends on: a
+     * question whose answer feeds a validated field stops meaning the same thing
+     * once it is renamed, while deleting it is a legitimate choice.
+     *
+     * `locked` is the stronger form and wins: a locked question (or one inside a
+     * locked section) freezes everything regardless of this.
+     */
+    lockedFields?: LockedFields;
+    /**
      * Optional notice shown in the lock tooltip when the question is locked. Use
      * it to say what this specific question is — it takes precedence over the
      * parent section's `LockedSectionNotice` and over the default question notice
      * from the i18n provider.
+     *
+     * Also used by `lockedFields`, where saying which part is frozen and why is
+     * the only cue the author gets.
      */
     lockedNote?: LockedQuestionNotice;
 };
@@ -2067,7 +2081,7 @@ declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "clas
     /**
      * Callback fired when the button is clicked. Supports async functions for loading state.
      */
-    onClick?: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void | Promise<unknown>;
+    onClick?: (event: React.MouseEvent<HTMLElement>) => void | Promise<unknown>;
     /**
      * The title of the button.
      */
@@ -2779,7 +2793,7 @@ declare type CardSelectRenderIfCondition = CardSelectRenderIfBase & ({
 });
 
 declare type CardVisualizationOptions<T, _Filters extends FiltersDefinition, _Sortings extends SortingsDefinition> = {
-    cardProperties: ReadonlyArray<CardPropertyDefinition<T>>;
+    cardProperties: readonly CardPropertyDefinition<T>[];
     title: (record: T) => string;
     description?: (record: T) => string;
     avatar?: (record: T) => CardAvatarVariant;
@@ -3853,14 +3867,14 @@ export declare interface DashboardCollectionItem<Filters extends FiltersDefiniti
      * Visualization configs for the collection (table, card, list, kanban).
      * Same shape as OneDataCollection's `visualizations` prop.
      */
-    visualizations: ReadonlyArray<any>;
+    visualizations: readonly any[];
 }
 
 export declare interface DashboardFetchSpec {
-    fetch: Array<{
+    fetch: {
         toolId: string;
         args: Record<string, unknown>;
-    }>;
+    }[];
     query: string | null;
     columnLabels?: Record<string, string>;
 }
@@ -4199,7 +4213,7 @@ declare type DataCollectionSourceDefinition<R extends RecordType = RecordType, F
     /** Item filter that can be used to filter the items before they are displayed */
     itemPreFilter?: (item: R) => boolean;
     /** Lanes configuration */
-    lanes?: ReadonlyArray<Lane<Filters>>;
+    lanes?: readonly Lane<Filters>[];
     /** Rich search preview shown in the shared header search (all visualizations). */
     searchPreview?: SearchPreview<R>;
 };
@@ -6565,7 +6579,7 @@ declare type EditableTableOnCellChangeParams<R extends RecordType> = {
 };
 
 declare type EditableTableVisualizationOptions<R extends RecordType, _Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition> = Omit<TableVisualizationOptions<R, _Filters, Sortings, Summaries>, "columns"> & {
-    columns: ReadonlyArray<EditableTableColumnDefinition<R, Sortings, Summaries>>;
+    columns: readonly EditableTableColumnDefinition<R, Sortings, Summaries>[];
     /**
      * Called when a cell value changes. Receives an object with the full updated
      * row (`updatedItem`) and a `changes` map of the modified attributes, keyed by
@@ -9032,12 +9046,12 @@ export declare type F0CustomConfig<TValue = unknown, TConfig = undefined> = TCon
  */
 declare type F0CustomConfigBase<TValue = unknown> = {
     /** Render function for the custom component */
-    render: (props: CustomFieldRenderProps<TValue, undefined>) => ReactNode;
+    render: (props: CustomFieldRenderProps<TValue>) => ReactNode;
 } | {
     /** Name identifying this custom field type (resolved by renderCustomField on the form) */
     customFieldName: string;
     /** Optional render function (overridden by form-level renderCustomField when customFieldName is set) */
-    render?: (props: CustomFieldRenderProps<TValue, undefined>) => ReactNode;
+    render?: (props: CustomFieldRenderProps<TValue>) => ReactNode;
 };
 
 /**
@@ -9090,7 +9104,7 @@ export declare type F0CustomFieldConfig<TValue = unknown, TConfig = undefined> =
  *
  * @typeParam TValue - Type of the field value (inferred from Zod schema)
  */
-declare type F0CustomFieldConfigBase<TValue = unknown> = F0BaseConfig & F0CustomConfig<TValue, undefined> & {
+declare type F0CustomFieldConfigBase<TValue = unknown> = F0BaseConfig & F0CustomConfig<TValue> & {
     fieldType: "custom";
 };
 
@@ -10269,9 +10283,9 @@ declare type F0EntitiesListField = F0BaseField & {
     /** User-facing text (add button, dialog description/title) */
     labels?: F0EntitiesListLabels;
     /** Ids of the items that can be edited (matched against `item.id`) */
-    editableIds?: Array<string | number>;
+    editableIds?: (string | number)[];
     /** Ids of the items that can be removed (matched against `item.id`) */
-    removableIds?: Array<string | number>;
+    removableIds?: (string | number)[];
     /** Maximum number of rows allowed */
     maxItems?: number;
     /** Per-column presentation options, keyed by item-schema property name */
@@ -10414,7 +10428,7 @@ declare interface F0EntitiesListOptions<T = EntitiesListItem> {
      * editing per row; with more than 2 it shows/hides the per-row edit
      * (pencil) action that opens the edit dialog.
      */
-    editableIds?: Array<string | number>;
+    editableIds?: (string | number)[];
     /**
      * Restricts which items can be removed, matched against each item's `id`
      * property. The remove counterpart to {@link editableIds}, and independent
@@ -10424,7 +10438,7 @@ declare interface F0EntitiesListOptions<T = EntitiesListItem> {
      * this list shows no remove action (`list-view`) / no remove button
      * (`editable-table`).
      */
-    removableIds?: Array<string | number>;
+    removableIds?: (string | number)[];
     /** Minimum number of rows required (defaults to 1 unless the field is optional) */
     minItems?: number;
     /** Maximum number of rows allowed. When reached the add button is hidden. */
@@ -11163,15 +11177,15 @@ export declare namespace f0FormField {
     }): RichTextObjectSchema & F0ZodType<RichTextObjectSchema>;
     /* Excluded from this release type: SelectConfig */
     export function select<const V extends string, R extends Record<string, unknown> = Record<string, unknown>>(config: SelectConfig<R> & {
-        options: Array<{
+        options: ({
             value: V;
-        } & Record<string, unknown>>;
+        } & Record<string, unknown>)[];
         optional: true;
     }): z.ZodOptional<z.ZodEnum<[V, ...V[]]>> & F0ZodType<z.ZodOptional<z.ZodEnum<[V, ...V[]]>>>;
     export function select<const V extends string, R extends Record<string, unknown> = Record<string, unknown>>(config: SelectConfig<R> & {
-        options: Array<{
+        options: ({
             value: V;
-        } & Record<string, unknown>>;
+        } & Record<string, unknown>)[];
         optional?: false | undefined;
     }): z.ZodEnum<[V, ...V[]]> & F0ZodType<z.ZodEnum<[V, ...V[]]>>;
     export function select<R extends Record<string, unknown> = Record<string, unknown>>(config: SelectConfig<R> & {
@@ -11181,16 +11195,16 @@ export declare namespace f0FormField {
         optional?: false | undefined;
     }): z.ZodString & F0ZodType<z.ZodString>;
     /* Excluded from this release type: MultiSelectConfig */
-    export function multiSelect<const V extends string>(config: Omit<MultiSelectConfig<string>, "options"> & {
-        options: Array<{
+    export function multiSelect<const V extends string>(config: Omit<MultiSelectConfig, "options"> & {
+        options: ({
             value: V;
-        } & Record<string, unknown>>;
+        } & Record<string, unknown>)[];
         optional: true;
     }): z.ZodOptional<z.ZodArray<z.ZodEnum<[V, ...V[]]>>> & F0ZodType<z.ZodOptional<z.ZodArray<z.ZodEnum<[V, ...V[]]>>>>;
-    export function multiSelect<const V extends string>(config: Omit<MultiSelectConfig<string>, "options"> & {
-        options: Array<{
+    export function multiSelect<const V extends string>(config: Omit<MultiSelectConfig, "options"> & {
+        options: ({
             value: V;
-        } & Record<string, unknown>>;
+        } & Record<string, unknown>)[];
         optional?: false | undefined;
     }): z.ZodArray<z.ZodEnum<[V, ...V[]]>> & F0ZodType<z.ZodArray<z.ZodEnum<[V, ...V[]]>>>;
     export function multiSelect<V extends string | number = string, R extends Record<string, unknown> = Record<string, unknown>>(config: MultiSelectConfig<V, R> & {
@@ -12656,7 +12670,7 @@ declare interface F0SelectConfigWithCustomFieldName extends F0SelectConfigBase {
  */
 declare interface F0SelectConfigWithOptions<T extends SelectValueType = string> extends F0SelectConfigBase {
     /** Options for the select dropdown */
-    options: F0SelectItemProps<T, unknown>[];
+    options: F0SelectItemProps<T>[];
     source?: never;
     mapOptions?: never;
 }
@@ -12681,8 +12695,8 @@ declare type F0SelectDataProps<T extends string, R = unknown> = {
 } | {
     source?: never;
     mapOptions?: never;
-    searchFn?: (option: F0SelectItemProps<T, unknown>, search?: string) => boolean | undefined;
-    options: F0SelectItemProps<T, unknown>[];
+    searchFn?: (option: F0SelectItemProps<T>, search?: string) => boolean | undefined;
+    options: F0SelectItemProps<T>[];
 };
 
 /**
@@ -12789,22 +12803,17 @@ declare type F0SelectPopupProps<T extends string, R = unknown> = {
     onChangeSelectedOption?: (option: F0SelectItemObject<T, ResolvedRecordType<R>> | undefined, checked: boolean) => void;
     open?: boolean;
     /**
-     * Whether the list can be searched.
+     * Whether the list can be searched. Defaults to true for a field select over
+     * static `options`, where filtering is local; a `source` is opt-in.
      *
-     * Defaults to TRUE for a field select over static `options`, where the
-     * filtering is local and therefore always works. A `source` stays opt-in:
-     * its search is a query parameter its adapter has to implement.
-     *
-     * Where the search field lands depends on the filters. With no filters the
-     * trigger itself becomes the search field — you type where the value shows.
-     * With filters it stays in the dropdown's top row, beside the filter picker.
-     * `variant="inline"`, `asList` and custom triggers always use the row.
+     * With no filters the trigger itself is the search field. With filters, and
+     * for `variant="inline"`, `asList` and custom triggers, the search box stays
+     * in the dropdown's top row.
      */
     showSearchBox?: boolean;
     /**
-     * Placeholder for the search field. When the trigger IS the search field,
-     * the select's own `placeholder` wins and this stands in only if there is
-     * none.
+     * Placeholder for the search field. When the trigger is the search field the
+     * select's own `placeholder` wins and this stands in.
      */
     searchBoxPlaceholder?: string;
     onSearchChange?: (value: string) => void;
@@ -12853,7 +12862,7 @@ declare type F0SelectSelectionProps<T extends string, R = unknown> = F0SelectSin
     multiple?: false;
     value?: T;
     defaultItem?: F0SelectItemObject<T, ResolvedRecordType<R>>;
-    onChange?: (value: T, originalItem?: ResolvedRecordType<R> | undefined, option?: F0SelectItemObject<T, ResolvedRecordType<R>>) => void;
+    onChange?: (value: T, originalItem?: ResolvedRecordType<R>, option?: F0SelectItemObject<T, ResolvedRecordType<R>>) => void;
     onSelectItems?: never;
 } | {
     multiple: true;
@@ -12885,7 +12894,7 @@ declare type F0SelectSingleSelectionProps<T extends string, R = unknown> = {
     multiple?: false;
     value?: T;
     defaultItem?: F0SelectItemObject<T, ResolvedRecordType<R>>;
-    onChange?: (value: T, originalItem?: ResolvedRecordType<R> | undefined, option?: F0SelectItemObject<T, ResolvedRecordType<R>>) => void;
+    onChange?: (value: T, originalItem?: ResolvedRecordType<R>, option?: F0SelectItemObject<T, ResolvedRecordType<R>>) => void;
     /** Callback for selection changes - provides full selection state for advanced use cases (e.g., "Select All" with exclusions) */
     onSelectItems?: never;
 };
@@ -14296,13 +14305,13 @@ declare type GraphVisualizationOptions<R extends RecordType, Filters extends Fil
      * toggle to show/hide each metadata column (like configuring table columns).
      * Values are tag `column` keys (or `type` when a tag has no `column`).
      */
-    nodeTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>;
+    nodeTagTypes?: readonly F0GraphNodeTagColumn[];
     /** Friendly labels per tag column, shown in the metadata visibility toggle. */
     nodeTagTypeLabels?: Partial<Record<F0GraphNodeTagColumn, string>>;
     /** Tag columns visible by default. Defaults to all of `nodeTagTypes`. */
-    defaultVisibleTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>;
+    defaultVisibleTagTypes?: readonly F0GraphNodeTagColumn[];
     /** Tag columns that are always visible and cannot be hidden in the settings. */
-    pinnedTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>;
+    pinnedTagTypes?: readonly F0GraphNodeTagColumn[];
     /**
      * Tag columns the actor is not allowed to see, mapped to the reason. Each is
      * still listed in the settings but with its toggle forced OFF and disabled,
@@ -14729,7 +14738,7 @@ export declare type heightType = "xxs" | "xs" | "sm" | "md" | "lg" | "xl" | "2xl
  */
 export declare type HiddenAction = "required" | "multiSelect" | "allowCreate" | "questionType" | "duplicate" | "delete";
 
-export declare type HiddenActions = ReadonlyArray<HiddenAction>;
+export declare type HiddenActions = readonly HiddenAction[];
 
 export declare const HomeLayout: WithDataTestIdReturnType_2<ForwardRefExoticComponent<Omit<{
 widgets?: ReactNode[];
@@ -14860,7 +14869,7 @@ declare type InFilterOptionItem<T = unknown> = {
         /** The filter key where child selections are stored in FiltersState */
         filterKey: string;
         /** Child options, which can themselves have children for infinite nesting */
-        options: Array<InFilterOptionItem<T>>;
+        options: InFilterOptionItem<T>[];
     };
 };
 
@@ -14880,7 +14889,7 @@ declare type InFilterOptions_2<T, _R extends RecordType = RecordType> = {
      */
     getLabel?: (value: unknown) => string | Promise<string>;
 } & ({
-    options: Array<InFilterOptionItem<T>> | (() => Array<InFilterOptionItem<T>> | Promise<Array<InFilterOptionItem<T>>>);
+    options: Array<InFilterOptionItem<T>> | (() => Array<InFilterOptionItem<T>> | Promise<InFilterOptionItem<T>[]>);
 } | {
     source: DataSourceDefinition<any, FiltersDefinition, SortingsDefinition, GroupingDefinition<any>>;
     mapOptions: (item: any) => InFilterOptionItem<T>;
@@ -15008,18 +15017,28 @@ declare type InputFieldProps<T> = {
     hideLabel?: boolean;
     hidePlaceholder?: boolean;
     /**
-     * Rich content drawn where the typed text would be while the field is empty
-     * (icons, avatars, a count). Lets a field whose value is not text, like a
-     * select whose trigger is typeable, show what is chosen without putting it
-     * in the input. Hidden as soon as there is text, and it hides the
-     * placeholder while shown.
+     * Rich content drawn where the typed text would be, for a field whose value
+     * is not text: icons, avatars, a count. Dropped as soon as there is text,
+     * and it hides the placeholder while shown.
      */
     valueSlot?: React.ReactNode;
+    /**
+     * Leaves the typed text alone when the clear button is pressed, so `onClear`
+     * is the whole behavior. For a field whose value is not its text, the button
+     * clears that value and the text is the user's query.
+     */
+    clearKeepsText?: boolean;
+    /**
+     * Whether there is anything to clear, when `isEmpty` cannot answer it: with
+     * a `valueSlot` the placeholder follows the text and the clear button
+     * follows the value.
+     */
+    canClear?: boolean;
     name?: string;
     onClickPlaceholder?: () => void;
     onClickChildren?: () => void;
-    /** Receives the click, so a caller can tell where inside the field it landed. */
-    onClickContent?: (event: React.MouseEvent<Element>) => void;
+    /** Receives the click, so a caller can tell where in the field it landed. */
+    onClickContent?: (event: React.MouseEvent) => void;
     value?: T | undefined;
     onChange?: (value: T) => void;
     size?: InputFieldSize;
@@ -15042,12 +15061,7 @@ declare type InputFieldProps<T> = {
      * selection moves elsewhere, so a screen reader hears nothing. */
     "aria-activedescendant"?: AriaAttributes["aria-activedescendant"];
     "aria-autocomplete"?: AriaAttributes["aria-autocomplete"];
-    /**
-     * For a field whose visible value is NOT its text — a select whose trigger is
-     * typeable draws the selection beside the caret — this is how that value
-     * reaches a screen reader: the input's own value is the query, so the
-     * selection has to be described.
-     */
+    /** How a `valueSlot` value reaches a screen reader. */
     "aria-describedby"?: AriaAttributes["aria-describedby"];
     onClear?: () => void;
     onFocus?: () => void;
@@ -15240,12 +15254,12 @@ declare type KanbanOnMove<TRecord extends RecordType> = (fromLaneId: string, toL
 } | null) => Promise<TRecord>;
 
 declare type KanbanVisualizationOptions<Record extends RecordType, _Filters extends FiltersDefinition, _Sortings extends SortingsDefinition> = {
-    lanes: ReadonlyArray<KanbanLaneDefinition>;
+    lanes: readonly KanbanLaneDefinition[];
     /** Per-group columns: when grouping is active, each group's board renders the
      * lanes this returns instead of the global `lanes` (lane ids must exist in
      * `source.lanes`). Enables the onboarding case where each policy version has
      * its own phases. NOTE: API shape pending Foundations review. */
-    getLanesForGroup?: (groupKey: string) => ReadonlyArray<KanbanLaneDefinition>;
+    getLanesForGroup?: (groupKey: string) => readonly KanbanLaneDefinition[];
     /** Whether each group header shows a selection checkbox when the collection is
      * selectable. Defaults to `true` (parity with Card/List). Set to `false` to
      * keep per-card selection while hiding the group-level checkbox — e.g. when
@@ -15256,7 +15270,7 @@ declare type KanbanVisualizationOptions<Record extends RecordType, _Filters exte
     title?: (record: Record) => string;
     description?: (record: Record) => string;
     avatar?: (record: Record) => CardAvatarVariant;
-    metadata?: (record: Record) => ReadonlyArray<CardMetadata>;
+    metadata?: (record: Record) => readonly CardMetadata[];
     onMove?: KanbanOnMove<Record>;
     onCreate?: KanbanOnCreate;
 };
@@ -15385,7 +15399,7 @@ declare type ListPropertyDefinition<R, Sortings extends SortingsDefinition> = Wi
 
 declare type ListVisualizationOptions<R extends RecordType, _Filters extends FiltersDefinition, Sortings extends SortingsDefinition> = {
     itemDefinition: (record: R) => ItemDefinition;
-    fields: ReadonlyArray<ListPropertyDefinition<R, Sortings>>;
+    fields: readonly ListPropertyDefinition<R, Sortings>[];
 };
 
 export declare interface LoadingStateProps {
@@ -15411,6 +15425,13 @@ declare interface LocalizedOption<T> {
     /** The value for this locale. */
     value: T;
 }
+
+/**
+ * The parts of a question that `lockedFields` can freeze on their own, without
+ * locking the question outright. Both are the question's wording — what it asks
+ * — as opposed to the answer it collects.
+ */
+export declare type LockedFields = readonly ("title" | "description")[];
 
 export declare type LockedQuestionNotice = {
     description: string;
@@ -15555,14 +15576,14 @@ declare type Message_2 = {
     id?: string;
     role?: string;
     content?: unknown;
-    toolCalls?: Array<{
+    toolCalls?: {
         id: string;
         type?: string;
         function?: {
             name: string;
             arguments: string;
         };
-    }>;
+    }[];
     generativeUI?: () => unknown;
     rawData?: unknown;
     /**
@@ -17090,7 +17111,7 @@ declare type Props = {
     /**
      * Array of chips to display.
      */
-    chips: Array<ChipProps>;
+    chips: ChipProps[];
     /**
      * The maximum number of chips to display.
      * @default 4
@@ -17183,11 +17204,11 @@ declare interface RadarChartSkeletonProps {
 export declare interface RadarComputation {
     datasetId: string;
     seriesColumn: string;
-    indicators: Array<{
+    indicators: {
         column: string;
         label: string;
         max?: number;
-    }>;
+    }[];
     limit?: number;
     sortBy?: string;
     sortOrder?: "asc" | "desc";
@@ -17804,17 +17825,17 @@ declare type SelectCellConfig<R extends RecordType> = {
  * Represents a collection of selected items.
  * @template T - The type of items in the collection
  */
-export declare type SelectedItems<T> = ReadonlyArray<T>;
+export declare type SelectedItems<T> = readonly T[];
 
 export declare type SelectedItemsDetailedStatus<R extends RecordType, Filters extends FiltersDefinition> = {
     allSelected: boolean | "indeterminate";
     /** Status of items that have been loaded. Items not yet loaded won't appear here. */
-    itemsStatus: ReadonlyArray<{
+    itemsStatus: readonly {
         item: R;
         checked: boolean;
-    }>;
+    }[];
     /** All selected item IDs, including those not yet loaded */
-    selectedIds: ReadonlyArray<SelectionId>;
+    selectedIds: readonly SelectionId[];
     groupsStatus: Record<string, boolean>;
     filters: FiltersState<Filters>;
     selectedCount: number;
@@ -17848,21 +17869,21 @@ export declare type SelectionId = number | string;
 export declare type SelectionMeta<R extends RecordType> = {
     selectedItemsCount: number;
     totalKnownItemsCount: number;
-    checkedItems: ReadonlyArray<R>;
-    uncheckedItems: ReadonlyArray<R>;
+    checkedItems: readonly R[];
+    uncheckedItems: readonly R[];
 };
 
 export declare type SelectionStatus<R extends RecordType, Filters extends FiltersDefinition> = {
     allChecked: boolean | "indeterminate";
     /** Status of items that have been loaded. Items not yet loaded won't appear here. */
-    itemsStatus: ReadonlyArray<{
+    itemsStatus: readonly {
         item: R;
         checked: boolean;
-    }>;
+    }[];
     /** All selected item IDs, including those not yet loaded */
-    selectedIds: ReadonlyArray<SelectionId>;
-    checkedItems: ReadonlyArray<R>;
-    uncheckedItems: ReadonlyArray<R>;
+    selectedIds: readonly SelectionId[];
+    checkedItems: readonly R[];
+    uncheckedItems: readonly R[];
     groupsStatus: Record<string, boolean>;
     filters: FiltersState<Filters>;
     selectedCount: number;
@@ -18411,7 +18432,7 @@ declare type TableVisualizationOptions<R extends RecordType, _Filters extends Fi
     /**
      * The columns to display
      */
-    columns: ReadonlyArray<TableColumnDefinition<R, Sortings, Summaries>>;
+    columns: readonly TableColumnDefinition<R, Sortings, Summaries>[];
     /**
      * Placeholder to display in summary-row cells when no summary value is
      * rendered. This also applies to columns without a `summary` definition.
@@ -18615,7 +18636,7 @@ export declare type TagListProps<T extends TagType> = {
     /**
      * Array of tag data corresponding to the specified type.
      */
-    tags: Array<TagTypeMapping[T]>;
+    tags: TagTypeMapping[T][];
     /**
      * The maximum number of tags to display.
      * @default 4
@@ -19603,7 +19624,7 @@ export declare interface UseDataReturn<R extends RecordType> {
  * - actions: Available actions for the collection
  * - presets: Available filter presets
  */
-export declare function useDataSource<R extends RecordType = RecordType, FiltersSchema extends FiltersDefinition = FiltersDefinition, Sortings extends SortingsDefinition = SortingsDefinition, Grouping extends GroupingDefinition<R> = GroupingDefinition<R>>({ defaultFilters, currentFilters: externalCurrentFilters, defaultGrouping: externalDefaultGrouping, currentGrouping: externalCurrentGrouping, filters, search, defaultSortings, currentSortings: externalCurrentSortings, dataAdapter, grouping, ...rest }: DataSourceDefinition<R, FiltersSchema, Sortings, Grouping>, deps?: ReadonlyArray<unknown>): DataSource<R, FiltersSchema, Sortings, Grouping>;
+export declare function useDataSource<R extends RecordType = RecordType, FiltersSchema extends FiltersDefinition = FiltersDefinition, Sortings extends SortingsDefinition = SortingsDefinition, Grouping extends GroupingDefinition<R> = GroupingDefinition<R>>({ defaultFilters, currentFilters: externalCurrentFilters, defaultGrouping: externalDefaultGrouping, currentGrouping: externalCurrentGrouping, filters, search, defaultSortings, currentSortings: externalCurrentSortings, dataAdapter, grouping, ...rest }: DataSourceDefinition<R, FiltersSchema, Sortings, Grouping>, deps?: readonly unknown[]): DataSource<R, FiltersSchema, Sortings, Grouping>;
 
 export declare function useDataSourceItemNavigation<R extends RecordType>(props: UseDataSourceItemNavigationProps<R>): UseDataSourceItemNavigationReturn<R>;
 
@@ -20128,7 +20149,7 @@ export declare type UseSelectableProps<R extends RecordType, Filters extends Fil
      * Selectable rows currently rendered (incl. nested children), so "select all"
      * reaches rows absent from `data.records`. Falls back to `data.records`.
      */
-    getRenderedSelectableEntries?: () => Array<[SelectionId, R]>;
+    getRenderedSelectableEntries?: () => [SelectionId, R][];
     /**
      * Count of currently-rendered selectable rows (incl. nested children). Used
      * as the item total when it exceeds `paginationInfo.total`, so selection
@@ -20559,17 +20580,17 @@ declare namespace _Page {
 declare module "gridstack" {
     interface GridStackWidget {
         id?: string;
-        allowedSizes?: Array<{
+        allowedSizes?: {
             w: number;
             h: number;
-        }>;
+        }[];
         meta?: Record<string, unknown>;
     }
     interface GridStackNode {
-        allowedSizes?: Array<{
+        allowedSizes?: {
             w: number;
             h: number;
-        }>;
+        }[];
     }
 }
 

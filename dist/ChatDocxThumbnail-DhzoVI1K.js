@@ -1,32 +1,35 @@
 import { jsx as h } from "react/jsx-runtime";
-import { useRef as n, useState as b, useEffect as g } from "react";
-import { r as p } from "./docx-preview-BaRDMyPN.js";
+import { r as b } from "./docx-preview-BaRDMyPN.js";
+import { useRef as n, useState as g, useEffect as p } from "react";
 const x = ({
   url: a,
   width: s,
   onError: o,
   onRendered: f
 }) => {
-  const l = n(null), [c, m] = b(null), u = n(o);
+  const l = n(null), [c, m] = g(null), u = n(o);
   u.current = o;
   const i = n(f);
-  return i.current = f, g(() => {
+  return i.current = f, p(() => {
     const t = l.current;
-    if (!t) return;
+    if (!t)
+      return;
     let r = !1;
     return fetch(a).then((e) => {
-      if (!e.ok) throw new Error(`${e.status}`);
+      if (!e.ok)
+        throw new Error(`${e.status}`);
       return e.blob();
     }).then((e) => {
       if (!r)
-        return p(e, t, void 0, {
+        return b(e, t, void 0, {
           inWrapper: !1,
           breakPages: !1,
           ignoreLastRenderedPageBreak: !0,
           renderHeaders: !1,
           renderFooters: !1
         }).then(() => {
-          if (r) return;
+          if (r)
+            return;
           const d = t.scrollWidth;
           m(d > 0 ? Math.min(1, s / d) : 1), i.current();
         });

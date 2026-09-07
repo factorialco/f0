@@ -1,4 +1,4 @@
-import { u as W, t as je, v as Ge, m as $, x as Xe, y as Ze, z as qe, A as Ye, B as Je, E as Qe, G as et, H as tt, J as nt, K as rt, L as at, M as ot, N as ye, O as st, Q as Ce, l as it, R as ct, U as lt, V as dt, w as ut, r as ft } from "./F0CanvasPanel-Dzl4Ki4E.js";
+import { u as W, t as je, v as Ge, m as $, x as Xe, y as Ze, z as qe, A as Ye, B as Je, E as Qe, G as et, H as tt, J as nt, K as rt, L as at, M as ot, N as ye, O as st, Q as Ce, l as it, R as ct, U as lt, V as dt, w as ut, r as ft } from "./F0CanvasPanel-C0g2uN38.js";
 import { jsxs as R, jsx as l } from "react/jsx-runtime";
 import { forwardRef as re, useId as mt, useState as x, useRef as O, useEffect as _, useMemo as J, useCallback as M } from "react";
 import { d as H, f as de } from "./tooltip-CMBdJvJA.js";
@@ -25,7 +25,8 @@ function ae(...e) {
   return Array.from(t.values());
 }
 function Le(e, t) {
-  if (e.label) return e.label;
+  if (e.label)
+    return e.label;
   try {
     const a = t ?? e.locale, o = new Intl.DisplayNames([a], { type: "language" }).of(e.locale) ?? e.locale;
     return o.charAt(0).toLocaleUpperCase(a) + o.slice(1);
@@ -34,22 +35,26 @@ function Le(e, t) {
   }
 }
 function Z(e, t) {
-  if (e.length === 0) return;
+  if (e.length === 0)
+    return;
   const a = e.map((r) => r.locale), n = (r) => r.split("-")[0], o = (r) => a.find((u) => u === r) ?? a.find((u) => n(u) === n(r));
   if (t) {
     const r = o(t);
-    if (r) return r;
+    if (r)
+      return r;
   }
   const i = typeof navigator < "u" ? navigator.language : void 0;
   if (i) {
     const r = o(i);
-    if (r) return r;
+    if (r)
+      return r;
   }
   return a[0];
 }
 const Re = [0.5, 0.75, 1, 1.25, 1.5], oe = 1, le = 0.25, Q = 5, te = 0.1, q = 12, vt = 1, bt = 250, yt = [25, 50, 75], Lt = 300 * 1e3, wt = 10, kt = 0.03;
 function ne(e) {
-  if (!Number.isFinite(e) || e < 0) return "0:00";
+  if (!Number.isFinite(e) || e < 0)
+    return "0:00";
   const t = Math.floor(e / 60), a = Math.floor(e % 60);
   return `${t}:${a.toString().padStart(2, "0")}`;
 }
@@ -206,7 +211,8 @@ function Et({
         '[role="menuitemradio"]'
       )
     );
-    if (d.length === 0) return;
+    if (d.length === 0)
+      return;
     const m = d.indexOf(document.activeElement);
     let g;
     switch (u.key) {
@@ -283,7 +289,105 @@ function Et({
     )
   ] });
 }
-const ie = "off", we = "py-2 pr-4 text-base font-medium", Ct = "gap-2 py-2 pl-3 pr-2 text-base font-medium", Ae = "max-h-[var(--radix-dropdown-menu-content-available-height)] min-w-[13rem] overflow-y-auto p-1";
+function Ct({
+  currentTime: e,
+  duration: t,
+  markerTime: a,
+  blockSeekPastMarker: n = !1,
+  onSeek: o
+}) {
+  const { t: i } = W(), r = O(null), [u, d] = x(!1), [m, g] = x(null), y = t > 0 ? Math.min(1, e / t) : 0, c = a !== void 0 && t > 0 ? Math.min(1, a / t) : 0, f = a !== void 0 && t > 0 && a > 0 && a < t - le && e < a - le, h = (v) => {
+    const S = r.current;
+    if (!S)
+      return 0;
+    const I = S.getBoundingClientRect();
+    return Math.max(0, Math.min(1, (v - I.left) / I.width));
+  }, b = (v) => {
+    t && o(h(v) * t);
+  }, E = (v) => {
+    t && (v.preventDefault(), v.currentTarget.setPointerCapture(v.pointerId), d(!0), b(v.clientX));
+  }, A = (v) => {
+    t && (g(h(v.clientX)), u && b(v.clientX));
+  }, k = (v) => {
+    u && (d(!1), v.currentTarget.hasPointerCapture(v.pointerId) && v.currentTarget.releasePointerCapture(v.pointerId));
+  }, L = m !== null && n && a !== void 0 && m > c, T = (v) => {
+    if (!t)
+      return;
+    let S = null;
+    switch (v.key) {
+      case "ArrowLeft":
+        S = Math.max(0, e - Q);
+        break;
+      case "ArrowRight":
+        S = Math.min(t, e + Q);
+        break;
+      case "Home":
+        S = 0;
+        break;
+      case "End":
+        S = t;
+        break;
+      default:
+        return;
+    }
+    v.preventDefault(), v.stopPropagation(), o(S);
+  };
+  return /* @__PURE__ */ R(
+    "div",
+    {
+      ref: r,
+      className: H(
+        "relative flex h-4 flex-1 items-center rounded-sm",
+        "cursor-pointer touch-none",
+        de()
+      ),
+      role: "slider",
+      tabIndex: 0,
+      "aria-label": i("videoPlayer.seekLabel"),
+      "aria-valuemin": 0,
+      "aria-valuemax": t || 0,
+      "aria-valuenow": e,
+      "aria-valuetext": i("videoPlayer.timeProgress", {
+        current: ne(e),
+        total: ne(t)
+      }),
+      onPointerDown: E,
+      onPointerMove: A,
+      onPointerUp: k,
+      onPointerCancel: k,
+      onLostPointerCapture: () => d(!1),
+      onPointerLeave: () => g(null),
+      onKeyDown: T,
+      children: [
+        /* @__PURE__ */ l("div", { className: "absolute inset-x-0 h-1 rounded-sm bg-f1-foreground/30" }),
+        /* @__PURE__ */ l(
+          "div",
+          {
+            className: "pointer-events-none absolute left-0 h-1 rounded-sm bg-f1-foreground",
+            style: { width: `${y * 100}%` }
+          }
+        ),
+        f && /* @__PURE__ */ l(
+          "div",
+          {
+            className: "pointer-events-none absolute z-[1] h-2.5 w-0.5 -translate-x-px bg-f1-foreground/95",
+            style: { left: `${c * 100}%` },
+            "aria-hidden": "true"
+          }
+        ),
+        /* @__PURE__ */ l(
+          "div",
+          {
+            className: "pointer-events-none absolute z-[2] h-3 w-3 -translate-x-1/2 rounded-full bg-f1-foreground shadow-[0_0_4px_rgba(0,0,0,0.4)]",
+            style: { left: `${y * 100}%` }
+          }
+        ),
+        L && /* @__PURE__ */ l("div", { className: "absolute inset-0 cursor-not-allowed" })
+      ]
+    }
+  );
+}
+const ie = "off", we = "py-2 pr-4 text-base font-medium", Pt = "gap-2 py-2 pl-3 pr-2 text-base font-medium", Ae = "max-h-[var(--radix-dropdown-menu-content-available-height)] min-w-[13rem] overflow-y-auto p-1";
 function ce({
   icon: e,
   label: t,
@@ -297,7 +401,7 @@ function ce({
 }) {
   const m = u !== void 0, g = n.find((c) => c.locale === o), y = m && !r ? d : g ? Le(g) : d;
   return /* @__PURE__ */ R(et, { children: [
-    /* @__PURE__ */ R(tt, { className: Ct, children: [
+    /* @__PURE__ */ R(tt, { className: Pt, children: [
       /* @__PURE__ */ l(nt, { icon: e }),
       /* @__PURE__ */ l("span", { className: "flex-1", children: t }),
       /* @__PURE__ */ l("span", { className: "text-f1-foreground-secondary", children: y })
@@ -323,7 +427,7 @@ function ce({
     ) }) })
   ] });
 }
-function Pt({
+function St({
   containerRef: e,
   audioLanguages: t,
   audioLanguage: a,
@@ -404,104 +508,8 @@ function Pt({
     )
   ] });
 }
-function St(e) {
+function Rt(e) {
   return e.audioLanguages > 1 || e.captionLanguages > 1 || e.audioDescriptionLanguages > 1;
-}
-function Rt({
-  currentTime: e,
-  duration: t,
-  markerTime: a,
-  blockSeekPastMarker: n = !1,
-  onSeek: o
-}) {
-  const { t: i } = W(), r = O(null), [u, d] = x(!1), [m, g] = x(null), y = t > 0 ? Math.min(1, e / t) : 0, c = a !== void 0 && t > 0 ? Math.min(1, a / t) : 0, f = a !== void 0 && t > 0 && a > 0 && a < t - le && e < a - le, h = (v) => {
-    const S = r.current;
-    if (!S) return 0;
-    const I = S.getBoundingClientRect();
-    return Math.max(0, Math.min(1, (v - I.left) / I.width));
-  }, b = (v) => {
-    t && o(h(v) * t);
-  }, E = (v) => {
-    t && (v.preventDefault(), v.currentTarget.setPointerCapture(v.pointerId), d(!0), b(v.clientX));
-  }, A = (v) => {
-    t && (g(h(v.clientX)), u && b(v.clientX));
-  }, k = (v) => {
-    u && (d(!1), v.currentTarget.hasPointerCapture(v.pointerId) && v.currentTarget.releasePointerCapture(v.pointerId));
-  }, L = m !== null && n && a !== void 0 && m > c, T = (v) => {
-    if (!t) return;
-    let S = null;
-    switch (v.key) {
-      case "ArrowLeft":
-        S = Math.max(0, e - Q);
-        break;
-      case "ArrowRight":
-        S = Math.min(t, e + Q);
-        break;
-      case "Home":
-        S = 0;
-        break;
-      case "End":
-        S = t;
-        break;
-      default:
-        return;
-    }
-    v.preventDefault(), v.stopPropagation(), o(S);
-  };
-  return /* @__PURE__ */ R(
-    "div",
-    {
-      ref: r,
-      className: H(
-        "relative flex h-4 flex-1 items-center rounded-sm",
-        "cursor-pointer touch-none",
-        de()
-      ),
-      role: "slider",
-      tabIndex: 0,
-      "aria-label": i("videoPlayer.seekLabel"),
-      "aria-valuemin": 0,
-      "aria-valuemax": t || 0,
-      "aria-valuenow": e,
-      "aria-valuetext": i("videoPlayer.timeProgress", {
-        current: ne(e),
-        total: ne(t)
-      }),
-      onPointerDown: E,
-      onPointerMove: A,
-      onPointerUp: k,
-      onPointerCancel: k,
-      onLostPointerCapture: () => d(!1),
-      onPointerLeave: () => g(null),
-      onKeyDown: T,
-      children: [
-        /* @__PURE__ */ l("div", { className: "absolute inset-x-0 h-1 rounded-sm bg-f1-foreground/30" }),
-        /* @__PURE__ */ l(
-          "div",
-          {
-            className: "pointer-events-none absolute left-0 h-1 rounded-sm bg-f1-foreground",
-            style: { width: `${y * 100}%` }
-          }
-        ),
-        f && /* @__PURE__ */ l(
-          "div",
-          {
-            className: "pointer-events-none absolute z-[1] h-2.5 w-0.5 -translate-x-px bg-f1-foreground/95",
-            style: { left: `${c * 100}%` },
-            "aria-hidden": "true"
-          }
-        ),
-        /* @__PURE__ */ l(
-          "div",
-          {
-            className: "pointer-events-none absolute z-[2] h-3 w-3 -translate-x-1/2 rounded-full bg-f1-foreground shadow-[0_0_4px_rgba(0,0,0,0.4)]",
-            style: { left: `${y * 100}%` }
-          }
-        ),
-        L && /* @__PURE__ */ l("div", { className: "absolute inset-0 cursor-not-allowed" })
-      ]
-    }
-  );
 }
 function Dt(e, t) {
   return t || e === 0 ? Pe : e <= 0.5 ? ht : gt;
@@ -542,7 +550,8 @@ function Tt({
 function Mt({ value: e, onChange: t }) {
   const { t: a } = W(), n = O(null), [o, i] = x(!1), r = Math.max(0, Math.min(1, e)), u = (c) => {
     const f = n.current;
-    if (!f) return 0;
+    if (!f)
+      return 0;
     const h = f.getBoundingClientRect(), b = h.width - q;
     return b <= 0 ? 0 : Math.max(
       0,
@@ -660,7 +669,7 @@ function At({
   onSeek: Y,
   download: X
 }) {
-  const { t: p } = W(), N = g && L.length <= 1, z = c && I.length <= 1, V = St({
+  const { t: p } = W(), N = g && L.length <= 1, z = c && I.length <= 1, V = Rt({
     audioLanguages: E.length,
     captionLanguages: L.length,
     audioDescriptionLanguages: I.length
@@ -698,7 +707,7 @@ function At({
           }
         ),
         /* @__PURE__ */ l(
-          Rt,
+          Ct,
           {
             currentTime: t,
             duration: a,
@@ -760,7 +769,7 @@ function At({
           }
         ),
         V && /* @__PURE__ */ l(
-          Pt,
+          St,
           {
             containerRef: m,
             audioLanguages: E,
@@ -823,7 +832,8 @@ const xe = "descriptions";
 function It(e, { enabled: t, describedSrc: a, descriptions: n }) {
   const o = a !== void 0, { trackSrc: i, needsCrossOrigin: r } = Ie(n), [u, d] = x(!1), m = o || n !== void 0 || u, [g, y] = x(), c = O(!1);
   return _(() => {
-    if (!e) return;
+    if (!e)
+      return;
     const f = e.textTracks, h = typeof window < "u" && "speechSynthesis" in window, b = t && !o && h, E = () => {
       c.current && (c.current = !1, e.play().catch(() => {
       }));
@@ -832,7 +842,8 @@ function It(e, { enabled: t, describedSrc: a, descriptions: n }) {
       const s = new SpeechSynthesisUtterance(C);
       s.onend = E, s.onerror = E, window.speechSynthesis.speak(s);
     }, k = /* @__PURE__ */ new WeakSet(), L = [], T = (C) => {
-      if (C.kind !== xe || (C.mode = "hidden", k.has(C)) || typeof C.addEventListener != "function") return;
+      if (C.kind !== xe || (C.mode = "hidden", k.has(C)) || typeof C.addEventListener != "function")
+        return;
       k.add(C);
       const s = () => {
         const D = C.activeCues?.[0]?.text || void 0;
@@ -895,7 +906,8 @@ function _t({
       ) || u.closest('[role="menu"], [role^="menuitem"]') || u.getAttribute("role") === "slider"))
         return;
       const d = e.current;
-      if (!d) return;
+      if (!d)
+        return;
       switch (r.key.length === 1 ? r.key.toLowerCase() : r.key) {
         case " ":
           r.preventDefault(), a();
@@ -939,7 +951,8 @@ function Ft({
   _(() => {
     n.current = 0, o.current = 0, u(0);
   }, [a]), _(() => {
-    if (!e) return;
+    if (!e)
+      return;
     const m = () => {
       i.current && e.currentTime > n.current + le && (e.currentTime = n.current);
     }, g = () => {
@@ -971,7 +984,8 @@ function Ut(e, t) {
   return _(() => {
     m(!1), u(!1);
   }, [a]), _(() => {
-    if (!e) return;
+    if (!e)
+      return;
     const c = e.textTracks, f = e.querySelector(
       'track[kind="captions"]'
     ), h = () => {
@@ -999,7 +1013,8 @@ function Ut(e, t) {
     }
     for (let k = 0; k < c.length; k++) {
       const L = c[k];
-      if (!Ee.has(L.kind) || typeof L.addEventListener != "function") continue;
+      if (!Ee.has(L.kind) || typeof L.addEventListener != "function")
+        continue;
       const T = () => h();
       L.addEventListener("cuechange", T), b.push(() => L.removeEventListener("cuechange", T));
     }
@@ -1036,7 +1051,8 @@ function Kt({
   _(() => {
     o.current = !1;
   }, [a]), _(() => {
-    if (!e || !i) return;
+    if (!e || !i)
+      return;
     const r = () => {
       o.current || !e.duration || e.currentTime >= $t(e.duration) && (o.current = !0, n.current?.(e));
     };
@@ -1056,9 +1072,11 @@ function zt({
   _(() => {
     o.current.clear();
   }, [a]), _(() => {
-    if (!e || !i) return;
+    if (!e || !i)
+      return;
     const r = () => {
-      if (!e.duration) return;
+      if (!e.duration)
+        return;
       const u = Math.round(e.currentTime / e.duration * 100);
       for (const d of yt)
         o.current.has(d) || u >= d && (o.current.add(d), n.current?.(d, e));
@@ -1080,7 +1098,8 @@ function Bt(e) {
     o.current = 0, t.current && (t.current.playbackRate = oe), u(!1), m(!1), y(0), f(0), L(oe);
   }, [e]), _(() => {
     const s = a;
-    if (!s) return;
+    if (!s)
+      return;
     const P = () => m(!0), D = () => m(!1), B = () => m(!1), j = () => {
       b(s.volume), A(s.muted);
     }, K = () => f(s.duration || 0), G = () => {
@@ -1102,7 +1121,8 @@ function Bt(e) {
     s && (s.muted = !s.muted);
   }, []), S = M((s) => {
     const P = t.current;
-    if (!P) return;
+    if (!P)
+      return;
     const D = Math.max(0, Math.min(1, s));
     P.volume = D, P.muted = D === 0;
   }, []), I = M((s) => {
@@ -1110,7 +1130,8 @@ function Bt(e) {
     P && (P.playbackRate = s);
   }, []), C = M((s) => {
     const P = t.current;
-    if (!P) return;
+    if (!P)
+      return;
     const D = Math.max(0, Math.min(s, P.duration || s));
     P.currentTime = D, y(D);
   }, []);
@@ -1141,7 +1162,8 @@ function Ht({
   a.current = t;
   const n = !!t;
   _(() => {
-    if (!e || !n) return;
+    if (!e || !n)
+      return;
     let o = null;
     const i = () => {
       o && (clearInterval(o), o = null);
@@ -1202,7 +1224,8 @@ function Wt({
     descriptions: G
   }), V = M(() => {
     const w = p.videoRef.current;
-    if (!w) return;
+    if (!w)
+      return;
     const He = w.currentTime, We = !w.paused, be = () => {
       w.currentTime = He, We && w.play().catch(() => {
       }), w.removeEventListener("loadedmetadata", be);
