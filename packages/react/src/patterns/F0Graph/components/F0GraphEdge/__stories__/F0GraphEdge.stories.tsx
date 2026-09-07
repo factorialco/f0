@@ -110,6 +110,7 @@ const meta = {
   tags: ["stable", "!autodocs"],
   parameters: {
     layout: "centered",
+    a11y: { test: "error" },
   },
 } satisfies Meta<typeof F0GraphEdge>
 
