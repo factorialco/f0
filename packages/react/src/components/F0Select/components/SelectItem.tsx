@@ -5,6 +5,7 @@ import { F0TagPerson } from "@/components/tags/F0TagPerson"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
 import { OneEllipsis } from "@/lib/OneEllipsis"
+import { cn } from "@/lib/utils"
 import { SelectItem as SelectItemPrimitive } from "@/ui/Select"
 import { F0SelectItemMetadata, F0SelectItemObject } from "../types"
 
@@ -52,6 +53,15 @@ export const SelectItem = <T extends string, R>({
       disabled={item.disabled}
       id={optionId}
       data-active={active ? "true" : undefined}
+      className={cn(
+        // The `focus:` highlight, for an option made active by
+        // `aria-activedescendant` rather than focused.
+        "data-[active=true]:after:bg-f1-background-hover data-[active=true]:after:text-f1-foreground data-[active=true]:after:opacity-100",
+        // Selected outranks hover, focus and active: none of them may swap
+        // its colour for the plain highlight.
+        "focus:data-[state=checked]:after:bg-f1-background-selected-bold/10 dark:focus:data-[state=checked]:after:bg-f1-background-selected-bold/20",
+        "data-[active=true]:data-[state=checked]:after:bg-f1-background-selected-bold/10 dark:data-[active=true]:data-[state=checked]:after:bg-f1-background-selected-bold/20"
+      )}
     >
       <div
         className={`flex w-full gap-1.5 ${item.description ? "items-start" : "items-center"}`}
