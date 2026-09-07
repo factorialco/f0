@@ -8,7 +8,7 @@ import { F0Dialog } from "@/patterns/F0Dialog"
 import { useF0Form } from "@/patterns/F0Form"
 
 import { useDataCollectionSource } from "../../../hooks/useDataCollectionSource"
-import { OneDataCollection } from "../../../index"
+import { OneDataCollection } from "../../.."
 import {
   cardVisualization,
   createResourceDataAdapter,

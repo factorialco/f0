@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest"
 import { getColor } from "@/kits/Charts/utils/colors"
 import { zeroRender as render, screen } from "@/testing/test-utils"
 
-import { F0SegmentedBar } from "../index"
+import { F0SegmentedBar } from ".."
 
 const getSegments = () =>
   Array.from(screen.getByRole("progressbar").children) as HTMLElement[]

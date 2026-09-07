@@ -9,7 +9,9 @@ import type { HourCycle } from "@/lib/providers/user-platafform/types"
  * Extracts time string (HH:mm) from a Date
  */
 export function dateToTimeString(date: Date | undefined): string {
-  if (!date || !(date instanceof Date) || isNaN(date.getTime())) return ""
+  if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
+    return ""
+  }
 
   const hours = String(date.getHours()).padStart(2, "0")
   const minutes = String(date.getMinutes()).padStart(2, "0")
@@ -22,10 +24,14 @@ export function dateToTimeString(date: Date | undefined): string {
  * Uses today's date as the base.
  */
 export function timeStringToDate(timeString: string): Date | undefined {
-  if (!timeString) return undefined
+  if (!timeString) {
+    return undefined
+  }
 
   const [hours, minutes] = timeString.split(":").map(Number)
-  if (isNaN(hours) || isNaN(minutes)) return undefined
+  if (isNaN(hours) || isNaN(minutes)) {
+    return undefined
+  }
 
   const date = new Date()
   date.setHours(hours, minutes, 0, 0)
@@ -39,7 +45,9 @@ export function combineDateAndTime(
   date: Date | undefined,
   timeString: string | undefined
 ): Date | undefined {
-  if (!date) return undefined
+  if (!date) {
+    return undefined
+  }
 
   const result = new Date(date)
 
@@ -64,7 +72,9 @@ export function dateToDisplayTime(
   date: Date | undefined,
   hourCycle: HourCycle
 ): string {
-  if (!date || !(date instanceof Date) || isNaN(date.getTime())) return ""
+  if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
+    return ""
+  }
   return format(date, timePattern(hourCycle))
 }
 
@@ -77,7 +87,9 @@ export function displayTimeToDate(
   hourCycle: HourCycle
 ): Date | undefined {
   const trimmed = input.trim()
-  if (!trimmed) return undefined
+  if (!trimmed) {
+    return undefined
+  }
   const parsed = parse(trimmed, timePattern(hourCycle), new Date())
   return isValid(parsed) ? parsed : undefined
 }

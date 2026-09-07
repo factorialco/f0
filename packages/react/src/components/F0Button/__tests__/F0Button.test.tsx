@@ -5,7 +5,7 @@ import { Add } from "@/icons/app"
 import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
 
 import { ButtonInternal } from "../internal"
-import { F0Button } from "../index"
+import { F0Button } from ".."
 
 describe("F0Button", () => {
   it("should call the onClick handler when clicked", async () => {

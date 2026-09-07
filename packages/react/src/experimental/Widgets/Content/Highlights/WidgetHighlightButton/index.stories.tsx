@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { InfoCircle as InfoCircleIcon } from "../../../../../icons/app"
-import { WidgetHighlightButton, WidgetHighlightButtonProps } from "./index"
+import { WidgetHighlightButton, WidgetHighlightButtonProps } from "."
 
 const meta: Meta<WidgetHighlightButtonProps> = {
   title: "Widgets/WidgetHighlightButton",

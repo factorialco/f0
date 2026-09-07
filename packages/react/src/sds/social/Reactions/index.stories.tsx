@@ -5,7 +5,7 @@ import { expect, within } from "storybook/test"
 import { getEmojiLabel } from "@/lib/emojis"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
-import { Reactions } from "./index"
+import { Reactions } from "."
 
 const meta = {
   component: Reactions,

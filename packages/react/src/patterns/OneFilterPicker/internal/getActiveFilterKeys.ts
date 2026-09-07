@@ -21,4 +21,4 @@ export const getActiveFilterKeys = <Filters extends FiltersDefinition>(
     })
 
     return !isEmpty
-  }) as Array<keyof Filters>
+  }) as (keyof Filters)[]

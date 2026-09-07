@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { ComponentProps } from "react"
 
 import { AlertCircle, Circle } from "../../../../icons/app"
-import { IndicatorsList } from "./index"
+import { IndicatorsList } from "."
 
 const taskCategories = [
   {

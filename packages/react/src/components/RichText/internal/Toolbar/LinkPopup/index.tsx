@@ -29,8 +29,12 @@ export const LinkPopup = ({ editor, disabled }: LinkPopupProps) => {
   const [url, setUrl] = useState(editor.getAttributes("link").href || "")
 
   const handleLinkButtonClick = (e?: React.MouseEvent) => {
-    if (e) e.preventDefault()
-    if (disabled) return
+    if (e) {
+      e.preventDefault()
+    }
+    if (disabled) {
+      return
+    }
     setOpenLinkPopover(!openLinkPopover)
   }
 
@@ -45,8 +49,12 @@ export const LinkPopup = ({ editor, disabled }: LinkPopupProps) => {
 
   const handleSave = () => {
     const trimmedUrl = url.trim()
-    if (!trimmedUrl) return
-    if (!checkIfUrlIsValid(trimmedUrl)) return
+    if (!trimmedUrl) {
+      return
+    }
+    if (!checkIfUrlIsValid(trimmedUrl)) {
+      return
+    }
     editor
       .chain()
       .focus()

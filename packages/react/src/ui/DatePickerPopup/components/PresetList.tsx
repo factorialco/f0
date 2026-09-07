@@ -17,13 +17,17 @@ const isDateMatchingPreset = (
   date: DatePickerValue | undefined,
   preset: DatePreset
 ): boolean => {
-  if (!date?.value) return false
+  if (!date?.value) {
+    return false
+  }
 
   const presetRange =
     typeof preset.value === "function" ? preset.value() : preset.value
 
   // Check if the granularity matches
-  if (date.granularity !== preset.granularity) return false
+  if (date.granularity !== preset.granularity) {
+    return false
+  }
 
   // Check if the date ranges match
   return (

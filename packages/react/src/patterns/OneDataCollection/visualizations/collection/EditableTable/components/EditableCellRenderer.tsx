@@ -24,8 +24,12 @@ function getCellValue<R extends RecordType>(
     return v === null || v === undefined ? "" : String(v)
   }
   const rendered = column.render(item)
-  if (typeof rendered === "string") return rendered
-  if (typeof rendered === "number") return String(rendered)
+  if (typeof rendered === "string") {
+    return rendered
+  }
+  if (typeof rendered === "number") {
+    return String(rendered)
+  }
 
   return ""
 }

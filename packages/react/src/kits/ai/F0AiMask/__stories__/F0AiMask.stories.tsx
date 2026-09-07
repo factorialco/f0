@@ -18,7 +18,9 @@ function F0AiMaskWrapper({
 
   useEffect(() => {
     const container = containerRef.current
-    if (!container) return
+    if (!container) {
+      return
+    }
 
     const motion = new F0AiMask({ width, height, mode })
     container.appendChild(motion.element)

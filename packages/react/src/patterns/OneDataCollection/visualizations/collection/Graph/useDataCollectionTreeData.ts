@@ -94,7 +94,9 @@ const resolveFetchResult = <R>(result: unknown): Promise<R[]> => {
       let settled = false
       const subscription = observable.subscribe({
         next: (state) => {
-          if (settled) return
+          if (settled) {
+            return
+          }
           if (state?.error) {
             settled = true
             reject(state.error)
@@ -136,11 +138,15 @@ const mergeHydratedData = <R extends RecordType>(
   prev: GraphNode<R>[],
   hydrated: Map<string, R>
 ): GraphNode<R>[] => {
-  if (hydrated.size === 0) return prev
+  if (hydrated.size === 0) {
+    return prev
+  }
   let changed = false
   const next = prev.map((node) => {
     const record = hydrated.get(node.id)
-    if (!record) return node
+    if (!record) {
+      return node
+    }
     changed = true
     // Preserve structure (childrenCount/childrenLoaded/parentId) from the
     // skeleton; only swap in the rich record and mark it loaded.
@@ -169,7 +175,9 @@ const indexChildrenByParent = <R extends RecordType>(
 ): Map<string, string[]> => {
   const index = new Map<string, string[]>()
   for (const node of nodes) {
-    if (node.parentId === null) continue
+    if (node.parentId === null) {
+      continue
+    }
     const siblings = index.get(node.parentId) ?? []
     siblings.push(node.id)
     index.set(node.parentId, siblings)
@@ -190,7 +198,9 @@ const collectSubtreeIds = <R extends RecordType>(
   byId: Map<string, GraphNode<R>>
 ): Set<string> => {
   const collected = new Set<string>()
-  if (ids.length === 0) return collected
+  if (ids.length === 0) {
+    return collected
+  }
   const childrenByParent = indexChildrenByParent(byId.values())
   const frontier: string[] = []
   for (const id of ids) {
@@ -201,7 +211,9 @@ const collectSubtreeIds = <R extends RecordType>(
   }
   for (let cursor = 0; cursor < frontier.length; cursor++) {
     for (const childId of childrenByParent.get(frontier[cursor]) ?? []) {
-      if (collected.has(childId)) continue
+      if (collected.has(childId)) {
+        continue
+      }
       collected.add(childId)
       frontier.push(childId)
     }
@@ -259,8 +271,12 @@ const applyUpsertRecords = <R extends RecordType>({
     const childrenCount = getChildrenCount(record)
     if (existing) {
       if (existing.parentId !== parentId) {
-        if (existing.parentId !== null) touchedParents.add(existing.parentId)
-        if (parentId !== null) touchedParents.add(parentId)
+        if (existing.parentId !== null) {
+          touchedParents.add(existing.parentId)
+        }
+        if (parentId !== null) {
+          touchedParents.add(parentId)
+        }
       }
       byId.set(id, {
         ...existing,
@@ -272,7 +288,9 @@ const applyUpsertRecords = <R extends RecordType>({
         dataLoaded: hydrates ? true : existing.dataLoaded,
       })
     } else {
-      if (parentId !== null) touchedParents.add(parentId)
+      if (parentId !== null) {
+        touchedParents.add(parentId)
+      }
       byId.set(id, {
         id,
         parentId,
@@ -301,16 +319,22 @@ const reconcileTouchedParents = <R extends RecordType>(
   touchedParents: Set<string>,
   loadedParents: Set<string>
 ): void => {
-  if (touchedParents.size === 0) return
+  if (touchedParents.size === 0) {
+    return
+  }
   // One pass over the nodes instead of one scan per touched parent.
   const childCounts = new Map<string, number>()
   for (const node of byId.values()) {
-    if (node.parentId === null || !touchedParents.has(node.parentId)) continue
+    if (node.parentId === null || !touchedParents.has(node.parentId)) {
+      continue
+    }
     childCounts.set(node.parentId, (childCounts.get(node.parentId) ?? 0) + 1)
   }
   for (const parentId of touchedParents) {
     const parent = byId.get(parentId)
-    if (!parent) continue
+    if (!parent) {
+      continue
+    }
     const inMemoryChildren = childCounts.get(parentId) ?? 0
     if (loadedParents.has(parentId) || parent.childrenLoaded) {
       byId.set(parentId, {
@@ -331,7 +355,9 @@ const reconcileTouchedParents = <R extends RecordType>(
         childrenCount,
         childrenLoaded: fullyLoaded || parent.childrenLoaded,
       })
-      if (fullyLoaded) loadedParents.add(parentId)
+      if (fullyLoaded) {
+        loadedParents.add(parentId)
+      }
     }
   }
 }
@@ -500,7 +526,9 @@ export function useDataCollectionTreeData<
       while (frontier.length > 0) {
         const loadable = frontier.filter((node) => !seen.has(node.id))
         loadable.forEach((node) => seen.add(node.id))
-        if (loadable.length === 0) break
+        if (loadable.length === 0) {
+          break
+        }
 
         const results = await Promise.all(
           loadable.map((node) =>
@@ -601,10 +629,14 @@ export function useDataCollectionTreeData<
   const loadVisibleNodeData = useCallback(
     (ids: string[]) => {
       const loader = optionsRef.current.loadNodeData
-      if (!loader) return
+      if (!loader) {
+        return
+      }
       const byId = new Map(nodesRef.current.map((node) => [node.id, node]))
       const wanted = ids.filter((id) => byId.get(id)?.dataLoaded === false)
-      if (wanted.length === 0) return
+      if (wanted.length === 0) {
+        return
+      }
       loader(wanted)
         .then((records) => {
           const hydrated = new Map(
@@ -630,7 +662,9 @@ export function useDataCollectionTreeData<
   // — the caller only needs to send the records that changed, not their parents.
   const applyLiveUpdate = useCallback(
     (upsert: R[], remove: string[]): void => {
-      if (upsert.length === 0 && remove.length === 0) return
+      if (upsert.length === 0 && remove.length === 0) {
+        return
+      }
       const opts = optionsRef.current
 
       setNodes((prev) => {
@@ -646,7 +680,9 @@ export function useDataCollectionTreeData<
         const dropSubtrees = (ids: string[]): void => {
           for (const id of collectSubtreeIds(ids, byId)) {
             const parentId = byId.get(id)?.parentId
-            if (parentId != null) touchedParents.add(parentId)
+            if (parentId != null) {
+              touchedParents.add(parentId)
+            }
             byId.delete(id)
             loadedParents.current.delete(id)
             removedIds.add(id)
@@ -685,8 +721,9 @@ export function useDataCollectionTreeData<
           const nextExpanded = new Set(
             [...currentExpanded].filter((id) => !removedIds.has(id))
           )
-          if (nextExpanded.size !== currentExpanded.size)
+          if (nextExpanded.size !== currentExpanded.size) {
             setExpandedState(nextExpanded)
+          }
         }
 
         // Preserve prior order for survivors; append any newly inserted nodes.
@@ -726,7 +763,9 @@ export function useDataCollectionTreeData<
       let frontier = roots
       for (let level = 0; level < depth && frontier.length > 0; level++) {
         const loadable = frontier.filter(hasChildren)
-        if (loadable.length === 0) break
+        if (loadable.length === 0) {
+          break
+        }
 
         const childArrays = await Promise.all(
           loadable.map((node) => loadChildrenOf(node.id))
@@ -744,7 +783,9 @@ export function useDataCollectionTreeData<
       if (focusOnEntry && optionsRef.current.loadNodePath) {
         try {
           const ancestorIds = await resolvePath(focusOnEntry)
-          for (const id of ancestorIds) expanded.add(id)
+          for (const id of ancestorIds) {
+            expanded.add(id)
+          }
         } catch {
           // Ignore — fall back to the default fit-to-all initial view.
         }
@@ -783,8 +824,12 @@ export function useDataCollectionTreeData<
   const lastLiveUpdateVersionRef = useRef<number | undefined>(liveUpdateVersion)
   useEffect(() => {
     const liveUpdate = optionsRef.current.liveUpdate
-    if (!liveUpdate || liveUpdate.version === lastLiveUpdateVersionRef.current)
+    if (
+      !liveUpdate ||
+      liveUpdate.version === lastLiveUpdateVersionRef.current
+    ) {
       return
+    }
     lastLiveUpdateVersionRef.current = liveUpdate.version
     applyLiveUpdate(liveUpdate.upsert ?? [], liveUpdate.remove ?? [])
   }, [liveUpdateVersion, applyLiveUpdate])

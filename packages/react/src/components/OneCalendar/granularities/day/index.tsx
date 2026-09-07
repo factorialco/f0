@@ -130,7 +130,9 @@ export const dayGranularity: GranularityDefinition = {
 
       // Fallback: manual parsing for other separators (dot, dash)
       const [day, month, year] = trimmed.split(/[/.-]/)
-      if (!day || !month || !year) return new Date(NaN)
+      if (!day || !month || !year) {
+        return new Date(NaN)
+      }
       return new Date(Number(year), Number(month) - 1, Number(day))
     }
 

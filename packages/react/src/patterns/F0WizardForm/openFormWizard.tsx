@@ -75,7 +75,9 @@ function wrapWizardDefinition<T extends F0FormSchema | F0PerSectionSchema>(
       ...def,
       onSubmit: async (arg) => {
         const result = await def.onSubmit(arg)
-        if (result.success) capture(arg.fullData as WizardData<T>)
+        if (result.success) {
+          capture(arg.fullData as WizardData<T>)
+        }
         return result
       },
     }
@@ -87,7 +89,9 @@ function wrapWizardDefinition<T extends F0FormSchema | F0PerSectionSchema>(
     ...def,
     onSubmit: async (arg) => {
       const result = await def.onSubmit(arg)
-      if (result.success) capture(arg.data as WizardData<T>)
+      if (result.success) {
+        capture(arg.data as WizardData<T>)
+      }
       return result
     },
   }
@@ -170,7 +174,9 @@ export function openFormWizard<T extends F0FormSchema | F0PerSectionSchema>(
     const id = options.id ?? nanoid()
     let settled = false
     const finish = (result: OpenFormWizardResult<T>) => {
-      if (settled) return
+      if (settled) {
+        return
+      }
       settled = true
       resolve(result)
       unmountFormOverlay(id)

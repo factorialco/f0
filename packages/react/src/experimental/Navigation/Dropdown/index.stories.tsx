@@ -6,7 +6,7 @@ import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import * as Icons from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
-import { Dropdown, MobileDropdown as MobileDropdownComponent } from "./index"
+import { Dropdown, MobileDropdown as MobileDropdownComponent } from "."
 
 const meta = {
   title: "Dropdown",

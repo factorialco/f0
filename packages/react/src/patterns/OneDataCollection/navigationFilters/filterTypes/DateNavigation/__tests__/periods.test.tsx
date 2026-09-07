@@ -7,7 +7,7 @@ import { TranslationsType } from "@/lib/providers/i18n"
 import { zeroRender as render } from "@/testing/test-utils"
 
 import { DateNavigation } from "../DateNavigation"
-import dateNavigatorFilter from "../index"
+import dateNavigatorFilter from ".."
 import { DateNavigatorFilterDefinition } from "../types"
 
 const periods = [

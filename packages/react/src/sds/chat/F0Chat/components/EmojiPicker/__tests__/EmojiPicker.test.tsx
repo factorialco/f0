@@ -43,7 +43,7 @@ vi.mock("react-virtuoso", async (importOriginal) => {
   }
 })
 
-const { EmojiPicker } = await import("../index")
+const { EmojiPicker } = await import("..")
 
 const searchBox = () => screen.getByRole("combobox")
 const grid = () => screen.getByRole("listbox", { name: "Emoji" })

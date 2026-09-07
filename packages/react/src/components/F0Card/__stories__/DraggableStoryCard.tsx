@@ -22,7 +22,9 @@ export function DraggableStoryCard({
   const [overEdge, setOverEdge] = useState<"top" | "bottom" | null>(null)
 
   useEffect(() => {
-    if (!ref.current) return
+    if (!ref.current) {
+      return
+    }
     return dropTargetForElements({
       element: ref.current,
       getData: ({ input, element }) =>

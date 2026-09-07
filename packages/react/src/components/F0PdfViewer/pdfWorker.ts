@@ -10,5 +10,7 @@ export const configurePdfWorker = (src?: string): void => {
 }
 
 export const ensurePdfWorker = (): void => {
-  if (!configured) configurePdfWorker()
+  if (!configured) {
+    configurePdfWorker()
+  }
 }

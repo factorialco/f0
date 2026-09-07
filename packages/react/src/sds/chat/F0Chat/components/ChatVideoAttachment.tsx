@@ -1,8 +1,7 @@
 import { lazy, Suspense, type ReactNode, useState } from "react"
 
 import { F0FileItem } from "@/components/F0FileItem"
-import { Download } from "@/icons/app"
-import { SolidPlay } from "@/icons/app"
+import { Download, SolidPlay } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"

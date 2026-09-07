@@ -51,23 +51,37 @@ function stripHtml(html: string): string {
 }
 
 function capitalizeFirst(text: string): string {
-  if (!text) return text
+  if (!text) {
+    return text
+  }
   return text.charAt(0).toUpperCase() + text.slice(1)
 }
 
 function formatDuration(totalSeconds: number): string {
   const { days, hours, minutes, seconds } = secondsToFields(totalSeconds)
   const parts: string[] = []
-  if (days > 0) parts.push(`${days}d`)
-  if (hours > 0) parts.push(`${hours}h`)
-  if (minutes > 0) parts.push(`${minutes}m`)
-  if (seconds > 0 || parts.length === 0) parts.push(`${seconds}s`)
+  if (days > 0) {
+    parts.push(`${days}d`)
+  }
+  if (hours > 0) {
+    parts.push(`${hours}h`)
+  }
+  if (minutes > 0) {
+    parts.push(`${minutes}m`)
+  }
+  if (seconds > 0 || parts.length === 0) {
+    parts.push(`${seconds}s`)
+  }
   return parts.join(" ")
 }
 
 function isDateLike(value: unknown): value is Date | string {
-  if (value instanceof Date) return true
-  if (typeof value !== "string") return false
+  if (value instanceof Date) {
+    return true
+  }
+  if (typeof value !== "string") {
+    return false
+  }
   const date = new Date(value)
   return !Number.isNaN(date.getTime())
 }
@@ -78,7 +92,9 @@ function toLocaleDateString(value: Date | string): string {
 }
 
 function extractText(content: DetailsItemContent): string {
-  if (content.type === "item") return content.text
+  if (content.type === "item") {
+    return content.text
+  }
   return ""
 }
 
@@ -86,7 +102,9 @@ function formatFieldContent(
   value: unknown,
   fieldType?: string
 ): DetailsItemContent | DetailsItemContent[] {
-  if (value == null || value === "") return { type: "item", text: "—" }
+  if (value == null || value === "") {
+    return { type: "item", text: "—" }
+  }
 
   if (fieldType === "duration" && typeof value === "number") {
     return { type: "item", text: formatDuration(value) }
@@ -130,7 +148,9 @@ function formatFieldContent(
     const texts = value
       .map((entry) => {
         const content = formatFieldContent(entry)
-        if (Array.isArray(content)) return content.map(extractText).join(", ")
+        if (Array.isArray(content)) {
+          return content.map(extractText).join(", ")
+        }
         return extractText(content)
       })
       .filter(Boolean)
@@ -189,9 +209,15 @@ export function FormCard({
   openRef.current = handleOpen
 
   useEffect(() => {
-    if (typeof window === "undefined") return
-    if (window.innerWidth < AUTO_OPEN_MIN_WIDTH) return
-    if (autoOpenedFormNames.has(formName)) return
+    if (typeof window === "undefined") {
+      return
+    }
+    if (window.innerWidth < AUTO_OPEN_MIN_WIDTH) {
+      return
+    }
+    if (autoOpenedFormNames.has(formName)) {
+      return
+    }
 
     autoOpenedFormNames.add(formName)
     openRef.current()
@@ -226,7 +252,9 @@ export function FormCard({
             }
           })
           .filter((field): field is NonNullable<typeof field> => {
-            if (!field) return false
+            if (!field) {
+              return false
+            }
             const firstContent = Array.isArray(field.content)
               ? field.content[0]
               : field.content

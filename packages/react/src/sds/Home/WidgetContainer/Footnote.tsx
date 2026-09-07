@@ -48,13 +48,17 @@ export const footnotePieces = (text: string): Piece[] => {
     // image file instead would be a worse answer than none.
     const image = text[at - 1] === "!"
     const before = text.slice(cursor, image ? at - 1 : at)
-    if (before) pieces.push({ text: before })
+    if (before) {
+      pieces.push({ text: before })
+    }
     pieces.push(
       image || !SAFE_HREF.test(href) ? { text: label } : { label, href }
     )
     cursor = at + match[0].length
   }
-  if (cursor < text.length) pieces.push({ text: text.slice(cursor) })
+  if (cursor < text.length) {
+    pieces.push({ text: text.slice(cursor) })
+  }
 
   return pieces
 }

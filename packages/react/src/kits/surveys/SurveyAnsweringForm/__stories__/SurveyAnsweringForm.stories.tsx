@@ -30,13 +30,17 @@ const useMockUpload: UseFileUpload = (): FileUploadHookReturn => {
     setProgress(0)
 
     await sleep(500)
-    if (abortRef.current) return { type: "aborted" }
+    if (abortRef.current) {
+      return { type: "aborted" }
+    }
 
     setStatus("uploading")
 
     for (let i = 1; i <= 10; i++) {
       await sleep(150)
-      if (abortRef.current) return { type: "aborted" }
+      if (abortRef.current) {
+        return { type: "aborted" }
+      }
       setProgress(i / 10)
     }
 

@@ -35,14 +35,17 @@ const CreditsPopoverPicker = ({
   /** Custom popover trigger (asChild). Defaults to the Sliders icon button. */
   trigger?: ReactNode
 }) => {
-  if (employeeCredits)
+  if (employeeCredits) {
     return (
       <EmployeeCreditsPopover
         employeeCredits={employeeCredits}
         trigger={trigger}
       />
     )
-  if (credits) return <CreditsPopover credits={credits} trigger={trigger} />
+  }
+  if (credits) {
+    return <CreditsPopover credits={credits} trigger={trigger} />
+  }
   return null
 }
 

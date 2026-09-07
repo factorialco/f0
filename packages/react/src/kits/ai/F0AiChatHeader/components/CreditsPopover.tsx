@@ -47,7 +47,9 @@ export function CreditsPopover({ credits, trigger }: CreditsPopoverProps) {
     [credits]
   )
 
-  if (!credits) return null
+  if (!credits) {
+    return null
+  }
 
   const percentage = data
     ? Math.min(100, Math.round((data.used / data.total) * 100))

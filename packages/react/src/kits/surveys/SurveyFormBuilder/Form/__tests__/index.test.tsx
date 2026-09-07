@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest"
 import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
 
 import { SurveyDatasets, SurveyFormBuilderElement } from "../../types"
-import { SurveyFormBuilder } from "../index"
+import { SurveyFormBuilder } from ".."
 
 // --- Test fixtures ---
 

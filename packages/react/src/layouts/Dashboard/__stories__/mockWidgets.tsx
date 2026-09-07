@@ -10,11 +10,7 @@ const getRandomArrayElement = <T,>(array: readonly T[]): T => {
   return array[Math.floor(Math.random() * array.length)]
 }
 
-const generateRandomData = (
-  length: number,
-  min: number = 0,
-  max: number = 100
-): number[] => {
+const generateRandomData = (length: number, min = 0, max = 100): number[] => {
   return Array.from(
     { length },
     () => Math.floor(Math.random() * (max - min + 1)) + min

@@ -29,11 +29,15 @@ export const ScoreEditOption = ({
   const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false)
 
   useEffect(() => {
-    if (disabled) setIsEmojiPickerOpen(false)
+    if (disabled) {
+      setIsEmojiPickerOpen(false)
+    }
   }, [disabled])
 
   const handleClick = () => {
-    if (disabled) return
+    if (disabled) {
+      return
+    }
     onClick(value)
   }
 

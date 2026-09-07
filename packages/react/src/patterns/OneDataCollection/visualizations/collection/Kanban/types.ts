@@ -26,12 +26,12 @@ export type KanbanVisualizationOptions<
   _Filters extends FiltersDefinition,
   _Sortings extends SortingsDefinition,
 > = {
-  lanes: ReadonlyArray<KanbanLaneDefinition>
+  lanes: readonly KanbanLaneDefinition[]
   /** Per-group columns: when grouping is active, each group's board renders the
    * lanes this returns instead of the global `lanes` (lane ids must exist in
    * `source.lanes`). Enables the onboarding case where each policy version has
    * its own phases. NOTE: API shape pending Foundations review. */
-  getLanesForGroup?: (groupKey: string) => ReadonlyArray<KanbanLaneDefinition>
+  getLanesForGroup?: (groupKey: string) => readonly KanbanLaneDefinition[]
   /** Whether each group header shows a selection checkbox when the collection is
    * selectable. Defaults to `true` (parity with Card/List). Set to `false` to
    * keep per-card selection while hiding the group-level checkbox — e.g. when
@@ -42,7 +42,7 @@ export type KanbanVisualizationOptions<
   title?: (record: Record) => string
   description?: (record: Record) => string
   avatar?: (record: Record) => CardAvatarVariant
-  metadata?: (record: Record) => ReadonlyArray<CardMetadata>
+  metadata?: (record: Record) => readonly CardMetadata[]
   onMove?: KanbanOnMove<Record>
   onCreate?: KanbanOnCreate
 }

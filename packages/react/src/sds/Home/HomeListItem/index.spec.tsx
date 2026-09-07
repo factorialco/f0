@@ -3,7 +3,7 @@ import { describe, expect, test, vi } from "vitest"
 import { Clock, Cross } from "@/icons/app"
 import { screen, userEvent, waitFor, zeroRender } from "@/testing/test-utils"
 
-import { HomeListItem } from "./index"
+import { HomeListItem } from "."
 
 describe("HomeListItem", () => {
   test("speaks with its three voices: title, subtitle inline, description below", () => {

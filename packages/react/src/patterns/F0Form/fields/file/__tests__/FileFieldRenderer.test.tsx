@@ -70,11 +70,7 @@ function createMockUploadHook(
   }
 }
 
-function createFile(
-  name: string,
-  size: number = 1024,
-  type: string = "application/pdf"
-): File {
+function createFile(name: string, size = 1024, type = "application/pdf"): File {
   const content = new Uint8Array(size)
   return new File([content], name, { type })
 }

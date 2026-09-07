@@ -78,7 +78,9 @@ export function usePageHeaderItemNavigation<R extends RecordType>(
   const goToNext = nav?.goToNext
 
   return useMemo(() => {
-    if (!hasInput) return null
+    if (!hasInput) {
+      return null
+    }
 
     const counter =
       absoluteIndex !== null && totalItems !== undefined
@@ -108,7 +110,9 @@ export function usePageHeaderItemNavigation<R extends RecordType>(
           ? { url: nextItemUrl, title: title(nextItem, "Next") }
           : undefined
 
-    if (!previous && !next && !counter) return null
+    if (!previous && !next && !counter) {
+      return null
+    }
 
     return { previous, next, counter }
   }, [

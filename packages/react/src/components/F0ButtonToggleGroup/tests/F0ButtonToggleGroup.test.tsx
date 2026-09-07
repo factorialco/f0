@@ -112,7 +112,9 @@ vi.mock("@radix-ui/react-toggle-group", () => {
       value: string
     }) => {
       const handleClick = () => {
-        if (!currentOnValueChange) return
+        if (!currentOnValueChange) {
+          return
+        }
 
         if (currentType === "single") {
           // In single mode, clicking selects that item (or deselects if already selected)
@@ -894,7 +896,7 @@ describe("F0ButtonToggleGroup", () => {
     })
 
     it("handles all size variants", () => {
-      const sizes: Array<"sm" | "md" | "lg"> = ["sm", "md", "lg"]
+      const sizes: ("sm" | "md" | "lg")[] = ["sm", "md", "lg"]
 
       sizes.forEach((size) => {
         const { unmount } = zeroRender(
@@ -910,7 +912,7 @@ describe("F0ButtonToggleGroup", () => {
     })
 
     it("handles all variant options", () => {
-      const variants: Array<"compact" | "expanded"> = ["compact", "expanded"]
+      const variants: ("compact" | "expanded")[] = ["compact", "expanded"]
 
       variants.forEach((variant) => {
         const { unmount } = zeroRender(

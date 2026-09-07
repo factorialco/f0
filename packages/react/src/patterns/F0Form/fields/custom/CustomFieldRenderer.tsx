@@ -1,4 +1,4 @@
-import { ControllerRenderProps, FieldValues } from "react-hook-form"
+import { ControllerRenderProps } from "react-hook-form"
 
 import type { ResolvedField } from "../types"
 import type { F0CustomField, CustomFieldRenderPropsBase } from "./types"
@@ -7,7 +7,7 @@ import { useOptionalF0FormContext } from "../../context"
 
 interface CustomFieldRendererProps {
   field: ResolvedField<F0CustomField>
-  formField: ControllerRenderProps<FieldValues>
+  formField: ControllerRenderProps
   error?: string
   isValidating: boolean
   required?: boolean

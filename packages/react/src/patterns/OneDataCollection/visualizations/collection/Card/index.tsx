@@ -41,7 +41,7 @@ export type CardVisualizationOptions<
   _Filters extends FiltersDefinition,
   _Sortings extends SortingsDefinition,
 > = {
-  cardProperties: ReadonlyArray<CardPropertyDefinition<T>>
+  cardProperties: readonly CardPropertyDefinition<T>[]
   title: (record: T) => string
   description?: (record: T) => string
   avatar?: (record: T) => CardAvatarVariant
@@ -129,7 +129,7 @@ type GroupCardsProps<
   items: Record[]
   selectedItems: Map<number | string, Record>
   handleSelectItemChange: (item: Record, checked: boolean) => void
-  cardProperties: ReadonlyArray<CardPropertyDefinition<Record>>
+  cardProperties: readonly CardPropertyDefinition<Record>[]
   title: (record: Record) => string
   description?: (record: Record) => string
   avatar?: (record: Record) => CardAvatarVariant
@@ -177,8 +177,8 @@ const GroupCards = <
 >) => {
   function getMetadata(
     item: Record,
-    properties: ReadonlyArray<CardPropertyDefinition<Record>>
-  ): Array<CardMetadata> {
+    properties: readonly CardPropertyDefinition<Record>[]
+  ): CardMetadata[] {
     return properties
       .map((property) => {
         if (property.hide?.(item)) {
@@ -191,17 +191,20 @@ const GroupCards = <
         }
 
         const cardProperty = convertToCardMetadataProperty(result)
-        if (!cardProperty) return null
+        if (!cardProperty) {
+          return null
+        }
 
         const propertyWithLabel = {
           ...cardProperty,
           label: property.label,
         } as CardMetadataProperty
 
-        if (propertyWithLabel.type === "file")
+        if (propertyWithLabel.type === "file") {
           return {
             property: propertyWithLabel,
           }
+        }
 
         return {
           icon: property.icon ?? Placeholder,

@@ -72,7 +72,9 @@ export function useAudioDescription(
   const autoPausedRef = useRef(false)
 
   useEffect(() => {
-    if (!video) return
+    if (!video) {
+      return
+    }
     const tracks = video.textTracks
     const canSpeak =
       typeof window !== "undefined" && "speechSynthesis" in window
@@ -96,15 +98,21 @@ export function useAudioDescription(
     }
 
     const subscribed = new WeakSet<TextTrack>()
-    const cleanups: Array<() => void> = []
+    const cleanups: (() => void)[] = []
 
     const watch = (track: TextTrack) => {
-      if (track.kind !== DESCRIPTION_TRACK_KIND) return
+      if (track.kind !== DESCRIPTION_TRACK_KIND) {
+        return
+      }
       // Hidden: cues parse and `cuechange` fires, but nothing renders natively
       // (browsers don't display descriptions tracks) — we draw the text.
       track.mode = "hidden"
-      if (subscribed.has(track)) return
-      if (typeof track.addEventListener !== "function") return
+      if (subscribed.has(track)) {
+        return
+      }
+      if (typeof track.addEventListener !== "function") {
+        return
+      }
       subscribed.add(track)
       const onCueChange = () => {
         const cue = track.activeCues?.[0] as VTTCue | undefined
@@ -128,9 +136,13 @@ export function useAudioDescription(
       let inBand = false
       for (let i = 0; i < tracks.length; i++) {
         const track = tracks[i]
-        if (track.kind !== DESCRIPTION_TRACK_KIND) continue
+        if (track.kind !== DESCRIPTION_TRACK_KIND) {
+          continue
+        }
         // A track with no backing <track> element is embedded in the file.
-        if (descriptions === undefined) inBand = true
+        if (descriptions === undefined) {
+          inBand = true
+        }
         watch(track)
       }
       setHasInBandDescriptions(inBand)
@@ -153,7 +165,9 @@ export function useAudioDescription(
       cleanups.forEach((cleanup) => cleanup())
       // Leaving the runtime path (toggle off / unmount): stop speaking and
       // release any auto-pause.
-      if (canSpeak) window.speechSynthesis.cancel()
+      if (canSpeak) {
+        window.speechSynthesis.cancel()
+      }
       resume()
     }
   }, [video, enabled, usingDescribedSrc, descriptions, trackSrc])

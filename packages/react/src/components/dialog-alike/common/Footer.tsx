@@ -42,7 +42,9 @@ export const Footer = (props: FooterProps) => {
   }
 
   const renderPrimaryAction = () => {
-    if (!hasPrimaryAction) return null
+    if (!hasPrimaryAction) {
+      return null
+    }
 
     const _variant = props.type === "critical" ? "critical" : "default"
 
@@ -59,9 +61,13 @@ export const Footer = (props: FooterProps) => {
           }))}
           onClick={async (value) => {
             // Guard against re-triggering while an action is still pending.
-            if (isPrimaryDropdownLoading) return
+            if (isPrimaryDropdownLoading) {
+              return
+            }
             const action = primaryActions.find((a) => a.value === value)
-            if (!action) return
+            if (!action) {
+              return
+            }
             setIsPrimaryDropdownLoading(true)
             try {
               await toPromise(action.onClick)

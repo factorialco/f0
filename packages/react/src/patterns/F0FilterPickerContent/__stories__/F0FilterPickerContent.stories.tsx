@@ -11,7 +11,7 @@ import type {
 } from "../../OneFilterPicker/types"
 
 import { filterDefinition } from "../../OneFilterPicker/__stories__/mockData"
-import { F0FilterPickerContent } from "../index"
+import { F0FilterPickerContent } from ".."
 
 const simpleFilterDefinition = {
   department: {

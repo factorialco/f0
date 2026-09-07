@@ -4,7 +4,7 @@ import { Add } from "@/icons/app"
 import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
 
 import { TOCAction } from "../types"
-import { TOCFooter } from "./index"
+import { TOCFooter } from "."
 
 describe("TOCFooter", () => {
   it("renders nothing when actions is undefined", () => {

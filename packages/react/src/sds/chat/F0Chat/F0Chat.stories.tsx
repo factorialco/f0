@@ -395,7 +395,9 @@ const StormHud = ({
         const distance =
           viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight
         samples.push(distance)
-        if (samples.length > 120) samples.shift()
+        if (samples.length > 120) {
+          samples.shift()
+        }
         const canvas = canvasRef.current
         const ctx = canvas?.getContext("2d")
         if (canvas && ctx) {
@@ -407,8 +409,11 @@ const StormHud = ({
           samples.forEach((s, i) => {
             const x = (i / 119) * canvas.width
             const y = canvas.height - (s / max) * (canvas.height - 4) - 2
-            if (i === 0) ctx.moveTo(x, y)
-            else ctx.lineTo(x, y)
+            if (i === 0) {
+              ctx.moveTo(x, y)
+            } else {
+              ctx.lineTo(x, y)
+            }
           })
           ctx.stroke()
         }
@@ -901,7 +906,9 @@ const VideoConversation = (): ReactNode => {
 const ColdStartVideoConversation = (): ReactNode => {
   const [isOpen, setIsOpen] = useState(false)
 
-  if (isOpen) return <VideoConversation />
+  if (isOpen) {
+    return <VideoConversation />
+  }
 
   return (
     <div className="flex h-[680px] items-center justify-center">

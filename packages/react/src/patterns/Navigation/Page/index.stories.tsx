@@ -11,7 +11,7 @@ import { PageHeader } from "@/experimental/Navigation/Header/PageHeader"
 import * as HeaderStories from "@/experimental/Navigation/Header/PageHeader/index.stories"
 import { Tabs } from "@/patterns/Navigation/Tabs"
 import * as TabsStories from "@/patterns/Navigation/Tabs/index.stories"
-import { Page } from "./index"
+import { Page } from "."
 
 type TabsProps = ComponentProps<typeof Tabs>
 

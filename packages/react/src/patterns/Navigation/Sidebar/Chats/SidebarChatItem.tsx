@@ -36,7 +36,9 @@ const PresenceDot = ({
   isActive: boolean
   label: string
 }) => {
-  if (presence === "offline") return null
+  if (presence === "offline") {
+    return null
+  }
   return (
     <div
       role="img"

@@ -19,9 +19,12 @@ function sortFunnelData(
   dataPoints: F0DataChartFunnelDataPoint[],
   sort: "descending" | "ascending" | "none"
 ): F0DataChartFunnelDataPoint[] {
-  if (sort === "none") return dataPoints
-  if (sort === "ascending")
+  if (sort === "none") {
+    return dataPoints
+  }
+  if (sort === "ascending") {
     return [...dataPoints].sort((a, b) => a.value - b.value)
+  }
   return [...dataPoints].sort((a, b) => b.value - a.value)
 }
 

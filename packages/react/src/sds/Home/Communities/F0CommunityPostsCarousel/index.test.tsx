@@ -2,7 +2,7 @@ import { describe, expect, test, vi } from "vitest"
 
 import { screen, userEvent, zeroRender } from "@/testing/test-utils"
 
-import { F0CommunityPostsCarousel, type CommunityPostSummary } from "./index"
+import { F0CommunityPostsCarousel, type CommunityPostSummary } from "."
 
 const LABELS = { previous: "Previous posts", next: "More posts" }
 
@@ -131,7 +131,9 @@ describe("F0CommunityPostsCarousel", () => {
     // while every tile carries the same one.
     const tiles = screen.getAllByRole("article")
     expect(tiles).toHaveLength(2)
-    for (const tile of tiles) expect(tile).toHaveClass("h-96")
+    for (const tile of tiles) {
+      expect(tile).toHaveClass("h-96")
+    }
   })
 
   test("the body takes the room the rest of the tile left, not a fixed count", () => {

@@ -18,7 +18,7 @@ import {
   SURNAMES_MOCK,
 } from "@/mocks"
 
-import { Breadcrumbs, BreadcrumbsProps } from "./index"
+import { Breadcrumbs, BreadcrumbsProps } from "."
 
 const meta: Meta<typeof Breadcrumbs> = {
   title: "Navigation/Breadcrumbs",

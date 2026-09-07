@@ -8,7 +8,7 @@ import {
 import { describe, expect, it } from "vitest"
 
 import { WeekStartDay } from "../../../types"
-import { createWeekGranularity, weekGranularity } from "../index"
+import { createWeekGranularity, weekGranularity } from ".."
 
 describe("weekGranularity", () => {
   // January 15, 2024 is a Monday (week 3 of 2024)

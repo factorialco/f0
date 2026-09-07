@@ -31,13 +31,19 @@ export function useVideoMilestones({
   }, [resetKey])
 
   useEffect(() => {
-    if (!video || !enabled) return
+    if (!video || !enabled) {
+      return
+    }
 
     const handleTimeUpdate = () => {
-      if (!video.duration) return
+      if (!video.duration) {
+        return
+      }
       const progress = Math.round((video.currentTime / video.duration) * 100)
       for (const milestone of DEFAULT_MILESTONES) {
-        if (firedRef.current.has(milestone)) continue
+        if (firedRef.current.has(milestone)) {
+          continue
+        }
         if (progress >= milestone) {
           firedRef.current.add(milestone)
           onMilestoneRef.current?.(milestone, video)

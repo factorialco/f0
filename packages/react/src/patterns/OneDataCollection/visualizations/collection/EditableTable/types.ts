@@ -274,7 +274,7 @@ export type EditableTableVisualizationOptions<
   TableVisualizationOptions<R, _Filters, Sortings, Summaries>,
   "columns"
 > & {
-  columns: ReadonlyArray<EditableTableColumnDefinition<R, Sortings, Summaries>>
+  columns: readonly EditableTableColumnDefinition<R, Sortings, Summaries>[]
   /**
    * Called when a cell value changes. Receives an object with the full updated
    * row (`updatedItem`) and a `changes` map of the modified attributes, keyed by

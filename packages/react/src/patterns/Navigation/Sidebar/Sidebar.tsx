@@ -74,7 +74,9 @@ function _Sidebar({
   }
 
   const renderFooter = () => {
-    if (!footer) return null
+    if (!footer) {
+      return null
+    }
     if (isValidElement(footer) && onFooterDropdownClick) {
       return cloneElement(
         footer as ReactElement<React.ComponentProps<typeof SidebarFooter>>,

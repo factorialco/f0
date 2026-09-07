@@ -6,7 +6,7 @@ import { HomeLayout } from "@/layouts/HomeLayout"
 import { Default as DefaultHomeLayoutStory } from "@/layouts/HomeLayout/index.stories"
 
 import { ApplicationFrame } from "@/patterns/ApplicationFrame"
-import { DaytimePage, DaytimePageProps } from "./index"
+import { DaytimePage, DaytimePageProps } from "."
 
 const meta: Meta<typeof DaytimePage> = {
   title: "Home/DaytimePage",

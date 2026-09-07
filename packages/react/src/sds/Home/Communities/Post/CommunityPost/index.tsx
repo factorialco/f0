@@ -195,7 +195,9 @@ export const BaseCommunityPost = ({
     event.preventDefault()
     event.stopPropagation()
 
-    if (!description) return
+    if (!description) {
+      return
+    }
 
     setExpandedDescription({ id, description })
   }
@@ -207,7 +209,9 @@ export const BaseCommunityPost = ({
   }, [descriptionExpanded])
 
   useEffect(() => {
-    if (!descriptionExpandable) setExpandedDescription(null)
+    if (!descriptionExpandable) {
+      setExpandedDescription(null)
+    }
   }, [descriptionExpandable])
 
   useEffect(() => {
@@ -226,7 +230,9 @@ export const BaseCommunityPost = ({
 
     updateDescriptionOverflow()
 
-    if (typeof ResizeObserver === "undefined") return
+    if (typeof ResizeObserver === "undefined") {
+      return
+    }
 
     const resizeObserver = new ResizeObserver(updateDescriptionOverflow)
     resizeObserver.observe(descriptionElement)

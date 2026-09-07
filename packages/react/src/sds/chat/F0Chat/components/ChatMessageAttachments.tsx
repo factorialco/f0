@@ -55,7 +55,9 @@ export const ChatMessageAttachments = ({
   const { openImagePreview } = useChatImagePreview()
   const emit = useF0ChatEmit()
   const attachments = message.attachments
-  if (!attachments || attachments.length === 0) return null
+  if (!attachments || attachments.length === 0) {
+    return null
+  }
   const surfaceClassName = messageSurfaceColorClass(message.author, isMine)
 
   const {
@@ -202,7 +204,9 @@ export const ChatMessageAttachments = ({
         >
           {albumCells(images).map((cell, cellIndex, cells) => {
             const image = images[cell.index]
-            if (!image) return null
+            if (!image) {
+              return null
+            }
             const hostsMeta =
               metaHost === "image" && cellIndex === cells.length - 1
             return (

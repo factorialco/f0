@@ -515,7 +515,9 @@ export const MainContent: React.FC<MainContentProps> = ({
                 height={VIRTUAL_LIST_HEIGHT}
                 itemCount={totalFlattenedItems + (onCreate ? 1 : 0)}
                 itemSize={(index) => {
-                  if (index === 0 && onCreate) return ITEM_SIZE_DEFAULT
+                  if (index === 0 && onCreate) {
+                    return ITEM_SIZE_DEFAULT
+                  }
                   const adjustedIndex = onCreate ? index - 1 : index
                   return flattenedList[adjustedIndex]?.parent === null
                     ? ITEM_SIZE_PARENT

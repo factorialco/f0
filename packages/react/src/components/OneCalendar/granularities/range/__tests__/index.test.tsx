@@ -1,7 +1,7 @@
 import { addDays, differenceInDays, endOfDay, startOfDay } from "date-fns"
 import { describe, expect, it } from "vitest"
 
-import { rangeGranularity } from "../index"
+import { rangeGranularity } from ".."
 
 describe("rangeGranularity", () => {
   const baseDate = new Date(2024, 0, 15) // January 15, 2024

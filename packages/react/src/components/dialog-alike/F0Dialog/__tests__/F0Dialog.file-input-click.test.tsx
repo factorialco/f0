@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { zeroRender as render, screen } from "@/testing/test-utils"
 
-import { F0Dialog } from "../index"
+import { F0Dialog } from ".."
 
 /**
  * Regression cover for the native file picker not opening inside a dialog-alike

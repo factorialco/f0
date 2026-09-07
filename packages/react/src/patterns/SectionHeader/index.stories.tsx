@@ -7,7 +7,7 @@ import { StandardLayout } from "@/layouts/StandardLayout"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import * as Icon from "@/icons/app"
-import { SectionHeader } from "./index"
+import { SectionHeader } from "."
 
 const meta: Meta<typeof SectionHeader> = {
   component: SectionHeader,

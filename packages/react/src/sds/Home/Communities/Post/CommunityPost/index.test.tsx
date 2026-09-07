@@ -2,7 +2,7 @@ import { afterEach, beforeAll, expect, test, vi } from "vitest"
 
 import { L10nProvider } from "@/lib/providers/l10n"
 import { screen, userEvent, zeroRender as render } from "@/testing/test-utils"
-import { BaseCommunityPost, CommunityPostProps } from "./index"
+import { BaseCommunityPost, CommunityPostProps } from "."
 
 const defaultProps: CommunityPostProps = {
   id: "post-1",

@@ -36,8 +36,11 @@ export const ChatHeaderSearch = (): ReactNode => {
   const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "Enter") {
       e.preventDefault()
-      if (e.shiftKey) goToPrevMatch()
-      else goToNextMatch()
+      if (e.shiftKey) {
+        goToPrevMatch()
+      } else {
+        goToNextMatch()
+      }
     } else if (e.key === "Escape") {
       e.preventDefault()
       closeSearch()

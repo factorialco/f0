@@ -48,7 +48,7 @@ export type PageAction = {
       onClick: () => void
     }
   | {
-      actions: Array<{ label: string; href: string }>
+      actions: { label: string; href: string }[]
     }
 )
 

@@ -7,11 +7,7 @@ import { Microphone, MicrophoneNegative } from "@/icons/app"
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
 
-import {
-  buttonToggleColors,
-  buttonToggleSizes,
-  buttonToggleVariants,
-} from "../"
+import { buttonToggleColors, buttonToggleSizes, buttonToggleVariants } from ".."
 import { F0ButtonToggle } from "../F0ButtonToggle"
 
 const meta = {

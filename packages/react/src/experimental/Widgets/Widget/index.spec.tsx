@@ -5,7 +5,7 @@ import { afterEach, describe, expect, test, vi } from "vitest"
 /* eslint-disable no-constant-binary-expression */
 import { userEvent, zeroRender } from "@/testing/test-utils"
 
-import { Widget } from "./index"
+import { Widget } from "."
 
 const renderWidget = () => {
   return zeroRender(

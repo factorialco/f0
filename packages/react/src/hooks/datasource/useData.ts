@@ -115,7 +115,9 @@ const decorateWithGroupId = <R extends RecordType>(
 
   return records.map((record) => {
     const cached = cache.entries.get(record)
-    if (cached) return cached
+    if (cached) {
+      return cached
+    }
 
     const decorated = {
       ...record,
@@ -516,7 +518,9 @@ export function useData<
       isLoadingMoreRef.current = false
       // Stamp the rendered records with the query they answer. Batched with
       // the setters above, so this costs no extra render.
-      if (query !== undefined) setCommittedQuery(query)
+      if (query !== undefined) {
+        setCommittedQuery(query)
+      }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want to re-run this callback when data.length changes
     [
@@ -802,7 +806,9 @@ export function useData<
   const loadMore = useCallback(
     () => {
       const currentPaginationInfo = paginationInfoRef.current
-      if (!currentPaginationInfo || isLoading || isLoadingMore) return
+      if (!currentPaginationInfo || isLoading || isLoadingMore) {
+        return
+      }
 
       if (!isInfiniteScrollPagination(currentPaginationInfo)) {
         console.warn(
@@ -845,7 +851,9 @@ export function useData<
 
   useEffect(
     () => {
-      if (!enabled) return
+      if (!enabled) {
+        return
+      }
       if (!isLoadingMoreRef.current) {
         // Page-based reuse: when only the page size shrank (same filters /
         // sortings / search) and page 1 already holds at least that many

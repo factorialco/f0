@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest"
 
 import { zeroRender as render } from "@/testing/test-utils"
 
-import { TooltipInternal } from "../index"
+import { TooltipInternal } from ".."
 
 describe("TooltipInternal with a bulleted list", () => {
   it("renders one bullet per item, with the object form's title as its lead", async () => {

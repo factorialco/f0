@@ -48,14 +48,14 @@ export type HiddenAction =
   | "duplicate"
   | "delete"
 
-export type HiddenActions = ReadonlyArray<HiddenAction>
+export type HiddenActions = readonly HiddenAction[]
 
 /**
  * The parts of a question that `lockedFields` can freeze on their own, without
  * locking the question outright. Both are the question's wording — what it asks
  * — as opposed to the answer it collects.
  */
-export type LockedFields = ReadonlyArray<"title" | "description">
+export type LockedFields = readonly ("title" | "description")[]
 
 /**
  * Explanation surfaced in a locked item's lock tooltip (authoring view only —

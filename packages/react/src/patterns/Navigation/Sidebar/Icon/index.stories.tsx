@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { SidebarIcon } from "./index"
+import { SidebarIcon } from "."
 
 const meta: Meta<typeof SidebarIcon> = {
   title: "Sidebar/Icon",

@@ -9,7 +9,7 @@ import {
   zeroRender as render,
 } from "@/testing/test-utils"
 
-import { F0PhoneInput } from "../index"
+import { F0PhoneInput } from ".."
 
 const getInput = () => screen.getByRole("textbox") as HTMLInputElement
 const getCountryTrigger = () => screen.getByRole("combobox")

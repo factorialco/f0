@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest"
 import { UserPlatformProvider } from "@/lib/providers/user-platafform/UserPlatformProvider"
 import { zeroRender } from "@/testing/test-utils"
 
-import { WithDataTestIdPropsOf, withDataTestId } from "../index"
+import { WithDataTestIdPropsOf, withDataTestId } from ".."
 
 const renderWithProviders = zeroRender
 

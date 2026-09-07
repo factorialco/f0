@@ -6,7 +6,7 @@ import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
 
 import type { FiltersDefinition } from "../types"
 
-import { ChipsList, Controls, OneFilterPicker, Root } from "../index"
+import { ChipsList, Controls, OneFilterPicker, Root } from ".."
 
 /**
  * OverflowList renders items in both a hidden measurement container

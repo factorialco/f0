@@ -47,7 +47,9 @@ export function describeFormSchema(
   for (const [fieldId, fieldSchema] of Object.entries(shape)) {
     const zodSchema = fieldSchema as ZodTypeAny
     const config = getF0Config(zodSchema)
-    if (!config) continue
+    if (!config) {
+      continue
+    }
 
     const fieldType = inferFieldType(zodSchema, config)
     const required = isFieldRequired(zodSchema, fieldType)

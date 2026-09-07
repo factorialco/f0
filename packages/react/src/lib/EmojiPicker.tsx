@@ -72,7 +72,9 @@ function observeEmojiButtonAria(element: EmojiMartElement): () => void {
 
   return () => {
     observer?.disconnect()
-    if (animationFrame !== null) cancelAnimationFrame(animationFrame)
+    if (animationFrame !== null) {
+      cancelAnimationFrame(animationFrame)
+    }
   }
 }
 
@@ -109,7 +111,9 @@ function EmojiPickerElement({ className, ...props }: EmojiPickerProps) {
   // crashes the page.
   useEffect(() => {
     const container = containerRef.current
-    if (!container) return
+    if (!container) {
+      return
+    }
 
     const element = document.createElement(
       "em-emoji-picker"
@@ -135,7 +139,9 @@ function EmojiPickerElement({ className, ...props }: EmojiPickerProps) {
   // Push later prop changes to the live element (as @emoji-mart/react does).
   useEffect(() => {
     const element = elementRef.current
-    if (!element) return
+    if (!element) {
+      return
+    }
 
     element.className = className ?? ""
     element.update?.(props)

@@ -1,4 +1,4 @@
-import type { ControllerRenderProps, FieldValues } from "react-hook-form"
+import type { ControllerRenderProps } from "react-hook-form"
 
 import { useId } from "react"
 
@@ -46,7 +46,7 @@ export function F0FormField({
     onBlur: onBlur ?? (() => {}),
     name: field.id,
     ref: () => {},
-  } as ControllerRenderProps<FieldValues>
+  } as ControllerRenderProps
 
   const fieldState = {
     error:

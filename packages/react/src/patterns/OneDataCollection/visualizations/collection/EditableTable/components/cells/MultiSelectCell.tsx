@@ -17,7 +17,9 @@ function getSelectedValues<R extends RecordType>(
   item: R,
   columnId: string | undefined
 ): string[] {
-  if (columnId === undefined) return []
+  if (columnId === undefined) {
+    return []
+  }
   const raw = item[columnId as keyof R]
   return Array.isArray(raw)
     ? raw.filter((v): v is string => typeof v === "string")

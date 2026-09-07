@@ -1308,7 +1308,9 @@ describe("F0Chat", () => {
 
   it("seeds more than 40 readers for the application frame overflow demo", () => {
     const seed = SEED_BY_ID.get("grp-reporting")
-    if (!seed) throw new Error("Expected grp-reporting mock seed")
+    if (!seed) {
+      throw new Error("Expected grp-reporting mock seed")
+    }
 
     const messages = initialConvState(seed).messages.filter(isUserMessage)
 
@@ -1318,7 +1320,9 @@ describe("F0Chat", () => {
     }
 
     const firstParticipant = seed.participants[0]
-    if (!firstParticipant) throw new Error("Expected group participants")
+    if (!firstParticipant) {
+      throw new Error("Expected group participants")
+    }
     const readers = groupReadersFor(
       {
         ...seed,
@@ -1329,7 +1333,9 @@ describe("F0Chat", () => {
     expect(new Set(readers?.map(({ id }) => id)).size).toBe(readers?.length)
 
     const dmSeed = SEED_BY_ID.get("dm-eleanor")
-    if (!dmSeed) throw new Error("Expected dm-eleanor mock seed")
+    if (!dmSeed) {
+      throw new Error("Expected dm-eleanor mock seed")
+    }
     expect(groupReadersFor(dmSeed, ME.id)).toBeUndefined()
   })
 
@@ -1347,7 +1353,9 @@ describe("F0Chat", () => {
         const message = result.current.states["grp-reporting"]?.messages
           .filter(isUserMessage)
           .find(({ body }) => body === "Receipt state test")
-        if (!message) throw new Error("Expected the live mock message")
+        if (!message) {
+          throw new Error("Expected the live mock message")
+        }
         return message
       }
 
@@ -1373,13 +1381,17 @@ describe("F0Chat", () => {
 
   it("resolves complete and fallback reaction users in the application mock", () => {
     const seed = SEED_BY_ID.get("grp-reporting")
-    if (!seed) throw new Error("Expected grp-reporting mock seed")
+    if (!seed) {
+      throw new Error("Expected grp-reporting mock seed")
+    }
 
     const messages = initialConvState(seed).messages
     const message = messages
       .filter(isUserMessage)
       .find((item) => item.reactions?.some(({ emoji }) => emoji === "🎉"))
-    if (!message) throw new Error("Expected a seeded reaction message")
+    if (!message) {
+      throw new Error("Expected a seeded reaction message")
+    }
 
     expect(
       resolveMockReactionUsers(seed, messages, message.id, "🎉").map(

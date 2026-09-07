@@ -5,7 +5,7 @@ import { fn } from "storybook/test"
 
 import { famousEmployees } from "../entity-select-name.factory"
 import { teamsWithEmployees } from "../groups-avatar-name.factory"
-import { EntitySelectListItem } from "./index"
+import { EntitySelectListItem } from "."
 
 const meta: Meta = {
   component: EntitySelectListItem,

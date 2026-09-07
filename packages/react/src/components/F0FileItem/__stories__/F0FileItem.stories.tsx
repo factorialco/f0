@@ -1,7 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { fn } from "storybook/test"
-
-import { expect, within } from "storybook/test"
+import { fn, expect, within } from "storybook/test"
 
 import { CrossedCircle, Download } from "@/icons/app"
 

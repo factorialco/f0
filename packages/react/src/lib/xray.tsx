@@ -128,7 +128,9 @@ export const useComponentXRay = <R extends HTMLElement | SVGElement>(
   const layoutElement = typeof document !== "undefined" ? document.body : null
 
   useEffect(() => {
-    if (!showXray || !ref.current || !filter.includes(meta.type)) return
+    if (!showXray || !ref.current || !filter.includes(meta.type)) {
+      return
+    }
 
     const element = ref.current
     element.dataset.componentName = meta.name
@@ -159,8 +161,12 @@ export const useComponentXRay = <R extends HTMLElement | SVGElement>(
     }
 
     return () => {
-      if (wrapper) layoutElement?.removeChild(wrapper)
-      if (tag) layoutElement?.removeChild(tag)
+      if (wrapper) {
+        layoutElement?.removeChild(wrapper)
+      }
+      if (tag) {
+        layoutElement?.removeChild(tag)
+      }
     }
   }, [showXray, meta.name, meta.type, filter, layoutElement])
 

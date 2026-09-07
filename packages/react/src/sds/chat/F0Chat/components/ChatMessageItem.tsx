@@ -57,8 +57,12 @@ const SELF_HANDLING_DESCENDANTS =
  */
 const isSelfHandling = (target: Element, stopAt: Element): boolean => {
   for (let node: Element | null = target; node; node = node.parentElement) {
-    if (node === stopAt) return false
-    if (node.matches(SELF_HANDLING_DESCENDANTS)) return true
+    if (node === stopAt) {
+      return false
+    }
+    if (node.matches(SELF_HANDLING_DESCENDANTS)) {
+      return true
+    }
   }
   return true
 }
@@ -120,7 +124,9 @@ export const ChatMessageItem = ({
   // the React root). A click faster than this is handled by the placeholder
   // itself; a hover slower than this reaches an already-real trigger.
   const armActionsSoon = useCallback(() => {
-    if (armTimerRef.current != null) return
+    if (armTimerRef.current != null) {
+      return
+    }
     armTimerRef.current = window.setTimeout(() => {
       armTimerRef.current = null
       armActions()
@@ -128,12 +134,16 @@ export const ChatMessageItem = ({
   }, [armActions])
   useEffect(
     () => () => {
-      if (armTimerRef.current != null) window.clearTimeout(armTimerRef.current)
+      if (armTimerRef.current != null) {
+        window.clearTimeout(armTimerRef.current)
+      }
     },
     []
   )
   useLayoutEffect(() => {
-    if (!restoreActionsFocusRef.current) return
+    if (!restoreActionsFocusRef.current) {
+      return
+    }
     restoreActionsFocusRef.current = false
     actionsWrapperRef.current?.querySelector("button")?.focus()
   }, [actionsArmed])
@@ -191,9 +201,15 @@ export const ChatMessageItem = ({
 
   const handleDoubleClick = useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {
-      if (!canQuote) return
-      if (!(event.target instanceof Element)) return
-      if (isSelfHandling(event.target, event.currentTarget)) return
+      if (!canQuote) {
+        return
+      }
+      if (!(event.target instanceof Element)) {
+        return
+      }
+      if (isSelfHandling(event.target, event.currentTarget)) {
+        return
+      }
       startReply(message)
     },
     [canQuote, message, startReply]

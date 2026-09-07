@@ -1,4 +1,4 @@
-import { ControllerRenderProps, FieldValues } from "react-hook-form"
+import { ControllerRenderProps } from "react-hook-form"
 
 import { F0TextInput } from "@/components/F0TextInput"
 import { getFieldInputIcon } from "@/lib/field-input-icons"
@@ -9,7 +9,7 @@ import { FORM_SIZE } from "../../constants"
 
 interface TextFieldRendererProps {
   field: ResolvedField<F0TextField>
-  formField: ControllerRenderProps<FieldValues>
+  formField: ControllerRenderProps
   error?: boolean
   loading?: boolean
   status?: InputFieldStatus

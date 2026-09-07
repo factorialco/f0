@@ -17,14 +17,18 @@ export function useTransientError(timeoutMs: number = TRANSIENT_ERROR_MS): {
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const clear = useCallback(() => {
-    if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current)
+    }
     timeoutRef.current = null
     setError(null)
   }, [])
 
   const show = useCallback(
     (message: string, options?: { persistent?: boolean }) => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
       setError(message)
       if (options?.persistent) {
         timeoutRef.current = null
@@ -40,7 +44,9 @@ export function useTransientError(timeoutMs: number = TRANSIENT_ERROR_MS): {
 
   useEffect(
     () => () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
     },
     []
   )

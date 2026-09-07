@@ -512,7 +512,7 @@ describe("useDataCollectionItemNavigation", () => {
     it("holds the previous navigation while neighbors resolve (no flicker)", async () => {
       const fetchData = makeFetchData()
       const fetchItemNeighbors = makeFetchItemNeighbors()
-      const navigationSamples: Array<boolean> = []
+      const navigationSamples: boolean[] = []
 
       const { result } = zeroRenderHook(() => {
         const controller = useDataCollectionItemNavigation({

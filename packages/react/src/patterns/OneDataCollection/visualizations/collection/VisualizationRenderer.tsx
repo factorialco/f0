@@ -12,8 +12,9 @@ import {
   CollectionProps,
   OnLoadDataCallback,
   OnLoadErrorCallback,
+  SortingsDefinition,
+  SummariesDefinition,
 } from "../../types"
-import { SortingsDefinition, SummariesDefinition } from "../../types"
 import {
   collectionVisualizations,
   VisualizacionTypeDefinition,

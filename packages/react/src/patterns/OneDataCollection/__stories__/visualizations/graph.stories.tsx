@@ -10,7 +10,7 @@ import { Calendar, Office } from "@/icons/app"
 import { F0Dialog } from "@/patterns/F0Dialog"
 
 import { useDataCollectionSource } from "../../hooks/useDataCollectionSource"
-import { OneDataCollection } from "../../index"
+import { OneDataCollection } from "../.."
 
 type Employee = {
   id: string
@@ -1005,7 +1005,9 @@ const LiveUpdateGraphExample = () => {
     const current = storeRef.current.find(
       (employee) => employee.id === LIVE_UPDATE_MOVE_SOURCE_ID
     )
-    if (!current) return
+    if (!current) {
+      return
+    }
     const renamedEmployee: LiveUpdateEmployee = {
       ...current,
       title: "Senior Software Engineer",
@@ -1024,7 +1026,9 @@ const LiveUpdateGraphExample = () => {
     const current = storeRef.current.find(
       (employee) => employee.id === LIVE_UPDATE_MOVE_SOURCE_ID
     )
-    if (!current) return
+    if (!current) {
+      return
+    }
     const movedEmployee: LiveUpdateEmployee = {
       ...current,
       managerId: LIVE_UPDATE_MOVE_TARGET_ID,

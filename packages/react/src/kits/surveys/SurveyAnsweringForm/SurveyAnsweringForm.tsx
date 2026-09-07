@@ -123,7 +123,9 @@ function SurveyAnsweringFormDialog({
 
   const scheduleClose = useCallback(
     (delay: number) => {
-      if (closeTimerRef.current) clearTimeout(closeTimerRef.current)
+      if (closeTimerRef.current) {
+        clearTimeout(closeTimerRef.current)
+      }
       closeTimerRef.current = setTimeout(() => {
         closeTimerRef.current = null
         onClose()

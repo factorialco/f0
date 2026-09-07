@@ -1,5 +1,4 @@
-import { createRef } from "react"
-import { act } from "react"
+import { createRef, act } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { zeroRender as render, screen } from "@/testing/test-utils"

@@ -13,7 +13,7 @@ import { getInputFieldArgs } from "@/components/F0InputField/__stories__/F0Input
 
 import { DateRange } from "@/components/OneCalendar/types"
 import { GranularityDefinitionKey } from "@/components/OneCalendar/granularities"
-import { F0DatePicker } from "../index"
+import { F0DatePicker } from ".."
 import { predefinedPresets } from "../presets"
 import { datepickerSizes, DatePickerValue } from "../types"
 import { inputFieldInheritedProps } from "../types.internal"

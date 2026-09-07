@@ -43,7 +43,9 @@ const runNextFrame = () => {
   const next = frames.entries().next().value as
     | [number, FrameRequestCallback]
     | undefined
-  if (!next) throw new Error("No animation frame is pending")
+  if (!next) {
+    throw new Error("No animation frame is pending")
+  }
   frames.delete(next[0])
   act(() => next[1](0))
 }

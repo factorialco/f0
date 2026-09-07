@@ -13,7 +13,7 @@ import {
 } from "@/kits/ai/F0AiChat/__stories__/_mock"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
-import { F0AnalyticsDashboard } from "../index"
+import { F0AnalyticsDashboard } from ".."
 import type { DashboardItem } from "../types"
 import { mixedItems } from "./mockDataMixed"
 
@@ -92,7 +92,9 @@ const openAskOneMenu = async (canvasElement: HTMLElement) => {
   await userEvent.click(trigger)
 
   const menuId = trigger.getAttribute("aria-controls")
-  if (!menuId) throw new Error("The widget menu trigger has no aria-controls")
+  if (!menuId) {
+    throw new Error("The widget menu trigger has no aria-controls")
+  }
 
   const menu = await waitFor(() => {
     const element = canvasElement.ownerDocument.getElementById(menuId)
@@ -163,7 +165,9 @@ export const WidgetQuotedInChat: Story = {
       menu = (await openAskOneMenu(canvasElement)).menu
     })
 
-    if (!menu) throw new Error("The widget actions menu did not open")
+    if (!menu) {
+      throw new Error("The widget actions menu did not open")
+    }
 
     await step("Ask One about the widget", async () => {
       await userEvent.click(
@@ -204,7 +208,9 @@ export const TargetObserver: Story = {
       menu = (await openAskOneMenu(canvasElement)).menu
     })
 
-    if (!menu) throw new Error("The widget actions menu did not open")
+    if (!menu) {
+      throw new Error("The widget actions menu did not open")
+    }
 
     await step("Ask One about the widget", async () => {
       await userEvent.click(
@@ -240,8 +246,9 @@ export const PointTargetObserver: Story = {
       trigger.focus()
       await userEvent.keyboard("{Enter}")
       const menuId = trigger.getAttribute("aria-controls")
-      if (!menuId)
+      if (!menuId) {
         throw new Error("The point menu trigger has no aria-controls")
+      }
       const menu = await waitFor(() => {
         const element = canvasElement.ownerDocument.getElementById(menuId)
         expect(element).toBeInTheDocument()
@@ -295,8 +302,9 @@ export const ChartPointFlow: Story = {
       await expect(trigger).toHaveFocus()
       await userEvent.keyboard("{Enter}")
       const menuId = trigger.getAttribute("aria-controls")
-      if (!menuId)
+      if (!menuId) {
         throw new Error("The point menu trigger has no aria-controls")
+      }
 
       const menu = await waitFor(() => {
         const element = canvasElement.ownerDocument.getElementById(menuId)

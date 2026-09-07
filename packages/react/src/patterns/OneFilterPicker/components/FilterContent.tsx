@@ -49,7 +49,9 @@ export function FilterContent<Definition extends FiltersDefinition>({
   onFilterChange,
   isCompactMode,
 }: FilterContentProps<Definition>) {
-  if (!selectedFilterKey) return null
+  if (!selectedFilterKey) {
+    return null
+  }
 
   const filter = definition[selectedFilterKey]
 

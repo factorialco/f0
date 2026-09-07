@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import PushPin from "@/icons/app/PushPin"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
-import { CommunityPost } from "./index"
+import { CommunityPost } from "."
 
 const meta: Meta<typeof CommunityPost> = {
   component: CommunityPost,

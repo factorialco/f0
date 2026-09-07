@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest"
 import { zeroRender as render, screen } from "@/testing/test-utils"
 import React from "react"
 
-import { PageHeader } from "../index"
+import { PageHeader } from ".."
 
 // The real switch renders null unless the AI toggle context is enabled, so we
 // stub it to a stable marker and assert only PageHeader's show/hide decision.

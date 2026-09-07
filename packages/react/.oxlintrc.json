@@ -14,6 +14,7 @@
     ],
 
     // eslint:recommended rules that oxlint does not put in `correctness`.
+    "curly": "error",
     "no-case-declarations": "error",
     "no-empty": "error",
     "no-fallthrough": "error",
@@ -23,6 +24,9 @@
     "preserve-caught-error": "error",
 
     // typescript-eslint strict + stylistic, no type information needed.
+    "typescript/consistent-generic-constructors": "error",
+    "typescript/no-inferrable-types": "error",
+    "typescript/array-type": "error",
     "typescript/adjacent-overload-signatures": "error",
     "typescript/ban-ts-comment": "error",
     "typescript/ban-tslint-comment": "error",
@@ -36,12 +40,20 @@
 
     // typescript-eslint strict + stylistic, type-aware. They run only with
     // `--type-aware` (see the lint scripts) and need `oxlint-tsgolint`.
+    "typescript/no-meaningless-void-operator": "error",
+    "typescript/return-await": "error",
+    "typescript/no-duplicate-type-constituents": "error",
+    "typescript/prefer-reduce-type-parameter": "error",
+    "typescript/no-unnecessary-type-arguments": "error",
+    "typescript/prefer-includes": "error",
     "typescript/no-mixed-enums": "error",
     "typescript/prefer-return-this-type": "error",
     "typescript/related-getter-setter-pairs": "error",
 
     // eslint-plugin-import. Native oxlint rules, plus `import-js/*` for rules
     // oxlint has no native version of (JS plugin).
+    "import-js/no-useless-path-segments": ["error", { "noUselessIndex": true }],
+    "import/no-duplicates": "error",
     "import/namespace": "error",
 
     // eslint-plugin-sonarjs recommended (JS plugin). Rules that need type
@@ -219,14 +231,8 @@
 
     // PENDING. Turned on in follow-up PRs together with the code fixes.
     // Number = violations on main when this was written.
-    "curly": "off", // 2603
-    "typescript/array-type": "off", // 193
-    "import-js/no-useless-path-segments": "off", // 322
-    "typescript/no-inferrable-types": "off", // 19
     "typescript/no-dynamic-delete": "off", // 10
-    "import/no-duplicates": "off", // 31
     "sonarjs/no-small-switch": "off", // 3
-    "typescript/consistent-generic-constructors": "off", // 4
     "sonarjs/concise-regex": "off", // 4
     "typescript/prefer-for-of": "off", // 9
     "sonarjs/no-dead-store": "off", // 3
@@ -254,20 +260,14 @@
     "sonarjs/no-redundant-boolean": "off", // 2
     "sonarjs/no-duplicate-test-title": "off", // 1
     "sonarjs/regex-complexity": "off", // 1
-    "typescript/prefer-includes": "off", // 8
     "typescript/no-unnecessary-template-expression": "off", // 14
-    "typescript/no-unnecessary-type-arguments": "off", // 60
-    "typescript/prefer-reduce-type-parameter": "off", // 9
     "typescript/await-thenable": "off", // 4
     "typescript/no-redundant-type-constituents": "off", // 10
     "typescript/use-unknown-in-catch-callback-variable": "off", // 7
     "typescript/prefer-promise-reject-errors": "off", // 8
     "typescript/no-misused-promises": "off", // 16
-    "typescript/no-duplicate-type-constituents": "off", // 4
     "typescript/restrict-plus-operands": "off", // 1
     "typescript/no-unsafe-enum-comparison": "off", // 2
-    "typescript/return-await": "off", // 4
-    "typescript/no-meaningless-void-operator": "off", // 4
 
     // DEBT. Turn on once the code is fixed. Number = violations when this
     // was written. Do not add new violations.

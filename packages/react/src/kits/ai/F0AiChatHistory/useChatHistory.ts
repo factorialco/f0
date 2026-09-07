@@ -122,10 +122,15 @@ export function useChatHistory({
   // it to localStorage so the pin state survives reloads.
   const setPinnedLocal = useCallback((id: string, pinned: boolean) => {
     setPinnedIds((prev) => {
-      if (pinned === prev.has(id)) return prev
+      if (pinned === prev.has(id)) {
+        return prev
+      }
       const next = new Set(prev)
-      if (pinned) next.add(id)
-      else next.delete(id)
+      if (pinned) {
+        next.add(id)
+      } else {
+        next.delete(id)
+      }
       writePinnedIds(next)
       return next
     })
@@ -133,10 +138,15 @@ export function useChatHistory({
 
   const markPending = useCallback((id: string, pending: boolean) => {
     setPendingIds((prev) => {
-      if (pending === prev.has(id)) return prev
+      if (pending === prev.has(id)) {
+        return prev
+      }
       const next = new Set(prev)
-      if (pending) next.add(id)
-      else next.delete(id)
+      if (pending) {
+        next.add(id)
+      } else {
+        next.delete(id)
+      }
       return next
     })
   }, [])
@@ -148,7 +158,9 @@ export function useChatHistory({
       const persist = pinned ? pinThreadCb : unpinThreadCb
       setPinnedLocal(id, pinned)
 
-      if (!persist) return // localStorage-only mode: nothing async to await.
+      if (!persist) {
+        return
+      } // localStorage-only mode: nothing async to await.
 
       markPending(id, true)
       persist(id)
@@ -178,7 +190,9 @@ export function useChatHistory({
 
         // Clean up from pinned if it was pinned.
         setPinnedIds((prev) => {
-          if (!prev.has(id)) return prev
+          if (!prev.has(id)) {
+            return prev
+          }
           const next = new Set(prev)
           next.delete(id)
           writePinnedIds(next)

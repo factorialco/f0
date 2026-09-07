@@ -63,7 +63,9 @@ function _UpsellingPopover({
   }
 
   const handleUpsellRequest = async (action: Action) => {
-    if (action.type !== "upsell") return
+    if (action.type !== "upsell") {
+      return
+    }
 
     setCurrentAction(action)
 

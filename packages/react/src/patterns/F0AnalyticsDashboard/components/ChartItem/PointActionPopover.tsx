@@ -52,11 +52,15 @@ export function PointActionPopover({
       return
     }
     const el = containerRef.current
-    if (!el) return
+    if (!el) {
+      return
+    }
 
     const { offsetWidth: width, offsetHeight: height } = el
     let top = anchor.clientY - height - GAP
-    if (top < MIN_MARGIN) top = anchor.clientY + GAP
+    if (top < MIN_MARGIN) {
+      top = anchor.clientY + GAP
+    }
     top = Math.min(
       Math.max(top, MIN_MARGIN),
       window.innerHeight - height - MIN_MARGIN
@@ -75,18 +79,24 @@ export function PointActionPopover({
   // captured so it closes even when the click lands on another chart mark,
   // which would otherwise re-anchor and re-open in the same gesture.
   useEffect(() => {
-    if (!anchor) return
+    if (!anchor) {
+      return
+    }
 
     const focusFrame = requestAnimationFrame(() => {
       containerRef.current?.querySelector<HTMLButtonElement>("button")?.focus()
     })
 
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onDismiss("escape")
+      if (e.key === "Escape") {
+        onDismiss("escape")
+      }
     }
     const onPointerDown = (e: PointerEvent) => {
       const el = containerRef.current
-      if (el && e.target instanceof Node && el.contains(e.target)) return
+      if (el && e.target instanceof Node && el.contains(e.target)) {
+        return
+      }
       onDismiss("outside")
     }
 
@@ -110,8 +120,12 @@ export function PointActionPopover({
     }
   }, [anchor, onDismiss])
 
-  if (typeof document === "undefined") return null
-  if (!anchor) return null
+  if (typeof document === "undefined") {
+    return null
+  }
+  if (!anchor) {
+    return null
+  }
 
   return createPortal(
     <div

@@ -16,7 +16,7 @@ import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/naviga
 
 import { ItemActionsDefinition } from "../../../../item-actions"
 import { SummariesDefinition } from "../../../../summary"
-import { TableCollection } from "../index"
+import { TableCollection } from ".."
 
 vi.mock("../../../property", () => ({
   propertyRenderers: {

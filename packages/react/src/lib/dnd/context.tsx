@@ -10,7 +10,9 @@ const Ctx = createContext<DndContextValue | null>(null)
 
 export function useDndContext(): DndContextValue {
   const ctx = useContext(Ctx)
-  if (!ctx) throw new Error("useDndContext must be used within DndProvider")
+  if (!ctx) {
+    throw new Error("useDndContext must be used within DndProvider")
+  }
   return ctx
 }
 

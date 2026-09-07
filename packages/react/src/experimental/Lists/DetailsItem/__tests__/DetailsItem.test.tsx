@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest"
 
 import { zeroRender as render, screen } from "@/testing/test-utils"
 
-import { DetailsItem } from "../index"
+import { DetailsItem } from ".."
 
 describe("DetailsItem", () => {
   it("renders the title (label)", () => {

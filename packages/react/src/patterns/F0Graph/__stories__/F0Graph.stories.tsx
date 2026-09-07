@@ -98,8 +98,8 @@ interface Employee {
   phone?: string
   workEmail?: string
   workplace?: string
-  workableDays?: ReadonlyArray<"M" | "T" | "W" | "R" | "F" | "S" | "U">
-  teams?: ReadonlyArray<Team>
+  workableDays?: readonly ("M" | "T" | "W" | "R" | "F" | "S" | "U")[]
+  teams?: readonly Team[]
 }
 
 function profileDefaults(
@@ -359,11 +359,11 @@ export const Lazy: Story = {
     loadChildren: async (nodeId: string) => {
       const lazyChildren: Record<
         string,
-        Array<{
+        {
           id: string
           data: { name: string; title: string }
           childrenCount: number
-        }>
+        }[]
       > = {
         "vp-eng": [
           {
@@ -1218,8 +1218,11 @@ export const Controlled: Story = {
             onExpandToggle={(nodeId, expanded) => {
               setExpandedNodes((prev) => {
                 const next = new Set(prev)
-                if (expanded) next.add(nodeId)
-                else next.delete(nodeId)
+                if (expanded) {
+                  next.add(nodeId)
+                } else {
+                  next.delete(nodeId)
+                }
                 return next
               })
             }}
@@ -1228,8 +1231,11 @@ export const Controlled: Story = {
             onNodeSelect={(nodeId, selected) => {
               setSelectedNodes((prev) => {
                 const next = new Set(prev)
-                if (selected) next.add(nodeId)
-                else next.delete(nodeId)
+                if (selected) {
+                  next.add(nodeId)
+                } else {
+                  next.delete(nodeId)
+                }
                 return next
               })
             }}
@@ -1411,7 +1417,9 @@ const LEVEL_TAG_LABELS = {
  */
 function catalogLevelTags(node: CatalogNode): F0GraphNodeTag[] {
   const { headcount, salaryFrom, competencies, devices } = node
-  if (salaryFrom === undefined) return []
+  if (salaryFrom === undefined) {
+    return []
+  }
   return [
     {
       type: "raw",
@@ -1471,7 +1479,9 @@ function catalogRoleTags(
   role: string,
   levels: CatalogNode[]
 ): F0GraphNodeTag[] {
-  if (levels.length === 0) return []
+  if (levels.length === 0) {
+    return []
+  }
   const from = Math.min(...levels.map((l) => l.salaryFrom ?? 0))
   const to = Math.max(...levels.map((l) => (l.salaryFrom ?? 0) + 10))
   return [
@@ -1506,7 +1516,9 @@ function catalogRoleTags(
 /** The levels under each role, so a role card can roll their metadata up. */
 const LEVELS_BY_ROLE = CATALOG_NODES.reduce<Record<string, CatalogNode[]>>(
   (acc, node) => {
-    if (node.data.kind !== "level") return acc
+    if (node.data.kind !== "level") {
+      return acc
+    }
     const role = node.data.name.split(" ").slice(1).join(" ")
     acc[role] = [...(acc[role] ?? []), node.data]
     return acc

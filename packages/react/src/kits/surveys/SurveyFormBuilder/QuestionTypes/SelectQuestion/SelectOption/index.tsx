@@ -59,7 +59,9 @@ export const SelectOption = ({
   const isDraggingThisItem = isDragging && draggedItemId === value
 
   const handleClick = () => {
-    if (!disabled && !answering) return // edit mode — do not select answer
+    if (!disabled && !answering) {
+      return
+    } // edit mode — do not select answer
     onClick(value)
   }
 

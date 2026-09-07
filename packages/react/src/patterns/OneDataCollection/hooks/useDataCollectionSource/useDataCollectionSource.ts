@@ -44,7 +44,7 @@ export const useDataCollectionSource = <
     NavigationFilters,
     Grouping
   >,
-  deps: ReadonlyArray<unknown> = []
+  deps: readonly unknown[] = []
 ): DataCollectionSource<
   R,
   FiltersSchema,
@@ -90,7 +90,9 @@ export const useDataCollectionSource = <
   })
 
   useDeepCompareEffect(() => {
-    if (!externalCurrentNavigationFilters) return
+    if (!externalCurrentNavigationFilters) {
+      return
+    }
     setCurrentNavigationFilters(externalCurrentNavigationFilters)
   }, [externalCurrentNavigationFilters])
 

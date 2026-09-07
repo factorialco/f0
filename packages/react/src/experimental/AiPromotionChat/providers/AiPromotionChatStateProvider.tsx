@@ -95,7 +95,9 @@ export const AiPromotionChatStateProvider: FC<
   }, [enabled])
 
   useEffect(() => {
-    if (open) onShow?.()
+    if (open) {
+      onShow?.()
+    }
     if (!open) {
       const prefersReducedMotion = window.matchMedia(
         "(prefers-reduced-motion: reduce)"

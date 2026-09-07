@@ -96,7 +96,9 @@ export function useFormCardValueFormatter(
   const formatters = context?.formatters
 
   return useMemo(() => {
-    if (!formatters || formatters.length === 0) return null
+    if (!formatters || formatters.length === 0) {
+      return null
+    }
 
     return (
       key: string,
@@ -113,12 +115,18 @@ export function useFormCardValueFormatter(
           entry.customFieldName === undefined ||
           entry.customFieldName === meta.customFieldName
 
-        if (!formMatch || !fieldMatch) continue
+        if (!formMatch || !fieldMatch) {
+          continue
+        }
 
         // Score: +2 for formName match, +1 for customFieldName match
         let score = 0
-        if (entry.formName !== undefined) score += 2
-        if (entry.customFieldName !== undefined) score += 1
+        if (entry.formName !== undefined) {
+          score += 2
+        }
+        if (entry.customFieldName !== undefined) {
+          score += 1
+        }
 
         if (score > bestScore) {
           bestScore = score
@@ -126,7 +134,9 @@ export function useFormCardValueFormatter(
         }
       }
 
-      if (!bestMatch) return undefined
+      if (!bestMatch) {
+        return undefined
+      }
       return bestMatch.format(value, { key, ...meta })
     }
   }, [formatters, formName])

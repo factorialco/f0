@@ -88,7 +88,9 @@ export const Footer = ({
   const showFooter =
     !loading && ((!singleSelector && anySelectOrClearAction) || anyAction)
 
-  if (!showFooter) return null
+  if (!showFooter) {
+    return null
+  }
 
   let leftButtons: React.ReactNode = undefined
   let rightButtons: React.ReactNode = undefined

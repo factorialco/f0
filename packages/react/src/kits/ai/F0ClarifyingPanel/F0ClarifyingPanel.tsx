@@ -105,12 +105,16 @@ const F0ClarifyingPanelContent = ({
   const isSubmitBlocked = isSubmitDisabled === true && isFinalStep
 
   const handleConfirm = () => {
-    if (isSubmitBlocked) return
+    if (isSubmitBlocked) {
+      return
+    }
     confirm()
   }
 
   const handleSkip = () => {
-    if (isSubmitBlocked) return
+    if (isSubmitBlocked) {
+      return
+    }
     skip()
   }
 

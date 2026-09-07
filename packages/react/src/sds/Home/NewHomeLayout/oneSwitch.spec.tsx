@@ -4,7 +4,7 @@ import { Calendar } from "@/icons/app"
 import { screen, zeroRender } from "@/testing/test-utils"
 
 import { type HomeWidgetItem } from "../slotRenderers"
-import { NewHomeLayout } from "./index"
+import { NewHomeLayout } from "."
 
 // The real switch draws NOTHING unless the AI chat context is enabled, so it is
 // stubbed to a marker here and only this layout's own show/hide decision — and

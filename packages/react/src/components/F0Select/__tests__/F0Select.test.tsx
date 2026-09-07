@@ -10,7 +10,7 @@ import { zeroRender as render } from "@/testing/test-utils"
 import type { F0SelectItemProps, F0SelectProps } from "../types"
 
 import { Search } from "../../../icons/app"
-import { F0Select } from "../index"
+import { F0Select } from ".."
 
 const mockOptions: F0SelectItemProps<string, RecordType>[] = [
   {

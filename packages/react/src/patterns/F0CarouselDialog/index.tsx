@@ -221,7 +221,9 @@ const F0CarouselDialogComponent = ({
       : items[index + 1]?.id
 
   const goPrevious = useCallback(() => {
-    if (previousId) onNavigate(previousId)
+    if (previousId) {
+      onNavigate(previousId)
+    }
   }, [previousId, onNavigate])
 
   /**
@@ -245,8 +247,12 @@ const F0CarouselDialogComponent = ({
   const askedAtCount = useRef(-1)
 
   const askForNextPage = useCallback(() => {
-    if (!pagination || isLoadingMore) return
-    if (askedAtCount.current === loaded) return
+    if (!pagination || isLoadingMore) {
+      return
+    }
+    if (askedAtCount.current === loaded) {
+      return
+    }
     askedAtCount.current = loaded
     pagination.onLoadMore()
   }, [pagination, isLoadingMore, loaded])
@@ -256,7 +262,9 @@ const F0CarouselDialogComponent = ({
       onNavigate(nextId)
       return
     }
-    if (waiting || !hasMore || !pagination) return
+    if (waiting || !hasMore || !pagination) {
+      return
+    }
     // THE PRESS IS RECORDED EITHER WAY. The prefetch has usually already asked
     // for this page, so a press at the boundary lands while it is in flight —
     // asking again would be a second request for the same records, and treating
@@ -272,13 +280,17 @@ const F0CarouselDialogComponent = ({
   useEffect(() => {
     const settled = wasLoadingMore.current && !isLoadingMore
     wasLoadingMore.current = isLoadingMore
-    if (!owedAdvance) return
+    if (!owedAdvance) {
+      return
+    }
     if (nextId) {
       setOwedAdvance(false)
       onNavigate(nextId)
       return
     }
-    if (settled) setOwedAdvance(false)
+    if (settled) {
+      setOwedAdvance(false)
+    }
   }, [owedAdvance, nextId, isLoadingMore, onNavigate])
 
   /**
@@ -292,7 +304,9 @@ const F0CarouselDialogComponent = ({
     // Not while waiting: "there is no next item" means "we don't know yet", not
     // "we have reached the end", and fetching on it would page the set forward
     // every time the URL moved ahead of the data.
-    if (!isOpen || waiting || nextId || !hasMore) return
+    if (!isOpen || waiting || nextId || !hasMore) {
+      return
+    }
     askForNextPage()
   }, [isOpen, waiting, nextId, hasMore, askForNextPage])
 
@@ -302,7 +316,9 @@ const F0CarouselDialogComponent = ({
   // find it. Bound to the document rather than to the panel because focus starts
   // nowhere in particular (`onOpenAutoFocus` is prevented).
   useEffect(() => {
-    if (!isOpen) return
+    if (!isOpen) {
+      return
+    }
     const onKeyDown = (event: KeyboardEvent) => {
       // Not while someone is typing: a text field's own caret movement is the
       // more specific claim on these keys.
@@ -311,10 +327,15 @@ const F0CarouselDialogComponent = ({
         target?.tagName === "INPUT" ||
         target?.tagName === "TEXTAREA" ||
         target?.isContentEditable
-      )
+      ) {
         return
-      if (event.key === "ArrowLeft") goPrevious()
-      if (event.key === "ArrowRight") goNext()
+      }
+      if (event.key === "ArrowLeft") {
+        goPrevious()
+      }
+      if (event.key === "ArrowRight") {
+        goNext()
+      }
     }
     document.addEventListener("keydown", onKeyDown)
     return () => document.removeEventListener("keydown", onKeyDown)
@@ -405,12 +426,16 @@ const F0CarouselDialogComponent = ({
    * that title and that position all the way out.
    */
   const lastOpen = useRef(live)
-  if (isOpen) lastOpen.current = live
+  if (isOpen) {
+    lastOpen.current = live
+  }
   const shown = isOpen ? live : lastOpen.current
 
   // Nothing to show and nothing promised: neither items nor a placeholder means
   // there is no dialog to draw.
-  if (!shown.content && !shown.title) return null
+  if (!shown.content && !shown.title) {
+    return null
+  }
 
   return (
     <F0Dialog

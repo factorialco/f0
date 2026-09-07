@@ -56,7 +56,9 @@ export const CountrySelect = ({
   const [open, setOpen] = useState(false)
 
   useEffect(() => {
-    if (!selectCountryRef) return undefined
+    if (!selectCountryRef) {
+      return undefined
+    }
     selectCountryRef.current = onChange
     return () => {
       selectCountryRef.current = null
@@ -113,8 +115,12 @@ export const CountrySelect = ({
         searchEmptyMessage={i18n.phoneInput.noResults}
         // The default search only matches labels — dial codes live in `metadata`
         searchFn={(option, search) => {
-          if (!search) return true
-          if (!("value" in option) || !option.value) return false
+          if (!search) {
+            return true
+          }
+          if (!("value" in option) || !option.value) {
+            return false
+          }
           const query = search.trim().toLowerCase()
           const dialCode =
             option.metadata?.type === "dialCode" ? option.metadata.dialCode : ""

@@ -111,7 +111,7 @@ const inputFieldArgs = {
 }
 
 export const getInputFieldArgs = (
-  keys?: ReadonlyArray<keyof typeof inputFieldArgs | string>
+  keys?: readonly (keyof typeof inputFieldArgs | string)[]
 ) => {
   if (!keys) {
     return inputFieldArgs

@@ -672,7 +672,9 @@ const observedChat = (observer: MockIntersectionObserver, id: string) => {
   const target = Array.from(observer.observed).find(
     (element) => (element as HTMLElement).dataset.sidebarChatId === id
   )
-  if (!target) throw new Error(`Chat ${id} is not observed`)
+  if (!target) {
+    throw new Error(`Chat ${id} is not observed`)
+  }
   return target
 }
 
@@ -841,7 +843,9 @@ describe("SidebarChatList unread navigation", () => {
       (element) =>
         (element as HTMLElement).dataset.sidebarPanelGroupId === "dms"
     )
-    if (!groupTarget) throw new Error("Collapsed group is not observed")
+    if (!groupTarget) {
+      throw new Error("Collapsed group is not observed")
+    }
     expect(observer.observed.size).toBe(1)
 
     act(() => {
@@ -910,7 +914,9 @@ describe("SidebarChatList unread navigation", () => {
     const header = screen
       .getByText("Direct messages")
       .closest<HTMLElement>("[tabindex='0']")
-    if (!header) throw new Error("Group header is not focusable")
+    if (!header) {
+      throw new Error("Group header is not focusable")
+    }
     const observersBeforeCollapse = MockIntersectionObserver.instances.length
     await userEvent.click(header)
     await waitFor(() => {

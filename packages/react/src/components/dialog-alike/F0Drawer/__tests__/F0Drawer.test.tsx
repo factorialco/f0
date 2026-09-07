@@ -2,7 +2,7 @@ import { describe, expect, it, vi, beforeEach } from "vitest"
 
 import { zeroRender as render, screen } from "@/testing/test-utils"
 
-import { F0Drawer } from "../index"
+import { F0Drawer } from ".."
 import { DrawerInternal } from "../internal/DrawerInternal"
 
 // Mock dependencies

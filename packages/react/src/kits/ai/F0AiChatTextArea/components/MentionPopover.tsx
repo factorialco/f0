@@ -50,7 +50,9 @@ export function MentionPopover({
   useLayoutEffect(() => {
     const el = listRef.current
     const parent = el?.offsetParent as HTMLElement | null
-    if (!el || !parent) return
+    if (!el || !parent) {
+      return
+    }
     const overflow = el.offsetLeft + el.offsetWidth - parent.clientWidth
     if (overflow > 0) {
       el.style.left = `${Math.max(0, el.offsetLeft - overflow)}px`
@@ -60,7 +62,9 @@ export function MentionPopover({
   const showLoading = isLoading && results.length === 0
   const showEmpty = !isLoading && results.length === 0
 
-  if (!isOpen || showEmpty) return null
+  if (!isOpen || showEmpty) {
+    return null
+  }
 
   return (
     <div

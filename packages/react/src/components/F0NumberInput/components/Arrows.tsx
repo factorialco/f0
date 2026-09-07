@@ -10,7 +10,9 @@ type ArrowsProps = {
 }
 
 export const Arrows = ({ onClickArrow, step, disabled }: ArrowsProps) => {
-  if (!step || disabled) return null
+  if (!step || disabled) {
+    return null
+  }
 
   return (
     <div

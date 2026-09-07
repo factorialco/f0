@@ -233,7 +233,9 @@ export function TreeSelector({
       option: { value: string } | undefined,
       _checked: boolean
     ) => {
-      if (!option) onChange?.("")
+      if (!option) {
+        onChange?.("")
+      }
     },
     disabled,
   }

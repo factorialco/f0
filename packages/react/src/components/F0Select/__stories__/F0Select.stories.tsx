@@ -15,7 +15,7 @@ import { Appearance, Circle, Desktop, Placeholder, Plus } from "@/icons/app"
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
-import { F0Select, selectSizes, selectVariants } from "../index"
+import { F0Select, selectSizes, selectVariants } from ".."
 import {
   Employee,
   employeeNestedPaginatedSource,
@@ -269,10 +269,14 @@ const meta: Meta = {
       const isMultiplePaginated = args.multiple && args.source
 
       const getSelectionDisplay = () => {
-        if (!selectionStatus) return "No selection yet"
+        if (!selectionStatus) {
+          return "No selection yet"
+        }
         const { allSelected, selectedIds, itemsStatus } = selectionStatus
 
-        if (allSelected === true) return "All selected"
+        if (allSelected === true) {
+          return "All selected"
+        }
 
         if (allSelected === "indeterminate") {
           const uncheckedIds = itemsStatus
@@ -283,18 +287,24 @@ const meta: Meta = {
           return `All selected except: ${uncheckedIds.slice(0, 10).join(", ")}${uncheckedIds.length > 10 ? "..." : ""}`
         }
 
-        if (selectedIds.length === 0) return "No items selected"
+        if (selectedIds.length === 0) {
+          return "No items selected"
+        }
         return `Selected: ${selectedIds.slice(0, 10).join(", ")}${selectedIds.length > 10 ? "..." : ""}`
       }
 
       const getFiltersDisplay = () => {
-        if (!selectionStatus?.filters) return ""
+        if (!selectionStatus?.filters) {
+          return ""
+        }
         const activeFilters = Object.entries(selectionStatus.filters)
           .filter(
             ([, value]) => value !== undefined && value !== null && value !== ""
           )
           .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
-        if (activeFilters.length === 0) return ""
+        if (activeFilters.length === 0) {
+          return ""
+        }
         return `Filters: ${activeFilters.join(", ")}`
       }
 

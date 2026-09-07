@@ -3,7 +3,7 @@ import { describe, expect, test } from "vitest"
 import { screen, userEvent, zeroRender } from "@/testing/test-utils"
 
 import { listSlot } from "../slotRenderers"
-import { SlotWidget } from "./index"
+import { SlotWidget } from "."
 
 /**
  * WHERE "View more" SITS. A row-based slot bleeds 8px past the card's content

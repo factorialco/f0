@@ -260,9 +260,11 @@ function EmbeddedCaptionsDemo(
   const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {
     const video = ref.current?.querySelector("video")
-    if (!video || typeof video.addTextTrack !== "function") return
+    if (!video || typeof video.addTextTrack !== "function") {
+      return
+    }
     const track = video.addTextTrack("captions", "English", "en")
-    const cues: Array<[number, number, string]> = [
+    const cues: [number, number, string][] = [
       [2.5, 6.4, "[SERENE MUSIC]"],
       [11.8, 14, "[BROOK BABBLES] [FLY BUZZES]"],
       [16.1, 17.7, "[BIRD TWEETS]"],

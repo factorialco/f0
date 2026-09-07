@@ -44,7 +44,9 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
     }
 
     const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-      if (event.currentTarget !== event.target) return
+      if (event.currentTarget !== event.target) {
+        return
+      }
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault()
         onClick?.()

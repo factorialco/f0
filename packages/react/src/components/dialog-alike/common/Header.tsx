@@ -54,7 +54,9 @@ export const Header = ({
     ) ?? []
 
   const Actions = () => {
-    if (!otherActionItems.length || !otherActions) return null
+    if (!otherActionItems.length || !otherActions) {
+      return null
+    }
 
     if (otherActionItems.length <= 2) {
       return (
@@ -77,7 +79,9 @@ export const Header = ({
   }
 
   const Module = () => {
-    if (!module) return null
+    if (!module) {
+      return null
+    }
 
     return (
       <BreadcrumbList>

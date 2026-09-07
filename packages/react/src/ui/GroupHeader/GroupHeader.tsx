@@ -68,7 +68,9 @@ export const GroupHeader = ({
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" || e.key === " ") {
-      if (e.key === " ") e.preventDefault()
+      if (e.key === " ") {
+        e.preventDefault()
+      }
       handleGroupClick()
     }
   }

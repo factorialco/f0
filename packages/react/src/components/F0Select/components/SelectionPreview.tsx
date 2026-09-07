@@ -91,7 +91,9 @@ export function SelectionPreview<T extends string>({
   // interfering.
   useEffect(() => {
     const el = containerRef.current
-    if (!el) return
+    if (!el) {
+      return
+    }
 
     const stop = (e: Event) => e.stopPropagation()
 

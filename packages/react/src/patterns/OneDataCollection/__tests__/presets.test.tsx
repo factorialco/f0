@@ -20,7 +20,7 @@ import {
   encodeSharedPreset,
   SHARED_PRESET_PARAM,
 } from "../internal/sharedPreset"
-import { OneDataCollection } from "../index"
+import { OneDataCollection } from ".."
 
 type Row = { name: string; department: string }
 

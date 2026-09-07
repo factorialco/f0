@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { AreaChartProps } from "@/kits/Charts/AreaChart"
 import { Default as AreaChartDefault } from "@/kits/Charts/AreaChart/index.stories"
 import { containerStoryArgs, WidgetDecorator } from "../storybook-utils"
-import { AreaChartWidget } from "./index"
+import { AreaChartWidget } from "."
 
 const meta: Meta<typeof AreaChartWidget> = {
   title: "Widgets/Charts/AreaChartWidget",

@@ -128,7 +128,9 @@ const F0SliderBase = forwardRef<HTMLDivElement, F0SliderProps>((props, ref) => {
   const handleValueChange = useCallback(
     (next: number[]) => {
       const [first] = next
-      if (first === undefined) return
+      if (first === undefined) {
+        return
+      }
       setInternalValue(first)
     },
     [setInternalValue]
@@ -137,7 +139,9 @@ const F0SliderBase = forwardRef<HTMLDivElement, F0SliderProps>((props, ref) => {
   const handleValueCommit = useCallback(
     (next: number[]) => {
       const [first] = next
-      if (first === undefined) return
+      if (first === undefined) {
+        return
+      }
       onValueCommit?.(first)
     },
     [onValueCommit]

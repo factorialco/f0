@@ -25,10 +25,10 @@ export { cardAlertVariants } from "./types"
 export type { CardAlertAction, CardAlertProps, CardAlertVariant } from "./types"
 
 const F0CardBase = forwardRef<HTMLDivElement, F0CardProps>((props, ref) => {
-  const publicProps = privateProps.reduce((acc, key) => {
+  const publicProps = privateProps.reduce<CardInternalProps>((acc, key) => {
     const { [key]: _, ...rest } = acc
     return rest
-  }, props as CardInternalProps)
+  }, props)
 
   return <CardInternal ref={ref} {...publicProps} />
 })

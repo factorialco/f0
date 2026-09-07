@@ -73,7 +73,9 @@ beforeAll(() => {
   vi.stubGlobal(
     "fetch",
     vi.fn(async (url: string) => {
-      if (String(url).includes("broken")) return { ok: false, status: 404 }
+      if (String(url).includes("broken")) {
+        return { ok: false, status: 404 }
+      }
       return { ok: true, arrayBuffer: async () => workbookBuffer() }
     })
   )

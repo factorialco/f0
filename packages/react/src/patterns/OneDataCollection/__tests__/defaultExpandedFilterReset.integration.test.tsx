@@ -5,7 +5,7 @@ import { Observable } from "zen-observable-ts"
 import { screen, zeroRender as render } from "@/testing/test-utils"
 
 import { useDataCollectionSource } from "../hooks/useDataCollectionSource"
-import { OneDataCollection } from "../index"
+import { OneDataCollection } from ".."
 
 /**
  * Reproduces FCT-62014's follow-up against the mechanism the Teams v2 list

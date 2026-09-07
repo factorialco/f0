@@ -17,9 +17,9 @@ import {
   ChartVerticalBars,
   Table as TableIcon,
 } from "@/icons/app"
-import { DataChartEmptyStateView, F0DataChart } from "@/kits/F0DataChart"
-import { tooltipValueFormat } from "@/kits/F0DataChart/utils/options"
 import {
+  DataChartEmptyStateView,
+  F0DataChart,
   BarChartSkeleton,
   FunnelChartSkeleton,
   GaugeChartSkeleton,
@@ -29,6 +29,7 @@ import {
   RadarChartSkeleton,
   ScatterChartSkeleton,
 } from "@/kits/F0DataChart"
+import { tooltipValueFormat } from "@/kits/F0DataChart/utils/options"
 import { useAiChat } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
 import { useI18n } from "@/lib/providers/i18n"
 import { OneDataCollection } from "@/patterns/OneDataCollection"
@@ -208,7 +209,9 @@ function numericPointValue(point: unknown): number | null {
     typeof point === "object" && point !== null && "value" in point
       ? point.value
       : point
-  if (raw === null || raw === undefined || raw === "") return null
+  if (raw === null || raw === undefined || raw === "") {
+    return null
+  }
   const value = Number(raw)
   return Number.isFinite(value) ? value : null
 }
@@ -234,10 +237,14 @@ export function buildAccessibleChartPoints(
   switch (chart.type) {
     case "bar":
       return chart.series.flatMap((series, seriesIndex) => {
-        if (selected[series.name] === false) return []
+        if (selected[series.name] === false) {
+          return []
+        }
         return series.data.flatMap((entry, dataIndex) => {
           const value = numericPointValue(entry)
-          if (value === null) return []
+          if (value === null) {
+            return []
+          }
           const point: F0AnalyticsDashboardPointClick = {
             seriesName: series.name,
             category: chart.categories[dataIndex] ?? "",
@@ -254,14 +261,18 @@ export function buildAccessibleChartPoints(
     case "line":
       return chart.categories.flatMap((category, dataIndex) => {
         const series = chart.series.flatMap((entry, seriesIndex) => {
-          if (selected[entry.name] === false) return []
+          if (selected[entry.name] === false) {
+            return []
+          }
           const value = numericPointValue(entry.data[dataIndex])
           return value === null
             ? []
             : [{ name: entry.name, seriesIndex, value }]
         })
         const first = series[0]
-        if (!first) return []
+        if (!first) {
+          return []
+        }
         const point: F0AnalyticsDashboardPointClick = {
           seriesName: first.name,
           category,
@@ -276,9 +287,13 @@ export function buildAccessibleChartPoints(
       })
     case "funnel":
       return chart.series.data.flatMap((entry, dataIndex) => {
-        if (selected[entry.name] === false) return []
+        if (selected[entry.name] === false) {
+          return []
+        }
         const value = numericPointValue(entry.value)
-        if (value === null) return []
+        if (value === null) {
+          return []
+        }
         const point: F0AnalyticsDashboardPointClick = {
           seriesName: chart.series.name,
           category: entry.name,
@@ -293,9 +308,13 @@ export function buildAccessibleChartPoints(
       })
     case "pie":
       return chart.series.data.flatMap((entry, dataIndex) => {
-        if (selected[entry.name] === false) return []
+        if (selected[entry.name] === false) {
+          return []
+        }
         const value = numericPointValue(entry.value)
-        if (value === null) return []
+        if (value === null) {
+          return []
+        }
         const point: F0AnalyticsDashboardPointClick = {
           seriesName: chart.series.name,
           category: entry.name,
@@ -310,7 +329,9 @@ export function buildAccessibleChartPoints(
       })
     case "radar":
       return chart.series.flatMap((series, seriesIndex) => {
-        if (selected[series.name] === false) return []
+        if (selected[series.name] === false) {
+          return []
+        }
         const values = series.data
         if (
           values.length === 0 ||
@@ -319,7 +340,9 @@ export function buildAccessibleChartPoints(
           return []
         }
         const value = values.at(-1)
-        if (value === undefined) return []
+        if (value === undefined) {
+          return []
+        }
         const point: F0AnalyticsDashboardPointClick = {
           seriesName: "",
           category: series.name,
@@ -334,7 +357,9 @@ export function buildAccessibleChartPoints(
       })
     case "gauge": {
       const value = numericPointValue(chart.value)
-      if (value === null) return []
+      if (value === null) {
+        return []
+      }
       const point: F0AnalyticsDashboardPointClick = {
         seriesName: "",
         category: chart.name ?? "",
@@ -349,7 +374,9 @@ export function buildAccessibleChartPoints(
     }
     case "heatmap":
       return chart.data.flatMap(([x, y, value], dataIndex) => {
-        if (![x, y, value].every(Number.isFinite)) return []
+        if (![x, y, value].every(Number.isFinite)) {
+          return []
+        }
         const point: F0AnalyticsDashboardPointClick = {
           seriesName: "",
           category: "",
@@ -364,10 +391,14 @@ export function buildAccessibleChartPoints(
       })
     case "scatter":
       return chart.series.flatMap((series, seriesIndex) => {
-        if (selected[series.name] === false) return []
+        if (selected[series.name] === false) {
+          return []
+        }
         return series.data.flatMap((entry, dataIndex) => {
           const [x, y] = Array.isArray(entry) ? entry : [entry.x, entry.y]
-          if (![x, y].every(Number.isFinite)) return []
+          if (![x, y].every(Number.isFinite)) {
+            return []
+          }
           const category = Array.isArray(entry) ? "" : (entry.label ?? "")
           const point: F0AnalyticsDashboardPointClick = {
             seriesName: series.name,
@@ -739,9 +770,7 @@ function ChartTableView({
     [tabular]
   )
 
-  const source = useDataCollectionSource<RecordType>(sourceDefinition, [
-    tabular,
-  ])
+  const source = useDataCollectionSource(sourceDefinition, [tabular])
 
   const visualizations = useMemo(
     () =>
@@ -918,7 +947,9 @@ export function ChartItem<Filters extends FiltersDefinition>({
         return
       }
 
-      if (!chartProps) return
+      if (!chartProps) {
+        return
+      }
 
       const quote = {
         text: buildPointQuoteText(item.title, chartProps, point),
@@ -926,7 +957,9 @@ export function ChartItem<Filters extends FiltersDefinition>({
       onAskAiTarget?.({ id: item.id, title: item.title, point, quote })
       setPendingQuote(quote)
       // Fullscreen covers the chat, matching the widget-level Ask One action.
-      if (isFullscreen) onFullscreenChange?.(false)
+      if (isFullscreen) {
+        onFullscreenChange?.(false)
+      }
       // Without this the quote would land in a panel the user cannot see.
       setAiChatOpen(true)
       focusChatInput()
@@ -1027,9 +1060,13 @@ export function ChartItem<Filters extends FiltersDefinition>({
 
   const availableChartTypes = CHART_TYPE_OPTIONS.filter((opt) => {
     const typeToCheck = opt.type === "bar" ? "bar" : opt.type
-    if (!allowedTargets.has(typeToCheck)) return false
+    if (!allowedTargets.has(typeToCheck)) {
+      return false
+    }
     // Hide pie for multi-series data — it only shows one series
-    if (opt.type === "pie" && seriesCount > 1) return false
+    if (opt.type === "pie" && seriesCount > 1) {
+      return false
+    }
     return true
   })
 
@@ -1222,7 +1259,9 @@ export function ChartItem<Filters extends FiltersDefinition>({
             <PointActionPopover
               anchor={pickedPoint}
               onAsk={() => {
-                if (pickedPoint) handleAskAboutPoint(pickedPoint)
+                if (pickedPoint) {
+                  handleAskAboutPoint(pickedPoint)
+                }
               }}
               onDismiss={dismissPointAction}
             />

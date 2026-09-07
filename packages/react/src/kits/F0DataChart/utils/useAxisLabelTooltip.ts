@@ -8,7 +8,9 @@ import type { ChartTheme } from "./theme"
 let measureCtx: CanvasRenderingContext2D | null | undefined
 
 function getMeasureContext(): CanvasRenderingContext2D | null {
-  if (measureCtx !== undefined) return measureCtx
+  if (measureCtx !== undefined) {
+    return measureCtx
+  }
   if (typeof document === "undefined") {
     measureCtx = null
     return null
@@ -43,7 +45,9 @@ function isLabelTruncated(
   fallbackFont: string
 ): boolean {
   const ctx = getMeasureContext()
-  if (!ctx) return false
+  if (!ctx) {
+    return false
+  }
   ctx.font = font
   const primary = ctx.measureText(text).width
   ctx.font = fallbackFont
@@ -71,7 +75,9 @@ export function useAxisLabelTooltip(
   useEffect(() => {
     const chart = chartRef.current
     const container = containerRef.current
-    if (!chart || !container) return
+    if (!chart || !container) {
+      return
+    }
 
     const labelFont = `${theme.textStyle.fontWeight} ${theme.textStyle.fontSize}px ${theme.textStyle.fontFamily}`
     const labelFontFallback = `${theme.textStyle.fontWeight} ${theme.textStyle.fontSize}px sans-serif`
@@ -79,7 +85,9 @@ export function useAxisLabelTooltip(
     let overlay: HTMLDivElement | null = null
 
     function getOverlay(): HTMLDivElement {
-      if (overlay) return overlay
+      if (overlay) {
+        return overlay
+      }
       overlay = document.createElement("div")
       overlay.style.cssText = [
         "position: absolute",
@@ -158,7 +166,9 @@ export function useAxisLabelTooltip(
           }
         | undefined
       const maxWidth = axis?.axisLabel?.width
-      if (typeof maxWidth !== "number") return
+      if (typeof maxWidth !== "number") {
+        return
+      }
 
       // Apply the axis formatter (if any) so we measure the text the user
       // actually sees, not the raw category value.
@@ -167,8 +177,11 @@ export function useAxisLabelTooltip(
       const displayed =
         typeof formatter === "function" ? formatter(rawValue) : rawValue
 
-      if (!isLabelTruncated(displayed, maxWidth, labelFont, labelFontFallback))
+      if (
+        !isLabelTruncated(displayed, maxWidth, labelFont, labelFontFallback)
+      ) {
         return
+      }
 
       showTooltip({
         value: displayed,
@@ -187,7 +200,9 @@ export function useAxisLabelTooltip(
       }
     }
 
-    if (typeof chart.on !== "function") return
+    if (typeof chart.on !== "function") {
+      return
+    }
 
     chart.on("mouseover", onMouseOver)
     chart.on("mouseout", onMouseOut)

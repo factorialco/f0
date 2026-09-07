@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
 
 import { UpsellingButton } from "../UpsellingButton"
-import { UpsellRequestResponseDialog } from "./index"
+import { UpsellRequestResponseDialog } from "."
 
 const defaultMessages = {
   errorMessage: {

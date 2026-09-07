@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { fn } from "storybook/test"
 
-import { HighlightBanner } from "./index"
+import { HighlightBanner } from "."
 
 const meta: Meta<typeof HighlightBanner> = {
   component: HighlightBanner,

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef } from "react"
-import { ControllerRenderProps, FieldValues } from "react-hook-form"
+import { ControllerRenderProps } from "react-hook-form"
 
 import {
   F0RichTextEditor,
@@ -11,7 +11,7 @@ import type { F0RichTextField, RichTextValue } from "./types"
 
 interface RichTextFieldRendererProps {
   field: ResolvedField<F0RichTextField>
-  formField: ControllerRenderProps<FieldValues>
+  formField: ControllerRenderProps
   error?: boolean
   loading?: boolean
 }

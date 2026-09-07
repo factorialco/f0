@@ -20,7 +20,7 @@ import { FIRST_NAMES_MOCK, getMockValue, SURNAMES_MOCK } from "@/mocks"
 
 import { ChartLine } from "../../../../icons/ai"
 import { EllipsisHorizontal, Settings } from "../../../../icons/app"
-import { PageHeader } from "./index"
+import { PageHeader } from "."
 
 const meta = {
   title: "Navigation/PageHeader",
@@ -357,7 +357,9 @@ const CollectionBoundPageHeaderDemo = () => {
           props.onClick?.(event)
           event.preventDefault()
           const id = props.href?.match(/^#\/employees\/(\d+)$/)?.[1]
-          if (id) setActiveId(id)
+          if (id) {
+            setActiveId(id)
+          }
         }}
       />
     ),

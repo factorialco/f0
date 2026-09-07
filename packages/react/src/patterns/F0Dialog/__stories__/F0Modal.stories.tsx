@@ -31,7 +31,7 @@ import {
 } from "@/lib/storybook-utils/aiChatStacking"
 import { useDataCollectionItemNavigation } from "@/patterns/OneDataCollection/hooks/useDataCollectionItemNavigation"
 
-import { F0Dialog } from "../index"
+import { F0Dialog } from ".."
 import { dialogPositions, dialogWidths } from "../types"
 
 const meta: Meta<typeof F0Dialog> = {

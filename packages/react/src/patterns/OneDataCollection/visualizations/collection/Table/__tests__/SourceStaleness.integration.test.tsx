@@ -16,7 +16,7 @@ import { zeroRender as render } from "@/testing/test-utils"
 
 import { ItemActionsDefinition } from "../../../../item-actions"
 import { SummariesDefinition } from "../../../../summary"
-import { TableCollection } from "../index"
+import { TableCollection } from ".."
 
 vi.mock("../../property", () => ({
   propertyRenderers: {

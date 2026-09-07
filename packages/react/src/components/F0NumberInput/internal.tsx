@@ -15,9 +15,8 @@ import { F0Button } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
 import { Calculator, Check } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
-import { Input as ShadcnInput } from "@/ui/input"
+import { Input as ShadcnInput, Input } from "@/ui/input"
 import { cn } from "@/lib/utils"
-import { Input } from "@/ui/input"
 import { InputMessages } from "@/components/F0InputField/components/InputMessages"
 import { Label } from "@/components/F0InputField/components/Label"
 import { InputFieldStatus } from "@/components/F0InputField/types"
@@ -70,8 +69,12 @@ const resolveStatus = (
       message: typeof error === "string" ? error : undefined,
     }
   }
-  if (hint) return { type: "default", message: hint }
-  if (status) return status
+  if (hint) {
+    return { type: "default", message: hint }
+  }
+  if (status) {
+    return status
+  }
   return undefined
 }
 
@@ -95,7 +98,9 @@ function FieldLabel({
 }
 
 function inputWidthStyle(inputWidth?: string): CSSProperties | undefined {
-  if (!inputWidth || inputWidth === "auto") return undefined
+  if (!inputWidth || inputWidth === "auto") {
+    return undefined
+  }
   return { width: inputWidth }
 }
 
@@ -263,7 +268,9 @@ export const NumberInputInternal = forwardRef<
   }
 
   useEffect(() => {
-    if (!isDeferredPopover || !popoverOpen) return
+    if (!isDeferredPopover || !popoverOpen) {
+      return
+    }
     setDraftValue(value != null ? value : null)
   }, [isDeferredPopover, popoverOpen, value])
 
@@ -280,7 +287,9 @@ export const NumberInputInternal = forwardRef<
     (e: React.FormEvent<HTMLInputElement>) => {
       const inputEvent = e.nativeEvent as InputEvent
       const data = inputEvent.data
-      if (!data) return
+      if (!data) {
+        return
+      }
 
       const input = e.currentTarget
       const start = input.selectionStart ?? 0
@@ -336,7 +345,9 @@ export const NumberInputInternal = forwardRef<
   }
 
   const handleStep = (type: "increase" | "decrease") => () => {
-    if (!step) return
+    if (!step) {
+      return
+    }
     if (inputValue == null) {
       const initialValue = step
       return handleChange(formatValue(initialValue, locale, maxDecimals))
@@ -365,7 +376,9 @@ export const NumberInputInternal = forwardRef<
     // Otherwise (grouping off, or focused): reconcile the field only when
     // `value` changed externally, so in-progress typing isn't clobbered.
     const extractedData = extractNumber(fieldValue, { maxDecimals })
-    if (inputValue === undefined || inputValue == extractedData?.value) return
+    if (inputValue === undefined || inputValue == extractedData?.value) {
+      return
+    }
     setFieldValue(
       inputValue != null ? formatValue(inputValue, locale, maxDecimals) : ""
     )

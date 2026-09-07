@@ -11,10 +11,10 @@ export type F0TextInputProps = Omit<
 
 const _F0TextInput = forwardRef<HTMLInputElement, F0TextInputProps>(
   function F0TextInput(props, ref) {
-    const publicProps = privateProps.reduce((acc, key) => {
+    const publicProps = privateProps.reduce<InputInternalProps>((acc, key) => {
       const { [key]: _, ...rest } = acc
       return rest
-    }, props as InputInternalProps)
+    }, props)
 
     return <InputInternal {...publicProps} ref={ref} />
   }

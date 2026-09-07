@@ -64,7 +64,7 @@ const ButtonInternal = forwardRef<
   const [isHovered, setIsHovered] = useState(false)
 
   const handleClick = async (
-    event: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement, MouseEvent>
+    event: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>
   ) => {
     const result = onClick?.(event)
 

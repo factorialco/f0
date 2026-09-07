@@ -12,7 +12,7 @@ import {
   teamsWithEmployees,
   workplaceWithEmployees,
 } from "./groups-avatar-name.factory"
-import { EntitySelect } from "./index"
+import { EntitySelect } from "."
 import {
   EntityId,
   EntitySelectEntity,
@@ -491,8 +491,11 @@ export const WithCustomTrigger = {
             setSelectedGroup(value ?? "all")
           }}
           onOpenChange={(open) => {
-            if (open) setTimeout(() => setLoading(false), 500)
-            else setLoading(true)
+            if (open) {
+              setTimeout(() => setLoading(false), 500)
+            } else {
+              setLoading(true)
+            }
             setOpen(open)
           }}
           selectedEntities={selected}

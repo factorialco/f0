@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { UpsellingButton } from "./index"
+import { UpsellingButton } from "."
 
 const meta = {
   title: "UpsellingButton",

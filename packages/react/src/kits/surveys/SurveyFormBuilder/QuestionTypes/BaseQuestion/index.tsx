@@ -50,7 +50,9 @@ const FrozenFieldNotice = ({
 }) => {
   const content = <div className={className}>{children}</div>
 
-  if (!notice) return content
+  if (!notice) {
+    return content
+  }
 
   return (
     <Tooltip instant {...notice}>

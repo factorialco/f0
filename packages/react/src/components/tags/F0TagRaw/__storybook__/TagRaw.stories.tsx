@@ -4,7 +4,7 @@ import { Ai } from "@/icons/app"
 import * as Icons from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
-import { F0TagRaw } from "../"
+import { F0TagRaw } from ".."
 
 const meta: Meta = {
   component: F0TagRaw,

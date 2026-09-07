@@ -13,7 +13,7 @@ import type {
   DashboardItemFiltersState,
 } from "../types"
 
-import { F0AnalyticsDashboard } from "../index"
+import { F0AnalyticsDashboard } from ".."
 import {
   dashboardFilters,
   dashboardPresets,
@@ -150,7 +150,9 @@ const InteractiveDashboard = ({ editMode }: { editMode?: boolean }) => {
       onTransformChart={(itemId, newType, orientation) => {
         setItems((prev) =>
           prev.map((item) => {
-            if (item.id !== itemId || item.type !== "chart") return item
+            if (item.id !== itemId || item.type !== "chart") {
+              return item
+            }
             return {
               ...item,
               chart: {
@@ -539,7 +541,9 @@ export const Snapshot: Story = {
     const canvas = within(canvasElement)
     const title = canvas.getAllByText("Headcount by Department").at(-1)
     const filteredWidget = title?.closest("[class*='dashitem']")
-    if (!filteredWidget) throw new Error("The filtered widget did not render")
+    if (!filteredWidget) {
+      throw new Error("The filtered widget did not render")
+    }
     await userEvent.hover(filteredWidget)
   },
 }
@@ -727,7 +731,9 @@ const itemFilterIds = [
 
 const itemFilterItems = itemFilterIds.flatMap((id, index) => {
   const item = mixedItems.find((candidate) => candidate.id === id)
-  if (!item) return []
+  if (!item) {
+    return []
+  }
 
   return [
     {
@@ -793,7 +799,9 @@ const ItemFiltersDemo = ({
     <F0AnalyticsDashboard
       items={items}
       itemFilters={(item) => {
-        if (item.id === "attrition-rate") return undefined
+        if (item.id === "attrition-rate") {
+          return undefined
+        }
         const config: DashboardItemFiltersConfig<ItemFilterDefinitions> = {
           filters: itemFilterDefinitions,
           value: valuesByItem[item.id] ?? {},
@@ -854,7 +862,9 @@ export const WithItemFilters: Story = {
       const dialog = dialogId
         ? canvasElement.ownerDocument.getElementById(dialogId)
         : null
-      if (!dialog) throw new Error("The item filter dialog did not open")
+      if (!dialog) {
+        throw new Error("The item filter dialog did not open")
+      }
       return within(dialog)
     }
     await expect(
@@ -978,7 +988,9 @@ export const ItemFiltersApplied: Story = {
     const popover = dialogId
       ? canvasElement.ownerDocument.getElementById(dialogId)
       : null
-    if (!popover) throw new Error("The item filter dialog did not open")
+    if (!popover) {
+      throw new Error("The item filter dialog did not open")
+    }
     const dialog = within(popover)
     await userEvent.click(dialog.getByRole("button", { name: "Country" }))
     await expect(dialog.getByRole("checkbox", { name: "Spain" })).toBeChecked()
@@ -991,7 +1003,9 @@ export const ItemFiltersApplied: Story = {
     const reopened = reopenedId
       ? canvasElement.ownerDocument.getElementById(reopenedId)
       : null
-    if (!reopened) throw new Error("The item filter dialog did not reopen")
+    if (!reopened) {
+      throw new Error("The item filter dialog did not reopen")
+    }
     const reopenedDialog = within(reopened)
     await userEvent.click(
       reopenedDialog.getByRole("button", { name: "Country" })
@@ -1053,8 +1067,11 @@ export const HoverItemFilterSignal: Story = {
     await step("Only the counter represents applied filters", async () => {
       await expect(trigger).toHaveTextContent("3")
       await expect(within(widget).queryByText("Country: Spain")).toBeNull()
-      if (supportsHover) await expect(trigger).not.toBeVisible()
-      else await expect(trigger).toBeVisible()
+      if (supportsHover) {
+        await expect(trigger).not.toBeVisible()
+      } else {
+        await expect(trigger).toBeVisible()
+      }
     })
 
     await step("Hover reveals the filter action", async () => {

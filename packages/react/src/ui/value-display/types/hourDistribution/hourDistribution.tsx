@@ -38,7 +38,9 @@ const MAX_MINUTES_FOR_SCALE = 8 * 60 // 8 hours
 function formatDateForTooltip(dateStr: string): string {
   try {
     const date = new Date(dateStr)
-    if (Number.isNaN(date.getTime())) return dateStr
+    if (Number.isNaN(date.getTime())) {
+      return dateStr
+    }
     return date.toLocaleDateString(undefined, {
       day: "numeric",
       month: "long",
@@ -51,7 +53,9 @@ function formatDateForTooltip(dateStr: string): string {
 function formatHours(minutes: number): string {
   const h = Math.floor(minutes / 60)
   const m = minutes % 60
-  if (m === 0) return `${h}h`
+  if (m === 0) {
+    return `${h}h`
+  }
   return `${h}h ${m}m`
 }
 

@@ -40,8 +40,12 @@ const joinSentences = (parts: string[]): string =>
 export const tooltipAccessibleText = (
   tooltip?: TooltipValue
 ): string | undefined => {
-  if (!tooltip) return undefined
-  if (typeof tooltip === "string") return tooltip
+  if (!tooltip) {
+    return undefined
+  }
+  if (typeof tooltip === "string") {
+    return tooltip
+  }
 
   const parts = [
     tooltip.title,
@@ -56,13 +60,23 @@ export const tooltipAccessibleText = (
 const toTooltipCopy = (
   tooltip?: TooltipValue
 ): TooltipCopyProps | undefined => {
-  if (!tooltip) return undefined
-  if (typeof tooltip === "string") return { label: tooltip }
+  if (!tooltip) {
+    return undefined
+  }
+  if (typeof tooltip === "string") {
+    return { label: tooltip }
+  }
 
   const { title, description, items } = tooltip
-  if (title) return { label: title, description, items }
-  if (description) return { description, items }
-  if (items?.length) return { items }
+  if (title) {
+    return { label: title, description, items }
+  }
+  if (description) {
+    return { description, items }
+  }
+  if (items?.length) {
+    return { items }
+  }
   return undefined
 }
 
@@ -77,7 +91,9 @@ export const TooltipWrapper: React.FC<TooltipWrapperProps> = ({
 }) => {
   const copy = toTooltipCopy(tooltip)
 
-  if (!copy) return <>{children}</>
+  if (!copy) {
+    return <>{children}</>
+  }
 
   return (
     <TooltipInternal instant {...copy}>

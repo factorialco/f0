@@ -5,11 +5,7 @@ import { useState } from "react"
 import { expect, userEvent, within } from "storybook/test"
 
 import { F0Button } from "../../../components/F0Button"
-import {
-  DataTestIdWrapper,
-  WithDataTestIdProps,
-  withDataTestId,
-} from "../index"
+import { DataTestIdWrapper, WithDataTestIdProps, withDataTestId } from ".."
 
 const WrappedButton = withDataTestId(F0Button)
 

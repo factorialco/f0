@@ -86,7 +86,9 @@ export function usePieChartOptions(
     const legendData = dataPoints.map((d) => d.name)
 
     const buildLabel = (): echarts.PieSeriesOption["label"] => {
-      if (!effectiveShowLabels) return { show: false }
+      if (!effectiveShowLabels) {
+        return { show: false }
+      }
 
       return {
         show: true,

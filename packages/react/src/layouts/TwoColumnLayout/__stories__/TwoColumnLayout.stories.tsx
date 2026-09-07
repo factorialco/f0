@@ -9,7 +9,7 @@ import { Dashboard } from "@/experimental/Widgets/Layout/Dashboard"
 import * as DashboardStories from "@/experimental/Widgets/Layout/Dashboard/index.stories"
 import { PageDecorator } from "@/lib/storybook-utils/pageDecorator"
 
-import { TwoColumnLayout } from "../index"
+import { TwoColumnLayout } from ".."
 
 const FocusableElement = () => {
   return (

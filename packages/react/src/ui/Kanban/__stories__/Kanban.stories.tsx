@@ -326,12 +326,12 @@ export const SimpleOnMoveTest: Story = {
   render: function Render() {
     const [instanceId] = useState(() => Symbol("kanban-instance"))
     const [callbackCalls, setCallbackCalls] = useState<
-      Array<{
+      {
         fromLaneId: string
         toLaneId: string
         sourceRecord: Task
         destinyRecord: { record: Task; position: "above" | "below" } | null
-      }>
+      }[]
     >([])
 
     // ✅ Estado mutable para las lanes para ver el movimiento visual

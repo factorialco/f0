@@ -5,7 +5,7 @@ import { expect, within } from "storybook/test"
 
 import { UserPlatformProvider } from "@/lib/providers/user-platafform/UserPlatformProvider"
 
-import { Shortcut } from "./index"
+import { Shortcut } from "."
 
 const meta = {
   component: Shortcut,

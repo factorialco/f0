@@ -53,7 +53,9 @@ export const AddButton = () => {
     )
   )
 
-  if (disabled || answering) return null
+  if (disabled || answering) {
+    return null
+  }
 
   return (
     <div className="ml-6 flex justify-center">

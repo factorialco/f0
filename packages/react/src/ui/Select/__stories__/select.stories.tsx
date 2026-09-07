@@ -10,7 +10,7 @@ import {
   SelectProps,
   SelectTrigger,
   SelectValue,
-} from "../index"
+} from ".."
 
 const SelectWithHooks = ({
   options,

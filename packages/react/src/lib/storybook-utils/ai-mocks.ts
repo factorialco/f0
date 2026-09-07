@@ -26,7 +26,9 @@ export const makeMockTranscribe =
     const words = transcript.split(" ")
     let acc = ""
     for (const word of words) {
-      if (signal?.aborted) break
+      if (signal?.aborted) {
+        break
+      }
       await new Promise((r) => setTimeout(r, 60 + Math.random() * 100))
       acc = acc ? `${acc} ${word}` : word
       onPartial(acc)

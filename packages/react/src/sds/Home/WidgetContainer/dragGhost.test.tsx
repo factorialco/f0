@@ -7,7 +7,7 @@ import { zeroRender } from "@/testing/test-utils"
 
 import { type HomeWidgetItem, type SlotRenderers } from "../slotRenderers"
 import { takeCardGhost, takePageSurface } from "./dragGhost"
-import { WidgetContainer } from "./index"
+import { WidgetContainer } from "."
 
 /**
  * The ghost is a COPY of the card's DOM rather than a second render of the

@@ -3,7 +3,7 @@ import type { Meta } from "@storybook/react-vite"
 import { PieChartProps } from "@/kits/Charts/PieChart"
 import { Default as PieChartDefault } from "@/kits/Charts/PieChart/index.stories"
 import { containerStoryArgs, WidgetDecorator } from "../storybook-utils"
-import { PieChartWidget } from "./index"
+import { PieChartWidget } from "."
 
 const meta = {
   title: "Widgets/Charts/PieChartWidget",

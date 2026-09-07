@@ -25,7 +25,9 @@ const FileList = ({
   disabled,
   fileInputRef,
 }: FileListProps) => {
-  if (!filesConfig) return null
+  if (!filesConfig) {
+    return null
+  }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = e.target.files

@@ -4,7 +4,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { F0Button } from "@/components/F0Button"
 import { usePrivacyMode } from "@/lib/privacyMode"
 
-import { PrivateBox } from "./index"
+import { PrivateBox } from "."
 
 const meta: Meta = {
   title: "Profile/PrivateBox",

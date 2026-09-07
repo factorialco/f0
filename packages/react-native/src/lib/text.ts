@@ -12,8 +12,12 @@ export const enforceTextFormat = (
   text: string | undefined,
   rules: TextFormatRules
 ) => {
-  if (typeof __DEV__ !== "undefined" && !__DEV__) return
-  if (text === undefined) return
+  if (typeof __DEV__ !== "undefined" && !__DEV__) {
+    return
+  }
+  if (text === undefined) {
+    return
+  }
 
   if (rules.disallowEmpty && text.length === 0) {
     throw Error("You need to provide some text that is not empty")

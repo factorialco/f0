@@ -6,7 +6,7 @@ import {
   BlockIdExtension,
   documentHasMissingBlockIds,
   isBlockNodeType,
-} from "../index"
+} from ".."
 
 describe("isBlockNodeType", () => {
   it("returns true for supported block-id node types", () => {

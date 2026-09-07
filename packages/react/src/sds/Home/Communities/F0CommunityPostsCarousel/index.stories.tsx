@@ -23,7 +23,7 @@ import {
 import { Plus } from "@/icons/app"
 
 import { SlotWidget } from "../../SlotWidget"
-import { F0CommunityPostsCarousel, type CommunityPostSummary } from "./index"
+import { F0CommunityPostsCarousel, type CommunityPostSummary } from "."
 
 const POSTS: CommunityPostSummary[] = [
   {

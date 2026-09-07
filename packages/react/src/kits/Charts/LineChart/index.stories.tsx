@@ -1,6 +1,6 @@
 import type { Meta } from "@storybook/react-vite"
 
-import { LineChart } from "./index"
+import { LineChart } from "."
 
 const meta: Meta = {
   component: LineChart,

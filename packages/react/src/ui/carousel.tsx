@@ -183,25 +183,37 @@ const usePagingState = (
 
   const askForNextPage = React.useCallback(() => {
     const { hasMore, isLoading, onLoadMore, owedNext } = latest.current
-    if (!hasMore || !onLoadMore) return
-    if (owedNext) return
+    if (!hasMore || !onLoadMore) {
+      return
+    }
+    if (owedNext) {
+      return
+    }
     slidesAtAsk.current = countSlides(api)
     setOwedNext(true)
     setAwaitedPage(true)
     // Recorded whether or not we are the ones who ask: a press landing while a
     // page is already in flight must still move the row when it lands, and
     // asking twice for the same records is not the way to make that happen.
-    if (!isLoading) onLoadMore()
+    if (!isLoading) {
+      onLoadMore()
+    }
   }, [api])
 
   React.useEffect(() => {
-    if (!api) return
+    if (!api) {
+      return
+    }
 
     const prefetchIfAtEnd = () => {
       const { hasMore, isLoading, onLoadMore } = latest.current
-      if (!hasMore || isLoading || !onLoadMore) return
+      if (!hasMore || isLoading || !onLoadMore) {
+        return
+      }
       const snaps = api.scrollSnapList().length
-      if (api.selectedScrollSnap() < snaps - 1) return
+      if (api.selectedScrollSnap() < snaps - 1) {
+        return
+      }
       setAwaitedPage(false)
       onLoadMore()
     }
@@ -211,14 +223,20 @@ const usePagingState = (
     const watchPull = () => {
       const { dragHandler, limit, location, percentOfView } =
         api.internalEngine()
-      if (!dragHandler.pointerDown()) return
+      if (!dragHandler.pointerDown()) {
+        return
+      }
       const pull = limit.min - location.get()
-      if (pull < percentOfView.measure(DRAG_PAST_END_PERCENT)) return
+      if (pull < percentOfView.measure(DRAG_PAST_END_PERCENT)) {
+        return
+      }
       pulledPastEnd = true
     }
 
     const askIfPulledPastEnd = () => {
-      if (!pulledPastEnd) return
+      if (!pulledPastEnd) {
+        return
+      }
       pulledPastEnd = false
       askForNextPage()
     }
@@ -243,8 +261,12 @@ const usePagingState = (
   React.useEffect(() => {
     const settled = wasLoading.current && !isLoading
     wasLoading.current = isLoading
-    if (settled) setAwaitedPage(false)
-    if (!owedNext) return
+    if (settled) {
+      setAwaitedPage(false)
+    }
+    if (!owedNext) {
+      return
+    }
     if (canScrollNext) {
       setOwedNext(false)
       scrollNext()
@@ -267,7 +289,9 @@ const usePagingState = (
      * moment the carousel's own list is the stale thing being worked around, so
      * consulting it answers "still two" and cancels the move all over again.
      */
-    if (settled && countSlides(api) <= slidesAtAsk.current) setOwedNext(false)
+    if (settled && countSlides(api) <= slidesAtAsk.current) {
+      setOwedNext(false)
+    }
   }, [owedNext, canScrollNext, isLoading, scrollNext, api])
 
   return {
@@ -551,7 +575,9 @@ const CarouselDots = React.forwardRef<
   const currentSlide = api?.selectedScrollSnap() || 0
 
   React.useEffect(() => {
-    if (!dotsContainerRef.current) return
+    if (!dotsContainerRef.current) {
+      return
+    }
 
     const container = dotsContainerRef.current
     const dotWidth = 16
@@ -568,7 +594,9 @@ const CarouselDots = React.forwardRef<
   // Prevent user scrolling
   React.useEffect(() => {
     const container = dotsContainerRef.current
-    if (!container) return
+    if (!container) {
+      return
+    }
 
     const preventScroll = (e: Event) => {
       e.preventDefault()
@@ -593,21 +621,31 @@ const CarouselDots = React.forwardRef<
   const visibleDotsWidth = Math.min(maxDots, numberOfSlides) * 16
 
   const getScale = (index: number) => {
-    if (maxDots === numberOfSlides) return null // No scaling when showing all dots
+    if (maxDots === numberOfSlides) {
+      return null
+    } // No scaling when showing all dots
 
     const distance = Math.abs(index - currentSlide)
 
-    if (distance === 0) return "scale-100"
-    if (distance === 1) return "scale-100"
-    if (distance === 2)
+    if (distance === 0) {
+      return "scale-100"
+    }
+    if (distance === 1) {
+      return "scale-100"
+    }
+    if (distance === 2) {
       return currentSlide === 0 || currentSlide === numberOfSlides - 1
         ? "scale-100"
         : "scale-75"
-    if (distance === 3)
+    }
+    if (distance === 3) {
       return currentSlide === 0 || currentSlide === numberOfSlides - 1
         ? "scale-75"
         : "scale-50"
-    if (distance >= 4) return "scale-50"
+    }
+    if (distance >= 4) {
+      return "scale-50"
+    }
   }
 
   return (

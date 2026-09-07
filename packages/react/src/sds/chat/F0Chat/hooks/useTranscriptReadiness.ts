@@ -13,7 +13,9 @@ let fontsSettled: boolean | null = null
 const fontsSettledListeners = new Set<() => void>()
 
 const areFontsSettled = (): boolean => {
-  if (fontsSettled !== null) return fontsSettled
+  if (fontsSettled !== null) {
+    return fontsSettled
+  }
   // jsdom has no document.fonts — treat it as settled.
   const fonts: FontFaceSet | undefined =
     typeof document !== "undefined" ? document.fonts : undefined
@@ -23,7 +25,9 @@ const areFontsSettled = (): boolean => {
   }
   fontsSettled = false
   const settle = () => {
-    if (fontsSettled) return
+    if (fontsSettled) {
+      return
+    }
     fontsSettled = true
     const listeners = [...fontsSettledListeners]
     fontsSettledListeners.clear()
@@ -65,7 +69,9 @@ export const useTranscriptReadiness = (
     readyRef.current = ready
   }
   const markReady = useCallback(() => {
-    if (readyRef.current) return
+    if (readyRef.current) {
+      return
+    }
     readyRef.current = true
     // Resizes after the reveal are owned by useTranscriptResizeAnchor, which
     // keeps its own observer for the life of the transcript.
@@ -75,16 +81,20 @@ export const useTranscriptReadiness = (
   }, [resetKey])
 
   const cancelFrames = useCallback(() => {
-    if (frameRef.current != null) cancelAnimationFrame(frameRef.current)
-    if (secondFrameRef.current != null)
+    if (frameRef.current != null) {
+      cancelAnimationFrame(frameRef.current)
+    }
+    if (secondFrameRef.current != null) {
       cancelAnimationFrame(secondFrameRef.current)
+    }
     frameRef.current = null
     secondFrameRef.current = null
   }, [])
 
   const scheduleStabilityCheck = useCallback(() => {
-    if (readyRef.current || !viewportRef.current || !listVisibleRef.current)
+    if (readyRef.current || !viewportRef.current || !listVisibleRef.current) {
       return
+    }
     cancelFrames()
     const version = sizeVersionRef.current
     frameRef.current = requestAnimationFrame(() => {
@@ -106,7 +116,9 @@ export const useTranscriptReadiness = (
   // Re-check once the webfont settles (the stability frames above may have
   // passed while the swap was still pending). The 1s fallback is unaffected.
   useEffect(() => {
-    if (areFontsSettled()) return
+    if (areFontsSettled()) {
+      return
+    }
     const listener = () => scheduleStabilityCheck()
     fontsSettledListeners.add(listener)
     return () => {
@@ -126,7 +138,9 @@ export const useTranscriptReadiness = (
       sizeVersionRef.current += 1
       cancelFrames()
 
-      if (!element || readyRef.current) return
+      if (!element || readyRef.current) {
+        return
+      }
 
       if (typeof ResizeObserver !== "undefined") {
         const observer = new ResizeObserver(() => {
@@ -157,15 +171,20 @@ export const useTranscriptReadiness = (
   const setListVisible = useCallback(
     (visible: boolean) => {
       listVisibleRef.current = visible
-      if (visible) scheduleStabilityCheck()
-      else cancelFrames()
+      if (visible) {
+        scheduleStabilityCheck()
+      } else {
+        cancelFrames()
+      }
     },
     [cancelFrames, scheduleStabilityCheck]
   )
 
   useEffect(() => {
     const viewport = viewportRef.current
-    if (viewport && !readyRef.current) setViewport(viewport)
+    if (viewport && !readyRef.current) {
+      setViewport(viewport)
+    }
 
     return () => {
       cancelFrames()
@@ -175,7 +194,9 @@ export const useTranscriptReadiness = (
   }, [cancelFrames, resetKey, setViewport])
 
   useEffect(() => {
-    if (readyRef.current) return
+    if (readyRef.current) {
+      return
+    }
     const fallback = window.setTimeout(markReady, FALLBACK_REVEAL_MS)
     return () => window.clearTimeout(fallback)
   }, [markReady, resetKey])

@@ -35,11 +35,15 @@ export const F0OneSwitch = ({
   const showTooltip = autoOpen ? autoTooltipVisible : tooltipOpen
 
   useEffect(() => {
-    if (autoOpen) setAutoTooltipVisible(true)
+    if (autoOpen) {
+      setAutoTooltipVisible(true)
+    }
   }, [autoOpen])
 
   useEffect(() => {
-    if (!autoOpen) return
+    if (!autoOpen) {
+      return
+    }
     const timer = setTimeout(() => setAutoTooltipVisible(false), 3000)
     return () => clearTimeout(timer)
   }, [autoOpen])

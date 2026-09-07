@@ -82,7 +82,9 @@ const SAMPLE_PEOPLE: PersonProfile[] = [
 
 const mockSearchPersons = async (query: string): Promise<PersonProfile[]> => {
   await new Promise((r) => setTimeout(r, 200))
-  if (!query) return SAMPLE_PEOPLE
+  if (!query) {
+    return SAMPLE_PEOPLE
+  }
   const q = query.toLowerCase()
   return SAMPLE_PEOPLE.filter((p) =>
     `${p.firstName} ${p.lastName}`.toLowerCase().includes(q)

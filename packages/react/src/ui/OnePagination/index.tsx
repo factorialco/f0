@@ -87,7 +87,9 @@ function _OnePagination({
   )
 
   const getPageNumbers = useMemo(() => {
-    if (isIndeterminate) return []
+    if (isIndeterminate) {
+      return []
+    }
 
     const pages: (number | string)[] = []
 

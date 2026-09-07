@@ -11,7 +11,7 @@ import LineChartWidgetStoriesMeta from "../../Charts/LineChartWidget/index.stori
 import { PieChartWidget } from "../../Charts/PieChartWidget"
 import PieChartWidgetStoriesMeta from "../../Charts/PieChartWidget/index.stories"
 import { Widget } from "../../Widget"
-import { WidgetStrip } from "./index"
+import { WidgetStrip } from "."
 
 /* eslint-disable react/jsx-key */
 const widgets = [

@@ -163,7 +163,9 @@ describe("senderBubbleColorClass", () => {
       | F0ChatSenderColor
       | undefined
 
-    if (!nameHue) throw new Error("Expected the sender name hue")
+    if (!nameHue) {
+      throw new Error("Expected the sender name hue")
+    }
     expect(bubbleClass).toContain(`colors.${nameHue}.50`)
     expect(bubbleClass).toContain(
       lightBubbleColorMixClass(nameHue, lightBubbleColorMix[nameHue])

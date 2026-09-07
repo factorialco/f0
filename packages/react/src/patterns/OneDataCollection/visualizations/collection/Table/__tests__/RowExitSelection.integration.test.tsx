@@ -26,9 +26,11 @@ type Person = { id: number; name: string }
 
 const ana: Person = { id: 1, name: "Ana" }
 
-const columns: ReadonlyArray<
-  TableColumnDefinition<Person, SortingsDefinition, SummariesDefinition>
-> = [{ label: "name", render: (item: Person) => item.name }]
+const columns: readonly TableColumnDefinition<
+  Person,
+  SortingsDefinition,
+  SummariesDefinition
+>[] = [{ label: "name", render: (item: Person) => item.name }]
 
 const source = {
   selectable: (item: Person) => item.id,

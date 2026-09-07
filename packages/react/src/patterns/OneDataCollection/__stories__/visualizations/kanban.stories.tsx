@@ -340,7 +340,9 @@ export const KanbanWithGroupingHiddenGroupSelect: Story = {
         const groups = await canvas.findAllByTestId(/^kanban-group-/)
         expect(groups.length).toBeGreaterThan(1)
         const [firstGroupEl] = groups
-        if (!firstGroupEl) return
+        if (!firstGroupEl) {
+          return
+        }
         const firstGroup = within(firstGroupEl)
         expect(
           firstGroup.queryByRole("checkbox", { name: "Select all" })

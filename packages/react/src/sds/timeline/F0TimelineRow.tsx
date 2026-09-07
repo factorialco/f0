@@ -21,7 +21,11 @@ const isMultitask = (
   "items" in props && !("icon" in props && props.icon !== undefined)
 
 export const F0TimelineRow = (props: F0TimelineRowProps) => {
-  if (isNestedtask(props)) return <NestedtaskRow props={props} />
-  if (isMultitask(props)) return <MultitaskRow props={props} />
+  if (isNestedtask(props)) {
+    return <NestedtaskRow props={props} />
+  }
+  if (isMultitask(props)) {
+    return <MultitaskRow props={props} />
+  }
   return <TaskRow props={props} />
 }

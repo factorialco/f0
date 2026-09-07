@@ -6,12 +6,12 @@ import { cn } from "@/lib/utils"
 interface DoDontsProps {
   do: {
     description: string
-    guidelines?: Array<string>
+    guidelines?: string[]
     children?: ReactNode
   }
   dont: {
     description: string
-    guidelines?: Array<string>
+    guidelines?: string[]
     children?: ReactNode
   }
   /**

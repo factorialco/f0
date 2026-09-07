@@ -4,7 +4,7 @@ import { describe, expect, test, vi } from "vitest"
 
 import { screen, userEvent, zeroRender } from "@/testing/test-utils"
 
-import { F0CarouselDialog, type F0CarouselDialogItem } from "../index"
+import { F0CarouselDialog, type F0CarouselDialogItem } from ".."
 
 const ITEMS: F0CarouselDialogItem[] = [
   { id: "a", title: "First post", content: <p>body a</p> },

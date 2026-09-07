@@ -169,7 +169,9 @@ export const useDataCollectionStorage = <
     // visualizationFilters map containing only the default visualization)
     // can be debounced and later flushed, overwriting the previously persisted
     // multi-key map because the default storage handler replaces the whole key.
-    if (!active || !storageReady) return
+    if (!active || !storageReady) {
+      return
+    }
 
     debouncedSetFeatures(featureProviders)
 

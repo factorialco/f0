@@ -51,7 +51,9 @@ export const findActiveCueIndex = (
   while (low <= high) {
     const mid = (low + high) >> 1
     const entry = timeline[mid]
-    if (entry === undefined) break
+    if (entry === undefined) {
+      break
+    }
     if (entry.start <= time) {
       active = entry.cueIndex
       low = mid + 1

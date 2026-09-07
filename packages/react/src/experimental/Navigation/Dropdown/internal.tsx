@@ -183,7 +183,9 @@ export function DropdownInternal({
   // `disabled` flips back to false. In controlled mode this fires the
   // consumer's `onOpenChange(false)` — a disabled menu must never stay open.
   useEffect(() => {
-    if (disabled && rawOpen) setOpen(false)
+    if (disabled && rawOpen) {
+      setOpen(false)
+    }
   }, [disabled, rawOpen, setOpen])
   // Mask the value passed to Radix during render so a disabled menu cannot
   // flash open before the effect above commits the state reset.

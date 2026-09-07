@@ -94,7 +94,9 @@ function FormDialogContent<TSchema extends F0FormSchema>({
       submitConfig: { ...formDefinition.submitConfig, hideSubmitButton: true },
       onSubmit: async (arg) => {
         const result = await formDefinition.onSubmit(arg)
-        if (result.success) submittedDataRef.current = arg.data
+        if (result.success) {
+          submittedDataRef.current = arg.data
+        }
         return result
       },
     }),
@@ -165,7 +167,9 @@ export function openFormDialog<TSchema extends F0FormSchema>(
     const id = options.id ?? nanoid()
     let settled = false
     const finish = (result: OpenFormDialogResult<TSchema>) => {
-      if (settled) return
+      if (settled) {
+        return
+      }
       settled = true
       resolve(result)
       unmountFormOverlay(id)

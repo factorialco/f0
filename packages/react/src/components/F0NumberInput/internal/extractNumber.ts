@@ -32,7 +32,9 @@ export function extractNumber(
   }
 
   const match = input.match(COMPLETE_NUMBER_FORMAT)
-  if (!match) return null
+  if (!match) {
+    return null
+  }
 
   // eslint-disable-next-line prefer-const
   let [_, sign, integers, separator, decimals] = match

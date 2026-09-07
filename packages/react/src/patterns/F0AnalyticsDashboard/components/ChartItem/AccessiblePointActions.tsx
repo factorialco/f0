@@ -76,7 +76,9 @@ export function AccessiblePointActions({
   }, [data, isLoading, chartType, legendSelection, owner, title])
 
   useEffect(() => {
-    if (!shouldFocusPageRef.current) return
+    if (!shouldFocusPageRef.current) {
+      return
+    }
     shouldFocusPageRef.current = false
     let focusFrame = 0
     const frame = requestAnimationFrame(() => {
@@ -95,8 +97,9 @@ export function AccessiblePointActions({
   }, [page])
 
   useEffect(() => {
-    if (!open || actions === null || !shouldFocusInitialActionRef.current)
+    if (!open || actions === null || !shouldFocusInitialActionRef.current) {
       return
+    }
     shouldFocusInitialActionRef.current = false
     let focusFrame = 0
     const frame = requestAnimationFrame(() => {
@@ -112,7 +115,9 @@ export function AccessiblePointActions({
     }
   }, [actions, open])
 
-  if (!hasActions) return null
+  if (!hasActions) {
+    return null
+  }
 
   const pageSize = 100
   const loadedActions = actions ?? []
@@ -167,7 +172,9 @@ export function AccessiblePointActions({
           side="top"
           className="max-h-80 max-w-[min(32rem,90vw)] overflow-y-auto"
           onCloseAutoFocus={(event) => {
-            if (!selectedActionRef.current) return
+            if (!selectedActionRef.current) {
+              return
+            }
             event.preventDefault()
             selectedActionRef.current = false
             const action = pendingActionRef.current

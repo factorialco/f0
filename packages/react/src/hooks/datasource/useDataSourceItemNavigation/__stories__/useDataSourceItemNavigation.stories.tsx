@@ -9,7 +9,7 @@ import {
   PaginatedDataAdapter,
   useData,
   useDataSource,
-} from "../../index"
+} from "../.."
 import { useDataSourceItemNavigation } from "../useDataSourceItemNavigation"
 
 type Item = {

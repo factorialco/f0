@@ -27,10 +27,14 @@ export function useRevealOnChange<T>(
   const prevRef = useRef(value)
 
   useIsomorphicLayoutEffect(() => {
-    if (prevRef.current === value) return
+    if (prevRef.current === value) {
+      return
+    }
     const prev = prevRef.current
     prevRef.current = value
-    if (shouldReduceMotion) return
+    if (shouldReduceMotion) {
+      return
+    }
     setVisible(false)
     const ms = typeof hold === "function" ? hold(prev, value) : hold
     const t = setTimeout(() => setVisible(true), ms)

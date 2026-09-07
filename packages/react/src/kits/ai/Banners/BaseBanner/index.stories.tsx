@@ -4,7 +4,7 @@ import { expect, within } from "storybook/test"
 
 import { Download, Upsell } from "@/icons/app"
 
-import { BaseBanner } from "./index"
+import { BaseBanner } from "."
 
 const meta = {
   title: "AI/BaseBanner",

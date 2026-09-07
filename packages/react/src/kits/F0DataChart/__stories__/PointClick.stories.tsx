@@ -4,7 +4,7 @@ import { useState } from "react"
 
 import type { F0DataChartPointClick, F0DataChartProps } from "../types"
 
-import { F0DataChart } from "../index"
+import { F0DataChart } from ".."
 
 /**
  * `onPointClick` reports the single mark the user picked. These stories are

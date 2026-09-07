@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { ComponentProps } from "react"
 
-import { Widget } from "./index"
+import { Widget } from "."
 
 const meta: Meta<ComponentProps<typeof Widget.Skeleton>> = {
   title: "Widgets/Widget/Skeleton",

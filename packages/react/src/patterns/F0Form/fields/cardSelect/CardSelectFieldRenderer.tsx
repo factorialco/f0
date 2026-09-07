@@ -1,4 +1,4 @@
-import type { ControllerRenderProps, FieldValues } from "react-hook-form"
+import type { ControllerRenderProps } from "react-hook-form"
 
 import { useContext } from "react"
 
@@ -13,7 +13,7 @@ import { CardSelectDepsContext } from "./CardSelectDepsContext"
 
 interface CardSelectFieldRendererProps {
   field: F0CardSelectField & { disabled: boolean }
-  formField: ControllerRenderProps<FieldValues>
+  formField: ControllerRenderProps
 }
 
 export function CardSelectFieldRenderer({

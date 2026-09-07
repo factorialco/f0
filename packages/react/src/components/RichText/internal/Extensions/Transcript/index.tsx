@@ -50,7 +50,9 @@ export const TranscriptView: React.FC<NodeViewProps> = ({
   const [isOpen, setIsOpen] = useState<boolean>(node.attrs.isOpen ?? false)
   const data = node.attrs.data as TranscriptData
 
-  if (!data) return null
+  if (!data) {
+    return null
+  }
 
   const handleToggleCollapse = () => {
     const newState = !isOpen
@@ -184,7 +186,9 @@ export const Transcript = Node.create({
           return dataAttr ? JSON.parse(dataAttr) : null
         },
         renderHTML: (attributes) => {
-          if (!attributes.data) return {}
+          if (!attributes.data) {
+            return {}
+          }
           return {
             "data-transcript": JSON.stringify(attributes.data),
           }
@@ -209,7 +213,9 @@ export const Transcript = Node.create({
 
   renderHTML({ HTMLAttributes, node }) {
     const data = node.attrs.data as TranscriptData
-    if (!data) return ["div"]
+    if (!data) {
+      return ["div"]
+    }
 
     return [
       "div",

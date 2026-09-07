@@ -5,7 +5,7 @@ import { expect, within } from "storybook/test"
 import type { TagListProps } from "@/components/tags/F0TagList"
 import type { TagDotProps } from "@/components/tags/F0TagDot"
 
-import { DetailsItemsList } from "./index"
+import { DetailsItemsList } from "."
 
 const meta: Meta = {
   title: "List/DetailsItemsList",

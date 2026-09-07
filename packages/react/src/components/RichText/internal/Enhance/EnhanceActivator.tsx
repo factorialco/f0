@@ -88,11 +88,17 @@ const EnhanceActivator = memo(function EnhanceActivator({
     useState<FrozenViewportPosition | null>(null)
 
   useLayoutEffect(() => {
-    if (!open) return
-    if (isLocked && flowOwnerRef.current) return
+    if (!open) {
+      return
+    }
+    if (isLocked && flowOwnerRef.current) {
+      return
+    }
 
     const updateGeometry = () => {
-      if (!enhanceButtonRef.current) return
+      if (!enhanceButtonRef.current) {
+        return
+      }
 
       setTriggerHeight(enhanceButtonRef.current.offsetHeight)
 
@@ -264,7 +270,9 @@ const EnhanceActivator = memo(function EnhanceActivator({
   }
 
   const preventIfLocked = (event: Event) => {
-    if (isLocked) event.preventDefault()
+    if (isLocked) {
+      event.preventDefault()
+    }
   }
 
   return (
@@ -272,7 +280,9 @@ const EnhanceActivator = memo(function EnhanceActivator({
       open={open}
       modal={false}
       onOpenChange={(o) => {
-        if (!o && isLocked) return
+        if (!o && isLocked) {
+          return
+        }
         if (!o) {
           flowOwnerRef.current = false
         }

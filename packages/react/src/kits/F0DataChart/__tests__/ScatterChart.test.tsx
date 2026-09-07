@@ -52,20 +52,22 @@ type ScatterPoint = {
 
 function getLatestOption() {
   const call = setOptionMock.mock.calls.at(-1)
-  if (!call) throw new Error("setOption was never called")
+  if (!call) {
+    throw new Error("setOption was never called")
+  }
   return call[0] as {
     xAxis: ValueAxis
     yAxis: ValueAxis
     // `buildLegend` returns undefined rather than `{show: false}` when hidden.
     legend?: { show: boolean; data?: string[] }
     tooltip: { trigger: string; formatter: (params: unknown) => string }
-    series: Array<{
+    series: {
       name: string
       type: string
       symbolSize: number
       data: ScatterPoint[]
       itemStyle?: { color?: string; opacity?: number }
-    }>
+    }[]
   }
 }
 

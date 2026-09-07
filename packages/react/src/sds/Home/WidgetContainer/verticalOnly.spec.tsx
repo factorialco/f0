@@ -4,7 +4,7 @@ import { describe, expect, test, vi } from "vitest"
 import { Clock } from "@/icons/app"
 import { zeroRender } from "@/testing/test-utils"
 
-import { WidgetContainer } from "./index"
+import { WidgetContainer } from "."
 import { verticalOnly } from "./verticalOnly"
 
 /**

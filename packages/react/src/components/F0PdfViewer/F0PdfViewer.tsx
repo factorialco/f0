@@ -50,7 +50,9 @@ const PAGE_VIEWPORT_PADDING = 48
 export const F0PdfViewerBase = forwardRef<HTMLDivElement, F0PdfViewerProps>(
   (props, ref) => {
     const { kind = "pdf", mimeType, ...pdfProps } = props
-    if (kind === "pdf") return <PdfViewerBase ref={ref} {...pdfProps} />
+    if (kind === "pdf") {
+      return <PdfViewerBase ref={ref} {...pdfProps} />
+    }
 
     // PDF-only props are ignored for the other kinds — strip them so only
     // data attributes reach the DOM.
@@ -184,7 +186,9 @@ const PdfViewerBase = forwardRef<
     (value: "page-width" | "page-fit") => {
       const metrics = pages[currentPage - 1]
       const container = containerRef.current
-      if (!metrics || !container) return
+      if (!metrics || !container) {
+        return
+      }
 
       const toolbarHeight = toolbarRef.current?.offsetHeight ?? 0
       const quarterTurned = rotation === 90 || rotation === 270
@@ -219,10 +223,14 @@ const PdfViewerBase = forwardRef<
   )
 
   const zoomTo = useCallback((value: number | undefined) => {
-    if (value === undefined) return
+    if (value === undefined) {
+      return
+    }
     setScale(value)
     const match = fixedScales.find((option) => Number(option) === value)
-    if (match) setSelectedScale(match)
+    if (match) {
+      setSelectedScale(match)
+    }
   }, [])
 
   const onZoomIn = useCallback(
@@ -256,13 +264,17 @@ const PdfViewerBase = forwardRef<
 
   const onContainerScroll = useCallback((event: BaseSyntheticEvent) => {
     const container = event.target
-    if (!(container instanceof HTMLElement)) return
+    if (!(container instanceof HTMLElement)) {
+      return
+    }
     const visiblePage = calculateVisiblePage(
       container,
       pageElements.current,
       toolbarRef.current?.offsetHeight ?? 0
     )
-    if (visiblePage) setCurrentPage(visiblePage)
+    if (visiblePage) {
+      setCurrentPage(visiblePage)
+    }
   }, [])
 
   const onPrint = useCallback(() => {
@@ -284,7 +296,9 @@ const PdfViewerBase = forwardRef<
   }, [page, goToPage])
 
   useEffect(() => {
-    if (currentPage > 0) onPageChange?.(currentPage)
+    if (currentPage > 0) {
+      onPageChange?.(currentPage)
+    }
   }, [currentPage, onPageChange])
 
   useEffect(() => {
@@ -306,7 +320,9 @@ const PdfViewerBase = forwardRef<
 
   useEffect(() => {
     const container = containerRef.current
-    if (!container) return
+    if (!container) {
+      return
+    }
 
     const handleClick = (event: Event) => {
       const target = event.target

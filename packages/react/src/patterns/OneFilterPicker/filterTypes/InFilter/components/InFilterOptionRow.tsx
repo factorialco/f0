@@ -53,7 +53,9 @@ export function InFilterOptionRow<T extends string>({
 
   const handleToggleChild = useCallback(
     (childValue: T, childLabel: string) => {
-      if (!childFilterKey || !onFilterChange) return
+      if (!childFilterKey || !onFilterChange) {
+        return
+      }
       const isChildSelected = childValues.includes(childValue)
       if (!isChildSelected) {
         cacheLabel(cacheKey, childValue, childLabel)

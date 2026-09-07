@@ -29,7 +29,7 @@ import {
   DataCollectionSource,
   useDataCollectionSource,
 } from "../hooks/useDataCollectionSource"
-import { OneDataCollection } from "../index"
+import { OneDataCollection } from ".."
 import { ItemActionsDefinition } from "../item-actions"
 import { NavigationFiltersDefinition } from "../navigationFilters/types"
 import { SummariesDefinition } from "../summary"
@@ -1112,7 +1112,9 @@ describe("Collections", () => {
         >({
           dataAdapter: {
             fetchData: async ({ search }) => {
-              if (!search) return { records: mockData }
+              if (!search) {
+                return { records: mockData }
+              }
 
               const searchLower = search.toLowerCase()
               return {

@@ -45,7 +45,9 @@ function emitChartEvent(event: string, params: unknown) {
   // Wrapped in `act` because the handlers set React state, and the assertion
   // reads the `setOption` payload that the resulting render produces.
   act(() => {
-    for (const handler of chartHandlers[event] ?? []) handler(params)
+    for (const handler of chartHandlers[event] ?? []) {
+      handler(params)
+    }
   })
 }
 
@@ -83,7 +85,9 @@ type BarItemStyle = { color?: string; borderRadius?: number | number[] }
 
 function getLatestOption() {
   const call = setOptionMock.mock.calls.at(-1)
-  if (!call) throw new Error("setOption was never called")
+  if (!call) {
+    throw new Error("setOption was never called")
+  }
   return call[0] as {
     legend?: { show?: boolean }
     grid?: { right?: number | string }
@@ -113,7 +117,9 @@ type LabelLayoutParams = {
 
 function getMainSeries() {
   const call = setOptionMock.mock.calls.at(-1)
-  if (!call) throw new Error("setOption was never called")
+  if (!call) {
+    throw new Error("setOption was never called")
+  }
   return (
     call[0] as {
       series: {
@@ -145,7 +151,9 @@ function getMainSeries() {
 /** Root-level animation keys that drive the hover blur cross-fade */
 function getAnimationOptions() {
   const call = setOptionMock.mock.calls.at(-1)
-  if (!call) throw new Error("setOption was never called")
+  if (!call) {
+    throw new Error("setOption was never called")
+  }
   return call[0] as {
     animation?: boolean
     animationDuration?: number
@@ -176,7 +184,9 @@ function getBorderRadii(seriesIndex: number) {
 
 beforeEach(() => {
   setOptionMock.mockClear()
-  for (const key of Object.keys(chartHandlers)) delete chartHandlers[key]
+  for (const key of Object.keys(chartHandlers)) {
+    delete chartHandlers[key]
+  }
   containerSize.width = 800
   containerSize.height = 320
 })
@@ -988,7 +998,9 @@ describe("BarChart — hideOverflowingLabels", () => {
 describe("BarChart — item tooltip", () => {
   function getTooltipFormatter() {
     const call = setOptionMock.mock.calls.at(-1)
-    if (!call) throw new Error("setOption was never called")
+    if (!call) {
+      throw new Error("setOption was never called")
+    }
     return (call[0] as { tooltip?: { formatter?: (p: unknown) => string } })
       .tooltip?.formatter
   }
@@ -2308,7 +2320,9 @@ describe("BarChart — overachievement", () => {
 describe("BarChart — target progress row", () => {
   function getTooltipFormatter() {
     const call = setOptionMock.mock.calls.at(-1)
-    if (!call) throw new Error("setOption was never called")
+    if (!call) {
+      throw new Error("setOption was never called")
+    }
     return (call[0] as { tooltip?: { formatter?: (p: unknown) => string } })
       .tooltip?.formatter
   }

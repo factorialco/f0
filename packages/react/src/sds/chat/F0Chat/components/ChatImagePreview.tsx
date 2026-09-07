@@ -72,7 +72,9 @@ export const ChatImagePreview = (): ReactNode => {
 
   const go = useCallback(
     (delta: number) => {
-      if (count === 0) return
+      if (count === 0) {
+        return
+      }
       setImagePreviewIndex((index + delta + count) % count)
     },
     [count, index, setImagePreviewIndex]
@@ -80,10 +82,15 @@ export const ChatImagePreview = (): ReactNode => {
 
   // Arrow keys page between a message's images while the lightbox is open.
   useEffect(() => {
-    if (!open || !multiple) return
+    if (!open || !multiple) {
+      return
+    }
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "ArrowRight") go(1)
-      else if (e.key === "ArrowLeft") go(-1)
+      if (e.key === "ArrowRight") {
+        go(1)
+      } else if (e.key === "ArrowLeft") {
+        go(-1)
+      }
     }
     window.addEventListener("keydown", onKey)
     return () => window.removeEventListener("keydown", onKey)
@@ -93,7 +100,9 @@ export const ChatImagePreview = (): ReactNode => {
     <Dialog
       open={open}
       onOpenChange={(next) => {
-        if (!next) closeImagePreview()
+        if (!next) {
+          closeImagePreview()
+        }
       }}
     >
       {current && (

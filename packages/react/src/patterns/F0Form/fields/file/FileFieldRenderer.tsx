@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react"
-import { ControllerRenderProps, FieldValues } from "react-hook-form"
+import { ControllerRenderProps } from "react-hook-form"
 
 import type { InputFieldStatusType } from "@/components/F0InputField/types"
 
@@ -28,7 +28,9 @@ const BARE_CATEGORIES = new Set([
  * wildcard form (`"image/*"`). Specific types pass through unchanged.
  */
 function normalizeMime(mime: string): string {
-  if (BARE_CATEGORIES.has(mime)) return `${mime}/*`
+  if (BARE_CATEGORIES.has(mime)) {
+    return `${mime}/*`
+  }
   return mime
 }
 
@@ -77,7 +79,9 @@ const WILDCARD_LABELS: Record<string, string> = {
  * string, e.g. "PDF, JPEG, PNG". Handles bare categories like "image".
  */
 function formatAcceptedTypes(accept: string[] | undefined): string | undefined {
-  if (!accept || accept.length === 0) return undefined
+  if (!accept || accept.length === 0) {
+    return undefined
+  }
 
   const labels: string[] = []
   for (const raw of accept) {
@@ -88,7 +92,9 @@ function formatAcceptedTypes(accept: string[] | undefined): string | undefined {
       labels.push(MIME_TO_LABEL[mime])
     } else {
       const ext = mime.split("/")[1]
-      if (ext) labels.push(ext.toUpperCase())
+      if (ext) {
+        labels.push(ext.toUpperCase())
+      }
     }
   }
   return labels.length > 0 ? labels.join(", ") : undefined
@@ -124,7 +130,7 @@ function getDropzoneStatusClasses({
 
 interface FileFieldRendererProps {
   field: ResolvedField<F0FileField>
-  formField: ControllerRenderProps<FieldValues>
+  formField: ControllerRenderProps
   error?: boolean
   statusType?: InputFieldStatusType
   initialFiles?: InitialFile[]
@@ -139,7 +145,9 @@ function resolveInitialEntries(
   formValue: unknown,
   isMultiple: boolean
 ): FileEntry[] {
-  if (!pool?.length) return []
+  if (!pool?.length) {
+    return []
+  }
 
   const values: string[] = isMultiple
     ? Array.isArray(formValue)
@@ -149,7 +157,9 @@ function resolveInitialEntries(
       ? [formValue]
       : []
 
-  if (values.length === 0) return []
+  if (values.length === 0) {
+    return []
+  }
 
   const lookup = new Map(pool.map((f) => [f.value, f]))
 
@@ -184,8 +194,12 @@ export function FileFieldRenderer({
   )
   const initialFilesApplied = useRef(initialFilesPool != null)
   useEffect(() => {
-    if (initialFilesApplied.current) return
-    if (initialFilesPool == null) return
+    if (initialFilesApplied.current) {
+      return
+    }
+    if (initialFilesPool == null) {
+      return
+    }
 
     // Wait for form values to be populated (e.g. after async defaultValues reset)
     // before resolving entries — avoids a race where the pool arrives before
@@ -193,7 +207,9 @@ export function FileFieldRenderer({
     const hasFormValue = isMultiple
       ? Array.isArray(formField.value) && formField.value.length > 0
       : !!formField.value
-    if (!hasFormValue) return
+    if (!hasFormValue) {
+      return
+    }
 
     initialFilesApplied.current = true
     setEntries((prev) => {
@@ -377,7 +393,9 @@ export function FileFieldRenderer({
     (e: React.DragEvent) => {
       e.preventDefault()
       e.stopPropagation()
-      if (!field.disabled) setIsDragOver(true)
+      if (!field.disabled) {
+        setIsDragOver(true)
+      }
     },
     [field.disabled]
   )
@@ -394,7 +412,9 @@ export function FileFieldRenderer({
       e.stopPropagation()
       setIsDragOver(false)
 
-      if (field.disabled) return
+      if (field.disabled) {
+        return
+      }
 
       const droppedFiles = Array.from(e.dataTransfer.files)
       if (droppedFiles.length > 0) {

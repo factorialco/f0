@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest"
 
 import { zeroRender as render, screen } from "@/testing/test-utils"
 
-import { SectionHeader } from "../index"
+import { SectionHeader } from ".."
 
 /**
  * The separator's dash is a design decision, not a browser default: 3px on,

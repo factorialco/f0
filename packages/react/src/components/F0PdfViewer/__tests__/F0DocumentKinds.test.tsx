@@ -10,7 +10,7 @@ import {
   waitFor,
 } from "@/testing/test-utils"
 
-import { F0PdfViewer } from "../index"
+import { F0PdfViewer } from ".."
 
 // The kind="pdf" path (default) is covered by F0PdfViewer.test — these tests
 // cover the non-PDF kinds the viewer routes to. pdf.js is mocked out so this
@@ -63,7 +63,9 @@ const MD_CONTENT = "# Release notes\n\n- Document previews\n"
 // Document fetches by extension; "broken" URLs 404.
 const fetchMock = vi.fn(async (url: string) => {
   const href = String(url)
-  if (href.includes("broken")) return { ok: false, status: 404 }
+  if (href.includes("broken")) {
+    return { ok: false, status: 404 }
+  }
   return {
     ok: true,
     arrayBuffer: async () => workbookBuffer(),

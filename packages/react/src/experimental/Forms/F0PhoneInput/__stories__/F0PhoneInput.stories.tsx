@@ -4,7 +4,7 @@ import { expect, fn, within } from "storybook/test"
 import { F0TextInput } from "@/components/F0TextInput"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
-import { F0PhoneInput } from "../index"
+import { F0PhoneInput } from ".."
 import { phoneInputSizes } from "../types"
 
 const meta = {

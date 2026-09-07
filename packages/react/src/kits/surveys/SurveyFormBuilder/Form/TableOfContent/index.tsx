@@ -41,7 +41,9 @@ function reorderElements(
       const sectionId = node.id.slice(SECTION_PREFIX.length)
       const section = sectionMap.get(sectionId)
 
-      if (!section) return
+      if (!section) {
+        return
+      }
 
       const reorderedQuestions = (node.children ?? [])
         .filter((child) => child.id.startsWith(QUESTION_PREFIX))

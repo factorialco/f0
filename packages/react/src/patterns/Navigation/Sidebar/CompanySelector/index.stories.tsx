@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { CompanySelector } from "./index"
+import { CompanySelector } from "."
 
 const meta: Meta<typeof CompanySelector> = {
   title: "Sidebar/CompanySelector",

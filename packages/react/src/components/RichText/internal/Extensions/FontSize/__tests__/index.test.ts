@@ -2,7 +2,7 @@ import { Editor, type JSONContent } from "@tiptap/core"
 import { afterEach, describe, expect, it } from "vitest"
 
 import { StarterKitExtension, TextStyleExtension } from "../../configured"
-import { FONT_SIZE_SCALE, FontSizeExtension } from "../index"
+import { FONT_SIZE_SCALE, FontSizeExtension } from ".."
 
 describe("FontSizeExtension", () => {
   const editors: Editor[] = []

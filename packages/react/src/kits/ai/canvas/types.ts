@@ -300,7 +300,7 @@ export type ChatDashboardMetricFormat =
   | { type: "custom"; suffix?: string; prefix?: string }
 
 export interface DashboardFetchSpec {
-  fetch: Array<{ toolId: string; args: Record<string, unknown> }>
+  fetch: { toolId: string; args: Record<string, unknown> }[]
   query: string | null
   columnLabels?: Record<string, string>
 }
@@ -333,7 +333,7 @@ export interface MetricComputation {
 export interface RadarComputation {
   datasetId: string
   seriesColumn: string
-  indicators: Array<{ column: string; label: string; max?: number }>
+  indicators: { column: string; label: string; max?: number }[]
   limit?: number
   sortBy?: string
   sortOrder?: "asc" | "desc"

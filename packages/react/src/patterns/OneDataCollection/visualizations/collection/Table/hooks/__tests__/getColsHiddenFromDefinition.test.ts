@@ -41,7 +41,7 @@ describe("getColsHiddenFromDefinition", () => {
   })
 
   it("should handle empty columns array", () => {
-    const columns: Array<{ id: string; hidden?: boolean }> = []
+    const columns: { id: string; hidden?: boolean }[] = []
 
     const result = getColsHiddenFromDefinition(columns)
 

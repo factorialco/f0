@@ -162,7 +162,7 @@ export type TableVisualizationOptions<
   /**
    * The columns to display
    */
-  columns: ReadonlyArray<TableColumnDefinition<R, Sortings, Summaries>>
+  columns: readonly TableColumnDefinition<R, Sortings, Summaries>[]
 
   /**
    * Placeholder to display in summary-row cells when no summary value is

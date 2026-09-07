@@ -23,7 +23,9 @@ const F0AccordionBase = forwardRef<HTMLDivElement, F0AccordionProps>(
     const { items, value, defaultValue, onValueChange, ...rest } = props
 
     const computedDefault = useMemo(() => {
-      if (defaultValue !== undefined) return defaultValue
+      if (defaultValue !== undefined) {
+        return defaultValue
+      }
       return items.filter((item) => item.defaultOpen).map((item) => item.id)
     }, [defaultValue, items])
 

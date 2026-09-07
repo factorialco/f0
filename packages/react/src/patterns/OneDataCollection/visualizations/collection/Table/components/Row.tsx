@@ -69,7 +69,7 @@ export type RowProps<
    * their own children's state. Absent for flat rows, so their props stay
    * identical across a selection change. */
   selectedItems?: Map<string | number, R>
-  columns: ReadonlyArray<TableColumnDefinition<R, Sortings, Summaries>>
+  columns: readonly TableColumnDefinition<R, Sortings, Summaries>[]
   frozenColumnsLeft: number
   checkColumnWidth: number
   noBorder?: boolean
@@ -214,7 +214,9 @@ const RowComponentInner = <
   const [flashing, setFlashing] = useState(isNew)
 
   useEffect(() => {
-    if (!flashing) return
+    if (!flashing) {
+      return
+    }
     const timeout = setTimeout(() => setFlashing(false), ROW_FLASH_DURATION_MS)
     return () => clearTimeout(timeout)
   }, [flashing])
@@ -270,7 +272,9 @@ const RowComponentInner = <
   // the registry and put it straight back in — a membership change per rendered
   // row, on every page.
   useEffect(() => {
-    if (id === undefined || !isRegistered || !registerSelectable) return
+    if (id === undefined || !isRegistered || !registerSelectable) {
+      return
+    }
     registerSelectable(id, itemRef.current)
     return () => unregisterSelectable?.(id)
   }, [id, isRegistered, registerSelectable, unregisterSelectable])
@@ -280,7 +284,9 @@ const RowComponentInner = <
   // only overwrites the item; membership, and the id list built from it, are
   // untouched.
   useEffect(() => {
-    if (id === undefined || !isRegistered || !registerSelectable) return
+    if (id === undefined || !isRegistered || !registerSelectable) {
+      return
+    }
     registerSelectable(id, item)
   }, [id, item, isRegistered, registerSelectable])
 

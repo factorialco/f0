@@ -30,9 +30,13 @@ export function DateCell<R extends RecordType>({
       : editableColumn.dateConfig
 
   const datePickerValue = useMemo<DatePickerValue | undefined>(() => {
-    if (!value) return undefined
+    if (!value) {
+      return undefined
+    }
     const date = parseISO(value)
-    if (!isValid(date)) return undefined
+    if (!isValid(date)) {
+      return undefined
+    }
     return { granularity: "day", value: { from: date, to: date } }
   }, [value])
 

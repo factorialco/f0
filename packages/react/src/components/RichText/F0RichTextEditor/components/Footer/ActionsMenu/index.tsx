@@ -27,14 +27,16 @@ const getLabelID = (label?: string) =>
 const normalizeSecondaryActions = (
   secondaryAction?: secondaryActionsType
 ): secondaryActionType[] => {
-  if (!secondaryAction) return []
+  if (!secondaryAction) {
+    return []
+  }
   return Array.isArray(secondaryAction) ? secondaryAction : [secondaryAction]
 }
 
 const createActionItems = (
   primaryAction?: primaryActionType,
   secondaryActions?: secondaryActionType[]
-): ButtonDropdownItem<string>[] => {
+): ButtonDropdownItem[] => {
   const primaryActionItems = primaryAction
     ? [
         {
@@ -185,7 +187,7 @@ const PrimaryActionButton = ({
 interface PrimaryActionContentProps {
   primaryAction: primaryActionType
   isFullscreen: boolean
-  listOfActions: ButtonDropdownItem<string>[]
+  listOfActions: ButtonDropdownItem[]
   handleOnClick: (labelID: string) => void
   disableButtons: boolean
   includeSecondaryInDropdown: boolean
@@ -258,7 +260,9 @@ const ActionsMenu = ({
 }: ActionsMenuProps) => {
   const secondaryActions = normalizeSecondaryActions(secondaryAction)
 
-  if (secondaryActions.length === 0 && !primaryAction) return null
+  if (secondaryActions.length === 0 && !primaryAction) {
+    return null
+  }
 
   const buttonSecondaryActions = secondaryActions.filter(
     (action) => action.type !== "switch"

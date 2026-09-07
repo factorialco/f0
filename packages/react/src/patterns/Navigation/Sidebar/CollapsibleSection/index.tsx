@@ -50,7 +50,9 @@ export const SidebarCollapsibleSection = ({
   const highlighted = highlightWhenCollapsed && !isOpen
 
   const handleClick = () => {
-    if (isDragging || wasDragging?.current) return
+    if (isDragging || wasDragging?.current) {
+      return
+    }
 
     const newIsOpen = !isOpen
     setIsOpen(newIsOpen)

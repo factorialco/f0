@@ -143,7 +143,9 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
 
     const visibleUnits = useMemo(() => {
       const filtered = UNIT_ORDER.filter((u) => units.includes(u))
-      if (filtered.length > 0) return filtered
+      if (filtered.length > 0) {
+        return filtered
+      }
       return UNIT_ORDER.filter((u) => DEFAULT_UNITS.includes(u))
     }, [units])
 
@@ -229,7 +231,9 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
           }
 
           const parsed = parseInt(digits, 10)
-          if (isNaN(parsed)) return
+          if (isNaN(parsed)) {
+            return
+          }
 
           const clamped = clampValue(parsed, max)
           const nextNegative =
@@ -254,8 +258,12 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
 
     const handleKeyDown = useCallback(
       (unit: DurationUnit) => (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.metaKey || e.ctrlKey || e.altKey) return
-        if (e.key.length > 1) return
+        if (e.metaKey || e.ctrlKey || e.altKey) {
+          return
+        }
+        if (e.key.length > 1) {
+          return
+        }
         if (
           allowNegative &&
           e.key === "-" &&
@@ -274,18 +282,27 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
 
     const handleContainerClick = useCallback(
       (e: React.MouseEvent) => {
-        if (disabled) return
-        if (e.target instanceof HTMLInputElement) return
+        if (disabled) {
+          return
+        }
+        if (e.target instanceof HTMLInputElement) {
+          return
+        }
         const firstUnit = visibleUnits[0]
-        if (firstUnit) inputRefs.current.get(firstUnit)?.focus()
+        if (firstUnit) {
+          inputRefs.current.get(firstUnit)?.focus()
+        }
       },
       [disabled, visibleUnits]
     )
 
     const setInputRef = useCallback(
       (unit: DurationUnit) => (el: HTMLInputElement | null) => {
-        if (el) inputRefs.current.set(unit, el)
-        else inputRefs.current.delete(unit)
+        if (el) {
+          inputRefs.current.set(unit, el)
+        } else {
+          inputRefs.current.delete(unit)
+        }
       },
       []
     )

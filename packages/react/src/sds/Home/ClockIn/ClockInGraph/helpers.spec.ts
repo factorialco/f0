@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 
 import { getLabels, normalizeData } from "./helpers"
-import { CLOCK_IN_COLORS, ClockInStatus } from "./index"
+import { CLOCK_IN_COLORS, ClockInStatus } from "."
 
 describe("ClockInGraph helpers", () => {
   describe("normalizeData", () => {

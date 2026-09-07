@@ -112,7 +112,9 @@ export const HalfYearView = ({
 
   // Check if a half-year is selected
   const isHalfYearSelected = (halfYear: number, year: number): boolean => {
-    if (!selected) return false
+    if (!selected) {
+      return false
+    }
 
     const halfYearRange = getHalfYearRange(halfYear, year)
 
@@ -154,7 +156,9 @@ export const HalfYearView = ({
 
   // Check if a half-year is the start of a range
   const isRangeStart = (halfYear: number, year: number): boolean => {
-    if (!selected || !isDateRange(selected) || !selected.from) return false
+    if (!selected || !isDateRange(selected) || !selected.from) {
+      return false
+    }
 
     const from = selected.from
     const fromHalfYear = getHalfYearFromMonth(from.getMonth())
@@ -163,7 +167,9 @@ export const HalfYearView = ({
 
   // Check if a half-year is the end of a range
   const isRangeEnd = (halfYear: number, year: number): boolean => {
-    if (!selected || !isDateRange(selected) || !selected.to) return false
+    if (!selected || !isDateRange(selected) || !selected.to) {
+      return false
+    }
 
     const to = selected.to
     const toHalfYear = getHalfYearFromMonth(to.getMonth())

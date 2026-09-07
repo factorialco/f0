@@ -40,9 +40,7 @@ export type AiInsightCardContent =
     }
   | {
       content: "people"
-      avatars: Array<
-        Pick<F0AvatarPersonProps, "firstName" | "lastName" | "src">
-      >
+      avatars: Pick<F0AvatarPersonProps, "firstName" | "lastName" | "src">[]
     }
   | {
       content: "team"

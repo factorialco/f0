@@ -40,7 +40,9 @@ export function useTranscriptResizeAnchor({
 
   const settle = useCallback(() => {
     timerRef.current = null
-    if (!resizingRef.current) return
+    if (!resizingRef.current) {
+      return
+    }
     resizingRef.current = false
     onSettledRef.current()
   }, [])
@@ -56,14 +58,20 @@ export function useTranscriptResizeAnchor({
       resizingRef.current = false
       widthRef.current = element ? element.clientWidth : null
 
-      if (!element || typeof ResizeObserver === "undefined") return
+      if (!element || typeof ResizeObserver === "undefined") {
+        return
+      }
 
       const observer = new ResizeObserver(() => {
         const width = element.clientWidth
-        if (width === widthRef.current) return
+        if (width === widthRef.current) {
+          return
+        }
         widthRef.current = width
         resizingRef.current = true
-        if (timerRef.current != null) window.clearTimeout(timerRef.current)
+        if (timerRef.current != null) {
+          window.clearTimeout(timerRef.current)
+        }
         timerRef.current = window.setTimeout(settle, RESIZE_SETTLE_MS)
       })
       observer.observe(element)
@@ -76,7 +84,9 @@ export function useTranscriptResizeAnchor({
     () => () => {
       observerRef.current?.disconnect()
       observerRef.current = null
-      if (timerRef.current != null) window.clearTimeout(timerRef.current)
+      if (timerRef.current != null) {
+        window.clearTimeout(timerRef.current)
+      }
     },
     []
   )

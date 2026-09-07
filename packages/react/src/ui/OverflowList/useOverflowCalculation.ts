@@ -84,7 +84,9 @@ export function useOverflowCalculation<T>(
       for (let i = 0; i < itemWidths.length; i++) {
         const newWidth = accumulatedWidth + itemWidths[i]
 
-        if (newWidth > availableWidth) break
+        if (newWidth > availableWidth) {
+          break
+        }
 
         accumulatedWidth = newWidth
         visibleCount++
@@ -106,7 +108,9 @@ export function useOverflowCalculation<T>(
       return
     }
 
-    if (!containerRef.current) return
+    if (!containerRef.current) {
+      return
+    }
 
     const currentContainerWidth = containerRef.current.clientWidth
     const overflowButtonWidth =

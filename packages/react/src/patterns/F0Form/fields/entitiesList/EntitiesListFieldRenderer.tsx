@@ -1,10 +1,6 @@
 import { parseISO } from "date-fns"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import {
-  ControllerRenderProps,
-  FieldValues,
-  useFormContext,
-} from "react-hook-form"
+import { ControllerRenderProps, useFormContext } from "react-hook-form"
 import { z, ZodTypeAny } from "zod"
 
 import type { F0FormEditableTableColumn } from "@/experimental/F0FormEditableTable"
@@ -72,7 +68,7 @@ type EntitiesListRow = { __key: string } & Record<string, unknown>
 
 interface EntitiesListFieldRendererProps {
   field: ResolvedField<F0EntitiesListField>
-  formField: ControllerRenderProps<FieldValues>
+  formField: ControllerRenderProps
   /**
    * The react-hook-form error for this field. Typed loosely because array
    * errors are index-keyed with an optional array-level `root`, which does not
@@ -111,7 +107,9 @@ function AddButton({
     />
   )
   const tooltip = config.disabled ? config.disabledTooltip : config.tooltip
-  if (!tooltip) return button
+  if (!tooltip) {
+    return button
+  }
   return (
     <TooltipProvider delayDuration={100}>
       <Tooltip>
@@ -132,7 +130,9 @@ function AddButton({
 
 /** Coerce an unknown form value into a normalized list of items. */
 function normalizeValue(value: unknown): EntitiesListItem[] {
-  if (!Array.isArray(value)) return []
+  if (!Array.isArray(value)) {
+    return []
+  }
   return value.map((item) =>
     typeof item === "object" && item !== null
       ? { ...(item as EntitiesListItem) }
@@ -236,8 +236,12 @@ export function EntitiesListFieldRenderer({
   const touchedCellsRef = useRef<Set<string>>(new Set())
   const shouldShowCellError = useCallback(
     (rowKey: string, columnId: string): boolean => {
-      if (revealAllOnSubmit) return true
-      if (!freshRowKeysRef.current.has(rowKey)) return true
+      if (revealAllOnSubmit) {
+        return true
+      }
+      if (!freshRowKeysRef.current.has(rowKey)) {
+        return true
+      }
       return touchedCellsRef.current.has(`${rowKey}:${columnId}`)
     },
     [revealAllOnSubmit]
@@ -277,7 +281,9 @@ export function EntitiesListFieldRenderer({
   /** Form item (`Date`) → row item (ISO string) for date fields. */
   const formItemToRow = useCallback(
     (item: EntitiesListItem): EntitiesListItem => {
-      if (dateKeys.length === 0) return item
+      if (dateKeys.length === 0) {
+        return item
+      }
       const next = { ...item }
       for (const key of dateKeys) {
         if (next[key] instanceof Date) {
@@ -292,7 +298,9 @@ export function EntitiesListFieldRenderer({
   /** Row item (ISO string) → form item (`Date`) for date fields. */
   const rowItemToForm = useCallback(
     (item: EntitiesListItem): EntitiesListItem => {
-      if (dateKeys.length === 0) return item
+      if (dateKeys.length === 0) {
+        return item
+      }
       const next = { ...item }
       for (const key of dateKeys) {
         const value = next[key]
@@ -387,7 +395,9 @@ export function EntitiesListFieldRenderer({
             confirm: { label: removeLabel },
           }
       const confirmed = await dialogs.confirmation(confirmOptions)
-      if (!confirmed) return
+      if (!confirmed) {
+        return
+      }
 
       if (onRemove) {
         setRemovingKeys((prev) => new Set(prev).add(__key))
@@ -462,9 +472,13 @@ export function EntitiesListFieldRenderer({
    */
   const isRowEditable = useCallback(
     (row: EntitiesListRow): boolean => {
-      if (!field.editableIds) return true
+      if (!field.editableIds) {
+        return true
+      }
       const id = row.id
-      if (id === undefined || id === null) return true
+      if (id === undefined || id === null) {
+        return true
+      }
       return field.editableIds.includes(id as string | number)
     },
     [field.editableIds]
@@ -477,9 +491,13 @@ export function EntitiesListFieldRenderer({
    */
   const isRowRemovable = useCallback(
     (row: EntitiesListRow): boolean => {
-      if (!field.removableIds) return true
+      if (!field.removableIds) {
+        return true
+      }
       const id = row.id
-      if (id === undefined || id === null) return true
+      if (id === undefined || id === null) {
+        return true
+      }
       return field.removableIds.includes(id as string | number)
     },
     [field.removableIds]
@@ -503,12 +521,17 @@ export function EntitiesListFieldRenderer({
           continue
         }
         const inner = unwrapZodSchema(propSchema)
-        if (isZodType(inner, "ZodString")) item[key] = ""
-        else if (isZodType(inner, "ZodArray")) item[key] = []
+        if (isZodType(inner, "ZodString")) {
+          item[key] = ""
+        } else if (isZodType(inner, "ZodArray")) {
+          item[key] = []
+        }
         // A boolean field (e.g. an optional switch/checkbox) has no inline cell,
         // so seed `false` — otherwise a new inline row can never satisfy the
         // required `z.boolean()` and the add button stays blocked.
-        else if (isZodType(inner, "ZodBoolean")) item[key] = false
+        else if (isZodType(inner, "ZodBoolean")) {
+          item[key] = false
+        }
       }
       return item
     },
@@ -566,7 +589,9 @@ export function EntitiesListFieldRenderer({
         description: mode === "add" ? createDescription : updateDescription,
         ...(mode === "add" ? { labels: { submit: addButtonLabel } } : {}),
       })
-      if (!result.submitted) return
+      if (!result.submitted) {
+        return
+      }
 
       // Dialog data has `Date`s; store ISO strings on the row (commit converts
       // them back to `Date` for the form value).
@@ -611,8 +636,12 @@ export function EntitiesListFieldRenderer({
     row: EntitiesListRow,
     editable: "text" | "number" | "money" | "date" | "select" | "multiselect"
   ) => {
-    if (useDialogMode) return "display-only" as const
-    if (isDisabled || !isRowEditable(row)) return "disabled" as const
+    if (useDialogMode) {
+      return "display-only" as const
+    }
+    if (isDisabled || !isRowEditable(row)) {
+      return "disabled" as const
+    }
     return editable
   }
 
@@ -620,12 +649,16 @@ export function EntitiesListFieldRenderer({
   // - hidden columns (value kept for row actions, no cell), and
   // - fields whose type has no inline cell (e.g. boolean, date, file); those
   //   keep their value but aren't shown as a column (editable via the dialog).
-  const columns: ReadonlyArray<F0FormEditableTableColumn<EntitiesListRow>> =
+  const columns: readonly F0FormEditableTableColumn<EntitiesListRow>[] =
     itemKeys
       .map((key): F0FormEditableTableColumn<EntitiesListRow> | null => {
-        if (field.columns?.[key]?.hidden) return null
+        if (field.columns?.[key]?.hidden) {
+          return null
+        }
         const resolution = resolveEntitiesListCell(itemShape[key])
-        if (!resolution) return null
+        if (!resolution) {
+          return null
+        }
 
         const columnConfig = field.columns?.[key]
         const base = {
@@ -698,7 +731,9 @@ export function EntitiesListFieldRenderer({
   const rootError = error?.root?.message ?? error?.message
   const getCellError = useCallback(
     (row: EntitiesListRow, columnId: string, index: number) => {
-      if (!shouldShowCellError(row.__key, columnId)) return undefined
+      if (!shouldShowCellError(row.__key, columnId)) {
+        return undefined
+      }
       return error?.[index]?.[columnId]?.message
     },
     [error, shouldShowCellError]
@@ -745,7 +780,9 @@ export function EntitiesListFieldRenderer({
       const result = field.itemSchema?.safeParse(rowItemToForm(item))
       if (result && !result.success) {
         anyInvalid = true
-        if (!freshRowKeysRef.current.has(__key)) existingInvalid = true
+        if (!freshRowKeysRef.current.has(__key)) {
+          existingInvalid = true
+        }
       }
     }
     return { hasInvalidRow: anyInvalid, hasInvalidExistingRow: existingInvalid }
@@ -788,14 +825,18 @@ export function EntitiesListFieldRenderer({
   const editRowByKey = useCallback(
     (rowKey: string) => {
       const row = findRow(rowKey)
-      if (row) openItemDialog("edit", row)
+      if (row) {
+        openItemDialog("edit", row)
+      }
     },
     [findRow, openItemDialog]
   )
   const removeRowByKey = useCallback(
     (rowKey: string) => {
       const row = findRow(rowKey)
-      if (row) void performRemove(row)
+      if (row) {
+        void performRemove(row)
+      }
     },
     [findRow, performRemove]
   )
@@ -817,7 +858,9 @@ export function EntitiesListFieldRenderer({
   const hrefByKey = useCallback(
     (rowKey: string) => {
       const row = findRow(rowKey)
-      if (!row || !itemHref) return undefined
+      if (!row || !itemHref) {
+        return undefined
+      }
       const { __key: _key, ...item } = row
       return itemHref(item)
     },
@@ -827,9 +870,13 @@ export function EntitiesListFieldRenderer({
   // overflow menu, with the same update/remove helpers as the table.
   const rowActionsByKey = useCallback(
     (rowKey: string): EntitiesListViewAction[] => {
-      if (!rowActionsFn) return []
+      if (!rowActionsFn) {
+        return []
+      }
       const index = rows.findIndex((r) => r.__key === rowKey)
-      if (index < 0) return []
+      if (index < 0) {
+        return []
+      }
       const { __key: _key, ...item } = rows[index]
       return rowActionsFn(item, index).map((action) => ({
         label: action.label,

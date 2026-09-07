@@ -60,7 +60,9 @@ export function Breadcrumbs({ breadcrumbs, append }: BreadcrumbsProps) {
   useLayoutEffect(() => {
     const container = containerRef.current
     const list = listRef.current
-    if (!container || !list || list.children.length < breadcrumbs.length) return
+    if (!container || !list || list.children.length < breadcrumbs.length) {
+      return
+    }
 
     const updateBreadcrumbState = () => {
       const containerWidth = containerRef.current?.clientWidth ?? null

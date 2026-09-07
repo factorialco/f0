@@ -110,10 +110,14 @@ export const QuarterView = ({
 
   // Check if a quarter is selected
   const isQuarterSelected = (quarter: number, year: number): boolean => {
-    if (!selected) return false
+    if (!selected) {
+      return false
+    }
 
     const quarterRange = getQuarterRange(quarter, year)
-    if (!quarterRange.to) return false
+    if (!quarterRange.to) {
+      return false
+    }
 
     if (!isDateRange(selected)) {
       // Single date selection
@@ -149,7 +153,9 @@ export const QuarterView = ({
 
   // Check if a quarter is the start of a range
   const isRangeStart = (quarter: number, year: number): boolean => {
-    if (!selected || !isDateRange(selected) || !selected.from) return false
+    if (!selected || !isDateRange(selected) || !selected.from) {
+      return false
+    }
 
     const from = selected.from
     const fromQuarter = getQuarterFromMonth(from.getMonth())
@@ -158,7 +164,9 @@ export const QuarterView = ({
 
   // Check if a quarter is the end of a range
   const isRangeEnd = (quarter: number, year: number): boolean => {
-    if (!selected || !isDateRange(selected) || !selected.to) return false
+    if (!selected || !isDateRange(selected) || !selected.to) {
+      return false
+    }
 
     const to = selected.to
     const toQuarter = getQuarterFromMonth(to.getMonth())

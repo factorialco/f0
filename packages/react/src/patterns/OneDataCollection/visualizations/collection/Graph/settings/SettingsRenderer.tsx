@@ -18,10 +18,10 @@ export type GraphVisualizationSettings = {
 }
 
 type GraphSettingsProps = {
-  tagTypes: ReadonlyArray<F0GraphNodeTagColumn>
+  tagTypes: readonly F0GraphNodeTagColumn[]
   labels?: Partial<Record<F0GraphNodeTagColumn, string>>
-  defaultVisibleTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>
-  pinnedTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>
+  defaultVisibleTagTypes?: readonly F0GraphNodeTagColumn[]
+  pinnedTagTypes?: readonly F0GraphNodeTagColumn[]
   lockedTagTypes?: Partial<Record<F0GraphNodeTagColumn, string>>
 }
 

@@ -398,7 +398,7 @@ export interface DashboardCollectionItem<
    * Same shape as OneDataCollection's `visualizations` prop.
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  visualizations: ReadonlyArray<any>
+  visualizations: readonly any[]
 }
 
 // ---------------------------------------------------------------------------

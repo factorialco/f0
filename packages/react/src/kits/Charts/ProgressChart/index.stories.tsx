@@ -1,6 +1,6 @@
 import type { Meta } from "@storybook/react-vite"
 
-import { ProgressBar } from "./index"
+import { ProgressBar } from "."
 
 const meta: Meta<typeof ProgressBar> = {
   title: "Charts/ProgressChart",

@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
-import { F0ProgressSeries } from "../index"
+import { F0ProgressSeries } from ".."
 import { F0ProgressSeriesBar, f0ProgressSeriesSizes } from "../types"
 
 const quarters: F0ProgressSeriesBar[] = [

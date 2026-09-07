@@ -9,7 +9,7 @@ import { useF0Form } from "@/patterns/F0Form"
 import type { BulkAction } from "../../../types"
 
 import { useDataCollectionSource } from "../../../hooks/useDataCollectionSource"
-import { OneDataCollection } from "../../../index"
+import { OneDataCollection } from "../../.."
 import {
   cardVisualization,
   createResourceDataAdapter,

@@ -6,7 +6,7 @@ import { ApplicationFrame } from "@/patterns/ApplicationFrame"
 import ApplicationFrameStoryMeta from "@/patterns/ApplicationFrame/index.stories"
 import UpsellIcon from "@/icons/app/Upsell"
 
-import { ProductModal } from "./index"
+import { ProductModal } from "."
 
 const meta = {
   title: "ProductModal",

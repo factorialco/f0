@@ -35,10 +35,10 @@ type DropdownProps = Omit<
 
 const _Dropdown = (props: DropdownProps) => {
   const { open, onOpenChange, dataTestId, ...rest } = props
-  const publicProps = privateProps.reduce((acc, key) => {
+  const publicProps = privateProps.reduce<DropdownInternalProps>((acc, key) => {
     const { [key]: _, ...rest } = acc
     return rest
-  }, rest as DropdownInternalProps)
+  }, rest)
 
   return (
     <DataTestIdWrapper dataTestId={dataTestId}>

@@ -57,7 +57,9 @@ export const usePlayerController = (
   const refreshedRef = useRef(false)
 
   const ensureSrc = useCallback(async () => {
-    if (!getSrc || resolvingRef.current) return
+    if (!getSrc || resolvingRef.current) {
+      return
+    }
     resolvingRef.current = true
     try {
       setResolvedSrc(await getSrc())
@@ -77,7 +79,9 @@ export const usePlayerController = (
   const handleError = useCallback(
     (error: MediaError | null) => {
       onError?.(error)
-      if (!getSrc || refreshedRef.current) return
+      if (!getSrc || refreshedRef.current) {
+        return
+      }
       refreshedRef.current = true
       playAfterResolveRef.current = true
       setResolvedSrc(undefined)
@@ -117,11 +121,15 @@ export const usePlayerController = (
 
   useEffect(() => {
     const audio = audioRef.current
-    if (!audio) return
+    if (!audio) {
+      return
+    }
 
     const applyPendingSeek = () => {
       const target = pendingSeekRef.current
-      if (target === null) return
+      if (target === null) {
+        return
+      }
       pendingSeekRef.current = null
       setPendingSeek(null)
       playerSeek(target)
@@ -132,11 +140,15 @@ export const usePlayerController = (
   }, [playerSeek])
 
   useEffect(() => {
-    if (eagerSrc !== undefined) setResolvedSrc(eagerSrc)
+    if (eagerSrc !== undefined) {
+      setResolvedSrc(eagerSrc)
+    }
   }, [eagerSrc])
 
   useEffect(() => {
-    if (!resolvedSrc || !playAfterResolveRef.current) return
+    if (!resolvedSrc || !playAfterResolveRef.current) {
+      return
+    }
     playAfterResolveRef.current = false
     player.play()
   }, [resolvedSrc, player])
@@ -151,7 +163,9 @@ export const usePlayerController = (
   }, [player, resolvedSrc, getSrc, ensureSrc])
 
   useEffect(() => {
-    if (playing === undefined) return
+    if (playing === undefined) {
+      return
+    }
     if (playing && !player.isPlaying) {
       if (!resolvedSrc && getSrc) {
         playAfterResolveRef.current = true
@@ -166,7 +180,9 @@ export const usePlayerController = (
 
   const reportedPlaying = useRef(player.isPlaying)
   useEffect(() => {
-    if (reportedPlaying.current === player.isPlaying) return
+    if (reportedPlaying.current === player.isPlaying) {
+      return
+    }
     reportedPlaying.current = player.isPlaying
     onPlayingChange?.(player.isPlaying)
   }, [player.isPlaying, onPlayingChange])

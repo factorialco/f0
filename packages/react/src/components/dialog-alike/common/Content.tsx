@@ -48,7 +48,9 @@ export const Content = ({
 
   const handleScroll = useCallback(() => {
     const el = viewportRef.current
-    if (!el) return
+    if (!el) {
+      return
+    }
     const { scrollTop, scrollHeight, clientHeight } = el
     setIsAtTop(scrollTop <= 0)
     setIsAtBottom(scrollTop + clientHeight >= scrollHeight - 1)
@@ -56,7 +58,9 @@ export const Content = ({
 
   useEffect(() => {
     const el = viewportRef.current
-    if (!el) return
+    if (!el) {
+      return
+    }
     el.addEventListener("scroll", handleScroll, { passive: true })
     handleScroll()
 

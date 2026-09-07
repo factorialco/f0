@@ -2,8 +2,8 @@ import { useMemo } from "react"
 import { z, ZodRawShape, ZodTypeAny } from "zod"
 
 import type { F0Field } from "./fields/types"
-import type { F0FormSchema } from "./types"
 import type {
+  F0FormSchema,
   F0SectionConfig,
   FieldItem,
   FormDefinitionItem,
@@ -373,7 +373,9 @@ function groupFieldsIntoRows(
   const processedIndices = new Set<number>()
 
   for (let i = 0; i < fields.length; i++) {
-    if (processedIndices.has(i)) continue
+    if (processedIndices.has(i)) {
+      continue
+    }
 
     const field = fields[i]
     const rowId = field.config.row

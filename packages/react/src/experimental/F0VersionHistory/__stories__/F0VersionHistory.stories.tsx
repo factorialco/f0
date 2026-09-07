@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { useState } from "react"
 
-import { F0VersionHistory } from "../index"
+import { F0VersionHistory } from ".."
 import { Version } from "../types"
 
 const mockVersions: Version[] = [

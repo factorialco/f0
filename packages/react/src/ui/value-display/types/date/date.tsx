@@ -6,8 +6,7 @@ import { ValueDisplayRendererContext } from "../../renderers"
  * Date cell type for displaying formatted dates in data collections.
  * Supports both direct date values and objects with placeholder states.
  */
-import { formatDateValue } from "../../utils"
-import { isShowingPlaceholder } from "../../utils"
+import { formatDateValue, isShowingPlaceholder } from "../../utils"
 import { WithPlaceholder } from "../types"
 
 interface DateValue extends WithPlaceholder {

@@ -7,7 +7,7 @@ import { F0Text } from "@/components/F0Text"
 import { F0Dialog } from "@/patterns/F0Dialog"
 
 import { useDataCollectionSource } from "../../../hooks/useDataCollectionSource"
-import { OneDataCollection } from "../../../index"
+import { OneDataCollection } from "../../.."
 import {
   cardVisualization,
   createResourceDataAdapter,

@@ -15,7 +15,7 @@ import RadialProgressWidgetStoriesMeta from "../../Charts/RadialProgressWidget/i
 import { VerticalBarChartWidget } from "../../Charts/VerticalBarChartWidget"
 import VerticalBarChartWidgetStoriesMeta from "../../Charts/VerticalBarChartWidget/index.stories"
 import { Widget } from "../../Widget"
-import { Dashboard } from "./index"
+import { Dashboard } from "."
 
 /* eslint-disable react/jsx-key */
 const widgets = [

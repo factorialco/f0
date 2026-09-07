@@ -63,7 +63,9 @@ export function F0CanvasPanel({
   const entity = content && entities ? entities[content.type] : undefined
 
   const renderInner = (): ReactNode => {
-    if (!content || !entity) return null
+    if (!content || !entity) {
+      return null
+    }
 
     const header = entity.renderHeader({
       content,

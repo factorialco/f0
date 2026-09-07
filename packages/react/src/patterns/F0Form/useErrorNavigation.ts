@@ -19,12 +19,16 @@ function findFieldAnchorElement(
   formName: string,
   fieldId: string
 ): HTMLElement | null {
-  if (typeof document === "undefined") return null
+  if (typeof document === "undefined") {
+    return null
+  }
 
   // Try without section ID first (non-sectioned form)
   const directId = generateAnchorId(formName, undefined, fieldId)
   const direct = document.getElementById(directId)
-  if (direct) return direct
+  if (direct) {
+    return direct
+  }
 
   // Fallback: search for sectioned anchor (forms.formName.*.fieldId)
   const prefix = `forms.${formName}.`
@@ -160,10 +164,16 @@ export function useErrorNavigation({
       : [...fieldErrorKeys].sort((a, b) => {
           const anchorA = findFieldAnchorElement(formName, a)
           const anchorB = findFieldAnchorElement(formName, b)
-          if (!anchorA || !anchorB) return 0
+          if (!anchorA || !anchorB) {
+            return 0
+          }
           const position = anchorA.compareDocumentPosition(anchorB)
-          if (position & Node.DOCUMENT_POSITION_FOLLOWING) return -1
-          if (position & Node.DOCUMENT_POSITION_PRECEDING) return 1
+          if (position & Node.DOCUMENT_POSITION_FOLLOWING) {
+            return -1
+          }
+          if (position & Node.DOCUMENT_POSITION_PRECEDING) {
+            return 1
+          }
           return 0
         })
   const hasErrors = fieldErrors.length > 0
@@ -189,7 +199,9 @@ export function useErrorNavigation({
   // Resolve the current index from the tracked field ID and the latest error list
   const resolveCurrentIndex = useCallback(() => {
     const id = currentFieldIdRef.current
-    if (!id) return 0
+    if (!id) {
+      return 0
+    }
     const idx = fieldErrorsRef.current.indexOf(id)
     return idx === -1 ? 0 : idx
   }, [])
@@ -222,7 +234,9 @@ export function useErrorNavigation({
   const navigateToError = useCallback(
     (index: number) => {
       const errors = fieldErrorsRef.current
-      if (errors.length === 0) return
+      if (errors.length === 0) {
+        return
+      }
 
       // Wrap around
       const wrappedIndex =

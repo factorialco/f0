@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { CalendarEventList } from "./index"
+import { CalendarEventList } from "."
 
 const meta: Meta = {
   title: "Widgets/Content/CalendarEventList",

@@ -48,7 +48,9 @@ export const F0DialogHeader = ({
     ) ?? []
 
   const Actions = () => {
-    if (!otherActionItems.length || !otherActions) return null
+    if (!otherActionItems.length || !otherActions) {
+      return null
+    }
 
     const hasCriticalAction = otherActionItems.some((action) => action.critical)
 
@@ -73,7 +75,9 @@ export const F0DialogHeader = ({
   }
 
   const Module = () => {
-    if (!module) return null
+    if (!module) {
+      return null
+    }
 
     return (
       <BreadcrumbList>
@@ -126,7 +130,9 @@ export const F0DialogHeader = ({
     ) : null
 
   const Controls = () => {
-    if (!controls) return null
+    if (!controls) {
+      return null
+    }
 
     if (controls.kind === "back") {
       return (

@@ -25,9 +25,9 @@ export const detectPlatform = async (): Promise<Platform> => {
   switch (true) {
     case /mac|iphone|ipod|ipad/.test(userAgent):
       return "mac"
-    case /win/.test(userAgent):
+    case userAgent.includes("win"):
       return "windows"
-    case /linux/.test(userAgent):
+    case userAgent.includes("linux"):
       return "linux"
     case /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
       userAgent

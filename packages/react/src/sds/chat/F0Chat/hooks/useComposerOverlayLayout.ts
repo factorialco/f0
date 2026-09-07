@@ -18,7 +18,9 @@ export const useComposerOverlayLayout = (enabled: boolean) => {
     const shell = shellRef.current
     const composer = composerOverlayRef.current
 
-    if (!shell) return
+    if (!shell) {
+      return
+    }
 
     if (!enabled || !composer) {
       shell.style.setProperty(CHAT_COMPOSER_HEIGHT_PROPERTY, "0px")
@@ -28,7 +30,9 @@ export const useComposerOverlayLayout = (enabled: boolean) => {
     let lastHeight = -1
     const publishHeight = (height: number) => {
       const nextHeight = Math.ceil(height)
-      if (nextHeight === lastHeight) return
+      if (nextHeight === lastHeight) {
+        return
+      }
 
       lastHeight = nextHeight
       shell.style.setProperty(CHAT_COMPOSER_HEIGHT_PROPERTY, `${nextHeight}px`)

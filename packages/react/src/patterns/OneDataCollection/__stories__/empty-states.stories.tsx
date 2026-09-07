@@ -8,8 +8,7 @@ import { BaseResponse } from "@/hooks/datasource/types"
 import { PromiseState } from "@/lib/promise-to-observable"
 
 import { CustomEmptyStates } from "../hooks/useEmptyState"
-import { OneDataCollection } from "../index"
-import { NavigationFiltersDefinition } from "../navigationFilters/types"
+import { OneDataCollection } from ".."
 import {
   createPromiseDataFetch,
   filters,
@@ -35,11 +34,7 @@ const BaseExampleComponent = ({
   currentFilters,
   emptyStates,
 }: {
-  dataAdapter: DataCollectionDataAdapter<
-    MockUser,
-    typeof filters,
-    NavigationFiltersDefinition
-  >
+  dataAdapter: DataCollectionDataAdapter<MockUser, typeof filters>
   currentFilters?: FiltersState<typeof filters>
   emptyStates?: CustomEmptyStates
 }) => {

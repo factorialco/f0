@@ -314,7 +314,9 @@ export const templatesForGuidedType = (
   guidedTypeId: string
 ): Template[] => {
   const type = flow.guidedTypes.find((t) => t.id === guidedTypeId)
-  if (!type) return []
+  if (!type) {
+    return []
+  }
   return flow.templates.filter((t) => t.category === type.templateCategory)
 }
 

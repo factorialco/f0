@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { IconType } from "@/components/F0Icon"
 import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
 
-import { F0ButtonDropdown } from "../index"
+import { F0ButtonDropdown } from ".."
 // Mock the imported components
 vi.mock("@/ui/Action", () => ({
   actionSizes: ["sm", "md", "lg"],

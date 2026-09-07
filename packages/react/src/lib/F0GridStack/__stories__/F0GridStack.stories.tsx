@@ -9,7 +9,7 @@ import { OneCalendar } from "@/components/OneCalendar"
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { getMockValue } from "@/mocks"
 
-import { F0GridStack, GridStackReactWidget } from "../index"
+import { F0GridStack, GridStackReactWidget } from ".."
 
 const meta = {
   title: "Utilities/GridStack",

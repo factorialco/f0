@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest"
 
 import { zeroRender as render, screen } from "@/testing/test-utils"
 
-import { Switch } from "../index"
+import { Switch } from ".."
 
 describe("Switch (experimental)", () => {
   it("renders a switch role and is enabled by default", () => {

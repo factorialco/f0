@@ -12,7 +12,7 @@ import {
 import type { ActionBarStatus } from "@/components/F0ActionBar"
 
 import { useDataCollectionSource } from "../hooks/useDataCollectionSource"
-import { OneDataCollection } from "../index"
+import { OneDataCollection } from ".."
 
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (
   <I18nProvider

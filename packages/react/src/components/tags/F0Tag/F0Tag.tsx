@@ -39,14 +39,30 @@ export type TagVariant =
 const tagComponent = (tag: TagVariant): ReactNode | undefined => {
   const { type } = tag
 
-  if (type === "dot") return <F0TagDot {...tag} />
-  if (type === "person") return <F0TagPerson {...tag} />
-  if (type === "team") return <F0TagTeam {...tag} />
-  if (type === "company") return <F0TagCompany {...tag} />
-  if (type === "alert") return <F0TagAlert {...tag} />
-  if (type === "status") return <F0TagStatus {...tag} />
-  if (type === "balance") return <F0TagBalance {...tag} />
-  if (type === "raw") return <F0TagRaw {...tag} />
+  if (type === "dot") {
+    return <F0TagDot {...tag} />
+  }
+  if (type === "person") {
+    return <F0TagPerson {...tag} />
+  }
+  if (type === "team") {
+    return <F0TagTeam {...tag} />
+  }
+  if (type === "company") {
+    return <F0TagCompany {...tag} />
+  }
+  if (type === "alert") {
+    return <F0TagAlert {...tag} />
+  }
+  if (type === "status") {
+    return <F0TagStatus {...tag} />
+  }
+  if (type === "balance") {
+    return <F0TagBalance {...tag} />
+  }
+  if (type === "raw") {
+    return <F0TagRaw {...tag} />
+  }
 
   return undefined
 }
@@ -54,7 +70,9 @@ const tagComponent = (tag: TagVariant): ReactNode | undefined => {
 export const Tag = ({ tag }: { tag: TagVariant }): ReactNode => {
   const renderTag = tagComponent(tag)
 
-  if (!renderTag) return "Invalid tag type"
+  if (!renderTag) {
+    return "Invalid tag type"
+  }
 
   return renderTag
 }

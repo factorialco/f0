@@ -45,7 +45,9 @@ export const ChatMessageMeta = ({
   const channelType = useF0ChatChannelType()
   const label = metaLabel(message, i18n.chat.edited)
 
-  if (channelType === "announcement") return null
+  if (channelType === "announcement") {
+    return null
+  }
 
   if (placement === "overlay") {
     return (
@@ -123,7 +125,9 @@ export const ChatMessageMetaLabel = ({
   const i18n = useI18n()
   const channelType = useF0ChatChannelType()
   // Announcing a made-up minute is worse than announcing nothing.
-  if (channelType === "announcement") return null
+  if (channelType === "announcement") {
+    return null
+  }
   return <span className="sr-only">{metaLabel(message, i18n.chat.edited)}</span>
 }
 

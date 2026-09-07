@@ -43,8 +43,12 @@ export const CollapsibleMessage = ({
   const isControlled = open !== undefined
   const isExpanded = isControlled ? open : uncontrolledOpen
   const handleOpenChange = (next: boolean) => {
-    if (lockOpen) return
-    if (!isControlled) setUncontrolledOpen(next)
+    if (lockOpen) {
+      return
+    }
+    if (!isControlled) {
+      setUncontrolledOpen(next)
+    }
     onOpenChange?.(next)
   }
 

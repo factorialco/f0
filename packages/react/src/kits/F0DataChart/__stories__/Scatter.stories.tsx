@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import type { F0DataChartProps, F0DataChartScatterSeries } from "../types"
 
-import { F0DataChart } from "../index"
+import { F0DataChart } from ".."
 import { ChartDecorator, ResponsiveSnapshot } from "./decorators"
 
 const meta = {

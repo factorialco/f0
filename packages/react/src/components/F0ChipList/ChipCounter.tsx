@@ -16,7 +16,9 @@ export const ChipCounter = ({ count, list }: Props) => {
 
   const counter = <Chip label={`+${count}`} />
 
-  if (!list?.length) return counter
+  if (!list?.length) {
+    return counter
+  }
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>

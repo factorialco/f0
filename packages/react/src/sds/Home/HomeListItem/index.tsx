@@ -363,7 +363,9 @@ export function HomeListItem({
     <div className={className}>{content}</div>
   )
 
-  if (!hasActions) return row
+  if (!hasActions) {
+    return row
+  }
 
   return (
     <div className="group relative">
@@ -387,8 +389,9 @@ export function HomeListItem({
             />
           )
 
-          if (!action.items)
+          if (!action.items) {
             return <Fragment key={action.label}>{button}</Fragment>
+          }
 
           return (
             <DropdownInternal

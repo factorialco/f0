@@ -31,7 +31,7 @@ export interface KanbanProps<TRecord extends RecordType> {
    * Lanes configuration. While the data source adapter is not ready, each lane
    * carries its concrete items so we can iterate visually.
    */
-  lanes: ReadonlyArray<KanbanLaneAttributes<TRecord>>
+  lanes: readonly KanbanLaneAttributes<TRecord>[]
 
   /** Whether the kanban is in loading state */
   loading?: boolean

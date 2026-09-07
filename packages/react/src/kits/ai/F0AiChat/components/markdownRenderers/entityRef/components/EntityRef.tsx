@@ -7,9 +7,15 @@ import { getEntityRefRenderer } from "./entityRefRegistry"
  * Handles strings, numbers, arrays, and fragments.
  */
 export function extractText(node: ReactNode): string {
-  if (typeof node === "string") return node
-  if (typeof node === "number") return String(node)
-  if (Array.isArray(node)) return node.map(extractText).join("")
+  if (typeof node === "string") {
+    return node
+  }
+  if (typeof node === "number") {
+    return String(node)
+  }
+  if (Array.isArray(node)) {
+    return node.map(extractText).join("")
+  }
   if (node && typeof node === "object" && "props" in node) {
     return extractText(node.props.children)
   }

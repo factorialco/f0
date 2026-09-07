@@ -72,7 +72,9 @@ function getVisibleItems(
   activeItem?: string
 ): FlattenedItem[] {
   const total = allItems.length
-  if (total <= MAX_BARS) return allItems
+  if (total <= MAX_BARS) {
+    return allItems
+  }
 
   const step = total / (MAX_BARS - 1)
   const selectedIndices = new Set(

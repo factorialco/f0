@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest"
 
 import { userEvent, zeroRender as render } from "@/testing/test-utils"
 
-import { PageNavigation } from "../index"
+import { PageNavigation } from ".."
 
 describe("PageNavigation", () => {
   it("renders the counter", () => {

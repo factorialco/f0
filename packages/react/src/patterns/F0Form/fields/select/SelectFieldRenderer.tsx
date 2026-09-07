@@ -1,4 +1,4 @@
-import { ControllerRenderProps, FieldValues } from "react-hook-form"
+import { ControllerRenderProps } from "react-hook-form"
 
 import type { InputFieldStatus } from "@/components/F0InputField/types"
 
@@ -12,7 +12,7 @@ import { FORM_SIZE } from "../../constants"
 
 interface SelectFieldRendererProps {
   field: ResolvedField<F0SelectField>
-  formField: ControllerRenderProps<FieldValues>
+  formField: ControllerRenderProps
   error?: boolean
   loading?: boolean
   status?: InputFieldStatus

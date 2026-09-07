@@ -6,7 +6,7 @@ import { expect, fn, userEvent, waitFor, within } from "storybook/test"
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
-import { F0EmojiPicker, f0EmojiPickerSizes } from "../index"
+import { F0EmojiPicker, f0EmojiPickerSizes } from ".."
 
 const meta = {
   title: "F0EmojiPicker",

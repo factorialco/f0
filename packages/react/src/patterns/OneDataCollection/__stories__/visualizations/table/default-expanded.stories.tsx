@@ -2,7 +2,7 @@ import { Meta, StoryObj } from "@storybook/react-vite"
 import { expect, within } from "storybook/test"
 
 import { useDataCollectionSource } from "../../../hooks/useDataCollectionSource"
-import { OneDataCollection } from "../../../index"
+import { OneDataCollection } from "../../.."
 
 /**
  * `defaultExpanded` decides which rows of a nested table start out open before
@@ -71,7 +71,9 @@ const byId = new Map<string, Node>()
 const indexTree = (nodes: Node[]) =>
   nodes.forEach((node) => {
     byId.set(node.id, node)
-    if (node.children) indexTree(node.children)
+    if (node.children) {
+      indexTree(node.children)
+    }
   })
 indexTree(TREE)
 

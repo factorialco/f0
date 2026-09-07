@@ -1,6 +1,6 @@
 import { Meta } from "@storybook/react-vite"
 
-import { BarChart } from "./index"
+import { BarChart } from "."
 
 const meta: Meta = {
   title: "Charts/BarChart",

@@ -4,7 +4,7 @@ import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0Avatar } from "../../F0Avatar"
 import { getBaseAvatarArgTypes } from "../../internal/BaseAvatar/__stories__/utils"
-import { F0AvatarModule } from "../index"
+import { F0AvatarModule } from ".."
 import { ModuleId, modules } from "../modules"
 
 const meta = {

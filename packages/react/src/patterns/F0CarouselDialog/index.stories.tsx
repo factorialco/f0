@@ -14,7 +14,7 @@ import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { F0CommunityPostsCarousel } from "@/sds/Home/Communities/F0CommunityPostsCarousel"
 import { CommunityPost } from "@/sds/Home/Communities/Post/CommunityPost"
 
-import { F0CarouselDialog, type F0CarouselDialogItem } from "./index"
+import { F0CarouselDialog, type F0CarouselDialogItem } from "."
 
 /**
  * The posts as `CommunityPost` already takes them. The dialog is a FRAME: what

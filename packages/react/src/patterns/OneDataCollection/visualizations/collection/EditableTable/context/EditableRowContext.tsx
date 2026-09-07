@@ -96,7 +96,9 @@ export function EditableRowProvider<R extends RecordType>({
   const setLoading = (columnIds: string[], loading: boolean) => {
     setCellLoading((prev) => {
       const next = { ...prev }
-      for (const id of columnIds) next[id] = loading
+      for (const id of columnIds) {
+        next[id] = loading
+      }
       return next
     })
   }
@@ -105,8 +107,11 @@ export function EditableRowProvider<R extends RecordType>({
     setCellErrors((prev) => {
       const next = { ...prev }
       for (const id of columnIds) {
-        if (message === undefined) delete next[id]
-        else next[id] = message
+        if (message === undefined) {
+          delete next[id]
+        } else {
+          next[id] = message
+        }
       }
       return next
     })
@@ -148,7 +153,9 @@ export function EditableRowProvider<R extends RecordType>({
   /** Saves the pending change now instead of waiting for its timer. */
   const flushPending = () => {
     const pending = pendingRef.current
-    if (!pending) return
+    if (!pending) {
+      return
+    }
 
     clearTimeout(pending.timer)
     pendingRef.current = null
@@ -166,11 +173,15 @@ export function EditableRowProvider<R extends RecordType>({
     options?: CellChangeOptions
   ) => {
     const columnIds = Object.keys(updates)
-    if (columnIds.length === 0) return
+    if (columnIds.length === 0) {
+      return
+    }
 
     const previousItem = localItemRef.current
     const previousValues: Record<string, unknown> = {}
-    for (const id of columnIds) previousValues[id] = previousItem[id]
+    for (const id of columnIds) {
+      previousValues[id] = previousItem[id]
+    }
 
     // The local item always updates immediately so the cell stays responsive
     const updatedItem = { ...previousItem, ...updates } as R
@@ -189,7 +200,9 @@ export function EditableRowProvider<R extends RecordType>({
     // from before the first keystroke so the reported change covers the
     // whole typing session, not just the last keystroke.
     const pending = pendingRef.current
-    if (pending) clearTimeout(pending.timer)
+    if (pending) {
+      clearTimeout(pending.timer)
+    }
 
     pendingRef.current = {
       previousValues: { ...previousValues, ...pending?.previousValues },

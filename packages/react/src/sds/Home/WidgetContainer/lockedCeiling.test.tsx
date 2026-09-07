@@ -5,7 +5,7 @@ import { Clock } from "@/icons/app"
 import { act, zeroRender } from "@/testing/test-utils"
 
 import type { HomeWidgetItem } from "../slotRenderers"
-import { WidgetContainer } from "./index"
+import { WidgetContainer } from "."
 import { lockedCeiling, noHigherThan, topPins } from "./lockedCeiling"
 
 /**

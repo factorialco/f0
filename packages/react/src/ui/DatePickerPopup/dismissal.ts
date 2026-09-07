@@ -26,9 +26,13 @@ export const isDropdownOwnedBy = (
   target: EventTarget | null,
   owner: Element | null
 ) => {
-  if (!(target instanceof Element) || !owner) return false
+  if (!(target instanceof Element) || !owner) {
+    return false
+  }
   const listbox = target.closest('[role="listbox"]')
-  if (!listbox?.id) return false
+  if (!listbox?.id) {
+    return false
+  }
   // Compared as attribute values rather than matched in a selector: Radix ids carry
   // colons, which a selector would need escaping for, and `CSS.escape` is missing in
   // some environments (jsdom) — throwing here would break dismissal outright.
@@ -54,7 +58,9 @@ export const createCalendarDismissalHandlers = (
   getCalendar: () => Element | null
 ) => ({
   onPointerDownOutside: (event: OutsideInteractionEvent) => {
-    if (isDropdownOwnedBy(event.target, getCalendar())) event.preventDefault()
+    if (isDropdownOwnedBy(event.target, getCalendar())) {
+      event.preventDefault()
+    }
   },
   onFocusOutside: (event: OutsideInteractionEvent) => {
     const calendar = getCalendar()

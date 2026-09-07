@@ -62,7 +62,9 @@ export const EditorBubbleMenu = memo(function EditorBubbleMenu({
   const [bubbleMenuWidth, setBubbleMenuWidth] = useState<number>()
 
   useEffect(() => {
-    if (!bubbleMenuContainerRef.current) return
+    if (!bubbleMenuContainerRef.current) {
+      return
+    }
     const updateWidth = () => {
       setBubbleMenuWidth(bubbleMenuContainerRef.current?.offsetWidth)
     }

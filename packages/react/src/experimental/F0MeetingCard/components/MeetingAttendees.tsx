@@ -22,7 +22,9 @@ export const MeetingAttendees = ({
 }) => {
   const { meetingCard } = useI18n()
 
-  if (attendees.length === 0) return null
+  if (attendees.length === 0) {
+    return null
+  }
 
   // Only force the counter when people are genuinely missing from the list —
   // F0AvatarList shows a "+0" badge for any defined `remainingCount`.

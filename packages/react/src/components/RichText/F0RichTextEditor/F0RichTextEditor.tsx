@@ -188,7 +188,9 @@ const F0RichTextEditorComponent = forwardRef<
   }, [height, isFullscreen])
 
   useEffect(() => {
-    if (!isFullscreen || !isToolbarOpen) return
+    if (!isFullscreen || !isToolbarOpen) {
+      return
+    }
 
     const updateWidth = () => {
       if (fullscreenToolbarRef.current) {
@@ -204,7 +206,9 @@ const F0RichTextEditorComponent = forwardRef<
   const handleToggleFullscreen = () => {
     setIsFullscreen((prev) => {
       const next = !prev
-      if (onFullscreenChange) onFullscreenChange(next)
+      if (onFullscreenChange) {
+        onFullscreenChange(next)
+      }
       return next
     })
   }
@@ -309,7 +313,9 @@ const F0RichTextEditorComponent = forwardRef<
   const applyDictation = useCallback(
     (text: string) => {
       const range = dictationRangeRef.current
-      if (!editor || !range) return
+      if (!editor || !range) {
+        return
+      }
       const docSize = editor.state.doc.content.size
       const from = Math.min(range.from, docSize)
       const to = Math.min(range.to, docSize)
@@ -335,7 +341,9 @@ const F0RichTextEditorComponent = forwardRef<
   })
   const canRecord = !!onTranscribe && recorder.isSupported
   const handleStartRecording = useCallback(() => {
-    if (!editor) return
+    if (!editor) {
+      return
+    }
     dictationRangeRef.current = {
       from: editor.state.selection.to,
       to: editor.state.selection.to,
@@ -370,7 +378,9 @@ const F0RichTextEditorComponent = forwardRef<
     },
   }))
 
-  if (!editor) return null
+  if (!editor) {
+    return null
+  }
 
   const editorContent = (
     <FocusScope trapped={false}>

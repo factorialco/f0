@@ -23,7 +23,9 @@ type WindowWithWebkitAudio = Window &
   }
 
 const getAudioContextCtor = (): typeof AudioContext | undefined => {
-  if (typeof window === "undefined") return undefined
+  if (typeof window === "undefined") {
+    return undefined
+  }
   const w = window as WindowWithWebkitAudio
   return w.AudioContext ?? w.webkitAudioContext
 }
@@ -60,7 +62,9 @@ export const RecordingWaveform = ({
   // Capacity = how many bars fit the current width (timeline scrolls past it).
   useEffect(() => {
     const el = containerRef.current
-    if (!el) return
+    if (!el) {
+      return
+    }
     const measure = () => {
       const width = el.clientWidth
       setCapacity(
@@ -68,7 +72,9 @@ export const RecordingWaveform = ({
       )
     }
     measure()
-    if (typeof ResizeObserver === "undefined") return
+    if (typeof ResizeObserver === "undefined") {
+      return
+    }
     const ro = new ResizeObserver(measure)
     ro.observe(el)
     return () => ro.disconnect()

@@ -7,7 +7,7 @@ import { expect, within } from "storybook/test"
 
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 
-import { F0ChipList } from "./index"
+import { F0ChipList } from "."
 
 const meta = {
   component: F0ChipList,

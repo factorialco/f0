@@ -8,7 +8,9 @@ import { F0AudioPlayer, F0AudioPlayerCard } from ".."
 
 const getAudio = (): HTMLAudioElement => {
   const audio = document.querySelector("audio")
-  if (!audio) throw new Error("audio element not found")
+  if (!audio) {
+    throw new Error("audio element not found")
+  }
   return audio
 }
 
@@ -860,7 +862,9 @@ describe("keeping the spoken cue in view", () => {
     const viewport = document.querySelector<HTMLElement>(
       "[data-scroll-container]"
     )
-    if (!viewport) throw new Error("scroll viewport not found")
+    if (!viewport) {
+      throw new Error("scroll viewport not found")
+    }
     const scrollTo = vi.fn()
     viewport.scrollTo = scrollTo
     vi.spyOn(viewport, "getBoundingClientRect").mockReturnValue({
@@ -934,7 +938,9 @@ describe("keeping the spoken cue in view", () => {
     expect(scrollTo).toHaveBeenCalledOnce()
 
     const scrollbarArea = viewport.parentElement
-    if (!scrollbarArea) throw new Error("scroll area root not found")
+    if (!scrollbarArea) {
+      throw new Error("scroll area root not found")
+    }
     fireEvent.pointerDown(scrollbarArea)
 
     playTo(20)

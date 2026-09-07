@@ -13,7 +13,7 @@ import {
 import { pulses, type Pulse } from "@/lib/mood"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
-import { F0ENPSButton } from "../index"
+import { F0ENPSButton } from ".."
 import type { F0ENPSButtonProps } from "../types"
 
 /**

@@ -62,12 +62,12 @@ vi.mock("@/components/F0ButtonDropdown", () => ({
         }
         onClick={() =>
           (onClick as (value: string, item: unknown) => void)(
-            (items as Array<{ value: string }>)[0].value,
-            (items as Array<unknown>)[0]
+            (items as { value: string }[])[0].value,
+            (items as unknown[])[0]
           )
         }
       >
-        {(items as Array<{ label: string }>)[0]?.label}
+        {(items as { label: string }[])[0]?.label}
       </button>
     </div>
   ),

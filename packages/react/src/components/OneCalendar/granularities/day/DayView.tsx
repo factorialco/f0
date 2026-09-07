@@ -35,7 +35,9 @@ interface DayViewProps {
  * because the user is still selecting the end date.
  */
 const isMultiDayRange = (range: DateRange | null | undefined): boolean => {
-  if (!range?.from || !range?.to) return false
+  if (!range?.from || !range?.to) {
+    return false
+  }
   // Check if from and to are on different days
   return range.from.toDateString() !== range.to.toDateString()
 }
@@ -67,7 +69,9 @@ export function DayView({
    */
   const handleRangeSelect: SelectRangeEventHandler = useCallback(
     (range) => {
-      if (!onSelect) return
+      if (!onSelect) {
+        return
+      }
 
       const previousRange = selected as DateRange | undefined
       const hadMultiDayRange = isMultiDayRange(previousRange)

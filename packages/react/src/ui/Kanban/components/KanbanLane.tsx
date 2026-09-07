@@ -86,7 +86,9 @@ export function KanbanLane<TRecord extends RecordType>({
         lastTimeRef.current = null
         return
       }
-      if (vp) vp.scrollTop += speedPxPerSecRef.current * dtSec
+      if (vp) {
+        vp.scrollTop += speedPxPerSecRef.current * dtSec
+      }
       rafRef.current = window.requestAnimationFrame(step)
     }
 
@@ -110,7 +112,9 @@ export function KanbanLane<TRecord extends RecordType>({
   }, [isDragging])
 
   useEffect(() => {
-    if (!id) return
+    if (!id) {
+      return
+    }
 
     const ensureLoop = () => {
       if (rafRef.current == null && speedPxPerSecRef.current !== 0) {
@@ -131,7 +135,9 @@ export function KanbanLane<TRecord extends RecordType>({
               }
               return
             }
-            if (vp2) vp2.scrollTop += speedPxPerSecRef.current * dt
+            if (vp2) {
+              vp2.scrollTop += speedPxPerSecRef.current * dt
+            }
             rafRef.current = window.requestAnimationFrame(loop)
           })
         })
@@ -500,7 +506,9 @@ export function KanbanLane<TRecord extends RecordType>({
   useEffect(() => {
     const resolve = () => {
       const root = laneRef.current
-      if (!root) return null
+      if (!root) {
+        return null
+      }
       viewportRef.current = root.querySelector(
         "[data-scroll-container]"
       ) as HTMLDivElement | null
@@ -509,7 +517,9 @@ export function KanbanLane<TRecord extends RecordType>({
     resolve()
 
     const root = laneRef.current
-    if (!root) return
+    if (!root) {
+      return
+    }
     const observer = new MutationObserver(() => {
       resolve()
     })
@@ -534,7 +544,9 @@ export function KanbanLane<TRecord extends RecordType>({
   // Test hook: allow stories to trigger onMove without real DnD
   useEffect(() => {
     const handler = (e: Event) => {
-      if (!id) return
+      if (!id) {
+        return
+      }
       const detail = (
         e as CustomEvent<
           | {
@@ -553,8 +565,12 @@ export function KanbanLane<TRecord extends RecordType>({
             }
         >
       ).detail
-      if (!detail) return
-      if (detail.toLaneId !== id) return
+      if (!detail) {
+        return
+      }
+      if (detail.toLaneId !== id) {
+        return
+      }
       void onMove?.(detail).catch(() => {})
     }
     window.addEventListener("kanban-test-move", handler as EventListener)
@@ -575,7 +591,9 @@ export function KanbanLane<TRecord extends RecordType>({
     }
     const measure = measureRef.current
     const outer = outerRef.current
-    if (!measure || !outer) return
+    if (!measure || !outer) {
+      return
+    }
 
     let rafId: number | null = null
     let lastCalculatedHeight: number | null = null
@@ -583,7 +601,9 @@ export function KanbanLane<TRecord extends RecordType>({
     const calculateHeight = () => {
       // Get parent flex container (the one with items-start)
       const flexContainer = outer.parentElement?.parentElement
-      if (!flexContainer) return
+      if (!flexContainer) {
+        return
+      }
 
       // Get max available height from the flex container
       const maxHeight = flexContainer.offsetHeight
@@ -706,7 +726,7 @@ export function KanbanLane<TRecord extends RecordType>({
                 const edge = index === forcedIndex ? forcedEdge : null
 
                 // Determine which edges should be disabled for this card to prevent useless drops
-                const disabledEdges: Array<"top" | "bottom"> = []
+                const disabledEdges: ("top" | "bottom")[] = []
                 if (draggedItemIndex >= 0) {
                   if (index === draggedItemIndex) {
                     // The dragged card itself - disable both edges

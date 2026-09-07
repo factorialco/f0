@@ -45,7 +45,9 @@ export const SelectQuestion = ({ options, ...props }: SelectQuestionProps) => {
 
   // preventing options with same value to cause unexpected behavior
   useEffect(() => {
-    if (!someOptionsWithSameValue) return
+    if (!someOptionsWithSameValue) {
+      return
+    }
 
     let newOptions = options.map((option) => ({
       ...option,

@@ -12,7 +12,7 @@ export const useSticky = <
   Summaries extends SummariesDefinition,
 >(
   frozenColumnsLeft: number,
-  columns: ReadonlyArray<TableColumnDefinition<R, Sortings, Summaries>>,
+  columns: readonly TableColumnDefinition<R, Sortings, Summaries>[],
   hasCheckColumn: boolean
 ) => {
   const checkColumnWidth = hasCheckColumn ? 56 : 0

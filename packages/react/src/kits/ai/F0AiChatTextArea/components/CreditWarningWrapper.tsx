@@ -27,7 +27,9 @@ export const CreditWarningWrapper = ({
 }: CreditWarningWrapperProps) => {
   const translation = useI18n()
 
-  if (!creditWarning) return children
+  if (!creditWarning) {
+    return children
+  }
 
   const config = {
     ...creditWarningConfig[creditWarning.level],

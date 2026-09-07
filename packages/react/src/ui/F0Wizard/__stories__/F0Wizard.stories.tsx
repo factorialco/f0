@@ -9,7 +9,7 @@ import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import type { F0WizardStep } from "../types"
 
-import { F0Wizard } from "../index"
+import { F0Wizard } from ".."
 
 const meta: Meta<typeof F0Wizard> = {
   title: "Wizard",

@@ -6,7 +6,7 @@ import { InFilterDefinition } from "."
 import { FilterTypeSchema } from "../types"
 import { InFilterOptionItem, InFilterOptions } from "./types"
 
-const optionsCache = new Map<string, InFilterOptionItem<unknown>[]>()
+const optionsCache = new Map<string, InFilterOptionItem[]>()
 
 // Label cache: stores value -> label mappings per schema
 // Key format: `${cacheKey}:${value}`
@@ -82,7 +82,7 @@ export async function loadOptions<T>(
     | InFilterOptionItem<T>[]
     | Promise<InFilterOptionItem<T>[]>
     | (() => Promise<InFilterOptionItem<T>[]> | InFilterOptionItem<T>[]),
-  cache: boolean = false
+  cache = false
 ): Promise<InFilterOptionItem<T>[]> {
   if (cache && optionsCache.has(cacheKey)) {
     return optionsCache.get(cacheKey) as InFilterOptionItem<T>[]

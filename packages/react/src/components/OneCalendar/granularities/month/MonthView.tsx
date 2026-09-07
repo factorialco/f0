@@ -118,7 +118,9 @@ export function MonthView({
 
   // Check if a month is selected
   const isMonthSelected = (monthIndex: number): boolean => {
-    if (!selected) return false
+    if (!selected) {
+      return false
+    }
 
     if (!isDateRange(selected)) {
       return (
@@ -144,7 +146,9 @@ export function MonthView({
 
   // Check if the month is the start of the range
   const isRangeStart = (monthIndex: number): boolean => {
-    if (!selected || !isDateRange(selected) || !selected.from) return false
+    if (!selected || !isDateRange(selected) || !selected.from) {
+      return false
+    }
 
     return (
       selected.from.getMonth() === monthIndex &&
@@ -154,7 +158,9 @@ export function MonthView({
 
   // Check if the month is the end of the range
   const isRangeEnd = (monthIndex: number): boolean => {
-    if (!selected || !isDateRange(selected) || !selected.to) return false
+    if (!selected || !isDateRange(selected) || !selected.to) {
+      return false
+    }
 
     return (
       selected.to.getMonth() === monthIndex &&

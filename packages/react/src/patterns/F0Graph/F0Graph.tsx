@@ -244,18 +244,18 @@ export interface F0GraphProps<T = unknown> {
    *
    * Order is preserved in the popover.
    */
-  nodeTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>
+  nodeTagTypes?: readonly F0GraphNodeTagColumn[]
   /**
    * Controlled set of currently visible tag types. When omitted, falls
    * back to `defaultVisibleTagTypes` (or all of `nodeTagTypes`). The
    * visibility UI itself is owned by the consumer.
    */
-  visibleTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>
+  visibleTagTypes?: readonly F0GraphNodeTagColumn[]
   /**
    * Initial visible tag types when `visibleTagTypes` is not controlled.
    * Defaults to all of `nodeTagTypes`.
    */
-  defaultVisibleTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>
+  defaultVisibleTagTypes?: readonly F0GraphNodeTagColumn[]
   /**
    * Whether the layout should reserve vertical room for one tag row beneath
    * each node so the source handle (and outgoing edges) anchors below the

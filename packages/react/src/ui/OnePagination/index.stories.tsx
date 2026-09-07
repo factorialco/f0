@@ -5,7 +5,7 @@ import { expect, within } from "storybook/test"
 
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 
-import { OnePagination } from "./index"
+import { OnePagination } from "."
 
 const meta: Meta<typeof OnePagination> = {
   component: OnePagination,

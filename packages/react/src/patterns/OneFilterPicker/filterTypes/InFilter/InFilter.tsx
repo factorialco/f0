@@ -110,7 +110,9 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
 
   // Pre-populate nested label cache for existing selections (e.g., after localStorage restore)
   useEffect(() => {
-    if (!allFiltersValue || !options.length) return
+    if (!allFiltersValue || !options.length) {
+      return
+    }
 
     const populateNestedCache = (parentOptions: InFilterOptionItem<T>[]) => {
       for (const option of parentOptions) {
@@ -260,7 +262,9 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
   }
 
   const handleScrollBottom = () => {
-    if (isLoading || !loadMore || !canLoadMore.current) return
+    if (isLoading || !loadMore || !canLoadMore.current) {
+      return
+    }
     loadMore()
   }
 

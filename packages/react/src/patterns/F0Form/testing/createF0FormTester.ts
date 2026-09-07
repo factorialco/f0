@@ -126,7 +126,9 @@ function flattenZodErrors(error: z.ZodError): FlattenedZodErrors {
   for (const issue of error.issues) {
     if (issue.path.length === 0) {
       // Root-level issue (e.g. from object-level .refine())
-      if (rootError === undefined) rootError = issue.message
+      if (rootError === undefined) {
+        rootError = issue.message
+      }
       continue
     }
     const path = issue.path.join(".")

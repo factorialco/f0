@@ -11,7 +11,7 @@ import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { forms } from "@/patterns/forms"
 
-import { F0WizardForm, useF0FormDefinition } from "../index"
+import { F0WizardForm, useF0FormDefinition } from ".."
 
 const meta: Meta<typeof F0WizardForm> = {
   title: "Forms/F0WizardForm",

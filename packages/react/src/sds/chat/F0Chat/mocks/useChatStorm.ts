@@ -75,12 +75,16 @@ export const useChatStorm = (
   const stampsRef = useRef<number[]>([])
 
   useEffect(() => {
-    if (!running) return
+    if (!running) {
+      return
+    }
     let cancelled = false
     let timer: ReturnType<typeof setTimeout>
 
     const fire = () => {
-      if (cancelled) return
+      if (cancelled) {
+        return
+      }
       const t = targetRef.current
       const people = authorsRef.current
       const roll = Math.random()

@@ -1,8 +1,8 @@
 import { endOfDay, startOfDay } from "date-fns"
 import { describe, expect, it } from "vitest"
 
-import { getGranularityDefinitions } from "../../index"
-import { createPeriodsGranularity, periodsGranularity } from "../index"
+import { getGranularityDefinitions } from "../.."
+import { createPeriodsGranularity, periodsGranularity } from ".."
 import { DatePeriod } from "../types"
 
 const i18n = {}

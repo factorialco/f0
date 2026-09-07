@@ -41,7 +41,9 @@ export function TaskItem({
   }
 
   const icon = useMemo(() => {
-    if (hideIcon) return
+    if (hideIcon) {
+      return
+    }
     return iconMap[status]
   }, [status, hideIcon])
 

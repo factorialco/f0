@@ -12,7 +12,7 @@ import * as DashboardStories from "@/experimental/Widgets/Layout/Dashboard/index
 import { PageDecorator } from "@/lib/storybook-utils/pageDecorator"
 import { withSkipA11y } from "@/lib/storybook-utils/parameters"
 
-import { Layout } from "../index"
+import { Layout } from ".."
 
 const FocusableElement = () => {
   return (

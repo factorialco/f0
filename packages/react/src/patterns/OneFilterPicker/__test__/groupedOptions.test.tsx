@@ -6,7 +6,7 @@ import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
 
 import type { FiltersDefinition } from "../types"
 
-import { OneFilterPicker } from "../index"
+import { OneFilterPicker } from ".."
 
 /**
  * Grouped ("in" filter with nested children) options store their selection under

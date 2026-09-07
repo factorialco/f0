@@ -35,15 +35,21 @@ const ChatDocxThumbnail = ({
 
   useEffect(() => {
     const host = hostRef.current
-    if (!host) return
+    if (!host) {
+      return
+    }
     let cancelled = false
     fetch(url)
       .then((response) => {
-        if (!response.ok) throw new Error(`${response.status}`)
+        if (!response.ok) {
+          throw new Error(`${response.status}`)
+        }
         return response.blob()
       })
       .then((blob) => {
-        if (cancelled) return
+        if (cancelled) {
+          return
+        }
         // No wrapper chrome for the snapshot — just the page content; the
         // card provides the white background and the crop.
         return renderAsync(blob, host, undefined, {
@@ -53,14 +59,18 @@ const ChatDocxThumbnail = ({
           renderHeaders: false,
           renderFooters: false,
         }).then(() => {
-          if (cancelled) return
+          if (cancelled) {
+            return
+          }
           const naturalWidth = host.scrollWidth
           setScale(naturalWidth > 0 ? Math.min(1, width / naturalWidth) : 1)
           onRenderedRef.current()
         })
       })
       .catch(() => {
-        if (!cancelled) onErrorRef.current()
+        if (!cancelled) {
+          onErrorRef.current()
+        }
       })
     return () => {
       cancelled = true

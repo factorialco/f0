@@ -6,7 +6,7 @@ import { describe, expect, test, vi } from "vitest"
 import { zeroRender as render } from "@/testing/test-utils"
 
 import Meta, { WithStep } from "../__stories__/F0NumberInput.stories"
-import { F0NumberInput } from "../index"
+import { F0NumberInput } from ".."
 
 const WithStepStory = composeStory(WithStep, Meta)
 

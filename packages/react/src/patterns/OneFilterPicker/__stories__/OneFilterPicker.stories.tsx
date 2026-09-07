@@ -14,11 +14,11 @@ import type {
 } from "../types"
 
 import { InFilterOptions } from "../filterTypes/InFilter/types"
-import * as OneFilterPicker from "../index"
+import * as OneFilterPicker from ".."
 import {
   OneFilterPicker as OneFilterPickerComponent,
   OneFilterPickerRootProps,
-} from "../index"
+} from ".."
 import {
   deserializeFilters,
   getFiltersFromUrl,

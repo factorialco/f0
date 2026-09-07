@@ -7,7 +7,7 @@ export interface SelectionRegistryValue<R extends RecordType = RecordType> {
   register: (id: SelectionId, item: R) => void
   unregister: (id: SelectionId) => void
   ids: SelectionId[]
-  getEntries: () => Array<[SelectionId, R]>
+  getEntries: () => [SelectionId, R][]
 }
 
 /**
@@ -28,11 +28,15 @@ export const useCreateSelectionRegistry = <
   const register = useCallback((id: SelectionId, item: R) => {
     const isNew = !entriesRef.current.has(id)
     entriesRef.current.set(id, item)
-    if (isNew) setMembership((current) => current + 1)
+    if (isNew) {
+      setMembership((current) => current + 1)
+    }
   }, [])
 
   const unregister = useCallback((id: SelectionId) => {
-    if (entriesRef.current.delete(id)) setMembership((current) => current + 1)
+    if (entriesRef.current.delete(id)) {
+      setMembership((current) => current + 1)
+    }
   }, [])
 
   const ids = useMemo(

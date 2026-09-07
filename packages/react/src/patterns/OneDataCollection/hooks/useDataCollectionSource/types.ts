@@ -191,7 +191,7 @@ export type DataCollectionSourceDefinition<
   itemPreFilter?: (item: R) => boolean
 
   /** Lanes configuration */
-  lanes?: ReadonlyArray<Lane<Filters>>
+  lanes?: readonly Lane<Filters>[]
 
   /** Rich search preview shown in the shared header search (all visualizations). */
   searchPreview?: SearchPreview<R>

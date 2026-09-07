@@ -9,7 +9,7 @@ import {
   zeroRender,
 } from "@/testing/test-utils"
 
-import { F0ENPSButton } from "../index"
+import { F0ENPSButton } from ".."
 
 const LABELS = {
   superNegative: "Very bad",

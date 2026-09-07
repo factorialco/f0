@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { sanitizePasted } from "../index"
+import { sanitizePasted } from ".."
 
 describe("sanitizePasted", () => {
   it("replaces every NBSP form with a regular space", () => {

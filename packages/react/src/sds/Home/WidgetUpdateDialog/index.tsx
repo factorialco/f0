@@ -98,7 +98,9 @@ export function WidgetUpdateDialog({
   // Reopening shows the widget as it IS, not as it was left the last time: the
   // dialog can be closed on a preview that was never saved.
   useEffect(() => {
-    if (isOpen) setPreview(params ?? {})
+    if (isOpen) {
+      setPreview(params ?? {})
+    }
   }, [isOpen, params])
 
   return (
@@ -117,7 +119,9 @@ export function WidgetUpdateDialog({
         // the same errors the fields would show, and a schema that says a param
         // is required is the only place "you must set this" is written down.
         onClick: async () => {
-          if (!(await trigger())) return
+          if (!(await trigger())) {
+            return
+          }
           onSave(getValues())
           onClose()
         },

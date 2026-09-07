@@ -78,8 +78,11 @@ const EmojiScroller = forwardRef<
   const setViewport = useCallback(
     (node: HTMLDivElement | null) => {
       context.viewportRef.current = node
-      if (typeof ref === "function") ref(node)
-      else if (ref) ref.current = node
+      if (typeof ref === "function") {
+        ref(node)
+      } else if (ref) {
+        ref.current = node
+      }
     },
     [ref, context]
   )
@@ -185,7 +188,9 @@ export const EmojiGrid = forwardRef<GroupedVirtuosoHandle, EmojiGridProps>(
           const label = sections[index]?.label
           // A search is one unlabelled block. The group still exists, so this
           // has to collapse to nothing rather than merely look empty.
-          if (!label) return <div className="h-0" />
+          if (!label) {
+            return <div className="h-0" />
+          }
           return (
             <div className="bg-f1-background px-2 pb-1 pt-2 text-xs font-medium uppercase tracking-wide text-f1-foreground-secondary">
               {label}
@@ -194,7 +199,9 @@ export const EmojiGrid = forwardRef<GroupedVirtuosoHandle, EmojiGridProps>(
         }}
         itemContent={(rowIndex) => {
           const row = layout.rows[rowIndex]
-          if (!row) return null
+          if (!row) {
+            return null
+          }
           return (
             <div className="flex px-2" style={{ height: EMOJI_ROW_HEIGHT }}>
               {row.emojis.map((emoji, column) => {

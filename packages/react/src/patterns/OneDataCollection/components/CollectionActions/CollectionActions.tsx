@@ -62,8 +62,9 @@ export const CollectionActions = ({
     secondaryActionsButtons.length === 0 &&
     dropdownItems.length === 0 &&
     !upsellAction
-  )
+  ) {
     return null
+  }
 
   return (
     <div className="flex flex-row-reverse items-center gap-2">

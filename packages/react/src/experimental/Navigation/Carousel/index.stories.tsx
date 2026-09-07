@@ -5,7 +5,7 @@ import { BarChartProps } from "@/kits/Charts/BarChart"
 import { Default as BarChartStory } from "@/kits/Charts/BarChart/index.stories"
 import { Placeholder } from "../../../lib/storybook-utils/placeholder"
 import { BarChartWidget } from "../../Widgets/Charts/BarChartWidget"
-import { Carousel } from "./index"
+import { Carousel } from "."
 
 const meta: Meta<typeof Carousel> = {
   title: "Carousel/Carousel",

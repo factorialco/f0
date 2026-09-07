@@ -98,8 +98,12 @@ export type DataCollectionUrlHistoryMode = "replace" | "push" | "none"
 /* ------------------------------------------------------------------ */
 
 const toSearchParams = (input?: string | URLSearchParams): URLSearchParams => {
-  if (input instanceof URLSearchParams) return input
-  if (typeof input === "string") return new URLSearchParams(input)
+  if (input instanceof URLSearchParams) {
+    return input
+  }
+  if (typeof input === "string") {
+    return new URLSearchParams(input)
+  }
   if (typeof window !== "undefined") {
     return new URLSearchParams(window.location.search)
   }
@@ -158,7 +162,9 @@ const isoDate = (date: Date): string => date.toISOString().slice(0, 10)
  * {@link decodeFilterValue} does, to restore the right type.
  */
 const encodeFilterValue = (value: unknown): string[] => {
-  if (value === undefined || value === null) return []
+  if (value === undefined || value === null) {
+    return []
+  }
 
   // `in` filter → repeated params, e.g. dc_department=A&dc_department=B
   if (Array.isArray(value)) {
@@ -167,9 +173,15 @@ const encodeFilterValue = (value: unknown): string[] => {
       .map(String)
   }
 
-  if (typeof value === "string") return value === "" ? [] : [value]
-  if (typeof value === "number") return [String(value)]
-  if (value instanceof Date) return [isoDate(value)]
+  if (typeof value === "string") {
+    return value === "" ? [] : [value]
+  }
+  if (typeof value === "number") {
+    return [String(value)]
+  }
+  if (value instanceof Date) {
+    return [isoDate(value)]
+  }
 
   if (typeof value === "object") {
     const record = value as Record<string, unknown>
@@ -190,7 +202,9 @@ const encodeFilterValue = (value: unknown): string[] => {
         | { value?: number; closed?: boolean }
         | undefined
       const to = record.to as { value?: number; closed?: boolean } | undefined
-      if (from?.value == null && to?.value == null) return []
+      if (from?.value == null && to?.value == null) {
+        return []
+      }
       const bound = (
         b: { value?: number; closed?: boolean } | undefined
       ): string =>
@@ -239,7 +253,9 @@ const decodeNumber = (raw: string): NumberFilterValue => {
 const decodeDate = (raw: string): Date | DateRange | undefined => {
   if (raw.includes(RANGE_SEPARATOR)) {
     const [from, to] = raw.split(RANGE_SEPARATOR)
-    if (!from) return undefined
+    if (!from) {
+      return undefined
+    }
     return to
       ? { from: new Date(from), to: new Date(to) }
       : { from: new Date(from) }
@@ -304,17 +320,23 @@ export const parseDataCollectionUrlParams = <
 
   if (params.has(DATA_COLLECTION_URL_PARAMS.visualization)) {
     const view = params.get(DATA_COLLECTION_URL_PARAMS.visualization)
-    if (view) state.visualization = view
+    if (view) {
+      state.visualization = view
+    }
   }
 
   if (params.has(DATA_COLLECTION_URL_PARAMS.page)) {
     const page = Number(params.get(DATA_COLLECTION_URL_PARAMS.page))
-    if (Number.isInteger(page) && page >= 1) state.page = page
+    if (Number.isInteger(page) && page >= 1) {
+      state.page = page
+    }
   }
 
   if (params.has(DATA_COLLECTION_URL_PARAMS.preset)) {
     const preset = params.get(DATA_COLLECTION_URL_PARAMS.preset)
-    if (preset) state.preset = preset
+    if (preset) {
+      state.preset = preset
+    }
   }
 
   if (filtersDefinition) {
@@ -322,14 +344,18 @@ export const parseDataCollectionUrlParams = <
     let hasFilters = false
     for (const [key, definition] of Object.entries(filtersDefinition)) {
       const name = filterParamName(key)
-      if (!params.has(name)) continue
+      if (!params.has(name)) {
+        continue
+      }
       filters[key] = decodeFilterValue(
         (definition as FilterDefinition).type,
         params.getAll(name)
       )
       hasFilters = true
     }
-    if (hasFilters) state.filters = filters as CurrentFiltersState
+    if (hasFilters) {
+      state.filters = filters as CurrentFiltersState
+    }
   }
 
   return state
@@ -342,7 +368,9 @@ export const parseDataCollectionUrlParams = <
 /** Dev warning, emitted once per filter key, when a filter is too big for the URL. */
 const oversizedFilterWarned = new Set<string>()
 const warnOversizedFilter = (key: string, count: number): void => {
-  if (oversizedFilterWarned.has(key)) return
+  if (oversizedFilterWarned.has(key)) {
+    return
+  }
   oversizedFilterWarned.add(key)
   // eslint-disable-next-line no-console -- intentional dev guidance
   console.warn(
@@ -466,7 +494,9 @@ export const syncDataCollectionUrlParams = <
   state: DataCollectionUrlState<CurrentFiltersState>,
   options?: { history?: DataCollectionUrlHistoryMode }
 ): string | null => {
-  if (typeof window === "undefined") return null
+  if (typeof window === "undefined") {
+    return null
+  }
 
   const params = setDataCollectionUrlParams(window.location.search, state)
   const query = params.toString()

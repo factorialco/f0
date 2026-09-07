@@ -14,7 +14,7 @@ import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
 import * as SidebarStories from "@/patterns/Navigation/Sidebar/index.stories"
 
 import { useDataCollectionSource } from "../../../hooks/useDataCollectionSource"
-import { OneDataCollection } from "../../../index"
+import { OneDataCollection } from "../../.."
 import {
   cardVisualization,
   createResourceDataAdapter,
@@ -44,8 +44,12 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 function statusVariant(status: Resource["status"]) {
-  if (status === "Complete") return "positive"
-  if (status === "Needs details") return "warning"
+  if (status === "Complete") {
+    return "positive"
+  }
+  if (status === "Needs details") {
+    return "warning"
+  }
   return "neutral"
 }
 

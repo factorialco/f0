@@ -47,7 +47,9 @@ export const useTargetElement = (
 
   useEffect(() => {
     const sync = (next: HTMLElement | null) => {
-      if (next === resolved.current) return
+      if (next === resolved.current) {
+        return
+      }
       resolved.current = next
       setElement(next)
     }

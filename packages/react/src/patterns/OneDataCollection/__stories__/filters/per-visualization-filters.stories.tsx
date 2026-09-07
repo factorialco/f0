@@ -4,7 +4,7 @@ import { Meta, StoryObj } from "@storybook/react-vite"
 import { Briefcase, Building, Envelope } from "@/icons/app"
 
 import { useDataCollectionSource } from "../../hooks/useDataCollectionSource"
-import { OneDataCollection } from "../../index"
+import { OneDataCollection } from "../.."
 import {
   createPromiseDataFetch,
   filterPresets,
@@ -490,7 +490,9 @@ const PersistenceHarness = () => {
   // Refresh snapshot on a 200 ms cadence while mounted so users can watch
   // the debounced storage writes land in real time.
   useEffect(() => {
-    if (!mounted) return
+    if (!mounted) {
+      return
+    }
     const id = window.setInterval(() => {
       setSnapshot(localStorage.getItem(PERSISTENCE_LS_KEY) ?? "")
     }, 200)
@@ -517,7 +519,9 @@ const PersistenceHarness = () => {
   // the persisted multi-visualization map survived (≥ 2 keys), shrank to one
   // key (the bug signature), or is empty.
   const parsed = (() => {
-    if (!snapshot) return null
+    if (!snapshot) {
+      return null
+    }
     try {
       return JSON.parse(snapshot) as {
         visualizationFilters?: Record<string, unknown>

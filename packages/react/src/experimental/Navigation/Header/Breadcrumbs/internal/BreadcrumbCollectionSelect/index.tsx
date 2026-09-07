@@ -73,7 +73,9 @@ export function BreadcrumbCollectionSelect({
     (filters: FiltersState<FiltersDefinition>) => {
       const current = latestRef.current
       current.onFiltersChange?.(filters)
-      if (!current.showFilters) return
+      if (!current.showFilters) {
+        return
+      }
       const persist = async () => {
         // NOTE: must await (not .then) — the default noop handler returns a
         // plain object typed as a Promise.
@@ -96,16 +98,22 @@ export function BreadcrumbCollectionSelect({
   const [pendingHref, setPendingHref] = useState<string | null>(null)
   const navRef = useRef<HTMLAnchorElement>(null)
   useLayoutEffect(() => {
-    if (!pendingHref) return
+    if (!pendingHref) {
+      return
+    }
     navRef.current?.click()
     setPendingHref(null)
   }, [pendingHref])
 
   const handleChange = useCallback((value: string, record?: RecordType) => {
     const current = latestRef.current
-    if (value === undefined || value === current.value) return
+    if (value === undefined || value === current.value) {
+      return
+    }
     const href = current.getItemHref?.(value, record)
-    if (href) setPendingHref(href)
+    if (href) {
+      setPendingHref(href)
+    }
     current.onSelect?.(value, record)
   }, [])
 

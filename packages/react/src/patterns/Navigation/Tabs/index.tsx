@@ -41,7 +41,9 @@ export const BaseTabs: React.FC<TabsProps> = ({
   )
 
   useEffect(() => {
-    if (activeTabId) onChangeActiveTabId?.(activeTabId)
+    if (activeTabId) {
+      onChangeActiveTabId?.(activeTabId)
+    }
   }, [onChangeActiveTabId, activeTabId])
 
   const { isActive } = useNavigation()

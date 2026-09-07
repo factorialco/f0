@@ -9,7 +9,7 @@ import {
   type NumericFormatterOptions,
   type NumericValue,
   type NumericWithFormatter,
-} from "../index"
+} from ".."
 
 describe("index.ts exports", () => {
   it("should export normalizeNumericWithFormatter", () => {

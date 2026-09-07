@@ -11,11 +11,11 @@ import {
 } from "@/testing/test-utils"
 
 import { type HomeWidgetItem } from "../slotRenderers"
-import { NewHomeLayout } from "./index"
+import { NewHomeLayout } from "."
 
 let layoutWidth = 1400
 
-let resizeCallbacks: Array<(entries: ResizeObserverEntry[]) => void> = []
+let resizeCallbacks: ((entries: ResizeObserverEntry[]) => void)[] = []
 
 const resizeLayoutTo = (width: number) => {
   layoutWidth = width

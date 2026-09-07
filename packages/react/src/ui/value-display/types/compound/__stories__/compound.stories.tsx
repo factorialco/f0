@@ -170,10 +170,10 @@ export const Snapshot: Story = {
     },
   },
   render: () => {
-    const variants: Array<{
+    const variants: {
       title: string
       value: CompoundCellValue
-    }> = [
+    }[] = [
       {
         title: "Tones",
         value: {

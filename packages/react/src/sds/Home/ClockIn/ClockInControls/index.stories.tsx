@@ -12,7 +12,7 @@ import {
   type ClockInControlsProps,
   type ClockInLocation,
   type ClockInProject,
-} from "./index"
+} from "."
 
 const defaultLabels = {
   clockedOut: "Clocked out",

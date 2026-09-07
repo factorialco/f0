@@ -23,7 +23,9 @@ const PresenceDot = ({
   online: boolean
   label: string
 }): ReactNode => {
-  if (!online) return null
+  if (!online) {
+    return null
+  }
 
   return (
     <span

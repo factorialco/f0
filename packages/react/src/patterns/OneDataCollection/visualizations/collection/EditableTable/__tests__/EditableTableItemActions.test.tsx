@@ -74,7 +74,7 @@ const createTestSource = (
 
 class MockIntersectionObserver implements IntersectionObserver {
   root: Document | Element | null = null
-  rootMargin: string = ``
+  rootMargin = ``
   thresholds: readonly number[] = []
 
   disconnect = vi.fn()

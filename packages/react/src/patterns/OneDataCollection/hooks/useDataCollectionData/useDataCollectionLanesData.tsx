@@ -212,13 +212,17 @@ export function useDataCollectionLanesData<
   const handleHookUpdate = useCallback(
     (laneId: string | symbol, value: UseDataCollectionData<R>) => {
       pendingLaneUpdatesRef.current[laneId] = value
-      if (flushScheduledRef.current) return
+      if (flushScheduledRef.current) {
+        return
+      }
       flushScheduledRef.current = true
       queueMicrotask(() => {
         const pending = pendingLaneUpdatesRef.current
         pendingLaneUpdatesRef.current = {}
         flushScheduledRef.current = false
-        if (!isMountedRef.current) return
+        if (!isMountedRef.current) {
+          return
+        }
         setLanesHooks((prev) => ({ ...prev, ...pending }))
       })
     },

@@ -78,7 +78,7 @@ interface F0SelectConfigWithOptions<
   T extends SelectValueType = string,
 > extends F0SelectConfigBase {
   /** Options for the select dropdown */
-  options: F0SelectItemProps<T, unknown>[]
+  options: F0SelectItemProps<T>[]
   source?: never
   mapOptions?: never
 }

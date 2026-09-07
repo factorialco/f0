@@ -265,7 +265,9 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
               formField.value,
               values
             )
-            if (!alertProps) return null
+            if (!alertProps) {
+              return null
+            }
             return (
               <F0Alert {...alertProps} variant={alertProps.variant ?? "info"} />
             )

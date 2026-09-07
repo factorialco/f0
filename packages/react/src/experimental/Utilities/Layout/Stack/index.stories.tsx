@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { Placeholder } from "../../../../lib/storybook-utils/placeholder"
-import { Stack } from "./index"
+import { Stack } from "."
 
 const meta = {
   title: "Layout/Blocks/Stack",

@@ -8,7 +8,7 @@ import * as Icon from "@/icons/app"
 import { Archive, Comment, Download, ExternalLink, Pencil } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
-import { F0ResourceHeader } from "./index"
+import { F0ResourceHeader } from "."
 
 const meta: Meta<typeof F0ResourceHeader> = {
   title: "Resource header",

@@ -102,17 +102,15 @@ export type VisualizationProps<
   Grouping extends GroupingDefinition<Record>,
 > = {
   /** Array of available visualization configurations */
-  visualizations?: ReadonlyArray<
-    Visualization<
-      Record,
-      Filters,
-      Sortings,
-      Summaries,
-      ItemActions,
-      NavigationFilters,
-      Grouping
-    >
-  >
+  visualizations?: readonly Visualization<
+    Record,
+    Filters,
+    Sortings,
+    Summaries,
+    ItemActions,
+    NavigationFilters,
+    Grouping
+  >[]
 }
 
 /**
@@ -142,17 +140,15 @@ export const VisualizationSelector = <
   currentVisualization,
   onVisualizationChange,
 }: {
-  visualizations: ReadonlyArray<
-    Visualization<
-      Record,
-      Filters,
-      Sortings,
-      Summaries,
-      ItemActions,
-      NavigationFilters,
-      Grouping
-    >
-  >
+  visualizations: readonly Visualization<
+    Record,
+    Filters,
+    Sortings,
+    Summaries,
+    ItemActions,
+    NavigationFilters,
+    Grouping
+  >[]
   currentVisualization: number
   onVisualizationChange: (index: number) => void
 }): JSX.Element => {

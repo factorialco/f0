@@ -51,7 +51,9 @@ export const CustomAnswerRow = ({
   // after every value change via useLayoutEffect to avoid a visible reflow.
   useLayoutEffect(() => {
     const textarea = textareaRef.current
-    if (!textarea) return
+    if (!textarea) {
+      return
+    }
     // Collapse first so scrollHeight reports the true content height rather
     // than the previous (possibly taller) height.
     textarea.style.height = "auto"

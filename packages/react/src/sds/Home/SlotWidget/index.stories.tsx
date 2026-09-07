@@ -21,7 +21,7 @@ import {
   type HomeWidgetSlot,
   type SlotRenderers,
 } from "../slotRenderers"
-import { SlotWidget } from "./index"
+import { SlotWidget } from "."
 
 const meta = {
   title: "Home/SlotWidget",

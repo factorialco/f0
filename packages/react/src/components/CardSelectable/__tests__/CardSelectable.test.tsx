@@ -4,7 +4,7 @@ import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
 
 import type { CardSelectableItem } from "../types"
 
-import { CardSelectableContainer } from "../index"
+import { CardSelectableContainer } from ".."
 
 const baseItems: CardSelectableItem<string>[] = [
   {

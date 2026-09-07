@@ -22,14 +22,24 @@ export const canEditChatMessage = (
     editWindowMs?: number
   }
 ): boolean => {
-  if (!hasEditMessage) return false
-  if (message.deleted) return false
-  if (message.status === "sending" || message.status === "failed") return false
+  if (!hasEditMessage) {
+    return false
+  }
+  if (message.deleted) {
+    return false
+  }
+  if (message.status === "sending" || message.status === "failed") {
+    return false
+  }
   const isVoiceNote = (message.attachments ?? []).some(
     (attachment) => attachment.kind === "voice"
   )
-  if (isVoiceNote) return false
-  if (capabilities?.canEditMessage) return capabilities.canEditMessage(message)
+  if (isVoiceNote) {
+    return false
+  }
+  if (capabilities?.canEditMessage) {
+    return capabilities.canEditMessage(message)
+  }
   const withinEditWindow =
     editWindowMs == null ||
     Date.now() - new Date(message.createdAt).getTime() <= editWindowMs

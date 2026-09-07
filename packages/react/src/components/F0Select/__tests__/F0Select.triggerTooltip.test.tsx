@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest"
 
 import { screen, zeroRender as render } from "@/testing/test-utils"
 
-import { F0Select } from "../index"
+import { F0Select } from ".."
 
 /**
  * The tooltip, STUBBED — its real content lives behind Radix's 700ms open timer

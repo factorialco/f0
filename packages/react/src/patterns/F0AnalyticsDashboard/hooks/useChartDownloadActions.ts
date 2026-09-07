@@ -43,7 +43,9 @@ export function useChartDownloadActions({
   const handleImage = useCallback(
     (type: "png" | "jpg") => {
       const instance = getEChartsInstance(chartContainerRef)
-      if (!instance) return
+      if (!instance) {
+        return
+      }
       const echartsType = type === "jpg" ? "jpeg" : "png"
       const dataUrl = instance.getDataURL({
         type: echartsType,
@@ -56,7 +58,9 @@ export function useChartDownloadActions({
   )
 
   const effectiveConfig = useMemo(() => {
-    if (!data) return chartConfig
+    if (!data) {
+      return chartConfig
+    }
     const dataShape = detectDataShape(data, chartConfig.type)
     return dataShape !== chartConfig.type
       ? ({ ...chartConfig, type: dataShape } as DashboardChartConfig)
@@ -64,19 +68,25 @@ export function useChartDownloadActions({
   }, [chartConfig, data])
 
   const handleExcel = useCallback(() => {
-    if (!data) return
+    if (!data) {
+      return
+    }
     const tabular = chartDataToTabular(effectiveConfig, data)
     downloadAsExcel(tabular.columns, tabular.rows, title, tabular.keys)
   }, [effectiveConfig, data, title])
 
   const handleCsv = useCallback(() => {
-    if (!data) return
+    if (!data) {
+      return
+    }
     const tabular = chartDataToTabular(effectiveConfig, data)
     downloadAsCsv(tabular.columns, tabular.rows, title, tabular.keys)
   }, [effectiveConfig, data, title])
 
   return useMemo(() => {
-    if (!data) return []
+    if (!data) {
+      return []
+    }
     return [
       {
         label: t("ai.dataDownload.download", { format: "PNG" }),

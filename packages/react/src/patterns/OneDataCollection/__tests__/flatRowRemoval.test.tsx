@@ -10,7 +10,7 @@ import type { OnSelectItemsCallback } from "@/hooks/datasource"
 import type { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 
 import { useDataCollectionSource } from "../hooks/useDataCollectionSource"
-import { OneDataCollection } from "../index"
+import { OneDataCollection } from ".."
 
 /**
  * Rows that leave a flat table's dataset must unmount on the same commit that

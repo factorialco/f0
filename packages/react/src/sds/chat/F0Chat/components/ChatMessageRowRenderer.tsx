@@ -34,9 +34,13 @@ const avatarFor = (author: F0ChatUser): ReactNode => (
  * transcript's top breathing room is a constant `components.Header` instead
  * (see ChatTopGap), exactly like the bottom gap. */
 const topSpacing = (row: ChatRow): string => {
-  if (row.type === "message") return row.isFirstOfRun ? "pt-5" : "pt-0"
+  if (row.type === "message") {
+    return row.isFirstOfRun ? "pt-5" : "pt-0"
+  }
   // The status footer hugs its message (MessageStatus brings its own pt-1).
-  if (row.type === "footer") return "pt-0"
+  if (row.type === "footer") {
+    return "pt-0"
+  }
   return "pt-3"
 }
 
@@ -85,15 +89,21 @@ const ChatMessageRowRendererComponent = ({
   // are real appended items so they gate like messages. The unread divider
   // never animates (it only (re)appears on conversation entry).
   const [entry] = useState(() => {
-    if (!enterAnimation) return null
+    if (!enterAnimation) {
+      return null
+    }
     if (row.type === "message" || row.type === "system") {
       const order = freshIds.get(row.message.id)
-      if (order === undefined || animatedIds.has(row.message.id)) return null
+      if (order === undefined || animatedIds.has(row.message.id)) {
+        return null
+      }
       return { order }
     }
     if (row.type === "separator") {
       const order = freshIds.get(row.forId)
-      if (order === undefined || animatedIds.has(row.key)) return null
+      if (order === undefined || animatedIds.has(row.key)) {
+        return null
+      }
       return { order }
     }
     return null

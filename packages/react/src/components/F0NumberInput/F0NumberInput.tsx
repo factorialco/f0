@@ -22,10 +22,13 @@ export type { NumberInputPopoverConfig }
  */
 export const F0NumberInput = forwardRef<HTMLInputElement, F0NumberInputProps>(
   function F0NumberInput(props, ref) {
-    const publicProps = privateProps.reduce((acc, key) => {
-      const { [key]: _, ...rest } = acc
-      return rest
-    }, props as NumberInputInternalProps)
+    const publicProps = privateProps.reduce<NumberInputInternalProps>(
+      (acc, key) => {
+        const { [key]: _, ...rest } = acc
+        return rest
+      },
+      props
+    )
 
     return <NumberInputInternal {...publicProps} ref={ref} />
   }

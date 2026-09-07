@@ -4,7 +4,7 @@ import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import type { F0DataChartProps } from "../types"
 
-import { F0DataChart } from "../index"
+import { F0DataChart } from ".."
 import { ChartDecorator } from "./decorators"
 
 const meta = {

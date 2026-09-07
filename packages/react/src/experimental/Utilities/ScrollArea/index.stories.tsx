@@ -4,7 +4,7 @@ import { F0Alert } from "@/components/F0Alert"
 import { F0Button } from "@/components/F0Button"
 import { Placeholder } from "@/lib/storybook-utils/placeholder"
 
-import { ScrollArea } from "./index"
+import { ScrollArea } from "."
 
 const meta = {
   title: "ScrollArea",

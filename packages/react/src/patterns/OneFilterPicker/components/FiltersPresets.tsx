@@ -107,7 +107,9 @@ export const FiltersPresets = <Filters extends FiltersDefinition>({
 
   // Filter out presets with invalid filters
   const validPresets = useMemo(() => {
-    if (!presets || presets.length === 0) return []
+    if (!presets || presets.length === 0) {
+      return []
+    }
     return presets.filter(
       (preset) =>
         preset &&

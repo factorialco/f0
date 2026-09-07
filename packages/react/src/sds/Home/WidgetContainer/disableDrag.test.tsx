@@ -5,7 +5,7 @@ import { useEffect } from "react"
 import { Calendar, Clock } from "@/icons/app"
 import { screen, zeroRender } from "@/testing/test-utils"
 
-import { WidgetContainer } from "./index"
+import { WidgetContainer } from "."
 
 const widget = (id: string) => ({
   id,

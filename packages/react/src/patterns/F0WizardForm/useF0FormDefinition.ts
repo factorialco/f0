@@ -149,7 +149,9 @@ type UseF0FormDefinitionPerSectionInput<
 // =============================================================================
 
 function isZodSchema(value: unknown): boolean {
-  if (typeof value !== "object" || value === null) return false
+  if (typeof value !== "object" || value === null) {
+    return false
+  }
   const obj = value as Record<string, unknown>
   const def = obj._def as Record<string, unknown> | undefined
   return def?.typeName === "ZodObject" || def?.typeName === "ZodEffects"
@@ -186,7 +188,9 @@ export function useAsyncDefaultValues<T>(
   paramsSchemaRef.current = defaultValuesParamsSchema
 
   useEffect(() => {
-    if (typeof asyncFnRef.current !== "function") return
+    if (typeof asyncFnRef.current !== "function") {
+      return
+    }
 
     const controller = new AbortController()
     setIsLoading(true)

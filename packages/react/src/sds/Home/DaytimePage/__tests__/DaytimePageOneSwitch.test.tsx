@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest"
 import { zeroRender as render, screen } from "@/testing/test-utils"
 import React from "react"
 
-import { DaytimePage } from "../index"
+import { DaytimePage } from ".."
 
 // The real switches render null unless their AI context is enabled, so we stub
 // them to stable markers and assert only DaytimePage's show/hide decision.

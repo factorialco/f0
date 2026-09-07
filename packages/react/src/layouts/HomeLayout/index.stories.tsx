@@ -20,7 +20,7 @@ import { Widget } from "@/experimental/Widgets/Widget"
 import { Placeholder } from "@/lib/storybook-utils/placeholder"
 
 import { AreaChartProps } from "@/kits/Charts/AreaChart"
-import { HomeLayout } from "./index"
+import { HomeLayout } from "."
 
 const widgets = [
   <AreaChartWidget

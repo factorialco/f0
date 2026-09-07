@@ -3,7 +3,7 @@ import { ComponentProps } from "react"
 
 import { snapshotMatrix } from "@/lib/storybook-utils/snapshotMatrix"
 
-import { F0Box } from "../index"
+import { F0Box } from ".."
 import { F0Text } from "@/components/F0Text"
 import { F0Heading } from "@/components/F0Heading"
 import { F0Button } from "@/components/F0Button"

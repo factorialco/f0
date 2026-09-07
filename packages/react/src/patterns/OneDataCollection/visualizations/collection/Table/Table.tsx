@@ -66,7 +66,9 @@ const normalizeAddRowActions = (
     | PrimaryActionItemDefinition[]
     | undefined
 ): PrimaryActionItemDefinition[] => {
-  if (!result) return []
+  if (!result) {
+    return []
+  }
   return (Array.isArray(result) ? result : [result]).filter(
     (item): item is PrimaryActionItemDefinition => item !== undefined
   )
@@ -337,7 +339,9 @@ export const TableCollection = <
   const summaryData = useMemo(() => {
     // Early return if no summaries configuration or summaries data is available
 
-    if (!summariesData || !source.summaries) return null
+    if (!summariesData || !source.summaries) {
+      return null
+    }
 
     return {
       data: summariesData as R,
@@ -718,7 +722,9 @@ export const TableCollection = <
                       onSortClick={
                         sorting
                           ? () => {
-                              if (!sorting) return
+                              if (!sorting) {
+                                return
+                              }
                               handleSortClick(sorting)
                             }
                           : undefined

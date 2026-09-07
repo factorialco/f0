@@ -20,7 +20,7 @@ import {
 
 import { getDialogAlikeArgTypes } from "../../common/__stories__/argsTypes.ts"
 import { OTHER_ACTIONS, TABS } from "../../common/__stories__/mocks.ts"
-import { F0Dialog } from "../index"
+import { F0Dialog } from ".."
 import { DialogNotificationInternal } from "../internal/DialogNotification"
 import { dialogSizes } from "../types"
 

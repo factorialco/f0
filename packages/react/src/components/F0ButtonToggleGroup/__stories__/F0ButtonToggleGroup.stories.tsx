@@ -12,7 +12,7 @@ import type {
   F0ButtonToggleGroupProps,
 } from "../types"
 
-import { buttonToggleGroupSizes, F0ButtonToggleGroup } from "../index"
+import { buttonToggleGroupSizes, F0ButtonToggleGroup } from ".."
 
 const meta = {
   title: "Button/ButtonToggleGroup",

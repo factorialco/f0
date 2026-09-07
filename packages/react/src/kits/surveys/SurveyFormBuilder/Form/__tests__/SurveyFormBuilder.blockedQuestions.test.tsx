@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest"
 import { zeroRender as render, screen } from "@/testing/test-utils"
 
 import { LockedFields, SurveyFormBuilderElement } from "../../types"
-import { SurveyFormBuilder } from "../index"
+import { SurveyFormBuilder } from ".."
 
 // --- Test fixtures ---
 

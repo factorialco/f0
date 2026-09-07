@@ -9,7 +9,7 @@ import {
   DataCollectionSource,
   useDataCollectionSource,
 } from "../../hooks/useDataCollectionSource"
-import { OneDataCollection } from "../../index"
+import { OneDataCollection } from "../.."
 import { ItemActionsDefinition } from "../../item-actions"
 import { NavigationFiltersDefinition } from "../../navigationFilters/types"
 import { GroupingDefinition } from "../../types"
@@ -127,17 +127,15 @@ function BaseStory<
     NavigationFilters,
     GroupingDefinition<(typeof mockUsers)[number]>
   >
-  visualizations?: ReadonlyArray<
-    Visualization<
-      (typeof mockUsers)[number],
-      Filters,
-      Sortings,
-      Summaries,
-      ItemActions,
-      NavigationFilters,
-      GroupingDefinition<(typeof mockUsers)[number]>
-    >
-  >
+  visualizations?: readonly Visualization<
+    (typeof mockUsers)[number],
+    Filters,
+    Sortings,
+    Summaries,
+    ItemActions,
+    NavigationFilters,
+    GroupingDefinition<(typeof mockUsers)[number]>
+  >[]
 }) {
   return (
     <div className="space-y-8">

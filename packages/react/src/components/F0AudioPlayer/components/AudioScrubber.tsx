@@ -36,7 +36,9 @@ export const AudioScrubber = ({
 
   useEffect(() => {
     const el = trackRef.current
-    if (!el) return
+    if (!el) {
+      return
+    }
     const update = () => setTrackWidth(el.clientWidth)
     update()
     const observer = new ResizeObserver(update)
@@ -51,7 +53,9 @@ export const AudioScrubber = ({
 
   const handleValueChange = useCallback((next: number[]) => {
     const [first] = next
-    if (first === undefined) return
+    if (first === undefined) {
+      return
+    }
     setDragValue(first)
   }, [])
 
@@ -59,7 +63,9 @@ export const AudioScrubber = ({
     (next: number[]) => {
       const [first] = next
       setDragValue(null)
-      if (first === undefined) return
+      if (first === undefined) {
+        return
+      }
       onSeek(first)
     },
     [onSeek]

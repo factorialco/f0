@@ -59,7 +59,7 @@ describe("toCalendarPickerMatcher", () => {
     ])
 
     // Check that the actual date objects are the same reference
-    const matchers = result as Array<{ before?: Date; after?: Date }>
+    const matchers = result as { before?: Date; after?: Date }[]
     expect(matchers[0].before).toBe(specificMinDate)
     expect(matchers[1].after).toBe(specificMaxDate)
   })
