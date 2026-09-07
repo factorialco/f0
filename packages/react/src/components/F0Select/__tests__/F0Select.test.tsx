@@ -100,17 +100,13 @@ describe("Select", () => {
   }
 
   /**
-   * A field select over static options searches from its own trigger, so the
-   * search field IS the combobox. Only a select with filters (or an inline /
-   * asList / custom-trigger one) keeps a separate `searchbox` in the popover.
+   * A static-options field select searches from its own trigger, so the search
+   * field IS the combobox. Only filters, inline, asList or a custom trigger
+   * keep a separate `searchbox` in the popover.
    */
   const getTriggerSearchInput = () => screen.getByRole("combobox")
 
-  /**
-   * Typing into the trigger opens the dropdown, but the virtualized list only
-   * renders its rows once the open animation has started — which jsdom never
-   * does on its own.
-   */
+  /** The virtualized rows only render once the open animation has started. */
   /** What `aria-activedescendant` on the field is pointing at. */
   const activeOptionText = () => {
     const id = getTriggerSearchInput().getAttribute("aria-activedescendant")
@@ -851,7 +847,6 @@ describe("Select", () => {
 
     await openSelect(user)
 
-    // The field IS the search box, so the search placeholder is the field's.
     expect(screen.getByText("Search options")).toBeInTheDocument()
   })
 
@@ -899,8 +894,7 @@ describe("Select", () => {
       />
     )
 
-    // The trigger is an input, so the pill is drawn beside the caret rather
-    // than inside the field's own element — but still inside the field.
+    // Beside the caret rather than inside the input, but still in the field.
     const selectedLabel = within(
       screen.getByTestId("input-field-wrapper")
     ).getByText("Approved")
@@ -1144,10 +1138,8 @@ describe("Select", () => {
     const footerAction = screen.getByRole("button", { name: "Manage options" })
     await waitFor(() => expect(getTriggerSearchInput()).toHaveFocus())
 
-    // The search field is the trigger, outside the portaled popover, so this
-    // starts from the footer rather than tabbing into it. What the test proves
-    // is the assertion AFTER the load: the arriving records must not pull
-    // focus out of the footer.
+    // Starts from the footer: the assertion that matters is the one after the
+    // load, that arriving records do not pull focus out of it.
     footerAction.focus()
 
     deferredOptions.resolve()
@@ -2616,8 +2608,7 @@ describe("Select", () => {
         />
       )
 
-      // `mockOptions[0]` carries an icon. A field you write in reads as text,
-      // so the selection's glyph stays out of it.
+      // `mockOptions[0]` carries an icon; the field keeps it out.
       const selected = await screen.findByText("Option 1")
       expect(
         selected.closest("[data-slot='value']")?.querySelectorAll("svg")
@@ -2654,8 +2645,7 @@ describe("Select", () => {
         />
       )
 
-      // `mockOptions[0]` carries an icon. A field you write in reads as text,
-      // so the selection's glyph stays out of it.
+      // `mockOptions[0]` carries an icon; the field keeps it out.
       const selected = await screen.findByText("Option 1")
       expect(
         selected.closest("[data-slot='value']")?.querySelectorAll("svg")
@@ -2683,9 +2673,8 @@ describe("Select", () => {
       const slot = selected.closest("[data-slot='value']")
       const trigger = getTriggerSearchInput()
 
-      // The selection is laid out BEFORE the input rather than over it, which
-      // is what puts the caret at the end of the text instead of on its first
-      // letter.
+      // Laid out before the input rather than over it, which is what puts the
+      // caret after the text.
       expect(slot).toBeInTheDocument()
       expect(
         slot!.compareDocumentPosition(trigger) &
@@ -2724,9 +2713,7 @@ describe("Select", () => {
       await user.type(getTriggerSearchInput(), "Option 1")
       await settleList()
 
-      // No `waitFor`: the query is applied on the keystroke, so by the time
-      // typing has finished the list has already narrowed. A debounce would
-      // still be holding "Option 2" here.
+      // No `waitFor`: a debounce would still be holding "Option 2" here.
       expect(screen.queryByText("Option 2")).not.toBeInTheDocument()
       expect(screen.getByText("Option 1")).toBeInTheDocument()
     })
@@ -2747,8 +2734,7 @@ describe("Select", () => {
       await user.keyboard("{ArrowDown}")
       await settleList()
 
-      // Opening lands on the selection, so Enter confirms it and the arrows
-      // move away from it rather than from the top of the list.
+      // Opening lands on the selection, not the top of the list.
       await waitFor(() => expect(activeOptionText()).toContain("Option 2"))
     })
 
@@ -2797,8 +2783,7 @@ describe("Select", () => {
         expect(screen.getByText("Option 1")).toBeInTheDocument()
       )
 
-      // The caret sits after "Option 1". Backspace deletes its last character
-      // and the rest is now text the user is editing, with no selection left.
+      // Backspace deletes the label's last character; the rest is now text.
       trigger.focus()
       await user.keyboard("{Backspace}")
 

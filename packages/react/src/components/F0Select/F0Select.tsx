@@ -233,20 +233,15 @@ const F0SelectComponent = forwardRef(function Select<
   const [openLocal, setOpenLocal] = useState(open)
 
   /**
-   * The keyboard model for a field that IS the search box.
-   *
-   * Focus never leaves the input, so every text key keeps working — Home, End,
-   * the arrows within the word, backspace. The list is driven from here
-   * instead: the arrows move an ACTIVE option, `aria-activedescendant` names
-   * it for a screen reader, and Enter takes it.
+   * Focus never leaves the input, so the text keys keep working. The list is
+   * driven from here instead: the arrows move an active option named by
+   * `aria-activedescendant`, and Enter takes it.
    */
   const [activeValue, setActiveValue] = useState<string | undefined>(undefined)
   const optionIdFor = useCallback(
     (value: string) => `${id}-option-${value}`,
     [id]
   )
-  // Holds whichever element the trigger renders: the inline variant's button,
-  // or the field chrome's root.
   const inlineTriggerRef = useRef<HTMLElement>(null)
   const composedTriggerRef = useComposedRefs(ref, inlineTriggerRef)
   const previousOpenRef = useRef(openLocal)
@@ -336,21 +331,13 @@ const F0SelectComponent = forwardRef(function Select<
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [options, source, "searchFn" in props && props.searchFn])
 
-  /**
-   * Only the field trigger can host the search: the inline variant is a bare
-   * label, `asList` has no trigger at all, and a custom trigger is the
-   * consumer's own markup.
-   */
+  /** Only the field trigger can host the search. */
   const isFieldTrigger = variant === "field" && !asList && !children
 
   /**
-   * Searching a list is the default for a field select over static options —
-   * finding a value by typing its name is what people try first, and with
-   * `options` the filtering is local, so it always works.
-   *
-   * A `source` stays opt-in: its search is a query parameter its adapter has
-   * to implement, and a search box over an adapter that ignores it would
-   * filter nothing.
+   * Default on for static `options`, where filtering is local. A `source`
+   * stays opt-in: its search is a query parameter its adapter has to
+   * implement, and a box over an adapter that ignores it filters nothing.
    */
   const showSearchBoxEffective = showSearchBox ?? (isFieldTrigger && !source)
 
@@ -407,14 +394,9 @@ const F0SelectComponent = forwardRef(function Select<
   const { currentSearch, setCurrentSearch } = localSource
 
   /**
-   * WHERE the search field goes.
-   *
-   * With no filters there is nothing else to put in the dropdown's top row, so
-   * the field itself becomes the search field: one place to look, one place to
-   * type, and no second input opening under the first.
-   *
-   * With filters the row earns its place — it holds the filter picker and the
-   * applied-filter chips — so the search box stays in it, beside them.
+   * Where the search field goes. With no filters the field itself is the
+   * search box; with filters it stays in the dropdown's row, beside the
+   * filter picker and the applied-filter chips.
    */
   const inlineSearch =
     showSearchBoxEffective && isFieldTrigger && !localSource.filters
@@ -954,18 +936,11 @@ const F0SelectComponent = forwardRef(function Select<
   }
 
   /**
-   * Opens the list on the spot, skipping the debounce above.
-   *
-   * The debounce is there so a close and an open arriving together (a toggle
-   * click racing the dismissal) resolve to one state instead of a flicker.
-   * Typing has nothing to race: the wait would just be 100ms of nothing
-   * happening after the first character.
+   * Skips the debounce above, which is there to resolve a close and an open
+   * arriving together. Typing has nothing to race, so the wait would just be
+   * 100ms of nothing happening after the first character.
    */
-  /**
-   * The arrows and Enter act on the LIST, which is assembled further down (it
-   * needs the fetched records), so they are reached through a ref rather than
-   * by moving the whole keyboard handler down there.
-   */
+  // The list is assembled further down, so the keys reach it through a ref.
   const listNavRef = useRef<{
     move: (direction: "next" | "previous") => void
     take: () => boolean
@@ -1009,9 +984,8 @@ const F0SelectComponent = forwardRef(function Select<
     onSelectActive: selectActiveThroughRef,
     onBackspaceOnEmpty: removeLastSelectedThroughRef,
     onSearchChange: onSearchChangeLocal,
-    // Clearing the query means NO query, not an empty one: an empty string is
-    // a new dataset identity, and a "select all" is scoped to the query it was
-    // made under, so it would be dropped on an open-and-close with no typing.
+    // No query, not an empty one: an empty string is a new dataset identity
+    // and would drop an active select-all on an open-and-close.
     onSearchReset: () => {
       setCurrentSearch(undefined)
       onSearchChange?.("")
@@ -1257,10 +1231,7 @@ const F0SelectComponent = forwardRef(function Select<
         as: asList ? ("list" as const) : undefined,
       } as const)
 
-  /**
-   * The values the arrows walk, in the order they are drawn. Separators and
-   * group headers are not options, and a disabled row cannot be taken.
-   */
+  /** The values the arrows walk, in the order they are drawn. */
   const navigableValues = useMemo(
     () =>
       inlineSearch
@@ -1273,11 +1244,7 @@ const F0SelectComponent = forwardRef(function Select<
 
   const navigableKey = navigableValues.join("\u0000")
 
-  /**
-   * The first option is active as soon as there is a list, and again whenever
-   * the list changes under it. Enter always has a target, and the target is
-   * always one the user can see and hear.
-   */
+  // An option is always active, so Enter always has a visible target.
   useEffect(() => {
     if (!inlineSearch) {
       return
@@ -1290,8 +1257,7 @@ const F0SelectComponent = forwardRef(function Select<
       if (current && navigableValues.includes(current)) {
         return current
       }
-      // Opening lands on what is already selected, so Enter confirms it and
-      // the arrows start from it. First option otherwise.
+      // Opening lands on the selection; first option otherwise.
       const selected = localValue.find((value) =>
         navigableValues.includes(value)
       )
@@ -1318,7 +1284,7 @@ const F0SelectComponent = forwardRef(function Select<
     [navigableValues]
   )
 
-  /** Takes the active option: what Enter does. */
+  /** What Enter does. */
   const selectActive = useCallback(() => {
     if (!activeValue) {
       return false
@@ -1334,12 +1300,9 @@ const F0SelectComponent = forwardRef(function Select<
   }, [activeValue, localValue, multiple, onItemCheckChange])
 
   /**
-   * Backspace on an empty field edits the SELECTION: its label becomes the
-   * text, minus the character the key deleted, and the selection is gone. The
-   * user is now typing over what they had, with the list narrowing to it.
-   *
-   * Multiple selection has no single label to edit, so it drops the last item
-   * the way a tag field does.
+   * Backspace on an empty field edits the selection: its label becomes the
+   * text minus one character, and the selection goes. Multiple selection has
+   * no single label to edit, so it drops the last item instead.
    */
   const removeLastSelected = useCallback(() => {
     const last = localValue[localValue.length - 1]
@@ -1378,10 +1341,7 @@ const F0SelectComponent = forwardRef(function Select<
     }
   }, [moveActive, removeLastSelected, selectActive])
 
-  /**
-   * A virtualized list only renders what is in view, so the active row has to
-   * be brought into it — the field cannot rely on focus doing it.
-   */
+  // A virtualized list only renders what is in view.
   useEffect(() => {
     if (!inlineSearch || !activeValue) {
       return
@@ -1393,8 +1353,7 @@ const F0SelectComponent = forwardRef(function Select<
 
   const handleCreate = onCreate
     ? (value: string) => {
-        // The query is spent once it has become an item. When the field is the
-        // search box, the text the user typed has to go with it.
+        // The query is spent once it has become an item.
         const resetSearch = () => {
           setCurrentSearch(undefined)
           if (inlineSearch) {
@@ -1432,14 +1391,11 @@ const F0SelectComponent = forwardRef(function Select<
   const selectContent = (
     <SelectContent
       items={items}
-      // The trigger is the search field, so it has to survive the aria-hidden
-      // sweep the open content applies to the rest of the page.
+      // The field must survive the aria-hidden sweep the open content applies
+      // to the rest of the page.
       keepTriggerAccessible={inlineSearch}
-      // The popup is a listbox, and an unnamed one announces as just that.
       aria-label={label}
-      // A pointer landing in the FIELD is not "outside" when the field is the
-      // search box: clicking your own text to fix a typo would otherwise
-      // dismiss the list you are typing to filter.
+      // Clicking your own text to fix a typo is not "outside".
       onPointerDownOutside={
         inlineSearch
           ? (event) => {
@@ -1538,11 +1494,7 @@ const F0SelectComponent = forwardRef(function Select<
     ? localValue.length > 0 || selectionMeta.selectedItemsCount > 0
     : !!localValue[0]
 
-  /**
-   * What the trigger shows when it is not being typed into: the selected
-   * item(s), with their avatars, icons and tags, or "N selected" for a
-   * multiple selection too wide to spell out.
-   */
+  /** What the trigger shows when it is not being typed into. */
   const selectedItemsNode = (
     <SelectedItems
       multiple={multiple}
@@ -1556,11 +1508,9 @@ const F0SelectComponent = forwardRef(function Select<
       allSelected={selectedState.allSelected}
       selection={getDisplayItemsForSelection}
       /**
-       * No glyph beside the caret: a field you write in reads as text, and the
-       * selected item's icon there competes with the query that replaces it.
-       * (For a plain trigger the reason is different but the effect is the
-       * same when the field carries its own `icon`: two glyphs 4px apart.)
-       * Options keep their icons for the rows either way.
+       * No glyph beside the caret: a field you write in reads as text. A plain
+       * trigger hides it too when the field carries its own `icon`, or the two
+       * sit 4px apart. Rows keep their icons either way.
        */
       hideItemIcon={inlineSearch || !!icon}
     />
@@ -1606,9 +1556,8 @@ const F0SelectComponent = forwardRef(function Select<
         className={cn(
           "w-full min-w-0",
           !!children && "h-full",
-          // The open dropdown lays a click blocker over the page. A field that
-          // is typed into has to stay reachable through it, or the caret can
-          // never be moved once the list is open.
+          // Over the open dropdown's click blocker, or the caret could never
+          // be moved once the list is open.
           inlineSearch && openLocal && "relative z-50"
         )}
       >
@@ -1624,8 +1573,7 @@ const F0SelectComponent = forwardRef(function Select<
     return (
       <TooltipInternal
         label={hideLabel ? label : undefined}
-        // Spelling out the selection over a field the user is typing into
-        // covers the list they are typing to see.
+        // It would cover the list the user is typing to see.
         description={inlineSearch && openLocal ? "" : selectedTooltipText}
       >
         {box}
@@ -1689,9 +1637,8 @@ const F0SelectComponent = forwardRef(function Select<
         <SelectTrigger
           ref={composedTriggerRef}
           asChild
-          // The field is typed into, so it completes from a list rather than
-          // announcing a fixed value. Set here because the select primitive's
-          // own `aria-autocomplete="none"` is what reaches the input otherwise.
+          // Set here: the primitive's own `none` is what reaches the input
+          // otherwise.
           aria-autocomplete={inlineSearch ? "list" : undefined}
         >
           {children ? (
@@ -1713,9 +1660,7 @@ const F0SelectComponent = forwardRef(function Select<
               hideLabel={hideLabel}
               value={
                 inlineSearch
-                  ? // The typed query IS the field's text; what is selected is
-                    // drawn behind it (see `valueSlot`).
-                    searchDraft
+                  ? searchDraft
                   : multiple
                     ? // For multiple: use count of selected items
                       Math.max(
@@ -1727,32 +1672,26 @@ const F0SelectComponent = forwardRef(function Select<
               }
               isEmpty={(value) =>
                 inlineSearch
-                  ? // The placeholder follows the TEXT, so it goes as soon as
-                    // the user starts writing. What can be cleared is a
-                    // different question, answered by `canClear` below.
+                  ? // The placeholder follows the text; `canClear` below
+                    // answers what can be cleared.
                     !value
                   : multiple
                     ? !value || +(value ?? 0) === 0
                     : !value
               }
-              // The button clears the SELECTION, so it is there exactly when
-              // there is one, whether or not anything is typed.
               canClear={inlineSearch ? hasSelection : undefined}
               onChange={inlineSearch ? handleSearchDraftChange : undefined}
-              // The button clears the selection. What the user typed is
-              // theirs, and backspace is right there.
+              // The button clears the selection, never the text.
               clearKeepsText={inlineSearch}
               aria-activedescendant={
-                // Names the option the arrows are on, which is the only way to
-                // announce it while the caret stays in the field.
+                // The only way to announce the active option while the caret
+                // stays in the field.
                 inlineSearch && openLocal && activeValue
                   ? optionIdFor(activeValue)
                   : undefined
               }
               aria-describedby={
-                // Only while the node it points at is rendered: the slot goes
-                // as soon as there is text, and a dangling reference is an
-                // error, not a description.
+                // Only while the node it points at is rendered.
                 inlineSearch && hasSelection && !searchDraft
                   ? selectionDescriptionId
                   : undefined
@@ -1760,14 +1699,10 @@ const F0SelectComponent = forwardRef(function Select<
               inputRef={inlineSearch ? searchInputRef : undefined}
               valueSlot={
                 inlineSearch && hasSelection ? (
-                  /* The input's own value is the query the user is typing, so
-                     the selection beside it is what `aria-describedby` on the
-                     field points at — otherwise it is never announced. */
                   <span
                     id={selectionDescriptionId}
-                    // The field is described BY this node, which accname reads
-                    // even hidden. Left visible to the tree it would say the
-                    // same thing twice, once as description and once as text.
+                    // accname reads a described-by node even hidden; visible
+                    // it would say the same thing twice.
                     aria-hidden="true"
                     className="contents"
                   >
@@ -1789,9 +1724,7 @@ const F0SelectComponent = forwardRef(function Select<
                 )?.(undefined, false)
               }}
               placeholder={
-                // One slot, two placeholders: the field's own wins, because it
-                // is what the consumer wrote for this empty field. The search
-                // placeholder stands in when there is none.
+                // The field's own placeholder wins; the search one stands in.
                 (inlineSearch
                   ? placeholder || searchBoxPlaceholder || i18n.toc.search
                   : placeholder) || ""
@@ -1804,19 +1737,15 @@ const F0SelectComponent = forwardRef(function Select<
                 offset: 34,
               }}
               loading={isInitialLoading || loading || isLoading}
-              // Never on the search field: its value is the query, and a
-              // native submit would post that instead of the selection (the
-              // hidden input below carries it).
+              // Never on the search field: a native submit would post the
+              // query. The hidden input below carries the selection.
               name={inlineSearch ? undefined : name}
               onClickContent={(event) => {
                 if (inlineSearch) {
                   /**
-                   * Clicking into the field to move the caret must not close
-                   * the list, so only a click that landed on the arrow toggles
-                   * it. The arrow stays a glyph rather than a button: a second
-                   * real target inside a 32px field is a target-size
-                   * violation, and the field already carries the name and the
-                   * expanded state.
+                   * Only a click on the arrow toggles: clicking into the field
+                   * moves the caret. The arrow stays a glyph because a second
+                   * target inside a 32px field violates target-size.
                    */
                   const onArrow = !!(event.target as HTMLElement).closest?.(
                     '[data-testid="select-arrow"]'
@@ -1846,9 +1775,7 @@ const F0SelectComponent = forwardRef(function Select<
                 <input
                   type="text"
                   autoComplete="off"
-                  // On the element itself: the field chrome clones a fixed set
-                  // of props onto its child, and a key handler is not one of
-                  // them.
+                  // On the element: the field chrome does not clone handlers.
                   onKeyDown={handleSearchKeyDown}
                   className="w-full shrink cursor-text bg-transparent placeholder:-z-10 disabled:cursor-not-allowed"
                 />

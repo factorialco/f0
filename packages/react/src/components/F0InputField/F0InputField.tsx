@@ -162,35 +162,27 @@ export type InputFieldProps<T> = {
   hideLabel?: boolean
   hidePlaceholder?: boolean
   /**
-   * Rich content drawn where the typed text would be while the field is empty
-   * (icons, avatars, a count). Lets a field whose value is not text, like a
-   * select whose trigger is typeable, show what is chosen without putting it
-   * in the input. Hidden as soon as there is text, and it hides the
-   * placeholder while shown.
+   * Rich content drawn where the typed text would be, for a field whose value
+   * is not text: icons, avatars, a count. Dropped as soon as there is text,
+   * and it hides the placeholder while shown.
    */
   valueSlot?: React.ReactNode
   /**
    * Leaves the typed text alone when the clear button is pressed, so `onClear`
-   * is the whole behavior.
-   *
-   * For a field whose value is not its text (see `valueSlot`): there, the
-   * button clears the VALUE, and the text is a query that belongs to the
-   * person typing it.
+   * is the whole behavior. For a field whose value is not its text, the button
+   * clears that value and the text is the user's query.
    */
   clearKeepsText?: boolean
   /**
-   * Whether there is anything to clear, when that is not the same question as
-   * whether the field has text.
-   *
-   * `isEmpty` answers both by default. A field whose value is not its text
-   * (see `valueSlot`) needs them apart: the placeholder follows the text, and
-   * the clear button follows the value.
+   * Whether there is anything to clear, when `isEmpty` cannot answer it: with
+   * a `valueSlot` the placeholder follows the text and the clear button
+   * follows the value.
    */
   canClear?: boolean
   name?: string
   onClickPlaceholder?: () => void
   onClickChildren?: () => void
-  /** Receives the click, so a caller can tell where inside the field it landed. */
+  /** Receives the click, so a caller can tell where in the field it landed. */
   onClickContent?: (event: React.MouseEvent) => void
   value?: T | undefined
   onChange?: (value: T) => void
@@ -216,12 +208,7 @@ export type InputFieldProps<T> = {
    * selection moves elsewhere, so a screen reader hears nothing. */
   "aria-activedescendant"?: AriaAttributes["aria-activedescendant"]
   "aria-autocomplete"?: AriaAttributes["aria-autocomplete"]
-  /**
-   * For a field whose visible value is NOT its text — a select whose trigger is
-   * typeable draws the selection beside the caret — this is how that value
-   * reaches a screen reader: the input's own value is the query, so the
-   * selection has to be described.
-   */
+  /** How a `valueSlot` value reaches a screen reader. */
   "aria-describedby"?: AriaAttributes["aria-describedby"]
   onClear?: () => void
   onFocus?: () => void
@@ -549,12 +536,9 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
               <div
                 data-slot="value"
                 className={cn(
-                  /**
-                   * In the flow rather than over the input, so the caret sits
-                   * AFTER the value instead of on top of its first letter.
-                   * `pointer-events-none` keeps the click going through to the
-                   * field, which is what focuses the input.
-                   */
+                  // In the flow, so the caret sits after the value rather
+                  // than on its first letter.
+
                   "pointer-events-none flex min-w-0 shrink items-center pr-0",
                   "pl-3",
                   (icon || avatar) && "pl-8",
@@ -596,7 +580,6 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                 name,
                 className: cn(
                   "h-full w-full min-w-0 px-3 text-f1-foreground",
-                  // The value in front of it already carries the left inset.
                   showValueSlot && "pl-0",
                   "[&::-webkit-search-cancel-button]:hidden",
                   (icon || avatar) && "pl-8",

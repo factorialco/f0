@@ -287,10 +287,7 @@ describe("SelectContent", () => {
     expect(search).toHaveFocus()
   })
 
-  /**
-   * The open content aria-hides the rest of the page, which is right for a
-   * button trigger and wrong for a trigger the user types in.
-   */
+  /** Right for a button trigger, wrong for one the user types in. */
   describe("keepTriggerAccessible", () => {
     it("hides the trigger while the content is open by default", async () => {
       render(

@@ -598,14 +598,9 @@ interface SelectContentImplProps
   disableScrollLock?: boolean
 
   /**
-   * Keeps the TRIGGER out of the aria-hidden sweep the open content applies to
-   * the rest of the page.
-   *
-   * The sweep treats the content as modal, which is right when the trigger is
-   * a button: there is nothing to do with it while the list is open. It is
-   * wrong when the trigger is a text field the user types in to filter that
-   * list — hiding it leaves a screen reader on a field that no longer exists,
-   * and takes the field out of every role query with it.
+   * Keeps the trigger out of the aria-hidden sweep the open content applies to
+   * the rest of the page. The sweep is right for a button trigger and wrong
+   * for a text field the user is typing in to filter this list.
    */
   keepTriggerAccessible?: boolean
 }

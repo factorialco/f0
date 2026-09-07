@@ -3,13 +3,9 @@ import { DropdownOpen } from "@/icons/app"
 import { cn } from "@/lib/utils"
 
 /**
- * The glyph at the end of a select's field. Decoration, deliberately: the
- * field is the control, and it carries the name and the expanded state.
- *
- * A second real button in here would be a second touch target inside a 32px
- * field, which is a target-size violation, so what closes the list is the
- * field's own click handler recognising a click that landed on this glyph
- * (see `F0Select`'s `onClickContent`).
+ * Decoration, deliberately: the field is the control. A button here would be a
+ * second touch target inside a 32px field, so the field's own click handler
+ * closes the list when the click landed on this glyph.
  */
 export const Arrow = ({
   disabled,

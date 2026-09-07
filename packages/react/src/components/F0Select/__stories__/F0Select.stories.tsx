@@ -48,7 +48,6 @@ const items = [
   },
 ]
 
-/** The default args' option list, for stories that build their own props. */
 const themeOptions = items.map((item) => ({
   value: item.id,
   label: item.name,
@@ -721,10 +720,7 @@ export const Clearable: Story = {
   },
 }
 
-/**
- * `searchFn` replaces the built-in matching, which is label plus description.
- * The field itself is the search box here, as it is for any static list.
- */
+/** `searchFn` replaces the built-in label-plus-description matching. */
 export const WithSearchBox: Story = {
   args: {
     searchEmptyMessage: "No results found",
@@ -1394,13 +1390,11 @@ export const MultipleSelectAllWithFilters: Story = {
 }
 
 /**
- * The default for a static list: the trigger IS the search field. Typing opens
- * the dropdown and filters it; the selected item is drawn where the text goes
- * until the user types over it.
+ * The default for a static list: the trigger IS the search field, and the
+ * selection is drawn where the text goes until the user types over it.
  *
- * Keys: the caret never leaves the field, so every text key keeps working.
- * The arrows move the active option, Enter takes it, and Escape or the arrow
- * glyph closes the list — a field you type in cannot toggle on click.
+ * The caret never leaves the field, so the text keys keep working. The arrows
+ * move the active option, Enter takes it, Escape or the arrow glyph closes.
  */
 export const SearchInTheTrigger: Story = {
   args: {
@@ -1415,8 +1409,8 @@ export const SearchInTheTrigger: Story = {
 
     const trigger = canvas.getByRole("combobox")
 
-    // The selection resolves asynchronously, and it is drawn beside the caret
-    // rather than being the field's own text, so this is how it is announced.
+    // The selection is drawn beside the caret, so this is how it is
+    // announced. It resolves asynchronously.
     await waitFor(async () =>
       expect(trigger).toHaveAccessibleDescription("Dark")
     )
@@ -1427,14 +1421,11 @@ export const SearchInTheTrigger: Story = {
       expect(trigger).toHaveAttribute("aria-expanded", "true")
     )
 
-    // The open dropdown aria-hides the rest of the page. The field being typed
-    // into has to survive that, or a screen reader loses it mid-word.
+    // The field must survive the open dropdown's aria-hidden sweep.
     await waitFor(async () => expect(body.getByRole("combobox")).toBe(trigger))
 
-    /**
-     * The query applies on the keystroke, but the list is virtualized behind
-     * the dropdown's entrance animation, so the rows still arrive a beat late.
-     */
+    // The rows are virtualized behind the entrance animation, so they arrive
+    // a beat after the keystroke.
     await waitFor(
       async () => {
         const options = body.getAllByRole("option")
@@ -1444,10 +1435,8 @@ export const SearchInTheTrigger: Story = {
       { timeout: 5000 }
     )
 
-    /**
-     * The active option is named on the FIELD rather than focused, which is
-     * what lets the caret stay put while the arrows walk the list.
-     */
+    // Named on the field rather than focused, which is what keeps the caret
+    // in place while the arrows walk the list.
     await waitFor(async () =>
       expect(trigger).toHaveAttribute("aria-activedescendant")
     )
@@ -1455,10 +1444,7 @@ export const SearchInTheTrigger: Story = {
   },
 }
 
-/**
- * Multiple selection keeps the same field. Closed, it says how many are
- * selected; typing replaces that with the query, and clearing gives it back.
- */
+/** Multiple selection keeps the same field, showing how many are selected. */
 export const SearchInTheTriggerMultiple: Story = {
   args: {
     label: "Select themes",
@@ -1469,10 +1455,7 @@ export const SearchInTheTriggerMultiple: Story = {
   },
 }
 
-/**
- * A short list reads better as a plain select. `showSearchBox={false}` opts out
- * and restores the button trigger.
- */
+/** `showSearchBox={false}` restores the plain button trigger. */
 export const SearchDisabled: Story = {
   args: {
     label: "Select a theme",
@@ -1662,11 +1645,9 @@ export const Snapshot: Story = {
     ]
 
     /**
-     * The trigger's two shapes, which the variants above cannot show: they
-     * render with no options and no value, so every one of them is the empty
+     * The variants above render with no value, so they are all the empty
      * search field. These carry a selection, so the capture covers what the
-     * field draws beside the caret — a label, a status pill, a count — and the
-     * plain button trigger that `showSearchBox={false}` keeps.
+     * field draws beside the caret, and the plain button trigger.
      */
     const triggerVariants = [
       {

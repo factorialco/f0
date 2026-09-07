@@ -1,41 +1,22 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 
 type UseTriggerSearchOptions = {
-  /** False for every select whose trigger is not the search field. */
   enabled: boolean
   open: boolean
-  /**
-   * Opens the list NOW, without the select's own open debounce. That debounce
-   * is there to swallow the close-then-open flicker of a toggle click, and
-   * typing has no such race — it would only be 100ms of nothing happening
-   * after the first character.
-   */
+  /** Opens the list without the select's own open debounce. */
   onOpen: () => void
   onSearchChange: (value: string) => void
   /** Clears the query, rather than setting it to an empty one. */
   onSearchReset: () => void
-  /** Moves the list's active option. Focus stays in the field. */
   onActiveMove: (direction: "next" | "previous") => void
-  /** Takes the active option. Returns false when there was nothing to take. */
+  /** Returns false when there was nothing to take. */
   onSelectActive: () => boolean
-  /** Backspace with nothing typed: edits the selection instead. */
+  /** Returns false when there was no selection to edit. */
   onBackspaceOnEmpty: () => boolean
-  /** The field's root element, for deciding where focus came from. */
   triggerRef: React.RefObject<HTMLElement | null>
 }
 
-/**
- * The state behind a select whose TRIGGER is the search field.
- *
- * The typed text is held here rather than in the data source: the source's
- * search is debounced, and a field that only showed the debounced value would
- * drop characters as the user types. The draft is what the input renders, and
- * it is emitted to the source on the trailing edge.
- *
- * The draft is also what tells the trigger whether to show the selection: it
- * stands where the selected label would be, so the label is only drawn while
- * there is nothing typed.
- */
+/** State for a select whose trigger is the search field. */
 export const useTriggerSearch = ({
   enabled,
   open,
@@ -50,9 +31,8 @@ export const useTriggerSearch = ({
   const [draft, setDraft] = useState("")
   const inputRef = useRef<HTMLInputElement>(null)
 
-  // Read the callbacks through refs so the returned handlers stay stable: they
-  // are cloned onto the input by the field chrome, and a new identity on every
-  // keystroke would remount it.
+  // Through refs: the handlers are cloned onto the input, and a new identity
+  // per keystroke would remount it.
   const callbacksRef = useRef({
     onSearchChange,
     onOpen,
@@ -79,12 +59,7 @@ export const useTriggerSearch = ({
     onSelectActive,
   ])
 
-  /**
-   * Whether the list is open, as far as the KEYS are concerned: `open` is a
-   * render behind the request, so a key pressed right after the first
-   * character would otherwise think the list is still closed and ask for it a
-   * second time instead of acting.
-   */
+  // `open` is a render behind the request, so the keys track the request.
   const requestedOpenRef = useRef(open)
   useEffect(() => {
     requestedOpenRef.current = open
@@ -95,19 +70,11 @@ export const useTriggerSearch = ({
     callbacksRef.current.onOpen()
   }, [])
 
-  /**
-   * The query goes out on the keystroke, with no wait of its own.
-   *
-   * Static options filter in the same render, so any wait is just the list
-   * lagging behind the text. A `source` still has the data layer's own
-   * debounce in front of the network, which is where that belongs.
-   */
   const handleChange = useCallback(
     (value: string) => {
       setDraft(value)
       callbacksRef.current.onSearchChange(value)
-      // Typing is how you open it. Clearing is not: the clear button routes
-      // through the same change handler with an empty value.
+      // Clearing routes through here too, with an empty value.
       if (value && !requestedOpenRef.current) {
         requestOpen()
       }
@@ -125,13 +92,9 @@ export const useTriggerSearch = ({
   }, [])
 
   /**
-   * Closing drops the query for single AND multiple selection: the trigger
-   * goes back to showing what is selected, so a query still applied to the
-   * list would reopen onto a filtered list the field no longer shows.
-   *
-   * Focus comes back to the field, but only when it was still inside the
-   * select — closing because the user clicked another field must not yank the
-   * caret back out of it.
+   * Closing drops the query, or reopening would land on a filtered list the
+   * field no longer shows. Focus only comes back when it never left the
+   * select: closing by clicking another field must not steal its caret.
    */
   const wasOpenRef = useRef(open)
   useEffect(() => {
@@ -156,11 +119,7 @@ export const useTriggerSearch = ({
     }
   }, [enabled, open, triggerRef])
 
-  /**
-   * Keys that belong to the LIST, and only those. Everything else is text
-   * editing and is left to the input: the caret keys, Home, End, backspace,
-   * and every printable character.
-   */
+  /** Keys that belong to the list. Everything else is the input's. */
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
       if (event.defaultPrevented) {
@@ -171,9 +130,8 @@ export const useTriggerSearch = ({
       const isArrowUp = event.key === "ArrowUp"
       const isEnter = event.key === "Enter"
 
-      // With nothing typed, backspace edits the selection instead: its label
-      // becomes the text minus one character. Consumed when that happened, so
-      // the input does not also delete from the text just handed to it.
+      // Consumed when it edited the selection, so the input does not also
+      // delete from the text just handed to it.
       if (event.key === "Backspace" && event.currentTarget.value === "") {
         if (callbacksRef.current.onBackspaceOnEmpty()) {
           event.preventDefault()
@@ -192,8 +150,7 @@ export const useTriggerSearch = ({
       }
 
       if (isEnter) {
-        // Consumed only if it took something, so a form can still be
-        // submitted from a field whose list has nothing in it.
+        // Consumed only if it took something, so a form can still submit.
         if (callbacksRef.current.onSelectActive()) {
           event.preventDefault()
         }
