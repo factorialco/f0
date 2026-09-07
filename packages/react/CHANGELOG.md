@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.87.0](https://github.com/factorialco/f0/compare/f0-react-v6.86.5...f0-react-v6.87.0) (2026-09-07)
+
+
+### Features
+
+* **F0AiChatTextArea:** neutral credit warning with CTA icon ([#5268](https://github.com/factorialco/f0/issues/5268)) ([ae44231](https://github.com/factorialco/f0/commit/ae44231bb44992c4d5b2bef0be8520a3d6b8fdce))
+
 ## [6.86.5](https://github.com/factorialco/f0/compare/f0-react-v6.86.4...f0-react-v6.86.5) (2026-09-07)
 
 
