@@ -580,10 +580,13 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                 name,
                 className: cn(
                   "h-full w-full min-w-0 px-3 text-f1-foreground",
-                  showValueSlot && "pl-0",
                   "[&::-webkit-search-cancel-button]:hidden",
                   (icon || avatar) && "pl-8",
                   (icon || avatar) && size === "md" && "pl-9",
+                  // After the icon offsets: the value in front of the input
+                  // already carries them, so applying them again leaves the
+                  // caret a whole inset away from the text.
+                  showValueSlot && "pl-0",
                   disabled && "cursor-not-allowed",
                   (children as React.ReactElement).props.className,
                   inputElementVariants({ size })

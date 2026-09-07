@@ -2682,6 +2682,24 @@ describe("Select", () => {
       ).toBeTruthy()
     })
 
+    it("puts the caret against the text, icon or no icon", async () => {
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          icon={Search}
+          options={mockOptions}
+          value="option1"
+          onChange={() => {}}
+        />
+      )
+
+      // The value in front of the input carries the icon's inset. Applying it
+      // to the input as well left the caret a whole inset past the text.
+      const trigger = getTriggerSearchInput()
+      expect(trigger).toHaveClass("pl-0")
+      expect(trigger.className).not.toMatch(/(^|\s)pl-8(\s|$)/)
+    })
+
     it("drops the placeholder as soon as there is something written", async () => {
       const user = userEvent.setup()
       render(
