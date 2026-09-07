@@ -18,7 +18,7 @@ type UseTriggerSearchOptions = {
   onActiveMove: (direction: "next" | "previous") => void
   /** Takes the active option. Returns false when there was nothing to take. */
   onSelectActive: () => boolean
-  /** Backspace with nothing typed: removes the selection instead. */
+  /** Backspace with nothing typed: edits the selection instead. */
   onBackspaceOnEmpty: () => boolean
   /** The field's root element, for deciding where focus came from. */
   triggerRef: React.RefObject<HTMLElement | null>
@@ -167,11 +167,11 @@ export const useTriggerSearch = ({
       const isArrowUp = event.key === "ArrowUp"
       const isEnter = event.key === "Enter"
 
-      // With nothing to delete, backspace deletes the selection: the
-      // selection sits where the text would be. Not consumed — there is
-      // nothing for the input to do with it anyway.
+      // With nothing typed, backspace edits the selection instead: its label
+      // becomes the text minus one character. Consumed when that happened, so
+      // the input does not also delete from the text just handed to it.
       if (event.key === "Backspace" && event.currentTarget.value === "") {
-        callbacksRef.current.onBackspaceOnEmpty()
+        if (callbacksRef.current.onBackspaceOnEmpty()) event.preventDefault()
         return
       }
 

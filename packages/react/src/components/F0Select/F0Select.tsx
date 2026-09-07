@@ -1324,9 +1324,12 @@ const F0SelectComponent = forwardRef(function Select<
   }, [activeValue, localValue, multiple, onItemCheckChange])
 
   /**
-   * Backspace on an empty field takes the selection back, the way it takes the
-   * last token in a tag field: the selection sits where the text would be, so
-   * it is what the key is pointing at.
+   * Backspace on an empty field edits the SELECTION: its label becomes the
+   * text, minus the character the key deleted, and the selection is gone. The
+   * user is now typing over what they had, with the list narrowing to it.
+   *
+   * Multiple selection has no single label to edit, so it drops the last item
+   * the way a tag field does.
    */
   const removeLastSelected = useCallback(() => {
     const last = localValue[localValue.length - 1]
@@ -1334,16 +1337,21 @@ const F0SelectComponent = forwardRef(function Select<
     hasUserInteracted.current = true
     if (multiple) {
       onItemCheckChange(last, false)
-    } else {
-      clearSelection()
-      selectedItemsCache.current.clear()
-      ;(
-        onChangeSelectedOption as (option: undefined, checked: boolean) => void
-      )?.(undefined, false)
+      return true
     }
+    const selected = getDisplayItemsForSelection[0]
+    const labelText = String(selected?.selectedLabel ?? selected?.label ?? "")
+    clearSelection()
+    selectedItemsCache.current.clear()
+    ;(
+      onChangeSelectedOption as (option: undefined, checked: boolean) => void
+    )?.(undefined, false)
+    handleSearchDraftChange(labelText.slice(0, -1))
     return true
   }, [
     clearSelection,
+    getDisplayItemsForSelection,
+    handleSearchDraftChange,
     localValue,
     multiple,
     onChangeSelectedOption,

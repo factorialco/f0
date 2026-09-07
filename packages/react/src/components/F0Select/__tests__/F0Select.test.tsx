@@ -2780,7 +2780,7 @@ describe("Select", () => {
       )
     })
 
-    it("takes the selection back on backspace when there is nothing typed", async () => {
+    it("turns the selection into text minus one character on backspace", async () => {
       const user = userEvent.setup()
       const handleChange = vi.fn()
       render(
@@ -2798,16 +2798,22 @@ describe("Select", () => {
         expect(screen.getByText("Option 1")).toBeInTheDocument()
       )
 
-      // The caret sits after the selection; backspace with no text is aimed
-      // at the selection itself.
+      // The caret sits after "Option 1". Backspace deletes its last character
+      // and the rest is now text the user is editing, with no selection left.
       trigger.focus()
       await user.keyboard("{Backspace}")
 
-      await waitFor(() =>
-        expect(screen.queryByText("Option 1")).not.toBeInTheDocument()
-      )
+      expect(trigger).toHaveValue("Option ")
       await waitFor(() => expect(handleChange).toHaveBeenCalled())
+      expect(
+        document.querySelector("[data-slot='value']")
+      ).not.toBeInTheDocument()
+      await settleList()
       expect(trigger).toHaveFocus()
+
+      // …and it keeps editing as text from here.
+      await user.keyboard("{Backspace}")
+      expect(trigger).toHaveValue("Option")
     })
 
     it("only deletes text on backspace while there is text", async () => {
