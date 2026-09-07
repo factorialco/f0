@@ -1,15 +1,9 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
 import { useCallback, useRef, useState } from "react"
-
-import type { FiltersDefinition } from "@/hooks/datasource"
-
 import { F0Button } from "@/components/F0Button"
-
-import type { NavigationFiltersDefinition } from "../../navigationFilters/types"
-
+import { OneDataCollection } from "../.."
 import { useDataCollectionSource } from "../../hooks/useDataCollectionSource"
 import type { DataCollectionDataAdapter } from "../../hooks/useDataCollectionSource/types"
-import { OneDataCollection } from "../../index"
 
 type Person = {
   id: number
@@ -59,11 +53,7 @@ const useRowCommitCounter = () => {
   return { count, measure, readout }
 }
 
-type Adapter = DataCollectionDataAdapter<
-  Person,
-  FiltersDefinition,
-  NavigationFiltersDefinition
->
+type Adapter = DataCollectionDataAdapter<Person>
 
 const pageOf = (offset: number) => people.slice(offset, offset + PER_PAGE)
 
