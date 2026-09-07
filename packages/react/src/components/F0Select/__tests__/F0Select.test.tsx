@@ -2107,6 +2107,7 @@ describe("Select", () => {
 
     it("drops the query when the dropdown closes", async () => {
       const user = userEvent.setup()
+      const searchSpy = vi.fn()
       render(
         <F0Select
           {...searchProps}
@@ -2114,6 +2115,7 @@ describe("Select", () => {
           options={mockOptions}
           value={[]}
           onChange={() => {}}
+          onSearchChange={searchSpy}
         />
       )
 
@@ -2127,10 +2129,14 @@ describe("Select", () => {
       await user.keyboard("{Escape}")
 
       await waitFor(() => expect(trigger).toHaveValue(""))
+      expect(searchSpy).toHaveBeenLastCalledWith("")
       await openSelect(user)
-      await waitFor(() =>
+      // The records refresh after the reopen, and the virtualized list needs
+      // its nudge again once they have.
+      await waitFor(() => {
+        fireEvent.animationStart(screen.getByRole("listbox"))
         expect(screen.getByText("Option 2")).toBeInTheDocument()
-      )
+      })
     })
 
     it("clears the selection and leaves the text alone", async () => {
@@ -2261,7 +2267,7 @@ describe("Select", () => {
       expect(screen.getByRole("listbox")).toBeInTheDocument()
     })
 
-    it("describes the selection it draws beside the caret", async () => {
+    it("shows a single selection as the field's own text", async () => {
       render(
         <F0Select
           {...searchProps}
@@ -2271,10 +2277,31 @@ describe("Select", () => {
         />
       )
 
-      const trigger = screen.getByRole("combobox")
-      await waitFor(() =>
-        expect(trigger).toHaveAccessibleDescription("Option 1")
+      const trigger = getTriggerSearchInput()
+      await waitFor(() => expect(trigger).toHaveValue("Option 1"))
+      // Text, not an overlay: nothing to describe, and nothing drawn beside it.
+      expect(trigger).not.toHaveAttribute("aria-describedby")
+      expect(document.querySelector("[data-slot='value']")).toBeNull()
+    })
+
+    it("describes a multiple selection it draws beside the caret", async () => {
+      render(
+        <F0Select
+          {...searchProps}
+          multiple
+          options={mockOptions}
+          value={["option1"]}
+          onChange={() => {}}
+        />
       )
+
+      const trigger = getTriggerSearchInput()
+      await waitFor(() => expect(trigger).toHaveAttribute("aria-describedby"))
+      const described = document.getElementById(
+        trigger.getAttribute("aria-describedby")!
+      )
+      expect(described).toBeInTheDocument()
+      expect(trigger).toHaveValue("")
     })
 
     it("shows the count for a multiple selection until the user types", async () => {
@@ -2470,7 +2497,8 @@ describe("Select", () => {
 
       await waitFor(() => expect(handleChange).toHaveBeenCalled())
       await waitFor(() => expect(trigger).toHaveFocus())
-      expect(trigger).toHaveValue("")
+      // Picked, so the label is the field's text again.
+      await waitFor(() => expect(trigger).toHaveValue("Option 1"))
     })
 
     it("dismisses on a pointer that lands outside both the field and the list", async () => {
@@ -2559,7 +2587,7 @@ describe("Select", () => {
       )
 
       await waitFor(() =>
-        expect(screen.getByText("Option 1")).toBeInTheDocument()
+        expect(getTriggerSearchInput()).toHaveValue("Option 1")
       )
 
       const submitted = container.querySelector<HTMLInputElement>(
@@ -2577,7 +2605,7 @@ describe("Select", () => {
       expect(getTriggerSearchInput()).toHaveClass("cursor-text")
     })
 
-    it("draws no glyph beside the caret when something is selected", async () => {
+    it("keeps the option's icon on the row, not in the field", async () => {
       const user = userEvent.setup()
       render(
         <F0Select
@@ -2588,13 +2616,12 @@ describe("Select", () => {
         />
       )
 
-      // `mockOptions[0]` carries an icon; the field keeps it out.
-      const selected = await screen.findByText("Option 1")
-      expect(
-        selected.closest("[data-slot='value']")?.querySelectorAll("svg")
-      ).toHaveLength(0)
+      // `mockOptions[0]` carries an icon. The field shows its label as text.
+      await waitFor(() =>
+        expect(getTriggerSearchInput()).toHaveValue("Option 1")
+      )
+      expect(document.querySelector("[data-slot='value']")).toBeNull()
 
-      // …while the ROW keeps its icon.
       await openSelect(user)
       const row = within(screen.getByRole("listbox"))
         .getByText("Option 1")
@@ -2602,77 +2629,43 @@ describe("Select", () => {
       expect(row?.querySelectorAll("svg").length).toBeGreaterThan(0)
     })
 
-    it("shows the pointer for writing, not for picking", () => {
-      render(
-        <F0Select {...searchProps} options={mockOptions} onChange={() => {}} />
-      )
-
-      expect(getTriggerSearchInput()).toHaveClass("cursor-text")
-    })
-
-    it("draws no glyph beside the caret when something is selected", async () => {
-      const user = userEvent.setup()
+    it("lays a multiple selection out before the input, so the caret follows it", async () => {
       render(
         <F0Select
           {...searchProps}
+          multiple
           options={mockOptions}
-          value="option1"
+          value={["option1"]}
           onChange={() => {}}
         />
       )
 
-      // `mockOptions[0]` carries an icon; the field keeps it out.
-      const selected = await screen.findByText("Option 1")
-      expect(
-        selected.closest("[data-slot='value']")?.querySelectorAll("svg")
-      ).toHaveLength(0)
-
-      // …while the ROW keeps its icon.
-      await openSelect(user)
-      const row = within(screen.getByRole("listbox"))
-        .getByText("Option 1")
-        .closest("[role='option']")
-      expect(row?.querySelectorAll("svg").length).toBeGreaterThan(0)
-    })
-
-    it("puts the caret after the selection, not on top of it", async () => {
-      render(
-        <F0Select
-          {...searchProps}
-          options={mockOptions}
-          value="option1"
-          onChange={() => {}}
-        />
-      )
-
-      const selected = await screen.findByText("Option 1")
-      const slot = selected.closest("[data-slot='value']")
       const trigger = getTriggerSearchInput()
-
-      // Laid out before the input rather than over it, which is what puts the
-      // caret after the text.
-      expect(slot).toBeInTheDocument()
+      await waitFor(() =>
+        expect(document.querySelector("[data-slot='value']")).not.toBeNull()
+      )
+      const slot = document.querySelector("[data-slot='value']")!
       expect(
-        slot!.compareDocumentPosition(trigger) &
-          Node.DOCUMENT_POSITION_FOLLOWING
+        slot.compareDocumentPosition(trigger) & Node.DOCUMENT_POSITION_FOLLOWING
       ).toBeTruthy()
     })
 
-    it("puts the caret against the text, icon or no icon", async () => {
+    it("puts the caret against the count, icon or no icon", async () => {
       render(
         <F0Select
           {...searchProps}
+          multiple
           icon={Search}
           options={mockOptions}
-          value="option1"
+          value={["option1"]}
           onChange={() => {}}
         />
       )
 
-      // The value in front of the input carries the icon's inset. Applying it
+      // The count in front of the input carries the icon's inset. Applying it
       // to the input as well left the caret a whole inset past the text.
       const trigger = getTriggerSearchInput()
-      expect(trigger).toHaveClass("pl-0")
+      await waitFor(() => expect(trigger).toHaveClass("pl-0"))
       expect(trigger.className).not.toMatch(/(^|\s)pl-8(\s|$)/)
     })
 
@@ -2755,7 +2748,7 @@ describe("Select", () => {
       )
     })
 
-    it("turns the selection into text minus one character on backspace", async () => {
+    it("edits the selected label like any text: backspace, then more", async () => {
       const user = userEvent.setup()
       const handleChange = vi.fn()
       render(
@@ -2769,28 +2762,23 @@ describe("Select", () => {
       )
 
       const trigger = getTriggerSearchInput()
-      await waitFor(() =>
-        expect(screen.getByText("Option 1")).toBeInTheDocument()
-      )
+      await waitFor(() => expect(trigger).toHaveValue("Option 1"))
 
-      // Backspace deletes the label's last character; the rest is now text.
-      trigger.focus()
+      // The label is text, so this is the browser's own backspace. The first
+      // edit is what drops the selection.
+      await user.click(trigger)
       await user.keyboard("{Backspace}")
 
       expect(trigger).toHaveValue("Option ")
       await waitFor(() => expect(handleChange).toHaveBeenCalled())
-      expect(
-        document.querySelector("[data-slot='value']")
-      ).not.toBeInTheDocument()
       await settleList()
       expect(trigger).toHaveFocus()
 
-      // …and it keeps editing as text from here.
       await user.keyboard("{Backspace}")
       expect(trigger).toHaveValue("Option")
     })
 
-    it("carries on from the selected label when the user types over it", async () => {
+    it("continues the selected label when the user types after it", async () => {
       const user = userEvent.setup()
       const handleChange = vi.fn()
       render(
@@ -2803,23 +2791,40 @@ describe("Select", () => {
       )
 
       const trigger = getTriggerSearchInput()
-      await waitFor(() =>
-        expect(screen.getByText("Option 1")).toBeInTheDocument()
-      )
+      await waitFor(() => expect(trigger).toHaveValue("Option 1"))
 
-      // The label is what the field is showing, so a space after it is
-      // "Option 1 ", not a lone space with the selection wiped.
       await user.type(trigger, " ")
 
       expect(trigger).toHaveValue("Option 1 ")
       await waitFor(() => expect(handleChange).toHaveBeenCalled())
-      expect(
-        document.querySelector("[data-slot='value']")
-      ).not.toBeInTheDocument()
 
-      // …and it is plain text from there on.
       await user.type(trigger, "x")
       expect(trigger).toHaveValue("Option 1 x")
+    })
+
+    it("selects, copies and replaces the label like any text", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0Select
+          {...searchProps}
+          options={mockOptions}
+          value="option1"
+          onChange={() => {}}
+        />
+      )
+
+      const trigger = getTriggerSearchInput()
+      await waitFor(() => expect(trigger).toHaveValue("Option 1"))
+
+      // Selection semantics are the browser's; the arrows-with-Shift half is
+      // covered by a real-browser run, jsdom only models select-all.
+      await user.click(trigger)
+      await user.keyboard("{Control>}a{/Control}")
+      expect(trigger.selectionStart).toBe(0)
+      expect(trigger.selectionEnd).toBe("Option 1".length)
+
+      await user.keyboard("Opt")
+      expect(trigger).toHaveValue("Opt")
     })
 
     it("only deletes text on backspace while there is text", async () => {

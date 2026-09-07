@@ -1404,11 +1404,8 @@ export const SearchInTheTrigger: Story = {
 
     const trigger = canvas.getByRole("combobox")
 
-    // The selection is drawn beside the caret, so this is how it is
-    // announced. It resolves asynchronously.
-    await waitFor(async () =>
-      expect(trigger).toHaveAccessibleDescription("Dark")
-    )
+    // The selected label is the field's own text. It resolves asynchronously.
+    await waitFor(async () => expect(trigger).toHaveValue("Dark"))
 
     // Backspace on a selection edits its label: "Dark" becomes "Dar", the
     // selection goes, and the list narrows to what is left.

@@ -108,9 +108,10 @@ describe("LocationSelector", () => {
       />
     )
 
-    expect(
-      screen.getByText("Llucuna A-3 — Office · Barcelona")
-    ).toBeInTheDocument()
+    // The picker searches from its trigger, so the path is the field's text.
+    expect(screen.getByRole("combobox")).toHaveValue(
+      "Llucuna A-3 — Office · Barcelona"
+    )
   })
 
   it("groups work areas under the chain above them", async () => {

@@ -3,40 +3,47 @@ import { useCallback, useEffect, useRef, useState } from "react"
 type UseTriggerSearchOptions = {
   enabled: boolean
   open: boolean
+  /**
+   * What the field shows when nobody is editing it: the selected label for a
+   * single selection, nothing for a multiple one.
+   */
+  restingText: string
   /** Opens the list without the select's own open debounce. */
   onOpen: () => void
   onSearchChange: (value: string) => void
   /** Clears the query, rather than setting it to an empty one. */
   onSearchReset: () => void
+  /** The first edit of the resting text: the selection it showed is gone. */
+  onEditStart: () => void
   onActiveMove: (direction: "next" | "previous") => void
   /** Returns false when there was nothing to take. */
   onSelectActive: () => boolean
-  /** Returns false when there was no selection to edit. */
+  /** Returns false when there was no selection to remove. */
   onBackspaceOnEmpty: () => boolean
-  /**
-   * Typing with a selection shown and no text yet. Returns the text to use —
-   * the selection's label plus what was typed — or null to type as normal.
-   */
-  onTypeOverSelection: (typed: string) => string | null
   triggerRef: React.RefObject<HTMLElement | null>
 }
 
-/** State for a select whose trigger is the search field. */
+/**
+ * State for a select whose trigger is the search field.
+ *
+ * The selected label IS the field's text, so selecting, copying and editing it
+ * are the browser's own. Only once the text is edited does it become a query.
+ */
 export const useTriggerSearch = ({
   enabled,
   open,
+  restingText,
   onOpen,
   onSearchChange,
   onSearchReset,
+  onEditStart,
   onActiveMove,
   onSelectActive,
   onBackspaceOnEmpty,
-  onTypeOverSelection,
   triggerRef,
 }: UseTriggerSearchOptions) => {
-  const [draft, setDraft] = useState("")
-  const draftRef = useRef(draft)
-  draftRef.current = draft
+  const [draft, setDraft] = useState(restingText)
+  const [editing, setEditing] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
   // Through refs: the handlers are cloned onto the input, and a new identity
@@ -45,30 +52,43 @@ export const useTriggerSearch = ({
     onSearchChange,
     onOpen,
     onSearchReset,
+    onEditStart,
     onActiveMove,
     onSelectActive,
     onBackspaceOnEmpty,
-    onTypeOverSelection,
   })
   useEffect(() => {
     callbacksRef.current = {
       onSearchChange,
       onOpen,
       onSearchReset,
+      onEditStart,
       onActiveMove,
       onSelectActive,
       onBackspaceOnEmpty,
-      onTypeOverSelection,
     }
   }, [
     onActiveMove,
     onBackspaceOnEmpty,
+    onEditStart,
     onOpen,
     onSearchChange,
     onSearchReset,
     onSelectActive,
-    onTypeOverSelection,
   ])
+
+  const restingTextRef = useRef(restingText)
+  useEffect(() => {
+    restingTextRef.current = restingText
+  }, [restingText])
+
+  // The field follows the selection while nobody is editing it.
+  useEffect(() => {
+    if (!enabled || editing) {
+      return
+    }
+    setDraft(restingText)
+  }, [editing, enabled, restingText])
 
   // `open` is a render behind the request, so the keys track the request.
   const requestedOpenRef = useRef(open)
@@ -81,32 +101,15 @@ export const useTriggerSearch = ({
     callbacksRef.current.onOpen()
   }, [])
 
+  const editingRef = useRef(editing)
+
   const handleChange = useCallback(
     (value: string) => {
-      /**
-       * The first character typed over a selection continues its label rather
-       * than replacing it: the label is what the field is showing, so "Approved"
-       * plus a space is "Approved ", not a lone space.
-       */
-      const next =
-        value && !draftRef.current
-          ? (callbacksRef.current.onTypeOverSelection(value) ?? value)
-          : value
-
-      setDraft(next)
-      callbacksRef.current.onSearchChange(next)
-      // Clearing routes through here too, with an empty value.
-      if (next && !requestedOpenRef.current) {
-        requestOpen()
+      if (!editingRef.current) {
+        editingRef.current = true
+        setEditing(true)
+        callbacksRef.current.onEditStart()
       }
-    },
-    [requestOpen]
-  )
-
-  /** Sets the text without the type-over rule: for text the field itself
-   * produced, not a keystroke. */
-  const setText = useCallback(
-    (value: string) => {
       setDraft(value)
       callbacksRef.current.onSearchChange(value)
       if (value && !requestedOpenRef.current) {
@@ -116,8 +119,11 @@ export const useTriggerSearch = ({
     [requestOpen]
   )
 
-  const clearDraft = useCallback(() => {
-    setDraft("")
+  /** Back to showing the selection, with no query. */
+  const resetText = useCallback(() => {
+    editingRef.current = false
+    setEditing(false)
+    setDraft(restingTextRef.current)
     callbacksRef.current.onSearchReset()
   }, [])
 
@@ -139,8 +145,7 @@ export const useTriggerSearch = ({
       return
     }
 
-    setDraft("")
-    callbacksRef.current.onSearchReset()
+    resetText()
 
     const active = document.activeElement
     const focusLeftTheSelect =
@@ -151,7 +156,7 @@ export const useTriggerSearch = ({
     if (!focusLeftTheSelect) {
       inputRef.current?.focus({ preventScroll: true })
     }
-  }, [enabled, open, triggerRef])
+  }, [enabled, open, resetText, triggerRef])
 
   /** Keys that belong to the list. Everything else is the input's. */
   const handleKeyDown = useCallback(
@@ -164,8 +169,7 @@ export const useTriggerSearch = ({
       const isArrowUp = event.key === "ArrowUp"
       const isEnter = event.key === "Enter"
 
-      // Consumed when it edited the selection, so the input does not also
-      // delete from the text just handed to it.
+      // Consumed when it removed a selection, so the input does not also act.
       if (event.key === "Backspace" && event.currentTarget.value === "") {
         if (callbacksRef.current.onBackspaceOnEmpty()) {
           event.preventDefault()
@@ -199,10 +203,10 @@ export const useTriggerSearch = ({
 
   return {
     draft,
+    editing,
     inputRef,
     focusInput,
-    clearDraft,
-    setText,
+    resetText,
     handleChange,
     handleKeyDown,
   }

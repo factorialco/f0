@@ -940,12 +940,10 @@ const F0SelectComponent = forwardRef(function Select<
     move: (direction: "next" | "previous") => void
     take: () => boolean
     removeLast: () => boolean
-    typeOver: (typed: string) => string | null
   }>({
     move: () => {},
     take: () => false,
     removeLast: () => false,
-    typeOver: () => null,
   })
   const moveActiveThroughRef = useCallback(
     (direction: "next" | "previous") => listNavRef.current.move(direction),
@@ -959,10 +957,6 @@ const F0SelectComponent = forwardRef(function Select<
     () => listNavRef.current.removeLast(),
     []
   )
-  const typeOverSelectionThroughRef = useCallback(
-    (typed: string) => listNavRef.current.typeOver(typed),
-    []
-  )
 
   const openNow = useCallback(() => {
     debouncedHandleChangeOpenLocal.cancel()
@@ -970,22 +964,48 @@ const F0SelectComponent = forwardRef(function Select<
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedHandleChangeOpenLocal])
 
+  /**
+   * For a single selection the field's text IS the selected label, so selecting,
+   * copying and editing it are the browser's own. A multiple selection has no
+   * single label: the field stays empty and shows the count beside the caret.
+   */
+  const selectedLabelText = multiple
+    ? ""
+    : String(
+        getDisplayItemsForSelection[0]?.selectedLabel ??
+          getDisplayItemsForSelection[0]?.label ??
+          ""
+      )
+
+  /** The first edit of the label means the selection it showed is gone. */
+  const dropSelectionForEditing = useCallback(() => {
+    if (multiple || localValue.length === 0) {
+      return
+    }
+    hasUserInteracted.current = true
+    clearSelection()
+    selectedItemsCache.current.clear()
+    ;(
+      onChangeSelectedOption as (option: undefined, checked: boolean) => void
+    )?.(undefined, false)
+  }, [clearSelection, localValue.length, multiple, onChangeSelectedOption])
+
   const {
     draft: searchDraft,
     inputRef: searchInputRef,
     focusInput: focusSearchInput,
-    clearDraft: clearSearchDraft,
-    setText: setSearchText,
+    resetText: resetSearchText,
     handleChange: handleSearchDraftChange,
     handleKeyDown: handleSearchKeyDown,
   } = useTriggerSearch({
     enabled: inlineSearch,
     open: !!openLocal,
+    restingText: inlineSearch ? selectedLabelText : "",
+    onEditStart: dropSelectionForEditing,
     onOpen: openNow,
     onActiveMove: moveActiveThroughRef,
     onSelectActive: selectActiveThroughRef,
     onBackspaceOnEmpty: removeLastSelectedThroughRef,
-    onTypeOverSelection: typeOverSelectionThroughRef,
     onSearchChange: onSearchChangeLocal,
     // No query, not an empty one: an empty string is a new dataset identity
     // and would drop an active select-all on an open-and-close.
@@ -1303,78 +1323,26 @@ const F0SelectComponent = forwardRef(function Select<
   }, [activeValue, localValue, multiple, onItemCheckChange])
 
   /**
-   * Backspace on an empty field edits the selection: its label becomes the
-   * text minus one character, and the selection goes. Multiple selection has
-   * no single label to edit, so it drops the last item instead.
+   * Backspace on an empty field, which only a multiple selection has: the last
+   * selected item goes, the way a tag field drops its last token.
    */
   const removeLastSelected = useCallback(() => {
     const last = localValue[localValue.length - 1]
-    if (!last) {
+    if (!multiple || !last) {
       return false
     }
     hasUserInteracted.current = true
-    if (multiple) {
-      onItemCheckChange(last, false)
-      return true
-    }
-    const selected = getDisplayItemsForSelection[0]
-    const labelText = String(selected?.selectedLabel ?? selected?.label ?? "")
-    clearSelection()
-    selectedItemsCache.current.clear()
-    ;(
-      onChangeSelectedOption as (option: undefined, checked: boolean) => void
-    )?.(undefined, false)
-    setSearchText(labelText.slice(0, -1))
+    onItemCheckChange(last, false)
     return true
-  }, [
-    clearSelection,
-    getDisplayItemsForSelection,
-    localValue,
-    multiple,
-    onChangeSelectedOption,
-    onItemCheckChange,
-    setSearchText,
-  ])
-
-  /**
-   * Typing over a selection carries on from its label: the selection goes, and
-   * the text is what was on screen plus what was typed. Multiple selection has
-   * no single label, so typing there just filters.
-   */
-  const typeOverSelection = useCallback(
-    (typed: string) => {
-      if (multiple) {
-        return null
-      }
-      const selected = getDisplayItemsForSelection[0]
-      const labelText = selected?.selectedLabel ?? selected?.label
-      if (!labelText) {
-        return null
-      }
-      hasUserInteracted.current = true
-      clearSelection()
-      selectedItemsCache.current.clear()
-      ;(
-        onChangeSelectedOption as (option: undefined, checked: boolean) => void
-      )?.(undefined, false)
-      return `${String(labelText)}${typed}`
-    },
-    [
-      clearSelection,
-      getDisplayItemsForSelection,
-      multiple,
-      onChangeSelectedOption,
-    ]
-  )
+  }, [localValue, multiple, onItemCheckChange])
 
   useEffect(() => {
     listNavRef.current = {
       move: moveActive,
       take: selectActive,
       removeLast: removeLastSelected,
-      typeOver: typeOverSelection,
     }
-  }, [moveActive, removeLastSelected, selectActive, typeOverSelection])
+  }, [moveActive, removeLastSelected, selectActive])
 
   // A virtualized list only renders what is in view.
   useEffect(() => {
@@ -1392,7 +1360,7 @@ const F0SelectComponent = forwardRef(function Select<
         const resetSearch = () => {
           setCurrentSearch(undefined)
           if (inlineSearch) {
-            clearSearchDraft()
+            resetSearchText()
           }
         }
         const result = onCreate(value)
@@ -1716,8 +1684,10 @@ const F0SelectComponent = forwardRef(function Select<
               }
               canClear={inlineSearch ? hasSelection : undefined}
               onChange={inlineSearch ? handleSearchDraftChange : undefined}
-              // The button clears the selection, never the text.
-              clearKeepsText={inlineSearch}
+              // The button clears the selection. With a multiple selection the
+              // text is a query and stays; with a single one the text IS the
+              // selection and goes with it.
+              clearKeepsText={inlineSearch && multiple}
               aria-activedescendant={
                 // The only way to announce the active option while the caret
                 // stays in the field.
@@ -1727,13 +1697,13 @@ const F0SelectComponent = forwardRef(function Select<
               }
               aria-describedby={
                 // Only while the node it points at is rendered.
-                inlineSearch && hasSelection && !searchDraft
+                inlineSearch && multiple && hasSelection && !searchDraft
                   ? selectionDescriptionId
                   : undefined
               }
               inputRef={inlineSearch ? searchInputRef : undefined}
               valueSlot={
-                inlineSearch && hasSelection ? (
+                inlineSearch && multiple && hasSelection ? (
                   <span
                     id={selectionDescriptionId}
                     // accname reads a described-by node even hidden; visible

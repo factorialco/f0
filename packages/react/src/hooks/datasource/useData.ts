@@ -401,18 +401,21 @@ export function useData<
 
   const deferredSearch = useDeferredValue(currentSearch)
 
-  // We need to use a ref to get the latest search value
-  // because the search value is updated asynchronously
-  // and we need to use the latest value in the callback functions
-  // like loadMore, setPage, etc.
-  const searchValue = useRef<string | undefined>(undefined)
-  useEffect(() => {
-    searchValue.current = !search?.enabled
-      ? undefined
-      : search?.sync
-        ? currentSearch
-        : deferredSearch || currentSearch
-  }, [currentSearch, deferredSearch, search?.enabled, search?.sync])
+  /**
+   * Derived in render, not mirrored into a ref by an effect: the callbacks
+   * below list it as a dependency, and a ref is only updated after the render
+   * that read it, so a change with no render behind it (clearing the query on
+   * close) never refetched.
+   */
+  const effectiveSearch = useMemo(
+    () =>
+      !search?.enabled
+        ? undefined
+        : search?.sync
+          ? currentSearch
+          : deferredSearch || currentSearch,
+    [currentSearch, deferredSearch, search?.enabled, search?.sync]
+  )
 
   /**
    * Merges 2 arrays of items using the idProvider to update the existing items
@@ -784,12 +787,11 @@ export function useData<
       fetchDataAndUpdate({
         filters: mergedFilters,
         currentPage: page,
-        search: searchValue.current,
+        search: effectiveSearch,
       })
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- we want to oberver ref current
     [
-      searchValue.current,
+      effectiveSearch,
       fetchDataAndUpdate,
       mergedFilters,
       setIsLoading,
@@ -827,7 +829,7 @@ export function useData<
           filters: mergedFilters,
           appendMode: true,
           cursor: currentCursor,
-          search: searchValue.current,
+          search: effectiveSearch,
         })
       }
     },
@@ -837,7 +839,7 @@ export function useData<
       isLoading,
       mergedFilters,
       paginationInfoRef.current,
-      searchValue.current,
+      effectiveSearch,
       isLoadingMore,
       setIsLoading,
       setIsLoadingMore,
@@ -866,7 +868,7 @@ export function useData<
           filters: mergedFilters,
           sortings: currentSortings,
           grouping: currentGrouping,
-          search: searchValue.current,
+          search: effectiveSearch,
           paginationType: dataAdapter.paginationType,
         })
         const canReuseLoadedData =
@@ -910,7 +912,7 @@ export function useData<
         fetchDataAndUpdate({
           filters: mergedFilters,
           currentPage: initialPosition,
-          search: searchValue.current,
+          search: effectiveSearch,
           cursor: dataAdapter.paginationType === "infinite-scroll" ? "0" : null, // Pass "0" as initial cursor
         })
       }
@@ -922,7 +924,7 @@ export function useData<
       setIsLoading,
       enabled,
       dataAdapter.paginationType,
-      searchValue.current,
+      effectiveSearch,
       // eslint-disable-next-line react-hooks/exhaustive-deps -- deps are handled by the caller
       ...deps,
     ]

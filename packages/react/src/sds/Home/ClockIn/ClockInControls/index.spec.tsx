@@ -223,8 +223,10 @@ describe("ClockInControls", () => {
       expect(
         screen.getByRole("combobox", { name: defaultLabels.selectProject })
       ).toBeInTheDocument()
-      // The location's current choice shows on its trigger.
-      expect(screen.getByText("Office")).toBeInTheDocument()
+      // The location's current choice is its trigger's text.
+      expect(
+        screen.getByRole("combobox", { name: defaultLabels.selectLocation })
+      ).toHaveValue("Office")
     })
 
     it("offers a clear affordance only on the pickers that aren't required", () => {
