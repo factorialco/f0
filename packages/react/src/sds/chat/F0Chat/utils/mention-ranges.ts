@@ -24,16 +24,22 @@ export type LocatedMention<T> = {
 const BASE_WITH_MARKS = /[\s\S]\p{M}*/uy
 
 /**
- * Marks never open a name, so one sitting after a match extends the letter.
+ * A code point that composes with whatever precedes it, so no match may end
+ * just before one. Combining marks are the general case; Hangul jungseong and
+ * jongseong are the rest of it, because they compose with a preceding jamo
+ * rather than as marks — a name held as `\uAE30` in jamo sits inside a
+ * jamo-spelled `\uAE40` exactly the way `@Ana` sits inside a decomposed
+ * `@Aná`, and ending there chips two thirds of somebody's syllable.
+ *
  * Sticky rather than a single-character test: a mark outside the BMP is two
  * code units and a lone surrogate is not `\p{M}`, so reading one unit would
- * wave an astral mark straight past the guard.
+ * wave an astral mark straight past.
  */
-const COMBINING_MARK = /\p{M}/uy
+const CONTINUES_PREVIOUS = /[\p{M}\u1161-\u1175\u11A8-\u11C2]/uy
 
-const startsWithMark = (text: string, at: number): boolean => {
-  COMBINING_MARK.lastIndex = at
-  return COMBINING_MARK.test(text)
+const continuesPrevious = (text: string, at: number): boolean => {
+  CONTINUES_PREVIOUS.lastIndex = at
+  return CONTINUES_PREVIOUS.test(text)
 }
 
 /**
@@ -71,7 +77,7 @@ const canonicalMatchEnd = (
   while (true) {
     const seen = text.slice(from, cursor).normalize(CANONICAL_FORM)
     if (seen === pattern) {
-      return cursor
+      return continuesPrevious(text, cursor) ? -1 : cursor
     }
     if (cursor === text.length || !pattern.startsWith(seen)) {
       return -1
@@ -81,10 +87,10 @@ const canonicalMatchEnd = (
 }
 
 /**
- * Index just past `needle` sitting literally at `from`, or `-1`. The mark test
- * is what keeps the shortcut honest: `@Ana` sits inside a decomposed `@Aná`,
- * and matching it there chips somebody else's name and strands the accent
- * outside the chip.
+ * Index just past `needle` sitting literally at `from`, or `-1`. The
+ * continuation test is what keeps the shortcut honest: `@Ana` sits inside a
+ * decomposed `@Aná`, and matching it there chips somebody else's name and
+ * strands the accent outside the chip.
  */
 const literalMatchEnd = (
   text: string,
@@ -92,7 +98,9 @@ const literalMatchEnd = (
   needle: string
 ): number => {
   const end = from + needle.length
-  return text.startsWith(needle, from) && !startsWithMark(text, end) ? end : -1
+  return text.startsWith(needle, from) && !continuesPrevious(text, end)
+    ? end
+    : -1
 }
 
 /**

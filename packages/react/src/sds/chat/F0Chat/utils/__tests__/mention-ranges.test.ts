@@ -117,6 +117,28 @@ describe("locateMentions", () => {
     ])
   })
 
+  // Jamo compose with each other rather than as marks, so a jamo name sits
+  // inside a longer jamo syllable exactly the way `@Ana` sits inside `@Aná`.
+  // Neither literal spelling may end there, and neither may the fold.
+  it("does not chip a syllable whose jamo a shorter name prefixes", () => {
+    expect(
+      locateMentions("@\u1100\u1175\u11B7 hi", [{ name: "\u1100\u1175" }])
+    ).toEqual([])
+  })
+
+  it("does not chip a syllable open on its leading jamo", () => {
+    expect(locateMentions("@\u1100\u1161 hi", [{ name: "\u1100" }])).toEqual([])
+  })
+
+  it("still matches a jamo name that a new syllable follows", () => {
+    const name = "\u1100\u1161\u11A8"
+    const body = `@${name}\u1100\u1161 hi`
+
+    expect(locateMentions(body, [{ name }])).toEqual([
+      { entry: { name }, start: 0, end: 1 + name.length },
+    ])
+  })
+
   it("does not swallow the accent that follows a name held as jamo", () => {
     expect(
       locateMentions("hi @\u1100\u1161\u11A8\u0301", [
