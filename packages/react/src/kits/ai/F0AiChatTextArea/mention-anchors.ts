@@ -51,10 +51,12 @@ export const diffSpan = (prev: string, next: string): TextEdit => {
  * Re-anchor `anchored` after the composer text went from `prev` to `next`, and
  * report which mentions the edit landed inside.
  *
- * A mention whose span the change overlaps is *touched*: its remaining text is
+ * A mention the change partly overlaps is *touched*: its remaining text is
  * reported so the caller can erase it whole. Adjacency is not overlap, so
  * typing a comma right after a mention — or deleting the space that followed
- * it — leaves the mention alone.
+ * it — leaves the mention alone. A mention the change swallowed entirely is
+ * simply dropped: its text is already gone, and the span that replaced it is
+ * whatever the user just typed or pasted.
  */
 export const reanchor = <T extends Anchored>(
   prev: string,
@@ -76,11 +78,14 @@ export const reanchor = <T extends Anchored>(
   for (const mention of anchored) {
     const start = mention.start
     const end = anchorEnd(mention)
-    if (prefix < end && prevEnd > start) {
-      touched.push({ start: mapStart(start), end: mapEnd(end) })
-    } else {
+    if (prefix >= end || prevEnd <= start) {
       kept.push({ ...mention, start: mapStart(start) })
+      continue
     }
+    if (start >= prefix && end <= prevEnd) {
+      continue
+    }
+    touched.push({ start: mapStart(start), end: mapEnd(end) })
   }
   return { kept, touched }
 }

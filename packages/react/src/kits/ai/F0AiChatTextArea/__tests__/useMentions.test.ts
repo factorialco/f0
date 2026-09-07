@@ -153,6 +153,20 @@ describe("useMentions — a mention is a token, not a substring", () => {
     )
   })
 
+  it("keeps what the user types when a selection replaces the whole mention", async () => {
+    const composer = mountComposer([ANA, BRUNO])
+    composer.type("Hola @Ana")
+    await pick(composer, 0, "Hola @Ana García ")
+    composer.setInputValue.mockClear()
+
+    // Select all, then type. The mention's own text is already gone, so there
+    // is nothing left to erase — and erasing anyway eats the keystroke.
+    composer.type("x", 1)
+
+    expect(composer.setInputValue).not.toHaveBeenCalled()
+    expect(composer.result.current.mentions).toHaveLength(0)
+  })
+
   it("anchors two people who share a display name independently", async () => {
     const composer = mountComposer([ANA, ANA_TWIN])
     composer.type("@Ana")
