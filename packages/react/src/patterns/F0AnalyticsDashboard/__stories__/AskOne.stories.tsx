@@ -226,53 +226,11 @@ export const TargetObserver: Story = {
   },
 }
 
-/** The point observer receives raw identity while the composer keeps its quote. */
-export const PointTargetObserver: Story = {
-  tags: ["ask-one-target-observer"],
-  render: () => <TargetObserverLayout items={pointWidget} />,
-  play: async ({ canvasElement, step }) => {
-    const canvas = within(canvasElement)
-
-    await step("Choose a chart point with the keyboard action", async () => {
-      const trigger = await canvas.findByRole("button", {
-        name: "Ask One: Headcount by Department",
-      })
-      trigger.focus()
-      await userEvent.keyboard("{Enter}")
-      const menuId = trigger.getAttribute("aria-controls")
-      if (!menuId)
-        throw new Error("The point menu trigger has no aria-controls")
-      const menu = await waitFor(() => {
-        const element = canvasElement.ownerDocument.getElementById(menuId)
-        expect(element).toBeInTheDocument()
-        return within(element!)
-      })
-      await userEvent.click(
-        await menu.findByRole("menuitem", {
-          name: "Headcount by Department — Engineering, Headcount: 145 people",
-        })
-      )
-    })
-
-    await step("Verify raw target and formatted built-in quote", async () => {
-      await waitFor(() =>
-        expect(
-          canvas.getByText(/point-headcount: point=Engineering\/145/)
-        ).toHaveTextContent("point-headcount: point=Engineering/145")
-      )
-      const removeQuote = await canvas.findByRole("button", {
-        name: "Remove quote",
-      })
-      await expect(removeQuote.parentElement).toHaveTextContent(
-        "Headcount by Department — Engineering Headcount: 145 people"
-      )
-    })
-  },
-}
-
 /**
- * Click the Engineering bar, then choose Ask One from the anchored action. The
- * complete category, series, and formatted value appear in the real composer.
+ * Clicking the Engineering bar reveals the Ask One action anchored to that
+ * mark; choosing it puts the category, series, and formatted value in the
+ * focused chat composer. Driven by hand — a play function cannot reliably hit
+ * a mark drawn on the chart canvas.
  */
 export const ChartPointFlow: Story = {
   render: () => <AskOneLayout items={pointWidget} />,
@@ -280,47 +238,8 @@ export const ChartPointFlow: Story = {
     docs: {
       description: {
         story:
-          "Click the Engineering bar to reveal the anchored Ask One action, or Tab to the chart's Ask One trigger to open the keyboard point menu. Choose the point to review the complete quote in the focused chat composer.",
+          "Click the Engineering bar to reveal the anchored Ask One action, then choose it to review the complete quote in the focused chat composer.",
       },
     },
-  },
-  play: async ({ canvasElement, step }) => {
-    const canvas = within(canvasElement)
-
-    await step("Open the keyboard point menu", async () => {
-      const trigger = await canvas.findByRole("button", {
-        name: "Ask One: Headcount by Department",
-      })
-      trigger.focus()
-      await expect(trigger).toHaveFocus()
-      await userEvent.keyboard("{Enter}")
-      const menuId = trigger.getAttribute("aria-controls")
-      if (!menuId)
-        throw new Error("The point menu trigger has no aria-controls")
-
-      const menu = await waitFor(() => {
-        const element = canvasElement.ownerDocument.getElementById(menuId)
-        expect(element).toBeInTheDocument()
-        return within(element!)
-      })
-      await userEvent.click(
-        await menu.findByRole("menuitem", {
-          name: "Headcount by Department — Engineering, Headcount: 145 people",
-        })
-      )
-    })
-
-    await step(
-      "Verify the formatted point in the focused composer",
-      async () => {
-        const removeQuote = await canvas.findByRole("button", {
-          name: "Remove quote",
-        })
-        await expect(removeQuote.parentElement).toHaveTextContent(
-          "Headcount by Department — Engineering Headcount: 145 people"
-        )
-        await waitFor(() => expect(canvas.getByRole("textbox")).toHaveFocus())
-      }
-    )
   },
 }

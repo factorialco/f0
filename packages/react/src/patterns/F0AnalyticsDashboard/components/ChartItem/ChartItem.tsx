@@ -56,10 +56,6 @@ import {
 } from "../../utils/chartDataAdapter"
 import { chartDataToTabular } from "../../utils/chartDataToTabular"
 import { DashboardItem } from "../DashboardItem/DashboardItem"
-import {
-  AccessiblePointActions,
-  type AccessiblePointAction,
-} from "./AccessiblePointActions"
 import { PointActionPopover } from "./PointActionPopover"
 
 // ---------------------------------------------------------------------------
@@ -196,250 +192,6 @@ export function buildPointQuoteText(
   const label = point.seriesName ? `${point.seriesName}: ` : ""
 
   return `${heading}\n${label}${formatPointValue(chart, point.value)}`
-}
-
-type AccessibleChartPoint = {
-  key: string
-  point: F0AnalyticsDashboardPointClick
-}
-
-function numericPointValue(point: unknown): number | null {
-  const raw =
-    typeof point === "object" && point !== null && "value" in point
-      ? point.value
-      : point
-  if (raw === null || raw === undefined || raw === "") return null
-  const value = Number(raw)
-  return Number.isFinite(value) ? value : null
-}
-
-function accessiblePoint(
-  key: string,
-  point: F0AnalyticsDashboardPointClick
-): AccessibleChartPoint {
-  return { key, point }
-}
-
-/** @internal Exported for keyboard-surface contract tests. */
-export function buildAccessibleChartPoints(
-  chart: F0DataChartProps,
-  selected: Record<string, boolean> = {}
-): AccessibleChartPoint[] {
-  const keyboardContext = {
-    source: "keyboard" as const,
-    clientX: 0,
-    clientY: 0,
-  }
-
-  switch (chart.type) {
-    case "bar":
-      return chart.series.flatMap((series, seriesIndex) => {
-        if (selected[series.name] === false) return []
-        return series.data.flatMap((entry, dataIndex) => {
-          const value = numericPointValue(entry)
-          if (value === null) return []
-          const point: F0AnalyticsDashboardPointClick = {
-            seriesName: series.name,
-            category: chart.categories[dataIndex] ?? "",
-            value,
-            values: [value],
-            series: [{ name: series.name, seriesIndex, value }],
-            dataIndex,
-            seriesIndex,
-            ...keyboardContext,
-          }
-          return [accessiblePoint(`bar-${seriesIndex}-${dataIndex}`, point)]
-        })
-      })
-    case "line":
-      return chart.categories.flatMap((category, dataIndex) => {
-        const series = chart.series.flatMap((entry, seriesIndex) => {
-          if (selected[entry.name] === false) return []
-          const value = numericPointValue(entry.data[dataIndex])
-          return value === null
-            ? []
-            : [{ name: entry.name, seriesIndex, value }]
-        })
-        const first = series[0]
-        if (!first) return []
-        const point: F0AnalyticsDashboardPointClick = {
-          seriesName: first.name,
-          category,
-          value: first.value,
-          values: [first.value],
-          series,
-          dataIndex,
-          seriesIndex: first.seriesIndex,
-          ...keyboardContext,
-        }
-        return [accessiblePoint(`line-${dataIndex}`, point)]
-      })
-    case "funnel":
-      return chart.series.data.flatMap((entry, dataIndex) => {
-        if (selected[entry.name] === false) return []
-        const value = numericPointValue(entry.value)
-        if (value === null) return []
-        const point: F0AnalyticsDashboardPointClick = {
-          seriesName: chart.series.name,
-          category: entry.name,
-          value,
-          values: [value],
-          series: [{ name: chart.series.name, seriesIndex: 0, value }],
-          dataIndex,
-          seriesIndex: 0,
-          ...keyboardContext,
-        }
-        return [accessiblePoint(`funnel-${dataIndex}`, point)]
-      })
-    case "pie":
-      return chart.series.data.flatMap((entry, dataIndex) => {
-        if (selected[entry.name] === false) return []
-        const value = numericPointValue(entry.value)
-        if (value === null) return []
-        const point: F0AnalyticsDashboardPointClick = {
-          seriesName: chart.series.name,
-          category: entry.name,
-          value,
-          values: [value],
-          series: [{ name: chart.series.name, seriesIndex: 0, value }],
-          dataIndex,
-          seriesIndex: 0,
-          ...keyboardContext,
-        }
-        return [accessiblePoint(`pie-${dataIndex}`, point)]
-      })
-    case "radar":
-      return chart.series.flatMap((series, seriesIndex) => {
-        if (selected[series.name] === false) return []
-        const values = series.data
-        if (
-          values.length === 0 ||
-          values.some((value) => !Number.isFinite(value))
-        ) {
-          return []
-        }
-        const value = values.at(-1)
-        if (value === undefined) return []
-        const point: F0AnalyticsDashboardPointClick = {
-          seriesName: "",
-          category: series.name,
-          value,
-          values,
-          series: [{ name: "", seriesIndex: 0, value }],
-          dataIndex: seriesIndex,
-          seriesIndex: 0,
-          ...keyboardContext,
-        }
-        return [accessiblePoint(`radar-${seriesIndex}`, point)]
-      })
-    case "gauge": {
-      const value = numericPointValue(chart.value)
-      if (value === null) return []
-      const point: F0AnalyticsDashboardPointClick = {
-        seriesName: "",
-        category: chart.name ?? "",
-        value,
-        values: [value],
-        series: [{ name: "", seriesIndex: 0, value }],
-        dataIndex: 0,
-        seriesIndex: 0,
-        ...keyboardContext,
-      }
-      return [accessiblePoint("gauge-0", point)]
-    }
-    case "heatmap":
-      return chart.data.flatMap(([x, y, value], dataIndex) => {
-        if (![x, y, value].every(Number.isFinite)) return []
-        const point: F0AnalyticsDashboardPointClick = {
-          seriesName: "",
-          category: "",
-          value,
-          values: [x, y, value],
-          series: [{ name: "", seriesIndex: 0, value }],
-          dataIndex,
-          seriesIndex: 0,
-          ...keyboardContext,
-        }
-        return [accessiblePoint(`heatmap-${dataIndex}`, point)]
-      })
-    case "scatter":
-      return chart.series.flatMap((series, seriesIndex) => {
-        if (selected[series.name] === false) return []
-        return series.data.flatMap((entry, dataIndex) => {
-          const [x, y] = Array.isArray(entry) ? entry : [entry.x, entry.y]
-          if (![x, y].every(Number.isFinite)) return []
-          const category = Array.isArray(entry) ? "" : (entry.label ?? "")
-          const point: F0AnalyticsDashboardPointClick = {
-            seriesName: series.name,
-            category,
-            value: y,
-            values: [x, y],
-            series: [{ name: series.name, seriesIndex, value: y }],
-            dataIndex,
-            seriesIndex,
-            ...keyboardContext,
-          }
-          return [accessiblePoint(`scatter-${seriesIndex}-${dataIndex}`, point)]
-        })
-      })
-  }
-}
-
-/** @internal Exported for keyboard-surface contract tests. */
-export function hasAccessibleChartPoint(
-  chart: F0DataChartProps,
-  selected: Record<string, boolean> = {}
-): boolean {
-  switch (chart.type) {
-    case "bar":
-      return chart.series.some(
-        (series) =>
-          selected[series.name] !== false &&
-          series.data.some((entry) => numericPointValue(entry) !== null)
-      )
-    case "line":
-      return chart.categories.some((_, dataIndex) =>
-        chart.series.some(
-          (series) =>
-            selected[series.name] !== false &&
-            numericPointValue(series.data[dataIndex]) !== null
-        )
-      )
-    case "funnel":
-      return chart.series.data.some(
-        (entry) =>
-          selected[entry.name] !== false &&
-          numericPointValue(entry.value) !== null
-      )
-    case "pie":
-      return chart.series.data.some(
-        (entry) =>
-          selected[entry.name] !== false &&
-          numericPointValue(entry.value) !== null
-      )
-    case "radar":
-      return chart.series.some(
-        (series) =>
-          selected[series.name] !== false &&
-          series.data.length > 0 &&
-          series.data.every(Number.isFinite)
-      )
-    case "gauge":
-      return numericPointValue(chart.value) !== null
-    case "heatmap":
-      return chart.data.some(([x, y, value]) =>
-        [x, y, value].every(Number.isFinite)
-      )
-    case "scatter":
-      return chart.series.some(
-        (series) =>
-          selected[series.name] !== false &&
-          series.data.some((entry) => {
-            const [x, y] = Array.isArray(entry) ? entry : [entry.x, entry.y]
-            return [x, y].every(Number.isFinite)
-          })
-      )
-  }
 }
 
 // ---------------------------------------------------------------------------
@@ -853,9 +605,6 @@ export function ChartItem<Filters extends FiltersDefinition>({
    */
   const [pickedPoint, setPickedPoint] =
     useState<F0AnalyticsDashboardPointClick | null>(null)
-  const [legendSelection, setLegendSelection] = useState<
-    Record<string, boolean> | undefined
-  >()
   const enabled = item.useDashboardFilters !== false
   const itemFiltersKey = JSON.stringify(itemFilters?.value ?? {})
   const { data, isLoading, error, retry } = useDashboardItemData<
@@ -863,7 +612,6 @@ export function ChartItem<Filters extends FiltersDefinition>({
     DashboardChartData
   >(item.fetchData, filters, enabled, itemFiltersKey)
   const chartContainerRef = useRef<HTMLDivElement>(null)
-  const keyboardPointTriggerRef = useRef<HTMLButtonElement | null>(null)
 
   // Keep the data used for quoting identical to the data actually rendered.
   // In particular, transformed radar charts synthesize indicators here that
@@ -883,7 +631,6 @@ export function ChartItem<Filters extends FiltersDefinition>({
   // rebuilt on every parent render even when their semantics are unchanged.
   useEffect(() => {
     setPickedPoint(null)
-    setLegendSelection(undefined)
   }, [data, isLoading, safeChart.type])
 
   const pointAskOwner = onAskAi ? "host" : aiEnabled ? "chat" : "none"
@@ -905,16 +652,6 @@ export function ChartItem<Filters extends FiltersDefinition>({
         // below: it owns the phrasing, and it has the formatters too.
         onAskAi({ id: item.id, title: item.title, point })
         setPickedPoint(null)
-        requestAnimationFrame(() => {
-          const activeElement = document.activeElement
-          if (
-            !activeElement ||
-            activeElement === document.body ||
-            !activeElement.isConnected
-          ) {
-            keyboardPointTriggerRef.current?.focus()
-          }
-        })
         return
       }
 
@@ -962,40 +699,7 @@ export function ChartItem<Filters extends FiltersDefinition>({
     [actions, downloadActions]
   )
 
-  const hasAccessiblePointActions = useMemo(
-    () =>
-      !!chartProps &&
-      canAskAboutPoint &&
-      hasAccessibleChartPoint(chartProps, legendSelection),
-    [chartProps, canAskAboutPoint, legendSelection]
-  )
-
-  const getAccessiblePointActions = useCallback<() => AccessiblePointAction[]>(
-    () =>
-      chartProps
-        ? buildAccessibleChartPoints(chartProps, legendSelection).map(
-            ({ key, point }) => ({
-              key,
-              getLabel: () =>
-                buildPointQuoteText(item.title, chartProps, point)
-                  .split("\n")
-                  .join(", "),
-              onSelect: () => handleAskAboutPoint(point),
-            })
-          )
-        : [],
-    [chartProps, item.title, legendSelection, handleAskAboutPoint]
-  )
-
-  const dismissPointAction = useCallback(
-    (reason: "escape" | "outside" | "viewport") => {
-      setPickedPoint(null)
-      if (reason !== "outside") {
-        requestAnimationFrame(() => keyboardPointTriggerRef.current?.focus())
-      }
-    },
-    []
-  )
+  const dismissPointAction = useCallback(() => setPickedPoint(null), [])
 
   // No fabricated error when data is absent — `F0DataChart` (or the explicit
   // fallback below for `!data`) renders a proper empty state instead.
@@ -1172,9 +876,6 @@ export function ChartItem<Filters extends FiltersDefinition>({
           >
             <F0DataChart
               {...chartProps}
-              {...(chartProps.type !== "gauge" && chartProps.type !== "heatmap"
-                ? { onLegendSelectionChange: setLegendSelection }
-                : {})}
               // Something has to be able to answer the click: the host, or
               // failing that a mounted chat.
               onPointClick={
@@ -1197,27 +898,6 @@ export function ChartItem<Filters extends FiltersDefinition>({
               // horizontal bar chart drops its row window and draws every
               // category at a fixed row height, growing the widget.
               {...(fitContent ? { showAllCategories: true } : {})}
-            />
-            <AccessiblePointActions
-              hasActions={hasAccessiblePointActions}
-              getActions={getAccessiblePointActions}
-              resetOn={{
-                data,
-                isLoading,
-                chartType: safeChart.type,
-                legendSelection,
-                owner: pointAskOwner,
-                title: item.title,
-              }}
-              label={translations.ai.dashboardItem.askOne}
-              triggerLabel={`${translations.ai.dashboardItem.askOne}: ${item.title}`}
-              previousLabel={translations.navigation.previous}
-              nextLabel={translations.navigation.next}
-              setTrigger={(element) => {
-                keyboardPointTriggerRef.current = element
-              }}
-              focusChatAfterSelect={!onAskAi}
-              focusChatInput={focusChatInput}
             />
             <PointActionPopover
               anchor={pickedPoint}

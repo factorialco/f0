@@ -11,6 +11,7 @@ import type {
   FiltersDefinition,
   FiltersState,
 } from "@/patterns/OneFilterPicker/types"
+import type { F0DataChartPointClick } from "@/kits/F0DataChart"
 import {
   AiChatStateProvider,
   useAiChat,
@@ -24,12 +25,35 @@ import type {
 } from "../types"
 
 // Keep this dashboard integration test at the chart boundary: jsdom has no
-// canvas context, while ChartItem's keyboard point surface is ordinary DOM.
+// canvas context, so the mock reports a mark the way `usePointClick` would.
+const MARK: F0DataChartPointClick = {
+  source: "pointer",
+  seriesName: "Headcount",
+  category: "Engineering",
+  value: 145,
+  values: [145],
+  series: [{ name: "Headcount", seriesIndex: 0, value: 145 }],
+  dataIndex: 0,
+  seriesIndex: 0,
+  clientX: 400,
+  clientY: 300,
+}
+
 vi.mock("@/kits/F0DataChart", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/kits/F0DataChart")>()
   return {
     ...actual,
-    F0DataChart: () => <div aria-label="Chart" role="img" />,
+    F0DataChart: ({
+      onPointClick,
+    }: {
+      onPointClick?: (point: F0DataChartPointClick) => void
+    }) => (
+      <div aria-label="Chart" role="img">
+        <button type="button" onClick={() => onPointClick?.(MARK)}>
+          mark
+        </button>
+      </div>
+    ),
   }
 })
 
@@ -517,22 +541,14 @@ describe("F0AnalyticsDashboard Ask One", () => {
       </AiChatStateProvider>
     )
 
-    const trigger = await screen.findByRole("button", {
-      name: "Ask One: Headcount by department",
-    })
-    trigger.focus()
-    await user.keyboard("{Enter}")
-    await user.click(
-      await screen.findByRole("menuitem", {
-        name: "Headcount by department — Engineering, Headcount: 145",
-      })
-    )
+    await user.click(await screen.findByRole("button", { name: "mark" }))
+    await user.click(await screen.findByRole("button", { name: "Ask One" }))
 
     expect(onAskAiTarget).toHaveBeenCalledWith({
       id: "headcount-chart",
       title: "Headcount by department",
       point: expect.objectContaining({
-        source: "keyboard",
+        source: "pointer",
         category: "Engineering",
         value: 145,
       }),
@@ -545,7 +561,7 @@ describe("F0AnalyticsDashboard Ask One", () => {
     )
   })
 
-  it("passes a keyboard-selected chart point through the public handler", async () => {
+  it("passes a clicked chart point through the public handler", async () => {
     const user = userEvent.setup()
     const onAskAi = vi.fn()
 
@@ -568,32 +584,13 @@ describe("F0AnalyticsDashboard Ask One", () => {
       />
     )
 
-    const trigger = await screen.findByRole("button", {
-      name: "Ask One: Headcount by department",
-    })
-    trigger.focus()
-    await user.keyboard("{Enter}")
-    await user.click(
-      await screen.findByRole("menuitem", {
-        name: "Headcount by department — Engineering, Headcount: 145",
-      })
-    )
+    await user.click(await screen.findByRole("button", { name: "mark" }))
+    await user.click(await screen.findByRole("button", { name: "Ask One" }))
 
     expect(onAskAi).toHaveBeenCalledWith({
       id: "headcount-chart",
       title: "Headcount by department",
-      point: {
-        source: "keyboard",
-        seriesName: "Headcount",
-        category: "Engineering",
-        value: 145,
-        values: [145],
-        series: [{ name: "Headcount", seriesIndex: 0, value: 145 }],
-        dataIndex: 0,
-        seriesIndex: 0,
-        clientX: 0,
-        clientY: 0,
-      },
+      point: MARK,
     })
   })
 })
