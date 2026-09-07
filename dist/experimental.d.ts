@@ -5120,7 +5120,7 @@ declare const defaultTranslations: {
         readonly address: "Address";
         readonly addressLine2: "Address line 2";
         readonly city: "City";
-        readonly state: "State / region";
+        readonly state: "Region";
         readonly postalCode: "Postal code";
         readonly placeholder: "Enter an address";
         readonly searchCountry: "Search country";
@@ -8143,7 +8143,7 @@ export declare type F0LocationInputValue = {
     addressLine1?: string;
     addressLine2?: string;
     city?: string;
-    /** State, province or region, as free text */
+    /** Region, state or province, as free text */
     state?: string;
     postalCode?: string;
     country?: CountryCode;

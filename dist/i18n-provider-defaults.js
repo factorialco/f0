@@ -1004,7 +1004,7 @@ const e = {
     address: "Address",
     addressLine2: "Address line 2",
     city: "City",
-    state: "State / region",
+    state: "Region",
     postalCode: "Postal code",
     placeholder: "Enter an address",
     searchCountry: "Search country",

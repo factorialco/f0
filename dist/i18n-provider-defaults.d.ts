@@ -977,7 +977,7 @@ export declare const defaultTranslations: {
         readonly address: "Address";
         readonly addressLine2: "Address line 2";
         readonly city: "City";
-        readonly state: "State / region";
+        readonly state: "Region";
         readonly postalCode: "Postal code";
         readonly placeholder: "Enter an address";
         readonly searchCountry: "Search country";
