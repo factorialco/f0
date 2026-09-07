@@ -79,10 +79,10 @@ const _Chip = ({
     <>
       {avatar && <F0Avatar avatar={avatar} size="xs" />}
       <div className="flex items-center gap-0.5">
-        {icon && <F0Icon icon={icon} size="sm" className="text-f1-icon" />}
+        {icon && <F0Icon icon={icon} size="sm" />}
         <span
           id={onClose ? closeDescriptionId : undefined}
-          className={deactivated ? "text-f1-foreground/[0.61]" : undefined}
+          className={deactivated ? "text-f1-foreground" : undefined}
         >
           {label}
         </span>
