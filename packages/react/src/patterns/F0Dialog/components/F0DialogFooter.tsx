@@ -1,6 +1,8 @@
 import { F0Button } from "@/components/F0Button"
 import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 
+import { useF0Dialog } from "./F0DialogProvider"
+
 import {
   F0DialogActionsProps,
   F0DialogPrimaryAction,
@@ -25,6 +27,7 @@ export const F0DialogFooter = ({
   primaryAction,
   secondaryAction,
 }: F0DialogActionsProps) => {
+  const { portalContainer } = useF0Dialog()
   const hasSecondaryAction = secondaryAction
   const hasPrimaryAction = primaryAction
 
@@ -47,6 +50,7 @@ export const F0DialogFooter = ({
             const action = primaryAction.find((a) => a.value === value)
             action?.onClick()
           }}
+          container={portalContainer}
           variant="default"
         />
       )
@@ -80,6 +84,10 @@ export const F0DialogFooter = ({
             const action = secondaryAction.find((a) => a.value === value)
             action?.onClick()
           }}
+          // INSIDE the dialog, not in the body: the dialog is a focus trap, and
+          // a menu portalled outside it is one the trap has to keep pulling
+          // focus back from — the two recurse until the stack gives out.
+          container={portalContainer}
           variant="outline"
         />
       )

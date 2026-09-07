@@ -64,6 +64,14 @@ export type DropdownInternalProps = {
    * @default false
    */
   disabled?: boolean
+  /**
+   * Where the menu is portalled. Defaults to the document body; pass the
+   * element of a surrounding modal layer — a dialog's own content node, which
+   * it publishes as `portalContainer` — so that layer's focus trap CONTAINS
+   * the menu instead of fighting it. Two traps over the same document push
+   * focus back and forth until the call stack gives out.
+   */
+  container?: HTMLElement | null
 } & DataAttributes
 
 const DropdownItem = ({ item }: { item: DropdownItemObject }) => {
@@ -169,6 +177,7 @@ export function DropdownInternal({
   onOpenChange: controlledOnOpenChange,
   label,
   disabled,
+  container,
   ...rest
 }: DropdownInternalProps) {
   const i18n = useI18n()
@@ -235,7 +244,7 @@ export function DropdownInternal({
       <DropdownMenuTrigger asChild disabled={disabled}>
         {trigger}
       </DropdownMenuTrigger>
-      <DropdownMenuContent align={align}>
+      <DropdownMenuContent align={align} container={container}>
         {items.map((item, index) => renderDropdownItem(item, index))}
       </DropdownMenuContent>
     </DropdownMenu>
