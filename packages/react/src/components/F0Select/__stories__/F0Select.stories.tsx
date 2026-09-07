@@ -1410,8 +1410,12 @@ export const SearchInTheTrigger: Story = {
       expect(trigger).toHaveAccessibleDescription("Dark")
     )
 
-    await userEvent.type(trigger, "Light")
+    // Backspace on a selection edits its label: "Dark" becomes "Dar", the
+    // selection goes, and the list narrows to what is left.
+    trigger.focus()
+    await userEvent.keyboard("{Backspace}")
 
+    await waitFor(async () => expect(trigger).toHaveValue("Dar"))
     await waitFor(async () =>
       expect(trigger).toHaveAttribute("aria-expanded", "true")
     )
@@ -1425,7 +1429,7 @@ export const SearchInTheTrigger: Story = {
       async () => {
         const options = body.getAllByRole("option")
         expect(options).toHaveLength(1)
-        expect(options[0]).toHaveTextContent("Light")
+        expect(options[0]).toHaveTextContent("Dark")
       },
       { timeout: 5000 }
     )
