@@ -17,24 +17,11 @@ It shares the chrome conventions (sizes, focus ring, disabled, readonly and load
 
 ### Anatomy
 
-Out of the box it is one field: the address combobox.
+One field by default; pass `fields` for the country and the parts.
 
 <Canvas of={Stories.Default} />
 
-- **Address field**: a combobox. Typing two or more characters searches; the suggestion list opens below the field, matching its width. Picking a suggestion fills the whole structured value, including the parts that are not on screen.
-- **Suggestion list**: the provider's results in the order it returned them, each with an optional secondary line. It also carries the searching and no-results rows.
-- **Label, status message**: standard input chrome.
-
-Pass `fields` and the same address combobox gains the parts around it, country first.
-
 <Canvas of={Stories.Detailed} />
-
-- **Country selector**: searchable [F0Select](?path=/docs/components-select--documentation) with flag avatars, built from the translated country list. The selected country is passed to `searchPlaces` so the provider can restrict its suggestions.
-- **Address field**: the same combobox, now labelled as the address line.
-- **Parts**: the fields passed in `fields`, in a fixed order: address line 2, then city and state / region on one row, then postal code.
-- **Status message**: shown once, under the group rather than under the address field.
-
-Detailed mode renders no visible group title: each part carries its own label and the `label` prop names the group for assistive technology only.
 
 <Controls of={Stories.Default} />
 
