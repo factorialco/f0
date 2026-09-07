@@ -5904,10 +5904,6 @@ export declare const defaultTranslations: {
             readonly phone: {
                 readonly invalid: "Enter a valid phone number";
             };
-            readonly location: {
-                readonly empty: "Enter an address";
-                readonly unresolved: "Select an address from the suggestions";
-            };
         };
     };
     readonly graph: {
@@ -10566,7 +10562,7 @@ export declare interface F0FAQItem {
 /**
  * Union of all F0 field types used for rendering
  */
-export declare type F0Field = F0TextField | F0NumberField | F0DurationField | F0TextareaField | F0SelectField | F0CheckboxField | F0SwitchField | F0DateField | F0TimeField | F0DateTimeField | F0DateRangeField | F0PeriodField | F0PhoneField | F0LocationField | F0RichTextField | F0FileField | F0CardSelectField | F0EntitiesListField | F0CustomField;
+export declare type F0Field = F0TextField | F0NumberField | F0DurationField | F0TextareaField | F0SelectField | F0CheckboxField | F0SwitchField | F0DateField | F0TimeField | F0DateTimeField | F0DateRangeField | F0PeriodField | F0PhoneField | F0RichTextField | F0FileField | F0CardSelectField | F0EntitiesListField | F0CustomField;
 
 /**
  * Alert configuration for a field.
@@ -10606,7 +10602,7 @@ export declare type F0FieldConfig<T extends string | number = string | number, R
 /**
  * Field types for rendering
  */
-export declare type F0FieldType = "text" | "number" | "percentage" | "money" | "duration" | "textarea" | "select" | "checkbox" | "switch" | "date" | "time" | "datetime" | "daterange" | "period" | "phone" | "location" | "richtext" | "file" | "cardSelect" | "entitiesList" | "custom";
+export declare type F0FieldType = "text" | "number" | "percentage" | "money" | "duration" | "textarea" | "select" | "checkbox" | "switch" | "date" | "time" | "datetime" | "daterange" | "period" | "phone" | "richtext" | "file" | "cardSelect" | "entitiesList" | "custom";
 
 export declare type F0FileAction = {
     icon?: IconType;
@@ -11166,40 +11162,6 @@ export declare namespace f0FormField {
     export function phone(config: PhoneFieldShortcutConfig & {
         optional?: false | undefined;
     }): PhoneObjectSchema & F0ZodType<PhoneObjectSchema>;
-    export type LocationObjectSchema = z.ZodEffects<z.ZodObject<{
-        formatted: z.ZodOptional<z.ZodString>;
-        addressLine1: z.ZodOptional<z.ZodString>;
-        addressLine2: z.ZodOptional<z.ZodString>;
-        city: z.ZodOptional<z.ZodString>;
-        state: z.ZodOptional<z.ZodString>;
-        postalCode: z.ZodOptional<z.ZodString>;
-        country: z.ZodOptional<z.ZodString>;
-        placeId: z.ZodOptional<z.ZodString>;
-        latitude: z.ZodOptional<z.ZodNumber>;
-        longitude: z.ZodOptional<z.ZodNumber>;
-        timezone: z.ZodOptional<z.ZodString>;
-    }>>;
-    export type LocationFieldShortcutConfig = Omit<F0LocationFieldConfig, "fieldType"> & {
-        optional?: boolean;
-        /**
-         * Requires a value picked from the suggestions, i.e. one that still
-         * carries a place id and coordinates. Use it when the address feeds a
-         * map or a geofence; a typed address has no coordinates until the
-         * consumer geocodes it.
-         * @default false
-         */
-        requireResolved?: boolean;
-        /** Message shown when the field is empty and required */
-        emptyMessage?: string;
-        /** Message shown when `requireResolved` is not satisfied */
-        unresolvedMessage?: string;
-    };
-    export function location(config: LocationFieldShortcutConfig & {
-        optional: true;
-    }): z.ZodOptional<LocationObjectSchema> & F0ZodType<z.ZodOptional<LocationObjectSchema>>;
-    export function location(config: LocationFieldShortcutConfig & {
-        optional?: false | undefined;
-    }): LocationObjectSchema & F0ZodType<LocationObjectSchema>;
     /* Excluded from this release type: RichTextObjectSchema */
     /* Excluded from this release type: RichTextConfig */
     export function richText(config: RichTextConfig & {
@@ -11920,86 +11882,6 @@ export declare type F0LinkProps = Omit<ActionLinkProps, "variant" | "href"> & {
     href?: string;
 };
 
-/**
- * F0 config options specific to location fields
- */
-export declare interface F0LocationConfig {
-    /**
-     * Omit for the address field alone. Pass the parts to render below it;
-     * the order is fixed by the component.
-     */
-    fields?: readonly LocationField[];
-    /** Overrides for the per-part labels, which default to translated copy */
-    partLabels?: Partial<Record<LocationField | "addressLine1", string>>;
-    /** Restricts the country selector. A single entry also scopes the search */
-    countries?: CountryCode[];
-    /** Country used to scope the search while the value has none */
-    defaultCountry?: CountryCode;
-    /**
-     * Suggestion provider. Without it there is no autocomplete and the parts
-     * stand alone as plain fields.
-     */
-    searchPlaces?: (query: string, context: F0LocationSearchContext) => Promise<F0LocationSuggestion[]>;
-    /** Resolves a picked suggestion into a full value */
-    resolvePlace?: (id: string) => Promise<F0LocationInputValue | undefined>;
-}
-
-/**
- * Location field with all properties for rendering
- */
-export declare type F0LocationField = F0BaseField & F0LocationConfig & {
-    type: "location";
-    /** Whether the field can be cleared (derived from optional/nullable) */
-    clearable?: boolean;
-    /** Conditional rendering based on another field's value */
-    renderIf?: LocationFieldRenderIf;
-};
-
-/**
- * Config for location fields (form value is a structured address object)
- */
-export declare type F0LocationFieldConfig = F0BaseConfig & F0LocationConfig & {
-    fieldType: "location";
-};
-
-/**
- * Canonical address shape. Deliberately camelCase with a lowercase ISO-2
- * country so every consumer stores the same thing.
- */
-declare type F0LocationInputValue = {
-    /** Display string. Comes from `resolvePlace` when picked, assembled locally once edited */
-    formatted?: string;
-    addressLine1?: string;
-    addressLine2?: string;
-    city?: string;
-    /** Region, state or province, as free text */
-    state?: string;
-    postalCode?: string;
-    country?: CountryCode;
-    /**
-     * Provider id of the picked place. Cleared as soon as a part that describes
-     * where the pin is gets edited; `addressLine2` does not, since a floor
-     * number stays inside the same building.
-     */
-    placeId?: string;
-    latitude?: number;
-    longitude?: number;
-    /** Carried through from `resolvePlace`, never derived here */
-    timezone?: string;
-};
-
-declare type F0LocationSearchContext = {
-    /** Country to scope the search to, when one is selected or implied */
-    country?: CountryCode;
-};
-
-declare type F0LocationSuggestion = {
-    id: string;
-    label: string;
-    /** Appended to the label, so each suggestion reads as one line */
-    description?: string;
-};
-
 export declare type F0Message = {
     id: string;
     role: "user" | "assistant" | "system" | "tool";
@@ -12179,12 +12061,12 @@ declare type F0NumberSelectConfig<R extends Record<string, unknown> = Record<str
 };
 
 /**
- * Config for object fields (richtext, daterange, phone, location, or custom)
+ * Config for object fields (richtext, daterange, phone, or custom)
  *
  * @typeParam TValue - Type of the field value (for custom fields)
  * @typeParam TConfig - Type of the custom configuration object (for custom fields)
  */
-declare type F0ObjectConfig<TValue = unknown, TConfig = undefined> = F0RichTextFieldConfig | F0DateRangeFieldConfig | F0PhoneFieldConfig | F0LocationFieldConfig | F0CustomFieldConfig<TValue, TConfig>;
+declare type F0ObjectConfig<TValue = unknown, TConfig = undefined> = F0RichTextFieldConfig | F0DateRangeFieldConfig | F0PhoneFieldConfig | F0CustomFieldConfig<TValue, TConfig>;
 
 export declare const F0OneIcon: ForwardRefExoticComponent<Omit<F0OneIconProps, "ref"> & RefAttributes<SVGSVGElement>>;
 
@@ -13754,7 +13636,7 @@ export declare function fieldsToSeconds(fields: DurationFields): number;
 /**
  * Field types for rendering
  */
-export declare type FieldType = "text" | "number" | "duration" | "textarea" | "select" | "checkbox" | "switch" | "date" | "time" | "datetime" | "daterange" | "period" | "phone" | "location" | "richtext" | "file" | "cardSelect" | "entitiesList" | "custom";
+export declare type FieldType = "text" | "number" | "duration" | "textarea" | "select" | "checkbox" | "switch" | "date" | "time" | "datetime" | "daterange" | "period" | "phone" | "richtext" | "file" | "cardSelect" | "entitiesList" | "custom";
 
 export declare const FILE_TYPES: {
     readonly PDF: "pdf";
@@ -15505,20 +15387,6 @@ declare interface LocalizedOption<T> {
     /** The value for this locale. */
     value: T;
 }
-
-declare type LocationField = (typeof locationFields)[number];
-
-/**
- * All valid renderIf conditions for location fields
- */
-declare type LocationFieldRenderIf = CommonRenderIfCondition | F0BaseFieldRenderIfFunction;
-
-/**
- * Parts that can be shown below the address field in detailed mode. The
- * address line itself is not listed: it is always rendered, because it is the
- * autocomplete field in both modes.
- */
-declare const locationFields: readonly ["country", "addressLine2", "city", "state", "postalCode"];
 
 export declare type LockedQuestionNotice = {
     description: string;
@@ -20711,16 +20579,6 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        fontSize: {
-            setFontSize: (fontSize: string) => ReturnType;
-            unsetFontSize: () => ReturnType;
-        };
-    }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
         indent: {
             setIndent: (level: number) => ReturnType;
             unsetIndent: () => ReturnType;
@@ -20734,6 +20592,16 @@ declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        fontSize: {
+            setFontSize: (fontSize: string) => ReturnType;
+            unsetFontSize: () => ReturnType;
         };
     }
 }
