@@ -13,7 +13,11 @@ import "../index.css"
 
 // Declared next to the component (not in a sibling types.ts) so api-extractor
 // rolls them into the bundled d.ts instead of emitting a broken './types' import.
-export interface F0RichTextDisplayProps extends HTMLAttributes<HTMLDivElement> {
+export interface F0RichTextDisplayProps
+  // `dangerouslySetInnerHTML` is omitted on purpose: this component exists to
+  // sanitize `content`, so accepting raw HTML alongside it would hand callers a
+  // way to skip that. Omitting the key turns the mistake into a type error.
+  extends Omit<HTMLAttributes<HTMLDivElement>, "dangerouslySetInnerHTML"> {
   content: string
   className?: string
   format?: "html" | "markdown"
@@ -56,6 +60,12 @@ const F0RichTextDisplayBase = forwardRef<
 
   return (
     <div
+      // The spread goes FIRST. `dangerouslySetInnerHTML` is a legal DOM prop,
+      // so spreading after it would let a caller replace the sanitized HTML
+      // with their own — silently defeating the only thing this component is
+      // for. The prop type omits the key as well; this ordering is the runtime
+      // half of that guarantee.
+      {...props}
       ref={ref}
       className={cn(
         "rich-text-display-container",
@@ -65,7 +75,6 @@ const F0RichTextDisplayBase = forwardRef<
       dangerouslySetInnerHTML={{
         __html: sanitized,
       }}
-      {...props}
     />
   )
 })
