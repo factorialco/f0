@@ -124725,13 +124725,6 @@ const C42 = A.forwardRef(({ className: e, children: t, ...n }, r) => {
         "hover:data-[state=checked]:after:bg-f1-background-selected-bold/10 dark:data-[state=checked]:after:bg-f1-background-selected-bold/20 dark:hover:data-[state=checked]:after:bg-f1-background-selected-bold/20",
         "focus:outline-none focus:ring-0 focus:ring-transparent",
         // Temporal fix for Gamma issue
-        // The `focus:` highlight, for an option made active by
-        // `aria-activedescendant` rather than focused.
-        "data-[active=true]:after:bg-f1-background-hover data-[active=true]:after:text-f1-foreground data-[active=true]:after:opacity-100",
-        // Selected outranks hover, focus and active: none of them may swap
-        // its colour for the plain highlight.
-        "focus:data-[state=checked]:after:bg-f1-background-selected-bold/10 dark:focus:data-[state=checked]:after:bg-f1-background-selected-bold/20",
-        "data-[active=true]:data-[state=checked]:after:bg-f1-background-selected-bold/10 dark:data-[active=true]:data-[state=checked]:after:bg-f1-background-selected-bold/20",
         "[&>*]:translate-y-0.5",
         !o && "data-[state=checked]:after:bg-f1-background-selected-bold/10 data-[state=checked]:after:opacity-100",
         o || s ? "grid-cols-[1fr_20px]" : void 0,
@@ -125067,6 +125060,15 @@ const xJ1 = /^\+\d{1,4}$/, Tj = /* @__PURE__ */ new Set(), PJ1 = (e) => {
       disabled: e.disabled,
       id: t,
       "data-active": n ? "true" : void 0,
+      className: X(
+        // The `focus:` highlight, for an option made active by
+        // `aria-activedescendant` rather than focused.
+        "data-[active=true]:after:bg-f1-background-hover data-[active=true]:after:text-f1-foreground data-[active=true]:after:opacity-100",
+        // Selected outranks hover, focus and active: none of them may swap
+        // its colour for the plain highlight.
+        "focus:data-[state=checked]:after:bg-f1-background-selected-bold/10 dark:focus:data-[state=checked]:after:bg-f1-background-selected-bold/20",
+        "data-[active=true]:data-[state=checked]:after:bg-f1-background-selected-bold/10 dark:data-[active=true]:data-[state=checked]:after:bg-f1-background-selected-bold/20"
+      ),
       children: /* @__PURE__ */ $(
         "div",
         {
