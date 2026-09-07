@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.88.0](https://github.com/factorialco/f0/compare/f0-react-v6.87.1...f0-react-v6.88.0) (2026-09-07)
+
+
+### Features
+
+* **SurveyFormBuilder:** freeze a question's wording without locking the question ([#5407](https://github.com/factorialco/f0/issues/5407)) ([00aaaa0](https://github.com/factorialco/f0/commit/00aaaa00359b18b0bb492815cf26100d7163a1f8))
+
 ## [6.87.1](https://github.com/factorialco/f0/compare/f0-react-v6.87.0...f0-react-v6.87.1) (2026-09-07)
 
 
