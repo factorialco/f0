@@ -107,6 +107,54 @@ class MockIntersectionObserver implements IntersectionObserver {
 window.IntersectionObserver = MockIntersectionObserver
 
 describe("TableCollection", () => {
+  describe("column help copy", () => {
+    it("passes a column's structured info through to its header cell", async () => {
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={[
+            {
+              label: "Email",
+              info: {
+                title: "Work email",
+                description: "The address payroll notifications are sent to.",
+              },
+              render: (item: Person) => item.email,
+            },
+          ]}
+          source={createTestSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      // Columns reach the header cell through a `{...column}` spread, so
+      // nothing else asserts that `info` survives the trip — and every
+      // catalog-backed column on the analytics dashboards depends on it.
+      // Querying by accessible name also pins that the copy stays a
+      // description and does not leak into the column's name.
+      const header = await screen.findByRole("columnheader", { name: "Email" })
+
+      await userEvent.hover(header)
+
+      expect(
+        await screen.findByText(
+          "The address payroll notifications are sent to.",
+          {},
+          { timeout: 2000 }
+        )
+      ).toBeInTheDocument()
+    })
+  })
+
   describe("rendering", () => {
     it("shows loading state initially", async () => {
       render(

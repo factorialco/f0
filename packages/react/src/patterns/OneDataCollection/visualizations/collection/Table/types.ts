@@ -54,7 +54,7 @@ export type TableColumnDefinition<
 > = WithOptionalSorting<R, Sortings> &
   Pick<
     ComponentProps<typeof TableHead>,
-    "hidden" | "info" | "infoIcon" | "sticky" | "width" | "minWidth"
+    "hidden" | "info" | "sticky" | "width" | "minWidth"
   > & {
     /**
      * Optional summary configuration for this column

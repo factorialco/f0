@@ -699,16 +699,22 @@ const PER_PAGE = 5
 
 function createEmployeeSource(filters: Filters) {
   return {
+    sortings: {
+      name: { label: "Name" },
+      department: { label: "Department" },
+      salary: { label: "Salary" },
+      status: { label: "Status" },
+    },
     dataAdapter: {
       paginationType: "pages" as const,
       perPage: PER_PAGE,
       fetchData: ({
         filters: dcFilters,
-        sortings: _sortings,
+        sortings,
         pagination,
       }: {
         filters: Record<string, unknown>
-        sortings: unknown
+        sortings: { field: string; order: "asc" | "desc" } | null | undefined
         pagination: { currentPage: number; perPage?: number }
       }) => {
         return new Promise<PageBasedPaginatedResponse<Employee>>((resolve) => {
@@ -729,6 +735,19 @@ function createEmployeeSource(filters: Filters) {
               | undefined
             if (statusFilter && statusFilter.length > 0) {
               filtered = filtered.filter((e) => statusFilter.includes(e.status))
+            }
+
+            if (sortings) {
+              const field = sortings.field as keyof Employee
+              filtered.sort((a, b) => {
+                const left = a[field]
+                const right = b[field]
+                const order =
+                  typeof left === "number" && typeof right === "number"
+                    ? left - right
+                    : String(left).localeCompare(String(right))
+                return sortings.order === "desc" ? -order : order
+              })
             }
 
             const page = pagination?.currentPage ?? 1
@@ -754,11 +773,21 @@ function createEmployeeSource(filters: Filters) {
 const employeeTableVisualization = {
   type: "table" as const,
   options: {
+    // Column help copy mirrors what a semantic dashboard attaches to every
+    // column from its catalog: a title, a description and a link into the
+    // catalog entry. The table reveals it when the header cell is hovered.
     columns: [
       {
         id: "name",
         label: "Name",
         width: 180,
+        sorting: "name",
+        info: {
+          title: "Full name",
+          description:
+            "Legal name of the employee as it appears on the contract.",
+          link: { label: "Learn more", onClick: () => {} },
+        },
         render: (item: Employee) => ({
           type: "person" as const,
           value: {
@@ -780,16 +809,32 @@ const employeeTableVisualization = {
       {
         id: "department",
         label: "Department",
+        sorting: "department",
+        info: {
+          title: "Department",
+          description: "Team the employee is assigned to on the selected date.",
+          link: { label: "Learn more", onClick: () => {} },
+        },
         render: (item: Employee) => item.department,
       },
       {
         id: "salary",
-        label: "Salary",
+        label: "Annual base salary",
+        width: 120,
+        sorting: "salary",
+        info: {
+          title: "Annual base salary",
+          description: "Per employee · Per year · In US dollars",
+          link: { label: "Learn more", onClick: () => {} },
+        },
         render: (item: Employee) => `$${item.salary.toLocaleString()}`,
       },
       {
         id: "status",
-        label: "Status",
+        label: "Employment status",
+        width: 110,
+        sorting: "status",
+        info: "Whether the employee holds an active contract today.",
         render: (item: Employee) => item.status,
       },
     ],

@@ -28,6 +28,42 @@ export type InfoHintContent = {
   label?: string
 }
 
+/**
+ * The body of a structured hint, shared by every surface that reveals one —
+ * the ⓘ trigger below, or a host that makes a whole region (a table header
+ * cell) the hover target. `onLinkClick` lets the host dismiss its own overlay
+ * before the link's action runs.
+ */
+export function InfoHintBody({
+  info,
+  onLinkClick,
+}: {
+  info: InfoHintContent
+  onLinkClick?: () => void
+}) {
+  return (
+    <div className="flex flex-col gap-1 whitespace-normal text-left">
+      <p>{info.title}</p>
+      <p className="text-f1-foreground-inverse-secondary">{info.description}</p>
+      {info.link && (
+        <button
+          type="button"
+          onClick={() => {
+            onLinkClick?.()
+            info.link?.onClick()
+          }}
+          className={cn(
+            "mt-1 w-fit rounded-xs font-medium text-f1-foreground-inverse underline underline-offset-2 transition-colors hover:text-f1-foreground-inverse-secondary",
+            focusRing()
+          )}
+        >
+          {info.link.label}
+        </button>
+      )}
+    </div>
+  )
+}
+
 function StructuredHint({
   info,
   icon,
@@ -65,27 +101,7 @@ function StructuredHint({
         </button>
       </HoverCardTrigger>
       <HoverCardContent className="w-auto max-w-xs px-3 py-2 shadow-md">
-        <div className="flex flex-col gap-1 whitespace-normal text-left">
-          <p>{info.title}</p>
-          <p className="text-f1-foreground-inverse-secondary">
-            {info.description}
-          </p>
-          {info.link && (
-            <button
-              type="button"
-              onClick={() => {
-                setOpen(false)
-                info.link?.onClick()
-              }}
-              className={cn(
-                "mt-1 w-fit rounded-xs font-medium text-f1-foreground-inverse underline underline-offset-2 transition-colors hover:text-f1-foreground-inverse-secondary",
-                focusRing()
-              )}
-            >
-              {info.link.label}
-            </button>
-          )}
-        </div>
+        <InfoHintBody info={info} onLinkClick={() => setOpen(false)} />
       </HoverCardContent>
     </HoverCard>
   )

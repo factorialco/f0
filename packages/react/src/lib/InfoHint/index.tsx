@@ -1,1 +1,1 @@
-export { InfoHint, type InfoHintContent } from "./InfoHint"
+export { InfoHint, InfoHintBody, type InfoHintContent } from "./InfoHint"
