@@ -23,6 +23,16 @@ So: **a handful of violations → write a rule here. Hundreds → write a ratche
 script.** If a rule you want lands in between, that is the signal to fix the
 code first.
 
+## External JS plugins
+
+`.oxlintrc.json` also loads two published ESLint plugins the same way:
+`eslint-plugin-sonarjs` (the `recommended` set, minus rules listed as debt in
+the config) and `eslint-plugin-import` under the alias `import-js`, for the
+rules oxlint has no native version of. The same editor caveat below applies to
+them. Rules that need type information run without it under oxlint's JS plugin
+bridge; the type-aware rules that do work come from oxlint's own `typescript`
+plugin with `--type-aware` (see the `lint` script).
+
 ## Caveat
 
 oxc marks JS plugins experimental and does not support them in the language
