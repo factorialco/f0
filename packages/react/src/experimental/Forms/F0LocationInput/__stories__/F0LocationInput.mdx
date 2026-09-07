@@ -77,7 +77,7 @@ Use **simple mode** when a picked suggestion is the whole job: search boxes, fil
 ### Content best practices
 
 - Keep the group `label` about the thing, not the action: "Office address", not "Enter address".
-- Leave the address `placeholder` unset unless you have a good reason: the default asks the user to start typing.
+- Leave the address `placeholder` unset unless you have a good reason: the default ("Enter an address") is translated and already says what to do.
 - Part labels are generic on purpose ("State / region", "Postal code"). Override them through `partLabels` when the product knows the country ("ZIP code", "Province").
 - Validation is consumer-side: the component reports `isResolved` but never blocks input.
 
@@ -185,8 +185,8 @@ The suggestion list portals into the surrounding centered or fullscreen `F0Dialo
           <code>string</code>
         </td>
         <td>
-          Placeholder of the address field. Defaults to a translated "Start
-          typing an address".
+          Placeholder of the address field. Defaults to a translated "Enter an
+          address".
         </td>
       </tr>
       <tr>
