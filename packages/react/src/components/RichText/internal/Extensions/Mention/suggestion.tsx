@@ -56,28 +56,47 @@ export function createSuggestionConfig(
     promise: Promise<MentionedUser[]>
     resolve: (items: MentionedUser[]) => void
   } | null = null
+  let session = 0
+  let latestPass: {
+    generation: number
+    session: number
+    promise: Promise<MentionedUser[]>
+  } | null = null
 
   const run = (query: string): Promise<MentionedUser[]> => {
     const mine = ++generation
-    return Promise.resolve(searchUsers?.(query) ?? mentionSuggestions).then(
-      (items) => {
-        // tiptap hands `items` no cancellation signal and discards no late
-        // result, so a superseded pass must drop its own answer here.
-        if (mine !== generation) {
-          return cachedItems
-        }
-        // A failed search is not an answer: it is neither published nor cached,
-        // so the next request for the same query retries instead of reading a
-        // remembered failure.
-        if (!items) {
-          return []
-        }
-        cachedQuery = query
-        cachedItems = items
-        setMentionSuggestions(items)
-        return items
+    const mySession = session
+    const pass = Promise.resolve(
+      searchUsers?.(query) ?? mentionSuggestions
+    ).then((items) => {
+      // tiptap hands `items` no cancellation signal and discards no late
+      // result: it assigns whatever this resolves with onto its newest props
+      // and renders that. A superseded pass must therefore answer with the
+      // list that belongs on screen, never with its own.
+      if (mine !== generation) {
+        // Before the first publish of a session `cachedItems` is still the
+        // empty seed, and answering with it opens the popover on "No results
+        // found" until the newer pass lands.
+        return cachedQuery === null &&
+          latestPass &&
+          latestPass.session === mySession &&
+          latestPass.generation !== mine
+          ? latestPass.promise
+          : cachedItems
       }
-    )
+      // A failed search is not an answer: it is neither published nor cached,
+      // so the next request for the same query retries instead of reading a
+      // remembered failure.
+      if (!items) {
+        return []
+      }
+      cachedQuery = query
+      cachedItems = items
+      setMentionSuggestions(items)
+      return items
+    })
+    latestPass = { generation: mine, session: mySession, promise: pass }
+    return pass
   }
 
   const abandonQueued = () => {
@@ -142,6 +161,7 @@ export function createSuggestionConfig(
     generation++
     sessionStarted = false
     cachedQuery = null
+    session++
   }
 
   return {
@@ -202,6 +222,13 @@ export function createSuggestionConfig(
       }
 
       return {
+        // tiptap awaits `items` for a `moved && changed` transition before the
+        // `onExit` that would have cleared `sessionStarted`, but it calls
+        // `onBeforeStart` first: this is the only point at which a session that
+        // opens on a moved caret can claim its immediate opening answer.
+        onBeforeStart: () => {
+          sessionStarted = false
+        },
         onStart: (props: SuggestionRenderProps) => {
           latestProps = props
 

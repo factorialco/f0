@@ -7,8 +7,10 @@ const rendererState: {
     items: MentionedUser[]
     command: (item: MentionedUser) => void
   } | null
+  destroy: ReturnType<typeof vi.fn>
 } = {
   props: null,
+  destroy: vi.fn(),
 }
 
 vi.mock("@tiptap/react", () => {
@@ -38,7 +40,9 @@ vi.mock("@tiptap/react", () => {
       }
     }
 
-    destroy() {}
+    destroy() {
+      rendererState.destroy()
+    }
   }
 
   return {
@@ -131,6 +135,7 @@ const createEditorMock = () => {
 describe("createSuggestionConfig", () => {
   beforeEach(() => {
     rendererState.props = null
+    rendererState.destroy.mockClear()
     rootState.roots = []
   })
 
@@ -149,8 +154,10 @@ describe("createSuggestionConfig", () => {
 
     const root = rootState.roots.at(-1)
     expect(root?.render).toHaveBeenCalledTimes(1)
+    const container = document.body.lastElementChild
+    expect(container).not.toBeNull()
 
-    return { config, renderer, props, root }
+    return { config, renderer, props, root, container }
   }
 
   it("ignores a suspended update that resumes after the popover exited", () => {
@@ -203,6 +210,48 @@ describe("createSuggestionConfig", () => {
     } finally {
       vi.useRealTimers()
     }
+  })
+
+  it("destroys the renderer and removes the container on Escape", () => {
+    const { renderer, container } = startPopover()
+
+    renderer.onKeyDown({ event: { key: "Escape" } as KeyboardEvent })
+
+    expect(rendererState.destroy).toHaveBeenCalledTimes(1)
+    expect(container?.isConnected).toBe(false)
+  })
+
+  it("destroys the renderer and removes the container on exit", () => {
+    const { renderer, container } = startPopover()
+
+    renderer.onExit()
+
+    expect(rendererState.destroy).toHaveBeenCalledTimes(1)
+    expect(container?.isConnected).toBe(false)
+  })
+
+  it("ignores a command fired after the popover was dismissed", () => {
+    const { renderer, props } = startPopover()
+    const command = rendererState.props?.command
+
+    renderer.onUpdate(props)
+    renderer.onExit()
+    command?.(users[0])
+
+    expect(props.editor.chain).not.toHaveBeenCalled()
+  })
+
+  it("stops handling keys once the popover has been dismissed", () => {
+    const { renderer } = startPopover()
+
+    renderer.onKeyDown({ event: { key: "Escape" } as KeyboardEvent })
+
+    expect(
+      renderer.onKeyDown({ event: { key: "ArrowDown" } as KeyboardEvent })
+    ).toBe(false)
+    expect(
+      renderer.onKeyDown({ event: { key: "Escape" } as KeyboardEvent })
+    ).toBe(false)
   })
 
   it("uses latest suggestion range and inserts mention atomically", () => {

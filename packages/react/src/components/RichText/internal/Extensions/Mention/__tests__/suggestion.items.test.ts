@@ -225,6 +225,125 @@ describe("createSuggestionConfig items", () => {
     expect(publish).not.toHaveBeenCalled()
   })
 
+  it("holds a keystroke for the full debounce window", async () => {
+    expect(MENTION_SUGGESTION_DEBOUNCE_MS).toBeGreaterThan(0)
+
+    const publish = vi.fn()
+    const config = await openSession(publish)
+    publish.mockClear()
+
+    const pending = config.items({ query: "ali" })
+    await vi.advanceTimersByTimeAsync(MENTION_SUGGESTION_DEBOUNCE_MS - 1)
+    expect(publish).not.toHaveBeenCalled()
+
+    await vi.advanceTimersByTimeAsync(1)
+    await pending
+    expect(publish).toHaveBeenCalledTimes(1)
+  })
+
+  it("opens on the newest candidates, not on an empty list, when the opening search is superseded", async () => {
+    const resolvers = new Map<string, (items: MentionedUser[]) => void>()
+    const search = vi.fn(
+      (query: string) =>
+        new Promise<MentionedUser[]>((resolve) => resolvers.set(query, resolve))
+    )
+    const publish = vi.fn()
+    const config = createSuggestionConfig([], publish, search, users)
+
+    const opening = config.items({ query: "" })
+    const narrowed = config.items({ query: "ali" })
+    await vi.advanceTimersByTimeAsync(MENTION_SUGGESTION_DEBOUNCE_MS)
+
+    resolvers.get("")?.(users)
+    resolvers.get("ali")?.([users[1]])
+
+    await expect(narrowed).resolves.toEqual([users[1]])
+    await expect(opening).resolves.toEqual([users[1]])
+  })
+
+  it("does not make a mid-session superseded pass wait for the newer search", async () => {
+    const resolvers = new Map<string, (items: MentionedUser[]) => void>()
+    const search = vi.fn(
+      (query: string) =>
+        new Promise<MentionedUser[]>((resolve) => resolvers.set(query, resolve))
+    )
+    const publish = vi.fn()
+    const config = createSuggestionConfig([], publish, search, users)
+
+    const opening = config.items({ query: "" })
+    resolvers.get("")?.(users)
+    await opening
+
+    const superseded = config.items({ query: "ali" })
+    await vi.advanceTimersByTimeAsync(MENTION_SUGGESTION_DEBOUNCE_MS)
+    const newer = config.items({ query: "alic" })
+    await vi.advanceTimersByTimeAsync(MENTION_SUGGESTION_DEBOUNCE_MS)
+
+    let settled: MentionedUser[] | "pending" = "pending"
+    void superseded.then((items) => {
+      settled = items
+    })
+    resolvers.get("ali")?.([users[1]])
+    await vi.advanceTimersByTimeAsync(0)
+
+    expect(settled).toEqual(users)
+
+    resolvers.get("alic")?.([users[1]])
+    await expect(newer).resolves.toEqual([users[1]])
+  })
+
+  it("does not make a pass from a closed session wait for the next one", async () => {
+    const resolvers = new Map<string, (items: MentionedUser[]) => void>()
+    const search = vi.fn(
+      (query: string) =>
+        new Promise<MentionedUser[]>((resolve) => resolvers.set(query, resolve))
+    )
+    const publish = vi.fn()
+    const config = createSuggestionConfig([], publish, search, users)
+    const renderer = config.render()
+
+    const opening = config.items({ query: "" })
+    resolvers.get("")?.(users)
+    await opening
+
+    const orphan = config.items({ query: "ali" })
+    await vi.advanceTimersByTimeAsync(MENTION_SUGGESTION_DEBOUNCE_MS)
+    renderer.onExit()
+
+    const reopened = config.items({ query: "bob" })
+    resolvers.get("ali")?.([users[1]])
+    resolvers.get("bob")?.([users[2]])
+
+    await expect(reopened).resolves.toEqual([users[2]])
+    await expect(orphan).resolves.toEqual(users)
+  })
+
+  it("answers the first query of a reopened session immediately", async () => {
+    const publish = vi.fn()
+    const config = createSuggestionConfig([], publish, undefined, users)
+    const renderer = config.render()
+
+    await config.items({ query: "" })
+    renderer.onExit()
+
+    const reopened = config.items({ query: "ali" })
+    expect(vi.getTimerCount()).toBe(0)
+    await expect(reopened).resolves.toEqual(undebouncedCandidates("ali"))
+  })
+
+  it("answers immediately when tiptap opens a session on a moved caret", async () => {
+    const publish = vi.fn()
+    const config = createSuggestionConfig([], publish, undefined, users)
+    const renderer = config.render()
+
+    await config.items({ query: "" })
+
+    renderer.onBeforeStart()
+    const opening = config.items({ query: "ali" })
+    expect(vi.getTimerCount()).toBe(0)
+    await expect(opening).resolves.toEqual(undebouncedCandidates("ali"))
+  })
+
   it("drops the cache on exit so a reopened popover searches again", async () => {
     const search = vi.fn(async (query: string) =>
       users.filter((user) => user.label.toLowerCase().includes(query))
