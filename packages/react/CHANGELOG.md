@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.86.5](https://github.com/factorialco/f0/compare/f0-react-v6.86.4...f0-react-v6.86.5) (2026-09-07)
+
+
+### Bug Fixes
+
+* **F0Chat:** keep a mention through an edit ([#5404](https://github.com/factorialco/f0/issues/5404)) ([522fd6e](https://github.com/factorialco/f0/commit/522fd6ef2615f5656c1d0a359492a82d2c0f74d7))
+
 ## [6.86.4](https://github.com/factorialco/f0/compare/f0-react-v6.86.3...f0-react-v6.86.4) (2026-09-07)
 
 
