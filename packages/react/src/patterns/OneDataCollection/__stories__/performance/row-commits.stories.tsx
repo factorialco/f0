@@ -29,11 +29,7 @@ const people: Person[] = Array.from({ length: TOTAL }, (_, index) => ({
   department: DEPARTMENTS[index % DEPARTMENTS.length],
 }))
 
-/**
- * Counts how many times a row's cells actually ran. A row that skips its render
- * calls none of its column renderers, so this is the row-commit count, taken
- * from where the work would be paid.
- */
+/** A skipped row calls none of its column renderers, so counting there counts commits. */
 const useRowCommitCounter = () => {
   const total = useRef(0)
   const [readout, setReadout] = useState<
@@ -47,8 +43,7 @@ const useRowCommitCounter = () => {
   const measure = useCallback(
     (label: string, rows: number) => {
       const before = total.current
-      // One frame is enough: the render this triggers is synchronous, and an
-      // append settles before the next paint.
+      // The render is synchronous and an append settles before the next paint.
       requestAnimationFrame(() =>
         requestAnimationFrame(() =>
           setReadout((entries) => [
@@ -73,11 +68,9 @@ type Adapter = DataCollectionDataAdapter<
 const pageOf = (offset: number) => people.slice(offset, offset + PER_PAGE)
 
 /**
- * Split by pagination type rather than parameterised: the adapter picks its
- * response shape from a literal `paginationType`, so one function returning both
- * shapes satisfies neither. `fetchData`'s parameters are left to be inferred
- * from the annotation for the same reason — annotating them explicitly stops
- * the union resolving.
+ * Split, not parameterised: the response shape comes from a literal
+ * `paginationType`, so one function returning both satisfies neither. Leave
+ * `fetchData`'s parameters inferred for the same reason.
  */
 const makeAdapter = (
   paginationType: "pages" | "infinite-scroll",
@@ -142,8 +135,8 @@ const Harness = ({
         loadedRef.current = rows
       }),
     },
-    // Nothing here closes over component state, so the definition never has to
-    // be rebuilt. A real consumer must list whatever its callbacks capture.
+    // Nothing here closes over component state. A real consumer must list
+    // whatever its callbacks capture.
     [paginationType]
   )
 

@@ -28,10 +28,7 @@ type UseItemActionProps<
   NavigationFilters extends NavigationFiltersDefinition,
   Grouping extends GroupingDefinition<R>,
 > = {
-  /**
-   * Only `itemActions` is read, so this takes the definition rather than the
-   * live source — a row that holds the live source cannot memoize.
-   */
+  /** The definition, not the live source: a row holding the live one cannot memoize. */
   source: DataCollectionSourceDefinition<
     R,
     Filters,

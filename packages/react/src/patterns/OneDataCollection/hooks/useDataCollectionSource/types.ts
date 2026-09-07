@@ -219,12 +219,9 @@ export type DataCollectionSource<
     Grouping
   > & {
     /**
-     * The definition the consumer passed, memoized on the hook's `deps`.
-     *
-     * The source itself changes identity on every render of the consumer — it
-     * carries live filter, search and sorting state, so it has to. Anything
-     * rendered per record takes this instead, so a memo boundary around a row
-     * can survive a consumer render.
+     * The definition the consumer passed, memoized on the hook's `deps`. What
+     * is rendered per record takes this, so a row's memo can survive a consumer
+     * render — the source itself changes identity on every one of them.
      */
     definition?: DataCollectionSourceDefinition<
       R,

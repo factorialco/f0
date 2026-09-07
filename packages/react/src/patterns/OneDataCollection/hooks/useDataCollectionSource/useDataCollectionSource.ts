@@ -97,13 +97,8 @@ export const useDataCollectionSource = <
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const memoizedSummaries = useMemo(() => summaries, deps)
 
-  // The consumer's definition, pinned to the same `deps` that already govern
-  // the data adapter and the filters. The source object returned below cannot
-  // be memoized — it carries live filter/search/sorting state that has to
-  // change — so anything that must not re-render on its identity takes this
-  // instead. Same contract as the rest of the hook: a definition that closes
-  // over consumer state needs that state in `deps`, or the adapter goes stale
-  // first and far more visibly.
+  // Pinned to the same `deps` that already govern the data adapter: the source
+  // returned below carries live filter state, so it cannot be memoized itself.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const definition = useMemo(() => source, deps)
 

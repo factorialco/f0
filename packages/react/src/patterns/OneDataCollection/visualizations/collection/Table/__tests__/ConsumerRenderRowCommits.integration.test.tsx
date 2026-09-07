@@ -47,9 +47,8 @@ const columns = [
 beforeEach(() => renderCounts.clear())
 
 /**
- * The consumer owns state the table knows nothing about, and rebuilds its
- * source definition inline on every render — which is what every real consumer
- * does, since the definition is written as an object literal at the call site.
+ * State the table knows nothing about, and a definition rebuilt inline every
+ * render — an object literal at the call site, as every real consumer writes it.
  */
 const Harness = () => {
   const [tick, setTick] = useState(0)

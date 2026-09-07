@@ -49,10 +49,8 @@ export type RowProps<
   Grouping extends GroupingDefinition<R>,
 > = {
   /**
-   * The consumer's definition, not the live source. Memoized by
-   * `useDataCollectionSource` on its `deps`, so this row's memo survives a
-   * consumer render — which the live source, carrying filter and search state,
-   * can never allow.
+   * The definition, memoized on the source's `deps` — not the live source,
+   * whose identity churns on every consumer render.
    */
   source: DataCollectionSourceDefinition<
     R,
@@ -64,9 +62,8 @@ export type RowProps<
     Grouping
   >
   /**
-   * The live source. Supplied only to rows that render nested children, which
-   * need the current filters and sortings to fetch them. Absent — and so
-   * stable — for flat rows.
+   * Supplied only to rows that render nested children, which need the current
+   * filters and sortings to fetch them. Absent, and so stable, for flat rows.
    */
   liveSource?: DataCollectionSource<
     R,
@@ -278,11 +275,8 @@ const RowComponentInner = <
   // clicked mid-exit must not reach them. `true` outside AnimatePresence.
   const isPresent = useIsPresent()
 
-  // A row delegates to NestedRow only if it was handed the live source: fetching
-  // children reads the current filters and sortings. Table supplies it to
-  // exactly the rows whose `itemsWithChildren` says they have children, so this
-  // is the same condition seen from here — and if it ever were not, the row
-  // renders flat rather than throwing.
+  // Requires the live source, which Table hands to exactly the rows
+  // `itemsWithChildren` claims. Should they ever disagree, render flat.
   const delegatesToNestedRow =
     rowWithChildren && hasChildrenLoaded && !!liveSource
 

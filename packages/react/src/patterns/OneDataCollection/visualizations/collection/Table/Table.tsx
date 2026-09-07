@@ -247,13 +247,9 @@ export const TableCollection = <
     [source, showItemActionsProp]
   )
 
-  // What a row reads: the consumer's definition, which `useDataCollectionSource`
-  // pins to its `deps`. The source itself cannot be pinned — it carries the live
-  // filter, search and sorting state — so handing it to rows meant every
-  // consumer render re-rendered all of them, whatever their memo said.
-  // Falls back to the source itself: the interface is public, so a source can be
-  // hand-built (mocks, adapters) without one. Those rows re-render as they did
-  // before rather than breaking.
+  // Rows read the pinned definition, never the live source: its identity churns
+  // every consumer render, which no row memo can survive. A hand-built source
+  // has no `definition`, and falls back to re-rendering as it did before.
   const rowDefinition = source.definition ?? source
   const rowSource = useMemo(
     () =>
@@ -263,10 +259,9 @@ export const TableCollection = <
     [rowDefinition, showItemActionsProp]
   )
 
-  // Only a row that renders nested children gets the live source: resolving a
-  // child needs the current filters and sortings, and children are fetched too
-  // late for this component to have resolved anything for them. Flat rows get
-  // `undefined`, which is stable, so their memo still holds.
+  // Children are fetched too late for this component to resolve anything for
+  // them, and resolving one reads the current filters and sortings. Flat rows
+  // get `undefined`, which is stable.
   const liveSourceFor = (record: R) =>
     effectiveSource.itemsWithChildren?.(record) ? effectiveSource : undefined
 

@@ -32,21 +32,16 @@ const people: Person[] = [
   { id: 3, name: "Carla" },
 ]
 
-// Hoisted: a consumer render changes no column identity, so the row memo has
-// nothing but the source to compare on.
+// Hoisted, so the row memo has nothing but the source to compare on.
 const columns = [{ label: "name", render: (item: Person) => item.name }]
 
 const onSelectItems = vi.fn()
 
 /**
- * `lockedIds` is consumer state that `selectionDisabled` closes over. Rows are
- * memoized and the registry they populate is filled from an effect, so this is
- * the case where "select all" has to keep up with a definition that changed
- * without any row's own data changing.
- *
- * `deps` is a parameter because both answers matter: declared, the definition
- * is rebuilt and the rows re-register; undeclared, the registry goes stale and
- * something else has to catch it.
+ * `selectionDisabled` closes over `lockedIds`, and rows fill the registry from
+ * an effect — so "select all" has to keep up with a definition that changed
+ * while no row's own data did. Declared `deps` re-register the rows; undeclared
+ * leave the registry stale, and something else has to catch it.
  */
 const Harness = ({ declareDeps }: { declareDeps: boolean }) => {
   const [lockedIds, setLockedIds] = useState<number[]>([])
@@ -123,10 +118,9 @@ describe("select all, after the consumer locks a row", () => {
   })
 
   it("skips it even when the registry is stale", async () => {
-    // The definition is pinned to an empty `deps`, so the rows never re-register
-    // and the registry still lists Bruno as selectable. `collectSelectableEntries`
-    // re-filters what the registry hands it through the live `selectionDisabled`,
-    // so the registry only decides which rows exist, never which may be picked.
+    // The rows never re-register, so the registry still lists Bruno.
+    // `collectSelectableEntries` re-filters it through the live
+    // `selectionDisabled`: the registry decides who exists, not who is pickable.
     await lockBrunoThenSelectAll(false)
 
     await waitFor(() => expect(selectedIds()).toEqual([1, 3]))
