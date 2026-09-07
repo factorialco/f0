@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.86.4](https://github.com/factorialco/f0/compare/f0-react-v6.86.3...f0-react-v6.86.4) (2026-09-07)
+
+
+### Bug Fixes
+
+* **NewHomeLayout:** keep widgets mounted when the layout stacks ([#5402](https://github.com/factorialco/f0/issues/5402)) ([530eddc](https://github.com/factorialco/f0/commit/530eddc813e71b3e16d59fd1c1627c3edfb279d8))
+
 ## [6.86.3](https://github.com/factorialco/f0/compare/f0-react-v6.86.2...f0-react-v6.86.3) (2026-09-07)
 
 
