@@ -231,7 +231,7 @@ describe("F0LocationInput", () => {
       )
     })
 
-    it("keeps an address the provider does not know", async () => {
+    it("offers no way to invent an address that is not a suggestion", async () => {
       const user = userEvent.setup()
       const onChange = vi.fn()
       render(
@@ -243,13 +243,14 @@ describe("F0LocationInput", () => {
       )
 
       await searchAddress(user, "Calle Falsa 123")
-      const create = await screen.findByRole("button", { name: /Create/ })
-      await user.click(create)
 
-      expect(onChange).toHaveBeenLastCalledWith(
-        expect.objectContaining({ addressLine1: "Calle Falsa 123" }),
-        { source: "typed", isResolved: false }
+      await waitFor(() =>
+        expect(screen.getByText("No addresses found")).toBeInTheDocument()
       )
+      expect(
+        screen.queryByRole("button", { name: /Create/ })
+      ).not.toBeInTheDocument()
+      expect(onChange).not.toHaveBeenCalled()
     })
 
     it("shows what the empty list means at each stage", async () => {

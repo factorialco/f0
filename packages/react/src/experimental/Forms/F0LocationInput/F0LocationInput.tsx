@@ -142,11 +142,6 @@ export const F0LocationInput = forwardRef<
       })
   }
 
-  const handleTypedAddress = (text: string) => {
-    cancelPendingPick()
-    setPart("addressLine1", text)
-  }
-
   const handleClear = () => {
     cancelPendingPick()
     clear()
@@ -179,7 +174,6 @@ export const F0LocationInput = forwardRef<
       country={searchCountry}
       searchPlaces={searchPlaces}
       onPick={handlePick}
-      onTyped={handleTypedAddress}
       onClear={handleClear}
       status={fieldStatus}
       required={required}
