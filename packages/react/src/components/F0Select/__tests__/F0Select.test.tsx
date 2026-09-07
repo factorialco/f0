@@ -2010,6 +2010,9 @@ describe("Select", () => {
    * Agreed with Foundations: with no filters the field IS the search box.
    */
   describe("search in the trigger", () => {
+    /** The field is the search box only when the select asks for search. */
+    const searchProps = { ...defaultSelectProps, showSearchBox: true }
+
     const filteredSource = createDataSourceDefinition<RecordType>({
       filters: {
         kind: {
@@ -2028,11 +2031,7 @@ describe("Select", () => {
     it("searches from the trigger by default over static options", async () => {
       const user = userEvent.setup()
       render(
-        <F0Select
-          {...defaultSelectProps}
-          options={mockOptions}
-          onChange={() => {}}
-        />
+        <F0Select {...searchProps} options={mockOptions} onChange={() => {}} />
       )
 
       const trigger = screen.getByRole("combobox")
@@ -2055,7 +2054,7 @@ describe("Select", () => {
       const user = userEvent.setup()
       render(
         <F0Select
-          {...defaultSelectProps}
+          {...searchProps}
           options={mockOptions}
           onChange={() => {}}
           showSearchBox={false}
@@ -2072,7 +2071,7 @@ describe("Select", () => {
       const user = userEvent.setup()
       render(
         <F0Select
-          {...defaultSelectProps}
+          {...searchProps}
           source={filteredSource}
           mapOptions={(item: RecordType) => ({
             value: item.id as string,
@@ -2093,7 +2092,7 @@ describe("Select", () => {
       const user = userEvent.setup()
       render(
         <F0Select
-          {...defaultSelectProps}
+          {...searchProps}
           options={mockOptions}
           onChange={() => {}}
           showSearchBox
@@ -2110,7 +2109,7 @@ describe("Select", () => {
       const user = userEvent.setup()
       render(
         <F0Select
-          {...defaultSelectProps}
+          {...searchProps}
           multiple
           options={mockOptions}
           value={[]}
@@ -2139,9 +2138,10 @@ describe("Select", () => {
       const handleChange = vi.fn()
       render(
         <F0Select
-          {...defaultSelectProps}
+          {...searchProps}
+          multiple
           options={mockOptions}
-          value="option1"
+          value={["option1"]}
           clearable
           onChange={handleChange}
         />
@@ -2152,6 +2152,8 @@ describe("Select", () => {
         expect(screen.getByText("Option 1")).toBeInTheDocument()
       )
 
+      // Multiple selection has no single label to type over, so text and
+      // selection coexist here.
       await user.type(trigger, "Opt")
       await user.click(screen.getByTestId("clear-button"))
 
@@ -2166,7 +2168,7 @@ describe("Select", () => {
       const handleChange = vi.fn()
       render(
         <F0Select
-          {...defaultSelectProps}
+          {...searchProps}
           options={mockOptions}
           onChange={handleChange}
         />
@@ -2186,7 +2188,7 @@ describe("Select", () => {
       const handleChange = vi.fn()
       render(
         <F0Select
-          {...defaultSelectProps}
+          {...searchProps}
           options={mockOptions}
           onChange={handleChange}
         />
@@ -2216,7 +2218,7 @@ describe("Select", () => {
       const handleAction = vi.fn()
       render(
         <F0Select
-          {...defaultSelectProps}
+          {...searchProps}
           options={mockOptions}
           onChange={() => {}}
           actions={[{ label: "Manage options", onClick: handleAction }]}
@@ -2242,11 +2244,7 @@ describe("Select", () => {
     it("stays open when the pointer lands back in the field", async () => {
       const user = userEvent.setup()
       render(
-        <F0Select
-          {...defaultSelectProps}
-          options={mockOptions}
-          onChange={() => {}}
-        />
+        <F0Select {...searchProps} options={mockOptions} onChange={() => {}} />
       )
 
       const trigger = screen.getByRole("combobox")
@@ -2266,7 +2264,7 @@ describe("Select", () => {
     it("describes the selection it draws beside the caret", async () => {
       render(
         <F0Select
-          {...defaultSelectProps}
+          {...searchProps}
           options={mockOptions}
           value="option1"
           onChange={() => {}}
@@ -2283,7 +2281,7 @@ describe("Select", () => {
       const user = userEvent.setup()
       render(
         <F0Select
-          {...defaultSelectProps}
+          {...searchProps}
           multiple
           options={mockOptions}
           value={["option1", "option2"]}
@@ -2303,7 +2301,7 @@ describe("Select", () => {
       )
     })
 
-    it("leaves a source alone unless it asks for search", async () => {
+    it("searches a source from the trigger too, when it has no filters", async () => {
       const user = userEvent.setup()
       const plainSource = createDataSourceDefinition<RecordType>({
         dataAdapter: {
@@ -2315,7 +2313,7 @@ describe("Select", () => {
 
       render(
         <F0Select
-          {...defaultSelectProps}
+          {...searchProps}
           source={plainSource}
           mapOptions={(item: RecordType) => ({
             value: item.id as string,
@@ -2325,21 +2323,18 @@ describe("Select", () => {
         />
       )
 
-      // Its adapter never received a query, so there is nothing to type into.
-      expect(screen.getByRole("combobox").tagName).toBe("BUTTON")
+      // Filters are what keep the box in the popover, not the kind of source.
+      expect(screen.getByRole("combobox").tagName).toBe("INPUT")
 
-      await openSelect(user)
+      await user.type(getTriggerSearchInput(), "Opt")
+      await settleList()
       expect(screen.queryByRole("searchbox")).not.toBeInTheDocument()
     })
 
     it("keeps the field in the accessibility tree while the list is open", async () => {
       const user = userEvent.setup()
       render(
-        <F0Select
-          {...defaultSelectProps}
-          options={mockOptions}
-          onChange={() => {}}
-        />
+        <F0Select {...searchProps} options={mockOptions} onChange={() => {}} />
       )
 
       const trigger = screen.getByRole("combobox")
@@ -2356,7 +2351,7 @@ describe("Select", () => {
       const handleChange = vi.fn()
       render(
         <F0Select
-          {...defaultSelectProps}
+          {...searchProps}
           options={mockOptions}
           onChange={handleChange}
         />
@@ -2386,11 +2381,7 @@ describe("Select", () => {
     it("moves the active option with the arrows, and never takes the caret", async () => {
       const user = userEvent.setup()
       render(
-        <F0Select
-          {...defaultSelectProps}
-          options={mockOptions}
-          onChange={() => {}}
-        />
+        <F0Select {...searchProps} options={mockOptions} onChange={() => {}} />
       )
 
       const trigger = getTriggerSearchInput()
@@ -2416,11 +2407,7 @@ describe("Select", () => {
     it("leaves the text keys to the text", async () => {
       const user = userEvent.setup()
       render(
-        <F0Select
-          {...defaultSelectProps}
-          options={mockOptions}
-          onChange={() => {}}
-        />
+        <F0Select {...searchProps} options={mockOptions} onChange={() => {}} />
       )
 
       const trigger = getTriggerSearchInput()
@@ -2444,11 +2431,7 @@ describe("Select", () => {
     it("closes on the arrow and gives the field its focus back", async () => {
       const user = userEvent.setup()
       render(
-        <F0Select
-          {...defaultSelectProps}
-          options={mockOptions}
-          onChange={() => {}}
-        />
+        <F0Select {...searchProps} options={mockOptions} onChange={() => {}} />
       )
 
       const trigger = screen.getByRole("combobox")
@@ -2470,7 +2453,7 @@ describe("Select", () => {
       const handleChange = vi.fn()
       render(
         <F0Select
-          {...defaultSelectProps}
+          {...searchProps}
           options={mockOptions}
           onChange={handleChange}
         />
@@ -2495,7 +2478,7 @@ describe("Select", () => {
       render(
         <div>
           <F0Select
-            {...defaultSelectProps}
+            {...searchProps}
             options={mockOptions}
             onChange={() => {}}
           />
@@ -2522,7 +2505,7 @@ describe("Select", () => {
     it("keeps its own placeholder over the search one", async () => {
       render(
         <F0Select
-          {...defaultSelectProps}
+          {...searchProps}
           options={mockOptions}
           placeholder="Choose a theme"
           searchBoxPlaceholder="Search themes"
@@ -2539,7 +2522,7 @@ describe("Select", () => {
       render(
         <div>
           <F0Select
-            {...defaultSelectProps}
+            {...searchProps}
             options={mockOptions}
             onChange={() => {}}
           />
@@ -2565,10 +2548,9 @@ describe("Select", () => {
     })
 
     it("posts the selection, never the query, under its name", async () => {
-      const user = userEvent.setup()
       const { container } = render(
         <F0Select
-          {...defaultSelectProps}
+          {...searchProps}
           options={mockOptions}
           name="theme"
           value="option1"
@@ -2576,7 +2558,9 @@ describe("Select", () => {
         />
       )
 
-      await user.type(screen.getByRole("combobox"), "Option 3")
+      await waitFor(() =>
+        expect(screen.getByText("Option 1")).toBeInTheDocument()
+      )
 
       const submitted = container.querySelector<HTMLInputElement>(
         'input[type="hidden"][name="theme"]'
@@ -2587,11 +2571,7 @@ describe("Select", () => {
 
     it("shows the pointer for writing, not for picking", () => {
       render(
-        <F0Select
-          {...defaultSelectProps}
-          options={mockOptions}
-          onChange={() => {}}
-        />
+        <F0Select {...searchProps} options={mockOptions} onChange={() => {}} />
       )
 
       expect(getTriggerSearchInput()).toHaveClass("cursor-text")
@@ -2601,7 +2581,7 @@ describe("Select", () => {
       const user = userEvent.setup()
       render(
         <F0Select
-          {...defaultSelectProps}
+          {...searchProps}
           options={mockOptions}
           value="option1"
           onChange={() => {}}
@@ -2624,11 +2604,7 @@ describe("Select", () => {
 
     it("shows the pointer for writing, not for picking", () => {
       render(
-        <F0Select
-          {...defaultSelectProps}
-          options={mockOptions}
-          onChange={() => {}}
-        />
+        <F0Select {...searchProps} options={mockOptions} onChange={() => {}} />
       )
 
       expect(getTriggerSearchInput()).toHaveClass("cursor-text")
@@ -2638,7 +2614,7 @@ describe("Select", () => {
       const user = userEvent.setup()
       render(
         <F0Select
-          {...defaultSelectProps}
+          {...searchProps}
           options={mockOptions}
           value="option1"
           onChange={() => {}}
@@ -2662,7 +2638,7 @@ describe("Select", () => {
     it("puts the caret after the selection, not on top of it", async () => {
       render(
         <F0Select
-          {...defaultSelectProps}
+          {...searchProps}
           options={mockOptions}
           value="option1"
           onChange={() => {}}
@@ -2685,7 +2661,7 @@ describe("Select", () => {
     it("puts the caret against the text, icon or no icon", async () => {
       render(
         <F0Select
-          {...defaultSelectProps}
+          {...searchProps}
           icon={Search}
           options={mockOptions}
           value="option1"
@@ -2704,7 +2680,7 @@ describe("Select", () => {
       const user = userEvent.setup()
       render(
         <F0Select
-          {...defaultSelectProps}
+          {...searchProps}
           options={mockOptions}
           placeholder="Search themes"
           onChange={() => {}}
@@ -2721,11 +2697,7 @@ describe("Select", () => {
     it("filters on the keystroke, with no wait of its own", async () => {
       const user = userEvent.setup()
       render(
-        <F0Select
-          {...defaultSelectProps}
-          options={mockOptions}
-          onChange={() => {}}
-        />
+        <F0Select {...searchProps} options={mockOptions} onChange={() => {}} />
       )
 
       await user.type(getTriggerSearchInput(), "Option 1")
@@ -2740,7 +2712,7 @@ describe("Select", () => {
       const user = userEvent.setup()
       render(
         <F0Select
-          {...defaultSelectProps}
+          {...searchProps}
           options={mockOptions}
           value="option2"
           onChange={() => {}}
@@ -2760,7 +2732,7 @@ describe("Select", () => {
       const user = userEvent.setup()
       render(
         <F0Select
-          {...defaultSelectProps}
+          {...searchProps}
           options={mockOptions}
           value="option2"
           onChange={() => {}}
@@ -2788,7 +2760,7 @@ describe("Select", () => {
       const handleChange = vi.fn()
       render(
         <F0Select
-          {...defaultSelectProps}
+          {...searchProps}
           options={mockOptions}
           value="option1"
           clearable
@@ -2818,14 +2790,45 @@ describe("Select", () => {
       expect(trigger).toHaveValue("Option")
     })
 
+    it("carries on from the selected label when the user types over it", async () => {
+      const user = userEvent.setup()
+      const handleChange = vi.fn()
+      render(
+        <F0Select
+          {...searchProps}
+          options={mockOptions}
+          value="option1"
+          onChange={handleChange}
+        />
+      )
+
+      const trigger = getTriggerSearchInput()
+      await waitFor(() =>
+        expect(screen.getByText("Option 1")).toBeInTheDocument()
+      )
+
+      // The label is what the field is showing, so a space after it is
+      // "Option 1 ", not a lone space with the selection wiped.
+      await user.type(trigger, " ")
+
+      expect(trigger).toHaveValue("Option 1 ")
+      await waitFor(() => expect(handleChange).toHaveBeenCalled())
+      expect(
+        document.querySelector("[data-slot='value']")
+      ).not.toBeInTheDocument()
+
+      // …and it is plain text from there on.
+      await user.type(trigger, "x")
+      expect(trigger).toHaveValue("Option 1 x")
+    })
+
     it("only deletes text on backspace while there is text", async () => {
       const user = userEvent.setup()
       const handleChange = vi.fn()
       render(
         <F0Select
-          {...defaultSelectProps}
+          {...searchProps}
           options={mockOptions}
-          value="option1"
           onChange={handleChange}
         />
       )
@@ -2840,11 +2843,7 @@ describe("Select", () => {
 
     it("describes nothing when nothing is selected", () => {
       render(
-        <F0Select
-          {...defaultSelectProps}
-          options={mockOptions}
-          onChange={() => {}}
-        />
+        <F0Select {...searchProps} options={mockOptions} onChange={() => {}} />
       )
 
       expect(screen.getByRole("combobox")).not.toHaveAttribute(

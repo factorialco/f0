@@ -334,12 +334,7 @@ const F0SelectComponent = forwardRef(function Select<
   /** Only the field trigger can host the search. */
   const isFieldTrigger = variant === "field" && !asList && !children
 
-  /**
-   * Default on for static `options`, where filtering is local. A `source`
-   * stays opt-in: its search is a query parameter its adapter has to
-   * implement, and a box over an adapter that ignores it filters nothing.
-   */
-  const showSearchBoxEffective = showSearchBox ?? (isFieldTrigger && !source)
+  const showSearchBoxEffective = !!showSearchBox
 
   const localSource = useDataSource(
     {
@@ -945,10 +940,12 @@ const F0SelectComponent = forwardRef(function Select<
     move: (direction: "next" | "previous") => void
     take: () => boolean
     removeLast: () => boolean
+    typeOver: (typed: string) => string | null
   }>({
     move: () => {},
     take: () => false,
     removeLast: () => false,
+    typeOver: () => null,
   })
   const moveActiveThroughRef = useCallback(
     (direction: "next" | "previous") => listNavRef.current.move(direction),
@@ -960,6 +957,10 @@ const F0SelectComponent = forwardRef(function Select<
   )
   const removeLastSelectedThroughRef = useCallback(
     () => listNavRef.current.removeLast(),
+    []
+  )
+  const typeOverSelectionThroughRef = useCallback(
+    (typed: string) => listNavRef.current.typeOver(typed),
     []
   )
 
@@ -974,6 +975,7 @@ const F0SelectComponent = forwardRef(function Select<
     inputRef: searchInputRef,
     focusInput: focusSearchInput,
     clearDraft: clearSearchDraft,
+    setText: setSearchText,
     handleChange: handleSearchDraftChange,
     handleKeyDown: handleSearchKeyDown,
   } = useTriggerSearch({
@@ -983,6 +985,7 @@ const F0SelectComponent = forwardRef(function Select<
     onActiveMove: moveActiveThroughRef,
     onSelectActive: selectActiveThroughRef,
     onBackspaceOnEmpty: removeLastSelectedThroughRef,
+    onTypeOverSelection: typeOverSelectionThroughRef,
     onSearchChange: onSearchChangeLocal,
     // No query, not an empty one: an empty string is a new dataset identity
     // and would drop an active select-all on an open-and-close.
@@ -1321,25 +1324,57 @@ const F0SelectComponent = forwardRef(function Select<
     ;(
       onChangeSelectedOption as (option: undefined, checked: boolean) => void
     )?.(undefined, false)
-    handleSearchDraftChange(labelText.slice(0, -1))
+    setSearchText(labelText.slice(0, -1))
     return true
   }, [
     clearSelection,
     getDisplayItemsForSelection,
-    handleSearchDraftChange,
     localValue,
     multiple,
     onChangeSelectedOption,
     onItemCheckChange,
+    setSearchText,
   ])
+
+  /**
+   * Typing over a selection carries on from its label: the selection goes, and
+   * the text is what was on screen plus what was typed. Multiple selection has
+   * no single label, so typing there just filters.
+   */
+  const typeOverSelection = useCallback(
+    (typed: string) => {
+      if (multiple) {
+        return null
+      }
+      const selected = getDisplayItemsForSelection[0]
+      const labelText = selected?.selectedLabel ?? selected?.label
+      if (!labelText) {
+        return null
+      }
+      hasUserInteracted.current = true
+      clearSelection()
+      selectedItemsCache.current.clear()
+      ;(
+        onChangeSelectedOption as (option: undefined, checked: boolean) => void
+      )?.(undefined, false)
+      return `${String(labelText)}${typed}`
+    },
+    [
+      clearSelection,
+      getDisplayItemsForSelection,
+      multiple,
+      onChangeSelectedOption,
+    ]
+  )
 
   useEffect(() => {
     listNavRef.current = {
       move: moveActive,
       take: selectActive,
       removeLast: removeLastSelected,
+      typeOver: typeOverSelection,
     }
-  }, [moveActive, removeLastSelected, selectActive])
+  }, [moveActive, removeLastSelected, selectActive, typeOverSelection])
 
   // A virtualized list only renders what is in view.
   useEffect(() => {

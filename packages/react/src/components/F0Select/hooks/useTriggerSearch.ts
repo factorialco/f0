@@ -13,6 +13,11 @@ type UseTriggerSearchOptions = {
   onSelectActive: () => boolean
   /** Returns false when there was no selection to edit. */
   onBackspaceOnEmpty: () => boolean
+  /**
+   * Typing with a selection shown and no text yet. Returns the text to use —
+   * the selection's label plus what was typed — or null to type as normal.
+   */
+  onTypeOverSelection: (typed: string) => string | null
   triggerRef: React.RefObject<HTMLElement | null>
 }
 
@@ -26,9 +31,12 @@ export const useTriggerSearch = ({
   onActiveMove,
   onSelectActive,
   onBackspaceOnEmpty,
+  onTypeOverSelection,
   triggerRef,
 }: UseTriggerSearchOptions) => {
   const [draft, setDraft] = useState("")
+  const draftRef = useRef(draft)
+  draftRef.current = draft
   const inputRef = useRef<HTMLInputElement>(null)
 
   // Through refs: the handlers are cloned onto the input, and a new identity
@@ -40,6 +48,7 @@ export const useTriggerSearch = ({
     onActiveMove,
     onSelectActive,
     onBackspaceOnEmpty,
+    onTypeOverSelection,
   })
   useEffect(() => {
     callbacksRef.current = {
@@ -49,6 +58,7 @@ export const useTriggerSearch = ({
       onActiveMove,
       onSelectActive,
       onBackspaceOnEmpty,
+      onTypeOverSelection,
     }
   }, [
     onActiveMove,
@@ -57,6 +67,7 @@ export const useTriggerSearch = ({
     onSearchChange,
     onSearchReset,
     onSelectActive,
+    onTypeOverSelection,
   ])
 
   // `open` is a render behind the request, so the keys track the request.
@@ -72,9 +83,32 @@ export const useTriggerSearch = ({
 
   const handleChange = useCallback(
     (value: string) => {
+      /**
+       * The first character typed over a selection continues its label rather
+       * than replacing it: the label is what the field is showing, so "Approved"
+       * plus a space is "Approved ", not a lone space.
+       */
+      const next =
+        value && !draftRef.current
+          ? (callbacksRef.current.onTypeOverSelection(value) ?? value)
+          : value
+
+      setDraft(next)
+      callbacksRef.current.onSearchChange(next)
+      // Clearing routes through here too, with an empty value.
+      if (next && !requestedOpenRef.current) {
+        requestOpen()
+      }
+    },
+    [requestOpen]
+  )
+
+  /** Sets the text without the type-over rule: for text the field itself
+   * produced, not a keystroke. */
+  const setText = useCallback(
+    (value: string) => {
       setDraft(value)
       callbacksRef.current.onSearchChange(value)
-      // Clearing routes through here too, with an empty value.
       if (value && !requestedOpenRef.current) {
         requestOpen()
       }
@@ -168,6 +202,7 @@ export const useTriggerSearch = ({
     inputRef,
     focusInput,
     clearDraft,
+    setText,
     handleChange,
     handleKeyDown,
   }

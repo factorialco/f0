@@ -54,9 +54,6 @@ export const SortingSelector = <Sortings extends SortingsDefinition>({
       <div className="flex items-end gap-2">
         <div className="shrink grow [&_button]:h-8 [&_button]:rounded">
           <F0Select
-            // A short list of fields, in a settings popover that styles the
-            // trigger button: a plain select, not a search field.
-            showSearchBox={false}
             key={displaySortings.field as string}
             label={i18n.collections.sorting.sortBy}
             options={sortingOptions}
