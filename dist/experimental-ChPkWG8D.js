@@ -2,7 +2,7 @@ import { cQ as i_, cR as $B, cS as n_, cT as g_, cU as a_, cV as o_, cW as vh, c
 import { jsx as m, jsxs as te, Fragment as Ii } from "react/jsx-runtime";
 import Et, { forwardRef as wi, useRef as Se, useTransition as sx, useState as Ne, useLayoutEffect as Hn, useId as ys, useContext as Dg, createContext as Jn, useEffect as nt, useCallback as Ke, useMemo as _t, useImperativeHandle as Ix, Fragment as xg, isValidElement as Kh, cloneElement as Gy, Suspense as wd, lazy as bs, createElement as Tc, memo as Ey, Children as Wh } from "react";
 import { d as Qe, T as Cx, a as Ax, b as lx, f as $i, c as cx, g as dx } from "./tooltip-CMBdJvJA.js";
-import { C as ux, P as fx, c as vd, n as Ty, E as hx, a as mx, u as px, b as Ny, e as Bx, f as Fx, g as yx, h as Ux, i as n0, M as Qx, p as wx, j as Zy, R as g0, k as Ky, l as vx, m as bx, o as _x, q as kx, r as xx, s as Dx, O as Wy, t as Yy, F as Sx, W as Fs, A as Rx, B as Mx, L as Px, v as Vx, V as Gx, w as Ex, x as Tx, y as Nx, z as Yh, S as Zx, D as zy, G as Hy, H as Kx, I as Wx, J as Yx, K as zx, N as Hx, Q as Ox, T as Jx, U as jx, X as Lx, Y as Xx, Z as a0, _ as qx, $ as $x } from "./CoachmarkProvider-CdSKowoY.js";
+import { C as ux, P as fx, c as vd, n as Ty, E as hx, a as mx, u as px, b as Ny, e as Bx, f as Fx, g as yx, h as Ux, i as n0, M as Qx, p as wx, j as Zy, R as g0, k as Ky, l as vx, m as bx, o as _x, q as kx, r as xx, s as Dx, O as Wy, t as Yy, F as Sx, W as Fs, A as Rx, B as Mx, L as Px, v as Vx, V as Gx, w as Ex, x as Tx, y as Nx, z as Yh, S as Zx, D as zy, G as Hy, H as Kx, I as Wx, J as Yx, K as zx, N as Hx, Q as Ox, T as Jx, U as jx, X as Lx, Y as Xx, Z as a0, _ as qx, $ as $x } from "./CoachmarkProvider-DOCH-Z8M.js";
 import { g as eD } from "./_commonjsHelpers-ByX85dGu.js";
 import tD, { createPortal as $c } from "react-dom";
 import './experimental.css';const iD = i_("Search", [
@@ -35441,7 +35441,7 @@ const Sd = (a, C) => {
     ),
     children: a
   }
-), AP = () => import("./ChatPdfThumbnail-CfNLkZpe.js"), lP = () => import("./ChatSheetThumbnail-D8aN1W_0.js"), cP = () => import("./ChatDocxThumbnail-DhzoVI1K.js"), dP = () => import("./ChatTextThumbnail-B53pSYUy.js"), uP = bs(AP), fP = bs(lP), hP = bs(cP), mP = bs(dP), pP = 384, BP = 160, QU = ({
+), AP = () => import("./ChatPdfThumbnail-CEIOpP4O.js"), lP = () => import("./ChatSheetThumbnail-D8aN1W_0.js"), cP = () => import("./ChatDocxThumbnail-DhzoVI1K.js"), dP = () => import("./ChatTextThumbnail-B53pSYUy.js"), uP = bs(AP), fP = bs(lP), hP = bs(cP), mP = bs(dP), pP = 384, BP = 160, QU = ({
   file: a,
   kind: C,
   cornerClass: f = "rounded-xl",
@@ -35634,7 +35634,7 @@ const Sd = (a, C) => {
     });
     U.observe(k), f.current = U;
   }, []), shouldMount: a };
-}, Rd = "w-[24rem] max-w-full", yP = "w-[32rem] max-w-full", UP = "gap-0.5", QP = "pointer-events-none absolute inset-x-0 bottom-0 h-[46%] bg-[linear-gradient(to_top,rgba(0,0,0,0.5),rgba(0,0,0,0.18)_45%,transparent)]", wP = "bg-[hsl(222_31%_11%)]", vP = "bg-[hsl(220_39%_6%/0.72)]", bP = "bg-[hsl(220_39%_6%/0.6)]", _P = "bg-[hsl(220_39%_6%/0.55)]", kP = () => import("./LocationMap-DP4g9MmT.js"), xP = bs(kP), DP = 3 / 2, SP = ({ latitude: a, longitude: C }) => `https://www.google.com/maps?q=${a},${C}`, wU = ({
+}, Rd = "w-[24rem] max-w-full", yP = "w-[32rem] max-w-full", UP = "gap-0.5", QP = "pointer-events-none absolute inset-x-0 bottom-0 h-[46%] bg-[linear-gradient(to_top,rgba(0,0,0,0.5),rgba(0,0,0,0.18)_45%,transparent)]", wP = "bg-[hsl(222_31%_11%)]", vP = "bg-[hsl(220_39%_6%/0.72)]", bP = "bg-[hsl(220_39%_6%/0.6)]", _P = "bg-[hsl(220_39%_6%/0.55)]", kP = () => import("./LocationMap-CpYWhp67.js"), xP = bs(kP), DP = 3 / 2, SP = ({ latitude: a, longitude: C }) => `https://www.google.com/maps?q=${a},${C}`, wU = ({
   location: a,
   cornerClass: C = "rounded-xl",
   surfaceClassName: f,
@@ -41159,7 +41159,7 @@ const PG = {
     }
   ) }) });
 }, WG = bs(
-  () => import("./index-DZuRdc_X.js").then((a) => a.i).then((a) => ({
+  () => import("./index-aH_cfqel.js").then((a) => a.i).then((a) => ({
     default: a.F0PdfViewer
   }))
 ), YG = () => {
