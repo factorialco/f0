@@ -36,7 +36,6 @@ const SingleLoadingRowInner = <
     frozenColumnsLeft,
     nestedRowProps,
     groupIndex,
-    onCheckedChange,
     selectedItems,
     checkColumnWidth,
     tableWithChildren,
@@ -95,7 +94,6 @@ const SingleLoadingRowInner = <
       columns={columns}
       noBorder={shouldHideBorder ?? false}
       groupIndex={groupIndex}
-      onCheckedChange={onCheckedChange}
       selectedItems={selectedItems}
       checkColumnWidth={checkColumnWidth}
       loading
