@@ -9,7 +9,7 @@ import * as Stories from "./F0LocationInput.stories"
 
 `F0LocationInput` is the writable address field for forms. The user types an address, picks a suggestion, and the component emits one **structured value** (street, city, state, postal code, ISO-2 country, coordinates) so no product surface has to parse a place result again. It has two modes: a single autocomplete field, or a grouped block with the country on top and the parts below.
 
-It shares the chrome conventions (sizes, focus ring, disabled, readonly and loading states) of every F0 writable input. The component makes **no network call and ships no API key**: the consumer injects `searchPlaces` and `resolvePlace`, and without them the parts are plain fields.
+The address line is an [F0Select](?path=/docs/components-select--documentation) whose options are the provider's suggestions, so searching, keyboard handling and dialog portalling are the select's. The component makes **no network call and ships no API key**: the consumer injects `searchPlaces` and `resolvePlace`, and without them the address line is a plain text field.
 
 ---
 
@@ -128,7 +128,13 @@ Editing a part that moves the pin - the address line, city, state, postal code o
 
 ### Picking a suggestion
 
-A pick shows the suggestion in the field right away but emits nothing until `resolvePlace` returns; the resolved value replaces the whole value, country included, with `{ source: "picked", isResolved: true }`. If `resolvePlace` is missing, rejects or returns nothing, the suggestion label is kept as the address line and the change is reported as typed.
+Typing happens in the select's search box: two or more characters search after a 250 ms debounce, out-of-order responses are discarded, and results are listed exactly as the provider returned them (no local filtering, which would drop accent variants).
+
+A pick shows the suggestion on the trigger right away but emits nothing until `resolvePlace` returns; the resolved value replaces the whole value, country included, with `{ source: "picked", isResolved: true }`. If `resolvePlace` is missing, rejects or returns nothing, the suggestion label is kept as the address line and the change is reported as typed.
+
+### An address the provider does not know
+
+When the search returns nothing, the empty state offers to keep what was typed. Choosing it sets the address line and reports `{ source: "typed", isResolved: false }`, so rural addresses, new buildings and typos-with-intent are still enterable. A value like that has no option behind it, and the trigger still shows it.
 
 ### Country and search scope
 
@@ -138,13 +144,13 @@ A pick shows the suggestion in the field right away but emits nothing until `res
 
 ### Without a provider
 
-Omit `searchPlaces` and the address field is a plain text input: no combobox role, no listbox, no network. This is how a surface without the autocomplete entitlement renders the same form.
+Omit `searchPlaces` and the address line is a plain [F0TextInput](?path=/docs/components-inputs-text-input--documentation): nothing to open, no network. This is how a surface without the autocomplete entitlement renders the same form.
 
 <Canvas of={Stories.WithoutAutocomplete} />
 
 ### Inside a dialog
 
-The suggestion list portals into the surrounding centered or fullscreen `F0Dialog`, so a click on a suggestion is never read as a click outside.
+`F0Select` portals its own dropdown into the surrounding centered or fullscreen `F0Dialog`, so a click on a suggestion is never read as a click outside.
 
 <Canvas of={Stories.InsideDialog} />
 
@@ -223,7 +229,10 @@ The suggestion list portals into the surrounding centered or fullscreen `F0Dialo
         <td>
           <code>boolean</code>
         </td>
-        <td>Focuses the address field on mount.</td>
+        <td>
+          Focuses the address field on mount. Only the provider-less text field
+          takes it: <code>F0Select</code> exposes no autofocus.
+        </td>
       </tr>
     </tbody>
   </table>
@@ -371,9 +380,10 @@ The suggestion list portals into the surrounding centered or fullscreen `F0Dialo
           </code>
         </td>
         <td>
-          Suggestion provider, called after a 250 ms debounce once the query has
-          two characters. Results are shown as returned, never filtered. Omit it
-          and the parts are plain fields.
+          Suggestion provider, called after a 250 ms debounce once the query
+          typed in the select's search box has two characters. Results are shown
+          as returned, never filtered locally. Omit it and the address line is a
+          plain text field.
         </td>
       </tr>
       <tr>
@@ -478,8 +488,8 @@ The suggestion list portals into the surrounding centered or fullscreen `F0Dialo
           <code>boolean</code>
         </td>
         <td>
-          Renders the clear button in the address field; clearing empties every
-          part and emits <code>undefined</code>.
+          Renders the select's clear action; clearing empties every part and
+          emits <code>undefined</code>.
         </td>
       </tr>
       <tr>
@@ -551,7 +561,7 @@ The suggestion list portals into the surrounding centered or fullscreen `F0Dialo
         <td>
           <code>{"() => void"}</code>
         </td>
-        <td>Address field gained focus.</td>
+        <td>Focus entered the address field.</td>
       </tr>
       <tr>
         <td>
@@ -560,7 +570,7 @@ The suggestion list portals into the surrounding centered or fullscreen `F0Dialo
         <td>
           <code>{"() => void"}</code>
         </td>
-        <td>Address field lost focus. The suggestion list closes first.</td>
+        <td>Focus left the address field.</td>
       </tr>
     </tbody>
   </table>
@@ -570,19 +580,20 @@ The suggestion list portals into the surrounding centered or fullscreen `F0Dialo
 
 ## Accessibility
 
+The address line inherits `F0Select`'s contract: the trigger is a `combobox`, the dropdown is a `listbox` of `option` rows, and the search box inside it is focused on open.
+
 ### Keyboard interaction
 
-| Key                         | Result                                                                                                                                                                |
-| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Type two or more characters | Searches and opens the suggestion list                                                                                                                                |
-| `ArrowDown` / `ArrowUp`     | Moves the active suggestion, wrapping at both ends. On a closed list either arrow reopens the last results, `ArrowDown` on the first option and `ArrowUp` on the last |
-| `Enter`                     | Picks the active suggestion. With no active suggestion it keeps its form meaning                                                                                      |
-| `Escape`                    | Closes the list and keeps the typed text. It does not reach the surrounding dialog                                                                                    |
-| `Tab`                       | Closes the list without picking and moves on                                                                                                                          |
+| Key | Result |
+| --- | --- |
+| `Enter` or `Space` on the trigger | Opens the dropdown with the search box focused |
+| Typing | Searches after two characters; results replace the list |
+| `ArrowDown` / `ArrowUp` | Moves through the options |
+| `Enter` | Picks the highlighted option |
+| `Escape` | Closes the dropdown and keeps the current value |
 
 ### Screen reader behavior
 
-- The address field has `role="combobox"`, `aria-autocomplete="list"` and `aria-expanded`. While the list is open it points at it with `aria-controls` and at the active row with `aria-activedescendant`; focus never leaves the input.
-- Suggestions are `role="option"` rows with `aria-selected`; the loading and empty rows are `role="status"`.
-- In detailed mode the parts are grouped in a `fieldset` named by `label` through `aria-label`, so each part is announced within its group without a visible title.
-- Without `searchPlaces` the field drops the combobox role and is announced as a plain text field.
+- Each part carries its own label. In detailed mode they are grouped in a `fieldset` named by `label` through `aria-label`, so a part is announced within its group without a visible title.
+- The empty state says which state the list is in: waiting for input, searching, or no results.
+- Without `searchPlaces` the address line is announced as a plain text field.

@@ -4,6 +4,7 @@ import type { InputFieldStatus } from "@/components/F0InputField"
 import type { CountryCode } from "@/lib/countries"
 
 import { InputMessages } from "@/components/F0InputField/components/InputMessages"
+import { F0TextInput } from "@/components/F0TextInput"
 import { useI18n } from "@/lib/providers/i18n"
 
 import type { EditableLocationPart } from "./internal-types"
@@ -13,7 +14,7 @@ import type {
   LocationField,
 } from "./types"
 
-import { AddressCombobox } from "./components/AddressCombobox"
+import { AddressSelect } from "./components/AddressSelect"
 import { AddressParts } from "./components/AddressParts"
 import { CountrySelect } from "./components/CountrySelect"
 import { useLocationValue } from "./hooks/useLocationValue"
@@ -141,7 +142,7 @@ export const F0LocationInput = forwardRef<
       })
   }
 
-  const handleAddressChange = (text: string) => {
+  const handleTypedAddress = (text: string) => {
     cancelPendingPick()
     setPart("addressLine1", text)
   }
@@ -161,25 +162,26 @@ export const F0LocationInput = forwardRef<
     }
   }
 
-  const addressField = (
-    <AddressCombobox
-      ref={ref}
+  // In detailed mode the message belongs to the group, the border to the field
+  const fieldStatus =
+    detailed && effectiveStatus
+      ? { type: effectiveStatus.type }
+      : effectiveStatus
+
+  const addressField = searchPlaces ? (
+    <AddressSelect
       label={labels.addressLine1}
       hideLabel={detailed ? false : hideLabel}
       labelIcon={detailed ? undefined : labelIcon}
-      placeholder={placeholder ?? i18n.locationInput.placeholder}
-      value={pendingLabel ?? value?.addressLine1 ?? ""}
-      onChangeText={handleAddressChange}
-      onPick={handlePick}
-      onClear={handleClear}
-      searchPlaces={searchPlaces}
+      placeholder={placeholder}
+      text={pendingLabel ?? value?.addressLine1 ?? ""}
+      placeId={value?.placeId}
       country={searchCountry}
-      // In detailed mode the message belongs to the group, the border to the field
-      status={
-        detailed && effectiveStatus
-          ? { type: effectiveStatus.type }
-          : effectiveStatus
-      }
+      searchPlaces={searchPlaces}
+      onPick={handlePick}
+      onTyped={handleTypedAddress}
+      onClear={handleClear}
+      status={fieldStatus}
       required={required}
       disabled={disabled}
       readonly={readonly}
@@ -187,13 +189,41 @@ export const F0LocationInput = forwardRef<
       clearable={clearable}
       size={size}
       name={name}
+    />
+  ) : (
+    // Nothing to suggest, so the address line is a field the user just types in
+    <F0TextInput
+      ref={ref}
+      label={labels.addressLine1}
+      hideLabel={detailed ? false : hideLabel}
+      labelIcon={detailed ? undefined : labelIcon}
+      placeholder={placeholder}
+      value={value?.addressLine1 ?? ""}
+      onChange={(text) => setPart("addressLine1", text)}
+      status={fieldStatus}
+      required={required}
+      disabled={disabled}
+      readonly={readonly}
+      loading={loading}
+      clearable={clearable}
+      size={size}
+      name={name}
       autoFocus={autoFocus}
-      onFocus={onFocus}
-      onBlur={onBlur}
     />
   )
 
-  if (!detailed) return addressField
+  // Neither F0Select nor F0TextInput takes an onFocus, and focus events bubble
+  // through React, so the pair is observed around the field instead
+  const addressBlock =
+    onFocus || onBlur ? (
+      <div onFocus={onFocus} onBlur={onBlur}>
+        {addressField}
+      </div>
+    ) : (
+      addressField
+    )
+
+  if (!detailed) return addressBlock
 
   return (
     <fieldset
@@ -215,7 +245,7 @@ export const F0LocationInput = forwardRef<
           name={name ? `${name}.country` : undefined}
         />
       )}
-      {addressField}
+      {addressBlock}
       <AddressParts
         fields={visibleFields}
         value={value}

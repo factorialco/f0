@@ -323,33 +323,42 @@ export const States: Story = {
 }
 
 /**
- * Keyboard-only path: type, wait for the list, move to the first option, pick
- * it with Enter and check the resolved value reaches `onChange`.
+ * Search and pick through the select: open it, type in its search box, choose
+ * the first suggestion, and check the resolved value reaches `onChange`.
  */
-export const KeyboardPick: Story = {
+export const SearchAndPick: Story = {
   args: { onChange: fn() },
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement)
-    const input = canvas.getByRole("combobox")
-
-    await userEvent.type(input, "Colon")
     const body = within(document.body)
+
+    await userEvent.click(canvas.getByRole("combobox", { name: "Address" }))
+    const search = await body.findByRole("searchbox")
+    await userEvent.type(search, "Colon")
+
     await waitFor(() =>
       expect(body.getAllByRole("option").length).toBeGreaterThan(0)
     )
+    await userEvent.click(body.getAllByRole("option")[0])
 
-    await userEvent.keyboard("{ArrowDown}")
-    const [first] = body.getAllByRole("option")
-    await expect(input).toHaveAttribute("aria-activedescendant", first.id)
-
-    await userEvent.keyboard("{Enter}")
     await waitFor(() =>
       expect(args.onChange).toHaveBeenLastCalledWith(
         expect.objectContaining({ placeId: "es-1", city: "Barcelona" }),
         { source: "picked", isResolved: true }
       )
     )
-    await expect(body.queryByRole("listbox")).not.toBeInTheDocument()
+  },
+}
+
+/**
+ * An address the provider does not return is kept through the create action in
+ * the empty state, and reported as typed rather than picked.
+ */
+export const UnlistedAddress: Story = {
+  args: {
+    label: "Office address",
+    fields: detailedLocationFields,
+    defaultValue: { addressLine1: "Camino de la Vega s/n", country: "es" },
   },
 }
 
