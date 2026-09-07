@@ -49,11 +49,24 @@ vi.mock("@tiptap/react", () => {
   }
 })
 
+const rootState: {
+  roots: {
+    render: ReturnType<typeof vi.fn>
+    unmount: ReturnType<typeof vi.fn>
+  }[]
+} = {
+  roots: [],
+}
+
 vi.mock("react-dom/client", () => ({
-  createRoot: () => ({
-    render: vi.fn(),
-    unmount: vi.fn(),
-  }),
+  createRoot: () => {
+    const root = {
+      render: vi.fn(),
+      unmount: vi.fn(),
+    }
+    rootState.roots.push(root)
+    return root
+  },
 }))
 
 const users: MentionedUser[] = [
@@ -118,6 +131,78 @@ const createEditorMock = () => {
 describe("createSuggestionConfig", () => {
   beforeEach(() => {
     rendererState.props = null
+    rootState.roots = []
+  })
+
+  const startPopover = () => {
+    const config = createSuggestionConfig(users, vi.fn(), undefined, users)
+    const renderer = config.render()
+    const { editor } = createEditorMock()
+    const props = {
+      items: users,
+      clientRect: () => rect,
+      editor: editor as never,
+      range: { from: 0, to: 1 },
+    }
+
+    renderer.onStart(props)
+
+    const root = rootState.roots.at(-1)
+    expect(root?.render).toHaveBeenCalledTimes(1)
+
+    return { config, renderer, props, root }
+  }
+
+  it("ignores a suspended update that resumes after the popover exited", () => {
+    const { renderer, props, root } = startPopover()
+
+    renderer.onExit()
+    expect(root?.unmount).toHaveBeenCalledTimes(1)
+
+    renderer.onUpdate(props)
+
+    expect(root?.render).toHaveBeenCalledTimes(1)
+  })
+
+  it("ignores a suspended update that resumes after Escape dismissed it", () => {
+    const { renderer, props, root } = startPopover()
+
+    renderer.onKeyDown({ event: { key: "Escape" } as KeyboardEvent })
+    expect(root?.unmount).toHaveBeenCalledTimes(1)
+
+    renderer.onUpdate(props)
+
+    expect(root?.render).toHaveBeenCalledTimes(1)
+  })
+
+  it("clears a pending debounce when Escape dismisses the popover", async () => {
+    vi.useFakeTimers()
+    try {
+      const publish = vi.fn()
+      const config = createSuggestionConfig([], publish, undefined, users)
+      const renderer = config.render()
+      const { editor } = createEditorMock()
+
+      renderer.onStart({
+        items: users,
+        clientRect: () => rect,
+        editor: editor as never,
+        range: { from: 0, to: 1 },
+      })
+
+      await config.items({ query: "" })
+      void config.items({ query: "ali" })
+      publish.mockClear()
+      expect(vi.getTimerCount()).toBe(1)
+
+      renderer.onKeyDown({ event: { key: "Escape" } as KeyboardEvent })
+
+      expect(vi.getTimerCount()).toBe(0)
+      await vi.advanceTimersByTimeAsync(500)
+      expect(publish).not.toHaveBeenCalled()
+    } finally {
+      vi.useRealTimers()
+    }
   })
 
   it("uses latest suggestion range and inserts mention atomically", () => {

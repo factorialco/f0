@@ -28,11 +28,11 @@ export function createSuggestionConfig(
   }))
 
   const searchUsers = onMentionQueryStringChanged
-    ? async (query: string): Promise<MentionedUser[]> => {
+    ? async (query: string): Promise<MentionedUser[] | null> => {
         try {
           return (await onMentionQueryStringChanged(query)) || []
         } catch {
-          return []
+          return null
         }
       }
     : searchableUsers
@@ -66,6 +66,12 @@ export function createSuggestionConfig(
         if (mine !== generation) {
           return cachedItems
         }
+        // A failed search is not an answer: it is neither published nor cached,
+        // so the next request for the same query retries instead of reading a
+        // remembered failure.
+        if (!items) {
+          return []
+        }
         cachedQuery = query
         cachedItems = items
         setMentionSuggestions(items)
@@ -91,8 +97,10 @@ export function createSuggestionConfig(
       return Promise.resolve(cachedItems)
     }
 
-    // tiptap awaits `items` before it calls `onStart`, so delaying the first
-    // answer of a session would delay the popover itself.
+    // tiptap awaits `items` before it calls `onStart`, so debouncing a session's
+    // opening query would delay the popover itself. The exception tiptap can
+    // still produce is `moved && changed`, where it awaits `items` before the
+    // `onExit` that would have cleared `sessionStarted`.
     const immediate = query === "" || !sessionStarted
     sessionStarted = true
 
@@ -126,12 +134,14 @@ export function createSuggestionConfig(
     return queued.promise
   }
 
+  // `cachedItems` survives on purpose: it is the invariant "what was last handed
+  // to setMentionSuggestions", which an abandoned or superseded pass still needs
+  // to resolve with. Clearing `cachedQuery` is what forces the next miss.
   const resetSuggestionState = () => {
     abandonQueued()
     generation++
     sessionStarted = false
     cachedQuery = null
-    cachedItems = []
   }
 
   return {
@@ -144,6 +154,22 @@ export function createSuggestionConfig(
       let popoverRoot: Root | null = null
       let container: HTMLDivElement | null = null
       let latestProps: SuggestionRenderProps | null = null
+
+      // Clearing the references is what stops a still-suspended tiptap update
+      // from rendering into a root that has already been unmounted, which React
+      // treats as an error rather than a no-op.
+      const dismiss = () => {
+        latestProps = null
+        resetSuggestionState()
+        if (popoverRoot && container) {
+          popoverRoot.unmount()
+          container.remove()
+        }
+        component?.destroy()
+        component = null
+        popoverRoot = null
+        container = null
+      }
 
       const getAtSymbolRect = (): DOMRect => {
         const selection = window.getSelection()
@@ -257,23 +283,13 @@ export function createSuggestionConfig(
             return (component.ref as MentionListRef)?.onKeyDown(props) || false
           }
           if (props.event.key === "Escape") {
-            latestProps = null
-            if (popoverRoot && container) {
-              popoverRoot.unmount()
-              container.remove()
-            }
+            dismiss()
             return true
           }
           return (component.ref as MentionListRef)?.onKeyDown(props) || false
         },
         onExit() {
-          latestProps = null
-          resetSuggestionState()
-          if (popoverRoot && container) {
-            popoverRoot.unmount()
-            container.remove()
-          }
-          component?.destroy()
+          dismiss()
         },
       }
     },

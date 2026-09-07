@@ -174,6 +174,57 @@ describe("createSuggestionConfig items", () => {
     expect(publish).toHaveBeenLastCalledWith([users[1]])
   })
 
+  it("does not cache or publish a failed search", async () => {
+    const search = vi.fn(async (query: string) => {
+      if (query === "ali") {
+        throw new Error("network")
+      }
+      return users
+    })
+    const publish = vi.fn()
+    const config = createSuggestionConfig([], publish, search, users)
+
+    await config.items({ query: "" })
+    publish.mockClear()
+
+    const failing = config.items({ query: "ali" })
+    await vi.advanceTimersByTimeAsync(MENTION_SUGGESTION_DEBOUNCE_MS)
+
+    await expect(failing).resolves.toEqual([])
+    expect(publish).not.toHaveBeenCalled()
+
+    const retry = config.items({ query: "ali" })
+    await vi.advanceTimersByTimeAsync(MENTION_SUGGESTION_DEBOUNCE_MS)
+    await retry
+
+    expect(search).toHaveBeenCalledTimes(3)
+  })
+
+  it("resolves a pass superseded by an exit with the list still on screen", async () => {
+    const resolvers = new Map<string, (items: MentionedUser[]) => void>()
+    const search = vi.fn(
+      (query: string) =>
+        new Promise<MentionedUser[]>((resolve) => resolvers.set(query, resolve))
+    )
+    const publish = vi.fn()
+    const config = createSuggestionConfig([], publish, search, users)
+    const renderer = config.render()
+
+    const opening = config.items({ query: "" })
+    resolvers.get("")?.(users)
+    await opening
+
+    const superseded = config.items({ query: "ali" })
+    await vi.advanceTimersByTimeAsync(MENTION_SUGGESTION_DEBOUNCE_MS)
+    publish.mockClear()
+
+    renderer.onExit()
+    resolvers.get("ali")?.([users[1]])
+
+    await expect(superseded).resolves.toEqual(users)
+    expect(publish).not.toHaveBeenCalled()
+  })
+
   it("drops the cache on exit so a reopened popover searches again", async () => {
     const search = vi.fn(async (query: string) =>
       users.filter((user) => user.label.toLowerCase().includes(query))
