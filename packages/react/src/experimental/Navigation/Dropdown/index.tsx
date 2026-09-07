@@ -6,6 +6,7 @@ import { EllipsisHorizontal } from "@/icons/app"
 import { DataTestIdWrapper, WithDataTestIdProps } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import { Link } from "@/lib/linkHandler"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils.ts"
 import {
   Drawer,
@@ -60,6 +61,7 @@ export const Dropdown = experimentalComponent("Dropdown", _Dropdown)
 export type { DropdownItem, DropdownItemLabel, DropdownItemObject }
 
 const _MobileDropdown = ({ items, children, dataTestId }: DropdownProps) => {
+  const i18n = useI18n()
   const [open, setOpen] = useState(false)
 
   return (
@@ -68,7 +70,7 @@ const _MobileDropdown = ({ items, children, dataTestId }: DropdownProps) => {
         <DrawerTrigger asChild>
           {children || (
             <ButtonInternal
-              label="Other actions"
+              label={i18n.actions.other}
               icon={EllipsisHorizontal}
               variant="outline"
               size="lg"

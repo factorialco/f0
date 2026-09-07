@@ -2,12 +2,14 @@ import { PropsWithChildren, useLayoutEffect, useRef, useState } from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { ChevronLeft, ChevronRight } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
 export const SPACE_FOR_WIDGET_SHADOW = 28
 const GAP = 16
 
 export const DynamicCarousel = ({ children }: PropsWithChildren) => {
+  const i18n = useI18n()
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [canScrollNext, setCanScrollNext] = useState(true)
   const [canScrollPrev, setCanScrollPrev] = useState(false)
@@ -127,7 +129,7 @@ export const DynamicCarousel = ({ children }: PropsWithChildren) => {
           )}
           onClick={scrollPrev}
           icon={ChevronLeft}
-          label="Previous"
+          label={i18n.navigation.previous}
           hideLabel
         ></ButtonInternal>
       )}
@@ -143,7 +145,7 @@ export const DynamicCarousel = ({ children }: PropsWithChildren) => {
           )}
           onClick={scrollNext}
           icon={ChevronRight}
-          label="Next"
+          label={i18n.navigation.next}
           hideLabel
         ></ButtonInternal>
       )}

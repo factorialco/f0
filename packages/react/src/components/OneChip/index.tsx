@@ -5,6 +5,7 @@ import { F0Avatar, type AvatarVariant } from "@/components/avatars/F0Avatar"
 import { F0Icon, type IconType } from "@/components/F0Icon"
 import { CrossedCircle } from "@/icons/app"
 import { experimentalComponent } from "@/lib/experimental"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 
 export const chipVariants = cva({
@@ -74,6 +75,7 @@ const _Chip = ({
   avatar,
   icon,
 }: ChipProps) => {
+  const i18n = useI18n()
   const closeDescriptionId = useId()
   const content = (
     <>
@@ -128,7 +130,7 @@ const _Chip = ({
             focusRing()
           )}
           tabIndex={0}
-          aria-label="Close"
+          aria-label={i18n.actions.close}
           aria-describedby={closeDescriptionId}
         >
           <F0Icon icon={CrossedCircle} size="sm" />

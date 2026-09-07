@@ -365,16 +365,34 @@ describe("suggesting an existing key", () => {
   const index = new Map([
     ["close", ["actions.close", "chat.closePreview"]],
     ["last 7 days", ["date.presets.last7Days"]],
-    ["next", ["navigation.next", "ai.clarifyingQuestion.next"]],
+    ["next", ["ai.clarifyingQuestion.next", "navigation.next"]],
+    ["back", ["chat.back", "ai.clarifyingQuestion.back"]],
   ])
 
   it("finds a key whose English matches, case-insensitively", () => {
-    expect(suggestKey("Close", index)).toBe("actions.close")
-    expect(suggestKey("last 7 DAYS", index)).toBe("date.presets.last7Days")
+    expect(suggestKey("Close", index)).toEqual({
+      key: "actions.close",
+      generic: true,
+    })
+    expect(suggestKey("last 7 DAYS", index)).toEqual({
+      key: "date.presets.last7Days",
+      generic: false,
+    })
   })
 
-  it("prefers the shallowest key when several hold the same English", () => {
-    expect(suggestKey("Next", index)).toBe("navigation.next")
+  it("prefers a shared namespace over a deeper feature key", () => {
+    // Depth alone picked wizard.previous for a date navigator.
+    expect(suggestKey("Next", index)).toEqual({
+      key: "navigation.next",
+      generic: true,
+    })
+  })
+
+  it("marks a feature-scoped key as not safe to borrow", () => {
+    expect(suggestKey("Back", index)).toEqual({
+      key: "chat.back",
+      generic: false,
+    })
   })
 
   it("returns nothing for a string the dictionary has never seen", () => {
@@ -427,34 +445,64 @@ describe("CI surfaces", () => {
     expect(annotations(wrapped)[0].split("\n")).toHaveLength(1)
   })
 
-  it("names the existing key in the annotation when there is one", () => {
+  it("names a shared key in the annotation as a straight swap", () => {
     const [line] = annotations([
-      added({ value: "Close", existingKey: "actions.close" }),
+      added({
+        value: "Close",
+        existingKey: "actions.close",
+        existingKeyIsGeneric: true,
+      }),
     ])
 
     expect(line).toContain("actions.close")
-    expect(line).toContain("A key for this already exists")
+    expect(line).toContain("A shared key already exists")
+  })
+
+  it("hedges when the only match is in another feature's namespace", () => {
+    const [line] = annotations([
+      added({
+        value: "Back",
+        existingKey: "chat.back",
+        existingKeyIsGeneric: false,
+      }),
+    ])
+
+    expect(line).toContain("chat.back")
+    expect(line).toContain("another feature's namespace")
+    // Must not read as an instruction to just use it.
+    expect(line).not.toContain("A shared key already exists")
   })
 
   it("tells you to write a key when none exists", () => {
     expect(fixHint(added({ value: "Nothing here yet" }))).toContain("Add a key")
   })
 
-  it("splits the comment into swap-a-key and write-a-key", () => {
+  it("splits the comment three ways by how reusable the key is", () => {
     const md = commentMarkdown({
       added: [
-        added({ value: "Close", existingKey: "actions.close" }),
+        added({
+          value: "Close",
+          existingKey: "actions.close",
+          existingKeyIsGeneric: true,
+        }),
+        added({
+          value: "Back",
+          existingKey: "chat.back",
+          existingKeyIsGeneric: false,
+        }),
         added({ value: "Nothing here yet", name: "emptyMessage", line: 18 }),
       ],
       fixed: {},
       staleFiles: [],
-      total: 160,
+      total: 161,
       baselineTotal: 158,
     })
 
-    expect(md).toContain("2 untranslated strings added")
-    expect(md).toContain("1 already have a key")
+    expect(md).toContain("3 untranslated strings added")
+    expect(md).toContain("1 can reuse a shared key")
     expect(md).toContain("`actions.close`")
+    expect(md).toContain("1 already translated in another feature")
+    expect(md).toContain("`chat.back`")
     expect(md).toContain("1 needs a new key")
     expect(md).toContain("`emptyMessage`")
     // The escape hatch must be discoverable from the comment alone.

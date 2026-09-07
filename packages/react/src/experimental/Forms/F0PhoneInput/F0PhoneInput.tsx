@@ -308,7 +308,7 @@ export const F0PhoneInput = forwardRef<HTMLInputElement, F0PhoneInputProps>(
                     "flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded-full p-0",
                     focusRing()
                   )}
-                  aria-label="Clear"
+                  aria-label={i18n.actions.clear}
                   type="button"
                   tabIndex={0}
                   data-testid="clear-button"

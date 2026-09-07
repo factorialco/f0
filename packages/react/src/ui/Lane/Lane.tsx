@@ -14,6 +14,7 @@ import { Spinner } from "@/ui/Spinner"
 import { LaneHeader } from "./components/LaneHeader"
 import { LoadingSkeleton } from "./components/LoadingSkeleton"
 import { LaneProps } from "./types"
+import { useI18n } from "@/lib/providers/i18n"
 
 export function Lane<Record extends RecordType>({
   title,
@@ -32,6 +33,8 @@ export function Lane<Record extends RecordType>({
   onFooterAction,
   dropPlaceholderIndex,
 }: LaneProps<Record>) {
+  const i18n = useI18n()
+
   // Create pagination info for infinite scroll
   const paginationInfo = {
     type: "infinite-scroll" as const,
@@ -144,7 +147,7 @@ export function Lane<Record extends RecordType>({
             size="md"
             className="w-full justify-center"
             icon={Plus}
-            label="Add"
+            label={i18n.actions.add}
             hideLabel
             onClick={onFooterAction}
           />
