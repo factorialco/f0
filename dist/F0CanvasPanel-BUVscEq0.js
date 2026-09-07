@@ -117893,10 +117893,13 @@ const oY1 = ({ text: e }) => /* @__PURE__ */ i(
                           name: J,
                           className: X(
                             "h-full w-full min-w-0 px-3 text-f1-foreground",
-                            b2 && "pl-0",
                             "[&::-webkit-search-cancel-button]:hidden",
                             (h || K) && "pl-8",
                             (h || K) && f === "md" && "pl-9",
+                            // After the icon offsets: the value in front of the input
+                            // already carries them, so applying them again leaves the
+                            // caret a whole inset away from the text.
+                            b2 && "pl-0",
                             t && "cursor-not-allowed",
                             e.props.className,
                             Bl({ size: f })
