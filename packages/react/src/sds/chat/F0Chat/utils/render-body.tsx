@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils"
 
 import { ChatUserHoverCard } from "../components/ChatUserHoverCard"
 import { type F0ChatLinkPreview, type F0ChatUser } from "../types"
+import { locateMentions } from "./mention-ranges"
 import { sanitizeDisplayText } from "./sanitize-text"
 
 /** URLs in a body render as clickable links (matches the mobile bubble). */
@@ -75,10 +76,10 @@ export const renderBodyWithLinks = (
   })
 }
 
-/** A `@name` token to highlight in a message body. Slack-style colours: a
- * mention of someone else reads in info colours; a mention of you (`isSelf`) or
- * the whole group (`isEveryone`, `@here`) reads in warning/amber. `user`, when
- * present (any person mention), opens the same profile hover card as the avatar. */
+/** A `@name` token to highlight in a message body. Every mention reads the
+ * same: secondary foreground, no background, whoever it names. `user`, when
+ * present (any person mention), opens the same profile hover card as the
+ * avatar. */
 export type MentionToken = {
   name: string
   isSelf: boolean
@@ -88,10 +89,16 @@ export type MentionToken = {
 
 /**
  * Render a body with its `@name` mentions as chips and everything else through
- * {@link renderBodyWithLinks}. Slack-style: a mention of someone else is an
- * info pill (and opens their profile hover card, like the sender avatar); a
- * mention of you or `@here` is an amber/warning pill that stands out. Falls back to
- * {@link renderBodyWithLinks} when there are no mentions.
+ * {@link renderBodyWithLinks}. A person mention also opens their profile hover
+ * card, like the sender avatar. Falls back to {@link renderBodyWithLinks} when
+ * there are no mentions.
+ *
+ * Carries no font-weight, deliberately, so the composer's highlight overlay can
+ * match it exactly and a mention looks the same while being typed and once
+ * sent. The overlay is the side that cannot have a weight — a `<textarea>` lays
+ * its whole run out at one weight, so a heavier mention there moves the caret
+ * off the glyphs (measured in #5274: 1.250px worst delta, 44/48 indices off,
+ * versus 0.023px without). Parity therefore has to be met here.
  *
  * Pure (no hooks): callers memoize the result per message.
  */
@@ -104,29 +111,7 @@ export const renderBodyWithMentions = (
   const body = sanitizeDisplayText(rawBody)
   if (tokens.length === 0) return renderBodyWithLinks(body, previews)
 
-  // Collect every `@name` occurrence (longest names first so "@Ana María" wins
-  // over "@Ana"), then drop overlaps left-to-right.
-  const ranges: { start: number; end: number; token: MentionToken }[] = []
-  const byLength = [...tokens].sort((a, b) => b.name.length - a.name.length)
-  for (const token of byLength) {
-    const pattern = `@${token.name}`
-    let from = 0
-    while (true) {
-      const idx = body.indexOf(pattern, from)
-      if (idx === -1) break
-      ranges.push({ start: idx, end: idx + pattern.length, token })
-      from = idx + pattern.length
-    }
-  }
-  ranges.sort((a, b) => a.start - b.start)
-
-  const clean: typeof ranges = []
-  let lastEnd = 0
-  for (const range of ranges) {
-    if (range.start < lastEnd) continue
-    clean.push(range)
-    lastEnd = range.end
-  }
+  const clean = locateMentions(body, tokens)
   if (clean.length === 0) return renderBodyWithLinks(body, previews)
 
   const nodes: ReactNode[] = []
@@ -139,12 +124,10 @@ export const renderBodyWithMentions = (
         </Fragment>
       )
     }
-    const { token } = range
+    const token = range.entry
     const chip = (
       <span
-        className={cn(
-          "font-medium text-f1-foreground-secondary hover:text-f1-foreground"
-        )}
+        className={cn("text-f1-foreground-secondary hover:text-f1-foreground")}
       >
         {body.slice(range.start, range.end)}
       </span>

@@ -2,7 +2,7 @@ import { act, renderHook, waitFor } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { type F0ChatUser } from "../../types"
-import { useMentions } from "../useMentions"
+import { type MentionEntry, useMentions } from "../useMentions"
 
 const MEMBERS: F0ChatUser[] = [
   { id: "ana-g", name: "Ana García" },
@@ -27,6 +27,8 @@ const makeProps = (over: Partial<Props> = {}): Props => {
     inputValue: "",
     setInputValue: () => {},
     cursorPosition: 0,
+    setCursorPosition: () => {},
+    requestSelection: () => {},
     textareaRef: { current: textarea },
     enabled: true,
     searchMembers: (q: string) =>
@@ -166,6 +168,140 @@ describe("useMentions", () => {
         mentions: [{ id: "ana-g", name: "Ana García" }],
         mentionedEveryone: false,
       })
+    )
+  })
+})
+
+// Raúl's report: editing a message that has a mention loses it. A mention is
+// re-derived from the text by name on every change and survives only while
+// `@Name` is followed by whitespace — which a saved body often isn't.
+describe("useMentions — a mention survives an edit", () => {
+  const ANA: MentionEntry = { id: "ana-g", name: "Ana García" }
+
+  const withValue = (body: string, over: Partial<Props> = {}) =>
+    makeProps({ inputValue: body, cursorPosition: body.length, ...over })
+
+  /**
+   * Reproduces `loadEditDraft`: seed the message's mentions, then hand the
+   * composer its body. The body arriving is what re-validates the seeded
+   * entries, so the order matters.
+   */
+  const openForEditing = (
+    body: string,
+    seeded: MentionEntry[],
+    over: Partial<Props> = {}
+  ) => {
+    const harness = renderHook((p: Props) => useMentions(p), {
+      initialProps: makeProps(over),
+    })
+    act(() => harness.result.current.seedMentions(seeded, body))
+    harness.rerender(withValue(body, over))
+    return harness
+  }
+
+  it("keeps a mention that ends the message", async () => {
+    const { result } = openForEditing("Ping @Ana García", [ANA])
+    await waitFor(() =>
+      expect(result.current.getMentions().mentions).toEqual([ANA])
+    )
+  })
+
+  it("keeps a mention followed by punctuation", async () => {
+    const { result } = openForEditing("Thanks @Ana García, all set", [ANA])
+    await waitFor(() =>
+      expect(result.current.getMentions().mentions).toEqual([ANA])
+    )
+  })
+
+  it("keeps a mention while the user edits the text around it", async () => {
+    let value = "Hola @Ana García, ¿vienes?"
+    const setInputValue = vi.fn((next: string) => {
+      value = next
+    })
+    const { result, rerender } = openForEditing(value, [ANA], { setInputValue })
+
+    value = "Hola @Ana García, ¿vienes hoy?"
+    rerender(withValue(value, { setInputValue }))
+
+    await waitFor(() =>
+      expect(result.current.getMentions().mentions).toEqual([ANA])
+    )
+    expect(setInputValue).not.toHaveBeenCalled()
+  })
+
+  it("removes the whole mention when the user edits inside it", async () => {
+    let value = "Hola @Ana García, ¿vienes?"
+    const setInputValue = vi.fn((next: string) => {
+      value = next
+    })
+    const { result, rerender } = openForEditing(value, [ANA], { setInputValue })
+
+    // Backspace the "c" of "García" — the caret lands at 13.
+    value = "Hola @Ana Garía, ¿vienes?"
+    rerender(
+      makeProps({ inputValue: value, cursorPosition: 13, setInputValue })
+    )
+
+    await waitFor(() =>
+      expect(setInputValue).toHaveBeenCalledWith("Hola , ¿vienes?")
+    )
+    expect(result.current.getMentions().mentions).toEqual([])
+  })
+
+  it("leaves the caret where the mention was, not at the end", async () => {
+    // A multi-line draft is where this shows: dropping the caret at the end
+    // moves it to another line entirely.
+    let value = "Hola @Ana García, ¿vienes?\nY mañana también\nGracias"
+    const setInputValue = vi.fn((next: string) => {
+      value = next
+    })
+    const setCursorPosition = vi.fn()
+    const { rerender } = openForEditing(value, [ANA], {
+      setInputValue,
+      setCursorPosition,
+    })
+
+    // Backspace the "c" of "García" — the caret lands at 13.
+    value = "Hola @Ana Garía, ¿vienes?\nY mañana también\nGracias"
+    rerender(
+      makeProps({
+        inputValue: value,
+        cursorPosition: 13,
+        setInputValue,
+        setCursorPosition,
+      })
+    )
+
+    await waitFor(() =>
+      expect(setInputValue).toHaveBeenCalledWith(
+        "Hola , ¿vienes?\nY mañana también\nGracias"
+      )
+    )
+    // 5 is where the "@" was; the end of that text is 40.
+    expect(setCursorPosition).toHaveBeenCalledWith(5)
+  })
+
+  it("tracks two people who share a display name independently", async () => {
+    const ANA_TWO: MentionEntry = { id: "ana-p", name: "Ana García" }
+    let value = "@Ana García and @Ana García, both please"
+    const setInputValue = vi.fn((next: string) => {
+      value = next
+    })
+    const { result, rerender } = openForEditing(value, [ANA, ANA_TWO], {
+      setInputValue,
+    })
+    await waitFor(() =>
+      expect(result.current.getMentions().mentions).toEqual([ANA, ANA_TWO])
+    )
+
+    // Delete the second occurrence: only the second id may go.
+    value = "@Ana García and , both please"
+    rerender(
+      makeProps({ inputValue: value, cursorPosition: 16, setInputValue })
+    )
+
+    await waitFor(() =>
+      expect(result.current.getMentions().mentions).toEqual([ANA])
     )
   })
 })

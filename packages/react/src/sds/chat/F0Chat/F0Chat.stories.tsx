@@ -1301,6 +1301,27 @@ export const ComposerHotkeys: Story = {
       // decides about focus — assert after that window, not before.
       await waitFor(() => expect(composer).toHaveFocus(), { timeout: 3000 })
     })
+
+    await step("Escape backs out of the quote, keeping the draft", async () => {
+      await userEvent.type(composer, "ya lo miro")
+      await userEvent.keyboard("{Escape}")
+      await waitFor(() =>
+        expect(
+          canvas.queryByRole("button", { name: /remove quote/i })
+        ).not.toBeInTheDocument()
+      )
+      await expect(composer).toHaveValue("ya lo miro")
+    })
+
+    await step("The next Escape clears the draft", async () => {
+      await userEvent.keyboard("{Escape}")
+      await waitFor(() => expect(composer).toHaveValue(""))
+    })
+
+    await step("Undo puts the cleared draft back", async () => {
+      await userEvent.keyboard("{Meta>}z{/Meta}")
+      await waitFor(() => expect(composer).toHaveValue("ya lo miro"))
+    })
   },
 }
 
