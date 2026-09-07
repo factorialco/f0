@@ -1,4 +1,5 @@
-import type { MentionEntry } from "./useMentions"
+import { anchorEnd } from "./mention-anchors"
+import type { AnchoredMention } from "./useMentions"
 
 /**
  * Escape a string for safe embedding inside XML/HTML attributes and text
@@ -27,7 +28,7 @@ export type HighlightSegment = {
  */
 export function buildHighlightSegments(
   text: string,
-  mentions: MentionEntry[],
+  mentions: AnchoredMention[],
   options?: {
     cursorPosition?: number
     inlineCompletion?: string | null
@@ -36,24 +37,12 @@ export function buildHighlightSegments(
   const cursorPos = options?.cursorPosition ?? text.length
   const ghost = options?.inlineCompletion ?? null
 
-  // Build a list of { start, end } ranges for each @Name occurrence
-  const ranges: { start: number; end: number }[] = []
-
-  for (const mention of mentions) {
-    const pattern = `@${mention.name}`
-    let searchFrom = 0
-    while (true) {
-      const idx = text.indexOf(pattern, searchFrom)
-      if (idx === -1) {
-        break
-      }
-      ranges.push({ start: idx, end: idx + pattern.length })
-      searchFrom = idx + pattern.length
-    }
-  }
-
-  // Sort by start position
-  ranges.sort((a, b) => a.start - b.start)
+  // The textarea owns the anchors, so the overlay paints exactly the spans it
+  // considers mentions — no second, independently-drifting match.
+  const ranges = mentions
+    .map((mention) => ({ start: mention.start, end: anchorEnd(mention) }))
+    .filter((range) => range.start >= 0 && range.end <= text.length)
+    .sort((a, b) => a.start - b.start)
 
   // Collect all "split points": mention ranges + the ghost insertion point
   // Then walk through the text emitting segments in order.
