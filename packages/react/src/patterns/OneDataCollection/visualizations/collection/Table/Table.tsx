@@ -253,40 +253,6 @@ export const TableCollection = <
   // `variants` prop on each render.
   const rowAnimationVariants = useMemo(() => getAnimationVariants(), [])
 
-  // Rows receive the source, and it gets a fresh identity on every render of the
-  // consumer: `useDataCollectionSource` returns an object literal whose spread
-  // members come from the consumer's inline definition, so it cannot be memoized
-  // at the origin. While that identity churns, no memo boundary on a row can ever
-  // hit — the comparison fails on this prop alone, every time.
-  //
-  // This hands rows a stable object that forwards every read to the latest
-  // source, so values are never stale; only the identity is pinned. A proxy
-  // rather than a hand-picked copy of the fields rows use, because the subtree
-  // both reads individual fields AND spreads the whole object (`RowLoading`
-  // rebuilds it to override one), so an explicit list would silently go out of
-  // date the next time a field is added.
-  const latestSourceRef = useRef(effectiveSource)
-  latestSourceRef.current = effectiveSource
-  const stableSource = useMemo(
-    () =>
-      new Proxy({} as typeof effectiveSource, {
-        get: (_target, prop) =>
-          latestSourceRef.current[prop as keyof typeof effectiveSource],
-        has: (_target, prop) => prop in latestSourceRef.current,
-        ownKeys: () => Reflect.ownKeys(latestSourceRef.current),
-        // The proxy target is empty, so a descriptor for a key it does not own
-        // must be reported configurable or the proxy invariant throws.
-        getOwnPropertyDescriptor: (_target, prop) => {
-          const descriptor = Reflect.getOwnPropertyDescriptor(
-            latestSourceRef.current,
-            prop
-          )
-          return descriptor && { ...descriptor, configurable: true }
-        },
-      }),
-    []
-  )
-
   // Infinite scroll pagination
   const { loadingIndicatorRef } = useInfiniteScrollPagination(
     paginationInfo,
@@ -360,14 +326,14 @@ export const TableCollection = <
   // every row's props differ on any selection change (measured: 25 mismatches for
   // 25 rows), so one checkbox re-rendered the entire table.
   const isItemSelected = (record: R): boolean => {
-    const id = stableSource.selectable?.(record)
+    const id = effectiveSource.selectable?.(record)
     return id !== undefined && selectedItems.has(id)
   }
 
   // Only rows that render nested children need the Map, to derive their own
   // children's state. Flat rows get `undefined`, which is stable.
   const nestedSelectedItems = (record: R): typeof selectedItems | undefined =>
-    stableSource.itemsWithChildren?.(record) ? selectedItems : undefined
+    effectiveSource.itemsWithChildren?.(record) ? selectedItems : undefined
   const summaryData = useMemo(() => {
     // Early return if no summaries configuration or summaries data is available
 
@@ -906,7 +872,7 @@ export const TableCollection = <
                                 custom={index}
                                 key={rowKey}
                                 layout
-                                source={stableSource}
+                                source={effectiveSource}
                                 item={item}
                                 index={index}
                                 groupIndex={groupIndex}
@@ -970,7 +936,7 @@ export const TableCollection = <
                       layout
                       isNew={isNew}
                       groupIndex={0}
-                      source={stableSource}
+                      source={effectiveSource}
                       item={item}
                       index={index}
                       onItemCheckedChange={stableSelectItemChange}
