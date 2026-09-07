@@ -1,12 +1,5 @@
-import {
-  memo,
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-} from "react"
-import { type AvatarVariant, F0Avatar } from "@/components/avatars/F0Avatar"
+import { memo, useCallback, useEffect, useLayoutEffect, useRef } from "react"
+import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0Icon } from "@/components/F0Icon"
 import { People } from "@/icons/app"
 import { OneEllipsis } from "@/lib/OneEllipsis"
@@ -40,7 +33,7 @@ const optionId = (listboxId: string, candidate: MentionCandidate): string => {
 export const getChatMentionOptionId = optionId
 
 type MentionOptionProps = {
-  optionId: string
+  id: string
   index: number
   isSelected: boolean
   onSelect: (index: number) => void
@@ -49,7 +42,7 @@ type MentionOptionProps = {
 }
 
 function MentionOption({
-  optionId,
+  id,
   index,
   isSelected,
   onSelect,
@@ -67,7 +60,7 @@ function MentionOption({
   return (
     <div
       ref={innerRef}
-      id={optionId}
+      id={id}
       role="option"
       aria-selected={isSelected}
       className={cn(
@@ -112,14 +105,18 @@ const UserRow = memo(function UserRow({
   user,
   ...option
 }: MentionRowProps & { user: F0ChatUser }) {
-  const avatar = useMemo<AvatarVariant>(
-    () => user.avatar ?? { type: "person", firstName: user.name, lastName: "" },
-    [user]
-  )
-
   return (
     <MentionOption {...option}>
-      <F0Avatar size="xs" avatar={avatar} />
+      <F0Avatar
+        size="xs"
+        avatar={
+          user.avatar ?? {
+            type: "person",
+            firstName: user.name,
+            lastName: "",
+          }
+        }
+      />
       <div className="flex min-w-0 flex-1 flex-col">
         <OneEllipsis className="text-base font-medium text-f1-foreground">
           {user.name}
@@ -156,9 +153,14 @@ export function ChatMentionPopover({
   // handed either of them directly would re-render on every keystroke however
   // it was memoized. Rows get an index and this handler instead, both stable.
   const resultsRef = useRef(results)
-  resultsRef.current = results
   const onSelectRef = useRef(onSelect)
-  onSelectRef.current = onSelect
+  // Committed values only: a render a host discards (a transition, a Suspense
+  // retry) must not leave these pointing at candidates that never reached the
+  // DOM, or a click would insert someone the list never showed.
+  useLayoutEffect(() => {
+    resultsRef.current = results
+    onSelectRef.current = onSelect
+  })
 
   const handleSelect = useCallback((index: number) => {
     const candidate = resultsRef.current[index]
@@ -215,7 +217,7 @@ export function ChatMentionPopover({
         return candidate.kind === "everyone" ? (
           <EveryoneRow
             key="@everyone"
-            optionId={id}
+            id={id}
             index={index}
             isSelected={isSelected}
             onSelect={handleSelect}
@@ -226,7 +228,7 @@ export function ChatMentionPopover({
         ) : (
           <UserRow
             key={candidate.user.id}
-            optionId={id}
+            id={id}
             index={index}
             isSelected={isSelected}
             onSelect={handleSelect}

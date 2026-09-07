@@ -1,6 +1,11 @@
-import { act, fireEvent, render, screen } from "@testing-library/react"
-import { type ComponentProps, useState } from "react"
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { forwardRef, StrictMode, useState } from "react"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import {
+  act,
+  fireEvent,
+  screen,
+  zeroRender as render,
+} from "@/testing/test-utils"
 import {
   type MentionCandidate,
   type PopoverPosition,
@@ -12,21 +17,25 @@ import {
 } from "../ChatMentionPopover"
 
 /**
- * Every candidate row renders `OneEllipsis` and nothing else in the popover
- * does, so counting its renders counts row renders without the test having to
- * know whether a row is inline JSX or its own component.
+ * Rows are the only thing in the popover that renders `OneEllipsis` — one per
+ * member row, two for the `@here` row — so recording its renders records row
+ * renders without the test knowing whether a row is inline JSX or its own
+ * component, which is what lets one test produce both the before and the after
+ * number. Keeping the text says *which* rows re-rendered, not just how many.
  */
-const rowRenders = { count: 0 }
+const rowRenders = vi.hoisted(() => ({ texts: [] as string[] }))
 
 vi.mock("@/lib/OneEllipsis", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/lib/OneEllipsis")>()
-  return {
-    ...actual,
-    OneEllipsis: (props: ComponentProps<typeof actual.OneEllipsis>) => {
-      rowRenders.count++
-      return <actual.OneEllipsis {...props} />
-    },
-  }
+  const Counted = forwardRef<
+    HTMLElement,
+    React.ComponentProps<typeof actual.OneEllipsis>
+  >((props, ref) => {
+    rowRenders.texts.push(props.children)
+    return <actual.OneEllipsis {...props} ref={ref} />
+  })
+  Counted.displayName = "CountedOneEllipsis"
+  return { ...actual, OneEllipsis: Counted }
 })
 
 const LISTBOX_ID = "mention-listbox"
@@ -43,7 +52,6 @@ type Controls = {
 }
 
 let controls: Controls
-
 const selections: MentionCandidate[] = []
 
 /**
@@ -90,48 +98,67 @@ function Harness({
 }
 
 beforeEach(() => {
-  rowRenders.count = 0
+  rowRenders.texts = []
   selections.length = 0
+  controls = undefined as unknown as Controls
+})
+
+afterEach(() => {
+  vi.restoreAllMocks()
 })
 
 describe("ChatMentionPopover row render cost", () => {
   it("mounts one row per candidate", () => {
     render(<Harness />)
+
     expect(screen.getAllByRole("option")).toHaveLength(50)
-    expect(rowRenders.count).toBe(50)
+    expect(rowRenders.texts).toHaveLength(50)
   })
 
   it("re-renders only the two rows the highlight moved between", () => {
     render(<Harness />)
-    rowRenders.count = 0
+    rowRenders.texts = []
 
     act(() => controls.setSelectedIndex(1))
 
-    expect(rowRenders.count).toBe(2)
+    expect(rowRenders.texts).toEqual(["Member 0", "Member 1"])
   })
 
   it("re-renders no rows when a keystroke leaves the candidates unchanged", () => {
-    render(<Harness />)
-    rowRenders.count = 0
+    render(<Harness everyoneLabel="here" />)
+    rowRenders.texts = []
 
     act(() => controls.setQuery("An"))
 
-    expect(rowRenders.count).toBe(0)
+    expect(rowRenders.texts).toEqual([])
+  })
+
+  it("re-renders no rows when the keystroke lands under StrictMode's double render", () => {
+    render(
+      <StrictMode>
+        <Harness everyoneLabel="here" />
+      </StrictMode>
+    )
+    rowRenders.texts = []
+
+    act(() => controls.setQuery("An"))
+
+    expect(rowRenders.texts).toEqual([])
   })
 
   it("drops the rows a narrower search removed and leaves the survivors alone", () => {
     const { rerender } = render(<Harness />)
-    rowRenders.count = 0
+    rowRenders.texts = []
 
     rerender(<Harness users={members.slice(0, 10)} />)
 
     expect(screen.getAllByRole("option")).toHaveLength(10)
-    expect(rowRenders.count).toBe(0)
+    expect(rowRenders.texts).toEqual([])
   })
 
   it("still re-renders a row whose candidate the search replaced", () => {
     const { rerender } = render(<Harness users={members.slice(0, 10)} />)
-    rowRenders.count = 0
+    rowRenders.texts = []
 
     rerender(
       <Harness
@@ -141,10 +168,8 @@ describe("ChatMentionPopover row render cost", () => {
       />
     )
 
-    expect(rowRenders.count).toBe(10)
-    expect(screen.getAllByRole("option")[0]).toHaveTextContent(
-      "Member 0 (renamed)"
-    )
+    expect(rowRenders.texts).toHaveLength(10)
+    expect(rowRenders.texts[0]).toBe("Member 0 (renamed)")
   })
 })
 
@@ -152,8 +177,7 @@ describe("ChatMentionPopover accessibility", () => {
   it("exposes the listbox and one option per candidate, in order, with the ids the composer points aria-activedescendant at", () => {
     render(<Harness users={members.slice(0, 3)} everyoneLabel="here" />)
 
-    const listbox = screen.getByRole("listbox")
-    expect(listbox).toHaveAttribute("id", LISTBOX_ID)
+    expect(screen.getByRole("listbox")).toHaveAttribute("id", LISTBOX_ID)
 
     const options = screen.getAllByRole("option")
     expect(options).toHaveLength(4)
@@ -190,11 +214,11 @@ describe("ChatMentionPopover accessibility", () => {
 
   it("scrolls the newly highlighted option into view, including when the highlight moves up", () => {
     const scrolled: HTMLElement[] = []
-    const spy = vi
-      .spyOn(HTMLElement.prototype, "scrollIntoView")
-      .mockImplementation(function (this: HTMLElement) {
+    vi.spyOn(HTMLElement.prototype, "scrollIntoView").mockImplementation(
+      function (this: HTMLElement) {
         scrolled.push(this)
-      })
+      }
+    )
 
     render(<Harness users={members.slice(0, 5)} />)
     act(() => controls.setSelectedIndex(3))
@@ -202,8 +226,8 @@ describe("ChatMentionPopover accessibility", () => {
 
     act(() => controls.setSelectedIndex(1))
 
-    expect(scrolled).toEqual([screen.getAllByRole("option")[1]])
-    spy.mockRestore()
+    expect(scrolled).toHaveLength(1)
+    expect(scrolled[0]).toBe(screen.getAllByRole("option")[1])
   })
 
   it("selects the pointed-at candidate without taking focus off the textarea", () => {
@@ -217,14 +241,26 @@ describe("ChatMentionPopover accessibility", () => {
     expect(selections).toEqual([{ kind: "user", user: members[1] }])
   })
 
+  it("selects from the candidates on screen after a narrower search", () => {
+    const { rerender } = render(
+      <Harness users={members.slice(0, 5)} everyoneLabel="here" />
+    )
+
+    rerender(<Harness users={members.slice(2, 5)} everyoneLabel="here" />)
+    fireEvent.mouseDown(screen.getAllByRole("option")[1]!)
+
+    expect(selections).toEqual([{ kind: "user", user: members[2] }])
+  })
+
   it("keeps loading skeletons out of the accessible option list", () => {
     render(<Harness users={[]} everyoneLabel="here" isLoading />)
 
     expect(screen.getAllByRole("option")).toHaveLength(1)
-    document
-      .querySelectorAll('[aria-hidden="true"]')
-      .forEach((skeleton) => expect(skeleton).toBeInTheDocument())
-    expect(document.querySelectorAll('[aria-hidden="true"]')).toHaveLength(3)
+    const skeletons = screen.getAllByTestId("skeleton")
+    expect(skeletons).toHaveLength(6)
+    skeletons.forEach((skeleton) =>
+      expect(skeleton.closest('[aria-hidden="true"]')).not.toBeNull()
+    )
   })
 
   it("renders nothing when closed, or when nothing matches and nothing is loading", () => {
