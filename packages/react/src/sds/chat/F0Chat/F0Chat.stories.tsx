@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { Profiler, type ReactNode, useEffect, useRef, useState } from "react"
-import { expect, fireEvent, userEvent, waitFor, within } from "storybook/test"
+import { expect, userEvent, waitFor, within } from "storybook/test"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
@@ -1313,12 +1313,14 @@ export const ComposerHotkeys: Story = {
       await expect(composer).toHaveValue("ya lo miro")
     })
 
-    await step("A second Escape clears the composer", async () => {
-      // Fired directly: the window between the two presses is what the feature
-      // measures, and userEvent's own pacing would race a loaded browser.
-      fireEvent.keyDown(composer, { key: "Escape" })
-      fireEvent.keyDown(composer, { key: "Escape" })
+    await step("The next Escape clears the draft", async () => {
+      await userEvent.keyboard("{Escape}")
       await waitFor(() => expect(composer).toHaveValue(""))
+    })
+
+    await step("Undo puts the cleared draft back", async () => {
+      await userEvent.keyboard("{Meta>}z{/Meta}")
+      await waitFor(() => expect(composer).toHaveValue("ya lo miro"))
     })
   },
 }

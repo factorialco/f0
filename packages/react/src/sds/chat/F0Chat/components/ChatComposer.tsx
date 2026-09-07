@@ -70,11 +70,6 @@ import {
 import { ChatReplyChip } from "./ChatReplyChip"
 import { ChatTextareaField } from "./ChatTextareaField"
 
-/** How long after an Escape a second one still means "clear the composer".
- * Long enough to be a deliberate double-tap, short enough that an Escape
- * minutes later starts over rather than wiping a draft. */
-const DOUBLE_ESCAPE_MS = 400
-
 type UploadingAttachment = {
   id: string
   status: "uploading"
@@ -146,7 +141,6 @@ export const ChatComposer = (): ReactNode => {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const attachmentStripRef = useRef<HTMLDivElement>(null)
   const localPreviewUrlsRef = useRef(new Set<string>())
-  const lastEscapeAtRef = useRef(0)
   // Where the caret belongs once React has written `forText`. A rAF is too
   // early — it can land before the commit, so the selection is set on the old
   // string and React's own value write then drops the caret at the end. The
@@ -904,30 +898,24 @@ export const ChatComposer = (): ReactNode => {
       if (handleEmojiAutocompleteKeyDown(e)) return
       // The mention popover consumes navigation keys first (↑↓/Enter/Tab/Esc).
       if (mentions.handleKeyDown(e)) return
-      // Escape, once neither autocomplete claimed it: back out of an edit or a
-      // reply, else clear the text on a second press. The composer only takes
-      // the key when it has something to lose — with nothing pending, Escape
-      // belongs to whatever the chat is mounted in, so a host dialog can still
-      // be closed from a focused composer.
+      // Escape, once neither autocomplete claimed it, undoes one thing at a
+      // time: the chip if one is open, else the text. No double-tap — a timed
+      // window put the gesture behind an invisible armed state and a rhythm,
+      // and the guard it was there to provide is now Cmd+Z, which puts a
+      // cleared draft straight back.
       if (e.key === "Escape") {
         if (target.kind !== "none") {
           e.preventDefault()
-          // Backing out of a chip is not the opening half of a clear.
-          lastEscapeAtRef.current = 0
           if (isEditing) dismissEdit()
           else dismissReply()
           return
         }
+        // Nothing to lose: the key belongs to whatever the chat is mounted in,
+        // so a host dialog can still be closed from a focused composer.
         if (value.length === 0) return
         e.preventDefault()
-        const now = Date.now()
-        if (now - lastEscapeAtRef.current <= DOUBLE_ESCAPE_MS) {
-          lastEscapeAtRef.current = 0
-          clearComposerText()
-          void stopTyping?.()
-          return
-        }
-        lastEscapeAtRef.current = now
+        clearComposerText()
+        void stopTyping?.()
         return
       }
       // A modifier makes ↑ a selection gesture, never this shortcut; and with

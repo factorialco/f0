@@ -579,24 +579,6 @@ describe("F0Chat composer escape", () => {
   /** Returns false when the composer claimed the key. */
   const pressEscape = () => fireEvent.keyDown(composer(), { key: "Escape" })
 
-  /**
-   * Escape presses with Date.now pinned to each value in turn. The pin has to
-   * span every press: restoring it between them lets the handler read the real
-   * clock, which makes two deliberately-distant presses look adjacent. Fake
-   * timers are avoided here because userEvent fights them.
-   */
-  const pressEscapeAt = (...times: number[]) => {
-    const clock = vi.spyOn(Date, "now")
-    try {
-      for (const at of times) {
-        clock.mockReturnValue(at)
-        pressEscape()
-      }
-    } finally {
-      clock.mockRestore()
-    }
-  }
-
   it("backs out of an edit in progress", async () => {
     renderChat(editable())
     await pressArrowUp()
@@ -659,15 +641,14 @@ describe("F0Chat composer escape", () => {
     await typeInComposer("@Ana")
     await screen.findByRole("option", { name: "Ana García" })
 
-    pressEscapeAt(1_000)
+    pressEscape()
 
     await waitFor(() =>
       expect(
         screen.queryByRole("option", { name: "Ana García" })
       ).not.toBeInTheDocument()
     )
-    // The press that closed the popover is not the opening half of a clear.
-    pressEscapeAt(1_100)
+    // The popover took that press; the text is untouched.
     expect(composer()).toHaveValue("@Ana")
   })
 
@@ -709,34 +690,31 @@ describe("F0Chat composer escape", () => {
     expect(input.selectionEnd).toBe(5)
   })
 
-  it("clears the composer on a second press", async () => {
+  it("clears the text once no chip is left to dismiss", async () => {
     renderChat(makeRuntime())
     await typeInComposer("un borrador")
 
-    pressEscapeAt(1_000)
-    expect(composer()).toHaveValue("un borrador")
+    pressEscape()
 
-    pressEscapeAt(1_000, 1_300)
     await waitFor(() => expect(composer()).toHaveValue(""))
   })
 
-  it("leaves the draft alone when the two presses are far apart", async () => {
-    renderChat(makeRuntime())
-    await typeInComposer("un borrador")
-
-    pressEscapeAt(1_000, 1_401)
-
-    expect(composer()).toHaveValue("un borrador")
-  })
-
-  it("does not carry a dismissed chip into a clear", async () => {
+  it("takes two presses from a reply chip — chip, then text", async () => {
     renderChat(makeRuntime())
     await typeInComposer("ya lo miro")
     await userEvent.dblClick(bubbleAround("Hello there"))
 
-    pressEscapeAt(1_000, 1_100)
-
+    // The chip goes first and the draft survives, whatever the rhythm.
+    pressEscape()
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("button", { name: /remove quote/i })
+      ).not.toBeInTheDocument()
+    )
     expect(composer()).toHaveValue("ya lo miro")
+
+    pressEscape()
+    await waitFor(() => expect(composer()).toHaveValue(""))
   })
 
   it("claims Escape once there is a draft to protect", async () => {
@@ -757,7 +735,7 @@ describe("F0Chat composer escape", () => {
     renderChat(makeRuntime())
     await typeInComposer("un borrador")
 
-    pressEscapeAt(1_000, 1_300)
+    pressEscape()
     await waitFor(() => expect(composer()).toHaveValue(""))
 
     await userEvent.keyboard("{Meta>}z{/Meta}")
