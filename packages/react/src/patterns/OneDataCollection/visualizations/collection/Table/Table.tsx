@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "motion/react"
-import { Fragment, useEffect, useMemo, useRef, useState } from "react"
+import { Fragment, memo, useEffect, useMemo, useRef, useState } from "react"
 import { F0Button } from "@/components/F0Button"
 import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import { F0Checkbox } from "@/components/F0Checkbox"
@@ -134,18 +134,30 @@ export const TableCollection = <
   TableCustomizationProps<R, Sortings, Summaries>) => {
   const { t, ...i18n } = useI18n()
   const addRow = useAddRow()
-  // Created a motion component for the row
+  // Created a motion component for the row.
+  //
+  // Memoized on the OUTSIDE of `motion.create`, not on `Row`: rows carry framer's
+  // `layout` prop, so the wrapper measures each row's box on every commit. A memo
+  // inside would skip React's render of the row but still pay that measurement,
+  // which is a large part of what makes a full-table commit expensive.
+  //
+  // Default shallow comparison on purpose. A hand-written comparator is faster but
+  // fails unsafely — omit a prop and a row silently shows stale data. Shallow only
+  // skips when every prop is identical, so a prop we have not stabilized costs a
+  // render rather than correctness.
   const [MotionRow] = useState(() =>
-    motion.create(
-      Row<
-        R,
-        Filters,
-        Sortings,
-        Summaries,
-        ItemActions,
-        NavigationFilters,
-        Grouping
-      >
+    memo(
+      motion.create(
+        Row<
+          R,
+          Filters,
+          Sortings,
+          Summaries,
+          ItemActions,
+          NavigationFilters,
+          Grouping
+        >
+      )
     )
   )
 
@@ -233,6 +245,11 @@ export const TableCollection = <
     [source, showItemActionsProp]
   )
 
+  // Called with no arguments at every use site, so the result is always the same
+  // object by value. Building it once stops every row receiving a fresh
+  // `variants` prop on each render.
+  const rowAnimationVariants = useMemo(() => getAnimationVariants(), [])
+
   // Infinite scroll pagination
   const { loadingIndicatorRef } = useInfiniteScrollPagination(
     paginationInfo,
@@ -290,6 +307,30 @@ export const TableCollection = <
     getRenderedSelectableEntries: selectionRegistry.getEntries,
     renderedSelectableCount: selectionRegistry.ids.length,
   })
+
+  // `handleSelectItemChange` is rebuilt whenever the consumer's `selectable`
+  // changes identity, which for an inline definition is every render. Rows get a
+  // stable wrapper instead, so the latest handler still runs.
+  const latestSelectItemChangeRef = useRef(handleSelectItemChange)
+  latestSelectItemChangeRef.current = handleSelectItemChange
+  const stableSelectItemChange = useMemo(
+    () => (item: R, checked: boolean) =>
+      latestSelectItemChangeRef.current(item, checked),
+    []
+  )
+
+  // Selection is handed to each row as its own boolean. Passing the whole Map made
+  // every row's props differ on any selection change (measured: 25 mismatches for
+  // 25 rows), so one checkbox re-rendered the entire table.
+  const isItemSelected = (record: R): boolean => {
+    const id = effectiveSource.selectable?.(record)
+    return id !== undefined && selectedItems.has(id)
+  }
+
+  // Only rows that render nested children need the Map, to derive their own
+  // children's state. Flat rows get `undefined`, which is stable.
+  const nestedSelectedItems = (record: R): typeof selectedItems | undefined =>
+    effectiveSource.itemsWithChildren?.(record) ? selectedItems : undefined
   const summaryData = useMemo(() => {
     // Early return if no summaries configuration or summaries data is available
 
@@ -821,7 +862,7 @@ export const TableCollection = <
                             const rowKey = `row-${groupIndex}-${getRowKey(item, index)}`
                             const motionRow = (
                               <MotionRow
-                                variants={getAnimationVariants()}
+                                variants={rowAnimationVariants}
                                 initial={collapsible ? "hidden" : "visible"}
                                 animate="visible"
                                 exit="hidden"
@@ -832,11 +873,9 @@ export const TableCollection = <
                                 item={item}
                                 index={index}
                                 groupIndex={groupIndex}
-                                onItemCheckedChange={handleSelectItemChange}
-                                onCheckedChange={(checked) =>
-                                  handleSelectItemChange(item, checked)
-                                }
-                                selectedItems={selectedItems}
+                                onItemCheckedChange={stableSelectItemChange}
+                                isSelected={isItemSelected(item)}
+                                selectedItems={nestedSelectedItems(item)}
                                 columns={columns}
                                 frozenColumnsLeft={frozenColumnsLeft}
                                 checkColumnWidth={checkColumnWidth}
@@ -883,7 +922,7 @@ export const TableCollection = <
                   const isNew = addedRowKeys.has(rowKey)
                   const motionRow = (
                     <MotionRow
-                      variants={getAnimationVariants()}
+                      variants={rowAnimationVariants}
                       // Only a genuinely-inserted row plays the enter
                       // animation; rows arriving via pagination or the initial
                       // load appear in place, without movement.
@@ -897,11 +936,9 @@ export const TableCollection = <
                       source={effectiveSource}
                       item={item}
                       index={index}
-                      onItemCheckedChange={handleSelectItemChange}
-                      onCheckedChange={(checked) =>
-                        handleSelectItemChange(item, checked)
-                      }
-                      selectedItems={selectedItems}
+                      onItemCheckedChange={stableSelectItemChange}
+                      isSelected={isItemSelected(item)}
+                      selectedItems={nestedSelectedItems(item)}
                       columns={columns}
                       frozenColumnsLeft={frozenColumnsLeft}
                       checkColumnWidth={checkColumnWidth}
