@@ -220,6 +220,7 @@ const DropdownMode = ({
   disabled,
   loading,
   tooltip,
+  contentClassName,
 }: {
   onClick: (value: string, item: ButtonDropdownItem) => void
   trigger?: string
@@ -230,6 +231,7 @@ const DropdownMode = ({
   disabled?: boolean
   loading?: boolean
   tooltip?: string
+  contentClassName?: string
 }) => {
   const [isOpen, setIsOpen] = useState(false)
 
@@ -300,6 +302,7 @@ const DropdownMode = ({
         }
         setIsOpen(open)
       }}
+      contentClassName={contentClassName}
     >
       <Action
         variant={variant}
@@ -336,6 +339,9 @@ const _F0ButtonDropdown = (props: F0ButtonDropdownProps) => {
         disabled={props.disabled}
         loading={props.loading}
         tooltip={props.tooltip}
+        contentClassName={
+          "contentClassName" in props ? props.contentClassName : undefined
+        }
       />
     )
   }
