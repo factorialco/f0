@@ -88,6 +88,16 @@ return <F0Form formDefinition={formDefinition} />
         <td>✓</td>
       </tr>
       <tr>
+        <td>`f0FormField.location(config)`</td>
+        <td>
+          `z.object({ addressLine1, city, state, postalCode, country, placeId,
+          latitude, longitude, ... })`. Requires a non-empty address unless
+          `optional`; `requireResolved` also demands a picked place
+        </td>
+        <td>location input (`F0LocationInput`)</td>
+        <td>✓</td>
+      </tr>
+      <tr>
         <td>`f0FormField.url(config)`</td>
         <td>`z.string().url()`</td>
         <td>text input (url)</td>
