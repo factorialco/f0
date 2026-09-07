@@ -7,7 +7,7 @@ import { F0Icon, type IconType } from "@/components/F0Icon"
 import { ChevronRight } from "@/icons/app"
 import { isExternalHref, Link } from "@/lib/linkHandler"
 import { cn } from "@/lib/utils"
-import { useWidgetIsWide } from "@/experimental/Widgets/Widget"
+import { useWidgetIsWideOrUnset } from "@/experimental/Widgets/Widget"
 import {
   DropdownInternal,
   type DropdownItem,
@@ -73,8 +73,8 @@ const ACTIONS_CLASS = cn(
   // Hidden but still in the DOM and still focusable, so Tab reaches them —
   // and reaching them is what reveals the strip (`group-focus-within`).
   "opacity-0 transition-opacity motion-reduce:transition-none",
-  "group-hover:pointer-events-auto group-hover:opacity-100",
-  "group-focus-within:pointer-events-auto group-focus-within:opacity-100"
+  "group-hover/row:pointer-events-auto group-hover/row:opacity-100",
+  "group-focus-within/row:pointer-events-auto group-focus-within/row:opacity-100"
 )
 
 /**
@@ -241,7 +241,8 @@ export function HomeListItem({
 }: HomeListItemProps) {
   const hasActions = Boolean(actions?.length)
   // The card the row landed in — the row's controls step up with it.
-  const isWide = useWidgetIsWide()
+  // `undefined` = no card at all (a row in a dialog), which has a wide row's room.
+  const isWide = useWidgetIsWideOrUnset()
   // Which action's menu is up, by label — `null` for none. Not a boolean, so
   // one menu closing can never hide a strip another one is still holding open.
   const [openMenu, setOpenMenu] = useState<string | null>(null)
@@ -344,7 +345,7 @@ export function HomeListItem({
     // the group version the row would go dark the moment the pointer crossed
     // into the strip on its way to a button.
     hasActions
-      ? "group-hover:bg-f1-background-tertiary group-focus-within:bg-f1-background-tertiary"
+      ? "group-hover/row:bg-f1-background-tertiary group-focus-within/row:bg-f1-background-tertiary"
       : href && "hover:bg-f1-background-tertiary",
     // With a menu up the pointer is off the row entirely, but the row is still
     // the thing being acted on — so it stays lit under its own open menu.
@@ -366,7 +367,12 @@ export function HomeListItem({
   if (!hasActions) return row
 
   return (
-    <div className="group relative">
+    // A NAMED group: `F0Button` is itself a `.group` and colours its glyph with
+    // unnamed `group-hover:` rules. An unnamed group here would be an ancestor
+    // match for those, so hovering the ROW painted every action button as if it
+    // were hovered — a critical action never showed its red rest state, because
+    // the strip is only visible on row hover.
+    <div className="group/row relative">
       {row}
       <div className={cn(ACTIONS_CLASS, openMenu && ACTIONS_PINNED_CLASS)}>
         {actions?.map((action) => {
@@ -382,7 +388,7 @@ export function HomeListItem({
               variant={action.critical ? "critical" : "outline"}
               // Up a step with the card, like everything else the row draws — a
               // 24px button beside a 40px glyph is a control you have to aim at.
-              size={isWide ? "md" : "sm"}
+              size={isWide === false ? "sm" : "md"}
               onClick={action.onClick}
             />
           )
