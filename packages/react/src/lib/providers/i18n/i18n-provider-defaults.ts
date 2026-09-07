@@ -401,6 +401,18 @@ export const defaultTranslations = {
     // reads badly past a couple of minutes — the consumer picks.
     thinkingElapsedSeconds: "{{seconds}}s",
     thinkingElapsedMinutes: "{{minutes}}m {{seconds}}s",
+    // Byline shown wherever One's own output is displayed, so the reader can
+    // always tell an assessment from a fact. One string, not a set: how much
+    // the message claims is the status's job, and a byline that also modulated
+    // the claim would be a second signal for the same thing.
+    attribution: "Suggested by One",
+    // The disclosure's verb belongs to the component and its noun to the
+    // product: the state then shows in one word instead of replacing the whole
+    // label, and the name of what is behind it never disappears.
+    evidence: {
+      show: "See {{name}}",
+      hide: "Hide {{name}}",
+    },
     feedbackModal: {
       positive: {
         title: "What did you like about this response?",
