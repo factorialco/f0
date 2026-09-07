@@ -97,20 +97,24 @@ export const ChatTextareaField = ({
               image's width is gone with it. */}
           {highlightSegments.map((seg, i) =>
             seg.type === "mention" ? (
-              // The bubble's colour, so a mention reads the same before and
-              // after sending: secondary foreground, no background, and no
+              // Exactly the bubble's chip, weight included, so a mention reads
+              // the same before and after sending: no background, and no
               // distinction between mentioning you, `@here` or anyone else.
               //
-              // Colour only — deliberately NOT the bubble's `font-medium`, and
-              // this is load-bearing. A `<textarea>` lays its entire run out at
-              // one weight, so a heavier mention in the overlay paints wider
-              // than the transparent glyphs the caret is positioned from, and
-              // every character from the mention onward sits off its boundary.
-              // Measured at 14px Inter, `font-medium` cost ~0.1px per mention
-              // character, plateauing at 1.25px (8.9% of an em) across the rest
-              // of the line — enough to park the caret inside a glyph instead
-              // of between two.
-              <span key={i} className="text-f1-foreground-secondary">
+              // The weight costs caret accuracy, knowingly. A `<textarea>` lays
+              // its entire run out at one weight, so a heavier mention in the
+              // overlay paints wider than the transparent glyphs the caret is
+              // positioned from, and every character after it sits off its
+              // boundary. Measured at 14px Inter: 1.02px for `@Ana`, 1.48px for
+              // `@Ana García`, 1.91px for `@Bruno Martínez` — it grows with the
+              // name and adds up per mention, so a line with two long ones
+              // drifts by most of a character by its end. Matching the bubble
+              // was judged worth that; this class is the thing to drop if the
+              // caret ever has to be exact again.
+              <span
+                key={i}
+                className="font-medium text-f1-foreground-secondary"
+              >
                 {seg.text}
               </span>
             ) : seg.type === "ghost" ? (
