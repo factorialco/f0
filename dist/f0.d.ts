@@ -11996,6 +11996,7 @@ declare type F0LocationSearchContext = {
 declare type F0LocationSuggestion = {
     id: string;
     label: string;
+    /** Appended to the label, so each suggestion reads as one line */
     description?: string;
 };
 

@@ -40878,8 +40878,10 @@ const nue = 250, JP = 2, iue = ({ searchPlaces: e, country: t, enabled: n }) => 
   }), E = Y(
     () => b.map((D) => ({
       value: D.id,
-      label: D.label,
-      description: D.description
+      // One line per suggestion: an address reads as a single string, and
+      // splitting it across label and description makes the list twice as
+      // tall for the same information
+      label: [D.label, D.description].filter(Boolean).join(", ")
     })),
     [b]
   ), S = r ? o ?? rue : void 0, A = r ? { value: S, label: r } : void 0, T = _ ? w.locationInput.searching : k.trim().length < JP ? w.locationInput.searchHint : w.locationInput.noResults, O = {
