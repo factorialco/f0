@@ -199,10 +199,6 @@ export function SwitchGroupRenderer({
     [visibleFields, values]
   )
 
-  if (visibleFields.length === 0) {
-    return null
-  }
-
   const handleChange = (newSelectedIds: string[]) => {
     // Update each field's value based on whether it's in the selected list
     for (const field of visibleFields) {
@@ -259,6 +255,15 @@ export function SwitchGroupRenderer({
       })),
     [visibleFields, formName, sectionId]
   )
+
+  // AFTER every hook, not before. A group whose switches are all hidden by
+  // `renderIf` still has to run the same hooks as one that isn't — otherwise
+  // the render that empties it runs fewer hooks than the one before, and React
+  // tears the component down mid-update. Which is exactly what happened when a
+  // switch appeared between two others and split their group.
+  if (visibleFields.length === 0) {
+    return null
+  }
 
   return (
     <div className="flex flex-col gap-2">
