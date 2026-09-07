@@ -53,7 +53,6 @@ export const usePlaceSearch = ({ searchPlaces, country, enabled }: Options) => {
   const search = useCallback(
     (query: string) => {
       const trimmed = query.trim()
-      // A fresh keystroke means the previous active option is gone
       setActiveIndex(-1)
 
       if (!enabled || !searchPlaces || trimmed.length < MIN_QUERY_LENGTH) {

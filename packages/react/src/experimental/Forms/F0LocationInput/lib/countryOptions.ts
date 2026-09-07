@@ -4,9 +4,8 @@ import type { CountryCode } from "@/lib/countries"
 import { flagsMap } from "@/flags"
 
 /**
- * One option per translated country, restricted to `allowed` when given and
- * sorted by the localized name so the list reads the same as the OS pickers
- * the user already knows.
+ * Sorted by the localized name, not by code, so the list reads in the order
+ * the user knows from every other country picker.
  */
 export const buildCountryOptions = (
   countryNames: Record<CountryCode, string>,

@@ -175,8 +175,7 @@ export const AddressCombobox = forwardRef<HTMLInputElement, Props>(
                 close()
                 onBlur?.()
               }}
-              // A plain text field when nothing can be suggested: a combobox
-              // that never opens is a broken promise to assistive tech
+              // A combobox that can never open would misannounce the field
               role={canSuggest ? "combobox" : undefined}
               aria-autocomplete={canSuggest ? "list" : undefined}
               aria-expanded={isOpen}

@@ -20,7 +20,6 @@ type Props = {
   name?: string
 }
 
-/** Searchable country picker with flag avatars, built from the i18n country list */
 export const CountrySelect = ({
   label,
   value,
