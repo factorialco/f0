@@ -11,6 +11,8 @@ export type {
   F0DataChartFunnelProps,
   F0DataChartFunnelSeries,
   F0DataChartGaugeProps,
+  F0DataChartGridLineContrast,
+  F0DataChartGridLineType,
   F0DataChartHeatmapProps,
   F0DataChartLineDataPoint,
   F0DataChartLineProps,
@@ -31,6 +33,7 @@ export type {
 } from "./types"
 
 export { DataChartEmptyStateView } from "./components/EmptyState/DataChartEmptyStateView"
+export { f0DataChartGridLineContrasts, f0DataChartGridLineTypes } from "./types"
 export { type ChartColorToken, chartColorTokens } from "./utils/colors"
 export type { ChartTheme } from "./utils/theme"
 export {

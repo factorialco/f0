@@ -192,7 +192,7 @@ export function DashboardItem({
   const actionsClassName = cn(
     "flex flex-shrink-0 gap-0.5",
     !isFullscreen &&
-      "opacity-100 transition-opacity delay-150 duration-150 focus-within:delay-0 group-hover/dashitem:delay-0 sm:[@media(hover:hover)]:opacity-0 focus-within:sm:opacity-100 group-hover/dashitem:sm:opacity-100",
+      "opacity-100 transition-opacity delay-150 duration-150 motion-reduce:transition-none focus-within:delay-0 group-hover/dashitem:delay-0 sm:[@media(hover:hover)]:opacity-0 focus-within:sm:opacity-100 group-hover/dashitem:sm:opacity-100",
     !isFullscreen && (isDropdownOpen || isFiltersOpen) && "delay-0 !opacity-100"
   )
 
@@ -399,6 +399,7 @@ export function DashboardItem({
           )}
           {hasFullscreen && (
             <ButtonInternal
+              data-dashboard-fullscreen-toggle={itemId}
               label={
                 isFullscreen
                   ? translations.actions.collapse

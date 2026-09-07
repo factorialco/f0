@@ -149,6 +149,8 @@ export interface F0MapProps extends WithDataTestIdProps {
   projection?: F0MapProjection
   /** Show the skeleton instead of the map. */
   loading?: boolean
+  /** Reports when the accessible HTML list replaces an unavailable WebGL map. */
+  onFallbackChange?: (visible: boolean) => void
   /** Accessible label for the map region. */
   ariaLabel?: string
   /** @private */
@@ -224,6 +226,7 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
     fullScreen = false,
     projection = "mercator",
     loading = false,
+    onFallbackChange,
     ariaLabel,
     dataTestId,
     className,
@@ -240,6 +243,11 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
   const [tileError, setTileError] = useState(false)
   const listId = useId()
   const reduceMotion = useReducedMotion()
+  const fallbackVisible = !loading && webglFailed
+
+  useEffect(() => {
+    onFallbackChange?.(fallbackVisible)
+  }, [fallbackVisible, onFallbackChange])
 
   // Dark detection needs a callback ref: with `loading` the container doesn't
   // exist on mount, and a plain RefObject effect would never re-run.
@@ -442,7 +450,17 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
     const handleBackgroundClick = () => selectRef.current(null)
     map.on("click", handleBackgroundClick)
 
+    // The map can mount before a container-query layout reaches its final
+    // dimensions. Keep MapLibre's canvas aligned when the host surface changes
+    // size (dashboard grids, drawers, and responsive split panes all do this).
+    const resizeObserver =
+      typeof ResizeObserver === "undefined"
+        ? null
+        : new ResizeObserver(() => map.resize())
+    resizeObserver?.observe(container)
+
     return () => {
+      resizeObserver?.disconnect()
       mapRef.current = null
       setMapInstance(null)
       map.remove()
@@ -514,12 +532,14 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
         >
           {/* Keyboard: jump past the opaque canvas straight to the operable
               list. Shown only while focused. */}
-          <a
-            href={`#${listId}`}
-            className="sr-only rounded-md focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-30 focus:bg-f1-background focus:px-3 focus:py-2 focus:text-sm focus:text-f1-foreground focus:shadow-md focus:outline-none focus:ring-1 focus:ring-f1-special-ring"
-          >
-            {i18n.map.skipToList}
-          </a>
+          {!fallbackVisible && (
+            <a
+              href={`#${listId}`}
+              className="sr-only rounded-md focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-30 focus:bg-f1-background focus:px-3 focus:py-2 focus:text-sm focus:text-f1-foreground focus:shadow-md focus:outline-none focus:ring-1 focus:ring-f1-special-ring"
+            >
+              {i18n.map.skipToList}
+            </a>
+          )}
           {/* Announces the marker count to screen readers when it changes. */}
           <div role="status" aria-live="polite" className="sr-only">
             {`${markers.length} ${
@@ -601,7 +621,7 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
             points={markers}
             selectedId={selectedId}
             onSelect={handleListSelect}
-            visible={webglFailed}
+            visible={fallbackVisible}
           />
         </div>
       )}

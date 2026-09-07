@@ -174,6 +174,21 @@ export type F0DataChartLineDataPoint =
 /** Line interpolation type */
 export type F0DataChartLineType = "linear" | "smooth" | "step"
 
+/** Named value-axis grid patterns supported by ECharts. */
+export const f0DataChartGridLineTypes = ["solid", "dashed", "dotted"] as const
+
+/** Value-axis grid pattern. A numeric sequence defines an ECharts dash pattern. */
+export type F0DataChartGridLineType =
+  | (typeof f0DataChartGridLineTypes)[number]
+  | readonly number[]
+
+/** Semantic contrast levels for value-axis grid lines. */
+export const f0DataChartGridLineContrasts = ["subtle", "strong"] as const
+
+/** Value-axis grid contrast resolved from the active F0 theme. */
+export type F0DataChartGridLineContrast =
+  (typeof f0DataChartGridLineContrasts)[number]
+
 /**
  * A series of data points to render as a line.
  */
@@ -358,6 +373,10 @@ export interface F0DataChartLineProps extends F0DataChartBaseProps {
   showArea?: boolean
   /** Show data point dots on the lines. @default false */
   showDots?: boolean
+  /** Pattern used for value-axis grid lines. @default "solid" */
+  gridLineType?: F0DataChartGridLineType
+  /** Theme-aware contrast used for value-axis grid lines. @default "subtle" */
+  gridLineContrast?: F0DataChartGridLineContrast
   /**
    * Formatter for the values shown in the hover tooltip. Defaults to
    * {@link F0DataChartBaseProps.valueFormatter}, so a unit or a currency on the

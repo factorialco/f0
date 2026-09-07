@@ -1205,7 +1205,10 @@ export function useBarChartOptions(
 
     // Keep the DOM attribute bounded for large datasets, matching ECharts'
     // own default of summarizing rather than serializing every data point.
-    const ariaDescriptions = series
+    const describedSeries = series.filter(
+      (currentSeries) => currentSeries.data.length > 0
+    )
+    const ariaDescriptions = describedSeries
       .slice(0, ARIA_MAX_SERIES)
       .map((currentSeries) => {
         const values = currentSeries.data
@@ -1229,16 +1232,21 @@ export function useBarChartOptions(
         )
         return `${currentSeries.name}: ${values}${remainingValues > 0 ? `; ${remainingValues} more values` : ""}.`
       })
-    if (series.length > ARIA_MAX_SERIES) {
-      ariaDescriptions.push(`${series.length - ARIA_MAX_SERIES} more series.`)
+    if (describedSeries.length > ARIA_MAX_SERIES) {
+      ariaDescriptions.push(
+        `${describedSeries.length - ARIA_MAX_SERIES} more series.`
+      )
     }
-    options.aria = {
-      enabled: true,
-      label: {
-        enabled: true,
-        description: ariaDescriptions.join(" "),
-      },
-    }
+    const ariaDescription = ariaDescriptions.join(" ")
+    options.aria = ariaDescription
+      ? {
+          enabled: true,
+          label: {
+            enabled: true,
+            description: ariaDescription,
+          },
+        }
+      : { enabled: false }
 
     // Fade in/out of the hover blur state (see `blur` on the series). Two
     // requirements: `stateAnimation` is only honored at the option root (the

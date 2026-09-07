@@ -1,3 +1,8 @@
+import type { ReactNode } from "react"
+
+import type { AvatarVariant } from "@/components/avatars/F0Avatar"
+import type { F0IconProps, IconType } from "@/components/F0Icon"
+import type { PendingQuote } from "@/kits/ai/F0AiChat/types"
 import type {
   ChartColorToken,
   F0DataChartBarSeries,
@@ -9,8 +14,8 @@ import type {
   F0DataChartRadarSeries,
   F0DataChartScatterSeries,
 } from "@/kits/F0DataChart"
-import type { PendingQuote } from "@/kits/ai/F0AiChat/types"
 import type { InfoHintContent } from "@/lib/InfoHint"
+import type { F0MapDensityPalette, F0MapStylePair } from "@/patterns/F0Map"
 import type { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import type {
   FiltersDefinition,
@@ -288,19 +293,27 @@ export interface DashboardItemBase {
    * row height in the grid is `max(itemHeight)` across all items in the row,
    * so a single tall item makes the whole row tall. When neither
    * `itemHeight` nor `rowSpan` is provided, the grid falls back to a
-   * type-specific default (chart 336, metric 144, collection 480).
+   * type-specific default (chart 336, metric 144, collection 480, location or
+   * custom 700).
    *
    * Should be a multiple of 48 to align with the grid's snap unit, but the
    * field accepts any positive number for pixel-accurate persisted resizes.
    */
   itemHeight?: number
+  /**
+   * Smallest height the designer may persist for this item, in pixels.
+   * Use this for host-composed bodies with a real intrinsic layout floor.
+   * The grid clamps initial, restored, and interactively resized rows to it.
+   */
+  minItemHeight?: number
   /** Grid column position (0-based). When set, skip auto-packing. */
   x?: number
   /** Grid row position (0-based). When set, skip auto-packing. */
   y?: number
   /**
-   * Whether this item receives dashboard-level filters in its fetchData.
-   * When false, fetchData receives an empty object.
+   * Whether this item receives dashboard-level filters in `fetchData` or a
+   * custom item's `renderContent`. When false, the callback receives an empty
+   * object.
    * @default true
    */
   useDashboardFilters?: boolean
@@ -402,14 +415,229 @@ export interface DashboardCollectionItem<
 }
 
 // ---------------------------------------------------------------------------
+// Location item
+// ---------------------------------------------------------------------------
+
+/** Semantic treatment for one of the three summary metrics. */
+export const dashboardLocationSummaryTones = [
+  "default",
+  "positive",
+  "critical",
+  "selected",
+] as const
+export type DashboardLocationSummaryTone =
+  (typeof dashboardLocationSummaryTones)[number]
+
+export const dashboardLocationDetailValueTones = [
+  "default",
+  "positive",
+  "critical",
+] as const
+export type DashboardLocationDetailValueTone =
+  (typeof dashboardLocationDetailValueTones)[number]
+
+/** Configuration for one metric in the location item's summary strip. */
+export interface DashboardLocationSummaryMetric {
+  /** Key used to read this metric from `DashboardLocationData.summary`. */
+  id: string
+  label: string
+  icon: IconType
+  /** @default "default" */
+  tone?: DashboardLocationSummaryTone
+}
+
+/** One labelled value shown at the end of a location detail row. */
+export interface DashboardLocationDetailValue {
+  /** Accessible label announced before the value. */
+  label: string
+  /** Preformatted value supplied by the host. */
+  value: string
+  icon?: IconType
+  iconColor?: F0IconProps["color"]
+  /** @default "default" */
+  tone?: DashboardLocationDetailValueTone
+}
+
+/** A domain-neutral row in the selected location panel. */
+export interface DashboardLocationDetailRow {
+  id: string
+  title: string
+  description?: string
+  avatar: AvatarVariant
+  /** Compact labelled values; additional values wrap within the row. */
+  values: readonly DashboardLocationDetailValue[]
+}
+
+/** A density-weighted point and the rows revealed when it is selected. */
+export interface DashboardLocationPoint {
+  id: string
+  name: string
+  /** `[longitude, latitude]`, resolved by the host. */
+  coordinates: [number, number]
+  /** Host-defined value used to select the marker's density bucket. */
+  density: number
+  /** Preformatted count or status shown below the location name. */
+  detailsLabel: string
+  details: readonly DashboardLocationDetailRow[]
+}
+
+/** Generic line timeline displayed along the bottom of the map. */
+export interface DashboardLocationTimelineData {
+  categories: readonly string[]
+  series: readonly F0DataChartLineSeries[]
+  /** Optional screen-reader summaries, one per category. */
+  accessibleLabels?: readonly string[]
+}
+
+/** Data returned by a location item's fetcher. */
+export interface DashboardLocationData {
+  /** Values keyed by `DashboardLocationSummaryMetric.id`. */
+  summary: Readonly<Record<string, string | number>>
+  locations: readonly DashboardLocationPoint[]
+  /** Omit when this dataset has no meaningful timeline. */
+  timeline?: DashboardLocationTimelineData
+}
+
+/** Optional surfaces within the map-led location visualization. */
+export interface DashboardLocationSections {
+  /** Show the three-metric summary strip. @default true */
+  summary?: boolean
+  /** Show the selected-location details panel and disclosure. @default true */
+  locationDetails?: boolean
+  /** Show the density scale legend. @default true */
+  densityLegend?: boolean
+  /** Show the timeline when timeline data also exists. @default true */
+  timeline?: boolean
+}
+
+/** Host-localized spreadsheet column labels for a location item export. */
+export interface DashboardLocationExportLabels {
+  /** Location-name column. */
+  location: string
+  /** Density-value column. */
+  density: string
+  /** Location summary column. */
+  details: string
+  /** Detail-row title column. */
+  item: string
+  /** Detail-row description column. */
+  description: string
+}
+
+/** Labels and visual policy shared by every response for one location item. */
+export interface DashboardLocationConfig {
+  /** Exactly three peer metrics rendered in the summary strip. */
+  summaryMetrics: readonly [
+    DashboardLocationSummaryMetric,
+    DashboardLocationSummaryMetric,
+    DashboardLocationSummaryMetric,
+  ]
+  densityLabel: string
+  densityLowLabel: (below: number) => string
+  densityMediumLabel: (from: number, below: number) => string
+  densityHighLabel: (from: number) => string
+  timelineTitle: string
+  timelineAriaLabel: string
+  mapAriaLabel: string
+  selectLocationLabel: string
+  viewLocationDetailsLabel: (locationName: string) => string
+  closeLocationDetailsLabel: string
+  noDataLabel: string
+  exportLabels: DashboardLocationExportLabels
+  /** Surface visibility. @default all sections visible */
+  sections?: DashboardLocationSections
+  densityScale?: {
+    mediumAt: number
+    highAt: number
+  }
+  /**
+   * Optional F0 palette overrides by density level. Missing levels keep the
+   * default red heat scale. @default f0MapDensityPalette
+   */
+  densityPalette?: Partial<F0MapDensityPalette>
+  /** Formats density values in marker accessibility labels and fallback rows. */
+  formatDensity?: (value: number) => string
+  /** Formats numeric summary values. String values are displayed unchanged. */
+  formatSummaryValue?: (value: number) => string
+  /** Optional map style pair for host-specific or deterministic maps. */
+  mapStyle?: F0MapStylePair
+}
+
+/**
+ * A map-led analytical widget for comparing activity or inventory by location.
+ *
+ * The item is intentionally domain-neutral: workforce events, devices,
+ * incidents, visitors, and other location-based datasets all use the same
+ * summary, point, detail-row, and timeline contract.
+ */
+export interface DashboardLocationItem<
+  Filters extends FiltersDefinition = FiltersDefinition,
+> extends DashboardItemBase {
+  type: "location"
+  location: DashboardLocationConfig
+  /** Async data fetcher — receives dashboard filters when enabled. */
+  fetchData: (filters: FiltersState<Filters>) => Promise<DashboardLocationData>
+  selectedLocationId?: string | null
+  defaultSelectedLocationId?: string | null
+  onLocationSelect?: (locationId: string | null) => void
+  /**
+   * Smallest equal-width slot this item can use before the dashboard stacks
+   * the row. @default 720
+   */
+  minItemWidth?: number
+}
+
+// ---------------------------------------------------------------------------
+// Custom item
+// ---------------------------------------------------------------------------
+
+/**
+ * A host-composed dashboard widget for domain-specific visualizations that do
+ * not fit the built-in chart, metric, or collection renderers.
+ *
+ * The dashboard still owns the standard item header, menu, edit controls,
+ * layout, and fullscreen behavior. The host owns only the content rendered
+ * inside that shell.
+ */
+export interface DashboardCustomItem<
+  Filters extends FiltersDefinition = FiltersDefinition,
+> extends DashboardItemBase {
+  type: "custom"
+  /**
+   * Allows this custom item to share a row with one peer widget.
+   *
+   * Custom items reserve a full-width row by default because their host-owned
+   * content can have an intrinsic minimum width. Enable this only when the
+   * custom body has explicit responsive states for a half-width dashboard
+   * slot. Rows containing a shareable custom item are capped at two items, so
+   * later metrics cannot squeeze the custom body below half width.
+   *
+   * @default false
+   */
+  allowRowSharing?: boolean
+  /**
+   * Smallest equal-width slot this custom item can use while sharing a row,
+   * in pixels. When the available slot would be narrower, the dashboard
+   * stacks every item in that row instead. Ignored unless
+   * `allowRowSharing` is true.
+   */
+  minItemWidth?: number
+  /**
+   * Renders the item body with the dashboard's currently applied filters.
+   * When `useDashboardFilters` is false, receives an empty object.
+   */
+  renderContent: (filters: FiltersState<Filters>) => ReactNode
+}
+
+// ---------------------------------------------------------------------------
 // Item union — discriminated on `type`
 // ---------------------------------------------------------------------------
 
 /**
  * A single dashboard item. Discriminated on `type`.
  *
- * Currently supports `"chart"`, `"metric"`, and `"collection"`.
- * Future types (e.g. `"custom"`) extend this union.
+ * Supports built-in chart, metric, collection, and location renderers plus a
+ * host-composed custom body that keeps the standard dashboard item shell.
  */
 export type DashboardItem<
   Filters extends FiltersDefinition = FiltersDefinition,
@@ -417,6 +645,8 @@ export type DashboardItem<
   | DashboardChartItem<Filters>
   | DashboardMetricItem<Filters>
   | DashboardCollectionItem<Filters>
+  | DashboardLocationItem<Filters>
+  | DashboardCustomItem<Filters>
 
 /** Report-style definitions accepted by a dashboard item's filter control. */
 export type DashboardItemFiltersDefinition<Keys extends string = string> =
@@ -517,10 +747,11 @@ export type F0AnalyticsDashboardAskAiTargetWithQuote =
  *
  * The entire dashboard is defined declaratively via `filters` (optional shared
  * filter definitions), `presets`, and `items` (an ordered array of chart /
- * collection configs).
+ * collection / location configs).
  *
- * An LLM can generate the full `items` array as JSON (minus the `fetchData`
- * functions) to build dashboards on the fly.
+ * An LLM can generate the declarative configuration for built-in items;
+ * hosts attach data functions, localized formatters, icons, and any custom
+ * item renderers.
  */
 export interface F0AnalyticsDashboardProps<
   Filters extends FiltersDefinition = FiltersDefinition,

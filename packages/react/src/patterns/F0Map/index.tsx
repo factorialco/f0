@@ -15,12 +15,25 @@ export type {
 } from "./types"
 /**
  * Product-semantic marker variant identity, used to describe a point's marker
- * (`default` / `workplace` / `employee` / `company` / `stop`). `F0Map` owns
- * rendering markers for its points, so the marker component itself is internal
- * and not exposed - see the `MarkerVariants` story for how each one looks.
+ * (`default` / `workplace` / `employee` / `company` / `stop` / `density`).
+ * `F0Map` owns rendering markers for its points, so the marker component itself
+ * is internal and not exposed - see the `MarkerVariants` story for each one.
  */
-export { f0MapMarkerVariants } from "./components/F0MapMarker"
+export {
+  f0MapDensityColorSteps,
+  f0MapDensityColors,
+  f0MapDensityLevels,
+  f0MapDensityPalette,
+  f0MapDensitySurfaceStyle,
+  f0MapMarkerVariants,
+  resolveF0MapDensityStyle,
+} from "./components/F0MapMarker"
 export type {
+  F0MapDensityColor,
+  F0MapDensityColorStep,
+  F0MapDensityLevel,
+  F0MapDensityPalette,
+  F0MapDensityStyle,
   F0MapMarkerVariant,
   F0MapMarkerVariantProps,
 } from "./components/F0MapMarker"

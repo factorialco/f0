@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react"
 
 import type { DropdownItem as DropdownItemType } from "@/experimental/Navigation/Dropdown"
 import type {
@@ -7,9 +7,11 @@ import type {
 } from "@/patterns/OneFilterPicker/types"
 
 import { F0Icon } from "@/components/F0Icon"
+import { Add, ArrowDown, ArrowUp, Minus } from "@/icons/app"
 import Handle from "@/icons/app/Handle"
 import { WIDGET_DRAG_END, WIDGET_DRAG_START } from "@/lib/dnd/widgetDragEvents"
-import { cn } from "@/lib/utils"
+import { useI18n } from "@/lib/providers/i18n"
+import { cn, focusRing } from "@/lib/utils"
 
 import type {
   DashboardItem as DashboardItemType,
@@ -21,19 +23,25 @@ import type {
 
 import { ChartItem, chartItemFitsContent } from "../ChartItem/ChartItem"
 import { CollectionItem } from "../CollectionItem/CollectionItem"
+import { CustomItem } from "../CustomItem/CustomItem"
 import { DashboardItem } from "../DashboardItem/DashboardItem"
+import { LocationItem } from "../LocationItem/LocationItem"
 import { MetricItem } from "../MetricItem/MetricItem"
 
 const GAP = 12
 const MAX_PER_ROW = 4
 const NARROW_THRESHOLD = 640
 const DRAG_START_THRESHOLD = 4
+const MAX_ROW_HEIGHT = 1600
+const REORDER_KEY_SHORTCUTS = "ArrowUp ArrowDown ArrowLeft ArrowRight" // i18n-exempt -- standardized ARIA key names, not UI copy
 
 /** Default row height in px, determined by the tallest item type. */
 const ROW_HEIGHTS: Record<string, number> = {
   chart: 336,
   metric: 144,
   collection: 480,
+  location: 700,
+  custom: 700,
 }
 const DEFAULT_ROW_HEIGHT = 336
 
@@ -42,6 +50,8 @@ const MIN_ROW_HEIGHTS: Record<string, number> = {
   chart: 240,
   metric: 120,
   collection: 300,
+  location: 640,
+  custom: 480,
 }
 const DEFAULT_MIN_ROW_HEIGHT = 120
 
@@ -104,14 +114,44 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
   onFullscreenChange,
 }: DashboardGridProps<Filters>) {
   const containerRef = useRef<HTMLDivElement>(null)
-  const [isNarrow, setIsNarrow] = useState(false)
+  const fullscreenFocusItemRef = useRef<string | null>(null)
+  const [containerWidth, setContainerWidth] = useState<number | null>(null)
   const [fullscreenItemId, setFullscreenItemId] = useState<string | null>(null)
+  const [layoutAnnouncement, setLayoutAnnouncement] = useState("")
+  const translations = useI18n()
 
   // Notify the parent whenever click-fullscreen state flips so it can apply
   // the fill-height layout (same chain that single-item dashboards use).
   useEffect(() => {
     onFullscreenChange?.(!!fullscreenItemId)
   }, [fullscreenItemId, onFullscreenChange])
+
+  useEffect(() => {
+    const itemId = fullscreenFocusItemRef.current
+    if (!itemId) return
+    fullscreenFocusItemRef.current = null
+
+    queueMicrotask(() => {
+      const toggles =
+        containerRef.current?.querySelectorAll<HTMLButtonElement>(
+          "[data-dashboard-fullscreen-toggle]"
+        ) ?? []
+      Array.from(toggles)
+        .find((toggle) => toggle.dataset.dashboardFullscreenToggle === itemId)
+        ?.focus()
+    })
+  }, [fullscreenItemId])
+
+  const setItemFullscreen = useCallback(
+    (itemId: string, fullscreen: boolean) => {
+      const focusedToggle =
+        document.activeElement instanceof HTMLElement &&
+        document.activeElement.dataset.dashboardFullscreenToggle === itemId
+      fullscreenFocusItemRef.current = focusedToggle ? itemId : null
+      setFullscreenItemId(fullscreen ? itemId : null)
+    },
+    []
+  )
 
   // Build item lookup
   const itemMap = useMemo(() => {
@@ -148,7 +188,7 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
     if (!el) return
     const observer = new ResizeObserver((entries) => {
       for (const entry of entries) {
-        setIsNarrow(entry.contentRect.width < NARROW_THRESHOLD)
+        setContainerWidth(entry.contentRect.width)
       }
     })
     observer.observe(el)
@@ -271,17 +311,22 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
         } else if (target.rowIdx >= next.length) {
           next.push({ ids: [draggedId], height: newRowHeight })
         } else {
-          const adjPos = Math.min(
-            target.position,
-            next[target.rowIdx].ids.length
-          )
-          next[target.rowIdx].ids.splice(adjPos, 0, draggedId)
-          const minHeight = getMinRowHeight(
-            next[target.rowIdx],
-            itemMapRef.current
-          )
-          if (next[target.rowIdx].height < minHeight) {
-            next[target.rowIdx] = { ...next[target.rowIdx], height: minHeight }
+          const targetRow = next[target.rowIdx]
+          if (
+            !item ||
+            !canAddItemToRow(targetRow.ids, item, itemMapRef.current)
+          ) {
+            next.splice(target.rowIdx + 1, 0, {
+              ids: [draggedId],
+              height: newRowHeight,
+            })
+          } else {
+            const adjPos = Math.min(target.position, targetRow.ids.length)
+            targetRow.ids.splice(adjPos, 0, draggedId)
+            const minHeight = getMinRowHeight(targetRow, itemMapRef.current)
+            if (targetRow.height < minHeight) {
+              next[target.rowIdx] = { ...targetRow, height: minHeight }
+            }
           }
         }
 
@@ -354,7 +399,18 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
 
       // Middle third → merge into the row.
       if (isFromThisRow && row.ids.length === 1) return null
-      if (row.ids.length >= MAX_PER_ROW && !isFromThisRow)
+      const draggedItem = draggedId
+        ? itemMapRef.current.get(draggedId)
+        : undefined
+      if (
+        !draggedItem ||
+        !canAddItemToRow(
+          row.ids,
+          draggedItem,
+          itemMapRef.current,
+          isFromThisRow ? (draggedId ?? undefined) : undefined
+        )
+      )
         return { type: "new-row", afterRowIdx: i }
 
       const cards = rowEls[i].querySelectorAll("[data-card-id]")
@@ -476,6 +532,72 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
     [commitDrop, onAskAi, onAskAiTarget, resolveDropTarget]
   )
 
+  const moveItemByStep = useCallback(
+    (id: string, direction: -1 | 1) => {
+      setRows((prev) => {
+        const orderedIds = prev.flatMap((row) => row.ids)
+        const fromIndex = orderedIds.indexOf(id)
+        const toIndex = fromIndex + direction
+        if (fromIndex < 0 || toIndex < 0 || toIndex >= orderedIds.length) {
+          return prev
+        }
+
+        const rowHeightById = new Map<string, number>()
+        for (const row of prev) {
+          for (const itemId of row.ids) rowHeightById.set(itemId, row.height)
+        }
+        orderedIds.splice(fromIndex, 1)
+        orderedIds.splice(toIndex, 0, id)
+
+        const next = buildRowsFromOrder(
+          orderedIds,
+          itemMapRef.current,
+          rowHeightById
+        )
+        emitLayout(next)
+
+        const title = itemMapRef.current.get(id)?.title ?? ""
+        queueMicrotask(() => {
+          setLayoutAnnouncement(
+            `${
+              direction < 0
+                ? translations.actions.moveUp
+                : translations.actions.moveDown
+            }: ${title}.`
+          )
+          requestAnimationFrame(() => {
+            const reorderButtons =
+              containerRef.current?.querySelectorAll<HTMLButtonElement>(
+                "[data-reorder-id]"
+              ) ?? []
+            Array.from(reorderButtons)
+              .find((button) => button.dataset.reorderId === id)
+              ?.focus()
+          })
+        })
+        return next
+      })
+    },
+    [emitLayout, translations.actions.moveDown, translations.actions.moveUp]
+  )
+
+  const handleGripKeyDown = useCallback(
+    (id: string, event: React.KeyboardEvent) => {
+      const direction =
+        event.key === "ArrowLeft" || event.key === "ArrowUp"
+          ? -1
+          : event.key === "ArrowRight" || event.key === "ArrowDown"
+            ? 1
+            : 0
+      if (direction === 0) return
+
+      event.preventDefault()
+      event.stopPropagation()
+      moveItemByStep(id, direction)
+    },
+    [moveItemByStep]
+  )
+
   // A drag in flight when this unmounts (navigating away, switching
   // dashboards) has to be retracted too, or the announcement outlives the grid
   // that made it.
@@ -493,8 +615,12 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
         getMinRowHeight(rows[rowIdx], itemMap),
         contentMinHeight
       )
+      const maxHeight = Math.max(MAX_ROW_HEIGHT, startHeight)
       const onMove = (e: MouseEvent) => {
-        const newHeight = Math.max(minHeight, startHeight + e.clientY - startY)
+        const newHeight = Math.min(
+          maxHeight,
+          Math.max(minHeight, startHeight + e.clientY - startY)
+        )
         setRows((prev) =>
           prev.map((row, i) =>
             i === rowIdx ? { ...row, height: newHeight } : row
@@ -515,17 +641,58 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
     [rows, emitLayout, itemMap]
   )
 
+  const resizeRowByStep = useCallback(
+    (
+      rowIdx: number,
+      delta: number,
+      rowEl: HTMLElement | null,
+      measurableCardIds: ReadonlySet<string>
+    ) => {
+      setRows((prev) => {
+        const row = prev[rowIdx]
+        if (!row) return prev
+
+        const renderedHeight = Math.max(
+          row.height,
+          rowEl?.getBoundingClientRect().height ?? 0
+        )
+        const minHeight = Math.max(
+          getMinRowHeight(row, itemMapRef.current),
+          getRowContentMinHeight(rowEl, measurableCardIds)
+        )
+        const maxHeight = Math.max(MAX_ROW_HEIGHT, renderedHeight)
+        const height = Math.min(
+          maxHeight,
+          Math.max(minHeight, renderedHeight + delta)
+        )
+        if (height === row.height) return prev
+
+        const next = prev.map((currentRow, index) =>
+          index === rowIdx ? { ...currentRow, height } : currentRow
+        )
+        emitLayout(next)
+        return next
+      })
+    },
+    [emitLayout]
+  )
+
   // ─── Render ─────────────────────────────────────────────────
-  const displayRows = isNarrow
-    ? rows.flatMap((row) =>
-        row.ids.map((id) => ({
+  const displayRows = rows.flatMap((row) =>
+    shouldStackRow(row, containerWidth, itemMap)
+      ? row.ids.map((id) => ({
           ids: [id],
           height: row.height,
         }))
-      )
-    : rows
+      : [row]
+  )
+  const displayOrder = displayRows.flatMap((row) => row.ids)
+  const hasResponsiveStacking = displayRows.length > rows.length
 
-  const canDrag = !!editMode && !isNarrow
+  // Responsive stacking is a presentation-only projection of the persisted
+  // row. Disable row mutation while projected rows differ from state, so drag
+  // and resize never operate against mismatched row indexes.
+  const canDrag = !!editMode && !hasResponsiveStacking
   const isNewRowTarget = (afterIdx: number) =>
     dragId &&
     dropTarget?.type === "new-row" &&
@@ -544,7 +711,15 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
   if (items.length === 1) {
     const soleItem = items[0]
     return (
-      <div ref={containerRef} className="flex h-full min-h-0 flex-col">
+      <div
+        ref={containerRef}
+        className="flex h-full min-h-0 flex-col"
+        style={
+          soleItem.minItemHeight
+            ? { minHeight: soleItem.minItemHeight }
+            : undefined
+        }
+      >
         <DashboardGridItem
           item={soleItem}
           itemFilters={itemFilters?.(soleItem)}
@@ -596,9 +771,7 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
             onAskAi={onAskAi}
             onAskAiTarget={onAskAiTarget}
             isFullscreen
-            onFullscreenChange={(fs) =>
-              setFullscreenItemId(fs ? fullscreenItemId : null)
-            }
+            onFullscreenChange={(fs) => setItemFullscreen(fullscreenItemId, fs)}
           />
         </div>
       )
@@ -624,16 +797,23 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
         const hasCollection = row.ids.some(
           (id) => itemMap.get(id)?.type === "collection"
         )
+        const rowTitle = row.ids
+          .map((id) => itemMap.get(id)?.title)
+          .filter(Boolean)
+          .join(", ")
+        const measurableCardIds = new Set(
+          row.ids.filter((id) => itemMap.get(id)?.type !== "chart")
+        )
 
         return (
-          <div key={ri} className="relative">
+          <div key={ri} data-dashboard-row-container="" className="relative">
             {/* Drop line before this row. The first row also gets one so an
                 item can be reordered to the very top (afterRowIdx -1). */}
             {canDrag && <RowGapDropZone active={!!isNewRowTarget(ri - 1)} />}
             <div
               data-dashboard-row=""
               className={cn(
-                "flex rounded-lg transition-colors duration-200",
+                "flex rounded-lg transition-colors duration-200 motion-reduce:transition-none",
                 isDropRow && "bg-f1-background-hover"
               )}
               style={{
@@ -668,11 +848,18 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
                   <RowItem
                     key={id}
                     id={id}
+                    title={item.title}
                     isDragging={isDragging}
                     showIndicatorBefore={!!showIndicatorBefore}
                     showIndicatorAfter={!!showIndicatorAfter}
                     draggable={canDrag}
                     onGripPointerDown={handleGripPointerDown}
+                    onGripKeyDown={handleGripKeyDown}
+                    onMove={moveItemByStep}
+                    canMoveEarlier={displayOrder.indexOf(id) > 0}
+                    canMoveLater={
+                      displayOrder.indexOf(id) < displayOrder.length - 1
+                    }
                     onContentHeightChange={handleItemContentHeightChange}
                   >
                     <DashboardGridItem
@@ -684,9 +871,7 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
                       onTransformChart={onTransformChart}
                       onAskAi={onAskAi}
                       onAskAiTarget={onAskAiTarget}
-                      onFullscreenChange={(fs) =>
-                        setFullscreenItemId(fs ? id : null)
-                      }
+                      onFullscreenChange={(fs) => setItemFullscreen(id, fs)}
                     />
                   </RowItem>
                 )
@@ -694,39 +879,105 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
             </div>
             {/* Row resize handle — only in edit mode */}
             {canDrag && (
-              <div
-                className="group/resize absolute -bottom-3.5 mx-auto flex h-3 w-full items-center justify-center hover:cursor-ns-resize"
-                onMouseDown={(e) => {
-                  e.preventDefault()
-                  const rowEl =
-                    e.currentTarget.parentElement?.querySelector<HTMLElement>(
-                      "[data-dashboard-row]"
+              <div className="group/resize-controls absolute -bottom-3.5 z-20 flex h-3 w-full items-center justify-center gap-1">
+                <button
+                  type="button"
+                  data-dashboard-row-decrease=""
+                  aria-label={`${rowTitle}: −`}
+                  className={cn(
+                    "flex size-6 shrink-0 items-center justify-center rounded border-0 bg-f1-background p-0 opacity-0 shadow-sm transition-opacity motion-reduce:transition-none group-hover/resize-controls:opacity-100 focus:opacity-100",
+                    focusRing("rounded")
+                  )}
+                  onClick={(event) => {
+                    const rowEl =
+                      event.currentTarget
+                        .closest<HTMLElement>("[data-dashboard-row-container]")
+                        ?.querySelector<HTMLElement>("[data-dashboard-row]") ??
+                      null
+                    resizeRowByStep(ri, -24, rowEl, measurableCardIds)
+                  }}
+                >
+                  <F0Icon icon={Minus} size="xs" />
+                </button>
+                <button
+                  type="button"
+                  role="separator"
+                  aria-label={rowTitle}
+                  aria-orientation="horizontal"
+                  aria-valuemin={getMinRowHeight(row, itemMap)}
+                  aria-valuemax={Math.max(MAX_ROW_HEIGHT, row.height)}
+                  aria-valuenow={row.height}
+                  aria-valuetext={`${row.height}`}
+                  className={cn(
+                    "group/resize flex h-3 w-16 shrink-0 items-center justify-center border-0 bg-transparent p-0 hover:cursor-ns-resize",
+                    focusRing("rounded")
+                  )}
+                  onMouseDown={(e) => {
+                    e.preventDefault()
+                    const rowEl =
+                      e.currentTarget
+                        .closest<HTMLElement>("[data-dashboard-row-container]")
+                        ?.querySelector<HTMLElement>("[data-dashboard-row]") ??
+                      null
+                    // Start from the RENDERED height, not `row.height` state:
+                    // the fit-content floor can hold the row taller than state
+                    // (e.g. a persisted height smaller than the loaded table),
+                    // and starting from the smaller state value would make the
+                    // handle feel detached from the cursor.
+                    const renderedHeight = Math.max(
+                      rowEl?.getBoundingClientRect().height ?? 0,
+                      row.height
                     )
-                  // Start from the RENDERED height, not `row.height` state:
-                  // the fit-content floor can hold the row taller than state
-                  // (e.g. a persisted height smaller than the loaded table),
-                  // and starting from the smaller state value would make the
-                  // handle feel detached from the cursor.
-                  const renderedHeight = Math.max(
-                    rowEl?.getBoundingClientRect().height ?? 0,
-                    row.height
-                  )
-                  // Charts are excluded from content measurement: their
-                  // canvas is sized FROM the row, so measuring them reads
-                  // back the current height and would make the row
-                  // unshrinkable.
-                  const measurableCardIds = new Set(
-                    row.ids.filter((id) => itemMap.get(id)?.type !== "chart")
-                  )
-                  startResize(
-                    ri,
-                    e.clientY,
-                    renderedHeight,
-                    getRowContentMinHeight(rowEl, measurableCardIds)
-                  )
-                }}
-              >
-                <div className="h-1 w-16 rounded-full bg-transparent transition-colors group-hover/resize:bg-f1-foreground-tertiary" />
+                    // Charts are excluded from content measurement: their
+                    // canvas is sized FROM the row, so measuring them reads
+                    // back the current height and would make the row
+                    // unshrinkable.
+                    startResize(
+                      ri,
+                      e.clientY,
+                      renderedHeight,
+                      getRowContentMinHeight(rowEl, measurableCardIds)
+                    )
+                  }}
+                  onKeyDown={(event) => {
+                    const delta =
+                      event.key === "ArrowUp"
+                        ? -24
+                        : event.key === "ArrowDown"
+                          ? 24
+                          : 0
+                    if (delta === 0) return
+
+                    event.preventDefault()
+                    const rowEl =
+                      event.currentTarget
+                        .closest<HTMLElement>("[data-dashboard-row-container]")
+                        ?.querySelector<HTMLElement>("[data-dashboard-row]") ??
+                      null
+                    resizeRowByStep(ri, delta, rowEl, measurableCardIds)
+                  }}
+                >
+                  <span className="h-1 w-16 rounded-full bg-transparent transition-colors motion-reduce:transition-none group-hover/resize:bg-f1-foreground-tertiary group-focus-visible/resize:bg-f1-foreground-tertiary" />
+                </button>
+                <button
+                  type="button"
+                  data-dashboard-row-increase=""
+                  aria-label={`${rowTitle}: +`}
+                  className={cn(
+                    "flex size-6 shrink-0 items-center justify-center rounded border-0 bg-f1-background p-0 opacity-0 shadow-sm transition-opacity motion-reduce:transition-none group-hover/resize-controls:opacity-100 focus:opacity-100",
+                    focusRing("rounded")
+                  )}
+                  onClick={(event) => {
+                    const rowEl =
+                      event.currentTarget
+                        .closest<HTMLElement>("[data-dashboard-row-container]")
+                        ?.querySelector<HTMLElement>("[data-dashboard-row]") ??
+                      null
+                    resizeRowByStep(ri, 24, rowEl, measurableCardIds)
+                  }}
+                >
+                  <F0Icon icon={Add} size="xs" />
+                </button>
               </div>
             )}
           </div>
@@ -750,6 +1001,9 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
           {itemMap.get(dragId)?.title ?? ""}
         </div>
       )}
+      <p className="sr-only" role="status" aria-live="polite">
+        {layoutAnnouncement}
+      </p>
     </div>
   )
 }
@@ -758,24 +1012,36 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
 
 function RowItem({
   id,
+  title,
   isDragging,
   showIndicatorBefore,
   showIndicatorAfter,
   draggable: canDrag,
   onGripPointerDown,
+  onGripKeyDown,
+  onMove,
+  canMoveEarlier,
+  canMoveLater,
   onContentHeightChange,
   children,
 }: {
   id: string
+  title: string
   isDragging: boolean
   showIndicatorBefore: boolean
   showIndicatorAfter: boolean
   draggable: boolean
   onGripPointerDown: (id: string, e: React.PointerEvent) => void
+  onGripKeyDown: (id: string, e: React.KeyboardEvent) => void
+  onMove: (id: string, direction: -1 | 1) => void
+  canMoveEarlier: boolean
+  canMoveLater: boolean
   onContentHeightChange: (id: string, height: number) => void
   children: React.ReactNode
 }) {
   const itemRef = useRef<HTMLDivElement>(null)
+  const reorderLabelId = useId()
+  const translations = useI18n()
 
   useEffect(() => {
     const el = itemRef.current
@@ -840,7 +1106,7 @@ function RowItem({
         ref={itemRef}
         data-card-id={id}
         className={cn(
-          "group/rowitem relative min-w-0 flex-1 transition-opacity duration-150",
+          "group/rowitem relative min-w-0 flex-1 transition-opacity duration-150 motion-reduce:transition-none",
           isDragging && "opacity-40 scale-[0.97]"
         )}
       >
@@ -851,12 +1117,50 @@ function RowItem({
           // arming depended on the grip sitting inside the draggable card's
           // box, so the grip's outer half and full-width charts never dragged.
           // `touch-none` stops touch scrolling from stealing the gesture.
-          <div
-            onPointerDown={(e) => onGripPointerDown(id, e)}
-            className="shadow-sm absolute -left-3 top-2.5 z-20 flex cursor-grab touch-none items-center justify-center rounded bg-f1-background p-2 opacity-0 transition-opacity hover:bg-f1-background-hover active:cursor-grabbing group-hover/rowitem:opacity-100"
-            aria-label="Drag to reorder"
-          >
-            <F0Icon icon={Handle} size="xs" />
+          <div className="shadow-sm absolute -left-3 top-2.5 z-20 flex flex-col items-center rounded bg-f1-background p-0.5 opacity-0 transition-opacity motion-reduce:transition-none group-hover/rowitem:opacity-100 focus-within:opacity-100">
+            <span id={reorderLabelId} className="sr-only">
+              {translations.collections.editableTable.reorderRow}: {title}
+            </span>
+            <button
+              type="button"
+              aria-label={`${translations.actions.moveUp}: ${title}`}
+              disabled={!canMoveEarlier}
+              onClick={() => onMove(id, -1)}
+              className={cn(
+                "flex size-7 items-center justify-center rounded border-0 bg-transparent p-0 hover:bg-f1-background-hover disabled:cursor-not-allowed disabled:opacity-40",
+                focusRing("rounded")
+              )}
+            >
+              <F0Icon icon={ArrowUp} size="xs" />
+            </button>
+            <button
+              type="button"
+              data-reorder-id={id}
+              aria-label={translations.collections.editableTable.reorderRow}
+              aria-labelledby={reorderLabelId}
+              aria-keyshortcuts={REORDER_KEY_SHORTCUTS}
+              title={translations.collections.editableTable.reorderRow}
+              onPointerDown={(e) => onGripPointerDown(id, e)}
+              onKeyDown={(e) => onGripKeyDown(id, e)}
+              className={cn(
+                "flex size-7 cursor-grab touch-none items-center justify-center rounded border-0 bg-transparent p-0 hover:bg-f1-background-hover active:cursor-grabbing",
+                focusRing("rounded")
+              )}
+            >
+              <F0Icon icon={Handle} size="xs" />
+            </button>
+            <button
+              type="button"
+              aria-label={`${translations.actions.moveDown}: ${title}`}
+              disabled={!canMoveLater}
+              onClick={() => onMove(id, 1)}
+              className={cn(
+                "flex size-7 items-center justify-center rounded border-0 bg-transparent p-0 hover:bg-f1-background-hover disabled:cursor-not-allowed disabled:opacity-40",
+                focusRing("rounded")
+              )}
+            >
+              <F0Icon icon={ArrowDown} size="xs" />
+            </button>
           </div>
         )}
         {children}
@@ -883,12 +1187,12 @@ function DropIndicator() {
 function RowGapDropZone({ active }: { active: boolean }) {
   return (
     <div
-      className="pointer-events-none relative flex items-center justify-center transition-all"
+      className="pointer-events-none relative flex items-center justify-center transition-all motion-reduce:transition-none"
       style={{ minHeight: active ? 12 : 0 }}
     >
       <div
         className={cn(
-          "absolute inset-x-0 top-1/2 h-1 -translate-y-1/2 rounded-full transition-colors",
+          "absolute inset-x-0 top-1/2 h-1 -translate-y-1/2 rounded-full transition-colors motion-reduce:transition-none",
           active ? "bg-f1-background-secondary-hover" : "bg-transparent"
         )}
       />
@@ -927,9 +1231,12 @@ function buildItemLayoutSignature<Filters extends FiltersDefinition>(
       item.type,
       item.itemHeight ?? null,
       item.rowSpan ?? null,
+      item.minItemHeight ?? null,
       item.x ?? null,
       item.y ?? null,
       item.colSpan ?? null,
+      item.type === "custom" ? (item.allowRowSharing ?? false) : null,
+      item.type === "location" ? (item.minItemWidth ?? 720) : null,
     ])
   )
 }
@@ -943,25 +1250,21 @@ function buildRowsFromPositions<Filters extends FiltersDefinition>(
     (a, b) => (a.y ?? 0) - (b.y ?? 0) || (a.x ?? 0) - (b.x ?? 0)
   )
 
-  const rowMap = new Map<number, { ids: string[]; maxHeight: number }>()
+  const rowMap = new Map<number, DashboardItemType<Filters>[]>()
 
   for (const item of sorted) {
     const y = item.y ?? 0
-    const h = resolveItemHeight(item)
-
-    let entry = rowMap.get(y)
-    if (!entry) {
-      entry = { ids: [], maxHeight: 0 }
-      rowMap.set(y, entry)
-    }
-    entry.ids.push(item.id)
-    if (h > entry.maxHeight) entry.maxHeight = h
+    const entry = rowMap.get(y) ?? []
+    entry.push(item)
+    rowMap.set(y, entry)
   }
 
-  // Convert map to sorted array of rows
+  // Persisted positions can come from older layouts that did not understand
+  // custom-item row sharing. Re-pack each saved y-band so restoring one keeps
+  // full-width custom items isolated and shareable custom items paired at most.
   return [...rowMap.entries()]
     .sort(([a], [b]) => a - b)
-    .map(([, entry]) => ({ ids: entry.ids, height: entry.maxHeight }))
+    .flatMap(([, rowItems]) => buildRowsGreedy(rowItems))
 }
 
 /** Greedy bin-packing for items without saved positions. */
@@ -970,28 +1273,61 @@ function buildRowsGreedy<Filters extends FiltersDefinition>(
 ): Row[] {
   const rows: Row[] = []
   let currentIds: string[] = []
-  let currentSlots = 0
+  let currentItems: DashboardItemType<Filters>[] = []
   let currentMaxHeight = 0
 
   for (const item of items) {
-    const weight = getSlotWeight(item)
     const h = resolveItemHeight(item)
 
-    if (currentSlots + weight > MAX_PER_ROW && currentIds.length > 0) {
+    if (!canPackItems(currentItems, item) && currentIds.length > 0) {
       rows.push({ ids: currentIds, height: currentMaxHeight })
       currentIds = []
-      currentSlots = 0
+      currentItems = []
       currentMaxHeight = 0
     }
 
     currentIds.push(item.id)
-    currentSlots += weight
+    currentItems.push(item)
     if (h > currentMaxHeight) currentMaxHeight = h
   }
   if (currentIds.length > 0) {
     rows.push({ ids: currentIds, height: currentMaxHeight })
   }
 
+  return rows
+}
+
+/** Re-pack a user-defined order without ever violating full-row slot weights. */
+function buildRowsFromOrder<Filters extends FiltersDefinition>(
+  orderedIds: string[],
+  itemMap: Map<string, DashboardItemType<Filters>>,
+  rowHeightById: ReadonlyMap<string, number>
+): Row[] {
+  const rows: Row[] = []
+  let ids: string[] = []
+  let height = 0
+
+  const flush = () => {
+    if (ids.length === 0) return
+    rows.push({ ids, height })
+    ids = []
+    height = 0
+  }
+
+  for (const id of orderedIds) {
+    const item = itemMap.get(id)
+    if (!item) continue
+
+    if (ids.length > 0 && !canAddItemToRow(ids, item, itemMap)) flush()
+
+    ids.push(id)
+    height = Math.max(
+      height,
+      resolveItemHeight(item),
+      rowHeightById.get(id) ?? 0
+    )
+  }
+  flush()
   return rows
 }
 
@@ -1004,10 +1340,80 @@ function getMinRowHeight<Filters extends FiltersDefinition>(
   for (const id of row.ids) {
     const item = itemMap.get(id)
     if (!item) continue
-    const h = MIN_ROW_HEIGHTS[item.type] ?? DEFAULT_MIN_ROW_HEIGHT
+    const h = getItemMinHeight(item)
     if (h > min) min = h
   }
   return min
+}
+
+function getItemMinHeight<Filters extends FiltersDefinition>(
+  item: DashboardItemType<Filters>
+): number {
+  return Math.max(
+    MIN_ROW_HEIGHTS[item.type] ?? DEFAULT_MIN_ROW_HEIGHT,
+    item.minItemHeight ?? 0
+  )
+}
+
+function shouldStackRow<Filters extends FiltersDefinition>(
+  row: Row,
+  containerWidth: number | null,
+  itemMap: Map<string, DashboardItemType<Filters>>
+): boolean {
+  if (containerWidth === null || row.ids.length < 2) return false
+  if (containerWidth < NARROW_THRESHOLD) return true
+
+  const availableItemWidth =
+    (containerWidth - GAP * (row.ids.length - 1)) / row.ids.length
+
+  return row.ids.some((id) => {
+    const item = itemMap.get(id)
+    const minItemWidth =
+      item?.type === "location"
+        ? (item.minItemWidth ?? 720)
+        : item?.type === "custom" && item.allowRowSharing
+          ? item.minItemWidth
+          : undefined
+    return (
+      typeof minItemWidth === "number" &&
+      Number.isFinite(minItemWidth) &&
+      minItemWidth > 0 &&
+      availableItemWidth < minItemWidth
+    )
+  })
+}
+
+function canAddItemToRow<Filters extends FiltersDefinition>(
+  rowIds: string[],
+  candidate: DashboardItemType<Filters>,
+  itemMap: Map<string, DashboardItemType<Filters>>,
+  excludedId?: string
+): boolean {
+  const items = rowIds.flatMap((id) => {
+    if (id === excludedId) return []
+    const item = itemMap.get(id)
+    return item ? [item] : []
+  })
+  return canPackItems(items, candidate)
+}
+
+function canPackItems<Filters extends FiltersDefinition>(
+  existingItems: DashboardItemType<Filters>[],
+  candidate: DashboardItemType<Filters>
+): boolean {
+  const combined = [...existingItems, candidate]
+  const slotWeight = combined.reduce(
+    (weight, item) => weight + getSlotWeight(item),
+    0
+  )
+  if (slotWeight > MAX_PER_ROW) return false
+
+  const hasTwoItemLimit = combined.some(
+    (item) =>
+      item.type === "location" ||
+      (item.type === "custom" && item.allowRowSharing)
+  )
+  return !hasTwoItemLimit || combined.length <= 2
 }
 
 /**
@@ -1063,6 +1469,8 @@ function getSlotWeight<Filters extends FiltersDefinition>(
   if (item.type === "metric") return 1
   if (item.type === "chart") return 2
   if (item.type === "collection") return MAX_PER_ROW
+  if (item.type === "location") return 2
+  if (item.type === "custom") return item.allowRowSharing ? 2 : MAX_PER_ROW
   return 2
 }
 
@@ -1079,9 +1487,14 @@ function getSlotWeight<Filters extends FiltersDefinition>(
 function resolveItemHeight<Filters extends FiltersDefinition>(
   item: DashboardItemType<Filters>
 ): number {
-  if (item.itemHeight && item.itemHeight > 0) return item.itemHeight
-  if (item.rowSpan) return item.rowSpan * 48
-  return ROW_HEIGHTS[item.type] ?? DEFAULT_ROW_HEIGHT
+  const configuredHeight =
+    item.itemHeight && item.itemHeight > 0
+      ? item.itemHeight
+      : item.rowSpan
+        ? item.rowSpan * 48
+        : (ROW_HEIGHTS[item.type] ?? DEFAULT_ROW_HEIGHT)
+
+  return Math.max(configuredHeight, getItemMinHeight(item))
 }
 
 // ─── Item renderer ──────────────────────────────────────────────
@@ -1150,6 +1563,36 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
     case "collection":
       return (
         <CollectionItem
+          item={item}
+          filters={filters}
+          actions={actions}
+          itemFilters={itemFilters}
+          editMode={editMode}
+          handleDelete={onDelete}
+          onAskAi={onAskAi}
+          onAskAiTarget={onAskAiTarget}
+          isFullscreen={isFullscreen}
+          onFullscreenChange={onFullscreenChange}
+        />
+      )
+    case "location":
+      return (
+        <LocationItem
+          item={item}
+          filters={filters}
+          actions={actions}
+          itemFilters={itemFilters}
+          editMode={editMode}
+          handleDelete={onDelete}
+          onAskAi={onAskAi}
+          onAskAiTarget={onAskAiTarget}
+          isFullscreen={isFullscreen}
+          onFullscreenChange={onFullscreenChange}
+        />
+      )
+    case "custom":
+      return (
+        <CustomItem
           item={item}
           filters={filters}
           actions={actions}

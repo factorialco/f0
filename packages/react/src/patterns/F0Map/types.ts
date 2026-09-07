@@ -64,5 +64,11 @@ export type F0MapPoint = {
   id: string
   /** `[longitude, latitude]`. */
   coordinates: [number, number]
+  /** Concise visual label rendered beside the marker. */
   label?: string
+  /**
+   * Optional richer name for the operable HTML list. Defaults to `label` or
+   * the variant's localized fallback.
+   */
+  ariaLabel?: string
 } & F0MapMarkerVariantProps

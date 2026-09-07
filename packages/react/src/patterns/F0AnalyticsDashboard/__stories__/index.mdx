@@ -1,14 +1,15 @@
 import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks"
 import * as Stories from "./index.stories"
 import * as AskOneStories from "./AskOne.stories"
-import * as WidgetDropStories from "@/kits/ai/F0AiChat/__stories__/F0AiChatWidgetDrop.stories"
+import * as LocationStories from "./LocationItem.stories"
+import * as WidgetDropStories from "../../../kits/ai/F0AiChat/__stories__/F0AiChatWidgetDrop.stories"
 import { DoDonts } from "@/lib/storybook-utils/do-donts"
 
 <Meta of={Stories} />
 
 # Analytics dashboard
 
-F0AnalyticsDashboard presents related metrics, charts, and tables as one report with shared filters, optional export, and an editable grid.
+F0AnalyticsDashboard presents related metrics, charts, tables, and location views as one report with shared filters, optional export, and an editable grid.
 
 ## Anatomy
 
@@ -34,7 +35,8 @@ F0AnalyticsDashboard presents related metrics, charts, and tables as one report 
       <tr>
         <td>One report combines related visualizations</td>
         <td>
-          Metrics, charts, and tables must share context and filter values.
+          Metrics, charts, tables, and location views must share context and
+          filter values.
         </td>
       </tr>
       <tr>
@@ -106,6 +108,87 @@ F0AnalyticsDashboard presents related metrics, charts, and tables as one report 
   }}
 />
 
+### Built-in location items
+
+Use a `location` item when geographic density, selected-location details, and a timeline answer one analytical question. The contract is generic: clock activity, IT inventory, and other domains supply different labels and data without forking the visualization. The dashboard owns filters, loading, errors, export, the standard header and menu, Ask One, drag and resize controls, and fullscreen.
+
+<Canvas of={LocationStories.Default} />
+
+```tsx
+const item: DashboardLocationItem<typeof filters> = {
+  id: "clock-activity-by-location",
+  type: "location",
+  title: "Clock activity by location",
+  description: "Last 30 days · Europe",
+  location: clockActivityConfig,
+  fetchData: (filters) => fetchClockActivity(filters),
+}
+
+<F0AnalyticsDashboard filters={filters} items={[item]} />
+```
+
+See the location item documentation for its complete generic data contract, IT inventory example, responsive width behavior, and accessibility guidance.
+
+### Exceptional custom items
+
+Use a `custom` item only when a visualization does not fit the built-in chart, metric, collection, or location renderers. The dashboard still owns the standard shell and layout while `renderContent` owns the body. Set `minItemHeight` for a real intrinsic floor and `useDashboardFilters=false` when the body must ignore report filters.
+
+<Canvas of={Stories.CustomItemDashboard} />
+
+```tsx
+const items: DashboardItem<typeof filters>[] = [
+  {
+    id: "domain-visualization",
+    type: "custom",
+    title: "Domain visualization",
+    minItemHeight: 480,
+    renderContent: (appliedFilters) => <DomainVisualization filters={appliedFilters} />,
+  },
+]
+
+<F0AnalyticsDashboard
+  filters={filters}
+  items={items}
+  editMode={isDesigning}
+/>
+```
+
+Custom item bodies are host-composed and are therefore omitted from the dashboard's automatic Excel export. Provide a domain export action from the host when that visualization needs one.
+
+### Layout and fullscreen
+
+Built-in metrics and charts greedily share rows up to the dashboard's four-slot
+limit. A location item occupies two slots and may share one equal-width row
+with one peer; the row stacks before its slot falls below
+
+<code>minItemWidth</code> (720px by default). Collections and custom items
+reserve a full-width row by default. A custom body with explicit responsive
+states may opt into the same two-item row contract with
+<code>allowRowSharing: true</code>. Designer drag, one-click move controls, and
+keyboard reorder controls preserve these constraints.
+
+<Canvas of={Stories.SharedRowCustomItem} />
+
+Fullscreen temporarily renders only the selected item. Give the dashboard a
+parent with a defined height—such as a flex child with <code>min-height: 0</code>
+inside a bounded canvas—because the expanded grid fills its parent. Collapse
+restores the previous rows and peer widgets.
+
+The story below proves four widgets in one row, expand and collapse, and a
+host-owned Ask One action while fullscreen remains active.
+
+<Canvas of={Stories.LayoutAndFullscreen} />
+
+- WHEN compatible built-in items fit within four slots → THEN they share one row.
+- WHEN a location item and one peer each have at least <code>minItemWidth</code> → THEN they share one equal-width row.
+- WHEN a location item's slot would be narrower than <code>minItemWidth</code> → THEN that row stacks without changing the persisted layout.
+- WHEN a custom item omits <code>allowRowSharing</code> → THEN it occupies a full-width row and other items pack into subsequent rows.
+- WHEN a custom item sets <code>allowRowSharing: true</code> → THEN it may share one equal-width row with one peer, and any third item moves to the next row.
+- WHEN a shared custom item's slot would be narrower than <code>minItemWidth</code> → THEN that row stacks without changing the persisted layout.
+- WHEN Expand is chosen in a multi-item dashboard → THEN only that item fills the bounded dashboard canvas.
+- WHEN Collapse is chosen → THEN the previous multi-row layout is restored.
+- WHEN <code>onLayoutChange</code> is provided → THEN drag, one-click, keyboard reorder, and resize changes emit the next persisted layout.
+
 ### Widget information hints
 
 Use `info` for the definition of the figure itself. A string reveals a short
@@ -120,7 +203,7 @@ so the new affordance can be compared with the unchanged header.
 
 <Canvas of={Stories.MixedDashboard} />
 
-- WHEN an item provides `info` → THEN an information trigger appears beside its title on chart, metric, and collection widgets.
+- WHEN an item provides `info` → THEN an information trigger appears beside its title on chart, metric, collection, location, and custom widgets.
 - WHEN `info` is omitted → THEN the header layout and interaction remain unchanged.
 - WHEN the widget is in an error state → THEN the information trigger remains available to explain what the failed widget was meant to measure.
 - WHEN the title is long → THEN it truncates around the fixed-size trigger instead of pushing the trigger out of the header.
@@ -411,6 +494,18 @@ fallback without exposing selected values in the widget.
           <kbd>ArrowUp</kbd> / <kbd>ArrowDown</kbd>
         </td>
         <td>Moves through data points in the open chart action menu.</td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>ArrowLeft</kbd> / <kbd>ArrowRight</kbd>
+        </td>
+        <td>Moves a focused designer reorder grip earlier or later.</td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>ArrowUp</kbd> / <kbd>ArrowDown</kbd> on a row separator
+        </td>
+        <td>Decreases or increases that designer row's height.</td>
       </tr>
     </tbody>
   </table>

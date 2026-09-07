@@ -38,7 +38,19 @@ export function useEChartsInstance(
   }, [ref])
 
   useEffect(() => {
-    chart.current?.setOption(options, true)
+    const instance = chart.current
+    instance?.setOption(options, true)
+
+    if (
+      instance &&
+      options.aria &&
+      !Array.isArray(options.aria) &&
+      options.aria.enabled === false
+    ) {
+      const renderer = instance.getDom()
+      renderer.removeAttribute("role")
+      renderer.removeAttribute("aria-label")
+    }
   }, [options])
 
   return chart

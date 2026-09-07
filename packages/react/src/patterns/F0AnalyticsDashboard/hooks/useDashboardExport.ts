@@ -8,6 +8,7 @@ import type {
 import type {
   DashboardChartData,
   DashboardItem,
+  DashboardLocationData,
   DashboardMetricData,
   DashboardMetricItem,
 } from "../types"
@@ -24,6 +25,15 @@ type SheetData = {
   /** Row-lookup keys parallel to `columns`, when headers may collide. */
   keys?: string[]
 }
+
+const LOCATION_EXPORT_KEYS = {
+  location: "location:name",
+  density: "location:density",
+  details: "location:details",
+  item: "location:item",
+  description: "location:description",
+} as const
+const LOCATION_DETAIL_VALUE_PREFIX = "location:value:"
 
 interface UseDashboardExportOptions<Filters extends FiltersDefinition> {
   items: DashboardItem<Filters>[]
@@ -151,6 +161,74 @@ async function buildAllSheets<Filters extends FiltersDefinition>(
         } catch (err) {
           console.warn(
             `[useDashboardExport] Failed to export collection "${item.title}":`,
+            err
+          )
+          return null
+        }
+      }
+
+      if (item.type === "location") {
+        try {
+          const labels = item.location.exportLabels
+          const data: DashboardLocationData = await item.fetchData(
+            getItemFilters(item, filters)
+          )
+          const rows = data.locations.flatMap((location) => {
+            if (location.details.length === 0) {
+              return [
+                {
+                  [LOCATION_EXPORT_KEYS.location]: location.name,
+                  [LOCATION_EXPORT_KEYS.density]: location.density,
+                  [LOCATION_EXPORT_KEYS.details]: location.detailsLabel,
+                },
+              ]
+            }
+
+            return location.details.map((detail) => {
+              const row: Record<string, unknown> = {
+                [LOCATION_EXPORT_KEYS.location]: location.name,
+                [LOCATION_EXPORT_KEYS.density]: location.density,
+                [LOCATION_EXPORT_KEYS.details]: location.detailsLabel,
+                [LOCATION_EXPORT_KEYS.item]: detail.title,
+              }
+              if (detail.description) {
+                row[LOCATION_EXPORT_KEYS.description] = detail.description
+              }
+              for (const value of detail.values) {
+                row[`${LOCATION_DETAIL_VALUE_PREFIX}${value.label}`] =
+                  value.value
+              }
+              return row
+            })
+          })
+          if (rows.length === 0) return null
+          const keys = Array.from(
+            new Set(
+              rows.flatMap((row) =>
+                Object.keys(row).filter((key) => !key.startsWith("_"))
+              )
+            )
+          )
+          const headersByKey: Record<string, string> = {
+            [LOCATION_EXPORT_KEYS.location]: labels.location,
+            [LOCATION_EXPORT_KEYS.density]: labels.density,
+            [LOCATION_EXPORT_KEYS.details]: labels.details,
+            [LOCATION_EXPORT_KEYS.item]: labels.item,
+            [LOCATION_EXPORT_KEYS.description]: labels.description,
+          }
+          return {
+            name: item.title,
+            columns: keys.map(
+              (key) =>
+                headersByKey[key] ??
+                key.slice(LOCATION_DETAIL_VALUE_PREFIX.length)
+            ),
+            keys,
+            rows,
+          }
+        } catch (err) {
+          console.warn(
+            `[useDashboardExport] Failed to export location item "${item.title}":`,
             err
           )
           return null
