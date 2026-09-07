@@ -16,6 +16,8 @@
     "preserve-caught-error": "error",
 
     // typescript-eslint strict + stylistic, no type information needed.
+    "typescript/no-dynamic-delete": "error",
+    "typescript/ban-ts-comment": "error",
     "typescript/no-inferrable-types": "error",
     "typescript/array-type": "error",
     "typescript/adjacent-overload-signatures": "error",
@@ -32,13 +34,8 @@
     "typescript/prefer-literal-enum-member": "error",
 
     // eslint-plugin-import, native oxlint rules.
+    "import/no-duplicates": "error",
     "import/namespace": "error",
-
-    // PENDING. Turned on in a follow-up PR together with the code fixes.
-    // Number = violations on main when this was written.
-    "typescript/ban-ts-comment": "off", // 3
-    "import/no-duplicates": "off", // 3
-    "typescript/no-dynamic-delete": "off", // 1
 
     // OFF ON PURPOSE. Not planned to be enabled.
     "import/default": "off", // false positives with CommonJS interop packages

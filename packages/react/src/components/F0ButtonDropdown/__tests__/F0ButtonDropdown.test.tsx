@@ -182,6 +182,7 @@ describe("F0ButtonDropdown", () => {
       expect(mockOnClick).not.toHaveBeenCalled()
     })
 
+    // Skipped since daccd9283 without a recorded reason. Un-skip or document.
     it.skip("changes selected value when dropdown item is clicked", async () => {
       const user = userEvent.setup()
       render(

@@ -85,8 +85,10 @@ function getVisibleItems(
   if (activeItem) {
     const activeIndex = allItems.findIndex((item) => item.id === activeItem)
     if (activeIndex !== -1 && !selectedIndices.has(activeIndex)) {
-      const closest = [...selectedIndices].reduce((a, b) =>
-        Math.abs(b - activeIndex) < Math.abs(a - activeIndex) ? b : a
+      const closest = [...selectedIndices].reduce(
+        (a, b) =>
+          Math.abs(b - activeIndex) < Math.abs(a - activeIndex) ? b : a,
+        Number.POSITIVE_INFINITY
       )
       selectedIndices.delete(closest)
       selectedIndices.add(activeIndex)

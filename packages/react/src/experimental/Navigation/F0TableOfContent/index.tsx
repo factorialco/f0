@@ -658,8 +658,6 @@ function TOCContent({
           if (targetItem.parentPath.length > 0) {
             targetParentId =
               targetItem.parentPath[targetItem.parentPath.length - 1]
-          } else {
-            targetParentId = null // Root level
           }
           // Find the index of the target item in its parent
           if (targetParentId === null) {
@@ -677,8 +675,6 @@ function TOCContent({
           if (targetItem.parentPath.length > 0) {
             targetParentId =
               targetItem.parentPath[targetItem.parentPath.length - 1]
-          } else {
-            targetParentId = null // Root level
           }
           // Find the index of the target item in its parent and add 1
           if (targetParentId === null) {

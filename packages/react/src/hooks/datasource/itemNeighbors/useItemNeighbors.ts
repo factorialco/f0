@@ -185,7 +185,7 @@ export function useItemNeighbors<
         setResolved({ key: requestKey, neighbors: response })
         setIsResolving(false)
       },
-      (cause) => {
+      (cause: unknown) => {
         if (latestKeyRef.current !== requestKey) {
           return
         }

@@ -183,7 +183,7 @@ export type BaseDataAdapter<
   FetchReturn = BaseResponse<R>,
 > = {
   /** Indicates this adapter doesn't use pagination */
-  paginationType?: never | undefined
+  paginationType?: undefined
   /**
    * Function to fetch data based on filter options
    * @param options - The filter options to apply when fetching data

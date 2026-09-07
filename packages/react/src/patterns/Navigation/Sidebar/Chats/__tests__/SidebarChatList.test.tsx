@@ -553,7 +553,7 @@ type MockIntersection = {
 }
 
 class MockIntersectionObserver implements IntersectionObserver {
-  static instances: MockIntersectionObserver[] = []
+  static readonly instances: MockIntersectionObserver[] = []
 
   readonly root: Element | Document | null
   readonly rootMargin = "0px"
@@ -687,7 +687,7 @@ describe("SidebarChatList unread navigation", () => {
   )
 
   beforeEach(() => {
-    MockIntersectionObserver.instances = []
+    MockIntersectionObserver.instances.length = 0
     Object.defineProperty(globalThis, "IntersectionObserver", {
       configurable: true,
       value: MockIntersectionObserver,

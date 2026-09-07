@@ -296,194 +296,185 @@ export function KanbanLane<TRecord extends RecordType>({
           }
         }
       },
-      onDrop: async ({ location, source }) => {
-        setIsOver(false)
-        setShowEmptyLanePlaceholder(false)
-        const sourceId = String((source.data as { id?: string }).id)
-        const sourceItem = source.data.data as TRecord
+      onDrop: ({ location, source }) => {
+        void (async () => {
+          setIsOver(false)
+          setShowEmptyLanePlaceholder(false)
+          const sourceId = String((source.data as { id?: string }).id)
+          const sourceItem = source.data.data as TRecord
 
-        // Find source index using getKey for consistency
-        const resourceIndexOnLane = laneProps.items.findIndex((item, idx) => {
-          const itemKey = String(laneProps.getKey(item, idx))
-          return itemKey === sourceId
-        })
-
-        const sourceLaneIdFromPayload = String(
-          (source.data as unknown as { data?: { laneId?: string } }).data
-            ?.laneId ?? ""
-        )
-        const initialLaneId =
-          sourceLaneIdFromPayload ||
-          String(
-            (
-              location.initial.dropTargets.find(
-                (t) => (t.data as { type?: string }).type === "list-droppable"
-              )?.data as { id?: string }
-            )?.id ?? ""
-          )
-
-        const isCrossLane = String(initialLaneId) !== String(id)
-
-        // Early check: prevent useless drops in same lane
-        if (!isCrossLane && resourceIndexOnLane >= 0) {
-          // Check if dropping on card target
-          const cardTarget = location.current.dropTargets.find((t) => {
-            const data = t.data as { type?: string }
-            return data.type === "list-card-target"
+          // Find source index using getKey for consistency
+          const resourceIndexOnLane = laneProps.items.findIndex((item, idx) => {
+            const itemKey = String(laneProps.getKey(item, idx))
+            return itemKey === sourceId
           })
 
-          if (cardTarget) {
-            const targetIndex = (cardTarget.data as { index?: number }).index
-            // Extract edge info from cardTarget
-            const edge = (cardTarget.data as { closestEdge?: string })
-              .closestEdge as "top" | "bottom" | undefined
+          const sourceLaneIdFromPayload = String(
+            (source.data as unknown as { data?: { laneId?: string } }).data
+              ?.laneId ?? ""
+          )
+          const initialLaneId =
+            sourceLaneIdFromPayload ||
+            String(
+              (
+                location.initial.dropTargets.find(
+                  (t) => (t.data as { type?: string }).type === "list-droppable"
+                )?.data as { id?: string }
+              )?.id ?? ""
+            )
 
-            if (targetIndex !== undefined && edge) {
-              // Check if this would be a useless drop based on target card and edge
-              let wouldBeUselessDrop = false
+          const isCrossLane = String(initialLaneId) !== String(id)
 
-              if (targetIndex === resourceIndexOnLane) {
-                // Dropping on same card - always useless
-                wouldBeUselessDrop = true
-              } else if (
-                targetIndex === resourceIndexOnLane - 1 &&
-                edge === "bottom"
-              ) {
-                // Dropping below card above = stays in same position
-                wouldBeUselessDrop = true
-              } else if (
-                targetIndex === resourceIndexOnLane + 1 &&
-                edge === "top"
-              ) {
-                // Dropping above card below = stays in same position
-                wouldBeUselessDrop = true
-              }
+          // Early check: prevent useless drops in same lane
+          if (!isCrossLane && resourceIndexOnLane >= 0) {
+            // Check if dropping on card target
+            const cardTarget = location.current.dropTargets.find((t) => {
+              const data = t.data as { type?: string }
+              return data.type === "list-card-target"
+            })
 
-              if (wouldBeUselessDrop) {
-                return
+            if (cardTarget) {
+              const targetIndex = (cardTarget.data as { index?: number }).index
+              // Extract edge info from cardTarget
+              const edge = (cardTarget.data as { closestEdge?: string })
+                .closestEdge as "top" | "bottom" | undefined
+
+              if (targetIndex !== undefined && edge) {
+                // Useless when dropping on the same card, below the card above,
+                // or above the card below: the item stays where it is.
+                const wouldBeUselessDrop =
+                  targetIndex === resourceIndexOnLane ||
+                  (targetIndex === resourceIndexOnLane - 1 &&
+                    edge === "bottom") ||
+                  (targetIndex === resourceIndexOnLane + 1 && edge === "top")
+
+                if (wouldBeUselessDrop) {
+                  return
+                }
               }
             }
           }
-        }
 
-        // Check if this would be a useless drop in same lane
-        if (!isCrossLane && forcedIndex !== null && forcedEdge !== null) {
-          const wouldBeUselessDrop =
-            (forcedIndex === resourceIndexOnLane && forcedEdge === "top") ||
-            (forcedIndex === resourceIndexOnLane && forcedEdge === "bottom") ||
-            (forcedIndex === resourceIndexOnLane - 1 &&
-              forcedEdge === "bottom") ||
-            (forcedIndex === resourceIndexOnLane + 1 && forcedEdge === "top")
+          // Check if this would be a useless drop in same lane
+          if (!isCrossLane && forcedIndex !== null && forcedEdge !== null) {
+            const wouldBeUselessDrop =
+              (forcedIndex === resourceIndexOnLane && forcedEdge === "top") ||
+              (forcedIndex === resourceIndexOnLane &&
+                forcedEdge === "bottom") ||
+              (forcedIndex === resourceIndexOnLane - 1 &&
+                forcedEdge === "bottom") ||
+              (forcedIndex === resourceIndexOnLane + 1 && forcedEdge === "top")
 
-          if (wouldBeUselessDrop) {
-            setForcedIndex(null)
-            setForcedEdge(null)
+            if (wouldBeUselessDrop) {
+              setForcedIndex(null)
+              setForcedEdge(null)
+              return
+            }
+          }
+
+          // Only the lane actually under the pointer should handle the drop
+          const overThisLane = location.current.dropTargets.some((t) => {
+            const data = t.data as { type?: string; id?: string }
+            return data.type === "list-droppable" && data.id === id
+          })
+          if (!overThisLane) {
             return
           }
-        }
 
-        // Only the lane actually under the pointer should handle the drop
-        const overThisLane = location.current.dropTargets.some((t) => {
-          const data = t.data as { type?: string; id?: string }
-          return data.type === "list-droppable" && data.id === id
-        })
-        if (!overThisLane) {
-          return
-        }
+          let onMoveParams: KanbanOnMoveParam | null = null
+          const { type: typeOfDrop, cardTarget } = findTypeOfDrop(
+            location.current.dropTargets
+          )
 
-        let onMoveParams: KanbanOnMoveParam | null = null
-        const { type: typeOfDrop, cardTarget } = findTypeOfDrop(
-          location.current.dropTargets
-        )
-
-        // Only compute params; do not mutate items locally. Parent will update lanes.
-        if (!isCrossLane) {
-          // Same-lane reorder
-          if (
-            typeOfDrop === "sameLaneOverCard" &&
-            cardTarget &&
-            cardTarget.data
-          ) {
-            onMoveParams = optimisticSameLaneOverCard<TRecord>({
-              resourceIndexOnLane,
-              cardTarget,
-              sourceItem,
-              fromLaneId: initialLaneId,
-              toLaneId: id as string,
-              sourceId,
-              setItems: () => {},
-            })
-          } else if (forcedIndex !== null && forcedEdge) {
-            onMoveParams = {
-              fromLaneId: initialLaneId,
-              toLaneId: id as string,
-              sourceId,
-              indexOfTarget: forcedIndex,
-              position: forcedEdge === "bottom" ? "below" : "above",
+          // Only compute params; do not mutate items locally. Parent will update lanes.
+          if (!isCrossLane) {
+            // Same-lane reorder
+            if (
+              typeOfDrop === "sameLaneOverCard" &&
+              cardTarget &&
+              cardTarget.data
+            ) {
+              onMoveParams = optimisticSameLaneOverCard<TRecord>({
+                resourceIndexOnLane,
+                cardTarget,
+                sourceItem,
+                fromLaneId: initialLaneId,
+                toLaneId: id as string,
+                sourceId,
+                setItems: () => {},
+              })
+            } else if (forcedIndex !== null && forcedEdge) {
+              onMoveParams = {
+                fromLaneId: initialLaneId,
+                toLaneId: id as string,
+                sourceId,
+                indexOfTarget: forcedIndex,
+                position: forcedEdge === "bottom" ? "below" : "above",
+              }
+            } else {
+              onMoveParams = optimisticSameLaneOverEmpty<TRecord>({
+                resourceIndexOnLane,
+                sourceItem,
+                fromLaneId: initialLaneId,
+                toLaneId: id as string,
+                sourceId,
+                setItems: () => {},
+              })
             }
           } else {
-            onMoveParams = optimisticSameLaneOverEmpty<TRecord>({
-              resourceIndexOnLane,
-              sourceItem,
-              fromLaneId: initialLaneId,
-              toLaneId: id as string,
-              sourceId,
-              setItems: () => {},
-            })
-          }
-        } else {
-          // Cross-lane destination insert. Ignore typeOfDrop label; rely on cardTarget presence
-          if (cardTarget && cardTarget.data) {
-            onMoveParams = optimisticDifferentLaneInsertOverCard<TRecord>({
-              cardTarget,
-              sourceItem,
-              fromLaneId: initialLaneId,
-              toLaneId: id as string,
-              sourceId,
-              setItems: () => {},
-            })
-          } else if (forcedIndex !== null && forcedEdge) {
-            onMoveParams = {
-              fromLaneId: initialLaneId,
-              toLaneId: id as string,
-              sourceId,
-              indexOfTarget: forcedIndex,
-              position: forcedEdge === "bottom" ? "below" : "above",
+            // Cross-lane destination insert. Ignore typeOfDrop label; rely on cardTarget presence
+            if (cardTarget && cardTarget.data) {
+              onMoveParams = optimisticDifferentLaneInsertOverCard<TRecord>({
+                cardTarget,
+                sourceItem,
+                fromLaneId: initialLaneId,
+                toLaneId: id as string,
+                sourceId,
+                setItems: () => {},
+              })
+            } else if (forcedIndex !== null && forcedEdge) {
+              onMoveParams = {
+                fromLaneId: initialLaneId,
+                toLaneId: id as string,
+                sourceId,
+                indexOfTarget: forcedIndex,
+                position: forcedEdge === "bottom" ? "below" : "above",
+              }
+            } else {
+              onMoveParams = optimisticDifferentLaneInsertOverEmpty<TRecord>({
+                sourceItem,
+                fromLaneId: initialLaneId,
+                toLaneId: id as string,
+                sourceId,
+                setItems: () => {},
+              })
             }
-          } else {
-            onMoveParams = optimisticDifferentLaneInsertOverEmpty<TRecord>({
-              sourceItem,
-              fromLaneId: initialLaneId,
-              toLaneId: id as string,
-              sourceId,
-              setItems: () => {},
-            })
           }
-        }
 
-        if (!onMoveParams) {
-          return
-        }
-
-        // Additional check: prevent useless drops in same lane with final computed params
-        if (!isCrossLane && onMoveParams.indexOfTarget !== undefined) {
-          const targetIdx = onMoveParams.indexOfTarget
-          const position = onMoveParams.position
-          const wouldBeUselessDrop =
-            (targetIdx === resourceIndexOnLane && position === "above") ||
-            (targetIdx === resourceIndexOnLane && position === "below") ||
-            (targetIdx === resourceIndexOnLane - 1 && position === "below") ||
-            (targetIdx === resourceIndexOnLane + 1 && position === "above")
-
-          if (wouldBeUselessDrop) {
+          if (!onMoveParams) {
             return
           }
-        }
 
-        // Single upward call. Parent/Story updates state; coordinator not needed here.
-        await onMove?.(onMoveParams)
-        setForcedIndex(null)
-        setForcedEdge(null)
+          // Additional check: prevent useless drops in same lane with final computed params
+          if (!isCrossLane && onMoveParams.indexOfTarget !== undefined) {
+            const targetIdx = onMoveParams.indexOfTarget
+            const position = onMoveParams.position
+            const wouldBeUselessDrop =
+              (targetIdx === resourceIndexOnLane && position === "above") ||
+              (targetIdx === resourceIndexOnLane && position === "below") ||
+              (targetIdx === resourceIndexOnLane - 1 && position === "below") ||
+              (targetIdx === resourceIndexOnLane + 1 && position === "above")
+
+            if (wouldBeUselessDrop) {
+              return
+            }
+          }
+
+          // Single upward call. Parent/Story updates state; coordinator not needed here.
+          await onMove?.(onMoveParams)
+          setForcedIndex(null)
+          setForcedEdge(null)
+        })()
       },
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -704,7 +695,7 @@ export function KanbanLane<TRecord extends RecordType>({
           ref={overlayRef}
           className={cn(
             "pointer-events-none absolute inset-0 z-[1]",
-            isDragging ? "bg-transparent" : "bg-transparent"
+            "bg-transparent"
           )}
           aria-hidden
         />

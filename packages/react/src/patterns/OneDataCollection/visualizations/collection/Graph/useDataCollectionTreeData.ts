@@ -106,10 +106,10 @@ const resolveFetchResult = <R>(result: unknown): Promise<R[]> => {
             subscription.unsubscribe()
           }
         },
-        error: (err) => {
+        error: (err: unknown) => {
           if (!settled) {
             settled = true
-            reject(err)
+            reject(err instanceof Error ? err : new Error(String(err)))
           }
         },
         complete: () => {
@@ -206,8 +206,9 @@ const collectSubtreeIds = <R extends RecordType>(
       frontier.push(id)
     }
   }
-  for (let cursor = 0; cursor < frontier.length; cursor++) {
-    for (const childId of childrenByParent.get(frontier[cursor]) ?? []) {
+  // The array iterator sees ids pushed during the loop, so this is a BFS.
+  for (const parentId of frontier) {
+    for (const childId of childrenByParent.get(parentId) ?? []) {
       if (collected.has(childId)) {
         continue
       }
@@ -641,7 +642,7 @@ export function useDataCollectionTreeData<
           )
           setNodes((prev) => mergeHydratedData(prev, hydrated))
         })
-        .catch((cause) => {
+        .catch((cause: unknown) => {
           const dataError = toDataError(cause)
           setError(dataError)
           callbacksRef.current.onLoadError(dataError)

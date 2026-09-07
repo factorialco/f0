@@ -57,13 +57,7 @@ export function YearView({
         to: endOfYear(selectedDate),
       })
     } else if (mode === "range") {
-      if (!selected || !isDateRange(selected)) {
-        // Start of range
-        onSelect?.({
-          from: selectedDate,
-          to: undefined,
-        })
-      } else if (selected && selected.from && !selected.to) {
+      if (selected && isDateRange(selected) && selected.from && !selected.to) {
         // Complete the range
         if (isSameYear(selected.from, selectedDate)) {
           // If clicking the same year, select just that year

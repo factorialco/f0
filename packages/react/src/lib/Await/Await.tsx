@@ -34,9 +34,9 @@ const _Await = <T,>({
             setResolvedValue(value)
           }
         })
-        .catch((error) => {
+        .catch((error: unknown) => {
           if (!cancelled) {
-            setError(error)
+            setError(error instanceof Error ? error : new Error(String(error)))
           }
         })
         .finally(() => {

@@ -433,11 +433,6 @@ export function hasAccessibleChartPoint(
         )
       )
     case "funnel":
-      return chart.series.data.some(
-        (entry) =>
-          selected[entry.name] !== false &&
-          numericPointValue(entry.value) !== null
-      )
     case "pie":
       return chart.series.data.some(
         (entry) =>
@@ -613,11 +608,6 @@ export function buildChartProps(
         series: adapted.series,
       } as F0DataChartProps
     case "funnel":
-      return {
-        ...config,
-        ...shared,
-        series: adapted.series,
-      } as F0DataChartProps
     case "pie":
       return {
         ...config,

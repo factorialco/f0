@@ -84,7 +84,7 @@ export interface UseDataOptions<
  */
 export const GROUP_ID_SYMBOL = Symbol("groupId")
 export type WithGroupId<RecordType> = RecordType & {
-  [GROUP_ID_SYMBOL]: unknown | undefined
+  [GROUP_ID_SYMBOL]: unknown
 }
 
 type GroupIdCache<R extends RecordType> = {

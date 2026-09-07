@@ -38,10 +38,10 @@ describe("index.ts exports", () => {
       formatterOptions: {},
     }
 
-    expect(value).toBeDefined()
-    expect(numeric).toBeDefined()
-    expect(options).toBeDefined()
-    expect(withFormatter).toBeDefined()
+    expect(value.value).toBe(123.45)
+    expect(numeric).toBe(value.value)
+    expect(options.decimalPlaces).toBe(2)
+    expect(withFormatter.numericValue.value).toBe(123.45)
   })
 
   it("should allow importing and using exported functions", () => {

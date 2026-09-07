@@ -1978,7 +1978,7 @@ export function createDataAdapter<
                 ) as PaginatedResponse<TRecord>
               )
             } catch (error) {
-              reject(error)
+              reject(error instanceof Error ? error : new Error(String(error)))
             }
           }, delay)
         })
@@ -2047,12 +2047,7 @@ export function createDataAdapter<
               ) as InfiniteScrollPaginatedResponse<TRecord>
               resolve(result)
             } catch (error) {
-              reject({
-                loading: false,
-                error:
-                  error instanceof Error ? error : new Error(String(error)),
-                data: null,
-              })
+              reject(error instanceof Error ? error : new Error(String(error)))
             }
           }, delay)
         })
@@ -2119,7 +2114,7 @@ export function createDataAdapter<
               summaries: summaries as TRecord,
             })
           } catch (error) {
-            reject(error)
+            reject(error instanceof Error ? error : new Error(String(error)))
           }
         }, delay)
       })

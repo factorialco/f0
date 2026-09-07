@@ -120,7 +120,8 @@ describe("F0BigNumber", () => {
         // Constructor can be empty, format is set as instance property
       }
 
-      static supportedLocalesOf = OriginalIntl.NumberFormat.supportedLocalesOf
+      static readonly supportedLocalesOf =
+        OriginalIntl.NumberFormat.supportedLocalesOf
     }
 
     global.Intl = {

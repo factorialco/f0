@@ -48,9 +48,8 @@ function useOverflowCalculation<T>(items: T[], gap: number) {
     const itemElements = measurementContainerRef.current.children
     const sizes: number[] = []
 
-    for (let i = 0; i < itemElements.length; i++) {
-      const itemSize = itemElements[i].getBoundingClientRect().height
-      sizes.push(itemSize)
+    for (const itemElement of itemElements) {
+      sizes.push(itemElement.getBoundingClientRect().height)
     }
 
     return sizes

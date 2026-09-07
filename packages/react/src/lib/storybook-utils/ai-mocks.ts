@@ -75,7 +75,7 @@ export const mockEnhanceText = (
     setTimeout(
       () => {
         resolve({
-          success: !(params.selectedIntent === "error"),
+          success: params.selectedIntent !== "error",
           error: "Error from AI",
           text: pickRandom(MOCK_ENHANCED_TEXTS),
         })

@@ -143,7 +143,9 @@ const NestedRowContent = <
   const sentinelRef = useRef<HTMLTableCellElement | null>(null)
   const addRow = useAddRow()
 
-  const rowId = `${props.nestedRowProps?.depth ?? 0}-${"id" in props.item ? props.item.id + "-" + props.index : props.index}`
+  const itemKey =
+    "id" in props.item ? `${String(props.item.id)}-${props.index}` : props.index
+  const rowId = `${props.nestedRowProps?.depth ?? 0}-${itemKey}`
 
   const {
     expandedRowIds,

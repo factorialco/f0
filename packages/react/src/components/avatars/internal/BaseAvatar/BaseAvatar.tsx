@@ -58,7 +58,7 @@ export const BaseAvatar = forwardRef<HTMLDivElement, BaseAvatarProps>(
     ): size is AvatarSize => avatarSizes.includes(size as AvatarSize)
 
     // Check if size is a valid avatar size
-    let mappedSize: AvatarSize = DEFAULT_SIZE
+    let mappedSize: AvatarSize
     if (size && !isSize(size)) {
       console.warn(
         `The avatar size: ${size} is deprecated. Use ${sizesMapping[size]} instead.`

@@ -140,7 +140,7 @@ export const WithVideo: Story = {
     ...Default.args,
     event: undefined,
     mediaUrl:
-      "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+      "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
     noVideoPreload: true,
   },
 }
@@ -153,7 +153,7 @@ export const WithEventAndVideo: Story = {
       title: "Sevilla Tour",
       place: "Sevilla",
       mediaUrl:
-        "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+        "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
       date: eventDate,
     },
     noVideoPreload: true,

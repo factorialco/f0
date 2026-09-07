@@ -76,7 +76,7 @@ const _VBarChart = <K extends ChartConfig>(
   const bars = Object.keys(dataConfig) as (keyof ChartConfig)[]
   const preparedData = prepareData<K>(data)
   const maxLabelWidth = Math.max(
-    ...preparedData.map((el) => measureTextWidth(`${el.x}`))
+    ...preparedData.map((el) => measureTextWidth(String(el.x)))
   )
   const totalCategories = bars.reduce<Record<string, number>>((acc, key) => {
     acc[key] = data.reduce((sum, item) => sum + (item.values[key] as number), 0)

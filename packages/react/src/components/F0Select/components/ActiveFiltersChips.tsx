@@ -115,8 +115,9 @@ export const ActiveFiltersChips = <Filters extends FiltersDefinition>({
   }
 
   const handleRemoveFilter = (key: string) => {
-    const newFilters = { ...currentFilters }
-    delete newFilters[key as keyof Filters]
+    const newFilters = Object.fromEntries(
+      Object.entries(currentFilters).filter(([filterKey]) => filterKey !== key)
+    ) as typeof currentFilters
     onFiltersChange(newFilters)
   }
 

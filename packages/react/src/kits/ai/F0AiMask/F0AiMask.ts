@@ -342,7 +342,7 @@ export class F0AiMask {
       )
 
       animation.onfinish = () => resolve()
-      animation.oncancel = () => reject("canceled")
+      animation.oncancel = () => reject(new Error("canceled"))
     })
   }
 
@@ -361,7 +361,7 @@ export class F0AiMask {
       )
 
       animation.onfinish = () => resolve()
-      animation.oncancel = () => reject("canceled")
+      animation.oncancel = () => reject(new Error("canceled"))
     })
   }
 

@@ -43,9 +43,7 @@ const _UpsellingBanner = forwardRef<HTMLDivElement, UpsellingBannerProps>(
         return (
           <UpsellingButton
             label={action.label}
-            onRequest={async () => {
-              await action.onClick()
-            }}
+            onRequest={action.onClick}
             errorMessage={action.errorMessage}
             successMessage={action.successMessage}
             loadingState={action.loadingState}

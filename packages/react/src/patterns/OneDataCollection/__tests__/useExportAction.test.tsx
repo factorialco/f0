@@ -81,11 +81,11 @@ beforeEach(() => {
   vi.stubGlobal(
     "URL",
     class extends URL {
-      static override createObjectURL = (blob: Blob) => {
+      static override readonly createObjectURL = (blob: Blob) => {
         blobCapture = blob
         return "blob:mock"
       }
-      static override revokeObjectURL = vi.fn()
+      static override readonly revokeObjectURL = vi.fn()
     }
   )
 

@@ -59,7 +59,7 @@ export type DataCollectionStorageFeaturesDefinition = (
   | "*"
   | `all`
   | `!${DataCollectionStorageFeature}`
-  | `${DataCollectionStorageFeature}`
+  | DataCollectionStorageFeature
 )[]
 
 /**

@@ -63,12 +63,7 @@ export const QuarterView = ({
     if (mode === "single") {
       onSelect?.(quarterRange.from)
     } else if (mode === "range") {
-      if (!selected || !isDateRange(selected)) {
-        onSelect?.({
-          from: quarterRange.from,
-          to: undefined,
-        })
-      } else if (selected && selected.from && !selected.to) {
+      if (selected && isDateRange(selected) && selected.from && !selected.to) {
         const fromDate = selected.from
         const fromQuarter = getQuarterFromMonth(fromDate.getMonth())
         const fromYear = fromDate.getFullYear()

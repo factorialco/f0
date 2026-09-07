@@ -944,7 +944,7 @@ describe("NewHomeLayout", () => {
     // test below sees a strip that fits.
     afterEach(() => {
       for (const prop of METRICS) {
-        delete HTMLElement.prototype[prop]
+        Reflect.deleteProperty(HTMLElement.prototype, prop)
       }
     })
 

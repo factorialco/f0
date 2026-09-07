@@ -84,7 +84,7 @@ const INTERACTIVE = [
 ].join(",")
 
 class WidgetDragSensor extends PointerSensor {
-  static activators = [
+  static readonly activators = [
     {
       eventName: "onPointerDown" as const,
       handler: (

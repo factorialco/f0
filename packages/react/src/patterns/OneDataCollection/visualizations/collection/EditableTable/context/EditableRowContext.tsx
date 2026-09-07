@@ -102,13 +102,15 @@ export function EditableRowProvider<R extends RecordType>({
 
   const setErrors = (columnIds: string[], message?: string) => {
     setCellErrors((prev) => {
+      if (message === undefined) {
+        const cleared = new Set(columnIds)
+        return Object.fromEntries(
+          Object.entries(prev).filter(([id]) => !cleared.has(id))
+        )
+      }
       const next = { ...prev }
       for (const id of columnIds) {
-        if (message === undefined) {
-          delete next[id]
-        } else {
-          next[id] = message
-        }
+        next[id] = message
       }
       return next
     })

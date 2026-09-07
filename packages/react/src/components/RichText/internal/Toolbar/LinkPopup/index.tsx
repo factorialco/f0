@@ -40,9 +40,7 @@ export const LinkPopup = ({ editor, disabled }: LinkPopupProps) => {
   const checkIfUrlIsValid = (url: string) => {
     const trimmedUrl = url.trim()
     const isValidUrl =
-      /^(https?:\/\/)([\w-]+(\.[\w-]+)+)(:[0-9]{1,5})?(\/.*)?$/i.test(
-        trimmedUrl
-      )
+      /^(https?:\/\/)([\w-]+(\.[\w-]+)+)(:\d{1,5})?(\/.*)?$/i.test(trimmedUrl)
     return isValidUrl
   }
 

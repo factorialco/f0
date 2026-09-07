@@ -65,7 +65,12 @@ const TargetObserverLayout = ({
           items={items}
           onAskAiTarget={({ id, point, quote }) => {
             setObservedTarget(
-              `${id}: ${point ? `point=${point.category}/${point.value}` : "widget"}; quote=${quote.text}`
+              (() => {
+                const target = point
+                  ? `point=${point.category}/${point.value}`
+                  : "widget"
+                return `${id}: ${target}; quote=${quote.text}`
+              })()
             )
           }}
         />
@@ -155,12 +160,13 @@ export const WidgetQuotedInChat: Story = {
   render: () => <AskOneLayout />,
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement)
-    let menu: ReturnType<typeof within> | undefined
+    const opened: Partial<Awaited<ReturnType<typeof openAskOneMenu>>> = {}
 
     await step("Open the widget actions menu", async () => {
-      menu = (await openAskOneMenu(canvasElement)).menu
+      opened.menu = (await openAskOneMenu(canvasElement)).menu
     })
 
+    const menu = opened.menu
     if (!menu) {
       throw new Error("The widget actions menu did not open")
     }
@@ -198,12 +204,13 @@ export const TargetObserver: Story = {
   render: () => <TargetObserverLayout />,
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement)
-    let menu: ReturnType<typeof within> | undefined
+    const opened: Partial<Awaited<ReturnType<typeof openAskOneMenu>>> = {}
 
     await step("Open the widget actions menu", async () => {
-      menu = (await openAskOneMenu(canvasElement)).menu
+      opened.menu = (await openAskOneMenu(canvasElement)).menu
     })
 
+    const menu = opened.menu
     if (!menu) {
       throw new Error("The widget actions menu did not open")
     }

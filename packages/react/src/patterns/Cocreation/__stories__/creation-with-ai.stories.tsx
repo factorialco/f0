@@ -1694,7 +1694,8 @@ function SurveyStoreProvider({ children }: { children: ReactNode }) {
 
   const createSurvey = useCallback<SurveyStoreValue["createSurvey"]>(
     (name, opts) => {
-      const surveyId = `survey-${(idRef.current += 1)}`
+      idRef.current += 1
+      const surveyId = `survey-${idRef.current}`
       setSurveys((prev) => ({
         ...prev,
         [surveyId]: {
@@ -1783,10 +1784,10 @@ function SurveyStoreProvider({ children }: { children: ReactNode }) {
     []
   )
 
-  const nextCardId = useCallback<SurveyStoreValue["nextCardId"]>(
-    () => `card-${(idRef.current += 1)}`,
-    []
-  )
+  const nextCardId = useCallback<SurveyStoreValue["nextCardId"]>(() => {
+    idRef.current += 1
+    return `card-${idRef.current}`
+  }, [])
 
   const registerLiveCard = useCallback<SurveyStoreValue["registerLiveCard"]>(
     (surveyId, cardId) => {

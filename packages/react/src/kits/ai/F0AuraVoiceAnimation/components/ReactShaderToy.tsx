@@ -68,12 +68,10 @@ const processUniform = <T extends UniformType>(
     }
   }
   if (typeof value === "number") {
-    switch (t) {
-      case "1i":
-        return gl.uniform1i(location, value)
-      default:
-        return gl.uniform1f(location, value)
+    if (t === "1i") {
+      return gl.uniform1i(location, value)
     }
+    return gl.uniform1f(location, value)
   }
   switch (t) {
     case "1iv":
@@ -565,9 +563,10 @@ export function ReactShaderToy({
     if (!channelResUniform) {
       return
     }
-    const channelResValue = Array.isArray(channelResUniform.value)
-      ? channelResUniform.value
-      : (channelResUniform.value = [])
+    if (!Array.isArray(channelResUniform.value)) {
+      channelResUniform.value = []
+    }
+    const channelResValue = channelResUniform.value
     channelResValue[id * 3] = width * devicePixelRatio
     channelResValue[id * 3 + 1] = height * devicePixelRatio
     channelResValue[id * 3 + 2] = 0
@@ -778,7 +777,7 @@ export function ReactShaderToy({
       return
     }
     if (textures && textures.length > 0) {
-      uniformsRef.current[`${UNIFORM_CHANNELRESOLUTION}`] = {
+      uniformsRef.current[UNIFORM_CHANNELRESOLUTION] = {
         type: "vec3",
         isNeeded: false,
         arraySize: `[${textures.length}]`,
@@ -806,8 +805,8 @@ export function ReactShaderToy({
             onDoneLoadingTextures()
           }
         })
-        .catch((e) => {
-          onError?.(e)
+        .catch((e: unknown) => {
+          onError?.(e instanceof Error ? e.message : String(e))
           if (onDoneLoadingTextures) {
             onDoneLoadingTextures()
           }
@@ -919,7 +918,8 @@ export function ReactShaderToy({
         shaderProgramRef.current,
         UNIFORM_TIME
       )
-      gl.uniform1f(timeUniform, (timerRef.current += delta))
+      timerRef.current += delta
+      gl.uniform1f(timeUniform, timerRef.current)
     }
     if (uniformsRef.current.iTimeDelta?.isNeeded) {
       const timeDeltaUniform = gl.getUniformLocation(

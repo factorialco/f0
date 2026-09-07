@@ -89,7 +89,7 @@ export const CalendarEvent = forwardRef<HTMLDivElement, CalendarEventProps>(
             <div
               className="absolute bottom-0 left-0 right-0 top-0 opacity-5"
               style={{
-                background: `${color}`,
+                background: color,
               }}
             />
             <div

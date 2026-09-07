@@ -4,7 +4,7 @@ import { zeroRender as render } from "@/testing/test-utils"
 import { F0DataChart } from "../F0DataChart"
 
 const setOptionMock = vi.fn()
-const chartEventHandlers: Record<string, ((params: unknown) => void)[]> = {}
+const chartEventHandlers = new Map<string, ((params: unknown) => void)[]>()
 
 vi.mock("echarts", () => ({
   init: vi.fn(() => ({
@@ -13,14 +13,17 @@ vi.mock("echarts", () => ({
     dispose: vi.fn(),
     getDom: vi.fn(() => document.createElement("div")),
     on: vi.fn((event: string, handler: (params: unknown) => void) => {
-      chartEventHandlers[event] = [
-        ...(chartEventHandlers[event] ?? []),
+      chartEventHandlers.set(event, [
+        ...(chartEventHandlers.get(event) ?? []),
         handler,
-      ]
+      ])
     }),
     off: vi.fn((event: string, handler: (params: unknown) => void) => {
-      chartEventHandlers[event] = (chartEventHandlers[event] ?? []).filter(
-        (candidate) => candidate !== handler
+      chartEventHandlers.set(
+        event,
+        (chartEventHandlers.get(event) ?? []).filter(
+          (candidate) => candidate !== handler
+        )
       )
     }),
     dispatchAction: vi.fn(),
@@ -79,9 +82,7 @@ const funnelProps = {
 
 beforeEach(() => {
   setOptionMock.mockClear()
-  for (const event of Object.keys(chartEventHandlers)) {
-    delete chartEventHandlers[event]
-  }
+  chartEventHandlers.clear()
   containerSize.width = 800
   containerSize.height = 320
 })
@@ -97,7 +98,7 @@ describe("FunnelChart — legend visibility", () => {
       />
     )
 
-    chartEventHandlers.legendselectchanged?.forEach((handler) =>
+    chartEventHandlers.get("legendselectchanged")?.forEach((handler) =>
       handler({
         name: "Applied",
         selected: {
