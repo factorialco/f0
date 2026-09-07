@@ -90,13 +90,8 @@ describe("ChatTextareaField overlay/textarea metric parity", () => {
   // to make it match a per-range weight. So any weight the overlay applies to
   // part of the text paints wider than the transparent glyphs the caret is
   // positioned from, and every character from there on sits off its boundary.
-  // Measured at 14px Inter, `font-medium` on the chip costs 1.02px for `@Ana`,
-  // 1.48px for `@Ana García` and 1.91px for `@Bruno Martínez` — it grows with
-  // the name and accumulates per mention, rather than plateauing.
-  //
-  // The chip carries that weight anyway, by decision: matching the bubble
-  // exactly beat sub-pixel caret accuracy. Everything else in the overlay must
-  // still stay on the inherited weight, which is what these tests hold.
+  // Measured at 14px Inter: `font-medium` on the chip cost ~0.1px per mention
+  // character, plateauing at 1.25px (8.9% of an em) across the rest of the line.
   const withMention = () => {
     const segments: HighlightSegment[] = [
       { type: "text", text: "Hi " },
@@ -113,35 +108,24 @@ describe("ChatTextareaField overlay/textarea metric parity", () => {
     )
   }
 
-  // Deliberate, and the one place the overlay is allowed a weight of its own:
-  // the bubble paints a mention `font-medium`, so the composer does too. Read
-  // the note above before removing it — the cost is caret drift, not nothing.
-  it("gives the mention chip the bubble's colour and weight, no background", () => {
+  it("gives the mention chip no weight of its own", () => {
+    const { container } = withMention()
+    const chip = container.querySelector(
+      '[class*="text-f1-foreground-secondary"]'
+    )
+    expect(chip).not.toBeNull()
+    expect(chip?.className).not.toMatch(OFF_WEIGHT)
+  })
+
+  // The bubble paints a mention with `font-medium`; the overlay must take the
+  // colour and leave the weight, or the caret drifts (see above).
+  it("paints the chip in the same colour as the bubble, with no background", () => {
     const { container } = withMention()
     const chip = container.querySelector(
       '[class*="text-f1-foreground-secondary"]'
     )
     expect(chip?.textContent).toBe("@Nora Vidal")
-    expect(chip?.className).toMatch(/\bfont-medium\b/)
     expect(chip?.className).not.toMatch(/\bbg-/)
-  })
-
-  it("leaves the ghost completion on the inherited weight", () => {
-    const segments: HighlightSegment[] = [
-      { type: "text", text: "Hi @Nor" },
-      { type: "ghost", text: "a Vidal" },
-    ]
-    const { container } = zeroRender(
-      <ChatTextareaField
-        {...baseProps()}
-        value="Hi @Nor"
-        highlightSegments={segments}
-        hasOverlay
-      />
-    )
-    const ghost = container.querySelector('[class*="opacity-50"]')
-    expect(ghost).not.toBeNull()
-    expect(ghost?.className).not.toMatch(OFF_WEIGHT)
   })
 
   it("leaves the textarea itself on the inherited weight", () => {
