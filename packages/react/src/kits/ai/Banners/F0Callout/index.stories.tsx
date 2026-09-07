@@ -5,10 +5,12 @@ import { WithDataTestIdProps } from "@/lib/data-testid"
 import { CalloutSkeleton } from "./CalloutSkeleton"
 import { F0Callout, F0CalloutProps } from "."
 const meta = {
-  title: "AI/AICallout (deprecated)",
+  title: "AI/AICallout",
   component: F0Callout,
-  // The tag is what the sidebar badge and the component-status API read; the
-  // title suffix alone marks nothing.
+  // The tag is what the sidebar badge (❌) and the component-status API read.
+  // Deliberately not a "(deprecated)" title suffix: that changes the Storybook
+  // id, so every existing link and bookmark to this page 404s, and it marks
+  // nothing the tag does not already mark.
   tags: ["deprecated"],
   parameters: {
     layout: "centered",

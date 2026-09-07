@@ -36,7 +36,11 @@ const Byline = () => {
   const { ai } = useI18n()
 
   return (
-    <span className="flex min-w-0 flex-row items-center gap-1 text-base font-normal text-f1-foreground-secondary opacity-50">
+    // No `opacity-50` here, though Figma draws the byline faint: halving the
+    // secondary token takes it from 4.96:1 to 2:1, well under AA, and an
+    // attribution nobody can read is the one thing this component cannot
+    // ship. It stays subordinate by token and weight instead.
+    <span className="flex min-w-0 flex-row items-center gap-1 text-base font-normal text-f1-foreground-secondary">
       <F0Icon icon={One} size="md" color="currentColor" aria-hidden />
       <span className="truncate">{ai.attribution}</span>
     </span>
@@ -245,7 +249,9 @@ export const AiCalloutInternal = forwardRef<HTMLDivElement, F0AiCalloutProps>(
             // one would read as a different message pasted on.
             <span
               className={cn(
-                "flex min-w-0 flex-row items-center gap-1 text-sm font-medium opacity-50",
+                // Subordinate by size (12 against the title's 14), not by
+                // opacity: at 50% the status foreground lands around 2:1.
+                "flex min-w-0 flex-row items-center gap-1 text-sm font-medium",
                 statusForegroundVariants({ status })
               )}
             >
