@@ -67,6 +67,33 @@ describe("reanchor", () => {
     )
   })
 
+  it("slides an anchor when the inserted text repeats its own @", () => {
+    // Starting a second mention in front of an existing one. The keystroke is
+    // the same character it lands on, so the change reads just as well as an
+    // edit inside the token, and reading it that way costs the user the name
+    // they already picked.
+    expect(
+      reanchor("Hola @Ana García ", "Hola @@Ana García ", [ana(5)])
+    ).toEqual({ kept: [ana(6)], touched: [] })
+  })
+
+  it("pulls an anchor back when the deleted text repeats its own @", () => {
+    // The undo of the case above, ambiguous in the same way.
+    expect(reanchor("@@Ana García ", "@Ana García ", [ana(1)])).toEqual({
+      kept: [ana(0)],
+      touched: [],
+    })
+  })
+
+  it("takes the mention when its own @ is the character deleted", () => {
+    // The `@` is part of the token, so losing it is an edit inside the
+    // mention — not a change that happened in front of it.
+    expect(reanchor("@Ana García ", "Ana García ", [ana(0)])).toEqual({
+      kept: [],
+      touched: [{ start: 0, end: 10 }],
+    })
+  })
+
   it("treats adjacency as adjacency, not overlap", () => {
     expect(
       reanchor("Hola @Ana García ", "Hola @Ana García,", [ana(5)])

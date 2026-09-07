@@ -202,6 +202,47 @@ describe("useMentions — a mention is a token, not a substring", () => {
     expect(composer.result.current.isOpen).toBe(false)
   })
 
+  it("keeps the mention when the user types @ in front of it", async () => {
+    const composer = mountComposer([ANA, BRUNO])
+    composer.type("Hola @Ana")
+    await pick(composer, 0, "Hola @Ana García ")
+    composer.setInputValue.mockClear()
+
+    // Caret at 5, type "@" to start a second mention in front of the first.
+    // The keystroke repeats the character it lands on, which is the one shape
+    // of insertion that can also be read as landing inside the token.
+    composer.type("Hola @@Ana García ", 6)
+
+    expect(composer.setInputValue).not.toHaveBeenCalled()
+    expect(composer.result.current.mentions).toEqual([
+      { id: "ana-g", name: "Ana García", start: 6 },
+    ])
+    expect(composer.result.current.transformMentions()).toBe(
+      `Hola @${refFor(ANA)} `
+    )
+    // The new trigger is a trigger: the popover opens on it, not on the
+    // resolved mention behind it.
+    expect(composer.result.current.isOpen).toBe(true)
+  })
+
+  it("keeps the mention when that @ is deleted again", async () => {
+    const composer = mountComposer([ANA, BRUNO])
+    composer.type("Hola @Ana")
+    await pick(composer, 0, "Hola @Ana García ")
+    composer.type("Hola @@Ana García ", 6)
+    composer.setInputValue.mockClear()
+
+    composer.type("Hola @Ana García ", 5)
+
+    expect(composer.setInputValue).not.toHaveBeenCalled()
+    expect(composer.result.current.mentions).toEqual([
+      { id: "ana-g", name: "Ana García", start: 5 },
+    ])
+    expect(composer.result.current.transformMentions()).toBe(
+      `Hola ${refFor(ANA)} `
+    )
+  })
+
   it("escapes a name and an id on the way into the tag", async () => {
     const AWKWARD: PersonProfile = {
       id: 'a&b"c',
@@ -245,6 +286,69 @@ describe("useMentions — a mention is a token, not a substring", () => {
 
     expect(composer.setInputValue).not.toHaveBeenCalled()
     expect(composer.result.current.mentions).toHaveLength(0)
+  })
+
+  it("does not reopen the popover on a resolved mention", async () => {
+    const composer = mountComposer([ANA, BRUNO])
+    composer.type("Hola @Ana")
+    await pick(composer, 0, "Hola @Ana García ")
+
+    // Caret at the end of the name. The `@` behind it starts a resolved token,
+    // so it is not a trigger — the whole reason the anchor, not the character
+    // after the name, decides what is a mention.
+    composer.type("Hola @Ana García ", 16)
+
+    expect(composer.result.current.isOpen).toBe(false)
+  })
+
+  it("anchors a pick where the token lands, not where the trigger was", async () => {
+    const composer = mountComposer([ANA])
+
+    // A query that matched nobody is remembered as dismissed, and the effect
+    // that remembers it returns without closing the popover or clearing the
+    // trigger it recorded.
+    composer.type("@zzz")
+    await waitFor(() => expect(composer.result.current.isOpen).toBe(true))
+    await waitFor(() => expect(composer.result.current.isOpen).toBe(false))
+
+    composer.type("@zzz @Ana")
+    await waitFor(() => expect(composer.result.current.results).toHaveLength(1))
+
+    // Back to the dismissed query: the popover stays open on a trigger index
+    // the text no longer has.
+    composer.type("@zzz", 4)
+    act(() => composer.result.current.selectPerson(ANA))
+    composer.flush()
+
+    // The `@` lands at 4, so the anchor has to say 4. Saying 5 is the failure
+    // this composer anchors mentions to prevent: the tag never reaches the
+    // agent, and nothing reports it.
+    expect(composer.result.current.mentions).toEqual([
+      { id: "ana-g", name: "Ana García", start: 4 },
+    ])
+    expect(composer.result.current.transformMentions()).toBe(
+      `@zzz${refFor(ANA)} `
+    )
+  })
+
+  it("slides an existing mention when a pick lands in front of it", async () => {
+    const composer = mountComposer([ANA, BRUNO])
+    composer.type("@Ana")
+    await pick(composer, 0, "@Ana García ")
+
+    // A second trigger typed in front of the first mention. Picking there grows
+    // the text before it, so its anchor has to move with it — the pick rewrites
+    // the value itself, so the reconciler never sees this change.
+    composer.type("@Bru@Ana García ", 4)
+    await pick(composer, 0, "@Bruno Martínez @Ana García ")
+
+    expect(composer.result.current.mentions).toEqual([
+      { id: "bruno", name: "Bruno Martínez", start: 0 },
+      { id: "ana-g", name: "Ana García", start: 16 },
+    ])
+    expect(composer.result.current.transformMentions()).toBe(
+      `${refFor(BRUNO)} ${refFor(ANA)} `
+    )
   })
 
   it("anchors two people who share a display name independently", async () => {

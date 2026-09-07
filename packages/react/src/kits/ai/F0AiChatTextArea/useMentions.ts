@@ -397,15 +397,23 @@ export function useMentions({
 
       setInputValue(newValue)
 
-      // The trigger span [atIndex, cursorPosition) becomes the inserted token,
-      // so anchors past it slide and any the trigger overlapped are gone.
-      const shift = insertedText.length - (cursorPosition - atIndex)
+      // The trigger span becomes the inserted token, so anchors past it slide
+      // and any the trigger overlapped are gone. It is measured from the same
+      // clamped slices the new text is built from, never from the recorded
+      // indices: `atIndexRef` and the caret are read from an earlier render and
+      // both outlive a value that has since shrunk under them — the popover can
+      // still be open on a trigger the text no longer has. An anchor taken from
+      // the stale index would point past its own `@`, and an anchor that does
+      // not sit on its name is dropped from the sent payload without a word.
+      const triggerStart = before.length
+      const triggerEnd = Math.min(cursorPosition, inputValue.length)
+      const shift = insertedText.length - (triggerEnd - triggerStart)
       const anchored = mentionsRef.current
-        .filter((m) => anchorEnd(m) <= atIndex || m.start >= cursorPosition)
+        .filter((m) => anchorEnd(m) <= triggerStart || m.start >= triggerEnd)
         .map((m) =>
-          m.start >= cursorPosition ? { ...m, start: m.start + shift } : m
+          m.start >= triggerEnd ? { ...m, start: m.start + shift } : m
         )
-      anchored.push({ id, name, start: atIndex })
+      anchored.push({ id, name, start: triggerStart })
       anchored.sort((a, b) => a.start - b.start)
       prevValueRef.current = newValue
       commitMentions(anchored)

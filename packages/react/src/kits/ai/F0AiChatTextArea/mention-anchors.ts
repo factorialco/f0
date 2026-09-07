@@ -48,6 +48,29 @@ export const diffSpan = (prev: string, next: string): TextEdit => {
 }
 
 /**
+ * Can the change from `prev` to `next` be read as replacing `[at, at + removed)`
+ * with the `inserted` characters that start there?
+ *
+ * {@link diffSpan} names the rightmost reading of an ambiguous change, which is
+ * the right bias at a mention's tail and the wrong one at its head: typing `@`
+ * in front of `@Ana García` — the way a second mention gets started there —
+ * repeats the character it lands on, so the rightmost reading puts it inside
+ * the token and takes the whole name with it. The readings of one change form
+ * a contiguous interval, so testing the anchor's own index settles whether a
+ * reading that leaves the mention whole exists at all.
+ */
+const readsAs = (
+  prev: string,
+  next: string,
+  at: number,
+  removed: number,
+  inserted: number
+): boolean =>
+  at >= 0 &&
+  next.slice(0, at) === prev.slice(0, at) &&
+  next.slice(at + inserted) === prev.slice(at + removed)
+
+/**
  * Re-anchor `anchored` after the composer text went from `prev` to `next`, and
  * report what is left of the mentions the change ran into.
  *
@@ -59,7 +82,8 @@ export const diffSpan = (prev: string, next: string): TextEdit => {
  *   mention, deleting the space that followed it, or typing immediately in
  *   front of the `@` all leave the mention alone — the last of those is a pure
  *   insertion at the anchor's own index, which moves the mention rather than
- *   editing it.
+ *   editing it. That holds even when the change is ambiguous and `diffSpan`
+ *   named a reading inside the token; see {@link readsAs}.
  * - A change strictly inside a mention takes the whole token, including what
  *   was typed in its place: a half-typed name was never a state the user meant.
  * - A change that swallowed a mention outright erases nothing. Its text is
@@ -72,6 +96,8 @@ export const reanchor = <T extends Anchored>(
 ): { kept: T[]; touched: Span[] } => {
   const { start: prefix, prevEnd, nextEnd } = diffSpan(prev, next)
   const delta = next.length - prev.length
+  const removed = prevEnd - prefix
+  const inserted = nextEnd - prefix
 
   const kept: T[] = []
   const touched: Span[] = []
@@ -81,6 +107,11 @@ export const reanchor = <T extends Anchored>(
 
     if (prefix >= end || prevEnd <= start) {
       kept.push({ ...mention, start: start < prefix ? start : start + delta })
+      continue
+    }
+
+    if (readsAs(prev, next, start - removed, removed, inserted)) {
+      kept.push({ ...mention, start: start + delta })
       continue
     }
 
