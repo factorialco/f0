@@ -1,4 +1,10 @@
-import { forwardRef, StrictMode, useState } from "react"
+import {
+  forwardRef,
+  startTransition,
+  StrictMode,
+  Suspense,
+  useState,
+} from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import {
   act,
@@ -170,6 +176,95 @@ describe("ChatMentionPopover row render cost", () => {
 
     expect(rowRenders.texts).toHaveLength(10)
     expect(rowRenders.texts[0]).toBe("Member 0 (renamed)")
+  })
+})
+
+describe("ChatMentionPopover committed-render safety", () => {
+  /**
+   * F0Chat is a library, so the host owns concurrency. A transition render that
+   * suspends is thrown away: React keeps the committed rows on screen and never
+   * runs that render's effects. The candidates the click path resolves against
+   * have to follow the rows the user can see, so a click cannot insert someone
+   * the popover never displayed.
+   */
+  it("selects a displayed candidate when a transition render is discarded", () => {
+    let settled = false
+    let release: () => void = () => {}
+    const pending = new Promise<void>((resolve) => {
+      release = () => {
+        settled = true
+        resolve()
+      }
+    })
+
+    function Suspender({ suspend }: { suspend: boolean }) {
+      if (suspend && !settled) {
+        throw pending
+      }
+      return null
+    }
+
+    let search: () => void = () => {}
+
+    function SuspendingHarness() {
+      const [users, setUsers] = useState(members.slice(0, 3))
+      const [suspend, setSuspend] = useState(false)
+      search = () =>
+        startTransition(() => {
+          setUsers(members.slice(10, 13))
+          setSuspend(true)
+        })
+
+      return (
+        <Suspense fallback={<div data-testid="fallback" />}>
+          <ChatMentionPopover
+            isOpen
+            listboxId={LISTBOX_ID}
+            results={users.map((user) => ({ kind: "user" as const, user }))}
+            isLoading={false}
+            selectedIndex={0}
+            position={{ left: 0, bottom: 0 }}
+            onSelect={(candidate) => selections.push(candidate)}
+            everyoneDescription={EVERYONE_DESCRIPTION}
+          />
+          <Suspender suspend={suspend} />
+        </Suspense>
+      )
+    }
+
+    render(<SuspendingHarness />)
+
+    act(() => search())
+
+    expect(screen.queryByTestId("fallback")).not.toBeInTheDocument()
+    const options = screen.getAllByRole("option")
+    expect(options[0]).toHaveTextContent("Member 0")
+
+    fireEvent.mouseDown(options[0]!)
+
+    expect(selections).toEqual([{ kind: "user", user: members[0] }])
+
+    act(() => release())
+  })
+
+  it("leaves no option selected when a narrower search drops the highlighted row", () => {
+    const scrolled: HTMLElement[] = []
+    vi.spyOn(HTMLElement.prototype, "scrollIntoView").mockImplementation(
+      function (this: HTMLElement) {
+        scrolled.push(this)
+      }
+    )
+
+    const { rerender } = render(<Harness users={members.slice(0, 5)} />)
+    act(() => controls.setSelectedIndex(4))
+    const dropped = screen.getAllByRole("option")[4]!
+    scrolled.length = 0
+
+    rerender(<Harness users={members.slice(0, 2)} />)
+
+    expect(screen.getAllByRole("option")).toHaveLength(2)
+    expect(screen.queryAllByRole("option", { selected: true })).toHaveLength(0)
+    expect(scrolled).not.toContain(dropped)
   })
 })
 
