@@ -2,6 +2,7 @@ import { userEvent } from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
 
 import {
+  act,
   screen,
   waitFor,
   within,
@@ -79,10 +80,303 @@ function chartItem(
   }
 }
 
+function deferred<T>() {
+  let resolve: (value: T) => void = () => undefined
+  let reject: (reason?: unknown) => void = () => undefined
+  const promise = new Promise<T>((resolvePromise, rejectPromise) => {
+    resolve = resolvePromise
+    reject = rejectPromise
+  })
+
+  return { promise, reject, resolve }
+}
+
 function QuoteProbe() {
   const { pendingQuote } = useAiChat()
   return <span data-testid="pending-quote">{pendingQuote?.text ?? ""}</span>
 }
+
+describe("F0AnalyticsDashboard item metadata and render state", () => {
+  it("renders an actionable item badge as a keyboard-native neutral button", async () => {
+    const user = userEvent.setup()
+    const onClick = vi.fn()
+
+    render(
+      <F0AnalyticsDashboard
+        items={[metricItem(vi.fn().mockResolvedValue({ value: 42 }))]}
+        itemBadge={() => ({
+          label: "+12%",
+          accessibilityLabel: "Explain the Headcount change of 12 percent",
+          onClick,
+        })}
+      />
+    )
+
+    const badge = screen.getByRole("button", {
+      name: "Explain the Headcount change of 12 percent",
+    })
+    expect(badge).toHaveTextContent("+12%")
+
+    badge.focus()
+    await user.keyboard("{Enter}")
+
+    expect(onClick).toHaveBeenCalledOnce()
+  })
+
+  it("renders a non-actionable item badge as accessible static text", () => {
+    render(
+      <F0AnalyticsDashboard
+        items={[metricItem(vi.fn().mockResolvedValue({ value: 42 }))]}
+        itemBadge={() => ({
+          label: "No change",
+          accessibilityLabel: "Headcount has not changed",
+        })}
+      />
+    )
+
+    expect(screen.getByText("No change")).toBeInTheDocument()
+    expect(screen.getByText("Headcount has not changed")).toHaveClass("sr-only")
+    expect(
+      screen.queryByRole("button", { name: "Headcount has not changed" })
+    ).not.toBeInTheDocument()
+  })
+
+  it("reports only the latest request under the render cycle that started it", async () => {
+    const firstRequest = deferred<{ value: number }>()
+    const secondRequest = deferred<{ value: number }>()
+    const fetchData = vi
+      .fn()
+      .mockImplementationOnce(() => firstRequest.promise)
+      .mockImplementationOnce(() => secondRequest.promise)
+    const onItemRenderStateChange = vi.fn()
+    const item = metricItem(fetchData)
+
+    const { rerender } = render(
+      <F0AnalyticsDashboard
+        items={[item]}
+        renderCycleKey="view-1"
+        onItemRenderStateChange={onItemRenderStateChange}
+      />
+    )
+
+    await waitFor(() =>
+      expect(onItemRenderStateChange).toHaveBeenCalledWith({
+        itemId: "headcount",
+        renderCycleKey: "view-1",
+        state: "loading",
+      })
+    )
+
+    rerender(
+      <F0AnalyticsDashboard
+        items={[item]}
+        renderCycleKey="view-2"
+        onItemRenderStateChange={onItemRenderStateChange}
+      />
+    )
+
+    await waitFor(() => expect(fetchData).toHaveBeenCalledTimes(2))
+    await waitFor(() =>
+      expect(onItemRenderStateChange).toHaveBeenCalledWith({
+        itemId: "headcount",
+        renderCycleKey: "view-2",
+        state: "loading",
+      })
+    )
+
+    await act(async () => firstRequest.resolve({ value: 10 }))
+
+    expect(onItemRenderStateChange).not.toHaveBeenCalledWith({
+      itemId: "headcount",
+      renderCycleKey: "view-1",
+      state: "ready",
+    })
+
+    await act(async () => secondRequest.resolve({ value: 20 }))
+
+    await waitFor(() =>
+      expect(onItemRenderStateChange).toHaveBeenCalledWith({
+        itemId: "headcount",
+        renderCycleKey: "view-2",
+        state: "ready",
+      })
+    )
+    expect(screen.getByText("20")).toBeInTheDocument()
+  })
+
+  it("reports loading before a fullscreen remount can become ready", async () => {
+    const user = userEvent.setup()
+    const fullscreenRequest = deferred<{
+      categories: string[]
+      series: Array<{ data: number[]; name: string }>
+    }>()
+    const fetchData = vi
+      .fn()
+      .mockResolvedValueOnce({
+        categories: ["Engineering"],
+        series: [{ data: [42], name: "Employees" }],
+      })
+      .mockImplementationOnce(() => fullscreenRequest.promise)
+    const onItemRenderStateChange = vi.fn()
+    const turnoverItem = {
+      ...metricItem(vi.fn().mockResolvedValue({ value: 7 })),
+      id: "turnover",
+      title: "Turnover",
+    }
+
+    render(
+      <F0AnalyticsDashboard
+        items={[chartItem(fetchData), turnoverItem]}
+        renderCycleKey="fullscreen-view"
+        onItemRenderStateChange={onItemRenderStateChange}
+      />
+    )
+
+    await waitFor(() =>
+      expect(onItemRenderStateChange).toHaveBeenCalledWith({
+        itemId: "headcount-chart",
+        renderCycleKey: "fullscreen-view",
+        state: "ready",
+      })
+    )
+
+    onItemRenderStateChange.mockClear()
+    const card = screen
+      .getByText("Headcount by department")
+      .closest("[class*='dashitem']") as HTMLElement
+    await user.click(within(card).getByRole("button", { name: "Expand" }))
+
+    await waitFor(() =>
+      expect(onItemRenderStateChange).toHaveBeenCalledWith({
+        itemId: "headcount-chart",
+        renderCycleKey: "fullscreen-view",
+        state: "loading",
+      })
+    )
+    expect(onItemRenderStateChange).not.toHaveBeenCalledWith({
+      itemId: "headcount-chart",
+      renderCycleKey: "fullscreen-view",
+      state: "ready",
+    })
+
+    await act(async () =>
+      fullscreenRequest.resolve({
+        categories: ["Engineering"],
+        series: [{ data: [84], name: "Employees" }],
+      })
+    )
+
+    await waitFor(() =>
+      expect(onItemRenderStateChange).toHaveBeenCalledWith({
+        itemId: "headcount-chart",
+        renderCycleKey: "fullscreen-view",
+        state: "ready",
+      })
+    )
+    expect(fetchData).toHaveBeenCalledTimes(2)
+  })
+
+  it("reports a committed item error for a rejected active request", async () => {
+    const request = deferred<{ value: number }>()
+    const onItemRenderStateChange = vi.fn()
+
+    render(
+      <F0AnalyticsDashboard
+        items={[metricItem(() => request.promise)]}
+        renderCycleKey="view-error"
+        onItemRenderStateChange={onItemRenderStateChange}
+      />
+    )
+
+    await waitFor(() =>
+      expect(onItemRenderStateChange).toHaveBeenCalledWith(
+        expect.objectContaining({ state: "loading" })
+      )
+    )
+
+    await act(async () => request.reject(new Error("No data")))
+
+    await waitFor(() =>
+      expect(onItemRenderStateChange).toHaveBeenCalledWith({
+        itemId: "headcount",
+        renderCycleKey: "view-error",
+        state: "error",
+      })
+    )
+    expect(screen.getByText("No data")).toBeInTheDocument()
+  })
+
+  it("reports chart readiness only after the chart UI commits", async () => {
+    const observations: Array<{ chartVisible: boolean; state: string }> = []
+
+    render(
+      <F0AnalyticsDashboard
+        items={[
+          chartItem(
+            vi.fn().mockResolvedValue({
+              categories: ["Engineering"],
+              series: [{ name: "Employees", data: [42] }],
+            })
+          ),
+        ]}
+        renderCycleKey="chart-view"
+        onItemRenderStateChange={({ state }) =>
+          observations.push({
+            state,
+            chartVisible: screen.queryByRole("img", { name: "Chart" }) !== null,
+          })
+        }
+      />
+    )
+
+    await waitFor(() =>
+      expect(observations).toContainEqual({
+        state: "ready",
+        chartVisible: true,
+      })
+    )
+  })
+
+  it("does not report item state without a render cycle key", async () => {
+    const onItemRenderStateChange = vi.fn()
+
+    render(
+      <F0AnalyticsDashboard
+        items={[metricItem(vi.fn().mockResolvedValue({ value: 42 }))]}
+        onItemRenderStateChange={onItemRenderStateChange}
+      />
+    )
+
+    await waitFor(() => expect(screen.getByText("42")).toBeInTheDocument())
+    expect(onItemRenderStateChange).not.toHaveBeenCalled()
+  })
+
+  it("reports an unsupported chart configuration as a committed error", async () => {
+    const onItemRenderStateChange = vi.fn()
+
+    render(
+      <F0AnalyticsDashboard
+        items={[
+          {
+            ...chartItem(vi.fn().mockResolvedValue({})),
+            chart: undefined as never,
+          },
+        ]}
+        renderCycleKey="unsupported-chart"
+        onItemRenderStateChange={onItemRenderStateChange}
+      />
+    )
+
+    await waitFor(() =>
+      expect(onItemRenderStateChange).toHaveBeenCalledWith({
+        itemId: "headcount-chart",
+        renderCycleKey: "unsupported-chart",
+        state: "error",
+      })
+    )
+    expect(getVisibleByText("Error loading data")).toBeInTheDocument()
+  })
+})
 
 describe("F0AnalyticsDashboard report filters", () => {
   it("uses default filters in uncontrolled mode and refetches after Clear", async () => {

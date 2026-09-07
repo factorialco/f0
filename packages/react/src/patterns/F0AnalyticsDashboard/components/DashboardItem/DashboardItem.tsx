@@ -1,6 +1,7 @@
 import { useRef, useState, type ReactNode } from "react"
 
 import type {
+  DashboardItemBadge as DashboardItemBadgeMetadata,
   F0AnalyticsDashboardAskAiTarget,
   F0AnalyticsDashboardAskAiTargetWithQuote,
 } from "../../types"
@@ -43,6 +44,7 @@ import {
 import type { DashboardItemFiltersConfig } from "../../types"
 
 import { DashboardItemFilters } from "./DashboardItemFilters"
+import { DashboardItemBadge } from "./DashboardItemBadge"
 
 interface DashboardItemProps {
   title: string
@@ -59,6 +61,8 @@ interface DashboardItemProps {
   /** Content-area skeleton shown while loading. Each item type provides its own. */
   skeleton?: ReactNode
   children: ReactNode
+  /** Consumer-owned neutral metadata shown beside the title. */
+  badge?: DashboardItemBadgeMetadata
   /** Download actions shown inside a "Download" submenu */
   actions?: DropdownItemType[]
   /**
@@ -133,6 +137,7 @@ export function DashboardItem({
   onRetry,
   skeleton,
   children,
+  badge,
   actions = [],
   itemFilters,
   editMode,
@@ -255,6 +260,7 @@ export function DashboardItem({
                   <InfoHint info={info} />
                 </div>
               )}
+              <DashboardItemBadge badge={badge} />
             </div>
             {description && (
               <p className="text-base text-f1-foreground-secondary">
@@ -355,6 +361,7 @@ export function DashboardItem({
                 <InfoHint info={info} />
               </div>
             )}
+            <DashboardItemBadge badge={badge} />
           </div>
           {(description || descriptionAction) && (
             // Baseline-aligned row so the link sits on the description's own

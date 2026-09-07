@@ -43,6 +43,9 @@ export const F0AnalyticsDashboard = <
   onFiltersChange,
   items,
   itemFilters,
+  itemBadge,
+  renderCycleKey,
+  onItemRenderStateChange,
   editMode,
   onLayoutChange,
   enableExport,
@@ -167,6 +170,9 @@ export const F0AnalyticsDashboard = <
         <DashboardGrid
           items={items}
           itemFilters={itemFilters}
+          itemBadge={itemBadge}
+          renderCycleKey={renderCycleKey}
+          onItemRenderStateChange={onItemRenderStateChange}
           filters={
             {
               ...currentFilters,

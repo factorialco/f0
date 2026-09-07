@@ -11,6 +11,7 @@ import type {
   DashboardItem,
   DashboardItemFiltersConfig,
   DashboardItemFiltersState,
+  DashboardItemRenderStateChange,
 } from "../types"
 
 import { F0AnalyticsDashboard } from "../index"
@@ -516,11 +517,95 @@ export const MetricHeightVariants: Story = {
   ),
 }
 
+const badgeLifecycleItems: DashboardItem<DashboardFiltersType>[] = [
+  { ...mixedItems.find((item) => item.id === "total-headcount")!, x: 0, y: 0 },
+  { ...mixedItems.find((item) => item.id === "headcount")!, x: 4, y: 0 },
+]
+
+const BadgeAndRenderLifecycleDashboard = () => {
+  const [badgeSelected, setBadgeSelected] = useState<string>()
+  const [renderStates, setRenderStates] = useState<
+    Record<string, DashboardItemRenderStateChange>
+  >({})
+  const readyCount = Object.values(renderStates).filter(
+    (event) =>
+      event.renderCycleKey === "storybook-cycle" && event.state === "ready"
+  ).length
+
+  return (
+    <div className="flex flex-col gap-4">
+      <output
+        className="text-sm text-f1-foreground-secondary"
+        data-testid="render-lifecycle-state"
+      >
+        storybook-cycle: {readyCount}/{badgeLifecycleItems.length} ready
+      </output>
+      <p className="m-0 text-sm text-f1-foreground-secondary">
+        Badge action: {badgeSelected ?? "not selected"}
+      </p>
+      <F0AnalyticsDashboard
+        filters={dashboardFilters}
+        items={badgeLifecycleItems}
+        itemBadge={(item) =>
+          item.id === "total-headcount"
+            ? {
+                label: "No change",
+                accessibilityLabel: `${item.title} has not changed`,
+              }
+            : {
+                label: "Changed",
+                accessibilityLabel: `Review changes in ${item.title}`,
+                onClick: () => setBadgeSelected(item.title),
+              }
+        }
+        renderCycleKey="storybook-cycle"
+        onItemRenderStateChange={(event) =>
+          setRenderStates((current) => ({
+            ...current,
+            [event.itemId]: event,
+          }))
+        }
+      />
+    </div>
+  )
+}
+
+/** Consumer-owned item metadata and committed render lifecycle. */
+export const BadgeAndRenderLifecycle: Story = {
+  tags: ["no-sidebar"],
+  render: () => <BadgeAndRenderLifecycleDashboard />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    await waitFor(() =>
+      expect(canvas.getByTestId("render-lifecycle-state")).toHaveTextContent(
+        "storybook-cycle: 2/2 ready"
+      )
+    )
+
+    await expect(canvas.getByText("No change")).toBeInTheDocument()
+    await expect(
+      canvas.queryByRole("button", {
+        name: "Total Headcount has not changed",
+      })
+    ).not.toBeInTheDocument()
+    await userEvent.click(
+      canvas.getByRole("button", {
+        name: "Review changes in Headcount by Department",
+      })
+    )
+    await expect(
+      canvas.getByText("Badge action: Headcount by Department")
+    ).toBeInTheDocument()
+  },
+}
+
 export const Snapshot: Story = {
   tags: ["no-sidebar"],
   parameters: withSnapshot({}),
   render: () => (
     <div className="flex flex-col gap-8">
+      <BadgeAndRenderLifecycleDashboard />
       <ControlledDashboard initialValue={supportedReportFilterValues} />
       <F0AnalyticsDashboard
         filters={dashboardFilters}

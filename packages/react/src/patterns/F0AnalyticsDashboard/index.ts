@@ -13,6 +13,9 @@ export type {
   DashboardItemFiltersConfig,
   DashboardItemFiltersDefinition,
   DashboardItemFiltersState,
+  DashboardItemBadge,
+  DashboardItemRenderState,
+  DashboardItemRenderStateChange,
   DashboardMetricData,
   DashboardMetricItem,
   F0AnalyticsDashboardAskAiTarget,
@@ -29,6 +32,8 @@ export type {
   RadarChartConfig,
   ScatterChartConfig,
 } from "./types"
+
+export { dashboardItemRenderStates } from "./types"
 
 /**
  * @experimental This is an experimental component use it at your own risk
