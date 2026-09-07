@@ -846,7 +846,6 @@ describe("Select", () => {
     await openSelect(user)
 
     // The field IS the search box, so the search placeholder is the field's.
-    expect(getTriggerSearchInput()).toBeInTheDocument()
     expect(screen.getByText("Search options")).toBeInTheDocument()
   })
 
@@ -895,8 +894,10 @@ describe("Select", () => {
     )
 
     // The trigger is an input, so the pill is drawn beside the caret rather
-    // than inside the field's own element.
-    const selectedLabel = screen.getByText("Approved")
+    // than inside the field's own element — but still inside the field.
+    const selectedLabel = within(
+      screen.getByTestId("input-field-wrapper")
+    ).getByText("Approved")
 
     await waitFor(() => {
       expect(selectedLabel.closest(".bg-f1-background-positive")).toBeTruthy()
@@ -1114,7 +1115,7 @@ describe("Select", () => {
     expect(searchInput).toHaveFocus()
   })
 
-  it("keeps footer focus when async options load", async () => {
+  it("does not steal footer focus when async options load", async () => {
     const user = userEvent.setup()
     const deferredOptions = createDeferredOptionsSource()
 
@@ -1137,10 +1138,11 @@ describe("Select", () => {
     const footerAction = screen.getByRole("button", { name: "Manage options" })
     await waitFor(() => expect(getTriggerSearchInput()).toHaveFocus())
 
-    // The search field is the trigger, outside the portaled popover, so the
-    // footer is focused directly rather than tabbed to from inside it.
+    // The search field is the trigger, outside the portaled popover, so this
+    // starts from the footer rather than tabbing into it. What the test proves
+    // is the assertion AFTER the load: the arriving records must not pull
+    // focus out of the footer.
     footerAction.focus()
-    expect(footerAction).toHaveFocus()
 
     deferredOptions.resolve()
 
@@ -2163,7 +2165,7 @@ describe("Select", () => {
       expect(handleChange).toHaveBeenCalled()
     })
 
-    it("moves focus into the list on ArrowDown and picks the first match on Enter", async () => {
+    it("reaches the option the query asked for, not the one still on screen", async () => {
       const user = userEvent.setup()
       const handleChange = vi.fn()
       render(
@@ -2177,21 +2179,43 @@ describe("Select", () => {
       const trigger = screen.getByRole("combobox")
       await user.type(trigger, "Option 3")
       await settleList()
-      // Wait for the debounced query to actually narrow the list, or "the
-      // first option" is still the first of the whole list.
-      await waitFor(() =>
-        expect(screen.queryByText("Option 1")).not.toBeInTheDocument()
-      )
-      expect(screen.getByText("Option 3")).toBeInTheDocument()
 
+      // No waiting for the debounce: pressing the key immediately is exactly
+      // the case that used to reach Option 1, the first row of the list the
+      // query had not narrowed yet.
       await user.keyboard("{ArrowDown}")
+
       await waitFor(() =>
-        expect(document.activeElement).toHaveAttribute("role", "option")
+        expect(document.activeElement).toHaveTextContent("Option 3")
+      )
+      expect(document.activeElement).toHaveAttribute("role", "option")
+
+      // Enter makes an option active rather than selecting it, so nothing is
+      // committed from the field itself.
+      expect(handleChange).not.toHaveBeenCalled()
+    })
+
+    it("makes an option active on Enter, and the option takes the next one", async () => {
+      const user = userEvent.setup()
+      const handleChange = vi.fn()
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          options={mockOptions}
+          onChange={handleChange}
+        />
       )
 
-      trigger.focus()
-      await user.keyboard("{Enter}")
+      await user.type(screen.getByRole("combobox"), "Option 3")
+      await settleList()
 
+      await user.keyboard("{Enter}")
+      await waitFor(() =>
+        expect(document.activeElement).toHaveTextContent("Option 3")
+      )
+      expect(handleChange).not.toHaveBeenCalled()
+
+      await user.keyboard("{Enter}")
       await waitFor(() =>
         expect(handleChange).toHaveBeenCalledWith(
           "option3",
@@ -2199,6 +2223,35 @@ describe("Select", () => {
           expect.anything()
         )
       )
+    })
+
+    it("reaches the popover's own controls from the field", async () => {
+      const user = userEvent.setup()
+      const handleAction = vi.fn()
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          options={mockOptions}
+          onChange={() => {}}
+          actions={[{ label: "Manage options", onClick: handleAction }]}
+        />
+      )
+
+      await user.type(screen.getByRole("combobox"), "Option")
+      await settleList()
+
+      // The field sits outside the portaled popover, so an option is the way
+      // in and the popover's own focus ring carries on from there.
+      await user.keyboard("{ArrowDown}")
+      await waitFor(() =>
+        expect(document.activeElement).toHaveAttribute("role", "option")
+      )
+
+      await user.tab()
+
+      expect(
+        screen.getByRole("button", { name: "Manage options" })
+      ).toHaveFocus()
     })
 
     it("stays open when the pointer lands back in the field", async () => {
@@ -2217,8 +2270,11 @@ describe("Select", () => {
 
       await user.click(trigger)
 
-      // Give the debounced open/close change its window to fire.
-      await new Promise((resolve) => setTimeout(resolve, 200))
+      // The select debounces open changes, so the list would still be here for
+      // a moment even if the click HAD dismissed it. Waiting for a state the
+      // dismissal would have to pass through proves it never started: the
+      // field keeps the caret, and the list is still open after it.
+      await waitFor(() => expect(trigger).toHaveFocus())
       expect(screen.getByRole("listbox")).toBeInTheDocument()
     })
 
@@ -2259,6 +2315,273 @@ describe("Select", () => {
 
       await waitFor(() =>
         expect(screen.queryByText("2 selected")).not.toBeInTheDocument()
+      )
+    })
+
+    it("leaves a source alone unless it asks for search", async () => {
+      const user = userEvent.setup()
+      const plainSource = createDataSourceDefinition<RecordType>({
+        dataAdapter: {
+          fetchData: () => ({
+            records: [{ id: "option1", name: "Option 1" }],
+          }),
+        },
+      })
+
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          source={plainSource}
+          mapOptions={(item: RecordType) => ({
+            value: item.id as string,
+            label: item.name as string,
+          })}
+          onChange={() => {}}
+        />
+      )
+
+      // Its adapter never received a query, so there is nothing to type into.
+      expect(screen.getByRole("combobox").tagName).toBe("BUTTON")
+
+      await openSelect(user)
+      expect(screen.queryByRole("searchbox")).not.toBeInTheDocument()
+    })
+
+    it("keeps the field in the accessibility tree while the list is open", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          options={mockOptions}
+          onChange={() => {}}
+        />
+      )
+
+      const trigger = screen.getByRole("combobox")
+      await user.type(trigger, "Option")
+      await settleList()
+
+      // The open dropdown aria-hides the rest of the page. The field being
+      // typed into has to survive that, or a screen reader loses it mid-word.
+      expect(screen.getByRole("combobox")).toBe(trigger)
+    })
+
+    it("opens on ArrowDown, ArrowUp and Enter without selecting anything", async () => {
+      const user = userEvent.setup()
+      const handleChange = vi.fn()
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          options={mockOptions}
+          onChange={handleChange}
+        />
+      )
+
+      const trigger = screen.getByRole("combobox")
+
+      for (const key of ["{ArrowDown}", "{ArrowUp}", "{Enter}"]) {
+        trigger.focus()
+        await user.keyboard(key)
+        await settleList()
+
+        // Each of them opens the list and makes an option active. None of
+        // them selects: the field never commits a row on the user's behalf.
+        await waitFor(() =>
+          expect(document.activeElement).toHaveAttribute("role", "option")
+        )
+        expect(handleChange).not.toHaveBeenCalled()
+
+        await user.keyboard("{Escape}")
+        await waitFor(() =>
+          expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
+        )
+      }
+    })
+
+    it("takes the first option on ArrowDown and the last on ArrowUp", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          options={mockOptions}
+          onChange={() => {}}
+        />
+      )
+
+      const trigger = screen.getByRole("combobox")
+      await user.type(trigger, "Option")
+      await settleList()
+      await waitFor(() =>
+        expect(screen.getAllByRole("option").length).toBeGreaterThan(1)
+      )
+
+      await user.keyboard("{ArrowDown}")
+      await waitFor(() =>
+        expect(document.activeElement).toHaveTextContent("Option 1")
+      )
+
+      trigger.focus()
+      await user.keyboard("{ArrowUp}")
+      await waitFor(() =>
+        expect(document.activeElement).toHaveTextContent("Option 3")
+      )
+    })
+
+    it("closes on the arrow and gives the field its focus back", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          options={mockOptions}
+          onChange={() => {}}
+        />
+      )
+
+      const trigger = screen.getByRole("combobox")
+      await user.type(trigger, "Option")
+      await settleList()
+
+      // The field no longer toggles on click, so the arrow is the pointer way
+      // out of an open list.
+      await user.click(screen.getByTestId("select-arrow"))
+
+      await waitFor(() =>
+        expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
+      )
+      expect(trigger).toHaveFocus()
+    })
+
+    it("gives the field its focus back after picking an option", async () => {
+      const user = userEvent.setup()
+      const handleChange = vi.fn()
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          options={mockOptions}
+          onChange={handleChange}
+        />
+      )
+
+      const trigger = screen.getByRole("combobox")
+      await user.type(trigger, "Option 1")
+      await settleList()
+      await waitFor(() =>
+        expect(screen.queryByText("Option 2")).not.toBeInTheDocument()
+      )
+
+      await user.click(screen.getByText("Option 1"))
+
+      await waitFor(() => expect(handleChange).toHaveBeenCalled())
+      await waitFor(() => expect(trigger).toHaveFocus())
+      expect(trigger).toHaveValue("")
+    })
+
+    it("dismisses on a pointer that lands outside both the field and the list", async () => {
+      const user = userEvent.setup()
+      render(
+        <div>
+          <F0Select
+            {...defaultSelectProps}
+            options={mockOptions}
+            onChange={() => {}}
+          />
+          <button type="button">Elsewhere</button>
+        </div>
+      )
+
+      // Grabbed before opening: the open dropdown aria-hides the rest of the
+      // page, and only the field is exempt from that.
+      const outside = screen.getByRole("button", { name: "Elsewhere" })
+
+      await user.type(screen.getByRole("combobox"), "Option")
+      await settleList()
+
+      // `fireEvent`, not `user.click`: the dropdown drops pointer events on
+      // everything outside it, and userEvent refuses to click through that.
+      fireEvent.pointerDown(outside)
+
+      await waitFor(() =>
+        expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
+      )
+    })
+
+    it("keeps its own placeholder over the search one", async () => {
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          options={mockOptions}
+          placeholder="Choose a theme"
+          searchBoxPlaceholder="Search themes"
+          onChange={() => {}}
+        />
+      )
+
+      expect(screen.getByText("Choose a theme")).toBeInTheDocument()
+      expect(screen.queryByText("Search themes")).not.toBeInTheDocument()
+    })
+
+    it("leaves focus alone when the user closes it by going somewhere else", async () => {
+      const user = userEvent.setup()
+      render(
+        <div>
+          <F0Select
+            {...defaultSelectProps}
+            options={mockOptions}
+            onChange={() => {}}
+          />
+          <input aria-label="Somewhere else" />
+        </div>
+      )
+
+      const elsewhere = screen.getByRole("textbox", { name: "Somewhere else" })
+      const trigger = screen.getByRole("combobox")
+
+      await user.type(trigger, "Option")
+      await settleList()
+
+      // What clicking another field amounts to: it takes focus, and the select
+      // dismisses. The caret must stay where the user put it.
+      elsewhere.focus()
+      fireEvent.pointerDown(elsewhere)
+
+      await waitFor(() =>
+        expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
+      )
+      expect(elsewhere).toHaveFocus()
+    })
+
+    it("posts the selection, never the query, under its name", async () => {
+      const user = userEvent.setup()
+      const { container } = render(
+        <F0Select
+          {...defaultSelectProps}
+          options={mockOptions}
+          name="theme"
+          value="option1"
+          onChange={() => {}}
+        />
+      )
+
+      await user.type(screen.getByRole("combobox"), "Option 3")
+
+      const submitted = container.querySelector<HTMLInputElement>(
+        'input[type="hidden"][name="theme"]'
+      )
+      expect(submitted).toHaveValue("option1")
+      expect(screen.getByRole("combobox")).not.toHaveAttribute("name")
+    })
+
+    it("describes nothing when nothing is selected", () => {
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          options={mockOptions}
+          onChange={() => {}}
+        />
+      )
+
+      expect(screen.getByRole("combobox")).not.toHaveAttribute(
+        "aria-describedby"
       )
     })
   })

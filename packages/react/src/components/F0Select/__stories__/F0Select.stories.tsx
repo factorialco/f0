@@ -1,7 +1,7 @@
 import type { Decorator, Meta, StoryObj } from "@storybook/react-vite"
 
 import { useState } from "react"
-import { expect, fn, within } from "storybook/test"
+import { expect, fn, userEvent, waitFor, within } from "storybook/test"
 
 import { IconType } from "@/components/F0Icon"
 import { inputFieldStatus } from "@/components/F0InputField"
@@ -51,6 +51,15 @@ const items = [
   },
 ]
 
+/** The default args' option list, for stories that build their own props. */
+const themeOptions = items.map((item) => ({
+  value: item.id,
+  label: item.name,
+  icon: icons[item.id],
+  description: item.description,
+  item,
+}))
+
 const meta: Meta = {
   title: "Select",
   component: F0Select,
@@ -64,7 +73,7 @@ const meta: Meta = {
           "<p>Renders a select input field with a list of options to choose from.</p>" +
           "<p>The list is virtualized so it can handle a large number of items.</p>" +
           '<p>Use <code>variant="field"</code> for forms and labeled inputs. Use <code>variant="inline"</code> for compact desktop row controls such as roles, statuses, and access levels. Inline selects are single-value and non-clearable; their required <code>label</code> provides the accessible name and becomes the visible empty-state fallback when no <code>placeholder</code> is provided.</p>' +
-          "<p>A field select over static options is searched from its own trigger: the field is the search box, so there is one place to look and one place to type. A select whose <code>source</code> carries filters keeps its search box in the dropdown, beside the filter picker. Pass <code>showSearchBox={false}</code> for a short list that reads better without it.</p>" +
+          "<p>A field select over static options is searched from its own trigger: the field is the search box, so there is one place to look and one place to type. Filters are what keep the search box in the dropdown instead, beside the filter picker — a <code>source</code> without them is opt-in, and searches from the trigger once you turn it on. A grouping selector does not move the search: the dropdown's row keeps it and the field keeps the query. Pass <code>showSearchBox={false}</code> for a short list that reads better without it.</p>" +
           "<p>Options support three kinds of annotations: <code>description</code> for prose rendered as a second line, <code>metadata</code> for a short typed token rendered next to the label (e.g. a dial code), and <code>tag</code> for chips rendered at the end of the row.</p>",
       },
     },
@@ -144,6 +153,12 @@ const meta: Meta = {
         "Custom trigger content for the select. When provided, replaces the default input field trigger",
     },
     showSearchBox: {
+      control: "boolean",
+      table: {
+        defaultValue: {
+          summary: "true for a field select over static options",
+        },
+      },
       description:
         "Whether the list can be searched. Defaults to **true** for a field select over static `options`, where the filtering is local. " +
         "A `source` stays opt-in, because its search is a query parameter its adapter has to implement. " +
@@ -699,10 +714,14 @@ export const Clearable: Story = {
   },
 }
 
+/**
+ * `searchFn` replaces the built-in matching, which is label plus description.
+ * The field itself is the search box here, as it is for any static list.
+ */
 export const WithSearchBox: Story = {
   args: {
     searchEmptyMessage: "No results found",
-    searchBoxPlaceholder: "Search for a theme",
+    placeholder: "Search for a theme",
   },
   render: (args) => {
     return (
@@ -733,7 +752,7 @@ export const WithActions: Story = {
   args: {
     showSearchBox: true,
     searchEmptyMessage: "No results found",
-    searchBoxPlaceholder: "Search for a theme",
+    placeholder: "Search for a theme",
     label: "Select a theme",
     actions: [
       {
@@ -1346,47 +1365,6 @@ export const MultipleClearSelectionsOnDatasetChange: Story = {
  *    keeps those rows selected — `preserveSelectionOnDatasetChange` governs
  *    manual selection only.
  */
-/**
- * The default for a static list: the trigger IS the search field. Typing opens
- * the dropdown and filters it; the selected item is drawn where the text goes
- * until the user types over it.
- */
-export const SearchInTheTrigger: Story = {
-  args: {
-    label: "Select a theme",
-    placeholder: "Search themes",
-    value: undefined,
-    clearable: true,
-  },
-}
-
-/**
- * Multiple selection keeps the same field. Closed, it says how many are
- * selected; typing replaces that with the query, and clearing gives it back.
- */
-export const SearchInTheTriggerMultiple: Story = {
-  args: {
-    label: "Select themes",
-    placeholder: "Search themes",
-    multiple: true,
-    clearable: true,
-    value: undefined,
-  },
-}
-
-/**
- * A short list reads better as a plain select. `showSearchBox={false}` opts out
- * and restores the button trigger.
- */
-export const SearchDisabled: Story = {
-  args: {
-    label: "Select a theme",
-    showSearchBox: false,
-    value: undefined,
-    placeholder: undefined,
-  },
-}
-
 export const MultipleSelectAllWithFilters: Story = {
   args: {
     label: "Select Team Members (preserve + select all)",
@@ -1405,6 +1383,77 @@ export const MultipleSelectAllWithFilters: Story = {
     onSelectItems: fn((selectionStatus) => {
       console.log("selectionStatus", selectionStatus)
     }),
+  },
+}
+
+/**
+ * The default for a static list: the trigger IS the search field. Typing opens
+ * the dropdown and filters it; the selected item is drawn where the text goes
+ * until the user types over it.
+ *
+ * Keys: ArrowDown or Enter makes the first option active, and the option takes
+ * the Enter that selects it. The arrow closes the list again, since a field
+ * you type in cannot toggle on click.
+ */
+export const SearchInTheTrigger: Story = {
+  args: {
+    label: "Select a theme",
+    placeholder: "Search themes",
+    value: "dark",
+    clearable: true,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+
+    const trigger = canvas.getByRole("combobox")
+    await expect(trigger).toHaveAccessibleDescription("Dark")
+
+    await userEvent.type(trigger, "Light")
+
+    // The open dropdown aria-hides the rest of the page. The field being typed
+    // into has to survive that, or a screen reader loses it mid-word.
+    await waitFor(async () => expect(body.getByRole("combobox")).toBe(trigger))
+    await waitFor(async () =>
+      expect(body.getByRole("option", { name: /Light/ })).toBeInTheDocument()
+    )
+
+    // The field never commits a row on the user's behalf: the keys make one
+    // active, and the option takes the Enter that selects it.
+    await userEvent.keyboard("{ArrowDown}")
+    await waitFor(async () =>
+      expect(canvasElement.ownerDocument.activeElement).toHaveAttribute(
+        "role",
+        "option"
+      )
+    )
+  },
+}
+
+/**
+ * Multiple selection keeps the same field. Closed, it says how many are
+ * selected; typing replaces that with the query, and clearing gives it back.
+ */
+export const SearchInTheTriggerMultiple: Story = {
+  args: {
+    label: "Select themes",
+    placeholder: "Search themes",
+    multiple: true,
+    clearable: true,
+    value: ["light", "dark"],
+  },
+}
+
+/**
+ * A short list reads better as a plain select. `showSearchBox={false}` opts out
+ * and restores the button trigger.
+ */
+export const SearchDisabled: Story = {
+  args: {
+    label: "Select a theme",
+    showSearchBox: false,
+    value: undefined,
+    placeholder: undefined,
   },
 }
 
@@ -1586,6 +1635,61 @@ export const Snapshot: Story = {
       },
       { name: "Hint", props: { ...base, hint: "Hint message" } },
     ]
+
+    /**
+     * The trigger's two shapes, which the variants above cannot show: they
+     * render with no options and no value, so every one of them is the empty
+     * search field. These carry a selection, so the capture covers what the
+     * field draws beside the caret — a label, a status pill, a count — and the
+     * plain button trigger that `showSearchBox={false}` keeps.
+     */
+    const triggerVariants = [
+      {
+        name: "Search field with a selection",
+        props: {
+          ...base,
+          value: "dark",
+          options: themeOptions,
+        },
+      },
+      {
+        name: "Search field with a status pill",
+        props: {
+          ...base,
+          icon: undefined,
+          value: "approved",
+          options: [
+            {
+              value: "approved",
+              label: "Approved",
+              tag: {
+                type: "status" as const,
+                text: "Approved",
+                variant: "positive" as const,
+              },
+            },
+          ],
+        },
+      },
+      {
+        name: "Search field, multiple selection",
+        props: {
+          ...base,
+          multiple: true as const,
+          value: ["light", "dark"],
+          options: themeOptions,
+        },
+      },
+      {
+        name: "Button trigger, search off",
+        props: {
+          ...base,
+          showSearchBox: false,
+          value: "dark",
+          options: themeOptions,
+        },
+      },
+    ]
     return (
       <div className="flex flex-col gap-4">
         {selectSizes.map((size) => (
@@ -1606,6 +1710,15 @@ export const Snapshot: Story = {
                   label={`${variant.name} select, ${size}`}
                   onChange={fn()}
                   options={[]}
+                />
+              ))}
+              {triggerVariants.map((variant) => (
+                <F0Select
+                  key={`${size}-${variant.name}`}
+                  size={size}
+                  {...variant.props}
+                  label={`${variant.name}, ${size}`}
+                  onChange={fn()}
                 />
               ))}
             </div>

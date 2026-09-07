@@ -235,7 +235,9 @@ const F0SelectComponent = forwardRef(function Select<
   type ActualRecordType = ResolvedRecordType<R>
 
   const [openLocal, setOpenLocal] = useState(open)
-  const inlineTriggerRef = useRef<HTMLButtonElement>(null)
+  // Holds whichever element the trigger renders: the inline variant's button,
+  // or the field chrome's root.
+  const inlineTriggerRef = useRef<HTMLElement>(null)
   const composedTriggerRef = useComposedRefs(ref, inlineTriggerRef)
   const previousOpenRef = useRef(openLocal)
   const isApplyingRef = useRef(false)
@@ -949,6 +951,14 @@ const F0SelectComponent = forwardRef(function Select<
     open: !!openLocal,
     onOpenChange: handleChangeOpenLocal,
     onSearchChange: onSearchChangeLocal,
+    // Clearing the query means NO query, not an empty one: an empty string is
+    // a new dataset identity, and a "select all" is scoped to the query it was
+    // made under, so it would be dropped on an open-and-close with no typing.
+    onSearchReset: () => {
+      setCurrentSearch(undefined)
+      onSearchChange?.("")
+    },
+    triggerRef: inlineTriggerRef,
   })
 
   const handleCancel = useCallback(() => {
@@ -1222,6 +1232,8 @@ const F0SelectComponent = forwardRef(function Select<
       // The trigger is the search field, so it has to survive the aria-hidden
       // sweep the open content applies to the rest of the page.
       keepTriggerAccessible={inlineSearch}
+      // The popup is a listbox, and an unnamed one announces as just that.
+      aria-label={label}
       // A pointer landing in the FIELD is not "outside" when the field is the
       // search box: clicking your own text to fix a typo would otherwise
       // dismiss the list you are typing to filter.
@@ -1518,7 +1530,10 @@ const F0SelectComponent = forwardRef(function Select<
               }
               onChange={inlineSearch ? handleSearchDraftChange : undefined}
               aria-describedby={
-                inlineSearch && hasSelection
+                // Only while the node it points at is rendered: the slot goes
+                // as soon as there is text, and a dangling reference is an
+                // error, not a description.
+                inlineSearch && hasSelection && !searchDraft
                   ? selectionDescriptionId
                   : undefined
               }
@@ -1528,7 +1543,14 @@ const F0SelectComponent = forwardRef(function Select<
                   /* The input's own value is the query the user is typing, so
                      the selection beside it is what `aria-describedby` on the
                      field points at — otherwise it is never announced. */
-                  <span id={selectionDescriptionId} className="contents">
+                  <span
+                    id={selectionDescriptionId}
+                    // The field is described BY this node, which accname reads
+                    // even hidden. Left visible to the tree it would say the
+                    // same thing twice, once as description and once as text.
+                    aria-hidden="true"
+                    className="contents"
+                  >
                     {selectedItemsNode}
                   </span>
                 ) : undefined
@@ -1557,7 +1579,7 @@ const F0SelectComponent = forwardRef(function Select<
                 // is what the consumer wrote for this empty field. The search
                 // placeholder stands in when there is none.
                 (inlineSearch
-                  ? placeholder || searchBoxPlaceholder
+                  ? placeholder || searchBoxPlaceholder || i18n.toc.search
                   : placeholder) || ""
               }
               disabled={disabled}
@@ -1568,7 +1590,10 @@ const F0SelectComponent = forwardRef(function Select<
                 offset: 34,
               }}
               loading={isInitialLoading || loading || isLoading}
-              name={name}
+              // Never on the search field: its value is the query, and a
+              // native submit would post that instead of the selection (the
+              // hidden input below carries it).
+              name={inlineSearch ? undefined : name}
               onClickContent={() => {
                 // Clicking into the field to move the caret must not close the
                 // list. The arrow is what closes it (see `Arrow.onChange`).
@@ -1618,6 +1643,17 @@ const F0SelectComponent = forwardRef(function Select<
             </F0InputField>
           )}
         </SelectTrigger>
+      )}
+      {/*
+        What a native form submit posts. The visible field's value is the
+        query, so the selection travels here instead.
+      */}
+      {inlineSearch && name && (
+        <input
+          type="hidden"
+          name={name}
+          value={multiple ? localValue.join(",") : (localValue[0] ?? "")}
+        />
       )}
       {openLocal && selectContent}
     </SelectPrimitive>
