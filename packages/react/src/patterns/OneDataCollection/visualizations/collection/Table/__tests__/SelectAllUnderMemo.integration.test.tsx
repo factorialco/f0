@@ -53,6 +53,7 @@ const Harness = ({ declareDeps }: { declareDeps: boolean }) => {
     GroupingDefinition<Person>
   >(
     {
+      memoizeDefinition: true,
       selectable: (item: Person) => item.id,
       selectionDisabled: (item: Person) => lockedIds.includes(item.id),
       dataAdapter: {

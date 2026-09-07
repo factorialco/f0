@@ -120,6 +120,7 @@ const Harness = ({
 
   const source = useDataCollectionSource(
     {
+      memoizeDefinition: true,
       selectable: (item: Person) => item.id,
       dataAdapter: makeAdapter(paginationType, (rows) => {
         loadedRef.current = rows

@@ -47,7 +47,7 @@ beforeEach(() => renderCounts.clear())
  * State the table knows nothing about, and a definition rebuilt inline every
  * render — an object literal at the call site, as every real consumer writes it.
  */
-const Harness = () => {
+const Harness = ({ memoizeDefinition }: { memoizeDefinition: boolean }) => {
   const [tick, setTick] = useState(0)
 
   const source = useDataCollectionSource<
@@ -60,6 +60,7 @@ const Harness = () => {
     GroupingDefinition<Person>
   >(
     {
+      memoizeDefinition,
       selectable: (item: Person) => item.id,
       itemUrl: (item: Person) => `/people/${item.id}`,
       dataAdapter: {
@@ -92,21 +93,28 @@ const Harness = () => {
   )
 }
 
+const tickAndCount = async (memoizeDefinition: boolean) => {
+  const user = userEvent.setup()
+  render(<Harness memoizeDefinition={memoizeDefinition} />)
+
+  await waitFor(() => expect(screen.getByText("Carla")).toBeInTheDocument())
+  const before = new Map(renderCounts)
+
+  await user.click(screen.getByText("tick"))
+  await waitFor(() => expect(screen.getByText("ticks: 1")).toBeInTheDocument())
+
+  return [1, 2, 3].map(
+    (id) => (renderCounts.get(id) ?? 0) - (before.get(id) ?? 0)
+  )
+}
+
 describe("a consumer render that has nothing to do with the rows", () => {
-  it("does not re-render them", async () => {
-    const user = userEvent.setup()
-    render(<Harness />)
+  it("does not re-render them, once the consumer opts in", async () => {
+    expect(await tickAndCount(true)).toEqual([0, 0, 0])
+  })
 
-    await waitFor(() => expect(screen.getByText("Carla")).toBeInTheDocument())
-    const before = new Map(renderCounts)
-
-    await user.click(screen.getByText("tick"))
-    await waitFor(() =>
-      expect(screen.getByText("ticks: 1")).toBeInTheDocument()
-    )
-
-    for (const id of [1, 2, 3]) {
-      expect(renderCounts.get(id)).toBe(before.get(id))
-    }
+  it("still re-renders them for a consumer that has not", async () => {
+    // A consumer that never asked keeps reading its callbacks fresh.
+    expect(await tickAndCount(false)).toEqual([1, 1, 1])
   })
 })

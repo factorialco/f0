@@ -100,7 +100,11 @@ export const useDataCollectionSource = <
   // Pinned to the same `deps` that already govern the data adapter: the source
   // returned below carries live filter state, so it cannot be memoized itself.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const definition = useMemo(() => source, deps)
+  const memoizedDefinition = useMemo(() => source, deps)
+
+  // Opt-in: it turns a forgotten dep from harmless into a stale closure, which
+  // is not a decision a version bump should make for a consumer.
+  const definition = source.memoizeDefinition ? memoizedDefinition : undefined
 
   return {
     ...datasource,

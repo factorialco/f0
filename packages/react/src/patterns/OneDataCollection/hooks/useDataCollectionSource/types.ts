@@ -151,6 +151,13 @@ export type DataCollectionSourceDefinition<
    * Data Collection specific datasource elements / features
    */
 
+  /**
+   * Pin this definition to `deps` so rows can skip a render. Only safe if `deps`
+   * lists everything the callbacks below close over: miss one and a row keeps
+   * calling the closure it mounted with.
+   */
+  memoizeDefinition?: boolean
+
   /** Navigation filters */
   navigationFilters?: NavigationFilters
 
@@ -219,9 +226,8 @@ export type DataCollectionSource<
     Grouping
   > & {
     /**
-     * The definition the consumer passed, memoized on the hook's `deps`. What
-     * is rendered per record takes this, so a row's memo can survive a consumer
-     * render — the source itself changes identity on every one of them.
+     * The definition, pinned to `deps`, for what is rendered per record — the
+     * source itself changes identity every render. Set by `memoizeDefinition`.
      */
     definition?: DataCollectionSourceDefinition<
       R,
