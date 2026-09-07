@@ -15,7 +15,6 @@ const trimmed = (text: string | undefined): string | undefined => {
   return value ? value : undefined
 }
 
-/** True when nothing the user can type or pick is set */
 export const isLocationValueEmpty = (
   value: F0LocationInputValue | undefined
 ): boolean => {
@@ -53,10 +52,13 @@ export const formatLocationValue = (
 export const invalidateResolution = (
   value: F0LocationInputValue
 ): F0LocationInputValue => {
-  const { placeId: _placeId, latitude, longitude, timezone, ...rest } = value
-  void latitude
-  void longitude
-  void timezone
+  const {
+    placeId: _placeId,
+    latitude: _latitude,
+    longitude: _longitude,
+    timezone: _timezone,
+    ...rest
+  } = value
   return rest
 }
 

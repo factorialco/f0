@@ -19,9 +19,8 @@ type Props = {
 }
 
 /**
- * The plain text parts below the address field. City and state / region share
- * a row; the postal code sits alone below them so it never fights a long
- * region name for width.
+ * City and state / region share a row; the postal code takes its own, so it
+ * never fights a long region name for width.
  */
 export const AddressParts = ({
   fields,
