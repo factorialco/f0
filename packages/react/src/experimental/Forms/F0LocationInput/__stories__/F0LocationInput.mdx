@@ -123,7 +123,9 @@ Every `onChange` carries `meta`:
 
 ### Editing invalidates the pick
 
-Editing any part, including the country, drops `placeId`, `latitude`, `longitude` and `timezone` and emits `{ source: "typed", isResolved: false }`. The typed text is kept. Consumers that need coordinates for a typed address geocode it themselves.
+Editing a part that moves the pin - the address line, city, state, postal code or country - drops `placeId`, `latitude`, `longitude` and `timezone` and emits `{ source: "typed", isResolved: false }`. The typed text is kept. Consumers that need coordinates for a typed address geocode it themselves.
+
+`addressLine2` is the exception: a floor or apartment number refines the address inside the same building, so it keeps the picked place and still reports `isResolved: true`. Any part added to the component later invalidates by default.
 
 <Canvas of={Stories.Controlled} />
 
@@ -573,13 +575,13 @@ The suggestion list portals into the surrounding centered or fullscreen `F0Dialo
 
 ### Keyboard interaction
 
-| Key                         | Result                                                                                                    |
-| --------------------------- | --------------------------------------------------------------------------------------------------------- |
-| Type two or more characters | Searches and opens the suggestion list                                                                    |
-| `ArrowDown` / `ArrowUp`     | Moves the active suggestion, wrapping at both ends. `ArrowDown` on a closed list reopens the last results |
-| `Enter`                     | Picks the active suggestion. With no active suggestion it keeps its form meaning                          |
-| `Escape`                    | Closes the list and keeps the typed text. It does not reach the surrounding dialog                        |
-| `Tab`                       | Closes the list without picking and moves on                                                              |
+| Key                         | Result                                                                                                                                                                |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Type two or more characters | Searches and opens the suggestion list                                                                                                                                |
+| `ArrowDown` / `ArrowUp`     | Moves the active suggestion, wrapping at both ends. On a closed list either arrow reopens the last results, `ArrowDown` on the first option and `ArrowUp` on the last |
+| `Enter`                     | Picks the active suggestion. With no active suggestion it keeps its form meaning                                                                                      |
+| `Escape`                    | Closes the list and keeps the typed text. It does not reach the surrounding dialog                                                                                    |
+| `Tab`                       | Closes the list without picking and moves on                                                                                                                          |
 
 ### Screen reader behavior
 

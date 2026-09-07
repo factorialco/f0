@@ -183,8 +183,8 @@ export const Default: Story = {}
 
 /**
  * Detailed mode: country first, then the same autocomplete field, then the
- * parts. Picking a suggestion fills every part; editing any of them drops the
- * coordinates, because they no longer describe what the user typed.
+ * parts. Picking a suggestion fills every part; editing one that moves the pin
+ * drops the coordinates, because they no longer describe what the user typed.
  */
 export const Detailed: Story = {
   args: {

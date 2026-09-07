@@ -118,19 +118,27 @@ export const AddressCombobox = forwardRef<HTMLInputElement, Props>(
       const count = suggestions.length
 
       switch (event.key) {
+        // Both arrows reopen the last results, one landing on the first
+        // option and the other on the last, as the combobox pattern expects
         case "ArrowDown":
           event.preventDefault()
+          if (count === 0) return
           if (!isOpen) {
-            if (count > 0) setOpen(true)
+            setOpen(true)
+            setActiveIndex(0)
             return
           }
-          if (count > 0) setActiveIndex((activeIndex + 1) % count)
+          setActiveIndex((activeIndex + 1) % count)
           return
         case "ArrowUp":
           event.preventDefault()
-          if (isOpen && count > 0) {
-            setActiveIndex((activeIndex - 1 + count) % count)
+          if (count === 0) return
+          if (!isOpen) {
+            setOpen(true)
+            setActiveIndex(count - 1)
+            return
           }
+          setActiveIndex((activeIndex - 1 + count) % count)
           return
         case "Enter": {
           const active = isOpen ? suggestions[activeIndex] : undefined
@@ -178,7 +186,7 @@ export const AddressCombobox = forwardRef<HTMLInputElement, Props>(
               // A combobox that can never open would misannounce the field
               role={canSuggest ? "combobox" : undefined}
               aria-autocomplete={canSuggest ? "list" : undefined}
-              aria-expanded={isOpen}
+              aria-expanded={canSuggest ? isOpen : undefined}
               aria-controls={isOpen ? listboxId : undefined}
               aria-activedescendant={
                 isOpen && activeIndex >= 0 ? optionId(activeIndex) : undefined
