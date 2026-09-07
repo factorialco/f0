@@ -1,16 +1,17 @@
 import { screen } from "@testing-library/react"
 import { Fragment } from "react"
 import { afterEach, describe, expect, test, vi } from "vitest"
-/* eslint-disable no-constant-binary-expression */
 import { userEvent, zeroRender } from "@/testing/test-utils"
 import { Widget } from "."
+
+const showHiddenChild = (): boolean => false
 
 const renderWidget = () => {
   return zeroRender(
     <Widget>
       <></>
       <Fragment></Fragment>
-      {false && <p>asd</p>}
+      {showHiddenChild() && <p>asd</p>}
       {null}
       {undefined}
       <p>1</p>
@@ -18,7 +19,7 @@ const renderWidget = () => {
       <p>3</p>
       <></>
       <Fragment></Fragment>
-      {false && <p>asd</p>}
+      {showHiddenChild() && <p>asd</p>}
       {null}
       {undefined}
     </Widget>

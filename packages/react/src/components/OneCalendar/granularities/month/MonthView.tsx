@@ -71,13 +71,7 @@ export function MonthView({
         to: monthEnd,
       })
     } else if (mode === "range") {
-      if (!selected || !isDateRange(selected)) {
-        // Start of range
-        onSelect?.({
-          from: selectedDate,
-          to: undefined,
-        })
-      } else if (selected.from && !selected.to) {
+      if (selected && isDateRange(selected) && selected.from && !selected.to) {
         // Complete the range
         const fromDate = selected.from
 

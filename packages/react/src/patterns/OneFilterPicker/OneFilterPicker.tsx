@@ -153,17 +153,19 @@ const FiltersRoot = <Definition extends FiltersDefinition>({
     stateMode === "controlled" ? value : localFiltersValue
 
   const removeFilterValue = (key: keyof Definition) => {
-    const newFilters = { ...currentFiltersValue }
-    delete newFilters[key]
-
     // Also clear nested child filter keys to avoid orphaned values
     const filterDef = filters?.[key]
+    const removedKeys = new Set<string>([String(key)])
     if (filterDef?.type === "in" && filterDef.options) {
-      const nestedKeys = collectNestedFilterKeys(filterDef.options)
-      nestedKeys.forEach((nestedKey) => {
-        delete newFilters[nestedKey as keyof Definition]
-      })
+      for (const nestedKey of collectNestedFilterKeys(filterDef.options)) {
+        removedKeys.add(String(nestedKey))
+      }
     }
+    const newFilters = Object.fromEntries(
+      Object.entries(currentFiltersValue).filter(
+        ([filterKey]) => !removedKeys.has(filterKey)
+      )
+    )
 
     if (stateMode === "optimistic") {
       setLocalFiltersValue(newFilters as FiltersState<Definition>)

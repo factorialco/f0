@@ -34,9 +34,7 @@ export const Footer = (props: FooterProps) => {
   }
 
   const toPromise = (onClick: () => void | Promise<void>) => {
-    return new Promise((resolve) => {
-      resolve(onClick())
-    })
+    return Promise.resolve(onClick())
   }
 
   const renderPrimaryAction = () => {

@@ -65,9 +65,7 @@ export function resolveLocalized<T>(
  * the union that drives a single shared language picker. Plain values
  * contribute no options (they aren't language-specific).
  */
-export function collectLanguages(
-  ...values: (Localized<unknown> | undefined)[]
-): LanguageOption[] {
+export function collectLanguages(...values: unknown[]): LanguageOption[] {
   const byLocale = new Map<string, LanguageOption>()
   for (const value of values) {
     if (!isLocalizedList(value)) {

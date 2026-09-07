@@ -3,6 +3,7 @@ import {
   getBezierPath,
   getSmoothStepPath,
   getStraightPath,
+  Position,
   type EdgeProps,
 } from "@xyflow/react"
 import { memo } from "react"
@@ -66,7 +67,8 @@ export function F0GraphEdgeBase({
   // When source and target are nearly aligned on the cross-axis,
   // use a straight line to avoid smoothstep introducing a tiny jog ("wiggle")
   const isVertical =
-    edgeProps.sourcePosition === "bottom" || edgeProps.sourcePosition === "top"
+    edgeProps.sourcePosition === Position.Bottom ||
+    edgeProps.sourcePosition === Position.Top
   const crossAxisDelta = isVertical
     ? Math.abs(edgeProps.sourceX - edgeProps.targetX)
     : Math.abs(edgeProps.sourceY - edgeProps.targetY)

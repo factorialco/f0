@@ -53,7 +53,7 @@ type ProductModalProps = {
 
 type Action = {
   label: string
-  onClick: () => void
+  onClick: () => void | Promise<void>
   icon?: IconType
   variant?: ButtonVariant
   size?: "md" | "lg"

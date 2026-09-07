@@ -88,7 +88,7 @@ export const OptionsList = ({
       return
     }
 
-    let next = tabStopIndex
+    let next: number
     switch (e.key) {
       case "ArrowDown":
       case "ArrowRight":

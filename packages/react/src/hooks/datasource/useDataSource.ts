@@ -23,7 +23,7 @@ import { SearchOptions } from "./types/search.typings"
  */
 
 export const getDataSourcePaginationType = <
-  D extends { paginationType?: PaginationType | undefined | never },
+  D extends { paginationType?: PaginationType | undefined },
 >(
   dataAdapter: D
 ): PaginationType => {

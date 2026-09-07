@@ -822,13 +822,13 @@ export const WithDataSourceGrouping: Story = {
         groupBy: {
           role: {
             name: "Role",
-            label: (groupId) => `${groupId}`,
+            label: (groupId) => groupId,
             itemCount: (groupId) =>
               mockItems.filter((item) => item.role === groupId).length,
           },
           workplace: {
             name: "Workplace",
-            label: (groupId) => `${groupId}`,
+            label: (groupId) => groupId,
             itemCount: (groupId) =>
               mockItems.filter((item) => item.workplace === groupId).length,
           },
@@ -905,7 +905,7 @@ export const WithDataSourceGroupingDefaultOpen: Story = {
         groupBy: {
           role: {
             name: "Role",
-            label: (groupId) => `${groupId}`,
+            label: (groupId) => groupId,
             itemCount: (groupId) =>
               mockItems.filter((item) => item.role === groupId).length,
           },
@@ -961,7 +961,7 @@ export const WithManyCollapsibleGroups: Story = {
         groupBy: {
           role: {
             name: "Role",
-            label: (groupId) => `${groupId}`,
+            label: (groupId) => groupId,
             itemCount: (groupId) =>
               mockItems.filter((item) => item.role === groupId).length,
           },

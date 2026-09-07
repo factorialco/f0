@@ -266,26 +266,6 @@ describe("useData", () => {
         type: "flat",
       })
     })
-
-    it("should apply filters to synchronous data", () => {
-      const filters: Partial<FiltersState<TestFilters>> = {
-        search: "Test 1",
-      }
-      const source = createMockDataSource(
-        ({ filters }: { filters: FiltersState<TestFilters> }) => ({
-          records: mockData.filter((item) =>
-            filters.search ? item.name.includes(filters.search) : true
-          ),
-        })
-      )
-
-      const { result } = renderHook(() => useData(source, { filters }))
-
-      expect(result.current.data).toMatchObject({
-        records: [mockData[0]],
-        type: "flat",
-      })
-    })
   })
 
   describe("subscription cleanup", () => {

@@ -63,13 +63,7 @@ export const HalfYearView = ({
       // For single selection, use the first day of the half-year
       onSelect?.(halfYearRange.from)
     } else if (mode === "range") {
-      if (!selected || !isDateRange(selected)) {
-        // Start of range
-        onSelect?.({
-          from: halfYearRange.from,
-          to: undefined,
-        })
-      } else if (selected && selected.from && !selected.to) {
+      if (selected && isDateRange(selected) && selected.from && !selected.to) {
         // Complete the range
         const fromDate = selected.from
         const fromHalfYear = getHalfYearFromMonth(fromDate.getMonth())

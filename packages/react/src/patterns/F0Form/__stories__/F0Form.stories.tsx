@@ -22,6 +22,8 @@ import type {
 } from "../fields/types"
 import type { RenderCustomFieldSelectConfig } from "../types"
 
+const DISABLED_STORY_SAMPLE_VALUE = "sample-value"
+
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 const meta: Meta = {
@@ -1408,7 +1410,7 @@ export const AllFieldTypesDisabled: Story = {
       defaultValues: {
         textField: "Sample text value",
         emailField: "user@example.com",
-        passwordField: "secretpassword",
+        passwordField: DISABLED_STORY_SAMPLE_VALUE,
         numberField: 42,
         durationField: 3661,
         textareaField:

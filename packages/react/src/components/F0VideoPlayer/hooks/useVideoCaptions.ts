@@ -88,8 +88,7 @@ export function useVideoCaptions(
     // and the passed <track>'s readyState.
     const evaluate = () => {
       let cues = false
-      for (let i = 0; i < tracks.length; i++) {
-        const track = tracks[i]
+      for (const track of Array.from(tracks)) {
         if (!CAPTION_TRACK_KINDS.has(track.kind)) {
           continue
         }
@@ -129,8 +128,7 @@ export function useVideoCaptions(
       })
     }
     // Re-evaluate as cues parse/activate and as tracks come and go.
-    for (let i = 0; i < tracks.length; i++) {
-      const track = tracks[i]
+    for (const track of Array.from(tracks)) {
       if (!CAPTION_TRACK_KINDS.has(track.kind)) {
         continue
       }

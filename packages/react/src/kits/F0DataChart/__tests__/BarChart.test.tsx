@@ -37,7 +37,7 @@ const { linearGradientMock } = vi.hoisted(() => ({
 }))
 
 /** Handlers the chart registered, so tests can fire ECharts events at it. */
-const chartHandlers: Record<string, ((params: unknown) => void)[]> = {}
+let chartHandlers: Record<string, ((params: unknown) => void)[]> = {}
 
 /** Fire an ECharts event at every handler the component registered for it. */
 function emitChartEvent(event: string, params: unknown) {
@@ -57,7 +57,8 @@ vi.mock("echarts", () => ({
     dispose: vi.fn(),
     getDom: vi.fn(() => document.createElement("div")),
     on: vi.fn((event: string, handler: (params: unknown) => void) => {
-      ;(chartHandlers[event] ??= []).push(handler)
+      chartHandlers[event] ??= []
+      chartHandlers[event].push(handler)
     }),
     off: vi.fn(),
     dispatchAction: vi.fn(),
@@ -183,9 +184,7 @@ function getBorderRadii(seriesIndex: number) {
 
 beforeEach(() => {
   setOptionMock.mockClear()
-  for (const key of Object.keys(chartHandlers)) {
-    delete chartHandlers[key]
-  }
+  chartHandlers = {}
   containerSize.width = 800
   containerSize.height = 320
 })

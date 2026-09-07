@@ -293,6 +293,7 @@ const SelectContent = forwardRef<
           ...(currentControl ? [currentControl] : []),
         ])
       ).sort((first, second) =>
+        // oxlint-disable-next-line sonarjs/bitwise-operators -- compareDocumentPosition returns a bitmask
         first.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING
           ? -1
           : 1

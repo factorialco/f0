@@ -133,8 +133,7 @@ export function useAudioDescription(
 
     const refresh = () => {
       let inBand = false
-      for (let i = 0; i < tracks.length; i++) {
-        const track = tracks[i]
+      for (const track of Array.from(tracks)) {
         if (track.kind !== DESCRIPTION_TRACK_KIND) {
           continue
         }

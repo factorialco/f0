@@ -180,11 +180,8 @@ const _SurveyFormBuilder = ({
                   {(() => {
                     const nodes: ReactNode[] = []
 
-                    for (
-                      let index = 0;
-                      index < reorderableItems.length;
-                      index++
-                    ) {
+                    let index = 0
+                    while (index < reorderableItems.length) {
                       const item = reorderableItems[index]
 
                       // A locked section renders as one muted grey rounded
@@ -245,7 +242,7 @@ const _SurveyFormBuilder = ({
                           </div>
                         )
 
-                        index = next - 1
+                        index = next
                         continue
                       }
 
@@ -274,6 +271,7 @@ const _SurveyFormBuilder = ({
                           />
                         )
                       }
+                      index++
                     }
 
                     return nodes

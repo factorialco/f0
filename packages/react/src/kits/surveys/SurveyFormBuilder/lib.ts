@@ -90,16 +90,13 @@ export const getDefaultParamsForQuestionType = (questionType: QuestionType) => {
       return {}
     case "text":
     case "longText":
+    case "link":
       return {
         value: "",
       }
     case "numeric":
       return {
         value: 0,
-      }
-    case "link":
-      return {
-        value: "",
       }
     case "date":
       return {

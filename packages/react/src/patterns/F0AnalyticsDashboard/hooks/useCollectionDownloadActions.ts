@@ -67,7 +67,7 @@ interface UseCollectionDownloadActionsOptions {
 }
 
 async function resolvePromiseLike<T>(value: T | Promise<T>): Promise<T> {
-  return value instanceof Promise ? value : value
+  return value
 }
 
 /**

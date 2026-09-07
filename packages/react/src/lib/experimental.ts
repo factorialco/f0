@@ -48,9 +48,13 @@ export const experimentalComponent = <T extends React.ComponentType<any>>(
     Object.entries(reported).forEach(([key, value]) => {
       const newUses = value.uses - value.usesReported
       if (newUses > 0) {
+        const newUsesReport =
+          value.usesReported === -1
+            ? ""
+            : `New uses found since last report: ${newUses}`
         console.warn(
           `🚧 The \x1b[1m${key}\x1b[0m component is experimental. Use it at your own risk.`,
-          `Found ${value.uses} uses. ${value.usesReported === -1 ? "" : `New uses found since last report: ${newUses}`}`
+          `Found ${value.uses} uses. ${newUsesReport}`
         )
         reported[key] = {
           ...value,

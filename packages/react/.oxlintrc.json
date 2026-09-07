@@ -24,6 +24,9 @@
     "preserve-caught-error": "error",
 
     // typescript-eslint strict + stylistic, no type information needed.
+    "typescript/no-extraneous-class": "error",
+    "typescript/prefer-for-of": "error",
+    "typescript/no-dynamic-delete": "error",
     "typescript/consistent-generic-constructors": "error",
     "typescript/no-inferrable-types": "error",
     "typescript/array-type": "error",
@@ -40,6 +43,17 @@
 
     // typescript-eslint strict + stylistic, type-aware. They run only with
     // `--type-aware` (see the lint scripts) and need `oxlint-tsgolint`.
+    "typescript/no-unsafe-enum-comparison": "error",
+    "typescript/restrict-plus-operands": "error",
+    "typescript/no-misused-promises": [
+      "error",
+      { "checksVoidReturn": { "attributes": false } }
+    ],
+    "typescript/prefer-promise-reject-errors": "error",
+    "typescript/use-unknown-in-catch-callback-variable": "error",
+    "typescript/no-redundant-type-constituents": "error",
+    "typescript/await-thenable": "error",
+    "typescript/no-unnecessary-template-expression": "error",
     "typescript/no-meaningless-void-operator": "error",
     "typescript/return-await": "error",
     "typescript/no-duplicate-type-constituents": "error",
@@ -58,6 +72,32 @@
 
     // eslint-plugin-sonarjs recommended (JS plugin). Rules that need type
     // information run without it here and may miss cases.
+    "sonarjs/regex-complexity": "error",
+    "sonarjs/no-duplicate-test-title": "error",
+    "sonarjs/no-redundant-boolean": "error",
+    "sonarjs/no-inverted-boolean-check": "error",
+    "sonarjs/bitwise-operators": "error",
+    "sonarjs/no-hardcoded-passwords": "error",
+    "sonarjs/link-with-target-blank": "error",
+    "sonarjs/no-trivial-assertions": "error",
+    "sonarjs/single-char-in-character-classes": "error",
+    "sonarjs/no-clear-text-protocols": "error",
+    "sonarjs/no-all-duplicated-branches": "error",
+    "sonarjs/no-skipped-tests": "error",
+    "sonarjs/no-gratuitous-expressions": "error",
+    "sonarjs/no-nested-assignment": "error",
+    "sonarjs/public-static-readonly": "error",
+    "sonarjs/prefer-promise-shorthand": "error",
+    "sonarjs/reduce-initial-value": "error",
+    "sonarjs/no-redundant-assignments": "error",
+    "sonarjs/updated-loop-counter": "error",
+    "sonarjs/no-redundant-jump": "error",
+    "sonarjs/prefer-native-lodash-alternative": "error",
+    "sonarjs/no-duplicated-branches": "error",
+    "sonarjs/no-nested-template-literals": "error",
+    "sonarjs/no-dead-store": "error",
+    "sonarjs/concise-regex": "error",
+    "sonarjs/no-small-switch": "error",
     "sonarjs/anchor-precedence": "error",
     "sonarjs/argument-type": "error",
     "sonarjs/arguments-order": "error",
@@ -228,46 +268,6 @@
     "sonarjs/weak-ssl": "error",
     "sonarjs/x-powered-by": "error",
     "sonarjs/xml-parser-xxe": "error",
-
-    // PENDING. Turned on in follow-up PRs together with the code fixes.
-    // Number = violations on main when this was written.
-    "typescript/no-dynamic-delete": "off", // 10
-    "sonarjs/no-small-switch": "off", // 3
-    "sonarjs/concise-regex": "off", // 4
-    "typescript/prefer-for-of": "off", // 9
-    "sonarjs/no-dead-store": "off", // 3
-    "sonarjs/no-nested-template-literals": "off", // 7
-    "sonarjs/no-duplicated-branches": "off", // 11
-    "sonarjs/prefer-native-lodash-alternative": "off", // 2
-    "sonarjs/no-redundant-jump": "off", // 3
-    "sonarjs/updated-loop-counter": "off", // 1
-    "sonarjs/no-redundant-assignments": "off", // 2
-    "sonarjs/reduce-initial-value": "off", // 1
-    "sonarjs/prefer-promise-shorthand": "off", // 1
-    "typescript/no-extraneous-class": "off", // 2
-    "sonarjs/public-static-readonly": "off", // 5
-    "sonarjs/no-nested-assignment": "off", // 6
-    "sonarjs/no-gratuitous-expressions": "off", // 1
-    "sonarjs/no-skipped-tests": "off", // 2
-    "sonarjs/no-all-duplicated-branches": "off", // 4
-    "sonarjs/no-clear-text-protocols": "off", // 2
-    "sonarjs/single-char-in-character-classes": "off", // 1
-    "sonarjs/no-trivial-assertions": "off", // 7
-    "sonarjs/link-with-target-blank": "off", // 1
-    "sonarjs/no-hardcoded-passwords": "off", // 1
-    "sonarjs/bitwise-operators": "off", // 1
-    "sonarjs/no-inverted-boolean-check": "off", // 2
-    "sonarjs/no-redundant-boolean": "off", // 2
-    "sonarjs/no-duplicate-test-title": "off", // 1
-    "sonarjs/regex-complexity": "off", // 1
-    "typescript/no-unnecessary-template-expression": "off", // 14
-    "typescript/await-thenable": "off", // 4
-    "typescript/no-redundant-type-constituents": "off", // 10
-    "typescript/use-unknown-in-catch-callback-variable": "off", // 7
-    "typescript/prefer-promise-reject-errors": "off", // 8
-    "typescript/no-misused-promises": "off", // 16
-    "typescript/restrict-plus-operands": "off", // 1
-    "typescript/no-unsafe-enum-comparison": "off", // 2
 
     // DEBT. Turn on once the code is fixed. Number = violations when this
     // was written. Do not add new violations.

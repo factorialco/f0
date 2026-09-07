@@ -1,4 +1,3 @@
-import flatten from "lodash/flatten"
 import React, {
   createContext,
   useCallback,
@@ -295,12 +294,10 @@ export function SurveyFormBuilderProvider({
     SurveyFormBuilderCallbacks["onDuplicateElement"]
   > = useCallback(
     ({ elementId }) => {
-      const flattenedElements = flatten(
-        elementsRef.current.map((element) =>
-          element.type === "section"
-            ? [element, ...(element.section.questions ?? [])]
-            : [element.question]
-        )
+      const flattenedElements = elementsRef.current.flatMap((element) =>
+        element.type === "section"
+          ? [element, ...(element.section.questions ?? [])]
+          : [element.question]
       )
 
       const element = flattenedElements.find((element) =>
@@ -336,12 +333,10 @@ export function SurveyFormBuilderProvider({
   )
 
   const getQuestionById = useCallback((questionId: string) => {
-    const questions = flatten(
-      elementsRef.current.map((element) =>
-        element.type === "question"
-          ? [element.question]
-          : element.section.questions
-      )
+    const questions = elementsRef.current.flatMap((element) =>
+      element.type === "question"
+        ? [element.question]
+        : (element.section.questions ?? [])
     )
     return questions.find((question) => question?.id === questionId)
   }, [])
@@ -417,7 +412,6 @@ export function SurveyFormBuilderProvider({
           type: "section",
         })
       }
-      return
     }
   }, [isEmpty, handleAddNewElement, disabled, answering, skipDefaultSection])
 

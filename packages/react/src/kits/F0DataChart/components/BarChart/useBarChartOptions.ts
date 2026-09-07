@@ -1259,7 +1259,9 @@ export function useBarChartOptions(
           0,
           currentSeries.data.length - ARIA_MAX_VALUES_PER_SERIES
         )
-        return `${currentSeries.name}: ${values}${remainingValues > 0 ? `; ${remainingValues} more values` : ""}.`
+        const remainingSuffix =
+          remainingValues > 0 ? `; ${remainingValues} more values` : ""
+        return `${currentSeries.name}: ${values}${remainingSuffix}.`
       })
     if (series.length > ARIA_MAX_SERIES) {
       ariaDescriptions.push(`${series.length - ARIA_MAX_SERIES} more series.`)

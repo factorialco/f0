@@ -33,9 +33,9 @@ const readCueText = (track: TextTrack): string => {
     return ""
   }
   const lines: string[] = []
-  for (let i = 0; i < cues.length; i++) {
+  for (const cue of Array.from(cues)) {
     // `VTTCue` exposes `text`; a generic `TextTrackCue` may not.
-    const text = (cues[i] as VTTCue).text
+    const text = (cue as VTTCue).text
     if (typeof text === "string" && text.trim()) {
       lines.push(text.trim())
     }

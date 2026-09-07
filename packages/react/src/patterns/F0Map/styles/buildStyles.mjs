@@ -214,8 +214,8 @@ const flavor = (theme) => {
     boundary: neutral(theme, 30),
     water: tint(theme, L ? "malibu.50" : "malibu.60", L ? 0.45 : 0.5, land),
     // Greens a gentle step deeper than the green land, so parks/woods still read.
-    park: tint(theme, L ? "flubber.60" : "flubber.60", 0.42, land),
-    wood: tint(theme, L ? "flubber.70" : "flubber.70", 0.55, land),
+    park: tint(theme, "flubber.60", 0.42, land),
+    wood: tint(theme, "flubber.70", 0.55, land),
     // Urban land use (and the zoomed-in base land) is a warm tan - Google
     // Maps' land colour - clearly warmer than a plain neutral and distinct from
     // the green countryside. yellow.60 is deep enough to read as a tan rather
@@ -625,11 +625,9 @@ const recolor = (style, theme) => {
   // raster with no layers pointing at it (we don't want shaded relief); left in,
   // its tile fetches fail and keep `map.isStyleLoaded()` from ever resolving.
   const usedSources = new Set(out.layers.map((l) => l.source).filter(Boolean))
-  for (const name of Object.keys(out.sources)) {
-    if (!usedSources.has(name)) {
-      delete out.sources[name]
-    }
-  }
+  out.sources = Object.fromEntries(
+    Object.entries(out.sources).filter(([name]) => usedSources.has(name))
+  )
 
   return out
 }

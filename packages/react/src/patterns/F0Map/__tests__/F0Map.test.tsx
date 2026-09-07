@@ -47,7 +47,8 @@ const mock = vi.hoisted(() => {
     ) {
       const cb = typeof a === "function" ? a : b
       if (cb) {
-        ;(this.handlers[type] ??= []).push(cb)
+        this.handlers[type] ??= []
+        this.handlers[type].push(cb)
       }
       return this
     }
@@ -123,7 +124,8 @@ const mock = vi.hoisted(() => {
       return this.sources[id]
     }
     removeSource(id: string) {
-      delete this.sources[id]
+      const { [id]: _removed, ...rest } = this.sources
+      this.sources = rest
     }
     addLayer(spec: { id: string }) {
       this.layers.add(spec.id)
@@ -156,7 +158,12 @@ const mock = vi.hoisted(() => {
       return this
     }
   }
-  class MockAttributionControl {}
+  class MockAttributionControl {
+    opts: Record<string, unknown> | undefined
+    constructor(opts?: Record<string, unknown>) {
+      this.opts = opts
+    }
+  }
 
   return {
     instances,

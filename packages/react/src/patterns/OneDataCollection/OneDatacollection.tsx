@@ -409,14 +409,10 @@ const OneDataCollectionComp = <
   // only trims, never grows. List rows are a fixed height (no reflow); the
   // table and editable table depend on their content, so they seed at the
   // baseline and rely on the measurement to trim.
-  const autoPerPageRowHeight = (() => {
-    switch (visualizations[currentVisualization]?.type) {
-      case "list":
-        return ESTIMATED_LIST_ROW_HEIGHT
-      default:
-        return ESTIMATED_ROW_HEIGHT
-    }
-  })()
+  const autoPerPageRowHeight =
+    visualizations[currentVisualization]?.type === "list"
+      ? ESTIMATED_LIST_ROW_HEIGHT
+      : ESTIMATED_ROW_HEIGHT
   const autoPerPage = useAutoPerPage(vizContainerRef, autoPerPageEnabled, {
     rowHeight: autoPerPageRowHeight,
     ready: firstDataLoaded,

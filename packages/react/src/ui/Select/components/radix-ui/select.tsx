@@ -104,7 +104,7 @@ type SelectProps<T extends string = string> = SelectSharedProps &
         value?: T
         defaultValue?: T
         onValueChange?(value: T): void
-        multiple?: false | never
+        multiple?: false
       }
     | {
         value?: T[]
@@ -741,7 +741,6 @@ const SelectContentImpl = React.forwardRef<
 
       if (!context.multiple) {
         focusFirst([selectedItem, content])
-        return
       }
     },
     [focusFirst, selectedItem, content, context.multiple]

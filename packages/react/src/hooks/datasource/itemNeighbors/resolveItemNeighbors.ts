@@ -42,9 +42,9 @@ export function resolveItemNeighbors<R>(result: ItemNeighborsResult<R>): {
             resolve(state.data)
           }
         },
-        error: (error) => {
+        error: (error: unknown) => {
           if (!cancelled) {
-            reject(error)
+            reject(error instanceof Error ? error : new Error(String(error)))
           }
         },
       })
@@ -66,9 +66,9 @@ export function resolveItemNeighbors<R>(result: ItemNeighborsResult<R>): {
           resolve(response)
         }
       },
-      (error) => {
+      (error: unknown) => {
         if (!cancelled) {
-          reject(error)
+          reject(error instanceof Error ? error : new Error(String(error)))
         }
       }
     )
