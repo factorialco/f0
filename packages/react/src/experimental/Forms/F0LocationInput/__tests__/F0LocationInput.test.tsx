@@ -291,7 +291,7 @@ describe("F0LocationInput", () => {
   })
 
   describe("detailed mode", () => {
-    it("renders country first, then the address and the parts", () => {
+    it("renders country first, then the address and the parts, with no group title", () => {
       const { container } = render(
         <F0LocationInput
           label="Office"
@@ -310,7 +310,8 @@ describe("F0LocationInput", () => {
         "State / region",
         "Postal code",
       ])
-      expect(screen.getByText("Office")).toBeInTheDocument()
+      expect(screen.getByRole("group", { name: "Office" })).toBeInTheDocument()
+      expect(screen.queryByText("Office")).not.toBeInTheDocument()
       expect(
         screen.queryByRole("textbox", { name: "Address line 2" })
       ).not.toBeInTheDocument()

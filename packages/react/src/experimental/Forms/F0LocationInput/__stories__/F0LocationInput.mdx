@@ -1,4 +1,4 @@
-import { Canvas, Controls, Meta } from "@storybook/addon-docs/blocks"
+import { Canvas, Controls, Meta, Unstyled } from "@storybook/addon-docs/blocks"
 import { DoDonts } from "@/lib/storybook-utils/do-donts"
 
 import * as Stories from "./F0LocationInput.stories"
@@ -9,7 +9,7 @@ import * as Stories from "./F0LocationInput.stories"
 
 `F0LocationInput` is the writable address field for forms. The user types an address, picks a suggestion, and the component emits one **structured value** (street, city, state, postal code, ISO-2 country, coordinates) so no product surface has to parse a place result again. It has two modes: a single autocomplete field, or a grouped block with the country on top and the parts below.
 
-The component makes **no network call and ships no API key**. The consumer injects `searchPlaces` and `resolvePlace`; without them the parts are plain fields.
+It shares the chrome conventions (sizes, focus ring, disabled, readonly and loading states) of every F0 writable input. The component makes **no network call and ships no API key**: the consumer injects `searchPlaces` and `resolvePlace`, and without them the parts are plain fields.
 
 ---
 
@@ -19,10 +19,12 @@ The component makes **no network call and ships no API key**. The consumer injec
 
 <Canvas of={Stories.Detailed} />
 
-- **Country selector** (detailed mode only): searchable `F0Select` with flag avatars, built from the translated country list. The selected country is passed to `searchPlaces` so the provider can restrict its suggestions.
-- **Address field**: a combobox. It is the whole component in simple mode and the address line in detailed mode. Typing two or more characters searches; the suggestion list opens below, matching the field's width.
-- **Parts** (detailed mode only): the fields passed in `fields`, in a fixed order: address line 2, city, then state / region and postal code sharing a row.
-- **Label, hint, status message**: standard input chrome. In detailed mode the message is shown once, under the group.
+- **Country selector** (detailed mode only): searchable [F0Select](?path=/docs/components-select--documentation) with flag avatars, built from the translated country list. The selected country is passed to `searchPlaces` so the provider can restrict its suggestions.
+- **Address field**: a combobox. It is the whole component in simple mode and the address line in detailed mode. Typing two or more characters searches; the suggestion list opens below the field, matching its width.
+- **Parts** (detailed mode only): the fields passed in `fields`, in a fixed order: address line 2, then city and state / region on one row, then postal code.
+- **Status message**: standard input chrome. In detailed mode the message is shown once, under the group; in simple mode it sits under the field.
+
+Detailed mode renders no visible group title: each part carries its own label and the `label` prop names the group for assistive technology only.
 
 <Controls of={Stories.Detailed} />
 
@@ -48,6 +50,8 @@ The component makes **no network call and ships no API key**. The consumer injec
 #### Simple vs detailed
 
 Use **simple mode** when a picked suggestion is the whole job: search boxes, filters, quick "where" prompts. Use **detailed mode** whenever the user may need to correct a part, or when the address may not exist in the provider (new buildings, rural addresses, no autocomplete entitlement).
+
+<Canvas of={Stories.Default} />
 
 <DoDonts
   do={{
@@ -80,7 +84,7 @@ Use **simple mode** when a picked suggestion is the whole job: search boxes, fil
 <DoDonts
   do={{
     description:
-      "Label the group with what is being described and keep part labels short.",
+      "Name the group after what is being described and keep part labels short.",
     guidelines: [
       '"Office address" as the group label',
       '"Postal code" as the part label, or "ZIP code" when the form is US-only',
@@ -99,6 +103,8 @@ Use **simple mode** when a picked suggestion is the whole job: search boxes, fil
 ---
 
 ## Behavior
+
+What `F0LocationInput` guarantees whether it is controlled (`value`) or uncontrolled (`defaultValue`).
 
 ### Value model
 
@@ -119,9 +125,17 @@ Every `onChange` carries `meta`:
 
 Editing any part, including the country, drops `placeId`, `latitude`, `longitude` and `timezone` and emits `{ source: "typed", isResolved: false }`. The typed text is kept. Consumers that need coordinates for a typed address geocode it themselves.
 
+<Canvas of={Stories.Controlled} />
+
+### Picking a suggestion
+
+A pick shows the suggestion in the field right away but emits nothing until `resolvePlace` returns; the resolved value replaces the whole value, country included, with `{ source: "picked", isResolved: true }`. If `resolvePlace` is missing, rejects or returns nothing, the suggestion label is kept as the address line and the change is reported as typed.
+
 ### Country and search scope
 
-`searchPlaces(query, { country })` receives the value's country, else `defaultCountry`, else the single entry of `countries`. Changing the country clears the cached suggestions. Picking a suggestion from another country updates the country selector, because the resolved value replaces the whole value.
+`searchPlaces(query, { country })` receives the value's country, else `defaultCountry`, else the single entry of `countries`. Changing the country clears the cached suggestions.
+
+<Canvas of={Stories.RestrictedCountries} />
 
 ### Without a provider
 
@@ -137,28 +151,416 @@ The suggestion list portals into the surrounding centered or fullscreen `F0Dialo
 
 ---
 
-## Code
+## Props
 
-```tsx
-import {
-  F0LocationInput,
-  detailedLocationFields,
-} from "@factorialco/f0-react/experimental"
+### General
 
-;<F0LocationInput
-  label="Office address"
-  fields={detailedLocationFields}
-  countries={["es", "pt", "fr"]}
-  searchPlaces={(query, { country }) => places.autocomplete(query, country)}
-  resolvePlace={(id) => places.details(id)}
-  onChange={(value, meta) => {
-    setAddress(value)
-    if (value && !meta.isResolved) scheduleGeocode(value)
-  }}
-/>
-```
+<Unstyled>
+  <table>
+    <thead>
+      <tr>
+        <th>Prop</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>label</code>
+        </td>
+        <td>
+          <code>string</code>
+        </td>
+        <td>
+          Required. Visible label of the address field in simple mode; the
+          accessible name of the group in detailed mode.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>placeholder</code>
+        </td>
+        <td>
+          <code>string</code>
+        </td>
+        <td>
+          Placeholder of the address field. Defaults to a translated "Start
+          typing an address".
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>size</code>
+        </td>
+        <td>
+          <code>"sm" | "md"</code>
+        </td>
+        <td>
+          Height of every field in the group. Defaults to <code>"sm"</code>.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>name</code>
+        </td>
+        <td>
+          <code>string</code>
+        </td>
+        <td>
+          Form field name of the address input. Parts get{" "}
+          <code>{"`${name}.city`"}</code> and so on.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>autoFocus</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>Focuses the address field on mount.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
 
-<Canvas of={Stories.Controlled} />
+### Value
+
+<Unstyled>
+  <table>
+    <thead>
+      <tr>
+        <th>Prop</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>value</code>
+        </td>
+        <td>
+          <code>F0LocationInputValue</code>
+        </td>
+        <td>Controlled value. See the value model above.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>defaultValue</code>
+        </td>
+        <td>
+          <code>F0LocationInputValue</code>
+        </td>
+        <td>Initial value when uncontrolled.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>onChange</code>
+        </td>
+        <td>
+          <code>
+            {
+              "(value: F0LocationInputValue | undefined, meta: F0LocationInputChangeMeta) => void"
+            }
+          </code>
+        </td>
+        <td>
+          Fires on every edit, pick or clear. <code>meta.source</code> is{" "}
+          <code>"picked"</code> or <code>"typed"</code>;{" "}
+          <code>meta.isResolved</code> says whether the coordinates can be
+          trusted.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+### Fields and labels
+
+<Unstyled>
+  <table>
+    <thead>
+      <tr>
+        <th>Prop</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>fields</code>
+        </td>
+        <td>
+          <code>
+            {'("country" | "addressLine2" | "city" | "state" | "postalCode")[]'}
+          </code>
+        </td>
+        <td>
+          Omit for simple mode. Pass the parts to render below the address
+          field; the order is fixed by the component. Use{" "}
+          <code>detailedLocationFields</code> for the recommended set.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>partLabels</code>
+        </td>
+        <td>
+          <code>
+            {'Partial<Record<LocationField | "addressLine1", string>>'}
+          </code>
+        </td>
+        <td>
+          Overrides for the per-part labels, which default to translated copy
+          ("Country", "Address", "City", "State / region", "Postal code").
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>countries</code>
+        </td>
+        <td>
+          <code>CountryCode[]</code>
+        </td>
+        <td>
+          Restricts the country selector. With exactly one entry it also scopes
+          the search in simple mode.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>defaultCountry</code>
+        </td>
+        <td>
+          <code>CountryCode</code>
+        </td>
+        <td>Country used to scope the search while the value has none.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+### Search
+
+<Unstyled>
+  <table>
+    <thead>
+      <tr>
+        <th>Prop</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>searchPlaces</code>
+        </td>
+        <td>
+          <code>
+            {
+              "(query: string, context: { country?: CountryCode }) => Promise<F0LocationSuggestion[]>"
+            }
+          </code>
+        </td>
+        <td>
+          Suggestion provider, called after a 250 ms debounce once the query has
+          two characters. Results are shown as returned, never filtered. Omit it
+          and the parts are plain fields.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>resolvePlace</code>
+        </td>
+        <td>
+          <code>
+            {"(id: string) => Promise<F0LocationInputValue | undefined>"}
+          </code>
+        </td>
+        <td>
+          Turns a picked suggestion into a full value. Its result replaces the
+          whole value and is reported as <code>picked</code>.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+### State
+
+<Unstyled>
+  <table>
+    <thead>
+      <tr>
+        <th>Prop</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>status</code>
+        </td>
+        <td>
+          <code>{`{ type: "default" | "warning" | "info" | "error"; message?: string }`}</code>
+        </td>
+        <td>
+          Colours the address field and renders the message once, under the
+          field or the group.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>hint</code>
+        </td>
+        <td>
+          <code>string</code>
+        </td>
+        <td>Shortcut for a default-type status message.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>error</code>
+        </td>
+        <td>
+          <code>string | boolean</code>
+        </td>
+        <td>
+          Shortcut for an error-type status; a string is used as the message.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>disabled</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>Blocks editing on every part and closes the suggestion list.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>readonly</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          Keeps the value visible and focusable but blocks edits and search.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>loading</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          Shows the spinner in the address field. The component also shows it on
+          its own while a pick resolves.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>clearable</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          Renders the clear button in the address field; clearing empties every
+          part and emits <code>undefined</code>.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>required</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>Renders the required marker next to the address label.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+### Label
+
+<Unstyled>
+  <table>
+    <thead>
+      <tr>
+        <th>Prop</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>hideLabel</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          Simple mode only: hides the visible label while keeping it as the
+          accessible name.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>labelIcon</code>
+        </td>
+        <td>
+          <code>IconType</code>
+        </td>
+        <td>Simple mode only: icon rendered before the label.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+### Events
+
+<Unstyled>
+  <table>
+    <thead>
+      <tr>
+        <th>Prop</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>onFocus</code>
+        </td>
+        <td>
+          <code>{"() => void"}</code>
+        </td>
+        <td>Address field gained focus.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>onBlur</code>
+        </td>
+        <td>
+          <code>{"() => void"}</code>
+        </td>
+        <td>Address field lost focus. The suggestion list closes first.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
 
 ---
 
@@ -178,5 +580,5 @@ import {
 
 - The address field has `role="combobox"`, `aria-autocomplete="list"` and `aria-expanded`. While the list is open it points at it with `aria-controls` and at the active row with `aria-activedescendant`; focus never leaves the input.
 - Suggestions are `role="option"` rows with `aria-selected`; the loading and empty rows are `role="status"`.
-- In detailed mode the parts are grouped in a `fieldset` whose `legend` is the `label`, so each part is announced within its group. The group message is linked once, under the parts.
+- In detailed mode the parts are grouped in a `fieldset` named by `label` through `aria-label`, so each part is announced within its group without a visible title.
 - Without `searchPlaces` the field drops the combobox role and is announced as a plain text field.

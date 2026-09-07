@@ -19,9 +19,9 @@ type Props = {
 }
 
 /**
- * The plain text parts below the address field. City gets its own row; state
- * and postal code share one, the way every address form the user has seen
- * lays them out.
+ * The plain text parts below the address field. City and state / region share
+ * a row; the postal code sits alone below them so it never fights a long
+ * region name for width.
  */
 export const AddressParts = ({
   fields,
@@ -46,14 +46,11 @@ export const AddressParts = ({
     />
   )
 
-  const rowParts = (["state", "postalCode"] as const).filter((key) =>
-    fields.has(key)
-  )
+  const rowParts = (["city", "state"] as const).filter((key) => fields.has(key))
 
   return (
     <>
       {fields.has("addressLine2") && part("addressLine2")}
-      {fields.has("city") && part("city")}
       {rowParts.length > 0 && (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {rowParts.map((key) => (
@@ -66,6 +63,7 @@ export const AddressParts = ({
           ))}
         </div>
       )}
+      {fields.has("postalCode") && part("postalCode")}
     </>
   )
 }
