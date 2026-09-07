@@ -313,6 +313,45 @@ describe("CardCollection", () => {
     })
   })
 
+  describe("entry animation", () => {
+    it("renders the cards in place, without a mount animation on the grid cells", async () => {
+      zeroRender(
+        <CardCollection<
+          Person,
+          FiltersDefinition,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          NavigationFiltersDefinition,
+          GroupingDefinition<Person>
+        >
+          title={(item) => item.name}
+          cardProperties={testCardProperties}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+          source={createTestSource()}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      // The grid cell around each card used to be a motion element that
+      // dropped in from the top (opacity 0 -> 1, y -10 -> 0). An entry
+      // animation has to drive those two properties inline, so a cell with
+      // neither is a cell that appeared in place.
+      const grid = document.querySelector(".grid-cols-1")
+      const cells = Array.from(grid?.children ?? []) as HTMLElement[]
+      expect(cells).toHaveLength(testData.length)
+      cells.forEach((cell) => {
+        expect(cell.style.opacity).toBe("")
+        expect(cell.style.transform).toBe("")
+      })
+    })
+  })
+
   describe("pagination behavior", () => {
     it("adjusts perPage to be a multiple of 2, 3, and 4", async () => {
       const largeDataSet = Array.from({ length: 50 }, (_, i) => ({
