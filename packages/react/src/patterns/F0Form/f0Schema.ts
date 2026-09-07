@@ -7,6 +7,10 @@ import type {
 } from "@/components/F0DurationInput/types"
 import type { InputFieldStatus } from "@/components/F0InputField/types"
 import {
+  isLocationValueEmpty,
+  isResolvedValue,
+} from "@/experimental/Forms/F0LocationInput/lib/format"
+import {
   isPossiblePhoneValue,
   isValidPhoneValue,
 } from "@/experimental/Forms/F0PhoneInput/lib/phone"
@@ -26,6 +30,10 @@ import type {
   F0EntitiesListOptions,
 } from "./fields/entitiesList/types"
 import type { F0FileConfig } from "./fields/file/types"
+import type {
+  F0LocationConfig,
+  F0LocationInputValue,
+} from "./fields/location/types"
 import type { F0NumberConfig } from "./fields/number/types"
 import type { F0PeriodConfig } from "./fields/period/types"
 import type { F0PhoneConfig } from "./fields/phone/types"
@@ -99,6 +107,7 @@ export type F0FieldType =
   | "daterange"
   | "period"
   | "phone"
+  | "location"
   | "richtext"
   | "file"
   | "cardSelect"
@@ -227,6 +236,7 @@ export type {
   F0TimeConfig,
   F0DateRangeConfig,
   F0PeriodConfig,
+  F0LocationConfig,
   F0PhoneConfig,
   F0RichTextConfig,
   F0CustomConfig,
@@ -486,6 +496,14 @@ export type F0PhoneFieldConfig = F0BaseConfig &
   }
 
 /**
+ * Config for location fields (form value is a structured address object)
+ */
+export type F0LocationFieldConfig = F0BaseConfig &
+  F0LocationConfig & {
+    fieldType: "location"
+  }
+
+/**
  * Config for file fields (single file upload, form value is a string identifier)
  */
 export type F0StringFileConfig = F0BaseConfig &
@@ -518,7 +536,7 @@ export type F0EntitiesListFieldConfig = F0BaseConfig &
   }
 
 /**
- * Config for object fields (richtext, daterange, phone, or custom)
+ * Config for object fields (richtext, daterange, phone, location, or custom)
  *
  * @typeParam TValue - Type of the field value (for custom fields)
  * @typeParam TConfig - Type of the custom configuration object (for custom fields)
@@ -527,6 +545,7 @@ export type F0ObjectConfig<TValue = unknown, TConfig = undefined> =
   | F0RichTextFieldConfig
   | F0DateRangeFieldConfig
   | F0PhoneFieldConfig
+  | F0LocationFieldConfig
   | F0CustomFieldConfig<TValue, TConfig>
 
 /**
@@ -1361,6 +1380,109 @@ export namespace f0FormField {
     return f0FormField(
       finalSchema as never,
       { ...config, fieldType: "phone" } as never
+    )
+  }
+
+  // ---- location ------------------------------------------------------------
+
+  export type LocationObjectSchema = z.ZodEffects<
+    z.ZodObject<{
+      formatted: z.ZodOptional<z.ZodString>
+      addressLine1: z.ZodOptional<z.ZodString>
+      addressLine2: z.ZodOptional<z.ZodString>
+      city: z.ZodOptional<z.ZodString>
+      state: z.ZodOptional<z.ZodString>
+      postalCode: z.ZodOptional<z.ZodString>
+      country: z.ZodOptional<z.ZodString>
+      placeId: z.ZodOptional<z.ZodString>
+      latitude: z.ZodOptional<z.ZodNumber>
+      longitude: z.ZodOptional<z.ZodNumber>
+      timezone: z.ZodOptional<z.ZodString>
+    }>
+  >
+  export type LocationFieldShortcutConfig = Omit<
+    F0LocationFieldConfig,
+    "fieldType"
+  > & {
+    optional?: boolean
+    /**
+     * Requires a value picked from the suggestions, i.e. one that still
+     * carries a place id and coordinates. Use it when the address feeds a
+     * map or a geofence; a typed address has no coordinates until the
+     * consumer geocodes it. Only satisfiable with `searchPlaces` and
+     * `resolvePlace`, and without `manualEntry`, since nothing else produces
+     * a resolved value.
+     * @default false
+     */
+    requireResolved?: boolean
+    /** Message shown when the field is empty and required */
+    emptyMessage?: string
+    /** Message shown when `requireResolved` is not satisfied */
+    unresolvedMessage?: string
+  }
+
+  export function location(
+    config: LocationFieldShortcutConfig & { optional: true }
+  ): z.ZodOptional<LocationObjectSchema> &
+    F0ZodType<z.ZodOptional<LocationObjectSchema>>
+  export function location(
+    config: LocationFieldShortcutConfig & { optional?: false }
+  ): LocationObjectSchema & F0ZodType<LocationObjectSchema>
+  export function location({
+    optional,
+    requireResolved = false,
+    emptyMessage,
+    unresolvedMessage,
+    ...config
+  }: LocationFieldShortcutConfig) {
+    const schema = z
+      .object({
+        formatted: z.string().optional(),
+        addressLine1: z.string().optional(),
+        addressLine2: z.string().optional(),
+        city: z.string().optional(),
+        state: z.string().optional(),
+        postalCode: z.string().optional(),
+        // Kept as a plain string: the ISO-2 union lives in the component, and
+        // a stored value from an older list must still parse
+        country: z.string().optional(),
+        placeId: z.string().optional(),
+        latitude: z.number().optional(),
+        longitude: z.number().optional(),
+        timezone: z.string().optional(),
+      })
+      // The refinement has to see `undefined` too: the component emits it for
+      // an empty value, and an object schema rejects that with the generic
+      // invalid_type before any refinement runs, so the location messages and
+      // a consumer's `emptyMessage` would never be the ones the user reads
+      .optional()
+      .superRefine((value, ctx) => {
+        const isEmpty = isLocationValueEmpty(value as F0LocationInputValue)
+        if (isEmpty) {
+          if (optional) {
+            return
+          }
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            params: { type: "location", reason: "empty" },
+            ...(emptyMessage ? { message: emptyMessage } : {}),
+          })
+          return
+        }
+        if (
+          requireResolved &&
+          !isResolvedValue(value as F0LocationInputValue)
+        ) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            params: { type: "location", reason: "unresolved" },
+            ...(unresolvedMessage ? { message: unresolvedMessage } : {}),
+          })
+        }
+      })
+    return f0FormField(
+      schema as never,
+      { ...config, fieldType: "location" } as never
     )
   }
 
