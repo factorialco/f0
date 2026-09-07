@@ -206,7 +206,8 @@ const collectSubtreeIds = <R extends RecordType>(
       frontier.push(id)
     }
   }
-  // The array iterator sees ids pushed during the loop, so this is a BFS.
+  // Children are pushed to `frontier` while it is iterated, so the walk visits
+  // the tree level by level.
   for (const parentId of frontier) {
     for (const childId of childrenByParent.get(parentId) ?? []) {
       if (collected.has(childId)) {
