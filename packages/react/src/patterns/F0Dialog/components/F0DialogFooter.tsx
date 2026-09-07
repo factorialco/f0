@@ -56,7 +56,10 @@ export const F0DialogFooter = ({
     return (
       <F0Button
         label={primaryAction.label}
-        onClick={primaryAction.onClick}
+        // Spread rather than passed: the button's `href` is one arm of a union,
+        // so an `undefined` one is not the same as none at all.
+        {...(primaryAction.href ? { href: primaryAction.href } : {})}
+        {...(primaryAction.onClick ? { onClick: primaryAction.onClick } : {})}
         variant="default"
         icon={primaryAction.icon}
         iconPosition={primaryAction.iconPosition}
@@ -91,7 +94,12 @@ export const F0DialogFooter = ({
     return (
       <F0Button
         label={secondaryAction.label}
-        onClick={secondaryAction.onClick}
+        // Spread rather than passed: the button's `href` is one arm of a union,
+        // so an `undefined` one is not the same as none at all.
+        {...(secondaryAction.href ? { href: secondaryAction.href } : {})}
+        {...(secondaryAction.onClick
+          ? { onClick: secondaryAction.onClick }
+          : {})}
         variant="outline"
         icon={secondaryAction.icon}
         iconPosition={secondaryAction.iconPosition}
