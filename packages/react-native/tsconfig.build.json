@@ -1,9 +1,0 @@
-{
-  "extends": "./tsconfig.json",
-  "exclude": ["playground", "lib", "package", "**/*.spec.tsx", "**/*.test.tsx", "**/*.spec.ts", "**/*.test.ts", "**/__tests__/**"],
-  "compilerOptions": {
-    "noEmit": false,
-    "rootDir": "src",
-    "outDir": "lib/typescript"
-  }
-}
