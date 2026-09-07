@@ -278,6 +278,23 @@ function configToF0Field(
         renderIf: config.renderIf,
       } as F0Field
 
+    case "location":
+      return {
+        ...baseProps,
+        type: "location",
+        fields: "fields" in config ? config.fields : undefined,
+        partLabels: "partLabels" in config ? config.partLabels : undefined,
+        countries: "countries" in config ? config.countries : undefined,
+        defaultCountry:
+          "defaultCountry" in config ? config.defaultCountry : undefined,
+        searchPlaces:
+          "searchPlaces" in config ? config.searchPlaces : undefined,
+        resolvePlace:
+          "resolvePlace" in config ? config.resolvePlace : undefined,
+        clearable,
+        renderIf: config.renderIf,
+      } as F0Field
+
     case "richtext":
       return {
         ...baseProps,

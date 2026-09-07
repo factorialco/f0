@@ -164,6 +164,7 @@ export type FieldType =
   | "daterange"
   | "period"
   | "phone"
+  | "location"
   | "richtext"
   | "file"
   | "cardSelect"
@@ -203,6 +204,11 @@ export type {
   F0PhoneField,
   F0PhoneInputValue,
 } from "./phone/types"
+export type {
+  F0LocationConfig,
+  F0LocationField,
+  F0LocationInputValue,
+} from "./location/types"
 export type {
   F0RichTextConfig,
   F0RichTextField,
@@ -247,6 +253,7 @@ import type { F0DurationField } from "./duration/types"
 import type { F0FileField } from "./file/types"
 import type { F0NumberField } from "./number/types"
 import type { F0PeriodField } from "./period/types"
+import type { F0LocationField } from "./location/types"
 import type { F0PhoneField } from "./phone/types"
 import type { F0RichTextField } from "./richtext/types"
 import type { F0SelectField } from "./select/types"
@@ -273,6 +280,7 @@ export type F0Field =
   | F0DateRangeField
   | F0PeriodField
   | F0PhoneField
+  | F0LocationField
   | F0RichTextField
   | F0FileField
   | F0CardSelectField

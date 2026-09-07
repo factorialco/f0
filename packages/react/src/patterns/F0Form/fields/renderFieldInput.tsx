@@ -17,6 +17,7 @@ import { EntitiesListFieldRenderer } from "./entitiesList/EntitiesListFieldRende
 import { FileFieldRenderer } from "./file/FileFieldRenderer"
 import { NumberFieldRenderer } from "./number/NumberFieldRenderer"
 import { PeriodFieldRenderer } from "./period/PeriodFieldRenderer"
+import { LocationFieldRenderer } from "./location/LocationFieldRenderer"
 import { PhoneFieldRenderer } from "./phone/PhoneFieldRenderer"
 import { RichTextFieldRenderer } from "./richtext/RichTextFieldRenderer"
 import { SelectFieldRenderer } from "./select/SelectFieldRenderer"
@@ -207,6 +208,15 @@ export function renderFieldInput({
     case "phone":
       return (
         <PhoneFieldRenderer
+          field={{ ...field, disabled: isDisabled }}
+          formField={formField}
+          {...errorAndLoadingProps}
+          status={visualStatus}
+        />
+      )
+    case "location":
+      return (
+        <LocationFieldRenderer
           field={{ ...field, disabled: isDisabled }}
           formField={formField}
           {...errorAndLoadingProps}
