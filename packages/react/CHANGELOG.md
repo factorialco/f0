@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.88.1](https://github.com/factorialco/f0/compare/f0-react-v6.88.0...f0-react-v6.88.1) (2026-09-07)
+
+
+### Performance Improvements
+
+* **OneDataCollection:** stop a page append re-rendering every row already on screen ([#5378](https://github.com/factorialco/f0/issues/5378)) ([bae8238](https://github.com/factorialco/f0/commit/bae8238f65d3106ebfebabfe7d7a054dabdb1f51))
+
 ## [6.88.0](https://github.com/factorialco/f0/compare/f0-react-v6.87.1...f0-react-v6.88.0) (2026-09-07)
 
 
