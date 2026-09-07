@@ -174,7 +174,8 @@ export type InputFieldProps<T> = {
   name?: string
   onClickPlaceholder?: () => void
   onClickChildren?: () => void
-  onClickContent?: () => void
+  /** Receives the click, so a caller can tell where inside the field it landed. */
+  onClickContent?: (event: React.MouseEvent<Element>) => void
   value?: T | undefined
   onChange?: (value: T) => void
   size?: InputFieldSize
@@ -361,9 +362,9 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
       props.onClear?.()
     }
 
-    const handleClickContent = () => {
+    const handleClickContent = (event: React.MouseEvent<Element>) => {
       if (!disabled) {
-        onClickContent?.()
+        onClickContent?.(event)
       }
     }
 

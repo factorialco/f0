@@ -2441,8 +2441,8 @@ describe("Select", () => {
       await user.type(trigger, "Option")
       await settleList()
 
-      // The field no longer toggles on click, so the arrow is the pointer way
-      // out of an open list.
+      // Clicking the field moves the caret; clicking its arrow is what closes
+      // the list, through the field's own handler rather than a second button.
       await user.click(screen.getByTestId("select-arrow"))
 
       await waitFor(() =>

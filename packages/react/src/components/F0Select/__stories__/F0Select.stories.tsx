@@ -1407,25 +1407,47 @@ export const SearchInTheTrigger: Story = {
     const body = within(canvasElement.ownerDocument.body)
 
     const trigger = canvas.getByRole("combobox")
-    await expect(trigger).toHaveAccessibleDescription("Dark")
+
+    // The selection resolves asynchronously, and it is drawn beside the caret
+    // rather than being the field's own text, so this is how it is announced.
+    await waitFor(async () =>
+      expect(trigger).toHaveAccessibleDescription("Dark")
+    )
 
     await userEvent.type(trigger, "Light")
+
+    await waitFor(async () =>
+      expect(trigger).toHaveAttribute("aria-expanded", "true")
+    )
 
     // The open dropdown aria-hides the rest of the page. The field being typed
     // into has to survive that, or a screen reader loses it mid-word.
     await waitFor(async () => expect(body.getByRole("combobox")).toBe(trigger))
-    await waitFor(async () =>
-      expect(body.getByRole("option", { name: /Light/ })).toBeInTheDocument()
+
+    /**
+     * Generous waits: the query is debounced, the dropdown's own open is
+     * debounced after that, and the list is virtualized, so the filtered rows
+     * are several beats behind the last keystroke.
+     */
+    await waitFor(
+      async () => {
+        const options = body.getAllByRole("option")
+        expect(options).toHaveLength(1)
+        expect(options[0]).toHaveTextContent("Light")
+      },
+      { timeout: 5000 }
     )
 
     // The field never commits a row on the user's behalf: the keys make one
     // active, and the option takes the Enter that selects it.
     await userEvent.keyboard("{ArrowDown}")
-    await waitFor(async () =>
-      expect(canvasElement.ownerDocument.activeElement).toHaveAttribute(
-        "role",
-        "option"
-      )
+    await waitFor(
+      async () =>
+        expect(canvasElement.ownerDocument.activeElement).toHaveAttribute(
+          "role",
+          "option"
+        ),
+      { timeout: 5000 }
     )
   },
 }

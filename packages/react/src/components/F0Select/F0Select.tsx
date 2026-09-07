@@ -1594,10 +1594,24 @@ const F0SelectComponent = forwardRef(function Select<
               // native submit would post that instead of the selection (the
               // hidden input below carries it).
               name={inlineSearch ? undefined : name}
-              onClickContent={() => {
-                // Clicking into the field to move the caret must not close the
-                // list. The arrow is what closes it (see `Arrow.onChange`).
+              onClickContent={(event) => {
                 if (inlineSearch) {
+                  /**
+                   * Clicking into the field to move the caret must not close
+                   * the list, so only a click that landed on the arrow toggles
+                   * it. The arrow stays a glyph rather than a button: a second
+                   * real target inside a 32px field is a target-size
+                   * violation, and the field already carries the name and the
+                   * expanded state.
+                   */
+                  const onArrow = !!(event.target as HTMLElement).closest?.(
+                    '[data-testid="select-arrow"]'
+                  )
+                  if (onArrow) {
+                    handleChangeOpenLocal(!openLocal)
+                    focusSearchInput()
+                    return
+                  }
                   if (!openLocal) handleChangeOpenLocal(true)
                   focusSearchInput()
                   return
@@ -1609,13 +1623,6 @@ const F0SelectComponent = forwardRef(function Select<
                   open={openLocal}
                   disabled={disabled}
                   size={effectiveSize}
-                  // The field no longer toggles when it is typed into, so the
-                  // arrow is what closes the list again.
-                  onChange={
-                    inlineSearch
-                      ? (next) => handleChangeOpenLocal(next)
-                      : undefined
-                  }
                 />
               }
             >
