@@ -30284,7 +30284,13 @@ const N2 = 250, Z2 = 2, K2 = ({ searchPlaces: a, country: C, enabled: f }) => {
   ].filter((w) => !!w);
   return B.length ? B.join(", ") : void 0;
 }, L2 = (a) => {
-  const { placeId: C, latitude: f, longitude: B, timezone: w, ...k } = a;
+  const {
+    placeId: C,
+    latitude: f,
+    longitude: B,
+    timezone: w,
+    ...k
+  } = a;
   return k;
 }, X2 = (a) => !!a && !!a.placeId && typeof a.latitude == "number" && typeof a.longitude == "number", q2 = ({
   value: a,
@@ -35975,7 +35981,7 @@ const Rd = (a, C) => {
     });
     U.observe(k), f.current = U;
   }, []), shouldMount: a };
-}, Md = "w-[24rem] max-w-full", GP = "w-[32rem] max-w-full", EP = "gap-0.5", TP = "pointer-events-none absolute inset-x-0 bottom-0 h-[46%] bg-[linear-gradient(to_top,rgba(0,0,0,0.5),rgba(0,0,0,0.18)_45%,transparent)]", NP = "bg-[hsl(222_31%_11%)]", ZP = "bg-[hsl(220_39%_6%/0.72)]", KP = "bg-[hsl(220_39%_6%/0.6)]", WP = "bg-[hsl(220_39%_6%/0.55)]", YP = () => import("./LocationMap-CUIlQmtO.js"), zP = vs(YP), HP = 3 / 2, OP = ({ latitude: a, longitude: C }) => `https://www.google.com/maps?q=${a},${C}`, bU = ({
+}, Md = "w-[24rem] max-w-full", GP = "w-[32rem] max-w-full", EP = "gap-0.5", TP = "pointer-events-none absolute inset-x-0 bottom-0 h-[46%] bg-[linear-gradient(to_top,rgba(0,0,0,0.5),rgba(0,0,0,0.18)_45%,transparent)]", NP = "bg-[hsl(222_31%_11%)]", ZP = "bg-[hsl(220_39%_6%/0.72)]", KP = "bg-[hsl(220_39%_6%/0.6)]", WP = "bg-[hsl(220_39%_6%/0.55)]", YP = () => import("./LocationMap-E0SnBn5h.js"), zP = vs(YP), HP = 3 / 2, OP = ({ latitude: a, longitude: C }) => `https://www.google.com/maps?q=${a},${C}`, bU = ({
   location: a,
   cornerClass: C = "rounded-xl",
   surfaceClassName: f,
