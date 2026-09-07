@@ -361,15 +361,43 @@ describe("F0AiCallout", () => {
       expect(screen.queryByRole("button", { name: "Close" })).toBeNull()
     })
 
-    it("warns and renders no card when findings is empty", () => {
+    it("warns and renders nothing at all when findings is empty", () => {
       const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
 
-      render(<F0AiCallout {...stackedProps} findings={[]} />)
+      const { container } = render(
+        <F0AiCallout {...stackedProps} findings={[]} />
+      )
 
       expect(warn).toHaveBeenCalledWith(
         expect.stringContaining("F0AiCallout: `findings` is empty")
       )
-      expect(screen.queryAllByRole("button")).toHaveLength(0)
+      // Not just "no buttons": the shell must not render either, or a critical
+      // pill reading like a verdict lands on the page with nothing under it —
+      // and a live region announces it.
+      expect(container).toBeEmptyDOMElement()
+      expect(screen.queryByRole("status")).toBeNull()
+    })
+
+    it("warns once per violation, not once per render", () => {
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+
+      const { rerender } = render(
+        <F0AiCallout status="neutral" title="Summary">
+          A device history.
+        </F0AiCallout>
+      )
+
+      const afterMount = warn.mock.calls.length
+
+      for (let i = 0; i < 5; i++) {
+        rerender(
+          <F0AiCallout status="neutral" title="Summary">
+            A device history.
+          </F0AiCallout>
+        )
+      }
+
+      expect(warn.mock.calls.length).toBe(afterMount)
     })
 
     it("lets the caller drive the state", async () => {

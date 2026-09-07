@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "motion/react"
-import { forwardRef, useState } from "react"
+import { forwardRef, useEffect, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
@@ -191,26 +191,47 @@ export const AiCalloutInternal = forwardRef<HTMLDivElement, F0AiCalloutProps>(
             ]
     const headerIcon = icon ?? statusIcons[status]
 
-    // The rule that keeps `neutral` and `info` apart, enforced where it is used
-    // rather than left in a doc: if there is something to do, the callout is not
-    // neutral. Without this the two rungs collapse into "grey or blue" and
-    // whichever feels calmer wins.
-    if (status === "neutral" && (action || secondaryAction)) {
-      console.warn(
-        "F0AiCallout: `neutral` means there is nothing to do, so it cannot carry an action. A callout that offers a move with nothing wrong is `info`."
-      )
-    }
+    // Development-only, and in an effect rather than in the render body: a
+    // console.warn during render fires again on every re-render, so a single
+    // violation turns into a stream. The deps are the *presence* of an action
+    // and of a headline rather than the objects themselves — products pass
+    // those inline, so a new identity every render would re-log exactly what
+    // the effect is here to stop.
+    const hasAction = Boolean(action || secondaryAction)
+    const hasHeadline = Boolean(headline)
 
-    if (status === "neutral" && !icon) {
-      console.warn(
-        "F0AiCallout: `neutral` carries no semantic glyph, so it needs an `icon` that describes the content (e.g. `Summary` from @/icons/ai)."
-      )
-    }
+    useEffect(() => {
+      if (process.env.NODE_ENV === "production") return
 
-    if (stacked && !headline) {
-      console.warn(
-        "F0AiCallout: `findings` is empty. A callout titled like a verdict with nothing under it tells the reader something is wrong and not what — render nothing instead."
-      )
+      // The `neutral`/`info` line is enforced here rather than left in a doc:
+      // if there is something to do, the callout is not neutral. Without this
+      // the two rungs collapse into "grey or blue" and whichever feels calmer
+      // wins.
+      if (status === "neutral" && hasAction) {
+        console.warn(
+          "F0AiCallout: `neutral` means there is nothing to do, so it cannot carry an action. A callout that offers a move with nothing wrong is `info`."
+        )
+      }
+
+      if (status === "neutral" && !icon) {
+        console.warn(
+          "F0AiCallout: `neutral` carries no semantic glyph, so it needs an `icon` that describes the content (e.g. `Summary` from @/icons/ai)."
+        )
+      }
+
+      if (stacked && !hasHeadline) {
+        console.warn(
+          "F0AiCallout: `findings` is empty. A callout titled like a verdict with nothing under it tells the reader something is wrong and not what — rendering nothing instead."
+        )
+      }
+    }, [status, hasAction, icon, stacked, hasHeadline])
+
+    // And actually render nothing, which the warning above promises. The header
+    // and shell are built unconditionally below, so without this an empty
+    // `findings` array puts a critical pill on the page reading like a verdict
+    // with no content under it.
+    if (stacked && !hasHeadline) {
+      return null
     }
 
     const header = (
