@@ -36,3 +36,16 @@ export const useF0Dialog = () => {
   const context = useContext(F0DialogContext)
   return context
 }
+
+/**
+ * Portal target for floating layers opened from inside a dialog. Centered and
+ * fullscreen dialogs trap focus, so a layer portalled to `body` would be
+ * unreachable and any click on it would read as a click outside; side panels
+ * render in `body` on purpose to avoid clipping. Returns `undefined` outside
+ * a dialog, which lets Radix fall back to `document.body`.
+ */
+export const useDialogPortalContainer = (): HTMLElement | undefined => {
+  const { portalContainer, position } = useContext(F0DialogContext)
+  const isFocusTrapped = position === "center" || position === "fullscreen"
+  return isFocusTrapped && portalContainer ? portalContainer : undefined
+}

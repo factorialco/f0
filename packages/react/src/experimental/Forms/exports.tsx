@@ -6,5 +6,6 @@ export * from "../../components/CardSelectable"
  * @deprecated EntitySelect has moved to @/deprecated/EntitySelect. Import from there instead.
  */
 export * from "../../deprecated/EntitySelect/exports"
+export * from "./F0LocationInput"
 export * from "./F0PhoneInput"
 export * from "./Fields/exports"
