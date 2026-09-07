@@ -4,6 +4,7 @@ import { F0AnalyticsDashboard as _F0AnalyticsDashboard } from "./F0AnalyticsDash
 
 export type {
   BarChartConfig,
+  DashboardCategoryComparison,
   DashboardChartConfig,
   DashboardChartData,
   DashboardChartItem,
@@ -15,6 +16,8 @@ export type {
   DashboardItemFiltersState,
   DashboardMetricData,
   DashboardMetricItem,
+  DashboardMetricTrend,
+  DashboardRowTrends,
   F0AnalyticsDashboardAskAiTarget,
   F0AnalyticsDashboardAskAiTargetWithQuote,
   F0AnalyticsDashboardPointClick,

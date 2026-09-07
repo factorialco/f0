@@ -1,3 +1,5 @@
+import type { ReactNode } from "react"
+
 import type {
   ChartColorToken,
   F0DataChartBarSeries,
@@ -47,6 +49,12 @@ interface ChartConfigBase {
   tooltipValueFormatter?: (value: number) => string
   /** Format category axis tick labels */
   categoryFormatter?: (value: string) => string
+  /**
+   * Names of the series carrying a comparison baseline — drawn faded, and
+   * dashed on a line chart. Matched after any chart-type transform, so a
+   * series the transform renamed or collapsed is not muted.
+   */
+  comparisonSeriesNames?: string[]
 }
 
 export interface BarChartConfig extends ChartConfigBase {
@@ -212,6 +220,61 @@ export type DashboardChartConfig =
   | ScatterChartConfig
 
 // ---------------------------------------------------------------------------
+// Trends — a comparison the host computed, rendered verbatim by every widget
+// ---------------------------------------------------------------------------
+
+/**
+ * A trend the host computed itself, for a change that is not a percentage of
+ * `previousValue` — percentage points, a target comparison, a rounding.
+ */
+export interface DashboardMetricTrend {
+  /** `flat` renders neutrally, without an arrow. */
+  direction: "up" | "down" | "flat"
+  /** Rendered verbatim ("+1.2 pp"); empty falls back to `previousValue`. */
+  label: string
+  /**
+   * The change as a number in the measure's own unit, for what draws or ranks
+   * it: a chart's change view sizes its bars by it, and the tooltip states the
+   * baseline (value − delta) beside the label. Without it the change view can
+   * only list categories by their label text, ordered by that text.
+   */
+  delta?: number
+  /**
+   * Whether the change is good news, for the measures where that does not
+   * follow its sign — attrition falling is positive. It decides the colour,
+   * `direction` still decides the arrow. Omitted, the colour follows the
+   * direction as before.
+   */
+  sentiment?: "positive" | "negative" | "neutral"
+}
+
+/**
+ * Per-category comparison for a chart whose categories are things rather than
+ * moments — bar, pie, funnel. Time series show their baseline as a faded
+ * series instead (see {@link BarChartConfig.comparisonSeriesNames}) and read
+ * their overall direction off {@link DashboardChartData.trend}.
+ */
+export interface DashboardCategoryComparison {
+  /** Keyed by the category label, as it appears in `categories` or a point's `name`. */
+  byCategory: Record<string, DashboardMetricTrend>
+  /** Categories the compared period did not have. Their tooltip says so; the change view pins them first. */
+  added?: string[]
+  /**
+   * Categories the compared period had and this one does not. Nothing draws
+   * them, so they show only as a count in the header chip and as the last
+   * rows of the change view.
+   */
+  removed?: string[]
+}
+
+/**
+ * Per-row trends for a collection item, keyed the way the collection itself
+ * identifies rows: its source's `idProvider` when it has one, otherwise the
+ * record's `id`.
+ */
+export type DashboardRowTrends = Record<string, DashboardMetricTrend>
+
+// ---------------------------------------------------------------------------
 // Chart data — the shape returned by a chart item's fetchData
 // ---------------------------------------------------------------------------
 
@@ -240,6 +303,19 @@ export interface DashboardChartData {
    * can never confuse it with a bar/line series array or the heatmap grid.
    */
   scatterSeries?: F0DataChartScatterSeries[]
+  /**
+   * How the chart as a whole compares to the compared period. Rendered as a
+   * badge beside the widget title, the same one a metric shows.
+   */
+  trend?: DashboardMetricTrend
+  /** What `trend` compares against, e.g. "vs previous month". Tooltip + screen reader. */
+  comparisonLabel?: string
+  /**
+   * Per-category comparison for bar/pie/funnel charts: a line in each
+   * category's tooltip, a summary chip beside `trend`, and a "Show change"
+   * view in the widget menu. Labels stay as they are.
+   */
+  categoryComparison?: DashboardCategoryComparison
 }
 
 // ---------------------------------------------------------------------------
@@ -342,6 +418,10 @@ export interface DashboardMetricData {
   value: number
   /** Optional previous value — used to compute a trend indicator */
   previousValue?: number
+  /** Takes precedence over the trend derived from `previousValue`. */
+  trend?: DashboardMetricTrend
+  /** What the trend compares against, e.g. "vs previous month". Tooltip + screen reader. */
+  comparisonLabel?: string
 }
 
 /**
@@ -399,6 +479,14 @@ export interface DashboardCollectionItem<
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   visualizations: ReadonlyArray<any>
+  /**
+   * Per-row comparison, appended as a "Change" column. A chart's trends ride
+   * in its `fetchData` result because that fetch owns its data; a collection's
+   * ride here because its source owns its rows.
+   */
+  rowTrends?: DashboardRowTrends
+  /** Sorting key of `createSource` that orders rows by their change; the column sorts only when the source can. */
+  rowTrendsSorting?: string
 }
 
 // ---------------------------------------------------------------------------
@@ -643,4 +731,14 @@ export interface F0AnalyticsDashboardProps<
    * Rendered above the grid alongside the regular filter bar.
    */
   navigationFilters?: NavigationFiltersDefinition
+  /** Host controls in the header row, left of the navigation filters. */
+  navigationActions?: ReactNode
+  /**
+   * Changes when the host wants widgets to refetch with the same filters. The
+   * grid is not remounted: metric and chart items re-run `fetchData` in place,
+   * keeping what is on screen visible but dimmed until the result arrives. A
+   * collection item instead re-creates its data source, which owns the fetch,
+   * so its page, sort and selection reset.
+   */
+  dataKey?: string
 }

@@ -180,7 +180,10 @@ const defaultFetchDataAndUpdateOptions = <
   options: O
 ): O => options
 
-const defaultIdProvider = (item: RecordType, index?: number): string | number =>
+export const defaultIdProvider = (
+  item: RecordType,
+  index?: number
+): string | number =>
   "id" in item ? `${item.id}` : index || JSON.stringify(item)
 
 /**

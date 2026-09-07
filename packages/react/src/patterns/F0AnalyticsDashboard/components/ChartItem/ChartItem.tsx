@@ -15,6 +15,7 @@ import {
   ChartLine,
   ChartPie,
   ChartVerticalBars,
+  Swap,
   Table as TableIcon,
 } from "@/icons/app"
 import { DataChartEmptyStateView, F0DataChart } from "@/kits/F0DataChart"
@@ -47,19 +48,24 @@ import type {
 import { useChartDownloadActions } from "../../hooks/useChartDownloadActions"
 import { useDashboardItemData } from "../../hooks/useDashboardItemData"
 import {
-  defaultChartConfig,
   detectDataShape,
   isRenderableChart,
-  fromCanonical,
   compatibleTargetTypes,
-  toCanonical,
 } from "../../utils/chartDataAdapter"
 import { chartDataToTabular } from "../../utils/chartDataToTabular"
+import {
+  ComparisonChip,
+  comparisonSummary,
+} from "../ComparisonChip/ComparisonChip"
 import { DashboardItem } from "../DashboardItem/DashboardItem"
+import { toTrendBadge } from "../TrendBadge/TrendBadge"
 import {
   AccessiblePointActions,
   type AccessiblePointAction,
 } from "./AccessiblePointActions"
+import { withTooltipComparison } from "./categoryComparison"
+import { ChangeView } from "./ChangeView"
+import { buildChartProps } from "./chartProps"
 import { PointActionPopover } from "./PointActionPopover"
 
 // ---------------------------------------------------------------------------
@@ -499,210 +505,6 @@ function chartSkeleton(config: DashboardChartConfig) {
 }
 
 // ---------------------------------------------------------------------------
-// Build chart props using the centralized adapter
-// ---------------------------------------------------------------------------
-
-/**
- * Build F0DataChart props. When `overrideType` differs from the item's
- * original chart type, the data is converted via the canonical adapter.
- *
- * @internal Exported for unit tests — not part of the package's public API.
- */
-export function buildChartProps(
-  item: DashboardChartItem,
-  data: DashboardChartData,
-  overrideType?: DashboardChartConfig["type"],
-  overrideOrientation?: "vertical" | "horizontal"
-): F0DataChartProps {
-  const targetType = overrideType ?? item.chart.type
-  // Detect actual data shape — after a transform, item.chart.type may have
-  // changed but the data from fetchData still has its original shape.
-  const dataShape = detectDataShape(data, targetType)
-
-  // When the data shape matches the target and chart type, pass through
-  // directly to preserve type-specific features (targets, color overrides).
-  if (
-    targetType === dataShape &&
-    targetType === item.chart.type &&
-    !overrideOrientation
-  ) {
-    return buildNativeChartProps(item, data)
-  }
-
-  // Cross-type transform: auto-detect source shape → canonical → target
-  const canonical = toCanonical(data)
-  const adapted = fromCanonical(canonical, targetType)
-  const config = defaultChartConfig(targetType)
-
-  // Preserve shared props from the original config
-  const shared: Record<string, unknown> = {}
-  if ("valueFormatter" in item.chart && item.chart.valueFormatter) {
-    shared.valueFormatter = item.chart.valueFormatter
-  }
-  if (
-    "tooltipValueFormatter" in item.chart &&
-    item.chart.tooltipValueFormatter
-  ) {
-    shared.tooltipValueFormatter = item.chart.tooltipValueFormatter
-  }
-  if ("showLegend" in item.chart) {
-    shared.showLegend = item.chart.showLegend
-  }
-  // Only bar targets inherit the source config's `showLabels`. Other types keep
-  // their own default, so transforming a pie (labels on by default) into a line
-  // doesn't drag labels along. `undefined` is not an explicit value — letting it
-  // through would clobber the target's default with "unset".
-  if (
-    targetType === "bar" &&
-    "showLabels" in item.chart &&
-    item.chart.showLabels !== undefined
-  ) {
-    shared.showLabels = item.chart.showLabels
-  }
-
-  // Build the final props by merging config + adapted data
-  switch (targetType) {
-    case "bar": {
-      // Resolve orientation: explicit override > item config > default config
-      const orientation =
-        overrideOrientation ??
-        ("orientation" in item.chart
-          ? (item.chart as { orientation?: string }).orientation
-          : undefined) ??
-        (config as { orientation?: string }).orientation
-      return {
-        ...config,
-        ...shared,
-        ...(orientation ? { orientation } : {}),
-        categories: adapted.categories ?? [],
-        series: adapted.series,
-      } as F0DataChartProps
-    }
-    case "line":
-      return {
-        ...config,
-        ...shared,
-        categories: adapted.categories ?? [],
-        series: adapted.series,
-      } as F0DataChartProps
-    case "funnel":
-      return {
-        ...config,
-        ...shared,
-        series: adapted.series,
-      } as F0DataChartProps
-    case "pie":
-      return {
-        ...config,
-        ...shared,
-        series: adapted.series,
-      } as F0DataChartProps
-    case "radar":
-      return {
-        ...config,
-        ...shared,
-        indicators: adapted.indicators ?? [],
-        series: adapted.series,
-      } as F0DataChartProps
-    case "gauge":
-      return {
-        ...config,
-        ...shared,
-        ...(adapted.series as { value: number; name?: string }),
-      } as F0DataChartProps
-    case "heatmap":
-      return {
-        ...config,
-        ...shared,
-        xCategories: adapted.xCategories ?? [],
-        yCategories: adapted.yCategories ?? [],
-        data: adapted.data ?? [],
-      } as F0DataChartProps
-    case "scatter":
-      // Reached only when the data doesn't look like a scatter: `detectDataShape`
-      // falls through to "bar" for an empty or errored result, which sends a
-      // scatter-configured item down the conversion path. Renders the empty
-      // state, so losing the axis names and pointSize that `shared` drops
-      // doesn't matter here.
-      return {
-        ...config,
-        ...shared,
-        series: adapted.scatterSeries ?? [],
-      } as F0DataChartProps
-  }
-}
-
-/**
- * Build props for the native (non-transformed) chart type.
- * This is the original buildChartProps logic that passes data through
- * as-is, preserving type-specific features.
- */
-function buildNativeChartProps(
-  item: DashboardChartItem,
-  data: DashboardChartData
-): F0DataChartProps {
-  const { chart } = item
-
-  switch (chart.type) {
-    case "funnel": {
-      let funnelSeries = data.series
-      if (Array.isArray(data.series)) {
-        const canonical = toCanonical(data, "bar")
-        funnelSeries = fromCanonical(canonical, "funnel").series
-      }
-      return { ...chart, series: funnelSeries } as F0DataChartProps
-    }
-    case "pie":
-      return { ...chart, series: data.series } as F0DataChartProps
-    case "radar":
-      return {
-        ...chart,
-        indicators: data.indicators ?? [],
-        series: data.series,
-      } as F0DataChartProps
-    case "gauge":
-      return {
-        ...chart,
-        ...(data.series as { value: number; name?: string }),
-      } as F0DataChartProps
-    case "heatmap":
-      return {
-        ...chart,
-        xCategories: data.xCategories ?? [],
-        yCategories: data.yCategories ?? [],
-        data: data.data ?? [],
-      } as F0DataChartProps
-    case "scatter":
-      return {
-        ...chart,
-        series: data.scatterSeries ?? [],
-      } as F0DataChartProps
-    case "bar":
-    case "line": {
-      let { series } = data
-      let categories = data.categories ?? []
-      if (series && !Array.isArray(series)) {
-        const canonical = toCanonical(data, "funnel")
-        const adapted = fromCanonical(canonical, chart.type)
-        series = adapted.series
-        categories = adapted.categories ?? []
-      }
-      return {
-        ...chart,
-        // Dashboard bar charts show value labels by default. Resolved after the
-        // spread rather than before it: `...chart` carries `showLabels` even
-        // when it is explicitly `undefined`, which would overwrite the default.
-        ...(chart.type === "bar"
-          ? { showLabels: chart.showLabels ?? true }
-          : {}),
-        categories,
-        series,
-      } as F0DataChartProps
-    }
-  }
-}
-
-// ---------------------------------------------------------------------------
 // Table view — renders chart data as a OneDataCollection table
 // ---------------------------------------------------------------------------
 
@@ -800,6 +602,7 @@ export function chartItemFitsContent<Filters extends FiltersDefinition>(
 interface ChartItemProps<Filters extends FiltersDefinition> {
   item: DashboardChartItem<Filters>
   filters: FiltersState<Filters>
+  dataKey?: string
   actions?: DropdownItem[]
   itemFilters?: DashboardItemFiltersConfig
   editMode?: boolean
@@ -818,6 +621,7 @@ interface ChartItemProps<Filters extends FiltersDefinition> {
 export function ChartItem<Filters extends FiltersDefinition>({
   item,
   filters,
+  dataKey,
   actions,
   itemFilters,
   editMode,
@@ -830,6 +634,7 @@ export function ChartItem<Filters extends FiltersDefinition>({
 }: ChartItemProps<Filters>) {
   const translations = useI18n()
   const [viewMode, setViewMode] = useState<"chart" | "table">("chart")
+  const [showChange, setShowChange] = useState(false)
   const {
     enabled: aiEnabled,
     setPendingQuote,
@@ -858,10 +663,10 @@ export function ChartItem<Filters extends FiltersDefinition>({
   >()
   const enabled = item.useDashboardFilters !== false
   const itemFiltersKey = JSON.stringify(itemFilters?.value ?? {})
-  const { data, isLoading, error, retry } = useDashboardItemData<
+  const { data, isLoading, isRefreshing, error, retry } = useDashboardItemData<
     Filters,
     DashboardChartData
-  >(item.fetchData, filters, enabled, itemFiltersKey)
+  >(item.fetchData, filters, enabled, itemFiltersKey, dataKey)
   const chartContainerRef = useRef<HTMLDivElement>(null)
   const keyboardPointTriggerRef = useRef<HTMLButtonElement | null>(null)
 
@@ -874,6 +679,14 @@ export function ChartItem<Filters extends FiltersDefinition>({
         ? buildChartProps(item as DashboardChartItem, data)
         : undefined,
     [item, data, unrenderableChart]
+  )
+
+  // Hover copy on the rendered props alone: quotes, keyboard labels and downloads read `chartProps`.
+  const comparison = data?.categoryComparison
+  const renderedChartProps = useMemo(
+    () =>
+      chartProps && withTooltipComparison(chartProps, comparison, translations),
+    [chartProps, comparison, translations]
   )
 
   // A point belongs to one exact data render. A filter/type/refetch transition
@@ -961,6 +774,16 @@ export function ChartItem<Filters extends FiltersDefinition>({
     () => [...(actions ?? []), ...downloadActions],
     [actions, downloadActions]
   )
+
+  const viewActions = comparison && [
+    {
+      label: showChange
+        ? translations.ai.dashboardItem.comparison.showValues
+        : translations.ai.dashboardItem.comparison.showChange,
+      icon: Swap,
+      onClick: () => setShowChange((on) => !on),
+    },
+  ]
 
   const hasAccessiblePointActions = useMemo(
     () =>
@@ -1134,9 +957,12 @@ export function ChartItem<Filters extends FiltersDefinition>({
       title={item.title}
       description={windowedDescription ?? item.description}
       info={item.info}
+      trend={toTrendBadge(data?.trend, data?.comparisonLabel)}
+      comparison={<ComparisonChip summary={comparisonSummary(comparison)} />}
       {...(descriptionAction ? { descriptionAction } : {})}
       explanation={item.explanation}
       isLoading={isLoading}
+      isRefreshing={isRefreshing}
       error={
         error ??
         // Deliberately message-less: the shared "Error loading data" title
@@ -1151,6 +977,7 @@ export function ChartItem<Filters extends FiltersDefinition>({
       onRetry={unrenderableChart ? undefined : retry}
       skeleton={chartSkeleton(safeChart)}
       actions={allActions}
+      viewActions={viewActions}
       itemFilters={itemFilters}
       editMode={editMode}
       handleDelete={handleDelete}
@@ -1162,17 +989,22 @@ export function ChartItem<Filters extends FiltersDefinition>({
       fitContent={fitContent}
       onFullscreenChange={onFullscreenChange}
     >
-      {data && chartProps ? (
+      {data && chartProps && renderedChartProps ? (
         viewMode === "table" ? (
           <ChartTableView config={safeChart} data={data} />
+        ) : showChange && comparison ? (
+          <div ref={chartContainerRef} className="h-full w-full px-4 py-3">
+            <ChangeView chart={chartProps} comparison={comparison} />
+          </div>
         ) : (
           <div
             ref={chartContainerRef}
             className="relative h-full w-full px-4 py-3"
           >
             <F0DataChart
-              {...chartProps}
-              {...(chartProps.type !== "gauge" && chartProps.type !== "heatmap"
+              {...renderedChartProps}
+              {...(renderedChartProps.type !== "gauge" &&
+              renderedChartProps.type !== "heatmap"
                 ? { onLegendSelectionChange: setLegendSelection }
                 : {})}
               // Something has to be able to answer the click: the host, or

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { buildChartProps } from "../components/ChartItem/ChartItem"
+import { buildChartProps } from "../components/ChartItem/chartProps"
 import type {
   DashboardChartConfig,
   DashboardChartData,

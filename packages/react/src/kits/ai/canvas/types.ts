@@ -530,6 +530,15 @@ export interface ChatDashboardConfig {
   items: ChatDashboardItem[]
   /** Fetch specs for server-side data retrieval, keyed by datasetId */
   fetchSpecs: Record<string, DashboardFetchSpec>
+  /** Dashboard-wide comparison target; the host owns resolving the shifted window. */
+  compareTo?:
+    | "none"
+    | "previous_period"
+    | "previous_week"
+    | "previous_month"
+    | "previous_quarter"
+    | "previous_half_year"
+    | "previous_year"
 }
 
 /**

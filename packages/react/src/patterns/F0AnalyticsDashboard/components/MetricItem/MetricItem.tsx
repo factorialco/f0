@@ -5,8 +5,6 @@ import type {
   FiltersState,
 } from "@/patterns/OneFilterPicker/types"
 
-import { F0Icon } from "@/components/F0Icon"
-import { ArrowUp, ArrowDown } from "@/icons/app"
 import { useContainerSize } from "@/kits/F0DataChart/utils/useContainerSize"
 import { cn, focusRing } from "@/lib/utils"
 
@@ -22,10 +20,16 @@ import type {
 import { useDashboardItemData } from "../../hooks/useDashboardItemData"
 import { DashboardItem } from "../DashboardItem/DashboardItem"
 import { MetricSkeleton } from "../DashboardItem/DashboardItemSkeleton"
+import {
+  toTrendBadge,
+  TrendBadge,
+  type TrendBadgeTrend,
+} from "../TrendBadge/TrendBadge"
 
 interface MetricItemProps<Filters extends FiltersDefinition> {
   item: DashboardMetricItem<Filters>
   filters: FiltersState<Filters>
+  dataKey?: string
   actions?: import("@/experimental/Navigation/Dropdown").DropdownItem[]
   itemFilters?: DashboardItemFiltersConfig
   editMode?: boolean
@@ -73,18 +77,31 @@ function formatValue(
   }
 }
 
-type MetricTrend = { percent: number; direction: "up" | "down" | "flat" }
-
-function computeTrend(
-  value: number,
-  previousValue?: number
-): MetricTrend | undefined {
+function computeTrend(value: number, previousValue?: number) {
   if (previousValue === undefined || previousValue === 0) return undefined
 
   const percent = ((value - previousValue) / Math.abs(previousValue)) * 100
   const direction = percent > 0.5 ? "up" : percent < -0.5 ? "down" : "flat"
 
-  return { percent: Math.abs(percent), direction }
+  return { percent: Math.abs(percent), direction } as const
+}
+
+function resolveTrend(data: DashboardMetricData): TrendBadgeTrend | undefined {
+  const hostTrend = toTrendBadge(data.trend, data.comparisonLabel)
+  if (hostTrend) return hostTrend
+
+  const computed = computeTrend(data.value, data.previousValue)
+  // A computed flat trend stays hidden — drawing it would change what existing
+  // dashboards show.
+  if (!computed || computed.direction === "flat") return undefined
+
+  const change = `${computed.percent.toFixed(1)}%`
+  return {
+    direction: computed.direction,
+    text: change,
+    srText: `${computed.direction === "up" ? "+" : "−"}${change}`,
+    comparisonLabel: data.comparisonLabel || undefined,
+  }
 }
 
 /**
@@ -100,7 +117,7 @@ export function MetricValue({
   trend,
 }: {
   value: string
-  trend?: MetricTrend
+  trend?: TrendBadgeTrend
 }) {
   const ref = useRef<HTMLDivElement>(null)
   const { height, width } = useContainerSize(ref)
@@ -114,7 +131,7 @@ export function MetricValue({
         (element.scrollWidth > element.clientWidth ||
           element.scrollHeight > element.clientHeight)
     )
-  }, [height, trend?.direction, trend?.percent, value, width])
+  }, [height, trend?.direction, trend?.text, value, width])
 
   return (
     <div
@@ -142,40 +159,7 @@ export function MetricValue({
         <span className="whitespace-nowrap text-3xl font-semibold leading-none tracking-tight text-f1-foreground">
           {value}
         </span>
-        {trend && trend.direction !== "flat" && (
-          <div className="flex shrink-0 items-center">
-            {trend.direction === "up" ? (
-              <F0Icon
-                icon={ArrowUp}
-                color="positive"
-                size="sm"
-                aria-hidden="true"
-              />
-            ) : (
-              <F0Icon
-                icon={ArrowDown}
-                color="critical"
-                size="sm"
-                aria-hidden="true"
-              />
-            )}
-            <span className="sr-only">
-              {trend.direction === "up" ? "+" : "−"}
-              {trend.percent.toFixed(1)}%
-            </span>
-            <span
-              aria-hidden="true"
-              className={cn(
-                "whitespace-nowrap text-base font-medium",
-                trend.direction === "up"
-                  ? "text-f1-foreground-positive"
-                  : "text-f1-foreground-critical"
-              )}
-            >
-              {trend.percent.toFixed(1)}%
-            </span>
-          </div>
-        )}
+        <TrendBadge trend={trend} />
       </div>
     </div>
   )
@@ -190,6 +174,7 @@ export function MetricValue({
 export function MetricItem<Filters extends FiltersDefinition>({
   item,
   filters,
+  dataKey,
   actions,
   itemFilters,
   editMode,
@@ -199,12 +184,12 @@ export function MetricItem<Filters extends FiltersDefinition>({
 }: MetricItemProps<Filters>) {
   const enabled = item.useDashboardFilters !== false
   const itemFiltersKey = JSON.stringify(itemFilters?.value ?? {})
-  const { data, isLoading, error, retry } = useDashboardItemData<
+  const { data, isLoading, isRefreshing, error, retry } = useDashboardItemData<
     Filters,
     DashboardMetricData
-  >(item.fetchData, filters, enabled, itemFiltersKey)
+  >(item.fetchData, filters, enabled, itemFiltersKey, dataKey)
 
-  const trend = data ? computeTrend(data.value, data.previousValue) : undefined
+  const trend = data ? resolveTrend(data) : undefined
 
   return (
     <DashboardItem
@@ -213,6 +198,7 @@ export function MetricItem<Filters extends FiltersDefinition>({
       info={item.info}
       explanation={item.explanation}
       isLoading={isLoading}
+      isRefreshing={isRefreshing}
       error={error}
       onRetry={retry}
       skeleton={<MetricSkeleton />}

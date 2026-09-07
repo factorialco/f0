@@ -7,6 +7,7 @@ import type {
 import type { DropdownItem } from "@/experimental/Navigation/Dropdown"
 import type { RecordType } from "@/hooks/datasource"
 
+import { useI18n } from "@/lib/providers/i18n"
 import { OneDataCollection } from "@/patterns/OneDataCollection"
 import { useDataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
 
@@ -18,11 +19,17 @@ import type {
 } from "../../types"
 
 import { useCollectionDownloadActions } from "../../hooks/useCollectionDownloadActions"
+import {
+  ComparisonChip,
+  comparisonSummary,
+} from "../ComparisonChip/ComparisonChip"
 import { DashboardItem } from "../DashboardItem/DashboardItem"
+import { changeColumn } from "./rowTrends"
 
 interface CollectionItemProps<Filters extends FiltersDefinition> {
   item: DashboardCollectionItem<Filters>
   filters: FiltersState<Filters>
+  dataKey?: string
   actions?: DropdownItem[]
   itemFilters?: DashboardItemFiltersConfig
   editMode?: boolean
@@ -45,6 +52,7 @@ interface CollectionItemProps<Filters extends FiltersDefinition> {
 export function CollectionItem<Filters extends FiltersDefinition>({
   item,
   filters,
+  dataKey,
   actions,
   itemFilters,
   editMode,
@@ -57,17 +65,20 @@ export function CollectionItem<Filters extends FiltersDefinition>({
   const enabled = item.useDashboardFilters !== false
   const effectiveFilters = enabled ? filters : ({} as FiltersState<Filters>)
 
+  const translations = useI18n()
+
   // Memoize the source definition to avoid re-creating on every render.
   const filtersKey = JSON.stringify(effectiveFilters)
   const itemFiltersKey = JSON.stringify(itemFilters?.value ?? {})
   const sourceDefinition = useMemo(
     () => item.createSource(effectiveFilters),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [filtersKey, itemFiltersKey]
+    [filtersKey, itemFiltersKey, dataKey]
   )
   const source = useDataCollectionSource<RecordType>(sourceDefinition, [
     filtersKey,
     itemFiltersKey,
+    dataKey,
   ])
 
   // We capture the current table visualization settings (hidden columns +
@@ -126,11 +137,53 @@ export function CollectionItem<Filters extends FiltersDefinition>({
     [actions, downloadActions]
   )
 
+  const changeLabel = translations.ai.dashboardItem.comparison.change
+
+  // The table viz is the only one with columns to add to; the others show
+  // whatever fields their own layout declares. The change sits right after
+  // the row's name, where the eye reads it against the row rather than after
+  // every other figure.
+  const visualizations = useMemo(() => {
+    if (!item.rowTrends) return item.visualizations
+    const column = changeColumn(
+      changeLabel,
+      item.rowTrends,
+      sourceDefinition?.idProvider,
+      item.rowTrendsSorting
+    )
+
+    return item.visualizations.map((visualization) => {
+      if (visualization?.type !== "table") return visualization
+      const [first, ...rest] = visualization.options?.columns ?? []
+      return {
+        ...visualization,
+        options: {
+          ...visualization.options,
+          columns: first ? [first, column, ...rest] : [column],
+        },
+      }
+    })
+  }, [
+    item.visualizations,
+    item.rowTrends,
+    item.rowTrendsSorting,
+    sourceDefinition,
+    changeLabel,
+  ])
+
   return (
     <DashboardItem
       title={item.title}
       description={item.description}
       info={item.info}
+      comparison={
+        <ComparisonChip
+          summary={comparisonSummary(
+            item.rowTrends && { byCategory: item.rowTrends }
+          )}
+          names={false}
+        />
+      }
       explanation={item.explanation}
       isLoading={false}
       actions={allActions}
@@ -146,7 +199,7 @@ export function CollectionItem<Filters extends FiltersDefinition>({
       <OneDataCollection
         fullHeight
         source={source}
-        visualizations={item.visualizations}
+        visualizations={visualizations}
         // We deliberately do NOT enable `csvExport` here — the dashboard
         // surface already exposes Excel + CSV downloads from the
         // DashboardItem 3-dot menu (`downloadActions` above) and both

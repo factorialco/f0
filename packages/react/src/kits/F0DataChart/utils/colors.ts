@@ -132,6 +132,19 @@ export function darkenChartColor(color: string): string {
   return colord(color).darken(DARKEN_AMOUNT).toHex()
 }
 
+/** `color` at `alpha`, scaled by the alpha it already carries. */
+export function fadeChartColor(color: string, alpha: number): string {
+  const base = colord(color)
+  return base.alpha(base.alpha() * alpha).toHex()
+}
+
+const MUTED_SERIES_ALPHA = 0.45
+
+/** Color for a `muted` series: faded enough to recede, solid enough to read. */
+export function mutedChartColor(color: string): string {
+  return fadeChartColor(color, MUTED_SERIES_ALPHA)
+}
+
 /** Linearly interpolate between two hex colors */
 export function lerpColor(from: string, to: string, t: number): string {
   const f = colord(from).toRgb()
