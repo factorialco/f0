@@ -13,6 +13,9 @@ const DIAL_CODE_PATTERN = /^\+\d{1,4}$/
 const warnedDialCodes = new Set<string>()
 
 const metadataText = (metadata: F0SelectItemMetadata): string => {
+  if (metadata.type !== "dialCode") {
+    return ""
+  }
   if (
     process.env.NODE_ENV !== "production" &&
     !DIAL_CODE_PATTERN.test(metadata.dialCode) &&
