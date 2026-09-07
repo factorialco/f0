@@ -118,7 +118,6 @@ export const ChatComposer = (): ReactNode => {
     maxFileSizeBytes,
     channel,
     searchMembers,
-    currentUserId,
     capabilities,
   } = useF0Chat()
   // Uploads need both the runtime hook AND the capability (a frozen channel
@@ -216,7 +215,6 @@ export const ChatComposer = (): ReactNode => {
         inlineCompletion: emojiAutocomplete.isOpen
           ? null
           : mentions.inlineCompletion,
-        currentUserId,
       }),
     [
       value,
@@ -224,7 +222,6 @@ export const ChatComposer = (): ReactNode => {
       cursorPosition,
       mentions.inlineCompletion,
       emojiAutocomplete.isOpen,
-      currentUserId,
     ]
   )
   // Mentions and ghost completions are the only things the overlay paints, so

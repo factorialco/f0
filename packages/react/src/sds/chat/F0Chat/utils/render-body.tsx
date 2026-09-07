@@ -76,10 +76,10 @@ export const renderBodyWithLinks = (
   })
 }
 
-/** A `@name` token to highlight in a message body. Slack-style colours: a
- * mention of someone else reads in info colours; a mention of you (`isSelf`) or
- * the whole group (`isEveryone`, `@here`) reads in warning/amber. `user`, when
- * present (any person mention), opens the same profile hover card as the avatar. */
+/** A `@name` token to highlight in a message body. Every mention reads the
+ * same: secondary foreground, no background, whoever it names. `user`, when
+ * present (any person mention), opens the same profile hover card as the
+ * avatar. */
 export type MentionToken = {
   name: string
   isSelf: boolean
@@ -89,10 +89,13 @@ export type MentionToken = {
 
 /**
  * Render a body with its `@name` mentions as chips and everything else through
- * {@link renderBodyWithLinks}. Slack-style: a mention of someone else is an
- * info pill (and opens their profile hover card, like the sender avatar); a
- * mention of you or `@here` is an amber/warning pill that stands out. Falls back to
- * {@link renderBodyWithLinks} when there are no mentions.
+ * {@link renderBodyWithLinks}. A person mention also opens their profile hover
+ * card, like the sender avatar. Falls back to {@link renderBodyWithLinks} when
+ * there are no mentions.
+ *
+ * The composer's highlight overlay paints the same colour, so a mention looks
+ * the same while being typed and once sent — see `hooks/highlight-utils.ts`,
+ * which cannot copy the weight here for caret reasons.
  *
  * Pure (no hooks): callers memoize the result per message.
  */
