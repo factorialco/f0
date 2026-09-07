@@ -17,6 +17,7 @@ import {
 import { breakpoints, panelWidths } from "@factorialco/f0-core"
 import { useMediaQuery } from "usehooks-ts"
 
+import { useLinkContext } from "@/lib/linkHandler"
 import { useI18n } from "@/lib/providers/i18n"
 
 import { AiChatProviderReturnValue, AiChatState } from "../internal-types"
@@ -185,6 +186,9 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     F0AiChatWelcomeCard[]
   >(initialWelcomeScreenCards)
   const i18n = useI18n()
+  // The host's current route, when it provides one. See the navigation effect
+  // below — this is the only thing here that knows the page has changed.
+  const { currentPath } = useLinkContext()
   const [placeholders, setPlaceholders] = useState<string[]>([
     i18n.t("ai.inputPlaceholder"),
   ])
@@ -222,6 +226,33 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     },
     [setVisualizationModeRaw, setOpen]
   )
+
+  /**
+   * NAVIGATING LEAVES FULLSCREEN.
+   *
+   * A fullscreen panel covers the page it is supposed to be beside, so every
+   * link in it lands the reader somewhere they cannot see: they arrive, see the
+   * same chat they were already looking at, and have to collapse it by hand
+   * before finding out where they went. Docking on the way keeps the panel open
+   * — nothing is lost — and hands the page back.
+   *
+   * Only on a CHANGE, never on the first render: arriving on a route with the
+   * panel already fullscreen (a reload, a deep link) is not navigation, and
+   * collapsing it there would quietly undo what the reader last chose.
+   *
+   * `currentPath` is `undefined` without a `LinkProvider`, and this then never
+   * fires — a standalone chat has no routes to follow.
+   */
+  const previousPathRef = useRef(currentPath)
+  useEffect(() => {
+    const previous = previousPathRef.current
+    previousPathRef.current = currentPath
+    if (currentPath === undefined || previous === undefined) return
+    if (previous === currentPath) return
+    // `canvas` is left alone: it is a workspace the reader opened ON PURPOSE
+    // for the thing they are doing, not a way of reading the chat.
+    setVisualizationMode((mode) => (mode === "fullscreen" ? "sidepanel" : mode))
+  }, [currentPath, setVisualizationMode])
 
   const previousVisualizationModeRef = useRef<VisualizationMode>("sidepanel")
 
