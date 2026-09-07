@@ -8,22 +8,20 @@ const DEBOUNCE_MS = 250
 export const MIN_QUERY_LENGTH = 2
 
 type Options = {
-  searchPlaces: F0LocationInputProps["searchPlaces"]
+  searchPlaces: NonNullable<F0LocationInputProps["searchPlaces"]>
   country: CountryCode | undefined
   enabled: boolean
 }
 
 /**
  * Debounced suggestion search with a stale-response guard, same shape as the
- * chat mentions hook. Results are never filtered client-side: the provider
- * already ranked them, and a local string match drops accent variants.
+ * chat mentions hook. Results are never filtered locally: the provider already
+ * ranked them, and a local string match drops accent variants.
  */
 export const usePlaceSearch = ({ searchPlaces, country, enabled }: Options) => {
   const [suggestions, setSuggestions] = useState<F0LocationSuggestion[]>([])
   const [isSearching, setIsSearching] = useState(false)
-  const [hasSearched, setHasSearched] = useState(false)
-  const [open, setOpen] = useState(false)
-  const [activeIndex, setActiveIndex] = useState(-1)
+  const [query, setQuery] = useState("")
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const searchIdRef = useRef(0)
@@ -40,29 +38,23 @@ export const usePlaceSearch = ({ searchPlaces, country, enabled }: Options) => {
     cancelPending()
     setSuggestions([])
     setIsSearching(false)
-    setHasSearched(false)
-    setOpen(false)
-    setActiveIndex(-1)
+    setQuery("")
   }, [cancelPending])
 
-  const close = useCallback(() => {
-    setOpen(false)
-    setActiveIndex(-1)
-  }, [])
-
   const search = useCallback(
-    (query: string) => {
-      const trimmed = query.trim()
-      setActiveIndex(-1)
+    (nextQuery: string) => {
+      setQuery(nextQuery)
+      const trimmed = nextQuery.trim()
 
-      if (!enabled || !searchPlaces || trimmed.length < MIN_QUERY_LENGTH) {
-        reset()
+      if (!enabled || trimmed.length < MIN_QUERY_LENGTH) {
+        cancelPending()
+        setSuggestions([])
+        setIsSearching(false)
         return
       }
 
       cancelPending()
       setIsSearching(true)
-      setOpen(true)
       const currentSearchId = searchIdRef.current
 
       debounceRef.current = setTimeout(() => {
@@ -70,12 +62,10 @@ export const usePlaceSearch = ({ searchPlaces, country, enabled }: Options) => {
           .then((data) => {
             if (currentSearchId !== searchIdRef.current) return
             setSuggestions(data)
-            setHasSearched(true)
           })
           .catch((error: unknown) => {
             if (currentSearchId !== searchIdRef.current) return
             setSuggestions([])
-            setHasSearched(true)
             if (process.env.NODE_ENV !== "production") {
               console.warn("F0LocationInput: searchPlaces rejected", error)
             }
@@ -85,7 +75,7 @@ export const usePlaceSearch = ({ searchPlaces, country, enabled }: Options) => {
           })
       }, DEBOUNCE_MS)
     },
-    [enabled, searchPlaces, cancelPending, reset]
+    [enabled, searchPlaces, cancelPending]
   )
 
   // A country change makes every cached suggestion wrong
@@ -98,16 +88,5 @@ export const usePlaceSearch = ({ searchPlaces, country, enabled }: Options) => {
 
   useEffect(() => cancelPending, [cancelPending])
 
-  return {
-    suggestions,
-    isSearching,
-    hasSearched,
-    open,
-    setOpen,
-    activeIndex,
-    setActiveIndex,
-    search,
-    close,
-    reset,
-  }
+  return { suggestions, isSearching, query, search, reset }
 }

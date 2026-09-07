@@ -1,7 +1,12 @@
 import userEvent from "@testing-library/user-event"
-import { afterEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-import { screen, waitFor, zeroRender as render } from "@/testing/test-utils"
+import {
+  fireEvent,
+  screen,
+  waitFor,
+  zeroRender as render,
+} from "@/testing/test-utils"
 
 import type { F0LocationInputValue, F0LocationSuggestion } from "../types"
 
@@ -28,69 +33,115 @@ const resolved: F0LocationInputValue = {
 const searchPlaces = vi.fn(async () => suggestions)
 const resolvePlace = vi.fn(async () => resolved)
 
-const getAddress = () => screen.getByRole("combobox") as HTMLInputElement
+const originalOffsetHeight = Object.getOwnPropertyDescriptor(
+  HTMLElement.prototype,
+  "offsetHeight"
+)
+const originalOffsetWidth = Object.getOwnPropertyDescriptor(
+  HTMLElement.prototype,
+  "offsetWidth"
+)
 
-const typeAndWaitForOptions = async (
-  user: ReturnType<typeof userEvent.setup>,
-  text = "Colon"
-) => {
-  await user.type(getAddress(), text)
-  await waitFor(() => expect(screen.getAllByRole("option")).toHaveLength(2))
+const getAddressTrigger = () =>
+  screen.getByRole("combobox", { name: "Address" })
+
+/** Opens the address select and kicks the list, which jsdom never animates */
+const openAddress = async (user: ReturnType<typeof userEvent.setup>) => {
+  await user.click(getAddressTrigger())
+  await waitFor(() => expect(screen.getByRole("listbox")).toBeInTheDocument())
+  fireEvent.animationStart(screen.getByRole("listbox"))
 }
 
-afterEach(() => {
-  vi.clearAllMocks()
-})
+const searchAddress = async (
+  user: ReturnType<typeof userEvent.setup>,
+  query = "Colon"
+) => {
+  await openAddress(user)
+  await user.type(screen.getByRole("searchbox"), query)
+}
 
 describe("F0LocationInput", () => {
+  beforeEach(() => {
+    // Give the virtualized option list a real-sized viewport in jsdom
+    Object.defineProperty(HTMLElement.prototype, "offsetHeight", {
+      value: 800,
+      configurable: true,
+    })
+    Object.defineProperty(HTMLElement.prototype, "offsetWidth", {
+      value: 800,
+      configurable: true,
+    })
+    vi.spyOn(Element.prototype, "getBoundingClientRect").mockImplementation(
+      () => ({
+        width: 320,
+        height: 320,
+        top: 0,
+        left: 0,
+        bottom: 0,
+        right: 0,
+        x: 0,
+        y: 0,
+        toJSON: () => {},
+      })
+    )
+  })
+
+  afterEach(() => {
+    if (originalOffsetHeight) {
+      Object.defineProperty(
+        HTMLElement.prototype,
+        "offsetHeight",
+        originalOffsetHeight
+      )
+    }
+    if (originalOffsetWidth) {
+      Object.defineProperty(
+        HTMLElement.prototype,
+        "offsetWidth",
+        originalOffsetWidth
+      )
+    }
+    vi.restoreAllMocks()
+    vi.clearAllMocks()
+  })
+
   describe("simple mode", () => {
-    it("renders a closed combobox with the label", () => {
+    it("renders the address as a select when a provider is given", () => {
       render(<F0LocationInput label="Address" searchPlaces={searchPlaces} />)
 
-      const input = getAddress()
       expect(screen.getByText("Address")).toBeInTheDocument()
-      expect(input).toHaveAttribute("aria-expanded", "false")
-      expect(input).toHaveAttribute("aria-autocomplete", "list")
-      expect(input).not.toHaveAttribute("aria-controls")
+      expect(getAddressTrigger()).toBeInTheDocument()
       expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
     })
 
-    it("renders a plain text field without a search function", () => {
+    it("renders a plain text field without a provider", () => {
       render(<F0LocationInput label="Address" />)
 
-      const input = screen.getByRole("textbox")
-      expect(input).toBeInTheDocument()
+      expect(screen.getByRole("textbox")).toBeInTheDocument()
       expect(screen.queryByRole("combobox")).not.toBeInTheDocument()
-      // No half-combobox: none of the contract leaks onto a plain textbox
-      expect(input).not.toHaveAttribute("aria-expanded")
-      expect(input).not.toHaveAttribute("aria-autocomplete")
-      expect(input).not.toHaveAttribute("aria-controls")
     })
 
     it("does not search below two characters", async () => {
       const user = userEvent.setup()
       render(<F0LocationInput label="Address" searchPlaces={searchPlaces} />)
 
-      await user.type(getAddress(), "C")
+      await searchAddress(user, "C")
       await new Promise((resolve) => setTimeout(resolve, 400))
 
       expect(searchPlaces).not.toHaveBeenCalled()
     })
 
-    it("debounces typing into one search and wires the listbox aria", async () => {
+    it("debounces typing into one search and lists what the provider returned", async () => {
       const user = userEvent.setup()
       render(<F0LocationInput label="Address" searchPlaces={searchPlaces} />)
 
-      await typeAndWaitForOptions(user)
+      await searchAddress(user)
 
+      await waitFor(() => expect(screen.getAllByRole("option")).toHaveLength(2))
       expect(searchPlaces).toHaveBeenCalledTimes(1)
       expect(searchPlaces).toHaveBeenCalledWith("Colon", { country: undefined })
-
-      const input = getAddress()
-      const listbox = screen.getByRole("listbox")
-      expect(input).toHaveAttribute("aria-expanded", "true")
-      expect(input).toHaveAttribute("aria-controls", listbox.id)
-      expect(input).not.toHaveAttribute("aria-activedescendant")
+      // No local filtering: the accent-insensitive match is the provider's job
+      expect(screen.getByText("Calle Colón 3")).toBeInTheDocument()
     })
 
     it("scopes the search to a single allowed country", async () => {
@@ -103,49 +154,14 @@ describe("F0LocationInput", () => {
         />
       )
 
-      await typeAndWaitForOptions(user)
+      await searchAddress(user)
 
-      expect(searchPlaces).toHaveBeenCalledWith("Colon", { country: "es" })
+      await waitFor(() =>
+        expect(searchPlaces).toHaveBeenCalledWith("Colon", { country: "es" })
+      )
     })
 
-    it("moves the active option with the arrow keys", async () => {
-      const user = userEvent.setup()
-      render(<F0LocationInput label="Address" searchPlaces={searchPlaces} />)
-
-      await typeAndWaitForOptions(user)
-      await user.keyboard("{ArrowDown}")
-
-      const [first, second] = screen.getAllByRole("option")
-      expect(getAddress()).toHaveAttribute("aria-activedescendant", first.id)
-      expect(first).toHaveAttribute("aria-selected", "true")
-
-      await user.keyboard("{ArrowDown}")
-      expect(getAddress()).toHaveAttribute("aria-activedescendant", second.id)
-
-      await user.keyboard("{ArrowUp}")
-      expect(getAddress()).toHaveAttribute("aria-activedescendant", first.id)
-    })
-
-    it("reopens the last results with either arrow, first or last option", async () => {
-      const user = userEvent.setup()
-      render(<F0LocationInput label="Address" searchPlaces={searchPlaces} />)
-
-      await typeAndWaitForOptions(user)
-      const [first, second] = screen.getAllByRole("option")
-
-      await user.keyboard("{Escape}")
-      expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
-
-      await user.keyboard("{ArrowUp}")
-      expect(screen.getByRole("listbox")).toBeInTheDocument()
-      expect(getAddress()).toHaveAttribute("aria-activedescendant", second.id)
-
-      await user.keyboard("{Escape}{ArrowDown}")
-      expect(screen.getByRole("listbox")).toBeInTheDocument()
-      expect(getAddress()).toHaveAttribute("aria-activedescendant", first.id)
-    })
-
-    it("picks with Enter, resolves the place and emits a resolved value", async () => {
+    it("resolves the picked suggestion and emits a resolved value", async () => {
       const user = userEvent.setup()
       const onChange = vi.fn()
       render(
@@ -157,8 +173,9 @@ describe("F0LocationInput", () => {
         />
       )
 
-      await typeAndWaitForOptions(user)
-      await user.keyboard("{ArrowDown}{Enter}")
+      await searchAddress(user)
+      await waitFor(() => expect(screen.getAllByRole("option")).toHaveLength(2))
+      await user.click(screen.getAllByRole("option")[0])
 
       expect(resolvePlace).toHaveBeenCalledWith("place-1")
       await waitFor(() =>
@@ -167,11 +184,9 @@ describe("F0LocationInput", () => {
           isResolved: true,
         })
       )
-      expect(getAddress()).toHaveValue("Carrer de Colón 12")
-      expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
     })
 
-    it("does not emit the typed text while a pick is resolving", async () => {
+    it("emits nothing until the pick resolves", async () => {
       const user = userEvent.setup()
       const onChange = vi.fn()
       render(
@@ -183,7 +198,8 @@ describe("F0LocationInput", () => {
         />
       )
 
-      await typeAndWaitForOptions(user)
+      await searchAddress(user)
+      await waitFor(() => expect(screen.getAllByRole("option")).toHaveLength(2))
       onChange.mockClear()
       await user.click(screen.getAllByRole("option")[0])
 
@@ -192,25 +208,6 @@ describe("F0LocationInput", () => {
         source: "picked",
         isResolved: true,
       })
-    })
-
-    it("keeps focus in the input when an option is clicked", async () => {
-      const user = userEvent.setup()
-      render(
-        <F0LocationInput
-          label="Address"
-          searchPlaces={searchPlaces}
-          resolvePlace={resolvePlace}
-        />
-      )
-
-      await typeAndWaitForOptions(user)
-      await user.click(screen.getAllByRole("option")[1])
-
-      expect(getAddress()).toHaveFocus()
-      await waitFor(() =>
-        expect(getAddress()).toHaveValue("Carrer de Colón 12")
-      )
     })
 
     it("falls back to the suggestion label without a resolver", async () => {
@@ -224,7 +221,8 @@ describe("F0LocationInput", () => {
         />
       )
 
-      await typeAndWaitForOptions(user)
+      await searchAddress(user)
+      await waitFor(() => expect(screen.getAllByRole("option")).toHaveLength(2))
       await user.click(screen.getAllByRole("option")[1])
 
       expect(onChange).toHaveBeenLastCalledWith(
@@ -233,84 +231,52 @@ describe("F0LocationInput", () => {
       )
     })
 
-    it("closes on Escape without letting the key reach the parent", async () => {
-      const user = userEvent.setup()
-      const onParentKeyDown = vi.fn()
-      render(
-        <div onKeyDown={onParentKeyDown}>
-          <F0LocationInput label="Address" searchPlaces={searchPlaces} />
-        </div>
-      )
-
-      await typeAndWaitForOptions(user)
-      onParentKeyDown.mockClear()
-      await user.keyboard("{Escape}")
-
-      expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
-      expect(onParentKeyDown).not.toHaveBeenCalled()
-      expect(getAddress()).toHaveValue("Colon")
-
-      // Closed: Escape is the parent's again
-      await user.keyboard("{Escape}")
-      expect(onParentKeyDown).toHaveBeenCalledTimes(1)
-    })
-
-    it("closes on Tab without picking", async () => {
+    it("keeps an address the provider does not know", async () => {
       const user = userEvent.setup()
       const onChange = vi.fn()
       render(
         <F0LocationInput
           label="Address"
-          searchPlaces={searchPlaces}
-          resolvePlace={resolvePlace}
+          searchPlaces={vi.fn(async () => [])}
           onChange={onChange}
         />
       )
 
-      await typeAndWaitForOptions(user)
-      await user.keyboard("{ArrowDown}{Tab}")
+      await searchAddress(user, "Calle Falsa 123")
+      const create = await screen.findByRole("button", { name: /Create/ })
+      await user.click(create)
 
-      expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
-      expect(resolvePlace).not.toHaveBeenCalled()
       expect(onChange).toHaveBeenLastCalledWith(
-        expect.objectContaining({ addressLine1: "Colon" }),
+        expect.objectContaining({ addressLine1: "Calle Falsa 123" }),
         { source: "typed", isResolved: false }
       )
     })
 
-    it("shows the empty state after a search with no results", async () => {
+    it("shows what the empty list means at each stage", async () => {
       const user = userEvent.setup()
       render(
         <F0LocationInput label="Address" searchPlaces={vi.fn(async () => [])} />
       )
 
-      await user.type(getAddress(), "zzzz")
+      await openAddress(user)
+      expect(screen.getByText("Type an address to search")).toBeInTheDocument()
 
+      await user.type(screen.getByRole("searchbox"), "zzzz")
       await waitFor(() =>
-        expect(screen.getByRole("status")).toHaveTextContent(
-          "No addresses found"
-        )
+        expect(screen.getByText("No addresses found")).toBeInTheDocument()
       )
     })
 
-    it("emits undefined once every part is cleared", async () => {
-      const user = userEvent.setup()
-      const onChange = vi.fn()
+    it("displays a value the options do not contain", () => {
       render(
         <F0LocationInput
           label="Address"
           searchPlaces={searchPlaces}
-          onChange={onChange}
+          defaultValue={{ addressLine1: "Calle Falsa 123" }}
         />
       )
 
-      await user.type(getAddress(), "Co")
-      await user.clear(getAddress())
-
-      expect(onChange).toHaveBeenLastCalledWith(undefined, {
-        source: "typed",
-        isResolved: false,
-      })
+      expect(getAddressTrigger()).toHaveTextContent("Calle Falsa 123")
     })
   })
 
@@ -336,9 +302,6 @@ describe("F0LocationInput", () => {
       ])
       expect(screen.getByRole("group", { name: "Office" })).toBeInTheDocument()
       expect(screen.queryByText("Office")).not.toBeInTheDocument()
-      expect(
-        screen.queryByRole("textbox", { name: "Address line 2" })
-      ).not.toBeInTheDocument()
     })
 
     it("honours partLabels overrides", () => {
@@ -416,6 +379,26 @@ describe("F0LocationInput", () => {
       expect(value.latitude).toBe(41.38)
       expect(value.longitude).toBe(2.17)
       expect(value.timezone).toBe("Europe/Madrid")
+    })
+
+    it("emits undefined once every part is cleared", async () => {
+      const user = userEvent.setup()
+      const onChange = vi.fn()
+      render(
+        <F0LocationInput
+          label="Office"
+          fields={["city"]}
+          defaultValue={{ city: "Barcelona" }}
+          onChange={onChange}
+        />
+      )
+
+      await user.clear(screen.getByRole("textbox", { name: "City" }))
+
+      expect(onChange).toHaveBeenLastCalledWith(undefined, {
+        source: "typed",
+        isResolved: false,
+      })
     })
 
     it("shows the group message once, under the parts", () => {

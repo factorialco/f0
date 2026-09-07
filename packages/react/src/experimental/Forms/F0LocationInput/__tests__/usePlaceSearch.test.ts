@@ -39,7 +39,7 @@ describe("usePlaceSearch", () => {
     act(() => vi.advanceTimersByTime(1000))
 
     expect(searchPlaces).not.toHaveBeenCalled()
-    expect(result.current.open).toBe(false)
+    expect(result.current.suggestions).toEqual([])
   })
 
   it("debounces keystrokes into one call and passes the country", async () => {
@@ -63,7 +63,7 @@ describe("usePlaceSearch", () => {
     expect(searchPlaces).toHaveBeenCalledWith("Colon", { country: "es" })
     expect(result.current.suggestions).toEqual([suggestion("1")])
     expect(result.current.isSearching).toBe(false)
-    expect(result.current.open).toBe(true)
+    expect(result.current.query).toBe("Colon")
   })
 
   it("ignores a response that arrives after a newer search", async () => {
@@ -106,7 +106,6 @@ describe("usePlaceSearch", () => {
     })
 
     expect(result.current.suggestions).toEqual([])
-    expect(result.current.hasSearched).toBe(true)
     expect(result.current.isSearching).toBe(false)
   })
 
@@ -127,28 +126,19 @@ describe("usePlaceSearch", () => {
     rerender({ country: "fr" })
 
     expect(result.current.suggestions).toEqual([])
-    expect(result.current.open).toBe(false)
+    expect(result.current.query).toBe("")
   })
 
-  it("is inert without a search function or when disabled", () => {
+  it("is inert when disabled", () => {
     const searchPlaces = vi.fn().mockResolvedValue([suggestion("1")])
-    const { result: noSearch } = renderHook(() =>
-      usePlaceSearch({
-        searchPlaces: undefined,
-        country: undefined,
-        enabled: true,
-      })
-    )
-    const { result: disabled } = renderHook(() =>
+    const { result } = renderHook(() =>
       usePlaceSearch({ searchPlaces, country: undefined, enabled: false })
     )
 
-    act(() => noSearch.current.search("Colon"))
-    act(() => disabled.current.search("Colon"))
+    act(() => result.current.search("Colon"))
     act(() => vi.advanceTimersByTime(1000))
 
     expect(searchPlaces).not.toHaveBeenCalled()
-    expect(noSearch.current.open).toBe(false)
-    expect(disabled.current.open).toBe(false)
+    expect(result.current.suggestions).toEqual([])
   })
 })
