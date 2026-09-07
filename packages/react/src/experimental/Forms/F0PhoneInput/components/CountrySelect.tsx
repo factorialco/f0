@@ -1,20 +1,15 @@
 import type { CountryCode as PhoneCountry } from "libphonenumber-js"
-
 import { useEffect, useMemo, useState } from "react"
-
-import type { F0SelectItemProps } from "@/components/F0Select"
-import type { CountryCode } from "@/lib/countries"
-
 import { F0Icon } from "@/components/F0Icon"
+import type { F0SelectItemProps } from "@/components/F0Select"
 import { F0Select } from "@/components/F0Select"
 import { flagsMap } from "@/flags"
 import { ChevronDown } from "@/icons/app"
+import type { CountryCode } from "@/lib/countries"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
-import type { PhoneInputSize } from "../types"
-
 import { dialCodeFor, toCountryCode } from "../lib/phone"
+import type { PhoneInputSize } from "../types"
 import { CountryFlag } from "./CountryFlag"
 
 /**
@@ -56,7 +51,9 @@ export const CountrySelect = ({
   const [open, setOpen] = useState(false)
 
   useEffect(() => {
-    if (!selectCountryRef) return undefined
+    if (!selectCountryRef) {
+      return undefined
+    }
     selectCountryRef.current = onChange
     return () => {
       selectCountryRef.current = null
@@ -113,8 +110,12 @@ export const CountrySelect = ({
         searchEmptyMessage={i18n.phoneInput.noResults}
         // The default search only matches labels — dial codes live in `metadata`
         searchFn={(option, search) => {
-          if (!search) return true
-          if (!("value" in option) || !option.value) return false
+          if (!search) {
+            return true
+          }
+          if (!("value" in option) || !option.value) {
+            return false
+          }
           const query = search.trim().toLowerCase()
           const dialCode =
             option.metadata?.type === "dialCode" ? option.metadata.dialCode : ""

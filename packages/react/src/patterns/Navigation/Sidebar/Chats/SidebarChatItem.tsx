@@ -7,7 +7,6 @@ import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { Spinner } from "@/ui/Spinner"
-
 import { SidebarChatItemSkeleton } from "./SidebarChatSkeleton"
 import { SidebarChat, SidebarChatPresence } from "./types"
 import { UnreadBadge } from "./UnreadBadge"
@@ -36,7 +35,9 @@ const PresenceDot = ({
   isActive: boolean
   label: string
 }) => {
-  if (presence === "offline") return null
+  if (presence === "offline") {
+    return null
+  }
   return (
     <div
       role="img"

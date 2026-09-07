@@ -1,6 +1,5 @@
 import { StrictMode } from "react"
 import { beforeAll, describe, expect, it, vi } from "vitest"
-
 import {
   fireEvent,
   zeroRender as render,
@@ -8,7 +7,6 @@ import {
   userEvent,
   waitFor,
 } from "@/testing/test-utils"
-
 import { F0Chat } from "../F0Chat"
 import { F0ChatProvider } from "../providers/F0ChatProvider"
 import { type F0ChatMessage, type F0ChatRuntime } from "../types"
@@ -96,7 +94,9 @@ const pressArrowUp = async () => {
  * test that wants a quote must not aim at them. */
 const bubbleAround = (body: string): HTMLElement => {
   const box = screen.getByText(body).parentElement
-  if (!box) throw new Error(`No bubble around "${body}"`)
+  if (!box) {
+    throw new Error(`No bubble around "${body}"`)
+  }
   return box
 }
 

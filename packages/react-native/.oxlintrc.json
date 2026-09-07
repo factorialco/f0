@@ -1,8 +1,49 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript"],
+  "plugins": ["react", "typescript", "import"],
   "categories": {
     "correctness": "error"
+  },
+  "rules": {
+    // eslint:recommended rules that oxlint does not put in `correctness`.
+    "curly": "error",
+    "no-case-declarations": "error",
+    "no-empty": "error",
+    "no-fallthrough": "error",
+    "no-prototype-builtins": "error",
+    "no-regex-spaces": "error",
+    "no-unexpected-multiline": "error",
+    "preserve-caught-error": "error",
+
+    // typescript-eslint strict + stylistic, no type information needed.
+    "typescript/no-inferrable-types": "error",
+    "typescript/array-type": "error",
+    "typescript/adjacent-overload-signatures": "error",
+    "typescript/ban-tslint-comment": "error",
+    "typescript/consistent-generic-constructors": "error",
+    "typescript/no-confusing-non-null-assertion": "error",
+    "typescript/no-extraneous-class": "error",
+    "typescript/no-non-null-asserted-nullish-coalescing": "error",
+    "typescript/no-require-imports": "error",
+    "typescript/no-unnecessary-type-constraint": "error",
+    "typescript/no-unsafe-function-type": "error",
+    "typescript/prefer-for-of": "error",
+    "typescript/prefer-function-type": "error",
+    "typescript/prefer-literal-enum-member": "error",
+
+    // eslint-plugin-import, native oxlint rules.
+    "import/namespace": "error",
+
+    // PENDING. Turned on in a follow-up PR together with the code fixes.
+    // Number = violations on main when this was written.
+    "typescript/ban-ts-comment": "off", // 3
+    "import/no-duplicates": "off", // 3
+    "typescript/no-dynamic-delete": "off", // 1
+
+    // OFF ON PURPOSE. Not planned to be enabled.
+    "import/default": "off", // false positives with CommonJS interop packages
+    "import/no-named-as-default": "off", // false positives with CommonJS interop packages
+    "import/no-named-as-default-member": "off" // false positives with CommonJS interop packages
   },
   "env": {
     "builtin": true,
@@ -28,7 +69,7 @@
         "react/rules-of-hooks": "error",
         "react/exhaustive-deps": "error"
       },
-      "plugins": ["react", "typescript"]
+      "plugins": ["react", "typescript", "import"]
     },
     {
       "files": ["**/*.{js,jsx,ts,tsx}"],
@@ -51,6 +92,12 @@
       ],
       "rules": {
         "no-console": "off"
+      }
+    },
+    {
+      "files": ["**/*.test.*", "**/*.spec.*", "**/__tests__/**"],
+      "rules": {
+        "typescript/no-require-imports": "off"
       }
     }
   ]

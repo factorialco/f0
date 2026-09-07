@@ -7,7 +7,6 @@ import {
   isSameYear,
   startOfQuarter,
 } from "date-fns"
-
 import { DateRange, DateRangeComplete } from "../../types"
 import {
   formatDateRange,

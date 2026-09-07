@@ -1,6 +1,5 @@
 import { cva, type VariantProps } from "cva"
 import { useId } from "react"
-
 import { F0Avatar, type AvatarVariant } from "@/components/avatars/F0Avatar"
 import { F0Icon, type IconType } from "@/components/F0Icon"
 import { CrossedCircle } from "@/icons/app"

@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import {
   COLLAPSER_OFFSET_ADJUSTMENT_BY_ZOOM,
   STACKED_GROUP_PADDING,

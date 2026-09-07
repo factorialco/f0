@@ -1,8 +1,6 @@
 import { useRef, useState } from "react"
-
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
-
 import { SEEK_EPSILON, SEEK_STEP_SECONDS, formatTime } from "../utils"
 
 export interface SeekbarProps {
@@ -47,18 +45,24 @@ export function Seekbar({
 
   const fractionFromPointer = (clientX: number): number => {
     const track = trackRef.current
-    if (!track) return 0
+    if (!track) {
+      return 0
+    }
     const rect = track.getBoundingClientRect()
     return Math.max(0, Math.min(1, (clientX - rect.left) / rect.width))
   }
 
   const seekFromPointer = (clientX: number) => {
-    if (!duration) return
+    if (!duration) {
+      return
+    }
     onSeek(fractionFromPointer(clientX) * duration)
   }
 
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (!duration) return
+    if (!duration) {
+      return
+    }
     event.preventDefault()
     event.currentTarget.setPointerCapture(event.pointerId)
     setIsDragging(true)
@@ -66,13 +70,19 @@ export function Seekbar({
   }
 
   const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (!duration) return
+    if (!duration) {
+      return
+    }
     setHoveredFraction(fractionFromPointer(event.clientX))
-    if (isDragging) seekFromPointer(event.clientX)
+    if (isDragging) {
+      seekFromPointer(event.clientX)
+    }
   }
 
   const handlePointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (!isDragging) return
+    if (!isDragging) {
+      return
+    }
     setIsDragging(false)
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId)
@@ -86,7 +96,9 @@ export function Seekbar({
     hoveredFraction > markerFraction
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    if (!duration) return
+    if (!duration) {
+      return
+    }
     let target: number | null = null
     switch (event.key) {
       case "ArrowLeft":

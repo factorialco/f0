@@ -1,11 +1,9 @@
 import React, { forwardRef } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { DataTestIdWrapper, WithDataTestIdProps } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { DetailsItem, DetailsItemType } from "../DetailsItem"
 
 interface DetailsItemsListProps extends WithDataTestIdProps {

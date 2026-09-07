@@ -1,5 +1,5 @@
-import { useDeepCompareEffect } from "@reactuses/core"
 import { useComposedRefs } from "@radix-ui/react-compose-refs"
+import { useDeepCompareEffect } from "@reactuses/core"
 import { cva } from "cva"
 import { isEqual } from "lodash"
 import {
@@ -12,12 +12,12 @@ import {
   useRef,
   useState,
 } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
 import { F0InputField } from "@/components/F0InputField"
 import { InputMessages } from "@/components/F0InputField/components/InputMessages"
 import { Label } from "@/components/F0InputField/components/Label"
+import { TooltipInternal } from "@/experimental/Overlays/Tooltip"
 import {
   BaseFetchOptions,
   BaseResponse,
@@ -47,24 +47,20 @@ import {
   VirtualItem,
 } from "@/ui/Select"
 import { textVariants } from "@/ui/Text"
-
-import type {
-  F0SelectItemObject,
-  F0SelectItemProps,
-  F0SelectProps,
-  ResolvedRecordType,
-} from "./types"
-
 import { Arrow } from "./components/Arrow"
-import { useTriggerSearch } from "./hooks/useTriggerSearch"
-import { TooltipInternal } from "@/experimental/Overlays/Tooltip"
-
 import { SelectAll } from "./components/SelectAll"
 import { SelectBottomActions } from "./components/SelectBottomActions"
 import { SelectedItems } from "./components/SelectedItems"
 import { SelectionPreview } from "./components/SelectionPreview"
 import { SelectItem } from "./components/SelectItem"
 import { SelectTopActions } from "./components/SelectTopActions"
+import { useTriggerSearch } from "./hooks/useTriggerSearch"
+import type {
+  F0SelectItemObject,
+  F0SelectItemProps,
+  F0SelectProps,
+  ResolvedRecordType,
+} from "./types"
 export * from "./types"
 
 const defaultSearchFn = (
@@ -703,7 +699,9 @@ const F0SelectComponent = forwardRef(function Select<
     const extractOriginalItem = (
       record: ActualRecordType | undefined
     ): ResolvedRecordType<R> | undefined => {
-      if (!record) return undefined
+      if (!record) {
+        return undefined
+      }
       if (source) {
         return record as unknown as ResolvedRecordType<R>
       }
@@ -775,7 +773,9 @@ const F0SelectComponent = forwardRef(function Select<
     const extractOriginalItem = (
       record: ActualRecordType | undefined
     ): ResolvedRecordType<R> | undefined => {
-      if (!record) return undefined
+      if (!record) {
+        return undefined
+      }
       if (source) {
         // For datasource, the record itself is the original item
         return record as unknown as ResolvedRecordType<R>
@@ -1279,13 +1279,17 @@ const F0SelectComponent = forwardRef(function Select<
    * always one the user can see and hear.
    */
   useEffect(() => {
-    if (!inlineSearch) return
+    if (!inlineSearch) {
+      return
+    }
     if (!openLocal) {
       setActiveValue(undefined)
       return
     }
     setActiveValue((current) => {
-      if (current && navigableValues.includes(current)) return current
+      if (current && navigableValues.includes(current)) {
+        return current
+      }
       // Opening lands on what is already selected, so Enter confirms it and
       // the arrows start from it. First option otherwise.
       const selected = localValue.find((value) =>
@@ -1300,7 +1304,9 @@ const F0SelectComponent = forwardRef(function Select<
   const moveActive = useCallback(
     (direction: "next" | "previous") => {
       setActiveValue((current) => {
-        if (navigableValues.length === 0) return undefined
+        if (navigableValues.length === 0) {
+          return undefined
+        }
         const at = current ? navigableValues.indexOf(current) : -1
         const next =
           direction === "next"
@@ -1314,11 +1320,15 @@ const F0SelectComponent = forwardRef(function Select<
 
   /** Takes the active option: what Enter does. */
   const selectActive = useCallback(() => {
-    if (!activeValue) return false
+    if (!activeValue) {
+      return false
+    }
     const isSelected = localValue.includes(activeValue)
     hasUserInteracted.current = true
     onItemCheckChange(activeValue, multiple ? !isSelected : true)
-    if (!multiple) handleChangeOpenLocal(false)
+    if (!multiple) {
+      handleChangeOpenLocal(false)
+    }
     return true
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeValue, localValue, multiple, onItemCheckChange])
@@ -1333,7 +1343,9 @@ const F0SelectComponent = forwardRef(function Select<
    */
   const removeLastSelected = useCallback(() => {
     const last = localValue[localValue.length - 1]
-    if (!last) return false
+    if (!last) {
+      return false
+    }
     hasUserInteracted.current = true
     if (multiple) {
       onItemCheckChange(last, false)
@@ -1371,7 +1383,9 @@ const F0SelectComponent = forwardRef(function Select<
    * be brought into it — the field cannot rely on focus doing it.
    */
   useEffect(() => {
-    if (!inlineSearch || !activeValue) return
+    if (!inlineSearch || !activeValue) {
+      return
+    }
     document
       .getElementById(optionIdFor(activeValue))
       ?.scrollIntoView({ block: "nearest" })
@@ -1383,7 +1397,9 @@ const F0SelectComponent = forwardRef(function Select<
         // search box, the text the user typed has to go with it.
         const resetSearch = () => {
           setCurrentSearch(undefined)
-          if (inlineSearch) clearSearchDraft()
+          if (inlineSearch) {
+            clearSearchDraft()
+          }
         }
         const result = onCreate(value)
         if (result && typeof result.then === "function") {
@@ -1810,7 +1826,9 @@ const F0SelectComponent = forwardRef(function Select<
                     focusSearchInput()
                     return
                   }
-                  if (!openLocal) handleChangeOpenLocal(true)
+                  if (!openLocal) {
+                    handleChangeOpenLocal(true)
+                  }
                   focusSearchInput()
                   return
                 }

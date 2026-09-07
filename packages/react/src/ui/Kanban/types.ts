@@ -1,5 +1,4 @@
 import type { ReactNode } from "react"
-
 import type { NewColor } from "@/components/tags/F0TagDot"
 import type { Variant } from "@/components/tags/F0TagStatus"
 import type { RecordType } from "@/hooks/datasource"
@@ -31,7 +30,7 @@ export interface KanbanProps<TRecord extends RecordType> {
    * Lanes configuration. While the data source adapter is not ready, each lane
    * carries its concrete items so we can iterate visually.
    */
-  lanes: ReadonlyArray<KanbanLaneAttributes<TRecord>>
+  lanes: readonly KanbanLaneAttributes<TRecord>[]
 
   /** Whether the kanban is in loading state */
   loading?: boolean

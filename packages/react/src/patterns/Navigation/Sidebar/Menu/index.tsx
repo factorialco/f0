@@ -7,21 +7,19 @@ import {
   useRef,
   useState,
 } from "react"
-
 import { AvatarVariant, F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
-import { OneEllipsis } from "@/lib/OneEllipsis"
-import { Counter } from "@/ui/Counter"
 import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
 import { NavigationItem } from "@/experimental/Navigation/utils"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { Delete, EllipsisHorizontal, MoveDown, MoveUp } from "@/icons/app"
 import { Link, useNavigation } from "@/lib/linkHandler"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { useTouchScreen } from "@/lib/useTouchScreen"
 import { cn, focusRing } from "@/lib/utils"
-
+import { Counter } from "@/ui/Counter"
 import { SidebarCollapsibleSection } from "../CollapsibleSection"
 import { DragProvider, useDragContext } from "./DragContext"
 
@@ -353,7 +351,9 @@ const CategoryItem = ({
     </SidebarCollapsibleSection>
   )
 
-  if (!isSortable) return content
+  if (!isSortable) {
+    return content
+  }
 
   return (
     <Reorder.Item
@@ -505,7 +505,9 @@ function MenuContent({
 
   const handleMoveFavorite = useCallback(
     (from: number, to: number) => {
-      if (to < 0 || to >= internalFavorites.length) return
+      if (to < 0 || to >= internalFavorites.length) {
+        return
+      }
       const updated = [...internalFavorites]
       const [moved] = updated.splice(from, 1)
       updated.splice(to, 0, moved)
@@ -555,16 +557,13 @@ function MenuContent({
   const favoritesContentWrapperClasses = "flex flex-col gap-0.5"
   const favoriteLabelsToIndex = useMemo(
     () =>
-      internalFavorites.reduce<Record<string, Array<number>>>(
-        (acc, item, idx) => {
-          if (!(item.label in acc)) {
-            acc[item.label] = []
-          }
-          acc[item.label].push(idx)
-          return acc
-        },
-        {}
-      ),
+      internalFavorites.reduce<Record<string, number[]>>((acc, item, idx) => {
+        if (!(item.label in acc)) {
+          acc[item.label] = []
+        }
+        acc[item.label].push(idx)
+        return acc
+      }, {}),
     [internalFavorites]
   )
 

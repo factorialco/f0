@@ -1,7 +1,4 @@
 import { z, type ZodErrorMap, type ZodTypeAny } from "zod"
-
-import type { F0FormSchema, F0FormSubmitResult } from "../types"
-
 import { buildDynamicSchema } from "../conditionalResolver"
 import {
   describeFormSchema,
@@ -9,6 +6,7 @@ import {
 } from "../describeFormSchema"
 import { getF0Config, unwrapToZodObject } from "../f0Schema"
 import { evaluateRenderIf } from "../fields/utils"
+import type { F0FormSchema, F0FormSubmitResult } from "../types"
 
 // =============================================================================
 // Public types
@@ -126,7 +124,9 @@ function flattenZodErrors(error: z.ZodError): FlattenedZodErrors {
   for (const issue of error.issues) {
     if (issue.path.length === 0) {
       // Root-level issue (e.g. from object-level .refine())
-      if (rootError === undefined) rootError = issue.message
+      if (rootError === undefined) {
+        rootError = issue.message
+      }
       continue
     }
     const path = issue.path.join(".")

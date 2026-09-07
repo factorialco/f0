@@ -1,12 +1,9 @@
 import { lazy, Suspense, type ReactNode, useState } from "react"
-
 import { F0FileItem } from "@/components/F0FileItem"
-import { Download } from "@/icons/app"
-import { SolidPlay } from "@/icons/app"
+import { Download, SolidPlay } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
-
 import { useF0ChatEmit } from "../providers/F0ChatProvider"
 import { type F0ChatFileAttachment } from "../types"
 import { formatFileSize } from "../utils/attachments"

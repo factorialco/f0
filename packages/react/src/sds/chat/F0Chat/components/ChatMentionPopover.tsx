@@ -1,12 +1,10 @@
 import { useEffect, useLayoutEffect, useRef } from "react"
-
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0Icon } from "@/components/F0Icon"
 import { People } from "@/icons/app"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
-
 import {
   type MentionCandidate,
   type PopoverPosition,
@@ -58,7 +56,9 @@ export function ChatMentionPopover({
   useLayoutEffect(() => {
     const el = listRef.current
     const parent = el?.offsetParent as HTMLElement | null
-    if (!el || !parent) return
+    if (!el || !parent) {
+      return
+    }
     const overflow = el.offsetLeft + el.offsetWidth - parent.clientWidth
     if (overflow > 0) {
       el.style.left = `${Math.max(0, el.offsetLeft - overflow)}px`
@@ -68,7 +68,9 @@ export function ChatMentionPopover({
   const hasUserResults = results.some((r) => r.kind === "user")
   const showMemberSkeleton = isLoading && !hasUserResults
   // Nothing matches at all and we're not loading → render nothing.
-  if (!isOpen || (results.length === 0 && !isLoading)) return null
+  if (!isOpen || (results.length === 0 && !isLoading)) {
+    return null
+  }
 
   return (
     <div

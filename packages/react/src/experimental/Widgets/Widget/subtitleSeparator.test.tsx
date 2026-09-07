@@ -1,8 +1,6 @@
 import { describe, expect, test } from "vitest"
-
 import { zeroRender } from "@/testing/test-utils"
-
-import { Widget } from "./index"
+import { Widget } from "."
 
 /**
  * A LINKED TITLE ALREADY SEPARATES ITSELF from the subtitle: it ends in a

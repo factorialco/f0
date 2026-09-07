@@ -1,9 +1,6 @@
 import { type RefObject } from "react"
-
 import { cn } from "@/lib/utils"
-
 import { type HighlightSegment } from "../highlight-utils"
-
 import { TypewriterPlaceholder } from "./TypewriterPlaceholder"
 
 interface TextareaFieldProps {

@@ -1,5 +1,4 @@
 import { type ReactNode, useRef, useState } from "react"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon, type IconType } from "@/components/F0Icon"
 import {
@@ -17,7 +16,6 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { Action } from "@/ui/Action"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
-
 import { useChatComposeActions } from "../providers/ChatUIProvider"
 import { useF0ChatEmit, useF0ChatStable } from "../providers/F0ChatProvider"
 import { type F0ChatMessage, type F0ChatReactionSource } from "../types"
@@ -123,7 +121,9 @@ export const ChatMessageActions = ({
 
   const handleOpenChange = (next: boolean) => {
     onOpenChange(next)
-    if (!next) setView("menu")
+    if (!next) {
+      setView("menu")
+    }
   }
 
   const react = (emoji: string, source: F0ChatReactionSource) => {
@@ -187,7 +187,9 @@ export const ChatMessageActions = ({
         align={isMine ? "end" : "start"}
         className="w-64 rounded-lg border border-solid border-f1-border-secondary p-0"
         onCloseAutoFocus={(event) => {
-          if (!keepComposerFocusRef.current) return
+          if (!keepComposerFocusRef.current) {
+            return
+          }
           keepComposerFocusRef.current = false
           event.preventDefault()
         }}
@@ -197,12 +199,12 @@ export const ChatMessageActions = ({
             <MenuItem
               icon={ArrowCycle}
               label={i18n.chat.retry}
-              onClick={runAndClose(() => void retryMessage(message.id))}
+              onClick={runAndClose(() => retryMessage(message.id))}
             />
             <MenuItem
               icon={Delete}
               label={i18n.actions.delete}
-              onClick={runAndClose(() => void discardFailed(message.id))}
+              onClick={runAndClose(() => discardFailed(message.id))}
             />
           </div>
         ) : view === "info" ? (
@@ -304,9 +306,7 @@ export const ChatMessageActions = ({
                     <MenuItem
                       icon={Delete}
                       label={i18n.actions.delete}
-                      onClick={runAndClose(
-                        () => void deleteMessage(message.id)
-                      )}
+                      onClick={runAndClose(() => deleteMessage(message.id))}
                     />
                   )}
                 </div>

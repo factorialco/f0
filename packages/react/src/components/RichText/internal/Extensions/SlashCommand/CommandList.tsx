@@ -7,10 +7,8 @@ import {
   useRef,
   useState,
 } from "react"
-
 import { F0Icon } from "@/components/F0Icon"
 import { cn } from "@/lib/utils"
-
 import { CommandGroup, CommandItem } from "./AvailableCommands"
 
 interface CommandListHandle {
@@ -61,7 +59,9 @@ const CommandList = forwardRef<CommandListHandle, CommandListProps>(
 
     const scrollIntoView = useCallback((element: HTMLElement) => {
       const container = containerRef.current
-      if (!container) return
+      if (!container) {
+        return
+      }
 
       const containerRect = container.getBoundingClientRect()
       const elementRect = element.getBoundingClientRect()

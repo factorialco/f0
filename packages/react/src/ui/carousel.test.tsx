@@ -1,7 +1,5 @@
 import { describe, expect, test } from "vitest"
-
 import { SPACE_FOR_WIDGET_SHADOW } from "@/experimental/Navigation/Carousel/DynamicCarousel"
-
 import { CAROUSEL_SHADOW_BLEED } from "./carousel"
 
 /**

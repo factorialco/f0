@@ -21,7 +21,9 @@ export const readDataCollectionStorage = <
 ): DataCollectionStorage<CurrentFiltersState> | null => {
   try {
     const raw = localStorage.getItem(getDataCollectionStorageKey(id))
-    if (raw === null) return null
+    if (raw === null) {
+      return null
+    }
     // JSON.parse returns `any`, which flows into the typed return — no `as`.
     const parsed: DataCollectionStorage<CurrentFiltersState> = JSON.parse(raw)
     return parsed
@@ -50,7 +52,9 @@ export const resolveDataCollectionFilters = <
     "visualization" | "visualizationFilters" | "filters"
   > | null
 ): CurrentFiltersState | undefined => {
-  if (!storage) return undefined
+  if (!storage) {
+    return undefined
+  }
   return (
     storage.visualizationFilters?.[String(storage.visualization ?? 0)] ??
     storage.filters

@@ -1,7 +1,6 @@
 import { breakpoints } from "@factorialco/f0-core"
 import { ReactNode } from "react"
 import { useMediaQuery } from "usehooks-ts"
-
 import { cn } from "@/lib/utils"
 
 /**

@@ -17,9 +17,6 @@
  */
 
 import { forwardRef, useCallback, useEffect, useRef } from "react"
-
-import type { TableVisualizationType } from "@/patterns/OneDataCollection/types"
-
 import {
   GroupingDefinition,
   RecordType,
@@ -30,15 +27,8 @@ import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useData
 import { ItemActionsDefinition } from "@/patterns/OneDataCollection/item-actions"
 import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import { SummariesDefinition } from "@/patterns/OneDataCollection/summary"
+import type { TableVisualizationType } from "@/patterns/OneDataCollection/types"
 import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
-
-import type {
-  CellRendererProps,
-  ColId,
-  RowWrapperProps,
-  TableColumnDefinition,
-} from "../types"
-
 import { PrimaryActionItemDefinition } from "../../../../actions"
 import { useAddRow } from "../../EditableTable/context/AddRowContext"
 import { useCalculateConectorHeight } from "../hooks/useCalculateConectorHeight"
@@ -46,6 +36,12 @@ import { HeaderGroupEntry } from "../hooks/useHeaderGroups"
 import { useLoadChildren } from "../hooks/useLoadChildren"
 import { useStickyParentRow } from "../hooks/useStickyParentRow"
 import { useNestedDataContext } from "../providers/NestedProvider"
+import type {
+  CellRendererProps,
+  ColId,
+  RowWrapperProps,
+  TableColumnDefinition,
+} from "../types"
 import { AddRowRow } from "./AddRow"
 import { LoadMoreRow } from "./LoadMore"
 import { NestedRowProps, Row } from "./Row"
@@ -57,7 +53,9 @@ const normalizeAddRowActions = (
     | PrimaryActionItemDefinition[]
     | undefined
 ): PrimaryActionItemDefinition[] => {
-  if (!result) return []
+  if (!result) {
+    return []
+  }
   return (Array.isArray(result) ? result : [result]).filter(
     (item): item is PrimaryActionItemDefinition => item !== undefined
   )
@@ -84,10 +82,12 @@ export type RowProps<
   item: R
   index: number
   groupIndex: number
-  onCheckedChange: (checked: boolean) => void
   onItemCheckedChange?: (item: R, checked: boolean) => void
-  selectedItems: Map<string | number, R>
-  columns: ReadonlyArray<TableColumnDefinition<R, Sortings, Summaries>>
+  /** This row's own selected state, so a selection change only alters the prop
+   * of the row that changed. */
+  isSelected?: boolean
+  selectedItems?: Map<string | number, R>
+  columns: readonly TableColumnDefinition<R, Sortings, Summaries>[]
   frozenColumnsLeft: number
   checkColumnWidth: number
   tableWithChildren: boolean
@@ -132,6 +132,14 @@ const NestedRowContent = <
     | null
 ) => {
   const internalRowRef = useRef<HTMLTableRowElement | null>(null)
+
+  // Each child gets its own boolean, for the same reason the parent does:
+  // handing down the Map made every sibling's props differ whenever any one of
+  // them changed, so selecting one row re-rendered them all.
+  const isChildSelected = (record: R): boolean => {
+    const childId = props.source.selectable?.(record)
+    return childId !== undefined && !!props.selectedItems?.has(childId)
+  }
   const sentinelRef = useRef<HTMLTableCellElement | null>(null)
   const addRow = useAddRow()
 
@@ -232,9 +240,12 @@ const NestedRowContent = <
   // parent whose fetch comes back empty) also avoids re-requesting every render.
   const requestedDefaultChildrenGenerationRef = useRef<number | null>(null)
   useEffect(() => {
-    if (!open || children.length) return
-    if (requestedDefaultChildrenGenerationRef.current === resetGeneration)
+    if (!open || children.length) {
       return
+    }
+    if (requestedDefaultChildrenGenerationRef.current === resetGeneration) {
+      return
+    }
     requestedDefaultChildrenGenerationRef.current = resetGeneration
     loadChildren()
   }, [open, children.length, loadChildren, resetGeneration])
@@ -339,9 +350,7 @@ const NestedRowContent = <
                 key={`nested-row-${props.groupIndex}-${child.id}-${props.index}-${childIndex}`}
                 index={childIndex}
                 item={childItem}
-                onCheckedChange={(checked) => {
-                  props.onItemCheckedChange?.(childItem, checked)
-                }}
+                isSelected={isChildSelected(childItem)}
                 tableWithChildren={props.tableWithChildren}
                 ref={getChildRef()}
                 nestedRowProps={{
@@ -379,9 +388,7 @@ const NestedRowContent = <
                 key={`row-${props.groupIndex}-${props.index}-${childIndex}`}
                 index={childIndex}
                 item={childItem}
-                onCheckedChange={(checked) => {
-                  props.onItemCheckedChange?.(childItem, checked)
-                }}
+                isSelected={isChildSelected(childItem)}
                 noBorder={leafShouldHideBorder}
                 ref={getChildRef()}
                 nestedRowProps={{
@@ -451,7 +458,9 @@ const NestedRowContent = <
           addRowActions={addRowActions}
           addRowLabel={addRow?.addNestedRowActionsLabel}
           ref={(el: HTMLTableRowElement | null) => {
-            if (children.length === 0) setFirstChildRef(el)
+            if (children.length === 0) {
+              setFirstChildRef(el)
+            }
             setLastChildRef(el)
           }}
           nestedRowProps={{

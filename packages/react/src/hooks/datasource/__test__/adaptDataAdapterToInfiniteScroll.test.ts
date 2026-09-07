@@ -1,8 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
 import { Observable } from "zen-observable-ts"
-
 import { PromiseState } from "@/lib/promise-to-observable"
-
 import { adaptDataAdapterToInfiniteScroll } from "../adaptDataAdapterToInfiniteScroll"
 import {
   DataAdapter,

@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "vitest"],
+  "plugins": ["react", "typescript", "vitest", "import"],
   "categories": {
     "correctness": "error"
   },
@@ -10,10 +10,324 @@
     "f0-security/require-sanitized-inner-html": "error",
     "f0-security/require-style-nonce": [
       "error",
-      {
-        "allow": ["src/ui/chart.tsx", "src/kits/ai/F0AiPong/F0AiPong.tsx"]
-      }
-    ]
+      { "allow": ["src/ui/chart.tsx", "src/kits/ai/F0AiPong/F0AiPong.tsx"] }
+    ],
+
+    // eslint:recommended rules that oxlint does not put in `correctness`.
+    "curly": "error",
+    "no-case-declarations": "error",
+    "no-empty": "error",
+    "no-fallthrough": "error",
+    "no-prototype-builtins": "error",
+    "no-regex-spaces": "error",
+    "no-unexpected-multiline": "error",
+    "preserve-caught-error": "error",
+
+    // typescript-eslint strict + stylistic, no type information needed.
+    "typescript/consistent-generic-constructors": "error",
+    "typescript/no-inferrable-types": "error",
+    "typescript/array-type": "error",
+    "typescript/adjacent-overload-signatures": "error",
+    "typescript/ban-ts-comment": "error",
+    "typescript/ban-tslint-comment": "error",
+    "typescript/no-confusing-non-null-assertion": "error",
+    "typescript/no-non-null-asserted-nullish-coalescing": "error",
+    "typescript/no-require-imports": "error",
+    "typescript/no-unnecessary-type-constraint": "error",
+    "typescript/no-unsafe-function-type": "error",
+    "typescript/prefer-function-type": "error",
+    "typescript/prefer-literal-enum-member": "error",
+
+    // typescript-eslint strict + stylistic, type-aware. They run only with
+    // `--type-aware` (see the lint scripts) and need `oxlint-tsgolint`.
+    "typescript/no-meaningless-void-operator": "error",
+    "typescript/return-await": "error",
+    "typescript/no-duplicate-type-constituents": "error",
+    "typescript/prefer-reduce-type-parameter": "error",
+    "typescript/no-unnecessary-type-arguments": "error",
+    "typescript/prefer-includes": "error",
+    "typescript/no-mixed-enums": "error",
+    "typescript/prefer-return-this-type": "error",
+    "typescript/related-getter-setter-pairs": "error",
+
+    // eslint-plugin-import. Native oxlint rules, plus `import-js/*` for rules
+    // oxlint has no native version of (JS plugin).
+    "import-js/no-useless-path-segments": ["error", { "noUselessIndex": true }],
+    "import/no-duplicates": "error",
+    "import/namespace": "error",
+
+    // eslint-plugin-sonarjs recommended (JS plugin). Rules that need type
+    // information run without it here and may miss cases.
+    "sonarjs/anchor-precedence": "error",
+    "sonarjs/argument-type": "error",
+    "sonarjs/arguments-order": "error",
+    "sonarjs/array-callback-without-return": "error",
+    "sonarjs/assertions-in-test-cases": "error",
+    "sonarjs/async-test-assertions": "error",
+    "sonarjs/aws-apigateway-public-api": "error",
+    "sonarjs/aws-ec2-rds-dms-public": "error",
+    "sonarjs/aws-ec2-unencrypted-ebs-volume": "error",
+    "sonarjs/aws-efs-unencrypted": "error",
+    "sonarjs/aws-iam-all-privileges": "error",
+    "sonarjs/aws-iam-privilege-escalation": "error",
+    "sonarjs/aws-iam-public-access": "error",
+    "sonarjs/aws-opensearchservice-domain": "error",
+    "sonarjs/aws-rds-unencrypted-databases": "error",
+    "sonarjs/aws-restricted-ip-admin-access": "error",
+    "sonarjs/aws-s3-bucket-granted-access": "error",
+    "sonarjs/aws-s3-bucket-insecure-http": "error",
+    "sonarjs/aws-s3-bucket-public-access": "error",
+    "sonarjs/aws-s3-bucket-versioning": "error",
+    "sonarjs/aws-sagemaker-unencrypted-notebook": "error",
+    "sonarjs/aws-sns-unencrypted-topics": "error",
+    "sonarjs/aws-sqs-unencrypted-queue": "error",
+    "sonarjs/block-scoped-var": "error",
+    "sonarjs/call-argument-line": "error",
+    "sonarjs/chai-determinate-assertion": "error",
+    "sonarjs/class-name": "error",
+    "sonarjs/code-eval": "error",
+    "sonarjs/comma-or-logical-or-case": "error",
+    "sonarjs/constructor-for-side-effects": "error",
+    "sonarjs/content-length": "error",
+    "sonarjs/content-security-policy": "error",
+    "sonarjs/cookie-no-httponly": "error",
+    "sonarjs/cors": "error",
+    "sonarjs/csrf": "error",
+    "sonarjs/deprecation": "error",
+    "sonarjs/different-types-comparison": "error",
+    "sonarjs/disabled-auto-escaping": "error",
+    "sonarjs/disabled-resource-integrity": "error",
+    "sonarjs/disabled-timeout": "error",
+    "sonarjs/dompurify-unsafe-config": "error",
+    "sonarjs/duplicates-in-character-class": "error",
+    "sonarjs/dynamically-constructed-templates": "error",
+    "sonarjs/empty-string-repetition": "error",
+    "sonarjs/encryption-secure-mode": "error",
+    "sonarjs/existing-groups": "error",
+    "sonarjs/explicit-test-skip": "error",
+    "sonarjs/file-permissions": "error",
+    "sonarjs/file-uploads": "error",
+    "sonarjs/fixme-tag": "error",
+    "sonarjs/for-loop-increment-sign": "error",
+    "sonarjs/function-inside-loop": "error",
+    "sonarjs/future-reserved-words": "error",
+    "sonarjs/generator-without-yield": "error",
+    "sonarjs/hardcoded-secret-signatures": "error",
+    "sonarjs/hashing": "error",
+    "sonarjs/hooks-before-test-cases": "error",
+    "sonarjs/in-operator-type-error": "error",
+    "sonarjs/inconsistent-function-call": "error",
+    "sonarjs/index-of-compare-to-positive-number": "error",
+    "sonarjs/insecure-cookie": "error",
+    "sonarjs/insecure-jwt-token": "error",
+    "sonarjs/inverted-assertion-arguments": "error",
+    "sonarjs/jsx-no-leaked-render": "error",
+    "sonarjs/label-position": "error",
+    "sonarjs/max-switch-cases": "error",
+    "sonarjs/memoize-cache-key": "error",
+    "sonarjs/misplaced-loop-counter": "error",
+    "sonarjs/new-operator-misuse": "error",
+    "sonarjs/no-alphabetical-sort": "error",
+    "sonarjs/no-angular-bypass-sanitization": "error",
+    "sonarjs/no-array-delete": "error",
+    "sonarjs/no-associative-arrays": "error",
+    "sonarjs/no-async-constructor": "error",
+    "sonarjs/no-case-label-in-switch": "error",
+    "sonarjs/no-code-after-done": "error",
+    "sonarjs/no-collection-size-mischeck": "error",
+    "sonarjs/no-control-regex": "error",
+    "sonarjs/no-debug-commands-in-ui-tests": "error",
+    "sonarjs/no-default-utility-imports": "error",
+    "sonarjs/no-delete-var": "error",
+    "sonarjs/no-duplicate-in-composite": "error",
+    "sonarjs/no-element-overwrite": "error",
+    "sonarjs/no-empty-after-reluctant": "error",
+    "sonarjs/no-empty-alternatives": "error",
+    "sonarjs/no-empty-character-class": "error",
+    "sonarjs/no-empty-collection": "error",
+    "sonarjs/no-empty-group": "error",
+    "sonarjs/no-empty-test-file": "error",
+    "sonarjs/no-empty-test-title": "error",
+    "sonarjs/no-equals-in-for-termination": "error",
+    "sonarjs/no-exclusive-tests": "error",
+    "sonarjs/no-extra-arguments": "error",
+    "sonarjs/no-fallthrough": "error",
+    "sonarjs/no-fixed-wait-in-tests": "error",
+    "sonarjs/no-forced-browser-interaction": "error",
+    "sonarjs/no-global-this": "error",
+    "sonarjs/no-hardcoded-ip": "error",
+    "sonarjs/no-hardcoded-secrets": "error",
+    "sonarjs/no-hook-setter-in-body": "error",
+    "sonarjs/no-identical-conditions": "error",
+    "sonarjs/no-identical-expressions": "error",
+    "sonarjs/no-ignored-exceptions": "error",
+    "sonarjs/no-ignored-return": "error",
+    "sonarjs/no-implicit-global": "error",
+    "sonarjs/no-in-misuse": "error",
+    "sonarjs/no-incompatible-assertion-types": "error",
+    "sonarjs/no-incomplete-assertions": "error",
+    "sonarjs/no-internal-api-use": "error",
+    "sonarjs/no-interpolation-in-inline-snapshots": "error",
+    "sonarjs/no-invalid-regexp": "error",
+    "sonarjs/no-invariant-returns": "error",
+    "sonarjs/no-labels": "error",
+    "sonarjs/no-literal-call": "error",
+    "sonarjs/no-mime-sniff": "error",
+    "sonarjs/no-misleading-array-reverse": "error",
+    "sonarjs/no-misleading-character-class": "error",
+    "sonarjs/no-mixed-completion-style": "error",
+    "sonarjs/no-os-command-from-path": "error",
+    "sonarjs/no-parameter-reassignment": "error",
+    "sonarjs/no-primitive-wrappers": "error",
+    "sonarjs/no-referrer-policy": "error",
+    "sonarjs/no-regex-spaces": "error",
+    "sonarjs/no-same-argument-assert": "error",
+    "sonarjs/no-same-line-conditional": "error",
+    "sonarjs/no-session-cookies-on-static-assets": "error",
+    "sonarjs/no-table-as-layout": "error",
+    "sonarjs/no-try-promise": "error",
+    "sonarjs/no-undefined-argument": "error",
+    "sonarjs/no-unenclosed-multiline-block": "error",
+    "sonarjs/no-uniq-key": "error",
+    "sonarjs/no-unthrown-error": "error",
+    "sonarjs/no-unused-collection": "error",
+    "sonarjs/no-use-of-empty-return-value": "error",
+    "sonarjs/no-useless-catch": "error",
+    "sonarjs/no-useless-increment": "error",
+    "sonarjs/no-useless-intersection": "error",
+    "sonarjs/no-useless-react-setstate": "error",
+    "sonarjs/no-weak-cipher": "error",
+    "sonarjs/no-weak-keys": "error",
+    "sonarjs/non-existent-operator": "error",
+    "sonarjs/null-dereference": "error",
+    "sonarjs/object-alt-content": "error",
+    "sonarjs/post-message": "error",
+    "sonarjs/prefer-default-last": "error",
+    "sonarjs/prefer-regexp-exec": "error",
+    "sonarjs/prefer-single-boolean-return": "error",
+    "sonarjs/prefer-type-guard": "error",
+    "sonarjs/prefer-while": "error",
+    "sonarjs/production-debug": "error",
+    "sonarjs/publicly-writable-directories": "error",
+    "sonarjs/review-blockchain-mnemonic": "error",
+    "sonarjs/session-regeneration": "error",
+    "sonarjs/single-character-alternation": "error",
+    "sonarjs/slow-regex": "error",
+    "sonarjs/sql-queries": "error",
+    "sonarjs/stable-tests": "error",
+    "sonarjs/stateful-regex": "error",
+    "sonarjs/strict-transport-security": "error",
+    "sonarjs/synchronous-suite-callback": "error",
+    "sonarjs/table-header": "error",
+    "sonarjs/table-header-reference": "error",
+    "sonarjs/test-check-exception": "error",
+    "sonarjs/unused-named-groups": "error",
+    "sonarjs/unverified-certificate": "error",
+    "sonarjs/unverified-hostname": "error",
+    "sonarjs/updated-const-var": "error",
+    "sonarjs/weak-ssl": "error",
+    "sonarjs/x-powered-by": "error",
+    "sonarjs/xml-parser-xxe": "error",
+
+    // PENDING. Turned on in follow-up PRs together with the code fixes.
+    // Number = violations on main when this was written.
+    "typescript/no-dynamic-delete": "off", // 10
+    "sonarjs/no-small-switch": "off", // 3
+    "sonarjs/concise-regex": "off", // 4
+    "typescript/prefer-for-of": "off", // 9
+    "sonarjs/no-dead-store": "off", // 3
+    "sonarjs/no-nested-template-literals": "off", // 7
+    "sonarjs/no-duplicated-branches": "off", // 11
+    "sonarjs/prefer-native-lodash-alternative": "off", // 2
+    "sonarjs/no-redundant-jump": "off", // 3
+    "sonarjs/updated-loop-counter": "off", // 1
+    "sonarjs/no-redundant-assignments": "off", // 2
+    "sonarjs/reduce-initial-value": "off", // 1
+    "sonarjs/prefer-promise-shorthand": "off", // 1
+    "typescript/no-extraneous-class": "off", // 2
+    "sonarjs/public-static-readonly": "off", // 5
+    "sonarjs/no-nested-assignment": "off", // 6
+    "sonarjs/no-gratuitous-expressions": "off", // 1
+    "sonarjs/no-skipped-tests": "off", // 2
+    "sonarjs/no-all-duplicated-branches": "off", // 4
+    "sonarjs/no-clear-text-protocols": "off", // 2
+    "sonarjs/single-char-in-character-classes": "off", // 1
+    "sonarjs/no-trivial-assertions": "off", // 7
+    "sonarjs/link-with-target-blank": "off", // 1
+    "sonarjs/no-hardcoded-passwords": "off", // 1
+    "sonarjs/bitwise-operators": "off", // 1
+    "sonarjs/no-inverted-boolean-check": "off", // 2
+    "sonarjs/no-redundant-boolean": "off", // 2
+    "sonarjs/no-duplicate-test-title": "off", // 1
+    "sonarjs/regex-complexity": "off", // 1
+    "typescript/no-unnecessary-template-expression": "off", // 14
+    "typescript/await-thenable": "off", // 4
+    "typescript/no-redundant-type-constituents": "off", // 10
+    "typescript/use-unknown-in-catch-callback-variable": "off", // 7
+    "typescript/prefer-promise-reject-errors": "off", // 8
+    "typescript/no-misused-promises": "off", // 16
+    "typescript/restrict-plus-operands": "off", // 1
+    "typescript/no-unsafe-enum-comparison": "off", // 2
+
+    // DEBT. Turn on once the code is fixed. Number = violations when this
+    // was written. Do not add new violations.
+    "typescript/no-non-null-assertion": "off", // 718
+    "typescript/consistent-type-definitions": "off", // 984 interfaces vs 803 type literals, pick one first
+    "typescript/no-explicit-any": "off", // 44; AGENTS.md forbids any, decide whether to enforce
+    "typescript/no-floating-promises": "off", // 317
+    "typescript/prefer-nullish-coalescing": "off", // 304; the autofix changes behavior for falsy values
+    "typescript/no-confusing-void-expression": "off", // 1373
+    "typescript/no-unsafe-member-access": "off", // 189
+    "typescript/no-unsafe-call": "off", // 60
+    "typescript/no-unsafe-return": "off", // 46
+    "typescript/no-deprecated": "off", // 133
+    "typescript/require-await": "off", // 103
+    "typescript/no-base-to-string": "off", // 34
+    "typescript/restrict-template-expressions": "off", // 27
+    "typescript/non-nullable-type-assertion-style": "off", // 38; would add non-null assertions
+    "typescript/no-unnecessary-boolean-literal-compare": "off", // 23
+    "typescript/prefer-optional-chain": "off", // 47; nursery rule in oxlint
+    "react/rules-of-hooks": "off", // 65 from the _Component naming convention, 414 from story render functions
+    "import/named": "off", // nursery rule, false positives
+    "import/export": "off", // nursery rule, false positives on export *
+    "sonarjs/cognitive-complexity": "off", // 143
+    "sonarjs/no-nested-functions": "off", // 110 at depth 4, 17 at depth 5
+    "sonarjs/prefer-specific-assertions": "off", // 75
+    "sonarjs/no-identical-functions": "off", // 51
+    "sonarjs/pseudo-random": "off", // 41; Math.random for ids and shuffles, not security
+    "sonarjs/no-redundant-optional": "off", // 35
+    "sonarjs/redundant-type-aliases": "off", // 31; public aliases like type ColId = string
+    "sonarjs/todo-tag": "off", // 26; enabling bans TODO comments
+    "sonarjs/assertions-in-tests": "off", // 23
+    "sonarjs/no-floating-point-equality": "off", // 22
+    "sonarjs/use-type-alias": "off", // 21
+    "sonarjs/parameterized-tests": "off", // 12
+    "sonarjs/super-linear-regex": "off", // 10
+    "sonarjs/void-use": "off", // 10
+    "sonarjs/no-globals-shadowing": "off", // 6; story exports named Error
+
+    // OXLINT BUGS (1.43). Re-check after each oxlint upgrade.
+    "typescript/consistent-indexed-object-style": "off", // flags mapped types that use the key; the autofix rewrites them to Record<> and drops the key
+    "typescript/no-unnecessary-type-assertion": "off", // tsgolint (TS 7 semantics) reports assertions tsc 5.9 still needs; the autofix broke the build
+
+    // OFF ON PURPOSE. Not planned to be enabled.
+    "typescript/no-namespace": "off", // namespaces are allowed
+    "typescript/no-unsafe-assignment": "off", // too noisy around untyped third-party values
+    "typescript/no-unsafe-argument": "off", // too noisy around untyped third-party values
+    "typescript/unbound-method": "off", // false positives on callbacks taken from context values and props
+    "typescript/no-misused-spread": "off", // spreading iterables and class instances is intentional where it happens
+    "typescript/no-empty-object-type": "off", // empty interfaces are used as extension points
+    "typescript/only-throw-error": "off", // throwing non-Error values is allowed
+    "import/default": "off", // false positives with CommonJS interop packages
+    "import/no-named-as-default": "off", // false positives with CommonJS interop packages
+    "import/no-named-as-default-member": "off", // false positives with CommonJS interop packages
+    "sonarjs/prefer-read-only-props": "off", // props are not marked readonly in this codebase
+    "sonarjs/no-nested-conditional": "off", // nested ternaries are allowed in JSX
+    "sonarjs/function-return-type": "off", // functions may return union types
+    "sonarjs/no-selector-parameter": "off", // boolean parameters that switch behavior are allowed
+    "sonarjs/no-unused-vars": "off", // duplicate of no-unused-vars
+    "sonarjs/unused-import": "off", // duplicate of no-unused-vars
+    "sonarjs/no-duplicate-string": "off" // 1167 hits, mostly class name strings
   },
   "env": {
     "builtin": true,
@@ -21,7 +335,12 @@
   },
   "jsPlugins": [
     "eslint-plugin-react-refresh",
-    "./.oxlint-plugins/f0-security/index.js"
+    "./.oxlint-plugins/f0-security/index.js",
+    "eslint-plugin-sonarjs",
+    {
+      "name": "import-js",
+      "specifier": "eslint-plugin-import"
+    }
   ],
   "overrides": [
     {
@@ -40,7 +359,7 @@
         "react/prop-types": "off",
         "react/display-name": ["error", {}]
       },
-      "plugins": ["react", "typescript"]
+      "plugins": ["react", "typescript", "import"]
     },
     {
       "files": ["**/*.{js,jsx,ts,tsx}"],
@@ -62,6 +381,34 @@
       ],
       "rules": {
         "no-console": "off"
+      }
+    },
+    {
+      "files": ["**/*.test.*", "**/*.spec.*", "**/__tests__/**"],
+      "rules": {
+        "typescript/await-thenable": "off",
+        "typescript/no-array-delete": "off",
+        "typescript/no-duplicate-type-constituents": "off",
+        "typescript/no-for-in-array": "off",
+        "typescript/no-implied-eval": "off",
+        "typescript/no-meaningless-void-operator": "off",
+        "typescript/no-misused-promises": "off",
+        "typescript/no-misused-spread": "off",
+        "typescript/no-mixed-enums": "off",
+        "typescript/no-redundant-type-constituents": "off",
+        "typescript/no-unnecessary-template-expression": "off",
+        "typescript/no-unnecessary-type-arguments": "off",
+        "typescript/no-unsafe-enum-comparison": "off",
+        "typescript/no-unsafe-unary-minus": "off",
+        "typescript/prefer-includes": "off",
+        "typescript/prefer-promise-reject-errors": "off",
+        "typescript/prefer-reduce-type-parameter": "off",
+        "typescript/prefer-return-this-type": "off",
+        "typescript/related-getter-setter-pairs": "off",
+        "typescript/require-array-sort-compare": "off",
+        "typescript/restrict-plus-operands": "off",
+        "typescript/return-await": "off",
+        "typescript/use-unknown-in-catch-callback-variable": "off"
       }
     },
     {

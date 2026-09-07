@@ -1,6 +1,5 @@
 import { act, renderHook, waitFor } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
 import { type F0ChatUser } from "../../types"
 import { type MentionEntry, useMentions } from "../useMentions"
 

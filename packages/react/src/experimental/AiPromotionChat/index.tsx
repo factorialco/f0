@@ -2,7 +2,6 @@ import { ButtonInternal } from "@/components/F0Button/internal"
 import { Check, Cross } from "@/icons/app"
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
-
 import { ChatTextarea, ChatWindow } from "./components"
 import { ActionProps, CustomButton } from "./components/CustomButton"
 import OneIcon from "./OneIcon"

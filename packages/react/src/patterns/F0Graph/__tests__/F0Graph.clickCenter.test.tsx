@@ -8,12 +8,10 @@ import {
   it,
   vi,
 } from "vitest"
-
 import { screen, zeroRender } from "@/testing/test-utils"
-
-import type { GraphNode } from "../types"
 import { FOCUS_SETTLE_DELAY_MS } from "../constants"
 import { F0Graph } from "../F0Graph"
+import type { GraphNode } from "../types"
 
 // Spy React Flow instance so we can observe the fly-to on click. Only the public
 // `useReactFlow` is mocked; the ReactFlow component itself renders normally.

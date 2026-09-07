@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import type { SortAndHideListItem } from "../visualizations/collection/Table/components/SortAndHideList/types"
 import {
   mergeUnlockedOrderIntoBaseline,

@@ -1,5 +1,4 @@
 import { cn } from "@/lib/utils"
-
 import { createPageLayoutBlock } from "../utils"
 import { Block, BlockProps } from "./Block"
 
@@ -18,7 +17,9 @@ const PageLayoutContentBlockComponent = ({
   className,
   ...props
 }: BlockProps & BlockContentExtraProps) => {
-  if (!title) return null
+  if (!title) {
+    return null
+  }
 
   const TitleTag = titleLevel
 

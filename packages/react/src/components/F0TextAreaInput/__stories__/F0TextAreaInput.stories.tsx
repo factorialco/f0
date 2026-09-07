@@ -1,11 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { expect, userEvent, within } from "storybook/test"
-
+import { inputSizes } from "@/components/F0TextInput/types"
 import { Placeholder } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-import { inputSizes } from "@/components/F0TextInput/types"
-
-import { F0TextAreaInput } from "../index"
+import { F0TextAreaInput } from ".."
 
 const meta = {
   title: "Inputs/Text area input",

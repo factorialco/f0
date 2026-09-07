@@ -1,5 +1,4 @@
 import { createContext, useContext } from "react"
-
 import type { NavigationProps } from "../PageNavigation"
 
 export const PageHeaderNavigationContext =

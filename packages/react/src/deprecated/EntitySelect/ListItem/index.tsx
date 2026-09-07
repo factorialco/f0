@@ -1,15 +1,13 @@
 import { ChevronDown, ChevronRight } from "lucide-react"
 import { useState } from "react"
-
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
-import { Counter } from "@/ui/Counter"
 import { CheckCircle } from "@/icons/app"
 import LogoAvatar from "@/icons/app/LogoAvatar"
 import { cn } from "@/lib/utils"
 import { Checkbox } from "@/ui/checkbox"
-
+import { Counter } from "@/ui/Counter"
 import { HighlightText } from "../HighLightText"
 import { EntitySelectEntity } from "../types"
 
@@ -81,7 +79,9 @@ export const ListItemSingleContent = ({
   const handleLabelClick = (ev: React.MouseEvent<HTMLButtonElement>) => {
     ev.preventDefault()
     ev.stopPropagation()
-    if (disabled) return
+    if (disabled) {
+      return
+    }
     if (selected) {
       onRemove(entity)
     } else {
@@ -92,7 +92,9 @@ export const ListItemSingleContent = ({
   const handleKeyDown = (ev: React.KeyboardEvent<HTMLButtonElement>) => {
     if (ev.key === "Enter" || ev.key === " ") {
       ev.preventDefault()
-      if (disabled) return
+      if (disabled) {
+        return
+      }
       if (!selected) {
         onSelect(entity)
       } else if (selected) {
@@ -230,7 +232,9 @@ const EntitySelectListItem = ({
     } else if (ev.key === "Enter" && singleSelector) {
       onExpand(!expanded)
     } else if (ev.key === "Enter") {
-      if (disabled) return
+      if (disabled) {
+        return
+      }
       if (!selected || partialSelected) {
         onSelect(entity)
       } else if (selected) {
@@ -248,14 +252,23 @@ const EntitySelectListItem = ({
       onExpand(!expanded)
       setPressingLabel(false)
     } else {
-      if (disabled) return
-      if (singleSelector) return
-      if (selected) onRemove(entity)
-      else onSelect(entity)
+      if (disabled) {
+        return
+      }
+      if (singleSelector) {
+        return
+      }
+      if (selected) {
+        onRemove(entity)
+      } else {
+        onSelect(entity)
+      }
     }
   }
 
-  if (!entity.subItems?.length) return null
+  if (!entity.subItems?.length) {
+    return null
+  }
 
   const checked = selected || partialSelected
   return (

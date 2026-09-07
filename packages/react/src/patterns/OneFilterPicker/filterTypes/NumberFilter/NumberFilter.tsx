@@ -2,14 +2,12 @@
 
 import { useDeepCompareEffect } from "@reactuses/core"
 import { useMemo, useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { NumberInputInternal } from "@/components/F0NumberInput/internal"
 import { Switch } from "@/experimental/Forms/Fields/Switch"
 import { EqualGreater, EqualLess, Greater, Less } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { useL10n } from "@/lib/providers/l10n"
-
 import { FilterTypeComponentProps } from "../types"
 
 export type NumberFilterOptions = {

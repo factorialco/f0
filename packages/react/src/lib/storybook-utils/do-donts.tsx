@@ -1,17 +1,16 @@
 import { FC, ReactNode } from "react"
-
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
 import { cn } from "@/lib/utils"
 
 interface DoDontsProps {
   do: {
     description: string
-    guidelines?: Array<string>
+    guidelines?: string[]
     children?: ReactNode
   }
   dont: {
     description: string
-    guidelines?: Array<string>
+    guidelines?: string[]
     children?: ReactNode
   }
   /**

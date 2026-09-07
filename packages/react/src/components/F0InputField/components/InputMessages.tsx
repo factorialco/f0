@@ -1,7 +1,6 @@
 import { F0Icon, F0IconProps, IconType } from "@/components/F0Icon"
 import { AlertCircle, InfoCircle, Warning } from "@/icons/app"
 import { cn } from "@/lib/utils"
-
 import { InputFieldStatus, InputFieldStatusType } from "../types"
 
 type InputMessagesProps = {
@@ -34,7 +33,9 @@ const statuses: Record<
 }
 
 const InputMessages = ({ status }: InputMessagesProps) => {
-  if (!status) return null
+  if (!status) {
+    return null
+  }
 
   const messages = (
     Array.isArray(status.message) ? status.message : [status.message]

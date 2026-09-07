@@ -1,6 +1,5 @@
 import * as SwitchPrimitive from "@radix-ui/react-switch"
 import { useEffect, useState } from "react"
-
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import {
@@ -9,7 +8,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/ui/tooltip"
-
 import { useAiChatToggle } from "../F0AiChat/providers/useAiChatToggle"
 import { F0OneIcon } from "../F0OneIcon"
 import { F0OneSwitchProps } from "./types"
@@ -35,11 +33,15 @@ export const F0OneSwitch = ({
   const showTooltip = autoOpen ? autoTooltipVisible : tooltipOpen
 
   useEffect(() => {
-    if (autoOpen) setAutoTooltipVisible(true)
+    if (autoOpen) {
+      setAutoTooltipVisible(true)
+    }
   }, [autoOpen])
 
   useEffect(() => {
-    if (!autoOpen) return
+    if (!autoOpen) {
+      return
+    }
     const timer = setTimeout(() => setAutoTooltipVisible(false), 3000)
     return () => clearTimeout(timer)
   }, [autoOpen])

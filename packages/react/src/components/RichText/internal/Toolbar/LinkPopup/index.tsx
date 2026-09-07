@@ -2,12 +2,10 @@ import * as Popover from "@radix-ui/react-popover"
 import { Editor } from "@tiptap/react"
 import { AnimatePresence, motion } from "motion/react"
 import { useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0ButtonToggle } from "@/components/F0ButtonToggle"
 import { F0Icon } from "@/components/F0Icon"
-import { Badge } from "@/ui/IconBadge"
 import {
   Alert,
   Check,
@@ -17,6 +15,7 @@ import {
 } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
+import { Badge } from "@/ui/IconBadge"
 
 interface LinkPopupProps {
   editor: Editor
@@ -29,8 +28,12 @@ export const LinkPopup = ({ editor, disabled }: LinkPopupProps) => {
   const [url, setUrl] = useState(editor.getAttributes("link").href || "")
 
   const handleLinkButtonClick = (e?: React.MouseEvent) => {
-    if (e) e.preventDefault()
-    if (disabled) return
+    if (e) {
+      e.preventDefault()
+    }
+    if (disabled) {
+      return
+    }
     setOpenLinkPopover(!openLinkPopover)
   }
 
@@ -45,8 +48,12 @@ export const LinkPopup = ({ editor, disabled }: LinkPopupProps) => {
 
   const handleSave = () => {
     const trimmedUrl = url.trim()
-    if (!trimmedUrl) return
-    if (!checkIfUrlIsValid(trimmedUrl)) return
+    if (!trimmedUrl) {
+      return
+    }
+    if (!checkIfUrlIsValid(trimmedUrl)) {
+      return
+    }
     editor
       .chain()
       .focus()

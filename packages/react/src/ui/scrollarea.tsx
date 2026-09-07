@@ -8,7 +8,6 @@ import {
   type ComponentPropsWithoutRef,
   type ElementRef,
 } from "react"
-
 import { cn } from "../lib/utils"
 
 type ScrollAreaProps = ComponentPropsWithoutRef<

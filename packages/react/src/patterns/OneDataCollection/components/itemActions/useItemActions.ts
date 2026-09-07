@@ -1,10 +1,13 @@
 import { useState } from "react"
-
-import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import {
   DropdownItem,
   DropdownItemSeparator,
 } from "@/experimental/Navigation/Dropdown/internal"
+import {
+  GroupingDefinition,
+  RecordType,
+  SortingsDefinition,
+} from "@/hooks/datasource"
 import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource/types"
 import {
   ActionDefinition,
@@ -13,12 +16,7 @@ import {
 } from "@/patterns/OneDataCollection/item-actions"
 import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import { SummariesDefinition } from "@/patterns/OneDataCollection/summary"
-import {
-  GroupingDefinition,
-  RecordType,
-  SortingsDefinition,
-} from "@/hooks/datasource"
-
+import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import { actionsToDropdownItems } from "../../visualizations/collection/utils"
 
 type UseItemActionProps<

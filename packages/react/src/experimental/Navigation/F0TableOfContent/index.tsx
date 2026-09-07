@@ -1,3 +1,4 @@
+import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter"
 import {
   ReactElement,
   useCallback,
@@ -6,20 +7,16 @@ import {
   useRef,
   useState,
 } from "react"
-
-import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 import { F0SearchInput } from "@/components/F0SearchInput"
-import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter"
-
+import { withDataTestId } from "@/lib/data-testid"
 import { createAtlaskitDriver } from "@/lib/dnd/atlaskitDriver"
 import { DndProvider } from "@/lib/dnd/context"
 import { useDndEvents } from "@/lib/dnd/hooks"
-import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
+import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { ScrollArea } from "@/ui/scrollarea"
-
 import { Item } from "./Item"
 import { ItemSectionHeader } from "./ItemSectionHeader"
 import { TOCFooter } from "./TOCFooter"
@@ -97,7 +94,9 @@ function renderTOCItem(
     if (currentParentId === null) {
       return allItems?.[0]?.id === item.id
     }
-    if (!allItems || !currentParentId) return false
+    if (!allItems || !currentParentId) {
+      return false
+    }
     const parent = findItemInTree(allItems, currentParentId)
     return parent?.item.children?.[0]?.id === item.id
   })()
@@ -227,7 +226,9 @@ function EdgeDropZone({
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (!ref.current) return
+    if (!ref.current) {
+      return
+    }
 
     return dropTargetForElements({
       element: ref.current,
@@ -355,7 +356,9 @@ function TOCContent({
 
       // Find the item to move
       const itemData = findItemInTree(sortableItems, itemId)
-      if (!itemData) return
+      if (!itemData) {
+        return
+      }
 
       const itemToMove = itemData.item
 

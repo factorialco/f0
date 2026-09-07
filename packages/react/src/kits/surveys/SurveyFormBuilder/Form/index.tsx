@@ -1,13 +1,10 @@
 import { motion, Reorder } from "motion/react"
 import { useEffect, useMemo, type ReactNode } from "react"
-
 import { withDataTestId } from "@/lib/data-testid"
 import { cn } from "@/lib/utils"
-
 import ApplyingChangesTag from "../ApplyingChangesTag"
 import { SurveyFormBuilderProvider } from "../Context"
-import { DragProvider } from "../DragContext"
-import { useDragContext } from "../DragContext"
+import { DragProvider, useDragContext } from "../DragContext"
 import { SurveyFormBuilderElement, SurveyFormBuilderProps } from "../types"
 import { AddButton } from "./AddButton"
 import { LastQuestionDialog } from "./LastQuestionDialog"

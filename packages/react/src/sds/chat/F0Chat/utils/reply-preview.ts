@@ -37,19 +37,27 @@ export const summariseAttachments = (
   const present = [images, files, locations, voices].filter(
     (list) => list.length > 0
   )
-  if (present.length > 1)
+  if (present.length > 1) {
     return {
       kind: "mixed",
       count: images.length + files.length + locations.length + voices.length,
     }
-  if (images.length > 0) return { kind: "photo", count: images.length }
-  if (files.length > 0)
+  }
+  if (images.length > 0) {
+    return { kind: "photo", count: images.length }
+  }
+  if (files.length > 0) {
     return {
       kind: "file",
       count: files.length,
       name: files.length === 1 ? files[0].name : undefined,
     }
-  if (locations.length > 0) return { kind: "location" }
-  if (voices.length > 0) return { kind: "voice" }
+  }
+  if (locations.length > 0) {
+    return { kind: "location" }
+  }
+  if (voices.length > 0) {
+    return { kind: "voice" }
+  }
   return null
 }

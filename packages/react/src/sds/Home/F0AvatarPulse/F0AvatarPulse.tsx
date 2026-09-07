@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "motion/react"
 import { ComponentProps, useState } from "react"
-
+import { BaseAvatar } from "@/components/avatars/internal/BaseAvatar"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
 import { Reaction } from "@/icons/app"
@@ -8,8 +8,6 @@ import { EmojiImage } from "@/lib/emojis"
 import { Pulse, pulseIcon, pulseIconColor } from "@/lib/mood"
 import { useI18n } from "@/lib/providers/i18n"
 import { Action } from "@/ui/Action"
-
-import { BaseAvatar } from "@/components/avatars/internal/BaseAvatar"
 
 type BaseAvatarProps = ComponentProps<typeof BaseAvatar>
 

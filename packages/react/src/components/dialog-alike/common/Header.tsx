@@ -13,7 +13,6 @@ import { Tabs, TabsProps } from "@/patterns/Navigation/Tabs"
 import { BreadcrumbList } from "@/ui/breadcrumb"
 import { DialogTitle } from "@/ui/Dialog/dialog"
 import { DrawerDescription } from "@/ui/drawer"
-
 import { useDialogWrapperContext } from "./DialogWrapperProvider"
 
 export type HeaderProps = {
@@ -54,7 +53,9 @@ export const Header = ({
     ) ?? []
 
   const Actions = () => {
-    if (!otherActionItems.length || !otherActions) return null
+    if (!otherActionItems.length || !otherActions) {
+      return null
+    }
 
     if (otherActionItems.length <= 2) {
       return (
@@ -77,7 +78,9 @@ export const Header = ({
   }
 
   const Module = () => {
-    if (!module) return null
+    if (!module) {
+      return null
+    }
 
     return (
       <BreadcrumbList>

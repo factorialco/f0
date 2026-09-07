@@ -34,7 +34,9 @@ export const getRatingOptions = (type: RatingOptionType) => {
 export const detectRatingOptionType = (
   options: { value: number; label: string }[]
 ): RatingOptionType | null => {
-  if (!options || options.length === 0) return null
+  if (!options || options.length === 0) {
+    return null
+  }
 
   const length = options.length
 

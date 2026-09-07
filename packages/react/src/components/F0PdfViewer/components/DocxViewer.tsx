@@ -1,10 +1,7 @@
-import { useEffect, useRef, useState, type ReactNode } from "react"
-
 import { renderAsync } from "docx-preview"
-
+import { useEffect, useRef, useState, type ReactNode } from "react"
 import { useI18n } from "@/lib/providers/i18n"
 import { Skeleton } from "@/ui/skeleton"
-
 import { type F0PdfViewerAction } from "../types"
 import { DocumentToolbar, useDocumentZoom } from "./DocumentToolbar"
 
@@ -33,27 +30,37 @@ const DocxViewer = ({
 
   useEffect(() => {
     const host = hostRef.current
-    if (!host) return
+    if (!host) {
+      return
+    }
     let cancelled = false
     setState("loading")
     fetch(url, { credentials: withCredentials ? "include" : "same-origin" })
       .then((response) => {
-        if (!response.ok) throw new Error(`${response.status}`)
+        if (!response.ok) {
+          throw new Error(`${response.status}`)
+        }
         return response.blob()
       })
       .then((blob) => {
-        if (cancelled) return
+        if (cancelled) {
+          return
+        }
         // The wrapper brings docx-preview's page chrome (page background and
         // spacing between pages), matching what a Word preview looks like.
         return renderAsync(blob, host, undefined, {
           inWrapper: true,
           breakPages: true,
         }).then(() => {
-          if (!cancelled) setState("ready")
+          if (!cancelled) {
+            setState("ready")
+          }
         })
       })
       .catch(() => {
-        if (!cancelled) setState("failed")
+        if (!cancelled) {
+          setState("failed")
+        }
       })
     return () => {
       cancelled = true

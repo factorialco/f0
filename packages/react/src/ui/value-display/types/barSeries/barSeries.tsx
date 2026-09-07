@@ -4,16 +4,15 @@
  * and other presets.
  */
 import { getColor } from "@/kits/Charts/utils/colors"
+import { cn } from "@/lib/utils"
 import {
   TooltipContent,
   Tooltip as TooltipPrimitive,
   TooltipProvider,
   TooltipTrigger,
 } from "@/ui/tooltip"
-
 import { tableDisplayClassNames } from "../../const"
 import { ValueDisplayRendererContext } from "../../renderers"
-import { cn } from "@/lib/utils"
 
 const CHART_HEIGHT_PX = 52
 const BAR_WIDTH_PX = 6

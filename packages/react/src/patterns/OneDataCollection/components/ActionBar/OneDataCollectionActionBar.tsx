@@ -1,8 +1,6 @@
 import NumberFlow from "@number-flow/react"
 import { forwardRef, useEffect, useMemo, useRef } from "react"
-
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
-import { F0Button } from "@/components/F0Button"
 import {
   type ActionBarGroup,
   type ActionBarItem,
@@ -10,6 +8,7 @@ import {
   F0ActionBar,
   type F0ActionBarRef,
 } from "@/components/F0ActionBar"
+import { F0Button } from "@/components/F0Button"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 
@@ -102,7 +101,9 @@ export const OneDataCollectionActionBar = forwardRef<
   // without this snapshot the bar shrinks abruptly before the exit animation.
   const lastSelectedNumberRef = useRef(selectedNumber ?? 0)
   useEffect(() => {
-    if (selectedNumber) lastSelectedNumberRef.current = selectedNumber
+    if (selectedNumber) {
+      lastSelectedNumberRef.current = selectedNumber
+    }
   }, [selectedNumber])
   const displayedSelectedNumber =
     isInteractionDisabled && !selectedNumber
@@ -124,14 +125,22 @@ export const OneDataCollectionActionBar = forwardRef<
   const actionBarStatus = status === "loading" ? "idle" : status
 
   const resolvedPrimaryActions = useMemo(() => {
-    if (warningMessage || !primaryActions) return []
-    if (status !== "loading") return primaryActions
+    if (warningMessage || !primaryActions) {
+      return []
+    }
+    if (status !== "loading") {
+      return primaryActions
+    }
     return withLoadingOnActions(primaryActions)
   }, [primaryActions, status, warningMessage])
 
   const resolvedSecondaryActions = useMemo(() => {
-    if (warningMessage || !secondaryActions) return []
-    if (status !== "loading") return secondaryActions
+    if (warningMessage || !secondaryActions) {
+      return []
+    }
+    if (status !== "loading") {
+      return secondaryActions
+    }
     return secondaryActions.map((a) => ({ ...a, disabled: true }))
   }, [secondaryActions, status, warningMessage])
 

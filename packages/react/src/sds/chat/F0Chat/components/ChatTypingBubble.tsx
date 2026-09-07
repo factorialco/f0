@@ -1,11 +1,9 @@
 import { motion } from "motion/react"
 import { type ReactNode, useEffect, useState } from "react"
-
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0AvatarList } from "@/components/avatars/F0AvatarList"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
 import { type F0ChatUser } from "../types"
 import { EASE_OUT_SWIFT } from "../utils/chat-motion"
@@ -71,9 +69,13 @@ export const ChatTypingBubble = ({
   // render can't flag the streak's first bubble as already shown.
   const [entryFresh] = useState(() => entryState?.fresh ?? true)
   useEffect(() => {
-    if (entryState) entryState.fresh = false
+    if (entryState) {
+      entryState.fresh = false
+    }
   }, [entryState])
-  if (users.length === 0) return null
+  if (users.length === 0) {
+    return null
+  }
 
   let label = i18n.chat.writing
   if (isGroup) {

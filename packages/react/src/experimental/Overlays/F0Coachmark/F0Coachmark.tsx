@@ -7,7 +7,6 @@ import {
   useRef,
   useState,
 } from "react"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { Cross } from "@/icons/app"
 import { useReducedMotion } from "@/lib/a11y"
@@ -20,7 +19,6 @@ import {
   PopoverArrow,
   PopoverContent,
 } from "@/ui/popover"
-
 import { CoachmarkSpotlight } from "./CoachmarkSpotlight"
 import type { F0CoachmarkProps } from "./types"
 
@@ -57,7 +55,9 @@ const FOCUSABLE = `${FIELDS}, select, button, a[href], [tabindex]:not([tabindex=
  * around the thing you actually type into.
  */
 const fieldIn = (target: HTMLElement): HTMLElement | null => {
-  if (target.matches(FOCUSABLE)) return target
+  if (target.matches(FOCUSABLE)) {
+    return target
+  }
   return (
     target.querySelector<HTMLElement>(FIELDS) ??
     target.querySelector<HTMLElement>(FOCUSABLE)
@@ -77,21 +77,29 @@ const useCentredWhenItCannotFit = (
     setCentred(false)
 
     const element = ref.current
-    if (!element || typeof ResizeObserver !== "function") return
+    if (!element || typeof ResizeObserver !== "function") {
+      return
+    }
 
     const check = () => {
-      if (latched.current) return
+      if (latched.current) {
+        return
+      }
       const style = getComputedStyle(element)
       const room = parseFloat(
         style.getPropertyValue("--radix-popover-content-available-height")
       )
-      if (!Number.isFinite(room)) return
+      if (!Number.isFinite(room)) {
+        return
+      }
 
       const body = element.querySelector<HTMLElement>("[data-coachmark-body]")
       const padding =
         parseFloat(style.paddingTop) + parseFloat(style.paddingBottom)
       const needed = (body?.scrollHeight ?? element.scrollHeight) + padding
-      if (room >= needed) return
+      if (room >= needed) {
+        return
+      }
 
       latched.current = true
       setCentred(true)
@@ -195,7 +203,9 @@ const CoachmarkPanel = ({
   // that is the panel or the element the new step points at.
   const announcedStep = useRef(step?.current)
   useEffect(() => {
-    if (announcedStep.current === step?.current) return
+    if (announcedStep.current === step?.current) {
+      return
+    }
     announcedStep.current = step?.current
     focusForStep()
   }, [step?.current])
@@ -212,7 +222,9 @@ const CoachmarkPanel = ({
       onOpenChange={(nextOpen) => {
         // Radix only ever requests closing here (Escape). The coachmark closes
         // itself: there is no `open` prop for a consumer to keep in sync.
-        if (!nextOpen) onClose()
+        if (!nextOpen) {
+          onClose()
+        }
       }}
     >
       <PopoverAnchor virtualRef={centred ? viewportCentre : anchorRef} />

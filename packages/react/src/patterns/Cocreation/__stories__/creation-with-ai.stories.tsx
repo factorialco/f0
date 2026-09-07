@@ -1,9 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
-import { expect, userEvent, waitFor, within } from "storybook/test"
-
-import { z } from "zod"
-
 import {
   ComponentProps,
   createContext,
@@ -15,9 +10,16 @@ import {
   useRef,
   useState,
 } from "react"
-import { StandardLayout } from "@/layouts/StandardLayout"
-import { PageHeader } from "@/experimental/Navigation/Header/PageHeader"
+import { expect, userEvent, waitFor, within } from "storybook/test"
+import { z } from "zod"
+import { F0Alert } from "@/components/F0Alert"
+import { F0Button } from "@/components/F0Button"
+import { F0Heading } from "@/components/F0Heading"
 import { F0CardHorizontal } from "@/experimental/F0CardHorizontal"
+import { PageHeader } from "@/experimental/Navigation/Header/PageHeader"
+// WIP: temporary toast mock — replace with "@/hooks/toast" once
+// https://github.com/factorialco/f0/pull/3493 merges, then remove this import.
+import { toasts } from "@/hooks/toast"
 import {
   Add,
   ArrowLeft,
@@ -33,27 +35,13 @@ import {
   SolidPlay,
   Upsell,
 } from "@/icons/app"
-import { F0Alert } from "@/components/F0Alert"
-import { F0Button } from "@/components/F0Button"
-import { F0Heading } from "@/components/F0Heading"
-import { dialogs } from "@/lib/providers/dialogs-alike"
-import { ButtonGroup, ButtonGroupSeparator } from "@/ui/ButtonGroup"
-import { ApplicationFrame } from "@/patterns/ApplicationFrame"
-import { Page as NavigationPage } from "@/patterns/Navigation/Page"
-import { Tabs } from "@/patterns/Navigation/Tabs"
-import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
-import * as SidebarStories from "@/patterns/Navigation/Sidebar/index.stories"
-import { OneDataCollection } from "@/patterns/OneDataCollection"
-import { useDataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
-import { F0ResourceHeader } from "@/patterns/F0ResourceHeader"
-import { useAiChat } from "@/kits/ai/F0AiChat"
-import type { ClarifyingOption } from "@/kits/ai/F0ClarifyingPanel"
 import {
   type CanvasContent,
   type CanvasContentBase,
   type CanvasEntityDefinition,
 } from "@/kits/ai/canvas"
-import { F0AiProcessingOverlay } from "@/kits/ai/F0AiProcessingOverlay"
+import { useAiChat } from "@/kits/ai/F0AiChat"
+import type { F0AiChatWelcomeCard } from "@/kits/ai/F0AiChat"
 import {
   type ClarifyingStep,
   MockAiChatRuntimeProvider,
@@ -62,32 +50,27 @@ import {
   MockConnectedMessagesContainer,
   useMockAiChatRuntime,
 } from "@/kits/ai/F0AiChat/__stories__/_mock"
-
-import { f0FormField, F0Form } from "@/patterns/F0Form"
-import type { F0SectionConfig } from "@/patterns/F0Form"
-import { useF0FormDefinition } from "@/patterns/F0WizardForm"
+import { F0AiProcessingOverlay } from "@/kits/ai/F0AiProcessingOverlay"
+import type { ClarifyingOption } from "@/kits/ai/F0ClarifyingPanel"
+import { mockDatasets } from "@/kits/surveys/__stories__/mocks"
 import { SurveyAnsweringForm } from "@/kits/surveys/SurveyAnsweringForm"
 import { SurveyFormBuilder } from "@/kits/surveys/SurveyFormBuilder/Form"
 import type { SurveyFormBuilderElement } from "@/kits/surveys/SurveyFormBuilder/types"
-import { mockDatasets } from "@/kits/surveys/__stories__/mocks"
-
-import {
-  EMPTY_SURVEY_TEMPLATE,
-  EMPTY_SURVEY_TEMPLATE_ID,
-  galleryCardVisualization,
-  listVisualization,
-  makeTemplatesDataAdapter,
-  resourceFilters,
-  resourceSortings,
-  tableVisualization,
-  templateSortings,
-} from "./mockData"
-import type { Template } from "./mockData"
-// WIP: temporary toast mock — replace with "@/hooks/toast" once
-// https://github.com/factorialco/f0/pull/3493 merges, then remove this import.
-import { toasts } from "@/hooks/toast"
+import { StandardLayout } from "@/layouts/StandardLayout"
+import { dialogs } from "@/lib/providers/dialogs-alike"
 import { useI18n } from "@/lib/providers/i18n"
-import { makeInitialSurveyElements } from "./survey-mocks"
+import { ApplicationFrame } from "@/patterns/ApplicationFrame"
+import { f0FormField, F0Form } from "@/patterns/F0Form"
+import type { F0SectionConfig } from "@/patterns/F0Form"
+import { F0ResourceHeader } from "@/patterns/F0ResourceHeader"
+import { useF0FormDefinition } from "@/patterns/F0WizardForm"
+import { Page as NavigationPage } from "@/patterns/Navigation/Page"
+import * as SidebarStories from "@/patterns/Navigation/Sidebar/index.stories"
+import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
+import { Tabs } from "@/patterns/Navigation/Tabs"
+import { OneDataCollection } from "@/patterns/OneDataCollection"
+import { useDataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
+import { ButtonGroup, ButtonGroupSeparator } from "@/ui/ButtonGroup"
 import {
   FLOW_CONFIGS,
   guidedTemplatesTitle,
@@ -100,7 +83,19 @@ import type {
   FlowConfig,
   GuidedEntryFlowConfig,
 } from "./flow-configs"
-import type { F0AiChatWelcomeCard } from "@/kits/ai/F0AiChat"
+import {
+  EMPTY_SURVEY_TEMPLATE,
+  EMPTY_SURVEY_TEMPLATE_ID,
+  galleryCardVisualization,
+  listVisualization,
+  makeTemplatesDataAdapter,
+  resourceFilters,
+  resourceSortings,
+  tableVisualization,
+  templateSortings,
+} from "./mockData"
+import type { Template } from "./mockData"
+import { makeInitialSurveyElements } from "./survey-mocks"
 
 /**
  * AI Cocreation patterns — "Walkthrough".
@@ -384,8 +379,11 @@ function TemplatesCollection({
       itemOnClick:
         onSelect || onEmpty
           ? (item) => () => {
-              if (onEmpty && item.id === EMPTY_SURVEY_TEMPLATE_ID) onEmpty()
-              else onSelect?.(item)
+              if (onEmpty && item.id === EMPTY_SURVEY_TEMPLATE_ID) {
+                onEmpty()
+              } else {
+                onSelect?.(item)
+              }
             }
           : undefined,
     },
@@ -523,7 +521,9 @@ function useOpenTemplatesCanvas() {
 
   return useCallback(
     (content: TemplatesCanvasContent, onBack?: (() => void) | null) => {
-      if (onBack !== undefined) templatesReturn.set(onBack)
+      if (onBack !== undefined) {
+        templatesReturn.set(onBack)
+      }
       openCanvas(toCanvasContent({ ...content, coversChat: true }))
     },
     [openCanvas, templatesReturn]
@@ -1080,9 +1080,13 @@ function useOpenEmptySurvey() {
 
   return useCallback(
     (guidedTypeId: string) => {
-      if (config.entryMode !== "guidedType") return
+      if (config.entryMode !== "guidedType") {
+        return
+      }
       const guidedType = config.guidedTypes.find((t) => t.id === guidedTypeId)
-      if (!guidedType) return
+      if (!guidedType) {
+        return
+      }
       const title = `${guidedType.label} form`
       const surveyId = createSurvey(title, {
         elements: [guidedType.emptySurveyElement],
@@ -1153,7 +1157,9 @@ function useStartBlankSurvey() {
   return useCallback(() => {
     // The "guidedType" flow seeds a type-scoped blank survey instead — see
     // `useOpenEmptySurvey`.
-    if (config.entryMode === "guidedType") return
+    if (config.entryMode === "guidedType") {
+      return
+    }
 
     // Walk type → audience → length as a single consecutive panel, then hand
     // off to a confirmation step: echo the picks, and post a
@@ -1319,14 +1325,18 @@ const surveyAnswerMessages = (
   const blocks = steps
     .map((step, i) => {
       const answer = (answersByStep[i] ?? []).join(", ").trim()
-      if (!answer) return null
+      if (!answer) {
+        return null
+      }
       // Trailing backslash = CommonMark hard line break, so the answer renders
       // directly UNDER the bold question (a plain "\n" is only a soft break/space).
       return `**${step.question}**\\\n${answer}`
     })
     .filter((block): block is string => block !== null)
 
-  if (blocks.length === 0) return []
+  if (blocks.length === 0) {
+    return []
+  }
   // Blank line between pairs → separate <p> blocks, spaced by the bubble's gap.
   return [{ role: "user" as const, content: blocks.join("\n\n") }]
 }
@@ -1480,7 +1490,9 @@ function SurveyCanvasHeader({ content }: { content: SurveyCanvasContent }) {
         ? config.guidedTypes.find((t) => t.id === content.guidedTypeId)
             ?.sampleElements
         : config.sampleElements
-    if (!elements) return
+    if (!elements) {
+      return
+    }
     // The preset carries its own created-card subtitle / resource-header
     // description; other templates fall back to the flow's "Created in …" copy.
     const description = preset ? preset.createdDescription : content.description
@@ -1871,7 +1883,9 @@ function SurveyCanvasStateProvider({
   const surveyId = content.surveyId
   const setElements = useCallback(
     (next: SurveyFormBuilderElement[]) => {
-      if (surveyId) store.setElements(surveyId, next)
+      if (surveyId) {
+        store.setElements(surveyId, next)
+      }
     },
     [store, surveyId]
   )
@@ -1929,22 +1943,26 @@ function SurveyEditorCanvasHeader({
           icon: SolidPlay,
           onClick: () =>
             void confirmPublish().then((ok) => {
-              if (ok)
+              if (ok) {
                 toasts.open({
                   title: SURVEY_PUBLISHED_TOAST,
                   variant: "success",
                 })
+              }
             }),
         }}
         onClose={() =>
           void confirmCloseUnsaved(config).then((action) => {
             // Cancel or dismissed → stay on the canvas.
-            if (action === "cancel" || action === undefined) return
-            if (action === "save")
+            if (action === "cancel" || action === undefined) {
+              return
+            }
+            if (action === "save") {
               toasts.open({
                 title: savedToast(config),
                 variant: "success",
               })
+            }
             onClose()
           })
         }
@@ -2018,7 +2036,9 @@ function SurveyEditorCanvasBody() {
   // From here saves are explicit (the header's "Save"); resources
   // without a draft state create nothing until the user explicitly saves.
   useEffect(() => {
-    if (!surveyId || createdSurveyIds.has(surveyId)) return
+    if (!surveyId || createdSurveyIds.has(surveyId)) {
+      return
+    }
     const t = setTimeout(() => {
       createdSurveyIds.add(surveyId)
       toasts.open({
@@ -2350,7 +2370,9 @@ function SurveyWelcomeCardsRegistrar() {
   // same for every flow that has a welcome screen. Only `cards` flows get here;
   // `guidedType`/`guidedEntry` have no welcome cards.
   const handleCardSelect = (id: string) => {
-    if (!cardsConfig) return
+    if (!cardsConfig) {
+      return
+    }
     switch (id) {
       case "empty-survey": {
         // Blank-survey flow: create + seed the survey, open its canvas, then
@@ -2500,7 +2522,9 @@ function FlowContent({
   // consecutive panel. The canvas stays closed throughout; it only opens once
   // the user confirms the draft on the `DraftConfirmationCard`.
   const runTypedClarifyingChain = () => {
-    if (config.entryMode !== "cards") return
+    if (config.entryMode !== "cards") {
+      return
+    }
     // Create the blank survey up front (state only — nothing visible yet); it's
     // named, shown, and drafted only when the user confirms the draft.
     const surveyId = createSurvey(UNTITLED_SURVEY_NAME)
@@ -2564,7 +2588,9 @@ function FlowContent({
   const confirmExitOrStay = (): Promise<boolean> =>
     confirmLeaveGuidedCreation(config).then((confirmed) => {
       const leave = confirmed === true
-      if (leave) leaveGuidedFlow()
+      if (leave) {
+        leaveGuidedFlow()
+      }
       return leave
     })
 
@@ -2580,7 +2606,9 @@ function FlowContent({
   // reopening this on "Keep creating" doesn't repeat them. No survey is created
   // by either step. Dismissing the panel asks to confirm leaving creation.
   const openGuidedTypeClarifying = () => {
-    if (config.entryMode !== "guidedType") return
+    if (config.entryMode !== "guidedType") {
+      return
+    }
     // The type question is this flow's `guidedQuestion`, so the entry actions
     // borrow the "guidedEntry" flow's wording — one source of truth for that
     // copy, as the no-credits redirect does.
@@ -2609,11 +2637,15 @@ function FlowContent({
         // (nothing happens) rather than silently picking for the user.
         const typeId = answerIdsByStep[0]?.[0]
         const type = config.guidedTypes.find((t) => t.id === typeId)
-        if (!type) return
+        if (!type) {
+          return
+        }
         const picked = guidedEntryOptions(type.id).find(
           (o) => o.id === answerIdsByStep[1]?.[0]
         )
-        if (!picked) return
+        if (!picked) {
+          return
+        }
         // Both answers echo as one bubble — question in bold, answer beneath —
         // the same shape the type → audience → length chain uses.
         runEntryPick(
@@ -2641,7 +2673,9 @@ function FlowContent({
   // `sendMessageWithThinkingOnly`) — before writing out the form-type options
   // and opening the clarifying panel.
   const startGuidedTypeFlow = () => {
-    if (config.entryMode !== "guidedType") return
+    if (config.entryMode !== "guidedType") {
+      return
+    }
     // Keep the composer out of view through the scripted intro; it reappears
     // (as the clarifying panel, fading in) once the thinking beat resolves.
     setComposerHidden(true)
@@ -2718,8 +2752,11 @@ function FlowContent({
       // walk the drafting conversation — or, with no credits, invite a typed
       // request met by an out-of-credits reply. Shared with the "cards" flow's
       // Empty survey card and the templates-header CTA.
-      if (guidedTypeId) openEmptySurvey(guidedTypeId)
-      else startBlankSurvey()
+      if (guidedTypeId) {
+        openEmptySurvey(guidedTypeId)
+      } else {
+        startBlankSurvey()
+      }
       return
     }
     if (optionId === TEMPLATES_OPTION_ID) {
@@ -2729,7 +2766,9 @@ function FlowContent({
       // out-of-credits reply — otherwise a typed message falls through to a
       // simulated AI answer (see `armNoCredits` / the mock's default reply).
       openTemplates(entryGalleryContent(guidedTypeId), reopenPanel)
-      if (noCredits) armNoCredits()
+      if (noCredits) {
+        armNoCredits()
+      }
       return
     }
     // A specific template: open it in the read-only preview framing (the
@@ -2738,7 +2777,9 @@ function FlowContent({
     const template = entryTemplates(guidedTypeId).find(
       (t) => t.id === templateId
     )
-    if (!template) return
+    if (!template) {
+      return
+    }
     // The preview's "Back to templates" enters the gallery without going
     // through the entry question, so record the way back now — closing that
     // gallery then lands on the question rather than on a bare chat.
@@ -2758,14 +2799,19 @@ function FlowContent({
     // As above: keep the no-credits reply armed while previewing so typing
     // never triggers a fake AI reply. `useThisTemplate` re-arms it once the
     // template is actually used.
-    if (noCredits) armNoCredits()
+    if (noCredits) {
+      armNoCredits()
+    }
   }
 
   // Copy for the assistant reply that precedes each action's canvas beat.
   const replyForOption = (optionId: string): string => {
-    if (optionId === EMPTY_OPTION_ID) return "Let's start with a blank survey."
-    if (optionId === TEMPLATES_OPTION_ID)
+    if (optionId === EMPTY_OPTION_ID) {
+      return "Let's start with a blank survey."
+    }
+    if (optionId === TEMPLATES_OPTION_ID) {
       return "Sure — here are the templates to choose from."
+    }
     return "Great — opening that template for you."
   }
 
@@ -2814,7 +2860,9 @@ function FlowContent({
         // echoed back into the transcript. A missing id would be a wiring bug —
         // bail rather than silently running the first action.
         const picked = options.find((o) => o.id === answerIdsByStep[0]?.[0])
-        if (!picked) return
+        if (!picked) {
+          return
+        }
         const label = answersByStep[0]?.[0] ?? picked.label
         runEntryPick(
           picked.id,
@@ -2834,7 +2882,9 @@ function FlowContent({
   // Dismissing the panel restarts the flow on the next typed message via the
   // panel's `onCancel`.
   const startGuidedEntryFlow = () => {
-    if (config.entryMode !== "guidedEntry") return
+    if (config.entryMode !== "guidedEntry") {
+      return
+    }
     // Keep the composer out of view through the scripted intro; it reappears
     // (as the clarifying panel, fading in) once the thinking beat resolves.
     setComposerHidden(true)
@@ -2959,9 +3009,13 @@ function FlowContent({
   // provider (every consumer, not just this mock), which is out of scope here.
   useEffect(() => {
     setBeforeClose(async () => {
-      if (!confirmOnCloseRef.current) return true
+      if (!confirmOnCloseRef.current) {
+        return true
+      }
       const leave = await confirmLeaveGuidedCreation(config)
-      if (leave) leaveGuidedFlow()
+      if (leave) {
+        leaveGuidedFlow()
+      }
       // Either we've closed via `leaveGuidedFlow`, or the user stayed — the
       // header shouldn't run its own close/animation in either case.
       return false
@@ -2976,7 +3030,9 @@ function FlowContent({
   useEffect(() => {
     const wasOpen = prevOpenRef.current
     prevOpenRef.current = open
-    if (wasOpen === open) return
+    if (wasOpen === open) {
+      return
+    }
     if (open && phase === "collection") {
       setPhase("chat")
     } else if (!open && phase !== "collection") {

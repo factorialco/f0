@@ -1,7 +1,5 @@
 import { forwardRef } from "react"
-
 import { withDataTestId } from "@/lib/data-testid"
-
 import type { F0DataChartProps } from "../../types"
 
 export interface DataChartEmptyStateProps {

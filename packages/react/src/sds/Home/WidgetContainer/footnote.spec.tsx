@@ -1,7 +1,5 @@
 import { describe, expect, test } from "vitest"
-
 import { screen, zeroRender } from "@/testing/test-utils"
-
 import { Footnote } from "./Footnote"
 
 /**

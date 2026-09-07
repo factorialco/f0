@@ -28,7 +28,9 @@ export interface SharedPresetPayload {
 const toBase64Url = (text: string): string => {
   const bytes = new TextEncoder().encode(text)
   let binary = ""
-  for (const byte of bytes) binary += String.fromCharCode(byte)
+  for (const byte of bytes) {
+    binary += String.fromCharCode(byte)
+  }
   return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "")
 }
 
@@ -60,7 +62,9 @@ export const encodeSharedPreset = (payload: SharedPresetPayload): string => {
 export const decodeSharedPreset = (
   encoded: string | null | undefined
 ): SharedPresetPayload | null => {
-  if (!encoded) return null
+  if (!encoded) {
+    return null
+  }
   try {
     const parsed = JSON.parse(fromBase64Url(encoded)) as unknown
     if (
@@ -84,7 +88,9 @@ export const decodeSharedPreset = (
 export const buildSharedPresetUrl = (
   payload: SharedPresetPayload
 ): string | null => {
-  if (typeof window === "undefined") return null
+  if (typeof window === "undefined") {
+    return null
+  }
   const { origin, pathname } = window.location
   return `${origin}${pathname}?${SHARED_PRESET_PARAM}=${encodeSharedPreset(payload)}`
 }

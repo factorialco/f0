@@ -1,11 +1,10 @@
 import { motion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon/F0Icon"
 import { ArrowUp, SolidStop } from "@/icons/app"
-import { cn } from "@/lib/utils"
 import { F0ActionItem } from "@/kits/ai/F0ActionItem"
+import { cn } from "@/lib/utils"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,7 +15,6 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/ui/dropdown-menu"
-
 import { EnhancementOption } from "./types"
 
 interface AIEnhanceMenuProps {
@@ -59,7 +57,9 @@ const AIEnhanceMenu = ({
 
   useEffect(() => {
     const input = customInputRef.current
-    if (!input) return
+    if (!input) {
+      return
+    }
 
     const timeoutId = window.setTimeout(() => {
       input.focus({ preventScroll: true })

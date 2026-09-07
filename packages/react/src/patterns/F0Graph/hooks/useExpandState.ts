@@ -5,7 +5,6 @@ import {
   useRef,
   useState,
 } from "react"
-
 import type { GraphNode, TreeNode } from "../types"
 import { collectExpandableNodeIds, computeExpandedByDepth } from "../utils"
 
@@ -119,7 +118,9 @@ export function useExpandState<T>({
           }
         }
         const toggled = nodeMapRef.current.get(nodeId)
-        if (toggled) collapseDescendants(toggled)
+        if (toggled) {
+          collapseDescendants(toggled)
+        }
       } else {
         next.add(nodeId)
       }
@@ -216,7 +217,9 @@ export function useExpandState<T>({
       const next: string[] = []
       for (const { children } of results) {
         for (const child of children) {
-          if (visited.has(child.id)) continue
+          if (visited.has(child.id)) {
+            continue
+          }
           visited.add(child.id)
           if ((child.childrenCount ?? 0) > 0) {
             next.push(child.id)

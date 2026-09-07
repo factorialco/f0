@@ -1,9 +1,8 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useCallback, useEffect, useRef, useState } from "react"
-
-import { useDialogWrapperContext as useF0Dialog } from "./DialogWrapperProvider"
 import { cn } from "@/lib/utils"
 import { ScrollArea, ScrollBar } from "@/ui/scrollarea"
+import { useDialogWrapperContext as useF0Dialog } from "./DialogWrapperProvider"
 
 export type ContentProps = {
   children: React.ReactNode
@@ -48,7 +47,9 @@ export const Content = ({
 
   const handleScroll = useCallback(() => {
     const el = viewportRef.current
-    if (!el) return
+    if (!el) {
+      return
+    }
     const { scrollTop, scrollHeight, clientHeight } = el
     setIsAtTop(scrollTop <= 0)
     setIsAtBottom(scrollTop + clientHeight >= scrollHeight - 1)
@@ -56,7 +57,9 @@ export const Content = ({
 
   useEffect(() => {
     const el = viewportRef.current
-    if (!el) return
+    if (!el) {
+      return
+    }
     el.addEventListener("scroll", handleScroll, { passive: true })
     handleScroll()
 

@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState, type ReactNode } from "react"
-
 import { fetchWorkbook } from "@/components/F0PdfViewer/sheetPreview"
 
 // Enough cells to fill the 160px crop; the parse range is capped too, so a
@@ -36,7 +35,9 @@ const ChatSheetThumbnail = ({
     let cancelled = false
     fetchWorkbook(url, { maxRows: THUMB_ROWS, maxCols: THUMB_COLS })
       .then((sheets) => {
-        if (cancelled) return
+        if (cancelled) {
+          return
+        }
         const first = sheets[0]
         if (!first || first.rows.length === 0) {
           onErrorRef.current()
@@ -46,14 +47,18 @@ const ChatSheetThumbnail = ({
         onRenderedRef.current()
       })
       .catch(() => {
-        if (!cancelled) onErrorRef.current()
+        if (!cancelled) {
+          onErrorRef.current()
+        }
       })
     return () => {
       cancelled = true
     }
   }, [url])
 
-  if (!rows) return null
+  if (!rows) {
+    return null
+  }
 
   return (
     <table className="w-full border-collapse bg-f1-background text-left">

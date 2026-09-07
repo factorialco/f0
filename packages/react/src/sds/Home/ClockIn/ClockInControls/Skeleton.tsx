@@ -1,6 +1,5 @@
 import { Skeleton } from "@/ui/skeleton"
-
-import type { ClockInControlsVariant } from "./index"
+import type { ClockInControlsVariant } from "."
 
 type ClockInControlsSkeletonProps = {
   variant?: ClockInControlsVariant

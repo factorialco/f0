@@ -1,7 +1,6 @@
 import { composeStories } from "@storybook/react-vite"
 import { render } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
-
 import * as stories from "../__stories__/F0GraphNode.stories"
 
 // F0GraphNode renders a bare `role="treeitem"`, which axe requires to be owned

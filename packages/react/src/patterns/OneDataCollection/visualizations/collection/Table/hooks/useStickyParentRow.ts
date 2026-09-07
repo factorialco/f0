@@ -1,7 +1,5 @@
 import { useLayoutEffect, useState } from "react"
-
 import { TABLE_ROW_STICKY_TOP_OFFSET } from "@/experimental/OneTable/TableRow"
-
 import { findScrollContainer } from "../lib/scroll"
 
 interface UseStickyParentRowResult {

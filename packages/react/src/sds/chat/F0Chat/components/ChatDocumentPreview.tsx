@@ -1,12 +1,10 @@
 "use client"
 
 import { lazy, type ReactNode, Suspense, useEffect, useState } from "react"
-
 import { Cross } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { Dialog, DialogContent, DialogTitle } from "@/ui/Dialog"
 import { Skeleton } from "@/ui/skeleton"
-
 import { useChatDocumentPreview } from "../providers/ChatUIProvider"
 
 // The document viewer is heavy (pdf.js up front, and it lazy-loads the
@@ -43,7 +41,9 @@ export const ChatDocumentPreview = (): ReactNode => {
     <Dialog
       open={documentPreview !== null}
       onOpenChange={(next) => {
-        if (!next) closeDocumentPreview()
+        if (!next) {
+          closeDocumentPreview()
+        }
       }}
     >
       {file && kind && (

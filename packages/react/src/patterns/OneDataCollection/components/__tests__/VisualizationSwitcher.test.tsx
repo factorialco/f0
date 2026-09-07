@@ -1,8 +1,6 @@
 import { userEvent } from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
-
 import { zeroRender as render, screen } from "@/testing/test-utils"
-
 import { VisualizationSwitcher } from "../VisualizationSwitcher"
 
 // Only the `type` drives the icon/label resolution, so minimal stubs suffice.

@@ -1,10 +1,8 @@
 import { type ReactNode } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { Cross } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { type AiChatCreditWarning } from "../../F0AiChat/types"
 
 const creditWarningConfig = {
@@ -27,7 +25,9 @@ export const CreditWarningWrapper = ({
 }: CreditWarningWrapperProps) => {
   const translation = useI18n()
 
-  if (!creditWarning) return children
+  if (!creditWarning) {
+    return children
+  }
 
   const config = {
     ...creditWarningConfig[creditWarning.level],

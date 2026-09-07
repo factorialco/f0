@@ -1,7 +1,6 @@
 import { F0Icon } from "@/components/F0Icon"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { cn } from "@/lib/utils"
-
 import { TOCAction } from "../types"
 
 interface TOCFooterProps {

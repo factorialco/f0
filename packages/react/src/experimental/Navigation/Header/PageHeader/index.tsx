@@ -1,24 +1,21 @@
 import { AnimatePresence, motion } from "motion/react"
 import { ReactElement, useContext, useRef, useState } from "react"
-
-import type { StatusVariant } from "@/components/tags/F0TagStatus"
-
 import { ModuleId } from "@/components/avatars/F0AvatarModule"
 import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { IconType } from "@/components/F0Icon"
+import type { StatusVariant } from "@/components/tags/F0TagStatus"
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
 import { OneSwitch as OnePromotionSwitch } from "@/experimental/AiPromotionChat/OneSwitch"
 import { Dropdown } from "@/experimental/Navigation/Dropdown"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { ChevronLeft, Menu } from "@/icons/app"
+import { F0OneSwitch } from "@/kits/ai/F0OneSwitch"
 import { Link } from "@/lib/linkHandler"
 import { cn } from "@/lib/utils"
 import { useSidebar } from "@/patterns/ApplicationFrame/FrameProvider"
-import { F0OneSwitch } from "@/kits/ai/F0OneSwitch"
 import { ActionButtonVariant } from "@/ui/Action"
 import { Skeleton } from "@/ui/skeleton"
-
 import { Breadcrumbs, BreadcrumbsProps } from "../Breadcrumbs"
 import { FavoriteButton } from "../Favorites"
 import { NavigationProps, PageNavigation } from "../PageNavigation"
@@ -48,7 +45,7 @@ export type PageAction = {
       onClick: () => void
     }
   | {
-      actions: Array<{ label: string; href: string }>
+      actions: { label: string; href: string }[]
     }
 )
 

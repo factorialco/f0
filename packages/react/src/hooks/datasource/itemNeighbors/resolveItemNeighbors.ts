@@ -1,7 +1,5 @@
 import { Observable } from "zen-observable-ts"
-
 import { isObservableLike, PromiseState } from "@/lib/promise-to-observable"
-
 import { ItemNeighborsResponse } from "../types/fetch.typings"
 
 export type ItemNeighborsResult<R> =
@@ -33,7 +31,9 @@ export function resolveItemNeighbors<R>(result: ItemNeighborsResult<R>): {
     const promise = new Promise<ItemNeighborsResponse<R>>((resolve, reject) => {
       subscription = result.subscribe({
         next: (state) => {
-          if (cancelled || state.loading) return
+          if (cancelled || state.loading) {
+            return
+          }
           if (state.error) {
             subscription?.unsubscribe()
             reject(state.error)
@@ -43,7 +43,9 @@ export function resolveItemNeighbors<R>(result: ItemNeighborsResult<R>): {
           }
         },
         error: (error) => {
-          if (!cancelled) reject(error)
+          if (!cancelled) {
+            reject(error)
+          }
         },
       })
     })
@@ -60,10 +62,14 @@ export function resolveItemNeighbors<R>(result: ItemNeighborsResult<R>): {
   const promise = new Promise<ItemNeighborsResponse<R>>((resolve, reject) => {
     Promise.resolve(result).then(
       (response) => {
-        if (!cancelled) resolve(response)
+        if (!cancelled) {
+          resolve(response)
+        }
       },
       (error) => {
-        if (!cancelled) reject(error)
+        if (!cancelled) {
+          reject(error)
+        }
       }
     )
   })

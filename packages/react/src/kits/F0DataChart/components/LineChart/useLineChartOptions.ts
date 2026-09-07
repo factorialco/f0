@@ -1,15 +1,12 @@
 import * as echarts from "echarts"
 import { type RefObject, useMemo } from "react"
-
 import { useI18n } from "@/lib/providers/i18n"
-
 import type {
   F0DataChartLineDataPoint,
   F0DataChartLineProps,
   F0DataChartLineSeries,
   F0DataChartLineType,
 } from "../../types"
-
 import { paletteColor, resolveChartColorToken } from "../../utils/colors"
 import {
   buildBaseChartOptions,
@@ -205,7 +202,9 @@ export function useLineChartOptions(
     // card every other chart type shows; with several, the category heads
     // the card and each series becomes a row.
     const tooltipFormatter = (params: unknown) => {
-      if (!Array.isArray(params) || params.length === 0) return ""
+      if (!Array.isArray(params) || params.length === 0) {
+        return ""
+      }
       const points = params as {
         seriesName?: string
         axisValueLabel?: string

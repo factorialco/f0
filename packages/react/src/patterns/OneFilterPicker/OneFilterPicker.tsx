@@ -1,20 +1,17 @@
 import type { ReactElement } from "react"
 import { useContext, useEffect, useMemo, useRef, useState } from "react"
-
-import { useEventEmitter } from "@/patterns/OneDataCollection/useEventEmitter"
 import { DataTestIdWrapper } from "@/lib/data-testid"
 import { RenderErrorBoundary } from "@/lib/RenderErrorBoundary"
 import { cn } from "@/lib/utils"
-
-import type { FiltersDefinition, FiltersMode, FiltersState } from "./types"
-
-import { collectNestedFilterKeys } from "./filterTypes/InFilter/components/option-utils"
+import { useEventEmitter } from "@/patterns/OneDataCollection/useEventEmitter"
 import { FiltersChipsList as FiltersChipsListComponent } from "./components/FiltersChipsList"
 import { FiltersControls as FiltersControlsComponent } from "./components/FiltersControls"
 import { FiltersPresets as FiltersPresetsComponent } from "./components/FiltersPresets"
 import { FiltersContext } from "./context"
+import { collectNestedFilterKeys } from "./filterTypes/InFilter/components/option-utils"
 import { isPresetSelected } from "./internal/isPresetSelected"
 import { FilterPickerStateModeContext } from "./internal/stateMode"
+import type { FiltersDefinition, FiltersMode, FiltersState } from "./types"
 import { PresetsDefinition } from "./types"
 
 /**
@@ -232,7 +229,9 @@ const FiltersControls = () => {
     setFiltersValue(filters)
   }
 
-  if (!shownFilters || Object.keys(shownFilters).length === 0) return null
+  if (!shownFilters || Object.keys(shownFilters).length === 0) {
+    return null
+  }
 
   return (
     <>
@@ -287,7 +286,9 @@ const FiltersPresets = () => {
         const preset = presets?.find(
           (p, index) => (p.id ?? `${p.label}-${index}`) === presetId
         )
-        if (preset) emitPresetClick(preset.filter)
+        if (preset) {
+          emitPresetClick(preset.filter)
+        }
         onSelectPreset(presetId)
       }
     : undefined
@@ -342,8 +343,12 @@ const FiltersChipsList = () => {
   // chips when a preset exactly matches the current filters (the preset chip
   // already represents them).
   const isAnyPresetActive = useMemo(() => {
-    if (onSelectPreset) return false
-    if (!presets?.length) return false
+    if (onSelectPreset) {
+      return false
+    }
+    if (!presets?.length) {
+      return false
+    }
     return presets.some((preset) => isPresetSelected(preset, value))
   }, [presets, value, onSelectPreset])
 

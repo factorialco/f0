@@ -1,6 +1,5 @@
 import { IconType } from "@/components/F0Icon"
 import { defaultTranslations } from "@/lib/providers/i18n/i18n-provider-defaults"
-
 import type {
   CanvasActions,
   CanvasContent,

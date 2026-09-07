@@ -1,6 +1,5 @@
 import { type ReactNode, useCallback, useEffect, useRef, useState } from "react"
 import { useResizeObserver } from "usehooks-ts"
-
 import { cn } from "../../lib/utils"
 
 /**
@@ -42,7 +41,9 @@ function useOverflowCalculation<T>(items: T[], gap: number) {
 
   // Measure all items in a hidden container
   const measureItemSizes = useCallback(() => {
-    if (!measurementContainerRef.current) return []
+    if (!measurementContainerRef.current) {
+      return []
+    }
 
     const itemElements = measurementContainerRef.current.children
     const sizes: number[] = []
@@ -64,7 +65,9 @@ function useOverflowCalculation<T>(items: T[], gap: number) {
       for (let i = 0; i < itemSizes.length; i++) {
         const newSize = accumulatedSize + itemSizes[i]
 
-        if (newSize > availableSize + 30) break
+        if (newSize > availableSize + 30) {
+          break
+        }
 
         accumulatedSize = newSize
         accumulatedSize = addGapBetweenItems(
@@ -83,7 +86,9 @@ function useOverflowCalculation<T>(items: T[], gap: number) {
 
   // Calculate which items should be visible and which should overflow
   const calculateVisibleItems = useCallback(() => {
-    if (!containerRef.current || items.length === 0) return
+    if (!containerRef.current || items.length === 0) {
+      return
+    }
 
     const currentContainerSize = containerRef.current.clientHeight
     const itemSizes = measureItemSizes()

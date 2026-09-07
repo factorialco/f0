@@ -1,6 +1,3 @@
-import type { Props as LabelProps } from "recharts/types/component/Label"
-import type { CartesianViewBox } from "recharts/types/util/types"
-
 import { cloneDeep } from "lodash"
 import { ForwardedRef } from "react"
 import {
@@ -13,9 +10,9 @@ import {
   YAxis,
   YAxisProps,
 } from "recharts"
-
+import type { Props as LabelProps } from "recharts/types/component/Label"
+import type { CartesianViewBox } from "recharts/types/util/types"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/ui/chart"
-
 import { prepareData } from "../utils/bar"
 import { getCategoricalColor, getColor } from "../utils/colors"
 import {
@@ -33,8 +30,8 @@ const getMaxValueByKey = (
 ): string => {
   const clonedData = cloneDeep(data)
 
-  let label: string = ""
-  let max: number = 0
+  let label = ""
+  let max = 0
 
   clonedData.forEach((datapoint) => {
     delete datapoint.x
@@ -81,16 +78,10 @@ const _VBarChart = <K extends ChartConfig>(
   const maxLabelWidth = Math.max(
     ...preparedData.map((el) => measureTextWidth(`${el.x}`))
   )
-  const totalCategories = bars.reduce(
-    (acc, key) => {
-      acc[key] = data.reduce(
-        (sum, item) => sum + (item.values[key] as number),
-        0
-      )
-      return acc
-    },
-    {} as Record<string, number>
-  )
+  const totalCategories = bars.reduce<Record<string, number>>((acc, key) => {
+    acc[key] = data.reduce((sum, item) => sum + (item.values[key] as number), 0)
+    return acc
+  }, {})
 
   const xAxisProps: XAxisProps = {
     ...xAxisConfigureProps(xAxis),

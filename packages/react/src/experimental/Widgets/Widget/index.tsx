@@ -7,7 +7,6 @@ import React, {
   useRef,
   useState,
 } from "react"
-
 import { F0Button, type F0ButtonProps } from "@/components/F0Button"
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { F0TagAlert } from "@/components/tags/F0TagAlert"
@@ -16,26 +15,25 @@ import {
   DropdownInternal,
   DropdownItem,
 } from "@/experimental/Navigation/Dropdown/internal.tsx"
-import { One as OneIcon } from "@/icons/ai"
-import { Ellipsis } from "@/icons/app"
-import { AIButton as AIButtonComponent } from "@/kits/ai/AIButton"
-import { useI18n } from "@/lib/providers/i18n"
-import { Counter } from "@/ui/Counter"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
-import { PrivateBox } from "@/sds/Profile/PrivateBox"
+import { One as OneIcon } from "@/icons/ai"
 import {
+  Ellipsis,
   ChevronRight,
   EyeInvisible,
   EyeVisible,
   Handle,
   InfoCircleLine,
 } from "@/icons/app"
+import { AIButton as AIButtonComponent } from "@/kits/ai/AIButton"
 import { withDataTestId } from "@/lib/data-testid"
-import { isExternalHref, Link } from "@/lib/linkHandler"
 import { experimentalComponent } from "@/lib/experimental"
+import { isExternalHref, Link } from "@/lib/linkHandler"
 import { usePrivacyMode } from "@/lib/privacyMode"
+import { useI18n } from "@/lib/providers/i18n"
 import { withSkeleton } from "@/lib/skeleton"
 import { cn } from "@/lib/utils"
+import { PrivateBox } from "@/sds/Profile/PrivateBox"
 import {
   Card,
   CardComment,
@@ -45,6 +43,7 @@ import {
   CardSubtitle,
   CardTitle,
 } from "@/ui/Card"
+import { Counter } from "@/ui/Counter"
 import { Separator } from "@/ui/separator"
 import { Skeleton as SkeletonPrimitive } from "@/ui/skeleton"
 
@@ -86,12 +85,12 @@ export interface WidgetProps {
    * takes no className of its own, so this is the seam for it.
    */
   footerClassName?: string
-  summaries?: Array<{
+  summaries?: {
     label: string
     value: string | number
     prefixUnit?: string
     postfixUnit?: string
-  }>
+  }[]
   alert?: string
   status?: {
     text: string
@@ -166,7 +165,9 @@ const useIsWide = (ref: React.RefObject<HTMLElement | null>) => {
 
   useEffect(() => {
     const element = ref.current
-    if (!element || typeof ResizeObserver === "undefined") return
+    if (!element || typeof ResizeObserver === "undefined") {
+      return
+    }
 
     const measure = () => setIsWide(element.clientWidth >= WIDE_WIDGET_PX)
 
@@ -239,7 +240,9 @@ const WidgetTitle = ({
   // title never moves anything beside it.
   const titleClass = cn("truncate", isWide && "text-lg font-semibold")
 
-  if (!link) return <CardTitle className={titleClass}>{title}</CardTitle>
+  if (!link) {
+    return <CardTitle className={titleClass}>{title}</CardTitle>
+  }
 
   const content = (
     <>
@@ -312,7 +315,9 @@ const Container = forwardRef<
   const isWide = useIsWide(cardRef)
 
   useEffect(() => {
-    if (!isDragging || !onDragEnd) return
+    if (!isDragging || !onDragEnd) {
+      return
+    }
     // The pointer can be released anywhere, so the end of a drag is a document
     // concern rather than this card's.
     const handleGlobalMouseUp = () => onDragEnd()

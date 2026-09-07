@@ -1,13 +1,12 @@
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0Button } from "@/components/F0Button"
-import { OneEllipsis } from "@/lib/OneEllipsis"
-import { Badge } from "@/ui/IconBadge"
+import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { Bell as BellIcon, Circle as CircleIcon } from "@/icons/app"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
-
-import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
+import { Badge } from "@/ui/IconBadge"
 
 interface SidebarFooterProps {
   user: {

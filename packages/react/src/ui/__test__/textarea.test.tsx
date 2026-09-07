@@ -1,9 +1,8 @@
+import "@testing-library/jest-dom/vitest"
 import { screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import "@testing-library/jest-dom/vitest"
 import { zeroRender as render } from "@/testing/test-utils"
-
 import { Textarea } from "../textarea"
 
 describe("Textarea", () => {

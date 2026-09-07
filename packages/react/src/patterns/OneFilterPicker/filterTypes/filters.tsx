@@ -1,6 +1,5 @@
 import { DateRange } from "@/components/OneCalendar/types"
 import { RecordType } from "@/hooks/datasource"
-
 import dateFilter, { DateFilterDefinition } from "./DateFilter"
 import inFilter, { InFilterDefinition } from "./InFilter"
 import { numberFilter, NumberFilterDefinition } from "./NumberFilter"
@@ -79,7 +78,7 @@ export type FilterDefinition =
 
 // This type ensures each filter follows FilterTypeDefinition while preserving its specific type
 type ValidateFilterType<T> = T extends {
-  [K: string]: FilterTypeDefinition<unknown>
+  [K: string]: FilterTypeDefinition
 }
   ? T
   : never

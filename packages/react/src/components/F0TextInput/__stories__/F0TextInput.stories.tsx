@@ -1,13 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { expect, userEvent, within } from "storybook/test"
-
+import { inputFieldStatus } from "@/components/F0InputField"
 import * as Icons from "@/icons/app"
 import { Placeholder } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-import { inputFieldStatus } from "@/components/F0InputField"
-
-import { F0TextInput } from "../index"
+import { F0TextInput } from ".."
 import { inputSizes } from "../types"
 
 const meta = {

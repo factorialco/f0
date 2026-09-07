@@ -1,5 +1,4 @@
 import { PropsWithChildren, useLayoutEffect, useRef, useState } from "react"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { ChevronLeft, ChevronRight } from "@/icons/app"
 import { cn } from "@/lib/utils"
@@ -14,7 +13,9 @@ export const DynamicCarousel = ({ children }: PropsWithChildren) => {
 
   useLayoutEffect(() => {
     const container = scrollContainerRef.current
-    if (!container) return
+    if (!container) {
+      return
+    }
 
     const ro = new ResizeObserver(() => updateScrollState())
     ro.observe(container)
@@ -34,7 +35,9 @@ export const DynamicCarousel = ({ children }: PropsWithChildren) => {
 
   function scrollNext() {
     const container = scrollContainerRef.current
-    if (!container) return
+    if (!container) {
+      return
+    }
 
     container.scrollBy({
       left: container.clientWidth,
@@ -44,7 +47,9 @@ export const DynamicCarousel = ({ children }: PropsWithChildren) => {
 
   function scrollPrev() {
     const container = scrollContainerRef.current
-    if (!container) return
+    if (!container) {
+      return
+    }
 
     container.scrollBy({
       left: -container.clientWidth,
@@ -53,7 +58,9 @@ export const DynamicCarousel = ({ children }: PropsWithChildren) => {
   }
 
   const updateScrollState = () => {
-    if (!scrollContainerRef.current) return
+    if (!scrollContainerRef.current) {
+      return
+    }
     const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current
 
     setCanScrollPrev(scrollLeft > 0)

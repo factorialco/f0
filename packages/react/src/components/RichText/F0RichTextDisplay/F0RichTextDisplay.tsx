@@ -1,3 +1,4 @@
+import "../index.css"
 import DOMPurify from "dompurify"
 import { forwardRef, type HTMLAttributes, useMemo } from "react"
 import rehypeStringify from "rehype-stringify"
@@ -5,11 +6,8 @@ import remarkGfm from "remark-gfm"
 import remarkParse from "remark-parse"
 import remarkRehype from "remark-rehype"
 import { unified } from "unified"
-
-import { cn } from "@/lib/utils"
 import { experimentalComponent } from "@/lib/experimental"
-
-import "../index.css"
+import { cn } from "@/lib/utils"
 
 // Declared next to the component (not in a sibling types.ts) so api-extractor
 // rolls them into the bundled d.ts instead of emitting a broken './types' import.

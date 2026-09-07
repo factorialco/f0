@@ -1,11 +1,9 @@
-import type { CountryCode as PhoneCountry } from "libphonenumber-js"
-import type { Labels, Value } from "react-phone-number-input"
-
 import { useControllableState } from "@radix-ui/react-use-controllable-state"
 import { cva } from "cva"
+import type { CountryCode as PhoneCountry } from "libphonenumber-js"
 import { forwardRef, useEffect, useId, useMemo, useRef, useState } from "react"
+import type { Labels, Value } from "react-phone-number-input"
 import RPNInput from "react-phone-number-input"
-
 import { F0Icon } from "@/components/F0Icon"
 import { InputMessages } from "@/components/F0InputField/components/InputMessages"
 import { Label } from "@/components/F0InputField/components/Label"
@@ -13,9 +11,6 @@ import { CrossedCircle } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { Spinner } from "@/ui/Spinner"
-
-import type { F0PhoneInputProps, F0PhoneInputValue } from "./types"
-
 import { CountrySelect } from "./components/CountrySelect"
 import { PhoneNumberInput } from "./components/PhoneNumberInput"
 import {
@@ -31,6 +26,7 @@ import {
   exampleInternationalPlaceholder,
   exampleNationalPlaceholder,
 } from "./lib/placeholder"
+import type { F0PhoneInputProps, F0PhoneInputValue } from "./types"
 
 const containerVariants = cva({
   base: [
@@ -174,7 +170,9 @@ export const F0PhoneInput = forwardRef<HTMLInputElement, F0PhoneInputProps>(
       const pinned = (pinnedCountries ?? [])
         .map(toPhoneCountry)
         .filter((code): code is PhoneCountry => !!code)
-      if (!pinned.length) return undefined
+      if (!pinned.length) {
+        return undefined
+      }
       return [...pinned, "|" as const, "..." as const]
     }, [pinnedCountries])
 
@@ -186,7 +184,9 @@ export const F0PhoneInput = forwardRef<HTMLInputElement, F0PhoneInputProps>(
     )
 
     const countries = useMemo(() => {
-      if (!allowedCountries) return undefined
+      if (!allowedCountries) {
+        return undefined
+      }
       const allowed = allowedCountries
         .map(toPhoneCountry)
         .filter((code): code is PhoneCountry => !!code)
@@ -211,9 +211,13 @@ export const F0PhoneInput = forwardRef<HTMLInputElement, F0PhoneInputProps>(
       null
     )
     useEffect(() => {
-      if (country || !e164) return
+      if (country || !e164) {
+        return
+      }
       const detected = countryForPartialE164(e164, countries)
-      if (detected) selectCountryRef.current?.(detected)
+      if (detected) {
+        selectCountryRef.current?.(detected)
+      }
     }, [country, e164, countries])
 
     // Legacy `hint`/`error` shortcuts, mirroring F0InputField's semantics

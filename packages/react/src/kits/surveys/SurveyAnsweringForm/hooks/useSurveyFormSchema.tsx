@@ -1,6 +1,7 @@
 import { useMemo } from "react"
 import { z, type ZodTypeAny } from "zod"
-
+import type { TranslationKey } from "@/lib/providers/i18n/i18n-provider-defaults"
+import { f0FormField } from "@/patterns/F0Form/f0Schema"
 import type { F0CheckboxField } from "@/patterns/F0Form/fields/checkbox/types"
 import type {
   MimeType,
@@ -8,25 +9,15 @@ import type {
 } from "@/patterns/F0Form/fields/file/types"
 import type { F0Field, F0FileField } from "@/patterns/F0Form/fields/types"
 import type { F0SectionConfig } from "@/patterns/F0Form/types"
-import type { TranslationKey } from "@/lib/providers/i18n/i18n-provider-defaults"
-
-import { f0FormField } from "@/patterns/F0Form/f0Schema"
 import { F0FormField } from "@/patterns/F0FormField"
-
+import { BaseQuestion } from "../../SurveyFormBuilder/QuestionTypes/BaseQuestion"
+import { DEFAULT_FILE_ACCEPT } from "../../SurveyFormBuilder/QuestionTypes/FileQuestion"
 import type {
   SurveyFormBuilderElement,
   QuestionElement,
   SelectQuestionOption,
   SurveyDatasets,
 } from "../../SurveyFormBuilder/types"
-import type {
-  FlatQuestion,
-  SurveyAnsweringFormMode,
-  SurveyAnswers,
-} from "../types"
-
-import { BaseQuestion } from "../../SurveyFormBuilder/QuestionTypes/BaseQuestion"
-import { DEFAULT_FILE_ACCEPT } from "../../SurveyFormBuilder/QuestionTypes/FileQuestion"
 import {
   RatingQuestionField,
   type RatingFieldConfig,
@@ -35,6 +26,11 @@ import {
   SelectQuestionField,
   type SelectFieldConfig,
 } from "../components/SelectQuestionField"
+import type {
+  FlatQuestion,
+  SurveyAnsweringFormMode,
+  SurveyAnswers,
+} from "../types"
 
 const URL_PATTERN = /^(https?:\/\/)?[\w.-]+\.[a-z]{2,}(:\d+)?(\/[^\s]*)?$/i
 
@@ -179,13 +175,18 @@ function getDefaultValue(
   defaultValues?: Partial<SurveyAnswers>
 ): unknown {
   const dv = defaultValues?.[question.id]
-  if (dv) return dv.value
+  if (dv) {
+    return dv.value
+  }
 
-  if (question.type === "multi-select" || question.type === "dropdown-multi")
+  if (question.type === "multi-select" || question.type === "dropdown-multi") {
     return []
+  }
 
   const q = question as QuestionElement & { value?: unknown }
-  if (q.value !== undefined && q.value !== null) return q.value
+  if (q.value !== undefined && q.value !== null) {
+    return q.value
+  }
 
   return null
 }
@@ -685,8 +686,9 @@ export function useSurveyFormSchema(
         }
 
         for (const q of section.questions ?? []) {
-          if (isStepped && currentQuestionId && q.id !== currentQuestionId)
+          if (isStepped && currentQuestionId && q.id !== currentQuestionId) {
             continue
+          }
 
           shape[q.id] = buildFieldForQuestion(
             q,
@@ -703,8 +705,9 @@ export function useSurveyFormSchema(
       } else {
         const q = element.question
 
-        if (isStepped && currentQuestionId && q.id !== currentQuestionId)
+        if (isStepped && currentQuestionId && q.id !== currentQuestionId) {
           continue
+        }
 
         shape[q.id] = buildFieldForQuestion(
           q,

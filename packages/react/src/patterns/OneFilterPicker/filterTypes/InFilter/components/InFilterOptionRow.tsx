@@ -1,13 +1,11 @@
 "use client"
 
 import { useCallback, useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
-import { OneEllipsis } from "@/lib/OneEllipsis"
 import { ChevronDown, ChevronRight } from "@/icons/app"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
-
 import { InFilterOptionItem } from "../types"
 import { cacheLabel, cacheNestedLabel } from "../useLoadOptions"
 import { InFilterOptionCheckbox } from "./InFilterOptionCheckbox"
@@ -53,7 +51,9 @@ export function InFilterOptionRow<T extends string>({
 
   const handleToggleChild = useCallback(
     (childValue: T, childLabel: string) => {
-      if (!childFilterKey || !onFilterChange) return
+      if (!childFilterKey || !onFilterChange) {
+        return
+      }
       const isChildSelected = childValues.includes(childValue)
       if (!isChildSelected) {
         cacheLabel(cacheKey, childValue, childLabel)

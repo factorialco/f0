@@ -1,13 +1,11 @@
 import { memo, useCallback, type RefObject } from "react"
-
 import { F0Text } from "@/components/F0Text"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
-
 import type { TranscriptCue } from "../types"
 import { formatPlaybackTime } from "../utils"
 
-type CueRefs = RefObject<Array<HTMLLIElement | null>>
+type CueRefs = RefObject<(HTMLLIElement | null)[]>
 
 interface CueRowProps {
   cue: TranscriptCue
@@ -38,13 +36,17 @@ const CueRow = memo(function CueRow({
 
   const setCueRef = useCallback(
     (node: HTMLLIElement | null) => {
-      if (cueRefs?.current) cueRefs.current[index] = node
+      if (cueRefs?.current) {
+        cueRefs.current[index] = node
+      }
     },
     [cueRefs, index]
   )
 
   const handleClick = useCallback(() => {
-    if (startTime !== undefined) onSeek?.(startTime)
+    if (startTime !== undefined) {
+      onSeek?.(startTime)
+    }
   }, [onSeek, startTime])
 
   return (

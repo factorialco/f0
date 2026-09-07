@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react"
-
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { Await } from "@/lib/Await"
-import { Counter } from "@/ui/Counter"
 import { cn, focusRing } from "@/lib/utils"
 import { ChevronToggle } from "@/ui/ChevronToggle/ChevronToggle"
+import { Counter } from "@/ui/Counter"
 import { Skeleton } from "@/ui/skeleton"
 
 type GroupHeaderProps = {
@@ -68,7 +67,9 @@ export const GroupHeader = ({
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" || e.key === " ") {
-      if (e.key === " ") e.preventDefault()
+      if (e.key === " ") {
+        e.preventDefault()
+      }
       handleGroupClick()
     }
   }

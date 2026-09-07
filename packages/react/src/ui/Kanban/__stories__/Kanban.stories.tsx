@@ -1,15 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { useState } from "react"
 import { expect, fn, waitFor, within } from "storybook/test"
-
 import { createAtlaskitDriver } from "@/lib/dnd/atlaskitDriver"
 import { DndProvider } from "@/lib/dnd/context"
-
-import type { KanbanProps } from "../types"
-
 import { KanbanCard } from "../components/KanbanCard"
 import { Kanban } from "../Kanban"
+import type { KanbanProps } from "../types"
 
 type Task = {
   id: string
@@ -326,12 +322,12 @@ export const SimpleOnMoveTest: Story = {
   render: function Render() {
     const [instanceId] = useState(() => Symbol("kanban-instance"))
     const [callbackCalls, setCallbackCalls] = useState<
-      Array<{
+      {
         fromLaneId: string
         toLaneId: string
         sourceRecord: Task
         destinyRecord: { record: Task; position: "above" | "below" } | null
-      }>
+      }[]
     >([])
 
     // ✅ Estado mutable para las lanes para ver el movimiento visual

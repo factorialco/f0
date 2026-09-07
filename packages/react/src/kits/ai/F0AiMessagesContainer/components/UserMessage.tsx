@@ -1,13 +1,10 @@
 import { type ReactNode, useEffect, useRef } from "react"
-
-import { F0Icon } from "@/components/F0Icon"
 import { F0FileItem } from "@/components/F0FileItem"
+import { F0Icon } from "@/components/F0Icon"
 import { F0RichTextDisplay } from "@/components/RichText/F0RichTextDisplay"
 import { Reply } from "@/icons/app"
-
 import { type Message } from "../types"
 import { useReplySelection } from "../useReplySelection"
-
 import { ReplyPopover } from "./ReplyPopover"
 
 type UploadedFile = {
@@ -32,7 +29,9 @@ type MessagePart = MessageTextPart | MessageBinaryPart
 function getTextContent(
   content: string | MessagePart[] | undefined
 ): string | undefined {
-  if (typeof content === "string") return content
+  if (typeof content === "string") {
+    return content
+  }
   if (Array.isArray(content)) {
     // When multiple text parts exist (e.g. pending context + user text),
     // only show the last one — earlier parts are invisible context for the agent.
@@ -134,7 +133,9 @@ export const UserMessage = ({
   const bubbleRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (!ref.current || !autoScrollIntoView) return
+    if (!ref.current || !autoScrollIntoView) {
+      return
+    }
 
     ref.current.scrollIntoView({
       behavior: "smooth",

@@ -1,6 +1,5 @@
 import type { AxeResults, Result, TagValue } from "axe-core"
 import React, { useCallback, useEffect, useRef, useState } from "react"
-
 import { A11Y_WCAG_TAGS } from "../lib/storybook-utils/a11yAxeConfig"
 import type { A11yTier } from "./component-status"
 
@@ -119,7 +118,9 @@ export function useA11yAudit(): {
   const started = useRef(false)
 
   const start = useCallback(() => {
-    if (started.current) return
+    if (started.current) {
+      return
+    }
     started.current = true
     if (!isInStorybookDocs()) {
       setState({ status: "unavailable" })
@@ -272,7 +273,9 @@ export function A11yRow({ detail, tier }: { detail: string; tier: A11yTier }) {
 
   const onToggle = useCallback(
     (e: React.SyntheticEvent<HTMLDetailsElement>) => {
-      if (!e.currentTarget.open) return
+      if (!e.currentTarget.open) {
+        return
+      }
       start()
     },
     [start]

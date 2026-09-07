@@ -138,7 +138,9 @@ export const useTriggerSearch = ({
     const wasOpen = wasOpenRef.current
     wasOpenRef.current = open
 
-    if (!enabled || !wasOpen || open) return
+    if (!enabled || !wasOpen || open) {
+      return
+    }
 
     setDraft("")
     callbacksRef.current.onSearchReset()
@@ -161,7 +163,9 @@ export const useTriggerSearch = ({
    */
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
-      if (event.defaultPrevented) return
+      if (event.defaultPrevented) {
+        return
+      }
 
       const isArrowDown = event.key === "ArrowDown"
       const isArrowUp = event.key === "ArrowUp"
@@ -171,11 +175,15 @@ export const useTriggerSearch = ({
       // becomes the text minus one character. Consumed when that happened, so
       // the input does not also delete from the text just handed to it.
       if (event.key === "Backspace" && event.currentTarget.value === "") {
-        if (callbacksRef.current.onBackspaceOnEmpty()) event.preventDefault()
+        if (callbacksRef.current.onBackspaceOnEmpty()) {
+          event.preventDefault()
+        }
         return
       }
 
-      if (!isArrowDown && !isArrowUp && !isEnter) return
+      if (!isArrowDown && !isArrowUp && !isEnter) {
+        return
+      }
 
       if (!requestedOpenRef.current) {
         event.preventDefault()
@@ -186,7 +194,9 @@ export const useTriggerSearch = ({
       if (isEnter) {
         // Consumed only if it took something, so a form can still be
         // submitted from a field whose list has nothing in it.
-        if (callbacksRef.current.onSelectActive()) event.preventDefault()
+        if (callbacksRef.current.onSelectActive()) {
+          event.preventDefault()
+        }
         return
       }
 

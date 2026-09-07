@@ -11,11 +11,11 @@ export type Message = {
   id?: string
   role?: string
   content?: unknown
-  toolCalls?: Array<{
+  toolCalls?: {
     id: string
     type?: string
     function?: { name: string; arguments: string }
-  }>
+  }[]
   generativeUI?: () => unknown
   rawData?: unknown
   /**

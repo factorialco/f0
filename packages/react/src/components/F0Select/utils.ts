@@ -65,7 +65,9 @@ export function useLabelsOverflow(labels: string[]): {
     calculate()
 
     const container = containerRef.current
-    if (!container) return
+    if (!container) {
+      return
+    }
 
     const resizeObserver = new ResizeObserver(() => {
       calculate()

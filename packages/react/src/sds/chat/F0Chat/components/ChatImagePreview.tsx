@@ -2,13 +2,11 @@
 
 import { AnimatePresence, motion } from "motion/react"
 import { type ReactNode, useCallback, useEffect, useState } from "react"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { type IconType } from "@/components/F0Icon"
 import { ChevronLeft, ChevronRight, Cross, Download } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { Dialog, DialogContent, DialogTitle } from "@/ui/Dialog"
-
 import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
 import { useChatImagePreview } from "../providers/ChatUIProvider"
 import { useF0ChatEmit } from "../providers/F0ChatProvider"
@@ -72,7 +70,9 @@ export const ChatImagePreview = (): ReactNode => {
 
   const go = useCallback(
     (delta: number) => {
-      if (count === 0) return
+      if (count === 0) {
+        return
+      }
       setImagePreviewIndex((index + delta + count) % count)
     },
     [count, index, setImagePreviewIndex]
@@ -80,10 +80,15 @@ export const ChatImagePreview = (): ReactNode => {
 
   // Arrow keys page between a message's images while the lightbox is open.
   useEffect(() => {
-    if (!open || !multiple) return
+    if (!open || !multiple) {
+      return
+    }
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "ArrowRight") go(1)
-      else if (e.key === "ArrowLeft") go(-1)
+      if (e.key === "ArrowRight") {
+        go(1)
+      } else if (e.key === "ArrowLeft") {
+        go(-1)
+      }
     }
     window.addEventListener("keydown", onKey)
     return () => window.removeEventListener("keydown", onKey)
@@ -93,7 +98,9 @@ export const ChatImagePreview = (): ReactNode => {
     <Dialog
       open={open}
       onOpenChange={(next) => {
-        if (!next) closeImagePreview()
+        if (!next) {
+          closeImagePreview()
+        }
       }}
     >
       {current && (

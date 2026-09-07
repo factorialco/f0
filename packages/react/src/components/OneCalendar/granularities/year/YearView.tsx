@@ -7,9 +7,7 @@ import {
   startOfYear,
 } from "date-fns"
 import { AnimatePresence, motion } from "motion/react"
-
 import { cn, focusRing } from "@/lib/utils"
-
 import { CalendarMode, DateRange } from "../../types"
 
 interface YearViewProps {
@@ -99,7 +97,9 @@ export function YearView({
 
   // Check if a year is selected
   const isYearSelected = (year: number) => {
-    if (!selected) return false
+    if (!selected) {
+      return false
+    }
 
     if (!isDateRange(selected)) {
       // Single date selection
@@ -127,13 +127,17 @@ export function YearView({
 
   // Check if a year is the start of the range
   const isRangeStart = (year: number): boolean => {
-    if (!selected || !isDateRange(selected) || !selected.from) return false
+    if (!selected || !isDateRange(selected) || !selected.from) {
+      return false
+    }
     return selected.from.getFullYear() === year
   }
 
   // Check if a year is the end of the range
   const isRangeEnd = (year: number): boolean => {
-    if (!selected || !isDateRange(selected) || !selected.to) return false
+    if (!selected || !isDateRange(selected) || !selected.to) {
+      return false
+    }
     return selected.to.getFullYear() === year
   }
 

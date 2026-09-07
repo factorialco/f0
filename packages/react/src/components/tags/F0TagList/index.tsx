@@ -1,5 +1,4 @@
 import { withDataTestId } from "@/lib/data-testid"
-
 import { F0TagList as _F0TagList } from "./F0TagList"
 
 export { TagCounter } from "./components/TagCounter"

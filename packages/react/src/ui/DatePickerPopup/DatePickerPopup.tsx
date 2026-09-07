@@ -1,5 +1,4 @@
 import { useContext, useEffect, useMemo, useRef, useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { F0Select } from "@/components/F0Select"
 import { OneCalendar } from "@/components/OneCalendar"
@@ -20,11 +19,10 @@ import { useI18n } from "@/lib/providers/i18n"
 import { useL10n } from "@/lib/providers/l10n"
 import { F0DialogContext } from "@/patterns/F0Dialog"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
-
 import { getCompareToValue } from "./compareTo"
-import { createCalendarDismissalHandlers } from "./dismissal"
 import { GranularitySelector } from "./components/GranularitySelector"
 import { PresetList } from "./components/PresetList"
+import { createCalendarDismissalHandlers } from "./dismissal"
 import { DatePickerValue, DatePreset } from "./types"
 import { isSameDatePickerValue } from "./utils"
 
@@ -179,7 +177,9 @@ export function DatePickerPopup({
     setCustomRangeMode(presetId === PRESET_CUSTOM)
 
     const selectedPreset = presetId ? presets[+presetId] : undefined
-    if (!selectedPreset) return
+    if (!selectedPreset) {
+      return
+    }
 
     handleSelect({
       value: definitions[selectedPreset.granularity].toRange(

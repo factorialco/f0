@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-
 import { type AvatarVariant } from "@/components/avatars/F0Avatar"
-
 import { useF0ChatEmit } from "../providers/F0ChatProvider"
 import { type F0ChatUser } from "../types"
 import { locateMentions } from "../utils/mention-ranges"
@@ -137,7 +135,9 @@ function findAtTrigger(
 ): { atIndex: number; query: string } | null {
   const textBeforeCursor = text.slice(0, cursorPos)
   const atIndex = textBeforeCursor.lastIndexOf("@")
-  if (atIndex === -1) return null
+  if (atIndex === -1) {
+    return null
+  }
 
   if (atIndex > 0) {
     const charBefore = text[atIndex - 1]
@@ -147,9 +147,13 @@ function findAtTrigger(
   }
 
   const query = text.slice(atIndex + 1, cursorPos)
-  if (query.includes("\n")) return null
+  if (query.includes("\n")) {
+    return null
+  }
 
-  if (anchored.some((mention) => mention.start === atIndex)) return null
+  if (anchored.some((mention) => mention.start === atIndex)) {
+    return null
+  }
 
   return { atIndex, query }
 }
@@ -204,15 +208,21 @@ const eraseSpans = (
   const merged: { start: number; end: number }[] = []
   for (const span of [...spans].sort((a, b) => a.start - b.start)) {
     const last = merged[merged.length - 1]
-    if (last && span.start <= last.end) last.end = Math.max(last.end, span.end)
-    else merged.push({ ...span })
+    if (last && span.start <= last.end) {
+      last.end = Math.max(last.end, span.end)
+    } else {
+      merged.push({ ...span })
+    }
   }
 
   const removedBefore = (pos: number): number => {
     let removed = 0
     for (const span of merged) {
-      if (span.end <= pos) removed += span.end - span.start
-      else if (span.start < pos) removed += pos - span.start
+      if (span.end <= pos) {
+        removed += span.end - span.start
+      } else if (span.start < pos) {
+        removed += pos - span.start
+      }
     }
     return removed
   }
@@ -359,7 +369,9 @@ export function useMentions({
           candidate.start === mention.start
         )
       })
-    if (unchanged) return
+    if (unchanged) {
+      return
+    }
     mentionsRef.current = next
     setMentions(next)
   }, [])
@@ -388,7 +400,9 @@ export function useMentions({
     if (everyoneLabel && matchesEveryone(query)) {
       out.push({ kind: "everyone", label: everyoneLabel })
     }
-    for (const user of memberResults) out.push({ kind: "user", user })
+    for (const user of memberResults) {
+      out.push({ kind: "user", user })
+    }
     return out
   }, [everyoneLabel, matchesEveryone, query, memberResults])
 
@@ -411,7 +425,9 @@ export function useMentions({
       return
     }
 
-    if (trigger.atIndex === dismissedAtIndexRef.current) return
+    if (trigger.atIndex === dismissedAtIndexRef.current) {
+      return
+    }
 
     atIndexRef.current = trigger.atIndex
     setQuery(trigger.query)
@@ -419,13 +435,17 @@ export function useMentions({
     setSelectedIndex(0)
     setIsLoading(true)
 
-    if (debounceRef.current) clearTimeout(debounceRef.current)
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current)
+    }
     const currentSearchId = ++searchIdRef.current
 
     debounceRef.current = setTimeout(() => {
       searchMembers(trigger.query)
         .then((data) => {
-          if (currentSearchId !== searchIdRef.current) return
+          if (currentSearchId !== searchIdRef.current) {
+            return
+          }
           setMemberResults(data)
           setSelectedIndex(0)
           // Dismiss only when nothing matches at all (no members AND the
@@ -446,12 +466,16 @@ export function useMentions({
           }
         })
         .finally(() => {
-          if (currentSearchId === searchIdRef.current) setIsLoading(false)
+          if (currentSearchId === searchIdRef.current) {
+            setIsLoading(false)
+          }
         })
     }, DEBOUNCE_MS)
 
     return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current)
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current)
+      }
     }
   }, [
     inputValue,
@@ -478,7 +502,9 @@ export function useMentions({
   const selectCandidate = useCallback(
     (candidate: MentionCandidate) => {
       const atIndex = atIndexRef.current
-      if (atIndex === -1) return
+      if (atIndex === -1) {
+        return
+      }
 
       const name =
         candidate.kind === "everyone" ? candidate.label : candidate.user.name
@@ -537,7 +563,9 @@ export function useMentions({
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>): boolean => {
-      if (!isOpen) return false
+      if (!isOpen) {
+        return false
+      }
 
       if (e.key === "Escape") {
         e.preventDefault()
@@ -545,7 +573,9 @@ export function useMentions({
         return true
       }
 
-      if (results.length === 0) return false
+      if (results.length === 0) {
+        return false
+      }
 
       switch (e.key) {
         case "ArrowDown":
@@ -575,7 +605,9 @@ export function useMentions({
         }
         case "Enter":
           e.preventDefault()
-          if (results[selectedIndex]) selectCandidate(results[selectedIndex])
+          if (results[selectedIndex]) {
+            selectCandidate(results[selectedIndex])
+          }
           return true
         default:
           return false
@@ -590,8 +622,12 @@ export function useMentions({
     // person mentioned twice is sent once.
     const users = new Map<string, MentionEntry>()
     for (const { start: _start, ...entry } of mentions) {
-      if (entry.id === MENTION_EVERYONE_ID) continue
-      if (!users.has(entry.id)) users.set(entry.id, entry)
+      if (entry.id === MENTION_EVERYONE_ID) {
+        continue
+      }
+      if (!users.has(entry.id)) {
+        users.set(entry.id, entry)
+      }
     }
     return { mentions: [...users.values()], mentionedEveryone }
   }, [mentions])
@@ -608,8 +644,11 @@ export function useMentions({
       const byName = new Map<string, MentionEntry[]>()
       for (const entry of entries) {
         const group = byName.get(entry.name)
-        if (group) group.push(entry)
-        else byName.set(entry.name, [entry])
+        if (group) {
+          group.push(entry)
+        } else {
+          byName.set(entry.name, [entry])
+        }
       }
 
       const taken = new Map<string, number>()
@@ -642,11 +681,15 @@ export function useMentions({
   // leaving one behind is what silently dropped the id before.
   useEffect(() => {
     const prev = prevValueRef.current
-    if (prev === inputValue) return
+    if (prev === inputValue) {
+      return
+    }
     prevValueRef.current = inputValue
 
     const anchored = mentionsRef.current
-    if (anchored.length === 0) return
+    if (anchored.length === 0) {
+      return
+    }
 
     const { kept, touched } = reanchorMentions(prev, inputValue, anchored)
     if (touched.length === 0) {
@@ -675,9 +718,13 @@ export function useMentions({
   ])
 
   const popoverPosition: PopoverPosition = useMemo(() => {
-    if (!isOpen || atIndexRef.current === -1) return null
+    if (!isOpen || atIndexRef.current === -1) {
+      return null
+    }
     const textarea = textareaRef.current
-    if (!textarea) return null
+    if (!textarea) {
+      return null
+    }
 
     const coords = getTextareaCaretCoordinates(textarea, atIndexRef.current)
     const left = textarea.offsetLeft + coords.left
@@ -690,11 +737,17 @@ export function useMentions({
   }, [isOpen, inputValue, cursorPosition, textareaRef])
 
   const inlineCompletion = useMemo<string | null>(() => {
-    if (!isOpen || results.length === 0) return null
+    if (!isOpen || results.length === 0) {
+      return null
+    }
     const candidate = results[selectedIndex]
-    if (!candidate) return null
+    if (!candidate) {
+      return null
+    }
     const label = candidateLabel(candidate)
-    if (query.length === 0) return label
+    if (query.length === 0) {
+      return label
+    }
     if (label.toLowerCase().startsWith(query.toLowerCase())) {
       return label.slice(query.length)
     }

@@ -1,7 +1,6 @@
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import { type CSSProperties, ReactNode } from "react"
-
 import { cn } from "@/lib/utils"
 
 /** What the sortable state hands to the widget being rendered. */

@@ -1,6 +1,9 @@
 import { useControllableState } from "@radix-ui/react-use-controllable-state"
 import { useEffect, useMemo, useState } from "react"
-
+import { useI18n } from "@/lib/providers/i18n"
+import { cn } from "@/lib/utils"
+import { NavigationFilters } from "@/patterns/OneDataCollection/components/NavigationFilters/NavigationFilters"
+import { navigationFilterTypes } from "@/patterns/OneDataCollection/navigationFilters"
 import type {
   NavigationFiltersDefinition,
   NavigationFiltersState,
@@ -9,19 +12,12 @@ import type {
   FiltersDefinition,
   FiltersState,
 } from "@/patterns/OneFilterPicker/types"
-
-import { useI18n } from "@/lib/providers/i18n"
-import { cn } from "@/lib/utils"
-import { NavigationFilters } from "@/patterns/OneDataCollection/components/NavigationFilters/NavigationFilters"
-import { navigationFilterTypes } from "@/patterns/OneDataCollection/navigationFilters"
-
-import type { F0AnalyticsDashboardProps } from "./types"
-
 import { DashboardGrid } from "./components/DashboardGrid/DashboardGrid"
 import { ExportDropdown } from "./components/ExportDropdown/ExportDropdown"
 import { FilterBar } from "./components/FilterBar/FilterBar"
 import { FilterBarSkeleton } from "./components/FilterBar/FilterBarSkeleton"
 import { useDashboardExport } from "./hooks/useDashboardExport"
+import type { F0AnalyticsDashboardProps } from "./types"
 
 /**
  * F0AnalyticsDashboard — a declarative, config-driven analytics dashboard.
@@ -66,8 +62,9 @@ export const F0AnalyticsDashboard = <
   })
 
   const initialNavState = useMemo(() => {
-    if (!navigationFilters)
+    if (!navigationFilters) {
       return {} as NavigationFiltersState<NavigationFiltersDefinition>
+    }
     const state: Record<string, unknown> = {}
     for (const [key, filter] of Object.entries(navigationFilters)) {
       const filterType = navigationFilterTypes[filter.type]

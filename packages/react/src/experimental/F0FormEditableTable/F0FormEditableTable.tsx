@@ -17,9 +17,6 @@ import {
 } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import { ReactNode } from "react"
-
-import type { RecordType } from "@/hooks/datasource"
-
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
 import {
@@ -30,6 +27,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/experimental/OneTable"
+import type { RecordType } from "@/hooks/datasource"
 import { Add, Delete, Handle, Pencil } from "@/icons/app"
 import { experimentalComponent } from "@/lib/experimental"
 import { useI18n } from "@/lib/providers/i18n"
@@ -42,7 +40,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/ui/tooltip"
-
 import type {
   EditableColumn,
   F0FormEditableTableColumn,
@@ -168,7 +165,9 @@ const restrictToParentElement: Modifier = ({
   draggingNodeRect,
   transform,
 }) => {
-  if (!draggingNodeRect || !containerNodeRect) return transform
+  if (!draggingNodeRect || !containerNodeRect) {
+    return transform
+  }
   const value = { ...transform }
   if (draggingNodeRect.top + transform.y < containerNodeRect.top) {
     value.y = containerNodeRect.top - draggingNodeRect.top
@@ -207,7 +206,9 @@ function RowActionButton<R extends RecordType>({
       onClick={() => action.onClick(item, index)}
     />
   )
-  if (!action.critical) return button
+  if (!action.critical) {
+    return button
+  }
   return (
     <span className="inline-flex [&:active_svg]:!text-f1-icon-inverse [&:hover_svg]:!text-f1-icon-inverse [&_svg]:!text-f1-icon-critical-bold">
       {button}
@@ -218,7 +219,7 @@ function RowActionButton<R extends RecordType>({
 type RowCellsProps<R extends RecordType> = {
   item: R
   index: number
-  columns: ReadonlyArray<EditableColumn<R>>
+  columns: readonly EditableColumn<R>[]
   onRemoveRow?: (item: R, index: number) => void
   onEditRow?: (item: R, index: number) => void
   canEditRow?: (item: R, index: number) => boolean
@@ -471,7 +472,9 @@ function F0FormEditableTableBase<R extends RecordType>({
   const columns = columnsProp.map(withRenderFallback)
 
   const resolveRowId = (item: R, index: number): string => {
-    if (getRowId) return getRowId(item, index)
+    if (getRowId) {
+      return getRowId(item, index)
+    }
     if ("id" in item && item.id !== undefined && item.id !== null) {
       return String(item.id)
     }
@@ -488,10 +491,14 @@ function F0FormEditableTableBase<R extends RecordType>({
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event
-    if (!over || active.id === over.id) return
+    if (!over || active.id === over.id) {
+      return
+    }
     const from = rowIds.indexOf(String(active.id))
     const to = rowIds.indexOf(String(over.id))
-    if (from === -1 || to === -1) return
+    if (from === -1 || to === -1) {
+      return
+    }
     onReorderRows?.({
       items: arrayMove(items, from, to),
       from,

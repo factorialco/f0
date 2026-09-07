@@ -1,5 +1,4 @@
 import { forwardRef } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
@@ -9,7 +8,6 @@ import { cn } from "@/lib/utils"
 import { Card } from "@/ui/Card"
 import { Skeleton } from "@/ui/skeleton"
 import { Text } from "@/ui/Text"
-
 import { MeetingAttendees } from "./components/MeetingAttendees"
 import { MeetingJoinButton } from "./components/MeetingJoinButton"
 import { MeetingStatusTag } from "./components/MeetingStatusTag"

@@ -5,9 +5,7 @@ import {
   useState,
   useTransition,
 } from "react"
-
 import { Breadcrumb, BreadcrumbList } from "@/ui/breadcrumb"
-
 import { getBreadcrumbKey } from "./getBreadcrumbKey"
 import { BreadcrumbItem } from "./internal/BreadcrumbItem"
 import { CollapsedBreadcrumbItem } from "./internal/CollapsedBreadcrumbItem"
@@ -60,7 +58,9 @@ export function Breadcrumbs({ breadcrumbs, append }: BreadcrumbsProps) {
   useLayoutEffect(() => {
     const container = containerRef.current
     const list = listRef.current
-    if (!container || !list || list.children.length < breadcrumbs.length) return
+    if (!container || !list || list.children.length < breadcrumbs.length) {
+      return
+    }
 
     const updateBreadcrumbState = () => {
       const containerWidth = containerRef.current?.clientWidth ?? null

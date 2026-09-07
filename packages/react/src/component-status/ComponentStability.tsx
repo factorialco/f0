@@ -1,12 +1,10 @@
 import React from "react"
-
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/ui/tooltip"
-
 import { A11yRow, A11yTooltipRow } from "./A11yRow"
 import {
   getComponentStatus,
@@ -82,7 +80,9 @@ export function ComponentStability({
   className,
 }: ComponentStabilityProps) {
   const status = getComponentStatus(componentName, components)
-  if (!status) return null
+  if (!status) {
+    return null
+  }
 
   return (
     <div
@@ -243,7 +243,9 @@ export function ComponentMaturityTag({
   className,
 }: ComponentStabilityProps) {
   const status = getComponentStatus(componentName, components)
-  if (!status) return null
+  if (!status) {
+    return null
+  }
 
   return (
     <TooltipProvider delayDuration={150}>

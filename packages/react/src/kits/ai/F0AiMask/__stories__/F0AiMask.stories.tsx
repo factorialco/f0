@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useEffect, useRef } from "react"
-
 import { F0AiMask } from "@/kits/ai/F0AiMask"
 
 type F0AiMaskWrapperProps = {
@@ -18,7 +17,9 @@ function F0AiMaskWrapper({
 
   useEffect(() => {
     const container = containerRef.current
-    if (!container) return
+    if (!container) {
+      return
+    }
 
     const motion = new F0AiMask({ width, height, mode })
     container.appendChild(motion.element)

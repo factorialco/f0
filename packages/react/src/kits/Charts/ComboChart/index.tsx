@@ -11,7 +11,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
-
 import {
   ChartConfig,
   ChartContainer,
@@ -20,7 +19,6 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/ui/chart"
-
 import { getCategoricalColor, getColor } from "../utils/colors"
 import {
   cartesianGridProps,
@@ -44,7 +42,9 @@ const createScatter = (categoryKey: string) => {
     }
 
     const getScatterValue = () => {
-      if (!payload) return "-"
+      if (!payload) {
+        return "-"
+      }
 
       if (payload[categoryKey] !== undefined) {
         return payload[categoryKey]
@@ -136,10 +136,10 @@ type ChartDataPoint<K extends ChartConfig> = {
   }
 }
 
-type ActivePayload<K> = Array<{
+type ActivePayload<K> = {
   name: keyof K
   value: number
-}>
+}[]
 
 type ChartTypeConfig<K extends ChartConfig> = {
   categories: keyof K | (keyof K)[]

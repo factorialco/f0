@@ -1,9 +1,7 @@
 import { fireEvent, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import { screen, zeroRender as render } from "@/testing/test-utils"
-
 import { type ClockInProject, ProjectSelector } from "./ProjectSelector"
 
 const NESTED: ClockInProject[] = [

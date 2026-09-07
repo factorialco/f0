@@ -8,7 +8,9 @@ export function optionMatchesSearch<T>(
   option: InFilterOptionItem<T>,
   term: string
 ): boolean {
-  if (option.label.toLowerCase().includes(term)) return true
+  if (option.label.toLowerCase().includes(term)) {
+    return true
+  }
   if (option.children) {
     return option.children.options.some((child) =>
       optionMatchesSearch(child, term)
@@ -25,12 +27,18 @@ export function hasSelectedDescendant<T>(
   option: InFilterOptionItem<T>,
   allFiltersValue?: Record<string, unknown>
 ): boolean {
-  if (!option.children || !allFiltersValue) return false
+  if (!option.children || !allFiltersValue) {
+    return false
+  }
   const { filterKey, options } = option.children
   const values = (allFiltersValue[filterKey] as T[]) ?? []
   for (const child of options) {
-    if (values.includes(child.value)) return true
-    if (hasSelectedDescendant(child, allFiltersValue)) return true
+    if (values.includes(child.value)) {
+      return true
+    }
+    if (hasSelectedDescendant(child, allFiltersValue)) {
+      return true
+    }
   }
   return false
 }

@@ -1,12 +1,10 @@
 import { VirtualItem } from "@tanstack/react-virtual"
 import React, { useCallback, useMemo } from "react"
-
 import { F0Select } from "@/components/F0Select"
-
 import { Action } from "@/components/F0Select/components/SelectBottomActions"
 import { cn } from "@/lib/utils"
-import { Spinner } from "@/ui/Spinner"
 import { VirtualList } from "@/lib/VirtualList"
+import { Spinner } from "@/ui/Spinner"
 import { CreateItem } from "../../CreateItem"
 import { EntitySelectListItem } from "../../ListItem"
 import {
@@ -515,7 +513,9 @@ export const MainContent: React.FC<MainContentProps> = ({
                 height={VIRTUAL_LIST_HEIGHT}
                 itemCount={totalFlattenedItems + (onCreate ? 1 : 0)}
                 itemSize={(index) => {
-                  if (index === 0 && onCreate) return ITEM_SIZE_DEFAULT
+                  if (index === 0 && onCreate) {
+                    return ITEM_SIZE_DEFAULT
+                  }
                   const adjustedIndex = onCreate ? index - 1 : index
                   return flattenedList[adjustedIndex]?.parent === null
                     ? ITEM_SIZE_PARENT

@@ -1,7 +1,5 @@
 import { type ReactNode } from "react"
-
 import { cn, focusRing } from "@/lib/utils"
-
 import { useF0ChatEmit } from "../providers/F0ChatProvider"
 import { type F0ChatLinkPreview } from "../types"
 import { ClampText } from "./ClampText"
@@ -86,7 +84,9 @@ export const ChatLinkPreview = ({
   isFirstOfRun?: boolean
 }): ReactNode => {
   const emit = useF0ChatEmit()
-  if (previews.length === 0) return null
+  if (previews.length === 0) {
+    return null
+  }
   const compact = previews.length > 1
   return (
     <div className="flex flex-col gap-1 p-1 pb-0">

@@ -1,7 +1,6 @@
 import { renderHook } from "@testing-library/react"
 import { StrictMode, act, createElement, type ReactNode } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
 import { useViewportDataLoader } from "../useViewportDataLoader"
 
 const strictWrapper = ({ children }: { children: ReactNode }) =>

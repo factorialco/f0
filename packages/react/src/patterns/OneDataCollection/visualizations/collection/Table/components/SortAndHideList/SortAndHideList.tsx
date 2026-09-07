@@ -1,7 +1,5 @@
-import { useEffect, useRef } from "react"
-
 import { Reorder, useDragControls } from "motion/react"
-
+import { useEffect, useRef } from "react"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
 import { Switch } from "@/experimental/Forms/Fields/Switch"
@@ -10,7 +8,6 @@ import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { TooltipWrapper } from "@/lib/tooltip-wrapper"
 import { cn } from "@/lib/utils"
-
 import { SortAndHideListItem } from "./types"
 
 const isLocked = (item: SortAndHideListItem) =>

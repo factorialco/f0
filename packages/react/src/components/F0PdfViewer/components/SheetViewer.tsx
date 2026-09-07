@@ -1,9 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react"
-
 import { ToggleGroup, ToggleGroupItem } from "@/deprecated/ToggleGroup"
 import { useI18n } from "@/lib/providers/i18n"
 import { Skeleton } from "@/ui/skeleton"
-
 import { columnLetters, fetchWorkbook, type SheetGrid } from "../sheetPreview"
 import { type F0PdfViewerAction } from "../types"
 import { DocumentToolbar, useDocumentZoom } from "./DocumentToolbar"
@@ -51,12 +49,19 @@ const SheetViewer = ({
       withCredentials,
     })
       .then((parsed) => {
-        if (cancelled) return
-        if (parsed.length === 0) setFailed(true)
-        else setSheets(parsed)
+        if (cancelled) {
+          return
+        }
+        if (parsed.length === 0) {
+          setFailed(true)
+        } else {
+          setSheets(parsed)
+        }
       })
       .catch(() => {
-        if (!cancelled) setFailed(true)
+        if (!cancelled) {
+          setFailed(true)
+        }
       })
     return () => {
       cancelled = true
@@ -87,7 +92,9 @@ const SheetViewer = ({
             size="sm"
             value={String(activeIndex)}
             onValueChange={(value: string) => {
-              if (value) setActiveIndex(Number(value))
+              if (value) {
+                setActiveIndex(Number(value))
+              }
             }}
             className="justify-start"
           >

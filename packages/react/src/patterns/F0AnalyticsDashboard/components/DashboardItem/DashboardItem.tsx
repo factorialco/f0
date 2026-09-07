@@ -1,10 +1,4 @@
 import { useRef, useState, type ReactNode } from "react"
-
-import type {
-  F0AnalyticsDashboardAskAiTarget,
-  F0AnalyticsDashboardAskAiTargetWithQuote,
-} from "../../types"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0ButtonToggleGroup } from "@/components/F0ButtonToggleGroup"
 import { F0Icon, type IconType } from "@/components/F0Icon"
@@ -14,6 +8,7 @@ import {
   type DropdownItem as DropdownItemType,
   type DropdownItemObject,
 } from "@/experimental/Navigation/Dropdown"
+import { One as OneIcon } from "@/icons/ai"
 import {
   Delete,
   Download,
@@ -22,9 +17,8 @@ import {
   Minimize,
   InfoCircleLine,
 } from "@/icons/app"
-import { InfoHint, type InfoHintContent } from "@/lib/InfoHint"
-import { One as OneIcon } from "@/icons/ai"
 import { useAiChat } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
+import { InfoHint, type InfoHintContent } from "@/lib/InfoHint"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
@@ -39,9 +33,11 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/ui/dropdown-menu"
-
-import type { DashboardItemFiltersConfig } from "../../types"
-
+import type {
+  F0AnalyticsDashboardAskAiTarget,
+  F0AnalyticsDashboardAskAiTargetWithQuote,
+  DashboardItemFiltersConfig,
+} from "../../types"
 import { DashboardItemFilters } from "./DashboardItemFilters"
 
 interface DashboardItemProps {
@@ -169,7 +165,9 @@ export function DashboardItem({
 
   const handleDropdownOpenChange = (open: boolean) => {
     setIsDropdownOpen(open)
-    if (!open) setIsExplanationView(false)
+    if (!open) {
+      setIsExplanationView(false)
+    }
   }
 
   // Filter to only actionable items (not separators/labels)
@@ -201,28 +199,38 @@ export function DashboardItem({
       // The host answers this one. Nothing else here applies: it may not open
       // the chat at all, so leaving fullscreen would be a guess. `hasAskOne`
       // guarantees the public payload has a real widget ID.
-      if (!itemId) return
+      if (!itemId) {
+        return
+      }
       onAskAi({ id: itemId, title })
       return
     }
 
     // Fullscreen covers the chat, so step out of it before handing the widget
     // over — same reason the delete action does.
-    if (isFullscreen) onFullscreenChange?.(false)
+    if (isFullscreen) {
+      onFullscreenChange?.(false)
+    }
     shouldFocusChatAfterMenuRef.current = true
     const quote = { text: title }
-    if (itemId) onAskAiTarget?.({ id: itemId, title, quote })
+    if (itemId) {
+      onAskAiTarget?.({ id: itemId, title, quote })
+    }
     setPendingQuote(quote)
     setAiChatOpen(true)
   }
 
   const handleAskOneMenuCloseAutoFocus = (event: Event) => {
-    if (!shouldFocusChatAfterMenuRef.current) return
+    if (!shouldFocusChatAfterMenuRef.current) {
+      return
+    }
     shouldFocusChatAfterMenuRef.current = false
 
     // Keep Radix's normal trigger restoration while the composer is still
     // mounting. The buffered request moves focus once registration completes.
-    if (focusChatInput()) event.preventDefault()
+    if (focusChatInput()) {
+      event.preventDefault()
+    }
   }
 
   const askOneMenuItem = hasAskOne ? (
@@ -526,7 +534,9 @@ export function DashboardItem({
                       <DropdownMenuGroup>
                         <DropdownMenuItem
                           onClick={() => {
-                            if (isFullscreen) onFullscreenChange?.(false)
+                            if (isFullscreen) {
+                              onFullscreenChange?.(false)
+                            }
                             handleDelete(itemId)
                           }}
                           className={cn("text-f1-foreground-critical")}

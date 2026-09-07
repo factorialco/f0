@@ -1,9 +1,7 @@
 import { BubbleMenu, Editor, isTextSelection } from "@tiptap/react"
 import { NodeSelection } from "prosemirror-state"
 import { memo, useEffect, useRef, useState } from "react"
-
 import { cn } from "@/lib/utils"
-
 import { EnhanceActivator } from "../Enhance/EnhanceActivator"
 import type { UseEnhanceReturn } from "../Enhance/useEnhance"
 import { Toolbar, ToolbarDivider } from "../Toolbar"
@@ -62,7 +60,9 @@ export const EditorBubbleMenu = memo(function EditorBubbleMenu({
   const [bubbleMenuWidth, setBubbleMenuWidth] = useState<number>()
 
   useEffect(() => {
-    if (!bubbleMenuContainerRef.current) return
+    if (!bubbleMenuContainerRef.current) {
+      return
+    }
     const updateWidth = () => {
       setBubbleMenuWidth(bubbleMenuContainerRef.current?.offsetWidth)
     }

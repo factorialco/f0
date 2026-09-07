@@ -1,13 +1,10 @@
 import { useCallback } from "react"
-
 import { F0NumberInput } from "@/components/F0NumberInput"
 import { RecordType } from "@/hooks/datasource/types/records.typings"
 import { cn } from "@/lib/utils"
-
-import type { EditableCellProps } from "."
-
 import { BaseCell } from "./BaseCell"
 import { useNumberCellLayout } from "./hooks/useNumberCellLayout"
+import type { EditableCellProps } from "."
 
 export function NumberCell<R extends RecordType>({
   editableColumn,
@@ -30,13 +27,19 @@ export function NumberCell<R extends RecordType>({
 
   const handleChange = (newValue: number | null) => {
     if (newValue == null) {
-      if (value !== "") onChange(null)
+      if (value !== "") {
+        onChange(null)
+      }
       return
     }
 
     let clamped = newValue
-    if (config?.min != null && clamped < config.min) clamped = config.min
-    if (config?.max != null && clamped > config.max) clamped = config.max
+    if (config?.min != null && clamped < config.min) {
+      clamped = config.min
+    }
+    if (config?.max != null && clamped > config.max) {
+      clamped = config.max
+    }
 
     const stringValue = String(clamped)
     if (stringValue !== value) {

@@ -1,15 +1,13 @@
 import { useLayoutEffect, useRef, useState } from "react"
-
-import type {
-  FiltersDefinition,
-  FiltersState,
-} from "@/patterns/OneFilterPicker/types"
-
 import { F0Icon } from "@/components/F0Icon"
 import { ArrowUp, ArrowDown } from "@/icons/app"
 import { useContainerSize } from "@/kits/F0DataChart/utils/useContainerSize"
 import { cn, focusRing } from "@/lib/utils"
-
+import type {
+  FiltersDefinition,
+  FiltersState,
+} from "@/patterns/OneFilterPicker/types"
+import { useDashboardItemData } from "../../hooks/useDashboardItemData"
 import type {
   DashboardItemFiltersConfig,
   DashboardMetricData,
@@ -18,8 +16,6 @@ import type {
   F0AnalyticsDashboardAskAiTargetWithQuote,
   MetricFormat,
 } from "../../types"
-
-import { useDashboardItemData } from "../../hooks/useDashboardItemData"
 import { DashboardItem } from "../DashboardItem/DashboardItem"
 import { MetricSkeleton } from "../DashboardItem/DashboardItemSkeleton"
 
@@ -39,7 +35,7 @@ interface MetricItemProps<Filters extends FiltersDefinition> {
 function formatValue(
   value: number,
   format: MetricFormat = { type: "number" },
-  decimals: number = 0
+  decimals = 0
 ): string {
   switch (format.type) {
     case "currency": {
@@ -79,7 +75,9 @@ function computeTrend(
   value: number,
   previousValue?: number
 ): MetricTrend | undefined {
-  if (previousValue === undefined || previousValue === 0) return undefined
+  if (previousValue === undefined || previousValue === 0) {
+    return undefined
+  }
 
   const percent = ((value - previousValue) / Math.abs(previousValue)) * 100
   const direction = percent > 0.5 ? "up" : percent < -0.5 ? "down" : "flat"

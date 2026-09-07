@@ -1,7 +1,6 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
-
-import { BasePostDescription } from "./index"
+import { BasePostDescription } from "."
 
 describe("PostDescription XSS Protection", () => {
   it("should sanitize script tags", () => {

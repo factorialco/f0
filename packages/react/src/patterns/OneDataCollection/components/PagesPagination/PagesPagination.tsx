@@ -14,8 +14,12 @@ export const PagesPagination = ({
 }) => {
   const t = useI18n()
 
-  if (!isPageBasedPagination(paginationInfo) || paginationInfo.pagesCount <= 1)
+  if (
+    !isPageBasedPagination(paginationInfo) ||
+    paginationInfo.pagesCount <= 1
+  ) {
     return null
+  }
 
   return (
     <div

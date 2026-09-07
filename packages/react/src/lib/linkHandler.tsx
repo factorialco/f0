@@ -72,11 +72,17 @@ export type LinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
  * guess, so it is not the one to make when in doubt.
  */
 export const isExternalHref = (href?: string): boolean => {
-  if (!href || href.startsWith("#")) return false
-  if (typeof window === "undefined") return false
+  if (!href || href.startsWith("#")) {
+    return false
+  }
+  if (typeof window === "undefined") {
+    return false
+  }
   try {
     const url = new URL(href, window.location.href)
-    if (url.protocol !== "http:" && url.protocol !== "https:") return false
+    if (url.protocol !== "http:" && url.protocol !== "https:") {
+      return false
+    }
     // `hostname`, not `host`: the port is how you reach this app, not which
     // app it is — see the note above.
     return url.hostname !== window.location.hostname
@@ -91,7 +97,9 @@ function stripTrailingSlash(path: string) {
 
 function splitPathAndSearch(fullPath: string): [string, URLSearchParams] {
   const queryIndex = fullPath.indexOf("?")
-  if (queryIndex === -1) return [fullPath, new URLSearchParams()]
+  if (queryIndex === -1) {
+    return [fullPath, new URLSearchParams()]
+  }
   return [
     fullPath.slice(0, queryIndex),
     new URLSearchParams(fullPath.slice(queryIndex)),
@@ -103,7 +111,9 @@ function searchParamsMatch(
   target: URLSearchParams
 ): boolean {
   for (const [key, value] of target) {
-    if (current.get(key) !== value) return false
+    if (current.get(key) !== value) {
+      return false
+    }
   }
   return true
 }
@@ -120,24 +130,29 @@ export const useNavigation = () => {
       path: string | undefined,
       { exact = false }: { exact?: boolean } = { exact: false }
     ) => {
-      if (currentPath === undefined || path === undefined) return false
+      if (currentPath === undefined || path === undefined) {
+        return false
+      }
 
       const [currentPathname, currentSearch] = splitPathAndSearch(currentPath)
       const [targetPathname, targetSearch] = splitPathAndSearch(path)
 
-      if (exact)
+      if (exact) {
         return (
           stripTrailingSlash(currentPathname) ===
             stripTrailingSlash(targetPathname) &&
           searchParamsEqual(currentSearch, targetSearch)
         )
+      }
 
       const pathnameMatch =
         `${stripTrailingSlash(currentPathname)}/`.startsWith(
           `${stripTrailingSlash(targetPathname)}/`
         )
 
-      if (!pathnameMatch) return false
+      if (!pathnameMatch) {
+        return false
+      }
 
       // When the href has query params, verify they are all present in the current URL
       if (targetSearch.size > 0) {

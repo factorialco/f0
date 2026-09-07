@@ -1,3 +1,4 @@
+import type { AvatarVariant } from "@/components/avatars/F0Avatar"
 import {
   BaseDataAdapter,
   BaseFetchOptions,
@@ -13,9 +14,6 @@ import {
   RecordType,
   SortingsDefinition,
 } from "@/hooks/datasource/types"
-
-import type { AvatarVariant } from "@/components/avatars/F0Avatar"
-
 import {
   PrimaryActionsDefinitionFn,
   SecondaryActionsDefinition,
@@ -191,7 +189,7 @@ export type DataCollectionSourceDefinition<
   itemPreFilter?: (item: R) => boolean
 
   /** Lanes configuration */
-  lanes?: ReadonlyArray<Lane<Filters>>
+  lanes?: readonly Lane<Filters>[]
 
   /** Rich search preview shown in the shared header search (all visualizations). */
   searchPreview?: SearchPreview<R>

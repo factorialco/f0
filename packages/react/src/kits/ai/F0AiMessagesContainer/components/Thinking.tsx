@@ -1,13 +1,9 @@
 import { useEffect, useRef, useState } from "react"
-
 import Lightbulb from "@/icons/app/Lightbulb"
 import { useI18n } from "@/lib/providers/i18n"
-
 import { F0ActionItem } from "../../F0ActionItem"
-
-import { CollapsibleMessage } from "./CollapsibleMessage"
-
 import { ThinkingProps } from "../types"
+import { CollapsibleMessage } from "./CollapsibleMessage"
 
 export const Thinking = ({
   titles,
@@ -34,7 +30,9 @@ export const Thinking = ({
     : (title ?? translations.ai.thoughtsGroupTitle)
   const lastIndex = titles.length - 1
   const itemStatus = (index: number): "executing" | "completed" => {
-    if (!inProgress || isWriting) return "completed"
+    if (!inProgress || isWriting) {
+      return "completed"
+    }
     return index === lastIndex ? "executing" : "completed"
   }
 

@@ -1,16 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import React, { useState } from "react"
-
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0Button } from "@/components/F0Button"
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { F0TagStatus, type StatusVariant } from "@/components/tags/F0TagStatus"
 import { Dropdown } from "@/experimental/Navigation/Dropdown"
-import { OnePagination } from "@/ui/OnePagination"
 import { Delete, Ellipsis, Pencil } from "@/icons/app"
-
+import { OnePagination } from "@/ui/OnePagination"
 import {
   OneTable,
   TableBody,
@@ -18,7 +15,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "./index"
+} from "."
 
 const meta: Meta<typeof OneTable> = {
   title: "Table",
@@ -314,7 +311,9 @@ export const Sortable: Story = {
     }
 
     const sortedData = React.useMemo(() => {
-      if (!sortConfig.column) return sampleData
+      if (!sortConfig.column) {
+        return sampleData
+      }
 
       return [...sampleData].sort((a, b) => {
         const aValue = a[sortConfig.column!]

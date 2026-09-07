@@ -1,6 +1,5 @@
 import { useRef, useState } from "react"
 import { useIsomorphicLayoutEffect } from "usehooks-ts"
-
 import { useReducedMotion } from "@/lib/a11y"
 
 type Hold<T> = number | ((prev: T, next: T) => number)
@@ -27,10 +26,14 @@ export function useRevealOnChange<T>(
   const prevRef = useRef(value)
 
   useIsomorphicLayoutEffect(() => {
-    if (prevRef.current === value) return
+    if (prevRef.current === value) {
+      return
+    }
     const prev = prevRef.current
     prevRef.current = value
-    if (shouldReduceMotion) return
+    if (shouldReduceMotion) {
+      return
+    }
     setVisible(false)
     const ms = typeof hold === "function" ? hold(prev, value) : hold
     const t = setTimeout(() => setVisible(true), ms)

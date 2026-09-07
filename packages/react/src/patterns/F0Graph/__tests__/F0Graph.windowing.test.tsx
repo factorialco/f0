@@ -1,11 +1,8 @@
 import React from "react"
 import { beforeAll, describe, expect, it, vi } from "vitest"
-
 import { zeroRender } from "@/testing/test-utils"
-
-import type { GraphNode, ZoomLevel } from "../types"
-
 import { F0Graph } from "../F0Graph"
+import type { GraphNode, ZoomLevel } from "../types"
 
 // React Flow needs ResizeObserver; jsdom doesn't provide it. Note that jsdom
 // also reports a 0×0 pane, so viewport-driven windowing stays inactive here —

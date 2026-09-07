@@ -1,7 +1,5 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
-
 import { act, zeroRenderHook } from "@/testing/test-utils"
-
 import {
   arrivalWindowMs,
   ENTRANCE_MS,

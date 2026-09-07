@@ -1,7 +1,6 @@
 import { type IconType } from "@/components/F0Icon"
 import { File, Image, Marker, Microphone, Paperclip } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
-
 import { type F0ChatAttachment } from "../types"
 import { replyThumbnailUrl, summariseAttachments } from "../utils/reply-preview"
 import { sanitizeDisplayText } from "../utils/sanitize-text"
@@ -35,7 +34,9 @@ export const useReplyPreview = (input: {
   const thumbnailUrl = replyThumbnailUrl(input.attachments)
   const summary = summariseAttachments(input.attachments)
 
-  if (!summary) return { label: body, thumbnailUrl }
+  if (!summary) {
+    return { label: body, thumbnailUrl }
+  }
 
   const media =
     summary.kind === "photo"

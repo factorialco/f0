@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react"
-
 import { F0AvatarModule, ModuleId } from "@/components/avatars/F0AvatarModule"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import CrossIcon from "@/icons/app/Cross"

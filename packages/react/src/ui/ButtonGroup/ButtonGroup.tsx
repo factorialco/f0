@@ -1,6 +1,5 @@
 import { type ReactNode, useEffect, useMemo, useRef } from "react"
 import { useMediaQuery, useResizeObserver } from "usehooks-ts"
-
 import { F0Button } from "@/components/F0Button"
 import { type ButtonSize } from "@/components/F0Button/types"
 import {
@@ -17,7 +16,6 @@ import { Ellipsis } from "@/icons/app"
 import { cn } from "@/lib/utils"
 import { type NavTarget } from "@/ui/Action"
 import { useOverflowCalculation } from "@/ui/OverflowList/useOverflowCalculation"
-
 import { buttonGroupVariants } from "./variants"
 
 /** Fields a primary/secondary action button exposes. Variant is fixed by role
@@ -410,11 +408,14 @@ function ButtonGroupRow({
 
   // Cluster = plain secondaries (those that fit) interleaved with inline
   // separators; splits are pinned to the right alongside the primary.
-  const clusterTokens: Array<
-    { kind: "node"; node: ReactNode } | { kind: "sep"; key: string }
-  > = []
+  const clusterTokens: (
+    | { kind: "node"; node: ReactNode }
+    | { kind: "sep"; key: string }
+  )[] = []
   secondaryItems.forEach((item, index) => {
-    if (isSplitAction(item)) return
+    if (isSplitAction(item)) {
+      return
+    }
     if (isInlineSeparator(item)) {
       clusterTokens.push({ kind: "sep", key: `sep-${index}` })
       return

@@ -1,10 +1,8 @@
 import { FC, Fragment } from "react"
-
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import ApprovalStep, { ApprovalStepProps } from "./ApprovalStep"
 
 type ApprovalStep = ApprovalStepProps

@@ -1,7 +1,5 @@
 import { type ComponentProps, type ReactNode, useState } from "react"
-
 import { cn } from "@/lib/utils"
-
 import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
 /**
  * `<img>` that fades in once it decodes, so media never pops into the
@@ -44,7 +42,9 @@ export const FadeInImage = ({
       decoding="async"
       {...props}
       ref={(el) => {
-        if (el?.complete) markLoaded()
+        if (el?.complete) {
+          markLoaded()
+        }
       }}
       onLoad={(event) => {
         markLoaded()

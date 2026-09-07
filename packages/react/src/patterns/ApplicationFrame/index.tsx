@@ -7,17 +7,12 @@ import {
 } from "motion/react"
 import { Fragment, useEffect, useMemo, useRef, useState } from "react"
 import { useMediaQuery } from "usehooks-ts"
-
 import {
   AiPromotionChat,
   AiPromotionChatProvider,
   AiPromotionChatProviderProps,
 } from "@/experimental/AiPromotionChat"
 import { useAiPromotionChat } from "@/experimental/AiPromotionChat/providers/AiPromotionChatStateProvider"
-import { useReducedMotion } from "@/lib/a11y"
-import { experimentalComponent } from "@/lib/experimental"
-import { useI18n } from "@/lib/providers/i18n"
-import { cn, focusRing } from "@/lib/utils"
 import {
   F0AiChat,
   F0AiChatProvider,
@@ -27,7 +22,10 @@ import { HostedPanelWindow } from "@/kits/ai/F0AiChat/components/layout/HostedPa
 import { useAiChat } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
 import { DEFAULT_CHAT_WIDTH } from "@/kits/ai/F0AiChat/utils/constants"
 import { F0CanvasPanel } from "@/kits/ai/F0CanvasPanel"
-
+import { useReducedMotion } from "@/lib/a11y"
+import { experimentalComponent } from "@/lib/experimental"
+import { useI18n } from "@/lib/providers/i18n"
+import { cn, focusRing } from "@/lib/utils"
 import { FrameProvider, SidebarState, useSidebar } from "./FrameProvider"
 
 const CONTENT_TRANSITION = { duration: 0.3, ease: [0, 0, 0.1, 1] }
@@ -248,10 +246,12 @@ function ApplicationFrameContent({
     isExitingFullscreen
 
   const chatContainerTransition = useMemo(() => {
-    if (isEnteringFullscreen)
+    if (isEnteringFullscreen) {
       return { duration: 0.15, ease: "easeOut" as const }
-    if (isExitingFullscreen)
+    }
+    if (isExitingFullscreen) {
       return { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] as const }
+    }
     return { duration: 0 }
   }, [isEnteringFullscreen, isExitingFullscreen])
 

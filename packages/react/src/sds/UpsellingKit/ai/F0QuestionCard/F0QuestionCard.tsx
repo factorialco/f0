@@ -1,12 +1,10 @@
 import { useCallback, useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { F0Icon } from "@/components/F0Icon"
 import { ChevronLeft, ChevronRight } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { Card, CardContent, CardFooter } from "@/ui/Card"
-
 import { F0QuestionCardMultiStepProps, F0QuestionCardOption } from "./types"
 
 export const F0QuestionCardMultiStep = ({

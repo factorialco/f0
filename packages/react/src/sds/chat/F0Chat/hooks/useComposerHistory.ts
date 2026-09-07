@@ -1,5 +1,4 @@
 import { useCallback, useRef } from "react"
-
 import { diffSpan } from "../utils/text-diff"
 import { type AnchoredMention } from "./useMentions"
 
@@ -31,7 +30,9 @@ const kindOf = (prev: string, next: string): EditKind => {
   if (removed === 0 && added === 1) {
     return /\s/.test(next[start] ?? "") ? "other" : "insert"
   }
-  if (added === 0 && removed === 1) return "delete"
+  if (added === 0 && removed === 1) {
+    return "delete"
+  }
   return "other"
 }
 
@@ -78,17 +79,23 @@ export const useComposerHistory = (): ComposerHistory => {
 
       lastKindRef.current = kind
       lastAtRef.current = now
-      if (continues) return
+      if (continues) {
+        return
+      }
 
       pastRef.current.push(previous)
-      if (pastRef.current.length > LIMIT) pastRef.current.shift()
+      if (pastRef.current.length > LIMIT) {
+        pastRef.current.shift()
+      }
     },
     []
   )
 
   const undo = useCallback((current: ComposerSnapshot) => {
     const previous = pastRef.current.pop()
-    if (!previous) return null
+    if (!previous) {
+      return null
+    }
     futureRef.current.push(current)
     // The run is over: the next keystroke starts a fresh step rather than
     // folding itself into whatever we just restored.
@@ -98,7 +105,9 @@ export const useComposerHistory = (): ComposerHistory => {
 
   const redo = useCallback((current: ComposerSnapshot) => {
     const next = futureRef.current.pop()
-    if (!next) return null
+    if (!next) {
+      return null
+    }
     pastRef.current.push(current)
     lastKindRef.current = "other"
     return next

@@ -6,19 +6,17 @@ import React, {
   useRef,
   useState,
 } from "react"
-
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import { stripNativeTitle } from "@/lib/strip-native-title"
+import { Shortcut } from "@/ui/Shortcut"
 import {
   TooltipContent,
   Tooltip as TooltipPrimitive,
   TooltipProvider,
   TooltipTrigger,
 } from "@/ui/tooltip"
-
 import { cn } from "../../../lib/utils"
-import { Shortcut } from "@/ui/Shortcut"
 
 /**
  * One bullet of a tooltip's list. The object form gets a semibold lead so a
@@ -79,7 +77,9 @@ export function TooltipInternal({
   }, [clearOpenTimeout])
 
   const scheduleOpen = useCallback(() => {
-    if (!hasContent) return
+    if (!hasContent) {
+      return
+    }
     onOpen?.()
     clearOpenTimeout()
     openTimeoutRef.current = setTimeout(() => setOpen(true), openDelayMs)
@@ -118,20 +118,26 @@ export function TooltipInternal({
           onOpenChange={(nextOpen) => {
             // We control when the tooltip opens so it doesn't show on mouse click
             // focus/programmatic focus. Still allow Radix to request closing (e.g. escape).
-            if (!nextOpen) close()
+            if (!nextOpen) {
+              close()
+            }
           }}
         >
           <TooltipTrigger
             asChild
             className="pointer-events-auto"
             onPointerEnter={(e) => {
-              if (e.pointerType === "touch") return
+              if (e.pointerType === "touch") {
+                return
+              }
               scheduleOpen()
             }}
             onPointerLeave={() => close()}
             onPointerDown={() => close()}
             onFocus={(e) => {
-              if (!hasContent) return
+              if (!hasContent) {
+                return
+              }
               if (isFocusVisible(e.currentTarget)) {
                 onOpen?.()
                 setOpen(true)

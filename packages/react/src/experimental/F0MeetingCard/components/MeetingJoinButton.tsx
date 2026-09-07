@@ -1,7 +1,6 @@
 import { F0Button } from "@/components/F0Button"
 import { VideoRecorder } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
-
 import type { MeetingJoin } from "../types"
 
 /**

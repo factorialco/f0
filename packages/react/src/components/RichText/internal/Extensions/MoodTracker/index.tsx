@@ -6,12 +6,11 @@ import {
   ReactNodeViewRenderer,
 } from "@tiptap/react"
 import React, { useState } from "react"
-
-import { Pulse, pulseIcon, pulseIconColor } from "@/lib/mood"
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
 import { Dropdown } from "@/experimental/Navigation/Dropdown"
 import { ChevronDown, ChevronUp, Delete } from "@/icons/app"
+import { Pulse, pulseIcon, pulseIconColor } from "@/lib/mood"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 
 interface MoodTrackerData {
@@ -43,7 +42,9 @@ export const MoodTrackerView: React.FC<NodeViewProps> = ({
 
   // Use dynamic config from extension options instead of persisted config
 
-  if (!data) return null
+  if (!data) {
+    return null
+  }
 
   const handleToggleCollapse = () => {
     const newState = !isOpen
@@ -166,7 +167,9 @@ export const MoodTracker = Node.create({
           return dataAttr ? JSON.parse(dataAttr) : null
         },
         renderHTML: (attributes) => {
-          if (!attributes.data) return {}
+          if (!attributes.data) {
+            return {}
+          }
           return {
             "data-mood-tracker": JSON.stringify(attributes.data),
           }
@@ -191,7 +194,9 @@ export const MoodTracker = Node.create({
 
   renderHTML({ HTMLAttributes, node }) {
     const data = node.attrs.data as MoodTrackerData
-    if (!data) return ["div"]
+    if (!data) {
+      return ["div"]
+    }
 
     return [
       "div",

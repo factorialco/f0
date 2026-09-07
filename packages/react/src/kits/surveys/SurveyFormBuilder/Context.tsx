@@ -7,9 +7,7 @@ import React, {
   useMemo,
   useRef,
 } from "react"
-
 import type { UseFileUpload } from "@/patterns/F0Form/fields/file/types"
-
 import {
   getDefaultParamsForQuestionType,
   getDefaultQuestionTypeToAdd,
@@ -91,7 +89,9 @@ export function SurveyFormBuilderProvider({
 
   const lastElementId = useMemo(() => {
     const lastElement = elements[elements.length - 1]
-    if (!lastElement) return undefined
+    if (!lastElement) {
+      return undefined
+    }
 
     return lastElement.type === "section"
       ? lastElement.section.id

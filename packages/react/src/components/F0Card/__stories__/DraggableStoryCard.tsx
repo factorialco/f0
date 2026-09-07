@@ -4,7 +4,6 @@ import {
 } from "@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge"
 import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter"
 import { useEffect, useRef, useState } from "react"
-
 import { DraggableF0Card } from "./DraggableF0Card"
 
 export function DraggableStoryCard({
@@ -22,7 +21,9 @@ export function DraggableStoryCard({
   const [overEdge, setOverEdge] = useState<"top" | "bottom" | null>(null)
 
   useEffect(() => {
-    if (!ref.current) return
+    if (!ref.current) {
+      return
+    }
     return dropTargetForElements({
       element: ref.current,
       getData: ({ input, element }) =>

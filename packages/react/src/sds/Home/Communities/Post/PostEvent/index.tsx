@@ -1,11 +1,9 @@
 import { f1Colors } from "@factorialco/f0-core"
-
 import { CalendarEvent } from "@/experimental/Widgets/Content/CalendarEvent"
 import { formatTime } from "@/lib/date"
 import { useDateFnsLocale } from "@/lib/providers/l10n"
 import { withSkeleton } from "@/lib/skeleton"
 import { Skeleton } from "@/ui/skeleton"
-
 import { isVideo } from "../CommunityPost/video"
 
 export type PostEventProps = {

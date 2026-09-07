@@ -1,14 +1,14 @@
 import { forwardRef } from "react"
-
 import { DataTestIdWrapper, type WithDataTestIdProps } from "@/lib/data-testid"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import type { F0MapPoint } from "../../types"
 
 /** Human-readable name for a point, for the accessible list / fallback. */
 const pointLabel = (p: F0MapPoint, fallback: string): string => {
-  if (p.label) return p.label
+  if (p.label) {
+    return p.label
+  }
   switch (p.variant) {
     case "employee":
       return `${p.firstName} ${p.lastName}`.trim()

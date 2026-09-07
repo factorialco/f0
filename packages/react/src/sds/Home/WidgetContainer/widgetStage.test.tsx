@@ -1,9 +1,6 @@
-import { describe, expect, test } from "vitest"
-
 import { useLayoutEffect, useRef, useState } from "react"
-
+import { describe, expect, test } from "vitest"
 import { act, zeroRender } from "@/testing/test-utils"
-
 import { WidgetStage } from "./WidgetStage"
 
 describe("WidgetStage", () => {

@@ -81,7 +81,9 @@ export const findDisabledRules = (content: string): string[] => {
         ts.isArrayLiteralExpression(node.initializer)
       ) {
         for (const el of node.initializer.elements) {
-          if (!ts.isObjectLiteralExpression(el)) continue
+          if (!ts.isObjectLiteralExpression(el)) {
+            continue
+          }
           if (propValue(el, "enabled")?.kind !== ts.SyntaxKind.FalseKeyword) {
             continue
           }

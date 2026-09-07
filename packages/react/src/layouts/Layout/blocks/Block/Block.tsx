@@ -1,9 +1,7 @@
 import { cva } from "cva"
 import { forwardRef, useMemo } from "react"
-
 import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
 import { cn } from "@/lib/utils"
-
 import { PageLayoutBlockComponent } from "../../types"
 import { BlockActionGroup, BlockActionItem, BlockProps } from "./types"
 

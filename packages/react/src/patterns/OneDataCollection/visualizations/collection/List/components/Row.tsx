@@ -1,10 +1,5 @@
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { F0Link } from "@/components/F0Link"
-import { ItemActionsMobile } from "@/patterns/OneDataCollection/components/itemActions/ItemActionsMobile/ItemActionsMobile"
-import { ItemActionsRow } from "@/patterns/OneDataCollection/components/itemActions/ItemActionsRow/ItemActionsRow"
-import { ItemActionsRowContainer } from "@/patterns/OneDataCollection/components/itemActions/ItemActionsRowContainer"
-import { useItemActions } from "@/patterns/OneDataCollection/components/itemActions/useItemActions"
-import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource/types"
 import {
   FiltersDefinition,
   GroupingDefinition,
@@ -13,7 +8,11 @@ import {
 } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
+import { ItemActionsMobile } from "@/patterns/OneDataCollection/components/itemActions/ItemActionsMobile/ItemActionsMobile"
+import { ItemActionsRow } from "@/patterns/OneDataCollection/components/itemActions/ItemActionsRow/ItemActionsRow"
+import { ItemActionsRowContainer } from "@/patterns/OneDataCollection/components/itemActions/ItemActionsRowContainer"
+import { useItemActions } from "@/patterns/OneDataCollection/components/itemActions/useItemActions"
+import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource/types"
 import { ItemActionsDefinition } from "../../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../../navigationFilters/types"
 import { renderProperty } from "../../../../property-render"
@@ -42,7 +41,7 @@ type RowProps<
   item: R
   selectedItems: Map<number | string, R>
   handleSelectItemChange: (item: R, checked: boolean) => void
-  fields: ReadonlyArray<ListPropertyDefinition<R, Sortings>>
+  fields: readonly ListPropertyDefinition<R, Sortings>[]
   itemDefinition: (record: R) => ItemDefinition
 }
 
@@ -159,7 +158,9 @@ export const Row = <
           .map((field) => {
             const content = renderCell(item, field)
 
-            if (!content) return null
+            if (!content) {
+              return null
+            }
 
             return (
               <div key={String(field.label)}>

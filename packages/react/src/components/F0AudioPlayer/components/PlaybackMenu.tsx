@@ -12,7 +12,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/ui/dropdown-menu"
-
 import type { AudioPlayerMenuAction } from "../types"
 
 interface PlaybackMenuProps {

@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { F0RichTextDisplay } from ".."
 
 const meta = {

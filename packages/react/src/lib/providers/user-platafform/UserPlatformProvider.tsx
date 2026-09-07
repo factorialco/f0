@@ -1,5 +1,4 @@
 import { createContext, useContext, useEffect, useState } from "react"
-
 import { HourCycle, Platform } from "./types"
 import { detectPlatform } from "./user-platform"
 

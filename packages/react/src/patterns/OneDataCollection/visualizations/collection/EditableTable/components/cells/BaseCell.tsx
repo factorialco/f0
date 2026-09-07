@@ -1,5 +1,4 @@
 import { ReactNode } from "react"
-
 import { F0Icon, type IconType, type F0IconProps } from "@/components/F0Icon"
 import { cn, focusRing } from "@/lib/utils"
 import {
@@ -8,7 +7,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/ui/tooltip"
-
 import { ErrorTooltip } from "./ErrorTooltip"
 
 const cursorClass = {

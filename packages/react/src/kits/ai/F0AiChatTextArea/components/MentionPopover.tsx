@@ -1,12 +1,9 @@
 import { useEffect, useLayoutEffect, useRef } from "react"
-
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson/F0AvatarPerson"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
-
 import { PersonProfile } from "../../F0AiChat/components/markdownRenderers/entityRef/entities/person/types"
-
 import type { PopoverPosition } from "../useMentions"
 
 export type MentionPopoverProps = {
@@ -50,7 +47,9 @@ export function MentionPopover({
   useLayoutEffect(() => {
     const el = listRef.current
     const parent = el?.offsetParent as HTMLElement | null
-    if (!el || !parent) return
+    if (!el || !parent) {
+      return
+    }
     const overflow = el.offsetLeft + el.offsetWidth - parent.clientWidth
     if (overflow > 0) {
       el.style.left = `${Math.max(0, el.offsetLeft - overflow)}px`
@@ -60,7 +59,9 @@ export function MentionPopover({
   const showLoading = isLoading && results.length === 0
   const showEmpty = !isLoading && results.length === 0
 
-  if (!isOpen || showEmpty) return null
+  if (!isOpen || showEmpty) {
+    return null
+  }
 
   return (
     <div

@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import { createSuggestionConfig } from "../suggestion"
 import { MentionedUser } from "../types"
 
@@ -30,7 +29,9 @@ vi.mock("@tiptap/react", () => {
     }
 
     updateProps(nextProps: { items: MentionedUser[] }) {
-      if (!rendererState.props) return
+      if (!rendererState.props) {
+        return
+      }
       rendererState.props = {
         ...rendererState.props,
         ...nextProps,

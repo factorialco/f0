@@ -1,9 +1,7 @@
 import { AnimatePresence, motion } from "motion/react"
 import { type ReactNode, useEffect, useRef, useState } from "react"
-
 import { useReducedMotion } from "@/lib/a11y"
 import { cn } from "@/lib/utils"
-
 import type { CanvasContent, CanvasEntityDefinition } from "../canvas/types"
 
 export type F0CanvasPanelProps = {
@@ -63,7 +61,9 @@ export function F0CanvasPanel({
   const entity = content && entities ? entities[content.type] : undefined
 
   const renderInner = (): ReactNode => {
-    if (!content || !entity) return null
+    if (!content || !entity) {
+      return null
+    }
 
     const header = entity.renderHeader({
       content,

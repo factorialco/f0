@@ -1,5 +1,4 @@
 import { forwardRef, PropsWithoutRef } from "react"
-
 import { useComponentXRay } from "../xray"
 import { ComponentMetadata } from "./types"
 

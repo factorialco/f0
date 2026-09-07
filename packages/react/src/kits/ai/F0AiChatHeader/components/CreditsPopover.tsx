@@ -1,6 +1,5 @@
 import { motion } from "motion/react"
 import { type ReactNode, useCallback, useState } from "react"
-
 import { F0AvatarCompany } from "@/components/avatars/F0AvatarCompany"
 import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
@@ -8,7 +7,6 @@ import { Sliders, Upsell } from "@/icons/app"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
-
 import type { AiChatCredits, CreditsUsage } from "../../F0AiChat/types"
 
 type CreditsPopoverProps = {
@@ -47,7 +45,9 @@ export function CreditsPopover({ credits, trigger }: CreditsPopoverProps) {
     [credits]
   )
 
-  if (!credits) return null
+  if (!credits) {
+    return null
+  }
 
   const percentage = data
     ? Math.min(100, Math.round((data.used / data.total) * 100))

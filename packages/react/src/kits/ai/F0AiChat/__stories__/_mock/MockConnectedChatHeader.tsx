@@ -1,9 +1,7 @@
 import { useCallback, useMemo, useState } from "react"
-
 import { F0AiChatHeader } from "../../../F0AiChatHeader"
 import { F0AiChatHistory, useChatHistory } from "../../../F0AiChatHistory"
 import { useAiChat } from "../../providers/AiChatStateProvider"
-
 import { useMockAiChatRuntime } from "./MockAiChatRuntime"
 import { filterNonRenderableMessages } from "./turn-utils"
 
@@ -55,7 +53,9 @@ export const MockConnectedChatHeader = ({
     // Let a registered guard veto the close BEFORE any docking animation runs,
     // so e.g. a "Leave creation?" confirmation can gate it (see `setBeforeClose`).
     const proceed = await runBeforeClose()
-    if (!proceed) return
+    if (!proceed) {
+      return
+    }
     if (fullscreen) {
       setVisualizationMode("sidepanel")
       setTimeout(() => setOpen(false), 200)

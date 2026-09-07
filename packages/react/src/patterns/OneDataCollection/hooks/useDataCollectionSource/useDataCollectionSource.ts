@@ -5,7 +5,6 @@
 
 import { useDeepCompareEffect } from "@reactuses/core"
 import { useMemo, useState } from "react"
-
 import {
   DataAdapter,
   FiltersDefinition,
@@ -15,7 +14,6 @@ import {
   useDataSource,
 } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
-
 import { ItemActionsDefinition } from "../../item-actions"
 import { navigationFilterTypes } from "../../navigationFilters"
 import {
@@ -44,7 +42,7 @@ export const useDataCollectionSource = <
     NavigationFilters,
     Grouping
   >,
-  deps: ReadonlyArray<unknown> = []
+  deps: readonly unknown[] = []
 ): DataCollectionSource<
   R,
   FiltersSchema,
@@ -90,7 +88,9 @@ export const useDataCollectionSource = <
   })
 
   useDeepCompareEffect(() => {
-    if (!externalCurrentNavigationFilters) return
+    if (!externalCurrentNavigationFilters) {
+      return
+    }
     setCurrentNavigationFilters(externalCurrentNavigationFilters)
   }, [externalCurrentNavigationFilters])
 

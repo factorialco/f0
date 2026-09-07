@@ -1,14 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { createPortal } from "react-dom"
-
 import { F0Icon } from "@/components/F0Icon"
-import { OneEllipsis } from "@/lib/OneEllipsis"
 import New from "@/icons/app/New"
 import Search from "@/icons/app/Search"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Action } from "@/ui/Action"
-
 import { CollapsibleGroup } from "./components/CollapsibleGroup"
 import { ThreadListSkeleton } from "./components/ThreadListSkeleton"
 import type { DateGroup, F0AiChatHistoryProps } from "./types"
@@ -61,7 +59,9 @@ export const F0AiChatHistory = ({
   )
 
   const filteredThreads = useMemo(() => {
-    if (!search.trim()) return threads
+    if (!search.trim()) {
+      return threads
+    }
     const query = search.toLowerCase()
     return threads.filter((t) => t.title.toLowerCase().includes(query))
   }, [threads, search])

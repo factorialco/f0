@@ -1,7 +1,5 @@
 import { Fragment } from "react"
-
 import { cn } from "@/lib/utils"
-
 import { tableDisplayClassNames } from "../../const"
 import { ValueDisplayRendererContext } from "../../renderers"
 import type { CurrencyDef } from "../amount"

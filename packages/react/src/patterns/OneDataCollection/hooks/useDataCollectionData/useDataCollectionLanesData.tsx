@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useDeepCompareMemoize } from "use-deep-compare-effect"
-
 import {
   DataError,
   FiltersDefinition,
@@ -9,7 +8,6 @@ import {
   SortingsDefinition,
   UseDataOptions,
 } from "@/hooks/datasource"
-
 import { ItemActionsDefinition } from "../../item-actions"
 import { NavigationFiltersDefinition } from "../../navigationFilters/types"
 import { SummariesDefinition } from "../../summary"
@@ -212,13 +210,17 @@ export function useDataCollectionLanesData<
   const handleHookUpdate = useCallback(
     (laneId: string | symbol, value: UseDataCollectionData<R>) => {
       pendingLaneUpdatesRef.current[laneId] = value
-      if (flushScheduledRef.current) return
+      if (flushScheduledRef.current) {
+        return
+      }
       flushScheduledRef.current = true
       queueMicrotask(() => {
         const pending = pendingLaneUpdatesRef.current
         pendingLaneUpdatesRef.current = {}
         flushScheduledRef.current = false
-        if (!isMountedRef.current) return
+        if (!isMountedRef.current) {
+          return
+        }
         setLanesHooks((prev) => ({ ...prev, ...pending }))
       })
     },

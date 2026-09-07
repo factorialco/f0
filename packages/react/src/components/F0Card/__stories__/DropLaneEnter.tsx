@@ -1,6 +1,5 @@
 import { monitorForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter"
 import { useEffect, useRef, useState } from "react"
-
 import { useDroppableList } from "@/lib/dnd/hooks"
 
 export function DropLaneEnter({

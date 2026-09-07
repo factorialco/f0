@@ -3,15 +3,6 @@ import { flushSync } from "react-dom"
 import { DefaultValues, Path, useForm } from "react-hook-form"
 import { useMediaQuery } from "usehooks-ts"
 import { z } from "zod"
-
-import type {
-  F0FormDefinitionPerSection,
-  F0FormDefinitionSingleSchema,
-  F0PerSectionSchema as WizardPerSectionSchema,
-  F0FormSchema as WizardFormSchema,
-  InferPerSectionValues,
-} from "@/patterns/F0WizardForm/types"
-
 import { ActionBarStatus, F0ActionBarRef } from "@/components/F0ActionBar"
 import { F0Button } from "@/components/F0Button"
 import { F0TableOfContent } from "@/experimental/Navigation/F0TableOfContent"
@@ -19,23 +10,15 @@ import { TOCItem } from "@/experimental/Navigation/F0TableOfContent/types"
 import { Delete } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { cn } from "@/lib/utils"
+import type {
+  F0FormDefinitionPerSection,
+  F0FormDefinitionSingleSchema,
+  F0PerSectionSchema as WizardPerSectionSchema,
+  F0FormSchema as WizardFormSchema,
+  InferPerSectionValues,
+} from "@/patterns/F0WizardForm/types"
 import { useAsyncDefaultValues } from "@/patterns/F0WizardForm/useF0FormDefinition"
 import { Form as FormProvider } from "@/ui/form"
-
-import type {
-  F0FormPropsWithPerSectionSchema,
-  F0FormPropsWithPerSectionDefinition,
-  F0FormPropsWithSingleSchema,
-  F0FormPropsWithSingleSchemaDefinition,
-  F0FormPropsWithDefinition,
-  F0FormRef,
-  F0FormSchema,
-  F0FormSubmitResult,
-  F0PerSectionSchema,
-  SectionDefinition,
-} from "./types"
-import type { F0FormStateCallback } from "./useF0Form"
-
 import { FormActionBar } from "./components/ActionBar"
 import { F0FormSection } from "./components/F0FormSection"
 import { RowRenderer } from "./components/RowRenderer"
@@ -52,7 +35,20 @@ import {
   buildCardSelectContentMap,
   groupContiguousSwitches,
 } from "./groupingUtils"
+import type {
+  F0FormPropsWithPerSectionSchema,
+  F0FormPropsWithPerSectionDefinition,
+  F0FormPropsWithSingleSchema,
+  F0FormPropsWithSingleSchemaDefinition,
+  F0FormPropsWithDefinition,
+  F0FormRef,
+  F0FormSchema,
+  F0FormSubmitResult,
+  F0PerSectionSchema,
+  SectionDefinition,
+} from "./types"
 import { useErrorNavigation } from "./useErrorNavigation"
+import type { F0FormStateCallback } from "./useF0Form"
 import { useSchemaDefinition } from "./useSchemaDefinition"
 import { createZodErrorMap } from "./zodErrorMap"
 
@@ -83,7 +79,9 @@ function flattenFormErrors(
 
   function walk(obj: Record<string, unknown>, prefix: string) {
     for (const [key, value] of Object.entries(obj)) {
-      if (key === "root") continue
+      if (key === "root") {
+        continue
+      }
       const path = prefix ? `${prefix}.${key}` : key
       if (value && typeof value === "object" && !Array.isArray(value)) {
         const err = value as Record<string, unknown>
@@ -105,7 +103,9 @@ function flattenFormErrors(
  * vs. a plain record of schemas (per-section mode).
  */
 function isZodSchema(value: unknown): value is F0FormSchema {
-  if (typeof value !== "object" || value === null) return false
+  if (typeof value !== "object" || value === null) {
+    return false
+  }
   const obj = value as Record<string, unknown>
   // Zod schemas have a _def.typeName property that plain objects don't
   const def = obj._def as Record<string, unknown> | undefined
@@ -164,7 +164,9 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
     (sectionId: string) => {
       // When only the selected section is shown, the content swaps in place —
       // there is no anchor to scroll to.
-      if (showOnlySelectedSection) return
+      if (showOnlySelectedSection) {
+        return
+      }
       const anchorId = generateAnchorId(name, sectionId)
       const element = document.getElementById(anchorId)
       if (element) {
@@ -179,7 +181,9 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
   )
 
   const tocItems: TOCItem[] = useMemo(() => {
-    if (!sections || !showSectionsSidepanel) return []
+    if (!sections || !showSectionsSidepanel) {
+      return []
+    }
 
     return sectionIds.map((sectionId) => ({
       id: sectionId,
@@ -643,15 +647,22 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
   const autoSaveFieldIds = useMemo(() => {
     const ids = new Set<string>()
     const add = (field: { id: string; autoSave?: boolean }) => {
-      if (field.autoSave) ids.add(field.id)
+      if (field.autoSave) {
+        ids.add(field.id)
+      }
     }
     for (const item of definition) {
-      if (item.type === "field") add(item.field)
-      else if (item.type === "row") item.fields.forEach(add)
-      else if (item.type === "section") {
+      if (item.type === "field") {
+        add(item.field)
+      } else if (item.type === "row") {
+        item.fields.forEach(add)
+      } else if (item.type === "section") {
         for (const sub of item.section.fields) {
-          if (sub.type === "field") add(sub.field)
-          else if (sub.type === "row") sub.fields.forEach(add)
+          if (sub.type === "field") {
+            add(sub.field)
+          } else if (sub.type === "row") {
+            sub.fields.forEach(add)
+          }
         }
       }
     }
@@ -779,10 +790,15 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
   const registerUploadState = useCallback(
     (id: string, isUploading: boolean) => {
       setUploadingFieldIds((prev) => {
-        if (isUploading === prev.has(id)) return prev
+        if (isUploading === prev.has(id)) {
+          return prev
+        }
         const next = new Set(prev)
-        if (isUploading) next.add(id)
-        else next.delete(id)
+        if (isUploading) {
+          next.add(id)
+        } else {
+          next.delete(id)
+        }
         return next
       })
     },
@@ -838,9 +854,12 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
   })
 
   const resolvedActionBarLabel = (() => {
-    if (actionBarStatus === "loading") return actionBarSavingLabel
-    if (actionBarStatus === "success")
+    if (actionBarStatus === "loading") {
+      return actionBarSavingLabel
+    }
+    if (actionBarStatus === "success") {
       return successMessage ?? forms.actionBar.saved
+    }
     return actionBarIdleLabel
   })()
 
@@ -849,7 +868,9 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     // Block submission while any file field still has an upload in flight.
     // Covers non-button submit paths (Enter key, autosubmit); the visible
     // submit controls are also disabled via `hasPendingUploads`.
-    if (hasPendingUploadsRef.current) return
+    if (hasPendingUploadsRef.current) {
+      return
+    }
 
     if (successTimerRef.current) {
       clearTimeout(successTimerRef.current)
@@ -871,7 +892,9 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     // The form may have unmounted while `onSubmit` was in flight. The unmount
     // cleanup has already run, so any state update here — or a timer scheduled
     // below — would leak past teardown. Bail out.
-    if (!isMountedRef.current) return
+    if (!isMountedRef.current) {
+      return
+    }
 
     if (result.success) {
       form.reset(form.getValues())
@@ -880,7 +903,9 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       setActionBarStatus("success")
 
       successTimerRef.current = setTimeout(() => {
-        if (!isMountedRef.current) return
+        if (!isMountedRef.current) {
+          return
+        }
         setActionBarStatus("idle")
         setSuccessMessage(undefined)
         successTimerRef.current = null
@@ -927,8 +952,12 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
    */
   const snapshotFocus = useCallback(() => {
     const active = document.activeElement
-    if (!(active instanceof HTMLElement)) return
-    if (!formElementRef.current?.contains(active)) return
+    if (!(active instanceof HTMLElement)) {
+      return
+    }
+    if (!formElementRef.current?.contains(active)) {
+      return
+    }
 
     const hasSelection =
       active instanceof HTMLInputElement ||
@@ -953,11 +982,15 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
   useEffect(() => {
     const wasSubmitting = wasSubmittingRef.current
     wasSubmittingRef.current = isSubmitting
-    if (!wasSubmitting || isSubmitting) return
+    if (!wasSubmitting || isSubmitting) {
+      return
+    }
 
     const snapshot = focusSnapshotRef.current
     focusSnapshotRef.current = null
-    if (!snapshot) return
+    if (!snapshot) {
+      return
+    }
     if (!snapshot.element.isConnected) {
       // `showSubmitWhenDirty` removes the submit button on a successful save.
       // If it was the focused element, park focus on the form so tab order
@@ -968,7 +1001,9 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       }
       return
     }
-    if (document.activeElement === snapshot.element) return
+    if (document.activeElement === snapshot.element) {
+      return
+    }
 
     snapshot.element.focus()
     if (
@@ -999,10 +1034,14 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       : DEFAULT_AUTOSUBMIT_DELAY_MS
 
   useEffect(() => {
-    if (!isAutosubmit && !hasFieldAutoSave) return
+    if (!isAutosubmit && !hasFieldAutoSave) {
+      return
+    }
 
     const subscription = form.watch((_values, { name }) => {
-      if (form.formState.isSubmitting) return
+      if (form.formState.isSubmitting) {
+        return
+      }
 
       if (!isAutosubmit) {
         // Per-field auto-save: only react to a change on a designated
@@ -1010,8 +1049,9 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
         // root field id "links"; a matching name is itself the "field changed"
         // signal (the watch fires with an undefined name on mount, skipped).
         const rootFieldId = name?.split(".")[0]
-        if (!rootFieldId || !autoSaveFieldIdsRef.current.has(rootFieldId))
+        if (!rootFieldId || !autoSaveFieldIdsRef.current.has(rootFieldId)) {
           return
+        }
       }
 
       if (autosubmitTimerRef.current) {
@@ -1019,12 +1059,16 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       }
       autosubmitTimerRef.current = setTimeout(() => {
         autosubmitTimerRef.current = null
-        if (!isMountedRef.current) return
+        if (!isMountedRef.current) {
+          return
+        }
         // Re-check dirtiness at fire time (RHF's `isDirty` has settled by now,
         // unlike inside the synchronous watch callback): skip a save when the
         // form is back to its last-saved state — e.g. a row was added then
         // removed, netting no change from the snapshot.
-        if (!form.formState.isDirty) return
+        if (!form.formState.isDirty) {
+          return
+        }
         snapshotFocus()
         form.handleSubmit((data) =>
           handleSubmitForAutosubmitRef.current(data)
@@ -1233,7 +1277,9 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     // With `showSubmitWhenDirty` the submit button unmounts itself on a
     // successful save, so a button activation is snapshotted too — otherwise
     // focus would be dropped on the floor when it disappears.
-    if (!isButtonActivation || showSubmitWhenDirty) snapshotFocus()
+    if (!isButtonActivation || showSubmitWhenDirty) {
+      snapshotFocus()
+    }
     submitHandler(event)
   }
 

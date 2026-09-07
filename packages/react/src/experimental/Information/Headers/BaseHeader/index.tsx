@@ -1,8 +1,6 @@
 import { Fragment } from "react"
-
 import { AvatarVariant, F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0Button } from "@/components/F0Button"
-import { Cross } from "@/icons/app"
 import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import { StatusVariant } from "@/components/tags/F0TagStatus"
 import { Description } from "@/experimental/Information/Headers/BaseHeader/Description"
@@ -22,6 +20,7 @@ import {
   DropdownItem,
   MobileDropdown,
 } from "@/experimental/Navigation/Dropdown"
+import { Cross } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 

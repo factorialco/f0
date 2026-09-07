@@ -17,7 +17,9 @@ export function isDataChartEmpty(props: F0DataChartProps): boolean {
     case "bar":
     case "line": {
       const series = props.series
-      if (!Array.isArray(series) || series.length === 0) return true
+      if (!Array.isArray(series) || series.length === 0) {
+        return true
+      }
       // Empty when every series has no data points at all.
       return series.every(
         (s) => !s || !Array.isArray(s.data) || s.data.length === 0
@@ -30,7 +32,9 @@ export function isDataChartEmpty(props: F0DataChartProps): boolean {
     }
     case "radar": {
       const series = props.series
-      if (!Array.isArray(series) || series.length === 0) return true
+      if (!Array.isArray(series) || series.length === 0) {
+        return true
+      }
       return series.every(
         (s) => !s || !Array.isArray(s.data) || s.data.length === 0
       )
@@ -45,7 +49,9 @@ export function isDataChartEmpty(props: F0DataChartProps): boolean {
     }
     case "scatter": {
       const series = props.series
-      if (!Array.isArray(series) || series.length === 0) return true
+      if (!Array.isArray(series) || series.length === 0) {
+        return true
+      }
       // A point at the origin is a legitimate coordinate, so only the absence
       // of points counts as empty.
       return series.every(

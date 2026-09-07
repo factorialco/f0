@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { type IconType } from "@/components/F0Icon"
 import { useReducedMotion } from "@/lib/a11y"
@@ -87,7 +86,9 @@ export const WelcomeScreen = ({
   useEffect(() => {
     // Reduced motion renders the first phrase statically: no typewriter,
     // no rotation (WCAG 2.2.2 — auto-updating content with no pause control).
-    if (reducedMotion) return
+    if (reducedMotion) {
+      return
+    }
 
     let timer: ReturnType<typeof setTimeout> | undefined
 
@@ -100,7 +101,9 @@ export const WelcomeScreen = ({
         setPhase("holding")
       }
     } else if (phase === "holding") {
-      if (messages.length <= 1) return
+      if (messages.length <= 1) {
+        return
+      }
       timer = setTimeout(() => setPhase("erasing"), HOLD_MS)
     } else if (phase === "erasing") {
       if (chars > 0) {
@@ -114,7 +117,9 @@ export const WelcomeScreen = ({
     }
 
     return () => {
-      if (timer) clearTimeout(timer)
+      if (timer) {
+        clearTimeout(timer)
+      }
     }
   }, [phase, chars, current.length, messages.length, reducedMotion])
 

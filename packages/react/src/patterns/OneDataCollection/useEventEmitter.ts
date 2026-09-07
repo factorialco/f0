@@ -1,10 +1,8 @@
 import { useCallback, useRef } from "react"
-
 import {
   SortingsDefinition,
   SortingsState,
 } from "@/hooks/datasource/types/sortings.typings"
-
 import {
   FiltersDefinition,
   FiltersState,
@@ -35,19 +33,25 @@ export const useEventEmitter = <Sortings extends SortingsDefinition>({
 
   const emitFilterChange = useCallback(
     (filters: FiltersState<FiltersDefinition>) => {
-      if (!filters) return
+      if (!filters) {
+        return
+      }
 
       const changedFilter = Object.entries(filters).find(
         ([field, value]) => latestFilters.current?.[field] !== value
       )
 
-      if (!changedFilter) return
+      if (!changedFilter) {
+        return
+      }
 
       const [field, value] = changedFilter
 
       const normalizedValue = normalizeEventValue(value)
 
-      if (normalizedValue === undefined) return
+      if (normalizedValue === undefined) {
+        return
+      }
 
       latestFilters.current = filters
 
@@ -69,8 +73,9 @@ export const useEventEmitter = <Sortings extends SortingsDefinition>({
           latestSortings?.current?.order === sortings?.order) ||
         !sortings ||
         typeof sortings.field !== "string"
-      )
+      ) {
         return
+      }
 
       latestSortings.current = sortings
 
@@ -84,19 +89,25 @@ export const useEventEmitter = <Sortings extends SortingsDefinition>({
 
   const emitPresetClick = useCallback(
     (filters: FiltersState<FiltersDefinition>) => {
-      if (!filters) return
+      if (!filters) {
+        return
+      }
 
       const changedFilter = Object.entries(filters).find(
         ([field, value]) => latestFilters.current?.[field] !== value
       )
 
-      if (!changedFilter) return
+      if (!changedFilter) {
+        return
+      }
 
       const [field, value] = changedFilter
 
       const normalizedValue = normalizeEventValue(value)
 
-      if (normalizedValue === undefined) return
+      if (normalizedValue === undefined) {
+        return
+      }
 
       latestFilters.current = filters
 

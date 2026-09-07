@@ -1,14 +1,11 @@
 import { AnimatePresence, motion } from "motion/react"
 import { type ReactNode } from "react"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import Cross from "@/icons/app/Cross"
 import { useReducedMotion } from "@/lib/a11y"
 import { experimentalComponent } from "@/lib/experimental"
 import { useI18n } from "@/lib/providers/i18n"
-
 import { Skeleton } from "@/ui/skeleton"
-
 import { SidebarWindow } from "./components/layout/ChatWindow"
 import { useRevealOnChange } from "./hooks/useRevealOnChange"
 import { AiChatStateProvider, useAiChat } from "./providers/AiChatStateProvider"

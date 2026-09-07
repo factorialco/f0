@@ -7,7 +7,6 @@ import {
   CalendarView,
   DateRange,
 } from "@/components/OneCalendar/types"
-
 import { FilterTypeComponentProps } from "../types"
 
 export type DateFilterOptions = {

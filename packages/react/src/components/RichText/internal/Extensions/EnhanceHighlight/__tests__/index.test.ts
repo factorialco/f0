@@ -1,7 +1,6 @@
 import { Editor } from "@tiptap/core"
 import StarterKit from "@tiptap/starter-kit"
 import { describe, expect, it } from "vitest"
-
 import { EnhanceHighlight } from "@/components/RichText/internal/Extensions/EnhanceHighlight"
 
 const createEditor = (content = "<p>Hello world enhance me</p>") =>

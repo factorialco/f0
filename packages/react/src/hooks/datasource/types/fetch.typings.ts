@@ -1,12 +1,10 @@
 import { Observable } from "zen-observable-ts"
-
+import { SortingsStateMultiple } from "@/hooks/datasource/types/sortings.typings"
+import { PromiseState } from "@/lib/promise-to-observable"
 import {
   FiltersDefinition,
   FiltersState,
 } from "@/patterns/OneFilterPicker/types"
-import { SortingsStateMultiple } from "@/hooks/datasource/types/sortings.typings"
-import { PromiseState } from "@/lib/promise-to-observable"
-
 import { RecordType } from "./records.typings"
 
 /**
@@ -294,4 +292,4 @@ export type DataAdapter<
  * Represents a collection of selected items.
  * @template T - The type of items in the collection
  */
-export type SelectedItems<T> = ReadonlyArray<T>
+export type SelectedItems<T> = readonly T[]

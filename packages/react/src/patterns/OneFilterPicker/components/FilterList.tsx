@@ -1,23 +1,20 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useId, useMemo } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
-import { OneEllipsis } from "@/lib/OneEllipsis"
 import { ChevronRight } from "@/icons/app"
 import { useReducedMotion } from "@/lib/a11y"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { NonFocusableScrollArea, ScrollArea } from "@/ui/scrollarea"
-
+import { FilterDefinitionsByType, getFilterType } from "../filterTypes"
+import { collectNestedFilterKeys } from "../filterTypes/InFilter/components/option-utils"
 import type {
   FilterTypeDefinition,
   FilterTypeSchema,
 } from "../filterTypes/types"
 import type { FiltersDefinition, FiltersState, FilterValue } from "../types"
-
-import { FilterDefinitionsByType, getFilterType } from "../filterTypes"
-import { collectNestedFilterKeys } from "../filterTypes/InFilter/components/option-utils"
 
 /**
  * Props for the FilterList component.
@@ -70,7 +67,9 @@ export function FilterList<Definition extends FiltersDefinition>({
       if (filter.type === "in" && "options" in filter) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any -- accessing nested options generically
         const nested = collectNestedFilterKeys((filter as any).options)
-        if (nested.length > 0) map.set(key, nested)
+        if (nested.length > 0) {
+          map.set(key, nested)
+        }
       }
     }
     return map

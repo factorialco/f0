@@ -8,7 +8,6 @@ import {
   SortingsState,
 } from "@/hooks/datasource"
 import { PresetsDefinition } from "@/patterns/OneFilterPicker/types"
-
 import {
   NavigationFiltersDefinition,
   NavigationFiltersState,

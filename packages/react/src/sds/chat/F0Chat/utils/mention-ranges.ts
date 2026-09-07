@@ -29,7 +29,9 @@ export const locateMentions = <T extends { name: string }>(
     let from = 0
     while (true) {
       const idx = text.indexOf(pattern, from)
-      if (idx === -1) break
+      if (idx === -1) {
+        break
+      }
       found.push({ entry, start: idx, end: idx + pattern.length })
       from = idx + pattern.length
     }
@@ -39,7 +41,9 @@ export const locateMentions = <T extends { name: string }>(
   const clean: LocatedMention<T>[] = []
   let lastEnd = 0
   for (const range of found) {
-    if (range.start < lastEnd) continue
+    if (range.start < lastEnd) {
+      continue
+    }
     clean.push(range)
     lastEnd = range.end
   }

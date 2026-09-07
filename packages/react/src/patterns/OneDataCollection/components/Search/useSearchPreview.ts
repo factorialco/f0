@@ -1,7 +1,5 @@
 import { useEffect, useRef, useState } from "react"
-
 import type { RecordType } from "@/hooks/datasource"
-
 import type {
   SearchPreview,
   SearchPreviewPage,
@@ -83,7 +81,9 @@ export function useSearchPreview<R extends RecordType>(
     }
     setLoading(true)
     void Promise.resolve(preview.search(trimmed, 0)).then((found) => {
-      if (requestId !== requestIdRef.current) return
+      if (requestId !== requestIdRef.current) {
+        return
+      }
       const page = normalizePage(found)
       recordsRef.current = page.records
       setResults(toResultItems(preview, page.records))
@@ -109,7 +109,9 @@ export function useSearchPreview<R extends RecordType>(
     setLoadingMore(true)
     void Promise.resolve(preview.search(trimmed, nextPage))
       .then((found) => {
-        if (requestId !== requestIdRef.current) return
+        if (requestId !== requestIdRef.current) {
+          return
+        }
         const page = normalizePage(found)
         pageRef.current = nextPage
         recordsRef.current = [...recordsRef.current, ...page.records]
@@ -119,7 +121,9 @@ export function useSearchPreview<R extends RecordType>(
         setLoadingMore(false)
       })
       .catch(() => {
-        if (requestId !== requestIdRef.current) return
+        if (requestId !== requestIdRef.current) {
+          return
+        }
         loadingMoreRef.current = false
         setLoadingMore(false)
       })
@@ -127,7 +131,9 @@ export function useSearchPreview<R extends RecordType>(
 
   const onSelect = (id: string) => {
     const preview = searchPreviewRef.current
-    if (!preview) return
+    if (!preview) {
+      return
+    }
     const record = recordsRef.current.find(
       (candidate) => preview.getId(candidate) === id
     )

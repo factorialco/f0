@@ -1,20 +1,19 @@
 import { ButtonInternal } from "@/components/F0Button/internal"
+import { BaseHeader } from "@/experimental/Information/Headers/BaseHeader"
 import {
   DropdownInternal,
   DropdownItemObject,
 } from "@/experimental/Navigation/Dropdown/internal"
-import { BaseHeader } from "@/experimental/Information/Headers/BaseHeader"
 import { BreadcrumbItem } from "@/experimental/Navigation/Header/Breadcrumbs/internal/BreadcrumbItem"
 import { PageNavigation } from "@/experimental/Navigation/Header/PageNavigation"
-import { Tabs } from "@/patterns/Navigation/Tabs"
-import CrossIcon from "@/icons/app/Cross"
 import { ArrowLeft, Ellipsis, Maximize } from "@/icons/app"
+import CrossIcon from "@/icons/app/Cross"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
+import { Tabs } from "@/patterns/Navigation/Tabs"
 import { BreadcrumbList } from "@/ui/breadcrumb"
 import { DialogTitle } from "@/ui/Dialog/dialog"
 import { DrawerDescription } from "@/ui/drawer"
-
 import { F0DialogHeaderProps } from "../internal-types"
 import { useF0Dialog } from "./F0DialogProvider"
 
@@ -48,7 +47,9 @@ export const F0DialogHeader = ({
     ) ?? []
 
   const Actions = () => {
-    if (!otherActionItems.length || !otherActions) return null
+    if (!otherActionItems.length || !otherActions) {
+      return null
+    }
 
     const hasCriticalAction = otherActionItems.some((action) => action.critical)
 
@@ -73,7 +74,9 @@ export const F0DialogHeader = ({
   }
 
   const Module = () => {
-    if (!module) return null
+    if (!module) {
+      return null
+    }
 
     return (
       <BreadcrumbList>
@@ -126,7 +129,9 @@ export const F0DialogHeader = ({
     ) : null
 
   const Controls = () => {
-    if (!controls) return null
+    if (!controls) {
+      return null
+    }
 
     if (controls.kind === "back") {
       return (

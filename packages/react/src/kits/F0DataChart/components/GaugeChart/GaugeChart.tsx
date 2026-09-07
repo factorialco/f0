@@ -1,7 +1,5 @@
 import { useRef } from "react"
-
 import type { F0DataChartGaugeProps } from "../../types"
-
 import { resolveChartSize } from "../../utils/responsive"
 import { useContainerSize } from "../../utils/useContainerSize"
 import { useEChartsInstance } from "../../utils/useEChartsInstance"

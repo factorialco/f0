@@ -1,5 +1,4 @@
 import { useState } from "react"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
 import { EllipsisHorizontal } from "@/icons/app"
@@ -13,7 +12,6 @@ import {
   DrawerOverlay,
   DrawerTrigger,
 } from "@/ui/drawer"
-
 import { DropdownItemContent } from "./DropdownItem"
 import {
   DropdownInternal,
@@ -35,10 +33,10 @@ type DropdownProps = Omit<
 
 const _Dropdown = (props: DropdownProps) => {
   const { open, onOpenChange, dataTestId, ...rest } = props
-  const publicProps = privateProps.reduce((acc, key) => {
+  const publicProps = privateProps.reduce<DropdownInternalProps>((acc, key) => {
     const { [key]: _, ...rest } = acc
     return rest
-  }, rest as DropdownInternalProps)
+  }, rest)
 
   return (
     <DataTestIdWrapper dataTestId={dataTestId}>

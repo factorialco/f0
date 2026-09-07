@@ -1,10 +1,8 @@
 import { useMemo } from "react"
-
 import type {
   RecordType,
   UseDataSourceItemNavigationReturn,
 } from "@/hooks/datasource"
-
 import type { NavigationProps } from "../PageNavigation"
 
 export type PageHeaderItemNavigationInput<R extends RecordType> = Pick<
@@ -78,7 +76,9 @@ export function usePageHeaderItemNavigation<R extends RecordType>(
   const goToNext = nav?.goToNext
 
   return useMemo(() => {
-    if (!hasInput) return null
+    if (!hasInput) {
+      return null
+    }
 
     const counter =
       absoluteIndex !== null && totalItems !== undefined
@@ -108,7 +108,9 @@ export function usePageHeaderItemNavigation<R extends RecordType>(
           ? { url: nextItemUrl, title: title(nextItem, "Next") }
           : undefined
 
-    if (!previous && !next && !counter) return null
+    if (!previous && !next && !counter) {
+      return null
+    }
 
     return { previous, next, counter }
   }, [

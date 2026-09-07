@@ -8,17 +8,14 @@ import {
   useEffect,
   useRef,
 } from "react"
-
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
-
-import type { F0GraphNodeProps } from "./types"
-
 import { useF0GraphRenderConfigInternal } from "../../contexts"
 import { F0GraphNodeHoverCard } from "./F0GraphNodeHoverCard"
 import { F0GraphNodeStackedRow } from "./F0GraphNodeStackedRow"
 import { F0GraphNodeTags } from "./F0GraphNodeTags"
+import type { F0GraphNodeProps } from "./types"
 import { tagColumn } from "./types"
 import { graphNodeContainerVariants } from "./variants"
 

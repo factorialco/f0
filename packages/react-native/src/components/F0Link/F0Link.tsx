@@ -21,8 +21,12 @@ import { F0_LINK_BLOCKED_FORWARD_PROPS, type F0LinkProps } from "./F0Link.types"
 const { ExternalLink } = AppIcons
 
 function getStringContent(value: React.ReactNode): string | undefined {
-  if (typeof value === "string") return value
-  if (typeof value === "number") return String(value)
+  if (typeof value === "string") {
+    return value
+  }
+  if (typeof value === "number") {
+    return String(value)
+  }
   if (Array.isArray(value)) {
     const content = value
       .map((item) => getStringContent(item))
@@ -78,7 +82,9 @@ const F0Link = React.memo(
 
     const handlePress = useCallback(
       async (event: GestureResponderEvent) => {
-        if (disabled) return
+        if (disabled) {
+          return
+        }
 
         if (stopPropagation) {
           event.stopPropagation()

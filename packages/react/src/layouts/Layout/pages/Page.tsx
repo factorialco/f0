@@ -1,7 +1,5 @@
 import { ReactNode, forwardRef } from "react"
-
 import { cn } from "@/lib/utils"
-
 import { validLayoutChildrenGuard } from "../internal/utils"
 
 export interface PageProps {

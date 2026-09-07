@@ -2,12 +2,10 @@ import * as TogglePrimitive from "@radix-ui/react-toggle"
 import { cva } from "cva"
 import { AnimatePresence, motion } from "motion/react"
 import { forwardRef, useMemo, useState } from "react"
-
 import { F0Icon } from "@/components/F0Icon"
 import { TooltipInternal } from "@/experimental/Overlays/Tooltip"
 import { cn, focusRing } from "@/lib/utils"
 import { actionVariants, buttonSizeVariants } from "@/ui/Action/variants"
-
 import { ButtonToggleColor } from "../types"
 import { F0ButtonToggleInternalProps } from "./types.internal"
 

@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import { albumCells, singlePhotoRatio } from "../album-layout"
 
 const photo = (width?: number, height?: number) => ({ width, height })

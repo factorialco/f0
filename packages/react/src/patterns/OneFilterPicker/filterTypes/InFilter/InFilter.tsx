@@ -1,16 +1,14 @@
 "use client"
 
 import { useEffect, useMemo, useRef, useState } from "react"
-
 import { F0Checkbox } from "@/components/F0Checkbox"
-import { OneEllipsis } from "@/lib/OneEllipsis"
 import { F0SearchInput } from "@/components/F0SearchInput"
-import { ScrollArea } from "@/ui/scrollarea"
-import { Spinner } from "@/ui/Spinner"
 import { RecordType } from "@/hooks/datasource"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
-
+import { ScrollArea } from "@/ui/scrollarea"
+import { Spinner } from "@/ui/Spinner"
 import { FilterTypeComponentProps } from "../types"
 import { InFilterFlatOption } from "./components/InFilterFlatOption"
 import { InFilterOptionRow } from "./components/InFilterOptionRow"
@@ -110,7 +108,9 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
 
   // Pre-populate nested label cache for existing selections (e.g., after localStorage restore)
   useEffect(() => {
-    if (!allFiltersValue || !options.length) return
+    if (!allFiltersValue || !options.length) {
+      return
+    }
 
     const populateNestedCache = (parentOptions: InFilterOptionItem<T>[]) => {
       for (const option of parentOptions) {
@@ -260,7 +260,9 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
   }
 
   const handleScrollBottom = () => {
-    if (isLoading || !loadMore || !canLoadMore.current) return
+    if (isLoading || !loadMore || !canLoadMore.current) {
+      return
+    }
     loadMore()
   }
 

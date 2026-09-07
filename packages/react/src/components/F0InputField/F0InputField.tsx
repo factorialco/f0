@@ -11,7 +11,6 @@ import {
   useState,
   type AutoFill,
 } from "react"
-
 import { F0Avatar } from "@/components/avatars/F0Avatar/F0Avatar"
 import { AvatarVariant } from "@/components/avatars/F0Avatar/types"
 import { F0ButtonToggle } from "@/components/F0ButtonToggle/F0ButtonToggle"
@@ -19,7 +18,6 @@ import { F0Icon, IconType } from "@/components/F0Icon"
 import { CrossedCircle } from "@/icons/app"
 import { cn, focusRing } from "@/lib/utils.ts"
 import { Spinner } from "@/ui/Spinner"
-
 import { AppendTag } from "./AppendTag"
 import { InputMessages } from "./components/InputMessages"
 import { Label } from "./components/Label"
@@ -193,7 +191,7 @@ export type InputFieldProps<T> = {
   onClickPlaceholder?: () => void
   onClickChildren?: () => void
   /** Receives the click, so a caller can tell where inside the field it landed. */
-  onClickContent?: (event: React.MouseEvent<Element>) => void
+  onClickContent?: (event: React.MouseEvent) => void
   value?: T | undefined
   onChange?: (value: T) => void
   size?: InputFieldSize
@@ -384,7 +382,7 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
       props.onClear?.()
     }
 
-    const handleClickContent = (event: React.MouseEvent<Element>) => {
+    const handleClickContent = (event: React.MouseEvent) => {
       if (!disabled) {
         onClickContent?.(event)
       }

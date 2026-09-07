@@ -1,7 +1,5 @@
-import { describe, expect, it } from "vitest"
-
 import { de as locale } from "date-fns/locale"
-
+import { describe, expect, it } from "vitest"
 import {
   formatTime,
   getAbbreviateMonth,

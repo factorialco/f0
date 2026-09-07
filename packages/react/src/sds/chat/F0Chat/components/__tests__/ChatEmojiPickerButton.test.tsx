@@ -7,7 +7,6 @@ import {
   useRef,
 } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import { screen, waitFor, zeroRender as render } from "@/testing/test-utils"
 
 // jsdom has no layout: without the mock context Virtuoso renders no rows and

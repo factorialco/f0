@@ -9,7 +9,6 @@ import {
 import { type LanguageOption } from "@/lib/localized"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { PlaybackRate, formatTime } from "../utils"
 import {
   AudioDescriptionFilledIcon,
@@ -17,8 +16,8 @@ import {
 } from "./AudioDescriptionToggleIcons"
 import { CaptionsFilledIcon, CaptionsLineIcon } from "./CaptionsToggleIcons"
 import { PlaybackRateMenu } from "./PlaybackRateMenu"
-import { hasSettingsMenu, SettingsMenu } from "./SettingsMenu"
 import { Seekbar } from "./Seekbar"
+import { hasSettingsMenu, SettingsMenu } from "./SettingsMenu"
 import { VolumeControl } from "./VolumeControl"
 
 export interface ControlsProps {

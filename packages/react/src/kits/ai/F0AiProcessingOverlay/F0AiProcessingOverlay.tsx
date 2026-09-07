@@ -1,10 +1,9 @@
 import { AnimatePresence, motion } from "motion/react"
 import { memo, type ReactNode, useEffect } from "react"
-
+import { F0OneIcon } from "@/kits/ai/F0OneIcon"
 import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-import { F0OneIcon } from "@/kits/ai/F0OneIcon"
 
 const IconMotion = motion.create(F0OneIcon)
 
@@ -107,7 +106,9 @@ export const F0AiProcessingOverlay = memo(function F0AiProcessingOverlay({
   // doesn't sit on a blurred, non-interactive field. Skip the chat input so
   // the user can keep typing follow-ups while changes apply.
   useEffect(() => {
-    if (!active) return
+    if (!active) {
+      return
+    }
     const activeElement = document.activeElement as HTMLElement | null
     if (
       activeElement &&

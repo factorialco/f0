@@ -1,11 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import {
   act,
   waitFor,
   zeroRenderHook as renderHook,
 } from "@/testing/test-utils"
-
 import { useCurrentLocation } from "../useCurrentLocation"
 
 const COORDS = { longitude: 2.15, latitude: 41.39 }

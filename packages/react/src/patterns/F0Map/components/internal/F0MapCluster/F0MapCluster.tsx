@@ -1,9 +1,7 @@
 import { forwardRef, useState } from "react"
-
 import { DataTestIdWrapper, type WithDataTestIdProps } from "@/lib/data-testid"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { F0MapMarker, type F0MapMarkerVariantProps } from "../../F0MapMarker"
 
 // The 2x2 grid fits four items. Up to four members every head is shown (a
@@ -21,7 +19,7 @@ const BOX = 72
 // Item-centre offsets (px) by the number of items shown (heads + optional
 // counter). The counter is always the last item, so with four it lands in the
 // bottom-right - like an avatar list's "+N".
-const LAYOUTS: Record<number, ReadonlyArray<readonly [number, number]>> = {
+const LAYOUTS: Record<number, readonly (readonly [number, number])[]> = {
   1: [[0, 0]],
   2: [
     [-8, 0],

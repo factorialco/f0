@@ -1,15 +1,14 @@
 import { motion } from "motion/react"
 import { useState, ReactNode } from "react"
-
 import { F0Icon, IconType } from "@/components/F0Icon"
 import ChevronRight from "@/icons/app/ChevronRight"
 import { useReducedMotion } from "@/lib/a11y"
+import { cn } from "@/lib/utils"
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/ui/collapsible"
-import { cn } from "@/lib/utils"
 
 interface CollapsibleMessageProps {
   icon: IconType
@@ -43,8 +42,12 @@ export const CollapsibleMessage = ({
   const isControlled = open !== undefined
   const isExpanded = isControlled ? open : uncontrolledOpen
   const handleOpenChange = (next: boolean) => {
-    if (lockOpen) return
-    if (!isControlled) setUncontrolledOpen(next)
+    if (lockOpen) {
+      return
+    }
+    if (!isControlled) {
+      setUncontrolledOpen(next)
+    }
     onOpenChange?.(next)
   }
 

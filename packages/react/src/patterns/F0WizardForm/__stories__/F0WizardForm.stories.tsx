@@ -1,17 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { ComponentProps, useState } from "react"
 import { z } from "zod"
-
 import { F0Button } from "@/components/F0Button"
-import { f0FormField } from "@/patterns/F0Form/f0Schema"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { ApplicationFrame } from "@/patterns/ApplicationFrame"
 import ApplicationFrameStoryMeta from "@/patterns/ApplicationFrame/index.stories"
-import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
+import { f0FormField } from "@/patterns/F0Form/f0Schema"
 import { forms } from "@/patterns/forms"
-
-import { F0WizardForm, useF0FormDefinition } from "../index"
+import { F0WizardForm, useF0FormDefinition } from ".."
 
 const meta: Meta<typeof F0WizardForm> = {
   title: "Forms/F0WizardForm",
