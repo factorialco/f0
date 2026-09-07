@@ -7,6 +7,7 @@ import type { EditableLocationPart } from "../internal-types"
 import type { F0LocationInputChangeMeta, F0LocationInputValue } from "../types"
 
 import {
+  editKeepsResolution,
   formatLocationValue,
   invalidateResolution,
   isLocationValueEmpty,
@@ -40,15 +41,16 @@ export const useLocationValue = ({
     prop: valueProp,
     defaultProp: defaultValue,
   })
-  // The latest value is needed synchronously inside event handlers that may
-  // fire before React re-renders (type, then pick in the same tick).
+  // Lets the callbacks below stay referentially stable while still reading the
+  // current value. Deliberately only written on render: writing the emitted
+  // value here too would leave the ref describing something a controlled
+  // parent may have filtered or never accepted.
   const valueRef = useRef(value)
   valueRef.current = value
 
   const emit = useCallback(
     (next: F0LocationInputValue | undefined, source: "picked" | "typed") => {
       const normalized = isLocationValueEmpty(next) ? undefined : next
-      valueRef.current = normalized
       setValue(normalized)
       onChange?.(normalized, {
         source,
@@ -59,15 +61,12 @@ export const useLocationValue = ({
   )
 
   const edited = useCallback(
-    (next: F0LocationInputValue) => {
-      const withoutResolution = invalidateResolution(next)
+    (next: F0LocationInputValue, keepResolution = false) => {
+      const base = keepResolution ? next : invalidateResolution(next)
       emit(
         {
-          ...withoutResolution,
-          formatted: formatLocationValue(
-            withoutResolution,
-            getCountryName(withoutResolution.country)
-          ),
+          ...base,
+          formatted: formatLocationValue(base, getCountryName(base.country)),
         },
         "typed"
       )
@@ -77,7 +76,7 @@ export const useLocationValue = ({
 
   const setPart = useCallback(
     (part: EditableLocationPart, text: string) => {
-      edited({ ...valueRef.current, [part]: text })
+      edited({ ...valueRef.current, [part]: text }, editKeepsResolution(part))
     },
     [edited]
   )

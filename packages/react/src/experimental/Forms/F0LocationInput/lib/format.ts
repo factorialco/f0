@@ -10,6 +10,18 @@ export const editableLocationParts = [
   "postalCode",
 ] as const satisfies readonly EditableLocationPart[]
 
+/**
+ * Parts that do not describe where the pin is: a floor or apartment number
+ * refines the address inside the same building, so it leaves a picked place
+ * (and its coordinates) valid. Everything else invalidates it, which is the
+ * safe default for any part added later.
+ */
+const resolutionSafeParts = new Set<EditableLocationPart>(["addressLine2"])
+
+/** Whether editing `part` leaves the picked place's coordinates trustworthy */
+export const editKeepsResolution = (part: EditableLocationPart): boolean =>
+  resolutionSafeParts.has(part)
+
 const trimmed = (text: string | undefined): string | undefined => {
   const value = text?.trim()
   return value ? value : undefined

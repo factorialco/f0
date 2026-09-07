@@ -42,7 +42,11 @@ export type F0LocationInputValue = {
   state?: string
   postalCode?: string
   country?: CountryCode
-  /** Provider id of the picked place. Cleared as soon as any part is edited */
+  /**
+   * Provider id of the picked place. Cleared as soon as a part that describes
+   * where the pin is gets edited; `addressLine2` does not, since a floor
+   * number stays inside the same building.
+   */
   placeId?: string
   latitude?: number
   longitude?: number

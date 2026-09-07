@@ -58,8 +58,13 @@ describe("F0LocationInput", () => {
     it("renders a plain text field without a search function", () => {
       render(<F0LocationInput label="Address" />)
 
-      expect(screen.getByRole("textbox")).toBeInTheDocument()
+      const input = screen.getByRole("textbox")
+      expect(input).toBeInTheDocument()
       expect(screen.queryByRole("combobox")).not.toBeInTheDocument()
+      // No half-combobox: none of the contract leaks onto a plain textbox
+      expect(input).not.toHaveAttribute("aria-expanded")
+      expect(input).not.toHaveAttribute("aria-autocomplete")
+      expect(input).not.toHaveAttribute("aria-controls")
     })
 
     it("does not search below two characters", async () => {
@@ -118,6 +123,25 @@ describe("F0LocationInput", () => {
       expect(getAddress()).toHaveAttribute("aria-activedescendant", second.id)
 
       await user.keyboard("{ArrowUp}")
+      expect(getAddress()).toHaveAttribute("aria-activedescendant", first.id)
+    })
+
+    it("reopens the last results with either arrow, first or last option", async () => {
+      const user = userEvent.setup()
+      render(<F0LocationInput label="Address" searchPlaces={searchPlaces} />)
+
+      await typeAndWaitForOptions(user)
+      const [first, second] = screen.getAllByRole("option")
+
+      await user.keyboard("{Escape}")
+      expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
+
+      await user.keyboard("{ArrowUp}")
+      expect(screen.getByRole("listbox")).toBeInTheDocument()
+      expect(getAddress()).toHaveAttribute("aria-activedescendant", second.id)
+
+      await user.keyboard("{Escape}{ArrowDown}")
+      expect(screen.getByRole("listbox")).toBeInTheDocument()
       expect(getAddress()).toHaveAttribute("aria-activedescendant", first.id)
     })
 
@@ -362,6 +386,36 @@ describe("F0LocationInput", () => {
       expect(value.formatted).toBe(
         "Carrer de Colón 12, 08001 Barcelona!, Catalonia, Spain"
       )
+    })
+
+    it("keeps the picked place when only address line 2 is edited", async () => {
+      const user = userEvent.setup()
+      const onChange = vi.fn()
+      render(
+        <F0LocationInput
+          label="Office"
+          fields={["country", "addressLine2", "city", "state", "postalCode"]}
+          defaultValue={resolved}
+          onChange={onChange}
+        />
+      )
+
+      await user.type(
+        screen.getByRole("textbox", { name: "Address line 2" }),
+        "Floor 3"
+      )
+
+      const [value, meta] = onChange.mock.lastCall as [
+        F0LocationInputValue,
+        unknown,
+      ]
+      // A floor number does not move the building, so the geofence survives
+      expect(meta).toEqual({ source: "typed", isResolved: true })
+      expect(value.addressLine2).toBe("Floor 3")
+      expect(value.placeId).toBe("place-1")
+      expect(value.latitude).toBe(41.38)
+      expect(value.longitude).toBe(2.17)
+      expect(value.timezone).toBe("Europe/Madrid")
     })
 
     it("shows the group message once, under the parts", () => {
