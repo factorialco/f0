@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.86.3](https://github.com/factorialco/f0/compare/f0-react-v6.86.2...f0-react-v6.86.3) (2026-09-07)
+
+
+### Bug Fixes
+
+* **F0RichTextDisplay:** prevent props spread bypassing sanitizer ([#5389](https://github.com/factorialco/f0/issues/5389)) ([bd8b248](https://github.com/factorialco/f0/commit/bd8b248ef3129e7fb5b28869b71ec7798bf4716c))
+
 ## [6.86.2](https://github.com/factorialco/f0/compare/f0-react-v6.86.1...f0-react-v6.86.2) (2026-09-04)
 
 
