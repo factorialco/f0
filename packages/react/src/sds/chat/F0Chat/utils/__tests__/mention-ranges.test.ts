@@ -55,6 +55,55 @@ describe("locateMentions", () => {
     expect(located).toHaveLength(1)
     expect(located[0]!.start).toBe(body.indexOf("@"))
     expect(body.slice(located[0]!.start, located[0]!.end)).toBe(`@${NFD_NAME}`)
+    // Text and name spelled alike: the span an existing caller derives from
+    // the name length is still the span this returns.
+    expect(located[0]!.end).toBe(located[0]!.start + NFD_NAME.length + 1)
+  })
+
+  // `end` is the only authority on where an occurrence stops. A caller that
+  // measures the name instead lands one index short here, which is why the
+  // field says so and why this case is pinned.
+  it("reports an end no caller can derive from the name length", () => {
+    const body = `hi @${NFD_NAME}!`
+    const [located] = locateMentions(body, [{ name: NFC_NAME }])
+
+    expect(located!.end).toBe(body.indexOf("!"))
+    expect(located!.end).not.toBe(located!.start + NFC_NAME.length + 1)
+  })
+
+  it("folds a singleton so a legacy code point still matches", () => {
+    const angstrom = "\u212Bngel"
+    const letterA = "\u00C5ngel"
+    const located = locateMentions(`hi @${angstrom}`, [{ name: letterA }])
+
+    expect(located).toHaveLength(1)
+  })
+
+  it("keeps a surrogate pair whole", () => {
+    const name = "Ana\u{1F916}"
+    const body = `hi @${name} there`
+    expect(locateMentions(body, [{ name }])).toEqual([
+      { entry: { name }, start: 3, end: body.indexOf(" there") },
+    ])
+  })
+
+  it("leaves a Hangul syllable written as jamo alone", () => {
+    // The boundary walk groups marks, not jamo, so a syllable could be cut in
+    // half here. It is not: the run stops being a canonical prefix first.
+    expect(
+      locateMentions("@\u1100\u1161\u11A8 hi", [{ name: "\uAC00" }])
+    ).toEqual([])
+  })
+
+  it("gives up on a trailing `@`", () => {
+    expect(locateMentions("hi @", [{ name: "Ana" }])).toEqual([])
+  })
+
+  it("keeps scanning past an `@` that is not a mention", () => {
+    const body = "write a@b.example or ping @Ana"
+    expect(locateMentions(body, [{ name: "Ana" }])).toEqual([
+      { entry: { name: "Ana" }, start: body.indexOf("@Ana"), end: body.length },
+    ])
   })
 
   it("does not swallow the accent of the character that ends the name", () => {

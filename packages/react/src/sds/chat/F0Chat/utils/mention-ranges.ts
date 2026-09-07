@@ -5,20 +5,40 @@ export type LocatedMention<T> = {
   entry: T
   /** Index of the `@`. */
   start: number
-  /** Index just past the last character of the name. */
+  /**
+   * Index just past the occurrence **as it is spelled in `text`**, which is
+   * not always `start + 1 + name.length`: an accent held decomposed on one
+   * side and composed on the other takes one more index there than here.
+   * Slice and anchor on this, never on the length of the name.
+   */
   end: number
 }
 
 /**
- * One code point plus the combining marks that belong to it. Canonical
- * composition joins a base with its marks, so a candidate may only start or
- * end here — cut between the two and a bare `a` gets compared against an `á`.
+ * One code point plus the combining marks that belong to it. A candidate may
+ * only start or end here — cut between a letter and its accent and a bare `a`
+ * gets compared against an `á`. Marks are the only thing this covers: Hangul
+ * jamo compose with each other, and {@link canonicalMatchEnd} is what keeps a
+ * syllable from being cut in half.
  */
 const BASE_WITH_MARKS = /[\s\S]\p{M}*/uy
 
+/** Marks never open a name, so one sitting after a match extends the letter. */
+const COMBINING_MARK = /\p{M}/u
+
+/**
+ * No ASCII character carries an accent or composes with a neighbour, so in a
+ * body without one there is nothing for a canonical fold to find that an exact
+ * comparison has not already found — whatever the names are spelled like.
+ */
+const NON_ASCII = /\P{ASCII}/u
+
 const nextBoundary = (text: string, at: number): number => {
   BASE_WITH_MARKS.lastIndex = at
-  return BASE_WITH_MARKS.exec(text) ? BASE_WITH_MARKS.lastIndex : text.length
+  BASE_WITH_MARKS.exec(text)
+  // The walk ends by reaching the end of the text, so the cursor may never
+  // stand still, whatever the regex leaves behind.
+  return Math.max(BASE_WITH_MARKS.lastIndex, at + 1)
 }
 
 /**
@@ -26,9 +46,11 @@ const nextBoundary = (text: string, at: number): number => {
  * `pattern`, or `-1` when no run there has it.
  *
  * Comparing canonical forms instead of raw code units is what lets a name held
- * as `i` + combining acute match a body the renderer already composed to `í`,
- * and the reverse. The index counts characters of `text` exactly as the caller
- * passed it, so a caller can still slice or anchor on its own string.
+ * as `i` + combining acute match a body the renderer already composed to `í`.
+ * Giving up the moment the run stops being a canonical prefix keeps a wrong
+ * `@` cheap, and is also what leaves decomposed Hangul alone: the boundary
+ * above would cut a syllable between its jamo, and the prefix test rejects
+ * that rather than chipping two thirds of it.
  */
 const canonicalMatchEnd = (
   text: string,
@@ -41,11 +63,34 @@ const canonicalMatchEnd = (
     if (seen === pattern) {
       return cursor
     }
-    if (cursor === text.length || seen.length > pattern.length) {
+    if (cursor === text.length || !pattern.startsWith(seen)) {
       return -1
     }
     cursor = nextBoundary(text, cursor)
   }
+}
+
+/**
+ * Both sides spelled the same way is the overwhelming majority — the renderer
+ * composes the body one line before it asks — and needs no normalizing at all.
+ * The mark test is what keeps the shortcut honest: `@Ana` sits inside a
+ * decomposed `@Aná`, and matching it there chips somebody else's name and
+ * strands the accent outside the chip.
+ */
+const matchEnd = (
+  text: string,
+  from: number,
+  pattern: string,
+  foldable: boolean
+): number => {
+  const exact = from + pattern.length
+  if (
+    text.startsWith(pattern, from) &&
+    !COMBINING_MARK.test(text.charAt(exact))
+  ) {
+    return exact
+  }
+  return foldable ? canonicalMatchEnd(text, from, pattern) : -1
 }
 
 /**
@@ -73,6 +118,7 @@ export const locateMentions = <T extends { name: string }>(
       pattern: `@${entry.name}`.normalize(CANONICAL_FORM),
     }))
     .sort((a, b) => b.pattern.length - a.pattern.length)
+  const foldable = NON_ASCII.test(text)
   for (const { entry, pattern } of byLength) {
     let from = 0
     while (true) {
@@ -80,7 +126,7 @@ export const locateMentions = <T extends { name: string }>(
       if (at === -1) {
         break
       }
-      const end = canonicalMatchEnd(text, at, pattern)
+      const end = matchEnd(text, at, pattern, foldable)
       if (end === -1) {
         from = at + 1
         continue
