@@ -16,6 +16,7 @@ import {
   Person,
   Receipt,
   Search,
+  Settings,
   Upsell,
 } from "@/icons/app"
 import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
