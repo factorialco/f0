@@ -30,7 +30,9 @@ const blocker = () =>
 /** One press on the dimmed page. */
 const pressOutside = async () => {
   const shield = blocker()
-  if (!shield) throw new Error("no blocker on screen")
+  if (!shield) {
+    throw new Error("no blocker on screen")
+  }
   await userEvent.click(shield)
 }
 
@@ -104,7 +106,9 @@ describe("coachmark overlay", () => {
     })
     await screen.findByRole("dialog")
 
-    for (let press = 0; press < 4; press++) await pressOutside()
+    for (let press = 0; press < 4; press++) {
+      await pressOutside()
+    }
     expect(screen.getByRole("dialog")).toBeInTheDocument()
     expect(onDismiss).not.toHaveBeenCalled()
 
@@ -154,7 +158,9 @@ describe("coachmark overlay", () => {
     })
     await screen.findByRole("dialog")
 
-    for (let press = 0; press < 8; press++) await pressOutside()
+    for (let press = 0; press < 8; press++) {
+      await pressOutside()
+    }
 
     expect(screen.getByRole("dialog")).toBeInTheDocument()
   })
@@ -429,7 +435,9 @@ describe("what onEnd reports", () => {
     open({ ...twoSteps(onEnd), onDismiss })
     await screen.findByRole("dialog")
 
-    for (let press = 0; press < 5; press++) await pressOutside()
+    for (let press = 0; press < 5; press++) {
+      await pressOutside()
+    }
 
     await waitFor(() => expect(onEnd).toHaveBeenCalledOnce())
     expect(onEnd).toHaveBeenCalledWith({

@@ -32,7 +32,9 @@ export const F0DialogFooter = ({
   }
 
   const renderPrimaryAction = () => {
-    if (!hasPrimaryAction) return null
+    if (!hasPrimaryAction) {
+      return null
+    }
 
     if (isPrimaryActionArray(primaryAction)) {
       return (
@@ -65,7 +67,9 @@ export const F0DialogFooter = ({
   }
 
   const renderSecondaryAction = () => {
-    if (!hasSecondaryAction) return null
+    if (!hasSecondaryAction) {
+      return null
+    }
 
     if (isSecondaryActionArray(secondaryAction)) {
       return (

@@ -2,7 +2,7 @@ import "@testing-library/jest-dom/vitest"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
 import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
-import { ChipsList, Controls, OneFilterPicker, Root } from "../index"
+import { ChipsList, Controls, OneFilterPicker, Root } from ".."
 import type { FiltersDefinition } from "../types"
 
 /**

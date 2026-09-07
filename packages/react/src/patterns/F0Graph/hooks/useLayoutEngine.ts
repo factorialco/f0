@@ -208,7 +208,9 @@ function computeTreeLayout(
   const childrenMap = new Map<string, string[]>()
   const parentOf = new Map<string, string>()
   for (const edge of edges) {
-    if (edge.target.startsWith("expander-")) continue
+    if (edge.target.startsWith("expander-")) {
+      continue
+    }
     const list = childrenMap.get(edge.source) ?? []
     list.push(edge.target)
     childrenMap.set(edge.source, list)
@@ -219,15 +221,21 @@ function computeTreeLayout(
   //    Preserve input order (which is DFS visible order from F0Graph).
   const roots: string[] = []
   for (const node of treeNodes) {
-    if (node.id.startsWith("expander-")) continue
-    if (!parentOf.has(node.id)) roots.push(node.id)
+    if (node.id.startsWith("expander-")) {
+      continue
+    }
+    if (!parentOf.has(node.id)) {
+      roots.push(node.id)
+    }
   }
 
   // 2b. Parents whose children render as a stack. They are laid out as leaves
   //     below, so the stack costs no cross-axis space at all.
   const stackParents = new Set<string>()
   for (const node of treeNodes) {
-    if (node.stackNodes) stackParents.add(node.id)
+    if (node.stackNodes) {
+      stackParents.add(node.id)
+    }
   }
 
   const isHorizontal = direction === "LR" || direction === "RL"
@@ -270,7 +278,9 @@ function computeTreeLayout(
     let lastCenter = 0
     children.forEach((childId, idx) => {
       const result = layoutSubtree(childId, cursor, depth + 1)
-      if (idx === 0) firstCenter = result.centerCross
+      if (idx === 0) {
+        firstCenter = result.centerCross
+      }
       lastCenter = result.centerCross
       // Use larger gap after branch children (their kids are "siblings of different parents")
       const isBranch = layoutChildrenOf(childId).length > 0
@@ -309,9 +319,15 @@ function computeTreeLayout(
     while (stack.length > 0) {
       const id = stack.pop()!
       const pos = positions.get(id)
-      if (pos) pos.cross += delta
+      if (pos) {
+        pos.cross += delta
+      }
       const kids = childrenMap.get(id)
-      if (kids) for (const k of kids) stack.push(k)
+      if (kids) {
+        for (const k of kids) {
+          stack.push(k)
+        }
+      }
     }
   }
 
@@ -336,11 +352,19 @@ function computeTreeLayout(
       if (pos) {
         const left = pos.cross - crossSize / 2
         const right = pos.cross + crossSize / 2
-        if (left < minCross) minCross = left
-        if (right > maxCross) maxCross = right
+        if (left < minCross) {
+          minCross = left
+        }
+        if (right > maxCross) {
+          maxCross = right
+        }
       }
       const kids = childrenMap.get(nodeId)
-      if (kids) for (const k of kids) walk(k)
+      if (kids) {
+        for (const k of kids) {
+          walk(k)
+        }
+      }
     }
     walk(rootId)
 
@@ -351,7 +375,9 @@ function computeTreeLayout(
   let crossCursor = 0
   for (const { rootId, minCross, maxCross } of rootExtents) {
     const shift = crossCursor - minCross
-    if (shift !== 0) shiftSubtree(rootId, shift)
+    if (shift !== 0) {
+      shiftSubtree(rootId, shift)
+    }
     crossCursor += maxCross - minCross + rootSep
   }
 
@@ -361,7 +387,9 @@ function computeTreeLayout(
   //     carries a `stackIndex` for its offset down the main axis from there.
   for (const parentId of stackParents) {
     const parentPos = positions.get(parentId)
-    if (!parentPos) continue
+    if (!parentPos) {
+      continue
+    }
     const children = childrenMap.get(parentId) ?? []
     children.forEach((childId, index) => {
       positions.set(childId, {
@@ -375,7 +403,9 @@ function computeTreeLayout(
   // 4. Compute total main-axis extent for BT/RL flipping.
   let maxDepth = 0
   for (const pos of positions.values()) {
-    if (pos.depth > maxDepth) maxDepth = pos.depth
+    if (pos.depth > maxDepth) {
+      maxDepth = pos.depth
+    }
   }
 
   // 5. Materialize PositionedNode entries for ALL input nodes.
@@ -450,10 +480,18 @@ function computeTreeLayout(
     const x = Math.round(centerX - width / 2)
     const y = Math.round(centerY - height / 2)
 
-    if (x < minX) minX = x
-    if (y < minY) minY = y
-    if (x + width > maxX) maxX = x + width
-    if (y + height > maxY) maxY = y + height
+    if (x < minX) {
+      minX = x
+    }
+    if (y < minY) {
+      minY = y
+    }
+    if (x + width > maxX) {
+      maxX = x + width
+    }
+    if (y + height > maxY) {
+      maxY = y + height
+    }
 
     return { id: node.id, x, y, width, height }
   })

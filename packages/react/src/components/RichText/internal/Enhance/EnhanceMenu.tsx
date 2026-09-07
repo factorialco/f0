@@ -57,7 +57,9 @@ const AIEnhanceMenu = ({
 
   useEffect(() => {
     const input = customInputRef.current
-    if (!input) return
+    if (!input) {
+      return
+    }
 
     const timeoutId = window.setTimeout(() => {
       input.focus({ preventScroll: true })

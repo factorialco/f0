@@ -13,7 +13,9 @@ const VIDEO_SRC = "https://example.com/video.mp4"
 
 function getVideo(): HTMLVideoElement {
   const video = document.querySelector("video")
-  if (!video) throw new Error("Video element not found")
+  if (!video) {
+    throw new Error("Video element not found")
+  }
   return video
 }
 
@@ -35,7 +37,9 @@ function timeUpdate(
   duration = 0
 ) {
   setVideoProp(video, "currentTime", currentTime)
-  if (duration) setVideoProp(video, "duration", duration)
+  if (duration) {
+    setVideoProp(video, "duration", duration)
+  }
   fireEvent.timeUpdate(video)
 }
 

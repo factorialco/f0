@@ -506,7 +506,9 @@ export const MockAiChatRuntimeProvider = ({
           const partial = response.slice(0, charIndex)
           setMessages((prev) => {
             const idx = prev.findIndex((m) => m.id === assistantId)
-            if (idx === -1) return prev
+            if (idx === -1) {
+              return prev
+            }
             const next = prev.slice()
             next[idx] = { ...next[idx], content: partial }
             return next
@@ -528,7 +530,9 @@ export const MockAiChatRuntimeProvider = ({
   const sendMessage = useCallback(
     (text: string, options?: { replyQuote?: string }) => {
       const trimmed = text.trim()
-      if (!trimmed) return
+      if (!trimmed) {
+        return
+      }
       setMessages((prev) => [
         ...prev,
         {
@@ -578,7 +582,9 @@ export const MockAiChatRuntimeProvider = ({
   const sendMessageWithThinkingOnly = useCallback(
     (text: string, onComplete?: () => void) => {
       const trimmed = text.trim()
-      if (!trimmed) return
+      if (!trimmed) {
+        return
+      }
       setMessages((prev) => [
         ...prev,
         { id: nextId(), role: "user", content: trimmed },
@@ -657,7 +663,9 @@ export const MockAiChatRuntimeProvider = ({
   // current step index; `confirm` advances through the steps and, on the final
   // one, fires `onConfirm` with the picked labels + ids for every step in order.
   const clarifyingQuestion: ClarifyingQuestionState | null = (() => {
-    if (!clarifyingConfig) return null
+    if (!clarifyingConfig) {
+      return null
+    }
     // Resolve the steps in order so a step deriving its options from an earlier
     // answer sees the ids picked before it. Rebuilt every render alongside the
     // rest of this state, so going back and changing an answer re-derives the
@@ -687,7 +695,9 @@ export const MockAiChatRuntimeProvider = ({
     })
     const stepIndex = clarifyingStepIndex
     const step = steps[stepIndex]
-    if (!step) return null
+    if (!step) {
+      return null
+    }
 
     const mode = step.selectionMode ?? "single"
     const storedInteraction = getClarifyingInteraction(
@@ -787,7 +797,9 @@ export const MockAiChatRuntimeProvider = ({
         }
       },
       skip: () => {
-        if (!step.optional) return
+        if (!step.optional) {
+          return
+        }
         if (!isFinalStep) {
           setClarifyingStepIndex(stepIndex + 1)
         } else {
@@ -805,7 +817,9 @@ export const MockAiChatRuntimeProvider = ({
         // composer behind the dialog (the "weird in-between state"). Close only
         // once `onCancel` resolves to anything other than `false`.
         void Promise.resolve(onCancel()).then((result) => {
-          if (result !== false) closeClarifying()
+          if (result !== false) {
+            closeClarifying()
+          }
         })
       },
       back: () => setClarifyingStepIndex((i) => Math.max(0, i - 1)),
@@ -814,7 +828,9 @@ export const MockAiChatRuntimeProvider = ({
         updateInteraction({ isCustomActive: active }),
       activateCustomAnswer: () => {
         const patch: Partial<ClarifyingInteraction> = { isCustomActive: true }
-        if (mode === "single") patch.selectedIds = []
+        if (mode === "single") {
+          patch.selectedIds = []
+        }
         updateInteraction(patch)
       },
     }
@@ -867,7 +883,9 @@ export const MockAiChatRuntimeProvider = ({
           setThreads((prev) => prev.filter((thread) => thread.id !== id))
           // If the deleted thread is the one currently loaded, clear it.
           setCurrentThreadId((current) => {
-            if (current !== id) return current
+            if (current !== id) {
+              return current
+            }
             setCurrentThreadTitle(null)
             return null
           })

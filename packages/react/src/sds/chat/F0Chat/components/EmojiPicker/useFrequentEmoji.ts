@@ -19,7 +19,9 @@ type Counts = Record<string, number>
 
 const readCounts = (): Counts => {
   const stored = readFromLocalStorage<unknown>(STORAGE_KEY, null)
-  if (!stored || typeof stored !== "object" || Array.isArray(stored)) return {}
+  if (!stored || typeof stored !== "object" || Array.isArray(stored)) {
+    return {}
+  }
   return Object.fromEntries(
     Object.entries(stored as Record<string, unknown>).flatMap(([id, count]) =>
       typeof count === "number" && Number.isFinite(count) && count > 0
@@ -37,13 +39,17 @@ const resolve = (counts: Counts): EmojiEntry[] => {
       return emoji ? [emoji] : []
     })
 
-  if (ranked.length >= MAX_FREQUENT) return ranked.slice(0, MAX_FREQUENT)
+  if (ranked.length >= MAX_FREQUENT) {
+    return ranked.slice(0, MAX_FREQUENT)
+  }
 
   // Top up a thin history with the house defaults, skipping anything already
   // ranked so the row never shows the same emoji twice.
   const seen = new Set(ranked.map((emoji) => emoji.id))
   const seeds = DEFAULT_EMOJI_IDS.flatMap((id) => {
-    if (seen.has(id)) return []
+    if (seen.has(id)) {
+      return []
+    }
     const emoji = findEmojiById(id)
     return emoji ? [emoji] : []
   })

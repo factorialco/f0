@@ -12,7 +12,7 @@ import {
   zeroRender,
 } from "@/testing/test-utils"
 import { type HomeWidgetItem, type SlotRenderers } from "../slotRenderers"
-import { NewHomeLayout } from "./index"
+import { NewHomeLayout } from "."
 
 /**
  * The layout decides everything responsive from its OWN measured width, so these
@@ -22,7 +22,7 @@ import { NewHomeLayout } from "./index"
 let layoutWidth = 1400
 
 /** Every live ResizeObserver callback, so a test can act like the box resized. */
-let resizeCallbacks: Array<() => void> = []
+let resizeCallbacks: (() => void)[] = []
 
 /**
  * Resizes the layout the way the window does: the new width is what
@@ -932,17 +932,20 @@ describe("NewHomeLayout", () => {
     /** A strip with more glyphs than fit: 2000px of them in a 500px column. */
     const overflowing = () => {
       const heights = { scrollHeight: 2000, clientHeight: 500 }
-      for (const prop of METRICS)
+      for (const prop of METRICS) {
         Object.defineProperty(HTMLElement.prototype, prop, {
           configurable: true,
           get: () => heights[prop],
         })
+      }
     }
 
     // Back to jsdom's own (on `Element`, which HTMLElement inherits from), so the
     // test below sees a strip that fits.
     afterEach(() => {
-      for (const prop of METRICS) delete HTMLElement.prototype[prop]
+      for (const prop of METRICS) {
+        delete HTMLElement.prototype[prop]
+      }
     })
 
     test("masks the bottom while glyphs are cut off there, and the top once scrolled", () => {

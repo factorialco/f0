@@ -219,7 +219,9 @@ export function GridStackProvider({
    * Sync widgets to gridstack
    */
   useDeepCompareEffect(() => {
-    if (!gridStack) return
+    if (!gridStack) {
+      return
+    }
 
     // Get the previous state
     const widgetsInGridstack = gridStack.save()
@@ -393,11 +395,11 @@ export function GridStackProvider({
       widgetsInGridstackIds.includes(widget.id!)
     )
     if (widgetsToUpdate.length > 0) {
-      const widgetsNeedingGridUpdate: Array<{
+      const widgetsNeedingGridUpdate: {
         id: string
         element: GridItemHTMLElement
         updateOptions: Partial<GridStackWidget>
-      }> = []
+      }[] = []
 
       widgetsToUpdate.forEach((widget) => {
         const widgetInGridstack = widgetsInGridstack.find(
@@ -523,7 +525,9 @@ export function GridStackProvider({
 
   // Toggle static mode imperatively without recreating the grid
   useEffect(() => {
-    if (!gridStack || isStatic === undefined) return
+    if (!gridStack || isStatic === undefined) {
+      return
+    }
     gridStack.setStatic(isStatic)
   }, [gridStack, isStatic])
 
@@ -536,8 +540,9 @@ export function GridStackProvider({
       !gridStack ||
       forcePositionSync === undefined ||
       forcePositionSync === prevForceSyncRef.current
-    )
+    ) {
       return
+    }
     prevForceSyncRef.current = forcePositionSync
 
     const widgetsToSync = widgets || []
@@ -561,7 +566,9 @@ export function GridStackProvider({
 
   // Ensure handle option is applied after widgets are synced and rendered
   useEffect(() => {
-    if (!gridStack || !convertedOptions.handle) return
+    if (!gridStack || !convertedOptions.handle) {
+      return
+    }
 
     // Update the handle option on the grid instance
     if (gridStack.opts) {
@@ -610,7 +617,9 @@ export function GridStackProvider({
       const updatedWidgets: GridStackReactWidget[] = layout
         .map((item) => {
           const widgetId = item.id
-          if (!widgetId) return null
+          if (!widgetId) {
+            return null
+          }
 
           // Retrieve React content from reactContentMapRef (always up-to-date synchronously)
           const content = reactContentMapRef.current.get(widgetId)
@@ -647,7 +656,9 @@ export function GridStackProvider({
   }, [gridStack])
 
   useEffect(() => {
-    if (!gridStack) return
+    if (!gridStack) {
+      return
+    }
 
     // Check if the gridStack instance is valid and has a DOM element
     // This prevents errors when the instance is destroyed or not fully initialized
@@ -688,7 +699,9 @@ export function GridStackProvider({
   }, [gridStack])
 
   useEffect(() => {
-    if (!gridStack) return
+    if (!gridStack) {
+      return
+    }
     // Only emit change if the gridStack instance is valid and widgets have been initialized
     // Skip the initial emitChange() to prevent overwriting widgets added via useEffect on mount
     if (

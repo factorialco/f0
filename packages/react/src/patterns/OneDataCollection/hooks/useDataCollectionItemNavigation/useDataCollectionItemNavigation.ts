@@ -154,14 +154,20 @@ export function useDataCollectionItemNavigation<
 
   const applyFiltersOverride = () => {
     const override = overrideFiltersRef.current
-    if (override === undefined) return
+    if (override === undefined) {
+      return
+    }
     appliedOverrideKeyRef.current = JSON.stringify(override)
     dataSourceRef.current.setCurrentFilters(override)
   }
 
   useEffect(() => {
-    if (!enabled) return
-    if (hydratedKeyRef.current === collectionId) return
+    if (!enabled) {
+      return
+    }
+    if (hydratedKeyRef.current === collectionId) {
+      return
+    }
     if (!restorePersistedState) {
       hydratedKeyRef.current = collectionId
       applyFiltersOverride()
@@ -187,7 +193,9 @@ export function useDataCollectionItemNavigation<
       } catch {
         // Unreadable persisted state — the definition defaults apply.
       }
-      if (cancelled) return
+      if (cancelled) {
+        return
+      }
       hydratedKeyRef.current = collectionId
       // The controlled override wins over what storage seeded, applied
       // before the fetch is enabled so the first fetch runs once with it.
@@ -204,8 +212,12 @@ export function useDataCollectionItemNavigation<
   // Later override changes (e.g. the user refining filters in a
   // collection-bound breadcrumb select) re-apply and refetch.
   useEffect(() => {
-    if (!hydrated || overrideFiltersKey === null) return
-    if (appliedOverrideKeyRef.current === overrideFiltersKey) return
+    if (!hydrated || overrideFiltersKey === null) {
+      return
+    }
+    if (appliedOverrideKeyRef.current === overrideFiltersKey) {
+      return
+    }
     applyFiltersOverride()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hydrated, overrideFiltersKey])
@@ -218,7 +230,9 @@ export function useDataCollectionItemNavigation<
   // first and re-applying the override after would leak one fetch under the
   // written filters.
   useEffect(() => {
-    if (!enabled || !restorePersistedState) return
+    if (!enabled || !restorePersistedState) {
+      return
+    }
     return subscribeToDataCollectionStorageChanges(collectionId, async () => {
       try {
         // NOTE: must await (not .then) — the default noop handler returns a
@@ -226,7 +240,9 @@ export function useDataCollectionItemNavigation<
         const storage = (await storageHandlerRef.current.get(
           collectionId
         )) as DataCollectionStorage<FiltersState<Filters>>
-        if (!storage) return
+        if (!storage) {
+          return
+        }
         const definition = dataSourceRef.current
         seedFromStorage<R, Filters, Sortings, Grouping>(
           storage,
@@ -361,7 +377,9 @@ export function useDataCollectionItemNavigation<
   })
 
   const effectiveIdProvider = useMemo(() => {
-    if (idProvider) return idProvider
+    if (idProvider) {
+      return idProvider
+    }
     if (dataSource.idProvider) {
       return (item: R, index?: number) => dataSource.idProvider!(item, index)
     }
@@ -369,7 +387,9 @@ export function useDataCollectionItemNavigation<
   }, [idProvider, dataSource.idProvider])
 
   const navigationState = useMemo(() => {
-    if (!needsNeighbors || neighbors === null) return itemNavigation
+    if (!needsNeighbors || neighbors === null) {
+      return itemNavigation
+    }
 
     // Window values win where present; neighbors fill the gaps. A null
     // neighbor from the backend is a true collection edge.
@@ -443,7 +463,9 @@ export function useDataCollectionItemNavigation<
   const heldNavigation =
     navigation ?? (awaitingNeighbors ? heldNavigationRef.current : null)
   useEffect(() => {
-    if (navigation !== null) heldNavigationRef.current = navigation
+    if (navigation !== null) {
+      heldNavigationRef.current = navigation
+    }
   }, [navigation])
 
   return {

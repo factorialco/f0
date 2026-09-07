@@ -17,9 +17,9 @@ import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useData
 import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import { zeroRender as render, zeroRenderHook } from "@/testing/test-utils"
 import { TextCell } from "@/ui/value-display/types/text"
+import { TableCollection } from ".."
 import { ItemActionsDefinition } from "../../../../item-actions"
 import { SummariesDefinition } from "../../../../summary"
-import { TableCollection } from "../index"
 import type { TableColumnDefinition } from "../types"
 
 vi.mock("../../property", () => ({
@@ -83,7 +83,9 @@ const createTestSource = (
   setIsLoading: vi.fn(),
   dataAdapter: {
     fetchData: async ({ filters: _filters }: BaseFetchOptions<TestFilters>) => {
-      if (error) throw error
+      if (error) {
+        throw error
+      }
       return { records: data }
     },
   },
@@ -93,7 +95,7 @@ const createTestSource = (
 
 class MockIntersectionObserver implements IntersectionObserver {
   root: Document | Element | null = null
-  rootMargin: string = ``
+  rootMargin = ``
   thresholds: readonly number[] = []
 
   disconnect = vi.fn()
@@ -2191,13 +2193,11 @@ describe("TableCollection", () => {
       salary?: number | null | string
     }
 
-    const summaryColumns: ReadonlyArray<
-      TableColumnDefinition<
-        SummaryPerson,
-        SortingsDefinition,
-        SummaryTestDefinitions
-      >
-    > = [
+    const summaryColumns: readonly TableColumnDefinition<
+      SummaryPerson,
+      SortingsDefinition,
+      SummaryTestDefinitions
+    >[] = [
       { label: "name", render: (item: SummaryPerson) => item.name },
       { label: "email", render: (item: SummaryPerson) => item.email },
       {
@@ -2340,13 +2340,11 @@ describe("TableCollection", () => {
                 ...summaryColumns[2],
                 summaryPlaceholder: "COLUMN",
               },
-            ] as ReadonlyArray<
-              TableColumnDefinition<
-                SummaryPerson,
-                SortingsDefinition,
-                SummaryTestDefinitions
-              >
-            >
+            ] as readonly TableColumnDefinition<
+              SummaryPerson,
+              SortingsDefinition,
+              SummaryTestDefinitions
+            >[]
           }
           source={createSummarySource({ salarySummary: null })}
           onSelectItems={vi.fn()}

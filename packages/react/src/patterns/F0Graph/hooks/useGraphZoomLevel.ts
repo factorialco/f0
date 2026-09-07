@@ -17,7 +17,9 @@ export function useGraphZoomLevel(
   const lastStableLevel = useRef<ZoomLevel>("detail")
 
   const resolvedThresholds = useMemo((): ZoomThresholds => {
-    if (options?.thresholds) return options.thresholds
+    if (options?.thresholds) {
+      return options.thresholds
+    }
     const preset = options?.preset ?? "default"
     return { ...zoomPresets[preset] }
   }, [options?.thresholds, options?.preset])
@@ -55,8 +57,12 @@ export function useGraphZoomLevel(
 }
 
 function computeRawLevel(zoom: number, thresholds: ZoomThresholds): ZoomLevel {
-  if (zoom >= thresholds.detail) return "detail"
-  if (zoom >= thresholds.compact) return "compact"
+  if (zoom >= thresholds.detail) {
+    return "detail"
+  }
+  if (zoom >= thresholds.compact) {
+    return "compact"
+  }
   return "dot"
 }
 
@@ -73,19 +79,27 @@ function computeLevelWithHysteresis(
   switch (currentLevel) {
     case "detail": {
       // To leave detail, zoom must drop below (detail - margin)
-      if (zoom >= thresholds.detail - margin) return "detail"
+      if (zoom >= thresholds.detail - margin) {
+        return "detail"
+      }
       return computeRawLevel(zoom, thresholds)
     }
     case "compact": {
       // To go up to detail, zoom must exceed (detail + margin)
-      if (zoom >= thresholds.detail + margin) return "detail"
+      if (zoom >= thresholds.detail + margin) {
+        return "detail"
+      }
       // To go down to dot, zoom must drop below (compact - margin)
-      if (zoom >= thresholds.compact - margin) return "compact"
+      if (zoom >= thresholds.compact - margin) {
+        return "compact"
+      }
       return computeRawLevel(zoom, thresholds)
     }
     case "dot": {
       // To go up to compact, zoom must exceed (compact + margin)
-      if (zoom >= thresholds.compact + margin) return "compact"
+      if (zoom >= thresholds.compact + margin) {
+        return "compact"
+      }
       return "dot"
     }
   }

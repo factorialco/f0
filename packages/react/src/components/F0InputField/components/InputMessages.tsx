@@ -33,7 +33,9 @@ const statuses: Record<
 }
 
 const InputMessages = ({ status }: InputMessagesProps) => {
-  if (!status) return null
+  if (!status) {
+    return null
+  }
 
   const messages = (
     Array.isArray(status.message) ? status.message : [status.message]

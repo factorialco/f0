@@ -17,8 +17,12 @@ export function useDraggable<T = unknown>(args: {
   const payloadKey = payload.id + "|" + (payloadData?.currentParentId ?? "null")
 
   useEffect(() => {
-    if (!ref.current) return
-    if (!ctx || disabled) return
+    if (!ref.current) {
+      return
+    }
+    if (!ctx || disabled) {
+      return
+    }
 
     return ctx.driver.registerDraggable(ref.current, {
       payload,
@@ -39,8 +43,12 @@ export function useDroppableList(args?: {
   const accepts = args?.accepts
 
   useEffect(() => {
-    if (!ref?.current) return
-    if (!ctx || !id || !accepts) return
+    if (!ref?.current) {
+      return
+    }
+    if (!ctx || !id || !accepts) {
+      return
+    }
     return ctx.driver.registerDroppable(ref.current, { id, accepts })
   }, [ctx, ref, id, accepts])
 }

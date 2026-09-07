@@ -18,13 +18,17 @@ export function ErrorTooltip({ message, children }: ErrorTooltipProps) {
   const [open, setOpen] = useState(false)
 
   const handleFocusCapture = useCallback(() => {
-    if (message) setOpen(true)
+    if (message) {
+      setOpen(true)
+    }
   }, [message])
 
   const handleBlurCapture = useCallback(() => setOpen(false), [])
 
   useEffect(() => {
-    if (!message) setOpen(false)
+    if (!message) {
+      setOpen(false)
+    }
   }, [message])
 
   return (

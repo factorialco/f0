@@ -7,7 +7,7 @@ import {
   useDataSource,
   useGroups,
   useSelectable,
-} from "../index"
+} from ".."
 
 const meta: Meta = {
   title: "Datasource/Examples",
@@ -114,8 +114,12 @@ const BasicExample = () => {
 
   const { data, isLoading, error } = useData(dataSource)
 
-  if (isLoading) return <div>Loading...</div>
-  if (error) return <div>Error: {error.message}</div>
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
+  if (error) {
+    return <div>Error: {error.message}</div>
+  }
 
   return (
     <div>
@@ -191,9 +195,15 @@ const GroupedExample = () => {
   const { data, isLoading, error } = useData(dataSource)
   const { openGroups, setGroupOpen } = useGroups(data.groups, ["Engineering"])
 
-  if (isLoading) return <div>Loading...</div>
-  if (error) return <div>Error: {error.message}</div>
-  if (data.type !== "grouped") return <div>Data is not grouped</div>
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
+  if (error) {
+    return <div>Error: {error.message}</div>
+  }
+  if (data.type !== "grouped") {
+    return <div>Data is not grouped</div>
+  }
 
   return (
     <div>
@@ -339,8 +349,12 @@ const SelectableExample = () => {
     },
   })
 
-  if (isLoading) return <div>Loading...</div>
-  if (error) return <div>Error: {error.message}</div>
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
+  if (error) {
+    return <div>Error: {error.message}</div>
+  }
 
   return (
     <div>
@@ -360,7 +374,9 @@ const SelectableExample = () => {
             type="checkbox"
             checked={allSelectedStatus.checked}
             ref={(el) => {
-              if (el) el.indeterminate = allSelectedStatus.indeterminate
+              if (el) {
+                el.indeterminate = allSelectedStatus.indeterminate
+              }
             }}
             onChange={(e) => handleSelectAll(e.target.checked)}
           />
@@ -512,9 +528,15 @@ const CompleteExample = () => {
     },
   })
 
-  if (isLoading) return <div>Loading...</div>
-  if (error) return <div>Error: {error.message}</div>
-  if (data.type !== "grouped") return <div>Data is not grouped</div>
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
+  if (error) {
+    return <div>Error: {error.message}</div>
+  }
+  if (data.type !== "grouped") {
+    return <div>Data is not grouped</div>
+  }
 
   return (
     <div>
@@ -545,7 +567,9 @@ const CompleteExample = () => {
               type="checkbox"
               checked={allSelectedStatus.checked}
               ref={(el) => {
-                if (el) el.indeterminate = allSelectedStatus.indeterminate
+                if (el) {
+                  el.indeterminate = allSelectedStatus.indeterminate
+                }
               }}
               onChange={(e) => handleSelectAll(e.target.checked)}
             />
@@ -654,8 +678,9 @@ const CompleteExample = () => {
                     type="checkbox"
                     checked={groupStatus?.checked || false}
                     ref={(el) => {
-                      if (el)
+                      if (el) {
                         el.indeterminate = groupStatus?.indeterminate || false
+                      }
                     }}
                     onChange={(e) =>
                       handleSelectGroupChange(group, e.target.checked)
@@ -803,8 +828,12 @@ const FilterExample = () => {
     })
   }
 
-  if (isLoading) return <div>Loading...</div>
-  if (error) return <div>Error: {error.message}</div>
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
+  if (error) {
+    return <div>Error: {error.message}</div>
+  }
 
   return (
     <div>

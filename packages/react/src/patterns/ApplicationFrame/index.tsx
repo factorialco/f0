@@ -246,10 +246,12 @@ function ApplicationFrameContent({
     isExitingFullscreen
 
   const chatContainerTransition = useMemo(() => {
-    if (isEnteringFullscreen)
+    if (isEnteringFullscreen) {
       return { duration: 0.15, ease: "easeOut" as const }
-    if (isExitingFullscreen)
+    }
+    if (isExitingFullscreen) {
       return { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] as const }
+    }
     return { duration: 0 }
   }, [isEnteringFullscreen, isExitingFullscreen])
 

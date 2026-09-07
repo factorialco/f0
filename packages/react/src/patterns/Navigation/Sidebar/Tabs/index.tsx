@@ -212,7 +212,9 @@ export const SidebarTabs = ({
   const storageKey = persistKey ? `f0-sidebar-tab:${persistKey}` : null
   const restoredRef = useRef(false)
   useEffect(() => {
-    if (!storageKey || restoredRef.current) return
+    if (!storageKey || restoredRef.current) {
+      return
+    }
     restoredRef.current = true
     let stored: string | null = null
     try {
@@ -229,7 +231,9 @@ export const SidebarTabs = ({
   }, [storageKey])
 
   useEffect(() => {
-    if (!storageKey) return
+    if (!storageKey) {
+      return
+    }
     try {
       localStorage.setItem(storageKey, activeTab)
     } catch {
@@ -247,7 +251,9 @@ export const SidebarTabs = ({
   useEffect(() => {
     const group = groupRef.current
     const probe = probeRef.current
-    if (!group || !probe) return
+    if (!group || !probe) {
+      return
+    }
     const measure = () => {
       setLabelsFit(probe.scrollWidth <= group.clientWidth)
     }
@@ -259,7 +265,9 @@ export const SidebarTabs = ({
     // standing, and the labels revealed in a row too narrow to hold them.
     const observer = new ResizeObserver(measure)
     observer.observe(group)
-    for (const child of Array.from(probe.children)) observer.observe(child)
+    for (const child of Array.from(probe.children)) {
+      observer.observe(child)
+    }
     return () => observer.disconnect()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tabsKey])

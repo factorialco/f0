@@ -69,7 +69,9 @@ export function EmployeeCreditsPopover({
     [employeeCredits]
   )
 
-  if (!employeeCredits) return null
+  if (!employeeCredits) {
+    return null
+  }
 
   const hasHeader = !!employeeCredits.companyName
   const percentage =

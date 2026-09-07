@@ -148,22 +148,30 @@ export function extractTypedCellValue(type: string, value: unknown): string {
     }
 
     case "number": {
-      if (typeof value === "number") return String(value)
+      if (typeof value === "number") {
+        return String(value)
+      }
       return v.number !== undefined ? String(v.number) : ""
     }
 
     case "amount": {
-      if (typeof value === "number") return String(value)
+      if (typeof value === "number") {
+        return String(value)
+      }
       return v.amount !== undefined ? String(v.amount) : ""
     }
 
     case "percentage": {
-      if (typeof value === "number") return String(value)
+      if (typeof value === "number") {
+        return String(value)
+      }
       return v.percentage !== undefined ? `${v.percentage}%` : ""
     }
 
     case "progressBar": {
-      if (typeof value === "number") return String(value)
+      if (typeof value === "number") {
+        return String(value)
+      }
       const pctValue = v.value !== undefined ? v.value : ""
       const pctLabel = typeof v.label === "string" ? v.label : ""
       return pctLabel || String(pctValue)
@@ -177,8 +185,12 @@ export function extractTypedCellValue(type: string, value: unknown): string {
       return v.text !== undefined ? String(v.text) : ""
 
     case "date": {
-      if (value instanceof Date) return value.toISOString()
-      if (v.date instanceof Date) return v.date.toISOString()
+      if (value instanceof Date) {
+        return value.toISOString()
+      }
+      if (v.date instanceof Date) {
+        return v.date.toISOString()
+      }
       return v.date !== undefined ? String(v.date) : ""
     }
 
@@ -220,7 +232,9 @@ export function extractTypedCellValue(type: string, value: unknown): string {
 }
 
 function getNestedValue(obj: Record<string, unknown>, path: string): unknown {
-  if (!path) return obj
+  if (!path) {
+    return obj
+  }
 
   return path.split(".").reduce<unknown>((current, key) => {
     if (current && typeof current === "object" && key in current) {
@@ -262,7 +276,9 @@ export function extractColumns<
     visualization.type === "editableTable"
   ) {
     const filtered = visualization.options.columns.filter((col) => {
-      if (!hiddenColumnIds || hiddenColumnIds.size === 0) return true
+      if (!hiddenColumnIds || hiddenColumnIds.size === 0) {
+        return true
+      }
       const colId = col.id ?? col.label ?? "column"
       return !hiddenColumnIds.has(colId)
     })

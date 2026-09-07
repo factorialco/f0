@@ -408,11 +408,14 @@ function ButtonGroupRow({
 
   // Cluster = plain secondaries (those that fit) interleaved with inline
   // separators; splits are pinned to the right alongside the primary.
-  const clusterTokens: Array<
-    { kind: "node"; node: ReactNode } | { kind: "sep"; key: string }
-  > = []
+  const clusterTokens: (
+    | { kind: "node"; node: ReactNode }
+    | { kind: "sep"; key: string }
+  )[] = []
   secondaryItems.forEach((item, index) => {
-    if (isSplitAction(item)) return
+    if (isSplitAction(item)) {
+      return
+    }
     if (isInlineSeparator(item)) {
       clusterTokens.push({ kind: "sep", key: `sep-${index}` })
       return

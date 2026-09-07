@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils"
 import { F0DialogContext } from "@/patterns/F0Dialog"
 import { ScrollArea } from "@/ui/scrollarea"
 import { Spinner } from "@/ui/Spinner"
-import { VirtualItem } from "../index"
+import { VirtualItem } from ".."
 import { SelectContext } from "../SelectContext"
 import * as SelectPrimitive from "./radix-ui"
 
@@ -225,11 +225,17 @@ const SelectContent = forwardRef<
     useEffect(() => {
       // A closed list starts a fresh session. `asList` never closes, so its one
       // reveal is on mount.
-      if (!open && !asList) revealedSelection.current = false
+      if (!open && !asList) {
+        revealedSelection.current = false
+      }
     }, [open, asList])
     useEffect(() => {
-      if (revealedSelection.current || positionIndex < 0) return
-      if (!open && !asList) return
+      if (revealedSelection.current || positionIndex < 0) {
+        return
+      }
+      if (!open && !asList) {
+        return
+      }
       revealedSelection.current = true
       virtualizer.scrollToIndex(positionIndex)
     }, [asList, open, positionIndex, virtualizer])

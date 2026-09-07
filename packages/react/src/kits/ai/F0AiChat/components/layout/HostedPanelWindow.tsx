@@ -21,7 +21,9 @@ export const HostedPanelWindow = () => {
   // immediately, but the window holds still (exitStyle "hold") while the main
   // content slides over it — an empty window would flash otherwise.
   const lastContentRef = useRef(panelContent)
-  if (panelContent) lastContentRef.current = panelContent
+  if (panelContent) {
+    lastContentRef.current = panelContent
+  }
   // While a reload's restore is pending, the window is already up showing a
   // skeleton keyed to the restored id — the crossfade below then fades the
   // real conversation in when the host re-mounts it.

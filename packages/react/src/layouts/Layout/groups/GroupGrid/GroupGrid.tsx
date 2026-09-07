@@ -243,9 +243,15 @@ export const GroupGrid = <
     prevDeps: (keyof Deps)[] | undefined,
     currentDeps: (keyof Deps)[] | undefined
   ): boolean => {
-    if (!prevDeps && !currentDeps) return false
-    if (!prevDeps || !currentDeps) return true
-    if (prevDeps.length !== currentDeps.length) return true
+    if (!prevDeps && !currentDeps) {
+      return false
+    }
+    if (!prevDeps || !currentDeps) {
+      return true
+    }
+    if (prevDeps.length !== currentDeps.length) {
+      return true
+    }
     return prevDeps.some((dep, index) => dep !== currentDeps[index])
   }
 

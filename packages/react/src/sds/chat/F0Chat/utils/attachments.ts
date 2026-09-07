@@ -13,7 +13,9 @@ const VIDEO_EXTENSIONS = new Set(["m4v", "mov", "mp4", "ogv", "webm"])
 
 /** Compact binary size used in composer validation messages. */
 export const formatFileSize = (bytes: number): string => {
-  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024) {
+    return `${bytes} B`
+  }
   if (bytes < 1024 * 1024) {
     const kilobytes = bytes / 1024
     return `${Number.isInteger(kilobytes) ? kilobytes : kilobytes.toFixed(1)} KB`
@@ -28,7 +30,9 @@ export const formatFileSize = (bytes: number): string => {
 
 /** Whether a generic file attachment can render in the native F0 video player. */
 export const isVideoFileAttachment = (file: F0ChatFileAttachment): boolean => {
-  if (file.mimeType?.toLowerCase().startsWith("video/")) return true
+  if (file.mimeType?.toLowerCase().startsWith("video/")) {
+    return true
+  }
 
   return [file.name, file.url].some((candidate) => {
     const cleanCandidate = candidate.split(/[?#]/, 1)[0] ?? ""
@@ -81,11 +85,15 @@ export const documentPreviewKind = (
 ): ChatDocumentKind | null => {
   const mime = file.mimeType?.toLowerCase() ?? ""
   for (const [fragment, kind] of MIME_KINDS) {
-    if (mime.includes(fragment)) return kind
+    if (mime.includes(fragment)) {
+      return kind
+    }
   }
   const name = file.name.toLowerCase()
   const dot = name.lastIndexOf(".")
-  if (dot <= 0) return null
+  if (dot <= 0) {
+    return null
+  }
   return EXTENSION_KINDS[name.slice(dot + 1)] ?? null
 }
 
@@ -114,8 +122,12 @@ export const withinPreviewSizeLimit = (
 export const attachedKindOf = (
   attachment: F0ChatImageAttachment | F0ChatFileAttachment
 ): F0ChatAttachedKind => {
-  if (attachment.kind === "image") return "image"
-  if (isVideoFileAttachment(attachment)) return "video"
+  if (attachment.kind === "image") {
+    return "image"
+  }
+  if (isVideoFileAttachment(attachment)) {
+    return "video"
+  }
   return documentPreviewKind(attachment) ? "document" : "file"
 }
 

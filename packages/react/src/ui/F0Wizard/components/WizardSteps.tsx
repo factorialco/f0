@@ -22,8 +22,12 @@ function getStepState(
   currentStep: number,
   isCompleted: boolean
 ): StepState {
-  if (index === currentStep) return "active"
-  if (isCompleted) return "completed"
+  if (index === currentStep) {
+    return "active"
+  }
+  if (isCompleted) {
+    return "completed"
+  }
   return "upcoming"
 }
 

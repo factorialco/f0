@@ -25,7 +25,7 @@ export type InFilterOptionItem<T = unknown> = {
     /** The filter key where child selections are stored in FiltersState */
     filterKey: string
     /** Child options, which can themselves have children for infinite nesting */
-    options: Array<InFilterOptionItem<T>>
+    options: InFilterOptionItem<T>[]
   }
 }
 
@@ -50,7 +50,7 @@ export type InFilterOptions<T, _R extends RecordType = RecordType> = {
         | Array<InFilterOptionItem<T>>
         | (() =>
             | Array<InFilterOptionItem<T>>
-            | Promise<Array<InFilterOptionItem<T>>>)
+            | Promise<InFilterOptionItem<T>[]>)
     }
   | {
       // Accept any DataSourceDefinition with any record type

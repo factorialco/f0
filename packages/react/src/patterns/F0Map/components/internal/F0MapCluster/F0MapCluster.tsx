@@ -19,7 +19,7 @@ const BOX = 72
 // Item-centre offsets (px) by the number of items shown (heads + optional
 // counter). The counter is always the last item, so with four it lands in the
 // bottom-right - like an avatar list's "+N".
-const LAYOUTS: Record<number, ReadonlyArray<readonly [number, number]>> = {
+const LAYOUTS: Record<number, readonly (readonly [number, number])[]> = {
   1: [[0, 0]],
   2: [
     [-8, 0],

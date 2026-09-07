@@ -142,7 +142,9 @@ export const DialogWrapper = ({
   const onWidthChangeRef = useRef(onWidthChange)
   onWidthChangeRef.current = onWidthChange
   useEffect(() => {
-    if (!contentBox || !onWidthChangeRef.current) return
+    if (!contentBox || !onWidthChangeRef.current) {
+      return
+    }
     const emit = () =>
       onWidthChangeRef.current?.(contentBox.getBoundingClientRect().width)
     emit()

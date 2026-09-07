@@ -21,8 +21,11 @@ import {
   ChartItem,
   hasAccessibleChartPoint,
 } from "../components/ChartItem/ChartItem"
-import type { DashboardChartConfig, DashboardChartItem } from "../types"
-import type { F0AnalyticsDashboardPointClick } from "../types"
+import type {
+  DashboardChartConfig,
+  DashboardChartItem,
+  F0AnalyticsDashboardPointClick,
+} from "../types"
 
 /** The mark a click lands on, as `usePointClick` would report it. */
 const POINT: F0DataChartPointClick = {
@@ -783,7 +786,9 @@ describe("buildPointQuoteText", () => {
       }
     )
     expect(transformed.type).toBe("radar")
-    if (transformed.type !== "radar") throw new Error("Expected radar props")
+    if (transformed.type !== "radar") {
+      throw new Error("Expected radar props")
+    }
 
     const [point] = buildAccessibleChartPoints(transformed)
     expect(
@@ -802,11 +807,11 @@ describe("buildAccessibleChartPoints", () => {
     clientY: 0,
   }
 
-  const cases: Array<{
+  const cases: {
     name: string
     chart: F0DataChartProps
     expected: F0AnalyticsDashboardPointClick[]
-  }> = [
+  }[] = [
     {
       name: "finite bar marks",
       chart: {

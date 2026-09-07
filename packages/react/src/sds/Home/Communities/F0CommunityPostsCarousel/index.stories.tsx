@@ -18,7 +18,7 @@ import {
 import { Plus } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { SlotWidget } from "../../SlotWidget"
-import { F0CommunityPostsCarousel, type CommunityPostSummary } from "./index"
+import { F0CommunityPostsCarousel, type CommunityPostSummary } from "."
 
 const POSTS: CommunityPostSummary[] = [
   {

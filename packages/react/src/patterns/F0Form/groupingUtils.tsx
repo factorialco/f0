@@ -19,7 +19,9 @@ export function isDependentOnSwitch(
   switchIds: Set<string>
 ): string | null {
   const renderIf = field.renderIf
-  if (!renderIf || typeof renderIf === "function") return null
+  if (!renderIf || typeof renderIf === "function") {
+    return null
+  }
   if (
     "fieldId" in renderIf &&
     "equalsTo" in renderIf &&
@@ -40,7 +42,9 @@ export function isDependentOnCardSelect(
   cardSelectIds: Set<string>
 ): { fieldId: string; equalsTo: string } | null {
   const renderIf = field.renderIf
-  if (!renderIf || typeof renderIf === "function") return null
+  if (!renderIf || typeof renderIf === "function") {
+    return null
+  }
   if (
     "fieldId" in renderIf &&
     "equalsTo" in renderIf &&

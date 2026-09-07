@@ -229,7 +229,9 @@ const FiltersControls = () => {
     setFiltersValue(filters)
   }
 
-  if (!shownFilters || Object.keys(shownFilters).length === 0) return null
+  if (!shownFilters || Object.keys(shownFilters).length === 0) {
+    return null
+  }
 
   return (
     <>
@@ -284,7 +286,9 @@ const FiltersPresets = () => {
         const preset = presets?.find(
           (p, index) => (p.id ?? `${p.label}-${index}`) === presetId
         )
-        if (preset) emitPresetClick(preset.filter)
+        if (preset) {
+          emitPresetClick(preset.filter)
+        }
         onSelectPreset(presetId)
       }
     : undefined
@@ -339,8 +343,12 @@ const FiltersChipsList = () => {
   // chips when a preset exactly matches the current filters (the preset chip
   // already represents them).
   const isAnyPresetActive = useMemo(() => {
-    if (onSelectPreset) return false
-    if (!presets?.length) return false
+    if (onSelectPreset) {
+      return false
+    }
+    if (!presets?.length) {
+      return false
+    }
     return presets.some((preset) => isPresetSelected(preset, value))
   }, [presets, value, onSelectPreset])
 

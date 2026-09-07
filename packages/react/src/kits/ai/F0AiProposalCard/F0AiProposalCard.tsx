@@ -8,14 +8,17 @@ import type { F0AiProposalCardActions, F0AiProposalCardProps } from "./types"
 const DEFAULT_MAX_COLLAPSED_DESCRIPTION_LENGTH = 180
 
 const getSafeCollapsedDescriptionLength = (maxLength: number) => {
-  if (!Number.isFinite(maxLength))
+  if (!Number.isFinite(maxLength)) {
     return DEFAULT_MAX_COLLAPSED_DESCRIPTION_LENGTH
+  }
 
   return Math.max(0, Math.floor(maxLength))
 }
 
 const getCollapsedDescription = (description: string, maxLength: number) => {
-  if (description.length <= maxLength) return description
+  if (description.length <= maxLength) {
+    return description
+  }
 
   return `${description.slice(0, maxLength).trimEnd()}...`
 }

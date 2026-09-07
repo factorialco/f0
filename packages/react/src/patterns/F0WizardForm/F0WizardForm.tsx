@@ -34,7 +34,9 @@ function areAllFieldsDisabled(schema: F0FormSchema): boolean {
   const shape = objectSchema.shape as Record<string, ZodTypeAny>
   const entries = Object.entries(shape)
 
-  if (entries.length === 0) return false
+  if (entries.length === 0) {
+    return false
+  }
 
   return entries.every(([, fieldSchema]) => {
     const config = getF0Config(fieldSchema)
@@ -46,7 +48,9 @@ function deriveSectionIdsFromSingleSchema(
   schema: F0FormSchema,
   sections?: Record<string, F0SectionConfig>
 ): string[] {
-  if (sections) return Object.keys(sections)
+  if (sections) {
+    return Object.keys(sections)
+  }
 
   const objectSchema = unwrapToZodObject(schema)
   const shape = objectSchema.shape as Record<string, ZodTypeAny>
@@ -85,11 +89,15 @@ function isStepFilled(
   customIsCompleted?: (arg: { data: Record<string, unknown> }) => boolean
 ): boolean {
   const values = data ?? {}
-  if (customIsCompleted) return customIsCompleted({ data: values })
+  if (customIsCompleted) {
+    return customIsCompleted({ data: values })
+  }
   const objectSchema = unwrapToZodObject(schema)
   const shape = objectSchema.shape as Record<string, ZodTypeAny>
   return Object.entries(shape).every(([key, fieldSchema]) => {
-    if (fieldSchema.isOptional()) return true
+    if (fieldSchema.isOptional()) {
+      return true
+    }
     const value = values[key]
     return value !== undefined && value !== null && value !== ""
   })
@@ -106,7 +114,9 @@ function useWizardActionBar() {
 
   useEffect(() => {
     return () => {
-      if (successTimerRef.current) clearTimeout(successTimerRef.current)
+      if (successTimerRef.current) {
+        clearTimeout(successTimerRef.current)
+      }
     }
   }, [])
 
@@ -232,7 +242,9 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
   const resolvedSteps = customSteps ?? formDefinition.steps
 
   const effectiveSteps = useMemo(() => {
-    if (!resolvedSteps) return undefined
+    if (!resolvedSteps) {
+      return undefined
+    }
 
     const hasMultiSectionStep = resolvedSteps.some(
       (step) => step.sectionIds.length > 1
@@ -322,12 +334,18 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
 
   const isStepDataFilled = useCallback(
     (stepIndex: number): boolean => {
-      if (!autoSkipCompletedSteps) return false
+      if (!autoSkipCompletedSteps) {
+        return false
+      }
       const stepConfig = stepsConfig[stepIndex]
-      if (!stepConfig) return false
+      if (!stepConfig) {
+        return false
+      }
       return stepConfig.sectionIds.every((id) => {
         const sectionSchema = schema[id]
-        if (!sectionSchema) return false
+        if (!sectionSchema) {
+          return false
+        }
         const data = (defaultValues?.[id as keyof typeof defaultValues] ??
           fullDataRef.current[id]) as Record<string, unknown> | undefined
         return isStepFilled(sectionSchema, data, stepConfig.isCompleted)
@@ -337,12 +355,18 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
   )
 
   const computedDefaultStepIndex = useMemo(() => {
-    if (defaultStepIndex !== undefined) return defaultStepIndex
-    if (!autoSkipCompletedSteps) return undefined
+    if (defaultStepIndex !== undefined) {
+      return defaultStepIndex
+    }
+    if (!autoSkipCompletedSteps) {
+      return undefined
+    }
     const firstIncomplete = stepsConfig.findIndex(
       (_, i) => !isStepDataFilled(i)
     )
-    if (firstIncomplete === -1) return stepsConfig.length - 1
+    if (firstIncomplete === -1) {
+      return stepsConfig.length - 1
+    }
     return firstIncomplete
   }, [defaultStepIndex, autoSkipCompletedSteps, stepsConfig, isStepDataFilled])
 
@@ -394,7 +418,9 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
 
   const handleLastStepCompleted = useCallback(() => {
     const result = lastSubmitResultRef.current
-    if (!result?.success) return
+    if (!result?.success) {
+      return
+    }
 
     if (linkAfterLastStepSubmit) {
       const url = linkAfterLastStepSubmit({
@@ -459,7 +485,9 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
             <div className="flex flex-col gap-6 pb-5">
               {currentSectionIds.map((sectionId) => {
                 const sectionSchema = schema[sectionId]
-                if (!sectionSchema) return null
+                if (!sectionSchema) {
+                  return null
+                }
 
                 const sectionConfig = sections?.[sectionId]
                 const submittedData = fullDataRef.current[sectionId] as
@@ -484,7 +512,9 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
                     sectionForms={sectionForms}
                     onErrorStateChange={(hasErrors) => {
                       setSectionErrorState((prev) => {
-                        if (prev[sectionId] === hasErrors) return prev
+                        if (prev[sectionId] === hasErrors) {
+                          return prev
+                        }
                         return { ...prev, [sectionId]: hasErrors }
                       })
                     }}
@@ -652,9 +682,13 @@ function F0WizardFormSingleSchema<TSchema extends F0FormSchema>({
 
   const isStepDataFilled = useCallback(
     (stepIndex: number): boolean => {
-      if (!autoSkipCompletedSteps) return false
+      if (!autoSkipCompletedSteps) {
+        return false
+      }
       const stepConfig = stepsConfig[stepIndex]
-      if (!stepConfig) return false
+      if (!stepConfig) {
+        return false
+      }
       const subSchema = buildSectionSubSchema(
         objectSchema,
         stepConfig.sectionIds
@@ -666,12 +700,18 @@ function F0WizardFormSingleSchema<TSchema extends F0FormSchema>({
   )
 
   const computedDefaultStepIndex = useMemo(() => {
-    if (defaultStepIndex !== undefined) return defaultStepIndex
-    if (!autoSkipCompletedSteps) return undefined
+    if (defaultStepIndex !== undefined) {
+      return defaultStepIndex
+    }
+    if (!autoSkipCompletedSteps) {
+      return undefined
+    }
     const firstIncomplete = stepsConfig.findIndex(
       (_, i) => !isStepDataFilled(i)
     )
-    if (firstIncomplete === -1) return stepsConfig.length - 1
+    if (firstIncomplete === -1) {
+      return stepsConfig.length - 1
+    }
     return firstIncomplete
   }, [defaultStepIndex, autoSkipCompletedSteps, stepsConfig, isStepDataFilled])
 
@@ -716,7 +756,9 @@ function F0WizardFormSingleSchema<TSchema extends F0FormSchema>({
 
   const handleLastStepCompleted = useCallback(() => {
     const result = lastSubmitResultRef.current
-    if (!result?.success) return
+    if (!result?.success) {
+      return
+    }
 
     showSuccess(result.message)
 
@@ -772,7 +814,9 @@ function F0WizardFormSingleSchema<TSchema extends F0FormSchema>({
         const stepSections = currentSectionIds.reduce<
           Record<string, F0SectionConfig>
         >((acc, id) => {
-          if (sections?.[id]) acc[id] = sections[id]
+          if (sections?.[id]) {
+            acc[id] = sections[id]
+          }
           return acc
         }, {})
 

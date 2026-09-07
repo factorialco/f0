@@ -18,9 +18,15 @@ const addDays = (date: Date, days: number): Date => {
  * days get a word of their own; anything further reads better as a date.
  */
 export const getDayKind = (date: Date, now: Date): MeetingDayKind => {
-  if (isSameDay(date, now)) return "today"
-  if (isSameDay(date, addDays(now, -1))) return "yesterday"
-  if (isSameDay(date, addDays(now, 1))) return "tomorrow"
+  if (isSameDay(date, now)) {
+    return "today"
+  }
+  if (isSameDay(date, addDays(now, -1))) {
+    return "yesterday"
+  }
+  if (isSameDay(date, addDays(now, 1))) {
+    return "tomorrow"
+  }
   return "other"
 }
 
@@ -48,8 +54,12 @@ export const isWithinJoinWindow = ({
   now: Date
   windowMinutes?: number
 }): boolean => {
-  if (state === "inProgress") return true
-  if (state !== "scheduled") return false
+  if (state === "inProgress") {
+    return true
+  }
+  if (state !== "scheduled") {
+    return false
+  }
   return getMinutesUntilStart(startsAt, now) <= windowMinutes
 }
 
@@ -72,7 +82,9 @@ export const shouldShowCountdown = ({
   now: Date
   windowMinutes?: number
 }): boolean => {
-  if (state !== "scheduled") return false
+  if (state !== "scheduled") {
+    return false
+  }
   const minutes = getMinutesUntilStart(startsAt, now)
   return minutes <= windowMinutes
 }
@@ -92,7 +104,9 @@ export const hasStatusTag = ({
   state: MeetingState
   hasCountdown: boolean
 }): boolean => {
-  if (state === "scheduled") return hasCountdown
+  if (state === "scheduled") {
+    return hasCountdown
+  }
   return true
 }
 
@@ -101,7 +115,9 @@ export const getDurationMinutes = (
   startsAt: Date,
   endsAt: Date | undefined
 ): number | undefined => {
-  if (!endsAt) return undefined
+  if (!endsAt) {
+    return undefined
+  }
   const minutes = differenceInMinutes(endsAt, startsAt)
   return minutes > 0 ? minutes : undefined
 }
@@ -110,7 +126,9 @@ export const resolveAttendeesDisplay = (
   display: AttendeesDisplay,
   state: MeetingState
 ): "avatars" | "count" => {
-  if (display !== "auto") return display
+  if (display !== "auto") {
+    return display
+  }
   return state === "inProgress" ? "avatars" : "count"
 }
 
@@ -129,7 +147,9 @@ export const resolveRelevantCount = ({
   invitedCount?: number
   presentCount?: number
 }): number => {
-  if (state === "inProgress" && presentCount !== undefined) return presentCount
+  if (state === "inProgress" && presentCount !== undefined) {
+    return presentCount
+  }
   return invitedCount ?? attendees.length
 }
 

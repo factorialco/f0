@@ -101,7 +101,9 @@ export const OneDataCollectionActionBar = forwardRef<
   // without this snapshot the bar shrinks abruptly before the exit animation.
   const lastSelectedNumberRef = useRef(selectedNumber ?? 0)
   useEffect(() => {
-    if (selectedNumber) lastSelectedNumberRef.current = selectedNumber
+    if (selectedNumber) {
+      lastSelectedNumberRef.current = selectedNumber
+    }
   }, [selectedNumber])
   const displayedSelectedNumber =
     isInteractionDisabled && !selectedNumber
@@ -123,14 +125,22 @@ export const OneDataCollectionActionBar = forwardRef<
   const actionBarStatus = status === "loading" ? "idle" : status
 
   const resolvedPrimaryActions = useMemo(() => {
-    if (warningMessage || !primaryActions) return []
-    if (status !== "loading") return primaryActions
+    if (warningMessage || !primaryActions) {
+      return []
+    }
+    if (status !== "loading") {
+      return primaryActions
+    }
     return withLoadingOnActions(primaryActions)
   }, [primaryActions, status, warningMessage])
 
   const resolvedSecondaryActions = useMemo(() => {
-    if (warningMessage || !secondaryActions) return []
-    if (status !== "loading") return secondaryActions
+    if (warningMessage || !secondaryActions) {
+      return []
+    }
+    if (status !== "loading") {
+      return secondaryActions
+    }
     return secondaryActions.map((a) => ({ ...a, disabled: true }))
   }, [secondaryActions, status, warningMessage])
 

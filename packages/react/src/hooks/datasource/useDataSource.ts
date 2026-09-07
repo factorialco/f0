@@ -103,7 +103,7 @@ export function useDataSource<
     grouping,
     ...rest
   }: DataSourceDefinition<R, FiltersSchema, Sortings, Grouping>,
-  deps: ReadonlyArray<unknown> = []
+  deps: readonly unknown[] = []
 ): DataSource<R, FiltersSchema, Sortings, Grouping> {
   /******************* FILTERS STATE***************************************************/
   const [currentFilters, _setCurrentFilters] = useState<
@@ -131,7 +131,9 @@ export function useDataSource<
   }
 
   useDeepCompareEffect(() => {
-    if (!externalCurrentFilters) return
+    if (!externalCurrentFilters) {
+      return
+    }
     setCurrentFilters(externalCurrentFilters)
   }, [externalCurrentFilters])
 
@@ -166,7 +168,9 @@ export function useDataSource<
   }
 
   useDeepCompareEffect(() => {
-    if (!externalCurrentSortings) return
+    if (!externalCurrentSortings) {
+      return
+    }
     setCurrentSortings(externalCurrentSortings)
   }, [externalCurrentSortings])
   /******************* SEARCH ***************************************************/
@@ -185,7 +189,9 @@ export function useDataSource<
   >(currentSearch, 200)
 
   useEffect(() => {
-    if (searchOptions.sync) return
+    if (searchOptions.sync) {
+      return
+    }
     setDebouncedCurrentSearch(currentSearch)
   }, [currentSearch, searchOptions.sync, setDebouncedCurrentSearch])
 

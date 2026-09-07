@@ -10,8 +10,8 @@ import type {
   F0PerSectionSubmitConfig,
   F0SectionConfig,
   F0PerSectionSectionConfig,
+  RenderCustomFieldFunction,
 } from "@/patterns/F0Form/types"
-import type { RenderCustomFieldFunction } from "@/patterns/F0Form/types"
 
 export type F0FormSchema<T extends ZodRawShape = ZodRawShape> =
   | z.ZodObject<T>

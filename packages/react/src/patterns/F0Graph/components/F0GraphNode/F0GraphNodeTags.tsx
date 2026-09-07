@@ -11,7 +11,9 @@ interface F0GraphNodeTagsProps {
  * all rendered as-is.
  */
 export function F0GraphNodeTags({ tags }: F0GraphNodeTagsProps) {
-  if (tags.length === 0) return null
+  if (tags.length === 0) {
+    return null
+  }
 
   return (
     <div className="flex flex-wrap items-center justify-center gap-1">

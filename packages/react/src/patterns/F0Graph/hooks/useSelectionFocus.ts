@@ -92,7 +92,7 @@ export function useSelectionFocus<T>({
   const flatVisibleOrder = useMemo(() => {
     const order: string[] = []
 
-    function walk(nodes: TreeNode<unknown>[]): void {
+    function walk(nodes: TreeNode[]): void {
       for (const node of nodes) {
         order.push(node.id)
         if (expandedNodes.has(node.id) && node.children.length > 0) {
@@ -120,7 +120,9 @@ export function useSelectionFocus<T>({
 
   // ── Initialize / repair focused node ──
   useEffect(() => {
-    if (flatVisibleOrder.length === 0) return
+    if (flatVisibleOrder.length === 0) {
+      return
+    }
     if (focusedNodeId === null || !flatVisibleOrderSet.has(focusedNodeId)) {
       // On initial mount, prefer first selected node if any are visible
       const firstSelected =

@@ -5,7 +5,7 @@ import { Counter } from "@/ui/Counter"
 import { Preset } from "@/ui/OnePreset"
 import { F0Icon } from "../../components/F0Icon"
 import { ChevronDown } from "../../icons/app"
-import { OverflowList } from "./index"
+import { OverflowList } from "."
 
 const meta = {
   title: "OverflowList",

@@ -9,8 +9,8 @@ import {
   zeroRender as render,
   zeroRenderHook as renderHook,
 } from "@/testing/test-utils"
+import { OneDataCollection } from ".."
 import { useDataCollectionSource } from "../hooks/useDataCollectionSource"
-import { OneDataCollection } from "../index"
 
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (
   <I18nProvider

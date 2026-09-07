@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { expect, within } from "storybook/test"
-import { TabItem, Tabs } from "./index"
+import { TabItem, Tabs } from "."
 
 const tabItems: TabItem[] = [
   { label: "Overview", href: "/", index: true },

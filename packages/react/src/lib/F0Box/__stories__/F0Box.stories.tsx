@@ -21,7 +21,7 @@ import {
 } from "@/icons/app"
 import { snapshotMatrix } from "@/lib/storybook-utils/snapshotMatrix"
 import { Badge } from "@/ui/badge"
-import { F0Box } from "../index"
+import { F0Box } from ".."
 
 // ─── Option arrays for controls ──────────────────────────────────
 

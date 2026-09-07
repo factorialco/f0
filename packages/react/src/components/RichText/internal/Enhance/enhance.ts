@@ -134,7 +134,9 @@ async function handleEnhanceWithAIFunction({
     isFullDocumentSelected,
   } = extractTextToEnhance(editor)
 
-  if (!isValidForEnhancement(textToEnhance)) return
+  if (!isValidForEnhancement(textToEnhance)) {
+    return
+  }
 
   const context = prepareEnhancementContext(editor, from, to)
 

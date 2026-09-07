@@ -59,7 +59,9 @@ const CommandList = forwardRef<CommandListHandle, CommandListProps>(
 
     const scrollIntoView = useCallback((element: HTMLElement) => {
       const container = containerRef.current
-      if (!container) return
+      if (!container) {
+        return
+      }
 
       const containerRect = container.getBoundingClientRect()
       const elementRect = element.getBoundingClientRect()

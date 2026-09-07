@@ -1674,7 +1674,9 @@ export const groupReadersFor = (
   seed: Seed | undefined,
   authorId: string
 ): F0ChatUser[] | undefined => {
-  if (seed?.type !== "group") return undefined
+  if (seed?.type !== "group") {
+    return undefined
+  }
 
   const uniqueParticipants = new Map(
     [...seed.participants, ME].map((participant) => [
@@ -1726,7 +1728,9 @@ export const buildSeedMessages = (seed: Seed): F0ChatItem[] => {
   })
   // Second pass: resolve reply references now that every message has an id.
   seed.lines.forEach((line, i) => {
-    if (isSystemLine(line) || line.replyToIndex == null) return
+    if (isSystemLine(line) || line.replyToIndex == null) {
+      return
+    }
     const target = built[line.replyToIndex]
     const source = built[i]
     if (target && isUserMessage(target) && isUserMessage(source)) {

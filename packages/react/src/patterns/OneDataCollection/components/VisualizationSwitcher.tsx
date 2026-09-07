@@ -28,17 +28,15 @@ export const VisualizationSwitcher = <
   onVisualizationChange,
   hideLabels,
 }: {
-  visualizations: ReadonlyArray<
-    Visualization<
-      Record,
-      Filters,
-      Sortings,
-      Summaries,
-      ItemActions,
-      NavigationFilters,
-      Grouping
-    >
-  >
+  visualizations: readonly Visualization<
+    Record,
+    Filters,
+    Sortings,
+    Summaries,
+    ItemActions,
+    NavigationFilters,
+    Grouping
+  >[]
   currentVisualization: number
   onVisualizationChange: (index: number) => void
   /** Show segments icon-only (e.g. when the header runs out of room). */

@@ -111,7 +111,9 @@ function buildTree<T>(nodes: GraphNode<T>[]): TreeBuilderResult<T> {
       cycleSet.add(node.id)
       return
     }
-    if (visited.has(node.id)) return
+    if (visited.has(node.id)) {
+      return
+    }
 
     visited.add(node.id)
     inStack.add(node.id)

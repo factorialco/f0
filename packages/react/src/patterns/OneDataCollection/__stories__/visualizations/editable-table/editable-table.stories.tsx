@@ -1172,7 +1172,9 @@ export const EditableTableWithDataSourceSelect: Story = {
                       placeholder: "Select role",
                       showSearchBox: true,
                       defaultItem: (item: MockUser) => {
-                        if (!item.role) return undefined
+                        if (!item.role) {
+                          return undefined
+                        }
                         return { value: item.role, label: item.role }
                       },
                     },

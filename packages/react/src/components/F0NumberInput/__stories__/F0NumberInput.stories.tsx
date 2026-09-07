@@ -3,7 +3,7 @@ import { useState } from "react"
 import { fn } from "storybook/test"
 import { Placeholder } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-import { F0NumberInput } from "../index"
+import { F0NumberInput } from ".."
 
 const meta = {
   render: (props) => <F0NumberInput key={JSON.stringify(props)} {...props} />,

@@ -1,5 +1,5 @@
 import { useMemo } from "react"
-import { ControllerRenderProps, FieldValues } from "react-hook-form"
+import { ControllerRenderProps } from "react-hook-form"
 import { F0DatePicker, DatePickerValue } from "@/components/F0DatePicker"
 import type { InputFieldStatus } from "@/components/F0InputField/types"
 import { FORM_SIZE } from "../../constants"
@@ -8,7 +8,7 @@ import type { F0DateRangeField, DateRangeValue } from "./types"
 
 interface DateRangeFieldRendererProps {
   field: ResolvedField<F0DateRangeField>
-  formField: ControllerRenderProps<FieldValues>
+  formField: ControllerRenderProps
   error?: boolean
   loading?: boolean
   status?: InputFieldStatus
@@ -20,7 +20,9 @@ interface DateRangeFieldRendererProps {
 function dateRangeToPickerValue(
   dateRange: DateRangeValue | undefined
 ): DatePickerValue | undefined {
-  if (!dateRange?.from || !dateRange?.to) return undefined
+  if (!dateRange?.from || !dateRange?.to) {
+    return undefined
+  }
   return {
     value: { from: dateRange.from, to: dateRange.to },
     granularity: "range",
@@ -33,7 +35,9 @@ function dateRangeToPickerValue(
 function pickerValueToDateRange(
   value: DatePickerValue | undefined
 ): DateRangeValue | undefined {
-  if (!value?.value?.from || !value?.value?.to) return undefined
+  if (!value?.value?.from || !value?.value?.to) {
+    return undefined
+  }
   return {
     from: value.value.from,
     to: value.value.to,

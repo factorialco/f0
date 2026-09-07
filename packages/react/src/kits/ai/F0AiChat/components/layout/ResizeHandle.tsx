@@ -37,7 +37,9 @@ export const ResizeHandle = ({
   }, [onReset, setIsResizing])
 
   useEffect(() => {
-    if (!isResizing) return
+    if (!isResizing) {
+      return
+    }
 
     // Pointer samples arrive faster than the screen repaints (120Hz trackpads),
     // and every one of them re-lays-out the whole panel — including a
@@ -47,7 +49,9 @@ export const ResizeHandle = ({
       frameRef.current = null
       const delta = pendingDeltaRef.current
       pendingDeltaRef.current = 0
-      if (delta !== 0) onResize(delta)
+      if (delta !== 0) {
+        onResize(delta)
+      }
     }
 
     const handleMouseMove = (e: MouseEvent) => {

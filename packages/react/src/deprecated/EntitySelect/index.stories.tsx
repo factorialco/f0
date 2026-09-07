@@ -15,7 +15,7 @@ import {
   EntitySelectNamedGroup,
   EntitySelectProps,
 } from "./types"
-import { EntitySelect } from "./index"
+import { EntitySelect } from "."
 
 const GROUP_DATA = {
   all: famousEmployees,
@@ -488,8 +488,11 @@ export const WithCustomTrigger = {
             setSelectedGroup(value ?? "all")
           }}
           onOpenChange={(open) => {
-            if (open) setTimeout(() => setLoading(false), 500)
-            else setLoading(true)
+            if (open) {
+              setTimeout(() => setLoading(false), 500)
+            } else {
+              setLoading(true)
+            }
             setOpen(open)
           }}
           selectedEntities={selected}

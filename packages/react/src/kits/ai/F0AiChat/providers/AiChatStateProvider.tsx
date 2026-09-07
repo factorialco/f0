@@ -1,10 +1,10 @@
 "use client"
 
-import type { ReactNode } from "react"
 import {
   createContext,
   type FC,
   type PropsWithChildren,
+  type ReactNode,
   useCallback,
   useContext,
   useEffect,
@@ -331,20 +331,26 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   // a restore is pending — panelContent is still null then and writing would
   // wipe the very id being restored (breaking a reload mid-restore).
   useEffect(() => {
-    if (restoringPanelContentId) return
+    if (restoringPanelContentId) {
+      return
+    }
     setPersistedPanelContentId(panelContent?.id ?? null)
   }, [panelContent, restoringPanelContentId, setPersistedPanelContentId])
 
   // A restore only makes sense while the panel is open; closing it drops the
   // pending id (the AI chat comes back normally on the next open).
   useEffect(() => {
-    if (!open) setRestoringPanelContentId(null)
+    if (!open) {
+      setRestoringPanelContentId(null)
+    }
   }, [open])
 
   // Safety net: a host that never resolves the restore must not block the
   // panel — fall back to the AI chat.
   useEffect(() => {
-    if (!restoringPanelContentId) return
+    if (!restoringPanelContentId) {
+      return
+    }
     const timer = setTimeout(
       () => setRestoringPanelContentId(null),
       PANEL_RESTORE_TIMEOUT_MS
@@ -514,12 +520,22 @@ const REAL_VALUES: Partial<AiChatProviderReturnValue> = {
 
 const NO_PROVIDER_CONTEXT = new Proxy({} as AiChatProviderReturnValue, {
   get(_, prop) {
-    if (typeof prop !== "string") return undefined
+    if (typeof prop !== "string") {
+      return undefined
+    }
     const key = prop as ProviderKey
-    if (key in REAL_VALUES) return REAL_VALUES[key]
-    if (NULL_KEYS.has(key)) return null
-    if (UNDEFINED_KEYS.has(key)) return undefined
-    if (FALSE_KEYS.has(key)) return false
+    if (key in REAL_VALUES) {
+      return REAL_VALUES[key]
+    }
+    if (NULL_KEYS.has(key)) {
+      return null
+    }
+    if (UNDEFINED_KEYS.has(key)) {
+      return undefined
+    }
+    if (FALSE_KEYS.has(key)) {
+      return false
+    }
     return noop
   },
 })

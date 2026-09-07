@@ -3,7 +3,7 @@ import { ComponentProps } from "react"
 import { fn } from "storybook/test"
 import { famousEmployees } from "../entity-select-name.factory"
 import { mapEntitySelectEntityToSubentity } from "../utils"
-import { ListTag } from "./index"
+import { ListTag } from "."
 
 const defaultArgs = {
   entity: mapEntitySelectEntityToSubentity(famousEmployees[0]),

@@ -23,7 +23,9 @@ export function useLegendInteraction(
 
   useEffect(() => {
     const chart = chartRef.current
-    if (!chart || typeof chart.on !== "function") return
+    if (!chart || typeof chart.on !== "function") {
+      return
+    }
 
     function onLegendSelectChanged(params: {
       name: string

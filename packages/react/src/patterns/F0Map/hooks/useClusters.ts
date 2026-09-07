@@ -62,38 +62,51 @@ export const useClusters = (
       // Union-find over the points.
       const parent = Array.from({ length: n }, (_, i) => i)
       const find = (x: number): number => {
-        while (parent[x] !== x) x = parent[x] = parent[parent[x]]
+        while (parent[x] !== x) {
+          x = parent[x] = parent[parent[x]]
+        }
         return x
       }
       const union = (a: number, b: number) => {
         const ra = find(a)
         const rb = find(b)
-        if (ra !== rb) parent[ra] = rb
+        if (ra !== rb) {
+          parent[ra] = rb
+        }
       }
 
       // "Core" points nearly touch a neighbour (tight `radius`) — only these
       // seed a cluster, so isolated markers stay individual.
       const core = new Array(n).fill(false)
-      for (let i = 0; i < n; i++)
-        for (let j = i + 1; j < n; j++)
+      for (let i = 0; i < n; i++) {
+        for (let j = i + 1; j < n; j++) {
           if (dist2(i, j) <= markerR2) {
             core[i] = core[j] = true
             union(i, j)
           }
+        }
+      }
       // A cluster then swallows everything within the looser `clusterRadius` of
       // any core point, so a dense pocket collapses into one pile rather than a
       // cluster ringed by leftover labelled dots. Non-core points can't extend
       // the reach, which keeps genuinely separate markers from chaining in.
-      for (let i = 0; i < n; i++)
-        for (let j = i + 1; j < n; j++)
-          if ((core[i] || core[j]) && dist2(i, j) <= clusterR2) union(i, j)
+      for (let i = 0; i < n; i++) {
+        for (let j = i + 1; j < n; j++) {
+          if ((core[i] || core[j]) && dist2(i, j) <= clusterR2) {
+            union(i, j)
+          }
+        }
+      }
 
       const groups = new Map<number, number[]>()
       for (let i = 0; i < n; i++) {
         const r = find(i)
         const g = groups.get(r)
-        if (g) g.push(i)
-        else groups.set(r, [i])
+        if (g) {
+          g.push(i)
+        } else {
+          groups.set(r, [i])
+        }
       }
 
       const clusters: F0MapClusterData[] = []

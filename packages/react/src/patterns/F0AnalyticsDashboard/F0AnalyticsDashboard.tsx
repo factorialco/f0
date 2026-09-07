@@ -62,8 +62,9 @@ export const F0AnalyticsDashboard = <
   })
 
   const initialNavState = useMemo(() => {
-    if (!navigationFilters)
+    if (!navigationFilters) {
       return {} as NavigationFiltersState<NavigationFiltersDefinition>
+    }
     const state: Record<string, unknown> = {}
     for (const [key, filter] of Object.entries(navigationFilters)) {
       const filterType = navigationFilterTypes[filter.type]

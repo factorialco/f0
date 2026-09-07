@@ -14,9 +14,9 @@ import {
 } from "@/lib/providers/datacollection"
 import { subscribeToDataCollectionStorageChanges } from "@/lib/providers/datacollection/dataCollectionStorageEvents"
 import { userEvent, zeroRender as render } from "@/testing/test-utils"
-import { Breadcrumbs } from "../../index"
+import { Breadcrumbs } from "../.."
 import { BreadcrumbCollectionSelectItemType } from "../../types"
-import { BreadcrumbCollectionSelect } from "./index"
+import { BreadcrumbCollectionSelect } from "."
 
 // Mock ResizeObserver - must be a class constructor for 'new ResizeObserver()' to work
 global.ResizeObserver = class MockResizeObserver {

@@ -47,7 +47,9 @@ export function useChartTheme(
   // any level: <html>, <body>, or a wrapper <div>).
   useEffect(() => {
     const element = containerRef.current
-    if (!element) return
+    if (!element) {
+      return
+    }
 
     // Initial resolution now that the element is mounted
     setTheme(resolveChartTheme(element))

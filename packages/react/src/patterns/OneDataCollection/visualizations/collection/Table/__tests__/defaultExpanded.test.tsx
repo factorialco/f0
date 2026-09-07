@@ -10,9 +10,9 @@ import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useData
 import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import { screen, zeroRender as render } from "@/testing/test-utils"
 import { TextCell } from "@/ui/value-display/types/text"
+import { TableCollection } from ".."
 import { ItemActionsDefinition } from "../../../../item-actions"
 import { SummariesDefinition } from "../../../../summary"
-import { TableCollection } from "../index"
 
 vi.mock("../../property", () => ({
   propertyRenderers: {
@@ -74,7 +74,9 @@ const TREE: Node[] = [
 const indexTree = (nodes: Node[], into = new Map<string, Node>()) => {
   nodes.forEach((node) => {
     into.set(node.id, node)
-    if (node.children) indexTree(node.children, into)
+    if (node.children) {
+      indexTree(node.children, into)
+    }
   })
   return into
 }

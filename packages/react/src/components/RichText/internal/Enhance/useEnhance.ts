@@ -77,7 +77,9 @@ function useEnhance(
 
   const handleEnhanceWithAI = useCallback(
     async (selectedIntent?: string, customIntent?: string) => {
-      if (!config || !editor) return
+      if (!config || !editor) {
+        return
+      }
 
       setLastIntent({ selectedIntent, customIntent })
 
@@ -128,7 +130,9 @@ function useEnhance(
   )
 
   const acceptChanges = useCallback(() => {
-    if (!editor) return
+    if (!editor) {
+      return
+    }
     editor.commands.clearEnhanceHighlight()
     setIsAcceptChangesOpen(false)
     editor.setEditable(true)
@@ -137,7 +141,9 @@ function useEnhance(
   }, [editor, config])
 
   const rejectChanges = useCallback(() => {
-    if (!editor) return
+    if (!editor) {
+      return
+    }
     editor.commands.clearEnhanceHighlight()
     editor.chain().focus().undo().run()
     setIsAcceptChangesOpen(false)
@@ -147,7 +153,9 @@ function useEnhance(
   }, [editor, config])
 
   const retryChanges = useCallback(() => {
-    if (!editor) return
+    if (!editor) {
+      return
+    }
     editor.commands.clearEnhanceHighlight()
     editor.chain().focus().undo().run()
     config?.onRetryChanges?.()

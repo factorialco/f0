@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useRef, useState } from "react"
 import { action } from "storybook/actions"
 import { Archive, ArchiveOpen } from "@/icons/app"
-import { F0FormEditableTable } from "../index"
+import { F0FormEditableTable } from ".."
 
 const meta: Meta<typeof F0FormEditableTable> = {
   title: "F0FormEditableTable",

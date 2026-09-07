@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { useState } from "react"
-import { ComponentProps } from "react"
+import { useState, ComponentProps } from "react"
 import { expect, within } from "storybook/test"
 import * as AIIcons from "@/icons/ai"
 import * as AnimatedIcons from "@/icons/animated"
@@ -10,7 +9,7 @@ import * as SpecialIcons from "@/icons/special"
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { snapshotMatrix } from "@/lib/storybook-utils/snapshotMatrix"
-import { F0Icon } from "../index"
+import { F0Icon } from ".."
 
 const meta = {
   title: "Icon",

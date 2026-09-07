@@ -41,7 +41,7 @@ type RowProps<
   item: R
   selectedItems: Map<number | string, R>
   handleSelectItemChange: (item: R, checked: boolean) => void
-  fields: ReadonlyArray<ListPropertyDefinition<R, Sortings>>
+  fields: readonly ListPropertyDefinition<R, Sortings>[]
   itemDefinition: (record: R) => ItemDefinition
 }
 
@@ -158,7 +158,9 @@ export const Row = <
           .map((field) => {
             const content = renderCell(item, field)
 
-            if (!content) return null
+            if (!content) {
+              return null
+            }
 
             return (
               <div key={String(field.label)}>

@@ -7,7 +7,7 @@ import type { EditableCellProps } from "."
 
 const resolveCurrencyInfo = (
   locale: string,
-  currency: string = "USD"
+  currency = "USD"
 ): { symbol: string; before: boolean } | undefined => {
   try {
     const parts = new Intl.NumberFormat(locale, {
@@ -41,7 +41,9 @@ export function MoneyCell<R extends RecordType>(props: EditableCellProps<R>) {
   )
 
   const unitsBefore = useMemo(() => {
-    if (!resolvedUnits) return false
+    if (!resolvedUnits) {
+      return false
+    }
 
     if (config?.unitsPosition) {
       return config.unitsPosition === "before"

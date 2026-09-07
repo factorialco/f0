@@ -69,9 +69,13 @@ export const ChatTypingBubble = ({
   // render can't flag the streak's first bubble as already shown.
   const [entryFresh] = useState(() => entryState?.fresh ?? true)
   useEffect(() => {
-    if (entryState) entryState.fresh = false
+    if (entryState) {
+      entryState.fresh = false
+    }
   }, [entryState])
-  if (users.length === 0) return null
+  if (users.length === 0) {
+    return null
+  }
 
   let label = i18n.chat.writing
   if (isGroup) {

@@ -5,8 +5,8 @@ import { createRef, useState } from "react"
 import { beforeEach, describe, expect, expectTypeOf, it, vi } from "vitest"
 import { createDataSourceDefinition, type RecordType } from "@/hooks/datasource"
 import { zeroRender as render } from "@/testing/test-utils"
+import { F0Select } from ".."
 import { Search } from "../../../icons/app"
-import { F0Select } from "../index"
 import type { F0SelectItemProps, F0SelectProps } from "../types"
 
 const mockOptions: F0SelectItemProps<string, RecordType>[] = [

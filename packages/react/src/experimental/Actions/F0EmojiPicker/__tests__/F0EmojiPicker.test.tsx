@@ -2,7 +2,7 @@ import { userEvent } from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
 import { defaultTranslations, I18nProvider } from "@/lib/providers/i18n"
 import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
-import { F0EmojiPicker } from "../index"
+import { F0EmojiPicker } from ".."
 
 vi.mock("@/lib/EmojiPicker", () => ({
   EmojiPicker: ({

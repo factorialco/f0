@@ -53,7 +53,9 @@ const normalizeAddRowActions = (
     | PrimaryActionItemDefinition[]
     | undefined
 ): PrimaryActionItemDefinition[] => {
-  if (!result) return []
+  if (!result) {
+    return []
+  }
   return (Array.isArray(result) ? result : [result]).filter(
     (item): item is PrimaryActionItemDefinition => item !== undefined
   )
@@ -85,7 +87,7 @@ export type RowProps<
    * of the row that changed. */
   isSelected?: boolean
   selectedItems?: Map<string | number, R>
-  columns: ReadonlyArray<TableColumnDefinition<R, Sortings, Summaries>>
+  columns: readonly TableColumnDefinition<R, Sortings, Summaries>[]
   frozenColumnsLeft: number
   checkColumnWidth: number
   tableWithChildren: boolean
@@ -238,9 +240,12 @@ const NestedRowContent = <
   // parent whose fetch comes back empty) also avoids re-requesting every render.
   const requestedDefaultChildrenGenerationRef = useRef<number | null>(null)
   useEffect(() => {
-    if (!open || children.length) return
-    if (requestedDefaultChildrenGenerationRef.current === resetGeneration)
+    if (!open || children.length) {
       return
+    }
+    if (requestedDefaultChildrenGenerationRef.current === resetGeneration) {
+      return
+    }
     requestedDefaultChildrenGenerationRef.current = resetGeneration
     loadChildren()
   }, [open, children.length, loadChildren, resetGeneration])
@@ -453,7 +458,9 @@ const NestedRowContent = <
           addRowActions={addRowActions}
           addRowLabel={addRow?.addNestedRowActionsLabel}
           ref={(el: HTMLTableRowElement | null) => {
-            if (children.length === 0) setFirstChildRef(el)
+            if (children.length === 0) {
+              setFirstChildRef(el)
+            }
             setLastChildRef(el)
           }}
           nestedRowProps={{

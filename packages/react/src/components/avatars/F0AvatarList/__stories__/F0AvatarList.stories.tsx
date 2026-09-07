@@ -359,7 +359,9 @@ export const OverflowPopover: Story = {
           const el = body.querySelector<HTMLElement>(
             '[data-radix-popper-content-wrapper] [data-state="open"]'
           )
-          if (!el) throw new Error("the `+N` popover did not open")
+          if (!el) {
+            throw new Error("the `+N` popover did not open")
+          }
           return el
         },
         { timeout: 3000 }

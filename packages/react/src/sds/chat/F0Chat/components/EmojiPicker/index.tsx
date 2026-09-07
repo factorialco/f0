@@ -94,7 +94,9 @@ export const EmojiPicker = ({
   )
 
   useEffect(() => {
-    if (autoFocusSearch) searchRef.current?.focus()
+    if (autoFocusSearch) {
+      searchRef.current?.focus()
+    }
   }, [autoFocusSearch])
 
   const { frequent, recordUse } = useFrequentEmoji()
@@ -139,7 +141,9 @@ export const EmojiPicker = ({
   const isSearching = query.trim().length > 0
 
   const sections = useMemo<EmojiSection[]>(() => {
-    if (!isSearching) return browseSections
+    if (!isSearching) {
+      return browseSections
+    }
     const results = searchEmoji(query, { maxVersion, localizedTerms })
     // One unlabelled block: a "Results" header over the only thing on screen is
     // noise, and an empty label keeps its sticky row out of the way.
@@ -158,7 +162,9 @@ export const EmojiPicker = ({
   // tail. Only searching resets it — clearing the query is handled by whoever
   // cleared it, and `jumpToSection` scrolls somewhere specific right after.
   useEffect(() => {
-    if (!isSearching) return
+    if (!isSearching) {
+      return
+    }
     virtuosoRef.current?.scrollToIndex({ index: 0, align: "start" })
   }, [query, isSearching])
 
@@ -173,7 +179,9 @@ export const EmojiPicker = ({
   const scrollActiveIntoView = useCallback(
     (index: number) => {
       const row = layout.rowByIndex[index]
-      if (row === undefined) return
+      if (row === undefined) {
+        return
+      }
       virtuosoRef.current?.scrollIntoView({ index: row })
     },
     [layout]
@@ -190,10 +198,14 @@ export const EmojiPicker = ({
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
       // An IME candidate window owns the arrow keys while it's open.
-      if (event.nativeEvent.isComposing) return
+      if (event.nativeEvent.isComposing) {
+        return
+      }
 
       if (isNavigationKey(event.key)) {
-        if (layout.flat.length === 0) return
+        if (layout.flat.length === 0) {
+          return
+        }
         event.preventDefault()
         const next = moveActiveIndex(layout, safeActiveIndex, event.key)
         setActiveIndex(next)
@@ -203,7 +215,9 @@ export const EmojiPicker = ({
 
       if (event.key === "Enter") {
         const emoji = layout.flat[safeActiveIndex]
-        if (!emoji) return
+        if (!emoji) {
+          return
+        }
         event.preventDefault()
         select(emoji)
         return
@@ -226,7 +240,9 @@ export const EmojiPicker = ({
       const groupIndex = browseSections.findIndex(
         (section) => section.id === id
       )
-      if (groupIndex === -1) return
+      if (groupIndex === -1) {
+        return
+      }
 
       setQuery("")
       const nextLayout = buildEmojiLayout(browseSections, EMOJI_COLUMNS)
@@ -245,9 +261,13 @@ export const EmojiPicker = ({
    * bar entry — frequently-used included — so exactly one is always lit, and
    * only a search leaves the bar with nothing selected. */
   const activeSection = useMemo<EmojiSectionId | null>(() => {
-    if (isSearching) return null
+    if (isSearching) {
+      return null
+    }
     const sectionIndex = layout.rows[topRow]?.sectionIndex
-    if (sectionIndex === undefined) return null
+    if (sectionIndex === undefined) {
+      return null
+    }
     return (sections[sectionIndex]?.id as EmojiSectionId) ?? null
   }, [isSearching, layout, topRow, sections])
 

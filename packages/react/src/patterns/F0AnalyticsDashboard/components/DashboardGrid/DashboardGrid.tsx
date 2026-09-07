@@ -112,7 +112,9 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
   // Build item lookup
   const itemMap = useMemo(() => {
     const map = new Map<string, DashboardItemType<Filters>>()
-    for (const item of items) map.set(item.id, item)
+    for (const item of items) {
+      map.set(item.id, item)
+    }
     return map
   }, [items])
 
@@ -141,7 +143,9 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
   // ─── Narrow detection ───────────────────────────────────────
   useEffect(() => {
     const el = containerRef.current
-    if (!el) return
+    if (!el) {
+      return
+    }
     const observer = new ResizeObserver((entries) => {
       for (const entry of entries) {
         setIsNarrow(entry.contentRect.width < NARROW_THRESHOLD)
@@ -161,7 +165,9 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
   // ─── Emit layout changes ────────────────────────────────────
   const emitLayout = useCallback(
     (newRows: Row[]) => {
-      if (!onLayoutChange) return
+      if (!onLayoutChange) {
+        return
+      }
       const layout: DashboardItemLayout[] = []
       let y = 0
       for (const row of newRows) {
@@ -193,12 +199,16 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
    */
   const handleItemContentHeightChange = useCallback(
     (itemId: string, requiredHeight: number) => {
-      if (requiredHeight <= 0) return
+      if (requiredHeight <= 0) {
+        return
+      }
       const needed = Math.ceil(requiredHeight)
 
       setRows((prev) => {
         const rowIdx = prev.findIndex((row) => row.ids.includes(itemId))
-        if (rowIdx === -1 || prev[rowIdx].height >= needed) return prev
+        if (rowIdx === -1 || prev[rowIdx].height >= needed) {
+          return prev
+        }
 
         const next = [...prev]
         next[rowIdx] = { ...next[rowIdx], height: needed }
@@ -313,8 +323,9 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
           clientX <= c.right &&
           clientY >= c.top &&
           clientY <= c.bottom
-        )
+        ) {
           return null
+        }
       }
 
       const rowEls = containerRef.current
@@ -325,7 +336,9 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
           )
         : []
       const cur = rowsRef.current
-      if (rowEls.length === 0 || rowEls.length !== cur.length) return null
+      if (rowEls.length === 0 || rowEls.length !== cur.length) {
+        return null
+      }
 
       const rects = rowEls.map((el) => el.getBoundingClientRect())
       // Nearest row band, splitting the gap between rows at its midpoint.
@@ -343,15 +356,20 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
       const isFromThisRow = draggedId ? row.ids.includes(draggedId) : false
       const third = rect.height / 3
 
-      if (clientY < rect.top + third)
+      if (clientY < rect.top + third) {
         return { type: "new-row", afterRowIdx: i - 1 }
-      if (clientY > rect.bottom - third)
+      }
+      if (clientY > rect.bottom - third) {
         return { type: "new-row", afterRowIdx: i }
+      }
 
       // Middle third → merge into the row.
-      if (isFromThisRow && row.ids.length === 1) return null
-      if (row.ids.length >= MAX_PER_ROW && !isFromThisRow)
+      if (isFromThisRow && row.ids.length === 1) {
+        return null
+      }
+      if (row.ids.length >= MAX_PER_ROW && !isFromThisRow) {
         return { type: "new-row", afterRowIdx: i }
+      }
 
       const cards = rowEls[i].querySelectorAll("[data-card-id]")
       let position = row.ids.length
@@ -372,7 +390,9 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
       // Only the primary (left) button drags. `typeof` guard: in real
       // browsers `button` is always a number (0 for left), but keep going
       // when it's absent so the gesture isn't wrongly suppressed.
-      if (typeof e.button === "number" && e.button !== 0) return
+      if (typeof e.button === "number" && e.button !== 0) {
+        return
+      }
       e.preventDefault()
       e.stopPropagation()
 
@@ -388,8 +408,9 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
           if (
             Math.hypot(ev.clientX - startX, ev.clientY - startY) <
             DRAG_START_THRESHOLD
-          )
+          ) {
             return
+          }
 
           hasStartedDrag = true
           setDragId(id)
@@ -439,8 +460,9 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
 
         const draggedId = dragIdRef.current
         const target = dropTargetRef.current
-        if (commit && hasStartedDrag && draggedId && target)
+        if (commit && hasStartedDrag && draggedId && target) {
           commitDrop(draggedId, target)
+        }
         dragIdRef.current = null
         dropTargetRef.current = null
         chatDropZonesRef.current = []
@@ -648,7 +670,9 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
             >
               {row.ids.map((id, ci) => {
                 const item = itemMap.get(id)
-                if (!item) return null
+                if (!item) {
+                  return null
+                }
                 const isDragging = dragId === id
                 const showIndicatorBefore =
                   isDropRow &&
@@ -775,7 +799,9 @@ function RowItem({
 
   useEffect(() => {
     const el = itemRef.current
-    if (!el) return
+    if (!el) {
+      return
+    }
 
     // Deliberately NOT rAF-scheduled: rAF never fires in hidden/background
     // tabs, and a re-rendering parent can re-run this effect (cancelling the
@@ -787,7 +813,9 @@ function RowItem({
 
     const measure = () => {
       queued = false
-      if (disposed) return
+      if (disposed) {
+        return
+      }
       // Report only genuine overflow: the wrapper is flex-stretched to the
       // row height, so its own height always equals the row's — a useless
       // (and ratcheting) signal. `scrollHeight` exceeds `clientHeight` only
@@ -799,7 +827,9 @@ function RowItem({
     }
 
     const scheduleMeasure = () => {
-      if (queued) return
+      if (queued) {
+        return
+      }
       queued = true
       queueMicrotask(measure)
     }
@@ -951,7 +981,9 @@ function buildRowsFromPositions<Filters extends FiltersDefinition>(
       rowMap.set(y, entry)
     }
     entry.ids.push(item.id)
-    if (h > entry.maxHeight) entry.maxHeight = h
+    if (h > entry.maxHeight) {
+      entry.maxHeight = h
+    }
   }
 
   // Convert map to sorted array of rows
@@ -982,7 +1014,9 @@ function buildRowsGreedy<Filters extends FiltersDefinition>(
 
     currentIds.push(item.id)
     currentSlots += weight
-    if (h > currentMaxHeight) currentMaxHeight = h
+    if (h > currentMaxHeight) {
+      currentMaxHeight = h
+    }
   }
   if (currentIds.length > 0) {
     rows.push({ ids: currentIds, height: currentMaxHeight })
@@ -999,9 +1033,13 @@ function getMinRowHeight<Filters extends FiltersDefinition>(
   let min = DEFAULT_MIN_ROW_HEIGHT
   for (const id of row.ids) {
     const item = itemMap.get(id)
-    if (!item) continue
+    if (!item) {
+      continue
+    }
     const h = MIN_ROW_HEIGHTS[item.type] ?? DEFAULT_MIN_ROW_HEIGHT
-    if (h > min) min = h
+    if (h > min) {
+      min = h
+    }
   }
   return min
 }
@@ -1025,7 +1063,9 @@ function getRowContentMinHeight(
   rowEl: HTMLElement | null | undefined,
   measurableCardIds: ReadonlySet<string>
 ): number {
-  if (!rowEl || measurableCardIds.size === 0) return 0
+  if (!rowEl || measurableCardIds.size === 0) {
+    return 0
+  }
   const prevHeight = rowEl.style.height
   const prevMinHeight = rowEl.style.minHeight
 
@@ -1056,9 +1096,15 @@ function getRowContentMinHeight(
 function getSlotWeight<Filters extends FiltersDefinition>(
   item: DashboardItemType<Filters>
 ): number {
-  if (item.type === "metric") return 1
-  if (item.type === "chart") return 2
-  if (item.type === "collection") return MAX_PER_ROW
+  if (item.type === "metric") {
+    return 1
+  }
+  if (item.type === "chart") {
+    return 2
+  }
+  if (item.type === "collection") {
+    return MAX_PER_ROW
+  }
   return 2
 }
 
@@ -1075,8 +1121,12 @@ function getSlotWeight<Filters extends FiltersDefinition>(
 function resolveItemHeight<Filters extends FiltersDefinition>(
   item: DashboardItemType<Filters>
 ): number {
-  if (item.itemHeight && item.itemHeight > 0) return item.itemHeight
-  if (item.rowSpan) return item.rowSpan * 48
+  if (item.itemHeight && item.itemHeight > 0) {
+    return item.itemHeight
+  }
+  if (item.rowSpan) {
+    return item.rowSpan * 48
+  }
   return ROW_HEIGHTS[item.type] ?? DEFAULT_ROW_HEIGHT
 }
 

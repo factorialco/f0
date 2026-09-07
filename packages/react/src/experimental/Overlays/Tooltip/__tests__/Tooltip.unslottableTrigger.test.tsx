@@ -3,7 +3,7 @@ import { screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it } from "vitest"
 import { zeroRender as render } from "@/testing/test-utils"
-import { TooltipInternal } from "../index"
+import { TooltipInternal } from ".."
 
 /**
  * The trigger mounts through Radix's `asChild` Slot, which needs a single

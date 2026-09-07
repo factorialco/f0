@@ -42,7 +42,9 @@ export const FadeInImage = ({
       decoding="async"
       {...props}
       ref={(el) => {
-        if (el?.complete) markLoaded()
+        if (el?.complete) {
+          markLoaded()
+        }
       }}
       onLoad={(event) => {
         markLoaded()

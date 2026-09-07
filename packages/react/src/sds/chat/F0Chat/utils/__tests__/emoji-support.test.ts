@@ -57,7 +57,9 @@ const installCanvas = ({
       this.drawn = text
     },
     getImageData() {
-      if (this.drawn === "￿") return { data: NOTDEF_PIXELS }
+      if (this.drawn === "￿") {
+        return { data: NOTDEF_PIXELS }
+      }
       if (supports.includes(this.drawn) || decompose.includes(this.drawn)) {
         return { data: GLYPH_PIXELS }
       }

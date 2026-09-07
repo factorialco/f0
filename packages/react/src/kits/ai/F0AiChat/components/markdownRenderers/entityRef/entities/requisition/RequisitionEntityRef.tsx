@@ -47,7 +47,7 @@ export function RequisitionEntityRef({
           ? `${profile.lineManager.firstName} ${profile.lineManager.lastName}`
           : undefined
 
-        const candidateRows: Array<EntityRefDetailRow | undefined> = [
+        const candidateRows: (EntityRefDetailRow | undefined)[] = [
           profile.status
             ? {
                 label: i18n.t("ai.entityRef.requisition.status"),

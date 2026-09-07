@@ -17,8 +17,8 @@ import {
 } from "@/experimental/Navigation/Dropdown/internal.tsx"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { One as OneIcon } from "@/icons/ai"
-import { Ellipsis } from "@/icons/app"
 import {
+  Ellipsis,
   ChevronRight,
   EyeInvisible,
   EyeVisible,
@@ -85,12 +85,12 @@ export interface WidgetProps {
    * takes no className of its own, so this is the seam for it.
    */
   footerClassName?: string
-  summaries?: Array<{
+  summaries?: {
     label: string
     value: string | number
     prefixUnit?: string
     postfixUnit?: string
-  }>
+  }[]
   alert?: string
   status?: {
     text: string
@@ -165,7 +165,9 @@ const useIsWide = (ref: React.RefObject<HTMLElement | null>) => {
 
   useEffect(() => {
     const element = ref.current
-    if (!element || typeof ResizeObserver === "undefined") return
+    if (!element || typeof ResizeObserver === "undefined") {
+      return
+    }
 
     const measure = () => setIsWide(element.clientWidth >= WIDE_WIDGET_PX)
 
@@ -238,7 +240,9 @@ const WidgetTitle = ({
   // title never moves anything beside it.
   const titleClass = cn("truncate", isWide && "text-lg font-semibold")
 
-  if (!link) return <CardTitle className={titleClass}>{title}</CardTitle>
+  if (!link) {
+    return <CardTitle className={titleClass}>{title}</CardTitle>
+  }
 
   const content = (
     <>
@@ -311,7 +315,9 @@ const Container = forwardRef<
   const isWide = useIsWide(cardRef)
 
   useEffect(() => {
-    if (!isDragging || !onDragEnd) return
+    if (!isDragging || !onDragEnd) {
+      return
+    }
     // The pointer can be released anywhere, so the end of a drag is a document
     // concern rather than this card's.
     const handleGlobalMouseUp = () => onDragEnd()

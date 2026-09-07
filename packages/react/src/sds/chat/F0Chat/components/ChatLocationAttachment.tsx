@@ -53,7 +53,9 @@ export const ChatLocationAttachment = ({
       ref={ref}
       href={mapsUrl(location)}
       onClick={() => {
-        if (surface === "transcript") emit.onLocationOpened()
+        if (surface === "transcript") {
+          emit.onLocationOpened()
+        }
       }}
       target="_blank"
       rel="noopener noreferrer"

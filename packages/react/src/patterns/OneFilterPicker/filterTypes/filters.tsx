@@ -78,7 +78,7 @@ export type FilterDefinition =
 
 // This type ensures each filter follows FilterTypeDefinition while preserving its specific type
 type ValidateFilterType<T> = T extends {
-  [K: string]: FilterTypeDefinition<unknown>
+  [K: string]: FilterTypeDefinition
 }
   ? T
   : never

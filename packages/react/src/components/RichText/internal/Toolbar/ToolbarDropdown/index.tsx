@@ -35,7 +35,9 @@ export const ToolbarDropdown = ({
   const [open, setOpen] = useState(false)
 
   const handleButtonClick = () => {
-    if (disabled) return
+    if (disabled) {
+      return
+    }
     setOpen(!open)
   }
 

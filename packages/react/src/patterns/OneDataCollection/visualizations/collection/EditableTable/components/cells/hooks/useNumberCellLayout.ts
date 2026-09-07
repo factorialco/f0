@@ -11,7 +11,9 @@ export function resolveUnits<R extends RecordType>(
   config: NumberCellConfig<R> | undefined,
   item: R
 ): string | undefined {
-  if (!config?.units) return undefined
+  if (!config?.units) {
+    return undefined
+  }
   return typeof config.units === "function" ? config.units(item) : config.units
 }
 

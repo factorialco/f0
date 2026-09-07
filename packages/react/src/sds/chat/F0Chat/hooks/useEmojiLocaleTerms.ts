@@ -27,10 +27,14 @@ export const useEmojiLocaleTerms = (
   )
 
   useEffect(() => {
-    if (!resolved) return
+    if (!resolved) {
+      return
+    }
     let live = true
     void loadEmojiLocaleTerms(resolved).then((loaded) => {
-      if (live) setTerms(loaded)
+      if (live) {
+        setTerms(loaded)
+      }
     })
     return () => {
       live = false

@@ -48,7 +48,9 @@ beforeAll(() => {
     "fetch",
     vi.fn(async (url: string) => {
       const href = String(url)
-      if (href.includes("broken")) return { ok: false, status: 404 }
+      if (href.includes("broken")) {
+        return { ok: false, status: 404 }
+      }
       return {
         ok: true,
         text: async () => (href.endsWith(".md") ? MD_CONTENT : TXT_CONTENT),

@@ -309,8 +309,11 @@ const PinController = () => {
   const togglePin = useCallback((id: string) => {
     setPinnedIds((prev) => {
       const next = new Set(prev)
-      if (next.has(id)) next.delete(id)
-      else next.add(id)
+      if (next.has(id)) {
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
       return next
     })
     // Simulate the backend round-trip: pending while it "saves".

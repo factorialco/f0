@@ -106,7 +106,9 @@ export const F0AiProcessingOverlay = memo(function F0AiProcessingOverlay({
   // doesn't sit on a blurred, non-interactive field. Skip the chat input so
   // the user can keep typing follow-ups while changes apply.
   useEffect(() => {
-    if (!active) return
+    if (!active) {
+      return
+    }
     const activeElement = document.activeElement as HTMLElement | null
     if (
       activeElement &&

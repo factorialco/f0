@@ -671,10 +671,14 @@ describe("F0GridStack", () => {
 
       // Simulate onResizeStop logic
       const node = mockElement.gridstackNode
-      if (!node) return
+      if (!node) {
+        return
+      }
 
       const allowed = node.allowedSizes ?? []
-      if (allowed.length === 0) return
+      if (allowed.length === 0) {
+        return
+      }
 
       const closestAllowed = (
         w: number,
@@ -723,10 +727,14 @@ describe("F0GridStack", () => {
       } as unknown as GridItemHTMLElement
 
       const node = mockElement.gridstackNode
-      if (!node) return
+      if (!node) {
+        return
+      }
 
       const allowed = node.allowedSizes ?? []
-      if (allowed.length === 0) return
+      if (allowed.length === 0) {
+        return
+      }
 
       const closestAllowed = (
         w: number,
@@ -777,7 +785,9 @@ describe("F0GridStack", () => {
       } as unknown as GridItemHTMLElement
 
       const node = mockElement.gridstackNode
-      if (!node) return
+      if (!node) {
+        return
+      }
 
       const allowed = node.allowedSizes ?? []
       expect(allowed.length).toBe(0)

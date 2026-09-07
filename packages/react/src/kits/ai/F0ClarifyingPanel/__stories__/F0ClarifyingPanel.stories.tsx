@@ -11,7 +11,7 @@ import type { ClarifyingQuestionState, ClarifyingSelectionMode } from "../types"
 
 interface StoryStep {
   question: string
-  options: Array<{ id: string; label: string }>
+  options: { id: string; label: string }[]
   selectionMode: ClarifyingSelectionMode
   optional?: boolean
   allowCustomAnswer?: boolean
@@ -85,7 +85,9 @@ function useLocalClarifyingState(
 
   const updateInteraction = useCallback(
     (patch: Partial<StepInteraction>) => {
-      if (!currentStep) return
+      if (!currentStep) {
+        return
+      }
       setInteractions((prev) => ({
         ...prev,
         [currentStep.question]: {
@@ -99,7 +101,9 @@ function useLocalClarifyingState(
 
   const toggleOption = useCallback(
     (optionId: string) => {
-      if (!currentStep) return
+      if (!currentStep) {
+        return
+      }
       if (mode === "single") {
         updateInteraction({ selectedIds: [optionId] })
       } else {
@@ -133,7 +137,9 @@ function useLocalClarifyingState(
 
   const activateCustomAnswer = useCallback(() => {
     const patch: Partial<StepInteraction> = { isCustomActive: true }
-    if (mode === "single") patch.selectedIds = []
+    if (mode === "single") {
+      patch.selectedIds = []
+    }
     updateInteraction(patch)
   }, [mode, updateInteraction])
 
@@ -148,8 +154,9 @@ function useLocalClarifyingState(
         const includeCustom = isSingle
           ? inter.selectedIds.length === 0 && inter.customText.trim().length > 0
           : inter.isCustomActive && inter.customText.trim().length > 0
-        if (includeCustom)
+        if (includeCustom) {
           labels.push(`(own response) ${inter.customText.trim()}`)
+        }
         return labels.length > 0
           ? `${step.question} → ${labels.join(", ")}`
           : `${step.question} → (skipped)`
@@ -169,7 +176,9 @@ function useLocalClarifyingState(
   }, [stepIndex, steps.length, buildSummary])
 
   const skip = useCallback(() => {
-    if (!currentStep?.optional) return
+    if (!currentStep?.optional) {
+      return
+    }
     updateInteraction(EMPTY_INTERACTION)
     if (stepIndex < steps.length - 1) {
       setStepIndex(stepIndex + 1)
@@ -188,7 +197,9 @@ function useLocalClarifyingState(
   }, [])
 
   const back = useCallback(() => {
-    if (stepIndex > 0) setStepIndex(stepIndex - 1)
+    if (stepIndex > 0) {
+      setStepIndex(stepIndex - 1)
+    }
   }, [stepIndex])
 
   const reset = useCallback(() => {

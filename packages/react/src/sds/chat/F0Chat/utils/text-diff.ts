@@ -20,7 +20,9 @@ export type TextEdit = {
 export const diffSpan = (prev: string, next: string): TextEdit => {
   const max = Math.min(prev.length, next.length)
   let start = 0
-  while (start < max && prev[start] === next[start]) start++
+  while (start < max && prev[start] === next[start]) {
+    start++
+  }
   let suffix = 0
   while (
     suffix < max - start &&

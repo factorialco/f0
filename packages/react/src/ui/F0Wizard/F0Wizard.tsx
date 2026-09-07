@@ -37,8 +37,12 @@ export const F0Wizard: FC<F0WizardProps> = ({
   autoSkipCompletedSteps = false,
 }) => {
   const effectiveDefaultStepIndex = useMemo(() => {
-    if (defaultStepIndex !== undefined) return defaultStepIndex
-    if (!autoSkipCompletedSteps) return 0
+    if (defaultStepIndex !== undefined) {
+      return defaultStepIndex
+    }
+    if (!autoSkipCompletedSteps) {
+      return 0
+    }
     const firstIncomplete = steps.findIndex(
       (step) => step.isCompleted?.() !== true
     )

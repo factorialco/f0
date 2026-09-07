@@ -17,7 +17,9 @@ export const F0TagDot = forwardRef<HTMLDivElement, Props>(
         ? `hsl(${baseColors[props.color][50]})`
         : "customColor" in props && props.customColor
 
-    if (!dotColor) return null
+    if (!dotColor) {
+      return null
+    }
 
     return (
       <BaseTag

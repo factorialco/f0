@@ -8,18 +8,18 @@ import { Archive, ArchiveOpen, ExternalLink, Plus, Settings } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { useF0FormDefinition } from "@/patterns/F0WizardForm"
 import { forms } from "@/patterns/forms"
-import type {
-  FileUploadHookReturn,
-  FileUploadResult,
-  FileUploadStatus,
-} from "../fields/types"
 import {
   f0FormField,
   F0Form,
   F0SectionConfig,
   RenderCustomFieldProps,
   F0FormRef,
-} from "../index"
+} from ".."
+import type {
+  FileUploadHookReturn,
+  FileUploadResult,
+  FileUploadStatus,
+} from "../fields/types"
 import type { RenderCustomFieldSelectConfig } from "../types"
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
@@ -1452,11 +1452,15 @@ function useMockUpload(): FileUploadHookReturn {
     setStatus("processing")
     setProgress(0)
     await sleep(500)
-    if (abortRef.current) return { type: "aborted" }
+    if (abortRef.current) {
+      return { type: "aborted" }
+    }
     setStatus("uploading")
     for (let i = 1; i <= 10; i++) {
       await sleep(200)
-      if (abortRef.current) return { type: "aborted" }
+      if (abortRef.current) {
+        return { type: "aborted" }
+      }
       setProgress(i / 10)
     }
     setStatus("success")

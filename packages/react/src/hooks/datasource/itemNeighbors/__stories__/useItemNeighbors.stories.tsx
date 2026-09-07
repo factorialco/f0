@@ -144,7 +144,9 @@ const DetailPanel = ({ withCapability }: { withCapability: boolean }) => {
             label="Previous"
             disabled={!neighbors?.previous || isResolving}
             onClick={() => {
-              if (neighbors?.previous) setActiveId(neighbors.previous.id)
+              if (neighbors?.previous) {
+                setActiveId(neighbors.previous.id)
+              }
             }}
           />
           <F0Button
@@ -156,7 +158,9 @@ const DetailPanel = ({ withCapability }: { withCapability: boolean }) => {
             loading={isResolving}
             disabled={!neighbors?.next || isResolving}
             onClick={() => {
-              if (neighbors?.next) setActiveId(neighbors.next.id)
+              if (neighbors?.next) {
+                setActiveId(neighbors.next.id)
+              }
             }}
           />
         </div>

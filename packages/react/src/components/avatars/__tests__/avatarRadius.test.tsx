@@ -38,7 +38,9 @@ const getAvatarBox = (container: HTMLElement): HTMLElement => {
   const box = container.querySelector<HTMLElement>(
     "[class*='border-f1-border-secondary'], [data-a11y-color-contrast-ignore]"
   )
-  if (!box) throw new Error("Could not locate the avatar box element")
+  if (!box) {
+    throw new Error("Could not locate the avatar box element")
+  }
   return box
 }
 

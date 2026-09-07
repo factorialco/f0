@@ -79,7 +79,9 @@ export const ListItemSingleContent = ({
   const handleLabelClick = (ev: React.MouseEvent<HTMLButtonElement>) => {
     ev.preventDefault()
     ev.stopPropagation()
-    if (disabled) return
+    if (disabled) {
+      return
+    }
     if (selected) {
       onRemove(entity)
     } else {
@@ -90,7 +92,9 @@ export const ListItemSingleContent = ({
   const handleKeyDown = (ev: React.KeyboardEvent<HTMLButtonElement>) => {
     if (ev.key === "Enter" || ev.key === " ") {
       ev.preventDefault()
-      if (disabled) return
+      if (disabled) {
+        return
+      }
       if (!selected) {
         onSelect(entity)
       } else if (selected) {
@@ -228,7 +232,9 @@ const EntitySelectListItem = ({
     } else if (ev.key === "Enter" && singleSelector) {
       onExpand(!expanded)
     } else if (ev.key === "Enter") {
-      if (disabled) return
+      if (disabled) {
+        return
+      }
       if (!selected || partialSelected) {
         onSelect(entity)
       } else if (selected) {
@@ -246,14 +252,23 @@ const EntitySelectListItem = ({
       onExpand(!expanded)
       setPressingLabel(false)
     } else {
-      if (disabled) return
-      if (singleSelector) return
-      if (selected) onRemove(entity)
-      else onSelect(entity)
+      if (disabled) {
+        return
+      }
+      if (singleSelector) {
+        return
+      }
+      if (selected) {
+        onRemove(entity)
+      } else {
+        onSelect(entity)
+      }
     }
   }
 
-  if (!entity.subItems?.length) return null
+  if (!entity.subItems?.length) {
+    return null
+  }
 
   const checked = selected || partialSelected
   return (

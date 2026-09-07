@@ -72,7 +72,9 @@ export const noHigherThan =
     // clone has been measured.
     const top = (draggingNodeRect ?? activeNodeRect)?.top
 
-    if (limit == null || top == null) return transform
+    if (limit == null || top == null) {
+      return transform
+    }
 
     // The card's TOP edge, not its middle: passing the pins means closing the
     // gap on them at all, and a card whose top is exactly on the limit is

@@ -14,7 +14,9 @@ type Props = {
 export const TagCounter = ({ count, list }: Props) => {
   const counter = <F0TagRaw text={`+${count}`} />
 
-  if (!list?.length) return counter
+  if (!list?.length) {
+    return counter
+  }
 
   return (
     <HoverCard>

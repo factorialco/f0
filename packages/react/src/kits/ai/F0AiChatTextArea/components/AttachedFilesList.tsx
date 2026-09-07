@@ -19,7 +19,9 @@ export const AttachedFilesList = ({
   onRemove,
   removeLabel,
 }: AttachedFilesListProps) => {
-  if (attachedFiles.length === 0) return null
+  if (attachedFiles.length === 0) {
+    return null
+  }
 
   return (
     <div

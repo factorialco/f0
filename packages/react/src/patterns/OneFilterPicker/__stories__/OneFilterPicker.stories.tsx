@@ -4,12 +4,12 @@ import { expect, fn, userEvent, within } from "storybook/test"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { Input } from "@/ui/input"
 import { Label } from "@/ui/label"
-import { InFilterOptions } from "../filterTypes/InFilter/types"
-import * as OneFilterPicker from "../index"
+import * as OneFilterPicker from ".."
 import {
   OneFilterPicker as OneFilterPickerComponent,
   OneFilterPickerRootProps,
-} from "../index"
+} from ".."
+import { InFilterOptions } from "../filterTypes/InFilter/types"
 import type {
   FiltersDefinition,
   FiltersState,

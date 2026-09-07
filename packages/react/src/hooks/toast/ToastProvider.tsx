@@ -91,21 +91,27 @@ const StackedToasts = ({
   }, [isTransitioning])
 
   const handleMouseEnter = () => {
-    if (!lockRef.current) setIsHovered(true)
+    if (!lockRef.current) {
+      setIsHovered(true)
+    }
   }
 
   useEffect(() => {
     onHoverChange?.(isHovered)
   }, [isHovered])
 
-  if (items.length === 0) return null
+  if (items.length === 0) {
+    return null
+  }
 
   // Count of actual visible (non-promoted) items for z-index and order calculations
   const visibleCount = items.filter(
     (item) => !promotedEverRef.current.has(item.id)
   ).length
 
-  if (visibleCount === 0) return null
+  if (visibleCount === 0) {
+    return null
+  }
 
   return (
     <div
@@ -324,7 +330,9 @@ const ToastsContainer = ({
   // (kept in sync on resize/scroll). Falls back to the full viewport when the
   // anchor element isn't present.
   useIsomorphicLayoutEffect(() => {
-    if (typeof document === "undefined" || !hasItems) return
+    if (typeof document === "undefined" || !hasItems) {
+      return
+    }
 
     const anchor = document.querySelector<HTMLElement>(toastAnchorSelector)
     if (!anchor) {
@@ -469,7 +477,9 @@ export const ToastProvider = ({
   const prevPortalTargetRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
-    if (typeof document === "undefined") return
+    if (typeof document === "undefined") {
+      return
+    }
     const selector = isMobile
       ? portalTargets?.mobile || "body"
       : portalTargets?.desktop || "body"

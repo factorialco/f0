@@ -8,7 +8,7 @@ import { Placeholder } from "@/lib/storybook-utils/placeholder"
 import { ApplicationFrame } from "@/patterns/ApplicationFrame"
 import { Tabs } from "@/patterns/Navigation/Tabs"
 import * as TabsStories from "@/patterns/Navigation/Tabs/index.stories"
-import { Page } from "./index"
+import { Page } from "."
 
 type TabsProps = ComponentProps<typeof Tabs>
 

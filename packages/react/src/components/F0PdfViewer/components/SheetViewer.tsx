@@ -49,12 +49,19 @@ const SheetViewer = ({
       withCredentials,
     })
       .then((parsed) => {
-        if (cancelled) return
-        if (parsed.length === 0) setFailed(true)
-        else setSheets(parsed)
+        if (cancelled) {
+          return
+        }
+        if (parsed.length === 0) {
+          setFailed(true)
+        } else {
+          setSheets(parsed)
+        }
       })
       .catch(() => {
-        if (!cancelled) setFailed(true)
+        if (!cancelled) {
+          setFailed(true)
+        }
       })
     return () => {
       cancelled = true
@@ -85,7 +92,9 @@ const SheetViewer = ({
             size="sm"
             value={String(activeIndex)}
             onValueChange={(value: string) => {
-              if (value) setActiveIndex(Number(value))
+              if (value) {
+                setActiveIndex(Number(value))
+              }
             }}
             className="justify-start"
           >

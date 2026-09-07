@@ -6,7 +6,7 @@ import {
   userEvent,
   waitFor,
 } from "@/testing/test-utils"
-import { Reactions } from "./index"
+import { Reactions } from "."
 
 it("forwards the lazy user loader and shows the resolved identities", async () => {
   const loadUsers = vi

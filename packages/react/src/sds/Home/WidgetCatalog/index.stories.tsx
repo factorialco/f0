@@ -15,7 +15,7 @@ import {
   WidgetCatalog,
   type WidgetCatalogGroup,
   type WidgetCatalogItem,
-} from "./index"
+} from "."
 
 /**
  * Beyond its header and slots, a widget may carry the `Widget` frame's own

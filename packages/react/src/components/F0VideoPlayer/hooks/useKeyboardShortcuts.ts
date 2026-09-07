@@ -40,16 +40,23 @@ export function useKeyboardShortcuts({
           target.closest(
             'button, a, input, textarea, select, [role="button"], [contenteditable="true"]'
           )
-        )
+        ) {
           return
+        }
         // Inside a menu, let the menu own its keys (Arrow/Space/Enter).
-        if (target.closest('[role="menu"], [role^="menuitem"]')) return
+        if (target.closest('[role="menu"], [role^="menuitem"]')) {
+          return
+        }
         // Custom sliders (seekbar, volume) own their own keyboard handling.
-        if (target.getAttribute("role") === "slider") return
+        if (target.getAttribute("role") === "slider") {
+          return
+        }
       }
 
       const video = videoRef.current
-      if (!video) return
+      if (!video) {
+        return
+      }
 
       const key = event.key.length === 1 ? event.key.toLowerCase() : event.key
 

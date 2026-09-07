@@ -32,16 +32,26 @@ export function usePersistedState<T>(
   debounceMs = 0
 ): [T, React.Dispatch<React.SetStateAction<T>>] {
   const [value, setValue] = useState<T>(() => {
-    if (typeof window === "undefined") return fallback
+    if (typeof window === "undefined") {
+      return fallback
+    }
     const stored = readFromLocalStorage<unknown>(key, null)
-    if (stored === null) return fallback
-    if (validate && !validate(stored)) return fallback
+    if (stored === null) {
+      return fallback
+    }
+    if (validate && !validate(stored)) {
+      return fallback
+    }
     return stored as T
   })
 
   useEffect(() => {
-    if (typeof window === "undefined") return
-    if (shouldWrite && !shouldWrite(value)) return
+    if (typeof window === "undefined") {
+      return
+    }
+    if (shouldWrite && !shouldWrite(value)) {
+      return
+    }
     if (debounceMs <= 0) {
       writeToLocalStorage(key, value)
       return

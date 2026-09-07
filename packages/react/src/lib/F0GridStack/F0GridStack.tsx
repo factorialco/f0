@@ -101,7 +101,9 @@ export const F0GridStack = ({
   const onResizeStop = (_: Event, el: GridItemHTMLElement) => {
     // el is the DOM element of the grid item
     const node = el.gridstackNode // node contains w,h,x,y
-    if (!node) return
+    if (!node) {
+      return
+    }
 
     const allowed = el.gridstackNode?.allowedSizes ?? []
     if (allowed.length === 0) {

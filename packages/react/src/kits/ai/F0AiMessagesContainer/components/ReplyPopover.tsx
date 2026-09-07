@@ -36,7 +36,9 @@ export function ReplyPopover({ anchor, onReply }: ReplyPopoverProps) {
       return
     }
     const el = ref.current
-    if (!el) return
+    if (!el) {
+      return
+    }
 
     const btnWidth = el.offsetWidth
     const btnHeight = el.offsetHeight
@@ -61,8 +63,12 @@ export function ReplyPopover({ anchor, onReply }: ReplyPopoverProps) {
     setCoords({ top, left })
   }, [anchor])
 
-  if (typeof document === "undefined") return null
-  if (!anchor) return null
+  if (typeof document === "undefined") {
+    return null
+  }
+  if (!anchor) {
+    return null
+  }
 
   const label = translation.ai.reply
 

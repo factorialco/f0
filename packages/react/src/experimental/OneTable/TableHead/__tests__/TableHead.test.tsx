@@ -7,8 +7,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "../../index"
-import type { TableHeaderInfo } from "../../index"
+} from "../.."
+import type { TableHeaderInfo } from "../.."
 
 const renderHeader = (
   info: string | TableHeaderInfo,

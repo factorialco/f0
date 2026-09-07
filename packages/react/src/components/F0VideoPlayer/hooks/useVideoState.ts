@@ -58,7 +58,9 @@ export function useVideoState(src: string): UseVideoStateResult {
   useEffect(() => {
     lastTimeUpdateAtRef.current = 0
     // Some browsers preserve `playbackRate` across `src` changes.
-    if (videoRef.current) videoRef.current.playbackRate = DEFAULT_PLAYBACK_RATE
+    if (videoRef.current) {
+      videoRef.current.playbackRate = DEFAULT_PLAYBACK_RATE
+    }
     setVideoLoaded(false)
     setIsPlaying(false)
     setCurrentTime(0)
@@ -69,7 +71,9 @@ export function useVideoState(src: string): UseVideoStateResult {
   // Attach listeners once the element mounts.
   useEffect(() => {
     const video = videoElement
-    if (!video) return
+    if (!video) {
+      return
+    }
 
     const handlePlay = () => setIsPlaying(true)
     const handlePause = () => setIsPlaying(false)
@@ -122,7 +126,9 @@ export function useVideoState(src: string): UseVideoStateResult {
 
   const togglePlay = useCallback(() => {
     const video = videoRef.current
-    if (!video) return
+    if (!video) {
+      return
+    }
     if (video.paused || video.ended) {
       // Autoplay-policy and interrupted-play rejections are benign; swallow them.
       void video.play().catch(() => {})
@@ -133,13 +139,17 @@ export function useVideoState(src: string): UseVideoStateResult {
 
   const toggleMute = useCallback(() => {
     const video = videoRef.current
-    if (!video) return
+    if (!video) {
+      return
+    }
     video.muted = !video.muted
   }, [])
 
   const setVolume = useCallback((value: number) => {
     const video = videoRef.current
-    if (!video) return
+    if (!video) {
+      return
+    }
     const clamped = Math.max(0, Math.min(1, value))
     video.volume = clamped
     video.muted = clamped === 0
@@ -147,13 +157,17 @@ export function useVideoState(src: string): UseVideoStateResult {
 
   const setPlaybackRate = useCallback((rate: PlaybackRate) => {
     const video = videoRef.current
-    if (!video) return
+    if (!video) {
+      return
+    }
     video.playbackRate = rate
   }, [])
 
   const seekTo = useCallback((time: number) => {
     const video = videoRef.current
-    if (!video) return
+    if (!video) {
+      return
+    }
     const clamped = Math.max(0, Math.min(time, video.duration || time))
     video.currentTime = clamped
     setCurrentTime(clamped)

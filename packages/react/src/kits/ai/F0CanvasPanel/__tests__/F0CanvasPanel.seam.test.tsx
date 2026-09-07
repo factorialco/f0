@@ -35,7 +35,9 @@ const backdrop = (): HTMLElement => {
   while (element && !element.className.includes("bg-f1-special-page")) {
     element = element.parentElement
   }
-  if (!element) throw new Error("canvas backdrop not found")
+  if (!element) {
+    throw new Error("canvas backdrop not found")
+  }
   return element
 }
 

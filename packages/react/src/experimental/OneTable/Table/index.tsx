@@ -26,7 +26,9 @@ function TableBase({ children, loading = false }: TableProps) {
 
   useEffect(() => {
     const container = containerRef.current
-    if (!container) return
+    if (!container) {
+      return
+    }
 
     const handleScroll = () => {
       setIsScrolled(container.scrollLeft > 0)

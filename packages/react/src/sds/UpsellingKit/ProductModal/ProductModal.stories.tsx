@@ -3,7 +3,7 @@ import { ComponentProps } from "react"
 import UpsellIcon from "@/icons/app/Upsell"
 import { ApplicationFrame } from "@/patterns/ApplicationFrame"
 import ApplicationFrameStoryMeta from "@/patterns/ApplicationFrame/index.stories"
-import { ProductModal } from "./index"
+import { ProductModal } from "."
 
 const meta = {
   title: "ProductModal",

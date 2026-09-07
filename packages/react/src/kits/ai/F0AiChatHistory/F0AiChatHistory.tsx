@@ -59,7 +59,9 @@ export const F0AiChatHistory = ({
   )
 
   const filteredThreads = useMemo(() => {
-    if (!search.trim()) return threads
+    if (!search.trim()) {
+      return threads
+    }
     const query = search.toLowerCase()
     return threads.filter((t) => t.title.toLowerCase().includes(query))
   }, [threads, search])

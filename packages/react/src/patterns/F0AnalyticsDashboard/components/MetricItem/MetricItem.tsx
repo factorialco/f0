@@ -35,7 +35,7 @@ interface MetricItemProps<Filters extends FiltersDefinition> {
 function formatValue(
   value: number,
   format: MetricFormat = { type: "number" },
-  decimals: number = 0
+  decimals = 0
 ): string {
   switch (format.type) {
     case "currency": {
@@ -75,7 +75,9 @@ function computeTrend(
   value: number,
   previousValue?: number
 ): MetricTrend | undefined {
-  if (previousValue === undefined || previousValue === 0) return undefined
+  if (previousValue === undefined || previousValue === 0) {
+    return undefined
+  }
 
   const percent = ((value - previousValue) / Math.abs(previousValue)) * 100
   const direction = percent > 0.5 ? "up" : percent < -0.5 ? "down" : "flat"

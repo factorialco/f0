@@ -4,8 +4,8 @@ import { endOfDay, startOfDay } from "date-fns"
 import { describe, expect, it, vi } from "vitest"
 import { TranslationsType } from "@/lib/providers/i18n"
 import { zeroRender as render } from "@/testing/test-utils"
+import dateNavigatorFilter from ".."
 import { DateNavigation } from "../DateNavigation"
-import dateNavigatorFilter from "../index"
 import { DateNavigatorFilterDefinition } from "../types"
 
 const periods = [

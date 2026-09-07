@@ -76,7 +76,9 @@ export function useVideoCaptions(
   }, [trackSrc])
 
   useEffect(() => {
-    if (!video) return
+    if (!video) {
+      return
+    }
     const tracks = video.textTracks
     const captionEl = video.querySelector<HTMLTrackElement>(
       'track[kind="captions"]'
@@ -88,11 +90,15 @@ export function useVideoCaptions(
       let cues = false
       for (let i = 0; i < tracks.length; i++) {
         const track = tracks[i]
-        if (!CAPTION_TRACK_KINDS.has(track.kind)) continue
+        if (!CAPTION_TRACK_KINDS.has(track.kind)) {
+          continue
+        }
         // `hidden` still loads/parses cues (needed to judge availability even
         // when captions are toggled off); `showing` also displays them.
         track.mode = showing ? "showing" : "hidden"
-        if (track.cues && track.cues.length > 0) cues = true
+        if (track.cues && track.cues.length > 0) {
+          cues = true
+        }
       }
       setHasCues(cues)
 
@@ -110,7 +116,7 @@ export function useVideoCaptions(
 
     evaluate()
 
-    const cleanups: Array<() => void> = []
+    const cleanups: (() => void)[] = []
     // The <track> element reports load success/failure of a passed URL or blob.
     if (captionEl) {
       const onLoad = () => evaluate()
@@ -125,8 +131,12 @@ export function useVideoCaptions(
     // Re-evaluate as cues parse/activate and as tracks come and go.
     for (let i = 0; i < tracks.length; i++) {
       const track = tracks[i]
-      if (!CAPTION_TRACK_KINDS.has(track.kind)) continue
-      if (typeof track.addEventListener !== "function") continue
+      if (!CAPTION_TRACK_KINDS.has(track.kind)) {
+        continue
+      }
+      if (typeof track.addEventListener !== "function") {
+        continue
+      }
       const onCueChange = () => evaluate()
       track.addEventListener("cuechange", onCueChange)
       cleanups.push(() => track.removeEventListener("cuechange", onCueChange))

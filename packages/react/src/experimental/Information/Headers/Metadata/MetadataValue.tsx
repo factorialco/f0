@@ -9,7 +9,7 @@ import { AlertCircle, Warning } from "@/icons/app"
 import { getColor } from "@/kits/Charts/utils/colors"
 import { cn } from "@/lib/utils"
 import { Progress } from "@/ui/progress"
-import { MetadataItem } from "./index"
+import { MetadataItem } from "."
 
 const DATE_ICON_STYLES = {
   warning: {

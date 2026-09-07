@@ -9,7 +9,7 @@ import { zeroRender as render } from "@/testing/test-utils"
 import { TextCell } from "@/ui/value-display/types/text"
 import { ItemActionsDefinition } from "../../../../item-actions"
 import { SummariesDefinition } from "../../../../summary"
-import { TableCollection } from "../../Table/index"
+import { TableCollection } from "../../Table"
 import { AddRowProvider } from "../context/AddRowContext"
 
 vi.mock("../../property", () => ({
@@ -136,7 +136,7 @@ const testColumns = [
 
 class MockIntersectionObserver implements IntersectionObserver {
   root: Document | Element | null = null
-  rootMargin: string = ``
+  rootMargin = ``
   thresholds: readonly number[] = []
 
   disconnect = vi.fn()

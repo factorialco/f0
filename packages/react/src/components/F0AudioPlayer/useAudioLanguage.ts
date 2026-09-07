@@ -50,12 +50,16 @@ export function useAudioLanguage(
 export function preserveAudioPosition(
   audio: HTMLAudioElement | null | undefined
 ): void {
-  if (!audio) return
+  if (!audio) {
+    return
+  }
   const time = audio.currentTime
   const wasPlaying = !audio.paused
   const restore = () => {
     audio.currentTime = time
-    if (wasPlaying) void audio.play().catch(() => {})
+    if (wasPlaying) {
+      void audio.play().catch(() => {})
+    }
     audio.removeEventListener("loadedmetadata", restore)
   }
   audio.addEventListener("loadedmetadata", restore)

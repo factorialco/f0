@@ -246,7 +246,9 @@ const F0NotesTextEditorComponent = forwardRef<
       return runWithoutOnChange(() => applyPageDocumentPatch(editor, patch))
     },
     insertAIBlock: () => {
-      if (!editor || !aiBlockConfig) return
+      if (!editor || !aiBlockConfig) {
+        return
+      }
       editor
         .chain()
         .focus()
@@ -264,7 +266,9 @@ const F0NotesTextEditorComponent = forwardRef<
         .run()
     },
     insertTranscript: (title, users, messages) => {
-      if (!editor) return
+      if (!editor) {
+        return
+      }
       editor
         .chain()
         .focus()
@@ -281,7 +285,9 @@ const F0NotesTextEditorComponent = forwardRef<
         .run()
     },
     pushContent: (content: string) => {
-      if (!editor) return
+      if (!editor) {
+        return
+      }
       editor
         .chain()
         .focus()
@@ -289,7 +295,9 @@ const F0NotesTextEditorComponent = forwardRef<
         .run()
     },
     insertImage: (file: File) => {
-      if (!editor || !imageUploadConfigWithError) return
+      if (!editor || !imageUploadConfigWithError) {
+        return
+      }
       insertImageFromFile(editor, file, imageUploadConfigWithError)
     },
   }))
@@ -310,7 +318,9 @@ const F0NotesTextEditorComponent = forwardRef<
 
   const handlePlusClick = useCallback(() => {
     const hovered = hoveredRef.current
-    if (!hovered || !editor) return
+    if (!hovered || !editor) {
+      return
+    }
 
     const { pos, nodeSize } = hovered
     const node = editor.state.doc.nodeAt(pos)
@@ -343,7 +353,9 @@ const F0NotesTextEditorComponent = forwardRef<
     status
   const showTitle = onTitleChange || title
 
-  if (!editor) return null
+  if (!editor) {
+    return null
+  }
 
   return (
     <div

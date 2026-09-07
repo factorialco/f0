@@ -125,19 +125,45 @@ export function F0GraphEdgeBase({
 F0GraphEdgeBase.displayName = "F0GraphEdge"
 
 export const F0GraphEdge = memo(F0GraphEdgeBase, (prev, next) => {
-  if (prev.id !== next.id) return false
-  if (prev.variant !== next.variant) return false
-  if (prev.strokeWidth !== next.strokeWidth) return false
-  if (prev.data?.variant !== next.data?.variant) return false
-  if (prev.data?.showDot !== next.data?.showDot) return false
-  if (prev.data?.pathType !== next.data?.pathType) return false
-  if (prev.style?.strokeWidth !== next.style?.strokeWidth) return false
-  if (prev.sourceX !== next.sourceX) return false
-  if (prev.sourceY !== next.sourceY) return false
-  if (prev.targetX !== next.targetX) return false
-  if (prev.targetY !== next.targetY) return false
-  if (prev.sourcePosition !== next.sourcePosition) return false
-  if (prev.targetPosition !== next.targetPosition) return false
+  if (prev.id !== next.id) {
+    return false
+  }
+  if (prev.variant !== next.variant) {
+    return false
+  }
+  if (prev.strokeWidth !== next.strokeWidth) {
+    return false
+  }
+  if (prev.data?.variant !== next.data?.variant) {
+    return false
+  }
+  if (prev.data?.showDot !== next.data?.showDot) {
+    return false
+  }
+  if (prev.data?.pathType !== next.data?.pathType) {
+    return false
+  }
+  if (prev.style?.strokeWidth !== next.style?.strokeWidth) {
+    return false
+  }
+  if (prev.sourceX !== next.sourceX) {
+    return false
+  }
+  if (prev.sourceY !== next.sourceY) {
+    return false
+  }
+  if (prev.targetX !== next.targetX) {
+    return false
+  }
+  if (prev.targetY !== next.targetY) {
+    return false
+  }
+  if (prev.sourcePosition !== next.sourcePosition) {
+    return false
+  }
+  if (prev.targetPosition !== next.targetPosition) {
+    return false
+  }
   return true
 })
 

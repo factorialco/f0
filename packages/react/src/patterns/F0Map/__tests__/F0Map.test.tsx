@@ -13,11 +13,11 @@ const mock = vi.hoisted(() => {
 
   class MockMap {
     opts: Record<string, unknown>
-    handlers: Record<string, Array<(e?: unknown) => void>> = {}
+    handlers: Record<string, ((e?: unknown) => void)[]> = {}
     calls = {
-      easeTo: [] as Array<Record<string, unknown>>,
-      flyTo: [] as Array<Record<string, unknown>>,
-      jumpTo: [] as Array<Record<string, unknown>>,
+      easeTo: [] as Record<string, unknown>[],
+      flyTo: [] as Record<string, unknown>[],
+      jumpTo: [] as Record<string, unknown>[],
       fitBounds: [] as unknown[],
       setStyle: [] as unknown[],
       setProjection: [] as unknown[],
@@ -33,7 +33,9 @@ const mock = vi.hoisted(() => {
     style = {}
 
     constructor(opts: Record<string, unknown>) {
-      if (state.throwOnCreate) throw new Error("WebGL not supported")
+      if (state.throwOnCreate) {
+        throw new Error("WebGL not supported")
+      }
       this.opts = opts
       instances.push(this)
     }
@@ -44,12 +46,16 @@ const mock = vi.hoisted(() => {
       b?: (e?: unknown) => void
     ) {
       const cb = typeof a === "function" ? a : b
-      if (cb) (this.handlers[type] ??= []).push(cb)
+      if (cb) {
+        ;(this.handlers[type] ??= []).push(cb)
+      }
       return this
     }
     once(type: string, cb: (e?: unknown) => void) {
       // Fire `load` on a microtask so the component's handler is registered.
-      if (type === "load") void Promise.resolve().then(() => cb())
+      if (type === "load") {
+        void Promise.resolve().then(() => cb())
+      }
       return this
     }
     off() {

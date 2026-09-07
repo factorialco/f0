@@ -223,7 +223,9 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
 
     useEffect(() => {
       const el = document.getElementById("content")
-      if (!el) return
+      if (!el) {
+        return
+      }
 
       const update = () => {
         const rect = el.getBoundingClientRect()
@@ -258,7 +260,9 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
     useImperativeHandle(ref, () => ({
       wiggle(options?: WiggleOptions) {
         const el = containerRef.current
-        if (!el) return
+        if (!el) {
+          return
+        }
 
         const className = options?.errorHighlight
           ? errorNavigateClassName
@@ -284,7 +288,9 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
     useEffect(() => {
       if (status === "error") {
         const el = containerRef.current
-        if (!el) return
+        if (!el) {
+          return
+        }
 
         if (wiggleTimeoutRef.current) {
           clearTimeout(wiggleTimeoutRef.current)

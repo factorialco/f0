@@ -37,8 +37,12 @@ export const ActiveFiltersChips = <Filters extends FiltersDefinition>({
   useEffect(() => {
     const resolveLabels = async () => {
       const entries = Object.entries(currentFilters).filter(([, value]) => {
-        if (value === undefined || value === null) return false
-        if (Array.isArray(value)) return value.length > 0
+        if (value === undefined || value === null) {
+          return false
+        }
+        if (Array.isArray(value)) {
+          return value.length > 0
+        }
         return value !== ""
       })
 
@@ -106,7 +110,9 @@ export const ActiveFiltersChips = <Filters extends FiltersDefinition>({
     resolveLabels()
   }, [currentFilters, filters, i18n])
 
-  if (activeFilters.length === 0) return null
+  if (activeFilters.length === 0) {
+    return null
+  }
 
   const handleRemoveFilter = (key: string) => {
     const newFilters = { ...currentFilters }

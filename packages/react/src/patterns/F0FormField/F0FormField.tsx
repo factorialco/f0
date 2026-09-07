@@ -1,5 +1,5 @@
 import { useId } from "react"
-import type { ControllerRenderProps, FieldValues } from "react-hook-form"
+import type { ControllerRenderProps } from "react-hook-form"
 import { InputMessages } from "@/components/F0InputField/components/InputMessages"
 import { renderFieldInput } from "@/patterns/F0Form/fields/renderFieldInput"
 import { isFieldRequired } from "@/patterns/F0Form/fields/schema"
@@ -42,7 +42,7 @@ export function F0FormField({
     onBlur: onBlur ?? (() => {}),
     name: field.id,
     ref: () => {},
-  } as ControllerRenderProps<FieldValues>
+  } as ControllerRenderProps
 
   const fieldState = {
     error:

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { Placeholder } from "../../../../lib/storybook-utils/placeholder"
-import { Split } from "./index"
+import { Split } from "."
 
 const meta = {
   title: "Layout/Blocks/Split",

@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useMemo, useState } from "react"
-import { Circle, Desktop } from "../../../icons/app"
 import {
   Select,
   SelectContent,
@@ -8,7 +7,8 @@ import {
   SelectProps,
   SelectTrigger,
   SelectValue,
-} from "../index"
+} from ".."
+import { Circle, Desktop } from "../../../icons/app"
 
 const SelectWithHooks = ({
   options,

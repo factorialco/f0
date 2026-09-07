@@ -79,7 +79,9 @@ export const Search = ({
     open && showResults && Boolean(value) && resultItems.length > 0
 
   const handleResultsScroll = (e: React.UIEvent<HTMLUListElement>) => {
-    if (!hasMore || loadingMore || !onLoadMore) return
+    if (!hasMore || loadingMore || !onLoadMore) {
+      return
+    }
     const el = e.currentTarget
     if (
       el.scrollHeight - el.scrollTop - el.clientHeight <=
@@ -118,7 +120,9 @@ export const Search = ({
   }
 
   useOnClickOutside(ref, () => {
-    if (open) setOpen(false)
+    if (open) {
+      setOpen(false)
+    }
     setShowResults(false)
   })
 
@@ -151,7 +155,9 @@ export const Search = ({
       return
     }
 
-    if (!resultsVisible) return
+    if (!resultsVisible) {
+      return
+    }
 
     if (e.key === "ArrowDown") {
       e.preventDefault()
@@ -168,7 +174,9 @@ export const Search = ({
     } else if (e.key === "Enter") {
       e.preventDefault()
       const target = resultItems[activeIndex >= 0 ? activeIndex : 0]
-      if (target) selectResult(target)
+      if (target) {
+        selectResult(target)
+      }
     }
   }
 

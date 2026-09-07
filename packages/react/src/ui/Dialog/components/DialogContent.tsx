@@ -78,7 +78,9 @@ export const DialogContent = forwardRef<
       }
     }, [propContainer, defaultContainerId])
 
-    if (container === undefined) return null
+    if (container === undefined) {
+      return null
+    }
 
     return (
       <DialogPortal container={container}>

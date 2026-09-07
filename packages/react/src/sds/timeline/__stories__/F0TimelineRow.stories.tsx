@@ -16,7 +16,7 @@ import ThumbsUp from "@/icons/app/ThumbsUp"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { OneDataCollection } from "@/patterns/OneDataCollection"
 import { useDataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
-import { F0TimelineRow } from "../"
+import { F0TimelineRow } from ".."
 import { timelineRowStatuses } from "../types"
 
 const meta = {
@@ -1111,11 +1111,11 @@ type SignatureRow = {
   fileName: string
   fileType: "pdf"
   fileUrl: string
-  assignees: Array<{
+  assignees: {
     name: string
     email: string
     signed?: boolean
-  }>
+  }[]
   statusLabel: string
   statusVariant: "positive" | "warning" | "critical"
 }

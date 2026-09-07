@@ -33,7 +33,7 @@ type ListGroupProps<
   items: R[]
   selectedItems: Map<number | string, R>
   handleSelectItemChange: (item: R, checked: boolean) => void
-  fields: ReadonlyArray<ListPropertyDefinition<R, Sortings>>
+  fields: readonly ListPropertyDefinition<R, Sortings>[]
   itemDefinition: (record: R) => ItemDefinition
   isLoadingMore: boolean
 }

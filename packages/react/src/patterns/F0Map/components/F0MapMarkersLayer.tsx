@@ -63,8 +63,9 @@ const selectionCollapsedIds = (
     if (
       boxesOverlap(head, headBox) ||
       (labelW > 0 && boxesOverlap(head, labelBox))
-    )
+    ) {
       collapsed.add(p.id)
+    }
   }
   return collapsed
 }
@@ -136,7 +137,9 @@ const expandCluster = (
   reduceMotion: boolean
 ) => {
   const cam = map.cameraForBounds(bounds, { padding: 64, maxZoom: 16 })
-  if (!cam?.center) return
+  if (!cam?.center) {
+    return
+  }
   const zoom = cam.zoom ?? map.getZoom()
   if (reduceMotion) {
     map.jumpTo({ center: cam.center, zoom })

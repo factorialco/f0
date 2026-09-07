@@ -39,7 +39,9 @@ export function createAtlaskitDriver(instanceId: symbol): DndDriver {
 
   return {
     registerDraggable(el, { payload, disabled, handle }) {
-      if (disabled) return () => {}
+      if (disabled) {
+        return () => {}
+      }
       return draggable({
         element: el,
         getInitialData: () => {

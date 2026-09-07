@@ -3,7 +3,7 @@ import { useState } from "react"
 import { expect, within } from "storybook/test"
 import { F0Button } from "@/components/F0Button"
 import { Delete } from "@/icons/app"
-import { Dialog } from "./index"
+import { Dialog } from "."
 
 const meta = {
   title: "Dialog (deprecated)",

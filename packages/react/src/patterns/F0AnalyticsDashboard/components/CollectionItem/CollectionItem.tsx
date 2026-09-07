@@ -61,7 +61,7 @@ export function CollectionItem<Filters extends FiltersDefinition>({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [filtersKey, itemFiltersKey]
   )
-  const source = useDataCollectionSource<RecordType>(sourceDefinition, [
+  const source = useDataCollectionSource(sourceDefinition, [
     filtersKey,
     itemFiltersKey,
   ])
@@ -86,11 +86,11 @@ export function CollectionItem<Filters extends FiltersDefinition>({
     ) as
       | {
           options?: {
-            columns?: Array<{
+            columns?: {
               id?: string
               label?: string
               render?: (item: RecordType) => unknown
-            }>
+            }[]
           }
         }
       | undefined
@@ -163,7 +163,9 @@ export function CollectionItem<Filters extends FiltersDefinition>({
               JSON.stringify(prev?.hidden) === JSON.stringify(next?.hidden)
             const sameOrder =
               JSON.stringify(prev?.order) === JSON.stringify(next?.order)
-            if (sameHidden && sameOrder) return prev
+            if (sameHidden && sameOrder) {
+              return prev
+            }
             return next
           })
         }}

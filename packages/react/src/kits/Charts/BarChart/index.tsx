@@ -34,10 +34,10 @@ type ChartDataPoint<K extends ChartConfig> = {
   }
 }
 
-type ActivePayload<K> = Array<{
+type ActivePayload<K> = {
   name: keyof K
   value: number
-}>
+}[]
 
 export type BarChartProps<K extends ChartConfig = ChartConfig> =
   ChartPropsBase<K> & {

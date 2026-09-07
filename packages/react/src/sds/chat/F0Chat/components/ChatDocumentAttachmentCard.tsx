@@ -162,7 +162,9 @@ export const ChatDocumentAttachmentCard = ({
         onClick={() => {
           openDocumentPreview(file)
           // Opening your own not-yet-sent draft is not consuming shared content.
-          if (surface === "transcript") emit.onDocumentOpened({ kind })
+          if (surface === "transcript") {
+            emit.onDocumentOpened({ kind })
+          }
         }}
         disabled={previewDisabled}
         aria-busy={!rendered ? true : undefined}

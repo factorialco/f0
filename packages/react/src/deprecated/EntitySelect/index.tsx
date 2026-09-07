@@ -109,7 +109,9 @@ export const EntitySelect = <T,>(
 
     parentIdsToUpdate.forEach((parentId) => {
       const filteredParent = filteredEntities.find((p) => p.id === parentId)
-      if (!filteredParent) return
+      if (!filteredParent) {
+        return
+      }
 
       const newVisibleSubItems =
         filteredParent.subItems?.filter((sub) =>
@@ -338,7 +340,9 @@ export const EntitySelect = <T,>(
       }
     })
 
-    if (!props.singleSelector) props.onSelect(newSelected)
+    if (!props.singleSelector) {
+      props.onSelect(newSelected)
+    }
   }
 
   const onSearch = (search: string) => {

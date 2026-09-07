@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
 import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
-import { CardSelectableContainer } from "../index"
+import { CardSelectableContainer } from ".."
 import type { CardSelectableItem } from "../types"
 
 const baseItems: CardSelectableItem<string>[] = [

@@ -37,17 +37,15 @@ type SettingsProps<
   NavigationFilters extends NavigationFiltersDefinition,
   Grouping extends GroupingDefinition<R>,
 > = {
-  visualizations: ReadonlyArray<
-    Visualization<
-      R,
-      Filters,
-      Sortings,
-      Summaries,
-      ItemActions,
-      NavigationFilters,
-      Grouping
-    >
-  >
+  visualizations: readonly Visualization<
+    R,
+    Filters,
+    Sortings,
+    Summaries,
+    ItemActions,
+    NavigationFilters,
+    Grouping
+  >[]
   currentVisualization: number
   grouping?: Grouping
   currentGrouping?: GroupingState<R, Grouping>
@@ -133,7 +131,9 @@ export const Settings = <
   const settingsTitle = useMemo(
     () => {
       const visualizationType = visualizations[currentVisualization]?.type
-      if (!visualizationType) return "-"
+      if (!visualizationType) {
+        return "-"
+      }
 
       const visualizationName =
         i18n.collections.visualizations[
@@ -152,8 +152,9 @@ export const Settings = <
   const settingsContext = useDataCollectionSettings()
 
   const hasModifiedSettings = useMemo(() => {
-    if (JSON.stringify(currentSortings) !== JSON.stringify(defaultSortings))
+    if (JSON.stringify(currentSortings) !== JSON.stringify(defaultSortings)) {
       return true
+    }
 
     const visualizationType = visualizations[currentVisualization]?.type
 

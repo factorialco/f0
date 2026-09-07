@@ -30,7 +30,7 @@ type ListSkeletonProps<
     NavigationFilters,
     Grouping
   >
-  fields: ReadonlyArray<ListPropertyDefinition<R, Sortings>>
+  fields: readonly ListPropertyDefinition<R, Sortings>[]
   count?: number
   isInitialLoading?: boolean
   className?: string

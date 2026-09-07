@@ -73,7 +73,9 @@ function findAtTrigger(
 
   // Find the last @ before the cursor
   const atIndex = textBeforeCursor.lastIndexOf("@")
-  if (atIndex === -1) return null
+  if (atIndex === -1) {
+    return null
+  }
 
   // The @ must be at start of text or preceded by whitespace/newline
   if (atIndex > 0) {
@@ -87,7 +89,9 @@ function findAtTrigger(
   const query = text.slice(atIndex + 1, cursorPos)
 
   // Query must not contain newlines (mention search is single-line)
-  if (query.includes("\n")) return null
+  if (query.includes("\n")) {
+    return null
+  }
 
   // Skip if the text after @ matches an already-completed mention AND the
   // cursor is past the mention with a word-boundary separator after it.
@@ -302,7 +306,9 @@ export function useMentions({
   const selectPerson = useCallback(
     (person: PersonProfile) => {
       const atIndex = atIndexRef.current
-      if (atIndex === -1) return
+      if (atIndex === -1) {
+        return
+      }
 
       const name = `${person.firstName} ${person.lastName}`.trim()
       const id = String(person.id)
@@ -339,7 +345,9 @@ export function useMentions({
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>): boolean => {
-      if (!isOpen) return false
+      if (!isOpen) {
+        return false
+      }
 
       // Escape always closes the popover when open
       if (e.key === "Escape") {
@@ -349,7 +357,9 @@ export function useMentions({
       }
 
       // Arrow keys, Enter, and Tab only work when there are results
-      if (results.length === 0) return false
+      if (results.length === 0) {
+        return false
+      }
 
       switch (e.key) {
         case "ArrowDown":
@@ -398,7 +408,9 @@ export function useMentions({
    */
   const transformMentions = useCallback(
     (text: string): string => {
-      if (mentions.length === 0) return text
+      if (mentions.length === 0) {
+        return text
+      }
 
       let result = text
 
@@ -429,7 +441,9 @@ export function useMentions({
       prev.filter((m) => {
         const pattern = `@${m.name}`
         const idx = inputValue.indexOf(pattern)
-        if (idx === -1) return false
+        if (idx === -1) {
+          return false
+        }
 
         // A mention is only "completed" when it has a word-boundary separator
         // right after it. If the separator was deleted, the user is editing
@@ -443,10 +457,14 @@ export function useMentions({
   // Compute popover position: pixel coordinates of the @ character
   // relative to the textarea, then offset so the popover sits above it.
   const popoverPosition: PopoverPosition = useMemo(() => {
-    if (!isOpen || atIndexRef.current === -1) return null
+    if (!isOpen || atIndexRef.current === -1) {
+      return null
+    }
 
     const textarea = textareaRef.current
-    if (!textarea) return null
+    if (!textarea) {
+      return null
+    }
 
     const coords = getCaretCoordinates(textarea, atIndexRef.current)
 
@@ -467,11 +485,17 @@ export function useMentions({
   // name that the user hasn't typed yet. Shown as ghost text after the cursor.
   // When query is empty (user just typed @), show the full name of the first result.
   const inlineCompletion = useMemo<string | null>(() => {
-    if (!isOpen || results.length === 0) return null
+    if (!isOpen || results.length === 0) {
+      return null
+    }
     const person = results[selectedIndex]
-    if (!person) return null
+    if (!person) {
+      return null
+    }
     const fullName = `${person.firstName} ${person.lastName}`.trim()
-    if (query.length === 0) return fullName
+    if (query.length === 0) {
+      return fullName
+    }
     if (fullName.toLowerCase().startsWith(query.toLowerCase())) {
       return fullName.slice(query.length)
     }

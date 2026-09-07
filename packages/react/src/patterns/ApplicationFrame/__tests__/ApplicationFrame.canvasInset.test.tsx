@@ -77,7 +77,9 @@ const canvasContainer = (): HTMLElement => {
   while (element && !element.className.includes("pointer-events-none")) {
     element = element.parentElement
   }
-  if (!element) throw new Error("canvas container not found")
+  if (!element) {
+    throw new Error("canvas container not found")
+  }
   return element
 }
 
@@ -183,7 +185,9 @@ describe("ApplicationFrame canvas inset", () => {
 
     const handle = await waitFor(() => {
       const node = document.querySelector<HTMLElement>(".cursor-ew-resize")
-      if (!node) throw new Error("resize handle not found")
+      if (!node) {
+        throw new Error("resize handle not found")
+      }
       return node
     })
 

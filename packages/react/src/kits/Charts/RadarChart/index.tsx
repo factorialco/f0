@@ -24,12 +24,12 @@ export type RadarChartProps<K extends ChartConfig> = {
   scaleMin?: number
   scaleMax?: number
   aspect?: ComponentProps<typeof ChartContainer>["aspect"]
-  defaultHiddenSeries?: Array<keyof K>
+  defaultHiddenSeries?: (keyof K)[]
 }
 
 type InteractiveLegendProps<K extends ChartConfig> = {
   series: { key: string; color: string; label: ReactNode }[]
-  hiddenKeys: Array<keyof K>
+  hiddenKeys: (keyof K)[]
   onToggle: (key: keyof K) => void
 }
 
@@ -80,7 +80,7 @@ const _RadarChart = <K extends ChartConfig>(
   }: RadarChartProps<K> & { dataTestId?: string },
   ref: ForwardedRef<HTMLDivElement>
 ) => {
-  const [hiddenKeys, setHiddenKeys] = useState<Array<keyof K>>(
+  const [hiddenKeys, setHiddenKeys] = useState<(keyof K)[]>(
     defaultHiddenSeries ?? []
   )
 

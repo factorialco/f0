@@ -30,7 +30,9 @@ export function useHorizontalScrollFade(fade: number = SCROLL_FADE_PX) {
   const [ends, setEnds] = useState({ start: false, end: false })
 
   useEffect(() => {
-    if (!el) return
+    if (!el) {
+      return
+    }
 
     const read = () => {
       // A pixel of slack: fractional scroll offsets and zoom leave sub-pixel
@@ -50,7 +52,9 @@ export function useHorizontalScrollFade(fade: number = SCROLL_FADE_PX) {
     const observer =
       typeof ResizeObserver === "function" ? new ResizeObserver(read) : null
     observer?.observe(el)
-    for (const child of Array.from(el.children)) observer?.observe(child)
+    for (const child of Array.from(el.children)) {
+      observer?.observe(child)
+    }
 
     return () => {
       el.removeEventListener("scroll", read)
@@ -59,7 +63,9 @@ export function useHorizontalScrollFade(fade: number = SCROLL_FADE_PX) {
   }, [el])
 
   const style = useMemo<CSSProperties>(() => {
-    if (!ends.start && !ends.end) return {}
+    if (!ends.start && !ends.end) {
+      return {}
+    }
     const from = ends.start ? `transparent 0, black ${fade}px` : "black 0"
     const to = ends.end
       ? `black calc(100% - ${fade}px), transparent 100%`

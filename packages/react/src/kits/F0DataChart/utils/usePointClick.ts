@@ -63,7 +63,9 @@ function resolveColumn(
 
   series.forEach((entry, seriesIndex) => {
     const name = String(entry.name ?? "")
-    if (selected?.[name] === false) return
+    if (selected?.[name] === false) {
+      return
+    }
 
     const point = entry.data?.[dataIndex]
     // A series that styles one of its points sends `{ value }` instead of a
@@ -72,10 +74,14 @@ function resolveColumn(
       point !== null && typeof point === "object" && "value" in point
         ? (point as { value?: unknown }).value
         : point
-    if (raw === null || raw === undefined || raw === "") return
+    if (raw === null || raw === undefined || raw === "") {
+      return
+    }
 
     const value = Number(raw)
-    if (!Number.isFinite(value)) return
+    if (!Number.isFinite(value)) {
+      return
+    }
 
     const resolved = { name, seriesIndex, value }
     entries.push(resolved)
@@ -125,13 +131,19 @@ export function usePointClick(
 
   useEffect(() => {
     const chart = chartRef.current
-    if (!chart) return
+    if (!chart) {
+      return
+    }
 
     // ─── "plot": resolve the click from the canvas ──────────────
     if (hitArea === "plot") {
-      if (typeof chart.getZr !== "function") return
+      if (typeof chart.getZr !== "function") {
+        return
+      }
       const zr = chart.getZr()
-      if (!zr) return
+      if (!zr) {
+        return
+      }
       let isAxisHover = false
 
       const pointOf = (ev: unknown): [number, number] | null => {
@@ -180,7 +192,9 @@ export function usePointClick(
 
       const onPlotClick = (ev: unknown) => {
         const handler = handlerRef.current
-        if (!handler) return
+        if (!handler) {
+          return
+        }
 
         const e = ev as {
           offsetX?: number
@@ -188,18 +202,26 @@ export function usePointClick(
           event?: NativePosition
         }
         const pixel = pointOf(e)
-        if (!pixel) return
+        if (!pixel) {
+          return
+        }
         // The plot area only: clicks on the legend, the axes or the margins
         // aren't picks, and this is exactly the region the tooltip covers.
-        if (!chart.containPixel("grid", pixel)) return
+        if (!chart.containPixel("grid", pixel)) {
+          return
+        }
 
         const coords = chart.convertFromPixel({ gridIndex: 0 }, pixel) as
           | number[]
           | undefined
         const xValue = coords?.[0]
         const yValue = coords?.[1]
-        if (typeof xValue !== "number" || !Number.isFinite(xValue)) return
-        if (typeof yValue !== "number" || !Number.isFinite(yValue)) return
+        if (typeof xValue !== "number" || !Number.isFinite(xValue)) {
+          return
+        }
+        if (typeof yValue !== "number" || !Number.isFinite(yValue)) {
+          return
+        }
 
         const option = chart.getOption() as {
           series?: PlotSeries[]
@@ -222,7 +244,9 @@ export function usePointClick(
           yValue,
           option.legend?.[0]?.selected
         )
-        if (!column) return
+        if (!column) {
+          return
+        }
 
         // `hideTip` is safe to fire even with no tooltip showing.
         chart.dispatchAction({ type: "hideTip" })
@@ -260,11 +284,15 @@ export function usePointClick(
     }
 
     // ─── "mark": ECharts names the mark for us ──────────────────
-    if (typeof chart.on !== "function") return
+    if (typeof chart.on !== "function") {
+      return
+    }
 
     const onClick = (params: unknown) => {
       const handler = handlerRef.current
-      if (!handler) return
+      if (!handler) {
+        return
+      }
 
       const p = params as {
         componentType?: string
@@ -281,7 +309,9 @@ export function usePointClick(
 
       // Axis labels, legend entries and the like also raise `click`; only marks
       // belonging to a series carry a value worth quoting.
-      if (p.componentType !== "series") return
+      if (p.componentType !== "series") {
+        return
+      }
 
       // Bars and lines give a bare number; a scatter point gives `[x, y]` and a
       // heatmap cell `[xIndex, yIndex, value]`. The measure is the last entry —
@@ -294,12 +324,15 @@ export function usePointClick(
         list.some(
           (entry) => entry === null || entry === undefined || entry === ""
         )
-      )
+      ) {
         return
+      }
       const values = list.map(Number)
       // Every tuple member is semantic data: a finite Y cannot make a broken
       // scatter X or heatmap index safe to quote.
-      if (values.some((entry) => !Number.isFinite(entry))) return
+      if (values.some((entry) => !Number.isFinite(entry))) {
+        return
+      }
       const value = values[values.length - 1]
 
       // `hideTip` is safe to fire even with no tooltip showing.
@@ -327,7 +360,9 @@ export function usePointClick(
     return () => {
       // `off` throws on a disposed instance, which happens when the chart
       // unmounts before this cleanup runs.
-      if (!chart.isDisposed?.()) chart.off("click", onClick)
+      if (!chart.isDisposed?.()) {
+        chart.off("click", onClick)
+      }
     }
   }, [chartRef, hitArea])
 }

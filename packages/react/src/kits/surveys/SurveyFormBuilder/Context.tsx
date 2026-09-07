@@ -89,7 +89,9 @@ export function SurveyFormBuilderProvider({
 
   const lastElementId = useMemo(() => {
     const lastElement = elements[elements.length - 1]
-    if (!lastElement) return undefined
+    if (!lastElement) {
+      return undefined
+    }
 
     return lastElement.type === "section"
       ? lastElement.section.id

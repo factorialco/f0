@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
 import { zeroRender as render, screen } from "@/testing/test-utils"
-import { F0Dialog } from "../index"
+import { F0Dialog } from ".."
 
 describe("patterns F0Dialog tabs strip", () => {
   const tabs = [

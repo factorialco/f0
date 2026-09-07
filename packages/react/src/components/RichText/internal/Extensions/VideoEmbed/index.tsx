@@ -162,7 +162,9 @@ export const VideoEmbedExtension = Node.create({
         ({ src }) =>
         ({ commands }) => {
           const info = parseVideoUrl(src)
-          if (!info) return false
+          if (!info) {
+            return false
+          }
 
           return commands.insertContent({
             type: this.name,
@@ -183,7 +185,9 @@ export const VideoEmbedExtension = Node.create({
         type: this.type,
         getAttributes: (match) => {
           const info = parseVideoUrl(match[0])
-          if (!info) return false
+          if (!info) {
+            return false
+          }
           return {
             src: info.embedUrl,
             provider: info.provider,
@@ -196,7 +200,9 @@ export const VideoEmbedExtension = Node.create({
         type: this.type,
         getAttributes: (match) => {
           const info = parseVideoUrl(match[0])
-          if (!info) return false
+          if (!info) {
+            return false
+          }
           return {
             src: info.embedUrl,
             provider: info.provider,

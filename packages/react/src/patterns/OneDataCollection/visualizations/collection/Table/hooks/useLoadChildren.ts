@@ -44,7 +44,9 @@ interface UseLoadChildrenProps<
 const isDetailed = <R extends RecordType>(
   data?: ChildrenResponse<R>
 ): data is NestedResponseWithType<R> => {
-  if (!data) return false
+  if (!data) {
+    return false
+  }
 
   return typeof data === "object" && "type" in data && data.type === "detailed"
 }
@@ -52,7 +54,9 @@ const isDetailed = <R extends RecordType>(
 const getChildren = <R extends RecordType>(
   fetchedData?: ChildrenResponse<R>
 ): R[] => {
-  if (!fetchedData) return []
+  if (!fetchedData) {
+    return []
+  }
 
   return Array.isArray(fetchedData) ? fetchedData : fetchedData.records
 }
@@ -60,7 +64,9 @@ const getChildren = <R extends RecordType>(
 const getChildrenType = <R extends RecordType>(
   fetchedData?: ChildrenResponse<R>
 ): NestedVariant => {
-  if (!fetchedData) return "basic"
+  if (!fetchedData) {
+    return "basic"
+  }
 
   return isDetailed(fetchedData) ? (fetchedData?.type ?? "basic") : "basic"
 }
@@ -138,7 +144,9 @@ export const useLoadChildren = <
   // same generation) instead of keeping the stale children.
   const previousResetGenerationRef = useRef(resetGeneration)
   useEffect(() => {
-    if (previousResetGenerationRef.current === resetGeneration) return
+    if (previousResetGenerationRef.current === resetGeneration) {
+      return
+    }
     previousResetGenerationRef.current = resetGeneration
 
     // Drop every live page: their subscriptions belong to the previous query and
@@ -193,7 +201,9 @@ export const useLoadChildren = <
   )
 
   const loadChildren = useCallback(() => {
-    if (children.length > 0 && !paginationInfo?.hasMore) return children
+    if (children.length > 0 && !paginationInfo?.hasMore) {
+      return children
+    }
 
     // The page about to be requested — the same cursor handed to the consumer.
     const page = (paginationInfo?.currentPage ?? 0) + 1

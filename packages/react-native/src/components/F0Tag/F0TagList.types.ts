@@ -47,7 +47,7 @@ export type F0TagListProps<T extends F0TagListType> = {
   /**
    * Array of tag props matching the selected `type`.
    */
-  tags: Array<F0TagListTypeMapping[T]>
+  tags: F0TagListTypeMapping[T][]
   /**
    * Maximum number of visible tags before showing overflow counter.
    * @default 4

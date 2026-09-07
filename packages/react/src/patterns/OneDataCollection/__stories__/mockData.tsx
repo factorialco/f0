@@ -10,6 +10,7 @@ import {
   MOCK_ICONS,
   MockUser,
   TEAMS_MOCK,
+  DEPARTMENTS_MOCK,
 } from "@/mocks"
 import { SummariesDefinition } from "@/patterns/OneDataCollection/summary.ts"
 export { generateMockUsers, type MockUser }
@@ -45,7 +46,6 @@ import {
   Star,
   Upload,
 } from "@/icons/app"
-import { DEPARTMENTS_MOCK } from "@/mocks"
 import {
   BulkActionsDefinition,
   DataCollectionBaseFetchOptions,
@@ -297,7 +297,7 @@ export const filterPresets: PresetsDefinition<typeof filters> = [
 export class MockDataCache<T extends MockUser> {
   // Map of id -> object for efficient updates
   private dataMap: Map<string, T>
-  private subscribers: Set<() => void> = new Set()
+  private subscribers = new Set<() => void>()
 
   constructor(initialData: T[]) {
     // Initialize cache with data
@@ -329,7 +329,9 @@ export class MockDataCache<T extends MockUser> {
 
   updateItemDepartment(itemId: string, newDepartment: string): T | null {
     const item = this.dataMap.get(itemId)
-    if (!item) return null
+    if (!item) {
+      return null
+    }
 
     // Update the cached object
     item.department = newDepartment as (typeof DEPARTMENTS_MOCK)[number]
@@ -344,7 +346,9 @@ export class MockDataCache<T extends MockUser> {
    * Replace an item in the cache with a new version.
    */
   updateItem(updatedItem: T): T | null {
-    if (!this.dataMap.has(updatedItem.id)) return null
+    if (!this.dataMap.has(updatedItem.id)) {
+      return null
+    }
     this.dataMap.set(updatedItem.id, updatedItem)
     this.notify()
     return updatedItem
@@ -1382,28 +1386,22 @@ export const ExampleComponent = ({
   presets?: PresetsDefinition<typeof filters>
   frozenColumns?: 0 | 1 | 2
   fullHeight?: boolean
-  visualizations?: ReadonlyArray<
-    Visualization<
-      MockUser,
-      FiltersType,
-      typeof sortings,
-      SummariesDefinition,
-      ItemActionsDefinition<MockUser>,
-      NavigationFiltersDefinition,
-      GroupingDefinition<MockUser>
-    >
-  >
+  visualizations?: readonly Visualization<
+    MockUser,
+    FiltersType,
+    typeof sortings,
+    SummariesDefinition,
+    ItemActionsDefinition<MockUser>,
+    NavigationFiltersDefinition,
+    GroupingDefinition<MockUser>
+  >[]
   id?: string
   storage?:
     | false
     | {
         features?: DataCollectionStorageFeaturesDefinition
       }
-  dataAdapter?: DataCollectionDataAdapter<
-    MockUser,
-    FiltersType,
-    NavigationFiltersDefinition
-  >
+  dataAdapter?: DataCollectionDataAdapter<MockUser, FiltersType>
   defaultSelectedItems?: SelectedItemsState<MockUser>
   selectable?: (item: MockUser) => string | number | undefined
   allPagesSelection?: boolean
@@ -1451,7 +1449,9 @@ export const ExampleComponent = ({
   const [cacheVersion, setCacheVersion] = useState(0)
 
   useEffect(() => {
-    if (!cache) return
+    if (!cache) {
+      return
+    }
 
     const unsubscribe = cache.subscribe(() => {
       setCacheVersion((v) => v + 1)
@@ -1473,7 +1473,9 @@ export const ExampleComponent = ({
   // By including cacheVersion in the useMemo deps and in the returned object,
   // we ensure that useData detects the change and triggers a refetch
   const dataAdapterMemoized = useMemo(() => {
-    if (dataAdapter) return dataAdapter
+    if (dataAdapter) {
+      return dataAdapter
+    }
 
     return {
       fetchData: useObservable
@@ -1552,7 +1554,9 @@ export const ExampleComponent = ({
       fetchChildren: async ({ item, pagination }) => {
         await new Promise((resolve) => setTimeout(resolve, 1000))
 
-        if (!item.children) return { records: [] }
+        if (!item.children) {
+          return { records: [] }
+        }
 
         // A real page, not the whole list echoed back with a pinned `hasMore`:
         // that shape made "See more" append the same records forever, so it
@@ -1652,11 +1656,18 @@ export const SubfiltersExampleComponent = () => {
             const deskSel = (f.desk as string[] | undefined) ?? []
 
             const filtered = base.filter((u) => {
-              if (officeSel.length && !officeSel.includes(u.officeId))
+              if (officeSel.length && !officeSel.includes(u.officeId)) {
                 return false
-              if (spaceSel.length && !spaceSel.includes(u.spaceId)) return false
-              if (deskSel.length && (!u.deskId || !deskSel.includes(u.deskId)))
+              }
+              if (spaceSel.length && !spaceSel.includes(u.spaceId)) {
                 return false
+              }
+              if (
+                deskSel.length &&
+                (!u.deskId || !deskSel.includes(u.deskId))
+              ) {
+                return false
+              }
               return true
             })
             resolve({ records: filtered })

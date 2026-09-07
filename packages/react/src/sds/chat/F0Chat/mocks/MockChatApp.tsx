@@ -53,11 +53,17 @@ export const resolveMockReactionUsers = (
   const message = messages.find(
     (item) => isUserMessage(item) && item.id === messageId
   )
-  if (!seed || !message || !isUserMessage(message)) return []
+  if (!seed || !message || !isUserMessage(message)) {
+    return []
+  }
 
   const reaction = message.reactions?.find((item) => item.emoji === emoji)
-  if (!reaction) return []
-  if (reaction.users?.length === reaction.count) return reaction.users
+  if (!reaction) {
+    return []
+  }
+  if (reaction.users?.length === reaction.count) {
+    return reaction.users
+  }
 
   return seed.participants.slice(0, reaction.count)
 }
@@ -157,7 +163,9 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
   // groups. The current user is included (you can @-mention yourself).
   const searchMembers = useCallback(
     (query: string): Promise<F0ChatUser[]> => {
-      if (!seed) return Promise.resolve([])
+      if (!seed) {
+        return Promise.resolve([])
+      }
       const q = query.trim().toLowerCase()
       const matches = [...seed.participants, ME]
         .filter((p) =>

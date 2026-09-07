@@ -54,8 +54,12 @@ export const DialogsAlike = ({ items }: DialogsAlikeProps) => {
     // An item just left the store: schedule its removal once its exit
     // animation has had time to play.
     for (const previousItem of previousItems) {
-      if (liveIds.has(previousItem.id)) continue
-      if (exitTimers.current.has(previousItem.id)) continue
+      if (liveIds.has(previousItem.id)) {
+        continue
+      }
+      if (exitTimers.current.has(previousItem.id)) {
+        continue
+      }
       const timer = setTimeout(() => {
         exitTimers.current.delete(previousItem.id)
         setRenderedItems((current) =>
@@ -71,8 +75,12 @@ export const DialogsAlike = ({ items }: DialogsAlikeProps) => {
       // ...then retain previously-rendered items that are no longer live so
       // they can animate out.
       for (const previousItem of previous) {
-        if (liveIds.has(previousItem.id)) continue
-        if (next.some((item) => item.id === previousItem.id)) continue
+        if (liveIds.has(previousItem.id)) {
+          continue
+        }
+        if (next.some((item) => item.id === previousItem.id)) {
+          continue
+        }
         next.push(previousItem)
       }
       // Avoid a needless re-render (which would regenerate action ids) when the
@@ -87,7 +95,9 @@ export const DialogsAlike = ({ items }: DialogsAlikeProps) => {
   useEffect(() => {
     const timers = exitTimers.current
     return () => {
-      for (const timer of timers.values()) clearTimeout(timer)
+      for (const timer of timers.values()) {
+        clearTimeout(timer)
+      }
       timers.clear()
     }
   }, [])

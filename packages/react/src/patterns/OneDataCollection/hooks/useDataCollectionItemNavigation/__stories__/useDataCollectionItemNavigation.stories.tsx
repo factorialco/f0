@@ -10,7 +10,7 @@ import {
 } from "@/lib/providers/datacollection"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { DEPARTMENTS_MOCK, generateMockUsers, MockUser } from "@/mocks"
-import { OneDataCollection } from "../../../index"
+import { OneDataCollection } from "../../.."
 import {
   DataCollectionSourceDefinition,
   useDataCollectionSource,
@@ -147,7 +147,9 @@ const UserDetail = ({
     collectionId: COLLECTION_ID,
     activeItemId: userId,
     onActiveItemChange: (id) => {
-      if (typeof id === "string") onNavigate(id)
+      if (typeof id === "string") {
+        onNavigate(id)
+      }
     },
     getItemTitle: (user) => user.name,
   })

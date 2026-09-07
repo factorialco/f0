@@ -9,7 +9,7 @@ import {
   type HomeWidgetItem,
   type WidgetParams,
 } from "../slotRenderers"
-import { WidgetCatalog, type WidgetCatalogGroup } from "./index"
+import { WidgetCatalog, type WidgetCatalogGroup } from "."
 
 const GROUPS: WidgetCatalogGroup[] = [
   { id: "time", label: "Time & attendance", module: "time-tracking" },
@@ -49,7 +49,9 @@ const listed = () =>
  */
 const boxAround = (a: HTMLElement, b: HTMLElement) => {
   let node: HTMLElement | null = a
-  while (node && !node.contains(b)) node = node.parentElement
+  while (node && !node.contains(b)) {
+    node = node.parentElement
+  }
   return node
 }
 

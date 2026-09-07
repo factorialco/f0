@@ -118,7 +118,9 @@ export function useA11yAudit(): {
   const started = useRef(false)
 
   const start = useCallback(() => {
-    if (started.current) return
+    if (started.current) {
+      return
+    }
     started.current = true
     if (!isInStorybookDocs()) {
       setState({ status: "unavailable" })
@@ -271,7 +273,9 @@ export function A11yRow({ detail, tier }: { detail: string; tier: A11yTier }) {
 
   const onToggle = useCallback(
     (e: React.SyntheticEvent<HTMLDetailsElement>) => {
-      if (!e.currentTarget.open) return
+      if (!e.currentTarget.open) {
+        return
+      }
       start()
     },
     [start]

@@ -62,16 +62,24 @@ export const F0Icon = forwardRef<SVGSVGElement, F0IconProps>(function F0Icon(
   { size, icon, state = "normal", color = "currentColor", ...props },
   ref
 ) {
-  if (!icon) return null
+  if (!icon) {
+    return null
+  }
   const Component = icon
   const isAnimated = icon.displayName?.includes("Animated")
 
   const isHexColor = color.startsWith("#")
 
   const getColorClass = (colorValue: string) => {
-    if (colorValue === "currentColor") return "text-current"
-    if (colorValue === "default") return "text-f1-icon"
-    if (colorValue.startsWith("#")) return ""
+    if (colorValue === "currentColor") {
+      return "text-current"
+    }
+    if (colorValue === "default") {
+      return "text-f1-icon"
+    }
+    if (colorValue.startsWith("#")) {
+      return ""
+    }
     return `text-f1-icon-${colorValue}`
   }
 

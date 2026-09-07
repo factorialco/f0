@@ -30,7 +30,9 @@ export const Thinking = ({
     : (title ?? translations.ai.thoughtsGroupTitle)
   const lastIndex = titles.length - 1
   const itemStatus = (index: number): "executing" | "completed" => {
-    if (!inProgress || isWriting) return "completed"
+    if (!inProgress || isWriting) {
+      return "completed"
+    }
     return index === lastIndex ? "executing" : "completed"
   }
 

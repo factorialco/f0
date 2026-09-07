@@ -5,7 +5,7 @@ import { F0Button } from "@/components/F0Button"
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { Skeleton } from "@/ui/skeleton"
-import { Await } from "../index"
+import { Await } from ".."
 
 // Deterministic promise states for the snapshot.
 const pendingPromise = new Promise<string>(() => {})

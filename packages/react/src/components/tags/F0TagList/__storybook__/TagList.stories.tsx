@@ -1,6 +1,6 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-import { F0TagList, TagType } from "../"
+import { F0TagList, TagType } from ".."
 import { mockTags } from "./mockData"
 
 const longLabelDotTags = [

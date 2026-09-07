@@ -166,9 +166,15 @@ function statusMultiplier(filters: Filters): number {
       ? (filters.status as string[])
       : null
 
-  if (!selected) return 1
-  if (selected.length === 2) return 1
-  if (selected.includes("Active")) return 0.75
+  if (!selected) {
+    return 1
+  }
+  if (selected.length === 2) {
+    return 1
+  }
+  if (selected.includes("Active")) {
+    return 0.75
+  }
   return 0.25
 }
 

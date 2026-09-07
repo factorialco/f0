@@ -79,7 +79,9 @@ describe("EmojiPicker", () => {
       this: HTMLElement,
       node: Node
     ) {
-      if (node === stub) propsAtAppendTime = stub.props
+      if (node === stub) {
+        propsAtAppendTime = stub.props
+      }
       return originalAppend.call(this, node) as Node
     })
     vi.spyOn(document, "createElement").mockImplementation((tag: string) =>

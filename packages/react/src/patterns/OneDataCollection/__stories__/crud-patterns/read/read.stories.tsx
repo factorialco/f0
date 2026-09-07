@@ -10,8 +10,8 @@ import { F0ResourceHeader } from "@/patterns/F0ResourceHeader"
 import { Page as NavigationPage } from "@/patterns/Navigation/Page"
 import * as SidebarStories from "@/patterns/Navigation/Sidebar/index.stories"
 import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
+import { OneDataCollection } from "../../.."
 import { useDataCollectionSource } from "../../../hooks/useDataCollectionSource"
-import { OneDataCollection } from "../../../index"
 import {
   cardVisualization,
   createResourceDataAdapter,
@@ -41,8 +41,12 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 function statusVariant(status: Resource["status"]) {
-  if (status === "Complete") return "positive"
-  if (status === "Needs details") return "warning"
+  if (status === "Complete") {
+    return "positive"
+  }
+  if (status === "Needs details") {
+    return "warning"
+  }
   return "neutral"
 }
 

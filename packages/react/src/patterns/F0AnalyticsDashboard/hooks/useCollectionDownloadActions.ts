@@ -67,7 +67,7 @@ interface UseCollectionDownloadActionsOptions {
 }
 
 async function resolvePromiseLike<T>(value: T | Promise<T>): Promise<T> {
-  return value instanceof Promise ? await value : value
+  return value instanceof Promise ? value : value
 }
 
 /**
@@ -127,9 +127,13 @@ async function fetchAllStateAwareRecords(
           pagination: { currentPage, perPage: EXPORT_PAGE_SIZE },
         }) as unknown
       )) as PaginatedResponse<RecordType>
-      if (!response.records || response.records.length === 0) break
+      if (!response.records || response.records.length === 0) {
+        break
+      }
       all.push(...response.records)
-      if ("pagesCount" in response && currentPage >= response.pagesCount) break
+      if ("pagesCount" in response && currentPage >= response.pagesCount) {
+        break
+      }
       currentPage++
     }
     return all.slice(0, MAX_EXPORT_ROWS)
@@ -145,9 +149,13 @@ async function fetchAllStateAwareRecords(
         pagination: { cursor, perPage: EXPORT_PAGE_SIZE },
       }) as unknown
     )) as PaginatedResponse<RecordType>
-    if (!response.records || response.records.length === 0) break
+    if (!response.records || response.records.length === 0) {
+      break
+    }
     all.push(...response.records)
-    if ("hasMore" in response && !response.hasMore) break
+    if ("hasMore" in response && !response.hasMore) {
+      break
+    }
     if ("cursor" in response) {
       cursor = (response.cursor as string | null) ?? null
     } else {
@@ -171,7 +179,9 @@ function resolveExportColumns(
   const visible = columns.filter((c) => !hidden.has(c.id))
 
   const order = tableSettings?.order
-  if (!order || order.length === 0) return visible
+  if (!order || order.length === 0) {
+    return visible
+  }
 
   const byId = new Map(visible.map((c) => [c.id, c]))
   const ordered: DownloadableColumn[] = []
@@ -184,7 +194,9 @@ function resolveExportColumns(
   }
   // Append any column not mentioned in `order` in its original schema order.
   for (const col of visible) {
-    if (byId.has(col.id)) ordered.push(col)
+    if (byId.has(col.id)) {
+      ordered.push(col)
+    }
   }
   return ordered
 }
@@ -208,12 +220,16 @@ export function useCollectionDownloadActions({
 
   const runDownload = useCallback(
     async (fmt: "excel" | "csv") => {
-      if (!source || isExporting) return
+      if (!source || isExporting) {
+        return
+      }
       setIsExporting(true)
       try {
         const records = await fetchAllStateAwareRecords(source)
         const exportColumns = resolveExportColumns(columns, tableSettings)
-        if (exportColumns.length === 0 || records.length === 0) return
+        if (exportColumns.length === 0 || records.length === 0) {
+          return
+        }
 
         // Pass labels (header row) and ids (row lookup keys) separately so
         // collections with two columns sharing the same label don't collide
@@ -235,9 +251,11 @@ export function useCollectionDownloadActions({
           return row
         })
 
-        if (fmt === "excel")
+        if (fmt === "excel") {
           downloadAsExcel(headerLabels, transformedRows, title, rowKeys)
-        else downloadAsCsv(headerLabels, transformedRows, title, rowKeys)
+        } else {
+          downloadAsCsv(headerLabels, transformedRows, title, rowKeys)
+        }
       } finally {
         setIsExporting(false)
       }
@@ -249,7 +267,9 @@ export function useCollectionDownloadActions({
   const handleCsv = useCallback(() => runDownload("csv"), [runDownload])
 
   return useMemo(() => {
-    if (!source) return []
+    if (!source) {
+      return []
+    }
     return [
       {
         label: t("ai.dataDownload.download", { format: "Excel" }),

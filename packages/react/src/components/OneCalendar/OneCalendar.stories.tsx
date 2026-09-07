@@ -101,8 +101,12 @@ export const MonthSingle: Story = {
     })
 
     const handleSelect = (date: Date | DateRange | null) => {
-      if (!date) return
-      if (date instanceof Date) return
+      if (!date) {
+        return
+      }
+      if (date instanceof Date) {
+        return
+      }
       setSelectedRange(date)
     }
 
@@ -136,8 +140,12 @@ export const MonthRange: Story = {
     })
 
     const handleSelect = (date: Date | DateRange | null) => {
-      if (!date) return
-      if (date instanceof Date) return
+      if (!date) {
+        return
+      }
+      if (date instanceof Date) {
+        return
+      }
       setSelectedRange(date)
     }
 
@@ -169,8 +177,12 @@ export const YearSingle: Story = {
     })
 
     const handleSelect = (date: Date | DateRange | null) => {
-      if (!date) return
-      if (date instanceof Date) return
+      if (!date) {
+        return
+      }
+      if (date instanceof Date) {
+        return
+      }
       setSelectedRange(date)
     }
 
@@ -204,8 +216,12 @@ export const YearRange: Story = {
     })
 
     const handleSelect = (date: Date | DateRange | null) => {
-      if (!date) return
-      if (date instanceof Date) return
+      if (!date) {
+        return
+      }
+      if (date instanceof Date) {
+        return
+      }
       setSelectedRange(date)
     }
 
@@ -237,7 +253,9 @@ export const DaySingle: Story = {
     })
 
     const handleSelect = (date: Date | DateRange | null) => {
-      if (!date) return
+      if (!date) {
+        return
+      }
       if (date instanceof Date) {
         setSelectedRange({
           from: date,
@@ -281,8 +299,12 @@ export const DayRange: Story = {
     })
 
     const handleSelect = (date: Date | DateRange | null) => {
-      if (!date) return
-      if (date instanceof Date) return
+      if (!date) {
+        return
+      }
+      if (date instanceof Date) {
+        return
+      }
       setSelectedRange(date)
     }
 
@@ -652,8 +674,12 @@ export const CompactMonthSingle: OneCalendarInternalStory = {
     })
 
     const handleSelect = (date: Date | DateRange | null) => {
-      if (!date) return
-      if (date instanceof Date) return
+      if (!date) {
+        return
+      }
+      if (date instanceof Date) {
+        return
+      }
       setSelectedRange(date)
     }
 
@@ -688,8 +714,12 @@ export const CompactMonthRange: OneCalendarInternalStory = {
     })
 
     const handleSelect = (date: Date | DateRange | null) => {
-      if (!date) return
-      if (date instanceof Date) return
+      if (!date) {
+        return
+      }
+      if (date instanceof Date) {
+        return
+      }
       setSelectedRange(date)
     }
 
@@ -772,8 +802,12 @@ export const CompactDayRange: OneCalendarInternalStory = {
     })
 
     const handleSelect = (date: Date | DateRange | null) => {
-      if (!date) return
-      if (date instanceof Date) return
+      if (!date) {
+        return
+      }
+      if (date instanceof Date) {
+        return
+      }
       setSelectedRange(date)
     }
 
@@ -807,8 +841,12 @@ export const RegularVsCompact: Story = {
     })
 
     const handleSelect = (date: Date | DateRange | null) => {
-      if (!date) return
-      if (date instanceof Date) return
+      if (!date) {
+        return
+      }
+      if (date instanceof Date) {
+        return
+      }
       setSelectedRange(date)
     }
 

@@ -41,7 +41,9 @@ export function EntityRefHoverCard<T>({
   }, [])
 
   const fetchData = useCallback(() => {
-    if (data || isLoading) return
+    if (data || isLoading) {
+      return
+    }
 
     const cached = cacheRef.current.get(id)
     if (cached) {
@@ -54,13 +56,19 @@ export function EntityRefHoverCard<T>({
     resolver(id)
       .then((result: T) => {
         cacheRef.current.set(id, result)
-        if (mountedRef.current) setData(result)
+        if (mountedRef.current) {
+          setData(result)
+        }
       })
       .catch(() => {
-        if (mountedRef.current) setHasError(true)
+        if (mountedRef.current) {
+          setHasError(true)
+        }
       })
       .finally(() => {
-        if (mountedRef.current) setIsLoading(false)
+        if (mountedRef.current) {
+          setIsLoading(false)
+        }
       })
   }, [resolver, id, data, isLoading])
 
@@ -71,7 +79,9 @@ export function EntityRefHoverCard<T>({
       openDelay={300}
       closeDelay={100}
       onOpenChange={(open) => {
-        if (open) fetchData()
+        if (open) {
+          fetchData()
+        }
       }}
     >
       <HoverCardTrigger asChild>{trigger}</HoverCardTrigger>

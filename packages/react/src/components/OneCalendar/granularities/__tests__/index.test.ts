@@ -3,7 +3,7 @@ import {
   getGranularityDefinitions,
   granularityDefinitions,
   resolveGranularityDefinition,
-} from "../index"
+} from ".."
 
 describe("granularityDefinitions", () => {
   // `periods` has no definition until a consumer supplies its ranges. Keeping it out of

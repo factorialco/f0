@@ -1,7 +1,7 @@
 import React from "react"
 import { describe, expect, it } from "vitest"
 import { zeroRender as render, screen } from "@/testing/test-utils"
-import { PageHeader } from "../index"
+import { PageHeader } from ".."
 import { PageHeaderNavigationProvider } from "../PageHeaderNavigationContext"
 
 const defaultModule = {

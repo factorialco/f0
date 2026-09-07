@@ -5,7 +5,7 @@ import { zeroRender as render, screen } from "@/testing/test-utils"
 import { F0AiChatHeader } from "../F0AiChatHeader"
 import type { F0AiChatHeaderProps } from "../types"
 
-const modes: Array<[string, Partial<F0AiChatHeaderProps>]> = [
+const modes: [string, Partial<F0AiChatHeaderProps>][] = [
   ["compact", { compact: true }],
   ["history", { historyEnabled: true }],
   ["legacy", {}],

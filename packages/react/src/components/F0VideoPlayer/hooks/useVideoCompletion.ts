@@ -39,10 +39,14 @@ export function useVideoCompletion({
   }, [resetKey])
 
   useEffect(() => {
-    if (!video || !enabled) return
+    if (!video || !enabled) {
+      return
+    }
 
     const handleTimeUpdate = () => {
-      if (firedRef.current || !video.duration) return
+      if (firedRef.current || !video.duration) {
+        return
+      }
       if (video.currentTime >= completionThreshold(video.duration)) {
         firedRef.current = true
         onCompleteRef.current?.(video)

@@ -19,20 +19,30 @@ export const deliveryState = (
   message: F0ChatMessage,
   { isGroup, memberCount }: { isGroup?: boolean; memberCount?: number } = {}
 ): ChatDeliveryState | null => {
-  if (!message.isMine) return null
-  if (message.status === "failed") return "failed"
+  if (!message.isMine) {
+    return null
+  }
+  if (message.status === "failed") {
+    return "failed"
+  }
 
   const isSettled =
     message.status === "sent" ||
     message.status === "delivered" ||
     message.status === "read"
-  if (!isSettled) return null
+  if (!isSettled) {
+    return null
+  }
 
-  if (message.status !== "read") return "sent"
+  if (message.status !== "read") {
+    return "sent"
+  }
 
   const expectedGroupReaders =
     isGroup && memberCount != null ? Math.max(0, memberCount - 1) : undefined
-  if (expectedGroupReaders == null || expectedGroupReaders === 0) return "read"
+  if (expectedGroupReaders == null || expectedGroupReaders === 0) {
+    return "read"
+  }
 
   const readByCount = message.readBy?.length ?? message.readByCount
   return readByCount != null && readByCount >= expectedGroupReaders

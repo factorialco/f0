@@ -121,7 +121,9 @@ const ActiveCoachmark = ({
   }
 
   // `null` while the step's target is not in the DOM — see useTargetElement.
-  if (!target) return null
+  if (!target) {
+    return null
+  }
 
   return (
     <F0Coachmark
@@ -157,7 +159,9 @@ const ActiveCoachmark = ({
       focusTarget={step.focusTarget}
       onOutsideInteraction={() => {
         outsidePresses.current += 1
-        if (skipAfter <= 0 || outsidePresses.current < skipAfter) return
+        if (skipAfter <= 0 || outsidePresses.current < skipAfter) {
+          return
+        }
         // A dismissal to the app's bookkeeping — the reader asked to be out of
         // the way of the page — and its own `reason` to whoever is tracking,
         // because "pressed past it until it went away" is not "closed it".
@@ -200,7 +204,9 @@ export const CoachmarkProvider = ({
 
   const [container, setContainer] = useState<HTMLElement | null>(null)
   useEffect(() => {
-    if (typeof document === "undefined") return
+    if (typeof document === "undefined") {
+      return
+    }
     setContainer(document.querySelector<HTMLElement>(portalTarget))
   }, [portalTarget])
 

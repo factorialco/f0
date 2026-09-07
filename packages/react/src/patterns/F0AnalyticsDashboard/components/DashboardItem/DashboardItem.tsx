@@ -36,8 +36,8 @@ import {
 import type {
   F0AnalyticsDashboardAskAiTarget,
   F0AnalyticsDashboardAskAiTargetWithQuote,
+  DashboardItemFiltersConfig,
 } from "../../types"
-import type { DashboardItemFiltersConfig } from "../../types"
 import { DashboardItemFilters } from "./DashboardItemFilters"
 
 interface DashboardItemProps {
@@ -165,7 +165,9 @@ export function DashboardItem({
 
   const handleDropdownOpenChange = (open: boolean) => {
     setIsDropdownOpen(open)
-    if (!open) setIsExplanationView(false)
+    if (!open) {
+      setIsExplanationView(false)
+    }
   }
 
   // Filter to only actionable items (not separators/labels)
@@ -197,28 +199,38 @@ export function DashboardItem({
       // The host answers this one. Nothing else here applies: it may not open
       // the chat at all, so leaving fullscreen would be a guess. `hasAskOne`
       // guarantees the public payload has a real widget ID.
-      if (!itemId) return
+      if (!itemId) {
+        return
+      }
       onAskAi({ id: itemId, title })
       return
     }
 
     // Fullscreen covers the chat, so step out of it before handing the widget
     // over — same reason the delete action does.
-    if (isFullscreen) onFullscreenChange?.(false)
+    if (isFullscreen) {
+      onFullscreenChange?.(false)
+    }
     shouldFocusChatAfterMenuRef.current = true
     const quote = { text: title }
-    if (itemId) onAskAiTarget?.({ id: itemId, title, quote })
+    if (itemId) {
+      onAskAiTarget?.({ id: itemId, title, quote })
+    }
     setPendingQuote(quote)
     setAiChatOpen(true)
   }
 
   const handleAskOneMenuCloseAutoFocus = (event: Event) => {
-    if (!shouldFocusChatAfterMenuRef.current) return
+    if (!shouldFocusChatAfterMenuRef.current) {
+      return
+    }
     shouldFocusChatAfterMenuRef.current = false
 
     // Keep Radix's normal trigger restoration while the composer is still
     // mounting. The buffered request moves focus once registration completes.
-    if (focusChatInput()) event.preventDefault()
+    if (focusChatInput()) {
+      event.preventDefault()
+    }
   }
 
   const askOneMenuItem = hasAskOne ? (
@@ -522,7 +534,9 @@ export function DashboardItem({
                       <DropdownMenuGroup>
                         <DropdownMenuItem
                           onClick={() => {
-                            if (isFullscreen) onFullscreenChange?.(false)
+                            if (isFullscreen) {
+                              onFullscreenChange?.(false)
+                            }
                             handleDelete(itemId)
                           }}
                           className={cn("text-f1-foreground-critical")}

@@ -42,7 +42,9 @@ const createScatter = (categoryKey: string) => {
     }
 
     const getScatterValue = () => {
-      if (!payload) return "-"
+      if (!payload) {
+        return "-"
+      }
 
       if (payload[categoryKey] !== undefined) {
         return payload[categoryKey]
@@ -134,10 +136,10 @@ type ChartDataPoint<K extends ChartConfig> = {
   }
 }
 
-type ActivePayload<K> = Array<{
+type ActivePayload<K> = {
   name: keyof K
   value: number
-}>
+}[]
 
 type ChartTypeConfig<K extends ChartConfig> = {
   categories: keyof K | (keyof K)[]

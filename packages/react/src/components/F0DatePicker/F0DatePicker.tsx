@@ -50,7 +50,9 @@ export function F0DatePicker({
    */
   const toSafeRange = useCallback(
     (value: DatePickerValue | undefined) => {
-      if (!value) return undefined
+      if (!value) {
+        return undefined
+      }
 
       const granularity = getGranularity(value.granularity)
       const range = granularity.toRange(
@@ -61,7 +63,9 @@ export function F0DatePicker({
 
       // Normalize { value: undefined } to undefined so isSameDatePickerValue
       // correctly detects "no change" on subsequent blur events after a clear.
-      if (!range) return undefined
+      if (!range) {
+        return undefined
+      }
 
       return { value: range, granularity: value.granularity }
     },

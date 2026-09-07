@@ -45,14 +45,18 @@ export const renderBodyWithLinks = (
   const body = sanitizeDisplayText(rawBody)
   // Split on a capturing group: URLs land at the odd indices.
   const parts = body.split(URL_REGEX)
-  if (parts.length === 1) return body
+  if (parts.length === 1) {
+    return body
+  }
   const titleByUrl = new Map(
     (previews ?? [])
       .filter((preview) => preview.title)
       .map((preview) => [preview.url, preview.title])
   )
   return parts.map((part, i) => {
-    if (part.length === 0) return null
+    if (part.length === 0) {
+      return null
+    }
     if (i % 2 === 0) {
       return <Fragment key={`text-${i}`}>{part}</Fragment>
     }
@@ -107,10 +111,14 @@ export const renderBodyWithMentions = (
 ): ReactNode => {
   // Sanitize BEFORE the range math so mention indices match what renders.
   const body = sanitizeDisplayText(rawBody)
-  if (tokens.length === 0) return renderBodyWithLinks(body, previews)
+  if (tokens.length === 0) {
+    return renderBodyWithLinks(body, previews)
+  }
 
   const clean = locateMentions(body, tokens)
-  if (clean.length === 0) return renderBodyWithLinks(body, previews)
+  if (clean.length === 0) {
+    return renderBodyWithLinks(body, previews)
+  }
 
   const nodes: ReactNode[] = []
   let cursor = 0

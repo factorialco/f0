@@ -43,7 +43,9 @@ export function ChatEmojiAutocomplete({
   useLayoutEffect(() => {
     const element = listRef.current
     const parent = element?.offsetParent as HTMLElement | null
-    if (!element || !parent) return
+    if (!element || !parent) {
+      return
+    }
     const overflow =
       element.offsetLeft + element.offsetWidth - parent.clientWidth
     if (overflow > 0) {
@@ -51,7 +53,9 @@ export function ChatEmojiAutocomplete({
     }
   }, [position])
 
-  if (!isOpen || results.length === 0) return null
+  if (!isOpen || results.length === 0) {
+    return null
+  }
 
   return (
     <div

@@ -87,7 +87,7 @@ import {
 import { SEED_BY_ID } from "@/sds/chat/F0Chat/mocks/mockSeeds"
 import { useDemoHeaderActions } from "@/sds/chat/F0Chat/mocks/useDemoHeaderActions"
 import { DaytimePage } from "@/sds/Home/DaytimePage"
-import { ApplicationFrame } from "./index"
+import { ApplicationFrame } from "."
 
 /**
  * Mock people database for @mention search and entity resolution in Storybook.
@@ -905,8 +905,9 @@ const MockChatPanel = ({
   }
 
   const previewRuntime = useMemo<F0ChatRuntime>(() => {
-    if (receiptPreview !== "partial" || previewMessageId.current == null)
+    if (receiptPreview !== "partial" || previewMessageId.current == null) {
       return runtime
+    }
 
     return {
       ...runtime,
@@ -1320,7 +1321,9 @@ const ConversationsSidebarInner = ({
   // up so the panel falls back to the AI chat.
   const restored = useRef(false)
   useEffect(() => {
-    if (!restoringPanelContentId || restored.current) return
+    if (!restoringPanelContentId || restored.current) {
+      return
+    }
     restored.current = true
     // An explicit story target is deterministic fixture setup, so it must win
     // over panel content persisted by a previously visited story.
@@ -1455,7 +1458,9 @@ const ReceiptStatusComparison = () => {
   const message = [...runtime.messages]
     .reverse()
     .find((item) => isUserMessage(item) && item.isMine)
-  if (!message || !isUserMessage(message)) return null
+  if (!message || !isUserMessage(message)) {
+    return null
+  }
 
   const partialMessage = {
     ...message,

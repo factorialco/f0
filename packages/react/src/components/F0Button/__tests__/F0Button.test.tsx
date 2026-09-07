@@ -2,7 +2,7 @@ import { userEvent } from "@testing-library/user-event"
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { Add } from "@/icons/app"
 import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
-import { F0Button } from "../index"
+import { F0Button } from ".."
 import { ButtonInternal } from "../internal"
 
 describe("F0Button", () => {

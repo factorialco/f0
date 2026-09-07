@@ -3,7 +3,7 @@ import { screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
 import { zeroRender as render } from "@/testing/test-utils"
-import { TooltipInternal } from "../index"
+import { TooltipInternal } from ".."
 
 /**
  * `instant` shortens Radix's open timer to 100ms, which a real-timer wait can

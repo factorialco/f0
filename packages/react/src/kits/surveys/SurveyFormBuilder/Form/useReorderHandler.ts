@@ -157,10 +157,14 @@ export function useReorderHandler({
       const sectionWillBecomeEmpty = [
         ...originalSectionQuestions.entries(),
       ].some(([sectionId, originalQuestions]) => {
-        if (originalQuestions.size === 0) return false
+        if (originalQuestions.size === 0) {
+          return false
+        }
         // Find the section header index
         const headerIdx = withSectionEnds.findIndex((it) => it.id === sectionId)
-        if (headerIdx === -1) return false
+        if (headerIdx === -1) {
+          return false
+        }
         const next = withSectionEnds[headerIdx + 1]
         // Empty if immediately followed by section-end (or nothing)
         return !next || next.type !== "question"

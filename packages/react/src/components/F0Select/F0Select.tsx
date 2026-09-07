@@ -650,7 +650,9 @@ const F0SelectComponent = forwardRef(function Select<
     const extractOriginalItem = (
       record: ActualRecordType | undefined
     ): ResolvedRecordType<R> | undefined => {
-      if (!record) return undefined
+      if (!record) {
+        return undefined
+      }
       if (source) {
         return record as unknown as ResolvedRecordType<R>
       }
@@ -722,7 +724,9 @@ const F0SelectComponent = forwardRef(function Select<
     const extractOriginalItem = (
       record: ActualRecordType | undefined
     ): ResolvedRecordType<R> | undefined => {
-      if (!record) return undefined
+      if (!record) {
+        return undefined
+      }
       if (source) {
         // For datasource, the record itself is the original item
         return record as unknown as ResolvedRecordType<R>

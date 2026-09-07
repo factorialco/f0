@@ -755,10 +755,14 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
     // what decides it is the room THIS layout has.
     useLayoutEffect(() => {
       const el = rootRef.current
-      if (!el) return
+      if (!el) {
+        return
+      }
       const read = () => setRootWidth(el.clientWidth)
       read()
-      if (typeof ResizeObserver !== "function") return
+      if (typeof ResizeObserver !== "function") {
+        return
+      }
       const observer = new ResizeObserver(read)
       observer.observe(el)
       return () => observer.disconnect()
@@ -771,7 +775,9 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
     // during the render that first sees a width, rather than from an effect, keeps
     // it from lagging a paint behind the measurement.
     const [hasMeasured, setHasMeasured] = useState(false)
-    if (rootWidth > 0 && !hasMeasured) setHasMeasured(true)
+    if (rootWidth > 0 && !hasMeasured) {
+      setHasMeasured(true)
+    }
 
     const [manualCollapsed, setManualCollapsed] = useState<boolean | null>(null)
     const canEditSide = (side: WidgetContainerSide) =>
@@ -856,7 +862,9 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
     )
     const hostRef = (id: string) => {
       const kept = hostRefs.current.get(id)
-      if (kept) return kept
+      if (kept) {
+        return kept
+      }
       const fresh = (node: HTMLElement | null) =>
         setHosts((was) => (was[id] === node ? was : { ...was, [id]: node }))
       hostRefs.current.set(id, fresh)
@@ -908,16 +916,24 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
     // the rail opens up: kept, it would reopen whatever was last hovered the
     // moment the layout narrowed again.
     useEffect(() => {
-      if (collapsed) return
-      if (openTimer.current) clearTimeout(openTimer.current)
+      if (collapsed) {
+        return
+      }
+      if (openTimer.current) {
+        clearTimeout(openTimer.current)
+      }
       openTimer.current = null
       setOpenId(null)
     }, [collapsed])
 
     useEffect(
       () => () => {
-        if (openTimer.current) clearTimeout(openTimer.current)
-        if (leaveTimer.current) clearTimeout(leaveTimer.current)
+        if (openTimer.current) {
+          clearTimeout(openTimer.current)
+        }
+        if (leaveTimer.current) {
+          clearTimeout(leaveTimer.current)
+        }
       },
       []
     )
@@ -944,7 +960,9 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
      * size halfway through the fade.
      */
     const closingId = useRef<string | null>(null)
-    if (openId) closingId.current = openId
+    if (openId) {
+      closingId.current = openId
+    }
     const shownId = useRef<string | null>(null)
     shownId.current = openId
     const panelWidgetId =
@@ -1011,11 +1029,15 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
         }
 
     const cancelLeave = () => {
-      if (leaveTimer.current) clearTimeout(leaveTimer.current)
+      if (leaveTimer.current) {
+        clearTimeout(leaveTimer.current)
+      }
       leaveTimer.current = null
     }
     const cancelOpen = () => {
-      if (openTimer.current) clearTimeout(openTimer.current)
+      if (openTimer.current) {
+        clearTimeout(openTimer.current)
+      }
       openTimer.current = null
     }
     const scheduleLeave = () => {
@@ -1045,7 +1067,9 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
     ) => {
       cancelLeave()
       cancelOpen()
-      if (shownId.current === id) return
+      if (shownId.current === id) {
+        return
+      }
       if (instant) {
         showFromAnchor(id, anchor)
         return
@@ -1060,8 +1084,11 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
       <motion.div
         ref={(node) => {
           rootRef.current = node
-          if (typeof ref === "function") ref(node)
-          else if (ref) ref.current = node
+          if (typeof ref === "function") {
+            ref(node)
+          } else if (ref) {
+            ref.current = node
+          }
         }}
         className={cn(
           // `isolate` so the surface layer's -z-10 stays INSIDE this layout

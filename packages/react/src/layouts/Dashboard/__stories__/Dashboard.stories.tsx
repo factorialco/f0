@@ -7,7 +7,7 @@ import { Delete } from "@/icons/app"
 import { Layout } from "@/layouts/Layout"
 import { withSkipA11y } from "@/lib/storybook-utils/parameters"
 import { Optional } from "@/lib/typescript-utils/optional"
-import { Dashboard, DashboardWidget } from "../"
+import { Dashboard, DashboardWidget } from ".."
 import { ChartWidget, KpiWidget, TableWidget, TextWidget } from "./mockWidgets"
 
 const availableSizes = [

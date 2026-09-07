@@ -87,7 +87,9 @@ export const MockConnectedChatInput = () => {
   // "Let's create a Survey" + thinking beat), until the first clarifying panel
   // is ready. Rendering nothing here — rather than adding a "hidden" state to
   // F0AiChatTextArea — keeps the component's own layout/animation rules intact.
-  if (composerHidden && !clarifyingQuestion) return null
+  if (composerHidden && !clarifyingQuestion) {
+    return null
+  }
 
   const clarifyingUI = clarifyingQuestion ? (
     <F0ClarifyingPanel

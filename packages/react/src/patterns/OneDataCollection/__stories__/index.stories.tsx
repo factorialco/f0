@@ -38,9 +38,9 @@ import {
 } from "@/mocks"
 import { SummariesDefinition } from "@/patterns/OneDataCollection/summary.ts"
 import { mockImage } from "@/testing/mocks/images"
+import { OneDataCollection } from ".."
 import { useDataCollectionData } from "../hooks/useDataCollectionData/useDataCollectionData"
 import { useDataCollectionSource } from "../hooks/useDataCollectionSource"
-import { OneDataCollection } from "../index"
 import { ItemActionsDefinition } from "../item-actions"
 import { NavigationFiltersDefinition } from "../navigationFilters/types"
 import type { CustomVisualizationProps } from "../visualizations/collection"
@@ -324,7 +324,9 @@ export const WithLinkedItems: Story = {
       filters,
       presets: filterPresets,
       itemUrl: (item) => {
-        if (item.id === "user-1") return undefined
+        if (item.id === "user-1") {
+          return undefined
+        }
         return `/users/${item.id}`
       },
       sortings: {

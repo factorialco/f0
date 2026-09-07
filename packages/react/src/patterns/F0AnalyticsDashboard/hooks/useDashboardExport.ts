@@ -46,7 +46,9 @@ async function buildMetricsSheet<Filters extends FiltersDefinition>(
   metricItems: DashboardMetricItem<Filters>[],
   filters: FiltersState<Filters>
 ): Promise<SheetData | null> {
-  if (metricItems.length === 0) return null
+  if (metricItems.length === 0) {
+    return null
+  }
 
   const rows: Record<string, unknown>[] = []
   let hasPrevious = false
@@ -73,7 +75,9 @@ async function buildMetricsSheet<Filters extends FiltersDefinition>(
     }
   }
 
-  if (rows.length === 0) return null
+  if (rows.length === 0) {
+    return null
+  }
 
   const columns = hasPrevious
     ? ["Metric", "Value", "Previous Value"]
@@ -93,7 +97,9 @@ async function buildAllSheets<Filters extends FiltersDefinition>(
     (item): item is DashboardMetricItem<Filters> => item.type === "metric"
   )
   const metricsSheet = await buildMetricsSheet(metricItems, filters)
-  if (metricsSheet) sheets.push(metricsSheet)
+  if (metricsSheet) {
+    sheets.push(metricsSheet)
+  }
 
   // Build sheets for charts and collections in parallel
   const nonMetricItems = items.filter((item) => item.type !== "metric")
@@ -142,7 +148,9 @@ async function buildAllSheets<Filters extends FiltersDefinition>(
             "records" in result
               ? result.records
               : (result as Record<string, unknown>[])
-          if (records.length === 0) return null
+          if (records.length === 0) {
+            return null
+          }
           const columns = extractColumns(records)
           return { name: item.title, columns, rows: records }
         } catch (err) {
@@ -160,7 +168,9 @@ async function buildAllSheets<Filters extends FiltersDefinition>(
 
   const results = await Promise.all(sheetPromises)
   for (const result of results) {
-    if (result) sheets.push(result)
+    if (result) {
+      sheets.push(result)
+    }
   }
 
   return sheets

@@ -1,6 +1,6 @@
 import { render } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { Metadata } from "./index"
+import { Metadata } from "."
 
 describe("Metadata", () => {
   it("renders multiple items without React key warnings", () => {

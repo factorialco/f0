@@ -177,7 +177,9 @@ export function DatePickerPopup({
     setCustomRangeMode(presetId === PRESET_CUSTOM)
 
     const selectedPreset = presetId ? presets[+presetId] : undefined
-    if (!selectedPreset) return
+    if (!selectedPreset) {
+      return
+    }
 
     handleSelect({
       value: definitions[selectedPreset.granularity].toRange(

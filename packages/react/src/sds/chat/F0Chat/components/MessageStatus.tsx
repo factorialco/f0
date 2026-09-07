@@ -30,7 +30,9 @@ export const MessageStatus = ({
     isGroup,
     memberCount: channel.memberCount,
   })
-  if (!state) return null
+  if (!state) {
+    return null
+  }
 
   const label =
     state === "failed"

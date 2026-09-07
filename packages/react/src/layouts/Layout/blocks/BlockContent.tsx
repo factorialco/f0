@@ -17,7 +17,9 @@ const PageLayoutContentBlockComponent = ({
   className,
   ...props
 }: BlockProps & BlockContentExtraProps) => {
-  if (!title) return null
+  if (!title) {
+    return null
+  }
 
   const TitleTag = titleLevel
 

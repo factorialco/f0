@@ -6,8 +6,8 @@ import {
   CompoundCellValue,
   CompoundTone,
 } from "@/ui/value-display/types/compound"
+import { OneDataCollection } from "../../.."
 import { useDataCollectionSource } from "../../../hooks/useDataCollectionSource"
-import { OneDataCollection } from "../../../index"
 import { ItemActionsDefinition } from "../../../item-actions"
 import { ExampleComponent, getMockVisualizations } from "../../mockData"
 
@@ -925,11 +925,15 @@ export const TableWithCollapsibleHeaderGroupsAndSorting: Story = {
       },
       dataAdapter: {
         fetchData: async ({ sortings }) => {
-          if (!sortings || sortings.length === 0) return { records }
+          if (!sortings || sortings.length === 0) {
+            return { records }
+          }
 
           const [{ field, order }] = sortings
           const read = sortValue[field as string]
-          if (!read) return { records }
+          if (!read) {
+            return { records }
+          }
 
           const sorted = [...records].sort((a, b) => {
             const left = read(a)
@@ -1166,16 +1170,22 @@ export const TableWithHighlightedHeaderGroup: Story = {
       sortings,
       dataAdapter: {
         fetchData: async ({ sortings }) => {
-          if (!sortings || sortings.length === 0) return { records }
+          if (!sortings || sortings.length === 0) {
+            return { records }
+          }
 
           const [{ field, order }] = sortings
           const read = (item: (typeof records)[number]): number | string => {
-            if (field === "team") return item.team
+            if (field === "team") {
+              return item.team
+            }
             const [month, metric] = String(field).split("-") as [
               Month,
               "salaries" | "bonuses" | "total",
             ]
-            if (!item.months[month]) return 0
+            if (!item.months[month]) {
+              return 0
+            }
             return metric === "total"
               ? monthTotal(item, month)
               : item.months[month][metric]
@@ -2368,11 +2378,15 @@ export const CellsOfDifferentHeightsShareOneCenter: Story = {
       const walker = document.createTreeWalker(cell, NodeFilter.SHOW_TEXT)
       let node: Node | null
       while ((node = walker.nextNode())) {
-        if (!node.textContent?.trim()) continue
+        if (!node.textContent?.trim()) {
+          continue
+        }
         const range = document.createRange()
         range.selectNodeContents(node)
         const [line] = [...range.getClientRects()].filter((r) => r.height > 0)
-        if (line) return (line.top + line.bottom) / 2 - cellRect.top
+        if (line) {
+          return (line.top + line.bottom) / 2 - cellRect.top
+        }
       }
       return null
     }

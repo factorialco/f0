@@ -172,11 +172,16 @@ const fitToPoints = (
   padding = 64
 ) => {
   const coords = framedCoords(points, routes, arcs)
-  if (coords.length === 0) return
+  if (coords.length === 0) {
+    return
+  }
   if (coords.length === 1) {
     const opts = { center: coords[0], zoom: 14 }
-    if (animate) map.easeTo(opts)
-    else map.jumpTo(opts)
+    if (animate) {
+      map.easeTo(opts)
+    } else {
+      map.jumpTo(opts)
+    }
     return
   }
   const bounds = new maplibregl.LngLatBounds()
@@ -263,7 +268,9 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
     selectedMarkerId !== undefined ? selectedMarkerId : internalSelected
   const selectMarker = useCallback(
     (id: string | null) => {
-      if (selectedMarkerId === undefined) setInternalSelected(id)
+      if (selectedMarkerId === undefined) {
+        setInternalSelected(id)
+      }
       onMarkerSelect?.(id)
     },
     [selectedMarkerId, onMarkerSelect]
@@ -286,8 +293,12 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
   // datasets are an explicit decision, not a silent slowdown.
   const warnedMarkerCount = useRef(false)
   useEffect(() => {
-    if (warnedMarkerCount.current || markers.length <= RECOMMENDED_MAX_MARKERS)
+    if (
+      warnedMarkerCount.current ||
+      markers.length <= RECOMMENDED_MAX_MARKERS
+    ) {
       return
+    }
     warnedMarkerCount.current = true
     console.warn(
       `F0Map: ${markers.length} markers exceeds the recommended maximum of ` +
@@ -306,7 +317,7 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
   const handleZoomIn = useCallback(() => mapRef.current?.zoomIn(), [])
   const handleZoomOut = useCallback(() => mapRef.current?.zoomOut(), [])
   const handleFit = useCallback(() => {
-    if (mapRef.current)
+    if (mapRef.current) {
       fitToPoints(
         mapRef.current,
         markersRef.current,
@@ -314,6 +325,7 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
         routesRef.current,
         arcsRef.current
       )
+    }
   }, [reduceMotion])
   const handleLocate = useCallback(() => {
     requestLocation((c) =>
@@ -332,7 +344,9 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
     (id: string) => {
       const map = mapRef.current
       const point = markersRef.current.find((p) => p.id === id)
-      if (map && point) focusPoint(map, point, !reduceMotion)
+      if (map && point) {
+        focusPoint(map, point, !reduceMotion)
+      }
       selectMarker(id)
     },
     [reduceMotion, selectMarker]
@@ -345,12 +359,14 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
       focusMarker: (id) => {
         const map = mapRef.current
         const point = markersRef.current.find((p) => p.id === id)
-        if (!map || !point) return
+        if (!map || !point) {
+          return
+        }
         focusPoint(map, point, !reduceMotion)
         selectRef.current(id)
       },
       fitToMarkers: () => {
-        if (mapRef.current)
+        if (mapRef.current) {
           fitToPoints(
             mapRef.current,
             markersRef.current,
@@ -358,6 +374,7 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
             routesRef.current,
             arcsRef.current
           )
+        }
       },
       clearSelection: () => selectRef.current(null),
     }),
@@ -372,9 +389,13 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
   const viewportRef = useRef(initialViewport ?? DEFAULT_VIEWPORT)
 
   useEffect(() => {
-    if (loading) return
+    if (loading) {
+      return
+    }
     const container = containerRef.current
-    if (!container) return
+    if (!container) {
+      return
+    }
 
     appliedStyleRef.current = styleRef.current
     const viewport = viewportRef.current
@@ -420,7 +441,7 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
       loaded = true
       setTileError(false)
       map.resize()
-      if (shouldFit)
+      if (shouldFit) {
         fitToPoints(
           map,
           markersRef.current,
@@ -428,10 +449,13 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
           routesRef.current,
           arcsRef.current
         )
+      }
       map.setProjection({ type: projectionRef.current })
     })
     const handleError = () => {
-      if (!loaded) setTileError(true)
+      if (!loaded) {
+        setTileError(true)
+      }
     }
     map.on("error", handleError)
     // Background click clears the selection (marker clicks are DOM events on
@@ -453,7 +477,9 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
   // setProjection hard-throws on a style that is still loading.
   useEffect(() => {
     const map = mapRef.current
-    if (!map || appliedStyleRef.current === style) return
+    if (!map || appliedStyleRef.current === style) {
+      return
+    }
     appliedStyleRef.current = style
     map.setStyle(style)
     map.once("style.load", () =>
@@ -469,7 +495,9 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
   // style.load handlers re-apply `projectionRef` when the style is ready.
   useEffect(() => {
     const map = mapRef.current
-    if (!map) return
+    if (!map) {
+      return
+    }
     try {
       map.setProjection({ type: projection })
     } catch {
@@ -480,10 +508,14 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
   // Reveal: fly to a newly highlighted marker (external search selecting a
   // result). Only fires when the id changes to a real marker.
   useEffect(() => {
-    if (!highlightedId) return
+    if (!highlightedId) {
+      return
+    }
     const map = mapRef.current
     const point = markersRef.current.find((p) => p.id === highlightedId)
-    if (map && point) focusPoint(map, point, !reduceMotion)
+    if (map && point) {
+      focusPoint(map, point, !reduceMotion)
+    }
   }, [highlightedId, reduceMotion])
 
   const hasLines = routes.length > 0 || arcs.length > 0
@@ -579,7 +611,9 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
                 type="button"
                 onClick={() => {
                   const map = mapRef.current
-                  if (!map) return
+                  if (!map) {
+                    return
+                  }
                   setTileError(false)
                   map.setStyle(styleRef.current)
                 }}

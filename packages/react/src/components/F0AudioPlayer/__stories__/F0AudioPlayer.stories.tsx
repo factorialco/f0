@@ -331,7 +331,9 @@ function EmbeddedTranscriptionDemo(
   const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {
     const audio = ref.current?.querySelector("audio")
-    if (!audio || typeof audio.addTextTrack !== "function") return
+    if (!audio || typeof audio.addTextTrack !== "function") {
+      return
+    }
     const track = audio.addTextTrack("captions", "English", "en")
     const lines = [
       "Interviewer: Can you tell me about your availability for night shifts and weekends?",

@@ -6,8 +6,12 @@ import { cn } from "@/lib/utils"
 import type { FileAttachmentProps } from "./types"
 
 function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  if (bytes < 1024) {
+    return `${bytes} B`
+  }
+  if (bytes < 1024 * 1024) {
+    return `${(bytes / 1024).toFixed(1)} KB`
+  }
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
@@ -53,8 +57,12 @@ export function FileAttachment({
   const uploadStartedRef = useRef(false)
 
   const handleUpload = useCallback(async () => {
-    if (!isNewUpload || !entry.file || !upload) return
-    if (uploadStartedRef.current) return
+    if (!isNewUpload || !entry.file || !upload) {
+      return
+    }
+    if (uploadStartedRef.current) {
+      return
+    }
     uploadStartedRef.current = true
 
     try {

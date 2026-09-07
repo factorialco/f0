@@ -22,7 +22,9 @@ export const DataChartEmptyStateView = ({
 }: DataChartEmptyStateViewProps) => {
   const i18n = useI18n()
 
-  if (emptyState?.render) return <>{emptyState.render()}</>
+  if (emptyState?.render) {
+    return <>{emptyState.render()}</>
+  }
 
   const defaults = i18n.dataChart.emptyState
 

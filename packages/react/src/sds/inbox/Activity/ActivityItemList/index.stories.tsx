@@ -6,7 +6,7 @@ import {
   Money as MoneyIcon,
   PalmTree as PalmTreeIcon,
 } from "@/icons/app"
-import { ActivityItemList } from "./index"
+import { ActivityItemList } from "."
 
 const mockDate = new Date(2024, 3, 1)
 const meta: Meta<typeof ActivityItemList> = {

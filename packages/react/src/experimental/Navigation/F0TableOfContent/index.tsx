@@ -94,7 +94,9 @@ function renderTOCItem(
     if (currentParentId === null) {
       return allItems?.[0]?.id === item.id
     }
-    if (!allItems || !currentParentId) return false
+    if (!allItems || !currentParentId) {
+      return false
+    }
     const parent = findItemInTree(allItems, currentParentId)
     return parent?.item.children?.[0]?.id === item.id
   })()
@@ -224,7 +226,9 @@ function EdgeDropZone({
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (!ref.current) return
+    if (!ref.current) {
+      return
+    }
 
     return dropTargetForElements({
       element: ref.current,
@@ -352,7 +356,9 @@ function TOCContent({
 
       // Find the item to move
       const itemData = findItemInTree(sortableItems, itemId)
-      if (!itemData) return
+      if (!itemData) {
+        return
+      }
 
       const itemToMove = itemData.item
 

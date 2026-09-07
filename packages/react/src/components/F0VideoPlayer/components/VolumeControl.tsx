@@ -19,8 +19,12 @@ export interface VolumeControlProps {
 
 /** Picks the volume icon by range: muted (0), mid (1–50%), high (51–100%). */
 export function volumeIcon(volume: number, muted: boolean) {
-  if (muted || volume === 0) return VolumeMuted
-  if (volume <= 0.5) return VolumeMid
+  if (muted || volume === 0) {
+    return VolumeMuted
+  }
+  if (volume <= 0.5) {
+    return VolumeMid
+  }
   return VolumeHigh
 }
 
@@ -82,10 +86,14 @@ function VolumeSlider({ value, onChange }: VolumeSliderProps) {
 
   const fractionFromPointer = (clientX: number): number => {
     const track = trackRef.current
-    if (!track) return 0
+    if (!track) {
+      return 0
+    }
     const rect = track.getBoundingClientRect()
     const usable = rect.width - VOLUME_SLIDER_THUMB_SIZE
-    if (usable <= 0) return 0
+    if (usable <= 0) {
+      return 0
+    }
     return Math.max(
       0,
       Math.min(1, (clientX - rect.left - VOLUME_SLIDER_THUMB_SIZE / 2) / usable)
@@ -100,12 +108,16 @@ function VolumeSlider({ value, onChange }: VolumeSliderProps) {
   }
 
   const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (!isDragging) return
+    if (!isDragging) {
+      return
+    }
     onChange(fractionFromPointer(event.clientX))
   }
 
   const handlePointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (!isDragging) return
+    if (!isDragging) {
+      return
+    }
     setIsDragging(false)
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId)

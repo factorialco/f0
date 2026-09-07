@@ -21,7 +21,9 @@ export function RatingQuestionField({
   const { options, disabled } = config
 
   const handleClick = (optionValue: number) => {
-    if (disabled) return
+    if (disabled) {
+      return
+    }
     onChange(optionValue)
     onBlur()
   }

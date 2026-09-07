@@ -533,10 +533,10 @@ describe("getSchemaDefinition", () => {
 
     expect(definition).toHaveLength(3)
     // Fields should be in declaration order
-    const fieldItems = definition as Array<{
+    const fieldItems = definition as {
       type: "field"
       field: { id: string }
-    }>
+    }[]
     expect(fieldItems[0].field.id).toBe("first")
     expect(fieldItems[1].field.id).toBe("second")
     expect(fieldItems[2].field.id).toBe("third")
@@ -560,7 +560,7 @@ describe("getSchemaDefinition", () => {
     expect(definition[0].type).toBe("row")
     const rowDef = definition[0] as {
       type: "row"
-      fields: Array<{ id: string }>
+      fields: { id: string }[]
     }
     expect(rowDef.fields).toHaveLength(2)
   })
@@ -4381,7 +4381,7 @@ describe("F0Form clearing optional values", () => {
       }),
     })
 
-    const submissions: Array<number | undefined> = []
+    const submissions: (number | undefined)[] = []
 
     const Harness = () => {
       const [budget, setBudget] = React.useState<number | undefined>(50)

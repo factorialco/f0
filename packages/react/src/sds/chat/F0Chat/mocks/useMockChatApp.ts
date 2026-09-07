@@ -64,7 +64,9 @@ const MockChatAppContext = createContext<MockChatAppValue | null>(null)
 
 export const useMockChatApp = (): MockChatAppValue => {
   const ctx = useContext(MockChatAppContext)
-  if (!ctx) throw new Error("useMockChatApp requires MockChatAppProvider")
+  if (!ctx) {
+    throw new Error("useMockChatApp requires MockChatAppProvider")
+  }
   return ctx
 }
 
@@ -126,7 +128,9 @@ export const useMockChatStore = (): MockChatAppValue => {
     (convId: string, fn: (s: ConvState) => ConvState) => {
       setStates((prev) => {
         const current = prev[convId]
-        if (!current) return prev
+        if (!current) {
+          return prev
+        }
         return { ...prev, [convId]: fn(current) }
       })
     },
@@ -225,9 +229,13 @@ export const useMockChatStore = (): MockChatAppValue => {
       // `multiTyping` group, a random 1–3 people type — and each of them sends a
       // message once they all finish writing.
       const replySeed = SEED_BY_ID.get(convId)
-      if (!replySeed) return
+      if (!replySeed) {
+        return
+      }
       const onlineParticipants = replySeed.participants.filter((p) => p.online)
-      if (onlineParticipants.length === 0) return
+      if (onlineParticipants.length === 0) {
+        return
+      }
       const typers =
         replySeed.type === "group" &&
         replySeed.multiTyping &&
@@ -324,15 +332,21 @@ export const useMockChatStore = (): MockChatAppValue => {
       patch(convId, (s) => ({
         ...s,
         messages: s.messages.map((m) => {
-          if (!isUserMessage(m) || m.id !== messageId) return m
+          if (!isUserMessage(m) || m.id !== messageId) {
+            return m
+          }
           const reactions = m.reactions ? [...m.reactions] : []
           const idx = reactions.findIndex((r) => r.emoji === emoji)
-          if (idx === -1) reactions.push({ emoji, count: 1, reactedByMe: true })
-          else {
+          if (idx === -1) {
+            reactions.push({ emoji, count: 1, reactedByMe: true })
+          } else {
             const r = reactions[idx]
             const count = r.count + (r.reactedByMe ? -1 : 1)
-            if (count <= 0) reactions.splice(idx, 1)
-            else reactions[idx] = { ...r, count, reactedByMe: !r.reactedByMe }
+            if (count <= 0) {
+              reactions.splice(idx, 1)
+            } else {
+              reactions[idx] = { ...r, count, reactedByMe: !r.reactedByMe }
+            }
           }
           return { ...m, reactions }
         }),
@@ -347,7 +361,9 @@ export const useMockChatStore = (): MockChatAppValue => {
         const target = s.messages
           .filter(isUserMessage)
           .find((m) => m.id === messageId)
-        if (!target) return s
+        if (!target) {
+          return s
+        }
         const beyondWindow =
           Date.now() - new Date(target.createdAt).getTime() > 5 * 60_000
         return {
@@ -388,7 +404,9 @@ export const useMockChatStore = (): MockChatAppValue => {
 
   const loadOlder = useCallback(
     (convId: string) => {
-      if (loadingOlder[convId] || (olderLeft.current[convId] ?? 0) <= 0) return
+      if (loadingOlder[convId] || (olderLeft.current[convId] ?? 0) <= 0) {
+        return
+      }
       setLoadingOlder((p) => ({ ...p, [convId]: true }))
       after(700, () => {
         patch(convId, (s) => {

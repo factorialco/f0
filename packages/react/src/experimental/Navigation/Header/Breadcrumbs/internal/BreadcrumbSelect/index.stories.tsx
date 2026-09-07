@@ -10,7 +10,7 @@ import {
   F0SelectItemProps,
 } from "../../../../../../components/F0Select"
 import { Search } from "../../../../../../icons/app"
-import { BreadcrumbSelect } from "./index"
+import { BreadcrumbSelect } from "."
 const meta: Meta<typeof BreadcrumbSelect> = {
   title: "Navigation/BreadcrumbSelect",
   component: BreadcrumbSelect,
@@ -62,7 +62,7 @@ export const WithSearchbox: Story = {
     onChange: (
       value: string,
       item?: unknown,
-      option?: F0SelectItemObject<string, unknown>
+      option?: F0SelectItemObject<string>
     ) => {
       console.log("onChange BreadcrumbSelect", value, item, option)
     },

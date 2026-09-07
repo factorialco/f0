@@ -80,7 +80,9 @@ const F0Button = React.memo(
     const isRound = hideLabel && round
 
     const handlePress = useCallback(async () => {
-      if (!onPress || isDisabled) return
+      if (!onPress || isDisabled) {
+        return
+      }
 
       try {
         const result = onPress()
@@ -144,8 +146,12 @@ const F0Button = React.memo(
 
     const accessibilityLabel = useMemo(() => {
       const parts = [label]
-      if (isDisabled) parts.push("disabled")
-      if (isBusy) parts.push("loading")
+      if (isDisabled) {
+        parts.push("disabled")
+      }
+      if (isBusy) {
+        parts.push("loading")
+      }
       return parts.join(", ")
     }, [label, isBusy, isDisabled])
 

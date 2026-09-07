@@ -41,7 +41,9 @@ export const ChatDocumentPreview = (): ReactNode => {
     <Dialog
       open={documentPreview !== null}
       onOpenChange={(next) => {
-        if (!next) closeDocumentPreview()
+        if (!next) {
+          closeDocumentPreview()
+        }
       }}
     >
       {file && kind && (

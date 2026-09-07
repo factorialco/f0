@@ -25,7 +25,9 @@ export const F0SegmentedControl = ({
     // the active segment, signalling deselection. A segmented control
     // always has one active segment, so we ignore that sentinel here.
     // Note: this means item values must be non-empty strings.
-    if (newValue === "") return
+    if (newValue === "") {
+      return
+    }
     setLocalValue(newValue)
   }
 

@@ -1,4 +1,4 @@
-import { ControllerRenderProps, FieldError, FieldValues } from "react-hook-form"
+import { ControllerRenderProps, FieldError } from "react-hook-form"
 import type { InputFieldStatus } from "@/components/F0InputField/types"
 import { CardSelectFieldRenderer } from "./cardSelect/CardSelectFieldRenderer"
 import { CheckboxFieldRenderer } from "./checkbox/CheckboxFieldRenderer"
@@ -29,7 +29,7 @@ export interface FieldState {
 
 export interface RenderFieldInputOptions {
   field: F0Field
-  formField: ControllerRenderProps<FieldValues>
+  formField: ControllerRenderProps
   fieldState: FieldState
   fieldStatus?: InputFieldStatus
   isSubmitting: boolean

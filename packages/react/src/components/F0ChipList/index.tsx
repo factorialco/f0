@@ -8,7 +8,7 @@ type Props = {
   /**
    * Array of chips to display.
    */
-  chips: Array<ChipProps>
+  chips: ChipProps[]
 
   /**
    * The maximum number of chips to display.

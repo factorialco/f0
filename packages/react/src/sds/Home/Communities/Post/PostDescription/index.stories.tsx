@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { PostDescription } from "./index"
+import { PostDescription } from "."
 
 const meta: Meta<typeof PostDescription> = {
   component: PostDescription,

@@ -145,7 +145,9 @@ export function FiltersControls<Filters extends FiltersDefinition>({
   // edit in those apps while working fine in stories with stable state.
   const previousValueRef = useRef(value)
   useEffect(() => {
-    if (isEqual(previousValueRef.current, value)) return
+    if (isEqual(previousValueRef.current, value)) {
+      return
+    }
     previousValueRef.current = value
     setLocalFiltersValue(value)
   }, [value])
@@ -189,7 +191,9 @@ export function FiltersControls<Filters extends FiltersDefinition>({
   useEffect(() => {
     const getFirstFilterNotEmpty = () => {
       return Object.entries(localFiltersValue || {}).find(([key, value]) => {
-        if (!filters[key]) return false
+        if (!filters[key]) {
+          return false
+        }
         // TODO: Make this type better
         const filterType = getFilterType(filters[key].type) as unknown as {
           isEmpty: (value: unknown, context: FilterTypeContext) => boolean

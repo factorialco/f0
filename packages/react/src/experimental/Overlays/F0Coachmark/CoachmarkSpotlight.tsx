@@ -29,14 +29,20 @@ const litRadius = (target: HTMLElement): number => {
     parseFloat(getComputedStyle(element).borderTopLeftRadius) || 0
 
   const own = radiusOf(target)
-  if (own > 0) return own + HIGHLIGHT_PADDING
+  if (own > 0) {
+    return own + HIGHLIGHT_PADDING
+  }
 
   const box = target.getBoundingClientRect()
   for (const element of [...target.querySelectorAll("*")].slice(0, 24)) {
     const radius = radiusOf(element)
-    if (radius === 0) continue
+    if (radius === 0) {
+      continue
+    }
     const inner = element.getBoundingClientRect()
-    if (inner.width < box.width * 0.8) continue
+    if (inner.width < box.width * 0.8) {
+      continue
+    }
     return radius + (inner.left - box.left) + HIGHLIGHT_PADDING
   }
 
@@ -61,7 +67,9 @@ const useTargetRect = (target: HTMLElement): Rect => {
   useEffect(() => {
     const sync = () => {
       const next = rectOf(target)
-      if (isSameRect(measured.current, next)) return
+      if (isSameRect(measured.current, next)) {
+        return
+      }
       measured.current = next
       setRect(next)
     }
@@ -70,7 +78,9 @@ const useTargetRect = (target: HTMLElement): Rect => {
 
     // A target handed to us in an environment with no frames (jsdom without
     // `pretendToBeVisual`, SSR hydration) is measured once and left alone.
-    if (typeof requestAnimationFrame !== "function") return
+    if (typeof requestAnimationFrame !== "function") {
+      return
+    }
 
     let frame = requestAnimationFrame(function measure() {
       sync()
@@ -107,9 +117,13 @@ const useTravelling = (target: HTMLElement, enabled: boolean) => {
 
   useEffect(() => {
     // Mount is not a move: the first step's light comes up where it comes up.
-    if (previous.current === target) return
+    if (previous.current === target) {
+      return
+    }
     previous.current = target
-    if (!enabled) return
+    if (!enabled) {
+      return
+    }
 
     setTravelling(true)
     const timer = setTimeout(() => setTravelling(false), MOVE_MS)
@@ -165,7 +179,9 @@ export const CoachmarkSpotlight = ({
   // up 6px from where it started, off screen, with the panel anchored to it.
   useEffect(() => {
     // jsdom has no scrolling to do.
-    if (typeof target.scrollIntoView !== "function") return
+    if (typeof target.scrollIntoView !== "function") {
+      return
+    }
     const bring = () =>
       target.scrollIntoView({ block: "center", inline: "nearest" })
 
@@ -176,12 +192,16 @@ export const CoachmarkSpotlight = ({
     // scroll that was aiming at the old one — the target lands short of centre,
     // sometimes at the very edge of the scrollport. The second pass measures the
     // column it actually became.
-    if (typeof requestAnimationFrame !== "function") return
+    if (typeof requestAnimationFrame !== "function") {
+      return
+    }
     const frame = requestAnimationFrame(bring)
     return () => cancelAnimationFrame(frame)
   }, [target])
 
-  if (typeof document === "undefined") return null
+  if (typeof document === "undefined") {
+    return null
+  }
 
   return createPortal(
     <div

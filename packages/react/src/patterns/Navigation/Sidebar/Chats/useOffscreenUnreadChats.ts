@@ -41,9 +41,15 @@ const EMPTY_DIRECTIONAL_UNREAD: DirectionalUnread = {
 const EMPTY_PORTAL_ROOTS: PortalRoots = { above: null, below: null }
 
 const getDirection = (entry: IntersectionObserverEntry): Direction | null => {
-  if (entry.isIntersecting || !entry.rootBounds) return null
-  if (entry.boundingClientRect.bottom <= entry.rootBounds.top) return "above"
-  if (entry.boundingClientRect.top >= entry.rootBounds.bottom) return "below"
+  if (entry.isIntersecting || !entry.rootBounds) {
+    return null
+  }
+  if (entry.boundingClientRect.bottom <= entry.rootBounds.top) {
+    return "above"
+  }
+  if (entry.boundingClientRect.top >= entry.rootBounds.bottom) {
+    return "below"
+  }
   return null
 }
 
@@ -127,7 +133,9 @@ export const useOffscreenUnreadChats = ({
       for (const group of groups) {
         const unreadIds: string[] = []
         for (const chat of group.chats) {
-          if (chat.loading || (chat.unreadCount ?? 0) <= 0) continue
+          if (chat.loading || (chat.unreadCount ?? 0) <= 0) {
+            continue
+          }
           byChatId.set(chat.id, 1)
           unreadIds.push(chat.id)
         }
@@ -188,7 +196,9 @@ export const useOffscreenUnreadChats = ({
       const searching = root.querySelector(
         "[data-sidebar-tab-panel-searching='true']"
       )
-      if (searching) return "searching"
+      if (searching) {
+        return "searching"
+      }
 
       const { byChatId, byGroupId } = unreadTargetsRef.current
       return Array.from(
@@ -247,13 +257,17 @@ export const useOffscreenUnreadChats = ({
           entries.forEach((entry) => {
             const element = entry.target as HTMLElement
             const current = statuses.get(element)
-            if (!current) return
+            if (!current) {
+              return
+            }
             const pendingFocus = pendingFocusRef.current
             if (entry.isIntersecting && pendingFocus?.target === element) {
               const shouldMoveFocus =
                 element.ownerDocument.activeElement === pendingFocus.origin
               clearPendingFocus()
-              if (shouldMoveFocus) focusUnreadTarget(element)
+              if (shouldMoveFocus) {
+                focusUnreadTarget(element)
+              }
             }
             statuses.set(element, {
               ...current,
@@ -273,7 +287,9 @@ export const useOffscreenUnreadChats = ({
         .forEach((groupElement) => {
           const groupId = groupElement.dataset.sidebarPanelGroupId
           const groupUnreadCount = groupId ? (byGroupId.get(groupId) ?? 0) : 0
-          if (groupUnreadCount === 0) return
+          if (groupUnreadCount === 0) {
+            return
+          }
 
           const collapsed = groupElement.querySelector(
             "[data-sidebar-collapsible-open='false']"
@@ -293,7 +309,9 @@ export const useOffscreenUnreadChats = ({
             .querySelectorAll<HTMLElement>("[data-sidebar-chat-id]")
             .forEach((chatElement) => {
               const chatId = chatElement.dataset.sidebarChatId
-              if (!chatId || !byChatId.has(chatId)) return
+              if (!chatId || !byChatId.has(chatId)) {
+                return
+              }
               statuses.set(chatElement, {
                 count: 1,
                 direction: null,
@@ -304,11 +322,15 @@ export const useOffscreenUnreadChats = ({
             })
         })
 
-      if (statuses.size === 0) updateDirections()
+      if (statuses.size === 0) {
+        updateDirections()
+      }
     }
 
     const scheduleBindTargets = () => {
-      if (!initialized || animationFrame !== null) return
+      if (!initialized || animationFrame !== null) {
+        return
+      }
       animationFrame = requestAnimationFrame(() => {
         animationFrame = null
         bindTargets()
@@ -341,8 +363,12 @@ export const useOffscreenUnreadChats = ({
       clearPendingFocus()
       intersectionObserver?.disconnect()
       mutationObserver.disconnect()
-      if (animationFrame !== null) cancelAnimationFrame(animationFrame)
-      if (initialFrame !== null) cancelAnimationFrame(initialFrame)
+      if (animationFrame !== null) {
+        cancelAnimationFrame(animationFrame)
+      }
+      if (initialFrame !== null) {
+        cancelAnimationFrame(initialFrame)
+      }
     }
   }, [clearPendingFocus, rootRef, unreadTargetSignature])
 
@@ -352,7 +378,9 @@ export const useOffscreenUnreadChats = ({
         direction === "above"
           ? navigation.above.target
           : navigation.below.target
-      if (!target) return
+      if (!target) {
+        return
+      }
 
       if (!shouldReduceMotion) {
         clearPendingFocus()
@@ -360,7 +388,9 @@ export const useOffscreenUnreadChats = ({
         const ownerDocument = target.ownerDocument
         const cancelPendingFocus = () => clearPendingFocus()
         const handleFocus = () => {
-          if (ownerDocument.activeElement !== origin) clearPendingFocus()
+          if (ownerDocument.activeElement !== origin) {
+            clearPendingFocus()
+          }
         }
 
         viewport?.addEventListener("wheel", cancelPendingFocus, { once: true })
@@ -399,7 +429,9 @@ export const useOffscreenUnreadChats = ({
         behavior: shouldReduceMotion ? "auto" : "smooth",
         block: "center",
       })
-      if (shouldReduceMotion) focusUnreadTarget(target)
+      if (shouldReduceMotion) {
+        focusUnreadTarget(target)
+      }
     },
     [clearPendingFocus, navigation, shouldReduceMotion]
   )

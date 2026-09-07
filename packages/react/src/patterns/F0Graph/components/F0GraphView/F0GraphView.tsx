@@ -110,16 +110,36 @@ function F0GraphEdgeWrapperInner(props: RFEdgeProps) {
 F0GraphEdgeWrapperInner.displayName = "F0GraphEdgeWrapper"
 
 const F0GraphEdgeWrapper = memo(F0GraphEdgeWrapperInner, (prev, next) => {
-  if (prev.id !== next.id) return false
-  if (prev.data?.showDot !== next.data?.showDot) return false
-  if (prev.data?.variant !== next.data?.variant) return false
-  if (prev.data?.graphEdge !== next.data?.graphEdge) return false
-  if (prev.sourceX !== next.sourceX) return false
-  if (prev.sourceY !== next.sourceY) return false
-  if (prev.targetX !== next.targetX) return false
-  if (prev.targetY !== next.targetY) return false
-  if (prev.sourcePosition !== next.sourcePosition) return false
-  if (prev.targetPosition !== next.targetPosition) return false
+  if (prev.id !== next.id) {
+    return false
+  }
+  if (prev.data?.showDot !== next.data?.showDot) {
+    return false
+  }
+  if (prev.data?.variant !== next.data?.variant) {
+    return false
+  }
+  if (prev.data?.graphEdge !== next.data?.graphEdge) {
+    return false
+  }
+  if (prev.sourceX !== next.sourceX) {
+    return false
+  }
+  if (prev.sourceY !== next.sourceY) {
+    return false
+  }
+  if (prev.targetX !== next.targetX) {
+    return false
+  }
+  if (prev.targetY !== next.targetY) {
+    return false
+  }
+  if (prev.sourcePosition !== next.sourcePosition) {
+    return false
+  }
+  if (prev.targetPosition !== next.targetPosition) {
+    return false
+  }
   return true
 })
 
@@ -240,7 +260,7 @@ export function F0GraphView<T = unknown>(
   renderNodeRef.current = renderNode
   const stableRenderNode = useMemo(
     () =>
-      (node: GraphNode<unknown>, ctx: F0GraphNodeRenderContext): ReactNode =>
+      (node: GraphNode, ctx: F0GraphNodeRenderContext): ReactNode =>
         renderNodeRef.current(node as GraphNode<T>, ctx),
     []
   )
@@ -480,17 +500,25 @@ export function F0GraphView<T = unknown>(
     (clientX: number, clientY: number, pointerType?: string) => {
       // Hover affordances are for mouse and pen; a touch pan would otherwise
       // reveal collapsers under the finger.
-      if (pointerType === "touch") return
+      if (pointerType === "touch") {
+        return
+      }
       // Before touching React Flow: a graph with no stacked column pays one
       // comparison, and `screenToFlowPosition` is absent from the hand-written
       // `useReactFlow` mocks in some tests.
       const zones = stackHoverZonesRef.current
-      if (zones.length === 0) return
+      if (zones.length === 0) {
+        return
+      }
       // The affordance does not render at dot zoom, so nothing can be revealed.
-      if (zoomLevelRef.current === "dot") return
+      if (zoomLevelRef.current === "dot") {
+        return
+      }
       const point = reactFlow.screenToFlowPosition({ x: clientX, y: clientY })
       const next = findStackHoverZoneAt(zones, point.x, point.y)
-      if (hoveredStackRef.current === next) return
+      if (hoveredStackRef.current === next) {
+        return
+      }
       hoveredStackRef.current = next
       setHoveredStackParentId(next)
     },
@@ -521,7 +549,9 @@ export function F0GraphView<T = unknown>(
     (viewport: Parameters<typeof handleViewportChange>[0]) => {
       handleViewportChange(viewport)
       const last = lastPointerRef.current
-      if (last) resolveStackHover(last.x, last.y, last.pointerType)
+      if (last) {
+        resolveStackHover(last.x, last.y, last.pointerType)
+      }
     },
     [handleViewportChange, resolveStackHover]
   )
@@ -530,7 +560,9 @@ export function F0GraphView<T = unknown>(
   // not fire when moving between children.
   const handleCanvasPointerLeave = useCallback(() => {
     lastPointerRef.current = null
-    if (hoveredStackRef.current === null) return
+    if (hoveredStackRef.current === null) {
+      return
+    }
     hoveredStackRef.current = null
     setHoveredStackParentId(null)
   }, [])
@@ -589,7 +621,9 @@ export function F0GraphView<T = unknown>(
     // Windowing: the target may be off-screen and absent from React Flow's
     // store, so center on its layout position instead of an id-based fitView
     // (which silently no-ops for a missing node).
-    if (enableNodeWindowing && centerOnNode(id, 300)) return
+    if (enableNodeWindowing && centerOnNode(id, 300)) {
+      return
+    }
     // Frame the node together with its (present) direct children and cap the
     // zoom, so navigation lands with surrounding context instead of zooming a
     // single node to `maxZoom` (2×) — same framing as the `initialFocusNodeId`
@@ -620,7 +654,9 @@ export function F0GraphView<T = unknown>(
   const flyToNodeClickRef = useRef<(id: string) => void>(() => {})
   flyToNodeClickRef.current = (id: string) => {
     const zoom = Math.min(nodeClickZoom ?? NODE_CLICK_ZOOM, maxZoom)
-    if (centerOnNode(id, 300, zoom)) return
+    if (centerOnNode(id, 300, zoom)) {
+      return
+    }
     reactFlow.fitView({
       nodes: [{ id }],
       duration: 300,
@@ -658,7 +694,9 @@ export function F0GraphView<T = unknown>(
       // `expander-`/`collapser-` ids, absent from `nodeMap`); flying to one would
       // chase the toggle's position as it shifts on expand/collapse. Gating on
       // `nodeMap` leaves the toggle itself untouched.
-      if (!centerOnNodeClick || !nodeMap.has(id)) return
+      if (!centerOnNodeClick || !nodeMap.has(id)) {
+        return
+      }
       // A second click supersedes a still-pending fly rather than queueing both.
       if (nodeClickFlyTimerRef.current) {
         clearTimeout(nodeClickFlyTimerRef.current)
@@ -672,7 +710,9 @@ export function F0GraphView<T = unknown>(
   )
 
   useEffect(() => {
-    if (!focusedNode) return
+    if (!focusedNode) {
+      return
+    }
     // Fires only when `focusedNode` transitions to a new value (entry,
     // search-select, "Find me") — never on layout re-renders while it's
     // unchanged. Slight delay so the layout settles before flying.
@@ -703,7 +743,9 @@ export function F0GraphView<T = unknown>(
   )
   const didInitialFrameRef = useRef(false)
   useEffect(() => {
-    if (didInitialFrameRef.current || renderedNodeIds.length === 0) return
+    if (didInitialFrameRef.current || renderedNodeIds.length === 0) {
+      return
+    }
     didInitialFrameRef.current = true
     if (!initialFocusNodeId) {
       reactFlow.fitView(
@@ -724,8 +766,9 @@ export function F0GraphView<T = unknown>(
   }, [renderedNodeIds.length, initialFocusNodeId, reactFlow])
   useEffect(
     () => () => {
-      if (initialFrameTimerRef.current)
+      if (initialFrameTimerRef.current) {
         clearTimeout(initialFrameTimerRef.current)
+      }
     },
     []
   )
@@ -870,25 +913,35 @@ export function F0GraphView<T = unknown>(
                         // moved (i.e. it was a click, not a pan drag).
                         const start = pointerDownRef.current
                         pointerDownRef.current = null
-                        if (!start || start.id !== e.pointerId) return
+                        if (!start || start.id !== e.pointerId) {
+                          return
+                        }
                         const dx = e.clientX - start.x
                         const dy = e.clientY - start.y
-                        if (dx * dx + dy * dy > NODE_CLICK_DISTANCE_SQ) return
+                        if (dx * dx + dy * dy > NODE_CLICK_DISTANCE_SQ) {
+                          return
+                        }
                         const target = e.target as HTMLElement | null
                         // Opt-out affordances inside a node (e.g. the tag row)
                         // are marked `data-no-node-select`: a pointerup on one
                         // must not select the node. Checked before the node
                         // lookup because this fires regardless of any inner
                         // `onClick` stopPropagation.
-                        if (target?.closest("[data-no-node-select]")) return
+                        if (target?.closest("[data-no-node-select]")) {
+                          return
+                        }
                         const nodeEl =
                           target?.closest<HTMLElement>(".react-flow__node")
-                        if (!nodeEl) return
+                        if (!nodeEl) {
+                          return
+                        }
                         const id = nodeEl.getAttribute("data-id")
                         // select + fly-to (the fly is opt-out via
                         // `centerOnNodeClick`). This is the click-only path;
                         // keyboard selection goes through `selectNode` directly.
-                        if (id) handleNodeClick(id)
+                        if (id) {
+                          handleNodeClick(id)
+                        }
                       }}
                       className="h-full w-full"
                     >
@@ -913,14 +966,18 @@ export function F0GraphView<T = unknown>(
                         onEdgeMouseEnter={(_, edge) => {
                           const ge = (edge.data as GraphEdgeData | undefined)
                             ?.graphEdge
-                          if (!ge?.onEdgeClick && !ge?.onEdgeHover) return
+                          if (!ge?.onEdgeClick && !ge?.onEdgeHover) {
+                            return
+                          }
                           setHoveredEdgeId(edge.id)
                           ge.onEdgeHover?.(ge)
                         }}
                         onEdgeMouseLeave={(_, edge) => {
                           const ge = (edge.data as GraphEdgeData | undefined)
                             ?.graphEdge
-                          if (!ge?.onEdgeClick && !ge?.onEdgeHover) return
+                          if (!ge?.onEdgeClick && !ge?.onEdgeHover) {
+                            return
+                          }
                           setHoveredEdgeId((current) =>
                             current === edge.id ? null : current
                           )

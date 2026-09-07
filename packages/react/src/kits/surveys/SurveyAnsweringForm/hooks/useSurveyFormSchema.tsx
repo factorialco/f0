@@ -175,13 +175,18 @@ function getDefaultValue(
   defaultValues?: Partial<SurveyAnswers>
 ): unknown {
   const dv = defaultValues?.[question.id]
-  if (dv) return dv.value
+  if (dv) {
+    return dv.value
+  }
 
-  if (question.type === "multi-select" || question.type === "dropdown-multi")
+  if (question.type === "multi-select" || question.type === "dropdown-multi") {
     return []
+  }
 
   const q = question as QuestionElement & { value?: unknown }
-  if (q.value !== undefined && q.value !== null) return q.value
+  if (q.value !== undefined && q.value !== null) {
+    return q.value
+  }
 
   return null
 }
@@ -681,8 +686,9 @@ export function useSurveyFormSchema(
         }
 
         for (const q of section.questions ?? []) {
-          if (isStepped && currentQuestionId && q.id !== currentQuestionId)
+          if (isStepped && currentQuestionId && q.id !== currentQuestionId) {
             continue
+          }
 
           shape[q.id] = buildFieldForQuestion(
             q,
@@ -699,8 +705,9 @@ export function useSurveyFormSchema(
       } else {
         const q = element.question
 
-        if (isStepped && currentQuestionId && q.id !== currentQuestionId)
+        if (isStepped && currentQuestionId && q.id !== currentQuestionId) {
           continue
+        }
 
         shape[q.id] = buildFieldForQuestion(
           q,

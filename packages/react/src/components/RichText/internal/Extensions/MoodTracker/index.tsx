@@ -42,7 +42,9 @@ export const MoodTrackerView: React.FC<NodeViewProps> = ({
 
   // Use dynamic config from extension options instead of persisted config
 
-  if (!data) return null
+  if (!data) {
+    return null
+  }
 
   const handleToggleCollapse = () => {
     const newState = !isOpen
@@ -165,7 +167,9 @@ export const MoodTracker = Node.create({
           return dataAttr ? JSON.parse(dataAttr) : null
         },
         renderHTML: (attributes) => {
-          if (!attributes.data) return {}
+          if (!attributes.data) {
+            return {}
+          }
           return {
             "data-mood-tracker": JSON.stringify(attributes.data),
           }
@@ -190,7 +194,9 @@ export const MoodTracker = Node.create({
 
   renderHTML({ HTMLAttributes, node }) {
     const data = node.attrs.data as MoodTrackerData
-    if (!data) return ["div"]
+    if (!data) {
+      return ["div"]
+    }
 
     return [
       "div",

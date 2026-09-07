@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { fn } from "storybook/test"
-import { TasksList, TasksListProps } from "./index"
+import { TasksList, TasksListProps } from "."
 
 const meta: Meta<TasksListProps> = {
   title: "Profile/TasksList",

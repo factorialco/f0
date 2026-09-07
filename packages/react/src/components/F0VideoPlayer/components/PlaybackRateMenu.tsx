@@ -34,7 +34,9 @@ export function PlaybackRateMenu({
         '[role="menuitemradio"]'
       )
     )
-    if (items.length === 0) return
+    if (items.length === 0) {
+      return
+    }
     const current = items.indexOf(document.activeElement as HTMLButtonElement)
     let next: number
     switch (event.key) {

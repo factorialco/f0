@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { ControllerRenderProps, FieldValues } from "react-hook-form"
+import { ControllerRenderProps } from "react-hook-form"
 import type { InputFieldStatus } from "@/components/F0InputField/types"
 import { F0TextInput } from "@/components/F0TextInput"
 import { getFieldInputIcon } from "@/lib/field-input-icons"
@@ -16,7 +16,7 @@ import {
 
 export interface TimeFieldRendererProps {
   field: ResolvedTimeField
-  formField: ControllerRenderProps<FieldValues>
+  formField: ControllerRenderProps
   error?: boolean
   loading?: boolean
   status?: InputFieldStatus

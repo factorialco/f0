@@ -3,7 +3,7 @@ import { useState } from "react"
 import { expect, userEvent, waitFor, within } from "storybook/test"
 import { Add, Briefcase, People } from "@/icons/app"
 import type { CardSelectableItem, CardSelectableSingleProps } from "./types"
-import { CardSelectableContainer } from "./index"
+import { CardSelectableContainer } from "."
 
 // Use single selection props for the meta type - stories can override for multiple
 const meta: Meta<CardSelectableSingleProps<string>> = {

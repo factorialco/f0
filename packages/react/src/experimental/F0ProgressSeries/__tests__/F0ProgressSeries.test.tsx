@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { zeroRender as render, screen } from "@/testing/test-utils"
-import { F0ProgressSeries } from "../index"
+import { F0ProgressSeries } from ".."
 import { F0ProgressSeriesBar } from "../types"
 
 const getBars = () => screen.getAllByRole("img")

@@ -1,10 +1,8 @@
 import { beforeAll, describe, expect, it } from "vitest"
-import { screen, zeroRender } from "@/testing/test-utils"
-import { zeroRenderHook } from "@/testing/test-utils"
+import { screen, zeroRender, zeroRenderHook } from "@/testing/test-utils"
 import { F0Graph, type F0GraphNodeRenderContext } from "../F0Graph"
 import { useLayoutEngine } from "../hooks/useLayoutEngine"
-import type { GraphNode } from "../types"
-import type { GraphEdge, TreeNode } from "../types"
+import type { GraphNode, GraphEdge, TreeNode } from "../types"
 import { resolveStackedParents } from "../utils"
 
 // ─── Helpers ───────────────────────────────────────────────────
@@ -165,7 +163,7 @@ describe("useLayoutEngine — stacked nodes", () => {
     return { nodes: [root, roleA, roleB, ...levels], edges }
   }
 
-  const byId = (layout: { nodes: Array<{ id: string }> }, id: string) =>
+  const byId = (layout: { nodes: { id: string }[] }, id: string) =>
     layout.nodes.find((n) => n.id === id)!
 
   it("places the rows in a column sharing the parent's x", () => {

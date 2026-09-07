@@ -78,7 +78,9 @@ export function createSuggestionConfig(
       const safeGetRect = (props: SuggestionRenderProps): DOMRect => {
         if (props.clientRect) {
           const rect = props.clientRect()
-          if (rect && rect.width && rect.height) return rect
+          if (rect && rect.width && rect.height) {
+            return rect
+          }
         }
         return getAtSymbolRect()
       }
@@ -88,7 +90,9 @@ export function createSuggestionConfig(
           latestProps = props
 
           const commandFn = (item: MentionedUser) => {
-            if (!latestProps) return
+            if (!latestProps) {
+              return
+            }
 
             const { editor, range } = latestProps
 
@@ -139,7 +143,9 @@ export function createSuggestionConfig(
         onUpdate: (props: SuggestionRenderProps) => {
           latestProps = props
 
-          if (!component || !container || !popoverRoot) return
+          if (!component || !container || !popoverRoot) {
+            return
+          }
           component.updateProps({ items: props.items })
           const anchorRect = safeGetRect(props)
           popoverRoot.render(
@@ -151,7 +157,9 @@ export function createSuggestionConfig(
           )
         },
         onKeyDown: (props: { event: KeyboardEvent }) => {
-          if (!component) return false
+          if (!component) {
+            return false
+          }
           if (
             props.event.key === "ArrowUp" ||
             props.event.key === "ArrowDown"

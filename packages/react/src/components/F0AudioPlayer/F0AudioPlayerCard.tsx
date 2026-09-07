@@ -133,7 +133,7 @@ const F0AudioPlayerCardBase = forwardRef<
   )
 
   const viewportRef = useRef<HTMLDivElement>(null)
-  const cueRefs = useRef<Array<HTMLLIElement | null>>([])
+  const cueRefs = useRef<(HTMLLIElement | null)[]>([])
   const readerTookOverRef = useRef(false)
 
   const handleSeek = useCallback(
@@ -146,18 +146,24 @@ const F0AudioPlayerCardBase = forwardRef<
 
   useEffect(() => {
     const viewport = viewportRef.current
-    if (!viewport) return
+    if (!viewport) {
+      return
+    }
 
     const takeOver = () => {
       readerTookOverRef.current = true
     }
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (SCROLL_KEYS.has(event.key)) takeOver()
+      if (SCROLL_KEYS.has(event.key)) {
+        takeOver()
+      }
     }
     // Dragging the scrollbar assigns `scrollTop` directly, firing none of the
     // above; anything pressed outside the viewport is its scrollbar or corner.
     const handlePointerDown = (event: PointerEvent) => {
-      if (!viewport.contains(event.target as Node)) takeOver()
+      if (!viewport.contains(event.target as Node)) {
+        takeOver()
+      }
     }
 
     const root = viewport.parentElement
@@ -175,7 +181,9 @@ const F0AudioPlayerCardBase = forwardRef<
 
   // Normalise whichever input was given into the tab list the panel renders.
   const tabs: AudioPlayerDetailTab[] = useMemo(() => {
-    if (usesLegacyDetails) return details ?? []
+    if (usesLegacyDetails) {
+      return details ?? []
+    }
     const built: AudioPlayerDetailTab[] = []
     if (summary) {
       built.push({
@@ -246,17 +254,23 @@ const F0AudioPlayerCardBase = forwardRef<
     onChange: onExpandedChange,
   })
   useEffect(() => {
-    if (!isExpanded || activeCueIndex < 0 || readerTookOverRef.current) return
+    if (!isExpanded || activeCueIndex < 0 || readerTookOverRef.current) {
+      return
+    }
 
     const viewport = viewportRef.current
     const cue = cueRefs.current[activeCueIndex]
-    if (!viewport || !cue) return
+    if (!viewport || !cue) {
+      return
+    }
 
     const viewportBox = viewport.getBoundingClientRect()
     const cueBox = cue.getBoundingClientRect()
     const above = cueBox.top - viewportBox.top
     const below = cueBox.bottom - viewportBox.bottom
-    if (above >= 0 && below <= 0) return
+    if (above >= 0 && below <= 0) {
+      return
+    }
 
     viewport.scrollTo({
       top: viewport.scrollTop + (above < 0 ? above : below),

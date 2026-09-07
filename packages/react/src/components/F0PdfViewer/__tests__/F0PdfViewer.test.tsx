@@ -7,7 +7,7 @@ import {
   screen,
   waitFor,
 } from "@/testing/test-utils"
-import { F0PdfViewer } from "../index"
+import { F0PdfViewer } from ".."
 
 interface FakePdf {
   numPages: number

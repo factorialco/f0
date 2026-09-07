@@ -19,6 +19,8 @@ export const FIELD_INPUT_ICONS = {
 export function getFieldInputIcon(
   inputType: string | undefined
 ): IconType | undefined {
-  if (!inputType) return undefined
+  if (!inputType) {
+    return undefined
+  }
   return (FIELD_INPUT_ICONS as Record<string, IconType | undefined>)[inputType]
 }

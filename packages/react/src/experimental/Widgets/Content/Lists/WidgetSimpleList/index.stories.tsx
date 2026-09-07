@@ -3,7 +3,7 @@ import {
   Default as DefaultWidgetSimpleListItemStory,
   WithLongTitle as WithLongTitleWidgetSimpleListItemStory,
 } from "../../ListItems/WidgetSimpleListItem/index.stories"
-import { WidgetSimpleList, WidgetSimpleListProps } from "./index"
+import { WidgetSimpleList, WidgetSimpleListProps } from "."
 
 const meta: Meta<WidgetSimpleListProps> = {
   title: "Widgets/WidgetSimpleList",

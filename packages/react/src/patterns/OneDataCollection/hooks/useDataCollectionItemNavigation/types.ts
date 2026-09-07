@@ -115,7 +115,7 @@ export interface UseDataCollectionItemNavigationProps<
    * Forwarded to `useDataCollectionSource` for `dataAdapter` memoization,
    * same convention as `useDataCollectionSource(source, deps)`.
    */
-  deps?: ReadonlyArray<unknown>
+  deps?: readonly unknown[]
 }
 
 export interface UseDataCollectionItemNavigationReturn<

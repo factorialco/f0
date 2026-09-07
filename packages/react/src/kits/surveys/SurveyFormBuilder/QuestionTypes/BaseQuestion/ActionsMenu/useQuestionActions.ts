@@ -47,7 +47,9 @@ export function shouldResetParamsOnTypeChange(
   currentType: QuestionType,
   question: { options?: unknown } | undefined
 ): boolean {
-  if (newType === currentType) return false
+  if (newType === currentType) {
+    return false
+  }
 
   // Keep existing options when switching between select and multi-select
   // if the question already has options
@@ -188,7 +190,9 @@ export function useQuestionActionsFactory() {
         questionType === "dropdown-multi" && !!currentDatasetKey
 
       const handleToggleMultiSelect = (enabled: boolean) => {
-        if (!currentDatasetKey) return
+        if (!currentDatasetKey) {
+          return
+        }
         const newType = enabled ? "dropdown-multi" : "dropdown-single"
         onQuestionChange?.({
           id: questionId,
@@ -211,7 +215,9 @@ export function useQuestionActionsFactory() {
       )
 
       const handleToggleAllowCreate = (enabled: boolean) => {
-        if (!currentDatasetKey) return
+        if (!currentDatasetKey) {
+          return
+        }
         onQuestionChange?.({
           id: questionId,
           type: questionType,

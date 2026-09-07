@@ -7,7 +7,7 @@ import {
   screen,
   waitFor,
 } from "@/testing/test-utils"
-import { F0Slider } from "../index"
+import { F0Slider } from ".."
 
 describe("F0Slider", () => {
   it("renders the visible label", () => {

@@ -7,7 +7,7 @@ import { ApplicationFrame } from "@/patterns/ApplicationFrame"
 import ApplicationFrameStoryMeta from "@/patterns/ApplicationFrame/index.stories"
 import { f0FormField } from "@/patterns/F0Form/f0Schema"
 import { forms } from "@/patterns/forms"
-import { F0WizardForm, useF0FormDefinition } from "../index"
+import { F0WizardForm, useF0FormDefinition } from ".."
 
 const meta: Meta<typeof F0WizardForm> = {
   title: "Forms/F0WizardForm",

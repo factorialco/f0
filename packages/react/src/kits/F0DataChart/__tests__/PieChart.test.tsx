@@ -36,14 +36,16 @@ vi.mock("../utils/useContainerSize", () => ({
 
 function getLatestOption() {
   const call = setOptionMock.mock.calls.at(-1)
-  if (!call) throw new Error("setOption was never called")
+  if (!call) {
+    throw new Error("setOption was never called")
+  }
   return call[0] as {
     legend?: { show?: boolean }
-    series: Array<{
+    series: {
       label?: { show?: boolean }
       labelLine?: { show?: boolean }
       radius?: [string, string]
-    }>
+    }[]
     tooltip?: { formatter?: (params: unknown) => string }
   }
 }
@@ -51,7 +53,9 @@ function getLatestOption() {
 /** Run the tooltip formatter the way ECharts would on hover. */
 function hover(params: unknown) {
   const formatter = getLatestOption().tooltip?.formatter
-  if (!formatter) throw new Error("the chart built no tooltip formatter")
+  if (!formatter) {
+    throw new Error("the chart built no tooltip formatter")
+  }
   return formatter(params)
 }
 

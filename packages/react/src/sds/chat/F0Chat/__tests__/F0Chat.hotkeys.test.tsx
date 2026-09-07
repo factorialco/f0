@@ -94,7 +94,9 @@ const pressArrowUp = async () => {
  * test that wants a quote must not aim at them. */
 const bubbleAround = (body: string): HTMLElement => {
   const box = screen.getByText(body).parentElement
-  if (!box) throw new Error(`No bubble around "${body}"`)
+  if (!box) {
+    throw new Error(`No bubble around "${body}"`)
+  }
   return box
 }
 

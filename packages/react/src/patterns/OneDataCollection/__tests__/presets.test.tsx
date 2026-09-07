@@ -13,8 +13,8 @@ import {
   waitFor,
   zeroRender,
 } from "@/testing/test-utils"
+import { OneDataCollection } from ".."
 import { useDataCollectionSource } from "../hooks/useDataCollectionSource"
-import { OneDataCollection } from "../index"
 import {
   encodeSharedPreset,
   SHARED_PRESET_PARAM,

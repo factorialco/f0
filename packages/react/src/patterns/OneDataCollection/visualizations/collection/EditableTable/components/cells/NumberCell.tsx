@@ -27,13 +27,19 @@ export function NumberCell<R extends RecordType>({
 
   const handleChange = (newValue: number | null) => {
     if (newValue == null) {
-      if (value !== "") onChange(null)
+      if (value !== "") {
+        onChange(null)
+      }
       return
     }
 
     let clamped = newValue
-    if (config?.min != null && clamped < config.min) clamped = config.min
-    if (config?.max != null && clamped > config.max) clamped = config.max
+    if (config?.min != null && clamped < config.min) {
+      clamped = config.min
+    }
+    if (config?.max != null && clamped > config.max) {
+      clamped = config.max
+    }
 
     const stringValue = String(clamped)
     if (stringValue !== value) {

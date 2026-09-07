@@ -92,7 +92,9 @@ async function resolveResult<T>(
     return new Promise<T>((resolve, reject) => {
       const subscription = observable.subscribe({
         next(state: PromiseState<T>) {
-          if (state.loading) return
+          if (state.loading) {
+            return
+          }
           subscription?.unsubscribe()
           if (state.error) {
             reject(state.error)
@@ -190,11 +192,15 @@ async function fetchAllRecords<
       )
 
       const response = result as PaginatedResponse<R>
-      if (!response.records || response.records.length === 0) break
+      if (!response.records || response.records.length === 0) {
+        break
+      }
 
       allRecords.push(...response.records)
 
-      if ("pagesCount" in response && currentPage >= response.pagesCount) break
+      if ("pagesCount" in response && currentPage >= response.pagesCount) {
+        break
+      }
       currentPage++
     }
 
@@ -214,11 +220,15 @@ async function fetchAllRecords<
       )
 
       const response = result as PaginatedResponse<R>
-      if (!response.records || response.records.length === 0) break
+      if (!response.records || response.records.length === 0) {
+        break
+      }
 
       allRecords.push(...response.records)
 
-      if ("hasMore" in response && !response.hasMore) break
+      if ("hasMore" in response && !response.hasMore) {
+        break
+      }
       if ("cursor" in response) {
         cursor = response.cursor ?? null
       } else {
@@ -266,7 +276,9 @@ export function useExportAction<
   const { settings } = useDataCollectionSettings()
 
   const handleExport = useCallback(async () => {
-    if (!enabled) return
+    if (!enabled) {
+      return
+    }
 
     setIsExporting(true)
 

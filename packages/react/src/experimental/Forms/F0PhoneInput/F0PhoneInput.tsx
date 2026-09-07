@@ -170,7 +170,9 @@ export const F0PhoneInput = forwardRef<HTMLInputElement, F0PhoneInputProps>(
       const pinned = (pinnedCountries ?? [])
         .map(toPhoneCountry)
         .filter((code): code is PhoneCountry => !!code)
-      if (!pinned.length) return undefined
+      if (!pinned.length) {
+        return undefined
+      }
       return [...pinned, "|" as const, "..." as const]
     }, [pinnedCountries])
 
@@ -182,7 +184,9 @@ export const F0PhoneInput = forwardRef<HTMLInputElement, F0PhoneInputProps>(
     )
 
     const countries = useMemo(() => {
-      if (!allowedCountries) return undefined
+      if (!allowedCountries) {
+        return undefined
+      }
       const allowed = allowedCountries
         .map(toPhoneCountry)
         .filter((code): code is PhoneCountry => !!code)
@@ -207,9 +211,13 @@ export const F0PhoneInput = forwardRef<HTMLInputElement, F0PhoneInputProps>(
       null
     )
     useEffect(() => {
-      if (country || !e164) return
+      if (country || !e164) {
+        return
+      }
       const detected = countryForPartialE164(e164, countries)
-      if (detected) selectCountryRef.current?.(detected)
+      if (detected) {
+        selectCountryRef.current?.(detected)
+      }
     }, [country, e164, countries])
 
     // Legacy `hint`/`error` shortcuts, mirroring F0InputField's semantics

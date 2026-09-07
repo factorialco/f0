@@ -86,7 +86,9 @@ export function useLazyTree<T>(
 
       // Clear any previous error for this node
       setErrorNodes((prev) => {
-        if (!prev.has(nodeId)) return prev
+        if (!prev.has(nodeId)) {
+          return prev
+        }
         const next = new Map(prev)
         next.delete(nodeId)
         return next
@@ -136,7 +138,7 @@ export function useLazyTree<T>(
 
   const expandNode = useCallback(
     async (nodeId: string): Promise<GraphNode<T>[]> => {
-      return await fetchChildren(nodeId)
+      return fetchChildren(nodeId)
     },
     [fetchChildren]
   )
@@ -150,7 +152,7 @@ export function useLazyTree<T>(
     async (nodeId: string): Promise<GraphNode<T>[]> => {
       // Allow re-fetch by clearing the loaded flag
       loadedParents.current.delete(nodeId)
-      return await fetchChildren(nodeId)
+      return fetchChildren(nodeId)
     },
     [fetchChildren]
   )

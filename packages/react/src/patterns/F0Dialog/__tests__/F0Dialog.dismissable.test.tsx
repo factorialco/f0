@@ -5,7 +5,7 @@ import {
   zeroRender as render,
   screen,
 } from "@/testing/test-utils"
-import { F0Dialog } from "../index"
+import { F0Dialog } from ".."
 
 const renderDialog = (props: { dismissable?: boolean; onClose: () => void }) =>
   render(

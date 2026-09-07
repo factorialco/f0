@@ -80,7 +80,9 @@ export function ComponentStability({
   className,
 }: ComponentStabilityProps) {
   const status = getComponentStatus(componentName, components)
-  if (!status) return null
+  if (!status) {
+    return null
+  }
 
   return (
     <div
@@ -241,7 +243,9 @@ export function ComponentMaturityTag({
   className,
 }: ComponentStabilityProps) {
   const status = getComponentStatus(componentName, components)
-  if (!status) return null
+  if (!status) {
+    return null
+  }
 
   return (
     <TooltipProvider delayDuration={150}>

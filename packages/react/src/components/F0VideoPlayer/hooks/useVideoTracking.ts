@@ -21,7 +21,9 @@ export function useVideoTracking({
   const enabled = !!onTrackAction
 
   useEffect(() => {
-    if (!video || !enabled) return
+    if (!video || !enabled) {
+      return
+    }
 
     let trackingInterval: ReturnType<typeof setInterval> | null = null
     const clearTrackingInterval = () => {

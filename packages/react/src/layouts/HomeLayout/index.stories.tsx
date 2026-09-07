@@ -18,7 +18,7 @@ import { Default as WidgetInboxListDefaultStory } from "@/experimental/Widgets/C
 import { Widget } from "@/experimental/Widgets/Widget"
 import { AreaChartProps } from "@/kits/Charts/AreaChart"
 import { Placeholder } from "@/lib/storybook-utils/placeholder"
-import { HomeLayout } from "./index"
+import { HomeLayout } from "."
 
 const widgets = [
   <AreaChartWidget

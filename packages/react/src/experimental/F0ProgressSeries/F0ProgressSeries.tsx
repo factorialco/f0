@@ -213,7 +213,9 @@ function BarLabel({
   caption: string
   textClass: string
 }) {
-  if (!label && !caption) return null
+  if (!label && !caption) {
+    return null
+  }
 
   return (
     <div className={cn("flex items-center gap-1 truncate", textClass)}>
@@ -231,8 +233,12 @@ function BarLabel({
  * 12 bars → 0, 3, 6, 9 (Jan, Apr, Jul, Oct).
  */
 function labelIndices(count: number, maxLabels: number): number[] {
-  if (count <= 0 || maxLabels <= 0) return []
-  if (count <= maxLabels) return Array.from({ length: count }, (_, i) => i)
+  if (count <= 0 || maxLabels <= 0) {
+    return []
+  }
+  if (count <= maxLabels) {
+    return Array.from({ length: count }, (_, i) => i)
+  }
   return Array.from({ length: maxLabels }, (_, i) =>
     Math.floor((i * count) / maxLabels)
   )

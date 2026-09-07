@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { Placeholder } from "../../../../../icons/app"
-import { WidgetSimpleListItem, WidgetSimpleListItemProps } from "./index"
+import { WidgetSimpleListItem, WidgetSimpleListItemProps } from "."
 
 const meta: Meta<WidgetSimpleListItemProps> = {
   title: "Widgets/WidgetSimpleListItem",

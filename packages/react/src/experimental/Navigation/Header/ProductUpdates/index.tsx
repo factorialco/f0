@@ -41,7 +41,7 @@ type ProductUpdate = {
 type ProductUpdatesProp = {
   label: string
   updatesPageUrl: string
-  getUpdates: () => Promise<Array<ProductUpdate>>
+  getUpdates: () => Promise<ProductUpdate[]>
   hasUnread?: boolean
   currentModule: string
   onOpenChange?: ComponentProps<typeof DropdownMenu>["onOpenChange"]
@@ -62,25 +62,23 @@ type ProductUpdatesProp = {
     sectionTitle: string
 
     onClose?: () => void
-    products: Array<
-      {
-        title: string
-        description: string
-        onClick: () => void
-        dismissable: boolean
-        onClose?: () => void
-        trackVisibility?: (open: boolean) => void
-      } & (
-        | {
-            module?: never
-            type: "one-campaign"
-          }
-        | {
-            module: ModuleId
-            type?: never
-          }
-      )
-    >
+    products: ({
+      title: string
+      description: string
+      onClick: () => void
+      dismissable: boolean
+      onClose?: () => void
+      trackVisibility?: (open: boolean) => void
+    } & (
+      | {
+          module?: never
+          type: "one-campaign"
+        }
+      | {
+          module: ModuleId
+          type?: never
+        }
+    ))[]
   }
 }
 

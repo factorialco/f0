@@ -14,7 +14,7 @@ import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
 import { DataCollectionSettingsProvider } from "../../../Settings/SettingsProvider"
 import { SummariesDefinition } from "../../../summary"
 import type { GraphVisualizationOptions } from "./types"
-import { GraphCollection } from "./index"
+import { GraphCollection } from "."
 
 // Stub F0Graph so we can read the props `GraphCollection` hands it — the entry
 // selection is wired here (controlled `selectedNodes` seeded with

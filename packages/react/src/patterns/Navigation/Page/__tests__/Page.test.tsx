@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { zeroRender as render, screen } from "@/testing/test-utils"
-import { Page } from "../index"
+import { Page } from ".."
 
 /**
  * The page frame used to be a `ring-inset` on the page element itself. An inset

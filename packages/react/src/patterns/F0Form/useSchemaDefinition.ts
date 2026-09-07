@@ -13,8 +13,8 @@ import { isFieldRequired } from "./fields/schema"
 import { inferInputType } from "./fields/text/schema"
 import { extractTextareaConstraints } from "./fields/textarea/schema"
 import type { F0Field } from "./fields/types"
-import type { F0FormSchema } from "./types"
 import type {
+  F0FormSchema,
   F0SectionConfig,
   FieldItem,
   FormDefinitionItem,
@@ -371,7 +371,9 @@ function groupFieldsIntoRows(
   const processedIndices = new Set<number>()
 
   for (let i = 0; i < fields.length; i++) {
-    if (processedIndices.has(i)) continue
+    if (processedIndices.has(i)) {
+      continue
+    }
 
     const field = fields[i]
     const rowId = field.config.row

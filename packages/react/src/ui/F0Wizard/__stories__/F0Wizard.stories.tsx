@@ -4,7 +4,7 @@ import { F0Button } from "@/components/F0Button"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { ApplicationFrame } from "@/patterns/ApplicationFrame"
 import ApplicationFrameStoryMeta from "@/patterns/ApplicationFrame/index.stories"
-import { F0Wizard } from "../index"
+import { F0Wizard } from ".."
 import type { F0WizardStep } from "../types"
 
 const meta: Meta<typeof F0Wizard> = {

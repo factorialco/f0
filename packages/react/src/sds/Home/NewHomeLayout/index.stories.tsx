@@ -85,7 +85,7 @@ import {
 } from "../slotRenderers"
 import { WidgetCatalog, type WidgetCatalogGroup } from "../WidgetCatalog"
 import { type WidgetContainerSide } from "../WidgetContainer"
-import { NewHomeLayout } from "./index"
+import { NewHomeLayout } from "."
 
 /* ============================ guided walkthrough =========================== */
 
@@ -360,7 +360,7 @@ const HomeHero = () => (
   </F0Box>
 )
 
-const SHORTCUTS: Array<{ icon: IconType; title: string }> = [
+const SHORTCUTS: { icon: IconType; title: string }[] = [
   { icon: PalmTree, title: "Request Time Off" },
   { icon: Calendar, title: "Request Leave" },
   { icon: Receipt, title: "Add an Expense" },
@@ -1045,7 +1045,9 @@ const LOADING_RIGHT_WIDGETS: HomeWidgetItem[] = RIGHT_WIDGETS.map((widget) => ({
   slots: widget.slots.map((slot) => {
     const params = slot.params as { items?: unknown[]; events?: unknown[] }
     const items = params.items ?? params.events
-    if (!items) return slot
+    if (!items) {
+      return slot
+    }
     return {
       ...slot,
       expectedItemsCount: items.length,
@@ -1164,13 +1166,17 @@ type CommunityScope = (typeof COMMUNITY_SCOPES)[number]["value"]
 
 /** Which posts each scope covers — the app's own filter, not the widget's. */
 const postsForScope = (scope: CommunityScope): CommunityPostSummary[] => {
-  if (scope === "all") return COMMUNITY_POSTS
-  if (scope === "celebrations" || scope === "claps")
+  if (scope === "all") {
+    return COMMUNITY_POSTS
+  }
+  if (scope === "celebrations" || scope === "claps") {
     return COMMUNITY_POSTS.filter((post) => post.id === "nordics-pilot")
-  if (scope === "announcements")
+  }
+  if (scope === "announcements") {
     return COMMUNITY_POSTS.filter((post) =>
       ["h2-planning", "office-move", "handbook"].includes(post.id)
     )
+  }
   return COMMUNITY_POSTS.filter((post) => post.id === "office-hours")
 }
 
@@ -1621,7 +1627,9 @@ const Home = ({ mainFootnote }: { mainFootnote?: string }) => {
           setMainIds((ids) => ids.filter((x) => x !== id))
         }}
         onChangeWidgetParams={(id, params) => {
-          if (id === "events") setEventsParams(params as EventsParams)
+          if (id === "events") {
+            setEventsParams(params as EventsParams)
+          }
         }}
         // The preview rebuilds the widget the same way the rail does, so the
         // dialog shows the events the params will really produce — not just the
@@ -1631,8 +1639,11 @@ const Home = ({ mainFootnote }: { mainFootnote?: string }) => {
           widget.id === "events" ? eventsWidget(params as EventsParams) : widget
         }
         onReorderWidgets={(reorderedSide, ids) => {
-          if (reorderedSide === "main") setMainIds(ids)
-          else setRail((w) => ids.flatMap((id) => w.filter((x) => x.id === id)))
+          if (reorderedSide === "main") {
+            setMainIds(ids)
+          } else {
+            setRail((w) => ids.flatMap((id) => w.filter((x) => x.id === id)))
+          }
         }}
         onClickAddNewWidget={(s) => {
           setSide(s)
@@ -1648,11 +1659,14 @@ const Home = ({ mainFootnote }: { mainFootnote?: string }) => {
         widgets={CATALOG}
         groups={CATALOG_GROUPS}
         onAdd={(id, params) => {
-          if (id === "events" && params) setEventsParams(params as EventsParams)
+          if (id === "events" && params) {
+            setEventsParams(params as EventsParams)
+          }
           // The picker only offers what the column can hold, so "which column"
           // is already decided — it is the side it was opened for.
-          if (side === "main" && !mainIds.includes(id))
+          if (side === "main" && !mainIds.includes(id)) {
             setMainIds((ids) => [...ids, id])
+          }
           setOpen(false)
         }}
         rebuildPreview={(item, params) =>
@@ -1943,12 +1957,15 @@ const clockInDay = (
   const at = (secondsAgo: number) => new Date(now.getTime() - secondsAgo * 1000)
   const trackedMinutes = Math.floor(worked / 60)
 
-  if (status === "clocked-out") return { data: [], trackedMinutes: 0 }
-  if (status === "clocked-in")
+  if (status === "clocked-out") {
+    return { data: [], trackedMinutes: 0 }
+  }
+  if (status === "clocked-in") {
     return {
       data: [{ from: at(worked), to: now, variant: "clocked-in" }],
       trackedMinutes,
     }
+  }
   return {
     data: [
       { from: at(worked + onBreak), to: at(onBreak), variant: "clocked-in" },
@@ -2000,10 +2017,15 @@ const ClockGlyphActionHome = () => {
   // the corner of the page would be a stopwatch, not a day. In the real Home
   // this is all the app's; the rail only draws the string it is handed.
   useEffect(() => {
-    if (status === "clocked-out") return
+    if (status === "clocked-out") {
+      return
+    }
     const tick = setInterval(() => {
-      if (status === "clocked-in") setWorked((seconds) => seconds + 1)
-      else setOnBreak((seconds) => seconds + 1)
+      if (status === "clocked-in") {
+        setWorked((seconds) => seconds + 1)
+      } else {
+        setOnBreak((seconds) => seconds + 1)
+      }
     }, 1000)
     return () => clearInterval(tick)
   }, [status])
@@ -2138,7 +2160,9 @@ const MountedCount = ({ of }: { of: number }) => {
 
   useEffect(() => {
     const page = root?.ownerDocument.body
-    if (!page) return
+    if (!page) {
+      return
+    }
     const read = () =>
       setMounted(page.querySelectorAll("[data-widget-id]").length)
     read()

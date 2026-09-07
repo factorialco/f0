@@ -9,7 +9,7 @@ import {
   type SlotRenderers,
   widgetChrome,
 } from "../slotRenderers"
-import { SlotWidget } from "./index"
+import { SlotWidget } from "."
 
 describe("SlotWidget", () => {
   test("draws each slot through the default renderer for its visualization", () => {
@@ -113,7 +113,7 @@ describe("SlotWidget", () => {
   })
 
   test("tells a slot whether it is the widget's last, so only that one bleeds to the bottom edge", () => {
-    const seen: Array<boolean | undefined> = []
+    const seen: (boolean | undefined)[] = []
     zeroRender(
       <SlotWidget
         slots={[

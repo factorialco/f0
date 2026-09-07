@@ -204,7 +204,9 @@ export const ChatComposer = (): ReactNode => {
       : undefined
 
   useEffect(() => {
-    if (emojiAutocomplete.isOpen) mentions.dismissCurrentTrigger()
+    if (emojiAutocomplete.isOpen) {
+      mentions.dismissCurrentTrigger()
+    }
   }, [emojiAutocomplete.isOpen, mentions.dismissCurrentTrigger])
   const highlightSegments = useMemo(
     () =>
@@ -232,7 +234,9 @@ export const ChatComposer = (): ReactNode => {
   const attachmentSeq = useRef(0)
 
   const releaseLocalPreview = useCallback((url: string) => {
-    if (!localPreviewUrlsRef.current.delete(url)) return
+    if (!localPreviewUrlsRef.current.delete(url)) {
+      return
+    }
     URL.revokeObjectURL(url)
   }, [])
 
@@ -300,7 +304,9 @@ export const ChatComposer = (): ReactNode => {
   const [isSendingVoiceNote, setIsSendingVoiceNote] = useState(false)
   const handleVoiceNote = useCallback(
     async (audio: Blob, durationMs: number) => {
-      if (!uploadFiles) return
+      if (!uploadFiles) {
+        return
+      }
       // Set before any await so it batches with the recorder's own
       // setStatus("idle") — the recording row swaps straight to the sending row.
       setIsSendingVoiceNote(true)
@@ -374,7 +380,9 @@ export const ChatComposer = (): ReactNode => {
   const prevCanSendRef = useRef(canSend)
   if (prevCanSendRef.current !== canSend) {
     prevCanSendRef.current = canSend
-    if (canSend) setSendActivationEpoch((epoch) => epoch + 1)
+    if (canSend) {
+      setSendActivationEpoch((epoch) => epoch + 1)
+    }
   }
 
   const handleChange = useCallback(
@@ -395,7 +403,9 @@ export const ChatComposer = (): ReactNode => {
       }
       // Clearing the text means typing stopped NOW — don't leave the
       // counterpart's dots hanging until the transport's timeout.
-      if (nextValue.trim().length === 0) void stopTyping?.()
+      if (nextValue.trim().length === 0) {
+        void stopTyping?.()
+      }
     },
     [onInputActivity, stopTyping]
   )
@@ -403,14 +413,22 @@ export const ChatComposer = (): ReactNode => {
   useLayoutEffect(
     function applyPendingSelection() {
       const pending = pendingSelectionRef.current
-      if (!pending) return
+      if (!pending) {
+        return
+      }
       // A request whose text never got committed is stale; drop it rather than
       // aim it at whatever the textarea holds now.
       pendingSelectionRef.current = null
-      if (pending.forText !== value) return
+      if (pending.forText !== value) {
+        return
+      }
       const node = textareaRef.current
-      if (!node) return
-      if (pending.focus) node.focus()
+      if (!node) {
+        return
+      }
+      if (pending.focus) {
+        node.focus()
+      }
       node.setSelectionRange(pending.caret, pending.caret)
     },
     [value]
@@ -478,7 +496,9 @@ export const ChatComposer = (): ReactNode => {
 
   const handleUpload = useCallback(
     async (files: File[], source: F0ChatAttachSource) => {
-      if (files.length === 0 || !uploadFiles || !canUpload) return
+      if (files.length === 0 || !uploadFiles || !canUpload) {
+        return
+      }
       clearTransientError()
       // Reject the whole batch when it would exceed the cap — a transient banner
       // is friendlier than silently truncating the user's selection.
@@ -538,7 +558,9 @@ export const ChatComposer = (): ReactNode => {
         setAttachments((prev) => {
           const readyById = new Map(ready.map((item) => [item.id, item]))
           return prev.flatMap((item) => {
-            if (!pendingIds.has(item.id)) return [item]
+            if (!pendingIds.has(item.id)) {
+              return [item]
+            }
             const replacement = readyById.get(item.id)
             return replacement ? [replacement] : []
           })
@@ -589,8 +611,11 @@ export const ChatComposer = (): ReactNode => {
         prev.filter((attachment) => attachment.id !== id)
       )
       requestAnimationFrame(() => {
-        if (hasRemainingAttachments) attachmentStripRef.current?.focus()
-        else textareaRef.current?.focus()
+        if (hasRemainingAttachments) {
+          attachmentStripRef.current?.focus()
+        } else {
+          textareaRef.current?.focus()
+        }
       })
     },
     [attachments, releaseLocalPreview, emit]
@@ -614,9 +639,13 @@ export const ChatComposer = (): ReactNode => {
 
   const handlePaste = useCallback(
     (event: ClipboardEvent<HTMLTextAreaElement>) => {
-      if (!canUpload) return
+      if (!canUpload) {
+        return
+      }
       const files = Array.from(event.clipboardData.files)
-      if (files.length === 0) return
+      if (files.length === 0) {
+        return
+      }
 
       // File pastes (Cmd/Ctrl+V) become attachments. Text-only clipboard
       // content keeps the textarea's native paste behavior.
@@ -694,7 +723,9 @@ export const ChatComposer = (): ReactNode => {
 
   const focusComposer = useCallback(() => {
     const node = textareaRef.current
-    if (!node) return
+    if (!node) {
+      return
+    }
     // preventScroll: the panel can sit in a longer host page, and taking a
     // quote must not scroll it.
     node.focus({ preventScroll: true })
@@ -711,9 +742,15 @@ export const ChatComposer = (): ReactNode => {
         next.kind === "edit" &&
         previous.message.id === next.message.id
 
-      if (leavingEdit) discardDraft()
-      if (next.kind === "edit" && !sameEdit) loadEditDraft(next.message)
-      if (next.kind !== "none") focusComposer()
+      if (leavingEdit) {
+        discardDraft()
+      }
+      if (next.kind === "edit" && !sameEdit) {
+        loadEditDraft(next.message)
+      }
+      if (next.kind !== "none") {
+        focusComposer()
+      }
     },
     [discardDraft, loadEditDraft, focusComposer]
   )
@@ -743,7 +780,9 @@ export const ChatComposer = (): ReactNode => {
   )
 
   const handleSend = useCallback(() => {
-    if (!canSend) return
+    if (!canSend) {
+      return
+    }
     // Typing stopped by definition — the message is out (or the edit saved).
     void stopTyping?.()
     const ready = attachments.flatMap((a) =>
@@ -820,12 +859,16 @@ export const ChatComposer = (): ReactNode => {
   // switch — neither is an abandonment. Only Escape and the chip's X route
   // through these, so the cancelled counts stay meaningful.
   const dismissEdit = useCallback(() => {
-    if (editingMessage) emit.onEditCancelled({ messageId: editingMessage.id })
+    if (editingMessage) {
+      emit.onEditCancelled({ messageId: editingMessage.id })
+    }
     clearComposeTarget()
   }, [clearComposeTarget, editingMessage, emit])
 
   const dismissReply = useCallback(() => {
-    if (replyTo) emit.onReplyCancelled({ messageId: replyTo.id })
+    if (replyTo) {
+      emit.onReplyCancelled({ messageId: replyTo.id })
+    }
     clearComposeTarget()
   }, [clearComposeTarget, emit, replyTo])
 
@@ -848,7 +891,9 @@ export const ChatComposer = (): ReactNode => {
       caret: cursorPosition,
       mentions: mentions.mentions,
     })
-    if (!snapshot) return false
+    if (!snapshot) {
+      return false
+    }
     applySnapshot(snapshot)
     return true
   }, [history, value, cursorPosition, mentions.mentions, applySnapshot])
@@ -859,7 +904,9 @@ export const ChatComposer = (): ReactNode => {
       caret: cursorPosition,
       mentions: mentions.mentions,
     })
-    if (!snapshot) return false
+    if (!snapshot) {
+      return false
+    }
     applySnapshot(snapshot)
     return true
   }, [history, value, cursorPosition, mentions.mentions, applySnapshot])
@@ -868,7 +915,9 @@ export const ChatComposer = (): ReactNode => {
     (e: KeyboardEvent<HTMLTextAreaElement>) => {
       // Enter confirms the active IME composition. It must never select an
       // autocomplete option or send the message while composition is active.
-      if (e.nativeEvent.isComposing) return
+      if (e.nativeEvent.isComposing) {
+        return
+      }
       // Undo/redo before anything else: the composer rewrites its own value
       // (inserting a mention, removing one whole, swapping an emoji shortcode)
       // and each write clears the textarea's native undo stack, so the
@@ -878,8 +927,11 @@ export const ChatComposer = (): ReactNode => {
         const key = e.key.toLowerCase()
         if (key === "z") {
           e.preventDefault()
-          if (e.shiftKey) redo()
-          else undo()
+          if (e.shiftKey) {
+            redo()
+          } else {
+            undo()
+          }
           return
         }
         if (key === "y") {
@@ -890,9 +942,13 @@ export const ChatComposer = (): ReactNode => {
       }
       // Emoji shortcode suggestions take precedence when the active caret token
       // starts with `:`; Enter/Tab select instead of sending the message.
-      if (handleEmojiAutocompleteKeyDown(e)) return
+      if (handleEmojiAutocompleteKeyDown(e)) {
+        return
+      }
       // The mention popover consumes navigation keys first (↑↓/Enter/Tab/Esc).
-      if (mentions.handleKeyDown(e)) return
+      if (mentions.handleKeyDown(e)) {
+        return
+      }
       // Escape, once neither autocomplete claimed it, undoes one thing at a
       // time: the chip if one is open, else the text. No double-tap — a timed
       // window put the gesture behind an invisible armed state and a rhythm,
@@ -901,13 +957,18 @@ export const ChatComposer = (): ReactNode => {
       if (e.key === "Escape") {
         if (target.kind !== "none") {
           e.preventDefault()
-          if (isEditing) dismissEdit()
-          else dismissReply()
+          if (isEditing) {
+            dismissEdit()
+          } else {
+            dismissReply()
+          }
           return
         }
         // Nothing to lose: the key belongs to whatever the chat is mounted in,
         // so a host dialog can still be closed from a focused composer.
-        if (value.length === 0) return
+        if (value.length === 0) {
+          return
+        }
         e.preventDefault()
         clearComposerText()
         void stopTyping?.()

@@ -214,7 +214,9 @@ export function SlotWidget({
       mounted.current = true
       return
     }
-    if (shouldReduceMotion) return
+    if (shouldReduceMotion) {
+      return
+    }
     setJumping(true)
     const landed = setTimeout(() => setJumping(false), FLIP_MS)
     return () => clearTimeout(landed)
@@ -328,7 +330,9 @@ export function SlotWidget({
   )
 
   // Nothing to turn over to: the card is just the card.
-  if (!info) return front
+  if (!info) {
+    return front
+  }
 
   return (
     // The scene. `perspective` is what makes the turn a TURN — without it the

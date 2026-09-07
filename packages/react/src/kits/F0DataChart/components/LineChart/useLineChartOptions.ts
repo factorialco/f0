@@ -202,7 +202,9 @@ export function useLineChartOptions(
     // card every other chart type shows; with several, the category heads
     // the card and each series becomes a row.
     const tooltipFormatter = (params: unknown) => {
-      if (!Array.isArray(params) || params.length === 0) return ""
+      if (!Array.isArray(params) || params.length === 0) {
+        return ""
+      }
       const points = params as {
         seriesName?: string
         axisValueLabel?: string

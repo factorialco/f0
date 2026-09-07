@@ -44,7 +44,9 @@ const escapeUserText = (s: string): string =>
     .map((part, i) => {
       // Odd indices are entity-ref tags produced by transformMentions — leave
       // them intact so the markdown renderer can turn them into chips.
-      if (i % 2 === 1) return part
+      if (i % 2 === 1) {
+        return part
+      }
       return part
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
@@ -111,7 +113,9 @@ export const F0AiChatTextArea = ({
 
   useEffect(
     () => () => {
-      if (blurCheckRef.current) clearTimeout(blurCheckRef.current)
+      if (blurCheckRef.current) {
+        clearTimeout(blurCheckRef.current)
+      }
     },
     []
   )
@@ -197,7 +201,9 @@ export const F0AiChatTextArea = ({
     // A composer that asks to start collapsed must not focus itself: the focus
     // is what opens the row, so autofocusing here would open it before the
     // reader has touched anything and make the prop a no-op.
-    if (welcomeScreenSuggestionsCollapsedByDefault) return
+    if (welcomeScreenSuggestionsCollapsedByDefault) {
+      return
+    }
     if (typeof window !== "undefined" && window.location.hash.length === 0) {
       textareaRef.current?.focus()
     }
@@ -222,7 +228,9 @@ export const F0AiChatTextArea = ({
   // of the textarea — `processFiles` keeps its identity unless its
   // dependencies change, which the parent re-registers automatically.
   useEffect(() => {
-    if (!onProcessFilesRef) return
+    if (!onProcessFilesRef) {
+      return
+    }
     onProcessFilesRef((files) => {
       void processFiles(files)
     })
@@ -247,7 +255,9 @@ export const F0AiChatTextArea = ({
   // a transient banner so the user knows the click was acknowledged but the
   // send was blocked, instead of silently swallowing the event.
   useEffect(() => {
-    if (!pendingSubmit || isUploading) return
+    if (!pendingSubmit || isUploading) {
+      return
+    }
     setPendingSubmit(false)
     if (hasErrorFiles) {
       showTransientError(translation.ai.fileUploadBlockedSubmit)
@@ -266,7 +276,9 @@ export const F0AiChatTextArea = ({
     e.preventDefault()
 
     // When clarifying, form submit is a no-op — the panel handles its own confirm
-    if (isClarifying) return
+    if (isClarifying) {
+      return
+    }
 
     mentions.close()
     if (inProgress) {
@@ -301,8 +313,12 @@ export const F0AiChatTextArea = ({
 
       const consumedContext = pendingContext
       const consumedQuote = pendingQuote
-      if (consumedContext) onPendingContextChange?.(null)
-      if (consumedQuote) onPendingQuoteChange?.(null)
+      if (consumedContext) {
+        onPendingContextChange?.(null)
+      }
+      if (consumedQuote) {
+        onPendingQuoteChange?.(null)
+      }
 
       await onSubmit({
         text: safeUserText,
@@ -319,8 +335,12 @@ export const F0AiChatTextArea = ({
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (isClarifying) return
-    if (mentions.handleKeyDown(e)) return
+    if (isClarifying) {
+      return
+    }
+    if (mentions.handleKeyDown(e)) {
+      return
+    }
 
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault()
@@ -416,8 +436,12 @@ export const F0AiChatTextArea = ({
    * focus.
    */
   const focusStaysInComposer = (next: EventTarget | null) => {
-    if (!(next instanceof Node)) return false
-    if (formRef.current?.contains(next)) return true
+    if (!(next instanceof Node)) {
+      return false
+    }
+    if (formRef.current?.contains(next)) {
+      return true
+    }
     return (
       next instanceof Element &&
       next.closest("[data-radix-popper-content-wrapper]") !== null
@@ -436,9 +460,13 @@ export const F0AiChatTextArea = ({
    * next tick `document.activeElement` has settled and can be trusted.
    */
   const handleComposerBlur = () => {
-    if (blurCheckRef.current) clearTimeout(blurCheckRef.current)
+    if (blurCheckRef.current) {
+      clearTimeout(blurCheckRef.current)
+    }
     blurCheckRef.current = setTimeout(() => {
-      if (!focusStaysInComposer(document.activeElement)) setFocusWithin(false)
+      if (!focusStaysInComposer(document.activeElement)) {
+        setFocusWithin(false)
+      }
     }, 0)
   }
 

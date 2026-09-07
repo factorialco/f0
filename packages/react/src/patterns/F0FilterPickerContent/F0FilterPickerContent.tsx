@@ -135,7 +135,9 @@ function _F0FilterPickerContent<Filters extends FiltersDefinition>({
 
   // Calculate form height based on filter types
   const formHeight = useMemo(() => {
-    if (height) return height
+    if (height) {
+      return height
+    }
     const maxHeight = Object.entries(filters).reduce((max, [_, value]) => {
       const filterType = getFilterType(value.type)
       return Math.max(max, filterType?.formHeight || DEFAULT_FORM_HEIGHT)

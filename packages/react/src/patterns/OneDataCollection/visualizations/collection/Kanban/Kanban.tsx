@@ -95,7 +95,9 @@ export const KanbanCollection = <
     for (const lane of hooks) {
       const laneTotal = lane.paginationInfo?.total ?? lane.data.records.length
       total += typeof laneTotal === "number" ? laneTotal : 0
-      if (lane.isInitialLoading) initialLoading = true
+      if (lane.isInitialLoading) {
+        initialLoading = true
+      }
     }
     return {
       totalItemsAggregated: total,
@@ -157,7 +159,9 @@ export const KanbanCollection = <
 
   const getKey = useCallback<NonNullable<KanbanProps<R>["getKey"]>>(
     (item, index) => {
-      if (idProvider) return String(idProvider(item, index))
+      if (idProvider) {
+        return String(idProvider(item, index))
+      }
       const fallbackId = (item as unknown as { id?: string | number })?.id
       return fallbackId !== undefined && fallbackId !== null
         ? String(fallbackId)
@@ -285,7 +289,9 @@ export const KanbanCollection = <
   // happened to surface the group first (each lane fetches with its own filters).
   const groupByConfig = useMemo(() => {
     const field = source.currentGrouping?.field
-    if (field == null) return undefined
+    if (field == null) {
+      return undefined
+    }
     const byField = source.grouping?.groupBy as
       | Record<
           string,
@@ -310,12 +316,18 @@ export const KanbanCollection = <
   // (currentGrouping.order) — NOT by the order lanes happen to surface them. A
   // group only appears if it has items, so empty groups aren't shown.
   const groupKeysOrdered = useMemo(() => {
-    if (!isGrouped) return [] as string[]
+    if (!isGrouped) {
+      return [] as string[]
+    }
     const keys = new Set<string>()
     for (const lane of lanes) {
       const data = lanesHooks[lane.id]?.data
-      if (data?.type !== "grouped") continue
-      for (const group of data.groups) keys.add(group.key)
+      if (data?.type !== "grouped") {
+        continue
+      }
+      for (const group of data.groups) {
+        keys.add(group.key)
+      }
     }
     return Array.from(keys).sort((a, b) => {
       const cmp = a.localeCompare(b, undefined, { numeric: true })
@@ -383,11 +395,15 @@ export const KanbanCollection = <
 
   // Ids returned by getLanesForGroup that aren't declared lanes: they never load.
   const unknownLaneIds = useMemo(() => {
-    if (!isGrouped || !getLanesForGroup) return [] as string[]
+    if (!isGrouped || !getLanesForGroup) {
+      return [] as string[]
+    }
     const unknown = new Set<string>()
     for (const key of groupKeysOrdered) {
       for (const lane of getLanesForGroup(key)) {
-        if (!knownLaneIds.has(lane.id)) unknown.add(lane.id)
+        if (!knownLaneIds.has(lane.id)) {
+          unknown.add(lane.id)
+        }
       }
     }
     return Array.from(unknown)
@@ -395,7 +411,9 @@ export const KanbanCollection = <
 
   // Dev diagnostics: surface silent-failure modes instead of degrading quietly.
   useEffect(() => {
-    if (!isDev || !isGrouped) return
+    if (!isDev || !isGrouped) {
+      return
+    }
     if (groupingField != null && !groupByConfig) {
       // The old runtime throw caught this: a grouping field absent from groupBy
       // makes useData return flat data, so the board renders without groups.
@@ -468,7 +486,9 @@ export const KanbanCollection = <
               let selectedCount = 0
               let unselectedCount = 0
               for (const lane of board.lanes) {
-                if (lane.id === undefined) continue
+                if (lane.id === undefined) {
+                  continue
+                }
                 const status = lanesUseSelectable.get(lane.id)
                   ?.groupAllSelectedStatus[board.key]
                 selectedCount += status?.selectedCount ?? 0
@@ -502,7 +522,9 @@ export const KanbanCollection = <
                     select={groupSelect}
                     onSelectChange={(checked) =>
                       board.lanes.forEach((lane) => {
-                        if (lane.id === undefined) return
+                        if (lane.id === undefined) {
+                          return
+                        }
                         lanesUseSelectable
                           .get(lane.id)
                           ?.handleSelectGroupChange(board.key, checked)

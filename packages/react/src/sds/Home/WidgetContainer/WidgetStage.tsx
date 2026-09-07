@@ -25,14 +25,18 @@ export const WidgetStage = ({
     (node: HTMLDivElement | null) => {
       anchorNode.current = node
       const parent = hostRef.current ?? node
-      if (parent && stage.parentElement !== parent) parent.appendChild(stage)
+      if (parent && stage.parentElement !== parent) {
+        parent.appendChild(stage)
+      }
     },
     [stage]
   )
 
   useLayoutEffect(() => {
     const parent = host ?? anchorNode.current
-    if (parent && stage.parentElement !== parent) parent.appendChild(stage)
+    if (parent && stage.parentElement !== parent) {
+      parent.appendChild(stage)
+    }
   }, [host, stage])
 
   useLayoutEffect(() => () => stage.remove(), [stage])

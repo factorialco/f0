@@ -119,12 +119,16 @@ export function F0VideoPlayerInternal({
   // toggle) reloads the element; carry the position and play state across it.
   const preservePositionAcrossSwap = useCallback(() => {
     const el = video.videoRef.current
-    if (!el) return
+    if (!el) {
+      return
+    }
     const time = el.currentTime
     const wasPlaying = !el.paused
     const restore = () => {
       el.currentTime = time
-      if (wasPlaying) void el.play().catch(() => {})
+      if (wasPlaying) {
+        void el.play().catch(() => {})
+      }
       el.removeEventListener("loadedmetadata", restore)
     }
     el.addEventListener("loadedmetadata", restore)
@@ -140,7 +144,9 @@ export function F0VideoPlayerInternal({
 
   const toggleAudioDescription = useCallback(() => {
     // Only the described-source path swaps the source; the WebVTT path doesn't.
-    if (describedSrc) preservePositionAcrossSwap()
+    if (describedSrc) {
+      preservePositionAcrossSwap()
+    }
     setAudioDescriptionOn((on) => !on)
   }, [describedSrc, preservePositionAcrossSwap])
 
@@ -150,24 +156,32 @@ export function F0VideoPlayerInternal({
   const selectCaptionLanguage = useCallback(
     (locale: string) => {
       setCaptionLocale(locale)
-      if (!captions.showing) captions.toggle()
+      if (!captions.showing) {
+        captions.toggle()
+      }
     },
     [captions]
   )
   const disableCaptions = useCallback(() => {
-    if (captions.showing) captions.toggle()
+    if (captions.showing) {
+      captions.toggle()
+    }
   }, [captions])
 
   const selectAudioDescriptionLanguage = useCallback(
     (locale: string) => {
-      if (describedSrc) preservePositionAcrossSwap()
+      if (describedSrc) {
+        preservePositionAcrossSwap()
+      }
       setAudioDescriptionLocale(locale)
       setAudioDescriptionOn(true)
     },
     [describedSrc, preservePositionAcrossSwap]
   )
   const disableAudioDescription = useCallback(() => {
-    if (describedSrc) preservePositionAcrossSwap()
+    if (describedSrc) {
+      preservePositionAcrossSwap()
+    }
     setAudioDescriptionOn(false)
   }, [describedSrc, preservePositionAcrossSwap])
 
@@ -209,7 +223,9 @@ export function F0VideoPlayerInternal({
   const describedSourceAudioActive = Boolean(audioDescriptionOn && describedSrc)
   useEffect(() => {
     const el = video.videoRef.current
-    if (silent && el) el.muted = !describedSourceAudioActive
+    if (silent && el) {
+      el.muted = !describedSourceAudioActive
+    }
   }, [silent, describedSourceAudioActive, video.videoElement, video.videoRef])
 
   const handleKeyDown = useKeyboardShortcuts({
@@ -222,7 +238,9 @@ export function F0VideoPlayerInternal({
   })
 
   useEffect(() => {
-    if (autoFocus) wrapperRef.current?.focus({ preventScroll: true })
+    if (autoFocus) {
+      wrapperRef.current?.focus({ preventScroll: true })
+    }
   }, [autoFocus])
 
   // Advanced controls (native context menu / download, PiP, remote playback,

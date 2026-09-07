@@ -153,7 +153,9 @@ const linesThatFit = (heightPx: number, lineHeightPx: number) =>
  */
 const lineHeightOf = (element: HTMLElement) => {
   const own = Number.parseFloat(window.getComputedStyle(element).lineHeight)
-  if (own > 0) return own
+  if (own > 0) {
+    return own
+  }
   const child = element.firstElementChild
   const inner = child
     ? Number.parseFloat(window.getComputedStyle(child).lineHeight)
@@ -204,11 +206,15 @@ const PostBody = ({ content }: { content: string }) => {
   const fit = useCallback((room: HTMLDivElement | null) => {
     observer.current?.disconnect()
     observer.current = null
-    if (!room || typeof ResizeObserver === "undefined") return
+    if (!room || typeof ResizeObserver === "undefined") {
+      return
+    }
 
     const read = () => {
       const body = text.current
-      if (!body) return
+      if (!body) {
+        return
+      }
       // The LINE HEIGHT is the text's own and the ROOM is the wrapper's — the two
       // things this needs sit on two different elements, which is the same split
       // that fixed the cut.
@@ -227,7 +233,9 @@ const PostBody = ({ content }: { content: string }) => {
        * against a pathological layout rather than an expected exit.
        */
       for (let guard = 0; lines > 1 && guard < 40; guard += 1) {
-        if (body.getBoundingClientRect().height <= available) break
+        if (body.getBoundingClientRect().height <= available) {
+          break
+        }
         lines -= 1
         body.style.webkitLineClamp = String(lines)
       }

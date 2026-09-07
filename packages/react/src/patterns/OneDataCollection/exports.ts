@@ -1,7 +1,7 @@
 export type * from "@/hooks/datasource/types/sortings.typings"
 export type * from "@/patterns/OneFilterPicker/exports"
 export type * from "./actions"
-export { OneDataCollection } from "./index"
+export { OneDataCollection } from "."
 export type * from "./item-actions"
 export type * from "./navigationFilters/types"
 export type * from "./summary"

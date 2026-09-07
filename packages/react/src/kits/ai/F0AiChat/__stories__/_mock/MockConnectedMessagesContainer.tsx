@@ -27,7 +27,9 @@ function parseThinkingTitle(argsJson: string): string {
 function collectThinkingTitles(messages: F0Message[]): string[] {
   const titles: string[] = []
   for (const message of messages) {
-    if (message.role !== "assistant") continue
+    if (message.role !== "assistant") {
+      continue
+    }
     const toolCalls = message.toolCalls
     for (const tc of toolCalls ?? []) {
       if (tc.function.name === "orchestratorThinking") {
@@ -148,7 +150,9 @@ export const MockConnectedMessagesContainer = ({
   // Wire the feedback modal. The thread id is fake (mock runtime has no
   // real threading) but stable enough for the modal's plumbing.
   const feedback = useMemo<FeedbackConfig | undefined>(() => {
-    if (!onThumbsUp && !onThumbsDown) return undefined
+    if (!onThumbsUp && !onThumbsDown) {
+      return undefined
+    }
     return {
       threadId: "mock-thread",
       onThumbsUp: (onThumbsUp ?? (() => {})) as FeedbackConfig["onThumbsUp"],

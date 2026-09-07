@@ -13,9 +13,15 @@ export function getDateGroup(dateString: string): DateGroup {
   const date = new Date(dateString)
   const now = new Date()
 
-  if (isToday(date)) return "today"
-  if (isYesterday(date)) return "yesterday"
-  if (isSameMonth(date, now)) return "thisMonth"
+  if (isToday(date)) {
+    return "today"
+  }
+  if (isYesterday(date)) {
+    return "yesterday"
+  }
+  if (isSameMonth(date, now)) {
+    return "thisMonth"
+  }
   return "older"
 }
 
@@ -49,8 +55,12 @@ export function formatThreadDate(
   // `p` = locale-aware short time (e.g. "7:59 AM" in en-US, "7:59" in es-ES).
   const time = format(date, "p", { locale })
 
-  if (isToday(date)) return `${labels.today}, ${time}`
-  if (isYesterday(date)) return `${labels.yesterday}, ${time}`
+  if (isToday(date)) {
+    return `${labels.today}, ${time}`
+  }
+  if (isYesterday(date)) {
+    return `${labels.yesterday}, ${time}`
+  }
 
   const includeYear = !isSameYear(date, new Date())
   // `MMM d` = short month + day (e.g. "Apr 23"). Add the year when the

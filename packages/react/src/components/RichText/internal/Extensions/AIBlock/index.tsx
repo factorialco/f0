@@ -90,7 +90,9 @@ const AI_BLOCK_CONTENT_EXTENSIONS = [
 ]
 
 const useJSONToHTML = (data: AIBlockData | undefined): string => {
-  if (!data?.content) return ""
+  if (!data?.content) {
+    return ""
+  }
   try {
     return generateHTML(data.content, AI_BLOCK_CONTENT_EXTENSIONS)
   } catch {
@@ -163,7 +165,9 @@ const useButtonMetadataPersistence = (
   data?: AIBlockData
 ): void => {
   useEffect(() => {
-    if (!data?.selectedAction || !config?.buttons) return
+    if (!data?.selectedAction || !config?.buttons) {
+      return
+    }
 
     const needsUpdate =
       !data?.selectedTitle ||
@@ -214,11 +218,15 @@ const useEditableContentIntegration = (
   data?: AIBlockData
 ) => {
   useEffect(() => {
-    if (!data?.content || !data?.isEditable || !editor || !getPos) return
+    if (!data?.content || !data?.isEditable || !editor || !getPos) {
+      return
+    }
 
     const pos = getPos()
 
-    if (pos === undefined) return
+    if (pos === undefined) {
+      return
+    }
 
     deleteNode()
     if (data.content) {
@@ -303,7 +311,9 @@ export const AIBlockView: FC<NodeViewProps> = ({
   useAutoExecuteAction(data, handleClick, updateAttributes)
 
   // Early return for invalid states (after hooks)
-  if (!data || !config || !config.buttons?.length) return null
+  if (!data || !config || !config.buttons?.length) {
+    return null
+  }
 
   // Compute display states
   const hasContent = Boolean(data?.content)
@@ -371,7 +381,9 @@ export const AIBlock = Node.create({
           return dataAttr ? JSON.parse(dataAttr) : null
         },
         renderHTML: (attributes) => {
-          if (!attributes.data) return {}
+          if (!attributes.data) {
+            return {}
+          }
           return {
             "data-ai-block": JSON.stringify(attributes.data),
           }
@@ -397,7 +409,9 @@ export const AIBlock = Node.create({
   renderHTML({ HTMLAttributes, node }) {
     const data = node.attrs.data as AIBlockData
     const config = node.attrs.config as AIBlockConfig
-    if (!data || !config) return ["div"]
+    if (!data || !config) {
+      return ["div"]
+    }
 
     return [
       "div",
@@ -428,7 +442,9 @@ export const AIBlock = Node.create({
         (actionType: string, config: AIBlockConfig) =>
         ({ commands }) => {
           const button = config.buttons?.find((btn) => btn.type === actionType)
-          if (!button) return false
+          if (!button) {
+            return false
+          }
           return commands.insertContent([
             {
               type: this.name,

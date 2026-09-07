@@ -46,7 +46,9 @@ function flattenFormErrors(
 
   function walk(obj: Record<string, unknown>, prefix: string) {
     for (const [key, value] of Object.entries(obj)) {
-      if (key === "root") continue
+      if (key === "root") {
+        continue
+      }
       const path = prefix ? `${prefix}.${key}` : key
       if (value && typeof value === "object" && !Array.isArray(value)) {
         const err = value as Record<string, unknown>

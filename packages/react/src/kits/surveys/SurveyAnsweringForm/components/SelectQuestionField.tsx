@@ -46,8 +46,12 @@ export function SelectQuestionField({
   const shouldShowValidation = !!showAnswerValidation && hasCorrectAnswers
 
   const handleSingleSelectChange = (optionValue: string) => {
-    if (disabled) return
-    if (type !== "select") return
+    if (disabled) {
+      return
+    }
+    if (type !== "select") {
+      return
+    }
     const newValue =
       !required && value === optionValue ? undefined : optionValue
     onChange(newValue)
@@ -55,8 +59,12 @@ export function SelectQuestionField({
   }
 
   const handleMultiSelectChange = (optionValue: string) => {
-    if (disabled) return
-    if (type !== "multi-select") return
+    if (disabled) {
+      return
+    }
+    if (type !== "multi-select") {
+      return
+    }
     const currentValue = Array.isArray(value) ? value : []
     const newValue = currentValue.includes(optionValue)
       ? currentValue.filter((v: string) => v !== optionValue)
@@ -91,7 +99,9 @@ export function SelectQuestionField({
                 : "cursor-pointer hover:bg-f1-background-hover"
             )}
             onClick={(e) => {
-              if (disabled) return
+              if (disabled) {
+                return
+              }
               // For multi-select, only trigger on parent div click, not on checkbox
               if (
                 type === "multi-select" &&

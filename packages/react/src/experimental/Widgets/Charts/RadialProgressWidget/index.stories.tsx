@@ -1,6 +1,6 @@
 import type { Meta } from "@storybook/react-vite"
 import { WidgetDecorator } from "../storybook-utils"
-import { RadialProgressWidget } from "./index"
+import { RadialProgressWidget } from "."
 
 const meta = {
   title: "Widgets/Charts/RadialProgressWidget",

@@ -33,10 +33,12 @@ export const ChatMessageReactions = ({
 
   const react = (emoji: string, source: F0ChatReactionSource) => {
     emitReactionToggle(emit, message, emoji, source)
-    void toggleReaction(message.id, emoji)
+    toggleReaction(message.id, emoji)
   }
 
-  if (!message.reactions || message.reactions.length === 0) return null
+  if (!message.reactions || message.reactions.length === 0) {
+    return null
+  }
 
   return (
     <div

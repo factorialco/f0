@@ -194,7 +194,9 @@ export function useGraphViewport({
   const getFitPadding = useCallback(
     (base: number): number | ViewportInsetPadding => {
       const inset = insetRef.current
-      if (!insetOccludes(inset)) return base
+      if (!insetOccludes(inset)) {
+        return base
+      }
       const { width, height } = storeApi.getState()
       const basePx = (dimension: number) =>
         (dimension - dimension / (1 + base)) / 2
@@ -260,7 +262,9 @@ export function useGraphViewport({
   const centerOnNode = useCallback(
     (nodeId: string, duration: number, zoom: number = defaultZoom): boolean => {
       const pos = getNodePosition?.(nodeId)
-      if (!pos) return false
+      if (!pos) {
+        return false
+      }
       const inset = insetRef.current
       const shiftX = ((inset?.right ?? 0) - (inset?.left ?? 0)) / 2 / zoom
       const shiftY = ((inset?.bottom ?? 0) - (inset?.top ?? 0)) / 2 / zoom
@@ -275,10 +279,14 @@ export function useGraphViewport({
   )
 
   const handleFocusUser = useCallback(() => {
-    if (!currentUserNodeId) return
+    if (!currentUserNodeId) {
+      return
+    }
     // Windowing: the target may be off-screen and absent from the store, so
     // center on its layout position instead of an id-based fitView.
-    if (nodeWindowingActive && centerOnNode(currentUserNodeId, 400)) return
+    if (nodeWindowingActive && centerOnNode(currentUserNodeId, 400)) {
+      return
+    }
     reactFlow.fitView({
       nodes: [{ id: currentUserNodeId }],
       duration: 400,

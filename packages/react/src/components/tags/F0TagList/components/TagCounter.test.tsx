@@ -38,7 +38,9 @@ describe("TagCounter", () => {
         const el = document.body.querySelector(
           '[data-radix-popper-content-wrapper] [data-testid="one-ellipsis"]'
         ) as HTMLElement | null
-        if (!el) throw new Error("popover content not mounted yet")
+        if (!el) {
+          throw new Error("popover content not mounted yet")
+        }
         return el
       },
       { timeout: 2000 }

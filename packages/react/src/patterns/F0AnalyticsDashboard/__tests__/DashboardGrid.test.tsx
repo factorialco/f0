@@ -139,7 +139,9 @@ describe("DashboardGrid", () => {
   it("grows a row when loaded content is taller than the configured itemHeight", async () => {
     vi.spyOn(HTMLElement.prototype, "scrollHeight", "get").mockImplementation(
       function getScrollHeight(this: HTMLElement) {
-        if (this.dataset.cardId === "expenses") return 960
+        if (this.dataset.cardId === "expenses") {
+          return 960
+        }
         return 0
       }
     )
@@ -246,7 +248,9 @@ describe("DashboardGrid", () => {
     it("clamps shrinking to overflowing content height", () => {
       vi.spyOn(HTMLElement.prototype, "scrollHeight", "get").mockImplementation(
         function getScrollHeight(this: HTMLElement) {
-          if (this.dataset.cardId === "headcount") return 180
+          if (this.dataset.cardId === "headcount") {
+            return 180
+          }
           return 0
         }
       )
@@ -266,7 +270,9 @@ describe("DashboardGrid", () => {
     it("clamps shrinking a collection row to its table content height", () => {
       vi.spyOn(HTMLElement.prototype, "scrollHeight", "get").mockImplementation(
         function getScrollHeight(this: HTMLElement) {
-          if (this.dataset.cardId === "expenses") return 460
+          if (this.dataset.cardId === "expenses") {
+            return 460
+          }
           return 0
         }
       )
@@ -322,7 +328,9 @@ describe("DashboardGrid", () => {
     it("measures and grows without requestAnimationFrame (hidden tabs, effect churn)", async () => {
       vi.spyOn(HTMLElement.prototype, "scrollHeight", "get").mockImplementation(
         function getScrollHeight(this: HTMLElement) {
-          if (this.dataset.cardId === "expenses") return 960
+          if (this.dataset.cardId === "expenses") {
+            return 960
+          }
           return 0
         }
       )
@@ -732,11 +740,11 @@ describe("DashboardGrid", () => {
 
       it("announces the widget identity and host-owned Ask One action", () => {
         const onAskAi = vi.fn()
-        const details: Array<{
+        const details: {
           id: string
           title: string
           onAskAi?: typeof onAskAi
-        }> = []
+        }[] = []
         const onStart = (event: Event) => {
           details.push(
             (

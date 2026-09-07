@@ -29,7 +29,9 @@ vi.mock("@tiptap/react", () => {
     }
 
     updateProps(nextProps: { items: MentionedUser[] }) {
-      if (!rendererState.props) return
+      if (!rendererState.props) {
+        return
+      }
       rendererState.props = {
         ...rendererState.props,
         ...nextProps,

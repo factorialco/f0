@@ -21,12 +21,12 @@ import {
   zeroRender as render,
   zeroRenderHook as renderHook,
 } from "@/testing/test-utils"
+import { OneDataCollection } from ".."
 import { useDataCollectionData } from "../hooks/useDataCollectionData/useDataCollectionData"
 import {
   DataCollectionSource,
   useDataCollectionSource,
 } from "../hooks/useDataCollectionSource"
-import { OneDataCollection } from "../index"
 import { ItemActionsDefinition } from "../item-actions"
 import { NavigationFiltersDefinition } from "../navigationFilters/types"
 import { SummariesDefinition } from "../summary"
@@ -1109,7 +1109,9 @@ describe("Collections", () => {
         >({
           dataAdapter: {
             fetchData: async ({ search }) => {
-              if (!search) return { records: mockData }
+              if (!search) {
+                return { records: mockData }
+              }
 
               const searchLower = search.toLowerCase()
               return {

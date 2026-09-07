@@ -40,7 +40,9 @@ const makeActionHandler =
     value: DialogActionValuePrimitive | undefined
   ) => {
     resolve(value ?? undefined)
-    if (action?.keepOpen) return
+    if (action?.keepOpen) {
+      return
+    }
     closeCallbacks.delete(id)
     dialogsAlikeStore.removeItem(id)
   }

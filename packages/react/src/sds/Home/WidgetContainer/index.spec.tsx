@@ -4,7 +4,7 @@ import { Calendar, Clock } from "@/icons/app"
 import { f0FormField } from "@/patterns/F0Form"
 import { screen, userEvent, waitFor, zeroRender } from "@/testing/test-utils"
 import { type HomeWidgetItem, type WidgetParams } from "../slotRenderers"
-import { WidgetContainer } from "./index"
+import { WidgetContainer } from "."
 
 const widget = (id: string, extra: Partial<HomeWidgetItem> = {}) => ({
   id,

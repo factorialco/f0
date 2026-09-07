@@ -69,7 +69,7 @@ export const WithUpsellingButton: Story = {
       <UpsellingButton
         label="Request information"
         onRequest={async () =>
-          await new Promise((resolve) => setTimeout(resolve, 1000))
+          new Promise((resolve) => setTimeout(resolve, 1000))
         }
         errorMessage={{
           title: "Request failed",

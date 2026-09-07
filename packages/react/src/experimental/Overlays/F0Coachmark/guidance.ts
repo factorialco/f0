@@ -33,8 +33,12 @@ const LOOK_FOR_TARGETS_INTERVAL_MS = 50
  */
 const isOnPage = (step: CoachmarkStep): boolean => {
   const target = step.targetElement
-  if (target === undefined) return false
-  if (typeof target !== "string") return target.isConnected
+  if (target === undefined) {
+    return false
+  }
+  if (typeof target !== "string") {
+    return target.isConnected
+  }
   return document.querySelector(target) !== null
 }
 
@@ -237,7 +241,9 @@ export const defineStepByStepCoachmarkGuidance = <
     clearTimeout(polling)
     polling = undefined
 
-    if (typeof document === "undefined") return id
+    if (typeof document === "undefined") {
+      return id
+    }
 
     const deadline = Date.now() + lookFor
     const openWhenReady = () => {

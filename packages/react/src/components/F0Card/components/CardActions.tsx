@@ -119,9 +119,15 @@ export function CardActions({
   )
 
   function hasSecondaryActions(): boolean {
-    if (!secondaryActions) return false
-    if ("href" in secondaryActions) return true
-    if ("length" in secondaryActions) return secondaryActions.length > 0
+    if (!secondaryActions) {
+      return false
+    }
+    if ("href" in secondaryActions) {
+      return true
+    }
+    if ("length" in secondaryActions) {
+      return secondaryActions.length > 0
+    }
 
     return false
   }

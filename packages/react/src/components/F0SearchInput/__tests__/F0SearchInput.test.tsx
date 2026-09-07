@@ -5,7 +5,7 @@ import {
   screen,
   zeroRender as render,
 } from "@/testing/test-utils"
-import { F0SearchInput } from "../index"
+import { F0SearchInput } from ".."
 
 describe("F0SearchInput", () => {
   beforeEach(() => {

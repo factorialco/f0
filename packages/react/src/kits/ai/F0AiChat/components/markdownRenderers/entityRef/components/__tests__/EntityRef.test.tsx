@@ -21,7 +21,9 @@ describe("EntityRef", () => {
     )
     ;(getEntityRefRenderer as ReturnType<typeof vi.fn>).mockImplementation(
       (type: string) => {
-        if (type === "person") return MockPerson
+        if (type === "person") {
+          return MockPerson
+        }
         return undefined
       }
     )

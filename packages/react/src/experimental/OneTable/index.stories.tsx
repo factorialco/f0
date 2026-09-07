@@ -15,7 +15,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "./index"
+} from "."
 
 const meta: Meta<typeof OneTable> = {
   title: "Table",
@@ -311,7 +311,9 @@ export const Sortable: Story = {
     }
 
     const sortedData = React.useMemo(() => {
-      if (!sortConfig.column) return sampleData
+      if (!sortConfig.column) {
+        return sampleData
+      }
 
       return [...sampleData].sort((a, b) => {
         const aValue = a[sortConfig.column!]

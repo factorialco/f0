@@ -141,17 +141,15 @@ export type OneDataCollectionProps<
     NavigationFilters,
     Grouping
   >
-  visualizations: ReadonlyArray<
-    Visualization<
-      R,
-      Filters,
-      Sortings,
-      Summaries,
-      ItemActions,
-      NavigationFilters,
-      Grouping
-    >
-  >
+  visualizations: readonly Visualization<
+    R,
+    Filters,
+    Sortings,
+    Summaries,
+    ItemActions,
+    NavigationFilters,
+    Grouping
+  >[]
   onSelectItems?: OnSelectItemsCallback<R, Filters>
   onBulkAction?: OnBulkActionCallback<R, Filters>
   /**
@@ -349,7 +347,9 @@ const OneDataCollectionComp = <
   // later URL sync can't wipe it before we read it). When present, we open the
   // create dialog prefilled with it; saving stores the shared config verbatim.
   const [sharedPreset] = useState<SharedPresetPayload | null>(() => {
-    if (typeof window === "undefined") return null
+    if (typeof window === "undefined") {
+      return null
+    }
     const params = new URLSearchParams(window.location.search)
     return decodeSharedPreset(params.get(SHARED_PRESET_PARAM))
   })
@@ -427,7 +427,9 @@ const OneDataCollectionComp = <
   // re-measured when the visualization switches: clear the ready flag so the
   // measurement waits for the new visualization's first page to load.
   useEffect(() => {
-    if (autoPerPageEnabled) setFirstDataLoaded(false)
+    if (autoPerPageEnabled) {
+      setFirstDataLoaded(false)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only on visualization change
   }, [currentVisualization])
 
@@ -715,7 +717,9 @@ const OneDataCollectionComp = <
         clearTimeout(successTimerRef.current)
       }
       successTimerRef.current = setTimeout(() => {
-        if (hideBar) setShowActionBar(false)
+        if (hideBar) {
+          setShowActionBar(false)
+        }
         onDismiss()
         successTimerRef.current = null
       }, SUCCESS_DISMISS_MS)
@@ -914,7 +918,9 @@ const OneDataCollectionComp = <
     filters: FiltersState<Filters>,
     search: string | undefined
   ) => {
-    if (totalItems !== 0) return false
+    if (totalItems !== 0) {
+      return false
+    }
     // Count only *active* filters: an all-empty value like `{ department: [] }`
     // is not a filter, so an empty result with no active filters is "no-data",
     // not "no-results".
@@ -1121,7 +1127,9 @@ const OneDataCollectionComp = <
       }
 
       const preset = mergedPresets.find((p) => p.id === presetId)
-      if (!preset) return
+      if (!preset) {
+        return
+      }
 
       // Remember the working state the first time a preset is selected (kept
       // across preset-to-preset switches) so it can be restored on deselect.
@@ -1176,15 +1184,21 @@ const OneDataCollectionComp = <
       }
     }
     const tracked = devSelectionRef.current
-    if (!tracked) return
+    if (!tracked) {
+      return
+    }
 
     // Don't evaluate mid-transition (filters still being applied across a view
     // switch); the post-transition render will re-run this effect.
-    if (pendingFiltersRef.current) return
+    if (pendingFiltersRef.current) {
+      return
+    }
 
     if (!tracked.settled) {
       // Wait until the view first matches the preset before arming deselect.
-      if (isEqual(capturedState, tracked.snapshot)) tracked.settled = true
+      if (isEqual(capturedState, tracked.snapshot)) {
+        tracked.settled = true
+      }
       return
     }
 
@@ -1221,7 +1235,9 @@ const OneDataCollectionComp = <
   const presetActionState = useMemo<"save" | "none">(() => {
     // Consumer opted out of saving views (e.g. the org-chart graph): never show
     // the "Save view" chip regardless of how the view diverges from the baseline.
-    if (savingViewsDisabled) return "none"
+    if (savingViewsDisabled) {
+      return "none"
+    }
     // Compares everything except the view mode, so a visualization-only change
     // does not count as a reason to save a new view.
     const sameIgnoringVisualization = (a: ViewSnapshot, b: ViewSnapshot) =>
@@ -1240,9 +1256,12 @@ const OneDataCollectionComp = <
 
     // Until storage settles (baseline captured), don't offer to save — avoids a
     // spurious "save" flash while filters/sorting/etc. hydrate from storage.
-    if (sessionBaseline === null) return "none"
-    if (!sameIgnoringVisualization(capturedState, sessionBaseline))
+    if (sessionBaseline === null) {
+      return "none"
+    }
+    if (!sameIgnoringVisualization(capturedState, sessionBaseline)) {
       return "save"
+    }
     // Just diverged from a (now de-selected) view → offer to fork it, even when
     // only the view mode differs, as long as we're not back at baseline.
     if (
@@ -1313,7 +1332,9 @@ const OneDataCollectionComp = <
     (values: PresetFormValues) => {
       const targetId =
         presetDialog?.mode === "update" ? presetDialog.presetId : undefined
-      if (!targetId) return
+      if (!targetId) {
+        return
+      }
       // The id is title-derived and doubles as the readable `dc_view` URL
       // value, so a rename must regenerate it (deduped against the other views)
       // and re-point the selection — otherwise the URL keeps the old name.
@@ -1345,7 +1366,9 @@ const OneDataCollectionComp = <
   const handleDeleteEditingPreset = useCallback(() => {
     const targetId =
       presetDialog?.mode === "update" ? presetDialog.presetId : undefined
-    if (!targetId) return
+    if (!targetId) {
+      return
+    }
     setCustomPresets((prev) => prev.filter((preset) => preset.id !== targetId))
     setSelectedPresetId((current) =>
       current === targetId ? undefined : current
@@ -1373,7 +1396,9 @@ const OneDataCollectionComp = <
   const onSharePreset = useCallback(
     (presetId: string) => {
       const preset = customPresets.find((p) => p.id === presetId)
-      if (!preset) return
+      if (!preset) {
+        return
+      }
       const url = buildSharedPresetUrl({
         label: preset.label,
         description: preset.description,
@@ -1385,7 +1410,9 @@ const OneDataCollectionComp = <
       })
       const clipboard =
         typeof navigator !== "undefined" ? navigator.clipboard : undefined
-      if (!url || !clipboard) return
+      if (!url || !clipboard) {
+        return
+      }
       void clipboard
         .writeText(url)
         .then(() => setShareCopied(true))
@@ -1397,7 +1424,9 @@ const OneDataCollectionComp = <
   // Transient confirmation shown after a successful "Share preset" copy.
   const [shareCopied, setShareCopied] = useState(false)
   useEffect(() => {
-    if (!shareCopied) return
+    if (!shareCopied) {
+      return
+    }
     const timer = setTimeout(
       () => setShareCopied(false),
       SHARE_COPIED_DISMISS_MS
@@ -1408,7 +1437,9 @@ const OneDataCollectionComp = <
   // A shared preset link prefills (once) the create dialog so the recipient can
   // just hit Save; strip the param afterwards so a reload doesn't reopen it.
   useEffect(() => {
-    if (!sharedPreset) return
+    if (!sharedPreset) {
+      return
+    }
     setPresetDialog({ mode: "create", shared: sharedPreset })
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search)

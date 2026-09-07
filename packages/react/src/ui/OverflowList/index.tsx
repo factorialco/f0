@@ -131,7 +131,9 @@ const OverflowList = function OverflowList<T>({
 
   // Placeholder elements for initialization
   const placeholderElements = useMemo(() => {
-    if (isInitialized) return null
+    if (isInitialized) {
+      return null
+    }
 
     return items.map((_, index) => (
       <Skeleton key={`placeholder-${index}`} className="h-2 w-20 rounded-md" />

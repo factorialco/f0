@@ -34,7 +34,9 @@ export const useReplyPreview = (input: {
   const thumbnailUrl = replyThumbnailUrl(input.attachments)
   const summary = summariseAttachments(input.attachments)
 
-  if (!summary) return { label: body, thumbnailUrl }
+  if (!summary) {
+    return { label: body, thumbnailUrl }
+  }
 
   const media =
     summary.kind === "photo"

@@ -5,7 +5,7 @@ import {
   Platform,
   UserPlatformProvider,
 } from "@/lib/providers/user-platafform/UserPlatformProvider"
-import { Shortcut } from "./index"
+import { Shortcut } from "."
 
 const renderShortcut = (
   keys: string[],

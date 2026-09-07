@@ -106,7 +106,9 @@ export const useRailMotion = ({
    */
   const [live, setLive] = useState(false)
   useEffect(() => {
-    if (drawn) setLive(true)
+    if (drawn) {
+      setLive(true)
+    }
   }, [drawn])
   const animated = live && !reducedMotion
 
@@ -134,7 +136,9 @@ export const useRailMotion = ({
   useLayoutEffect(() => {
     // Nothing reads the variable until the rail is drawn, so there is nothing to
     // animate from either.
-    if (!drawn) return
+    if (!drawn) {
+      return
+    }
     if (!animated) {
       widthValue.jump(width)
       return

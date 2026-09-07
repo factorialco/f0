@@ -39,9 +39,15 @@ const Card = React.forwardRef<
       )}
       {...props}
       onClick={() => {
-        if (disabled) return
-        if (href) return
-        if (onClick) return onClick()
+        if (disabled) {
+          return
+        }
+        if (href) {
+          return
+        }
+        if (onClick) {
+          return onClick()
+        }
       }}
     >
       {href && !disabled && (

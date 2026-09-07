@@ -27,7 +27,7 @@ import { Default as ResourceHeaderDefault } from "@/patterns/F0ResourceHeader/in
 import { useDataCollectionItemNavigation } from "@/patterns/OneDataCollection/hooks/useDataCollectionItemNavigation"
 import { ActivityItemList } from "@/sds/inbox/Activity/ActivityItemList"
 import { Default as ActivityItemListDefault } from "@/sds/inbox/Activity/ActivityItemList/index.stories"
-import { F0Dialog } from "../index"
+import { F0Dialog } from ".."
 import { dialogPositions, dialogWidths } from "../types"
 
 const meta: Meta<typeof F0Dialog> = {
