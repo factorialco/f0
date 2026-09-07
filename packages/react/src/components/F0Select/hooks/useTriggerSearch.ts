@@ -18,7 +18,13 @@ type UseTriggerSearchOptions = {
   /** False for every select whose trigger is not the search field. */
   enabled: boolean
   open: boolean
-  onOpenChange: (open: boolean) => void
+  /**
+   * Opens the list NOW, without the select's own open debounce. That debounce
+   * is there to swallow the close-then-open flicker of a toggle click, and
+   * typing has no such race — it would only be 100ms of nothing happening
+   * after the first character.
+   */
+  onOpen: () => void
   onSearchChange: (value: string) => void
   /** Clears the query, rather than setting it to an empty one. */
   onSearchReset: () => void
@@ -41,7 +47,7 @@ type UseTriggerSearchOptions = {
 export const useTriggerSearch = ({
   enabled,
   open,
-  onOpenChange,
+  onOpen,
   onSearchChange,
   onSearchReset,
   triggerRef,
@@ -56,17 +62,16 @@ export const useTriggerSearch = ({
   // Read the callbacks through refs so the returned handlers stay stable: they
   // are cloned onto the input by the field chrome, and a new identity on every
   // keystroke would remount it.
-  const callbacksRef = useRef({ onSearchChange, onOpenChange, onSearchReset })
+  const callbacksRef = useRef({ onSearchChange, onOpen, onSearchReset })
   useEffect(() => {
-    callbacksRef.current = { onSearchChange, onOpenChange, onSearchReset }
-  }, [onOpenChange, onSearchChange, onSearchReset])
+    callbacksRef.current = { onSearchChange, onOpen, onSearchReset }
+  }, [onOpen, onSearchChange, onSearchReset])
 
   /**
-   * Whether the list is open, as far as the KEYS are concerned.
-   *
-   * `open` arrives ~100ms late (the select debounces its own open changes), so
-   * a key pressed right after the first character would otherwise think the
-   * list is still closed and ask for it a second time instead of acting.
+   * Whether the list is open, as far as the KEYS are concerned: `open` is a
+   * render behind the request, so a key pressed right after the first
+   * character would otherwise think the list is still closed and ask for it a
+   * second time instead of acting.
    */
   const requestedOpenRef = useRef(open)
   useEffect(() => {
@@ -75,7 +80,7 @@ export const useTriggerSearch = ({
 
   const requestOpen = useCallback(() => {
     requestedOpenRef.current = true
-    callbacksRef.current.onOpenChange(true)
+    callbacksRef.current.onOpen()
   }, [])
 
   const cancelPending = useCallback(() => {

@@ -939,6 +939,20 @@ const F0SelectComponent = forwardRef(function Select<
     debouncedHandleChangeOpenLocal(open)
   }
 
+  /**
+   * Opens the list on the spot, skipping the debounce above.
+   *
+   * The debounce is there so a close and an open arriving together (a toggle
+   * click racing the dismissal) resolve to one state instead of a flicker.
+   * Typing has nothing to race: the wait would just be 100ms of nothing
+   * happening after the first character.
+   */
+  const openNow = useCallback(() => {
+    debouncedHandleChangeOpenLocal.cancel()
+    applyOpenChangeRef.current(true)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedHandleChangeOpenLocal])
+
   const {
     draft: searchDraft,
     inputRef: searchInputRef,
@@ -949,7 +963,7 @@ const F0SelectComponent = forwardRef(function Select<
   } = useTriggerSearch({
     enabled: inlineSearch,
     open: !!openLocal,
-    onOpenChange: handleChangeOpenLocal,
+    onOpen: openNow,
     onSearchChange: onSearchChangeLocal,
     // Clearing the query means NO query, not an empty one: an empty string is
     // a new dataset identity, and a "select all" is scoped to the query it was
