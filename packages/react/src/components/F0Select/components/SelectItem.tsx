@@ -1,3 +1,4 @@
+import { useContext } from "react"
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0Icon } from "@/components/F0Icon"
 import { F0TagDot } from "@/components/tags/F0TagDot"
@@ -8,6 +9,7 @@ import { OneEllipsis } from "@/lib/OneEllipsis"
 import { cn } from "@/lib/utils"
 import { SelectItem as SelectItemPrimitive } from "@/ui/Select"
 import { F0SelectItemMetadata, F0SelectItemObject } from "../types"
+import { ActiveOptionContext } from "./ActiveOptionContext"
 
 const DIAL_CODE_PATTERN = /^\+\d{1,4}$/
 
@@ -33,26 +35,34 @@ const metadataText = (metadata: F0SelectItemMetadata): string => {
 export const SelectItem = <T extends string, R>({
   item,
   optionId,
-  active,
 }: {
   item: F0SelectItemObject<T, R>
-  /**
-   * Set when the field drives this list from outside it: the option needs an
-   * id for `aria-activedescendant` to point at, and a way to look active
-   * without taking focus.
-   */
+  /** Set when the field drives this list: `aria-activedescendant` points here. */
   optionId?: string
-  active?: boolean
 }) => {
   const isStatusTag =
     item.tag && typeof item.tag !== "string" && item.tag.type === "status"
 
+  const value = String(item.value)
+  const activeOption = useContext(ActiveOptionContext)
+  const active = activeOption?.value === value
+
   return (
     <SelectItemPrimitive
-      value={String(item.value)}
+      value={value}
       disabled={item.disabled}
       id={optionId}
       data-active={active ? "true" : undefined}
+      onPointerMove={
+        activeOption && !item.disabled
+          ? (event) => {
+              // The primitive would focus the row here, pulling the caret out
+              // of the field. Hover marks it active instead.
+              event.preventDefault()
+              activeOption.setActive(value)
+            }
+          : undefined
+      }
       className={cn(
         // The `focus:` highlight, for an option made active by
         // `aria-activedescendant` rather than focused.

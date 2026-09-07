@@ -521,6 +521,14 @@ The `loading` spinner is a separate live region — it carries its own `aria-bus
   <table>
     <thead>
       <tr>
+        <th>Prop</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
         <td>
           <code>valueSlot</code>
         </td>
@@ -540,13 +548,36 @@ The `loading` spinner is a separate live region — it carries its own `aria-bus
         </td>
       </tr>
       <tr>
-        <th>Prop</th>
-        <th>Type</th>
-        <th>Description</th>
-        <th>Default</th>
+        <td>
+          <code>canClear</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          Whether there is anything to clear, when <code>isEmpty</code> cannot
+          answer it. With a <code>valueSlot</code> the placeholder follows the
+          text and the clear button follows the value.
+        </td>
+        <td>
+          <code>undefined</code>
+        </td>
       </tr>
-    </thead>
-    <tbody>
+      <tr>
+        <td>
+          <code>clearKeepsText</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          Leaves the typed text alone when the clear button is pressed, so{" "}
+          <code>onClear</code> is the whole behavior.
+        </td>
+        <td>
+          <code>false</code>
+        </td>
+      </tr>
       <tr>
         <td>
           <code>clearable</code>

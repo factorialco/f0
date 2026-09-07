@@ -407,15 +407,11 @@ export function useData<
    * that read it, so a change with no render behind it (clearing the query on
    * close) never refetched.
    */
-  const effectiveSearch = useMemo(
-    () =>
-      !search?.enabled
-        ? undefined
-        : search?.sync
-          ? currentSearch
-          : deferredSearch || currentSearch,
-    [currentSearch, deferredSearch, search?.enabled, search?.sync]
-  )
+  const effectiveSearch = !search?.enabled
+    ? undefined
+    : search?.sync
+      ? currentSearch
+      : deferredSearch || currentSearch
 
   /**
    * Merges 2 arrays of items using the idProvider to update the existing items

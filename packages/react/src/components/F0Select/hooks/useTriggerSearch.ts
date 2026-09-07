@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react"
+import { getSelectContentControls } from "@/ui/Select"
 
 type UseTriggerSearchOptions = {
   enabled: boolean
@@ -10,11 +11,10 @@ type UseTriggerSearchOptions = {
   restingText: string
   /** Opens the list without the select's own open debounce. */
   onOpen: () => void
+  onClose: () => void
   onSearchChange: (value: string) => void
   /** Clears the query, rather than setting it to an empty one. */
   onSearchReset: () => void
-  /** The first edit of the resting text: the selection it showed is gone. */
-  onEditStart: () => void
   onActiveMove: (direction: "next" | "previous") => void
   /** Returns false when there was nothing to take. */
   onSelectActive: () => boolean
@@ -27,16 +27,17 @@ type UseTriggerSearchOptions = {
  * State for a select whose trigger is the search field.
  *
  * The selected label IS the field's text, so selecting, copying and editing it
- * are the browser's own. Only once the text is edited does it become a query.
+ * are the browser's own. Editing turns the text into a query; the selection
+ * itself only changes when the user picks or clears.
  */
 export const useTriggerSearch = ({
   enabled,
   open,
   restingText,
   onOpen,
+  onClose,
   onSearchChange,
   onSearchReset,
-  onEditStart,
   onActiveMove,
   onSelectActive,
   onBackspaceOnEmpty,
@@ -46,42 +47,6 @@ export const useTriggerSearch = ({
   const [editing, setEditing] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  // Through refs: the handlers are cloned onto the input, and a new identity
-  // per keystroke would remount it.
-  const callbacksRef = useRef({
-    onSearchChange,
-    onOpen,
-    onSearchReset,
-    onEditStart,
-    onActiveMove,
-    onSelectActive,
-    onBackspaceOnEmpty,
-  })
-  useEffect(() => {
-    callbacksRef.current = {
-      onSearchChange,
-      onOpen,
-      onSearchReset,
-      onEditStart,
-      onActiveMove,
-      onSelectActive,
-      onBackspaceOnEmpty,
-    }
-  }, [
-    onActiveMove,
-    onBackspaceOnEmpty,
-    onEditStart,
-    onOpen,
-    onSearchChange,
-    onSearchReset,
-    onSelectActive,
-  ])
-
-  const restingTextRef = useRef(restingText)
-  useEffect(() => {
-    restingTextRef.current = restingText
-  }, [restingText])
-
   // The field follows the selection while nobody is editing it.
   useEffect(() => {
     if (!enabled || editing) {
@@ -90,42 +55,34 @@ export const useTriggerSearch = ({
     setDraft(restingText)
   }, [editing, enabled, restingText])
 
-  // `open` is a render behind the request, so the keys track the request.
-  const requestedOpenRef = useRef(open)
-  useEffect(() => {
-    requestedOpenRef.current = open
-  }, [open])
-
-  const requestOpen = useCallback(() => {
-    requestedOpenRef.current = true
-    callbacksRef.current.onOpen()
+  // `aria-controls` names the listbox; the popup around it also holds the
+  // actions and footer.
+  const popupElement = useCallback(() => {
+    const id = inputRef.current?.getAttribute("aria-controls")
+    const listbox = id ? document.getElementById(id) : null
+    return listbox?.closest<HTMLElement>("[data-radix-select-content]") ?? null
   }, [])
-
-  const editingRef = useRef(editing)
 
   const handleChange = useCallback(
     (value: string) => {
-      if (!editingRef.current) {
-        editingRef.current = true
-        setEditing(true)
-        callbacksRef.current.onEditStart()
-      }
+      setEditing(true)
       setDraft(value)
-      callbacksRef.current.onSearchChange(value)
-      if (value && !requestedOpenRef.current) {
-        requestOpen()
+      onSearchChange(value)
+      if (!open) {
+        onOpen()
       }
     },
-    [requestOpen]
+    [onOpen, onSearchChange, open]
   )
 
   /** Back to showing the selection, with no query. */
   const resetText = useCallback(() => {
-    editingRef.current = false
-    setEditing(false)
-    setDraft(restingTextRef.current)
-    callbacksRef.current.onSearchReset()
-  }, [])
+    setDraft(restingText)
+    if (editing) {
+      setEditing(false)
+      onSearchReset()
+    }
+  }, [editing, onSearchReset, restingText])
 
   const focusInput = useCallback(() => {
     inputRef.current?.focus({ preventScroll: true })
@@ -158,10 +115,53 @@ export const useTriggerSearch = ({
     }
   }, [enabled, open, resetText, triggerRef])
 
+  /**
+   * Focus leaving for somewhere that is neither the field nor the popup closes
+   * the list. Nothing else would: the popup only dismisses on a pointer.
+   */
+  const handleBlur = useCallback(
+    (event: React.FocusEvent<HTMLInputElement>) => {
+      if (!open) {
+        return
+      }
+      const next = event.relatedTarget
+      if (
+        next instanceof Node &&
+        (triggerRef.current?.contains(next) || popupElement()?.contains(next))
+      ) {
+        return
+      }
+      if (next) {
+        onClose()
+      }
+    },
+    [onClose, open, popupElement, triggerRef]
+  )
+
   /** Keys that belong to the list. Everything else is the input's. */
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
-      if (event.defaultPrevented) {
+      if (event.defaultPrevented || event.nativeEvent.isComposing) {
+        return
+      }
+
+      // Consumed when it removed a selection, so the input does not also act.
+      if (event.key === "Backspace" && event.currentTarget.value === "") {
+        if (onBackspaceOnEmpty()) {
+          event.preventDefault()
+        }
+        return
+      }
+
+      // Tab walks into the popup's own controls; the options are reached with
+      // the arrows and are not in that walk.
+      if (event.key === "Tab" && !event.shiftKey && open) {
+        const popup = popupElement()
+        const [control] = popup ? getSelectContentControls(popup) : []
+        if (control) {
+          event.preventDefault()
+          control.focus()
+        }
         return
       }
 
@@ -169,45 +169,42 @@ export const useTriggerSearch = ({
       const isArrowUp = event.key === "ArrowUp"
       const isEnter = event.key === "Enter"
 
-      // Consumed when it removed a selection, so the input does not also act.
-      if (event.key === "Backspace" && event.currentTarget.value === "") {
-        if (callbacksRef.current.onBackspaceOnEmpty()) {
-          event.preventDefault()
-        }
-        return
-      }
-
       if (!isArrowDown && !isArrowUp && !isEnter) {
         return
       }
 
-      if (!requestedOpenRef.current) {
-        event.preventDefault()
-        requestOpen()
+      // Always consumed: a field that is browsing a list never submits a form.
+      event.preventDefault()
+
+      if (!open) {
+        onOpen()
         return
       }
 
       if (isEnter) {
-        // Consumed only if it took something, so a form can still submit.
-        if (callbacksRef.current.onSelectActive()) {
-          event.preventDefault()
-        }
+        onSelectActive()
         return
       }
 
-      event.preventDefault()
-      callbacksRef.current.onActiveMove(isArrowDown ? "next" : "previous")
+      onActiveMove(isArrowDown ? "next" : "previous")
     },
-    [requestOpen]
+    [
+      onActiveMove,
+      onBackspaceOnEmpty,
+      onOpen,
+      onSelectActive,
+      open,
+      popupElement,
+    ]
   )
 
   return {
     draft,
-    editing,
     inputRef,
     focusInput,
     resetText,
     handleChange,
+    handleBlur,
     handleKeyDown,
   }
 }

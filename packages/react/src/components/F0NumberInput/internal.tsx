@@ -407,9 +407,9 @@ export const NumberInputInternal = forwardRef<
         loading={loading}
         readonly={readonly}
         onFocus={() => setIsFocused(true)}
-        onBlur={() => {
+        onBlur={(event) => {
           setIsFocused(false)
-          onBlur?.()
+          onBlur?.(event)
         }}
         onBeforeInput={handleBeforeInput}
         appendTag={units}

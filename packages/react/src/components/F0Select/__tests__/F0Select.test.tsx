@@ -100,13 +100,12 @@ describe("Select", () => {
   }
 
   /**
-   * A static-options field select searches from its own trigger, so the search
-   * field IS the combobox. Only filters, inline, asList or a custom trigger
-   * keep a separate `searchbox` in the popover.
+   * With search on, a field select searches from its own trigger, so the search
+   * field IS the combobox. Filters, inline, asList or a custom trigger keep a
+   * separate `searchbox` in the popover.
    */
   const getTriggerSearchInput = () => screen.getByRole("combobox")
 
-  /** The virtualized rows only render once the open animation has started. */
   /** What `aria-activedescendant` on the field is pointing at. */
   const activeOptionText = () => {
     const id = getTriggerSearchInput().getAttribute("aria-activedescendant")
@@ -116,6 +115,7 @@ describe("Select", () => {
     return document.getElementById(id)?.textContent ?? null
   }
 
+  /** The virtualized rows only render once the open animation has started. */
   const settleList = async () => {
     await waitFor(() => expect(screen.getByRole("listbox")).toBeInTheDocument())
     fireEvent.animationStart(screen.getByRole("listbox"))
@@ -2028,7 +2028,7 @@ describe("Select", () => {
       },
     })
 
-    it("searches from the trigger by default over static options", async () => {
+    it("searches from the trigger over static options", async () => {
       const user = userEvent.setup()
       render(
         <F0Select {...searchProps} options={mockOptions} onChange={() => {}} />
@@ -2184,7 +2184,7 @@ describe("Select", () => {
       await settleList()
 
       // The first option is active from the start, so Enter always has a
-      // target — and the target is one the user can see and hear.
+      // target, and the target is one the user can see and hear.
       await waitFor(() => expect(activeOptionText()).toContain("Option 3"))
       expect(handleChange).not.toHaveBeenCalled()
     })
@@ -2238,13 +2238,13 @@ describe("Select", () => {
         name: "Manage options",
       })
 
-      // The field sits outside the portaled popover, and the popover comes
-      // after it, so tabbing forward walks into it.
-      for (let i = 0; i < 4 && !footerAction.matches(":focus"); i++) {
-        await user.tab()
-      }
-
+      // Tab walks straight into the popover's controls, and Shift+Tab from
+      // the first of them comes back to the field.
+      await user.tab()
       expect(footerAction).toHaveFocus()
+
+      await user.tab({ shift: true })
+      expect(getTriggerSearchInput()).toHaveFocus()
     })
 
     it("stays open when the pointer lands back in the field", async () => {
@@ -2575,8 +2575,8 @@ describe("Select", () => {
       expect(elsewhere).toHaveFocus()
     })
 
-    it("posts the selection, never the query, under its name", async () => {
-      const { container } = render(
+    it("keeps its name off the field, so a native submit never posts the query", async () => {
+      render(
         <F0Select
           {...searchProps}
           options={mockOptions}
@@ -2589,12 +2589,7 @@ describe("Select", () => {
       await waitFor(() =>
         expect(getTriggerSearchInput()).toHaveValue("Option 1")
       )
-
-      const submitted = container.querySelector<HTMLInputElement>(
-        'input[type="hidden"][name="theme"]'
-      )
-      expect(submitted).toHaveValue("option1")
-      expect(screen.getByRole("combobox")).not.toHaveAttribute("name")
+      expect(getTriggerSearchInput()).not.toHaveAttribute("name")
     })
 
     it("shows the pointer for writing, not for picking", () => {
@@ -2764,18 +2759,23 @@ describe("Select", () => {
       const trigger = getTriggerSearchInput()
       await waitFor(() => expect(trigger).toHaveValue("Option 1"))
 
-      // The label is text, so this is the browser's own backspace. The first
-      // edit is what drops the selection.
+      // The label is text, so this is the browser's own backspace. Editing
+      // turns the text into a query; the selection itself is not touched.
       await user.click(trigger)
       await user.keyboard("{Backspace}")
 
       expect(trigger).toHaveValue("Option ")
-      await waitFor(() => expect(handleChange).toHaveBeenCalled())
       await settleList()
       expect(trigger).toHaveFocus()
 
       await user.keyboard("{Backspace}")
       expect(trigger).toHaveValue("Option")
+      expect(handleChange).not.toHaveBeenCalled()
+
+      // Leaving without picking puts the label back.
+      await user.keyboard("{Escape}")
+      await waitFor(() => expect(trigger).toHaveValue("Option 1"))
+      expect(handleChange).not.toHaveBeenCalled()
     })
 
     it("continues the selected label when the user types after it", async () => {
@@ -2796,10 +2796,11 @@ describe("Select", () => {
       await user.type(trigger, " ")
 
       expect(trigger).toHaveValue("Option 1 ")
-      await waitFor(() => expect(handleChange).toHaveBeenCalled())
+      await settleList()
 
       await user.type(trigger, "x")
       expect(trigger).toHaveValue("Option 1 x")
+      expect(handleChange).not.toHaveBeenCalled()
     })
 
     it("selects, copies and replaces the label like any text", async () => {
@@ -2844,6 +2845,204 @@ describe("Select", () => {
 
       expect(trigger).toHaveValue("a")
       expect(handleChange).not.toHaveBeenCalled()
+    })
+
+    it("emits once when the selection is cleared while closed", async () => {
+      const user = userEvent.setup()
+      const handleChange = vi.fn()
+      render(
+        <F0Select
+          {...searchProps}
+          options={mockOptions}
+          value="option1"
+          clearable
+          onChange={handleChange}
+        />
+      )
+
+      const trigger = getTriggerSearchInput()
+      await waitFor(() => expect(trigger).toHaveValue("Option 1"))
+
+      await user.click(screen.getByTestId("clear-button"))
+
+      expect(handleChange).toHaveBeenCalledTimes(1)
+      expect(handleChange.mock.calls[0][0]).toBeUndefined()
+      await waitFor(() => expect(trigger).toHaveValue(""))
+      expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
+    })
+
+    it("walks past disabled options and never takes one", async () => {
+      const user = userEvent.setup()
+      const handleChange = vi.fn()
+      render(
+        <F0Select
+          {...searchProps}
+          options={[
+            { value: "alpha", label: "Alpha" },
+            { value: "beta", label: "Beta", disabled: true },
+            { value: "gamma", label: "Gamma" },
+          ]}
+          onChange={handleChange}
+        />
+      )
+
+      const trigger = getTriggerSearchInput()
+      await user.click(trigger)
+      await user.keyboard("{ArrowDown}")
+      await settleList()
+      await waitFor(() => expect(activeOptionText()).toContain("Alpha"))
+
+      await user.keyboard("{ArrowDown}")
+      await waitFor(() => expect(activeOptionText()).toContain("Gamma"))
+
+      await user.keyboard("{Enter}")
+      await waitFor(() => expect(handleChange).toHaveBeenCalled())
+      expect(handleChange.mock.calls[0][0]).toBe("gamma")
+    })
+
+    it("never submits the form around it on Enter", async () => {
+      const user = userEvent.setup()
+      const handleSubmit = vi.fn((event: React.FormEvent) =>
+        event.preventDefault()
+      )
+      render(
+        <form onSubmit={handleSubmit}>
+          <F0Select
+            {...searchProps}
+            options={mockOptions}
+            onChange={() => {}}
+          />
+        </form>
+      )
+
+      const trigger = getTriggerSearchInput()
+      await user.click(trigger)
+      await user.keyboard("{Enter}")
+      await settleList()
+
+      await user.type(trigger, "nothing matches this")
+      await user.keyboard("{Enter}")
+
+      expect(handleSubmit).not.toHaveBeenCalled()
+    })
+
+    it("closes when focus goes somewhere else", async () => {
+      const user = userEvent.setup()
+      render(
+        <>
+          <F0Select
+            {...searchProps}
+            options={mockOptions}
+            onChange={() => {}}
+          />
+          <button type="button">Elsewhere</button>
+        </>
+      )
+
+      const trigger = getTriggerSearchInput()
+      await user.type(trigger, "Option")
+      await settleList()
+
+      fireEvent.blur(trigger, { relatedTarget: screen.getByText("Elsewhere") })
+
+      await waitFor(() =>
+        expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
+      )
+    })
+
+    it("points at an option the browser can find, whatever its value", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0Select
+          {...searchProps}
+          options={[{ value: "needs space/and:more", label: "Odd value" }]}
+          onChange={() => {}}
+        />
+      )
+
+      const trigger = getTriggerSearchInput()
+      await user.type(trigger, "Odd")
+      await settleList()
+
+      await waitFor(() =>
+        expect(trigger).toHaveAttribute("aria-activedescendant")
+      )
+      const id = trigger.getAttribute("aria-activedescendant") as string
+      expect(id).not.toMatch(/\s/)
+      expect(document.getElementById(id)).toHaveTextContent("Odd value")
+    })
+
+    it("moves the active option under the pointer without taking the caret", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0Select {...searchProps} options={mockOptions} onChange={() => {}} />
+      )
+
+      const trigger = getTriggerSearchInput()
+      await user.type(trigger, "Option")
+      await settleList()
+      await waitFor(() => expect(activeOptionText()).toContain("Option 1"))
+
+      await user.hover(screen.getByRole("option", { name: /Option 2/ }))
+
+      await waitFor(() => expect(activeOptionText()).toContain("Option 2"))
+      expect(trigger).toHaveFocus()
+    })
+
+    it("lets an IME finish its composition before Enter picks anything", async () => {
+      const user = userEvent.setup()
+      const handleChange = vi.fn()
+      render(
+        <F0Select
+          {...searchProps}
+          options={mockOptions}
+          onChange={handleChange}
+        />
+      )
+
+      const trigger = getTriggerSearchInput()
+      await user.type(trigger, "Option")
+      await settleList()
+      await waitFor(() => expect(activeOptionText()).toContain("Option 1"))
+
+      fireEvent.keyDown(trigger, { key: "Enter", isComposing: true })
+      expect(handleChange).not.toHaveBeenCalled()
+
+      await user.keyboard("{Enter}")
+      await waitFor(() => expect(handleChange).toHaveBeenCalled())
+    })
+
+    it("waits for the user to stop typing before asking a source", async () => {
+      const user = userEvent.setup()
+      const fetchData = vi.fn(() => ({
+        records: [{ id: "option1", name: "Option 1" }],
+      }))
+      const source = createDataSourceDefinition<RecordType>({
+        dataAdapter: { fetchData },
+      })
+      render(
+        <F0Select
+          {...searchProps}
+          source={source}
+          onChange={() => {}}
+          mapOptions={(item: RecordType) => ({
+            value: item.id as string,
+            label: item.name as string,
+          })}
+        />
+      )
+
+      const trigger = getTriggerSearchInput()
+      await waitFor(() => expect(fetchData).toHaveBeenCalled())
+      const before = fetchData.mock.calls.length
+
+      await user.type(trigger, "Op")
+      expect(fetchData).toHaveBeenCalledTimes(before)
+
+      await waitFor(
+        () => expect(fetchData.mock.calls.length).toBeGreaterThan(before),
+        { timeout: 1500 }
+      )
     })
 
     it("describes nothing when nothing is selected", () => {

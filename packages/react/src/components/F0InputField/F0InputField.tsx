@@ -212,7 +212,7 @@ export type InputFieldProps<T> = {
   "aria-describedby"?: AriaAttributes["aria-describedby"]
   onClear?: () => void
   onFocus?: () => void
-  onBlur?: () => void
+  onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void
   onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void
   canGrow?: boolean
   children: React.ReactNode & {
@@ -571,7 +571,11 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                 "aria-expanded": role === "combobox" ? ariaExpanded : undefined,
                 "aria-activedescendant": ariaActiveDescendant,
                 "aria-autocomplete": ariaAutocomplete,
-                "aria-describedby": ariaDescribedBy,
+                // Only when given: `cloneElement` would otherwise overwrite a
+                // description the child brought itself.
+                ...(ariaDescribedBy !== undefined && {
+                  "aria-describedby": ariaDescribedBy,
+                }),
                 id,
                 value: localValue ?? "",
                 "aria-label": label || placeholder || "no-label",

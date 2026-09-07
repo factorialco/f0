@@ -31,6 +31,22 @@ const TABBABLE_ELEMENT_SELECTOR = [
 ].join(",")
 
 /**
+ * The controls a keyboard user tabs through inside the popup: its search box,
+ * actions and footer. Options are reached with the arrows, never with Tab.
+ */
+export const getSelectContentControls = (content: HTMLElement) =>
+  Array.from(
+    content.querySelectorAll<HTMLElement>(TABBABLE_ELEMENT_SELECTOR)
+  ).filter(
+    (element) =>
+      (element.tabIndex >= 0 || element.getAttribute("role") === "searchbox") &&
+      !element.matches("[data-radix-scroll-area-viewport]") &&
+      !element.closest(
+        '[hidden], [aria-hidden="true"], [inert], [role="listbox"]'
+      )
+  )
+
+/**
  * Select Content component
  */
 // Define two different prop types for the two mutually exclusive scenarios
@@ -274,17 +290,7 @@ const SelectContent = forwardRef<
           : content.querySelector<HTMLElement>(
               '[role="option"][data-highlighted]:not([aria-disabled="true"]), [role="option"][data-state="checked"]:not([aria-disabled="true"]), [role="option"]:not([aria-disabled="true"])'
             ))
-      const controls = Array.from(
-        content.querySelectorAll<HTMLElement>(TABBABLE_ELEMENT_SELECTOR)
-      ).filter(
-        (element) =>
-          (element.tabIndex >= 0 ||
-            element.getAttribute("role") === "searchbox") &&
-          !element.matches("[data-radix-scroll-area-viewport]") &&
-          !element.closest(
-            '[hidden], [aria-hidden="true"], [inert], [role="listbox"]'
-          )
-      )
+      const controls = getSelectContentControls(content)
       const currentControl =
         !focusedOption &&
         eventTarget !== content &&

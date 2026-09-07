@@ -40,6 +40,7 @@ import { cn, focusRing } from "@/lib/utils"
 import { F0DialogContext } from "@/patterns/F0Dialog"
 import { GroupHeader } from "@/ui/GroupHeader/index"
 import {
+  getSelectContentControls,
   SelectContent,
   Select as SelectPrimitive,
   SelectSeparator,
@@ -47,6 +48,7 @@ import {
   VirtualItem,
 } from "@/ui/Select"
 import { textVariants } from "@/ui/Text"
+import { ActiveOptionContext } from "./components/ActiveOptionContext"
 import { Arrow } from "./components/Arrow"
 import { SelectAll } from "./components/SelectAll"
 import { SelectBottomActions } from "./components/SelectBottomActions"
@@ -61,7 +63,14 @@ import type {
   F0SelectProps,
   ResolvedRecordType,
 } from "./types"
+import { displayLabel } from "./utils"
 export * from "./types"
+
+/**
+ * Typing into the field queries a remote source on this delay, the same the
+ * popover's search box has always used. Static options filter at once.
+ */
+const REMOTE_SEARCH_DEBOUNCE_MS = 400
 
 const defaultSearchFn = (
   option: F0SelectItemProps<string>,
@@ -239,10 +248,17 @@ const F0SelectComponent = forwardRef(function Select<
    */
   const [activeValue, setActiveValue] = useState<string | undefined>(undefined)
   const optionIdFor = useCallback(
-    (value: string) => `${id}-option-${value}`,
+    // Values are arbitrary strings and an IDREF cannot hold whitespace, so a
+    // space is spelled out as its char code.
+    (value: string) =>
+      `${id}-option-${value.replace(
+        /\s/g,
+        (char) => `_${char.charCodeAt(0).toString(16)}`
+      )}`,
     [id]
   )
   const inlineTriggerRef = useRef<HTMLElement>(null)
+  const arrowRef = useRef<HTMLDivElement>(null)
   const composedTriggerRef = useComposedRefs(ref, inlineTriggerRef)
   const previousOpenRef = useRef(openLocal)
   const isApplyingRef = useRef(false)
@@ -597,6 +613,28 @@ const F0SelectComponent = forwardRef(function Select<
     setCurrentSearch(value)
     onSearchChange?.(value)
   }
+
+  const searchEmitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const cancelPendingSearchEmit = useCallback(() => {
+    if (searchEmitTimerRef.current !== null) {
+      clearTimeout(searchEmitTimerRef.current)
+      searchEmitTimerRef.current = null
+    }
+  }, [])
+  useEffect(() => cancelPendingSearchEmit, [cancelPendingSearchEmit])
+
+  /** The field's query: immediate for static options, debounced for a source. */
+  const emitSearchFromField = (value: string) => {
+    cancelPendingSearchEmit()
+    if (!source) {
+      onSearchChangeLocal(value)
+      return
+    }
+    searchEmitTimerRef.current = setTimeout(() => {
+      searchEmitTimerRef.current = null
+      onSearchChangeLocal(value)
+    }, REMOTE_SEARCH_DEBOUNCE_MS)
+  }
   // Show apply button when in multiple selection, and not rendered as a list
   const showApplyButton = multiple && !asList
   const hasDeferredApply = !!(withApplySelection && showApplyButton)
@@ -935,86 +973,11 @@ const F0SelectComponent = forwardRef(function Select<
    * arriving together. Typing has nothing to race, so the wait would just be
    * 100ms of nothing happening after the first character.
    */
-  // The list is assembled further down, so the keys reach it through a ref.
-  const listNavRef = useRef<{
-    move: (direction: "next" | "previous") => void
-    take: () => boolean
-    removeLast: () => boolean
-  }>({
-    move: () => {},
-    take: () => false,
-    removeLast: () => false,
-  })
-  const moveActiveThroughRef = useCallback(
-    (direction: "next" | "previous") => listNavRef.current.move(direction),
-    []
-  )
-  const selectActiveThroughRef = useCallback(
-    () => listNavRef.current.take(),
-    []
-  )
-  const removeLastSelectedThroughRef = useCallback(
-    () => listNavRef.current.removeLast(),
-    []
-  )
-
   const openNow = useCallback(() => {
     debouncedHandleChangeOpenLocal.cancel()
     applyOpenChangeRef.current(true)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedHandleChangeOpenLocal])
-
-  /**
-   * For a single selection the field's text IS the selected label, so selecting,
-   * copying and editing it are the browser's own. A multiple selection has no
-   * single label: the field stays empty and shows the count beside the caret.
-   */
-  const selectedLabelText = multiple
-    ? ""
-    : String(
-        getDisplayItemsForSelection[0]?.selectedLabel ??
-          getDisplayItemsForSelection[0]?.label ??
-          ""
-      )
-
-  /** The first edit of the label means the selection it showed is gone. */
-  const dropSelectionForEditing = useCallback(() => {
-    if (multiple || localValue.length === 0) {
-      return
-    }
-    hasUserInteracted.current = true
-    clearSelection()
-    selectedItemsCache.current.clear()
-    ;(
-      onChangeSelectedOption as (option: undefined, checked: boolean) => void
-    )?.(undefined, false)
-  }, [clearSelection, localValue.length, multiple, onChangeSelectedOption])
-
-  const {
-    draft: searchDraft,
-    inputRef: searchInputRef,
-    focusInput: focusSearchInput,
-    resetText: resetSearchText,
-    handleChange: handleSearchDraftChange,
-    handleKeyDown: handleSearchKeyDown,
-  } = useTriggerSearch({
-    enabled: inlineSearch,
-    open: !!openLocal,
-    restingText: inlineSearch ? selectedLabelText : "",
-    onEditStart: dropSelectionForEditing,
-    onOpen: openNow,
-    onActiveMove: moveActiveThroughRef,
-    onSelectActive: selectActiveThroughRef,
-    onBackspaceOnEmpty: removeLastSelectedThroughRef,
-    onSearchChange: onSearchChangeLocal,
-    // No query, not an empty one: an empty string is a new dataset identity
-    // and would drop an active select-all on an open-and-close.
-    onSearchReset: () => {
-      setCurrentSearch(undefined)
-      onSearchChange?.("")
-    },
-    triggerRef: inlineTriggerRef,
-  })
 
   const handleCancel = useCallback(() => {
     handleChangeOpenLocal(false)
@@ -1148,18 +1111,16 @@ const F0SelectComponent = forwardRef(function Select<
                       ? optionIdFor(String(mappedOption.value))
                       : undefined
                   }
-                  active={
-                    inlineSearch && activeValue === String(mappedOption.value)
-                  }
                 />
               ),
+              disabled: mappedOption.disabled,
               // Convert to string to ensure consistent comparison with selectedItemsValues
               // which also converts to strings (line 623)
               value: String(mappedOption.value),
             }
       })
     },
-    [optionMapper, inlineSearch, activeValue, optionIdFor]
+    [optionMapper, inlineSearch, optionIdFor]
   )
 
   const items: VirtualItem[] = useMemo(() => {
@@ -1259,13 +1220,16 @@ const F0SelectComponent = forwardRef(function Select<
     () =>
       inlineSearch
         ? items
-            .filter((item) => item.type === "item" && item.value !== undefined)
+            .filter(
+              (item) =>
+                item.type === "item" &&
+                item.value !== undefined &&
+                !item.disabled
+            )
             .map((item) => item.value as string)
         : [],
     [inlineSearch, items]
   )
-
-  const navigableKey = navigableValues.join("\u0000")
 
   // An option is always active, so Enter always has a visible target.
   useEffect(() => {
@@ -1286,9 +1250,10 @@ const F0SelectComponent = forwardRef(function Select<
       )
       return selected ?? navigableValues[0]
     })
-    // navigableKey stands in for the list's identity
+    // localValue is read for the starting row only; the list's identity is
+    // what re-runs this
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inlineSearch, openLocal, navigableKey])
+  }, [inlineSearch, openLocal, navigableValues])
 
   const moveActive = useCallback(
     (direction: "next" | "previous") => {
@@ -1336,13 +1301,43 @@ const F0SelectComponent = forwardRef(function Select<
     return true
   }, [localValue, multiple, onItemCheckChange])
 
-  useEffect(() => {
-    listNavRef.current = {
-      move: moveActive,
-      take: selectActive,
-      removeLast: removeLastSelected,
-    }
-  }, [moveActive, removeLastSelected, selectActive])
+  /**
+   * For a single selection the field's text IS the selected label, so
+   * selecting, copying and editing it are the browser's own. Editing makes it
+   * a query; the selection only changes when the user picks or clears.
+   */
+  const selectedLabelText =
+    !multiple && getDisplayItemsForSelection[0]
+      ? String(displayLabel(getDisplayItemsForSelection[0]))
+      : ""
+
+  const {
+    draft: searchDraft,
+    inputRef: searchInputRef,
+    focusInput: focusSearchInput,
+    resetText: resetSearchText,
+    handleChange: handleSearchDraftChange,
+    handleBlur: handleSearchBlur,
+    handleKeyDown: handleSearchKeyDown,
+  } = useTriggerSearch({
+    enabled: inlineSearch,
+    open: !!openLocal,
+    restingText: inlineSearch ? selectedLabelText : "",
+    onOpen: openNow,
+    onClose: () => handleChangeOpenLocal(false),
+    onActiveMove: moveActive,
+    onSelectActive: selectActive,
+    onBackspaceOnEmpty: removeLastSelected,
+    onSearchChange: emitSearchFromField,
+    // No query, not an empty one: an empty string is a new dataset identity
+    // and would drop an active select-all on an open-and-close.
+    onSearchReset: () => {
+      cancelPendingSearchEmit()
+      setCurrentSearch(undefined)
+      onSearchChange?.("")
+    },
+    triggerRef: inlineTriggerRef,
+  })
 
   // A virtualized list only renders what is in view.
   useEffect(() => {
@@ -1394,6 +1389,20 @@ const F0SelectComponent = forwardRef(function Select<
   const selectContent = (
     <SelectContent
       items={items}
+      onKeyDown={
+        inlineSearch
+          ? (event) => {
+              if (event.key !== "Tab" || !event.shiftKey) {
+                return
+              }
+              const [first] = getSelectContentControls(event.currentTarget)
+              if (first && first === event.target) {
+                event.preventDefault()
+                focusSearchInput()
+              }
+            }
+          : undefined
+      }
       // The field must survive the aria-hidden sweep the open content applies
       // to the rest of the page.
       keepTriggerAccessible={inlineSearch}
@@ -1493,29 +1502,23 @@ const F0SelectComponent = forwardRef(function Select<
 
   const selectionDescriptionId = `${id}-selection`
 
-  const hasSelection = multiple
-    ? localValue.length > 0 || selectionMeta.selectedItemsCount > 0
-    : !!localValue[0]
+  const selectedCount = multiple
+    ? Math.max(localValue.length, selectionMeta.selectedItemsCount)
+    : localValue[0]
+      ? 1
+      : 0
+  const hasSelection = selectedCount > 0
 
   /** What the trigger shows when it is not being typed into. */
   const selectedItemsNode = (
     <SelectedItems
       multiple={multiple}
-      totalSelectedCount={
-        multiple
-          ? Math.max(localValue.length, selectionMeta.selectedItemsCount)
-          : localValue[0]
-            ? 1
-            : 0
-      }
+      totalSelectedCount={selectedCount}
       allSelected={selectedState.allSelected}
       selection={getDisplayItemsForSelection}
-      /**
-       * No glyph beside the caret: a field you write in reads as text. A plain
-       * trigger hides it too when the field carries its own `icon`, or the two
-       * sit 4px apart. Rows keep their icons either way.
-       */
-      hideItemIcon={inlineSearch || !!icon}
+      // The field's own icon already occupies the glyph slot; two icons would
+      // sit 4px apart. Rows keep their icons either way.
+      hideItemIcon={!!icon}
     />
   )
 
@@ -1532,7 +1535,7 @@ const F0SelectComponent = forwardRef(function Select<
    * Nothing selected, nothing to explain: empty, and nothing opens on hover.
    */
   const selectedTooltipText = getDisplayItemsForSelection
-    .map((item) => item.selectedLabel ?? item.label)
+    .map(displayLabel)
     .filter(Boolean)
     .join(", ")
 
@@ -1665,13 +1668,8 @@ const F0SelectComponent = forwardRef(function Select<
                 inlineSearch
                   ? searchDraft
                   : multiple
-                    ? // For multiple: use count of selected items
-                      Math.max(
-                        localValue.length,
-                        selectionMeta.selectedItemsCount
-                      ).toString()
-                    : // For single: use the selected value directly
-                      (localValue[0] ?? undefined)
+                    ? selectedCount.toString()
+                    : (localValue[0] ?? undefined)
               }
               isEmpty={(value) =>
                 inlineSearch
@@ -1684,10 +1682,11 @@ const F0SelectComponent = forwardRef(function Select<
               }
               canClear={inlineSearch ? hasSelection : undefined}
               onChange={inlineSearch ? handleSearchDraftChange : undefined}
-              // The button clears the selection. With a multiple selection the
-              // text is a query and stays; with a single one the text IS the
-              // selection and goes with it.
-              clearKeepsText={inlineSearch && multiple}
+              onBlur={inlineSearch ? handleSearchBlur : undefined}
+              // The button clears the selection and `onClear` below puts the
+              // field back; the chrome must not also empty the text through
+              // the change handler, or the clear would count as an edit.
+              clearKeepsText={inlineSearch}
               aria-activedescendant={
                 // The only way to announce the active option while the caret
                 // stays in the field.
@@ -1743,7 +1742,7 @@ const F0SelectComponent = forwardRef(function Select<
               }}
               loading={isInitialLoading || loading || isLoading}
               // Never on the search field: a native submit would post the
-              // query. The hidden input below carries the selection.
+              // query.
               name={inlineSearch ? undefined : name}
               onClickContent={(event) => {
                 if (inlineSearch) {
@@ -1752,9 +1751,9 @@ const F0SelectComponent = forwardRef(function Select<
                    * moves the caret. The arrow stays a glyph because a second
                    * target inside a 32px field violates target-size.
                    */
-                  const onArrow = !!(event.target as HTMLElement).closest?.(
-                    '[data-testid="select-arrow"]'
-                  )
+                  const onArrow =
+                    event.target instanceof Node &&
+                    !!arrowRef.current?.contains(event.target)
                   if (onArrow) {
                     handleChangeOpenLocal(!openLocal)
                     focusSearchInput()
@@ -1770,6 +1769,7 @@ const F0SelectComponent = forwardRef(function Select<
               }}
               append={
                 <Arrow
+                  ref={arrowRef}
                   open={openLocal}
                   disabled={disabled}
                   size={effectiveSize}
@@ -1799,18 +1799,17 @@ const F0SelectComponent = forwardRef(function Select<
           )}
         </SelectTrigger>
       )}
-      {/*
-        What a native form submit posts. The visible field's value is the
-        query, so the selection travels here instead.
-      */}
-      {inlineSearch && name && (
-        <input
-          type="hidden"
-          name={name}
-          value={multiple ? localValue.join(",") : (localValue[0] ?? "")}
-        />
+      {openLocal && (
+        <ActiveOptionContext.Provider
+          value={
+            inlineSearch
+              ? { value: activeValue, setActive: setActiveValue }
+              : null
+          }
+        >
+          {selectContent}
+        </ActiveOptionContext.Provider>
       )}
-      {openLocal && selectContent}
     </SelectPrimitive>
   )
 
