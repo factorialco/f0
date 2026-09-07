@@ -2,7 +2,10 @@ import { cva } from "cva"
 import { AnimatePresence, motion } from "motion/react"
 import React from "react"
 
-import { TooltipInternal } from "@/experimental/Overlays/Tooltip"
+import {
+  ICON_ONLY_TOOLTIP_DELAY_MS,
+  TooltipInternal,
+} from "@/experimental/Overlays/Tooltip"
 import { Link } from "@/lib/linkHandler"
 import { cn, focusRing } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
@@ -170,7 +173,7 @@ export const Action = React.forwardRef<
         : undefined
 
   const element = tooltipProps ? (
-    <TooltipInternal {...tooltipProps} delay={1000}>
+    <TooltipInternal {...tooltipProps} delay={ICON_ONLY_TOOLTIP_DELAY_MS}>
       {mainElement}
     </TooltipInternal>
   ) : (

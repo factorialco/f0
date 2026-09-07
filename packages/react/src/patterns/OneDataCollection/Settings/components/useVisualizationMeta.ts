@@ -12,8 +12,9 @@ import {
 } from "../../visualizations/collection"
 
 /**
- * Returns a resolver for a visualization's icon + localized label. Shared by the
- * Settings popover selector and the header view switcher so both stay in sync.
+ * Returns a resolver for a visualization's icon + localized label, for the
+ * header view switcher. The icon always comes from the built-in registry and is
+ * never customizable, so a given view looks the same in every collection.
  */
 export const useVisualizationMeta = () => {
   const i18n = useI18n()

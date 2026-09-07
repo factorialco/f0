@@ -21,6 +21,15 @@ import { cn } from "../../../lib/utils"
 import { Shortcut } from "@/ui/Shortcut"
 
 /**
+ * How long a control whose visible label is hidden waits before naming itself.
+ * Shared so every icon-only control in F0 reveals its name at the same speed:
+ * a header holding an icon-only segmented control next to icon-only buttons
+ * would otherwise answer the same "what is this glyph?" question at two
+ * different speeds.
+ */
+export const ICON_ONLY_TOOLTIP_DELAY_MS = 1000
+
+/**
  * One bullet of a tooltip's list. The object form gets a semibold lead so a
  * list of named things (alerts, broken rules) reads as a list rather than a run
  * of sentences.

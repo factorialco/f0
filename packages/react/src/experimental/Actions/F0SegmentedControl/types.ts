@@ -29,8 +29,13 @@ export interface F0SegmentedControlProps {
    */
   fullWidth?: boolean
   /**
-   * Render segments icon-only, keeping the label accessible to screen readers.
-   * Segments without an icon still show their label. Useful in tight headers.
+   * Render segments icon-only, keeping the label accessible to screen readers
+   * and showing it in a tooltip once the pointer rests on the segment.
+   *
+   * The label is only hidden where the pointer can hover, since that is where
+   * the tooltip can recover it: on touch (`hover: none`) the text stays
+   * visible. Segments without an icon, and disabled segments (which can be
+   * neither hovered nor focused), also keep their label.
    * @default false
    */
   hideLabels?: boolean

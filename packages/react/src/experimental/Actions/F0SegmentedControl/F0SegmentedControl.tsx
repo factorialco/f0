@@ -1,9 +1,9 @@
 import { useControllableState } from "@radix-ui/react-use-controllable-state"
 
-import { F0Icon } from "@/components/F0Icon"
-import { cn, focusRing } from "@/lib/utils"
-import { ToggleGroup, ToggleGroupItem } from "@/ui/ToggleGroup"
+import { cn } from "@/lib/utils"
+import { ToggleGroup } from "@/ui/ToggleGroup"
 
+import { Segment } from "./components/Segment"
 import { F0SegmentedControlProps } from "./types"
 
 export const F0SegmentedControl = ({
@@ -45,28 +45,14 @@ export const F0SegmentedControl = ({
       )}
     >
       {items.map((item) => (
-        <ToggleGroupItem
+        <Segment
           key={item.value}
-          value={item.value}
-          disabled={disabled || item.disabled}
-          className={cn(
-            "relative flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded font-medium transition-all",
-            "text-f1-foreground-secondary",
-            "hover:text-f1-foreground hover:bg-f1-background-hover",
-            "disabled:pointer-events-none disabled:text-f1-foreground-disabled",
-            "data-[state=on]:bg-f1-background data-[state=on]:text-f1-foreground data-[state=on]:shadow",
-            focusRing(),
-            "h-8 px-3 text-base",
-            fullWidth && "w-full"
-          )}
-        >
-          {item.icon && <F0Icon icon={item.icon} size="md" />}
-          {hideLabels && item.icon ? (
-            <span className="sr-only">{item.label}</span>
-          ) : (
-            item.label
-          )}
-        </ToggleGroupItem>
+          item={item}
+          selected={item.value === localValue}
+          disabled={disabled || Boolean(item.disabled)}
+          fullWidth={fullWidth}
+          hideLabel={hideLabels}
+        />
       ))}
     </ToggleGroup>
   )

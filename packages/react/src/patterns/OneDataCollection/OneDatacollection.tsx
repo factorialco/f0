@@ -96,7 +96,6 @@ import {
   DataCollectionSettings,
   useDataCollectionSettings,
 } from "./Settings/SettingsProvider"
-import { useHeaderActionsCollapse } from "./components/useHeaderActionsCollapse"
 import { VisualizationSwitcher } from "./components/VisualizationSwitcher"
 import { SummariesDefinition } from "./summary"
 import { useEventEmitter } from "./useEventEmitter"
@@ -674,16 +673,6 @@ const OneDataCollectionComp = <
   const actionBarRef = useRef<F0ActionBarRef>(null)
   const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // When the header row runs out of room, collapse the view switcher to
-  // icon-only so it keeps fitting next to the rest of the header controls.
-  const toolbarRef = useRef<HTMLDivElement>(null)
-  const headerActionsRef = useRef<HTMLDivElement>(null)
-  const headerSummaryRef = useRef<HTMLDivElement>(null)
-  const collapseHeaderActions = useHeaderActionsCollapse(
-    toolbarRef,
-    headerActionsRef,
-    headerSummaryRef
-  )
   // isControlledModeActive: true when controlled status is non-idle and not
   // an already-dismissed success. Drives the auto-manage bail-out in onClick.
   // Repeated for resolvedBulkActionStatus and isControlledModeActive — helper
@@ -1654,7 +1643,6 @@ const OneDataCollectionComp = <
       )}
       {showBottomToolbar && (
         <div
-          ref={toolbarRef}
           className={cn(
             "flex flex-row gap-4 px-page",
             fullHeight && "max-h-full",
@@ -1662,7 +1650,7 @@ const OneDataCollectionComp = <
           )}
         >
           {totalItemSummaryPosition === "bottom" && (
-            <div ref={headerSummaryRef} className="flex items-center">
+            <div className="flex items-center">
               <TotalItemsSummary
                 isReady={!showTotalItemSummarySkeleton}
                 totalItemSummaryResult={totalItemSummaryResult}
@@ -1684,7 +1672,7 @@ const OneDataCollectionComp = <
               presetActionState={presetActionState}
               onPresetAction={onPresetAction}
             >
-              <div ref={headerActionsRef} className="flex items-center gap-2">
+              <div className="flex items-center gap-2">
                 {isLoading && (
                   <motion.div
                     className="flex h-8 w-8 items-center justify-center"
@@ -1714,7 +1702,6 @@ const OneDataCollectionComp = <
                     visualizations={visualizations}
                     currentVisualization={currentVisualization}
                     onVisualizationChange={setCurrentVisualization}
-                    hideLabels={collapseHeaderActions}
                   />
                 )}
                 {shouldShowSettings && (
