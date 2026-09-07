@@ -49,6 +49,7 @@ import { WidgetUpdateDialog } from "../WidgetUpdateDialog"
 import { takeCardGhost, takePageSurface } from "./dragGhost"
 import { lockedCeiling, noHigherThan, topPins } from "./lockedCeiling"
 import { SortableWidget } from "./SortableWidget"
+import { WidgetStage } from "./WidgetStage"
 import {
   useWidgetVirtualizer,
   type WidgetPlacement,
@@ -269,6 +270,8 @@ export interface WidgetContainerProps {
   disableEdition?: boolean
   /** Disables dragging without changing the tree: the sortables stay mounted. */
   disableDrag?: boolean
+  widgetHostFor?: (widget: HomeWidgetItem) => HTMLElement | null | undefined
+  afterWidgets?: ReactNode
   /**
    * Marks the element a dragged card should carry a copy of behind it — the
    * page's own surface, so the card the pointer holds is the colour it was.
@@ -409,6 +412,8 @@ export function WidgetContainer({
   renderWidget,
   disableEdition = false,
   disableDrag = false,
+  widgetHostFor,
+  afterWidgets,
   dragSurfaceSelector,
   onRemoveWidget,
   onClickAddNewWidget,
@@ -432,6 +437,7 @@ export function WidgetContainer({
   const canEdit = !disableEdition
   const isHidden = (widget: HomeWidgetItem) =>
     visibleWidgetId !== undefined && widget.id !== visibleWidgetId
+  const arrangeable = canEdit && onReorder != null
   /**
    * WHETHER THERE IS AN ARRANGEMENT TO MAKE — two widgets that can actually
    * move, not merely two widgets. A column of one free card among pinned ones
@@ -439,10 +445,7 @@ export function WidgetContainer({
    * offering a gesture whose every outcome is the arrangement you already have
    * is offering a refusal.
    */
-  const canDrag =
-    canEdit &&
-    onReorder != null &&
-    widgets.filter((widget) => !widget.locked).length > 1
+  const hasArrangement = widgets.filter((widget) => !widget.locked).length > 1
   // The widget being dragged: its in-list card hides while a copy of it rides
   // the pointer in the DragOverlay (see below).
   const [activeId, setActiveId] = useState<string | null>(null)
@@ -807,17 +810,22 @@ export function WidgetContainer({
       placement={placement}
       measureRef={virtual.measureRef}
     >
-      {canDrag ? (
-        <SortableWidget id={widget.id} disabled={widget.locked || disableDrag}>
-          {/* The arrival wrapper sits INSIDE the sortable rather than around it:
-              dnd-kit measures the element it holds the ref to, and a transformed
-              ancestor would offset every rect it reads while a drag is in
-              flight. */}
-          {(state) => enter(order, render(widget, state), widget)}
-        </SortableWidget>
-      ) : (
-        enter(order, render(widget), widget)
-      )}
+      <WidgetStage host={widgetHostFor?.(widget)}>
+        {arrangeable ? (
+          <SortableWidget
+            id={widget.id}
+            disabled={widget.locked || disableDrag || !hasArrangement}
+          >
+            {/* The arrival wrapper sits INSIDE the sortable rather than around
+                it: dnd-kit measures the element it holds the ref to, and a
+                transformed ancestor would offset every rect it reads while a
+                drag is in flight. */}
+            {(state) => enter(order, render(widget, state), widget)}
+          </SortableWidget>
+        ) : (
+          enter(order, render(widget), widget)
+        )}
+      </WidgetStage>
     </WidgetSlot>
   )
 
@@ -877,7 +885,7 @@ export function WidgetContainer({
       style={style}
     >
       {children}
-      {canDrag ? (
+      {arrangeable ? (
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
@@ -972,6 +980,7 @@ export function WidgetContainer({
       ) : (
         list
       )}
+      {afterWidgets}
       {/* THE COLUMN'S FOOTNOTE: under every widget, above the offer to add
           another. It takes the beat after the last widget and the placeholder
           takes the one after it, so the arrival still runs straight down the
