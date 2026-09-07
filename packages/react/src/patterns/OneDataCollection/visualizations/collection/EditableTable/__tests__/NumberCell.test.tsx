@@ -160,6 +160,18 @@ describe("NumberCell", () => {
     expect(screen.getByText("€")).toBeInTheDocument()
   })
 
+  it("calls onBlur when the input loses focus", () => {
+    const onBlur = vi.fn()
+
+    render(<NumberCell {...defaultProps} onBlur={onBlur} />)
+
+    const input = screen.getByRole("textbox")
+    input.focus()
+    input.blur()
+
+    expect(onBlur).toHaveBeenCalledTimes(1)
+  })
+
   it("resolves units from a function based on the item", () => {
     render(
       <NumberCell

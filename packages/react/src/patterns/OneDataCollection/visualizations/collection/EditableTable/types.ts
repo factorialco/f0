@@ -96,6 +96,14 @@ export type NumberCellConfig<R extends RecordType = RecordType> = {
    */
   units?: string | ((item: R) => string | undefined)
   unitsPosition?: "before" | "after"
+  /**
+   * When to notify onCellChange. Defaults to `"change"` (debounced ~250ms
+   * after the user stops typing). Set to `"blur"` to wait until the field
+   * loses focus instead — useful when partial values while typing (e.g.
+   * "12.") shouldn't trigger transient saves. Applies to money cells too,
+   * since they reuse this config.
+   */
+  commitOn?: "change" | "blur"
 }
 
 /**

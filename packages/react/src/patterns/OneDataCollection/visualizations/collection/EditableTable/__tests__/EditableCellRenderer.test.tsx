@@ -281,6 +281,39 @@ describe("EditableCellRenderer", () => {
       // This depends on how TextCell/Input displays errors
     })
 
+    it("does not debounce and only commits on blur for numberConfig.commitOn: 'blur'", async () => {
+      const user = userEvent.setup()
+      const onCellChange = vi.fn().mockResolvedValue(undefined)
+      const numericItem = { ...testItem, name: "100" }
+
+      render(
+        <EditableRowProvider item={numericItem} onCellChange={onCellChange}>
+          <EditableCellRenderer
+            column={createEditableColumn({
+              editType: () => "number",
+              numberConfig: { commitOn: "blur" },
+            })}
+            item={numericItem}
+            cellIndex={0}
+          >
+            <span>Fallback</span>
+          </EditableCellRenderer>
+        </EditableRowProvider>
+      )
+
+      const input = screen.getByRole("textbox")
+      await user.clear(input)
+      await user.type(input, "5")
+
+      // Typing does not trigger a save, even after the usual debounce delay
+      await new Promise((resolve) => setTimeout(resolve, 400))
+      expect(onCellChange).not.toHaveBeenCalled()
+
+      await user.tab()
+
+      await waitFor(() => expect(onCellChange).toHaveBeenCalledTimes(1))
+    })
+
     it("applies right border except for last column", () => {
       const { container } = render(
         <EditableRowProvider item={testItem} onCellChange={vi.fn()}>

@@ -65,6 +65,7 @@ export function EditableCellRenderer<
     cellLoading,
     handleCellChange,
     batchCellChanges,
+    flushPendingChanges,
   } = editableCtx
   const editableColumn = column as EditableTableColumnDefinition<
     R,
@@ -76,10 +77,20 @@ export function EditableCellRenderer<
 
   const hasId = editableColumn.id !== undefined
 
+  // Number/money columns can opt into committing on blur instead of the
+  // default debounce (see numberConfig.commitOn).
+  const commitOn =
+    (cellEditType === "number" || cellEditType === "money") &&
+    editableColumn.numberConfig?.commitOn === "blur"
+      ? ("blur" as const)
+      : undefined
+
   // Typing cells debounce the parent notification so it fires once when the
   // user stops typing; discrete cells (select, date...) commit immediately.
   const debounce =
-    cellEditType !== undefined && typingEditTypes.has(cellEditType)
+    commitOn !== "blur" &&
+    cellEditType !== undefined &&
+    typingEditTypes.has(cellEditType)
 
   const onChange = (
     value: string | string[] | null,
@@ -105,10 +116,10 @@ export function EditableCellRenderer<
             [editableColumn.id]: value,
             ...formulaUpdates,
           },
-          { debounce }
+          { debounce, commitOn }
         )
       } else {
-        handleCellChange(editableColumn.id, value, { debounce })
+        handleCellChange(editableColumn.id, value, { debounce, commitOn })
       }
     }
   }
@@ -141,6 +152,9 @@ export function EditableCellRenderer<
             isLastColumn={isLastColumn}
             loading={loading}
             onChange={onChange}
+            onBlur={
+              commitOn === "blur" ? () => flushPendingChanges() : undefined
+            }
             hint={editableColumn.cellHint?.(localItem)}
           />
         </div>

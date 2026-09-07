@@ -66,6 +66,27 @@ function TestConsumer() {
       >
         Update Email
       </button>
+      <button
+        onClick={() =>
+          ctx.handleCellChange("name", "Blurred Name", { commitOn: "blur" })
+        }
+        data-testid="type-name-blur"
+      >
+        Type Name (commitOn blur)
+      </button>
+      <button
+        onClick={() =>
+          ctx.handleCellChange("email", "typed@example.com", {
+            debounce: true,
+          })
+        }
+        data-testid="type-email-debounced"
+      >
+        Type Email (debounced)
+      </button>
+      <button onClick={() => ctx.flushPendingChanges()} data-testid="flush">
+        Flush
+      </button>
     </div>
   )
 }
@@ -422,6 +443,113 @@ describe("EditableRowContext", () => {
       expect(onCellChange).toHaveBeenCalledWith({
         updatedItem: { ...reloadedItem, name: "Typed N" },
         changes: { name: ["John Doe", "Typed N"] },
+      })
+    })
+  })
+
+  describe("commit-on-blur cell changes", () => {
+    beforeEach(() => {
+      vi.useFakeTimers()
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it("updates localItem immediately but never saves on its own", async () => {
+      const onCellChange = vi.fn().mockResolvedValue(undefined)
+
+      render(
+        <EditableRowProvider item={testItem} onCellChange={onCellChange}>
+          <TestConsumer />
+        </EditableRowProvider>
+      )
+
+      fireEvent.click(screen.getByTestId("type-name-blur"))
+
+      expect(screen.getByTestId("name")).toHaveTextContent("Blurred Name")
+      expect(onCellChange).not.toHaveBeenCalled()
+
+      await act(async () => {
+        vi.advanceTimersByTime(CELL_CHANGE_DEBOUNCE_MS * 10)
+      })
+
+      expect(onCellChange).not.toHaveBeenCalled()
+    })
+
+    it("saves the pending change when flushPendingChanges is called", () => {
+      const onCellChange = vi.fn().mockResolvedValue(undefined)
+
+      render(
+        <EditableRowProvider item={testItem} onCellChange={onCellChange}>
+          <TestConsumer />
+        </EditableRowProvider>
+      )
+
+      fireEvent.click(screen.getByTestId("type-name-blur"))
+      fireEvent.click(screen.getByTestId("flush"))
+
+      expect(onCellChange).toHaveBeenCalledTimes(1)
+      expect(onCellChange).toHaveBeenCalledWith({
+        updatedItem: { ...testItem, name: "Blurred Name" },
+        changes: { name: ["John Doe", "Blurred Name"] },
+      })
+    })
+
+    it("does not save a debounced change from another column in the same row until flushed", async () => {
+      const onCellChange = vi.fn().mockResolvedValue(undefined)
+
+      render(
+        <EditableRowProvider item={testItem} onCellChange={onCellChange}>
+          <TestConsumer />
+        </EditableRowProvider>
+      )
+
+      fireEvent.click(screen.getByTestId("type-name-blur"))
+      fireEvent.click(screen.getByTestId("type-email-debounced"))
+
+      // Without the deferred flag, the email column's debounce timer would
+      // save the whole row (including the still-unblurred name) early.
+      await act(async () => {
+        vi.advanceTimersByTime(CELL_CHANGE_DEBOUNCE_MS * 10)
+      })
+
+      expect(onCellChange).not.toHaveBeenCalled()
+
+      fireEvent.click(screen.getByTestId("flush"))
+
+      expect(onCellChange).toHaveBeenCalledTimes(1)
+      expect(onCellChange).toHaveBeenCalledWith({
+        updatedItem: {
+          ...testItem,
+          name: "Blurred Name",
+          email: "typed@example.com",
+        },
+        changes: {
+          name: ["John Doe", "Blurred Name"],
+          email: ["john@example.com", "typed@example.com"],
+        },
+      })
+    })
+
+    it("flushes the pending blur change on unmount", () => {
+      const onCellChange = vi.fn().mockResolvedValue(undefined)
+
+      const { unmount } = render(
+        <EditableRowProvider item={testItem} onCellChange={onCellChange}>
+          <TestConsumer />
+        </EditableRowProvider>
+      )
+
+      fireEvent.click(screen.getByTestId("type-name-blur"))
+      expect(onCellChange).not.toHaveBeenCalled()
+
+      unmount()
+
+      expect(onCellChange).toHaveBeenCalledTimes(1)
+      expect(onCellChange).toHaveBeenCalledWith({
+        updatedItem: { ...testItem, name: "Blurred Name" },
+        changes: { name: ["John Doe", "Blurred Name"] },
       })
     })
   })
