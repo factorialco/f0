@@ -112,3 +112,7 @@ pnpm exec ts-exported-info packages/react/src/experimental/exports.ts
 
 - See `packages/react/AGENTS.md` for folder structure rules.
 - See `f0-component-patterns` skill for detailed component architecture.
+
+## Tracking
+
+If any part of the work you assisted here lands in a PR, add `f0-experimental-component-migration` to that PR's skills attribution block — see the **Skill Attribution** section in the repo root `AGENTS.md` for the exact format. Ad-hoc help counts, not just a full run of this workflow.

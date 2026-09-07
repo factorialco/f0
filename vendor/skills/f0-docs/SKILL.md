@@ -124,3 +124,7 @@ A component is not considered done until its MDX file exists and covers all publ
 | `f0-quality-gate`      | Runs all checks after any code change, including MDX coverage |
 
 MDX and stories are separate files with separate purposes — both are required.
+
+## Tracking
+
+If any part of the work you assisted here lands in a PR, add `f0-docs` to that PR's skills attribution block — see the **Skill Attribution** section in the repo root `AGENTS.md` for the exact format. Ad-hoc help counts, not just a full run of this workflow.

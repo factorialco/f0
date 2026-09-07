@@ -135,3 +135,7 @@ An F0 designer + Foundations engineer respond to promotion requests based on tea
 - **Forgetting `CODEOWNERS`** — the original team will keep getting bug pings.
 - **Forgetting to remove `experimentalComponent()` wrapper** — consumers will see the warning forever.
 - **Updating story title** — keep `"Components/F0Name"`, do not rename.
+
+## Tracking
+
+If any part of the work you assisted here lands in a PR, add `f0-component-promotion` to that PR's skills attribution block — see the **Skill Attribution** section in the repo root `AGENTS.md` for the exact format. Ad-hoc help counts, not just a full run of this workflow.

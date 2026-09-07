@@ -160,3 +160,7 @@ The owning team is responsible for the component until promotion (when ownership
 - **Hard-coded colors or strings** — use design tokens and `useI18n()`.
 - **Importing Radix directly** — use `@/ui/` wrappers.
 - **Forgetting `experimentalComponent()` wrapper** — needed for the runtime warning consumers see.
+
+## Tracking
+
+If any part of the work you assisted here lands in a PR, add `f0-component-contribution` to that PR's skills attribution block — see the **Skill Attribution** section in the repo root `AGENTS.md` for the exact format. Ad-hoc help counts, not just a full run of this workflow.

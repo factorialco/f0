@@ -410,3 +410,7 @@ Quality gate passed. All checks green.
 | A11y          | Task (general) | Loads `a11y`                                          |
 | Storybook     | Task (general) | Loads `f0-storybook-stories` + `f0-storybook-testing` |
 | Test Coverage | Task (general) | Loads `f0-unit-testing`                               |
+
+## Tracking
+
+If any part of the work you assisted here lands in a PR, add `f0-quality-gate` to that PR's skills attribution block — see the **Skill Attribution** section in the repo root `AGENTS.md` for the exact format. Ad-hoc help counts, not just a full run of this workflow.
