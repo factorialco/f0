@@ -93,9 +93,12 @@ export type MentionToken = {
  * card, like the sender avatar. Falls back to {@link renderBodyWithLinks} when
  * there are no mentions.
  *
- * The composer's highlight overlay paints the same colour, so a mention looks
- * the same while being typed and once sent — see `hooks/highlight-utils.ts`,
- * which cannot copy the weight here for caret reasons.
+ * Carries no font-weight, deliberately, so the composer's highlight overlay can
+ * match it exactly and a mention looks the same while being typed and once
+ * sent. The overlay is the side that cannot have a weight — a `<textarea>` lays
+ * its whole run out at one weight, so a heavier mention there moves the caret
+ * off the glyphs (measured in #5274: 1.250px worst delta, 44/48 indices off,
+ * versus 0.023px without). Parity therefore has to be met here.
  *
  * Pure (no hooks): callers memoize the result per message.
  */
@@ -124,9 +127,7 @@ export const renderBodyWithMentions = (
     const token = range.entry
     const chip = (
       <span
-        className={cn(
-          "font-medium text-f1-foreground-secondary hover:text-f1-foreground"
-        )}
+        className={cn("text-f1-foreground-secondary hover:text-f1-foreground")}
       >
         {body.slice(range.start, range.end)}
       </span>
