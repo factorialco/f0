@@ -31,6 +31,32 @@ const TEXT_AREA_STYLE: object = {
   fieldSizing: "content",
 }
 
+/**
+ * Wraps a field that `lockedFields` has frozen. Such a field has no affordance
+ * of its own — no lock, since that icon means the whole card is frozen — so the
+ * notice hangs off this wrapper, which stays pointer-interactive even though the
+ * textarea inside is disabled and fires no hover events.
+ */
+const FrozenFieldNotice = ({
+  notice,
+  className,
+  children,
+}: {
+  notice: { description: string } | null
+  className?: string
+  children: React.ReactNode
+}) => {
+  const content = <div className={className}>{children}</div>
+
+  if (!notice) return content
+
+  return (
+    <Tooltip instant {...notice}>
+      {content}
+    </Tooltip>
+  )
+}
+
 export const BaseQuestion = ({
   id,
   title,
@@ -40,6 +66,7 @@ export const BaseQuestion = ({
   type: questionType,
   hiddenActions,
   locked: ownLocked,
+  lockedFields,
   lockedNote,
 }: BaseQuestionProps) => {
   const {
@@ -59,6 +86,12 @@ export const BaseQuestion = ({
   // A question is locked either on its own (`locked` prop) or by living inside a
   // locked section.
   const locked = !!containingSection?.locked || !!ownLocked
+
+  // `lockedFields` freezes the wording alone. A fully locked question already
+  // freezes everything, so it subsumes them.
+  const titleLocked = locked || !!lockedFields?.includes("title")
+  const descriptionLocked = locked || !!lockedFields?.includes("description")
+  const partiallyLocked = !locked && (titleLocked || descriptionLocked)
 
   const isWithinSection = !!containingSection
 
@@ -138,20 +171,21 @@ export const BaseQuestion = ({
     }
   }, [])
 
-  const inputDisabled = disabled || locked || answering
-
-  const showCursorNotAllowed = !answering && inputDisabled
+  const titleDisabled = disabled || titleLocked || answering
+  const descriptionDisabled = disabled || descriptionLocked || answering
 
   // A read-only question (locked/disabled) with no description has nothing to
   // edit, so hide the input rather than show an editable-looking placeholder.
   // Editable questions always render it so authors can add one.
-  const showDescription = !inputDisabled || !!description
+  const showDescription = !descriptionDisabled || !!description
 
   // Blocked question: an instant, title-less tooltip shown on the lock icon. It
   // prefers the question's own `lockedNote`, falls back to the parent section's
   // `lockedNote`, and finally to a default so a locked question always says
   // something.
-  const lockTooltipProps: { description: string } | null = !locked
+  const lockTooltipProps: { description: string } | null = !(
+    locked || partiallyLocked
+  )
     ? null
     : {
         description:
@@ -179,7 +213,12 @@ export const BaseQuestion = ({
     >
       <div className="flex flex-col gap-0.5">
         <div className="flex flex-row gap-2">
-          <div className="relative w-full">
+          <FrozenFieldNotice
+            className="relative w-full"
+            // Only for a partial lock: a fully locked question already carries
+            // its notice on the lock icon.
+            notice={partiallyLocked && titleLocked ? lockTooltipProps : null}
+          >
             {answering ? (
               <div className="w-full whitespace-pre-wrap break-words px-2 py-1 text-lg font-semibold text-f1-foreground">
                 {title || titlePlaceholder}
@@ -195,10 +234,10 @@ export const BaseQuestion = ({
                   aria-label={t("surveyFormBuilder.labels.title")}
                   placeholder={titlePlaceholder}
                   onChange={handleChangeTitle}
-                  disabled={inputDisabled}
+                  disabled={titleDisabled}
                   className={cn(
                     "w-full resize-none px-2 py-1 text-lg font-semibold text-f1-foreground placeholder:text-f1-foreground-tertiary [&::-webkit-search-cancel-button]:hidden",
-                    showCursorNotAllowed && "cursor-not-allowed"
+                    !answering && titleDisabled && "!cursor-not-allowed"
                   )}
                   style={TEXT_AREA_STYLE}
                 />
@@ -218,30 +257,16 @@ export const BaseQuestion = ({
                 </div>
               </>
             )}
-          </div>
-          {!disabled && !answering && !locked && (
-            <div
-              className={cn(
-                "opacity-0 group-hover/question:opacity-100",
-                actionsDropdownOpen && "opacity-100"
-              )}
-            >
-              <ActionsMenu
-                open={actionsDropdownOpen}
-                setOpen={setActionsDropdownOpen}
-                questionId={id}
-                questionType={questionType}
-                canDeleteQuestion={
-                  !isWithinSection || !isSingleQuestionInSection
-                }
-                hiddenActions={hiddenActions}
-              />
-            </div>
-          )}
+          </FrozenFieldNotice>
           {!answering && locked && (
             // Blocked question: a static lock sits where the actions "⋯" menu
             // would be, signalling the card is predefined and can't be edited.
             // Hovering just the lock (not the whole card) reveals why.
+            //
+            // A partially locked question gets no lock of its own: the icon
+            // reads as "this card is frozen", which is exactly what it is not,
+            // and it would sit next to a menu that still offers delete and
+            // duplicate. Its notice hangs off the frozen field instead.
             <div>
               {lockTooltipProps ? (
                 <Tooltip instant {...lockTooltipProps}>
@@ -275,6 +300,25 @@ export const BaseQuestion = ({
               )}
             </div>
           )}
+          {!disabled && !answering && !locked && (
+            <div
+              className={cn(
+                "opacity-0 group-hover/question:opacity-100",
+                actionsDropdownOpen && "opacity-100"
+              )}
+            >
+              <ActionsMenu
+                open={actionsDropdownOpen}
+                setOpen={setActionsDropdownOpen}
+                questionId={id}
+                questionType={questionType}
+                canDeleteQuestion={
+                  !isWithinSection || !isSingleQuestionInSection
+                }
+                hiddenActions={hiddenActions}
+              />
+            </div>
+          )}
         </div>
         {answering ? (
           description ? (
@@ -283,18 +327,24 @@ export const BaseQuestion = ({
             </p>
           ) : null
         ) : showDescription ? (
-          <textarea
-            value={description}
-            aria-label={t("surveyFormBuilder.labels.description")}
-            placeholder={descriptionPlaceholder}
-            onChange={handleChangeDescription}
-            disabled={inputDisabled}
-            className={cn(
-              "w-full resize-none px-2 text-f1-foreground-secondary placeholder:text-f1-foreground-tertiary disabled:text-f1-foreground-secondary [&::-webkit-search-cancel-button]:hidden",
-              showCursorNotAllowed && "cursor-not-allowed"
-            )}
-            style={TEXT_AREA_STYLE}
-          />
+          <FrozenFieldNotice
+            notice={
+              partiallyLocked && descriptionLocked ? lockTooltipProps : null
+            }
+          >
+            <textarea
+              value={description}
+              aria-label={t("surveyFormBuilder.labels.description")}
+              placeholder={descriptionPlaceholder}
+              onChange={handleChangeDescription}
+              disabled={descriptionDisabled}
+              className={cn(
+                "w-full resize-none px-2 text-f1-foreground-secondary placeholder:text-f1-foreground-tertiary disabled:text-f1-foreground-secondary [&::-webkit-search-cancel-button]:hidden",
+                !answering && descriptionDisabled && "!cursor-not-allowed"
+              )}
+              style={TEXT_AREA_STYLE}
+            />
+          </FrozenFieldNotice>
         ) : null}
       </div>
       {children}

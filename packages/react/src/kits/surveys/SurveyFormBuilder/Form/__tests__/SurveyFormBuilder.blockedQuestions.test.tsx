@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
 import { zeroRender as render, screen } from "@/testing/test-utils"
-import { SurveyFormBuilderElement } from "../../types"
+import { LockedFields, SurveyFormBuilderElement } from "../../types"
 import { SurveyFormBuilder } from "../index"
 
 // --- Test fixtures ---
@@ -8,7 +8,11 @@ import { SurveyFormBuilder } from "../index"
 const makeQuestion = (
   id: string,
   title: string,
-  opts: { description?: string } = {}
+  opts: {
+    description?: string
+    locked?: boolean
+    lockedFields?: LockedFields
+  } = {}
 ): SurveyFormBuilderElement => ({
   type: "question",
   question: {
@@ -16,6 +20,8 @@ const makeQuestion = (
     title,
     type: "text" as const,
     ...(opts.description !== undefined && { description: opts.description }),
+    ...(opts.locked !== undefined && { locked: opts.locked }),
+    ...(opts.lockedFields !== undefined && { lockedFields: opts.lockedFields }),
   },
 })
 
@@ -174,5 +180,82 @@ describe("SurveyFormBuilder — blocked questions", () => {
       />
     )
     expect(screen.queryByRole("button", { name: "Locked" })).toBeNull()
+  })
+
+  // --- Partially blocked questions (`lockedFields`) ---
+
+  it("freezes the wording but keeps the actions menu on a partially locked question", () => {
+    render(
+      <SurveyFormBuilder
+        elements={[
+          makeQuestion("q1", "Frozen title", {
+            description: "Frozen description",
+            lockedFields: ["title", "description"],
+          }),
+        ]}
+        onChange={vi.fn()}
+      />
+    )
+
+    expect(screen.getByDisplayValue("Frozen title")).toBeDisabled()
+    expect(screen.getByDisplayValue("Frozen description")).toBeDisabled()
+
+    // The point of the prop: everything the menu offers — required, duplicate,
+    // delete — stays available, so this is not `locked` under another name.
+    expect(screen.getByRole("button", { name: "Actions" })).toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: "Locked" })).toBeNull()
+  })
+
+  it("freezes only the fields named in lockedFields", () => {
+    const { rerender } = render(
+      <SurveyFormBuilder
+        elements={[
+          makeQuestion("q1", "A title", {
+            description: "A description",
+            lockedFields: ["title"],
+          }),
+        ]}
+        onChange={vi.fn()}
+      />
+    )
+
+    expect(screen.getByDisplayValue("A title")).toBeDisabled()
+    expect(screen.getByDisplayValue("A description")).not.toBeDisabled()
+
+    rerender(
+      <SurveyFormBuilder
+        elements={[
+          makeQuestion("q1", "A title", {
+            description: "A description",
+            lockedFields: ["description"],
+          }),
+        ]}
+        onChange={vi.fn()}
+      />
+    )
+
+    expect(screen.getByDisplayValue("A title")).not.toBeDisabled()
+    expect(screen.getByDisplayValue("A description")).toBeDisabled()
+  })
+
+  it("lets locked win over lockedFields", () => {
+    render(
+      <SurveyFormBuilder
+        elements={[
+          makeQuestion("q1", "Blocked title", {
+            description: "Blocked description",
+            locked: true,
+            lockedFields: ["title"],
+          }),
+        ]}
+        onChange={vi.fn()}
+      />
+    )
+
+    // The stronger form still freezes the description it does not name, and
+    // still takes the actions menu away.
+    expect(screen.getByDisplayValue("Blocked description")).toBeDisabled()
+    expect(screen.getByRole("button", { name: "Locked" })).toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: "Actions" })).toBeNull()
   })
 })

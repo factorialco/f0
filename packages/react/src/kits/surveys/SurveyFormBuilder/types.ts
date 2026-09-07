@@ -50,6 +50,13 @@ export type HiddenAction =
 export type HiddenActions = ReadonlyArray<HiddenAction>
 
 /**
+ * The parts of a question that `lockedFields` can freeze on their own, without
+ * locking the question outright. Both are the question's wording — what it asks
+ * — as opposed to the answer it collects.
+ */
+export type LockedFields = ReadonlyArray<"title" | "description">
+
+/**
  * Explanation surfaced in a locked item's lock tooltip (authoring view only —
  * never shown in the answering/preview form), saying why it can't be edited,
  * moved, or removed. Rendered as a title-less popover on hovering the lock.
