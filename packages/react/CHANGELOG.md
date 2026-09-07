@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.87.1](https://github.com/factorialco/f0/compare/f0-react-v6.87.0...f0-react-v6.87.1) (2026-09-07)
+
+
+### Bug Fixes
+
+* **Widget:** no separator dot when the title is a link ([#5416](https://github.com/factorialco/f0/issues/5416)) ([daf797f](https://github.com/factorialco/f0/commit/daf797fe2a74d017db92fd3f88c13b2d6261fd9f))
+
 ## [6.87.0](https://github.com/factorialco/f0/compare/f0-react-v6.86.5...f0-react-v6.87.0) (2026-09-07)
 
 
