@@ -114,7 +114,8 @@ const FindingRow = ({
  * so the shell's tint shows through it. No token invented, no value borrowed.
  *
  * Foundations still owes a neutral border token at the 6% step; until then the
- * 1px hairlines keep using `border-secondary`, where 10% is not a problem.
+ * 1px hairlines keep using `border-f1-border-secondary`, where 10% is
+ * not a problem.
  */
 const neutralRing = (status: AiCalloutStatus) =>
   status === "neutral" && "border-transparent bg-clip-padding"
