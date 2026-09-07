@@ -71,24 +71,48 @@ const canonicalMatchEnd = (
 }
 
 /**
+ * Index just past `needle` sitting literally at `from`, or `-1`. The mark test
+ * is what keeps the shortcut honest: `@Ana` sits inside a decomposed `@Aná`,
+ * and matching it there chips somebody else's name and strands the accent
+ * outside the chip.
+ */
+const literalMatchEnd = (
+  text: string,
+  from: number,
+  needle: string
+): number => {
+  const end = from + needle.length
+  return text.startsWith(needle, from) && !COMBINING_MARK.test(text.charAt(end))
+    ? end
+    : -1
+}
+
+/**
  * Both sides spelled the same way is the overwhelming majority — the renderer
  * composes the body one line before it asks — and needs no normalizing at all.
- * The mark test is what keeps the shortcut honest: `@Ana` sits inside a
- * decomposed `@Aná`, and matching it there chips somebody else's name and
- * strands the accent outside the chip.
+ *
+ * The name as it is actually held is tried too, and is not redundant with the
+ * fold: {@link canonicalMatchEnd} walks base+mark groups, while Hangul jamo
+ * compose with each other rather than as marks, so a run of jamo is never a
+ * canonical prefix of the syllable it composes to. Without this a name kept as
+ * jamo would stop being found in a body carrying those very same jamo.
  */
 const matchEnd = (
   text: string,
   from: number,
   pattern: string,
+  asWritten: string,
   foldable: boolean
 ): number => {
-  const exact = from + pattern.length
-  if (
-    text.startsWith(pattern, from) &&
-    !COMBINING_MARK.test(text.charAt(exact))
-  ) {
-    return exact
+  const composed = literalMatchEnd(text, from, pattern)
+  if (composed !== -1) {
+    return composed
+  }
+  if (asWritten !== pattern) {
+    const literal = literalMatchEnd(text, from, asWritten)
+    if (literal !== -1) {
+      return literal
+    }
   }
   return foldable ? canonicalMatchEnd(text, from, pattern) : -1
 }
@@ -113,20 +137,20 @@ export const locateMentions = <T extends { name: string }>(
 ): LocatedMention<T>[] => {
   const found: LocatedMention<T>[] = []
   const byLength = entries
-    .map((entry) => ({
-      entry,
-      pattern: `@${entry.name}`.normalize(CANONICAL_FORM),
-    }))
+    .map((entry) => {
+      const asWritten = `@${entry.name}`
+      return { entry, asWritten, pattern: asWritten.normalize(CANONICAL_FORM) }
+    })
     .sort((a, b) => b.pattern.length - a.pattern.length)
   const foldable = NON_ASCII.test(text)
-  for (const { entry, pattern } of byLength) {
+  for (const { entry, asWritten, pattern } of byLength) {
     let from = 0
     while (true) {
       const at = text.indexOf("@", from)
       if (at === -1) {
         break
       }
-      const end = matchEnd(text, at, pattern, foldable)
+      const end = matchEnd(text, at, pattern, asWritten, foldable)
       if (end === -1) {
         from = at + 1
         continue

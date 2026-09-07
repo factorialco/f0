@@ -95,6 +95,36 @@ describe("locateMentions", () => {
     ).toEqual([])
   })
 
+  // The same walk is why a name *held* as jamo needs the spelling it was given
+  // as well as the composed one: jamo compose with each other rather than as
+  // marks, so the walk can never reach them and the name would stop being
+  // found in the very spelling it is stored in.
+  it("locates a name held as jamo in a body spelled the same way", () => {
+    const jamo = "\u1100\u1161\u11A8"
+    const body = `hi @${jamo}!`
+
+    expect(locateMentions(body, [{ name: jamo }])).toEqual([
+      { entry: { name: jamo }, start: 3, end: body.indexOf("!") },
+    ])
+  })
+
+  it("locates a name held as jamo in a body that composed it", () => {
+    const jamo = "\u1100\u1161\u11A8"
+    const body = "hi @\uAC01!"
+
+    expect(locateMentions(body, [{ name: jamo }])).toEqual([
+      { entry: { name: jamo }, start: 3, end: body.indexOf("!") },
+    ])
+  })
+
+  it("does not swallow the accent that follows a name held as jamo", () => {
+    expect(
+      locateMentions("hi @\u1100\u1161\u11A8\u0301", [
+        { name: "\u1100\u1161\u11A8" },
+      ])
+    ).toEqual([])
+  })
+
   it("gives up on a trailing `@`", () => {
     expect(locateMentions("hi @", [{ name: "Ana" }])).toEqual([])
   })
