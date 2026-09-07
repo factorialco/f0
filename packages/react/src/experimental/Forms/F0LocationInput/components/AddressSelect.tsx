@@ -83,8 +83,12 @@ export const AddressSelect = ({
     () =>
       suggestions.map((suggestion) => ({
         value: suggestion.id,
-        label: suggestion.label,
-        description: suggestion.description,
+        // One line per suggestion: an address reads as a single string, and
+        // splitting it across label and description makes the list twice as
+        // tall for the same information
+        label: [suggestion.label, suggestion.description]
+          .filter(Boolean)
+          .join(", "),
       })),
     [suggestions]
   )
