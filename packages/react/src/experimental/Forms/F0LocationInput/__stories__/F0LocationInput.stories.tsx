@@ -154,7 +154,10 @@ const meta = {
     size: {
       control: "select",
       options: locationInputSizes,
-      table: { type: { summary: locationInputSizes.join(" | ") } },
+      table: {
+        type: { summary: locationInputSizes.join(" | ") },
+        defaultValue: { summary: "md" },
+      },
     },
     fields: { control: "object" },
     value: { control: "object" },
@@ -282,8 +285,8 @@ export const InsideDialog: Story = {
 export const Sizes: Story = {
   render: (args) => (
     <div className="flex flex-col gap-4">
-      <F0LocationInput {...args} label="Small (default)" size="sm" />
-      <F0LocationInput {...args} label="Medium" size="md" />
+      <F0LocationInput {...args} label="Medium (default)" size="md" />
+      <F0LocationInput {...args} label="Small" size="sm" />
     </div>
   ),
 }
@@ -368,8 +371,8 @@ export const Snapshot: Story = {
       />
       <F0LocationInput
         {...args}
-        label="Detailed, medium, with error"
-        size="md"
+        label="Detailed, small, with error"
+        size="sm"
         fields={["country", "addressLine2", "city", "state", "postalCode"]}
         error="Enter the office address"
       />

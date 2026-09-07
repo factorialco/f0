@@ -44,7 +44,7 @@ export const F0LocationInput = forwardRef<
     readonly = false,
     loading = false,
     clearable = false,
-    size = "sm",
+    size = "md",
     name,
     autoFocus,
     onBlur,
