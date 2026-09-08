@@ -75,8 +75,17 @@ export interface WidgetProps {
     }
     count?: number
   }
-  /** The card's footer button — its call to action. `neutral`/`sm` by default. */
-  action?: F0ButtonProps
+  /**
+   * The card's footer button — its call to action. `neutral`/`sm` by default,
+   * `outline`/`md` once the card is wide.
+   *
+   * AN ARRAY draws TWO, side by side, for a card that carries both its own call
+   * to action and the way out of it ("Sign now", "Go to Documents"). A pair is
+   * drawn `outline` at every width: two buttons in a footer are a set of equals,
+   * and filling one of them nominates it as the card's answer. Two is the
+   * ceiling — a third belongs in `actions`, the overflow menu.
+   */
+  action?: F0ButtonProps | F0ButtonProps[]
   /**
    * Extra classes for the FOOTER row that `action` draws in. For content that
    * BLEEDS past the card's content box and wants the footer brought onto its
@@ -314,6 +323,11 @@ const Container = forwardRef<
   const composedRef = useComposedRefs(ref, cardRef)
   const isWide = useIsWide(cardRef)
 
+  // One or two, drawn the same way either way — the footer's only difference is
+  // how many buttons are in the row.
+  const footerActions = action ? [action].flat() : []
+  const isPairOfActions = footerActions.length > 1
+
   useEffect(() => {
     if (!isDragging || !onDragEnd) {
       return
@@ -497,22 +511,28 @@ const Container = forwardRef<
               )
             })}
         </CardContent>
-        {action && (
-          <CardFooter className={cn(footerClassName)}>
-            {/* Both are DEFAULTS, not decisions: `action` is spread after them,
-              so a widget that asks for a particular variant or size still gets
-              it.
+        {footerActions.length > 0 && (
+          <CardFooter className={cn("gap-2", footerClassName)}>
+            {footerActions.map((footerAction, index) => (
+              /* Both are DEFAULTS, not decisions: each action is spread after
+                them, so a widget that asks for a particular variant or size
+                still gets it.
 
-              `outline` only once the card is WIDE. In the rail the footer button
-              sits directly under a dense stack of rows, and a bordered rectangle
-              across the card there reads as one more row; the filled `neutral`
-              reads as a control. With the room a wide card has, that fill
-              becomes the heaviest thing on the card and the border is enough. */}
-            <F0Button
-              variant={isWide ? "outline" : "neutral"}
-              size={isWide ? "md" : "sm"}
-              {...action}
-            />
+                `outline` once the card is WIDE, and whenever there are TWO.
+                Alone in the rail the footer button sits directly under a dense
+                stack of rows, and a bordered rectangle across the card there
+                reads as one more row; the filled `neutral` reads as a control.
+                With the room a wide card has, that fill becomes the heaviest
+                thing on the card and the border is enough — and a PAIR is a set
+                of equals, where one filled button would nominate itself as the
+                card's answer. */
+              <F0Button
+                key={index}
+                variant={isPairOfActions || isWide ? "outline" : "neutral"}
+                size={isWide ? "md" : "sm"}
+                {...footerAction}
+              />
+            ))}
           </CardFooter>
         )}
       </Card>
