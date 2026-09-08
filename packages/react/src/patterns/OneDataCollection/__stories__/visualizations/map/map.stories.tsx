@@ -16,6 +16,7 @@ import type { F0MapMarkerVariantProps } from "@/patterns/F0Map"
 import { Page } from "@/patterns/Navigation/Page"
 import { TabbedSidebar } from "@/patterns/Navigation/Sidebar/index.stories"
 import { Tabs } from "@/patterns/Navigation/Tabs"
+import type { SearchPreview } from "../../../hooks/useDataCollectionSource"
 import {
   createDataAdapter,
   ExampleComponent,
@@ -60,6 +61,9 @@ type MapVisualization = Extract<
  * backdrop through.
  */
 const storyFrame = "h-[600px] bg-f1-background pt-5"
+
+/** How many search-preview rows arrive per page, so the dropdown paginates. */
+const SEARCH_PREVIEW_PAGE_SIZE = 5
 
 /** One label per variant, so the demo map names what each pin is showing. */
 const VARIANT_LABELS = [
@@ -417,6 +421,43 @@ export const InApp: Story = {
       [users]
     )
 
+    // Whoever the header search last picked. The map flies to that record and
+    // opens its detail; the collection bumps a nonce of its own, so picking the
+    // same person twice reveals them twice.
+    const [revealedId, setRevealedId] = useState<string | null>(null)
+
+    // The header search's results dropdown - the same typeahead the org chart
+    // has, over the same records the map is drawing: a face, a name and a
+    // position, paginated as the list is scrolled.
+    const searchPreview = useMemo<SearchPreview<MockUser>>(
+      () => ({
+        search: async (query, page = 0) => {
+          const normalized = query.toLowerCase()
+          const matches = users.filter(
+            (user) =>
+              user.name.toLowerCase().includes(normalized) ||
+              user.role.toLowerCase().includes(normalized)
+          )
+          const start = page * SEARCH_PREVIEW_PAGE_SIZE
+          return {
+            records: matches.slice(start, start + SEARCH_PREVIEW_PAGE_SIZE),
+            hasMore: start + SEARCH_PREVIEW_PAGE_SIZE < matches.length,
+          }
+        },
+        getId: (user) => user.id,
+        render: (user) => {
+          const [firstName = "", lastName = ""] = user.name.split(" ")
+          return {
+            avatar: { type: "person", firstName, lastName },
+            title: user.name,
+            subtitle: user.role,
+          }
+        },
+        onSelect: (user) => setRevealedId(user.id),
+      }),
+      [users]
+    )
+
     const mapVisualization = mockVisualizations.map as MapVisualization
     const visualizations = useMemo(
       () => [
@@ -425,6 +466,13 @@ export const InApp: Story = {
           options: {
             ...mapVisualization.options,
             ariaLabel: "People map",
+            // Picking a search result flies to that marker and opens its
+            // detail - a record the map cannot place is still selected, there
+            // is just nowhere to fly to.
+            revealRecordId: revealedId,
+            // What the panel's own search matches on: the two fields its rows
+            // show. It filters the list beside the map, not the collection.
+            sidebarSearchText: (user: MockUser) => `${user.name} ${user.role}`,
             // The panel lists the same records the markers stand for, handed
             // over by the visualization from its own load - so the two can
             // never drift apart as filters and search narrow the set.
@@ -473,7 +521,7 @@ export const InApp: Story = {
         },
         mockVisualizations.table,
       ],
-      [mapVisualization, mockVisualizations.table]
+      [mapVisualization, mockVisualizations.table, revealedId]
     )
 
     return (
@@ -505,6 +553,7 @@ export const InApp: Story = {
             <ExampleComponent
               fullHeight
               searchBar
+              searchPreview={searchPreview}
               filters={mapFilters}
               visualizations={visualizations}
               dataAdapter={dataAdapter}

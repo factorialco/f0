@@ -238,7 +238,19 @@ collection:
   same records the markers stand for, one load, one page, so the list and the
   map can never drift apart as filters and the search narrow the set. The
   visualization owns the scrolling: return rows, not a scroll container.
-  `onSidebarToggle` reports the toggle.
+  `onSidebarToggle` reports the toggle. **Not on map** opens collapsed - a
+  header and a count until somebody asks for it - and the count on the map
+  surface is what asks.
+
+  The panel's header row carries a search at its start and the toggle at its
+  far end - the edge the panel is pushing back. The search is ghost rather than
+  the toolbar's bordered box, and it opens into the width the row has left
+  rather than a fixed one. It filters the rows the panel already holds and
+  leaves the markers alone - the toolbar's search is the one that narrows the
+  whole view - and while something is typed the two sections flatten into one
+  list of matches: on the map or not, a result is a result. Offered when
+  `sidebarSearchText` says what to match a record against.
+
 - `detail` is a second panel that slides in beside the list rather than over
   it, following the selection - so it opens from a row click and a marker click
   alike.
@@ -299,7 +311,10 @@ The camera is driven by the collection, not by the map alone:
 - **On a reveal**, `revealRecordId` flies to one marker and selects it - for
   picking a single record out of the search results rather than narrowing to
   them. Pair it with the collection's `searchSelectionNonce` so picking the same
-  record twice flies again.
+  record twice flies again. Give the source a `searchPreview` and the header
+  search offers those records as a results dropdown - a face, a name and a
+  position, the same typeahead the graph view has - and its `onSelect` is where
+  `revealRecordId` comes from.
 - **On clearing** a selection or a search, it returns to the overview, but only
   when the camera had actually flown in. After a plain click there is no zoom to
   undo, and reframing would be a jump the user never asked for.

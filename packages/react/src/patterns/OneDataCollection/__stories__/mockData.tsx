@@ -50,6 +50,7 @@ import {
   BulkActionsDefinition,
   DataCollectionBaseFetchOptions,
   DataCollectionDataAdapter,
+  type SearchPreview,
   useDataCollectionSource,
 } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
 import {
@@ -1498,6 +1499,7 @@ export const ExampleComponent = ({
   primaryActions,
   secondaryActions,
   searchBar = false,
+  searchPreview,
   id,
   storage,
   /**
@@ -1555,6 +1557,12 @@ export const ExampleComponent = ({
   primaryActions?: PrimaryActionsDefinitionFn
   secondaryActions?: SecondaryActionsDefinition
   searchBar?: boolean | SearchOptions
+  /**
+   * The rich results dropdown under the header search - avatar, name, position
+   * - and what picking one does. Shared by every visualization, so a story that
+   * passes it gets the same typeahead in the table, the graph and the map.
+   */
+  searchPreview?: SearchPreview<MockUser>
   tableAllowColumnReordering?: boolean
   tableAllowColumnHiding?: boolean
   onStateChange?: (
@@ -1696,6 +1704,7 @@ export const ExampleComponent = ({
           : typeof searchBar === "object"
             ? searchBar
             : undefined,
+      searchPreview,
       dataAdapter: dataAdapterMemoized,
       itemsWithChildren: (item) => !!item?.children?.length,
       childrenCount: ({ item }) => item?.children?.length,

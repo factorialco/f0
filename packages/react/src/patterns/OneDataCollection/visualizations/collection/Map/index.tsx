@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { F0Text } from "@/components/F0Text"
 import {
   GroupingDefinition,
   RecordType,
@@ -14,6 +15,7 @@ import {
   RECOMMENDED_MAX_MARKERS,
 } from "@/patterns/F0Map"
 import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
+import { Search } from "../../../components/Search"
 import { useDataCollectionData } from "../../../hooks/useDataCollectionData"
 import { ItemActionsDefinition } from "../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
@@ -96,6 +98,7 @@ export const MapCollection = <
   markerLimit,
   ariaLabel,
   sidebar,
+  sidebarSearchText,
   detail,
   onSidebarToggle,
   onLoadData,
@@ -236,12 +239,25 @@ export const MapCollection = <
       return next
     })
   }, [onSidebarToggle])
-  // The count on the map opens the panel *to* the records it counts: the
-  // section it points at is expanded whatever state it was left in, or the
-  // press could land on a collapsed header and show nothing.
-  const [notOnMapOpen, setNotOnMapOpen] = useState(true)
+  // Collapsed to start with: opening the panel is a question about the records
+  // on the map, and the ones that are not are a header and a count until
+  // somebody asks for them. The count on the map surface is what asks - it
+  // opens the panel *to* those records, so it expands the section whatever
+  // state it was left in, or the press could land on a collapsed header and
+  // show nothing.
+  const [notOnMapOpen, setNotOnMapOpen] = useState(false)
+  // What the panel's own search has typed in it. Its own state, not the
+  // collection's: it filters the rows the panel already holds and leaves the
+  // markers alone, so it can never disagree with the map about which records
+  // exist - only about which of them are worth listing right now. Always a
+  // string, empty when there is nothing typed: `Search` clears itself with
+  // `undefined`, and an input handed that turns uncontrolled.
+  const [panelQuery, setPanelQuery] = useState("")
   const openSidebar = useCallback(() => {
     setNotOnMapOpen(true)
+    // ...and to a list that actually holds them: a filtered panel could have
+    // none of the records the count is pointing at.
+    setPanelQuery("")
     setSidebarExpanded((expanded) => {
       if (!expanded) {
         onSidebarToggle?.(true)
@@ -421,34 +437,92 @@ export const MapCollection = <
     [unplaced]
   )
 
+  // What the panel's search leaves standing, or `null` when it is not filtering
+  // - which is what tells the panel below whether to group its rows or flatten
+  // them. Unplaced first, as the sections have them, so clearing the search
+  // puts every row back where it was instead of reshuffling the list.
+  const panelMatches = useMemo(() => {
+    const query = panelQuery.trim().toLowerCase()
+    if (!sidebarSearchText || !query) {
+      return null
+    }
+    return [...unplacedRecords, ...placedRecords].filter((record) =>
+      sidebarSearchText(record).toLowerCase().includes(query)
+    )
+  }, [sidebarSearchText, panelQuery, unplacedRecords, placedRecords])
+
   // The panel is two sections the visualization owns, so a record with no
   // marker is always listed somewhere whatever the consumer renders: the
   // consumer supplies the rows, called once per section with that section's
   // records. Not on map goes first - it is the one that wants acting on - and
   // is left out entirely when empty rather than shown as an empty header. The
   // panel scrolls them as one list, so this only has to stack them.
+  //
+  // A search collapses that structure: the sections are a way of accounting for
+  // every record, and a result has already accounted for itself. So the matches
+  // come back as one flat list - on the map or not, they are what was asked
+  // for, and two headers over a handful of rows would only bury them.
   const panelContent = sidebar ? (
-    <div className="flex flex-col gap-1">
-      {unplaced.length > 0 ? (
-        <MapPanelSection
-          title={i18n.collections.map.notOnMap}
-          count={unplaced.length}
-          open={notOnMapOpen}
-          onOpenChange={setNotOnMapOpen}
-          dataTestId="map-panel-not-on-map"
-        >
-          {sidebar(unplacedRecords, sidebarApi)}
-        </MapPanelSection>
-      ) : null}
-      <MapPanelSection
-        title={i18n.collections.map.onMap}
-        count={placedRecords.length}
-        dataTestId="map-panel-on-map"
-      >
-        {sidebar(placedRecords, sidebarApi)}
-      </MapPanelSection>
+    // The panel hands over its whole body, header row aside: this owns the
+    // insets and the scrolling. 4px horizontally rather than the 6px a row
+    // gets, so a section header spans wider than the rows under it.
+    <div className="flex h-full min-h-0 flex-col gap-1 overflow-y-auto px-1 pb-1.5 pt-0.5">
+      {panelMatches ? (
+        // The 2px a section's rows step in by, so a match sits exactly where
+        // the same row sat before the search.
+        <div className="px-0.5" data-testid="map-panel-search-results">
+          {panelMatches.length > 0 ? (
+            sidebar(panelMatches, sidebarApi)
+          ) : (
+            // `select`'s own phrase rather than a key of the map's: it is the
+            // same sentence, and every consumer already translates that one.
+            <div className="px-2 py-1.5">
+              <F0Text
+                variant="description"
+                content={i18n.select.noResults}
+                markdown={false}
+              />
+            </div>
+          )}
+        </div>
+      ) : (
+        <>
+          {unplaced.length > 0 ? (
+            <MapPanelSection
+              title={i18n.collections.map.notOnMap}
+              count={unplaced.length}
+              open={notOnMapOpen}
+              onOpenChange={setNotOnMapOpen}
+              dataTestId="map-panel-not-on-map"
+            >
+              {sidebar(unplacedRecords, sidebarApi)}
+            </MapPanelSection>
+          ) : null}
+          <MapPanelSection
+            title={i18n.collections.map.onMap}
+            count={placedRecords.length}
+            dataTestId="map-panel-on-map"
+          >
+            {sidebar(placedRecords, sidebarApi)}
+          </MapPanelSection>
+        </>
+      )}
     </div>
   ) : undefined
+
+  // The panel's own search, at the start of its header row - the toggle holds
+  // the other end. Ghost so it reads as a sibling of that toggle rather than a
+  // field parked in the corner, and it grows into the row it is in rather than
+  // the toolbar's fixed width: the panel is 214px wide.
+  const panelSearch =
+    sidebar && sidebarSearchText ? (
+      <Search
+        value={panelQuery}
+        onChange={(query) => setPanelQuery(query ?? "")}
+        variant="ghost"
+        expandedWidth="fill"
+      />
+    ) : undefined
 
   // The count on the map surface: the map's own account of the records it is
   // not showing, beside the toggle that opens the panel listing them. When they
@@ -510,6 +584,7 @@ export const MapCollection = <
         sidebarExpanded={sidebarExpanded}
         onSidebarToggle={toggleSidebar}
         sidebarToggleAddon={notOnMapButton}
+        sidebarHeaderStart={panelSearch}
         // The detail panel follows the selection, whichever way it was made.
         // Mounted from the first render when a detail renderer exists, empty
         // until something is selected: a CSS transition doesn't run on the

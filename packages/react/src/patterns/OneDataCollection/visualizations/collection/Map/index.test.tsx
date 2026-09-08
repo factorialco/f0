@@ -46,6 +46,9 @@ vi.mock("@/patterns/F0Map", () => ({
         <div data-testid="stub-addon">
           {props.sidebarToggleAddon as ReactNode}
         </div>
+        <div data-testid="stub-panel-header">
+          {props.sidebarHeaderStart as ReactNode}
+        </div>
       </>
     )
   }),
@@ -642,11 +645,19 @@ describe("MapCollection — records it cannot place", () => {
       .getAllByRole("listitem")
       .map((item) => item.textContent)
 
+  /** Not on map opens collapsed, so reading its rows means opening it first. */
+  const expandNotOnMap = async () => {
+    const section = screen.getByTestId("map-panel-not-on-map")
+    fireEvent.click(within(section).getByRole("button", { name: /Not on map/ }))
+    await waitFor(() => expect(section).toHaveAttribute("data-state", "open"))
+    return section
+  }
+
   it("lists them under Not on map, ahead of the ones On map", async () => {
     renderMap({ sidebar: rows })
     await waitForMap()
 
-    const notOnMap = screen.getByTestId("map-panel-not-on-map")
+    const notOnMap = await expandNotOnMap()
     const onMap = screen.getByTestId("map-panel-on-map")
     expect(idsIn(notOnMap)).toEqual(UNPLACED)
     expect(idsIn(onMap)).toEqual(PLACED)
@@ -730,23 +741,43 @@ describe("MapCollection — records it cannot place", () => {
     expect(screen.queryByTestId("map-not-on-map")).toBeNull()
   })
 
-  it("re-expands the Not on map section when opened from the count", async () => {
+  it("opens the panel with Not on map collapsed, and On map showing", async () => {
+    renderMap({ sidebar: rows })
+    await waitForMap()
+
+    // Opening the panel is a question about the records on the map; the ones
+    // that are not are a header and a count until somebody asks for them.
+    expect(screen.getByTestId("map-panel-not-on-map")).toHaveAttribute(
+      "data-state",
+      "closed"
+    )
+    expect(screen.getByTestId("map-panel-on-map")).toHaveAttribute(
+      "data-state",
+      "open"
+    )
+  })
+
+  it("expands the Not on map section when opened from the count", async () => {
     renderMap({ sidebar: rows })
     await waitForMap()
 
     const section = () => screen.getByTestId("map-panel-not-on-map")
-    // Collapse it by hand first...
-    fireEvent.click(
-      within(section()).getByRole("button", { name: /Not on map/ })
-    )
-    await waitFor(() =>
-      expect(section()).toHaveAttribute("data-state", "closed")
-    )
 
-    // ...then the count must land on it open, or the press shows nothing.
+    // The count must land on it open, or the press shows nothing.
     fireEvent.click(screen.getByTestId("map-not-on-map"))
 
     await waitFor(() => expect(section()).toHaveAttribute("data-state", "open"))
+  })
+
+  it("keeps it expanded once opened, and collapsed once closed again", async () => {
+    renderMap({ sidebar: rows })
+    await waitForMap()
+
+    const section = await expandNotOnMap()
+
+    fireEvent.click(within(section).getByRole("button", { name: /Not on map/ }))
+
+    await waitFor(() => expect(section).toHaveAttribute("data-state", "closed"))
   })
 
   it("lists an incomplete record like any other unplaced one", async () => {
@@ -755,7 +786,7 @@ describe("MapCollection — records it cannot place", () => {
     renderMap({ sidebar: rows })
     await waitForMap()
 
-    expect(idsIn(screen.getByTestId("map-panel-not-on-map"))).toEqual(UNPLACED)
+    expect(idsIn(await expandNotOnMap())).toEqual(UNPLACED)
   })
 
   it("wears their avatars on the count when they are all people", async () => {
@@ -768,10 +799,118 @@ describe("MapCollection — records it cannot place", () => {
     })
     await waitForMap()
 
-    // Two unplaced people, two avatars. At the `xs` size an avatar shows one
-    // initial, and the fixture has no photos.
+    // Two unplaced people, two avatars - under the three faces the control
+    // shows, so no "+N" bubble. At `sm` an avatar shows one initial, and the
+    // fixture has no photos.
     const count = within(screen.getByTestId("map-not-on-map"))
     expect(count.getByText("R")).toBeInTheDocument()
     expect(count.getByText("N")).toBeInTheDocument()
+  })
+})
+
+describe("MapCollection — the panel's own search", () => {
+  /** Rows as plain text, so what the panel lists can be read back. */
+  const rows = (records: Office[]) => (
+    <ul>
+      {records.map((office) => (
+        <li key={office.id}>{office.id}</li>
+      ))}
+    </ul>
+  )
+
+  const idsInPanel = () =>
+    within(screen.getByTestId("stub-panel"))
+      .getAllByRole("listitem")
+      .map((item) => item.textContent)
+
+  const idsInSection = (testId: string) =>
+    within(screen.getByTestId(testId))
+      .getAllByRole("listitem")
+      .map((item) => item.textContent)
+
+  const searchOptions = {
+    sidebar: rows,
+    sidebarSearchText: (office: Office) => office.name,
+  }
+
+  /** Open the ghost search and type into it. */
+  const search = async (query: string) => {
+    const header = within(screen.getByTestId("stub-panel-header"))
+    fireEvent.click(header.getByRole("button", { name: /search/i }))
+    const input = await waitFor(() => header.getByRole("textbox"))
+    fireEvent.change(input, { target: { value: query } })
+  }
+
+  it("is not offered without something to match a record against", async () => {
+    renderMap({ sidebar: rows })
+    await waitForMap()
+
+    expect(
+      within(screen.getByTestId("stub-panel-header")).queryByRole("button")
+    ).toBeNull()
+  })
+
+  it("filters the rows and flattens the sections into one list", async () => {
+    renderMap(searchOptions)
+    await waitForMap()
+
+    expect(screen.getByTestId("map-panel-not-on-map")).toBeInTheDocument()
+
+    await search("mad")
+
+    // One list, no headers: a result has already accounted for itself.
+    await waitFor(() =>
+      expect(screen.getByTestId("map-panel-search-results")).toBeInTheDocument()
+    )
+    expect(screen.queryByTestId("map-panel-not-on-map")).toBeNull()
+    expect(screen.queryByTestId("map-panel-on-map")).toBeNull()
+    expect(idsInPanel()).toEqual(["mad"])
+  })
+
+  it("matches records the map cannot place, same as the rest", async () => {
+    renderMap(searchOptions)
+    await waitForMap()
+
+    await search("remote")
+
+    await waitFor(() => expect(idsInPanel()).toEqual(["remote"]))
+  })
+
+  it("leaves the collection's own search alone", async () => {
+    const source = buildSource()
+    zeroRender(
+      <MapCollection
+        source={source}
+        onSelectItems={vi.fn()}
+        onLoadData={vi.fn()}
+        onLoadError={vi.fn()}
+        searchSelectionNonce={0}
+        {...baseOptions(searchOptions)}
+      />
+    )
+    await waitForMap()
+
+    await search("mad")
+
+    // The markers are the collection's, and this search never asked for them
+    // to change - only for fewer rows beside them.
+    await waitFor(() => expect(idsInPanel()).toEqual(["mad"]))
+    expect(source.setCurrentSearch).not.toHaveBeenCalled()
+    expect(markers().map((point) => point.id)).toEqual(PLACED)
+  })
+
+  it("clears itself when the count opens the panel, so its records show", async () => {
+    renderMap(searchOptions)
+    await waitForMap()
+
+    await search("mad")
+    await waitFor(() => expect(idsInPanel()).toEqual(["mad"]))
+
+    fireEvent.click(screen.getByTestId("map-not-on-map"))
+
+    // Back to the sections, with the records the count was pointing at.
+    await waitFor(() =>
+      expect(idsInSection("map-panel-not-on-map")).toEqual(UNPLACED)
+    )
   })
 })

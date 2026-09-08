@@ -49,7 +49,10 @@ export const MapPanelSection = ({
         <button
           type="button"
           className={cn(
-            "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left",
+            // Wider than the rows it heads, and 10px of its own so the title
+            // still starts where their content does: the header spans the
+            // panel, the rows sit inside it.
+            "flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-left",
             "hover:bg-f1-background-hover",
             focusRing()
           )}
@@ -68,7 +71,9 @@ export const MapPanelSection = ({
           </span>
         </button>
       </CollapsibleTrigger>
-      <CollapsibleContent>{children}</CollapsibleContent>
+      {/* The rows step 2px in from the header's own edges, which is what makes
+          the header read as the wider thing they belong to. */}
+      <CollapsibleContent className="px-0.5">{children}</CollapsibleContent>
     </Collapsible>
   )
 }
