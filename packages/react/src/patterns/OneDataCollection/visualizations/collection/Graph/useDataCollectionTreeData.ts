@@ -529,6 +529,7 @@ export function useDataCollectionTreeData<
           break
         }
 
+        // oxlint-disable-next-line no-await-in-loop -- each level loads in parallel; the next level comes from its results
         const results = await Promise.all(
           loadable.map((node) =>
             loadChildrenOf(node.id).then((children) => ({ children }))
@@ -766,6 +767,7 @@ export function useDataCollectionTreeData<
           break
         }
 
+        // oxlint-disable-next-line no-await-in-loop -- each level loads in parallel; the next level comes from its results
         const childArrays = await Promise.all(
           loadable.map((node) => loadChildrenOf(node.id))
         )

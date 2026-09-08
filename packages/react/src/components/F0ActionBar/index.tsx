@@ -77,18 +77,16 @@ const normalizeItems = (
     if (items.every((item) => isActionGroup(item))) {
       // ActionBarGroup[]
       return items
-    } else {
-      // ActionType[]
-      return [
-        {
-          items: items,
-        },
-      ]
     }
-  } else {
-    // ActionBarGroup
-    return [items]
+    // ActionType[]
+    return [
+      {
+        items: items,
+      },
+    ]
   }
+  // ActionBarGroup
+  return [items]
 }
 
 export const actionBarStatuses = [
@@ -492,17 +490,15 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
                       />
                     ))}
                   {!singlePrimaryAction ? (
-                    <>
-                      <F0ButtonDropdown
-                        items={primaryActionsDropdownItems}
-                        onClick={(value) => {
-                          const action = getActionByValue(value)
-                          ;(action as ActionType)?.onClick?.()
-                        }}
-                        disabled={isInteractionDisabled || hasLoadingAction}
-                        loading={hasLoadingAction}
-                      />
-                    </>
+                    <F0ButtonDropdown
+                      items={primaryActionsDropdownItems}
+                      onClick={(value) => {
+                        const action = getActionByValue(value)
+                        ;(action as ActionType)?.onClick?.()
+                      }}
+                      disabled={isInteractionDisabled || hasLoadingAction}
+                      loading={hasLoadingAction}
+                    />
                   ) : (
                     <WithReason reason={singlePrimaryAction.tooltip}>
                       <F0Button

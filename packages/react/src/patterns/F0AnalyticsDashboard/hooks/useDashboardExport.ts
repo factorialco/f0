@@ -50,29 +50,42 @@ async function buildMetricsSheet<Filters extends FiltersDefinition>(
     return null
   }
 
+  // Metrics are independent, so they are fetched in parallel. Rows keep the
+  // item order.
+  const results = await Promise.all(
+    metricItems.map(async (item) => {
+      try {
+        const data: DashboardMetricData = await item.fetchData(
+          getItemFilters(item, filters)
+        )
+        return { item, data }
+      } catch (err) {
+        console.warn(
+          `[useDashboardExport] Failed to export metric "${item.title}":`,
+          err
+        )
+        return null
+      }
+    })
+  )
+
   const rows: Record<string, unknown>[] = []
   let hasPrevious = false
 
-  for (const item of metricItems) {
-    try {
-      const data: DashboardMetricData = await item.fetchData(
-        getItemFilters(item, filters)
-      )
-      const row: Record<string, unknown> = {
-        Metric: item.title,
-        Value: data.value,
-      }
-      if (data.previousValue !== undefined) {
-        row["Previous Value"] = data.previousValue
-        hasPrevious = true
-      }
-      rows.push(row)
-    } catch (err) {
-      console.warn(
-        `[useDashboardExport] Failed to export metric "${item.title}":`,
-        err
-      )
+  for (const result of results) {
+    if (!result) {
+      continue
     }
+    const { item, data } = result
+    const row: Record<string, unknown> = {
+      Metric: item.title,
+      Value: data.value,
+    }
+    if (data.previousValue !== undefined) {
+      row["Previous Value"] = data.previousValue
+      hasPrevious = true
+    }
+    rows.push(row)
   }
 
   if (rows.length === 0) {

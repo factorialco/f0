@@ -307,7 +307,7 @@ export const SingleSelector = {
         }
         selectedEntities={!selected ? [] : [selected]}
         onSelect={(selection) => {
-          if (selectedGroup != "all") {
+          if (selectedGroup !== "all") {
             const found = GROUP_DATA["all"].find(
               (el) => el.id === selection?.subItems?.[0]?.subId
             )
@@ -498,7 +498,7 @@ export const WithCustomTrigger = {
           selectedEntities={selected}
           onSelect={(selection: EntitySelectEntity[]) => {
             setSelected(selection)
-            if (selectedGroup != "all") {
+            if (selectedGroup !== "all") {
               let total = 0
               selection.forEach((el) => (total += el.subItems?.length ?? 0))
               setNumSelected(total)

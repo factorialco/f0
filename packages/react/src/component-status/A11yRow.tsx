@@ -76,10 +76,10 @@ async function runAudit(): Promise<Criterion[]> {
   const targets = canvases.length > 0 ? canvases : []
 
   const byRule = new Map<string, Criterion>()
-  // Serialize: axe throws "Axe is already running" on concurrent runs.
   for (const node of targets) {
     let results: AxeResults
     try {
+      // oxlint-disable-next-line no-await-in-loop -- axe throws "Axe is already running" on concurrent runs
       results = await axe.run(node, {
         runOnly: { type: "tag", values: WCAG_TAGS },
       })

@@ -55,7 +55,7 @@ const mock = vi.hoisted(() => {
     once(type: string, cb: (e?: unknown) => void) {
       // Fire `load` on a microtask so the component's handler is registered.
       if (type === "load") {
-        void Promise.resolve().then(() => cb())
+        queueMicrotask(() => cb())
       }
       return this
     }

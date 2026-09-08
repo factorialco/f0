@@ -47,11 +47,10 @@ const _Await = <T,>({
       return () => {
         cancelled = true
       }
-    } else {
-      setResolvedValue(resolve)
-      setError(null)
-      setIsPending(false)
     }
+    setResolvedValue(resolve)
+    setError(null)
+    setIsPending(false)
   }, [resolve])
 
   if (isPending) {

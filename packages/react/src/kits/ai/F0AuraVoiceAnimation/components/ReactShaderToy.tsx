@@ -35,14 +35,14 @@ function isVectorListType(t: string, v: number[] | number): v is number[] {
   return (
     t.includes("v") &&
     Array.isArray(v) &&
-    v.length > Number.parseInt(t.charAt(0))
+    v.length > Number.parseInt(t.charAt(0), 10)
   )
 }
 function isVectorType(t: string, v: number[] | number): v is Vector4 {
   return (
     !t.includes("v") &&
     Array.isArray(v) &&
-    v.length > Number.parseInt(t.charAt(0))
+    v.length > Number.parseInt(t.charAt(0), 10)
   )
 }
 const processUniform = <T extends UniformType>(
@@ -753,13 +753,13 @@ export function ReactShaderToy({
         const tempObject: { arraySize?: string } = {}
         if (isMatrixType(type, value)) {
           const arrayLength = type.length
-          const val = Number.parseInt(type.charAt(arrayLength - 3))
+          const val = Number.parseInt(type.charAt(arrayLength - 3), 10)
           const numberOfMatrices = Math.floor(value.length / (val * val))
           if (value.length > val * val) {
             tempObject.arraySize = `[${numberOfMatrices}]`
           }
         } else if (isVectorListType(type, value)) {
-          tempObject.arraySize = `[${Math.floor(value.length / Number.parseInt(type.charAt(0)))}]`
+          tempObject.arraySize = `[${Math.floor(value.length / Number.parseInt(type.charAt(0), 10))}]`
         }
         uniformsRef.current[name] = {
           type: glslType,
@@ -794,9 +794,7 @@ export function ReactShaderToy({
           texturesArrRef.current[id] = new Texture(gl)
           return texturesArrRef.current[id]
             ?.load(texture)
-            .then((t: Texture) => {
-              setupChannelRes(t, id)
-            })
+            .then((t: Texture) => setupChannelRes(t, id))
         }
       )
       Promise.all(texturePromisesArr)

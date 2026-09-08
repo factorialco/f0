@@ -274,7 +274,7 @@ const DataSourceFilterOptions: InFilterOptions<
         // Apply pagination
         const perPage = options.pagination?.perPage || 20
         const cursor = options.pagination?.cursor
-          ? parseInt(options.pagination.cursor)
+          ? parseInt(options.pagination.cursor, 10)
           : 0
         const startIndex = cursor
         const endIndex = startIndex + perPage

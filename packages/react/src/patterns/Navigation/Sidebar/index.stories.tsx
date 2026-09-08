@@ -59,11 +59,7 @@ const meta: Meta<typeof Sidebar> = {
   },
   args: {
     header: <Header defaultSelected="1" />,
-    body: (
-      <>
-        <Menu {...SidebarMenuStories.Default.args} />
-      </>
-    ),
+    body: <Menu {...SidebarMenuStories.Default.args} />,
     footer: <SidebarFooter {...SidebarFooterStories.Default.args} />,
   } satisfies ComponentProps<typeof Sidebar>,
 }
@@ -75,11 +71,7 @@ type Story = StoryObj<typeof Sidebar>
 export const Default: Story = {
   args: {
     header: <Header defaultSelected="1" />,
-    body: (
-      <>
-        <Menu {...SidebarMenuStories.Default.args} />
-      </>
-    ),
+    body: <Menu {...SidebarMenuStories.Default.args} />,
     footer: <SidebarFooter {...SidebarFooterStories.Default.args} />,
   },
   decorators: [

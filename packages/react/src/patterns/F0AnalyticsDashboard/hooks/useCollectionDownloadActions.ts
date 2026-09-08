@@ -121,6 +121,7 @@ async function fetchAllStateAwareRecords(
     const all: RecordType[] = []
     let currentPage = 1
     while (all.length < MAX_EXPORT_ROWS) {
+      // oxlint-disable-next-line no-await-in-loop -- the previous response says whether there is another page
       const response = (await resolvePromiseLike(
         fetchFn({
           ...baseParams,
@@ -143,6 +144,7 @@ async function fetchAllStateAwareRecords(
   const all: RecordType[] = []
   let cursor: string | null = null
   while (all.length < MAX_EXPORT_ROWS) {
+    // oxlint-disable-next-line no-await-in-loop -- the previous response says whether there is another page
     const response = (await resolvePromiseLike(
       fetchFn({
         ...baseParams,

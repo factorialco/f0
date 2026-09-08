@@ -77,7 +77,7 @@ export const useClusters = (
 
       // "Core" points nearly touch a neighbour (tight `radius`) — only these
       // seed a cluster, so isolated markers stay individual.
-      const core = new Array(n).fill(false)
+      const core = Array.from({ length: n }, () => false)
       for (let i = 0; i < n; i++) {
         for (let j = i + 1; j < n; j++) {
           if (dist2(i, j) <= markerR2) {

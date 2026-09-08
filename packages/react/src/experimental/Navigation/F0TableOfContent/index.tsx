@@ -42,11 +42,6 @@ function renderTOCItem(
   hideChildrenCounter?: boolean,
   expandedItems?: Set<string>,
   onToggleExpanded?: (id: string) => void,
-  onMoveItem?: (
-    itemId: string,
-    targetParentId: string | null,
-    targetIndex: number
-  ) => void,
   allItems?: TOCItem[],
   draggedItemId?: string | null,
   dragOverItemId?: string | null,
@@ -170,7 +165,6 @@ function renderTOCItem(
                   hideChildrenCounter,
                   expandedItems,
                   onToggleExpanded,
-                  onMoveItem,
                   allItems,
                   draggedItemId,
                   dragOverItemId,
@@ -949,7 +943,6 @@ function TOCContent({
                 hideChildrenCounter,
                 expandedItems,
                 handleToggleExpanded,
-                handleMoveItem,
                 sortableItems,
                 draggedItemId,
                 dragOverItemId,

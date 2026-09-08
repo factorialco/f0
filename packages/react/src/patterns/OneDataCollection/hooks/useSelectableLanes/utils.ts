@@ -14,23 +14,18 @@ export const mergeLanesSelectItemsStatus = <
   selectItemsStatus: Map<string, SelectedItemsDetailedStatus<R, Filters>>
 ): SelectedItemsDetailedStatus<R, Filters> => {
   const lanesStatus = Array.from(selectItemsStatus.values())
+  const groupsStatus: SelectedItemsDetailedStatus<R, Filters>["groupsStatus"] =
+    {}
+  const filters = {} as SelectedItemsDetailedStatus<R, Filters>["filters"]
+  for (const status of lanesStatus) {
+    Object.assign(groupsStatus, status.groupsStatus)
+    Object.assign(filters, status.filters)
+  }
   return {
     allSelected: lanesStatus.every((status) => status.allSelected),
     itemsStatus: lanesStatus.flatMap((status) => status.itemsStatus),
-    groupsStatus: lanesStatus.reduce(
-      (acc, status) => ({
-        ...acc,
-        ...status.groupsStatus,
-      }),
-      {}
-    ),
-    filters: lanesStatus.reduce(
-      (acc, status) => ({
-        ...acc,
-        ...status.filters,
-      }),
-      {}
-    ),
+    groupsStatus,
+    filters,
     selectedCount: lanesStatus.reduce(
       (acc, status) => acc + status.selectedCount,
       0

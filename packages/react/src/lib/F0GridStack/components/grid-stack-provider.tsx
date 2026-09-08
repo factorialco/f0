@@ -228,15 +228,17 @@ export function GridStackProvider({
     if (!Array.isArray(widgetsInGridstack)) {
       return
     }
-    const widgetsInGridstackIds = widgetsInGridstack.map((widget) => widget.id)
+    const widgetsInGridstackIds = new Set(
+      widgetsInGridstack.map((widget) => widget.id)
+    )
     const newWidgets = widgets || []
-    const newWidgetsIds = newWidgets.map((widget) => widget.id)
+    const newWidgetsIds = new Set(newWidgets.map((widget) => widget.id))
 
     /**
      * Add new widgets to gridstack
      */
     const widgetsToAdd = newWidgets.filter(
-      (widget) => !widgetsInGridstackIds.includes(widget.id!)
+      (widget) => !widgetsInGridstackIds.has(widget.id!)
     )
     if (widgetsToAdd.length > 0) {
       // Update ref synchronously BEFORE adding widgets to GridStack
@@ -287,7 +289,7 @@ export function GridStackProvider({
      * Remove widgets from gridstack that are not in the widgets array
      */
     const widgetsToRemove = widgetsInGridstack.filter(
-      (widget) => !newWidgetsIds.includes(widget.id!)
+      (widget) => !newWidgetsIds.has(widget.id!)
     )
     if (widgetsToRemove.length > 0) {
       const idsToRemove = widgetsToRemove.map((w) => w.id!).filter(Boolean)
@@ -392,7 +394,7 @@ export function GridStackProvider({
      * Update widgets DOM elements in gridstack that are in the widgets array
      */
     const widgetsToUpdate = newWidgets.filter((widget) =>
-      widgetsInGridstackIds.includes(widget.id!)
+      widgetsInGridstackIds.has(widget.id!)
     )
     if (widgetsToUpdate.length > 0) {
       const widgetsNeedingGridUpdate: {

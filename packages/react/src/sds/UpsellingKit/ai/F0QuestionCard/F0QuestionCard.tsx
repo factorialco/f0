@@ -50,7 +50,7 @@ export const F0QuestionCardMultiStep = ({
         // Build message from all selections
         const allSelectedLabels = Object.entries(selections)
           .map(([stepIndex, ids]) => {
-            const step = steps[parseInt(stepIndex)]
+            const step = steps[parseInt(stepIndex, 10)]
             return step.options
               .filter((o) => ids.includes(o.id))
               .map((o) => o.label)
