@@ -115,9 +115,9 @@ export const F0AiChatUsageLimitsButton = ({
             />
           )}
         </div>
-        {usage && hasCompanySection && (
+        {usage && hasCompanySection ? (
           <div className="flex flex-col border-0 border-t border-solid border-f1-border-secondary p-2">
-            {usage.onSeeCompany && (
+            {usage.onSeeCompany ? (
               <button
                 type="button"
                 onClick={usage.onSeeCompany}
@@ -132,7 +132,7 @@ export const F0AiChatUsageLimitsButton = ({
                 </span>
                 <F0Icon icon={ChevronRight} size="md" />
               </button>
-            )}
+            ) : null}
             {sections.map((section) => (
               <div key={section.id} className="p-2">
                 <UsageRow
@@ -143,7 +143,7 @@ export const F0AiChatUsageLimitsButton = ({
               </div>
             ))}
           </div>
-        )}
+        ) : null}
       </PopoverContent>
     </Popover>
   )
