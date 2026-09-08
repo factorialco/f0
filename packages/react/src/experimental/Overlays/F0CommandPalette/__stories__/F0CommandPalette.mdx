@@ -122,10 +122,102 @@ inside its own `search`.
 
 <Canvas of={Stories.LoadingAndFailingProviders} />
 
-If a domain already has an F0 `DataSource` for its collection, adapt it inside
-`search` rather than handing it over: the palette wants a global top-N for a
-string, not a collection's current filter, sorting, pagination and selection
-state.
+#### Reusing a collection's `DataAdapter`
+
+A domain that already renders a list has a `DataAdapter` carrying the search its
+backend understands, and a second lookup written for the palette is a second
+thing to keep in step. Reuse `fetchData` — but **call it** rather than handing
+the adapter over, because the two ask different questions: a collection asks for
+the current page of a list under the filters the reader has set, and the palette
+asks for the best few records for a string across everything.
+
+```tsx
+// The adapter the collection page already mounts. `satisfies` rather than a
+// `:` annotation, deliberately — see below.
+const deviceAdapter = {
+  paginationType: "pages",
+  fetchData: async ({
+    search = "",
+    pagination,
+  }: PaginatedFetchOptions<DeviceFilters>) =>
+    api.devices({
+      q: search,
+      page: pagination.currentPage,
+      perPage: pagination.perPage,
+    }),
+} satisfies PaginatedDataAdapter<DeviceRecord, DeviceFilters>
+
+// The domain's record, as the palette needs to render it. The only
+// palette-specific line in the whole integration.
+const toDeviceRef = (record: DeviceRecord): CommandEntityRef => ({
+  type: "device",
+  kind: "one",
+  id: record.id,
+  label: record.name,
+  sublabel: `${record.owner} · ${record.serial}`,
+  icon: Laptop,
+  href: `/devices/${record.id}`,
+})
+
+const deviceProvider: CommandEntityProvider = {
+  type: "device",
+  label: "Devices",
+  search: async (query, limit) => {
+    const answer = await deviceAdapter.fetchData({
+      filters: {}, // the whole collection, not the reader's current view of it
+      sortings: [], // unsorted, so the backend can rank by relevance
+      search: query,
+      pagination: { currentPage: 1, perPage: limit }, // `limit` IS the page size
+    })
+    return answer.records.map(toDeviceRef)
+  },
+}
+```
+
+**What to pass, and why.** `filters: {}`, because a filter the reader left on a
+list page is not something they asked the palette for. `sortings: []`, because
+relevance to the query is the ranking that matters here and the backend is
+better placed to produce it than a field order is. `perPage: limit`, because the
+palette wants a global top-N rather than a page to walk — it never paginates.
+
+**Declare the adapter with `satisfies`.** A `DataAdapter`'s `fetchData` is typed
+as three channels at once — a response, a promise of one, or an observable of
+loading states — so `const x: DataAdapter<…>` widens the call site to that union
+and `answer.records` stops type-checking. `satisfies` checks the object against
+the adapter contract while keeping this `fetchData`'s own narrower type, which
+is the promise `await` wants. If all you hold is an adapter already typed the
+wide way, flatten it first: subscribe, ignore the emissions where `loading` is
+true, and resolve with the first `data`.
+
+The loading states then come for free. The adapter is remote, so `search`
+returns a promise, so the group holds its space with skeleton rows until it
+lands and explains itself if it rejects — none of which the provider above
+implements.
+
+<Canvas of={Stories.FromACollectionDataAdapter} />
+
+`inside` is the same shape, with the scope supplying the filter that `search`
+deliberately left empty:
+
+```tsx
+const teamProvider: CommandEntityProvider = {
+  type: "team",
+  label: "Teams",
+  search: async (query, limit) => /* as above, over the team adapter */ [],
+  // A team's people, resolved through the PEOPLE collection's adapter — the
+  // team provider hands back `person` refs and never learns what can be done
+  // to them.
+  inside: async (ref, query, limit) => {
+    const answer = await peopleAdapter.fetchData({
+      filters: { team: ref.kind === "one" ? [ref.id] : ref.ids },
+      sortings: [],
+      search: query,
+      pagination: { currentPage: 1, perPage: limit },
+    })
+    return answer.records.map(toPersonRef)
+  },
+}
+```
 
 ### Narrowing before acting
 

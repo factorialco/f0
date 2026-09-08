@@ -4,6 +4,11 @@ import { useEffect, type ReactNode } from "react"
 import { expect, userEvent, waitFor, within } from "storybook/test"
 
 import { F0Button } from "@/components/F0Button"
+import type {
+  InFilterDefinition,
+  PaginatedDataAdapter,
+  PaginatedFetchOptions,
+} from "@/hooks/datasource"
 import {
   Calendar,
   CheckCircleLine,
@@ -873,6 +878,153 @@ export const LoadingAndFailingProviders: Story = {
     // And the domain that could not be reached explains itself.
     await expect(
       body.getByRole("option", { name: /Could not load these results/ })
+    ).toBeVisible()
+  },
+}
+
+/* ── A collection's own DataAdapter, reused by the palette ─────────────────── */
+
+/**
+ * The record a device COLLECTION renders — the domain's own shape, with the
+ * domain's own field names. That the palette never sees it is the point: what
+ * bridges the two is a mapping function, not a shared type.
+ */
+type DeviceRecord = {
+  id: string
+  name: string
+  serial: string
+  owner: string
+}
+
+const deviceRecords: DeviceRecord[] = [
+  { id: "d-1", name: 'MacBook Pro 14"', serial: "C02X", owner: "Ben Carter" },
+  { id: "d-2", name: 'MacBook Air 13"', serial: "FVFZ", owner: "Nadia Osei" },
+  { id: "d-3", name: 'iPad Air 11"', serial: "DMPV", owner: "Ben Carter" },
+]
+
+type DeviceFilters = { owner: InFilterDefinition<string> }
+
+/**
+ * The adapter a device collection page already has, and the palette reuses.
+ *
+ * Written out here because a story has no app around it; in a real module it is
+ * imported from wherever the collection lives. It answers over a timer against
+ * the array above, so this story makes no requests.
+ *
+ * `satisfies` rather than a `:` annotation, and that is load-bearing. A
+ * `DataAdapter`'s `fetchData` is DECLARED as three channels at once — a
+ * response, a promise of one, or an observable of loading states — so annotating
+ * the const widens the call site to that union and `answer.records` stops
+ * type-checking. `satisfies` checks the object against the adapter contract
+ * while keeping this `fetchData`'s own narrower type, which is a promise.
+ */
+const deviceCollectionAdapter = {
+  paginationType: "pages",
+  fetchData: ({
+    search = "",
+    filters,
+    pagination,
+  }: PaginatedFetchOptions<DeviceFilters>) => {
+    const perPage = pagination.perPage ?? 20
+    const page = pagination.currentPage ?? 1
+    const owners = filters.owner
+    const found = deviceRecords.filter(
+      (record) =>
+        (!owners?.length || owners.includes(record.owner)) &&
+        `${record.name} ${record.owner} ${record.serial}`
+          .toLowerCase()
+          .includes(search.toLowerCase())
+    )
+    return afterDelay(
+      {
+        type: "pages" as const,
+        records: found.slice((page - 1) * perPage, page * perPage),
+        total: found.length,
+        perPage,
+        currentPage: page,
+        pagesCount: Math.max(1, Math.ceil(found.length / perPage)),
+      },
+      900
+    )
+  },
+} satisfies PaginatedDataAdapter<DeviceRecord, DeviceFilters>
+
+/** The domain's record, as the palette needs to render it. */
+const toDeviceRef = (record: DeviceRecord): CommandEntityRef => ({
+  type: "device",
+  kind: "one",
+  id: record.id,
+  label: record.name,
+  sublabel: `${record.owner} · ${record.serial}`,
+  icon: Laptop,
+  href: `/devices/${record.id}`,
+})
+
+/**
+ * A provider that is nothing but a translation layer over that adapter.
+ *
+ * Two mappings and no third thing: the palette's `(query, limit)` into fetch
+ * options, and the collection's records into refs.
+ */
+const deviceProviderFromAdapter: CommandEntityProvider = {
+  type: "device",
+  label: "Devices",
+  search: async (query, limit) => {
+    const answer = await deviceCollectionAdapter.fetchData({
+      // The WHOLE collection, not the reader's current view of it: a filter
+      // they left on a list page is not something they asked the palette for.
+      filters: {},
+      // Unsorted, so the backend stays free to rank by relevance to `query`.
+      sortings: [],
+      search: query,
+      // The palette's `limit` IS the page size — it wants a global top-N.
+      pagination: { currentPage: 1, perPage: limit },
+    })
+    return answer.records.map(toDeviceRef)
+  },
+  actions: deviceProvider.actions,
+}
+
+/**
+ * THE RECORDS CAN COME FROM A COLLECTION'S ADAPTER, and usually should.
+ *
+ * A domain that already renders a device list has an adapter carrying the
+ * search its backend understands, and a second lookup written for the palette
+ * is a second thing to keep in step. Reuse `fetchData` — but CALL it rather
+ * than handing the adapter over, because the two ask different questions: a
+ * collection asks for the current page of a list under the filters the reader
+ * has set, and the palette asks for the best few records for a string across
+ * everything.
+ *
+ * The loading states then come for free. The adapter is remote, so `search`
+ * returns a promise, so the group holds its space with skeleton rows until it
+ * lands and says so if it rejects — none of which this provider has to
+ * implement. Nothing here is palette-specific except `toDeviceRef`.
+ */
+export const FromACollectionDataAdapter: Story = {
+  args: { providers: [deviceProviderFromAdapter, peopleProvider] },
+  play: async ({ canvasElement }) => {
+    const { body, field } = await openPalette(canvasElement)
+    await userEvent.type(field, "mac")
+
+    // Remote, so the group loads before it lands.
+    await waitFor(() =>
+      expect(body.getByRole("listbox")).toHaveAttribute("aria-busy", "true")
+    )
+
+    // Then the adapter's records, rendered through `toDeviceRef`.
+    await waitFor(
+      () =>
+        expect(
+          body.getByRole("option", { name: /MacBook Pro 14/ })
+        ).toBeVisible(),
+      { timeout: 4000 }
+    )
+    await expect(body.getByRole("listbox")).not.toHaveAttribute("aria-busy")
+
+    // The owner reached the row's sublabel, so the mapping ran, not a fixture.
+    await expect(
+      body.getByRole("option", { name: /Ben Carter · C02X/ })
     ).toBeVisible()
   },
 }
