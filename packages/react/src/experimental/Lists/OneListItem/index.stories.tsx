@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { expect, fn, within } from "storybook/test"
-import { Building, Check, Placeholder } from "../../../icons/app"
+import { Building, Check, PinOff, Placeholder } from "../../../icons/app"
 import { OneListItem } from "."
 
 const meta = {
@@ -106,6 +106,24 @@ export const WithTags: Story = {
       { text: "24 desks", icon: Placeholder },
       { text: "WEZ", icon: Placeholder },
     ],
+  },
+}
+
+/**
+ * A marker at the row's right edge for something true of the item, with the
+ * tooltip saying what: here a workplace with no location on the map. A fact
+ * about the row rather than an action on it, so it is not a button.
+ */
+export const WithRightIcon: Story = {
+  args: {
+    avatar: { type: "icon", icon: Building },
+    title: "Remote",
+    description: "No address on file",
+    rightIcon: {
+      icon: PinOff,
+      tooltip: "No location set",
+      tooltipDescription: "Set a location to place a pin on the map",
+    },
   },
 }
 

@@ -36,6 +36,19 @@ export type OneListItemProps = {
    */
   metadata?: CardMetadataType[]
   rightTag?: TagDotProps
+  /**
+   * A marker at the row's right edge, on the title's line: an icon standing for
+   * something true of the item, and the tooltip saying what. For a fact about
+   * the item rather than an action on it - a record with no location, say - so
+   * it is deliberately not a button.
+   */
+  rightIcon?: {
+    icon: IconType
+    /** What the icon means, in words. Required: an icon alone is a riddle. */
+    tooltip: string
+    /** A second line under it, for what to do about what the first line says. */
+    tooltipDescription?: string
+  }
   actions?: {
     primary?: {
       icon?: IconType
@@ -75,6 +88,7 @@ const BaseOneListItem = React.forwardRef<HTMLDivElement, OneListItemProps>(
       bottomTags,
       metadata,
       rightTag,
+      rightIcon,
       actions,
       info,
       onClick,
@@ -133,6 +147,14 @@ const BaseOneListItem = React.forwardRef<HTMLDivElement, OneListItemProps>(
         ) : null}
       </div>
       <div className="flex flex-row items-center justify-between gap-2">
+        {rightIcon ? (
+          <Tooltip
+            label={rightIcon.tooltip}
+            description={rightIcon.tooltipDescription}
+          >
+            <F0Icon icon={rightIcon.icon} size="md" color="secondary" />
+          </Tooltip>
+        ) : null}
         {rightTag ? <F0TagDot {...rightTag} /> : null}
         {actions ? (
           <div className="flex flex-1 flex-row items-center justify-end gap-2">
