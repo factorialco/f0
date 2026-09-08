@@ -81,6 +81,7 @@ export const F0AiChatTextArea = ({
   searchPersons,
   onProcessFilesRef,
   disclaimer,
+  disclaimerEnd,
   footer,
   isWelcomeScreen = false,
   fullscreen = false,
@@ -921,11 +922,14 @@ export const F0AiChatTextArea = ({
             </span>
           </motion.div>
         ) : (
-          disclaimer?.text &&
+          (disclaimer?.text || disclaimerEnd) &&
           !isFullscreenWelcome && (
             <motion.div
               key="chat-disclaimer"
-              className="flex w-full max-w-content flex-row items-center justify-center gap-1"
+              className={cn(
+                "flex w-full max-w-content flex-row items-center gap-1",
+                disclaimerEnd ? "justify-between" : "justify-center"
+              )}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -934,42 +938,49 @@ export const F0AiChatTextArea = ({
                 ease: "easeOut",
               }}
             >
-              {disclaimer.onClick ? (
-                <button
-                  type="button"
-                  onClick={disclaimer.onClick}
-                  className={cn(
-                    "group min-w-0 cursor-pointer bg-transparent p-0 text-inherit",
-                    "transition-transform duration-700 ease-out",
-                    "hover:scale-[1.02] focus-visible:scale-[1.02]",
-                    "motion-reduce:transition-none motion-reduce:hover:scale-100 motion-reduce:focus-visible:scale-100"
-                  )}
-                >
-                  <OneEllipsis
+              <div className="flex min-w-0 flex-row items-center gap-1">
+                {disclaimer?.text && disclaimer.onClick ? (
+                  <button
+                    type="button"
+                    onClick={disclaimer.onClick}
                     className={cn(
-                      "text-sm font-medium text-f1-foreground-tertiary transition-colors duration-700 ease-out",
-                      "group-hover:bg-gradient-to-r group-hover:from-[#E55619] group-hover:to-[#A1ADE5] group-hover:bg-clip-text group-hover:text-transparent",
-                      "group-focus-visible:bg-gradient-to-r group-focus-visible:from-[#E55619] group-focus-visible:to-[#A1ADE5] group-focus-visible:bg-clip-text group-focus-visible:text-transparent"
+                      "group min-w-0 cursor-pointer bg-transparent p-0 text-inherit",
+                      "transition-transform duration-700 ease-out",
+                      "hover:scale-[1.02] focus-visible:scale-[1.02]",
+                      "motion-reduce:transition-none motion-reduce:hover:scale-100 motion-reduce:focus-visible:scale-100"
                     )}
                   >
+                    <OneEllipsis
+                      className={cn(
+                        "text-sm font-medium text-f1-foreground-tertiary transition-colors duration-700 ease-out",
+                        "group-hover:bg-gradient-to-r group-hover:from-[#E55619] group-hover:to-[#A1ADE5] group-hover:bg-clip-text group-hover:text-transparent",
+                        "group-focus-visible:bg-gradient-to-r group-focus-visible:from-[#E55619] group-focus-visible:to-[#A1ADE5] group-focus-visible:bg-clip-text group-focus-visible:text-transparent"
+                      )}
+                    >
+                      {disclaimer.text}
+                    </OneEllipsis>
+                  </button>
+                ) : disclaimer?.text ? (
+                  <OneEllipsis className="text-sm font-medium text-f1-foreground-tertiary">
                     {disclaimer.text}
                   </OneEllipsis>
-                </button>
-              ) : (
-                <OneEllipsis className="text-sm font-medium text-f1-foreground-tertiary">
-                  {disclaimer.text}
-                </OneEllipsis>
-              )}
+                ) : null}
 
-              {disclaimer.link && disclaimer.linkText && (
-                <Link
-                  href={disclaimer.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-shrink-0 text-sm font-medium text-f1-foreground-tertiary"
-                >
-                  {disclaimer.linkText}
-                </Link>
+                {disclaimer?.link && disclaimer.linkText && (
+                  <Link
+                    href={disclaimer.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-shrink-0 text-sm font-medium text-f1-foreground-tertiary"
+                  >
+                    {disclaimer.linkText}
+                  </Link>
+                )}
+              </div>
+              {disclaimerEnd && (
+                <div className="flex shrink-0 items-center">
+                  {disclaimerEnd}
+                </div>
               )}
             </motion.div>
           )

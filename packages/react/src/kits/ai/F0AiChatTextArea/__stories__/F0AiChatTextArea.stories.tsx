@@ -28,6 +28,7 @@ import type {
   UploadedFile,
   WelcomeScreenSuggestion,
 } from "../../F0AiChat/types"
+import { F0AiChatUsageLimitsButton } from "../../F0AiChatUsageLimits"
 import { F0ClarifyingPanel } from "../../F0ClarifyingPanel"
 import type { ClarifyingQuestionState } from "../../F0ClarifyingPanel/types"
 import { F0AiChatTextArea } from "../F0AiChatTextArea"
@@ -318,6 +319,7 @@ type WrapperProps = {
   clarifyingQuestion?: ClarifyingQuestionState | null
   creditWarning?: AiChatCreditWarning
   disclaimer?: AiChatDisclaimer
+  disclaimerEnd?: React.ReactNode
   footer?: React.ReactNode
   welcomeScreenSuggestions?: WelcomeScreenSuggestion[]
   welcomeScreenSuggestionsPlacement?: "above" | "inside"
@@ -340,6 +342,7 @@ const Wrapper = ({
   clarifyingQuestion = null,
   creditWarning,
   disclaimer,
+  disclaimerEnd,
   footer,
   welcomeScreenSuggestions,
   welcomeScreenSuggestionsPlacement,
@@ -410,6 +413,7 @@ const Wrapper = ({
         onTranscribe={onTranscribe}
         searchPersons={searchPersons}
         disclaimer={disclaimer}
+        disclaimerEnd={disclaimerEnd}
         footer={footer}
         welcomeScreenSuggestions={welcomeScreenSuggestions}
         welcomeScreenSuggestionsPlacement={welcomeScreenSuggestionsPlacement}
@@ -521,6 +525,23 @@ export const WithRotatingPlaceholders: Story = {
 export const WithDisclaimer: Story = {
   args: {
     disclaimer: DISCLAIMER,
+  },
+}
+
+export const WithUsageLimits: Story = {
+  args: {
+    disclaimer: DISCLAIMER,
+    disclaimerEnd: (
+      <F0AiChatUsageLimitsButton
+        usage={{
+          usedPercentage: 30,
+          onSeeTeam: () => console.log("see team"),
+          sections: [
+            { id: "company", label: "Company pool", usedPercentage: 70 },
+          ],
+        }}
+      />
+    ),
   },
 }
 

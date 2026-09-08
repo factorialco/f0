@@ -561,3 +561,29 @@ export interface AiChatTranslationsProviderProps {
   children: React.ReactNode
   translations: AiChatTranslations
 }
+
+/** One row of the extra section in the usage-limits popover. */
+export type AiChatUsageLimitsSection = {
+  /** Stable identifier used as the React key. */
+  id: string
+  /** Already-localized row label (e.g. "Company pool"). */
+  label: string
+  /** Share of that allowance consumed, 0–100. */
+  usedPercentage: number
+}
+
+/**
+ * Usage-limits snapshot for the chat's usage popover (`F0AiChatUsageLimitsButton`).
+ *
+ * The host resolves the numbers (personal allowance, company pool…) and
+ * passes them in; F0 only renders. Percentages, never credit counts: the
+ * product deliberately avoids credit language in the chat.
+ */
+export type AiChatUsageLimits = {
+  /** The viewer's own allowance consumed, 0–100. Drives the ring trigger and the first row. */
+  usedPercentage: number
+  /** Extra rows rendered below a divider, typically for admins (company pool…). */
+  sections?: AiChatUsageLimitsSection[]
+  /** When set, a "Your team" row links to the host's team usage view. */
+  onSeeTeam?: () => void
+}

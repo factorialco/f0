@@ -118,6 +118,13 @@ export type F0AiChatTextAreaProps = {
   disclaimer?: AiChatDisclaimer
 
   /**
+   * Host-owned control pinned to the right end of the disclaimer row (e.g. the
+   * usage-limits popover trigger). With it, the disclaimer text aligns left
+   * instead of centered. Hidden together with the disclaimer.
+   */
+  disclaimerEnd?: ReactNode
+
+  /**
    * Optional footer (e.g. powered-by, legal copy) rendered below the
    * textarea on the welcome screen.
    */

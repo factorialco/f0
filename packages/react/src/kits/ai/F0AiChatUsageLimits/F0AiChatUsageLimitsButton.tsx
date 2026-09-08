@@ -1,0 +1,125 @@
+import { useCallback, useState } from "react"
+import { F0Icon } from "@/components/F0Icon"
+import ChevronRight from "@/icons/app/ChevronRight"
+import { useI18n } from "@/lib/providers/i18n"
+import { cn, focusRing } from "@/lib/utils"
+import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
+import { UsageRing } from "./components/UsageRing"
+import { UsageRow } from "./components/UsageRow"
+import type { F0AiChatUsageLimitsButtonProps } from "./types"
+
+const clampPercentage = (value: number) =>
+  Math.min(100, Math.max(0, Math.round(value)))
+
+const UsageSkeleton = () => (
+  <div className="flex flex-col gap-2" aria-busy="true" aria-live="polite">
+    <div className="flex justify-between">
+      <div className="h-5 w-28 animate-pulse rounded bg-f1-background-secondary" />
+      <div className="h-5 w-16 animate-pulse rounded bg-f1-background-secondary" />
+    </div>
+    <div className="h-2 w-full animate-pulse rounded-full bg-f1-background-secondary" />
+  </div>
+)
+
+/**
+ * The One usage-limits popover with its ring trigger. Shows the viewer's own
+ * allowance as a percentage and, for hosts that pass them, extra rows (company
+ * pool…) plus a "Your team" link. Headless: the host resolves the numbers and
+ * refetches on `onOpenChange(true)`.
+ *
+ * Designed for the composer's disclaimer row (`F0AiChatTextArea`'s
+ * `disclaimerEnd` slot), hence `side` defaults to `"top"`.
+ */
+export const F0AiChatUsageLimitsButton = ({
+  usage,
+  error = false,
+  onOpenChange,
+  trigger,
+  side = "top",
+}: F0AiChatUsageLimitsButtonProps) => {
+  const i18n = useI18n()
+  const [open, setOpen] = useState(false)
+
+  const handleOpenChange = useCallback(
+    (isOpen: boolean) => {
+      setOpen(isOpen)
+      onOpenChange?.(isOpen)
+    },
+    [onOpenChange]
+  )
+
+  const personal = usage ? clampPercentage(usage.usedPercentage) : 0
+  const sections = usage?.sections ?? []
+  const hasTeamSection = !!usage?.onSeeTeam || sections.length > 0
+  const title = i18n.t("ai.usageLimits.title")
+  const triggerLabel = usage
+    ? `${title}: ${i18n.t("ai.usageLimits.used", { percentage: personal })}`
+    : title
+
+  return (
+    <Popover open={open} onOpenChange={handleOpenChange}>
+      <PopoverTrigger asChild>
+        {trigger ?? (
+          <button
+            type="button"
+            aria-expanded={open}
+            aria-haspopup="dialog"
+            className={cn(
+              "flex h-6 w-6 shrink-0 items-center justify-center rounded-sm bg-transparent p-0",
+              "hover:bg-f1-background-secondary",
+              open && "bg-f1-background-secondary",
+              focusRing()
+            )}
+          >
+            <UsageRing percentage={personal} exhausted={personal >= 100} />
+            <span className="sr-only">{triggerLabel}</span>
+          </button>
+        )}
+      </PopoverTrigger>
+      <PopoverContent
+        side={side}
+        align="end"
+        sideOffset={8}
+        collisionPadding={12}
+        className="flex w-[328px] flex-col gap-3 rounded-md border border-solid border-f1-border-secondary p-3"
+      >
+        {error ? (
+          <span className="text-sm text-f1-foreground-secondary">
+            {i18n.t("ai.usageLimits.error")}
+          </span>
+        ) : !usage ? (
+          <UsageSkeleton />
+        ) : (
+          <>
+            <UsageRow label={title} percentage={personal} />
+            {hasTeamSection && (
+              <div className="flex flex-col gap-3 border-0 border-t border-solid border-f1-border-secondary pt-3">
+                {usage.onSeeTeam && (
+                  <button
+                    type="button"
+                    onClick={usage.onSeeTeam}
+                    className={cn(
+                      "flex w-full items-center justify-between gap-2 rounded-sm bg-transparent p-0 text-left text-base font-medium text-f1-foreground-secondary",
+                      "hover:text-f1-foreground",
+                      focusRing()
+                    )}
+                  >
+                    <span>{i18n.t("ai.usageLimits.yourTeam")}</span>
+                    <F0Icon icon={ChevronRight} size="sm" />
+                  </button>
+                )}
+                {sections.map((section) => (
+                  <UsageRow
+                    key={section.id}
+                    label={section.label}
+                    percentage={clampPercentage(section.usedPercentage)}
+                  />
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      </PopoverContent>
+    </Popover>
+  )
+}
