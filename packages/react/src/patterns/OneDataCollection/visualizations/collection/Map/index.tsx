@@ -39,7 +39,7 @@ type Unplaced<Record> = {
 /**
  * The avatars a "not on map" count can wear: only when every record it stands
  * for is a person. An avatar list is one kind of avatar, so a mix has to fall
- * back to a pin.
+ * back to a plain counter.
  */
 const personAvatars = (
   markers: F0MapMarkerVariantProps[]
@@ -417,14 +417,13 @@ export const MapCollection = <
   ) : undefined
 
   // The count on the map surface: the map's own account of the records it is
-  // not showing, beside the toggle that opens the panel listing them. Wears
-  // the first few as avatars when they are all people; a mixed set gets a pin.
+  // not showing, beside the toggle that opens the panel listing them. When they
+  // are all people the avatar list is the count - a few faces and a "+N" for
+  // the rest; a mixed set gets a plain counter.
   const notOnMapAvatars = useMemo(
     () =>
       marker
-        ? personAvatars(
-            unplaced.slice(0, 3).map((entry) => marker(entry.record))
-          )
+        ? personAvatars(unplaced.map((entry) => marker(entry.record)))
         : null,
     [unplaced, marker]
   )

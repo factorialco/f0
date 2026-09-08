@@ -263,11 +263,12 @@ one silently, and it needs no opting in:
 - **Every unplaced record is listed** in the panel's **Not on map** section,
   ahead of **On map**. The section is left out entirely when nothing is
   unplaced, not shown as an empty header.
-- **The map counts them** with a control beside the panel toggle: the first
-  few records as avatars when they are all people (a mixed set gets a pin), the
-  section's name, and its count. Pressing it opens the panel with the **Not on
-  map** section expanded, whatever state it was left in. It hides with the
-  toggle while the panel is open, and is absent when the count is zero.
+- **The map counts them** with a control beside the panel toggle: the section's
+  name, then the records as an avatar list when they are all people - a few
+  faces and a "+N" bubble for the rest, which is the count (a mixed set gets a
+  plain counter instead). Pressing it opens the panel with the **Not on map**
+  section expanded, whatever state it was left in. It hides with the toggle
+  while the panel is open, and is absent when the count is zero.
 - **One treatment, for now.** A bare `null` ("no reason given") and
   `{ kind: "incomplete" }` (the record should have had a location) are listed
   the same way. The kind is kept so the distinction can be drawn later without

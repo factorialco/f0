@@ -1,9 +1,10 @@
 import { F0AvatarList } from "@/components/avatars/F0AvatarList"
-import { F0Icon } from "@/components/F0Icon"
-import { Pin } from "@/icons/app"
 import { cn, focusRing } from "@/lib/utils"
 import { Counter } from "@/ui/Counter"
 import { Text } from "@/ui/Text"
+
+/** How many faces show before the rest fold into the "+N" bubble. */
+const MAX_FACES = 3
 
 /** The people a "not on map" count stands for, when it can show them. */
 export type MapNotOnMapAvatar = {
@@ -19,9 +20,10 @@ export interface MapNotOnMapButtonProps {
   /** The whole thing as one sentence for assistive tech ("3 not on map"). */
   ariaLabel: string
   /**
-   * Avatars for the leftmost slot. `null` when the records cannot be shown as
-   * one avatar list - a mix of people and companies, say - in which case a pin
-   * stands in.
+   * Every unplaced record as an avatar: the list is the count, showing the
+   * first few and folding the rest into its own "+N". `null` when the records
+   * cannot be shown as one avatar list - a mix of people and companies, say -
+   * in which case a plain counter stands in.
    */
   avatars: MapNotOnMapAvatar[] | null
   onClick: () => void
@@ -30,9 +32,9 @@ export interface MapNotOnMapButtonProps {
 
 /**
  * The count of records the map could not place, on the map surface beside the
- * panel toggle. A ghost button carrying who is missing on the left, the group's
- * name, and how many on the right; pressing it opens the panel to the section
- * that lists them. Bare: `F0Map` puts it on the control card with the toggle.
+ * panel toggle. A ghost button: the group's name, then who is missing as an
+ * avatar list whose overflow bubble is the count. Pressing it opens the panel
+ * to the section that lists them. Bare: `F0Map` puts it on a control card.
  */
 export const MapNotOnMapButton = ({
   title,
@@ -53,19 +55,6 @@ export const MapNotOnMapButton = ({
       focusRing()
     )}
   >
-    {avatars && avatars.length > 0 ? (
-      <F0AvatarList
-        type="person"
-        avatars={avatars}
-        size="xs"
-        max={3}
-        noTooltip
-      />
-    ) : (
-      <span className="flex px-1 text-f1-icon">
-        <F0Icon icon={Pin} size="sm" />
-      </span>
-    )}
     <span className="whitespace-nowrap">
       {/* The label variant in secondary. F0Text takes no colour, so this is the
           primitive it wraps, with the one class it cannot be given. */}
@@ -76,6 +65,22 @@ export const MapNotOnMapButton = ({
         className="text-f1-foreground-secondary"
       />
     </span>
-    <Counter value={count} size="sm" />
+    {avatars && avatars.length > 0 ? (
+      // Three faces, then a "+N" bubble that is the count. `sm`, not `xs`: at
+      // `xs` the bubble is an ellipsis icon with the number only for screen
+      // readers. And the rest go in as `remainingCount` rather than as items,
+      // which keeps the bubble a plain element - given the items themselves
+      // it becomes a disclosure button, a button inside this button.
+      <F0AvatarList
+        type="person"
+        avatars={avatars.slice(0, MAX_FACES)}
+        remainingCount={Math.max(count - MAX_FACES, 0)}
+        size="sm"
+        max={MAX_FACES}
+        noTooltip
+      />
+    ) : (
+      <Counter value={count} size="sm" />
+    )}
   </button>
 )
