@@ -41,7 +41,7 @@ describe("F0AiChatUsageLimitsButton", () => {
           onSeeCompany,
           sections: [
             { id: "company", label: "Company allowance", usedPercentage: 70 },
-            { id: "current", label: "Current usage", usedPercentage: 12 },
+            { id: "team", label: "Personal allowance", usedPercentage: 12 },
           ],
         }}
       />
