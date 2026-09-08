@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.89.0](https://github.com/factorialco/f0/compare/f0-react-v6.88.5...f0-react-v6.89.0) (2026-09-08)
+
+
+### Features
+
+* **F0CommandPalette:** add experimental command palette ([#5403](https://github.com/factorialco/f0/issues/5403)) ([7204700](https://github.com/factorialco/f0/commit/720470089c4a9d7504404c04e5f7a7f6f22959f2))
+
 ## [6.88.5](https://github.com/factorialco/f0/compare/f0-react-v6.88.4...f0-react-v6.88.5) (2026-09-08)
 
 
