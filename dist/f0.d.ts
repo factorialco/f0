@@ -12681,6 +12681,12 @@ declare type F0SelectDataProps<T extends string, R = unknown> = {
 } | {
     source?: never;
     mapOptions?: never;
+    /**
+     * Replaces how a query is matched against an option. Without it, an
+     * option matches on anything the row shows: its `label`, its
+     * `description`, and a `metadata` dial code. Static `options` only —
+     * a `source` is searched through its own `fetchData`.
+     */
     searchFn?: (option: F0SelectItemProps<T, unknown>, search?: string) => boolean | undefined;
     options: F0SelectItemProps<T, unknown>[];
 };
@@ -20589,10 +20595,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        indent: {
-            setIndent: (level: number) => ReturnType;
-            unsetIndent: () => ReturnType;
-            outdent: () => ReturnType;
+        fontSize: {
+            setFontSize: (fontSize: string) => ReturnType;
+            unsetFontSize: () => ReturnType;
         };
     }
 }
@@ -20600,9 +20605,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        fontSize: {
-            setFontSize: (fontSize: string) => ReturnType;
-            unsetFontSize: () => ReturnType;
+        indent: {
+            setIndent: (level: number) => ReturnType;
+            unsetIndent: () => ReturnType;
+            outdent: () => ReturnType;
         };
     }
 }

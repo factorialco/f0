@@ -127708,7 +127708,14 @@ const s23 = ({
       }
     ) })
   ] });
-}, l23 = (e) => Object.entries(e).some(([, t]) => t == null ? !1 : Array.isArray(t) ? t.length > 0 : t !== ""), u23 = (e, t) => e.type === "separator" || !t || e.label.toLowerCase().includes(t.toLowerCase()), $y = (e) => {
+}, l23 = (e) => Object.entries(e).some(([, t]) => t == null ? !1 : Array.isArray(t) ? t.length > 0 : t !== ""), u23 = (e, t) => {
+  if (e.type === "separator" || !t)
+    return !0;
+  const n = t.toLowerCase(), r = e.metadata?.type === "dialCode" ? e.metadata.dialCode : void 0;
+  return [e.label, e.description, r].some(
+    (a) => a?.toLowerCase().includes(n)
+  );
+}, $y = (e) => {
   if (!(e.type === "separator" || e.tag === void 0 || typeof e.tag == "string"))
     return e.tag.type;
 }, c23 = Y1({
@@ -128301,6 +128308,9 @@ const f23 = Z(function({
       showLoadingIndicator: !!d,
       portalContainer: M2,
       retainTrigger: $2,
+      onEscapeKeyDown: (x2) => {
+        $2 && E2 && (x2.preventDefault(), S5(""));
+      },
       onPointerDownOutside: (x2) => {
         const Q2 = x2.target;
         $2 && Q2 instanceof Node && j2.current?.contains(Q2) && x2.preventDefault();
@@ -128362,7 +128372,6 @@ const f23 = Z(function({
       ), B || c3(!1);
       return;
     }
-    x2.key === "Escape" && E2 && (x2.preventDefault(), x2.stopPropagation(), S5(""));
   }, Pf = (x2) => {
     if (!$2 || O2)
       return;
@@ -128506,7 +128515,7 @@ const f23 = Z(function({
         ) : /* @__PURE__ */ i(
           "button",
           {
-            className: "flex w-full items-center justify-between",
+            className: "flex w-full items-center justify-between focus-visible:outline-none",
             "aria-label": H || n,
             onKeyDown: Pf,
             onClick: (x2) => {
