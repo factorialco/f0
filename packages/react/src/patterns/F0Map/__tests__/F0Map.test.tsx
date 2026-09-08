@@ -1,6 +1,11 @@
 import { createRef } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { fireEvent, screen, zeroRender as render } from "@/testing/test-utils"
+import {
+  fireEvent,
+  screen,
+  waitFor,
+  zeroRender as render,
+} from "@/testing/test-utils"
 import { F0Map, type F0MapHandle } from "../F0Map"
 import type { F0MapArc, F0MapPoint, F0MapRoute } from "../types"
 
@@ -49,11 +54,16 @@ const mock = vi.hoisted(() => {
       if (cb) {
         this.handlers[type] ??= []
         this.handlers[type].push(cb)
+        // A real map fires `load` at whoever is subscribed, `on` and `once`
+        // alike - and the adapter subscribes with `on`. Deferred to a microtask
+        // so the subscription is in place first.
+        if (type === "load") {
+          void Promise.resolve().then(() => cb())
+        }
       }
       return this
     }
     once(type: string, cb: (e?: unknown) => void) {
-      // Fire `load` on a microtask so the component's handler is registered.
       if (type === "load") {
         void Promise.resolve().then(() => cb())
       }
@@ -337,6 +347,20 @@ describe("F0Map", () => {
         cb({ features: [{ properties: { id: "commute", kind: "route" } }] })
       )
       expect(onRouteClick).toHaveBeenCalledWith("commute")
+    })
+  })
+
+  describe("engine readiness", () => {
+    it("frames the markers and applies the projection once ready", async () => {
+      render(<F0Map markers={POINTS} />)
+      // The readiness handler does this, not the imperative handle: nothing
+      // here calls fitToMarkers.
+      await waitFor(() =>
+        expect(mock.instances[0].calls.fitBounds.length).toBeGreaterThan(0)
+      )
+      expect(mock.instances[0].calls.setProjection.at(-1)).toEqual({
+        type: "mercator",
+      })
     })
   })
 
