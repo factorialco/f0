@@ -24,7 +24,7 @@ const UsageSkeleton = () => (
 /**
  * The One usage-limits popover with its ring trigger. Shows the viewer's own
  * allowance as a percentage and, for hosts that pass them, extra rows (company
- * pool…) plus a "Your team" link. Headless: the host resolves the numbers and
+ * pool…) plus a "Your company" link. Headless: the host resolves the numbers and
  * refetches on `onOpenChange(true)`.
  *
  * Designed for the composer's disclaimer row (`F0AiChatTextArea`'s
