@@ -1,6 +1,5 @@
 import "maplibre-gl/dist/maplibre-gl.css"
 import "./F0Map.css"
-import maplibregl from "maplibre-gl"
 import {
   forwardRef,
   useCallback,
@@ -511,8 +510,6 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
   }, [highlightedId, reduceMotion])
 
   const hasLines = routes.length > 0 || arcs.length > 0
-  // The line and current-location layers are still on the engine's own map.
-  const nativeMap = adapterInstance?.native() as maplibregl.Map | undefined
 
   return (
     <DataTestIdWrapper dataTestId={dataTestId}>
@@ -553,15 +550,18 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
           {/* Bottom of the overlay stack: a GL circle under the lines and under
               every DOM marker. The sr-only span keeps the announcement the
               canvas can't provide. */}
-          {!webglFailed && nativeMap && currentLocation && (
+          {!webglFailed && adapterInstance && currentLocation && (
             <>
-              <CurrentLocationLayer map={nativeMap} coords={currentLocation} />
+              <CurrentLocationLayer
+                adapter={adapterInstance}
+                coords={currentLocation}
+              />
               <span className="sr-only">{i18n.map.currentLocation}</span>
             </>
           )}
-          {!webglFailed && nativeMap && hasLines && (
+          {!webglFailed && adapterInstance && hasLines && (
             <F0MapVectorLayer
-              map={nativeMap}
+              adapter={adapterInstance}
               routes={routes}
               arcs={arcs}
               isDark={isDark}
