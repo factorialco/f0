@@ -101,7 +101,7 @@ const F0MapClusterBase = forwardRef<HTMLDivElement, F0MapClusterProps>(
           // focus ring renders on the sized target span below via
           // `group-focus-visible:` (a ring on the div itself would be invisible).
           className={cn("group cursor-pointer outline-none", className)}
-          // Zero-size origin (like a single marker) so maplibre's `center`
+          // Zero-size origin (like a single marker) so the adapter's centred
           // anchor lands the origin exactly on the coordinate; everything is
           // centred on that origin. A single sized box would anchor off-centre.
           // The mount pop-in lives in the map layer's motion wrapper (one
