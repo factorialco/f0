@@ -1007,11 +1007,15 @@ export const defaultTranslations = {
     loadError: "Couldn't load the map.",
     retry: "Retry",
     currentLocation: "Your location",
+    panel: "Map panel",
+    detailPanel: "Map detail panel",
     controls: {
       zoomIn: "Zoom in",
       zoomOut: "Zoom out",
       fit: "Fit to markers",
       locate: "My location",
+      showPanel: "Show panel",
+      hidePanel: "Hide panel",
     },
   },
   wizard: {

@@ -1,7 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
+
+import { useState } from "react"
 import { expect, userEvent, within } from "storybook/test"
-import { F0Map } from "../F0Map"
 import type { F0MapPoint } from "../types"
+
+import { F0Map } from "../F0Map"
 
 // Barcelona-area points: the four product-semantic marker variants.
 const BARCELONA: F0MapPoint[] = [
@@ -119,6 +122,26 @@ export const Terrain: Story = {
  */
 export const WithMarkers: Story = {
   args: { markers: BARCELONA },
+}
+
+/**
+ * The side panel and the toggle that opens it. The panel slides in from the left
+ * edge the button sits on, wearing the same material as the overlay controls,
+ * and both control stacks step aside for it in the same movement. Pass `sidebar`
+ * to fill it; empty here, since its content is the consumer's.
+ */
+export const SidebarToggle: Story = {
+  render: (args) => {
+    const [expanded, setExpanded] = useState(false)
+    return (
+      <F0Map
+        {...args}
+        markers={BARCELONA}
+        sidebarExpanded={expanded}
+        onSidebarToggle={() => setExpanded((open) => !open)}
+      />
+    )
+  },
 }
 
 // One of each product-semantic marker variant, spread across Spain so none of

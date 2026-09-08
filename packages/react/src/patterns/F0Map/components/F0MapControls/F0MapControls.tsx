@@ -2,9 +2,10 @@ import { forwardRef } from "react"
 import { F0Button } from "@/components/F0Button"
 import { Add, FitView, Minus, Target } from "@/icons/app"
 import { DataTestIdWrapper } from "@/lib/data-testid"
-import { F0Box } from "@/lib/F0Box"
 import { useI18n } from "@/lib/providers/i18n"
 import type { F0MapControlsProps } from "./types"
+
+import { MapControlCard } from "../internal/MapControlCard"
 
 /**
  * The map's navigation toolbar - locate, fit, zoom in/out - as a vertical stack
@@ -19,22 +20,9 @@ export const F0MapControls = forwardRef<HTMLDivElement, F0MapControlsProps>(
     const hasZoomGroup = Boolean(onZoomIn || onZoomOut)
 
     // Each group sits on its own card so zoom and navigation read as two
-    // separate surfaces lifted off the map. F0Box has no backdrop-filter
-    // prop, so the frosted-glass blur lives on a wrapper whose radius matches
-    // the card - the translucent surface then frosts the map behind it.
+    // separate surfaces lifted off the map.
     const card = (children: React.ReactNode) => (
-      <div className="rounded-lg backdrop-blur-md">
-        <F0Box
-          background="inverse-secondary"
-          border="default"
-          borderStyle="solid"
-          borderColor="secondary"
-          borderRadius="lg"
-          padding="xs"
-        >
-          <div className="flex flex-col items-center gap-1">{children}</div>
-        </F0Box>
-      </div>
+      <MapControlCard>{children}</MapControlCard>
     )
 
     return (

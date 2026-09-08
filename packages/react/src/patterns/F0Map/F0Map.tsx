@@ -3,6 +3,7 @@ import "./F0Map.css"
 import maplibregl from "maplibre-gl"
 import {
   forwardRef,
+  type ReactNode,
   useCallback,
   useEffect,
   useId,
@@ -14,19 +15,6 @@ import { useReducedMotion } from "@/lib/a11y"
 import { DataTestIdWrapper, type WithDataTestIdProps } from "@/lib/data-testid"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-import {
-  F0MapControls,
-  type F0MapControlLabels,
-} from "./components/F0MapControls"
-import { F0MapList } from "./components/F0MapList"
-import { F0MapMarkersLayer } from "./components/F0MapMarkersLayer"
-import { F0MapVectorLayer } from "./components/F0MapVectorLayer"
-import { CurrentLocationLayer } from "./components/internal/CurrentLocationLayer"
-import { FLY_OPTS, RECOMMENDED_MAX_MARKERS } from "./constants"
-import { F0MapSkeleton } from "./F0MapSkeleton"
-import { useCurrentLocation } from "./hooks/useCurrentLocation"
-import { useIsDarkContext } from "./hooks/useIsDarkContext"
-import { f0MapStyles, type F0MapStylePair } from "./styles"
 import type {
   F0MapArc,
   F0MapPoint,
@@ -34,6 +22,30 @@ import type {
   F0MapViewport,
   F0MapViewportInset,
 } from "./types"
+import {
+  F0MapControls,
+  type F0MapControlLabels,
+} from "./components/F0MapControls"
+import { F0MapList } from "./components/F0MapList"
+import { F0MapMarkersLayer } from "./components/F0MapMarkersLayer"
+import {
+  F0MapSidebar,
+  mapPanelOffset,
+  mapPanelShift,
+} from "./components/F0MapSidebar"
+import { F0MapSidebarToggle } from "./components/F0MapSidebarToggle"
+import { F0MapVectorLayer } from "./components/F0MapVectorLayer"
+import { CurrentLocationLayer } from "./components/internal/CurrentLocationLayer"
+import {
+  MAP_CONTROL_INSET,
+  MAP_PANEL,
+  MAP_PANEL_TIMING,
+} from "./components/internal/mapSurface"
+import { FLY_OPTS, RECOMMENDED_MAX_MARKERS } from "./constants"
+import { F0MapSkeleton } from "./F0MapSkeleton"
+import { useCurrentLocation } from "./hooks/useCurrentLocation"
+import { useIsDarkContext } from "./hooks/useIsDarkContext"
+import { f0MapStyles, type F0MapStylePair } from "./styles"
 
 /** City-level default view (Barcelona) used when no `initialViewport` is given. */
 const DEFAULT_VIEWPORT: Required<F0MapViewport> = {
@@ -96,19 +108,22 @@ export interface F0MapProps extends WithDataTestIdProps {
    */
   highlightedId?: string | null
   /**
-   * Region of the map covered by external chrome, typically a side panel opened
-   * over it. Every camera move re-targets so the point lands centred in the free
-   * area beside the panel, and changing the value re-centres the current view -
-   * so opening, resizing or closing a panel keeps the selection visible. The
-   * consumer supplies it; the map has no notion of the panel.
+   * Region of the map covered by *external* chrome - a side panel the consumer
+   * opens over it. Every camera move re-targets so the point lands centred in
+   * the free area beside it, and changing the value re-centres the current view,
+   * so opening, resizing or closing that chrome keeps the selection visible.
+   *
+   * The map's own panels (`sidebar`, `detail`) need no reporting: it knows their
+   * geometry and folds them in itself. Both are measured from the same edges, so
+   * on each edge the wider of the two claims wins rather than the two stacking.
    */
   viewportInset?: F0MapViewportInset
   /**
    * Re-center the camera on a marker when it is clicked, at the current zoom,
    * so a selection never sits behind a panel opened over the map (it lands in
-   * the free area left by `viewportInset`). Defaults to `false`, which leaves
-   * the camera where it is. Zoom is untouched - use the `focusMarker` handle for
-   * the "take me there" flight that also zooms in.
+   * the free area left by the open panels and `viewportInset`). Defaults to
+   * `false`, which leaves the camera where it is. Zoom is untouched - use the
+   * `focusMarker` handle for the "take me there" flight that also zooms in.
    */
   centerOnMarkerClick?: boolean
   /**
@@ -155,11 +170,46 @@ export interface F0MapProps extends WithDataTestIdProps {
   showCurrentLocation?: boolean
   /**
    * Edge-to-edge presentation. `false` (default) frames the map as a card -
-   * large rounded corners, a secondary border, and controls inset 16px. `true`
-   * drops the frame so the map bleeds to its container's edges, with controls
-   * inset 24px.
+   * large rounded corners and a secondary border. `true` drops the frame so the
+   * map bleeds to its container's edges. The overlay controls sit 8px off the
+   * edges either way.
    */
   fullScreen?: boolean
+  /**
+   * Renders the panel toggle in the top-left corner, on the same control
+   * treatment as the navigation controls. Presence-driven, like `onFit`: pass a
+   * handler to show the button. `F0Map` draws no panel of its own - the
+   * consumer owns whatever the button opens.
+   */
+  onSidebarToggle?: () => void
+  /**
+   * Whether the panel the toggle controls is open. Drives which way the icon's
+   * arrow points. Defaults to `false`.
+   */
+  sidebarExpanded?: boolean
+  /**
+   * Content of the side panel the toggle opens. The panel is the map's own
+   * surface, sized and animated here; this is what goes inside it.
+   */
+  sidebar?: ReactNode
+  /**
+   * Content of a second panel, on the same surface, sliding in beside the first
+   * rather than over it - a detail view for whatever was picked in the list or
+   * on the map. Shown while `detailOpen` is true.
+   */
+  detail?: ReactNode
+  /**
+   * Whether the detail panel is open. Defaults to `false`. Pressing Escape
+   * inside the map ends the selection, so a detail panel driven by it closes
+   * on Escape without the consumer wiring anything.
+   */
+  detailOpen?: boolean
+  /**
+   * Clear the selection when the map background is clicked. Defaults to `true`.
+   * Set `false` when the selection opens something that must be dismissed
+   * deliberately - a detail panel shouldn't vanish on a stray click on the map.
+   */
+  clearSelectionOnBackgroundClick?: boolean
   /**
    * Map projection. `"mercator"` (default) is the flat web map; `"globe"`
    * renders the world as a 3D sphere at low zoom and eases into mercator as you
@@ -198,6 +248,23 @@ const cameraPadding = (
   right: base + (inset?.right ?? 0),
   bottom: base + (inset?.bottom ?? 0),
   left: base + (inset?.left ?? 0),
+})
+
+/**
+ * The camera's total occlusion: the consumer's external chrome merged with the
+ * map's own open panels. Both are measured from the same edges, so they overlap
+ * rather than stack - on each edge the wider claim wins. Merged here rather
+ * than left to the consumer: the map owns the panels' geometry, so a consumer
+ * that had to report it would be duplicating numbers it can't see.
+ */
+const mergeInsets = (
+  external: F0MapViewportInset | undefined,
+  own: F0MapViewportInset
+): F0MapViewportInset => ({
+  top: Math.max(external?.top ?? 0, own.top ?? 0),
+  right: Math.max(external?.right ?? 0, own.right ?? 0),
+  bottom: Math.max(external?.bottom ?? 0, own.bottom ?? 0),
+  left: Math.max(external?.left ?? 0, own.left ?? 0),
 })
 
 const fitToPoints = (
@@ -308,6 +375,12 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
     controlLabels,
     showCurrentLocation = false,
     fullScreen = false,
+    onSidebarToggle,
+    sidebarExpanded = false,
+    sidebar,
+    detail,
+    detailOpen = false,
+    clearSelectionOnBackgroundClick = true,
     projection = "mercator",
     loading = false,
     ariaLabel,
@@ -360,11 +433,41 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
     [selectedMarkerId, onMarkerSelect]
   )
 
+  // The detail panel sits beside the list panel while that one is open, and
+  // takes its place at the map's edge when opened on its own.
+  const listPanelOpen = sidebarExpanded
+  const detailPanelOpen = detailOpen && Boolean(detail)
+  const listOffset = mapPanelOffset([])
+  // With the list open the detail sits beside it; on its own it takes the map's
+  // edge, where the toggle floats over its top corner - so it starts below the
+  // toggle rather than under it.
+  const detailOffset = mapPanelOffset(
+    listPanelOpen ? [MAP_PANEL.listWidth] : []
+  )
+  const detailOffsetY = listPanelOpen
+    ? MAP_PANEL.inset
+    : MAP_PANEL.inset + MAP_PANEL.toggleSize + MAP_PANEL.gap
+  // Rightmost edge the controls have to clear, or null when nothing is open.
+  const rightmostPanelEdge = detailPanelOpen
+    ? detailOffset + MAP_PANEL.detailWidth
+    : listPanelOpen
+      ? listOffset + MAP_PANEL.listWidth
+      : null
+
+  // What the map's own panels take away from the camera: everything left of
+  // their outer edge, plus the shared gap so a centred marker lands beside the
+  // panel rather than against it - the same clearance the controls keep.
+  // Rebuilt every render; the effect that reacts to it compares by value, so a
+  // fresh object costs nothing.
+  const cameraInset = mergeInsets(viewportInset, {
+    left: rightmostPanelEdge === null ? 0 : rightmostPanelEdge + MAP_PANEL.gap,
+  })
+
   // Latest values read by map event handlers without re-binding.
   const markersRef = useRef(markers)
   markersRef.current = markers
-  const insetRef = useRef(viewportInset)
-  insetRef.current = viewportInset
+  const insetRef = useRef(cameraInset)
+  insetRef.current = cameraInset
   const selectedIdRef = useRef(selectedId)
   selectedIdRef.current = selectedId
   // What the camera was last told to do. A padding change has to *redo* that
@@ -380,6 +483,10 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
   projectionRef.current = projection
   const selectRef = useRef(selectMarker)
   selectRef.current = selectMarker
+  const clearSelectionOnBackgroundClickRef = useRef(
+    clearSelectionOnBackgroundClick
+  )
+  clearSelectionOnBackgroundClickRef.current = clearSelectionOnBackgroundClick
 
   // Only the marker-click path centers: the imperative handle and the marker
   // list already fly to their target, and a background click deselects.
@@ -473,6 +580,34 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
     },
     [reduceMotion, selectMarker]
   )
+
+  // Escape ends the selection, which is what closes the detail panel: the
+  // keyboard counterpart to a background click, and the only way out when the
+  // consumer has turned that click off - which is exactly what a detail panel
+  // does.
+  //
+  // On the document rather than the map's own container, because a click is
+  // how a selection is usually made and it does not reliably leave focus
+  // inside the map (clicking a panel row lands it back on `body`), so a
+  // container-scoped handler would simply never hear the key. Bound only while
+  // something is selected, so the map is deaf to Escape the rest of the time,
+  // and skipped when something nearer has already claimed the press -
+  // `preventDefault` then marks it spent so one press doesn't also close a
+  // dialog around the map.
+  useEffect(() => {
+    if (selectedId === null) return
+
+    const onKeyDown = (event: globalThis.KeyboardEvent) => {
+      if (event.key !== "Escape" || event.defaultPrevented) return
+
+      event.preventDefault()
+      selectMarker(null)
+    }
+
+    const doc = containerRef.current?.ownerDocument ?? document
+    doc.addEventListener("keydown", onKeyDown)
+    return () => doc.removeEventListener("keydown", onKeyDown)
+  }, [selectedId, selectMarker])
 
   useImperativeHandle(
     ref,
@@ -589,8 +724,13 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
     }
     map.on("error", handleError)
     // Background click clears the selection (marker clicks are DOM events on
-    // the marker element and never reach the canvas).
-    const handleBackgroundClick = () => selectRef.current(null)
+    // the marker element and never reach the canvas) - unless the consumer has
+    // opted out, because a panel the selection opened has to be dismissed
+    // deliberately rather than by a stray click on the map.
+    const handleBackgroundClick = () => {
+      if (!clearSelectionOnBackgroundClickRef.current) return
+      selectRef.current(null)
+    }
     map.on("click", handleBackgroundClick)
 
     return () => {
@@ -653,15 +793,16 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
     }
   }, [highlightedId, reduceMotion])
 
-  // Re-centre when the panel covering the map opens, resizes or closes. Camera
-  // padding is part of MapLibre's transform, so easing it with no `center`
-  // slides the current view into the free area and holds it there. Skipped on
-  // mount: the creation effect's fit already frames with the inset applied.
-  // Compared by value, not identity: a consumer that rebuilds the inset object
-  // every render must not re-ease the camera on each one.
+  // Re-centre when the space the camera has changes: one of the map's own
+  // panels sliding in or out, or the consumer's chrome opening, resizing or
+  // closing. Camera padding is part of MapLibre's transform, so easing it with
+  // no `center` slides the current view into the free area and holds it there.
+  // Skipped on mount: the creation effect's fit already frames with the inset
+  // applied. Compared by value, not identity: the merged inset is a fresh
+  // object every render and must not re-ease the camera on each one.
   const appliedInsetRef = useRef<string | null>(null)
   useEffect(() => {
-    const padding = cameraPadding(viewportInset, 0)
+    const padding = cameraPadding(cameraInset, 0)
     const signature = JSON.stringify(padding)
     if (signature === appliedInsetRef.current) return
 
@@ -701,15 +842,52 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
         !reduceMotion,
         routesRef.current,
         arcsRef.current,
-        viewportInset
+        cameraInset
       )
       return
     }
 
     map.easeTo({ padding, animate: !reduceMotion })
-  }, [viewportInset, reduceMotion])
+  }, [cameraInset, reduceMotion])
 
   const hasLines = routes.length > 0 || arcs.length > 0
+
+  // Both overlay stacks step aside for the open panels by the same distance.
+  // Translated rather than re-positioned: `left` would lay out and paint every
+  // frame.
+  const controlsShift = mapPanelShift(MAP_CONTROL_INSET, rightmostPanelEdge)
+
+  // They travel on the timing of whatever displaced them - a panel arriving or
+  // one leaving - so the two move as one thing rather than the controls running
+  // ahead of the panel pushing them. Every panel shares a curve and a duration
+  // per direction, so matching the direction is exact lockstep, which is also
+  // what keeps a panel from overlapping a control still in flight.
+  //
+  // The direction has to be known in the same commit that moves them: a CSS
+  // transition reads its duration when it starts, so learning it in an effect
+  // is too late. Hence deriving it during render, keyed on the value itself - a
+  // re-render with an unchanged shift leaves the history alone, so this
+  // survives being called twice for one commit (StrictMode does exactly that,
+  // and a plain `ref.current = shift` reads as "no change" the second time
+  // round).
+  const shiftHistory = useRef({ from: controlsShift, to: controlsShift })
+  if (shiftHistory.current.to !== controlsShift) {
+    shiftHistory.current = { from: shiftHistory.current.to, to: controlsShift }
+  }
+  const controlsTiming =
+    controlsShift > shiftHistory.current.from
+      ? MAP_PANEL_TIMING.enter
+      : MAP_PANEL_TIMING.exit
+
+  const controlsClassName = "absolute left-2 z-10"
+  // The controls' whole animation is travel, so reduced motion has nothing
+  // gentler to keep: they take their new position outright.
+  const controlsStyle = {
+    transform: `translateX(${controlsShift}px)`,
+    transitionProperty: reduceMotion ? "none" : "transform",
+    transitionDuration: controlsTiming.duration,
+    transitionTimingFunction: controlsTiming.easing,
+  }
 
   return (
     <DataTestIdWrapper dataTestId={dataTestId}>
@@ -778,12 +956,85 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
               onSelect={handleMarkerClick}
             />
           ) : null}
-          {!webglFailed && mapInstance && showControls && interactive ? (
+          {/* Rendered before the toggle and the list panel: with equal
+              z-index, paint order follows DOM order, so both sit above it. */}
+          {!webglFailed && mapInstance && detail && (
+            <F0MapSidebar
+              open={detailPanelOpen}
+              offsetX={detailOffset}
+              offsetY={detailOffsetY}
+              width={MAP_PANEL.detailWidth}
+              // Appears beside the list rather than from the map's edge, so it
+              // grows into place instead of crossing the panel next to it.
+              entrance="grow"
+              // The detail content brings its own header and section insets.
+              disableContentPadding
+              ariaLabel={i18n.map.detailPanel}
+            >
+              {detail}
+            </F0MapSidebar>
+          )}
+
+          {/* The map's own toggle. Never moves: it sits at the map's corner
+              whatever is open, riding over the detail panel and disappearing
+              under the list panel - which is the one that replaces it.
+
+              Rendered between the two panels, so with equal z-index paint order
+              puts it above the detail and below the list. And it stays mounted
+              rather than unmounting when the list covers it: with nothing there
+              the pointer would land on the canvas and take the map's grab
+              cursor, and a cursor only re-resolves on the next mouse move, so
+              it would sit wrong until you twitched. */}
+          {!webglFailed && mapInstance && onSidebarToggle && (
             <div
               className={cn(
-                "absolute z-10",
-                fullScreen ? "bottom-6 left-6" : "bottom-2 left-2"
+                "absolute left-2 top-2 z-10",
+                listPanelOpen && "opacity-0"
               )}
+              style={{
+                transitionProperty: reduceMotion ? "none" : "opacity",
+                transitionDuration: listPanelOpen
+                  ? MAP_PANEL_TIMING.enter.duration
+                  : MAP_PANEL_TIMING.exit.duration,
+                transitionTimingFunction: MAP_PANEL_TIMING.enter.easing,
+              }}
+            >
+              <F0MapSidebarToggle
+                expanded={false}
+                onToggle={onSidebarToggle}
+                // The panel's own toggle has taken over; this one only stays to
+                // hold the cursor, so it must not be tabbable or announced.
+                inactive={listPanelOpen}
+              />
+            </div>
+          )}
+
+          {!webglFailed && mapInstance && onSidebarToggle && (
+            <F0MapSidebar
+              open={listPanelOpen}
+              offsetX={listOffset}
+              width={MAP_PANEL.listWidth}
+              // Once the panel is open the toggle belongs to it, sitting in its
+              // header rather than travelling with the map's controls.
+              headerAction={
+                <F0MapSidebarToggle
+                  expanded
+                  onToggle={onSidebarToggle}
+                  // Inside the panel there is no map to lift it off, so no
+                  // card - just the button.
+                  bare
+                  dataTestId="map-panel-toggle-open"
+                />
+              }
+            >
+              {sidebar}
+            </F0MapSidebar>
+          )}
+
+          {!webglFailed && mapInstance && showControls && interactive ? (
+            <div
+              className={cn(controlsClassName, "bottom-2")}
+              style={controlsStyle}
             >
               <F0MapControls
                 onZoomIn={handleZoomIn}

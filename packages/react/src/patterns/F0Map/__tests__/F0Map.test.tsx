@@ -1,8 +1,10 @@
-import { createRef } from "react"
+import { type ComponentProps, createRef } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { fireEvent, screen, zeroRender as render } from "@/testing/test-utils"
-import { F0Map, type F0MapHandle } from "../F0Map"
 import type { F0MapArc, F0MapPoint, F0MapRoute } from "../types"
+
+import { MAP_PANEL } from "../components/internal/mapSurface"
+import { F0Map, type F0MapHandle } from "../F0Map"
 
 // maplibre-gl needs WebGL (absent in jsdom). Stub the classes F0Map touches,
 // recording camera calls so behaviour is observable. `throwOnCreate` simulates
@@ -486,6 +488,127 @@ describe("F0Map", () => {
     })
   })
 
+  // The map owns its panels' geometry, so a consumer never reports it: the
+  // camera has to fold the open ones in by itself. Left inset = the panel's
+  // outer edge (8px map inset + width, plus the detail's own 8px gap when it
+  // sits beside the list) plus the 8px clearance the controls also keep.
+  describe("own panels", () => {
+    // Derived from the panel geometry rather than restated, so resizing a panel
+    // doesn't fail these for the wrong reason.
+    const { inset, gap, listWidth, detailWidth } = MAP_PANEL
+    const LIST_EDGE = inset + listWidth + gap
+    const DETAIL_BESIDE_LIST_EDGE = LIST_EDGE + detailWidth + gap
+    const DETAIL_ALONE_EDGE = inset + detailWidth + gap
+
+    // `padding` comes off the recorded call as `unknown`.
+    const lastPadding = () =>
+      mock.instances[0].calls.easeTo.at(-1)?.padding as Record<string, number>
+
+    const withPanels = (props: Partial<ComponentProps<typeof F0Map>> = {}) => (
+      <F0Map
+        markers={POINTS}
+        sidebar={<div>list</div>}
+        onSidebarToggle={() => {}}
+        detail={<div>detail</div>}
+        {...props}
+      />
+    )
+
+    it("keeps the focus target clear of the open list panel", () => {
+      const ref = createRef<F0MapHandle>()
+      render(withPanels({ ref, sidebarExpanded: true }))
+      ref.current?.focusMarker("hq")
+
+      expect(mock.instances[0].calls.easeTo.at(-1)?.padding).toEqual({
+        top: 0,
+        right: 0,
+        bottom: 0,
+        left: LIST_EDGE,
+      })
+    })
+
+    it("clears both panels when the detail opens beside the list", () => {
+      const ref = createRef<F0MapHandle>()
+      render(withPanels({ ref, sidebarExpanded: true, detailOpen: true }))
+      ref.current?.focusMarker("hq")
+
+      expect(lastPadding().left).toBe(DETAIL_BESIDE_LIST_EDGE)
+    })
+
+    it("clears only the detail when it opens on its own", () => {
+      const ref = createRef<F0MapHandle>()
+      render(withPanels({ ref, detailOpen: true }))
+      ref.current?.focusMarker("hq")
+
+      expect(lastPadding().left).toBe(DETAIL_ALONE_EDGE)
+    })
+
+    it("ignores `detailOpen` with no detail content to show", () => {
+      const ref = createRef<F0MapHandle>()
+      render(withPanels({ ref, detail: null, detailOpen: true }))
+      ref.current?.focusMarker("hq")
+
+      expect(lastPadding().left).toBe(0)
+    })
+
+    it("re-centres the selection when a panel opens", () => {
+      const { rerender } = render(
+        withPanels({ selectedMarkerId: "hq", sidebarExpanded: false })
+      )
+      const before = mock.instances[0].calls.easeTo.length
+
+      rerender(withPanels({ selectedMarkerId: "hq", sidebarExpanded: true }))
+
+      const easeTo = mock.instances[0].calls.easeTo
+      expect(easeTo.length).toBe(before + 1)
+      expect(easeTo.at(-1)?.center).toEqual([2.19, 41.4])
+      expect(lastPadding().left).toBe(LIST_EDGE)
+    })
+
+    it("gives the space back when a panel closes", () => {
+      const { rerender } = render(
+        withPanels({ selectedMarkerId: "hq", sidebarExpanded: true })
+      )
+
+      rerender(withPanels({ selectedMarkerId: "hq", sidebarExpanded: false }))
+
+      expect(lastPadding().left).toBe(0)
+    })
+
+    it("frames the markers inside the free area on a fit", () => {
+      const ref = createRef<F0MapHandle>()
+      render(withPanels({ ref, sidebarExpanded: true }))
+      ref.current?.fitToMarkers()
+
+      const [, opts] = mock.instances[0].calls.fitBounds.at(-1) as [
+        unknown,
+        { padding: Record<string, number> },
+      ]
+      expect(opts.padding).toEqual({
+        top: 64,
+        right: 64,
+        bottom: 64,
+        left: 64 + LIST_EDGE,
+      })
+    })
+
+    it("takes the wider claim when external chrome covers the same edge", () => {
+      const ref = createRef<F0MapHandle>()
+      render(
+        withPanels({
+          ref,
+          sidebarExpanded: true,
+          viewportInset: { left: 400 },
+        })
+      )
+      ref.current?.focusMarker("hq")
+
+      // Both are measured from the left edge, so they overlap: 598 would be
+      // this panel counted twice.
+      expect(lastPadding().left).toBe(400)
+    })
+  })
+
   describe("centerOnMarkerClick", () => {
     // Pins render into the marker elements MapLibre hosts, in `markers` order,
     // as `aria-hidden` buttons (keyboard users get `F0MapList` instead).
@@ -552,6 +675,113 @@ describe("F0Map", () => {
       render(<F0Map markers={POINTS} onMarkerSelect={onMarkerSelect} />)
       fireEvent.click(screen.getByRole("button", { name: "Office" }))
       expect(onMarkerSelect).toHaveBeenCalledWith("office")
+    })
+  })
+
+  describe("Escape", () => {
+    const withDetail = (props: Partial<ComponentProps<typeof F0Map>> = {}) => (
+      <F0Map
+        markers={POINTS}
+        detail={<div>detail</div>}
+        // What a detail panel does: dismissal stops being a stray click's job,
+        // which leaves Escape as the way out.
+        clearSelectionOnBackgroundClick={false}
+        {...props}
+      />
+    )
+
+    const pressEscape = (init: KeyboardEventInit = {}) =>
+      fireEvent.keyDown(document, { key: "Escape", ...init })
+
+    it("ends the selection, closing the detail panel", () => {
+      const onMarkerSelect = vi.fn()
+      render(
+        withDetail({
+          selectedMarkerId: "office",
+          detailOpen: true,
+          onMarkerSelect,
+        })
+      )
+
+      pressEscape()
+
+      expect(onMarkerSelect).toHaveBeenCalledWith(null)
+    })
+
+    it("hears the key wherever focus is", () => {
+      // A click is how a selection is usually made, and it does not leave
+      // focus inside the map - so the map must not depend on it being there.
+      const onMarkerSelect = vi.fn()
+      render(
+        withDetail({
+          selectedMarkerId: "office",
+          detailOpen: true,
+          onMarkerSelect,
+        })
+      )
+      expect(document.activeElement).toBe(document.body)
+
+      pressEscape()
+
+      expect(onMarkerSelect).toHaveBeenCalledWith(null)
+    })
+
+    it("is deaf to Escape with nothing selected", () => {
+      const onMarkerSelect = vi.fn()
+      render(withDetail({ selectedMarkerId: null, onMarkerSelect }))
+
+      pressEscape()
+
+      expect(onMarkerSelect).not.toHaveBeenCalled()
+    })
+
+    it("leaves a press something nearer already claimed alone", () => {
+      const onMarkerSelect = vi.fn()
+      render(
+        withDetail({
+          selectedMarkerId: "office",
+          detailOpen: true,
+          onMarkerSelect,
+        })
+      )
+
+      // Whatever handled it first - a dialog over the map - owns the press.
+      const event = new window.KeyboardEvent("keydown", {
+        key: "Escape",
+        cancelable: true,
+      })
+      event.preventDefault()
+      document.dispatchEvent(event)
+
+      expect(onMarkerSelect).not.toHaveBeenCalled()
+    })
+
+    it("marks the press it used as spent", () => {
+      render(withDetail({ selectedMarkerId: "office", detailOpen: true }))
+
+      const event = new window.KeyboardEvent("keydown", {
+        key: "Escape",
+        cancelable: true,
+      })
+      document.dispatchEvent(event)
+
+      // Otherwise one press would close the panel and a dialog holding it.
+      expect(event.defaultPrevented).toBe(true)
+    })
+
+    it("ignores other keys", () => {
+      const onMarkerSelect = vi.fn()
+      render(
+        withDetail({
+          selectedMarkerId: "office",
+          detailOpen: true,
+          onMarkerSelect,
+        })
+      )
+
+      fireEvent.keyDown(document, { key: "Enter" })
+
+      expect(onMarkerSelect).not.toHaveBeenCalled()
     })
   })
 

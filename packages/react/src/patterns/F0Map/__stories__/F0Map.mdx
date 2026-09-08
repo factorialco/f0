@@ -122,6 +122,25 @@ grown pin). `highlightedId` is a separate, lighter channel - it floats a marker
 above the rest, keeps its label, and flies to it - meant for an **external
 search / reveal** (search lives outside the map, as in F0Graph).
 
+### Side panel
+
+`onSidebarToggle` puts a panel toggle in the top-left corner, on the same
+material and inset as the navigation controls. With `sidebarExpanded` true the
+panel slides in from the left edge the button sits on - 8px from the map's left,
+top and bottom - and both control stacks translate aside to keep 16px of air
+between themselves and it. `sidebar` is what goes inside; the panel itself is
+just the surface. See the `SidebarToggle` story.
+
+`detail` / `detailOpen` open a second panel on the same surface, sliding in
+_beside_ the list rather than over it - the detail view for whatever was picked
+in the list or on the map.
+
+The camera treats both as space it doesn't have: the free area beside the open
+panels is what a fit frames and what a focused or clicked marker centres in, and
+opening or closing one re-centres the current view so the selection never ends
+up behind a panel. Nothing to report - the map owns the panels' geometry.
+`viewportInset` is only for chrome the _consumer_ puts over the map.
+
 ### Current location
 
 `showCurrentLocation` renders a "you are here" dot once the user has granted
@@ -154,7 +173,7 @@ page scroll. Use `"greedy"` for a dedicated/full-screen map.
 ### Presentation
 
 `fullScreen={false}` (default) frames the map as a card - rounded corners and a
-subtle border, controls inset 16px. `fullScreen` drops the frame for an
+subtle border, controls inset 6px. `fullScreen` drops the frame for an
 edge-to-edge map. Theme always follows the nearest `.dark` ancestor, restyling
 live when the app theme toggles.
 

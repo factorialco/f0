@@ -34,6 +34,14 @@ export type {
   F0MapControlsProps,
   F0MapControlLabels,
 } from "./components/F0MapControls"
+/** The map's side panel. `F0Map` renders it from `sidebarExpanded`; exported
+ * for custom compositions. */
+export { F0MapSidebar } from "./components/F0MapSidebar"
+export type { F0MapSidebarProps } from "./components/F0MapSidebar"
+/** The map's panel toggle. `F0Map` renders it when given `onSidebarToggle`, but
+ * it's exported for custom compositions. */
+export { F0MapSidebarToggle } from "./components/F0MapSidebarToggle"
+export type { F0MapSidebarToggleProps } from "./components/F0MapSidebarToggle"
 /** The accessible marker list - screen-reader text alternative + render
  * fallback. `F0Map` renders it automatically; exported for custom use. */
 export { F0MapList } from "./components/F0MapList"
