@@ -1,0 +1,235 @@
+{
+  "version": 1,
+  "generatedAt": "2026-06-17T09:51:09.565Z",
+  "format": "Each item: { n: name, s: section letter (C|P|K|L), d: short description, p: comma-joined top prop names }",
+  "components": [
+    {
+      "n": "ApplicationFrame",
+      "s": "P",
+      "d": "The product shell. Wraps a page with a collapsible sidebar and main co",
+      "p": "ai,aiPromotion,banner,sidebar,children"
+    },
+    {
+      "n": "F0Accordion",
+      "s": "C",
+      "d": ""
+    },
+    {
+      "n": "F0ActionBar",
+      "s": "C",
+      "d": "",
+      "p": "isOpen,primaryActions,secondaryActions,label,variant"
+    },
+    {
+      "n": "F0Alert",
+      "s": "C",
+      "d": "Inline alert/banner for status messages. Variants: info, warning, crit"
+    },
+    {
+      "n": "F0AnalyticsDashboard",
+      "s": "P",
+      "d": ""
+    },
+    {
+      "n": "F0BigNumber",
+      "s": "C",
+      "d": "KPI card with a large numeric value, optional label, trend indicator a"
+    },
+    {
+      "n": "F0Button",
+      "s": "C",
+      "d": "Action button. Variants for hierarchy (default, outline, neutral, crit",
+      "p": "variant"
+    },
+    {
+      "n": "F0ButtonDropdown",
+      "s": "C",
+      "d": ""
+    },
+    {
+      "n": "F0ButtonToggle",
+      "s": "C",
+      "d": ""
+    },
+    {
+      "n": "F0ButtonToggleGroup",
+      "s": "C",
+      "d": ""
+    },
+    {
+      "n": "F0Card",
+      "s": "C",
+      "d": "Container card with optional title, description, icon and footer actio"
+    },
+    {
+      "n": "F0Checkbox",
+      "s": "C",
+      "d": ""
+    },
+    {
+      "n": "F0ChipList",
+      "s": "C",
+      "d": ""
+    },
+    {
+      "n": "F0DataChart",
+      "s": "K",
+      "d": "Generic chart wrapper supporting line, bar, area, pie. Pass series + l"
+    },
+    {
+      "n": "F0DatePicker",
+      "s": "C",
+      "d": ""
+    },
+    {
+      "n": "F0Dialog",
+      "s": "P",
+      "d": "",
+      "p": "title,description,module,otherActions,navigation"
+    },
+    {
+      "n": "F0DurationInput",
+      "s": "C",
+      "d": ""
+    },
+    {
+      "n": "F0FileItem",
+      "s": "C",
+      "d": "",
+      "p": "file,actions,disabled,size"
+    },
+    {
+      "n": "F0FilterPickerContent",
+      "s": "P",
+      "d": ""
+    },
+    {
+      "n": "F0Form",
+      "s": "P",
+      "d": ""
+    },
+    {
+      "n": "F0FormField",
+      "s": "P",
+      "d": ""
+    },
+    {
+      "n": "F0Graph",
+      "s": "P",
+      "d": "",
+      "p": "nodes,edges,rootNodes,loadChildren,deferredNodes"
+    },
+    {
+      "n": "F0Heading",
+      "s": "C",
+      "d": "Typographic heading. Pass text via `content` (NOT children). `variant`",
+      "p": "variant,as"
+    },
+    {
+      "n": "F0Icon",
+      "s": "C",
+      "d": "",
+      "p": "icon,size,state,color"
+    },
+    {
+      "n": "F0InputField",
+      "s": "C",
+      "d": ""
+    },
+    {
+      "n": "F0Link",
+      "s": "C",
+      "d": "",
+      "p": "variant,stopPropagation,href"
+    },
+    {
+      "n": "F0NumberInput",
+      "s": "C",
+      "d": ""
+    },
+    {
+      "n": "F0SearchInput",
+      "s": "C",
+      "d": "",
+      "p": "value,threshold,debounceTime,autoFocus"
+    },
+    {
+      "n": "F0Select",
+      "s": "C",
+      "d": ""
+    },
+    {
+      "n": "F0Slider",
+      "s": "C",
+      "d": ""
+    },
+    {
+      "n": "F0TableOfContentPopover",
+      "s": "C",
+      "d": ""
+    },
+    {
+      "n": "F0Text",
+      "s": "C",
+      "d": "Body text. Pass text via `content` (NOT children). `variant`: \"body\" |",
+      "p": "variant,as,markdown"
+    },
+    {
+      "n": "F0TextAreaInput",
+      "s": "C",
+      "d": ""
+    },
+    {
+      "n": "F0TextInput",
+      "s": "C",
+      "d": ""
+    },
+    {
+      "n": "F0Widget",
+      "s": "C",
+      "d": ""
+    },
+    {
+      "n": "F0WizardForm",
+      "s": "P",
+      "d": ""
+    },
+    {
+      "n": "OneCalendar",
+      "s": "C",
+      "d": ""
+    },
+    {
+      "n": "OneChip",
+      "s": "C",
+      "d": "Compact chip/tag — exported as `Chip`. Variants are limited to \"defaul"
+    },
+    {
+      "n": "OneDataCollection",
+      "s": "P",
+      "d": "The flagship collection pattern: tables, lists, kanbans and grids over",
+      "p": "source,visualizations,onSelectItems,onBulkAction,autoManageBulkActionStatus"
+    },
+    {
+      "n": "OneDateNavigator",
+      "s": "P",
+      "d": ""
+    },
+    {
+      "n": "OneEmptyState",
+      "s": "C",
+      "d": "Empty state with optional emoji, title, description and action buttons"
+    },
+    {
+      "n": "OneFilterPicker",
+      "s": "P",
+      "d": ""
+    },
+    {
+      "n": "Page",
+      "s": "P",
+      "d": "",
+      "p": "children,header,embedded"
+    }
+  ]
+}
