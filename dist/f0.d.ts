@@ -15599,11 +15599,12 @@ declare type MapVisualizationOptions<R extends RecordType, _Filters extends Filt
      * Rows of the map's side panel, the one the top-left toggle opens. The panel
      * is split into two sections the visualization renders itself - "Not on map"
      * first, for records `coordinates` could not place, then "On map" - and this
-     * is called once per section with that section's records. They are the very
-     * records the map is drawing (or failing to draw) markers for - the same
-     * page, from the same load - so the list beside the map can never disagree
-     * with it. The panel itself is the map's surface; this is what goes inside
-     * each section.
+     * is called once per section with that section's records (or once with
+     * every match, flat, while the panel's own search has something typed in
+     * it). They are the very records the map is drawing (or failing to draw)
+     * markers for - the same page, from the same load - so the list beside the
+     * map can never disagree with it. The panel itself is the map's surface;
+     * this is what goes inside each section.
      *
      * The visualization owns the panel's scrolling, so return the rows, not a
      * scroll container of your own.
@@ -15613,6 +15614,18 @@ declare type MapVisualizationOptions<R extends RecordType, _Filters extends Filt
      * is not on the map opens its detail without moving the camera.
      */
     sidebar?: (records: R[], api: MapSidebarApi<R>) => ReactNode;
+    /**
+     * Text the panel's own search matches a record against - a name, a role, a
+     * workplace, whatever its row shows; concatenate the fields worth matching.
+     * Given it, the panel's header carries a search that filters the rows it
+     * lists, and while something is typed the two sections flatten into one list
+     * of matches - a result is a result, whether or not it is on the map. It
+     * searches the records the panel already has, not the collection: the
+     * toolbar's search is the one that narrows the whole view.
+     *
+     * Left out, there is nothing to match on, and no search is offered.
+     */
+    sidebarSearchText?: (record: R) => string;
     /**
      * Content of a second panel, sliding in beside the first rather than over it.
      * Called with the selected record - whichever was picked, from a marker or
@@ -20795,9 +20808,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        fontSize: {
-            setFontSize: (fontSize: string) => ReturnType;
-            unsetFontSize: () => ReturnType;
+        indent: {
+            setIndent: (level: number) => ReturnType;
+            unsetIndent: () => ReturnType;
+            outdent: () => ReturnType;
         };
     }
 }
@@ -20805,10 +20819,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        indent: {
-            setIndent: (level: number) => ReturnType;
-            unsetIndent: () => ReturnType;
-            outdent: () => ReturnType;
+        fontSize: {
+            setFontSize: (fontSize: string) => ReturnType;
+            unsetFontSize: () => ReturnType;
         };
     }
 }

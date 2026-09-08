@@ -8371,8 +8371,16 @@ export declare interface F0MapProps extends WithDataTestIdProps {
      */
     sidebarToggleAddon?: ReactNode;
     /**
+     * A control for the start of the panel's own header row, opposite the toggle
+     * that holds its far end - a search that filters what the panel lists, say.
+     * Only shown while the panel is open, since that row is the panel's.
+     */
+    sidebarHeaderStart?: ReactNode;
+    /**
      * Content of the side panel the toggle opens. The panel is the map's own
-     * surface, sized and animated here; this is what goes inside it.
+     * surface, sized and animated here; this is what goes inside it. It gets the
+     * panel bare - below the header row, edge to edge, no padding and no scroll
+     * container - so sections can span the full width and scroll as one list.
      */
     sidebar?: ReactNode;
     /**
@@ -8435,7 +8443,7 @@ export declare interface F0MapRoute extends F0MapLineStyle {
  *
  * Presentational: `F0Map` owns the open state and the geometry.
  */
-export declare const F0MapSidebar: ({ children, open, offsetX, offsetY, width, disableContentPadding, entrance, headerAction, ariaLabel, dataTestId, }: F0MapSidebarProps) => JSX_2.Element;
+export declare const F0MapSidebar: ({ children, open, offsetX, offsetY, width, disableContentPadding, entrance, headerStart, headerEnd, ariaLabel, dataTestId, }: F0MapSidebarProps) => JSX_2.Element;
 
 export declare interface F0MapSidebarProps extends WithDataTestIdProps {
     children?: ReactNode;
@@ -8451,9 +8459,10 @@ export declare interface F0MapSidebarProps extends WithDataTestIdProps {
     /** Panel width, in px. */
     width: number;
     /**
-     * Drop the panel's own padding and scrolling, for content that brings both
+     * Drop the content area's padding and scrolling, for content that brings both
      * (a header that spans the full width, sections with their own insets and
-     * their own scroll region). Defaults to `false`.
+     * their own scroll region). Defaults to `false`. The header row keeps its own
+     * 2px either way - that is what aligns its control with the map's.
      */
     disableContentPadding?: boolean;
     /**
@@ -8465,12 +8474,15 @@ export declare interface F0MapSidebarProps extends WithDataTestIdProps {
      */
     entrance?: "slide" | "grow";
     /**
-     * A control belonging to the panel itself, in a header row of its own. The
-     * row is reserved space, not an overlay: the content below gets whatever
-     * height is left and scrolls inside it, so nothing ever passes under the
-     * control or is clipped by it.
+     * A control belonging to the panel itself, at the start of a header row of
+     * its own. The row is reserved space, not an overlay: the content below gets
+     * whatever height is left and scrolls inside it, so nothing ever passes
+     * under the control or is clipped by it. It also takes the width the row has
+     * left, so a control that opens into a field has somewhere to open into.
      */
-    headerAction?: ReactNode;
+    headerStart?: ReactNode;
+    /** A second control in that same header row, at its far end. */
+    headerEnd?: ReactNode;
     /** Names the region for assistive tech. Defaults to the map's panel label. */
     ariaLabel?: string;
 }
@@ -11365,11 +11377,12 @@ export declare type MapVisualizationOptions<R extends RecordType, _Filters exten
      * Rows of the map's side panel, the one the top-left toggle opens. The panel
      * is split into two sections the visualization renders itself - "Not on map"
      * first, for records `coordinates` could not place, then "On map" - and this
-     * is called once per section with that section's records. They are the very
-     * records the map is drawing (or failing to draw) markers for - the same
-     * page, from the same load - so the list beside the map can never disagree
-     * with it. The panel itself is the map's surface; this is what goes inside
-     * each section.
+     * is called once per section with that section's records (or once with
+     * every match, flat, while the panel's own search has something typed in
+     * it). They are the very records the map is drawing (or failing to draw)
+     * markers for - the same page, from the same load - so the list beside the
+     * map can never disagree with it. The panel itself is the map's surface;
+     * this is what goes inside each section.
      *
      * The visualization owns the panel's scrolling, so return the rows, not a
      * scroll container of your own.
@@ -11379,6 +11392,18 @@ export declare type MapVisualizationOptions<R extends RecordType, _Filters exten
      * is not on the map opens its detail without moving the camera.
      */
     sidebar?: (records: R[], api: MapSidebarApi<R>) => ReactNode;
+    /**
+     * Text the panel's own search matches a record against - a name, a role, a
+     * workplace, whatever its row shows; concatenate the fields worth matching.
+     * Given it, the panel's header carries a search that filters the rows it
+     * lists, and while something is typed the two sections flatten into one list
+     * of matches - a result is a result, whether or not it is on the map. It
+     * searches the records the panel already has, not the collection: the
+     * toolbar's search is the one that narrows the whole view.
+     *
+     * Left out, there is nothing to match on, and no search is offered.
+     */
+    sidebarSearchText?: (record: R) => string;
     /**
      * Content of a second panel, sliding in beside the first rather than over it.
      * Called with the selected record - whichever was picked, from a marker or
@@ -16372,9 +16397,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        fontSize: {
-            setFontSize: (fontSize: string) => ReturnType;
-            unsetFontSize: () => ReturnType;
+        indent: {
+            setIndent: (level: number) => ReturnType;
+            unsetIndent: () => ReturnType;
+            outdent: () => ReturnType;
         };
     }
 }
@@ -16382,10 +16408,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        indent: {
-            setIndent: (level: number) => ReturnType;
-            unsetIndent: () => ReturnType;
-            outdent: () => ReturnType;
+        fontSize: {
+            setFontSize: (fontSize: string) => ReturnType;
+            unsetFontSize: () => ReturnType;
         };
     }
 }
