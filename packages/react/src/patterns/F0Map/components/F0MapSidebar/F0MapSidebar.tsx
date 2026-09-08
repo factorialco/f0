@@ -8,7 +8,7 @@ import {
   MAP_PANEL,
   MAP_PANEL_ENTRANCE,
   MAP_PANEL_TIMING,
-  mapSurfaceBlur,
+  mapSurfaceClassName,
   mapSurfaceProps,
   mapSurfaceRadius,
 } from "../internal/mapSurface"
@@ -182,7 +182,7 @@ export const F0MapSidebar = ({
             // shrinking any consumer content whose type doesn't pin its own
             // size. Back to the app base.
             "relative h-full overflow-hidden text-base",
-            mapSurfaceBlur(mapSurfaceRadius.panel),
+            mapSurfaceClassName(mapSurfaceRadius.panel),
             open ? "pointer-events-auto" : "opacity-0"
           )}
           style={{

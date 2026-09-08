@@ -3,12 +3,13 @@
  * Held in one place so the navigation controls, the panel toggle and the side
  * panel read as one material instead of three lookalikes that drift apart.
  *
- * `F0Box` has no backdrop-filter prop, so the frosted-glass blur lives on a
- * wrapper whose radius matches the card - the translucent surface then frosts
- * the map behind it. `mapSurfaceBlur` is that wrapper's class.
+ * The border is `F0Box`'s; the fill and the frosted-glass blur are not. `F0Box`
+ * has no backdrop-filter prop, and it takes one background where this surface
+ * needs a different token per theme, so both live on the wrapper whose radius
+ * matches the card - `mapSurfaceClassName`.
  */
 export const mapSurfaceProps = {
-  background: "inverse-secondary",
+  background: "transparent",
   border: "default",
   borderStyle: "solid",
   borderColor: "secondary",
@@ -32,9 +33,18 @@ const BLUR_BY_RADIUS = {
   xl: "rounded-xl backdrop-blur-md",
 } as const
 
-export const mapSurfaceBlur = (
+/**
+ * The fill, per theme. `inverse-secondary` is 60% white in both themes - it is
+ * meant for a light veil - so in the dark it would leave a pale card floating
+ * over dark tiles. `tertiary` inverts with the theme, and is the swap
+ * `ui/Action`'s outline variant makes for the same token.
+ */
+const SURFACE_FILL =
+  "bg-f1-background-inverse-secondary dark:bg-f1-background-tertiary"
+
+export const mapSurfaceClassName = (
   radius: (typeof mapSurfaceRadius)[keyof typeof mapSurfaceRadius]
-) => BLUR_BY_RADIUS[radius]
+) => `${BLUR_BY_RADIUS[radius]} ${SURFACE_FILL}`
 
 /**
  * Geometry shared by the side panels and the overlay controls beside them. One
