@@ -13,7 +13,7 @@ import { DataCollectionSource } from "../../../hooks/useDataCollectionSource/typ
 import { ItemActionsDefinition } from "../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
 import { SummariesDefinition } from "../../../summary"
-import type { MapVisualizationOptions } from "./types"
+import type { MapSidebarApi, MapVisualizationOptions } from "./types"
 import { MapCollection } from "."
 
 // Stub the whole F0Map module: these tests are about what the visualization
@@ -781,12 +781,30 @@ describe("MapCollection — records it cannot place", () => {
   })
 
   it("lists an incomplete record like any other unplaced one", async () => {
-    // `kind` is kept on the API for the distinction to be drawn later; the
-    // view does not yet treat the two differently.
+    // Both are records with no pin, so both are listed here. What sets them
+    // apart is the reason the panel reports for each - see below.
     renderMap({ sidebar: rows })
     await waitForMap()
 
     expect(idsIn(await expandNotOnMap())).toEqual(UNPLACED)
+  })
+
+  it("reports why each record has no pin, so a row can say so", async () => {
+    let api!: MapSidebarApi<Office>
+    renderMap({
+      sidebar: (_records, sidebarApi) => {
+        api = sidebarApi
+        return null
+      },
+    })
+    await waitForMap()
+
+    // Drawn: nothing to explain.
+    expect(api.placement(offices[0])).toBe("placed")
+    // `coordinates` gave `null` and no reason with it.
+    expect(api.placement(offices[2])).toBe("unplaced")
+    // ...and here it said why, which is the whole point of the `kind`.
+    expect(api.placement(offices[3])).toBe("incomplete")
   })
 
   it("wears their avatars on the count when they are all people", async () => {

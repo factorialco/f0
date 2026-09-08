@@ -65,6 +65,27 @@ const storyFrame = "h-[600px] bg-f1-background pt-5"
 /** How many search-preview rows arrive per page, so the dropdown paginates. */
 const SEARCH_PREVIEW_PAGE_SIZE = 5
 
+/**
+ * Why a row has no pin, in the words its reason deserves. The panel reports the
+ * reason per record and the rows are ours, so the copy is ours too: a record
+ * that should carry a location and does not is somebody's to go and fix, while
+ * one that never had a location is just a fact about it. Nothing to say about a
+ * record the map did place.
+ */
+const NO_PIN_MARKER = {
+  placed: undefined,
+  unplaced: {
+    icon: Icons.PinOff,
+    tooltip: "No location set",
+    tooltipDescription: "Set a location to place a pin on the map",
+  },
+  incomplete: {
+    icon: Icons.PinOff,
+    tooltip: "Location incomplete",
+    tooltipDescription: "Finish the address to place a pin on the map",
+  },
+} as const
+
 /** One label per variant, so the demo map names what each pin is showing. */
 const VARIANT_LABELS = [
   "Default",
@@ -478,7 +499,10 @@ export const InApp: Story = {
             // never drift apart as filters and search narrow the set.
             // Called once per panel section ("Not on map", "On map") with
             // that section's records; the visualization owns the scrolling.
-            sidebar: (records: MockUser[], { select, selectedRecordId }) => (
+            sidebar: (
+              records: MockUser[],
+              { select, selectedRecordId, placement }
+            ) => (
               <div className="flex flex-col gap-1">
                 {records.map((user) => {
                   const [firstName = "", lastName = ""] = user.name.split(" ")
@@ -491,6 +515,10 @@ export const InApp: Story = {
                       // showing, so repeating it on every row says nothing the
                       // pin beside it doesn't. The detail panel carries it.
                       description={user.role}
+                      // Why this row has no pin beside it, in the words that
+                      // fit the reason. Nothing on a record the map placed, so
+                      // the marker means something when it does show up.
+                      rightIcon={NO_PIN_MARKER[placement(user)]}
                       withPointerCursor
                       // The row for whatever the detail panel is showing, so
                       // the list says which record you are looking at.

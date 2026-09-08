@@ -269,7 +269,12 @@ collection:
   alike.
 
 Both are handed a `select` / `selectedRecordId` pair, which is what lets a row
-drive the map's own selection. With a `detail` panel in play a click on the map
+drive the map's own selection, and a `placement(record)` that answers `"placed"`,
+`"unplaced"` or the `kind` `coordinates` gave for turning the record down - so a
+row can say why it has no pin, in the words its reason deserves. The rows are
+yours, so that copy is yours: the story marks an unplaced row with a pin-off
+icon whose tooltip differs for a record that never had a location and one whose
+address is unfinished. With a `detail` panel in play a click on the map
 background no longer clears the selection - dismissal becomes deliberate:
 the panel's own close button, or Escape.
 

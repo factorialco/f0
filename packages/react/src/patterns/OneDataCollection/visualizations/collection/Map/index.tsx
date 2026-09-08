@@ -159,33 +159,39 @@ export const MapCollection = <
   // it cannot place. The unplaced are not dropped: a record with nowhere to be
   // drawn is still a record, so it goes to the "Not on map" section of the
   // panel and into the count on the map, rather than pinned at [0, 0] or lost.
-  const { points, placedIds, placedRecords, unplaced } = useMemo(() => {
-    const points: F0MapPoint[] = []
-    const placedIds = new Set<string>()
-    const placedRecords: Record[] = []
-    const unplaced: Unplaced<Record>[] = []
-    for (const record of records) {
-      const position = coordinates(record)
-      if (position === null) {
-        unplaced.push({ record, kind: null })
-        continue
+  const { points, placedIds, placedRecords, unplaced, unplacedKinds } =
+    useMemo(() => {
+      const points: F0MapPoint[] = []
+      const placedIds = new Set<string>()
+      const placedRecords: Record[] = []
+      const unplaced: Unplaced<Record>[] = []
+      // Kept by id as well as on the entry, so the panel can be asked about one
+      // record without walking the list for it.
+      const unplacedKinds = new Map<string, MapUnplaced["kind"] | null>()
+      for (const record of records) {
+        const position = coordinates(record)
+        if (position === null) {
+          unplaced.push({ record, kind: null })
+          unplacedKinds.set(recordId(record), null)
+          continue
+        }
+        if (!Array.isArray(position)) {
+          unplaced.push({ record, kind: position.kind })
+          unplacedKinds.set(recordId(record), position.kind)
+          continue
+        }
+        const id = recordId(record)
+        placedIds.add(id)
+        placedRecords.push(record)
+        points.push({
+          id,
+          coordinates: position,
+          label: label?.(record),
+          ...(marker?.(record) ?? { variant: "default" }),
+        })
       }
-      if (!Array.isArray(position)) {
-        unplaced.push({ record, kind: position.kind })
-        continue
-      }
-      const id = recordId(record)
-      placedIds.add(id)
-      placedRecords.push(record)
-      points.push({
-        id,
-        coordinates: position,
-        label: label?.(record),
-        ...(marker?.(record) ?? { variant: "default" }),
-      })
-    }
-    return { points, placedIds, placedRecords, unplaced }
-  }, [records, coordinates, label, marker, recordId])
+      return { points, placedIds, placedRecords, unplaced, unplacedKinds }
+    }, [records, coordinates, label, marker, recordId])
 
   // Selection is tracked here so a marker click can hand the consumer the whole
   // record (for a side panel) while `F0Map` only ever deals in ids. Controlled
@@ -289,8 +295,15 @@ export const MapCollection = <
         }
       },
       selectedRecordId: selectedId,
+      placement: (record: Record) => {
+        const id = recordId(record)
+        if (placedIds.has(id)) {
+          return "placed" as const
+        }
+        return unplacedKinds.get(id) ?? ("unplaced" as const)
+      },
     }),
-    [selectRecord, recordId, selectedId, placedIds]
+    [selectRecord, recordId, selectedId, placedIds, unplacedKinds]
   )
 
   const selectedRecord = selectedId
