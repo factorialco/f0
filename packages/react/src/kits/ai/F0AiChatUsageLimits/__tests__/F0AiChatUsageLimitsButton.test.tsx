@@ -6,7 +6,7 @@ import { F0AiChatUsageLimitsButton } from "../F0AiChatUsageLimitsButton"
 
 const openPopover = async () => {
   await userEvent.click(
-    screen.getByRole("button", { name: /your usage limits/i })
+    screen.getByRole("button", { name: /personal allowance/i })
   )
   return screen.findByRole("dialog")
 }
@@ -16,7 +16,7 @@ describe("F0AiChatUsageLimitsButton", () => {
     render(<F0AiChatUsageLimitsButton usage={{ usedPercentage: 30 }} />)
 
     expect(
-      screen.getByRole("button", { name: "Your usage limits: 30% used" })
+      screen.getByRole("button", { name: "Personal allowance: 30% used" })
     ).toBeInTheDocument()
   })
 
@@ -24,7 +24,7 @@ describe("F0AiChatUsageLimitsButton", () => {
     render(<F0AiChatUsageLimitsButton usage={{ usedPercentage: 30 }} />)
     const dialog = await openPopover()
 
-    expect(dialog).toHaveTextContent("Your usage limits")
+    expect(dialog).toHaveTextContent("Personal allowance")
     expect(dialog).toHaveTextContent("30% used")
     expect(
       screen.queryByRole("button", { name: /your company/i })
@@ -40,7 +40,7 @@ describe("F0AiChatUsageLimitsButton", () => {
           usedPercentage: 30,
           onSeeCompany,
           sections: [
-            { id: "company", label: "Company pool", usedPercentage: 70 },
+            { id: "company", label: "Company allowance", usedPercentage: 70 },
             { id: "current", label: "Current usage", usedPercentage: 12 },
           ],
         }}
@@ -48,7 +48,7 @@ describe("F0AiChatUsageLimitsButton", () => {
     )
     await openPopover()
 
-    expect(screen.getByText("Company pool")).toBeInTheDocument()
+    expect(screen.getByText("Company allowance")).toBeInTheDocument()
     expect(screen.getByText("70% used")).toBeInTheDocument()
     expect(screen.getByText("12% used")).toBeInTheDocument()
     await userEvent.click(screen.getByRole("button", { name: /your company/i }))
@@ -59,7 +59,7 @@ describe("F0AiChatUsageLimitsButton", () => {
     render(<F0AiChatUsageLimitsButton usage={{ usedPercentage: 137 }} />)
     await openPopover()
 
-    const bar = screen.getByRole("progressbar", { name: "Your usage limits" })
+    const bar = screen.getByRole("progressbar", { name: "Personal allowance" })
     expect(bar).toHaveAttribute("aria-valuenow", "100")
     expect(screen.getByText("100% used")).toBeInTheDocument()
   })
@@ -83,7 +83,7 @@ describe("F0AiChatUsageLimitsButton", () => {
           sections: [
             {
               id: "company",
-              label: "Company pool",
+              label: "Company allowance",
               usedPercentage: 0,
               unlimited: true,
             },
@@ -93,7 +93,7 @@ describe("F0AiChatUsageLimitsButton", () => {
     )
 
     expect(
-      screen.getByRole("button", { name: "Your usage limits: Unlimited" })
+      screen.getByRole("button", { name: "Personal allowance: Unlimited" })
     ).toBeInTheDocument()
     await openPopover()
 

@@ -537,7 +537,7 @@ export const WithUsageLimits: Story = {
           usedPercentage: 30,
           onSeeCompany: () => console.log("see company"),
           sections: [
-            { id: "company", label: "Company pool", usedPercentage: 70 },
+            { id: "company", label: "Company allowance", usedPercentage: 70 },
           ],
         }}
       />

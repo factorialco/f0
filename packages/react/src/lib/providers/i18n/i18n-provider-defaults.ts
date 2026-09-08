@@ -446,7 +446,7 @@ export const defaultTranslations = {
       needMoreCredits: "Need more credits?",
     },
     usageLimits: {
-      title: "Your usage limits",
+      title: "Personal allowance",
       used: "{{percentage}}% used",
       yourCompany: "Your company",
       unlimited: "Unlimited",

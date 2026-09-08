@@ -29,7 +29,7 @@ const ADMIN_USAGE = {
   usedPercentage: 30,
   onSeeCompany,
   sections: [
-    { id: "company", label: "Company pool", usedPercentage: 70 },
+    { id: "company", label: "Company allowance", usedPercentage: 70 },
     { id: "current", label: "Current usage", usedPercentage: 30 },
   ],
 }
@@ -42,7 +42,7 @@ export const Employee: Story = {
     const canvas = within(canvasElement)
     await step("Open the popover from the ring", async () => {
       await userEvent.click(
-        canvas.getByRole("button", { name: /your usage limits/i })
+        canvas.getByRole("button", { name: /personal allowance/i })
       )
       const dialog = await screen.findByRole("dialog")
       await expect(within(dialog).getByText("30% used")).toBeInTheDocument()
@@ -58,10 +58,12 @@ export const Admin: Story = {
     const canvas = within(canvasElement)
     await step("Admins get the company section", async () => {
       await userEvent.click(
-        canvas.getByRole("button", { name: /your usage limits/i })
+        canvas.getByRole("button", { name: /personal allowance/i })
       )
       const dialog = await screen.findByRole("dialog")
-      await expect(within(dialog).getByText("Company pool")).toBeInTheDocument()
+      await expect(
+        within(dialog).getByText("Company allowance")
+      ).toBeInTheDocument()
       await userEvent.click(
         within(dialog).getByRole("button", { name: /your company/i })
       )
@@ -85,7 +87,7 @@ export const Unlimited: Story = {
       sections: [
         {
           id: "company",
-          label: "Company pool",
+          label: "Company allowance",
           usedPercentage: 0,
           unlimited: true,
         },

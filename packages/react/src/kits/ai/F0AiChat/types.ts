@@ -566,7 +566,7 @@ export interface AiChatTranslationsProviderProps {
 export type AiChatUsageLimitsSection = {
   /** Stable identifier used as the React key. */
   id: string
-  /** Already-localized row label (e.g. "Company pool"). */
+  /** Already-localized row label (e.g. "Company allowance"). */
   label: string
   /** Share of that allowance consumed, 0–100. */
   usedPercentage: number
@@ -577,7 +577,7 @@ export type AiChatUsageLimitsSection = {
 /**
  * Usage-limits snapshot for the chat's usage popover (`F0AiChatUsageLimitsButton`).
  *
- * The host resolves the numbers (personal allowance, company pool…) and
+ * The host resolves the numbers (personal allowance, company allowance…) and
  * passes them in; F0 only renders. Percentages, never credit counts: the
  * product deliberately avoids credit language in the chat.
  */
@@ -586,7 +586,7 @@ export type AiChatUsageLimits = {
   usedPercentage: number
   /** No personal cap applies: the ring and the first row render neutral with "Unlimited". */
   unlimited?: boolean
-  /** Extra rows rendered below a divider, typically for admins (company pool…). */
+  /** Extra rows rendered below a divider, typically for admins (company allowance…). */
   sections?: AiChatUsageLimitsSection[]
   /** When set, a "Your company" row links to the host's company usage view. */
   onSeeCompany?: () => void
