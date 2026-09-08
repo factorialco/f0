@@ -515,6 +515,29 @@ const Conversation = ({
   )
 }
 
+const MessageLengthConversation = (): ReactNode => {
+  const runtime = useMockChatRuntime({
+    channel: dmChannel,
+    me,
+    others: [ana],
+    initialCount: 8,
+    olderPages: 0,
+    ambientEveryMs: 0,
+  })
+  const constrainedRuntime = {
+    ...runtime,
+    maxMessageCharacters: 10,
+  } satisfies F0ChatRuntime
+
+  return (
+    <Frame>
+      <F0ChatProvider runtime={constrainedRuntime}>
+        <F0Chat />
+      </F0ChatProvider>
+    </Frame>
+  )
+}
+
 /** Voice-note regression at the width used by a minimized chat panel. */
 const CompactVoiceConversation = (): ReactNode => {
   const runtime = useMockChatRuntime({
@@ -1043,6 +1066,13 @@ export const Snapshot: Story = {
       </section>
       <section
         className="flex w-[760px] flex-col gap-2"
+        data-testid="snapshot-message-limit"
+      >
+        <h2 className="text-lg font-medium">Message character limit</h2>
+        <MessageLengthConversation />
+      </section>
+      <section
+        className="flex w-[760px] flex-col gap-2"
         data-testid="snapshot-documents"
       >
         <h2 className="text-lg font-medium">Document attachments</h2>
@@ -1092,6 +1122,18 @@ export const Snapshot: Story = {
       )
     })
 
+    await step("Show the message length validation", async () => {
+      const messageLimit = within(canvas.getByTestId("snapshot-message-limit"))
+      const composer = messageLimit.getByRole("combobox", {
+        name: /write something here/i,
+      })
+      await userEvent.type(composer, "12345678901")
+      await userEvent.keyboard("{Enter}")
+      await expect(
+        messageLimit.getByText("Messages can be up to 10 characters")
+      ).toBeVisible()
+    })
+
     await step("Render document snapshots", async () => {
       const documents = within(canvas.getByTestId("snapshot-documents"))
       canvas
@@ -1131,6 +1173,43 @@ export const Snapshot: Story = {
 export const ComposerMotion: Story = {
   name: "Composer micro-interactions",
   render: () => <Conversation initialCount={8} />,
+}
+
+export const MessageCharacterLimit: Story = {
+  name: "Message character limit",
+  render: () => <MessageLengthConversation />,
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    const composer = canvas.getByRole("combobox", {
+      name: /write something here/i,
+    })
+
+    await step("Keep an oversized draft and show the limit", async () => {
+      await userEvent.type(composer, "12345678901")
+      await userEvent.keyboard("{Enter}")
+
+      const alert = canvas.getByRole("alert")
+      await expect(alert).toHaveTextContent(
+        "Messages can be up to 10 characters"
+      )
+      await expect(composer).toHaveValue("12345678901")
+      await expect(composer).toHaveFocus()
+      await expect(composer).toHaveAttribute("aria-invalid", "true")
+      await expect(composer).toHaveAttribute("aria-describedby", alert.id)
+    })
+
+    await step("Clear the error after correction and send", async () => {
+      await userEvent.clear(composer)
+      await userEvent.type(composer, "1234567890")
+      await waitFor(() => expect(canvas.queryByRole("alert")).toBeNull())
+      await expect(composer).not.toHaveAttribute("aria-invalid")
+      await expect(composer).not.toHaveAttribute("aria-describedby")
+
+      await userEvent.keyboard("{Enter}")
+      await waitFor(() => expect(composer).toHaveValue(""))
+      await expect(canvas.getByText("1234567890")).toBeVisible()
+    })
+  },
 }
 
 /** Minimized-chat regression (360px panel): the waveform compresses before
