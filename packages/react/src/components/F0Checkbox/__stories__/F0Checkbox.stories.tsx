@@ -10,6 +10,7 @@ const meta = {
   tags: ["stable", "!autodocs"],
   title: "Checkbox",
   parameters: {
+    a11y: { test: "error" },
     layout: "centered",
     docs: {
       description: {

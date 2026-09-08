@@ -1,5 +1,7 @@
 import { Canvas, Meta, Controls } from "@storybook/addon-docs/blocks"
 import * as CheckboxStories from "./F0Checkbox.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+import { F0Checkbox } from "../F0Checkbox"
 
 <Meta of={CheckboxStories} />
 
@@ -86,3 +88,32 @@ keyboard navigation.
   on or off takes effect immediately, rather than being captured as a form value
 - **Mutually exclusive options**: Use a radio button when only one option can be
   selected at a time
+
+### Do's and don'ts
+
+<DoDonts
+  do={{
+    description:
+      "Let the title name the option in the affirmative, and put the consequence in description.",
+    guidelines: [
+      "Sentence case, no trailing period, and no question mark",
+      "Use description for what happens once it is ticked, not a restatement of the title",
+    ],
+    children: (
+      <F0Checkbox
+        title="Share usage data"
+        description="Helps us decide which reports are worth keeping."
+        checked
+      />
+    ),
+  }}
+  dont={{
+    description:
+      "Don't phrase the title as a question, and don't negate it: a negative title makes the ticked state a double negative.",
+    guidelines: [
+      'A question leaves ticked and unticked equally plausible as "yes"',
+      'Turn "Don\'t send reminders" into "Send reminders" and let the box carry the negation',
+    ],
+    children: <F0Checkbox title="Don't send reminders" checked={false} />,
+  }}
+/>
