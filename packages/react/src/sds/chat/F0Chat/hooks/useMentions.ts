@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
 
 import { type AvatarVariant } from "@/components/avatars/F0Avatar"
 
@@ -35,11 +42,21 @@ export type MentionEntry = {
 export type AnchoredMention = MentionEntry & {
   /** Index of the `@` in the composer text. */
   start: number
+  /**
+   * Index just past the last character of the `@name` in the text.
+   *
+   * Recorded where the mention is anchored rather than derived from
+   * `name.length`, because the two can differ: a saved message's entry can
+   * spell a name in a different Unicode normal form from the body it is
+   * matched against — a combining accent for a precomposed one, three jamo for
+   * one Hangul syllable — and a derived end then over- or undershoots the text
+   * it is supposed to cover.
+   */
+  end: number
 }
 
-/** Index just past the last character of an anchored mention's name. */
-export const mentionEnd = (mention: AnchoredMention): number =>
-  mention.start + mention.name.length + 1
+/** Index just past the last character of a mention's `@name` in the text. */
+export const mentionEnd = (mention: AnchoredMention): number => mention.end
 
 /** A row in the mention popover: a group member, or the "everyone" option. */
 export type MentionCandidate =
@@ -155,41 +172,91 @@ function findAtTrigger(
 }
 
 /**
- * Re-anchor `anchored` after the composer text went from `prev` to `next`, and
- * report which mentions the edit landed inside.
+ * Can the change from `prev` to `next` be read as replacing `[at, at + removed)`
+ * with the `inserted` characters that start there?
  *
- * The change is read as the single contiguous span between the common prefix
- * and the common suffix — enough for typing, deletion, paste and the emoji
- * shortcode swap alike. A mention whose span the change overlaps is *touched*:
- * its remaining text is reported so the caller can erase it whole. Adjacency
- * is not overlap, so typing a comma right after a mention (or deleting the
- * space that followed it) leaves the mention alone.
+ * {@link diffSpan} names the rightmost reading of an ambiguous change, which is
+ * the right bias at a mention's tail and the wrong one at its head: typing `@`
+ * in front of `@Ana García` — the way a second mention gets started there —
+ * repeats the character it lands on, so the rightmost reading puts it inside
+ * the token and takes the whole name with it. The readings of one change form
+ * a contiguous interval, so testing the anchor's own index settles whether a
+ * reading that leaves the mention whole exists at all.
  */
-const reanchorMentions = (
+const readsAs = (
+  prev: string,
+  next: string,
+  at: number,
+  removed: number,
+  inserted: number
+): boolean =>
+  at >= 0 &&
+  next.slice(0, at) === prev.slice(0, at) &&
+  next.slice(at + inserted) === prev.slice(at + removed)
+
+/**
+ * Re-anchor `anchored` after the composer text went from `prev` to `next`, and
+ * report what is left of the mentions the change ran into.
+ *
+ * A mention the change missed is kept, shifted. One the change ran into is
+ * *touched*: the spans it still occupies in `next` are reported so the caller
+ * can erase them and take the token out whole. Three rules make that safe:
+ *
+ * - Adjacency is not overlap, on either side. Typing a comma right after a
+ *   mention, deleting the space that followed it, or typing immediately in
+ *   front of the `@` all leave the mention alone — the last of those is a pure
+ *   insertion at the anchor's own index, which moves the mention rather than
+ *   editing it. That holds even when the change is ambiguous and `diffSpan`
+ *   named a reading inside the token; see {@link readsAs}.
+ * - A change strictly inside a mention takes the whole token, including what
+ *   was typed in its place: a half-typed name was never a state the user meant.
+ * - A change that swallowed a mention outright erases nothing. Its text is
+ *   already gone, and what replaced it is the user's own keystroke or paste.
+ */
+export const reanchorMentions = (
   prev: string,
   next: string,
   anchored: AnchoredMention[]
 ): { kept: AnchoredMention[]; touched: { start: number; end: number }[] } => {
   const { start: prefix, prevEnd, nextEnd } = diffSpan(prev, next)
   const delta = next.length - prev.length
-
-  // Positions inside the changed span have no image in `next`; clamp a start
-  // down and an end up so an erased range covers the whole disturbed region.
-  const mapStart = (pos: number): number =>
-    pos <= prefix ? pos : pos >= prevEnd ? pos + delta : prefix
-  const mapEnd = (pos: number): number =>
-    pos <= prefix ? pos : pos >= prevEnd ? pos + delta : nextEnd
+  const removed = prevEnd - prefix
+  const inserted = nextEnd - prefix
 
   const kept: AnchoredMention[] = []
   const touched: { start: number; end: number }[] = []
   for (const mention of anchored) {
     const start = mention.start
     const end = mentionEnd(mention)
-    if (prefix < end && prevEnd > start) {
-      touched.push({ start: mapStart(start), end: mapEnd(end) })
-    } else {
-      kept.push({ ...mention, start: mapStart(start) })
+
+    if (prefix >= end || prevEnd <= start) {
+      // Wholly on one side of the change, so start and end move together.
+      const shift = start < prefix ? 0 : delta
+      kept.push({ ...mention, start: start + shift, end: end + shift })
+      continue
     }
+
+    // The reading that moves this anchor is only available if it does not
+    // land it on text another anchor already holds: deleting one of two
+    // identical mentions reads equally as deleting the other, and taking that
+    // reading for both keeps two ids on one `@name`.
+    const moved = { start: start + delta, end: end + delta }
+    const free = !kept.some(
+      (other) => other.start < moved.end && mentionEnd(other) > moved.start
+    )
+    if (free && readsAs(prev, next, start - removed, removed, inserted)) {
+      kept.push({ ...mention, ...moved })
+      continue
+    }
+
+    const headSurvives = start < prefix
+    const tailSurvives = end > prevEnd
+    if (headSurvives && tailSurvives) {
+      touched.push({ start, end: end + delta })
+      continue
+    }
+    if (headSurvives) touched.push({ start, end: prefix })
+    if (tailSurvives) touched.push({ start: nextEnd, end: end + delta })
   }
   return { kept, touched }
 }
@@ -230,6 +297,7 @@ const eraseSpans = (
     mentions: anchored.map((mention) => ({
       ...mention,
       start: mention.start - removedBefore(mention.start),
+      end: mention.end - removedBefore(mention.end),
     })),
     caret: caret - removedBefore(caret),
   }
@@ -272,11 +340,26 @@ const MIRROR_PROPERTIES = [
   "wordBreak",
 ] as const
 
-/** Pixel position of the character at `index`, relative to the textarea. */
-export function getTextareaCaretCoordinates(
-  textarea: HTMLTextAreaElement,
-  index: number
-): { left: number; top: number } {
+/**
+ * A hidden copy of the textarea, laid out with the same metrics, in which the
+ * pixel position of one character can be read off a span.
+ *
+ * Building it is the expensive half — one `getComputedStyle` and a style write
+ * per mirrored property — and none of it changes while the popover it
+ * positions is open, so it is built once and measured in repeatedly. It is a
+ * live document node for that whole time, which is what makes
+ * {@link disposeCaretMirror} part of the contract rather than tidiness.
+ */
+type CaretMirror = {
+  textarea: HTMLTextAreaElement
+  /** Content width at the time the copy was taken — what decides wrapping. */
+  width: number
+  div: HTMLDivElement
+  prefix: Text
+  span: HTMLSpanElement
+}
+
+const createCaretMirror = (textarea: HTMLTextAreaElement): CaretMirror => {
   const div = document.createElement("div")
   const style = div.style
   const computed = window.getComputedStyle(textarea)
@@ -291,24 +374,53 @@ export function getTextareaCaretCoordinates(
     style.setProperty(prop, computed.getPropertyValue(prop))
   }
 
-  div.textContent = textarea.value.substring(0, index)
-
+  // Two stable children, so a measurement writes text and never reshapes the
+  // tree: `div.textContent = …` would drop the span on every keystroke.
+  const prefix = document.createTextNode("")
   const span = document.createElement("span")
-  // Zero-width space so the span has a measurable position even at text end.
-  span.textContent = textarea.value.substring(index) || "​"
+  div.appendChild(prefix)
   div.appendChild(span)
-
   document.body.appendChild(div)
 
-  const left = span.offsetLeft
-  const top = span.offsetTop - textarea.scrollTop
+  return { textarea, width: textarea.clientWidth, div, prefix, span }
+}
 
-  document.body.removeChild(div)
+const disposeCaretMirror = (mirror: CaretMirror): void => {
+  mirror.div.remove()
+}
 
-  return { left, top }
+const measureInCaretMirror = (
+  mirror: CaretMirror,
+  index: number
+): { left: number; top: number } => {
+  const { value } = mirror.textarea
+  mirror.prefix.data = value.substring(0, index)
+  // Zero-width space so the span has a measurable position even at text end.
+  mirror.span.textContent = value.substring(index) || "​"
+
+  return {
+    left: mirror.span.offsetLeft,
+    top: mirror.span.offsetTop - mirror.textarea.scrollTop,
+  }
+}
+
+/** Pixel position of the character at `index`, relative to the textarea. */
+export function getTextareaCaretCoordinates(
+  textarea: HTMLTextAreaElement,
+  index: number
+): { left: number; top: number } {
+  const mirror = createCaretMirror(textarea)
+  try {
+    return measureInCaretMirror(mirror, index)
+  } finally {
+    disposeCaretMirror(mirror)
+  }
 }
 
 const DEBOUNCE_MS = 250
+
+/** One key for the spellings of a name that a reader cannot tell apart. */
+const canonicalName = (name: string): string => name.normalize("NFC")
 
 const candidateLabel = (c: MentionCandidate): string =>
   c.kind === "everyone" ? c.label : c.user.name
@@ -336,6 +448,10 @@ export function useMentions({
   const [isOpen, setIsOpen] = useState(false)
   const [query, setQuery] = useState("")
   const [memberResults, setMemberResults] = useState<F0ChatUser[]>([])
+  // The query `memberResults` answers. Written with them and read by the
+  // keyboard guard below, which is the difference between "a search is running"
+  // and "the rows are for something else".
+  const [resultsQuery, setResultsQuery] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [mentions, setMentions] = useState<AnchoredMention[]>([])
@@ -356,7 +472,8 @@ export function useMentions({
           candidate !== undefined &&
           candidate.id === mention.id &&
           candidate.name === mention.name &&
-          candidate.start === mention.start
+          candidate.start === mention.start &&
+          candidate.end === mention.end
         )
       })
     if (unchanged) return
@@ -373,6 +490,42 @@ export function useMentions({
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const searchIdRef = useRef(0)
   const dismissedAtIndexRef = useRef<number>(-1)
+  const mirrorRef = useRef<CaretMirror | null>(null)
+
+  // The host owns `searchMembers`, and a host that builds it inline hands the
+  // effect below a new dependency on every render — in a group chat, one per
+  // event anyone else causes. Read through a ref so the effect keys only on
+  // what makes a new request; the boolean is what an absent search means.
+  const searchMembersRef = useRef(searchMembers)
+  useLayoutEffect(() => {
+    searchMembersRef.current = searchMembers
+  })
+  const canSearch = enabled && !!searchMembers
+
+  /**
+   * Retire whatever search is scheduled or in flight.
+   *
+   * Clearing the timer only helps before the debounce fires; once the host has
+   * been called nothing can cancel it, so the id it was dispatched under is
+   * bumped and its answer is dropped on arrival. The loading flag has to be
+   * resolved here too — the retired search's `finally` no longer will.
+   */
+  const abandonSearch = useCallback(() => {
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current)
+      debounceRef.current = null
+    }
+    searchIdRef.current++
+    setIsLoading(false)
+    setMemberResults((current) => (current.length === 0 ? current : []))
+  }, [])
+
+  const discardCaretMirror = useCallback(() => {
+    const mirror = mirrorRef.current
+    if (!mirror) return
+    mirrorRef.current = null
+    disposeCaretMirror(mirror)
+  }, [])
 
   const matchesEveryone = useCallback(
     (q: string): boolean =>
@@ -403,7 +556,8 @@ export function useMentions({
 
   // Detect the `@` trigger on every input/cursor change and search.
   useEffect(() => {
-    if (!enabled || !searchMembers) {
+    if (!canSearch) {
+      abandonSearch()
       setIsOpen(false)
       return
     }
@@ -411,16 +565,19 @@ export function useMentions({
     const trigger = findAtTrigger(inputValue, cursorPosition, mentions)
 
     if (!trigger) {
+      abandonSearch()
       setIsOpen(false)
       setQuery("")
-      setMemberResults([])
       setSelectedIndex(0)
       atIndexRef.current = -1
       dismissedAtIndexRef.current = -1
       return
     }
 
-    if (trigger.atIndex === dismissedAtIndexRef.current) return
+    if (trigger.atIndex === dismissedAtIndexRef.current) {
+      abandonSearch()
+      return
+    }
 
     atIndexRef.current = trigger.atIndex
     setQuery(trigger.query)
@@ -432,10 +589,16 @@ export function useMentions({
     const currentSearchId = ++searchIdRef.current
 
     debounceRef.current = setTimeout(() => {
-      searchMembers(trigger.query)
+      const search = searchMembersRef.current
+      if (!search) {
+        if (currentSearchId === searchIdRef.current) setIsLoading(false)
+        return
+      }
+      search(trigger.query)
         .then((data) => {
           if (currentSearchId !== searchIdRef.current) return
           setMemberResults(data)
+          setResultsQuery(trigger.query)
           setSelectedIndex(0)
           // Dismiss only when nothing matches at all (no members AND the
           // "everyone" option doesn't match the typed query).
@@ -465,30 +628,22 @@ export function useMentions({
   }, [
     inputValue,
     cursorPosition,
-    enabled,
-    searchMembers,
+    canSearch,
     mentions,
     matchesEveryone,
+    abandonSearch,
   ])
 
   const close = useCallback(() => {
     // Escape closes without touching the composer text, so the search effect
     // keeps its dependencies and never runs the cleanup that would cancel a
-    // pending search. Retiring the id matters even once one is in flight: an
-    // empty late result sets `dismissedAtIndexRef`, which would keep the
-    // popover from reopening at this same `@`.
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current)
-      debounceRef.current = null
-    }
-    searchIdRef.current++
+    // pending search.
+    abandonSearch()
     setIsOpen(false)
     setQuery("")
-    setMemberResults([])
     setSelectedIndex(0)
-    setIsLoading(false)
     atIndexRef.current = -1
-  }, [])
+  }, [abandonSearch])
 
   const dismissCurrentTrigger = useCallback(() => {
     dismissedAtIndexRef.current = atIndexRef.current
@@ -529,9 +684,16 @@ export function useMentions({
       const anchored = mentionsRef.current
         .filter((m) => mentionEnd(m) <= atIndex || m.start >= cursorPosition)
         .map((m) =>
-          m.start >= cursorPosition ? { ...m, start: m.start + shift } : m
+          m.start >= cursorPosition
+            ? { ...m, start: m.start + shift, end: m.end + shift }
+            : m
         )
-      anchored.push({ ...entry, start: atIndex })
+      // The token was written from `name`, so its extent is exact here.
+      anchored.push({
+        ...entry,
+        start: atIndex,
+        end: atIndex + 1 + name.length,
+      })
       anchored.sort((a, b) => a.start - b.start)
       prevValueRef.current = newValue
       commitMentions(anchored)
@@ -553,6 +715,26 @@ export function useMentions({
       commitMentions,
       requestSelection,
     ]
+  )
+
+  /**
+   * Can this row still be the answer to what is typed now?
+   *
+   * A keystroke starts a newer search and resets the highlight to the top of
+   * the list the previous one returned, so between the two the highlighted row
+   * can be somebody the user has already typed past. Rows that answer the
+   * current query are picked as they are — which matching model produced them
+   * is the host's business, not this hook's. Only rows answering an older query
+   * are held to the check Tab has always made: the label still starts with what
+   * is typed. Anything else waits for the search it belongs to, at most one
+   * debounce window.
+   */
+  const stillMatchesQuery = useCallback(
+    (candidate: MentionCandidate): boolean =>
+      resultsQuery === query ||
+      query.length === 0 ||
+      candidateLabel(candidate).toLowerCase().startsWith(query.toLowerCase()),
+    [resultsQuery, query]
   )
 
   const handleKeyDown = useCallback(
@@ -593,15 +775,29 @@ export function useMentions({
           }
           return false
         }
-        case "Enter":
+        case "Enter": {
           e.preventDefault()
-          if (results[selectedIndex]) selectCandidate(results[selectedIndex])
+          const candidate = results[selectedIndex]
+          if (candidate && stillMatchesQuery(candidate)) {
+            selectCandidate(candidate)
+          }
+          // Consumed either way: the popover is open, so Enter must not send
+          // the message behind it.
           return true
+        }
         default:
           return false
       }
     },
-    [isOpen, results, selectedIndex, query, selectCandidate, close]
+    [
+      isOpen,
+      results,
+      selectedIndex,
+      query,
+      selectCandidate,
+      close,
+      stillMatchesQuery,
+    ]
   )
 
   const getMentions = useCallback((): MentionPayload => {
@@ -609,7 +805,7 @@ export function useMentions({
     // Anchors are per occurrence; the payload is a set of people, so the same
     // person mentioned twice is sent once.
     const users = new Map<string, MentionEntry>()
-    for (const { start: _start, ...entry } of mentions) {
+    for (const { start: _start, end: _end, ...entry } of mentions) {
       if (entry.id === MENTION_EVERYONE_ID) continue
       if (!users.has(entry.id)) users.set(entry.id, entry)
     }
@@ -625,24 +821,50 @@ export function useMentions({
       // what says where they are. Occurrences of one `@name` are handed out to
       // the entries sharing that name in order — two people with the same
       // display name get one each, while one person named twice keeps both.
+      //
+      // "The same name" is canonical equality, not string equality: two people
+      // whose display names differ only in Unicode normal form read as one name
+      // and would otherwise queue separately, so the occurrences went to the
+      // first of them twice and the second was dropped. The names handed to the
+      // matcher stay as spelled, because that is what the body contains.
       const byName = new Map<string, MentionEntry[]>()
+      const spellings = new Set<string>()
       for (const entry of entries) {
-        const group = byName.get(entry.name)
+        const key = canonicalName(entry.name)
+        const group = byName.get(key)
         if (group) group.push(entry)
-        else byName.set(entry.name, [entry])
+        else byName.set(key, [entry])
+        spellings.add(entry.name)
       }
 
-      const taken = new Map<string, number>()
+      const handedOut = new Set<MentionEntry>()
       commitMentions(
         locateMentions(
           text,
-          [...byName.keys()].map((name) => ({ name }))
-        ).flatMap(({ entry: { name }, start }) => {
-          const group = byName.get(name) ?? []
-          const index = taken.get(name) ?? 0
-          taken.set(name, index + 1)
-          const picked = group[Math.min(index, group.length - 1)]
-          return picked ? [{ ...picked, start }] : []
+          [...spellings].map((name) => ({ name }))
+        ).flatMap(({ entry: { name }, start, end }) => {
+          const group = byName.get(canonicalName(name)) ?? []
+          const free = group.filter((entry) => !handedOut.has(entry))
+          // An occurrence goes to someone whose name is spelled exactly the way
+          // the text spells it when there is such a person left, and otherwise
+          // to the next in the queue. Without the first half, a body written in
+          // one normal form hands its occurrence to whoever happens to be first
+          // in the group — the wrong person, notified in their place.
+          //
+          // "The way the text spells it" is read off the located range, not off
+          // the name the matcher reports having matched. The two are the same
+          // string while matching is exact; once it folds normal forms together
+          // every spelling matches every occurrence and the reported one is
+          // just whichever entry the matcher was handed first.
+          const spelled = text.slice(start + 1, end)
+          const picked =
+            free.find((entry) => entry.name === spelled) ??
+            free[0] ??
+            group[group.length - 1]
+          if (picked) handedOut.add(picked)
+          // The range comes from the matcher, so the anchor covers the text
+          // that is actually there rather than the entry's spelling of it.
+          return picked ? [{ ...picked, start, end }] : []
         })
       )
     },
@@ -699,7 +921,18 @@ export function useMentions({
     const textarea = textareaRef.current
     if (!textarea) return null
 
-    const coords = getTextareaCaretCoordinates(textarea, atIndexRef.current)
+    let mirror = mirrorRef.current
+    if (
+      !mirror ||
+      mirror.textarea !== textarea ||
+      mirror.width !== textarea.clientWidth
+    ) {
+      if (mirror) disposeCaretMirror(mirror)
+      mirror = createCaretMirror(textarea)
+      mirrorRef.current = mirror
+    }
+
+    const coords = measureInCaretMirror(mirror, atIndexRef.current)
     const left = textarea.offsetLeft + coords.left
     const formHeight = textarea.offsetParent
       ? (textarea.offsetParent as HTMLElement).offsetHeight
@@ -708,6 +941,14 @@ export function useMentions({
 
     return { left, bottom }
   }, [isOpen, inputValue, cursorPosition, textareaRef])
+
+  // The mirror is a document node the memo above creates during render, so
+  // nothing but this releases it: a closed popover measures nothing.
+  useEffect(() => {
+    if (!isOpen) discardCaretMirror()
+  }, [isOpen, discardCaretMirror])
+
+  useEffect(() => discardCaretMirror, [discardCaretMirror])
 
   const inlineCompletion = useMemo<string | null>(() => {
     if (!isOpen || results.length === 0) return null
