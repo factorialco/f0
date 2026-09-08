@@ -448,7 +448,8 @@ export const defaultTranslations = {
     usageLimits: {
       title: "Your usage limits",
       used: "{{percentage}}% used",
-      yourTeam: "Your team",
+      yourCompany: "Your company",
+      unlimited: "Unlimited",
       error: "Could not load usage",
     },
     reportCard: {

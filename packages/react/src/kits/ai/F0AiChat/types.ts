@@ -570,6 +570,8 @@ export type AiChatUsageLimitsSection = {
   label: string
   /** Share of that allowance consumed, 0–100. */
   usedPercentage: number
+  /** The allowance has no cap: the row shows "Unlimited" and a neutral bar. */
+  unlimited?: boolean
 }
 
 /**
@@ -582,8 +584,10 @@ export type AiChatUsageLimitsSection = {
 export type AiChatUsageLimits = {
   /** The viewer's own allowance consumed, 0–100. Drives the ring trigger and the first row. */
   usedPercentage: number
+  /** No personal cap applies: the ring and the first row render neutral with "Unlimited". */
+  unlimited?: boolean
   /** Extra rows rendered below a divider, typically for admins (company pool…). */
   sections?: AiChatUsageLimitsSection[]
-  /** When set, a "Your team" row links to the host's team usage view. */
-  onSeeTeam?: () => void
+  /** When set, a "Your company" row links to the host's company usage view. */
+  onSeeCompany?: () => void
 }

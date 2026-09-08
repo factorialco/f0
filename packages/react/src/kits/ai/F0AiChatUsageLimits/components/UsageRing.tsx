@@ -3,22 +3,25 @@ import { cn } from "@/lib/utils"
 const VIEWBOX_SIZE = 20
 const STROKE_WIDTH = 2.5
 
+export type UsageRingTone = "default" | "exhausted" | "unlimited"
+
 type UsageRingProps = {
-  /** 0–100, already clamped by the caller. */
+  /** 0–100, already clamped by the caller. Ignored when the tone is unlimited. */
   percentage: number
-  /** Turns the ring red once the allowance is gone. */
-  exhausted: boolean
+  tone: UsageRingTone
 }
 
 /**
  * Compact radial gauge used as the usage-limits popover trigger. Purely
- * decorative: the owning button carries the accessible name.
+ * decorative: the owning button carries the accessible name. An unlimited
+ * allowance shows a full neutral ring, since there is no share to report.
  */
-export const UsageRing = ({ percentage, exhausted }: UsageRingProps) => {
+export const UsageRing = ({ percentage, tone }: UsageRingProps) => {
   const center = VIEWBOX_SIZE / 2
   const radius = center - STROKE_WIDTH / 2
   const circumference = 2 * Math.PI * radius
-  const offset = ((100 - percentage) / 100) * circumference
+  const filled = tone === "unlimited" ? 100 : percentage
+  const offset = ((100 - filled) / 100) * circumference
 
   return (
     <svg
@@ -46,9 +49,9 @@ export const UsageRing = ({ percentage, exhausted }: UsageRingProps) => {
         strokeLinecap="round"
         className={cn(
           "transition-[stroke-dashoffset] duration-300 ease-out motion-reduce:transition-none",
-          exhausted
-            ? "stroke-f1-background-critical-bold"
-            : "stroke-f1-background-info-bold"
+          tone === "exhausted" && "stroke-f1-background-critical-bold",
+          tone === "unlimited" && "stroke-f1-border",
+          tone === "default" && "stroke-f1-background-info-bold"
         )}
       />
     </svg>

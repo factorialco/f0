@@ -23,11 +23,11 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-const onSeeTeam = fn()
+const onSeeCompany = fn()
 
 const ADMIN_USAGE = {
   usedPercentage: 30,
-  onSeeTeam,
+  onSeeCompany,
   sections: [
     { id: "company", label: "Company pool", usedPercentage: 70 },
     { id: "current", label: "Current usage", usedPercentage: 30 },
@@ -56,16 +56,16 @@ export const Admin: Story = {
   },
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement)
-    await step("Admins get the team section", async () => {
+    await step("Admins get the company section", async () => {
       await userEvent.click(
         canvas.getByRole("button", { name: /your usage limits/i })
       )
       const dialog = await screen.findByRole("dialog")
       await expect(within(dialog).getByText("Company pool")).toBeInTheDocument()
       await userEvent.click(
-        within(dialog).getByRole("button", { name: /your team/i })
+        within(dialog).getByRole("button", { name: /your company/i })
       )
-      await expect(onSeeTeam).toHaveBeenCalled()
+      await expect(onSeeCompany).toHaveBeenCalled()
     })
   },
 }
@@ -73,6 +73,24 @@ export const Admin: Story = {
 export const Exhausted: Story = {
   args: {
     usage: { ...ADMIN_USAGE, usedPercentage: 100 },
+  },
+}
+
+export const Unlimited: Story = {
+  args: {
+    usage: {
+      usedPercentage: 0,
+      unlimited: true,
+      onSeeCompany,
+      sections: [
+        {
+          id: "company",
+          label: "Company pool",
+          usedPercentage: 0,
+          unlimited: true,
+        },
+      ],
+    },
   },
 }
 
@@ -98,6 +116,10 @@ export const Snapshot: Story = {
     <div className="flex flex-row items-center gap-6">
       <F0AiChatUsageLimitsButton {...args} usage={{ usedPercentage: 30 }} />
       <F0AiChatUsageLimitsButton {...args} usage={{ usedPercentage: 100 }} />
+      <F0AiChatUsageLimitsButton
+        {...args}
+        usage={{ usedPercentage: 0, unlimited: true }}
+      />
       <F0AiChatUsageLimitsButton {...args} usage={null} />
     </div>
   ),

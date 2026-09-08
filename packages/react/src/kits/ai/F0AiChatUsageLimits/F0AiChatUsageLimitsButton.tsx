@@ -49,12 +49,19 @@ export const F0AiChatUsageLimitsButton = ({
   )
 
   const personal = usage ? clampPercentage(usage.usedPercentage) : 0
+  const unlimited = usage?.unlimited ?? false
+  const ringTone = unlimited
+    ? "unlimited"
+    : personal >= 100
+      ? "exhausted"
+      : "default"
   const sections = usage?.sections ?? []
-  const hasTeamSection = !!usage?.onSeeTeam || sections.length > 0
+  const hasCompanySection = !!usage?.onSeeCompany || sections.length > 0
   const title = i18n.t("ai.usageLimits.title")
-  const triggerLabel = usage
-    ? `${title}: ${i18n.t("ai.usageLimits.used", { percentage: personal })}`
-    : title
+  const triggerValue = unlimited
+    ? i18n.t("ai.usageLimits.unlimited")
+    : i18n.t("ai.usageLimits.used", { percentage: personal })
+  const triggerLabel = usage ? `${title}: ${triggerValue}` : title
 
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
@@ -71,7 +78,7 @@ export const F0AiChatUsageLimitsButton = ({
               focusRing()
             )}
           >
-            <UsageRing percentage={personal} exhausted={personal >= 100} />
+            <UsageRing percentage={personal} tone={ringTone} />
             <span className="sr-only">{triggerLabel}</span>
           </button>
         )}
@@ -91,15 +98,19 @@ export const F0AiChatUsageLimitsButton = ({
           ) : !usage ? (
             <UsageSkeleton />
           ) : (
-            <UsageRow label={title} percentage={personal} />
+            <UsageRow
+              label={title}
+              percentage={personal}
+              unlimited={unlimited}
+            />
           )}
         </div>
-        {usage && hasTeamSection && (
+        {usage && hasCompanySection && (
           <div className="flex flex-col border-0 border-t border-solid border-f1-border-secondary p-2">
-            {usage.onSeeTeam && (
+            {usage.onSeeCompany && (
               <button
                 type="button"
-                onClick={usage.onSeeTeam}
+                onClick={usage.onSeeCompany}
                 className={cn(
                   "flex w-full items-center gap-2 rounded bg-transparent p-2 text-left text-base font-medium text-f1-foreground-tertiary",
                   "hover:bg-f1-background-secondary hover:text-f1-foreground-secondary",
@@ -107,7 +118,7 @@ export const F0AiChatUsageLimitsButton = ({
                 )}
               >
                 <span className="min-w-0 flex-1 truncate">
-                  {i18n.t("ai.usageLimits.yourTeam")}
+                  {i18n.t("ai.usageLimits.yourCompany")}
                 </span>
                 <F0Icon icon={ChevronRight} size="md" />
               </button>
@@ -117,6 +128,7 @@ export const F0AiChatUsageLimitsButton = ({
                 <UsageRow
                   label={section.label}
                   percentage={clampPercentage(section.usedPercentage)}
+                  unlimited={section.unlimited}
                 />
               </div>
             ))}

@@ -535,7 +535,7 @@ export const WithUsageLimits: Story = {
       <F0AiChatUsageLimitsButton
         usage={{
           usedPercentage: 30,
-          onSeeTeam: () => console.log("see team"),
+          onSeeCompany: () => console.log("see company"),
           sections: [
             { id: "company", label: "Company pool", usedPercentage: 70 },
           ],

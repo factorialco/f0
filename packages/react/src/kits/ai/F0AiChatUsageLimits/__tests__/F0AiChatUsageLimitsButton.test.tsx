@@ -27,18 +27,18 @@ describe("F0AiChatUsageLimitsButton", () => {
     expect(dialog).toHaveTextContent("Your usage limits")
     expect(dialog).toHaveTextContent("30% used")
     expect(
-      screen.queryByRole("button", { name: /your team/i })
+      screen.queryByRole("button", { name: /your company/i })
     ).not.toBeInTheDocument()
     expect(screen.getAllByRole("progressbar")).toHaveLength(1)
   })
 
-  it("renders the team link and extra sections for admins", async () => {
-    const onSeeTeam = vi.fn()
+  it("renders the company link and extra sections for admins", async () => {
+    const onSeeCompany = vi.fn()
     render(
       <F0AiChatUsageLimitsButton
         usage={{
           usedPercentage: 30,
-          onSeeTeam,
+          onSeeCompany,
           sections: [
             { id: "company", label: "Company pool", usedPercentage: 70 },
             { id: "current", label: "Current usage", usedPercentage: 12 },
@@ -51,8 +51,8 @@ describe("F0AiChatUsageLimitsButton", () => {
     expect(screen.getByText("Company pool")).toBeInTheDocument()
     expect(screen.getByText("70% used")).toBeInTheDocument()
     expect(screen.getByText("12% used")).toBeInTheDocument()
-    await userEvent.click(screen.getByRole("button", { name: /your team/i }))
-    expect(onSeeTeam).toHaveBeenCalledTimes(1)
+    await userEvent.click(screen.getByRole("button", { name: /your company/i }))
+    expect(onSeeCompany).toHaveBeenCalledTimes(1)
   })
 
   it("clamps percentages into 0–100 and exposes them on the bar", async () => {
@@ -72,6 +72,34 @@ describe("F0AiChatUsageLimitsButton", () => {
 
     rerender(<F0AiChatUsageLimitsButton usage={null} error />)
     expect(screen.getByText("Could not load usage")).toBeInTheDocument()
+  })
+
+  it('renders a neutral ring and "Unlimited" instead of a percentage when uncapped', async () => {
+    render(
+      <F0AiChatUsageLimitsButton
+        usage={{
+          usedPercentage: 250,
+          unlimited: true,
+          sections: [
+            {
+              id: "company",
+              label: "Company pool",
+              usedPercentage: 0,
+              unlimited: true,
+            },
+          ],
+        }}
+      />
+    )
+
+    expect(
+      screen.getByRole("button", { name: "Your usage limits: Unlimited" })
+    ).toBeInTheDocument()
+    await openPopover()
+
+    expect(screen.getAllByText("Unlimited")).toHaveLength(2)
+    expect(screen.queryByRole("progressbar")).not.toBeInTheDocument()
+    expect(screen.queryByText(/% used/)).not.toBeInTheDocument()
   })
 
   it("reports open and close so the host can refetch", async () => {
