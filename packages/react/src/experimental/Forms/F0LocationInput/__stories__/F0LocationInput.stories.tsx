@@ -13,7 +13,7 @@ import type {
   F0LocationSuggestion,
 } from "../index"
 
-import { detailedLocationFields, F0LocationInput } from "../index"
+import { F0LocationInput } from "../index"
 import { locationInputSizes } from "../types"
 
 type MockPlace = F0LocationSuggestion & { value: F0LocationInputValue }
@@ -159,7 +159,7 @@ const meta = {
         defaultValue: { summary: "md" },
       },
     },
-    fields: { control: "object" },
+    manualEntry: { control: "boolean" },
     value: { control: "object" },
     defaultValue: { control: "object" },
     status: { control: "object" },
@@ -182,21 +182,14 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {}
 
 /**
- * Detailed mode: country first, then the same autocomplete field, then the
- * parts. Picking a suggestion fills every part; editing one that moves the pin
- * drops the coordinates, because they no longer describe what the user typed.
+ * Manual entry: country first, then the same address field, then every part.
+ * Picking a suggestion fills them all; editing one that moves the pin drops
+ * the coordinates, because they no longer describe what the user typed.
  */
-export const Detailed: Story = {
+export const ManualEntry: Story = {
   args: {
     label: "Office address",
-    fields: detailedLocationFields,
-  },
-}
-
-export const DetailedWithAddressLine2: Story = {
-  args: {
-    label: "Office address",
-    fields: ["country", "addressLine2", "city", "state", "postalCode"],
+    manualEntry: true,
   },
 }
 
@@ -204,7 +197,7 @@ export const DetailedWithAddressLine2: Story = {
 export const RestrictedCountries: Story = {
   args: {
     label: "Spanish office",
-    fields: detailedLocationFields,
+    manualEntry: true,
     countries: ["es"],
     defaultValue: { country: "es" },
   },
@@ -214,7 +207,7 @@ export const RestrictedCountries: Story = {
 export const WithoutAutocomplete: Story = {
   args: {
     label: "Postal address",
-    fields: detailedLocationFields,
+    manualEntry: true,
     searchPlaces: undefined,
     resolvePlace: undefined,
   },
@@ -223,7 +216,7 @@ export const WithoutAutocomplete: Story = {
 export const Prefilled: Story = {
   args: {
     label: "Office address",
-    fields: detailedLocationFields,
+    manualEntry: true,
     defaultValue: places[0].value,
   },
 }
@@ -251,7 +244,7 @@ export const Controlled: Story = {
   },
   args: {
     label: "Office address",
-    fields: detailedLocationFields,
+    manualEntry: true,
     clearable: true,
   },
 }
@@ -278,7 +271,7 @@ const DialogExample = (args: Story["args"]) => {
 export const InsideDialog: Story = {
   render: (args) => <DialogExample {...args} />,
   args: {
-    fields: detailedLocationFields,
+    manualEntry: true,
   },
 }
 
@@ -291,35 +284,58 @@ export const Sizes: Story = {
   ),
 }
 
+/**
+ * Every state, in both shapes: the address field alone and the manual entry
+ * block. The status message sits under the field in the first and under the
+ * group in the second.
+ */
 export const States: Story = {
-  render: (args) => (
-    <div className="flex flex-col gap-4">
-      <F0LocationInput {...args} label="Disabled" disabled />
-      <F0LocationInput
-        {...args}
-        label="Read only"
-        readonly
-        defaultValue={places[0].value}
-      />
-      <F0LocationInput {...args} label="Loading" loading />
-      <F0LocationInput
-        {...args}
-        label="With hint"
-        hint="Used to place the office on the map"
-      />
-      <F0LocationInput
-        {...args}
-        label="With error"
-        error="Enter the office address"
-      />
-      <F0LocationInput
-        {...args}
-        label="Detailed with error"
-        fields={detailedLocationFields}
-        error="Enter the office address"
-      />
-    </div>
-  ),
+  render: (args) => {
+    const state = (
+      label: string,
+      props: Partial<React.ComponentProps<typeof F0LocationInput>>
+    ) => (
+      <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-2">
+        <F0LocationInput {...args} {...props} label={label} />
+        <F0LocationInput {...args} {...props} label={label} manualEntry />
+      </div>
+    )
+
+    return (
+      <div className="flex flex-col gap-8">
+        {state("Default", {})}
+        {state("Prefilled", { defaultValue: places[0].value })}
+        {state("Disabled", { disabled: true })}
+        {state("Read only", {
+          readonly: true,
+          defaultValue: places[0].value,
+        })}
+        {state("With hint", {
+          hint: "Used to place the office on the map",
+        })}
+        {state("With info", {
+          status: {
+            type: "info",
+            message: "The address is used for geofencing",
+          },
+        })}
+        {state("With warning", {
+          status: {
+            type: "warning",
+            message: "This address is outside the country you selected",
+          },
+        })}
+        {state("With error", { error: "Enter the office address" })}
+      </div>
+    )
+  },
+  decorators: [
+    (Story) => (
+      <div className="max-w-5xl">
+        <Story />
+      </div>
+    ),
+  ],
 }
 
 /**
@@ -357,7 +373,7 @@ export const SearchAndPick: Story = {
 export const UnlistedAddress: Story = {
   args: {
     label: "Office address",
-    fields: detailedLocationFields,
+    manualEntry: true,
     defaultValue: { addressLine1: "Camino de la Vega s/n", country: "es" },
   },
 }
@@ -366,24 +382,29 @@ export const Snapshot: Story = {
   parameters: withSnapshot({}),
   render: (args) => (
     <div className="flex flex-col gap-6">
-      <F0LocationInput {...args} label="Simple" />
+      <F0LocationInput {...args} label="Address" />
       <F0LocationInput
         {...args}
-        label="Simple, prefilled"
+        label="Address, prefilled"
         defaultValue={places[0].value}
       />
       <F0LocationInput
         {...args}
-        label="Detailed"
-        fields={detailedLocationFields}
+        label="Manual entry"
+        manualEntry
         defaultValue={places[0].value}
       />
       <F0LocationInput
         {...args}
-        label="Detailed, small, with error"
+        label="Manual entry, small, with error"
         size="sm"
-        fields={["country", "addressLine2", "city", "state", "postalCode"]}
+        manualEntry
         error="Enter the office address"
+      />
+      <F0LocationInput
+        {...args}
+        label="With warning"
+        status={{ type: "warning", message: "Check the postal code" }}
       />
       <F0LocationInput {...args} label="Disabled" disabled />
     </div>

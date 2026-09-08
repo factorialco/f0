@@ -17,11 +17,11 @@ The address line is an [F0Select](?path=/docs/components-select--documentation) 
 
 ### Anatomy
 
-One field by default; pass `fields` for the country and the parts.
+One field by default; pass `manualEntry` for the country and every part.
 
 <Canvas of={Stories.Default} />
 
-<Canvas of={Stories.Detailed} />
+<Canvas of={Stories.ManualEntry} />
 
 <Controls of={Stories.Default} />
 
@@ -35,7 +35,7 @@ One field by default; pass `fields` for the country and the parts.
 
 - The user enters a postal address that will be stored, shown on a map, or used for geofencing. The structured value keeps every consumer on the same field names.
 - International audiences: the same component serves every country, with generic labels the consumer can override through `partLabels`.
-- A form already has a country field: pass `fields` without `"country"` and set `defaultCountry` from your own field to scope the search.
+- A form already carries the address parts: leave `manualEntry` off and set `defaultCountry` from your own country field to scope the search.
 
 #### When NOT to use
 
@@ -44,9 +44,9 @@ One field by default; pass `fields` for the country and the parts.
 - Showing a saved address read-only. Render the `formatted` string instead.
 - Drawing a geofence radius or dragging a pin. This component stops at the address; put an `F0Map` next to it.
 
-#### Simple vs detailed
+#### Address field vs manual entry
 
-Use **simple mode** when a picked suggestion is the whole job: search boxes, filters, quick "where" prompts. Use **detailed mode** whenever the user may need to correct a part, or when the address may not exist in the provider (new buildings, rural addresses, no autocomplete entitlement).
+Leave `manualEntry` off when a picked suggestion is the whole job: search boxes, filters, quick "where" prompts. Turn it on whenever the user may need to correct a part, or when the address may not exist in the provider (new buildings, rural addresses, no autocomplete entitlement).
 
 <Canvas of={Stories.Prefilled} />
 
@@ -55,7 +55,7 @@ Use **simple mode** when a picked suggestion is the whole job: search boxes, fil
     description:
       "Pass the parts you store and let the component order them. Country first, then the address, then the rest.",
     guidelines: [
-      "Start with detailedLocationFields and add addressLine2 only if your model has it",
+      "Turn on manualEntry when the user may have to correct a part by hand",
       "Pass countries when the product only operates in a few, so the search is scoped from the first keystroke",
       "Read meta.isResolved before trusting latitude and longitude",
     ],
@@ -136,7 +136,7 @@ A pick shows the suggestion on the trigger right away but emits nothing until `r
 
 The list offers exactly what the provider returned: there is no create action, so the field cannot invent an address. When the search comes back empty it says so and nothing changes.
 
-A stored value that no suggestion covers is still displayed (the trigger reads the value, not a matching option) and stays editable through the parts in detailed mode. A surface that must accept addresses the provider does not know should omit `searchPlaces`, which turns the address line into a plain text field.
+A stored value that no suggestion covers is still displayed (the trigger reads the value, not a matching option) and stays editable through the parts under `manualEntry`. A surface that must accept addresses the provider does not know should omit `searchPlaces`, which turns the address line into a plain text field.
 
 ### Country and search scope
 
@@ -181,7 +181,7 @@ Omit `searchPlaces` and the address line is a plain [F0TextInput](?path=/docs/co
         </td>
         <td>
           Required. Visible label of the address field in simple mode; the
-          accessible name of the group in detailed mode.
+          accessible name of the group under <code>manualEntry</code>.
         </td>
       </tr>
       <tr>
@@ -306,17 +306,16 @@ Omit `searchPlaces` and the address line is a plain [F0TextInput](?path=/docs/co
     <tbody>
       <tr>
         <td>
-          <code>fields</code>
+          <code>manualEntry</code>
         </td>
         <td>
-          <code>
-            {'("country" | "addressLine2" | "city" | "state" | "postalCode")[]'}
-          </code>
+          <code>boolean</code>
         </td>
         <td>
-          Omit for simple mode. Pass the parts to render below the address
-          field; the order is fixed by the component. Use{" "}
-          <code>detailedLocationFields</code> for the recommended set.
+          Renders the whole address as separate fields: country, address line 1
+          and 2, city, region and postal code. The address line keeps its
+          suggestions. Defaults to <code>false</code>, which is the address
+          field on its own.
         </td>
       </tr>
       <tr>
@@ -324,9 +323,7 @@ Omit `searchPlaces` and the address line is a plain [F0TextInput](?path=/docs/co
           <code>partLabels</code>
         </td>
         <td>
-          <code>
-            {'Partial<Record<LocationField | "addressLine1", string>>'}
-          </code>
+          <code>{"Partial<Record<LocationPart, string>>"}</code>
         </td>
         <td>
           Overrides for the per-part labels, which default to translated copy
@@ -596,6 +593,6 @@ The address line inherits `F0Select`'s contract: the trigger is a `combobox`, th
 
 ### Screen reader behavior
 
-- Each part carries its own label. In detailed mode they are grouped in a `fieldset` named by `label` through `aria-label`, so a part is announced within its group without a visible title.
+- Each part carries its own label. Under `manualEntry` they are grouped in a `fieldset` named by `label` through `aria-label`, so a part is announced within its group without a visible title.
 - The empty state says which state the list is in: waiting for input, searching, or no results.
 - Without `searchPlaces` the address line is announced as a plain text field.

@@ -6,27 +6,16 @@ import type { CountryCode } from "@/lib/countries"
 export const locationInputSizes = INPUTFIELD_SIZES
 export type LocationInputSize = (typeof locationInputSizes)[number]
 
-/**
- * Parts that can be shown below the address field in detailed mode. The
- * address line itself is not listed: it is always rendered, because it is the
- * autocomplete field in both modes.
- */
-export const locationFields = [
+/** Every part the manual entry block renders, in the order it renders them */
+export const locationParts = [
   "country",
+  "addressLine1",
   "addressLine2",
   "city",
   "state",
   "postalCode",
 ] as const
-export type LocationField = (typeof locationFields)[number]
-
-/** Recommended detailed preset. `addressLine2` is opt-in. */
-export const detailedLocationFields = [
-  "country",
-  "city",
-  "state",
-  "postalCode",
-] as const satisfies readonly LocationField[]
+export type LocationPart = (typeof locationParts)[number]
 
 /**
  * Canonical address shape. Deliberately camelCase with a lowercase ISO-2
@@ -84,12 +73,15 @@ export interface F0LocationInputProps {
     meta: F0LocationInputChangeMeta
   ) => void
   /**
-   * Omit for the address field alone (simple mode). Pass the parts to render
-   * below it (detailed mode). Order is fixed by the component.
+   * Renders the whole address as separate fields the user can fill in by
+   * hand: country, address line 1 and 2, city, region and postal code. The
+   * address line keeps its suggestions, so picking one still fills the rest.
+   * Without it the component is the address field alone.
+   * @default false
    */
-  fields?: readonly LocationField[]
+  manualEntry?: boolean
   /** Overrides for the per-part labels, which default to translated copy */
-  partLabels?: Partial<Record<LocationField | "addressLine1", string>>
+  partLabels?: Partial<Record<LocationPart, string>>
   /** Restricts the country selector. A single entry also scopes the search */
   countries?: CountryCode[]
   /** Country used to scope the search while the value has none */

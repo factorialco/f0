@@ -1,17 +1,16 @@
 import { F0TextInput } from "@/components/F0TextInput"
-import { cn } from "@/lib/utils"
+import { useI18n } from "@/lib/providers/i18n"
 
 import type { EditableLocationPart } from "../internal-types"
 import type {
   F0LocationInputValue,
-  LocationField,
   LocationInputSize,
+  LocationPart,
 } from "../types"
 
 type Props = {
-  fields: ReadonlySet<LocationField>
   value: F0LocationInputValue | undefined
-  labels: Record<EditableLocationPart, string>
+  labels: Record<LocationPart, string>
   onChangePart: (part: EditableLocationPart, text: string) => void
   size: LocationInputSize
   disabled?: boolean
@@ -20,11 +19,10 @@ type Props = {
 }
 
 /**
- * City, state / region and postal code share one row; only address line 2
- * takes the full width above them.
+ * The parts below the address field. Address line 2 takes the full width;
+ * city, region and postal code share one row.
  */
 export const AddressParts = ({
-  fields,
   value,
   labels,
   onChangePart,
@@ -33,10 +31,22 @@ export const AddressParts = ({
   readonly,
   name,
 }: Props) => {
+  const i18n = useI18n()
+  const placeholders: Record<
+    Exclude<EditableLocationPart, "addressLine1">,
+    string
+  > = {
+    addressLine2: i18n.locationInput.addressLine2Placeholder,
+    city: i18n.locationInput.cityPlaceholder,
+    state: i18n.locationInput.statePlaceholder,
+    postalCode: i18n.locationInput.postalCodePlaceholder,
+  }
+
   const part = (key: Exclude<EditableLocationPart, "addressLine1">) => (
     <F0TextInput
       key={key}
       label={labels[key]}
+      placeholder={placeholders[key]}
       value={value?.[key] ?? ""}
       onChange={(text) => onChangePart(key, text)}
       size={size}
@@ -46,24 +56,14 @@ export const AddressParts = ({
     />
   )
 
-  const rowParts = (["city", "state", "postalCode"] as const).filter((key) =>
-    fields.has(key)
-  )
-  // Tailwind needs the column count as a literal class
-  const rowColumns = {
-    1: "sm:grid-cols-1",
-    2: "sm:grid-cols-2",
-    3: "sm:grid-cols-3",
-  }[rowParts.length]
-
   return (
     <>
-      {fields.has("addressLine2") && part("addressLine2")}
-      {rowParts.length > 0 && (
-        <div className={cn("grid grid-cols-1 gap-3", rowColumns)}>
-          {rowParts.map(part)}
-        </div>
-      )}
+      {part("addressLine2")}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        {part("city")}
+        {part("state")}
+        {part("postalCode")}
+      </div>
     </>
   )
 }

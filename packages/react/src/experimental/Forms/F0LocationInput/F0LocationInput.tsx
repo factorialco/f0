@@ -7,11 +7,10 @@ import { InputMessages } from "@/components/F0InputField/components/InputMessage
 import { F0TextInput } from "@/components/F0TextInput"
 import { useI18n } from "@/lib/providers/i18n"
 
-import type { EditableLocationPart } from "./internal-types"
 import type {
   F0LocationInputProps,
   F0LocationSuggestion,
-  LocationField,
+  LocationPart,
 } from "./types"
 
 import { AddressSelect } from "./components/AddressSelect"
@@ -28,7 +27,7 @@ export const F0LocationInput = forwardRef<
     value: valueProp,
     defaultValue,
     onChange,
-    fields,
+    manualEntry = false,
     partLabels,
     countries,
     defaultCountry,
@@ -70,24 +69,18 @@ export const F0LocationInput = forwardRef<
     }
   )
 
-  const visibleFields = useMemo(
-    () => new Set<LocationField>(fields ?? []),
-    [fields]
-  )
-  const detailed = visibleFields.size > 0
-
-  const labels = useMemo<Record<EditableLocationPart | "country", string>>(
+  const labels = useMemo<Record<LocationPart, string>>(
     () => ({
       addressLine1:
         partLabels?.addressLine1 ??
-        (detailed ? i18n.locationInput.address : label),
+        (manualEntry ? i18n.locationInput.address : label),
       addressLine2: partLabels?.addressLine2 ?? i18n.locationInput.addressLine2,
       city: partLabels?.city ?? i18n.locationInput.city,
       state: partLabels?.state ?? i18n.locationInput.state,
       postalCode: partLabels?.postalCode ?? i18n.locationInput.postalCode,
       country: partLabels?.country ?? i18n.locationInput.country,
     }),
-    [partLabels, detailed, label, i18n]
+    [partLabels, manualEntry, label, i18n]
   )
 
   const searchCountry =
@@ -159,15 +152,15 @@ export const F0LocationInput = forwardRef<
 
   // In detailed mode the message belongs to the group, the border to the field
   const fieldStatus =
-    detailed && effectiveStatus
+    manualEntry && effectiveStatus
       ? { type: effectiveStatus.type }
       : effectiveStatus
 
   const addressField = searchPlaces ? (
     <AddressSelect
       label={labels.addressLine1}
-      hideLabel={detailed ? false : hideLabel}
-      labelIcon={detailed ? undefined : labelIcon}
+      hideLabel={manualEntry ? false : hideLabel}
+      labelIcon={manualEntry ? undefined : labelIcon}
       placeholder={placeholder}
       text={pendingLabel ?? value?.addressLine1 ?? ""}
       placeId={value?.placeId}
@@ -189,8 +182,8 @@ export const F0LocationInput = forwardRef<
     <F0TextInput
       ref={ref}
       label={labels.addressLine1}
-      hideLabel={detailed ? false : hideLabel}
-      labelIcon={detailed ? undefined : labelIcon}
+      hideLabel={manualEntry ? false : hideLabel}
+      labelIcon={manualEntry ? undefined : labelIcon}
       placeholder={placeholder}
       value={value?.addressLine1 ?? ""}
       onChange={(text) => setPart("addressLine1", text)}
@@ -217,7 +210,7 @@ export const F0LocationInput = forwardRef<
       addressField
     )
 
-  if (!detailed) return addressBlock
+  if (!manualEntry) return addressBlock
 
   return (
     <fieldset
@@ -227,21 +220,18 @@ export const F0LocationInput = forwardRef<
       aria-label={label}
       aria-busy={resolving || undefined}
     >
-      {visibleFields.has("country") && (
-        <CountrySelect
-          label={labels.country}
-          value={value?.country}
-          onChange={setCountry}
-          countries={countries}
-          size={size}
-          disabled={disabled}
-          readonly={readonly}
-          name={name ? `${name}.country` : undefined}
-        />
-      )}
+      <CountrySelect
+        label={labels.country}
+        value={value?.country}
+        onChange={setCountry}
+        countries={countries}
+        size={size}
+        disabled={disabled}
+        readonly={readonly}
+        name={name ? `${name}.country` : undefined}
+      />
       {addressBlock}
       <AddressParts
-        fields={visibleFields}
         value={value}
         labels={labels}
         onChangePart={(part, text) => {

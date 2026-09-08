@@ -283,12 +283,12 @@ describe("F0LocationInput", () => {
     })
   })
 
-  describe("detailed mode", () => {
-    it("renders country first, then the address and the parts, with no group title", () => {
+  describe("manual entry", () => {
+    it("renders every part in order, with no group title", () => {
       const { container } = render(
         <F0LocationInput
           label="Office"
-          fields={["country", "city", "state", "postalCode"]}
+          manualEntry
           searchPlaces={searchPlaces}
         />
       )
@@ -299,6 +299,7 @@ describe("F0LocationInput", () => {
       expect(labels).toEqual([
         "Country",
         "Address",
+        "Address line 2",
         "City",
         "Region",
         "Postal code",
@@ -311,7 +312,7 @@ describe("F0LocationInput", () => {
       render(
         <F0LocationInput
           label="Office"
-          fields={["postalCode"]}
+          manualEntry
           partLabels={{ addressLine1: "Street", postalCode: "ZIP code" }}
         />
       )
@@ -330,7 +331,7 @@ describe("F0LocationInput", () => {
       render(
         <F0LocationInput
           label="Office"
-          fields={["country", "city", "state", "postalCode"]}
+          manualEntry
           defaultValue={resolved}
           onChange={onChange}
         />
@@ -360,7 +361,7 @@ describe("F0LocationInput", () => {
       render(
         <F0LocationInput
           label="Office"
-          fields={["country", "addressLine2", "city", "state", "postalCode"]}
+          manualEntry
           defaultValue={resolved}
           onChange={onChange}
         />
@@ -390,7 +391,7 @@ describe("F0LocationInput", () => {
       render(
         <F0LocationInput
           label="Office"
-          fields={["city"]}
+          manualEntry
           defaultValue={{ city: "Barcelona" }}
           onChange={onChange}
         />
@@ -408,7 +409,7 @@ describe("F0LocationInput", () => {
       render(
         <F0LocationInput
           label="Office"
-          fields={["city"]}
+          manualEntry
           error="Address is required"
         />
       )
