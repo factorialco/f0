@@ -180,6 +180,14 @@ times, and the two headings the palette invented for the first two — "Actions"
 and "Go to" — were the only words on screen a product could not choose. They are
 now `label`, beside the content they describe.
 
+**A scoped record's actions are grouped the same way.** `provider.actions`
+returns `CommandEntityActionGroup[]` — `{ label, items }` — so three
+maintenance actions name "Maintenance" once between them instead of once each.
+That also removed machinery: while the heading was a field on every action, the
+palette had to re-sort the list so rows of one intent came out contiguous, or a
+straggler re-emitted a heading that had already appeared. A group cannot be
+non-contiguous.
+
 Exactly one of `items` or `provider`, enforced with `never` on the other, so a
 group carrying both is a compile error rather than a silent precedence rule.
 
@@ -494,14 +502,20 @@ const deviceProvider: CommandEntityProvider = {
   type: "device",
   label: "Devices",
   search: (query, limit) => findDevices(query).slice(0, limit),
+  // Grouped by intent, and the heading is written once however many actions
+  // share it.
   actions: (ref) => [
     {
-      key: "lock",
-      label: "Lock screen",
-      icon: LockLocked,
-      group: "Security",
-      risk: "none",
-      run: (target, values, { navigate }) => lockDevice(target, navigate),
+      label: "Security",
+      items: [
+        {
+          key: "lock",
+          label: "Lock screen",
+          icon: LockLocked,
+          risk: "none",
+          run: (target, values, { navigate }) => lockDevice(target, navigate),
+        },
+      ],
     },
   ],
 }
@@ -512,7 +526,7 @@ const deviceProvider: CommandEntityProvider = {
 | `type`    | `string`                                    | Stable discriminator, and the value of `CommandEntityRef.type`. How actions are resolved for a ref. |
 | `label`   | `string`                                    | The group heading its records appear under.                                                         |
 | `search`  | `(query, limit) => CommandEntityRef[]`      | Record lookup. Ranking across providers is the palette's job.                                       |
-| `actions` | `(ref) => CommandEntityAction[]`            | What can be done to one of its records. Optional.                                                   |
+| `actions` | `(ref) => CommandEntityActionGroup[]`       | What can be done to one of its records, grouped by intent. Optional.                                |
 | `inside`  | `(ref, query, limit) => CommandEntityRef[]` | What lives **inside** one of its records, for narrowing before acting. Optional.                    |
 
 Both `actions` and `inside` are optional, and a record needs **one of them** to be worth committing: with neither, its provider has nothing on the other side of the gesture, so the record stays findable and openable but not scopable — a valid state, not a broken one, and the palette simply does not offer the affordance.
@@ -546,28 +560,35 @@ const actions: CommandAction[] = [
 // can end up in the URL.
 actions: () => [
   {
-    key: "policy",
-    label: "Device policy",
-    icon: Book,
-    group: "Help",
-    risk: "none",
-    href: "/help/devices",
+    label: "Help",
+    items: [
+      {
+        key: "policy",
+        label: "Device policy",
+        icon: Book,
+        risk: "none",
+        href: "/help/devices",
+      },
+      {
+        key: "history",
+        label: "View history",
+        icon: Clock,
+        risk: "none",
+        href: (ref) => `/devices/${ref.id}/history`,
+      },
+    ],
   },
   {
-    key: "history",
-    label: "View history",
-    icon: Clock,
-    group: "Inventory",
-    risk: "none",
-    href: (ref) => `/devices/${ref.id}/history`,
-  },
-  {
-    key: "lock",
-    label: "Lock screen",
-    icon: LockLocked,
-    group: "Security",
-    risk: "none",
-    run: (ref, values, { navigate }) => lockDevice(ref, navigate),
+    label: "Security",
+    items: [
+      {
+        key: "lock",
+        label: "Lock screen",
+        icon: LockLocked,
+        risk: "none",
+        run: (ref, values, { navigate }) => lockDevice(ref, navigate),
+      },
+    ],
   },
 ]
 ```

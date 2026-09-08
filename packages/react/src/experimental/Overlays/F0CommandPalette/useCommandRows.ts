@@ -366,9 +366,16 @@ export const useCommandRows = ({
     const provider = providers.find(
       (candidate) => candidate.type === scope.type
     )
-    const available = provider?.actions?.(scope) ?? []
+    /*
+      Flattened with the group's heading carried alongside each action, so the
+      buckets below can pull a row out of its group — suggested up, blocked
+      down — without losing the heading the ones that stay put still need.
+    */
+    const available = (provider?.actions?.(scope) ?? []).flatMap((group) =>
+      group.items.map((action) => ({ action, group: group.label }))
+    )
 
-    const resolved = available.map((action) => {
+    const resolved = available.map(({ action, group }) => {
       const availability = action.availability?.(scope) ?? { disabled: false }
       const impact = action.impact?.(scope)
       // The blast radius, stated on the row the reader is about to press Enter
@@ -378,6 +385,7 @@ export const useCommandRows = ({
         impact && impact.total > 1 ? labels.impact(impact) : undefined
 
       return {
+        group,
         action,
         disabled: availability.disabled,
         reason: availability.reason,
@@ -414,22 +422,6 @@ export const useCommandRows = ({
       run: () => onAdvance(entry.action, {}, 0),
     })
 
-    /**
-     * Rows of the same intent must be CONTIGUOUS whatever order the provider
-     * returned them in — otherwise a late straggler re-emits a heading that has
-     * already appeared, which reads as a rendering bug. Group order is first
-     * appearance, so the provider still decides which intent leads.
-     */
-    const order: string[] = []
-    for (const entry of rest) {
-      if (!order.includes(entry.action.group)) {
-        order.push(entry.action.group)
-      }
-    }
-    const grouped = order.flatMap((group) =>
-      rest.filter((entry) => entry.action.group === group)
-    )
-
     /*
       Blocked rows collect under ONE trailing heading rather than re-emitting
       every intent group a second time.
@@ -443,7 +435,7 @@ export const useCommandRows = ({
     */
     return [
       ...suggested.map((entry) => toRow(entry, labels.groups.suggested)),
-      ...grouped.map((entry) => toRow(entry, entry.action.group)),
+      ...rest.map((entry) => toRow(entry, entry.group)),
       ...childRows,
       ...blocked.map((entry) => toRow(entry, labels.groups.unavailable)),
     ]

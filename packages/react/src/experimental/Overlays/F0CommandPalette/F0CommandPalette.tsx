@@ -277,7 +277,12 @@ export const F0CommandPalette = ({
       const provider = providers.find(
         (candidate) => candidate.type === ref.type
       )
-      const count = provider?.actions?.(ref).length ?? 0
+      // Across the groups, not the number of groups: the announcement counts
+      // what the reader can do, and a heading is not one of them.
+      const count = (provider?.actions?.(ref) ?? []).reduce(
+        (total, group) => total + group.items.length,
+        0
+      )
       // The count goes over as a number, plural and zero case included: only the
       // consumer knows how its language says "no actions".
       setAnnouncement(labels.announce.scoped(ref.label, count))

@@ -140,8 +140,6 @@ type CommandEntityActionBase = {
   label: string
   description?: string
   icon: IconType
-  /** Intent heading, e.g. Security · Maintenance · Lifecycle. */
-  group: string
   /** Origin as metadata, never as navigation: "Script", "Query". */
   badge?: string
   risk: CommandActionRisk
@@ -218,7 +216,7 @@ export type CommandEntityProvider = {
    * registry: its records stay findable, they are just not yet actionable —
    * a valid state, since the palette still offers navigation.
    */
-  actions?: (ref: CommandEntityRef) => CommandEntityAction[]
+  actions?: (ref: CommandEntityRef) => CommandEntityActionGroup[]
   /**
    * The records that live INSIDE a ref, so the palette can narrow before it
    * acts: a team's people, a project's tasks, a folder's documents.
@@ -304,9 +302,24 @@ export type CommandAction = CommandActionBase &
  *
  * Give it a STABLE identity — module scope, or memoised. It keys the row memos.
  */
+/** A heading and the things under it — the shape every group here has. */
+export type Grouped<TItem> = { label: string; items: TItem[] }
+
 export type CommandGroup =
-  | { label: string; items: CommandAction[]; provider?: never }
+  | (Grouped<CommandAction> & { provider?: never })
   | { provider: CommandEntityProvider; label?: never; items?: never }
+
+/**
+ * A named set of actions on one record: "Security", "Maintenance", "Lifecycle".
+ *
+ * The heading sits HERE rather than on each action, for the same reason it sits
+ * on `CommandGroup` rather than on each command. Three maintenance actions used
+ * to write `group: "Maintenance"` three times — three chances to disagree — and
+ * because the heading was per-row the palette then had to re-sort the list so
+ * that rows of one intent came out contiguous, or a straggler re-emitted a
+ * heading that had already appeared. A group cannot be non-contiguous.
+ */
+export type CommandEntityActionGroup = Grouped<CommandEntityAction>
 
 /**
  * The assistant escape hatch — the way out of the list when nothing in it fit.

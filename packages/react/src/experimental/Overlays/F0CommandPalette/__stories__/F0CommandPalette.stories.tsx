@@ -130,22 +130,30 @@ const peopleProvider: CommandEntityProvider = {
     people.filter((person) => matches(person, query)).slice(0, limit),
   actions: () => [
     {
-      key: "time-off",
-      label: "Request time off for them",
-      icon: Calendar,
-      group: "Person",
-      risk: "none",
-      suggested: () => true,
-      run: () => undefined,
+      label: "Person",
+      items: [
+        {
+          key: "time-off",
+          label: "Request time off for them",
+          icon: Calendar,
+          risk: "none",
+          suggested: () => true,
+          run: () => undefined,
+        },
+      ],
     },
     {
-      key: "offboard",
-      label: "Start offboarding",
-      description: "Revokes every access. This can't be undone",
-      icon: Delete,
-      group: "Lifecycle",
-      risk: "danger",
-      run: () => undefined,
+      label: "Lifecycle",
+      items: [
+        {
+          key: "offboard",
+          label: "Start offboarding",
+          description: "Revokes every access. This can't be undone",
+          icon: Delete,
+          risk: "danger",
+          run: () => undefined,
+        },
+      ],
     },
   ],
 }
@@ -163,25 +171,29 @@ const teamProvider: CommandEntityProvider = {
   label: "Teams",
   search: (query, limit) =>
     teams.filter((entry) => matches(entry, query)).slice(0, limit),
+  // BOTH under one heading, written once — the shape's whole point.
   actions: () => [
     {
-      key: "rename",
-      label: "Rename team",
-      icon: Settings,
-      group: "Admin",
-      risk: "none",
-      run: () => undefined,
-    },
-    // A DESTINATION, not a behaviour: `href` says so directly rather than
-    // burying a route in a callback. A function of the target where the
-    // destination depends on it, a plain string where it does not.
-    {
-      key: "directory",
-      label: "Open the team directory",
-      icon: Person,
-      group: "Admin",
-      risk: "none",
-      href: (ref) => `/teams/${ref.kind === "one" ? ref.id : ""}`,
+      label: "Admin",
+      items: [
+        {
+          key: "rename",
+          label: "Rename team",
+          icon: Settings,
+          risk: "none",
+          run: () => undefined,
+        },
+        // A DESTINATION, not a behaviour: `href` says so directly rather than
+        // burying a route in a callback. A function of the target where the
+        // destination depends on it, a plain string where it does not.
+        {
+          key: "directory",
+          label: "Open the team directory",
+          icon: Person,
+          risk: "none",
+          href: (ref) => `/teams/${ref.kind === "one" ? ref.id : ""}`,
+        },
+      ],
     },
   ],
   inside: (ref, query, limit) =>
@@ -199,99 +211,123 @@ const deviceProvider: CommandEntityProvider = {
   label: "Devices",
   search: (query, limit) =>
     devices.filter((device) => matches(device, query)).slice(0, limit),
+  /**
+   * Grouped by INTENT, and each heading written once.
+   *
+   * Two maintenance actions and two lifecycle ones share a heading here — under
+   * the old shape that string appeared on every action that belonged to it.
+   */
   actions: () => [
     {
-      key: "lock",
-      label: "Lock screen",
-      description: "Locks immediately and asks for the passcode",
-      icon: LockLocked,
-      group: "Security",
-      risk: "none",
-      suggested: () => true,
-      run: () => undefined,
-    },
-    {
-      key: "collect-logs",
-      label: "Collect diagnostics",
-      icon: Download,
-      group: "Maintenance",
-      badge: "Script",
-      risk: "none",
-      keywords: "logs sysdiagnose support bundle",
-      run: () => undefined,
-    },
-    {
-      key: "update",
-      label: "Update macOS",
-      icon: Settings,
-      group: "Maintenance",
-      risk: "confirm",
-      // The parameter becomes the palette's next level rather than a dialog.
-      params: [
+      label: "Security",
+      items: [
         {
-          key: "version",
-          label: "Choose a version",
-          options: () => [
-            { value: "15.3", label: "macOS 15.3", sublabel: "Latest" },
-            { value: "15.2", label: "macOS 15.2" },
-            { value: "14.7", label: "macOS 14.7", sublabel: "Previous major" },
+          key: "lock",
+          label: "Lock screen",
+          description: "Locks immediately and asks for the passcode",
+          icon: LockLocked,
+          risk: "none",
+          suggested: () => true,
+          run: () => undefined,
+        },
+      ],
+    },
+    {
+      label: "Maintenance",
+      items: [
+        {
+          key: "collect-logs",
+          label: "Collect diagnostics",
+          icon: Download,
+          badge: "Script",
+          risk: "none",
+          keywords: "logs sysdiagnose support bundle",
+          run: () => undefined,
+        },
+        {
+          key: "update",
+          label: "Update macOS",
+          icon: Settings,
+          risk: "confirm",
+          // The parameter becomes the palette's next level rather than a dialog.
+          params: [
+            {
+              key: "version",
+              label: "Choose a version",
+              options: () => [
+                { value: "15.3", label: "macOS 15.3", sublabel: "Latest" },
+                { value: "15.2", label: "macOS 15.2" },
+                {
+                  value: "14.7",
+                  label: "macOS 14.7",
+                  sublabel: "Previous major",
+                },
+              ],
+            },
           ],
+          run: () => undefined,
         },
       ],
-      run: () => undefined,
     },
     {
-      key: "reassign",
-      label: "Reassign owner",
-      icon: Person,
-      group: "Inventory",
-      risk: "none",
-      params: [
+      label: "Inventory",
+      items: [
         {
-          key: "owner",
-          label: "Choose an owner",
-          options: () =>
-            people.map((person) => ({
-              value: person.id,
-              label: person.label,
-              sublabel: person.sublabel,
-              avatar: person.avatar,
-            })),
+          key: "reassign",
+          label: "Reassign owner",
+          icon: Person,
+          risk: "none",
+          params: [
+            {
+              key: "owner",
+              label: "Choose an owner",
+              options: () =>
+                people.map((person) => ({
+                  value: person.id,
+                  label: person.label,
+                  sublabel: person.sublabel,
+                  avatar: person.avatar,
+                })),
+            },
+          ],
+          run: () => undefined,
         },
       ],
-      run: () => undefined,
     },
     {
-      key: "enroll",
-      label: "Enroll in MDM",
-      icon: CheckCircleLine,
-      group: "Lifecycle",
-      risk: "none",
-      // Gated, so it stays listed WITH its reason instead of disappearing.
-      availability: () => ({
-        disabled: true,
-        reason: "Already enrolled since March",
-      }),
-      run: () => undefined,
-    },
-    {
-      key: "wipe",
-      label: "Wipe device",
-      description: "Erases everything. This can't be undone",
-      icon: Delete,
-      group: "Lifecycle",
-      risk: "danger",
-      // The eligible/skipped split, stated on the row before the commit.
-      impact: (target) =>
-        target.kind === "many"
-          ? {
-              eligible: 3,
-              total: target.ids.length,
-              skipped: 1,
-              reason: "1 is already wiped",
-            }
-          : undefined,
-      run: () => undefined,
+      label: "Lifecycle",
+      items: [
+        {
+          key: "enroll",
+          label: "Enroll in MDM",
+          icon: CheckCircleLine,
+          risk: "none",
+          // Gated, so it stays listed WITH its reason instead of disappearing.
+          availability: () => ({
+            disabled: true,
+            reason: "Already enrolled since March",
+          }),
+          run: () => undefined,
+        },
+        {
+          key: "wipe",
+          label: "Wipe device",
+          description: "Erases everything. This can't be undone",
+          icon: Delete,
+          risk: "danger",
+          // The eligible/skipped split, stated on the row before the commit.
+          impact: (target) =>
+            target.kind === "many"
+              ? {
+                  eligible: 3,
+                  total: target.ids.length,
+                  skipped: 1,
+                  reason: "1 is already wiped",
+                }
+              : undefined,
+          run: () => undefined,
+        },
+      ],
     },
   ],
 }

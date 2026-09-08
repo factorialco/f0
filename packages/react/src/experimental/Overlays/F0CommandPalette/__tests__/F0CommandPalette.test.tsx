@@ -40,48 +40,59 @@ const deviceProvider: CommandEntityProvider = {
     laptop.label.toLowerCase().includes(query.toLowerCase()) ? [laptop] : [],
   actions: () => [
     {
-      key: "lock",
-      label: "Lock screen",
-      icon: Laptop,
-      group: "Security",
-      risk: "none",
-      run: run.lock,
-    },
-    {
-      key: "wipe",
-      label: "Wipe device",
-      description: "This can't be undone",
-      icon: Delete,
-      group: "Lifecycle",
-      risk: "danger",
-      run: run.wipe,
-    },
-    {
-      key: "enroll",
-      label: "Enroll in MDM",
-      icon: Laptop,
-      group: "Lifecycle",
-      risk: "none",
-      availability: () => ({ disabled: true, reason: "Already enrolled" }),
-      run: vi.fn(),
-    },
-    {
-      key: "update",
-      label: "Update macOS",
-      icon: Laptop,
-      group: "Maintenance",
-      risk: "confirm",
-      params: [
+      label: "Security",
+      items: [
         {
-          key: "version",
-          label: "Choose a version",
-          options: () => [
-            { value: "15", label: "macOS 15" },
-            { value: "14", label: "macOS 14" },
-          ],
+          key: "lock",
+          label: "Lock screen",
+          icon: Laptop,
+          risk: "none",
+          run: run.lock,
         },
       ],
-      run: run.update,
+    },
+    {
+      label: "Lifecycle",
+      items: [
+        {
+          key: "wipe",
+          label: "Wipe device",
+          description: "This can't be undone",
+          icon: Delete,
+          risk: "danger",
+          run: run.wipe,
+        },
+        {
+          key: "enroll",
+          label: "Enroll in MDM",
+          icon: Laptop,
+          risk: "none",
+          availability: () => ({ disabled: true, reason: "Already enrolled" }),
+          run: vi.fn(),
+        },
+      ],
+    },
+    {
+      label: "Maintenance",
+      items: [
+        {
+          key: "update",
+          label: "Update macOS",
+          icon: Laptop,
+          risk: "confirm",
+          params: [
+            {
+              key: "version",
+              label: "Choose a version",
+              options: () => [
+                { value: "15", label: "macOS 15" },
+                { value: "14", label: "macOS 14" },
+              ],
+            },
+          ],
+          run: run.update,
+        },
+      ],
     },
   ],
 }
@@ -112,12 +123,16 @@ const teamProvider: CommandEntityProvider = {
     team.label.toLowerCase().includes(query.toLowerCase()) ? [team] : [],
   actions: () => [
     {
-      key: "rename",
-      label: "Rename team",
-      icon: Laptop,
-      group: "Admin",
-      risk: "none",
-      run: run.rename,
+      label: "Admin",
+      items: [
+        {
+          key: "rename",
+          label: "Rename team",
+          icon: Laptop,
+          risk: "none",
+          run: run.rename,
+        },
+      ],
     },
   ],
   // The team hands back `person` refs; the person provider below is what says
@@ -134,12 +149,16 @@ const personProvider: CommandEntityProvider = {
   search: () => [],
   actions: () => [
     {
-      key: "profile",
-      label: "Open profile",
-      icon: Laptop,
-      group: "Person",
-      risk: "none",
-      run: run.profile,
+      label: "Person",
+      items: [
+        {
+          key: "profile",
+          label: "Open profile",
+          icon: Laptop,
+          risk: "none",
+          run: run.profile,
+        },
+      ],
     },
   ],
 }
@@ -1021,23 +1040,27 @@ describe("an action that only goes somewhere", () => {
     search: (query) =>
       laptop.label.toLowerCase().includes(query.toLowerCase()) ? [laptop] : [],
     actions: () => [
-      // A plain string: the destination is the same wherever you came from.
       {
-        key: "docs",
-        label: "Device policy",
-        icon: Laptop,
-        group: "Help",
-        risk: "none",
-        href: "/help/devices",
-      },
-      // A function of the target, for a destination that depends on it.
-      {
-        key: "history",
-        label: "View history",
-        icon: Laptop,
-        group: "Inventory",
-        risk: "none",
-        href: (ref) => `/devices/${ref.kind === "one" ? ref.id : ""}/history`,
+        label: "Links",
+        items: [
+          // A plain string: the destination is the same wherever you came from.
+          {
+            key: "docs",
+            label: "Device policy",
+            icon: Laptop,
+            risk: "none",
+            href: "/help/devices",
+          },
+          // A function of the target, for a destination that depends on it.
+          {
+            key: "history",
+            label: "View history",
+            icon: Laptop,
+            risk: "none",
+            href: (ref) =>
+              `/devices/${ref.kind === "one" ? ref.id : ""}/history`,
+          },
+        ],
       },
     ],
   }

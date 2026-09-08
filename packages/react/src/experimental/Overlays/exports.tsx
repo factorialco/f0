@@ -26,6 +26,7 @@ export {
   type CommandAssistant,
   type CommandAvailability,
   type CommandEntityAction,
+  type CommandEntityActionGroup,
   type CommandEntityAvatar,
   type CommandEntityProvider,
   type CommandEntityRef,
