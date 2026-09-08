@@ -16,6 +16,7 @@ export type {
   DataDownloadCanvasContent,
   DataDownloadDataset,
   AutofillTimesheetCanvasContent,
+  BulkResolveInconsistenciesCanvasContent,
   AutofillTimesheetShift,
   DashboardCanvasActions,
   DashboardMetadata,

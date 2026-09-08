@@ -9,6 +9,7 @@ import type {
   DataDownloadCanvasContent,
   FormCanvasContent,
   AutofillTimesheetCanvasContent,
+  BulkResolveInconsistenciesCanvasContent,
 } from "../canvas/types"
 
 /**
@@ -56,6 +57,7 @@ export type {
   DataDownloadCanvasContent,
   FormCanvasContent,
   AutofillTimesheetCanvasContent,
+  BulkResolveInconsistenciesCanvasContent,
 }
 
 export type { PersonProfile } from "./components/markdownRenderers/entityRef/entities/person/types"
