@@ -242,10 +242,11 @@ None of this is visually demonstrable, so it is documented here instead of in a 
 
 - A generated `id` links the rendered `<label htmlFor>` to the cloned child, and the child also gets `aria-label` (from `label`, falling back to `placeholder`) — `label` is required even when `hideLabel` visually hides the `<label>` element, so the accessible name survives either way.
 - `aria-disabled` while `disabled` or `readonly`, and `aria-busy` while `loading` — both land on the child element itself.
-- `aria-controls` and `aria-expanded` pass straight through to the child when the consumer supplies them, for a future input that needs to describe an owned listbox or popover.
+- `aria-controls`, `aria-expanded`, `aria-activedescendant`, `aria-autocomplete` and `aria-describedby` pass straight through to the child when the consumer supplies them, for an input that drives a listbox or popover it does not contain. `aria-expanded` is dropped unless `role` is `combobox`, where it is the only role allowed to carry it.
+- `aria-describedby` is how a field whose visible value is NOT its own text stays announceable. Pair it with `valueSlot`: the slot draws the value (a label, an avatar, a status pill, a count) where the typed text would be, and `aria-describedby` points at that node so a screen reader reads it. `F0Select` uses exactly this pairing for a trigger you can type in. Point it only at a node that is currently rendered — the slot is dropped as soon as there is text, and a reference to a node that is gone is an error rather than a description.
 - The clear button has a fixed `aria-label="Clear"`; there is no prop to relabel it, only `onClear` to change what happens when it is activated.
 
-The `loading` spinner is a separate live region — it carries its own `aria-busy` and `aria-live="polite"` (`ui/Spinner`), independent of the child's `aria-busy`. Status, warning, info and hint messages, by contrast, render as plain text next to the field: they are not connected to the child via `aria-describedby` or an `aria-live` region, so a type-specific input built on `F0InputField` that needs a validation error to be announced has to wire that itself.
+The `loading` spinner is a separate live region — it carries its own `aria-busy` and `aria-live="polite"` (`ui/Spinner`), independent of the child's `aria-busy`. Status, warning, info and hint messages, by contrast, render as plain text next to the field: they are not connected to the child via `aria-describedby` or an `aria-live` region, so a type-specific input built on `F0InputField` that needs a validation error to be announced has to wire that itself — and if it does, it owns the whole `aria-describedby` value, since the prop is passed through rather than merged.
 
 ## Props
 
@@ -527,6 +528,56 @@ The `loading` spinner is a separate live region — it carries its own `aria-bus
       </tr>
     </thead>
     <tbody>
+      <tr>
+        <td>
+          <code>valueSlot</code>
+        </td>
+        <td>
+          <code>React.ReactNode</code>
+        </td>
+        <td>
+          Rich content drawn where the typed text would be, while the field has
+          no text: a label, an avatar, a status pill, a count. For a field whose
+          visible value is not its own text. It hides the placeholder while it
+          shows, and is itself dropped as soon as there is text. Pair it with{" "}
+          <code>aria-describedby</code> pointing at it, or the value it draws is
+          never announced.
+        </td>
+        <td>
+          <code>undefined</code>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>canClear</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          Whether there is anything to clear, when <code>isEmpty</code> cannot
+          answer it. With a <code>valueSlot</code> the placeholder follows the
+          text and the clear button follows the value.
+        </td>
+        <td>
+          <code>undefined</code>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>clearKeepsText</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          Leaves the typed text alone when the clear button is pressed, so{" "}
+          <code>onClear</code> is the whole behavior.
+        </td>
+        <td>
+          <code>false</code>
+        </td>
+      </tr>
       <tr>
         <td>
           <code>clearable</code>

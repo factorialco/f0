@@ -1,6 +1,6 @@
 import type { Decorator, Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
-import { expect, fn, within } from "storybook/test"
+import { expect, fn, userEvent, waitFor, within } from "storybook/test"
 import { IconType } from "@/components/F0Icon"
 import { inputFieldStatus } from "@/components/F0InputField"
 import {
@@ -48,6 +48,14 @@ const items = [
   },
 ]
 
+const themeOptions = items.map((item) => ({
+  value: item.id,
+  label: item.name,
+  icon: icons[item.id],
+  description: item.description,
+  item,
+}))
+
 const meta: Meta = {
   title: "Select",
   component: F0Select,
@@ -61,6 +69,7 @@ const meta: Meta = {
           "<p>Renders a select input field with a list of options to choose from.</p>" +
           "<p>The list is virtualized so it can handle a large number of items.</p>" +
           '<p>Use <code>variant="field"</code> for forms and labeled inputs. Use <code>variant="inline"</code> for compact desktop row controls such as roles, statuses, and access levels. Inline selects are single-value and non-clearable; their required <code>label</code> provides the accessible name and becomes the visible empty-state fallback when no <code>placeholder</code> is provided.</p>' +
+          "<p>With <code>showSearchBox</code>, a field select is searched from its own trigger: the field is the search box, so there is one place to look and one place to type. Filters are what keep the search box in the dropdown instead, beside the filter picker. A grouping selector does not move the search: the dropdown's row keeps it and the field keeps the query.</p>" +
           "<p>Options support three kinds of annotations: <code>description</code> for prose rendered as a second line, <code>metadata</code> for a short typed token rendered next to the label (e.g. a dial code), and <code>tag</code> for chips rendered at the end of the row.</p>",
       },
     },
@@ -140,8 +149,11 @@ const meta: Meta = {
         "Custom trigger content for the select. When provided, replaces the default input field trigger",
     },
     showSearchBox: {
+      control: "boolean",
       description:
-        "Shows a search box. The component will filter the items by name and by description unless searchFunc will be in use",
+        "Whether the list can be searched. " +
+        "Where the search field lands depends on the filters: with no filters the trigger itself becomes the search field, and with filters it stays in the dropdown's top row beside the filter picker. " +
+        '`variant="inline"`, `asList` and custom triggers always use the row. Filtering matches label, description and a metadata dial code unless `searchFn` is in use.',
     },
     searchValue: {
       description: "Default value for the search box",
@@ -233,7 +245,6 @@ const meta: Meta = {
       }
     }),
     disabled: false,
-    showSearchBox: false,
   },
   decorators: [
     ((Story, { args }) => {
@@ -703,10 +714,11 @@ export const Clearable: Story = {
   },
 }
 
+/** `searchFn` replaces the built-in matching over label, description and dial code. */
 export const WithSearchBox: Story = {
   args: {
     searchEmptyMessage: "No results found",
-    searchBoxPlaceholder: "Search for a theme",
+    placeholder: "Search for a theme",
   },
   render: (args) => {
     return (
@@ -737,7 +749,7 @@ export const WithActions: Story = {
   args: {
     showSearchBox: true,
     searchEmptyMessage: "No results found",
-    searchBoxPlaceholder: "Search for a theme",
+    placeholder: "Search for a theme",
     label: "Select a theme",
     actions: [
       {
@@ -1372,6 +1384,84 @@ export const MultipleSelectAllWithFilters: Story = {
 }
 
 /**
+ * The default for a static list: the trigger IS the search field, and the
+ * selection is drawn where the text goes until the user types over it.
+ *
+ * The caret never leaves the field, so the text keys keep working. The arrows
+ * move the active option, Enter takes it, Escape or the arrow glyph closes.
+ */
+export const SearchInTheTrigger: Story = {
+  args: {
+    label: "Select a theme",
+    placeholder: "Search themes",
+    showSearchBox: true,
+    value: "dark",
+    clearable: true,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
+
+    const trigger = canvas.getByRole("combobox")
+
+    // The selected label is the field's own text. It resolves asynchronously.
+    await waitFor(async () => expect(trigger).toHaveValue("Dark"))
+
+    // Backspace on a selection edits its label: "Dark" becomes "Dar", the
+    // selection goes, and the list narrows to what is left.
+    trigger.focus()
+    await userEvent.keyboard("{Backspace}")
+
+    await waitFor(async () => expect(trigger).toHaveValue("Dar"))
+    await waitFor(async () =>
+      expect(trigger).toHaveAttribute("aria-expanded", "true")
+    )
+
+    // The field must survive the open dropdown's aria-hidden sweep.
+    await waitFor(async () => expect(body.getByRole("combobox")).toBe(trigger))
+
+    // The rows are virtualized behind the entrance animation, so they arrive
+    // a beat after the keystroke.
+    await waitFor(
+      async () => {
+        const options = body.getAllByRole("option")
+        expect(options).toHaveLength(1)
+        expect(options[0]).toHaveTextContent("Dark")
+      },
+      { timeout: 5000 }
+    )
+
+    // Named on the field rather than focused, which is what keeps the caret
+    // in place while the arrows walk the list.
+    await waitFor(async () =>
+      expect(trigger).toHaveAttribute("aria-activedescendant")
+    )
+    expect(canvasElement.ownerDocument.activeElement).toBe(trigger)
+  },
+}
+
+/** Multiple selection keeps the same field, showing how many are selected. */
+export const SearchInTheTriggerMultiple: Story = {
+  args: {
+    label: "Select themes",
+    placeholder: "Search themes",
+    showSearchBox: true,
+    multiple: true,
+    clearable: true,
+    value: ["light", "dark"],
+  },
+}
+
+/** Without `showSearchBox`, the trigger is a plain button. */
+export const SearchDisabled: Story = {
+  args: {
+    label: "Select a theme",
+    value: undefined,
+    placeholder: undefined,
+  },
+}
+
+/**
  * Single select with paginated data and filters.
  * Use `defaultItem` to provide label for pre-selected value not in the first page.
  * Filter by department, office, or legal entity to narrow down results.
@@ -1549,6 +1639,61 @@ export const Snapshot: Story = {
       },
       { name: "Hint", props: { ...base, hint: "Hint message" } },
     ]
+
+    /**
+     * The variants above render with no value, so they are all the empty
+     * search field. These carry a selection, so the capture covers what the
+     * field draws beside the caret, and the plain button trigger.
+     */
+    const triggerVariants = [
+      {
+        name: "Search field with a selection",
+        props: {
+          ...base,
+          showSearchBox: true,
+          value: "dark",
+          options: themeOptions,
+        },
+      },
+      {
+        name: "Search field with a status pill",
+        props: {
+          ...base,
+          showSearchBox: true,
+          icon: undefined,
+          value: "approved",
+          options: [
+            {
+              value: "approved",
+              label: "Approved",
+              tag: {
+                type: "status" as const,
+                text: "Approved",
+                variant: "positive" as const,
+              },
+            },
+          ],
+        },
+      },
+      {
+        name: "Search field, multiple selection",
+        props: {
+          ...base,
+          showSearchBox: true,
+          multiple: true as const,
+          value: ["light", "dark"],
+          options: themeOptions,
+        },
+      },
+      {
+        name: "Button trigger, search off",
+        props: {
+          ...base,
+          value: "dark",
+          options: themeOptions,
+        },
+      },
+    ]
     return (
       <div className="flex flex-col gap-4">
         {selectSizes.map((size) => (
@@ -1569,6 +1714,15 @@ export const Snapshot: Story = {
                   label={`${variant.name} select, ${size}`}
                   onChange={fn()}
                   options={[]}
+                />
+              ))}
+              {triggerVariants.map((variant) => (
+                <F0Select
+                  key={`${size}-${variant.name}`}
+                  size={size}
+                  {...variant.props}
+                  label={`${variant.name}, ${size}`}
+                  onChange={fn()}
                 />
               ))}
             </div>

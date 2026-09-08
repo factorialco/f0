@@ -1,4 +1,4 @@
-import { fireEvent } from "@testing-library/react"
+import { fireEvent, waitFor } from "@testing-library/react"
 import React from "react"
 import { beforeAll, describe, expect, it, vi } from "vitest"
 import { zeroRender as render, screen, within } from "@/testing/test-utils"
@@ -67,6 +67,13 @@ describe("OneCalendar", () => {
     // month by passing a concrete selected date.
     const march2024 = new Date(2024, 2, 15)
 
+    // The year picker is searchable, so its trigger is an input whose text is
+    // the year. It is the last combobox in the header.
+    const yearCombobox = () => {
+      const all = screen.getAllByRole("combobox")
+      return all[all.length - 1]
+    }
+
     it("shows month and year dropdowns in day view", async () => {
       render(
         <TestWrapper locale="en-US">
@@ -77,7 +84,7 @@ describe("OneCalendar", () => {
       const comboboxes = screen.getAllByRole("combobox")
       expect(comboboxes).toHaveLength(2)
       expect(await screen.findByText("March")).toBeInTheDocument()
-      expect(await screen.findByText("2024")).toBeInTheDocument()
+      await waitFor(() => expect(yearCombobox()).toHaveValue("2024"))
     })
 
     it("shows month and year dropdowns in week view", async () => {
@@ -101,7 +108,9 @@ describe("OneCalendar", () => {
       // Exactly one dropdown (year); the month picker is the grid itself.
       const comboboxes = screen.getAllByRole("combobox")
       expect(comboboxes).toHaveLength(1)
-      expect(comboboxes[0]).toHaveTextContent("2024")
+      // The year picker is searchable, so its trigger is an input whose text
+      // is the year.
+      expect(comboboxes[0]).toHaveValue("2024")
     })
 
     it("keeps the plain label (no dropdowns) in quarter view", () => {
@@ -141,7 +150,7 @@ describe("OneCalendar", () => {
 
       fireEvent.click(screen.getByRole("button", { name: "Next" }))
       expect(await screen.findByText("December")).toBeInTheDocument()
-      expect(await screen.findByText("2024")).toBeInTheDocument()
+      await waitFor(() => expect(yearCombobox()).toHaveValue("2024"))
     })
 
     it("navigates freely into future years within the default window", async () => {
@@ -163,9 +172,9 @@ describe("OneCalendar", () => {
 
       fireEvent.click(screen.getByRole("button", { name: "Next" }))
       expect(await screen.findByText("January")).toBeInTheDocument()
-      expect(
-        await screen.findByText(String(currentYear + 1))
-      ).toBeInTheDocument()
+      await waitFor(() =>
+        expect(yearCombobox()).toHaveValue(String(currentYear + 1))
+      )
     })
 
     it("disables adjacent-month day cells that fall outside the year range", async () => {
@@ -218,7 +227,7 @@ describe("OneCalendar", () => {
 
       expect(await screen.findByText("Sep")).toBeInTheDocument()
       expect(screen.queryByText("September")).not.toBeInTheDocument()
-      expect(await screen.findByText("2024")).toBeInTheDocument()
+      await waitFor(() => expect(yearCombobox()).toHaveValue("2024"))
     })
 
     it("does not impose a hidden lower bound when only maxDate is set", async () => {
@@ -240,7 +249,7 @@ describe("OneCalendar", () => {
 
       // The year dropdown stretches to display 1850.
       expect(await screen.findByText("June")).toBeInTheDocument()
-      expect(await screen.findByText("1850")).toBeInTheDocument()
+      await waitFor(() => expect(yearCombobox()).toHaveValue("1850"))
 
       // Days in 1850 are not disabled and remain selectable.
       const grid = screen.getAllByRole("grid")[0]

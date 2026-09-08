@@ -34,7 +34,18 @@ type F0SelectPopupProps<T extends string, R = unknown> = {
     checked: boolean
   ) => void
   open?: boolean
+  /**
+   * Whether the list can be searched.
+   *
+   * With no filters the trigger itself is the search field: you type where the
+   * value shows. With filters, and for `variant="inline"`, `asList` and custom
+   * triggers, the search box stays in the dropdown's top row.
+   */
   showSearchBox?: boolean
+  /**
+   * Placeholder for the search field. When the trigger is the search field the
+   * select's own `placeholder` wins and this stands in.
+   */
   searchBoxPlaceholder?: string
   onSearchChange?: (value: string) => void
   searchValue?: string

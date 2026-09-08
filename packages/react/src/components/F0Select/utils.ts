@@ -84,3 +84,9 @@ export function useLabelsOverflow(labels: string[]): {
 
 /** Exported constant for use in components */
 export { LABEL_SEPARATOR }
+
+/** What an item is called outside its row: `selectedLabel` when it has one. */
+export const displayLabel = (item: {
+  label: string
+  selectedLabel?: string
+}): string => item.selectedLabel ?? item.label

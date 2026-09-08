@@ -287,6 +287,45 @@ describe("SelectContent", () => {
     expect(search).toHaveFocus()
   })
 
+  /** Right for a button trigger, wrong for one the user types in. */
+  describe("keepTriggerAccessible", () => {
+    it("hides the trigger while the content is open by default", async () => {
+      render(
+        <Select open value="first" onValueChange={vi.fn()}>
+          <SelectTrigger aria-label="Choose an option">First</SelectTrigger>
+          <SelectContent>
+            <SelectItem value="first">First</SelectItem>
+          </SelectContent>
+        </Select>
+      )
+
+      await screen.findByRole("listbox")
+
+      await waitFor(() =>
+        expect(
+          screen.queryByRole("combobox", { name: "Choose an option" })
+        ).not.toBeInTheDocument()
+      )
+    })
+
+    it("keeps the trigger in the accessibility tree when asked", async () => {
+      render(
+        <Select open value="first" onValueChange={vi.fn()}>
+          <SelectTrigger aria-label="Choose an option">First</SelectTrigger>
+          <SelectContent keepTriggerAccessible>
+            <SelectItem value="first">First</SelectItem>
+          </SelectContent>
+        </Select>
+      )
+
+      await screen.findByRole("listbox")
+
+      expect(
+        screen.getByRole("combobox", { name: "Choose an option" })
+      ).toBeInTheDocument()
+    })
+  })
+
   it("keeps typeahead navigation on options", async () => {
     const user = userEvent.setup()
 

@@ -108,9 +108,10 @@ describe("LocationSelector", () => {
       />
     )
 
-    expect(
-      screen.getByText("Llucuna A-3 — Office · Barcelona")
-    ).toBeInTheDocument()
+    // The picker searches from its trigger, so the path is the field's text.
+    expect(screen.getByRole("combobox")).toHaveValue(
+      "Llucuna A-3 — Office · Barcelona"
+    )
   })
 
   it("groups work areas under the chain above them", async () => {
@@ -176,7 +177,8 @@ describe("LocationSelector", () => {
     // `fireEvent.change`, not `user.type`: the search box is controlled and
     // re-renders per keystroke, which drops characters here — "Barcelona" reached
     // the adapter as "brcelona", and the search then correctly found nothing.
-    fireEvent.change(screen.getByRole("searchbox"), {
+    // The field IS the combobox: the picker searches from its own trigger.
+    fireEvent.change(screen.getByRole("combobox"), {
       target: { value: "Barcelona" },
     })
 

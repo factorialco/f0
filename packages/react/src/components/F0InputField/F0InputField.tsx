@@ -161,10 +161,29 @@ export type InputFieldProps<T> = {
   labelIcon?: IconType
   hideLabel?: boolean
   hidePlaceholder?: boolean
+  /**
+   * Rich content drawn where the typed text would be, for a field whose value
+   * is not text: icons, avatars, a count. Dropped as soon as there is text,
+   * and it hides the placeholder while shown.
+   */
+  valueSlot?: React.ReactNode
+  /**
+   * Leaves the typed text alone when the clear button is pressed, so `onClear`
+   * is the whole behavior. For a field whose value is not its text, the button
+   * clears that value and the text is the user's query.
+   */
+  clearKeepsText?: boolean
+  /**
+   * Whether there is anything to clear, when `isEmpty` cannot answer it: with
+   * a `valueSlot` the placeholder follows the text and the clear button
+   * follows the value.
+   */
+  canClear?: boolean
   name?: string
   onClickPlaceholder?: () => void
   onClickChildren?: () => void
-  onClickContent?: () => void
+  /** Receives the click, so a caller can tell where in the field it landed. */
+  onClickContent?: (event: React.MouseEvent) => void
   value?: T | undefined
   onChange?: (value: T) => void
   size?: InputFieldSize
@@ -189,9 +208,11 @@ export type InputFieldProps<T> = {
    * selection moves elsewhere, so a screen reader hears nothing. */
   "aria-activedescendant"?: AriaAttributes["aria-activedescendant"]
   "aria-autocomplete"?: AriaAttributes["aria-autocomplete"]
+  /** How a `valueSlot` value reaches a screen reader. */
+  "aria-describedby"?: AriaAttributes["aria-describedby"]
   onClear?: () => void
   onFocus?: () => void
-  onBlur?: () => void
+  onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void
   onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void
   canGrow?: boolean
   children: React.ReactNode & {
@@ -265,6 +286,9 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
       hideMaxLength = false,
       append,
       hidePlaceholder = false,
+      valueSlot,
+      clearKeepsText = false,
+      canClear,
       onClickPlaceholder,
       onClickChildren,
       onClickContent,
@@ -276,6 +300,7 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
       "aria-expanded": ariaExpanded,
       "aria-activedescendant": ariaActiveDescendant,
       "aria-autocomplete": ariaAutocomplete,
+      "aria-describedby": ariaDescribedBy,
       buttonToggle,
       transparent,
       ...props
@@ -338,13 +363,15 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
     }
 
     const handleClear = () => {
-      handleChange(emptyValue)
+      if (!clearKeepsText) {
+        handleChange(emptyValue)
+      }
       props.onClear?.()
     }
 
-    const handleClickContent = () => {
+    const handleClickContent = (event: React.MouseEvent) => {
       if (!disabled) {
-        onClickContent?.()
+        onClickContent?.(event)
       }
     }
 
@@ -413,6 +440,13 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
     /**********************/
 
     const hasAppend = append || appendTag || buttonToggle
+    const hasSomethingToClear = canClear ?? !isEmpty(localValue)
+    // The slot stands in for typed text, so any text wins over it.
+    const showValueSlot =
+      valueSlot !== undefined &&
+      valueSlot !== null &&
+      defaultIsEmpty(localValue) &&
+      !isAutofilled
 
     return (
       <div
@@ -498,6 +532,23 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                 {avatar && <F0Avatar avatar={avatar} size="xs" />}
               </div>
             )}
+            {showValueSlot && (
+              <div
+                data-slot="value"
+                className={cn(
+                  // In the flow, so the caret sits after the value rather
+                  // than on its first letter.
+
+                  "pointer-events-none flex min-w-0 shrink items-center pr-0",
+                  "pl-3",
+                  (icon || avatar) && "pl-8",
+                  (icon || avatar) && size === "md" && "pl-9",
+                  inputElementVariants({ size })
+                )}
+              >
+                {valueSlot}
+              </div>
+            )}
             <div
               onClick={handleClickChildren}
               className="w-full min-w-0 flex-1"
@@ -520,6 +571,11 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                 "aria-expanded": role === "combobox" ? ariaExpanded : undefined,
                 "aria-activedescendant": ariaActiveDescendant,
                 "aria-autocomplete": ariaAutocomplete,
+                // Only when given: `cloneElement` would otherwise overwrite a
+                // description the child brought itself.
+                ...(ariaDescribedBy !== undefined && {
+                  "aria-describedby": ariaDescribedBy,
+                }),
                 id,
                 value: localValue ?? "",
                 "aria-label": label || placeholder || "no-label",
@@ -531,6 +587,10 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                   "[&::-webkit-search-cancel-button]:hidden",
                   (icon || avatar) && "pl-8",
                   (icon || avatar) && size === "md" && "pl-9",
+                  // After the icon offsets: the value in front of the input
+                  // already carries them, so applying them again leaves the
+                  // caret a whole inset away from the text.
+                  showValueSlot && "pl-0",
                   disabled && "cursor-not-allowed",
                   (children as React.ReactElement).props.className,
                   inputElementVariants({ size })
@@ -548,6 +608,7 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                 inputElementVariants({ size }),
                 placeholder &&
                   !hidePlaceholder &&
+                  !showValueSlot &&
                   isEmpty(localValue) &&
                   !isAutofilled
                   ? "opacity-100"
@@ -568,8 +629,8 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                 )}
               >
                 {clearable && !noEdit && (
-                  <AnimatePresence initial={!isEmpty(localValue)}>
-                    {!isEmpty(localValue) && (
+                  <AnimatePresence initial={hasSomethingToClear}>
+                    {hasSomethingToClear && (
                       <motion.button
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
