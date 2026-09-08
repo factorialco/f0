@@ -143,6 +143,18 @@ describe("announcement channel", () => {
     expect(screen.getByTestId("chat-date-separator")).toBeInTheDocument()
   })
 
+  // The meta cluster is what would carry the marker, and it is off here for
+  // everyone: the sr-only twin must stay silent too, not only the visible copy.
+  it("does not announce 'Drafted with One' either, since the meta cluster is off", () => {
+    renderChat(
+      makeRuntime({
+        messages: [{ ...welcome, aiAssisted: true }, cardMessage()],
+      })
+    )
+    // queryByText also matches sr-only text, so this covers the hidden twin.
+    expect(screen.queryByText(/Drafted with One/)).not.toBeInTheDocument()
+  })
+
   it("renders the card and lets it act — the one interactive thing here", async () => {
     const onClick = vi.fn()
     renderChat(makeRuntime({ messages: [welcome, cardMessage(onClick)] }))

@@ -166,6 +166,23 @@ F0Chat renders a transport-agnostic direct or group conversation. The host provi
       </tr>
       <tr>
         <td>
+          <code>message.aiAssisted</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          The message was drafted with One and approved by its author, who
+          remains the sender. Shows the muted “Drafted with One” label in the
+          meta cluster after the body, before “edited” and the time. Hidden on
+          deleted tombstones. Map it from server-set message metadata, never
+          from body text.
+        </td>
+      </tr>
+      <tr>
+        <td>
           <code>runtime.loadReactionUsers</code>
         </td>
         <td>
@@ -355,6 +372,7 @@ memoization is required of the host.
 - WHEN `canSend` is false and the host does not set `canReply` → THEN Reply is hidden, because replying needs a composer to reply into.
 - WHEN the current user cannot send in a channel → THEN the composer is replaced by `channel.readOnlyNotice` (or a generic line), and dragging files over the panel no longer offers a drop affordance.
 - WHEN a channel is an announcement → THEN messages carry no per-message clock and the day separator carries the time instead, because those posts are seeded rather than sent and their minute would be invented. The header also drops its ellipsis: a fixed, short transcript has nothing to search.
+- WHEN a message has `aiAssisted` → THEN the meta cluster reads “Drafted with One · edited · time”, each part only when present, on every surface that shows the message: the text bubble, and the media or the line under it for an attachment-only message. A deleted tombstone shows only the time.
 - WHEN a message carries a `kind: "card"` attachment → THEN F0 renders an `F0Card` at the shared media width from the host's data (avatar, title, description, image, one footer action). It keeps its own border and radius rather than chaining into the bubble stack, and it is not editable — the composer has no affordance for a card, so loading one into it could only drop it on save.
 - WHEN a group has an explicit emoji → THEN the sidebar and chat header render that emoji.
 - WHEN a group has neither an emoji nor a custom team/company image → THEN the sidebar and chat header render `＃` instead of an empty generated avatar.
@@ -472,7 +490,7 @@ The message action menu opens the Info panel with standard button navigation. It
 
 ### Screen reader behavior
 
-Reaction buttons announce their emoji label, count, and pressed state. Group reader lists use the localized “Read by” count as their accessible name. The final-message footer is a polite, atomic status region, so assistive technology announces the asynchronous transition from “Sent” to “Read”. It reports delivery only — the time belongs to the message itself, which carries it in its own bubble.
+Reaction buttons announce their emoji label, count, and pressed state. Group reader lists use the localized “Read by” count as their accessible name. The final-message footer is a polite, atomic status region, so assistive technology announces the asynchronous transition from “Sent” to “Read”. It reports delivery only — the time belongs to the message itself, which carries it in its own bubble. The visible meta cluster is hidden from assistive technology, and a hidden copy after the content repeats it, so the “Drafted with One” and “edited” markers are read in the same order sighted readers see them — for attachment-only messages too.
 
 Attachment actions include the filename in their accessible names. Each video
 player is contained in a figure named after its file and exposes a contextual

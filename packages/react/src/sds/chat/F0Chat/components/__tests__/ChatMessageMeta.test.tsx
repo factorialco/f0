@@ -28,6 +28,21 @@ describe("ChatMessageMeta", () => {
     }
   )
 
+  it.each(["bubble", "overlay", "below"] as const)(
+    "leads the %s cluster with 'Drafted with One' on an AI-assisted message",
+    (placement) => {
+      render(
+        <ChatMessageMeta
+          message={{ ...MESSAGE, aiAssisted: true }}
+          placement={placement}
+        />
+      )
+      expect(screen.getByTestId("chat-message-time")).toHaveTextContent(
+        `Drafted with One · ${formatClock(new Date(CREATED_AT))}`
+      )
+    }
+  )
+
   it("writes the clock in the reader's own locale", () => {
     render(<ChatMessageMeta message={MESSAGE} placement="below" />)
     // Through the shared formatter, not a hand-rolled 24-hour string: on a

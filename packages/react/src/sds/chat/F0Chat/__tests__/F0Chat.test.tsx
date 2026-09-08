@@ -470,6 +470,36 @@ describe("F0Chat", () => {
     )
   })
 
+  it("shows and announces 'Drafted with One' on an AI-assisted attachment-only message (no text bubble)", () => {
+    const { container } = renderChat(
+      makeRuntime({
+        messages: [
+          {
+            id: "a-ai",
+            author: { id: "me", name: "Me" },
+            body: "",
+            createdAt: now,
+            isMine: true,
+            status: "read",
+            aiAssisted: true,
+            attachments: [
+              { kind: "image", url: "blob:img", name: "photo.png" },
+            ],
+          },
+        ],
+      })
+    )
+    expect(screen.getAllByTestId("chat-message-time")[0]).toHaveTextContent(
+      /^Drafted with One · /
+    )
+    // The header has its own sr-only labels; the twin is the one that starts
+    // with the marker.
+    const twins = Array.from(container.querySelectorAll(".sr-only")).filter(
+      (el) => (el.textContent ?? "").startsWith("Drafted with One · ")
+    )
+    expect(twins).toHaveLength(1)
+  })
+
   it("colors media attachments but keeps file items neutral", () => {
     const author = {
       id: "other",
