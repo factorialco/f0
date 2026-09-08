@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.88.5](https://github.com/factorialco/f0/compare/f0-react-v6.88.4...f0-react-v6.88.5) (2026-09-08)
+
+
+### Bug Fixes
+
+* **F0InputField:** a placeholder never takes a second line ([#5452](https://github.com/factorialco/f0/issues/5452)) ([bdcda41](https://github.com/factorialco/f0/commit/bdcda41f6474b9618b9830cda55306727aa97ea3))
+
 ## [6.88.4](https://github.com/factorialco/f0/compare/f0-react-v6.88.3...f0-react-v6.88.4) (2026-09-08)
 
 
