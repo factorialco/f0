@@ -1,11 +1,9 @@
 import { useState } from "react"
-
-import { useI18n } from "@/lib/providers/i18n"
-
 import {
   ActionProps,
   OneEmptyStateProps,
 } from "@/components/OneEmptyState/types"
+import { useI18n } from "@/lib/providers/i18n"
 
 export type EmptyState = {
   emoji?: string

@@ -1,5 +1,4 @@
 import { ComponentProps } from "react"
-
 /**
  * Alert tag cell type for displaying alert indicators with labels.
  * Used for showing alerts on items in data collections.

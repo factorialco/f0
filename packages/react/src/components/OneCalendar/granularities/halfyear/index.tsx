@@ -10,7 +10,6 @@ import {
   startOfMonth,
   startOfYear,
 } from "date-fns"
-
 import { DateRange, DateRangeComplete } from "../../types"
 import {
   isAfterOrEqual,
@@ -89,7 +88,8 @@ const formatHalfYearShort = (date: Date | DateRange | undefined | null) => {
   }
   const { from, to } = dateRange
 
-  return `${from}${to && from !== to ? ` ${rangeSeparator} ${to}` : ""}`
+  const toPart = to && from !== to ? ` ${rangeSeparator} ${to}` : ""
+  return `${from}${toPart}`
 }
 
 const formatHalfYearLong = (date: Date | DateRange | undefined | null) => {

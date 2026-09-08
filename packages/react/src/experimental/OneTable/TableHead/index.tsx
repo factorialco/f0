@@ -1,7 +1,5 @@
 import { AnimatePresence, motion } from "motion/react"
-
 import { TableHead as TableHeadRoot } from "@/ui/table"
-
 import { F0Icon, IconType } from "../../../components/F0Icon"
 import { ArrowDown, InfoCircleLine } from "../../../icons/app"
 import { InfoHint, type InfoHintContent } from "../../../lib/InfoHint"
@@ -168,9 +166,9 @@ export function TableHead({
             {children}
           </div>
         )}
-        {hasContent && (
+        {hasContent ? (
           <div className="flex items-center">
-            {info && (
+            {info ? (
               <div
                 className="flex h-6 w-6 items-center justify-center text-f1-foreground-secondary"
                 // Reading the column's help text is not asking to sort by it.
@@ -182,8 +180,8 @@ export function TableHead({
                   label={typeof children === "string" ? children : undefined}
                 />
               </div>
-            )}
-            {onSortClick && (
+            ) : null}
+            {onSortClick ? (
               <motion.button
                 className={cn(
                   "relative h-5 w-5 rounded-xs p-1 text-f1-foreground-secondary opacity-0 transition-all focus-within:opacity-100 hover:bg-f1-background-hover group-hover:opacity-100",
@@ -210,7 +208,7 @@ export function TableHead({
                   >
                     <F0Icon icon={ArrowDown} size="xs" />
                   </motion.div>
-                  {sortState === "none" && (
+                  {sortState === "none" ? (
                     <motion.div
                       key="sort-arrow-secondary"
                       className="absolute left-1 top-1 flex h-3 w-3 items-center justify-center"
@@ -224,12 +222,12 @@ export function TableHead({
                     >
                       <F0Icon icon={ArrowDown} size="xs" />
                     </motion.div>
-                  )}
+                  ) : null}
                 </AnimatePresence>
               </motion.button>
-            )}
+            ) : null}
           </div>
-        )}
+        ) : null}
       </div>
     </>
   )
@@ -280,8 +278,7 @@ export function TableHead({
     >
       <div className="absolute inset-x-0 top-0 z-[1] h-px w-full bg-f1-border-secondary" />
       <AnimatePresence>
-        {((isStickyLeft && isScrolled) ||
-          (isStickyRight && isScrolledRight)) && (
+        {(isStickyLeft && isScrolled) || (isStickyRight && isScrolledRight) ? (
           <motion.div
             key="shadow-gradient"
             className={cn(
@@ -293,9 +290,9 @@ export function TableHead({
             animate={{ opacity: 0.1 }}
             exit={{ opacity: 0 }}
           />
-        )}
+        ) : null}
       </AnimatePresence>
-      {!hidden && content}
+      {!hidden ? content : null}
     </TableHeadRoot>
   )
 }

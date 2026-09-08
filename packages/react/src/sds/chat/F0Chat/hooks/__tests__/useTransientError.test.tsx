@@ -1,7 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
-
 import { act, zeroRenderHook as renderHook } from "@/testing/test-utils"
-
 import { useTransientError } from "../useTransientError"
 
 describe("useTransientError", () => {

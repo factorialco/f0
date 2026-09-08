@@ -1,5 +1,5 @@
-import type { ActionType } from "./types"
 import type { InternalActionType } from "./ItemContainer"
+import type { ActionType } from "./types"
 
 /**
  * Convert simplified action type received from user to internal action format

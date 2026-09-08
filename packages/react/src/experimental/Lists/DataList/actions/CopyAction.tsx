@@ -1,6 +1,5 @@
 import { AnimatePresence, motion } from "motion/react"
 import { ReactNode, useEffect, useState } from "react"
-
 import { F0Icon } from "../../../../components/F0Icon"
 import { CheckCircle, LayersFront } from "../../../../icons/app"
 import { cn } from "../../../../lib/utils"
@@ -48,7 +47,7 @@ export const CopyAction = ({ text, children }: CopyActionProps) => {
       {children}
       <div className="relative h-5 w-5">
         <AnimatePresence mode="wait">
-          {!copied && (
+          {!copied ? (
             <motion.div
               key="copy-icon"
               initial={{ opacity: 0, scale: 0.8 }}
@@ -69,8 +68,8 @@ export const CopyAction = ({ text, children }: CopyActionProps) => {
                 )}
               />
             </motion.div>
-          )}
-          {copied && (
+          ) : null}
+          {copied ? (
             <motion.div
               key="check-icon"
               initial={{ opacity: 0, scale: 0.8 }}
@@ -91,7 +90,7 @@ export const CopyAction = ({ text, children }: CopyActionProps) => {
                 )}
               />
             </motion.div>
-          )}
+          ) : null}
         </AnimatePresence>
       </div>
     </button>

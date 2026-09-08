@@ -3,8 +3,7 @@ import React from "react"
 
 import { Archive } from "../../../../icons/app"
 import { Home } from "../../../../icons/modules"
-import { applyIconInterop } from "../F0Icon"
-import F0Icon from "../F0Icon"
+import F0Icon, { applyIconInterop } from "../F0Icon"
 
 describe("F0Icon", () => {
   it("renders correctly with an app icon", () => {

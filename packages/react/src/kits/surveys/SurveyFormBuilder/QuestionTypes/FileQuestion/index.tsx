@@ -1,12 +1,10 @@
-import type { F0FileField } from "@/patterns/F0Form/fields/types"
+import { useI18n } from "@/lib/providers/i18n"
 import type {
   MimeType,
   UseFileUpload,
 } from "@/patterns/F0Form/fields/file/types"
-
+import type { F0FileField } from "@/patterns/F0Form/fields/types"
 import { F0FormField } from "@/patterns/F0FormField"
-import { useI18n } from "@/lib/providers/i18n"
-
 import { useSurveyFormBuilderContext } from "../../Context"
 import { BaseQuestionOnChangeParams } from "../../types"
 import {

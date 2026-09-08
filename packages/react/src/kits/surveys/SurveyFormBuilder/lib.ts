@@ -34,7 +34,9 @@ export const getRatingOptions = (type: RatingOptionType) => {
 export const detectRatingOptionType = (
   options: { value: number; label: string }[]
 ): RatingOptionType | null => {
-  if (!options || options.length === 0) return null
+  if (!options || options.length === 0) {
+    return null
+  }
 
   const length = options.length
 
@@ -88,16 +90,13 @@ export const getDefaultParamsForQuestionType = (questionType: QuestionType) => {
       return {}
     case "text":
     case "longText":
+    case "link":
       return {
         value: "",
       }
     case "numeric":
       return {
         value: 0,
-      }
-    case "link":
-      return {
-        value: "",
       }
     case "date":
       return {

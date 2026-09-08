@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest"
-
 import { screen, zeroRender } from "@/testing/test-utils"
-
 import {
   type MentionToken,
   renderBodyWithLinks,
@@ -27,6 +25,26 @@ describe("renderBodyWithMentions", () => {
     const chip = screen.getByText("@Ana")
     expect(chip).toBeInTheDocument()
     expect(chip.className).toContain("text-f1-foreground-secondary")
+  })
+
+  // The composer's overlay has to paint a mention identically, and it is the
+  // side that cannot carry a weight: a `<textarea>` lays its whole run out at
+  // one weight, so a heavier mention there pushes the caret off the glyphs
+  // (#5274 measured 1.250px worst delta and 44/48 indices off, versus 0.023px
+  // without it). Parity is therefore met here, by this side staying unweighted.
+  it("gives the chip no font-weight, so the composer can match it exactly", () => {
+    const tokens: MentionToken[] = [
+      {
+        name: "Ana",
+        isSelf: false,
+        isEveryone: false,
+        user: { id: "1", name: "Ana" },
+      },
+    ]
+    zeroRender(<div>{renderBodyWithMentions("hi @Ana!", tokens)}</div>)
+    expect(screen.getByText("@Ana").className).not.toMatch(
+      /\bfont-(thin|extralight|light|medium|semibold|bold|extrabold|black)\b/
+    )
   })
 
   it("renders a self / everyone mention with accessible neutral emphasis", () => {

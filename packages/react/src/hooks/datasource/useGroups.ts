@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react"
-
 import { RecordType } from "./types/records.typings"
 import { GroupRecord } from "./useData"
 
@@ -7,16 +6,13 @@ const computeDefaultOpenGroups = <R extends RecordType>(
   groups: GroupRecord<R>[],
   defaultOpenGroups: boolean | GroupRecord<R>["key"][]
 ): Record<string, boolean> =>
-  groups.reduce(
-    (acc, group) => {
-      acc[group.key] =
-        typeof defaultOpenGroups === "boolean"
-          ? defaultOpenGroups
-          : defaultOpenGroups.includes(group.key)
-      return acc
-    },
-    {} as Record<string, boolean>
-  )
+  groups.reduce<Record<string, boolean>>((acc, group) => {
+    acc[group.key] =
+      typeof defaultOpenGroups === "boolean"
+        ? defaultOpenGroups
+        : defaultOpenGroups.includes(group.key)
+    return acc
+  }, {})
 
 export const useGroups = <R extends RecordType>(
   groups: GroupRecord<R>[],
@@ -30,7 +26,9 @@ export const useGroups = <R extends RecordType>(
 
   useEffect(() => {
     const defaultValue = computeDefaultOpenGroups(groups, defaultOpenGroups)
-    if (Object.values(defaultValue).length === 0) return
+    if (Object.values(defaultValue).length === 0) {
+      return
+    }
 
     setOpenGroups((prev) =>
       Object.fromEntries(

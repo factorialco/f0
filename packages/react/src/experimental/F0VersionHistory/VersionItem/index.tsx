@@ -1,5 +1,4 @@
 import { format } from "date-fns"
-
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 import { useDateFnsLocale } from "@/lib/providers/l10n"

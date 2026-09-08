@@ -1,16 +1,12 @@
-import type { ReactNode } from "react"
-
 import { breakpoints } from "@factorialco/f0-core"
 import { AnimatePresence, motion } from "motion/react"
+import type { ReactNode } from "react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useMediaQuery } from "usehooks-ts"
-
-import type { WidgetDragStartDetail } from "@/lib/dnd/widgetDragEvents"
-
 import { useReducedMotion } from "@/lib/a11y"
+import type { WidgetDragStartDetail } from "@/lib/dnd/widgetDragEvents"
 import { WIDGET_DRAG_END, WIDGET_DRAG_START } from "@/lib/dnd/widgetDragEvents"
 import { cn } from "@/lib/utils"
-
 import { DropOverlay } from "../../../F0AiChatTextArea"
 import { F0AiPong } from "../../../F0AiPong"
 import { useAiChat } from "../../providers/AiChatStateProvider"
@@ -98,7 +94,9 @@ export const SidebarWindow = ({
       e.preventDefault()
       e.stopPropagation()
       dragCounterRef.current++
-      if (canDrop) setFileDragOver(true)
+      if (canDrop) {
+        setFileDragOver(true)
+      }
     },
     [canDrop, setFileDragOver]
   )
@@ -157,15 +155,18 @@ export const SidebarWindow = ({
 
   useEffect(() => {
     const onStart = (e: Event) => {
-      if (!canAcceptWidgetDrop) return
+      if (!canAcceptWidgetDrop) {
+        return
+      }
       const detail = (e as CustomEvent<WidgetDragStartDetail>).detail
       if (
         typeof detail?.id !== "string" ||
         !detail.id ||
         typeof detail.title !== "string" ||
         !detail.title.trim()
-      )
+      ) {
         return
+      }
       setDragQuoteBoth(detail)
     }
     const onEnd = () => setDragQuoteBoth(null)
@@ -182,7 +183,9 @@ export const SidebarWindow = ({
   // shell while a pointer is still down. Retract the invitation immediately
   // so releasing over non-chat content can never create an invisible quote.
   useEffect(() => {
-    if (!canAcceptWidgetDrop) setDragQuoteBoth(null)
+    if (!canAcceptWidgetDrop) {
+      setDragQuoteBoth(null)
+    }
   }, [canAcceptWidgetDrop, setDragQuoteBoth])
 
   // Releasing over the chat quotes the widget. This is a handler on the card,
@@ -194,7 +197,9 @@ export const SidebarWindow = ({
       return
     }
     const detail = dragQuoteRef.current
-    if (detail === null) return
+    if (detail === null) {
+      return
+    }
     setDragQuoteBoth(null)
     if (detail.onAskAi) {
       detail.onAskAi({ id: detail.id, title: detail.title })
@@ -217,7 +222,9 @@ export const SidebarWindow = ({
   // canvas inset). Cleared on unmount too, so a window torn down mid-drag
   // doesn't strand the flag.
   useEffect(() => {
-    if (!isDragging) return
+    if (!isDragging) {
+      return
+    }
     setIsResizing?.(true)
     return () => setIsResizing?.(false)
   }, [isDragging, setIsResizing])
@@ -236,16 +243,19 @@ export const SidebarWindow = ({
   )
 
   const wrapperTransition = useMemo(() => {
-    if (isDragging || reducedMotion) return { duration: 0 }
-    if (shouldPlayEntranceAnimation)
+    if (isDragging || reducedMotion) {
+      return { duration: 0 }
+    }
+    if (shouldPlayEntranceAnimation) {
       return { duration: 0.3, ease: [0, 0, 0.1, 1] as const }
+    }
     return { duration: 0.3, ease: [0, 0, 0.1, 1] as const }
   }, [isDragging, reducedMotion, shouldPlayEntranceAnimation])
   const closedClipPath = isLeft ? "inset(0 100% 0 0)" : "inset(0 0 0 100%)"
 
   return (
     <AnimatePresence>
-      {isVisible && (
+      {isVisible ? (
         <motion.div
           key="chat-wrapper"
           className={cn(
@@ -289,7 +299,7 @@ export const SidebarWindow = ({
         >
           {/* Resize seam: inner (left) edge for a right-docked panel, inner
               (right) edge for a left-docked one — so it renders after the card. */}
-          {resizable && !fullscreen && !isSmallScreen && !isLeft && (
+          {resizable && !fullscreen && !isSmallScreen && !isLeft ? (
             <ResizeHandle
               onResize={handleResize}
               onReset={resetChatWidth}
@@ -298,7 +308,7 @@ export const SidebarWindow = ({
               isCanvasMode={isCanvasMode}
               side="right"
             />
-          )}
+          ) : null}
           <div
             ref={widgetDropZoneRef}
             aria-hidden={!isVisible}
@@ -331,7 +341,7 @@ export const SidebarWindow = ({
             </div>
             {/* `canDrop` gates only the file drop — quoting a dragged widget
                 needs no upload handler, so it renders on its own. */}
-            {(canDrop || (canAcceptWidgetDrop && dragQuote !== null)) && (
+            {canDrop || (canAcceptWidgetDrop && dragQuote !== null) ? (
               <DropOverlay
                 visible={(canDrop && fileDragOver) || dragQuote !== null}
                 mode={dragQuote !== null ? "discuss" : "files"}
@@ -345,10 +355,10 @@ export const SidebarWindow = ({
                     : undefined
                 }
               />
-            )}
-            {activeGame === "pong" && <F0AiPong onClose={closeGame} />}
+            ) : null}
+            {activeGame === "pong" ? <F0AiPong onClose={closeGame} /> : null}
           </div>
-          {resizable && !fullscreen && !isSmallScreen && isLeft && (
+          {resizable && !fullscreen && !isSmallScreen && isLeft ? (
             <ResizeHandle
               onResize={handleResize}
               onReset={resetChatWidth}
@@ -357,9 +367,9 @@ export const SidebarWindow = ({
               isCanvasMode={isCanvasMode}
               side="left"
             />
-          )}
+          ) : null}
         </motion.div>
-      )}
+      ) : null}
     </AnimatePresence>
   )
 }

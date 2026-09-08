@@ -20,5 +20,5 @@ export interface F0VersionHistoryProps {
   title: string
   versions: Version[]
   currentVersion?: CurrentVersion
-  activeVersionId?: string | "current"
+  activeVersionId?: "current" | (string & {})
 }

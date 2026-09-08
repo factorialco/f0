@@ -1,5 +1,4 @@
 import { ReactNode, useEffect, useState } from "react"
-
 import { DataTestIdWrapper } from "@/lib/data-testid"
 
 export type AwaitProps<T> = {
@@ -31,13 +30,19 @@ const _Await = <T,>({
       let cancelled = false
       resolve
         .then((value) => {
-          if (!cancelled) setResolvedValue(value)
+          if (!cancelled) {
+            setResolvedValue(value)
+          }
         })
-        .catch((error) => {
-          if (!cancelled) setError(error)
+        .catch((error: unknown) => {
+          if (!cancelled) {
+            setError(error instanceof Error ? error : new Error(String(error)))
+          }
         })
         .finally(() => {
-          if (!cancelled) setIsPending(false)
+          if (!cancelled) {
+            setIsPending(false)
+          }
         })
       return () => {
         cancelled = true

@@ -1,13 +1,9 @@
-import type { ControllerRenderProps, FieldValues } from "react-hook-form"
-
 import { useId } from "react"
-
+import type { ControllerRenderProps } from "react-hook-form"
 import { InputMessages } from "@/components/F0InputField/components/InputMessages"
-
-import type { F0FormFieldProps } from "./types"
-
 import { renderFieldInput } from "@/patterns/F0Form/fields/renderFieldInput"
 import { isFieldRequired } from "@/patterns/F0Form/fields/schema"
+import type { F0FormFieldProps } from "./types"
 
 /**
  * Standalone form field component that renders the appropriate F0Form input
@@ -46,7 +42,7 @@ export function F0FormField({
     onBlur: onBlur ?? (() => {}),
     name: field.id,
     ref: () => {},
-  } as ControllerRenderProps<FieldValues>
+  } as ControllerRenderProps
 
   const fieldState = {
     error:
@@ -68,17 +64,17 @@ export function F0FormField({
 
   return (
     <div className="space-y-2" id={id}>
-      {showLabel && (
+      {showLabel ? (
         <label
           htmlFor={field.id}
           className="text-base font-medium leading-normal text-f1-foreground-secondary"
         >
           {field.label}
-          {isRequired && (
+          {isRequired ? (
             <span className="ml-0.5 text-f1-foreground-critical">*</span>
-          )}
+          ) : null}
         </label>
-      )}
+      ) : null}
       {renderFieldInput({
         field: resolvedField,
         formField,
@@ -89,11 +85,11 @@ export function F0FormField({
         initialFiles: fileInitialFiles,
         fieldStatus: resolvedStatus,
       })}
-      {field.helpText && (
+      {field.helpText ? (
         <p className="text-base text-f1-foreground-secondary">
           {field.helpText}
         </p>
-      )}
+      ) : null}
       <InputMessages status={resolvedStatus} />
     </div>
   )

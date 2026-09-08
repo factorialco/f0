@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest"
-
 import { zeroRenderHook as renderHook } from "@/testing/test-utils"
-
 import { TableColumnDefinition, TableVisualizationSettings } from "../../types"
 import { useColumns } from "../useColums"
 

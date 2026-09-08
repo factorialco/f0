@@ -16,7 +16,7 @@ function _Page({ children, header, embedded = false }: PageProps) {
         !embedded && "xs:rounded-xl"
       )}
     >
-      {header && <div className="flex flex-col">{header}</div>}
+      {header ? <div className="flex flex-col">{header}</div> : null}
       <div className="isolate flex w-full flex-1 flex-col overflow-auto [&>*]:flex-1">
         {children}
       </div>

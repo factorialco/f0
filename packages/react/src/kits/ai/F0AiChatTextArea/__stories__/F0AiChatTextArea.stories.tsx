@@ -1,10 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useRef, useState } from "react"
 import { expect, userEvent, waitFor, within } from "storybook/test"
-
-import { F0AiChatTextArea } from "../F0AiChatTextArea"
-import type { F0AiChatTextAreaSubmitPayload } from "../types"
-
 import { F0SegmentedControl } from "@/experimental/Actions/F0SegmentedControl"
 import {
   Calendar,
@@ -17,11 +13,9 @@ import {
   Receipt,
   Search,
   Settings,
+  Upsell,
 } from "@/icons/app"
 import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
-
-import { F0ClarifyingPanel } from "../../F0ClarifyingPanel"
-import type { ClarifyingQuestionState } from "../../F0ClarifyingPanel/types"
 import type {
   AiChatCreditWarning,
   AiChatDisclaimer,
@@ -34,6 +28,10 @@ import type {
   UploadedFile,
   WelcomeScreenSuggestion,
 } from "../../F0AiChat/types"
+import { F0ClarifyingPanel } from "../../F0ClarifyingPanel"
+import type { ClarifyingQuestionState } from "../../F0ClarifyingPanel/types"
+import { F0AiChatTextArea } from "../F0AiChatTextArea"
+import type { F0AiChatTextAreaSubmitPayload } from "../types"
 
 const ROTATING_PLACEHOLDERS = [
   "Ask about location, directions, or travel details…",
@@ -81,7 +79,9 @@ const SAMPLE_PEOPLE: PersonProfile[] = [
 
 const mockSearchPersons = async (query: string): Promise<PersonProfile[]> => {
   await new Promise((r) => setTimeout(r, 200))
-  if (!query) return SAMPLE_PEOPLE
+  if (!query) {
+    return SAMPLE_PEOPLE
+  }
   const q = query.toLowerCase()
   return SAMPLE_PEOPLE.filter((p) =>
     `${p.firstName} ${p.lastName}`.toLowerCase().includes(q)
@@ -104,6 +104,7 @@ const FILE_UPLOAD_CONFIG: AiChatFileAttachmentConfig = {
 const CREDIT_WARNING: AiChatCreditWarning = {
   level: "soft",
   onGetCredits: () => console.log("get credits clicked"),
+  getCreditsIcon: Upsell,
   onDismiss: () => console.log("dismiss clicked"),
 }
 
@@ -429,14 +430,14 @@ const Wrapper = ({
         fullscreen={fullscreen}
         padding={padding}
       />
-      {submissions.length > 0 && (
+      {submissions.length > 0 ? (
         <div className="rounded-md border border-f1-border p-3 text-sm">
           <div className="font-medium pb-2">Last submission</div>
           <pre className="text-xs whitespace-pre-wrap">
             {JSON.stringify(submissions[submissions.length - 1], null, 2)}
           </pre>
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

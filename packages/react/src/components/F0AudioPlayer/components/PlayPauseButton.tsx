@@ -1,7 +1,6 @@
 import { SolidPause, SolidPlay } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
-
 import type { F0AudioPlayerSize } from "../types"
 
 interface PlayPauseButtonProps {

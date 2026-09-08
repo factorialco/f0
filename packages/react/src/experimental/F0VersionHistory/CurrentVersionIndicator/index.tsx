@@ -1,6 +1,6 @@
 import { F0Icon } from "@/components/F0Icon"
-import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 import { Bullet } from "@/icons/app"
+import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 import { cn, focusRing } from "@/lib/utils"
 
 interface CurrentVersionIndicatorProps {

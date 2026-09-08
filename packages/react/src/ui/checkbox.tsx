@@ -2,7 +2,6 @@ import * as CheckboxPrimitive from "@radix-ui/react-checkbox"
 import { AnimatePresence } from "motion/react"
 import * as React from "react"
 import { useId } from "react"
-
 import { F0Icon } from "../components/F0Icon"
 import { Check, Minus } from "../icons/app"
 import { cn, focusRing } from "../lib/utils"
@@ -56,7 +55,7 @@ const Checkbox = React.forwardRef<
             </CheckboxPrimitive.Indicator>
           </AnimatePresence>
         </CheckboxPrimitive.Root>
-        {props.title && !hideLabel && (
+        {props.title && !hideLabel ? (
           <label
             htmlFor={checkboxId}
             className={cn(
@@ -66,11 +65,11 @@ const Checkbox = React.forwardRef<
             )}
           >
             {props.title}
-            {required && (
+            {required ? (
               <span className="ml-0.5 text-f1-foreground-critical">*</span>
-            )}
+            ) : null}
           </label>
-        )}
+        ) : null}
       </div>
     )
   }

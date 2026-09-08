@@ -2,10 +2,8 @@ import maplibregl from "maplibre-gl"
 import { AnimatePresence, motion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
 import { createPortal } from "react-dom"
-
 import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
-
 import { FLY_OPTS } from "../constants"
 import { useClusters } from "../hooks/useClusters"
 import {
@@ -16,8 +14,6 @@ import {
 } from "../hooks/useLabelCollision"
 import { useZoomAtLeast } from "../hooks/useZoomAtLeast"
 import type { F0MapPoint } from "../types"
-
-import { F0MapCluster } from "./internal/F0MapCluster"
 import { F0MapMarker, type F0MapMarkerVariantProps } from "./F0MapMarker"
 import {
   getMarkerMetrics,
@@ -25,6 +21,7 @@ import {
   SELECTED_DOT_R,
   type BaseMapMarkerSize,
 } from "./internal/BaseMapMarker"
+import { F0MapCluster } from "./internal/F0MapCluster"
 
 // At/above this zoom the basemap starts drawing individual POI names, so the
 // markers step up a size to keep their weight against the busier map.
@@ -66,8 +63,9 @@ const selectionCollapsedIds = (
     if (
       boxesOverlap(head, headBox) ||
       (labelW > 0 && boxesOverlap(head, labelBox))
-    )
+    ) {
       collapsed.add(p.id)
+    }
   }
   return collapsed
 }
@@ -139,7 +137,9 @@ const expandCluster = (
   reduceMotion: boolean
 ) => {
   const cam = map.cameraForBounds(bounds, { padding: 64, maxZoom: 16 })
-  if (!cam?.center) return
+  if (!cam?.center) {
+    return
+  }
   const zoom = cam.zoom ?? map.getZoom()
   if (reduceMotion) {
     map.jumpTo({ center: cam.center, zoom })

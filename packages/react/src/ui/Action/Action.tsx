@@ -1,12 +1,10 @@
 import { cva } from "cva"
 import { AnimatePresence, motion } from "motion/react"
 import React from "react"
-
 import { TooltipInternal } from "@/experimental/Overlays/Tooltip"
 import { Link } from "@/lib/linkHandler"
 import { cn, focusRing } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
-
 import { ActionLinkProps, ActionProps } from "./types"
 import { isLinkStyled } from "./utils"
 import {
@@ -90,7 +88,7 @@ export const Action = React.forwardRef<
         {append}
       </div>
       <AnimatePresence>
-        {loading && (
+        {loading ? (
           <>
             {isLinkStyled(localVariant) ? (
               <Skeleton className="absolute inset-0 my-auto h-full w-full" />
@@ -114,7 +112,7 @@ export const Action = React.forwardRef<
               </div>
             )}
           </>
-        )}
+        ) : null}
       </AnimatePresence>
     </>
   )

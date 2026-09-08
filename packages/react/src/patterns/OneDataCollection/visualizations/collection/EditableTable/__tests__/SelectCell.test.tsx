@@ -3,7 +3,6 @@ import { fireEvent, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import React from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import { zeroRender as render } from "../../../../../../testing/test-utils"
 import { EditableCellProps } from "../components/cells"
 import { SelectCell } from "../components/cells/SelectCell"

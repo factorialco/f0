@@ -1,6 +1,5 @@
 import { motion } from "motion/react"
 import { type ReactNode, useCallback, useState } from "react"
-
 import { F0AvatarCompany } from "@/components/avatars/F0AvatarCompany"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { Sliders } from "@/icons/app"
@@ -8,7 +7,6 @@ import { useReducedMotion } from "@/lib/a11y"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
-
 import type {
   AiChatEmployeeCredits,
   EmployeeCreditsUsage,
@@ -71,7 +69,9 @@ export function EmployeeCreditsPopover({
     [employeeCredits]
   )
 
-  if (!employeeCredits) return null
+  if (!employeeCredits) {
+    return null
+  }
 
   const hasHeader = !!employeeCredits.companyName
   const percentage =
@@ -101,7 +101,7 @@ export function EmployeeCreditsPopover({
         collisionPadding={12}
         className="flex w-[324px] flex-col gap-3 rounded-md border border-solid border-f1-border-secondary p-3"
       >
-        {hasHeader && (
+        {hasHeader ? (
           <div className="flex min-w-0 max-w-full flex-1 items-center gap-2 overflow-hidden text-left text-lg text-f1-foreground">
             <F0AvatarCompany
               name={employeeCredits.companyName ?? ""}
@@ -112,20 +112,20 @@ export function EmployeeCreditsPopover({
               <OneEllipsis tag="span" className="font-medium">
                 {employeeCredits.companyName ?? ""}
               </OneEllipsis>
-              {employeeCredits.planName && (
+              {employeeCredits.planName ? (
                 <OneEllipsis
                   tag="span"
                   className="text-sm font-medium text-f1-foreground-secondary"
                 >
                   {employeeCredits.planName}
                 </OneEllipsis>
-              )}
+              ) : null}
             </div>
           </div>
-        )}
+        ) : null}
         <div className="flex flex-col rounded border border-solid border-f1-border-secondary">
           <div className="flex flex-col gap-2 p-3">
-            {loading && (
+            {loading ? (
               <div
                 className="flex flex-col gap-2"
                 aria-busy="true"
@@ -141,13 +141,13 @@ export function EmployeeCreditsPopover({
                   <div className="h-3 w-28 animate-pulse rounded bg-f1-background-secondary" />
                 </div>
               </div>
-            )}
-            {error && (
+            ) : null}
+            {error ? (
               <span className="text-sm text-f1-foreground-secondary">
                 {i18n.t("ai.credits.creditsError")}
               </span>
-            )}
-            {!loading && !error && data && (
+            ) : null}
+            {!loading && !error && data ? (
               <div className="flex flex-col gap-2">
                 <div className="flex justify-between">
                   <span className="text-base font-medium text-f1-foreground">
@@ -189,7 +189,7 @@ export function EmployeeCreditsPopover({
                   </span>
                 </div>
               </div>
-            )}
+            ) : null}
           </div>
         </div>
       </PopoverContent>

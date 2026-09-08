@@ -1,13 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { motion } from "motion/react"
 import { useState } from "react"
-
-import { F0Icon } from "../../components/F0Icon"
 import { Counter } from "@/ui/Counter"
 import { Preset } from "@/ui/OnePreset"
+import { F0Icon } from "../../components/F0Icon"
 import { ChevronDown } from "../../icons/app"
-import { OverflowList } from "./index"
+import { OverflowList } from "."
 
 const meta = {
   title: "OverflowList",
@@ -217,7 +215,9 @@ export const Presets: Story = {
       return (
         <div className="flex justify-between rounded p-2 transition-colors hover:cursor-pointer hover:bg-f1-background-hover">
           <span className="font-medium">{preset.name}</span>
-          {preset.number && <Counter value={preset.number} type="default" />}
+          {preset.number ? (
+            <Counter value={preset.number} type="default" />
+          ) : null}
         </div>
       )
     },

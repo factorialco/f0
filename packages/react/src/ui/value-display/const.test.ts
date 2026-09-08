@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import {
   TABLE_CELL_BAND_PX,
   TABLE_CELL_LINE_PX,

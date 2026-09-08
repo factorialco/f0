@@ -1,11 +1,9 @@
 import { useLayoutEffect, useRef, useState } from "react"
 import { createPortal } from "react-dom"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { Quote } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import type { ReplySelectionAnchor } from "../useReplySelection"
 
 const GAP = 8
@@ -38,7 +36,9 @@ export function ReplyPopover({ anchor, onReply }: ReplyPopoverProps) {
       return
     }
     const el = ref.current
-    if (!el) return
+    if (!el) {
+      return
+    }
 
     const btnWidth = el.offsetWidth
     const btnHeight = el.offsetHeight
@@ -63,8 +63,12 @@ export function ReplyPopover({ anchor, onReply }: ReplyPopoverProps) {
     setCoords({ top, left })
   }, [anchor])
 
-  if (typeof document === "undefined") return null
-  if (!anchor) return null
+  if (typeof document === "undefined") {
+    return null
+  }
+  if (!anchor) {
+    return null
+  }
 
   const label = translation.ai.reply
 

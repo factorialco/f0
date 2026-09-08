@@ -6,7 +6,6 @@ vi.mock("@/lib/a11y", () => ({
 }))
 
 import { zeroRender as render } from "@/testing/test-utils"
-
 import { F0AiChatTextArea } from "../F0AiChatTextArea"
 
 const SPIN = "rotate-gradient_6s_linear_infinite"

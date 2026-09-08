@@ -1,9 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-
 import type { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
-
-import type { SortingsDefinition } from "../types/sortings.typings"
-
 import {
   GroupingDefinition,
   RecordType,
@@ -11,6 +7,7 @@ import {
   SelectedItemState,
   SelectionId,
 } from "../types"
+import type { SortingsDefinition } from "../types/sortings.typings"
 import { GROUP_ID_SYMBOL, GroupRecord, WithGroupId } from "../useData"
 import {
   AllSelectionStatus,
@@ -118,7 +115,9 @@ export function useSelectable<
   ])
 
   const currentPageIdentifier = useMemo(() => {
-    if (!paginationInfo) return null
+    if (!paginationInfo) {
+      return null
+    }
     if ("type" in paginationInfo && paginationInfo.type === "pages") {
       return paginationInfo.currentPage
     }
@@ -150,8 +149,12 @@ export function useSelectable<
   )
 
   const isAllSelected = useMemo(() => {
-    if (disableSelectAll) return false
-    if (isSearchActive) return allSelectedCheck && checkedCount > 0
+    if (disableSelectAll) {
+      return false
+    }
+    if (isSearchActive) {
+      return allSelectedCheck && checkedCount > 0
+    }
     return (allSelectedCheck || areAllKnownItemsSelected) && checkedCount > 0
   }, [
     disableSelectAll,
@@ -162,9 +165,15 @@ export function useSelectable<
   ])
 
   const allSelectedState = useMemo(() => {
-    if (disableSelectAll) return false
-    if (isSearchActive && !wasExplicitSelectAll.current) return false
-    if (!allSelectedCheck) return false
+    if (disableSelectAll) {
+      return false
+    }
+    if (isSearchActive && !wasExplicitSelectAll.current) {
+      return false
+    }
+    if (!allSelectedCheck) {
+      return false
+    }
     return uncheckedCount === 0 ? true : "indeterminate"
   }, [disableSelectAll, allSelectedCheck, uncheckedCount, isSearchActive])
 
@@ -184,7 +193,9 @@ export function useSelectable<
     string,
     AllSelectionStatus
   > => {
-    if (!isGrouped || data.type !== "grouped") return {}
+    if (!isGrouped || data.type !== "grouped") {
+      return {}
+    }
 
     const result: Record<string, AllSelectionStatus> = {}
 
@@ -266,7 +277,9 @@ export function useSelectable<
 
     const itemsStatus = Array.from(items.values())
       .filter((itemState) => {
-        if (itemState.item === undefined) return false
+        if (itemState.item === undefined) {
+          return false
+        }
         // Filter to only current page items in page-only selection mode
         if (isPageOnlySelection && currentPageItemIds) {
           return currentPageItemIds.has(itemState.id)
@@ -277,7 +290,9 @@ export function useSelectable<
 
     const selectedIds = Array.from(items.entries())
       .filter(([id, itemState]) => {
-        if (!itemState.checked) return false
+        if (!itemState.checked) {
+          return false
+        }
         // Filter to only current page items in page-only selection mode
         if (isPageOnlySelection && currentPageItemIds) {
           return currentPageItemIds.has(id)
@@ -361,7 +376,9 @@ export function useSelectable<
 
   const getSelectedStateKey = useCallback(
     (state: SelectedItemsState<R> | undefined): string => {
-      if (!state) return ""
+      if (!state) {
+        return ""
+      }
       const itemsKeys = Array.from(state.items?.entries() || [])
         .map(([id, item]) => `${id}:${item.checked}`)
         .sort()
@@ -503,7 +520,7 @@ export function useSelectable<
     (
       itemId: SelectionId | readonly SelectionId[],
       checked: boolean,
-      onlyIfNotPreviousState: boolean = false,
+      onlyIfNotPreviousState = false,
       fallbackItem?: R | readonly R[]
     ) => {
       const itemIds = (Array.isArray(itemId) ? itemId : [itemId]).slice(
@@ -545,7 +562,9 @@ export function useSelectable<
           newItemsState.set(id, { id, checked, item })
         }
 
-        if (updated === 0) return current
+        if (updated === 0) {
+          return current
+        }
 
         return {
           ...current,
@@ -564,7 +583,9 @@ export function useSelectable<
       groupOrId: GroupRecord<R> | SelectionId | readonly SelectionId[],
       checked: boolean
     ) => {
-      if (!isGrouped || data.type !== "grouped") return
+      if (!isGrouped || data.type !== "grouped") {
+        return
+      }
 
       const groupIds: SelectionId[] = isGroupRecord(groupOrId)
         ? [groupOrId.key]
@@ -573,7 +594,9 @@ export function useSelectable<
           : [groupOrId]
 
       const groups = data.groups.filter((group) => groupIds.includes(group.key))
-      if (groups.length === 0) return
+      if (groups.length === 0) {
+        return
+      }
 
       const groupItemIds = groups.flatMap((group) =>
         group.records
@@ -598,13 +621,14 @@ export function useSelectable<
 
   // Selectable rows a "select all" can act on: rendered-row registry when
   // present (covers nested children), else `data.records`.
-  const collectSelectableEntries = useCallback((): Array<[SelectionId, R]> => {
+  const collectSelectableEntries = useCallback((): [SelectionId, R][] => {
     const isDisabled = ([, item]: [SelectionId, R]) =>
       getSelectionDisabled(item) === true
 
     const rendered = getRenderedSelectableEntries?.() ?? []
-    if (rendered.length > 0)
+    if (rendered.length > 0) {
       return rendered.filter((entry) => !isDisabled(entry))
+    }
 
     return data.records
       .map((record): [SelectionId, R] | undefined => {
@@ -629,7 +653,9 @@ export function useSelectable<
   const handleSelectItemChange = useCallback(
     (itemOrId: R | SelectionId | readonly SelectionId[], checked: boolean) => {
       if (isRecordItem(itemOrId, getSelectable !== undefined)) {
-        if (getSelectionDisabled(itemOrId)) return
+        if (getSelectionDisabled(itemOrId)) {
+          return
+        }
         const id = getSelectable?.(itemOrId)
         if (id !== undefined) {
           handleSelectItemChangeInternal(id, checked, false, itemOrId)
@@ -648,7 +674,9 @@ export function useSelectable<
    */
   const handleSelectAll = useCallback(
     (checked: boolean) => {
-      if (!isMultiSelection) return
+      if (!isMultiSelection) {
+        return
+      }
 
       if (!checked && allSelectedCheck) {
         setAllSelectedCheck(false)
@@ -715,7 +743,9 @@ export function useSelectable<
    */
   const handleSelectAllItems = useCallback(
     (checked: boolean) => {
-      if (!isMultiSelection) return
+      if (!isMultiSelection) {
+        return
+      }
 
       setAllSelectedCheck(checked)
       wasExplicitSelectAll.current = checked
@@ -772,7 +802,9 @@ export function useSelectable<
             }
           }
 
-          if (!hasChanges) return current
+          if (!hasChanges) {
+            return current
+          }
 
           return {
             ...current,
@@ -827,7 +859,9 @@ export function useSelectable<
       return
     }
 
-    if (currentKey === previousSelectedStateKey.current) return
+    if (currentKey === previousSelectedStateKey.current) {
+      return
+    }
 
     previousSelectedStateKey.current = currentKey
     updateLocalSelectedState(selectedState)
@@ -895,7 +929,9 @@ export function useSelectable<
   // user has not navigated away. We never clear for infinite-scroll; the
   // dataset-identity effect above handles the case where the dataset truly resets.
   useEffect(() => {
-    if (!resetOnPageChange) return
+    if (!resetOnPageChange) {
+      return
+    }
 
     // Infinite-scroll loadMore is not a page navigation — skip.
     if (paginationInfo?.type === "infinite-scroll") {
@@ -933,7 +969,9 @@ export function useSelectable<
   // Sync selection state when data changes
   useEffect(() => {
     const allRecords = getAllRecords()
-    if (allRecords.length === 0) return
+    if (allRecords.length === 0) {
+      return
+    }
 
     const recordIds = allRecords
       .map((record) => getSelectable?.(record))
@@ -955,7 +993,9 @@ export function useSelectable<
     if (isGrouped) {
       for (const record of allRecords) {
         const recordId = getSelectable?.(record)
-        if (recordId === undefined) continue
+        if (recordId === undefined) {
+          continue
+        }
 
         const groupId = (record as WithGroupId<R>)[GROUP_ID_SYMBOL] as
           | string

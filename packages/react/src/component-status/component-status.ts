@@ -178,8 +178,12 @@ function effectiveStatusOf(
   meetsBar: boolean,
   taggedStable: boolean
 ): ApiStatus {
-  if (apiStatus === "deprecated") return "deprecated"
-  if (apiStatus === "internal") return "internal"
+  if (apiStatus === "deprecated") {
+    return "deprecated"
+  }
+  if (apiStatus === "internal") {
+    return "internal"
+  }
   return taggedStable && meetsBar ? "stable" : "experimental"
 }
 
@@ -228,7 +232,9 @@ export const F0_NAME_PATTERN = /^F0[A-Z]/
 export function componentFolderName(storyFile: string): string {
   const parts = storyFile.split("/")
   parts.pop() // the story file itself
-  if (parts[parts.length - 1] === "__stories__") parts.pop()
+  if (parts[parts.length - 1] === "__stories__") {
+    parts.pop()
+  }
   return parts[parts.length - 1] ?? ""
 }
 
@@ -261,13 +267,13 @@ export function a11yTierAtLeast(actual: A11yTier, min: A11yTier): boolean {
  * changes for 60 days, and Foundations approval. Those remain manual promotion
  * gates (see Lifecycle/Definition of Done).
  */
-export const STABLE_REQUIREMENTS: ReadonlyArray<{
+export const STABLE_REQUIREMENTS: readonly {
   key: string
   label: string
   detail: string
-  criteria?: Array<{ label: string; isMet: (c: ComponentEntry) => boolean }>
+  criteria?: { label: string; isMet: (c: ComponentEntry) => boolean }[]
   isMet: (c: ComponentEntry) => boolean
-}> = [
+}[] = [
   {
     key: "naming",
     label: 'Named with the "F0" prefix',
@@ -366,8 +372,11 @@ export function evaluateComponentStatus(
   const taggedStable = entry.apiStatus === "stable"
 
   let discrepancy: ComponentStatus["discrepancy"] = null
-  if (taggedStable && !meetsBar) discrepancy = "tagged-but-below-bar"
-  else if (!taggedStable && meetsBar) discrepancy = "meets-bar-not-tagged"
+  if (taggedStable && !meetsBar) {
+    discrepancy = "tagged-but-below-bar"
+  } else if (!taggedStable && meetsBar) {
+    discrepancy = "meets-bar-not-tagged"
+  }
 
   const effectiveStatus = effectiveStatusOf(
     entry.apiStatus,
@@ -419,7 +428,9 @@ export function getComponentStatus(
   name: string,
   components: ComponentEntry[] = componentStatusData.components
 ): ComponentStatus | null {
-  if (!name) return null
+  if (!name) {
+    return null
+  }
   const target = normalize(name)
   const targetLeaf = normalize(leaf(name))
 

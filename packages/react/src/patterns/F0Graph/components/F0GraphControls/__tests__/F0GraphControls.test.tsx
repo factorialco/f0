@@ -1,8 +1,6 @@
 import { userEvent } from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
-
 import { screen, zeroRender as render } from "@/testing/test-utils"
-
 import { F0GraphControls } from "../F0GraphControls"
 
 describe("F0GraphControls", () => {

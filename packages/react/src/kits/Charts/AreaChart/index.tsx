@@ -10,7 +10,6 @@ import {
   XAxisProps,
   YAxis,
 } from "recharts"
-
 import {
   ChartContainer,
   ChartLegend,
@@ -19,7 +18,6 @@ import {
   ChartTooltipContent,
   LineChartConfig,
 } from "@/ui/chart"
-
 import { usePrivacyMode } from "../../../lib/privacyMode"
 import { getCategoricalColor, getColor } from "../utils/colors"
 import {
@@ -125,26 +123,26 @@ export const BaseAreaChart = <K extends LineChartConfig>(
             x2="100%"
             y2="0"
           >
-            {(blurArea === "l" || blurArea === "lr") && (
+            {blurArea === "l" || blurArea === "lr" ? (
               <>
                 <stop offset="0%" stopColor="black" stopOpacity="0"></stop>
                 <stop offset="1%" stopColor="white" stopOpacity="0.1"></stop>
                 <stop offset="7%" stopColor="white" stopOpacity="1"></stop>
               </>
-            )}
-            {(blurArea === "r" || blurArea === "lr") && (
+            ) : null}
+            {blurArea === "r" || blurArea === "lr" ? (
               <>
                 <stop offset="93%" stopColor="white" stopOpacity="1"></stop>
                 <stop offset="99%" stopColor="white" stopOpacity="0.1"></stop>
                 <stop offset="100%" stopColor="black" stopOpacity="0"></stop>
               </>
-            )}
-            {!blurArea && (
+            ) : null}
+            {!blurArea ? (
               <>
                 <stop offset="0%" stopColor="white" stopOpacity="1"></stop>
                 <stop offset="100%" stopColor="white" stopOpacity="1"></stop>
               </>
-            )}
+            ) : null}
           </linearGradient>
           <mask
             id={`${chartId}-transparent-edges`}
@@ -193,7 +191,7 @@ export const BaseAreaChart = <K extends LineChartConfig>(
           {...cartesianGridProps()}
           mask={`url(#${chartId}-transparent-edges)`}
         />
-        {isXAxisVisible && (
+        {isXAxisVisible ? (
           <XAxis
             dataKey="x"
             tickLine={false}
@@ -205,8 +203,8 @@ export const BaseAreaChart = <K extends LineChartConfig>(
             interval={0}
             tick={ChartAreaBoundedTick}
           />
-        )}
-        {isYAxisVisible && (
+        ) : null}
+        {isYAxisVisible ? (
           <YAxis
             tickLine={false}
             axisLine={false}
@@ -221,8 +219,8 @@ export const BaseAreaChart = <K extends LineChartConfig>(
             domain={yAxis?.domain}
             width={yAxisWidth}
           />
-        )}
-        {showTooltip && (
+        ) : null}
+        {showTooltip ? (
           <ChartTooltip
             {...chartTooltipProps()}
             content={
@@ -232,7 +230,7 @@ export const BaseAreaChart = <K extends LineChartConfig>(
               />
             }
           />
-        )}
+        ) : null}
         {areas.map((area, index) => (
           <Area
             isAnimationActive={false}
@@ -251,12 +249,12 @@ export const BaseAreaChart = <K extends LineChartConfig>(
             strokeDasharray={dataConfig[area].dashed ? "4 4" : undefined}
           />
         ))}
-        {Object.keys(dataConfig).length > 1 && (
+        {Object.keys(dataConfig).length > 1 ? (
           <ChartLegend
             className="flex justify-start"
             content={<ChartLegendContent />}
           />
-        )}
+        ) : null}
       </AreaChartPrimitive>
     </ChartContainer>
   )

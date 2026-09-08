@@ -5,9 +5,7 @@ import {
   useRef,
   type TextareaHTMLAttributes,
 } from "react"
-
 import { F0InputField, InputFieldProps } from "@/components/F0InputField"
-
 import { cn } from "../lib/utils"
 
 export type TextareaProps = Omit<
@@ -73,7 +71,9 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
 
     useLayoutEffect(() => {
       const textarea = textareaRef.current
-      if (!textarea) return
+      if (!textarea) {
+        return
+      }
 
       // Collapse to zero so scrollHeight reports only content height,
       // not the flex-stretched height from parent containers.

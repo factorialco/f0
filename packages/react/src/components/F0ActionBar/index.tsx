@@ -9,7 +9,6 @@ import {
   useRef,
   useState,
 } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import {
   ButtonDropdownGroup,
@@ -18,7 +17,6 @@ import {
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { Dropdown, MobileDropdown } from "@/experimental/Navigation/Dropdown"
 import { TooltipInternal } from "@/experimental/Overlays/Tooltip"
-
 import CheckCircleAnimated from "@/icons/animated/CheckCircle"
 import { AlertCircle, AlertCircleLine } from "@/icons/app"
 import { withDataTestId } from "@/lib/data-testid"
@@ -225,7 +223,9 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
 
     useEffect(() => {
       const el = document.getElementById("content")
-      if (!el) return
+      if (!el) {
+        return
+      }
 
       const update = () => {
         const rect = el.getBoundingClientRect()
@@ -260,7 +260,9 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
     useImperativeHandle(ref, () => ({
       wiggle(options?: WiggleOptions) {
         const el = containerRef.current
-        if (!el) return
+        if (!el) {
+          return
+        }
 
         const className = options?.errorHighlight
           ? errorNavigateClassName
@@ -286,7 +288,9 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
     useEffect(() => {
       if (status === "error") {
         const el = containerRef.current
-        if (!el) return
+        if (!el) {
+          return
+        }
 
         if (wiggleTimeoutRef.current) {
           clearTimeout(wiggleTimeoutRef.current)
@@ -374,7 +378,7 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
 
     const actionBarContent = (
       <AnimatePresence>
-        {isOpen && (
+        {isOpen ? (
           <motion.div
             ref={containerRef}
             data-variant={variant}
@@ -407,12 +411,12 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
             )}
           >
             {leftContent}
-            {(!!label || (status && status !== "idle")) && (
+            {!!label || (status && status !== "idle") ? (
               <div className="ml-2 flex items-center gap-2">
-                {status && status !== "idle" && (
+                {status && status !== "idle" ? (
                   <StatusIcon status={status} isLight={isLight} />
-                )}
-                {!!label && (
+                ) : null}
+                {label ? (
                   <span
                     className={cn(
                       "font-medium",
@@ -423,9 +427,9 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
                   >
                     {label}
                   </span>
-                )}
+                ) : null}
               </div>
-            )}
+            ) : null}
             <div>
               <div
                 className={cn(
@@ -471,9 +475,9 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
                 )}
               >
                 <Fragment key="desktop-actions">
-                  {dropdownActions.length > 0 && (
+                  {dropdownActions.length > 0 ? (
                     <Dropdown items={dropdownActions} />
-                  )}
+                  ) : null}
                   {visibleSecondaryActions
                     .slice()
                     .reverse()
@@ -518,7 +522,7 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
               </div>
             </div>
           </motion.div>
-        )}
+        ) : null}
       </AnimatePresence>
     )
 

@@ -1,9 +1,7 @@
 import { useControllableState } from "@radix-ui/react-use-controllable-state"
-
 import { F0Icon } from "@/components/F0Icon"
 import { cn, focusRing } from "@/lib/utils"
 import { ToggleGroup, ToggleGroupItem } from "@/ui/ToggleGroup"
-
 import { F0SegmentedControlProps } from "./types"
 
 export const F0SegmentedControl = ({
@@ -27,7 +25,9 @@ export const F0SegmentedControl = ({
     // the active segment, signalling deselection. A segmented control
     // always has one active segment, so we ignore that sentinel here.
     // Note: this means item values must be non-empty strings.
-    if (newValue === "") return
+    if (newValue === "") {
+      return
+    }
     setLocalValue(newValue)
   }
 
@@ -60,7 +60,7 @@ export const F0SegmentedControl = ({
             fullWidth && "w-full"
           )}
         >
-          {item.icon && <F0Icon icon={item.icon} size="md" />}
+          {item.icon ? <F0Icon icon={item.icon} size="md" /> : null}
           {hideLabels && item.icon ? (
             <span className="sr-only">{item.label}</span>
           ) : (

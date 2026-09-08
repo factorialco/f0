@@ -1,7 +1,5 @@
 import { forwardRef } from "react"
-
 import { TableRow as TableRowRoot } from "@/ui/table"
-
 import { cn } from "../../../lib/utils"
 
 export const TABLE_ROW_STICKY_TOP_OFFSET = 40

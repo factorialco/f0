@@ -1,7 +1,6 @@
 import { act } from "@testing-library/react"
 import { userEvent } from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import {
   fireEvent,
   zeroRender as render,
@@ -36,11 +35,11 @@ describe("F0AiChatTextArea queued submit while uploading", () => {
   it("waits for the upload to finish, then submits WITH the file", async () => {
     const onSubmit = vi.fn()
     let resolveUpload: (
-      v: Array<{ url: string; filename: string; mimetype: string }>
+      v: { url: string; filename: string; mimetype: string }[]
     ) => void = () => {}
     const onUploadFiles = vi.fn(
       () =>
-        new Promise<Array<{ url: string; filename: string; mimetype: string }>>(
+        new Promise<{ url: string; filename: string; mimetype: string }[]>(
           (res) => {
             resolveUpload = res
           }
@@ -94,7 +93,7 @@ describe("F0AiChatTextArea queued submit while uploading", () => {
     let rejectUpload: (e: Error) => void = () => {}
     const onUploadFiles = vi.fn(
       () =>
-        new Promise<Array<{ url: string; filename: string; mimetype: string }>>(
+        new Promise<{ url: string; filename: string; mimetype: string }[]>(
           (_, rej) => {
             rejectUpload = rej
           }

@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react"
-
 import { F0AvatarModule, ModuleId } from "@/components/avatars/F0AvatarModule"
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
@@ -116,7 +115,7 @@ function _ProductCard({
                 </div>
               </>
 
-              {dismissable && (
+              {dismissable ? (
                 <div className="h-6 w-6">
                   <F0Button
                     variant="ghost"
@@ -127,7 +126,7 @@ function _ProductCard({
                     label="Close"
                   />
                 </div>
-              )}
+              ) : null}
             </div>
           </div>
         </div>

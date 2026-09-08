@@ -1,11 +1,9 @@
 import { ElementRef, forwardRef, useMemo } from "react"
-
-import { Badge } from "@/ui/IconBadge"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { DataTestIdWrapper, WithDataTestIdProps } from "@/lib/data-testid"
 import { cn } from "@/lib/utils"
 import { Avatar, AvatarFallback, InternalAvatarProps } from "@/ui/Avatar"
-
+import { Badge } from "@/ui/IconBadge"
 import { AvatarBadge } from "../F0Avatar/types"
 import { F0AvatarModule } from "../F0AvatarModule"
 import { BaseAvatarProps, sizesMapping } from "../internal/BaseAvatar"
@@ -45,12 +43,12 @@ const F0AvatarFile = forwardRef<ElementRef<typeof Avatar>, F0AvatarFileProps>(
       () =>
         badge ? (
           <>
-            {badge.type === "module" && (
+            {badge.type === "module" ? (
               <F0AvatarModule module={badge.module} size={moduleAvatarSize} />
-            )}
-            {badge.type !== "module" && (
+            ) : null}
+            {badge.type !== "module" ? (
               <Badge type={badge.type} icon={badge.icon} size={badgeSize} />
-            )}
+            ) : null}
           </>
         ) : null,
       [badge, badgeSize, moduleAvatarSize]
@@ -79,7 +77,7 @@ const F0AvatarFile = forwardRef<ElementRef<typeof Avatar>, F0AvatarFileProps>(
           >
             {fileType}
           </AvatarFallback>
-          {badge && (
+          {badge ? (
             <div className="absolute -bottom-0.5 -right-0.5">
               {badge.tooltip ? (
                 <Tooltip description={badge.tooltip}>
@@ -89,7 +87,7 @@ const F0AvatarFile = forwardRef<ElementRef<typeof Avatar>, F0AvatarFileProps>(
                 badgeContent
               )}
             </div>
-          )}
+          ) : null}
         </Avatar>
       </DataTestIdWrapper>
     )

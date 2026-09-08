@@ -1,7 +1,5 @@
 import { useState } from "react"
-
 import { describe, expect, it, vi } from "vitest"
-
 import {
   screen,
   userEvent,
@@ -9,7 +7,6 @@ import {
   within,
   zeroRender as render,
 } from "@/testing/test-utils"
-
 import { DataCollectionSettingsProvider } from "../../../../../Settings/SettingsProvider"
 import { SettingsRenderer } from "../SettingsRenderer"
 

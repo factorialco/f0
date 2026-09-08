@@ -13,14 +13,11 @@ import {
 import { userEvent } from "@testing-library/user-event"
 import React, { type ReactElement } from "react"
 import * as ReactDOMClient from "react-dom/client"
-
 import { UserPlatformProvider } from "@/lib/providers/user-platafform/UserPlatformProvider"
-
 import { defaultTranslations, I18nProvider } from "../lib/providers/i18n"
 export * from "@testing-library/react"
 
 import { MotionGlobalConfig } from "motion"
-
 import { WeekStartDay } from "@/components/OneCalendar/types"
 import { DataCollectionStorageProvider } from "@/lib/providers/datacollection/DataCollectionStorageProvider"
 import { L10nProvider } from "@/lib/providers/l10n"
@@ -71,7 +68,7 @@ const zeroRenderHook = <
   BaseElement extends RendererableContainer | HydrateableContainer = Container,
 >(
   render: (initialProps: Props) => Result,
-  options?: RenderHookOptions<Props, Q, Container, BaseElement> | undefined
+  options?: RenderHookOptions<Props, Q, Container, BaseElement>
 ): RenderHookResult<Result, Props> =>
   renderHook(render, { wrapper: TestProviders, ...options })
 

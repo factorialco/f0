@@ -1,8 +1,6 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
-
 import { WeekStartDay } from "@/components/OneCalendar/types"
-
 import { L10nProvider, useL10n } from "./l10n-provider"
 
 // Test component that uses the l10n hook

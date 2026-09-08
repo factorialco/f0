@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from "react"
-
 import { type TranscribeFn } from "../F0AiChat/types"
 
 export type RecorderStatus = "idle" | "recording" | "transcribing"
@@ -120,9 +119,13 @@ export function useAudioRecorder({
         onPartial,
         signal: controller.signal,
       })
-      if (!controller.signal.aborted) onFinal(finalText)
+      if (!controller.signal.aborted) {
+        onFinal(finalText)
+      }
     } catch {
-      if (!controller.signal.aborted) onError("transcription-failed")
+      if (!controller.signal.aborted) {
+        onError("transcription-failed")
+      }
     } finally {
       abortRef.current = null
       setStatus("idle")
@@ -132,11 +135,15 @@ export function useAudioRecorder({
 
   const stop = useCallback(() => {
     const recorder = recorderRef.current
-    if (recorder && recorder.state !== "inactive") recorder.stop()
+    if (recorder && recorder.state !== "inactive") {
+      recorder.stop()
+    }
   }, [])
 
   const start = useCallback(async () => {
-    if (status !== "idle" || (!onTranscribe && !onAudio) || !isSupported) return
+    if (status !== "idle" || (!onTranscribe && !onAudio) || !isSupported) {
+      return
+    }
     canceledRef.current = false
     chunksRef.current = []
 
@@ -158,7 +165,9 @@ export function useAudioRecorder({
     recorderRef.current = recorder
 
     recorder.ondataavailable = (e) => {
-      if (e.data.size > 0) chunksRef.current.push(e.data)
+      if (e.data.size > 0) {
+        chunksRef.current.push(e.data)
+      }
     }
     recorder.onstop = () => {
       releaseDevice()
@@ -208,7 +217,9 @@ export function useAudioRecorder({
       canceledRef.current = true
       abortRef.current?.abort()
       const recorder = recorderRef.current
-      if (recorder && recorder.state !== "inactive") recorder.stop()
+      if (recorder && recorder.state !== "inactive") {
+        recorder.stop()
+      }
       releaseDevice()
     },
     [releaseDevice]

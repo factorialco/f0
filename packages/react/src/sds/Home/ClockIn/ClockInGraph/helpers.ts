@@ -1,7 +1,7 @@
 import { formatTime24Hours } from "@/lib/date"
 import { getNormalizedRemainingMinutes } from "../ClockInControls/helpers"
 import type { ClockInSegment } from "./HorizontalBar"
-import { CLOCK_IN_COLORS, ClockInGraphProps } from "./index"
+import { CLOCK_IN_COLORS, ClockInGraphProps } from "."
 
 const EMPTY_LABEL = "--:--"
 
@@ -63,7 +63,7 @@ export const normalizeData = ({
   let res = [
     ...dataCopy
       .reverse()
-      .reduce((acc, entry) => {
+      .reduce<ClockInSegment[]>((acc, entry) => {
         const totalEntrySeconds =
           (entry.to.getTime() - entry.from.getTime()) / 1000
 
@@ -109,7 +109,7 @@ export const normalizeData = ({
             ...context,
           },
         ]
-      }, [] as ClockInSegment[])
+      }, [])
       .reverse(),
     ...(leftEntry ? [leftEntry] : []),
   ]
@@ -140,8 +140,9 @@ export const getLabels = ({
     : EMPTY_LABEL
 
   const secondaryLabel = (() => {
-    if (remainingMinutes === undefined || remainingMinutes > 0)
+    if (remainingMinutes === undefined || remainingMinutes > 0) {
       return EMPTY_LABEL
+    }
 
     return lastEntry ? formatTime24Hours(lastEntry.to) : EMPTY_LABEL
   })()

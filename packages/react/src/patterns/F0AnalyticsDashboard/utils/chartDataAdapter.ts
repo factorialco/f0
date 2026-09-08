@@ -7,7 +7,6 @@ import type {
   F0DataChartRadarSeries,
   F0DataChartScatterDataPoint,
 } from "@/kits/F0DataChart"
-
 import type { DashboardChartConfig, DashboardChartData } from "../types"
 
 // ---------------------------------------------------------------------------
@@ -33,7 +32,9 @@ export interface CanonicalChartData {
 
 /** Extract a numeric value from a data point that can be a plain number or {value, target} */
 function numericValue(point: unknown): number {
-  if (typeof point === "number") return point
+  if (typeof point === "number") {
+    return point
+  }
   if (point != null && typeof point === "object" && "value" in point) {
     return (point as { value: number }).value
   }
@@ -84,7 +85,9 @@ function funnelToCanonical(data: DashboardChartData): CanonicalChartData {
     return barLineToCanonical(data)
   }
   const fs = data.series as F0DataChartFunnelSeries
-  if (!fs?.data) return { categories: [], series: [] }
+  if (!fs?.data) {
+    return { categories: [], series: [] }
+  }
   return {
     categories: fs.data.map((d) => d.name),
     series: [{ name: fs.name, data: fs.data.map((d) => d.value) }],
@@ -93,7 +96,9 @@ function funnelToCanonical(data: DashboardChartData): CanonicalChartData {
 
 function pieToCanonical(data: DashboardChartData): CanonicalChartData {
   const ps = data.series as F0DataChartPieSeries
-  if (!ps?.data) return { categories: [], series: [] }
+  if (!ps?.data) {
+    return { categories: [], series: [] }
+  }
   return {
     categories: ps.data.map((d) => d.name),
     series: [{ name: ps.name, data: ps.data.map((d) => d.value) }],

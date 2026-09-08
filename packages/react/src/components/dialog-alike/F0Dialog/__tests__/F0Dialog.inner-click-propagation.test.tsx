@@ -1,8 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
 import { zeroRender as render, screen } from "@/testing/test-utils"
-
-import { F0Dialog } from "../index"
+import { F0Dialog } from ".."
 
 /**
  * The dialog box stops propagation of clicks coming out of its contents, so they

@@ -1,7 +1,4 @@
-import { getCategoricalColor, getColor } from "@/kits/Charts/utils/colors"
 import { CSSProperties, useState } from "react"
-
-import { Skeleton } from "@/ui/skeleton"
 import {
   buildCategoryBarSegments,
   CATEGORY_BAR_TOOLTIP_DELAY_MS,
@@ -9,16 +6,17 @@ import {
   formatCategoryBarPercentage,
   toCategoryBarTooltipItems,
 } from "@/kits/Charts/CategoryBarChart/CategoryBarTooltipContent"
+import { getCategoricalColor, getColor } from "@/kits/Charts/utils/colors"
 import {
   type ChartColorToken,
   chartColorTokens,
   resolveChartColorToken,
 } from "@/kits/F0DataChart/utils/colors"
+import { cn, focusRing } from "@/lib/utils"
+import { Skeleton } from "@/ui/skeleton"
 import { Tooltip, TooltipProvider, TooltipTrigger } from "@/ui/tooltip"
-
 import { tableDisplayClassNames } from "../../const"
 import { ValueDisplayRendererContext } from "../../renderers"
-import { cn, focusRing } from "@/lib/utils"
 
 /**
  * Legacy `kits/Charts` color tokens, resolved as `hsl(var(--chart-*))`.
@@ -193,12 +191,12 @@ function CategoryBar({
             </div>
           </div>
         </TooltipTrigger>
-        {!hideTooltip && tooltipItems.length > 0 && (
+        {!hideTooltip && tooltipItems.length > 0 ? (
           <CategoryBarTooltipContent
             items={tooltipItems}
             activeKey={activeKey}
           />
-        )}
+        ) : null}
       </Tooltip>
     </TooltipProvider>
   )

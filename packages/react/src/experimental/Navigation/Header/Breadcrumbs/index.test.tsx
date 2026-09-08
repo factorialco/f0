@@ -1,10 +1,8 @@
 import { within } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import { Home, Settings } from "@/icons/app"
 import { zeroRender as render } from "@/testing/test-utils"
-
-import { Breadcrumbs } from "./index"
+import { Breadcrumbs } from "."
 
 // Mock ResizeObserver - must be a class constructor for 'new ResizeObserver()' to work
 global.ResizeObserver = class MockResizeObserver {
@@ -244,6 +242,7 @@ describe("Breadcrumbs", async () => {
     })
   })
 
+  // Skipped since eaed0ace4 without a recorded reason. Un-skip or document.
   it.skip("renders select type breadcrumb correctly", async () => {
     const breadcrumbs = [
       { id: "home", label: "Home", href: "/" },

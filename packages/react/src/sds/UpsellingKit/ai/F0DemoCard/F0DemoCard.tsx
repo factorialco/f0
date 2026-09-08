@@ -2,7 +2,6 @@ import { F0Button } from "@/components/F0Button"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Card, CardContent, CardFooter } from "@/ui/Card"
-
 import { F0DemoCardProps } from "./types"
 
 export const F0DemoCard = ({

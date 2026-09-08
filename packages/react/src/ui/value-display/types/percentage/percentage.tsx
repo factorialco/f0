@@ -3,7 +3,6 @@
  * Supports both direct values and objects with placeholder states, it also supports a label.
  */
 import { cn } from "@/lib/utils"
-
 import { tableDisplayClassNames } from "../../const"
 import { ValueDisplayRendererContext } from "../../renderers"
 import { isShowingPlaceholder, resolveValue } from "../../utils"
@@ -35,8 +34,7 @@ export const PercentageCell = (
     return (
       <span
         className={cn(
-          "text-f1-foreground",
-          isPlaceholder && "text-f1-foreground-secondary",
+          "text-f1-foreground text-f1-foreground-secondary",
           meta.visualization === "table" && tableDisplayClassNames.text
         )}
         data-cell-type="percentage"

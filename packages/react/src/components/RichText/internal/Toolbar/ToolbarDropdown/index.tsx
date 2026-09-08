@@ -1,7 +1,6 @@
 import * as Popover from "@radix-ui/react-popover"
 import { AnimatePresence, motion } from "motion/react"
 import { useState } from "react"
-
 import { F0ButtonToggle } from "@/components/F0ButtonToggle"
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { cn } from "@/lib/utils"
@@ -36,7 +35,9 @@ export const ToolbarDropdown = ({
   const [open, setOpen] = useState(false)
 
   const handleButtonClick = () => {
-    if (disabled) return
+    if (disabled) {
+      return
+    }
     setOpen(!open)
   }
 
@@ -61,7 +62,7 @@ export const ToolbarDropdown = ({
           style={{ zIndex: 9999 }}
         >
           <AnimatePresence>
-            {open && (
+            {open ? (
               <motion.div
                 initial={{ opacity: 0, scale: 0.95, y: 5 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -99,7 +100,7 @@ export const ToolbarDropdown = ({
                   </Action>
                 ))}
               </motion.div>
-            )}
+            ) : null}
           </AnimatePresence>
         </Popover.Content>
       </Popover.Portal>

@@ -1,3 +1,4 @@
+import "./index.css"
 import DragHandle from "@tiptap/extension-drag-handle-react"
 import { Node } from "@tiptap/pm/model"
 import {
@@ -17,36 +18,12 @@ import {
   useRef,
   useState,
 } from "react"
-
 import { F0Alert } from "@/components/F0Alert"
+import type { F0AlertProps } from "@/components/F0Alert"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
 import { EditorBubbleMenu } from "@/components/RichText/internal"
 import { useEnhance } from "@/components/RichText/internal/Enhance"
-import { Handle, Plus } from "@/icons/app"
-import { experimentalComponent } from "@/lib/experimental"
-import { useI18n } from "@/lib/providers/i18n"
-import { withSkeleton } from "@/lib/skeleton"
-import { ScrollArea } from "@/ui/scrollarea"
-import { Skeleton } from "@/ui/skeleton"
-
-import { documentHasMissingBlockIds } from "../internal/Extensions/BlockIdExtension"
-import {
-  type ImageUploadConfig,
-  ImageUploadErrorType,
-  insertImageFromFile,
-} from "../internal/Extensions/Image"
-import { EnhanceErrorBanner } from "../internal/Error"
-import "./index.css"
-import {
-  applyPageDocumentPatch,
-  getNotesTextEditorSnapshot,
-} from "./applyPageDocumentPatch"
-import { createNotesTextEditorExtensions } from "./extensions"
-import { Header } from "./components/Header"
-import { ImageUploadError } from "./components/ImageUploadError"
-import { Title } from "./components/Title"
-import type { F0AlertProps } from "@/components/F0Alert"
 import type { HeaderSecondaryAction } from "@/experimental/Information/Headers/BaseHeader"
 import type { MetadataItem } from "@/experimental/Information/Headers/Metadata"
 import type {
@@ -54,10 +31,31 @@ import type {
   PrimaryDropdownAction,
 } from "@/experimental/Information/utils"
 import type { DropdownItem } from "@/experimental/Navigation/Dropdown"
+import { Handle, Plus } from "@/icons/app"
+import { experimentalComponent } from "@/lib/experimental"
+import { useI18n } from "@/lib/providers/i18n"
+import { withSkeleton } from "@/lib/skeleton"
+import { ScrollArea } from "@/ui/scrollarea"
+import { Skeleton } from "@/ui/skeleton"
 import type { enhanceConfig } from "../internal/Enhance/types"
+import { EnhanceErrorBanner } from "../internal/Error"
 import type { AIBlockConfig } from "../internal/Extensions/AIBlock"
+import { documentHasMissingBlockIds } from "../internal/Extensions/BlockIdExtension"
+import {
+  type ImageUploadConfig,
+  ImageUploadErrorType,
+  insertImageFromFile,
+} from "../internal/Extensions/Image"
 import type { Message, User } from "../internal/Extensions/Transcript"
+import {
+  applyPageDocumentPatch,
+  getNotesTextEditorSnapshot,
+} from "./applyPageDocumentPatch"
+import { Header } from "./components/Header"
 import type { HeaderStatusProps } from "./components/Header"
+import { ImageUploadError } from "./components/ImageUploadError"
+import { Title } from "./components/Title"
+import { createNotesTextEditorExtensions } from "./extensions"
 import type {
   NotesTextEditorPageDocumentPatch,
   NotesTextEditorSnapshot,
@@ -248,7 +246,9 @@ const F0NotesTextEditorComponent = forwardRef<
       return runWithoutOnChange(() => applyPageDocumentPatch(editor, patch))
     },
     insertAIBlock: () => {
-      if (!editor || !aiBlockConfig) return
+      if (!editor || !aiBlockConfig) {
+        return
+      }
       editor
         .chain()
         .focus()
@@ -266,7 +266,9 @@ const F0NotesTextEditorComponent = forwardRef<
         .run()
     },
     insertTranscript: (title, users, messages) => {
-      if (!editor) return
+      if (!editor) {
+        return
+      }
       editor
         .chain()
         .focus()
@@ -283,7 +285,9 @@ const F0NotesTextEditorComponent = forwardRef<
         .run()
     },
     pushContent: (content: string) => {
-      if (!editor) return
+      if (!editor) {
+        return
+      }
       editor
         .chain()
         .focus()
@@ -291,7 +295,9 @@ const F0NotesTextEditorComponent = forwardRef<
         .run()
     },
     insertImage: (file: File) => {
-      if (!editor || !imageUploadConfigWithError) return
+      if (!editor || !imageUploadConfigWithError) {
+        return
+      }
       insertImageFromFile(editor, file, imageUploadConfigWithError)
     },
   }))
@@ -312,7 +318,9 @@ const F0NotesTextEditorComponent = forwardRef<
 
   const handlePlusClick = useCallback(() => {
     const hovered = hoveredRef.current
-    if (!hovered || !editor) return
+    if (!hovered || !editor) {
+      return
+    }
 
     const { pos, nodeSize } = hovered
     const node = editor.state.doc.nodeAt(pos)
@@ -345,7 +353,9 @@ const F0NotesTextEditorComponent = forwardRef<
     status
   const showTitle = onTitleChange || title
 
-  if (!editor) return null
+  if (!editor) {
+    return null
+  }
 
   return (
     <div
@@ -353,7 +363,7 @@ const F0NotesTextEditorComponent = forwardRef<
       ref={containerRef}
       id={editorId}
     >
-      {showHeader && (
+      {showHeader ? (
         <Header
           primaryAction={primaryAction}
           secondaryActions={secondaryActions}
@@ -361,12 +371,12 @@ const F0NotesTextEditorComponent = forwardRef<
           otherActions={otherActions}
           status={status}
         />
-      )}
-      {error && (
+      ) : null}
+      {error ? (
         <ImageUploadError errorType={error} onDismiss={() => setError(null)} />
-      )}
+      ) : null}
       <AnimatePresence>
-        {enhance.error && !enhance.isLoading && (
+        {enhance.error && !enhance.isLoading ? (
           <motion.div
             key="enhance-error"
             initial={{ height: 0, opacity: 0, y: -20 }}
@@ -380,27 +390,27 @@ const F0NotesTextEditorComponent = forwardRef<
               onDismiss={enhance.clearError}
             />
           </motion.div>
-        )}
+        ) : null}
       </AnimatePresence>
       <ScrollArea className="notes-text-editor-scroll h-full gap-6">
-        {alert && (
+        {alert ? (
           <div className="mx-auto w-full max-w-[824px] sm:px-14 px-0">
             <F0Alert {...alert} />
           </div>
-        )}
-        {showTitle && (
+        ) : null}
+        {showTitle ? (
           <Title
             value={title}
             onChange={onTitleChange ? setTitle : undefined}
             placeholder={titlePlaceholder}
             disabled={!onTitleChange || readonly}
           />
-        )}
+        ) : null}
         <div
           className="notes-text-editor h-full"
           onClick={() => editor.commands.focus()}
         >
-          {!readonly && (
+          {!readonly ? (
             <DragHandle
               editor={editor}
               tippyOptions={tippyOptions}
@@ -427,7 +437,7 @@ const F0NotesTextEditorComponent = forwardRef<
                 </div>
               </div>
             </DragHandle>
-          )}
+          ) : null}
 
           <EditorContent
             editor={editor}
@@ -435,7 +445,7 @@ const F0NotesTextEditorComponent = forwardRef<
           />
         </div>
       </ScrollArea>
-      {!readonly && (
+      {!readonly ? (
         <EditorBubbleMenu
           editorId={editorId}
           editor={editor}
@@ -445,7 +455,7 @@ const F0NotesTextEditorComponent = forwardRef<
           plainHtmlMode={false}
           enhance={enhance}
         />
-      )}
+      ) : null}
     </div>
   )
 })
@@ -461,7 +471,7 @@ export const F0NotesTextEditorSkeleton = ({
       aria-busy="true"
       aria-live="polite"
     >
-      {withHeader && (
+      {withHeader ? (
         <div className="flex items-center justify-between border-b border-f1-border px-6 py-3">
           <div className="flex items-center gap-3">
             <Skeleton className="h-6 w-20 rounded-md" />
@@ -472,9 +482,9 @@ export const F0NotesTextEditorSkeleton = ({
             <Skeleton className="h-8 w-12 rounded-md" />
           </div>
         </div>
-      )}
+      ) : null}
 
-      {withToolbar && (
+      {withToolbar ? (
         <div className="absolute bottom-8 left-1/2 z-50 flex -translate-x-1/2 flex-row items-center gap-[9px] rounded-lg bg-f1-background p-2 shadow-md">
           <Skeleton className="h-8 w-8 rounded" />
           <div className="flex items-center gap-0.5">
@@ -497,13 +507,13 @@ export const F0NotesTextEditorSkeleton = ({
             <Skeleton className="h-8 w-8 rounded" />
           </div>
         </div>
-      )}
+      ) : null}
       <ScrollArea className="h-full gap-6">
-        {withTitle && (
+        {withTitle ? (
           <div className="mx-auto flex w-full max-w-[824px] flex-col px-14 pb-5 pt-5">
             <Skeleton className="h-8 w-80 rounded-md" />
           </div>
-        )}
+        ) : null}
 
         <div className="h-full">
           <div className="pb-28 [&>div]:mx-auto [&>div]:w-full [&>div]:max-w-[824px] [&>div]:px-14">

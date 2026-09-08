@@ -1,9 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react"
-
 import { ToggleGroup, ToggleGroupItem } from "@/deprecated/ToggleGroup"
 import { useI18n } from "@/lib/providers/i18n"
 import { Skeleton } from "@/ui/skeleton"
-
 import { columnLetters, fetchWorkbook, type SheetGrid } from "../sheetPreview"
 import { type F0PdfViewerAction } from "../types"
 import { DocumentToolbar, useDocumentZoom } from "./DocumentToolbar"
@@ -51,12 +49,19 @@ const SheetViewer = ({
       withCredentials,
     })
       .then((parsed) => {
-        if (cancelled) return
-        if (parsed.length === 0) setFailed(true)
-        else setSheets(parsed)
+        if (cancelled) {
+          return
+        }
+        if (parsed.length === 0) {
+          setFailed(true)
+        } else {
+          setSheets(parsed)
+        }
       })
       .catch(() => {
-        if (!cancelled) setFailed(true)
+        if (!cancelled) {
+          setFailed(true)
+        }
       })
     return () => {
       cancelled = true
@@ -81,13 +86,15 @@ const SheetViewer = ({
       >
         {/* Sheet switcher — one toggle per workbook sheet. Radix single-type
             toggles emit "" when re-clicking the active one; keep it selected. */}
-        {sheets && sheets.length > 1 && (
+        {sheets && sheets.length > 1 ? (
           <ToggleGroup
             type="single"
             size="sm"
             value={String(activeIndex)}
             onValueChange={(value: string) => {
-              if (value) setActiveIndex(Number(value))
+              if (value) {
+                setActiveIndex(Number(value))
+              }
             }}
             className="justify-start"
           >
@@ -101,7 +108,7 @@ const SheetViewer = ({
               </ToggleGroupItem>
             ))}
           </ToggleGroup>
-        )}
+        ) : null}
       </DocumentToolbar>
       {failed ? (
         <div className="flex min-h-0 grow items-center justify-center text-f1-foreground-secondary">
@@ -156,13 +163,13 @@ const SheetViewer = ({
               </tbody>
             </table>
           </div>
-          {active.truncatedRows && (
+          {active.truncatedRows ? (
             <div className="shrink-0 border-0 border-t border-solid border-f1-border-secondary px-3 py-1.5 text-sm text-f1-foreground-secondary">
               {i18n.t("pdfViewer.showingFirstRows.other", {
                 count: VIEWER_MAX_ROWS,
               })}
             </div>
-          )}
+          ) : null}
         </>
       )}
     </div>

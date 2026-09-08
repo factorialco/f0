@@ -6,7 +6,7 @@ import type { MetadataItem } from "../F0Metadata.types"
 
 describe("F0Metadata", () => {
   describe("Snapshots — value types", () => {
-    const cases: Array<{ name: string; item: MetadataItem }> = [
+    const cases: { name: string; item: MetadataItem }[] = [
       {
         name: "text",
         item: {

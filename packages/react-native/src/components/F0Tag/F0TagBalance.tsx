@@ -28,7 +28,9 @@ const f0TagBalanceTextColorMap: Record<BalanceStatus, F0TagProps["textColor"]> =
 const resolveNumericConfig = (
   value: F0TagNumericInput | F0TagPercentageInput | null | undefined
 ) => {
-  if (value === null || value === undefined) return null
+  if (value === null || value === undefined) {
+    return null
+  }
   if (typeof value === "number") {
     return {
       value,
@@ -51,7 +53,9 @@ const formatNumericValue = (
   numeric: ReturnType<typeof resolveNumericConfig>,
   fallbackDecimalPlaces: number
 ): string | null => {
-  if (!numeric || Number.isNaN(numeric.value)) return null
+  if (!numeric || Number.isNaN(numeric.value)) {
+    return null
+  }
 
   const decimalPlaces = numeric.decimalPlaces ?? fallbackDecimalPlaces
   const formatted = new Intl.NumberFormat(numeric.locale ?? "en-US", {
@@ -59,8 +63,12 @@ const formatNumericValue = (
     maximumFractionDigits: decimalPlaces,
   }).format(numeric.value)
 
-  if (!numeric.units) return formatted
-  if (numeric.unitsPosition === "left") return `${numeric.units}${formatted}`
+  if (!numeric.units) {
+    return formatted
+  }
+  if (numeric.unitsPosition === "left") {
+    return `${numeric.units}${formatted}`
+  }
   return `${formatted}${numeric.units}`
 }
 

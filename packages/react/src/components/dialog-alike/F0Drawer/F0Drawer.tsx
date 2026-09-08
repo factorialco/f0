@@ -13,7 +13,7 @@ const F0Drawer = (props: F0DrawerProps) => {
   const publicProps = privateProps.reduce<DrawerInternalProps>((acc, key) => {
     const { [key as keyof DrawerInternalProps]: _, ...rest } = acc
     return rest as DrawerInternalProps
-  }, props as DrawerInternalProps)
+  }, props)
 
   return <DrawerInternal {...publicProps} />
 }

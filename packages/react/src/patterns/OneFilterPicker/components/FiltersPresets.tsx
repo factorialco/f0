@@ -1,5 +1,4 @@
 import { useMemo } from "react"
-
 import { F0Icon } from "@/components/F0Icon"
 import { Add } from "@/icons/app"
 import { Await } from "@/lib/Await"
@@ -9,9 +8,8 @@ import { Counter } from "@/ui/Counter"
 import { Preset } from "@/ui/OnePreset"
 import { OverflowList } from "@/ui/OverflowList"
 import { Skeleton } from "@/ui/skeleton"
-
-import { FiltersDefinition, FiltersState, PresetsDefinition } from "../types"
 import { isPresetSelected } from "../internal/isPresetSelected"
+import { FiltersDefinition, FiltersState, PresetsDefinition } from "../types"
 
 interface FilterPresetsProps<Filters extends FiltersDefinition> {
   value: FiltersState<Filters>
@@ -107,7 +105,9 @@ export const FiltersPresets = <Filters extends FiltersDefinition>({
 
   // Filter out presets with invalid filters
   const validPresets = useMemo(() => {
-    if (!presets || presets.length === 0) return []
+    if (!presets || presets.length === 0) {
+      return []
+    }
     return presets.filter(
       (preset) =>
         preset &&
@@ -246,7 +246,7 @@ export const FiltersPresets = <Filters extends FiltersDefinition>({
         data-visible={true}
       >
         {preset.label}
-        {presetNumber !== undefined && (
+        {presetNumber !== undefined ? (
           <Await
             resolve={presetNumber}
             fallback={<Skeleton className="h-4 w-6" />}
@@ -260,7 +260,7 @@ export const FiltersPresets = <Filters extends FiltersDefinition>({
               )
             }
           </Await>
-        )}
+        ) : null}
       </button>
     )
   }

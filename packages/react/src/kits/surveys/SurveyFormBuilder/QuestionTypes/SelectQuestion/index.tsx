@@ -1,11 +1,9 @@
 import { Reorder } from "motion/react"
 import { nanoid } from "nanoid"
 import { useEffect, useMemo } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { Add } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
-
 import { useSurveyFormBuilderContext } from "../../Context"
 import { DragProvider } from "../../DragContext"
 import { SelectQuestionOption } from "../../types"
@@ -45,7 +43,9 @@ export const SelectQuestion = ({ options, ...props }: SelectQuestionProps) => {
 
   // preventing options with same value to cause unexpected behavior
   useEffect(() => {
-    if (!someOptionsWithSameValue) return
+    if (!someOptionsWithSameValue) {
+      return
+    }
 
     let newOptions = options.map((option) => ({
       ...option,
@@ -207,7 +207,7 @@ export const SelectQuestion = ({ options, ...props }: SelectQuestionProps) => {
             })}
           </Reorder.Group>
         </DragProvider>
-        {!disabled && !answering && !questionLocked && (
+        {!disabled && !answering && !questionLocked ? (
           <div className="opacity-70">
             <F0Button
               label={t("surveyFormBuilder.selectQuestion.addOption")}
@@ -216,7 +216,7 @@ export const SelectQuestion = ({ options, ...props }: SelectQuestionProps) => {
               onClick={handleAddOption}
             />
           </div>
-        )}
+        ) : null}
       </div>
     </BaseQuestion>
   )

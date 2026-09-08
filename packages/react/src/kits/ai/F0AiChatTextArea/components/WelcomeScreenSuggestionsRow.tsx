@@ -6,15 +6,12 @@ import {
   useRef,
   useState,
 } from "react"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
 import { ArrowUp } from "@/icons/app"
 import { useReducedMotion } from "@/lib/a11y"
-import { focusRing } from "@/lib/utils"
-import { cn } from "@/lib/utils"
+import { focusRing, cn } from "@/lib/utils"
 import { Popover, PopoverAnchor, PopoverContent } from "@/ui/popover"
-
 import type {
   WelcomeScreenSuggestion,
   WelcomeScreenSuggestionItem,
@@ -35,7 +32,9 @@ function pickRandomItems(
   list: WelcomeScreenSuggestionItem[],
   amount: number = MAX_ITEMS_PER_GROUP
 ): WelcomeScreenSuggestionItem[] {
-  if (list.length <= amount) return list
+  if (list.length <= amount) {
+    return list
+  }
   return [...list].sort(() => 0.5 - Math.random()).slice(0, amount)
 }
 
@@ -115,7 +114,9 @@ export const WelcomeScreenSuggestionsRow = ({
   const popoverHeadingId = useId()
   const activeGroup = activeIdx !== null ? suggestions[activeIdx] : null
 
-  if (suggestions.length === 0) return null
+  if (suggestions.length === 0) {
+    return null
+  }
 
   return (
     <Popover
@@ -151,7 +152,9 @@ export const WelcomeScreenSuggestionsRow = ({
           <div
             ref={(node) => {
               rowRef.current = node
-              if (scrolls) fade.ref(node)
+              if (scrolls) {
+                fade.ref(node)
+              }
             }}
             style={scrolls ? fade.style : undefined}
             className={cn(
@@ -210,7 +213,7 @@ export const WelcomeScreenSuggestionsRow = ({
           </div>
         </PopoverAnchor>
       </div>
-      {activeGroup && (
+      {activeGroup ? (
         <PopoverContent
           side={side}
           align="start"
@@ -268,7 +271,7 @@ export const WelcomeScreenSuggestionsRow = ({
             ))}
           </div>
         </PopoverContent>
-      )}
+      ) : null}
     </Popover>
   )
 }
@@ -325,13 +328,19 @@ function SuggestionItem({ item, onSelect, onHover }: SuggestionItemProps) {
   }, [])
 
   const startScroll = useCallback(() => {
-    if (reduceMotion) return
+    if (reduceMotion) {
+      return
+    }
     timerRef.current = window.setTimeout(() => {
       const text = textRef.current
       const wrap = wrapRef.current
-      if (!text || !wrap) return
+      if (!text || !wrap) {
+        return
+      }
       const overflow = text.scrollWidth - text.clientWidth
-      if (overflow <= 0) return // fits — nothing hidden to reveal
+      if (overflow <= 0) {
+        return
+      } // fits — nothing hidden to reveal
       const distance = overflow + SUGGESTION_TRAILING_GAP
       const duration = (distance / SUGGESTION_SCROLL_SPEED) * 1000
       // Let the label spill past its own box so translating reveals the tail
@@ -359,7 +368,9 @@ function SuggestionItem({ item, onSelect, onHover }: SuggestionItemProps) {
   // mid-hold.
   useEffect(
     () => () => {
-      if (timerRef.current != null) clearTimeout(timerRef.current)
+      if (timerRef.current != null) {
+        clearTimeout(timerRef.current)
+      }
     },
     []
   )

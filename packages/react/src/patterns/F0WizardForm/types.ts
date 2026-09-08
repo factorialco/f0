@@ -1,6 +1,7 @@
 import { z, ZodRawShape, ZodEffects, type ZodType } from "zod"
-
 import type { ModuleId } from "@/components/avatars/F0AvatarModule"
+import { F0DialogSize } from "@/components/dialog-alike/F0Dialog"
+import { DialogWidth } from "@/patterns/F0Dialog"
 import type { InitialFile } from "@/patterns/F0Form/fields/file/types"
 import type {
   F0FormErrorTriggerMode,
@@ -9,11 +10,8 @@ import type {
   F0PerSectionSubmitConfig,
   F0SectionConfig,
   F0PerSectionSectionConfig,
+  RenderCustomFieldFunction,
 } from "@/patterns/F0Form/types"
-import type { RenderCustomFieldFunction } from "@/patterns/F0Form/types"
-
-import { F0DialogSize } from "@/components/dialog-alike/F0Dialog"
-import { DialogWidth } from "@/patterns/F0Dialog"
 
 export type F0FormSchema<T extends ZodRawShape = ZodRawShape> =
   | z.ZodObject<T>

@@ -1,23 +1,20 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useId, useMemo } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
-import { OneEllipsis } from "@/lib/OneEllipsis"
 import { ChevronRight } from "@/icons/app"
 import { useReducedMotion } from "@/lib/a11y"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { NonFocusableScrollArea, ScrollArea } from "@/ui/scrollarea"
-
+import { FilterDefinitionsByType, getFilterType } from "../filterTypes"
+import { collectNestedFilterKeys } from "../filterTypes/InFilter/components/option-utils"
 import type {
   FilterTypeDefinition,
   FilterTypeSchema,
 } from "../filterTypes/types"
 import type { FiltersDefinition, FiltersState, FilterValue } from "../types"
-
-import { FilterDefinitionsByType, getFilterType } from "../filterTypes"
-import { collectNestedFilterKeys } from "../filterTypes/InFilter/components/option-utils"
 
 /**
  * Props for the FilterList component.
@@ -70,7 +67,9 @@ export function FilterList<Definition extends FiltersDefinition>({
       if (filter.type === "in" && "options" in filter) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any -- accessing nested options generically
         const nested = collectNestedFilterKeys((filter as any).options)
-        if (nested.length > 0) map.set(key, nested)
+        if (nested.length > 0) {
+          map.set(key, nested)
+        }
       }
     }
     return map
@@ -90,9 +89,9 @@ export function FilterList<Definition extends FiltersDefinition>({
           "flex flex-1 h-full w-full flex-col min-h-0 max-h-full gap-1 overflow-x-hidden p-2"
         )}
       >
-        {isCompactMode && (
+        {isCompactMode ? (
           <div className="-mx-2 mb-1 h-px border-0 border-t border-solid border-f1-border-secondary" />
-        )}
+        ) : null}
         <ListScrollArea className="flex-1 min-h-0 max-h-full">
           <div className="flex flex-col gap-1">
             {Object.entries(definition).map(([key, filter]) => {
@@ -140,7 +139,7 @@ export function FilterList<Definition extends FiltersDefinition>({
                       {filter.label}
                     </OneEllipsis>
                     <AnimatePresence>
-                      {isActive && (
+                      {isActive ? (
                         <motion.span
                           className="h-2 w-2 shrink-0 rounded-full bg-f1-background-selected-bold"
                           initial={
@@ -155,11 +154,11 @@ export function FilterList<Definition extends FiltersDefinition>({
                               : { opacity: 0, scale: 0.7 }
                           }
                         />
-                      )}
+                      ) : null}
                     </AnimatePresence>
-                    {isCompactMode && <F0Icon icon={ChevronRight} />}
+                    {isCompactMode ? <F0Icon icon={ChevronRight} /> : null}
                   </div>
-                  {isActive && (
+                  {isActive ? (
                     <span
                       id={`${activeDescriptionId}-${key}`}
                       className="sr-only"
@@ -168,20 +167,20 @@ export function FilterList<Definition extends FiltersDefinition>({
                         filters: filter.label,
                       })}
                     </span>
-                  )}
+                  ) : null}
                 </button>
               )
             })}
           </div>
         </ListScrollArea>
-        {isCompactMode && (
+        {isCompactMode ? (
           <div className="-mx-2 flex items-center justify-end gap-2 border border-solid border-transparent border-t-f1-border-secondary p-2">
             <F0Button
               onClick={onClickApplyFilters}
               label={i18n.filters.applyFilters}
             />
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   )

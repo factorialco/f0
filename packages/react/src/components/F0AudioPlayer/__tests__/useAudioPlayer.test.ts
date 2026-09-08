@@ -1,6 +1,5 @@
 import { act, fireEvent, renderHook } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
 import { useAudioPlayer } from "../useAudioPlayer"
 
 const makeRef = () => ({ current: document.createElement("audio") })

@@ -1,6 +1,5 @@
 import { IconType } from "@/components/F0Icon"
 import { defaultTranslations } from "@/lib/providers/i18n/i18n-provider-defaults"
-
 import type {
   CanvasActions,
   CanvasContent,
@@ -173,6 +172,11 @@ export type AiChatCreditWarning = {
   onDismiss?: () => void
   /** Called when the user clicks the "Get Credits" button. */
   onGetCredits?: () => void
+  /**
+   * Icon rendered to the left of the "Get Credits" label. Only used when
+   * `onGetCredits` is provided. Hosts typically pass the `Upsell` icon.
+   */
+  getCreditsIcon?: IconType
 }
 
 /**

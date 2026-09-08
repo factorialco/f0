@@ -16,9 +16,13 @@ export function derivePresetId(
 ): string {
   const base = title.trim().replace(/\s+/g, " ") || "preset"
   const taken = new Set(existingIds)
-  if (!taken.has(base)) return base
+  if (!taken.has(base)) {
+    return base
+  }
 
   let n = 2
-  while (taken.has(`${base} ${n}`)) n++
+  while (taken.has(`${base} ${n}`)) {
+    n++
+  }
   return `${base} ${n}`
 }

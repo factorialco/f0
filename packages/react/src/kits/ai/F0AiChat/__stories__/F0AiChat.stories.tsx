@@ -1,13 +1,10 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
 import { useEffect, useState } from "react"
 import { expect, userEvent, waitFor, within } from "storybook/test"
-
 import { F0Button } from "@/components/F0Button"
 import { ChartVerticalBars, Pencil, Search } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
 import { F0AiChat, F0AiChatProvider, useAiChat } from ".."
-
 import {
   MockAiChatRuntimeProvider,
   MockConnectedChatHeader,

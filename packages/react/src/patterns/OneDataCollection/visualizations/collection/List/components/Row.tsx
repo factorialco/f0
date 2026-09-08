@@ -1,10 +1,5 @@
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { F0Link } from "@/components/F0Link"
-import { ItemActionsMobile } from "@/patterns/OneDataCollection/components/itemActions/ItemActionsMobile/ItemActionsMobile"
-import { ItemActionsRow } from "@/patterns/OneDataCollection/components/itemActions/ItemActionsRow/ItemActionsRow"
-import { ItemActionsRowContainer } from "@/patterns/OneDataCollection/components/itemActions/ItemActionsRowContainer"
-import { useItemActions } from "@/patterns/OneDataCollection/components/itemActions/useItemActions"
-import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource/types"
 import {
   FiltersDefinition,
   GroupingDefinition,
@@ -13,7 +8,11 @@ import {
 } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
+import { ItemActionsMobile } from "@/patterns/OneDataCollection/components/itemActions/ItemActionsMobile/ItemActionsMobile"
+import { ItemActionsRow } from "@/patterns/OneDataCollection/components/itemActions/ItemActionsRow/ItemActionsRow"
+import { ItemActionsRowContainer } from "@/patterns/OneDataCollection/components/itemActions/ItemActionsRowContainer"
+import { useItemActions } from "@/patterns/OneDataCollection/components/itemActions/useItemActions"
+import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource/types"
 import { ItemActionsDefinition } from "../../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../../navigationFilters/types"
 import { renderProperty } from "../../../../property-render"
@@ -42,7 +41,7 @@ type RowProps<
   item: R
   selectedItems: Map<number | string, R>
   handleSelectItemChange: (item: R, checked: boolean) => void
-  fields: ReadonlyArray<ListPropertyDefinition<R, Sortings>>
+  fields: readonly ListPropertyDefinition<R, Sortings>[]
   itemDefinition: (record: R) => ItemDefinition
 }
 
@@ -116,7 +115,7 @@ export const Row = <
         className="pointer-events-auto absolute inset-0"
       ></div>
       <div className="pointer-events-none flex flex-1 flex-row items-center gap-2">
-        {source.selectable && id !== undefined && (
+        {source.selectable && id !== undefined ? (
           // z-10 is needed here to prevent the checkbox from not being selectable when itemHref is provided
           <div
             className={cn(
@@ -135,8 +134,8 @@ export const Row = <
               hideLabel
             />
           </div>
-        )}
-        {itemHref && (
+        ) : null}
+        {itemHref ? (
           <F0Link
             href={itemHref}
             className="pointer-events-auto absolute inset-0 block"
@@ -146,7 +145,7 @@ export const Row = <
           >
             <span className="sr-only">{actions.view}</span>
           </F0Link>
-        )}
+        ) : null}
         <ItemTeaser
           title={itemDef.title}
           avatar={itemDef.avatar}
@@ -159,7 +158,9 @@ export const Row = <
           .map((field) => {
             const content = renderCell(item, field)
 
-            if (!content) return null
+            if (!content) {
+              return null
+            }
 
             return (
               <div key={String(field.label)}>
@@ -170,7 +171,7 @@ export const Row = <
             )
           })}
       </div>
-      {source.itemActions && (
+      {source.itemActions ? (
         <>
           <ItemActionsRowContainer
             dropDownOpen={dropDownOpen}
@@ -183,16 +184,16 @@ export const Row = <
             />
           </ItemActionsRowContainer>
 
-          {hasMobileItemActions && (
+          {hasMobileItemActions ? (
             <ItemActionsMobile
               className="absolute -right-px bottom-0 top-0 z-20 items-center justify-end gap-2 py-2 pl-20 pr-3 md:hidden"
               items={mobileDropdownItemActions}
               onOpenChange={handleDropDownOpenChange}
             />
-          )}
+          ) : null}
         </>
-      )}
-      {source.selectable && id !== undefined && (
+      ) : null}
+      {source.selectable && id !== undefined ? (
         <div
           className={cn(
             "pointer-events-auto absolute right-3 top-3 flex h-8 w-8 items-center justify-center md:hidden",
@@ -208,7 +209,7 @@ export const Row = <
             hideLabel
           />
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

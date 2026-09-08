@@ -2,7 +2,6 @@ import {
   createDataSourceDefinition,
   type PaginatedFetchOptions,
 } from "@/hooks/datasource"
-
 import { InFilterOptions } from "../filterTypes/InFilter/types"
 import { FiltersDefinition, PresetsDefinition } from "../types"
 
@@ -229,7 +228,7 @@ export const generateCountries = () => {
   return countries
 }
 
-export const getPresetMock = (itemsCount: boolean = false) => {
+export const getPresetMock = (itemsCount = false) => {
   return samplePresets.map((preset, index) => ({
     ...preset,
     itemsCount: itemsCount ? () => index * 12 : undefined,

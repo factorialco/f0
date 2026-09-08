@@ -1,5 +1,4 @@
 import type * as echarts from "echarts"
-
 import type { ChartTheme } from "./theme"
 
 // ---------------------------------------------------------------------------
@@ -121,9 +120,13 @@ export function computeLabelInterval(
   // label width; for a vertical axis (horizontal charts) it's the line-height.
   minSpace: number = MIN_LABEL_WIDTH
 ): number | undefined {
-  if (!axisLength || categoryCount <= 1) return undefined
+  if (!axisLength || categoryCount <= 1) {
+    return undefined
+  }
   const spacePerLabel = axisLength / categoryCount
-  if (spacePerLabel >= minSpace) return undefined
+  if (spacePerLabel >= minSpace) {
+    return undefined
+  }
   // How many labels fit comfortably
   const fitCount = Math.max(1, Math.floor(axisLength / minSpace))
   // interval = skip every N labels so that only fitCount labels are shown
@@ -152,10 +155,14 @@ export function computeCategoryAxisLayout(
   axisLength: number | undefined,
   edgeAligned: boolean
 ): CategoryAxisLayout | undefined {
-  if (!axisLength || axisLength <= 0 || categoryCount <= 1) return undefined
+  if (!axisLength || axisLength <= 0 || categoryCount <= 1) {
+    return undefined
+  }
 
   const maxWidthForCount = (count: number): number => {
-    if (count <= 1) return Math.floor(axisLength)
+    if (count <= 1) {
+      return Math.floor(axisLength)
+    }
     if (edgeAligned) {
       // step between adjacent ticks; first/last label anchored to chart edge
       const step = axisLength / (count - 1)
@@ -382,7 +389,9 @@ export function buildLegend({
   data,
   theme,
 }: LegendOptions): echarts.EChartsOption["legend"] {
-  if (!show) return undefined
+  if (!show) {
+    return undefined
+  }
 
   return {
     type: "scroll",
@@ -667,7 +676,9 @@ export function buildTooltip({
     formatter:
       customFormatter ??
       ((params: unknown) => {
-        if (!Array.isArray(params)) return ""
+        if (!Array.isArray(params)) {
+          return ""
+        }
 
         const filtered = filterSeries
           ? params.filter(
@@ -676,7 +687,9 @@ export function buildTooltip({
             )
           : params
 
-        if (filtered.length === 0) return ""
+        if (filtered.length === 0) {
+          return ""
+        }
 
         const header = `<div style="margin-bottom: 4px; font-weight: 500">${escapeTooltipText(filtered[0].axisValueLabel ?? filtered[0].name ?? "")}</div>`
         const items = filtered

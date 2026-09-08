@@ -1,9 +1,7 @@
 import { createRef, forwardRef, type SVGProps } from "react"
 import { describe, expect, it } from "vitest"
-
 import { zeroRender as render, screen } from "@/testing/test-utils"
-
-import { F0Icon, type IconType } from "../index"
+import { F0Icon, type IconType } from ".."
 
 interface TestIconProps extends SVGProps<SVGSVGElement> {
   animate?: "normal" | "animate"

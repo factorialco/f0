@@ -1,12 +1,10 @@
 import { forwardRef } from "react"
-
 import { F0Button } from "@/components/F0Button"
-import { OneEllipsis } from "@/lib/OneEllipsis"
 import { F0RichTextDisplay } from "@/components/RichText/F0RichTextDisplay"
 import { Cross } from "@/icons/app"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
-
 import { AiBannerInternalProps, AiBannerSkeletonProps } from "./types"
 
 export const AiBannerInternal = forwardRef<
@@ -24,7 +22,7 @@ export const AiBannerInternal = forwardRef<
     >
       <div className="flex flex-row items-center justify-between px-4 py-2">
         <OneEllipsis className="font-medium">{title}</OneEllipsis>
-        {onClose && (
+        {onClose ? (
           <F0Button
             variant="ghost"
             icon={Cross}
@@ -33,7 +31,7 @@ export const AiBannerInternal = forwardRef<
             onClick={onClose}
             label="Close"
           />
-        )}
+        ) : null}
       </div>
 
       <div className="flex flex-col gap-[1px]">
@@ -47,30 +45,30 @@ export const AiBannerInternal = forwardRef<
         >
           <F0RichTextDisplay content={content} />
         </div>
-        {(secondaryAction || primaryAction) && (
+        {secondaryAction || primaryAction ? (
           <div className="flex flex-row items-center justify-between gap-3 rounded-b-[13.25px] bg-f1-background px-4 py-3">
             <div>
-              {secondaryAction && (
+              {secondaryAction ? (
                 <F0Button
                   label={secondaryAction.label}
                   onClick={secondaryAction.onClick}
                   variant="outline"
                   icon={secondaryAction.icon}
                 />
-              )}
+              ) : null}
             </div>
             <div>
-              {primaryAction && (
+              {primaryAction ? (
                 <F0Button
                   label={primaryAction.label}
                   onClick={primaryAction.onClick}
                   variant="outline"
                   icon={primaryAction.icon}
                 />
-              )}
+              ) : null}
             </div>
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   )
@@ -100,12 +98,12 @@ export const AiBannerSkeleton = ({ compact }: AiBannerSkeletonProps) => {
             <Skeleton className="h-4 w-1/2 rounded-md" />
           </div>
         </div>
-        {!compact && (
+        {!compact ? (
           <div className="flex flex-row items-center justify-between gap-3 rounded-b-[13.25px] bg-f1-background px-4 py-3">
             <Skeleton className="h-8 w-24 rounded-md" />
             <Skeleton className="h-8 w-28 rounded-md" />
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   )

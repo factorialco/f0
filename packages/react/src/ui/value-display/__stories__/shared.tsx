@@ -1,9 +1,9 @@
 import { NewColor } from "@/components/tags/F0TagDot"
+import { useI18n } from "@/lib/providers/i18n"
 import {
   PropertyDefinition,
   renderProperty,
 } from "@/patterns/OneDataCollection/property-render"
-import { useI18n } from "@/lib/providers/i18n"
 
 export const mockItem = {
   id: "1",

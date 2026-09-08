@@ -1,5 +1,4 @@
 import { useCallback, useRef } from "react"
-
 import { useChatComposeActions } from "../providers/ChatUIProvider"
 import { useF0Chat } from "../providers/F0ChatProvider"
 import {
@@ -32,8 +31,12 @@ export const findShortcutEditTarget = (
 ): F0ChatMessage | null => {
   for (let i = messages.length - 1; i >= 0; i--) {
     const item = messages[i]
-    if (!isUserMessage(item) || !item.isMine) continue
-    if (item.body.trim() === "") return null
+    if (!isUserMessage(item) || !item.isMine) {
+      continue
+    }
+    if (item.body.trim() === "") {
+      return null
+    }
     return canEditChatMessage(item, policy) ? item : null
   }
   return null
@@ -53,10 +56,14 @@ export const useEditLastOwnMessage = (): (() => boolean) => {
   )
 
   return useCallback(() => {
-    if (!editMessage) return false
+    if (!editMessage) {
+      return false
+    }
     // The loaded messages do not always end at the newest one: after jumping to
     // a search result the last one can be months old.
-    if (hasMoreNewer === true) return false
+    if (hasMoreNewer === true) {
+      return false
+    }
 
     const policy: EditPolicy = {
       hasEditMessage: true,

@@ -1,13 +1,11 @@
+import "./styles.css"
 import { AnimatePresence, motion } from "motion/react"
-
 import { F0Icon } from "@/components/F0Icon"
 import OutlineCircle from "@/icons/animated/CheckCircleLine"
 import DottedCircle from "@/icons/app/DottedCircle"
 import { useReducedMotion } from "@/lib/a11y"
 import { cn } from "@/lib/utils"
-
 import { ChatSpinner } from "./components/ChatSpinner"
-import "./styles.css"
 import { F0ActionItemProps } from "./types"
 
 const ICON_MOTION = {
@@ -32,7 +30,7 @@ export const F0ActionItem = ({ title, status, inGroup }: F0ActionItemProps) => {
     <div className="flex w-full items-start gap-1 text-f1-foreground-secondary">
       <div className="flex h-5 w-6 shrink-0 items-center justify-start">
         <AnimatePresence mode="wait">
-          {inProgress && (
+          {inProgress ? (
             <motion.div
               key="inProgress"
               className="flex h-5 w-5 shrink-0 items-center justify-center"
@@ -45,13 +43,13 @@ export const F0ActionItem = ({ title, status, inGroup }: F0ActionItemProps) => {
                 icon={DottedCircle}
               />
             </motion.div>
-          )}
-          {(executing || writing) && (
+          ) : null}
+          {executing || writing ? (
             <div className="flex h-5 w-5 shrink-0 items-center justify-center">
               <ChatSpinner variant={executing ? "default" : "continuous"} />
             </div>
-          )}
-          {completed && (
+          ) : null}
+          {completed ? (
             <motion.div
               key="completed"
               {...ICON_MOTION}
@@ -65,10 +63,10 @@ export const F0ActionItem = ({ title, status, inGroup }: F0ActionItemProps) => {
                 icon={OutlineCircle}
               />
             </motion.div>
-          )}
+          ) : null}
         </AnimatePresence>
       </div>
-      {title && (
+      {title ? (
         <p
           className={cn(
             "text-pretty leading-5",
@@ -77,7 +75,7 @@ export const F0ActionItem = ({ title, status, inGroup }: F0ActionItemProps) => {
         >
           {title}
         </p>
-      )}
+      ) : null}
     </div>
   )
 }

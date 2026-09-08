@@ -1,10 +1,8 @@
 import { waitFor } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-
 import { Add, Pencil } from "@/icons/app"
 import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
-
-import { Dropdown } from "../index"
+import { Dropdown } from ".."
 
 const items = [
   { label: "Create", onClick: vi.fn(), icon: Add },

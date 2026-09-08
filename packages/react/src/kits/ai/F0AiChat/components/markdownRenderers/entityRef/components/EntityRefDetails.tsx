@@ -18,9 +18,9 @@ export function EntityRefDetails({ rows }: EntityRefDetailsProps) {
     <div className="flex flex-col gap-2">
       {rows.map((row, index) => (
         <div key={row.label ?? index} className="flex flex-col">
-          {row.label && (
+          {row.label ? (
             <p className="text-f1-foreground-secondary">{row.label}</p>
-          )}
+          ) : null}
           <div className="flex items-center gap-1.5 font-medium text-f1-foreground">
             {row.value}
           </div>

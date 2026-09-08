@@ -1,5 +1,4 @@
 import { withDataTestId } from "@/lib/data-testid"
-
 import { F0TagStatus as _F0TagStatus } from "./F0TagStatus"
 
 export type {

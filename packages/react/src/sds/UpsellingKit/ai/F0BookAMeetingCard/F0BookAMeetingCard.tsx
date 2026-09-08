@@ -1,10 +1,9 @@
 import { F0Button } from "@/components/F0Button"
-import { useI18n } from "@/lib/providers/i18n"
-import { Card, CardContent, CardFooter } from "@/ui/Card"
-
-import { F0BookAMeetingCardProps } from "./types"
 import { F0Icon } from "@/components/F0Icon"
 import { Calendar } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
+import { Card, CardContent, CardFooter } from "@/ui/Card"
+import { F0BookAMeetingCardProps } from "./types"
 
 export const F0BookAMeetingCard = ({
   onAction,

@@ -14,7 +14,7 @@ const ALL_FEATURES_TOKENS = ["*", "all"]
 export const getFeatures = (
   features: DataCollectionStorageFeaturesDefinition | undefined
 ) => {
-  const res: Set<DataCollectionStorageFeature> = new Set()
+  const res = new Set<DataCollectionStorageFeature>()
   if (!features) {
     return []
   }

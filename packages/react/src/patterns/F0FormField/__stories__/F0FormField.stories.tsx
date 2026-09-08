@@ -1,16 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { useCallback, useRef, useState } from "react"
-
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import type {
   F0Field,
   FileUploadHookReturn,
   FileUploadResult,
   FileUploadStatus,
 } from "@/patterns/F0Form/fields/types"
-
-import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
 import { F0FormField } from "../F0FormField"
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
@@ -26,13 +22,17 @@ function useMockUpload(): FileUploadHookReturn {
     setProgress(0)
 
     await sleep(500)
-    if (abortRef.current) return { type: "aborted" }
+    if (abortRef.current) {
+      return { type: "aborted" }
+    }
 
     setStatus("uploading")
 
     for (let i = 1; i <= 10; i++) {
       await sleep(200)
-      if (abortRef.current) return { type: "aborted" }
+      if (abortRef.current) {
+        return { type: "aborted" }
+      }
       setProgress(i / 10)
     }
 

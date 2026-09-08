@@ -1,7 +1,6 @@
 import { F0Button } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
 import { experimentalComponent } from "@/lib/experimental"
-
 import { Picker } from "./Picker"
 import { Reaction, ReactionProps } from "./reaction"
 
@@ -19,7 +18,7 @@ export interface ReactionsProps {
 function _Reactions({ items, onInteraction, locale, action }: ReactionsProps) {
   return (
     <div className="flex flex-wrap gap-2">
-      {action && (
+      {action ? (
         <F0Button
           label={action.label}
           icon={action.icon}
@@ -27,7 +26,7 @@ function _Reactions({ items, onInteraction, locale, action }: ReactionsProps) {
           variant="outline"
           hideLabel
         />
-      )}
+      ) : null}
       <Picker onSelect={onInteraction} locale={locale} />
       {items.map((item) => (
         <Reaction

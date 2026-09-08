@@ -71,11 +71,11 @@ function PageNavigationLink({
 export function PageNavigation({ previous, next, counter }: NavigationProps) {
   return (
     <div className="flex items-center gap-3">
-      {counter && (
+      {counter ? (
         <span className="text-sm text-f1-foreground-secondary">
           {counter.current}/{counter.total}
         </span>
-      )}
+      ) : null}
       <div className="flex items-center gap-2">
         <PageNavigationLink
           icon={ChevronLeft}

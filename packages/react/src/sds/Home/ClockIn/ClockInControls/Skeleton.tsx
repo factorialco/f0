@@ -1,6 +1,5 @@
 import { Skeleton } from "@/ui/skeleton"
-
-import type { ClockInControlsVariant } from "./index"
+import type { ClockInControlsVariant } from "."
 
 type ClockInControlsSkeletonProps = {
   variant?: ClockInControlsVariant
@@ -41,7 +40,9 @@ export function ClockInControlsSkeleton({
           <Skeleton className="h-7 w-28" />
           <Skeleton className="h-7 w-12" />
         </div>
-        {canSeeGraph && <Skeleton className="h-1.5 w-full rounded-full" />}
+        {canSeeGraph ? (
+          <Skeleton className="h-1.5 w-full rounded-full" />
+        ) : null}
         <div className="flex flex-row justify-between gap-2">
           <Skeleton className="h-5 w-12" />
           <Skeleton className="h-5 w-24" />
@@ -54,9 +55,9 @@ export function ClockInControlsSkeleton({
             <Skeleton className="h-8 w-full rounded-md" />
           ) : null}
           <div className="flex flex-row items-center gap-2">
-            {(canShowLocation || canShowProject) && (
+            {canShowLocation || canShowProject ? (
               <Skeleton className="h-8 min-w-0 flex-1 rounded-md" />
-            )}
+            ) : null}
             <Skeleton className="ml-auto h-8 w-24 shrink-0 rounded-md" />
           </div>
         </div>
@@ -82,12 +83,14 @@ export function ClockInControlsSkeleton({
               <Skeleton className="h-8 w-28 rounded-md" />
             </div>
           </div>
-          {canSeeGraph && (
+          {canSeeGraph ? (
             <Skeleton className="h-40 w-40 shrink-0 rounded-full" />
-          )}
+          ) : null}
         </div>
         <div className="mt-6 flex flex-row justify-center @xs:justify-start">
-          {canShowLocation && <Skeleton className="h-6 w-32 rounded-md" />}
+          {canShowLocation ? (
+            <Skeleton className="h-6 w-32 rounded-md" />
+          ) : null}
         </div>
       </div>
     </div>

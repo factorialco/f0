@@ -1,10 +1,9 @@
+import { F0Icon } from "@/components/F0Icon"
+import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
+import { Question } from "@/icons/app"
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
-
-import { F0Icon } from "@/components/F0Icon"
-import { Question } from "@/icons/app"
 import { cn, focusRing } from "@/lib/utils"
-import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
 
 interface Option {
   title?: string
@@ -51,9 +50,9 @@ function _OmniButton({ label, options, hasNewUpdate }: OmniButtonProps) {
           aria-label={label}
         >
           <F0Icon icon={Question} size="sm" />
-          {hasNewUpdate && (
+          {hasNewUpdate ? (
             <div className="absolute right-0.5 top-0.5 h-1.5 w-1.5 rounded-full bg-f1-background-critical-bold ring-2 ring-f1-background-critical" />
-          )}
+          ) : null}
         </button>
       </Dropdown>
     </div>

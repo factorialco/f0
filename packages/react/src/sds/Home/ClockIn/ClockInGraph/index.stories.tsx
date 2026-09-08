@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
-import { ClockInGraph } from "./index"
+import { ClockInGraph } from "."
 
 const meta: Meta<typeof ClockInGraph> = {
   title: "Home/ClockInGraph",

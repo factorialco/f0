@@ -1,11 +1,9 @@
 import { f1Colors } from "@factorialco/f0-core"
-
 import { CalendarEvent } from "@/experimental/Widgets/Content/CalendarEvent"
 import { formatTime } from "@/lib/date"
 import { useDateFnsLocale } from "@/lib/providers/l10n"
 import { withSkeleton } from "@/lib/skeleton"
 import { Skeleton } from "@/ui/skeleton"
-
 import { isVideo } from "../CommunityPost/video"
 
 export type PostEventProps = {
@@ -35,7 +33,7 @@ export const BasePostEvent = ({
 
   return (
     <div className="flex w-full flex-col gap-1 rounded-xl border border-solid border-f1-border-secondary bg-f1-background-inverse-secondary p-1 shadow dark:bg-f1-background-tertiary">
-      {mediaUrl && (
+      {mediaUrl ? (
         <div className="relative aspect-video w-full overflow-hidden rounded-md">
           {isVideo(mediaUrl) ? (
             <video
@@ -57,7 +55,7 @@ export const BasePostEvent = ({
             </>
           )}
         </div>
-      )}
+      ) : null}
       <CalendarEvent
         title={title}
         description={description}

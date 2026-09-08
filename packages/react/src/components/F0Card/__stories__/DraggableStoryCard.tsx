@@ -4,7 +4,6 @@ import {
 } from "@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge"
 import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter"
 import { useEffect, useRef, useState } from "react"
-
 import { DraggableF0Card } from "./DraggableF0Card"
 
 export function DraggableStoryCard({
@@ -22,7 +21,9 @@ export function DraggableStoryCard({
   const [overEdge, setOverEdge] = useState<"top" | "bottom" | null>(null)
 
   useEffect(() => {
-    if (!ref.current) return
+    if (!ref.current) {
+      return
+    }
     return dropTargetForElements({
       element: ref.current,
       getData: ({ input, element }) =>
@@ -57,17 +58,17 @@ export function DraggableStoryCard({
 
   return (
     <div ref={ref} className="relative w-full py-2">
-      {overEdge === "top" && (
+      {overEdge === "top" ? (
         <div className="absolute inset-x-0 top-0 z-10 mt-[-2px] h-[4px] bg-f1-border-hover" />
-      )}
+      ) : null}
       <DraggableF0Card
         title={title}
         description={description}
         drag={{ id, type: "list-card" }}
       />
-      {overEdge === "bottom" && (
+      {overEdge === "bottom" ? (
         <div className="absolute inset-x-0 bottom-0 z-10 mb-[-2px] h-[4px] bg-f1-border-hover" />
-      )}
+      ) : null}
     </div>
   )
 }

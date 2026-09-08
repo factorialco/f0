@@ -6,7 +6,6 @@ import {
   useMemo,
   useState,
 } from "react"
-
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import {
   modules,
@@ -15,11 +14,10 @@ import {
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { F0SearchInput } from "@/components/F0SearchInput"
 import { ArrowLeft, Star } from "@/icons/app"
-import { cn } from "@/lib/utils"
 import { useI18n } from "@/lib/providers/i18n"
+import { cn } from "@/lib/utils"
 import { F0Dialog } from "@/patterns/F0Dialog"
 import { F0Form, useF0Form } from "@/patterns/F0Form"
-
 import {
   resolveWidgetHeader,
   widgetChrome,
@@ -201,7 +199,9 @@ const CatalogPreview = ({
   params?: WidgetParams
   slotRenderers?: SlotRenderers
 }) => {
-  if (!isWidgetItem(preview)) return <>{preview}</>
+  if (!isWidgetItem(preview)) {
+    return <>{preview}</>
+  }
   return (
     <SlotWidget
       {...widgetChrome(preview)}
@@ -354,12 +354,12 @@ export function WidgetCatalog({
       // No heading: these belong to nothing in particular, and inventing "Other"
       // for them would claim they do.
       ...(loose.length ? [{ id: "ungrouped", items: loose }] : []),
-    ] as Array<{
+    ] as {
       id: string
       label?: string
       icon?: IconType
       items: WidgetCatalogItem[]
-    }>
+    }[]
   }, [widgets, groups, needle, area, t])
 
   // Selection follows the ORDER THE LIST IS IN, so "the first one" is the first
@@ -396,7 +396,9 @@ export function WidgetCatalog({
   }, [isOpen])
 
   useEffect(() => {
-    if (step === "configure" && !needsStep) setStep("pick")
+    if (step === "configure" && !needsStep) {
+      setStep("pick")
+    }
   }, [step, needsStep])
 
   return (
@@ -417,7 +419,9 @@ export function WidgetCatalog({
           ? {
               label: "Add widget",
               onClick: async () => {
-                if (!(await trigger())) return
+                if (!(await trigger())) {
+                  return
+                }
                 onAdd(selected.id, getValues())
               },
             }
@@ -425,10 +429,16 @@ export function WidgetCatalog({
               label: needsStep ? t.wizard.next : "Add widget",
               disabled: !selected,
               onClick: () => {
-                if (!selected) return
-                if (needsStep) goToStep("configure")
-                else if (schema) onAdd(selected.id, params)
-                else onAdd(selected.id)
+                if (!selected) {
+                  return
+                }
+                if (needsStep) {
+                  goToStep("configure")
+                } else if (schema) {
+                  onAdd(selected.id, params)
+                } else {
+                  onAdd(selected.id)
+                }
               },
             }
       }

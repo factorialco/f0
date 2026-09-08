@@ -1,16 +1,13 @@
 import { AnimatePresence, motion } from "motion/react"
 import React from "react"
-
-import type { RecordType } from "@/hooks/datasource"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Card } from "@/components/F0Card"
 import { ScrollArea } from "@/experimental/Utilities/ScrollArea"
+import type { RecordType } from "@/hooks/datasource"
 import { Plus } from "@/icons/app"
 import { cn } from "@/lib/utils"
 import { useInfiniteScrollPagination } from "@/patterns/OneDataCollection/hooks/useInfiniteScrollPagination"
 import { Spinner } from "@/ui/Spinner"
-
 import { LaneHeader } from "./components/LaneHeader"
 import { LoadingSkeleton } from "./components/LoadingSkeleton"
 import { LaneProps } from "./types"
@@ -117,12 +114,12 @@ export function Lane<Record extends RecordType>({
                     )
                   })
                 )}
-                {(loadingMore || hasMore) && (
+                {loadingMore || hasMore ? (
                   <LoadingSkeleton ref={loadingIndicatorRef} />
-                )}
+                ) : null}
               </div>
             </ScrollArea>
-            {loadingMore && (
+            {loadingMore ? (
               <AnimatePresence>
                 <motion.div
                   className="absolute inset-0 m-auto flex w-10 cursor-progress items-center justify-center"
@@ -133,11 +130,11 @@ export function Lane<Record extends RecordType>({
                   <Spinner />
                 </motion.div>
               </AnimatePresence>
-            )}
+            ) : null}
           </>
         )}
       </div>
-      {showFooterAction && (
+      {showFooterAction ? (
         <div className="pointer-events-none absolute inset-x-1 bottom-1.5 z-20 opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100">
           <ButtonInternal
             variant="ghost"
@@ -149,7 +146,7 @@ export function Lane<Record extends RecordType>({
             onClick={onFooterAction}
           />
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

@@ -34,11 +34,15 @@ export const subscribeToScroll = (
   callback: () => void
 ): (() => void) | undefined => {
   const scrollContainer = findScrollContainer(element)
-  if (!scrollContainer) return undefined
+  if (!scrollContainer) {
+    return undefined
+  }
 
   let rafId: number | undefined
   const onScroll = () => {
-    if (rafId !== undefined) cancelAnimationFrame(rafId)
+    if (rafId !== undefined) {
+      cancelAnimationFrame(rafId)
+    }
     rafId = requestAnimationFrame(callback)
   }
 
@@ -46,6 +50,8 @@ export const subscribeToScroll = (
 
   return () => {
     scrollContainer.removeEventListener("scroll", onScroll)
-    if (rafId !== undefined) cancelAnimationFrame(rafId)
+    if (rafId !== undefined) {
+      cancelAnimationFrame(rafId)
+    }
   }
 }

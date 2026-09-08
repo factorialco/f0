@@ -1,12 +1,10 @@
 import { Observable } from "zen-observable-ts"
-
 import {
   isObservableLike,
   isPromiseLike,
   PromiseState,
 } from "@/lib/promise-to-observable"
 import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
-
 import {
   DataAdapter,
   InfiniteScrollPaginatedResponse,
@@ -20,7 +18,9 @@ import { getDataSourcePaginationType } from "./useDataSource"
 const pagesResponseToInfiniteScroll = <R>(
   response: PaginatedResponse<R>
 ): InfiniteScrollPaginatedResponse<R> => {
-  if (response.type === "infinite-scroll") return response
+  if (response.type === "infinite-scroll") {
+    return response
+  }
   return {
     type: "infinite-scroll",
     records: response.records,
@@ -74,7 +74,9 @@ export const adaptDataAdapterToInfiniteScroll = <
 >(
   dataAdapter: DataAdapter<R, Filters>
 ): DataAdapter<R, Filters> => {
-  if (getDataSourcePaginationType(dataAdapter) !== "pages") return dataAdapter
+  if (getDataSourcePaginationType(dataAdapter) !== "pages") {
+    return dataAdapter
+  }
 
   const paginated = dataAdapter as PaginatedDataAdapter<R, Filters>
 

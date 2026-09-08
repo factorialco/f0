@@ -4,7 +4,6 @@ import {
   ReactNodeViewRenderer,
   type NodeViewProps,
 } from "@tiptap/react"
-
 import { F0Button } from "@/components/F0Button"
 import { Delete } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
@@ -88,7 +87,7 @@ const VideoEmbedNodeView = ({
             allowFullScreen
           />
         </div>
-        {isEditable && (
+        {isEditable ? (
           <div className="dark absolute right-2 top-2">
             <F0Button
               onClick={deleteNode}
@@ -99,7 +98,7 @@ const VideoEmbedNodeView = ({
               size="sm"
             />
           </div>
-        )}
+        ) : null}
       </div>
     </NodeViewWrapper>
   )
@@ -163,7 +162,9 @@ export const VideoEmbedExtension = Node.create({
         ({ src }) =>
         ({ commands }) => {
           const info = parseVideoUrl(src)
-          if (!info) return false
+          if (!info) {
+            return false
+          }
 
           return commands.insertContent({
             type: this.name,
@@ -184,7 +185,9 @@ export const VideoEmbedExtension = Node.create({
         type: this.type,
         getAttributes: (match) => {
           const info = parseVideoUrl(match[0])
-          if (!info) return false
+          if (!info) {
+            return false
+          }
           return {
             src: info.embedUrl,
             provider: info.provider,
@@ -197,7 +200,9 @@ export const VideoEmbedExtension = Node.create({
         type: this.type,
         getAttributes: (match) => {
           const info = parseVideoUrl(match[0])
-          if (!info) return false
+          if (!info) {
+            return false
+          }
           return {
             src: info.embedUrl,
             provider: info.provider,

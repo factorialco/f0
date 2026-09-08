@@ -1,33 +1,30 @@
 import React, { useEffect, useMemo, useRef } from "react"
 import { useFormContext } from "react-hook-form"
 import { ZodTypeAny } from "zod"
-
-import { F0Alert } from "@/components/F0Alert"
 import {
   CardSelectableContainer,
   type CardSelectableItem,
 } from "@/components/CardSelectable"
+import { F0Alert } from "@/components/F0Alert"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import {
   FormField as FormFieldPrimitive,
   FormItem,
   FormMessage,
 } from "@/ui/form"
-
-import type { F0FieldAlertProps } from "../f0Schema"
-import type { F0SwitchField } from "../fields/switch/types"
-import type { F0Field } from "../fields/types"
-import type { RowDefinition } from "../types"
-
 import { generateAnchorId, useF0FormContext } from "../context"
+import type { F0FieldAlertProps } from "../f0Schema"
 import { isZodType, unwrapZodSchema } from "../f0Schema"
 import { CardSelectDepsContext } from "../fields/cardSelect/CardSelectDepsContext"
 import { FieldRenderer } from "../fields/FieldRenderer"
+import type { F0SwitchField } from "../fields/switch/types"
+import type { F0Field } from "../fields/types"
 import {
   evaluateDisabled,
   evaluateRenderIf,
   resolveFieldAlert,
 } from "../fields/utils"
+import type { RowDefinition } from "../types"
 import { RowRenderer } from "./RowRenderer"
 
 /**
@@ -283,7 +280,7 @@ export function SwitchGroupRenderer({
           <F0Alert key={fieldId} {...props} variant={props.variant ?? "info"} />
         ))}
       </div>
-      {groupErrors.length > 0 && (
+      {groupErrors.length > 0 ? (
         <div className="flex flex-col gap-1">
           {groupErrors.map((error) => (
             <FormFieldPrimitive
@@ -298,7 +295,7 @@ export function SwitchGroupRenderer({
             />
           ))}
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

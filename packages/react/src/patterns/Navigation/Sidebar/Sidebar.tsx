@@ -1,14 +1,12 @@
 import { AnimatePresence, motion } from "motion/react"
 import { ReactElement, ReactNode, cloneElement, isValidElement } from "react"
 import { useIntersectionObserver } from "usehooks-ts"
-
 import { withDataTestId } from "@/lib/data-testid"
+import { useSidebar } from "@/patterns/ApplicationFrame/FrameProvider"
 import { ScrollArea } from "@/ui/scrollarea"
-
 import { useReducedMotion } from "../../../lib/a11y"
 import { useI18n } from "../../../lib/providers/i18n"
 import { cn } from "../../../lib/utils"
-import { useSidebar } from "@/patterns/ApplicationFrame/FrameProvider"
 import { SidebarFooter } from "./Footer"
 
 const ScrollShadow = ({ position }: { position: "top" | "bottom" }) => (
@@ -74,7 +72,9 @@ function _Sidebar({
   }
 
   const renderFooter = () => {
-    if (!footer) return null
+    if (!footer) {
+      return null
+    }
     if (isValidElement(footer) && onFooterDropdownClick) {
       return cloneElement(
         footer as ReactElement<React.ComponentProps<typeof SidebarFooter>>,
@@ -114,7 +114,7 @@ function _Sidebar({
       transition={transition}
     >
       <header className="flex-shrink-0">{header}</header>
-      {body && (
+      {body ? (
         <nav className="relative flex-grow overflow-y-hidden">
           <ScrollArea className="h-full">
             <div
@@ -133,15 +133,15 @@ function _Sidebar({
           </ScrollArea>
 
           <AnimatePresence>
-            {!isAtTop && (
+            {!isAtTop ? (
               <ScrollShadow position="top" key="shadow-scroll-top" />
-            )}
-            {!isAtBottom && (
+            ) : null}
+            {!isAtBottom ? (
               <ScrollShadow position="bottom" key="shadow-scroll-bottom" />
-            )}
+            ) : null}
           </AnimatePresence>
         </nav>
-      )}
+      ) : null}
       <footer className="flex-shrink-0">{renderFooter()}</footer>
     </motion.aside>
   )

@@ -28,10 +28,15 @@ const FORBIDDEN = "non-scaling-stroke"
 
 function collectTsx(dir: string, acc: string[] = []): string[] {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    if (entry.name === "node_modules" || entry.name === "__tests__") continue
+    if (entry.name === "node_modules" || entry.name === "__tests__") {
+      continue
+    }
     const full = path.join(dir, entry.name)
-    if (entry.isDirectory()) collectTsx(full, acc)
-    else if (entry.name.endsWith(".tsx")) acc.push(full)
+    if (entry.isDirectory()) {
+      collectTsx(full, acc)
+    } else if (entry.name.endsWith(".tsx")) {
+      acc.push(full)
+    }
   }
   return acc
 }

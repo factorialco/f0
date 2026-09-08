@@ -1,7 +1,6 @@
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import { withSkeleton } from "@/lib/skeleton"
-
 import { F0PdfViewerBase } from "./F0PdfViewer"
 import { F0PdfViewerSkeleton } from "./F0PdfViewerSkeleton"
 

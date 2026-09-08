@@ -1,12 +1,10 @@
 import { type KeyboardEvent, type ReactNode } from "react"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0SearchInput } from "@/components/F0SearchInput"
 import { ChevronDown, ChevronUp, Cross } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
-
-import { useChatSearch } from "../providers/ChatUIProvider"
 import { cn } from "@/lib/utils"
+import { useChatSearch } from "../providers/ChatUIProvider"
 
 /**
  * Inline search bar that replaces the whole header in search mode: F0SearchInput
@@ -36,8 +34,11 @@ export const ChatHeaderSearch = (): ReactNode => {
   const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "Enter") {
       e.preventDefault()
-      if (e.shiftKey) goToPrevMatch()
-      else goToNextMatch()
+      if (e.shiftKey) {
+        goToPrevMatch()
+      } else {
+        goToNextMatch()
+      }
     } else if (e.key === "Escape") {
       e.preventDefault()
       closeSearch()

@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react"
-
 import { F0Icon } from "@/components/F0Icon"
 import {
   DropdownInternal,
@@ -11,7 +10,6 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils.ts"
 import { Action } from "@/ui/Action/index.tsx"
 import { actionVariants, buttonSizeVariants } from "@/ui/Action/variants.ts"
-
 import {
   ButtonDropdownGroup,
   ButtonDropdownItem,
@@ -77,12 +75,9 @@ const SplitMode = ({
   loading,
   tooltip,
 }: {
-  onClick: (value: string, item: ButtonDropdownItem<string>) => void
+  onClick: (value: string, item: ButtonDropdownItem) => void
   value?: string
-  items:
-    | ButtonDropdownItem<string>[]
-    | ButtonDropdownGroup<string>[]
-    | ButtonDropdownGroup<string>
+  items: ButtonDropdownItem[] | ButtonDropdownGroup[] | ButtonDropdownGroup
   size?: ButtonDropdownSize
   variant?: ButtonDropdownVariant
   disabled?: boolean
@@ -92,7 +87,7 @@ const SplitMode = ({
   const t = useI18n()
   const [isOpen, setIsOpen] = useState(false)
 
-  const items: ButtonDropdownGroup<string>[] = useMemo(
+  const items: ButtonDropdownGroup[] = useMemo(
     () => normalizeItems(rawItems),
     [rawItems]
   )
@@ -171,7 +166,9 @@ const SplitMode = ({
               align="end"
               open={isOpen && !disabled}
               onOpenChange={(open) => {
-                if (disabled) return
+                if (disabled) {
+                  return
+                }
                 setIsOpen(open)
               }}
             >
@@ -224,13 +221,10 @@ const DropdownMode = ({
   loading,
   tooltip,
 }: {
-  onClick: (value: string, item: ButtonDropdownItem<string>) => void
+  onClick: (value: string, item: ButtonDropdownItem) => void
   trigger?: string
   value?: string
-  items:
-    | ButtonDropdownItem<string>[]
-    | ButtonDropdownGroup<string>[]
-    | ButtonDropdownGroup<string>
+  items: ButtonDropdownItem[] | ButtonDropdownGroup[] | ButtonDropdownGroup
   size?: ButtonDropdownSize
   variant?: ButtonDropdownVariant
   disabled?: boolean
@@ -239,7 +233,7 @@ const DropdownMode = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false)
 
-  const items: ButtonDropdownGroup<string>[] = useMemo(
+  const items: ButtonDropdownGroup[] = useMemo(
     () => normalizeItems(rawItems),
     [rawItems]
   )
@@ -291,7 +285,9 @@ const DropdownMode = ({
     [items, onClick]
   )
 
-  if (!triggerLabel) return null
+  if (!triggerLabel) {
+    return null
+  }
 
   return (
     <DropdownInternal
@@ -299,7 +295,9 @@ const DropdownMode = ({
       align="end"
       open={isOpen && !disabled}
       onOpenChange={(open) => {
-        if (disabled) return
+        if (disabled) {
+          return
+        }
         setIsOpen(open)
       }}
     >

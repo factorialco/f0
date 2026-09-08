@@ -1,5 +1,54 @@
 # Changelog
 
+## [6.88.3](https://github.com/factorialco/f0/compare/f0-react-v6.88.2...f0-react-v6.88.3) (2026-09-08)
+
+
+### Bug Fixes
+
+* **Widget:** draw both footer actions when given two ([#5436](https://github.com/factorialco/f0/issues/5436)) ([8f7bb56](https://github.com/factorialco/f0/commit/8f7bb56615ae428c1e052019d27c2e3eb2e809c9))
+
+## [6.88.2](https://github.com/factorialco/f0/compare/f0-react-v6.88.1...f0-react-v6.88.2) (2026-09-08)
+
+
+### Performance Improvements
+
+* **OneDataCollection:** give rows the definition instead of the live source ([#5411](https://github.com/factorialco/f0/issues/5411)) ([d4cc5bf](https://github.com/factorialco/f0/commit/d4cc5bfe3d35a766e39b9042ada5bffdfea2ebd3))
+
+## [6.88.1](https://github.com/factorialco/f0/compare/f0-react-v6.88.0...f0-react-v6.88.1) (2026-09-07)
+
+
+### Performance Improvements
+
+* **OneDataCollection:** stop a page append re-rendering every row already on screen ([#5378](https://github.com/factorialco/f0/issues/5378)) ([bae8238](https://github.com/factorialco/f0/commit/bae8238f65d3106ebfebabfe7d7a054dabdb1f51))
+
+## [6.88.0](https://github.com/factorialco/f0/compare/f0-react-v6.87.1...f0-react-v6.88.0) (2026-09-07)
+
+
+### Features
+
+* **SurveyFormBuilder:** freeze a question's wording without locking the question ([#5407](https://github.com/factorialco/f0/issues/5407)) ([00aaaa0](https://github.com/factorialco/f0/commit/00aaaa00359b18b0bb492815cf26100d7163a1f8))
+
+## [6.87.1](https://github.com/factorialco/f0/compare/f0-react-v6.87.0...f0-react-v6.87.1) (2026-09-07)
+
+
+### Bug Fixes
+
+* **Widget:** no separator dot when the title is a link ([#5416](https://github.com/factorialco/f0/issues/5416)) ([daf797f](https://github.com/factorialco/f0/commit/daf797fe2a74d017db92fd3f88c13b2d6261fd9f))
+
+## [6.87.0](https://github.com/factorialco/f0/compare/f0-react-v6.86.5...f0-react-v6.87.0) (2026-09-07)
+
+
+### Features
+
+* **F0AiChatTextArea:** neutral credit warning with CTA icon ([#5268](https://github.com/factorialco/f0/issues/5268)) ([ae44231](https://github.com/factorialco/f0/commit/ae44231bb44992c4d5b2bef0be8520a3d6b8fdce))
+
+## [6.86.5](https://github.com/factorialco/f0/compare/f0-react-v6.86.4...f0-react-v6.86.5) (2026-09-07)
+
+
+### Bug Fixes
+
+* **F0Chat:** keep a mention through an edit ([#5404](https://github.com/factorialco/f0/issues/5404)) ([522fd6e](https://github.com/factorialco/f0/commit/522fd6ef2615f5656c1d0a359492a82d2c0f74d7))
+
 ## [6.86.4](https://github.com/factorialco/f0/compare/f0-react-v6.86.3...f0-react-v6.86.4) (2026-09-07)
 
 

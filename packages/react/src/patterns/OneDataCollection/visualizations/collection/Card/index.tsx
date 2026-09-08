@@ -1,7 +1,4 @@
 import { useEffect, useMemo } from "react"
-
-import type { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
-
 import {
   F0Card,
   type CardImageAspectRatio,
@@ -21,10 +18,10 @@ import { cn } from "@/lib/utils"
 import { useDataCollectionData } from "@/patterns/OneDataCollection/hooks/useDataCollectionData"
 import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
 import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
+import type { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/Card"
 import { GroupHeader } from "@/ui/GroupHeader/GroupHeader"
 import { Skeleton } from "@/ui/skeleton"
-
 import { PagesPagination } from "../../../components/PagesPagination"
 import { ItemActionsDefinition } from "../../../item-actions"
 import { PropertyDefinition } from "../../../property-render"
@@ -40,7 +37,7 @@ export type CardVisualizationOptions<
   _Filters extends FiltersDefinition,
   _Sortings extends SortingsDefinition,
 > = {
-  cardProperties: ReadonlyArray<CardPropertyDefinition<T>>
+  cardProperties: readonly CardPropertyDefinition<T>[]
   title: (record: T) => string
   description?: (record: T) => string
   avatar?: (record: T) => CardAvatarVariant
@@ -128,7 +125,7 @@ type GroupCardsProps<
   items: Record[]
   selectedItems: Map<number | string, Record>
   handleSelectItemChange: (item: Record, checked: boolean) => void
-  cardProperties: ReadonlyArray<CardPropertyDefinition<Record>>
+  cardProperties: readonly CardPropertyDefinition<Record>[]
   title: (record: Record) => string
   description?: (record: Record) => string
   avatar?: (record: Record) => CardAvatarVariant
@@ -176,8 +173,8 @@ const GroupCards = <
 >) => {
   function getMetadata(
     item: Record,
-    properties: ReadonlyArray<CardPropertyDefinition<Record>>
-  ): Array<CardMetadata> {
+    properties: readonly CardPropertyDefinition<Record>[]
+  ): CardMetadata[] {
     return properties
       .map((property) => {
         if (property.hide?.(item)) {
@@ -190,17 +187,20 @@ const GroupCards = <
         }
 
         const cardProperty = convertToCardMetadataProperty(result)
-        if (!cardProperty) return null
+        if (!cardProperty) {
+          return null
+        }
 
         const propertyWithLabel = {
           ...cardProperty,
           label: property.label,
         } as CardMetadataProperty
 
-        if (propertyWithLabel.type === "file")
+        if (propertyWithLabel.type === "file") {
           return {
             property: propertyWithLabel,
           }
+        }
 
         return {
           icon: property.icon ?? Placeholder,
@@ -438,54 +438,55 @@ export const CardCollection = <
           </CardGrid>
         ) : (
           <>
-            {data?.type === "grouped" &&
-              data.groups.map((group) => {
-                return (
-                  <>
-                    <GroupHeader
-                      label={group.label}
-                      itemCount={group.itemCount}
-                      onOpenChange={(open) => setGroupOpen(group.key, open)}
-                      open={openGroups[group.key]}
-                      selectable={!!source.selectable}
-                      showOpenChange={collapsible}
-                      select={
-                        groupAllSelectedStatus[group.key]?.checked
-                          ? true
-                          : groupAllSelectedStatus[group.key]?.indeterminate
-                            ? "indeterminate"
-                            : false
-                      }
-                      onSelectChange={(checked) =>
-                        handleSelectGroupChange(group, checked)
-                      }
-                      className="px-page pb-2 pt-4"
-                    />
-                    {(!collapsible || openGroups[group.key]) && (
-                      <GroupCards
-                        key={group.key}
-                        source={source}
-                        items={group.records}
-                        selectedItems={selectedItems}
-                        handleSelectItemChange={handleSelectItemChange}
-                        title={title}
-                        cardProperties={cardProperties}
-                        description={description}
-                        avatar={avatar}
-                        image={image}
-                        imageFit={imageFit}
-                        imageSize={imageSize}
-                        imageAspectRatio={imageAspectRatio}
-                        blurredBackground={blurredBackground}
-                        compact={compact}
-                        tmpFullWidth={tmpFullWidth}
+            {data?.type === "grouped"
+              ? data.groups.map((group) => {
+                  return (
+                    <>
+                      <GroupHeader
+                        label={group.label}
+                        itemCount={group.itemCount}
+                        onOpenChange={(open) => setGroupOpen(group.key, open)}
+                        open={openGroups[group.key]}
+                        selectable={!!source.selectable}
+                        showOpenChange={collapsible}
+                        select={
+                          groupAllSelectedStatus[group.key]?.checked
+                            ? true
+                            : groupAllSelectedStatus[group.key]?.indeterminate
+                              ? "indeterminate"
+                              : false
+                        }
+                        onSelectChange={(checked) =>
+                          handleSelectGroupChange(group, checked)
+                        }
+                        className="px-page pb-2 pt-4"
                       />
-                    )}
-                  </>
-                )
-              })}
+                      {!collapsible || openGroups[group.key] ? (
+                        <GroupCards
+                          key={group.key}
+                          source={source}
+                          items={group.records}
+                          selectedItems={selectedItems}
+                          handleSelectItemChange={handleSelectItemChange}
+                          title={title}
+                          cardProperties={cardProperties}
+                          description={description}
+                          avatar={avatar}
+                          image={image}
+                          imageFit={imageFit}
+                          imageSize={imageSize}
+                          imageAspectRatio={imageAspectRatio}
+                          blurredBackground={blurredBackground}
+                          compact={compact}
+                          tmpFullWidth={tmpFullWidth}
+                        />
+                      ) : null}
+                    </>
+                  )
+                })
+              : null}
 
-            {data?.type === "flat" && (
+            {data?.type === "flat" ? (
               <GroupCards
                 source={source}
                 items={data.records}
@@ -503,7 +504,7 @@ export const CardCollection = <
                 compact={compact}
                 tmpFullWidth={tmpFullWidth}
               />
-            )}
+            ) : null}
           </>
         )}
       </div>

@@ -6,12 +6,12 @@ declare module "gridstack" {
   // TypeScript will merge these with the original interface
   interface GridStackWidget {
     id?: string
-    allowedSizes?: Array<{ w: number; h: number }>
+    allowedSizes?: { w: number; h: number }[]
     meta?: Record<string, unknown>
   }
 
   // Augment GridStackNode interface - only add our custom property
   interface GridStackNode {
-    allowedSizes?: Array<{ w: number; h: number }>
+    allowedSizes?: { w: number; h: number }[]
   }
 }

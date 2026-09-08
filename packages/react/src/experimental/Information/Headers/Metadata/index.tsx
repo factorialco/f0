@@ -1,6 +1,5 @@
 import { AnimatePresence, motion } from "motion/react"
 import { Fragment, memo, useState } from "react"
-
 import {
   AvatarVariant,
   CompanyAvatarVariant,
@@ -17,7 +16,6 @@ import { InfoCircleLine } from "@/icons/app"
 import { experimentalComponent } from "@/lib/experimental"
 import { cn } from "@/lib/utils"
 import { ButtonCopy } from "@/ui/ButtonCopy"
-
 import { MetadataValue } from "./MetadataValue"
 
 type MetadataItemValue =
@@ -176,11 +174,11 @@ function MetadataItem({ item }: { item: MetadataItem }) {
 
   return (
     <div className="flex h-8 items-center gap-2">
-      {item.icon && (
+      {item.icon ? (
         <span className="flex shrink-0 items-center text-f1-foreground-secondary">
           <F0Icon icon={item.icon} size="md" />
         </span>
-      )}
+      ) : null}
       <div
         className={cn(
           "flex w-28 items-center gap-1 truncate text-f1-foreground-secondary md:w-fit",
@@ -188,7 +186,7 @@ function MetadataItem({ item }: { item: MetadataItem }) {
         )}
       >
         {item.label}
-        {item.info && (
+        {item.info ? (
           <div className="flex h-4 w-4 items-center text-f1-foreground-tertiary hover:cursor-help">
             <Tooltip
               label={item.info.title}
@@ -197,7 +195,7 @@ function MetadataItem({ item }: { item: MetadataItem }) {
               <F0Icon icon={InfoCircleLine} size="sm" />
             </Tooltip>
           </div>
-        )}
+        ) : null}
       </div>
       <div
         role="button"
@@ -217,7 +215,7 @@ function MetadataItem({ item }: { item: MetadataItem }) {
         >
           <MetadataValue item={item} collapse />
         </div>
-        {isAction && (
+        {isAction ? (
           <div className="w-full md:hidden">
             <MobileDropdown
               items={
@@ -231,9 +229,9 @@ function MetadataItem({ item }: { item: MetadataItem }) {
               <MetadataValue item={item} collapse />
             </MobileDropdown>
           </div>
-        )}
+        ) : null}
         <AnimatePresence>
-          {isActive && hasHover && (
+          {isActive && hasHover ? (
             <motion.div
               className={cn(
                 "absolute -left-1.5 -top-1.5 z-50 hidden max-h-[80vh] items-start justify-center gap-1.5 overflow-y-auto whitespace-nowrap rounded-sm bg-f1-background py-1 pl-1.5 shadow-md ring-1 ring-inset ring-f1-border-secondary md:flex",
@@ -253,7 +251,7 @@ function MetadataItem({ item }: { item: MetadataItem }) {
               >
                 <MetadataValue item={item} />
               </div>
-              {isAction && (
+              {isAction ? (
                 <motion.div
                   className="flex gap-1"
                   initial={{ x: -16 }}
@@ -289,9 +287,9 @@ function MetadataItem({ item }: { item: MetadataItem }) {
                     }
                   })}
                 </motion.div>
-              )}
+              ) : null}
             </motion.div>
-          )}
+          ) : null}
         </AnimatePresence>
       </div>
     </div>
@@ -313,9 +311,9 @@ const _Metadata = memo(function Metadata({
       {cleanedItems.map((item, index) => (
         <Fragment key={`metadata-item-${index}`}>
           <MetadataItem item={item} />
-          {index < cleanedItems.length - 1 && (
+          {index < cleanedItems.length - 1 ? (
             <div className="hidden h-4 w-[1px] bg-f1-border md:block" />
-          )}
+          ) : null}
         </Fragment>
       ))}
     </div>

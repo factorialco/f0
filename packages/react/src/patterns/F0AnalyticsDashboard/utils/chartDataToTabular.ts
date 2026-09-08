@@ -5,7 +5,6 @@ import type {
   F0DataChartPieSeries,
   F0DataChartRadarSeries,
 } from "@/kits/F0DataChart"
-
 import type {
   DashboardChartConfig,
   DashboardChartData,
@@ -30,8 +29,12 @@ interface TabularResult {
  * or an object with a `value` property (e.g. bar chart {value, target}).
  */
 function numericValue(point: unknown): number | null {
-  if (point == null) return null
-  if (typeof point === "number") return point
+  if (point == null) {
+    return null
+  }
+  if (typeof point === "number") {
+    return point
+  }
   if (typeof point === "object" && "value" in point) {
     return (point as { value: number }).value
   }
@@ -92,7 +95,9 @@ function funnelToTabular(data: DashboardChartData): TabularResult {
   if (Array.isArray(data.series)) {
     const series = data.series as F0DataChartBarSeries[]
     const firstSeries = series[0]
-    if (!firstSeries) return { columns: ["Stage", "Value"], rows: [] }
+    if (!firstSeries) {
+      return { columns: ["Stage", "Value"], rows: [] }
+    }
 
     const categories = data.categories ?? []
     const rows = categories.map((cat, i) => ({

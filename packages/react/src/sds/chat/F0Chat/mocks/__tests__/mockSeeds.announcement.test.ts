@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import { isUserMessage } from "../../types"
 import { buildSeedMessages, SEED_BY_ID, SEEDS } from "../mockSeeds"
 

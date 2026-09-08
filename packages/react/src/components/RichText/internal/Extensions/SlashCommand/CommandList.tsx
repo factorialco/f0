@@ -7,10 +7,8 @@ import {
   useRef,
   useState,
 } from "react"
-
 import { F0Icon } from "@/components/F0Icon"
 import { cn } from "@/lib/utils"
-
 import { CommandGroup, CommandItem } from "./AvailableCommands"
 
 interface CommandListHandle {
@@ -61,7 +59,9 @@ const CommandList = forwardRef<CommandListHandle, CommandListProps>(
 
     const scrollIntoView = useCallback((element: HTMLElement) => {
       const container = containerRef.current
-      if (!container) return
+      if (!container) {
+        return
+      }
 
       const containerRect = container.getBoundingClientRect()
       const elementRect = element.getBoundingClientRect()
@@ -141,13 +141,13 @@ const CommandList = forwardRef<CommandListHandle, CommandListProps>(
           <div key={groupIndex}>
             <div className="p-1">
               {/* Group title (only show if we have multiple groups and the group has a title) */}
-              {groups && group.title && (
+              {groups && group.title ? (
                 <div className="p-2">
                   <p className="text-sm font-medium tracking-wide text-f1-foreground-secondary">
                     {group.title}
                   </p>
                 </div>
-              )}
+              ) : null}
 
               {/* Group commands */}
               {group.commands.map((item, commandIndex) => {
@@ -184,11 +184,11 @@ const CommandList = forwardRef<CommandListHandle, CommandListProps>(
               })}
             </div>
             {/* Divider between groups (only show if not the last group and we have multiple groups) */}
-            {groups && groupIndex < commandsToRender.length - 1 && (
+            {groups && groupIndex < commandsToRender.length - 1 ? (
               <div className="py-1">
                 <div className="h-[1px] w-full bg-f1-border-secondary" />
               </div>
-            )}
+            ) : null}
           </div>
         ))}
       </div>

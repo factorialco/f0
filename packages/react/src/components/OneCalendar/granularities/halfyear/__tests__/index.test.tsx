@@ -1,8 +1,7 @@
 import { startOfYear } from "date-fns"
 import { describe, expect, it } from "vitest"
-
+import { halfyearGranularity } from ".."
 import { granularityDefinitions } from "../.."
-import { halfyearGranularity } from "../index"
 
 describe("halfyearGranularity", () => {
   const baseDate = new Date(2024, 0, 1) // January 1, 2024

@@ -7,9 +7,7 @@ import {
   startOfYear,
 } from "date-fns"
 import { AnimatePresence, motion } from "motion/react"
-
 import { cn, focusRing } from "@/lib/utils"
-
 import { CalendarMode, DateRange } from "../../types"
 
 interface YearViewProps {
@@ -59,13 +57,7 @@ export function YearView({
         to: endOfYear(selectedDate),
       })
     } else if (mode === "range") {
-      if (!selected || !isDateRange(selected)) {
-        // Start of range
-        onSelect?.({
-          from: selectedDate,
-          to: undefined,
-        })
-      } else if (selected && selected.from && !selected.to) {
+      if (selected && isDateRange(selected) && selected.from && !selected.to) {
         // Complete the range
         if (isSameYear(selected.from, selectedDate)) {
           // If clicking the same year, select just that year
@@ -99,7 +91,9 @@ export function YearView({
 
   // Check if a year is selected
   const isYearSelected = (year: number) => {
-    if (!selected) return false
+    if (!selected) {
+      return false
+    }
 
     if (!isDateRange(selected)) {
       // Single date selection
@@ -127,13 +121,17 @@ export function YearView({
 
   // Check if a year is the start of the range
   const isRangeStart = (year: number): boolean => {
-    if (!selected || !isDateRange(selected) || !selected.from) return false
+    if (!selected || !isDateRange(selected) || !selected.from) {
+      return false
+    }
     return selected.from.getFullYear() === year
   }
 
   // Check if a year is the end of the range
   const isRangeEnd = (year: number): boolean => {
-    if (!selected || !isDateRange(selected) || !selected.to) return false
+    if (!selected || !isDateRange(selected) || !selected.to) {
+      return false
+    }
     return selected.to.getFullYear() === year
   }
 
@@ -205,7 +203,7 @@ export function YearView({
               )}
             >
               <span>{year}</span>
-              {isCurrent && (
+              {isCurrent ? (
                 <div
                   className={cn(
                     "absolute inset-x-0 bottom-1 z-20 mx-auto h-0.5 w-1.5 rounded-full bg-f1-background-selected-bold transition-colors duration-100",
@@ -218,7 +216,7 @@ export function YearView({
                       "bg-f1-background-selected-bold"
                   )}
                 />
-              )}
+              ) : null}
             </button>
           )
         })}

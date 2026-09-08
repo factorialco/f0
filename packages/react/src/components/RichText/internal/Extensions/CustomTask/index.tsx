@@ -1,5 +1,4 @@
 import TaskItem from "@tiptap/extension-task-item"
-
 import { cn } from "@/lib/utils"
 
 const CustomTask = TaskItem.extend({

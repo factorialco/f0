@@ -7,15 +7,12 @@ import {
   useState,
 } from "react"
 import { Observable } from "zen-observable-ts"
-
+import { getValueByPath } from "@/lib/objectPaths"
+import { PromiseState, promiseToObservable } from "@/lib/promise-to-observable"
 import type {
   FiltersDefinition,
   FiltersState,
 } from "@/patterns/OneFilterPicker/types"
-
-import { getValueByPath } from "@/lib/objectPaths"
-import { PromiseState, promiseToObservable } from "@/lib/promise-to-observable"
-
 import {
   BaseFetchOptions,
   GroupingDefinition,
@@ -87,7 +84,45 @@ export interface UseDataOptions<
  */
 export const GROUP_ID_SYMBOL = Symbol("groupId")
 export type WithGroupId<RecordType> = RecordType & {
-  [GROUP_ID_SYMBOL]: unknown | undefined
+  [GROUP_ID_SYMBOL]: unknown
+}
+
+type GroupIdCache<R extends RecordType> = {
+  field: string | undefined
+  entries: WeakMap<R, WithGroupId<R>>
+}
+
+/**
+ * Decorates records with their group id, reusing the object built for a record
+ * the last time it was seen. A page append rebuilds the array but keeps the
+ * objects of the records already loaded, and the table's row memo compares on
+ * those objects: decorating each record afresh would re-render every row
+ * already on screen.
+ */
+const decorateWithGroupId = <R extends RecordType>(
+  records: R[],
+  field: string,
+  cacheRef: { current: GroupIdCache<R> }
+): WithGroupId<R>[] => {
+  const cache = cacheRef.current
+  if (cache.field !== field) {
+    cache.field = field
+    cache.entries = new WeakMap()
+  }
+
+  return records.map((record) => {
+    const cached = cache.entries.get(record)
+    if (cached) {
+      return cached
+    }
+
+    const decorated = {
+      ...record,
+      [GROUP_ID_SYMBOL]: getValueByPath(record, field) || undefined,
+    }
+    cache.entries.set(record, decorated)
+    return decorated
+  })
 }
 
 /**
@@ -480,7 +515,9 @@ export function useData<
       isLoadingMoreRef.current = false
       // Stamp the rendered records with the query they answer. Batched with
       // the setters above, so this costs no extra render.
-      if (query !== undefined) setCommittedQuery(query)
+      if (query !== undefined) {
+        setCommittedQuery(query)
+      }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want to re-run this callback when data.length changes
     [
@@ -497,30 +534,25 @@ export function useData<
     ]
   )
 
+  const groupIdCacheRef = useRef<GroupIdCache<R>>({
+    field: undefined,
+    entries: new WeakMap(),
+  })
+
   const data = useMemo(() => {
-    // if (hasLanes) return { type: "flat" as const, records: [] }
-    // Add the groupId to the data if grouping is enabled
-    const data: WithGroupId<R>[] = rawData.map((record) => ({
-      ...record,
-      [GROUP_ID_SYMBOL]:
-        (currentGrouping?.field &&
-          getValueByPath(record, currentGrouping.field as string)) ||
-        undefined,
-    }))
+    const groupingField = currentGrouping?.field as string | undefined
+    const isGrouped =
+      !!groupingField &&
+      !!grouping &&
+      !!(grouping.groupBy as Record<string, unknown>)[groupingField]
 
     /**
      * Grouped data
      */
-    if (
-      currentGrouping &&
-      currentGrouping.field &&
-      grouping &&
-      (grouping.groupBy as Record<string, unknown>)[
-        currentGrouping.field as string
-      ]
-    ) {
+    if (isGrouped) {
+      const data = decorateWithGroupId(rawData, groupingField, groupIdCacheRef)
       const groupedData = groupBy(data, GROUP_ID_SYMBOL)
-      const fieldName = currentGrouping.field as string
+      const fieldName = groupingField
       const groupConfig = (grouping.groupBy as Record<string, unknown>)[
         fieldName
       ] as {
@@ -554,6 +586,12 @@ export function useData<
     /**
      * Flat data
      */
+    // The group id is only ever read from a grouped result, so ungrouped
+    // records are handed through untouched. Decorating them would give every
+    // record a new identity on each run of this memo, which is what the row
+    // memo downstream compares on.
+    const data = rawData as WithGroupId<R>[]
+
     return {
       type: "flat" as const,
       records: data,
@@ -765,7 +803,9 @@ export function useData<
   const loadMore = useCallback(
     () => {
       const currentPaginationInfo = paginationInfoRef.current
-      if (!currentPaginationInfo || isLoading || isLoadingMore) return
+      if (!currentPaginationInfo || isLoading || isLoadingMore) {
+        return
+      }
 
       if (!isInfiniteScrollPagination(currentPaginationInfo)) {
         console.warn(
@@ -808,7 +848,9 @@ export function useData<
 
   useEffect(
     () => {
-      if (!enabled) return
+      if (!enabled) {
+        return
+      }
       if (!isLoadingMoreRef.current) {
         // Page-based reuse: when only the page size shrank (same filters /
         // sortings / search) and page 1 already holds at least that many

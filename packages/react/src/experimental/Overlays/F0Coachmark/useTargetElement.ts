@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react"
-
 import type { CoachmarkTarget } from "./types"
 
 const isDev = process.env.NODE_ENV !== "production"
@@ -47,7 +46,9 @@ export const useTargetElement = (
 
   useEffect(() => {
     const sync = (next: HTMLElement | null) => {
-      if (next === resolved.current) return
+      if (next === resolved.current) {
+        return
+      }
       resolved.current = next
       setElement(next)
     }

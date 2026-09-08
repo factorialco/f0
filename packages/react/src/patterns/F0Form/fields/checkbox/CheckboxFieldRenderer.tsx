@@ -1,15 +1,13 @@
-import { ControllerRenderProps, FieldValues } from "react-hook-form"
+import { ControllerRenderProps } from "react-hook-form"
 import { ZodTypeAny } from "zod"
-
 import { F0Checkbox } from "@/components/F0Checkbox"
-
 import { isZodType, unwrapZodSchema } from "../../f0Schema"
-import type { F0CheckboxField } from "./types"
 import type { ResolvedField } from "../types"
+import type { F0CheckboxField } from "./types"
 
 interface CheckboxFieldRendererProps {
   field: ResolvedField<F0CheckboxField>
-  formField: ControllerRenderProps<FieldValues>
+  formField: ControllerRenderProps
 }
 
 /**

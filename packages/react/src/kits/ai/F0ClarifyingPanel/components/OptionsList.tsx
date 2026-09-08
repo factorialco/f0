@@ -1,10 +1,7 @@
 import { motion } from "motion/react"
 import { useEffect, useRef, useState, type Ref } from "react"
-
 import { useReducedMotion } from "@/lib/a11y"
-
 import type { ClarifyingOption, ClarifyingSelectionMode } from "../types"
-
 import { CustomAnswerRow } from "./CustomAnswerRow"
 import { OptionRow } from "./OptionRow"
 
@@ -65,7 +62,9 @@ export const OptionsList = ({
   // Roving tabindex: index of the currently-focused option.
   // When nothing is selected, default to the first option.
   const initialTabStop = (() => {
-    if (mode !== "single") return 0
+    if (mode !== "single") {
+      return 0
+    }
     const idx = options.findIndex((o) => selectedOptionIds.includes(o.id))
     return idx >= 0 ? idx : 0
   })()
@@ -81,11 +80,15 @@ export const OptionsList = ({
   }, [])
 
   const handleKeyNavigate = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (mode !== "single") return
+    if (mode !== "single") {
+      return
+    }
     const last = options.length - 1
-    if (last < 0) return
+    if (last < 0) {
+      return
+    }
 
-    let next = tabStopIndex
+    let next: number
     switch (e.key) {
       case "ArrowDown":
       case "ArrowRight":
@@ -157,7 +160,7 @@ export const OptionsList = ({
         </motion.div>
       ))}
 
-      {allowCustomAnswer && (
+      {allowCustomAnswer ? (
         <motion.div {...rowEnter(options.length)}>
           <CustomAnswerRow
             mode={mode}
@@ -173,7 +176,7 @@ export const OptionsList = ({
             onConfirm={onConfirm}
           />
         </motion.div>
-      )}
+      ) : null}
     </div>
   )
 }

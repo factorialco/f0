@@ -2,10 +2,8 @@
 
 import { cva } from "cva"
 import { useCallback, useRef, useState } from "react"
-
 import { cn, focusRing } from "@/lib/utils"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/ui/hover-card"
-
 import { F0TableOfContent } from "../../experimental/Navigation/F0TableOfContent"
 import { CollapsedBars } from "./components/CollapsedBars"
 import { F0TableOfContentPopoverProps } from "./internal-types"
@@ -55,7 +53,9 @@ export function F0TableOfContentPopover({
   const handleOpenChange = (nextOpen: boolean) => {
     // When a nested dropdown is open, defer the close until the dropdown
     // is dismissed or the pointer leaves both surfaces.
-    if (!nextOpen && deferClose()) return
+    if (!nextOpen && deferClose()) {
+      return
+    }
 
     if (nextOpen && !isOpen) {
       shouldScrollRef.current = true
@@ -65,7 +65,9 @@ export function F0TableOfContentPopover({
 
   const contentRefCallback = useCallback((container: HTMLDivElement | null) => {
     contentRef.current = container
-    if (!container || !shouldScrollRef.current) return
+    if (!container || !shouldScrollRef.current) {
+      return
+    }
 
     shouldScrollRef.current = false
 

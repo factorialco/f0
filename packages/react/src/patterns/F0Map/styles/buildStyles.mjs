@@ -214,8 +214,8 @@ const flavor = (theme) => {
     boundary: neutral(theme, 30),
     water: tint(theme, L ? "malibu.50" : "malibu.60", L ? 0.45 : 0.5, land),
     // Greens a gentle step deeper than the green land, so parks/woods still read.
-    park: tint(theme, L ? "flubber.60" : "flubber.60", 0.42, land),
-    wood: tint(theme, L ? "flubber.70" : "flubber.70", 0.55, land),
+    park: tint(theme, "flubber.60", 0.42, land),
+    wood: tint(theme, "flubber.70", 0.55, land),
     // Urban land use (and the zoomed-in base land) is a warm tan - Google
     // Maps' land colour - clearly warmer than a plain neutral and distinct from
     // the green countryside. yellow.60 is deep enough to read as a tan rather
@@ -327,46 +327,82 @@ const saturatedFlavor = (theme) => {
 
 // Geometry (fill/line) role from the layer id + its source-layer.
 const fillRole = (lid) => {
-  if (/water|ocean|sea|river|lake|bay/.test(lid)) return "water"
-  if (/wood|forest/.test(lid)) return "wood"
-  if (/cemetery/.test(lid)) return "park"
-  if (/park|grass|meadow|golf|pitch|garden|recreation|vegetation/.test(lid))
+  if (/water|ocean|sea|river|lake|bay/.test(lid)) {
+    return "water"
+  }
+  if (/wood|forest/.test(lid)) {
+    return "wood"
+  }
+  if (/cemetery/.test(lid)) {
     return "park"
-  if (/residential|suburb|neighbourhood/.test(lid)) return "residential"
-  if (/commercial|retail/.test(lid)) return "commercial"
-  if (/hospital/.test(lid)) return "hospital"
-  if (/school|university|college/.test(lid)) return "school"
-  if (/industrial|railway|dam|garages/.test(lid)) return "industrial"
-  if (/sand|beach/.test(lid)) return "sand"
-  if (/glacier|ice-shelf|ice_shelf/.test(lid)) return "glacier"
-  if (/building/.test(lid)) return "building"
-  if (/boundary|admin/.test(lid)) return "boundary"
+  }
+  if (/park|grass|meadow|golf|pitch|garden|recreation|vegetation/.test(lid)) {
+    return "park"
+  }
+  if (/residential|suburb|neighbourhood/.test(lid)) {
+    return "residential"
+  }
+  if (/commercial|retail/.test(lid)) {
+    return "commercial"
+  }
+  if (/hospital/.test(lid)) {
+    return "hospital"
+  }
+  if (/school|university|college/.test(lid)) {
+    return "school"
+  }
+  if (/industrial|railway|dam|garages/.test(lid)) {
+    return "industrial"
+  }
+  if (/sand|beach/.test(lid)) {
+    return "sand"
+  }
+  if (/glacier|ice-shelf|ice_shelf/.test(lid)) {
+    return "glacier"
+  }
+  if (/building/.test(lid)) {
+    return "building"
+  }
+  if (/boundary|admin/.test(lid)) {
+    return "boundary"
+  }
   // Pedestrian / cycle paths, before the catch-all road rule (their ids also
   // contain highway/bridge/tunnel), so walking trails get their own colour.
-  if (/path|footway|cycleway|pedestrian|steps/.test(lid)) return "path"
+  if (/path|footway|cycleway|pedestrian|steps/.test(lid)) {
+    return "path"
+  }
   if (
     /bridge|tunnel|highway|motorway|road|transp|rail|aeroway|path|street|pier/.test(
       lid
     )
-  )
+  ) {
     return "road"
+  }
   return "land"
 }
 
 // Scale a line-width value (number or zoom interpolate/step expression) so
 // streets render wider than OSM Bright's rather thin defaults.
 const scaleWidth = (v, factor) => {
-  if (typeof v === "number") return v * factor
+  if (typeof v === "number") {
+    return v * factor
+  }
   if (Array.isArray(v) && v[0] === "interpolate") {
     const out = [...v]
-    for (let i = 4; i < out.length; i += 2)
-      if (typeof out[i] === "number") out[i] = out[i] * factor
+    for (let i = 4; i < out.length; i += 2) {
+      if (typeof out[i] === "number") {
+        out[i] = out[i] * factor
+      }
+    }
     return out
   }
   if (Array.isArray(v) && v[0] === "step") {
     const out = [...v]
-    for (let i = 2; i < out.length; i += 2)
-      if (typeof out[i] === "number") out[i] = out[i] * factor
+    for (let i = 2; i < out.length; i += 2) {
+      if (typeof out[i] === "number") {
+        out[i] = out[i] * factor
+      }
+    }
     return out
   }
   return v
@@ -446,16 +482,18 @@ const recolor = (style, theme) => {
       // POI badges (our sprite) bake in their category colour and white glyph,
       // so they need no icon-color. Only recolour icons that were tinted
       // upstream (non-POI symbol layers) to keep them on-theme.
-      if (src !== "poi" && "icon-color" in paint)
+      if (src !== "poi" && "icon-color" in paint) {
         paint["icon-color"] = f.labelSecondary
+      }
       layer.paint = paint
       continue
     }
 
     // Urban fills must not cut off at a zoom threshold - Bright caps
     // landuse-suburb at z10, which made city areas pop green while zooming.
-    if (/landuse-(suburb|residential|commercial)/.test(lid))
+    if (/landuse-(suburb|residential|commercial)/.test(lid)) {
       delete layer.maxzoom
+    }
 
     // Wider streets: scale every road line-width (fills and casings stay
     // proportional). Paths/footways keep their thin default.
@@ -471,7 +509,9 @@ const recolor = (style, theme) => {
     // Fills / lines by geometry role.
     const role = fillRole(lid)
     for (const k of Object.keys(paint)) {
-      if (!COLOR_KEYS.has(k)) continue
+      if (!COLOR_KEYS.has(k)) {
+        continue
+      }
       let v
       switch (role) {
         case "water":
@@ -567,7 +607,9 @@ const recolor = (style, theme) => {
     },
   ]
   let idx = out.layers.findIndex((l) => l.id === "landcover-sand")
-  if (idx < 0) idx = 0
+  if (idx < 0) {
+    idx = 0
+  }
   for (const a of arid) {
     out.layers.splice(++idx, 0, {
       id: a.id,
@@ -583,9 +625,9 @@ const recolor = (style, theme) => {
   // raster with no layers pointing at it (we don't want shaded relief); left in,
   // its tile fetches fail and keep `map.isStyleLoaded()` from ever resolving.
   const usedSources = new Set(out.layers.map((l) => l.source).filter(Boolean))
-  for (const name of Object.keys(out.sources)) {
-    if (!usedSources.has(name)) delete out.sources[name]
-  }
+  out.sources = Object.fromEntries(
+    Object.entries(out.sources).filter(([name]) => usedSources.has(name))
+  )
 
   return out
 }

@@ -8,7 +8,6 @@ import {
   SortingsState,
 } from "@/hooks/datasource"
 import { PresetsDefinition } from "@/patterns/OneFilterPicker/types"
-
 import {
   NavigationFiltersDefinition,
   NavigationFiltersState,
@@ -60,7 +59,7 @@ export type DataCollectionStorageFeaturesDefinition = (
   | "*"
   | `all`
   | `!${DataCollectionStorageFeature}`
-  | `${DataCollectionStorageFeature}`
+  | DataCollectionStorageFeature
 )[]
 
 /**

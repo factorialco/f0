@@ -1,11 +1,10 @@
-import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import {
   GroupingDefinition,
   RecordType,
   SortingsDefinition,
 } from "@/hooks/datasource"
 import { cn } from "@/lib/utils"
-
+import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import { DataCollectionSource } from "../../../../hooks/useDataCollectionSource"
 import { ItemActionsDefinition } from "../../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../../navigationFilters/types"
@@ -34,7 +33,7 @@ type ListGroupProps<
   items: R[]
   selectedItems: Map<number | string, R>
   handleSelectItemChange: (item: R, checked: boolean) => void
-  fields: ReadonlyArray<ListPropertyDefinition<R, Sortings>>
+  fields: readonly ListPropertyDefinition<R, Sortings>[]
   itemDefinition: (record: R) => ItemDefinition
   isLoadingMore: boolean
 }

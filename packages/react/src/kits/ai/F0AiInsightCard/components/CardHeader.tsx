@@ -1,10 +1,8 @@
 import { AnimatePresence, motion } from "motion/react"
-
+import { AIButton } from "@/kits/ai/AIButton"
 import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-import { AIButton } from "@/kits/ai/AIButton"
-
 import { descriptionVariants } from "../variants"
 
 type CardHeaderProps = {
@@ -23,13 +21,13 @@ export const CardHeader = ({
 
   return (
     <>
-      {description && (
+      {description ? (
         <span className={cn(descriptionVariants(), "truncate")}>
           {description}
         </span>
-      )}
+      ) : null}
       <AnimatePresence>
-        {onAskOne && isRevealed && (
+        {onAskOne && isRevealed ? (
           <motion.div
             className="absolute bottom-4 left-4 z-10"
             initial={{ opacity: 0 }}
@@ -49,7 +47,7 @@ export const CardHeader = ({
               }}
             />
           </motion.div>
-        )}
+        ) : null}
       </AnimatePresence>
     </>
   )

@@ -7,7 +7,6 @@ import {
   useRef,
   useState,
 } from "react"
-
 import { RecordType } from "@/hooks/datasource"
 import { ChildrenResponse } from "@/hooks/datasource/types/nested.typings"
 
@@ -140,9 +139,12 @@ export const NestedDataProvider = <R extends RecordType>({
 
   const isExpandedByDefault = useCallback(
     (record: R, depth: number) => {
-      if (typeof defaultExpanded === "function")
+      if (typeof defaultExpanded === "function") {
         return defaultExpanded(record, { depth })
-      if (typeof defaultExpanded === "number") return depth < defaultExpanded
+      }
+      if (typeof defaultExpanded === "number") {
+        return depth < defaultExpanded
+      }
       return defaultExpanded
     },
     [defaultExpanded]
