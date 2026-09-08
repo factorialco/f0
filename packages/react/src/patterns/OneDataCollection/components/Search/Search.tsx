@@ -40,6 +40,20 @@ interface SearchProps {
   loadingMore?: boolean
   /** Request the next page (fired when the list is scrolled near the bottom). */
   onLoadMore?: () => void
+  /**
+   * How the field is drawn. `"outline"` (default) is the toolbar's bordered
+   * box. `"ghost"` has no surface of its own at all - closed it is an icon with
+   * a hover wash, open it is an icon and a caret over whatever is behind it.
+   * For a search that already sits on a card, like the map panel's header,
+   * where a bordered, filled field reads as a second card inside the first.
+   */
+  variant?: "outline" | "ghost"
+  /**
+   * How wide the field grows when opened. `"fixed"` (default) takes the
+   * toolbar's 180px. `"fill"` takes the width it is given, for a search inside
+   * a panel - where 180px can be more room than there is.
+   */
+  expandedWidth?: "fixed" | "fill"
 }
 
 // Trigger the next page when the user scrolls within this many px of the bottom.
@@ -63,8 +77,23 @@ export const Search = ({
   hasMore = false,
   loadingMore = false,
   onLoadMore,
+  variant = "outline",
+  expandedWidth = "fixed",
 }: SearchProps) => {
+  // Ghost gives up every surface of its own, open as well as closed: it is for
+  // a search that already sits on a card, where a field carrying its own border
+  // and fill reads as a second card inside the first.
+  const ghost = variant === "ghost"
+
   const [open, setOpen] = useState(false)
+  // Hover, tracked here rather than left to CSS. Clearing the search collapses
+  // the field, which shrinks it out from under a stationary cursor - the
+  // browser re-hit-tests as it travels, so `hover:` would light the collapsed
+  // button up as though the user had gone looking for it. A pointer that has
+  // not moved has not hovered anything, so an enter that arrives from the
+  // collapse alone is ignored, and the next real movement re-arms it.
+  const [hovered, setHovered] = useState(false)
+  const ignoreHoverUntilMove = useRef(false)
   const [showResults, setShowResults] = useState(false)
   const [activeIndex, setActiveIndex] = useState(-1)
   const uniqueId = useId()
@@ -105,6 +134,8 @@ export const Search = ({
   const handleClear = () => {
     onChange(undefined)
     setOpen(false)
+    ignoreHoverUntilMove.current = true
+    setHovered(false)
     setShowResults(false)
     setActiveIndex(-1)
     if (inputRef?.current) {
@@ -190,20 +221,28 @@ export const Search = ({
             layout
             ref={ref}
             className={cn(
-              "relative flex h-8 w-fit min-w-8 max-w-[180px] items-center justify-center",
-              (open || value) && "w-[180px]"
+              "relative flex h-8 w-fit min-w-8 items-center justify-center",
+              expandedWidth === "fill" ? "max-w-full" : "max-w-[180px]",
+              (open || value) &&
+                (expandedWidth === "fill" ? "w-full" : "w-[180px]")
             )}
           >
             {open ? (
               <motion.div
                 layout
                 layoutId="search-container"
-                className="absolute inset-0 h-8 w-full bg-f1-border p-px transition-colors focus-within:bg-f1-border-hover"
+                className={cn(
+                  "absolute inset-0 h-8 w-full p-px transition-colors",
+                  !ghost && "bg-f1-border focus-within:bg-f1-border-hover"
+                )}
                 style={{ borderRadius: 12 }}
               >
                 <motion.div
                   layout
-                  className="relative flex h-full w-full items-center justify-between gap-1 overflow-hidden bg-f1-background pr-1.5"
+                  className={cn(
+                    "relative flex h-full w-full items-center justify-between gap-1 overflow-hidden pr-1.5",
+                    !ghost && "bg-f1-background"
+                  )}
                   style={{ borderRadius: 11 }}
                 >
                   <motion.div
@@ -226,7 +265,10 @@ export const Search = ({
                       setShowResults(true)
                       setActiveIndex(0)
                     }}
-                    className="h-full w-full appearance-none rounded border-none bg-f1-background py-2 pl-7 text-base text-f1-foreground"
+                    className={cn(
+                      "h-full w-full appearance-none rounded border-none py-2 pl-7 text-base text-f1-foreground",
+                      ghost ? "bg-transparent" : "bg-f1-background"
+                    )}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
@@ -262,17 +304,37 @@ export const Search = ({
                 layout
                 layoutId="search-container"
                 className={cn(
-                  "relative h-8 w-full bg-f1-border p-px transition-colors hover:bg-f1-border-hover",
+                  "relative h-8 w-full p-px transition-colors",
+                  !ghost && "bg-f1-border",
+                  !ghost && hovered && "bg-f1-border-hover",
                   focusRing()
                 )}
                 onClick={handleOpen}
                 onKeyDown={handleKeyDown}
+                onPointerEnter={() => {
+                  if (!ignoreHoverUntilMove.current) {
+                    setHovered(true)
+                  }
+                }}
+                onPointerMove={() => {
+                  ignoreHoverUntilMove.current = false
+                  setHovered(true)
+                }}
+                onPointerLeave={() => {
+                  ignoreHoverUntilMove.current = false
+                  setHovered(false)
+                }}
                 style={{ borderRadius: 10 }}
               >
                 <motion.div
                   layout
-                  className="relative flex h-full w-full items-center gap-1 overflow-hidden bg-f1-background"
-                  style={{ borderRadius: 9 }}
+                  className={cn(
+                    "relative flex h-full w-full items-center gap-1 overflow-hidden transition-colors",
+                    ghost
+                      ? hovered && "bg-f1-background-hover"
+                      : "bg-f1-background"
+                  )}
+                  style={{ borderRadius: ghost ? 10 : 9 }}
                 >
                   <motion.div
                     className="absolute left-[5px] top-[5px] flex h-5 w-5 items-center justify-center text-f1-icon-bold"
