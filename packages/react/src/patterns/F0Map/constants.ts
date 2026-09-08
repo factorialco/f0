@@ -11,9 +11,8 @@ export const FLY_OPTS = {
 } as const
 
 /**
- * Soft ceiling for marker count. Markers are DOM elements (one
- * `maplibregl.Marker` each) with JS screen-space clustering - designed for
- * workplace-scale datasets. Beyond this, pan/zoom starts to stutter; thousands
- * of points need a GL-native clustering path instead.
+ * Soft ceiling for marker count. Markers are DOM elements with JS screen-space
+ * clustering - designed for workplace-scale datasets. Beyond this, pan/zoom
+ * starts to stutter; thousands of points need a GL-native clustering path.
  */
 export const RECOMMENDED_MAX_MARKERS = 200
