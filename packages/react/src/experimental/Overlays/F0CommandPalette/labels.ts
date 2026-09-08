@@ -1,7 +1,5 @@
 import { useMemo } from "react"
-
 import { useI18n } from "@/lib/providers/i18n"
-
 import type { CommandImpact, CommandPaletteLabels } from "./types"
 
 /**

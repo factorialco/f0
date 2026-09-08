@@ -1,5 +1,4 @@
 import type { ReactNode } from "react"
-
 import type { IconType } from "@/components/F0Icon"
 
 /**

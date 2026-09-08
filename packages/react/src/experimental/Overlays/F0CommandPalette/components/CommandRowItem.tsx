@@ -1,11 +1,9 @@
 import type { KeyboardEvent } from "react"
-
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0Icon } from "@/components/F0Icon"
 import { ArrowRight } from "@/icons/app"
 import { cn, focusRing } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
-
 import type { CommandRow } from "../internal-types"
 
 type CommandRowItemProps = {

@@ -9,26 +9,10 @@ import {
   useState,
 } from "react"
 import { useMediaQuery } from "usehooks-ts"
-
 import { toasts } from "@/hooks/toast"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Dialog, DialogContent, DialogTitle } from "@/ui/Dialog/dialog"
-
-import type { CommandStage } from "./internal-types"
-import type {
-  CommandAction,
-  CommandAssistant,
-  CommandEntityAction,
-  CommandEntityProvider,
-  CommandEntityRef,
-  CommandNavigationItem,
-  CommandPaletteLabels,
-  CommandParamValues,
-  CommandRunContext,
-} from "./types"
-
-import { commandActionHref } from "./types"
 import { CommandFooter } from "./components/CommandFooter"
 import { CommandRowActions } from "./components/CommandRowActions"
 import { CommandRowItem } from "./components/CommandRowItem"
@@ -40,9 +24,22 @@ import {
   caretToEnd,
   chipIndexAtCaret,
 } from "./fieldCaret"
+import type { CommandStage } from "./internal-types"
 import { useCommandLabels } from "./labels"
-import { useEntitySearch, useScopeChildren } from "./useEntitySearch"
+import type {
+  CommandAction,
+  CommandAssistant,
+  CommandEntityAction,
+  CommandEntityProvider,
+  CommandEntityRef,
+  CommandNavigationItem,
+  CommandPaletteLabels,
+  CommandParamValues,
+  CommandRunContext,
+} from "./types"
+import { commandActionHref } from "./types"
 import { useCommandRows } from "./useCommandRows"
+import { useEntitySearch, useScopeChildren } from "./useEntitySearch"
 
 /**
  * How many references the chain may hold.
@@ -175,7 +172,9 @@ export const F0CommandPalette = ({
       exactly once, whatever the tree does around it. Radix guards its own
       `Presence` ref the same way, for the same reason.
     */
-    if (node) setListNode((current) => (current === node ? current : node))
+    if (node) {
+      setListNode((current) => (current === node ? current : node))
+    }
   }, [])
   /**
    * The list AND the cluster drawn over it. The cluster is deliberately not
@@ -225,7 +224,9 @@ export const F0CommandPalette = ({
     const button = bodyRef.current?.querySelector<HTMLButtonElement>(
       `[data-row="${row}"][data-action="${index}"] button`
     )
-    if (!button) return
+    if (!button) {
+      return
+    }
     setFocusedAction(index)
     button.focus()
   }, [])
@@ -332,17 +333,22 @@ export const F0CommandPalette = ({
         setActive(0)
         return
       }
-      if (!scope) return
+      if (!scope) {
+        return
+      }
       /*
         A DESTINATION OR A BEHAVIOUR. An action that only goes somewhere says so
         with `href` rather than wrapping a route in a callback, so the palette
         knows it is a link — and `navigate` is the consumer's own router either
         way, never a hard page load.
       */
-      if (action.run) action.run(scope, values, context)
-      else {
+      if (action.run) {
+        action.run(scope, values, context)
+      } else {
         const href = commandActionHref(action, scope, values)
-        if (href) navigate(href)
+        if (href) {
+          navigate(href)
+        }
         return
       }
       close()
@@ -466,7 +472,9 @@ export const F0CommandPalette = ({
   const [moreAbove, setMoreAbove] = useState(false)
   useLayoutEffect(() => {
     const list = listNode
-    if (!list) return
+    if (!list) {
+      return
+    }
 
     const measure = () => {
       // A pixel of slack: fractional scroll heights never land exactly.
@@ -496,7 +504,9 @@ export const F0CommandPalette = ({
   const activateRow = useCallback(
     (index: number) => {
       const row = rows[index]
-      if (!row) return
+      if (!row) {
+        return
+      }
       if (row.disabledReason) {
         // A blocked row is reachable so its reason can be read, but it never
         // runs: re-announce rather than failing silently.
@@ -528,14 +538,18 @@ export const F0CommandPalette = ({
       next >= 0 && next < rows.length;
       next += delta
     ) {
-      if (!rows[next]?.skeleton) return next
+      if (!rows[next]?.skeleton) {
+        return next
+      }
     }
     return from
   }
 
   const clusterSize = (index: number): number => {
     const row = rows[index]
-    if (!row) return 0
+    if (!row) {
+      return 0
+    }
     return (row.rowActions?.length ?? 0) + (row.disabledReason ? 0 : 1)
   }
 
@@ -550,8 +564,12 @@ export const F0CommandPalette = ({
    */
   const commitScope = (index: number): boolean => {
     const row = rows[index]
-    if (stage.kind !== "browse" || !row?.scopeRef) return false
-    if (scopes.length >= MAX_SCOPE_DEPTH) return false
+    if (stage.kind !== "browse" || !row?.scopeRef) {
+      return false
+    }
+    if (scopes.length >= MAX_SCOPE_DEPTH) {
+      return false
+    }
     enterScope(row.scopeRef)
     return true
   }
@@ -560,7 +578,9 @@ export const F0CommandPalette = ({
     const field = fieldRef.current
 
     if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
-      if (!assistant) return
+      if (!assistant) {
+        return
+      }
       event.preventDefault()
       ask(askPrompt)
       return
@@ -615,7 +635,9 @@ export const F0CommandPalette = ({
     if (event.key === "Tab") {
       event.preventDefault()
 
-      if (commitScope(active)) return
+      if (commitScope(active)) {
+        return
+      }
 
       if (rows.length > 0) {
         setActive(0)
@@ -638,7 +660,9 @@ export const F0CommandPalette = ({
     // Backspace on an empty query walks back out of the stack instead of
     // deleting nothing.
     if (event.key === "Backspace" && query === "") {
-      if (popLevel()) event.preventDefault()
+      if (popLevel()) {
+        event.preventDefault()
+      }
       return
     }
 
@@ -683,7 +707,9 @@ export const F0CommandPalette = ({
     if (event.key === "Tab") {
       event.preventDefault()
 
-      if (event.shiftKey || !commitScope(index)) focusField()
+      if (event.shiftKey || !commitScope(index)) {
+        focusField()
+      }
       return
     }
 
@@ -732,16 +758,22 @@ export const F0CommandPalette = ({
     if (event.key === "ArrowRight") {
       consume()
 
-      if (index + 1 < count) focusRowAction(active, index + 1)
+      if (index + 1 < count) {
+        focusRowAction(active, index + 1)
+      }
       return
     }
 
     if (event.key === "ArrowLeft") {
       consume()
 
-      if (index > 0) focusRowAction(active, index - 1)
-      else if (clusterOrigin.current === "row") focusRow(active)
-      else focusField()
+      if (index > 0) {
+        focusRowAction(active, index - 1)
+      } else if (clusterOrigin.current === "row") {
+        focusRow(active)
+      } else {
+        focusField()
+      }
       return
     }
 
@@ -916,7 +948,9 @@ export const F0CommandPalette = ({
         onEscapeKeyDown={(event) => {
           // Escape pops one level of the grammar before it closes anything: it
           // is the way back out of a scope, not only the way out of the overlay.
-          if (popLevel()) event.preventDefault()
+          if (popLevel()) {
+            event.preventDefault()
+          }
         }}
         onOpenAutoFocus={(event) => {
           event.preventDefault()
@@ -940,7 +974,9 @@ export const F0CommandPalette = ({
           left alone.
         */
         onPointerDown={(event) => {
-          if (event.target === event.currentTarget) close()
+          if (event.target === event.currentTarget) {
+            close()
+          }
         }}
       >
         <DialogTitle className="sr-only">

@@ -1,5 +1,4 @@
 import { useCallback, useMemo } from "react"
-
 import {
   ArrowRight,
   CheckCircleLine,
@@ -9,10 +8,8 @@ import {
 } from "@/icons/app"
 import { fuzzyScore } from "@/lib/fuzzyMatch"
 import { useI18n } from "@/lib/providers/i18n"
-
-import type { ResolvedCommandLabels } from "./labels"
-import type { EntitySearchState, ScopeChildrenState } from "./useEntitySearch"
 import type { CommandRow, CommandStage } from "./internal-types"
+import type { ResolvedCommandLabels } from "./labels"
 import type {
   CommandAction,
   CommandAssistant,
@@ -26,6 +23,7 @@ import type {
   CommandRowAction,
   CommandRunContext,
 } from "./types"
+import type { EntitySearchState, ScopeChildrenState } from "./useEntitySearch"
 
 /**
  * A keyword hit is worth slightly less than a label hit, so a command whose
@@ -43,7 +41,9 @@ const score = (
 ): number | null => {
   const onLabel = fuzzyScore(query, label)
   const onKeywords = keywords ? fuzzyScore(query, keywords) : null
-  if (onLabel === null && onKeywords === null) return null
+  if (onLabel === null && onKeywords === null) {
+    return null
+  }
   return Math.max(
     onLabel ?? -Infinity,
     (onKeywords ?? -Infinity) - KEYWORD_PENALTY
@@ -123,7 +123,9 @@ export const useCommandRows = ({
         action.run(context)
         return
       }
-      if (action.href) context.navigate(action.href)
+      if (action.href) {
+        context.navigate(action.href)
+      }
     },
     [context]
   )
@@ -237,7 +239,9 @@ export const useCommandRows = ({
         scopeRef: canScope ? ref : undefined,
         rowActions,
         run: () => {
-          if (href) context.navigate(href)
+          if (href) {
+            context.navigate(href)
+          }
         },
       }
     },
@@ -250,7 +254,9 @@ export const useCommandRows = ({
    * overloaded.
    */
   const entityRows = useMemo<CommandRow[]>(() => {
-    if (!q) return []
+    if (!q) {
+      return []
+    }
     return providers.flatMap((provider) => {
       /*
         A PROVIDER STILL ANSWERING GETS ITS SPACE HELD, not skipped. Skipping it
@@ -301,7 +307,9 @@ export const useCommandRows = ({
    * only difference is where they were found, which the group heading says.
    */
   const childRows = useMemo<CommandRow[]>(() => {
-    if (!scope || !canDrill) return []
+    if (!scope || !canDrill) {
+      return []
+    }
 
     /** Whatever group these records belong to, for a heading or a placeholder. */
     const groupOf = (ref: CommandEntityRef) =>
@@ -342,7 +350,9 @@ export const useCommandRows = ({
    * reason rather than hidden.
    */
   const scopedRows = useMemo<CommandRow[]>(() => {
-    if (!scope) return []
+    if (!scope) {
+      return []
+    }
     const provider = providers.find(
       (candidate) => candidate.type === scope.type
     )
@@ -402,7 +412,9 @@ export const useCommandRows = ({
      */
     const order: string[] = []
     for (const entry of rest) {
-      if (!order.includes(entry.action.group)) order.push(entry.action.group)
+      if (!order.includes(entry.action.group)) {
+        order.push(entry.action.group)
+      }
     }
     const grouped = order.flatMap((group) =>
       rest.filter((entry) => entry.action.group === group)
@@ -429,11 +441,15 @@ export const useCommandRows = ({
 
   /** Parameter options as rows — the level is a list, not a dialog. */
   const paramRows = useMemo<CommandRow[]>(() => {
-    if (stage.kind !== "param" || !scope) return []
+    if (stage.kind !== "param" || !scope) {
+      return []
+    }
     const step: CommandParamStep | undefined = (stage.action.params ?? [])[
       stage.step
     ]
-    if (!step) return []
+    if (!step) {
+      return []
+    }
 
     const chosen = new Set(stage.values[step.key] ?? [])
     const options = step.options(scope)
@@ -470,7 +486,9 @@ export const useCommandRows = ({
    * when nothing above it fit.
    */
   const assistantRow = useMemo<CommandRow | null>(() => {
-    if (!assistant) return null
+    if (!assistant) {
+      return null
+    }
     const prompt = query.trim()
     return {
       id: "assistant",
@@ -485,7 +503,9 @@ export const useCommandRows = ({
   }, [assistant, query, scope])
 
   return useMemo<CommandRow[]>(() => {
-    if (stage.kind === "param") return paramRows
+    if (stage.kind === "param") {
+      return paramRows
+    }
 
     if (scope) {
       return [...scopedRows, ...(assistantRow ? [assistantRow] : [])]

@@ -1,8 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { useEffect, type ReactNode } from "react"
 import { expect, userEvent, waitFor, within } from "storybook/test"
-
 import { F0Button } from "@/components/F0Button"
 import type {
   InFilterDefinition,
@@ -26,7 +24,7 @@ import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import NewHomeLayoutStories, {
   Default as NewHomeLayoutDefault,
 } from "@/sds/Home/NewHomeLayout/index.stories"
-
+import { F0CommandPaletteProvider, useCommandPalette } from ".."
 import type {
   CommandAction,
   CommandEntityProvider,
@@ -34,8 +32,6 @@ import type {
   CommandNavigationItem,
   F0CommandPaletteProviderProps,
 } from "../types"
-
-import { F0CommandPaletteProvider, useCommandPalette } from ".."
 
 /* ── The mock world every story searches ──────────────────────────────────── */
 
@@ -374,8 +370,11 @@ const AutoOpen = ({ scope }: { scope?: CommandEntityRef }) => {
   const palette = useCommandPalette()
 
   useEffect(() => {
-    if (scope) palette.openScoped(scope)
-    else palette.open()
+    if (scope) {
+      palette.openScoped(scope)
+    } else {
+      palette.open()
+    }
     // Once, on mount: re-running on every render would fight the reader closing it.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -548,7 +547,7 @@ export const DrillingIntoATeam: Story = {
         .getAllByRole("option")
         .find((row) => row.getAttribute("aria-selected") === "true")
         ?.getAttribute("aria-label") ?? ""
-    for (let step = 0; step < 8 && !/Ben Carter/.test(selected()); step++) {
+    for (let step = 0; step < 8 && !selected().includes("Ben Carter"); step++) {
       await userEvent.keyboard("{ArrowDown}")
     }
     await expect(

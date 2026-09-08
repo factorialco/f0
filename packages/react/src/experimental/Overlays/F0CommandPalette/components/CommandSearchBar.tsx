@@ -1,12 +1,8 @@
 import { type KeyboardEvent, type RefObject, useEffect, useRef } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
 import { Search } from "@/icons/app"
 import { cn } from "@/lib/utils"
-
-import type { CommandAssistant, CommandEntityRef } from "../types"
-
 import {
   caretToEnd,
   editWouldTakeChipFrom,
@@ -16,6 +12,7 @@ import {
   textAfterEdit,
   textSegments,
 } from "../fieldCaret"
+import type { CommandAssistant, CommandEntityRef } from "../types"
 import { ScopeChip } from "./ScopeChip"
 
 type CommandSearchBarProps = {
@@ -86,7 +83,9 @@ export const CommandSearchBar = ({
   const lastTypedRef = useRef<string | null>(null)
 
   useEffect(() => {
-    if (lastTypedRef.current === query) return
+    if (lastTypedRef.current === query) {
+      return
+    }
     lastTypedRef.current = null
     setText(fieldRef.current, query)
   }, [fieldRef, query])
@@ -131,20 +130,28 @@ export const CommandSearchBar = ({
           onQueryChange(next)
         }}
         onBeforeInput={(event) => {
-          if (scopes.length === 0) return
+          if (scopes.length === 0) {
+            return
+          }
           const native = event.nativeEvent as InputEvent
           const index = editWouldTakeChipFrom(fieldRef.current, native)
-          if (index === -1) return
+          if (index === -1) {
+            return
+          }
           event.preventDefault()
           onChipTakingEdit(index, textAfterEdit(fieldRef.current, native))
         }}
         onFocus={() => {
-          if (!hasCaretIn(fieldRef.current)) caretToEnd(fieldRef.current)
+          if (!hasCaretIn(fieldRef.current)) {
+            caretToEnd(fieldRef.current)
+          }
         }}
         onPaste={(event) => {
           event.preventDefault()
           const text = event.clipboardData.getData("text/plain")
-          if (text) document.execCommand("insertText", false, text)
+          if (text) {
+            document.execCommand("insertText", false, text)
+          }
         }}
         onKeyDown={onKeyDown}
       >

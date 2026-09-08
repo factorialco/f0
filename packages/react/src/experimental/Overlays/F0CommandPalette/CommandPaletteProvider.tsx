@@ -7,14 +7,12 @@ import {
   useMemo,
   useState,
 } from "react"
-
+import { F0CommandPalette } from "./F0CommandPalette"
 import type {
   CommandEntityRef,
   F0CommandPaletteApi,
   F0CommandPaletteProviderProps,
 } from "./types"
-
-import { F0CommandPalette } from "./F0CommandPalette"
 
 const CommandPaletteContext = createContext<F0CommandPaletteApi | null>(null)
 
@@ -93,7 +91,9 @@ export const CommandPaletteProvider = ({
   const close = useCallback(() => setIsOpen(false), [setIsOpen])
 
   useEffect(() => {
-    if (!shortcut) return
+    if (!shortcut) {
+      return
+    }
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (
@@ -103,7 +103,9 @@ export const CommandPaletteProvider = ({
         return
       }
 
-      if (event.repeat) return
+      if (event.repeat) {
+        return
+      }
       event.preventDefault()
       setInitialScope(null)
       setOpenSeq((sequence) => sequence + 1)

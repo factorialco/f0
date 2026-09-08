@@ -1,11 +1,9 @@
 import type { KeyboardEvent } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
-import type { ResolvedCommandLabels } from "../labels"
 import type { CommandRow } from "../internal-types"
+import type { ResolvedCommandLabels } from "../labels"
 
 type CommandRowActionsProps = {
   labels: ResolvedCommandLabels

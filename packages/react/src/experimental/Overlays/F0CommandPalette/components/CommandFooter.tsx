@@ -1,7 +1,6 @@
 import { Shortcut } from "@/ui/Shortcut"
-
-import type { ResolvedCommandLabels } from "../labels"
 import type { CommandRow, CommandStage } from "../internal-types"
+import type { ResolvedCommandLabels } from "../labels"
 
 type CommandFooterProps = {
   labels: ResolvedCommandLabels
@@ -67,7 +66,9 @@ export const CommandFooter = ({
     band still rendered, which read as a strip of the panel that had failed to
     load rather than as a legend with nothing in it.
   */
-  if (hints.length === 0) return null
+  if (hints.length === 0) {
+    return null
+  }
 
   return (
     <div className="flex items-center justify-center gap-4 border-0 border-t border-solid border-f1-border-secondary px-3.5 py-2 text-sm text-f1-foreground-secondary">

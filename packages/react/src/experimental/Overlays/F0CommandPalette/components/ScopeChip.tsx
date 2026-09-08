@@ -1,7 +1,6 @@
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0Icon, type IconType } from "@/components/F0Icon"
 import { cn } from "@/lib/utils"
-
 import type { CommandEntityAvatar } from "../types"
 
 type ScopeChipProps = {

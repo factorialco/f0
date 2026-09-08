@@ -1,5 +1,4 @@
 import { experimentalComponent } from "@/lib/experimental"
-
 import { CommandPaletteProvider } from "./CommandPaletteProvider"
 
 /**

@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import { Delete, Laptop } from "@/icons/app"
 import {
   act,
@@ -8,15 +7,13 @@ import {
   userEvent,
   zeroRender as render,
 } from "@/testing/test-utils"
-
+import { F0CommandPaletteProvider, useCommandPalette } from ".."
 import type {
   CommandAction,
   CommandEntityProvider,
   CommandEntityRef,
   CommandNavigationItem,
 } from "../types"
-
-import { F0CommandPaletteProvider, useCommandPalette } from ".."
 
 const laptop: CommandEntityRef = {
   type: "device",
@@ -222,7 +219,9 @@ const chipsOf = (field: HTMLElement) =>
 const typeIn = (field: HTMLElement, text: string) => {
   const chips = chipsOf(field)
   for (const node of Array.from(field.childNodes)) {
-    if (!chips.includes(node as Element)) node.remove()
+    if (!chips.includes(node as Element)) {
+      node.remove()
+    }
   }
   const node = document.createTextNode(text)
   field.append(node)
@@ -255,7 +254,9 @@ const caretAfter = (node: Text) => {
  */
 const caretAfterChip = (field: HTMLElement, index: number) => {
   const chip = chipsOf(field)[index]
-  if (!chip) throw new Error(`no chip at ${index}`)
+  if (!chip) {
+    throw new Error(`no chip at ${index}`)
+  }
   const range = document.createRange()
   range.setStartAfter(chip)
   range.collapse(true)
@@ -266,7 +267,9 @@ const caretAfterChip = (field: HTMLElement, index: number) => {
 
 const queryOf = (field: HTMLElement) => {
   const clone = field.cloneNode(true) as HTMLElement
-  for (const chip of clone.querySelectorAll("[data-scope-chip]")) chip.remove()
+  for (const chip of clone.querySelectorAll("[data-scope-chip]")) {
+    chip.remove()
+  }
   return (clone.textContent ?? "").split(ZWSP).join("")
 }
 
@@ -1069,8 +1072,10 @@ describe("remote entity search", () => {
 
   /** A provider that answers when told to, so a test can hold it open. */
   const deferredProvider = () => {
-    let release: (refs: CommandEntityRef[]) => void = () => undefined
-    let reject: () => void = () => undefined
+    // Assigned synchronously by the promise executor below, which runs before
+    // anything can call either of them.
+    let release!: (refs: CommandEntityRef[]) => void
+    let reject!: () => void
     const provider: CommandEntityProvider = {
       type: "device",
       label: "Devices",
@@ -1149,7 +1154,7 @@ describe("remote entity search", () => {
   })
 
   it("ignores an answer that arrives after a newer query", async () => {
-    const answers: Array<(refs: CommandEntityRef[]) => void> = []
+    const answers: ((refs: CommandEntityRef[]) => void)[] = []
     const provider: CommandEntityProvider = {
       type: "device",
       label: "Devices",

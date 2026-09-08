@@ -21,7 +21,9 @@ export const chipsIn = (field: HTMLElement | null): HTMLElement[] =>
  * typed.
  */
 export const textSegments = (field: HTMLElement | null): string[] => {
-  if (!field) return [""]
+  if (!field) {
+    return [""]
+  }
   const segments = [""]
   for (const node of Array.from(field.childNodes)) {
     if (isChip(node)) {
@@ -40,24 +42,35 @@ export const textOf = (field: HTMLElement | null): string =>
   textSegments(field).join("")
 
 const selectionIn = (field: HTMLElement | null): Range | null => {
-  if (!field) return null
+  if (!field) {
+    return null
+  }
   const selection = window.getSelection()
-  if (!selection || selection.rangeCount === 0) return null
+  if (!selection || selection.rangeCount === 0) {
+    return null
+  }
   const range = selection.getRangeAt(0)
   return field.contains(range.startContainer) ? range : null
 }
 
 export const caretOffset = (field: HTMLElement | null): number => {
   const range = selectionIn(field)
-  if (!field || !range) return 0
+  if (!field || !range) {
+    return 0
+  }
   const probe = document.createRange()
   probe.selectNodeContents(field)
   probe.setEnd(range.startContainer, range.startOffset)
   const fragment = probe.cloneContents()
   let out = ""
   for (const node of Array.from(fragment.childNodes)) {
-    if (node.nodeType === Node.TEXT_NODE) out += node.textContent ?? ""
-    else if (node instanceof HTMLElement && !node.matches(CHIP_SELECTOR)) {
+    // Text the reader typed counts; an element counts unless it is a chip,
+    // whose label was never part of the query. Anything else (a comment, a
+    // non-HTML element) contributes nothing.
+    const counts =
+      node.nodeType === Node.TEXT_NODE ||
+      (node instanceof HTMLElement && !node.matches(CHIP_SELECTOR))
+    if (counts) {
       out += node.textContent ?? ""
     }
   }
@@ -67,20 +80,26 @@ export const caretOffset = (field: HTMLElement | null): number => {
 
 export const caretAtStart = (field: HTMLElement | null): boolean => {
   const range = selectionIn(field)
-  if (!range || !range.collapsed) return false
+  if (!range || !range.collapsed) {
+    return false
+  }
   return caretOffset(field) === 0
 }
 
 export const caretAtEnd = (field: HTMLElement | null): boolean => {
   const range = selectionIn(field)
-  if (!range || !range.collapsed) return false
+  if (!range || !range.collapsed) {
+    return false
+  }
   return caretOffset(field) === textOf(field).length
 }
 
 export const caretBeforeChip = (field: HTMLElement | null): boolean => {
   const range = selectionIn(field)
   const chip = field?.querySelector(CHIP_SELECTOR)
-  if (!field || !range || !chip) return false
+  if (!field || !range || !chip) {
+    return false
+  }
   const upToChip = document.createRange()
   upToChip.selectNodeContents(field)
   upToChip.setEndBefore(chip)
@@ -109,12 +128,17 @@ const touchesCaret = (
     }
     between.setEndBefore(chip)
   }
-  if (between.collapsed) return true
+  if (between.collapsed) {
+    return true
+  }
 
-  if (
-    between.startContainer.compareDocumentPosition(between.endContainer) &
-    Node.DOCUMENT_POSITION_PRECEDING
-  ) {
+  // A BITMASK, not a boolean: `compareDocumentPosition` packs its answer into
+  // flags, so the bit has to be picked out and compared rather than tested.
+  const order = between.startContainer.compareDocumentPosition(
+    between.endContainer
+  )
+  // oxlint-disable-next-line sonarjs/bitwise-operators -- compareDocumentPosition returns a bitmask
+  if ((order & Node.DOCUMENT_POSITION_PRECEDING) !== 0) {
     return false
   }
   return strip(between.toString()) === ""
@@ -133,12 +157,16 @@ export const chipIndexAtCaret = (
   side: "before" | "after"
 ): number => {
   const range = selectionIn(field)
-  if (!field || !range || !range.collapsed) return -1
+  if (!field || !range || !range.collapsed) {
+    return -1
+  }
   return chipsIn(field).findIndex((chip) => touchesCaret(range, chip, side))
 }
 
 const stripPhantomBreaks = (field: HTMLElement): void => {
-  for (const br of Array.from(field.querySelectorAll("br"))) br.remove()
+  for (const br of Array.from(field.querySelectorAll("br"))) {
+    br.remove()
+  }
 }
 
 const dropCarrierIfRedundant = (field: HTMLElement): void => {
@@ -146,12 +174,18 @@ const dropCarrierIfRedundant = (field: HTMLElement): void => {
   const range =
     selection && selection.rangeCount > 0 ? selection.getRangeAt(0) : null
   for (const node of Array.from(field.childNodes)) {
-    if (node.nodeType !== Node.TEXT_NODE) continue
+    if (node.nodeType !== Node.TEXT_NODE) {
+      continue
+    }
     const text = node.textContent ?? ""
-    if (!text.includes(ZWSP)) continue
+    if (!text.includes(ZWSP)) {
+      continue
+    }
     const cleaned = strip(text)
 
-    if (cleaned === "") continue
+    if (cleaned === "") {
+      continue
+    }
     const caretHere = range?.startContainer === node
     const before = caretHere
       ? strip(text.slice(0, range.startOffset)).length
@@ -168,7 +202,9 @@ const dropCarrierIfRedundant = (field: HTMLElement): void => {
 }
 
 export const ensureCaretHome = (field: HTMLElement | null): void => {
-  if (!field) return
+  if (!field) {
+    return
+  }
   stripPhantomBreaks(field)
   dropCarrierIfRedundant(field)
   const last = field.lastChild
@@ -194,7 +230,9 @@ export const hasCaretIn = (field: HTMLElement | null): boolean =>
 const tail = (field: HTMLElement): Text => {
   const last = field.lastChild
   if (last && last.nodeType === Node.TEXT_NODE) {
-    if ((last.textContent ?? "") === "") last.textContent = ZWSP
+    if ((last.textContent ?? "") === "") {
+      last.textContent = ZWSP
+    }
     return last as Text
   }
   const node = document.createTextNode(ZWSP)
@@ -203,7 +241,9 @@ const tail = (field: HTMLElement): Text => {
 }
 
 export const caretToEnd = (field: HTMLElement | null): void => {
-  if (!field) return
+  if (!field) {
+    return
+  }
   const node = tail(field)
   const range = document.createRange()
 
@@ -226,9 +266,13 @@ export const editWouldTakeChipFrom = (
   field: HTMLElement | null,
   event: InputEvent
 ): number => {
-  if (!field) return -1
+  if (!field) {
+    return -1
+  }
   const chips = chipsIn(field)
-  if (chips.length === 0) return -1
+  if (chips.length === 0) {
+    return -1
+  }
 
   const ranges: Range[] = []
   for (const staticRange of event.getTargetRanges?.() ?? []) {
@@ -241,7 +285,9 @@ export const editWouldTakeChipFrom = (
     const selection = document.getSelection()
     const range =
       selection && selection.rangeCount > 0 ? selection.getRangeAt(0) : null
-    if (range && !range.collapsed) ranges.push(range)
+    if (range && !range.collapsed) {
+      ranges.push(range)
+    }
   }
 
   return chips.findIndex((chip) =>
@@ -253,19 +299,25 @@ export const textAfterEdit = (
   field: HTMLElement | null,
   event: InputEvent
 ): string => {
-  if (!field) return ""
+  if (!field) {
+    return ""
+  }
   const selection = document.getSelection()
   const range =
     selection && selection.rangeCount > 0 ? selection.getRangeAt(0) : null
   const whole = textOf(field)
-  if (!range) return whole + (event.data ?? "")
+  if (!range) {
+    return whole + (event.data ?? "")
+  }
 
   const side = (which: "before" | "after") => {
     const probe = document.createRange()
     probe.selectNodeContents(field)
-    if (which === "before")
+    if (which === "before") {
       probe.setEnd(range.startContainer, range.startOffset)
-    else probe.setStart(range.endContainer, range.endOffset)
+    } else {
+      probe.setStart(range.endContainer, range.endOffset)
+    }
     const fragment = probe.cloneContents()
     fragment.querySelector?.(CHIP_SELECTOR)?.remove()
     return strip(fragment.textContent ?? "")
@@ -274,11 +326,15 @@ export const textAfterEdit = (
 }
 
 export const setText = (field: HTMLElement | null, text: string): void => {
-  if (!field) return
+  if (!field) {
+    return
+  }
   // EVERY chip survives, not just the first: the chain is React's to render, and
   // this only owns the text around it.
   for (const node of Array.from(field.childNodes)) {
-    if (!isChip(node)) field.removeChild(node)
+    if (!isChip(node)) {
+      field.removeChild(node)
+    }
   }
 
   field.appendChild(document.createTextNode(text === "" ? ZWSP : text))
