@@ -18,6 +18,11 @@ import { getCategoricalColor, getColor } from "../utils/colors"
 import { fixedForwardRef } from "../utils/forwardRef"
 import { ChartConfig, ChartItem } from "../utils/types"
 
+/**
+ * @deprecated Use F0DataChartRadarProps from @/kits/F0DataChart instead.
+ * @removeIn 7.0.0
+ * @migration https://github.com/factorialco/f0/blob/main/packages/react/docs/migrations/f0-radarchart-to-f0datachart.md
+ */
 export type RadarChartProps<K extends ChartConfig> = {
   dataConfig: K
   data: ChartItem<K>[]
@@ -164,4 +169,9 @@ const _RadarChart = <K extends ChartConfig>(
   )
 }
 
+/**
+ * @deprecated Use F0DataChart with `type="radar"` instead.
+ * @removeIn 7.0.0
+ * @migration https://github.com/factorialco/f0/blob/main/packages/react/docs/migrations/f0-radarchart-to-f0datachart.md
+ */
 export const RadarChart = fixedForwardRef(_RadarChart)

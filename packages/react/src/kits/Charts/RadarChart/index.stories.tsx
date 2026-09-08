@@ -5,7 +5,7 @@ import { RadarChart } from "."
 const meta: Meta = {
   title: "Charts/RadarChart",
   component: RadarChart,
-  tags: ["autodocs", "stable", "no-sidebar"],
+  tags: ["autodocs", "deprecated", "no-sidebar"],
   decorators: [
     (Story) => (
       <div className="h-80">
