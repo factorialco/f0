@@ -61,6 +61,7 @@ const _DetailsItemsList = forwardRef<HTMLDivElement, DetailsItemsListProps>(
             {details?.map((item, index) => (
               <React.Fragment key={item.title}>
                 <DetailsItem
+                  id={item.id}
                   title={item.title}
                   key={item.title}
                   content={item.content}
