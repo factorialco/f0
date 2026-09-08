@@ -47,8 +47,14 @@ const makeActionHandler =
     dialogsAlikeStore.removeItem(id)
   }
 
+// `Optional<…>` is built on `Omit`, which does not distribute over a union — it collapses
+// `DialogDefinitionInternal` to the keys both variants share, dropping notification-only ones. So
+// `dismissable` is re-declared here rather than being widened onto the public `DialogDefinition`,
+// where the default variant would advertise a prop its own `Header` already covers.
 const openDialogInternal = (
-  definition: Optional<DialogDefinitionInternal, "id">
+  definition: Optional<DialogDefinitionInternal, "id"> & {
+    dismissable?: boolean
+  }
 ): Promise<DialogActionValue> => {
   return new Promise((resolve) => {
     const id = definition.id || nanoid()
@@ -137,6 +143,7 @@ const notification = (
     title: options.title,
     content: <></>,
     actions: options.actions,
+    dismissable: options.dismissable,
   })
 
 // Notification dialog with confirm + cancel actions (defaults to Ok/Cancel).

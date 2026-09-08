@@ -23,6 +23,12 @@ const meta: Meta<typeof DialogNotificationInternal> = {
       options: dialogNotificationTypes,
       table: { defaultValue: { summary: "info" } },
     },
+    dismissable: {
+      description:
+        'Renders a dismiss (X) control in the top-right corner, so the dialog does not have to spend a button on "Cancel".',
+      control: "boolean",
+      table: { defaultValue: { summary: "false" } },
+    },
     ...getDialogAlikeArgTypes({
       componentName: "dialog",
       include: [
@@ -107,5 +113,28 @@ export const Positive: Story = {
     type: "positive",
     title: "Success",
     description: "Operation completed successfully.",
+  },
+}
+
+/**
+ * With `dismissable`, the notification gets the same close control every other dialog has, so it no
+ * longer needs to spend a button on "Cancel" — the two remaining actions are the real choices.
+ */
+export const Dismissable: Story = {
+  args: {
+    isOpen: true,
+    type: "warning",
+    title: "Unsaved changes",
+    description:
+      "You have unsaved changes. Save them before leaving, or discard them.",
+    dismissable: true,
+    primaryAction: {
+      label: "Save & leave",
+      onClick: () => {},
+    },
+    secondaryAction: {
+      label: "Discard & leave",
+      onClick: () => {},
+    },
   },
 }
