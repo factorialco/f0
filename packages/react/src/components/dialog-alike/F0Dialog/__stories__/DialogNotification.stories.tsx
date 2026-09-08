@@ -23,12 +23,6 @@ const meta: Meta<typeof DialogNotificationInternal> = {
       options: dialogNotificationTypes,
       table: { defaultValue: { summary: "info" } },
     },
-    dismissable: {
-      description:
-        'Renders a dismiss (X) control in the top-right corner, so the dialog does not have to spend a button on "Cancel".',
-      control: "boolean",
-      table: { defaultValue: { summary: "false" } },
-    },
     ...getDialogAlikeArgTypes({
       componentName: "dialog",
       include: [
@@ -38,6 +32,7 @@ const meta: Meta<typeof DialogNotificationInternal> = {
         "secondaryAction",
         "isOpen",
         "onClose",
+        "dismissable",
       ],
     }),
   },
@@ -104,6 +99,7 @@ export const Warning: Story = {
     type: "warning",
     title: "Warning",
     description: "Proceed with caution.",
+    isOpen: false,
   },
 }
 
