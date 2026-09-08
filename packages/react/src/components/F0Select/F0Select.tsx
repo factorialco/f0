@@ -62,14 +62,34 @@ import type {
 } from "./types"
 export * from "./types"
 
+/**
+ * Matches a query against EVERYTHING THE ROW SHOWS, not just its label.
+ *
+ * A row that reads "Spain +34" has to be findable by "34" — a substring, so
+ * the "+" nobody types is optional — and one with a `description` by the words
+ * in it. Matching the label alone made the search quietly ignore half of what
+ * was on screen: the documented contract already claimed descriptions were
+ * matched, and consumers were passing their own `searchFn` to get back
+ * behavior they had been promised.
+ *
+ * Metadata is matched per variant rather than by walking the object, so a new
+ * `F0SelectItemMetadata` variant is a deliberate decision about whether it is
+ * searchable — not something that silently becomes part of the query surface.
+ */
 const defaultSearchFn = (
   option: F0SelectItemProps<string>,
   search?: string
 ) => {
-  return (
-    option.type === "separator" ||
-    !search ||
-    option.label.toLowerCase().includes(search.toLowerCase())
+  if (option.type === "separator" || !search) {
+    return true
+  }
+
+  const query = search.toLowerCase()
+  const metadata =
+    option.metadata?.type === "dialCode" ? option.metadata.dialCode : undefined
+
+  return [option.label, option.description, metadata].some((field) =>
+    field?.toLowerCase().includes(query)
   )
 }
 
@@ -229,18 +249,69 @@ const F0SelectComponent = forwardRef(function Select<
     "disableSelectAll" in props ? props.disableSelectAll : false
   type ActualRecordType = ResolvedRecordType<R>
 
+  /**
+   * SEARCH: whether there is one, and where it goes.
+   *
+   * A search box at the top of the dropdown is extra chrome above the list, so
+   * it has always been something consumers switch on. INSIDE the trigger it
+   * costs nothing — the field is already on screen — so wherever it can live
+   * there it is on by default, and `showSearchBox` is only needed to turn it
+   * off.
+   *
+   * It can live there only when this select renders its own field: `asList`
+   * and a custom `children` trigger have no input to type into, and the
+   * inline variant's trigger is a compact borderless button. Filters keep it in
+   * the dropdown too — the filter picker and the search are one query, and
+   * splitting them puts half of it in the trigger and half in the popup.
+   *
+   * Turning it on by default covers static `options` only, which this
+   * component filters itself. A `source` is searched by the consumer's own
+   * adapter, so a box we switched on for them would be a field that filters
+   * nothing: those keep opting in, and get the inline placement once they do.
+   */
+  const canSearchInTrigger =
+    variant === "field" && !asList && !children && !source?.filters
+  const isSearchEnabled = showSearchBox ?? (canSearchInTrigger && !source)
+  const searchesInTrigger = isSearchEnabled && canSearchInTrigger
+  const searchesInDropdown = isSearchEnabled && !searchesInTrigger
+
   const [openLocal, setOpenLocal] = useState(open)
   const inlineTriggerRef = useRef<HTMLButtonElement>(null)
   const composedTriggerRef = useComposedRefs(ref, inlineTriggerRef)
+  /**
+   * The trigger's CHILD: the button that shows the selection, or the text input
+   * the inline search swaps it for. `inlineTriggerRef` holds the field's
+   * wrapper, which isn't focusable, so this is where focus has to be handed
+   * back when the dropdown closes — the input unmounts with it, and
+   * SelectContent prevents Radix's own focus restoration, which would leave
+   * focus on the body.
+   */
+  const triggerFieldRef = useRef<HTMLElement>(null)
   const previousOpenRef = useRef(openLocal)
   const isApplyingRef = useRef(false)
 
   useEffect(() => {
-    if (variant === "inline" && previousOpenRef.current && !openLocal) {
-      inlineTriggerRef.current?.focus({ preventScroll: true })
+    if (previousOpenRef.current && !openLocal) {
+      if (variant === "inline") {
+        inlineTriggerRef.current?.focus({ preventScroll: true })
+      } else if (searchesInTrigger) {
+        /**
+         * Only when nothing else has taken focus: picking an option leaves it
+         * on a row that is being unmounted, and it lands on the body — but a
+         * close caused by clicking another field must not yank it back here.
+         */
+        const active = document.activeElement
+        const focusIsLoose =
+          active === null ||
+          active === document.body ||
+          !!inlineTriggerRef.current?.contains(active)
+        if (focusIsLoose) {
+          triggerFieldRef.current?.focus({ preventScroll: true })
+        }
+      }
     }
     previousOpenRef.current = openLocal
-  }, [openLocal, variant])
+  }, [openLocal, variant, searchesInTrigger])
 
   const defaultItems = useMemo(
     () =>
@@ -333,9 +404,9 @@ const F0SelectComponent = forwardRef(function Select<
           ? String(mappedOption.value)
           : undefined
       },
-      search: showSearchBox
+      search: isSearchEnabled
         ? {
-            enabled: showSearchBox,
+            enabled: true,
             sync: !source,
           }
         : undefined,
@@ -1198,7 +1269,7 @@ const F0SelectComponent = forwardRef(function Select<
             searchValue={currentSearch}
             onSearchChange={onSearchChangeLocal}
             searchBoxPlaceholder={searchBoxPlaceholder}
-            showSearchBox={showSearchBox}
+            showSearchBox={searchesInDropdown}
             grouping={localSource.grouping}
             currentGrouping={localSource.currentGrouping}
             onGroupingChange={localSource.setCurrentGrouping}
@@ -1224,7 +1295,7 @@ const F0SelectComponent = forwardRef(function Select<
               onChange={handleSelectAllWithTracking}
               hideCheckbox={disableSelectAll}
               items={getDisplayItemsForSelection}
-              paddingTop={!showSearchBox && !localSource.filters}
+              paddingTop={!searchesInDropdown && !localSource.filters}
             />
           )}
         </>
@@ -1247,6 +1318,38 @@ const F0SelectComponent = forwardRef(function Select<
       isLoading={isLoading || loading}
       showLoadingIndicator={!!children}
       portalContainer={effectivePortalContainer}
+      retainTrigger={searchesInTrigger}
+      onEscapeKeyDown={(event) => {
+        /**
+         * Escape drops the QUERY first, and only closes the list on the second
+         * press, once there is nothing left to undo.
+         *
+         * Through Radix's own hook, never the input's `onKeyDown`: the dismiss
+         * runs from a listener on `document` in the CAPTURE phase, so it has
+         * already fired by the time the event reaches anything inside — no
+         * amount of `stopPropagation` from a descendant can get in front of
+         * it. This hook is the one place that can.
+         */
+        if (searchesInTrigger && currentSearch) {
+          event.preventDefault()
+          onSearchChangeLocal("")
+        }
+      }}
+      onPointerDownOutside={(event) => {
+        /**
+         * With the search inside the trigger, the trigger is part of the thing
+         * that is open: clicking into the field to move the caret must not
+         * dismiss the list it is driving.
+         */
+        const target = event.target
+        if (
+          searchesInTrigger &&
+          target instanceof Node &&
+          inlineTriggerRef.current?.contains(target)
+        ) {
+          event.preventDefault()
+        }
+      }}
     />
   )
 
@@ -1266,6 +1369,194 @@ const F0SelectComponent = forwardRef(function Select<
     .map((item) => item.selectedLabel ?? item.label)
     .filter(Boolean)
     .join(", ")
+
+  /**
+   * INLINE SEARCH — the trigger IS the search box.
+   *
+   * While the dropdown is open the field swaps the selection it displays for a
+   * real text input, so the query is typed where the user is already looking
+   * instead of in a second box that opens underneath it. Closed, the field goes
+   * back to the selection with its avatars and tags; open, that selection
+   * becomes the input's placeholder, so it stays readable until the first
+   * keystroke replaces it.
+   */
+  const isSearchingInTrigger = searchesInTrigger && openLocal
+
+  /**
+   * A query never outlives the dropdown it was typed into: the field shows the
+   * selection again on close, and what it reopens on is the whole list.
+   *
+   * On the CLOSE, not while closed — a keystroke on the closed field seeds the
+   * query and opens the dropdown in that order, and "while closed" would wipe
+   * the first character before the input ever mounts.
+   */
+  /**
+   * THE HANDOVER: this input replaces the button the click or the keystroke
+   * landed on, so it has to take focus, or the query would be typed into
+   * nothing.
+   *
+   * From an effect and a timeout, NOT React's `autoFocus`. autoFocus focuses
+   * during the commit, and around an open popup `focus` is patched by the
+   * instrumentation Storybook and the test tooling install — patched into
+   * something that schedules React work. React then throws "Should not already
+   * be working" mid-commit and the select renders nothing at all. The timeout
+   * puts the call after the commit, which is also where the popup's own
+   * opening focus runs: ours lands first, and Radix leaves a trigger-focused
+   * select alone.
+   */
+  useEffect(() => {
+    if (!isSearchingInTrigger) {
+      return
+    }
+
+    const timeout = setTimeout(() => {
+      const field = triggerFieldRef.current
+      if (field && document.activeElement !== field) {
+        field.focus({ preventScroll: true })
+      }
+    }, 0)
+
+    return () => clearTimeout(timeout)
+  }, [isSearchingInTrigger])
+
+  const wasOpenForSearchRef = useRef(openLocal)
+  useEffect(() => {
+    if (searchesInTrigger && wasOpenForSearchRef.current && !openLocal) {
+      setCurrentSearch(undefined)
+    }
+    wasOpenForSearchRef.current = openLocal
+  }, [searchesInTrigger, openLocal, setCurrentSearch])
+
+  /**
+   * What Enter picks: the first option the query left standing. Typing
+   * `light` and carrying straight on is the point of typing in the trigger,
+   * and it can't require arrowing into the list first.
+   */
+  const firstSelectableOption = useMemo(() => {
+    const records =
+      data.type === "grouped"
+        ? data.groups.flatMap((group) => group.records)
+        : data.records
+
+    for (const record of records) {
+      const option = optionMapper(record)
+      if (option.type !== "separator" && !option.disabled) {
+        return option
+      }
+    }
+
+    return undefined
+  }, [data, optionMapper])
+
+  /**
+   * The arrows hand focus over to the list, which is where Radix takes the
+   * navigation from — the same handover the dropdown's own search box makes.
+   * The listbox is whatever the field already points `aria-controls` at, so
+   * it is found through that rather than through a second id of our own.
+   */
+  const focusOptionInList = (
+    field: HTMLElement,
+    position: "first" | "last"
+  ) => {
+    const listboxId = field.getAttribute("aria-controls")
+    const listbox = listboxId ? document.getElementById(listboxId) : null
+    const options = Array.from(
+      listbox?.querySelectorAll<HTMLElement>(
+        '[role="option"]:not([aria-disabled="true"])'
+      ) ?? []
+    )
+    const option =
+      position === "first" ? options[0] : options[options.length - 1]
+
+    option?.scrollIntoView({ block: "nearest" })
+    option?.focus({ preventScroll: true })
+  }
+
+  const clearTriggerSelection = () => {
+    hasUserInteracted.current = true
+    clearSelection()
+    // Clear the cache when clearing selection
+    selectedItemsCache.current.clear()
+    // Call with undefined to indicate no item is selected
+    ;(
+      onChangeSelectedOption as (option: undefined, checked: boolean) => void
+    )?.(undefined, false)
+  }
+
+  const handleTriggerSearchChange = (value: string) => {
+    onSearchChangeLocal(value)
+    if (!openLocal) {
+      handleChangeOpenLocal(true)
+    }
+  }
+
+  const handleTriggerClear = () => {
+    // The text goes first: while the field is a search box, its clear button is
+    // clearing a query, not a selection.
+    if (isSearchingInTrigger && currentSearch) {
+      onSearchChangeLocal("")
+      return
+    }
+
+    clearTriggerSelection()
+  }
+
+  const handleTriggerSearchKeyDown = (
+    event: React.KeyboardEvent<HTMLInputElement>
+  ) => {
+    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      event.preventDefault()
+      focusOptionInList(
+        event.currentTarget,
+        event.key === "ArrowUp" ? "last" : "first"
+      )
+      return
+    }
+
+    if (event.key === "Enter") {
+      // Never a form submit: this input is a select's trigger.
+      event.preventDefault()
+
+      if (!firstSelectableOption) {
+        return
+      }
+
+      const optionValue = String(firstSelectableOption.value)
+      onItemCheckChange(
+        optionValue,
+        multiple ? !localValue.includes(optionValue) : true
+      )
+
+      if (!multiple) {
+        handleChangeOpenLocal(false)
+      }
+    }
+  }
+
+  /**
+   * The CLOSED field takes the first keystroke too. Typing is the way into a
+   * searchable select, so a character opens the dropdown and becomes the query
+   * instead of being swallowed while the input mounts. Space is left alone —
+   * it is how a focused button is pressed.
+   */
+  const handleTriggerKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
+    if (!searchesInTrigger || openLocal) {
+      return
+    }
+
+    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      event.preventDefault()
+      handleChangeOpenLocal(true)
+      return
+    }
+
+    const isModifierKey = event.ctrlKey || event.altKey || event.metaKey
+    if (!isModifierKey && event.key.length === 1 && event.key !== " ") {
+      event.preventDefault()
+      onSearchChangeLocal(event.key)
+      handleChangeOpenLocal(true)
+    }
+  }
 
   const withTriggerTooltip = (trigger: React.ReactNode) => {
     /**
@@ -1377,35 +1668,46 @@ const F0SelectComponent = forwardRef(function Select<
               icon={icon}
               labelIcon={labelIcon}
               hideLabel={hideLabel}
+              inputRef={triggerFieldRef}
+              aria-autocomplete={isSearchingInTrigger ? "list" : undefined}
               value={
-                multiple
-                  ? // For multiple: use count of selected items
-                    Math.max(
-                      localValue.length,
-                      selectionMeta.selectedItemsCount
-                    ).toString()
-                  : // For single: use the selected value directly
-                    (localValue[0] ?? undefined)
+                isSearchingInTrigger
+                  ? // While searching, the field's value IS the query
+                    (currentSearch ?? "")
+                  : multiple
+                    ? // For multiple: use count of selected items
+                      Math.max(
+                        localValue.length,
+                        selectionMeta.selectedItemsCount
+                      ).toString()
+                    : // For single: use the selected value directly
+                      (localValue[0] ?? undefined)
               }
               isEmpty={(value) =>
-                multiple ? !value || +(value ?? 0) === 0 : !value
+                isSearchingInTrigger
+                  ? !value
+                  : multiple
+                    ? !value || +(value ?? 0) === 0
+                    : !value
               }
-              onClear={() => {
-                hasUserInteracted.current = true
-                clearSelection()
-                // Clear the cache when clearing selection
-                selectedItemsCache.current.clear()
-                // Call with undefined to indicate no item is selected
-                ;(
-                  onChangeSelectedOption as (
-                    option: undefined,
-                    checked: boolean
-                  ) => void
-                )?.(undefined, false)
-              }}
-              placeholder={placeholder || ""}
+              onChange={
+                isSearchingInTrigger ? handleTriggerSearchChange : undefined
+              }
+              onClear={handleTriggerClear}
+              placeholder={
+                isSearchingInTrigger
+                  ? /**
+                     * What is selected, held in the placeholder so an open field
+                     * still says what it is set to until the first keystroke
+                     * replaces it. Multiple selection keeps the field's own
+                     * placeholder: the checkmarks in the list are the readable
+                     * answer there, and a joined list of labels is not.
+                     */
+                    (!multiple ? selectedTooltipText : "") || placeholder || ""
+                  : placeholder || ""
+              }
               disabled={disabled}
-              clearable={clearable}
+              clearable={clearable || !!(isSearchingInTrigger && currentSearch)}
               size={effectiveSize}
               loadingIndicator={{
                 asOverlay: true,
@@ -1414,6 +1716,11 @@ const F0SelectComponent = forwardRef(function Select<
               loading={isInitialLoading || loading || isLoading}
               name={name}
               onClickContent={() => {
+                // A click into an open search field is placing the caret, not
+                // toggling the dropdown shut. The arrow still closes it.
+                if (isSearchingInTrigger) {
+                  return
+                }
                 handleChangeOpenLocal(!openLocal)
               }}
               append={
@@ -1421,42 +1728,64 @@ const F0SelectComponent = forwardRef(function Select<
                   open={openLocal}
                   disabled={disabled}
                   size={effectiveSize}
+                  onChange={
+                    isSearchingInTrigger ? handleChangeOpenLocal : undefined
+                  }
                 />
               }
             >
-              <button
-                className="flex w-full items-center justify-between"
-                aria-label={label || placeholder}
-                onClick={(e) => {
-                  e.preventDefault()
-                }}
-              >
-                {(multiple
-                  ? localValue.length > 0 ||
-                    selectionMeta.selectedItemsCount > 0
-                  : !!localValue[0]) && (
-                  <SelectedItems
-                    multiple={multiple}
-                    totalSelectedCount={
-                      multiple
-                        ? Math.max(
-                            localValue.length,
-                            selectionMeta.selectedItemsCount
-                          )
-                        : localValue[0]
-                          ? 1
-                          : 0
-                    }
-                    allSelected={selectedState.allSelected}
-                    selection={getDisplayItemsForSelection}
-                    // The field's own icon already occupies the trigger's glyph
-                    // slot, and the two are drawn in different places — showing
-                    // both put two icons 4px apart on one trigger. Options keep
-                    // their icons for the rows regardless.
-                    hideItemIcon={!!icon}
-                  />
-                )}
-              </button>
+              {isSearchingInTrigger ? (
+                <input
+                  type="text"
+                  autoComplete="off"
+                  spellCheck={false}
+                  className="bg-transparent"
+                  onKeyDown={handleTriggerSearchKeyDown}
+                />
+              ) : (
+                <button
+                  /**
+                   * No outline of its own: the FIELD draws the focus ring, from
+                   * `focus-within` on the wrapper, and this button fills it.
+                   * `reset.css` does the same for `input` and `textarea` and
+                   * stops at buttons, so once the dropdown started handing
+                   * focus back here on close, Chrome drew its own heavy ring
+                   * inside F0's.
+                   */
+                  className="flex w-full items-center justify-between focus-visible:outline-none"
+                  aria-label={label || placeholder}
+                  onKeyDown={handleTriggerKeyDown}
+                  onClick={(e) => {
+                    e.preventDefault()
+                  }}
+                >
+                  {(multiple
+                    ? localValue.length > 0 ||
+                      selectionMeta.selectedItemsCount > 0
+                    : !!localValue[0]) && (
+                    <SelectedItems
+                      multiple={multiple}
+                      totalSelectedCount={
+                        multiple
+                          ? Math.max(
+                              localValue.length,
+                              selectionMeta.selectedItemsCount
+                            )
+                          : localValue[0]
+                            ? 1
+                            : 0
+                      }
+                      allSelected={selectedState.allSelected}
+                      selection={getDisplayItemsForSelection}
+                      // The field's own icon already occupies the trigger's
+                      // glyph slot, and the two are drawn in different places —
+                      // showing both put two icons 4px apart on one trigger.
+                      // Options keep their icons for the rows regardless.
+                      hideItemIcon={!!icon}
+                    />
+                  )}
+                </button>
+              )}
             </F0InputField>
           )}
         </SelectTrigger>

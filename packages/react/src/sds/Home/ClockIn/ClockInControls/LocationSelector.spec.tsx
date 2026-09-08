@@ -176,7 +176,7 @@ describe("LocationSelector", () => {
     // `fireEvent.change`, not `user.type`: the search box is controlled and
     // re-renders per keystroke, which drops characters here — "Barcelona" reached
     // the adapter as "brcelona", and the search then correctly found nothing.
-    fireEvent.change(screen.getByRole("searchbox"), {
+    fireEvent.change(screen.getByRole("combobox"), {
       target: { value: "Barcelona" },
     })
 

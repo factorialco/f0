@@ -34,7 +34,26 @@ type F0SelectPopupProps<T extends string, R = unknown> = {
     checked: boolean
   ) => void
   open?: boolean
+  /**
+   * Whether the options can be searched.
+   *
+   * Defaults to `true` where the search can live INSIDE the trigger — a
+   * `field` select with no filters, no `asList` and no custom `children`
+   * trigger — and the options are static, which this component filters itself.
+   * There the search costs nothing: the field is already on screen, so it is
+   * always on and this prop is only needed to turn it OFF.
+   *
+   * Everywhere else it defaults to `false` and stays opt-in. A `source` is
+   * searched by the consumer's own adapter, so a box switched on for them
+   * would filter nothing; and with filters, or with no field to type into, the
+   * search is a separate box at the top of the dropdown — chrome the consumer
+   * should choose to spend.
+   */
   showSearchBox?: boolean
+  /**
+   * Placeholder for the search box in the dropdown. The inline search reuses
+   * the trigger's own `placeholder`, falling back to the selected label.
+   */
   searchBoxPlaceholder?: string
   onSearchChange?: (value: string) => void
   searchValue?: string
@@ -147,6 +166,12 @@ type F0SelectDataProps<T extends string, R = unknown> =
   | {
       source?: never
       mapOptions?: never
+      /**
+       * Replaces how a query is matched against an option. Without it, an
+       * option matches on anything the row shows: its `label`, its
+       * `description`, and a `metadata` dial code. Static `options` only —
+       * a `source` is searched through its own `fetchData`.
+       */
       searchFn?: (
         option: F0SelectItemProps<T>,
         search?: string
