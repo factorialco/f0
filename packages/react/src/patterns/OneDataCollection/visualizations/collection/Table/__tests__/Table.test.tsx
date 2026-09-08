@@ -3317,7 +3317,7 @@ describe("TableCollection", () => {
       })
       await user.click(engineeringHeading)
 
-      expect(onSelectItems.mock.calls.length).toBe(callCountAfterRender)
+      expect(onSelectItems.mock.calls).toHaveLength(callCountAfterRender)
     })
   })
 

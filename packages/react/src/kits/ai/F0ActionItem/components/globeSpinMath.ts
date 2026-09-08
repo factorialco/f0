@@ -71,6 +71,9 @@ function qRot(ax: number, ay: number, az: number, ang: number): Q {
 // hot loop doesn't allocate a 3-tuple per call (~1100 allocations/frame saved).
 const _scratchV: V = [0, 0, 0]
 
+// Hot path (runs per vertex per frame). Primitives avoid allocating a vector
+// per call.
+// oxlint-disable-next-line max-params
 function rotVecInto(q: Q, x: number, y: number, z: number, out: V): void {
   const w = q[0]
   const qx = q[1]

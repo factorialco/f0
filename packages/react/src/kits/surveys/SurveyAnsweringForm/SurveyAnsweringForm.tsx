@@ -97,18 +97,18 @@ function SurveyAnsweringFormDialog({
     schema,
     defaultValues: formDefaultValues,
     sections,
-  } = useSurveyFormSchema(
+  } = useSurveyFormSchema({
     elements,
     mode,
     t,
     defaultValues,
     currentQuestionId,
-    isStepped ? accumulatedValuesRef.current : undefined,
-    preview,
-    isReadonlyPreview,
+    accumulatedValues: isStepped ? accumulatedValuesRef.current : undefined,
+    previewMode: preview,
+    disableFields: isReadonlyPreview,
     useUpload,
-    datasets
-  )
+    datasets,
+  })
 
   const position: DialogPosition = isFullscreen
     ? "fullscreen"
@@ -417,18 +417,16 @@ function SurveyAnsweringFormInline({
     schema,
     defaultValues: formDefaultValues,
     sections,
-  } = useSurveyFormSchema(
+  } = useSurveyFormSchema({
     elements,
-    "all-questions",
+    mode: "all-questions",
     t,
     defaultValues,
-    undefined,
-    undefined,
-    true,
-    true,
+    previewMode: true,
+    disableFields: true,
     useUpload,
-    datasets
-  )
+    datasets,
+  })
 
   return (
     <SurveyFormBuilderProvider

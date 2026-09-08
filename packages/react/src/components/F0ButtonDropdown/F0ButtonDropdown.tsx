@@ -18,12 +18,15 @@ import {
   F0ButtonDropdownProps,
 } from "./types.ts"
 
+type ButtonDropdownItems =
+  | ButtonDropdownItem[]
+  | ButtonDropdownGroup[]
+  | ButtonDropdownGroup
+
 /**
  * Normalize the items to an array of DropdownButtonGroup
  */
-const normalizeItems = (
-  items: ButtonDropdownItem[] | ButtonDropdownGroup[] | ButtonDropdownGroup
-) => {
+const normalizeItems = (items: ButtonDropdownItems) => {
   if (Array.isArray(items)) {
     // ButtonDropdownItem[]
     if (items.every(isButtonDropdownItem)) {
@@ -75,7 +78,7 @@ const SplitMode = ({
 }: {
   onClick: (value: string, item: ButtonDropdownItem) => void
   value?: string
-  items: ButtonDropdownItem[] | ButtonDropdownGroup[] | ButtonDropdownGroup
+  items: ButtonDropdownItems
   size?: ButtonDropdownSize
   variant?: ButtonDropdownVariant
   disabled?: boolean
@@ -222,7 +225,7 @@ const DropdownMode = ({
   onClick: (value: string, item: ButtonDropdownItem) => void
   trigger?: string
   value?: string
-  items: ButtonDropdownItem[] | ButtonDropdownGroup[] | ButtonDropdownGroup
+  items: ButtonDropdownItems
   size?: ButtonDropdownSize
   variant?: ButtonDropdownVariant
   disabled?: boolean

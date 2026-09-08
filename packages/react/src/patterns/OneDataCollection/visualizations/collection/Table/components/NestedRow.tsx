@@ -41,6 +41,7 @@ import type {
   ColId,
   RowWrapperProps,
   TableColumnDefinition,
+  TableRowRef,
 } from "../types"
 import { AddRowRow } from "./AddRow"
 import { LoadMoreRow } from "./LoadMore"
@@ -126,10 +127,7 @@ const NestedRowContent = <
     NavigationFilters,
     Grouping
   >,
-  externalRef:
-    | ((element: HTMLTableRowElement | null) => void)
-    | React.RefObject<HTMLTableRowElement>
-    | null
+  externalRef: TableRowRef
 ) => {
   const internalRowRef = useRef<HTMLTableRowElement | null>(null)
 
@@ -510,10 +508,7 @@ const NestedRowComponentInner = <
     NavigationFilters,
     Grouping
   >,
-  ref:
-    | ((element: HTMLTableRowElement | null) => void)
-    | React.RefObject<HTMLTableRowElement>
-    | null
+  ref: TableRowRef
 ) => {
   // Provider is mounted at Table level when tableWithChildren is true, so we
   // never wrap here. This keeps expansion state and fetched data in a single
@@ -539,10 +534,7 @@ const NestedRowContentWithRef = forwardRef(NestedRowContent) as <
     NavigationFilters,
     Grouping
   > & {
-    ref?:
-      | ((element: HTMLTableRowElement | null) => void)
-      | React.RefObject<HTMLTableRowElement>
-      | null
+    ref?: TableRowRef
   }
 ) => ReturnType<typeof NestedRowContent>
 

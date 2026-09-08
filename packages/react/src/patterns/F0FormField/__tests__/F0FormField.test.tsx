@@ -551,7 +551,7 @@ describe("F0FormField", () => {
 
       // No help text in the document
       const helpTexts = screen.queryAllByText(/Username/)
-      expect(helpTexts.length).toBe(1) // Only label, no help text
+      expect(helpTexts).toHaveLength(1) // Only label, no help text
     })
   })
 

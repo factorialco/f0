@@ -1487,12 +1487,12 @@ export const WithSynchronousData: Story = {
         fetchData: ({ filters, sortings, navigationFilters }) => {
           // Ensure sortings are properly applied
           return {
-            records: filterUsers(
-              mockUsers,
-              filters,
-              sortings,
-              navigationFilters
-            ),
+            records: filterUsers({
+              users: mockUsers,
+              filterValues: filters,
+              sortingState: sortings,
+              navigationFilters,
+            }),
           }
         },
       },

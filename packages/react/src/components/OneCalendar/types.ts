@@ -22,6 +22,10 @@ export type DateRange = {
 
 export type DateRangeComplete = Required<DateRange>
 
+export type CalendarSelection = Date | DateRange | null
+
+export type OptionalCalendarSelection = CalendarSelection | undefined
+
 export type DateRangeString = {
   from: string
   to?: string

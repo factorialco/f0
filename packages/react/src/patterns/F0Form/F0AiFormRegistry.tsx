@@ -824,6 +824,7 @@ export function F0AiFormRegistryProvider({
   }, [])
 
   const register = useCallback(
+    // oxlint-disable-next-line max-params -- public signature through useF0AiFormRegistry, change with a deprecation
     (
       name: string,
       ref: React.MutableRefObject<F0FormRef | null>,

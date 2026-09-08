@@ -1035,7 +1035,7 @@ describe("SidebarChatList unread navigation", () => {
     expect(
       screen.queryByRole("button", { name: /unread chats? above/ })
     ).not.toBeInTheDocument()
-    expect(MockIntersectionObserver.instances.length).toBe(
+    expect(MockIntersectionObserver.instances).toHaveLength(
       observersBeforeStandalone
     )
   })

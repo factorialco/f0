@@ -38,10 +38,10 @@ describe("index.ts exports", () => {
       formatterOptions: {},
     }
 
-    expect(value.value).toBe(123.45)
-    expect(numeric).toBe(value.value)
+    expect(value.value).toBeCloseTo(123.45)
+    expect(numeric).toBeCloseTo(value.value)
     expect(options.decimalPlaces).toBe(2)
-    expect(withFormatter.numericValue.value).toBe(123.45)
+    expect(withFormatter.numericValue.value).toBeCloseTo(123.45)
   })
 
   it("should allow importing and using exported functions", () => {
@@ -61,7 +61,7 @@ describe("index.ts exports", () => {
   it("should allow importing and using numericFinalValue", () => {
     const value: NumericValue = { value: 123.45 }
     const result = numericFinalValue(value)
-    expect(result).toBe(123.45)
+    expect(result).toBeCloseTo(123.45)
   })
 
   it("should allow importing and using toNumericValue", () => {

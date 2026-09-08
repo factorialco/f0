@@ -626,8 +626,8 @@ describe("BarChart — stacked segment polish", () => {
     const series = getMainSeries()
     for (const entry of series) {
       expect(entry?.emphasis?.focus).toBe("series")
-      expect(entry?.blur?.itemStyle?.opacity).toBe(0.4)
-      expect(entry?.blur?.label?.opacity).toBe(0.4)
+      expect(entry?.blur?.itemStyle?.opacity).toBeCloseTo(0.4)
+      expect(entry?.blur?.label?.opacity).toBeCloseTo(0.4)
     }
   })
 
@@ -652,7 +652,7 @@ describe("BarChart — stacked segment polish", () => {
     // [main, target] — the ghost is a separate series, so `focus: "series"`
     // blurs it too; it must dim to the same 40%.
     const target = getMainSeries()[1]
-    expect(target?.blur?.itemStyle?.opacity).toBe(0.4)
+    expect(target?.blur?.itemStyle?.opacity).toBeCloseTo(0.4)
   })
 
   it("runs the blur cross-fade without animating entrance or updates", () => {
@@ -714,7 +714,7 @@ describe("BarChart — stacked segment polish", () => {
       // just arrives instantly instead of fading.
       expect(getAnimationOptions().stateAnimation?.duration).toBe(0)
       expect(getMainSeries()[0]?.emphasis?.focus).toBe("series")
-      expect(getMainSeries()[0]?.blur?.itemStyle?.opacity).toBe(0.4)
+      expect(getMainSeries()[0]?.blur?.itemStyle?.opacity).toBeCloseTo(0.4)
     })
 
     it("overrides a consumer-provided cross-fade duration", () => {

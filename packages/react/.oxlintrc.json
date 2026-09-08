@@ -285,6 +285,19 @@
     "sonarjs/x-powered-by": "error",
     "sonarjs/xml-parser-xxe": "error",
 
+    // sonarjs rules that were debt and are now fixed.
+    "sonarjs/no-nested-functions": ["error", { "threshold": 5 }], // the default of 4 has 110 hits, most of them JSX callbacks inside hooks
+    "sonarjs/no-identical-functions": "error", // off for stories and tests below, they repeat on purpose
+    "sonarjs/prefer-specific-assertions": "error",
+    "sonarjs/no-redundant-optional": "error",
+    "sonarjs/assertions-in-tests": "error",
+    "sonarjs/no-floating-point-equality": "error",
+    "sonarjs/use-type-alias": "error",
+    "sonarjs/parameterized-tests": "error",
+    "sonarjs/void-use": "error",
+    "sonarjs/no-globals-shadowing": "error",
+    "max-params": ["error", { "max": 4 }], // five or more parameters: move all of them into one options object, do not mix positionals with an object
+
     // eslint-plugin-react, loaded as a JS plugin (`react-js`). It has no type
     // information, so only the syntax-based rules are useful. `f0-react` wraps
     // its jsx-no-leaked-render to check JSX children only, not attributes.
@@ -315,21 +328,8 @@
     "react/rules-of-hooks": "off", // 65 from the _Component naming convention, 414 from story render functions
     "import/named": "off", // nursery rule, false positives
     "import/export": "off", // nursery rule, false positives on export *
-    "sonarjs/cognitive-complexity": "off", // 143
-    "sonarjs/no-nested-functions": "off", // 110 at depth 4, 17 at depth 5
-    "sonarjs/prefer-specific-assertions": "off", // 75
-    "sonarjs/no-identical-functions": "off", // 51
-    "sonarjs/pseudo-random": "off", // 41; Math.random for ids and shuffles, not security
-    "sonarjs/no-redundant-optional": "off", // 35
-    "sonarjs/redundant-type-aliases": "off", // 31; public aliases like type ColId = string
+    "sonarjs/cognitive-complexity": "off", // 187 at the default threshold of 15; first rule of the lint ratchet (next PR)
     "sonarjs/todo-tag": "off", // 26; enabling bans TODO comments
-    "sonarjs/assertions-in-tests": "off", // 23
-    "sonarjs/no-floating-point-equality": "off", // 22
-    "sonarjs/use-type-alias": "off", // 21
-    "sonarjs/parameterized-tests": "off", // 12
-    "sonarjs/super-linear-regex": "off", // 10
-    "sonarjs/void-use": "off", // 10
-    "sonarjs/no-globals-shadowing": "off", // 6; story exports named Error
     "react-js/no-unstable-nested-components": "off", // 25
     "react-js/jsx-no-constructed-context-values": "off", // 35
     "react-js/no-unused-prop-types": "off", // 34
@@ -340,6 +340,9 @@
     "typescript/no-unnecessary-type-assertion": "off", // tsgolint (TS 7 semantics) reports assertions tsc 5.9 still needs; the autofix broke the build
 
     // OFF ON PURPOSE. Not planned to be enabled.
+    "sonarjs/pseudo-random": "off", // Math.random is used for ids and shuffles, never for security
+    "sonarjs/redundant-type-aliases": "off", // aliases like `type ColId = string` name intent, and most are exported
+    "sonarjs/super-linear-regex": "off", // the flagged regexes run on short strings we build ourselves
     "typescript/ban-types": "off", // deprecated upstream; it bans `(string & {})`, which keeps autocomplete on open string unions. no-unsafe-function-type covers the useful part
     "oxc/no-map-spread": "off", // wants Object.assign onto the mapped item, which mutates the input; props and state are immutable here. Its autofix also breaks code (oxlint 1.43)
     "typescript/no-namespace": "off", // namespaces are allowed
@@ -418,7 +421,8 @@
       ],
       "rules": {
         "no-console": "off",
-        "no-await-in-loop": "off" // stories and tests step through flows one await at a time
+        "no-await-in-loop": "off", // stories and tests step through flows one await at a time
+        "sonarjs/no-identical-functions": "off" // each story and test case reads on its own
       }
     },
     {

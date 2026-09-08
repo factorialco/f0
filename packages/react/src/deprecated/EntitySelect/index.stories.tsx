@@ -763,7 +763,7 @@ export const WithDeactivatedEntities = {
   },
 }
 
-export const Error = {
+const ErrorState = {
   args: {
     ...defaultArgs,
     error: "This is an error",
@@ -785,3 +785,6 @@ export const Disabled = {
     disabled: true,
   },
 }
+
+// Exported under the global's name so the story id stays `--error`.
+export { ErrorState as Error }

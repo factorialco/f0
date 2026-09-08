@@ -812,6 +812,30 @@ const OneDataCollectionComp = <
       ? source.bulkActions(selectedItems)
       : undefined
 
+    const settleBulkAction = (
+      bulkAction: BulkActionDefinition,
+      result: Promise<void>
+    ) => {
+      setInternalBulkActionStatus("loading")
+      result.then(
+        () => {
+          setInternalBulkActionStatus("success")
+          // Always wipe on success — prevents already-processed items from
+          // mixing with new selections made during loading.
+          scheduleDismiss(() => {
+            if (!bulkAction.keepSelection) {
+              clearSelectedItems()
+            }
+            setInternalBulkActionStatus("idle")
+          }, !bulkAction.keepSelection)
+        },
+        () => {
+          setInternalBulkActionStatus("error")
+          actionBarRef.current?.wiggle({ errorHighlight: true })
+        }
+      )
+    }
+
     const mapBulkActions = (
       action: BulkActionDefinition | { type: "separator" }
     ): MappedBulkAction => {
@@ -852,24 +876,7 @@ const OneDataCollectionComp = <
             return
           }
 
-          setInternalBulkActionStatus("loading")
-          ;(result as Promise<void>).then(
-            () => {
-              setInternalBulkActionStatus("success")
-              // Always wipe on success — prevents already-processed items from
-              // mixing with new selections made during loading.
-              scheduleDismiss(() => {
-                if (!bulkAction.keepSelection) {
-                  clearSelectedItems()
-                }
-                setInternalBulkActionStatus("idle")
-              }, !bulkAction.keepSelection)
-            },
-            () => {
-              setInternalBulkActionStatus("error")
-              actionBarRef.current?.wiggle({ errorHighlight: true })
-            }
-          )
+          settleBulkAction(bulkAction, result as Promise<void>)
         },
       }
     }

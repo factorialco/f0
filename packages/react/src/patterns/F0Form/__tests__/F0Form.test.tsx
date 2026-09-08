@@ -405,23 +405,19 @@ describe("inferFieldType", () => {
     expect(inferFieldType(schema, config)).toBe("text")
   })
 
-  it("infers number type from ZodNumber", () => {
-    const schema = z.number()
-    const config = { label: "Test", fieldType: "number" } as const
-    expect(inferFieldType(schema, config)).toBe("number")
-  })
-
-  it("infers duration type from explicit fieldType", () => {
-    const schema = z.number()
-    const config = { label: "Test", fieldType: "duration" } as const
-    expect(inferFieldType(schema, config)).toBe("duration")
-  })
-
-  it("infers switch type from ZodBoolean", () => {
-    const schema = z.boolean()
-    const config = { label: "Test", fieldType: "switch" } as const
-    expect(inferFieldType(schema, config)).toBe("switch")
-  })
+  it.each([
+    { fieldType: "number", schema: z.number() },
+    { fieldType: "duration", schema: z.number() },
+    { fieldType: "switch", schema: z.boolean() },
+    { fieldType: "percentage", schema: z.number() },
+    { fieldType: "money", schema: z.number() },
+  ] as const)(
+    "infers $fieldType type from explicit fieldType",
+    ({ fieldType, schema }) => {
+      const config = { label: "Test", fieldType } as const
+      expect(inferFieldType(schema, config)).toBe(fieldType)
+    }
+  )
 
   it("infers textarea from rows config", () => {
     const schema = z.string()
@@ -449,18 +445,6 @@ describe("inferFieldType", () => {
       fieldType: "checkbox",
     } as const
     expect(inferFieldType(schema, config)).toBe("checkbox")
-  })
-
-  it("infers percentage type from explicit fieldType", () => {
-    const schema = z.number()
-    const config = { label: "Test", fieldType: "percentage" } as const
-    expect(inferFieldType(schema, config)).toBe("percentage")
-  })
-
-  it("infers money type from explicit fieldType", () => {
-    const schema = z.number()
-    const config = { label: "Test", fieldType: "money" } as const
-    expect(inferFieldType(schema, config)).toBe("money")
   })
 })
 
