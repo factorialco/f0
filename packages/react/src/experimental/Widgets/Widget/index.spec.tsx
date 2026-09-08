@@ -1,3 +1,4 @@
+/* oxlint-disable react/jsx-no-useless-fragment -- empty fragments are part of the children under test */
 import { screen } from "@testing-library/react"
 import { Fragment } from "react"
 import { afterEach, describe, expect, test, vi } from "vitest"

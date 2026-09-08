@@ -115,27 +115,26 @@ export const HalfYearView = ({
       const selectedMonth = selected.getMonth()
       const selectedHalfYear = getHalfYearFromMonth(selectedMonth)
       return selectedHalfYear === halfYear && selected.getFullYear() === year
-    } else {
-      // Range selection
-      const from = selected.from
-      const to = selected.to
+    }
+    // Range selection
+    const from = selected.from
+    const to = selected.to
 
-      if (from && to) {
-        // Check if any part of the half-year is within the selected range
-        const isWithinRange =
-          isWithinInterval(halfYearRange.from, { start: from, end: to }) ||
-          (!!halfYearRange.to &&
-            isWithinInterval(halfYearRange.to, { start: from, end: to })) ||
-          (isBefore(halfYearRange.from, from) &&
-            !!halfYearRange.to &&
-            isAfter(halfYearRange.to, to))
+    if (from && to) {
+      // Check if any part of the half-year is within the selected range
+      const isWithinRange =
+        isWithinInterval(halfYearRange.from, { start: from, end: to }) ||
+        (!!halfYearRange.to &&
+          isWithinInterval(halfYearRange.to, { start: from, end: to })) ||
+        (isBefore(halfYearRange.from, from) &&
+          !!halfYearRange.to &&
+          isAfter(halfYearRange.to, to))
 
-        return isWithinRange
-      } else if (from) {
-        // Check if the from date is in this half-year
-        const fromHalfYear = getHalfYearFromMonth(from.getMonth())
-        return fromHalfYear === halfYear && from.getFullYear() === year
-      }
+      return isWithinRange
+    } else if (from) {
+      // Check if the from date is in this half-year
+      const fromHalfYear = getHalfYearFromMonth(from.getMonth())
+      return fromHalfYear === halfYear && from.getFullYear() === year
     }
 
     return false

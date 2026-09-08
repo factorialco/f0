@@ -270,21 +270,20 @@ function MetadataItem({ item }: { item: MetadataItem }) {
                           )}
                         />
                       )
-                    } else {
-                      return (
-                        <Tooltip label={action.label} key={`tooltip-${index}`}>
-                          <F0Button
-                            key={`action-${index}`}
-                            size="sm"
-                            variant="neutral"
-                            label={action.label}
-                            hideLabel
-                            icon={action.icon}
-                            onClick={action.onClick}
-                          />
-                        </Tooltip>
-                      )
                     }
+                    return (
+                      <Tooltip label={action.label} key={`tooltip-${index}`}>
+                        <F0Button
+                          key={`action-${index}`}
+                          size="sm"
+                          variant="neutral"
+                          label={action.label}
+                          hideLabel
+                          icon={action.icon}
+                          onClick={action.onClick}
+                        />
+                      </Tooltip>
+                    )
                   })}
                 </motion.div>
               ) : null}

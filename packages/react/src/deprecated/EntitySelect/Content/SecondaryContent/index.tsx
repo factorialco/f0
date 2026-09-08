@@ -77,6 +77,7 @@ export const SecondaryContent = ({
           renderer={(vi) => {
             const current = flattenedList[vi.index]
             if (!current) {
+              // oxlint-disable-next-line react/jsx-no-useless-fragment -- the renderer must return an element
               return <></>
             }
             return (

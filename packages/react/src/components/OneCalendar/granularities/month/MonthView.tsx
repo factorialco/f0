@@ -118,19 +118,18 @@ export function MonthView({
       return (
         selected.getMonth() === monthIndex && selected.getFullYear() === year
       )
-    } else {
-      if (selected.from && selected.to) {
-        const current = new Date(year, monthIndex, 15)
-        return isWithinInterval(current, {
-          start: selected.from,
-          end: selected.to,
-        })
-      } else if (selected.from) {
-        return (
-          selected.from.getMonth() === monthIndex &&
-          selected.from.getFullYear() === year
-        )
-      }
+    }
+    if (selected.from && selected.to) {
+      const current = new Date(year, monthIndex, 15)
+      return isWithinInterval(current, {
+        start: selected.from,
+        end: selected.to,
+      })
+    } else if (selected.from) {
+      return (
+        selected.from.getMonth() === monthIndex &&
+        selected.from.getFullYear() === year
+      )
     }
 
     return false

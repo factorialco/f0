@@ -241,6 +241,7 @@ function toAvailableFormDefinition(
           // Call onSubmit for each section (matching per-section contract)
           const sectionIds = Object.keys(sectionSchemas)
           for (const sectionId of sectionIds) {
+            // oxlint-disable-next-line no-await-in-loop -- sections submit one after another, as the per-section form does
             await (
               originalOnSubmit as F0FormDefinitionPerSection<F0PerSectionSchema>["onSubmit"]
             )({

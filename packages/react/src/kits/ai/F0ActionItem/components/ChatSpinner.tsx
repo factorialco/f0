@@ -52,7 +52,10 @@ const ChatSpinnerComponent = (
 
   // Stable placeholder array for the JSX: one <polygon> per pool slot. We pay
   // the React mount cost ONCE; per-frame updates go straight to the DOM.
-  const placeholders = useMemo(() => new Array(QUAD_POOL_SIZE).fill(0), [])
+  const placeholders = useMemo(
+    () => Array.from({ length: QUAD_POOL_SIZE }, () => 0),
+    []
+  )
 
   const setRefs = (el: HTMLDivElement | null) => {
     wrapperRef.current = el

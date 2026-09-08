@@ -415,19 +415,17 @@ function buildFieldForQuestion(
             q.allowCreate && dataset.onCreate
               ? {
                   ...field,
-                  onCreate: (searchValue: string) => {
-                    return dataset.onCreate!(searchValue).then(
-                      (record) => {
-                        const option = dataset.mapOptions(record)
-                        ;(onChange as (value: unknown) => void)(option.value)
-                      },
-                      (err: unknown) => {
-                        console.warn(
-                          "[SurveyAnsweringForm] onCreate failed:",
-                          err
-                        )
-                      }
-                    )
+                  onCreate: async (searchValue: string) => {
+                    try {
+                      const record = await dataset.onCreate!(searchValue)
+                      const option = dataset.mapOptions(record)
+                      ;(onChange as (value: unknown) => void)(option.value)
+                    } catch (err) {
+                      console.warn(
+                        "[SurveyAnsweringForm] onCreate failed:",
+                        err
+                      )
+                    }
                   },
                 }
               : field

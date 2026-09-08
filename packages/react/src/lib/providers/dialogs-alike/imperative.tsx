@@ -135,7 +135,7 @@ const notification = (
     description: options.msg,
     id: options.id || nanoid(),
     title: options.title,
-    content: <></>,
+    content: null,
     actions: options.actions,
   })
 

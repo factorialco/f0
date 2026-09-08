@@ -76,19 +76,18 @@ function applyEnhancedText(
       highlightFrom: 1,
       highlightTo: Math.max(1, docSize - 1),
     }
-  } else {
-    editor
-      .chain()
-      .focus()
-      .deleteRange({ from, to })
-      .insertContent(enhancedText)
-      .run()
-    // After insertion, cursor is at the end of inserted content
-    const highlightTo = editor.state.selection.to
-    return {
-      highlightFrom: from,
-      highlightTo,
-    }
+  }
+  editor
+    .chain()
+    .focus()
+    .deleteRange({ from, to })
+    .insertContent(enhancedText)
+    .run()
+  // After insertion, cursor is at the end of inserted content
+  const highlightTo = editor.state.selection.to
+  return {
+    highlightFrom: from,
+    highlightTo,
   }
 }
 

@@ -307,6 +307,7 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
       for (const sectionId of ids) {
         const sectionForm = sectionForms[sectionId]
         if (sectionForm) {
+          // oxlint-disable-next-line no-await-in-loop -- sections submit in order and a rejection stops the step
           await sectionForm.submit()
         }
       }

@@ -407,9 +407,8 @@ export const TableCollection = <
           field: columnSorting,
           order: "desc",
         }
-      } else {
-        return null
       }
+      return null
     })
   }
 
