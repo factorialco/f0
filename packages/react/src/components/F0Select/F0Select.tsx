@@ -1530,8 +1530,6 @@ const F0SelectComponent = forwardRef(function Select<
       if (!multiple) {
         handleChangeOpenLocal(false)
       }
-
-      return
     }
   }
 
