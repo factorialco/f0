@@ -1008,32 +1008,32 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
                 transitionTimingFunction: MAP_PANEL_TIMING.enter.easing,
               }}
             >
-              <MapControlCard>
-                <div
-                  className="flex items-center gap-1"
-                  // The addon shares the toggle's fate while the panel covers
-                  // them: still there for the cursor, out of reach for the
-                  // keyboard and assistive tech. `inert` is set by hand, as
-                  // the panel does: React's types do not know it yet.
-                  aria-hidden={listPanelOpen || undefined}
-                  ref={(node) => {
-                    if (listPanelOpen) node?.setAttribute("inert", "")
-                    else node?.removeAttribute("inert")
-                  }}
-                >
-                  <F0MapSidebarToggle
-                    expanded={false}
-                    onToggle={onSidebarToggle}
-                    // The panel's own toggle has taken over; this one only stays
-                    // to hold the cursor, so it must not be tabbable or
-                    // announced.
-                    inactive={listPanelOpen}
-                    // Sharing a card with the addon: the card is this wrapper's.
-                    bare
-                  />
-                  {sidebarToggleAddon}
-                </div>
-              </MapControlCard>
+              <div
+                // Two cards, the shared gap apart: the toggle on its own, the
+                // addon on its own, so each reads as one control.
+                className="flex items-start gap-2"
+                // The addon shares the toggle's fate while the panel covers
+                // them: still there for the cursor, out of reach for the
+                // keyboard and assistive tech. `inert` is set by hand, as the
+                // panel does: React's types do not know it yet.
+                aria-hidden={listPanelOpen || undefined}
+                ref={(node) => {
+                  if (listPanelOpen) node?.setAttribute("inert", "")
+                  else node?.removeAttribute("inert")
+                }}
+              >
+                <F0MapSidebarToggle
+                  expanded={false}
+                  onToggle={onSidebarToggle}
+                  // The panel's own toggle has taken over; this one only stays
+                  // to hold the cursor, so it must not be tabbable or
+                  // announced.
+                  inactive={listPanelOpen}
+                />
+                {sidebarToggleAddon && (
+                  <MapControlCard>{sidebarToggleAddon}</MapControlCard>
+                )}
+              </div>
             </div>
           )}
 

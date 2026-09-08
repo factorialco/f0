@@ -1,9 +1,9 @@
 import { F0AvatarList } from "@/components/avatars/F0AvatarList"
 import { F0Icon } from "@/components/F0Icon"
-import { F0Text } from "@/components/F0Text"
 import { Pin } from "@/icons/app"
 import { cn, focusRing } from "@/lib/utils"
 import { Counter } from "@/ui/Counter"
+import { Text } from "@/ui/Text"
 
 /** The people a "not on map" count stands for, when it can show them. */
 export type MapNotOnMapAvatar = {
@@ -48,7 +48,7 @@ export const MapNotOnMapButton = ({
     aria-label={ariaLabel}
     data-testid={dataTestId}
     className={cn(
-      "flex h-8 items-center gap-2 rounded-md pl-1 pr-1.5",
+      "flex h-8 items-center gap-2 rounded-md pl-2 pr-2.5",
       "hover:bg-f1-background-hover",
       focusRing()
     )}
@@ -67,9 +67,14 @@ export const MapNotOnMapButton = ({
       </span>
     )}
     <span className="whitespace-nowrap">
-      {/* `small`: the label weight in secondary, which F0Text has no colour
-          prop to ask for otherwise. The panel's own header keeps `label`. */}
-      <F0Text variant="small" content={title} markdown={false} />
+      {/* The label variant in secondary. F0Text takes no colour, so this is the
+          primitive it wraps, with the one class it cannot be given. */}
+      <Text
+        variant="label"
+        content={title}
+        markdown={false}
+        className="text-f1-foreground-secondary"
+      />
     </span>
     <Counter value={count} size="sm" />
   </button>

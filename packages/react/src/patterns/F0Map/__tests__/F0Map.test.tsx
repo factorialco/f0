@@ -694,8 +694,13 @@ describe("F0Map", () => {
 
       const addon = screen.getByRole("button", { name: "Addon" })
       const toggle = screen.getByRole("button", { name: "Show panel" })
-      // Same row, toggle first.
-      expect(addon.parentElement).toBe(toggle.parentElement)
+      // Same row, each on a card of its own, toggle first.
+      const row = toggle.closest(".flex.items-start")
+      expect(row).not.toBeNull()
+      expect(row).toContainElement(addon)
+      expect(addon.closest(".backdrop-blur-md")).not.toBe(
+        toggle.closest(".backdrop-blur-md")
+      )
       expect(
         toggle.compareDocumentPosition(addon) & Node.DOCUMENT_POSITION_FOLLOWING
       ).toBeTruthy()
