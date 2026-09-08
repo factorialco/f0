@@ -398,7 +398,7 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
   // down on toggle), so it reads the current style and viewport through refs.
   const styleRef = useRef(style)
   styleRef.current = style
-  const appliedStyleRef = useRef<typeof style | null>(null)
+  const appliedStyleRef = useRef<unknown>(null)
   const viewportRef = useRef(initialViewport ?? DEFAULT_VIEWPORT)
 
   useEffect(() => {
