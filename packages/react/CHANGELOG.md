@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.90.0](https://github.com/factorialco/f0/compare/f0-react-v6.89.0...f0-react-v6.90.0) (2026-09-08)
+
+
+### Features
+
+* **F0Dialog:** optional dismiss control on the notification variant ([#5457](https://github.com/factorialco/f0/issues/5457)) ([148d1d3](https://github.com/factorialco/f0/commit/148d1d3dd2c1d317c3d21555da4acbac3fdd477f))
+
 ## [6.89.0](https://github.com/factorialco/f0/compare/f0-react-v6.88.5...f0-react-v6.89.0) (2026-09-08)
 
 
