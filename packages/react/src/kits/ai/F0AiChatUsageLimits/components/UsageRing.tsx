@@ -6,16 +6,11 @@ const STROKE_WIDTH = 2.5
 export type UsageRingTone = "default" | "exhausted" | "unlimited"
 
 type UsageRingProps = {
-  /** 0–100, already clamped by the caller. Ignored when the tone is unlimited. */
   percentage: number
   tone: UsageRingTone
 }
 
-/**
- * Compact radial gauge used as the usage-limits popover trigger. Purely
- * decorative: the owning button carries the accessible name. An unlimited
- * allowance shows a full neutral ring, since there is no share to report.
- */
+/** Decorative: the owning button carries the accessible name. */
 export const UsageRing = ({ percentage, tone }: UsageRingProps) => {
   const center = VIEWBOX_SIZE / 2
   const radius = center - STROKE_WIDTH / 2

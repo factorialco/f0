@@ -22,13 +22,8 @@ const UsageSkeleton = () => (
 )
 
 /**
- * The One usage-limits popover with its ring trigger. Shows the viewer's own
- * allowance as a percentage and, for hosts that pass them, extra rows (company
- * pool…) plus a "Your company" link. Headless: the host resolves the numbers and
- * refetches on `onOpenChange(true)`.
- *
- * Designed for the composer's disclaimer row (`F0AiChatTextArea`'s
- * `disclaimerEnd` slot), hence `side` defaults to `"top"`.
+ * Headless usage-limits popover with its ring trigger, meant for the
+ * `disclaimerEnd` slot of `F0AiChatTextArea`.
  */
 export const F0AiChatUsageLimitsButton = ({
   usage,
@@ -91,9 +86,8 @@ export const F0AiChatUsageLimitsButton = ({
         sideOffset={8}
         collisionPadding={12}
         tabIndex={-1}
-        // Radix would focus the first tabbable child, drawing a focus ring on
-        // the "Your company" row of a popover the user opened with the mouse.
-        // Focus the card itself instead: Tab still reaches the row next.
+        // Radix would focus the first tabbable child, painting a focus ring on
+        // "Your company" after a mouse click.
         onOpenAutoFocus={(event) => {
           event.preventDefault()
           contentRef.current?.focus()

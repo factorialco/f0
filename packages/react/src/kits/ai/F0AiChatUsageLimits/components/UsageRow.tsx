@@ -2,18 +2,11 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
 type UsageRowProps = {
-  /** Already-localized row label. */
   label: string
-  /** 0–100, already clamped by the caller. Ignored when unlimited. */
   percentage: number
-  /** No cap applies: the value reads "Unlimited" and the bar is a full neutral track. */
   unlimited?: boolean
 }
 
-/**
- * Label + "N% used" + a bar. The bar turns red once the allowance is gone so
- * the exhausted state reads at a glance, matching the ring trigger.
- */
 export const UsageRow = ({
   label,
   percentage,
