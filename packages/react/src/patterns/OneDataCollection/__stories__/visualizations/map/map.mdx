@@ -1,0 +1,388 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks"
+
+import * as MapStories from "./map.stories"
+
+<Meta title="Data Collection/Visualizations/Map" />
+
+# Map Visualization
+
+## Introduction
+
+The Map visualization projects each record onto a coordinate and renders it as a
+marker, driven by the same toolbar (filters, search, view switcher) as every
+other view. Reading a record's position is the only required option; everything
+about how a marker looks belongs to `F0Map`.
+
+The camera follows the collection: applying a filter or typing in the search box
+reframes to the markers left (the set matching every active filter and the
+search term), selecting a marker centres it at the current zoom, and dropping
+the selection or clearing the search returns to the overview.
+
+## Examples
+
+<Canvas of={MapStories.BasicMapVisualization} />
+
+## Setting Up Map Visualization
+
+To enable the Map visualization in your data collection component, provide the
+`type: "map"` in the `visualizations` prop:
+
+```tsx
+<OneDataCollection
+  source={dataSource}
+  visualizations={[
+    {
+      type: "map",
+      options: {
+        coordinates: (item) => [item.longitude, item.latitude],
+        label: (item) => item.name,
+      },
+    },
+  ]}
+/>
+```
+
+The map does no geocoding. Resolve coordinates server-side and read them in
+`coordinates`. A record that returns `null` draws no marker but is not lost: it
+is listed under **Not on map** in the side panel and counted on the map surface
+(see [Not on map](#not-on-map) below). Return `{ kind: "incomplete" }` instead
+when the record _should_ have a location and does not, so the collection keeps
+the distinction even though the view does not yet draw it.
+
+## Map Properties
+
+```ts
+type MapVisualizationOptions<T> = {
+  /**
+   * A record's `[longitude, latitude]`, or what stands in for one. `null` means
+   * "not on the map, no reason given"; a `MapUnplaced` says why. Either way the
+   * record is kept: listed under "Not on map" in the panel and counted on the
+   * map surface, never silently dropped.
+   */
+  coordinates: (record: T) => [number, number] | null | MapUnplaced
+  /**
+   * Label rendered beside the marker. Omitted means an unlabelled pin.
+   */
+  label?: (record: T) => string
+  /**
+   * Semantic marker variant (`default` / `workplace` / `employee` / ...).
+   * Defaults to `default` for every record.
+   */
+  marker?: (record: T) => F0MapMarkerVariantProps
+  /**
+   * A record's id. Defaults to `String(record.id)`, like the graph view.
+   */
+  getRecordId?: (record: T) => string
+  /**
+   * Controlled selection: the id of the selected record, or `null` for none.
+   */
+  selectedRecordId?: string | null
+  /**
+   * Fired when the selection changes: a marker click, a reveal, or `null` when
+   * the selection is cleared.
+   */
+  onSelect?: (record: T | null) => void
+  /**
+   * Reveal a record: the camera flies to its marker and selects it.
+   */
+  revealRecordId?: string | null
+  /**
+   * Region of the map covered by external chrome, typically a side panel.
+   */
+  viewportInset?: F0MapViewportInset
+  /**
+   * Initial camera. Defaults to framing every marker.
+   */
+  initialViewport?: F0MapViewport
+  /**
+   * Show the navigation controls (locate / fit / zoom). Defaults to `true`.
+   */
+  showControls?: boolean
+  /**
+   * Fired when the panel toggle is pressed, with the state it moved to. The
+   * toggle is always offered; this is what tells you it was used.
+   */
+  onSidebarToggle?: (expanded: boolean) => void
+  /**
+   * Map projection. Defaults to `"mercator"`.
+   */
+  projection?: F0MapProjection
+  /**
+   * Markers to request in one page, capped at the map's recommended ceiling.
+   */
+  markerLimit?: number
+  /**
+   * Accessible label for the map region.
+   */
+  ariaLabel?: string
+  /**
+   * Content of the map's side panel, the one the toggle opens. Called with the
+   * very records the map is drawing markers for, so the list beside the map
+   * can never disagree with it.
+   */
+  sidebar?: (records: T[], api: MapSidebarApi<T>) => ReactNode
+  /**
+   * Text the panel's own search matches a record against - a name, a role, a
+   * workplace, whatever its row shows. Given it, the panel's header carries a
+   * search over the rows it lists; left out, no search is offered.
+   */
+  sidebarSearchText?: (record: T) => string
+  /**
+   * Content of a second panel, beside the first rather than over it. Called
+   * with the selected record, and shown for as long as something is selected.
+   */
+  detail?: (record: T, api: MapSidebarApi<T>) => ReactNode
+}
+
+/** A record the map cannot place, and why. */
+type MapUnplaced = {
+  /**
+   * `incomplete`: the record should have a location and does not - an unfilled
+   * or ungeocodable address. The case somebody can go and fix.
+   */
+  kind: "incomplete"
+}
+
+/** Selection handles handed to the panels, so their content drives the map. */
+type MapSidebarApi<T> = {
+  /** Select a record (or clear with `null`), exactly as a marker click would. */
+  select: (record: T | null) => void
+  /** Id of the selected record, or `null`. */
+  selectedRecordId: string | null
+  /**
+   * What the map did with this record: `"placed"` when it has a marker,
+   * `"unplaced"` when `coordinates` gave `null` with no reason, or the `kind`
+   * it gave when it did. Asked per record, so it still answers in the flat
+   * list a panel search produces.
+   */
+  placement: (record: T) => "placed" | "unplaced" | MapUnplaced["kind"]
+}
+```
+
+## Complete Example
+
+```tsx
+<OneDataCollection
+  source={dataSource}
+  visualizations={[
+    {
+      type: "map",
+      options: {
+        coordinates: (item) => [item.longitude, item.latitude],
+        label: (item) => item.name,
+        marker: () => ({ variant: "workplace" }),
+        getRecordId: (item) => item.slug,
+        initialViewport: { center: [2.154, 41.39], zoom: 11 },
+        showControls: true,
+        projection: "mercator",
+        ariaLabel: "Workplaces map",
+      },
+    },
+    tableVisualization,
+  ]}
+/>
+```
+
+## Marker variants
+
+Markers are semantic: `marker` returns a variant and its data, and `F0Map` fixes
+everything about how it looks - color, size, label placement and the selected
+state - so markers stay uniform across the map. Omitting `marker` gives every
+record the `default` pin.
+
+- **`default`** - a plain colored pin, no icon or avatar. The generic marker.
+- **`workplace`** - a building glyph on a fixed brand hue, so every site reads
+  the same.
+- **`employee`** - a person avatar in its own identity color. Takes `firstName`,
+  `lastName` and an optional `src` photo.
+- **`company`** - a company avatar. Takes `name` and an optional `src`.
+- **`stop`** - a lettered route stop (A, B, C...), on the same fixed hue as the
+  route and arc lines it punctuates. Takes `letter`.
+
+`workplace` and `company` render as rounded squares (the entity shape);
+`default`, `employee` and `stop` stay circular.
+
+```tsx
+{
+  type: "map",
+  options: {
+    coordinates: (item) => item.position,
+    marker: (item) =>
+      item.kind === "office"
+        ? { variant: "workplace" }
+        : {
+            variant: "employee",
+            firstName: item.firstName,
+            lastName: item.lastName,
+            src: item.avatarUrl,
+          },
+  },
+}
+```
+
+<Canvas of={MapStories.MarkerVariants} />
+
+Pick the variant that matches what the record is: `workplace` for sites,
+`employee` / `company` for people and orgs. The fixed colors are what keep the
+categories readable at a glance.
+
+## Selection
+
+Selecting a marker grows it to a pinned, lifted state, and neighbours it would
+cover fold to a dot until it is deselected.
+
+- `onSelect` fires with the record on a marker click, on a reveal, and with
+  `null` when the selection is cleared.
+- `selectedRecordId` makes the selection controlled, so something outside the
+  map can end one. Left out, the map keeps its own selection and nothing else
+  can clear it.
+- Leaving the map drops the selection: switching to another view unmounts the
+  visualization, and the selection does not come back on return.
+
+## Side panels
+
+The map can carry two panels, both on its own surface and both fed by the
+collection:
+
+- `sidebar` renders the rows of the list beside the map, opened by the toggle in
+  the map's top-left corner. The panel is split into two collapsible sections
+  the visualization draws itself, **Not on map** first and **On map** second,
+  and `sidebar` is called once per section with that section's records - the
+  same records the markers stand for, one load, one page, so the list and the
+  map can never drift apart as filters and the search narrow the set. The
+  visualization owns the scrolling: return rows, not a scroll container.
+  `onSidebarToggle` reports the toggle. **Not on map** opens collapsed - a
+  header and a count until somebody asks for it - and the count on the map
+  surface is what asks.
+
+  The panel's header row carries a search at its start and the toggle at its
+  far end - the edge the panel is pushing back. The search is ghost rather than
+  the toolbar's bordered box, and it opens into the width the row has left
+  rather than a fixed one. It filters the rows the panel already holds and
+  leaves the markers alone - the toolbar's search is the one that narrows the
+  whole view - and while something is typed the two sections flatten into one
+  list of matches: on the map or not, a result is a result. Offered when
+  `sidebarSearchText` says what to match a record against.
+
+- `detail` is a second panel that slides in beside the list rather than over
+  it, following the selection - so it opens from a row click and a marker click
+  alike.
+
+Both are handed a `select` / `selectedRecordId` pair, which is what lets a row
+drive the map's own selection, and a `placement(record)` that answers `"placed"`,
+`"unplaced"` or the `kind` `coordinates` gave for turning the record down - so a
+row can say why it has no pin, in the words its reason deserves. The rows are
+yours, so that copy is yours: the story marks an unplaced row with a pin-off
+icon whose tooltip differs for a record that never had a location and one whose
+address is unfinished. With a `detail` panel in play a click on the map
+background no longer clears the selection - dismissal becomes deliberate:
+the panel's own close button, or Escape.
+
+The story below is the view in a real page: the app frame, the page header and
+its tabs, the collection's toolbar, and both panels over the map.
+
+<Canvas of={MapStories.InApp} />
+
+## Not on map
+
+A record with no usable coordinate is still a record. Dropping it from the map
+with no trace would make the toolbar's count and the map disagree, and would
+hide exactly the records most likely to need attention. So the map never drops
+one silently, and it needs no opting in:
+
+- **Every unplaced record is listed** in the panel's **Not on map** section,
+  ahead of **On map**. The section is left out entirely when nothing is
+  unplaced, not shown as an empty header.
+- **The map counts them** with a control beside the panel toggle: the section's
+  name, then the records as an avatar list when they are all people - three
+  faces, and a "+N" for any beyond them (a mixed set gets a plain counter
+  instead). Pressing it opens the panel with the **Not on map** section
+  expanded, whatever state it was left in, and clears the panel's own search on
+  the way, since a filtered list could hold none of the records it is pointing
+  at. It hides with the toggle while the panel is open, and is absent when the
+  count is zero.
+- **One treatment, for now.** A bare `null` ("no reason given") and
+  `{ kind: "incomplete" }` (the record should have had a location) are listed
+  the same way. The kind is kept so the distinction can be drawn later without
+  changing consumers - a remote employee and a missing address are not the same
+  problem, but the view does not yet say so.
+- **Selecting one opens its detail, and moves no camera.** There is no marker to
+  fly to, so the camera stays where it is, and dropping that selection later
+  does not zoom back out either - nothing was zoomed in. A search reveal of an
+  unplaced record behaves the same way: selected, not flown to.
+- **The toolbar count is unchanged.** It counts records and is shared across
+  views; the map explains its own delta instead.
+
+Known limitation: in the WebGL fallback the panels and the toggle are not
+rendered, so unplaced records are not reachable there. Records left undrawn by
+`markerLimit` do not join the section yet; the name leaves room for them.
+
+## Camera behaviour
+
+The camera is driven by the collection, not by the map alone:
+
+- **On load**, it frames every marker.
+- **On filter or search**, it reframes to the markers left, once the new records
+  have actually arrived. Both narrow the same query, so the markers and the
+  `sidebar` panel always show the same records. A query that does not change
+  what is drawn leaves the camera alone.
+- **On marker click**, it centres the marker at the current zoom, so a click
+  never changes how far in the user was.
+- **On a reveal**, `revealRecordId` flies to one marker and selects it - for
+  picking a single record out of the search results rather than narrowing to
+  them. Pair it with the collection's `searchSelectionNonce` so picking the same
+  record twice flies again. Give the source a `searchPreview` and the header
+  search offers those records as a results dropdown - a face, a name and a
+  position, the same typeahead the graph view has - and its `onSelect` is where
+  `revealRecordId` comes from.
+- **On clearing** a selection or a search, it returns to the overview, but only
+  when the camera had actually flown in. After a plain click there is no zoom to
+  undo, and reframing would be a jump the user never asked for.
+
+`viewportInset` reports a region of the map covered by external chrome, so every
+camera move targets the free area instead of the covered one. The map's own
+`sidebar` and `detail` panels are already accounted for - it knows how wide they
+are and what is open, so the camera frames into whatever is left beside them
+without being told.
+
+## Clustering
+
+Clustering is **automatic** - it is how the map behaves, not something you turn
+on. Nearby markers gather as you zoom out and separate as you zoom in; there is
+no option to think about. Lone markers only merge when nearly touching, but once
+a cluster forms it absorbs its neighbours, so dense pockets collapse into one
+pile instead of a ring of stray pins. Clicking a cluster flies to its bounds, so
+every member stays in view.
+
+Pass the full record set and let the map manage overlap rather than thinning it
+by hand.
+
+## Labels
+
+Keep labels to a place or person name, two to four words, never a sentence. The
+map runs a collision pass and drops labels in dense areas automatically, so do
+not rely on them being visible at low zoom.
+
+## Accessibility
+
+- The **synchronized list is the text alternative**, not decoration. A WebGL
+  canvas is opaque to assistive tech, so screen-reader and keyboard users
+  operate the map through the list, where activating an item selects it and
+  flies to it.
+- A **skip-to-list** link jumps past the canvas, and an `aria-live` region
+  announces the marker count.
+- If WebGL is unavailable the list becomes the **visible fallback**, and a
+  tile-load failure shows a retry banner.
+- Pass `ariaLabel` to name the map region for what this collection actually
+  shows.
+
+## Marker limits
+
+A map is a single canvas, not a paginated surface, so it requests one page big
+enough to hold every marker it can usefully draw rather than the page size a
+table would use. Markers are DOM elements, so `markerLimit` is capped at the
+map's recommended ceiling; a collection with more records than that shows the
+first page of them.
+
+`maplibre-gl` is heavy and needs a WebGL context, so avoid putting more than one
+map on a page.

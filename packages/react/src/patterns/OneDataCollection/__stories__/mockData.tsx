@@ -50,10 +50,12 @@ import {
   BulkActionsDefinition,
   DataCollectionBaseFetchOptions,
   DataCollectionDataAdapter,
+  type SearchPreview,
   useDataCollectionSource,
 } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
 import {
   FilterDefinition,
+  FiltersDefinition,
   FiltersState,
   PresetsDefinition,
 } from "@/patterns/OneFilterPicker"
@@ -362,6 +364,115 @@ export class MockDataCache<T extends MockUser> {
 
 // Mock data
 export const mockUsers = generateMockUsers(10)
+
+/**
+ * Real `[longitude, latitude]` pairs for the map visualization's demo data.
+ * Mock users carry no location of their own, so each one is placed in the city
+ * at its index - real places, so the map reads like production data.
+ */
+export const MAP_CITIES_MOCK: {
+  name: string
+  country: string
+  at: [number, number]
+}[] = [
+  { name: "Barcelona", country: "Spain", at: [2.1734, 41.3851] },
+  { name: "Madrid", country: "Spain", at: [-3.7038, 40.4168] },
+  { name: "Valencia", country: "Spain", at: [-0.3763, 39.4699] },
+  { name: "Seville", country: "Spain", at: [-5.9845, 37.3891] },
+  { name: "Bilbao", country: "Spain", at: [-2.935, 43.263] },
+  { name: "Lisbon", country: "Portugal", at: [-9.1393, 38.7223] },
+  { name: "Porto", country: "Portugal", at: [-8.6109, 41.1496] },
+  { name: "Paris", country: "France", at: [2.3522, 48.8566] },
+  { name: "Lyon", country: "France", at: [4.8357, 45.764] },
+  { name: "Marseille", country: "France", at: [5.3698, 43.2965] },
+  { name: "Toulouse", country: "France", at: [1.4442, 43.6047] },
+  { name: "London", country: "United Kingdom", at: [-0.1276, 51.5072] },
+  { name: "Manchester", country: "United Kingdom", at: [-2.2426, 53.4808] },
+  { name: "Dublin", country: "Ireland", at: [-6.2603, 53.3498] },
+  { name: "Edinburgh", country: "United Kingdom", at: [-3.1883, 55.9533] },
+  { name: "Amsterdam", country: "Netherlands", at: [4.9041, 52.3676] },
+  { name: "Rotterdam", country: "Netherlands", at: [4.4777, 51.9244] },
+  { name: "Brussels", country: "Belgium", at: [4.3517, 50.8503] },
+  { name: "Cologne", country: "Germany", at: [6.9603, 50.9375] },
+  { name: "Berlin", country: "Germany", at: [13.405, 52.52] },
+  { name: "Hamburg", country: "Germany", at: [9.9937, 53.5511] },
+  { name: "Munich", country: "Germany", at: [11.582, 48.1351] },
+  { name: "Frankfurt", country: "Germany", at: [8.6821, 50.1109] },
+  { name: "Zurich", country: "Switzerland", at: [8.5417, 47.3769] },
+  { name: "Geneva", country: "Switzerland", at: [6.1432, 46.2044] },
+  { name: "Milan", country: "Italy", at: [9.19, 45.4642] },
+  { name: "Rome", country: "Italy", at: [12.4964, 41.9028] },
+  { name: "Naples", country: "Italy", at: [14.2681, 40.8518] },
+  { name: "Turin", country: "Italy", at: [7.6869, 45.0703] },
+  { name: "Vienna", country: "Austria", at: [16.3738, 48.2082] },
+  { name: "Prague", country: "Czechia", at: [14.4378, 50.0755] },
+  { name: "Warsaw", country: "Poland", at: [21.0122, 52.2297] },
+  { name: "Krakow", country: "Poland", at: [19.945, 50.0647] },
+  { name: "Budapest", country: "Hungary", at: [19.0402, 47.4979] },
+  { name: "Copenhagen", country: "Denmark", at: [12.5683, 55.6761] },
+  { name: "Stockholm", country: "Sweden", at: [18.0686, 59.3293] },
+  { name: "Oslo", country: "Norway", at: [10.7522, 59.9139] },
+  { name: "Helsinki", country: "Finland", at: [24.9384, 60.1699] },
+  { name: "Athens", country: "Greece", at: [23.7275, 37.9838] },
+  { name: "Bucharest", country: "Romania", at: [26.1025, 44.4268] },
+]
+
+/**
+ * The city a record is placed in. Mock users carry no location of their own, so
+ * the map stories place each one in the city at its index - one helper rather
+ * than the same modulo spelled out at every call site, so the marker, the
+ * detail panel and the country filter can never disagree about where a record
+ * is.
+ */
+export const mapCityFor = (index: number) =>
+  MAP_CITIES_MOCK[index % MAP_CITIES_MOCK.length]
+
+/**
+ * Whether a record can be placed on the map, and if not, why. A few records per
+ * page have no usable location so the map's "Not on map" section has something
+ * to show: most as an address left unfilled (`incomplete`), one with no reason
+ * given (`none`), which is what a bare `null` coordinate means. Shared by the
+ * marker's `coordinates` and the adapter's country filter, so a record the map
+ * cannot place never matches a country either.
+ */
+export const mapPlacementFor = (
+  index: number
+): "placed" | "incomplete" | "none" => {
+  if (index === 7) {
+    return "none"
+  }
+  if (index % 9 === 4) {
+    return "incomplete"
+  }
+  return "placed"
+}
+
+/** Every country the demo cities cover, for the map view's country filter. */
+export const MAP_COUNTRIES_MOCK = [
+  ...new Set(MAP_CITIES_MOCK.map((city) => city.country)),
+].sort()
+
+/**
+ * The filter set the map view uses. Country first, because on a map "where" is
+ * the question the view is actually asking - and it is always offered, so the
+ * view can narrow itself down to one place without a search.
+ *
+ * Deliberately without the `search` / `searchStrict` entries the default set
+ * carries: those exist to demo search-type filters, and in a view that already
+ * has a search box in its toolbar they read as a duplicate of it sitting in the
+ * wrong place.
+ */
+export const mapFilters = {
+  country: {
+    type: "in",
+    label: "Country",
+    options: {
+      options: MAP_COUNTRIES_MOCK.map((value) => ({ value, label: value })),
+    },
+  },
+  department: filters.department,
+  salary: filters.salary,
+} as const
 
 export const getMockVisualizations = (options?: {
   // @deprecated
@@ -1006,6 +1117,33 @@ export const getMockVisualizations = (options?: {
         childrenFilters: () => ({}),
       },
     },
+    map: {
+      type: "map",
+      options: {
+        // Real city coordinates rather than an arithmetic spread, so markers
+        // land on actual places and clustering behaves the way it would with
+        // production data (dense in western Europe, sparser to the east).
+        coordinates: (u) => {
+          const placement = mapPlacementFor(u.index)
+          if (placement === "none") {
+            return null
+          }
+          if (placement === "incomplete") {
+            return { kind: "incomplete" }
+          }
+          return mapCityFor(u.index).at
+        },
+        label: (u) => u.name,
+        // The records are people, so they get the person marker. No `src`: the
+        // avatar falls back to the generated initials chip in its identity
+        // color, which is what a collection without photos would show.
+        marker: (u) => ({
+          variant: "employee",
+          firstName: u.name.split(" ")[0] ?? "",
+          lastName: u.name.split(" ")[1] ?? "",
+        }),
+      },
+    },
   }) as const
 // Example of using the object-based approach (recommended)
 export const sortings = {
@@ -1361,6 +1499,7 @@ export const ExampleComponent = ({
   primaryActions,
   secondaryActions,
   searchBar = false,
+  searchPreview,
   id,
   storage,
   /**
@@ -1375,6 +1514,7 @@ export const ExampleComponent = ({
    */
   enableCache = true,
   hideFilters,
+  filters: filtersOverride,
   tmpFullWidth,
   nestedRecords = false,
   nestedRecordsType = "basic",
@@ -1417,6 +1557,12 @@ export const ExampleComponent = ({
   primaryActions?: PrimaryActionsDefinitionFn
   secondaryActions?: SecondaryActionsDefinition
   searchBar?: boolean | SearchOptions
+  /**
+   * The rich results dropdown under the header search - avatar, name, position
+   * - and what picking one does. Shared by every visualization, so a story that
+   * passes it gets the same typeahead in the table, the graph and the map.
+   */
+  searchPreview?: SearchPreview<MockUser>
   tableAllowColumnReordering?: boolean
   tableAllowColumnHiding?: boolean
   onStateChange?: (
@@ -1424,6 +1570,13 @@ export const ExampleComponent = ({
   ) => void
   enableCache?: boolean
   hideFilters?: boolean
+  /**
+   * A filter set to offer instead of the default one - for a view whose
+   * filters are its own (the map's country filter) or which has no business
+   * showing some of the defaults. Typed loosely because it is a different
+   * shape than the default set, which the rest of these props are keyed on.
+   */
+  filters?: FiltersDefinition
   currentFilters?: FiltersState<FiltersType>
   currentSortings?: SortingsState<typeof sortings>
   currentNavigationFilters?: NavigationFiltersState<NavigationFiltersDefinition>
@@ -1488,7 +1641,10 @@ export const ExampleComponent = ({
 
   const dataSource = useDataCollectionSource(
     {
-      filters: hideFilters ? undefined : filters,
+      filters: hideFilters
+        ? undefined
+        : // eslint-disable-next-line no-type-assertion/no-type-assertion -- story scaffolding: the override is a different filter shape than the default set this component is typed on
+          ((filtersOverride ?? filters) as FiltersType),
       currentFilters,
       currentSortings,
       navigationFilters,
@@ -1548,6 +1704,7 @@ export const ExampleComponent = ({
           : typeof searchBar === "object"
             ? searchBar
             : undefined,
+      searchPreview,
       dataAdapter: dataAdapterMemoized,
       itemsWithChildren: (item) => !!item?.children?.length,
       childrenCount: ({ item }) => item?.children?.length,
@@ -1750,6 +1907,9 @@ export function createDataAdapter<
     email: string
     department: (typeof DEPARTMENTS_MOCK)[number]
     salary?: number
+    // The map stories place a record by its index, which is what the country
+    // filter matches on.
+    index?: number
   },
   TFilters extends Record<string, FilterDefinition>,
   TNavigationFilters extends NavigationFiltersDefinition,
@@ -1787,7 +1947,11 @@ export function createDataAdapter<
       currentPage?: number
       perPage?: number
       cursor?: string | null
-    }
+    },
+    // The term the collection is searching for, handed to every `fetchData`
+    // call. Falls back to the adapter's own `search` option, for the stories
+    // that seed a fixed term instead of driving the search bar.
+    searchTerm: string = search
   ): TRecord[] | PaginatedResponse<TRecord> | BaseResponse<TRecord> => {
     let filteredRecords = [...records]
 
@@ -1806,13 +1970,13 @@ export function createDataAdapter<
       )
     }
 
-    if (search) {
-      const searchTerm = search.toLowerCase()
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase()
       filteredRecords = filteredRecords.filter(
         (record) =>
-          record.name.toLowerCase().includes(searchTerm) ||
-          record.email.toLowerCase().includes(searchTerm) ||
-          record.department.toLowerCase().includes(searchTerm)
+          record.name.toLowerCase().includes(term) ||
+          record.email.toLowerCase().includes(term) ||
+          record.department.toLowerCase().includes(term)
       )
     }
 
@@ -1820,6 +1984,19 @@ export function createDataAdapter<
     if ("department" in filters && Array.isArray(filters.department)) {
       filteredRecords = filteredRecords.filter((record) =>
         (filters.department as string[]).includes(record.department)
+      )
+    }
+
+    // The map view's country filter. Records carry no location of their own -
+    // the map places each one in the city at its index - so this matches on
+    // that same mapping rather than on a field.
+    if ("country" in filters && Array.isArray(filters.country)) {
+      const countries = filters.country as string[]
+      filteredRecords = filteredRecords.filter(
+        (record) =>
+          record.index !== undefined &&
+          mapPlacementFor(record.index) === "placed" &&
+          countries.includes(mapCityFor(record.index).country)
       )
     }
 
@@ -1926,7 +2103,7 @@ export function createDataAdapter<
     > = {
       paginationType: "pages",
       perPage,
-      fetchData: ({ filters, sortings, pagination }) => {
+      fetchData: ({ filters, sortings, pagination, search: searchTerm }) => {
         if (useObservable) {
           return new Observable<PromiseState<PaginatedResponse<TRecord>>>(
             (observer) => {
@@ -1942,7 +2119,8 @@ export function createDataAdapter<
                     data,
                     filters,
                     sortings,
-                    pagination
+                    pagination,
+                    searchTerm
                   ) as PaginatedResponse<TRecord>
 
                 try {
@@ -1974,7 +2152,8 @@ export function createDataAdapter<
                   data,
                   filters,
                   sortings,
-                  pagination
+                  pagination,
+                  searchTerm
                 ) as PaginatedResponse<TRecord>
               )
             } catch (error) {
@@ -1994,7 +2173,7 @@ export function createDataAdapter<
     > = {
       paginationType: "infinite-scroll",
       perPage,
-      fetchData: ({ filters, sortings, pagination }) => {
+      fetchData: ({ filters, sortings, pagination, search: searchTerm }) => {
         if (useObservable) {
           return new Observable<PromiseState<PaginatedResponse<TRecord>>>(
             (observer) => {
@@ -2010,7 +2189,8 @@ export function createDataAdapter<
                     data,
                     filters,
                     sortings,
-                    pagination
+                    pagination,
+                    searchTerm
                   ) as InfiniteScrollPaginatedResponse<TRecord>
 
                 const fetchData = fetch()
@@ -2043,7 +2223,8 @@ export function createDataAdapter<
                 data,
                 filters,
                 sortings,
-                pagination
+                pagination,
+                searchTerm
               ) as InfiniteScrollPaginatedResponse<TRecord>
               resolve(result)
             } catch (error) {
@@ -2062,7 +2243,7 @@ export function createDataAdapter<
     TFilters,
     TNavigationFilters
   > = {
-    fetchData: ({ filters, sortings }) => {
+    fetchData: ({ filters, sortings, search: searchTerm }) => {
       if (useObservable) {
         return new Observable<PromiseState<BaseResponse<TRecord>>>(
           (observer) => {
@@ -2075,7 +2256,13 @@ export function createDataAdapter<
             setTimeout(() => {
               try {
                 const fetch = () =>
-                  filterData(data, filters, sortings) as TRecord[]
+                  filterData(
+                    data,
+                    filters,
+                    sortings,
+                    undefined,
+                    searchTerm
+                  ) as TRecord[]
 
                 const summaries = calculateSummaries(fetch())
                 observer.next({
@@ -2101,7 +2288,13 @@ export function createDataAdapter<
       return new Promise<BaseResponse<TRecord>>((resolve, reject) => {
         setTimeout(() => {
           try {
-            const result = filterData(data, filters, sortings)
+            const result = filterData(
+              data,
+              filters,
+              sortings,
+              undefined,
+              searchTerm
+            )
             // If the result is an array, we need to wrap it with summaries
             const recordsData = Array.isArray(result)
               ? result

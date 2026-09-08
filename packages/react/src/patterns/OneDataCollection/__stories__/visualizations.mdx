@@ -1,7 +1,7 @@
 import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks"
 import { DoDonts } from "@/lib/storybook-utils/do-donts"
 import { FeatureGrid } from "~/docs/components/FeatureGrid"
-import { Kanban, List, Pencil, Table } from "@/icons/app"
+import { Kanban, List, Pencil, Pin, Table } from "@/icons/app"
 import * as GraphStories from "./visualizations/graph.stories"
 
 <Meta title="Data Collection/Visualizations" />
@@ -53,6 +53,13 @@ etc.) and the visualization, of the data at item level (visualization) and
         description:
           "Kanban visualization is a visualization that displays the data in a kanban format.",
         href: "/?path=/docs/patterns-data-collection-visualizations-kanban--documentation",
+      },
+      {
+        icon: Pin,
+        title: "Map",
+        description:
+          "Map visualization projects each record onto a coordinate and draws it as a marker, with optional list and detail panels beside it.",
+        href: "/?path=/docs/patterns-data-collection-visualizations-map--documentation",
       },
     ]}
   />

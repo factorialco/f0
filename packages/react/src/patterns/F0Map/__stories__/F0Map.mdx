@@ -39,20 +39,24 @@ export function Example() {
 
 ## Story map
 
-| Story             | What it shows                                         |
-| ----------------- | ----------------------------------------------------- |
-| `Default`         | Empty map at a city-level view                        |
-| `Dark`            | The dark theme, auto-detected from a `.dark` island   |
-| `WithMarkers`     | Mixed marker variants on a city map                   |
-| `MarkerVariants`  | Every marker variant (default/workplace/…) on one map |
-| `WithClusters`    | Distance clustering that expands on zoom / click      |
-| `WorldClusters`   | Clustering at world scale                             |
-| `CurrentLocation` | The "you are here" dot + the locate control           |
-| `Terrain`         | Low-zoom land / water styling                         |
-| `Routes`          | A polyline drawn through given coordinates            |
-| `Arcs`            | Curved hub-and-spoke connections (flight paths)       |
-| `Globe`           | The 3D globe projection at world scale                |
-| `Loading`         | The skeleton placeholder                              |
+| Story                | What it shows                                         |
+| -------------------- | ----------------------------------------------------- |
+| `Default`            | Empty map at a city-level view                        |
+| `Dark`               | The dark theme, auto-detected from a `.dark` island   |
+| `WithMarkers`        | Mixed marker variants on a city map                   |
+| `MarkerVariants`     | Every marker variant (default/workplace/…) on one map |
+| `WithClusters`       | Distance clustering that expands on zoom / click      |
+| `WorldClusters`      | Clustering at world scale                             |
+| `CurrentLocation`    | The "you are here" dot + the locate control           |
+| `Terrain`            | Low-zoom land / water styling                         |
+| `SidebarToggle`      | The side panel and the toggle that opens it           |
+| `SidebarToggleAddon` | A control of yours beside that toggle                 |
+| `SidebarHeaderStart` | A control at the start of the open panel's header     |
+| `SelectionFromList`  | Selecting from the list alternative                   |
+| `Routes`             | A polyline drawn through given coordinates            |
+| `Arcs`               | Curved hub-and-spoke connections (flight paths)       |
+| `Globe`              | The 3D globe projection at world scale                |
+| `Loading`            | The skeleton placeholder                              |
 
 ---
 
@@ -122,6 +126,41 @@ grown pin). `highlightedId` is a separate, lighter channel - it floats a marker
 above the rest, keeps its label, and flies to it - meant for an **external
 search / reveal** (search lives outside the map, as in F0Graph).
 
+### Side panel
+
+`onSidebarToggle` puts a panel toggle in the top-left corner, on the same
+material and inset as the navigation controls. With `sidebarExpanded` true the
+panel slides in from the left edge the button sits on - 8px from the map's left,
+top and bottom - and both control stacks translate aside to keep 16px of air
+between themselves and it. `sidebar` is what goes inside; the panel itself is
+just the surface. See the `SidebarToggle` story.
+
+`detail` / `detailOpen` open a second panel on the same surface, sliding in
+_beside_ the list rather than over it - the detail view for whatever was picked
+in the list or on the map.
+
+`sidebarToggleAddon` places a control of your own beside the toggle, on the same
+card - a count that opens the panel, say. It is opaque to the map and follows
+the toggle: shown while the panel is closed, out of reach under it once open.
+See the `SidebarToggleAddon` story.
+
+Once the panel is open the toggle belongs to it, sitting at the far end of a
+header row of that panel's own - the edge it is pushing back.
+`sidebarHeaderStart` fills the other end of that row: a search that filters what
+the panel lists, say. The row is reserved space rather than an overlay, so
+nothing below it passes under the control, and the start takes whatever width
+the row has left, so a control that opens into a field has somewhere to open
+into. It is only rendered while the panel is open - the row is the panel's.
+Below it the panel is bare: `sidebar` gets it edge to edge, with no padding and
+no scroll container of the map's, so sections can span the full width and scroll
+as one list. See the `SidebarHeaderStart` story.
+
+The camera treats both as space it doesn't have: the free area beside the open
+panels is what a fit frames and what a focused or clicked marker centres in, and
+opening or closing one re-centres the current view so the selection never ends
+up behind a panel. Nothing to report - the map owns the panels' geometry.
+`viewportInset` is only for chrome the _consumer_ puts over the map.
+
 ### Current location
 
 `showCurrentLocation` renders a "you are here" dot once the user has granted
@@ -154,7 +193,7 @@ page scroll. Use `"greedy"` for a dedicated/full-screen map.
 ### Presentation
 
 `fullScreen={false}` (default) frames the map as a card - rounded corners and a
-subtle border, controls inset 16px. `fullScreen` drops the frame for an
+subtle border, controls inset 6px. `fullScreen` drops the frame for an
 edge-to-edge map. Theme always follows the nearest `.dark` ancestor, restyling
 live when the app theme toggles.
 
@@ -242,23 +281,26 @@ All public props on `<F0Map>`, grouped by behavior.
 
 ### Selection
 
-| Prop                      | Type                           | Default | Description                                       |
-| ------------------------- | ------------------------------ | ------- | ------------------------------------------------- |
-| `selectedMarkerId`        | `string \| null`               | —       | Controlled selected marker.                       |
-| `defaultSelectedMarkerId` | `string \| null`               | `null`  | Uncontrolled initial selection.                   |
-| `onMarkerSelect`          | `(id: string \| null) => void` | —       | Fired on marker click or background click.        |
-| `highlightedId`           | `string \| null`               | `null`  | Emphasise + fly to a marker without selecting it. |
+| Prop                              | Type                           | Default | Description                                                                                                   |
+| --------------------------------- | ------------------------------ | ------- | ------------------------------------------------------------------------------------------------------------- |
+| `selectedMarkerId`                | `string \| null`               | —       | Controlled selected marker.                                                                                   |
+| `defaultSelectedMarkerId`         | `string \| null`               | `null`  | Uncontrolled initial selection.                                                                               |
+| `onMarkerSelect`                  | `(id: string \| null) => void` | —       | Fired on marker click or background click.                                                                    |
+| `highlightedId`                   | `string \| null`               | `null`  | Emphasise + fly to a marker without selecting it.                                                             |
+| `clearSelectionOnBackgroundClick` | `boolean`                      | `true`  | Clear the selection on a background click; `false` when the selection opens something dismissed deliberately. |
 
 ### Viewport
 
 Clustering is automatic (no prop) - see [Clustering](#clustering).
 
-| Prop              | Type            | Default             | Description                            |
-| ----------------- | --------------- | ------------------- | -------------------------------------- |
-| `fitToMarkers`    | `boolean`       | `true` w/o viewport | Frame all markers on load.             |
-| `initialViewport` | `F0MapViewport` | city-level          | Initial `{ center, zoom }`, read once. |
-| `minZoom`         | `number`        | fitted              | Farthest zoom out.                     |
-| `maxZoom`         | `number`        | `18`                | Closest zoom in.                       |
+| Prop                  | Type                 | Default             | Description                                                                         |
+| --------------------- | -------------------- | ------------------- | ----------------------------------------------------------------------------------- |
+| `fitToMarkers`        | `boolean`            | `true` w/o viewport | Frame all markers on load.                                                          |
+| `initialViewport`     | `F0MapViewport`      | city-level          | Initial `{ center, zoom }`, read once.                                              |
+| `minZoom`             | `number`             | fitted              | Farthest zoom out.                                                                  |
+| `maxZoom`             | `number`             | `18`                | Closest zoom in.                                                                    |
+| `viewportInset`       | `F0MapViewportInset` | —                   | Region covered by chrome of the consumer's; camera moves target the free area.      |
+| `centerOnMarkerClick` | `boolean`            | `false`             | Re-center on a clicked marker at the current zoom, so it never sits behind a panel. |
 
 ### Presentation & interaction
 
@@ -273,6 +315,21 @@ Clustering is automatic (no prop) - see [Clustering](#clustering).
 | `showCurrentLocation` | `boolean`                   | `false`         | Show the "you are here" dot when location is granted.     |
 | `loading`             | `boolean`                   | `false`         | Show the skeleton instead of the map.                     |
 | `ariaLabel`           | `string`                    | `"Map"` (i18n)  | Accessible name for the map region.                       |
+| `controlLabels`       | `F0MapControlLabels`        | —               | Override the controls' tooltips / accessible names.       |
+
+### Side panels
+
+See [Side panel](#side-panel) for how the two panels and the camera relate.
+
+| Prop                 | Type         | Default | Description                                                                                                   |
+| -------------------- | ------------ | ------- | ------------------------------------------------------------------------------------------------------------- |
+| `sidebar`            | `ReactNode`  | —       | Content of the side panel; it gets the panel bare, below the header row.                                      |
+| `sidebarExpanded`    | `boolean`    | `false` | Whether that panel is open. Drives which way the toggle's arrow points.                                       |
+| `onSidebarToggle`    | `() => void` | —       | Fired when the toggle is pressed. Its presence is what offers the toggle.                                     |
+| `sidebarToggleAddon` | `ReactNode`  | —       | A control of yours beside the toggle, on the same card. Hidden once the panel is open.                        |
+| `sidebarHeaderStart` | `ReactNode`  | —       | A control at the start of the open panel's header row, opposite the toggle. Takes the width the row has left. |
+| `detail`             | `ReactNode`  | —       | Content of a second panel, sliding in beside the first rather than over it.                                   |
+| `detailOpen`         | `boolean`    | `false` | Whether that second panel is open. Escape ends the selection, so a panel driven by it closes.                 |
 
 ### Imperative handle (`ref`)
 

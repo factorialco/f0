@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
+import { useState } from "react"
 import { expect, userEvent, within } from "storybook/test"
 import { F0Map } from "../F0Map"
 import type { F0MapPoint } from "../types"
@@ -119,6 +120,96 @@ export const Terrain: Story = {
  */
 export const WithMarkers: Story = {
   args: { markers: BARCELONA },
+}
+
+/**
+ * The side panel and the toggle that opens it. The panel slides in from the left
+ * edge the button sits on, wearing the same material as the overlay controls,
+ * and both control stacks step aside for it in the same movement. Pass `sidebar`
+ * to fill it; empty here, since its content is the consumer's.
+ */
+export const SidebarToggle: Story = {
+  render: (args) => {
+    const [expanded, setExpanded] = useState(false)
+    return (
+      <F0Map
+        {...args}
+        markers={BARCELONA}
+        sidebarExpanded={expanded}
+        onSidebarToggle={() => setExpanded((open) => !open)}
+      />
+    )
+  },
+}
+
+/**
+ * Something of the consumer's beside the toggle, on the same card: here a
+ * count that opens the panel. The map treats it as opaque content and only
+ * gives it the toggle's own rules - shown while the panel is closed, hidden
+ * under it once open.
+ */
+export const SidebarToggleAddon: Story = {
+  render: (args) => {
+    const [expanded, setExpanded] = useState(false)
+    return (
+      <F0Map
+        {...args}
+        markers={BARCELONA}
+        sidebarExpanded={expanded}
+        onSidebarToggle={() => setExpanded((open) => !open)}
+        sidebarToggleAddon={
+          <button
+            type="button"
+            onClick={() => setExpanded(true)}
+            className="h-8 rounded-md px-2 text-sm font-medium text-f1-foreground hover:bg-f1-background-hover"
+          >
+            3 not on map {/* i18n-exempt: story copy */}
+          </button>
+        }
+        sidebar={<div className="p-2 text-sm">Panel content</div>}
+      />
+    )
+  },
+}
+
+/**
+ * A control of the panel's own at the start of its header row, with the toggle
+ * holding the far end: here a filter over the rows below it. It takes the width
+ * the row has left, so a control that opens into a field has somewhere to open
+ * into, and it is only rendered while the panel is open - the row is the
+ * panel's, not the map's.
+ */
+export const SidebarHeaderStart: Story = {
+  render: (args) => {
+    const [expanded, setExpanded] = useState(true)
+    const [query, setQuery] = useState("")
+    const matches = BARCELONA.filter((point) =>
+      (point.label ?? "").toLowerCase().includes(query.toLowerCase())
+    )
+    return (
+      <F0Map
+        {...args}
+        markers={BARCELONA}
+        sidebarExpanded={expanded}
+        onSidebarToggle={() => setExpanded((open) => !open)}
+        sidebarHeaderStart={
+          <input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Filter" // i18n-exempt: story copy
+            className="h-8 w-full rounded-md bg-transparent px-2 text-sm text-f1-foreground placeholder:text-f1-foreground-secondary"
+          />
+        }
+        sidebar={
+          <ul className="flex flex-col gap-1 p-2 text-sm text-f1-foreground">
+            {matches.map((point) => (
+              <li key={point.id}>{point.label}</li>
+            ))}
+          </ul>
+        }
+      />
+    )
+  },
 }
 
 // One of each product-semantic marker variant, spread across Spain so none of
