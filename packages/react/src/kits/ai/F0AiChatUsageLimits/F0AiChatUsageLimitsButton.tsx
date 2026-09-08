@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react"
+import { useCallback, useRef, useState } from "react"
 import { F0Icon } from "@/components/F0Icon"
 import ChevronRight from "@/icons/app/ChevronRight"
 import { useI18n } from "@/lib/providers/i18n"
@@ -39,6 +39,7 @@ export const F0AiChatUsageLimitsButton = ({
 }: F0AiChatUsageLimitsButtonProps) => {
   const i18n = useI18n()
   const [open, setOpen] = useState(false)
+  const contentRef = useRef<HTMLDivElement>(null)
 
   const handleOpenChange = useCallback(
     (isOpen: boolean) => {
@@ -84,10 +85,19 @@ export const F0AiChatUsageLimitsButton = ({
         )}
       </PopoverTrigger>
       <PopoverContent
+        ref={contentRef}
         side={side}
         align="end"
         sideOffset={8}
         collisionPadding={12}
+        tabIndex={-1}
+        // Radix would focus the first tabbable child, drawing a focus ring on
+        // the "Your company" row of a popover the user opened with the mouse.
+        // Focus the card itself instead: Tab still reaches the row next.
+        onOpenAutoFocus={(event) => {
+          event.preventDefault()
+          contentRef.current?.focus()
+        }}
         className="flex w-[328px] flex-col overflow-hidden rounded-md border border-solid border-f1-border-secondary p-0 shadow-md"
       >
         <div className="p-4">
