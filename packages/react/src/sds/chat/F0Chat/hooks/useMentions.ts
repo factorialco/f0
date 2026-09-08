@@ -162,41 +162,83 @@ function findAtTrigger(
 }
 
 /**
- * Re-anchor `anchored` after the composer text went from `prev` to `next`, and
- * report which mentions the edit landed inside.
+ * Can the change from `prev` to `next` be read as replacing `[at, at + removed)`
+ * with the `inserted` characters that start there?
  *
- * The change is read as the single contiguous span between the common prefix
- * and the common suffix — enough for typing, deletion, paste and the emoji
- * shortcode swap alike. A mention whose span the change overlaps is *touched*:
- * its remaining text is reported so the caller can erase it whole. Adjacency
- * is not overlap, so typing a comma right after a mention (or deleting the
- * space that followed it) leaves the mention alone.
+ * {@link diffSpan} names the rightmost reading of an ambiguous change, which is
+ * the right bias at a mention's tail and the wrong one at its head: typing `@`
+ * in front of `@Ana García` — the way a second mention gets started there —
+ * repeats the character it lands on, so the rightmost reading puts it inside
+ * the token and takes the whole name with it. The readings of one change form
+ * a contiguous interval, so testing the anchor's own index settles whether a
+ * reading that leaves the mention whole exists at all.
  */
-const reanchorMentions = (
+const readsAs = (
+  prev: string,
+  next: string,
+  at: number,
+  removed: number,
+  inserted: number
+): boolean =>
+  at >= 0 &&
+  next.slice(0, at) === prev.slice(0, at) &&
+  next.slice(at + inserted) === prev.slice(at + removed)
+
+/**
+ * Re-anchor `anchored` after the composer text went from `prev` to `next`, and
+ * report what is left of the mentions the change ran into.
+ *
+ * A mention the change missed is kept, shifted. One the change ran into is
+ * *touched*: the spans it still occupies in `next` are reported so the caller
+ * can erase them and take the token out whole. Three rules make that safe:
+ *
+ * - Adjacency is not overlap, on either side. Typing a comma right after a
+ *   mention, deleting the space that followed it, or typing immediately in
+ *   front of the `@` all leave the mention alone — the last of those is a pure
+ *   insertion at the anchor's own index, which moves the mention rather than
+ *   editing it. That holds even when the change is ambiguous and `diffSpan`
+ *   named a reading inside the token; see {@link readsAs}.
+ * - A change strictly inside a mention takes the whole token, including what
+ *   was typed in its place: a half-typed name was never a state the user meant.
+ * - A change that swallowed a mention outright erases nothing. Its text is
+ *   already gone, and what replaced it is the user's own keystroke or paste.
+ */
+export const reanchorMentions = (
   prev: string,
   next: string,
   anchored: AnchoredMention[]
 ): { kept: AnchoredMention[]; touched: { start: number; end: number }[] } => {
   const { start: prefix, prevEnd, nextEnd } = diffSpan(prev, next)
   const delta = next.length - prev.length
-
-  // Positions inside the changed span have no image in `next`; clamp a start
-  // down and an end up so an erased range covers the whole disturbed region.
-  const mapStart = (pos: number): number =>
-    pos <= prefix ? pos : pos >= prevEnd ? pos + delta : prefix
-  const mapEnd = (pos: number): number =>
-    pos <= prefix ? pos : pos >= prevEnd ? pos + delta : nextEnd
+  const removed = prevEnd - prefix
+  const inserted = nextEnd - prefix
 
   const kept: AnchoredMention[] = []
   const touched: { start: number; end: number }[] = []
   for (const mention of anchored) {
     const start = mention.start
     const end = mentionEnd(mention)
-    if (prefix < end && prevEnd > start) {
-      touched.push({ start: mapStart(start), end: mapEnd(end) })
-    } else {
-      kept.push({ ...mention, start: mapStart(start) })
+
+    if (prefix >= end || prevEnd <= start) {
+      // Wholly on one side of the change, so start and end move together.
+      const shift = start < prefix ? 0 : delta
+      kept.push({ ...mention, start: start + shift })
+      continue
     }
+
+    if (readsAs(prev, next, start - removed, removed, inserted)) {
+      kept.push({ ...mention, start: start + delta })
+      continue
+    }
+
+    const headSurvives = start < prefix
+    const tailSurvives = end > prevEnd
+    if (headSurvives && tailSurvives) {
+      touched.push({ start, end: end + delta })
+      continue
+    }
+    if (headSurvives) touched.push({ start, end: prefix })
+    if (tailSurvives) touched.push({ start: nextEnd, end: end + delta })
   }
   return { kept, touched }
 }
