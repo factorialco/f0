@@ -12,9 +12,12 @@
  * Run: `node src/patterns/F0Map/styles/buildStyles.mjs [--google|--maplibre]`
  * Source: https://tiles.openfreemap.org/styles/bright  (OSM data, ODbL)
  *
- * Both pairs derive from the same f0 tokens, but only the MapLibre one reads
- * Bright - and Bright has moved since the committed pair was generated, so
- * regenerating it is an 8k-line diff and a deliberate decision. Pass a target.
+ * Both pairs derive from the same f0 tokens; only the MapLibre one reads
+ * Bright, so `--google` needs no network.
+ *
+ * Output is plain `JSON.stringify`, which oxfmt then reformats. A regeneration
+ * therefore shows up as a whole-file diff until it is formatted - the
+ * pre-commit hook does that, or run `pnpm format` on the emitted files.
  */
 import fs from "node:fs"
 import path from "node:path"
@@ -732,10 +735,8 @@ const write = (name, value) => {
 const wanted = process.argv.slice(2)
 const emit = (target) => wanted.length === 0 || wanted.includes(target)
 
-// The Google pair needs only f0 tokens; the MapLibre pair needs Bright. They
-// are separable on purpose: `--maplibre` re-fetches upstream, and upstream has
-// moved since the committed pair was generated, so a regeneration is a
-// deliberate act rather than a side effect of touching the Google styles.
+// Separable so that touching the Google styles does not re-fetch Bright, and
+// so either pair can be regenerated on its own.
 if (emit("--google")) {
   for (const theme of ["light", "dark"]) {
     write(`google-${theme}`, googleStyles(theme))
