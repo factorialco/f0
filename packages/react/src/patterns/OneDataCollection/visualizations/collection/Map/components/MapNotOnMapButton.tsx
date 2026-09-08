@@ -50,7 +50,7 @@ export const MapNotOnMapButton = ({
     aria-label={ariaLabel}
     data-testid={dataTestId}
     className={cn(
-      "flex h-8 items-center gap-2 rounded-md pl-2 pr-2.5",
+      "flex h-8 items-center gap-2 rounded-md pl-3 pr-1.5",
       "hover:bg-f1-background-hover",
       focusRing()
     )}
@@ -66,16 +66,16 @@ export const MapNotOnMapButton = ({
       />
     </span>
     {avatars && avatars.length > 0 ? (
-      // Three faces, then a "+N" bubble that is the count. `sm`, not `xs`: at
-      // `xs` the bubble is an ellipsis icon with the number only for screen
-      // readers. And the rest go in as `remainingCount` rather than as items,
-      // which keeps the bubble a plain element - given the items themselves
-      // it becomes a disclosure button, a button inside this button.
+      // Three faces, then the bubble for the rest. At `xs` F0AvatarList draws
+      // that bubble as an ellipsis icon, with the number for screen readers
+      // only. The rest go in as `remainingCount` rather than as items, which
+      // keeps the bubble a plain element - given the items themselves it
+      // becomes a disclosure button, a button inside this button.
       <F0AvatarList
         type="person"
         avatars={avatars.slice(0, MAX_FACES)}
         remainingCount={Math.max(count - MAX_FACES, 0)}
-        size="sm"
+        size="xs"
         max={MAX_FACES}
         noTooltip
       />
