@@ -84,7 +84,7 @@ F0Chat renders a transport-agnostic direct or group conversation. The host provi
   </table>
 </Unstyled>
 
-### Participant, receipt, reaction, and upload contracts
+### Participant, receipt, reaction, message, and upload contracts
 
 <Unstyled>
   <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
@@ -192,6 +192,22 @@ F0Chat renders a transport-agnostic direct or group conversation. The host provi
         <td>
           Maximum size of each selected, dropped, or pasted file, in bytes. The
           ApplicationFrame mock uses <code>100 * 1024 * 1024</code> (100 MB).
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>runtime.maxMessageCharacters</code>
+        </td>
+        <td>
+          <code>number</code>
+        </td>
+        <td>Unlimited</td>
+        <td>—</td>
+        <td>
+          Maximum number of characters in a sent or edited message. An oversized
+          draft stays in the composer, the runtime mutation is not called, and
+          the validation banner remains until the text is within the limit. Omit
+          this field when the host has no message limit.
         </td>
       </tr>
       <tr>
@@ -442,6 +458,14 @@ keyboard or pointer without leaving the composer.
 
 <Canvas of={Stories.EmojiAutocomplete} />
 
+**Message character limits**
+
+Set <code>runtime.maxMessageCharacters</code> to the transport&apos;s limit. The
+example uses 10 characters to make the validation easy to exercise; a host
+with a 5,000-character transport limit passes <code>5000</code>.
+
+<Canvas of={Stories.MessageCharacterLimit} />
+
 **Document attachments**
 
 Previewable documents open from a snapshot card into their fullscreen viewer.
@@ -485,3 +509,8 @@ Voice notes expose their waveform as a seek slider. Use the arrow keys to move
 through the recording and Home or End to jump to either edge. The playback
 speed button remains in the tab order and replaces the duration while it has
 keyboard focus; its accessible name includes the current speed.
+
+When a message exceeds the configured character limit, submitting from the
+textarea keeps focus there, marks it invalid, associates it with the visible
+error, and announces the atomic alert. Correcting or replacing the draft
+removes the invalid state and alert.

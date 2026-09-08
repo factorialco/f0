@@ -589,6 +589,7 @@ export const defaultTranslations = {
     // Composer errors (upload/voice failures are transient; validation may persist).
     tooManyFilesError: "You can attach up to {{maxFiles}} files at once",
     fileTooLargeError: "Each file must be {{maxFileSize}} or smaller",
+    messageTooLongError: "Messages can be up to {{maxCharacters}} characters",
     fileUploadError: "Upload failed",
     micPermissionDenied:
       "Microphone access is blocked. Allow it in your browser settings to dictate.",
