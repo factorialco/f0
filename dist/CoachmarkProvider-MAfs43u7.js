@@ -37642,7 +37642,7 @@ const s0 = ({
     }
   );
 }, Mde = _$(
-  () => import("./index-CHa8Pe1T.js").then((e) => ({ default: e.MapCollection }))
+  () => import("./index-_MOD9UEk.js").then((e) => ({ default: e.MapCollection }))
 ), Hs = {
   table: {
     name: "Table",

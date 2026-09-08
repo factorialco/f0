@@ -11285,6 +11285,19 @@ declare type MapSidebarApi<R extends RecordType> = {
     select: (record: R | null) => void;
     /** Id of the selected record, or `null`. */
     selectedRecordId: string | null;
+    /**
+     * What the map did with this record, and when it drew nothing, why:
+     * `"placed"` when there is a marker, `"unplaced"` when `coordinates` gave
+     * `null` and no reason with it, or the `kind` it gave when it did. Asked per
+     * record rather than per section, so it still answers in the flat list a
+     * panel search produces, where placed and unplaced rows are mixed.
+     *
+     * Mark the rows it turns down: a row with no pin is the one thing the panel
+     * knows that the row itself does not, and the reason is what decides the
+     * words. A record that should have a location and has not is somebody's to
+     * fix; one that never had a location is just a fact about it.
+     */
+    placement: (record: R) => "placed" | "unplaced" | MapUnplaced["kind"];
 };
 
 /**
@@ -12553,6 +12566,19 @@ export declare type OneListItemProps = {
      */
     metadata?: CardMetadata[];
     rightTag?: Props_4;
+    /**
+     * A marker at the row's right edge, on the title's line: an icon standing for
+     * something true of the item, and the tooltip saying what. For a fact about
+     * the item rather than an action on it - a record with no location, say - so
+     * it is deliberately not a button.
+     */
+    rightIcon?: {
+        icon: IconType;
+        /** What the icon means, in words. Required: an icon alone is a riddle. */
+        tooltip: string;
+        /** A second line under it, for what to do about what the first line says. */
+        tooltipDescription?: string;
+    };
     actions?: {
         primary?: {
             icon?: IconType;
