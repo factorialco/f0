@@ -1,9 +1,32 @@
 import { forwardRef } from "react"
 import { F0TagRaw, TagRawProps } from "@/components/tags/F0TagRaw"
 import { experimentalComponent } from "@/lib/experimental"
+import { ItemContainer } from "../ItemContainer"
+import type { ActionType } from "../types"
+import { getInternalAction } from "../utils"
 
-const _RawTagItem = forwardRef<HTMLLIElement, TagRawProps>(
-  ({ ...props }, ref) => {
+export type RawTagItemProps = TagRawProps & {
+  /** Makes the row interactive like any other item; the tag itself is unchanged. */
+  action?: ActionType
+}
+
+const _RawTagItem = forwardRef<HTMLLIElement, RawTagItemProps>(
+  ({ action, ...props }, ref) => {
+    if (action) {
+      return (
+        <ItemContainer
+          ref={ref}
+          text={props.text}
+          action={getInternalAction(action, props.text)}
+          content={
+            <span className="flex flex-1">
+              <F0TagRaw {...props} />
+            </span>
+          }
+        />
+      )
+    }
+
     return (
       <li ref={ref} className="flex items-start pt-1">
         <F0TagRaw {...props} />

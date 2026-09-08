@@ -1,6 +1,7 @@
 export type {
   ActionType,
   CopyActionType,
+  DrawerActionType,
   NavigateActionType,
   OpenLinkActionType,
 } from "./actions"
@@ -11,4 +12,7 @@ export type {
   EmployeeItemProps,
   CompanyItemProps,
   TeamItemProps,
+  RecordDetail,
+  RecordProgress,
+  RecordItemProps,
 } from "./items"
