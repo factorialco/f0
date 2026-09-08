@@ -1,7 +1,7 @@
-import { S as L, m as ye, u as Z, n as Se, o as Re, i as ke, j as _e, k as Ne, q as Ce, l as Le, w as Fe, r as Ve, s as Te } from "./F0CanvasPanel-o38gFTCC.js";
+import { S as L, m as ye, u as Z, n as Se, o as Re, i as ke, j as _e, k as Ne, q as Ce, l as Le, w as Fe, r as Ve, s as Te } from "./F0CanvasPanel-CpgOQnbI.js";
 import { jsx as t, jsxs as y } from "react/jsx-runtime";
 import { lazy as J, forwardRef as ne, Suspense as He, useState as V, useRef as A, useMemo as te, useCallback as w, useEffect as T } from "react";
-import { e as Ee, D as Ue, P as je, c as De } from "./pdfWorker-DFxopiD7.js";
+import { e as Ee, D as Ue, P as je, c as De } from "./pdfWorker-wHv_aPH2.js";
 import { F as We } from "./Printer-BD-FEi_2.js";
 import { d as ae } from "./tooltip-CMBdJvJA.js";
 import './index.css';const Oe = ({
@@ -171,7 +171,8 @@ import './index.css';const Oe = ({
   const a = await o.saveDocument();
   return new Blob([new Uint8Array(a)], { type: "application/pdf" });
 }, Be = async (o) => {
-  if (!o) return;
+  if (!o)
+    return;
   const a = URL.createObjectURL(await re(o)), e = document.createElement("iframe");
   e.style.display = "none", e.src = a, e.onload = () => {
     e.focus(), e.contentWindow?.print();
@@ -181,7 +182,8 @@ import './index.css';const Oe = ({
     e.contentWindow?.addEventListener("afterprint", i), setTimeout(i, 6e4);
   }, document.body.appendChild(e);
 }, ze = async (o, a) => {
-  if (!o) return;
+  if (!o)
+    return;
   const e = URL.createObjectURL(await re(o)), i = document.createElement("a");
   i.href = e, i.download = a.length > 0 ? a : "document.pdf", document.body.appendChild(i), i.click(), i.remove(), URL.revokeObjectURL(e);
 }, at = async (o, a, e = !0) => {
@@ -190,7 +192,8 @@ import './index.css';const Oe = ({
     const d = await fetch(o, {
       credentials: e ? "include" : "same-origin"
     });
-    if (!d.ok) throw new Error(`${d.status}`);
+    if (!d.ok)
+      throw new Error(`${d.status}`);
     l = URL.createObjectURL(await d.blob()), i = l;
   } catch {
   }
@@ -208,9 +211,11 @@ import './index.css';const Oe = ({
 ], ie = G.map(Number), Me = (o) => ie.find((a) => a > o), Ie = (o) => [...ie].reverse().find((a) => a < o), Ae = (o, a, e) => {
   let i = null, l = 0;
   return a.forEach((s, d) => {
-    if (!s) return;
+    if (!s)
+      return;
     const p = s.offsetHeight, m = s.offsetTop, v = m + p, k = o.offsetHeight - e, P = o.scrollTop + e, g = P + k;
-    if (!(P < v && g > m)) return;
+    if (!(P < v && g > m))
+      return;
     let x;
     if (P <= m)
       x = g > v ? p : g - m;
@@ -222,10 +227,11 @@ import './index.css';const Oe = ({
   }), i;
 };
 Ee();
-const qe = J(() => import("./SheetViewer-BlWKNSVx.js")), Ge = J(() => import("./DocxViewer-DhlnoeUY.js")), Ze = J(() => import("./TextViewer-BH0eyXo_.js")), oe = 48, se = ne(
+const qe = J(() => import("./SheetViewer-DSbC_CR2.js")), Ge = J(() => import("./DocxViewer-_Z59Wr2S.js")), Ze = J(() => import("./TextViewer-BkgAiijZ.js")), oe = 48, se = ne(
   (o, a) => {
     const { kind: e = "pdf", mimeType: i, ...l } = o;
-    if (e === "pdf") return /* @__PURE__ */ t(le, { ref: a, ...l });
+    if (e === "pdf")
+      return /* @__PURE__ */ t(le, { ref: a, ...l });
     const {
       url: s,
       filename: d,
@@ -322,7 +328,8 @@ const le = ne((o, a) => {
   ), O = w(
     (n) => {
       const r = _[S - 1], f = I.current;
-      if (!r || !f) return;
+      if (!r || !f)
+        return;
       const u = j.current?.offsetHeight ?? 0, C = E === 90 || E === 270, B = C ? r.originalHeight : r.originalWidth, ve = C ? r.originalWidth : r.originalHeight, xe = n === "page-width" ? (f.clientWidth - oe) / B : (f.clientHeight - u - oe) / ve;
       z(xe), M(n);
     },
@@ -337,7 +344,8 @@ const le = ne((o, a) => {
     },
     [O]
   ), $ = w((n) => {
-    if (n === void 0) return;
+    if (n === void 0)
+      return;
     z(n);
     const r = G.find((f) => Number(f) === n);
     r && M(r);
@@ -361,7 +369,8 @@ const le = ne((o, a) => {
     [P, l, F]
   ), be = w((n) => {
     const r = n.target;
-    if (!(r instanceof HTMLElement)) return;
+    if (!(r instanceof HTMLElement))
+      return;
     const f = Ae(
       r,
       D.current,
@@ -385,7 +394,8 @@ const le = ne((o, a) => {
     (U === "page-width" || U === "page-fit") && O(U);
   }, [E]), T(() => {
     const n = I.current;
-    if (!n) return;
+    if (!n)
+      return;
     const r = (f) => {
       const u = f.target;
       u instanceof HTMLAnchorElement && (u.target = "_blank", u.rel = "noopener noreferrer");

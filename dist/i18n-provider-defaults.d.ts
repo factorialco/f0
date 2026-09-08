@@ -481,7 +481,6 @@ export declare const defaultTranslations: {
             readonly list: "List";
             readonly kanban: "Kanban";
             readonly graph: "Graph";
-            readonly map: "Map";
             readonly pagination: {
                 readonly of: "of";
             };
@@ -1326,17 +1325,17 @@ declare namespace _Page {
 declare module "gridstack" {
     interface GridStackWidget {
         id?: string;
-        allowedSizes?: Array<{
+        allowedSizes?: {
             w: number;
             h: number;
-        }>;
+        }[];
         meta?: Record<string, unknown>;
     }
     interface GridStackNode {
-        allowedSizes?: Array<{
+        allowedSizes?: {
             w: number;
             h: number;
-        }>;
+        }[];
     }
 }
 

@@ -1,25 +1,27 @@
 import { jsxs as c, jsx as t } from "react/jsx-runtime";
-import { useRef as g, useState as h, useEffect as b } from "react";
-import { r as p } from "./docx-preview-BaRDMyPN.js";
-import { u as v, S as w } from "./F0CanvasPanel-o38gFTCC.js";
-import { u as x, D as y } from "./DocumentToolbar-BdGAZWpY.js";
+import { r as g } from "./docx-preview-BaRDMyPN.js";
+import { useRef as h, useState as b, useEffect as p } from "react";
+import { u as v, S as w } from "./F0CanvasPanel-CpgOQnbI.js";
+import { u as x, D as y } from "./DocumentToolbar-p4qZSVUD.js";
 const V = ({
   url: o,
   filename: d,
   withCredentials: a = !0,
   actions: m
 }) => {
-  const s = v(), i = x(), f = g(null), [l, n] = h("loading");
-  return b(() => {
+  const s = v(), i = x(), f = h(null), [l, n] = b("loading");
+  return p(() => {
     const u = f.current;
-    if (!u) return;
+    if (!u)
+      return;
     let r = !1;
     return n("loading"), fetch(o, { credentials: a ? "include" : "same-origin" }).then((e) => {
-      if (!e.ok) throw new Error(`${e.status}`);
+      if (!e.ok)
+        throw new Error(`${e.status}`);
       return e.blob();
     }).then((e) => {
       if (!r)
-        return p(e, u, void 0, {
+        return g(e, u, void 0, {
           inWrapper: !0,
           breakPages: !0
         }).then(() => {
