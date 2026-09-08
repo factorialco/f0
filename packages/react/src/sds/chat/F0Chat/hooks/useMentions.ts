@@ -638,6 +638,25 @@ export function useMentions({
     ]
   )
 
+  /**
+   * Can this row still be the answer to what is typed now?
+   *
+   * The rows answer the last query that came back. A keystroke starts a newer
+   * search and resets the highlight to the top of that older list, so for the
+   * length of the debounce the highlighted row can be somebody the user has
+   * already typed past. A row whose label still starts with the query is the
+   * same answer either way; anything else waits for the search it belongs to.
+   * This is the check Tab has always made, extended to Enter and paid for only
+   * while a search is in flight.
+   */
+  const stillMatchesQuery = useCallback(
+    (candidate: MentionCandidate): boolean =>
+      !isLoading ||
+      query.length === 0 ||
+      candidateLabel(candidate).toLowerCase().startsWith(query.toLowerCase()),
+    [isLoading, query]
+  )
+
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>): boolean => {
       if (!isOpen) return false
@@ -676,15 +695,29 @@ export function useMentions({
           }
           return false
         }
-        case "Enter":
+        case "Enter": {
           e.preventDefault()
-          if (results[selectedIndex]) selectCandidate(results[selectedIndex])
+          const candidate = results[selectedIndex]
+          if (candidate && stillMatchesQuery(candidate)) {
+            selectCandidate(candidate)
+          }
+          // Consumed either way: the popover is open, so Enter must not send
+          // the message behind it.
           return true
+        }
         default:
           return false
       }
     },
-    [isOpen, results, selectedIndex, query, selectCandidate, close]
+    [
+      isOpen,
+      results,
+      selectedIndex,
+      query,
+      selectCandidate,
+      close,
+      stillMatchesQuery,
+    ]
   )
 
   const getMentions = useCallback((): MentionPayload => {
