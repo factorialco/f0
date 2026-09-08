@@ -5677,6 +5677,7 @@ export declare const defaultTranslations: {
     readonly locationInput: {
         readonly country: "Country";
         readonly address: "Address";
+        readonly addressLine1: "Address line 1";
         readonly addressLine2: "Address line 2";
         readonly city: "City";
         readonly state: "Region";
@@ -5686,6 +5687,7 @@ export declare const defaultTranslations: {
         readonly noCountryResults: "No country found";
         readonly noResults: "No addresses found";
         readonly searchHint: "Type an address to search";
+        readonly addressLine1Placeholder: "Enter a street and number";
         readonly addressLine2Placeholder: "Enter a floor or unit";
         readonly cityPlaceholder: "Enter a city";
         readonly statePlaceholder: "Enter a region";

@@ -1002,6 +1002,7 @@ const e = {
   locationInput: {
     country: "Country",
     address: "Address",
+    addressLine1: "Address line 1",
     addressLine2: "Address line 2",
     city: "City",
     state: "Region",
@@ -1011,6 +1012,7 @@ const e = {
     noCountryResults: "No country found",
     noResults: "No addresses found",
     searchHint: "Type an address to search",
+    addressLine1Placeholder: "Enter a street and number",
     addressLine2Placeholder: "Enter a floor or unit",
     cityPlaceholder: "Enter a city",
     statePlaceholder: "Enter a region",
