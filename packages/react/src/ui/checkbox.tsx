@@ -75,7 +75,7 @@ const Checkbox = React.forwardRef<
           <label
             htmlFor={checkboxId}
             className={cn(
-              "flex flex-col pl-1 hover:cursor-pointer",
+              "flex flex-col pl-2 hover:cursor-pointer",
               // With a description the row aligns to the top rather than the
               // centre, so the title has to line up with the *visible* 20px
               // square, which `after:top-0.5` paints 2px below the top of the
