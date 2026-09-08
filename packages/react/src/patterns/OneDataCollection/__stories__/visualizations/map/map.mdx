@@ -46,8 +46,8 @@ The map does no geocoding. Resolve coordinates server-side and read them in
 `coordinates`. A record that returns `null` draws no marker but is not lost: it
 is listed under **Not on map** in the side panel and counted on the map surface
 (see [Not on map](#not-on-map) below). Return `{ kind: "incomplete" }` instead
-when the record _should_ have a location and does not, so the view can ask for
-attention rather than shrug.
+when the record _should_ have a location and does not, so the collection keeps
+the distinction even though the view does not yet draw it.
 
 ## Map Properties
 
@@ -132,12 +132,9 @@ type MapVisualizationOptions<T> = {
 type MapUnplaced = {
   /**
    * `incomplete`: the record should have a location and does not - an unfilled
-   * or ungeocodable address. Shown with attention and listed first, because it
-   * is the case somebody can go and fix.
+   * or ungeocodable address. The case somebody can go and fix.
    */
   kind: "incomplete"
-  /** Short reason shown with the group. Defaults to "Location missing". */
-  label?: string
 }
 
 /** Selection handles handed to the panels, so their content drives the map. */
@@ -266,16 +263,16 @@ one silently, and it needs no opting in:
 - **Every unplaced record is listed** in the panel's **Not on map** section,
   ahead of **On map**. The section is left out entirely when nothing is
   unplaced, not shown as an empty header.
-- **The map counts them** with a control beside the panel toggle, wearing the
-  first few records as avatars when they are all people (a mixed set gets a
-  pin) and reading "3 not on map". Pressing it opens the panel. It hides with
-  the toggle while the panel is open, and is absent when the count is zero.
-- **Two treatments.** A bare `null` means "no reason given" and stays neutral.
-  `{ kind: "incomplete" }` means the record should have had a location: the
-  count and the section take the warning colour, and a hint line under the
-  header says why - `label` if you pass one, "Location missing" otherwise.
-  Legitimately location-less records (a remote employee, say) currently share
-  the neutral treatment; a distinct kind for them is a later addition.
+- **The map counts them** with a control beside the panel toggle: the first
+  few records as avatars when they are all people (a mixed set gets a pin), the
+  section's name, and its count. Pressing it opens the panel with the **Not on
+  map** section expanded, whatever state it was left in. It hides with the
+  toggle while the panel is open, and is absent when the count is zero.
+- **One treatment, for now.** A bare `null` ("no reason given") and
+  `{ kind: "incomplete" }` (the record should have had a location) are listed
+  the same way. The kind is kept so the distinction can be drawn later without
+  changing consumers - a remote employee and a missing address are not the same
+  problem, but the view does not yet say so.
 - **Selecting one opens its detail, and moves no camera.** There is no marker to
   fly to, so the camera stays where it is, and dropping that selection later
   does not zoom back out either - nothing was zoomed in. A search reveal of an

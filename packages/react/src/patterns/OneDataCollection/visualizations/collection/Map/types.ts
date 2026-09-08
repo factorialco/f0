@@ -18,12 +18,11 @@ import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 export type MapUnplaced = {
   /**
    * `incomplete`: the record should have a location and does not - an unfilled
-   * or ungeocodable address. Shown with attention and listed first, because it
-   * is the one somebody can go and fix.
+   * or ungeocodable address. Listed with the other unplaced records; it is
+   * the case somebody can go and fix, and the hook for telling it apart from a
+   * record that is legitimately location-less once that distinction is drawn.
    */
   kind: "incomplete"
-  /** Short reason shown with the group. Defaults to the localized "Location missing". */
-  label?: string
 }
 
 /**
@@ -40,8 +39,7 @@ export type MapVisualizationOptions<
    * A record's `[longitude, latitude]`, or what stands in for one when it has
    * none. `null` means "not on the map, no reason given": the record draws no
    * marker but is still listed under "Not on map" in the side panel. A
-   * `MapUnplaced` says why, and `incomplete` gets attention - it is the case
-   * somebody should fix. The map does no geocoding: resolve coordinates
+   * `MapUnplaced` says why. The map does no geocoding: resolve coordinates
    * server-side and read them here.
    */
   coordinates: (record: R) => [number, number] | null | MapUnplaced

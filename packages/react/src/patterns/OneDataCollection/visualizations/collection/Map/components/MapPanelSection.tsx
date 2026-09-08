@@ -1,7 +1,7 @@
-import { type ReactNode, useState } from "react"
+import { useControllableState } from "@radix-ui/react-use-controllable-state"
+import { type ReactNode } from "react"
 
 import { F0Icon } from "@/components/F0Icon"
-import { F0Text } from "@/components/F0Text"
 import { ChevronDown } from "@/icons/app"
 import { cn, focusRing } from "@/lib/utils"
 import {
@@ -9,21 +9,15 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/ui/collapsible"
-
-export type MapPanelSectionTone = "neutral" | "attention"
+import { Counter } from "@/ui/Counter"
 
 export interface MapPanelSectionProps {
   title: string
   /** How many rows the section holds. Shown in the header, so a collapsed section still says what is inside. */
   count: number
-  /**
-   * `attention` marks a section whose rows want acting on - records that should
-   * be on the map and are not. Colours the count, nothing else: the rows are the
-   * consumer's and keep their own look.
-   */
-  tone?: MapPanelSectionTone
-  /** One line under the header saying why these rows are grouped here. */
-  hint?: string
+  /** Controlled open state; leave unset to let the section keep its own. */
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
   defaultOpen?: boolean
   children: ReactNode
   dataTestId?: string
@@ -37,45 +31,33 @@ export interface MapPanelSectionProps {
 export const MapPanelSection = ({
   title,
   count,
-  tone = "neutral",
-  hint,
+  open: openProp,
+  onOpenChange,
   defaultOpen = true,
   children,
   dataTestId,
 }: MapPanelSectionProps) => {
-  const [open, setOpen] = useState(defaultOpen)
+  const [open = defaultOpen, setOpen] = useControllableState({
+    prop: openProp,
+    defaultProp: defaultOpen,
+    onChange: onOpenChange,
+  })
 
   return (
-    <Collapsible
-      open={open}
-      onOpenChange={setOpen}
-      data-testid={dataTestId}
-      data-tone={tone}
-    >
+    <Collapsible open={open} onOpenChange={setOpen} data-testid={dataTestId}>
       <CollapsibleTrigger asChild>
         <button
           type="button"
           className={cn(
             "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left",
-            "text-f1-foreground hover:bg-f1-background-hover",
+            "hover:bg-f1-background-hover",
             focusRing()
           )}
         >
-          <span className="min-w-0 flex-1 truncate text-sm font-medium">
+          <span className="min-w-0 flex-1 truncate text-sm font-medium text-f1-foreground-secondary">
             {title}
           </span>
-          <span
-            className={cn(
-              "shrink-0 rounded-xs px-1 text-xs font-medium tabular-nums",
-              tone === "attention"
-                ? "bg-f1-background-warning text-f1-foreground-warning"
-                : "text-f1-foreground-secondary"
-            )}
-          >
-            {count}
-          </span>
-          {/* Radix stamps `data-state` on the trigger, so the chevron can
-              follow it without a second piece of state. */}
+          <Counter value={count} size="sm" />
           <span
             className={cn(
               "flex shrink-0 text-f1-icon transition-transform duration-200 motion-reduce:transition-none",
@@ -86,14 +68,7 @@ export const MapPanelSection = ({
           </span>
         </button>
       </CollapsibleTrigger>
-      <CollapsibleContent>
-        {hint && (
-          <div className="px-2 pb-1">
-            <F0Text variant="description" content={hint} markdown={false} />
-          </div>
-        )}
-        {children}
-      </CollapsibleContent>
+      <CollapsibleContent>{children}</CollapsibleContent>
     </Collapsible>
   )
 }

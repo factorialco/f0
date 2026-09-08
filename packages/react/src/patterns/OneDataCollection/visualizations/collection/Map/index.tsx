@@ -34,7 +34,6 @@ export type { MapUnplaced, MapVisualizationOptions } from "./types"
 type Unplaced<Record> = {
   record: Record
   kind: MapUnplaced["kind"] | null
-  label?: string
 }
 
 /**
@@ -167,7 +166,7 @@ export const MapCollection = <
         continue
       }
       if (!Array.isArray(position)) {
-        unplaced.push({ record, kind: position.kind, label: position.label })
+        unplaced.push({ record, kind: position.kind })
         continue
       }
       const id = recordId(record)
@@ -231,7 +230,12 @@ export const MapCollection = <
       return next
     })
   }, [onSidebarToggle])
+  // The count on the map opens the panel *to* the records it counts: the
+  // section it points at is expanded whatever state it was left in, or the
+  // press could land on a collapsed header and show nothing.
+  const [notOnMapOpen, setNotOnMapOpen] = useState(true)
   const openSidebar = useCallback(() => {
+    setNotOnMapOpen(true)
     setSidebarExpanded((expanded) => {
       if (!expanded) onSidebarToggle?.(true)
       return true
@@ -378,14 +382,6 @@ export const MapCollection = <
 
   const i18n = useI18n()
 
-  // What the unplaced records ask for. `incomplete` is the one somebody can go
-  // and fix, so any of them turns the whole group to attention; the hint under
-  // the header says why, taking the consumer's word for it when given one.
-  const incomplete = unplaced.find((entry) => entry.kind === "incomplete")
-  const unplacedTone = incomplete ? "attention" : "neutral"
-  const unplacedHint = incomplete
-    ? (incomplete.label ?? i18n.collections.map.locationMissing)
-    : undefined
   const unplacedRecords = useMemo(
     () => unplaced.map((entry) => entry.record),
     [unplaced]
@@ -403,8 +399,8 @@ export const MapCollection = <
         <MapPanelSection
           title={i18n.collections.map.notOnMap}
           count={unplaced.length}
-          tone={unplacedTone}
-          hint={unplacedHint}
+          open={notOnMapOpen}
+          onOpenChange={setNotOnMapOpen}
           dataTestId="map-panel-not-on-map"
         >
           {sidebar(unplacedRecords, sidebarApi)}
@@ -435,10 +431,11 @@ export const MapCollection = <
   const notOnMapButton =
     unplaced.length > 0 ? (
       <MapNotOnMapButton
-        label={i18n.t("collections.map.notOnMapCount", {
+        title={i18n.collections.map.notOnMap}
+        count={unplaced.length}
+        ariaLabel={i18n.t("collections.map.notOnMapCount", {
           count: unplaced.length,
         })}
-        tone={unplacedTone}
         avatars={notOnMapAvatars}
         onClick={openSidebar}
         dataTestId="map-not-on-map"

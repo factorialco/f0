@@ -2,8 +2,7 @@ import { F0AvatarList } from "@/components/avatars/F0AvatarList"
 import { F0Icon } from "@/components/F0Icon"
 import { Pin } from "@/icons/app"
 import { cn, focusRing } from "@/lib/utils"
-
-import type { MapPanelSectionTone } from "./MapPanelSection"
+import { Counter } from "@/ui/Counter"
 
 /** The people a "not on map" count stands for, when it can show them. */
 export type MapNotOnMapAvatar = {
@@ -13,9 +12,11 @@ export type MapNotOnMapAvatar = {
 }
 
 export interface MapNotOnMapButtonProps {
-  /** The full sentence, already localized and counted ("3 not on map"). */
-  label: string
-  tone: MapPanelSectionTone
+  /** The group's name, as the panel section is titled ("Not on map"). */
+  title: string
+  count: number
+  /** The whole thing as one sentence for assistive tech ("3 not on map"). */
+  ariaLabel: string
   /**
    * Avatars for the leftmost slot. `null` when the records cannot be shown as
    * one avatar list - a mix of people and companies, say - in which case a pin
@@ -28,13 +29,14 @@ export interface MapNotOnMapButtonProps {
 
 /**
  * The count of records the map could not place, on the map surface beside the
- * panel toggle. A ghost button carrying who is missing on the left and how many
- * on the right; pressing it opens the panel, where the "Not on map" section
- * lists them. Bare: `F0Map` puts it on the control card with the toggle.
+ * panel toggle. A ghost button carrying who is missing on the left, the group's
+ * name, and how many on the right; pressing it opens the panel to the section
+ * that lists them. Bare: `F0Map` puts it on the control card with the toggle.
  */
 export const MapNotOnMapButton = ({
-  label,
-  tone,
+  title,
+  count,
+  ariaLabel,
   avatars,
   onClick,
   dataTestId,
@@ -42,11 +44,11 @@ export const MapNotOnMapButton = ({
   <button
     type="button"
     onClick={onClick}
+    aria-label={ariaLabel}
     data-testid={dataTestId}
-    data-tone={tone}
     className={cn(
-      "flex h-8 items-center gap-2 rounded-md pl-1 pr-2 text-sm font-medium",
-      "text-f1-foreground hover:bg-f1-background-hover",
+      "flex h-8 items-center gap-2 rounded-md pl-1 pr-1.5 text-sm font-medium",
+      "text-f1-foreground-secondary hover:bg-f1-background-hover",
       focusRing()
     )}
   >
@@ -63,13 +65,7 @@ export const MapNotOnMapButton = ({
         <F0Icon icon={Pin} size="sm" />
       </span>
     )}
-    <span
-      className={cn(
-        "whitespace-nowrap tabular-nums",
-        tone === "attention" && "text-f1-foreground-warning"
-      )}
-    >
-      {label}
-    </span>
+    <span className="whitespace-nowrap">{title}</span>
+    <Counter value={count} size="sm" />
   </button>
 )

@@ -249,7 +249,6 @@ export const defaultTranslations = {
       notOnMap: "Not on map",
       onMap: "On map",
       notOnMapCount: "{{count}} not on map",
-      locationMissing: "Location missing",
     },
     table: {
       seeMoreChildren: "See more",

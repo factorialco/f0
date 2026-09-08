@@ -711,7 +711,11 @@ describe("MapCollection — records it cannot place", () => {
     await waitForMap()
 
     const count = screen.getByTestId("map-not-on-map")
-    expect(count).toHaveTextContent("2 not on map")
+    // The group's name and its count, with the whole thing as one sentence
+    // for assistive tech.
+    expect(count).toHaveTextContent("Not on map")
+    expect(count).toHaveTextContent("2")
+    expect(count).toHaveAttribute("aria-label", "2 not on map")
     expect(mock.props.latest?.sidebarExpanded).toBe(false)
 
     fireEvent.click(count)
@@ -727,52 +731,32 @@ describe("MapCollection — records it cannot place", () => {
     expect(screen.queryByTestId("map-not-on-map")).toBeNull()
   })
 
-  it("asks for attention when one of them should have had a location", async () => {
+  it("re-expands the Not on map section when opened from the count", async () => {
     renderMap({ sidebar: rows })
     await waitForMap()
 
-    expect(screen.getByTestId("map-not-on-map")).toHaveAttribute(
-      "data-tone",
-      "attention"
+    const section = () => screen.getByTestId("map-panel-not-on-map")
+    // Collapse it by hand first...
+    fireEvent.click(
+      within(section()).getByRole("button", { name: /Not on map/ })
     )
-    const section = screen.getByTestId("map-panel-not-on-map")
-    expect(section).toHaveAttribute("data-tone", "attention")
-    // The reason, under the header.
-    expect(within(section).getByText("Location missing")).toBeInTheDocument()
+    await waitFor(() =>
+      expect(section()).toHaveAttribute("data-state", "closed")
+    )
+
+    // ...then the count must land on it open, or the press shows nothing.
+    fireEvent.click(screen.getByTestId("map-not-on-map"))
+
+    await waitFor(() => expect(section()).toHaveAttribute("data-state", "open"))
   })
 
-  it("stays neutral, with no reason line, when no reason was given", async () => {
-    renderMap({ sidebar: rows }, 0, {
-      filters: { country: ["bcn", "remote"] },
-    })
+  it("lists an incomplete record like any other unplaced one", async () => {
+    // `kind` is kept on the API for the distinction to be drawn later; the
+    // view does not yet treat the two differently.
+    renderMap({ sidebar: rows })
     await waitForMap()
 
-    expect(screen.getByTestId("map-not-on-map")).toHaveAttribute(
-      "data-tone",
-      "neutral"
-    )
-    const section = screen.getByTestId("map-panel-not-on-map")
-    expect(section).toHaveAttribute("data-tone", "neutral")
-    expect(within(section).queryByText("Location missing")).toBeNull()
-  })
-
-  it("takes the consumer's reason over the default", async () => {
-    renderMap({
-      sidebar: rows,
-      coordinates: (office) =>
-        office.incomplete
-          ? { kind: "incomplete", label: "Address not geocoded" }
-          : office.longitude != null && office.latitude != null
-            ? [office.longitude, office.latitude]
-            : null,
-    })
-    await waitForMap()
-
-    expect(
-      within(screen.getByTestId("map-panel-not-on-map")).getByText(
-        "Address not geocoded"
-      )
-    ).toBeInTheDocument()
+    expect(idsIn(screen.getByTestId("map-panel-not-on-map"))).toEqual(UNPLACED)
   })
 
   it("wears their avatars on the count when they are all people", async () => {
