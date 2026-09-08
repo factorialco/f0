@@ -27,7 +27,7 @@ import { useIsDarkContext } from "./hooks/useIsDarkContext"
 import type { F0MapProvider } from "./providers/names"
 import { loadMapAdapterFactory } from "./providers/registry"
 import type { MapAdapter, MapEvent } from "./providers/types"
-import { f0MapStyles, type F0MapStyle } from "./styles"
+import { defaultMapStyle, type F0MapStyle } from "./styles"
 import type { F0MapArc, F0MapPoint, F0MapRoute, F0MapViewport } from "./types"
 
 /** Subscribe for a single firing. */
@@ -233,7 +233,7 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
     highlightedId = null,
     fitToMarkers,
     initialViewport,
-    mapStyle = f0MapStyles,
+    mapStyle,
     interactive = true,
     gestureHandling = "cooperative",
     minZoom,
@@ -282,13 +282,12 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
   const isDark = isDarkContext
   // The provider tag is only worth carrying if something reads it: a style is
   // an engine's own shape, so handing it to a different engine renders nothing
-  // and explains nothing. Falls back to that engine's default look.
-  const styleMatchesEngine = mapStyle.provider === engine
-  const style = styleMatchesEngine
-    ? isDark
-      ? mapStyle.dark
-      : mapStyle.light
-    : undefined
+  // and explains nothing. A mismatch falls back to that engine's own default.
+  const styleMatchesEngine = !mapStyle || mapStyle.provider === engine
+  const resolvedStyle = styleMatchesEngine
+    ? (mapStyle ?? defaultMapStyle(engine))
+    : defaultMapStyle(engine)
+  const style = isDark ? resolvedStyle.dark : resolvedStyle.light
   const warnedStyleRef = useRef(false)
   useEffect(() => {
     if (styleMatchesEngine || warnedStyleRef.current) {
@@ -296,11 +295,11 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
     }
     warnedStyleRef.current = true
     console.warn(
-      `F0Map: ignoring a "${mapStyle.provider}" mapStyle on the "${engine}" ` +
+      `F0Map: ignoring a "${mapStyle?.provider}" mapStyle on the "${engine}" ` +
         `engine - the shapes are not interchangeable. Pass a "${engine}" ` +
         `style, or none for its default look.`
     )
-  }, [styleMatchesEngine, mapStyle.provider, engine])
+  }, [styleMatchesEngine, mapStyle?.provider, engine])
 
   // Selection (controlled when the prop is set - `null` means "none selected",
   // not "uncontrolled" - internal state only mutates when uncontrolled).
