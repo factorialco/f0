@@ -67,7 +67,9 @@ export const MapNotOnMapButton = ({
       </span>
     )}
     <span className="whitespace-nowrap">
-      <F0Text variant="label" content={title} markdown={false} />
+      {/* `small`: the label weight in secondary, which F0Text has no colour
+          prop to ask for otherwise. The panel's own header keeps `label`. */}
+      <F0Text variant="small" content={title} markdown={false} />
     </span>
     <Counter value={count} size="sm" />
   </button>
