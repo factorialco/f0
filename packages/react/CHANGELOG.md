@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.88.3](https://github.com/factorialco/f0/compare/f0-react-v6.88.2...f0-react-v6.88.3) (2026-09-08)
+
+
+### Bug Fixes
+
+* **Widget:** draw both footer actions when given two ([#5436](https://github.com/factorialco/f0/issues/5436)) ([8f7bb56](https://github.com/factorialco/f0/commit/8f7bb56615ae428c1e052019d27c2e3eb2e809c9))
+
 ## [6.88.2](https://github.com/factorialco/f0/compare/f0-react-v6.88.1...f0-react-v6.88.2) (2026-09-08)
 
 
