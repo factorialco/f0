@@ -20,6 +20,12 @@ export interface CameraOptions {
   animate?: boolean
 }
 
+/** A DOM element anchored to a coordinate by the engine. */
+export interface DomMarkerHandle {
+  setPosition(at: LngLat): void
+  remove(): void
+}
+
 export type MapEvent =
   | "ready"
   | "move"
@@ -88,6 +94,15 @@ export interface MapAdapter {
     coordinates: LngLat[],
     options?: CameraOptions & { maxZoom?: number }
   ): void
+
+  /** Anchors an element at a coordinate, centred on it. */
+  addDomMarker(element: HTMLElement, at: LngLat): DomMarkerHandle
+
+  /** The camera `fitCoordinates` would apply, without applying it. */
+  cameraForCoordinates(
+    coordinates: LngLat[],
+    options?: CameraOptions & { maxZoom?: number }
+  ): CameraTarget | null
 
   zoomIn(): void
   zoomOut(): void
