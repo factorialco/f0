@@ -378,6 +378,28 @@ describe("F0AiCallout", () => {
       expect(screen.queryByRole("status")).toBeNull()
     })
 
+    it("says nothing in a production build", () => {
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+      vi.stubEnv("NODE_ENV", "production")
+
+      try {
+        // Two violations at once: `neutral` with an action and no icon.
+        render(
+          <F0AiCallout
+            status="neutral"
+            title="Summary"
+            action={{ label: "Review", onClick: () => {} }}
+          >
+            A device history.
+          </F0AiCallout>
+        )
+
+        expect(warn).not.toHaveBeenCalled()
+      } finally {
+        vi.unstubAllEnvs()
+      }
+    })
+
     it("warns once per violation, not once per render", () => {
       const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
 
