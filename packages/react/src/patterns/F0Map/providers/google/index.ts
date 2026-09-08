@@ -41,7 +41,14 @@ const DOT_HALO = 11 - DOT_R
 
 /** Exported for the contract suite, which stubs the engine rather than loading it. */
 export const createGoogleAdapter: MapAdapterFactory = (init): MapAdapter => {
-  const map = new google.maps.Map(init.container, {
+  // Google has no teardown of its own, and the container is React's: it holds
+  // the skip link, the live region, the controls and the list. So the engine
+  // gets a surface of its own to fill and wreck, and destroy drops just that.
+  const surface = document.createElement("div")
+  surface.style.cssText = "position:absolute;inset:0"
+  init.container.appendChild(surface)
+
+  const map = new google.maps.Map(surface, {
     center: literal(init.center),
     zoom: init.zoom,
     minZoom: init.minZoom,
@@ -83,9 +90,7 @@ export const createGoogleAdapter: MapAdapterFactory = (init): MapAdapter => {
       lines.destroy()
       dotHandle?.remove()
       overlay.destroy()
-      // Google offers no teardown of its own; dropping the nodes it rendered is
-      // what releases the map.
-      init.container.replaceChildren()
+      surface.remove()
     },
 
     on: (event, handler) => {
