@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.88.2](https://github.com/factorialco/f0/compare/f0-react-v6.88.1...f0-react-v6.88.2) (2026-09-08)
+
+
+### Performance Improvements
+
+* **OneDataCollection:** give rows the definition instead of the live source ([#5411](https://github.com/factorialco/f0/issues/5411)) ([d4cc5bf](https://github.com/factorialco/f0/commit/d4cc5bfe3d35a766e39b9042ada5bffdfea2ebd3))
+
 ## [6.88.1](https://github.com/factorialco/f0/compare/f0-react-v6.88.0...f0-react-v6.88.1) (2026-09-07)
 
 
