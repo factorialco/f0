@@ -7,6 +7,6 @@
  * another: the shapes are not interchangeable, and without it the mismatch
  * would only surface at runtime.
  */
-export type F0MapProvider = "maplibre"
+export type F0MapProvider = "maplibre" | "google"
 
 export const DEFAULT_MAP_PROVIDER: F0MapProvider = "maplibre"

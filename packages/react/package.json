@@ -187,6 +187,7 @@
     "@testing-library/react": "^16.1.0",
     "@testing-library/user-event": "^14.6.1",
     "@types/canvas-confetti": "^1.9.0",
+    "@types/google.maps": "^3.66.2",
     "@types/lodash": "^4.17.16",
     "@types/node": "^22.13.9",
     "@types/react": "^18.3.18",

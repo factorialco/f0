@@ -446,6 +446,31 @@ describe("F0Map", () => {
     })
   })
 
+  describe("style", () => {
+    it("ignores a style meant for another engine, and says so", async () => {
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+      render(
+        <F0Map
+          markers={POINTS}
+          mapStyle={{
+            provider: "google",
+            light: ["a google style"],
+            dark: ["a google style"],
+          }}
+        />
+      )
+      const map = await engine()
+
+      // Handing an engine another engine's style renders nothing and explains
+      // nothing, so the tag is enforced rather than merely carried.
+      expect(map.opts.style).toBeUndefined()
+      expect(warn).toHaveBeenCalledWith(
+        expect.stringContaining('ignoring a "google" mapStyle')
+      )
+      warn.mockRestore()
+    })
+  })
+
   describe("engine readiness", () => {
     it("frames the markers and applies the projection once ready", async () => {
       render(<F0Map markers={POINTS} />)
