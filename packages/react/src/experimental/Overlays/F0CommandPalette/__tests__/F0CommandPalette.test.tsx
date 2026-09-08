@@ -1,16 +1,22 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import { Delete, Laptop } from "@/icons/app"
+import {
+  act,
+  fireEvent,
+  screen,
+  userEvent,
+  zeroRender as render,
+} from "@/testing/test-utils"
 
-import { screen, userEvent, zeroRender as render } from "@/testing/test-utils"
-
-import { F0CommandPaletteProvider, useCommandPalette } from ".."
 import type {
   CommandAction,
   CommandEntityProvider,
   CommandEntityRef,
   CommandNavigationItem,
 } from "../types"
+
+import { F0CommandPaletteProvider, useCommandPalette } from ".."
 
 const laptop: CommandEntityRef = {
   type: "device",
@@ -25,6 +31,8 @@ const run = {
   lock: vi.fn(),
   wipe: vi.fn(),
   update: vi.fn(),
+  rename: vi.fn(),
+  profile: vi.fn(),
 }
 
 const deviceProvider: CommandEntityProvider = {
@@ -80,6 +88,64 @@ const deviceProvider: CommandEntityProvider = {
   ],
 }
 
+/* ── A container and the records inside it, for the drill-down ─────────────── */
+
+const team: CommandEntityRef = {
+  type: "team",
+  kind: "one",
+  id: "t-1",
+  label: "Acme Design",
+  sublabel: "12 people",
+}
+
+const member: CommandEntityRef = {
+  type: "person",
+  kind: "one",
+  id: "p-1",
+  label: "Ben Carter",
+  sublabel: "Engineering",
+  href: "/people/p-1",
+}
+
+const teamProvider: CommandEntityProvider = {
+  type: "team",
+  label: "Teams",
+  search: (query) =>
+    team.label.toLowerCase().includes(query.toLowerCase()) ? [team] : [],
+  actions: () => [
+    {
+      key: "rename",
+      label: "Rename team",
+      icon: Laptop,
+      group: "Admin",
+      risk: "none",
+      run: run.rename,
+    },
+  ],
+  // The team hands back `person` refs; the person provider below is what says
+  // what can be done to one. Neither has to know about the other.
+  inside: (_ref, query) =>
+    member.label.toLowerCase().includes(query.toLowerCase()) ? [member] : [],
+}
+
+const personProvider: CommandEntityProvider = {
+  type: "person",
+  label: "People",
+  // Not findable globally in these tests, so any `person` row that appears came
+  // from inside the team rather than from a search.
+  search: () => [],
+  actions: () => [
+    {
+      key: "profile",
+      label: "Open profile",
+      icon: Laptop,
+      group: "Person",
+      risk: "none",
+      run: run.profile,
+    },
+  ],
+}
+
 const actions: CommandAction[] = [
   { id: "new-task", label: "Create a task", href: "/tasks/new" },
   { id: "my-tasks", label: "Go to my tasks", href: "/tasks?scope=mine" },
@@ -107,6 +173,8 @@ type SetupOptions = {
   withAssistant?: boolean
   recent?: string[]
   scoped?: boolean
+  /** Register the team + person providers, for the drill-down. */
+  withTeam?: boolean
 }
 
 const setup = ({
@@ -115,11 +183,16 @@ const setup = ({
   withAssistant = false,
   recent = [],
   scoped = false,
+  withTeam = false,
 }: SetupOptions = {}) => {
   const user = userEvent.setup()
   render(
     <F0CommandPaletteProvider
-      providers={[deviceProvider]}
+      providers={
+        withTeam
+          ? [deviceProvider, teamProvider, personProvider]
+          : [deviceProvider]
+      }
       actions={actions}
       navigation={navigation}
       recent={recent}
@@ -135,8 +208,68 @@ const setup = ({
 const open = async (options: SetupOptions = {}) => {
   const context = setup(options)
   await context.user.click(screen.getByRole("button", { name: "launch" }))
-  return { ...context, input: screen.getByRole("combobox") }
+  return { ...context, field: screen.getByRole("combobox") }
 }
+
+const ZWSP = "​"
+
+const chipsOf = (field: HTMLElement) =>
+  Array.from(field.querySelectorAll("[data-scope-chip]"))
+
+const typeIn = (field: HTMLElement, text: string) => {
+  const chips = chipsOf(field)
+  for (const node of Array.from(field.childNodes)) {
+    if (!chips.includes(node as Element)) node.remove()
+  }
+  const node = document.createTextNode(text)
+  field.append(node)
+  caretAfter(node)
+  fireEvent.input(field)
+}
+
+const typeBeforeChip = (field: HTMLElement, text: string) => {
+  const node = document.createTextNode(text)
+  chipsOf(field)[0]?.before(node)
+  caretAfter(node)
+  fireEvent.input(field)
+}
+
+const caretAfter = (node: Text) => {
+  const range = document.createRange()
+  range.setStart(node, node.length)
+  range.collapse(true)
+  const selection = window.getSelection()
+  selection?.removeAllRanges()
+  selection?.addRange(range)
+}
+
+/**
+ * Put the caret immediately after the chip at `index`.
+ *
+ * There is no text node between two adjacent chips, so this cannot go through
+ * `caretAfter` — and it is exactly the position `Backspace` has to read to know
+ * which link of the chain it is about to take.
+ */
+const caretAfterChip = (field: HTMLElement, index: number) => {
+  const chip = chipsOf(field)[index]
+  if (!chip) throw new Error(`no chip at ${index}`)
+  const range = document.createRange()
+  range.setStartAfter(chip)
+  range.collapse(true)
+  const selection = window.getSelection()
+  selection?.removeAllRanges()
+  selection?.addRange(range)
+}
+
+const queryOf = (field: HTMLElement) => {
+  const clone = field.cloneNode(true) as HTMLElement
+  for (const chip of clone.querySelectorAll("[data-scope-chip]")) chip.remove()
+  return (clone.textContent ?? "").split(ZWSP).join("")
+}
+
+/** The chain, as the labels its chips show. */
+const chainOf = (field: HTMLElement) =>
+  chipsOf(field).map((chip) => chip.textContent)
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -172,6 +305,23 @@ describe("F0CommandPaletteProvider", () => {
     expect(screen.queryByRole("combobox")).not.toBeInTheDocument()
   })
 
+  it("treats a HELD mod+k as one press", async () => {
+    const user = userEvent.setup()
+    render(
+      <F0CommandPaletteProvider actions={actions}>
+        <span>page</span>
+      </F0CommandPaletteProvider>
+    )
+
+    await user.keyboard("{Meta>}k{/Meta}")
+    expect(screen.getByRole("combobox")).toBeInTheDocument()
+
+    fireEvent.keyDown(document, { key: "k", metaKey: true, repeat: true })
+    fireEvent.keyDown(document, { key: "k", metaKey: true, repeat: true })
+
+    expect(screen.getByRole("combobox")).toBeInTheDocument()
+  })
+
   it("does not bind the shortcut when it is turned off", async () => {
     const user = userEvent.setup()
     render(
@@ -183,9 +333,9 @@ describe("F0CommandPaletteProvider", () => {
     expect(screen.queryByRole("combobox")).not.toBeInTheDocument()
   })
 
-  it("focuses the input on open", async () => {
-    const { input } = await open()
-    expect(input).toHaveFocus()
+  it("focuses the field on open", async () => {
+    const { field } = await open()
+    expect(field).toHaveFocus()
   })
 })
 
@@ -202,20 +352,20 @@ describe("global mode", () => {
   })
 
   it("shows no assistant row until something is typed", async () => {
-    const { user, input } = await open({ withAssistant: true })
+    const { field } = await open({ withAssistant: true })
     expect(
       screen.queryByRole("option", { name: /^Ask One:/ })
     ).not.toBeInTheDocument()
 
-    await user.type(input, "task")
+    typeIn(field, "task")
     expect(
       screen.getByRole("option", { name: /^Ask One:/ })
     ).toBeInTheDocument()
   })
 
   it("ranks a label match above a record match and finds records", async () => {
-    const { user, input } = await open()
-    await user.type(input, "macbook")
+    const { field } = await open()
+    typeIn(field, "macbook")
 
     expect(screen.getByText("Devices")).toBeInTheDocument()
     expect(
@@ -224,8 +374,8 @@ describe("global mode", () => {
   })
 
   it("navigates on Enter and never runs an action", async () => {
-    const { user, input, onNavigate } = await open()
-    await user.type(input, "macbook")
+    const { user, field, onNavigate } = await open()
+    typeIn(field, "macbook")
     await user.keyboard("{Enter}")
 
     expect(onNavigate).toHaveBeenCalledWith("/devices/d-1")
@@ -234,16 +384,16 @@ describe("global mode", () => {
   })
 
   it("hands the query to the assistant on mod+Enter", async () => {
-    const { user, input, onAsk } = await open({ withAssistant: true })
-    await user.type(input, "why is this slow")
+    const { user, field, onAsk } = await open({ withAssistant: true })
+    typeIn(field, "why is this slow")
     await user.keyboard("{Meta>}{Enter}{/Meta}")
 
     expect(onAsk).toHaveBeenCalledWith("why is this slow", undefined)
   })
 
   it("renders no assistant affordances when none is configured", async () => {
-    const { user, input } = await open()
-    await user.type(input, "task")
+    const { field } = await open()
+    typeIn(field, "task")
 
     expect(
       screen.queryByRole("button", { name: "Ask One" })
@@ -254,16 +404,16 @@ describe("global mode", () => {
   })
 
   it("preselects the assistant row for a question-shaped query", async () => {
-    const { user, input } = await open({ withAssistant: true })
-    await user.type(input, "how do I enroll a laptop?")
+    const { field } = await open({ withAssistant: true })
+    typeIn(field, "how do I enroll a laptop?")
 
     const assistantRow = screen.getByRole("option", { name: /^Ask One:/ })
     expect(assistantRow).toHaveAttribute("aria-selected", "true")
   })
 
   it("shows an empty state when nothing matches", async () => {
-    const { user, input } = await open()
-    await user.type(input, "zzzzzz")
+    const { field } = await open()
+    typeIn(field, "zzzzzz")
 
     expect(screen.getByText("No results")).toBeInTheDocument()
     expect(screen.queryAllByRole("option")).toHaveLength(0)
@@ -271,38 +421,52 @@ describe("global mode", () => {
 })
 
 describe("scoping", () => {
-  it("enters a scope with / and lists that record's actions", async () => {
-    const { user, input } = await open()
-    await user.type(input, "macbook")
-    await user.keyboard("/")
+  it("commits the highlighted record as a chip on Tab", async () => {
+    const { user, field } = await open()
+    typeIn(field, "macbook")
+    await user.keyboard("{Tab}")
 
     expect(
       screen.getByRole("option", { name: /Lock screen/ })
     ).toBeInTheDocument()
     // The query resets: the noun is committed, the verb comes next.
-    expect(screen.getByRole("combobox")).toHaveValue("")
+    expect(queryOf(screen.getByRole("combobox"))).toBe("")
     expect(
-      screen.getByRole("button", { name: /Remove scope, MacBook Pro 14/ })
+      screen.getByRole("button", { name: /MacBook Pro 14.*remove this scope/ })
     ).toBeInTheDocument()
   })
 
-  it("enters a scope with the right arrow from the end of the query", async () => {
-    const { user, input } = await open()
-    await user.type(input, "macbook")
-    await user.keyboard("{ArrowRight}")
+  it("renders the committed scope as a chip inside the field", async () => {
+    await open({ scoped: true })
 
-    expect(
-      screen.getByRole("option", { name: /Lock screen/ })
-    ).toBeInTheDocument()
+    const chip = screen.getByRole("combobox").querySelector("[data-scope-chip]")
+    expect(chip).toBeInTheDocument()
+    expect(chip).toHaveTextContent('MacBook Pro 14"')
+
+    expect(chip).toHaveAttribute("contenteditable", "false")
+
+    expect(chip).toHaveAttribute("tabindex", "-1")
   })
 
-  it("keeps / an ordinary character once a scope is committed", async () => {
-    const { user, input } = await open()
-    await user.type(input, "macbook")
-    await user.keyboard("/")
-    await user.keyboard("/")
+  it("keeps Shift+Tab from committing the reference", async () => {
+    const { user, field } = await open()
+    typeIn(field, "macbook")
+    await user.keyboard("{Shift>}{Tab}{/Shift}")
 
-    expect(screen.getByRole("combobox")).toHaveValue("/")
+    expect(
+      screen.queryByRole("button", { name: /remove this scope/ })
+    ).not.toBeInTheDocument()
+    expect(field).toHaveFocus()
+  })
+
+  it("keeps / an ordinary character now that it commits nothing", async () => {
+    const { field } = await open()
+    typeIn(field, "macbook/pro")
+
+    expect(
+      screen.queryByRole("button", { name: /remove this scope/ })
+    ).not.toBeInTheDocument()
+    expect(queryOf(field)).toBe("macbook/pro")
   })
 
   it("opens already scoped from a surface that knows its target", async () => {
@@ -312,8 +476,22 @@ describe("scoping", () => {
       screen.getByRole("option", { name: /Lock screen/ })
     ).toBeInTheDocument()
     expect(
-      screen.getByRole("button", { name: /Remove scope, MacBook Pro 14/ })
+      screen.getByRole("button", { name: /MacBook Pro 14.*remove this scope/ })
     ).toBeInTheDocument()
+  })
+
+  it("keeps text typed in front of the chip in the order it was written", async () => {
+    const { user, field, onAsk } = await open({
+      scoped: true,
+      withAssistant: true,
+    })
+    typeBeforeChip(field, "who owns ")
+    await user.keyboard("{Meta>}{Enter}{/Meta}")
+
+    expect(onAsk).toHaveBeenCalledWith(
+      'who owns MacBook Pro 14"',
+      expect.objectContaining({ id: "d-1" })
+    )
   })
 
   it("leaves the scope on Backspace with an empty query", async () => {
@@ -360,6 +538,26 @@ describe("risk and availability", () => {
     )
   })
 
+  it("gives a destructive row's Enter the critical treatment", async () => {
+    const { user } = await open({ scoped: true })
+
+    await user.hover(screen.getByRole("option", { name: /Wipe device/ }))
+
+    const enter = screen.getByRole("button", { name: /Run Wipe device/ })
+
+    expect(enter).toHaveClass("text-f1-foreground-critical")
+    expect(enter).toHaveClass("hover:bg-f1-background-critical-bold")
+  })
+
+  it("keeps every other row's Enter an outline", async () => {
+    const { user } = await open({ scoped: true })
+    await user.hover(screen.getByRole("option", { name: /Lock screen/ }))
+
+    expect(
+      screen.getByRole("button", { name: /Run Lock screen/ })
+    ).not.toHaveClass("text-f1-foreground-critical")
+  })
+
   it("does not run a destructive action on a bare Enter that lands elsewhere", async () => {
     const { user } = await open({ scoped: true })
     await user.keyboard("{Enter}")
@@ -380,8 +578,8 @@ describe("risk and availability", () => {
   })
 
   it("falls back to the last row when nothing safe can be preselected", async () => {
-    const { user } = await open({ scoped: true, withAssistant: true })
-    await user.type(screen.getByRole("combobox"), "wipe")
+    await open({ scoped: true, withAssistant: true })
+    typeIn(screen.getByRole("combobox"), "wipe")
 
     // Only the destructive row and the assistant survive the filter, so the
     // default lands on the assistant — never on index 0.
@@ -420,43 +618,111 @@ describe("parameters", () => {
 })
 
 describe("row actions", () => {
-  it("reaches a row's own actions with Tab", async () => {
-    const { user, input } = await open({ withAssistant: true })
-    await user.type(input, "macbook")
-    await user.keyboard("{Tab}")
+  it("reaches a row's own controls with the right arrow", async () => {
+    const { user, field } = await open({ withAssistant: true })
+    typeIn(field, "macbook")
+    await user.keyboard("{ArrowRight}")
 
     expect(document.activeElement).toHaveAccessibleName(/Ask One/)
   })
 
-  it("hands focus back to the input on ArrowLeft", async () => {
-    const { user, input } = await open({ withAssistant: true })
-    await user.type(input, "macbook")
-    await user.keyboard("{Tab}")
+  it("walks the cluster with the arrows and stops at the last control", async () => {
+    const { user, field } = await open({ withAssistant: true })
+    typeIn(field, "macbook")
+    await user.keyboard("{ArrowRight}")
+    await user.keyboard("{ArrowRight}")
+
+    expect(document.activeElement).toHaveAccessibleName(
+      /Actions for MacBook Pro 14/
+    )
+  })
+
+  it("makes the row's own Enter the last control in the cluster", async () => {
+    const { user, field } = await open()
+    typeIn(field, "macbook")
+
+    await user.keyboard("{ArrowRight}{ArrowRight}{ArrowRight}")
+
+    expect(document.activeElement).toHaveAccessibleName(/Open MacBook Pro 14/)
+
+    await user.keyboard("{ArrowRight}")
+    expect(document.activeElement).toHaveAccessibleName(/Open MacBook Pro 14/)
+  })
+
+  it("hands focus back to the field on ArrowLeft", async () => {
+    const { user, field } = await open({ withAssistant: true })
+    typeIn(field, "macbook")
+    await user.keyboard("{ArrowRight}")
     await user.keyboard("{ArrowLeft}")
 
-    expect(input).toHaveFocus()
+    expect(field).toHaveFocus()
   })
 
-  it("takes a typed character back to the input", async () => {
-    const { user, input } = await open({ withAssistant: true })
-    await user.type(input, "macbook")
-    await user.keyboard("{Tab}")
+  it("takes a typed character back to the field", async () => {
+    const { user, field } = await open({ withAssistant: true })
+    typeIn(field, "macbook")
+    await user.keyboard("{ArrowRight}")
     await user.keyboard("x")
 
-    expect(input).toHaveFocus()
-    expect(input).toHaveValue("macbookx")
+    expect(field).toHaveFocus()
+    expect(queryOf(field)).toBe("macbookx")
   })
 
-  it("offers open-in-new-tab and copy-link for a record with an href", async () => {
-    const { user, input } = await open()
-    await user.type(input, "macbook")
+  it("offers the record's actions and copy-link, and no new-tab", async () => {
+    const { field } = await open()
+    typeIn(field, "macbook")
 
     expect(
-      screen.getByRole("button", { name: "Open in a new tab" })
+      screen.getByRole("button", { name: /Actions for MacBook Pro 14/ })
     ).toBeInTheDocument()
     expect(
-      screen.getByRole("button", { name: "Copy link" })
+      screen.getByRole("button", { name: /Copy link to MacBook Pro 14/ })
     ).toBeInTheDocument()
+
+    expect(
+      screen.queryByRole("button", { name: "Open in a new tab" })
+    ).not.toBeInTheDocument()
+  })
+
+  it("scopes to the record from the row's own Actions control", async () => {
+    const { user, field } = await open()
+    typeIn(field, "macbook")
+
+    await user.click(
+      screen.getByRole("button", { name: /Actions for MacBook Pro 14/ })
+    )
+
+    expect(
+      screen.getByRole("option", { name: /Lock screen/ })
+    ).toBeInTheDocument()
+  })
+})
+
+describe("the list as a focus region", () => {
+  it("moves focus into the list on Tab when the row cannot be a reference", async () => {
+    const { user } = await open()
+
+    await user.keyboard("{Tab}")
+
+    expect(document.activeElement).toHaveAttribute("role", "option")
+
+    expect(document.activeElement).toHaveAttribute("data-index", "0")
+  })
+
+  it("walks the rows with the arrows while the list holds focus", async () => {
+    const { user } = await open()
+    await user.keyboard("{Tab}")
+    await user.keyboard("{ArrowDown}")
+
+    expect(document.activeElement).toHaveAttribute("data-index", "1")
+  })
+
+  it("hands focus back to the field on Tab from the list", async () => {
+    const { user, field } = await open()
+    await user.keyboard("{Tab}")
+    await user.keyboard("{Tab}")
+
+    expect(field).toHaveFocus()
   })
 })
 
@@ -481,9 +747,9 @@ describe("keyboard navigation", () => {
   })
 
   it("points the combobox at the active option", async () => {
-    const { input } = await open()
-    expect(input).toHaveAttribute("aria-activedescendant")
-    expect(input).toHaveAttribute("aria-controls")
+    const { field } = await open()
+    expect(field).toHaveAttribute("aria-activedescendant")
+    expect(field).toHaveAttribute("aria-controls")
   })
 })
 
@@ -504,5 +770,425 @@ describe("dismissing", () => {
     await user.click(screen.getByRole("listbox"))
 
     expect(screen.getByRole("combobox")).toBeInTheDocument()
+  })
+})
+
+describe("on a phone", () => {
+  const asPhone = () => {
+    const original = window.matchMedia
+    window.matchMedia = ((query: string) => ({
+      matches: query.includes("max-width: 560px"),
+      media: query,
+      onchange: null,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      addListener: () => {},
+      removeListener: () => {},
+      dispatchEvent: () => false,
+    })) as typeof window.matchMedia
+    return () => {
+      window.matchMedia = original
+    }
+  }
+
+  it("becomes a bottom sheet", async () => {
+    const restore = asPhone()
+    try {
+      await open()
+
+      expect(screen.getByRole("dialog")).toHaveClass("items-end")
+      expect(screen.getByRole("dialog")).not.toHaveClass("items-start")
+    } finally {
+      restore()
+    }
+  })
+
+  it("gives the rows a touch-sized target", async () => {
+    const restore = asPhone()
+    try {
+      await open()
+
+      expect(screen.getAllByRole("option")[0]).toHaveClass("min-h-12")
+    } finally {
+      restore()
+    }
+  })
+
+  it("shows no key legend", async () => {
+    const restore = asPhone()
+    try {
+      await open({ withAssistant: true })
+
+      expect(screen.queryByText("Ask")).not.toBeInTheDocument()
+      expect(screen.queryByText("Actions")).not.toBeInTheDocument()
+    } finally {
+      restore()
+    }
+  })
+})
+
+describe("drilling into a scope", () => {
+  /** Search the team, then commit it — the state every test here starts from. */
+  const openTeam = async () => {
+    const context = await open({ withTeam: true, withAssistant: true })
+    typeIn(context.field, "acme")
+    await context.user.keyboard("{Tab}")
+    return context
+  }
+
+  it("lists the records inside a scope alongside its own actions", async () => {
+    const { field } = await openTeam()
+
+    expect(chainOf(field)).toEqual(["Acme Design"])
+    // The team's own verb…
+    expect(
+      screen.getByRole("option", { name: /Rename team/ })
+    ).toBeInTheDocument()
+    // …and what is inside it, under the heading of the provider that owns the
+    // child's type rather than the one that produced it.
+    expect(
+      screen.getByRole("option", { name: /Ben Carter/ })
+    ).toBeInTheDocument()
+    expect(screen.getByText("People")).toBeInTheDocument()
+  })
+
+  it("puts the scope's own actions above what is inside it", async () => {
+    await openTeam()
+
+    const labels = screen
+      .getAllByRole("option")
+      .map((row) => row.getAttribute("aria-label") ?? "")
+    expect(labels.findIndex((l) => /Rename team/.test(l))).toBeLessThan(
+      labels.findIndex((l) => /Ben Carter/.test(l))
+    )
+  })
+
+  it("pushes a second chip and shows that record's actions", async () => {
+    const { user, field } = await openTeam()
+
+    // Arrow down to the child, then commit it the same way the team was
+    // committed: one gesture, no new key.
+    await user.keyboard("{ArrowDown}")
+    expect(screen.getByRole("option", { name: /Ben Carter/ })).toHaveAttribute(
+      "aria-selected",
+      "true"
+    )
+    await user.keyboard("{Tab}")
+
+    expect(chainOf(field)).toEqual(["Acme Design", "Ben Carter"])
+    // The last link owns the list, which is what makes "whose actions?" have one
+    // answer.
+    expect(
+      screen.getByRole("option", { name: /Open profile/ })
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole("option", { name: /Rename team/ })
+    ).not.toBeInTheDocument()
+  })
+
+  it("drills in from the row's own Actions control too", async () => {
+    const { user, field } = await openTeam()
+
+    // The cluster is drawn for the ACTIVE row only, so arrive on him first.
+    await user.keyboard("{ArrowDown}")
+    await user.click(
+      screen.getByRole("button", { name: /Actions for Ben Carter/ })
+    )
+
+    expect(chainOf(field)).toEqual(["Acme Design", "Ben Carter"])
+  })
+
+  it("pops one link at a time on Backspace", async () => {
+    const { user, field } = await openTeam()
+    await user.keyboard("{ArrowDown}")
+    await user.keyboard("{Tab}")
+    expect(chainOf(field)).toHaveLength(2)
+
+    await user.keyboard("{Backspace}")
+
+    // Back in the team you found them in, not back at the top.
+    expect(chainOf(field)).toEqual(["Acme Design"])
+    expect(
+      screen.getByRole("option", { name: /Rename team/ })
+    ).toBeInTheDocument()
+  })
+
+  it("truncates the whole chain when the outer link is removed", async () => {
+    const { user, field } = await openTeam()
+    await user.keyboard("{ArrowDown}")
+    await user.keyboard("{Tab}")
+
+    // Beside the FIRST chip: the chain is a path, so taking a link takes what
+    // was reached through it rather than leaving an orphan.
+    caretAfterChip(field, 0)
+    await user.keyboard("{Backspace}")
+
+    expect(chainOf(field)).toEqual([])
+  })
+
+  it("stops offering the gesture at the depth cap", async () => {
+    const { user, field } = await openTeam()
+    await user.keyboard("{ArrowDown}")
+    await user.keyboard("{Tab}")
+    expect(chainOf(field)).toHaveLength(2)
+
+    // A person's actions are all that is left; none of them is a reference, so
+    // there is nothing to push even if the cap were higher.
+    expect(
+      screen.queryByRole("button", { name: /Actions for/ })
+    ).not.toBeInTheDocument()
+  })
+
+  it("hands the assistant the whole path, not just the last link", async () => {
+    const { user, field, onAsk } = await openTeam()
+    await user.keyboard("{ArrowDown}")
+    await user.keyboard("{Tab}")
+    await user.keyboard("{Meta>}{Enter}{/Meta}")
+
+    expect(onAsk).toHaveBeenCalledWith(
+      "Acme Design Ben Carter",
+      expect.objectContaining({ id: "p-1" })
+    )
+    expect(chainOf(field)).toHaveLength(2)
+  })
+
+  it("keeps a sentence typed around the chain in order", async () => {
+    const { user, field, onAsk } = await openTeam()
+    typeBeforeChip(field, "who is in ")
+    await user.keyboard("{Meta>}{Enter}{/Meta}")
+
+    expect(onAsk).toHaveBeenCalledWith(
+      "who is in Acme Design",
+      expect.objectContaining({ id: "t-1" })
+    )
+  })
+})
+
+describe("the footer", () => {
+  it("is not drawn when there is nothing to teach", async () => {
+    // No assistant, and the default list is plain verbs: no reference to
+    // commit, no controls of their own, so every hint is absent at once.
+    const { field } = await open({ withAssistant: false })
+
+    expect(queryOf(field)).toBe("")
+    expect(screen.queryByText("Ask")).not.toBeInTheDocument()
+    expect(screen.queryByText("Actions")).not.toBeInTheDocument()
+    // The band itself, not just its contents.
+    expect(document.querySelector(".border-t")).not.toBeInTheDocument()
+  })
+
+  it("appears once a row can offer something", async () => {
+    const { field } = await open({ withAssistant: false })
+    typeIn(field, "macbook")
+
+    // A record can be committed, so `Tab` is worth teaching.
+    expect(screen.getByText("Actions")).toBeInTheDocument()
+  })
+
+  it("always has the assistant's binding to teach when one is configured", async () => {
+    await open({ withAssistant: true })
+
+    expect(screen.getByText("Ask")).toBeInTheDocument()
+  })
+})
+
+describe("an action that only goes somewhere", () => {
+  const withHrefActions: CommandEntityProvider = {
+    type: "device",
+    label: "Devices",
+    search: (query) =>
+      laptop.label.toLowerCase().includes(query.toLowerCase()) ? [laptop] : [],
+    actions: () => [
+      // A plain string: the destination is the same wherever you came from.
+      {
+        key: "docs",
+        label: "Device policy",
+        icon: Laptop,
+        group: "Help",
+        risk: "none",
+        href: "/help/devices",
+      },
+      // A function of the target, for a destination that depends on it.
+      {
+        key: "history",
+        label: "View history",
+        icon: Laptop,
+        group: "Inventory",
+        risk: "none",
+        href: (ref) => `/devices/${ref.kind === "one" ? ref.id : ""}/history`,
+      },
+    ],
+  }
+
+  const openWithHrefs = async () => {
+    const onNavigate = vi.fn()
+    const user = userEvent.setup()
+    render(
+      <F0CommandPaletteProvider
+        providers={[withHrefActions]}
+        actions={actions}
+        onNavigate={onNavigate}
+      >
+        <OpenButton scoped />
+      </F0CommandPaletteProvider>
+    )
+    await user.click(screen.getByRole("button", { name: "launch" }))
+    return { user, onNavigate }
+  }
+
+  it("navigates on a string href, with no run to write", async () => {
+    const { user, onNavigate } = await openWithHrefs()
+
+    await user.click(screen.getByRole("option", { name: /Device policy/ }))
+
+    expect(onNavigate).toHaveBeenCalledWith("/help/devices")
+  })
+
+  it("resolves an href that depends on the target", async () => {
+    const { user, onNavigate } = await openWithHrefs()
+
+    await user.click(screen.getByRole("option", { name: /View history/ }))
+
+    expect(onNavigate).toHaveBeenCalledWith("/devices/d-1/history")
+  })
+
+  it("closes the palette after following one", async () => {
+    const { user } = await openWithHrefs()
+
+    await user.click(screen.getByRole("option", { name: /Device policy/ }))
+
+    expect(screen.queryByRole("combobox")).not.toBeInTheDocument()
+  })
+})
+
+describe("remote entity search", () => {
+  const laptopRef = laptop as Extract<CommandEntityRef, { kind: "one" }>
+
+  /** A provider that answers when told to, so a test can hold it open. */
+  const deferredProvider = () => {
+    let release: (refs: CommandEntityRef[]) => void = () => undefined
+    let reject: () => void = () => undefined
+    const provider: CommandEntityProvider = {
+      type: "device",
+      label: "Devices",
+      search: () =>
+        new Promise<CommandEntityRef[]>((resolve, fail) => {
+          release = resolve
+          reject = () => fail(new Error("upstream unavailable"))
+        }),
+    }
+    return {
+      provider,
+      // Async: resolving a promise queues a microtask, and a synchronous `act`
+      // returns before it runs — so the state update would land after the
+      // assertion rather than before it.
+      release: async (refs: CommandEntityRef[]) => {
+        await act(async () => {
+          release(refs)
+        })
+      },
+      reject: async () => {
+        await act(async () => {
+          reject()
+        })
+      },
+    }
+  }
+
+  const openWith = async (provider: CommandEntityProvider) => {
+    const user = userEvent.setup()
+    render(
+      <F0CommandPaletteProvider providers={[provider]} actions={actions}>
+        <OpenButton />
+      </F0CommandPaletteProvider>
+    )
+    await user.click(screen.getByRole("button", { name: "launch" }))
+    return { user, field: screen.getByRole("combobox") }
+  }
+
+  it("holds the group's space with placeholders while it waits", async () => {
+    const { provider, release } = deferredProvider()
+    const { field } = await openWith(provider)
+
+    typeIn(field, "macbook")
+
+    const list = screen.getByRole("listbox")
+    expect(list).toHaveAttribute("aria-busy", "true")
+    expect(
+      list.querySelectorAll("[data-testid=skeleton]").length
+    ).toBeGreaterThan(0)
+    // A placeholder is not an option: nothing selectable was invented.
+    expect(
+      screen.queryByRole("option", { name: /MacBook/ })
+    ).not.toBeInTheDocument()
+
+    await release([laptopRef])
+
+    expect(
+      screen.getByRole("option", { name: /MacBook Pro 14/ })
+    ).toBeInTheDocument()
+    expect(screen.getByRole("listbox")).not.toHaveAttribute("aria-busy")
+  })
+
+  it("says so when a provider cannot be reached", async () => {
+    const { provider, reject } = deferredProvider()
+    const { field } = await openWith(provider)
+
+    typeIn(field, "macbook")
+    await reject()
+
+    // Listed with its reason, never silently absent — which would read as
+    // "there are no such devices".
+    expect(
+      screen.getByRole("option", { name: /Could not load these results/ })
+    ).toBeInTheDocument()
+  })
+
+  it("ignores an answer that arrives after a newer query", async () => {
+    const answers: Array<(refs: CommandEntityRef[]) => void> = []
+    const provider: CommandEntityProvider = {
+      type: "device",
+      label: "Devices",
+      search: () =>
+        new Promise<CommandEntityRef[]>((resolve) => answers.push(resolve)),
+    }
+    const { field } = await openWith(provider)
+
+    typeIn(field, "mac")
+    typeIn(field, "macbook")
+    expect(answers).toHaveLength(2)
+
+    // The SECOND request answers first, then the stale first one lands.
+    const air: CommandEntityRef = {
+      type: "device",
+      kind: "one",
+      id: "d-2",
+      label: 'MacBook Air 13"',
+    }
+    await act(async () => {
+      answers[1]!([air])
+    })
+    await act(async () => {
+      answers[0]!([laptopRef])
+    })
+
+    // The newest query's answer survives; the late one is dropped.
+    expect(
+      screen.getByRole("option", { name: /MacBook Air 13/ })
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole("option", { name: /MacBook Pro 14/ })
+    ).not.toBeInTheDocument()
+  })
+
+  it("keeps a synchronous provider instant, with no loading state", async () => {
+    const { field } = await openWith(deviceProvider)
+
+    typeIn(field, "macbook")
+
+    expect(screen.getByRole("listbox")).not.toHaveAttribute("aria-busy")
+    expect(
+      screen.getByRole("option", { name: /MacBook Pro 14/ })
+    ).toBeInTheDocument()
   })
 })

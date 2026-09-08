@@ -4,14 +4,16 @@ import { F0Button } from "@/components/F0Button"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
+import type { ResolvedCommandLabels } from "../labels"
 import type { CommandRow } from "../internal-types"
 
 type CommandRowActionsProps = {
+  labels: ResolvedCommandLabels
   row: CommandRow
   index: number
   /** Distance from the top of the scroll container to the row's vertical centre. */
   top: number
-  /** Which pill holds focus, or `null` while the input does. */
+
   focusedAction: number | null
   onActivate: () => void
   onActionKeyDown: (event: KeyboardEvent, index: number, count: number) => void
@@ -37,20 +39,31 @@ type CommandRowActionsProps = {
  * travels with the list on scroll without a single scroll listener.
  */
 export const CommandRowActions = ({
+  labels,
   row,
   index,
   top,
   focusedAction,
-  onActivate,
   onActionKeyDown,
   onActionFocus,
+  onActivate,
 }: CommandRowActionsProps) => {
   const i18n = useI18n()
   const rowActions = row.rowActions ?? []
 
-  const enterLabel = row.scopeRef
-    ? i18n.t("commandPalette.row.open", { label: row.label })
-    : i18n.t("commandPalette.row.run", { label: row.label })
+  const clusterSize = rowActions.length + (row.disabledReason ? 0 : 1)
+
+  const enterVerb = row.assistant
+    ? labels.verbs.ask
+    : row.scopeRef
+      ? labels.verbs.open
+      : labels.verbs.run
+
+  const enterLabel = row.assistant
+    ? i18n.t("commandPalette.row.ask", { label: row.label })
+    : row.scopeRef
+      ? i18n.t("commandPalette.row.open", { label: row.label })
+      : i18n.t("commandPalette.row.run", { label: row.label })
 
   return (
     <span
@@ -73,7 +86,7 @@ export const CommandRowActions = ({
           )}
           onFocus={() => onActionFocus(actionIndex)}
           onKeyDown={(event) =>
-            onActionKeyDown(event, actionIndex, rowActions.length)
+            onActionKeyDown(event, actionIndex, clusterSize)
           }
         >
           <F0Button
@@ -82,9 +95,8 @@ export const CommandRowActions = ({
             icon={action.icon}
             label={action.text ?? action.label}
             hideLabel={!action.text}
-            tooltip={action.text ? undefined : action.label}
-            // Never a document tab stop: the palette is one focus trap around the
-            // input, and its own `Tab` handling is what reaches these.
+            aria-label={action.label}
+            tooltip={action.text ? undefined : (action.tip ?? action.label)}
             tabIndex={-1}
             onClick={action.run}
           />
@@ -92,22 +104,52 @@ export const CommandRowActions = ({
       ))}
 
       {/*
-        The row's own Enter. Its glyph is the key that triggers it, so pointer and
-        keyboard read as one affordance rather than two. Outline like its
-        neighbours: a filled brand-red button beside a red "Wipe" label makes the
-        same colour mean "run this" in one place and "this cannot be undone" in
-        the other. A blocked row gets no button rather than a dead one.
+        The row's own Enter. Its glyph is the key that triggers it, so pointer
+        and keyboard read as one affordance rather than two. A blocked row gets
+        no button at all rather than a dead one.
+
+        ON A DESTRUCTIVE ROW IT IS `critical`, and this reverses an earlier call
+        worth explaining rather than quietly flipping. The old note said a filled
+        red button beside a red `Wipe` made the same colour mean "run this" in
+        one place and "this is irreversible" in the other — and it was right
+        about `variant="default"`, which in this theme IS brand red. Two
+        different reds meaning two different things in one row is exactly the
+        collision it described.
+
+        `critical` removes the collision instead of dodging it, and it turns out
+        to be quiet by design: F0 renders it `bg-f1-background-secondary` +
+        `text-f1-foreground-critical` at rest — the same neutral chip as its
+        neighbours, wearing a red glyph — and only fills to
+        `background-critical-bold` under hover and press. So the row reads as one
+        destructive unit (red icon, red verb, red `↵`) without a red slab
+        competing with the label, and the button goes loud exactly at the moment
+        the pointer is on the thing that cannot be undone. Every other row keeps
+        `outline`.
       */}
       {row.disabledReason ? null : (
-        <F0Button
-          variant="outline"
-          size="sm"
-          /* i18n-exempt -- the Return key's own glyph, not prose */
-          label="↵"
-          aria-label={enterLabel}
-          tabIndex={-1}
-          onClick={onActivate}
-        />
+        <span
+          data-row={index}
+          data-action={rowActions.length}
+          className={cn(
+            "inline-flex rounded-sm",
+            focusedAction === rowActions.length &&
+              "ring-2 ring-f1-border-selected"
+          )}
+          onFocus={() => onActionFocus(rowActions.length)}
+          onKeyDown={(event) =>
+            onActionKeyDown(event, rowActions.length, clusterSize)
+          }
+        >
+          <F0Button
+            variant={row.danger ? "critical" : "outline"}
+            size="sm"
+            label="↵"
+            aria-label={enterLabel}
+            tooltip={enterVerb}
+            tabIndex={-1}
+            onClick={onActivate}
+          />
+        </span>
       )}
     </span>
   )

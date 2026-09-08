@@ -35,35 +35,168 @@ The **scope** is a record or a selection, the **action** is the verb, the **para
 
 | Part            | What it is                                                                                                                            |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| **Bar**         | The sentence being written: the search icon, the committed scope, the rendered `/` separator, the input, and the assistant button.    |
-| **Scope**       | The record or selection the list is about. Plain text in the input's own type — not a tag — removable by pointer or with `Backspace`. |
+| **Bar**         | The sentence being written: the search icon, the chain of committed scopes, the field, and the assistant button.                      |
+| **Scope**       | The record the list is about, as a chip inline in the field, sized to the field's own type. Removable by pointer or with `Backspace`. |
 | **List**        | Grouped rows. Headings are ordinary secondary text; rows of one group are always contiguous.                                          |
 | **Row**         | A leading glyph or avatar, the label, an optional origin badge, and the context trailing it on the same line.                         |
-| **Row actions** | Secondary actions floated over the row's right edge, revealed on hover, on the active row, and while one holds focus.                 |
+| **Row actions** | Controls floated over the row's right edge — the assistant, `Actions`, `Copy link`, and the row's own `↵` — reached with `→`.         |
 | **Footer**      | The gesture that matters right now, as key-and-label pairs.                                                                           |
 
 ### Modes
 
-| Mode                     | Reached by                                   | The list holds                                                                         |
-| ------------------------ | -------------------------------------------- | -------------------------------------------------------------------------------------- |
-| **Global, empty query**  | Opening it                                   | `recent`, then `actions` as "Suggestions"                                              |
-| **Global, with a query** | Typing                                       | Ranked `actions`, records from every provider, ranked `navigation`, then the assistant |
-| **Scoped**               | `/` or `→` on a record, or `openScoped(ref)` | That record's actions — suggested first, blocked last                                  |
-| **Parameter**            | Choosing an action with `params`             | That step's options                                                                    |
+| Mode                     | Reached by                                                     | The list holds                                                                         |
+| ------------------------ | -------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| **Global, empty query**  | Opening it                                                     | `recent`, then `actions` as "Suggestions"                                              |
+| **Global, with a query** | Typing                                                         | Ranked `actions`, records from every provider, ranked `navigation`, then the assistant |
+| **Scoped**               | `Tab` on a record, its `Actions` control, or `openScoped(ref)` | That record's actions — suggested first, then whatever is inside it, blocked last      |
+| **Parameter**            | Choosing an action with `params`                               | That step's options                                                                    |
 
 ### Keyboard
 
-| Key         | What it does                                                                                                         |
-| ----------- | -------------------------------------------------------------------------------------------------------------------- |
-| `mod+K`     | Opens and closes the palette                                                                                         |
-| `↑` `↓`     | Moves the selection                                                                                                  |
-| `Enter`     | Runs the active row. On a record it **navigates** and never executes                                                 |
-| `/`         | Commits the highlighted record as the scope. An ordinary character everywhere else, so slashes in names stay typable |
-| `→`         | The same gesture, from the end of the query only                                                                     |
-| `Tab`       | Reaches the active row's own actions, then cycles the selection when it has none                                     |
-| `Backspace` | On an empty query, walks back one level: parameter → action → scope → nothing                                        |
-| `Escape`    | Pops one level, and closes only when there is nothing left to pop                                                    |
-| `mod+Enter` | Hands the query and the scope to the assistant                                                                       |
+The field is a **token field** — one editable box with the scope rendered inside
+it as a chip — and that is what settles the grammar. `Tab` means there what it
+means in every token field: take the highlighted suggestion and make it a token.
+The palette has two focus regions, the field and the list; `Tab` moves between
+them, and the arrows are the map inside each.
+
+| Key         | What it does                                                                                                                    |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `mod+K`     | Opens and closes the palette. A held press is one press, not a strobe                                                           |
+| `↑` `↓`     | Moves the selection, and walks the rows while the list holds focus                                                              |
+| `Enter`     | Runs the active row. On a record it **navigates** and never executes                                                            |
+| `Tab`       | Commits the highlighted record as the scope; on any other row, moves between the field and the list                             |
+| `shift+Tab` | From the field, nothing — it is the first region, and backwards must never be the irreversible gesture                          |
+| `→`         | Opens the active row's own controls and walks them, stopping at the last                                                        |
+| `←`         | Walks back through them and out, to whichever side the cluster was entered from                                                 |
+| `Backspace` | Beside a chip, takes that link and everything reached through it, keeping the sentence. On an empty query, walks back one level |
+| `Escape`    | Pops one level, and closes only when there is nothing left to pop                                                               |
+| `mod+Enter` | Hands the sentence — the chip in the position it was typed — and the scope to the assistant                                     |
+
+`/` used to be a second key for committing the scope and is gone. It came from
+command lines, where the bar IS one; here the bar is a token field, `Tab` is what
+a hand reaches for in one, and a slash you can also type into a name is a worse
+way to say the same thing. Nothing lost a gesture — one gesture lost a spare key.
+
+### Where the records come from
+
+`search` **may be async**, because real entity search is remote. Return an array
+when the records are already in hand and a promise when they are not — the same
+for `inside`.
+
+```tsx
+const deviceProvider: CommandEntityProvider = {
+  type: "device",
+  label: "Devices",
+  // Sync: already in memory. Instant, no loading state, nothing to configure.
+  search: (query, limit) => localDevices(query).slice(0, limit),
+}
+
+const ticketProvider: CommandEntityProvider = {
+  type: "ticket",
+  label: "Tickets",
+  // Async: the palette renders skeleton rows in this group while it waits, and
+  // a reason row in it if the promise rejects.
+  search: async (query, limit) => {
+    const response = await api.searchTickets({ q: query, limit })
+    return response.items.map(toRef)
+  },
+}
+```
+
+**Each domain shows its own state, in its own group.** A provider that has
+answered renders immediately rather than waiting for its neighbours; one still
+working holds the space its results will fill with skeleton rows; one that
+failed says `Could not load these results` instead of contributing nothing —
+because silence there is indistinguishable from "there are no tickets called
+that". The listbox carries `aria-busy` while anything is outstanding, and the
+placeholders are deliberately **not** options: a bar that is about to become a
+result is not something to choose, so the arrows step over it and a screen
+reader is never offered it.
+
+**The palette guards staleness; it does not debounce.** It calls `search` on
+every query change and applies only the newest answer, so a slow reply to `mac`
+can never overwrite a fast one to `macbook` — that guard needs a request
+identity the palette already has. Debouncing is the opposite: only the provider
+knows what a round trip costs, so a provider that wants fewer of them debounces
+inside its own `search`.
+
+<Canvas of={Stories.LoadingFromRemoteProviders} />
+
+If a domain already has an F0 `DataSource` for its collection, adapt it inside
+`search` rather than handing it over: the palette wants a global top-N for a
+string, not a collection's current filter, sorting, pagination and selection
+state.
+
+### Narrowing before acting
+
+A provider can say what lives **inside** one of its records with `inside`, and
+the palette then holds a **chain** of references rather than one: search a team,
+list the people in it, act on one of them. The field shows a chip per link.
+
+```tsx
+const teamProvider: CommandEntityProvider = {
+  type: "team",
+  label: "Teams",
+  search: (query, limit) => findTeams(query).slice(0, limit),
+  actions: () => [renameTeam],
+  // Return refs of ANY type. The palette resolves each one's actions from the
+  // provider matching that type, so a team hands back `person` refs and the
+  // person provider supplies what can be done to them — neither has to know
+  // about the other.
+  inside: (ref, query, limit) => membersOf(ref, query).slice(0, limit),
+}
+```
+
+The last link owns the list, which is what makes this resolve: "whose actions?"
+always has exactly one answer. Two parallel subjects would have none, which is
+why a selection stays a single `kind: "many"` chip instead.
+
+`Tab` needs no new meaning — it pushes another link, the same gesture that
+committed the first — and `Backspace` pops one at a time, so backing out of a
+person lands in the team you found them in rather than at the top. `Backspace`
+beside a chip takes that link **and everything reached through it**, because the
+chain is a path and a gap in one would leave a record whose context has gone.
+
+The chain is capped at **two**. Deeper stops being a reference and starts being
+navigation, which the product already has screens for — and the cap bounds a
+an `inside` that returns something containing itself.
+
+Rows only offer the gesture when there is something on the other side: a record
+whose provider has neither `actions` nor `inside` is a dead end, so it gets no
+`Actions` control and `Tab` on it moves to the list instead.
+
+<Canvas of={Stories.DrillingIntoATeam} />
+
+### On a phone
+
+Below F0's own dialog breakpoint (560px) the palette is a **bottom sheet**: same
+state, same rows, same handlers, reversed.
+
+The field sits at the **very foot** and the results **run up from it**, so the
+top-ranked row is the one nearest the thumb and the field is where the hand
+already is — the keyboard comes up from there too. Rows are 48px with the
+context on a second line, because at 390px a label and its context cannot share
+a line without one truncating to nothing, and the context is the half that tells
+two similar records apart.
+
+Reversing the flow rather than reordering the markup keeps the combobox before
+its listbox in the DOM, which is the order a screen reader wants. One
+consequence worth knowing if you touch the list: a group heading emitted before
+its rows renders _below_ them once the axis is reversed, so on a phone the
+heading is carried by the group's **last** row instead of its first.
+
+There is no key legend: a centred row teaching `TAB` and `⌘↵` to a device with
+neither is decoration that costs a row of the list. The gestures the phone does
+have are visible controls on the rows instead.
+
+<Canvas of={Stories.OnAPhone} />
+
+### At every other size
+
+The panel always keeps a **gutter** — it never spans the viewport edge to edge.
+Below the 840px cap it holds the margins the dialog ships with; above it, the cap
+centres it. A floating panel whose edges touch the screen's stops reading as
+floating, which is what made it look wrong on a tablet.
 
 ## Guidelines
 
@@ -169,7 +302,73 @@ const deviceProvider: CommandEntityProvider = {
 }
 ```
 
-`actions` is optional. Leave it off while a domain has not adopted the registry: its records stay findable and openable, they are simply not scopable yet — a valid state, not a broken one.
+| Member    | Type                                        | Description                                                                                         |
+| --------- | ------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `type`    | `string`                                    | Stable discriminator, and the value of `CommandEntityRef.type`. How actions are resolved for a ref. |
+| `label`   | `string`                                    | The group heading its records appear under.                                                         |
+| `search`  | `(query, limit) => CommandEntityRef[]`      | Record lookup. Ranking across providers is the palette's job.                                       |
+| `actions` | `(ref) => CommandEntityAction[]`            | What can be done to one of its records. Optional.                                                   |
+| `inside`  | `(ref, query, limit) => CommandEntityRef[]` | What lives **inside** one of its records, for narrowing before acting. Optional.                    |
+
+Both `actions` and `inside` are optional, and a record needs **one of them** to be worth committing: with neither, its provider has nothing on the other side of the gesture, so the record stays findable and openable but not scopable — a valid state, not a broken one, and the palette simply does not offer the affordance.
+
+A row's own controls come from `CommandRowAction`, where `label` is always the accessible name and always carries the target (`Copy link to MacBook Pro 14"`), while `tip` is the shorter string the tooltip shows when repeating the target would cover the row it describes. Give `text` to at most one control per row.
+
+### A destination or a behaviour
+
+Every action — global (`CommandAction`) or scoped (`CommandEntityAction`) — is one
+of two things, and the type enforces **exactly one**: `href` if it goes
+somewhere, `run` if it does something. Neither is a type error rather than a row
+that silently does nothing when pressed.
+
+Reach for `href` first. Most rows are destinations, and `run: () => navigate("/x")`
+buries a link inside a function — the palette then cannot know the row **is** a
+link, which is what lets it offer `Copy link` and open in a new tab.
+
+```tsx
+// Global: a plain string is all it takes.
+const actions: CommandAction[] = [
+  { id: "new-task", label: "Create a task", href: "/tasks/new" },
+  {
+    id: "invite",
+    label: "Invite a teammate",
+    run: ({ navigate }) => openInvite(navigate),
+  },
+]
+
+// Scoped: a string when the destination is fixed, a function of the target when
+// it is not — and it receives the collected parameters too, so a step's answer
+// can end up in the URL.
+actions: () => [
+  {
+    key: "policy",
+    label: "Device policy",
+    icon: Book,
+    group: "Help",
+    risk: "none",
+    href: "/help/devices",
+  },
+  {
+    key: "history",
+    label: "View history",
+    icon: Clock,
+    group: "Inventory",
+    risk: "none",
+    href: (ref) => `/devices/${ref.id}/history`,
+  },
+  {
+    key: "lock",
+    label: "Lock screen",
+    icon: LockLocked,
+    group: "Security",
+    risk: "none",
+    run: (ref, values, { navigate }) => lockDevice(ref, navigate),
+  },
+]
+```
+
+An `href` is followed through your `onNavigate`, never a hard page load, and the
+palette closes itself afterwards — the same path `run`'s `navigate` takes.
 
 ### Behavior
 
@@ -177,13 +376,18 @@ const deviceProvider: CommandEntityProvider = {
 - **A selection is a snapshot.** `kind: "many"` carries the ids captured when the palette opened, so a selection changing behind the overlay cannot redirect an action mid-flight.
 - **Every open starts clean.** The panel is keyed on the open count, so opening scoped immediately after a plain open cannot inherit the previous scope.
 - **`recent` is yours.** What counts as recent is a fact about your app's history, so the palette reads the list and never writes to storage on your behalf.
-- **Escape is layered.** It pops one level of the grammar before it closes the overlay, so it is the way back out of a scope as well as the way out.
+- **Escape is layered.** It pops one level of the grammar before it closes the overlay, so it is the way back out of a scope as well as the way out — and with a chain, one link at a time.
+- **The footer promises only what the highlighted row can do.** `Actions` and `Row actions` are both row-dependent: a record can become a reference and has its own controls, while "Create a task" is a verb with neither. Printed unconditionally the legend described two keys that did nothing on the row you were looking at, and a legend that is wrong on half the list is worse than a shorter one. The cost is honest movement: the line recentres as you arrow between a record and an action.
+- **A held `mod+K` is one press.** The OS auto-repeats `keydown` while the keys are down, so the shortcut ignores every firing after the first rather than strobing the overlay open and shut.
 
 ## Accessibility
 
-- The bar is a `combobox` wired to the list with `aria-controls` and `aria-activedescendant`; the list is a `listbox` and every row an `option` with `aria-selected`. Selection moves without focus ever leaving the input.
+- The bar is a `combobox` wired to the list with `aria-controls` and `aria-activedescendant`; the list is a `listbox` and every row an `option` with `aria-selected`. `aria-expanded` reports whether there are **options**, not whether the panel is on screen — saying a list is open and then offering nothing to find in it is worse than saying nothing.
+- **The field is a `contenteditable`, so its name is explicit.** The visible prompt is drawn from `data-placeholder`, and a generated pseudo-element contributes nothing to the accessible name — the combobox reported `name: ""` until it was labelled by hand. A placeholder is never a label even when it is a real attribute; here it was never even that.
+- **Two focus regions, both real.** `Tab` moves between the field and the list; while the list holds focus the rows are a roving `tabindex="-1"` stop, so a screen reader announces the row actually landed on rather than a highlight described from elsewhere.
+- **The chip is not a tab stop.** The field owns `Tab`, so a focusable chip would describe a route nothing could take. It comes off with `Backspace` or `Delete` beside it, the way a token comes off any token field, and the removal announces itself in the live region. Its text is part of the field's own accessible name, so the scope is heard on arriving at the combobox rather than as a stray button inside it.
 - **Blocked rows stay reachable.** A gated row carries `aria-disabled` and folds its reason into its accessible name, so the reason can be read rather than inferred from an absence. Activating it re-announces instead of failing silently.
 - **A live region carries what the visuals say.** Entering a scope announces the record and how many actions it has, clearing it announces that, a blocked activation announces the reason, and a copied link announces the URL.
-- **Row actions are real buttons, drawn from outside the list.** A control inside a `role="option"` is `nested-interactive` — and `tabindex="-1"` does not exempt it, since assistive technology still reaches it — while a control anywhere else inside a `role="listbox"` is `aria-required-children`. So the active row's controls are rendered outside the listbox and positioned over the row they belong to. That is what lets them stay real buttons, with real accessible names, activated natively by `Enter` and `Space`, rather than painted-on affordances only a pointer can use. They are never document tab stops: the palette is one focus trap around the input, and its own `Tab` handling is what moves focus onto them. Every key belonging to the list hands focus straight back, so they are a detour of exactly one key.
-- **Risk is structural, not chromatic.** A destructive row is not marked by colour at rest: the verb says it, the description says it out loud, it is never the preselected row, and `Enter` hands it to your own dialog. The row turns critical only once the reader is on it.
+- **Row actions are real buttons, drawn from outside the list.** A control inside a `role="option"` is `nested-interactive` — and `tabindex="-1"` does not exempt it, since assistive technology still reaches it — while a control anywhere else inside a `role="listbox"` is `aria-required-children`. So the active row's controls are rendered outside the listbox and positioned over the row they belong to. That is what lets them stay real buttons, with real accessible names, activated natively by `Enter` and `Space`, rather than painted-on affordances only a pointer can use. They are never document tab stops: the palette is one focus trap, and `→` from the row or the field is what moves focus onto them. Their accessible names always carry the record (`Copy link to MacBook Pro 14"`) because a screen reader arrives at one with no idea which row it belongs to, while their tooltips say only the verb — the row it would otherwise repeat is an inch away.
+- **Risk is structural, not chromatic.** A destructive row is not marked by colour at rest: the verb says it, the description says it out loud, it is never the preselected row, and `Enter` hands it to your own dialog. The row turns critical only once the reader is on it, and its `↵` takes F0's `critical` variant — quiet by design, the same neutral chip as its neighbours wearing a red glyph, filling only under hover and press. So the row reads as one destructive unit without a red slab competing with the label, and the control goes loud exactly when the pointer is on the thing that cannot be undone.
 - The panel is a modal dialog: focus is trapped, the page behind is scroll-locked, and focus returns where it came from on close. The overlay does not tint the page, so nothing behind it loses contrast.

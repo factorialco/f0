@@ -35,6 +35,12 @@ export type CommandRow = {
   danger?: boolean
   /** Renders the assistant's mark and needs no group heading above it. */
   assistant?: boolean
+  /**
+   * A PLACEHOLDER while its provider is still answering. Not a record and not
+   * selectable: it carries no label, takes no keyboard position, and is drawn
+   * as skeleton bars in the group its results will fill.
+   */
+  skeleton?: boolean
   rowActions?: CommandRowAction[]
   run: () => void
 }

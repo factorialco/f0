@@ -8,12 +8,13 @@ import {
   useState,
 } from "react"
 
-import { F0CommandPalette } from "./F0CommandPalette"
 import type {
   CommandEntityRef,
   F0CommandPaletteApi,
   F0CommandPaletteProviderProps,
 } from "./types"
+
+import { F0CommandPalette } from "./F0CommandPalette"
 
 const CommandPaletteContext = createContext<F0CommandPaletteApi | null>(null)
 
@@ -53,6 +54,7 @@ export const CommandPaletteProvider = ({
   navigation = [],
   recent = [],
   assistant,
+  labels,
   onNavigate = hardNavigate,
   shortcut = true,
   open: openProp,
@@ -100,6 +102,8 @@ export const CommandPaletteProvider = ({
       ) {
         return
       }
+
+      if (event.repeat) return
       event.preventDefault()
       setInitialScope(null)
       setOpenSeq((sequence) => sequence + 1)
@@ -128,6 +132,7 @@ export const CommandPaletteProvider = ({
         navigation={navigation}
         recent={recent}
         assistant={assistant}
+        labels={labels}
         onNavigate={onNavigate}
       />
     </CommandPaletteContext.Provider>

@@ -4,8 +4,6 @@ import { useEffect, type ReactNode } from "react"
 import { expect, userEvent, waitFor, within } from "storybook/test"
 
 import { F0Button } from "@/components/F0Button"
-import { withSnapshot } from "@/lib/storybook-utils/parameters"
-import { F0OneIcon } from "@/kits/ai/F0OneIcon"
 import {
   Calendar,
   CheckCircleLine,
@@ -18,11 +16,12 @@ import {
   Receipt,
   Settings,
 } from "@/icons/app"
+import { F0OneIcon } from "@/kits/ai/F0OneIcon"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import NewHomeLayoutStories, {
   Default as NewHomeLayoutDefault,
 } from "@/sds/Home/NewHomeLayout/index.stories"
 
-import { F0CommandPaletteProvider, useCommandPalette } from ".."
 import type {
   CommandAction,
   CommandEntityProvider,
@@ -30,6 +29,8 @@ import type {
   CommandNavigationItem,
   F0CommandPaletteProviderProps,
 } from "../types"
+
+import { F0CommandPaletteProvider, useCommandPalette } from ".."
 
 /* ── The mock world every story searches ──────────────────────────────────── */
 
@@ -56,6 +57,24 @@ const people: CommandEntityRecord[] = [
     href: "/people/p-2",
   },
 ]
+
+const teams: CommandEntityRecord[] = [
+  {
+    type: "team",
+    kind: "one",
+    id: "t-1",
+    label: "Acme Design",
+    sublabel: "2 people",
+    icon: Person,
+  },
+]
+
+/**
+ * Who is in which team. Fixture bookkeeping, deliberately NOT a field on the
+ * ref: `CommandEntityRef` describes what the palette has to render, and a
+ * provider's own data model stays its own business.
+ */
+const teamOf: Record<string, string> = { "p-1": "t-1", "p-2": "t-1" }
 
 const devices: CommandEntityRecord[] = [
   {
@@ -87,21 +106,89 @@ const deviceSelection: CommandEntityRef = {
   icon: Laptop,
 }
 
+/**
+ * A remote provider, faked honestly: a real delay, and a real failure.
+ *
+ * `search` may return a promise, so this is what a module talking to an API
+ * actually looks like — and it is what the other stories in this file are not.
+ */
+const afterDelay = <T,>(value: T, ms: number): Promise<T> =>
+  new Promise((resolve) => setTimeout(() => resolve(value), ms))
+
 const matches = (ref: CommandEntityRef, query: string) =>
   `${ref.label} ${ref.kind === "one" ? (ref.sublabel ?? "") : ""}`
     .toLowerCase()
     .includes(query.toLowerCase())
 
-/**
- * A domain with records but NO actions yet — a valid state. Its people stay
- * findable and openable, they are just not scopable, so `/` does nothing on
- * them rather than opening an empty list.
- */
+/** The domain a team's members resolve to: what can be done to a person. */
 const peopleProvider: CommandEntityProvider = {
   type: "person",
   label: "People",
   search: (query, limit) =>
     people.filter((person) => matches(person, query)).slice(0, limit),
+  actions: () => [
+    {
+      key: "time-off",
+      label: "Request time off for them",
+      icon: Calendar,
+      group: "Person",
+      risk: "none",
+      suggested: () => true,
+      run: () => undefined,
+    },
+    {
+      key: "offboard",
+      label: "Start offboarding",
+      description: "Revokes every access. This can't be undone",
+      icon: Delete,
+      group: "Lifecycle",
+      risk: "danger",
+      run: () => undefined,
+    },
+  ],
+}
+
+/**
+ * A CONTAINER: a record whose point is the records inside it.
+ *
+ * `inside` is what makes the palette able to narrow before it acts — search a
+ * team, list its people, then act on one of them. The refs it returns are
+ * `person`s, and the person provider above is what says what can be done to
+ * one, so neither domain has to know about the other.
+ */
+const teamProvider: CommandEntityProvider = {
+  type: "team",
+  label: "Teams",
+  search: (query, limit) =>
+    teams.filter((entry) => matches(entry, query)).slice(0, limit),
+  actions: () => [
+    {
+      key: "rename",
+      label: "Rename team",
+      icon: Settings,
+      group: "Admin",
+      risk: "none",
+      run: () => undefined,
+    },
+    // A DESTINATION, not a behaviour: `href` says so directly rather than
+    // burying a route in a callback. A function of the target where the
+    // destination depends on it, a plain string where it does not.
+    {
+      key: "directory",
+      label: "Open the team directory",
+      icon: Person,
+      group: "Admin",
+      risk: "none",
+      href: (ref) => `/teams/${ref.kind === "one" ? ref.id : ""}`,
+    },
+  ],
+  inside: (ref, query, limit) =>
+    people
+      .filter(
+        (person) => teamOf[person.id] === (ref.kind === "one" ? ref.id : "")
+      )
+      .filter((person) => matches(person, query))
+      .slice(0, limit),
 }
 
 /** A domain that has adopted the registry: its records are actionable. */
@@ -246,7 +333,7 @@ const navigation: CommandNavigationItem[] = [
 ]
 
 const baseConfig: Omit<F0CommandPaletteProviderProps, "children"> = {
-  providers: [peopleProvider, deviceProvider],
+  providers: [teamProvider, peopleProvider, deviceProvider],
   actions,
   navigation,
   recent: ["my-tasks", "nav-settings"],
@@ -333,10 +420,10 @@ const openPalette = async (
   await userEvent.click(within(canvasElement).getByRole("button", { name }))
 
   const body = within(document.body)
-  const input = await body.findByRole("combobox")
-  await waitFor(() => expect(input).toBeVisible())
+  const field = await body.findByRole("combobox")
+  await waitFor(() => expect(field).toBeVisible())
 
-  return { body, input }
+  return { body, field }
 }
 
 /**
@@ -349,9 +436,9 @@ const openPalette = async (
  */
 export const Default: Story = {
   play: async ({ canvasElement }) => {
-    const { body, input } = await openPalette(canvasElement)
+    const { body, field } = await openPalette(canvasElement)
 
-    await expect(input).toHaveFocus()
+    await expect(field).toHaveFocus()
     await waitFor(() => expect(body.getByText("Recent")).toBeVisible())
     await waitFor(() => expect(body.getByText("Suggestions")).toBeVisible())
   },
@@ -367,8 +454,8 @@ export const Default: Story = {
  */
 export const Searching: Story = {
   play: async ({ canvasElement }) => {
-    const { body, input } = await openPalette(canvasElement)
-    await userEvent.type(input, "mac")
+    const { body, field } = await openPalette(canvasElement)
+    await userEvent.type(field, "mac")
 
     await waitFor(() => expect(body.getByText("Devices")).toBeVisible())
     await waitFor(() =>
@@ -378,37 +465,127 @@ export const Searching: Story = {
 }
 
 /**
- * `/` commits the highlighted record into the bar and turns the list into that
- * record's actions.
+ * `Tab` commits the highlighted record into the field as a CHIP and turns the
+ * list into that record's actions.
  *
- * The scope reads as the first words of the sentence being written, in the
- * input's own type — not as a tag. `Enter` on a record still navigates and never
- * executes; scoping is a separate gesture precisely so that stays true.
+ * The field is one editable box with the chip inline in it — a token field — so
+ * `Tab` means there what it means in every token field: take the highlighted
+ * suggestion and make it a token. `Enter` on a record still navigates and never
+ * executes; committing is a separate gesture precisely so that stays true.
  */
 export const ScopedToARecord: Story = {
   play: async ({ canvasElement }) => {
-    const { body, input } = await openPalette(canvasElement)
-    await userEvent.type(input, "macbook pro")
+    const { body, field } = await openPalette(canvasElement)
+    await userEvent.type(field, "macbook pro")
 
-    // The record has to be the highlighted row before `/` means anything.
     await waitFor(() =>
       expect(
         body.getByRole("option", { name: /MacBook Pro 14/ })
       ).toHaveAttribute("aria-selected", "true")
     )
-    await userEvent.keyboard("/")
+    await userEvent.keyboard("{Tab}")
 
     await waitFor(() =>
       expect(body.getByRole("option", { name: /Lock screen/ })).toBeVisible()
     )
-    // The noun is committed, so the query resets and the verb comes next.
-    await expect(input).toHaveValue("")
+
+    const chip = field.querySelector("[data-scope-chip]")
+    await expect(chip).toBeVisible()
+    await expect(chip).toHaveAttribute("contenteditable", "false")
     // Suggested floats to the top on an empty query; the destructive row is
     // never the default.
     await expect(body.getByText("Suggested")).toBeVisible()
     await expect(
       body.getByRole("option", { name: /Wipe device/ })
     ).toHaveAttribute("aria-selected", "false")
+  },
+}
+
+/**
+ * NARROWING BEFORE ACTING: search a team, list the people inside it, then act on
+ * one of them.
+ *
+ * The chain is what makes this resolve. Two references sit in the field as
+ * chips, and "whose actions?" still has one answer — the last link — which is
+ * why drilling in works where two parallel subjects would not.
+ *
+ * `Tab` needs no new meaning: it pushes another link, the same gesture that
+ * committed the first. `Backspace` pops one at a time, so backing out of a
+ * person lands in the team you found them in rather than at the top. The chain
+ * is capped at two: deeper than that stops being a reference and starts being
+ * navigation, which the product has screens for.
+ */
+export const DrillingIntoATeam: Story = {
+  play: async ({ canvasElement }) => {
+    const { body, field } = await openPalette(canvasElement)
+    await userEvent.type(field, "acme")
+
+    await waitFor(() =>
+      expect(body.getByRole("option", { name: /Acme Design/ })).toBeVisible()
+    )
+    await userEvent.keyboard("{Tab}")
+
+    // Inside the team: its own verbs, then the people in it.
+    await waitFor(() =>
+      expect(body.getByRole("option", { name: /Rename team/ })).toBeVisible()
+    )
+    await expect(body.getByRole("option", { name: /Ben Carter/ })).toBeVisible()
+
+    /*
+      Down to a person and in again — the second link.
+
+      Walked rather than counted: the team's own verbs come first, so a fixed
+      number of presses breaks the moment the fixture gains an action. Arrowing
+      until the person is highlighted says what the step means instead.
+    */
+    const selected = () =>
+      body
+        .getAllByRole("option")
+        .find((row) => row.getAttribute("aria-selected") === "true")
+        ?.getAttribute("aria-label") ?? ""
+    for (let step = 0; step < 8 && !/Ben Carter/.test(selected()); step++) {
+      await userEvent.keyboard("{ArrowDown}")
+    }
+    await expect(
+      body.getByRole("option", { name: /Ben Carter/ })
+    ).toHaveAttribute("aria-selected", "true")
+
+    await userEvent.keyboard("{Tab}")
+
+    await waitFor(() =>
+      expect(
+        body.getByRole("option", { name: /Request time off for them/ })
+      ).toBeVisible()
+    )
+    await expect(field.querySelectorAll("[data-scope-chip]")).toHaveLength(2)
+  },
+}
+
+export const TypingAroundTheChip: Story = {
+  args: { scope: devices[0] },
+  play: async ({ canvasElement }) => {
+    const { body, field } = await openPalette(
+      canvasElement,
+      /Actions for MacBook Pro/
+    )
+
+    await userEvent.type(field, "lock")
+    await waitFor(() =>
+      expect(body.getByRole("option", { name: /Lock screen/ })).toBeVisible()
+    )
+
+    // The chip survives typing rather than being edited into: it is one atom,
+    // so the characters land beside it and not inside somebody's name.
+    const chip = field.querySelector("[data-scope-chip]")
+    await expect(chip).toBeVisible()
+    await expect(chip).toHaveTextContent('MacBook Pro 14"')
+
+    // Walking the caret PAST the chip and typing in front of it works in a
+    // browser and cannot be driven from here: arrow keys move a caret as a
+    // default action of a trusted event, and `userEvent` dispatches synthetic
+    // ones — which is also why it reports `{Home}` as not implemented. The
+    // typed order that behaviour guarantees is asserted in the unit tests,
+    // where the selection can be placed directly.
   },
 }
 
@@ -459,8 +636,8 @@ export const CollectingAParameter: Story = {
 export const WithoutAnAssistant: Story = {
   args: { assistant: undefined },
   play: async ({ canvasElement }) => {
-    const { body, input } = await openPalette(canvasElement)
-    await userEvent.type(input, "task")
+    const { body, field } = await openPalette(canvasElement)
+    await userEvent.type(field, "task")
 
     await waitFor(() =>
       expect(body.getByRole("option", { name: /Create a task/ })).toBeVisible()
@@ -481,8 +658,8 @@ export const WithoutAnAssistant: Story = {
 export const NoResults: Story = {
   args: { assistant: undefined },
   play: async ({ canvasElement }) => {
-    const { body, input } = await openPalette(canvasElement)
-    await userEvent.type(input, "qqqq")
+    const { body, field } = await openPalette(canvasElement)
+    await userEvent.type(field, "qqqq")
 
     await waitFor(() => expect(body.getByText("No results")).toBeVisible())
     await expect(body.queryAllByRole("option")).toHaveLength(0)
@@ -495,8 +672,8 @@ export const NoResults: Story = {
  */
 export const NoMatchesWithAnAssistant: Story = {
   play: async ({ canvasElement }) => {
-    const { body, input } = await openPalette(canvasElement)
-    await userEvent.type(input, "qqqq")
+    const { body, field } = await openPalette(canvasElement)
+    await userEvent.type(field, "qqqq")
 
     await waitFor(() =>
       expect(body.getByRole("option", { name: /^Ask One:/ })).toBeVisible()
@@ -511,14 +688,58 @@ export const NoMatchesWithAnAssistant: Story = {
  */
 export const ClosesOnOutsideClick: Story = {
   play: async ({ canvasElement }) => {
-    const { body, input } = await openPalette(canvasElement)
+    const { body, field } = await openPalette(canvasElement)
 
     // The dialog node Radix renders is the viewport-sized wrapper AROUND the
     // panel, so pressing it directly is what a press on the page resolves to.
     // Not the body: Radix sets `pointer-events: none` on it in modal mode, and
     // user-event refuses to click through that.
     await userEvent.click(body.getByRole("dialog"))
-    await waitFor(() => expect(input).not.toBeInTheDocument())
+    await waitFor(() => expect(field).not.toBeInTheDocument())
+  },
+}
+
+/**
+ * ON A PHONE the palette is a BOTTOM SHEET, below F0's own dialog breakpoint
+ * (560px) — the same width at which `F0Dialog` and `F0Drawer` become sheets, so
+ * it changes shape where everything else in the product does.
+ *
+ * The field sits at the FOOT and the results run up from it: the thumb is at the
+ * bottom of the device and so is the keyboard, so a panel under the eyeline puts
+ * the field as far from both as the screen allows. Rows are 48px with the
+ * context on a second line, because at 390px a label and its context cannot
+ * share a line without one truncating to nothing — and the context is the half
+ * that tells two similar records apart.
+ *
+ * There is no key legend: a centred row teaching `TAB` and `⌘↵` to a device with
+ * neither is decoration that costs a row of the list. The gestures the phone
+ * does have are visible controls on the rows instead.
+ *
+ * The play function below deliberately asserts NONE of that. The breakpoint is a
+ * media query against the window, and the viewport addon resizes the preview
+ * iframe in Storybook's own UI — where this story does render as a sheet — while
+ * the test runner renders the story in a fixed-size page, so the query does not
+ * match there. Asserting the sheet here would pass by describing the desktop
+ * panel. The sheet's own rules are asserted in the unit tests instead, where
+ * `matchMedia` can be answered directly; what runs here is the part that is true
+ * at any width, plus axe.
+ */
+export const OnAPhone: Story = {
+  parameters: {
+    viewport: {
+      options: {
+        phone: { name: "Phone", styles: { width: "390px", height: "780px" } },
+      },
+    },
+  },
+  globals: { viewport: { value: "phone", isRotated: false } },
+  play: async ({ canvasElement }) => {
+    const { body, field } = await openPalette(canvasElement)
+    await userEvent.type(field, "mac")
+
+    await waitFor(() =>
+      expect(body.getByRole("option", { name: /MacBook Pro 14/ })).toBeVisible()
+    )
   },
 }
 
@@ -571,4 +792,86 @@ export const Snapshot: Story = {
       <AutoOpen scope={scope} />
     </F0CommandPaletteProvider>
   ),
+}
+
+/* ── Remote providers, for the loading stories ─────────────────────────────── */
+
+/** Answers slowly, the way an API does. */
+const slowDeviceProvider: CommandEntityProvider = {
+  ...deviceProvider,
+  search: (query, limit) =>
+    afterDelay(
+      devices.filter((device) => matches(device, query)).slice(0, limit),
+      1200
+    ),
+}
+
+/** Answers quickly, so one group can land while another is still loading. */
+const quickTeamProvider: CommandEntityProvider = {
+  ...teamProvider,
+  search: (query, limit) =>
+    afterDelay(
+      teams.filter((team) => matches(team, query)).slice(0, limit),
+      150
+    ),
+}
+
+/** Cannot be reached at all. */
+const brokenAppProvider: CommandEntityProvider = {
+  type: "app",
+  label: "Apps",
+  search: () => Promise.reject(new Error("upstream unavailable")),
+}
+
+/**
+ * SEARCH IS REMOTE, and the palette shows it.
+ *
+ * `search` may return a promise, and every other story in this file pretends
+ * otherwise — they resolve from a local array, so nothing ever loads and every
+ * result is instant. That is not what a module talking to an API looks like.
+ *
+ * Here `Devices` takes 1.2s, `Teams` takes 150ms, and `Apps` is down. Each
+ * domain shows its own state in its own group: skeleton rows hold the space a
+ * result will fill, a group that has answered renders immediately rather than
+ * waiting for its neighbours, and the one that failed says so instead of
+ * contributing nothing — which would be indistinguishable from "there are no
+ * apps called that".
+ *
+ * The palette does not debounce: it calls `search` on every query change and
+ * applies only the newest answer, so a slow reply to `mac` can never overwrite
+ * a fast one to `macbook`. A provider that wants fewer round trips debounces
+ * inside its own `search`, since only it knows what one costs.
+ */
+export const LoadingFromRemoteProviders: Story = {
+  args: {
+    providers: [quickTeamProvider, slowDeviceProvider, brokenAppProvider],
+  },
+  play: async ({ canvasElement }) => {
+    const { body, field } = await openPalette(canvasElement)
+    await userEvent.type(field, "a")
+
+    // Placeholders first: the slow provider's space is held, not skipped.
+    await waitFor(() =>
+      expect(body.getByRole("listbox")).toHaveAttribute("aria-busy", "true")
+    )
+    await expect(
+      body.getByRole("listbox").querySelectorAll("[data-testid=skeleton]")
+        .length
+    ).toBeGreaterThan(0)
+
+    // Then the results, once the slowest has answered.
+    await waitFor(
+      () =>
+        expect(
+          body.getByRole("option", { name: /MacBook Pro 14/ })
+        ).toBeVisible(),
+      { timeout: 4000 }
+    )
+    await expect(body.getByRole("listbox")).not.toHaveAttribute("aria-busy")
+
+    // And the domain that could not be reached explains itself.
+    await expect(
+      body.getByRole("option", { name: /Could not load these results/ })
+    ).toBeVisible()
+  },
 }

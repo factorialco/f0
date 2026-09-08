@@ -1,13 +1,16 @@
-import { useI18n } from "@/lib/providers/i18n"
 import { Shortcut } from "@/ui/Shortcut"
 
-import type { CommandStage } from "../internal-types"
+import type { ResolvedCommandLabels } from "../labels"
+import type { CommandRow, CommandStage } from "../internal-types"
 
 type CommandFooterProps = {
+  labels: ResolvedCommandLabels
   stage: CommandStage
   scoped: boolean
   /** Whether the assistant's `mod+Enter` binding is live. */
   hasAssistant: boolean
+
+  row?: CommandRow
 }
 
 /**
@@ -29,31 +32,48 @@ const Hint = ({ keys, label }: { keys: string[]; label: string }) => (
 )
 
 export const CommandFooter = ({
+  labels,
   stage,
   scoped,
   hasAssistant,
+  row,
 }: CommandFooterProps) => {
-  const i18n = useI18n()
-  const footer = i18n.commandPalette.footer
+  const footer = labels.footer
+
+  const hints = [
+    ...(stage.kind === "param"
+      ? [
+          { keys: ["enter"], label: footer.choose },
+          { keys: ["backspace"], label: footer.goBack },
+        ]
+      : scoped
+        ? [{ keys: ["backspace"], label: footer.leaveScope }]
+        : [
+            ...(row?.scopeRef
+              ? [{ keys: ["tab"], label: footer.actions }]
+              : []),
+            ...((row?.rowActions?.length ?? 0) > 0
+              ? [{ keys: ["→"], label: footer.rowActions }]
+              : []),
+          ]),
+    ...(hasAssistant ? [{ keys: ["cmd", "enter"], label: footer.ask }] : []),
+  ]
+
+  /*
+    NOTHING TO TEACH, NOTHING TO DRAW. Every hint here is conditional — the
+    stage's own, the row's, and the assistant's — so they can all be absent at
+    once: at the root, with no assistant configured, on a row that is a plain
+    verb with neither a reference to commit nor controls of its own. The bordered
+    band still rendered, which read as a strip of the panel that had failed to
+    load rather than as a legend with nothing in it.
+  */
+  if (hints.length === 0) return null
 
   return (
     <div className="flex items-center justify-center gap-4 border-0 border-t border-solid border-f1-border-secondary px-3.5 py-2 text-sm text-f1-foreground-secondary">
-      {stage.kind === "param" ? (
-        <Hint keys={["backspace"]} label={footer.goBack} />
-      ) : scoped ? (
-        <>
-          <Hint keys={["backspace"]} label={footer.leaveScope} />
-          <Hint keys={["tab"]} label={footer.rowActions} />
-        </>
-      ) : (
-        <>
-          <Hint keys={["/"]} label={footer.act} />
-          <Hint keys={["tab"]} label={footer.rowActions} />
-        </>
-      )}
-      {hasAssistant ? (
-        <Hint keys={["cmd", "enter"]} label={footer.ask} />
-      ) : null}
+      {hints.map((hint) => (
+        <Hint key={hint.label} keys={hint.keys} label={hint.label} />
+      ))}
     </div>
   )
 }

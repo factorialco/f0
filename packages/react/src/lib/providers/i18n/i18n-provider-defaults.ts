@@ -295,8 +295,13 @@ export const defaultTranslations = {
   shortcut: "Shortcut",
   commandPalette: {
     label: "Command palette",
-    placeholder: "Search, or type a name then / to act",
+
+    placeholder: "Search, or type a name then Tab to use it",
+
+    placeholderPhone: "Search or ask",
+
     placeholderScoped: "Run an action",
+    fieldLabelScoped: "Search or run an action on {{name}}",
     groups: {
       recent: "Recent",
       suggestions: "Suggestions",
@@ -310,18 +315,21 @@ export const defaultTranslations = {
       description: "Try a different search.",
     },
     footer: {
-      act: "Act on a result",
+      actions: "Actions",
       rowActions: "Row actions",
       ask: "Ask",
+      choose: "Choose",
       leaveScope: "Leave scope",
       goBack: "Go back",
     },
     scope: {
-      remove: "Remove scope, {{name}}",
+      remove: "{{name}}, remove this scope",
     },
     rowActions: {
-      openInNewTab: "Open in a new tab",
+      actions: "Actions",
+      actionsFor: "Actions for {{label}}",
       copyLink: "Copy link",
+      copyLinkTo: "Copy link to {{label}}",
       linkCopied: "Link copied",
     },
     announce: {
@@ -338,7 +346,16 @@ export const defaultTranslations = {
       open: "Open {{label}}",
       run: "Run {{label}}",
       select: "Select {{label}}",
+      ask: "Ask about {{label}}",
+
+      verb: {
+        open: "Open",
+        run: "Run",
+        ask: "Ask",
+      },
       unavailable: "Not available here",
+      /** A provider whose search could not be reached. */
+      searchFailed: "Could not load these results",
       impact: "{{eligible}} of {{total}}",
       impactWithReason: "{{eligible}} of {{total}} · {{reason}}",
     },

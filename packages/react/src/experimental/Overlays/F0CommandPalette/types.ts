@@ -115,8 +115,26 @@ export type CommandRunContext = {
   ask: (prompt: string) => void
 }
 
+/**
+ * A row has to DO something, and there are exactly two things it can be: a
+ * DESTINATION or a BEHAVIOUR. `href` for the first, `run` for the second, and
+ * the union is what makes "one of them, never neither" a type error rather than
+ * a row that silently does nothing when pressed.
+ *
+ * Most rows are destinations, so most rows want a plain string and no callback:
+ * writing `run: () => navigate("/x")` to express "go to /x" buries a link inside
+ * a function, and the palette then cannot know it IS a link — which is what
+ * lets a destination row offer `Copy link` and open in a new tab.
+ *
+ * `TRun` is the callback's own shape, because a global command is handed the
+ * context while an entity action is handed its target as well.
+ */
+type CommandDoes<TRun, THref = string> =
+  | { href: THref; run?: never }
+  | { run: TRun; href?: never }
+
 /** An action that applies to a scoped record or selection. */
-export type CommandEntityAction = {
+type CommandEntityActionBase = {
   /** Unique within its provider. */
   key: string
   /** Verb-first, so scanning and search both work: "Lock screen". */
@@ -135,12 +153,36 @@ export type CommandEntityAction = {
   /** Floats the action into "Suggested" while the query is empty. */
   suggested?: (ref: CommandEntityRef) => boolean
   params?: CommandParamStep[]
-  run: (
-    ref: CommandEntityRef,
-    values: CommandParamValues,
-    context: CommandRunContext
-  ) => void
 }
+
+/**
+ * An action that applies to a scoped record or selection.
+ *
+ * Either a destination or a behaviour, never neither. The destination may be a
+ * plain string when it is the same wherever you came from, or a function of the
+ * target when it is not — `(ref) => \`/devices/${ref.id}/history\`` — and it
+ * receives the collected parameters too, so a step's answer can end up in the
+ * URL.
+ */
+export type CommandEntityAction = CommandEntityActionBase &
+  CommandDoes<
+    (
+      ref: CommandEntityRef,
+      values: CommandParamValues,
+      context: CommandRunContext
+    ) => void,
+    string | ((ref: CommandEntityRef, values: CommandParamValues) => string)
+  >
+
+/** Resolve an action's destination, whichever form it was declared in. */
+export const commandActionHref = (
+  action: CommandEntityAction,
+  ref: CommandEntityRef,
+  values: CommandParamValues
+): string | undefined =>
+  typeof action.href === "function"
+    ? action.href(ref, values)
+    : (action.href ?? undefined)
 
 /**
  * One domain's contribution to the palette: how to find its records, and what
@@ -154,23 +196,58 @@ export type CommandEntityProvider = {
   type: string
   /** Group heading in the global list, e.g. "Devices". */
   label: string
-  /** Record lookup. Ranking across providers is the palette's job. */
-  search: (query: string, limit: number) => CommandEntityRef[]
+  /**
+   * Record lookup. Ranking across providers is the palette's job.
+   *
+   * MAY BE ASYNC, because real entity search is remote. Return an array when the
+   * records are already in hand and a promise when they are not — the palette
+   * renders skeleton rows in this provider's group while one is outstanding, and
+   * a reason row if it rejects.
+   *
+   * The palette calls this on every query change and applies only the NEWEST
+   * response, so a slow answer to `mac` can never overwrite a fast one to
+   * `macbook`. It does not debounce: a provider that wants fewer round trips
+   * should debounce inside its own `search`, since only it knows what a
+   * round trip costs.
+   */
+  search: (
+    query: string,
+    limit: number
+  ) => CommandEntityRef[] | Promise<CommandEntityRef[]>
   /**
    * The actions a ref can run. Omit it while a domain has not adopted the
    * registry: its records stay findable, they are just not yet actionable —
    * a valid state, since the palette still offers navigation.
    */
   actions?: (ref: CommandEntityRef) => CommandEntityAction[]
+  /**
+   * The records that live INSIDE a ref, so the palette can narrow before it
+   * acts: a team's people, a project's tasks, a folder's documents.
+   *
+   * Named `inside` and not `children` on purpose: this returns REFS, and a prop
+   * called `children` on anything React-shaped reads as a `ReactNode` slot.
+   * Props here are data, strongly typed — never rendered nodes handed in.
+   *
+   * Return refs of any `type`. The palette resolves each one's actions from the
+   * provider matching that type, so a team provider hands back `person` refs and
+   * the person provider supplies what can be done to them — nothing has to know
+   * about both.
+   *
+   * `query` is what has been typed inside the scope, and `limit` caps the rows:
+   * a team of forty is a list to filter, not a list to print.
+   */
+  inside?: (
+    ref: CommandEntityRef,
+    query: string,
+    limit: number
+  ) => CommandEntityRef[] | Promise<CommandEntityRef[]>
 }
 
-/** A secondary action that lives *on* a row, reached with `Tab` or by pointer. */
 export type CommandRowAction = {
   key: string
   /**
-   * Accessible name and tooltip. Verb-first and short: the row beside it already
-   * names the target, so repeating it makes the tooltip cover the row it
-   * describes.
+   * The accessible name, and it always carries the target: `Copy link to
+   * MacBook Pro 14"`. The tooltip may be shorter — see `tip`.
    */
   label: string
   icon?: IconType
@@ -179,11 +256,13 @@ export type CommandRowAction = {
    * otherwise the row turns into a row of buttons.
    */
   text?: string
+
+  tip?: string
   run: () => void
 }
 
 /** A flat global command: a shortcut, a jump, a thing to create. */
-export type CommandAction = {
+type CommandActionBase = {
   id: string
   label: string
   icon?: IconType
@@ -191,11 +270,19 @@ export type CommandAction = {
   keywords?: string
   /** Second line. Leave it out unless it says something the label cannot. */
   description?: string
-  /** Where this command goes, if going somewhere is all it does. */
-  href?: string
-  /** What this command does. Runs instead of `href` when both are given. */
-  run?: (context: CommandRunContext) => void
+  /**
+   * The heading these commands collect under. Defaults to "Actions".
+   *
+   * A scoped action has always named its own group, and a global one could not
+   * — so its heading was the one word on screen a product could not choose.
+   * Same field, same meaning, both ends.
+   */
+  group?: string
 }
+
+/** A flat global command: a shortcut, a jump, a thing to create. */
+export type CommandAction = CommandActionBase &
+  CommandDoes<(context: CommandRunContext) => void>
 
 /** An entry in the "Go to" group: somewhere in the product to land. */
 export type CommandNavigationItem = {
@@ -204,6 +291,8 @@ export type CommandNavigationItem = {
   icon?: IconType
   keywords?: string
   href: string
+  /** The heading these destinations collect under. Defaults to "Go to". */
+  group?: string
 }
 
 /**
@@ -226,8 +315,65 @@ export type CommandAssistant = {
   onAsk: (prompt: string, ref?: CommandEntityRef) => void
 }
 
+/**
+ * Every word the palette puts ON SCREEN, for a product that words it
+ * differently. All optional: each one falls back to F0's own translation, so
+ * the palette is fully localised before anybody configures it.
+ *
+ * What is NOT here is deliberate. Accessible names, live-region announcements
+ * and the tooltips on controls the palette generated itself stay in i18n —
+ * they describe the component's own mechanics rather than the product's domain,
+ * and moving them here would mean supplying `"Copy link to MacBook Pro 14\""`
+ * in every language to get what F0 already ships translated.
+ */
+export type CommandPaletteLabels = {
+  /** The prompt in the field while nothing is typed and nothing is scoped. */
+  placeholder?: string
+  /** The short form, for a field sharing its row with the assistant on a phone. */
+  placeholderPhone?: string
+  empty?: { title?: string; description?: string }
+  /**
+   * Headings over the palette's own buckets. A provider names its records'
+   * group with `label`, and a command or destination names its own with
+   * `group` — these are the ones the palette computes.
+   */
+  groups?: {
+    recent?: string
+    suggestions?: string
+    actions?: string
+    goTo?: string
+    suggested?: string
+    unavailable?: string
+  }
+  /** The key legend's labels. The keys themselves are glyphs, not copy. */
+  footer?: {
+    actions?: string
+    rowActions?: string
+    ask?: string
+    choose?: string
+    leaveScope?: string
+    goBack?: string
+  }
+  /** Visible text and tooltips on the controls a row carries. */
+  rowActions?: { actions?: string; copyLink?: string; linkCopied?: string }
+  /** One word each, on the tooltip of a row's own `↵`. */
+  verbs?: { open?: string; run?: string; ask?: string }
+  /** Shown on a gated row that supplied no reason of its own. */
+  unavailable?: string
+  /** Shown in a provider's group when its search could not be reached. */
+  searchFailed?: string
+  /**
+   * The blast radius, as a sentence. A function rather than a template: the
+   * line carries three values and a conditional reason, and this is the only
+   * form that can reorder them or drop the separator.
+   */
+  impact?: (impact: CommandImpact) => string
+}
+
 export type F0CommandPaletteProviderProps = {
   children: ReactNode
+  /** Overrides for the copy the palette puts on screen. */
+  labels?: CommandPaletteLabels
   /** The domains whose records are findable, in the order their groups appear. */
   providers?: CommandEntityProvider[]
   /** Flat global commands. Shown under "Suggestions" while the query is empty. */
