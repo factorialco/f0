@@ -272,11 +272,24 @@ const MIRROR_PROPERTIES = [
   "wordBreak",
 ] as const
 
-/** Pixel position of the character at `index`, relative to the textarea. */
-export function getTextareaCaretCoordinates(
-  textarea: HTMLTextAreaElement,
-  index: number
-): { left: number; top: number } {
+/**
+ * A hidden copy of the textarea, laid out with the same metrics, in which the
+ * pixel position of one character can be read off a span.
+ *
+ * Building it is the expensive half — one `getComputedStyle` and a style write
+ * per mirrored property — and none of it changes while the popover it
+ * positions is open, so it is built once and measured in repeatedly. It is a
+ * live document node for that whole time, which is what makes
+ * {@link disposeCaretMirror} part of the contract rather than tidiness.
+ */
+type CaretMirror = {
+  textarea: HTMLTextAreaElement
+  div: HTMLDivElement
+  prefix: Text
+  span: HTMLSpanElement
+}
+
+const createCaretMirror = (textarea: HTMLTextAreaElement): CaretMirror => {
   const div = document.createElement("div")
   const style = div.style
   const computed = window.getComputedStyle(textarea)
@@ -291,21 +304,47 @@ export function getTextareaCaretCoordinates(
     style.setProperty(prop, computed.getPropertyValue(prop))
   }
 
-  div.textContent = textarea.value.substring(0, index)
-
+  // Two stable children, so a measurement writes text and never reshapes the
+  // tree: `div.textContent = …` would drop the span on every keystroke.
+  const prefix = document.createTextNode("")
   const span = document.createElement("span")
-  // Zero-width space so the span has a measurable position even at text end.
-  span.textContent = textarea.value.substring(index) || "​"
+  div.appendChild(prefix)
   div.appendChild(span)
-
   document.body.appendChild(div)
 
-  const left = span.offsetLeft
-  const top = span.offsetTop - textarea.scrollTop
+  return { textarea, div, prefix, span }
+}
 
-  document.body.removeChild(div)
+const disposeCaretMirror = (mirror: CaretMirror): void => {
+  mirror.div.remove()
+}
 
-  return { left, top }
+const measureInCaretMirror = (
+  mirror: CaretMirror,
+  index: number
+): { left: number; top: number } => {
+  const { value } = mirror.textarea
+  mirror.prefix.data = value.substring(0, index)
+  // Zero-width space so the span has a measurable position even at text end.
+  mirror.span.textContent = value.substring(index) || "​"
+
+  return {
+    left: mirror.span.offsetLeft,
+    top: mirror.span.offsetTop - mirror.textarea.scrollTop,
+  }
+}
+
+/** Pixel position of the character at `index`, relative to the textarea. */
+export function getTextareaCaretCoordinates(
+  textarea: HTMLTextAreaElement,
+  index: number
+): { left: number; top: number } {
+  const mirror = createCaretMirror(textarea)
+  try {
+    return measureInCaretMirror(mirror, index)
+  } finally {
+    disposeCaretMirror(mirror)
+  }
 }
 
 const DEBOUNCE_MS = 250
@@ -373,6 +412,14 @@ export function useMentions({
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const searchIdRef = useRef(0)
   const dismissedAtIndexRef = useRef<number>(-1)
+  const mirrorRef = useRef<CaretMirror | null>(null)
+
+  const discardCaretMirror = useCallback(() => {
+    const mirror = mirrorRef.current
+    if (!mirror) return
+    mirrorRef.current = null
+    disposeCaretMirror(mirror)
+  }, [])
 
   const matchesEveryone = useCallback(
     (q: string): boolean =>
@@ -699,7 +746,14 @@ export function useMentions({
     const textarea = textareaRef.current
     if (!textarea) return null
 
-    const coords = getTextareaCaretCoordinates(textarea, atIndexRef.current)
+    let mirror = mirrorRef.current
+    if (!mirror || mirror.textarea !== textarea) {
+      if (mirror) disposeCaretMirror(mirror)
+      mirror = createCaretMirror(textarea)
+      mirrorRef.current = mirror
+    }
+
+    const coords = measureInCaretMirror(mirror, atIndexRef.current)
     const left = textarea.offsetLeft + coords.left
     const formHeight = textarea.offsetParent
       ? (textarea.offsetParent as HTMLElement).offsetHeight
@@ -708,6 +762,14 @@ export function useMentions({
 
     return { left, bottom }
   }, [isOpen, inputValue, cursorPosition, textareaRef])
+
+  // The mirror is a document node the memo above creates during render, so
+  // nothing but this releases it: a closed popover measures nothing.
+  useEffect(() => {
+    if (!isOpen) discardCaretMirror()
+  }, [isOpen, discardCaretMirror])
+
+  useEffect(() => discardCaretMirror, [discardCaretMirror])
 
   const inlineCompletion = useMemo<string | null>(() => {
     if (!isOpen || results.length === 0) return null
