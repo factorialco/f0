@@ -47,6 +47,9 @@ export const Employee: Story = {
       const dialog = await screen.findByRole("dialog")
       await expect(within(dialog).getByText("30% used")).toBeInTheDocument()
     })
+    await step("Close it so the story rests in its idle state", async () => {
+      await userEvent.keyboard("{Escape}")
+    })
   },
 }
 
@@ -68,6 +71,9 @@ export const Admin: Story = {
         within(dialog).getByRole("button", { name: /your company/i })
       )
       await expect(onSeeCompany).toHaveBeenCalled()
+    })
+    await step("Close it so the story rests in its idle state", async () => {
+      await userEvent.keyboard("{Escape}")
     })
   },
 }
