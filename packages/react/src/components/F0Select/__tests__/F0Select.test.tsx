@@ -2847,6 +2847,63 @@ describe("Select", () => {
       expect(handleChange).not.toHaveBeenCalled()
     })
 
+    it("drops the selection when the user empties the field and leaves", async () => {
+      const user = userEvent.setup()
+      const handleChange = vi.fn()
+      render(
+        <>
+          <F0Select
+            {...searchProps}
+            options={mockOptions}
+            value="option1"
+            clearable
+            onChange={handleChange}
+          />
+          <button type="button">Elsewhere</button>
+        </>
+      )
+
+      const trigger = getTriggerSearchInput()
+      await waitFor(() => expect(trigger).toHaveValue("Option 1"))
+
+      await user.click(trigger)
+      await user.clear(trigger)
+      await settleList()
+      expect(trigger).toHaveValue("")
+      expect(handleChange).not.toHaveBeenCalled()
+
+      // Leaving is what commits: an empty field is a clear, not a query.
+      fireEvent.blur(trigger, { relatedTarget: screen.getByText("Elsewhere") })
+
+      await waitFor(() => expect(handleChange).toHaveBeenCalledTimes(1))
+      expect(handleChange.mock.calls[0][0]).toBeUndefined()
+      expect(trigger).toHaveValue("")
+    })
+
+    it("keeps a selection that cannot be cleared, even from an emptied field", async () => {
+      const user = userEvent.setup()
+      const handleChange = vi.fn()
+      render(
+        <F0Select
+          {...searchProps}
+          options={mockOptions}
+          value="option1"
+          onChange={handleChange}
+        />
+      )
+
+      const trigger = getTriggerSearchInput()
+      await waitFor(() => expect(trigger).toHaveValue("Option 1"))
+
+      await user.click(trigger)
+      await user.clear(trigger)
+      await settleList()
+      await user.keyboard("{Escape}")
+
+      await waitFor(() => expect(trigger).toHaveValue("Option 1"))
+      expect(handleChange).not.toHaveBeenCalled()
+    })
+
     it("emits once when the selection is cleared while closed", async () => {
       const user = userEvent.setup()
       const handleChange = vi.fn()

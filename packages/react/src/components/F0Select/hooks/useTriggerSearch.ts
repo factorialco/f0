@@ -15,6 +15,8 @@ type UseTriggerSearchOptions = {
   onSearchChange: (value: string) => void
   /** Clears the query, rather than setting it to an empty one. */
   onSearchReset: () => void
+  /** The user emptied the field and left: the selection goes with the text. */
+  onCloseEmpty: () => void
   onActiveMove: (direction: "next" | "previous") => void
   /** Returns false when there was nothing to take. */
   onSelectActive: () => boolean
@@ -38,6 +40,7 @@ export const useTriggerSearch = ({
   onClose,
   onSearchChange,
   onSearchReset,
+  onCloseEmpty,
   onActiveMove,
   onSelectActive,
   onBackspaceOnEmpty,
@@ -90,8 +93,9 @@ export const useTriggerSearch = ({
 
   /**
    * Closing drops the query, or reopening would land on a filtered list the
-   * field no longer shows. Focus only comes back when it never left the
-   * select: closing by clicking another field must not steal its caret.
+   * field no longer shows. A field the user emptied stays empty: that is a
+   * clear, not a query. Focus only comes back when it never left the select:
+   * closing by clicking another field must not steal its caret.
    */
   const wasOpenRef = useRef(open)
   useEffect(() => {
@@ -102,6 +106,9 @@ export const useTriggerSearch = ({
       return
     }
 
+    if (editing && draft === "") {
+      onCloseEmpty()
+    }
     resetText()
 
     const active = document.activeElement
@@ -113,7 +120,7 @@ export const useTriggerSearch = ({
     if (!focusLeftTheSelect) {
       inputRef.current?.focus({ preventScroll: true })
     }
-  }, [enabled, open, resetText, triggerRef])
+  }, [draft, editing, enabled, onCloseEmpty, open, resetText, triggerRef])
 
   /**
    * Focus leaving for somewhere that is neither the field nor the popup closes

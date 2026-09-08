@@ -1311,6 +1311,23 @@ const F0SelectComponent = forwardRef(function Select<
       ? String(displayLabel(getDisplayItemsForSelection[0]))
       : ""
 
+  const selectedCount = multiple
+    ? Math.max(localValue.length, selectionMeta.selectedItemsCount)
+    : localValue[0]
+      ? 1
+      : 0
+  const hasSelection = selectedCount > 0
+
+  /** What the clear button does, shared with emptying the field. */
+  const clearFromField = () => {
+    hasUserInteracted.current = true
+    clearSelection()
+    selectedItemsCache.current.clear()
+    ;(
+      onChangeSelectedOption as (option: undefined, checked: boolean) => void
+    )?.(undefined, false)
+  }
+
   const {
     draft: searchDraft,
     inputRef: searchInputRef,
@@ -1335,6 +1352,13 @@ const F0SelectComponent = forwardRef(function Select<
       cancelPendingSearchEmit()
       setCurrentSearch(undefined)
       onSearchChange?.("")
+    },
+    // A multiple selection is not the text, and a select that cannot be
+    // cleared keeps its value: the label comes back in both cases.
+    onCloseEmpty: () => {
+      if (!multiple && clearable && hasSelection) {
+        clearFromField()
+      }
     },
     triggerRef: inlineTriggerRef,
   })
@@ -1501,13 +1525,6 @@ const F0SelectComponent = forwardRef(function Select<
   )
 
   const selectionDescriptionId = `${id}-selection`
-
-  const selectedCount = multiple
-    ? Math.max(localValue.length, selectionMeta.selectedItemsCount)
-    : localValue[0]
-      ? 1
-      : 0
-  const hasSelection = selectedCount > 0
 
   /** What the trigger shows when it is not being typed into. */
   const selectedItemsNode = (
@@ -1714,19 +1731,7 @@ const F0SelectComponent = forwardRef(function Select<
                   </span>
                 ) : undefined
               }
-              onClear={() => {
-                hasUserInteracted.current = true
-                clearSelection()
-                // Clear the cache when clearing selection
-                selectedItemsCache.current.clear()
-                // Call with undefined to indicate no item is selected
-                ;(
-                  onChangeSelectedOption as (
-                    option: undefined,
-                    checked: boolean
-                  ) => void
-                )?.(undefined, false)
-              }}
+              onClear={clearFromField}
               placeholder={
                 // The field's own placeholder wins; the search one stands in.
                 (inlineSearch
