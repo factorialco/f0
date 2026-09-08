@@ -33,7 +33,12 @@ export const loadMapAdapterFactory = (
   if (started) {
     return started
   }
-  const load = LOADERS[provider](config)
+  // Forgotten if it rejects: a memoised failure would make a transient one -
+  // a dropped network, a script blocked once - permanent for the session.
+  const load = LOADERS[provider](config).catch((error: unknown) => {
+    loading.delete(provider)
+    throw error
+  })
   loading.set(provider, load)
   return load
 }
