@@ -120,7 +120,7 @@ identity the palette already has. Debouncing is the opposite: only the provider
 knows what a round trip costs, so a provider that wants fewer of them debounces
 inside its own `search`.
 
-<Canvas of={Stories.LoadingFromRemoteProviders} />
+<Canvas of={Stories.LoadingAndFailingProviders} />
 
 If a domain already has an F0 `DataSource` for its collection, adapt it inside
 `search` rather than handing it over: the palette wants a global top-N for a

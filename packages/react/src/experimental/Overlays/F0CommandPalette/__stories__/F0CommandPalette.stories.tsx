@@ -107,10 +107,10 @@ const deviceSelection: CommandEntityRef = {
 }
 
 /**
- * A remote provider, faked honestly: a real delay, and a real failure.
- *
- * `search` may return a promise, so this is what a module talking to an API
- * actually looks like — and it is what the other stories in this file are not.
+ * A slow answer, faked with a timer over the SAME in-memory fixtures every
+ * other story uses. No requests, nothing external, nothing to be offline for —
+ * `setTimeout` is the whole mock, so the loading stories are as deterministic
+ * as the instant ones.
  */
 const afterDelay = <T,>(value: T, ms: number): Promise<T> =>
   new Promise((resolve) => setTimeout(() => resolve(value), ms))
@@ -824,13 +824,14 @@ const brokenAppProvider: CommandEntityProvider = {
 }
 
 /**
- * SEARCH IS REMOTE, and the palette shows it.
+ * SEARCH CAN BE ASYNC, and the palette shows it.
  *
  * `search` may return a promise, and every other story in this file pretends
  * otherwise — they resolve from a local array, so nothing ever loads and every
  * result is instant. That is not what a module talking to an API looks like.
  *
- * Here `Devices` takes 1.2s, `Teams` takes 150ms, and `Apps` is down. Each
+ * Here `Devices` takes 1.2s, `Teams` takes 150ms, and `Apps` rejects — all
+ * mocked in memory with a timer, so this story makes no requests. Each
  * domain shows its own state in its own group: skeleton rows hold the space a
  * result will fill, a group that has answered renders immediately rather than
  * waiting for its neighbours, and the one that failed says so instead of
@@ -842,7 +843,7 @@ const brokenAppProvider: CommandEntityProvider = {
  * a fast one to `macbook`. A provider that wants fewer round trips debounces
  * inside its own `search`, since only it knows what one costs.
  */
-export const LoadingFromRemoteProviders: Story = {
+export const LoadingAndFailingProviders: Story = {
   args: {
     providers: [quickTeamProvider, slowDeviceProvider, brokenAppProvider],
   },
