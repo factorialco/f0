@@ -98,7 +98,7 @@
     "@radix-ui/react-visually-hidden": "^1.2.3",
     "@reactuses/core": "^6.1.5",
     "@tanstack/react-virtual": "^3.13.2",
-    "@tiptap/core": "^2.24.0",
+    "@tiptap/core": "^3.30.4",
     "@tiptap/extension-bubble-menu": "^2.11.5",
     "@tiptap/extension-character-count": "^2.11.5",
     "@tiptap/extension-collaboration": "^2.24.0",
