@@ -3262,7 +3262,7 @@ const b9 = {
   }, []);
   return q(() => () => i.current?.disconnect(), []), { containerRef: a, isDark: e };
 }, mv = {
-  maplibre: () => import("./index-DiM5nQh_.js").then((e) => e.createMaplibreAdapter),
+  maplibre: () => import("./index-DOiLnMP0.js").then((e) => e.createMaplibreAdapter),
   // Google needs its script in the page before a map can be constructed, so the
   // loader resolves only once the API is up - which is what keeps the factory
   // itself synchronous for every engine.
@@ -3297,7 +3297,7 @@ const b9 = {
     elementType: "geometry.fill",
     stylers: [
       {
-        color: "#192231"
+        color: "#0d1626"
       }
     ]
   },
@@ -3306,7 +3306,7 @@ const b9 = {
     elementType: "geometry.fill",
     stylers: [
       {
-        color: "#192231"
+        color: "#26372b"
       }
     ]
   },
@@ -3315,7 +3315,7 @@ const b9 = {
     elementType: "geometry.fill",
     stylers: [
       {
-        color: "#192231"
+        color: "#26372b"
       }
     ]
   },
@@ -3333,7 +3333,7 @@ const b9 = {
     elementType: "geometry.stroke",
     stylers: [
       {
-        color: "#3d4551"
+        color: "#252d3c"
       }
     ]
   },
@@ -3342,7 +3342,7 @@ const b9 = {
     elementType: "geometry.fill",
     stylers: [
       {
-        color: "#1c2433"
+        color: "#26426d"
       }
     ]
   },
@@ -3351,7 +3351,16 @@ const b9 = {
     elementType: "labels.text.fill",
     stylers: [
       {
-        color: "#759cd6"
+        color: "#5596f6"
+      }
+    ]
+  },
+  {
+    featureType: "water",
+    elementType: "labels.text.stroke",
+    stylers: [
+      {
+        color: "#0d1626"
       }
     ]
   },
@@ -3360,25 +3369,7 @@ const b9 = {
     elementType: "geometry.fill",
     stylers: [
       {
-        color: "#192231"
-      }
-    ]
-  },
-  {
-    featureType: "poi.business",
-    elementType: "geometry.fill",
-    stylers: [
-      {
-        color: "#192231"
-      }
-    ]
-  },
-  {
-    featureType: "poi.school",
-    elementType: "geometry.fill",
-    stylers: [
-      {
-        color: "#192231"
+        color: "#364c2f"
       }
     ]
   },
@@ -3387,7 +3378,25 @@ const b9 = {
     elementType: "geometry.fill",
     stylers: [
       {
-        color: "#192231"
+        color: "#252d3c"
+      }
+    ]
+  },
+  {
+    featureType: "poi.school",
+    elementType: "geometry.fill",
+    stylers: [
+      {
+        color: "#252d3c"
+      }
+    ]
+  },
+  {
+    featureType: "poi.business",
+    elementType: "geometry.fill",
+    stylers: [
+      {
+        color: "#252d3c"
       }
     ]
   },
@@ -3396,7 +3405,16 @@ const b9 = {
     elementType: "geometry.fill",
     stylers: [
       {
-        color: "#5d636e"
+        color: "#6e737d"
+      }
+    ]
+  },
+  {
+    featureType: "road.highway",
+    elementType: "geometry.stroke",
+    stylers: [
+      {
+        color: "#252d3c"
       }
     ]
   },
@@ -3405,7 +3423,16 @@ const b9 = {
     elementType: "geometry.fill",
     stylers: [
       {
-        color: "#5d636e"
+        color: "#565c67"
+      }
+    ]
+  },
+  {
+    featureType: "road.arterial",
+    elementType: "geometry.stroke",
+    stylers: [
+      {
+        color: "#252d3c"
       }
     ]
   },
@@ -3414,16 +3441,16 @@ const b9 = {
     elementType: "geometry.fill",
     stylers: [
       {
-        color: "#565c67"
+        color: "#3d4551"
       }
     ]
   },
   {
-    featureType: "road",
+    featureType: "road.local",
     elementType: "geometry.stroke",
     stylers: [
       {
-        color: "#3d4551"
+        color: "#252d3c"
       }
     ]
   },
@@ -3523,7 +3550,7 @@ const b9 = {
     elementType: "geometry.fill",
     stylers: [
       {
-        color: "#d8eeba"
+        color: "#d8e6b2"
       }
     ]
   },
@@ -3532,7 +3559,7 @@ const b9 = {
     elementType: "geometry.fill",
     stylers: [
       {
-        color: "#d8eeba"
+        color: "#d8e6b2"
       }
     ]
   },
@@ -3541,7 +3568,7 @@ const b9 = {
     elementType: "geometry.fill",
     stylers: [
       {
-        color: "#eceef2"
+        color: "#f3f4f7"
       }
     ]
   },
@@ -3559,7 +3586,7 @@ const b9 = {
     elementType: "geometry.fill",
     stylers: [
       {
-        color: "#95c7df"
+        color: "#b0caef"
       }
     ]
   },
@@ -3568,7 +3595,16 @@ const b9 = {
     elementType: "labels.text.fill",
     stylers: [
       {
-        color: "#2e63b2"
+        color: "#3a65a6"
+      }
+    ]
+  },
+  {
+    featureType: "water",
+    elementType: "labels.text.stroke",
+    stylers: [
+      {
+        color: "#ffffff"
       }
     ]
   },
@@ -3577,25 +3613,7 @@ const b9 = {
     elementType: "geometry.fill",
     stylers: [
       {
-        color: "#b2cd88"
-      }
-    ]
-  },
-  {
-    featureType: "poi.business",
-    elementType: "geometry.fill",
-    stylers: [
-      {
-        color: "#f9f1e3"
-      }
-    ]
-  },
-  {
-    featureType: "poi.school",
-    elementType: "geometry.fill",
-    stylers: [
-      {
-        color: "#fbf7ef"
+        color: "#c7d6a1"
       }
     ]
   },
@@ -3604,7 +3622,25 @@ const b9 = {
     elementType: "geometry.fill",
     stylers: [
       {
-        color: "#ffebea"
+        color: "#f3f4f7"
+      }
+    ]
+  },
+  {
+    featureType: "poi.school",
+    elementType: "geometry.fill",
+    stylers: [
+      {
+        color: "#f3f4f7"
+      }
+    ]
+  },
+  {
+    featureType: "poi.business",
+    elementType: "geometry.fill",
+    stylers: [
+      {
+        color: "#f3f4f7"
       }
     ]
   },
@@ -3618,11 +3654,29 @@ const b9 = {
     ]
   },
   {
+    featureType: "road.highway",
+    elementType: "geometry.stroke",
+    stylers: [
+      {
+        color: "#cdd3da"
+      }
+    ]
+  },
+  {
     featureType: "road.arterial",
     elementType: "geometry.fill",
     stylers: [
       {
-        color: "#bac1cd"
+        color: "#cdd3da"
+      }
+    ]
+  },
+  {
+    featureType: "road.arterial",
+    elementType: "geometry.stroke",
+    stylers: [
+      {
+        color: "#cdd3da"
       }
     ]
   },
@@ -3636,11 +3690,11 @@ const b9 = {
     ]
   },
   {
-    featureType: "road",
+    featureType: "road.local",
     elementType: "geometry.stroke",
     stylers: [
       {
-        color: "#e7eaee"
+        color: "#cdd3da"
       }
     ]
   },
