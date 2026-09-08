@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.90.1](https://github.com/factorialco/f0/compare/f0-react-v6.90.0...f0-react-v6.90.1) (2026-09-08)
+
+
+### Bug Fixes
+
+* **F0Chat:** show message length validation ([#5466](https://github.com/factorialco/f0/issues/5466)) ([b1e593c](https://github.com/factorialco/f0/commit/b1e593c2d6fab500f74fb78d0e0e32024388ec66))
+
 ## [6.90.0](https://github.com/factorialco/f0/compare/f0-react-v6.89.0...f0-react-v6.90.0) (2026-09-08)
 
 
