@@ -496,8 +496,15 @@ export const Default: Story = {
     const { body, field } = await openPalette(canvasElement)
 
     await expect(field).toHaveFocus()
+    // "Recent" is the palette's own bucket, so it comes from `labels`. Every
+    // other heading is the one the consumer wrote on its group.
+    //
+    // Scoped to the LISTBOX: the key legend also says "Actions", so a document
+    // -wide `getByText` would be ambiguous the moment a row offers controls.
     await waitFor(() => expect(body.getByText("Recent")).toBeVisible())
-    await waitFor(() => expect(body.getByText("Suggestions")).toBeVisible())
+    const list = () => within(body.getByRole("listbox"))
+    await waitFor(() => expect(list().getByText("Actions")).toBeVisible())
+    await waitFor(() => expect(list().getByText("Go to")).toBeVisible())
   },
 }
 
