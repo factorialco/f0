@@ -123,7 +123,7 @@ describe("F0AiCallout", () => {
   })
 
   describe("action", () => {
-    it("renders at most one action and fires it", async () => {
+    it("renders the action and fires it", async () => {
       const onClick = vi.fn()
       render(
         <F0AiCallout
@@ -139,6 +139,35 @@ describe("F0AiCallout", () => {
         screen.getByRole("button", { name: "Request repayment" })
       )
       expect(onClick).toHaveBeenCalledTimes(1)
+    })
+
+    it("puts the override before the recommended move, and ghosts it", async () => {
+      const reject = vi.fn()
+      const approve = vi.fn()
+      render(
+        <F0AiCallout
+          {...defaultProps}
+          action={{ label: "Reject", onClick: reject }}
+          secondaryAction={{ label: "Approve anyway", onClick: approve }}
+        />
+      )
+
+      const override = screen.getByRole("button", { name: "Approve anyway" })
+      const recommended = screen.getByRole("button", { name: "Reject" })
+
+      // The recommended move comes last, so it reads as the end of the
+      // sentence rather than competing with its own way out.
+      expect(
+        override.compareDocumentPosition(recommended) &
+          Node.DOCUMENT_POSITION_FOLLOWING
+      ).toBeTruthy()
+      // Ghost against outline: the pair has to read as a hierarchy.
+      expect(override.className).toContain("bg-transparent")
+      expect(recommended.className).not.toContain("bg-transparent")
+
+      await userEvent.click(override)
+      expect(approve).toHaveBeenCalledTimes(1)
+      expect(reject).not.toHaveBeenCalled()
     })
 
     it("keeps the byline row when there is no action", () => {
@@ -376,6 +405,25 @@ describe("F0AiCallout", () => {
       // and a live region announces it.
       expect(container).toBeEmptyDOMElement()
       expect(screen.queryByRole("status")).toBeNull()
+    })
+
+    it("warns when evidence has no items", () => {
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+
+      render(
+        <F0AiCallout
+          {...defaultProps}
+          evidence={{ name: "the 5 checks", items: [] }}
+        />
+      )
+
+      expect(warn).toHaveBeenCalledWith(
+        expect.stringContaining("F0AiCallout: `evidence` has no items")
+      )
+      // Still a complete verdict, so unlike empty `findings` it renders — it
+      // just has no toggle.
+      expect(screen.getByText("Not reimbursable")).toBeVisible()
+      expect(screen.queryByRole("button", { name: /the 5 checks/ })).toBeNull()
     })
 
     it("says nothing in a production build", () => {

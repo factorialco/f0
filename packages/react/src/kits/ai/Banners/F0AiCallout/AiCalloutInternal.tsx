@@ -202,6 +202,7 @@ export const AiCalloutInternal = forwardRef<HTMLDivElement, F0AiCalloutProps>(
     // the effect is here to stop.
     const hasAction = Boolean(action || secondaryAction)
     const hasHeadline = Boolean(headline)
+    const evidenceEmpty = Boolean(evidence) && !hasEvidence
 
     useEffect(() => {
       if (process.env.NODE_ENV === "production") return
@@ -227,7 +228,18 @@ export const AiCalloutInternal = forwardRef<HTMLDivElement, F0AiCalloutProps>(
           "F0AiCallout: `findings` is empty. A callout titled like a verdict with nothing under it tells the reader something is wrong and not what — rendering nothing instead."
         )
       }
-    }, [status, hasAction, icon, stacked, hasHeadline])
+
+      // Unlike empty `findings` this still leaves a complete verdict on screen,
+      // so it renders rather than bailing. It is worth saying out loud all the
+      // same: the product named something ("the 5 checks") and there is no
+      // disclosure to open, which from the outside looks like a broken toggle
+      // rather than an empty array.
+      if (evidenceEmpty) {
+        console.warn(
+          "F0AiCallout: `evidence` has no items, so no disclosure renders. Leave `evidence` out entirely when there is nothing behind it."
+        )
+      }
+    }, [status, hasAction, icon, stacked, hasHeadline, evidenceEmpty])
 
     // And actually render nothing, which the warning above promises. The header
     // and shell are built unconditionally below, so without this an empty
