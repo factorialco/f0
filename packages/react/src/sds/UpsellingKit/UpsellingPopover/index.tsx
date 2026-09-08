@@ -131,19 +131,19 @@ function _UpsellingPopover({
       </Popover>
 
       {currentAction?.type === "upsell" &&
-        currentAction.showConfirmation &&
-        responseStatus && (
-          <UpsellRequestResponseDialog
-            open={true}
-            onClose={handleModalClose}
-            success={responseStatus === "success"}
-            errorMessage={currentAction.errorMessage}
-            successMessage={currentAction.successMessage}
-            nextSteps={currentAction.nextSteps}
-            closeLabel={currentAction.closeLabel}
-            portalContainer={null}
-          />
-        )}
+      currentAction.showConfirmation &&
+      responseStatus ? (
+        <UpsellRequestResponseDialog
+          open={true}
+          onClose={handleModalClose}
+          success={responseStatus === "success"}
+          errorMessage={currentAction.errorMessage}
+          successMessage={currentAction.successMessage}
+          nextSteps={currentAction.nextSteps}
+          closeLabel={currentAction.closeLabel}
+          portalContainer={null}
+        />
+      ) : null}
     </>
   )
 }

@@ -97,7 +97,7 @@ export function F0CanvasPanel({
 
   return (
     <AnimatePresence>
-      {content && (
+      {content ? (
         <motion.div
           className={cn(
             // No overflow on the outer wrappers so the inner card's
@@ -151,7 +151,7 @@ export function F0CanvasPanel({
             </motion.div>
           </div>
         </motion.div>
-      )}
+      ) : null}
     </AnimatePresence>
   )
 }

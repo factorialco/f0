@@ -141,16 +141,16 @@ export const SelectedItems = forwardRef<HTMLDivElement, SelectValueProps>(
 
     return (
       <div className="flex min-w-0 flex-1 justify-start gap-1.5" ref={ref}>
-        {selectedItem.avatar && (
+        {selectedItem.avatar ? (
           <div className="flex shrink-0 items-center">
             <F0Avatar avatar={selectedItem.avatar} size="xs" />
           </div>
-        )}
-        {selectedItem.icon && !hideItemIcon && (
+        ) : null}
+        {selectedItem.icon && !hideItemIcon ? (
           <div className="h-5 shrink-0 text-f1-icon">
             <F0Icon icon={selectedItem.icon} />
           </div>
-        )}
+        ) : null}
         <OneEllipsis tag="span" className="text-left text-f1-foreground">
           {/* `selectedLabel` when the item carries one: out here there is no
               group header or sibling to read the row's short label against. */}

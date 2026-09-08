@@ -196,7 +196,7 @@ export function AccessiblePointActions({
             focusChatInput()
           }}
         >
-          {hasPrevious && (
+          {hasPrevious ? (
             <DropdownMenuItem
               onSelect={(event) => {
                 event.preventDefault()
@@ -205,7 +205,7 @@ export function AccessiblePointActions({
             >
               {previousLabel}
             </DropdownMenuItem>
-          )}
+          ) : null}
           {pageActions.map((action) => (
             <DropdownMenuItem
               key={action.key}
@@ -230,7 +230,7 @@ export function AccessiblePointActions({
               {action.getLabel()}
             </DropdownMenuItem>
           ))}
-          {hasNext && (
+          {hasNext ? (
             <DropdownMenuItem
               onSelect={(event) => {
                 event.preventDefault()
@@ -239,7 +239,7 @@ export function AccessiblePointActions({
             >
               {nextLabel}
             </DropdownMenuItem>
-          )}
+          ) : null}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

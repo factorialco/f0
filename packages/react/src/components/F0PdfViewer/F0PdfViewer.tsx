@@ -78,23 +78,23 @@ export const F0PdfViewerBase = forwardRef<HTMLDivElement, F0PdfViewerProps>(
         <Suspense
           fallback={<Skeleton className="h-full w-full rounded-none" />}
         >
-          {kind === "sheet" && (
+          {kind === "sheet" ? (
             <SheetViewer
               url={url}
               filename={filename}
               withCredentials={withCredentials}
               actions={actions}
             />
-          )}
-          {kind === "docx" && (
+          ) : null}
+          {kind === "docx" ? (
             <DocxViewer
               url={url}
               filename={filename}
               withCredentials={withCredentials}
               actions={actions}
             />
-          )}
-          {kind === "text" && (
+          ) : null}
+          {kind === "text" ? (
             <TextViewer
               url={url}
               name={filename ?? ""}
@@ -102,7 +102,7 @@ export const F0PdfViewerBase = forwardRef<HTMLDivElement, F0PdfViewerProps>(
               withCredentials={withCredentials}
               actions={actions}
             />
-          )}
+          ) : null}
         </Suspense>
       </div>
     )
@@ -364,7 +364,7 @@ const PdfViewerBase = forwardRef<
           actions={actions}
         />
 
-        {url && (
+        {url ? (
           <Document
             file={file}
             onLoadSuccess={onDocumentLoadSuccess}
@@ -376,50 +376,52 @@ const PdfViewerBase = forwardRef<
               />
             }
           >
-            {pdf &&
-              Array.from({ length: totalPages ?? 0 }).map((_, index) => {
-                const pageNumber =
-                  (pagesToDisplay.length > 0 ? pagesToDisplay[index] : index) +
-                  1
-                return (
-                  <div
-                    key={index}
-                    className="F0PdfViewer__page mx-auto w-fit px-4 pt-4 last:pb-4"
-                  >
-                    <Page
-                      className="overflow-hidden rounded-lg border border-solid border-f1-border-secondary shadow-md"
-                      pageNumber={pageNumber}
-                      scale={scale}
-                      rotate={rotation}
-                      loading={
-                        <Skeleton
-                          style={{
-                            width: pageSkeletonWidth,
-                            height: pageSkeletonHeight,
-                          }}
-                        />
-                      }
-                      renderForms
-                      renderTextLayer
-                      inputRef={(reference) => {
-                        pageElements.current[index] = reference
-                      }}
-                      onLoadSuccess={(loadedPage) => {
-                        setPages((current) => {
-                          const next = [...current]
-                          next[index] = {
-                            originalWidth: loadedPage.originalWidth,
-                            originalHeight: loadedPage.originalHeight,
-                          }
-                          return next
-                        })
-                      }}
-                    />
-                  </div>
-                )
-              })}
+            {pdf
+              ? Array.from({ length: totalPages ?? 0 }).map((_, index) => {
+                  const pageNumber =
+                    (pagesToDisplay.length > 0
+                      ? pagesToDisplay[index]
+                      : index) + 1
+                  return (
+                    <div
+                      key={index}
+                      className="F0PdfViewer__page mx-auto w-fit px-4 pt-4 last:pb-4"
+                    >
+                      <Page
+                        className="overflow-hidden rounded-lg border border-solid border-f1-border-secondary shadow-md"
+                        pageNumber={pageNumber}
+                        scale={scale}
+                        rotate={rotation}
+                        loading={
+                          <Skeleton
+                            style={{
+                              width: pageSkeletonWidth,
+                              height: pageSkeletonHeight,
+                            }}
+                          />
+                        }
+                        renderForms
+                        renderTextLayer
+                        inputRef={(reference) => {
+                          pageElements.current[index] = reference
+                        }}
+                        onLoadSuccess={(loadedPage) => {
+                          setPages((current) => {
+                            const next = [...current]
+                            next[index] = {
+                              originalWidth: loadedPage.originalWidth,
+                              originalHeight: loadedPage.originalHeight,
+                            }
+                            return next
+                          })
+                        }}
+                      />
+                    </div>
+                  )
+                })
+              : null}
           </Document>
-        )}
+        ) : null}
       </div>
     </div>
   )

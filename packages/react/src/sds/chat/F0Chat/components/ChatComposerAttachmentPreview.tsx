@@ -80,7 +80,7 @@ const ChatComposerAttachmentPreviewContent = ({
             onClick={removeAction.onClick}
           />
         </div>
-        {uploading && <PreviewProgress />}
+        {uploading ? <PreviewProgress /> : null}
         <figcaption className="sr-only">{attachment.name}</figcaption>
       </figure>
     )
@@ -131,7 +131,7 @@ const ChatComposerAttachmentPreviewContent = ({
               onClick={removeAction.onClick}
             />
           </div>
-          {uploading && <PreviewProgress />}
+          {uploading ? <PreviewProgress /> : null}
           <figcaption className="sr-only">{attachment.name}</figcaption>
         </figure>
       )
@@ -153,7 +153,7 @@ const ChatComposerAttachmentPreviewContent = ({
             previewDisabled={uploading}
             compact
           />
-          {uploading && <PreviewProgress />}
+          {uploading ? <PreviewProgress /> : null}
         </div>
       )
     }
@@ -181,7 +181,7 @@ const ChatComposerAttachmentPreviewContent = ({
             onClick={removeAction.onClick}
           />
         </div>
-        {uploading && <PreviewProgress />}
+        {uploading ? <PreviewProgress /> : null}
         <span className="sr-only">{attachment.name}</span>
       </div>
     )
@@ -209,7 +209,7 @@ const ChatComposerAttachmentPreviewContent = ({
             onClick={removeAction.onClick}
           />
         </div>
-        {uploading && <PreviewProgress />}
+        {uploading ? <PreviewProgress /> : null}
       </div>
     )
   }
@@ -231,7 +231,7 @@ const ChatComposerAttachmentPreviewContent = ({
           onClick={removeAction.onClick}
         />
       </div>
-      {uploading && <PreviewProgress />}
+      {uploading ? <PreviewProgress /> : null}
     </div>
   )
 }

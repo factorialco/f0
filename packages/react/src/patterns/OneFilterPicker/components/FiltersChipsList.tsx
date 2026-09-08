@@ -47,7 +47,7 @@ export function FiltersChipsList<Filters extends FiltersDefinition>({
   return (
     <div className="mt-2 flex items-center gap-2">
       <div className="flex flex-wrap items-center gap-2">
-        {resultCount !== undefined && hasVisibleChips && (
+        {resultCount !== undefined && hasVisibleChips ? (
           <F0TagRaw
             text={i18n.t(
               resultCount === 1
@@ -56,47 +56,48 @@ export function FiltersChipsList<Filters extends FiltersDefinition>({
               { count: resultCount }
             )}
           />
-        )}
+        ) : null}
         <AnimatePresence presenceAffectsLayout initial={false}>
-          {hasVisibleChips &&
-            activeFilterKeys.map((key) => {
-              const filterSchema = filters[key]
+          {hasVisibleChips
+            ? activeFilterKeys.map((key) => {
+                const filterSchema = filters[key]
 
-              if (!filters[key]) {
-                return null
-              }
+                if (!filters[key]) {
+                  return null
+                }
 
-              const currentValue = value?.[key as keyof Filters]
+                const currentValue = value?.[key as keyof Filters]
 
-              const filterType = getFilterType(filterSchema.type)
-              type FilterType =
-                FilterDefinitionsByType[typeof filterSchema.type]
+                const filterType = getFilterType(filterSchema.type)
+                type FilterType =
+                  FilterDefinitionsByType[typeof filterSchema.type]
 
-              const typedFilterType =
-                filterType as unknown as FilterTypeDefinition<
-                  FilterValue<FilterType>
-                >
+                const typedFilterType =
+                  filterType as unknown as FilterTypeDefinition<
+                    FilterValue<FilterType>
+                  >
 
-              if (
-                typedFilterType.isEmpty(currentValue, {
-                  schema: filterSchema as unknown as FilterTypeSchema,
-                  i18n,
-                })
-              ) {
-                return null
-              }
+                if (
+                  typedFilterType.isEmpty(currentValue, {
+                    schema: filterSchema as unknown as FilterTypeSchema,
+                    i18n,
+                  })
+                ) {
+                  return null
+                }
 
-              return (
-                <FilterChipButton
-                  key={`filter-${String(key)}`}
-                  filter={filterSchema}
-                  filterKey={String(key)}
-                  value={currentValue}
-                  onSelect={() => onFilterSelect(key)}
-                  onRemove={() => onFilterRemove(key)}
-                />
-              )
-            })}
+                return (
+                  <FilterChipButton
+                    key={`filter-${String(key)}`}
+                    filter={filterSchema}
+                    filterKey={String(key)}
+                    value={currentValue}
+                    onSelect={() => onFilterSelect(key)}
+                    onRemove={() => onFilterRemove(key)}
+                  />
+                )
+              })
+            : null}
         </AnimatePresence>
       </div>
 

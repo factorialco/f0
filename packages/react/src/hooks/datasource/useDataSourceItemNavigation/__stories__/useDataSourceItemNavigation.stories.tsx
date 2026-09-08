@@ -179,26 +179,26 @@ const PageBasedDemo = () => {
         <button disabled={!hasNext || isNavigating} onClick={goToNext}>
           Next →
         </button>
-        {isNavigating && <span style={{ color: "#888" }}>Loading…</span>}
+        {isNavigating ? <span style={{ color: "#888" }}>Loading…</span> : null}
       </div>
 
-      {(previousItemUrl || nextItemUrl) && (
+      {previousItemUrl || nextItemUrl ? (
         <div style={{ marginBottom: 8, fontSize: "0.85em", color: "#666" }}>
-          {previousItemUrl && (
+          {previousItemUrl ? (
             <span>
               ← <a href={previousItemUrl}>{previousItemUrl}</a>
             </span>
-          )}
-          {previousItemUrl && nextItemUrl && " | "}
-          {nextItemUrl && (
+          ) : null}
+          {previousItemUrl && nextItemUrl ? " | " : null}
+          {nextItemUrl ? (
             <span>
               <a href={nextItemUrl}>{nextItemUrl}</a> →
             </span>
-          )}
+          ) : null}
         </div>
-      )}
+      ) : null}
 
-      {activeItem && (
+      {activeItem ? (
         <div
           style={{
             padding: 12,
@@ -211,14 +211,14 @@ const PageBasedDemo = () => {
           <strong>Active:</strong> {(activeItem as Item).name} —{" "}
           {(activeItem as Item).department} ({(activeItem as Item).email})
         </div>
-      )}
+      ) : null}
 
-      {paginationInfo?.type === "pages" && (
+      {paginationInfo?.type === "pages" ? (
         <div style={{ marginBottom: 8, fontSize: "0.85em", color: "#666" }}>
           Page {paginationInfo.currentPage} of {paginationInfo.pagesCount} •{" "}
           {paginationInfo.total} total items
         </div>
-      )}
+      ) : null}
 
       <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
         {isLoading && data.records.length === 0 ? (
@@ -386,26 +386,26 @@ const InfiniteScrollDemo = () => {
         <button disabled={!hasNext || isNavigating} onClick={goToNext}>
           Next →
         </button>
-        {isNavigating && <span style={{ color: "#888" }}>Loading…</span>}
+        {isNavigating ? <span style={{ color: "#888" }}>Loading…</span> : null}
       </div>
 
-      {(previousItemUrl || nextItemUrl) && (
+      {previousItemUrl || nextItemUrl ? (
         <div style={{ marginBottom: 8, fontSize: "0.85em", color: "#666" }}>
-          {previousItemUrl && (
+          {previousItemUrl ? (
             <span>
               ← <a href={previousItemUrl}>{previousItemUrl}</a>
             </span>
-          )}
-          {previousItemUrl && nextItemUrl && " | "}
-          {nextItemUrl && (
+          ) : null}
+          {previousItemUrl && nextItemUrl ? " | " : null}
+          {nextItemUrl ? (
             <span>
               <a href={nextItemUrl}>{nextItemUrl}</a> →
             </span>
-          )}
+          ) : null}
         </div>
-      )}
+      ) : null}
 
-      {activeItem && (
+      {activeItem ? (
         <div
           style={{
             padding: 12,
@@ -418,13 +418,13 @@ const InfiniteScrollDemo = () => {
           <strong>Active:</strong> {(activeItem as Item).name} —{" "}
           {(activeItem as Item).department} ({(activeItem as Item).email})
         </div>
-      )}
+      ) : null}
 
       <div style={{ marginBottom: 8, fontSize: "0.85em", color: "#666" }}>
         {data.records.length} items loaded
-        {paginationInfo?.type === "infinite-scroll" &&
-          paginationInfo.hasMore &&
-          " • More available"}
+        {paginationInfo?.type === "infinite-scroll" && paginationInfo.hasMore
+          ? " • More available"
+          : null}
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>

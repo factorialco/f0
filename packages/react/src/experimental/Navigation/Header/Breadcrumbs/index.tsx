@@ -112,7 +112,7 @@ export function Breadcrumbs({ breadcrumbs, append }: BreadcrumbsProps) {
           </BreadcrumbItem>
         ))}
       </ol>
-      {state && state.headItem && (
+      {state && state.headItem ? (
         <BreadcrumbList>
           <BreadcrumbItem
             isOnly={state.isOnly}
@@ -127,7 +127,7 @@ export function Breadcrumbs({ breadcrumbs, append }: BreadcrumbsProps) {
             this triggers resize observer and starts an infinite loop.
             The only way to make this transactional is to rerender all tail breadcrumbs together with the collapsed element
           */}
-          {hasCollapsedElements && (
+          {hasCollapsedElements ? (
             <>
               <CollapsedBreadcrumbItem
                 key="collapsed-items"
@@ -144,8 +144,8 @@ export function Breadcrumbs({ breadcrumbs, append }: BreadcrumbsProps) {
                 </BreadcrumbItem>
               ))}
             </>
-          )}
-          {!hasCollapsedElements && (
+          ) : null}
+          {!hasCollapsedElements ? (
             <>
               {state.tailItems.map((item, index) => (
                 <BreadcrumbItem
@@ -158,9 +158,9 @@ export function Breadcrumbs({ breadcrumbs, append }: BreadcrumbsProps) {
                 </BreadcrumbItem>
               ))}
             </>
-          )}
+          ) : null}
         </BreadcrumbList>
-      )}
+      ) : null}
     </Breadcrumb>
   )
 }

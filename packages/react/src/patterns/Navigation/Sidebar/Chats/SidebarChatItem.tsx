@@ -132,13 +132,13 @@ export const SidebarChatItem = ({
             ) : (
               <F0Avatar size="xs" avatar={chat.avatar} />
             )}
-            {presence && (
+            {presence ? (
               <PresenceDot
                 presence={presence}
                 isActive={isActive}
                 label={i18n.chat.online}
               />
-            )}
+            ) : null}
           </div>
         ) : null}
 
@@ -158,7 +158,7 @@ export const SidebarChatItem = ({
         >
           {chat.label}
         </OneEllipsis>
-        {(statuses.length > 0 || chat.unreadCount) && (
+        {statuses.length > 0 || chat.unreadCount ? (
           <div
             className={cn(
               "gap-1 flex items-center justify-center transition-opacity",
@@ -189,14 +189,14 @@ export const SidebarChatItem = ({
               />
             ) : null}
           </div>
-        )}
+        ) : null}
       </button>
       {/* Hover (or focus) reveals a pin/unpin button, sitting where the unread
           badge / status is — a sibling of the row button so it isn't a nested
           <button>. While a pin/unpin is saving, a spinner takes its place and
           stays visible off-hover. */}
-      {chat.onTogglePin &&
-        (chat.pinPending ? (
+      {chat.onTogglePin ? (
+        chat.pinPending ? (
           <div
             className="absolute right-1.5 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center"
             aria-label={chat.pinned ? i18n.chat.unpin : i18n.chat.pin}
@@ -222,7 +222,8 @@ export const SidebarChatItem = ({
               }}
             />
           </div>
-        ))}
+        )
+      ) : null}
     </div>
   )
 }

@@ -81,7 +81,7 @@ export function NumberCell<R extends RecordType>({
           )}
           style={{ width }}
         >
-          {unitsBefore && unitsSpan}
+          {unitsBefore ? unitsSpan : null}
           <F0NumberInput
             label={editableColumn.label}
             hideLabel
@@ -98,7 +98,7 @@ export function NumberCell<R extends RecordType>({
             step={config?.step}
             maxDecimals={config?.maxDecimals}
           />
-          {!unitsBefore && unitsSpan}
+          {!unitsBefore ? unitsSpan : null}
         </div>
       </div>
     </BaseCell>

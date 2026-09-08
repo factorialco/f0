@@ -77,7 +77,7 @@ export const ChatTextareaField = ({
         {value.endsWith("\n") ? value + "_" : value || " "}
       </div>
 
-      {hasOverlay && (
+      {hasOverlay ? (
         <div
           ref={highlightRef}
           aria-hidden
@@ -120,7 +120,7 @@ export const ChatTextareaField = ({
             )
           )}
         </div>
-      )}
+      ) : null}
 
       <textarea
         ref={textareaRef}

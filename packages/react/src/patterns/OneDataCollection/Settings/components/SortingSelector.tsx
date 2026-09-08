@@ -67,7 +67,7 @@ export const SortingSelector = <Sortings extends SortingsDefinition>({
           />
         </div>
 
-        {displaySortings.field !== EmptySortingValue && (
+        {displaySortings.field !== EmptySortingValue ? (
           <div>
             <F0Button
               hideLabel
@@ -82,7 +82,7 @@ export const SortingSelector = <Sortings extends SortingsDefinition>({
               }
             />
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   )

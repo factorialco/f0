@@ -58,7 +58,7 @@ function TableBase({ children, loading = false }: TableProps) {
           {children}
         </TableRoot>
         <AnimatePresence>
-          {loading && (
+          {loading ? (
             <motion.div
               className="absolute inset-0 flex cursor-progress items-center justify-center"
               initial={{ opacity: 0 }}
@@ -67,7 +67,7 @@ function TableBase({ children, loading = false }: TableProps) {
             >
               <Spinner />
             </motion.div>
-          )}
+          ) : null}
         </AnimatePresence>
       </div>
     </TableContext.Provider>

@@ -62,9 +62,9 @@ export const DialogsAlikeLayoutProvider = ({
 
   return (
     <>
-      {isRenderer &&
-        typeof document !== "undefined" &&
-        createPortal(<DialogsAlike items={items} />, document.body)}
+      {isRenderer && typeof document !== "undefined"
+        ? createPortal(<DialogsAlike items={items} />, document.body)
+        : null}
       {children}
     </>
   )

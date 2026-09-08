@@ -649,7 +649,7 @@ const PersistenceHarness = () => {
         </details>
       </div>
 
-      {mounted && <PersistenceCollection />}
+      {mounted ? <PersistenceCollection /> : null}
     </div>
   )
 }

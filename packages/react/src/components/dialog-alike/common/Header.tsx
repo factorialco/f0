@@ -117,15 +117,15 @@ export const Header = ({
               </DialogTitle>
             )
           )}
-          {!!description && (
+          {description ? (
             <DrawerDescription className="text-base text-f1-foreground-secondary">
               {description}
             </DrawerDescription>
-          )}
+          ) : null}
         </div>
         <div className="flex flex-row gap-2">
           <Actions />
-          {otherActions && <Divider />}
+          {otherActions ? <Divider /> : null}
           <ButtonInternal
             variant="outline"
             icon={CrossIcon}
@@ -136,7 +136,7 @@ export const Header = ({
           />
         </div>
       </div>
-      {tabs && tabs.length > 0 && (
+      {tabs && tabs.length > 0 ? (
         <div className="-mx-2">
           <Tabs
             tabs={tabs}
@@ -144,7 +144,7 @@ export const Header = ({
             setActiveTabId={setActiveTabId}
           />
         </div>
-      )}
+      ) : null}
     </>
   )
 }

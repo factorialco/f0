@@ -90,8 +90,8 @@ export const GroupHeader = ({
         onKeyDown: handleKeyDown,
       })}
     >
-      {chevronPosition === "leading" && chevron}
-      {selectable && (
+      {chevronPosition === "leading" ? chevron : null}
+      {selectable ? (
         <F0Checkbox
           checked={!!select}
           indeterminate={select === "indeterminate"}
@@ -100,7 +100,7 @@ export const GroupHeader = ({
           onCheckedChange={(checked) => onSelectChange?.(checked)}
           stopPropagation
         />
-      )}
+      ) : null}
       <Await resolve={label} fallback={<Skeleton className="h-4 w-24" />}>
         {(label) => (
           <h6 className="text-base font-semibold text-f1-foreground">
@@ -111,7 +111,7 @@ export const GroupHeader = ({
       <Await resolve={itemCount} fallback={<Skeleton className="h-4 w-5" />}>
         {(count) => count !== undefined && <Counter value={count} />}
       </Await>
-      {chevronPosition === "trailing" && chevron}
+      {chevronPosition === "trailing" ? chevron : null}
     </div>
   )
 }

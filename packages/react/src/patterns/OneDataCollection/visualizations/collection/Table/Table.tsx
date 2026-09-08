@@ -247,6 +247,24 @@ export const TableCollection = <
     [source, showItemActionsProp]
   )
 
+  // Rows read the pinned definition, never the live source: its identity churns
+  // every consumer render, which no row memo can survive. A hand-built source
+  // has no `definition`, and falls back to re-rendering as it did before.
+  const rowDefinition = source.definition ?? source
+  const rowSource = useMemo(
+    () =>
+      showItemActionsProp === false
+        ? { ...rowDefinition, itemActions: undefined }
+        : rowDefinition,
+    [rowDefinition, showItemActionsProp]
+  )
+
+  // Children are fetched too late for this component to resolve anything for
+  // them, and resolving one reads the current filters and sortings. Flat rows
+  // get `undefined`, which is stable.
+  const liveSourceFor = (record: R) =>
+    effectiveSource.itemsWithChildren?.(record) ? effectiveSource : undefined
+
   // Called with no arguments at every use site, so the result is always the same
   // object by value. Building it once stops every row receiving a fresh
   // `variants` prop on each render.
@@ -513,7 +531,7 @@ export const TableCollection = <
             <TableHeader sticky={true}>
               {headerGroups ? (
                 <TableRow>
-                  {source.selectable && (
+                  {source.selectable ? (
                     <TableHead
                       align="left"
                       sticky={{ left: 0 }}
@@ -525,7 +543,7 @@ export const TableCollection = <
                     >
                       <div className="ml-3.5 flex w-full items-center justify-start" />
                     </TableHead>
-                  )}
+                  ) : null}
                   {headerGroups.map((entry, entryIndex) => {
                     // A collapsible group is clickable, so it keeps the cell's
                     // hover highlight — the same one a sortable column header
@@ -625,8 +643,8 @@ export const TableCollection = <
                       </TableHead>
                     )
                   })}
-                  {showItemActions &&
-                    (isEditableTable ? (
+                  {showItemActions ? (
+                    isEditableTable ? (
                       <TableHead
                         key="actions"
                         width="fit"
@@ -649,11 +667,12 @@ export const TableCollection = <
                           <span />
                         </TableHead>
                       </>
-                    ))}
+                    )
+                  ) : null}
                 </TableRow>
               ) : null}
               <TableRow>
-                {source.selectable && (
+                {source.selectable ? (
                   <TableHead
                     width={checkColumnWidth}
                     sticky={{ left: 0 }}
@@ -664,7 +683,7 @@ export const TableCollection = <
                         : undefined
                     }
                   >
-                    {!selectAllDisabled && (
+                    {!selectAllDisabled ? (
                       <div className="ml-3.5 flex w-full items-center justify-start">
                         <F0Checkbox
                           checked={isAllSelected}
@@ -675,9 +694,9 @@ export const TableCollection = <
                           disabled={data?.records.length === 0}
                         />
                       </div>
-                    )}
+                    ) : null}
                   </TableHead>
-                )}
+                ) : null}
                 {columns.map(({ sorting, label, ...column }, index) => {
                   const headerGroup = headerGroups?.find(
                     (group) =>
@@ -731,8 +750,8 @@ export const TableCollection = <
                     </TableHead>
                   )
                 })}
-                {showItemActions &&
-                  (isEditableTable ? (
+                {showItemActions ? (
+                  isEditableTable ? (
                     <TableHead key="actions" width="fit" sticky={{ right: 0 }}>
                       <span className="sr-only">
                         {i18n.collections.actions.actions}
@@ -753,253 +772,264 @@ export const TableCollection = <
                         {i18n.collections.actions.actions}
                       </TableHead>
                     </>
-                  ))}
+                  )
+                ) : null}
               </TableRow>
               {hasSelection &&
-                source.selectable &&
-                !!source.allPagesSelection && (
-                  <TableRow>
-                    <th
-                      colSpan={1 + selectionHeaderColSpan}
-                      className="h-11 border-0 border-t border-solid border-f1-border-secondary bg-f1-background-secondary px-5"
-                    >
-                      <div className="flex items-center gap-3">
-                        <HighlightedCount
-                          text={
-                            allSelectedStatus.checked &&
-                            !allSelectedStatus.indeterminate
-                              ? t("status.selected.allItemsSelected", {
-                                  total: selectableTotal,
+              source.selectable &&
+              !!source.allPagesSelection ? (
+                <TableRow>
+                  <th
+                    colSpan={1 + selectionHeaderColSpan}
+                    className="h-11 border-0 border-t border-solid border-f1-border-secondary bg-f1-background-secondary px-5"
+                  >
+                    <div className="flex items-center gap-3">
+                      <HighlightedCount
+                        text={
+                          allSelectedStatus.checked &&
+                          !allSelectedStatus.indeterminate
+                            ? t("status.selected.allItemsSelected", {
+                                total: selectableTotal,
+                              })
+                            : allPageRowsSelected
+                              ? t("status.selected.allOnPage", {
+                                  count: allSelectedStatus.selectedCount,
                                 })
-                              : allPageRowsSelected
-                                ? t("status.selected.allOnPage", {
-                                    count: allSelectedStatus.selectedCount,
-                                  })
-                                : `${allSelectedStatus.selectedCount} ${selectedText}`
-                          }
-                          count={
-                            allSelectedStatus.checked &&
-                            !allSelectedStatus.indeterminate
-                              ? selectableTotal
-                              : allSelectedStatus.selectedCount
-                          }
+                              : `${allSelectedStatus.selectedCount} ${selectedText}`
+                        }
+                        count={
+                          allSelectedStatus.checked &&
+                          !allSelectedStatus.indeterminate
+                            ? selectableTotal
+                            : allSelectedStatus.selectedCount
+                        }
+                      />
+                      {showSelectAllOption ? (
+                        <F0Button
+                          variant="outline"
+                          label={t("status.selected.selectAllItems", {
+                            total: selectableTotal,
+                          })}
+                          onClick={() => handleSelectAllItems(true)}
+                          size="sm"
                         />
-                        {showSelectAllOption && (
-                          <F0Button
-                            variant="outline"
-                            label={t("status.selected.selectAllItems", {
-                              total: selectableTotal,
-                            })}
-                            onClick={() => handleSelectAllItems(true)}
-                            size="sm"
-                          />
-                        )}
-                      </div>
-                    </th>
-                  </TableRow>
-                )}
+                      ) : null}
+                    </div>
+                  </th>
+                </TableRow>
+              ) : null}
             </TableHeader>
             <TableBody>
-              {data?.type === "grouped" &&
-                data.groups.map((group, groupIndex) => {
-                  const itemCount = group.itemCount
-                  return (
-                    <Fragment key={`group-${group.key}`}>
-                      <TableRow key={`group-header-${group.key}`} sticky>
-                        {source.selectable && (
-                          <TableCell
-                            width={checkColumnWidth}
-                            sticky={{ left: 0 }}
-                          >
-                            <div className="pointer-events-auto ml-1.5 flex items-center justify-start">
-                              {/* A group checkbox selects the whole group. */}
-                              {!selectAllDisabled && (
-                                <F0Checkbox
-                                  checked={
-                                    !!statusToChecked(
-                                      groupAllSelectedStatus[group.key]
-                                    )
-                                  }
-                                  indeterminate={
-                                    statusToChecked(
-                                      groupAllSelectedStatus[group.key]
-                                    ) === "indeterminate"
-                                  }
-                                  title={i18n.actions.selectAll}
-                                  hideLabel
-                                  onCheckedChange={(checked) =>
-                                    handleSelectGroupChange(group, checked)
-                                  }
-                                />
-                              )}
-                            </div>
-                          </TableCell>
-                        )}
-                        <TableCell
-                          sticky={{
-                            left: source.selectable ? checkColumnWidth : 0,
-                          }}
-                          colSpan={frozenColumnsLeft || 1}
-                        >
-                          <GroupHeader
-                            selectable={false}
-                            showOpenChange={collapsible}
-                            label={group.label}
-                            itemCount={itemCount}
-                            open={openGroups[group.key]}
-                            onOpenChange={(open) =>
-                              setGroupOpen(group.key, open)
-                            }
-                          />
-                        </TableCell>
-                        {columns.length - (frozenColumnsLeft || 1) > 0 && (
-                          <TableCell
-                            colSpan={columns.length - (frozenColumnsLeft || 1)}
-                          >
-                            &nbsp;
-                          </TableCell>
-                        )}
-                      </TableRow>
-
-                      <AnimatePresence key={`group-animate-${groupIndex}`}>
-                        {MotionRow &&
-                          (!collapsible || openGroups[group.key]) &&
-                          group.records.map((item, index) => {
-                            const rowKey = `row-${groupIndex}-${getRowKey(item, index)}`
-                            const motionRow = (
-                              <MotionRow
-                                variants={rowAnimationVariants}
-                                initial={collapsible ? "hidden" : "visible"}
-                                animate="visible"
-                                exit="hidden"
-                                custom={index}
-                                key={rowKey}
-                                layout
-                                source={effectiveSource}
-                                item={item}
-                                index={index}
-                                groupIndex={groupIndex}
-                                onItemCheckedChange={stableSelectItemChange}
-                                isSelected={isItemSelected(item)}
-                                selectedItems={nestedSelectedItems(item)}
-                                columns={columns}
-                                frozenColumnsLeft={frozenColumnsLeft}
-                                checkColumnWidth={checkColumnWidth}
-                                referenceRowType={referenceRowType}
-                                rowWrapper={RowWrapper}
-                                cellRenderer={cellRenderer}
-                                headerGroups={headerGroups}
-                                collapsingCellClasses={collapsingCellClasses}
-                                fromVisualization={fromVisualization}
-                                registerSelectable={selectionRegistry.register}
-                                unregisterSelectable={
-                                  selectionRegistry.unregister
-                                }
-                              />
-                            )
-                            if (RowWrapper) {
-                              return (
-                                <RowWrapper
-                                  key={rowKey}
-                                  item={item}
-                                  index={index}
-                                >
-                                  {motionRow}
-                                </RowWrapper>
-                              )
-                            }
-
-                            return motionRow
-                          })}
-                      </AnimatePresence>
-                    </Fragment>
-                  )
-                })}
-              {data?.type === "flat" &&
-                // Deliberately not wrapped in `AnimatePresence`: a row that
-                // leaves the dataset (deleted, filtered out, re-sorted away)
-                // must unmount on the same render. An exit transition keeps it
-                // mounted — still in the DOM, still in the selection registry —
-                // for as long as it runs, so a removed row goes on answering
-                // queries and shifting row/checkbox positions. Enter and flash
-                // don't need presence tracking; `initial`/`animate` cover them.
-                data.records.map((item, index) => {
-                  const rowKey = `row-${getRowKey(item, index)}`
-                  const isNew = addedRowKeys.has(rowKey)
-                  const motionRow = (
-                    <MotionRow
-                      variants={rowAnimationVariants}
-                      // Only a genuinely-inserted row plays the enter
-                      // animation; rows arriving via pagination or the initial
-                      // load appear in place, without movement.
-                      initial={isNew ? "hidden" : false}
-                      animate="visible"
-                      custom={index}
-                      key={rowKey}
-                      layout
-                      isNew={isNew}
-                      groupIndex={0}
-                      source={effectiveSource}
-                      item={item}
-                      index={index}
-                      onItemCheckedChange={stableSelectItemChange}
-                      isSelected={isItemSelected(item)}
-                      selectedItems={nestedSelectedItems(item)}
-                      columns={columns}
-                      frozenColumnsLeft={frozenColumnsLeft}
-                      checkColumnWidth={checkColumnWidth}
-                      tableWithChildren={tableWithChildren}
-                      referenceRowType={referenceRowType}
-                      boldRootRows={boldRootRows}
-                      rowWrapper={RowWrapper}
-                      cellRenderer={cellRenderer}
-                      fromVisualization={fromVisualization}
-                      headerGroups={headerGroups}
-                      collapsingCellClasses={collapsingCellClasses}
-                      registerSelectable={selectionRegistry.register}
-                      unregisterSelectable={selectionRegistry.unregister}
-                    />
-                  )
-                  if (RowWrapper) {
+              {data?.type === "grouped"
+                ? data.groups.map((group, groupIndex) => {
+                    const itemCount = group.itemCount
                     return (
-                      <RowWrapper key={rowKey} item={item} index={index}>
-                        {motionRow}
-                      </RowWrapper>
-                    )
-                  }
+                      <Fragment key={`group-${group.key}`}>
+                        <TableRow key={`group-header-${group.key}`} sticky>
+                          {source.selectable ? (
+                            <TableCell
+                              width={checkColumnWidth}
+                              sticky={{ left: 0 }}
+                            >
+                              <div className="pointer-events-auto ml-1.5 flex items-center justify-start">
+                                {/* A group checkbox selects the whole group. */}
+                                {!selectAllDisabled ? (
+                                  <F0Checkbox
+                                    checked={
+                                      !!statusToChecked(
+                                        groupAllSelectedStatus[group.key]
+                                      )
+                                    }
+                                    indeterminate={
+                                      statusToChecked(
+                                        groupAllSelectedStatus[group.key]
+                                      ) === "indeterminate"
+                                    }
+                                    title={i18n.actions.selectAll}
+                                    hideLabel
+                                    onCheckedChange={(checked) =>
+                                      handleSelectGroupChange(group, checked)
+                                    }
+                                  />
+                                ) : null}
+                              </div>
+                            </TableCell>
+                          ) : null}
+                          <TableCell
+                            sticky={{
+                              left: source.selectable ? checkColumnWidth : 0,
+                            }}
+                            colSpan={frozenColumnsLeft || 1}
+                          >
+                            <GroupHeader
+                              selectable={false}
+                              showOpenChange={collapsible}
+                              label={group.label}
+                              itemCount={itemCount}
+                              open={openGroups[group.key]}
+                              onOpenChange={(open) =>
+                                setGroupOpen(group.key, open)
+                              }
+                            />
+                          </TableCell>
+                          {columns.length - (frozenColumnsLeft || 1) > 0 ? (
+                            <TableCell
+                              colSpan={
+                                columns.length - (frozenColumnsLeft || 1)
+                              }
+                            >
+                              &nbsp;
+                            </TableCell>
+                          ) : null}
+                        </TableRow>
 
-                  return motionRow
-                })}
-              {paginationInfo?.type === "infinite-scroll" &&
-                isLoadingMore &&
-                Array.from({ length: 5 }).map((_, rowIndex) => (
-                  <TableRow key={`skeleton-row-${rowIndex}`}>
-                    {Array.from({ length: skeletonColumns }).map(
-                      (_, colIndex) => (
-                        <TableCell
-                          key={`skeleton-cell-${rowIndex}-${colIndex}`}
-                        >
-                          <Skeleton className="h-4 w-full" />
-                        </TableCell>
+                        <AnimatePresence key={`group-animate-${groupIndex}`}>
+                          {!collapsible || openGroups[group.key]
+                            ? group.records.map((item, index) => {
+                                const rowKey = `row-${groupIndex}-${getRowKey(item, index)}`
+                                const motionRow = (
+                                  <MotionRow
+                                    variants={rowAnimationVariants}
+                                    initial={collapsible ? "hidden" : "visible"}
+                                    animate="visible"
+                                    exit="hidden"
+                                    custom={index}
+                                    key={rowKey}
+                                    layout
+                                    source={rowSource}
+                                    liveSource={liveSourceFor(item)}
+                                    item={item}
+                                    index={index}
+                                    groupIndex={groupIndex}
+                                    onItemCheckedChange={stableSelectItemChange}
+                                    isSelected={isItemSelected(item)}
+                                    selectedItems={nestedSelectedItems(item)}
+                                    columns={columns}
+                                    frozenColumnsLeft={frozenColumnsLeft}
+                                    checkColumnWidth={checkColumnWidth}
+                                    referenceRowType={referenceRowType}
+                                    rowWrapper={RowWrapper}
+                                    cellRenderer={cellRenderer}
+                                    headerGroups={headerGroups}
+                                    collapsingCellClasses={
+                                      collapsingCellClasses
+                                    }
+                                    fromVisualization={fromVisualization}
+                                    registerSelectable={
+                                      selectionRegistry.register
+                                    }
+                                    unregisterSelectable={
+                                      selectionRegistry.unregister
+                                    }
+                                  />
+                                )
+                                if (RowWrapper) {
+                                  return (
+                                    <RowWrapper
+                                      key={rowKey}
+                                      item={item}
+                                      index={index}
+                                    >
+                                      {motionRow}
+                                    </RowWrapper>
+                                  )
+                                }
+
+                                return motionRow
+                              })
+                            : null}
+                        </AnimatePresence>
+                      </Fragment>
+                    )
+                  })
+                : null}
+              {/* Deliberately not wrapped in `AnimatePresence`: a row that
+                  leaves the dataset (deleted, filtered out, re-sorted away)
+                  must unmount on the same render. An exit transition keeps it
+                  mounted — still in the DOM, still in the selection registry —
+                  for as long as it runs, so a removed row goes on answering
+                  queries and shifting row/checkbox positions. Enter and flash
+                  don't need presence tracking; `initial`/`animate` cover them. */}
+              {data?.type === "flat"
+                ? data.records.map((item, index) => {
+                    const rowKey = `row-${getRowKey(item, index)}`
+                    const isNew = addedRowKeys.has(rowKey)
+                    const motionRow = (
+                      <MotionRow
+                        variants={rowAnimationVariants}
+                        // Only a genuinely-inserted row plays the enter
+                        // animation; rows arriving via pagination or the initial
+                        // load appear in place, without movement.
+                        initial={isNew ? "hidden" : false}
+                        animate="visible"
+                        custom={index}
+                        key={rowKey}
+                        layout
+                        isNew={isNew}
+                        groupIndex={0}
+                        source={rowSource}
+                        liveSource={liveSourceFor(item)}
+                        item={item}
+                        index={index}
+                        onItemCheckedChange={stableSelectItemChange}
+                        isSelected={isItemSelected(item)}
+                        selectedItems={nestedSelectedItems(item)}
+                        columns={columns}
+                        frozenColumnsLeft={frozenColumnsLeft}
+                        checkColumnWidth={checkColumnWidth}
+                        tableWithChildren={tableWithChildren}
+                        referenceRowType={referenceRowType}
+                        boldRootRows={boldRootRows}
+                        rowWrapper={RowWrapper}
+                        cellRenderer={cellRenderer}
+                        fromVisualization={fromVisualization}
+                        headerGroups={headerGroups}
+                        collapsingCellClasses={collapsingCellClasses}
+                        registerSelectable={selectionRegistry.register}
+                        unregisterSelectable={selectionRegistry.unregister}
+                      />
+                    )
+                    if (RowWrapper) {
+                      return (
+                        <RowWrapper key={rowKey} item={item} index={index}>
+                          {motionRow}
+                        </RowWrapper>
                       )
-                    )}
-                  </TableRow>
-                ))}
+                    }
+
+                    return motionRow
+                  })
+                : null}
+              {paginationInfo?.type === "infinite-scroll" && isLoadingMore
+                ? Array.from({ length: 5 }).map((_, rowIndex) => (
+                    <TableRow key={`skeleton-row-${rowIndex}`}>
+                      {Array.from({ length: skeletonColumns }).map(
+                        (_, colIndex) => (
+                          <TableCell
+                            key={`skeleton-cell-${rowIndex}-${colIndex}`}
+                          >
+                            <Skeleton className="h-4 w-full" />
+                          </TableCell>
+                        )
+                      )}
+                    </TableRow>
+                  ))
+                : null}
               {isInfiniteScrollPagination(paginationInfo) &&
-                paginationInfo.hasMore && (
-                  <tr>
-                    <td
-                      colSpan={
-                        columns.length +
-                        (source.selectable ? 1 : 0) +
-                        (showItemActions ? 1 : 0)
-                      }
-                      ref={loadingIndicatorRef}
-                      className="h-10"
-                      aria-hidden="true"
-                    ></td>
-                  </tr>
-                )}
+              paginationInfo.hasMore ? (
+                <tr>
+                  <td
+                    colSpan={
+                      columns.length +
+                      (source.selectable ? 1 : 0) +
+                      (showItemActions ? 1 : 0)
+                    }
+                    ref={loadingIndicatorRef}
+                    className="h-10"
+                    aria-hidden="true"
+                  ></td>
+                </tr>
+              ) : null}
             </TableBody>
             {(() => {
               const actions = normalizeAddRowActions(addRow?.addRowActions?.())
@@ -1010,7 +1040,7 @@ export const TableCollection = <
 
               return (
                 <TableFooter>
-                  {summaryData && (
+                  {summaryData ? (
                     <TableRow
                       className={cn(
                         summaryData.sticky &&
@@ -1018,18 +1048,18 @@ export const TableCollection = <
                         "font-medium"
                       )}
                     >
-                      {source.selectable && (
+                      {source.selectable ? (
                         <TableCell
                           width={checkColumnWidth}
                           sticky={{ left: 0 }}
                         >
-                          {summaryData.label && (
+                          {summaryData.label ? (
                             <div className="font-medium text-f1-foreground-secondary">
                               {summaryData.label}
                             </div>
-                          )}
+                          ) : null}
                         </TableCell>
-                      )}
+                      ) : null}
                       {columns.map((column, cellIndex) => (
                         <TableCell
                           key={`summary-${String(column.label)}`}
@@ -1101,8 +1131,8 @@ export const TableCollection = <
                           )}
                         </TableCell>
                       ))}
-                      {showItemActions &&
-                        (isEditableTable ? (
+                      {showItemActions ? (
+                        isEditableTable ? (
                           <TableCell
                             key="summary-actions"
                             sticky={{ right: 0 }}
@@ -1123,10 +1153,11 @@ export const TableCollection = <
                               {""}
                             </TableCell>
                           </>
-                        ))}
+                        )
+                      ) : null}
                     </TableRow>
-                  )}
-                  {actions.length > 0 && (
+                  ) : null}
+                  {actions.length > 0 ? (
                     <TableRow>
                       <TableCell
                         colSpan={
@@ -1190,7 +1221,7 @@ export const TableCollection = <
                         </div>
                       </TableCell>
                     </TableRow>
-                  )}
+                  ) : null}
                 </TableFooter>
               )
             })()}

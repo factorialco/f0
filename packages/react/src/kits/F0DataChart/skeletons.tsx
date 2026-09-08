@@ -52,7 +52,7 @@ function AxisSkeleton({
         </div>
 
         {/* Legend */}
-        {showLegend && (
+        {showLegend ? (
           <div className="flex items-center justify-center gap-4 pt-3">
             <div className="flex items-center gap-1.5">
               <Skeleton className="size-2.5 rounded-full" />
@@ -63,7 +63,7 @@ function AxisSkeleton({
               <Skeleton className="h-2.5 w-12 rounded-sm" />
             </div>
           </div>
-        )}
+        ) : null}
       </div>
     )
   }
@@ -97,7 +97,7 @@ function AxisSkeleton({
       </div>
 
       {/* Legend */}
-      {showLegend && (
+      {showLegend ? (
         <div className="flex items-center justify-center gap-4 pt-3">
           <div className="flex items-center gap-1.5">
             <Skeleton className="size-2.5 rounded-full" />
@@ -108,7 +108,7 @@ function AxisSkeleton({
             <Skeleton className="h-2.5 w-12 rounded-sm" />
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   )
 }
@@ -294,7 +294,7 @@ export function LineChartSkeleton({
           preserveAspectRatio="none"
           className="h-full w-full"
         >
-          {showArea && (
+          {showArea ? (
             <defs>
               <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
                 <stop
@@ -306,8 +306,8 @@ export function LineChartSkeleton({
                 <stop offset="100%" stopColor="currentColor" stopOpacity="0" />
               </linearGradient>
             </defs>
-          )}
-          {showArea && <path d={fillD} fill={`url(#${gradientId})`} />}
+          ) : null}
+          {showArea ? <path d={fillD} fill={`url(#${gradientId})`} /> : null}
           <path
             d={pathD}
             fill="none"
@@ -318,18 +318,19 @@ export function LineChartSkeleton({
             className="text-f1-foreground-secondary"
           />
         </svg>
-        {showDots &&
-          DOT_POINTS.map(([x, y]) => (
-            <Skeleton
-              key={`${x}-${y}`}
-              className="absolute size-2 rounded-full"
-              style={{
-                left: `${(x / 200) * 100}%`,
-                top: `${(y / 80) * 100}%`,
-                transform: "translate(-50%, -50%)",
-              }}
-            />
-          ))}
+        {showDots
+          ? DOT_POINTS.map(([x, y]) => (
+              <Skeleton
+                key={`${x}-${y}`}
+                className="absolute size-2 rounded-full"
+                style={{
+                  left: `${(x / 200) * 100}%`,
+                  top: `${(y / 80) * 100}%`,
+                  transform: "translate(-50%, -50%)",
+                }}
+              />
+            ))
+          : null}
       </div>
     </AxisSkeleton>
   )
@@ -473,14 +474,14 @@ export function FunnelChartSkeleton({
         </div>
 
         {/* Legend */}
-        {showLegend && (
+        {showLegend ? (
           <div className="flex items-center justify-center gap-4 pt-1.5">
             <div className="flex items-center gap-1.5">
               <Skeleton className="size-2.5 rounded-full" />
               <Skeleton className="h-2.5 w-14 rounded-sm" />
             </div>
           </div>
-        )}
+        ) : null}
       </div>
     )
   }
@@ -528,14 +529,14 @@ export function FunnelChartSkeleton({
       </div>
 
       {/* Legend */}
-      {showLegend && (
+      {showLegend ? (
         <div className="flex items-center justify-center gap-4 pt-1.5">
           <div className="flex items-center gap-1.5">
             <Skeleton className="size-2.5 rounded-full" />
             <Skeleton className="h-2.5 w-14 rounded-sm" />
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   )
 }
@@ -616,14 +617,14 @@ export function PieChartSkeleton({
             className="text-f1-background"
           />
           {/* Inner circle for donut */}
-          {innerR > 0 && (
+          {innerR > 0 ? (
             <circle cx="50" cy="50" r={innerR} className="fill-f1-background" />
-          )}
+          ) : null}
         </svg>
       </div>
 
       {/* Legend */}
-      {showLegend && (
+      {showLegend ? (
         <div className="flex items-center justify-center gap-4 pt-3">
           <div className="flex items-center gap-1.5">
             <Skeleton className="size-2.5 rounded-full" />
@@ -638,7 +639,7 @@ export function PieChartSkeleton({
             <Skeleton className="h-2.5 w-8 rounded-sm" />
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   )
 }
@@ -728,7 +729,7 @@ export function RadarChartSkeleton({
       </div>
 
       {/* Legend */}
-      {showLegend && (
+      {showLegend ? (
         <div className="flex items-center justify-center gap-4 pt-3">
           <div className="flex items-center gap-1.5">
             <Skeleton className="size-2.5 rounded-full" />
@@ -739,7 +740,7 @@ export function RadarChartSkeleton({
             <Skeleton className="h-2.5 w-12 rounded-sm" />
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

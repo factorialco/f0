@@ -450,56 +450,57 @@ export const CardCollection = <
           </CardGrid>
         ) : (
           <>
-            {data?.type === "grouped" &&
-              data.groups.map((group) => {
-                return (
-                  <>
-                    <GroupHeader
-                      label={group.label}
-                      itemCount={group.itemCount}
-                      onOpenChange={(open) => setGroupOpen(group.key, open)}
-                      open={openGroups[group.key]}
-                      selectable={!!source.selectable}
-                      showOpenChange={collapsible}
-                      select={
-                        groupAllSelectedStatus[group.key]?.checked
-                          ? true
-                          : groupAllSelectedStatus[group.key]?.indeterminate
-                            ? "indeterminate"
-                            : false
-                      }
-                      onSelectChange={(checked) =>
-                        handleSelectGroupChange(group, checked)
-                      }
-                      className="px-page pb-2 pt-4"
-                    />
-                    <AnimatePresence>
-                      {(!collapsible || openGroups[group.key]) && (
-                        <GroupCards
-                          key={group.key}
-                          source={source}
-                          items={group.records}
-                          selectedItems={selectedItems}
-                          handleSelectItemChange={handleSelectItemChange}
-                          title={title}
-                          cardProperties={cardProperties}
-                          description={description}
-                          avatar={avatar}
-                          image={image}
-                          imageFit={imageFit}
-                          imageSize={imageSize}
-                          imageAspectRatio={imageAspectRatio}
-                          blurredBackground={blurredBackground}
-                          compact={compact}
-                          tmpFullWidth={tmpFullWidth}
-                        />
-                      )}
-                    </AnimatePresence>
-                  </>
-                )
-              })}
+            {data?.type === "grouped"
+              ? data.groups.map((group) => {
+                  return (
+                    <>
+                      <GroupHeader
+                        label={group.label}
+                        itemCount={group.itemCount}
+                        onOpenChange={(open) => setGroupOpen(group.key, open)}
+                        open={openGroups[group.key]}
+                        selectable={!!source.selectable}
+                        showOpenChange={collapsible}
+                        select={
+                          groupAllSelectedStatus[group.key]?.checked
+                            ? true
+                            : groupAllSelectedStatus[group.key]?.indeterminate
+                              ? "indeterminate"
+                              : false
+                        }
+                        onSelectChange={(checked) =>
+                          handleSelectGroupChange(group, checked)
+                        }
+                        className="px-page pb-2 pt-4"
+                      />
+                      <AnimatePresence>
+                        {!collapsible || openGroups[group.key] ? (
+                          <GroupCards
+                            key={group.key}
+                            source={source}
+                            items={group.records}
+                            selectedItems={selectedItems}
+                            handleSelectItemChange={handleSelectItemChange}
+                            title={title}
+                            cardProperties={cardProperties}
+                            description={description}
+                            avatar={avatar}
+                            image={image}
+                            imageFit={imageFit}
+                            imageSize={imageSize}
+                            imageAspectRatio={imageAspectRatio}
+                            blurredBackground={blurredBackground}
+                            compact={compact}
+                            tmpFullWidth={tmpFullWidth}
+                          />
+                        ) : null}
+                      </AnimatePresence>
+                    </>
+                  )
+                })
+              : null}
 
-            {data?.type === "flat" && (
+            {data?.type === "flat" ? (
               <GroupCards
                 source={source}
                 items={data.records}
@@ -517,7 +518,7 @@ export const CardCollection = <
                 compact={compact}
                 tmpFullWidth={tmpFullWidth}
               />
-            )}
+            ) : null}
           </>
         )}
       </div>

@@ -123,20 +123,20 @@ export const TranscriptView: React.FC<NodeViewProps> = ({
           </div>
         </div>
 
-        {isOpen && (
+        {isOpen ? (
           <div className="scrollbar-macos text-f1-text-primary flex max-h-[500px] flex-col gap-4 overflow-y-auto">
             {data.messages.map((message, index) => {
               const user = getUserById(message.userId)
               return (
                 <div key={index} className="flex flex-row gap-3">
-                  {user?.imageUrl && (
+                  {user?.imageUrl ? (
                     <F0AvatarPerson
                       size="xs"
                       src={user.imageUrl}
                       firstName={user.fullname}
                       lastName={""}
                     />
-                  )}
+                  ) : null}
                   <div className="flex flex-col">
                     <div className="flex items-baseline gap-2">
                       <span className="text-f1-text-primary font-medium">
@@ -152,7 +152,7 @@ export const TranscriptView: React.FC<NodeViewProps> = ({
               )
             })}
           </div>
-        )}
+        ) : null}
       </div>
       <NodeViewContent style={{ display: "none" }} />
     </NodeViewWrapper>

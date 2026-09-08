@@ -95,11 +95,13 @@ export const F0GraphNodeStackedRow = ({
             className="shrink-0 rounded-full"
             style={{ width: STACKED_NODE_AVATAR, height: STACKED_NODE_AVATAR }}
           />
-          {titleType && <Skeleton className="h-3 w-24 flex-1 rounded-xs" />}
+          {titleType ? (
+            <Skeleton className="h-3 w-24 flex-1 rounded-xs" />
+          ) : null}
         </>
       ) : (
         <>
-          {avatar && (
+          {avatar ? (
             <div
               className={cn(
                 "flex shrink-0 items-center justify-center",
@@ -120,23 +122,23 @@ export const F0GraphNodeStackedRow = ({
             >
               <F0Avatar size="md" avatar={avatar} />
             </div>
-          )}
+          ) : null}
           {/* Dropped entirely at dot zoom rather than faded: the card has no
               text there either, and a row that keeps it would be the only
               legible label on a canvas of dots. */}
-          {titleType && (
+          {titleType ? (
             <p
               className="min-w-0 flex-1 truncate font-medium tracking-[-0.07px] text-f1-foreground"
               style={titleType}
             >
               {title}
             </p>
-          )}
+          ) : null}
         </>
       )}
       {/* Trailing content follows the title: it is a detail-level affordance,
           and at dot zoom there is no text for it to sit beside. */}
-      {trailing && titleType && (
+      {trailing && titleType ? (
         // Its own affordance: clicking a small action must not also select and
         // fly to the node. Two paths would select it — the row's `onClick`,
         // stopped here, and the canvas `pointerup` handler, which fires
@@ -148,7 +150,7 @@ export const F0GraphNodeStackedRow = ({
         >
           {trailing}
         </div>
-      )}
+      ) : null}
     </div>
   )
 

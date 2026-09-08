@@ -60,7 +60,7 @@ export const F0SegmentedControl = ({
             fullWidth && "w-full"
           )}
         >
-          {item.icon && <F0Icon icon={item.icon} size="md" />}
+          {item.icon ? <F0Icon icon={item.icon} size="md" /> : null}
           {hideLabels && item.icon ? (
             <span className="sr-only">{item.label}</span>
           ) : (

@@ -80,19 +80,19 @@ const DocxViewer = ({
         zoom={zoom}
       />
       <div className="relative min-h-0 grow overflow-auto bg-f1-background-secondary">
-        {state === "loading" && (
+        {state === "loading" ? (
           <Skeleton
             role="status"
             aria-busy={true}
             aria-label={i18n.pdfViewer.loading}
             className="absolute inset-0 h-full w-full rounded-none"
           />
-        )}
-        {state === "failed" && (
+        ) : null}
+        {state === "failed" ? (
           <div className="flex h-full w-full items-center justify-center bg-f1-background text-f1-foreground-secondary">
             {i18n.pdfViewer.previewFailed}
           </div>
-        )}
+        ) : null}
         {/* Always mounted: the render effect writes into it across url changes.
             CSS zoom reflows, so the scroll container tracks the zoomed pages. */}
         <div

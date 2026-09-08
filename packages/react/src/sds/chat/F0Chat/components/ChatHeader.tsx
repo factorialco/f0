@@ -124,12 +124,12 @@ export const ChatHeader = ({
         ) : (
           <F0Avatar size="sm" avatar={channel.avatar} />
         )}
-        {showPresence && (
+        {showPresence ? (
           <PresenceDot
             online={channel.presence === "online"}
             label={i18n.chat.online}
           />
-        )}
+        ) : null}
       </div>
       <span className="truncate text-base font-medium text-f1-foreground">
         {channel.title}
@@ -176,7 +176,7 @@ export const ChatHeader = ({
             ))}
             {/* Search + the host's menu actions live behind the ellipsis menu,
                 which only exists while it holds something. */}
-            {menuItems.length > 0 && (
+            {menuItems.length > 0 ? (
               <Dropdown items={menuItems} align="end" label={i18n.chat.options}>
                 <ButtonInternal
                   variant="ghost"
@@ -185,8 +185,8 @@ export const ChatHeader = ({
                   icon={Ellipsis}
                 />
               </Dropdown>
-            )}
-            {onToggleFullscreen && !isSmallScreen && (
+            ) : null}
+            {onToggleFullscreen && !isSmallScreen ? (
               <ButtonInternal
                 variant="ghost"
                 hideLabel
@@ -196,8 +196,8 @@ export const ChatHeader = ({
                 icon={isFullscreen ? Minimize : Maximize}
                 onClick={onToggleFullscreen}
               />
-            )}
-            {onClose && (
+            ) : null}
+            {onClose ? (
               <ButtonInternal
                 variant="ghost"
                 hideLabel
@@ -205,7 +205,7 @@ export const ChatHeader = ({
                 icon={Cross}
                 onClick={onClose}
               />
-            )}
+            ) : null}
           </div>
         </>
       )}

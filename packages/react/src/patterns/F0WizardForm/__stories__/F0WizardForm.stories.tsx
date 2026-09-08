@@ -218,9 +218,9 @@ function OpenFormWizardStory() {
     >
       <div className="flex flex-1 flex-col items-center justify-center gap-3">
         <F0Button label="Open wizard" onClick={handleOpen} />
-        {lastResult && (
+        {lastResult ? (
           <p className="text-f1-foreground-secondary">{lastResult}</p>
-        )}
+        ) : null}
       </div>
     </ApplicationFrame>
   )

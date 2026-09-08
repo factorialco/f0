@@ -173,7 +173,9 @@ const ChatMessageRowRendererComponent = ({
     const showFooterGutter = isGroup && !row.message.isMine
     return (
       <div className={cn("flex w-full gap-1.5", spacing)}>
-        {showFooterGutter && <span aria-hidden className="size-5 shrink-0" />}
+        {showFooterGutter ? (
+          <span aria-hidden className="size-5 shrink-0" />
+        ) : null}
         <div className="min-w-0 flex-1">
           <MessageStatus message={row.message} isGroup={isGroup} />
         </div>

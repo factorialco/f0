@@ -160,7 +160,7 @@ export const F0AiChatHeader = ({
         )}
       >
         <div className="flex min-w-0 flex-1 items-center">
-          {!lockVisualizationMode && (
+          {!lockVisualizationMode ? (
             <Action
               variant="ghost"
               size="md"
@@ -174,7 +174,7 @@ export const F0AiChatHeader = ({
                 <F0Icon icon={ChevronDown} color="default" size="md" />
               </div>
             </Action>
-          )}
+          ) : null}
         </div>
         <motion.div
           className="flex shrink-0 items-center"
@@ -211,7 +211,7 @@ export const F0AiChatHeader = ({
           ease: "easeOut",
         }}
       >
-        {hasMessages && !lockVisualizationMode && (
+        {hasMessages && !lockVisualizationMode ? (
           <ButtonInternal
             variant="ghost"
             hideLabel
@@ -219,7 +219,7 @@ export const F0AiChatHeader = ({
             icon={New}
             onClick={onNewChat}
           />
-        )}
+        ) : null}
         <CreditsPopoverPicker
           credits={credits}
           employeeCredits={employeeCredits}

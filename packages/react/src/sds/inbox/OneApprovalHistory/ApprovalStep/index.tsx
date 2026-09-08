@@ -123,11 +123,11 @@ const ApprovalStep: FC<ApprovalStepProps> = ({
       <div className="w-full">
         <F0AvatarList avatars={avatars} layout="fill" type="person" size="md" />
       </div>
-      {approvalDate && (
+      {approvalDate ? (
         <p className="text-sm text-f1-foreground-secondary">
           {format(approvalDate, "PP", { locale })}
         </p>
-      )}
+      ) : null}
     </div>
   )
 }

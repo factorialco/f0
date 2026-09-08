@@ -27,11 +27,13 @@ vi.mock("@/ui/Action", () => ({
         data-tooltip={tooltip ? JSON.stringify(tooltip) : undefined}
         {...props}
       >
-        {prepend && <div data-testid="action-prepend">{prepend}</div>}
+        {prepend ? <div data-testid="action-prepend">{prepend}</div> : null}
         <span data-testid="action-label">{children}</span>
-        {append && <div data-testid="action-append-inline">{append}</div>}
+        {append ? <div data-testid="action-append-inline">{append}</div> : null}
       </button>
-      {appendOutside && <div data-testid="action-append">{appendOutside}</div>}
+      {appendOutside ? (
+        <div data-testid="action-append">{appendOutside}</div>
+      ) : null}
     </>
   ),
 }))

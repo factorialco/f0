@@ -79,9 +79,12 @@ const _UpsellingBanner = forwardRef<HTMLDivElement, UpsellingBannerProps>(
         primaryAction={basePrimaryAction}
         secondaryAction={baseSecondaryAction}
       >
-        {primaryAction?.variant === "promote" && renderAction(primaryAction)}
-        {secondaryAction?.variant === "promote" &&
-          renderAction(secondaryAction)}
+        {primaryAction?.variant === "promote"
+          ? renderAction(primaryAction)
+          : null}
+        {secondaryAction?.variant === "promote"
+          ? renderAction(secondaryAction)
+          : null}
       </BaseBanner>
     )
   }

@@ -83,7 +83,7 @@ export const DocumentToolbar = ({
       <div className="flex min-w-0 flex-1 basis-0 flex-row items-center gap-2 overflow-x-auto">
         {children}
       </div>
-      {zoom && (
+      {zoom ? (
         <div className="flex shrink-0 flex-row items-center gap-2">
           <ToolbarButton
             label={pdfViewer.zoomOut}
@@ -103,7 +103,7 @@ export const DocumentToolbar = ({
             onChange={(value: FixedScale) => zoom.setScale(Number(value))}
           />
         </div>
-      )}
+      ) : null}
       <div className="flex flex-1 basis-0 flex-row items-center justify-end gap-2">
         <ToolbarButton
           label={pdfViewer.download}

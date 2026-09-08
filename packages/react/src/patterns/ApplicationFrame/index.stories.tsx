@@ -1392,9 +1392,9 @@ const ConversationsSidebarInner = ({
           />
           {/* Search lives with the tabs in the (fixed) header so it stays put
               while the body scrolls. Only the Home tab uses it. */}
-          {tab === "home" && (
+          {tab === "home" ? (
             <SearchBar placeholder="Search..." onClick={() => {}} />
-          )}
+          ) : null}
         </>
       }
       body={

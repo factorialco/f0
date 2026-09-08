@@ -108,17 +108,17 @@ export const Block = forwardRef<HTMLDivElement, BlockProps>(
         data-drag-id={dragId}
         {...props}
       >
-        {showActionsBar && (
+        {showActionsBar ? (
           <div className="absolute right-0 top-0 flex items-center justify-end gap-2 p-4">
-            {!!primaryAction && primaryAction}
-            {actionsDropdownItems.length > 0 && (
+            {primaryAction ? primaryAction : null}
+            {actionsDropdownItems.length > 0 ? (
               <Dropdown
                 items={actionsToLayoutBlockActionItems(actions)}
                 data-testid="actions-dropdown"
               />
-            )}
+            ) : null}
           </div>
-        )}
+        ) : null}
         <div data-testid="content">{children}</div>
       </div>
     )

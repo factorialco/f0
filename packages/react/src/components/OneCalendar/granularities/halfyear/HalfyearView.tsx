@@ -236,14 +236,14 @@ export const HalfYearView = ({
                         "rounded-none bg-f1-background-selected after:opacity-0 after:transition-none first:rounded-l-md last:rounded-r-md hover:bg-f1-background-selected [&>span]:text-f1-foreground-selected"
                     )}
                   >
-                    {isStart && (
+                    {isStart ? (
                       <div className="absolute inset-y-0 right-0 z-0 w-1/2 bg-f1-background-selected" />
-                    )}
-                    {isEnd && (
+                    ) : null}
+                    {isEnd ? (
                       <div className="absolute inset-y-0 left-0 z-0 w-1/2 bg-f1-background-selected" />
-                    )}
+                    ) : null}
                     <span className="z-10 font-medium">H{halfYear}</span>
-                    {isCurrent && (
+                    {isCurrent ? (
                       <div
                         className={cn(
                           "absolute inset-x-0 bottom-1 z-20 mx-auto h-0.5 w-1.5 rounded-full bg-f1-background-selected-bold transition-colors duration-100",
@@ -256,7 +256,7 @@ export const HalfYearView = ({
                             "bg-f1-background-selected-bold"
                         )}
                       />
-                    )}
+                    ) : null}
                   </button>
                 )
               })}

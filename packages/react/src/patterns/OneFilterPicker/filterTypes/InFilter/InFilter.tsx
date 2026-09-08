@@ -296,7 +296,7 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
       role="group"
       aria-label={schema.label}
     >
-      {showSearch && (
+      {showSearch ? (
         <div className="rounded-tr-xl p-2">
           <F0SearchInput
             placeholder={i18n.filters.inFilter.searchPlaceholder}
@@ -305,7 +305,7 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
             clearable
           />
         </div>
-      )}
+      ) : null}
       <div
         className={cn(
           "flex w-full items-center justify-between gap-1 pb-1",
@@ -335,11 +335,11 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
         onScrollBottom={handleScrollBottom}
         scrollMargin={50}
       >
-        {filteredOptions.length === 0 && !isLoading && (
+        {filteredOptions.length === 0 && !isLoading ? (
           <div className="flex w-full items-center justify-center py-4 text-sm text-f1-foreground-secondary">
             {i18n.select.noResults}
           </div>
-        )}
+        ) : null}
         {hasAnyChildren
           ? filteredOptions.map((option) => (
               <InFilterOptionRow
@@ -365,11 +365,11 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
                 isCompactMode={isCompactMode}
               />
             ))}
-        {isLoading && (
+        {isLoading ? (
           <div className="flex w-full items-center justify-center py-4">
             <Spinner size="small" />
           </div>
-        )}
+        ) : null}
       </ScrollArea>
     </div>
   )

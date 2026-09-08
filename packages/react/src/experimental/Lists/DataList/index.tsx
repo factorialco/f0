@@ -34,7 +34,7 @@ const _DataList = forwardRef<HTMLUListElement, DataListProps>(
             : "min-w-32"
         )}
       >
-        {label && (
+        {label ? (
           <p
             className={cn(
               "px-1.5 text-f1-foreground-secondary",
@@ -43,7 +43,7 @@ const _DataList = forwardRef<HTMLUListElement, DataListProps>(
           >
             {label}
           </p>
-        )}
+        ) : null}
         <ul className="flex flex-col justify-center gap-0.5" ref={ref}>
           {children}
         </ul>

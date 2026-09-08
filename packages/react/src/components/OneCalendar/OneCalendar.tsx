@@ -327,7 +327,7 @@ const OneCalendarInternal = ({
 
   return (
     <div className="flex flex-col">
-      {showInput && !granularity.hideDateInput && (
+      {showInput && !granularity.hideDateInput ? (
         <div className="mb-2 flex gap-2">
           <Input
             label={i18n.date.from}
@@ -347,7 +347,7 @@ const OneCalendarInternal = ({
             }}
             onChange={(value) => setInputValue({ ...inputValue, from: value })}
           />
-          {mode === "range" && (
+          {mode === "range" ? (
             <Input
               label={i18n.date.to}
               hideLabel
@@ -366,10 +366,10 @@ const OneCalendarInternal = ({
               }}
               onChange={(value) => setInputValue({ ...inputValue, to: value })}
             />
-          )}
+          ) : null}
         </div>
-      )}
-      {showNavigation && (
+      ) : null}
+      {showNavigation ? (
         <div
           className={cn(
             "flex items-center justify-between",
@@ -417,7 +417,7 @@ const OneCalendarInternal = ({
             />
           </div>
         </div>
-      )}
+      ) : null}
       <div className="relative">
         {granularity.render({
           mode,

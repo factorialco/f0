@@ -123,7 +123,7 @@ const TabButton = ({
           Toggled (no fade) so it appears/disappears directly — shown only once
           the pill has settled (see `showAura`) so it never flashes mid-transition.
           The slower spin comes from the inline animation-duration (keyframe is 2s). */}
-      {showAura && (
+      {showAura ? (
         <span
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 rounded"
@@ -134,16 +134,16 @@ const TabButton = ({
           />
           <span className="absolute inset-0 rounded bg-f1-background" />
         </span>
-      )}
+      ) : null}
       {/* The sliding active background — one element shared across tabs. */}
-      {isActive && (
+      {isActive ? (
         <motion.span
           layoutId="sidebar-tab-active-pill"
           transition={transition}
           aria-hidden="true"
           className="absolute inset-0 rounded bg-f1-background-inverse-secondary ring-1 ring-inset ring-f1-border dark:bg-f1-background"
         />
-      )}
+      ) : null}
       <div className="main flex h-8 min-w-0 items-center justify-center">
         {/* Icon inherits the span's colour (F0Icon ignores a passed className),
             so an inactive tab only darkens its icon on hover — no background. */}
@@ -180,7 +180,7 @@ const TabButton = ({
         </span>
       </div>
 
-      {tab.badge && <UnreadDot />}
+      {tab.badge ? <UnreadDot /> : null}
     </button>
   )
 }

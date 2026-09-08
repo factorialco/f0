@@ -104,7 +104,7 @@ function renderTOCItem(
   return (
     <>
       {/* Placeholder before item — instant, pointer-events-none to avoid layout thrashing */}
-      {showPlaceholderBefore && (
+      {showPlaceholderBefore ? (
         <div
           className={cn(
             "pointer-events-none h-10 rounded border-2 border-dashed border-f1-border-secondary bg-f1-background-hover/40",
@@ -112,7 +112,7 @@ function renderTOCItem(
             "mb-0.5"
           )}
         />
-      )}
+      ) : null}
       {Component === Item ? (
         <Item
           key={item.id}
@@ -149,7 +149,7 @@ function renderTOCItem(
           currentParentId={currentParentId}
           draggedItemId={draggedItemId}
         >
-          {item.children && (Component === ItemSectionHeader || isExpanded) && (
+          {item.children && (Component === ItemSectionHeader || isExpanded) ? (
             <div
               className={cn(
                 "flex flex-col",
@@ -185,21 +185,21 @@ function renderTOCItem(
               })}
               {/* Placeholder when dragging inside and section is empty or collapsed */}
               {isDragOver &&
-                dragOverPosition === "inside" &&
-                canDropInside &&
-                (!isExpanded || item.children.length === 0) && (
-                  <div className="flex h-9 items-center justify-center rounded-md bg-f1-background-hover/30 text-xs text-f1-foreground-secondary">
-                    Drop here
-                  </div>
-                )}
+              dragOverPosition === "inside" &&
+              canDropInside &&
+              (!isExpanded || item.children.length === 0) ? (
+                <div className="flex h-9 items-center justify-center rounded-md bg-f1-background-hover/30 text-xs text-f1-foreground-secondary">
+                  Drop here
+                </div>
+              ) : null}
             </div>
-          )}
+          ) : null}
         </Component>
       )}
       {/* Placeholder after item — instant, pointer-events-none to avoid layout thrashing */}
-      {showPlaceholderAfter && (
+      {showPlaceholderAfter ? (
         <div className="pointer-events-none my-0.5 h-10 rounded border-2 border-dashed border-f1-border-secondary bg-f1-background-hover/40" />
-      )}
+      ) : null}
     </>
   )
 }
@@ -897,9 +897,9 @@ function TOCContent({
       aria-label={title}
       ref={containerRef}
     >
-      {(title || showSearchBox) && (
+      {title || showSearchBox ? (
         <div className="shrink-0 bg-f1-background pb-2 pl-5 pr-4 pt-5">
-          {showSearchBox && (
+          {showSearchBox ? (
             <div className="mb-4">
               <F0SearchInput
                 placeholder={searchPlaceholder ?? i18n.toc.search}
@@ -908,9 +908,9 @@ function TOCContent({
                 clearable
               />
             </div>
-          )}
+          ) : null}
 
-          {title && (
+          {title ? (
             <OneEllipsis
               lines={1}
               tag="h2"
@@ -918,9 +918,9 @@ function TOCContent({
             >
               {title}
             </OneEllipsis>
-          )}
+          ) : null}
         </div>
-      )}
+      ) : null}
       {(() => {
         const displayItems = sortable ? filteredSortableItems : filteredItems
         const firstItem = displayItems[0]
@@ -929,7 +929,7 @@ function TOCContent({
 
         const listContent = (
           <>
-            {sortable && firstItem && (
+            {sortable && firstItem ? (
               <EdgeDropZone
                 targetItemId={firstItem.id}
                 position="before"
@@ -938,7 +938,7 @@ function TOCContent({
                 onDrop={handleDrop}
                 visible={hasDrag}
               />
-            )}
+            ) : null}
             {displayItems.map((item) =>
               renderTOCItem(
                 item,
@@ -962,7 +962,7 @@ function TOCContent({
                 justDroppedItemId
               )
             )}
-            {sortable && lastItem && (
+            {sortable && lastItem ? (
               <EdgeDropZone
                 targetItemId={lastItem.id}
                 position="after"
@@ -971,7 +971,7 @@ function TOCContent({
                 onDrop={handleDrop}
                 visible={hasDrag}
               />
-            )}
+            ) : null}
           </>
         )
 

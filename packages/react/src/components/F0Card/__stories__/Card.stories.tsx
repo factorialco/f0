@@ -783,14 +783,14 @@ export const WithDismissibleAlert: Story = {
             onDismiss: () => setVisible(false),
           }}
         />
-        {!visible && (
+        {!visible ? (
           <button
             className="self-start text-sm text-f1-foreground-secondary underline"
             onClick={() => setVisible(true)}
           >
             Restore alert
           </button>
-        )}
+        ) : null}
       </div>
     )
   },
@@ -816,7 +816,7 @@ export const WithAlertAction: Story = {
             },
           }}
         />
-        {actioned && (
+        {actioned ? (
           <button
             type="button"
             className="self-start text-sm text-f1-foreground-secondary underline"
@@ -824,7 +824,7 @@ export const WithAlertAction: Story = {
           >
             Reset action
           </button>
-        )}
+        ) : null}
       </div>
     )
   },

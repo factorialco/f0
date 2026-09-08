@@ -39,36 +39,38 @@ export const ChatViewportOverlays = ({
   return (
     <>
       <AnimatePresence>
-        {!atTop && <ScrollShadow position="top" key="chat-header-shadow" />}
+        {!atTop ? (
+          <ScrollShadow position="top" key="chat-header-shadow" />
+        ) : null}
       </AnimatePresence>
 
       <AnimatePresence>
         {scrolledUp &&
-          (!atTop || hasMoreOlder || loadingOlder) &&
-          stickyDate && (
-            <motion.div
-              className="pointer-events-none absolute inset-x-0 top-2 flex justify-center"
-              initial={{ opacity: 0, y: -4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: transitionDuration }}
+        (!atTop || hasMoreOlder || loadingOlder) &&
+        stickyDate ? (
+          <motion.div
+            className="pointer-events-none absolute inset-x-0 top-2 flex justify-center"
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: transitionDuration }}
+          >
+            <div
+              className="z-50"
+              aria-label={loadingOlder ? i18n.chat.loadingOlder : undefined}
             >
-              <div
-                className="z-50"
-                aria-label={loadingOlder ? i18n.chat.loadingOlder : undefined}
-              >
-                <DateTimeSeparator
-                  at={stickyDate}
-                  withTime
-                  loading={loadingOlder}
-                />
-              </div>
-            </motion.div>
-          )}
+              <DateTimeSeparator
+                at={stickyDate}
+                withTime
+                loading={loadingOlder}
+              />
+            </div>
+          </motion.div>
+        ) : null}
       </AnimatePresence>
 
       <AnimatePresence>
-        {showJumpButton && (
+        {showJumpButton ? (
           <motion.div
             data-testid="chat-jump-overlay"
             className="pointer-events-none absolute inset-x-0 flex justify-center"
@@ -116,7 +118,7 @@ export const ChatViewportOverlays = ({
               />
             </motion.div>
           </motion.div>
-        )}
+        ) : null}
       </AnimatePresence>
     </>
   )

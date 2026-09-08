@@ -173,12 +173,12 @@ const _Carousel = ({
               )
             })}
           </CarouselContent>
-          {showArrows && !inRow && (
+          {showArrows && !inRow ? (
             <>
               <CarouselPrevious label={arrowLabels?.previous ?? "Previous"} />
               <CarouselNext label={arrowLabels?.next ?? "Next"} />
             </>
-          )}
+          ) : null}
         </div>
         {inRow ? (
           <CarouselControls labels={arrowLabels} showDots={showDots} />

@@ -248,11 +248,11 @@ const FiltersControls = () => {
         mode={mode}
         displayCounter={displayCounter}
       />
-      {!!presets?.length && (
+      {presets?.length ? (
         <div className="flex items-center">
           <div className="mx-2 h-4 w-px bg-f1-background-secondary-hover" />
         </div>
-      )}
+      ) : null}
     </>
   )
 }
@@ -386,21 +386,21 @@ const _OneFilterPicker = <Definition extends FiltersDefinition>(
             !rootProps.filters && "justify-end"
           )}
         >
-          {rootProps.filters && (
+          {rootProps.filters ? (
             <div className="flex min-w-0 flex-1 gap-1">
               <FiltersControls />
               <FiltersPresets />
             </div>
-          )}
-          {rootProps.children && (
+          ) : null}
+          {rootProps.children ? (
             <div className="flex shrink-0 items-center gap-2">
               {rootProps.children}
             </div>
-          )}
+          ) : null}
         </div>
-        {(!rootProps.mode || rootProps.mode === "default") && (
+        {!rootProps.mode || rootProps.mode === "default" ? (
           <FiltersChipsList />
-        )}
+        ) : null}
       </FiltersRoot>
     </DataTestIdWrapper>
   )

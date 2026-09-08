@@ -65,10 +65,10 @@ function _DaytimePage({
       } bg-f1-special-page shadow`}
     >
       <div className={daytimePageVariants({ period })} />
-      {header && (
+      {header ? (
         <div className="flex flex-row items-center justify-between pr-6 @container">
           <div className="flex flex-row items-center gap-2 px-5 py-4 @5xl:px-page">
-            {(isSmallScreen || sidebarState === "hidden") && (
+            {isSmallScreen || sidebarState === "hidden" ? (
               <F0Button
                 variant="ghost"
                 onClick={() => toggleSidebar()}
@@ -76,7 +76,7 @@ function _DaytimePage({
                 icon={Menu}
                 hideLabel
               />
-            )}
+            ) : null}
             <div
               className={cn(
                 "flex flex-row items-center",
@@ -115,7 +115,7 @@ function _DaytimePage({
                   {header.title}
                 </p>
 
-                {header.description && (
+                {header.description ? (
                   <p
                     className={cn(
                       isSmallScreen ? "text-md" : "text-lg",
@@ -124,16 +124,16 @@ function _DaytimePage({
                   >
                     {header.description}
                   </p>
-                )}
+                ) : null}
               </div>
             </div>
           </div>
           <div>
-            {!hideOneSwitch && <F0OneSwitch />}
+            {!hideOneSwitch ? <F0OneSwitch /> : null}
             <OnePromotionSwitch />
           </div>
         </div>
-      )}
+      ) : null}
       <div
         className={cn(
           "isolate flex w-full flex-1 flex-col overflow-y-auto overflow-x-hidden [&>*]:flex-1",

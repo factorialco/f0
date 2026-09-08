@@ -84,9 +84,9 @@ export function F0AvatarModule({
         </defs>
         <path d={squirclePath} fill={`url(#${gradientId})`} />
       </svg>
-      {IconComponent && (
+      {IconComponent ? (
         <IconComponent className={iconSizeVariants({ size })} />
-      )}
+      ) : null}
     </div>
   )
 }

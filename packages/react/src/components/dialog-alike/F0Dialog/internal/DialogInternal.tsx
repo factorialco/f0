@@ -35,7 +35,7 @@ export const DialogInternal: FC<DialogInternalProps> = ({
   const _memoizedDialogLayout = useMemo(() => {
     return (
       <>
-        {variant !== "notification" && (
+        {variant !== "notification" ? (
           <Header
             title={title}
             description={description}
@@ -46,7 +46,7 @@ export const DialogInternal: FC<DialogInternalProps> = ({
             setActiveTabId={setActiveTabId}
             disableClose={disableClose}
           />
-        )}
+        ) : null}
         <Content disableContentPadding={disableContentPadding ?? false}>
           {children}
         </Content>

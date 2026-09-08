@@ -1212,7 +1212,7 @@ const F0SelectComponent = forwardRef(function Select<
             onFiltersOpenChange={setIsFiltersOpen}
             showPreview={showPreview}
           />
-          {multiple && !currentSearch && !isFiltersOpen && (
+          {multiple && !currentSearch && !isFiltersOpen ? (
             <SelectAll
               selectedCount={selectionMeta.selectedItemsCount}
               indeterminate={
@@ -1226,7 +1226,7 @@ const F0SelectComponent = forwardRef(function Select<
               items={getDisplayItemsForSelection}
               paddingTop={!showSearchBox && !localSource.filters}
             />
-          )}
+          ) : null}
         </>
       }
       right={
@@ -1315,7 +1315,7 @@ const F0SelectComponent = forwardRef(function Select<
             disabled && "cursor-not-allowed opacity-50"
           )}
         >
-          {label && !hideLabel && (
+          {label && !hideLabel ? (
             <Label
               label={label}
               required={required}
@@ -1323,7 +1323,7 @@ const F0SelectComponent = forwardRef(function Select<
               icon={labelIcon}
               disabled={disabled}
             />
-          )}
+          ) : null}
           {/* Select Container */}
           <div
             className={cn(
@@ -1431,10 +1431,12 @@ const F0SelectComponent = forwardRef(function Select<
                   e.preventDefault()
                 }}
               >
-                {(multiple
-                  ? localValue.length > 0 ||
-                    selectionMeta.selectedItemsCount > 0
-                  : !!localValue[0]) && (
+                {(
+                  multiple
+                    ? localValue.length > 0 ||
+                      selectionMeta.selectedItemsCount > 0
+                    : !!localValue[0]
+                ) ? (
                   <SelectedItems
                     multiple={multiple}
                     totalSelectedCount={
@@ -1455,13 +1457,13 @@ const F0SelectComponent = forwardRef(function Select<
                     // their icons for the rows regardless.
                     hideItemIcon={!!icon}
                   />
-                )}
+                ) : null}
               </button>
             </F0InputField>
           )}
         </SelectTrigger>
       )}
-      {openLocal && selectContent}
+      {openLocal ? selectContent : null}
     </SelectPrimitive>
   )
 

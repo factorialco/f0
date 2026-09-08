@@ -203,7 +203,7 @@ export function YearView({
               )}
             >
               <span>{year}</span>
-              {isCurrent && (
+              {isCurrent ? (
                 <div
                   className={cn(
                     "absolute inset-x-0 bottom-1 z-20 mx-auto h-0.5 w-1.5 rounded-full bg-f1-background-selected-bold transition-colors duration-100",
@@ -216,7 +216,7 @@ export function YearView({
                       "bg-f1-background-selected-bold"
                   )}
                 />
-              )}
+              ) : null}
             </button>
           )
         })}

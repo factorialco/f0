@@ -46,57 +46,59 @@ export const F0MapControls = forwardRef<HTMLDivElement, F0MapControlsProps>(
           aria-label={i18n.map.navigation}
           className="flex flex-col items-center gap-2"
         >
-          {hasTopGroup &&
-            card(
-              <>
-                {onFit && (
-                  <F0Button
-                    variant="ghost"
-                    size="md"
-                    label={labels?.fit ?? i18n.map.controls.fit}
-                    icon={FitView}
-                    hideLabel
-                    onClick={onFit}
-                  />
-                )}
-                {onLocate && (
-                  <F0Button
-                    variant="ghost"
-                    size="md"
-                    label={labels?.locate ?? i18n.map.controls.locate}
-                    icon={Target}
-                    hideLabel
-                    onClick={onLocate}
-                  />
-                )}
-              </>
-            )}
+          {hasTopGroup
+            ? card(
+                <>
+                  {onFit ? (
+                    <F0Button
+                      variant="ghost"
+                      size="md"
+                      label={labels?.fit ?? i18n.map.controls.fit}
+                      icon={FitView}
+                      hideLabel
+                      onClick={onFit}
+                    />
+                  ) : null}
+                  {onLocate ? (
+                    <F0Button
+                      variant="ghost"
+                      size="md"
+                      label={labels?.locate ?? i18n.map.controls.locate}
+                      icon={Target}
+                      hideLabel
+                      onClick={onLocate}
+                    />
+                  ) : null}
+                </>
+              )
+            : null}
 
-          {hasZoomGroup &&
-            card(
-              <>
-                {onZoomIn && (
-                  <F0Button
-                    variant="ghost"
-                    size="md"
-                    label={labels?.zoomIn ?? i18n.map.controls.zoomIn}
-                    icon={Add}
-                    hideLabel
-                    onClick={onZoomIn}
-                  />
-                )}
-                {onZoomOut && (
-                  <F0Button
-                    variant="ghost"
-                    size="md"
-                    label={labels?.zoomOut ?? i18n.map.controls.zoomOut}
-                    icon={Minus}
-                    hideLabel
-                    onClick={onZoomOut}
-                  />
-                )}
-              </>
-            )}
+          {hasZoomGroup
+            ? card(
+                <>
+                  {onZoomIn ? (
+                    <F0Button
+                      variant="ghost"
+                      size="md"
+                      label={labels?.zoomIn ?? i18n.map.controls.zoomIn}
+                      icon={Add}
+                      hideLabel
+                      onClick={onZoomIn}
+                    />
+                  ) : null}
+                  {onZoomOut ? (
+                    <F0Button
+                      variant="ghost"
+                      size="md"
+                      label={labels?.zoomOut ?? i18n.map.controls.zoomOut}
+                      icon={Minus}
+                      hideLabel
+                      onClick={onZoomOut}
+                    />
+                  ) : null}
+                </>
+              )
+            : null}
         </div>
       </DataTestIdWrapper>
     )

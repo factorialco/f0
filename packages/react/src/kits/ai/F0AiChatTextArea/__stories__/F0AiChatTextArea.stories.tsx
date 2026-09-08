@@ -434,14 +434,14 @@ const Wrapper = ({
         fullscreen={fullscreen}
         padding={padding}
       />
-      {submissions.length > 0 && (
+      {submissions.length > 0 ? (
         <div className="rounded-md border border-f1-border p-3 text-sm">
           <div className="font-medium pb-2">Last submission</div>
           <pre className="text-xs whitespace-pre-wrap">
             {JSON.stringify(submissions[submissions.length - 1], null, 2)}
           </pre>
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

@@ -280,7 +280,7 @@ export const Search = ({
                   >
                     <IconComponent loading={loading || resultsLoading} />
                   </motion.div>
-                  {value && (
+                  {value ? (
                     <div className="flex h-7 w-full items-center justify-between gap-1.5 overflow-hidden pr-1.5">
                       <motion.div
                         layout
@@ -313,7 +313,7 @@ export const Search = ({
                         />
                       </motion.div>
                     </div>
-                  )}
+                  ) : null}
                 </motion.div>
               </motion.div>
             )}

@@ -45,7 +45,7 @@ export const CreditWarningWrapper = ({
           {config.text}
         </p>
         <div className="flex shrink-0 items-center gap-1">
-          {creditWarning.onGetCredits && (
+          {creditWarning.onGetCredits ? (
             <F0Button
               label={translation.ai.creditWarning.getCredits ?? ""}
               size="sm"
@@ -54,8 +54,8 @@ export const CreditWarningWrapper = ({
               tooltip={translation.ai.creditWarning.getCredits ?? ""}
               onClick={creditWarning.onGetCredits}
             />
-          )}
-          {creditWarning.onDismiss && (
+          ) : null}
+          {creditWarning.onDismiss ? (
             <F0Button
               label={translation.ai.creditWarning.dismiss ?? ""}
               size="sm"
@@ -64,7 +64,7 @@ export const CreditWarningWrapper = ({
               hideLabel
               onClick={creditWarning.onDismiss}
             />
-          )}
+          ) : null}
         </div>
       </div>
       {children}

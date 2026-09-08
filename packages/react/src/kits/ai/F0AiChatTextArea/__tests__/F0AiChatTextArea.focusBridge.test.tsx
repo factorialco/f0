@@ -39,14 +39,14 @@ const FocusHarness = () => {
       <button type="button" onClick={() => setIsClarifying(false)}>
         Restore composer
       </button>
-      {showInput && (
+      {showInput ? (
         <F0AiChatTextArea
           onSubmit={vi.fn()}
           clarifyingUI={
             isClarifying ? <div>Choose a reporting period</div> : undefined
           }
         />
-      )}
+      ) : null}
     </>
   )
 }
