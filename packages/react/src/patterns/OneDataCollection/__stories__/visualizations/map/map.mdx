@@ -122,6 +122,12 @@ type MapVisualizationOptions<T> = {
    */
   sidebar?: (records: T[], api: MapSidebarApi<T>) => ReactNode
   /**
+   * Text the panel's own search matches a record against - a name, a role, a
+   * workplace, whatever its row shows. Given it, the panel's header carries a
+   * search over the rows it lists; left out, no search is offered.
+   */
+  sidebarSearchText?: (record: T) => string
+  /**
    * Content of a second panel, beside the first rather than over it. Called
    * with the selected record, and shown for as long as something is selected.
    */
@@ -143,6 +149,13 @@ type MapSidebarApi<T> = {
   select: (record: T | null) => void
   /** Id of the selected record, or `null`. */
   selectedRecordId: string | null
+  /**
+   * What the map did with this record: `"placed"` when it has a marker,
+   * `"unplaced"` when `coordinates` gave `null` with no reason, or the `kind`
+   * it gave when it did. Asked per record, so it still answers in the flat
+   * list a panel search produces.
+   */
+  placement: (record: T) => "placed" | "unplaced" | MapUnplaced["kind"]
 }
 ```
 
@@ -276,11 +289,13 @@ one silently, and it needs no opting in:
   ahead of **On map**. The section is left out entirely when nothing is
   unplaced, not shown as an empty header.
 - **The map counts them** with a control beside the panel toggle: the section's
-  name, then the records as an avatar list when they are all people - a few
-  faces and a "+N" bubble for the rest, which is the count (a mixed set gets a
-  plain counter instead). Pressing it opens the panel with the **Not on map**
-  section expanded, whatever state it was left in. It hides with the toggle
-  while the panel is open, and is absent when the count is zero.
+  name, then the records as an avatar list when they are all people - three
+  faces, and a "+N" for any beyond them (a mixed set gets a plain counter
+  instead). Pressing it opens the panel with the **Not on map** section
+  expanded, whatever state it was left in, and clears the panel's own search on
+  the way, since a filtered list could hold none of the records it is pointing
+  at. It hides with the toggle while the panel is open, and is absent when the
+  count is zero.
 - **One treatment, for now.** A bare `null` ("no reason given") and
   `{ kind: "incomplete" }` (the record should have had a location) are listed
   the same way. The kind is kept so the distinction can be drawn later without

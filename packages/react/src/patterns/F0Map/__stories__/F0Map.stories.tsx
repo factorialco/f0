@@ -172,6 +172,46 @@ export const SidebarToggleAddon: Story = {
   },
 }
 
+/**
+ * A control of the panel's own at the start of its header row, with the toggle
+ * holding the far end: here a filter over the rows below it. It takes the width
+ * the row has left, so a control that opens into a field has somewhere to open
+ * into, and it is only rendered while the panel is open - the row is the
+ * panel's, not the map's.
+ */
+export const SidebarHeaderStart: Story = {
+  render: (args) => {
+    const [expanded, setExpanded] = useState(true)
+    const [query, setQuery] = useState("")
+    const matches = BARCELONA.filter((point) =>
+      (point.label ?? "").toLowerCase().includes(query.toLowerCase())
+    )
+    return (
+      <F0Map
+        {...args}
+        markers={BARCELONA}
+        sidebarExpanded={expanded}
+        onSidebarToggle={() => setExpanded((open) => !open)}
+        sidebarHeaderStart={
+          <input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Filter" // i18n-exempt: story copy
+            className="h-8 w-full rounded-md bg-transparent px-2 text-sm text-f1-foreground placeholder:text-f1-foreground-secondary"
+          />
+        }
+        sidebar={
+          <ul className="flex flex-col gap-1 p-2 text-sm text-f1-foreground">
+            {matches.map((point) => (
+              <li key={point.id}>{point.label}</li>
+            ))}
+          </ul>
+        }
+      />
+    )
+  },
+}
+
 // One of each product-semantic marker variant, spread across Spain so none of
 // them cluster - the reference for how every variant renders on the map.
 const ALL_VARIANTS: F0MapPoint[] = [
