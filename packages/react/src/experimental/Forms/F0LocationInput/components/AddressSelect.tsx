@@ -119,6 +119,9 @@ export const AddressSelect = ({
       const suggestion = suggestions.find((item) => item.id === value)
       if (suggestion) onPick(suggestion)
     },
+    // The value is a searched address, not one of a handful of options: the
+    // arrow would promise a list the user is meant to browse
+    hideArrow: true,
     showSearchBox: true,
     searchBoxPlaceholder: i18n.locationInput.placeholder,
     searchEmptyMessage: emptyMessage,

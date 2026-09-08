@@ -176,6 +176,14 @@ type F0SelectFieldProps<T extends string, R = unknown> = F0SelectPopupProps<
      * @default false
      */
     showPreview?: boolean
+    /**
+     * Hides the trigger's dropdown arrow. For fields where the select is an
+     * implementation detail rather than the affordance: the value is a typed
+     * search result, not one of a few known options, and the arrow promises a
+     * list the user is not meant to browse.
+     * @default false
+     */
+    hideArrow?: boolean
   } & Pick<
     InputFieldProps<T>,
     | "required"
@@ -211,6 +219,7 @@ type F0SelectInlineProps<T extends string, R = unknown> = F0SelectPopupProps<
     children?: never
     className?: never
     asList?: never
+    hideArrow?: never
     showPreview?: never
     required?: never
     loading?: never
