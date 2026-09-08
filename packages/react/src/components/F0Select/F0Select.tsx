@@ -1100,6 +1100,9 @@ const F0SelectComponent = forwardRef(function Select<
     ...props,
     onItemCheckChange,
     disabled,
+    // Destructured for the label above, so it has to be handed back for the
+    // trigger to carry aria-required
+    required,
     open: openLocal,
     onOpenChange: handleChangeOpenLocal,
   }
