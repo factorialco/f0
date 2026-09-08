@@ -10,6 +10,7 @@ const meta: Meta<typeof F0BigNumber> = {
   title: "BigNumber",
   parameters: {
     layout: "centered",
+    a11y: { test: "error" },
     docs: {
       description: {
         component: [
