@@ -180,17 +180,25 @@ Set it once for the whole app rather than per map:
 <F0Provider map={{ provider: "google", config: { apiKey } }}>
 ```
 
-|                                        | `maplibre`               | `google`                               |
-| -------------------------------------- | ------------------------ | -------------------------------------- |
-| API key                                | none                     | required                               |
-| Billing                                | none                     | per map load                           |
-| Globe projection                       | yes                      | no                                     |
-| Coupled fly-to (pan + zoom in one arc) | yes                      | no - it pans and zooms, without an arc |
-| Cartography                            | generated from f0 tokens | not yet themed (see FCT-63109)         |
+|                                        | `maplibre`                          | `google`                                 |
+| -------------------------------------- | ----------------------------------- | ---------------------------------------- |
+| API key                                | none                                | required                                 |
+| Billing                                | none                                | per map load                             |
+| Globe projection                       | yes                                 | no                                       |
+| Coupled fly-to (pan + zoom in one arc) | yes                                 | no - it pans and zooms, without an arc   |
+| Cartography                            | generated from f0 tokens, per layer | the same tokens, coarser: 14 of 25 roles |
 
 A style carries the engine it was written for. Handing a `maplibre` style to a
-`google` map renders nothing, so the mismatch is ignored and logged rather than
-passed through - pass no `mapStyle` to get an engine's default look.
+`google` map renders nothing, so the mismatch is ignored and logged, and the
+engine falls back to its own default. Pass no `mapStyle` to get that default.
+
+Both defaults are generated from the f0 tokens by
+`styles/buildStyles.mjs --google` / `--maplibre`, so a token change lands as a
+reviewable diff on both rather than silently drifting on one. They will not look
+identical: Google takes a `featureType` from a fixed list with flat stylers - no
+per-layer control, no zoom-dependent or data-driven expressions, and no way to
+add a layer its basemap omits - so landuse, footpaths, woods and buildings keep
+Google's own colours.
 
 ## Guidelines
 

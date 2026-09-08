@@ -9,8 +9,12 @@
  * roads, buildings, boundaries, labels) rides the neutral ramp; nature (water,
  * park, sand) borrows a desaturated categorical hue at low opacity.
  *
- * Run: `node src/patterns/F0Map/styles/buildStyles.mjs`
+ * Run: `node src/patterns/F0Map/styles/buildStyles.mjs [--google|--maplibre]`
  * Source: https://tiles.openfreemap.org/styles/bright  (OSM data, ODbL)
+ *
+ * Both pairs derive from the same f0 tokens, but only the MapLibre one reads
+ * Bright - and Bright has moved since the committed pair was generated, so
+ * regenerating it is an 8k-line diff and a deliberate decision. Pass a target.
  */
 import fs from "node:fs"
 import path from "node:path"
@@ -632,12 +636,115 @@ const recolor = (style, theme) => {
   return out
 }
 
-const bright = await (await fetch(BRIGHT_URL)).json()
-for (const theme of ["light", "dark"]) {
-  const styled = recolor(bright, theme)
+/**
+ * The same flavor, expressed in Google's `MapTypeStyle[]`.
+ *
+ * Deliberately partial. Google's styling model takes a `featureType` from a
+ * fixed list, an `elementType`, and flat stylers - no per-layer control, no
+ * data-driven or zoom-dependent expressions, and no way to add a layer its
+ * basemap omits. So of the flavor's 25 roles, 14 have an expression here and
+ * 11 do not:
+ *
+ *   worldLand   the base land is zoom-interpolated on MapLibre; Google has no
+ *               zoom-dependent styler at all, so the near-view colour wins
+ *   path        no featureType for footways or cycleways
+ *   wood        no featureType distinct from landcover
+ *   residential, industrial, sand, farmland, rock, glacier
+ *               no landuse featureTypes exist
+ *   building, buildingLine
+ *               no building featureType; landscape.man_made is the nearest
+ *               approximation and covers more than buildings
+ *
+ * The two maps will not match. The point is that both derive from the same
+ * tokens, so a token change lands as a reviewable diff on both rather than
+ * silently drifting on one.
+ */
+const googleStyles = (theme) => {
+  const f = saturatedFlavor(theme)
+  const paint = (featureType, elementType, color) => ({
+    featureType,
+    elementType,
+    stylers: [{ color }],
+  })
+  return [
+    // Base land. `residential` rather than `worldLand`: without a zoom styler
+    // one colour has to serve every scale, and the near view is the one users
+    // spend their time in.
+    paint("landscape", "geometry.fill", f.residential),
+    paint("landscape.natural.landcover", "geometry.fill", f.land),
+    paint("landscape.natural.terrain", "geometry.fill", f.land),
+    // Nearest thing to a building, and wider than one.
+    paint("landscape.man_made", "geometry.fill", f.building),
+    paint("landscape.man_made", "geometry.stroke", f.buildingLine),
+
+    paint("water", "geometry.fill", f.water),
+    paint("water", "labels.text.fill", f.waterLabel),
+
+    paint("poi.park", "geometry.fill", f.park),
+    paint("poi.business", "geometry.fill", f.commercial),
+    paint("poi.school", "geometry.fill", f.school),
+    paint("poi.medical", "geometry.fill", f.hospital),
+
+    paint("road.highway", "geometry.fill", f.roadMajor),
+    paint("road.arterial", "geometry.fill", f.roadMajor),
+    paint("road.local", "geometry.fill", f.roadMinor),
+    paint("road", "geometry.stroke", f.roadCasing),
+
+    paint("administrative", "geometry.stroke", f.boundary),
+    paint("administrative.locality", "labels.text.fill", f.labelText),
+    paint("administrative.country", "labels.text.fill", f.labelText),
+    paint("administrative.province", "labels.text.fill", f.labelSecondary),
+    paint("administrative.neighborhood", "labels.text.fill", f.labelSecondary),
+    {
+      featureType: "all",
+      elementType: "labels.text.stroke",
+      stylers: [{ color: f.labelHalo }],
+    },
+
+    // Our own markers are the only points of interest, and route shields plus
+    // transit noise are hidden on MapLibre too.
+    {
+      featureType: "poi",
+      elementType: "labels",
+      stylers: [{ visibility: "off" }],
+    },
+    {
+      featureType: "transit",
+      elementType: "all",
+      stylers: [{ visibility: "off" }],
+    },
+    {
+      featureType: "road",
+      elementType: "labels.icon",
+      stylers: [{ visibility: "off" }],
+    },
+  ]
+}
+
+const write = (name, value) => {
   fs.writeFileSync(
-    path.join(OUT_DIR, `f0-${theme}.json`),
-    JSON.stringify(styled, null, 2) + "\n"
+    path.join(OUT_DIR, `${name}.json`),
+    JSON.stringify(value, null, 2) + "\n"
   )
-  console.log(`wrote f0-${theme}.json`)
+  console.log(`wrote ${name}.json`)
+}
+
+const wanted = process.argv.slice(2)
+const emit = (target) => wanted.length === 0 || wanted.includes(target)
+
+// The Google pair needs only f0 tokens; the MapLibre pair needs Bright. They
+// are separable on purpose: `--maplibre` re-fetches upstream, and upstream has
+// moved since the committed pair was generated, so a regeneration is a
+// deliberate act rather than a side effect of touching the Google styles.
+if (emit("--google")) {
+  for (const theme of ["light", "dark"]) {
+    write(`google-${theme}`, googleStyles(theme))
+  }
+}
+
+if (emit("--maplibre")) {
+  const bright = await (await fetch(BRIGHT_URL)).json()
+  for (const theme of ["light", "dark"]) {
+    write(`f0-${theme}`, recolor(bright, theme))
+  }
 }
