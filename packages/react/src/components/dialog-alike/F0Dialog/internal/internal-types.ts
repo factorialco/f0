@@ -17,4 +17,11 @@ export type DialogInternalProps = DialogAlikeInternalProps & {
    * @private
    */
   variant?: DialogVariant
+
+  /**
+   * Renders a dismiss (X) control in the notification variant's top-right corner. Ignored by the
+   * default variant, whose `Header` already carries one.
+   * @default false
+   */
+  dismissable?: boolean
 }
