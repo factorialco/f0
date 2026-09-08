@@ -137,7 +137,7 @@ export function ReadOnlyCellContent<R extends RecordType>({
         <span className="min-w-0 truncate">
           {formattedDate ??
             multiSelectLabel ??
-            renderProperty(item, editableColumn, "editableTable", i18n)}
+            renderProperty(item, editableColumn, "editableTable", { i18n })}
         </span>
         {!unitsBefore ? unit : null}
       </span>

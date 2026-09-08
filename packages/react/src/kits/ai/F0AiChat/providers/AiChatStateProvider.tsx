@@ -91,15 +91,16 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   const [chatWidth, setChatWidth] = usePersistedState<number>(
     CHAT_WIDTH_STORAGE_KEY,
     DEFAULT_CHAT_WIDTH,
-    (v): v is number =>
-      typeof v === "number" &&
-      !isNaN(v) &&
-      v >= CHAT_WIDTH_MIN &&
-      v <= CHAT_WIDTH_MAX,
-    undefined,
-    // The only continuously-changing persisted value: a drag would otherwise
-    // mean one synchronous localStorage write per animation frame.
-    CHAT_WIDTH_PERSIST_DEBOUNCE_MS
+    {
+      validate: (v): v is number =>
+        typeof v === "number" &&
+        !isNaN(v) &&
+        v >= CHAT_WIDTH_MIN &&
+        v <= CHAT_WIDTH_MAX,
+      // The only continuously-changing persisted value: a drag would otherwise
+      // mean one synchronous localStorage write per animation frame.
+      debounceMs: CHAT_WIDTH_PERSIST_DEBOUNCE_MS,
+    }
   )
 
   // Not persisted: this is the live state of a pointer drag, not a preference.
@@ -108,7 +109,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   const [open, setOpen] = usePersistedState<boolean>(
     CHAT_OPEN_STORAGE_KEY,
     defaultVisualizationMode === "fullscreen",
-    (v): v is boolean => typeof v === "boolean"
+    { validate: (v): v is boolean => typeof v === "boolean" }
   )
 
   const fallbackVisualizationMode: VisualizationMode =
@@ -119,8 +120,11 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     usePersistedState<VisualizationMode>(
       CHAT_VISUALIZATION_MODE_STORAGE_KEY,
       fallbackVisualizationMode,
-      (v): v is VisualizationMode => v === "sidepanel" || v === "fullscreen",
-      isPersistableVisualizationMode
+      {
+        validate: (v): v is VisualizationMode =>
+          v === "sidepanel" || v === "fullscreen",
+        shouldWrite: isPersistableVisualizationMode,
+      }
     )
 
   const [mode, setMode] = useState<AiChatMode>("chat")
@@ -293,11 +297,9 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   // persist only its id so a reload can reopen WHAT was showing, not just that
   // the panel was open. The host re-mounts the content when it's loaded.
   const [persistedPanelContentId, setPersistedPanelContentId] =
-    usePersistedState<string | null>(
-      CHAT_PANEL_CONTENT_ID_STORAGE_KEY,
-      null,
-      (v): v is string | null => v === null || typeof v === "string"
-    )
+    usePersistedState<string | null>(CHAT_PANEL_CONTENT_ID_STORAGE_KEY, null, {
+      validate: (v): v is string | null => v === null || typeof v === "string",
+    })
 
   // Pending restore: the panel reopened (persisted `open`) while hosted
   // content was up on the last session. Until the host re-mounts it (via

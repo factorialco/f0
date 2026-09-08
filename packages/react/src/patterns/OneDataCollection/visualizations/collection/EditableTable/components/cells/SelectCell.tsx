@@ -30,7 +30,7 @@ export function SelectCell<R extends RecordType>({
     }
     return (
       <BaseCell>
-        {renderProperty(item, editableColumn, "editableTable", i18n)}
+        {renderProperty(item, editableColumn, "editableTable", { i18n })}
       </BaseCell>
     )
   }

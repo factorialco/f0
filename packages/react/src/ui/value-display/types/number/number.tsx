@@ -12,7 +12,7 @@ interface NumberValue extends WithPlaceholder {
   number: number | undefined
   units?: string
   unitsPosition?: "left" | "right"
-  decimalPlaces?: number | undefined
+  decimalPlaces?: number
 }
 
 export type NumberCellValue = number | undefined | NumberValue

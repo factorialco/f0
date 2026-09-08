@@ -33,8 +33,10 @@ export const useClusters = (
   map: maplibregl.Map | null,
   points: F0MapPoint[],
   enabled: boolean,
-  radius = 12,
-  clusterRadius = 164
+  {
+    radius = 12,
+    clusterRadius = 164,
+  }: { radius?: number; clusterRadius?: number } = {}
 ): F0MapClusterResult => {
   const [result, setResult] = useState<F0MapClusterResult>({
     clusters: [],

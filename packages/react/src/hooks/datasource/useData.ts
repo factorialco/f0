@@ -635,7 +635,7 @@ export function useData<
     currentPage?: number
     appendMode?: boolean
     cursor?: string | null
-    search?: string | undefined
+    search?: string
   }
 
   const fetchDataAndUpdate = useCallback(

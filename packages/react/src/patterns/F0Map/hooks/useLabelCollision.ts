@@ -44,10 +44,12 @@ export const measureLabel = (text: string, fontPx: number): number => {
 // Label box for a given placement, relative to a head centered at (cx, cy).
 const labelBox = (
   placement: BaseMapMarkerLabelPlacement,
-  cx: number,
-  cy: number,
-  point: F0MapPoint,
-  size: BaseMapMarkerSize
+  {
+    cx,
+    cy,
+    point,
+    size,
+  }: { cx: number; cy: number; point: F0MapPoint; size: BaseMapMarkerSize }
 ): Box => {
   const m = getMarkerMetrics(size)
   const raw = measureLabel(point.label ?? "", m.label) + 2
@@ -145,7 +147,7 @@ export const useLabelCollision = (
 
         let chosen: BaseMapMarkerLabelPlacement | null = null
         for (const placement of candidates) {
-          const box = labelBox(placement, s.x, s.y, p, size)
+          const box = labelBox(placement, { cx: s.x, cy: s.y, point: p, size })
           const hitsHead = heads.some((h) => boxesOverlap(box, h))
           const hitsLabel = placedLabels.some((l) => boxesOverlap(box, l))
           if (!hitsHead && !hitsLabel) {

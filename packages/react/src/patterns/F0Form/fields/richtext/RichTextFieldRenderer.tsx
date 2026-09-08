@@ -7,6 +7,8 @@ import {
 import type { ResolvedField } from "../types"
 import type { F0RichTextField, RichTextValue } from "./types"
 
+type RichTextFieldValue = RichTextValue | string | undefined
+
 interface RichTextFieldRendererProps {
   field: ResolvedField<F0RichTextField>
   formField: ControllerRenderProps
@@ -28,7 +30,7 @@ function haveEqualMentionIds(
 }
 
 function areEquivalentRichTextValues(
-  currentValue: RichTextValue | string | undefined,
+  currentValue: RichTextFieldValue,
   nextValue: RichTextValue
 ) {
   const currentContent =
@@ -55,12 +57,10 @@ export function RichTextFieldRenderer({
   loading,
 }: RichTextFieldRendererProps) {
   const { ref: formRef, ...formFieldRest } = formField
-  const rawValue = formField.value as RichTextValue | string | undefined
+  const rawValue = formField.value as RichTextFieldValue
   const editorRef = useRef<RichTextEditorHandle>(null)
   const lastInternalContentRef = useRef<string>("")
-  const lastAcceptedValueRef = useRef<RichTextValue | string | undefined>(
-    rawValue
-  )
+  const lastAcceptedValueRef = useRef<RichTextFieldValue>(rawValue)
 
   // Compose react-hook-form's ref (used for shouldFocusError) with our own
   const composedRef = useCallback(

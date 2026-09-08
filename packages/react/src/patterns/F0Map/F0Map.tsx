@@ -167,9 +167,11 @@ const fitToPoints = (
   map: maplibregl.Map,
   points: F0MapPoint[],
   animate: boolean,
-  routes: F0MapRoute[] = [],
-  arcs: F0MapArc[] = [],
-  padding = 64
+  {
+    routes = [],
+    arcs = [],
+    padding = 64,
+  }: { routes?: F0MapRoute[]; arcs?: F0MapArc[]; padding?: number } = {}
 ) => {
   const coords = framedCoords(points, routes, arcs)
   if (coords.length === 0) {
@@ -318,13 +320,10 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
   const handleZoomOut = useCallback(() => mapRef.current?.zoomOut(), [])
   const handleFit = useCallback(() => {
     if (mapRef.current) {
-      fitToPoints(
-        mapRef.current,
-        markersRef.current,
-        !reduceMotion,
-        routesRef.current,
-        arcsRef.current
-      )
+      fitToPoints(mapRef.current, markersRef.current, !reduceMotion, {
+        routes: routesRef.current,
+        arcs: arcsRef.current,
+      })
     }
   }, [reduceMotion])
   const handleLocate = useCallback(() => {
@@ -367,13 +366,10 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
       },
       fitToMarkers: () => {
         if (mapRef.current) {
-          fitToPoints(
-            mapRef.current,
-            markersRef.current,
-            !reduceMotion,
-            routesRef.current,
-            arcsRef.current
-          )
+          fitToPoints(mapRef.current, markersRef.current, !reduceMotion, {
+            routes: routesRef.current,
+            arcs: arcsRef.current,
+          })
         }
       },
       clearSelection: () => selectRef.current(null),
@@ -442,13 +438,10 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
       setTileError(false)
       map.resize()
       if (shouldFit) {
-        fitToPoints(
-          map,
-          markersRef.current,
-          false,
-          routesRef.current,
-          arcsRef.current
-        )
+        fitToPoints(map, markersRef.current, false, {
+          routes: routesRef.current,
+          arcs: arcsRef.current,
+        })
       }
       map.setProjection({ type: projectionRef.current })
     })

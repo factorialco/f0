@@ -60,15 +60,18 @@ const person = (
   id: string,
   firstName: string,
   lastName: string,
-  subtitle: string,
   // `image` (index into the mock photo set) gives a photo avatar; omit it to use
   // the initials + colour avatar — the mock mixes both on purpose.
-  opts: {
+  {
+    subtitle,
+    ...opts
+  }: {
+    subtitle: string
     online?: boolean
     vacation?: boolean
     image?: number
     avatarColor?: F0ChatSenderColor
-  } = {}
+  }
 ): MockPerson =>
   ({
     id,
@@ -97,55 +100,64 @@ const person = (
 
 // A deliberate mix: some people have a photo (`image`), others fall back to the
 // initials + colour avatar (and their name is tinted to match — WhatsApp-style).
-export const ME = person("me", "Jordan", "Avery", "Product Manager", {
+export const ME = person("me", "Jordan", "Avery", {
+  subtitle: "Product Manager",
   online: true,
   image: 4,
 })
 // Online people reply when you message them; offline people never do.
-const ELEANOR = person(
-  "u_eleanor",
-  "Eleanor",
-  "Whitfield",
-  "Senior Product Designer",
-  { online: true, image: 0 }
-)
-const MARCUS = person("u_marcus", "Marcus", "Bennett", "Engineering Manager", {
+const ELEANOR = person("u_eleanor", "Eleanor", "Whitfield", {
+  subtitle: "Senior Product Designer",
+  online: true,
+  image: 0,
+})
+const MARCUS = person("u_marcus", "Marcus", "Bennett", {
+  subtitle: "Engineering Manager",
   online: true,
   image: 1,
 })
-const PRIYA = person("u_priya", "Priya", "Raman", "Account Executive", {
+const PRIYA = person("u_priya", "Priya", "Raman", {
+  subtitle: "Account Executive",
   online: true,
   vacation: true,
   image: 2,
 })
 // No photo — initials + colour avatar.
-const THEO = person("u_theo", "Theo", "Lindqvist", "On vacation until Monday", {
+const THEO = person("u_theo", "Theo", "Lindqvist", {
+  subtitle: "On vacation until Monday",
   vacation: true,
 })
-const NADIA = person("u_nadia", "Nadia", "Costa", "Recruiter")
-const OWEN = person("u_owen", "Owen", "Carter", "Finance Analyst", {
+const NADIA = person("u_nadia", "Nadia", "Costa", { subtitle: "Recruiter" })
+const OWEN = person("u_owen", "Owen", "Carter", {
+  subtitle: "Finance Analyst",
   online: true,
   image: 3,
 })
-const HARPER = person("u_harper", "Harper", "Quinn", "Customer Success", {
+const HARPER = person("u_harper", "Harper", "Quinn", {
+  subtitle: "Customer Success",
   online: true,
   image: 7,
 })
 // No photo — initials + colour avatar.
-const GRACE = person("u_grace", "Grace", "Liang", "Data Analyst", {
+const GRACE = person("u_grace", "Grace", "Liang", {
+  subtitle: "Data Analyst",
   online: true,
 })
-const SAM = person("u_sam", "Sam", "Okafor", "Frontend Engineer", {
+const SAM = person("u_sam", "Sam", "Okafor", {
+  subtitle: "Frontend Engineer",
   online: true,
   image: 5,
 })
-const NOAH = person("u_noah", "Noah", "Bergström", "QA Engineer")
-const ISLA = person("u_isla", "Isla", "Romano", "Content Strategist", {
+const NOAH = person("u_noah", "Noah", "Bergström", { subtitle: "QA Engineer" })
+const ISLA = person("u_isla", "Isla", "Romano", {
+  subtitle: "Content Strategist",
   online: true,
   image: 6,
 })
 // No photo — initials + colour avatar.
-const VIKTOR = person("u_viktor", "Viktor", "Hale", "Staff Engineer")
+const VIKTOR = person("u_viktor", "Viktor", "Hale", {
+  subtitle: "Staff Engineer",
+})
 
 /** The brand mark, the same one the ApplicationFrame sidebar shows. */
 const FACTORIAL_AVATAR: AvatarVariant = {
@@ -172,12 +184,9 @@ const FACTORIAL: MockPerson = {
  * so the message-info list has a realistic overflow state. */
 const RECEIPT_DEMO_READERS = Array.from({ length: 42 }, (_, index) => {
   const number = String(index + 1).padStart(2, "0")
-  return person(
-    `u_receipt_demo_${number}`,
-    "Demo",
-    `Reader ${number}`,
-    "Quarterly Reporting member"
-  )
+  return person(`u_receipt_demo_${number}`, "Demo", `Reader ${number}`, {
+    subtitle: "Quarterly Reporting member",
+  })
 })
 
 // ---------------------------------------------------------------------------

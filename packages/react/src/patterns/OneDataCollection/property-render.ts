@@ -59,8 +59,11 @@ export const renderProperty = <R extends RecordType>(
   item: R,
   property: PropertyDefinition<R>,
   visualization: VisualizationType,
-  i18n: TranslationsType,
-  options?: {
+  {
+    i18n,
+    tableAlign,
+  }: {
+    i18n: TranslationsType
     tableAlign?: ValueDisplayTableAlignment
   }
 ): ReactNode => {
@@ -76,7 +79,7 @@ export const renderProperty = <R extends RecordType>(
     {
       visualization,
       i18n,
-      tableAlign: options?.tableAlign,
+      tableAlign,
     },
     undefinedValue
   )

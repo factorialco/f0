@@ -271,7 +271,7 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
         }
 
         el.classList.remove(errorNavigateClassName, wiggleClassName)
-        void el.offsetWidth // Force reflow to restart animation
+        el.getBoundingClientRect() // Force reflow to restart animation
         el.classList.add(className)
 
         wiggleTimeoutRef.current = setTimeout(() => {
@@ -296,7 +296,7 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
 
         setShowErrorStyles(false)
         el.classList.remove(errorNavigateClassName)
-        void el.offsetWidth
+        el.getBoundingClientRect() // Force reflow to restart animation
         el.classList.add(errorNavigateClassName)
 
         wiggleTimeoutRef.current = setTimeout(() => {

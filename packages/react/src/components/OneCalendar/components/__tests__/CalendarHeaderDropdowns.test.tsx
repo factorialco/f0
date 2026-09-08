@@ -114,33 +114,19 @@ describe("buildMonthOptions", () => {
   })
 
   it("returns localized short month names for compact headers", () => {
-    const english = buildMonthOptions(
-      2026,
-      "en-US",
-      undefined,
-      undefined,
-      "short"
-    )
+    const english = buildMonthOptions(2026, "en-US", { format: "short" })
     expect(english[8].label).toBe("Sep")
 
-    const spanish = buildMonthOptions(
-      2026,
-      "es-ES",
-      undefined,
-      undefined,
-      "short"
-    )
+    const spanish = buildMonthOptions(2026, "es-ES", { format: "short" })
     expect(spanish[0].label.toLowerCase()).toContain("ene")
   })
 
   it("disables months that fall entirely outside min/max", () => {
     // Range is only June–August 2026.
-    const options = buildMonthOptions(
-      2026,
-      "en-US",
-      new Date(2026, 5, 1),
-      new Date(2026, 7, 31)
-    )
+    const options = buildMonthOptions(2026, "en-US", {
+      minDate: new Date(2026, 5, 1),
+      maxDate: new Date(2026, 7, 31),
+    })
 
     // January (0) is before the range, December (11) is after it.
     expect(options[0].disabled).toBe(true)
@@ -153,7 +139,9 @@ describe("buildMonthOptions", () => {
 
   it("keeps a partially-covered boundary month enabled", () => {
     // minDate mid-March: March is partially covered, so it stays enabled.
-    const options = buildMonthOptions(2026, "en-US", new Date(2026, 2, 15))
+    const options = buildMonthOptions(2026, "en-US", {
+      minDate: new Date(2026, 2, 15),
+    })
     expect(options[2].disabled).toBe(false)
     expect(options[1].disabled).toBe(true) // February fully before min
   })

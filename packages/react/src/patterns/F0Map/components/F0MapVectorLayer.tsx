@@ -57,13 +57,19 @@ interface LineCollection {
   features: LineFeature[]
 }
 
-const feature = (
-  id: string,
-  kind: LineKind,
-  coordinates: [number, number][],
-  style: F0MapLineStyle,
+const feature = ({
+  id,
+  kind,
+  coordinates,
+  style,
+  isDark,
+}: {
+  id: string
+  kind: LineKind
+  coordinates: [number, number][]
+  style: F0MapLineStyle
   isDark: boolean
-): LineFeature => ({
+}): LineFeature => ({
   type: "Feature",
   // Top-level id (via `promoteId`) is what `setFeatureState` keys on for hover.
   id,
@@ -86,9 +92,23 @@ const buildCollection = (
 ): LineCollection => ({
   type: "FeatureCollection",
   features: [
-    ...routes.map((r) => feature(r.id, "route", r.coordinates, r, isDark)),
+    ...routes.map((r) =>
+      feature({
+        id: r.id,
+        kind: "route",
+        coordinates: r.coordinates,
+        style: r,
+        isDark,
+      })
+    ),
     ...arcs.map((a) =>
-      feature(a.id, "arc", arcLineString(a.from, a.to, a.curvature), a, isDark)
+      feature({
+        id: a.id,
+        kind: "arc",
+        coordinates: arcLineString(a.from, a.to, a.curvature),
+        style: a,
+        isDark,
+      })
     ),
   ],
 })

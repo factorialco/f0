@@ -530,19 +530,34 @@ function buildBorderRadiusResolver(
  *  1. The main (solid) bar showing `value`
  *  2. A stacked "target" bar showing `target - value` with a linear gradient fill
  */
+type BuildSeriesEntriesOptions = {
+  isVertical: boolean
+  showLabels: boolean
+  stacked: boolean
+  highlightOverachievement: boolean
+  labelColor: string
+  stackGapColor: string
+  labelFontSize: number
+  resolveBorderRadius: BorderRadiusResolver | undefined
+  labelLayout?: echarts.BarSeriesOption["labelLayout"]
+  valueFormatter?: (value: number) => string
+}
+
 function buildSeriesEntries(
   series: F0DataChartBarSeries,
   index: number,
-  isVertical: boolean,
-  showLabels: boolean,
-  stacked: boolean,
-  highlightOverachievement: boolean,
-  labelColor: string,
-  stackGapColor: string,
-  labelFontSize: number,
-  resolveBorderRadius: BorderRadiusResolver | undefined,
-  labelLayout?: echarts.BarSeriesOption["labelLayout"],
-  valueFormatter?: (value: number) => string
+  {
+    isVertical,
+    showLabels,
+    stacked,
+    highlightOverachievement,
+    labelColor,
+    stackGapColor,
+    labelFontSize,
+    resolveBorderRadius,
+    labelLayout,
+    valueFormatter,
+  }: BuildSeriesEntriesOptions
 ): echarts.BarSeriesOption[] {
   const color = resolveColor(series, index)
   const hasTargetData = hasTargets(series)
@@ -864,10 +879,17 @@ function stackTotals(
  */
 function buildStackTotalSeries(
   totals: number[],
-  labelColor: string,
-  labelFontSize: number,
-  containerWidth: number,
-  valueFormatter?: (value: number) => string
+  {
+    labelColor,
+    labelFontSize,
+    containerWidth,
+    valueFormatter,
+  }: {
+    labelColor: string
+    labelFontSize: number
+    containerWidth: number
+    valueFormatter?: (value: number) => string
+  }
 ): echarts.BarSeriesOption {
   return {
     name: STACK_TOTAL_SERIES_NAME,
@@ -1116,20 +1138,19 @@ export function useBarChartOptions(
 
     // Build all ECharts series (including target ghost bars)
     const echartsSeries = series.flatMap((s, i) =>
-      buildSeriesEntries(
-        s,
-        i,
+      buildSeriesEntries(s, i, {
         isVertical,
         showLabels,
         stacked,
         highlightOverachievement,
-        theme.colors.foregroundSecondary,
-        theme.colors.containerBackground ?? theme.colors.background,
-        resolvedLabelFontSize,
+        labelColor: theme.colors.foregroundSecondary,
+        stackGapColor:
+          theme.colors.containerBackground ?? theme.colors.background,
+        labelFontSize: resolvedLabelFontSize,
         resolveBorderRadius,
         labelLayout,
-        valueFormatter
-      )
+        valueFormatter,
+      })
     )
 
     // A horizontal stacked bar reads as one quantity split into parts, so the
@@ -1142,13 +1163,12 @@ export function useBarChartOptions(
         : undefined
     if (totals) {
       echartsSeries.push(
-        buildStackTotalSeries(
-          totals,
-          theme.colors.foregroundSecondary,
-          resolvedLabelFontSize,
+        buildStackTotalSeries(totals, {
+          labelColor: theme.colors.foregroundSecondary,
+          labelFontSize: resolvedLabelFontSize,
           containerWidth,
-          valueFormatter
-        )
+          valueFormatter,
+        })
       )
     }
 

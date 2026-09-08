@@ -82,25 +82,40 @@ type UseColumnsReturn<
   }[]
 }
 
+type UseColumnsOptions<
+  R extends RecordType,
+  Sortings extends SortingsDefinition,
+  Summaries extends SummariesDefinition,
+> = {
+  originalColumns: Readonly<TableColumnDefinition<R, Sortings, Summaries>[]>
+  frozenColumns: number
+  settings?: TableVisualizationSettings
+  allowSorting?: boolean
+  allowHiding?: boolean
+  lockedColumnIds?: readonly ColId[]
+  usesExplicitColumnLocking?: boolean
+}
+
 /**
  * Hook to manage the columns state of the table (hide, order, etc)
- * @param originalColumns
- * @param frozenColumns
- * @returns
  */
 export const useColumns = <
   R extends RecordType,
   Sortings extends SortingsDefinition,
   Summaries extends SummariesDefinition,
->(
-  originalColumns: Readonly<TableColumnDefinition<R, Sortings, Summaries>[]>,
-  frozenColumns: number,
-  settings?: TableVisualizationSettings,
-  allowSorting?: boolean,
-  allowHiding?: boolean,
-  lockedColumnIds?: readonly ColId[],
-  usesExplicitColumnLocking?: boolean
-): UseColumnsReturn<R, Sortings, Summaries> => {
+>({
+  originalColumns,
+  frozenColumns,
+  settings,
+  allowSorting,
+  allowHiding,
+  lockedColumnIds,
+  usesExplicitColumnLocking,
+}: UseColumnsOptions<R, Sortings, Summaries>): UseColumnsReturn<
+  R,
+  Sortings,
+  Summaries
+> => {
   // Merge user preferences with developer defaults for NEW columns
   // New columns (not in saved order) should respect their hidden: true default
   const getMergedHidden = () => {

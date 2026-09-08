@@ -104,9 +104,11 @@ export function classifyWindowChange(
 export function nextFirstItemIndex(
   prev: number,
   change: WindowChange,
-  prevRowCount: number,
-  rowCount: number,
-  headShift = 0
+  {
+    prevRowCount,
+    rowCount,
+    headShift = 0,
+  }: { prevRowCount: number; rowCount: number; headShift?: number }
 ): number {
   if (change === "initial" || change === "replace") {
     return PREPEND_OFFSET
@@ -213,13 +215,11 @@ export function advanceChatWindow(
   const headShift =
     survivingHeadIndex != null ? survivingHeadIndex - prev.headRowIndex : 0
 
-  const firstItemIndex = nextFirstItemIndex(
-    prev.firstItemIndex,
-    change,
-    prev.rowCount,
+  const firstItemIndex = nextFirstItemIndex(prev.firstItemIndex, change, {
+    prevRowCount: prev.rowCount,
     rowCount,
-    headShift
-  )
+    headShift,
+  })
 
   const last = messages[messages.length - 1]
   const ownGlide =

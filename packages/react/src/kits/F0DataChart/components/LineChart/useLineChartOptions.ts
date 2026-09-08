@@ -72,11 +72,19 @@ function buildAreaStyle(color: string): echarts.LineSeriesOption["areaStyle"] {
 function buildSeriesEntry(
   series: F0DataChartLineSeries,
   index: number,
-  globalLineType: F0DataChartLineType,
-  globalShowArea: boolean,
-  showDots: boolean,
-  showLabels: boolean,
-  labelColor: string
+  {
+    globalLineType,
+    globalShowArea,
+    showDots,
+    showLabels,
+    labelColor,
+  }: {
+    globalLineType: F0DataChartLineType
+    globalShowArea: boolean
+    showDots: boolean
+    showLabels: boolean
+    labelColor: string
+  }
 ): echarts.LineSeriesOption {
   const color = resolveColor(series, index)
   const lineType = series.lineType ?? globalLineType
@@ -182,11 +190,13 @@ export function useLineChartOptions(
         // accidentally re-enable area on a single series in `buildSeriesEntry`.
         isMultiSeries ? { ...s, showArea: false } : s,
         i,
-        lineType,
-        effectiveShowArea,
-        showDots,
-        showLabels,
-        theme.colors.foregroundSecondary
+        {
+          globalLineType: lineType,
+          globalShowArea: effectiveShowArea,
+          showDots,
+          showLabels,
+          labelColor: theme.colors.foregroundSecondary,
+        }
       )
     )
 

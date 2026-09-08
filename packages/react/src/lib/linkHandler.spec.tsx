@@ -26,51 +26,40 @@ describe("useLink", () => {
     return <a href={href} data-is-active={isActive(href)} />
   }
 
-  test("isActive returns true if the current path is the same as the href", async () => {
+  test.each([
+    {
+      name: "the current path is the same as the href",
+      currentPath: "/foo",
+      href: "/foo",
+      expected: "true",
+    },
+    {
+      name: "the current path starts with the href and a slash",
+      currentPath: "/foo/bar",
+      href: "/foo",
+      expected: "true",
+    },
+    {
+      name: "the current path starts with the href without a slash",
+      currentPath: "/foo_bar",
+      href: "/foo",
+      expected: "false",
+    },
+    {
+      name: "the current path is not contained in the href",
+      currentPath: "/foo",
+      href: "/foo/bar",
+      expected: "false",
+    },
+  ])("isActive is $expected if $name", ({ currentPath, href, expected }) => {
     render(
-      <LinkProvider currentPath="/foo">
-        <Component href="/foo" />
+      <LinkProvider currentPath={currentPath}>
+        <Component href={href} />
       </LinkProvider>
     )
 
     expect(screen.getByRole("link").getAttribute("data-is-active")).toEqual(
-      "true"
-    )
-  })
-
-  test("isActive returns true if the current path starts with href including trailing slash", async () => {
-    render(
-      <LinkProvider currentPath="/foo/bar">
-        <Component href="/foo" />
-      </LinkProvider>
-    )
-
-    expect(screen.getByRole("link").getAttribute("data-is-active")).toEqual(
-      "true"
-    )
-  })
-
-  test("isActive returns true if the current path starts with href with no trailing slash", async () => {
-    render(
-      <LinkProvider currentPath="/foo_bar">
-        <Component href="/foo" />
-      </LinkProvider>
-    )
-
-    expect(screen.getByRole("link").getAttribute("data-is-active")).toEqual(
-      "false"
-    )
-  })
-
-  test("isActive returns false if the current path is not contained in the href", async () => {
-    render(
-      <LinkProvider currentPath="/foo">
-        <Component href="/foo/bar" />
-      </LinkProvider>
-    )
-
-    expect(screen.getByRole("link").getAttribute("data-is-active")).toEqual(
-      "false"
+      expected
     )
   })
 

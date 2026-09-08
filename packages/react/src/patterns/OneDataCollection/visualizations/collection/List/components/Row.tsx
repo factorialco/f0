@@ -78,7 +78,7 @@ export const Row = <
     item: Record,
     property: ListPropertyDefinition<Record, Sortings>
   ) => {
-    return renderProperty(item, property, "list", i18n)
+    return renderProperty(item, property, "list", { i18n })
   }
 
   const itemHref = source.itemUrl ? source.itemUrl(item) : undefined

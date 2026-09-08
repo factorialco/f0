@@ -77,9 +77,11 @@ export function buildYearOptions(
 export function buildMonthOptions(
   year: number,
   locale: string,
-  minDate?: Date,
-  maxDate?: Date,
-  format: "long" | "short" = "long"
+  {
+    minDate,
+    maxDate,
+    format = "long",
+  }: { minDate?: Date; maxDate?: Date; format?: "long" | "short" } = {}
 ): SelectOption[] {
   const formatter = new Intl.DateTimeFormat(locale, { month: format })
   return Array.from({ length: 12 }, (_, month) => {
@@ -145,13 +147,11 @@ export function CalendarHeaderDropdowns({
 
   const monthOptions = useMemo(
     () =>
-      buildMonthOptions(
-        viewDate.getFullYear(),
-        locale,
+      buildMonthOptions(viewDate.getFullYear(), locale, {
         minDate,
         maxDate,
-        compact ? "short" : "long"
-      ),
+        format: compact ? "short" : "long",
+      }),
     [locale, viewDate, minDate, maxDate, compact]
   )
 
