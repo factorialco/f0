@@ -42,11 +42,21 @@ export type MentionEntry = {
 export type AnchoredMention = MentionEntry & {
   /** Index of the `@` in the composer text. */
   start: number
+  /**
+   * Index just past the last character of the `@name` in the text.
+   *
+   * Recorded where the mention is anchored rather than derived from
+   * `name.length`, because the two can differ: a saved message's entry can
+   * spell a name in a different Unicode normal form from the body it is
+   * matched against — a combining accent for a precomposed one, three jamo for
+   * one Hangul syllable — and a derived end then over- or undershoots the text
+   * it is supposed to cover.
+   */
+  end: number
 }
 
 /** Index just past the last character of an anchored mention's name. */
-export const mentionEnd = (mention: AnchoredMention): number =>
-  mention.start + mention.name.length + 1
+export const mentionEnd = (mention: AnchoredMention): number => mention.end
 
 /** A row in the mention popover: a group member, or the "everyone" option. */
 export type MentionCandidate =
@@ -222,12 +232,12 @@ export const reanchorMentions = (
     if (prefix >= end || prevEnd <= start) {
       // Wholly on one side of the change, so start and end move together.
       const shift = start < prefix ? 0 : delta
-      kept.push({ ...mention, start: start + shift })
+      kept.push({ ...mention, start: start + shift, end: end + shift })
       continue
     }
 
     if (readsAs(prev, next, start - removed, removed, inserted)) {
-      kept.push({ ...mention, start: start + delta })
+      kept.push({ ...mention, start: start + delta, end: end + delta })
       continue
     }
 
@@ -279,6 +289,7 @@ const eraseSpans = (
     mentions: anchored.map((mention) => ({
       ...mention,
       start: mention.start - removedBefore(mention.start),
+      end: mention.end - removedBefore(mention.end),
     })),
     caret: caret - removedBefore(caret),
   }
@@ -398,6 +409,9 @@ export function getTextareaCaretCoordinates(
 
 const DEBOUNCE_MS = 250
 
+/** One key for the spellings of a name that a reader cannot tell apart. */
+const canonicalName = (name: string): string => name.normalize("NFC")
+
 const candidateLabel = (c: MentionCandidate): string =>
   c.kind === "everyone" ? c.label : c.user.name
 
@@ -444,7 +458,8 @@ export function useMentions({
           candidate !== undefined &&
           candidate.id === mention.id &&
           candidate.name === mention.name &&
-          candidate.start === mention.start
+          candidate.start === mention.start &&
+          candidate.end === mention.end
         )
       })
     if (unchanged) return
@@ -654,9 +669,16 @@ export function useMentions({
       const anchored = mentionsRef.current
         .filter((m) => mentionEnd(m) <= atIndex || m.start >= cursorPosition)
         .map((m) =>
-          m.start >= cursorPosition ? { ...m, start: m.start + shift } : m
+          m.start >= cursorPosition
+            ? { ...m, start: m.start + shift, end: m.end + shift }
+            : m
         )
-      anchored.push({ ...entry, start: atIndex })
+      // The token was written from `name`, so its extent is exact here.
+      anchored.push({
+        ...entry,
+        start: atIndex,
+        end: atIndex + 1 + name.length,
+      })
       anchored.sort((a, b) => a.start - b.start)
       prevValueRef.current = newValue
       commitMentions(anchored)
@@ -767,7 +789,7 @@ export function useMentions({
     // Anchors are per occurrence; the payload is a set of people, so the same
     // person mentioned twice is sent once.
     const users = new Map<string, MentionEntry>()
-    for (const { start: _start, ...entry } of mentions) {
+    for (const { start: _start, end: _end, ...entry } of mentions) {
       if (entry.id === MENTION_EVERYONE_ID) continue
       if (!users.has(entry.id)) users.set(entry.id, entry)
     }
@@ -783,25 +805,38 @@ export function useMentions({
       // what says where they are. Occurrences of one `@name` are handed out to
       // the entries sharing that name in order — two people with the same
       // display name get one each, while one person named twice keeps both.
+      //
+      // "The same name" is canonical equality, not string equality: two people
+      // whose display names differ only in Unicode normal form read as one name
+      // and would otherwise queue separately, so the occurrences went to the
+      // first of them twice and the second was dropped. The names handed to the
+      // matcher stay as spelled, because that is what the body contains.
       const byName = new Map<string, MentionEntry[]>()
+      const spellings: { name: string }[] = []
       for (const entry of entries) {
-        const group = byName.get(entry.name)
+        const key = canonicalName(entry.name)
+        const group = byName.get(key)
         if (group) group.push(entry)
-        else byName.set(entry.name, [entry])
+        else byName.set(key, [entry])
+        if (!spellings.some((seen) => seen.name === entry.name)) {
+          spellings.push({ name: entry.name })
+        }
       }
 
       const taken = new Map<string, number>()
       commitMentions(
-        locateMentions(
-          text,
-          [...byName.keys()].map((name) => ({ name }))
-        ).flatMap(({ entry: { name }, start }) => {
-          const group = byName.get(name) ?? []
-          const index = taken.get(name) ?? 0
-          taken.set(name, index + 1)
-          const picked = group[Math.min(index, group.length - 1)]
-          return picked ? [{ ...picked, start }] : []
-        })
+        locateMentions(text, spellings).flatMap(
+          ({ entry: { name }, start, end }) => {
+            const key = canonicalName(name)
+            const group = byName.get(key) ?? []
+            const index = taken.get(key) ?? 0
+            taken.set(key, index + 1)
+            const picked = group[Math.min(index, group.length - 1)]
+            // The range comes from the matcher, so the anchor covers the text
+            // that is actually there rather than the entry's spelling of it.
+            return picked ? [{ ...picked, start, end }] : []
+          }
+        )
       )
     },
     [commitMentions]

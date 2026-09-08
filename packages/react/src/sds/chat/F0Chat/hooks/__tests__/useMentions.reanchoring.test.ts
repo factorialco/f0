@@ -156,7 +156,7 @@ describe("useMentions — an edit outside a mention never touches it", () => {
       const text = `${before}@${NAME}${after}`
       const start = before.length
       const end = start + NAME.length + 1
-      const anchor: AnchoredMention = { id: "ana-g", name: NAME, start }
+      const anchor: AnchoredMention = { id: "ana-g", name: NAME, start, end }
 
       // Half the edits in front of the `@`, half past the end of the name.
       const inFront = next() < 0.5
@@ -176,6 +176,7 @@ describe("useMentions — an edit outside a mention never touches it", () => {
         edited,
         touched: touched.length,
         start: kept[0]?.start,
+        span: (kept[0]?.end ?? 0) - (kept[0]?.start ?? 0),
         onItsName: edited.startsWith(`@${NAME}`, kept[0]?.start ?? -1),
       }).toEqual({
         i,
@@ -183,6 +184,7 @@ describe("useMentions — an edit outside a mention never touches it", () => {
         edited,
         touched: 0,
         start: expected,
+        span: NAME.length + 1,
         onItsName: true,
       })
       checked++
