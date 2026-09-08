@@ -153,7 +153,7 @@ const meta: Meta = {
       description:
         "Whether the list can be searched. " +
         "Where the search field lands depends on the filters: with no filters the trigger itself becomes the search field, and with filters it stays in the dropdown's top row beside the filter picker. " +
-        '`variant="inline"`, `asList` and custom triggers always use the row. Filtering matches label and description unless `searchFn` is in use.',
+        '`variant="inline"`, `asList` and custom triggers always use the row. Filtering matches label, description and a metadata dial code unless `searchFn` is in use.',
     },
     searchValue: {
       description: "Default value for the search box",
@@ -714,7 +714,7 @@ export const Clearable: Story = {
   },
 }
 
-/** `searchFn` replaces the built-in label-plus-description matching. */
+/** `searchFn` replaces the built-in matching over label, description and dial code. */
 export const WithSearchBox: Story = {
   args: {
     searchEmptyMessage: "No results found",

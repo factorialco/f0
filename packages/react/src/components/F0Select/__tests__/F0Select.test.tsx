@@ -1034,6 +1034,56 @@ describe("Select", () => {
     expect(container.querySelector(".h-\\[40px\\]")).toBeFalsy()
   })
 
+  // Regression: matching was label-only, so a row reading "Spain +34" could not
+  // be found by its dial code and one with a `description` could not be found by
+  // the words in it — while the prop's own documentation said both were matched.
+  it.each([
+    ["a dial code, without the plus", "34", "Spain"],
+    ["a dial code, with the plus", "+49", "Germany"],
+    ["a description", "seoul", "South Korea"],
+  ])("finds an option by %s", async (_case, query, expected) => {
+    const user = userEvent.setup()
+    render(
+      <F0Select
+        {...defaultSelectProps}
+        onChange={() => {}}
+        showSearchBox
+        options={[
+          {
+            value: "es",
+            label: "Spain",
+            metadata: { type: "dialCode", dialCode: "+34" },
+          },
+          {
+            value: "de",
+            label: "Germany",
+            metadata: { type: "dialCode", dialCode: "+49" },
+          },
+          {
+            value: "kr",
+            label: "South Korea",
+            description: "Seoul",
+            metadata: { type: "dialCode", dialCode: "+82" },
+          },
+        ]}
+      />
+    )
+
+    await openSelect(user)
+    await user.type(getTriggerSearchInput(), query)
+
+    await waitFor(() =>
+      expect(
+        within(screen.getByRole("listbox")).getAllByRole("option")
+      ).toHaveLength(1)
+    )
+    expect(
+      within(screen.getByRole("listbox")).getByRole("option", {
+        name: new RegExp(expected),
+      })
+    ).toBeInTheDocument()
+  })
+
   it("filters options based on search input", async () => {
     const user = userEvent.setup()
     render(

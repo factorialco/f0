@@ -72,14 +72,35 @@ export * from "./types"
  */
 const REMOTE_SEARCH_DEBOUNCE_MS = 400
 
+/**
+ * Matches a query against EVERYTHING THE ROW SHOWS, not just its label.
+ *
+ * A row reading "Spain +34" has to be findable by "34" — a substring, so the
+ * "+" nobody types is optional — and one carrying a `description` by the words
+ * in it. The label alone made the search quietly ignore half of what was on
+ * screen, while the documented contract said otherwise, which is why the
+ * `searchFn` story reimplements description matching by hand.
+ *
+ * Metadata is read per variant rather than through `metadataText`: that one
+ * warns about a malformed dial code as a side effect of rendering a row, and a
+ * query runs over every option on every keystroke. A new
+ * `F0SelectItemMetadata` variant is then a deliberate decision about whether
+ * it is searchable, instead of silently joining the query surface.
+ */
 const defaultSearchFn = (
   option: F0SelectItemProps<string>,
   search?: string
 ) => {
-  return (
-    option.type === "separator" ||
-    !search ||
-    option.label.toLowerCase().includes(search.toLowerCase())
+  if (option.type === "separator" || !search) {
+    return true
+  }
+
+  const query = search.toLowerCase()
+  const metadata =
+    option.metadata?.type === "dialCode" ? option.metadata.dialCode : undefined
+
+  return [option.label, option.description, metadata].some((field) =>
+    field?.toLowerCase().includes(query)
   )
 }
 
