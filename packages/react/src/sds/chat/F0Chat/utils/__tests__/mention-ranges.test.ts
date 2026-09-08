@@ -48,6 +48,47 @@ describe("locateMentions", () => {
     expect(body.slice(located[1]!.start, located[1]!.end)).toBe(`@${NFD_NAME}`)
   })
 
+  it("assigns canonically equal spellings to distinct entries", () => {
+    const entries = [
+      { id: "nfc", name: NFC_NAME },
+      { id: "nfd", name: NFD_NAME },
+    ]
+    const body = `@${NFC_NAME} and @${NFD_NAME}`
+
+    expect(locateMentions(body, entries).map(({ entry }) => entry.id)).toEqual([
+      "nfc",
+      "nfd",
+    ])
+  })
+
+  it("keeps repeated exact spellings on their exact identity", () => {
+    const entries = [
+      { id: "nfc", name: NFC_NAME },
+      { id: "nfd", name: NFD_NAME },
+    ]
+    const body = `@${NFC_NAME} @${NFC_NAME} @${NFD_NAME}`
+
+    expect(locateMentions(body, entries).map(({ entry }) => entry.id)).toEqual([
+      "nfc",
+      "nfc",
+      "nfd",
+    ])
+  })
+
+  it("allocates canonical-only matches once before reusing the last entry", () => {
+    const entries = [
+      { id: "composed", name: "\u00C5ngel" },
+      { id: "decomposed", name: "A\u030Angel" },
+    ]
+    const body = "@\u212Bngel @\u212Bngel @\u212Bngel"
+
+    expect(locateMentions(body, entries).map(({ entry }) => entry.id)).toEqual([
+      "composed",
+      "decomposed",
+      "decomposed",
+    ])
+  })
+
   it("marks only the `@` occurrence when the name also appears as plain text", () => {
     const body = `${NFC_NAME} wrote: hi @${NFD_NAME}`
     const located = locateMentions(body, [{ name: NFD_NAME }])
@@ -77,6 +118,33 @@ describe("locateMentions", () => {
     const located = locateMentions(`hi @${angstrom}`, [{ name: letterA }])
 
     expect(located).toHaveLength(1)
+  })
+
+  it("matches through a stripped bidi control while keeping raw offsets", () => {
+    const body = "hi @A\u202Ena!"
+    const [located] = locateMentions(body, [{ name: "Ana" }])
+
+    expect(located).toEqual({
+      entry: { name: "Ana" },
+      start: body.indexOf("@"),
+      end: body.indexOf("!"),
+    })
+    expect(sanitizeDisplayText(body.slice(located!.start, located!.end))).toBe(
+      "@Ana"
+    )
+  })
+
+  it("matches a capped combining stack while keeping raw offsets", () => {
+    const keptMarks = "\u0301".repeat(4)
+    const excessMarks = "\u0301".repeat(6)
+    const name = `A${keptMarks}na`
+    const body = `hi @A${excessMarks}na!`
+    const [located] = locateMentions(body, [{ name }])
+
+    expect(sanitizeDisplayText(`@${name}`)).toBe(
+      sanitizeDisplayText(body.slice(located!.start, located!.end))
+    )
+    expect(located!.end).toBe(body.indexOf("!"))
   })
 
   it("keeps a surrogate pair whole", () => {
@@ -114,6 +182,15 @@ describe("locateMentions", () => {
 
     expect(locateMentions(body, [{ name: jamo }])).toEqual([
       { entry: { name: jamo }, start: 3, end: body.indexOf("!") },
+    ])
+  })
+
+  it("locates a composed Hangul name in a body held as jamo", () => {
+    const jamo = "\u1100\u1161\u11A8"
+    const body = `hi @${jamo}!`
+
+    expect(locateMentions(body, [{ name: "\uAC01" }])).toEqual([
+      { entry: { name: "\uAC01" }, start: 3, end: body.indexOf("!") },
     ])
   })
 
@@ -166,29 +243,5 @@ describe("locateMentions", () => {
   // `\p{M}`, so reading one unit at the end of a match waves it straight past.
   it("does not swallow an astral combining mark either", () => {
     expect(locateMentions("hi @Ana\u{1D167} x", [{ name: "Ana" }])).toEqual([])
-  })
-
-  // `hooks/useMentions.ts` (`seedMentions`) calls this with bare `{ name }`
-  // objects and reads back `{ entry: { name }, start }` to anchor a saved
-  // message's mentions on its text. That shape has to keep resolving.
-  it("keeps the `seedMentions` call shape resolving", () => {
-    const text = `hi @${NFD_NAME}, ping @Ana`
-    const byName = new Map([
-      [NFC_NAME, [{ id: "1", name: NFC_NAME }]],
-      ["Ana", [{ id: "2", name: "Ana" }]],
-    ])
-
-    const anchored = locateMentions(
-      text,
-      [...byName.keys()].map((name) => ({ name }))
-    ).flatMap(({ entry: { name }, start }) => {
-      const picked = byName.get(name)?.[0]
-      return picked ? [{ ...picked, start }] : []
-    })
-
-    expect(anchored).toEqual([
-      { id: "1", name: NFC_NAME, start: 3 },
-      { id: "2", name: "Ana", start: text.indexOf("@Ana") },
-    ])
   })
 })

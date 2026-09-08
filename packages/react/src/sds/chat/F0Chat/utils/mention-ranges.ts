@@ -1,4 +1,4 @@
-import { CANONICAL_FORM } from "./sanitize-text"
+import { sanitizeDisplayText } from "./sanitize-text"
 
 /** A `@name` occurrence located in a body of text. */
 export type LocatedMention<T> = {
@@ -18,7 +18,7 @@ export type LocatedMention<T> = {
  * One code point plus the combining marks that belong to it. A candidate may
  * only start or end here — cut between a letter and its accent and a bare `a`
  * gets compared against an `á`. Marks are the only thing this covers: Hangul
- * jamo compose with each other, and {@link canonicalMatchEnd} is what keeps a
+ * jamo compose with each other, and {@link sanitizedMatchEnd} is what keeps a
  * syllable from being cut in half.
  */
 const BASE_WITH_MARKS = /[\s\S]\p{M}*/uy
@@ -58,8 +58,8 @@ const nextBoundary = (text: string, at: number): number => {
 }
 
 /**
- * Index just past the run starting at `from` whose canonical form is
- * `pattern`, or `-1` when no run there has it.
+ * Index just past the run starting at `from` whose displayed form is `pattern`,
+ * or `-1` when no run there has it.
  *
  * Comparing canonical forms instead of raw code units is what lets a name held
  * as `i` + combining acute match a body the renderer already composed to `í`.
@@ -68,18 +68,21 @@ const nextBoundary = (text: string, at: number): number => {
  * above would cut a syllable between its jamo, and the prefix test rejects
  * that rather than chipping two thirds of it.
  */
-const canonicalMatchEnd = (
+const sanitizedMatchEnd = (
   text: string,
   from: number,
   pattern: string
 ): number => {
   let cursor = from
   while (true) {
-    const seen = text.slice(from, cursor).normalize(CANONICAL_FORM)
+    const seen = sanitizeDisplayText(text.slice(from, cursor))
     if (seen === pattern) {
       return continuesPrevious(text, cursor) ? -1 : cursor
     }
-    if (cursor === text.length || !pattern.startsWith(seen)) {
+    if (
+      cursor === text.length ||
+      (!pattern.startsWith(seen) && !continuesPrevious(text, cursor))
+    ) {
       return -1
     }
     cursor = nextBoundary(text, cursor)
@@ -104,11 +107,11 @@ const literalMatchEnd = (
 }
 
 /**
- * Both sides spelled the same way is the overwhelming majority — the renderer
- * composes the body one line before it asks — and needs no normalizing at all.
+ * Both sides spelled the same way is the overwhelming majority and needs no
+ * normalization or sanitization at all.
  *
  * The name as it is actually held is tried too, and is not redundant with the
- * fold: {@link canonicalMatchEnd} walks base+mark groups, while Hangul jamo
+ * fold: {@link sanitizedMatchEnd} walks base+mark groups, while Hangul jamo
  * compose with each other rather than as marks, so a run of jamo is never a
  * canonical prefix of the syllable it composes to. Without this a name kept as
  * jamo would stop being found in a body carrying those very same jamo.
@@ -130,7 +133,7 @@ const matchEnd = (
       return literal
     }
   }
-  return foldable ? canonicalMatchEnd(text, from, pattern) : -1
+  return foldable ? sanitizedMatchEnd(text, from, pattern) : -1
 }
 
 /**
@@ -151,33 +154,72 @@ export const locateMentions = <T extends { name: string }>(
   text: string,
   entries: readonly T[]
 ): LocatedMention<T>[] => {
-  const found: LocatedMention<T>[] = []
-  const byLength = entries
-    .map((entry) => {
+  type Candidate = {
+    entry: T
+    asWritten: string
+    pattern: string
+  }
+  type CanonicalGroup = {
+    pattern: string
+    candidates: Candidate[]
+  }
+  type LocatedGroup = {
+    group: CanonicalGroup
+    start: number
+    end: number
+  }
+
+  const groupsByPattern = new Map<string, CanonicalGroup>()
+  for (const entry of entries) {
+    const candidate = (() => {
       const asWritten = `@${entry.name}`
-      return { entry, asWritten, pattern: asWritten.normalize(CANONICAL_FORM) }
-    })
-    .sort((a, b) => b.pattern.length - a.pattern.length)
+      return { entry, asWritten, pattern: sanitizeDisplayText(asWritten) }
+    })()
+    const group = groupsByPattern.get(candidate.pattern)
+    if (group) {
+      group.candidates.push(candidate)
+    } else {
+      groupsByPattern.set(candidate.pattern, {
+        pattern: candidate.pattern,
+        candidates: [candidate],
+      })
+    }
+  }
+
+  const groups = [...groupsByPattern.values()].sort(
+    (a, b) => b.pattern.length - a.pattern.length
+  )
+  const found: LocatedGroup[] = []
   const foldable = NON_ASCII.test(text)
-  for (const { entry, asWritten, pattern } of byLength) {
+  for (const group of groups) {
     let from = 0
     while (true) {
       const at = text.indexOf("@", from)
       if (at === -1) {
         break
       }
-      const end = matchEnd(text, at, pattern, asWritten, foldable)
+      const end = group.candidates.reduce(
+        (matchedEnd, { asWritten }) =>
+          Math.max(
+            matchedEnd,
+            matchEnd(text, at, group.pattern, asWritten, foldable)
+          ),
+        -1
+      )
       if (end === -1) {
         from = at + 1
         continue
       }
-      found.push({ entry, start: at, end })
+      found.push({ group, start: at, end })
       from = end
     }
   }
-  found.sort((a, b) => a.start - b.start)
+  found.sort(
+    (a, b) =>
+      a.start - b.start || b.group.pattern.length - a.group.pattern.length
+  )
 
-  const clean: LocatedMention<T>[] = []
+  const clean: LocatedGroup[] = []
   let lastEnd = 0
   for (const range of found) {
     if (range.start < lastEnd) {
@@ -186,5 +228,26 @@ export const locateMentions = <T extends { name: string }>(
     clean.push(range)
     lastEnd = range.end
   }
-  return clean
+
+  const usedByGroup = new Map<CanonicalGroup, Set<number>>()
+  return clean.map(({ group, start, end }) => {
+    const used = usedByGroup.get(group) ?? new Set<number>()
+    usedByGroup.set(group, used)
+    const exact = group.candidates
+      .map((candidate, index) => ({ candidate, index }))
+      .filter(
+        ({ candidate }) =>
+          literalMatchEnd(text, start, candidate.asWritten) === end
+      )
+    const picked = exact.find(({ index }) => !used.has(index)) ??
+      exact.at(-1) ??
+      group.candidates
+        .map((candidate, index) => ({ candidate, index }))
+        .find(({ index }) => !used.has(index)) ?? {
+        candidate: group.candidates[group.candidates.length - 1]!,
+        index: group.candidates.length - 1,
+      }
+    used.add(picked.index)
+    return { entry: picked.candidate.entry, start, end }
+  })
 }

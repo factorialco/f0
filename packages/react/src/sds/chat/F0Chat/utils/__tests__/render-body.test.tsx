@@ -5,6 +5,7 @@ import {
   renderBodyWithLinks,
   renderBodyWithMentions,
 } from "../render-body"
+import { sanitizeDisplayText } from "../sanitize-text"
 
 describe("renderBodyWithMentions", () => {
   it("returns the plain body when there are no mentions", () => {
@@ -75,8 +76,9 @@ describe("renderBodyWithMentions", () => {
     expect(screen.getByText("@Ana María")).toBeInTheDocument()
   })
 
-  // The body is composed before the ranges are taken, so a name carrying the
-  // decomposed spelling reaches a chip only if matching folds both sides.
+  // Ranges are taken from the raw body before each rendered slice is composed,
+  // so a name carrying the decomposed spelling must match without losing its
+  // original boundaries.
   // Escapes, not literal characters: the two spellings are the point here and
   // are indistinguishable on screen.
   it("chips a name whose accent is stored decomposed", () => {
@@ -94,6 +96,36 @@ describe("renderBodyWithMentions", () => {
       <div>{renderBodyWithMentions(`hi @${decomposed}!`, tokens)}</div>
     )
     expect(screen.getByText(`@${composed}`).className).toContain(
+      "text-f1-foreground-secondary"
+    )
+  })
+
+  it("keeps a profile mention when display sanitization strips a bidi control", () => {
+    const tokens: MentionToken[] = [
+      {
+        name: "Ana",
+        isSelf: false,
+        isEveryone: false,
+        user: { id: "1", name: "Ana", profileHref: "/people/ana" },
+      },
+    ]
+
+    zeroRender(<div>{renderBodyWithMentions("hi @A\u202Ena!", tokens)}</div>)
+
+    expect(screen.getByRole("link", { name: "@Ana" })).toHaveAttribute(
+      "href",
+      "/people/ana"
+    )
+  })
+
+  it("keeps a mention when display sanitization caps combining marks", () => {
+    const name = `A${"\u0301".repeat(4)}na`
+    const bodyName = `A${"\u0301".repeat(6)}na`
+    const tokens: MentionToken[] = [{ name, isSelf: false, isEveryone: false }]
+
+    zeroRender(<div>{renderBodyWithMentions(`hi @${bodyName}!`, tokens)}</div>)
+
+    expect(screen.getByText(sanitizeDisplayText(`@${name}`))).toHaveClass(
       "text-f1-foreground-secondary"
     )
   })
