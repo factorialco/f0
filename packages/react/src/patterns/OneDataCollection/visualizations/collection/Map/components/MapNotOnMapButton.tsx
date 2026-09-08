@@ -66,16 +66,20 @@ export const MapNotOnMapButton = ({
       />
     </span>
     {avatars && avatars.length > 0 ? (
-      // Three faces, then the bubble for the rest. At `xs` F0AvatarList draws
-      // that bubble as an ellipsis icon, with the number for screen readers
-      // only. The rest go in as `remainingCount` rather than as items, which
-      // keeps the bubble a plain element - given the items themselves it
-      // becomes a disclosure button, a button inside this button.
+      // Three faces, then the count for the rest. `sm`, not `xs`: at `xs`
+      // F0AvatarList draws that bubble as an ellipsis icon and leaves the
+      // number to screen readers, and the number is the whole point here - this
+      // control is a count of what the map is not showing. The rest go in as
+      // `remainingCount` rather than as items, which keeps the bubble a plain
+      // element - given the items themselves it becomes a disclosure button, a
+      // button inside this button.
       <F0AvatarList
         type="person"
         avatars={avatars.slice(0, MAX_FACES)}
-        remainingCount={Math.max(count - MAX_FACES, 0)}
-        size="xs"
+        // Only when there is a remainder: a forced `0` still draws the bubble,
+        // and "+0" beside three faces says nothing.
+        remainingCount={count > MAX_FACES ? count - MAX_FACES : undefined}
+        size="sm"
         max={MAX_FACES}
         noTooltip
       />
