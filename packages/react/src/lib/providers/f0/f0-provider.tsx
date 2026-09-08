@@ -22,6 +22,7 @@ import { DialogsAlikeLayoutProvider } from "../dialogs-alike/DialogsAlikeLayoutP
 import { FormOverlaysProvider } from "../form-overlays"
 import { I18nProvider, I18nProviderProps } from "../i18n"
 import { L10nProvider, L10nProviderProps } from "../l10n"
+import { MapProvider, type MapContextValue } from "../map"
 import { UserPlatformProvider } from "../user-platafform"
 import type { HourCycle } from "../user-platafform/types"
 
@@ -120,6 +121,11 @@ export const F0Provider: React.FC<{
    * ```
    */
   formComponent?: F0FormLikeComponent
+  /**
+   * App-level map engine, so switching provider is one change at the root
+   * rather than one per screen. An `F0Map` may still name its own.
+   */
+  map?: MapContextValue
 }> = ({
   children,
   layout,
@@ -134,6 +140,7 @@ export const F0Provider: React.FC<{
   showExperimentalWarnings = false,
   renderDataTestIdAttribute = false,
   formComponent,
+  map,
 }) => {
   return (
     <MotionProvider>
@@ -168,7 +175,9 @@ export const F0Provider: React.FC<{
                               >
                                 <FormCardValueFormatterProvider>
                                   <CoachmarkProvider>
-                                    {children}
+                                    <MapProvider {...map}>
+                                      {children}
+                                    </MapProvider>
                                   </CoachmarkProvider>
                                 </FormCardValueFormatterProvider>
                               </FormComponentContext.Provider>
