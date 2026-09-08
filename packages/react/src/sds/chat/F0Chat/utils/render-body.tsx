@@ -154,9 +154,9 @@ export const renderBodyWithMentions = (
     ) : token.user ? (
       <span className="cursor-default text-f1-foreground-secondary">
         {label}
-        {token.user.subtitle && (
+        {token.user.subtitle ? (
           <span className="sr-only">, {token.user.subtitle}</span>
-        )}
+        ) : null}
       </span>
     ) : (
       <span className="text-f1-foreground-secondary">{label}</span>

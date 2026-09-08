@@ -116,12 +116,16 @@ const literalMatchEnd = (
  * canonical prefix of the syllable it composes to. Without this a name kept as
  * jamo would stop being found in a body carrying those very same jamo.
  */
+type MatchOptions = {
+  pattern: string
+  asWritten: string
+  foldable: boolean
+}
+
 const matchEnd = (
   text: string,
   from: number,
-  pattern: string,
-  asWritten: string,
-  foldable: boolean
+  { pattern, asWritten, foldable }: MatchOptions
 ): number => {
   const composed = literalMatchEnd(text, from, pattern)
   if (composed !== -1) {
@@ -202,7 +206,11 @@ export const locateMentions = <T extends { name: string }>(
         (matchedEnd, { asWritten }) =>
           Math.max(
             matchedEnd,
-            matchEnd(text, at, group.pattern, asWritten, foldable)
+            matchEnd(text, at, {
+              pattern: group.pattern,
+              asWritten,
+              foldable,
+            })
           ),
         -1
       )
