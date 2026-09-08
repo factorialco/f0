@@ -80,6 +80,10 @@ export const WithAction: Story = {
 /**
  * Two footer buttons: `action` takes an ARRAY for a card that carries both its
  * own call to action and the way out of it, side by side in the footer.
+ *
+ * A pair is drawn `outline` at every width, where a lone button in the rail is
+ * filled. Two buttons in a footer are a set of equals; filling one of them
+ * would nominate it as the card's answer.
  */
 export const WithTwoActions: Story = {
   args: {
