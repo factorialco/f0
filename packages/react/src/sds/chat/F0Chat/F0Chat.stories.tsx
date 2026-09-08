@@ -1,14 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { Profiler, type ReactNode, useEffect, useRef, useState } from "react"
 import { expect, userEvent, waitFor, within } from "storybook/test"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
-import { F0Chat } from "./F0Chat"
 import { ChatBubble } from "./components/ChatBubble"
 import { ChatMessageAttachments } from "./components/ChatMessageAttachments"
+import { F0Chat } from "./F0Chat"
 import { MOCK_VIDEO_CAPTIONS, MOCK_VIDEO_DESCRIPTIONS } from "./mocks/constants"
 import { useMockChatRuntime } from "./mocks/createMockChatRuntime"
 import { useChatStorm } from "./mocks/useChatStorm"
@@ -395,7 +392,9 @@ const StormHud = ({
         const distance =
           viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight
         samples.push(distance)
-        if (samples.length > 120) samples.shift()
+        if (samples.length > 120) {
+          samples.shift()
+        }
         const canvas = canvasRef.current
         const ctx = canvas?.getContext("2d")
         if (canvas && ctx) {
@@ -407,8 +406,11 @@ const StormHud = ({
           samples.forEach((s, i) => {
             const x = (i / 119) * canvas.width
             const y = canvas.height - (s / max) * (canvas.height - 4) - 2
-            if (i === 0) ctx.moveTo(x, y)
-            else ctx.lineTo(x, y)
+            if (i === 0) {
+              ctx.moveTo(x, y)
+            } else {
+              ctx.lineTo(x, y)
+            }
           })
           ctx.stroke()
         }
@@ -901,7 +903,9 @@ const VideoConversation = (): ReactNode => {
 const ColdStartVideoConversation = (): ReactNode => {
   const [isOpen, setIsOpen] = useState(false)
 
-  if (isOpen) return <VideoConversation />
+  if (isOpen) {
+    return <VideoConversation />
+  }
 
   return (
     <div className="flex h-[680px] items-center justify-center">
@@ -1300,6 +1304,27 @@ export const ComposerHotkeys: Story = {
       // Radix keeps the popover mounted for its exit animation and only then
       // decides about focus — assert after that window, not before.
       await waitFor(() => expect(composer).toHaveFocus(), { timeout: 3000 })
+    })
+
+    await step("Escape backs out of the quote, keeping the draft", async () => {
+      await userEvent.type(composer, "ya lo miro")
+      await userEvent.keyboard("{Escape}")
+      await waitFor(() =>
+        expect(
+          canvas.queryByRole("button", { name: /remove quote/i })
+        ).not.toBeInTheDocument()
+      )
+      await expect(composer).toHaveValue("ya lo miro")
+    })
+
+    await step("The next Escape clears the draft", async () => {
+      await userEvent.keyboard("{Escape}")
+      await waitFor(() => expect(composer).toHaveValue(""))
+    })
+
+    await step("Undo puts the cleared draft back", async () => {
+      await userEvent.keyboard("{Meta>}z{/Meta}")
+      await waitFor(() => expect(composer).toHaveValue("ya lo miro"))
     })
   },
 }

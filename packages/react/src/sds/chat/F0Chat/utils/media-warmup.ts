@@ -33,13 +33,19 @@ export const warmupRange = (
 
 /** Every image URL a row will paint, in the order the reader meets them. */
 export const rowImageUrls = (row: ChatRow | undefined): string[] => {
-  if (!row || row.type !== "message") return []
+  if (!row || row.type !== "message") {
+    return []
+  }
   const urls: string[] = []
   for (const attachment of row.message.attachments ?? []) {
-    if (attachment.kind !== "image") continue
+    if (attachment.kind !== "image") {
+      continue
+    }
     // The blur source first: it is tiny, and having it decoded is what makes
     // the photo resolve out of something rather than appear over a flat tint.
-    if (attachment.blurUrl) urls.push(attachment.blurUrl)
+    if (attachment.blurUrl) {
+      urls.push(attachment.blurUrl)
+    }
     urls.push(attachment.thumbnailUrl ?? attachment.url)
   }
   return urls
@@ -65,9 +71,13 @@ export const createMediaWarmer = (): {
 
   return {
     warm: (urls) => {
-      if (disposed || typeof Image === "undefined") return
+      if (disposed || typeof Image === "undefined") {
+        return
+      }
       for (const url of urls) {
-        if (seen.has(url)) continue
+        if (seen.has(url)) {
+          continue
+        }
         seen.add(url)
         const image = new Image()
         image.src = url

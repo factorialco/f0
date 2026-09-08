@@ -1,5 +1,4 @@
 import { Editor, JSONContent } from "@tiptap/react"
-
 import { enhancedTextResponse, enhanceTextParams } from "./types"
 
 /** Maximum characters sent to the AI for enhancement */
@@ -135,7 +134,9 @@ async function handleEnhanceWithAIFunction({
     isFullDocumentSelected,
   } = extractTextToEnhance(editor)
 
-  if (!isValidForEnhancement(textToEnhance)) return
+  if (!isValidForEnhancement(textToEnhance)) {
+    return
+  }
 
   const context = prepareEnhancementContext(editor, from, to)
 

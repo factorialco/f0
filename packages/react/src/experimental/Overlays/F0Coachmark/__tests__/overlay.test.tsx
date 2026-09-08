@@ -1,13 +1,11 @@
 import { userEvent } from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import {
   act,
   screen,
   waitFor,
   zeroRender as render,
 } from "@/testing/test-utils"
-
 import { CoachmarkProvider } from "../CoachmarkProvider"
 import { coachmarks } from "../imperative"
 import type { CoachmarkEnd, CoachmarkOptions } from "../types"
@@ -32,7 +30,9 @@ const blocker = () =>
 /** One press on the dimmed page. */
 const pressOutside = async () => {
   const shield = blocker()
-  if (!shield) throw new Error("no blocker on screen")
+  if (!shield) {
+    throw new Error("no blocker on screen")
+  }
   await userEvent.click(shield)
 }
 
@@ -106,7 +106,9 @@ describe("coachmark overlay", () => {
     })
     await screen.findByRole("dialog")
 
-    for (let press = 0; press < 4; press++) await pressOutside()
+    for (let press = 0; press < 4; press++) {
+      await pressOutside()
+    }
     expect(screen.getByRole("dialog")).toBeInTheDocument()
     expect(onDismiss).not.toHaveBeenCalled()
 
@@ -156,7 +158,9 @@ describe("coachmark overlay", () => {
     })
     await screen.findByRole("dialog")
 
-    for (let press = 0; press < 8; press++) await pressOutside()
+    for (let press = 0; press < 8; press++) {
+      await pressOutside()
+    }
 
     expect(screen.getByRole("dialog")).toBeInTheDocument()
   })
@@ -246,10 +250,6 @@ describe("the handover between two steps", () => {
   })
 })
 
-/**
- * `focusTarget` on a step whose whole point is a field: the caret starts in it,
- * so it wears its own focus state instead of being described from outside.
- */
 describe("a step that focuses what it points at", () => {
   beforeEach(() => {
     coachmarks.closeAll()
@@ -358,19 +358,6 @@ describe("what the shield does to focus", () => {
     coachmarks.closeAll()
   })
 
-  /**
-   * A press on the shield must not take focus off the page.
-   *
-   * Preventing the POINTER event is not enough: the mouse event that follows it
-   * has its own default action — "focus what was pressed" — and on a shield that
-   * means blurring whatever held focus and leaving it on the body. A step that
-   * focused its own field lost that field's focus glow on the reader's first
-   * press anywhere on the page.
-   *
-   * `defaultPrevented` is the observable here rather than `document.activeElement`:
-   * jsdom does not move focus on a mouse press at all, so only the real browser
-   * can show the blur — and only the prevention can be asserted here.
-   */
   it("swallows the press without moving focus", async () => {
     renderApp()
     open({
@@ -391,11 +378,6 @@ describe("what the shield does to focus", () => {
   })
 })
 
-/**
- * ONE CALLBACK FOR THE WHOLE OUTCOME. Every ending arrives at `onEnd` exactly
- * once, carrying which way out the reader took and how far they got — the shape
- * a funnel is read off, rather than two callbacks to join up afterwards.
- */
 describe("what onEnd reports", () => {
   beforeEach(() => {
     coachmarks.closeAll()
@@ -453,7 +435,9 @@ describe("what onEnd reports", () => {
     open({ ...twoSteps(onEnd), onDismiss })
     await screen.findByRole("dialog")
 
-    for (let press = 0; press < 5; press++) await pressOutside()
+    for (let press = 0; press < 5; press++) {
+      await pressOutside()
+    }
 
     await waitFor(() => expect(onEnd).toHaveBeenCalledOnce())
     expect(onEnd).toHaveBeenCalledWith({
@@ -504,5 +488,96 @@ describe("what onEnd reports", () => {
     // Nobody ended it, so there is no outcome — counting this as a drop-off
     // would blame the reader for a navigation.
     expect(onEnd).not.toHaveBeenCalled()
+  })
+})
+
+describe("what the dim is painted in", () => {
+  beforeEach(() => {
+    coachmarks.closeAll()
+  })
+
+  it("dims and glows in colours that do not flip with the theme", async () => {
+    renderApp()
+    open({
+      targetElement: "#filters",
+      title: "Filters got smarter",
+      overlay: true,
+    })
+    await screen.findByRole("dialog")
+
+    const lit = blocker()?.firstElementChild
+    const paint = lit?.className ?? ""
+
+    // `--shadow` is `218 48% 10%` in BOTH themes — the colour f0 casts every
+    // elevation shadow in — so the same declaration darkens either way.
+    expect(paint).toContain("hsl(var(--shadow)/0.5)")
+    // The tokens that flip are the ones this must not go back to.
+    expect(paint).not.toContain("--neutral-40")
+    expect(paint).not.toContain("--neutral-0")
+  })
+})
+
+describe("how deep the dim goes", () => {
+  beforeEach(() => {
+    coachmarks.closeAll()
+  })
+
+  it("goes deeper in dark than in light", async () => {
+    renderApp()
+    open({
+      targetElement: "#filters",
+      title: "Filters got smarter",
+      overlay: true,
+    })
+    await screen.findByRole("dialog")
+
+    const paint = blocker()?.firstElementChild?.className ?? ""
+    expect(paint).toContain("shadow-[0_0_0_100vmax_hsl(var(--shadow)/0.5)]")
+    expect(paint).toContain(
+      "dark:shadow-[0_0_0_100vmax_hsl(var(--shadow)/0.85)]"
+    )
+    expect(paint).not.toContain("24px")
+    // And the panel gets the extra surface that depth costs it.
+    expect(screen.getByRole("dialog").className).toContain(
+      "dark:bg-f1-background-secondary"
+    )
+  })
+})
+
+describe("how the light is drawn", () => {
+  beforeEach(() => {
+    coachmarks.closeAll()
+  })
+
+  it("measures its corner rather than wearing a fixed one", async () => {
+    renderApp()
+    open({
+      targetElement: "#filters",
+      title: "Filters got smarter",
+      overlay: true,
+    })
+    await screen.findByRole("dialog")
+
+    const lit = blocker()?.firstElementChild as HTMLElement | null
+    expect(lit?.style.borderRadius).toMatch(/^[\d.]+px$/)
+    expect(lit?.className).not.toContain("rounded-")
+  })
+
+  it("scrolls its content inside the box rather than spilling out of it", async () => {
+    renderApp()
+    open({
+      targetElement: "#filters",
+      title: "Filters got smarter",
+      overlay: true,
+    })
+
+    const panel = await screen.findByRole("dialog")
+    expect(panel.className).toContain("overflow-visible")
+    expect(panel.className).not.toContain("max-h-none")
+    const group = panel.querySelector(".overflow-y-auto")
+    expect(group?.className).toContain("min-h-0")
+    expect(group).toContainElement(
+      screen.getByRole("button", { name: "Got it" })
+    )
   })
 })

@@ -1,21 +1,19 @@
 import { userEvent } from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
-
+import {
+  AiChatStateProvider,
+  useAiChat,
+} from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
+import type {
+  FiltersDefinition,
+  FiltersState,
+} from "@/patterns/OneFilterPicker/types"
 import {
   screen,
   waitFor,
   within,
   zeroRender as render,
 } from "@/testing/test-utils"
-import type {
-  FiltersDefinition,
-  FiltersState,
-} from "@/patterns/OneFilterPicker/types"
-import {
-  AiChatStateProvider,
-  useAiChat,
-} from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
-
 import { F0AnalyticsDashboard } from "../F0AnalyticsDashboard"
 import type {
   DashboardChartItem,

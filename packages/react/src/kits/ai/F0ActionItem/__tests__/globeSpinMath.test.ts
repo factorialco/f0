@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import {
   buildFrameInto,
   createGlobeSpinState,
@@ -62,8 +61,12 @@ describe("spinEase", () => {
   // The ramp is quadratic, so an unclamped negative t returns POSITIVE — a
   // clock that runs backwards would jump the mark most of a turn.
   it("holds at the endpoints outside 0..1", () => {
-    for (const t of [-2, -0.5, -0.001]) expect(spinEase(t)).toBe(0)
-    for (const t of [1.001, 1.5, 3]) expect(spinEase(t)).toBe(1)
+    for (const t of [-2, -0.5, -0.001]) {
+      expect(spinEase(t)).toBe(0)
+    }
+    for (const t of [1.001, 1.5, 3]) {
+      expect(spinEase(t)).toBe(1)
+    }
   })
 
   it("never goes backwards", () => {
@@ -93,7 +96,9 @@ describe("spinEase", () => {
     for (let t = 0; t < SPIN_MS; t++) {
       const degPerS =
         (spinEase((t + 1) / SPIN_MS) - spinEase(t / SPIN_MS)) * TOTAL_DEG * 1000
-      if (degPerS < PERCEPTIBLE_DEG_PER_S) slowMs++
+      if (degPerS < PERCEPTIBLE_DEG_PER_S) {
+        slowMs++
+      }
     }
     expect(slowMs).toBeLessThan(100)
   })

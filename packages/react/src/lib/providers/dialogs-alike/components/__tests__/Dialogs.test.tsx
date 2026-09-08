@@ -1,12 +1,9 @@
-import { act, screen, waitFor } from "@testing-library/react"
 import "@testing-library/jest-dom/vitest"
+import { act, screen, waitFor } from "@testing-library/react"
 import React from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import { zeroRender } from "@/testing/test-utils"
-
 import type { DialogDefinitionInternal } from "../../internal-types"
-
 import { DialogsAlike } from "../DialogsAlike"
 
 // Mock nanoid
@@ -76,7 +73,7 @@ const MockDialogNotificationInternal = vi.hoisted(() => {
       <button data-testid="notification-close-button" onClick={props.onClose}>
         Close
       </button>
-      {props.primaryAction && (
+      {props.primaryAction ? (
         <button
           data-testid="notification-primary-action"
           onClick={props.primaryAction.onClick}
@@ -84,7 +81,7 @@ const MockDialogNotificationInternal = vi.hoisted(() => {
         >
           {props.primaryAction.label}
         </button>
-      )}
+      ) : null}
       {props.secondaryAction?.map((action: any, index: number) => (
         <button
           key={`notification-secondary-${index}`}

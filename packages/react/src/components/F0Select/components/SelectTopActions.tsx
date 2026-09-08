@@ -1,8 +1,6 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useCallback, useState } from "react"
-
-import { OneFilterPicker } from "@/patterns/OneFilterPicker"
-import { GroupingSelector } from "@/patterns/OneDataCollection/Settings/components/GroupingSelector"
+import { F0SearchInput } from "@/components/F0SearchInput"
 import {
   FiltersDefinition,
   FiltersState,
@@ -11,8 +9,8 @@ import {
   RecordType,
 } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
-
-import { F0SearchInput } from "@/components/F0SearchInput"
+import { GroupingSelector } from "@/patterns/OneDataCollection/Settings/components/GroupingSelector"
+import { OneFilterPicker } from "@/patterns/OneFilterPicker"
 import { ActiveFiltersChips } from "./ActiveFiltersChips"
 
 interface SelectTopActionsProps<
@@ -77,7 +75,7 @@ export const SelectTopActions = <R extends RecordType = RecordType>({
     <div className="flex flex-col">
       <div className="flex gap-2 p-2 border-0 border-b border-solid border-f1-border-secondary">
         <div className="flex flex-1 flex-row gap-2">
-          {showSearchBox && (
+          {showSearchBox ? (
             <div className="flex-1">
               <F0SearchInput
                 placeholder={searchBoxPlaceholder ?? i18n.toc.search}
@@ -88,8 +86,8 @@ export const SelectTopActions = <R extends RecordType = RecordType>({
                 clearable
               />
             </div>
-          )}
-          {filters && (
+          ) : null}
+          {filters ? (
             <OneFilterPicker
               filters={filters}
               value={currentFilters}
@@ -97,7 +95,7 @@ export const SelectTopActions = <R extends RecordType = RecordType>({
               mode={showPreview ? "inline" : asList ? "simple" : "compact"}
               onOpenChange={handleFiltersOpenChange}
             />
-          )}
+          ) : null}
         </div>
         <GroupingSelector
           hideLabel={true}
@@ -107,7 +105,7 @@ export const SelectTopActions = <R extends RecordType = RecordType>({
         />
       </div>
       <AnimatePresence>
-        {filters && hasActiveFilters(currentFilters) && (
+        {filters && hasActiveFilters(currentFilters) ? (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
@@ -120,7 +118,7 @@ export const SelectTopActions = <R extends RecordType = RecordType>({
               onFiltersChange={onFiltersChange}
             />
           </motion.div>
-        )}
+        ) : null}
       </AnimatePresence>
     </div>
   )
@@ -133,8 +131,12 @@ const hasActiveFilters = <Filters extends FiltersDefinition>(
   currentFilters: FiltersState<Filters>
 ): boolean => {
   return Object.entries(currentFilters).some(([, value]) => {
-    if (value === undefined || value === null) return false
-    if (Array.isArray(value)) return value.length > 0
+    if (value === undefined || value === null) {
+      return false
+    }
+    if (Array.isArray(value)) {
+      return value.length > 0
+    }
     return value !== ""
   })
 }

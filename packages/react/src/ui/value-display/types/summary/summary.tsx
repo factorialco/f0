@@ -19,7 +19,7 @@ export const SummaryCell = (
       <span className="text-f1-foreground-secondary">
         {meta.i18n.collections.summaries.types.sum}
       </span>
-      {`${args.label}`}
+      {args.label}
     </div>
   )
 }

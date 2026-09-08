@@ -1,11 +1,9 @@
 import { type ReactNode, useCallback, useEffect, useRef, useState } from "react"
-
 import { useAudioPlayer } from "@/components/F0AudioPlayer"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { SolidPause, SolidPlay } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
-
 import { useChatSurface } from "../providers/ChatSurfaceProvider"
 import {
   useF0ChatEmit,
@@ -49,10 +47,14 @@ const enqueueWaveformDecode = <Result,>(
 
 const loadVoiceWaveform = (url: string): Promise<number[]> => {
   const cached = waveformCache.get(url)
-  if (cached) return Promise.resolve(cached)
+  if (cached) {
+    return Promise.resolve(cached)
+  }
 
   const pending = waveformRequests.get(url)
-  if (pending) return pending
+  if (pending) {
+    return pending
+  }
 
   const AudioCtx =
     typeof window !== "undefined"
@@ -60,7 +62,9 @@ const loadVoiceWaveform = (url: string): Promise<number[]> => {
         (window as { webkitAudioContext?: typeof AudioContext })
           .webkitAudioContext)
       : undefined
-  if (!AudioCtx) return Promise.resolve(FALLBACK_LEVELS)
+  if (!AudioCtx) {
+    return Promise.resolve(FALLBACK_LEVELS)
+  }
 
   const request = (async () => {
     const response = await fetch(url)
@@ -128,7 +132,9 @@ const useVoiceWaveform = (url: string): number[] => {
 
     let cancelled = false
     void loadVoiceWaveform(url).then((nextLevels) => {
-      if (!cancelled) setLevels(nextLevels)
+      if (!cancelled) {
+        setLevels(nextLevels)
+      }
     })
     return () => {
       cancelled = true
@@ -188,7 +194,9 @@ const ChatVoiceAttachmentContent = ({
       voicePlayLog.markReported(voice.url)
       emit.onVoiceNotePlayed({ durationSeconds: voice.durationSeconds })
     }
-    if (duration > 0 && player.currentTime >= duration) player.seek(0)
+    if (duration > 0 && player.currentTime >= duration) {
+      player.seek(0)
+    }
     player.play()
   }, [
     player,
@@ -213,7 +221,9 @@ const ChatVoiceAttachmentContent = ({
   const handleSeek = useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {
       const bars = barsRef.current
-      if (!bars || duration <= 0) return
+      if (!bars || duration <= 0) {
+        return
+      }
       const rect = bars.getBoundingClientRect()
       const fraction = Math.min(
         1,
@@ -226,7 +236,9 @@ const ChatVoiceAttachmentContent = ({
 
   const handleSeekKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
-      if (duration <= 0) return
+      if (duration <= 0) {
+        return
+      }
       const step = Math.max(1, duration / BAR_COUNT)
       let nextTime: number
 

@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it } from "vitest"
-
 import type { CanvasContent } from "@/kits/ai/canvas/types"
 import { useAiChat } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
 import { DEFAULT_CHAT_WIDTH } from "@/kits/ai/F0AiChat/utils/constants"
@@ -10,7 +9,6 @@ import {
   userEvent,
   waitFor,
 } from "@/testing/test-utils"
-
 import { ApplicationFrame } from ".."
 
 // "note" is not part of the SDS `CanvasContent` union — hosts register their own
@@ -79,7 +77,9 @@ const canvasContainer = (): HTMLElement => {
   while (element && !element.className.includes("pointer-events-none")) {
     element = element.parentElement
   }
-  if (!element) throw new Error("canvas container not found")
+  if (!element) {
+    throw new Error("canvas container not found")
+  }
   return element
 }
 
@@ -185,7 +185,9 @@ describe("ApplicationFrame canvas inset", () => {
 
     const handle = await waitFor(() => {
       const node = document.querySelector<HTMLElement>(".cursor-ew-resize")
-      if (!node) throw new Error("resize handle not found")
+      if (!node) {
+        throw new Error("resize handle not found")
+      }
       return node
     })
 

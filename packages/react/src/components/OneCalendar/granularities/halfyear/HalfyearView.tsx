@@ -6,9 +6,7 @@ import {
   startOfMonth,
 } from "date-fns"
 import { AnimatePresence, motion } from "motion/react"
-
 import { cn, focusRing } from "@/lib/utils"
-
 import { CalendarMode, DateRange } from "../../types"
 
 export const getHalfYearFromMonth = (month: number): number =>
@@ -65,13 +63,7 @@ export const HalfYearView = ({
       // For single selection, use the first day of the half-year
       onSelect?.(halfYearRange.from)
     } else if (mode === "range") {
-      if (!selected || !isDateRange(selected)) {
-        // Start of range
-        onSelect?.({
-          from: halfYearRange.from,
-          to: undefined,
-        })
-      } else if (selected && selected.from && !selected.to) {
+      if (selected && isDateRange(selected) && selected.from && !selected.to) {
         // Complete the range
         const fromDate = selected.from
         const fromHalfYear = getHalfYearFromMonth(fromDate.getMonth())
@@ -112,7 +104,9 @@ export const HalfYearView = ({
 
   // Check if a half-year is selected
   const isHalfYearSelected = (halfYear: number, year: number): boolean => {
-    if (!selected) return false
+    if (!selected) {
+      return false
+    }
 
     const halfYearRange = getHalfYearRange(halfYear, year)
 
@@ -154,7 +148,9 @@ export const HalfYearView = ({
 
   // Check if a half-year is the start of a range
   const isRangeStart = (halfYear: number, year: number): boolean => {
-    if (!selected || !isDateRange(selected) || !selected.from) return false
+    if (!selected || !isDateRange(selected) || !selected.from) {
+      return false
+    }
 
     const from = selected.from
     const fromHalfYear = getHalfYearFromMonth(from.getMonth())
@@ -163,7 +159,9 @@ export const HalfYearView = ({
 
   // Check if a half-year is the end of a range
   const isRangeEnd = (halfYear: number, year: number): boolean => {
-    if (!selected || !isDateRange(selected) || !selected.to) return false
+    if (!selected || !isDateRange(selected) || !selected.to) {
+      return false
+    }
 
     const to = selected.to
     const toHalfYear = getHalfYearFromMonth(to.getMonth())
@@ -238,14 +236,14 @@ export const HalfYearView = ({
                         "rounded-none bg-f1-background-selected after:opacity-0 after:transition-none first:rounded-l-md last:rounded-r-md hover:bg-f1-background-selected [&>span]:text-f1-foreground-selected"
                     )}
                   >
-                    {isStart && (
+                    {isStart ? (
                       <div className="absolute inset-y-0 right-0 z-0 w-1/2 bg-f1-background-selected" />
-                    )}
-                    {isEnd && (
+                    ) : null}
+                    {isEnd ? (
                       <div className="absolute inset-y-0 left-0 z-0 w-1/2 bg-f1-background-selected" />
-                    )}
+                    ) : null}
                     <span className="z-10 font-medium">H{halfYear}</span>
-                    {isCurrent && (
+                    {isCurrent ? (
                       <div
                         className={cn(
                           "absolute inset-x-0 bottom-1 z-20 mx-auto h-0.5 w-1.5 rounded-full bg-f1-background-selected-bold transition-colors duration-100",
@@ -258,7 +256,7 @@ export const HalfYearView = ({
                             "bg-f1-background-selected-bold"
                         )}
                       />
-                    )}
+                    ) : null}
                   </button>
                 )
               })}

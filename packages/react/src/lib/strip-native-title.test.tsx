@@ -1,6 +1,5 @@
 import { isValidElement, type ReactElement } from "react"
 import { describe, expect, test } from "vitest"
-
 import { stripNativeTitle } from "./strip-native-title"
 
 describe("stripNativeTitle", () => {

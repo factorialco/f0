@@ -1,8 +1,6 @@
 import { beforeAll, describe, expect, it, vi } from "vitest"
-
 import { BellOff, Pencil } from "@/icons/app"
 import { fireEvent, zeroRender as render, screen } from "@/testing/test-utils"
-
 import { F0Chat } from "../F0Chat"
 import { F0ChatProvider } from "../providers/F0ChatProvider"
 import { type F0ChatHeaderAction, type F0ChatRuntime } from "../types"

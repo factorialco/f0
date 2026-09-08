@@ -8,11 +8,9 @@ import {
   it,
   vi,
 } from "vitest"
-
 import { zeroRender } from "@/testing/test-utils"
-
-import type { GraphNode } from "../types"
 import { F0Graph } from "../F0Graph"
+import type { GraphNode } from "../types"
 
 // Spy React Flow instance so we can count fly-to (fitView) calls. Only the
 // public `useReactFlow` is mocked — the ReactFlow component renders normally.

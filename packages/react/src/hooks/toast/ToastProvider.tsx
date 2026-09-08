@@ -10,11 +10,9 @@ import {
 } from "react"
 import { createPortal } from "react-dom"
 import { useIsomorphicLayoutEffect } from "usehooks-ts"
-
-import { F0Toast } from "@/ui/Toast/F0Toast"
 import { useIsMobile } from "@/lib/useIsDesktop"
 import { cn } from "@/lib/utils"
-
+import { F0Toast } from "@/ui/Toast/F0Toast"
 import { toastStore } from "./store"
 import { ToastId, ToastProviderItem } from "./types"
 
@@ -93,21 +91,27 @@ const StackedToasts = ({
   }, [isTransitioning])
 
   const handleMouseEnter = () => {
-    if (!lockRef.current) setIsHovered(true)
+    if (!lockRef.current) {
+      setIsHovered(true)
+    }
   }
 
   useEffect(() => {
     onHoverChange?.(isHovered)
   }, [isHovered])
 
-  if (items.length === 0) return null
+  if (items.length === 0) {
+    return null
+  }
 
   // Count of actual visible (non-promoted) items for z-index and order calculations
   const visibleCount = items.filter(
     (item) => !promotedEverRef.current.has(item.id)
   ).length
 
-  if (visibleCount === 0) return null
+  if (visibleCount === 0) {
+    return null
+  }
 
   return (
     <div
@@ -326,7 +330,9 @@ const ToastsContainer = ({
   // (kept in sync on resize/scroll). Falls back to the full viewport when the
   // anchor element isn't present.
   useIsomorphicLayoutEffect(() => {
-    if (typeof document === "undefined" || !hasItems) return
+    if (typeof document === "undefined" || !hasItems) {
+      return
+    }
 
     const anchor = document.querySelector<HTMLElement>(toastAnchorSelector)
     if (!anchor) {
@@ -365,7 +371,7 @@ const ToastsContainer = ({
       style={anchorStyle}
     >
       <AnimatePresence>
-        {hasItems && (
+        {hasItems ? (
           <div key="toast-panel" className="flex w-full flex-col p-6 sm:w-96">
             {/* Stacked Toasts at the Top */}
             <div ref={stackedContainerRef}>
@@ -420,7 +426,7 @@ const ToastsContainer = ({
               </AnimatePresence>
             </div>
           </div>
-        )}
+        ) : null}
       </AnimatePresence>
     </div>
   )
@@ -471,7 +477,9 @@ export const ToastProvider = ({
   const prevPortalTargetRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
-    if (typeof document === "undefined") return
+    if (typeof document === "undefined") {
+      return
+    }
     const selector = isMobile
       ? portalTargets?.mobile || "body"
       : portalTargets?.desktop || "body"
@@ -487,15 +495,16 @@ export const ToastProvider = ({
   return (
     <>
       {isRenderer &&
-        isMounted &&
-        typeof document !== "undefined" &&
-        portalTarget != null &&
-        createPortal(
-          <Fragment key={portalKey}>
-            <ToastsContainer items={items} />
-          </Fragment>,
-          portalTarget
-        )}
+      isMounted &&
+      typeof document !== "undefined" &&
+      portalTarget != null
+        ? createPortal(
+            <Fragment key={portalKey}>
+              <ToastsContainer items={items} />
+            </Fragment>,
+            portalTarget
+          )
+        : null}
       {children}
     </>
   )

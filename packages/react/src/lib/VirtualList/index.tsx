@@ -1,8 +1,6 @@
 import { useVirtualizer, VirtualItem } from "@tanstack/react-virtual"
 import React, { forwardRef } from "react"
-
 import { experimentalComponent } from "@/lib/experimental"
-
 import { cn } from "@/lib/utils"
 
 type VirtualListProps = {

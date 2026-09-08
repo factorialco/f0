@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest"
-
 import { zeroRender as render } from "@/testing/test-utils"
-
 import { F0GraphSkeleton } from "../F0GraphSkeleton"
 
 const cards = (c: HTMLElement) => c.querySelectorAll(".w-64")

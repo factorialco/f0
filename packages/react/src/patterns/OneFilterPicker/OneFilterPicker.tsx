@@ -1,20 +1,17 @@
 import type { ReactElement } from "react"
 import { useContext, useEffect, useMemo, useRef, useState } from "react"
-
-import { useEventEmitter } from "@/patterns/OneDataCollection/useEventEmitter"
 import { DataTestIdWrapper } from "@/lib/data-testid"
 import { RenderErrorBoundary } from "@/lib/RenderErrorBoundary"
 import { cn } from "@/lib/utils"
-
-import type { FiltersDefinition, FiltersMode, FiltersState } from "./types"
-
-import { collectNestedFilterKeys } from "./filterTypes/InFilter/components/option-utils"
+import { useEventEmitter } from "@/patterns/OneDataCollection/useEventEmitter"
 import { FiltersChipsList as FiltersChipsListComponent } from "./components/FiltersChipsList"
 import { FiltersControls as FiltersControlsComponent } from "./components/FiltersControls"
 import { FiltersPresets as FiltersPresetsComponent } from "./components/FiltersPresets"
 import { FiltersContext } from "./context"
+import { collectNestedFilterKeys } from "./filterTypes/InFilter/components/option-utils"
 import { isPresetSelected } from "./internal/isPresetSelected"
 import { FilterPickerStateModeContext } from "./internal/stateMode"
+import type { FiltersDefinition, FiltersMode, FiltersState } from "./types"
 import { PresetsDefinition } from "./types"
 
 /**
@@ -156,17 +153,19 @@ const FiltersRoot = <Definition extends FiltersDefinition>({
     stateMode === "controlled" ? value : localFiltersValue
 
   const removeFilterValue = (key: keyof Definition) => {
-    const newFilters = { ...currentFiltersValue }
-    delete newFilters[key]
-
     // Also clear nested child filter keys to avoid orphaned values
     const filterDef = filters?.[key]
+    const removedKeys = new Set<string>([String(key)])
     if (filterDef?.type === "in" && filterDef.options) {
-      const nestedKeys = collectNestedFilterKeys(filterDef.options)
-      nestedKeys.forEach((nestedKey) => {
-        delete newFilters[nestedKey as keyof Definition]
-      })
+      for (const nestedKey of collectNestedFilterKeys(filterDef.options)) {
+        removedKeys.add(String(nestedKey))
+      }
     }
+    const newFilters = Object.fromEntries(
+      Object.entries(currentFiltersValue).filter(
+        ([filterKey]) => !removedKeys.has(filterKey)
+      )
+    )
 
     if (stateMode === "optimistic") {
       setLocalFiltersValue(newFilters as FiltersState<Definition>)
@@ -232,7 +231,9 @@ const FiltersControls = () => {
     setFiltersValue(filters)
   }
 
-  if (!shownFilters || Object.keys(shownFilters).length === 0) return null
+  if (!shownFilters || Object.keys(shownFilters).length === 0) {
+    return null
+  }
 
   return (
     <>
@@ -247,11 +248,11 @@ const FiltersControls = () => {
         mode={mode}
         displayCounter={displayCounter}
       />
-      {!!presets?.length && (
+      {presets?.length ? (
         <div className="flex items-center">
           <div className="mx-2 h-4 w-px bg-f1-background-secondary-hover" />
         </div>
-      )}
+      ) : null}
     </>
   )
 }
@@ -287,7 +288,9 @@ const FiltersPresets = () => {
         const preset = presets?.find(
           (p, index) => (p.id ?? `${p.label}-${index}`) === presetId
         )
-        if (preset) emitPresetClick(preset.filter)
+        if (preset) {
+          emitPresetClick(preset.filter)
+        }
         onSelectPreset(presetId)
       }
     : undefined
@@ -342,8 +345,12 @@ const FiltersChipsList = () => {
   // chips when a preset exactly matches the current filters (the preset chip
   // already represents them).
   const isAnyPresetActive = useMemo(() => {
-    if (onSelectPreset) return false
-    if (!presets?.length) return false
+    if (onSelectPreset) {
+      return false
+    }
+    if (!presets?.length) {
+      return false
+    }
     return presets.some((preset) => isPresetSelected(preset, value))
   }, [presets, value, onSelectPreset])
 
@@ -379,21 +386,21 @@ const _OneFilterPicker = <Definition extends FiltersDefinition>(
             !rootProps.filters && "justify-end"
           )}
         >
-          {rootProps.filters && (
+          {rootProps.filters ? (
             <div className="flex min-w-0 flex-1 gap-1">
               <FiltersControls />
               <FiltersPresets />
             </div>
-          )}
-          {rootProps.children && (
+          ) : null}
+          {rootProps.children ? (
             <div className="flex shrink-0 items-center gap-2">
               {rootProps.children}
             </div>
-          )}
+          ) : null}
         </div>
-        {(!rootProps.mode || rootProps.mode === "default") && (
+        {!rootProps.mode || rootProps.mode === "default" ? (
           <FiltersChipsList />
-        )}
+        ) : null}
       </FiltersRoot>
     </DataTestIdWrapper>
   )

@@ -1,6 +1,5 @@
 import type { AxeResults, Result, TagValue } from "axe-core"
 import React, { useCallback, useEffect, useRef, useState } from "react"
-
 import { A11Y_WCAG_TAGS } from "../lib/storybook-utils/a11yAxeConfig"
 import type { A11yTier } from "./component-status"
 
@@ -119,7 +118,9 @@ export function useA11yAudit(): {
   const started = useRef(false)
 
   const start = useCallback(() => {
-    if (started.current) return
+    if (started.current) {
+      return
+    }
     started.current = true
     if (!isInStorybookDocs()) {
       setState({ status: "unavailable" })
@@ -165,7 +166,7 @@ export function A11yAuditResults({
   const c = TONE[tone]
   return (
     <div className="mt-2" aria-live="polite">
-      {state.status === "running" && (
+      {state.status === "running" ? (
         <div className="flex items-center gap-2">
           <svg
             className={`h-4 w-4 shrink-0 animate-spin motion-reduce:animate-none ${c.muted}`}
@@ -190,19 +191,19 @@ export function A11yAuditResults({
           </svg>
           <span>Checking the rendered stories…</span>
         </div>
-      )}
-      {state.status === "unavailable" && (
+      ) : null}
+      {state.status === "unavailable" ? (
         <p className="m-0">
           Live results are available on the Storybook docs page. See the story’s{" "}
           <strong>Accessibility</strong> tab for per-element detail.
         </p>
-      )}
-      {state.status === "done" && state.criteria.length === 0 && (
+      ) : null}
+      {state.status === "done" && state.criteria.length === 0 ? (
         <p className="m-0 text-f1-foreground-positive">
           No violations in the stories’ default state.
         </p>
-      )}
-      {state.status === "done" && state.criteria.length > 0 && (
+      ) : null}
+      {state.status === "done" && state.criteria.length > 0 ? (
         <div role="list" className="space-y-1">
           {state.criteria.map((crit) => (
             <div
@@ -215,12 +216,12 @@ export function A11yAuditResults({
               </span>
               <span>
                 <code className={c.strong}>{crit.ruleId}</code>
-                {crit.sc && (
+                {crit.sc ? (
                   <span className={c.muted}>
                     {" "}
                     · WCAG {crit.sc} {crit.level} ({crit.version})
                   </span>
-                )}
+                ) : null}
                 <span className={c.muted}>
                   {" "}
                   · {crit.description} · {crit.nodes}{" "}
@@ -230,14 +231,14 @@ export function A11yAuditResults({
             </div>
           ))}
         </div>
-      )}
-      {(state.status === "done" || state.status === "unavailable") && (
+      ) : null}
+      {state.status === "done" || state.status === "unavailable" ? (
         <p className={`mt-2 text-sm ${c.muted}`}>
           Checked in each story’s default state — violations behind interactions
           (open menus, dialogs) aren’t shown here. CI enforces the full set,
           including play-function states.
         </p>
-      )}
+      ) : null}
     </div>
   )
 }
@@ -272,7 +273,9 @@ export function A11yRow({ detail, tier }: { detail: string; tier: A11yTier }) {
 
   const onToggle = useCallback(
     (e: React.SyntheticEvent<HTMLDetailsElement>) => {
-      if (!e.currentTarget.open) return
+      if (!e.currentTarget.open) {
+        return
+      }
       start()
     },
     [start]

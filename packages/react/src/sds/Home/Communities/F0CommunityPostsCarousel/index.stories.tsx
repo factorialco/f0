@@ -1,7 +1,5 @@
-import { useMemo } from "react"
-
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
+import { useMemo } from "react"
 import {
   expect,
   fireEvent,
@@ -10,9 +8,6 @@ import {
   waitFor,
   within,
 } from "storybook/test"
-
-import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
 import { F0Button } from "@/components/F0Button"
 import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import {
@@ -21,9 +16,9 @@ import {
   useDataSource,
 } from "@/hooks/datasource"
 import { Plus } from "@/icons/app"
-
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { SlotWidget } from "../../SlotWidget"
-import { F0CommunityPostsCarousel, type CommunityPostSummary } from "./index"
+import { F0CommunityPostsCarousel, type CommunityPostSummary } from "."
 
 const POSTS: CommunityPostSummary[] = [
   {

@@ -1,13 +1,12 @@
 import { describe, expect, it } from "vitest"
-
-import { SurveyFormBuilderElement } from "../../types"
 import {
   flattenElements,
   reconstructElements,
   computeSectionEndIds,
   injectSectionEnds,
   FlatFormItem,
-} from "../index"
+} from ".."
+import { SurveyFormBuilderElement } from "../../types"
 
 // --- Test fixtures ---
 
@@ -988,14 +987,20 @@ describe("reorder scenarios (end-to-end)", () => {
     expect(result[3].type).toBe("section")
     expect(result[4].type).toBe("question")
 
-    if (result[0].type === "question") expect(result[0].question.id).toBe("q0")
+    if (result[0].type === "question") {
+      expect(result[0].question.id).toBe("q0")
+    }
     if (result[1].type === "section") {
       expect(result[1].section.questions).toHaveLength(2)
     }
-    if (result[2].type === "question") expect(result[2].question.id).toBe("q3")
+    if (result[2].type === "question") {
+      expect(result[2].question.id).toBe("q3")
+    }
     if (result[3].type === "section") {
       expect(result[3].section.questions).toHaveLength(1)
     }
-    if (result[4].type === "question") expect(result[4].question.id).toBe("q5")
+    if (result[4].type === "question") {
+      expect(result[4].question.id).toBe("q5")
+    }
   })
 })

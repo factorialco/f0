@@ -11,7 +11,9 @@ export const calculateVisiblePage = (
   let maxVisibleHeight = 0
 
   pageElements.forEach((element, index) => {
-    if (!element) return
+    if (!element) {
+      return
+    }
 
     const elementHeight = element.offsetHeight
     const startOfElement = element.offsetTop
@@ -23,7 +25,9 @@ export const calculateVisiblePage = (
 
     const isVisible =
       viewportStart < endOfElement && viewportEnd > startOfElement
-    if (!isVisible) return
+    if (!isVisible) {
+      return
+    }
 
     let visibleHeight: number
     if (viewportStart <= startOfElement) {
@@ -33,8 +37,9 @@ export const calculateVisiblePage = (
           : viewportEnd - startOfElement
     } else {
       let missingHeight = viewportStart - startOfElement
-      if (viewportEnd < endOfElement)
+      if (viewportEnd < endOfElement) {
         missingHeight += endOfElement - viewportEnd
+      }
       visibleHeight = elementHeight - missingHeight
     }
 

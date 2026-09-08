@@ -1,5 +1,4 @@
 import { addYears, endOfDay, parse, startOfDay } from "date-fns"
-
 import { DateRange, DateRangeComplete } from "../../types"
 import {
   formatDateRange,

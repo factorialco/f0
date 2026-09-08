@@ -1,5 +1,4 @@
 import { z, ZodTypeAny } from "zod"
-
 import type { F0AlertProps } from "@/components/F0Alert/types"
 import type {
   DurationFieldConfig,
@@ -7,13 +6,11 @@ import type {
   DurationUnit,
 } from "@/components/F0DurationInput/types"
 import type { InputFieldStatus } from "@/components/F0InputField/types"
-import type { F0FormDefinitionSingleSchema } from "@/patterns/F0WizardForm/types"
-
 import {
   isPossiblePhoneValue,
   isValidPhoneValue,
 } from "@/experimental/Forms/F0PhoneInput/lib/phone"
-
+import type { F0FormDefinitionSingleSchema } from "@/patterns/F0WizardForm/types"
 import type { F0CardSelectConfig } from "./fields/cardSelect/types"
 import type { F0CheckboxConfig } from "./fields/checkbox/types"
 import type { F0CustomConfig } from "./fields/custom/types"
@@ -441,7 +438,7 @@ export type F0ArrayConfig<
  * @typeParam TValue - Type of the field value (inferred from Zod schema)
  */
 export type F0CustomFieldConfigBase<TValue = unknown> = F0BaseConfig &
-  F0CustomConfig<TValue, undefined> & {
+  F0CustomConfig<TValue> & {
     fieldType: "custom"
   }
 
@@ -872,8 +869,12 @@ export namespace f0FormField {
   }: TextConfig) {
     let schema = z.string()
     const effectiveMin = !optional && minLength === undefined ? 1 : minLength
-    if (effectiveMin !== undefined) schema = schema.min(effectiveMin)
-    if (maxLength !== undefined) schema = schema.max(maxLength)
+    if (effectiveMin !== undefined) {
+      schema = schema.min(effectiveMin)
+    }
+    if (maxLength !== undefined) {
+      schema = schema.max(maxLength)
+    }
     const finalSchema = optional ? schema.optional() : schema
     return f0FormField(finalSchema as never, config as never)
   }
@@ -941,9 +942,15 @@ export namespace f0FormField {
     ...config
   }: NumberConfig) {
     let schema = z.number()
-    if (isInt) schema = schema.int()
-    if (min !== undefined) schema = schema.min(min)
-    if (max !== undefined) schema = schema.max(max)
+    if (isInt) {
+      schema = schema.int()
+    }
+    if (min !== undefined) {
+      schema = schema.min(min)
+    }
+    if (max !== undefined) {
+      schema = schema.max(max)
+    }
     const finalSchema = optional ? schema.optional() : schema
     return f0FormField(finalSchema as never, config as never)
   }
@@ -1069,8 +1076,12 @@ export namespace f0FormField {
     ...config
   }: PercentageConfig) {
     let schema = z.number()
-    if (min !== undefined) schema = schema.min(min)
-    if (max !== undefined) schema = schema.max(max)
+    if (min !== undefined) {
+      schema = schema.min(min)
+    }
+    if (max !== undefined) {
+      schema = schema.max(max)
+    }
     const finalSchema = optional ? schema.optional() : schema
     return f0FormField(
       finalSchema as never,
@@ -1085,7 +1096,7 @@ export namespace f0FormField {
     F0StringCardSelectConfig,
     "fieldType" | "options"
   > & {
-    options: Array<{ value: V } & Record<string, unknown>>
+    options: ({ value: V } & Record<string, unknown>)[]
     optional?: boolean
   }
 
@@ -1331,8 +1342,12 @@ export namespace f0FormField {
         number: z.string(),
       })
       .superRefine((value, ctx) => {
-        if (validate === false) return
-        if (optional && !value.number?.trim()) return
+        if (validate === false) {
+          return
+        }
+        if (optional && !value.number?.trim()) {
+          return
+        }
         const pair = { prefix: value.prefix, number: value.number }
         const isOk =
           validate === "possible"
@@ -1397,7 +1412,7 @@ export namespace f0FormField {
     R extends Record<string, unknown> = Record<string, unknown>,
   >(
     config: SelectConfig<R> & {
-      options: Array<{ value: V } & Record<string, unknown>>
+      options: ({ value: V } & Record<string, unknown>)[]
       optional: true
     }
   ): z.ZodOptional<z.ZodEnum<[V, ...V[]]>> &
@@ -1407,7 +1422,7 @@ export namespace f0FormField {
     R extends Record<string, unknown> = Record<string, unknown>,
   >(
     config: SelectConfig<R> & {
-      options: Array<{ value: V } & Record<string, unknown>>
+      options: ({ value: V } & Record<string, unknown>)[]
       optional?: false | undefined
     }
   ): z.ZodEnum<[V, ...V[]]> & F0ZodType<z.ZodEnum<[V, ...V[]]>>
@@ -1458,15 +1473,15 @@ export namespace f0FormField {
 
   // With typed options → z.array(z.enum(...)).min(1) inferred from option values
   export function multiSelect<const V extends string>(
-    config: Omit<MultiSelectConfig<string>, "options"> & {
-      options: Array<{ value: V } & Record<string, unknown>>
+    config: Omit<MultiSelectConfig, "options"> & {
+      options: ({ value: V } & Record<string, unknown>)[]
       optional: true
     }
   ): z.ZodOptional<z.ZodArray<z.ZodEnum<[V, ...V[]]>>> &
     F0ZodType<z.ZodOptional<z.ZodArray<z.ZodEnum<[V, ...V[]]>>>>
   export function multiSelect<const V extends string>(
-    config: Omit<MultiSelectConfig<string>, "options"> & {
-      options: Array<{ value: V } & Record<string, unknown>>
+    config: Omit<MultiSelectConfig, "options"> & {
+      options: ({ value: V } & Record<string, unknown>)[]
       optional?: false | undefined
     }
   ): z.ZodArray<z.ZodEnum<[V, ...V[]]>> &
@@ -1663,8 +1678,12 @@ export namespace f0FormField {
     const options = rest.config
     let base = z.array(canonical)
     const effectiveMin = options?.minItems ?? (optional ? undefined : 1)
-    if (effectiveMin !== undefined) base = base.min(effectiveMin)
-    if (options?.maxItems !== undefined) base = base.max(options.maxItems)
+    if (effectiveMin !== undefined) {
+      base = base.min(effectiveMin)
+    }
+    if (options?.maxItems !== undefined) {
+      base = base.max(options.maxItems)
+    }
     const finalSchema = optional ? base.optional() : base
     return f0FormField(
       finalSchema as never,

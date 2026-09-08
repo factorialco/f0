@@ -1,7 +1,6 @@
-import { describe, expect, it, vi } from "vitest"
 import "@testing-library/jest-dom/vitest"
+import { describe, expect, it, vi } from "vitest"
 import { screen, userEvent, zeroRender } from "@/testing/test-utils"
-
 import { Preset } from "."
 
 describe("Preset - description tooltip", () => {

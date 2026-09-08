@@ -1,8 +1,6 @@
 import { betweenSpacing } from "@factorialco/f0-core"
 import { describe, expect, it, vi } from "vitest"
-
 import { zeroRender as render, screen } from "@/testing/test-utils"
-
 import { BUTTON_GROUP_GAP_PX, ButtonGroup } from "../ButtonGroup"
 
 // The width-driven overflow (useOverflowCalculation) can't be exercised in

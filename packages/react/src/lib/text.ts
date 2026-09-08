@@ -20,8 +20,8 @@ const containsEmojis = (text: string): boolean => {
 const textFormatEnforcer = (
   text: string,
   rules: Rules,
-  warn: boolean = false,
-  componentName: string = ""
+  warn = false,
+  componentName = ""
 ) => {
   if (rules.disallowEmpty && text.length === 0) {
     const errorMessage = `${componentName}: You need to provide some text that is not empty`

@@ -1,8 +1,6 @@
 import type { ReactNode } from "react"
 import { beforeEach, describe, expect, it } from "vitest"
-
 import { screen, userEvent, zeroRender as render } from "@/testing/test-utils"
-
 import { F0AiChat } from "../F0AiChat"
 import {
   AiChatStateProvider,

@@ -1,11 +1,9 @@
 import { useControllableState } from "@radix-ui/react-use-controllable-state"
 import { Fragment, forwardRef, useMemo } from "react"
-
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import { withSkeleton } from "@/lib/skeleton"
 import { cn } from "@/lib/utils"
-
 import { AccordionItem } from "./components/AccordionItem"
 import { F0AccordionSkeleton } from "./F0AccordionSkeleton"
 import { F0AccordionProps } from "./types"
@@ -23,7 +21,9 @@ const F0AccordionBase = forwardRef<HTMLDivElement, F0AccordionProps>(
     const { items, value, defaultValue, onValueChange, ...rest } = props
 
     const computedDefault = useMemo(() => {
-      if (defaultValue !== undefined) return defaultValue
+      if (defaultValue !== undefined) {
+        return defaultValue
+      }
       return items.filter((item) => item.defaultOpen).map((item) => item.id)
     }, [defaultValue, items])
 
@@ -53,9 +53,9 @@ const F0AccordionBase = forwardRef<HTMLDivElement, F0AccordionProps>(
       >
         {items.map((item, index) => (
           <Fragment key={item.id}>
-            {index > 0 && (
+            {index > 0 ? (
               <div className="h-px w-full bg-f1-border-secondary" />
-            )}
+            ) : null}
             <AccordionItem
               item={item}
               open={openIds.includes(item.id)}

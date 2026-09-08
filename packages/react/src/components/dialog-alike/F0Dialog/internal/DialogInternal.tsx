@@ -1,5 +1,4 @@
 import { FC, useEffect, useMemo, useState } from "react"
-
 import { Content } from "../../common/Content"
 import { Footer } from "../../common/Footer"
 import { Header } from "../../common/Header"
@@ -36,7 +35,7 @@ export const DialogInternal: FC<DialogInternalProps> = ({
   const _memoizedDialogLayout = useMemo(() => {
     return (
       <>
-        {variant !== "notification" && (
+        {variant !== "notification" ? (
           <Header
             title={title}
             description={description}
@@ -47,7 +46,7 @@ export const DialogInternal: FC<DialogInternalProps> = ({
             setActiveTabId={setActiveTabId}
             disableClose={disableClose}
           />
-        )}
+        ) : null}
         <Content disableContentPadding={disableContentPadding ?? false}>
           {children}
         </Content>

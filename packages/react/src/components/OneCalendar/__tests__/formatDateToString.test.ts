@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import { DateRange } from "../types"
 import { formatDateToString } from "../utils"
 

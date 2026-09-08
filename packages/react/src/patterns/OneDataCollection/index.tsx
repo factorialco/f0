@@ -1,12 +1,10 @@
 import { ReactElement } from "react"
-
 import {
   FiltersDefinition,
   RecordType,
   SortingsDefinition,
 } from "@/hooks/datasource"
 import { withDataTestId, WithDataTestIdProps } from "@/lib/data-testid"
-
 import { ItemActionsDefinition } from "./item-actions"
 import { NavigationFiltersDefinition } from "./navigationFilters/types"
 import {

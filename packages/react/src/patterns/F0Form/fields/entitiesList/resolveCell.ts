@@ -1,5 +1,4 @@
 import type { ZodTypeAny } from "zod"
-
 import {
   getF0Config,
   inferFieldType,
@@ -35,7 +34,9 @@ function optionsFromConfig(
   config: Record<string, unknown>
 ): SelectOption[] | null {
   const options = config.options
-  if (!Array.isArray(options)) return null
+  if (!Array.isArray(options)) {
+    return null
+  }
   const mapped = options
     .filter(
       (option): option is { value: string; label?: unknown } =>
@@ -52,7 +53,9 @@ function optionsFromConfig(
 
 /** One option per enum value, or null if the schema isn't a `z.enum`. */
 function optionsFromEnum(schema: ZodTypeAny): SelectOption[] | null {
-  if (!isZodType(schema, "ZodEnum")) return null
+  if (!isZodType(schema, "ZodEnum")) {
+    return null
+  }
   const values = schema._def.values as string[]
   return values.map((value) => ({ value, label: value }))
 }

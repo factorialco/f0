@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import { limitDeep } from "../limit-deep"
 
 describe("limitDeep", () => {

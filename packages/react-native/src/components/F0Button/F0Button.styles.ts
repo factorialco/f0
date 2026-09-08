@@ -33,8 +33,12 @@ export const getButtonPadding = (
   round: boolean,
   iconPosition: "left" | "right"
 ): string => {
-  if (round) return ""
-  if (!icon || hideLabel) return DEFAULT_PADDING[size]
+  if (round) {
+    return ""
+  }
+  if (!icon || hideLabel) {
+    return DEFAULT_PADDING[size]
+  }
   return ICON_PADDING[size][iconPosition]
 }
 
@@ -150,9 +154,11 @@ export const loadingIndicatorVariants = tv({
 export const getIconColor = (
   variant: ButtonVariant,
   isPressed: boolean,
-  isDark: boolean = false
+  isDark = false
 ): IconColor => {
-  if (isDark && variant === "ghost") return "inverse"
+  if (isDark && variant === "ghost") {
+    return "inverse"
+  }
 
   switch (variant) {
     case "default":
@@ -167,9 +173,11 @@ export const getIconColor = (
 export const getIconOnlyColor = (
   variant: ButtonVariant,
   isPressed: boolean,
-  isDark: boolean = false
+  isDark = false
 ): IconColor => {
-  if (isDark && variant === "ghost") return "inverse"
+  if (isDark && variant === "ghost") {
+    return "inverse"
+  }
 
   switch (variant) {
     case "critical":
@@ -188,9 +196,11 @@ export const getIconOnlyColor = (
 export const getTextColor = (
   variant: ButtonVariant,
   isPressed: boolean,
-  isDark: boolean = false
+  isDark = false
 ): TextColor => {
-  if (isDark && variant === "ghost") return "inverse"
+  if (isDark && variant === "ghost") {
+    return "inverse"
+  }
 
   if (isPressed && variant === "critical") {
     return "inverse"

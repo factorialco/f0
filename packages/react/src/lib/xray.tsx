@@ -11,7 +11,6 @@ import {
   useState,
 } from "react"
 import { createPortal } from "react-dom"
-
 import {
   componentTypes,
   type ComponentMetadata,
@@ -62,31 +61,31 @@ export const XRayProvider: React.FC<{ children: ReactNode }> = ({
   return (
     <XRayContext.Provider value={{ enabled, enable, disable, filter }}>
       {children}
-      {enabled &&
-        typeof document !== "undefined" &&
-        createPortal(
-          <div className="bg-white fixed right-2 top-2 z-50 flex flex-col space-y-2 rounded-2xs border-solid border-f1-border p-4 opacity-80 shadow-md">
-            <div className="text-md z-50 font-semibold">XRay</div>
-            <div className="flex flex-col space-y-2">
-              {componentTypes.map((type) => (
-                <label className="block" key={type}>
-                  <input
-                    onChange={(event) =>
-                      event.target.checked
-                        ? setFilter([...filter, type])
-                        : setFilter(filter.filter((f) => f !== type))
-                    }
-                    type="checkbox"
-                    checked={filter.includes(type)}
-                    className="mr-2"
-                  />
-                  {type}
-                </label>
-              ))}
-            </div>
-          </div>,
-          document?.body
-        )}
+      {enabled && typeof document !== "undefined"
+        ? createPortal(
+            <div className="bg-white fixed right-2 top-2 z-50 flex flex-col space-y-2 rounded-2xs border-solid border-f1-border p-4 opacity-80 shadow-md">
+              <div className="text-md z-50 font-semibold">XRay</div>
+              <div className="flex flex-col space-y-2">
+                {componentTypes.map((type) => (
+                  <label className="block" key={type}>
+                    <input
+                      onChange={(event) =>
+                        event.target.checked
+                          ? setFilter([...filter, type])
+                          : setFilter(filter.filter((f) => f !== type))
+                      }
+                      type="checkbox"
+                      checked={filter.includes(type)}
+                      className="mr-2"
+                    />
+                    {type}
+                  </label>
+                ))}
+              </div>
+            </div>,
+            document?.body
+          )
+        : null}
     </XRayContext.Provider>
   )
 }
@@ -128,7 +127,9 @@ export const useComponentXRay = <R extends HTMLElement | SVGElement>(
   const layoutElement = typeof document !== "undefined" ? document.body : null
 
   useEffect(() => {
-    if (!showXray || !ref.current || !filter.includes(meta.type)) return
+    if (!showXray || !ref.current || !filter.includes(meta.type)) {
+      return
+    }
 
     const element = ref.current
     element.dataset.componentName = meta.name
@@ -159,8 +160,12 @@ export const useComponentXRay = <R extends HTMLElement | SVGElement>(
     }
 
     return () => {
-      if (wrapper) layoutElement?.removeChild(wrapper)
-      if (tag) layoutElement?.removeChild(tag)
+      if (wrapper) {
+        layoutElement?.removeChild(wrapper)
+      }
+      if (tag) {
+        layoutElement?.removeChild(tag)
+      }
     }
   }, [showXray, meta.name, meta.type, filter, layoutElement])
 

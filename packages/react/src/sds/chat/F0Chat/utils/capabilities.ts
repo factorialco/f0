@@ -28,10 +28,14 @@ export const chatPermission = (
 ): boolean => {
   const explicit = capabilities?.[permission]
   // The host always wins: an admin of the noticeboard does post there.
-  if (explicit !== undefined) return explicit
+  if (explicit !== undefined) {
+    return explicit
+  }
   // An announcement channel is one-way by construction, so it inverts every
   // default at once — a read-only noticeboard needs no configuration.
-  if (channelType === "announcement") return false
+  if (channelType === "announcement") {
+    return false
+  }
   // Replying needs a composer to reply into.
   if (permission === "canReply") {
     return chatPermission("canSend", channelType, capabilities)

@@ -1,11 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { expect, within } from "storybook/test"
-
-import type { TagListProps } from "@/components/tags/F0TagList"
 import type { TagDotProps } from "@/components/tags/F0TagDot"
-
-import { DetailsItemsList } from "./index"
+import type { TagListProps } from "@/components/tags/F0TagList"
+import { DetailsItemsList } from "."
 
 const meta: Meta = {
   title: "List/DetailsItemsList",

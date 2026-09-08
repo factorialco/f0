@@ -1,9 +1,7 @@
 import { AnimatePresence, motion } from "motion/react"
 import { type ReactNode } from "react"
-
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { useChatPermission } from "../hooks/useChatPermission"
 import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
 import { useF0ChatEmit, useF0ChatStable } from "../providers/F0ChatProvider"
@@ -35,10 +33,12 @@ export const ChatMessageReactions = ({
 
   const react = (emoji: string, source: F0ChatReactionSource) => {
     emitReactionToggle(emit, message, emoji, source)
-    void toggleReaction(message.id, emoji)
+    toggleReaction(message.id, emoji)
   }
 
-  if (!message.reactions || message.reactions.length === 0) return null
+  if (!message.reactions || message.reactions.length === 0) {
+    return null
+  }
 
   return (
     <div
@@ -98,14 +98,14 @@ export const ChatMessageReactions = ({
           </motion.span>
         ))}
       </AnimatePresence>
-      {canReact && (
+      {canReact ? (
         <ChatEmojiPickerButton
           size="md"
           variant="outline"
           label={i18n.chat.react}
           onSelect={(emoji) => react(emoji, "inlinePicker")}
         />
-      )}
+      ) : null}
     </div>
   )
 }

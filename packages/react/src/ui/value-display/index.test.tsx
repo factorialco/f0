@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import { hasPlaceholder, isShowingPlaceholder, resolveValue } from "./utils"
 
 describe("hasPlaceholder", () => {

@@ -1,10 +1,5 @@
-import { ControllerRenderProps, FieldError, FieldValues } from "react-hook-form"
-
+import { ControllerRenderProps, FieldError } from "react-hook-form"
 import type { InputFieldStatus } from "@/components/F0InputField/types"
-
-import type { InitialFile } from "./file/types"
-import type { F0Field } from "./types"
-
 import { CardSelectFieldRenderer } from "./cardSelect/CardSelectFieldRenderer"
 import { CheckboxFieldRenderer } from "./checkbox/CheckboxFieldRenderer"
 import { CustomFieldRenderer } from "./custom/CustomFieldRenderer"
@@ -15,6 +10,7 @@ import { DateRangeFieldRenderer } from "./daterange/DateRangeFieldRenderer"
 import { DurationFieldRenderer } from "./duration/DurationFieldRenderer"
 import { EntitiesListFieldRenderer } from "./entitiesList/EntitiesListFieldRenderer"
 import { FileFieldRenderer } from "./file/FileFieldRenderer"
+import type { InitialFile } from "./file/types"
 import { NumberFieldRenderer } from "./number/NumberFieldRenderer"
 import { PeriodFieldRenderer } from "./period/PeriodFieldRenderer"
 import { PhoneFieldRenderer } from "./phone/PhoneFieldRenderer"
@@ -23,6 +19,7 @@ import { SelectFieldRenderer } from "./select/SelectFieldRenderer"
 import { SwitchFieldRenderer } from "./switch/SwitchFieldRenderer"
 import { TextFieldRenderer } from "./text/TextFieldRenderer"
 import { TextareaFieldRenderer } from "./textarea/TextareaFieldRenderer"
+import type { F0Field } from "./types"
 import { evaluateDateConstraint, evaluateDisabled } from "./utils"
 
 export interface FieldState {
@@ -32,7 +29,7 @@ export interface FieldState {
 
 export interface RenderFieldInputOptions {
   field: F0Field
-  formField: ControllerRenderProps<FieldValues>
+  formField: ControllerRenderProps
   fieldState: FieldState
   fieldStatus?: InputFieldStatus
   isSubmitting: boolean

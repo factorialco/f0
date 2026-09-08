@@ -1,9 +1,7 @@
 import { act, renderHook } from "@testing-library/react"
 import type { ReactNode } from "react"
 import { beforeEach, describe, expect, it } from "vitest"
-
 import { TestProviders } from "@/testing/test-utils"
-
 import { AiChatStateProvider, useAiChat } from "../AiChatStateProvider"
 import { useAiChatToggle } from "../useAiChatToggle"
 

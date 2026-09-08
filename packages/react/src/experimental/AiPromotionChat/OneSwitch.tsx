@@ -1,6 +1,5 @@
 import * as SwitchPrimitive from "@radix-ui/react-switch"
 import { useState } from "react"
-
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import {
@@ -9,7 +8,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/ui/tooltip"
-
 import OneIcon from "./OneIcon"
 import { useAiPromotionChat } from "./providers/AiPromotionChatStateProvider"
 
@@ -73,11 +71,11 @@ export const OneSwitch = ({
               </SwitchPrimitive.Root>
             </div>
           </TooltipTrigger>
-          {!open && (
+          {!open ? (
             <TooltipContent side="left" className="font-medium">
               {translations.ai.welcome}
             </TooltipContent>
-          )}
+          ) : null}
         </Tooltip>
       </TooltipProvider>
     </div>

@@ -3,7 +3,9 @@
  * Supports exact matches ("application/pdf") and wildcard patterns ("image/*").
  */
 export function matchesMimeType(fileType: string, pattern: string): boolean {
-  if (pattern === "*/*") return true
+  if (pattern === "*/*") {
+    return true
+  }
   if (pattern.endsWith("/*")) {
     const prefix = pattern.slice(0, pattern.indexOf("/"))
     return fileType.startsWith(prefix + "/")
@@ -20,11 +22,15 @@ export function filterByMimeType(
   files: File[],
   allowedMimeTypes: string | string[] | undefined
 ): File[] {
-  if (!allowedMimeTypes) return files
+  if (!allowedMimeTypes) {
+    return files
+  }
   const patterns = Array.isArray(allowedMimeTypes)
     ? allowedMimeTypes
     : [allowedMimeTypes]
-  if (patterns.length === 0) return files
+  if (patterns.length === 0) {
+    return files
+  }
   return files.filter((file) =>
     patterns.some((pattern) => matchesMimeType(file.type, pattern))
   )

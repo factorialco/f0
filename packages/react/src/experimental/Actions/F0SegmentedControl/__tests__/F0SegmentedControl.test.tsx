@@ -1,9 +1,7 @@
 import { userEvent } from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
-
 import { List, Table } from "@/icons/app"
 import { zeroRender as render, screen } from "@/testing/test-utils"
-
 import { F0SegmentedControl } from "../F0SegmentedControl"
 
 const defaultItems = [

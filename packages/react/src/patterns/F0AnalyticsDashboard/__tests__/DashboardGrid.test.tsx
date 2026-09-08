@@ -1,5 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
-
+import { AiChatStateProvider } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
+import {
+  WIDGET_DRAG_START,
+  type WidgetDragStartDetail,
+} from "@/lib/dnd/widgetDragEvents"
 import {
   fireEvent,
   screen,
@@ -8,16 +12,8 @@ import {
   within,
   zeroRender as render,
 } from "@/testing/test-utils"
-
-import { AiChatStateProvider } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
-import {
-  WIDGET_DRAG_START,
-  type WidgetDragStartDetail,
-} from "@/lib/dnd/widgetDragEvents"
-
-import type { DashboardItem } from "../types"
-
 import { DashboardGrid } from "../components/DashboardGrid/DashboardGrid"
+import type { DashboardItem } from "../types"
 
 type ExpenseRecord = {
   employee: string
@@ -143,7 +139,9 @@ describe("DashboardGrid", () => {
   it("grows a row when loaded content is taller than the configured itemHeight", async () => {
     vi.spyOn(HTMLElement.prototype, "scrollHeight", "get").mockImplementation(
       function getScrollHeight(this: HTMLElement) {
-        if (this.dataset.cardId === "expenses") return 960
+        if (this.dataset.cardId === "expenses") {
+          return 960
+        }
         return 0
       }
     )
@@ -250,7 +248,9 @@ describe("DashboardGrid", () => {
     it("clamps shrinking to overflowing content height", () => {
       vi.spyOn(HTMLElement.prototype, "scrollHeight", "get").mockImplementation(
         function getScrollHeight(this: HTMLElement) {
-          if (this.dataset.cardId === "headcount") return 180
+          if (this.dataset.cardId === "headcount") {
+            return 180
+          }
           return 0
         }
       )
@@ -270,7 +270,9 @@ describe("DashboardGrid", () => {
     it("clamps shrinking a collection row to its table content height", () => {
       vi.spyOn(HTMLElement.prototype, "scrollHeight", "get").mockImplementation(
         function getScrollHeight(this: HTMLElement) {
-          if (this.dataset.cardId === "expenses") return 460
+          if (this.dataset.cardId === "expenses") {
+            return 460
+          }
           return 0
         }
       )
@@ -326,7 +328,9 @@ describe("DashboardGrid", () => {
     it("measures and grows without requestAnimationFrame (hidden tabs, effect churn)", async () => {
       vi.spyOn(HTMLElement.prototype, "scrollHeight", "get").mockImplementation(
         function getScrollHeight(this: HTMLElement) {
-          if (this.dataset.cardId === "expenses") return 960
+          if (this.dataset.cardId === "expenses") {
+            return 960
+          }
           return 0
         }
       )
@@ -736,11 +740,11 @@ describe("DashboardGrid", () => {
 
       it("announces the widget identity and host-owned Ask One action", () => {
         const onAskAi = vi.fn()
-        const details: Array<{
+        const details: {
           id: string
           title: string
           onAskAi?: typeof onAskAi
-        }> = []
+        }[] = []
         const onStart = (event: Event) => {
           details.push(
             (

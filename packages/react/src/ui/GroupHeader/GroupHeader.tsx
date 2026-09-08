@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react"
-
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { Await } from "@/lib/Await"
-import { Counter } from "@/ui/Counter"
 import { cn, focusRing } from "@/lib/utils"
 import { ChevronToggle } from "@/ui/ChevronToggle/ChevronToggle"
+import { Counter } from "@/ui/Counter"
 import { Skeleton } from "@/ui/skeleton"
 
 type GroupHeaderProps = {
@@ -68,7 +67,9 @@ export const GroupHeader = ({
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" || e.key === " ") {
-      if (e.key === " ") e.preventDefault()
+      if (e.key === " ") {
+        e.preventDefault()
+      }
       handleGroupClick()
     }
   }
@@ -89,8 +90,8 @@ export const GroupHeader = ({
         onKeyDown: handleKeyDown,
       })}
     >
-      {chevronPosition === "leading" && chevron}
-      {selectable && (
+      {chevronPosition === "leading" ? chevron : null}
+      {selectable ? (
         <F0Checkbox
           checked={!!select}
           indeterminate={select === "indeterminate"}
@@ -99,7 +100,7 @@ export const GroupHeader = ({
           onCheckedChange={(checked) => onSelectChange?.(checked)}
           stopPropagation
         />
-      )}
+      ) : null}
       <Await resolve={label} fallback={<Skeleton className="h-4 w-24" />}>
         {(label) => (
           <h6 className="text-base font-semibold text-f1-foreground">
@@ -110,7 +111,7 @@ export const GroupHeader = ({
       <Await resolve={itemCount} fallback={<Skeleton className="h-4 w-5" />}>
         {(count) => count !== undefined && <Counter value={count} />}
       </Await>
-      {chevronPosition === "trailing" && chevron}
+      {chevronPosition === "trailing" ? chevron : null}
     </div>
   )
 }

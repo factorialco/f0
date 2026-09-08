@@ -1,5 +1,4 @@
 import { ReactNode } from "react"
-
 import { F0Icon, type IconType, type F0IconProps } from "@/components/F0Icon"
 import { cn, focusRing } from "@/lib/utils"
 import {
@@ -8,7 +7,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/ui/tooltip"
-
 import { ErrorTooltip } from "./ErrorTooltip"
 
 const cursorClass = {
@@ -87,9 +85,9 @@ export function BaseCell({
       )}
     >
       <ErrorTooltip message={error}>
-        {hintPosition === "left" && hintIcon}
+        {hintPosition === "left" ? hintIcon : null}
         <div className="min-w-0 flex-1">{children}</div>
-        {hintPosition === "right" && hintIcon}
+        {hintPosition === "right" ? hintIcon : null}
       </ErrorTooltip>
     </div>
   )

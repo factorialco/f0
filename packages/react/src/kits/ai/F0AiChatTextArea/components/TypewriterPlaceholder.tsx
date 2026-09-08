@@ -1,6 +1,5 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
-
 import { useReducedMotion } from "@/lib/a11y"
 import { cn } from "@/lib/utils"
 
@@ -147,9 +146,9 @@ export const TypewriterPlaceholder = ({
           )}
         >
           {displayedPlaceholder}
-          {isTyping && !shouldReduceMotion && (
+          {isTyping && !shouldReduceMotion ? (
             <span className="f0-chat-cursor-blink">|</span>
-          )}
+          ) : null}
         </div>
       </motion.div>
     </AnimatePresence>

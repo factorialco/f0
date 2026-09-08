@@ -1,8 +1,6 @@
 import { forwardRef } from "react"
-
 import { F0RichTextDisplay } from "@/components/RichText/F0RichTextDisplay"
 import { Skeleton } from "@/ui/skeleton"
-
 import { withSkeleton } from "../../../../../lib/skeleton"
 import { cn } from "../../../../../lib/utils"
 

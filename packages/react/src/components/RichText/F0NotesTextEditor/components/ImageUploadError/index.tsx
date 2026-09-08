@@ -1,7 +1,6 @@
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import { F0Button } from "@/components/F0Button"
 import { useI18n } from "@/lib/providers/i18n"
-
 import { ImageUploadErrorType } from "../../../internal/Extensions/Image"
 
 interface ImageUploadErrorProps {

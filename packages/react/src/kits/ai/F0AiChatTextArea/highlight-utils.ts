@@ -44,7 +44,9 @@ export function buildHighlightSegments(
     let searchFrom = 0
     while (true) {
       const idx = text.indexOf(pattern, searchFrom)
-      if (idx === -1) break
+      if (idx === -1) {
+        break
+      }
       ranges.push({ start: idx, end: idx + pattern.length })
       searchFrom = idx + pattern.length
     }

@@ -1,13 +1,10 @@
 import { motion, Reorder } from "motion/react"
 import { useEffect, useMemo, type ReactNode } from "react"
-
 import { withDataTestId } from "@/lib/data-testid"
 import { cn } from "@/lib/utils"
-
 import ApplyingChangesTag from "../ApplyingChangesTag"
 import { SurveyFormBuilderProvider } from "../Context"
-import { DragProvider } from "../DragContext"
-import { useDragContext } from "../DragContext"
+import { DragProvider, useDragContext } from "../DragContext"
 import { SurveyFormBuilderElement, SurveyFormBuilderProps } from "../types"
 import { AddButton } from "./AddButton"
 import { LastQuestionDialog } from "./LastQuestionDialog"
@@ -160,9 +157,9 @@ const _SurveyFormBuilder = ({
     >
       <DragProvider>
         <DragSelectGuard>
-          {showTableOfContent && (
+          {showTableOfContent ? (
             <TableOfContent elements={elements} onChange={onChange} />
-          )}
+          ) : null}
           <div className="relative flex flex-1 flex-col">
             <motion.div
               className={cn(
@@ -183,11 +180,8 @@ const _SurveyFormBuilder = ({
                   {(() => {
                     const nodes: ReactNode[] = []
 
-                    for (
-                      let index = 0;
-                      index < reorderableItems.length;
-                      index++
-                    ) {
+                    let index = 0
+                    while (index < reorderableItems.length) {
                       const item = reorderableItems[index]
 
                       // A locked section renders as one muted grey rounded
@@ -248,7 +242,7 @@ const _SurveyFormBuilder = ({
                           </div>
                         )
 
-                        index = next - 1
+                        index = next
                         continue
                       }
 
@@ -277,15 +271,16 @@ const _SurveyFormBuilder = ({
                           />
                         )
                       }
+                      index++
                     }
 
                     return nodes
                   })()}
                 </div>
               </Reorder.Group>
-              {shouldShowAddButton && <AddButton />}
+              {shouldShowAddButton ? <AddButton /> : null}
             </motion.div>
-            {applyingChanges && (
+            {applyingChanges ? (
               <motion.div
                 className="sticky bottom-1/2 left-0 z-50 flex w-full items-center justify-center"
                 initial={{ opacity: 0, scale: 0.95 }}
@@ -294,7 +289,7 @@ const _SurveyFormBuilder = ({
               >
                 <ApplyingChangesTag />
               </motion.div>
-            )}
+            ) : null}
           </div>
         </DragSelectGuard>
       </DragProvider>

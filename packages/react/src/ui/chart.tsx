@@ -3,7 +3,6 @@ import DOMPurify from "dompurify"
 import * as React from "react"
 import { useLayoutEffect, useMemo, useState } from "react"
 import * as RechartsPrimitive from "recharts"
-
 import { cn } from "../lib/utils"
 
 const variants = cva({
@@ -327,13 +326,13 @@ const ChartTooltipContent = React.forwardRef<
                           {itemConfig?.label || item.name}
                         </span>
                       </div>
-                      {item.value && (
+                      {item.value ? (
                         <span className="font-mono font-medium tabular-nums text-f1-foreground">
                           {yAxisFormatter
                             ? yAxisFormatter(String(item.value))
                             : item.value.toLocaleString()}
                         </span>
-                      )}
+                      ) : null}
                     </div>
                   </>
                 )}

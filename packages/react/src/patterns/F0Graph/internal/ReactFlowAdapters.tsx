@@ -5,19 +5,14 @@ import {
   type NodeProps,
 } from "@xyflow/react"
 import { type CSSProperties, type ReactNode, memo } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { Minimize } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
-import type { F0GraphNodeRenderContext } from "../F0Graph"
 import type {
   GraphNodeState,
   GraphNodeVariant,
 } from "../components/F0GraphNode"
-import type { GraphNode, LayoutDirection, ZoomLevel } from "../types"
-
 import {
   COLLAPSER_OFFSET_ADJUSTMENT_BY_ZOOM,
   NODE_BOX_INSET,
@@ -26,6 +21,8 @@ import {
   STACKED_NODE_HEIGHT,
   STACKED_RANK_SEP_RATIO,
 } from "../constants"
+import type { F0GraphNodeRenderContext } from "../F0Graph"
+import type { GraphNode, LayoutDirection, ZoomLevel } from "../types"
 
 /** A React Flow handle's default box, which is square. */
 const HANDLE_SIZE = 6
@@ -85,7 +82,9 @@ const paintedHandleStyle = (
   painted: number,
   reserved: number
 ): CSSProperties | undefined => {
-  if (reserved <= 0) return undefined
+  if (reserved <= 0) {
+    return undefined
+  }
   switch (position) {
     case Position.Bottom:
       // Flush like `flushHandleStyle`, free here since `top` is already set:
@@ -121,6 +120,7 @@ function handlePositions(direction: LayoutDirection): {
   }
 }
 
+import { F0GraphExpander } from "../components/F0GraphExpander"
 import {
   useF0GraphZoomInternal,
   useF0GraphExpandInternal,
@@ -130,16 +130,12 @@ import {
   useF0GraphRenderConfigInternal,
   useF0GraphStackHoverInternal,
 } from "../contexts"
-import { F0GraphExpander } from "../components/F0GraphExpander"
 
 // ─── Shared types ──────────────────────────────────────────────
 
 export interface GraphNodeData extends Record<string, unknown> {
-  graphNode: GraphNode<unknown>
-  renderNode: (
-    node: GraphNode<unknown>,
-    ctx: F0GraphNodeRenderContext
-  ) => ReactNode
+  graphNode: GraphNode
+  renderNode: (node: GraphNode, ctx: F0GraphNodeRenderContext) => ReactNode
   ariaLevel: number
   ariaSetSize: number
   ariaPosInSet: number
@@ -249,7 +245,9 @@ function F0GraphNodeWrapperInner({ data, id }: NodeProps<GraphRFNode>) {
   const actionsCtx = useF0GraphActionsInternal()
   const focusCtx = useF0GraphFocusInternal()
   const renderCfg = useF0GraphRenderConfigInternal()
-  if (!zoomCtx || !expandCtx || !selectionCtx || !actionsCtx) return null
+  if (!zoomCtx || !expandCtx || !selectionCtx || !actionsCtx) {
+    return null
+  }
 
   const { zoomLevel } = zoomCtx
   const { expandedNodes } = expandCtx
@@ -374,21 +372,38 @@ F0GraphNodeWrapperInner.displayName = "F0GraphNodeWrapper"
 export const F0GraphNodeWrapper = memo(
   F0GraphNodeWrapperInner,
   (prev, next) => {
-    if (prev.id !== next.id) return false
+    if (prev.id !== next.id) {
+      return false
+    }
     const prevData = prev.data as GraphNodeData
     const nextData = next.data as GraphNodeData
-    if (prevData.graphNode !== nextData.graphNode) return false
-    if (prevData.ariaLevel !== nextData.ariaLevel) return false
-    if (prevData.ariaSetSize !== nextData.ariaSetSize) return false
-    if (prevData.ariaPosInSet !== nextData.ariaPosInSet) return false
-    if (prevData.stacked !== nextData.stacked) return false
+    if (prevData.graphNode !== nextData.graphNode) {
+      return false
+    }
+    if (prevData.ariaLevel !== nextData.ariaLevel) {
+      return false
+    }
+    if (prevData.ariaSetSize !== nextData.ariaSetSize) {
+      return false
+    }
+    if (prevData.ariaPosInSet !== nextData.ariaPosInSet) {
+      return false
+    }
+    if (prevData.stacked !== nextData.stacked) {
+      return false
+    }
     if (
       (prevData.visibleChildIds?.join(",") ?? "") !==
       (nextData.visibleChildIds?.join(",") ?? "")
-    )
+    ) {
       return false
-    if (prev.positionAbsoluteX !== next.positionAbsoluteX) return false
-    if (prev.positionAbsoluteY !== next.positionAbsoluteY) return false
+    }
+    if (prev.positionAbsoluteX !== next.positionAbsoluteX) {
+      return false
+    }
+    if (prev.positionAbsoluteY !== next.positionAbsoluteY) {
+      return false
+    }
     return true
   }
 )
@@ -403,7 +418,9 @@ function F0GraphExpanderWrapperInner({ data, id }: NodeProps<ExpanderRFNode>) {
   const focusCtx = useF0GraphFocusInternal()
   const renderCfg = useF0GraphRenderConfigInternal()
   const i18n = useI18n()
-  if (!zoomCtx || !expandCtx || !actionsCtx) return null
+  if (!zoomCtx || !expandCtx || !actionsCtx) {
+    return null
+  }
   const expanded = expandCtx.expandedNodes.has(parentId)
   const { source: sourcePos, target: targetPos } = handlePositions(
     zoomCtx.direction
@@ -449,15 +466,29 @@ F0GraphExpanderWrapperInner.displayName = "F0GraphExpanderWrapper"
 export const F0GraphExpanderWrapper = memo(
   F0GraphExpanderWrapperInner,
   (prev, next) => {
-    if (prev.id !== next.id) return false
+    if (prev.id !== next.id) {
+      return false
+    }
     const prevData = prev.data as ExpanderNodeData
     const nextData = next.data as ExpanderNodeData
-    if (prevData.parentId !== nextData.parentId) return false
-    if (prevData.count !== nextData.count) return false
-    if (prevData.parentWidth !== nextData.parentWidth) return false
-    if (prevData.loading !== nextData.loading) return false
-    if (prev.positionAbsoluteX !== next.positionAbsoluteX) return false
-    if (prev.positionAbsoluteY !== next.positionAbsoluteY) return false
+    if (prevData.parentId !== nextData.parentId) {
+      return false
+    }
+    if (prevData.count !== nextData.count) {
+      return false
+    }
+    if (prevData.parentWidth !== nextData.parentWidth) {
+      return false
+    }
+    if (prevData.loading !== nextData.loading) {
+      return false
+    }
+    if (prev.positionAbsoluteX !== next.positionAbsoluteX) {
+      return false
+    }
+    if (prev.positionAbsoluteY !== next.positionAbsoluteY) {
+      return false
+    }
     return true
   }
 )
@@ -475,8 +506,12 @@ function F0GraphCollapserWrapperInner({
   const focusCtx = useF0GraphFocusInternal()
   const stackHoverCtx = useF0GraphStackHoverInternal()
   const i18n = useI18n()
-  if (!zoomCtx || !actionsCtx) return null
-  if (zoomCtx.zoomLevel === "dot") return null
+  if (!zoomCtx || !actionsCtx) {
+    return null
+  }
+  if (zoomCtx.zoomLevel === "dot") {
+    return null
+  }
   const { source: sourcePos, target: targetPos } = handlePositions(
     zoomCtx.direction
   )
@@ -576,14 +611,26 @@ F0GraphCollapserWrapperInner.displayName = "F0GraphCollapserWrapper"
 export const F0GraphCollapserWrapper = memo(
   F0GraphCollapserWrapperInner,
   (prev, next) => {
-    if (prev.id !== next.id) return false
+    if (prev.id !== next.id) {
+      return false
+    }
     const prevData = prev.data as CollapserNodeData
     const nextData = next.data as CollapserNodeData
-    if (prevData.parentId !== nextData.parentId) return false
-    if (prevData.parentWidth !== nextData.parentWidth) return false
-    if (prevData.collapseLabel !== nextData.collapseLabel) return false
-    if (prev.positionAbsoluteX !== next.positionAbsoluteX) return false
-    if (prev.positionAbsoluteY !== next.positionAbsoluteY) return false
+    if (prevData.parentId !== nextData.parentId) {
+      return false
+    }
+    if (prevData.parentWidth !== nextData.parentWidth) {
+      return false
+    }
+    if (prevData.collapseLabel !== nextData.collapseLabel) {
+      return false
+    }
+    if (prev.positionAbsoluteX !== next.positionAbsoluteX) {
+      return false
+    }
+    if (prev.positionAbsoluteY !== next.positionAbsoluteY) {
+      return false
+    }
     return true
   }
 )

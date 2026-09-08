@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { type IconType } from "@/components/F0Icon"
 import { useReducedMotion } from "@/lib/a11y"
@@ -87,7 +86,9 @@ export const WelcomeScreen = ({
   useEffect(() => {
     // Reduced motion renders the first phrase statically: no typewriter,
     // no rotation (WCAG 2.2.2 — auto-updating content with no pause control).
-    if (reducedMotion) return
+    if (reducedMotion) {
+      return
+    }
 
     let timer: ReturnType<typeof setTimeout> | undefined
 
@@ -100,7 +101,9 @@ export const WelcomeScreen = ({
         setPhase("holding")
       }
     } else if (phase === "holding") {
-      if (messages.length <= 1) return
+      if (messages.length <= 1) {
+        return
+      }
       timer = setTimeout(() => setPhase("erasing"), HOLD_MS)
     } else if (phase === "erasing") {
       if (chars > 0) {
@@ -114,7 +117,9 @@ export const WelcomeScreen = ({
     }
 
     return () => {
-      if (timer) clearTimeout(timer)
+      if (timer) {
+        clearTimeout(timer)
+      }
     }
   }, [phase, chars, current.length, messages.length, reducedMotion])
 
@@ -136,7 +141,7 @@ export const WelcomeScreen = ({
       )}
     >
       <div className="flex flex-col items-center">
-        {cta && (
+        {cta ? (
           <ButtonInternal
             variant="neutral"
             size="sm"
@@ -145,12 +150,12 @@ export const WelcomeScreen = ({
             icon={cta.icon}
             onClick={cta.onClick}
           />
-        )}
-        {caption && (
+        ) : null}
+        {caption ? (
           <p className="animate-in fade-in-0 text-center text-2xl font-semibold leading-[28px] text-f1-foreground-secondary duration-500">
             {caption}
           </p>
-        )}
+        ) : null}
         {/* aria-label is prohibited on a plain paragraph role, so only the
             interactive (button) case is named by it; the sr-only span names
             the static case with the full, stable phrase instead of the
@@ -177,11 +182,11 @@ export const WelcomeScreen = ({
           </span>
           <span className="sr-only">{current}</span>
         </p>
-        {subtitle && (
+        {subtitle ? (
           <p className="animate-in fade-in-0 mt-3 text-center text-base leading-snug text-f1-foreground-secondary duration-500">
             {subtitle}
           </p>
-        )}
+        ) : null}
       </div>
     </div>
   )

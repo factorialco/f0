@@ -1,12 +1,10 @@
 import sortBy from "lodash/sortBy"
 import throttle from "lodash/throttle"
 import React from "react"
-
 import { categorizeItemsByDate } from "@/lib/date"
 import { experimentalComponent } from "@/lib/experimental"
 import { useI18n } from "@/lib/providers/i18n"
 import { withSkeleton } from "@/lib/skeleton"
-
 import { ActivityItem } from "../ActivityItem"
 import { Section, SectionProps } from "./Section"
 
@@ -82,13 +80,14 @@ export const BaseActivityItemList = ({
             onClickItem={onClickItem}
             onItemVisible={handleItemVisible}
           />
-          {index !== groups.length - 1 && <Separator />}
+          {index !== groups.length - 1 ? <Separator /> : null}
         </React.Fragment>
       ))}
-      {loadingMoreItems &&
-        new Array(MORE_ITEMS_LOADING_COUNT)
-          .fill(null)
-          .map((_, index) => <ActivityItem.Skeleton key={index} />)}
+      {loadingMoreItems
+        ? new Array(MORE_ITEMS_LOADING_COUNT)
+            .fill(null)
+            .map((_, index) => <ActivityItem.Skeleton key={index} />)
+        : null}
     </div>
   )
 }

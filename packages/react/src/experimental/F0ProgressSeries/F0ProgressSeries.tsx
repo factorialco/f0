@@ -1,5 +1,4 @@
 import { forwardRef } from "react"
-
 import { getColor } from "@/kits/Charts/utils/colors"
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
@@ -13,7 +12,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/ui/tooltip"
-
 import {
   F0ProgressSeriesBar,
   F0ProgressSeriesColor,
@@ -192,14 +190,14 @@ function BarTrack({
               : "bg-f1-background-secondary"
           )}
         >
-          {!isEmpty && !bar.canceled && (
+          {!isEmpty && !bar.canceled ? (
             <BarFill pct={pct} color={bar.color ?? DEFAULT_COLOR} />
-          )}
+          ) : null}
         </div>
       </TooltipTrigger>
-      {!hideTooltip && (
+      {!hideTooltip ? (
         <TooltipContent className="text-sm">{tooltip}</TooltipContent>
-      )}
+      ) : null}
     </Tooltip>
   )
 }
@@ -215,14 +213,16 @@ function BarLabel({
   caption: string
   textClass: string
 }) {
-  if (!label && !caption) return null
+  if (!label && !caption) {
+    return null
+  }
 
   return (
     <div className={cn("flex items-center gap-1 truncate", textClass)}>
-      {label && <span className="text-f1-foreground">{label}</span>}
-      {caption && (
+      {label ? <span className="text-f1-foreground">{label}</span> : null}
+      {caption ? (
         <span className="text-f1-foreground-secondary">{caption}</span>
-      )}
+      ) : null}
     </div>
   )
 }
@@ -233,8 +233,12 @@ function BarLabel({
  * 12 bars → 0, 3, 6, 9 (Jan, Apr, Jul, Oct).
  */
 function labelIndices(count: number, maxLabels: number): number[] {
-  if (count <= 0 || maxLabels <= 0) return []
-  if (count <= maxLabels) return Array.from({ length: count }, (_, i) => i)
+  if (count <= 0 || maxLabels <= 0) {
+    return []
+  }
+  if (count <= maxLabels) {
+    return Array.from({ length: count }, (_, i) => i)
+  }
   return Array.from({ length: maxLabels }, (_, i) =>
     Math.floor((i * count) / maxLabels)
   )
@@ -286,24 +290,24 @@ const F0ProgressSeriesBase = forwardRef<HTMLDivElement, F0ProgressSeriesProps>(
             ))}
           </div>
 
-          {showLabelRow && (
+          {showLabelRow ? (
             <div className={cn("flex w-full", gapClass)} aria-hidden="true">
               {resolved.map((r, index) => (
                 <div
                   key={`${r.bar.label}-${index}`}
                   className="min-w-[3px] flex-1 overflow-hidden"
                 >
-                  {shown.has(index) && (
+                  {shown.has(index) ? (
                     <BarLabel
                       label={r.bar.label}
                       caption={r.caption}
                       textClass={LABEL_CLASS[size]}
                     />
-                  )}
+                  ) : null}
                 </div>
               ))}
             </div>
-          )}
+          ) : null}
         </TooltipProvider>
       </div>
     )

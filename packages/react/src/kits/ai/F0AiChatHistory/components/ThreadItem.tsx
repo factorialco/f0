@@ -1,5 +1,4 @@
 import { useMemo } from "react"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
 import {
@@ -15,10 +14,8 @@ import { useI18n } from "@/lib/providers/i18n"
 import { useDateFnsLocale } from "@/lib/providers/l10n"
 import { cn, focusRing } from "@/lib/utils"
 import { Spinner } from "@/ui/Spinner"
-
 import type { ThreadActionHandlers } from "../types"
 import type { ChatThread } from "../useChatHistory"
-
 import { formatThreadDate } from "../utils"
 
 interface ThreadItemProps extends ThreadActionHandlers {
@@ -103,14 +100,14 @@ export function ThreadItem({
         className="flex w-full min-w-0 items-center gap-1"
         onClick={() => onSelect(thread.id, thread.title)}
       >
-        {thread.icon && (
+        {thread.icon ? (
           <F0Icon
             icon={thread.icon}
             size="sm"
             className="mr-1 shrink-0 text-f1-icon"
             aria-hidden
           />
-        )}
+        ) : null}
         <OneEllipsis lines={1} className="py-0.5 text-left font-medium">
           {thread.title}
         </OneEllipsis>
@@ -119,11 +116,11 @@ export function ThreadItem({
           {formattedDate}
         </span>
       </div>
-      {thread.trailingLabel && (
+      {thread.trailingLabel ? (
         <span className="hidden shrink-0 pr-1 text-sm font-medium text-f1-foreground-tertiary group-focus-within:inline group-hover:inline">
           {thread.trailingLabel}
         </span>
-      )}
+      ) : null}
       {isPending ? (
         // While saving, the spinner sits where the actions button is and stays
         // visible off-hover so the row reads as "working".

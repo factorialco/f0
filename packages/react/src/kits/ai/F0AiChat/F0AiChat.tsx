@@ -1,14 +1,11 @@
 import { AnimatePresence, motion } from "motion/react"
 import { type ReactNode } from "react"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import Cross from "@/icons/app/Cross"
 import { useReducedMotion } from "@/lib/a11y"
 import { experimentalComponent } from "@/lib/experimental"
 import { useI18n } from "@/lib/providers/i18n"
-
 import { Skeleton } from "@/ui/skeleton"
-
 import { SidebarWindow } from "./components/layout/ChatWindow"
 import { useRevealOnChange } from "./hooks/useRevealOnChange"
 import { AiChatStateProvider, useAiChat } from "./providers/AiChatStateProvider"
@@ -226,11 +223,11 @@ const F0AiChatComponent = ({
             {input}
           </motion.div>
         </div>
-        {overlay && (
+        {overlay ? (
           <div className="absolute inset-0 z-30 flex items-center justify-center bg-f1-background-overlay p-4">
             {overlay}
           </div>
-        )}
+        ) : null}
       </div>
     )
   }

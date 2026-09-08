@@ -1,7 +1,5 @@
 import { type RefObject } from "react"
-
 import { cn } from "@/lib/utils"
-
 import { type HighlightSegment } from "../hooks/highlight-utils"
 
 type ChatTextareaFieldProps = {
@@ -79,7 +77,7 @@ export const ChatTextareaField = ({
         {value.endsWith("\n") ? value + "_" : value || " "}
       </div>
 
-      {hasOverlay && (
+      {hasOverlay ? (
         <div
           ref={highlightRef}
           aria-hidden
@@ -97,25 +95,20 @@ export const ChatTextareaField = ({
               image's width is gone with it. */}
           {highlightSegments.map((seg, i) =>
             seg.type === "mention" ? (
-              // Same colour pattern as the bubble: you / @here amber, others
-              // info. Tone and background carry the whole distinction: no
-              // padding, and — load-bearing — no weight change. A `<textarea>`
-              // lays its entire run out at one weight, so a heavier mention
-              // here paints wider than the transparent glyphs the caret is
-              // positioned from, and every character from the mention onward
-              // sits off its boundary. Measured at 14px Inter, `font-medium`
-              // cost ~0.1px per mention character, plateauing at 1.25px (8.9%
-              // of an em) across the rest of the line — enough to park the
-              // caret inside a glyph instead of between two.
-              <span
-                key={i}
-                className={cn(
-                  "rounded-xs",
-                  seg.tone === "self" || seg.tone === "everyone"
-                    ? "bg-f1-background-warning text-f1-foreground-warning"
-                    : "bg-f1-background-info text-f1-foreground-info"
-                )}
-              >
+              // The bubble's colour, so a mention reads the same before and
+              // after sending: secondary foreground, no background, and no
+              // distinction between mentioning you, `@here` or anyone else.
+              //
+              // Colour only — deliberately NOT the bubble's `font-medium`, and
+              // this is load-bearing. A `<textarea>` lays its entire run out at
+              // one weight, so a heavier mention in the overlay paints wider
+              // than the transparent glyphs the caret is positioned from, and
+              // every character from the mention onward sits off its boundary.
+              // Measured at 14px Inter, `font-medium` cost ~0.1px per mention
+              // character, plateauing at 1.25px (8.9% of an em) across the rest
+              // of the line — enough to park the caret inside a glyph instead
+              // of between two.
+              <span key={i} className="text-f1-foreground-secondary">
                 {seg.text}
               </span>
             ) : seg.type === "ghost" ? (
@@ -127,7 +120,7 @@ export const ChatTextareaField = ({
             )
           )}
         </div>
-      )}
+      ) : null}
 
       <textarea
         ref={textareaRef}

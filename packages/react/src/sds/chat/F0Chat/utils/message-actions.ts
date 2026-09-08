@@ -72,12 +72,18 @@ export const canEditAction = ({
   hasEditMessage,
   editWindowMs,
 }: MessageActionContext): boolean => {
-  if (message.deleted || !hasEditMessage) return false
+  if (message.deleted || !hasEditMessage) {
+    return false
+  }
   const uneditable = (message.attachments ?? []).some(
     (a) => a.kind === "voice" || a.kind === "card"
   )
-  if (uneditable) return false
-  if (capabilities?.canEditMessage) return capabilities.canEditMessage(message)
+  if (uneditable) {
+    return false
+  }
+  if (capabilities?.canEditMessage) {
+    return capabilities.canEditMessage(message)
+  }
   const withinEditWindow =
     editWindowMs == null ||
     Date.now() - new Date(message.createdAt).getTime() <= editWindowMs

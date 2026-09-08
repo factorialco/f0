@@ -1,11 +1,9 @@
 import { forwardRef } from "react"
-
 import { getColor } from "@/kits/Charts/utils/colors"
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { F0SegmentedBarProps } from "./types"
 
 export type { F0SegmentedBarProps, SegmentColorToken } from "./types"

@@ -1,20 +1,19 @@
 import { ButtonInternal } from "@/components/F0Button/internal"
+import { BaseHeader } from "@/experimental/Information/Headers/BaseHeader"
 import {
   DropdownInternal,
   DropdownItemObject,
 } from "@/experimental/Navigation/Dropdown/internal"
-import { BaseHeader } from "@/experimental/Information/Headers/BaseHeader"
 import { BreadcrumbItem } from "@/experimental/Navigation/Header/Breadcrumbs/internal/BreadcrumbItem"
 import { PageNavigation } from "@/experimental/Navigation/Header/PageNavigation"
-import { Tabs } from "@/patterns/Navigation/Tabs"
-import CrossIcon from "@/icons/app/Cross"
 import { ArrowLeft, Ellipsis, Maximize } from "@/icons/app"
+import CrossIcon from "@/icons/app/Cross"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
+import { Tabs } from "@/patterns/Navigation/Tabs"
 import { BreadcrumbList } from "@/ui/breadcrumb"
 import { DialogTitle } from "@/ui/Dialog/dialog"
 import { DrawerDescription } from "@/ui/drawer"
-
 import { F0DialogHeaderProps } from "../internal-types"
 import { useF0Dialog } from "./F0DialogProvider"
 
@@ -48,7 +47,9 @@ export const F0DialogHeader = ({
     ) ?? []
 
   const Actions = () => {
-    if (!otherActionItems.length || !otherActions) return null
+    if (!otherActionItems.length || !otherActions) {
+      return null
+    }
 
     const hasCriticalAction = otherActionItems.some((action) => action.critical)
 
@@ -73,7 +74,9 @@ export const F0DialogHeader = ({
   }
 
   const Module = () => {
-    if (!module) return null
+    if (!module) {
+      return null
+    }
 
     return (
       <BreadcrumbList>
@@ -126,7 +129,9 @@ export const F0DialogHeader = ({
     ) : null
 
   const Controls = () => {
-    if (!controls) return null
+    if (!controls) {
+      return null
+    }
 
     if (controls.kind === "back") {
       return (
@@ -141,8 +146,8 @@ export const F0DialogHeader = ({
 
     return (
       <>
-        {controls.expand &&
-          (controls.expand.url !== undefined ? (
+        {controls.expand ? (
+          controls.expand.url !== undefined ? (
             <ButtonInternal
               variant="outline"
               icon={Maximize}
@@ -156,9 +161,12 @@ export const F0DialogHeader = ({
               onClick={controls.expand.onClick}
               label={controls.expand.label}
             />
-          ))}
-        {controls.expand && controls.navigation && <Divider />}
-        {controls.navigation && <PageNavigation {...controls.navigation} />}
+          )
+        ) : null}
+        {controls.expand && controls.navigation ? <Divider /> : null}
+        {controls.navigation ? (
+          <PageNavigation {...controls.navigation} />
+        ) : null}
       </>
     )
   }
@@ -205,7 +213,7 @@ export const F0DialogHeader = ({
         )}
       >
         <div className="flex flex-row items-center gap-3">
-          {(module || title || !!description) && (
+          {module || title || !!description ? (
             <div className="flex flex-col gap-1">
               {module ? (
                 <Module />
@@ -216,19 +224,19 @@ export const F0DialogHeader = ({
                   </DialogTitle>
                 )
               )}
-              {!!description && (
+              {description ? (
                 <DrawerDescription className="text-base text-f1-foreground-secondary">
                   {description}
                 </DrawerDescription>
-              )}
+              ) : null}
             </div>
-          )}
+          ) : null}
         </div>
         <div className="flex flex-row items-center gap-2">
-          {navigation && <PageNavigation {...navigation} />}
+          {navigation ? <PageNavigation {...navigation} /> : null}
           <Status />
           <Actions />
-          {(navigation || otherActions) && <Divider />}
+          {navigation || otherActions ? <Divider /> : null}
           <CloseButton />
         </div>
       </div>

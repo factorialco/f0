@@ -1,5 +1,4 @@
-import { FilterTypeKey, FilterTypes } from "."
-import { filterTypes } from "."
+import { FilterTypeKey, FilterTypes, filterTypes } from "."
 
 /**
  * Returns the filter options with the defaults if the option property is not provided by the filter

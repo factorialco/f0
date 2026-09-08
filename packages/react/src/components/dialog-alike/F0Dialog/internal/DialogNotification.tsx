@@ -3,7 +3,6 @@ import {
   F0AvatarAlert,
 } from "@/components/avatars/F0AvatarAlert"
 import { DialogDescription, DialogTitle } from "@/ui/Dialog"
-
 import { F0DialogAction } from "../types"
 import { DialogInternal } from "./DialogInternal"
 

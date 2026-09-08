@@ -1,24 +1,21 @@
 import { AnimatePresence, motion } from "motion/react"
 import { ReactElement, useContext, useRef, useState } from "react"
-
-import type { StatusVariant } from "@/components/tags/F0TagStatus"
-
 import { ModuleId } from "@/components/avatars/F0AvatarModule"
 import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { IconType } from "@/components/F0Icon"
+import type { StatusVariant } from "@/components/tags/F0TagStatus"
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
 import { OneSwitch as OnePromotionSwitch } from "@/experimental/AiPromotionChat/OneSwitch"
 import { Dropdown } from "@/experimental/Navigation/Dropdown"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { ChevronLeft, Menu } from "@/icons/app"
+import { F0OneSwitch } from "@/kits/ai/F0OneSwitch"
 import { Link } from "@/lib/linkHandler"
 import { cn } from "@/lib/utils"
 import { useSidebar } from "@/patterns/ApplicationFrame/FrameProvider"
-import { F0OneSwitch } from "@/kits/ai/F0OneSwitch"
 import { ActionButtonVariant } from "@/ui/Action"
 import { Skeleton } from "@/ui/skeleton"
-
 import { Breadcrumbs, BreadcrumbsProps } from "../Breadcrumbs"
 import { FavoriteButton } from "../Favorites"
 import { NavigationProps, PageNavigation } from "../PageNavigation"
@@ -48,7 +45,7 @@ export type PageAction = {
       onClick: () => void
     }
   | {
-      actions: Array<{ label: string; href: string }>
+      actions: { label: string; href: string }[]
     }
 )
 
@@ -134,7 +131,7 @@ export function PageHeader({
     >
       <div className="flex flex-grow items-center">
         <AnimatePresence>
-          {!embedded && sidebarState !== "locked" && (
+          {!embedded && sidebarState !== "locked" ? (
             <motion.div
               initial={{ opacity: 0, width: 0 }}
               animate={{ opacity: 1, width: "auto" }}
@@ -150,7 +147,7 @@ export function PageHeader({
                 />
               </div>
             </motion.div>
-          )}
+          ) : null}
         </AnimatePresence>
         <div
           className={cn(
@@ -158,7 +155,7 @@ export function PageHeader({
             canGoBack && "justify-center"
           )}
         >
-          {embedded && canGoBack && (
+          {embedded && canGoBack ? (
             <div className="absolute left-4">
               <F0Button
                 variant="ghost"
@@ -168,7 +165,7 @@ export function PageHeader({
                 onClick={() => window.history.back()}
               />
             </div>
-          )}
+          ) : null}
           {canGoBack || hasNavigation ? (
             <div className="text-lg font-semibold text-f1-foreground">
               {"loading" in lastBreadcrumb ? (
@@ -195,7 +192,7 @@ export function PageHeader({
         </div>
       </div>
       <div className="flex items-center gap-3">
-        {!embedded && hasStatus && (
+        {!embedded && hasStatus ? (
           <div>
             {statusTag.tooltip ? (
               <Tooltip label={statusTag.tooltip}>
@@ -211,42 +208,44 @@ export function PageHeader({
               <F0TagStatus text={statusTag.text} variant={statusTag.variant} />
             )}
           </div>
-        )}
+        ) : null}
         {!embedded &&
-          hasStatus &&
-          (effectiveNavigation || hasActions || hasProductUpdates) && (
-            <div className="h-4 w-px bg-f1-border-secondary" />
-          )}
-        {effectiveNavigation && <PageNavigation {...effectiveNavigation} />}
-        {effectiveNavigation && hasActions && (
+        hasStatus &&
+        (effectiveNavigation || hasActions || hasProductUpdates) ? (
           <div className="h-4 w-px bg-f1-border-secondary" />
-        )}
-        {(hasProductUpdates || hasActions) && (
+        ) : null}
+        {effectiveNavigation ? (
+          <PageNavigation {...effectiveNavigation} />
+        ) : null}
+        {effectiveNavigation && hasActions ? (
+          <div className="h-4 w-px bg-f1-border-secondary" />
+        ) : null}
+        {hasProductUpdates || hasActions ? (
           <div className="flex items-center gap-2">
-            {hasProductUpdates && (
+            {hasProductUpdates ? (
               <div className="items-right flex gap-2">
                 <ProductUpdates
                   {...productUpdates}
                   currentModule={module.name}
                 />
               </div>
-            )}
-            {hasActions && (
+            ) : null}
+            {hasActions ? (
               <div className="items-right flex gap-2">
                 {actions.map((action, index) => (
                   <PageAction key={index} action={action} />
                 ))}
               </div>
-            )}
+            ) : null}
           </div>
-        )}
+        ) : null}
         <div className="flex items-center gap-3">
-          {!hideOneSwitch && (
+          {!hideOneSwitch ? (
             <F0OneSwitch
               tooltip={oneSwitchTooltip}
               autoOpen={oneSwitchAutoOpen}
             />
-          )}
+          ) : null}
           <OnePromotionSwitch />
         </div>
       </div>

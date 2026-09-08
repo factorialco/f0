@@ -1,7 +1,6 @@
 "use client"
 
 import { type ReactElement, useEffect, useMemo, useState } from "react"
-
 /**
  * Public implementation of the FilterPickerInternal component.
  * F0FilterPickerContent component.
@@ -9,16 +8,14 @@ import { type ReactElement, useEffect, useMemo, useState } from "react"
 import { DataTestIdWrapper } from "@/lib/data-testid"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
+import { getFilterType } from "../OneFilterPicker/filterTypes"
 import type {
   FilterTypeContext,
   FilterTypeSchema,
 } from "../OneFilterPicker/filterTypes/types"
 import type { FiltersDefinition, FiltersState } from "../OneFilterPicker/types"
-import type { F0FilterPickerContentProps } from "./types"
-
-import { getFilterType } from "../OneFilterPicker/filterTypes"
 import { FilterPickerInternal } from "./internal"
+import type { F0FilterPickerContentProps } from "./types"
 
 const DEFAULT_FORM_HEIGHT = 388
 
@@ -138,7 +135,9 @@ function _F0FilterPickerContent<Filters extends FiltersDefinition>({
 
   // Calculate form height based on filter types
   const formHeight = useMemo(() => {
-    if (height) return height
+    if (height) {
+      return height
+    }
     const maxHeight = Object.entries(filters).reduce((max, [_, value]) => {
       const filterType = getFilterType(value.type)
       return Math.max(max, filterType?.formHeight || DEFAULT_FORM_HEIGHT)

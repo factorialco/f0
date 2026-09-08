@@ -1,11 +1,9 @@
 import { motion } from "motion/react"
 import { type ReactNode, useEffect, useState } from "react"
-
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0AvatarList } from "@/components/avatars/F0AvatarList"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
 import { type F0ChatUser } from "../types"
 import { EASE_OUT_SWIFT } from "../utils/chat-motion"
@@ -71,9 +69,13 @@ export const ChatTypingBubble = ({
   // render can't flag the streak's first bubble as already shown.
   const [entryFresh] = useState(() => entryState?.fresh ?? true)
   useEffect(() => {
-    if (entryState) entryState.fresh = false
+    if (entryState) {
+      entryState.fresh = false
+    }
   }, [entryState])
-  if (users.length === 0) return null
+  if (users.length === 0) {
+    return null
+  }
 
   let label = i18n.chat.writing
   if (isGroup) {
@@ -104,8 +106,8 @@ export const ChatTypingBubble = ({
       animate={leaving ? { opacity: 0 } : { opacity: 1 }}
       transition={{ duration: 0.14, ease: EASE_OUT_SWIFT }}
     >
-      {isGroup &&
-        (users.length > 1 ? (
+      {isGroup ? (
+        users.length > 1 ? (
           // Several people typing: stacked avatar list, capped at 3 with a +N.
           <F0AvatarList
             type="person"
@@ -125,7 +127,8 @@ export const ChatTypingBubble = ({
               }
             }
           />
-        ))}
+        )
+      ) : null}
       {/* The point only belongs where the avatar is — in a DM there's nothing
           beside the bubble for it to aim at (see `bubbleCornerClass`). */}
       <div

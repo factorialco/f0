@@ -44,8 +44,9 @@ const scrollableAncestor = (from: HTMLElement): HTMLElement | null => {
     // `getPropertyValue`, not `.overflowY`: the property accessor is the one
     // jsdom's computed style does not implement, and this is the API both it and
     // every browser agree on.
-    if (SCROLLS.has(getComputedStyle(el).getPropertyValue("overflow-y")))
+    if (SCROLLS.has(getComputedStyle(el).getPropertyValue("overflow-y"))) {
       return el
+    }
     el = el.parentElement
   }
   return null
@@ -169,7 +170,9 @@ export function useWidgetVirtualizer({
   const explicit = settings?.scrollElement != null
 
   useLayoutEffect(() => {
-    if (!wanted || explicit || !listEl) return
+    if (!wanted || explicit || !listEl) {
+      return
+    }
     setAncestor(scrollableAncestor(listEl))
   }, [wanted, explicit, listEl])
 
@@ -185,7 +188,9 @@ export function useWidgetVirtualizer({
   const [scrollMargin, setScrollMargin] = useState(0)
 
   useLayoutEffect(() => {
-    if (!wanted || !listEl || !scrollElement) return
+    if (!wanted || !listEl || !scrollElement) {
+      return
+    }
 
     const read = () => {
       const offset =
@@ -199,13 +204,17 @@ export function useWidgetVirtualizer({
     }
 
     read()
-    if (typeof ResizeObserver !== "function") return
+    if (typeof ResizeObserver !== "function") {
+      return
+    }
     const observer = new ResizeObserver(read)
     observer.observe(scrollElement)
     // The COLUMN, because what moves the widgets down is the content above them
     // growing — the feed loading, a card appearing — and none of that resizes
     // either the scroll region or the list.
-    if (listEl.parentElement) observer.observe(listEl.parentElement)
+    if (listEl.parentElement) {
+      observer.observe(listEl.parentElement)
+    }
     return () => observer.disconnect()
   }, [wanted, listEl, scrollElement])
 
@@ -226,8 +235,11 @@ export function useWidgetVirtualizer({
   const rangeExtractor = useCallback(
     (range: Range) => {
       const indexes = new Set(defaultRangeExtractor(range))
-      for (const index of pinnedRef.current)
-        if (index >= 0 && index < range.count) indexes.add(index)
+      for (const index of pinnedRef.current) {
+        if (index >= 0 && index < range.count) {
+          indexes.add(index)
+        }
+      }
       return [...indexes].sort((a, b) => a - b)
     },
     [pinnedKey]

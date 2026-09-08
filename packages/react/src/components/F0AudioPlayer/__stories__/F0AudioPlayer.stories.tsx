@@ -1,9 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { ComponentProps, useEffect, useRef } from "react"
-
 import { Download } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
 import { F0AudioPlayer, F0AudioPlayerCard } from ".."
 
 // A short public-domain sample so the controls are playable in Storybook.
@@ -333,7 +331,9 @@ function EmbeddedTranscriptionDemo(
   const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {
     const audio = ref.current?.querySelector("audio")
-    if (!audio || typeof audio.addTextTrack !== "function") return
+    if (!audio || typeof audio.addTextTrack !== "function") {
+      return
+    }
     const track = audio.addTextTrack("captions", "English", "en")
     const lines = [
       "Interviewer: Can you tell me about your availability for night shifts and weekends?",

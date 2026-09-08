@@ -6,7 +6,9 @@ const getPdfBlob = async (pdf: PDFDocumentProxy): Promise<Blob> => {
 }
 
 export const printPdf = async (pdf: PDFDocumentProxy | null): Promise<void> => {
-  if (!pdf) return
+  if (!pdf) {
+    return
+  }
 
   const blobUrl = URL.createObjectURL(await getPdfBlob(pdf))
   const iframe = document.createElement("iframe")
@@ -29,7 +31,9 @@ export const downloadPdf = async (
   pdf: PDFDocumentProxy | null,
   filename: string
 ): Promise<void> => {
-  if (!pdf) return
+  if (!pdf) {
+    return
+  }
 
   const url = URL.createObjectURL(await getPdfBlob(pdf))
   const anchor = document.createElement("a")
@@ -55,7 +59,9 @@ export const downloadFromUrl = async (
     const response = await fetch(url, {
       credentials: withCredentials ? "include" : "same-origin",
     })
-    if (!response.ok) throw new Error(`${response.status}`)
+    if (!response.ok) {
+      throw new Error(`${response.status}`)
+    }
     objectUrl = URL.createObjectURL(await response.blob())
     href = objectUrl
   } catch {
@@ -66,9 +72,13 @@ export const downloadFromUrl = async (
   anchor.href = href
   anchor.download = filename ?? ""
   anchor.rel = "noreferrer"
-  if (!objectUrl) anchor.target = "_blank"
+  if (!objectUrl) {
+    anchor.target = "_blank"
+  }
   document.body.appendChild(anchor)
   anchor.click()
   anchor.remove()
-  if (objectUrl) URL.revokeObjectURL(objectUrl)
+  if (objectUrl) {
+    URL.revokeObjectURL(objectUrl)
+  }
 }

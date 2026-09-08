@@ -1,9 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-
 import { useI18n } from "@/lib/providers/i18n"
-
 import { type AiChatFileAttachmentConfig } from "../F0AiChat/types"
-
 import { filterByMimeType } from "./file-utils"
 import { type AttachedFile } from "./types"
 
@@ -25,8 +22,12 @@ export function useFileAttachments(
   const maxFiles = fileAttachments?.maxFiles
 
   const acceptValue = useMemo(() => {
-    if (!allowedMimeTypes) return undefined
-    if (Array.isArray(allowedMimeTypes)) return allowedMimeTypes.join(",")
+    if (!allowedMimeTypes) {
+      return undefined
+    }
+    if (Array.isArray(allowedMimeTypes)) {
+      return allowedMimeTypes.join(",")
+    }
     return allowedMimeTypes
   }, [allowedMimeTypes])
 
@@ -66,10 +67,14 @@ export function useFileAttachments(
 
   const processFiles = useCallback(
     async (rawFiles: File[]) => {
-      if (rawFiles.length === 0 || !onUploadFiles) return
+      if (rawFiles.length === 0 || !onUploadFiles) {
+        return
+      }
 
       const files = filterByMimeType(rawFiles, allowedMimeTypes)
-      if (files.length === 0) return
+      if (files.length === 0) {
+        return
+      }
 
       // Reject the whole batch when it would exceed the cap — surfacing a
       // transient banner is friendlier than silently truncating the user's
@@ -118,7 +123,9 @@ export function useFileAttachments(
         setAttachedFiles((prev) =>
           prev.map((att) => {
             const idx = newAttached.findIndex((n) => n.id === att.id)
-            if (idx === -1) return att
+            if (idx === -1) {
+              return att
+            }
             if (uploaded[idx]) {
               return {
                 ...att,

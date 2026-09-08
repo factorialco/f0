@@ -1,7 +1,6 @@
 import { useMemo } from "react"
-
-import { Calendar, Completed, DottedCircle, InProgressTask } from "@/icons/app"
 import { WidgetSimpleListItem } from "@/experimental/Widgets/Content/ListItems/WidgetSimpleListItem"
+import { Calendar, Completed, DottedCircle, InProgressTask } from "@/icons/app"
 
 export type TaskStatus = "done" | "in-progress" | "todo"
 export interface Task {
@@ -41,7 +40,9 @@ export function TaskItem({
   }
 
   const icon = useMemo(() => {
-    if (hideIcon) return
+    if (hideIcon) {
+      return
+    }
     return iconMap[status]
   }, [status, hideIcon])
 

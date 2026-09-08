@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from "react"
-
 import type {
   FiltersDefinition,
   FiltersState,

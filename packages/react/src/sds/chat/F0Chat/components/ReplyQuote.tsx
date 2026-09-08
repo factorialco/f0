@@ -1,9 +1,7 @@
 import { type ReactNode } from "react"
-
 import { F0Icon } from "@/components/F0Icon"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { useReplyPreview } from "../hooks/useReplyPreview"
 import { useChatJump } from "../providers/ChatUIProvider"
 import { useF0ChatEmit, useF0ChatStable } from "../providers/F0ChatProvider"
@@ -64,7 +62,7 @@ export const ReplyQuote = ({
               : "rounded-tl-xs"
         )}
       >
-        {thumbnailUrl && (
+        {thumbnailUrl ? (
           <img
             src={thumbnailUrl}
             alt=""
@@ -72,7 +70,7 @@ export const ReplyQuote = ({
             decoding="async"
             className="ml-2.5 h-9 w-9 shrink-0 self-center rounded-sm object-cover"
           />
-        )}
+        ) : null}
         <div className="flex min-w-0 flex-1 flex-col gap-0.5 p-2.5">
           <ClampText
             className={cn(
@@ -83,7 +81,7 @@ export const ReplyQuote = ({
             {senderName}
           </ClampText>
           <span className="flex min-w-0 items-center gap-1 text-f1-foreground-secondary">
-            {icon && <F0Icon icon={icon} size="sm" color="default" />}
+            {icon ? <F0Icon icon={icon} size="sm" color="default" /> : null}
             <ClampText className="min-w-0 text-base">{label}</ClampText>
           </span>
         </div>

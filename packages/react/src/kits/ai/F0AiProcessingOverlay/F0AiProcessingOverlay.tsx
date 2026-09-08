@@ -1,10 +1,9 @@
 import { AnimatePresence, motion } from "motion/react"
 import { memo, type ReactNode, useEffect } from "react"
-
+import { F0OneIcon } from "@/kits/ai/F0OneIcon"
 import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-import { F0OneIcon } from "@/kits/ai/F0OneIcon"
 
 const IconMotion = motion.create(F0OneIcon)
 
@@ -107,7 +106,9 @@ export const F0AiProcessingOverlay = memo(function F0AiProcessingOverlay({
   // doesn't sit on a blurred, non-interactive field. Skip the chat input so
   // the user can keep typing follow-ups while changes apply.
   useEffect(() => {
-    if (!active) return
+    if (!active) {
+      return
+    }
     const activeElement = document.activeElement as HTMLElement | null
     if (
       activeElement &&
@@ -120,7 +121,7 @@ export const F0AiProcessingOverlay = memo(function F0AiProcessingOverlay({
   return (
     <div className={cn("relative flex flex-1 flex-col", className)}>
       <AnimatePresence>
-        {active && (
+        {active ? (
           // Zero-height sticky anchor pinned to the top of the scroll viewport,
           // with the pill pushed to ~half the viewport height. This keeps the
           // pill centred in the visible area regardless of how tall the blurred
@@ -138,7 +139,7 @@ export const F0AiProcessingOverlay = memo(function F0AiProcessingOverlay({
               />
             </div>
           </motion.div>
-        )}
+        ) : null}
       </AnimatePresence>
       <motion.div
         className={cn("flex flex-1 flex-col", active && "pointer-events-none")}

@@ -1,11 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { Plus } from "lucide-react"
 import { expect, fn, within } from "storybook/test"
-
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
 import { OneEmptyState } from "../OneEmptyState"
 
 const meta = {

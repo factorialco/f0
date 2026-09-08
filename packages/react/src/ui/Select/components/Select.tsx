@@ -1,7 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
-
 import { toArray } from "@/lib/toArray.ts"
-
 import { SelectContext, SelectContextType } from "../SelectContext.tsx"
 import * as SelectPrimitive from "./radix-ui"
 import { SelectPrimitiveProps } from "./radix-ui/select.tsx"
@@ -23,7 +21,7 @@ export type SelectProps<T extends string = string> = SelectPrimitiveProps<T> & {
 
 const Select = <T extends string = string>(props: SelectProps<T>) => {
   type Value = NonNullable<typeof props.value>
-  const [internalOpen, setInternalOpen] = useState(!!(props.as === "list"))
+  const [internalOpen, setInternalOpen] = useState(props.as === "list")
 
   const isOpen =
     props.as === "list"

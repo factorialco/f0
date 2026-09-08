@@ -1,7 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
 import { useDebounceCallback } from "usehooks-ts"
-
-import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import {
   FiltersDefinition,
   FiltersState,
@@ -10,7 +8,7 @@ import {
   SortingsDefinition,
 } from "@/hooks/datasource"
 import { useDataCollectionStorage as useDataCollectionStorageProvider } from "@/lib/providers/datacollection/DataCollectionStorageProvider"
-
+import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import { getFeatures } from "./getFeatures"
 import {
   DataCollectionStatus,
@@ -169,7 +167,9 @@ export const useDataCollectionStorage = <
     // visualizationFilters map containing only the default visualization)
     // can be debounced and later flushed, overwriting the previously persisted
     // multi-key map because the default storage handler replaces the whole key.
-    if (!active || !storageReady) return
+    if (!active || !storageReady) {
+      return
+    }
 
     debouncedSetFeatures(featureProviders)
 

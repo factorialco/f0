@@ -3,9 +3,8 @@ import {
   ButtonDropdownItem,
   F0ButtonDropdown,
 } from "@/components/F0ButtonDropdown"
-import { Switch } from "@/experimental/Forms/Fields/Switch"
 import { ToolbarDivider } from "@/components/RichText/internal"
-
+import { Switch } from "@/experimental/Forms/Fields/Switch"
 import {
   primaryActionType,
   secondaryActionType,
@@ -27,14 +26,16 @@ const getLabelID = (label?: string) =>
 const normalizeSecondaryActions = (
   secondaryAction?: secondaryActionsType
 ): secondaryActionType[] => {
-  if (!secondaryAction) return []
+  if (!secondaryAction) {
+    return []
+  }
   return Array.isArray(secondaryAction) ? secondaryAction : [secondaryAction]
 }
 
 const createActionItems = (
   primaryAction?: primaryActionType,
   secondaryActions?: secondaryActionType[]
-): ButtonDropdownItem<string>[] => {
+): ButtonDropdownItem[] => {
   const primaryActionItems = primaryAction
     ? [
         {
@@ -140,21 +141,22 @@ const SecondaryActionsButtons = ({
       })}
 
       {/* Render button actions - these might be hidden in little mode */}
-      {!shouldHideButtonActions &&
-        buttonActions.map((action, index) => (
-          <F0Button
-            key={`button-${index}`}
-            onClick={(e) => {
-              e.preventDefault()
-              action.onClick()
-            }}
-            variant={"variant" in action ? action.variant : "outline"}
-            size="md"
-            label={action.label}
-            disabled={disableButtons || action.disabled}
-            icon={"icon" in action ? action.icon : undefined}
-          />
-        ))}
+      {!shouldHideButtonActions
+        ? buttonActions.map((action, index) => (
+            <F0Button
+              key={`button-${index}`}
+              onClick={(e) => {
+                e.preventDefault()
+                action.onClick()
+              }}
+              variant={"variant" in action ? action.variant : "outline"}
+              size="md"
+              label={action.label}
+              disabled={disableButtons || action.disabled}
+              icon={"icon" in action ? action.icon : undefined}
+            />
+          ))
+        : null}
     </div>
   )
 }
@@ -185,7 +187,7 @@ const PrimaryActionButton = ({
 interface PrimaryActionContentProps {
   primaryAction: primaryActionType
   isFullscreen: boolean
-  listOfActions: ButtonDropdownItem<string>[]
+  listOfActions: ButtonDropdownItem[]
   handleOnClick: (labelID: string) => void
   disableButtons: boolean
   includeSecondaryInDropdown: boolean
@@ -236,7 +238,7 @@ const renderPrimaryActionContent = ({
           icon={sub.icon}
         />
       ))}
-      {primaryAction.subActions?.length && <ToolbarDivider />}
+      {primaryAction.subActions?.length ? <ToolbarDivider /> : null}
       <PrimaryActionButton
         primaryAction={primaryAction.action}
         disableButtons={disableButtons}
@@ -258,7 +260,9 @@ const ActionsMenu = ({
 }: ActionsMenuProps) => {
   const secondaryActions = normalizeSecondaryActions(secondaryAction)
 
-  if (secondaryActions.length === 0 && !primaryAction) return null
+  if (secondaryActions.length === 0 && !primaryAction) {
+    return null
+  }
 
   const buttonSecondaryActions = secondaryActions.filter(
     (action) => action.type !== "switch"
@@ -294,17 +298,19 @@ const ActionsMenu = ({
         disableButtons={disableButtons}
       />
 
-      {shouldShowDivider && <ToolbarDivider />}
+      {shouldShowDivider ? <ToolbarDivider /> : null}
 
-      {primaryAction &&
-        renderPrimaryActionContent({
-          primaryAction,
-          isFullscreen,
-          listOfActions,
-          handleOnClick: onActionClick,
-          disableButtons,
-          includeSecondaryInDropdown: shouldIncludeSecondaryInDropdown ?? false,
-        })}
+      {primaryAction
+        ? renderPrimaryActionContent({
+            primaryAction,
+            isFullscreen,
+            listOfActions,
+            handleOnClick: onActionClick,
+            disableButtons,
+            includeSecondaryInDropdown:
+              shouldIncludeSecondaryInDropdown ?? false,
+          })
+        : null}
     </div>
   )
 }

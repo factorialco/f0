@@ -1,5 +1,4 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
 import type { DialogDefinitionProviderItem } from "../internal-types"
 import { dialogsAlikeStore } from "../store"
 
@@ -122,14 +121,16 @@ describe("dialogsAlikeStore", () => {
 
   describe("renderer election", () => {
     // Release everything we acquire so the singleton is clean for other suites.
-    const acquired: Array<{ release: () => void }> = []
+    const acquired: { release: () => void }[] = []
     const acquire = () => {
       const handle = dialogsAlikeStore.acquireRenderer()
       acquired.push(handle)
       return handle
     }
     afterEach(() => {
-      while (acquired.length) acquired.pop()!.release()
+      while (acquired.length) {
+        acquired.pop()!.release()
+      }
     })
 
     it("reports no provider until one is acquired", () => {

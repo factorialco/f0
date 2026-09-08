@@ -1,6 +1,5 @@
 import { userEvent } from "@testing-library/user-event"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
 import { BellOff, Clock, PalmTree } from "@/icons/app"
 import {
   act,
@@ -8,7 +7,6 @@ import {
   zeroRender as render,
   screen,
 } from "@/testing/test-utils"
-
 import { SidebarChatList } from "../SidebarChatList"
 import {
   SidebarChatProvider,
@@ -555,7 +553,7 @@ type MockIntersection = {
 }
 
 class MockIntersectionObserver implements IntersectionObserver {
-  static instances: MockIntersectionObserver[] = []
+  static readonly instances: MockIntersectionObserver[] = []
 
   readonly root: Element | Document | null
   readonly rootMargin = "0px"
@@ -672,7 +670,9 @@ const observedChat = (observer: MockIntersectionObserver, id: string) => {
   const target = Array.from(observer.observed).find(
     (element) => (element as HTMLElement).dataset.sidebarChatId === id
   )
-  if (!target) throw new Error(`Chat ${id} is not observed`)
+  if (!target) {
+    throw new Error(`Chat ${id} is not observed`)
+  }
   return target
 }
 
@@ -687,7 +687,7 @@ describe("SidebarChatList unread navigation", () => {
   )
 
   beforeEach(() => {
-    MockIntersectionObserver.instances = []
+    MockIntersectionObserver.instances.length = 0
     Object.defineProperty(globalThis, "IntersectionObserver", {
       configurable: true,
       value: MockIntersectionObserver,
@@ -841,7 +841,9 @@ describe("SidebarChatList unread navigation", () => {
       (element) =>
         (element as HTMLElement).dataset.sidebarPanelGroupId === "dms"
     )
-    if (!groupTarget) throw new Error("Collapsed group is not observed")
+    if (!groupTarget) {
+      throw new Error("Collapsed group is not observed")
+    }
     expect(observer.observed.size).toBe(1)
 
     act(() => {
@@ -910,7 +912,9 @@ describe("SidebarChatList unread navigation", () => {
     const header = screen
       .getByText("Direct messages")
       .closest<HTMLElement>("[tabindex='0']")
-    if (!header) throw new Error("Group header is not focusable")
+    if (!header) {
+      throw new Error("Group header is not focusable")
+    }
     const observersBeforeCollapse = MockIntersectionObserver.instances.length
     await userEvent.click(header)
     await waitFor(() => {

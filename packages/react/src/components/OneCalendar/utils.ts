@@ -1,6 +1,5 @@
 import { format, isAfter, isBefore, isEqual, max, min } from "date-fns"
 import { Matcher } from "react-day-picker"
-
 import { GranularityDefinition } from "./granularities"
 import { rangeSeparator } from "./granularities/consts"
 import { DateRange, DateRangeComplete, DateRangeString } from "./types"
@@ -130,7 +129,8 @@ export const formatDateToString = (
   }
   const { from, to } = dateRange
 
-  return `${from}${to && from !== to ? ` ${rangeSeparator} ${to}` : ""}`
+  const toPart = to && from !== to ? ` ${rangeSeparator} ${to}` : ""
+  return `${from}${toPart}`
 }
 
 export function toGranularityDateRange<

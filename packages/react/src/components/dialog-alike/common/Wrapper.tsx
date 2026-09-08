@@ -1,10 +1,8 @@
 import { cva } from "cva"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-
 import { cn } from "@/lib/utils"
-import { Dialog, DialogContent } from "./dialog-primitive"
 import { Drawer, DrawerContent, DrawerOverlay } from "@/ui/drawer"
-
+import { Dialog, DialogContent } from "./dialog-primitive"
 import { DialogWrapperProvider } from "./DialogWrapperProvider"
 import { DialogAlikeSize } from "./types"
 import { useIsSmallScreen } from "./utils"
@@ -144,7 +142,9 @@ export const DialogWrapper = ({
   const onWidthChangeRef = useRef(onWidthChange)
   onWidthChangeRef.current = onWidthChange
   useEffect(() => {
-    if (!contentBox || !onWidthChangeRef.current) return
+    if (!contentBox || !onWidthChangeRef.current) {
+      return
+    }
     const emit = () =>
       onWidthChangeRef.current?.(contentBox.getBoundingClientRect().width)
     emit()

@@ -1,11 +1,9 @@
 import { screen } from "@testing-library/react"
 import { userEvent } from "@testing-library/user-event"
 import { afterEach, describe, expect, it, vi } from "vitest"
-
 import { DialogWrapperProvider } from "@/components/dialog-alike/common/DialogWrapperProvider"
 import { DialogPosition, F0DialogContext } from "@/patterns/F0Dialog"
 import { zeroRender as render } from "@/testing/test-utils"
-
 import { DatePickerPopup } from "../DatePickerPopup"
 
 // The calendar header's year and month dropdowns are selects, and selects portal

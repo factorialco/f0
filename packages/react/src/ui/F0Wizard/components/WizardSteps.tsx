@@ -1,9 +1,7 @@
 import { cva } from "cva"
-
 import Check from "@/icons/app/Check"
 import { cn, focusRing } from "@/lib/utils"
 import { Counter } from "@/ui/Counter"
-
 import { useF0Wizard } from "./WizardProvider"
 
 const stepLabelVariants = cva({
@@ -24,8 +22,12 @@ function getStepState(
   currentStep: number,
   isCompleted: boolean
 ): StepState {
-  if (index === currentStep) return "active"
-  if (isCompleted) return "completed"
+  if (index === currentStep) {
+    return "active"
+  }
+  if (isCompleted) {
+    return "completed"
+  }
   return "upcoming"
 }
 

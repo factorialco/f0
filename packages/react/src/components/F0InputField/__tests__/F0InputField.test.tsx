@@ -1,9 +1,8 @@
+import "@testing-library/jest-dom/vitest"
 import { fireEvent, screen } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import "@testing-library/jest-dom/vitest"
 import { Archive } from "@/icons/app"
 import { zeroRender as render } from "@/testing/test-utils"
-
 import { F0InputField, InputFieldStatusType } from "../F0InputField"
 
 describe("F0InputField", () => {
@@ -381,7 +380,9 @@ describe("F0InputField", () => {
       )
 
       // The placeholder div is still in the DOM but should have opacity-0
-      const placeholder = screen.getByText("Enter text")
+      const placeholder = screen
+        .getByText("Enter text")
+        .closest("[data-slot='placeholder']")
       expect(placeholder).toHaveClass("opacity-0")
     })
 
@@ -392,7 +393,9 @@ describe("F0InputField", () => {
         </F0InputField>
       )
 
-      const placeholder = screen.getByText("Enter text")
+      const placeholder = screen
+        .getByText("Enter text")
+        .closest("[data-slot='placeholder']")
       expect(placeholder).toHaveClass("opacity-0")
     })
 
@@ -403,8 +406,35 @@ describe("F0InputField", () => {
         </F0InputField>
       )
 
-      const placeholder = screen.getByText("Enter text")
+      const placeholder = screen
+        .getByText("Enter text")
+        .closest("[data-slot='placeholder']")
       expect(placeholder).toHaveClass("opacity-100")
+    })
+
+    it("keeps a placeholder on one line inside the field", () => {
+      render(
+        <F0InputField
+          label="Postal code"
+          placeholder="Enter a very long postal code that cannot possibly fit"
+          value=""
+        >
+          <input />
+        </F0InputField>
+      )
+
+      const slot = screen
+        .getByText("Enter a very long postal code that cannot possibly fit")
+        .closest("[data-slot='placeholder']")
+
+      // Spans the field and clips, rather than growing past it...
+      expect(slot).toHaveClass("inset-x-0")
+      expect(slot).toHaveClass("overflow-hidden")
+      // ...and the text truncates instead of wrapping onto a second line.
+      // `line-clamp-1` used to live on the slot, where `flex` overrode its
+      // `display`, so the clamp never applied.
+      expect(slot).not.toHaveClass("line-clamp-1")
+      expect(slot?.firstElementChild).toHaveClass("truncate")
     })
 
     it("should call onClickPlaceholder when placeholder is clicked", () => {
@@ -421,7 +451,9 @@ describe("F0InputField", () => {
         </F0InputField>
       )
 
-      const placeholder = screen.getByText("Enter text")
+      const placeholder = screen
+        .getByText("Enter text")
+        .closest("[data-slot='placeholder']")
       fireEvent.click(placeholder)
 
       expect(handleClickPlaceholder).toHaveBeenCalled()

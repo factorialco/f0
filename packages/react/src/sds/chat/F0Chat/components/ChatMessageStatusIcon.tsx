@@ -1,9 +1,7 @@
 import { type ReactNode, useEffect, useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { Clock } from "@/icons/app"
 import { cn } from "@/lib/utils"
-
 import { formatClock } from "../utils/natural-time"
 
 /** Fast sends never flash the clock — it only shows once a send has been in
@@ -34,14 +32,14 @@ export const SendingClock = ({ sentAt }: { sentAt: string }): ReactNode => {
       )}
       data-testid="chat-sending-clock"
     >
-      {visible && (
+      {visible ? (
         <F0Button
           variant="ghost"
           hideLabel
           label={formatClock(new Date(sentAt))}
           icon={Clock}
         />
-      )}
+      ) : null}
     </span>
   )
 }

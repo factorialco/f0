@@ -1,5 +1,4 @@
 import { type ReactNode } from "react"
-
 import { ensurePdfWorker } from "@/components/F0PdfViewer/pdfWorker"
 import { Document, Page } from "@/ui/pdf"
 

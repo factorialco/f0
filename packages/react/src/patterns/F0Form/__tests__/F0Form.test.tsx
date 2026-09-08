@@ -2,7 +2,6 @@ import userEvent from "@testing-library/user-event"
 import React, { useRef } from "react"
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { z } from "zod"
-
 import {
   zeroRender as render,
   screen,
@@ -10,14 +9,10 @@ import {
   within,
   act,
 } from "@/testing/test-utils"
-
-import type { F0FieldAlertProps } from "../f0Schema"
-import type { F0SectionConfig } from "../types"
-import type { F0FormRef } from "../useF0Form"
-
 import { createConditionalResolver } from "../conditionalResolver"
 import { generateAnchorId } from "../context"
 import { F0Form } from "../F0Form"
+import type { F0FieldAlertProps } from "../f0Schema"
 import {
   f0FormField,
   getF0Config,
@@ -26,6 +21,8 @@ import {
 } from "../f0Schema"
 import { isFieldRequired, isOptionalOrNullable } from "../fields/schema"
 import { evaluateDisabled, evaluateRenderIf } from "../fields/utils"
+import type { F0SectionConfig } from "../types"
+import type { F0FormRef } from "../useF0Form"
 import { getSchemaDefinition } from "../useSchemaDefinition"
 
 describe("F0Form", () => {
@@ -536,10 +533,10 @@ describe("getSchemaDefinition", () => {
 
     expect(definition).toHaveLength(3)
     // Fields should be in declaration order
-    const fieldItems = definition as Array<{
+    const fieldItems = definition as {
       type: "field"
       field: { id: string }
-    }>
+    }[]
     expect(fieldItems[0].field.id).toBe("first")
     expect(fieldItems[1].field.id).toBe("second")
     expect(fieldItems[2].field.id).toBe("third")
@@ -563,7 +560,7 @@ describe("getSchemaDefinition", () => {
     expect(definition[0].type).toBe("row")
     const rowDef = definition[0] as {
       type: "row"
-      fields: Array<{ id: string }>
+      fields: { id: string }[]
     }
     expect(rowDef.fields).toHaveLength(2)
   })
@@ -4384,7 +4381,7 @@ describe("F0Form clearing optional values", () => {
       }),
     })
 
-    const submissions: Array<number | undefined> = []
+    const submissions: (number | undefined)[] = []
 
     const Harness = () => {
       const [budget, setBudget] = React.useState<number | undefined>(50)

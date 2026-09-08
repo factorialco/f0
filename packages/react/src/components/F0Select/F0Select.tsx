@@ -1,5 +1,5 @@
-import { useDeepCompareEffect } from "@reactuses/core"
 import { useComposedRefs } from "@radix-ui/react-compose-refs"
+import { useDeepCompareEffect } from "@reactuses/core"
 import { cva } from "cva"
 import { isEqual } from "lodash"
 import {
@@ -12,12 +12,12 @@ import {
   useRef,
   useState,
 } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
 import { F0InputField } from "@/components/F0InputField"
 import { InputMessages } from "@/components/F0InputField/components/InputMessages"
 import { Label } from "@/components/F0InputField/components/Label"
+import { TooltipInternal } from "@/experimental/Overlays/Tooltip"
 import {
   BaseFetchOptions,
   BaseResponse,
@@ -47,23 +47,19 @@ import {
   VirtualItem,
 } from "@/ui/Select"
 import { textVariants } from "@/ui/Text"
-
-import type {
-  F0SelectItemObject,
-  F0SelectItemProps,
-  F0SelectProps,
-  ResolvedRecordType,
-} from "./types"
-
 import { Arrow } from "./components/Arrow"
-import { TooltipInternal } from "@/experimental/Overlays/Tooltip"
-
 import { SelectAll } from "./components/SelectAll"
 import { SelectBottomActions } from "./components/SelectBottomActions"
 import { SelectedItems } from "./components/SelectedItems"
 import { SelectionPreview } from "./components/SelectionPreview"
 import { SelectItem } from "./components/SelectItem"
 import { SelectTopActions } from "./components/SelectTopActions"
+import type {
+  F0SelectItemObject,
+  F0SelectItemProps,
+  F0SelectProps,
+  ResolvedRecordType,
+} from "./types"
 export * from "./types"
 
 const defaultSearchFn = (
@@ -654,7 +650,9 @@ const F0SelectComponent = forwardRef(function Select<
     const extractOriginalItem = (
       record: ActualRecordType | undefined
     ): ResolvedRecordType<R> | undefined => {
-      if (!record) return undefined
+      if (!record) {
+        return undefined
+      }
       if (source) {
         return record as unknown as ResolvedRecordType<R>
       }
@@ -726,7 +724,9 @@ const F0SelectComponent = forwardRef(function Select<
     const extractOriginalItem = (
       record: ActualRecordType | undefined
     ): ResolvedRecordType<R> | undefined => {
-      if (!record) return undefined
+      if (!record) {
+        return undefined
+      }
       if (source) {
         // For datasource, the record itself is the original item
         return record as unknown as ResolvedRecordType<R>
@@ -1212,7 +1212,7 @@ const F0SelectComponent = forwardRef(function Select<
             onFiltersOpenChange={setIsFiltersOpen}
             showPreview={showPreview}
           />
-          {multiple && !currentSearch && !isFiltersOpen && (
+          {multiple && !currentSearch && !isFiltersOpen ? (
             <SelectAll
               selectedCount={selectionMeta.selectedItemsCount}
               indeterminate={
@@ -1226,7 +1226,7 @@ const F0SelectComponent = forwardRef(function Select<
               items={getDisplayItemsForSelection}
               paddingTop={!showSearchBox && !localSource.filters}
             />
-          )}
+          ) : null}
         </>
       }
       right={
@@ -1315,7 +1315,7 @@ const F0SelectComponent = forwardRef(function Select<
             disabled && "cursor-not-allowed opacity-50"
           )}
         >
-          {label && !hideLabel && (
+          {label && !hideLabel ? (
             <Label
               label={label}
               required={required}
@@ -1323,7 +1323,7 @@ const F0SelectComponent = forwardRef(function Select<
               icon={labelIcon}
               disabled={disabled}
             />
-          )}
+          ) : null}
           {/* Select Container */}
           <div
             className={cn(
@@ -1431,10 +1431,12 @@ const F0SelectComponent = forwardRef(function Select<
                   e.preventDefault()
                 }}
               >
-                {(multiple
-                  ? localValue.length > 0 ||
-                    selectionMeta.selectedItemsCount > 0
-                  : !!localValue[0]) && (
+                {(
+                  multiple
+                    ? localValue.length > 0 ||
+                      selectionMeta.selectedItemsCount > 0
+                    : !!localValue[0]
+                ) ? (
                   <SelectedItems
                     multiple={multiple}
                     totalSelectedCount={
@@ -1455,13 +1457,13 @@ const F0SelectComponent = forwardRef(function Select<
                     // their icons for the rows regardless.
                     hideItemIcon={!!icon}
                   />
-                )}
+                ) : null}
               </button>
             </F0InputField>
           )}
         </SelectTrigger>
       )}
-      {openLocal && selectContent}
+      {openLocal ? selectContent : null}
     </SelectPrimitive>
   )
 

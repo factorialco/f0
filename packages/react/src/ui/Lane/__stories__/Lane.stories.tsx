@@ -1,21 +1,16 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { monitorForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter"
+import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useEffect, useRef, useState } from "react"
 import { fn } from "storybook/test"
-
-import type { RecordType } from "@/hooks/datasource"
-
 import { F0Card } from "@/components/F0Card"
 import { DraggableF0Card } from "@/components/F0Card/__stories__/DraggableF0Card"
+import type { RecordType } from "@/hooks/datasource"
 import { ArrowUp, Clock, Delete, Pencil, Person, Search } from "@/icons/app"
 import { createAtlaskitDriver } from "@/lib/dnd/atlaskitDriver"
 import { DndProvider } from "@/lib/dnd/context"
 import { useDroppableList } from "@/lib/dnd/hooks"
-
-import type { LaneProps } from "../types"
-
 import { Lane } from "../Lane"
+import type { LaneProps } from "../types"
 import {
   additionalMockTasks,
   allMockTasks,
@@ -339,13 +334,13 @@ export const WithImages: Story = {
           "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=400&h=200&fit=crop",
         team: "Development Team",
       },
-    ] as Array<{
+    ] as {
       id: string
       title: string
       description: string
       image: string
       team: string
-    }>,
+    }[],
     getKey: (project: RecordType) => (project as MockTask).id,
     renderCard: (project: RecordType) => {
       const proj = project as {
@@ -410,9 +405,9 @@ export const TwoLanesDnD: Story = {
           canMonitor: ({ source }) =>
             (source.data as { instanceId?: symbol }).instanceId === instanceId,
           onDropTargetChange: ({ location }) => {
-            const targets = location.current.dropTargets as Array<{
+            const targets = location.current.dropTargets as {
               data?: { type?: string; id?: string }
-            }>
+            }[]
             const overThisLane = targets.some(
               (t) => t.data?.type === "list-droppable" && t.data?.id === id
             )
@@ -477,7 +472,9 @@ export const TwoLanesDnD: Story = {
         <MoveMonitor
           instanceId={instanceId}
           onMove={(sourceId, fromLane, toLane) => {
-            if (fromLane === toLane) return
+            if (fromLane === toLane) {
+              return
+            }
             setLeft((prev) => {
               const exists = prev.find((t) => t.id === sourceId)
               return exists ? prev.filter((t) => t.id !== sourceId) : prev
@@ -529,13 +526,15 @@ function MoveMonitor({
       canMonitor: ({ source }) =>
         (source.data as { instanceId?: symbol }).instanceId === instanceId,
       onDrop: ({ location, source }) => {
-        if (!location.current.dropTargets.length) return
-        const currentTargets = location.current.dropTargets as Array<{
+        if (!location.current.dropTargets.length) {
+          return
+        }
+        const currentTargets = location.current.dropTargets as {
           data?: { type?: string; id?: string }
-        }>
-        const initialTargets = location.initial.dropTargets as Array<{
+        }[]
+        const initialTargets = location.initial.dropTargets as {
           data?: { type?: string; id?: string }
-        }>
+        }[]
 
         const sourceId = String((source.data as { id?: string }).id ?? "")
         const fromLane = String(
@@ -546,7 +545,9 @@ function MoveMonitor({
           currentTargets.find((t) => t.data?.type === "list-droppable")?.data
             ?.id ?? ""
         )
-        if (!toLane || !fromLane || !sourceId) return
+        if (!toLane || !fromLane || !sourceId) {
+          return
+        }
         onMove(sourceId, fromLane, toLane)
       },
     })

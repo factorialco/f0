@@ -1,11 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { useState } from "react"
 import { expect, fn, within } from "storybook/test"
-
 import { Add, Placeholder } from "@/icons/app"
-
-import { F0TableOfContent } from "../index"
+import { F0TableOfContent } from ".."
 import { TOCAction, TOCItem, TOCItemAction } from "../types"
 
 const mockOtherActions: TOCItemAction[] = [

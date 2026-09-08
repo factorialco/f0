@@ -1,5 +1,4 @@
 import { addDays, differenceInDays, endOfDay, startOfDay } from "date-fns"
-
 import { DateRangeComplete } from "../../types"
 import {
   formatToPlaceholder,

@@ -8,12 +8,10 @@ import {
   useRef,
   useState,
 } from "react"
-
-import { cn, focusRing } from "@/lib/utils"
 import { InputMessages } from "@/components/F0InputField/components/InputMessages"
 import { Label } from "@/components/F0InputField/components/Label"
+import { cn, focusRing } from "@/lib/utils"
 import { Slider, SliderRange, SliderThumb, SliderTrack } from "@/ui/slider"
-
 import { SliderRangeLabels } from "./components/SliderRangeLabels"
 import { SliderTooltip } from "./components/SliderTooltip"
 import type { F0SliderProps } from "./types"
@@ -128,7 +126,9 @@ const F0SliderBase = forwardRef<HTMLDivElement, F0SliderProps>((props, ref) => {
   const handleValueChange = useCallback(
     (next: number[]) => {
       const [first] = next
-      if (first === undefined) return
+      if (first === undefined) {
+        return
+      }
       setInternalValue(first)
     },
     [setInternalValue]
@@ -137,7 +137,9 @@ const F0SliderBase = forwardRef<HTMLDivElement, F0SliderProps>((props, ref) => {
   const handleValueCommit = useCallback(
     (next: number[]) => {
       const [first] = next
-      if (first === undefined) return
+      if (first === undefined) {
+        return
+      }
       onValueCommit?.(first)
     },
     [onValueCommit]
@@ -172,7 +174,7 @@ const F0SliderBase = forwardRef<HTMLDivElement, F0SliderProps>((props, ref) => {
         pointerInteractionRef.current = false
       }}
     >
-      {showLabel && (
+      {showLabel ? (
         <Label
           label={label}
           required={required}
@@ -180,7 +182,7 @@ const F0SliderBase = forwardRef<HTMLDivElement, F0SliderProps>((props, ref) => {
           id={labelId}
           disabled={disabled}
         />
-      )}
+      ) : null}
       <Slider
         value={[currentValue]}
         onValueChange={handleValueChange}
@@ -219,13 +221,13 @@ const F0SliderBase = forwardRef<HTMLDivElement, F0SliderProps>((props, ref) => {
           onFocus={() => setIsFocused(!pointerInteractionRef.current)}
           onBlur={() => setIsFocused(false)}
         />
-        {showTooltip !== "never" && (
+        {showTooltip !== "never" ? (
           <SliderTooltip
             visible={tooltipVisible}
             content={formatValue(currentValue)}
             style={{ left: `calc(${percent}% + ${thumbInBoundsOffset}px)` }}
           />
-        )}
+        ) : null}
       </Slider>
       <SliderRangeLabels minLabel={minLabel} maxLabel={maxLabel} />
       <div id={messagesId} role="status" aria-live="polite">

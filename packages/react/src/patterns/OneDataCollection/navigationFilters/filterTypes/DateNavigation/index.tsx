@@ -1,6 +1,5 @@
 import { DateRange, getGranularityDefinitions } from "@/components/OneCalendar"
 import { TranslationsType } from "@/lib/providers/i18n"
-
 import { NavigationFilter, NavigationFilterComponentProps } from "../../types"
 import { DateNavigation } from "./DateNavigation"
 import { DateValue } from "./types"

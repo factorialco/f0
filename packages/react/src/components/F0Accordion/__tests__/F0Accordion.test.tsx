@@ -1,10 +1,8 @@
 import { userEvent } from "@testing-library/user-event"
 import { useState } from "react"
 import { describe, expect, it, vi } from "vitest"
-
 import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
-
-import { F0Accordion } from "../index"
+import { F0Accordion } from ".."
 import { F0AccordionItem } from "../types"
 
 const items: F0AccordionItem[] = [

@@ -1,8 +1,8 @@
 import { type ReactNode, forwardRef, useRef } from "react"
-
 import { F0Link } from "@/components/F0Link"
 import { Image } from "@/components/Utilities/Image"
 import { DropdownItem } from "@/experimental/Navigation/Dropdown"
+import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 import { cn, focusRing } from "@/lib/utils"
 import {
   Card,
@@ -12,8 +12,6 @@ import {
   CardTitle,
 } from "@/ui/Card"
 import { Skeleton } from "@/ui/skeleton"
-
-import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 import {
   CardActions,
   type CardPrimaryAction,
@@ -286,7 +284,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
         data-testid="card"
         ref={alert && alert.visible !== false ? undefined : ref}
       >
-        {link && !disableOverlayLink && (
+        {link && !disableOverlayLink ? (
           <F0Link
             href={link}
             variant="unstyled"
@@ -296,9 +294,9 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
           >
             &nbsp;
           </F0Link>
-        )}
+        ) : null}
 
-        {image && (
+        {image ? (
           <div
             className={cn(
               // pointer-events-none lets clicks on the image fall through to the
@@ -318,23 +316,23 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
             )}
           >
             {blurredBackground &&
-              (imageFit === "contain" ||
-                imageFit === "fit-width" ||
-                imageFit === "fit-height" ||
-                imageFit === "scale-down") && (
-                <div
-                  className="absolute inset-0 z-0 rounded-md"
-                  style={{
-                    backgroundImage: `url(${image})`,
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
-                    filter: "blur(20px)",
-                    opacity: 0.4,
-                    transform: "scale(1.1)",
-                  }}
-                  aria-hidden="true"
-                />
-              )}
+            (imageFit === "contain" ||
+              imageFit === "fit-width" ||
+              imageFit === "fit-height" ||
+              imageFit === "scale-down") ? (
+              <div
+                className="absolute inset-0 z-0 rounded-md"
+                style={{
+                  backgroundImage: `url(${image})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  filter: "blur(20px)",
+                  opacity: 0.4,
+                  transform: "scale(1.1)",
+                }}
+                aria-hidden="true"
+              />
+            ) : null}
             <Image
               src={image}
               alt={title}
@@ -350,7 +348,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
               overlay
             />
           </div>
-        )}
+        ) : null}
 
         <div
           className={cn(
@@ -405,13 +403,13 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
                 compact && "flex-row items-center gap-2"
               )}
             >
-              {avatar && (
+              {avatar ? (
                 <CardAvatar
                   avatar={avatar}
                   overlay={!!image}
                   compact={compact}
                 />
-              )}
+              ) : null}
               <div className={cn("flex flex-col gap-0")}>
                 <CardTitle
                   className={cn(
@@ -421,7 +419,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
                 >
                   {title}
                 </CardTitle>
-                {description && (
+                {description ? (
                   <CardSubtitle
                     className={cn("text-base text-f1-foreground-secondary")}
                   >
@@ -429,10 +427,10 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
                       {description}
                     </OneEllipsis>
                   </CardSubtitle>
-                )}
+                ) : null}
               </div>
             </CardHeader>
-            {!image && (
+            {!image ? (
               <CardOptions
                 otherActions={otherActions}
                 selectable={selectable}
@@ -441,9 +439,9 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
                 bookmark={bookmark}
                 title={title}
               />
-            )}
+            ) : null}
           </div>
-          {metadata && (
+          {metadata ? (
             // Metadata is display-only, so it navigates with the rest of the card:
             // clicks bubble up to the body handler above. It sits above the overlay
             // link (z-10) so its icon tooltips stay hoverable.
@@ -458,8 +456,8 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
                 <CardMetadata key={index} metadata={item} />
               ))}
             </div>
-          )}
-          {children && (
+          ) : null}
+          {children ? (
             // Children can be interactive, so this region swallows clicks
             // (stopPropagation) and only re-enables pointer events on the
             // interactive elements inside it — keeping them from navigating the
@@ -470,7 +468,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
             >
               {children}
             </CardContent>
-          )}
+          ) : null}
         </div>
         <CardActions
           primaryAction={primaryAction}

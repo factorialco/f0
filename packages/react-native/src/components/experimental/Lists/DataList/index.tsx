@@ -204,7 +204,9 @@ const CardItem = ({ action, name, thumbnailUrl, metadata }: CardItemProps) => {
   const resolveStatusVariant = (
     status: CardMetadataStatus | undefined
   ): F0TagStatusProps["variant"] => {
-    if (status === "completed") return "positive"
+    if (status === "completed") {
+      return "positive"
+    }
     return status ?? "neutral"
   }
 

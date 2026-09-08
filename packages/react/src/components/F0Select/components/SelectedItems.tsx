@@ -1,11 +1,9 @@
 import { forwardRef } from "react"
-
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0Icon } from "@/components/F0Icon"
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
-
 import type { F0SelectItemObject } from "../types"
 import { LABEL_SEPARATOR, useLabelsOverflow } from "../utils"
 
@@ -143,16 +141,16 @@ export const SelectedItems = forwardRef<HTMLDivElement, SelectValueProps>(
 
     return (
       <div className="flex min-w-0 flex-1 justify-start gap-1.5" ref={ref}>
-        {selectedItem.avatar && (
+        {selectedItem.avatar ? (
           <div className="flex shrink-0 items-center">
             <F0Avatar avatar={selectedItem.avatar} size="xs" />
           </div>
-        )}
-        {selectedItem.icon && !hideItemIcon && (
+        ) : null}
+        {selectedItem.icon && !hideItemIcon ? (
           <div className="h-5 shrink-0 text-f1-icon">
             <F0Icon icon={selectedItem.icon} />
           </div>
-        )}
+        ) : null}
         <OneEllipsis tag="span" className="text-left text-f1-foreground">
           {/* `selectedLabel` when the item carries one: out here there is no
               group header or sibling to read the row's short label against. */}

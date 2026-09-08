@@ -1,6 +1,5 @@
 import { F0Icon, F0IconProps, IconType } from "@/components/F0Icon"
 import { cn } from "@/lib/utils"
-
 import { BaseAvatarProps } from "../internal/BaseAvatar"
 
 export const avatarIconSizes = ["sm", "md", "lg"] as const

@@ -1,6 +1,5 @@
 import { useId } from "react"
 import { Bar, BarProps, Rectangle, RectangleProps } from "recharts"
-
 import { projectedFade } from "@/ui/chart"
 
 type GradientSign = "positive" | "negative"

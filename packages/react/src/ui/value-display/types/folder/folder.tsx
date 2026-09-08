@@ -3,7 +3,6 @@
  * Used for showing alerts on items in data collections.
  */
 import { Folder } from "@/icons/app"
-
 import { IconCell } from "../icon"
 
 interface FolderValue {

@@ -1,3 +1,4 @@
+import "../index.css"
 import { FocusScope } from "@radix-ui/react-focus-scope"
 import { Editor, EditorContent, useEditor } from "@tiptap/react"
 import { AnimatePresence, motion } from "motion/react"
@@ -12,33 +13,31 @@ import {
   useState,
 } from "react"
 import ReactDOM from "react-dom"
-
+import { F0Button } from "@/components/F0Button"
 import {
   EditorBubbleMenu,
   MentionedUser,
   Toolbar,
   ToolbarDivider,
 } from "@/components/RichText/internal"
-import { F0Button } from "@/components/F0Button"
-import { Cross } from "@/icons/app"
-import { experimentalComponent } from "@/lib/experimental"
-import { useI18n } from "@/lib/providers/i18n/i18n-provider"
-import { withSkeleton } from "@/lib/skeleton"
-import { cn } from "@/lib/utils"
-
-import "../index.css"
-import { Skeleton } from "@/ui/skeleton"
-
+import type { MentionsConfig } from "@/components/RichText/internal"
 import {
   AIEnhanceMenu,
   EnhanceActivator,
   useEnhance,
 } from "@/components/RichText/internal/Enhance"
 import { EnhanceErrorBanner } from "@/components/RichText/internal/Error"
+import { Cross } from "@/icons/app"
+import type { TranscribeFn } from "@/kits/ai/F0AiChat/types"
 import {
   type RecorderError,
   useAudioRecorder,
 } from "@/kits/ai/F0AiChatTextArea/useAudioRecorder"
+import { experimentalComponent } from "@/lib/experimental"
+import { useI18n } from "@/lib/providers/i18n/i18n-provider"
+import { withSkeleton } from "@/lib/skeleton"
+import { cn } from "@/lib/utils"
+import { Skeleton } from "@/ui/skeleton"
 import { FileList } from "./components/FileList"
 import { Footer } from "./components/Footer"
 import { Head } from "./components/Head"
@@ -49,8 +48,6 @@ import {
   handleEditorUpdate,
   setupContainerObservers,
 } from "./utils/helpers"
-import type { MentionsConfig } from "@/components/RichText/internal"
-import type { TranscribeFn } from "@/kits/ai/F0AiChat/types"
 import type {
   enhanceConfig,
   filesConfig,
@@ -188,7 +185,9 @@ const F0RichTextEditorComponent = forwardRef<
   }, [height, isFullscreen])
 
   useEffect(() => {
-    if (!isFullscreen || !isToolbarOpen) return
+    if (!isFullscreen || !isToolbarOpen) {
+      return
+    }
 
     const updateWidth = () => {
       if (fullscreenToolbarRef.current) {
@@ -204,7 +203,9 @@ const F0RichTextEditorComponent = forwardRef<
   const handleToggleFullscreen = () => {
     setIsFullscreen((prev) => {
       const next = !prev
-      if (onFullscreenChange) onFullscreenChange(next)
+      if (onFullscreenChange) {
+        onFullscreenChange(next)
+      }
       return next
     })
   }
@@ -309,7 +310,9 @@ const F0RichTextEditorComponent = forwardRef<
   const applyDictation = useCallback(
     (text: string) => {
       const range = dictationRangeRef.current
-      if (!editor || !range) return
+      if (!editor || !range) {
+        return
+      }
       const docSize = editor.state.doc.content.size
       const from = Math.min(range.from, docSize)
       const to = Math.min(range.to, docSize)
@@ -335,7 +338,9 @@ const F0RichTextEditorComponent = forwardRef<
   })
   const canRecord = !!onTranscribe && recorder.isSupported
   const handleStartRecording = useCallback(() => {
-    if (!editor) return
+    if (!editor) {
+      return
+    }
     dictationRangeRef.current = {
       from: editor.state.selection.to,
       to: editor.state.selection.to,
@@ -370,7 +375,9 @@ const F0RichTextEditorComponent = forwardRef<
     },
   }))
 
-  if (!editor) return null
+  if (!editor) {
+    return null
+  }
 
   const editorContent = (
     <FocusScope trapped={false}>
@@ -389,9 +396,9 @@ const F0RichTextEditorComponent = forwardRef<
             "border-f1-border-critical-bold bg-f1-background-critical bg-opacity-10"
         )}
       >
-        {isFullscreen && (
+        {isFullscreen ? (
           <div className="pointer-events-none fixed inset-0 z-40" />
-        )}
+        ) : null}
 
         <Head
           fullScreenMode={fullScreenMode}
@@ -440,7 +447,7 @@ const F0RichTextEditorComponent = forwardRef<
           <AnimatePresence>
             {/* The floating toolbar disappears the moment an enhance kicks off
                 (disableButtons covers loading, review and error). */}
-            {isFullscreen && isToolbarOpen && !enhance.disableButtons && (
+            {isFullscreen && isToolbarOpen && !enhance.disableButtons ? (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -470,7 +477,7 @@ const F0RichTextEditorComponent = forwardRef<
                       icon={Cross}
                     />
                     <ToolbarDivider />
-                    {enhanceConfig && (
+                    {enhanceConfig ? (
                       <>
                         <EnhanceActivator
                           enhance={enhance}
@@ -480,7 +487,7 @@ const F0RichTextEditorComponent = forwardRef<
                         />
                         <ToolbarDivider />
                       </>
-                    )}
+                    ) : null}
                     <Toolbar
                       editor={editor}
                       isFullscreen={isFullscreen}
@@ -490,13 +497,13 @@ const F0RichTextEditorComponent = forwardRef<
                   </div>
                 </div>
               </motion.div>
-            )}
+            ) : null}
           </AnimatePresence>
 
           {/* In review the floating toolbar disappears entirely and the
               compact accept/discard menu takes its place. */}
           <AnimatePresence>
-            {isFullscreen && isToolbarOpen && enhance.isAcceptChangesOpen && (
+            {isFullscreen && isToolbarOpen && enhance.isAcceptChangesOpen ? (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -521,7 +528,7 @@ const F0RichTextEditorComponent = forwardRef<
                   />
                 </div>
               </motion.div>
-            )}
+            ) : null}
           </AnimatePresence>
         </div>
 
@@ -533,7 +540,7 @@ const F0RichTextEditorComponent = forwardRef<
           )}
         >
           <AnimatePresence>
-            {enhance.error && !enhance.isLoading && (
+            {enhance.error && !enhance.isLoading ? (
               <motion.div
                 key="accordion"
                 initial={{ height: 0, opacity: 0, y: -20 }}
@@ -547,11 +554,11 @@ const F0RichTextEditorComponent = forwardRef<
                   onDismiss={enhance.clearError}
                 />
               </motion.div>
-            )}
+            ) : null}
           </AnimatePresence>
 
           <AnimatePresence initial={false}>
-            {dictationError && (
+            {dictationError ? (
               <motion.div
                 key="dictation-error"
                 role="alert"
@@ -567,7 +574,7 @@ const F0RichTextEditorComponent = forwardRef<
                   dismissLabel={i18n.actions.close}
                 />
               </motion.div>
-            )}
+            ) : null}
           </AnimatePresence>
 
           <FileList

@@ -19,13 +19,19 @@ const WORD_BOUNDARY = /[\s/·\-_,.]/
 
 export const fuzzyMatch = (query: string, text: string): boolean => {
   const q = normalize(query.trim())
-  if (!q) return true
+  if (!q) {
+    return true
+  }
 
   const haystack = normalize(text)
   let i = 0
   for (const char of haystack) {
-    if (char === q[i]) i++
-    if (i === q.length) return true
+    if (char === q[i]) {
+      i++
+    }
+    if (i === q.length) {
+      return true
+    }
   }
   return i === q.length
 }

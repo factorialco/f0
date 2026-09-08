@@ -1,9 +1,7 @@
-import { describe, expect, it, vi } from "vitest"
 import "@testing-library/jest-dom/vitest"
-import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
-
+import { describe, expect, it, vi } from "vitest"
 import Check from "@/icons/app/Check"
-
+import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
 import { F0AiProposalCard } from "../F0AiProposalCard"
 
 const defaultProps = {

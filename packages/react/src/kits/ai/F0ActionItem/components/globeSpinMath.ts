@@ -96,13 +96,19 @@ export function spinEase(t: number): number {
   // quadratic: unclamped, a negative `t` comes back POSITIVE (t² / 2r / area),
   // so a clock that briefly runs backwards would jump the mark most of a turn
   // instead of holding it at rest.
-  if (t <= 0) return 0
-  if (t >= 1) return 1
+  if (t <= 0) {
+    return 0
+  }
+  if (t >= 1) {
+    return 1
+  }
   // Area under the unit-height trapezoid; dividing by it makes spinEase(1) = 1.
   // Numerically equal to where the ramp down starts, but a different quantity —
   // they are spelled out separately on purpose.
   const area = 1 - SPIN_RAMP
-  if (t <= SPIN_RAMP) return (t * t) / (2 * SPIN_RAMP) / area
+  if (t <= SPIN_RAMP) {
+    return (t * t) / (2 * SPIN_RAMP) / area
+  }
   if (t >= 1 - SPIN_RAMP) {
     const u = 1 - t
     return (area - (u * u) / (2 * SPIN_RAMP)) / area
@@ -229,7 +235,9 @@ export function buildFrameInto(
   const precessQ = qRot(0, 0, 1, axisPhase * 2 * Math.PI)
   rotVecInto(precessQ, PATH_AXIS[0], PATH_AXIS[1], PATH_AXIS[2], _scratchV)
   const qDelta = qRot(_scratchV[0], _scratchV[1], _scratchV[2], angle)
-  for (let k = 0; k < 4; k++) _capQs[k] = qMul(qDelta, Q_LENS[k])
+  for (let k = 0; k < 4; k++) {
+    _capQs[k] = qMul(qDelta, Q_LENS[k])
+  }
 
   let count = 0
 
@@ -272,7 +280,9 @@ export function buildFrameInto(
         const p11 = grid[rowB + si + 1]
 
         const avgT = (p00.t + p01.t + p10.t + p11.t) * 0.25
-        if (avgT < 0.001) continue
+        if (avgT < 0.001) {
+          continue
+        }
 
         const mx = (p00.x + p01.x + p10.x + p11.x) * 0.25
         const my = (p00.y + p01.y + p10.y + p11.y) * 0.25

@@ -1,7 +1,6 @@
 "use client"
 
 import { lazy, type ReactNode, Suspense, useState } from "react"
-
 import { F0AvatarFile } from "@/components/avatars/F0AvatarFile"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0FileItem } from "@/components/F0FileItem"
@@ -10,10 +9,9 @@ import { Download } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
-
 import { useChatRenderConfig } from "../providers/ChatRenderConfigProvider"
-import { useChatDocumentPreview } from "../providers/ChatUIProvider"
 import { useChatSurface } from "../providers/ChatSurfaceProvider"
+import { useChatDocumentPreview } from "../providers/ChatUIProvider"
 import { useF0ChatEmit } from "../providers/F0ChatProvider"
 import { type F0ChatFileAttachment } from "../types"
 import { attachedKindOf, type ChatDocumentKind } from "../utils/attachments"
@@ -138,7 +136,7 @@ export const ChatDocumentAttachmentCard = ({
       style={{ width: cardWidth }}
       data-testid="chat-document-attachment"
     >
-      {!compact && (
+      {!compact ? (
         <div className="flex items-center gap-2 px-2 py-2">
           <F0AvatarFile
             file={{ name: file.name, type: file.mimeType ?? "" }}
@@ -147,7 +145,7 @@ export const ChatDocumentAttachmentCard = ({
           <ClampText className="grow text-sm font-medium text-f1-foreground">
             {file.name}
           </ClampText>
-          {action && (
+          {action ? (
             <ButtonInternal
               variant="ghost"
               size="sm"
@@ -156,15 +154,17 @@ export const ChatDocumentAttachmentCard = ({
               label={action.label}
               onClick={action.onClick}
             />
-          )}
+          ) : null}
         </div>
-      )}
+      ) : null}
       <button
         type="button"
         onClick={() => {
           openDocumentPreview(file)
           // Opening your own not-yet-sent draft is not consuming shared content.
-          if (surface === "transcript") emit.onDocumentOpened({ kind })
+          if (surface === "transcript") {
+            emit.onDocumentOpened({ kind })
+          }
         }}
         disabled={previewDisabled}
         aria-busy={!rendered ? true : undefined}
@@ -194,40 +194,40 @@ export const ChatDocumentAttachmentCard = ({
           data-testid="chat-document-snapshot"
         >
           <Suspense fallback={null}>
-            {kind === "pdf" && (
+            {kind === "pdf" ? (
               <ChatPdfThumbnail
                 url={file.url}
                 width={cardWidth - 2}
                 onError={() => setFailed(true)}
                 onRendered={() => setRendered(true)}
               />
-            )}
-            {kind === "sheet" && (
+            ) : null}
+            {kind === "sheet" ? (
               <ChatSheetThumbnail
                 url={file.url}
                 onError={() => setFailed(true)}
                 onRendered={() => setRendered(true)}
               />
-            )}
-            {kind === "docx" && (
+            ) : null}
+            {kind === "docx" ? (
               <ChatDocxThumbnail
                 url={file.url}
                 width={cardWidth - 2}
                 onError={() => setFailed(true)}
                 onRendered={() => setRendered(true)}
               />
-            )}
-            {kind === "text" && (
+            ) : null}
+            {kind === "text" ? (
               <ChatTextThumbnail
                 url={file.url}
                 onError={() => setFailed(true)}
                 onRendered={() => setRendered(true)}
               />
-            )}
+            ) : null}
           </Suspense>
         </div>
       </button>
-      {compact && action && (
+      {compact && action ? (
         <>
           <div className="absolute right-1 top-1 z-30 flex rounded bg-f1-background opacity-0 transition-opacity focus-within:opacity-100 group-hover/attachment:opacity-100">
             <ButtonInternal
@@ -241,7 +241,7 @@ export const ChatDocumentAttachmentCard = ({
           </div>
           <span className="sr-only">{file.name}</span>
         </>
-      )}
+      ) : null}
     </div>
   )
 }

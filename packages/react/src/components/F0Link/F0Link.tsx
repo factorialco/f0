@@ -1,5 +1,4 @@
 import { forwardRef } from "react"
-
 import ExternalLink from "@/icons/app/ExternalLink"
 import { withDataTestId } from "@/lib/data-testid"
 import {
@@ -8,7 +7,6 @@ import {
   ActionLinkVariant,
   ActionProps,
 } from "@/ui/Action"
-
 import { F0Icon } from "../F0Icon"
 
 export type F0LinkProps = Omit<ActionLinkProps, "variant" | "href"> & {
@@ -63,12 +61,12 @@ const _F0Link = forwardRef<HTMLAnchorElement, F0LinkProps>(function Link(
   return (
     <Action ref={ref} {...actionProps} variant={variant}>
       <span>{children}</span>
-      {external && (
+      {external ? (
         <>
           <F0Icon icon={ExternalLink} size="sm" aria-hidden={true} />
           <span className="sr-only"> (opens in new tab)</span>
         </>
-      )}
+      ) : null}
     </Action>
   )
 })

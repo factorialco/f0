@@ -2,9 +2,7 @@
 
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { forwardRef } from "react"
-
 import { cn } from "@/lib/utils"
-
 import { useDialogPrimitiveContext } from "./context"
 
 export const DialogOverlay = forwardRef<

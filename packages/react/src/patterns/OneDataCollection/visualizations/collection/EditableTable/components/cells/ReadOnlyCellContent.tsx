@@ -1,7 +1,5 @@
 import { format, isValid, parseISO } from "date-fns"
-
 import type { F0IconProps } from "@/components/F0Icon"
-
 import { F0Icon } from "@/components/F0Icon"
 import { Arrow } from "@/components/F0Select/components/Arrow"
 import { RecordType } from "@/hooks/datasource/types/records.typings"
@@ -10,11 +8,9 @@ import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { useDateFnsLocale } from "@/lib/providers/l10n"
 import { cn } from "@/lib/utils"
 import { renderProperty } from "@/patterns/OneDataCollection/property-render"
-
-import type { EditableCellProps } from "."
-
 import { resolveUnits } from "./hooks/useNumberCellLayout"
 import { resolveTextCellIcon } from "./textIcon"
+import type { EditableCellProps } from "."
 
 type ReadOnlyCellContentProps<R extends RecordType> = Pick<
   EditableCellProps<R>,
@@ -132,24 +128,24 @@ export function ReadOnlyCellContent<R extends RecordType>({
       )}
     >
       <span className="flex min-w-0 items-center gap-1.5">
-        {leadingIcon && (
+        {leadingIcon ? (
           <span className="flex h-5 w-5 shrink-0 items-center justify-center">
             <F0Icon icon={leadingIcon} color={iconColor} />
           </span>
-        )}
-        {unitsBefore && unit}
+        ) : null}
+        {unitsBefore ? unit : null}
         <span className="min-w-0 truncate">
           {formattedDate ??
             multiSelectLabel ??
             renderProperty(item, editableColumn, "editableTable", i18n)}
         </span>
-        {!unitsBefore && unit}
+        {!unitsBefore ? unit : null}
       </span>
-      {isSelect && (
+      {isSelect ? (
         <span className="flex shrink-0 items-center">
           <Arrow open={false} size="sm" />
         </span>
-      )}
+      ) : null}
     </div>
   )
 }

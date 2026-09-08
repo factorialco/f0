@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { F0AiChatHistory } from "../F0AiChatHistory"
 import type { ChatThread } from "../useChatHistory"
 

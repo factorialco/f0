@@ -1,9 +1,7 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import image from "@storybook-static/avatars/person04.jpg"
+import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
 import { expect, fn, within } from "storybook/test"
-
 import { F0Link } from "@/components/F0Link"
 import {
   Add,
@@ -26,7 +24,6 @@ import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { mockImage } from "@/testing/mocks/images"
 import { Switch } from "@/ui/switch"
 import { Text } from "@/ui/Text"
-
 import {
   cardAlertVariants,
   cardImageFits,
@@ -786,14 +783,14 @@ export const WithDismissibleAlert: Story = {
             onDismiss: () => setVisible(false),
           }}
         />
-        {!visible && (
+        {!visible ? (
           <button
             className="self-start text-sm text-f1-foreground-secondary underline"
             onClick={() => setVisible(true)}
           >
             Restore alert
           </button>
-        )}
+        ) : null}
       </div>
     )
   },
@@ -819,7 +816,7 @@ export const WithAlertAction: Story = {
             },
           }}
         />
-        {actioned && (
+        {actioned ? (
           <button
             type="button"
             className="self-start text-sm text-f1-foreground-secondary underline"
@@ -827,7 +824,7 @@ export const WithAlertAction: Story = {
           >
             Reset action
           </button>
-        )}
+        ) : null}
       </div>
     )
   },

@@ -1,15 +1,14 @@
+import "gridstack/dist/gridstack.css"
+import "./F0GridStack.css"
 import {
   GridItemHTMLElement,
   GridStackOptions,
   GridStackWidget,
 } from "gridstack"
-import "gridstack/dist/gridstack.css"
 import { useMemo } from "react"
-
 import { GridStackProvider } from "./components/grid-stack-provider"
 import { GridStackRender } from "./components/grid-stack-render"
 import { GridStackRenderProvider } from "./components/grid-stack-render-provider"
-import "./F0GridStack.css"
 export type GridStackReactOptions = Omit<GridStackOptions, "children">
 
 export type GridStackReactSize = { w: number; h: number }
@@ -102,7 +101,9 @@ export const F0GridStack = ({
   const onResizeStop = (_: Event, el: GridItemHTMLElement) => {
     // el is the DOM element of the grid item
     const node = el.gridstackNode // node contains w,h,x,y
-    if (!node) return
+    if (!node) {
+      return
+    }
 
     const allowed = el.gridstackNode?.allowedSizes ?? []
     if (allowed.length === 0) {
