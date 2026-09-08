@@ -32,11 +32,11 @@ export const AddressParts = ({
   name,
 }: Props) => {
   const i18n = useI18n()
-  const placeholders: Record<EditableLocationPart, string> = {
+  // City and region are self-evident from their labels; the postal code takes
+  // an example, because its shape is what the user hesitates over
+  const placeholders: Partial<Record<EditableLocationPart, string>> = {
     addressLine1: i18n.locationInput.addressLine1Placeholder,
     addressLine2: i18n.locationInput.addressLine2Placeholder,
-    city: i18n.locationInput.cityPlaceholder,
-    state: i18n.locationInput.statePlaceholder,
     postalCode: i18n.locationInput.postalCodePlaceholder,
   }
 

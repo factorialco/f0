@@ -39,7 +39,7 @@ export const CountrySelect = ({
   return (
     <F0Select<CountryCode>
       label={label}
-      placeholder={label}
+      placeholder={i18n.locationInput.selectCountry}
       options={options}
       value={value}
       onChange={(next) => onChange(next)}
