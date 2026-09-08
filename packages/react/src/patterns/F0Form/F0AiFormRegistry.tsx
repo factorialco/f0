@@ -581,22 +581,18 @@ export interface F0AiFormDescription {
   defaultValuesParams?: Record<string, unknown>
 }
 
-export interface F0AiFormRegisterOptions {
-  sections?: Record<string, F0SectionConfig>
-  defaultValuesParamsSchema?: ZodType
-  defaultValuesFn?: (
-    params: Record<string, unknown>
-  ) => Promise<Record<string, unknown>>
-  description?: string
-  module?: ModuleId
-}
-
 interface F0AiFormRegistryContextValue {
   register: (
     name: string,
     ref: React.MutableRefObject<F0FormRef | null>,
     schema: F0FormSchema,
-    options?: F0AiFormRegisterOptions
+    sections?: Record<string, F0SectionConfig>,
+    defaultValuesParamsSchema?: ZodType,
+    defaultValuesFn?: (
+      params: Record<string, unknown>
+    ) => Promise<Record<string, unknown>>,
+    description?: string,
+    module?: ModuleId
   ) => void
   unregister: (name: string) => void
   get: (name: string) => F0AiFormEntry | undefined
@@ -828,17 +824,18 @@ export function F0AiFormRegistryProvider({
   }, [])
 
   const register = useCallback(
+    // oxlint-disable-next-line max-params -- public signature through useF0AiFormRegistry, change with a deprecation
     (
       name: string,
       ref: React.MutableRefObject<F0FormRef | null>,
       schema: F0FormSchema,
-      {
-        sections,
-        defaultValuesParamsSchema,
-        defaultValuesFn,
-        description,
-        module,
-      }: F0AiFormRegisterOptions = {}
+      sections?: Record<string, F0SectionConfig>,
+      defaultValuesParamsSchema?: ZodType,
+      defaultValuesFn?: (
+        params: Record<string, unknown>
+      ) => Promise<Record<string, unknown>>,
+      description?: string,
+      module?: ModuleId
     ) => {
       // Rendered forms always take precedence over virtual entries.
       // Preserve onSubmit from a previous virtual entry so canvas-submitted

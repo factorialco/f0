@@ -1185,13 +1185,16 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       if (!formRef) {
         internalFormRef.current = buildRefMethods()
       }
-      aiFormRegistry.register(name, registryFormRef, schema, {
+      aiFormRegistry.register(
+        name,
+        registryFormRef,
+        schema,
         sections,
         defaultValuesParamsSchema,
         defaultValuesFn,
         description,
-        module,
-      })
+        module
+      )
       return () => {
         aiFormRegistry.unregister(name)
       }
