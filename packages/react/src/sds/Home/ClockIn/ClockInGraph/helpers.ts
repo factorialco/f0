@@ -84,20 +84,16 @@ export const normalizeData = ({
         const context = { from: entry.from, to: entry.to, label: entry.label }
 
         if (entry.variant === "clocked-in" && overtimeOnly) {
-          return [
-            ...acc,
-            {
-              value:
-                totalEntryOvertimeSeconds / totalSecondsWithRemainingTime +
-                value,
-              color: CLOCK_IN_COLORS.overtime,
-              ...context,
-            },
-          ]
+          acc.push({
+            value:
+              totalEntryOvertimeSeconds / totalSecondsWithRemainingTime + value,
+            color: CLOCK_IN_COLORS.overtime,
+            ...context,
+          })
+          return acc
         }
 
-        return [
-          ...acc,
+        acc.push(
           {
             value: totalEntryOvertimeSeconds / totalSecondsWithRemainingTime,
             color: CLOCK_IN_COLORS.overtime,
@@ -107,8 +103,9 @@ export const normalizeData = ({
             value,
             color: CLOCK_IN_COLORS[entry.variant],
             ...context,
-          },
-        ]
+          }
+        )
+        return acc
       }, [])
       .reverse(),
     ...(leftEntry ? [leftEntry] : []),

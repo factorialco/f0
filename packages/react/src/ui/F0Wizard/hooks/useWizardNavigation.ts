@@ -78,6 +78,7 @@ export function useWizardNavigation({
           for (let i = currentStep; i < index; i++) {
             const step = stepsRef.current[i]
             if (step?.onNext) {
+              // oxlint-disable-next-line no-await-in-loop -- steps run onNext in order and a rejection stops the jump
               await step.onNext()
             }
           }

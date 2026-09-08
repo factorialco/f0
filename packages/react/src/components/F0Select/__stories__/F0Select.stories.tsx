@@ -712,25 +712,23 @@ export const WithSearchBox: Story = {
   },
   render: (args) => {
     return (
-      <>
-        <F0Select
-          showSearchBox
-          label="Select a theme"
-          onChange={fn()}
-          searchFn={(option, searchValue) => {
-            console.log("searchFn", option, searchValue)
-            return (
-              option.type === "separator" ||
-              !searchValue ||
-              option.label.toLowerCase().includes(searchValue.toLowerCase()) ||
-              option.description
-                ?.toLowerCase()
-                .includes(searchValue.toLowerCase())
-            )
-          }}
-          options={args.options}
-        />
-      </>
+      <F0Select
+        showSearchBox
+        label="Select a theme"
+        onChange={fn()}
+        searchFn={(option, searchValue) => {
+          console.log("searchFn", option, searchValue)
+          return (
+            option.type === "separator" ||
+            !searchValue ||
+            option.label.toLowerCase().includes(searchValue.toLowerCase()) ||
+            option.description
+              ?.toLowerCase()
+              .includes(searchValue.toLowerCase())
+          )
+        }}
+        options={args.options}
+      />
     )
   },
 }

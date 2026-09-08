@@ -128,7 +128,7 @@ export function NumberFilter({
         return {
           ...prev,
           [index]: {
-            ...(prev?.[index] ?? {}),
+            ...prev?.[index],
             value: inputValue ?? undefined,
           },
         }

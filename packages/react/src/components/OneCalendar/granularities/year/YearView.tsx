@@ -98,17 +98,16 @@ export function YearView({
     if (!isDateRange(selected)) {
       // Single date selection
       return selected.getFullYear() === year
-    } else {
-      // Range selection
-      if (selected.from && selected.to) {
-        const current = new Date(year, 6, 1)
-        return isWithinInterval(current, {
-          start: selected.from,
-          end: selected.to,
-        })
-      } else if (selected.from) {
-        return selected.from.getFullYear() === year
-      }
+    }
+    // Range selection
+    if (selected.from && selected.to) {
+      const current = new Date(year, 6, 1)
+      return isWithinInterval(current, {
+        start: selected.from,
+        end: selected.to,
+      })
+    } else if (selected.from) {
+      return selected.from.getFullYear() === year
     }
 
     return false

@@ -56,14 +56,12 @@ const normalizeActionItems = (
           items: items,
         },
       ]
-    } else {
-      // LayoutBlockActionGroup[] case
-      return items
     }
-  } else {
-    // LayoutBlockActionGroup case
-    return [items]
+    // LayoutBlockActionGroup[] case
+    return items
   }
+  // LayoutBlockActionGroup case
+  return [items]
 }
 
 export const Block = forwardRef<HTMLDivElement, BlockProps>(

@@ -50,17 +50,16 @@ function _OneEmptyState({
                   closeLabel={action.closeLabel}
                 />
               )
-            } else {
-              return (
-                <F0Button
-                  key={action.label}
-                  label={action.label}
-                  variant={action.variant}
-                  onClick={action.onClick}
-                  icon={action.icon}
-                />
-              )
             }
+            return (
+              <F0Button
+                key={action.label}
+                label={action.label}
+                variant={action.variant}
+                onClick={action.onClick}
+                icon={action.icon}
+              />
+            )
           })}
         </div>
       ) : null}

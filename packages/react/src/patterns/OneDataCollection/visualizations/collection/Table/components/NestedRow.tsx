@@ -378,48 +378,47 @@ const NestedRowContent = <
               }
 
               return nestedChild
-            } else {
-              // Base case: Leaf node with no children
-              // For leaf nodes, border is shown only if it's the last visible element in the tree
-              const leafShouldHideBorder =
-                !childIsLastInTree && isTableVisualization
-
-              const leafChild = (
-                <Row
-                  {...props}
-                  key={`row-${props.groupIndex}-${props.index}-${childIndex}`}
-                  index={childIndex}
-                  item={childItem}
-                  isSelected={isChildSelected(childItem)}
-                  noBorder={leafShouldHideBorder}
-                  ref={getChildRef()}
-                  nestedRowProps={{
-                    ...props.nestedRowProps,
-                    depth: (props.nestedRowProps?.depth ?? 0) + 1,
-                    parentHasChildren: true,
-                    nestedVariant: childrenType,
-                    onExpand: handleExpand,
-                    isLastChild: childIsLastInTree,
-                  }}
-                  fromVisualization={props.fromVisualization}
-                  tableWithChildren={props.tableWithChildren}
-                />
-              )
-
-              if (RowWrapper) {
-                return (
-                  <RowWrapper
-                    key={`row-${props.groupIndex}-${props.index}-${childIndex}`}
-                    item={childItem}
-                    index={childIndex}
-                  >
-                    {leafChild}
-                  </RowWrapper>
-                )
-              }
-
-              return leafChild
             }
+            // Base case: Leaf node with no children
+            // For leaf nodes, border is shown only if it's the last visible element in the tree
+            const leafShouldHideBorder =
+              !childIsLastInTree && isTableVisualization
+
+            const leafChild = (
+              <Row
+                {...props}
+                key={`row-${props.groupIndex}-${props.index}-${childIndex}`}
+                index={childIndex}
+                item={childItem}
+                isSelected={isChildSelected(childItem)}
+                noBorder={leafShouldHideBorder}
+                ref={getChildRef()}
+                nestedRowProps={{
+                  ...props.nestedRowProps,
+                  depth: (props.nestedRowProps?.depth ?? 0) + 1,
+                  parentHasChildren: true,
+                  nestedVariant: childrenType,
+                  onExpand: handleExpand,
+                  isLastChild: childIsLastInTree,
+                }}
+                fromVisualization={props.fromVisualization}
+                tableWithChildren={props.tableWithChildren}
+              />
+            )
+
+            if (RowWrapper) {
+              return (
+                <RowWrapper
+                  key={`row-${props.groupIndex}-${props.index}-${childIndex}`}
+                  item={childItem}
+                  index={childIndex}
+                >
+                  {leafChild}
+                </RowWrapper>
+              )
+            }
+
+            return leafChild
           })
         : null}
 

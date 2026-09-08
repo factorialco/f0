@@ -1260,7 +1260,7 @@ describe("widgetChrome", () => {
       id: "communities",
       slots: [],
       action: { label: "Go to Communities" },
-      headerControls: <span>host's own</span>,
+      headerControls: <span>host&apos;s own</span>,
       headerActions: [{ label: "Write post" }],
       headerSelect: select,
       status: undefined,

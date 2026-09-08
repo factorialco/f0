@@ -154,15 +154,15 @@ export const useColumns = <
     : frozenColumns || 1
   const columnsInSavedOrder = useMemo(() => {
     const leadingColumns = originalColumns.slice(0, nonEditableColumns)
-    const orderedColumns = [...originalColumns.slice(nonEditableColumns)].sort(
-      (a, b) => {
+    const orderedColumns = originalColumns
+      .slice(nonEditableColumns)
+      .sort((a, b) => {
         const aIndex = colsOrder.indexOf(getColumnId(a))
         const bIndex = colsOrder.indexOf(getColumnId(b))
         const aPos = aIndex === -1 ? colsOrder.length : aIndex
         const bPos = bIndex === -1 ? colsOrder.length : bIndex
         return aPos - bPos
-      }
-    )
+      })
 
     return [...leadingColumns, ...orderedColumns]
   }, [originalColumns, nonEditableColumns, colsOrder])

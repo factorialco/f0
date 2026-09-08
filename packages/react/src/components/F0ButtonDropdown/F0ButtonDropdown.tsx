@@ -32,14 +32,12 @@ const normalizeItems = (
           items: items,
         },
       ]
-    } else {
-      // ButtonDropdownGroup[]
-      return items
     }
-  } else {
-    // ButtonDropdownGroup
-    return [items]
+    // ButtonDropdownGroup[]
+    return items
   }
+  // ButtonDropdownGroup
+  return [items]
 }
 
 export type F0DropdownButtonProps<T = string> = {

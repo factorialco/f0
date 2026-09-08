@@ -42,20 +42,19 @@ const DocxViewer = ({
         }
         return response.blob()
       })
-      .then((blob) => {
+      .then(async (blob) => {
         if (cancelled) {
           return
         }
         // The wrapper brings docx-preview's page chrome (page background and
         // spacing between pages), matching what a Word preview looks like.
-        return renderAsync(blob, host, undefined, {
+        await renderAsync(blob, host, undefined, {
           inWrapper: true,
           breakPages: true,
-        }).then(() => {
-          if (!cancelled) {
-            setState("ready")
-          }
         })
+        if (!cancelled) {
+          setState("ready")
+        }
       })
       .catch(() => {
         if (!cancelled) {
