@@ -56,7 +56,7 @@ const FileList = ({
         aria-label="Upload file"
       />
       <AnimatePresence>
-        {files.length > 0 && (
+        {files.length > 0 ? (
           <motion.div
             key="filelist-accordion"
             initial={{ height: 0, opacity: 0, y: -20 }}
@@ -81,7 +81,7 @@ const FileList = ({
               ))}
             </div>
           </motion.div>
-        )}
+        ) : null}
       </AnimatePresence>
     </>
   )

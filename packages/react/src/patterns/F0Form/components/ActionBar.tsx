@@ -80,7 +80,7 @@ export const FormActionBar = forwardRef<F0ActionBarRef, FormActionBarProps>(
                         )}
                   </span>
                 </div>
-                {errorCount > 1 && (
+                {errorCount > 1 ? (
                   <div className="flex items-center gap-2">
                     <F0Button
                       icon={ChevronUp}
@@ -97,7 +97,7 @@ export const FormActionBar = forwardRef<F0ActionBarRef, FormActionBarProps>(
                       hideLabel
                     />
                   </div>
-                )}
+                ) : null}
               </div>
             ) : undefined
           }

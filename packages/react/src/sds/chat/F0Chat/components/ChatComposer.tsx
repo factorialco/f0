@@ -1115,7 +1115,7 @@ export const ChatComposer = (): ReactNode => {
           {/* Composer error. Upload/voice failures fade out; validation errors
               may persist until the next corrective attachment attempt. */}
           <AnimatePresence initial={false}>
-            {transientError && (
+            {transientError ? (
               <motion.div
                 key="transient-error"
                 role="alert"
@@ -1143,13 +1143,13 @@ export const ChatComposer = (): ReactNode => {
                   </p>
                 </div>
               </motion.div>
-            )}
+            ) : null}
           </AnimatePresence>
 
           {/* Pending files render from local object URLs immediately. Their
               uniform image-sized thumbnails keep the composer compact. */}
           <AnimatePresence initial={false}>
-            {attachments.length > 0 && (
+            {attachments.length > 0 ? (
               <motion.div
                 key="attachments-row"
                 className="overflow-hidden"
@@ -1221,7 +1221,7 @@ export const ChatComposer = (): ReactNode => {
                   </AnimatePresence>
                 </div>
               </motion.div>
-            )}
+            ) : null}
           </AnimatePresence>
 
           {/* The textarea stays during recording: it shows "Listening…" and
@@ -1343,7 +1343,7 @@ export const ChatComposer = (): ReactNode => {
                     />
                   </div>
                   <div className="flex items-center gap-1">
-                    {canRecord && (
+                    {canRecord ? (
                       <ButtonInternal
                         variant="outline"
                         size="md"
@@ -1364,7 +1364,7 @@ export const ChatComposer = (): ReactNode => {
                           isSendingVoiceNote
                         }
                       />
-                    )}
+                    ) : null}
                     {/* The send button fades on ACTIVATION (boundary flip of
                         canSend — first character, attachment ready) and on the
                         edit-mode icon swap; never per keystroke. */}

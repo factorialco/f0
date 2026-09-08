@@ -146,9 +146,9 @@ export const TypewriterPlaceholder = ({
           )}
         >
           {displayedPlaceholder}
-          {isTyping && !shouldReduceMotion && (
+          {isTyping && !shouldReduceMotion ? (
             <span className="f0-chat-cursor-blink">|</span>
-          )}
+          ) : null}
         </div>
       </motion.div>
     </AnimatePresence>

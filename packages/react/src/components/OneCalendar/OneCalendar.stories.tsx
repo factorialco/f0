@@ -74,7 +74,7 @@ function SelectedDateDisplay({ range }: { range: DateRange }) {
       <h4>Selected</h4>
       <p className="text-sm text-f1-foreground">
         {formatDate(range.from)}
-        {range.to && <> - {formatDate(range.to)}</>}
+        {range.to ? <> - {formatDate(range.to)}</> : null}
         <br />
         <span className="tabular-nums">
           ({range.from.toLocaleDateString()} - {range.to?.toLocaleDateString()})
@@ -117,7 +117,7 @@ export const MonthSingle: Story = {
           defaultSelected={selectedRange}
           onSelect={handleSelect}
         />
-        {selectedRange && <SelectedDateDisplay range={selectedRange} />}
+        {selectedRange ? <SelectedDateDisplay range={selectedRange} /> : null}
       </div>
     )
   },
@@ -156,7 +156,7 @@ export const MonthRange: Story = {
           defaultSelected={selectedRange}
           onSelect={handleSelect}
         />
-        {selectedRange && <SelectedDateDisplay range={selectedRange} />}
+        {selectedRange ? <SelectedDateDisplay range={selectedRange} /> : null}
       </div>
     )
   },
@@ -193,7 +193,7 @@ export const YearSingle: Story = {
           defaultSelected={selectedRange}
           onSelect={handleSelect}
         />
-        {selectedRange && <SelectedDateDisplay range={selectedRange} />}
+        {selectedRange ? <SelectedDateDisplay range={selectedRange} /> : null}
       </div>
     )
   },
@@ -232,7 +232,7 @@ export const YearRange: Story = {
           defaultSelected={selectedRange}
           onSelect={handleSelect}
         />
-        {selectedRange && <SelectedDateDisplay range={selectedRange} />}
+        {selectedRange ? <SelectedDateDisplay range={selectedRange} /> : null}
       </div>
     )
   },
@@ -273,7 +273,7 @@ export const DaySingle: Story = {
           defaultSelected={selectedRange?.from}
           onSelect={handleSelect}
         />
-        {selectedRange && <SelectedDateDisplay range={selectedRange} />}
+        {selectedRange ? <SelectedDateDisplay range={selectedRange} /> : null}
       </div>
     )
   },
@@ -315,7 +315,7 @@ export const DayRange: Story = {
           defaultSelected={selectedRange}
           onSelect={handleSelect}
         />
-        {selectedRange && <SelectedDateDisplay range={selectedRange} />}
+        {selectedRange ? <SelectedDateDisplay range={selectedRange} /> : null}
       </div>
     )
   },
@@ -359,7 +359,7 @@ export const Week: Story = {
           defaultSelected={selectedRange}
           onSelect={handleSelect}
         />
-        {selectedRange && <SelectedDateDisplay range={selectedRange} />}
+        {selectedRange ? <SelectedDateDisplay range={selectedRange} /> : null}
       </div>
     )
   },
@@ -405,7 +405,7 @@ export const QuarterSingle: Story = {
           defaultSelected={selectedDate}
           onSelect={handleSelect}
         />
-        {displayRange && <SelectedDateDisplay range={displayRange} />}
+        {displayRange ? <SelectedDateDisplay range={displayRange} /> : null}
       </div>
     )
   },
@@ -448,7 +448,7 @@ export const QuarterRange: Story = {
           defaultSelected={selectedRange}
           onSelect={handleSelect}
         />
-        {selectedRange && <SelectedDateDisplay range={selectedRange} />}
+        {selectedRange ? <SelectedDateDisplay range={selectedRange} /> : null}
       </div>
     )
   },
@@ -494,7 +494,7 @@ export const HalfYearSingle: Story = {
           defaultSelected={selectedDate}
           onSelect={handleSelect}
         />
-        {displayRange && <SelectedDateDisplay range={displayRange} />}
+        {displayRange ? <SelectedDateDisplay range={displayRange} /> : null}
       </div>
     )
   },
@@ -536,7 +536,7 @@ export const HalfYearRange: Story = {
           defaultSelected={selectedRange}
           onSelect={handleSelect}
         />
-        {selectedRange && <SelectedDateDisplay range={selectedRange} />}
+        {selectedRange ? <SelectedDateDisplay range={selectedRange} /> : null}
       </div>
     )
   },
@@ -690,7 +690,7 @@ export const CompactMonthSingle: OneCalendarInternalStory = {
           defaultSelected={selectedRange}
           onSelect={handleSelect}
         />
-        {selectedRange && <SelectedDateDisplay range={selectedRange} />}
+        {selectedRange ? <SelectedDateDisplay range={selectedRange} /> : null}
       </div>
     )
   },
@@ -730,7 +730,7 @@ export const CompactMonthRange: OneCalendarInternalStory = {
           defaultSelected={selectedRange}
           onSelect={handleSelect}
         />
-        {selectedRange && <SelectedDateDisplay range={selectedRange} />}
+        {selectedRange ? <SelectedDateDisplay range={selectedRange} /> : null}
       </div>
     )
   },
@@ -775,7 +775,7 @@ export const CompactWeek: OneCalendarInternalStory = {
           defaultSelected={selectedRange}
           onSelect={handleSelect}
         />
-        {selectedRange && <SelectedDateDisplay range={selectedRange} />}
+        {selectedRange ? <SelectedDateDisplay range={selectedRange} /> : null}
       </div>
     )
   },
@@ -818,7 +818,7 @@ export const CompactDayRange: OneCalendarInternalStory = {
           defaultSelected={selectedRange}
           onSelect={handleSelect}
         />
-        {selectedRange && <SelectedDateDisplay range={selectedRange} />}
+        {selectedRange ? <SelectedDateDisplay range={selectedRange} /> : null}
       </div>
     )
   },
@@ -871,11 +871,11 @@ export const RegularVsCompact: Story = {
             onSelect={handleSelect}
           />
         </div>
-        {selectedRange && (
+        {selectedRange ? (
           <div className="mt-6">
             <SelectedDateDisplay range={selectedRange} />
           </div>
-        )}
+        ) : null}
       </div>
     )
   },

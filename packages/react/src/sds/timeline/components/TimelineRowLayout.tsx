@@ -23,7 +23,7 @@ export const TimelineRowLayout = ({
   children: ReactNode
 }) => (
   <div className="flex gap-4">
-    {!hideStatus && (
+    {!hideStatus ? (
       <div className="flex flex-col items-center">
         <div
           className="h-8 flex flex-col justify-center"
@@ -31,9 +31,9 @@ export const TimelineRowLayout = ({
         >
           {statusIcons[status]}
         </div>
-        {!isLast && <F0TimelineConnector status={status} />}
+        {!isLast ? <F0TimelineConnector status={status} /> : null}
       </div>
-    )}
+    ) : null}
     <div className="flex flex-1 flex-col gap-3 pb-5">{children}</div>
   </div>
 )

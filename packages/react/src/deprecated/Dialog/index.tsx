@@ -73,7 +73,7 @@ const OneDialog = forwardRef<HTMLDivElement, DialogProps>(
               </DialogDescription>
             </div>
           </DialogHeader>
-          {actions && (
+          {actions ? (
             <DialogFooter className="px-4 pb-4 pt-2">
               <div className="hidden sm:flex sm:flex-row sm:justify-between sm:gap-3 [&>div]:w-full">
                 <F0Button variant="outline" {...actions.secondary} />
@@ -91,7 +91,7 @@ const OneDialog = forwardRef<HTMLDivElement, DialogProps>(
                 />
               </div>
             </DialogFooter>
-          )}
+          ) : null}
         </DialogContent>
       </DialogPrimitive>
     )

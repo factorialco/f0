@@ -115,7 +115,7 @@ function _ProductCard({
                 </div>
               </>
 
-              {dismissable && (
+              {dismissable ? (
                 <div className="h-6 w-6">
                   <F0Button
                     variant="ghost"
@@ -126,7 +126,7 @@ function _ProductCard({
                     label="Close"
                   />
                 </div>
-              )}
+              ) : null}
             </div>
           </div>
         </div>

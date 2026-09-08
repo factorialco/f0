@@ -62,7 +62,7 @@ export const ToolbarDropdown = ({
           style={{ zIndex: 9999 }}
         >
           <AnimatePresence>
-            {open && (
+            {open ? (
               <motion.div
                 initial={{ opacity: 0, scale: 0.95, y: 5 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -100,7 +100,7 @@ export const ToolbarDropdown = ({
                   </Action>
                 ))}
               </motion.div>
-            )}
+            ) : null}
           </AnimatePresence>
         </Popover.Content>
       </Popover.Portal>

@@ -517,13 +517,13 @@ export function FileFieldRenderer({
 
   return (
     <div className="flex flex-col gap-4">
-      {isLoadingInitialFiles && !hasFiles && (
+      {isLoadingInitialFiles && !hasFiles ? (
         <div className="flex animate-pulse flex-col gap-2 rounded-xl border border-dashed border-f1-border px-4 py-10">
           <div className="mx-auto h-8 w-8 rounded-full bg-f1-background-secondary" />
           <div className="mx-auto h-4 w-32 rounded bg-f1-background-secondary" />
         </div>
-      )}
-      {!isLoadingInitialFiles && showDropzone && (
+      ) : null}
+      {!isLoadingInitialFiles && showDropzone ? (
         <div
           role="button"
           tabIndex={field.disabled ? -1 : 0}
@@ -549,17 +549,17 @@ export function FileFieldRenderer({
             <span className="text-center text-base font-medium text-f1-foreground">
               {dropzoneText}
             </span>
-            {acceptedTypesLabel && (
+            {acceptedTypesLabel ? (
               <span className="text-center text-base text-f1-foreground-secondary">
                 {translations.acceptedTypes.replace(
                   "{{types}}",
                   acceptedTypesLabel
                 )}
               </span>
-            )}
+            ) : null}
           </div>
         </div>
-      )}
+      ) : null}
 
       <input
         ref={fileInputRef}
@@ -573,16 +573,16 @@ export function FileFieldRenderer({
         tabIndex={-1}
       />
 
-      {validationError && (
+      {validationError ? (
         <div className="-mt-2 flex items-center gap-1">
           <F0Icon icon={AlertCircle} color="critical" />
           <p className="text-base font-medium text-f1-foreground-critical">
             {validationError}
           </p>
         </div>
-      )}
+      ) : null}
 
-      {entries.length > 0 && (
+      {entries.length > 0 ? (
         <div className="flex flex-col">
           {entries.map((entry, index) => {
             const total = entries.length
@@ -618,7 +618,7 @@ export function FileFieldRenderer({
             )
           })}
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

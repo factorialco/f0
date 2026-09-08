@@ -120,7 +120,7 @@ export const ListItemSingleContent = ({
             : ""
         )}
       >
-        {!hiddenAvatar && (
+        {!hiddenAvatar ? (
           <F0AvatarPerson
             src={entity.avatar}
             firstName={firstName}
@@ -128,7 +128,7 @@ export const ListItemSingleContent = ({
             size="xs"
             deactivated={entity.deactivated}
           />
-        )}
+        ) : null}
 
         <div className="flex flex-1 flex-col">
           <div
@@ -157,13 +157,13 @@ export const ListItemSingleContent = ({
           )}
         />
 
-        {singleSelector && selected && (
+        {singleSelector && selected ? (
           <F0Icon
             className="text-f1-icon-selected"
             icon={CheckCircle}
             size="md"
           />
-        )}
+        ) : null}
       </label>
     </div>
   )
@@ -290,12 +290,12 @@ const EntitySelectListItem = ({
           }}
           className="flex flex-1 flex-row items-center gap-2 rounded border px-2 py-1.5 focus-within:outline focus-within:outline-1 focus-within:-outline-offset-1 focus-within:outline-f1-border-selected-bold hover:cursor-pointer hover:bg-f1-background-hover"
         >
-          {showGroupIcon && (
+          {showGroupIcon ? (
             <F0Icon
               icon={LogoAvatar}
               className="rounded-xs bg-f1-foreground-secondary text-f1-foreground-inverse"
             />
-          )}
+          ) : null}
           <div className="flex flex-grow flex-row items-center gap-2 break-all">
             <HighlightText
               semiBold
@@ -321,9 +321,9 @@ const EntitySelectListItem = ({
         </label>
       </div>
 
-      {!hideLine && !expanded && (
+      {!hideLine && !expanded ? (
         <div className="h-[1px] w-full bg-f1-border-secondary" />
-      )}
+      ) : null}
     </>
   )
 }

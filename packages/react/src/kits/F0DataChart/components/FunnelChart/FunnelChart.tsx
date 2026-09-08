@@ -48,7 +48,7 @@ export const FunnelChart = (props: F0DataChartFunnelProps) => {
 
   return (
     <div className="relative h-full w-full">
-      {showLabels && (
+      {showLabels ? (
         <div
           className={`pointer-events-none absolute inset-0 z-10 flex ${isHorizontal ? "" : "flex-col"}`}
         >
@@ -91,7 +91,7 @@ export const FunnelChart = (props: F0DataChartFunnelProps) => {
                       >
                         {formattedValue}
                       </OneEllipsis>
-                      {pct && <Tag tag={{ type: "raw", text: pct }} />}
+                      {pct ? <Tag tag={{ type: "raw", text: pct }} /> : null}
                     </div>
                   ) : (
                     <>
@@ -101,7 +101,7 @@ export const FunnelChart = (props: F0DataChartFunnelProps) => {
                       >
                         {formattedValue}
                       </OneEllipsis>
-                      {pct && <Tag tag={{ type: "raw", text: pct }} />}
+                      {pct ? <Tag tag={{ type: "raw", text: pct }} /> : null}
                     </>
                   )}
                 </div>
@@ -109,7 +109,7 @@ export const FunnelChart = (props: F0DataChartFunnelProps) => {
             )
           })}
         </div>
-      )}
+      ) : null}
 
       <div ref={ref} className="h-full w-full" />
     </div>

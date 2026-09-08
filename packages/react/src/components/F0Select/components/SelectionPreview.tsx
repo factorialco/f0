@@ -31,14 +31,14 @@ function PreviewItem<T extends string>({
   return (
     <div className="flex w-fit max-w-full min-w-0 items-center justify-between gap-1.5 rounded-md border border-solid border-f1-border-secondary p-1">
       <div className="flex min-w-0 flex-1 items-center gap-1.5">
-        {item.avatar && <F0Avatar avatar={item.avatar} size="xs" />}
-        {item.icon && (
+        {item.avatar ? <F0Avatar avatar={item.avatar} size="xs" /> : null}
+        {item.icon ? (
           <F0Icon
             icon={item.icon}
             size="sm"
             className="shrink-0 text-f1-icon"
           />
-        )}
+        ) : null}
         <OneEllipsis className="text-sm">{item.label}</OneEllipsis>
       </div>
       <button
@@ -130,11 +130,11 @@ export function SelectionPreview<T extends string>({
                   onDeselect={onDeselect}
                 />
               ))}
-              {isLoadingMore && (
+              {isLoadingMore ? (
                 <div className="flex items-center justify-center py-2">
                   <Spinner size="small" />
                 </div>
-              )}
+              ) : null}
             </div>
           </ScrollArea>
         </div>

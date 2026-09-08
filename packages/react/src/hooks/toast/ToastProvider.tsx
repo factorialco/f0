@@ -371,7 +371,7 @@ const ToastsContainer = ({
       style={anchorStyle}
     >
       <AnimatePresence>
-        {hasItems && (
+        {hasItems ? (
           <div key="toast-panel" className="flex w-full flex-col p-6 sm:w-96">
             {/* Stacked Toasts at the Top */}
             <div ref={stackedContainerRef}>
@@ -426,7 +426,7 @@ const ToastsContainer = ({
               </AnimatePresence>
             </div>
           </div>
-        )}
+        ) : null}
       </AnimatePresence>
     </div>
   )
@@ -495,15 +495,16 @@ export const ToastProvider = ({
   return (
     <>
       {isRenderer &&
-        isMounted &&
-        typeof document !== "undefined" &&
-        portalTarget != null &&
-        createPortal(
-          <Fragment key={portalKey}>
-            <ToastsContainer items={items} />
-          </Fragment>,
-          portalTarget
-        )}
+      isMounted &&
+      typeof document !== "undefined" &&
+      portalTarget != null
+        ? createPortal(
+            <Fragment key={portalKey}>
+              <ToastsContainer items={items} />
+            </Fragment>,
+            portalTarget
+          )
+        : null}
       {children}
     </>
   )

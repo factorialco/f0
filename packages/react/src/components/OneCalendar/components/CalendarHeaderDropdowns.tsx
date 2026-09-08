@@ -167,7 +167,7 @@ export function CalendarHeaderDropdowns({
     // min-w-0 lets the header shrink this side instead of pushing the
     // prev/next arrows out of the container.
     <div className="flex min-w-0 items-center gap-1">
-      {showMonth && (
+      {showMonth ? (
         // Fixed width so the trigger (and the popover around it) doesn't
         // resize when switching between short and long month names. Compact
         // pairs a narrower trigger with short month labels: 5.5rem fits the
@@ -185,7 +185,7 @@ export function CalendarHeaderDropdowns({
             fitContentWidth
           />
         </div>
-      )}
+      ) : null}
       <div className={compact ? "w-[5.5rem]" : "w-[6rem]"}>
         <F0Select
           size="sm"

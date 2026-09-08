@@ -223,11 +223,11 @@ const F0AiChatComponent = ({
             {input}
           </motion.div>
         </div>
-        {overlay && (
+        {overlay ? (
           <div className="absolute inset-0 z-30 flex items-center justify-center bg-f1-background-overlay p-4">
             {overlay}
           </div>
-        )}
+        ) : null}
       </div>
     )
   }

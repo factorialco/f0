@@ -61,7 +61,7 @@ export const Description = ({ description }: { description: string }) => {
           {description}
         </div>
       </motion.div>
-      {(needsTruncation || isExpanded) && (
+      {needsTruncation || isExpanded ? (
         <button
           onClick={() => setIsExpanded((current) => !current)}
           className="relative w-fit font-medium text-f1-foreground after:absolute after:-bottom-0.5 after:left-0 after:right-0 after:h-[1.5px] after:bg-f1-border after:transition-all after:content-[''] hover:after:bg-f1-border-hover"
@@ -70,7 +70,7 @@ export const Description = ({ description }: { description: string }) => {
             ? translations.actions.showLess
             : translations.actions.showAll}
         </button>
-      )}
+      ) : null}
     </div>
   )
 }

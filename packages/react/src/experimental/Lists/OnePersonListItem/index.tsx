@@ -65,7 +65,7 @@ const BaseOnePersonListItem = React.forwardRef<
       <div className="flex flex-1 flex-col">
         <div className="flex flex-1 flex-row items-center gap-1">
           <span className="truncate font-medium">{`${person.firstName} ${person.lastName}`}</span>
-          {props.info && (
+          {props.info ? (
             <Tooltip label={props.info}>
               <F0Icon
                 icon={InfoCircle}
@@ -73,40 +73,40 @@ const BaseOnePersonListItem = React.forwardRef<
                 className="text-f1-icon-secondary"
               />
             </Tooltip>
-          )}
+          ) : null}
         </div>
-        {"bottomTags" in props && (
+        {"bottomTags" in props ? (
           <div className="-ml-1.5 flex flex-row items-center [&>div]:-mr-1">
             {props.bottomTags.map((tag, i) => (
               <>
                 <F0TagRaw key={tag.text} {...tag} />
-                {i < props.bottomTags.length - 1 && <span>·</span>}
+                {i < props.bottomTags.length - 1 ? <span>·</span> : null}
               </>
             ))}
           </div>
-        )}
-        {"description" in props && props.description && (
+        ) : null}
+        {"description" in props && props.description ? (
           <p className="truncate text-f1-foreground-secondary">
             {props.description}
           </p>
-        )}
+        ) : null}
       </div>
       <div className="flex flex-row items-center justify-between gap-2">
-        {"rightTag" in props && props.rightTag && (
+        {"rightTag" in props && props.rightTag ? (
           <F0TagDot {...props.rightTag} />
-        )}
-        {"actions" in props && (
+        ) : null}
+        {"actions" in props ? (
           <div className="flex flex-1 flex-row items-center justify-end gap-2">
-            {props.actions?.primary && (
+            {props.actions?.primary ? (
               <F0Button
                 variant="outline"
                 onClick={props.actions.primary.onClick}
                 label={props.actions.primary.label}
                 icon={props.actions.primary.icon}
               />
-            )}
+            ) : null}
 
-            {props.actions?.secondary && (
+            {props.actions?.secondary ? (
               <F0Button
                 variant="outline"
                 onClick={props.actions.secondary.onClick}
@@ -114,9 +114,9 @@ const BaseOnePersonListItem = React.forwardRef<
                 icon={props.actions.secondary.icon}
                 hideLabel
               />
-            )}
+            ) : null}
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   )

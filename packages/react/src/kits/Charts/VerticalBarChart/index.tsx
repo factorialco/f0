@@ -106,21 +106,21 @@ const _VBarChart = <K extends ChartConfig>(
           right: label || showRatio ? 100 : 0,
         }}
       >
-        {!hideTooltip && (
+        {!hideTooltip ? (
           <ChartTooltip
             {...chartTooltipProps(true)}
             content={
               <ChartTooltipContent yAxisFormatter={yAxis?.tickFormatter} />
             }
           />
-        )}
-        {!hideGrid && (
+        ) : null}
+        {!hideGrid ? (
           <CartesianGrid
             {...cartesianGridProps()}
             vertical={true}
             horizontal={false}
           />
-        )}
+        ) : null}
         <XAxis {...xAxisProps} hide={xAxis?.hide} />
         <YAxis
           {...yAxisProps}
@@ -144,7 +144,7 @@ const _VBarChart = <K extends ChartConfig>(
                 radius={4}
                 maxBarSize={24}
               >
-                {(label || showRatio) && (
+                {label || showRatio ? (
                   <LabelList
                     key={`label-{${key}}`}
                     position="right"
@@ -162,7 +162,7 @@ const _VBarChart = <K extends ChartConfig>(
                       ) : undefined
                     }
                   />
-                )}
+                ) : null}
               </Bar>
             </>
           )
@@ -198,7 +198,7 @@ const CustomLabel = ({
 
   return (
     <g transform={`translate(${gx},${gy + 4})`}>
-      {showLabel && (
+      {showLabel ? (
         <text
           x={0}
           textAnchor="start"
@@ -206,7 +206,7 @@ const CustomLabel = ({
         >
           {firstText}
         </text>
-      )}
+      ) : null}
       {
         <text
           x={showLabel ? firstTextWidth + 8 : 0}

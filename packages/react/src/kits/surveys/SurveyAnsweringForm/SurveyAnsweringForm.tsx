@@ -303,10 +303,10 @@ function SurveyAnsweringFormDialog({
             isStepped && !isFullscreen && "min-h-[600px]"
           )}
         >
-          {showTableOfContent && (
+          {showTableOfContent ? (
             <TableOfContent elements={elements} onChange={noop} answering />
-          )}
-          {showStepperProgress && (
+          ) : null}
+          {showStepperProgress ? (
             <div className="absolute left-0 right-0 top-0 [&>div>div>div]:h-1 [&>div>div>div]:rounded-none">
               <ProgressBarCell
                 label="Value"
@@ -314,7 +314,7 @@ function SurveyAnsweringFormDialog({
                 hideLabel
               />
             </div>
-          )}
+          ) : null}
           <div
             className={cn(
               "mx-auto flex w-full flex-1 justify-center flex-col @lg:w-[750px] max-w-full pt-0",
@@ -350,19 +350,19 @@ function SurveyAnsweringFormDialog({
                 />
               </F0Box>
             ) : null}
-            {showSectionHeader && (
+            {showSectionHeader ? (
               <div className="py-1 pl-5">
                 <span className="text-lg font-semibold text-f1-foreground">
                   {stepper.currentQuestion?.sectionTitle}
                 </span>
-                {stepper.currentQuestion?.sectionDescription && (
+                {stepper.currentQuestion?.sectionDescription ? (
                   <p className="text-f1-foreground-secondary">
                     {stepper.currentQuestion?.sectionDescription}
                   </p>
-                )}
+                ) : null}
               </div>
-            )}
-            {hasQuestions && !loading && (
+            ) : null}
+            {hasQuestions && !loading ? (
               <F0Form
                 key={isStepped ? stepper.currentStep : undefined}
                 formRef={formRef}
@@ -376,7 +376,7 @@ function SurveyAnsweringFormDialog({
                 errorTriggerMode={errorTriggerMode}
                 sections={sections}
               />
-            )}
+            ) : null}
           </div>
         </div>
       </SurveyFormBuilderProvider>
@@ -438,7 +438,7 @@ function SurveyAnsweringFormInline({
       datasets={datasets}
     >
       <div className="mx-auto flex w-full max-w-3xl flex-col">
-        {!hideResourceHeader && (
+        {!hideResourceHeader ? (
           <div className="mb-6">
             <F0ResourceHeader
               title={title}
@@ -446,7 +446,7 @@ function SurveyAnsweringFormInline({
               {...resourceHeader}
             />
           </div>
-        )}
+        ) : null}
         {loading ? (
           <SurveyAllQuestionsLoadingSkeleton />
         ) : !hasQuestions ? (

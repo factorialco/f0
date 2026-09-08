@@ -84,7 +84,7 @@ export const CalendarEvent = forwardRef<HTMLDivElement, CalendarEventProps>(
         ref={ref}
         className="relative flex flex-row items-stretch gap-2.5 overflow-hidden rounded-sm p-2"
       >
-        {!noBackground && (
+        {!noBackground ? (
           <>
             <div
               className="absolute bottom-0 left-0 right-0 top-0 opacity-5"
@@ -99,7 +99,7 @@ export const CalendarEvent = forwardRef<HTMLDivElement, CalendarEventProps>(
               }}
             />
           </>
-        )}
+        ) : null}
 
         <div
           className="min-h-10 min-w-1 rounded-2xs"
@@ -122,21 +122,21 @@ export const CalendarEvent = forwardRef<HTMLDivElement, CalendarEventProps>(
         <div className="z-10 flex flex-1 flex-col gap-2">
           <div className="flex flex-row items-start gap-2.5">
             <div className="flex flex-1 flex-col gap-0.5">
-              {!!label && (
+              {label ? (
                 <p className="line-clamp-1 text-sm text-f1-foreground-secondary">
                   {label}
                 </p>
-              )}
+              ) : null}
               <p className="line-clamp-3 font-medium text-f1-foreground">
                 {title}
-                {!!subtitle && (
+                {subtitle ? (
                   <span className="pl-1 font-normal text-f1-foreground-secondary">{`· ${subtitle}`}</span>
-                )}
+                ) : null}
               </p>
               <p className="text-f1-foreground-secondary">{description}</p>
             </div>
             <div className="flex flex-row items-center">
-              {fromDate && (
+              {fromDate ? (
                 <>
                   <F0AvatarDate date={fromDate} />
                   <F0Icon
@@ -145,16 +145,16 @@ export const CalendarEvent = forwardRef<HTMLDivElement, CalendarEventProps>(
                     className="text-f1-foreground-tertiary"
                   />
                 </>
-              )}
-              {toDate && <F0AvatarDate date={toDate} />}
+              ) : null}
+              {toDate ? <F0AvatarDate date={toDate} /> : null}
             </div>
           </div>
-          {(leftTags || rightTags) && (
+          {leftTags || rightTags ? (
             <div className="flex flex-row items-center justify-between">
-              {leftTags && <Tags tags={leftTags} />}
-              {rightTags && <Tags tags={rightTags} right />}
+              {leftTags ? <Tags tags={leftTags} /> : null}
+              {rightTags ? <Tags tags={rightTags} right /> : null}
             </div>
-          )}
+          ) : null}
         </div>
       </div>
     )

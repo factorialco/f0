@@ -87,7 +87,7 @@ const VideoEmbedNodeView = ({
             allowFullScreen
           />
         </div>
-        {isEditable && (
+        {isEditable ? (
           <div className="dark absolute right-2 top-2">
             <F0Button
               onClick={deleteNode}
@@ -98,7 +98,7 @@ const VideoEmbedNodeView = ({
               size="sm"
             />
           </div>
-        )}
+        ) : null}
       </div>
     </NodeViewWrapper>
   )

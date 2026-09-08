@@ -76,11 +76,11 @@ export const F0MapList = forwardRef<HTMLElement, F0MapListProps>(
             className
           )}
         >
-          {visible && (
+          {visible ? (
             <h2 className="text-f1-foreground mb-2 text-base font-medium">
               {listLabel}
             </h2>
-          )}
+          ) : null}
           <ul className={visible ? "flex flex-col gap-0.5" : undefined}>
             {points.map((p) => (
               <li key={p.id}>

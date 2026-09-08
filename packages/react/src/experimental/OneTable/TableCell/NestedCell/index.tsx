@@ -189,8 +189,8 @@ export const NestedCell = ({
               }
             }}
           >
-            {firstCellWithChildren &&
-              (nestedRowProps?.expanded ? (
+            {firstCellWithChildren ? (
+              nestedRowProps?.expanded ? (
                 <ChevronDown
                   className="pointer-events-none shrink-0"
                   size={CHEVRON_SIZE}
@@ -200,7 +200,8 @@ export const NestedCell = ({
                   className="pointer-events-none shrink-0"
                   size={CHEVRON_SIZE}
                 />
-              ))}
+              )
+            ) : null}
           </div>
           <div
             className={cn(

@@ -341,9 +341,9 @@ const Label = ({
 }) => (
   <div className="flex flex-col gap-1 pb-2">
     <span className="text-lg font-semibold text-f1-foreground">{children}</span>
-    {subtitle && (
+    {subtitle ? (
       <span className="text-base text-f1-foreground-secondary">{subtitle}</span>
-    )}
+    ) : null}
   </div>
 )
 

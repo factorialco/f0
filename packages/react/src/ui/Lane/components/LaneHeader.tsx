@@ -29,7 +29,7 @@ export const LaneHeader = ({
         <F0TagStatus text={label} variant={variant || "neutral"} />
       )}
       <Counter size="md" type="default" value={count} />
-      {showPrimary && (
+      {showPrimary ? (
         <div className="ml-auto flex items-center gap-1 pr-1">
           <F0Button
             variant="ghost"
@@ -40,7 +40,7 @@ export const LaneHeader = ({
             onClick={onPrimaryAction}
           />
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

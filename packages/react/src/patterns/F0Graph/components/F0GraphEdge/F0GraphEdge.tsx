@@ -91,7 +91,7 @@ export function F0GraphEdgeBase({
 
   return (
     <>
-      {showDot && (
+      {showDot ? (
         <defs>
           <marker
             id={`${MARKER_ID}-${edgeProps.id}`}
@@ -109,7 +109,7 @@ export function F0GraphEdgeBase({
             />
           </marker>
         </defs>
-      )}
+      ) : null}
       <BaseEdge
         id={edgeProps.id}
         path={edgePath}

@@ -71,11 +71,11 @@ export const OneSwitch = ({
               </SwitchPrimitive.Root>
             </div>
           </TooltipTrigger>
-          {!open && (
+          {!open ? (
             <TooltipContent side="left" className="font-medium">
               {translations.ai.welcome}
             </TooltipContent>
-          )}
+          ) : null}
         </Tooltip>
       </TooltipProvider>
     </div>

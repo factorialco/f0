@@ -216,9 +216,9 @@ export const CoachmarkProvider = ({
 
   return (
     <>
-      {isRenderer && item && (
+      {isRenderer && item ? (
         <ActiveCoachmark key={item.id} item={item} container={container} />
-      )}
+      ) : null}
       {children}
     </>
   )

@@ -11,7 +11,7 @@ const renderWidget = () => {
     <Widget>
       <></>
       <Fragment></Fragment>
-      {showHiddenChild() && <p>asd</p>}
+      {showHiddenChild() ? <p>asd</p> : null}
       {null}
       {undefined}
       <p>1</p>
@@ -19,7 +19,7 @@ const renderWidget = () => {
       <p>3</p>
       <></>
       <Fragment></Fragment>
-      {showHiddenChild() && <p>asd</p>}
+      {showHiddenChild() ? <p>asd</p> : null}
       {null}
       {undefined}
     </Widget>

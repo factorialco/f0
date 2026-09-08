@@ -108,14 +108,14 @@ export const F0OneSwitch = ({
               </SwitchPrimitive.Root>
             </div>
           </TooltipTrigger>
-          {!open && (
+          {!open ? (
             <TooltipContent
               side="left"
               className={cn("font-medium", autoOpen && "z-[100]")}
             >
               {tooltipText}
             </TooltipContent>
-          )}
+          ) : null}
         </Tooltip>
       </TooltipProvider>
     </div>

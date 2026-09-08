@@ -18,19 +18,23 @@ function _OneEmptyState({
       className="@container flex flex-col items-center justify-center gap-5 p-8"
       {...rest}
     >
-      {variant === "default" && <F0AvatarEmoji emoji={emoji!} size="lg" />}
-      {variant !== "default" && <F0AvatarAlert type={variant} size="lg" />}
+      {variant === "default" ? (
+        <F0AvatarEmoji emoji={emoji!} size="lg" />
+      ) : null}
+      {variant !== "default" ? (
+        <F0AvatarAlert type={variant} size="lg" />
+      ) : null}
       <div className="flex flex-col items-center justify-center gap-0.5">
         <p className="text-center text-lg font-medium text-f1-foreground">
           {title}
         </p>
-        {description && (
+        {description ? (
           <p className="max-w-96 text-center text-f1-foreground-secondary">
             {description}
           </p>
-        )}
+        ) : null}
       </div>
-      {actions && (
+      {actions ? (
         <div className="flex w-full max-w-full flex-col items-center justify-center gap-2 @sm:w-fit @sm:flex-row @sm:flex-wrap @sm:gap-3 [&>div]:w-full">
           {actions.map((action) => {
             if (action.type === "upsell") {
@@ -59,7 +63,7 @@ function _OneEmptyState({
             }
           })}
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

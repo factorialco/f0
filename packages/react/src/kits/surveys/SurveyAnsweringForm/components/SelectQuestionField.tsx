@@ -30,7 +30,9 @@ function RadioIndicator({ checked }: { checked: boolean }) {
           : "border border-solid border-f1-border bg-f1-background"
       )}
     >
-      {checked && <div className="h-2 w-2 rounded-full bg-f1-background" />}
+      {checked ? (
+        <div className="h-2 w-2 rounded-full bg-f1-background" />
+      ) : null}
     </div>
   )
 }

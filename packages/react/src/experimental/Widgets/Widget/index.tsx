@@ -376,11 +376,11 @@ const Container = forwardRef<
         )}
         ref={composedRef}
       >
-        {header && (
+        {header ? (
           <CardHeader className="-mr-1 -mt-1">
             <div className="flex w-full flex-1 flex-col gap-4">
               <div className="flex flex-1 flex-row flex-nowrap items-center justify-between gap-2">
-                {draggable && (
+                {draggable ? (
                   <div
                     className="-ml-1 flex h-6 w-6 shrink-0 items-center justify-center text-f1-icon-secondary hover:cursor-grab"
                     onMouseDown={onDragStart}
@@ -388,28 +388,28 @@ const Container = forwardRef<
                   >
                     <F0Icon icon={Handle} size="xs" />
                   </div>
-                )}
+                ) : null}
                 {/* `min-w-0` rather than `truncate`: the ellipsis belongs to the
                   TITLE, which carries its own (see `WidgetTitle`), and an
                   `overflow: hidden` here clipped the linked title's hover
                   background where it bleeds past the content box. */}
                 <div className="flex min-h-6 min-w-0 grow flex-row items-center gap-1">
-                  {header.title && (
+                  {header.title ? (
                     <WidgetTitle
                       title={header.title}
                       link={header.link}
                       isWide={isWide}
                     />
-                  )}
-                  {header.subtitle && (
+                  ) : null}
+                  {header.subtitle ? (
                     <div className="flex flex-row items-center gap-1">
-                      {!header.link && <InlineDot />}
+                      {!header.link ? <InlineDot /> : null}
                       <CardSubtitle className="truncate">
                         {header.subtitle}
                       </CardSubtitle>
                     </div>
-                  )}
-                  {header.info && (
+                  ) : null}
+                  {header.info ? (
                     <Tooltip label={header.info}>
                       <F0Icon
                         icon={InfoCircleLine}
@@ -417,28 +417,28 @@ const Container = forwardRef<
                         className="text-f1-foreground-secondary"
                       />
                     </Tooltip>
-                  )}
-                  {header.count && (
+                  ) : null}
+                  {header.count ? (
                     <div className="ml-0.5">
                       <Counter value={header.count} />
                     </div>
-                  )}
+                  ) : null}
                 </div>
                 <div className="flex flex-row items-center gap-3">
-                  {alert && <F0TagAlert text={alert} level="critical" />}
-                  {status && (
+                  {alert ? <F0TagAlert text={alert} level="critical" /> : null}
+                  {status ? (
                     <F0TagStatus text={status.text} variant={status.variant} />
-                  )}
+                  ) : null}
                   {headerControls}
-                  {AIButton && (
+                  {AIButton ? (
                     <AIButtonComponent
                       size="sm"
                       label={t.ai.ask}
                       onClick={AIButton}
                       icon={OneIcon}
                     />
-                  )}
-                  {actions && (
+                  ) : null}
+                  {actions ? (
                     <DropdownInternal items={actions} align="end">
                       <F0Button
                         icon={Ellipsis}
@@ -448,17 +448,17 @@ const Container = forwardRef<
                         hideLabel
                       />
                     </DropdownInternal>
-                  )}
+                  ) : null}
                   {/* No link here: it is the TITLE (see `WidgetTitle`). This
                     corner belongs to the overflow menu. */}
                 </div>
               </div>
-              {header.comment && (
+              {header.comment ? (
                 <div className="flex flex-row items-center gap-3 overflow-visible">
                   <PrivateBox>
                     <CardComment>{header.comment}</CardComment>
                   </PrivateBox>
-                  {!!header.canBeBlurred && (
+                  {header.canBeBlurred ? (
                     <span>
                       <F0Button
                         icon={privacyModeEnabled ? EyeInvisible : EyeVisible}
@@ -469,14 +469,14 @@ const Container = forwardRef<
                         size="sm"
                       />
                     </span>
-                  )}
+                  ) : null}
                 </div>
-              )}
+              ) : null}
             </div>
           </CardHeader>
-        )}
+        ) : null}
         <CardContent className="flex h-full flex-col gap-4">
-          {summaries && (
+          {summaries ? (
             <div className="flex flex-row">
               {summaries.map((summary, index) => (
                 <div key={index} className="grow">
@@ -484,34 +484,34 @@ const Container = forwardRef<
                     {summary.label}
                   </div>
                   <div className="flex flex-row items-end gap-0.5 text-2xl font-semibold">
-                    {!!summary.prefixUnit && (
+                    {summary.prefixUnit ? (
                       <div className="text-lg font-medium">
                         {summary.prefixUnit}
                       </div>
-                    )}
+                    ) : null}
                     {summary.value}
-                    {!!summary.postfixUnit && (
+                    {summary.postfixUnit ? (
                       <div className="text-lg font-medium">
                         {summary.postfixUnit}
                       </div>
-                    )}
+                    ) : null}
                   </div>
                 </div>
               ))}
             </div>
-          )}
+          ) : null}
           {React.Children.toArray(children)
             .filter(isRealNode)
             .map((child, index) => {
               return (
                 <React.Fragment key={index}>
-                  {index > 0 && <Separator bare />}
+                  {index > 0 ? <Separator bare /> : null}
                   {child}
                 </React.Fragment>
               )
             })}
         </CardContent>
-        {footerActions.length > 0 && (
+        {footerActions.length > 0 ? (
           <CardFooter className={cn("gap-2", footerClassName)}>
             {footerActions.map((footerAction, index) => (
               /* Both are DEFAULTS, not decisions: each action is spread after
@@ -534,7 +534,7 @@ const Container = forwardRef<
               />
             ))}
           </CardFooter>
-        )}
+        ) : null}
       </Card>
     </WidgetIsWideContext.Provider>
   )
@@ -584,7 +584,9 @@ const Skeleton = forwardRef<HTMLDivElement, WidgetSkeletonProps>(
             ) : (
               <SkeletonPrimitive className="h-4 w-full max-w-16" />
             )}
-            {header?.subtitle && <CardSubtitle>{header.subtitle}</CardSubtitle>}
+            {header?.subtitle ? (
+              <CardSubtitle>{header.subtitle}</CardSubtitle>
+            ) : null}
           </div>
         </CardHeader>
         <CardContent

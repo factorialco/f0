@@ -174,7 +174,7 @@ const F0SliderBase = forwardRef<HTMLDivElement, F0SliderProps>((props, ref) => {
         pointerInteractionRef.current = false
       }}
     >
-      {showLabel && (
+      {showLabel ? (
         <Label
           label={label}
           required={required}
@@ -182,7 +182,7 @@ const F0SliderBase = forwardRef<HTMLDivElement, F0SliderProps>((props, ref) => {
           id={labelId}
           disabled={disabled}
         />
-      )}
+      ) : null}
       <Slider
         value={[currentValue]}
         onValueChange={handleValueChange}
@@ -221,13 +221,13 @@ const F0SliderBase = forwardRef<HTMLDivElement, F0SliderProps>((props, ref) => {
           onFocus={() => setIsFocused(!pointerInteractionRef.current)}
           onBlur={() => setIsFocused(false)}
         />
-        {showTooltip !== "never" && (
+        {showTooltip !== "never" ? (
           <SliderTooltip
             visible={tooltipVisible}
             content={formatValue(currentValue)}
             style={{ left: `calc(${percent}% + ${thumbInBoundsOffset}px)` }}
           />
-        )}
+        ) : null}
       </Slider>
       <SliderRangeLabels minLabel={minLabel} maxLabel={maxLabel} />
       <div id={messagesId} role="status" aria-live="polite">

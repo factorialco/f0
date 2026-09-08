@@ -343,10 +343,10 @@ function ButtonGroupStacked({
 
   return (
     <>
-      {otherActions.length > 0 && <MobileDropdown items={otherActions} />}
+      {otherActions.length > 0 ? <MobileDropdown items={otherActions} /> : null}
       {stackedSecondaries}
-      {secondaryLink && renderSecondaryLink(secondaryLink, size)}
-      {primaryAction && renderPrimaryNode(primaryAction, size)}
+      {secondaryLink ? renderSecondaryLink(secondaryLink, size) : null}
+      {primaryAction ? renderPrimaryNode(primaryAction, size) : null}
     </>
   )
 }
@@ -472,7 +472,7 @@ function ButtonGroupRow({
       >
         {/* Hidden measurement copy, used to compute the visible/overflow split.
             Skipped when the group can't overflow — nothing is ever measured away. */}
-        {canOverflow && (
+        {canOverflow ? (
           <div
             ref={measurementContainerRef}
             aria-hidden="true"
@@ -482,13 +482,13 @@ function ButtonGroupRow({
               renderActionButton(action, size, "outline")
             )}
           </div>
-        )}
+        ) : null}
 
-        {menuItems.length > 0 && (
+        {menuItems.length > 0 ? (
           <div ref={customOverflowIndicatorRef}>
             <Dropdown items={menuItems} icon={Ellipsis} size={size} />
           </div>
-        )}
+        ) : null}
 
         {cleanedTokens.map((token) =>
           token.kind === "sep" ? (
@@ -498,13 +498,13 @@ function ButtonGroupRow({
           )
         )}
 
-        {secondaryLink && renderSecondaryLink(secondaryLink, size)}
+        {secondaryLink ? renderSecondaryLink(secondaryLink, size) : null}
       </div>
 
       {splitSecondaries.map((action) =>
         renderSplitButton(action, size, "outline")
       )}
-      {dividerBeforePinned && <ButtonGroupSeparator />}
+      {dividerBeforePinned ? <ButtonGroupSeparator /> : null}
       {primaryNode}
     </>
   )

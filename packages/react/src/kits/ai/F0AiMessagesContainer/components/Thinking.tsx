@@ -52,12 +52,12 @@ export const Thinking = ({
               status={itemStatus(index)}
               inGroup
             />
-            {index < titles.length - 1 && (
+            {index < titles.length - 1 ? (
               <div
                 aria-hidden
                 className="absolute -bottom-3 left-2 ml-px top-5 w-px bg-f1-border-secondary rounded"
               />
-            )}
+            ) : null}
           </div>
         ))}
       </div>

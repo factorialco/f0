@@ -64,26 +64,26 @@ export function WidgetSimpleListItem({
   return (
     <Wrapper onClick={handleOnClick} className={className}>
       <div className="flex flex-1 flex-row items-start gap-1">
-        {icon && (
+        {icon ? (
           <F0Icon
             icon={icon}
             size="md"
             className={cn("mt-0.5", iconClassName)}
           />
-        )}
+        ) : null}
         <p className="mt-0.5 line-clamp-2 font-medium">{title}</p>
-        {rightIcon && (
+        {rightIcon ? (
           <F0Icon
             icon={rightIcon}
             size="md"
             className={cn("mt-0.5", rightIconClassName)}
           />
-        )}
+        ) : null}
       </div>
       <div className="flex flex-row items-center gap-2">
-        {alert && <F0TagAlert {...alert} />}
-        {rawTag && <F0TagRaw {...rawTag} />}
-        {!!count && <Counter value={count} />}
+        {alert ? <F0TagAlert {...alert} /> : null}
+        {rawTag ? <F0TagRaw {...rawTag} /> : null}
+        {count ? <Counter value={count} /> : null}
       </div>
     </Wrapper>
   )

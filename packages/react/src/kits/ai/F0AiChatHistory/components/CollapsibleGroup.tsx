@@ -59,7 +59,7 @@ export function CollapsibleGroup({
           size="xs"
         />
       </div>
-      {expanded && (
+      {expanded ? (
         <div className="flex flex-col">
           {threads.map((thread) => (
             <ThreadItem
@@ -73,7 +73,7 @@ export function CollapsibleGroup({
             />
           ))}
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

@@ -363,7 +363,7 @@ const F0NotesTextEditorComponent = forwardRef<
       ref={containerRef}
       id={editorId}
     >
-      {showHeader && (
+      {showHeader ? (
         <Header
           primaryAction={primaryAction}
           secondaryActions={secondaryActions}
@@ -371,12 +371,12 @@ const F0NotesTextEditorComponent = forwardRef<
           otherActions={otherActions}
           status={status}
         />
-      )}
-      {error && (
+      ) : null}
+      {error ? (
         <ImageUploadError errorType={error} onDismiss={() => setError(null)} />
-      )}
+      ) : null}
       <AnimatePresence>
-        {enhance.error && !enhance.isLoading && (
+        {enhance.error && !enhance.isLoading ? (
           <motion.div
             key="enhance-error"
             initial={{ height: 0, opacity: 0, y: -20 }}
@@ -390,27 +390,27 @@ const F0NotesTextEditorComponent = forwardRef<
               onDismiss={enhance.clearError}
             />
           </motion.div>
-        )}
+        ) : null}
       </AnimatePresence>
       <ScrollArea className="notes-text-editor-scroll h-full gap-6">
-        {alert && (
+        {alert ? (
           <div className="mx-auto w-full max-w-[824px] sm:px-14 px-0">
             <F0Alert {...alert} />
           </div>
-        )}
-        {showTitle && (
+        ) : null}
+        {showTitle ? (
           <Title
             value={title}
             onChange={onTitleChange ? setTitle : undefined}
             placeholder={titlePlaceholder}
             disabled={!onTitleChange || readonly}
           />
-        )}
+        ) : null}
         <div
           className="notes-text-editor h-full"
           onClick={() => editor.commands.focus()}
         >
-          {!readonly && (
+          {!readonly ? (
             <DragHandle
               editor={editor}
               tippyOptions={tippyOptions}
@@ -437,7 +437,7 @@ const F0NotesTextEditorComponent = forwardRef<
                 </div>
               </div>
             </DragHandle>
-          )}
+          ) : null}
 
           <EditorContent
             editor={editor}
@@ -445,7 +445,7 @@ const F0NotesTextEditorComponent = forwardRef<
           />
         </div>
       </ScrollArea>
-      {!readonly && (
+      {!readonly ? (
         <EditorBubbleMenu
           editorId={editorId}
           editor={editor}
@@ -455,7 +455,7 @@ const F0NotesTextEditorComponent = forwardRef<
           plainHtmlMode={false}
           enhance={enhance}
         />
-      )}
+      ) : null}
     </div>
   )
 })
@@ -471,7 +471,7 @@ export const F0NotesTextEditorSkeleton = ({
       aria-busy="true"
       aria-live="polite"
     >
-      {withHeader && (
+      {withHeader ? (
         <div className="flex items-center justify-between border-b border-f1-border px-6 py-3">
           <div className="flex items-center gap-3">
             <Skeleton className="h-6 w-20 rounded-md" />
@@ -482,9 +482,9 @@ export const F0NotesTextEditorSkeleton = ({
             <Skeleton className="h-8 w-12 rounded-md" />
           </div>
         </div>
-      )}
+      ) : null}
 
-      {withToolbar && (
+      {withToolbar ? (
         <div className="absolute bottom-8 left-1/2 z-50 flex -translate-x-1/2 flex-row items-center gap-[9px] rounded-lg bg-f1-background p-2 shadow-md">
           <Skeleton className="h-8 w-8 rounded" />
           <div className="flex items-center gap-0.5">
@@ -507,13 +507,13 @@ export const F0NotesTextEditorSkeleton = ({
             <Skeleton className="h-8 w-8 rounded" />
           </div>
         </div>
-      )}
+      ) : null}
       <ScrollArea className="h-full gap-6">
-        {withTitle && (
+        {withTitle ? (
           <div className="mx-auto flex w-full max-w-[824px] flex-col px-14 pb-5 pt-5">
             <Skeleton className="h-8 w-80 rounded-md" />
           </div>
-        )}
+        ) : null}
 
         <div className="h-full">
           <div className="pb-28 [&>div]:mx-auto [&>div]:w-full [&>div]:max-w-[824px] [&>div]:px-14">

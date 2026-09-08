@@ -253,7 +253,9 @@ function CardDeleteScenario() {
           onClick: () => setPreviewedResource(null),
         }}
       >
-        {previewedResource && <CrudContentPlaceholder minHeight="min-h-56" />}
+        {previewedResource ? (
+          <CrudContentPlaceholder minHeight="min-h-56" />
+        ) : null}
       </F0Dialog>
       <F0Dialog
         isOpen={selectedResource !== null}

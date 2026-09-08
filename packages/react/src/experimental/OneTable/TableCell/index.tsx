@@ -176,8 +176,7 @@ export function TableCell({
       }}
     >
       <AnimatePresence>
-        {((isStickyLeft && isScrolled) ||
-          (isStickyRight && isScrolledRight)) && (
+        {(isStickyLeft && isScrolled) || (isStickyRight && isScrolledRight) ? (
           <motion.div
             key="cell-shadow-gradient"
             className={cn(
@@ -189,18 +188,18 @@ export function TableCell({
             animate={{ opacity: 0.1 }}
             exit={{ opacity: 0 }}
           />
-        )}
+        ) : null}
       </AnimatePresence>
 
-      {firstCell && nestedRowProps?.tableWithChildren && (
+      {firstCell && nestedRowProps?.tableWithChildren ? (
         <TreeConnector
           firstCell={firstCell}
           nestedRowProps={nestedRowProps}
           fromVisualization={fromVisualization}
         />
-      )}
+      ) : null}
 
-      {loading && (
+      {loading ? (
         <div
           style={{ ...firstCellMarginLeft }}
           className={cn(
@@ -212,9 +211,9 @@ export function TableCell({
         >
           <Skeleton className="h-4 w-full" />
         </div>
-      )}
+      ) : null}
 
-      {!loading && (
+      {!loading ? (
         <>
           <div
             className={cn(
@@ -254,7 +253,7 @@ export function TableCell({
               </div>
             )}
           </div>
-          {href && (
+          {href ? (
             <Link
               ref={linkRef}
               href={href}
@@ -263,8 +262,8 @@ export function TableCell({
             >
               <span className="sr-only">{actions.view}</span>
             </Link>
-          )}
-          {onClick && (
+          ) : null}
+          {onClick ? (
             <button
               type="button"
               onClick={(e) => {
@@ -283,9 +282,9 @@ export function TableCell({
             >
               <span className="sr-only">{actions.view}</span>
             </button>
-          )}
+          ) : null}
         </>
-      )}
+      ) : null}
     </TableCellRoot>
   )
 }

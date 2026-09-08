@@ -90,9 +90,9 @@ export const SidebarCollapsibleSection = ({
               <F0Icon icon={ChevronDown} size="xs" />
             </motion.div>
             {/* Surfaces hidden unreads at the far right while collapsed. */}
-            {!isOpen && collapsedBadge && (
+            {!isOpen && collapsedBadge ? (
               <span className="ml-auto">{collapsedBadge}</span>
-            )}
+            ) : null}
           </button>
         </div>
         <CollapsibleContent forceMount className="mt-0.5 flex flex-col gap-1">

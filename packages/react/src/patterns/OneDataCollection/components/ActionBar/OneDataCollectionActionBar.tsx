@@ -150,8 +150,8 @@ export const OneDataCollectionActionBar = forwardRef<
     }
     return (
       <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center">
-        {warningMessage && <WarningAlert message={warningMessage} />}
-        {!!displayedSelectedNumber && (
+        {warningMessage ? <WarningAlert message={warningMessage} /> : null}
+        {displayedSelectedNumber ? (
           <div className="dark flex h-8 w-full items-center justify-between gap-3 px-2 sm:h-auto sm:w-fit sm:justify-start sm:pl-2 sm:pr-0">
             {showAllItemsSelected ? (
               <span className="font-medium tabular-nums text-f1-foreground">
@@ -182,7 +182,7 @@ export const OneDataCollectionActionBar = forwardRef<
               size="sm"
             />
           </div>
-        )}
+        ) : null}
       </div>
     )
   }, [

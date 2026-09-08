@@ -255,7 +255,7 @@ export const SidebarWindow = ({
 
   return (
     <AnimatePresence>
-      {isVisible && (
+      {isVisible ? (
         <motion.div
           key="chat-wrapper"
           className={cn(
@@ -299,7 +299,7 @@ export const SidebarWindow = ({
         >
           {/* Resize seam: inner (left) edge for a right-docked panel, inner
               (right) edge for a left-docked one — so it renders after the card. */}
-          {resizable && !fullscreen && !isSmallScreen && !isLeft && (
+          {resizable && !fullscreen && !isSmallScreen && !isLeft ? (
             <ResizeHandle
               onResize={handleResize}
               onReset={resetChatWidth}
@@ -308,7 +308,7 @@ export const SidebarWindow = ({
               isCanvasMode={isCanvasMode}
               side="right"
             />
-          )}
+          ) : null}
           <div
             ref={widgetDropZoneRef}
             aria-hidden={!isVisible}
@@ -341,7 +341,7 @@ export const SidebarWindow = ({
             </div>
             {/* `canDrop` gates only the file drop — quoting a dragged widget
                 needs no upload handler, so it renders on its own. */}
-            {(canDrop || (canAcceptWidgetDrop && dragQuote !== null)) && (
+            {canDrop || (canAcceptWidgetDrop && dragQuote !== null) ? (
               <DropOverlay
                 visible={(canDrop && fileDragOver) || dragQuote !== null}
                 mode={dragQuote !== null ? "discuss" : "files"}
@@ -355,10 +355,10 @@ export const SidebarWindow = ({
                     : undefined
                 }
               />
-            )}
-            {activeGame === "pong" && <F0AiPong onClose={closeGame} />}
+            ) : null}
+            {activeGame === "pong" ? <F0AiPong onClose={closeGame} /> : null}
           </div>
-          {resizable && !fullscreen && !isSmallScreen && isLeft && (
+          {resizable && !fullscreen && !isSmallScreen && isLeft ? (
             <ResizeHandle
               onResize={handleResize}
               onReset={resetChatWidth}
@@ -367,9 +367,9 @@ export const SidebarWindow = ({
               isCanvasMode={isCanvasMode}
               side="left"
             />
-          )}
+          ) : null}
         </motion.div>
-      )}
+      ) : null}
     </AnimatePresence>
   )
 }

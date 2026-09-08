@@ -130,7 +130,7 @@ function _ProductModal({
             promoTag={promoTag}
             actions={
               <div className="flex gap-3">
-                {primaryAction && (
+                {primaryAction ? (
                   <F0Button
                     variant={primaryAction.variant}
                     label={isLoading ? loadingState.label : primaryAction.label}
@@ -139,8 +139,8 @@ function _ProductModal({
                     loading={primaryAction.loading}
                     size={primaryAction.size}
                   />
-                )}
-                {secondaryAction && (
+                ) : null}
+                {secondaryAction ? (
                   <F0Button
                     onClick={secondaryAction.onClick}
                     label={secondaryAction.label}
@@ -148,14 +148,14 @@ function _ProductModal({
                     size={secondaryAction.size}
                     icon={secondaryAction.icon}
                   />
-                )}
+                ) : null}
               </div>
             }
           />
         </div>
       </CustomModal>
 
-      {responseStatus && showResponseDialog && (
+      {responseStatus && showResponseDialog ? (
         <UpsellRequestResponseDialog
           open={true}
           onClose={() => {
@@ -169,7 +169,7 @@ function _ProductModal({
           closeLabel={closeLabel}
           portalContainer={portalContainer}
         />
-      )}
+      ) : null}
     </>
   )
 }

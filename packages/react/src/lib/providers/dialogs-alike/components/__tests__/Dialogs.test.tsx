@@ -73,7 +73,7 @@ const MockDialogNotificationInternal = vi.hoisted(() => {
       <button data-testid="notification-close-button" onClick={props.onClose}>
         Close
       </button>
-      {props.primaryAction && (
+      {props.primaryAction ? (
         <button
           data-testid="notification-primary-action"
           onClick={props.primaryAction.onClick}
@@ -81,7 +81,7 @@ const MockDialogNotificationInternal = vi.hoisted(() => {
         >
           {props.primaryAction.label}
         </button>
-      )}
+      ) : null}
       {props.secondaryAction?.map((action: any, index: number) => (
         <button
           key={`notification-secondary-${index}`}

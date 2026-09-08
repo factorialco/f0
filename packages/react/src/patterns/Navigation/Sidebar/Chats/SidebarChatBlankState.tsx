@@ -40,13 +40,13 @@ function _SidebarChatBlankState({
     >
       <div className="flex flex-col gap-0.5">
         <p className="text-base font-medium text-f1-foreground">{title}</p>
-        {description && (
+        {description ? (
           <p className="text-base text-f1-foreground-secondary">
             {description}
           </p>
-        )}
+        ) : null}
       </div>
-      {actions && actions.length > 0 && (
+      {actions && actions.length > 0 ? (
         <div className="flex flex-col items-center gap-2">
           {actions.map((action) => (
             <ButtonInternal
@@ -59,7 +59,7 @@ function _SidebarChatBlankState({
             />
           ))}
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

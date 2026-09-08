@@ -280,7 +280,7 @@ export function SwitchGroupRenderer({
           <F0Alert key={fieldId} {...props} variant={props.variant ?? "info"} />
         ))}
       </div>
-      {groupErrors.length > 0 && (
+      {groupErrors.length > 0 ? (
         <div className="flex flex-col gap-1">
           {groupErrors.map((error) => (
             <FormFieldPrimitive
@@ -295,7 +295,7 @@ export function SwitchGroupRenderer({
             />
           ))}
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

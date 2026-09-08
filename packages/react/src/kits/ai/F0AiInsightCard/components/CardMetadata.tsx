@@ -54,7 +54,7 @@ export const CardMetadata = (props: CardMetadataProps) => {
         animate={{ opacity: shouldFadeContent ? 0 : 1 }}
         transition={fadeTransition}
       >
-        {content === "person" && (
+        {content === "person" ? (
           <div className="flex items-center gap-1">
             <F0AvatarPerson
               firstName={props.avatar.firstName}
@@ -62,49 +62,55 @@ export const CardMetadata = (props: CardMetadataProps) => {
               src={props.avatar.src}
               size="xs"
             />
-            {label && <span className={cn(labelVariants())}>{label}</span>}
+            {label ? (
+              <span className={cn(labelVariants())}>{label}</span>
+            ) : null}
           </div>
-        )}
+        ) : null}
 
-        {content === "people" && (
+        {content === "people" ? (
           <F0AvatarList
             type="person"
             avatars={props.avatars}
             size="md"
             max={3}
           />
-        )}
+        ) : null}
 
-        {content === "team" && (
+        {content === "team" ? (
           <div className="flex items-center gap-1">
             <F0AvatarTeam
               name={props.avatar.name}
               src={props.avatar.src}
               size="xs"
             />
-            {label && <span className={cn(labelVariants())}>{label}</span>}
+            {label ? (
+              <span className={cn(labelVariants())}>{label}</span>
+            ) : null}
           </div>
-        )}
+        ) : null}
 
-        {content === "company" && (
+        {content === "company" ? (
           <div className="flex items-center gap-1">
             <F0AvatarCompany
               name={props.avatar.name}
               src={props.avatar.src}
               size="xs"
             />
-            {label && <span className={cn(labelVariants())}>{label}</span>}
+            {label ? (
+              <span className={cn(labelVariants())}>{label}</span>
+            ) : null}
           </div>
-        )}
+        ) : null}
 
-        {content === "alert" && (
+        {content === "alert" ? (
           <F0TagAlert text={props.alertLabel} level={props.level} />
-        )}
+        ) : null}
 
-        {content === "balance" && <BalanceTag balance={props.balance} />}
+        {content === "balance" ? <BalanceTag balance={props.balance} /> : null}
       </motion.div>
 
-      {label && !hiddenBottomLabelTypes.has(content) && (
+      {label && !hiddenBottomLabelTypes.has(content) ? (
         <motion.span
           className={cn(labelVariants())}
           animate={{ opacity: shouldFadeContent ? 0 : 1 }}
@@ -112,7 +118,7 @@ export const CardMetadata = (props: CardMetadataProps) => {
         >
           {label}
         </motion.span>
-      )}
+      ) : null}
     </div>
   )
 }

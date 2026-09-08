@@ -55,11 +55,11 @@ const Probe = ({
         Start Pong
       </button>
       <span data-testid="quote">{pendingQuote?.text ?? ""}</span>
-      {onCaptureQuote && (
+      {onCaptureQuote ? (
         <button type="button" onClick={() => onCaptureQuote(pendingQuote)}>
           Capture pending quote
         </button>
-      )}
+      ) : null}
     </>
   )
 }

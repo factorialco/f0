@@ -26,7 +26,9 @@ function RadioIndicator({
         disabled && "opacity-50"
       )}
     >
-      {checked && <div className="h-2 w-2 rounded-full bg-f1-background" />}
+      {checked ? (
+        <div className="h-2 w-2 rounded-full bg-f1-background" />
+      ) : null}
     </div>
   )
 }
@@ -169,11 +171,11 @@ export const SelectOption = ({
         ) : (
           <p className="flex-1 font-medium">{label}</p>
         )}
-        {!disabled && !answering && correct && (
+        {!disabled && !answering && correct ? (
           <span className="text-sm font-medium text-f1-foreground-positive">
             {t("surveyFormBuilder.selectQuestion.correct")}
           </span>
-        )}
+        ) : null}
         {!disabled && !answering && !locked ? (
           <div className="hidden flex-row items-center gap-1 group-hover:inline-block">
             <F0Button

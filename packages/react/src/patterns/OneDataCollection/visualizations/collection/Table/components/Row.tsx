@@ -372,7 +372,7 @@ const RowComponentInner = <
         referenceTypeClasses[referenceRowType]
       )}
     >
-      {source.selectable && (
+      {source.selectable ? (
         <TableCell
           width={checkColumnWidth}
           sticky={{ left: 0 }}
@@ -385,7 +385,7 @@ const RowComponentInner = <
           )}
           referenceRowType={referenceRowType}
         >
-          {id !== undefined && (
+          {id !== undefined ? (
             <div
               className={cn(
                 "pointer-events-auto ml-3.5 flex h-full items-center justify-start",
@@ -402,9 +402,9 @@ const RowComponentInner = <
                 hideLabel
               />
             </div>
-          )}
+          ) : null}
         </TableCell>
-      )}
+      ) : null}
 
       {columns.map((column, cellIndex) => {
         const headerGroup = headerGroups?.find((group) => {
@@ -475,10 +475,10 @@ const RowComponentInner = <
       })}
 
       {hasItemActions &&
-        !loading &&
-        !nestedRowProps?.onLoadMoreChildren &&
-        !nestedRowProps?.onAddRow &&
-        (fromVisualization === "editableTable" ? (
+      !loading &&
+      !nestedRowProps?.onLoadMoreChildren &&
+      !nestedRowProps?.onAddRow ? (
+        fromVisualization === "editableTable" ? (
           <TableCell
             key={`table-cell-${groupIndex}-${index}-actions`}
             sticky={{ right: 0 }}
@@ -510,7 +510,7 @@ const RowComponentInner = <
               </ItemActionsRowContainer>
             </td>
             {/** Mobile item actions */}
-            {hasMobileItemActions && (
+            {hasMobileItemActions ? (
               <TableCell
                 key={`table-cell-${groupIndex}-${index}-actions`}
                 width={68}
@@ -526,9 +526,10 @@ const RowComponentInner = <
                   onOpenChange={handleDropDownOpenChange}
                 />
               </TableCell>
-            )}
+            ) : null}
           </>
-        ))}
+        )
+      ) : null}
     </TableRow>
   )
 }

@@ -88,7 +88,7 @@ export const Action = React.forwardRef<
         {append}
       </div>
       <AnimatePresence>
-        {loading && (
+        {loading ? (
           <>
             {isLinkStyled(localVariant) ? (
               <Skeleton className="absolute inset-0 my-auto h-full w-full" />
@@ -112,7 +112,7 @@ export const Action = React.forwardRef<
               </div>
             )}
           </>
-        )}
+        ) : null}
       </AnimatePresence>
     </>
   )
