@@ -196,8 +196,16 @@ export interface F0MapProps extends WithDataTestIdProps {
    */
   sidebarToggleAddon?: ReactNode
   /**
+   * A control for the start of the panel's own header row, opposite the toggle
+   * that holds its far end - a search that filters what the panel lists, say.
+   * Only shown while the panel is open, since that row is the panel's.
+   */
+  sidebarHeaderStart?: ReactNode
+  /**
    * Content of the side panel the toggle opens. The panel is the map's own
-   * surface, sized and animated here; this is what goes inside it.
+   * surface, sized and animated here; this is what goes inside it. It gets the
+   * panel bare - below the header row, edge to edge, no padding and no scroll
+   * container - so sections can span the full width and scroll as one list.
    */
   sidebar?: ReactNode
   /**
@@ -386,6 +394,7 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
     onSidebarToggle,
     sidebarExpanded = false,
     sidebarToggleAddon,
+    sidebarHeaderStart,
     sidebar,
     detail,
     detailOpen = false,
@@ -1057,9 +1066,15 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
               open={listPanelOpen}
               offsetX={listOffset}
               width={MAP_PANEL.listWidth}
-              // Once the panel is open the toggle belongs to it, sitting in its
-              // header rather than travelling with the map's controls.
-              headerAction={
+              // The panel's sections span its full width and scroll as one
+              // list, so they carry their own insets - see `sidebar`.
+              disableContentPadding
+              headerStart={sidebarHeaderStart}
+              // Once the panel is open the toggle belongs to it, sitting at the
+              // far end of its header row rather than travelling with the map's
+              // controls - the edge it is pushing back, not the one it came
+              // from.
+              headerEnd={
                 <F0MapSidebarToggle
                   expanded
                   onToggle={onSidebarToggle}

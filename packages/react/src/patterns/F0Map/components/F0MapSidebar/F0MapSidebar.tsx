@@ -47,9 +47,10 @@ export interface F0MapSidebarProps extends WithDataTestIdProps {
   /** Panel width, in px. */
   width: number
   /**
-   * Drop the panel's own padding and scrolling, for content that brings both
+   * Drop the content area's padding and scrolling, for content that brings both
    * (a header that spans the full width, sections with their own insets and
-   * their own scroll region). Defaults to `false`.
+   * their own scroll region). Defaults to `false`. The header row keeps its own
+   * 2px either way - that is what aligns its control with the map's.
    */
   disableContentPadding?: boolean
   /**
@@ -61,12 +62,15 @@ export interface F0MapSidebarProps extends WithDataTestIdProps {
    */
   entrance?: "slide" | "grow"
   /**
-   * A control belonging to the panel itself, in a header row of its own. The
-   * row is reserved space, not an overlay: the content below gets whatever
-   * height is left and scrolls inside it, so nothing ever passes under the
-   * control or is clipped by it.
+   * A control belonging to the panel itself, at the start of a header row of
+   * its own. The row is reserved space, not an overlay: the content below gets
+   * whatever height is left and scrolls inside it, so nothing ever passes
+   * under the control or is clipped by it. It also takes the width the row has
+   * left, so a control that opens into a field has somewhere to open into.
    */
-  headerAction?: ReactNode
+  headerStart?: ReactNode
+  /** A second control in that same header row, at its far end. */
+  headerEnd?: ReactNode
   /** Names the region for assistive tech. Defaults to the map's panel label. */
   ariaLabel?: string
 }
@@ -96,7 +100,8 @@ export const F0MapSidebar = ({
   width,
   disableContentPadding = false,
   entrance = "slide",
-  headerAction,
+  headerStart,
+  headerEnd,
   ariaLabel,
   dataTestId,
 }: F0MapSidebarProps) => {
@@ -199,17 +204,16 @@ export const F0MapSidebar = ({
             padding="none"
             height="full"
           >
-            {/* 6px of breathing room around everything, below F0Box's smallest
-                token (`xs` is 4px), so it lives on a plain wrapper. */}
-            <div
-              className={cn(
-                "flex h-full flex-col",
-                !disableContentPadding && "p-1.5"
-              )}
-            >
-              {headerAction ? (
-                <div className="flex shrink-0 justify-start">
-                  {headerAction}
+            <div className="flex h-full flex-col">
+              {headerStart || headerEnd ? (
+                <div className="flex shrink-0 items-center justify-between gap-1 p-0.5">
+                  {/* Takes the rest of the row, so a control that opens into a
+                      field has somewhere to open into - and stays at the near
+                      end while it is still just a button. */}
+                  <div className="flex min-w-0 flex-1 justify-start">
+                    {headerStart}
+                  </div>
+                  {headerEnd}
                 </div>
               ) : null}
               {/* Takes the height the header leaves, and scrolls: the panel
@@ -220,7 +224,7 @@ export const F0MapSidebar = ({
               <div
                 className={cn(
                   "min-h-0 flex-1",
-                  !disableContentPadding && "overflow-y-auto"
+                  !disableContentPadding && "overflow-y-auto p-1.5"
                 )}
               >
                 {children}
