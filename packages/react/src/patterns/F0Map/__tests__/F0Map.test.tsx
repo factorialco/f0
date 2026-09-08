@@ -162,21 +162,31 @@ const mock = vi.hoisted(() => {
     }
   }
   class MockMarker {
-    constructor(opts?: { element?: HTMLElement }) {
-      markers.push({ element: opts?.element, position: null, added: false })
-      this.index = markers.length - 1
+    // Held by reference, not by index: a removal used to shift every later
+    // marker's position out from under it.
+    entry: {
+      element?: HTMLElement
+      position: [number, number] | null
+      added: boolean
     }
-    index: number
+    constructor(opts?: { element?: HTMLElement }) {
+      this.entry = { element: opts?.element, position: null, added: false }
+      markers.push(this.entry)
+    }
     setLngLat(at: [number, number]) {
-      markers[this.index].position = at
+      this.entry.position = at
       return this
     }
     addTo() {
-      markers[this.index].added = true
+      this.entry.added = true
       return this
     }
     remove() {
-      markers.splice(this.index, 1)
+      const at = markers.indexOf(this.entry)
+      if (at >= 0) {
+        markers.splice(at, 1)
+      }
+      return this
     }
   }
   class MockLngLatBounds {
@@ -237,6 +247,13 @@ const ARCS: F0MapArc[] = [
 ]
 const LINE_LAYERS = ["f0-map-lines-solid", "f0-map-lines-dashed"]
 
+// The engine is behind a dynamic import, so it lands a microtask after render
+// rather than during it.
+const engine = async () => {
+  await waitFor(() => expect(mock.instances.length).toBeGreaterThan(0))
+  return mock.instances[0]
+}
+
 describe("F0Map", () => {
   beforeEach(() => {
     mock.instances.length = 0
@@ -245,14 +262,14 @@ describe("F0Map", () => {
   })
 
   describe("accessibility", () => {
-    it("exposes a labelled region", () => {
+    it("exposes a labelled region", async () => {
       render(<F0Map markers={POINTS} ariaLabel="Offices map" />)
       expect(
         screen.getByRole("region", { name: "Offices map" })
       ).toBeInTheDocument()
     })
 
-    it("renders every marker in the operable list (text alternative)", () => {
+    it("renders every marker in the operable list (text alternative)", async () => {
       render(<F0Map markers={POINTS} />)
       const list = screen.getByRole("navigation", { name: "Locations" })
       expect(list).toBeInTheDocument()
@@ -260,12 +277,12 @@ describe("F0Map", () => {
       expect(screen.getByRole("button", { name: "Office" })).toBeInTheDocument()
     })
 
-    it("announces the marker count in a live region", () => {
+    it("announces the marker count in a live region", async () => {
       render(<F0Map markers={POINTS} />)
       expect(screen.getByRole("status")).toHaveTextContent("2 locations")
     })
 
-    it("offers a skip-to-list link targeting the list", () => {
+    it("offers a skip-to-list link targeting the list", async () => {
       render(<F0Map markers={POINTS} />)
       const skip = screen.getByRole("link", { name: /skip to location list/i })
       const list = screen.getByRole("navigation", { name: "Locations" })
@@ -274,23 +291,23 @@ describe("F0Map", () => {
   })
 
   describe("imperative handle", () => {
-    it("focusMarker flies the camera to the point", () => {
+    it("focusMarker flies the camera to the point", async () => {
       const ref = createRef<F0MapHandle>()
       render(<F0Map ref={ref} markers={POINTS} />)
+      const easeTo = (await engine()).calls.easeTo
       ref.current?.focusMarker("hq")
-      const easeTo = mock.instances[0].calls.easeTo
       expect(easeTo.at(-1)?.center).toEqual([2.19, 41.4])
       expect(easeTo.at(-1)?.zoom).toBe(15) // max(getZoom()=11, 15)
     })
 
-    it("fitToMarkers frames the points", () => {
+    it("fitToMarkers frames the points", async () => {
       const ref = createRef<F0MapHandle>()
       render(<F0Map ref={ref} markers={POINTS} />)
       ref.current?.fitToMarkers()
-      expect(mock.instances[0].calls.fitBounds.length).toBeGreaterThan(0)
+      expect((await engine()).calls.fitBounds.length).toBeGreaterThan(0)
     })
 
-    it("clearSelection fires the selection callback with null", () => {
+    it("clearSelection fires the selection callback with null", async () => {
       const ref = createRef<F0MapHandle>()
       const onMarkerSelect = vi.fn()
       render(
@@ -300,15 +317,16 @@ describe("F0Map", () => {
       expect(onMarkerSelect).toHaveBeenCalledWith(null)
     })
 
-    it("getNativeMap returns the engine's own instance", () => {
+    it("getNativeMap returns the engine's own instance", async () => {
       const ref = createRef<F0MapHandle>()
       render(<F0Map ref={ref} markers={POINTS} />)
-      expect(ref.current?.getNativeMap()).toBe(mock.instances[0])
+      const map = await engine()
+      await waitFor(() => expect(ref.current?.getNativeMap()).toBe(map))
     })
   })
 
   describe("list interaction", () => {
-    it("activating a list item selects that marker", () => {
+    it("activating a list item selects that marker", async () => {
       const onMarkerSelect = vi.fn()
       render(<F0Map markers={POINTS} onMarkerSelect={onMarkerSelect} />)
       fireEvent.click(screen.getByRole("button", { name: "Office" }))
@@ -317,29 +335,29 @@ describe("F0Map", () => {
   })
 
   describe("WebGL fallback", () => {
-    it("shows the list as a visible fallback when the map can't be created", () => {
+    it("shows the list as a visible fallback when the map can't be created", async () => {
       mock.state.throwOnCreate = true
       render(<F0Map markers={POINTS} />)
       // No map instance was created...
       expect(mock.instances).toHaveLength(0)
       // ...but the list is still there and operable (now the visible fallback).
       const list = screen.getByRole("navigation", { name: "Locations" })
-      expect(list).not.toHaveClass("sr-only")
+      await waitFor(() => expect(list).not.toHaveClass("sr-only"))
       expect(screen.getByRole("button", { name: "HQ" })).toBeInTheDocument()
     })
   })
 
   describe("routes & arcs", () => {
-    it("draws them as a GL line source with solid/dashed layers", () => {
+    it("draws them as a GL line source with solid/dashed layers", async () => {
       render(<F0Map markers={POINTS} routes={ROUTES} arcs={ARCS} />)
-      const map = mock.instances[0]
+      const map = await engine()
       expect(map.sources["f0-map-lines"]).toBeDefined()
       expect([...map.layers]).toEqual(expect.arrayContaining(LINE_LAYERS))
     })
 
-    it("re-adds the line layers after a style swap wipes them", () => {
+    it("re-adds the line layers after a style swap wipes them", async () => {
       render(<F0Map markers={POINTS} routes={ROUTES} />)
-      const map = mock.instances[0]
+      const map = await engine()
       // Simulate `setStyle` clearing every custom source and layer.
       delete map.sources["f0-map-lines"]
       map.layers.clear()
@@ -349,19 +367,21 @@ describe("F0Map", () => {
       expect([...map.layers]).toEqual(expect.arrayContaining(LINE_LAYERS))
     })
 
-    it("fits the camera over line coordinates even without markers", () => {
+    it("fits the camera over line coordinates even without markers", async () => {
       const ref = createRef<F0MapHandle>()
       render(<F0Map ref={ref} routes={ROUTES} />)
+      const map = await engine()
       ref.current?.fitToMarkers()
-      expect(mock.instances[0].calls.fitBounds.length).toBeGreaterThan(0)
+      expect(map.calls.fitBounds.length).toBeGreaterThan(0)
     })
 
-    it("fires onRouteClick when a route line is clicked", () => {
+    it("fires onRouteClick when a route line is clicked", async () => {
       const onRouteClick = vi.fn()
       render(
         <F0Map markers={POINTS} routes={ROUTES} onRouteClick={onRouteClick} />
       )
-      mock.instances[0].handlers["click"]?.forEach((cb) =>
+      const map = await engine()
+      map.handlers["click"]?.forEach((cb) =>
         cb({ features: [{ properties: { id: "commute", kind: "route" } }] })
       )
       expect(onRouteClick).toHaveBeenCalledWith("commute")
@@ -390,23 +410,31 @@ describe("F0Map", () => {
     it("draws the dot beneath the lines once located", async () => {
       grantLocation()
       render(<F0Map markers={POINTS} routes={ROUTES} showCurrentLocation />)
-      const map = mock.instances[0]
+      const map = await engine()
       await waitFor(() =>
         expect(map.layers.has("f0-current-location")).toBe(true)
       )
       expect(map.sources["f0-current-location"]).toBeDefined()
-      // Inserted below the bottom line layer, so lines and pins stay above it.
-      expect(map.layerInsertions.at(-1)).toEqual([
-        "f0-current-location",
-        "f0-map-lines-solid",
-      ])
+      // Below the lines either way: anchored under the bottom line layer when
+      // that layer is already there, and otherwise simply added before it -
+      // which one applies depends on whether the located dot or the lines win
+      // the race, and both orders keep the dot beneath.
+      const inserted = map.layerInsertions.map(([id]) => id)
+      const [, anchor] =
+        map.layerInsertions[inserted.indexOf("f0-current-location")]
+      expect(
+        anchor === "f0-map-lines-solid" ||
+          inserted.indexOf("f0-current-location") <
+            inserted.indexOf("f0-map-lines-solid")
+      ).toBe(true)
     })
   })
 
   describe("markers", () => {
-    it("anchors one engine marker per point, at its coordinates", () => {
+    it("anchors one engine marker per point, at its coordinates", async () => {
       render(<F0Map markers={POINTS} />)
-      expect(mock.markers).toHaveLength(POINTS.length)
+      await engine()
+      await waitFor(() => expect(mock.markers).toHaveLength(POINTS.length))
       expect(mock.markers.map((m) => m.position)).toEqual(
         POINTS.map((p) => p.coordinates)
       )
@@ -423,17 +451,16 @@ describe("F0Map", () => {
       render(<F0Map markers={POINTS} />)
       // The readiness handler does this, not the imperative handle: nothing
       // here calls fitToMarkers.
-      await waitFor(() =>
-        expect(mock.instances[0].calls.fitBounds.length).toBeGreaterThan(0)
-      )
-      expect(mock.instances[0].calls.setProjection.at(-1)).toEqual({
+      const map = await engine()
+      await waitFor(() => expect(map.calls.fitBounds.length).toBeGreaterThan(0))
+      expect(map.calls.setProjection.at(-1)).toEqual({
         type: "mercator",
       })
     })
   })
 
   describe("style", () => {
-    it("hands the engine the matching half of the style pair", () => {
+    it("hands the engine the matching half of the style pair", async () => {
       // The pair is opaque to F0Map (its shape belongs to the engine), so the
       // only thing worth asserting is that the right half reaches the map
       // unchanged - jsdom has no `.dark` ancestor, so that is `light`.
@@ -445,27 +472,27 @@ describe("F0Map", () => {
           mapStyle={{ provider: "maplibre", light, dark }}
         />
       )
-      expect(mock.instances[0].opts.style).toBe(light)
+      expect((await engine()).opts.style).toBe(light)
     })
   })
 
   describe("projection", () => {
-    it("applies the globe projection when requested", () => {
+    it("applies the globe projection when requested", async () => {
       render(<F0Map markers={POINTS} projection="globe" />)
-      expect(mock.instances[0].calls.setProjection).toContainEqual({
+      expect((await engine()).calls.setProjection).toContainEqual({
         type: "globe",
       })
     })
   })
 
   describe("cooperative gestures", () => {
-    it("enables cooperative gestures by default", () => {
+    it("enables cooperative gestures by default", async () => {
       render(<F0Map markers={POINTS} />)
-      expect(mock.instances[0].opts.cooperativeGestures).toBe(true)
+      expect((await engine()).opts.cooperativeGestures).toBe(true)
     })
-    it("disables them in greedy mode", () => {
+    it("disables them in greedy mode", async () => {
       render(<F0Map markers={POINTS} gestureHandling="greedy" />)
-      expect(mock.instances[0].opts.cooperativeGestures).toBe(false)
+      expect((await engine()).opts.cooperativeGestures).toBe(false)
     })
   })
 })

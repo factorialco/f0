@@ -10,6 +10,7 @@ import {
 import { useReducedMotion } from "@/lib/a11y"
 import { DataTestIdWrapper, type WithDataTestIdProps } from "@/lib/data-testid"
 import { useI18n } from "@/lib/providers/i18n"
+import { useMapProvider } from "@/lib/providers/map"
 import { cn } from "@/lib/utils"
 import {
   F0MapControls,
@@ -23,7 +24,8 @@ import { RECOMMENDED_MAX_MARKERS } from "./constants"
 import { F0MapSkeleton } from "./F0MapSkeleton"
 import { useCurrentLocation } from "./hooks/useCurrentLocation"
 import { useIsDarkContext } from "./hooks/useIsDarkContext"
-import { createMaplibreAdapter } from "./providers/maplibre"
+import type { F0MapProvider } from "./providers/names"
+import { loadMapAdapterFactory } from "./providers/registry"
 import type { MapAdapter, MapEvent } from "./providers/types"
 import { f0MapStyles, type F0MapStyle } from "./styles"
 import type { F0MapArc, F0MapPoint, F0MapRoute, F0MapViewport } from "./types"
@@ -157,6 +159,12 @@ export interface F0MapProps extends WithDataTestIdProps {
    * zoom in - best for a world-scale view. Changing it re-projects live.
    */
   projection?: F0MapProjection
+  /**
+   * Rendering engine. Defaults to the `F0Provider` `map.provider`, and to
+   * `maplibre` when that is unset: it needs no API key, so the library default
+   * cannot depend on a billing account being registered.
+   */
+  provider?: F0MapProvider
   /** Show the skeleton instead of the map. */
   loading?: boolean
   /** Accessible label for the map region. */
@@ -235,6 +243,7 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
     showCurrentLocation = false,
     fullScreen = false,
     projection = "mercator",
+    provider,
     loading = false,
     ariaLabel,
     dataTestId,
@@ -243,6 +252,7 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
   ref
 ) {
   const i18n = useI18n()
+  const engine = useMapProvider(provider)
   const containerRef = useRef<HTMLDivElement | null>(null)
   const adapterRef = useRef<MapAdapter | null>(null)
   const [adapterInstance, setAdapterInstance] = useState<MapAdapter | null>(
@@ -409,66 +419,103 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
 
     appliedStyleRef.current = styleRef.current
     const viewport = viewportRef.current
-    let adapter: MapAdapter
-    try {
-      adapter = createMaplibreAdapter({
-        container,
-        style: styleRef.current,
-        center: viewport.center,
-        zoom: viewport.zoom ?? DEFAULT_VIEWPORT.zoom,
-        minZoom,
-        maxZoom,
-        interactive,
-        cooperativeGestures: gestureHandling === "cooperative",
-      })
-    } catch {
-      // The engine could not start (no WebGL): fall back to the list view.
-      setWebglFailed(true)
-      return
-    }
-    adapterRef.current = adapter
-    setAdapterInstance(adapter)
-    // A previous run may have failed (and set the list fallback) with props
-    // that made creation throw; this run succeeded, so clear it.
-    setWebglFailed(false)
+    // The engine is behind a dynamic import, so everything below runs once it
+    // has landed - including the teardown, which has to cope with an unmount
+    // that happened while the import was still in flight.
+    let adapter: MapAdapter | null = null
+    let cancelled = false
+    const teardowns: (() => void)[] = []
 
-    // Errors before the map is ready mean the style/tiles failed to come up -
-    // surface the retry banner. Transient per-tile errors after are ignored
-    // (they don't break the map).
-    let ready = false
-    const offReady = once(adapter, "ready", () => {
-      ready = true
-      setTileError(false)
-      adapter.resize()
-      if (shouldFit) {
-        fitToPoints(
-          adapter,
-          markersRef.current,
-          false,
-          routesRef.current,
-          arcsRef.current
-        )
-      }
-      adapter.setGlobeProjection(projectionRef.current === "globe")
-    })
-    const offError = adapter.on("error", () => {
-      if (!ready) {
-        setTileError(true)
-      }
-    })
-    // Background click clears the selection (marker clicks are DOM events on
-    // the marker element and never reach the canvas).
-    const offClick = adapter.on("click", () => selectRef.current(null))
+    void loadMapAdapterFactory(engine)
+      .then((createAdapter) => {
+        if (cancelled) {
+          return
+        }
+        try {
+          adapter = createAdapter({
+            container,
+            style: styleRef.current,
+            center: viewport.center,
+            zoom: viewport.zoom ?? DEFAULT_VIEWPORT.zoom,
+            minZoom,
+            maxZoom,
+            interactive,
+            cooperativeGestures: gestureHandling === "cooperative",
+          })
+        } catch {
+          // The engine could not start (no WebGL): fall back to the list view.
+          setWebglFailed(true)
+          return
+        }
+        wire(adapter)
+      })
+      .catch((error: unknown) => {
+        // The engine's own chunk failed to load. Same outcome as a machine
+        // without WebGL - the list is the map's text alternative - but worth
+        // surfacing, because a failed chunk is a deployment problem, not a
+        // capability the visitor lacks.
+        console.error("[F0Map] could not load the map engine", error)
+        if (!cancelled) {
+          setWebglFailed(true)
+        }
+      })
 
     return () => {
-      offReady()
-      offError()
-      offClick()
-      adapterRef.current = null
-      setAdapterInstance(null)
-      adapter.destroy()
+      cancelled = true
+      teardowns.forEach((off) => off())
+      if (adapter) {
+        adapterRef.current = null
+        setAdapterInstance(null)
+        adapter.destroy()
+      }
     }
-  }, [loading, interactive, gestureHandling, minZoom, maxZoom, shouldFit])
+
+    function wire(created: MapAdapter) {
+      adapterRef.current = created
+      setAdapterInstance(created)
+      // A previous run may have failed (and set the list fallback) with props
+      // that made creation throw; this run succeeded, so clear it.
+      setWebglFailed(false)
+
+      // Errors before the map is ready mean the style/tiles failed to come up -
+      // surface the retry banner. Transient per-tile errors after are ignored
+      // (they don't break the map).
+      let ready = false
+      teardowns.push(
+        once(created, "ready", () => {
+          ready = true
+          setTileError(false)
+          created.resize()
+          if (shouldFit) {
+            fitToPoints(
+              created,
+              markersRef.current,
+              false,
+              routesRef.current,
+              arcsRef.current
+            )
+          }
+          created.setGlobeProjection(projectionRef.current === "globe")
+        }),
+        created.on("error", () => {
+          if (!ready) {
+            setTileError(true)
+          }
+        }),
+        // Background click clears the selection (marker clicks are DOM events
+        // on the marker element and never reach the canvas).
+        created.on("click", () => selectRef.current(null))
+      )
+    }
+  }, [
+    loading,
+    interactive,
+    gestureHandling,
+    minZoom,
+    maxZoom,
+    shouldFit,
+    engine,
+  ])
 
   // Theme swap: a full setStyle, kept separate from the creation effect. A
   // setStyle can reset the projection to the new style's default, so re-apply
