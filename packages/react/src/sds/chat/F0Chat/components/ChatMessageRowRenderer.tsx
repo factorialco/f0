@@ -38,9 +38,10 @@ const topSpacing = (row: ChatRow): string => {
   if (row.type === "message") return row.isFirstOfRun ? "pt-5" : "pt-0"
   // The status footer hugs its message (MessageStatus brings its own pt-1).
   if (row.type === "footer") return "pt-0"
-  // The card brings its own padding; on top of it, the gap between posts is the
-  // same as the one between message stacks.
-  if (row.type === "post") return "pt-2"
+  // NO GAP between posts. A feed is one column of them, divided by a hairline
+  // and nothing else (see `ChatPostRow`) — the gap that separates message
+  // stacks would turn each post back into a floating card.
+  if (row.type === "post") return "pt-0"
   return "pt-3"
 }
 
@@ -116,7 +117,7 @@ const ChatMessageRowRendererComponent = ({
     // FULL WIDTH, no gutter and no bubble: the card IS the row. The messages'
     // `flex flex-col gap-1` exists to stack a bubble over its meta line, and a
     // post has neither.
-    const card = <ChatPostRow post={row.post} />
+    const card = <ChatPostRow post={row.post} last={row.isLast} />
     return animate ? (
       <motion.div
         className={spacing}

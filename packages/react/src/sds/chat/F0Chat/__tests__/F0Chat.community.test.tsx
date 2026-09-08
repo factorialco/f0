@@ -262,3 +262,98 @@ describe("opening a post from the feed", () => {
     expect(openPost).toHaveBeenCalledWith("p1", { source: "card" })
   })
 })
+
+describe("a feed reads as one column, not a stack of cards", () => {
+  const threeDays = [
+    post({ id: "p1", title: "Monday", createdAt: "2026-06-15T10:00:00" }),
+    post({ id: "p2", title: "Wednesday", createdAt: "2026-06-17T10:00:00" }),
+    post({
+      id: "p3",
+      title: "The Tuesday after",
+      createdAt: "2026-06-23T10:00:00",
+    }),
+  ]
+
+  it("never breaks a community by day", () => {
+    // Posts arrive days apart by nature. Slicing them into "Monday /
+    // Wednesday / last Tuesday" turns a column of three posts into a column of
+    // three posts and three headings.
+    renderChat(makeRuntime({ messages: threeDays }))
+
+    expect(screen.getAllByTestId("chat-post-row")).toHaveLength(3)
+    expect(screen.queryByTestId("chat-date-separator")).toBeNull()
+  })
+
+  it("still breaks a conversation by day", () => {
+    // The rule is about feeds, not about turning day separators off.
+    renderChat(
+      makeRuntime(
+        {
+          messages: [
+            { ...message, id: "m1", createdAt: "2026-06-15T10:00:00" },
+            { ...message, id: "m2", createdAt: "2026-06-17T10:00:00" },
+          ],
+        },
+        "dm"
+      )
+    )
+
+    expect(screen.getAllByTestId("chat-date-separator").length).toBeGreaterThan(
+      0
+    )
+  })
+
+  it("divides posts with a hairline and no card of their own", () => {
+    renderChat(makeRuntime({ messages: threeDays }))
+
+    const rows = screen.getAllByTestId("chat-post-row")
+    for (const row of rows) {
+      // Edge to edge, so the divider and the hover tint both reach the panel's
+      // sides. Any padding here would frame a hovered post in untinted row.
+      expect(row.className).toMatch(/-mx-4/)
+      expect(row.className).not.toMatch(/\bpx-\d/)
+      // And none of the boxed card it used to be.
+      expect(row.className).not.toMatch(/rounded-2xl/)
+    }
+    // A line under each…
+    for (const row of rows.slice(0, -1)) {
+      expect(row.className).toMatch(/border-b/)
+    }
+    // …except the last: it would divide the feed from the composer, and there
+    // is nothing under it to divide.
+    expect(rows.at(-1)?.className).not.toMatch(/border-b/)
+  })
+
+  it("moves the last-post rule along when a post arrives", () => {
+    // The row cache reuses a post's row while the post object is unchanged, so
+    // the flag has to be part of what makes two rows equivalent — otherwise
+    // the old last post keeps it and the feed loses a divider in the middle.
+    const { rerender } = renderChat(makeRuntime({ messages: threeDays }))
+
+    const withOneMore = makeRuntime({
+      messages: [...threeDays, post({ id: "p4", title: "Newest" })],
+    })
+    rerender(
+      <F0ChatProvider runtime={withOneMore}>
+        <F0Chat />
+      </F0ChatProvider>
+    )
+
+    const rows = screen.getAllByTestId("chat-post-row")
+    expect(rows).toHaveLength(4)
+    expect(rows[2].className).toMatch(/border-b/)
+    expect(rows[3].className).not.toMatch(/border-b/)
+  })
+
+  it("dates a post by how fresh it is, not to the minute", () => {
+    // "2 days ago", not "June 21st, 2026 at 10:00 AM" — the question a date
+    // answers in a feed.
+    renderChat(
+      makeRuntime({
+        messages: [post({ createdAt: new Date().toISOString() })],
+      })
+    )
+
+    expect(screen.getByText(/ago|less than/i)).toBeVisible()
+  })
+})

@@ -355,7 +355,9 @@ const ESTIMATE_FILE_CHIP = 56
  * ⚠️ `ESTIMATE_POST_MEDIA` is CALIBRATED TO THAT 712px COLUMN. Widen the
  * transcript and this drifts, taking the entry position with it.
  */
-const ESTIMATE_POST_SPACING = 8 // pt-2
+/** The row's own 1px divider. Posts have no gap between them — see
+ * `topSpacing` in the row renderer. */
+const ESTIMATE_POST_SPACING = 1
 /** The card's `p-3` plus its `md:pb-4`. */
 const ESTIMATE_POST_PADDING = 28
 /** 32px avatar next to two lines of author/community. */

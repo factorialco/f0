@@ -121,9 +121,11 @@ describe("a community channel inside the application frame", () => {
     )
     expect(marked).toHaveLength(1)
     expect(marked[0].textContent).toContain("The coffee machine is fixed")
-    // Selected, not "done": the border is the selection token, and the card
-    // says so to a screen reader as the current item of the set.
-    expect(marked[0].className).toMatch(/border-f1-border-selected-bold/)
+    // Selected, not "done": the selection tint, and the card says so to a
+    // screen reader as the current item of the set. A tint alone — an accent
+    // edge on top of it was a second thing saying the same thing.
+    expect(marked[0].className).toMatch(/bg-f1-background-selected-secondary/)
+    expect(marked[0].className).not.toMatch(/border-f1-border-selected/)
     expect(marked[0]).toHaveAttribute("aria-current", "true")
   })
 

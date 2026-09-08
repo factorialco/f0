@@ -257,6 +257,9 @@ export const ChatMessagesContainer = (): ReactNode => {
   } = useF0Chat()
   const { reducedMotion } = useChatRenderConfig()
   const isGroup = channel.type === "group"
+  // Declared with the rest of the channel reads, not further down where it is
+  // first needed: the row flattening below runs during THIS render.
+  const isCommunity = channel.type === "community"
   const canSend = chatPermission("canSend", channel.type, capabilities)
 
   const { registerScrollToMessage } = useChatJump()
@@ -281,10 +284,12 @@ export const ChatMessagesContainer = (): ReactNode => {
     const flat = flattenChatRows(messages, {
       dividerId,
       previousRows: rowCacheRef.current,
+      // A feed has no days — see the option's own note.
+      daySeparators: !isCommunity,
     })
     rowCacheRef.current = flat.rowCache
     return flat
-  }, [messages, dividerId])
+  }, [messages, dividerId, isCommunity])
 
   // Fresh tail of this commit (transports coalesce bursts into ONE render):
   // every appended message animates in, staggered by its batch order — not
@@ -463,7 +468,6 @@ export const ChatMessagesContainer = (): ReactNode => {
 
   // A feed marks posts read as they're scrolled past; a chat keeps its
   // all-or-nothing rule at the bottom (below).
-  const isCommunity = channel.type === "community"
   const reportSeenRow = useVisiblePostReads({
     enabled: isCommunity,
     rows: displayRows,
@@ -615,9 +619,13 @@ export const ChatMessagesContainer = (): ReactNode => {
     [animatedIds, effectiveTypingLeaving, isGroup, reducedMotion]
   )
 
-  // Sticky date pill: the date of the top-most visible row.
+  // Sticky date pill: the date of the top-most visible row. A feed has no day
+  // rows to stick, and a date hovering over posts that are days apart answers
+  // a question nobody asked of a feed.
   const stickyDate =
-    stickyIndex != null ? dateForRow(displayRows, stickyIndex) : null
+    stickyIndex != null && !isCommunity
+      ? dateForRow(displayRows, stickyIndex)
+      : null
 
   // Show the affordance when scrolled up, or whenever the live tail isn't loaded
   // (after a far-back jump) so there's always a way back to the latest messages.

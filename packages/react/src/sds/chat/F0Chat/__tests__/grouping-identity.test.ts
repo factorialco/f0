@@ -227,14 +227,38 @@ describe("posts in the flattened rows", () => {
     expect(rows.filter((row) => row.type === "separator")).toHaveLength(2)
   })
 
-  it("reuses a post row object when the post did not change", () => {
-    const p = communityPost("p1", "ana", 0)
-    const first = flattenChatRows([p])
-    const second = flattenChatRows([p, communityPost("p2", "ana", 1)], {
+  it("reuses the post rows an append did not touch", () => {
+    const [p1, p2, p3] = [
+      communityPost("p1", "ana", 0),
+      communityPost("p2", "ana", 1),
+      communityPost("p3", "ana", 2),
+    ]
+    const first = flattenChatRows([p1, p2, p3])
+    const second = flattenChatRows(
+      [p1, p2, p3, communityPost("p4", "ana", 3)],
+      {
+        previousRows: first.rowCache,
+      }
+    )
+
+    // Neither of these was last before, and neither is now.
+    expect(second.rows[1]).toBe(first.rows[1])
+    expect(second.rows[2]).toBe(first.rows[2])
+  })
+
+  it("rebuilds the post that stops being last", () => {
+    // It carries `isLast`, which is what decides its divider — so an append
+    // rebuilds exactly two rows: the new one, and the one it displaced. Same
+    // trade-off `isLastOfRun` makes for a message stack's tail.
+    const p1 = communityPost("p1", "ana", 0)
+    const first = flattenChatRows([p1])
+    const second = flattenChatRows([p1, communityPost("p2", "ana", 1)], {
       previousRows: first.rowCache,
     })
 
-    expect(second.rows[1]).toBe(first.rows[1])
+    expect(second.rows[1]).not.toBe(first.rows[1])
+    expect(second.rows[1]).toMatchObject({ type: "post", isLast: false })
+    expect(second.rows[2]).toMatchObject({ type: "post", isLast: true })
   })
 
   it("indexes a post so it can be jumped to", () => {

@@ -2,7 +2,6 @@ import { format, isSameDay, isTomorrow, type Locale } from "date-fns"
 import { useEffect, useRef, useState, type ReactNode } from "react"
 
 import { F0Icon, type IconType } from "@/components/F0Icon"
-import { Chip } from "@/components/OneChip"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { Dropdown, type DropdownItem } from "@/experimental/Navigation/Dropdown"
 import {
@@ -24,6 +23,7 @@ import {
   type F0ChatPinnedPost,
   type F0ChatScheduledPost,
 } from "../types"
+import { ButtonInternal } from "@/components/F0Button/internal"
 
 type ShelfList = "pinned" | "scheduled" | "draft"
 
@@ -123,11 +123,13 @@ export const ChatCommunityShelf = (): ReactNode => {
             wrapper is it, and `flex` keeps it from adding a line box of its
             own around the chip it holds. */}
         <span data-shelf-chip={list} className="flex">
-          <Chip
+          <ButtonInternal
             icon={icons[list]}
             label={`${i18n.t(`chat.community.${list}Posts`)} ${counts[list]}`}
-            variant={open === list ? "selected" : "default"}
+            pressed={open === list}
             onClick={() => toggle(list)}
+            variant="outline"
+            size="sm"
           />
         </span>
       </PopoverAnchor>
@@ -179,7 +181,7 @@ export const ChatCommunityShelf = (): ReactNode => {
       ref={stripRef}
       data-testid="chat-community-shelf"
       aria-label={i18n.t("chat.community.shelfLabel")}
-      className="flex pb-2 shrink-0 items-center gap-1.5 px-4"
+      className="flex pb-2 shrink-0 items-center gap-1.5 px-4 overflow-x-auto overflow-y-hidden"
     >
       {pinned.length > 0 &&
         shelf(

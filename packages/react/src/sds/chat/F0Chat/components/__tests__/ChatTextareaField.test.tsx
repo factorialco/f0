@@ -108,19 +108,20 @@ describe("ChatTextareaField overlay/textarea metric parity", () => {
     )
   }
 
-  it("gives an info-toned mention chip no weight of its own", () => {
-    const { container } = withMention("other")
-    const chip = container.querySelector('[class*="bg-f1-background-info"]')
-    expect(chip).not.toBeNull()
-    expect(chip?.className).not.toMatch(OFF_WEIGHT)
-  })
-
-  it("gives a warning-toned mention chip no weight of its own", () => {
-    const { container } = withMention("self")
-    const chip = container.querySelector('[class*="bg-f1-background-warning"]')
-    expect(chip).not.toBeNull()
-    expect(chip?.className).not.toMatch(OFF_WEIGHT)
-  })
+  // Both tones render the same way now — colour, no tint. What the test is
+  // for is the WEIGHT: emphasis here has to come from colour, because a
+  // heavier overlay lays its glyphs out wider than the letters underneath.
+  it.each(["other", "self"] as const)(
+    "gives a %s mention no weight of its own",
+    (tone) => {
+      const { container } = withMention(tone)
+      const mention = container.querySelector(
+        '[class*="text-f1-foreground-secondary"]'
+      )
+      expect(mention).not.toBeNull()
+      expect(mention?.className).not.toMatch(OFF_WEIGHT)
+    }
+  )
 
   it("leaves the textarea itself on the inherited weight", () => {
     const { container } = withMention("other")

@@ -33,7 +33,14 @@ const noop = (): void => {}
  * Reads the STABLE context rather than the runtime: a transport event (someone
  * typing, a message arriving) must not re-render every post card on screen.
  */
-const ChatPostRowComponent = ({ post }: { post: F0ChatPost }): ReactNode => {
+const ChatPostRowComponent = ({
+  post,
+  last,
+}: {
+  post: F0ChatPost
+  /** The feed ends here, so the row draws no divider. */
+  last?: boolean
+}): ReactNode => {
   const i18n = useI18n()
   const {
     channelTitle,
@@ -97,20 +104,36 @@ const ChatPostRowComponent = ({ post }: { post: F0ChatPost }): ReactNode => {
       aria-current={active ? "true" : undefined}
       data-active={active || undefined}
       className={cn(
-        "rounded-2xl border border-solid",
-        // Arriving from a jump — the pinned bar, a search hit. Same ring, same
-        // token and same 200ms as a message's: one visual answer to "this is
-        // the one you asked for", however you asked.
-        "transition-[box-shadow,border-color] duration-200 motion-reduce:transition-none",
-        // OPEN BESIDE THE FEED. Selected, not "success": green in F0 means
-        // something went well, and nothing has happened here — the reader is
-        // simply standing on this one. Same border-plus-glow the selected
-        // `Widget` card uses, so a selected card looks the same everywhere.
-        active
-          ? "border-f1-border-selected-bold shadow-[0_0_0_4px_hsl(var(--selected-50)/0.1)]"
-          : "border-f1-border-secondary",
-        highlighted &&
-          "ring-1 ring-f1-special-ring ring-offset-1 ring-offset-f1-background"
+        // ONE COLUMN OF POSTS, divided by a hairline — the shape every feed
+        // worth reading has. Boxed cards with a gap between them made a short
+        // channel look like a search results page: four rounded rectangles
+        // floating on a background, each announcing its own edges twice.
+        //
+        // FULL BLEED, and no padding of its own: `-mx-4` cancels the
+        // transcript's gutter so the divider — and the card's hover tint,
+        // which is what the reader actually points at — reach both edges of
+        // the panel. Any padding here would inset the tint and leave a
+        // 4px frame of untinted row around a hovered post.
+        //
+        // The content's own inset is the card's `p-3`, which is where it comes
+        // from on every other surface too.
+        // …except on the last one, where the line would divide the feed from
+        // the composer. Nothing follows it, so there is nothing to divide.
+        "-mx-4 border-0 border-solid border-f1-border-secondary",
+        !last && "border-b",
+        // The card rounds its own hover tint, which inside a full-bleed row
+        // leaves four untinted corners. Square it here rather than in the
+        // shared component: the page still wants a rounded card.
+        "[&>*]:rounded-none",
+        // Arriving from a jump — the pinned bar, a search hit. Same token and
+        // same 200ms as a message's: one visual answer to "this is the one you
+        // asked for", however you asked.
+        "transition-colors duration-200 motion-reduce:transition-none",
+        // OPEN BESIDE THE FEED — the tint and nothing else. An accent edge on
+        // top of it was a second thing saying the same thing, and in a column
+        // with no card borders left it read as a stray rule.
+        active && "bg-f1-background-selected-secondary",
+        highlighted && "ring-1 ring-inset ring-f1-special-ring ring-offset-0"
       )}
     >
       <CommunityPost
@@ -137,6 +160,8 @@ const ChatPostRowComponent = ({ post }: { post: F0ChatPost }): ReactNode => {
         counters={postCountersFrom(post, i18n.t)}
         pinned={!!post.pinnedAt}
         pinnedLabel={i18n.chat.community.pinnedPost}
+        // A feed asks "how fresh is this", not "at what minute".
+        relativeDate
         inLabel={i18n.chat.post.in}
         comment={{
           label: i18n.chat.post.comment,

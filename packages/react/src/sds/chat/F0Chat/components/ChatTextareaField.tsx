@@ -109,12 +109,13 @@ export const ChatTextareaField = ({
               // caret inside a glyph instead of between two.
               <span
                 key={i}
-                className={cn(
-                  "rounded-xs",
-                  seg.tone === "self" || seg.tone === "everyone"
-                    ? "bg-f1-background-warning text-f1-foreground-warning"
-                    : "bg-f1-background-info text-f1-foreground-info"
-                )}
+                // COLOUR ONLY. Not `font-medium`, however much a mention wants
+                // the emphasis: this span is the overlay's glyphs and the caret
+                // comes from the textarea underneath, so a heavier weight lays
+                // the highlight out at a different width than the letters it
+                // is supposed to be sitting on, and the two drift apart across
+                // the line. Emphasis here has to come from colour or a tint.
+                className="text-f1-foreground-secondary"
               >
                 {seg.text}
               </span>
