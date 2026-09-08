@@ -145,7 +145,7 @@ const meta: Meta = {
     },
     showSearchBox: {
       description:
-        "Whether the options can be searched. On by default where the search fits inside the trigger — a field select with no filters carrying static options — and only needed to turn it off there. A data source, or a select with filters, opts in and gets the search box at the top of the dropdown. The component filters static options by label unless a searchFn is in use",
+        "Whether the options can be searched. On by default where the search fits inside the trigger — a field select with no filters carrying static options — and only needed to turn it off there. A data source, or a select with filters, opts in and gets the search box at the top of the dropdown. Static options match on their label, description and metadata dial code unless a searchFn is in use",
     },
     searchValue: {
       description: "Default value for the search box",
@@ -158,7 +158,7 @@ const meta: Meta = {
     },
     searchFn: {
       description:
-        "Function to filter the options. If not provided, the component will filter the options by label. Only applies when options are passed in the options prop, not when a data source is used (use fetchData options for this)",
+        "Function to filter the options. If not provided, an option matches on anything its row shows: label, description, and a metadata dial code. Only applies when options are passed in the options prop, not when a data source is used (use fetchData options for this)",
       table: {
         type: {
           summary:

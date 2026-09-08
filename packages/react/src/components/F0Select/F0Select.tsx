@@ -66,14 +66,34 @@ import { SelectItem } from "./components/SelectItem"
 import { SelectTopActions } from "./components/SelectTopActions"
 export * from "./types"
 
+/**
+ * Matches a query against EVERYTHING THE ROW SHOWS, not just its label.
+ *
+ * A row that reads "Spain +34" has to be findable by "34" — a substring, so
+ * the "+" nobody types is optional — and one with a `description` by the words
+ * in it. Matching the label alone made the search quietly ignore half of what
+ * was on screen: the documented contract already claimed descriptions were
+ * matched, and consumers were passing their own `searchFn` to get back
+ * behavior they had been promised.
+ *
+ * Metadata is matched per variant rather than by walking the object, so a new
+ * `F0SelectItemMetadata` variant is a deliberate decision about whether it is
+ * searchable — not something that silently becomes part of the query surface.
+ */
 const defaultSearchFn = (
   option: F0SelectItemProps<string>,
   search?: string
 ) => {
-  return (
-    option.type === "separator" ||
-    !search ||
-    option.label.toLowerCase().includes(search.toLowerCase())
+  if (option.type === "separator" || !search) {
+    return true
+  }
+
+  const query = search.toLowerCase()
+  const metadata =
+    option.metadata?.type === "dialCode" ? option.metadata.dialCode : undefined
+
+  return [option.label, option.description, metadata].some((field) =>
+    field?.toLowerCase().includes(query)
   )
 }
 
@@ -1299,6 +1319,22 @@ const F0SelectComponent = forwardRef(function Select<
       showLoadingIndicator={!!children}
       portalContainer={effectivePortalContainer}
       retainTrigger={searchesInTrigger}
+      onEscapeKeyDown={(event) => {
+        /**
+         * Escape drops the QUERY first, and only closes the list on the second
+         * press, once there is nothing left to undo.
+         *
+         * Through Radix's own hook, never the input's `onKeyDown`: the dismiss
+         * runs from a listener on `document` in the CAPTURE phase, so it has
+         * already fired by the time the event reaches anything inside — no
+         * amount of `stopPropagation` from a descendant can get in front of
+         * it. This hook is the one place that can.
+         */
+        if (searchesInTrigger && currentSearch) {
+          event.preventDefault()
+          onSearchChangeLocal("")
+        }
+      }}
       onPointerDownOutside={(event) => {
         /**
          * With the search inside the trigger, the trigger is part of the thing
@@ -1496,14 +1532,6 @@ const F0SelectComponent = forwardRef(function Select<
       }
 
       return
-    }
-
-    if (event.key === "Escape" && currentSearch) {
-      // Escape drops the query first and only closes on the second press, once
-      // there is nothing left to undo.
-      event.preventDefault()
-      event.stopPropagation()
-      onSearchChangeLocal("")
     }
   }
 
@@ -1718,7 +1746,15 @@ const F0SelectComponent = forwardRef(function Select<
                 />
               ) : (
                 <button
-                  className="flex w-full items-center justify-between"
+                  /**
+                   * No outline of its own: the FIELD draws the focus ring, from
+                   * `focus-within` on the wrapper, and this button fills it.
+                   * `reset.css` does the same for `input` and `textarea` and
+                   * stops at buttons, so once the dropdown started handing
+                   * focus back here on close, Chrome drew its own heavy ring
+                   * inside F0's.
+                   */
+                  className="flex w-full items-center justify-between focus-visible:outline-none"
                   aria-label={label || placeholder}
                   onKeyDown={handleTriggerKeyDown}
                   onClick={(e) => {

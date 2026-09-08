@@ -168,6 +168,12 @@ type F0SelectDataProps<T extends string, R = unknown> =
   | {
       source?: never
       mapOptions?: never
+      /**
+       * Replaces how a query is matched against an option. Without it, an
+       * option matches on anything the row shows: its `label`, its
+       * `description`, and a `metadata` dial code. Static `options` only —
+       * a `source` is searched through its own `fetchData`.
+       */
       searchFn?: (
         option: F0SelectItemProps<T, unknown>,
         search?: string

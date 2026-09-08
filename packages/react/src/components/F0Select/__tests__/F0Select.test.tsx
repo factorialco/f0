@@ -839,6 +839,56 @@ describe("Select", () => {
     expect(screen.queryByText("Search options")).not.toBeInTheDocument()
   })
 
+  // Regression: the search matched `label` and nothing else, so a row reading
+  // "Spain +34" could not be found by its dial code and a row with a
+  // `description` could not be found by the words in it — even though the
+  // documented contract claimed descriptions were matched.
+  it.each([
+    ["a dial code, without the plus", "34", "Spain"],
+    ["a dial code, with the plus", "+49", "Germany"],
+    ["a description", "seoul", "South Korea"],
+  ])("finds an option by %s", async (_case, query, expected) => {
+    const user = userEvent.setup()
+    render(
+      <F0Select
+        {...defaultSelectProps}
+        onChange={() => {}}
+        options={[
+          {
+            value: "es",
+            label: "Spain",
+            metadata: { type: "dialCode", dialCode: "+34" },
+          },
+          {
+            value: "de",
+            label: "Germany",
+            metadata: { type: "dialCode", dialCode: "+49" },
+          },
+          {
+            value: "kr",
+            label: "South Korea",
+            description: "Seoul",
+            metadata: { type: "dialCode", dialCode: "+82" },
+          },
+        ]}
+      />
+    )
+
+    await openSelect(user)
+    await user.type(screen.getByRole("combobox"), query)
+
+    await waitFor(() =>
+      expect(
+        within(screen.getByRole("listbox")).getAllByRole("option")
+      ).toHaveLength(1)
+    )
+    expect(
+      within(screen.getByRole("listbox")).getByRole("option", {
+        name: new RegExp(expected),
+      })
+    ).toBeInTheDocument()
+  })
+
   it("keeps the trigger in the accessibility tree while the list is open", async () => {
     const user = userEvent.setup()
     render(
@@ -991,7 +1041,12 @@ describe("Select", () => {
     )
   })
 
-  it("drops the query when the dropdown closes", async () => {
+  // The first Escape must be ABSORBED by the query. Radix dismisses from a
+  // capture-phase listener on `document`, so a handler on the input can never
+  // get in front of it — this only holds while it goes through Radix's own
+  // `onEscapeKeyDown`. Asserting the two presses separately: pressing Escape
+  // twice passes either way, because the query is dropped on close regardless.
+  it("drops the query on the first Escape and closes on the second", async () => {
     const user = userEvent.setup()
     const onSearchChange = vi.fn()
     render(
@@ -1006,16 +1061,21 @@ describe("Select", () => {
     await openSelect(user)
     await user.type(screen.getByRole("combobox"), "1")
     await waitFor(() => expect(onSearchChange).toHaveBeenCalledWith("1"))
+    await waitFor(() =>
+      expect(screen.queryByText("Option 2")).not.toBeInTheDocument()
+    )
 
-    await user.keyboard("{Escape}{Escape}")
+    await user.keyboard("{Escape}")
+
+    await waitFor(() => expect(screen.getByRole("combobox")).toHaveValue(""))
+    expect(screen.getByRole("listbox")).toBeInTheDocument()
+    expect(screen.getByText("Option 2")).toBeInTheDocument()
+
+    await user.keyboard("{Escape}")
 
     await waitFor(() =>
       expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
     )
-    expect(screen.getByRole("combobox")).toHaveValue("")
-
-    await openSelect(user)
-    expect(screen.getByText("Option 2")).toBeInTheDocument()
   })
 
   it("renders icon tags with text", async () => {
