@@ -678,6 +678,41 @@ describe("F0Map", () => {
     })
   })
 
+  describe("sidebarToggleAddon", () => {
+    const withAddon = (props: Partial<ComponentProps<typeof F0Map>> = {}) => (
+      <F0Map
+        markers={POINTS}
+        sidebar={<div>list</div>}
+        onSidebarToggle={() => {}}
+        sidebarToggleAddon={<button type="button">Addon</button>}
+        {...props}
+      />
+    )
+
+    it("renders beside the panel toggle while the panel is closed", () => {
+      render(withAddon())
+
+      const addon = screen.getByRole("button", { name: "Addon" })
+      const toggle = screen.getByRole("button", { name: "Show panel" })
+      // Same row, toggle first.
+      expect(addon.parentElement).toBe(toggle.parentElement)
+      expect(
+        toggle.compareDocumentPosition(addon) & Node.DOCUMENT_POSITION_FOLLOWING
+      ).toBeTruthy()
+    })
+
+    it("goes out of reach with the toggle once the panel is open", () => {
+      render(withAddon({ sidebarExpanded: true }))
+
+      // Still in the DOM - the row holds the cursor - but neither announced nor
+      // tabbable, exactly like the toggle it sits with.
+      expect(screen.queryByRole("button", { name: "Addon" })).toBeNull()
+      const addon = screen.getByText("Addon")
+      expect(addon.closest("[inert]")).not.toBeNull()
+      expect(addon.closest("[aria-hidden='true']")).not.toBeNull()
+    })
+  })
+
   describe("Escape", () => {
     const withDetail = (props: Partial<ComponentProps<typeof F0Map>> = {}) => (
       <F0Map

@@ -426,6 +426,22 @@ export const MAP_CITIES_MOCK: {
 export const mapCityFor = (index: number) =>
   MAP_CITIES_MOCK[index % MAP_CITIES_MOCK.length]
 
+/**
+ * Whether a record can be placed on the map, and if not, why. A few records per
+ * page have no usable location so the map's "Not on map" section has something
+ * to show: most as an address left unfilled (`incomplete`), one with no reason
+ * given (`none`), which is what a bare `null` coordinate means. Shared by the
+ * marker's `coordinates` and the adapter's country filter, so a record the map
+ * cannot place never matches a country either.
+ */
+export const mapPlacementFor = (
+  index: number
+): "placed" | "incomplete" | "none" => {
+  if (index === 7) return "none"
+  if (index % 9 === 4) return "incomplete"
+  return "placed"
+}
+
 /** Every country the demo cities cover, for the map view's country filter. */
 export const MAP_COUNTRIES_MOCK = [
   ...new Set(MAP_CITIES_MOCK.map((city) => city.country)),
@@ -1102,8 +1118,12 @@ export const getMockVisualizations = (options?: {
         // Real city coordinates rather than an arithmetic spread, so markers
         // land on actual places and clustering behaves the way it would with
         // production data (dense in western Europe, sparser to the east).
-        coordinates: (u) =>
-          MAP_CITIES_MOCK[u.index % MAP_CITIES_MOCK.length].at,
+        coordinates: (u) => {
+          const placement = mapPlacementFor(u.index)
+          if (placement === "none") return null
+          if (placement === "incomplete") return { kind: "incomplete" }
+          return mapCityFor(u.index).at
+        },
         label: (u) => u.name,
         // The records are people, so they get the person marker. No `src`: the
         // avatar falls back to the generated initials chip in its identity
@@ -1958,6 +1978,7 @@ export function createDataAdapter<
       filteredRecords = filteredRecords.filter(
         (record) =>
           record.index !== undefined &&
+          mapPlacementFor(record.index) === "placed" &&
           countries.includes(mapCityFor(record.index).country)
       )
     }

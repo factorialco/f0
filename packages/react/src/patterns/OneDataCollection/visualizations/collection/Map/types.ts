@@ -10,6 +10,23 @@ import type {
 import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 
 /**
+ * A record the map cannot place, and why. Returned from `coordinates` instead of
+ * a position. The record is not dropped: it is listed under "Not on map" in the
+ * side panel and counted on the map surface, so a collection never loses a
+ * record just because it has nowhere to draw it.
+ */
+export type MapUnplaced = {
+  /**
+   * `incomplete`: the record should have a location and does not - an unfilled
+   * or ungeocodable address. Shown with attention and listed first, because it
+   * is the one somebody can go and fix.
+   */
+  kind: "incomplete"
+  /** Short reason shown with the group. Defaults to the localized "Location missing". */
+  label?: string
+}
+
+/**
  * Options for the map visualization. The map is a projection of the collection's
  * records onto coordinates: the only required option is how to read a record's
  * position. Everything about how a marker looks and behaves belongs to `F0Map`.
@@ -20,11 +37,14 @@ export type MapVisualizationOptions<
   _Sortings extends SortingsDefinition,
 > = {
   /**
-   * A record's `[longitude, latitude]`, or `null` when it has none - those
-   * records draw no marker. The map does no geocoding: resolve coordinates
+   * A record's `[longitude, latitude]`, or what stands in for one when it has
+   * none. `null` means "not on the map, no reason given": the record draws no
+   * marker but is still listed under "Not on map" in the side panel. A
+   * `MapUnplaced` says why, and `incomplete` gets attention - it is the case
+   * somebody should fix. The map does no geocoding: resolve coordinates
    * server-side and read them here.
    */
-  coordinates: (record: R) => [number, number] | null
+  coordinates: (record: R) => [number, number] | null | MapUnplaced
   /** Label rendered beside the marker. Omitted means an unlabelled pin. */
   label?: (record: R) => string
   /**
@@ -82,13 +102,21 @@ export type MapVisualizationOptions<
   /** Accessible label for the map region. */
   ariaLabel?: string
   /**
-   * Content of the map's side panel, the one the top-left toggle opens. Called
-   * with the very records the map is drawing markers for - the same page, from
-   * the same load - so the list beside the map can never disagree with it.
-   * The panel itself is the map's surface; this is what goes inside it.
+   * Rows of the map's side panel, the one the top-left toggle opens. The panel
+   * is split into two sections the visualization renders itself - "Not on map"
+   * first, for records `coordinates` could not place, then "On map" - and this
+   * is called once per section with that section's records. They are the very
+   * records the map is drawing (or failing to draw) markers for - the same
+   * page, from the same load - so the list beside the map can never disagree
+   * with it. The panel itself is the map's surface; this is what goes inside
+   * each section.
+   *
+   * The visualization owns the panel's scrolling, so return the rows, not a
+   * scroll container of your own.
    *
    * `select` drives the same selection a marker click does, so a row in this
-   * panel and its pin on the map open the same detail.
+   * panel and its pin on the map open the same detail. Selecting a record that
+   * is not on the map opens its detail without moving the camera.
    */
   sidebar?: (records: R[], api: MapSidebarApi<R>) => ReactNode
   /**

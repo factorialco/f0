@@ -144,6 +144,36 @@ export const SidebarToggle: Story = {
   },
 }
 
+/**
+ * Something of the consumer's beside the toggle, on the same card: here a
+ * count that opens the panel. The map treats it as opaque content and only
+ * gives it the toggle's own rules - shown while the panel is closed, hidden
+ * under it once open.
+ */
+export const SidebarToggleAddon: Story = {
+  render: (args) => {
+    const [expanded, setExpanded] = useState(false)
+    return (
+      <F0Map
+        {...args}
+        markers={BARCELONA}
+        sidebarExpanded={expanded}
+        onSidebarToggle={() => setExpanded((open) => !open)}
+        sidebarToggleAddon={
+          <button
+            type="button"
+            onClick={() => setExpanded(true)}
+            className="h-8 rounded-md px-2 text-sm font-medium text-f1-foreground hover:bg-f1-background-hover"
+          >
+            3 not on map {/* i18n-exempt: story copy */}
+          </button>
+        }
+        sidebar={<div className="p-2 text-sm">Panel content</div>}
+      />
+    )
+  },
+}
+
 // One of each product-semantic marker variant, spread across Spain so none of
 // them cluster - the reference for how every variant renders on the map.
 const ALL_VARIANTS: F0MapPoint[] = [

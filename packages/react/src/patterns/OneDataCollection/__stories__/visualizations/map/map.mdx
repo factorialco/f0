@@ -43,18 +43,23 @@ To enable the Map visualization in your data collection component, provide the
 ```
 
 The map does no geocoding. Resolve coordinates server-side and read them in
-`coordinates`; records that return `null` draw no marker, so a collection whose
-records are not all mappable still works.
+`coordinates`. A record that returns `null` draws no marker but is not lost: it
+is listed under **Not on map** in the side panel and counted on the map surface
+(see [Not on map](#not-on-map) below). Return `{ kind: "incomplete" }` instead
+when the record _should_ have a location and does not, so the view can ask for
+attention rather than shrug.
 
 ## Map Properties
 
 ```ts
 type MapVisualizationOptions<T> = {
   /**
-   * A record's `[longitude, latitude]`, or `null` when it has none - those
-   * records draw no marker.
+   * A record's `[longitude, latitude]`, or what stands in for one. `null` means
+   * "not on the map, no reason given"; a `MapUnplaced` says why. Either way the
+   * record is kept: listed under "Not on map" in the panel and counted on the
+   * map surface, never silently dropped.
    */
-  coordinates: (record: T) => [number, number] | null
+  coordinates: (record: T) => [number, number] | null | MapUnplaced
   /**
    * Label rendered beside the marker. Omitted means an unlabelled pin.
    */
@@ -121,6 +126,18 @@ type MapVisualizationOptions<T> = {
    * with the selected record, and shown for as long as something is selected.
    */
   detail?: (record: T, api: MapSidebarApi<T>) => ReactNode
+}
+
+/** A record the map cannot place, and why. */
+type MapUnplaced = {
+  /**
+   * `incomplete`: the record should have a location and does not - an unfilled
+   * or ungeocodable address. Shown with attention and listed first, because it
+   * is the case somebody can go and fix.
+   */
+  kind: "incomplete"
+  /** Short reason shown with the group. Defaults to "Location missing". */
+  label?: string
 }
 
 /** Selection handles handed to the panels, so their content drives the map. */
@@ -217,10 +234,14 @@ cover fold to a dot until it is deselected.
 The map can carry two panels, both on its own surface and both fed by the
 collection:
 
-- `sidebar` is the list beside the map, opened by the toggle in the map's
-  top-left corner. It is called with the same records the markers stand for -
-  one load, one page - so the list and the map can never drift apart as filters
-  and the search narrow the set. `onSidebarToggle` reports the toggle.
+- `sidebar` renders the rows of the list beside the map, opened by the toggle in
+  the map's top-left corner. The panel is split into two collapsible sections
+  the visualization draws itself, **Not on map** first and **On map** second,
+  and `sidebar` is called once per section with that section's records - the
+  same records the markers stand for, one load, one page, so the list and the
+  map can never drift apart as filters and the search narrow the set. The
+  visualization owns the scrolling: return rows, not a scroll container.
+  `onSidebarToggle` reports the toggle.
 - `detail` is a second panel that slides in beside the list rather than over
   it, following the selection - so it opens from a row click and a marker click
   alike.
@@ -234,6 +255,37 @@ The story below is the view in a real page: the app frame, the page header and
 its tabs, the collection's toolbar, and both panels over the map.
 
 <Canvas of={MapStories.InApp} />
+
+## Not on map
+
+A record with no usable coordinate is still a record. Dropping it from the map
+with no trace would make the toolbar's count and the map disagree, and would
+hide exactly the records most likely to need attention. So the map never drops
+one silently, and it needs no opting in:
+
+- **Every unplaced record is listed** in the panel's **Not on map** section,
+  ahead of **On map**. The section is left out entirely when nothing is
+  unplaced, not shown as an empty header.
+- **The map counts them** with a control beside the panel toggle, wearing the
+  first few records as avatars when they are all people (a mixed set gets a
+  pin) and reading "3 not on map". Pressing it opens the panel. It hides with
+  the toggle while the panel is open, and is absent when the count is zero.
+- **Two treatments.** A bare `null` means "no reason given" and stays neutral.
+  `{ kind: "incomplete" }` means the record should have had a location: the
+  count and the section take the warning colour, and a hint line under the
+  header says why - `label` if you pass one, "Location missing" otherwise.
+  Legitimately location-less records (a remote employee, say) currently share
+  the neutral treatment; a distinct kind for them is a later addition.
+- **Selecting one opens its detail, and moves no camera.** There is no marker to
+  fly to, so the camera stays where it is, and dropping that selection later
+  does not zoom back out either - nothing was zoomed in. A search reveal of an
+  unplaced record behaves the same way: selected, not flown to.
+- **The toolbar count is unchanged.** It counts records and is shared across
+  views; the map explains its own delta instead.
+
+Known limitation: in the WebGL fallback the panels and the toggle are not
+rendered, so unplaced records are not reachable there. Records left undrawn by
+`markerLimit` do not join the section yet; the name leaves room for them.
 
 ## Camera behaviour
 

@@ -1,5 +1,5 @@
 import { act, waitFor } from "@testing-library/react"
-import { forwardRef, useImperativeHandle } from "react"
+import { forwardRef, type ReactNode, useImperativeHandle } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import {
@@ -9,7 +9,7 @@ import {
   SortingsDefinition,
 } from "@/hooks/datasource"
 import type { F0MapPoint } from "@/patterns/F0Map"
-import { zeroRender } from "@/testing/test-utils"
+import { fireEvent, screen, within, zeroRender } from "@/testing/test-utils"
 
 import { DataCollectionSource } from "../../../hooks/useDataCollectionSource/types"
 import { ItemActionsDefinition } from "../../../item-actions"
@@ -39,7 +39,17 @@ vi.mock("@/patterns/F0Map", () => ({
       clearSelection: vi.fn(),
       getMap: () => null,
     }))
-    return null
+    // What the visualization puts in the panel and beside the toggle is the
+    // visualization's own output, so it is rendered here to be queried. The
+    // map itself is not.
+    return (
+      <>
+        <div data-testid="stub-panel">{props.sidebar as ReactNode}</div>
+        <div data-testid="stub-addon">
+          {props.sidebarToggleAddon as ReactNode}
+        </div>
+      </>
+    )
   }),
 }))
 
@@ -48,14 +58,29 @@ type Office = RecordType & {
   name: string
   longitude: number | null
   latitude: number | null
+  /** The address exists but was never filled in: the map should say so. */
+  incomplete?: boolean
 }
 
 const offices: Office[] = [
   { id: "bcn", name: "Barcelona", longitude: 2.1649, latitude: 41.3925 },
   { id: "mad", name: "Madrid", longitude: -3.7058, latitude: 40.4203 },
-  // No coordinates yet: must not be pinned at [0, 0].
+  // No coordinates, no reason given: must not be pinned at [0, 0].
   { id: "remote", name: "Remote", longitude: null, latitude: null },
+  // No coordinates because the address is missing: the fixable case.
+  {
+    id: "tbd",
+    name: "New office",
+    longitude: null,
+    latitude: null,
+    incomplete: true,
+  },
 ]
+
+/** The offices the map can place, in collection order. */
+const PLACED = ["bcn", "mad"]
+/** The offices it cannot, in collection order. */
+const UNPLACED = ["remote", "tbd"]
 
 type SourceState = {
   filters?: Record<string, unknown>
@@ -112,10 +137,11 @@ const baseOptions = (
     MapVisualizationOptions<Office, FiltersDefinition, SortingsDefinition>
   > = {}
 ): MapVisualizationOptions<Office, FiltersDefinition, SortingsDefinition> => ({
-  coordinates: (office) =>
-    office.longitude != null && office.latitude != null
-      ? [office.longitude, office.latitude]
-      : null,
+  coordinates: (office) => {
+    if (office.longitude != null && office.latitude != null)
+      return [office.longitude, office.latitude]
+    return office.incomplete ? { kind: "incomplete" } : null
+  },
   label: (office) => office.name,
   ...overrides,
 })
@@ -291,11 +317,27 @@ describe("MapCollection — reveal", () => {
     )
   })
 
-  it("ignores a reveal for a record that has no marker", async () => {
-    renderMap({ revealRecordId: "remote" })
+  it("reveals a record it cannot place without flying anywhere", async () => {
+    const onSelect = vi.fn()
+    renderMap({ onSelect, revealRecordId: "remote" })
+    await waitForMap()
+
+    // Selected - its detail opens - but there is no marker to fly to.
+    await waitFor(() =>
+      expect(onSelect).toHaveBeenCalledWith(
+        expect.objectContaining({ id: "remote" })
+      )
+    )
+    expect(mock.focusMarker).not.toHaveBeenCalled()
+  })
+
+  it("ignores a reveal for a record the collection does not have", async () => {
+    const onSelect = vi.fn()
+    renderMap({ onSelect, revealRecordId: "nowhere" })
     await waitForMap()
 
     expect(mock.focusMarker).not.toHaveBeenCalled()
+    expect(onSelect).not.toHaveBeenCalled()
   })
 
   it("flies again when the same record is revealed under a new nonce", async () => {
@@ -583,5 +625,170 @@ describe("MapCollection — the panels drive the map", () => {
     await waitForMap()
 
     expect(mock.props.latest?.clearSelectionOnBackgroundClick).toBe(false)
+  })
+})
+
+describe("MapCollection — records it cannot place", () => {
+  /** Rows as plain text, so each section's records can be read back. */
+  const rows = (records: Office[]) => (
+    <ul>
+      {records.map((office) => (
+        <li key={office.id}>{office.id}</li>
+      ))}
+    </ul>
+  )
+
+  const idsIn = (section: HTMLElement) =>
+    within(section)
+      .getAllByRole("listitem")
+      .map((item) => item.textContent)
+
+  it("lists them under Not on map, ahead of the ones On map", async () => {
+    renderMap({ sidebar: rows })
+    await waitForMap()
+
+    const notOnMap = screen.getByTestId("map-panel-not-on-map")
+    const onMap = screen.getByTestId("map-panel-on-map")
+    expect(idsIn(notOnMap)).toEqual(UNPLACED)
+    expect(idsIn(onMap)).toEqual(PLACED)
+    // First in the panel: it is the section that wants acting on.
+    expect(
+      notOnMap.compareDocumentPosition(onMap) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy()
+  })
+
+  it("calls the row renderer once per section, with disjoint records", async () => {
+    const sidebar = vi.fn(rows)
+    renderMap({ sidebar })
+    await waitForMap()
+
+    const calls = sidebar.mock.calls.map(([records]) =>
+      records.map((office) => office.id)
+    )
+    expect(calls).toContainEqual(UNPLACED)
+    expect(calls).toContainEqual(PLACED)
+  })
+
+  it("shows no Not on map section when every record is placed", async () => {
+    renderMap({ sidebar: rows }, 0, { filters: { country: PLACED } })
+    await waitForMap()
+
+    expect(screen.queryByTestId("map-panel-not-on-map")).toBeNull()
+    expect(idsIn(screen.getByTestId("map-panel-on-map"))).toEqual(PLACED)
+  })
+
+  it("selects one from the panel without flying, and never zooms back out for it", async () => {
+    let api!: { select: (record: Office | null) => void }
+    const onSelect = vi.fn()
+    renderMap({
+      onSelect,
+      sidebar: (_records, sidebarApi) => {
+        api = sidebarApi
+        return null
+      },
+    })
+    await waitForMap()
+
+    act(() => api.select(offices[3]))
+
+    expect(onSelect).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "tbd" })
+    )
+    // No marker, nowhere to fly.
+    expect(mock.focusMarker).not.toHaveBeenCalled()
+
+    mock.fitToMarkers.mockClear()
+    act(() => api.select(null))
+
+    // It was never flown to, so dropping it has no zoom to undo. Before, the
+    // flown-to flag was set regardless and this refit fired.
+    expect(mock.fitToMarkers).not.toHaveBeenCalled()
+  })
+
+  it("counts them on the map surface and opens the panel from the count", async () => {
+    const onSidebarToggle = vi.fn()
+    renderMap({ onSidebarToggle })
+    await waitForMap()
+
+    const count = screen.getByTestId("map-not-on-map")
+    expect(count).toHaveTextContent("2 not on map")
+    expect(mock.props.latest?.sidebarExpanded).toBe(false)
+
+    fireEvent.click(count)
+
+    await waitFor(() => expect(mock.props.latest?.sidebarExpanded).toBe(true))
+    expect(onSidebarToggle).toHaveBeenCalledWith(true)
+  })
+
+  it("shows no count when every record is placed", async () => {
+    renderMap({}, 0, { filters: { country: PLACED } })
+    await waitForMap()
+
+    expect(screen.queryByTestId("map-not-on-map")).toBeNull()
+  })
+
+  it("asks for attention when one of them should have had a location", async () => {
+    renderMap({ sidebar: rows })
+    await waitForMap()
+
+    expect(screen.getByTestId("map-not-on-map")).toHaveAttribute(
+      "data-tone",
+      "attention"
+    )
+    const section = screen.getByTestId("map-panel-not-on-map")
+    expect(section).toHaveAttribute("data-tone", "attention")
+    // The reason, under the header.
+    expect(within(section).getByText("Location missing")).toBeInTheDocument()
+  })
+
+  it("stays neutral, with no reason line, when no reason was given", async () => {
+    renderMap({ sidebar: rows }, 0, {
+      filters: { country: ["bcn", "remote"] },
+    })
+    await waitForMap()
+
+    expect(screen.getByTestId("map-not-on-map")).toHaveAttribute(
+      "data-tone",
+      "neutral"
+    )
+    const section = screen.getByTestId("map-panel-not-on-map")
+    expect(section).toHaveAttribute("data-tone", "neutral")
+    expect(within(section).queryByText("Location missing")).toBeNull()
+  })
+
+  it("takes the consumer's reason over the default", async () => {
+    renderMap({
+      sidebar: rows,
+      coordinates: (office) =>
+        office.incomplete
+          ? { kind: "incomplete", label: "Address not geocoded" }
+          : office.longitude != null && office.latitude != null
+            ? [office.longitude, office.latitude]
+            : null,
+    })
+    await waitForMap()
+
+    expect(
+      within(screen.getByTestId("map-panel-not-on-map")).getByText(
+        "Address not geocoded"
+      )
+    ).toBeInTheDocument()
+  })
+
+  it("wears their avatars on the count when they are all people", async () => {
+    renderMap({
+      marker: (office) => ({
+        variant: "employee",
+        firstName: office.name,
+        lastName: "Office",
+      }),
+    })
+    await waitForMap()
+
+    // Two unplaced people, two avatars. At the `xs` size an avatar shows one
+    // initial, and the fixture has no photos.
+    const count = within(screen.getByTestId("map-not-on-map"))
+    expect(count.getByText("R")).toBeInTheDocument()
+    expect(count.getByText("N")).toBeInTheDocument()
   })
 })

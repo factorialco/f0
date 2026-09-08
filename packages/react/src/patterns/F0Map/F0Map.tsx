@@ -36,6 +36,7 @@ import {
 import { F0MapSidebarToggle } from "./components/F0MapSidebarToggle"
 import { F0MapVectorLayer } from "./components/F0MapVectorLayer"
 import { CurrentLocationLayer } from "./components/internal/CurrentLocationLayer"
+import { MapControlCard } from "./components/internal/MapControlCard"
 import {
   MAP_CONTROL_INSET,
   MAP_PANEL,
@@ -187,6 +188,13 @@ export interface F0MapProps extends WithDataTestIdProps {
    * arrow points. Defaults to `false`.
    */
   sidebarExpanded?: boolean
+  /**
+   * Content placed beside the panel toggle, on the same control card, for a
+   * control that belongs with it - a count that opens the panel, say. Follows
+   * the toggle: shown while the panel is closed, hidden under it once open.
+   * Opaque to the map; whatever is passed is the consumer's.
+   */
+  sidebarToggleAddon?: ReactNode
   /**
    * Content of the side panel the toggle opens. The panel is the map's own
    * surface, sized and animated here; this is what goes inside it.
@@ -377,6 +385,7 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
     fullScreen = false,
     onSidebarToggle,
     sidebarExpanded = false,
+    sidebarToggleAddon,
     sidebar,
     detail,
     detailOpen = false,
@@ -999,13 +1008,32 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
                 transitionTimingFunction: MAP_PANEL_TIMING.enter.easing,
               }}
             >
-              <F0MapSidebarToggle
-                expanded={false}
-                onToggle={onSidebarToggle}
-                // The panel's own toggle has taken over; this one only stays to
-                // hold the cursor, so it must not be tabbable or announced.
-                inactive={listPanelOpen}
-              />
+              <MapControlCard>
+                <div
+                  className="flex items-center gap-1"
+                  // The addon shares the toggle's fate while the panel covers
+                  // them: still there for the cursor, out of reach for the
+                  // keyboard and assistive tech. `inert` is set by hand, as
+                  // the panel does: React's types do not know it yet.
+                  aria-hidden={listPanelOpen || undefined}
+                  ref={(node) => {
+                    if (listPanelOpen) node?.setAttribute("inert", "")
+                    else node?.removeAttribute("inert")
+                  }}
+                >
+                  <F0MapSidebarToggle
+                    expanded={false}
+                    onToggle={onSidebarToggle}
+                    // The panel's own toggle has taken over; this one only stays
+                    // to hold the cursor, so it must not be tabbable or
+                    // announced.
+                    inactive={listPanelOpen}
+                    // Sharing a card with the addon: the card is this wrapper's.
+                    bare
+                  />
+                  {sidebarToggleAddon}
+                </div>
+              </MapControlCard>
             </div>
           )}
 

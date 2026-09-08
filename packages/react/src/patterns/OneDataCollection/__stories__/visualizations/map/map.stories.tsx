@@ -25,6 +25,7 @@ import {
   getMockVisualizations,
   mapCityFor,
   mapFilters,
+  mapPlacementFor,
   type MockUser,
 } from "../../mockData"
 
@@ -227,7 +228,8 @@ const PersonDetail = ({
   onClose,
 }: {
   user: MockUser
-  workplace: string
+  /** Absent for a record the map cannot place: the row shows "-". */
+  workplace?: string
   onClose: () => void
 }) => {
   const [firstName = "", lastName = ""] = user.name.split(" ")
@@ -428,8 +430,10 @@ export const InApp: Story = {
             // The panel lists the same records the markers stand for, handed
             // over by the visualization from its own load - so the two can
             // never drift apart as filters and search narrow the set.
+            // Called once per panel section ("Not on map", "On map") with
+            // that section's records; the visualization owns the scrolling.
             sidebar: (records: MockUser[], { select, selectedRecordId }) => (
-              <div className="flex h-full flex-col gap-1 overflow-y-auto">
+              <div className="flex flex-col gap-1">
                 {records.map((user) => {
                   const [firstName = "", lastName = ""] = user.name.split(" ")
                   return (
@@ -458,7 +462,12 @@ export const InApp: Story = {
             detail: (user: MockUser, { select }) => (
               <PersonDetail
                 user={user}
-                workplace={mapCityFor(user.index).name}
+                // A record the map cannot place has no workplace to name.
+                workplace={
+                  mapPlacementFor(user.index) === "placed"
+                    ? mapCityFor(user.index).name
+                    : undefined
+                }
                 onClose={() => select(null)}
               />
             ),

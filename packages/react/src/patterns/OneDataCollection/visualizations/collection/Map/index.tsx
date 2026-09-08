@@ -5,9 +5,11 @@ import {
   RecordType,
   SortingsDefinition,
 } from "@/hooks/datasource"
+import { useI18n } from "@/lib/providers/i18n"
 import {
   F0Map,
   type F0MapHandle,
+  type F0MapMarkerVariantProps,
   type F0MapPoint,
   F0MapSkeleton,
   RECOMMENDED_MAX_MARKERS,
@@ -19,9 +21,37 @@ import { ItemActionsDefinition } from "../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
 import { SummariesDefinition } from "../../../summary"
 import { CollectionProps } from "../../../types"
-import { MapVisualizationOptions } from "./types"
+import {
+  MapNotOnMapButton,
+  type MapNotOnMapAvatar,
+} from "./components/MapNotOnMapButton"
+import { MapPanelSection } from "./components/MapPanelSection"
+import { MapUnplaced, MapVisualizationOptions } from "./types"
 
-export type { MapVisualizationOptions } from "./types"
+export type { MapUnplaced, MapVisualizationOptions } from "./types"
+
+/** A record `coordinates` could not place, and the reason it gave, if any. */
+type Unplaced<Record> = {
+  record: Record
+  kind: MapUnplaced["kind"] | null
+  label?: string
+}
+
+/**
+ * The avatars a "not on map" count can wear: only when every record it stands
+ * for is a person. An avatar list is one kind of avatar, so a mix has to fall
+ * back to a pin.
+ */
+const personAvatars = (
+  markers: F0MapMarkerVariantProps[]
+): MapNotOnMapAvatar[] | null => {
+  const people: MapNotOnMapAvatar[] = []
+  for (const m of markers) {
+    if (m.variant !== "employee") return null
+    people.push({ firstName: m.firstName, lastName: m.lastName, src: m.src })
+  }
+  return people
+}
 
 export type MapCollectionProps<
   Record extends RecordType,
@@ -121,20 +151,36 @@ export const MapCollection = <
     [getRecordId]
   )
 
-  // Records without coordinates are dropped rather than pinned at [0, 0].
-  const points = useMemo<F0MapPoint[]>(() => {
-    const markers: F0MapPoint[] = []
+  // One pass splits the records into the markers the map draws and the records
+  // it cannot place. The unplaced are not dropped: a record with nowhere to be
+  // drawn is still a record, so it goes to the "Not on map" section of the
+  // panel and into the count on the map, rather than pinned at [0, 0] or lost.
+  const { points, placedIds, placedRecords, unplaced } = useMemo(() => {
+    const points: F0MapPoint[] = []
+    const placedIds = new Set<string>()
+    const placedRecords: Record[] = []
+    const unplaced: Unplaced<Record>[] = []
     for (const record of records) {
       const position = coordinates(record)
-      if (!position) continue
-      markers.push({
-        id: recordId(record),
+      if (position === null) {
+        unplaced.push({ record, kind: null })
+        continue
+      }
+      if (!Array.isArray(position)) {
+        unplaced.push({ record, kind: position.kind, label: position.label })
+        continue
+      }
+      const id = recordId(record)
+      placedIds.add(id)
+      placedRecords.push(record)
+      points.push({
+        id,
         coordinates: position,
         label: label?.(record),
         ...(marker?.(record) ?? { variant: "default" }),
       })
     }
-    return markers
+    return { points, placedIds, placedRecords, unplaced }
   }, [records, coordinates, label, marker, recordId])
 
   // Selection is tracked here so a marker click can hand the consumer the whole
@@ -185,6 +231,12 @@ export const MapCollection = <
       return next
     })
   }, [onSidebarToggle])
+  const openSidebar = useCallback(() => {
+    setSidebarExpanded((expanded) => {
+      if (!expanded) onSidebarToggle?.(true)
+      return true
+    })
+  }, [onSidebarToggle])
 
   // Handed to both panels so their content can drive the map's own selection:
   // a row in the list and its pin on the map end up in the same place.
@@ -194,16 +246,19 @@ export const MapCollection = <
         const id = record ? recordId(record) : null
         // Picking from the list flies to the marker, not just marks it: the
         // record may be off screen, and a selection you cannot see is no
-        // answer. Same path a search reveal takes.
-        if (id) mapRef.current?.focusMarker(id)
+        // answer. Same path a search reveal takes. A record with no marker
+        // has nowhere to fly to: it is selected where the camera stands, and
+        // dropping it later has no zoom to undo.
+        const placed = id !== null && placedIds.has(id)
+        if (placed) mapRef.current?.focusMarker(id)
         selectRecord(id)
         // Set after `selectRecord`, which resets it: this selection was flown
         // to, so dropping it has a zoom to undo.
-        if (id) zoomedIntoSelectionRef.current = true
+        if (placed) zoomedIntoSelectionRef.current = true
       },
       selectedRecordId: selectedId,
     }),
-    [selectRecord, recordId, selectedId]
+    [selectRecord, recordId, selectedId, placedIds]
   )
 
   const selectedRecord = selectedId
@@ -300,15 +355,95 @@ export const MapCollection = <
     if (!revealRecordId) return
     const signature = `${revealRecordId}:${searchSelectionNonce ?? 0}`
     if (revealedRef.current === signature) return
-    if (!points.some((point) => point.id === revealRecordId)) return
+    const placed = placedIds.has(revealRecordId)
+    // Not here yet (or not here at all): wait for the records to arrive.
+    if (!placed && !records.some((r) => recordId(r) === revealRecordId)) return
 
     revealedRef.current = signature
-    mapRef.current?.focusMarker(revealRecordId)
+    // A record the map cannot place is still revealed - selected, its detail
+    // open - there is just no marker to fly to.
+    if (placed) mapRef.current?.focusMarker(revealRecordId)
     selectRecord(revealRecordId)
     // Set after `selectRecord`, which resets it: this selection was flown to,
     // so dropping it has a zoom to undo.
-    zoomedIntoSelectionRef.current = true
-  }, [revealRecordId, searchSelectionNonce, points, selectRecord])
+    zoomedIntoSelectionRef.current = placed
+  }, [
+    revealRecordId,
+    searchSelectionNonce,
+    placedIds,
+    records,
+    recordId,
+    selectRecord,
+  ])
+
+  const i18n = useI18n()
+
+  // What the unplaced records ask for. `incomplete` is the one somebody can go
+  // and fix, so any of them turns the whole group to attention; the hint under
+  // the header says why, taking the consumer's word for it when given one.
+  const incomplete = unplaced.find((entry) => entry.kind === "incomplete")
+  const unplacedTone = incomplete ? "attention" : "neutral"
+  const unplacedHint = incomplete
+    ? (incomplete.label ?? i18n.collections.map.locationMissing)
+    : undefined
+  const unplacedRecords = useMemo(
+    () => unplaced.map((entry) => entry.record),
+    [unplaced]
+  )
+
+  // The panel is two sections the visualization owns, so a record with no
+  // marker is always listed somewhere whatever the consumer renders: the
+  // consumer supplies the rows, called once per section with that section's
+  // records. Not on map goes first - it is the one that wants acting on - and
+  // is left out entirely when empty rather than shown as an empty header. The
+  // scroller is here, once, so the two sections scroll as one list.
+  const panelContent = sidebar ? (
+    <div className="flex h-full flex-col gap-1 overflow-y-auto">
+      {unplaced.length > 0 && (
+        <MapPanelSection
+          title={i18n.collections.map.notOnMap}
+          count={unplaced.length}
+          tone={unplacedTone}
+          hint={unplacedHint}
+          dataTestId="map-panel-not-on-map"
+        >
+          {sidebar(unplacedRecords, sidebarApi)}
+        </MapPanelSection>
+      )}
+      <MapPanelSection
+        title={i18n.collections.map.onMap}
+        count={placedRecords.length}
+        dataTestId="map-panel-on-map"
+      >
+        {sidebar(placedRecords, sidebarApi)}
+      </MapPanelSection>
+    </div>
+  ) : undefined
+
+  // The count on the map surface: the map's own account of the records it is
+  // not showing, beside the toggle that opens the panel listing them. Wears
+  // the first few as avatars when they are all people; a mixed set gets a pin.
+  const notOnMapAvatars = useMemo(
+    () =>
+      marker
+        ? personAvatars(
+            unplaced.slice(0, 3).map((entry) => marker(entry.record))
+          )
+        : null,
+    [unplaced, marker]
+  )
+  const notOnMapButton =
+    unplaced.length > 0 ? (
+      <MapNotOnMapButton
+        label={i18n.t("collections.map.notOnMapCount", {
+          count: unplaced.length,
+        })}
+        tone={unplacedTone}
+        avatars={notOnMapAvatars}
+        onClick={openSidebar}
+        dataTestId="map-not-on-map"
+      />
+    ) : undefined
 
   // The map runs edge to edge - it is a canvas, not a list of rows, so a
   // horizontal gutter would only shrink the area it has to draw in. The rule on
@@ -341,9 +476,10 @@ export const MapCollection = <
         projection={projection}
         ariaLabel={ariaLabel}
         // Same `records` the markers come from: one fetch, one page, one truth.
-        sidebar={sidebar?.(records, sidebarApi)}
+        sidebar={panelContent}
         sidebarExpanded={sidebarExpanded}
         onSidebarToggle={toggleSidebar}
+        sidebarToggleAddon={notOnMapButton}
         // The detail panel follows the selection, whichever way it was made.
         // Mounted from the first render when a detail renderer exists, empty
         // until something is selected: a CSS transition doesn't run on the
