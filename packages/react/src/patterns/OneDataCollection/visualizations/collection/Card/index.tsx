@@ -1,4 +1,3 @@
-import { AnimatePresence, motion } from "motion/react"
 import { useEffect, useMemo } from "react"
 import {
   F0Card,
@@ -12,7 +11,7 @@ import { CardMetadata, CardMetadataProperty } from "@/components/F0Card/types"
 import { IconType } from "@/components/F0Icon"
 import { GroupingDefinition, RecordType } from "@/hooks/datasource"
 import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
-import { getAnimationVariants, useGroups } from "@/hooks/datasource/useGroups"
+import { useGroups } from "@/hooks/datasource/useGroups"
 import { useSelectable } from "@/hooks/datasource/useSelectable/useSelectable"
 import { Placeholder } from "@/icons/app"
 import { cn } from "@/lib/utils"
@@ -273,18 +272,7 @@ const GroupCards = <
         const metadata = getMetadata(item, cardProperties)
 
         return (
-          <motion.div
-            key={index}
-            layout
-            initial="hidden"
-            animate="visible"
-            exit="hidden"
-            custom={index}
-            variants={getAnimationVariants({
-              delay: 0.02,
-              duration: 0.3,
-            })}
-          >
+          <div key={index}>
             <F0Card
               key={index}
               title={title(item)}
@@ -307,7 +295,7 @@ const GroupCards = <
               metadata={metadata}
               fullHeight={true}
             />
-          </motion.div>
+          </div>
         )
       })}
     </CardGrid>
@@ -473,28 +461,26 @@ export const CardCollection = <
                         }
                         className="px-page pb-2 pt-4"
                       />
-                      <AnimatePresence>
-                        {!collapsible || openGroups[group.key] ? (
-                          <GroupCards
-                            key={group.key}
-                            source={source}
-                            items={group.records}
-                            selectedItems={selectedItems}
-                            handleSelectItemChange={handleSelectItemChange}
-                            title={title}
-                            cardProperties={cardProperties}
-                            description={description}
-                            avatar={avatar}
-                            image={image}
-                            imageFit={imageFit}
-                            imageSize={imageSize}
-                            imageAspectRatio={imageAspectRatio}
-                            blurredBackground={blurredBackground}
-                            compact={compact}
-                            tmpFullWidth={tmpFullWidth}
-                          />
-                        ) : null}
-                      </AnimatePresence>
+                      {!collapsible || openGroups[group.key] ? (
+                        <GroupCards
+                          key={group.key}
+                          source={source}
+                          items={group.records}
+                          selectedItems={selectedItems}
+                          handleSelectItemChange={handleSelectItemChange}
+                          title={title}
+                          cardProperties={cardProperties}
+                          description={description}
+                          avatar={avatar}
+                          image={image}
+                          imageFit={imageFit}
+                          imageSize={imageSize}
+                          imageAspectRatio={imageAspectRatio}
+                          blurredBackground={blurredBackground}
+                          compact={compact}
+                          tmpFullWidth={tmpFullWidth}
+                        />
+                      ) : null}
                     </>
                   )
                 })
