@@ -437,8 +437,7 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
       return
     }
     adapterRef.current = adapter
-    // The marker, line and current-location layers still take the engine's own
-    // map; they move behind the port next.
+    // The layers still take the engine's own map; they move next.
     setMapInstance(adapter.native() as maplibregl.Map)
     // A previous run may have failed (and set the list fallback) with props
     // that made creation throw; this run succeeded, so clear it.
