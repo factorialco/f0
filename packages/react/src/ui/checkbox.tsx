@@ -5,6 +5,7 @@ import { useId } from "react"
 import { F0Icon } from "../components/F0Icon"
 import { Check, Minus } from "../icons/app"
 import { cn, focusRing } from "../lib/utils"
+import { Text } from "./Text"
 
 const Checkbox = React.forwardRef<
   React.ElementRef<typeof CheckboxPrimitive.Root>,
@@ -56,19 +57,18 @@ const Checkbox = React.forwardRef<
           </AnimatePresence>
         </CheckboxPrimitive.Root>
         {props.title && !hideLabel ? (
-          <label
+          <Text
+            as="label"
+            variant="label"
             htmlFor={checkboxId}
+            content={props.title}
+            required={required}
             className={cn(
-              "flex items-center justify-center pl-2.5 text-current hover:cursor-pointer disabled:cursor-not-allowed disabled:opacity-50",
+              "flex items-center justify-center gap-0.5 pl-2 hover:cursor-pointer",
               disabled &&
                 "cursor-not-allowed opacity-50 hover:cursor-not-allowed"
             )}
-          >
-            {props.title}
-            {required ? (
-              <span className="ml-0.5 text-f1-foreground-critical">*</span>
-            ) : null}
-          </label>
+          />
         ) : null}
       </div>
     )
