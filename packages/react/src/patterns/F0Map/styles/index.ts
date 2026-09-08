@@ -1,12 +1,6 @@
+import type { F0MapProvider } from "../providers/names"
 import darkStyle from "./f0-dark.json"
 import lightStyle from "./f0-light.json"
-
-/**
- * Which rendering engine a style is written for. The tag exists so a style
- * built for one engine can never be handed to another: the shapes are not
- * interchangeable, and without it the mismatch would only surface at runtime.
- */
-export type F0MapProvider = "maplibre"
 
 /**
  * A light/dark style pair for one engine. `light` and `dark` are deliberately
@@ -33,3 +27,5 @@ export const f0MapStyles: F0MapStyle = {
   light: lightStyle,
   dark: darkStyle,
 }
+
+export type { F0MapProvider }
