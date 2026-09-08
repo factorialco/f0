@@ -247,6 +247,24 @@ export const TableCollection = <
     [source, showItemActionsProp]
   )
 
+  // Rows read the pinned definition, never the live source: its identity churns
+  // every consumer render, which no row memo can survive. A hand-built source
+  // has no `definition`, and falls back to re-rendering as it did before.
+  const rowDefinition = source.definition ?? source
+  const rowSource = useMemo(
+    () =>
+      showItemActionsProp === false
+        ? { ...rowDefinition, itemActions: undefined }
+        : rowDefinition,
+    [rowDefinition, showItemActionsProp]
+  )
+
+  // Children are fetched too late for this component to resolve anything for
+  // them, and resolving one reads the current filters and sortings. Flat rows
+  // get `undefined`, which is stable.
+  const liveSourceFor = (record: R) =>
+    effectiveSource.itemsWithChildren?.(record) ? effectiveSource : undefined
+
   // Called with no arguments at every use site, so the result is always the same
   // object by value. Building it once stops every row receiving a fresh
   // `variants` prop on each render.
@@ -875,7 +893,8 @@ export const TableCollection = <
                                 custom={index}
                                 key={rowKey}
                                 layout
-                                source={effectiveSource}
+                                source={rowSource}
+                                liveSource={liveSourceFor(item)}
                                 item={item}
                                 index={index}
                                 groupIndex={groupIndex}
@@ -939,7 +958,8 @@ export const TableCollection = <
                       layout
                       isNew={isNew}
                       groupIndex={0}
-                      source={effectiveSource}
+                      source={rowSource}
+                      liveSource={liveSourceFor(item)}
                       item={item}
                       index={index}
                       onItemCheckedChange={stableSelectItemChange}
