@@ -127937,7 +127937,14 @@ const d23 = ({
     handleBlur: _,
     handleKeyDown: F
   };
-}, h23 = 400, m23 = (e, t) => e.type === "separator" || !t || e.label.toLowerCase().includes(t.toLowerCase()), Dy = (e) => {
+}, h23 = 400, m23 = (e, t) => {
+  if (e.type === "separator" || !t)
+    return !0;
+  const n = t.toLowerCase(), r = e.metadata?.type === "dialCode" ? e.metadata.dialCode : void 0;
+  return [e.label, e.description, r].some(
+    (a) => a?.toLowerCase().includes(n)
+  );
+}, Dy = (e) => {
   if (!(e.type === "separator" || e.tag === void 0 || typeof e.tag == "string"))
     return e.tag.type;
 }, p23 = Y1({
