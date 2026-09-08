@@ -1,25 +1,27 @@
 import { jsxs as c, jsx as t } from "react/jsx-runtime";
-import { useRef as g, useState as h, useEffect as b } from "react";
-import { r as p } from "./docx-preview-BaRDMyPN.js";
-import { u as v, S as w } from "./F0CanvasPanel-R3j-gfXj.js";
-import { u as x, D as y } from "./DocumentToolbar-CCW0-2sz.js";
+import { r as g } from "./docx-preview-BaRDMyPN.js";
+import { useRef as h, useState as b, useEffect as p } from "react";
+import { u as v, S as w } from "./F0CanvasPanel-3ekzcY7k.js";
+import { u as x, D as y } from "./DocumentToolbar-C0I0QTcn.js";
 const V = ({
   url: o,
   filename: d,
   withCredentials: a = !0,
   actions: m
 }) => {
-  const s = v(), i = x(), f = g(null), [l, n] = h("loading");
-  return b(() => {
-    const u = f.current;
-    if (!u) return;
+  const s = v(), i = x(), u = h(null), [l, n] = b("loading");
+  return p(() => {
+    const f = u.current;
+    if (!f)
+      return;
     let r = !1;
     return n("loading"), fetch(o, { credentials: a ? "include" : "same-origin" }).then((e) => {
-      if (!e.ok) throw new Error(`${e.status}`);
+      if (!e.ok)
+        throw new Error(`${e.status}`);
       return e.blob();
     }).then((e) => {
       if (!r)
-        return p(e, u, void 0, {
+        return g(e, f, void 0, {
           inWrapper: !0,
           breakPages: !0
         }).then(() => {
@@ -42,7 +44,7 @@ const V = ({
       }
     ),
     /* @__PURE__ */ c("div", { className: "relative min-h-0 grow overflow-auto bg-f1-background-secondary", children: [
-      l === "loading" && /* @__PURE__ */ t(
+      l === "loading" ? /* @__PURE__ */ t(
         w,
         {
           role: "status",
@@ -50,12 +52,12 @@ const V = ({
           "aria-label": s.pdfViewer.loading,
           className: "absolute inset-0 h-full w-full rounded-none"
         }
-      ),
-      l === "failed" && /* @__PURE__ */ t("div", { className: "flex h-full w-full items-center justify-center bg-f1-background text-f1-foreground-secondary", children: s.pdfViewer.previewFailed }),
+      ) : null,
+      l === "failed" ? /* @__PURE__ */ t("div", { className: "flex h-full w-full items-center justify-center bg-f1-background text-f1-foreground-secondary", children: s.pdfViewer.previewFailed }) : null,
       /* @__PURE__ */ t(
         "div",
         {
-          ref: f,
+          ref: u,
           className: l === "failed" ? "hidden" : void 0,
           style: { zoom: i.scale }
         }

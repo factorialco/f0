@@ -11,7 +11,8 @@ const h = 4096, p = ({
   return o.current = c, m(() => {
     let r = !1;
     return fetch(n).then((t) => {
-      if (!t.ok) throw new Error(`${t.status}`);
+      if (!t.ok)
+        throw new Error(`${t.status}`);
       return t.text();
     }).then((t) => {
       if (!r) {

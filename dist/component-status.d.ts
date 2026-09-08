@@ -235,16 +235,16 @@ export declare interface RequirementResult {
  * changes for 60 days, and Foundations approval. Those remain manual promotion
  * gates (see Lifecycle/Definition of Done).
  */
-export declare const STABLE_REQUIREMENTS: ReadonlyArray<{
+export declare const STABLE_REQUIREMENTS: readonly {
     key: string;
     label: string;
     detail: string;
-    criteria?: Array<{
+    criteria?: {
         label: string;
         isMet: (c: ComponentEntry) => boolean;
-    }>;
+    }[];
     isMet: (c: ComponentEntry) => boolean;
-}>;
+}[];
 
 /** Human-readable badge label per maturity level. */
 export declare const STATUS_LABELS: Record<ApiStatus, string>;
@@ -274,17 +274,17 @@ declare namespace _Page {
 declare module "gridstack" {
     interface GridStackWidget {
         id?: string;
-        allowedSizes?: Array<{
+        allowedSizes?: {
             w: number;
             h: number;
-        }>;
+        }[];
         meta?: Record<string, unknown>;
     }
     interface GridStackNode {
-        allowedSizes?: Array<{
+        allowedSizes?: {
             w: number;
             h: number;
-        }>;
+        }[];
     }
 }
 
@@ -328,10 +328,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        indent: {
-            setIndent: (level: number) => ReturnType;
-            unsetIndent: () => ReturnType;
-            outdent: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
@@ -339,8 +337,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        indent: {
+            setIndent: (level: number) => ReturnType;
+            unsetIndent: () => ReturnType;
+            outdent: () => ReturnType;
         };
     }
 }
