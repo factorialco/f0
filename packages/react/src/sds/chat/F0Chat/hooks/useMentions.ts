@@ -850,8 +850,15 @@ export function useMentions({
           // to the next in the queue. Without the first half, a body written in
           // one normal form hands its occurrence to whoever happens to be first
           // in the group — the wrong person, notified in their place.
+          //
+          // "The way the text spells it" is read off the located range, not off
+          // the name the matcher reports having matched. The two are the same
+          // string while matching is exact; once it folds normal forms together
+          // every spelling matches every occurrence and the reported one is
+          // just whichever entry the matcher was handed first.
+          const spelled = text.slice(start + 1, end)
           const picked =
-            free.find((entry) => entry.name === name) ??
+            free.find((entry) => entry.name === spelled) ??
             free[0] ??
             group[group.length - 1]
           if (picked) handedOut.add(picked)
