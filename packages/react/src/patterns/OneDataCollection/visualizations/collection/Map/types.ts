@@ -1,3 +1,5 @@
+import type { ReactNode } from "react"
+
 import { RecordType, SortingsDefinition } from "@/hooks/datasource"
 import type {
   F0MapMarkerVariantProps,
@@ -42,8 +44,9 @@ export type MapVisualizationOptions<
   selectedRecordId?: string | null
   /**
    * Fired when the selection changes: a marker click, a reveal, or `null` when
-   * the selection is cleared. Open a side panel from here - and report the
-   * region it covers through `viewportInset` so the marker stays visible.
+   * the selection is cleared. Open a side panel from here - and if it is your
+   * own chrome rather than the map's `detail` panel, report the region it covers
+   * through `viewportInset` so the marker stays visible.
    */
   onSelect?: (record: R | null) => void
   /**
@@ -52,12 +55,22 @@ export type MapVisualizationOptions<
    * `searchSelectionNonce` so picking the same record twice flies again.
    */
   revealRecordId?: string | null
-  /** Region of the map covered by external chrome, typically a side panel. */
+  /**
+   * Region of the map covered by external chrome, typically a side panel. The
+   * map's own `sidebar` / `detail` panels are folded in for you.
+   */
   viewportInset?: F0MapViewportInset
   /** Initial camera. Defaults to framing every marker. */
   initialViewport?: F0MapViewport
   /** Show the navigation controls (locate / fit / zoom). Defaults to `true`. */
   showControls?: boolean
+  /**
+   * Fired with the panel's new open state when the top-left panel toggle is
+   * pressed. The map view always shows that toggle and tracks its state itself;
+   * the panel it will open does not exist yet, so nothing else changes when it
+   * is pressed.
+   */
+  onSidebarToggle?: (expanded: boolean) => void
   /** Map projection. Defaults to `"mercator"`. */
   projection?: F0MapProjection
   /**
@@ -68,4 +81,28 @@ export type MapVisualizationOptions<
   markerLimit?: number
   /** Accessible label for the map region. */
   ariaLabel?: string
+  /**
+   * Content of the map's side panel, the one the top-left toggle opens. Called
+   * with the very records the map is drawing markers for - the same page, from
+   * the same load - so the list beside the map can never disagree with it.
+   * The panel itself is the map's surface; this is what goes inside it.
+   *
+   * `select` drives the same selection a marker click does, so a row in this
+   * panel and its pin on the map open the same detail.
+   */
+  sidebar?: (records: R[], api: MapSidebarApi<R>) => ReactNode
+  /**
+   * Content of a second panel, sliding in beside the first rather than over it.
+   * Called with the selected record - whichever was picked, from a marker or
+   * from the list - and shown for as long as something is selected.
+   */
+  detail?: (record: R, api: MapSidebarApi<R>) => ReactNode
+}
+
+/** Selection handles handed to the panels, so their content can drive the map. */
+export type MapSidebarApi<R extends RecordType> = {
+  /** Select a record (or clear with `null`), exactly as a marker click would. */
+  select: (record: R | null) => void
+  /** Id of the selected record, or `null`. */
+  selectedRecordId: string | null
 }

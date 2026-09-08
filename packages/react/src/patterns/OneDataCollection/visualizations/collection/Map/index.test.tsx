@@ -64,8 +64,18 @@ type SourceState = {
 
 const recordsFor = (state: SourceState) => {
   const country = (state.filters?.country ?? undefined) as string[] | undefined
-  if (!country) return offices
-  return offices.filter((office) => country.includes(office.id))
+  let records = country
+    ? offices.filter((office) => country.includes(office.id))
+    : offices
+  // A real datasource applies the search term server-side, so the collection
+  // only ever sees the matches.
+  if (state.search) {
+    const term = state.search.toLowerCase()
+    records = records.filter((office) =>
+      office.name.toLowerCase().includes(term)
+    )
+  }
+  return records
 }
 
 const buildSource = (state: SourceState = {}) =>
@@ -312,6 +322,30 @@ describe("MapCollection — framing", () => {
     expect(mock.fitToMarkers).toHaveBeenCalled()
   })
 
+  it("reframes to the markers left by a search", async () => {
+    const { rerender } = renderMap()
+    await waitForMap()
+    expect(markers()).toHaveLength(2)
+    mock.fitToMarkers.mockClear()
+
+    rerender(collection({}, 0, { search: "barcelona" }))
+
+    await waitFor(() => expect(markers()).toHaveLength(1))
+    expect(mock.fitToMarkers).toHaveBeenCalled()
+  })
+
+  it("gives the markers back when the search is cleared", async () => {
+    const { rerender } = renderMap({}, 0, { search: "barcelona" })
+    await waitForMap()
+    expect(markers()).toHaveLength(1)
+    mock.fitToMarkers.mockClear()
+
+    rerender(collection({}, 0, { search: undefined }))
+
+    await waitFor(() => expect(markers()).toHaveLength(2))
+    expect(mock.fitToMarkers).toHaveBeenCalled()
+  })
+
   it("frames the union of two filters at once", async () => {
     const { rerender } = renderMap({}, 0, { filters: { country: ["bcn"] } })
     await waitForMap()
@@ -377,8 +411,11 @@ describe("MapCollection — framing", () => {
   })
 
   it("leaves the camera alone when a search that never flew is cleared", async () => {
-    const { rerender } = renderMap({}, 0, { search: "zzz" })
+    // A term every office matches, so clearing it gives no markers back and
+    // there is nothing to reframe to - and nothing flew, so no zoom to undo.
+    const { rerender } = renderMap({}, 0, { search: "a" })
     await waitForMap()
+    expect(markers()).toHaveLength(2)
     mock.fitToMarkers.mockClear()
 
     rerender(collection({}, 0, { search: undefined }))
@@ -478,5 +515,73 @@ describe("MapCollection — framing while the new records are in flight", () => 
     await source.settle([offices[0]])
     await waitFor(() => expect(markers()).toHaveLength(1))
     expect(mock.fitToMarkers).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe("MapCollection — the panels drive the map", () => {
+  /** The `select` handle the visualization hands its panels, last seen. */
+  let sidebarApi: {
+    select: (record: Office | null) => void
+    selectedRecordId: string | null
+  }
+
+  const renderWithPanels = () =>
+    renderMap({
+      sidebar: (_records, api) => {
+        sidebarApi = api
+        return null
+      },
+      // Renders something identifiable: a `null` renderer would make
+      // "unmounted" and "rendered nothing" indistinguishable.
+      detail: (record) => <span>{String(record.id)}</span>,
+    })
+
+  it("flies to the record a panel selects, not just marks it", async () => {
+    renderWithPanels()
+    await waitForMap()
+
+    sidebarApi.select(offices[1])
+
+    await waitFor(() => expect(mock.focusMarker).toHaveBeenCalledWith("mad"))
+  })
+
+  it("reports the selection back to the panels", async () => {
+    renderWithPanels()
+    await waitForMap()
+
+    sidebarApi.select(offices[1])
+
+    await waitFor(() => expect(sidebarApi.selectedRecordId).toBe("mad"))
+  })
+
+  it("opens the detail panel for the selected record", async () => {
+    renderWithPanels()
+    await waitForMap()
+    expect(mock.props.latest?.detailOpen).toBe(false)
+
+    sidebarApi.select(offices[1])
+
+    await waitFor(() => expect(mock.props.latest?.detailOpen).toBe(true))
+  })
+
+  it("keeps the detail mounted while it closes, so it can animate out", async () => {
+    renderWithPanels()
+    await waitForMap()
+    sidebarApi.select(offices[1])
+    await waitFor(() => expect(mock.props.latest?.detailOpen).toBe(true))
+
+    sidebarApi.select(null)
+
+    // Closed, but still rendering its record: unmounting here would make the
+    // panel vanish instead of sliding away.
+    await waitFor(() => expect(mock.props.latest?.detailOpen).toBe(false))
+    expect(mock.props.latest?.detail).not.toBeNull()
+  })
+
+  it("leaves background clicks alone when a detail panel can open", async () => {
+    renderWithPanels()
+    await waitForMap()
+
+    expect(mock.props.latest?.clearSelectionOnBackgroundClick).toBe(false)
   })
 })

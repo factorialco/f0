@@ -66,6 +66,9 @@ export const MapCollection = <
   projection,
   markerLimit,
   ariaLabel,
+  sidebar,
+  detail,
+  onSidebarToggle,
   onLoadData,
   onLoadError,
 }: MapCollectionProps<
@@ -171,30 +174,82 @@ export const MapCollection = <
 
   const mapRef = useRef<F0MapHandle>(null)
 
-  // Filters narrow the markers, so the camera reframes to what is left - with
-  // two filters applied at once that is the set matching both.
+  // The panel toggle is always offered by the map view. Its state lives here
+  // because the panel it will open does not exist yet - pressing it only flips
+  // the icon and notifies the consumer.
+  const [sidebarExpanded, setSidebarExpanded] = useState(false)
+  const toggleSidebar = useCallback(() => {
+    setSidebarExpanded((expanded) => {
+      const next = !expanded
+      onSidebarToggle?.(next)
+      return next
+    })
+  }, [onSidebarToggle])
+
+  // Handed to both panels so their content can drive the map's own selection:
+  // a row in the list and its pin on the map end up in the same place.
+  const sidebarApi = useMemo(
+    () => ({
+      select: (record: Record | null) => {
+        const id = record ? recordId(record) : null
+        // Picking from the list flies to the marker, not just marks it: the
+        // record may be off screen, and a selection you cannot see is no
+        // answer. Same path a search reveal takes.
+        if (id) mapRef.current?.focusMarker(id)
+        selectRecord(id)
+        // Set after `selectRecord`, which resets it: this selection was flown
+        // to, so dropping it has a zoom to undo.
+        if (id) zoomedIntoSelectionRef.current = true
+      },
+      selectedRecordId: selectedId,
+    }),
+    [selectRecord, recordId, selectedId]
+  )
+
+  const selectedRecord = selectedId
+    ? (records.find((record) => recordId(record) === selectedId) ?? null)
+    : null
+
+  // The detail panel has to stay mounted while it slides away, so it keeps
+  // rendering the record it was showing until something else is selected.
+  // Dropping the content on deselect would unmount the panel mid-transition and
+  // it would simply vanish instead of leaving.
+  const lastDetailRecord = useRef<Record | null>(null)
+  if (selectedRecord) lastDetailRecord.current = selectedRecord
+  const detailRecord = selectedRecord ?? lastDetailRecord.current
+
+  // Filters and the search box both narrow the records the collection hands
+  // over, so the camera reframes to what is left - with two filters applied at
+  // once that is the set matching both, and with a search term that is the
+  // matches. Search is part of the query, not a separate gesture: the panel on
+  // the right lists the same narrowed records, so the map has to agree with it.
   //
-  // The fit cannot fire on the filter change itself: the records for the new
-  // filters are still being fetched, so the markers on screen are the previous
+  // The fit cannot fire on the query change itself: the records for the new
+  // query are still being fetched, so the markers on screen are the previous
   // ones and the camera would frame those. Waiting on a new `points` identity is
   // not enough either — it changes within the same commit, while the contents
   // are still stale. So the pending fit records the marker set that was on
-  // screen and waits for one that is actually different, with nothing in flight.
+  // screen and waits for one that is actually different, with nothing in
+  // flight. A query that does not change what is shown therefore never moves
+  // the camera.
   const markerKey = points.map((point) => point.id).join(",")
-  const filterSignature = JSON.stringify(source.currentFilters ?? {})
+  const querySignature = JSON.stringify({
+    filters: source.currentFilters ?? {},
+    search: source.currentSearch ?? "",
+  })
   // Starts unset so the initial load frames itself, which is F0Map's own job.
-  const framedFiltersRef = useRef<string | null>(null)
+  const framedQueryRef = useRef<string | null>(null)
   const staleMarkerKeyRef = useRef<string | null>(null)
   useEffect(() => {
-    if (framedFiltersRef.current === null) {
-      framedFiltersRef.current = filterSignature
+    if (framedQueryRef.current === null) {
+      framedQueryRef.current = querySignature
       return
     }
-    if (framedFiltersRef.current === filterSignature) return
+    if (framedQueryRef.current === querySignature) return
 
-    framedFiltersRef.current = filterSignature
+    framedQueryRef.current = querySignature
     staleMarkerKeyRef.current = markerKey
-  }, [filterSignature, markerKey])
+  }, [querySignature, markerKey])
   useEffect(() => {
     if (staleMarkerKeyRef.current === null || isLoading) return
     // Same markers as before the filter changed: they have not arrived yet, or
@@ -226,7 +281,14 @@ export const MapCollection = <
     previousSearchRef.current = search
     if (!previous || search) return
 
-    if (zoomedIntoSelectionRef.current) mapRef.current?.fitToMarkers()
+    // Skipped when clearing the search is already going to widen the marker
+    // set: the reframe above is the same movement, and firing both would ease
+    // the camera to the same place twice. This one is for the case where the
+    // search only ever flew somewhere - the records never changed - and there
+    // is a zoom left to undo.
+    if (zoomedIntoSelectionRef.current && staleMarkerKeyRef.current === null) {
+      mapRef.current?.fitToMarkers()
+    }
     zoomedIntoSelectionRef.current = false
   }, [search])
 
@@ -248,16 +310,23 @@ export const MapCollection = <
     zoomedIntoSelectionRef.current = true
   }, [revealRecordId, searchSelectionNonce, points, selectRecord])
 
+  // The map runs edge to edge - it is a canvas, not a list of rows, so a
+  // horizontal gutter would only shrink the area it has to draw in. The rule on
+  // top is what separates it from the toolbar; the other views get that
+  // separation from their own header row, a map has no such edge of its own.
+  const wrapperClassName =
+    "flex h-full min-h-0 flex-1 flex-col border-0 border-t border-solid border-f1-border-secondary"
+
   if (isInitialLoading) {
     return (
-      <div className="flex h-full min-h-0 flex-1 flex-col">
+      <div className={wrapperClassName}>
         <F0MapSkeleton />
       </div>
     )
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-1 flex-col">
+    <div className={wrapperClassName}>
       <F0Map
         ref={mapRef}
         markers={points}
@@ -271,6 +340,28 @@ export const MapCollection = <
         showControls={showControls}
         projection={projection}
         ariaLabel={ariaLabel}
+        // Same `records` the markers come from: one fetch, one page, one truth.
+        sidebar={sidebar?.(records, sidebarApi)}
+        sidebarExpanded={sidebarExpanded}
+        onSidebarToggle={toggleSidebar}
+        // The detail panel follows the selection, whichever way it was made.
+        // Mounted from the first render when a detail renderer exists, empty
+        // until something is selected: a CSS transition doesn't run on the
+        // frame an element mounts, so a panel that appears only on selection
+        // would skip its own entrance the first time.
+        detail={
+          detail ? (
+            detailRecord ? (
+              detail(detailRecord, sidebarApi)
+            ) : (
+              <></>
+            )
+          ) : null
+        }
+        detailOpen={Boolean(selectedRecord)}
+        // With a detail panel in play, dismissal is its own job: a click on the
+        // map must not close it out from under the reader.
+        clearSelectionOnBackgroundClick={!detail}
         fullScreen
       />
     </div>
