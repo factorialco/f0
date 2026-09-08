@@ -166,10 +166,10 @@ export const F0CommandPalette = ({
       cause: `null` and the node are different values, so neither call bails
       out, and one render becomes an unbounded chain of them.
 
-      That cause exists in this repo. `.storybook/preview-head.html` loads
-      `react-render-tracker`, which wraps components and so changes element
-      identity every render, and the crash it produced pointed straight here —
-      `setRef` dispatching state, over and over.
+      Anything that wraps components creates that cause, because wrapping is
+      what changes element identity: devtools instrumentation, a profiler, a
+      HOC added upstream. The guard means none of them can turn this into a
+      render loop, so it stays whether or not such a thing is installed.
 
       Ignoring the detach and comparing before setting makes the update happen
       exactly once, whatever the tree does around it. Radix guards its own

@@ -213,6 +213,9 @@ const open = async (options: SetupOptions = {}) => {
 
 const ZWSP = "​"
 
+/** Let a deferred state update land: the search hook defers by one task. */
+const flushTask = () => new Promise((resolve) => setTimeout(resolve, 0))
+
 const chipsOf = (field: HTMLElement) =>
   Array.from(field.querySelectorAll("[data-scope-chip]"))
 
@@ -1079,17 +1082,18 @@ describe("remote entity search", () => {
     }
     return {
       provider,
-      // Async: resolving a promise queues a microtask, and a synchronous `act`
-      // returns before it runs — so the state update would land after the
-      // assertion rather than before it.
+      // Resolving queues a microtask AND the hook defers the state update by a
+      // task (see `onNextTask`), so both have to be flushed before asserting.
       release: async (refs: CommandEntityRef[]) => {
         await act(async () => {
           release(refs)
+          await flushTask()
         })
       },
       reject: async () => {
         await act(async () => {
           reject()
+          await flushTask()
         })
       },
     }
@@ -1167,9 +1171,11 @@ describe("remote entity search", () => {
     }
     await act(async () => {
       answers[1]!([air])
+      await flushTask()
     })
     await act(async () => {
       answers[0]!([laptopRef])
+      await flushTask()
     })
 
     // The newest query's answer survives; the late one is dropped.
@@ -1196,9 +1202,9 @@ describe("remote entity search", () => {
 describe("resilience to a re-invoked callback ref", () => {
   /**
    * React re-invokes a callback ref — `null`, then the node — whenever its own
-   * identity or the element's changes. Anything that wraps components does
-   * that on every render, and `.storybook/preview-head.html` loads
-   * `react-render-tracker`, which is exactly such a thing.
+   * identity or the element's changes, and anything that wraps components does
+   * that on every render: devtools instrumentation, a profiler, an HOC added
+   * upstream.
    *
    * There is no way to make React do it on demand from a test, so this drives
    * the same sequence by hand against the live node: detach, reattach, many
