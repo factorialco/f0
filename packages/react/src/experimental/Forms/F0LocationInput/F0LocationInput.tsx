@@ -73,7 +73,7 @@ export const F0LocationInput = forwardRef<
     () => ({
       addressLine1:
         partLabels?.addressLine1 ??
-        (manualEntry ? i18n.locationInput.address : label),
+        (manualEntry ? i18n.locationInput.addressLine1 : label),
       addressLine2: partLabels?.addressLine2 ?? i18n.locationInput.addressLine2,
       city: partLabels?.city ?? i18n.locationInput.city,
       state: partLabels?.state ?? i18n.locationInput.state,
@@ -156,64 +156,66 @@ export const F0LocationInput = forwardRef<
       ? { type: effectiveStatus.type }
       : effectiveStatus
 
-  const addressField = searchPlaces ? (
-    <AddressSelect
-      label={labels.addressLine1}
-      hideLabel={manualEntry ? false : hideLabel}
-      labelIcon={manualEntry ? undefined : labelIcon}
-      placeholder={placeholder}
-      text={pendingLabel ?? value?.addressLine1 ?? ""}
-      placeId={value?.placeId}
-      country={searchCountry}
-      searchPlaces={searchPlaces}
-      onPick={handlePick}
-      onClear={handleClear}
-      status={fieldStatus}
-      required={required}
-      disabled={disabled}
-      readonly={readonly}
-      loading={loading || resolving}
-      clearable={clearable}
-      size={size}
-      name={name}
-    />
-  ) : (
-    // Nothing to suggest, so the address line is a field the user just types in
-    <F0TextInput
-      ref={ref}
-      label={labels.addressLine1}
-      hideLabel={manualEntry ? false : hideLabel}
-      labelIcon={manualEntry ? undefined : labelIcon}
-      placeholder={placeholder}
-      value={value?.addressLine1 ?? ""}
-      onChange={(text) => setPart("addressLine1", text)}
-      status={fieldStatus}
-      required={required}
-      disabled={disabled}
-      readonly={readonly}
-      loading={loading}
-      clearable={clearable}
-      size={size}
-      name={name}
-      autoFocus={autoFocus}
-    />
-  )
+  const addressField =
+    searchPlaces && !manualEntry ? (
+      <AddressSelect
+        label={labels.addressLine1}
+        hideLabel={hideLabel}
+        labelIcon={labelIcon}
+        placeholder={placeholder}
+        text={pendingLabel ?? value?.addressLine1 ?? ""}
+        placeId={value?.placeId}
+        country={searchCountry}
+        searchPlaces={searchPlaces}
+        onPick={handlePick}
+        onClear={handleClear}
+        status={fieldStatus}
+        required={required}
+        disabled={disabled}
+        readonly={readonly}
+        loading={loading || resolving}
+        clearable={clearable}
+        size={size}
+        name={name}
+      />
+    ) : manualEntry ? null : (
+      // Nothing to suggest, so the address is a field the user just types in
+      <F0TextInput
+        ref={ref}
+        label={labels.addressLine1}
+        hideLabel={hideLabel}
+        labelIcon={labelIcon}
+        placeholder={placeholder}
+        value={value?.addressLine1 ?? ""}
+        onChange={(text) => setPart("addressLine1", text)}
+        status={fieldStatus}
+        required={required}
+        disabled={disabled}
+        readonly={readonly}
+        loading={loading}
+        clearable={clearable}
+        size={size}
+        name={name}
+        autoFocus={autoFocus}
+      />
+    )
 
-  // Neither F0Select nor F0TextInput takes an onFocus, and focus events bubble
-  // through React, so the pair is observed around the field instead
-  const addressBlock =
-    onFocus || onBlur ? (
+  if (!manualEntry) {
+    // Neither F0Select nor F0TextInput takes an onFocus, and focus events
+    // bubble through React, so the pair is observed around the field
+    return onFocus || onBlur ? (
       <div onFocus={onFocus} onBlur={onBlur}>
         {addressField}
       </div>
     ) : (
       addressField
     )
-
-  if (!manualEntry) return addressBlock
+  }
 
   return (
     <fieldset
+      onFocus={onFocus}
+      onBlur={onBlur}
       className="m-0 flex min-w-0 flex-col gap-3 border-0 p-0"
       // The group is named for assistive tech only: each part carries its own
       // visible label, and a heading above them reads as a second form title
@@ -230,7 +232,6 @@ export const F0LocationInput = forwardRef<
         readonly={readonly}
         name={name ? `${name}.country` : undefined}
       />
-      {addressBlock}
       <AddressParts
         value={value}
         labels={labels}

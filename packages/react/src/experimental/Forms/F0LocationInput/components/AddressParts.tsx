@@ -19,8 +19,8 @@ type Props = {
 }
 
 /**
- * The parts below the address field. Address line 2 takes the full width;
- * city, region and postal code share one row.
+ * Every part typed by hand. The two address lines take the full width; city,
+ * region and postal code share one row.
  */
 export const AddressParts = ({
   value,
@@ -32,17 +32,15 @@ export const AddressParts = ({
   name,
 }: Props) => {
   const i18n = useI18n()
-  const placeholders: Record<
-    Exclude<EditableLocationPart, "addressLine1">,
-    string
-  > = {
+  const placeholders: Record<EditableLocationPart, string> = {
+    addressLine1: i18n.locationInput.addressLine1Placeholder,
     addressLine2: i18n.locationInput.addressLine2Placeholder,
     city: i18n.locationInput.cityPlaceholder,
     state: i18n.locationInput.statePlaceholder,
     postalCode: i18n.locationInput.postalCodePlaceholder,
   }
 
-  const part = (key: Exclude<EditableLocationPart, "addressLine1">) => (
+  const part = (key: EditableLocationPart) => (
     <F0TextInput
       key={key}
       label={labels[key]}
@@ -58,6 +56,7 @@ export const AddressParts = ({
 
   return (
     <>
+      {part("addressLine1")}
       {part("addressLine2")}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         {part("city")}

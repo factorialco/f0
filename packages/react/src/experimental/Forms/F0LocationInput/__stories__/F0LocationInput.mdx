@@ -17,7 +17,7 @@ The address line is an [F0Select](?path=/docs/components-select--documentation) 
 
 ### Anatomy
 
-One field by default; pass `manualEntry` for the country and every part.
+One field by default; pass `manualEntry` to type every part by hand instead.
 
 <Canvas of={Stories.Default} />
 
@@ -46,7 +46,7 @@ One field by default; pass `manualEntry` for the country and every part.
 
 #### Address field vs manual entry
 
-Leave `manualEntry` off when a picked suggestion is the whole job: search boxes, filters, quick "where" prompts. Turn it on whenever the user may need to correct a part, or when the address may not exist in the provider (new buildings, rural addresses, no autocomplete entitlement).
+Leave `manualEntry` off when a picked suggestion is the whole job: search boxes, filters, quick "where" prompts. Turn it on when the address has to be typed: it may not exist in the provider (new buildings, rural addresses), or the surface has no autocomplete entitlement.
 
 <Canvas of={Stories.Prefilled} />
 
@@ -136,7 +136,7 @@ A pick shows the suggestion on the trigger right away but emits nothing until `r
 
 The list offers exactly what the provider returned: there is no create action, so the field cannot invent an address. When the search comes back empty it says so and nothing changes.
 
-A stored value that no suggestion covers is still displayed (the trigger reads the value, not a matching option) and stays editable through the parts under `manualEntry`. A surface that must accept addresses the provider does not know should omit `searchPlaces`, which turns the address line into a plain text field.
+A stored value that no suggestion covers is still displayed (the trigger reads the value, not a matching option). A surface that must accept addresses the provider does not know should either turn on `manualEntry` or omit `searchPlaces`, both of which give a plain text field.
 
 ### Country and search scope
 
@@ -146,7 +146,7 @@ A stored value that no suggestion covers is still displayed (the trigger reads t
 
 ### Without a provider
 
-Omit `searchPlaces` and the address line is a plain [F0TextInput](?path=/docs/components-inputs-text-input--documentation): nothing to open, no network. This is how a surface without the autocomplete entitlement renders the same form.
+Omit `searchPlaces` and the address line is a plain [F0TextInput](?path=/docs/components-inputs-text-input--documentation): nothing to open, no network. `manualEntry` does the same for every part, and ignores `searchPlaces` altogether.
 
 <Canvas of={Stories.WithoutAutocomplete} />
 
@@ -312,10 +312,10 @@ Omit `searchPlaces` and the address line is a plain [F0TextInput](?path=/docs/co
           <code>boolean</code>
         </td>
         <td>
-          Renders the whole address as separate fields: country, address line 1
-          and 2, city, region and postal code. The address line keeps its
-          suggestions. Defaults to <code>false</code>, which is the address
-          field on its own.
+          Renders the whole address as separate fields the user types by hand:
+          country, address line 1 and 2, city, region and postal code. There is
+          no suggestion list in this shape. Defaults to <code>false</code>,
+          which is the searchable address field on its own.
         </td>
       </tr>
       <tr>

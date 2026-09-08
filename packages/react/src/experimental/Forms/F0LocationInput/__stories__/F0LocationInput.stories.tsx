@@ -182,9 +182,9 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {}
 
 /**
- * Manual entry: country first, then the same address field, then every part.
- * Picking a suggestion fills them all; editing one that moves the pin drops
- * the coordinates, because they no longer describe what the user typed.
+ * Manual entry: country first, then every part typed by hand, address line 1
+ * included. Editing a part that moves the pin drops the coordinates of a value
+ * that arrived resolved, because they no longer describe what it says.
  */
 export const ManualEntry: Story = {
   args: {
@@ -203,11 +203,10 @@ export const RestrictedCountries: Story = {
   },
 }
 
-/** Without `searchPlaces` the parts are plain fields: no listbox, no network. */
+/** Without `searchPlaces` the address field is a plain text input. */
 export const WithoutAutocomplete: Story = {
   args: {
     label: "Postal address",
-    manualEntry: true,
     searchPlaces: undefined,
     resolvePlace: undefined,
   },
@@ -289,53 +288,57 @@ export const Sizes: Story = {
  * block. The status message sits under the field in the first and under the
  * group in the second.
  */
+/**
+ * Every state, first for the address field on its own and then for manual
+ * entry. The status message sits under the field in the first and under the
+ * group in the second.
+ */
 export const States: Story = {
   render: (args) => {
-    const state = (
-      label: string,
-      props: Partial<React.ComponentProps<typeof F0LocationInput>>
-    ) => (
-      <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-2">
-        <F0LocationInput {...args} {...props} label={label} />
-        <F0LocationInput {...args} {...props} label={label} manualEntry />
-      </div>
-    )
-
-    return (
-      <div className="flex flex-col gap-8">
-        {state("Default", {})}
-        {state("Prefilled", { defaultValue: places[0].value })}
-        {state("Disabled", { disabled: true })}
-        {state("Read only", {
-          readonly: true,
-          defaultValue: places[0].value,
-        })}
-        {state("With hint", {
-          hint: "Used to place the office on the map",
-        })}
-        {state("With info", {
+    const states: [string, Partial<typeof args>][] = [
+      ["Default", {}],
+      ["Prefilled", { defaultValue: places[0].value }],
+      ["Disabled", { disabled: true }],
+      ["Read only", { readonly: true, defaultValue: places[0].value }],
+      ["With hint", { hint: "Used to place the office on the map" }],
+      [
+        "With info",
+        {
           status: {
             type: "info",
             message: "The address is used for geofencing",
           },
-        })}
-        {state("With warning", {
+        },
+      ],
+      [
+        "With warning",
+        {
           status: {
             type: "warning",
             message: "This address is outside the country you selected",
           },
-        })}
-        {state("With error", { error: "Enter the office address" })}
+        },
+      ],
+      ["With error", { error: "Enter the office address" }],
+    ]
+
+    return (
+      <div className="flex max-w-md flex-col gap-10">
+        {states.map(([label, props]) => (
+          <F0LocationInput key={label} {...args} {...props} label={label} />
+        ))}
+        {states.map(([label, props]) => (
+          <F0LocationInput
+            key={`manual-${label}`}
+            {...args}
+            {...props}
+            label={label}
+            manualEntry
+          />
+        ))}
       </div>
     )
   },
-  decorators: [
-    (Story) => (
-      <div className="max-w-5xl">
-        <Story />
-      </div>
-    ),
-  ],
 }
 
 /**

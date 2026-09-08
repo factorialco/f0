@@ -284,7 +284,7 @@ describe("F0LocationInput", () => {
   })
 
   describe("manual entry", () => {
-    it("renders every part in order, with no group title", () => {
+    it("renders every part as a typed field, in order, with no group title", () => {
       const { container } = render(
         <F0LocationInput
           label="Office"
@@ -298,7 +298,7 @@ describe("F0LocationInput", () => {
       )
       expect(labels).toEqual([
         "Country",
-        "Address",
+        "Address line 1",
         "Address line 2",
         "City",
         "Region",
@@ -306,6 +306,13 @@ describe("F0LocationInput", () => {
       ])
       expect(screen.getByRole("group", { name: "Office" })).toBeInTheDocument()
       expect(screen.queryByText("Office")).not.toBeInTheDocument()
+      // Manual entry means manual: no suggestion list to open
+      expect(
+        screen.getByRole("textbox", { name: "Address line 1" })
+      ).toBeInTheDocument()
+      expect(
+        screen.queryByRole("combobox", { name: "Address line 1" })
+      ).not.toBeInTheDocument()
     })
 
     it("honours partLabels overrides", () => {
