@@ -51,7 +51,9 @@ export const fuzzyMatch = (query: string, text: string): boolean => {
  */
 export const fuzzyScore = (query: string, text: string): number | null => {
   const q = normalize(query.trim())
-  if (!q) return 0
+  if (!q) {
+    return 0
+  }
 
   const haystack = normalize(text)
   let cursor = 0
@@ -60,7 +62,9 @@ export const fuzzyScore = (query: string, text: string): number | null => {
 
   for (const char of q) {
     const found = haystack.indexOf(char, cursor)
-    if (found === -1) return null
+    if (found === -1) {
+      return null
+    }
 
     const atWordStart =
       found === 0 || WORD_BOUNDARY.test(haystack[found - 1] ?? "")
