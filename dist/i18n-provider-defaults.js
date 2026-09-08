@@ -1008,15 +1008,14 @@ const e = {
     state: "Region",
     postalCode: "Postal code",
     placeholder: "Enter an address",
+    selectCountry: "Select a country",
     searchCountry: "Search country",
     noCountryResults: "No country found",
     noResults: "No addresses found",
     searchHint: "Type an address to search",
     addressLine1Placeholder: "Enter a street and number",
     addressLine2Placeholder: "Enter a floor or unit",
-    cityPlaceholder: "Enter a city",
-    statePlaceholder: "Enter a region",
-    postalCodePlaceholder: "Enter a postal code",
+    postalCodePlaceholder: "08001",
     searching: "Searching addresses"
   },
   imageUpload: {

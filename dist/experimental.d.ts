@@ -5124,15 +5124,14 @@ declare const defaultTranslations: {
         readonly state: "Region";
         readonly postalCode: "Postal code";
         readonly placeholder: "Enter an address";
+        readonly selectCountry: "Select a country";
         readonly searchCountry: "Search country";
         readonly noCountryResults: "No country found";
         readonly noResults: "No addresses found";
         readonly searchHint: "Type an address to search";
         readonly addressLine1Placeholder: "Enter a street and number";
         readonly addressLine2Placeholder: "Enter a floor or unit";
-        readonly cityPlaceholder: "Enter a city";
-        readonly statePlaceholder: "Enter a region";
-        readonly postalCodePlaceholder: "Enter a postal code";
+        readonly postalCodePlaceholder: "08001";
         readonly searching: "Searching addresses";
     };
     readonly imageUpload: {

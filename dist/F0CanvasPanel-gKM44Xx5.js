@@ -117846,7 +117846,11 @@ const iY1 = ({ text: e }) => /* @__PURE__ */ i(
                       {
                         "data-slot": "placeholder",
                         className: Y(
-                          "pointer-events-none absolute left-0 top-[1px] z-10 flex flex-1 justify-start px-3 text-f1-foreground-secondary transition-opacity line-clamp-1",
+                          // `line-clamp-1` used to sit here, but it sets `display` and
+                          // loses to `flex`, so a placeholder longer than the field
+                          // wrapped onto a second line and spilled out of it. The child
+                          // truncates instead.
+                          "pointer-events-none absolute inset-x-0 top-[1px] z-10 flex flex-1 justify-start overflow-hidden px-3 text-f1-foreground-secondary transition-opacity",
                           !m && "bottom-0",
                           m && "items-start",
                           (h || e2) && "pl-8",
@@ -117857,7 +117861,7 @@ const iY1 = ({ text: e }) => /* @__PURE__ */ i(
                         onClick: i2,
                         "aria-hidden": "true",
                         title: b,
-                        children: b
+                        children: /* @__PURE__ */ i("span", { className: "min-w-0 truncate", children: b })
                       }
                     ),
                     (L || n1 || g) && /* @__PURE__ */ $(
