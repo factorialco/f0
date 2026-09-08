@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
 
 import { type AvatarVariant } from "@/components/avatars/F0Avatar"
 
@@ -414,6 +421,34 @@ export function useMentions({
   const dismissedAtIndexRef = useRef<number>(-1)
   const mirrorRef = useRef<CaretMirror | null>(null)
 
+  // The host owns `searchMembers`, and a host that builds it inline hands the
+  // effect below a new dependency on every render — in a group chat, one per
+  // event anyone else causes. Read through a ref so the effect keys only on
+  // what makes a new request; the boolean is what an absent search means.
+  const searchMembersRef = useRef(searchMembers)
+  useLayoutEffect(() => {
+    searchMembersRef.current = searchMembers
+  })
+  const canSearch = enabled && !!searchMembers
+
+  /**
+   * Retire whatever search is scheduled or in flight.
+   *
+   * Clearing the timer only helps before the debounce fires; once the host has
+   * been called nothing can cancel it, so the id it was dispatched under is
+   * bumped and its answer is dropped on arrival. The loading flag has to be
+   * resolved here too — the retired search's `finally` no longer will.
+   */
+  const abandonSearch = useCallback(() => {
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current)
+      debounceRef.current = null
+    }
+    searchIdRef.current++
+    setIsLoading(false)
+    setMemberResults((current) => (current.length === 0 ? current : []))
+  }, [])
+
   const discardCaretMirror = useCallback(() => {
     const mirror = mirrorRef.current
     if (!mirror) return
@@ -450,7 +485,8 @@ export function useMentions({
 
   // Detect the `@` trigger on every input/cursor change and search.
   useEffect(() => {
-    if (!enabled || !searchMembers) {
+    if (!canSearch) {
+      abandonSearch()
       setIsOpen(false)
       return
     }
@@ -458,16 +494,19 @@ export function useMentions({
     const trigger = findAtTrigger(inputValue, cursorPosition, mentions)
 
     if (!trigger) {
+      abandonSearch()
       setIsOpen(false)
       setQuery("")
-      setMemberResults([])
       setSelectedIndex(0)
       atIndexRef.current = -1
       dismissedAtIndexRef.current = -1
       return
     }
 
-    if (trigger.atIndex === dismissedAtIndexRef.current) return
+    if (trigger.atIndex === dismissedAtIndexRef.current) {
+      abandonSearch()
+      return
+    }
 
     atIndexRef.current = trigger.atIndex
     setQuery(trigger.query)
@@ -479,7 +518,12 @@ export function useMentions({
     const currentSearchId = ++searchIdRef.current
 
     debounceRef.current = setTimeout(() => {
-      searchMembers(trigger.query)
+      const search = searchMembersRef.current
+      if (!search) {
+        if (currentSearchId === searchIdRef.current) setIsLoading(false)
+        return
+      }
+      search(trigger.query)
         .then((data) => {
           if (currentSearchId !== searchIdRef.current) return
           setMemberResults(data)
@@ -512,30 +556,22 @@ export function useMentions({
   }, [
     inputValue,
     cursorPosition,
-    enabled,
-    searchMembers,
+    canSearch,
     mentions,
     matchesEveryone,
+    abandonSearch,
   ])
 
   const close = useCallback(() => {
     // Escape closes without touching the composer text, so the search effect
     // keeps its dependencies and never runs the cleanup that would cancel a
-    // pending search. Retiring the id matters even once one is in flight: an
-    // empty late result sets `dismissedAtIndexRef`, which would keep the
-    // popover from reopening at this same `@`.
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current)
-      debounceRef.current = null
-    }
-    searchIdRef.current++
+    // pending search.
+    abandonSearch()
     setIsOpen(false)
     setQuery("")
-    setMemberResults([])
     setSelectedIndex(0)
-    setIsLoading(false)
     atIndexRef.current = -1
-  }, [])
+  }, [abandonSearch])
 
   const dismissCurrentTrigger = useCallback(() => {
     dismissedAtIndexRef.current = atIndexRef.current
