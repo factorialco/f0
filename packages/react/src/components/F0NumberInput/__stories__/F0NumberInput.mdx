@@ -1,6 +1,8 @@
 import { Canvas, Controls, Meta, Unstyled } from "@storybook/addon-docs/blocks"
 
 import * as Stories from "./F0NumberInput.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+import { F0NumberInput } from "../F0NumberInput"
 
 <Meta of={Stories} />
 
@@ -41,6 +43,44 @@ import * as Stories from "./F0NumberInput.stories"
 - The value is a duration in hours/minutes. Use [F0DurationInput](?path=/docs/components-inputs-duration-input--documentation).
 - The value is one of a small, discrete set of numbers (e.g. a 1–5 rating). Use a selector with the available options instead.
 - The value is an identifier that happens to look numeric (phone, postal code, credit card). These are formatted strings, not quantities — leading zeros, spaces and country variants matter, and locale-aware formatting would corrupt them. Use [F0TextInput](?path=/docs/components-inputs-text-input--documentation) with the right `autocomplete` and `inputMode`.
+
+#### Do's and don'ts
+
+<DoDonts
+  do={{
+    description:
+      "Group amounts and quantities, and pass the unit through `units` rather than folding it into the label.",
+    guidelines: [
+      "grouping makes a salary or a headcount readable at a glance",
+      "The unit belongs beside the value, where it stays visible while typing",
+    ],
+    children: (
+      <F0NumberInput
+        label="Gross annual salary"
+        value={48500}
+        units="EUR"
+        grouping
+        locale="en-GB"
+      />
+    ),
+  }}
+  dont={{
+    description:
+      "Don't group numbers that aren't quantities — a year or an employee id is not 2,026.",
+    guidelines: [
+      "Leave grouping off for years, ids, document numbers and codes",
+      "Don't put the unit in the label; it scrolls out of sight on narrow forms",
+    ],
+    children: (
+      <F0NumberInput
+        label="Year of joining"
+        value={2026}
+        grouping
+        locale="en-GB"
+      />
+    ),
+  }}
+/>
 
 ---
 

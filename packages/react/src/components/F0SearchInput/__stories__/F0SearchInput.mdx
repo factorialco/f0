@@ -1,6 +1,8 @@
 import { Canvas, Controls, Meta, Unstyled } from "@storybook/addon-docs/blocks"
 
 import * as Stories from "./F0SearchInput.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+import { F0SearchInput } from "../F0SearchInput"
 
 <Meta of={Stories} />
 
@@ -43,6 +45,29 @@ It shares the chrome conventions (sizes, focus ring, disabled and loading states
 
 - The user enters free-form text that is not a search query. Use [F0TextInput](?path=/docs/components-inputs-text-input--documentation).
 - You need labels, status messages or hint text. `F0SearchInput` deliberately exposes none of those — search fields are self-explanatory and errors are surfaced by the result list, not the input.
+
+#### Do's and don'ts
+
+<DoDonts
+  do={{
+    description:
+      "Name what is being searched in the placeholder, and let threshold and debounce decide when the query actually fires.",
+    guidelines: [
+      "Say the collection: employees, expenses, documents",
+      "Keep clearable on so a filtered list can be reset in one click",
+    ],
+    children: <F0SearchInput placeholder="Search employees" clearable />,
+  }}
+  dont={{
+    description:
+      'Don\'t settle for "Search…", and don\'t query on every keystroke.',
+    guidelines: [
+      "A generic placeholder tells the reader nothing about the scope of the search",
+      "Firing per keystroke sends requests nobody reads and makes the list flicker",
+    ],
+    children: <F0SearchInput placeholder="Search..." />,
+  }}
+/>
 
 ---
 

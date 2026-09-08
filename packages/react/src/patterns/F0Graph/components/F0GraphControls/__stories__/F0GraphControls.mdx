@@ -1,6 +1,7 @@
 import { Canvas, Meta, Controls } from "@storybook/addon-docs/blocks"
 
 import * as Stories from "./F0GraphControls.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
 
 <Meta of={Stories} />
 
@@ -38,6 +39,31 @@ so the toolbar is shown in its fully-loaded state.
   toggle switch bound to `visibleTagTypes`. If `tagTypes` is empty (or
   omitted), or `onToggleTagType` is not provided, the metadata popover
   button is hidden.
+
+---
+
+## Guidelines
+
+### Do's and don'ts
+
+<DoDonts
+  do={{
+    description:
+      "Show the controls the surface actually needs, and keep them reachable wherever the reader is on the canvas.",
+    guidelines: [
+      "Fit-to-view earns its place on any graph larger than a screen",
+      "Find me matters most in a big org chart, where the reader's own node is off-screen",
+      "Pass controlLabels so every control translates",
+    ],
+  }}
+  dont={{
+    description: "Don't build a second toolbar next to this one.",
+    guidelines: [
+      "Two control surfaces on one canvas leave the reader guessing which one pans",
+      "Don't hide the controls on small screens — that is where fit-to-view matters most",
+    ],
+  }}
+/>
 
 ---
 

@@ -1,6 +1,8 @@
 import { Canvas, Controls, Meta, Unstyled } from "@storybook/addon-docs/blocks"
 
 import * as Stories from "./F0DurationInput.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+import { F0DurationInput } from "../F0DurationInput"
 
 <Meta of={Stories} />
 
@@ -101,6 +103,44 @@ Defaults to `["hours", "minutes"]` when `units` is omitted or empty.
 - The value is a **point in time** (date, time of day, datetime). Use a date or time picker instead.
 - The value is a **single dimension-less number** (count, percentage). Use [F0NumberInput](?path=/docs/components-inputs-number-input--documentation).
 - You need to express ranges (`from / to`). Compose two date pickers or a range picker.
+
+#### Do's and don'ts
+
+<DoDonts
+  stacked
+  do={{
+    description:
+      "Show only the units the reader actually enters, and keep the value in seconds.",
+    guidelines: [
+      "Overtime and worked time are hours and minutes — nothing finer",
+      "The component owns the formatting; store the raw seconds",
+    ],
+    children: (
+      <F0DurationInput
+        label="Overtime approved"
+        value={5400}
+        units={["hours", "minutes"]}
+        onChange={() => {}}
+      />
+    ),
+  }}
+  dont={{
+    description:
+      "Don't offer every unit by default — each extra field is another box to tab through and get wrong.",
+    guidelines: [
+      "Seconds precision on an absence invites typos nobody will notice",
+      "If a unit can only ever be zero, drop it from units",
+    ],
+    children: (
+      <F0DurationInput
+        label="Overtime approved"
+        value={5400}
+        units={["days", "hours", "minutes", "seconds"]}
+        onChange={() => {}}
+      />
+    ),
+  }}
+/>
 
 ---
 

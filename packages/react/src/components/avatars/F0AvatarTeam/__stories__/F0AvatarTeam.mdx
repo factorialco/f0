@@ -1,5 +1,7 @@
 import { Canvas, Meta, Controls } from "@storybook/addon-docs/blocks"
 import * as TeamStories from "./F0AvatarTeam.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+import { F0AvatarTeam } from "../F0AvatarTeam"
 
 <Meta of={TeamStories} />
 
@@ -40,6 +42,29 @@ shared by every avatar type except person.
 
 - The entity type is dynamic (could be a person or company): use `F0Avatar`
 - The entity is not a team: use the matching `F0Avatar*` component
+
+#### Do's and don'ts
+
+<DoDonts
+  do={{
+    description:
+      "Use the team name exactly as it reads in the org, so the avatar matches what people search for.",
+    guidelines: [
+      "Take the name from the team record, not from the surrounding copy",
+      "Keep it identical across pickers, headers and assignment rows",
+    ],
+    children: <F0AvatarTeam name="People Operations" size="lg" />,
+  }}
+  dont={{
+    description:
+      "Don't shorten the name to fit — the initials change and the team stops being recognizable.",
+    guidelines: [
+      "An internal abbreviation reads as a different team",
+      "If the row is tight, truncate the label, not the name you pass in",
+    ],
+    children: <F0AvatarTeam name="POps" size="lg" />,
+  }}
+/>
 
 ---
 

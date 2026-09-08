@@ -1,5 +1,7 @@
 import { Canvas, Meta, Controls } from "@storybook/addon-docs/blocks"
 import * as EmojiStories from "./F0AvatarEmoji.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+import { F0AvatarEmoji } from "../F0AvatarEmoji"
 
 <Meta of={EmojiStories} />
 
@@ -41,3 +43,26 @@ An emoji avatar is square and renders a single emoji. It is available in sizes
 
 - The entity type is dynamic: use `F0Avatar`
 - You need a system icon rather than an emoji: use `F0AvatarIcon`
+#### Do's and don'ts
+
+<DoDonts
+  do={{
+    description:
+      "Pick a single emoji that still reads at avatar size and means the same thing to everyone.",
+    guidelines: [
+      "One glyph, legible at sm",
+      "Keep the mapping stable so people learn it",
+    ],
+    children: <F0AvatarEmoji emoji="🏖️" size="lg" />,
+  }}
+  dont={{
+    description:
+      "Don't pass anything that isn't a single, universally rendered emoji.",
+    guidelines: [
+      "Multi-glyph sequences fall back to a replacement character on some platforms",
+      "Don't encode status in an emoji — that is what F0AvatarAlert is for",
+    ],
+    children: <F0AvatarEmoji emoji={"\uFFFD"} size="lg" />,
+  }}
+/>
+

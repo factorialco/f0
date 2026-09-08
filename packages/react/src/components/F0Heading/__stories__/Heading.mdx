@@ -1,5 +1,7 @@
 import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks"
 import * as Stories from "./Heading.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+import { F0Heading } from "../F0Heading"
 
 <Meta of={Stories} />
 
@@ -84,6 +86,28 @@ Renders a heading with consistent typographic scale. It separates visual style (
 - Do not use `F0Heading` to build a section header inside a form or content block: use `SectionHeader` instead — it handles description, help link, separator, and action
 - Do not use `heading-large` for section titles inside a page — it creates false visual hierarchy
 - Do not omit the `as` prop when the heading level matters for accessibility — the default rendering tag may not match the document structure
+
+#### Do's and don'ts
+
+<DoDonts
+  do={{
+    description:
+      "Pick `as` from the page structure and `variant` from the size you need, so the outline stays correct whatever the heading looks like.",
+    guidelines: [
+      "One h1 per page, then h2 for its sections, h3 inside those",
+      "Never skip a level — an h2 followed by an h4 breaks screen-reader navigation",
+    ],
+    children: <F0Heading as="h1" variant="heading-large" content="Time off" />,
+  }}
+  dont={{
+    description: "Don't choose the heading level for its font size.",
+    guidelines: [
+      "Jumping to a deeper level to get smaller text corrupts the outline",
+      'For a field or section label use F0Text variant="label", not a heading',
+    ],
+    children: <F0Heading as="h4" variant="heading" content="Time off" />,
+  }}
+/>
 
 #### How to use
 

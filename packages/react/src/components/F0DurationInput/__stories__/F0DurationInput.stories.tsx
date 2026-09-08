@@ -9,6 +9,7 @@ const meta = {
   tags: ["stable", "!autodocs"],
   title: "Inputs/Duration input",
   parameters: {
+    a11y: { test: "error" },
     layout: "centered",
     docs: {
       description: {

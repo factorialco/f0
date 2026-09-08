@@ -85,6 +85,7 @@ export const Variants: Story = {
 
 export const HeadingAlignment: Story = {
   parameters: {
+    a11y: { test: "error" },
     chromatic: { disableSnapshot: true },
   },
   args: {

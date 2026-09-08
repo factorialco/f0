@@ -62,6 +62,7 @@ const meta = {
     },
   },
   parameters: {
+    a11y: { test: "error" },
     jsx: {
       filterProps: (_: unknown, propName: string) => propName !== "key",
     },

@@ -9,6 +9,7 @@ const meta = {
   component: OneEmptyState,
   title: "EmptyState",
   tags: ["autodocs", "stable"],
+  parameters: { a11y: { test: "error" } },
   argTypes: {
     ...dataTestIdArgs,
   },

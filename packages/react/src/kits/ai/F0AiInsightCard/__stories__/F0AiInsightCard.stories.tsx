@@ -49,6 +49,7 @@ const meta = {
   component: F0AiInsightCard,
   title: "AI/AiInsightCard",
   parameters: {
+    a11y: { test: "error" },
     layout: "centered",
   },
   tags: ["autodocs", "stable"],

@@ -201,6 +201,7 @@ export const OptimisticWithoutEcho: Story = {
     onChange: fn(),
   },
   parameters: {
+    a11y: { test: "error" },
     echoChanges: false,
   },
   play: async ({ canvasElement }) => {

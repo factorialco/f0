@@ -6,6 +6,7 @@ const meta: Meta = {
   title: "Charts/RadarChart",
   component: RadarChart,
   tags: ["autodocs", "stable", "no-sidebar"],
+  parameters: { a11y: { test: "error" } },
   decorators: [
     (Story) => (
       <div className="h-80">

@@ -1,5 +1,7 @@
 import { Canvas, Meta, Controls } from "@storybook/addon-docs/blocks"
 import * as FlagStories from "./F0AvatarFlag.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+import { F0AvatarFlag } from "../F0AvatarFlag.tsx"
 
 <Meta of={FlagStories} />
 
@@ -40,3 +42,35 @@ region code.
 
 - The entity type is dynamic: use `F0Avatar`
 - The entity is not a country/locale: use the matching `F0Avatar*` component
+#### Do's and don'ts
+
+<DoDonts
+  do={{
+    description:
+      "Use it for a place, from the country code already on the record, and name that place in text.",
+    guidelines: [
+      "Workplace location, legal entity country, nationality field",
+      "A flag on its own is decoration, not a label",
+    ],
+    children: (
+      <div className="flex items-center gap-2">
+        <F0AvatarFlag flag="es" size="lg" />
+        <span>Barcelona, Spain</span>
+      </div>
+    ),
+  }}
+  dont={{
+    description: "Don't use a flag to stand for a language.",
+    guidelines: [
+      "Spanish is not the Spanish flag — it mislabels employees in Mexico or Argentina",
+      "In a locale picker, show the language name and region code instead",
+    ],
+    children: (
+      <div className="flex items-center gap-2">
+        <F0AvatarFlag flag="es" size="lg" />
+        <span>Spanish</span>
+      </div>
+    ),
+  }}
+/>
+

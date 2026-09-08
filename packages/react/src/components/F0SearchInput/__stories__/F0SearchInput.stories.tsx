@@ -6,6 +6,7 @@ const meta = {
   component: F0SearchInput,
   title: "Inputs/Search input",
   parameters: {
+    a11y: { test: "error" },
     layout: "centered",
   },
   tags: ["stable", "!autodocs"],

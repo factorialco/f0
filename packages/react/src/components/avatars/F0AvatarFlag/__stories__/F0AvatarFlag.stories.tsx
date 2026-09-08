@@ -23,6 +23,7 @@ const meta = {
     },
   },
   parameters: {
+    a11y: { test: "error" },
     docs: {
       description: {
         component: ["A flag avatar component."]

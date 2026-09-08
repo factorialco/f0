@@ -9,6 +9,7 @@ const meta = {
   component: F0AvatarModule,
   title: "Avatars/AvatarModule",
   tags: ["stable", "!autodocs"],
+  parameters: { a11y: { test: "error" } },
   argTypes: {
     size: {
       control: "radio",

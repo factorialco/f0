@@ -10,6 +10,7 @@ const meta = {
   component: F0AvatarPerson,
   title: "Avatars/AvatarPerson",
   tags: ["stable", "!autodocs"],
+  parameters: { a11y: { test: "error" } },
   argTypes: {
     ...getBaseAvatarArgTypes([
       "size",

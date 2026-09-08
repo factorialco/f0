@@ -1,6 +1,7 @@
 import { Canvas, Meta, Controls } from "@storybook/addon-docs/blocks"
 
 import * as Stories from "./F0GraphNode.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
 
 <Meta of={Stories} />
 
@@ -87,6 +88,32 @@ context:
 - **selected** — user has clicked/tapped or included in multi-select
 - **highlighted** — visually emphasized (e.g. search result, hover target)
 - **dimmed** — de-emphasized during selection or search
+
+---
+
+## Guidelines
+
+### Do's and don'ts
+
+<DoDonts
+  do={{
+    description:
+      "Answer \"who is this and what do they do\" and stop there — a node is scanned, not read.",
+    guidelines: [
+      "Title is the person or team name; subtitle is the job title or the headcount",
+      "Spread ctx so selection, focus and the zoom levels keep working",
+      "Let the zoom level drop the subtitle rather than shortening it yourself",
+    ],
+  }}
+  dont={{
+    description: "Don't pack a whole record into a node.",
+    guidelines: [
+      "Tag rows are for the one or two facts that change the reader's next click",
+      "An id, an email and a start date belong in the detail panel, not on the canvas",
+      "Don't hand-roll a node div — you lose keyboard focus and the treeitem semantics",
+    ],
+  }}
+/>
 
 ---
 

@@ -1,5 +1,7 @@
 import { Canvas, Meta, Controls } from "@storybook/addon-docs/blocks"
 import * as CompanyStories from "./F0AvatarCompany.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+import { F0AvatarCompany } from "../F0AvatarCompany"
 
 <Meta of={CompanyStories} />
 
@@ -40,6 +42,28 @@ shared by every avatar type except person.
 
 - The entity type is dynamic (could be a person or team): use `F0Avatar`
 - The entity is not a company: use the matching `F0Avatar*` component
+
+#### Do's and don'ts
+
+<DoDonts
+  do={{
+    description:
+      "Pass the entity name as it is stored, so the initials fallback matches the company the reader knows.",
+    guidelines: [
+      "Use the registered name, not an internal shorthand",
+      "Keep the same name on every surface the entity appears on",
+    ],
+    children: <F0AvatarCompany name="Factorial HR" size="lg" />,
+  }}
+  dont={{
+    description: "Don't pass a category or an identifier where the name goes.",
+    guidelines: [
+      'A label like "Company" reduces the fallback to one meaningless letter',
+      "Don't pass a tax number or an internal id",
+    ],
+    children: <F0AvatarCompany name="Company" size="lg" />,
+  }}
+/>
 
 ---
 

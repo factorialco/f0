@@ -1,5 +1,7 @@
 import { Canvas, Meta, Controls } from "@storybook/addon-docs/blocks"
 import * as FileStories from "./F0AvatarFile.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+import { F0AvatarFile } from "../F0AvatarFile"
 
 <Meta of={FileStories} />
 
@@ -49,3 +51,30 @@ The icon adapts to the file type — documents, images, spreadsheets, and so on.
 
 - The entity type is dynamic: use `F0Avatar`
 - The item is not a file: use the matching `F0Avatar*` component
+#### Do's and don'ts
+
+<DoDonts
+  do={{
+    description:
+      "Pass the stored filename and MIME type, so the type icon and the label agree.",
+    guidelines: [
+      "Read name and type straight off the upload record",
+      "Keep the extension visible in the surrounding text too",
+    ],
+    children: (
+      <F0AvatarFile
+        file={{ name: "payroll-january-2026.pdf", type: "application/pdf" }}
+        size="lg"
+      />
+    ),
+  }}
+  dont={{
+    description: "Don't swap the filename for a friendly label.",
+    guidelines: [
+      'Without the extension the icon drops to a generic file',
+      "Don't infer type from the label — take it from the file",
+    ],
+    children: <F0AvatarFile file={{ name: "Payroll", type: "" }} size="lg" />,
+  }}
+/>
+

@@ -1,9 +1,8 @@
 {
-  "$comment": "Story files grandfathered to use `a11y: { skipCi: true }` (directly or via the deprecated withSkipA11y helper) while their accessibility violations are burned down (Path to AA). Each entry maps a file to its number of grandfathered skip call-sites. Counts may ONLY go down: when you remove skips from a file, lower (or delete, at zero) its entry — the diff of this file is the burndown metric. Any skipCi in a non-listed file fails CI at runtime (.storybook/test-runner.ts), and src/lib/storybook-utils/a11ySkipAllowlist.test.ts fails fast when a count grows, an entry is stale, or a grandfathered file moved. Paths are relative to packages/react, as reported by Storybook parameters.fileName without the leading ./",
+  "$comment": "Story files grandfathered to use `a11y: { skipCi: true }` (directly or via the deprecated withSkipA11y helper) while their accessibility violations are burned down (Path to AA). Each entry maps a file to its number of grandfathered skip call-sites. Counts may ONLY go down: when you remove skips from a file, lower (or delete, at zero) its entry \u2014 the diff of this file is the burndown metric. Any skipCi in a non-listed file fails CI at runtime (.storybook/test-runner.ts), and src/lib/storybook-utils/a11ySkipAllowlist.test.ts fails fast when a count grows, an entry is stale, or a grandfathered file moved. Paths are relative to packages/react, as reported by Storybook parameters.fileName without the leading ./",
   "files": {
     "src/components/F0ActionBar/index.stories.tsx": 1,
     "src/components/F0ButtonToggle/__stories__/F0ButtonToggle.stories.tsx": 1,
-    "src/components/F0DatePicker/__stories__/F0DatePicker.stories.tsx": 1,
     "src/components/OneCalendar/OneCalendar.stories.tsx": 2,
     "src/components/RichText/F0RichTextDisplay/__stories__/F0RichTextDisplay.stories.tsx": 1,
     "src/experimental/Navigation/Dropdown/index.stories.tsx": 2,

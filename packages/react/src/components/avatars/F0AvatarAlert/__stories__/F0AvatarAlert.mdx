@@ -1,5 +1,7 @@
 import { Canvas, Meta, Controls } from "@storybook/addon-docs/blocks"
 import * as AlertStories from "./F0AvatarAlert.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+import { F0AvatarAlert } from "../F0AvatarAlert"
 
 <Meta of={AlertStories} />
 
@@ -51,3 +53,28 @@ Each type maps to a fixed icon and semantic color.
 - Representing an entity (person, team, …): use `F0Avatar` or the matching
   `F0Avatar*` component
 - Inline or text-level status: use a Badge or Tag instead
+#### Do's and don'ts
+
+<DoDonts
+  do={{
+    description:
+      "Match the type to what actually happened, so a critical marker still means something when one shows up.",
+    guidelines: [
+      'type="positive" — the step is done, nothing to chase',
+      'type="info" — worth knowing, no action',
+      'type="warning" — becomes a problem if ignored',
+      'type="critical" — already failed, or data is at risk',
+    ],
+    children: <F0AvatarAlert type="warning" size="lg" />,
+  }}
+  dont={{
+    description:
+      "Don't reach for a louder type to make a row stand out in a list.",
+    guidelines: [
+      'Don\'t use "critical" for a reminder, like a contract still unsigned',
+      "Don't mark every row — a marker on all of them signals nothing",
+    ],
+    children: <F0AvatarAlert type="critical" size="lg" />,
+  }}
+/>
+

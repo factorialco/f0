@@ -1,5 +1,7 @@
 import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks"
 import * as ModuleStories from "./F0AvatarModule.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+import { F0AvatarModule } from ".."
 
 <Meta of={ModuleStories} />
 
@@ -126,6 +128,29 @@ for a standalone module avatar use `xs` (20px) or larger.
   standalone.
 - Representing a person, team or other entity: use the matching `F0Avatar*`
   component.
+
+#### Do's and don'ts
+
+<DoDonts
+  do={{
+    description:
+      "Standalone, keep the module avatar at xs or larger so the icon stays legible.",
+    guidelines: [
+      "xs (20px) and up for a module shown on its own",
+      "Reserve the sub-xs sizes for the corner badge on another avatar",
+    ],
+    children: <F0AvatarModule module="employees" size="md" />,
+  }}
+  dont={{
+    description:
+      "Don't use the sub-xs sizes on their own — at that size the icon is unreadable.",
+    guidelines: [
+      "2xs / 3xs / 4xs exist only so the module reads as a badge",
+      "Don't shrink the avatar to fit a dense row; drop the module instead",
+    ],
+    children: <F0AvatarModule module="employees" size="3xs" />,
+  }}
+/>
 
 #### Adding a new module icon
 

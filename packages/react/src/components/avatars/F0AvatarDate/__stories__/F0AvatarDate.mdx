@@ -1,5 +1,7 @@
 import { Canvas, Meta, Controls } from "@storybook/addon-docs/blocks"
 import * as DateStories from "./F0AvatarDate.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+import { F0AvatarDate } from "../F0AvatarDate"
 
 <Meta of={DateStories} />
 
@@ -42,3 +44,30 @@ sizes the month and day would become too small to stay legible.
 
 - Representing a person, team or other entity: use `F0Avatar` or the matching
   `F0Avatar*` component
+#### Do's and don'ts
+
+<DoDonts
+  do={{
+    description:
+      "Use one chip for the single date the row is about, and pass a real Date.",
+    guidelines: [
+      "Contract start, review due date, the day of an absence",
+      "Let the component format day and month so it follows the reader's locale",
+    ],
+    children: <F0AvatarDate date={new Date(2026, 0, 15)} />,
+  }}
+  dont={{
+    description: "Don't chain chips to stand in for a period.",
+    guidelines: [
+      "A leave request has a start and an end — show them as a text range",
+      'Don\'t render a relative label like "In 3 days" as a date chip',
+    ],
+    children: (
+      <div className="flex items-center gap-1">
+        <F0AvatarDate date={new Date(2026, 0, 15)} />
+        <F0AvatarDate date={new Date(2026, 0, 22)} />
+      </div>
+    ),
+  }}
+/>
+

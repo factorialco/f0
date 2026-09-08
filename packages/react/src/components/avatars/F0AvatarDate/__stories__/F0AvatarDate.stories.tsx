@@ -8,6 +8,7 @@ const meta = {
   title: "Avatars/AvatarDate",
   tags: ["stable", "!autodocs"],
   parameters: {
+    a11y: { test: "error" },
     docs: {
       description: {
         component: ["An avatar component that displays a date."]

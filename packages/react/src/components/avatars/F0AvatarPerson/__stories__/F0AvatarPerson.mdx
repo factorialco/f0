@@ -1,5 +1,7 @@
 import { Canvas, Meta, Controls } from "@storybook/addon-docs/blocks"
 import * as PersonStories from "./F0AvatarPerson.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+import { F0AvatarPerson } from "../F0AvatarPerson"
 
 <Meta of={PersonStories} />
 
@@ -57,6 +59,30 @@ mutually exclusive; if both are set, `deactivated` wins.
 
 - The entity type is dynamic (could be a team or company): use `F0Avatar`
 - The entity is not a person: use the matching `F0Avatar*` component
+
+#### Do's and don'ts
+
+<DoDonts
+  do={{
+    description:
+      "Pass firstName and lastName separately, so the initials fallback is the person's two initials.",
+    guidelines: [
+      "Send the two name fields straight from the employee record",
+      "Add src when there is a photo — initials are the fallback, not a downgrade",
+    ],
+    children: <F0AvatarPerson firstName="Ana" lastName="García" size="lg" />,
+  }}
+  dont={{
+    description: "Don't pack a whole name into firstName.",
+    guidelines: [
+      "A single joined string collapses the fallback to one letter",
+      "Don't invent a second name just to force two initials",
+    ],
+    children: (
+      <F0AvatarPerson firstName="Ana García López" lastName="" size="lg" />
+    ),
+  }}
+/>
 
 ---
 

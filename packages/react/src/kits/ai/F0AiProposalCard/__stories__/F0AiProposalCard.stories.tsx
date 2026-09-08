@@ -27,6 +27,7 @@ const meta: Meta<F0AiProposalCardProps> = {
   title: "AI/F0AiProposalCard",
   component: F0AiProposalCard,
   parameters: {
+    a11y: { test: "error" },
     layout: "centered",
   },
   tags: ["autodocs", "stable"],

@@ -8,7 +8,7 @@ import { GranularityDefinitionKey } from "@/components/OneCalendar/granularities
 import { DateRange } from "@/components/OneCalendar/types"
 import { Placeholder } from "@/icons/app"
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
-import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { F0Dialog } from "@/patterns/F0Dialog"
 import { F0DatePicker } from ".."
 import { predefinedPresets } from "../presets"
@@ -28,6 +28,7 @@ const meta = {
     }
   },
   parameters: {
+    a11y: { test: "error" },
     docs: {
       description: {
         component: [
@@ -354,7 +355,7 @@ export const WithClearable: Story = {
 }
 
 export const Snapshot: Story = {
-  parameters: withSkipA11y(withSnapshot({ width: "100%" })),
+  parameters: withSnapshot({ width: "100%" }),
   args: {
     label: "Label text here",
   },

@@ -7,6 +7,7 @@ const meta = {
   title: "Image",
   component: Image,
   parameters: {
+    a11y: { test: "error" },
     layout: "centered",
   },
   tags: ["autodocs", "stable", "no-sidebar"],

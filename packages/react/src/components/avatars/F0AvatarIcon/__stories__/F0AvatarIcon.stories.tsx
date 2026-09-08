@@ -27,6 +27,7 @@ const meta = {
     size: "lg",
   },
   parameters: {
+    a11y: { test: "error" },
     docs: {
       description: {
         component: ["An avatar component that displays an icon."]

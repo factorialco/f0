@@ -1,6 +1,7 @@
 import { Canvas, Meta } from "@storybook/addon-docs/blocks"
 
 import * as Stories from "./F0GraphEdge.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
 
 <Meta of={Stories} />
 
@@ -49,6 +50,30 @@ or hovered. Draws attention to the specific relationship.
 
 Reduced-opacity edge used to de-emphasize non-relevant
 relationships during selection or search.
+
+---
+
+## Guidelines
+
+### Do's and don'ts
+
+<DoDonts
+  do={{
+    description:
+      "Keep edges quiet, and use highlighted and dimmed to answer one question at a time.",
+    guidelines: [
+      "Dim the rest of the graph when you highlight a reporting line",
+      "Leave every edge that is not part of the answer in its default state",
+    ],
+  }}
+  dont={{
+    description: "Don't encode data in edge styling.",
+    guidelines: [
+      "A graph where every edge is highlighted has no highlight",
+      "A second dimension belongs on the node, where it can be labelled",
+    ],
+  }}
+/>
 
 ---
 

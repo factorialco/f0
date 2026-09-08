@@ -12,6 +12,7 @@ const meta = {
   title: "Avatars/AvatarAlert",
   tags: ["stable", "!autodocs"],
   parameters: {
+    a11y: { test: "error" },
     docs: {
       description: {
         component: [

@@ -11,6 +11,7 @@ const meta = {
   component: F0AvatarTeam,
   title: "Avatars/AvatarTeam",
   tags: ["stable", "!autodocs"],
+  parameters: { a11y: { test: "error" } },
   argTypes: {
     ...getBaseAvatarArgTypes([
       "size",
