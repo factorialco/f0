@@ -1,5 +1,11 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
+  // `pnpm lint` and the CI job cover src/. The repo's own tooling lives
+  // outside it and cannot be type-aware linted at all: .scripts/tsconfig.json
+  // inherits `moduleResolution: "node"`, which tsgolint rejects. Without this,
+  // staging a file in there made `git commit` impossible, because the
+  // pre-commit hook passes staged paths straight to oxlint.
+  "ignorePatterns": [".scripts/**", ".oxlint-plugins/**"],
   "plugins": ["react", "typescript", "vitest", "import", "unicorn", "oxc", "promise"],
   "categories": {
     "correctness": "error"
@@ -306,6 +312,12 @@
     "react-js/no-deprecated": "error",
     "react-js/no-invalid-html-attribute": "error",
 
+    // RATCHET. On as warnings. `pnpm lint` hides warnings (`--quiet`);
+    // `pnpm check:lint-debt` compares them per file against
+    // .scripts/lint-debt.json, a baseline that may only shrink. Add a rule
+    // here when it has too many hits to fix in one PR.
+    "sonarjs/cognitive-complexity": "warn", // 187 at the default threshold of 15
+
     // DEBT. Turn on once the code is fixed. Number = violations when this
     // was written. Do not add new violations.
     "typescript/no-non-null-assertion": "off", // 718
@@ -328,7 +340,6 @@
     "react/rules-of-hooks": "off", // 65 from the _Component naming convention, 414 from story render functions
     "import/named": "off", // nursery rule, false positives
     "import/export": "off", // nursery rule, false positives on export *
-    "sonarjs/cognitive-complexity": "off", // 187 at the default threshold of 15; first rule of the lint ratchet (next PR)
     "sonarjs/todo-tag": "off", // 26; enabling bans TODO comments
     "react-js/no-unstable-nested-components": "off", // 25
     "react-js/jsx-no-constructed-context-values": "off", // 35

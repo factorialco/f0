@@ -1,0 +1,504 @@
+{
+  "note": "Warnings from the RATCHET rules in .oxlintrc.json, per file and per rule. Enforced by .scripts/check-lint-debt.ts. This list may only shrink: fix a warning and run \"--update\", never add one.",
+  "total": 190,
+  "rules": {
+    "sonarjs/cognitive-complexity": 190
+  },
+  "files": {
+    "src/__tests__/mdxStoryReferences.test.ts": {
+      "sonarjs/cognitive-complexity": 2
+    },
+    "src/components/CardSelectable/CardSelectable.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/components/F0ActionBar/index.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/components/F0AudioPlayer/F0AudioPlayerCard.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/components/F0Button/internal.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/components/F0Card/CardInternal.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/components/F0InputField/F0InputField.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/components/F0NumberInput/internal.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/components/F0Select/F0Select.tsx": {
+      "sonarjs/cognitive-complexity": 2
+    },
+    "src/components/F0Select/components/SelectItem.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/components/F0Select/components/SelectedItems.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/components/F0VideoPlayer/internal.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/components/OneCalendar/OneCalendar.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/components/OneCalendar/granularities/halfyear/HalfyearView.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/components/OneCalendar/granularities/month/MonthView.tsx": {
+      "sonarjs/cognitive-complexity": 2
+    },
+    "src/components/OneCalendar/granularities/quarter/QuarterView.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/components/OneCalendar/granularities/year/YearView.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/components/RichText/F0NotesTextEditor/components/Header/index.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/components/RichText/F0RichTextEditor/F0RichTextEditor.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/components/RichText/F0RichTextEditor/components/Footer/index.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/components/RichText/internal/Enhance/EnhanceActivator.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/components/RichText/internal/Enhance/EnhanceMenu.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/components/RichText/internal/Toolbar/LinkPopup/index.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/components/avatars/internal/BaseAvatar/BaseAvatar.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/deprecated/EntitySelect/Content/MainContent/index.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/deprecated/EntitySelect/Trigger/index.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/experimental/F0CardHorizontal/F0CardHorizontal.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/experimental/F0MeetingCard/F0MeetingCard.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/experimental/Forms/F0PhoneInput/lib/phone.ts": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/experimental/Information/Headers/BaseHeader/index.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/experimental/Information/Headers/Metadata/MetadataValue.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/experimental/Information/Headers/Metadata/index.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/experimental/Navigation/F0TableOfContent/Item/ItemDropDown.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/experimental/Navigation/F0TableOfContent/Item/PrimitiveItem.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/experimental/Navigation/F0TableOfContent/Item/index.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/experimental/Navigation/F0TableOfContent/index.tsx": {
+      "sonarjs/cognitive-complexity": 3
+    },
+    "src/experimental/Navigation/F0TableOfContent/utils.ts": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/experimental/Navigation/Header/Breadcrumbs/internal/BreadcrumbCollectionSelect/buildCollectionBoundSource.ts": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/experimental/Navigation/Header/Breadcrumbs/internal/BreadcrumbItem.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/experimental/Navigation/Header/PageHeader/index.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/experimental/OneTable/TableCell/NestedCell/index.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/experimental/OneTable/TableCell/TreeConnector/index.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/experimental/OneTable/TableCell/index.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/experimental/OneTable/TableHead/index.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/experimental/Overlays/F0CommandPalette/F0CommandPalette.tsx": {
+      "sonarjs/cognitive-complexity": 2
+    },
+    "src/experimental/Overlays/F0CommandPalette/components/CommandRowItem.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/experimental/Widgets/Widget/index.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/hooks/datasource/useData.ts": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/hooks/datasource/useDataSourceItemNavigation/useDataSourceItemNavigation.ts": {
+      "sonarjs/cognitive-complexity": 2
+    },
+    "src/hooks/datasource/useSelectable/useSelectable.ts": {
+      "sonarjs/cognitive-complexity": 2
+    },
+    "src/kits/Charts/ComboChart/index.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/kits/F0DataChart/components/BarChart/useBarChartOptions.ts": {
+      "sonarjs/cognitive-complexity": 2
+    },
+    "src/kits/ai/F0ActionItem/components/ChatSpinner.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/kits/ai/F0ActionItem/components/globeSpinMath.ts": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/kits/ai/F0AiChat/F0AiChat.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/kits/ai/F0AiChat/__stories__/_mock/turn-utils.ts": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/kits/ai/F0AiChat/components/layout/ChatWindow.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/kits/ai/F0AiChatHeader/components/EmployeeCreditsPopover.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/kits/ai/F0AiChatTextArea/F0AiChatTextArea.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/kits/ai/F0AiInsightCard/components/CardMetadata.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/kits/ai/F0AiMessagesContainer/components/FormCard.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/kits/ai/F0AiMessagesContainer/components/WelcomeScreen.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/kits/ai/F0AiPong/F0AiPong.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/kits/ai/F0AuraVoiceAnimation/components/ReactShaderToy.tsx": {
+      "sonarjs/cognitive-complexity": 2
+    },
+    "src/kits/ai/canvas/F0CanvasCard/F0CanvasCard.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/kits/surveys/SurveyAnsweringForm/SurveyAnsweringForm.tsx": {
+      "sonarjs/cognitive-complexity": 2
+    },
+    "src/kits/surveys/SurveyAnsweringForm/hooks/useSurveyFormSchema.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/kits/surveys/SurveyFormBuilder/Form/TableOfContent/useTableOfContentItems.ts": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/kits/surveys/SurveyFormBuilder/Form/index.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/kits/surveys/SurveyFormBuilder/Form/useReorderHandler.ts": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/kits/surveys/SurveyFormBuilder/Form/utils.ts": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/kits/surveys/SurveyFormBuilder/QuestionTypes/BaseQuestion/ActionsMenu/index.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/kits/surveys/SurveyFormBuilder/QuestionTypes/BaseQuestion/index.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/kits/surveys/SurveyFormBuilder/QuestionTypes/SelectQuestion/SelectOption/index.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/kits/surveys/SurveyFormBuilder/Section/index.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/lib/providers/datacollection/dataCollectionUrlParams.ts": {
+      "sonarjs/cognitive-complexity": 2
+    },
+    "src/lib/text.ts": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/ApplicationFrame/index.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/F0AnalyticsDashboard/components/ChartItem/ChartItem.tsx": {
+      "sonarjs/cognitive-complexity": 2
+    },
+    "src/patterns/F0AnalyticsDashboard/components/DashboardGrid/DashboardGrid.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/F0AnalyticsDashboard/components/DashboardItem/DashboardItem.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/F0AnalyticsDashboard/hooks/useCollectionDownloadActions.ts": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/F0CarouselDialog/index.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/F0Dialog/F0DialogInternal.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/F0Form/F0AiFormRegistry.tsx": {
+      "sonarjs/cognitive-complexity": 3
+    },
+    "src/patterns/F0Form/F0Form.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/F0Form/describeFormSchema.ts": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/F0Form/f0Schema.ts": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/F0Form/fields/entitiesList/EntitiesListFieldRenderer.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/F0Form/fields/file/FileFieldRenderer.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/F0Form/fields/utils.ts": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/F0Form/groupingUtils.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/F0Form/useSchemaDefinition.ts": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/F0Form/zodErrorMap.ts": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/F0Graph/components/F0GraphNode/F0GraphNode.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/F0Graph/components/F0GraphNode/F0GraphNodeStackedRow.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/F0Graph/components/F0GraphView/F0GraphView.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/F0Graph/hooks/useExpandState.ts": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/F0Graph/hooks/useGraphKeyboard.ts": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/F0Graph/hooks/useGraphRenderModel.ts": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/F0Graph/hooks/useLayoutEngine.ts": {
+      "sonarjs/cognitive-complexity": 2
+    },
+    "src/patterns/F0Graph/hooks/useTreeBuilder.ts": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/F0Graph/internal/ReactFlowAdapters.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/F0Map/F0Map.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/F0Map/components/internal/BaseMapMarker/BaseMapMarker.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/F0Map/hooks/useClusters.ts": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/F0Map/hooks/useLabelCollision.ts": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/F0Map/styles/buildStyles.mjs": {
+      "sonarjs/cognitive-complexity": 2
+    },
+    "src/patterns/Navigation/Sidebar/Chats/SidebarChatItem.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/Navigation/Sidebar/Sidebar.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/OneDataCollection/OneDatacollection.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/OneDataCollection/__stories__/crud-patterns/by-view/by-view.stories.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/OneDataCollection/__stories__/mockData.tsx": {
+      "sonarjs/cognitive-complexity": 4
+    },
+    "src/patterns/OneDataCollection/components/Search/Search.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/OneDataCollection/hooks/useExportAction.ts": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/OneDataCollection/utils/csvExport.ts": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/OneDataCollection/visualizations/collection/EditableTable/components/cells/ReadOnlyCellContent.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/OneDataCollection/visualizations/collection/Graph/useDataCollectionTreeData.ts": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/OneDataCollection/visualizations/collection/List/components/Row.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/OneDataCollection/visualizations/collection/Table/Table.tsx": {
+      "sonarjs/cognitive-complexity": 2
+    },
+    "src/patterns/OneDataCollection/visualizations/collection/Table/components/NestedRow.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/OneDataCollection/visualizations/collection/Table/components/Row.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/OneDataCollection/visualizations/collection/Table/components/SortAndHideList/SortAndHideList.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/OneFilterPicker/components/FiltersControls.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/OneFilterPicker/filterTypes/InFilter/InFilter.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/OneFilterPicker/filterTypes/InFilter/components/InFilterOptionRow.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/OneFilterPicker/filterTypes/InFilter/index.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/patterns/OneFilterPicker/filterTypes/NumberFilter/index.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/sds/Home/ClockIn/ClockInControls/index.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/sds/Home/Communities/Post/CommunityPost/index.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/sds/Home/DaytimePage/index.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/sds/Home/HomeListItem/index.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/sds/Home/NewHomeLayout/index.tsx": {
+      "sonarjs/cognitive-complexity": 2
+    },
+    "src/sds/Home/SlotWidget/index.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/sds/Home/WidgetCatalog/index.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/sds/Home/WidgetContainer/index.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/sds/chat/F0Chat/components/ChatComposer.tsx": {
+      "sonarjs/cognitive-complexity": 2
+    },
+    "src/sds/chat/F0Chat/components/ChatComposerAttachmentPreview.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/sds/chat/F0Chat/components/ChatDocumentAttachmentCard.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/sds/chat/F0Chat/components/ChatHeader.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/sds/chat/F0Chat/components/ChatMessageActions.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/sds/chat/F0Chat/components/ChatMessageAttachments.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/sds/chat/F0Chat/components/ChatMessageItem.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/sds/chat/F0Chat/components/ChatMessageRowRenderer.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/sds/chat/F0Chat/components/ChatMessagesContainer.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/sds/chat/F0Chat/components/ChatViewportOverlays.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/sds/chat/F0Chat/hooks/useChatVirtuoso.ts": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/sds/chat/F0Chat/mocks/useDemoHeaderActions.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/sds/chat/F0Chat/utils/attachments.ts": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/sds/chat/F0Chat/utils/virtuoso-chat.ts": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/sds/timeline/components/NestedtaskHeader.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/ui/Action/Action.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/ui/ButtonGroup/ButtonGroup.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/ui/F0Wizard/hooks/useWizardNavigation.ts": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/ui/Kanban/Kanban.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/ui/Kanban/components/KanbanLane.tsx": {
+      "sonarjs/cognitive-complexity": 2
+    },
+    "src/ui/Lane/Lane.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/ui/OnePagination/index.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/ui/OnePreset/index.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/ui/Select/components/SelectContent.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/ui/Select/components/radix-ui/select.tsx": {
+      "sonarjs/cognitive-complexity": 2
+    },
+    "src/ui/Toast/F0Toast.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/ui/calendar.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/ui/chart.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    },
+    "src/ui/value-display/types/barSeries/barSeries.tsx": {
+      "sonarjs/cognitive-complexity": 1
+    }
+  }
+}
