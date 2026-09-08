@@ -1207,7 +1207,7 @@ export const MessageCharacterLimit: Story = {
 
       await userEvent.keyboard("{Enter}")
       await waitFor(() => expect(composer).toHaveValue(""))
-      await expect(canvas.getByText("1234567890")).toBeVisible()
+      await waitFor(() => expect(canvas.getByText("1234567890")).toBeVisible())
     })
   },
 }
