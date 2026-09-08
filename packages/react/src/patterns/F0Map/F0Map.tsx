@@ -1,5 +1,3 @@
-import "maplibre-gl/dist/maplibre-gl.css"
-import "./F0Map.css"
 import {
   forwardRef,
   useCallback,
