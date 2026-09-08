@@ -32,11 +32,11 @@ export const HeatmapChart = (props: F0DataChartHeatmapProps) => {
         ref={ref}
         className="h-full w-full data-[axis-hover=true]:[&_canvas]:!cursor-default"
       />
-      {size === "sm" && (
+      {size === "sm" ? (
         <div className="absolute inset-0 flex items-center justify-center bg-f1-background p-3 text-center text-sm font-medium text-f1-foreground-tertiary">
           {i18n.dataChart.heatmapNotSupported}
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

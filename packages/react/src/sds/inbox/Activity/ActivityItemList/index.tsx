@@ -80,13 +80,14 @@ export const BaseActivityItemList = ({
             onClickItem={onClickItem}
             onItemVisible={handleItemVisible}
           />
-          {index !== groups.length - 1 && <Separator />}
+          {index !== groups.length - 1 ? <Separator /> : null}
         </React.Fragment>
       ))}
-      {loadingMoreItems &&
-        new Array(MORE_ITEMS_LOADING_COUNT)
-          .fill(null)
-          .map((_, index) => <ActivityItem.Skeleton key={index} />)}
+      {loadingMoreItems
+        ? new Array(MORE_ITEMS_LOADING_COUNT)
+            .fill(null)
+            .map((_, index) => <ActivityItem.Skeleton key={index} />)
+        : null}
     </div>
   )
 }

@@ -29,7 +29,7 @@ const BreadcrumbItem = forwardRef<
   PropsWithChildren<BreadcrumbItemProps>
 >(({ item, isLast, isOnly = false, isFirst = false, children }, ref) => (
   <ShadBreadcrumbItem key={getBreadcrumbKey(item)} ref={ref}>
-    {!isFirst && <BreadcrumbSeparator />}
+    {!isFirst ? <BreadcrumbSeparator /> : null}
     <BreadcrumbContent
       item={item}
       isLast={isLast}
@@ -65,11 +65,11 @@ const BreadcrumbContent = forwardRef<HTMLDivElement, BreadcrumbItemProps>(
         transition={{ duration: 0.15 }}
       >
         {!isLoading &&
-          "module" in item &&
-          item.module &&
-          (isOnly || isFirst) && (
-            <F0AvatarModule module={item.module} size={isOnly ? "md" : "xs"} />
-          )}
+        "module" in item &&
+        item.module &&
+        (isOnly || isFirst) ? (
+          <F0AvatarModule module={item.module} size={isOnly ? "md" : "xs"} />
+        ) : null}
         <span className="truncate">
           {!isLoading && "label" in item ? item.label : ""}
         </span>

@@ -160,7 +160,7 @@ export const OptionsList = ({
         </motion.div>
       ))}
 
-      {allowCustomAnswer && (
+      {allowCustomAnswer ? (
         <motion.div {...rowEnter(options.length)}>
           <CustomAnswerRow
             mode={mode}
@@ -176,7 +176,7 @@ export const OptionsList = ({
             onConfirm={onConfirm}
           />
         </motion.div>
-      )}
+      ) : null}
     </div>
   )
 }

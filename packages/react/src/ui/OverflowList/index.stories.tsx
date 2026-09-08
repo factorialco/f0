@@ -215,7 +215,9 @@ export const Presets: Story = {
       return (
         <div className="flex justify-between rounded p-2 transition-colors hover:cursor-pointer hover:bg-f1-background-hover">
           <span className="font-medium">{preset.name}</span>
-          {preset.number && <Counter value={preset.number} type="default" />}
+          {preset.number ? (
+            <Counter value={preset.number} type="default" />
+          ) : null}
         </div>
       )
     },

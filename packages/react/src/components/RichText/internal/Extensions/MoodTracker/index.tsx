@@ -116,7 +116,7 @@ export const MoodTrackerView: React.FC<NodeViewProps> = ({
           </div>
         </div>
 
-        {isOpen && (
+        {isOpen ? (
           <div className="text-f1-text-primary flex flex-col gap-2">
             {data.days.map((day, index) => (
               <div className="flex flex-row items-center gap-2" key={index}>
@@ -134,7 +134,7 @@ export const MoodTrackerView: React.FC<NodeViewProps> = ({
               </div>
             ))}
           </div>
-        )}
+        ) : null}
       </div>
       <NodeViewContent style={{ display: "none" }} />
     </NodeViewWrapper>

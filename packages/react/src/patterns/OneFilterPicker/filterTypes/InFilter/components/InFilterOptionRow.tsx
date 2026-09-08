@@ -88,7 +88,7 @@ export function InFilterOptionRow<T extends string>({
         className="flex flex-row items-center overflow-hidden min-w-0"
         style={{ paddingLeft: `${depth * 24}px` }}
       >
-        {hasChildren && (
+        {hasChildren ? (
           <div className="relative shrink-0">
             <F0Button
               variant="ghost"
@@ -104,14 +104,14 @@ export function InFilterOptionRow<T extends string>({
               aria-expanded={effectiveExpanded}
               hideLabel
             />
-            {hasDescendantSelected && !effectiveExpanded && (
+            {hasDescendantSelected && !effectiveExpanded ? (
               <span
                 aria-hidden="true"
                 className="absolute -right-px -top-px h-2 w-2 rounded-full bg-f1-background-selected-bold"
               />
-            )}
+            ) : null}
           </div>
-        )}
+        ) : null}
         <div
           className={cn(
             "flex min-w-0 flex-1 cursor-pointer appearance-none items-center gap-1 rounded p-1.5 font-medium transition-colors hover:bg-f1-background-secondary",
@@ -134,7 +134,7 @@ export function InFilterOptionRow<T extends string>({
           </div>
         </div>
       </div>
-      {effectiveExpanded && option.children && (
+      {effectiveExpanded && option.children ? (
         <div>
           {option.children.options
             .filter(
@@ -161,7 +161,7 @@ export function InFilterOptionRow<T extends string>({
               )
             })}
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

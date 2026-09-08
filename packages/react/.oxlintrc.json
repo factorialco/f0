@@ -161,7 +161,6 @@
     "sonarjs/insecure-cookie": "error",
     "sonarjs/insecure-jwt-token": "error",
     "sonarjs/inverted-assertion-arguments": "error",
-    "sonarjs/jsx-no-leaked-render": "error",
     "sonarjs/label-position": "error",
     "sonarjs/max-switch-cases": "error",
     "sonarjs/memoize-cache-key": "error",
@@ -269,6 +268,14 @@
     "sonarjs/x-powered-by": "error",
     "sonarjs/xml-parser-xxe": "error",
 
+    // eslint-plugin-react, loaded as a JS plugin (`react-js`). It has no type
+    // information, so only the syntax-based rules are useful. `f0-react` wraps
+    // its jsx-no-leaked-render to check JSX children only, not attributes.
+    // Ternaries everywhere is the only leak-safe strategy without types.
+    "f0-react/jsx-no-leaked-render": ["error", { "validStrategies": ["ternary"] }],
+    "react-js/no-deprecated": "error",
+    "react-js/no-invalid-html-attribute": "error",
+
     // DEBT. Turn on once the code is fixed. Number = violations when this
     // was written. Do not add new violations.
     "typescript/no-non-null-assertion": "off", // 718
@@ -305,6 +312,10 @@
     "sonarjs/super-linear-regex": "off", // 10
     "sonarjs/void-use": "off", // 10
     "sonarjs/no-globals-shadowing": "off", // 6; story exports named Error
+    "react-js/no-unstable-nested-components": "off", // 25
+    "react-js/jsx-no-constructed-context-values": "off", // 35
+    "react-js/no-unused-prop-types": "off", // 34
+    "react-js/no-object-type-as-default-prop": "off", // 59
 
     // OXLINT BUGS (1.43). Re-check after each oxlint upgrade.
     "typescript/consistent-indexed-object-style": "off", // flags mapped types that use the key; the autofix rewrites them to Record<> and drops the key
@@ -327,7 +338,8 @@
     "sonarjs/no-selector-parameter": "off", // boolean parameters that switch behavior are allowed
     "sonarjs/no-unused-vars": "off", // duplicate of no-unused-vars
     "sonarjs/unused-import": "off", // duplicate of no-unused-vars
-    "sonarjs/no-duplicate-string": "off" // 1167 hits, mostly class name strings
+    "sonarjs/no-duplicate-string": "off", // 1167 hits, mostly class name strings
+    "sonarjs/jsx-no-leaked-render": "off" // needs type information, reports nothing under oxlint; f0-react/jsx-no-leaked-render replaces it
   },
   "env": {
     "builtin": true,
@@ -336,10 +348,15 @@
   "jsPlugins": [
     "eslint-plugin-react-refresh",
     "./.oxlint-plugins/f0-security/index.js",
+    "./.oxlint-plugins/f0-react/index.js",
     "eslint-plugin-sonarjs",
     {
       "name": "import-js",
       "specifier": "eslint-plugin-import"
+    },
+    {
+      "name": "react-js",
+      "specifier": "eslint-plugin-react"
     }
   ],
   "overrides": [

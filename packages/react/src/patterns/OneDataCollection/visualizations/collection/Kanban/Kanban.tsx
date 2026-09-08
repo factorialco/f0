@@ -534,7 +534,7 @@ export const KanbanCollection = <
                     onOpenChange={(open) => setGroupOpen(board.key, open)}
                   />
                   <AnimatePresence>
-                    {(!collapsible || openGroups[board.key]) && (
+                    {!collapsible || openGroups[board.key] ? (
                       <motion.div
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: "auto", opacity: 1 }}
@@ -560,7 +560,7 @@ export const KanbanCollection = <
                           loading={kanbanLoading}
                         />
                       </motion.div>
-                    )}
+                    ) : null}
                   </AnimatePresence>
                 </div>
               )

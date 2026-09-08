@@ -104,11 +104,11 @@ export function PlaybackRateMenu({
                 setOpen(false)
               }}
             >
-              {isActive && (
+              {isActive ? (
                 <span className="absolute left-2.5 inline-flex items-center">
                   <Check />
                 </span>
-              )}
+              ) : null}
               {formatPlaybackRate(rate)}
             </button>
           )

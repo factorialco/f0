@@ -55,7 +55,7 @@ export function DateFilter({
           showInput
         />
       </div>
-      {!isCompactMode && (
+      {!isCompactMode ? (
         <div className="sticky bottom-0 left-0 right-0 z-20 flex items-center justify-end gap-2 border border-solid border-transparent border-t-f1-border-secondary bg-f1-background/80 p-2 backdrop-blur-[8px]">
           <F0Button
             variant="ghost"
@@ -65,7 +65,7 @@ export function DateFilter({
             size="sm"
           />
         </div>
-      )}
+      ) : null}
     </>
   )
 }

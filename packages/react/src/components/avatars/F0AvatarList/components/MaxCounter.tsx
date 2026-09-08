@@ -134,11 +134,11 @@ export const MaxCounter = ({
           <div className="truncate font-semibold">
             {getAvatarDisplayName(avatarType, avatar)}
           </div>
-          {description && (
+          {description ? (
             <div className="truncate text-sm text-current opacity-70">
               {description}
             </div>
-          )}
+          ) : null}
         </div>
       </div>
     )

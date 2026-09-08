@@ -64,17 +64,17 @@ export function F0FormField({
 
   return (
     <div className="space-y-2" id={id}>
-      {showLabel && (
+      {showLabel ? (
         <label
           htmlFor={field.id}
           className="text-base font-medium leading-normal text-f1-foreground-secondary"
         >
           {field.label}
-          {isRequired && (
+          {isRequired ? (
             <span className="ml-0.5 text-f1-foreground-critical">*</span>
-          )}
+          ) : null}
         </label>
-      )}
+      ) : null}
       {renderFieldInput({
         field: resolvedField,
         formField,
@@ -85,11 +85,11 @@ export function F0FormField({
         initialFiles: fileInitialFiles,
         fieldStatus: resolvedStatus,
       })}
-      {field.helpText && (
+      {field.helpText ? (
         <p className="text-base text-f1-foreground-secondary">
           {field.helpText}
         </p>
-      )}
+      ) : null}
       <InputMessages status={resolvedStatus} />
     </div>
   )

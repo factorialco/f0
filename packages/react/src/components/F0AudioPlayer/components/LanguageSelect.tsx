@@ -106,11 +106,11 @@ export function LanguageSelect({
                 setOpen(false)
               }}
             >
-              {isActive && (
+              {isActive ? (
                 <span className="absolute left-2.5 inline-flex items-center">
                   <Check />
                 </span>
-              )}
+              ) : null}
               {languageLabel(option)}
             </button>
           )

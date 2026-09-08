@@ -782,7 +782,7 @@ function ClickToFocusWithSidePanelDemo() {
         }}
         onPaneClick={() => setSelected(null)}
       />
-      {selected && (
+      {selected ? (
         <div
           className="absolute right-0 top-0 z-20 flex h-full flex-col gap-2 border-l border-f1-border bg-f1-background p-6 shadow-lg"
           style={{ width: PANEL_WIDTH }}
@@ -799,7 +799,7 @@ function ClickToFocusWithSidePanelDemo() {
             onClick={() => setSelected(null)}
           />
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

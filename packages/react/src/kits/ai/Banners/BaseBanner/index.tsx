@@ -88,16 +88,16 @@ const BaseBannerComponent = forwardRef<HTMLDivElement, BaseBannerProps>(
             )}
           >
             <h3 className="font-bold text-xl text-f1-foreground">{title}</h3>
-            {subtitle && (
+            {subtitle ? (
               <p className="text-base text-f1-foreground-secondary">
                 {subtitle}
               </p>
-            )}
+            ) : null}
           </div>
 
           {/* Actions */}
           <div className="flex gap-3">
-            {primaryAction && (
+            {primaryAction ? (
               <F0Button
                 onClick={primaryAction.onClick}
                 label={primaryAction.label}
@@ -105,8 +105,8 @@ const BaseBannerComponent = forwardRef<HTMLDivElement, BaseBannerProps>(
                 size="md"
                 icon={primaryAction.icon}
               />
-            )}
-            {secondaryAction && (
+            ) : null}
+            {secondaryAction ? (
               <F0Button
                 onClick={secondaryAction.onClick}
                 label={secondaryAction.label}
@@ -114,13 +114,13 @@ const BaseBannerComponent = forwardRef<HTMLDivElement, BaseBannerProps>(
                 size="md"
                 icon={secondaryAction.icon}
               />
-            )}
+            ) : null}
             {children}
           </div>
         </div>
 
         {/* Close button */}
-        {onClose && (
+        {onClose ? (
           <div className="absolute right-2 top-2 z-10">
             <F0Button
               variant="ghost"
@@ -131,7 +131,7 @@ const BaseBannerComponent = forwardRef<HTMLDivElement, BaseBannerProps>(
               label="Close"
             />
           </div>
-        )}
+        ) : null}
       </div>
     ) : null
   }

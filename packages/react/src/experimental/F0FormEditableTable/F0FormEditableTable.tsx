@@ -266,7 +266,7 @@ function RowCells<R extends RecordType>({
   const customActions = rowActions?.(item, index) ?? []
   return (
     <>
-      {dragHandle !== undefined && (
+      {dragHandle !== undefined ? (
         <TableCell
           width={HANDLE_COL_WIDTH}
           sticky={{ left: 0 }}
@@ -279,7 +279,7 @@ function RowCells<R extends RecordType>({
             {dragHandle}
           </div>
         </TableCell>
-      )}
+      ) : null}
       {columns.map((column, cellIndex) => {
         const editType = column.editType?.(item)
         const isEditableCell =
@@ -322,14 +322,14 @@ function RowCells<R extends RecordType>({
           </TableCell>
         )
       })}
-      {hasActionsColumn && (
+      {hasActionsColumn ? (
         <TableCell
           width={actionsColWidth}
           sticky={{ right: 0 }}
           className={cn(CELL_CLASSES, ACTIONS_SHRINK_CLASSES)}
         >
           <div className="pointer-events-auto flex h-full items-center justify-center gap-2 px-2">
-            {showEdit && (
+            {showEdit ? (
               <F0Button
                 type="button"
                 variant="outline"
@@ -339,7 +339,7 @@ function RowCells<R extends RecordType>({
                 disabled={disabled}
                 onClick={() => onEditRow(item, index)}
               />
-            )}
+            ) : null}
             {customActions.map((action, actionIndex) => (
               <RowActionButton
                 key={action.id ?? `${action.label}-${actionIndex}`}
@@ -349,7 +349,7 @@ function RowCells<R extends RecordType>({
                 disabled={disabled}
               />
             ))}
-            {showRemove && (
+            {showRemove ? (
               // The critical variant inverts its icon on `group-hover`, which
               // the surrounding `.group` table row also triggers — turning the
               // icon white on mere row hover. Pin it to the critical color and
@@ -367,10 +367,10 @@ function RowCells<R extends RecordType>({
                   onClick={() => onRemoveRow(item, index)}
                 />
               </span>
-            )}
+            ) : null}
           </div>
         </TableCell>
-      )}
+      ) : null}
     </>
   )
 }
@@ -561,7 +561,7 @@ function F0FormEditableTableBase<R extends RecordType>({
     <OneTable>
       <TableHeader>
         <TableRow>
-          {sortableRows && (
+          {sortableRows ? (
             <TableHead
               width={HANDLE_COL_WIDTH}
               sticky={{ left: 0 }}
@@ -569,7 +569,7 @@ function F0FormEditableTableBase<R extends RecordType>({
             >
               <span className="sr-only">{reorderLabel}</span>
             </TableHead>
-          )}
+          ) : null}
           {columns.map((column, index) => (
             <TableHead
               key={column.id ?? `head-${index}`}
@@ -582,7 +582,7 @@ function F0FormEditableTableBase<R extends RecordType>({
               {column.label}
             </TableHead>
           ))}
-          {hasActionsColumn && (
+          {hasActionsColumn ? (
             <TableHead
               width={actionsColWidth}
               sticky={{ right: 0 }}
@@ -594,7 +594,7 @@ function F0FormEditableTableBase<R extends RecordType>({
             >
               <span className="sr-only">{actionsLabel}</span>
             </TableHead>
-          )}
+          ) : null}
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -653,8 +653,8 @@ function F0FormEditableTableBase<R extends RecordType>({
           table
         )}
       </div>
-      {addRow &&
-        (addRow.disabled && addRow.disabledTooltip ? (
+      {addRow ? (
+        addRow.disabled && addRow.disabledTooltip ? (
           <TooltipProvider delayDuration={100}>
             <Tooltip>
               {/* A disabled button emits no hover events, so the span wrapper
@@ -690,7 +690,8 @@ function F0FormEditableTableBase<R extends RecordType>({
             onClick={addRow.onClick}
             disabled={addRow.disabled}
           />
-        ))}
+        )
+      ) : null}
     </div>
   )
 }

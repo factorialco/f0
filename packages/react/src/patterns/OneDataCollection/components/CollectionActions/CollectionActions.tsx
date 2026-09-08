@@ -153,7 +153,7 @@ export const CollectionActions = ({
         )
       })}
 
-      {upsellAction && (
+      {upsellAction ? (
         <F0Button
           size="md"
           variant={upsellAction.variant ?? "outlinePromote"}
@@ -162,9 +162,9 @@ export const CollectionActions = ({
           onClick={upsellAction.onClick}
           disabled={upsellAction.disabled}
         />
-      )}
+      ) : null}
 
-      {dropdownItems.length > 0 && (
+      {dropdownItems.length > 0 ? (
         <Dropdown
           items={dropdownItems}
           align="end"
@@ -179,7 +179,7 @@ export const CollectionActions = ({
             pressed={open}
           />
         </Dropdown>
-      )}
+      ) : null}
     </div>
   )
 }

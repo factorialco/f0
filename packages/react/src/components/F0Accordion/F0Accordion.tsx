@@ -53,9 +53,9 @@ const F0AccordionBase = forwardRef<HTMLDivElement, F0AccordionProps>(
       >
         {items.map((item, index) => (
           <Fragment key={item.id}>
-            {index > 0 && (
+            {index > 0 ? (
               <div className="h-px w-full bg-f1-border-secondary" />
-            )}
+            ) : null}
             <AccordionItem
               item={item}
               open={openIds.includes(item.id)}

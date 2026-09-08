@@ -19,7 +19,7 @@ export const SliderTooltip = ({
 
   return (
     <AnimatePresence>
-      {visible && (
+      {visible ? (
         <motion.div
           initial={{ opacity: 0, x: "-50%", y: 2 }}
           animate={{ opacity: 1, x: "-50%", y: 0 }}
@@ -36,7 +36,7 @@ export const SliderTooltip = ({
         >
           {content}
         </motion.div>
-      )}
+      ) : null}
     </AnimatePresence>
   )
 }

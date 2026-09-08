@@ -51,7 +51,7 @@ export const Item = ({ question }: ItemProps) => {
         )}
         style={{ marginLeft: disabled || answering ? 0 : -27 }}
       >
-        {!disabled && !answering && (
+        {!disabled && !answering ? (
           <div
             className={cn(
               "mt-2 flex aspect-square w-6 scale-75 items-center opacity-0 hover:opacity-40 group-hover/question-element:opacity-40",
@@ -66,7 +66,7 @@ export const Item = ({ question }: ItemProps) => {
           >
             <F0Icon icon={Handle} size="sm" />
           </div>
-        )}
+        ) : null}
         <Question
           {...({
             ...question,

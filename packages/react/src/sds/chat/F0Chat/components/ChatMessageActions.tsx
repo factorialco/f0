@@ -214,7 +214,7 @@ export const ChatMessageActions = ({
           />
         ) : (
           <>
-            {canReact && (
+            {canReact ? (
               <>
                 <div className="flex items-center justify-between p-2">
                   {QUICK_EMOJIS.map((emoji) => (
@@ -239,10 +239,10 @@ export const ChatMessageActions = ({
                 </div>
                 <div className="h-px bg-f1-border-secondary" />
               </>
-            )}
-            {(canViewInfo || canReply || canCopy) && (
+            ) : null}
+            {canViewInfo || canReply || canCopy ? (
               <div className="flex flex-col gap-0 p-1">
-                {canViewInfo && (
+                {canViewInfo ? (
                   <MenuItem
                     icon={AlertCircleLine}
                     label={i18n.chat.info}
@@ -258,10 +258,10 @@ export const ChatMessageActions = ({
                       />
                     }
                   />
-                )}
+                ) : null}
                 {/* Gated on `canReply`, which follows `canSend`: without a
                     composer this used to focus a node that isn't mounted. */}
-                {canReply && (
+                {canReply ? (
                   <MenuItem
                     icon={Reply}
                     label={i18n.chat.reply}
@@ -270,8 +270,8 @@ export const ChatMessageActions = ({
                       startReply(message)
                     })}
                   />
-                )}
-                {canCopy && (
+                ) : null}
+                {canCopy ? (
                   <MenuItem
                     icon={Files}
                     label={i18n.actions.copy}
@@ -284,34 +284,34 @@ export const ChatMessageActions = ({
                         .catch(() => {})
                     })}
                   />
-                )}
+                ) : null}
               </div>
-            )}
-            {(canEdit || canDelete) && (
+            ) : null}
+            {canEdit || canDelete ? (
               <>
                 {/* Only a separator when there IS something above to separate
                     from — a moderator-only menu opens straight on Delete. */}
-                {(canReact || canViewInfo || canReply || canCopy) && (
+                {canReact || canViewInfo || canReply || canCopy ? (
                   <div className="h-px bg-f1-border-secondary" />
-                )}
+                ) : null}
                 <div className="flex flex-col gap-0 p-1">
-                  {canEdit && (
+                  {canEdit ? (
                     <MenuItem
                       icon={Pencil}
                       label={i18n.chat.edit}
                       onClick={runAndClose(() => startEdit(message))}
                     />
-                  )}
-                  {canDelete && (
+                  ) : null}
+                  {canDelete ? (
                     <MenuItem
                       icon={Delete}
                       label={i18n.actions.delete}
                       onClick={runAndClose(() => deleteMessage(message.id))}
                     />
-                  )}
+                  ) : null}
                 </div>
               </>
-            )}
+            ) : null}
           </>
         )}
       </PopoverContent>

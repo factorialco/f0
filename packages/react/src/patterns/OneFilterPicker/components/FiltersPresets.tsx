@@ -246,7 +246,7 @@ export const FiltersPresets = <Filters extends FiltersDefinition>({
         data-visible={true}
       >
         {preset.label}
-        {presetNumber !== undefined && (
+        {presetNumber !== undefined ? (
           <Await
             resolve={presetNumber}
             fallback={<Skeleton className="h-4 w-6" />}
@@ -260,7 +260,7 @@ export const FiltersPresets = <Filters extends FiltersDefinition>({
               )
             }
           </Await>
-        )}
+        ) : null}
       </button>
     )
   }

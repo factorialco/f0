@@ -172,7 +172,7 @@ const Harness = ({
         however many rows are already loaded, not grow with them.
       </p>
 
-      {readout.length > 0 && (
+      {readout.length > 0 ? (
         <table className="w-fit border-collapse text-left">
           <thead>
             <tr className="text-f1-foreground-secondary">
@@ -191,7 +191,7 @@ const Harness = ({
             ))}
           </tbody>
         </table>
-      )}
+      ) : null}
 
       <OneDataCollection
         source={source}

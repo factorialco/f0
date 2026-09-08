@@ -149,7 +149,9 @@ function DefaultDialogScenario() {
           onClick: () => setSelectedResource(null),
         }}
       >
-        {selectedResource && <CrudContentPlaceholder minHeight="min-h-56" />}
+        {selectedResource ? (
+          <CrudContentPlaceholder minHeight="min-h-56" />
+        ) : null}
       </F0Dialog>
     </CrudPatternLayout>
   )
@@ -192,7 +194,9 @@ function VisualizationDialogScenario({
           onClick: () => setSelectedResource(null),
         }}
       >
-        {selectedResource && <CrudContentPlaceholder minHeight="min-h-56" />}
+        {selectedResource ? (
+          <CrudContentPlaceholder minHeight="min-h-56" />
+        ) : null}
       </F0Dialog>
     </CrudPatternLayout>
   )
@@ -275,7 +279,7 @@ function RightDialogScenario({
           onClick: () => setSelectedResource(null),
         }}
       >
-        {selectedResource && <ResourceDialogPreview />}
+        {selectedResource ? <ResourceDialogPreview /> : null}
       </F0Dialog>
     </CrudPatternLayout>
   )
@@ -328,7 +332,7 @@ function RightDialogToPageScenario() {
           onClick: () => setSurface("page"),
         }}
       >
-        {selectedResource && <ResourceDialogPreview />}
+        {selectedResource ? <ResourceDialogPreview /> : null}
       </F0Dialog>
     </CrudPatternLayout>
   )

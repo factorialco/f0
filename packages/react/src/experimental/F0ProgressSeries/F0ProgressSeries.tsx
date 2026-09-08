@@ -190,14 +190,14 @@ function BarTrack({
               : "bg-f1-background-secondary"
           )}
         >
-          {!isEmpty && !bar.canceled && (
+          {!isEmpty && !bar.canceled ? (
             <BarFill pct={pct} color={bar.color ?? DEFAULT_COLOR} />
-          )}
+          ) : null}
         </div>
       </TooltipTrigger>
-      {!hideTooltip && (
+      {!hideTooltip ? (
         <TooltipContent className="text-sm">{tooltip}</TooltipContent>
-      )}
+      ) : null}
     </Tooltip>
   )
 }
@@ -219,10 +219,10 @@ function BarLabel({
 
   return (
     <div className={cn("flex items-center gap-1 truncate", textClass)}>
-      {label && <span className="text-f1-foreground">{label}</span>}
-      {caption && (
+      {label ? <span className="text-f1-foreground">{label}</span> : null}
+      {caption ? (
         <span className="text-f1-foreground-secondary">{caption}</span>
-      )}
+      ) : null}
     </div>
   )
 }
@@ -290,24 +290,24 @@ const F0ProgressSeriesBase = forwardRef<HTMLDivElement, F0ProgressSeriesProps>(
             ))}
           </div>
 
-          {showLabelRow && (
+          {showLabelRow ? (
             <div className={cn("flex w-full", gapClass)} aria-hidden="true">
               {resolved.map((r, index) => (
                 <div
                   key={`${r.bar.label}-${index}`}
                   className="min-w-[3px] flex-1 overflow-hidden"
                 >
-                  {shown.has(index) && (
+                  {shown.has(index) ? (
                     <BarLabel
                       label={r.bar.label}
                       caption={r.caption}
                       textClass={LABEL_CLASS[size]}
                     />
-                  )}
+                  ) : null}
                 </div>
               ))}
             </div>
-          )}
+          ) : null}
         </TooltipProvider>
       </div>
     )

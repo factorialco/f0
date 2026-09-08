@@ -185,62 +185,63 @@ export const ListCollection = <
         aria-busy={showFullscreenLoading ? "true" : undefined}
       >
         <div className="min-h-0 flex-1 overflow-auto pb-3">
-          {data.type === "grouped" &&
-            data.groups.map((group, index) => {
-              const itemCount = group.itemCount
-              return (
-                <div
-                  className="flex flex-col gap-0 pt-2 first:pt-0"
-                  key={`group-header-${group.key}`}
-                >
-                  <GroupHeader
+          {data.type === "grouped"
+            ? data.groups.map((group, index) => {
+                const itemCount = group.itemCount
+                return (
+                  <div
+                    className="flex flex-col gap-0 pt-2 first:pt-0"
                     key={`group-header-${group.key}`}
-                    className="cursor-pointer select-none rounded-md px-3.5 py-3 transition-colors hover:bg-f1-background-hover"
-                    selectable={!!source.selectable}
-                    select={
-                      groupAllSelectedStatus[group.key]?.checked
-                        ? true
-                        : groupAllSelectedStatus[group.key]?.indeterminate
-                          ? "indeterminate"
-                          : false
-                    }
-                    onSelectChange={(checked) =>
-                      handleSelectGroupChange(group, checked)
-                    }
-                    showOpenChange={collapsible}
-                    label={group.label}
-                    itemCount={itemCount}
-                    open={openGroups[group.key]}
-                    onOpenChange={(open) => setGroupOpen(group.key, open)}
-                  />
-                  <AnimatePresence>
-                    {(!collapsible || openGroups[group.key]) && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.1, ease: "easeInOut" }}
-                        className="mt-0.5"
-                      >
-                        <ListGroup
-                          key={`list-group-${group.key}`}
-                          source={source}
-                          items={group.records}
-                          selectedItems={selectedItems}
-                          handleSelectItemChange={handleSelectItemChange}
-                          fields={fields}
-                          itemDefinition={itemDefinition}
-                          isLoadingMore={
-                            isLoadingMore && index === data.groups.length - 1
-                          }
-                        />
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              )
-            })}
-          {data?.type === "flat" && (
+                  >
+                    <GroupHeader
+                      key={`group-header-${group.key}`}
+                      className="cursor-pointer select-none rounded-md px-3.5 py-3 transition-colors hover:bg-f1-background-hover"
+                      selectable={!!source.selectable}
+                      select={
+                        groupAllSelectedStatus[group.key]?.checked
+                          ? true
+                          : groupAllSelectedStatus[group.key]?.indeterminate
+                            ? "indeterminate"
+                            : false
+                      }
+                      onSelectChange={(checked) =>
+                        handleSelectGroupChange(group, checked)
+                      }
+                      showOpenChange={collapsible}
+                      label={group.label}
+                      itemCount={itemCount}
+                      open={openGroups[group.key]}
+                      onOpenChange={(open) => setGroupOpen(group.key, open)}
+                    />
+                    <AnimatePresence>
+                      {!collapsible || openGroups[group.key] ? (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.1, ease: "easeInOut" }}
+                          className="mt-0.5"
+                        >
+                          <ListGroup
+                            key={`list-group-${group.key}`}
+                            source={source}
+                            items={group.records}
+                            selectedItems={selectedItems}
+                            handleSelectItemChange={handleSelectItemChange}
+                            fields={fields}
+                            itemDefinition={itemDefinition}
+                            isLoadingMore={
+                              isLoadingMore && index === data.groups.length - 1
+                            }
+                          />
+                        </motion.div>
+                      ) : null}
+                    </AnimatePresence>
+                  </div>
+                )
+              })
+            : null}
+          {data?.type === "flat" ? (
             <ListGroup
               source={source}
               items={data.records}
@@ -250,19 +251,19 @@ export const ListCollection = <
               itemDefinition={itemDefinition}
               isLoadingMore={isLoadingMore}
             />
-          )}
+          ) : null}
           {/* Show skeleton items when loading more data */}
-          {isInfiniteScrollPagination(paginationInfo) && isLoadingMore && (
+          {isInfiniteScrollPagination(paginationInfo) && isLoadingMore ? (
             <ListSkeleton source={source} fields={fields} count={5} />
-          )}
+          ) : null}
           {isInfiniteScrollPagination(paginationInfo) &&
-            paginationInfo.hasMore && (
-              <div
-                ref={loadingIndicatorRef}
-                className="w-full"
-                aria-hidden="true"
-              />
-            )}
+          paginationInfo.hasMore ? (
+            <div
+              ref={loadingIndicatorRef}
+              className="w-full"
+              aria-hidden="true"
+            />
+          ) : null}
         </div>
       </div>
       <PagesPagination paginationInfo={paginationInfo} setPage={setPage} />

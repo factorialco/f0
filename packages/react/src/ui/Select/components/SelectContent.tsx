@@ -452,9 +452,9 @@ const SelectContent = forwardRef<
               : undefined
           }
         >
-          {asList && !props.right && (
+          {asList && !props.right ? (
             <div className="flex-shrink-0">{props.top}</div>
-          )}
+          ) : null}
           <div className="flex min-h-0 flex-1 flex-row overflow-hidden">
             <div
               className={cn(
@@ -462,8 +462,8 @@ const SelectContent = forwardRef<
                 asList && "flex flex-col overflow-hidden flex-1 min-h-0"
               )}
             >
-              {(!asList || props.right) && props.top}
-              {showLoadingIndicator && loadingNewContent && (
+              {!asList || props.right ? props.top : null}
+              {showLoadingIndicator && loadingNewContent ? (
                 <div
                   className="absolute inset-0 flex cursor-progress items-center justify-center"
                   aria-live="polite"
@@ -471,7 +471,7 @@ const SelectContent = forwardRef<
                 >
                   <Spinner />
                 </div>
-              )}
+              ) : null}
               <ScrollArea
                 viewportRef={parentRef}
                 className={cn(
@@ -519,11 +519,11 @@ const SelectContent = forwardRef<
           </div>
           {(isEmpty && emptyAction) || bottom ? (
             <div className="shrink-0">
-              {isEmpty && emptyAction && (
+              {isEmpty && emptyAction ? (
                 <div className="w-full border-0 border-t border-solid border-f1-border-secondary p-2">
                   {emptyAction}
                 </div>
-              )}
+              ) : null}
               {bottom}
             </div>
           ) : null}
@@ -541,7 +541,7 @@ const SelectContent = forwardRef<
             Only render when NOT using a custom portal container to avoid
             conflicts with modal focus management.
           */}
-          {open && !effectivePortalContainer && (
+          {open && !effectivePortalContainer ? (
             <div
               className="pointer-events-auto fixed inset-0 z-40"
               onClick={(e) => {
@@ -549,7 +549,7 @@ const SelectContent = forwardRef<
                 e.stopPropagation()
               }}
             />
-          )}
+          ) : null}
           {content}
         </>
       </SelectPrimitive.Portal>

@@ -3052,7 +3052,7 @@ function FlowContent({
               href: "/cocreation",
             }}
           />
-          {visualizationMode !== "fullscreen" && (
+          {visualizationMode !== "fullscreen" ? (
             <ClickableTabs
               tabs={[
                 { label: config.navTabLabel, id: config.id },
@@ -3061,7 +3061,7 @@ function FlowContent({
               activeTabId={activeTabId}
               setActiveTabId={setActiveTabId}
             />
-          )}
+          ) : null}
         </>
       }
     >
@@ -3187,7 +3187,9 @@ function CreationWithAIFlow({
               {/* Feeds the survey welcome cards into the chat via
                   `welcomeScreenCards`; renders nothing itself. "cards" entry
                   flow (Engagement) only — "guidedType" (Training) has none. */}
-              {config.entryMode === "cards" && <SurveyWelcomeCardsRegistrar />}
+              {config.entryMode === "cards" ? (
+                <SurveyWelcomeCardsRegistrar />
+              ) : null}
               <FlowContent phase={phase} setPhase={setPhase} />
             </ApplicationFrame>
           </TemplatesReturnProvider>

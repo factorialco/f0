@@ -163,13 +163,15 @@ export function TooltipInternal({
           >
             <div className="flex flex-col gap-0.5">
               <div className="flex items-center gap-2">
-                {label && <p className="font-semibold">{label}</p>}
-                {shortcut && <Shortcut keys={shortcut} variant="inverse" />}
+                {label ? <p className="font-semibold">{label}</p> : null}
+                {shortcut ? (
+                  <Shortcut keys={shortcut} variant="inverse" />
+                ) : null}
               </div>
-              {description && (
+              {description ? (
                 <p className="font-normal">{description.toString()}</p>
-              )}
-              {items && items.length > 0 && (
+              ) : null}
+              {items && items.length > 0 ? (
                 <ul className="m-0 flex list-disc flex-col gap-0.5 pl-4 font-normal">
                   {items.map((item, index) => (
                     <li
@@ -180,13 +182,13 @@ export function TooltipInternal({
                       ) : (
                         <>
                           <span className="font-semibold">{item.title}</span>
-                          {item.description && <> {item.description}</>}
+                          {item.description ? <> {item.description}</> : null}
                         </>
                       )}
                     </li>
                   ))}
                 </ul>
-              )}
+              ) : null}
             </div>
           </TooltipContent>
         </TooltipPrimitive>

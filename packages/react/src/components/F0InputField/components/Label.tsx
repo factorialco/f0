@@ -31,13 +31,13 @@ const Label = ({
       aria-label={label}
       aria-disabled={disabled}
     >
-      {icon && <F0Icon icon={icon} size="sm"></F0Icon>}
+      {icon ? <F0Icon icon={icon} size="sm"></F0Icon> : null}
       <OneEllipsis className="shrink-1 min-w-0">{label}</OneEllipsis>
-      {required && (
+      {required ? (
         <span className="text-f1-foreground-critical" aria-hidden="true">
           *
         </span>
-      )}
+      ) : null}
     </label>
   )
 }

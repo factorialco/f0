@@ -163,11 +163,11 @@ export const UserMessage = ({
       ref={ref}
       className="my-4 flex w-full flex-col items-end gap-2 first:mt-0 last:mb-0"
     >
-      {quoteText && (
+      {quoteText ? (
         <ReplyQuoteBlock text={quoteText} renderMarkdown={renderMarkdown} />
-      )}
+      ) : null}
 
-      {uploadedFiles.length > 0 && (
+      {uploadedFiles.length > 0 ? (
         <div className="flex max-w-[90%] flex-wrap justify-end gap-1.5">
           {uploadedFiles.map((file, index) => (
             <F0FileItem
@@ -177,15 +177,15 @@ export const UserMessage = ({
             />
           ))}
         </div>
-      )}
-      {hasVisibleText && (
+      ) : null}
+      {hasVisibleText ? (
         <div
           ref={bubbleRef}
           className="w-fit max-w-[90%] self-end whitespace-pre-wrap rounded-xl bg-f1-background-tertiary px-4 py-3 [&>div]:flex [&>div]:flex-col [&>div]:gap-1"
         >
           {(renderMarkdown ?? defaultMarkdownFallback)(content)}
         </div>
-      )}
+      ) : null}
       <ReplyPopover
         anchor={anchor}
         onReply={(text) => {

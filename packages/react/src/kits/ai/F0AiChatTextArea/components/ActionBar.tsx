@@ -99,7 +99,7 @@ export const ActionBar = ({
     // `justify-between`, which would strand a lone send button on the left the
     // moment the row has nothing else in it.
     <div className="flex shrink-0 items-center gap-2 p-3">
-      {(onUploadFiles || toolbarStart) && (
+      {onUploadFiles || toolbarStart ? (
         <div
           className={cn(
             "flex items-center gap-2",
@@ -109,7 +109,7 @@ export const ActionBar = ({
             center ? "shrink-0" : "min-w-0"
           )}
         >
-          {onUploadFiles && (
+          {onUploadFiles ? (
             <>
               <ButtonInternal
                 label={translation.ai.attachFile}
@@ -136,8 +136,8 @@ export const ActionBar = ({
                 onChange={handleFileSelect}
               />
             </>
-          )}
-          {toolbarStart && (
+          ) : null}
+          {toolbarStart ? (
             // Host controls keep their own focus instead of bubbling to the
             // form's click handler, which intentionally focuses the textarea.
             <div
@@ -146,18 +146,18 @@ export const ActionBar = ({
             >
               {toolbarStart}
             </div>
-          )}
+          ) : null}
         </div>
-      )}
-      {center && <div className="min-w-0 flex-1">{center}</div>}
+      ) : null}
+      {center ? <div className="min-w-0 flex-1">{center}</div> : null}
       <div className="ml-auto flex shrink-0 items-center gap-2">
-        {canRecord && (
+        {canRecord ? (
           <DictationButton
             inProgress={inProgress}
             recordingStatus={recordingStatus}
             onStartRecording={onStartRecording}
           />
-        )}
+        ) : null}
         <SubmitButton
           inProgress={inProgress}
           hasDataToSend={hasDataToSend}

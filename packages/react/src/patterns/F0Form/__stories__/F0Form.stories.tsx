@@ -2505,9 +2505,9 @@ export const CustomField: Story = {
               </option>
             ))}
           </select>
-          {error && (
+          {error ? (
             <span className="text-sm text-f1-foreground-critical">{error}</span>
-          )}
+          ) : null}
         </div>
       )
     }
@@ -2556,9 +2556,9 @@ export const CustomField: Story = {
               </button>
             ))}
           </div>
-          {error && (
+          {error ? (
             <span className="text-sm text-f1-foreground-critical">{error}</span>
-          )}
+          ) : null}
         </div>
       )
     }
@@ -3539,9 +3539,9 @@ export const FormInDialog: Story = {
     return (
       <div className="flex flex-col items-start gap-3">
         <F0Button label="Add Team Member" icon={Plus} onClick={handleAdd} />
-        {lastResult && (
+        {lastResult ? (
           <p className="text-sm text-f1-foreground-secondary">{lastResult}</p>
-        )}
+        ) : null}
       </div>
     )
   },

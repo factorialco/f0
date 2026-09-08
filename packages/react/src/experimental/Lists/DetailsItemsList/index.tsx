@@ -45,11 +45,11 @@ const _DetailsItemsList = forwardRef<HTMLDivElement, DetailsItemsListProps>(
     return (
       <DataTestIdWrapper dataTestId={dataTestId}>
         <div ref={ref} className="flex flex-col gap-4">
-          {!!title && (
+          {title ? (
             <p className="mb-1 pl-1.5 text-sm font-semibold text-f1-foreground-secondary">
               {title.toLocaleUpperCase()}
             </p>
-          )}
+          ) : null}
           <div
             className={cn(
               "flex flex-col",
@@ -68,13 +68,13 @@ const _DetailsItemsList = forwardRef<HTMLDivElement, DetailsItemsListProps>(
                   isHorizontal={tableView}
                   verticalLayout={item.verticalLayout}
                 />
-                {tableView && index !== details.length - 1 && (
+                {tableView && index !== details.length - 1 ? (
                   <div className="h-[1px] w-full bg-f1-border-secondary" />
-                )}
+                ) : null}
               </React.Fragment>
             ))}
           </div>
-          {showSeeMore && <SeeMoreButton onClick={onClickSeeMore} />}
+          {showSeeMore ? <SeeMoreButton onClick={onClickSeeMore} /> : null}
         </div>
       </DataTestIdWrapper>
     )

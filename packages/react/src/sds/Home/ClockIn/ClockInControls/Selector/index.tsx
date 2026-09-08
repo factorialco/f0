@@ -18,7 +18,7 @@ function Selector({
       className="flex cursor-default flex-row items-center gap-1 rounded-xs px-1 py-0.5 hover:bg-f1-background-hover"
       onClick={onClick}
     >
-      {icon && <F0Icon icon={icon} className="text-f1-icon" />}
+      {icon ? <F0Icon icon={icon} className="text-f1-icon" /> : null}
       <span
         className={cn(
           "font-medium",

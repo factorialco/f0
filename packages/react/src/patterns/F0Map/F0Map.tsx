@@ -559,7 +559,7 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
           {/* Bottom of the overlay stack: a GL circle under the lines and under
               every DOM marker. The sr-only span keeps the announcement the
               canvas can't provide. */}
-          {!webglFailed && mapInstance && currentLocation && (
+          {!webglFailed && mapInstance && currentLocation ? (
             <>
               <CurrentLocationLayer
                 map={mapInstance}
@@ -567,8 +567,8 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
               />
               <span className="sr-only">{i18n.map.currentLocation}</span>
             </>
-          )}
-          {!webglFailed && mapInstance && hasLines && (
+          ) : null}
+          {!webglFailed && mapInstance && hasLines ? (
             <F0MapVectorLayer
               map={mapInstance}
               routes={routes}
@@ -577,8 +577,8 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
               onRouteClick={onRouteClick}
               onArcClick={onArcClick}
             />
-          )}
-          {!webglFailed && mapInstance && markers.length > 0 && (
+          ) : null}
+          {!webglFailed && mapInstance && markers.length > 0 ? (
             <F0MapMarkersLayer
               map={mapInstance}
               points={markers}
@@ -586,8 +586,8 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
               highlightedId={highlightedId}
               onSelect={selectMarker}
             />
-          )}
-          {!webglFailed && mapInstance && showControls && interactive && (
+          ) : null}
+          {!webglFailed && mapInstance && showControls && interactive ? (
             <div
               className={cn(
                 "absolute z-10",
@@ -602,9 +602,9 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
                 labels={controlLabels}
               />
             </div>
-          )}
+          ) : null}
 
-          {tileError && !webglFailed && (
+          {tileError && !webglFailed ? (
             <div className="absolute inset-x-0 top-0 z-30 flex items-center justify-between gap-3 border-b border-solid border-f1-border-secondary bg-f1-background px-4 py-2 text-sm text-f1-foreground">
               <span>{i18n.map.loadError}</span>
               <button
@@ -622,7 +622,7 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
                 {i18n.map.retry}
               </button>
             </div>
-          )}
+          ) : null}
 
           {/* Screen-reader text alternative (always in the DOM), and the visible
               fallback when the map can't render. */}

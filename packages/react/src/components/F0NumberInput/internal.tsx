@@ -123,11 +123,11 @@ function NumberRow({
       >
         {children}
       </div>
-      {extraContent && (
+      {extraContent ? (
         <span className="shrink-0 text-f1-foreground-secondary">
           {extraContent}
         </span>
-      )}
+      ) : null}
       {trailingAction}
     </div>
   )

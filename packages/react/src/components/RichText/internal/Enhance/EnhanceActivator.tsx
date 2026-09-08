@@ -305,9 +305,9 @@ const EnhanceActivator = memo(function EnhanceActivator({
               only affordance: the menu stays hidden and reopens in review mode
               (unless the consumer renders its own review UI). */}
           {open &&
-            !isLoadingEnhance &&
-            !(hideReviewPanel && isAcceptChangesOpen) &&
-            (renderAsFixedLockedPanel ? (
+          !isLoadingEnhance &&
+          !(hideReviewPanel && isAcceptChangesOpen) ? (
+            renderAsFixedLockedPanel ? (
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -356,7 +356,8 @@ const EnhanceActivator = memo(function EnhanceActivator({
                   <AIEnhanceMenu {...enhanceMenuProps} />
                 </motion.div>
               </Popover.Content>
-            ))}
+            )
+          ) : null}
         </AnimatePresence>
       </Popover.Portal>
     </Popover.Root>

@@ -133,46 +133,48 @@ export const SidebarChatList = ({
           }
         />
       </div>
-      {portalRoots.above &&
-        createPortal(
-          above.count > 0 && (
-            <div className="pointer-events-none absolute inset-x-0 top-2 z-[60] flex justify-center">
-              <div className="flex rounded bg-f1-background">
-                <ButtonInternal
-                  type="button"
-                  variant="outline"
-                  size="md"
-                  className="pointer-events-auto shadow-md"
-                  icon={ArrowUp}
-                  label={getUnreadLabel(above.count)}
-                  aria-label={getDirectionalLabel("above", above.count)}
-                  onClick={(event) => jump("above", event.currentTarget)}
-                />
+      {portalRoots.above
+        ? createPortal(
+            above.count > 0 && (
+              <div className="pointer-events-none absolute inset-x-0 top-2 z-[60] flex justify-center">
+                <div className="flex rounded bg-f1-background">
+                  <ButtonInternal
+                    type="button"
+                    variant="outline"
+                    size="md"
+                    className="pointer-events-auto shadow-md"
+                    icon={ArrowUp}
+                    label={getUnreadLabel(above.count)}
+                    aria-label={getDirectionalLabel("above", above.count)}
+                    onClick={(event) => jump("above", event.currentTarget)}
+                  />
+                </div>
               </div>
-            </div>
-          ),
-          portalRoots.above
-        )}
-      {portalRoots.below &&
-        createPortal(
-          below.count > 0 && (
-            <div className="pointer-events-none absolute inset-x-0 bottom-2 z-[60] flex justify-center">
-              <div className="flex rounded bg-f1-background">
-                <ButtonInternal
-                  type="button"
-                  variant="outline"
-                  size="md"
-                  className="pointer-events-auto shadow-md"
-                  icon={ArrowDown}
-                  label={getUnreadLabel(below.count)}
-                  aria-label={getDirectionalLabel("below", below.count)}
-                  onClick={(event) => jump("below", event.currentTarget)}
-                />
+            ),
+            portalRoots.above
+          )
+        : null}
+      {portalRoots.below
+        ? createPortal(
+            below.count > 0 && (
+              <div className="pointer-events-none absolute inset-x-0 bottom-2 z-[60] flex justify-center">
+                <div className="flex rounded bg-f1-background">
+                  <ButtonInternal
+                    type="button"
+                    variant="outline"
+                    size="md"
+                    className="pointer-events-auto shadow-md"
+                    icon={ArrowDown}
+                    label={getUnreadLabel(below.count)}
+                    aria-label={getDirectionalLabel("below", below.count)}
+                    onClick={(event) => jump("below", event.currentTarget)}
+                  />
+                </div>
               </div>
-            </div>
-          ),
-          portalRoots.below
-        )}
+            ),
+            portalRoots.below
+          )
+        : null}
     </>
   )
 }

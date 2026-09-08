@@ -58,15 +58,15 @@ const meta: Meta<typeof F0Toast> = {
       return (
         <div className="flex flex-col items-start gap-4 p-4">
           <div className="h-10">
-            {!isOpen && (
+            {!isOpen ? (
               <F0Button label="Open Toast" onClick={() => setIsOpen(true)} />
-            )}
+            ) : null}
           </div>
-          {isOpen && (
+          {isOpen ? (
             <Story
               args={{ ...context.args, onClose: () => setIsOpen(false) }}
             />
-          )}
+          ) : null}
         </div>
       )
     },

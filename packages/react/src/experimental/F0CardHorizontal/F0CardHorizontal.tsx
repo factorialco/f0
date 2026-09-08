@@ -206,7 +206,7 @@ const F0CardHorizontalBase = forwardRef<HTMLDivElement, F0CardHorizontalProps>(
         onClick={disabled ? undefined : onClick}
         data-testid="card"
       >
-        {link && !disableOverlayLink && (
+        {link && !disableOverlayLink ? (
           <F0Link
             href={link}
             variant="unstyled"
@@ -215,7 +215,7 @@ const F0CardHorizontalBase = forwardRef<HTMLDivElement, F0CardHorizontalProps>(
           >
             &nbsp;
           </F0Link>
-        )}
+        ) : null}
 
         <div className={cardHorizontalClassName[stackAt]}>
           <div
@@ -229,7 +229,7 @@ const F0CardHorizontalBase = forwardRef<HTMLDivElement, F0CardHorizontalProps>(
               avatar ? "items-start" : "items-center"
             )}
           >
-            {avatar && <CardAvatar avatar={avatar} size="lg" />}
+            {avatar ? <CardAvatar avatar={avatar} size="lg" /> : null}
             <div className="flex min-w-0 flex-col gap-0">
               <Text
                 variant="body"
@@ -239,7 +239,7 @@ const F0CardHorizontalBase = forwardRef<HTMLDivElement, F0CardHorizontalProps>(
                   inactive && "text-f1-foreground-secondary line-through"
                 )}
               />
-              {description && (
+              {description ? (
                 <Text
                   variant="description"
                   content={description}
@@ -249,7 +249,7 @@ const F0CardHorizontalBase = forwardRef<HTMLDivElement, F0CardHorizontalProps>(
                     inactive && "line-through"
                   )}
                 />
-              )}
+              ) : null}
             </div>
           </div>
 

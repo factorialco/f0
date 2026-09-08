@@ -140,7 +140,7 @@ export function MetricValue({
         <span className="whitespace-nowrap text-3xl font-semibold leading-none tracking-tight text-f1-foreground">
           {value}
         </span>
-        {trend && trend.direction !== "flat" && (
+        {trend && trend.direction !== "flat" ? (
           <div className="flex shrink-0 items-center">
             {trend.direction === "up" ? (
               <F0Icon
@@ -173,7 +173,7 @@ export function MetricValue({
               {trend.percent.toFixed(1)}%
             </span>
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   )
@@ -222,7 +222,7 @@ export function MetricItem<Filters extends FiltersDefinition>({
       onAskAiTarget={onAskAiTarget}
       itemId={item.id}
     >
-      {data && (
+      {data ? (
         <MetricValue
           value={
             item.valueFormatter
@@ -231,7 +231,7 @@ export function MetricItem<Filters extends FiltersDefinition>({
           }
           trend={trend}
         />
-      )}
+      ) : null}
     </DashboardItem>
   )
 }

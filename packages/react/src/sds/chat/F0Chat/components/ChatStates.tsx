@@ -28,7 +28,7 @@ export const ChatError = (): ReactNode => {
       <div className="flex flex-col items-center gap-3">
         <span>{i18n.chat.error}</span>
         {/* Recovery action — only when the host can actually retry the load. */}
-        {reconnect && (
+        {reconnect ? (
           <ButtonInternal
             variant="outline"
             size="sm"
@@ -36,7 +36,7 @@ export const ChatError = (): ReactNode => {
             icon={ArrowCycle}
             onClick={() => void reconnect()}
           />
-        )}
+        ) : null}
       </div>
     </Centered>
   )

@@ -45,21 +45,21 @@ export const SelectBottomActions = ({
           disabled={action.disabled}
         />
       ))}
-      {showCancelButton && (
+      {showCancelButton ? (
         <F0Button
           onClick={onCancel}
           label={i18n.filters.cancel}
           variant="ghost"
         />
-      )}
-      {showApplyButton && (
+      ) : null}
+      {showApplyButton ? (
         <div className={showCancelButton ? "" : "ml-auto"}>
           <F0Button
             onClick={onApply}
             label={applyLabel ?? i18n.select.applySelection}
           />
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

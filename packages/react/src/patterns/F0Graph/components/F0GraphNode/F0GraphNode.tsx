@@ -416,12 +416,12 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
                           width: isCompact ? 120 : 96,
                         }}
                       />
-                      {!isCompact && !isDot && (
+                      {!isCompact && !isDot ? (
                         <Skeleton
                           className="rounded-xs"
                           style={{ height: 12, width: 64 }}
                         />
-                      )}
+                      ) : null}
                     </div>
                   ) : (
                     <>
@@ -435,7 +435,7 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
                       >
                         {title}
                       </p>
-                      {!isCompact && !isDot && subtitle && (
+                      {!isCompact && !isDot && subtitle ? (
                         <p
                           className="w-full truncate tracking-[-0.07px] text-f1-foreground-secondary"
                           style={{
@@ -446,7 +446,7 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
                         >
                           {subtitle}
                         </p>
-                      )}
+                      ) : null}
                     </>
                   )}
                 </motion.div>
@@ -455,7 +455,7 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
           </div>
         </div>
 
-        {isDetail && actions && (
+        {isDetail && actions ? (
           <NodeToolbar
             nodeId={nodeId}
             isVisible={state === "selected"}
@@ -465,7 +465,7 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
           >
             <div className="flex items-center gap-1">{actions}</div>
           </NodeToolbar>
-        )}
+        ) : null}
 
         {tagRow("max-w-[256px]")}
       </div>

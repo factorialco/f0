@@ -906,11 +906,11 @@ export function EntitiesListFieldRenderer({
           FieldRenderer.tsx. */}
       <label className="text-base font-medium leading-normal text-f1-foreground-secondary">
         {field.label}
-        {isRequired && (
+        {isRequired ? (
           <span className="ml-0.5 text-f1-foreground-critical">*</span>
-        )}
+        ) : null}
       </label>
-      {addConfig && <AddButton config={addConfig} />}
+      {addConfig ? <AddButton config={addConfig} /> : null}
     </div>
   )
 
@@ -955,11 +955,11 @@ export function EntitiesListFieldRenderer({
           viewLabel={translations.view}
         />
 
-        {rootError && (
+        {rootError ? (
           <p className="text-sm font-medium text-f1-foreground-critical">
             {rootError}
           </p>
-        )}
+        ) : null}
       </div>
     )
   }
@@ -1000,11 +1000,11 @@ export function EntitiesListFieldRenderer({
         disabled={isDisabled || removingKeys.size > 0}
       />
 
-      {rootError && (
+      {rootError ? (
         <p className="text-sm font-medium text-f1-foreground-critical">
           {rootError}
         </p>
-      )}
+      ) : null}
     </div>
   )
 }

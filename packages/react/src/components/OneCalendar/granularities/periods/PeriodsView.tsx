@@ -68,11 +68,11 @@ export function PeriodsView({
 
   return (
     <div className="flex flex-col gap-2">
-      {header && (
+      {header ? (
         <div className="px-2 font-medium text-f1-foreground-secondary">
           {header}
         </div>
-      )}
+      ) : null}
       <AnimatePresence
         mode="popLayout"
         initial={false}

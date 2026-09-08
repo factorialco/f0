@@ -32,7 +32,7 @@ export function TOCFooter({ actions }: TOCFooterProps) {
           >
             {action.label}
           </OneEllipsis>
-          {action.icon && <F0Icon icon={action.icon} color="secondary" />}
+          {action.icon ? <F0Icon icon={action.icon} color="secondary" /> : null}
         </div>
       ))}
     </div>

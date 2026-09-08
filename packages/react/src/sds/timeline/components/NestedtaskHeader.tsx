@@ -54,9 +54,9 @@ export const NestedtaskHeader = ({
             >
               {title}
             </span>
-            {description && (
+            {description ? (
               <F0Text content={description} variant="description" as="span" />
-            )}
+            ) : null}
             <F0Icon
               icon={expanded ? ChevronUp : ChevronDown}
               size="xs"
@@ -73,12 +73,12 @@ export const NestedtaskHeader = ({
             >
               {title}
             </span>
-            {description && (
+            {description ? (
               <F0Text content={description} variant="description" as="span" />
-            )}
+            ) : null}
           </div>
         )}
-        {completedCount !== undefined && taskCount !== undefined && (
+        {completedCount !== undefined && taskCount !== undefined ? (
           <div
             className="flex items-center gap-2"
             aria-label={`${completedCount} of ${taskCount} completed`}
@@ -96,7 +96,7 @@ export const NestedtaskHeader = ({
               {completedCount}/{taskCount}
             </span>
           </div>
-        )}
+        ) : null}
       </div>
     </>
   )

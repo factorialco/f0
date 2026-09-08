@@ -153,20 +153,20 @@ export function Seekbar({
         className="pointer-events-none absolute left-0 h-1 rounded-sm bg-f1-foreground"
         style={{ width: `${progressFraction * 100}%` }}
       />
-      {showMarker && (
+      {showMarker ? (
         <div
           className="pointer-events-none absolute z-[1] h-2.5 w-0.5 -translate-x-px bg-f1-foreground/95"
           style={{ left: `${markerFraction * 100}%` }}
           aria-hidden="true"
         />
-      )}
+      ) : null}
       <div
         className="pointer-events-none absolute z-[2] h-3 w-3 -translate-x-1/2 rounded-full bg-f1-foreground shadow-[0_0_4px_rgba(0,0,0,0.4)]"
         style={{ left: `${progressFraction * 100}%` }}
       />
-      {isHoveringBlocked && (
+      {isHoveringBlocked ? (
         <div className="absolute inset-0 cursor-not-allowed" />
-      )}
+      ) : null}
     </div>
   )
 }

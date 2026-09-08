@@ -157,9 +157,9 @@ const _SurveyFormBuilder = ({
     >
       <DragProvider>
         <DragSelectGuard>
-          {showTableOfContent && (
+          {showTableOfContent ? (
             <TableOfContent elements={elements} onChange={onChange} />
-          )}
+          ) : null}
           <div className="relative flex flex-1 flex-col">
             <motion.div
               className={cn(
@@ -278,9 +278,9 @@ const _SurveyFormBuilder = ({
                   })()}
                 </div>
               </Reorder.Group>
-              {shouldShowAddButton && <AddButton />}
+              {shouldShowAddButton ? <AddButton /> : null}
             </motion.div>
-            {applyingChanges && (
+            {applyingChanges ? (
               <motion.div
                 className="sticky bottom-1/2 left-0 z-50 flex w-full items-center justify-center"
                 initial={{ opacity: 0, scale: 0.95 }}
@@ -289,7 +289,7 @@ const _SurveyFormBuilder = ({
               >
                 <ApplyingChangesTag />
               </motion.div>
-            )}
+            ) : null}
           </div>
         </DragSelectGuard>
       </DragProvider>

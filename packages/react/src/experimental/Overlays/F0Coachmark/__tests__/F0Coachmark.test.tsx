@@ -18,7 +18,7 @@ const Harness = (props: PanelProps) => {
   return (
     <>
       <button ref={setTarget}>Filters</button>
-      {target && <F0Coachmark {...props} target={target} />}
+      {target ? <F0Coachmark {...props} target={target} /> : null}
     </>
   )
 }

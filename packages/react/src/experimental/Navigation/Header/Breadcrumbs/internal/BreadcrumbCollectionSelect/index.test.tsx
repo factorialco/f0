@@ -40,7 +40,7 @@ vi.mock("../BreadcrumbSelect", async (importOriginal) => {
   const BreadcrumbSelect: typeof actual.BreadcrumbSelect = (props) => (
     <>
       <actual.BreadcrumbSelect {...props} />
-      {driver.selection && (
+      {driver.selection ? (
         <button
           aria-label="pick"
           onClick={() =>
@@ -54,8 +54,8 @@ vi.mock("../BreadcrumbSelect", async (importOriginal) => {
             )
           }
         />
-      )}
-      {driver.filtersChange && (
+      ) : null}
+      {driver.filtersChange ? (
         <button
           aria-label="set-filters"
           onClick={() =>
@@ -66,7 +66,7 @@ vi.mock("../BreadcrumbSelect", async (importOriginal) => {
             )
           }
         />
-      )}
+      ) : null}
     </>
   )
   return { ...actual, BreadcrumbSelect }

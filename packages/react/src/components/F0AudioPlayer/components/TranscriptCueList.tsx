@@ -93,7 +93,9 @@ export const TranscriptCueList = memo(function TranscriptCueList({
 
   return (
     <>
-      {onSeek && <p className="sr-only">{i18n.audioPlayer.transcriptHint}</p>}
+      {onSeek ? (
+        <p className="sr-only">{i18n.audioPlayer.transcriptHint}</p>
+      ) : null}
       <ol className="flex list-none flex-col gap-1 p-0">
         {cues.map((cue, index) => (
           <CueRow

@@ -342,13 +342,13 @@ export const BaseCommunityPost = ({
                 title={act.label ?? ""}
               />
             ))}
-            {dropdownItems?.length && (
+            {dropdownItems?.length ? (
               <Dropdown
                 items={dropdownItems}
                 icon={EllipsisHorizontal}
                 size="sm"
               />
-            )}
+            ) : null}
           </div>
           <div className="md:hidden">
             <Dropdown
@@ -376,7 +376,7 @@ export const BaseCommunityPost = ({
         >
           {title}
         </p>
-        {description && (
+        {description ? (
           <>
             <PostDescription
               ref={descriptionRef}
@@ -387,20 +387,20 @@ export const BaseCommunityPost = ({
               className={cn(descriptionExpanded && focusRing())}
             />
             {descriptionExpandable &&
-              !noDescriptionClamp &&
-              isDescriptionOverflowing &&
-              !descriptionExpanded && (
-                <ExpandDescriptionButton
-                  describedBy={titleId}
-                  controls={descriptionId}
-                  expanded={descriptionExpanded}
-                  onClick={handleExpandDescription}
-                />
-              )}
+            !noDescriptionClamp &&
+            isDescriptionOverflowing &&
+            !descriptionExpanded ? (
+              <ExpandDescriptionButton
+                describedBy={titleId}
+                controls={descriptionId}
+                expanded={descriptionExpanded}
+                onClick={handleExpandDescription}
+              />
+            ) : null}
           </>
-        )}
+        ) : null}
       </div>
-      {mediaUrl && !event && (
+      {mediaUrl && !event ? (
         // FILLS THE POST, UP TO THE READING COLUMN. The old 480px cap dated
         // from when the avatar's gutter took a chunk of the card and the media
         // sat in what was left; with the body starting at the card's own edge it
@@ -441,14 +441,14 @@ export const BaseCommunityPost = ({
             </>
           )}
         </div>
-      )}
-      {event && (
+      ) : null}
+      {event ? (
         <div className="w-full @[744px]:max-w-content">
           <PostEvent {...event} />
         </div>
-      )}
+      ) : null}
       <p className="text-f1-foreground-secondary">{countersDisplay}</p>
-      {!noReactionsButton && (
+      {!noReactionsButton ? (
         <Reactions
           items={reactions?.items ?? []}
           onInteraction={reactions?.onInteraction}
@@ -458,7 +458,7 @@ export const BaseCommunityPost = ({
             icon: CommentIcon,
           }}
         />
-      )}
+      ) : null}
     </div>
   )
 }
@@ -488,16 +488,16 @@ export const CommunityPostSkeleton = ({
       <div className="mt-3">
         <PostDescription.Skeleton />
       </div>
-      {withImage && !withEvent && (
+      {withImage && !withEvent ? (
         <div className="mt-3 aspect-video w-full overflow-hidden rounded-xl md:w-2/3">
           <Skeleton className="h-full w-full rounded-2xs" />
         </div>
-      )}
-      {withEvent && (
+      ) : null}
+      {withEvent ? (
         <div className="mt-3 w-full md:w-2/3">
           <PostEvent.Skeleton />
         </div>
-      )}
+      ) : null}
       <div className="mt-3 flex flex-row items-center gap-1 py-1">
         <Skeleton className="h-2.5 w-14 rounded-2xs" />
         <Skeleton className="h-2.5 w-14 rounded-2xs" />

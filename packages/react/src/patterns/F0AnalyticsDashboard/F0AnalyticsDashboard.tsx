@@ -124,7 +124,7 @@ export const F0AnalyticsDashboard = <
     <div
       className={cn("flex flex-col gap-5 pb-10", fillHeight && "h-full pb-0")}
     >
-      {(filters || filtersLoading || enableExport || navigationFilters) && (
+      {filters || filtersLoading || enableExport || navigationFilters ? (
         <div className="flex items-center justify-between gap-4 px-5">
           <div className="w-full">
             {filters ? (
@@ -139,22 +139,22 @@ export const F0AnalyticsDashboard = <
             ) : null}
           </div>
           <div className="flex shrink-0 items-center gap-2">
-            {navigationFilters && (
+            {navigationFilters ? (
               <NavigationFilters
                 navigationFilters={navigationFilters}
                 currentNavigationFilters={currentNavigationFilters}
                 onChangeNavigationFilters={setCurrentNavigationFilters}
               />
-            )}
-            {enableExport && (
+            ) : null}
+            {enableExport ? (
               <ExportDropdown
                 onExportExcel={exportAsExcel}
                 isExporting={isExporting}
               />
-            )}
+            ) : null}
           </div>
         </div>
-      )}
+      ) : null}
       <div
         className={cn(
           "px-5",

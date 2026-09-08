@@ -25,11 +25,18 @@ code first.
 
 ## External JS plugins
 
-`.oxlintrc.json` also loads two published ESLint plugins the same way:
+`.oxlintrc.json` also loads three published ESLint plugins the same way:
 `eslint-plugin-sonarjs` (the `recommended` set, minus rules listed as debt in
-the config) and `eslint-plugin-import` under the alias `import-js`, for the
-rules oxlint has no native version of. The same editor caveat below applies to
-them. Rules that need type information run without it under oxlint's JS plugin
+the config), `eslint-plugin-import` under the alias `import-js`, and
+`eslint-plugin-react` under the alias `react-js`, for the rules oxlint has no
+native version of. The aliases are needed because oxlint reserves the names
+`import` and `react` for its own plugins. The same editor caveat below applies
+to them.
+
+`f0-react/` is a local wrapper around `eslint-plugin-react`'s
+`jsx-no-leaked-render`. The upstream rule reports `&&` in attribute values as
+well as in children; the wrapper only reports children, where a leaked `0` or
+`""` actually renders. It is tested in `__tests__/f0-react.test.ts`. Rules that need type information run without it under oxlint's JS plugin
 bridge; the type-aware rules that do work come from oxlint's own `typescript`
 plugin with `--type-aware` (see the `lint` script).
 

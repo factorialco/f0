@@ -89,9 +89,9 @@ export function FilterList<Definition extends FiltersDefinition>({
           "flex flex-1 h-full w-full flex-col min-h-0 max-h-full gap-1 overflow-x-hidden p-2"
         )}
       >
-        {isCompactMode && (
+        {isCompactMode ? (
           <div className="-mx-2 mb-1 h-px border-0 border-t border-solid border-f1-border-secondary" />
-        )}
+        ) : null}
         <ListScrollArea className="flex-1 min-h-0 max-h-full">
           <div className="flex flex-col gap-1">
             {Object.entries(definition).map(([key, filter]) => {
@@ -139,7 +139,7 @@ export function FilterList<Definition extends FiltersDefinition>({
                       {filter.label}
                     </OneEllipsis>
                     <AnimatePresence>
-                      {isActive && (
+                      {isActive ? (
                         <motion.span
                           className="h-2 w-2 shrink-0 rounded-full bg-f1-background-selected-bold"
                           initial={
@@ -154,11 +154,11 @@ export function FilterList<Definition extends FiltersDefinition>({
                               : { opacity: 0, scale: 0.7 }
                           }
                         />
-                      )}
+                      ) : null}
                     </AnimatePresence>
-                    {isCompactMode && <F0Icon icon={ChevronRight} />}
+                    {isCompactMode ? <F0Icon icon={ChevronRight} /> : null}
                   </div>
-                  {isActive && (
+                  {isActive ? (
                     <span
                       id={`${activeDescriptionId}-${key}`}
                       className="sr-only"
@@ -167,20 +167,20 @@ export function FilterList<Definition extends FiltersDefinition>({
                         filters: filter.label,
                       })}
                     </span>
-                  )}
+                  ) : null}
                 </button>
               )
             })}
           </div>
         </ListScrollArea>
-        {isCompactMode && (
+        {isCompactMode ? (
           <div className="-mx-2 flex items-center justify-end gap-2 border border-solid border-transparent border-t-f1-border-secondary p-2">
             <F0Button
               onClick={onClickApplyFilters}
               label={i18n.filters.applyFilters}
             />
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   )

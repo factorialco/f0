@@ -325,15 +325,17 @@ const meta: Meta = {
             {isMultiplePaginated ? (
               <>
                 <p>{getSelectionDisplay()}</p>
-                {selectionStatus && (
+                {selectionStatus ? (
                   <p>Total: {selectionStatus.selectedCount}</p>
-                )}
-                {getFiltersDisplay() && <p>Filters: {getFiltersDisplay()}</p>}
+                ) : null}
+                {getFiltersDisplay() ? (
+                  <p>Filters: {getFiltersDisplay()}</p>
+                ) : null}
               </>
             ) : (
               <>
                 Selected: {JSON.stringify(truncatedValue, null, 2)}
-                {args.multiple && ` - Total: ${localValue?.length ?? 0}`}
+                {args.multiple ? ` - Total: ${localValue?.length ?? 0}` : null}
               </>
             )}
           </div>
