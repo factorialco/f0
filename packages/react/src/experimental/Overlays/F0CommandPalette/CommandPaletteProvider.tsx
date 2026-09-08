@@ -47,9 +47,7 @@ const hardNavigate = (href: string) => {
  */
 export const CommandPaletteProvider = ({
   children,
-  providers = [],
-  actions = [],
-  navigation = [],
+  groups,
   recent = [],
   assistant,
   labels,
@@ -129,9 +127,7 @@ export const CommandPaletteProvider = ({
         open={isOpen}
         onOpenChange={setIsOpen}
         initialScope={initialScope}
-        providers={providers}
-        actions={actions}
-        navigation={navigation}
+        groups={groups}
         recent={recent}
         assistant={assistant}
         labels={labels}

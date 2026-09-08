@@ -1,9 +1,9 @@
 import { Shortcut } from "@/ui/Shortcut"
 import type { CommandRow, CommandStage } from "../internal-types"
-import type { ResolvedCommandLabels } from "../labels"
+import type { CommandPaletteLabels } from "../types"
 
 type CommandFooterProps = {
-  labels: ResolvedCommandLabels
+  labels: CommandPaletteLabels
   stage: CommandStage
   scoped: boolean
   /** Whether the assistant's `mod+Enter` binding is live. */

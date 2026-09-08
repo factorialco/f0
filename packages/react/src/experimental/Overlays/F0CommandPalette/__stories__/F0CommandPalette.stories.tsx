@@ -25,11 +25,12 @@ import NewHomeLayoutStories, {
   Default as NewHomeLayoutDefault,
 } from "@/sds/Home/NewHomeLayout/index.stories"
 import { F0CommandPaletteProvider, useCommandPalette } from ".."
+import { englishLabels } from "../labels.fixture"
 import type {
   CommandAction,
   CommandEntityProvider,
   CommandEntityRef,
-  CommandNavigationItem,
+  CommandGroup,
   F0CommandPaletteProviderProps,
 } from "../types"
 
@@ -326,17 +327,33 @@ const actions: CommandAction[] = [
   },
 ]
 
-const navigation: CommandNavigationItem[] = [
+const destinations: CommandAction[] = [
   { id: "nav-people", label: "People", href: "/people" },
   { id: "nav-devices", label: "Devices", href: "/devices" },
   { id: "nav-time", label: "Time off", href: "/time-off" },
   { id: "nav-settings", label: "Settings", href: "/settings" },
 ]
 
+/**
+ * The whole list, in the order it appears: commands, then records, then
+ * destinations.
+ *
+ * That order is DATA here, not a rule inside the palette. A product that wants
+ * its people above its shortcuts writes them above its shortcuts, and the
+ * heading over each group is the product's own word rather than one the
+ * component invented — which is what "Actions" and "Go to" used to be.
+ */
+const groups: CommandGroup[] = [
+  { label: "Actions", items: actions },
+  { provider: teamProvider },
+  { provider: peopleProvider },
+  { provider: deviceProvider },
+  { label: "Go to", items: destinations },
+]
+
 const baseConfig: Omit<F0CommandPaletteProviderProps, "children"> = {
-  providers: [teamProvider, peopleProvider, deviceProvider],
-  actions,
-  navigation,
+  labels: englishLabels,
+  groups,
   recent: ["my-tasks", "nav-settings"],
   assistant: {
     label: "Ask One",
@@ -849,7 +866,11 @@ const brokenAppProvider: CommandEntityProvider = {
  */
 export const LoadingAndFailingProviders: Story = {
   args: {
-    providers: [quickTeamProvider, slowDeviceProvider, brokenAppProvider],
+    groups: [
+      { provider: quickTeamProvider },
+      { provider: slowDeviceProvider },
+      { provider: brokenAppProvider },
+    ],
   },
   play: async ({ canvasElement }) => {
     const { body, field } = await openPalette(canvasElement)
@@ -1001,7 +1022,12 @@ const deviceProviderFromAdapter: CommandEntityProvider = {
  * implement. Nothing here is palette-specific except `toDeviceRef`.
  */
 export const FromACollectionDataAdapter: Story = {
-  args: { providers: [deviceProviderFromAdapter, peopleProvider] },
+  args: {
+    groups: [
+      { provider: deviceProviderFromAdapter },
+      { provider: peopleProvider },
+    ],
+  },
   play: async ({ canvasElement }) => {
     const { body, field } = await openPalette(canvasElement)
     await userEvent.type(field, "mac")

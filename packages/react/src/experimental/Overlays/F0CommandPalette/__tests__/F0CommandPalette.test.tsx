@@ -8,11 +8,12 @@ import {
   zeroRender as render,
 } from "@/testing/test-utils"
 import { F0CommandPaletteProvider, useCommandPalette } from ".."
+import { englishLabels } from "../labels.fixture"
 import type {
   CommandAction,
   CommandEntityProvider,
   CommandEntityRef,
-  CommandNavigationItem,
+  CommandGroup,
 } from "../types"
 
 const laptop: CommandEntityRef = {
@@ -148,8 +149,15 @@ const actions: CommandAction[] = [
   { id: "my-tasks", label: "Go to my tasks", href: "/tasks?scope=mine" },
 ]
 
-const navigation: CommandNavigationItem[] = [
+const destinations: CommandAction[] = [
   { id: "nav-devices", label: "Devices", href: "/devices" },
+]
+
+/** The default list: commands, records, destinations — in that order. */
+const groupsWith = (providers: CommandEntityProvider[]): CommandGroup[] => [
+  { label: "Shortcuts", items: actions },
+  ...providers.map((provider) => ({ provider })),
+  { label: "Go to", items: destinations },
 ]
 
 const OpenButton = ({ scoped = false }: { scoped?: boolean }) => {
@@ -185,13 +193,12 @@ const setup = ({
   const user = userEvent.setup()
   render(
     <F0CommandPaletteProvider
-      providers={
+      labels={englishLabels}
+      groups={groupsWith(
         withTeam
           ? [deviceProvider, teamProvider, personProvider]
           : [deviceProvider]
-      }
-      actions={actions}
-      navigation={navigation}
+      )}
       recent={recent}
       onNavigate={onNavigate}
       assistant={withAssistant ? { label: "Ask One", onAsk } : undefined}
@@ -298,7 +305,7 @@ describe("F0CommandPaletteProvider", () => {
   it("opens on mod+k and closes on a second press", async () => {
     const user = userEvent.setup()
     render(
-      <F0CommandPaletteProvider actions={actions}>
+      <F0CommandPaletteProvider labels={englishLabels} groups={groupsWith([])}>
         <span>page</span>
       </F0CommandPaletteProvider>
     )
@@ -314,7 +321,7 @@ describe("F0CommandPaletteProvider", () => {
   it("treats a HELD mod+k as one press", async () => {
     const user = userEvent.setup()
     render(
-      <F0CommandPaletteProvider actions={actions}>
+      <F0CommandPaletteProvider labels={englishLabels} groups={groupsWith([])}>
         <span>page</span>
       </F0CommandPaletteProvider>
     )
@@ -331,7 +338,11 @@ describe("F0CommandPaletteProvider", () => {
   it("does not bind the shortcut when it is turned off", async () => {
     const user = userEvent.setup()
     render(
-      <F0CommandPaletteProvider actions={actions} shortcut={false}>
+      <F0CommandPaletteProvider
+        labels={englishLabels}
+        groups={groupsWith([])}
+        shortcut={false}
+      >
         <span>page</span>
       </F0CommandPaletteProvider>
     )
@@ -346,13 +357,17 @@ describe("F0CommandPaletteProvider", () => {
 })
 
 describe("global mode", () => {
-  it("leads the empty state with recents, then suggestions", async () => {
+  it("leads the empty state with recents, then the groups as declared", async () => {
     await open({ recent: ["my-tasks"] })
 
+    // "Recent" is the palette's own bucket, so it comes from `labels`. Every
+    // other heading is the one the consumer wrote — the palette used to relabel
+    // all of them "Suggestions", which renamed content it did not write.
     expect(screen.getByText("Recent")).toBeInTheDocument()
-    expect(screen.getByText("Suggestions")).toBeInTheDocument()
+    expect(screen.getByText("Shortcuts")).toBeInTheDocument()
+    expect(screen.getByText("Go to")).toBeInTheDocument()
 
-    // The recent row comes before the suggestion of the same command.
+    // The recent row comes before the same command in its own group.
     const rows = screen.getAllByRole("option")
     expect(rows[0]).toHaveAccessibleName("Go to my tasks")
   })
@@ -507,7 +522,8 @@ describe("scoping", () => {
     expect(
       screen.queryByRole("button", { name: /Remove scope/ })
     ).not.toBeInTheDocument()
-    expect(screen.getByText("Suggestions")).toBeInTheDocument()
+    // Back to the unscoped list, under the consumer's own headings.
+    expect(screen.getByText("Shortcuts")).toBeInTheDocument()
   })
 
   it("pops the scope on Escape before closing the palette", async () => {
@@ -1031,8 +1047,8 @@ describe("an action that only goes somewhere", () => {
     const user = userEvent.setup()
     render(
       <F0CommandPaletteProvider
-        providers={[withHrefActions]}
-        actions={actions}
+        labels={englishLabels}
+        groups={groupsWith([withHrefActions])}
         onNavigate={onNavigate}
       >
         <OpenButton scoped />
@@ -1107,7 +1123,10 @@ describe("remote entity search", () => {
   const openWith = async (provider: CommandEntityProvider) => {
     const user = userEvent.setup()
     render(
-      <F0CommandPaletteProvider providers={[provider]} actions={actions}>
+      <F0CommandPaletteProvider
+        labels={englishLabels}
+        groups={groupsWith([provider])}
+      >
         <OpenButton />
       </F0CommandPaletteProvider>
     )

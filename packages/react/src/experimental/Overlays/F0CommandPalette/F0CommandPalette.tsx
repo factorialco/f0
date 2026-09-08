@@ -10,7 +10,6 @@ import {
 } from "react"
 import { useMediaQuery } from "usehooks-ts"
 import { toasts } from "@/hooks/toast"
-import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Dialog, DialogContent, DialogTitle } from "@/ui/Dialog/dialog"
 import { CommandFooter } from "./components/CommandFooter"
@@ -27,12 +26,10 @@ import {
 import type { CommandStage } from "./internal-types"
 import { useCommandLabels } from "./labels"
 import type {
-  CommandAction,
   CommandAssistant,
   CommandEntityAction,
-  CommandEntityProvider,
   CommandEntityRef,
-  CommandNavigationItem,
+  CommandGroup,
   CommandPaletteLabels,
   CommandParamValues,
   CommandRunContext,
@@ -56,12 +53,10 @@ type F0CommandPaletteProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   initialScope: CommandEntityRef | null
-  providers: CommandEntityProvider[]
-  actions: CommandAction[]
-  navigation: CommandNavigationItem[]
+  groups: CommandGroup[]
   recent: string[]
   assistant?: CommandAssistant
-  labels?: CommandPaletteLabels
+  labels: CommandPaletteLabels
   onNavigate: (href: string) => void
 }
 
@@ -95,16 +90,36 @@ export const F0CommandPalette = ({
   open,
   onOpenChange,
   initialScope,
-  providers,
-  actions,
-  navigation,
+  groups,
   recent,
   assistant,
-  labels: labelOverrides,
+  labels: fromProps,
   onNavigate,
 }: F0CommandPaletteProps) => {
-  const i18n = useI18n()
-  const labels = useCommandLabels(labelOverrides)
+  const labels = useCommandLabels(fromProps)
+
+  /**
+   * The providers among the groups, in the order they were declared.
+   *
+   * Derived rather than passed, because a provider is a group now — but the
+   * parts of the palette that fetch, resolve a ref's owner and count a scope's
+   * actions all want the plain list, and each rebuilding it would be three
+   * copies of the same filter.
+   *
+   * Keyed on the group SIGNATURE and not on `groups` itself: a consumer writing
+   * `groups={[...]}` inline hands over a new array every render, and this list
+   * feeds `useEntitySearch`, so an identity that changed every render would
+   * re-run every provider's search on every render. The signature is the shape
+   * that actually matters here — which providers, in which order.
+   */
+  const groupSignature = groups
+    .map((group) => group.provider?.type ?? `items:${group.label}`)
+    .join(" ")
+  const providers = useMemo(
+    () => groups.flatMap((group) => (group.provider ? [group.provider] : [])),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- see the note above
+    [groupSignature]
+  )
   const listboxId = useId()
 
   const isPhone = useMediaQuery("(max-width: 560px)", {
@@ -241,9 +256,9 @@ export const F0CommandPalette = ({
         title: labels.rowActions.linkCopied,
         variant: "success",
       })
-      setAnnouncement(i18n.t("commandPalette.announce.linkCopied", { url }))
+      setAnnouncement(labels.announce.linkCopied(url))
     },
-    [i18n, labels]
+    [labels]
   )
 
   /**
@@ -263,18 +278,11 @@ export const F0CommandPalette = ({
         (candidate) => candidate.type === ref.type
       )
       const count = provider?.actions?.(ref).length ?? 0
-      setAnnouncement(
-        count === 0
-          ? i18n.t("commandPalette.announce.scopedEmpty", { name: ref.label })
-          : i18n.t(
-              count === 1
-                ? "commandPalette.announce.scoped.one"
-                : "commandPalette.announce.scoped.other",
-              { name: ref.label, count }
-            )
-      )
+      // The count goes over as a number, plural and zero case included: only the
+      // consumer knows how its language says "no actions".
+      setAnnouncement(labels.announce.scoped(ref.label, count))
     },
-    [i18n, providers]
+    [labels, providers]
   )
 
   /**
@@ -292,11 +300,11 @@ export const F0CommandPalette = ({
       setStage({ kind: "browse" })
       setQuery(text)
       setSegments([text])
-      setAnnouncement(i18n.commandPalette.announce.cleared)
+      setAnnouncement(labels.announce.cleared)
       fieldRef.current?.focus()
       caretToEnd(fieldRef.current)
     },
-    [i18n]
+    [labels]
   )
 
   /** Pop one level: params → previous param → the last link → nothing. Returns
@@ -367,9 +375,8 @@ export const F0CommandPalette = ({
     query,
     scope,
     stage,
+    groups,
     providers,
-    actions,
-    navigation,
     recent,
     assistant,
     context,
@@ -511,16 +518,13 @@ export const F0CommandPalette = ({
         // A blocked row is reachable so its reason can be read, but it never
         // runs: re-announce rather than failing silently.
         setAnnouncement(
-          i18n.t("commandPalette.announce.unavailable", {
-            label: row.label,
-            reason: row.disabledReason,
-          })
+          labels.announce.unavailable(row.label, row.disabledReason)
         )
         return
       }
       row.run()
     },
-    [i18n, rows]
+    [labels, rows]
   )
 
   /**
@@ -836,9 +840,9 @@ export const F0CommandPalette = ({
   const fieldLabel =
     stage.kind === "param"
       ? ((stage.action.params ?? [])[stage.step]?.label ??
-        i18n.commandPalette.placeholderScoped)
+        labels.placeholderScoped)
       : scope
-        ? i18n.t("commandPalette.fieldLabelScoped", { name: scopeName })
+        ? labels.fieldLabelScoped(scopeName)
         : labels.placeholder
 
   /**
@@ -861,7 +865,7 @@ export const F0CommandPalette = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        aria-label={i18n.commandPalette.label}
+        aria-label={labels.label}
         // The palette has no prose to describe it — the footer teaches the
         // gesture, and pointing `aria-describedby` at that would read the key
         // hints out as the dialog's purpose. Explicitly none, which is how
@@ -979,9 +983,7 @@ export const F0CommandPalette = ({
           }
         }}
       >
-        <DialogTitle className="sr-only">
-          {i18n.commandPalette.label}
-        </DialogTitle>
+        <DialogTitle className="sr-only">{labels.label}</DialogTitle>
 
         <CommandSearchBar
           query={query}
@@ -994,15 +996,11 @@ export const F0CommandPalette = ({
           scopes={scopes}
           scopeName={(index) => nameOf(scopes[index])}
           removeScopeLabel={(index) =>
-            i18n.t("commandPalette.scope.remove", {
-              name: nameOf(scopes[index]),
-            })
+            labels.scope.remove(nameOf(scopes[index]))
           }
           assistant={assistant}
           askLabel={
-            scope
-              ? i18n.t("commandPalette.row.ask", { label: scope.label })
-              : (assistant?.label ?? "")
+            scope ? labels.row.ask(scope.label) : (assistant?.label ?? "")
           }
           onRemoveScope={(index) => truncateScopes(index, "")}
           onAsk={() => ask(askPrompt)}
@@ -1041,7 +1039,7 @@ export const F0CommandPalette = ({
             ref={attachList}
             id={listboxId}
             role="listbox"
-            aria-label={i18n.commandPalette.label}
+            aria-label={labels.label}
             // The honest way to say "still arriving": the option list stays
             // exactly the options that exist, and this says more are coming.
             aria-busy={search.pending.length > 0 || undefined}

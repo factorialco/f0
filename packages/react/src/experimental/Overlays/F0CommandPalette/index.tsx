@@ -26,7 +26,7 @@ export type {
   CommandEntityProvider,
   CommandEntityRef,
   CommandImpact,
-  CommandNavigationItem,
+  CommandGroup,
   CommandParamOption,
   CommandParamStep,
   CommandParamValues,

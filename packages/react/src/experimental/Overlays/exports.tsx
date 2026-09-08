@@ -30,7 +30,7 @@ export {
   type CommandEntityProvider,
   type CommandEntityRef,
   type CommandImpact,
-  type CommandNavigationItem,
+  type CommandGroup,
   type CommandParamOption,
   type CommandParamStep,
   type CommandParamValues,

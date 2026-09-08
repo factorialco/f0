@@ -270,29 +270,43 @@ type CommandActionBase = {
   /** Second line. Leave it out unless it says something the label cannot. */
   description?: string
   /**
-   * The heading these commands collect under. Defaults to "Actions".
+   * NO `group` field, deliberately. A global command takes its heading from the
+   * `CommandGroup` that holds it, because a heading is a fact about the group
+   * rather than about one row inside it — five items each naming the same
+   * string is five chances for them to disagree.
    *
-   * A scoped action has always named its own group, and a global one could not
-   * — so its heading was the one word on screen a product could not choose.
-   * Same field, same meaning, both ends.
+   * A scoped action keeps its own `group`: that list is assembled by the
+   * palette from a provider's `actions`, so there is no consumer-declared group
+   * for it to inherit one from.
    */
-  group?: string
 }
 
 /** A flat global command: a shortcut, a jump, a thing to create. */
 export type CommandAction = CommandActionBase &
   CommandDoes<(context: CommandRunContext) => void>
 
-/** An entry in the "Go to" group: somewhere in the product to land. */
-export type CommandNavigationItem = {
-  id: string
-  label: string
-  icon?: IconType
-  keywords?: string
-  href: string
-  /** The heading these destinations collect under. Defaults to "Go to". */
-  group?: string
-}
+/**
+ * ONE HEADING AND WHAT SITS UNDER IT.
+ *
+ * Either items the consumer wrote, or a provider that fetches records — one
+ * ordered list holds both, and the order it is written in is the order the
+ * groups appear on screen.
+ *
+ * There is no separate `navigation` prop and no built-in "Go to". A destination
+ * is a command whose `CommandDoes` picked `href`, so a group of destinations is
+ * a group like any other and the product names it. The palette used to assign
+ * those headings itself, which made "Actions" and "Go to" the only two words on
+ * screen a product could not choose — and put copy about the consumer's own
+ * content into a labels table, where it did not belong.
+ *
+ * Exactly one of `items` or `provider`, enforced by `never` on the other, so a
+ * group carrying both is a type error rather than a silent precedence rule.
+ *
+ * Give it a STABLE identity — module scope, or memoised. It keys the row memos.
+ */
+export type CommandGroup =
+  | { label: string; items: CommandAction[]; provider?: never }
+  | { provider: CommandEntityProvider; label?: never; items?: never }
 
 /**
  * The assistant escape hatch — the way out of the list when nothing in it fit.
@@ -315,73 +329,121 @@ export type CommandAssistant = {
 }
 
 /**
- * Every word the palette puts ON SCREEN, for a product that words it
- * differently. All optional: each one falls back to F0's own translation, so
- * the palette is fully localised before anybody configures it.
+ * EVERY WORD THE PALETTE PUTS ON SCREEN — all of it, and all of it required.
  *
- * What is NOT here is deliberate. Accessible names, live-region announcements
- * and the tooltips on controls the palette generated itself stay in i18n —
- * they describe the component's own mechanics rather than the product's domain,
- * and moving them here would mean supplying `"Copy link to MacBook Pro 14\""`
- * in every language to get what F0 already ships translated.
+ * The palette ships no copy of its own. It renders the consumer's records,
+ * their commands and their destinations, so the words wrapped around that
+ * content belong to the same product and arrive the same way: as props, rather
+ * than half here and half in a shared translation table this component would
+ * have to grow a key in every time a row learned a new state.
+ *
+ * REQUIRED, not optional with a fallback, because a fallback is exactly where
+ * an untranslated string hides. An English default renders perfectly inside a
+ * Spanish app and nothing fails — nothing is even detectably wrong until a
+ * reader sees it. A required field is a compile error instead.
+ *
+ * ANYTHING THAT INTERPOLATES IS A FUNCTION, never a template carrying
+ * `{{name}}`. A function is typed, so a missing value is a compile error rather
+ * than a literal `{{name}}` on screen; it cannot be handed the wrong
+ * interpolation dialect; and it is the only form that can reorder its parts or
+ * choose a plural, which a template cannot do in any language that inflects.
+ *
+ * Define it at MODULE SCOPE and hand over the same object every render. It is
+ * static copy, so there is nothing to recompute — and the palette keys its row
+ * memos off these values.
  */
 export type CommandPaletteLabels = {
+  /** Accessible name of the overlay, for a screen reader announcing it. */
+  label: string
   /** The prompt in the field while nothing is typed and nothing is scoped. */
-  placeholder?: string
+  placeholder: string
   /** The short form, for a field sharing its row with the assistant on a phone. */
-  placeholderPhone?: string
-  empty?: { title?: string; description?: string }
+  placeholderPhone: string
+  /** The prompt once the palette is scoped and only actions remain. */
+  placeholderScoped: string
+  /** The same, once the palette is scoped to a record. */
+  fieldLabelScoped: (name: string) => string
+  empty: { title: string; description: string }
   /**
-   * Headings over the palette's own buckets. A provider names its records'
-   * group with `label`, and a command or destination names its own with
-   * `group` — these are the ones the palette computes.
+   * Headings over the buckets the palette COMPUTES, and only those.
+   *
+   * Every other heading arrives with its content: a `CommandGroup` names itself
+   * with `label`, and a provider names its records' group the same way. What is
+   * left here is the three rearrangements the palette performs on that content
+   * — what you did lately, what it floats first, what it had to gate. Those are
+   * facts about this component's own behaviour, so they are generic copy;
+   * "Actions" and "Go to" never were, and used to sit here by mistake.
    */
-  groups?: {
-    recent?: string
-    suggestions?: string
-    actions?: string
-    goTo?: string
-    suggested?: string
-    unavailable?: string
+  groups: {
+    recent: string
+    suggested: string
+    unavailable: string
   }
   /** The key legend's labels. The keys themselves are glyphs, not copy. */
-  footer?: {
-    actions?: string
-    rowActions?: string
-    ask?: string
-    choose?: string
-    leaveScope?: string
-    goBack?: string
+  footer: {
+    actions: string
+    rowActions: string
+    ask: string
+    choose: string
+    leaveScope: string
+    goBack: string
   }
+  /** The chip in the field, which is a control and needs a name. */
+  scope: { remove: (name: string) => string }
   /** Visible text and tooltips on the controls a row carries. */
-  rowActions?: { actions?: string; copyLink?: string; linkCopied?: string }
-  /** One word each, on the tooltip of a row's own `↵`. */
-  verbs?: { open?: string; run?: string; ask?: string }
-  /** Shown on a gated row that supplied no reason of its own. */
-  unavailable?: string
-  /** Shown in a provider's group when its search could not be reached. */
-  searchFailed?: string
+  rowActions: {
+    actions: string
+    actionsFor: (label: string) => string
+    copyLink: string
+    copyLinkTo: (label: string) => string
+    linkCopied: string
+  }
   /**
-   * The blast radius, as a sentence. A function rather than a template: the
-   * line carries three values and a conditional reason, and this is the only
-   * form that can reorder them or drop the separator.
+   * What the live region says when the palette changes under the reader.
+   *
+   * `scoped` is handed the count so it can pick its own plural — including the
+   * zero case, which is why there is no separate "no actions" string.
    */
-  impact?: (impact: CommandImpact) => string
+  announce: {
+    scoped: (name: string, count: number) => string
+    cleared: string
+    unavailable: (label: string, reason: string) => string
+    linkCopied: (url: string) => string
+  }
+  /** What one row says, and what pressing it will do. */
+  row: {
+    open: (label: string) => string
+    run: (label: string) => string
+    ask: (label: string) => string
+    /** One word each, on the tooltip of a row's own `↵`. */
+    verb: { open: string; run: string; ask: string }
+    /** Shown on a gated row that supplied no reason of its own. */
+    unavailable: string
+    /** Shown in a provider's group when its search could not be reached. */
+    searchFailed: string
+  }
+  /**
+   * The blast radius, as a sentence. Three values and a conditional reason,
+   * which is more than a template can put in a sensible order.
+   */
+  impact: (impact: CommandImpact) => string
 }
 
 export type F0CommandPaletteProviderProps = {
   children: ReactNode
-  /** Overrides for the copy the palette puts on screen. */
-  labels?: CommandPaletteLabels
-  /** The domains whose records are findable, in the order their groups appear. */
-  providers?: CommandEntityProvider[]
-  /** Flat global commands. Shown under "Suggestions" while the query is empty. */
-  actions?: CommandAction[]
-  /** The "Go to" group. */
-  navigation?: CommandNavigationItem[]
+  /** Every word the palette puts on screen. Required: it ships none itself. */
+  labels: CommandPaletteLabels
   /**
-   * Ids of `actions` or `navigation` entries to lead the empty state with, most
-   * recent first.
+   * Everything findable, as an ordered list of groups.
+   *
+   * One prop rather than three, because `actions`, `navigation` and `providers`
+   * were the same idea three times — a heading and the rows under it. Order
+   * here is order on screen, so where records sit relative to commands is the
+   * product's call and no longer a rule buried in this component.
+   */
+  groups: CommandGroup[]
+  /**
+   * Ids of items in `groups` to lead the empty state with, most recent first.
    *
    * Consumer-owned on purpose: what counts as recent is a fact about the app's
    * history, not about this overlay, and the palette must not be the thing that

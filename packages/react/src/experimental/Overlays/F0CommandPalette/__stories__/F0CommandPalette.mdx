@@ -44,12 +44,12 @@ The **scope** is a record or a selection, the **action** is the verb, the **para
 
 ### Modes
 
-| Mode                     | Reached by                                                     | The list holds                                                                         |
-| ------------------------ | -------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| **Global, empty query**  | Opening it                                                     | `recent`, then `actions` as "Suggestions"                                              |
-| **Global, with a query** | Typing                                                         | Ranked `actions`, records from every provider, ranked `navigation`, then the assistant |
-| **Scoped**               | `Tab` on a record, its `Actions` control, or `openScoped(ref)` | That record's actions — suggested first, then whatever is inside it, blocked last      |
-| **Parameter**            | Choosing an action with `params`                               | That step's options                                                                    |
+| Mode                     | Reached by                                                     | The list holds                                                                    |
+| ------------------------ | -------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| **Global, empty query**  | Opening it                                                     | `recent`, then each group under its own heading                                   |
+| **Global, with a query** | Typing                                                         | Every group in declared order, items ranked within each, then the assistant       |
+| **Scoped**               | `Tab` on a record, its `Actions` control, or `openScoped(ref)` | That record's actions — suggested first, then whatever is inside it, blocked last |
+| **Parameter**            | Choosing an action with `params`                               | That step's options                                                               |
 
 ### Keyboard
 
@@ -76,6 +76,120 @@ them, and the arrows are the map inside each.
 command lines, where the bar IS one; here the bar is a token field, `Tab` is what
 a hand reaches for in one, and a slash you can also type into a name is a worse
 way to say the same thing. Nothing lost a gesture — one gesture lost a spare key.
+
+### Every word on screen is a prop
+
+`labels` is **required**, and it holds all of the copy: the field's prompt, the
+group headings, the empty state, the key legend, the accessible name of every
+control the palette generates and every sentence it puts in a live region.
+
+The palette carries none of its own. It renders your records, your commands and
+your destinations, so the words wrapped around that content belong to the same
+product — they arrive the same way rather than half as props and half as keys in
+a shared translation table.
+
+Required rather than optional with a fallback, because **a fallback is where an
+untranslated string hides.** An English default renders perfectly inside a
+Spanish app; nothing throws, nothing logs, and nothing is detectably wrong until
+a reader sees it. A missing required field is a compile error instead.
+
+```tsx
+// Module scope. It is static copy, and the palette keys its row memos off
+// these values — a fresh object every render would churn all of them.
+const labels: CommandPaletteLabels = {
+  label: "Command palette",
+  placeholder: "Search, or type a name then Tab to use it",
+  placeholderPhone: "Search or ask",
+  placeholderScoped: "Run an action",
+  fieldLabelScoped: (name) => `Search or run an action on ${name}`,
+  empty: { title: "No results", description: "Try a different search." },
+  groups: { recent: "Recent", actions: "Actions" /* … */ },
+  footer: { actions: "Actions", ask: "Ask" /* … */ },
+  scope: { remove: (name) => `${name}, remove this scope` },
+  rowActions: {
+    actions: "Actions",
+    actionsFor: (label) => `Actions for ${label}`,
+    copyLink: "Copy link",
+    copyLinkTo: (label) => `Copy link to ${label}`,
+    linkCopied: "Link copied",
+  },
+  announce: {
+    // Zero and plural in one place — which is why this is a function.
+    scoped: (name, count) =>
+      count === 0
+        ? `Scoped to ${name}. No actions available.`
+        : `Scoped to ${name}. ${count} ${count === 1 ? "action" : "actions"}.`,
+    cleared: "Scope cleared.",
+    unavailable: (label, reason) => `${label} is not available. ${reason}`,
+    linkCopied: (url) => `Link copied. ${url}`,
+  },
+  row: {
+    open: (label) => `Open ${label}`,
+    run: (label) => `Run ${label}`,
+    ask: (label) => `Ask about ${label}`,
+    verb: { open: "Open", run: "Run", ask: "Ask" },
+    unavailable: "Not available here",
+    searchFailed: "Could not load these results",
+  },
+  impact: (impact) => `${impact.eligible} of ${impact.total}`,
+}
+
+<F0CommandPaletteProvider labels={labels} groups={groups}>
+  {children}
+</F0CommandPaletteProvider>
+```
+
+**Anything that interpolates is a function, never a template with `{{name}}`
+in it.** A function is typed, so a value you forgot is a compile error rather
+than a literal `{{name}}` on screen; it cannot be handed the wrong interpolation
+dialect; and it is the only form that can reorder its parts or choose a plural,
+which no template can do in a language that inflects. `announce.scoped` is the
+clearest case: it takes the count as a number and decides for itself what its
+language says about zero, one and many.
+
+If your app already has a translation layer, call it inside these functions —
+`fieldLabelScoped: (name) => t("palette.scopedTo", { name })`. The palette does
+not care where a string came from, only that you wrote it.
+
+### One ordered list of groups
+
+`groups` is everything findable, and a group is **a heading plus what sits
+under it** — either items you wrote, or a provider that fetches records.
+
+```tsx
+const groups: CommandGroup[] = [
+  { label: "Shortcuts", items: [createTask, requestTimeOff] },
+  { provider: peopleProvider },
+  { provider: deviceProvider },
+  {
+    label: "Go to",
+    items: [{ id: "settings", label: "Settings", href: "/settings" }],
+  },
+]
+```
+
+**Order here is order on screen.** Where records sit relative to commands is the
+product's decision, not a rule inside this component — it used to be
+commands-then-records-then-destinations, fixed, and a product that wanted its
+people first could not have them.
+
+**There is no `navigation` prop and no built-in "Go to".** A destination is a
+command whose `CommandDoes` picked `href`, so a group of destinations is a group
+like any other. `actions`, `navigation` and `providers` were the same idea three
+times, and the two headings the palette invented for the first two — "Actions"
+and "Go to" — were the only words on screen a product could not choose. They are
+now `label`, beside the content they describe.
+
+Exactly one of `items` or `provider`, enforced with `never` on the other, so a
+group carrying both is a compile error rather than a silent precedence rule.
+
+**Ranking stays inside a group.** A group is a claim about kind — commands,
+people, devices — and a fuzzy score is not a reason to interleave kinds, so
+items rank against their siblings and never across the list.
+
+What remains in `labels.groups` is the three buckets the palette _computes_ by
+rearranging your content: `recent`, `suggested` and `unavailable`. Those are
+facts about this component's behaviour, which is what makes them generic copy.
 
 ### Where the records come from
 
@@ -359,16 +473,15 @@ The assistant is optional. With no `assistant`, the bar button, the trailing row
 
 `F0CommandPaletteProvider` mounts the overlay and owns whether it is open. Render it once, high in the tree.
 
-| Prop                    | Type                                  | Default        | Description                                                                       |
-| ----------------------- | ------------------------------------- | -------------- | --------------------------------------------------------------------------------- |
-| `providers`             | `CommandEntityProvider[]`             | `[]`           | The domains whose records are findable, in the order their groups appear.         |
-| `actions`               | `CommandAction[]`                     | `[]`           | Flat global commands. Shown under "Suggestions" on an empty query.                |
-| `navigation`            | `CommandNavigationItem[]`             | `[]`           | The "Go to" group.                                                                |
-| `recent`                | `string[]`                            | `[]`           | Ids of `actions` or `navigation` to lead the empty state with, most recent first. |
-| `assistant`             | `CommandAssistant`                    | —              | The assistant escape hatch. Omit it and every assistant affordance disappears.    |
-| `onNavigate`            | `(href: string) => void`              | full page load | How an `href` is followed. Pass your router's navigate.                           |
-| `shortcut`              | `boolean`                             | `true`         | Bind `mod+K`.                                                                     |
-| `open` / `onOpenChange` | `boolean` / `(open: boolean) => void` | —              | Controlled open state. Leave out to let the palette own it.                       |
+| Prop                    | Type                                  | Default        | Description                                                                         |
+| ----------------------- | ------------------------------------- | -------------- | ----------------------------------------------------------------------------------- |
+| `labels`                | `CommandPaletteLabels`                | required       | Every word on screen. The palette ships none.                                       |
+| `groups`                | `CommandGroup[]`                      | required       | Everything findable, in the order it appears: `{ label, items }` or `{ provider }`. |
+| `recent`                | `string[]`                            | `[]`           | Ids of items in `groups` to lead the empty state with, most recent first.           |
+| `assistant`             | `CommandAssistant`                    | —              | The assistant escape hatch. Omit it and every assistant affordance disappears.      |
+| `onNavigate`            | `(href: string) => void`              | full page load | How an `href` is followed. Pass your router's navigate.                             |
+| `shortcut`              | `boolean`                             | `true`         | Bind `mod+K`.                                                                       |
+| `open` / `onOpenChange` | `boolean` / `(open: boolean) => void` | —              | Controlled open state. Leave out to let the palette own it.                         |
 
 `useCommandPalette()` returns `{ open, openScoped, close, isOpen }`, and throws outside the provider.
 

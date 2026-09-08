@@ -1,12 +1,11 @@
 import type { KeyboardEvent } from "react"
 import { F0Button } from "@/components/F0Button"
-import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import type { CommandRow } from "../internal-types"
-import type { ResolvedCommandLabels } from "../labels"
+import type { CommandPaletteLabels } from "../types"
 
 type CommandRowActionsProps = {
-  labels: ResolvedCommandLabels
+  labels: CommandPaletteLabels
   row: CommandRow
   index: number
   /** Distance from the top of the scroll container to the row's vertical centre. */
@@ -46,22 +45,21 @@ export const CommandRowActions = ({
   onActionFocus,
   onActivate,
 }: CommandRowActionsProps) => {
-  const i18n = useI18n()
   const rowActions = row.rowActions ?? []
 
   const clusterSize = rowActions.length + (row.disabledReason ? 0 : 1)
 
   const enterVerb = row.assistant
-    ? labels.verbs.ask
+    ? labels.row.verb.ask
     : row.scopeRef
-      ? labels.verbs.open
-      : labels.verbs.run
+      ? labels.row.verb.open
+      : labels.row.verb.run
 
   const enterLabel = row.assistant
-    ? i18n.t("commandPalette.row.ask", { label: row.label })
+    ? labels.row.ask(row.label)
     : row.scopeRef
-      ? i18n.t("commandPalette.row.open", { label: row.label })
-      : i18n.t("commandPalette.row.run", { label: row.label })
+      ? labels.row.open(row.label)
+      : labels.row.run(row.label)
 
   return (
     <span

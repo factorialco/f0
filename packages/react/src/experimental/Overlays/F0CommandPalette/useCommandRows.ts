@@ -7,16 +7,15 @@ import {
   Link,
 } from "@/icons/app"
 import { fuzzyScore } from "@/lib/fuzzyMatch"
-import { useI18n } from "@/lib/providers/i18n"
 import type { CommandRow, CommandStage } from "./internal-types"
-import type { ResolvedCommandLabels } from "./labels"
 import type {
   CommandAction,
   CommandAssistant,
   CommandEntityAction,
   CommandEntityProvider,
   CommandEntityRef,
-  CommandNavigationItem,
+  CommandGroup,
+  CommandPaletteLabels,
   CommandParamOption,
   CommandParamStep,
   CommandParamValues,
@@ -65,9 +64,9 @@ type UseCommandRowsOptions = {
   query: string
   scope: CommandEntityRef | null
   stage: CommandStage
+  groups: CommandGroup[]
+  /** The providers among `groups`, in order. Derived once by the caller. */
   providers: CommandEntityProvider[]
-  actions: CommandAction[]
-  navigation: CommandNavigationItem[]
   recent: string[]
   assistant?: CommandAssistant
   context: CommandRunContext
@@ -78,7 +77,7 @@ type UseCommandRowsOptions = {
     fromStep: number
   ) => void
   onCopyLink: (href: string) => void
-  labels: ResolvedCommandLabels
+  labels: CommandPaletteLabels
   /** Per-provider entity search state: what answered, what is pending, what failed. */
   search: EntitySearchState
   /** The current scope's own records, with their loading. */
@@ -100,9 +99,8 @@ export const useCommandRows = ({
   query,
   scope,
   stage,
+  groups,
   providers,
-  actions,
-  navigation,
   recent,
   assistant,
   context,
@@ -114,7 +112,6 @@ export const useCommandRows = ({
   onEnterScope,
   canDrill,
 }: UseCommandRowsOptions): CommandRow[] => {
-  const i18n = useI18n()
   const q = query.trim()
 
   const runAction = useCallback(
@@ -130,36 +127,45 @@ export const useCommandRows = ({
     [context]
   )
 
-  /** Flat global commands, as rows. */
-  const actionRows = useMemo<RankableRow[]>(
+  /**
+   * The consumer's item groups, each group's rows kept together.
+   *
+   * One shape for both kinds of item, because a destination IS a command whose
+   * `CommandDoes` picked `href` — `runAction` navigates in that case, so there
+   * is nothing left for a second row builder to do. The old pair of memos
+   * differed only in which label they invented for the heading, which is now
+   * the group's own.
+   *
+   * An item with no icon gets a quiet arrow: varied glyphs down a dense list
+   * read as noise, and the eye is here for the labels.
+   */
+  const itemGroups = useMemo<{ label: string; rows: RankableRow[] }[]>(
     () =>
-      actions.map((action) => ({
-        id: action.id,
-        group: action.group ?? labels.groups.actions,
-        label: action.label,
-        hint: action.description,
-        icon: action.icon ?? ArrowRight,
-        keywords: action.keywords,
-        run: runAction(action),
-      })),
-    [actions, labels, runAction]
+      groups.flatMap((group) =>
+        group.provider
+          ? []
+          : [
+              {
+                label: group.label,
+                rows: group.items.map((item) => ({
+                  id: item.id,
+                  group: group.label,
+                  label: item.label,
+                  hint: item.description,
+                  icon: item.icon ?? ArrowRight,
+                  keywords: item.keywords,
+                  run: runAction(item),
+                })),
+              },
+            ]
+      ),
+    [groups, runAction]
   )
 
-  /**
-   * The "Go to" group shares ONE icon. Varied per-destination glyphs read as
-   * noise down a dense list; a single quiet arrow keeps the eye on the labels.
-   */
-  const navigationRows = useMemo<RankableRow[]>(
-    () =>
-      navigation.map((item) => ({
-        id: item.id,
-        group: item.group ?? labels.groups.goTo,
-        label: item.label,
-        icon: item.icon ?? ArrowRight,
-        keywords: item.keywords,
-        run: () => context.navigate(item.href),
-      })),
-    [context, labels, navigation]
+  /** Every item row, flattened — what `recent` looks its ids up in. */
+  const allItemRows = useMemo<RankableRow[]>(
+    () => itemGroups.flatMap((group) => group.rows),
+    [itemGroups]
   )
 
   /**
@@ -205,10 +211,8 @@ export const useCommandRows = ({
           ? [
               {
                 key: "actions",
-                label: i18n.t("commandPalette.rowActions.actionsFor", {
-                  label: ref.label,
-                }),
-                tip: i18n.commandPalette.rowActions.actions,
+                label: labels.rowActions.actionsFor(ref.label),
+                tip: labels.rowActions.actions,
                 icon: ChevronRight,
                 run: () => onEnterScope(ref),
               },
@@ -218,10 +222,8 @@ export const useCommandRows = ({
           ? [
               {
                 key: "copy",
-                label: i18n.t("commandPalette.rowActions.copyLinkTo", {
-                  label: ref.label,
-                }),
-                tip: i18n.commandPalette.rowActions.copyLink,
+                label: labels.rowActions.copyLinkTo(ref.label),
+                tip: labels.rowActions.copyLink,
                 icon: Link,
                 run: () => onCopyLink(href),
               },
@@ -245,19 +247,20 @@ export const useCommandRows = ({
         },
       }
     },
-    [assistant, context, i18n, onCopyLink, onEnterScope]
+    [assistant, context, labels, onCopyLink, onEnterScope]
   )
 
   /**
-   * Record rows from every provider. `Enter` opens the record, `Tab` commits it
-   * onto the chain, `→` reaches its own controls — three keys, three jobs, none
+   * One provider's record rows. `Enter` opens the record, `Tab` commits it onto
+   * the chain, `→` reaches its own controls — three keys, three jobs, none
    * overloaded.
+   *
+   * Per provider rather than across all of them, because a provider is now a
+   * group in the consumer's list and has to be able to render in the position
+   * they put it in.
    */
-  const entityRows = useMemo<CommandRow[]>(() => {
-    if (!q) {
-      return []
-    }
-    return providers.flatMap((provider) => {
+  const entityRowsOf = useCallback(
+    (provider: CommandEntityProvider): CommandRow[] => {
       /*
         A PROVIDER STILL ANSWERING GETS ITS SPACE HELD, not skipped. Skipping it
         makes the list jump as each domain lands, and — worse — a reader who
@@ -287,7 +290,7 @@ export const useCommandRows = ({
             id: `${provider.type}-failed`,
             group: provider.label,
             label: provider.label,
-            disabledReason: labels.searchFailed,
+            disabledReason: labels.row.searchFailed,
             run: () => undefined,
           },
         ]
@@ -296,8 +299,9 @@ export const useCommandRows = ({
       return (search.refs[provider.type] ?? []).map((ref) =>
         refToRow(ref, provider.label, canDrillInto(ref))
       )
-    })
-  }, [canDrillInto, labels, providers, q, refToRow, search])
+    },
+    [canDrillInto, labels, refToRow, search]
+  )
 
   /**
    * The records INSIDE the current scope — a team's people, a project's tasks.
@@ -310,18 +314,25 @@ export const useCommandRows = ({
     if (!scope || !canDrill) {
       return []
     }
-
-    /** Whatever group these records belong to, for a heading or a placeholder. */
+    /**
+     * Whatever group these records belong to.
+     *
+     * The provider that owns the ref's type names it — a team hands back people,
+     * so the heading is "People" and not the team. Failing that, the SCOPE's own
+     * label: these records were found inside it, so its name is the truest thing
+     * left to say about them. It used to fall back to the "Suggestions" heading,
+     * which described neither the records nor where they came from.
+     */
     const groupOf = (ref: CommandEntityRef) =>
       providers.find((candidate) => candidate.type === ref.type)?.label ??
-      labels.groups.suggestions
+      scope.label
 
     // The same treatment global search gets: hold the space while it loads,
     // and say so rather than nothing when it fails.
     if (children.pending) {
       return Array.from({ length: SKELETON_ROWS }, (_, index) => ({
         id: `inside-skeleton-${index}`,
-        group: labels.groups.suggestions,
+        group: scope.label,
         label: "",
         skeleton: true,
         run: () => undefined,
@@ -331,14 +342,13 @@ export const useCommandRows = ({
       return [
         {
           id: "inside-failed",
-          group: labels.groups.suggestions,
-          label: labels.groups.suggestions,
-          disabledReason: labels.searchFailed,
+          group: scope.label,
+          label: scope.label,
+          disabledReason: labels.row.searchFailed,
           run: () => undefined,
         },
       ]
     }
-
     return children.refs.map((ref) =>
       refToRow(ref, groupOf(ref), canDrillInto(ref))
     )
@@ -398,7 +408,7 @@ export const useCommandRows = ({
       icon: entry.action.icon,
       badge: entry.action.badge,
       disabledReason: entry.disabled
-        ? (entry.reason ?? labels.unavailable)
+        ? (entry.reason ?? labels.row.unavailable)
         : undefined,
       danger: entry.action.risk === "danger",
       run: () => onAdvance(entry.action, {}, 0),
@@ -437,7 +447,7 @@ export const useCommandRows = ({
       ...childRows,
       ...blocked.map((entry) => toRow(entry, labels.groups.unavailable)),
     ]
-  }, [childRows, i18n, onAdvance, providers, q, scope])
+  }, [childRows, labels, onAdvance, providers, q, scope])
 
   /** Parameter options as rows — the level is a list, not a dialog. */
   const paramRows = useMemo<CommandRow[]>(() => {
@@ -515,10 +525,9 @@ export const useCommandRows = ({
     // No assistant row — an offer nobody asked for is an advert, and the bar
     // button already carries that affordance without taking a result's slot.
     if (!q) {
-      const byId = new Map<string, CommandRow>([
-        ...actionRows.map((row): [string, CommandRow] => [row.id, row]),
-        ...navigationRows.map((row): [string, CommandRow] => [row.id, row]),
-      ])
+      const byId = new Map<string, CommandRow>(
+        allItemRows.map((row): [string, CommandRow] => [row.id, row])
+      )
       const recentRows = recent
         .map((id) => byId.get(id))
         .filter((row): row is CommandRow => Boolean(row))
@@ -529,25 +538,46 @@ export const useCommandRows = ({
           icon: Clock,
           hint: undefined,
         }))
-      const suggestions = actionRows.map((row) => ({
-        ...row,
-        group: labels.groups.suggestions,
-      }))
-      return [...recentRows, ...suggestions]
+      /*
+        Then the groups AS DECLARED, under their own headings.
+
+        The palette used to relabel all of this "Suggestions", which is the same
+        mistake as owning the headings in the first place: it renamed content it
+        did not write. A product that wants that heading calls its first group
+        "Suggestions" and gets it — and one that would rather say "Start here"
+        can, which was impossible before.
+      */
+      return [...recentRows, ...allItemRows]
     }
 
+    /*
+      Searching: every group in DECLARED ORDER, items ranked among themselves.
+
+      Ranking stays inside a group and never across them, because a group is a
+      claim about kind — commands, people, devices — and a fuzzy score is not a
+      reason to interleave kinds. Where the groups themselves sit is the
+      product's decision, expressed by the order it wrote them in, and no longer
+      a commands-then-records-then-destinations rule buried in this file.
+    */
     return [
-      ...rankRows(actionRows, q),
-      ...entityRows,
-      ...rankRows(navigationRows, q),
+      ...groups.flatMap((group) =>
+        group.provider
+          ? entityRowsOf(group.provider)
+          : rankRows(
+              itemGroups.find((candidate) => candidate.label === group.label)
+                ?.rows ?? [],
+              q
+            )
+      ),
       ...(assistantRow ? [assistantRow] : []),
     ]
   }, [
-    actionRows,
+    allItemRows,
     assistantRow,
-    entityRows,
-    i18n,
-    navigationRows,
+    entityRowsOf,
+    groups,
+    itemGroups,
+    labels,
     paramRows,
     q,
     recent,
