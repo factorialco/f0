@@ -1,6 +1,5 @@
-import type { F0LocationInputValue } from "../types"
-
 import type { EditableLocationPart } from "../internal-types"
+import type { F0LocationInputValue } from "../types"
 
 export const editableLocationParts = [
   "addressLine1",
@@ -27,11 +26,21 @@ const trimmed = (text: string | undefined): string | undefined => {
   return value ? value : undefined
 }
 
+/**
+ * A value is empty only when nothing at all identifies a place. A provider can
+ * resolve an address that has no granular breakdown (a point of interest, a
+ * plus code), so `formatted` and `placeId` count as content: treating them as
+ * empty would blank the field right after the user picked the right address.
+ */
 export const isLocationValueEmpty = (
   value: F0LocationInputValue | undefined
 ): boolean => {
-  if (!value) return true
-  if (value.country) return false
+  if (!value) {
+    return true
+  }
+  if (value.country || value.placeId || trimmed(value.formatted)) {
+    return false
+  }
   return editableLocationParts.every((part) => !trimmed(value[part]))
 }
 

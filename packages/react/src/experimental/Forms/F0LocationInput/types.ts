@@ -1,6 +1,6 @@
+import type { IconType } from "@/components/F0Icon"
 import type { InputFieldStatus } from "@/components/F0InputField"
 import { INPUTFIELD_SIZES } from "@/components/F0InputField"
-import type { IconType } from "@/components/F0Icon"
 import type { CountryCode } from "@/lib/countries"
 
 export const locationInputSizes = INPUTFIELD_SIZES
@@ -56,7 +56,12 @@ export type F0LocationSearchContext = {
 }
 
 export type F0LocationInputChangeMeta = {
-  /** `"picked"` right after a suggestion is chosen, `"typed"` once any part is edited */
+  /**
+   * `"picked"` when a suggestion was chosen *and* resolved into a full value.
+   * `"typed"` in every other case, which includes a suggestion that could not
+   * be resolved, so do not read `"typed"` as "the user did not use the list".
+   * `isResolved` is what says whether the value can be trusted.
+   */
   source: "picked" | "typed"
   /** Whether the value still carries trustworthy coordinates and place id */
   isResolved: boolean
@@ -74,9 +79,10 @@ export interface F0LocationInputProps {
   ) => void
   /**
    * Renders the whole address as separate fields the user can fill in by
-   * hand: country, address line 1 and 2, city, region and postal code. The
-   * address line keeps its suggestions, so picking one still fills the rest.
-   * Without it the component is the address field alone.
+   * hand: country, address line 1 and 2, city, region and postal code.
+   * Changing the country clears the other parts, since they described a
+   * place in the previous one. Without it the component is the address
+   * field alone.
    * @default false
    */
   manualEntry?: boolean

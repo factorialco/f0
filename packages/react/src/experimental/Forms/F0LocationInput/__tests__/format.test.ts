@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import {
   formatLocationValue,
   invalidateResolution,
@@ -59,6 +58,12 @@ describe("isLocationValueEmpty", () => {
 
   it("is not empty when a country is selected", () => {
     expect(isLocationValueEmpty({ country: "es" })).toBe(false)
+  })
+
+  it("is not empty for a resolved place without granular parts", () => {
+    expect(isLocationValueEmpty({ placeId: "poi-1" })).toBe(false)
+    expect(isLocationValueEmpty({ formatted: "Sagrada Família" })).toBe(false)
+    expect(isLocationValueEmpty({ formatted: "  " })).toBe(true)
   })
 })
 

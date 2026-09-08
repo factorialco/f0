@@ -1,9 +1,7 @@
 import { act, renderHook } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
-import type { F0LocationSuggestion } from "../types"
-
 import { MIN_QUERY_LENGTH, usePlaceSearch } from "../hooks/usePlaceSearch"
+import type { F0LocationSuggestion } from "../types"
 
 const suggestion = (id: string): F0LocationSuggestion => ({
   id,
@@ -93,7 +91,7 @@ describe("usePlaceSearch", () => {
     expect(result.current.suggestions).toEqual([suggestion("2")])
   })
 
-  it("treats a rejected search as no results", async () => {
+  it("reports a rejected search as an error, not as no results", async () => {
     const searchPlaces = vi.fn().mockRejectedValue(new Error("offline"))
     vi.spyOn(console, "warn").mockImplementation(() => {})
     const { result } = renderHook(() =>
@@ -107,6 +105,50 @@ describe("usePlaceSearch", () => {
 
     expect(result.current.suggestions).toEqual([])
     expect(result.current.isSearching).toBe(false)
+    expect(result.current.status).toBe("error")
+  })
+
+  it("reports an empty answer as empty and a full one as idle", async () => {
+    const searchPlaces = vi
+      .fn()
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([suggestion("1")])
+    const { result } = renderHook(() =>
+      usePlaceSearch({ searchPlaces, country: undefined, enabled: true })
+    )
+
+    act(() => result.current.search("zzzz"))
+    await act(async () => {
+      vi.advanceTimersByTime(250)
+    })
+    expect(result.current.status).toBe("empty")
+
+    act(() => result.current.search("Colon"))
+    expect(result.current.status).toBe("searching")
+    await act(async () => {
+      vi.advanceTimersByTime(250)
+    })
+    expect(result.current.status).toBe("idle")
+  })
+
+  it("recovers from a provider that throws synchronously", async () => {
+    const searchPlaces = vi.fn(() => {
+      throw new Error("google.maps is not loaded")
+    })
+    vi.spyOn(console, "warn").mockImplementation(() => {})
+    const { result } = renderHook(() =>
+      usePlaceSearch({ searchPlaces, country: undefined, enabled: true })
+    )
+
+    act(() => result.current.search("Colon"))
+    await act(async () => {
+      vi.advanceTimersByTime(250)
+    })
+
+    // Without the guard the throw escapes the timer and the field stays on
+    // "searching" for good
+    expect(result.current.isSearching).toBe(false)
+    expect(result.current.status).toBe("error")
   })
 
   it("drops cached suggestions when the country changes", async () => {

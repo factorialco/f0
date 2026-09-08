@@ -1,22 +1,27 @@
-import { forwardRef, useCallback, useMemo, useRef, useState } from "react"
-
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
 import type { InputFieldStatus } from "@/components/F0InputField"
-import type { CountryCode } from "@/lib/countries"
-
 import { InputMessages } from "@/components/F0InputField/components/InputMessages"
 import { F0TextInput } from "@/components/F0TextInput"
+import type { CountryCode } from "@/lib/countries"
 import { useI18n } from "@/lib/providers/i18n"
-
+import { AddressParts } from "./components/AddressParts"
+import { AddressSelect } from "./components/AddressSelect"
+import { CountrySelect } from "./components/CountrySelect"
+import { useLocationValue } from "./hooks/useLocationValue"
+import { invokeAsync } from "./lib/invokeAsync"
 import type {
   F0LocationInputProps,
   F0LocationSuggestion,
   LocationPart,
 } from "./types"
-
-import { AddressSelect } from "./components/AddressSelect"
-import { AddressParts } from "./components/AddressParts"
-import { CountrySelect } from "./components/CountrySelect"
-import { useLocationValue } from "./hooks/useLocationValue"
 
 export const F0LocationInput = forwardRef<
   HTMLInputElement,
@@ -83,10 +88,11 @@ export const F0LocationInput = forwardRef<
     [partLabels, manualEntry, label, i18n]
   )
 
+  // Never the value's own country: the search only exists without manual
+  // entry, where no selector shows or undoes that scope, so the first picked
+  // address would silently lock every later search to its country
   const searchCountry =
-    value?.country ??
-    defaultCountry ??
-    (countries?.length === 1 ? countries[0] : undefined)
+    defaultCountry ?? (countries?.length === 1 ? countries[0] : undefined)
 
   // Picking shows the suggestion right away, but nothing is emitted until the
   // place resolves: an intermediate "typed" change would make consumers
@@ -94,6 +100,13 @@ export const F0LocationInput = forwardRef<
   const [pendingLabel, setPendingLabel] = useState<string | undefined>()
   const [resolving, setResolving] = useState(false)
   const pickIdRef = useRef(0)
+  // A resolution still in flight must not emit once the field is gone
+  useEffect(
+    () => () => {
+      pickIdRef.current += 1
+    },
+    []
+  )
 
   const cancelPendingPick = () => {
     pickIdRef.current += 1
@@ -109,9 +122,13 @@ export const F0LocationInput = forwardRef<
     }
     setPendingLabel(suggestion.label)
     setResolving(true)
-    resolvePlace(suggestion.id)
+    // A resolver that throws synchronously would otherwise leave the field
+    // locked on "resolving"
+    invokeAsync(() => resolvePlace(suggestion.id))
       .then((resolved) => {
-        if (pickId !== pickIdRef.current) return
+        if (pickId !== pickIdRef.current) {
+          return
+        }
         if (resolved) {
           applyResolved({
             ...resolved,
@@ -122,14 +139,18 @@ export const F0LocationInput = forwardRef<
         }
       })
       .catch((reason: unknown) => {
-        if (pickId !== pickIdRef.current) return
+        if (pickId !== pickIdRef.current) {
+          return
+        }
         if (process.env.NODE_ENV !== "production") {
           console.warn("F0LocationInput: resolvePlace rejected", reason)
         }
         setPart("addressLine1", suggestion.label)
       })
       .finally(() => {
-        if (pickId !== pickIdRef.current) return
+        if (pickId !== pickIdRef.current) {
+          return
+        }
         setPendingLabel(undefined)
         setResolving(false)
       })
@@ -142,13 +163,17 @@ export const F0LocationInput = forwardRef<
 
   // Legacy `hint`/`error` shortcuts, mirroring F0InputField's semantics
   let effectiveStatus: InputFieldStatus | undefined = status
-  if (hint) effectiveStatus = { type: "default", message: hint }
+  if (hint) {
+    effectiveStatus = { type: "default", message: hint }
+  }
   if (error) {
     effectiveStatus = {
       type: "error",
       message: typeof error === "string" ? error : undefined,
     }
   }
+
+  const messagesId = useId()
 
   // In detailed mode the message belongs to the group, the border to the field
   const fieldStatus =
@@ -163,7 +188,7 @@ export const F0LocationInput = forwardRef<
         hideLabel={hideLabel}
         labelIcon={labelIcon}
         placeholder={placeholder}
-        text={pendingLabel ?? value?.addressLine1 ?? ""}
+        text={pendingLabel ?? value?.addressLine1 ?? value?.formatted ?? ""}
         placeId={value?.placeId}
         country={searchCountry}
         searchPlaces={searchPlaces}
@@ -221,6 +246,8 @@ export const F0LocationInput = forwardRef<
       // visible label, and a heading above them reads as a second form title
       aria-label={label}
       aria-busy={resolving || undefined}
+      aria-describedby={effectiveStatus?.message ? messagesId : undefined}
+      aria-invalid={effectiveStatus?.type === "error" || undefined}
     >
       <CountrySelect
         label={labels.country}
@@ -244,7 +271,13 @@ export const F0LocationInput = forwardRef<
         readonly={readonly}
         name={name}
       />
-      <InputMessages status={effectiveStatus} />
+      <div
+        id={messagesId}
+        role={effectiveStatus?.type === "error" ? "alert" : "status"}
+        aria-live="polite"
+      >
+        <InputMessages status={effectiveStatus} />
+      </div>
     </fieldset>
   )
 })

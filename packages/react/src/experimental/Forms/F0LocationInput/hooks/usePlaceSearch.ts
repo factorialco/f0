@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react"
-
 import type { CountryCode } from "@/lib/countries"
-
+import { invokeAsync } from "../lib/invokeAsync"
 import type { F0LocationInputProps, F0LocationSuggestion } from "../types"
 
 const DEBOUNCE_MS = 250
@@ -14,13 +13,20 @@ type Options = {
 }
 
 /**
+ * `error` is kept apart from `empty` on purpose: a provider that failed and a
+ * provider that legitimately found nothing look identical to the user
+ * otherwise, and "no addresses found" for an address that exists is a lie.
+ */
+export type PlaceSearchStatus = "idle" | "searching" | "empty" | "error"
+
+/**
  * Debounced suggestion search with a stale-response guard, same shape as the
  * chat mentions hook. Results are never filtered locally: the provider already
  * ranked them, and a local string match drops accent variants.
  */
 export const usePlaceSearch = ({ searchPlaces, country, enabled }: Options) => {
   const [suggestions, setSuggestions] = useState<F0LocationSuggestion[]>([])
-  const [isSearching, setIsSearching] = useState(false)
+  const [status, setStatus] = useState<PlaceSearchStatus>("idle")
   const [query, setQuery] = useState("")
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -29,7 +35,9 @@ export const usePlaceSearch = ({ searchPlaces, country, enabled }: Options) => {
   countryRef.current = country
 
   const cancelPending = useCallback(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current)
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current)
+    }
     debounceRef.current = null
     searchIdRef.current += 1
   }, [])
@@ -37,7 +45,7 @@ export const usePlaceSearch = ({ searchPlaces, country, enabled }: Options) => {
   const reset = useCallback(() => {
     cancelPending()
     setSuggestions([])
-    setIsSearching(false)
+    setStatus("idle")
     setQuery("")
   }, [cancelPending])
 
@@ -49,29 +57,36 @@ export const usePlaceSearch = ({ searchPlaces, country, enabled }: Options) => {
       if (!enabled || trimmed.length < MIN_QUERY_LENGTH) {
         cancelPending()
         setSuggestions([])
-        setIsSearching(false)
+        setStatus("idle")
         return
       }
 
       cancelPending()
-      setIsSearching(true)
+      setStatus("searching")
       const currentSearchId = searchIdRef.current
 
       debounceRef.current = setTimeout(() => {
-        searchPlaces(trimmed, { country: countryRef.current })
+        // Called bare, a synchronous throw would escape the timer with no
+        // promise to reject and leave the field on "searching" forever
+        invokeAsync(() =>
+          searchPlaces(trimmed, { country: countryRef.current })
+        )
           .then((data) => {
-            if (currentSearchId !== searchIdRef.current) return
+            if (currentSearchId !== searchIdRef.current) {
+              return
+            }
             setSuggestions(data)
+            setStatus(data.length ? "idle" : "empty")
           })
           .catch((error: unknown) => {
-            if (currentSearchId !== searchIdRef.current) return
+            if (currentSearchId !== searchIdRef.current) {
+              return
+            }
             setSuggestions([])
+            setStatus("error")
             if (process.env.NODE_ENV !== "production") {
               console.warn("F0LocationInput: searchPlaces rejected", error)
             }
-          })
-          .finally(() => {
-            if (currentSearchId === searchIdRef.current) setIsSearching(false)
           })
       }, DEBOUNCE_MS)
     },
@@ -81,12 +96,21 @@ export const usePlaceSearch = ({ searchPlaces, country, enabled }: Options) => {
   // A country change makes every cached suggestion wrong
   const previousCountryRef = useRef(country)
   useEffect(() => {
-    if (previousCountryRef.current === country) return
+    if (previousCountryRef.current === country) {
+      return
+    }
     previousCountryRef.current = country
     reset()
   }, [country, reset])
 
   useEffect(() => cancelPending, [cancelPending])
 
-  return { suggestions, isSearching, query, search, reset }
+  return {
+    suggestions,
+    status,
+    isSearching: status === "searching",
+    query,
+    search,
+    reset,
+  }
 }

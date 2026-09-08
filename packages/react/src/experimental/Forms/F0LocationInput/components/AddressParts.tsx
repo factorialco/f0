@@ -1,6 +1,5 @@
 import { F0TextInput } from "@/components/F0TextInput"
 import { useI18n } from "@/lib/providers/i18n"
-
 import type { EditableLocationPart } from "../internal-types"
 import type {
   F0LocationInputValue,
@@ -58,10 +57,13 @@ export const AddressParts = ({
     <>
       {part("addressLine1")}
       {part("addressLine2")}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        {part("city")}
-        {part("state")}
-        {part("postalCode")}
+      {/* Container, not viewport: the block lives in side panels and dialogs */}
+      <div className="@container">
+        <div className="grid grid-cols-1 gap-3 @sm:grid-cols-3">
+          {part("city")}
+          {part("state")}
+          {part("postalCode")}
+        </div>
       </div>
     </>
   )

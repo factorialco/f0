@@ -1,7 +1,6 @@
 import type { F0SelectItemProps } from "@/components/F0Select"
-import type { CountryCode } from "@/lib/countries"
-
 import { flagsMap } from "@/flags"
+import type { CountryCode } from "@/lib/countries"
 
 /**
  * Sorted by the localized name, not by code, so the list reads in the order

@@ -790,6 +790,11 @@ export const defaultTranslations = {
     addressLine2Placeholder: "Enter a floor or unit",
     postalCodePlaceholder: "e.g., 08001",
     searching: "Searching addresses",
+    searchError: "Couldn't load addresses. Try again.",
+    resultsCount: {
+      one: "{{count}} address found",
+      other: "{{count}} addresses found",
+    },
   },
   imageUpload: {
     uploading: "Uploading...",

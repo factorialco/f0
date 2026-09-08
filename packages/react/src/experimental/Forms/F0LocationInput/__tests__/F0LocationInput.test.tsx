@@ -1,16 +1,14 @@
 import userEvent from "@testing-library/user-event"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
 import {
   fireEvent,
   screen,
   waitFor,
+  within,
   zeroRender as render,
 } from "@/testing/test-utils"
-
+import { F0LocationInput } from ".."
 import type { F0LocationInputValue, F0LocationSuggestion } from "../types"
-
-import { F0LocationInput } from "../index"
 
 const suggestions: F0LocationSuggestion[] = [
   { id: "place-1", label: "Carrer de Colón 12", description: "Barcelona" },
@@ -44,6 +42,10 @@ const originalOffsetWidth = Object.getOwnPropertyDescriptor(
 
 const getAddressTrigger = () =>
   screen.getByRole("combobox", { name: "Address" })
+
+/** The dropdown's own text, as opposed to the live region that echoes it */
+const listText = (text: string) =>
+  within(screen.getByRole("listbox")).getByText(text)
 
 /** Opens the address select and kicks the list, which jsdom never animates */
 const openAddress = async (user: ReturnType<typeof userEvent.setup>) => {
@@ -247,7 +249,7 @@ describe("F0LocationInput", () => {
       await searchAddress(user, "Calle Falsa 123")
 
       await waitFor(() =>
-        expect(screen.getByText("No addresses found")).toBeInTheDocument()
+        expect(listText("No addresses found")).toBeInTheDocument()
       )
       expect(
         screen.queryByRole("button", { name: /Create/ })
@@ -262,12 +264,195 @@ describe("F0LocationInput", () => {
       )
 
       await openAddress(user)
-      expect(screen.getByText("Type an address to search")).toBeInTheDocument()
+      expect(listText("Type an address to search")).toBeInTheDocument()
 
       await user.type(screen.getByRole("searchbox"), "zzzz")
       await waitFor(() =>
-        expect(screen.getByText("No addresses found")).toBeInTheDocument()
+        expect(listText("No addresses found")).toBeInTheDocument()
       )
+    })
+
+    it("does not scope the search to the country of the current value", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0LocationInput
+          label="Address"
+          searchPlaces={searchPlaces}
+          defaultValue={resolved}
+        />
+      )
+
+      await searchAddress(user, "Downing")
+
+      // No country selector shows or undoes the scope here, so the first
+      // picked address must not lock every later search to its country
+      await waitFor(() =>
+        expect(searchPlaces).toHaveBeenCalledWith("Downing", {
+          country: undefined,
+        })
+      )
+    })
+
+    it("keeps a resolved place that has no granular parts", async () => {
+      const user = userEvent.setup()
+      const onChange = vi.fn()
+      const poi: F0LocationInputValue = {
+        formatted: "Sagrada Família, Barcelona",
+        placeId: "poi-1",
+        latitude: 41.4036,
+        longitude: 2.1744,
+      }
+      render(
+        <F0LocationInput
+          label="Address"
+          searchPlaces={searchPlaces}
+          resolvePlace={vi.fn(async () => poi)}
+          onChange={onChange}
+        />
+      )
+
+      await searchAddress(user)
+      await waitFor(() => expect(screen.getAllByRole("option")).toHaveLength(2))
+      await user.click(screen.getAllByRole("option")[0])
+
+      await waitFor(() =>
+        expect(onChange).toHaveBeenLastCalledWith(poi, {
+          source: "picked",
+          isResolved: true,
+        })
+      )
+      // The trigger is aria-hidden until the dropdown has finished closing
+      await waitFor(() =>
+        expect(getAddressTrigger()).toHaveTextContent(
+          "Sagrada Família, Barcelona"
+        )
+      )
+    })
+
+    it("emits nothing for a pick that resolves after unmount", async () => {
+      const user = userEvent.setup()
+      const onChange = vi.fn()
+      let finish!: (value: F0LocationInputValue) => void
+      const lateResolve = vi.fn(
+        () =>
+          new Promise<F0LocationInputValue>((resolve) => {
+            finish = resolve
+          })
+      )
+      const { unmount } = render(
+        <F0LocationInput
+          label="Address"
+          searchPlaces={searchPlaces}
+          resolvePlace={lateResolve}
+          onChange={onChange}
+        />
+      )
+
+      await searchAddress(user)
+      await waitFor(() => expect(screen.getAllByRole("option")).toHaveLength(2))
+      await user.click(screen.getAllByRole("option")[0])
+      expect(lateResolve).toHaveBeenCalled()
+
+      unmount()
+      finish(resolved)
+      await new Promise((resolve) => setTimeout(resolve, 0))
+
+      expect(onChange).not.toHaveBeenCalled()
+    })
+
+    it("recovers from a resolver that throws synchronously", async () => {
+      const user = userEvent.setup()
+      const onChange = vi.fn()
+      vi.spyOn(console, "warn").mockImplementation(() => {})
+      render(
+        <F0LocationInput
+          label="Address"
+          searchPlaces={searchPlaces}
+          resolvePlace={vi.fn(() => {
+            throw new Error("google.maps is not loaded")
+          })}
+          onChange={onChange}
+        />
+      )
+
+      await searchAddress(user)
+      await waitFor(() => expect(screen.getAllByRole("option")).toHaveLength(2))
+      await user.click(screen.getAllByRole("option")[0])
+
+      await waitFor(() =>
+        expect(onChange).toHaveBeenLastCalledWith(
+          expect.objectContaining({ addressLine1: "Carrer de Colón 12" }),
+          { source: "typed", isResolved: false }
+        )
+      )
+    })
+
+    it("starts a fresh search each time the list opens", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0LocationInput
+          label="Address"
+          searchPlaces={searchPlaces}
+          resolvePlace={resolvePlace}
+        />
+      )
+
+      await searchAddress(user)
+      await waitFor(() => expect(screen.getAllByRole("option")).toHaveLength(2))
+      await user.click(screen.getAllByRole("option")[0])
+      await waitFor(() =>
+        expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
+      )
+
+      await openAddress(user)
+
+      expect(listText("Type an address to search")).toBeInTheDocument()
+      expect(
+        screen.queryByText("Calle Colón 3, Valencia")
+      ).not.toBeInTheDocument()
+    })
+
+    it("tells a failed search apart from an empty one", async () => {
+      const user = userEvent.setup()
+      vi.spyOn(console, "warn").mockImplementation(() => {})
+      render(
+        <F0LocationInput
+          label="Address"
+          searchPlaces={vi.fn(async () => {
+            throw new Error("offline")
+          })}
+        />
+      )
+
+      await searchAddress(user)
+
+      await waitFor(() =>
+        expect(
+          listText("Couldn't load addresses. Try again.")
+        ).toBeInTheDocument()
+      )
+      expect(screen.queryByText("No addresses found")).not.toBeInTheDocument()
+    })
+
+    it("announces the search progress to assistive tech", async () => {
+      const user = userEvent.setup()
+      let answer!: (value: F0LocationSuggestion[]) => void
+      const slowSearch = vi.fn(
+        () =>
+          new Promise<F0LocationSuggestion[]>((resolve) => {
+            answer = resolve
+          })
+      )
+      render(<F0LocationInput label="Address" searchPlaces={slowSearch} />)
+      const live = screen.getByRole("status")
+      expect(live).toHaveAttribute("aria-live", "polite")
+
+      await searchAddress(user)
+
+      await waitFor(() => expect(live).toHaveTextContent("Searching addresses"))
+      await waitFor(() => expect(slowSearch).toHaveBeenCalled())
+      answer(suggestions)
+      await waitFor(() => expect(live).toHaveTextContent("2 addresses found"))
     })
 
     it("displays a value the options do not contain", () => {
@@ -422,6 +607,55 @@ describe("F0LocationInput", () => {
       )
 
       expect(screen.getAllByText("Address is required")).toHaveLength(1)
+    })
+
+    it("links the error to the group and announces it", () => {
+      render(
+        <F0LocationInput
+          label="Office"
+          manualEntry
+          error="Address is required"
+        />
+      )
+
+      const group = screen.getByRole("group", { name: "Office" })
+      expect(group).toHaveAttribute("aria-invalid", "true")
+      const messages = document.getElementById(
+        group.getAttribute("aria-describedby") as string
+      )
+      expect(messages).toHaveAttribute("role", "alert")
+      expect(messages).toHaveTextContent("Address is required")
+    })
+
+    it("clears the address when the country changes", async () => {
+      const user = userEvent.setup()
+      const onChange = vi.fn()
+      render(
+        <F0LocationInput
+          label="Office"
+          manualEntry
+          countries={["es", "fr"]}
+          defaultValue={resolved}
+          onChange={onChange}
+        />
+      )
+
+      await user.click(screen.getByRole("combobox", { name: "Country" }))
+      await waitFor(() =>
+        expect(screen.getByRole("listbox")).toBeInTheDocument()
+      )
+      fireEvent.animationStart(screen.getByRole("listbox"))
+      await user.click(await screen.findByRole("option", { name: "France" }))
+
+      // A new country moves the pin further than any street edit: the parts
+      // described a place in the old one, so they go with the coordinates
+      expect(onChange).toHaveBeenLastCalledWith(
+        { country: "fr", formatted: "France" },
+        { source: "typed", isResolved: false }
+      )
+      await waitFor(() =>
+        expect(screen.getByRole("textbox", { name: "City" })).toHaveValue("")
+      )
     })
   })
 })

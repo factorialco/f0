@@ -1,11 +1,7 @@
 import { useControllableState } from "@radix-ui/react-use-controllable-state"
 import { useCallback, useRef } from "react"
-
 import type { CountryCode } from "@/lib/countries"
-
 import type { EditableLocationPart } from "../internal-types"
-import type { F0LocationInputChangeMeta, F0LocationInputValue } from "../types"
-
 import {
   editKeepsResolution,
   formatLocationValue,
@@ -13,6 +9,7 @@ import {
   isLocationValueEmpty,
   isResolvedValue,
 } from "../lib/format"
+import type { F0LocationInputChangeMeta, F0LocationInputValue } from "../types"
 
 type Options = {
   value?: F0LocationInputValue
@@ -81,9 +78,12 @@ export const useLocationValue = ({
     [edited]
   )
 
+  // A new country moves the pin further than any street edit, so the parts
+  // describing the old place go with the resolution: keeping them would emit
+  // an address such as "Carrer de Colón 12, Barcelona, France"
   const setCountry = useCallback(
     (country: CountryCode | undefined) => {
-      edited({ ...valueRef.current, country })
+      edited({ country })
     },
     [edited]
   )

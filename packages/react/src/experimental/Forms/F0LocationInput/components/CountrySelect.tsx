@@ -1,13 +1,9 @@
 import { useMemo } from "react"
-
-import type { CountryCode } from "@/lib/countries"
-
 import { F0Select } from "@/components/F0Select"
+import type { CountryCode } from "@/lib/countries"
 import { useI18n } from "@/lib/providers/i18n"
-
-import type { LocationInputSize } from "../types"
-
 import { buildCountryOptions } from "../lib/countryOptions"
+import type { LocationInputSize } from "../types"
 
 type Props = {
   label: string
@@ -49,7 +45,6 @@ export const CountrySelect = ({
       size={size}
       disabled={disabled || readonly}
       name={name}
-      data-testid="location-input-country"
     />
   )
 }

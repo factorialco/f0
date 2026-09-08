@@ -1,5 +1,4 @@
 import { experimentalComponent } from "@/lib/experimental"
-
 import { F0LocationInput as F0LocationInputComponent } from "./F0LocationInput"
 
 export * from "./types"

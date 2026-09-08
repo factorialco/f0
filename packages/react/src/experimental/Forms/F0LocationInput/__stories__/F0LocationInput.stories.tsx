@@ -1,19 +1,15 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { useState } from "react"
 import { expect, fn, userEvent, waitFor, within } from "storybook/test"
-
 import { F0Button } from "@/components/F0Button"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { F0Dialog } from "@/patterns/F0Dialog"
-
 import type {
   F0LocationInputValue,
   F0LocationSearchContext,
   F0LocationSuggestion,
-} from "../index"
-
-import { F0LocationInput } from "../index"
+} from ".."
+import { F0LocationInput } from ".."
 import { locationInputSizes } from "../types"
 
 type MockPlace = F0LocationSuggestion & { value: F0LocationInputValue }
@@ -355,10 +351,13 @@ export const SearchAndPick: Story = {
     const search = await body.findByRole("searchbox")
     await userEvent.type(search, "Colon")
 
-    await waitFor(() =>
-      expect(body.getAllByRole("option").length).toBeGreaterThan(0)
-    )
-    await userEvent.click(body.getAllByRole("option")[0])
+    // Not "some option": the empty-state message is an option too, so waiting
+    // for the list to be non-empty clicks the disabled hint before the
+    // provider has answered
+    const suggestion = await body.findByRole("option", {
+      name: /Carrer de Colón/,
+    })
+    await userEvent.click(suggestion)
 
     await waitFor(() =>
       expect(args.onChange).toHaveBeenLastCalledWith(
@@ -410,6 +409,15 @@ export const Snapshot: Story = {
         status={{ type: "warning", message: "Check the postal code" }}
       />
       <F0LocationInput {...args} label="Disabled" disabled />
+      {/* Side-panel width: the city row must stack on the container, not the viewport */}
+      <div className="max-w-[280px]">
+        <F0LocationInput
+          {...args}
+          label="Manual entry, narrow"
+          manualEntry
+          defaultValue={places[0].value}
+        />
+      </div>
     </div>
   ),
 }
