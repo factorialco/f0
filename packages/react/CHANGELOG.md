@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.90.2](https://github.com/factorialco/f0/compare/f0-react-v6.90.1...f0-react-v6.90.2) (2026-09-08)
+
+
+### Bug Fixes
+
+* **virtuoso:** revert "chore(deps): drop the react-virtuoso patch for 4.18.13" ([#5473](https://github.com/factorialco/f0/issues/5473)) ([0b22fb5](https://github.com/factorialco/f0/commit/0b22fb518bab4dabb3802799deddd2b49b044b91))
+
 ## [6.90.1](https://github.com/factorialco/f0/compare/f0-react-v6.90.0...f0-react-v6.90.1) (2026-09-08)
 
 
