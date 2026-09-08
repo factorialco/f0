@@ -49,9 +49,9 @@ export interface F0MapSidebarProps extends WithDataTestIdProps {
   /** Panel width, in px. */
   width: number
   /**
-   * Drop the panel's own padding, for content that brings its own (a header
-   * that spans the full width, sections with their own insets). Defaults to
-   * `false`.
+   * Drop the panel's own padding and scrolling, for content that brings both
+   * (a header that spans the full width, sections with their own insets and
+   * their own scroll region). Defaults to `false`.
    */
   disableContentPadding?: boolean
   /**
@@ -198,12 +198,12 @@ export const F0MapSidebar = ({
             padding="none"
             height="full"
           >
-            {/* 2px of breathing room around everything, below F0Box's smallest
+            {/* 6px of breathing room around everything, below F0Box's smallest
                 token (`xs` is 4px), so it lives on a plain wrapper. */}
             <div
               className={cn(
                 "flex h-full flex-col",
-                !disableContentPadding && "p-0.5"
+                !disableContentPadding && "p-1.5"
               )}
             >
               {headerAction && (
@@ -211,14 +211,15 @@ export const F0MapSidebar = ({
                   {headerAction}
                 </div>
               )}
-              {/* Takes the height the header leaves. The consumer's own scroll
-                  container lives in here, so its content can never reach the
-                  header row above it. It carries the padding the header doesn't
-                  need, keeping the rows off the edge. */}
+              {/* Takes the height the header leaves, and scrolls: the panel
+                  owns that so its content can never reach the header row above
+                  it, and so a consumer needs no scroll container of its own.
+                  Content that brings its own chrome brings its own scrolling
+                  too, hence the padding switch standing in for both. */}
               <div
                 className={cn(
                   "min-h-0 flex-1",
-                  !disableContentPadding && "p-1"
+                  !disableContentPadding && "overflow-y-auto"
                 )}
               >
                 {children}

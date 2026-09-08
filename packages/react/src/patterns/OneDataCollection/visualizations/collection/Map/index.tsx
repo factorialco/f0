@@ -392,9 +392,9 @@ export const MapCollection = <
   // consumer supplies the rows, called once per section with that section's
   // records. Not on map goes first - it is the one that wants acting on - and
   // is left out entirely when empty rather than shown as an empty header. The
-  // scroller is here, once, so the two sections scroll as one list.
+  // panel scrolls them as one list, so this only has to stack them.
   const panelContent = sidebar ? (
-    <div className="flex h-full flex-col gap-1 overflow-y-auto">
+    <div className="flex flex-col gap-1">
       {unplaced.length > 0 && (
         <MapPanelSection
           title={i18n.collections.map.notOnMap}

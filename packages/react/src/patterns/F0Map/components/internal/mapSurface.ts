@@ -15,13 +15,12 @@ export const mapSurfaceProps = {
 } as const
 
 /**
- * Radius per overlay, kept concentric with what each one holds: outer radius =
- * the inner element's radius + the padding between them. Both a control card
- * and a panel wrap a 10px-cornered button in 2px, so both land on the 12px
- * corner. They are named separately so a change to either one's padding can
- * move it without dragging the other along.
+ * Radius per overlay. A control card wraps a 10px-cornered button in 2px, so it
+ * lands on the 12px corner. A panel is a surface rather than a snug wrapper and
+ * takes the 16px corner, which is also what the page's own cards use. Named
+ * separately so a change to either can move without dragging the other along.
  */
-export const mapSurfaceRadius = { control: "md", panel: "md" } as const
+export const mapSurfaceRadius = { control: "md", panel: "xl" } as const
 
 /**
  * Frosted-glass wrapper class per radius. Spelled out rather than interpolated:
@@ -30,6 +29,7 @@ export const mapSurfaceRadius = { control: "md", panel: "md" } as const
 const BLUR_BY_RADIUS = {
   md: "rounded-md backdrop-blur-md",
   lg: "rounded-lg backdrop-blur-md",
+  xl: "rounded-xl backdrop-blur-md",
 } as const
 
 export const mapSurfaceBlur = (
