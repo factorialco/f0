@@ -11,11 +11,8 @@ import type {
   ScreenPoint,
 } from "../types"
 
-/**
- * Unify mouse-wheel and trackpad-pinch zoom at the midpoint of their defaults
- * (wheel 1/90, pinch 1/40) so both gestures feel the same - neither
- * exaggerated. MapLibre's own wheel default (1/450) feels sluggish.
- */
+/** Midpoint of MapLibre's wheel (1/90) and pinch (1/40) rates, so both
+ * gestures feel alike; its 1/450 wheel default feels sluggish. */
 const ZOOM_RATE = (1 / 90 + 1 / 40) / 2
 
 /** The engine's own style shape, from the port's opaque one. */
@@ -30,7 +27,7 @@ const toPadding = (gutter: number) => ({
   left: gutter,
 })
 
-/** Port event -> MapLibre event. `ready` is `load`: painting and projecting. */
+/** `ready` is `load`: MapLibre paints and projects at the same moment. */
 const EVENTS: Record<MapEvent, string> = {
   ready: "load",
   move: "move",
@@ -65,13 +62,11 @@ export const createMaplibreAdapter: MapAdapterFactory = (init): MapAdapter => {
   map.scrollZoom.setZoomRate(ZOOM_RATE)
 
   let destroyed = false
-  // Every style accessor dereferences `map.style`, which is gone after
-  // `remove()`, so liveness is what guards each of them.
+  // Every style accessor dereferences `map.style`, gone after `remove()`.
   const alive = () => !destroyed && Boolean(map.style)
 
-  // Padding only when the caller asked to reframe: MapLibre keeps its current
-  // padding when the option is absent, so always sending a zero would reset
-  // framing out from under a move that never mentioned it.
+  // Only when asked: MapLibre keeps its current padding when the option is
+  // absent, so a blanket zero would reset framing.
   const camera = (
     target: CameraTarget,
     options: CameraOptions | undefined
@@ -131,13 +126,10 @@ export const createMaplibreAdapter: MapAdapterFactory = (init): MapAdapter => {
     applyStyle: (style) => map.setStyle(asEngineStyle(style)),
 
     setGlobeProjection: (enabled) => {
-      // `isStyleLoaded()` can report true while the style is still finalising,
-      // and `setProjection` hard-throws on one that is. Dropping the failure is
-      // safe: the pending `load` / `style.load` handlers re-apply it.
       try {
         map.setProjection({ type: enabled ? "globe" : "mercator" })
       } catch {
-        // Style mid-load.
+        // Throws on a style still finalising; the ready handlers re-apply it.
       }
     },
   }
