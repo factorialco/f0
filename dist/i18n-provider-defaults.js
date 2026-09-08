@@ -1011,6 +1011,10 @@ const e = {
     noCountryResults: "No country found",
     noResults: "No addresses found",
     searchHint: "Type an address to search",
+    addressLine2Placeholder: "Enter a floor or unit",
+    cityPlaceholder: "Enter a city",
+    statePlaceholder: "Enter a region",
+    postalCodePlaceholder: "Enter a postal code",
     searching: "Searching addresses"
   },
   imageUpload: {

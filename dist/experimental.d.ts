@@ -5127,6 +5127,10 @@ declare const defaultTranslations: {
         readonly noCountryResults: "No country found";
         readonly noResults: "No addresses found";
         readonly searchHint: "Type an address to search";
+        readonly addressLine2Placeholder: "Enter a floor or unit";
+        readonly cityPlaceholder: "Enter a city";
+        readonly statePlaceholder: "Enter a region";
+        readonly postalCodePlaceholder: "Enter a postal code";
         readonly searching: "Searching addresses";
     };
     readonly imageUpload: {
@@ -5536,9 +5540,6 @@ declare type DescriptionPart = {
     /** Draws THIS part critical rather than muted. */
     critical?: boolean;
 };
-
-/** Recommended detailed preset. `addressLine2` is opt-in. */
-export declare const detailedLocationFields: readonly ["country", "city", "state", "postalCode"];
 
 /**
  * @experimental This is an experimental component use it at your own risk
@@ -8092,12 +8093,15 @@ export declare interface F0LocationInputProps {
     defaultValue?: F0LocationInputValue;
     onChange?: (value: F0LocationInputValue | undefined, meta: F0LocationInputChangeMeta) => void;
     /**
-     * Omit for the address field alone (simple mode). Pass the parts to render
-     * below it (detailed mode). Order is fixed by the component.
+     * Renders the whole address as separate fields the user can fill in by
+     * hand: country, address line 1 and 2, city, region and postal code. The
+     * address line keeps its suggestions, so picking one still fills the rest.
+     * Without it the component is the address field alone.
+     * @default false
      */
-    fields?: readonly LocationField[];
+    manualEntry?: boolean;
     /** Overrides for the per-part labels, which default to translated copy */
-    partLabels?: Partial<Record<LocationField | "addressLine1", string>>;
+    partLabels?: Partial<Record<LocationPart, string>>;
     /** Restricts the country selector. A single entry also scopes the search */
     countries?: CountryCode[];
     /** Country used to scope the search while the value has none */
@@ -11189,18 +11193,14 @@ declare interface LocalizedOption<T> {
     value: T;
 }
 
-export declare type LocationField = (typeof locationFields)[number];
-
-/**
- * Parts that can be shown below the address field in detailed mode. The
- * address line itself is not listed: it is always rendered, because it is the
- * autocomplete field in both modes.
- */
-export declare const locationFields: readonly ["country", "addressLine2", "city", "state", "postalCode"];
-
 export declare type LocationInputSize = (typeof locationInputSizes)[number];
 
 export declare const locationInputSizes: readonly ["sm", "md"];
+
+export declare type LocationPart = (typeof locationParts)[number];
+
+/** Every part the manual entry block renders, in the order it renders them */
+export declare const locationParts: readonly ["country", "addressLine1", "addressLine2", "city", "state", "postalCode"];
 
 declare const markerColors: readonly ["neutral", "grey", "radical", "malibu", "viridian", "flubber", "grass", "camel", "indigo", "lilac", "orange", "purple", "yellow", "red", "army", "smoke", "barbie"];
 

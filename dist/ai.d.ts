@@ -2884,6 +2884,10 @@ export declare const defaultTranslations: {
         readonly noCountryResults: "No country found";
         readonly noResults: "No addresses found";
         readonly searchHint: "Type an address to search";
+        readonly addressLine2Placeholder: "Enter a floor or unit";
+        readonly cityPlaceholder: "Enter a city";
+        readonly statePlaceholder: "Enter a region";
+        readonly postalCodePlaceholder: "Enter a postal code";
         readonly searching: "Searching addresses";
     };
     readonly imageUpload: {
