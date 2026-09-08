@@ -10,7 +10,7 @@ const meta = {
     layout: "centered",
     a11y: { test: "error" },
   },
-  tags: ["autodocs", "experimental"],
+  tags: ["!autodocs", "experimental"],
   decorators: [
     (Story) => (
       <div className="flex w-[360px] justify-end pt-[260px]">
