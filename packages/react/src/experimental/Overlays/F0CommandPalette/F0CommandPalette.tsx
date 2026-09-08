@@ -157,7 +157,25 @@ export const F0CommandPalette = ({
   const [listNode, setListNode] = useState<HTMLDivElement | null>(null)
   const attachList = useCallback((node: HTMLDivElement | null) => {
     listRef.current = node
-    setListNode(node)
+    /*
+      NEVER BACK TO `null`, AND NEVER A REDUNDANT UPDATE.
+
+      A callback ref is re-invoked whenever its own identity or the element it
+      is attached to changes — React calls the previous one with `null`, then
+      the next with the node. Setting state from that is a loop waiting for a
+      cause: `null` and the node are different values, so neither call bails
+      out, and one render becomes an unbounded chain of them.
+
+      That cause exists in this repo. `.storybook/preview-head.html` loads
+      `react-render-tracker`, which wraps components and so changes element
+      identity every render, and the crash it produced pointed straight here —
+      `setRef` dispatching state, over and over.
+
+      Ignoring the detach and comparing before setting makes the update happen
+      exactly once, whatever the tree does around it. Radix guards its own
+      `Presence` ref the same way, for the same reason.
+    */
+    if (node) setListNode((current) => (current === node ? current : node))
   }, [])
   /**
    * The list AND the cluster drawn over it. The cluster is deliberately not

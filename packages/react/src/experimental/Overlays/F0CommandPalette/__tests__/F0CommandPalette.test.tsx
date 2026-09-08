@@ -1192,3 +1192,39 @@ describe("remote entity search", () => {
     ).toBeInTheDocument()
   })
 })
+
+describe("resilience to a re-invoked callback ref", () => {
+  /**
+   * React re-invokes a callback ref — `null`, then the node — whenever its own
+   * identity or the element's changes. Anything that wraps components does
+   * that on every render, and `.storybook/preview-head.html` loads
+   * `react-render-tracker`, which is exactly such a thing.
+   *
+   * There is no way to make React do it on demand from a test, so this drives
+   * the same sequence by hand against the live node: detach, reattach, many
+   * times over. Without the guard each pair is two distinct state values and
+   * the palette re-renders itself into React's update-depth limit; with it,
+   * the node is recorded once and the churn is inert.
+   */
+  it("survives the ref being detached and reattached repeatedly", async () => {
+    const { field } = await open()
+    typeIn(field, "macbook")
+
+    const list = screen.getByRole("listbox")
+    const before = screen.getAllByRole("option").length
+
+    // The palette keeps the node in state so the layout effect that measures
+    // the row controls re-runs when it arrives. That is the state this churns.
+    for (let i = 0; i < 30; i++) {
+      await act(async () => {
+        list.remove()
+        document.querySelector("[role=dialog]")?.appendChild(list)
+      })
+    }
+
+    expect(screen.getAllByRole("option")).toHaveLength(before)
+    expect(
+      screen.getByRole("option", { name: /MacBook Pro 14/ })
+    ).toBeInTheDocument()
+  })
+})
