@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils"
 import { FLY_OPTS, RECOMMENDED_MAX_MARKERS } from "./constants"
 import { useCurrentLocation } from "./hooks/useCurrentLocation"
 import { useIsDarkContext } from "./hooks/useIsDarkContext"
-import { f0MapStyles, type F0MapStylePair } from "./styles"
+import { f0MapStyles, type F0MapStyle } from "./styles"
 import type {
   F0MapArc,
   F0MapPoint,
@@ -38,6 +38,14 @@ import { F0MapVectorLayer } from "./components/F0MapVectorLayer"
 import { CurrentLocationLayer } from "./components/internal/CurrentLocationLayer"
 import { F0MapSkeleton } from "./F0MapSkeleton"
 
+/**
+ * Narrows the opaque public style to MapLibre's own shape. The single place
+ * F0Map trusts a style's provider tag; it moves into the MapLibre adapter once
+ * the engine sits behind a port.
+ */
+const asEngineStyle = (style: unknown) =>
+  style as maplibregl.StyleSpecification | string
+
 /** City-level default view (Barcelona) used when no `initialViewport` is given. */
 const DEFAULT_VIEWPORT: Required<F0MapViewport> = {
   center: [2.154, 41.39],
@@ -52,8 +60,13 @@ export type F0MapProjection = "mercator" | "globe"
 
 /** Imperative handle exposed via `ref`. */
 export interface F0MapHandle {
-  /** The raw MapLibre instance (escape hatch). `null` until the map has mounted. */
-  getMap: () => maplibregl.Map | null
+  /**
+   * The rendering engine's own map object, as an escape hatch. Typed `unknown`
+   * on purpose: what comes back depends on the provider, so narrowing it is a
+   * deliberate decision at the call site instead of an implicit dependency on
+   * whichever engine F0Map happens to use. `null` until the map has mounted.
+   */
+  getNativeMap: () => unknown
   /** Center on a marker (and select it). Always animates unless reduced-motion. */
   focusMarker: (id: string) => void
   /** Frame all markers in view. */
@@ -122,7 +135,7 @@ export interface F0MapProps extends WithDataTestIdProps {
   /** Initial camera. Defaults to a city-level view. Read once on mount. */
   initialViewport?: F0MapViewport
   /** Light/dark style pair. Defaults to the f0-themed OpenFreeMap styles. */
-  mapStyle?: F0MapStylePair
+  mapStyle?: F0MapStyle
   /**
    * Allow pan/zoom. Defaults to `true`. Read on mount: changing it recreates
    * the map (and resets the camera), so treat it as static.
@@ -466,7 +479,7 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
   useImperativeHandle(
     ref,
     () => ({
-      getMap: () => mapRef.current,
+      getNativeMap: () => mapRef.current,
       focusMarker: (id) => {
         const map = mapRef.current
         const point = markersRef.current.find((p) => p.id === id)
@@ -514,7 +527,7 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
     try {
       map = new maplibregl.Map({
         container,
-        style: styleRef.current,
+        style: asEngineStyle(styleRef.current),
         center: viewport.center,
         zoom: viewport.zoom ?? DEFAULT_VIEWPORT.zoom,
         minZoom,
@@ -588,7 +601,7 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
     const map = mapRef.current
     if (!map || appliedStyleRef.current === style) return
     appliedStyleRef.current = style
-    map.setStyle(style)
+    map.setStyle(asEngineStyle(style))
     map.once("style.load", () =>
       map.setProjection({ type: projectionRef.current })
     )
@@ -776,7 +789,7 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
                   const map = mapRef.current
                   if (!map) return
                   setTileError(false)
-                  map.setStyle(styleRef.current)
+                  map.setStyle(asEngineStyle(styleRef.current))
                 }}
                 className="font-medium underline"
               >

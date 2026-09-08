@@ -37,7 +37,7 @@ vi.mock("@/patterns/F0Map", () => ({
       focusMarker: mock.focusMarker,
       fitToMarkers: mock.fitToMarkers,
       clearSelection: vi.fn(),
-      getMap: () => null,
+      getNativeMap: () => null,
     }))
     return null
   }),
