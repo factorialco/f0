@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.88.4](https://github.com/factorialco/f0/compare/f0-react-v6.88.3...f0-react-v6.88.4) (2026-09-08)
+
+
+### Bug Fixes
+
+* **OneDataCollection:** drop the entry animation on card view cards ([#5410](https://github.com/factorialco/f0/issues/5410)) ([c54b926](https://github.com/factorialco/f0/commit/c54b9269ee87360271bb9eda765de7dfe203ff95))
+
 ## [6.88.3](https://github.com/factorialco/f0/compare/f0-react-v6.88.2...f0-react-v6.88.3) (2026-09-08)
 
 
