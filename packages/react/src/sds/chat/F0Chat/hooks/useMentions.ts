@@ -55,7 +55,7 @@ export type AnchoredMention = MentionEntry & {
   end: number
 }
 
-/** Index just past the last character of an anchored mention's name. */
+/** Index just past the last character of a mention's `@name` in the text. */
 export const mentionEnd = (mention: AnchoredMention): number => mention.end
 
 /** A row in the mention popover: a group member, or the "everyone" option. */
@@ -236,8 +236,16 @@ export const reanchorMentions = (
       continue
     }
 
-    if (readsAs(prev, next, start - removed, removed, inserted)) {
-      kept.push({ ...mention, start: start + delta, end: end + delta })
+    // The reading that moves this anchor is only available if it does not
+    // land it on text another anchor already holds: deleting one of two
+    // identical mentions reads equally as deleting the other, and taking that
+    // reading for both keeps two ids on one `@name`.
+    const moved = { start: start + delta, end: end + delta }
+    const free = !kept.some(
+      (other) => other.start < moved.end && mentionEnd(other) > moved.start
+    )
+    if (free && readsAs(prev, next, start - removed, removed, inserted)) {
+      kept.push({ ...mention, ...moved })
       continue
     }
 
@@ -344,6 +352,8 @@ const MIRROR_PROPERTIES = [
  */
 type CaretMirror = {
   textarea: HTMLTextAreaElement
+  /** Content width at the time the copy was taken — what decides wrapping. */
+  width: number
   div: HTMLDivElement
   prefix: Text
   span: HTMLSpanElement
@@ -372,7 +382,7 @@ const createCaretMirror = (textarea: HTMLTextAreaElement): CaretMirror => {
   div.appendChild(span)
   document.body.appendChild(div)
 
-  return { textarea, div, prefix, span }
+  return { textarea, width: textarea.clientWidth, div, prefix, span }
 }
 
 const disposeCaretMirror = (mirror: CaretMirror): void => {
@@ -438,6 +448,10 @@ export function useMentions({
   const [isOpen, setIsOpen] = useState(false)
   const [query, setQuery] = useState("")
   const [memberResults, setMemberResults] = useState<F0ChatUser[]>([])
+  // The query `memberResults` answers. Written with them and read by the
+  // keyboard guard below, which is the difference between "a search is running"
+  // and "the rows are for something else".
+  const [resultsQuery, setResultsQuery] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [mentions, setMentions] = useState<AnchoredMention[]>([])
@@ -584,6 +598,7 @@ export function useMentions({
         .then((data) => {
           if (currentSearchId !== searchIdRef.current) return
           setMemberResults(data)
+          setResultsQuery(trigger.query)
           setSelectedIndex(0)
           // Dismiss only when nothing matches at all (no members AND the
           // "everyone" option doesn't match the typed query).
@@ -705,20 +720,21 @@ export function useMentions({
   /**
    * Can this row still be the answer to what is typed now?
    *
-   * The rows answer the last query that came back. A keystroke starts a newer
-   * search and resets the highlight to the top of that older list, so for the
-   * length of the debounce the highlighted row can be somebody the user has
-   * already typed past. A row whose label still starts with the query is the
-   * same answer either way; anything else waits for the search it belongs to.
-   * This is the check Tab has always made, extended to Enter and paid for only
-   * while a search is in flight.
+   * A keystroke starts a newer search and resets the highlight to the top of
+   * the list the previous one returned, so between the two the highlighted row
+   * can be somebody the user has already typed past. Rows that answer the
+   * current query are picked as they are — which matching model produced them
+   * is the host's business, not this hook's. Only rows answering an older query
+   * are held to the check Tab has always made: the label still starts with what
+   * is typed. Anything else waits for the search it belongs to, at most one
+   * debounce window.
    */
   const stillMatchesQuery = useCallback(
     (candidate: MentionCandidate): boolean =>
-      !isLoading ||
+      resultsQuery === query ||
       query.length === 0 ||
       candidateLabel(candidate).toLowerCase().startsWith(query.toLowerCase()),
-    [isLoading, query]
+    [resultsQuery, query]
   )
 
   const handleKeyDown = useCallback(
@@ -812,31 +828,37 @@ export function useMentions({
       // first of them twice and the second was dropped. The names handed to the
       // matcher stay as spelled, because that is what the body contains.
       const byName = new Map<string, MentionEntry[]>()
-      const spellings: { name: string }[] = []
+      const spellings = new Set<string>()
       for (const entry of entries) {
         const key = canonicalName(entry.name)
         const group = byName.get(key)
         if (group) group.push(entry)
         else byName.set(key, [entry])
-        if (!spellings.some((seen) => seen.name === entry.name)) {
-          spellings.push({ name: entry.name })
-        }
+        spellings.add(entry.name)
       }
 
-      const taken = new Map<string, number>()
+      const handedOut = new Set<MentionEntry>()
       commitMentions(
-        locateMentions(text, spellings).flatMap(
-          ({ entry: { name }, start, end }) => {
-            const key = canonicalName(name)
-            const group = byName.get(key) ?? []
-            const index = taken.get(key) ?? 0
-            taken.set(key, index + 1)
-            const picked = group[Math.min(index, group.length - 1)]
-            // The range comes from the matcher, so the anchor covers the text
-            // that is actually there rather than the entry's spelling of it.
-            return picked ? [{ ...picked, start, end }] : []
-          }
-        )
+        locateMentions(
+          text,
+          [...spellings].map((name) => ({ name }))
+        ).flatMap(({ entry: { name }, start, end }) => {
+          const group = byName.get(canonicalName(name)) ?? []
+          const free = group.filter((entry) => !handedOut.has(entry))
+          // An occurrence goes to someone whose name is spelled exactly the way
+          // the text spells it when there is such a person left, and otherwise
+          // to the next in the queue. Without the first half, a body written in
+          // one normal form hands its occurrence to whoever happens to be first
+          // in the group — the wrong person, notified in their place.
+          const picked =
+            free.find((entry) => entry.name === name) ??
+            free[0] ??
+            group[group.length - 1]
+          if (picked) handedOut.add(picked)
+          // The range comes from the matcher, so the anchor covers the text
+          // that is actually there rather than the entry's spelling of it.
+          return picked ? [{ ...picked, start, end }] : []
+        })
       )
     },
     [commitMentions]
@@ -893,7 +915,11 @@ export function useMentions({
     if (!textarea) return null
 
     let mirror = mirrorRef.current
-    if (!mirror || mirror.textarea !== textarea) {
+    if (
+      !mirror ||
+      mirror.textarea !== textarea ||
+      mirror.width !== textarea.clientWidth
+    ) {
       if (mirror) disposeCaretMirror(mirror)
       mirror = createCaretMirror(textarea)
       mirrorRef.current = mirror

@@ -52,12 +52,12 @@ describe("useMentions — an edit around a mention", () => {
   })
 
   /** Seed a saved body's mentions, then hand the composer that body. */
-  const openForEditing = (body: string) => {
+  const openForEditing = (body: string, seeded: MentionEntry[] = [ANA]) => {
     value = body
     const harness = renderHook((props: Props) => useMentions(props), {
       initialProps: makeProps(),
     })
-    act(() => harness.result.current.seedMentions([ANA], body))
+    act(() => harness.result.current.seedMentions(seeded, body))
     harness.rerender(makeProps())
     return harness
   }
@@ -104,6 +104,22 @@ describe("useMentions — an edit around a mention", () => {
     edit(rerender, "Holxbye", 4)
 
     await waitFor(() => expect(result.current.mentions).toEqual([]))
+    expect(setInputValue).not.toHaveBeenCalled()
+  })
+
+  it("never leaves two anchors on one `@name`", async () => {
+    // Deleting either of two identical mentions produces the same text, so the
+    // reading that moves the second one onto the first is available to both.
+    const { result, rerender } = openForEditing(
+      "Hi @Ana García @Ana García ok",
+      [ANA, { id: "ana-p", name: "Ana García" }]
+    )
+    await waitFor(() => expect(result.current.mentions).toHaveLength(2))
+
+    edit(rerender, "Hi @Ana García ok", 15)
+
+    await waitFor(() => expect(result.current.mentions).toHaveLength(1))
+    expect(result.current.mentions).toMatchObject([{ start: 3, end: 14 }])
     expect(setInputValue).not.toHaveBeenCalled()
   })
 
@@ -191,5 +207,76 @@ describe("useMentions — an edit outside a mention never touches it", () => {
     }
 
     expect(checked).toBe(20000)
+  })
+})
+
+/**
+ * The reading that saves an anchor is chosen per anchor, which is exactly how
+ * two of them end up on one token: deleting either of two identical mentions
+ * produces the same text, so the reading that moves the survivor is available
+ * to the deleted one as well. Nothing in an example test says "and the anchors
+ * still describe disjoint pieces of the message", so this does.
+ */
+describe("useMentions — anchors never collide, whatever the edit", () => {
+  const NAME = "Ana"
+  const ALPHABET = "@aAn ,"
+
+  const random = (seed: number) => () => {
+    seed = (seed + 0x6d2b79f5) | 0
+    let t = seed
+    t = Math.imul(t ^ (t >>> 15), t | 1)
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61)
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+
+  it("keeps disjoint spans, over 20000 random edits to two mentions", () => {
+    const next = random(20260909)
+    const pick = (limit: number) => Math.floor(next() * limit)
+    const noise = (length: number) =>
+      Array.from(
+        { length },
+        () => ALPHABET[pick(ALPHABET.length)] as string
+      ).join("")
+
+    for (let i = 0; i < 20000; i++) {
+      const token = `@${NAME}`
+      const head = noise(pick(4))
+      const middle = noise(pick(4))
+      const tail = noise(pick(4))
+      const text = head + token + middle + token + tail
+      const first = head.length
+      const second = first + token.length + middle.length
+      const anchors: AnchoredMention[] = [
+        { id: "one", name: NAME, start: first, end: first + token.length },
+        { id: "two", name: NAME, start: second, end: second + token.length },
+      ]
+
+      // Anywhere at all, including straight through a mention.
+      const at = pick(text.length + 1)
+      const removed = pick(text.length - at + 1)
+      const edited =
+        text.slice(0, at) + noise(pick(4)) + text.slice(at + removed)
+
+      const { kept } = reanchorMentions(text, edited, anchors)
+      const overlapping = kept.filter((mention, index) =>
+        kept.some(
+          (other, otherIndex) =>
+            otherIndex !== index &&
+            other.start < mention.end &&
+            other.end > mention.start
+        )
+      )
+      const offItsName = kept.filter(
+        (mention) => !edited.startsWith(token, mention.start)
+      )
+
+      expect({ i, text, edited, overlapping, offItsName }).toEqual({
+        i,
+        text,
+        edited,
+        overlapping: [],
+        offItsName: [],
+      })
+    }
   })
 })

@@ -140,6 +140,60 @@ describe("useMentions — a keyboard pick during the debounce window", () => {
     expect(inserted).toEqual(["@here "])
   })
 
+  /** A host that matches anywhere in the name, as the real one does. */
+  const substringProps = (over: Partial<Props> = {}): Props =>
+    makeProps({
+      searchMembers: (query: string) =>
+        Promise.resolve(
+          MEMBERS.filter((member) =>
+            member.name.toLowerCase().includes(query.toLowerCase())
+          )
+        ),
+      ...over,
+    })
+
+  it("picks a row the host matched on a substring, once it answers the query", async () => {
+    // Which matching model produced a row is the host's business. Holding rows
+    // to a prefix test once they answer the current query would make Enter a
+    // dead key for every host that matches on a surname or a username.
+    const { result, rerender } = renderHook(
+      (props: Props) => useMentions(props),
+      { initialProps: substringProps() }
+    )
+
+    rerender(substringProps({ inputValue: "@gar", cursorPosition: 4 }))
+    await settle()
+    expect(result.current.results).toMatchObject([
+      { kind: "user", user: { id: "ana-g" } },
+    ])
+
+    press(result, "Enter")
+
+    expect(inserted).toEqual(["@Ana García "])
+  })
+
+  it("does not hold a pick up while the search re-runs for the same query", async () => {
+    const body = "@Ana García @gar"
+    const { result, rerender } = renderHook(
+      (props: Props) => useMentions(props),
+      { initialProps: substringProps() }
+    )
+
+    rerender(substringProps({ inputValue: body, cursorPosition: body.length }))
+    await settle()
+    expect(inserted).toEqual([])
+
+    // Anchoring the mention that is already in the text re-runs the trigger
+    // effect, which dispatches the same query again. The rows on screen answer
+    // it: a search being in flight is not the same as the rows being stale.
+    act(() =>
+      result.current.seedMentions([{ id: "ana-g", name: "Ana García" }], body)
+    )
+    press(result, "Enter")
+
+    expect(inserted).toEqual(["@Ana García @Ana García "])
+  })
+
   it("leaves Tab's own check in place", async () => {
     const { result, rerender } = mount()
 

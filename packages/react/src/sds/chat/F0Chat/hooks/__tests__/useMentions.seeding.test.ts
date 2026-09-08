@@ -117,6 +117,19 @@ describe("useMentions — seeding a saved message's mentions", () => {
     expect(setInputValue).not.toHaveBeenCalled()
   })
 
+  it("gives an occurrence to the person whose name is spelled that way", async () => {
+    // The body is written the way the *second* person's name is written. One
+    // canonical queue is right for handing out repeats; it must not decide who
+    // a single occurrence belongs to when the text already says.
+    const { result } = openForEditing(`@${DECOMPOSED}`, [ONE, TWO])
+
+    await waitFor(() => expect(result.current.mentions).toHaveLength(1))
+    expect(result.current.mentions).toMatchObject([
+      { id: "u2", start: 0, end: 8 },
+    ])
+    expect(result.current.getMentions().mentions).toEqual([TWO])
+  })
+
   it("still gives one person named twice both occurrences", async () => {
     const { result } = openForEditing(BODY, [ONE])
 

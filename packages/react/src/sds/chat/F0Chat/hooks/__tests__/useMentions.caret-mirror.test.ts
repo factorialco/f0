@@ -61,13 +61,13 @@ describe("useMentions — caret mirror cost", () => {
     })
 
     appendedToBody = []
-    vi.spyOn(document.body, "appendChild").mockImplementation(
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-      function (this: HTMLElement, node: Node) {
-        appendedToBody.push(node)
-        return HTMLElement.prototype.appendChild.call(this, node) as Node
-      } as typeof document.body.appendChild
-    )
+    vi.spyOn(document.body, "appendChild").mockImplementation(function (
+      this: HTMLElement,
+      node: Node
+    ) {
+      appendedToBody.push(node)
+      return HTMLElement.prototype.appendChild.call(this, node) as Node
+    } as typeof document.body.appendChild)
 
     spanReads = 0
     vi.spyOn(HTMLElement.prototype, "offsetLeft", "get").mockImplementation(
@@ -153,6 +153,26 @@ describe("useMentions — caret mirror cost", () => {
     type(rerender, "Hey @Ana")
 
     expect(result.current.popoverPosition).toEqual({ left: 4, bottom: 0 })
+  })
+
+  it("re-measures when the textarea's width changes under it", () => {
+    let width = 320
+    Object.defineProperty(textarea, "clientWidth", {
+      configurable: true,
+      get: () => width,
+    })
+    const { rerender } = mount()
+
+    type(rerender, "Hola @")
+    computedStyleCalls = 0
+
+    // A narrower composer wraps the text differently, so the copy of it is no
+    // longer a copy — width is the one property the mirror really carries.
+    width = 180
+    type(rerender, "Hola @A")
+
+    expect(computedStyleCalls).toBeGreaterThan(0)
+    expect(mirrorsInBody()).toHaveLength(1)
   })
 
   it("takes the measuring node out of the document when the popover closes", () => {
