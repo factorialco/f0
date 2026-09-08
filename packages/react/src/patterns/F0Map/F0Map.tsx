@@ -17,9 +17,11 @@ import { DataTestIdWrapper, type WithDataTestIdProps } from "@/lib/data-testid"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
-import { FLY_OPTS, RECOMMENDED_MAX_MARKERS } from "./constants"
+import { RECOMMENDED_MAX_MARKERS } from "./constants"
 import { useCurrentLocation } from "./hooks/useCurrentLocation"
 import { useIsDarkContext } from "./hooks/useIsDarkContext"
+import { createMaplibreAdapter } from "./providers/maplibre"
+import type { MapAdapter, MapEvent } from "./providers/types"
 import { f0MapStyles, type F0MapStyle } from "./styles"
 import type {
   F0MapArc,
@@ -38,13 +40,23 @@ import { F0MapVectorLayer } from "./components/F0MapVectorLayer"
 import { CurrentLocationLayer } from "./components/internal/CurrentLocationLayer"
 import { F0MapSkeleton } from "./F0MapSkeleton"
 
-/**
- * Narrows the opaque public style to MapLibre's own shape. The single place
- * F0Map trusts a style's provider tag; it moves into the MapLibre adapter once
- * the engine sits behind a port.
- */
-const asEngineStyle = (style: unknown) =>
-  style as maplibregl.StyleSpecification | string
+/** Compare an inset by value: a consumer may rebuild the object every render. */
+const insetSignature = (inset: F0MapViewportInset | undefined) =>
+  JSON.stringify([
+    inset?.top ?? 0,
+    inset?.right ?? 0,
+    inset?.bottom ?? 0,
+    inset?.left ?? 0,
+  ])
+
+/** Subscribe for a single firing. */
+const once = (adapter: MapAdapter, event: MapEvent, handler: () => void) => {
+  const off = adapter.on(event, () => {
+    off()
+    handler()
+  })
+  return off
+}
 
 /** City-level default view (Barcelona) used when no `initialViewport` is given. */
 const DEFAULT_VIEWPORT: Required<F0MapViewport> = {
@@ -201,42 +213,25 @@ const framedCoords = (
   ...arcs.flatMap((a) => [a.from, a.to]),
 ]
 
-/**
- * MapLibre camera padding: the inset a side panel covers, plus a uniform base
- * so a fit never puts markers flush against the edges. Passed on every camera
- * move, which is also what keeps a still camera shifted while a panel is open.
- */
-const cameraPadding = (
-  inset: F0MapViewportInset | undefined,
-  base: number
-): Required<F0MapViewportInset> => ({
-  top: base + (inset?.top ?? 0),
-  right: base + (inset?.right ?? 0),
-  bottom: base + (inset?.bottom ?? 0),
-  left: base + (inset?.left ?? 0),
-})
-
 const fitToPoints = (
-  map: maplibregl.Map,
+  adapter: MapAdapter,
   points: F0MapPoint[],
   animate: boolean,
   routes: F0MapRoute[] = [],
   arcs: F0MapArc[] = [],
   inset?: F0MapViewportInset,
-  base = 64
+  gutter = 64
 ) => {
   const coords = framedCoords(points, routes, arcs)
   if (coords.length === 0) return
-  const padding = cameraPadding(inset, base)
+  const options = { inset, gutter, animate }
   if (coords.length === 1) {
-    const opts = { center: coords[0], zoom: 14, padding }
-    if (animate) map.easeTo(opts)
-    else map.jumpTo(opts)
+    const target = { center: coords[0], zoom: 14 }
+    if (animate) adapter.easeTo(target, options)
+    else adapter.jumpTo(target, options)
     return
   }
-  const bounds = new maplibregl.LngLatBounds()
-  coords.forEach((c) => bounds.extend(c))
-  map.fitBounds(bounds, { padding, maxZoom: 15, animate })
+  adapter.fitCoordinates(coords, { ...options, maxZoom: 15 })
 }
 
 /**
@@ -251,16 +246,12 @@ type CameraIntent = { kind: "fit" } | { kind: "flight"; zoom: number } | null
  * means "take me there".
  */
 const centerPoint = (
-  map: maplibregl.Map,
+  adapter: MapAdapter,
   point: F0MapPoint,
   animate: boolean,
   inset?: F0MapViewportInset
 ) => {
-  map.easeTo({
-    center: point.coordinates,
-    padding: cameraPadding(inset, 0),
-    animate,
-  })
+  adapter.centerInFreeRegion(point.coordinates, { inset, gutter: 0, animate })
 }
 
 /**
@@ -269,30 +260,28 @@ const centerPoint = (
  * carry on to it instead of freezing wherever the animation had reached.
  */
 const focusPoint = (
-  map: maplibregl.Map,
+  adapter: MapAdapter,
   point: F0MapPoint,
   animate: boolean,
   inset?: F0MapViewportInset
 ) => {
-  const zoom = Math.max(map.getZoom(), 15)
-  map.easeTo({
-    center: point.coordinates,
-    zoom,
-    padding: cameraPadding(inset, 0),
-    animate,
-  })
+  const zoom = Math.max(adapter.getZoom(), 15)
+  adapter.easeTo(
+    { center: point.coordinates, zoom },
+    { inset, gutter: 0, animate }
+  )
   return zoom
 }
 
 /** Fly to a point and report the intent, for a later padding change to redo. */
 const flightIntent = (
-  map: maplibregl.Map,
+  adapter: MapAdapter,
   point: F0MapPoint,
   animate: boolean,
   inset?: F0MapViewportInset
 ): CameraIntent => ({
   kind: "flight",
-  zoom: focusPoint(map, point, animate, inset),
+  zoom: focusPoint(adapter, point, animate, inset),
 })
 
 const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
@@ -329,7 +318,7 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
 ) {
   const i18n = useI18n()
   const containerRef = useRef<HTMLDivElement | null>(null)
-  const mapRef = useRef<maplibregl.Map | null>(null)
+  const adapterRef = useRef<MapAdapter | null>(null)
   const [mapInstance, setMapInstance] = useState<maplibregl.Map | null>(null)
   // WebGL missing (map can't be created) -> show the list as the fallback.
   // Tile/style load failure -> a retry banner over the map.
@@ -395,14 +384,14 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
   const handleMarkerClick = useCallback(
     (id: string | null) => {
       if (centerOnMarkerClick && id) {
-        const map = mapRef.current
+        const adapter = adapterRef.current
         const point = markersRef.current.find(
           (candidate) => candidate.id === id
         )
-        if (map && point) {
+        if (adapter && point) {
           // A click has no zoom intent: nothing to redo but the centering.
           cameraIntentRef.current = null
-          centerPoint(map, point, !reduceMotion, insetRef.current)
+          centerPoint(adapter, point, !reduceMotion, insetRef.current)
         }
       }
       selectRef.current(id)
@@ -431,14 +420,14 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
   const { coords: currentLocation, request: requestLocation } =
     useCurrentLocation(showCurrentLocation)
 
-  // Control handlers (wired to the MapLibre instance via refs).
-  const handleZoomIn = useCallback(() => mapRef.current?.zoomIn(), [])
-  const handleZoomOut = useCallback(() => mapRef.current?.zoomOut(), [])
+  // Control handlers (wired to the adapter via refs).
+  const handleZoomIn = useCallback(() => adapterRef.current?.zoomIn(), [])
+  const handleZoomOut = useCallback(() => adapterRef.current?.zoomOut(), [])
   const handleFit = useCallback(() => {
     cameraIntentRef.current = { kind: "fit" }
-    if (mapRef.current)
+    if (adapterRef.current)
       fitToPoints(
-        mapRef.current,
+        adapterRef.current,
         markersRef.current,
         !reduceMotion,
         routesRef.current,
@@ -448,13 +437,10 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
   }, [reduceMotion])
   const handleLocate = useCallback(() => {
     requestLocation((c) =>
-      mapRef.current?.flyTo({
-        ...FLY_OPTS,
-        center: c,
-        zoom: Math.max(mapRef.current.getZoom(), 13),
-        padding: cameraPadding(insetRef.current, 0),
-        animate: !reduceMotion,
-      })
+      adapterRef.current?.flyTo(
+        { center: c, zoom: Math.max(adapterRef.current.getZoom(), 13) },
+        { inset: insetRef.current, gutter: 0, animate: !reduceMotion }
+      )
     )
   }, [requestLocation, reduceMotion])
 
@@ -462,11 +448,11 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
   // screen-reader users navigate; the map has no focusable pins).
   const handleListSelect = useCallback(
     (id: string) => {
-      const map = mapRef.current
+      const adapter = adapterRef.current
       const point = markersRef.current.find((p) => p.id === id)
-      if (map && point)
+      if (adapter && point)
         cameraIntentRef.current = flightIntent(
-          map,
+          adapter,
           point,
           !reduceMotion,
           insetRef.current
@@ -479,13 +465,13 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
   useImperativeHandle(
     ref,
     () => ({
-      getNativeMap: () => mapRef.current,
+      getNativeMap: () => adapterRef.current?.native() ?? null,
       focusMarker: (id) => {
-        const map = mapRef.current
+        const adapter = adapterRef.current
         const point = markersRef.current.find((p) => p.id === id)
-        if (!map || !point) return
+        if (!adapter || !point) return
         cameraIntentRef.current = flightIntent(
-          map,
+          adapter,
           point,
           !reduceMotion,
           insetRef.current
@@ -494,9 +480,9 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
       },
       fitToMarkers: () => {
         cameraIntentRef.current = { kind: "fit" }
-        if (mapRef.current)
+        if (adapterRef.current)
           fitToPoints(
-            mapRef.current,
+            adapterRef.current,
             markersRef.current,
             !reduceMotion,
             routesRef.current,
@@ -523,72 +509,64 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
 
     appliedStyleRef.current = styleRef.current
     const viewport = viewportRef.current
-    let map: maplibregl.Map
+    let adapter: MapAdapter
     try {
-      map = new maplibregl.Map({
+      adapter = createMaplibreAdapter({
         container,
-        style: asEngineStyle(styleRef.current),
+        style: styleRef.current,
         center: viewport.center,
         zoom: viewport.zoom ?? DEFAULT_VIEWPORT.zoom,
         minZoom,
         maxZoom,
         interactive,
-        // Plain wheel scrolls the page; Ctrl/⌘ + wheel or two fingers zoom. The
-        // hint overlay MapLibre adds is hidden in F0Map.css.
         cooperativeGestures: gestureHandling === "cooperative",
-        renderWorldCopies: false,
-        attributionControl: { compact: true },
       })
     } catch {
-      // No WebGL (or context creation failed): fall back to the list view.
+      // The engine could not start (no WebGL): fall back to the list view.
       setWebglFailed(true)
       return
     }
-    mapRef.current = map
-    setMapInstance(map)
+    adapterRef.current = adapter
+    // The marker, line and current-location layers still take the engine's own
+    // map; they move behind the port next.
+    setMapInstance(adapter.native() as maplibregl.Map)
     // A previous run may have failed (and set the list fallback) with props
     // that made creation throw; this run succeeded, so clear it.
     setWebglFailed(false)
 
-    // Unify mouse-wheel and trackpad-pinch zoom at the midpoint of their prior
-    // rates (wheel 1/90, pinch 1/40) so both gestures feel the same - neither
-    // exaggerated. Default wheel (1/450) feels sluggish; this stays snappier.
-    const zoomRate = (1 / 90 + 1 / 40) / 2 // ≈ 1/55
-    map.scrollZoom.setWheelZoomRate(zoomRate)
-    map.scrollZoom.setZoomRate(zoomRate)
-
-    // Errors before the first `load` mean the style/tiles failed to come up -
-    // surface the retry banner. Transient per-tile errors after load are
-    // ignored (they don't break the map).
-    let loaded = false
-    map.once("load", () => {
-      loaded = true
+    // Errors before the map is ready mean the style/tiles failed to come up -
+    // surface the retry banner. Transient per-tile errors after are ignored
+    // (they don't break the map).
+    let ready = false
+    const offReady = once(adapter, "ready", () => {
+      ready = true
       setTileError(false)
-      map.resize()
+      adapter.resize()
       if (shouldFit)
         fitToPoints(
-          map,
+          adapter,
           markersRef.current,
           false,
           routesRef.current,
           arcsRef.current,
           insetRef.current
         )
-      map.setProjection({ type: projectionRef.current })
+      adapter.setGlobeProjection(projectionRef.current === "globe")
     })
-    const handleError = () => {
-      if (!loaded) setTileError(true)
-    }
-    map.on("error", handleError)
+    const offError = adapter.on("error", () => {
+      if (!ready) setTileError(true)
+    })
     // Background click clears the selection (marker clicks are DOM events on
     // the marker element and never reach the canvas).
-    const handleBackgroundClick = () => selectRef.current(null)
-    map.on("click", handleBackgroundClick)
+    const offClick = adapter.on("click", () => selectRef.current(null))
 
     return () => {
-      mapRef.current = null
+      offReady()
+      offError()
+      offClick()
+      adapterRef.current = null
       setMapInstance(null)
-      map.remove()
+      adapter.destroy()
     }
   }, [loading, interactive, gestureHandling, minZoom, maxZoom, shouldFit])
 
@@ -598,40 +576,31 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
   // fires as soon as the new style STARTS loading) is the done signal -
   // setProjection hard-throws on a style that is still loading.
   useEffect(() => {
-    const map = mapRef.current
-    if (!map || appliedStyleRef.current === style) return
+    const adapter = adapterRef.current
+    if (!adapter || appliedStyleRef.current === style) return
     appliedStyleRef.current = style
-    map.setStyle(asEngineStyle(style))
-    map.once("style.load", () =>
-      map.setProjection({ type: projectionRef.current })
+    adapter.applyStyle(style)
+    once(adapter, "styled", () =>
+      adapter.setGlobeProjection(projectionRef.current === "globe")
     )
   }, [style])
 
-  // Re-project live when the `projection` prop changes. The initial application
-  // is left to the creation effect's load handler; this only matters for
-  // post-mount changes. `isStyleLoaded()` can report true while the style is
-  // still finalising (and setProjection then throws anyway), so the guard is
-  // the try - a mid-load failure is safely dropped because the pending load /
-  // style.load handlers re-apply `projectionRef` when the style is ready.
+  // Re-project live when the `projection` prop changes. The initial
+  // application is left to the creation effect's ready handler; this only
+  // matters for post-mount changes.
   useEffect(() => {
-    const map = mapRef.current
-    if (!map) return
-    try {
-      map.setProjection({ type: projection })
-    } catch {
-      // Style mid-load; the load handler applies the projection.
-    }
+    adapterRef.current?.setGlobeProjection(projection === "globe")
   }, [projection])
 
   // Reveal: fly to a newly highlighted marker (external search selecting a
   // result). Only fires when the id changes to a real marker.
   useEffect(() => {
     if (!highlightedId) return
-    const map = mapRef.current
+    const adapter = adapterRef.current
     const point = markersRef.current.find((p) => p.id === highlightedId)
-    if (map && point)
+    if (adapter && point)
       cameraIntentRef.current = flightIntent(
-        map,
+        adapter,
         point,
         !reduceMotion,
         insetRef.current
@@ -646,16 +615,15 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
   // every render must not re-ease the camera on each one.
   const appliedInsetRef = useRef<string | null>(null)
   useEffect(() => {
-    const padding = cameraPadding(viewportInset, 0)
-    const signature = JSON.stringify(padding)
+    const signature = insetSignature(viewportInset)
     if (signature === appliedInsetRef.current) return
 
     const isFirstRun = appliedInsetRef.current === null
     appliedInsetRef.current = signature
     if (isFirstRun) return
 
-    const map = mapRef.current
-    if (!map) return
+    const adapter = adapterRef.current
+    if (!adapter) return
 
     // With a marker selected, re-center on it: the point of the inset is to keep
     // *that* marker clear of the panel, and the current view may have been
@@ -665,14 +633,15 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
     )
     const intent = cameraIntentRef.current
     if (selected) {
-      map.easeTo({
-        center: selected.coordinates,
-        padding,
-        // Carry on to a flight's target; otherwise leave the zoom alone, so
-        // opening a panel over a click-selection never zooms.
-        ...(intent?.kind === "flight" ? { zoom: intent.zoom } : {}),
-        animate: !reduceMotion,
-      })
+      adapter.easeTo(
+        {
+          center: selected.coordinates,
+          // Carry on to a flight's target; otherwise leave the zoom alone, so
+          // opening a panel over a click-selection never zooms.
+          ...(intent?.kind === "flight" ? { zoom: intent.zoom } : {}),
+        },
+        { inset: viewportInset, gutter: 0, animate: !reduceMotion }
+      )
       return
     }
 
@@ -681,7 +650,7 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
     // freed-up space, rather than freezing that fit part-way through.
     if (intent?.kind === "fit") {
       fitToPoints(
-        map,
+        adapter,
         markersRef.current,
         !reduceMotion,
         routesRef.current,
@@ -691,7 +660,11 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
       return
     }
 
-    map.easeTo({ padding, animate: !reduceMotion })
+    adapter.setFreeRegion({
+      inset: viewportInset,
+      gutter: 0,
+      animate: !reduceMotion,
+    })
   }, [viewportInset, reduceMotion])
 
   const hasLines = routes.length > 0 || arcs.length > 0
@@ -786,10 +759,10 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
               <button
                 type="button"
                 onClick={() => {
-                  const map = mapRef.current
-                  if (!map) return
+                  const adapter = adapterRef.current
+                  if (!adapter) return
                   setTileError(false)
-                  map.setStyle(asEngineStyle(styleRef.current))
+                  adapter.applyStyle(styleRef.current)
                 }}
                 className="font-medium underline"
               >
