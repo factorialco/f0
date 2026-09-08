@@ -640,87 +640,117 @@ const recolor = (style, theme) => {
 }
 
 /**
- * The same flavor, expressed in Google's `MapTypeStyle[]`.
+ * Google's own flavor, from the same f0 tokens.
  *
- * Deliberately partial. Google's styling model takes a `featureType` from a
- * fixed list, an `elementType`, and flat stylers - no per-layer control, no
- * data-driven or zoom-dependent expressions, and no way to add a layer its
- * basemap omits. So of the flavor's 25 roles, 14 have an expression here and
- * 11 do not:
+ * Not a translation of the MapLibre one. That flavor makes decisions which only
+ * work because MapLibre draws buildings, landuse and dashed paths on top: it
+ * collapses every dark surface onto one step (contrast lives on the linework)
+ * and paints local streets pure white (a darker casing separates them). Google
+ * draws none of those layers, so copying it gives a dead plane in dark and
+ * streets that vanish in light.
  *
- *   worldLand   the base land is zoom-interpolated on MapLibre; Google has no
- *               zoom-dependent styler at all, so the near-view colour wins
- *   path        no featureType for footways or cycleways
- *   wood        no featureType distinct from landcover
- *   residential, industrial, sand, farmland, rock, glacier
- *               no landuse featureTypes exist
- *   building, buildingLine
- *               no building featureType; landscape.man_made is the nearest
- *               approximation and covers more than buildings
+ * So this composes for what Google actually renders: surfaces separated by
+ * their own steps, and a road hierarchy that reads without help.
+ */
+const googleFlavor = (theme) => {
+  const L = theme === "light"
+  // Light ground is the warm near-white the urban fabric uses; dark ground is
+  // the page itself, so the map sits in the app rather than on it.
+  const base = L
+    ? tint(theme, "yellow.60", 0.09, neutral(theme, 0))
+    : neutral(theme, 0)
+  return {
+    base,
+    // Vegetation and parks stay distinguishable in dark, where MapLibre gives
+    // up on them: there are no buildings here to carry the contrast instead.
+    vegetation: tint(
+      theme,
+      L ? "flubber.50" : "flubber.60",
+      L ? 0.34 : 0.22,
+      base
+    ),
+    park: tint(theme, L ? "flubber.60" : "flubber.50", L ? 0.42 : 0.3, base),
+    builtUp: L
+      ? mix(neutral(theme, 5), neutral(theme, 10), 0.5)
+      : neutral(theme, 10),
+    // Water reads as water in both themes. MapLibre's dark map de-blues it
+    // because its whole surface palette is flat; this one has room for it.
+    water: tint(theme, L ? "malibu.50" : "malibu.60", L ? 0.45 : 0.42, base),
+    // Three steps, so the network has a hierarchy of its own.
+    roadMajor: L
+      ? mix(neutral(theme, 30), neutral(theme, 40), 0.3)
+      : neutral(theme, 40),
+    // Same step as the casing below: an arterial reads as one weight up from a
+    // local street, not as another white one.
+    roadArterial: neutral(theme, 30),
+    roadLocal: L ? "#ffffff" : neutral(theme, 20),
+    // Darker than the fill it outlines, which is what makes a white street
+    // legible on near-white ground.
+    roadCasing: L ? neutral(theme, 30) : neutral(theme, 10),
+    boundary: neutral(theme, 30),
+    label: neutral(theme, 100),
+    labelSecondary: neutral(theme, L ? "solid50" : "solid40"),
+    labelHalo: neutral(theme, 0),
+    waterLabel: L ? hex(rgbOf("malibu.70")) : hex(rgbOf("malibu.50")),
+  }
+}
+
+/**
+ * That flavor as `MapTypeStyle[]`.
  *
- * The two maps will not match. The point is that both derive from the same
- * tokens, so a token change lands as a reviewable diff on both rather than
- * silently drifting on one.
+ * Google takes a `featureType` from a fixed list, an `elementType`, and flat
+ * stylers - no per-layer control, no data-driven or zoom-dependent expressions,
+ * and no way to add a layer its basemap omits. There is no featureType for
+ * footways, woods, buildings, or any landuse category, and no zoom styler, so
+ * those roles have no expression here and keep Google's own colours.
  */
 const googleStyles = (theme) => {
-  const f = saturatedFlavor(theme)
+  const f = googleFlavor(theme)
   const paint = (featureType, elementType, color) => ({
     featureType,
     elementType,
     stylers: [{ color }],
   })
+  const hide = (featureType, elementType) => ({
+    featureType,
+    elementType,
+    stylers: [{ visibility: "off" }],
+  })
   return [
-    // Base land. `residential` rather than `worldLand`: without a zoom styler
-    // one colour has to serve every scale, and the near view is the one users
-    // spend their time in.
-    paint("landscape", "geometry.fill", f.residential),
-    paint("landscape.natural.landcover", "geometry.fill", f.land),
-    paint("landscape.natural.terrain", "geometry.fill", f.land),
-    // Nearest thing to a building, and wider than one.
-    paint("landscape.man_made", "geometry.fill", f.building),
-    paint("landscape.man_made", "geometry.stroke", f.buildingLine),
+    paint("landscape", "geometry.fill", f.base),
+    paint("landscape.natural.landcover", "geometry.fill", f.vegetation),
+    paint("landscape.natural.terrain", "geometry.fill", f.vegetation),
+    paint("landscape.man_made", "geometry.fill", f.builtUp),
+    paint("landscape.man_made", "geometry.stroke", f.roadCasing),
 
     paint("water", "geometry.fill", f.water),
     paint("water", "labels.text.fill", f.waterLabel),
+    paint("water", "labels.text.stroke", f.labelHalo),
 
     paint("poi.park", "geometry.fill", f.park),
-    paint("poi.business", "geometry.fill", f.commercial),
-    paint("poi.school", "geometry.fill", f.school),
-    paint("poi.medical", "geometry.fill", f.hospital),
+    paint("poi.medical", "geometry.fill", f.builtUp),
+    paint("poi.school", "geometry.fill", f.builtUp),
+    paint("poi.business", "geometry.fill", f.builtUp),
 
     paint("road.highway", "geometry.fill", f.roadMajor),
-    paint("road.arterial", "geometry.fill", f.roadMajor),
-    paint("road.local", "geometry.fill", f.roadMinor),
-    paint("road", "geometry.stroke", f.roadCasing),
+    paint("road.highway", "geometry.stroke", f.roadCasing),
+    paint("road.arterial", "geometry.fill", f.roadArterial),
+    paint("road.arterial", "geometry.stroke", f.roadCasing),
+    paint("road.local", "geometry.fill", f.roadLocal),
+    paint("road.local", "geometry.stroke", f.roadCasing),
 
     paint("administrative", "geometry.stroke", f.boundary),
-    paint("administrative.locality", "labels.text.fill", f.labelText),
-    paint("administrative.country", "labels.text.fill", f.labelText),
+    paint("administrative.locality", "labels.text.fill", f.label),
+    paint("administrative.country", "labels.text.fill", f.label),
     paint("administrative.province", "labels.text.fill", f.labelSecondary),
     paint("administrative.neighborhood", "labels.text.fill", f.labelSecondary),
-    {
-      featureType: "all",
-      elementType: "labels.text.stroke",
-      stylers: [{ color: f.labelHalo }],
-    },
+    paint("all", "labels.text.stroke", f.labelHalo),
 
-    // Our own markers are the only points of interest, and route shields plus
-    // transit noise are hidden on MapLibre too.
-    {
-      featureType: "poi",
-      elementType: "labels",
-      stylers: [{ visibility: "off" }],
-    },
-    {
-      featureType: "transit",
-      elementType: "all",
-      stylers: [{ visibility: "off" }],
-    },
-    {
-      featureType: "road",
-      elementType: "labels.icon",
-      stylers: [{ visibility: "off" }],
-    },
+    // Our own markers are the only points of interest, and the route shields
+    // and transit noise are hidden on MapLibre too.
+    hide("poi", "labels"),
+    hide("transit", "all"),
+    hide("road", "labels.icon"),
   ]
 }
 
