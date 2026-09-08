@@ -489,6 +489,11 @@ export declare const defaultTranslations: {
             readonly reset: "Reset to default";
             readonly viewSelectorLabel: "Select view";
         };
+        readonly map: {
+            readonly notOnMap: "Not on map";
+            readonly onMap: "On map";
+            readonly notOnMapCount: "{{count}} not on map";
+        };
         readonly table: {
             readonly seeMoreChildren: "See more";
             readonly settings: {
@@ -1214,11 +1219,15 @@ export declare const defaultTranslations: {
         readonly loadError: "Couldn't load the map.";
         readonly retry: "Retry";
         readonly currentLocation: "Your location";
+        readonly panel: "Map panel";
+        readonly detailPanel: "Map detail panel";
         readonly controls: {
             readonly zoomIn: "Zoom in";
             readonly zoomOut: "Zoom out";
             readonly fit: "Fit to markers";
             readonly locate: "My location";
+            readonly showPanel: "Show panel";
+            readonly hidePanel: "Hide panel";
         };
     };
     readonly wizard: {
@@ -1326,17 +1335,17 @@ declare namespace _Page {
 declare module "gridstack" {
     interface GridStackWidget {
         id?: string;
-        allowedSizes?: Array<{
+        allowedSizes?: {
             w: number;
             h: number;
-        }>;
+        }[];
         meta?: Record<string, unknown>;
     }
     interface GridStackNode {
-        allowedSizes?: Array<{
+        allowedSizes?: {
             w: number;
             h: number;
-        }>;
+        }[];
     }
 }
 

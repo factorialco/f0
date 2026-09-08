@@ -1,7 +1,7 @@
 import { jsxs as b, jsx as e } from "react/jsx-runtime";
 import { useState as _, useEffect as h } from "react";
-import { u as x, S as p, p as w } from "./F0CanvasPanel-o38gFTCC.js";
-import { u as y, D as g } from "./DocumentToolbar-B1x0HFMK.js";
+import { u as x, S as p, p as w } from "./F0CanvasPanel-CNzjQ3Am.js";
+import { u as y, D as g } from "./DocumentToolbar-D2aga4Mz.js";
 const k = 2 * 1024 * 1024, v = [
   "[&_h1]:mb-3 [&_h1]:mt-6 [&_h1]:text-2xl [&_h1]:font-semibold",
   "[&_h2]:mb-2 [&_h2]:mt-5 [&_h2]:text-xl [&_h2]:font-semibold",
@@ -30,7 +30,8 @@ const k = 2 * 1024 * 1024, v = [
   return h(() => {
     let s = !1;
     return c(null), m(!1), fetch(o, { credentials: l ? "include" : "same-origin" }).then((t) => {
-      if (!t.ok) throw new Error(`${t.status}`);
+      if (!t.ok)
+        throw new Error(`${t.status}`);
       return t.text();
     }).then((t) => {
       s || c(t.slice(0, k));

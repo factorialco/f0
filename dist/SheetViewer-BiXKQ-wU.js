@@ -1,25 +1,25 @@
 import { jsxs as a, jsx as r, Fragment as N } from "react/jsx-runtime";
 import { useState as i, useEffect as k } from "react";
-import { u as v, T as S, h as V, S as R } from "./F0CanvasPanel-o38gFTCC.js";
-import { f as z, c as E } from "./sheetPreview-5qeAOp0W.js";
-import { u as _, D as j } from "./DocumentToolbar-B1x0HFMK.js";
+import { u as v, T as S, h as V, S as R } from "./F0CanvasPanel-CNzjQ3Am.js";
+import { f as z, c as E } from "./sheetPreview-Djc-YyVs.js";
+import { u as _, D as j } from "./DocumentToolbar-D2aga4Mz.js";
 const g = 1e3, F = 100, G = ({
   url: n,
   filename: y,
   withCredentials: d = !0,
   actions: x
 }) => {
-  const c = v(), f = _(), [t, m] = i(null), [w, l] = i(!1), [u, b] = i(0);
+  const l = v(), f = _(), [t, m] = i(null), [w, c] = i(!1), [u, b] = i(0);
   k(() => {
     let e = !1;
-    return m(null), l(!1), b(0), z(n, {
+    return m(null), c(!1), b(0), z(n, {
       maxRows: g,
       maxCols: F,
       withCredentials: d
     }).then((o) => {
-      e || (o.length === 0 ? l(!0) : m(o));
+      e || (o.length === 0 ? c(!0) : m(o));
     }).catch(() => {
-      e || l(!0);
+      e || c(!0);
     }), () => {
       e = !0;
     };
@@ -34,7 +34,7 @@ const g = 1e3, F = 100, G = ({
         withCredentials: d,
         actions: x,
         zoom: f,
-        children: t && t.length > 1 && /* @__PURE__ */ r(
+        children: t && t.length > 1 ? /* @__PURE__ */ r(
           S,
           {
             type: "single",
@@ -54,10 +54,10 @@ const g = 1e3, F = 100, G = ({
               `${e.name}-${o}`
             ))
           }
-        )
+        ) : null
       }
     ),
-    w ? /* @__PURE__ */ r("div", { className: "flex min-h-0 grow items-center justify-center text-f1-foreground-secondary", children: c.pdfViewer.previewFailed }) : s ? /* @__PURE__ */ a(N, { children: [
+    w ? /* @__PURE__ */ r("div", { className: "flex min-h-0 grow items-center justify-center text-f1-foreground-secondary", children: l.pdfViewer.previewFailed }) : s ? /* @__PURE__ */ a(N, { children: [
       /* @__PURE__ */ r("div", { className: "min-h-0 grow overflow-auto", children: /* @__PURE__ */ a(
         "table",
         {
@@ -89,15 +89,15 @@ const g = 1e3, F = 100, G = ({
           ]
         }
       ) }),
-      s.truncatedRows && /* @__PURE__ */ r("div", { className: "shrink-0 border-0 border-t border-solid border-f1-border-secondary px-3 py-1.5 text-sm text-f1-foreground-secondary", children: c.t("pdfViewer.showingFirstRows.other", {
+      s.truncatedRows ? /* @__PURE__ */ r("div", { className: "shrink-0 border-0 border-t border-solid border-f1-border-secondary px-3 py-1.5 text-sm text-f1-foreground-secondary", children: l.t("pdfViewer.showingFirstRows.other", {
         count: g
-      }) })
+      }) }) : null
     ] }) : /* @__PURE__ */ r(
       R,
       {
         role: "status",
         "aria-busy": !0,
-        "aria-label": c.pdfViewer.loading,
+        "aria-label": l.pdfViewer.loading,
         className: "min-h-0 w-full grow rounded-none"
       }
     )

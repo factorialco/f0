@@ -1,14 +1,14 @@
 import { AlertAvatarProps as AlertAvatarProps_2 } from './F0AvatarAlert';
-import { AlertTagCellValue } from './types/alertTag';
-import { AlertTagCellValue as AlertTagCellValue_2 } from './experimental';
-import { AmountCellValue } from './types/amount';
-import { AmountCellValue as AmountCellValue_2 } from './experimental';
+import { AlertTagCellValue } from './experimental';
+import { AlertTagCellValue as AlertTagCellValue_2 } from './types/alertTag';
+import { AmountCellValue } from './experimental';
+import { AmountCellValue as AmountCellValue_2 } from './types/amount';
 import { AnchorHTMLAttributes } from 'react';
 import { AreaChartWidgetProps } from './AreaChartWidget';
 import { AriaAttributes } from 'react';
 import { AutoFill as AutoFill_2 } from 'react';
-import { AvatarListCellValue } from './types/avatarList';
-import { AvatarListCellValue as AvatarListCellValue_2 } from './experimental';
+import { AvatarListCellValue } from './experimental';
+import { AvatarListCellValue as AvatarListCellValue_2 } from './types/avatarList';
 import * as AvatarPrimitive from '@radix-ui/react-avatar';
 import { BarChartProps } from './experimental';
 import { BarSeriesCellValue } from './types/barSeries';
@@ -20,23 +20,23 @@ import { ChartConfig } from './experimental';
 import { ChartConfig as ChartConfig_2 } from './utils/types';
 import { ChartPropsBase } from './utils/types';
 import { ClassValue } from 'cva';
-import { CompanyCellValue } from './types/company';
-import { CompanyCellValue as CompanyCellValue_2 } from './experimental';
+import { CompanyCellValue } from './experimental';
+import { CompanyCellValue as CompanyCellValue_2 } from './types/company';
 import { CompanyItemProps } from './types';
 import { ComponentProps } from 'react';
 import { CompoundCellValue } from './types/compound';
 import { Context } from 'react';
 import { CountCellValue } from './types/count';
 import { CountryCellValue } from './types/country';
-import { DateCellValue } from './types/date';
-import { DateCellValue as DateCellValue_2 } from './experimental';
+import { DateCellValue } from './experimental';
+import { DateCellValue as DateCellValue_2 } from './types/date';
 import { DateFilterOptions } from './DateFilter/DateFilter';
 import { default as default_2 } from 'react';
 import { default as default_3 } from 'maplibre-gl';
 import { DeltaCellValue } from './types/delta';
 import { Dispatch } from 'react';
-import { DotTagCellValue } from './types/dotTag';
-import { DotTagCellValue as DotTagCellValue_2 } from './experimental';
+import { DotTagCellValue } from './experimental';
+import { DotTagCellValue as DotTagCellValue_2 } from './types/dotTag';
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 import { EmployeeItemProps } from './types';
 import { F0EmojiPickerProps as F0EmojiPickerProps_2 } from './types';
@@ -51,10 +51,10 @@ import { F0TagRawProps as F0TagRawProps_2 } from './types';
 import { F0TagTeamProps } from './types';
 import { f1Colors } from '@factorialco/f0-core';
 import { FC } from 'react';
-import { FileCellValue } from './types/file';
-import { FileCellValue as FileCellValue_2 } from './experimental';
-import { FolderCellValue } from './types/folder';
-import { FolderCellValue as FolderCellValue_2 } from './experimental';
+import { FileCellValue } from './experimental';
+import { FileCellValue as FileCellValue_2 } from './types/file';
+import { FolderCellValue } from './experimental';
+import { FolderCellValue as FolderCellValue_2 } from './types/folder';
 import { ForwardedRef } from 'react';
 import { ForwardRefExoticComponent } from 'react';
 import { HourDistributionCellValue } from './types/hourDistribution';
@@ -71,19 +71,19 @@ import { LineChartConfig } from './experimental';
 import { LineChartProps } from './experimental';
 import { LineChartPropsBase } from './utils/types';
 import { LongTextCellValue } from './types/longText';
-import { NumberCellValue } from './types/number';
-import { NumberCellValue as NumberCellValue_2 } from './experimental';
+import { NumberCellValue } from './experimental';
+import { NumberCellValue as NumberCellValue_2 } from './types/number';
 import { NumberFilterOptions } from './NumberFilter/NumberFilter';
 import { Observable } from 'zen-observable-ts';
 import { PercentageCellValue } from './types/percentage';
-import { PersonCellValue } from './types/person';
-import { PersonCellValue as PersonCellValue_2 } from './experimental';
+import { PersonCellValue } from './experimental';
+import { PersonCellValue as PersonCellValue_2 } from './types/person';
 import { PieChartProps } from './PieChart';
 import { PieChartProps as PieChartProps_2 } from './experimental';
 import * as PopoverPrimitive from '@radix-ui/react-popover';
 import { PopoverProps } from '@radix-ui/react-popover';
-import { ProgressBarCellValue } from './types/progressBar';
-import { ProgressBarCellValue as ProgressBarCellValue_2 } from './experimental';
+import { ProgressBarCellValue } from './experimental';
+import { ProgressBarCellValue as ProgressBarCellValue_2 } from './types/progressBar';
 import { ProgressSeriesCellValue } from './types/progressSeries';
 import { Props as Props_5 } from './types';
 import { PropsWithChildren } from 'react';
@@ -97,30 +97,30 @@ import { RefAttributes } from 'react';
 import { RefObject } from 'react';
 import { ScrollAreaProps } from '@radix-ui/react-scroll-area';
 import { SearchFilterOptions } from './SearchFilter/SearchFilter';
-import { StatusCellValue } from './types/status';
-import { StatusCellValue as StatusCellValue_2 } from './experimental';
+import { StatusCellValue } from './experimental';
+import { StatusCellValue as StatusCellValue_2 } from './types/status';
 import { StyleSpecification } from 'maplibre-gl';
 import { SummaryCellValue } from './types/summary';
 import { SVGProps } from 'react';
 import { TagAlertProps } from './experimental';
 import { TagBalanceProps } from './experimental';
-import { TagCellValue } from './types/tag';
-import { TagCellValue as TagCellValue_2 } from './experimental';
+import { TagCellValue } from './experimental';
+import { TagCellValue as TagCellValue_2 } from './types/tag';
 import { TagDotProps } from './experimental';
-import { TagListCellValue } from './types/tagList';
-import { TagListCellValue as TagListCellValue_2 } from './experimental';
+import { TagListCellValue } from './experimental';
+import { TagListCellValue as TagListCellValue_2 } from './types/tagList';
 import { TagListProps } from './experimental';
 import { TagRawProps } from './experimental';
 import { TagStatusProps } from './experimental';
 import { TagType } from './experimental';
-import { TeamCellValue } from './types/team';
-import { TeamCellValue as TeamCellValue_2 } from './experimental';
+import { TeamCellValue } from './experimental';
+import { TeamCellValue as TeamCellValue_2 } from './types/team';
 import { TeamItemProps } from './types';
 import { TextareaHTMLAttributes } from 'react';
-import { TextCellValue } from './types/text';
-import { TextCellValue as TextCellValue_2 } from './experimental';
+import { TextCellValue } from './experimental';
+import { TextCellValue as TextCellValue_2 } from './types/text';
 import * as ToggleGroupPrimitive from '@radix-ui/react-toggle-group';
-import { ValueDisplayRendererContext as ValueDisplayRendererContext_2 } from './experimental';
+import { ValueDisplayRendererContext } from './experimental';
 import { VariantProps } from 'cva';
 import { VerticalBarChartProps } from './experimental';
 import { VirtualItem } from '@tanstack/react-virtual';
@@ -478,6 +478,11 @@ declare type AiChatCreditWarning = {
     onDismiss?: () => void;
     /** Called when the user clicks the "Get Credits" button. */
     onGetCredits?: () => void;
+    /**
+     * Icon rendered to the left of the "Get Credits" label. Only used when
+     * `onGetCredits` is provided. Hosts typically pass the `Upsell` icon.
+     */
+    getCreditsIcon?: IconType;
 };
 
 /**
@@ -792,6 +797,15 @@ declare type AlertVariant = (typeof alertVariantOptions)[number];
 declare const alertVariantOptions: readonly ["info", "warning", "critical", "neutral", "positive"];
 
 /**
+ * The attribute a guidance's `anchor()` writes, and the one its steps are
+ * resolved through. A data attribute rather than the `id` attribute: an id is
+ * the page's own namespace — one per document, handed out by whatever renders
+ * the element — and a walkthrough that claimed ids would collide with the app's
+ * own the first time two of them named the same thing.
+ */
+declare const ANCHOR_ATTRIBUTE = "data-f0-coachmark";
+
+/**
  * @experimental This is an experimental component use it at your own risk
  */
 export declare const ApplicationFrame: typeof _ApplicationFrame;
@@ -1085,7 +1099,7 @@ export declare const BaseCommunityPost: ({ id, author, group, createdAt, title, 
  */
 export declare type BaseDataAdapter<R extends RecordType, Filters extends FiltersDefinition, Options extends BaseFetchOptions<Filters>, FetchReturn = BaseResponse<R>> = {
     /** Indicates this adapter doesn't use pagination */
-    paginationType?: never | undefined;
+    paginationType?: undefined;
     /**
      * Function to fetch data based on filter options
      * @param options - The filter options to apply when fetching data
@@ -1451,7 +1465,7 @@ declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "clas
     /**
      * Callback fired when the button is clicked. Supports async functions for loading state.
      */
-    onClick?: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void | Promise<unknown>;
+    onClick?: (event: React.MouseEvent<HTMLElement>) => void | Promise<unknown>;
     /**
      * The title of the button.
      */
@@ -1510,7 +1524,9 @@ declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "clas
     pressed?: boolean;
     /**
      * @private
-     * If true, the button will not automatically add a tooltip based on the hideLabel and label properties.
+     * If true, the button adds no automatic tooltip — neither the one derived
+     * from `hideLabel` + `label`, nor the one the label shows when it is too
+     * long and gets clipped to an ellipsis.
      */
     noAutoTooltip?: boolean;
     /**
@@ -2038,22 +2054,22 @@ declare type CardPropertyDefinition<T> = PropertyDefinition_2<T> & {
 };
 
 declare const cardPropertyRenderers: {
-    readonly text: (args: TextCellValue_2, meta: ValueDisplayRendererContext_2) => default_2.JSX.Element;
-    readonly number: (args: NumberCellValue_2, meta: ValueDisplayRendererContext_2) => default_2.JSX.Element;
-    readonly date: (args: DateCellValue_2, meta: ValueDisplayRendererContext_2) => default_2.JSX.Element;
-    readonly amount: (args: AmountCellValue_2, meta: ValueDisplayRendererContext_2) => default_2.JSX.Element;
-    readonly person: (args: PersonCellValue_2, meta: ValueDisplayRendererContext_2) => default_2.JSX.Element;
-    readonly company: (args: CompanyCellValue_2, meta: ValueDisplayRendererContext_2) => default_2.JSX.Element;
-    readonly team: (args: TeamCellValue_2, meta: ValueDisplayRendererContext_2) => default_2.JSX.Element;
-    readonly status: (args: StatusCellValue_2) => default_2.JSX.Element;
-    readonly tag: (args: TagCellValue_2) => default_2.JSX.Element;
-    readonly avatarList: (args: AvatarListCellValue_2, meta: ValueDisplayRendererContext_2) => default_2.JSX.Element;
-    readonly tagList: (args: TagListCellValue_2) => default_2.JSX.Element;
-    readonly alertTag: (args: AlertTagCellValue_2) => default_2.JSX.Element;
-    readonly dotTag: (args: DotTagCellValue_2) => default_2.JSX.Element;
-    readonly file: (args: FileCellValue_2) => default_2.JSX.Element;
-    readonly folder: (args: FolderCellValue_2) => default_2.JSX.Element;
-    readonly progressBar: (args: ProgressBarCellValue_2, _meta: ValueDisplayRendererContext_2) => default_2.JSX.Element | null;
+    readonly text: (args: TextCellValue, meta: ValueDisplayRendererContext) => default_2.JSX.Element;
+    readonly number: (args: NumberCellValue, meta: ValueDisplayRendererContext) => default_2.JSX.Element;
+    readonly date: (args: DateCellValue, meta: ValueDisplayRendererContext) => default_2.JSX.Element;
+    readonly amount: (args: AmountCellValue, meta: ValueDisplayRendererContext) => default_2.JSX.Element;
+    readonly person: (args: PersonCellValue, meta: ValueDisplayRendererContext) => default_2.JSX.Element;
+    readonly company: (args: CompanyCellValue, meta: ValueDisplayRendererContext) => default_2.JSX.Element;
+    readonly team: (args: TeamCellValue, meta: ValueDisplayRendererContext) => default_2.JSX.Element;
+    readonly status: (args: StatusCellValue) => default_2.JSX.Element;
+    readonly tag: (args: TagCellValue) => default_2.JSX.Element;
+    readonly avatarList: (args: AvatarListCellValue, meta: ValueDisplayRendererContext) => default_2.JSX.Element;
+    readonly tagList: (args: TagListCellValue) => default_2.JSX.Element;
+    readonly alertTag: (args: AlertTagCellValue) => default_2.JSX.Element;
+    readonly dotTag: (args: DotTagCellValue) => default_2.JSX.Element;
+    readonly file: (args: FileCellValue) => default_2.JSX.Element;
+    readonly folder: (args: FolderCellValue) => default_2.JSX.Element;
+    readonly progressBar: (args: ProgressBarCellValue, _meta: ValueDisplayRendererContext) => default_2.JSX.Element | null;
 };
 
 declare type CardPropertyType = keyof typeof cardPropertyRenderers;
@@ -2158,7 +2174,7 @@ export declare interface CardSelectableSingleProps<T extends CardSelectableValue
 export declare type CardSelectableValue = string | number;
 
 declare type CardVisualizationOptions<T, _Filters extends FiltersDefinition, _Sortings extends SortingsDefinition> = {
-    cardProperties: ReadonlyArray<CardPropertyDefinition<T>>;
+    cardProperties: readonly CardPropertyDefinition<T>[];
     title: (record: T) => string;
     description?: (record: T) => string;
     avatar?: (record: T) => CardAvatarVariant;
@@ -2837,7 +2853,7 @@ export declare type CoachmarkAction = {
     onClick?: () => void;
 };
 
-declare type CoachmarkBase = CoachmarkPlacement & {
+declare type CoachmarkBase = CoachmarkPlacement & CoachmarkFocus & {
     /**
      * Stable identity. Opening again with the same id replaces that coachmark
      * instead of queueing a second one, so an effect that runs twice shows one
@@ -2845,9 +2861,25 @@ declare type CoachmarkBase = CoachmarkPlacement & {
      */
     id?: CoachmarkId;
     /**
+     * HOW IT ENDED, IN ONE PLACE — reached the end, left part-way through, or
+     * pressed past until it gave up, and how far the reader got either way. The
+     * callback to reach for when tracking a walkthrough: every ending comes
+     * through here exactly once, so a funnel is one event carrying a `reason`
+     * rather than two callbacks to join up afterwards.
+     *
+     * NOT called when the app itself closes the coachmark (`coachmarks.close`, a
+     * guidance's `stop()`, the page unmounting): nobody ended it, so there is no
+     * outcome to report.
+     */
+    onEnd?: (end: CoachmarkEnd) => void;
+    /**
      * Called when the user closes the coachmark with the close button or Escape,
      * before the last step is reached. For tracking only — the coachmark closes
      * itself either way.
+     *
+     * Also fires when a walkthrough gives up after too many presses on the
+     * dimmed page, which is a dismissal by any other name. `onEnd` is what tells
+     * those two apart.
      */
     onDismiss?: () => void;
     /**
@@ -2855,6 +2887,26 @@ declare type CoachmarkBase = CoachmarkPlacement & {
      * — the coachmark closes itself either way.
      */
     onComplete?: () => void;
+    /**
+     * SPOTLIGHT THE TARGET: dims the whole page except the element this step
+     * points at, and swallows every press on the page while the coachmark is up
+     * (see `skipAfterOutsideClicks` for how a user who keeps pressing gets out).
+     *
+     * Off by default — one coachmark pointing something out should not take the
+     * page hostage. Turn it on for a walkthrough that has to be followed in order.
+     */
+    overlay?: boolean;
+    /**
+     * HOW MANY PRESSES ON THE DIMMED PAGE END THE COACHMARK. The panel wiggles at
+     * each one to say the press went nowhere, and gives up at this many: a user
+     * pressing outside over and over is telling us they want out, and the way out
+     * cannot be the button they are ignoring. Reported to `onDismiss` like any
+     * other abandonment. Defaults to 5; `0` never gives up.
+     *
+     * Only has an effect alongside `overlay` — without the shield there are no
+     * presses to count, because they reach the page.
+     */
+    skipAfterOutsideClicks?: number;
 };
 
 declare type CoachmarkContent = {
@@ -2865,6 +2917,144 @@ declare type CoachmarkContent = {
     /** The single call to action, rendered at the bottom right. */
     action?: CoachmarkAction;
 };
+
+/** What `onEnd` is told. */
+export declare type CoachmarkEnd = {
+    reason: CoachmarkEndReason;
+    /**
+     * The step it ended on, 1-based — how far the reader got. `0` when it never
+     * opened (`unavailable`).
+     */
+    step: number;
+    /**
+     * How many steps the reader was actually offered. Not necessarily how many
+     * were declared: a guidance leaves out the steps whose element was not there.
+     */
+    totalSteps: number;
+    /**
+     * Presses on the dimmed page over the whole coachmark — the wiggles. A tour
+     * that completed with six of these was fought with; one that completed with
+     * none was followed. Always `0` without `overlay`, which has no shield to
+     * press.
+     */
+    outsidePresses: number;
+};
+
+/**
+ * HOW A COACHMARK ENDED. One value per way out, so a funnel can be read off it
+ * without joining two callbacks together:
+ *
+ * - `completed` — the action on the last step. The reader saw the whole thing.
+ * - `dismissed` — the close button or Escape, before the last step. They left
+ *   part-way through, and `step` says where.
+ * - `skipped` — it gave up after `skipAfterOutsideClicks` presses on the dimmed
+ *   page. Not the same as dismissing: the reader never used the way out they
+ *   were offered, they pressed past it until it went away.
+ * - `unavailable` — it never opened, because nothing it points at was on the
+ *   page (only `defineStepByStepCoachmarkGuidance` reports this). The reason a
+ *   funnel can be missing readers who were never shown anything.
+ */
+export declare type CoachmarkEndReason = "completed" | "dismissed" | "skipped" | "unavailable";
+
+declare type CoachmarkFocus = {
+    /**
+     * PUT THE CARET WHERE THE STEP IS POINTING. Focus goes to the target — or to
+     * the first field inside it — instead of to the panel, so the element the
+     * coachmark is explaining lights up the way it does when the reader lands on
+     * it themselves: a composer with its cursor in it and its own focus glow,
+     * rather than a box being described.
+     *
+     * OFF BY DEFAULT, and worth being deliberate about. The panel takes focus
+     * precisely so a screen reader reads the step out and so Enter cannot fire
+     * the action unread; handing focus to a field instead trades that away —
+     * the step is no longer announced, and typing goes into the page. Use it on a
+     * step whose whole point is the field (a composer, a search box), and leave
+     * every other step to the panel.
+     *
+     * Escape still closes the coachmark from anywhere, and the action button is
+     * still one Tab away.
+     */
+    focusTarget?: boolean;
+};
+
+export declare type CoachmarkGuidance<TElement extends string> = {
+    /** The id every `start()` opens under, and the one `stop()` closes. */
+    id: CoachmarkId;
+    /**
+     * MARKS AN ELEMENT AS A STEP'S TARGET. Spread onto the element (or onto any
+     * component that forwards unknown props to its DOM node):
+     *
+     * `<section {...guidance.anchor("needs-you")}>`
+     *
+     * Only names declared by a step type-check, so a renamed step breaks at the
+     * anchor rather than at run time — where a missing target is a coachmark that
+     * silently waits for an element that is never coming.
+     */
+    anchor: (element: TElement) => Record<typeof ANCHOR_ATTRIBUTE, TElement>;
+    /** The selector `anchor(element)` is found by. For tests and edge cases. */
+    selector: (element: TElement) => string;
+    /**
+     * Start the walkthrough — once the elements it points at are actually on the
+     * page (see `lookForTargetsMs`). Steps whose element never turns up are left
+     * out, and a walkthrough with nothing left to point at never opens at all.
+     * Returns the id it will open under, whether it has opened yet or not.
+     */
+    start: () => CoachmarkId;
+    /** End it wherever it is. Reports nothing: nobody dismissed it. */
+    stop: () => void;
+};
+
+export declare type CoachmarkGuidanceOptions<TElement extends string> = {
+    /**
+     * Stable identity, so starting the same guidance twice shows ONE walkthrough.
+     * Defaults to a generated id.
+     */
+    id?: CoachmarkId;
+    /** The walkthrough, in order. */
+    steps: readonly CoachmarkGuidanceStep<TElement>[];
+    /**
+     * Spotlight each step's element and shield the page from the pointer.
+     * Defaults to `true` — a walkthrough is a sequence, and a page you can act on
+     * mid-sequence is a sequence the user has already left.
+     */
+    overlay?: boolean;
+    /** Presses on the dimmed page that end the walkthrough. Defaults to 5. */
+    skipAfterOutsideClicks?: number;
+    /**
+     * HOW LONG `start()` KEEPS LOOKING for the steps whose elements are not on the
+     * page yet, before running the walkthrough without them. Defaults to 2000ms.
+     *
+     * A walkthrough is started on mount, and the things it walks arrive over the
+     * next few hundred milliseconds — a rail that is still measuring itself, a
+     * widget waiting on its data. Opening on the first frame would drop those
+     * steps; waiting forever on one that is genuinely absent (a control this user
+     * has no permission for) would mean no walkthrough at all.
+     */
+    lookForTargetsMs?: number;
+    /**
+     * HOW IT ENDED, IN ONE PLACE: finished, left part-way through, pressed past
+     * until it gave up — or never opened at all, because nothing it points at was
+     * on the page. One event with a `reason`, which is what a funnel wants.
+     */
+    onEnd?: (end: CoachmarkEnd) => void;
+    /** Abandoned: closed, escaped, or skipped by pressing past it. */
+    onDismiss?: () => void;
+    /** Finished: the action on the last step. */
+    onComplete?: () => void;
+};
+
+/**
+ * One step of a walkthrough. It points either at a NAME the guidance knows —
+ * marked on the element with `anchor()` — or, for an element you cannot put
+ * props on (something a library renders), straight at a selector or an element.
+ */
+export declare type CoachmarkGuidanceStep<TElement extends string> = Omit<CoachmarkStep, "targetElement"> & ({
+    element: TElement;
+    targetElement?: never;
+} | {
+    element?: never;
+    targetElement: CoachmarkTarget;
+});
 
 export declare type CoachmarkId = string;
 
@@ -2975,15 +3165,25 @@ export declare type CoachmarkSingleOptions = CoachmarkBase & CoachmarkContent & 
  * its own placement; anything it leaves out falls back to the value passed
  * alongside `steps`.
  */
-export declare type CoachmarkStep = CoachmarkContent & CoachmarkPlacement & {
+export declare type CoachmarkStep = CoachmarkContent & CoachmarkPlacement & CoachmarkFocus & {
     /** Falls back to the `targetElement` passed alongside `steps`. */
     targetElement?: CoachmarkTarget;
 };
 
 /**
- * What the coachmark points at: a CSS selector that must match exactly one
- * element, or the element itself. A selector is re-resolved while the coachmark
- * is queued, so it may point at something that mounts later.
+ * What the coachmark points at: ANY CSS SELECTOR, or the element itself.
+ *
+ * An id (`"#filters-button"`), a class (`".js-filters"`), an attribute
+ * (`'[data-add-widget="right"]'`), or anything else `querySelector` takes — the
+ * string is handed straight to the DOM, so the choice is about what the page
+ * can promise to keep stable, not about what this accepts. It must match
+ * exactly ONE element: a selector that matches several anchors to the first and
+ * warns in development, because a coachmark pointing at "one of these six
+ * cards" is pointing at nothing in particular.
+ *
+ * A selector is re-resolved while the coachmark is queued, so it may point at
+ * something that mounts later. An ELEMENT is not re-resolved (there is nothing
+ * to re-run), so one that unmounts takes its coachmark off screen with it.
  */
 export declare type CoachmarkTarget = string | HTMLElement;
 
@@ -3365,10 +3565,10 @@ declare type DashboardCanvasActions = {
 };
 
 declare interface DashboardFetchSpec {
-    fetch: Array<{
+    fetch: {
         toolId: string;
         args: Record<string, unknown>;
-    }>;
+    }[];
     query: string | null;
     columnLabels?: Record<string, string>;
 }
@@ -3469,6 +3669,11 @@ declare interface DataCollectionSettingsContextType {
  * Extends the base data source with data collection specific elements / features
  */
 export declare type DataCollectionSource<R extends RecordType = RecordType, Filters extends FiltersDefinition = FiltersDefinition, Sortings extends SortingsDefinition = SortingsDefinition, Summaries extends SummariesDefinition = SummariesDefinition, ItemActions extends ItemActionsDefinition<R> = ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition = NavigationFiltersDefinition, Grouping extends GroupingDefinition<R> = GroupingDefinition<R>> = DataSource<R, Filters, Sortings, Grouping> & DataCollectionSourceDefinition<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping> & {
+    /**
+     * The definition, pinned to `deps`, for what is rendered per record — the
+     * source itself changes identity every render. Set by `memoizeDefinition`.
+     */
+    definition?: DataCollectionSourceDefinition<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>;
     currentNavigationFilters: NavigationFiltersState<NavigationFilters>;
     setCurrentNavigationFilters: React.Dispatch<React.SetStateAction<NavigationFiltersState<NavigationFilters>>>;
     /** Current summaries data */
@@ -3485,6 +3690,12 @@ export declare type DataCollectionSourceDefinition<R extends RecordType = Record
     /**
      * Data Collection specific datasource elements / features
      */
+    /**
+     * Pin this definition to `deps` so rows can skip a render. Only safe if `deps`
+     * lists everything the callbacks below close over: miss one and a row keeps
+     * calling the closure it mounted with.
+     */
+    memoizeDefinition?: boolean;
     /** Navigation filters */
     navigationFilters?: NavigationFilters;
     currentNavigationFilters?: NavigationFiltersState<NavigationFilters>;
@@ -3518,7 +3729,7 @@ export declare type DataCollectionSourceDefinition<R extends RecordType = Record
     /** Item filter that can be used to filter the items before they are displayed */
     itemPreFilter?: (item: R) => boolean;
     /** Lanes configuration */
-    lanes?: ReadonlyArray<Lane<Filters>>;
+    lanes?: readonly Lane<Filters>[];
     /** Rich search preview shown in the shared header search (all visualizations). */
     searchPreview?: SearchPreview<R>;
 };
@@ -3555,7 +3766,7 @@ declare type DataCollectionStorageFeature = (typeof dataCollectionStorageFeature
  */
 declare const dataCollectionStorageFeatures: readonly ["filters", "navigationFilters", "sortings", "grouping", "visualization", "search", "visualizationFilters"];
 
-declare type DataCollectionStorageFeaturesDefinition = ("*" | `all` | `!${DataCollectionStorageFeature}` | `${DataCollectionStorageFeature}`)[];
+declare type DataCollectionStorageFeaturesDefinition = ("*" | `all` | `!${DataCollectionStorageFeature}` | DataCollectionStorageFeature)[];
 
 /**
  * Represents an error that occurred during data fetching
@@ -4437,6 +4648,11 @@ declare const defaultTranslations: {
             readonly reset: "Reset to default";
             readonly viewSelectorLabel: "Select view";
         };
+        readonly map: {
+            readonly notOnMap: "Not on map";
+            readonly onMap: "On map";
+            readonly notOnMapCount: "{{count}} not on map";
+        };
         readonly table: {
             readonly seeMoreChildren: "See more";
             readonly settings: {
@@ -5162,11 +5378,15 @@ declare const defaultTranslations: {
         readonly loadError: "Couldn't load the map.";
         readonly retry: "Retry";
         readonly currentLocation: "Your location";
+        readonly panel: "Map panel";
+        readonly detailPanel: "Map detail panel";
         readonly controls: {
             readonly zoomIn: "Zoom in";
             readonly zoomOut: "Zoom out";
             readonly fit: "Fit to markers";
             readonly locate: "My location";
+            readonly showPanel: "Show panel";
+            readonly hidePanel: "Hide panel";
         };
     };
     readonly wizard: {
@@ -5234,6 +5454,48 @@ declare const defaultTranslations: {
         readonly off: "Off";
     };
 };
+
+/**
+ * A STEP-BY-STEP WALKTHROUGH OF A PAGE, declared in one place.
+ *
+ * `coachmarks.open({ steps })` already shows steps one at a time; what it takes
+ * is a CSS selector per step, which means every walkthrough invents its own
+ * convention for marking the elements it walks — and a selector written against
+ * someone else's markup breaks the next time that markup is refactored, without
+ * a single type error to say so.
+ *
+ * This closes that loop: the steps name their targets, `anchor()` marks them,
+ * and the names are a union the compiler holds both sides to. The walkthrough
+ * also arrives with the manners a walkthrough needs — the page dimmed to the
+ * step's element, the pointer shielded, and a way out for the user who keeps
+ * pressing past it — because those are properties of walking someone through a
+ * page rather than of one coachmark.
+ *
+ * @example
+ * const tour = defineStepByStepCoachmarkGuidance({
+ *   id: "home-tour",
+ *   steps: [
+ *     { element: "composer", title: "Let One do it for you", side: "bottom" },
+ *     { element: "needs-you", title: "What needs you", side: "right" },
+ *     // Something f0 renders: point at it directly.
+ *     { targetElement: '[data-add-widget="right"]', title: "Add a widget" },
+ *   ],
+ *   // Finished, dropped out at step N, pressed past it, or never shown.
+ *   onEnd: ({ reason, step, totalSteps }) =>
+ *     track("home-tour-ended", { reason, step, totalSteps }),
+ * })
+ *
+ * // In the page
+ * <div {...tour.anchor("composer")}>…</div>
+ * <section {...tour.anchor("needs-you")}>…</section>
+ *
+ * // Whenever it should run
+ * useEffect(() => {
+ *   tour.start()
+ *   return () => tour.stop()
+ * }, [tour])
+ */
+export declare const defineStepByStepCoachmarkGuidance: <const TElement extends string>(options: CoachmarkGuidanceOptions<TElement>) => CoachmarkGuidance<TElement>;
 
 export declare interface DeleteBlockNotesTextEditorPageDocumentPatch {
     type: "delete_block";
@@ -5370,7 +5632,7 @@ declare type DialogControls = {
 } | {
     kind: "back";
     label: string;
-    onClick: () => void;
+    onClick: () => void | Promise<void>;
 };
 
 declare type DialogPosition = (typeof dialogPositions)[number];
@@ -5622,7 +5884,7 @@ declare type EditableTableOnCellChangeParams<R extends RecordType> = {
 };
 
 declare type EditableTableVisualizationOptions<R extends RecordType, _Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition> = Omit<TableVisualizationOptions<R, _Filters, Sortings, Summaries>, "columns"> & {
-    columns: ReadonlyArray<EditableTableColumnDefinition<R, Sortings, Summaries>>;
+    columns: readonly EditableTableColumnDefinition<R, Sortings, Summaries>[];
     /**
      * Called when a cell value changes. Receives an object with the full updated
      * row (`updatedItem`) and a `changes` map of the modified attributes, keyed by
@@ -7453,7 +7715,7 @@ declare type F0DialogPrimaryAction = {
     label: string;
     icon?: IconType;
     iconPosition?: "left" | "right";
-    onClick: () => void;
+    onClick: () => void | Promise<void>;
     disabled?: boolean;
     loading?: boolean;
 };
@@ -7464,7 +7726,7 @@ declare type F0DialogSecondaryAction = {
     label: string;
     icon?: IconType;
     iconPosition?: "left" | "right";
-    onClick: () => void;
+    onClick: () => void | Promise<void>;
     disabled?: boolean;
     loading?: boolean;
 };
@@ -7671,7 +7933,7 @@ export declare type F0FormEditableTableColumn<R extends RecordType> = Omit<Edita
  */
 export declare type F0FormEditableTableProps<R extends RecordType> = {
     /** Column definitions (see {@link F0FormEditableTableColumn}). */
-    columns: ReadonlyArray<F0FormEditableTableColumn<R>>;
+    columns: readonly F0FormEditableTableColumn<R>[];
     /**
      * Rows in display order. The table is controlled: edits, reorders and
      * removals are reported via callbacks and the parent updates `items`.
@@ -8022,19 +8284,22 @@ export declare interface F0MapProps extends WithDataTestIdProps {
      */
     highlightedId?: string | null;
     /**
-     * Region of the map covered by external chrome, typically a side panel opened
-     * over it. Every camera move re-targets so the point lands centred in the free
-     * area beside the panel, and changing the value re-centres the current view -
-     * so opening, resizing or closing a panel keeps the selection visible. The
-     * consumer supplies it; the map has no notion of the panel.
+     * Region of the map covered by *external* chrome - a side panel the consumer
+     * opens over it. Every camera move re-targets so the point lands centred in
+     * the free area beside it, and changing the value re-centres the current view,
+     * so opening, resizing or closing that chrome keeps the selection visible.
+     *
+     * The map's own panels (`sidebar`, `detail`) need no reporting: it knows their
+     * geometry and folds them in itself. Both are measured from the same edges, so
+     * on each edge the wider of the two claims wins rather than the two stacking.
      */
     viewportInset?: F0MapViewportInset;
     /**
      * Re-center the camera on a marker when it is clicked, at the current zoom,
      * so a selection never sits behind a panel opened over the map (it lands in
-     * the free area left by `viewportInset`). Defaults to `false`, which leaves
-     * the camera where it is. Zoom is untouched - use the `focusMarker` handle for
-     * the "take me there" flight that also zooms in.
+     * the free area left by the open panels and `viewportInset`). Defaults to
+     * `false`, which leaves the camera where it is. Zoom is untouched - use the
+     * `focusMarker` handle for the "take me there" flight that also zooms in.
      */
     centerOnMarkerClick?: boolean;
     /**
@@ -8081,11 +8346,53 @@ export declare interface F0MapProps extends WithDataTestIdProps {
     showCurrentLocation?: boolean;
     /**
      * Edge-to-edge presentation. `false` (default) frames the map as a card -
-     * large rounded corners, a secondary border, and controls inset 16px. `true`
-     * drops the frame so the map bleeds to its container's edges, with controls
-     * inset 24px.
+     * large rounded corners and a secondary border. `true` drops the frame so the
+     * map bleeds to its container's edges. The overlay controls sit 8px off the
+     * edges either way.
      */
     fullScreen?: boolean;
+    /**
+     * Renders the panel toggle in the top-left corner, on the same control
+     * treatment as the navigation controls. Presence-driven, like `onFit`: pass a
+     * handler to show the button. `F0Map` draws no panel of its own - the
+     * consumer owns whatever the button opens.
+     */
+    onSidebarToggle?: () => void;
+    /**
+     * Whether the panel the toggle controls is open. Drives which way the icon's
+     * arrow points. Defaults to `false`.
+     */
+    sidebarExpanded?: boolean;
+    /**
+     * Content placed beside the panel toggle, on the same control card, for a
+     * control that belongs with it - a count that opens the panel, say. Follows
+     * the toggle: shown while the panel is closed, hidden under it once open.
+     * Opaque to the map; whatever is passed is the consumer's.
+     */
+    sidebarToggleAddon?: ReactNode;
+    /**
+     * Content of the side panel the toggle opens. The panel is the map's own
+     * surface, sized and animated here; this is what goes inside it.
+     */
+    sidebar?: ReactNode;
+    /**
+     * Content of a second panel, on the same surface, sliding in beside the first
+     * rather than over it - a detail view for whatever was picked in the list or
+     * on the map. Shown while `detailOpen` is true.
+     */
+    detail?: ReactNode;
+    /**
+     * Whether the detail panel is open. Defaults to `false`. Pressing Escape
+     * inside the map ends the selection, so a detail panel driven by it closes
+     * on Escape without the consumer wiring anything.
+     */
+    detailOpen?: boolean;
+    /**
+     * Clear the selection when the map background is clicked. Defaults to `true`.
+     * Set `false` when the selection opens something that must be dismissed
+     * deliberately - a detail panel shouldn't vanish on a stray click on the map.
+     */
+    clearSelectionOnBackgroundClick?: boolean;
     /**
      * Map projection. `"mercator"` (default) is the flat web map; `"globe"`
      * renders the world as a 3D sphere at low zoom and eases into mercator as you
@@ -8109,6 +8416,95 @@ export declare interface F0MapRoute extends F0MapLineStyle {
     id: string;
     /** Ordered `[lng, lat]` vertices the line passes through. */
     coordinates: [number, number][];
+}
+
+/**
+ * A map side panel: the same material as the overlay controls, given the height
+ * of the map. Slides in from the left edge it is anchored to, which is also
+ * where its toggle sits - so the panel visibly comes from the button that
+ * opened it.
+ *
+ * A CSS transition rather than a JS one: the open state is a boolean we own, so
+ * there is nothing to interpolate imperatively, it keeps running while the map
+ * is busy painting tiles, and no ancestor's `MotionConfig` can silently
+ * override it (`ApplicationFrame` sets one).
+ *
+ * Stays mounted and translates out of frame (the map clips it), so the slide
+ * runs on the compositor in both directions. `inert` keeps it out of the tab
+ * order and off assistive tech while it is away.
+ *
+ * Presentational: `F0Map` owns the open state and the geometry.
+ */
+export declare const F0MapSidebar: ({ children, open, offsetX, offsetY, width, disableContentPadding, entrance, headerAction, ariaLabel, dataTestId, }: F0MapSidebarProps) => JSX_2.Element;
+
+export declare interface F0MapSidebarProps extends WithDataTestIdProps {
+    children?: ReactNode;
+    /** Whether the panel is open. Drives the slide. */
+    open: boolean;
+    /** Distance from the map's left edge, in px. */
+    offsetX: number;
+    /**
+     * Distance from the map's top edge, in px. Defaults to the shared inset;
+     * raise it to clear something floating over the panel's top corner.
+     */
+    offsetY?: number;
+    /** Panel width, in px. */
+    width: number;
+    /**
+     * Drop the panel's own padding and scrolling, for content that brings both
+     * (a header that spans the full width, sections with their own insets and
+     * their own scroll region). Defaults to `false`.
+     */
+    disableContentPadding?: boolean;
+    /**
+     * How the panel arrives. `"slide"` (default) travels in from off-canvas, for
+     * a panel anchored to the map's edge. `"grow"` scales up into place with a
+     * short left-to-right nudge, for one that appears beside another - it has no
+     * edge to come from, so sliding it would mean crossing the panel it sits
+     * next to.
+     */
+    entrance?: "slide" | "grow";
+    /**
+     * A control belonging to the panel itself, in a header row of its own. The
+     * row is reserved space, not an overlay: the content below gets whatever
+     * height is left and scrolls inside it, so nothing ever passes under the
+     * control or is clipped by it.
+     */
+    headerAction?: ReactNode;
+    /** Names the region for assistive tech. Defaults to the map's panel label. */
+    ariaLabel?: string;
+}
+
+/**
+ * Opens and closes the map's side panel. Reuses the app sidebar's own icon - the
+ * same rectangle whose arrow and divider animate on hover - so the gesture reads
+ * the same here as it does in the application frame, but wearing the map's
+ * control treatment so it belongs to the overlay rather than the page.
+ *
+ * Presentational and engine-free, like `F0MapControls`: `F0Map` positions it and
+ * owns the state.
+ */
+export declare const F0MapSidebarToggle: ForwardRefExoticComponent<F0MapSidebarToggleProps & RefAttributes<HTMLButtonElement>>;
+
+export declare interface F0MapSidebarToggleProps extends WithDataTestIdProps {
+    /** Whether the panel this button controls is currently open. */
+    expanded: boolean;
+    onToggle: () => void;
+    /** Overrides the default show / hide label. */
+    label?: string;
+    /**
+     * Drop the overlay card, leaving a bare ghost button. For the toggle once it
+     * lives inside a panel: the card exists to lift a control off the map, and
+     * inside a panel there is no map to lift it off.
+     */
+    bare?: boolean;
+    /**
+     * Kept in the layout but out of reach: invisible, unfocusable and hidden from
+     * assistive tech, while still holding the pointer so the cursor does not fall
+     * through to whatever is underneath. For a control another element has taken
+     * over from.
+     */
+    inactive?: boolean;
 }
 
 /**
@@ -8483,7 +8879,7 @@ export declare const F0RichTextDisplay: ForwardRefExoticComponent<F0RichTextDisp
 
 export declare type F0RichTextDisplayHandle = HTMLDivElement;
 
-export declare interface F0RichTextDisplayProps extends HTMLAttributes<HTMLDivElement> {
+export declare interface F0RichTextDisplayProps extends Omit<HTMLAttributes<HTMLDivElement>, "dangerouslySetInnerHTML"> {
     content: string;
     className?: string;
     format?: "html" | "markdown";
@@ -8641,8 +9037,8 @@ declare type F0SelectDataProps<T extends string, R = unknown> = {
 } | {
     source?: never;
     mapOptions?: never;
-    searchFn?: (option: F0SelectItemProps<T, unknown>, search?: string) => boolean | undefined;
-    options: F0SelectItemProps<T, unknown>[];
+    searchFn?: (option: F0SelectItemProps<T>, search?: string) => boolean | undefined;
+    options: F0SelectItemProps<T>[];
 };
 
 declare type F0SelectFieldProps<T extends string, R = unknown> = F0SelectPopupProps<T, R> & F0SelectSelectionProps<T, R> & {
@@ -8790,7 +9186,7 @@ declare type F0SelectSelectionProps<T extends string, R = unknown> = F0SelectSin
     multiple?: false;
     value?: T;
     defaultItem?: F0SelectItemObject<T, ResolvedRecordType<R>>;
-    onChange?: (value: T, originalItem?: ResolvedRecordType<R> | undefined, option?: F0SelectItemObject<T, ResolvedRecordType<R>>) => void;
+    onChange?: (value: T, originalItem?: ResolvedRecordType<R>, option?: F0SelectItemObject<T, ResolvedRecordType<R>>) => void;
     onSelectItems?: never;
 } | {
     multiple: true;
@@ -8822,7 +9218,7 @@ declare type F0SelectSingleSelectionProps<T extends string, R = unknown> = {
     multiple?: false;
     value?: T;
     defaultItem?: F0SelectItemObject<T, ResolvedRecordType<R>>;
-    onChange?: (value: T, originalItem?: ResolvedRecordType<R> | undefined, option?: F0SelectItemObject<T, ResolvedRecordType<R>>) => void;
+    onChange?: (value: T, originalItem?: ResolvedRecordType<R>, option?: F0SelectItemObject<T, ResolvedRecordType<R>>) => void;
     /** Callback for selection changes - provides full selection state for advanced use cases (e.g., "Select All" with exclusions) */
     onSelectItems?: never;
 };
@@ -8898,7 +9294,7 @@ declare type F0TagListProps<T extends TagType_2> = {
     /**
      * Array of tag data corresponding to the specified type.
      */
-    tags: Array<TagTypeMapping[T]>;
+    tags: TagTypeMapping[T][];
     /**
      * The maximum number of tags to display.
      * @default 4
@@ -9002,7 +9398,7 @@ export declare interface F0VersionHistoryProps {
     title: string;
     versions: Version[];
     currentVersion?: CurrentVersion;
-    activeVersionId?: string | "current";
+    activeVersionId?: "current" | (string & {});
 }
 
 /**
@@ -9436,13 +9832,13 @@ export declare type GraphVisualizationOptions<R extends RecordType, Filters exte
      * toggle to show/hide each metadata column (like configuring table columns).
      * Values are tag `column` keys (or `type` when a tag has no `column`).
      */
-    nodeTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>;
+    nodeTagTypes?: readonly F0GraphNodeTagColumn[];
     /** Friendly labels per tag column, shown in the metadata visibility toggle. */
     nodeTagTypeLabels?: Partial<Record<F0GraphNodeTagColumn, string>>;
     /** Tag columns visible by default. Defaults to all of `nodeTagTypes`. */
-    defaultVisibleTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>;
+    defaultVisibleTagTypes?: readonly F0GraphNodeTagColumn[];
     /** Tag columns that are always visible and cannot be hidden in the settings. */
-    pinnedTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>;
+    pinnedTagTypes?: readonly F0GraphNodeTagColumn[];
     /**
      * Tag columns the actor is not allowed to see, mapped to the reason. Each is
      * still listed in the settings but with its toggle forced OFF and disabled,
@@ -10233,7 +10629,7 @@ declare type InFilterOptionItem<T = unknown> = {
         /** The filter key where child selections are stored in FiltersState */
         filterKey: string;
         /** Child options, which can themselves have children for infinite nesting */
-        options: Array<InFilterOptionItem<T>>;
+        options: InFilterOptionItem<T>[];
     };
 };
 
@@ -10253,7 +10649,7 @@ declare type InFilterOptions_2<T, _R extends RecordType = RecordType> = {
      */
     getLabel?: (value: unknown) => string | Promise<string>;
 } & ({
-    options: Array<InFilterOptionItem<T>> | (() => Array<InFilterOptionItem<T>> | Promise<Array<InFilterOptionItem<T>>>);
+    options: Array<InFilterOptionItem<T>> | (() => Array<InFilterOptionItem<T>> | Promise<InFilterOptionItem<T>[]>);
 } | {
     source: DataSourceDefinition<any, FiltersDefinition, SortingsDefinition, GroupingDefinition<any>>;
     mapOptions: (item: any) => InFilterOptionItem<T>;
@@ -10564,12 +10960,12 @@ declare type KanbanOnMove<TRecord extends RecordType> = (fromLaneId: string, toL
 } | null) => Promise<TRecord>;
 
 declare type KanbanVisualizationOptions<Record extends RecordType, _Filters extends FiltersDefinition, _Sortings extends SortingsDefinition> = {
-    lanes: ReadonlyArray<KanbanLaneDefinition>;
+    lanes: readonly KanbanLaneDefinition[];
     /** Per-group columns: when grouping is active, each group's board renders the
      * lanes this returns instead of the global `lanes` (lane ids must exist in
      * `source.lanes`). Enables the onboarding case where each policy version has
      * its own phases. NOTE: API shape pending Foundations review. */
-    getLanesForGroup?: (groupKey: string) => ReadonlyArray<KanbanLaneDefinition>;
+    getLanesForGroup?: (groupKey: string) => readonly KanbanLaneDefinition[];
     /** Whether each group header shows a selection checkbox when the collection is
      * selectable. Defaults to `true` (parity with Card/List). Set to `false` to
      * keep per-card selection while hiding the group-level checkbox — e.g. when
@@ -10580,7 +10976,7 @@ declare type KanbanVisualizationOptions<Record extends RecordType, _Filters exte
     title?: (record: Record) => string;
     description?: (record: Record) => string;
     avatar?: (record: Record) => CardAvatarVariant;
-    metadata?: (record: Record) => ReadonlyArray<CardMetadata>;
+    metadata?: (record: Record) => readonly CardMetadata[];
     onMove?: KanbanOnMove<Record>;
     onCreate?: KanbanOnCreate;
 };
@@ -10721,7 +11117,7 @@ export declare const listMoreButtonClass: (ctx: HomeRenderCtx) => string;
 /** `list` params: the schema, then items shaped by it. Build with {@link listSlot}. */
 export declare interface ListParams<S extends ListSchema = ListSchema> {
     schema: S;
-    items: Array<ListItem<S>>;
+    items: ListItem<S>[];
 }
 
 declare type ListPropertyDefinition<R, Sortings extends SortingsDefinition> = WithOptionalSorting_2<R, Sortings> & PropertyDefinition_2<R>;
@@ -10729,7 +11125,7 @@ declare type ListPropertyDefinition<R, Sortings extends SortingsDefinition> = Wi
 declare type ListRightData<R, Optional> = R extends "counter" ? Demanded<{
     count: number;
 }, Optional> : R extends `${infer T extends F0AvatarListProps["type"]}-list` ? Demanded<{
-    avatars: Array<AvatarData<T>>;
+    avatars: AvatarData<T>[];
 }, Optional> & {
     remainingCount?: number;
 } : R extends AvatarVariant["type"] ? Demanded<{
@@ -10821,7 +11217,7 @@ export declare interface ListSchema {
  * CHECKED against it — a `left: "person"` slot only takes person data, a
  * `clickBehavior: "link"` slot demands an `href` on every row.
  */
-export declare const listSlot: <const S extends ListSchema>(schema: S, items: Array<ListItem<S>>, options?: SlotOptions) => HomeWidgetSlot;
+export declare const listSlot: <const S extends ListSchema>(schema: S, items: ListItem<S>[], options?: SlotOptions) => HomeWidgetSlot;
 
 declare type ListTextData<S extends ListSchema> = {
     title: string;
@@ -10842,7 +11238,7 @@ declare type ListTextData<S extends ListSchema> = {
 
 declare type ListVisualizationOptions<R extends RecordType, _Filters extends FiltersDefinition, Sortings extends SortingsDefinition> = {
     itemDefinition: (record: R) => ItemDefinition;
-    fields: ReadonlyArray<ListPropertyDefinition<R, Sortings>>;
+    fields: readonly ListPropertyDefinition<R, Sortings>[];
 };
 
 declare interface LoadingStateProps {
@@ -10871,6 +11267,30 @@ declare interface LocalizedOption<T> {
 
 declare type MapCollectionProps<Record extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<Record>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<Record>> = CollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping, MapVisualizationOptions<Record, Filters, Sortings>>;
 
+/** Selection handles handed to the panels, so their content can drive the map. */
+declare type MapSidebarApi<R extends RecordType> = {
+    /** Select a record (or clear with `null`), exactly as a marker click would. */
+    select: (record: R | null) => void;
+    /** Id of the selected record, or `null`. */
+    selectedRecordId: string | null;
+};
+
+/**
+ * A record the map cannot place, and why. Returned from `coordinates` instead of
+ * a position. The record is not dropped: it is listed under "Not on map" in the
+ * side panel and counted on the map surface, so a collection never loses a
+ * record just because it has nowhere to draw it.
+ */
+export declare type MapUnplaced = {
+    /**
+     * `incomplete`: the record should have a location and does not - an unfilled
+     * or ungeocodable address. Listed with the other unplaced records; it is
+     * the case somebody can go and fix, and the hook for telling it apart from a
+     * record that is legitimately location-less once that distinction is drawn.
+     */
+    kind: "incomplete";
+};
+
 /**
  * Options for the map visualization. The map is a projection of the collection's
  * records onto coordinates: the only required option is how to read a record's
@@ -10878,11 +11298,13 @@ declare type MapCollectionProps<Record extends RecordType, Filters extends Filte
  */
 export declare type MapVisualizationOptions<R extends RecordType, _Filters extends FiltersDefinition, _Sortings extends SortingsDefinition> = {
     /**
-     * A record's `[longitude, latitude]`, or `null` when it has none - those
-     * records draw no marker. The map does no geocoding: resolve coordinates
+     * A record's `[longitude, latitude]`, or what stands in for one when it has
+     * none. `null` means "not on the map, no reason given": the record draws no
+     * marker but is still listed under "Not on map" in the side panel. A
+     * `MapUnplaced` says why. The map does no geocoding: resolve coordinates
      * server-side and read them here.
      */
-    coordinates: (record: R) => [number, number] | null;
+    coordinates: (record: R) => [number, number] | null | MapUnplaced;
     /** Label rendered beside the marker. Omitted means an unlabelled pin. */
     label?: (record: R) => string;
     /**
@@ -10902,8 +11324,9 @@ export declare type MapVisualizationOptions<R extends RecordType, _Filters exten
     selectedRecordId?: string | null;
     /**
      * Fired when the selection changes: a marker click, a reveal, or `null` when
-     * the selection is cleared. Open a side panel from here - and report the
-     * region it covers through `viewportInset` so the marker stays visible.
+     * the selection is cleared. Open a side panel from here - and if it is your
+     * own chrome rather than the map's `detail` panel, report the region it covers
+     * through `viewportInset` so the marker stays visible.
      */
     onSelect?: (record: R | null) => void;
     /**
@@ -10912,12 +11335,22 @@ export declare type MapVisualizationOptions<R extends RecordType, _Filters exten
      * `searchSelectionNonce` so picking the same record twice flies again.
      */
     revealRecordId?: string | null;
-    /** Region of the map covered by external chrome, typically a side panel. */
+    /**
+     * Region of the map covered by external chrome, typically a side panel. The
+     * map's own `sidebar` / `detail` panels are folded in for you.
+     */
     viewportInset?: F0MapViewportInset;
     /** Initial camera. Defaults to framing every marker. */
     initialViewport?: F0MapViewport;
     /** Show the navigation controls (locate / fit / zoom). Defaults to `true`. */
     showControls?: boolean;
+    /**
+     * Fired with the panel's new open state when the top-left panel toggle is
+     * pressed. The map view always shows that toggle and tracks its state itself;
+     * the panel it will open does not exist yet, so nothing else changes when it
+     * is pressed.
+     */
+    onSidebarToggle?: (expanded: boolean) => void;
     /** Map projection. Defaults to `"mercator"`. */
     projection?: F0MapProjection;
     /**
@@ -10928,6 +11361,30 @@ export declare type MapVisualizationOptions<R extends RecordType, _Filters exten
     markerLimit?: number;
     /** Accessible label for the map region. */
     ariaLabel?: string;
+    /**
+     * Rows of the map's side panel, the one the top-left toggle opens. The panel
+     * is split into two sections the visualization renders itself - "Not on map"
+     * first, for records `coordinates` could not place, then "On map" - and this
+     * is called once per section with that section's records. They are the very
+     * records the map is drawing (or failing to draw) markers for - the same
+     * page, from the same load - so the list beside the map can never disagree
+     * with it. The panel itself is the map's surface; this is what goes inside
+     * each section.
+     *
+     * The visualization owns the panel's scrolling, so return the rows, not a
+     * scroll container of your own.
+     *
+     * `select` drives the same selection a marker click does, so a row in this
+     * panel and its pin on the map open the same detail. Selecting a record that
+     * is not on the map opens its detail without moving the camera.
+     */
+    sidebar?: (records: R[], api: MapSidebarApi<R>) => ReactNode;
+    /**
+     * Content of a second panel, sliding in beside the first rather than over it.
+     * Called with the selected record - whichever was picked, from a marker or
+     * from the list - and shown for as long as something is selected.
+     */
+    detail?: (record: R, api: MapSidebarApi<R>) => ReactNode;
 };
 
 declare const markerColors: readonly ["neutral", "grey", "radical", "malibu", "viridian", "flubber", "grass", "camel", "indigo", "lilac", "orange", "purple", "yellow", "red", "army", "smoke", "barbie"];
@@ -11354,6 +11811,28 @@ export declare interface NewHomeLayoutProps {
     children?: ReactNode;
     /** Main column: widget slots stacked below `children`. */
     leftWidgets?: HomeWidgetItem[];
+    /**
+     * THE MAIN COLUMN'S FOOTNOTE: one sentence under every widget and above the
+     * "+ Add widget" placeholder — Home's last word rather than a widget.
+     *
+     * `"You are viewing Factorial's new home, if you want you can [go back to the
+     * old home.](/home?legacy=1)"`
+     *
+     * A STRING, NOT A NODE. The one piece of markdown it honours is the inline
+     * link, `[label](href)`; f0 decides the rest — centered, secondary, one
+     * paragraph — so the foot of the column cannot become a second layout. Text
+     * that isn't a link is printed as written, and an href a sentence has no
+     * business carrying (`javascript:`) keeps its label and loses its link.
+     *
+     * It is not part of the arrangement: no card, no drag, no "Remove widget",
+     * and it stays at the bottom whatever the widgets above it do. It arrives on
+     * the same stagger they do, one beat after the last of them.
+     *
+     * STACKED (below `md`) the rail's pinned widgets fold into the main column,
+     * and this still comes after all of them — it is the column's foot, not the
+     * widgets' end.
+     */
+    mainFootnote?: string;
     /** Side rail: spec-conforming widgets. */
     rightWidgets?: HomeWidgetItem[];
     /** Freeform side-rail content, rendered above `rightWidgets` (expanded rail only). */
@@ -11822,7 +12301,7 @@ declare type OneDataCollectionGeneric = <R extends RecordType, Filters extends F
  */
 declare type OneDataCollectionProps<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<R>> = {
     source: DataCollectionSource<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>;
-    visualizations: ReadonlyArray<Visualization<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>>;
+    visualizations: readonly Visualization<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>[];
     onSelectItems?: OnSelectItemsCallback<R, Filters>;
     onBulkAction?: OnBulkActionCallback<R, Filters>;
     /**
@@ -12016,6 +12495,71 @@ declare type OneFilterPickerRootProps<Definition extends FiltersDefinition> = {
 };
 
 /**
+ * A row in a list of things. `OnePersonListItem`'s anatomy - leading avatar,
+ * title, inline facts, a status dot and up to two actions - with the person
+ * assumption removed: pass any `AvatarVariant` and your own title, so the same
+ * row serves workplaces, teams, companies, files or documents.
+ *
+ * `OnePersonListItem` is this component with a person's name pre-composed.
+ *
+ * @experimental This is an experimental component use it at your own risk
+ */
+export declare const OneListItem: WithDataTestIdReturnType_3<default_2.ForwardRefExoticComponent<OneListItemProps & default_2.RefAttributes<HTMLDivElement>> & {
+Skeleton: () => default_2.JSX.Element;
+}>;
+
+export declare type OneListItemProps = {
+    /**
+     * Any avatar variant - person, team, company, file, flag, icon or emoji - so
+     * the item can stand for whatever the list is of. Omit it for a list with no
+     * leading graphic.
+     */
+    avatar?: AvatarVariant;
+    /** The item's name. The one thing every list item has. */
+    title: string;
+    description?: string;
+    /** Facts under the title, rendered inline and separated by a middot. */
+    bottomTags?: Omit<F0TagRawProps, "noBorder">[];
+    /**
+     * Fields under the subtitle - team, workplace, manager and the like. Same
+     * shape and same renderers as `F0Card`'s metadata: a leading icon carrying
+     * the field's label as its tooltip, then the value drawn by the shared
+     * value-display renderer for its type.
+     */
+    metadata?: CardMetadata[];
+    rightTag?: Props_4;
+    actions?: {
+        primary?: {
+            icon?: IconType;
+            label: string;
+            onClick: () => void;
+        };
+        secondary?: {
+            icon: IconType;
+            /** Accessible name - the button shows only its icon. */
+            label?: string;
+            onClick: () => void;
+        };
+    };
+    /** Tooltip beside the title, for a caveat that doesn't fit in the row. */
+    info?: string;
+    onClick: () => void;
+    withPointerCursor?: boolean;
+    /**
+     * Marks the row as the one currently being acted on - the record open in a
+     * detail view, say. Tinted surface and a matching border, so it reads as
+     * chosen rather than merely hovered, and `aria-current` says so to assistive
+     * tech rather than leaving it to colour alone.
+     */
+    selected?: boolean;
+};
+
+/** Shared by the item and its skeleton, so the two occupy the same box. */
+export declare const oneListItemRowClassName = "flex w-full flex-row flex-wrap items-start gap-2 rounded-md border p-2 focus:outline focus:outline-1 focus:outline-offset-1 focus:outline-f1-border-selected-bold";
+
+export declare const OneListItemSkeleton: () => default_2.JSX.Element;
+
+/**
  * @experimental This is an experimental component use it at your own risk
  */
 export declare const OnePagination: WithDataTestIdReturnType_2<typeof _OnePagination>;
@@ -12064,6 +12608,10 @@ declare interface OnePaginationProps {
 }
 
 /**
+ * A person in a list: `OneListItem` with the avatar and title composed from a
+ * person's name. Reach for `OneListItem` directly when the row stands for
+ * anything else.
+ *
  * @experimental This is an experimental component use it at your own risk
  */
 export declare const OnePersonListItem: WithDataTestIdReturnType_3<default_2.ForwardRefExoticComponent<OnePersonListItemProps & default_2.RefAttributes<HTMLDivElement>> & {
@@ -12170,10 +12718,10 @@ export declare type PageAction = {
 } | {
     onClick: () => void;
 } | {
-    actions: Array<{
+    actions: {
         label: string;
         href: string;
-    }>;
+    }[];
 });
 
 /**
@@ -12505,7 +13053,7 @@ declare type ProductUpdate = {
 declare type ProductUpdatesProp = {
     label: string;
     updatesPageUrl: string;
-    getUpdates: () => Promise<Array<ProductUpdate>>;
+    getUpdates: () => Promise<ProductUpdate[]>;
     hasUnread?: boolean;
     currentModule: string;
     onOpenChange?: ComponentProps<typeof DropdownMenu>["onOpenChange"];
@@ -12525,7 +13073,7 @@ declare type ProductUpdatesProp = {
         isVisible: boolean;
         sectionTitle: string;
         onClose?: () => void;
-        products: Array<{
+        products: ({
             title: string;
             description: string;
             onClick: () => void;
@@ -12538,7 +13086,7 @@ declare type ProductUpdatesProp = {
         } | {
             module: ModuleId;
             type?: never;
-        })>;
+        }))[];
     };
 };
 
@@ -12686,11 +13234,11 @@ dataTestId?: string;
 declare interface RadarComputation {
     datasetId: string;
     seriesColumn: string;
-    indicators: Array<{
+    indicators: {
         column: string;
         label: string;
         max?: number;
-    }>;
+    }[];
     limit?: number;
     sortBy?: string;
     sortOrder?: "asc" | "desc";
@@ -13060,17 +13608,17 @@ declare type SelectCellConfig<R extends RecordType> = {
  * Represents a collection of selected items.
  * @template T - The type of items in the collection
  */
-export declare type SelectedItems<T> = ReadonlyArray<T>;
+export declare type SelectedItems<T> = readonly T[];
 
 export declare type SelectedItemsDetailedStatus<R extends RecordType, Filters extends FiltersDefinition> = {
     allSelected: boolean | "indeterminate";
     /** Status of items that have been loaded. Items not yet loaded won't appear here. */
-    itemsStatus: ReadonlyArray<{
+    itemsStatus: readonly {
         item: R;
         checked: boolean;
-    }>;
+    }[];
     /** All selected item IDs, including those not yet loaded */
-    selectedIds: ReadonlyArray<SelectionId>;
+    selectedIds: readonly SelectionId[];
     groupsStatus: Record<string, boolean>;
     filters: FiltersState<Filters>;
     selectedCount: number;
@@ -14018,7 +14566,7 @@ declare type TableVisualizationOptions<R extends RecordType, _Filters extends Fi
     /**
      * The columns to display
      */
-    columns: ReadonlyArray<TableColumnDefinition<R, Sortings, Summaries>>;
+    columns: readonly TableColumnDefinition<R, Sortings, Summaries>[];
     /**
      * Placeholder to display in summary-row cells when no summary value is
      * rendered. This also applies to columns without a `summary` definition.
@@ -14646,7 +15194,7 @@ export declare interface UseDataCollectionItemNavigationProps<R extends RecordTy
      * Forwarded to `useDataCollectionSource` for `dataAdapter` memoization,
      * same convention as `useDataCollectionSource(source, deps)`.
      */
-    deps?: ReadonlyArray<unknown>;
+    deps?: readonly unknown[];
 }
 
 export declare interface UseDataCollectionItemNavigationReturn<R extends RecordType = RecordType, Filters extends FiltersDefinition = FiltersDefinition, Sortings extends SortingsDefinition = SortingsDefinition, Summaries extends SummariesDefinition = SummariesDefinition, ItemActions extends ItemActionsDefinition<R> = ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition = NavigationFiltersDefinition, Grouping extends GroupingDefinition<R> = GroupingDefinition<R>> extends UseDataSourceItemNavigationReturn<R> {
@@ -14672,7 +15220,7 @@ export declare interface UseDataCollectionItemNavigationReturn<R extends RecordT
     isLoading: boolean;
 }
 
-export declare const useDataCollectionSource: <R extends RecordType = RecordType, FiltersSchema extends FiltersDefinition = FiltersDefinition, Sortings extends SortingsDefinition = SortingsDefinition, Summaries extends SummariesDefinition = SummariesDefinition, ItemActions extends ItemActionsDefinition<R> = ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition = NavigationFiltersDefinition, Grouping extends GroupingDefinition<R> = GroupingDefinition<R>>(source: DataCollectionSourceDefinition<R, FiltersSchema, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>, deps?: ReadonlyArray<unknown>) => DataCollectionSource<R, FiltersSchema, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>;
+export declare const useDataCollectionSource: <R extends RecordType = RecordType, FiltersSchema extends FiltersDefinition = FiltersDefinition, Sortings extends SortingsDefinition = SortingsDefinition, Summaries extends SummariesDefinition = SummariesDefinition, ItemActions extends ItemActionsDefinition<R> = ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition = NavigationFiltersDefinition, Grouping extends GroupingDefinition<R> = GroupingDefinition<R>>(source: DataCollectionSourceDefinition<R, FiltersSchema, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>, deps?: readonly unknown[]) => DataCollectionSource<R, FiltersSchema, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>;
 
 /**
  * Hook options for useData
@@ -14880,7 +15428,7 @@ declare type VacancyProfile = {
     vacancyType?: string;
 };
 
-declare type ValueDisplayRendererContext = {
+declare type ValueDisplayRendererContext_2 = {
     visualization: ValueDisplayVisualizationType;
     i18n: TranslationsType;
     tableAlign?: ValueDisplayTableAlignment;
@@ -14898,34 +15446,34 @@ declare type ValueDisplayRendererDefinition = {
 }[keyof typeof valueDisplayRenderers];
 
 declare const valueDisplayRenderers: {
-    readonly text: (args: TextCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
-    readonly longText: (args: LongTextCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
-    readonly number: (args: NumberCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
-    readonly date: (args: DateCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
-    readonly amount: (args: AmountCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
-    readonly compound: (args: CompoundCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
-    readonly avatarList: (args: AvatarListCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
-    readonly status: (args: StatusCellValue) => JSX_2.Element;
-    readonly alertTag: (args: AlertTagCellValue) => JSX_2.Element;
-    readonly person: (args: PersonCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
-    readonly percentage: (args: PercentageCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element | null;
-    readonly progressBar: (args: ProgressBarCellValue, _meta: ValueDisplayRendererContext) => JSX_2.Element | null;
-    readonly progressSeries: (args: ProgressSeriesCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
-    readonly barSeries: (args: BarSeriesCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
-    readonly categoryBarChart: (args: CategoryBarChartCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
-    readonly hourDistribution: (args: HourDistributionCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
-    readonly company: (args: CompanyCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
-    readonly team: (args: TeamCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
-    readonly tag: (args: TagCellValue) => JSX_2.Element;
-    readonly dotTag: (args: DotTagCellValue) => JSX_2.Element;
-    readonly tagList: (args: TagListCellValue) => JSX_2.Element;
-    readonly icon: (args: IconCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
-    readonly file: (args: FileCellValue) => JSX_2.Element;
-    readonly folder: (args: FolderCellValue) => JSX_2.Element;
-    readonly country: (args: CountryCellValue, context: ValueDisplayRendererContext) => JSX_2.Element;
+    readonly text: (args: TextCellValue_2, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
+    readonly longText: (args: LongTextCellValue, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
+    readonly number: (args: NumberCellValue_2, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
+    readonly date: (args: DateCellValue_2, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
+    readonly amount: (args: AmountCellValue_2, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
+    readonly compound: (args: CompoundCellValue, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
+    readonly avatarList: (args: AvatarListCellValue_2, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
+    readonly status: (args: StatusCellValue_2) => JSX_2.Element;
+    readonly alertTag: (args: AlertTagCellValue_2) => JSX_2.Element;
+    readonly person: (args: PersonCellValue_2, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
+    readonly percentage: (args: PercentageCellValue, meta: ValueDisplayRendererContext_2) => JSX_2.Element | null;
+    readonly progressBar: (args: ProgressBarCellValue_2, _meta: ValueDisplayRendererContext_2) => JSX_2.Element | null;
+    readonly progressSeries: (args: ProgressSeriesCellValue, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
+    readonly barSeries: (args: BarSeriesCellValue, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
+    readonly categoryBarChart: (args: CategoryBarChartCellValue, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
+    readonly hourDistribution: (args: HourDistributionCellValue, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
+    readonly company: (args: CompanyCellValue_2, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
+    readonly team: (args: TeamCellValue_2, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
+    readonly tag: (args: TagCellValue_2) => JSX_2.Element;
+    readonly dotTag: (args: DotTagCellValue_2) => JSX_2.Element;
+    readonly tagList: (args: TagListCellValue_2) => JSX_2.Element;
+    readonly icon: (args: IconCellValue, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
+    readonly file: (args: FileCellValue_2) => JSX_2.Element;
+    readonly folder: (args: FolderCellValue_2) => JSX_2.Element;
+    readonly country: (args: CountryCellValue, context: ValueDisplayRendererContext_2) => JSX_2.Element;
     readonly delta: (args: DeltaCellValue) => JSX_2.Element;
-    readonly summary: (args: SummaryCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
-    readonly count: (args: CountCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
+    readonly summary: (args: SummaryCellValue, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
+    readonly count: (args: CountCellValue, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
 };
 
 declare type ValueDisplayTableAlignment = "left" | "right";
@@ -15416,11 +15964,11 @@ export declare type WidgetEmptyStateProps = {
  */
 export declare interface WidgetHeaderSelect {
     /** What the reader can switch between. The first one is the default. */
-    options: Array<{
+    options: {
         value: string;
         label: string;
         icon?: IconType;
-    }>;
+    }[];
     /** Which one the card starts on. Defaults to the first option. */
     value?: string;
     /** The trigger names the selection, so this is what says what KIND it is. */
@@ -15506,8 +16054,17 @@ export declare interface WidgetProps {
         };
         count?: number;
     };
-    /** The card's footer button — its call to action. `neutral`/`sm` by default. */
-    action?: F0ButtonProps;
+    /**
+     * The card's footer button — its call to action. `neutral`/`sm` by default,
+     * `outline`/`md` once the card is wide.
+     *
+     * AN ARRAY draws TWO, side by side, for a card that carries both its own call
+     * to action and the way out of it ("Sign now", "Go to Documents"). A pair is
+     * drawn `outline` at every width: two buttons in a footer are a set of equals,
+     * and filling one of them nominates it as the card's answer. Two is the
+     * ceiling — a third belongs in `actions`, the overflow menu.
+     */
+    action?: F0ButtonProps | F0ButtonProps[];
     /**
      * Extra classes for the FOOTER row that `action` draws in. For content that
      * BLEEDS past the card's content box and wants the footer brought onto its
@@ -15516,12 +16073,12 @@ export declare interface WidgetProps {
      * takes no className of its own, so this is the seam for it.
      */
     footerClassName?: string;
-    summaries?: Array<{
+    summaries?: {
         label: string;
         value: string | number;
         prefixUnit?: string;
         postfixUnit?: string;
-    }>;
+    }[];
     alert?: string;
     status?: {
         text: string;
@@ -15694,7 +16251,7 @@ declare type WithDataTestIdProps = {
 };
 
 declare type WithGroupId<RecordType> = RecordType & {
-    [GROUP_ID_SYMBOL]: unknown | undefined;
+    [GROUP_ID_SYMBOL]: unknown;
 };
 
 declare type WithOptionalSorting<R extends RecordType, Sortings extends SortingsDefinition> = Omit<PropertyDefinition_2<R>, "hide"> & {
@@ -15771,17 +16328,17 @@ declare namespace _Page {
 declare module "gridstack" {
     interface GridStackWidget {
         id?: string;
-        allowedSizes?: Array<{
+        allowedSizes?: {
             w: number;
             h: number;
-        }>;
+        }[];
         meta?: Record<string, unknown>;
     }
     interface GridStackNode {
-        allowedSizes?: Array<{
+        allowedSizes?: {
             w: number;
             h: number;
-        }>;
+        }[];
     }
 }
 

@@ -489,6 +489,11 @@ const e = {
       reset: "Reset to default",
       viewSelectorLabel: "Select view"
     },
+    map: {
+      notOnMap: "Not on map",
+      onMap: "On map",
+      notOnMapCount: "{{count}} not on map"
+    },
     table: {
       seeMoreChildren: "See more",
       settings: {
@@ -1241,11 +1246,15 @@ const e = {
     loadError: "Couldn't load the map.",
     retry: "Retry",
     currentLocation: "Your location",
+    panel: "Map panel",
+    detailPanel: "Map detail panel",
     controls: {
       zoomIn: "Zoom in",
       zoomOut: "Zoom out",
       fit: "Fit to markers",
-      locate: "My location"
+      locate: "My location",
+      showPanel: "Show panel",
+      hidePanel: "Hide panel"
     }
   },
   wizard: {
