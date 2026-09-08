@@ -109,6 +109,6 @@ export const MAP_PANEL_ENTRANCE = {
   grow: {
     closedTransform: "translateX(-10%) scale(0.97)",
     /** Grows out of the edge it comes from, not from its own middle. */
-    origin: "left center",
+    origin: "left center", // i18n-exempt: a CSS transform-origin, not copy
   },
 } as const
