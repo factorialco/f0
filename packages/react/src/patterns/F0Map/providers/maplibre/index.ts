@@ -19,6 +19,12 @@ const ZOOM_RATE = (1 / 90 + 1 / 40) / 2
 const asEngineStyle = (style: unknown) =>
   style as maplibregl.StyleSpecification | string
 
+const toBounds = (coordinates: LngLat[]) => {
+  const bounds = new maplibregl.LngLatBounds()
+  coordinates.forEach((c) => bounds.extend(c))
+  return bounds
+}
+
 /** MapLibre expresses framing as camera padding. */
 const toPadding = (gutter: number) => ({
   top: gutter,
@@ -110,13 +116,35 @@ export const createMaplibreAdapter: MapAdapterFactory = (init): MapAdapter => {
       map.flyTo({ ...FLY_OPTS, ...camera(target, options) }),
 
     fitCoordinates: (coordinates, options) => {
-      const bounds = new maplibregl.LngLatBounds()
-      coordinates.forEach((c) => bounds.extend(c))
-      map.fitBounds(bounds, {
+      map.fitBounds(toBounds(coordinates), {
         padding: toPadding(options?.gutter ?? 0),
         maxZoom: options?.maxZoom,
         animate: options?.animate ?? true,
       })
+    },
+
+    addDomMarker: (element, at) => {
+      const marker = new maplibregl.Marker({ element, anchor: "center" })
+        .setLngLat(at)
+        .addTo(map)
+      return {
+        setPosition: (next) => marker.setLngLat(next),
+        remove: () => marker.remove(),
+      }
+    },
+
+    cameraForCoordinates: (coordinates, options) => {
+      const cam = map.cameraForBounds(toBounds(coordinates), {
+        padding: toPadding(options?.gutter ?? 0),
+        maxZoom: options?.maxZoom,
+      })
+      if (!cam?.center) {
+        return null
+      }
+      // `cameraForBounds` hands back whatever LngLatLike it likes.
+      const c = cam.center as { lng: number; lat: number } | [number, number]
+      const center: LngLat = Array.isArray(c) ? [c[0], c[1]] : [c.lng, c.lat]
+      return { center, zoom: cam.zoom }
     },
 
     zoomIn: () => map.zoomIn(),

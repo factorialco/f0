@@ -1,10 +1,8 @@
-import maplibregl from "maplibre-gl"
 import { AnimatePresence, motion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
 import { createPortal } from "react-dom"
 import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
-import { FLY_OPTS } from "../constants"
 import { useClusters } from "../hooks/useClusters"
 import {
   boxesOverlap,
@@ -13,6 +11,7 @@ import {
   type Box,
 } from "../hooks/useLabelCollision"
 import { useZoomAtLeast } from "../hooks/useZoomAtLeast"
+import type { DomMarkerHandle, MapAdapter } from "../providers/types"
 import type { F0MapPoint } from "../types"
 import { F0MapMarker, type F0MapMarkerVariantProps } from "./F0MapMarker"
 import {
@@ -36,12 +35,15 @@ const POI_LABEL_ZOOM = 16
  * marker actually renders.
  */
 const selectionCollapsedIds = (
-  map: maplibregl.Map,
+  adapter: MapAdapter,
   selected: F0MapPoint,
   others: F0MapPoint[],
   size: BaseMapMarkerSize
-): Set<string> => {
-  const sel = map.project(selected.coordinates)
+): Set<string> | null => {
+  const sel = adapter.project(selected.coordinates)
+  if (!sel) {
+    return null
+  }
   const xl = getMarkerMetrics("xl")
   const base = getMarkerMetrics(size)
   const headTop = sel.y + getSelectedHeadGroupY()
@@ -58,7 +60,10 @@ const selectionCollapsedIds = (
   const d = base.d
   const collapsed = new Set<string>()
   for (const p of others) {
-    const s = map.project(p.coordinates)
+    const s = adapter.project(p.coordinates)
+    if (!s) {
+      return null
+    }
     const head: Box = { x: s.x - d / 2, y: s.y - d / 2, w: d, h: d }
     if (
       boxesOverlap(head, headBox) ||
@@ -77,7 +82,7 @@ const selectionCollapsedIds = (
  * set actually differs, so zoom frames don't re-render the layer.
  */
 const useSelectionCollapse = (
-  map: maplibregl.Map,
+  adapter: MapAdapter,
   selectedPoint: F0MapPoint | undefined,
   singles: F0MapPoint[],
   size: BaseMapMarkerSize
@@ -94,11 +99,14 @@ const useSelectionCollapse = (
     let raf = 0
     const recompute = () => {
       const next = selectionCollapsedIds(
-        map,
+        adapter,
         selectedPoint,
         singles.filter((p) => p.id !== selectedPoint.id),
         size
       )
+      if (!next) {
+        return
+      }
       setIds((prev) => {
         const same =
           prev !== null &&
@@ -112,14 +120,12 @@ const useSelectionCollapse = (
       raf = requestAnimationFrame(recompute)
     }
     schedule()
-    map.on("zoom", schedule)
-    map.on("resize", schedule)
+    const offs = [adapter.on("zoom", schedule), adapter.on("resize", schedule)]
     return () => {
       cancelAnimationFrame(raf)
-      map.off("zoom", schedule)
-      map.off("resize", schedule)
+      offs.forEach((off) => off())
     }
-  }, [map, selectedPoint, singles, size])
+  }, [adapter, selectedPoint, singles, size])
 
   return ids
 }
@@ -132,20 +138,20 @@ const useSelectionCollapse = (
  * zoom overshoot would (a "cluster of clusters" would frame the empty middle).
  */
 const expandCluster = (
-  map: maplibregl.Map,
+  adapter: MapAdapter,
   bounds: [[number, number], [number, number]],
   reduceMotion: boolean
 ) => {
-  const cam = map.cameraForBounds(bounds, { padding: 64, maxZoom: 16 })
-  if (!cam?.center) {
+  const cam = adapter.cameraForCoordinates(bounds, { gutter: 64, maxZoom: 16 })
+  if (!cam) {
     return
   }
-  const zoom = cam.zoom ?? map.getZoom()
+  const target = { center: cam.center, zoom: cam.zoom ?? adapter.getZoom() }
   if (reduceMotion) {
-    map.jumpTo({ center: cam.center, zoom })
+    adapter.jumpTo(target, { animate: false })
     return
   }
-  map.flyTo({ ...FLY_OPTS, center: cam.center, zoom })
+  adapter.flyTo(target)
 }
 
 /** Extracts just the variant half of a point for spreading into F0MapMarker. */
@@ -159,20 +165,20 @@ const variantProps = (point: F0MapPoint): F0MapMarkerVariantProps => {
   return variant
 }
 
-/** One maplibre DOM marker that portals React content into it. */
+/** One engine-anchored DOM marker that portals React content into it. */
 const MapMarkerPortal = ({
-  map,
+  adapter,
   coordinates,
   selected,
   children,
 }: {
-  map: maplibregl.Map
+  adapter: MapAdapter
   coordinates: [number, number]
   selected: boolean
   children: React.ReactNode
 }) => {
   const [el] = useState(() => document.createElement("div"))
-  const markerRef = useRef<maplibregl.Marker | null>(null)
+  const markerRef = useRef<DomMarkerHandle | null>(null)
 
   useEffect(() => {
     // Marker elements live inside the map's canvas container, so clicks on
@@ -181,9 +187,7 @@ const MapMarkerPortal = ({
     const stop = (event: MouseEvent) => event.stopPropagation()
     el.style.cursor = "pointer"
     el.addEventListener("click", stop)
-    const marker = new maplibregl.Marker({ element: el, anchor: "center" })
-      .setLngLat(coordinates)
-      .addTo(map)
+    const marker = adapter.addDomMarker(el, coordinates)
     markerRef.current = marker
     return () => {
       el.removeEventListener("click", stop)
@@ -192,10 +196,10 @@ const MapMarkerPortal = ({
     }
     // Created once; `coordinates` is handled by the next effect.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [map, el])
+  }, [adapter, el])
 
   useEffect(() => {
-    markerRef.current?.setLngLat(coordinates)
+    markerRef.current?.setPosition(coordinates)
   }, [coordinates])
 
   // Selected marker floats above the rest.
@@ -207,7 +211,7 @@ const MapMarkerPortal = ({
 }
 
 export interface F0MapMarkersLayerProps {
-  map: maplibregl.Map
+  adapter: MapAdapter
   points: F0MapPoint[]
   selectedId: string | null
   /** Emphasised (not selected) marker: floats above and keeps its label. */
@@ -216,7 +220,7 @@ export interface F0MapMarkersLayerProps {
 }
 
 export const F0MapMarkersLayer = ({
-  map,
+  adapter,
   points,
   selectedId,
   highlightedId,
@@ -226,12 +230,12 @@ export const F0MapMarkersLayer = ({
   const reduceMotion = useReducedMotion()
   // Clustering is always on - markers gather when zoomed out and separate as
   // you zoom in. It is intrinsic to the map, not a mode the caller opts into.
-  const { clusters, singles } = useClusters(map, points, true)
+  const { clusters, singles } = useClusters(adapter, points, true)
   // Markers bump one size step up once POI names appear (see POI_LABEL_ZOOM).
-  const poiZoom = useZoomAtLeast(map, POI_LABEL_ZOOM)
+  const poiZoom = useZoomAtLeast(adapter, POI_LABEL_ZOOM)
   const sizeStep: BaseMapMarkerSize = poiZoom ? "lg" : "md"
   // Only the un-clustered points participate in label collision.
-  const placements = useLabelCollision(map, singles, sizeStep)
+  const placements = useLabelCollision(adapter, singles, sizeStep)
 
   const pointById = new Map(points.map((p) => [p.id, p]))
   // While any cluster is on screen, drop the leftover single markers' labels -
@@ -244,7 +248,7 @@ export const F0MapMarkersLayer = ({
   // neighbour.
   const selectedPoint = selectedId ? pointById.get(selectedId) : undefined
   const collapsedIds = useSelectionCollapse(
-    map,
+    adapter,
     selectedPoint,
     singles,
     sizeStep
@@ -257,7 +261,7 @@ export const F0MapMarkersLayer = ({
       {clusters.map((c) => (
         <MapMarkerPortal
           key={c.id}
-          map={map}
+          adapter={adapter}
           coordinates={c.coordinates}
           selected={false}
         >
@@ -280,7 +284,7 @@ export const F0MapMarkersLayer = ({
                 .map((id) => pointById.get(id))
                 .filter((p): p is F0MapPoint => Boolean(p))
                 .map(variantProps)}
-              onClick={() => expandCluster(map, c.bounds, reduceMotion)}
+              onClick={() => expandCluster(adapter, c.bounds, reduceMotion)}
             />
           </motion.span>
         </MapMarkerPortal>
@@ -294,7 +298,7 @@ export const F0MapMarkersLayer = ({
         return (
           <MapMarkerPortal
             key={point.id}
-            map={map}
+            adapter={adapter}
             coordinates={point.coordinates}
             selected={selectedId === point.id || highlighted}
           >

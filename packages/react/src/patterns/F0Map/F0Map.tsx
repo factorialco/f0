@@ -248,7 +248,9 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
   const i18n = useI18n()
   const containerRef = useRef<HTMLDivElement | null>(null)
   const adapterRef = useRef<MapAdapter | null>(null)
-  const [mapInstance, setMapInstance] = useState<maplibregl.Map | null>(null)
+  const [adapterInstance, setAdapterInstance] = useState<MapAdapter | null>(
+    null
+  )
   // WebGL missing (map can't be created) -> show the list as the fallback.
   // Tile/style load failure -> a retry banner over the map.
   const [webglFailed, setWebglFailed] = useState(false)
@@ -428,8 +430,7 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
       return
     }
     adapterRef.current = adapter
-    // The layers still take the engine's own map; they move next.
-    setMapInstance(adapter.native() as maplibregl.Map)
+    setAdapterInstance(adapter)
     // A previous run may have failed (and set the list fallback) with props
     // that made creation throw; this run succeeded, so clear it.
     setWebglFailed(false)
@@ -467,7 +468,7 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
       offError()
       offClick()
       adapterRef.current = null
-      setMapInstance(null)
+      setAdapterInstance(null)
       adapter.destroy()
     }
   }, [loading, interactive, gestureHandling, minZoom, maxZoom, shouldFit])
@@ -510,6 +511,8 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
   }, [highlightedId, reduceMotion])
 
   const hasLines = routes.length > 0 || arcs.length > 0
+  // The line and current-location layers are still on the engine's own map.
+  const nativeMap = adapterInstance?.native() as maplibregl.Map | undefined
 
   return (
     <DataTestIdWrapper dataTestId={dataTestId}>
@@ -550,18 +553,15 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
           {/* Bottom of the overlay stack: a GL circle under the lines and under
               every DOM marker. The sr-only span keeps the announcement the
               canvas can't provide. */}
-          {!webglFailed && mapInstance && currentLocation && (
+          {!webglFailed && nativeMap && currentLocation && (
             <>
-              <CurrentLocationLayer
-                map={mapInstance}
-                coords={currentLocation}
-              />
+              <CurrentLocationLayer map={nativeMap} coords={currentLocation} />
               <span className="sr-only">{i18n.map.currentLocation}</span>
             </>
           )}
-          {!webglFailed && mapInstance && hasLines && (
+          {!webglFailed && nativeMap && hasLines && (
             <F0MapVectorLayer
-              map={mapInstance}
+              map={nativeMap}
               routes={routes}
               arcs={arcs}
               isDark={isDark}
@@ -569,16 +569,16 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
               onArcClick={onArcClick}
             />
           )}
-          {!webglFailed && mapInstance && markers.length > 0 && (
+          {!webglFailed && adapterInstance && markers.length > 0 && (
             <F0MapMarkersLayer
-              map={mapInstance}
+              adapter={adapterInstance}
               points={markers}
               selectedId={selectedId}
               highlightedId={highlightedId}
               onSelect={selectMarker}
             />
           )}
-          {!webglFailed && mapInstance && showControls && interactive && (
+          {!webglFailed && adapterInstance && showControls && interactive && (
             <div
               className={cn(
                 "absolute z-10",
