@@ -1,5 +1,6 @@
 import { F0AvatarList } from "@/components/avatars/F0AvatarList"
 import { F0Icon } from "@/components/F0Icon"
+import { F0Text } from "@/components/F0Text"
 import { Pin } from "@/icons/app"
 import { cn, focusRing } from "@/lib/utils"
 import { Counter } from "@/ui/Counter"
@@ -47,8 +48,8 @@ export const MapNotOnMapButton = ({
     aria-label={ariaLabel}
     data-testid={dataTestId}
     className={cn(
-      "flex h-8 items-center gap-2 rounded-md pl-1 pr-1.5 text-sm font-medium",
-      "text-f1-foreground-secondary hover:bg-f1-background-hover",
+      "flex h-8 items-center gap-2 rounded-md pl-1 pr-1.5",
+      "hover:bg-f1-background-hover",
       focusRing()
     )}
   >
@@ -65,7 +66,9 @@ export const MapNotOnMapButton = ({
         <F0Icon icon={Pin} size="sm" />
       </span>
     )}
-    <span className="whitespace-nowrap">{title}</span>
+    <span className="whitespace-nowrap">
+      <F0Text variant="label" content={title} markdown={false} />
+    </span>
     <Counter value={count} size="sm" />
   </button>
 )

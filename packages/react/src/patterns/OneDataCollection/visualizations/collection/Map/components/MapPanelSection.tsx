@@ -2,6 +2,7 @@ import { useControllableState } from "@radix-ui/react-use-controllable-state"
 import { type ReactNode } from "react"
 
 import { F0Icon } from "@/components/F0Icon"
+import { F0Text } from "@/components/F0Text"
 import { ChevronDown } from "@/icons/app"
 import { cn, focusRing } from "@/lib/utils"
 import {
@@ -54,8 +55,8 @@ export const MapPanelSection = ({
             focusRing()
           )}
         >
-          <span className="min-w-0 flex-1 truncate text-sm font-medium text-f1-foreground-secondary">
-            {title}
+          <span className="min-w-0 flex-1">
+            <F0Text variant="label" content={title} markdown={false} ellipsis />
           </span>
           <Counter value={count} size="sm" />
           <span
