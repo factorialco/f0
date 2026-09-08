@@ -1,5 +1,5 @@
-import type maplibregl from "maplibre-gl"
 import { useEffect, useState } from "react"
+import type { MapAdapter, ScreenPoint } from "../providers/types"
 import type { F0MapPoint } from "../types"
 
 export interface F0MapClusterData {
@@ -30,7 +30,7 @@ export interface F0MapClusterResult {
  * distinct while still gathering the rest of a dense pocket into one pile.
  */
 export const useClusters = (
-  map: maplibregl.Map | null,
+  adapter: MapAdapter | null,
   points: F0MapPoint[],
   enabled: boolean,
   radius = 12,
@@ -42,14 +42,22 @@ export const useClusters = (
   })
 
   useEffect(() => {
-    if (!map || !enabled) {
+    if (!adapter || !enabled) {
       setResult({ clusters: [], singles: points })
       return
     }
 
     let raf = 0
     const recompute = () => {
-      const projected = points.map((p) => map.project(p.coordinates))
+      const projected: ScreenPoint[] = []
+      for (const p of points) {
+        const at = adapter.project(p.coordinates)
+        // Not projectable yet: leave the previous grouping until `ready`.
+        if (!at) {
+          return
+        }
+        projected.push(at)
+      }
       const n = points.length
       const markerR2 = radius * radius
       const clusterR2 = clusterRadius * clusterRadius
@@ -166,16 +174,16 @@ export const useClusters = (
       raf = requestAnimationFrame(recompute)
     }
     schedule()
-    map.on("move", schedule)
-    map.on("zoom", schedule)
-    map.on("resize", schedule)
+    const offs = [
+      adapter.on("move", schedule),
+      adapter.on("zoom", schedule),
+      adapter.on("resize", schedule),
+    ]
     return () => {
       cancelAnimationFrame(raf)
-      map.off("move", schedule)
-      map.off("zoom", schedule)
-      map.off("resize", schedule)
+      offs.forEach((off) => off())
     }
-  }, [map, points, enabled, radius, clusterRadius])
+  }, [adapter, points, enabled, radius, clusterRadius])
 
   return result
 }
