@@ -32,6 +32,9 @@ import {
   statusTintVariants,
 } from "./variants"
 
+// One string and not a set of them: how much the message claims is the status's
+// job, so a byline that also modulated the claim would be a second signal for
+// the same thing. That is why there is no `attribution` prop.
 const Byline = () => {
   const { ai } = useI18n()
 
