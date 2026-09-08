@@ -302,11 +302,8 @@ export type CommandAction = CommandActionBase &
  *
  * Give it a STABLE identity — module scope, or memoised. It keys the row memos.
  */
-/** A heading and the things under it — the shape every group here has. */
-export type Grouped<TItem> = { label: string; items: TItem[] }
-
 export type CommandGroup =
-  | (Grouped<CommandAction> & { provider?: never })
+  | { label: string; items: CommandAction[]; provider?: never }
   | { provider: CommandEntityProvider; label?: never; items?: never }
 
 /**
@@ -319,7 +316,10 @@ export type CommandGroup =
  * that rows of one intent came out contiguous, or a straggler re-emitted a
  * heading that had already appeared. A group cannot be non-contiguous.
  */
-export type CommandEntityActionGroup = Grouped<CommandEntityAction>
+export type CommandEntityActionGroup = {
+  label: string
+  items: CommandEntityAction[]
+}
 
 /**
  * The assistant escape hatch — the way out of the list when nothing in it fit.
