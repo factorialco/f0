@@ -1015,7 +1015,7 @@ const e = {
     searchHint: "Type an address to search",
     addressLine1Placeholder: "Enter a street and number",
     addressLine2Placeholder: "Enter a floor or unit",
-    postalCodePlaceholder: "08001",
+    postalCodePlaceholder: "e.g., 08001",
     searching: "Searching addresses"
   },
   imageUpload: {

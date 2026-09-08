@@ -5131,7 +5131,7 @@ declare const defaultTranslations: {
         readonly searchHint: "Type an address to search";
         readonly addressLine1Placeholder: "Enter a street and number";
         readonly addressLine2Placeholder: "Enter a floor or unit";
-        readonly postalCodePlaceholder: "08001";
+        readonly postalCodePlaceholder: "e.g., 08001";
         readonly searching: "Searching addresses";
     };
     readonly imageUpload: {
@@ -16041,12 +16041,12 @@ declare global {
 }
 
 
-declare namespace _DaytimePage {
+declare namespace _Page {
     var displayName: string;
 }
 
 
-declare namespace _Page {
+declare namespace _DaytimePage {
     var displayName: string;
 }
 
@@ -16127,10 +16127,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        videoEmbed: {
-            setVideoEmbed: (options: {
-                src: string;
-            }) => ReturnType;
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
 }
@@ -16138,8 +16136,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData) => ReturnType;
+        videoEmbed: {
+            setVideoEmbed: (options: {
+                src: string;
+            }) => ReturnType;
         };
     }
 }
