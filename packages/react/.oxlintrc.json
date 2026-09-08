@@ -296,7 +296,7 @@
     "sonarjs/parameterized-tests": "error",
     "sonarjs/void-use": "error",
     "sonarjs/no-globals-shadowing": "error",
-    "max-params": ["error", { "max": 4 }], // more than four positional arguments: pass an object
+    "max-params": ["error", { "max": 4 }], // five or more parameters: move all of them into one options object, do not mix positionals with an object
 
     // eslint-plugin-react, loaded as a JS plugin (`react-js`). It has no type
     // information, so only the syntax-based rules are useful. `f0-react` wraps

@@ -69,23 +69,25 @@ function buildAreaStyle(color: string): echarts.LineSeriesOption["areaStyle"] {
 /**
  * Build a single ECharts line series entry from an F0DataChartLineSeries.
  */
-function buildSeriesEntry(
-  series: F0DataChartLineSeries,
-  index: number,
-  {
-    globalLineType,
-    globalShowArea,
-    showDots,
-    showLabels,
-    labelColor,
-  }: {
-    globalLineType: F0DataChartLineType
-    globalShowArea: boolean
-    showDots: boolean
-    showLabels: boolean
-    labelColor: string
-  }
-): echarts.LineSeriesOption {
+type BuildSeriesEntryOptions = {
+  series: F0DataChartLineSeries
+  index: number
+  globalLineType: F0DataChartLineType
+  globalShowArea: boolean
+  showDots: boolean
+  showLabels: boolean
+  labelColor: string
+}
+
+function buildSeriesEntry({
+  series,
+  index,
+  globalLineType,
+  globalShowArea,
+  showDots,
+  showLabels,
+  labelColor,
+}: BuildSeriesEntryOptions): echarts.LineSeriesOption {
   const color = resolveColor(series, index)
   const lineType = series.lineType ?? globalLineType
   const showArea = series.showArea ?? globalShowArea
@@ -185,19 +187,17 @@ export function useLineChartOptions(
     const { showCategoryAxis, showValueAxis } = responsive
 
     const echartsSeries = series.map((s, i) =>
-      buildSeriesEntry(
-        // When forced off, also strip the per-series override so it doesn't
-        // accidentally re-enable area on a single series in `buildSeriesEntry`.
-        isMultiSeries ? { ...s, showArea: false } : s,
-        i,
-        {
-          globalLineType: lineType,
-          globalShowArea: effectiveShowArea,
-          showDots,
-          showLabels,
-          labelColor: theme.colors.foregroundSecondary,
-        }
-      )
+      buildSeriesEntry({
+        series: // When forced off, also strip the per-series override so it doesn't
+          // accidentally re-enable area on a single series in `buildSeriesEntry`.
+          isMultiSeries ? { ...s, showArea: false } : s,
+        index: i,
+        globalLineType: lineType,
+        globalShowArea: effectiveShowArea,
+        showDots,
+        showLabels,
+        labelColor: theme.colors.foregroundSecondary,
+      })
     )
 
     const legendData = series.map((s) => s.name)

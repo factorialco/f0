@@ -88,44 +88,40 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   const [footer, setFooter] = useState<ReactNode | undefined>(initialFooter)
   const [enabledInternal, setEnabledInternal] = useState(enabled)
 
-  const [chatWidth, setChatWidth] = usePersistedState<number>(
-    CHAT_WIDTH_STORAGE_KEY,
-    DEFAULT_CHAT_WIDTH,
-    {
-      validate: (v): v is number =>
-        typeof v === "number" &&
-        !isNaN(v) &&
-        v >= CHAT_WIDTH_MIN &&
-        v <= CHAT_WIDTH_MAX,
-      // The only continuously-changing persisted value: a drag would otherwise
-      // mean one synchronous localStorage write per animation frame.
-      debounceMs: CHAT_WIDTH_PERSIST_DEBOUNCE_MS,
-    }
-  )
+  const [chatWidth, setChatWidth] = usePersistedState<number>({
+    key: CHAT_WIDTH_STORAGE_KEY,
+    fallback: DEFAULT_CHAT_WIDTH,
+    validate: (v): v is number =>
+      typeof v === "number" &&
+      !isNaN(v) &&
+      v >= CHAT_WIDTH_MIN &&
+      v <= CHAT_WIDTH_MAX,
+    // The only continuously-changing persisted value: a drag would otherwise
+    // mean one synchronous localStorage write per animation frame.
+    debounceMs: CHAT_WIDTH_PERSIST_DEBOUNCE_MS,
+  })
 
   // Not persisted: this is the live state of a pointer drag, not a preference.
   const [isResizing, setIsResizing] = useState(false)
 
-  const [open, setOpen] = usePersistedState<boolean>(
-    CHAT_OPEN_STORAGE_KEY,
-    defaultVisualizationMode === "fullscreen",
-    { validate: (v): v is boolean => typeof v === "boolean" }
-  )
+  const [open, setOpen] = usePersistedState<boolean>({
+    key: CHAT_OPEN_STORAGE_KEY,
+    fallback: defaultVisualizationMode === "fullscreen",
+    validate: (v): v is boolean => typeof v === "boolean",
+  })
 
   const fallbackVisualizationMode: VisualizationMode =
     defaultVisualizationMode === "canvas"
       ? "sidepanel"
       : defaultVisualizationMode
   const [visualizationMode, setVisualizationModeRaw] =
-    usePersistedState<VisualizationMode>(
-      CHAT_VISUALIZATION_MODE_STORAGE_KEY,
-      fallbackVisualizationMode,
-      {
-        validate: (v): v is VisualizationMode =>
-          v === "sidepanel" || v === "fullscreen",
-        shouldWrite: isPersistableVisualizationMode,
-      }
-    )
+    usePersistedState<VisualizationMode>({
+      key: CHAT_VISUALIZATION_MODE_STORAGE_KEY,
+      fallback: fallbackVisualizationMode,
+      validate: (v): v is VisualizationMode =>
+        v === "sidepanel" || v === "fullscreen",
+      shouldWrite: isPersistableVisualizationMode,
+    })
 
   const [mode, setMode] = useState<AiChatMode>("chat")
   const [shouldPlayEntranceAnimation, setShouldPlayEntranceAnimation] =
@@ -297,7 +293,9 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   // persist only its id so a reload can reopen WHAT was showing, not just that
   // the panel was open. The host re-mounts the content when it's loaded.
   const [persistedPanelContentId, setPersistedPanelContentId] =
-    usePersistedState<string | null>(CHAT_PANEL_CONTENT_ID_STORAGE_KEY, null, {
+    usePersistedState<string | null>({
+      key: CHAT_PANEL_CONTENT_ID_STORAGE_KEY,
+      fallback: null,
       validate: (v): v is string | null => v === null || typeof v === "string",
     })
 

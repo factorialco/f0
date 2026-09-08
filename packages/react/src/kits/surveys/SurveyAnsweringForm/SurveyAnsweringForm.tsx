@@ -97,7 +97,10 @@ function SurveyAnsweringFormDialog({
     schema,
     defaultValues: formDefaultValues,
     sections,
-  } = useSurveyFormSchema(elements, mode, t, {
+  } = useSurveyFormSchema({
+    elements,
+    mode,
+    t,
     defaultValues,
     currentQuestionId,
     accumulatedValues: isStepped ? accumulatedValuesRef.current : undefined,
@@ -414,7 +417,10 @@ function SurveyAnsweringFormInline({
     schema,
     defaultValues: formDefaultValues,
     sections,
-  } = useSurveyFormSchema(elements, "all-questions", t, {
+  } = useSurveyFormSchema({
+    elements,
+    mode: "all-questions",
+    t,
     defaultValues,
     previewMode: true,
     disableFields: true,

@@ -74,15 +74,21 @@ export function buildYearOptions(
  * "short" format ("Sep", "sept.") so the trigger fits its narrower header at
  * a fixed width across locales.
  */
-export function buildMonthOptions(
-  year: number,
-  locale: string,
-  {
-    minDate,
-    maxDate,
-    format = "long",
-  }: { minDate?: Date; maxDate?: Date; format?: "long" | "short" } = {}
-): SelectOption[] {
+type BuildMonthOptionsOptions = {
+  year: number
+  locale: string
+  minDate?: Date
+  maxDate?: Date
+  format?: "long" | "short"
+}
+
+export function buildMonthOptions({
+  year,
+  locale,
+  minDate,
+  maxDate,
+  format = "long",
+}: BuildMonthOptionsOptions): SelectOption[] {
   const formatter = new Intl.DateTimeFormat(locale, { month: format })
   return Array.from({ length: 12 }, (_, month) => {
     const monthDate = new Date(year, month, 1)
@@ -147,7 +153,9 @@ export function CalendarHeaderDropdowns({
 
   const monthOptions = useMemo(
     () =>
-      buildMonthOptions(viewDate.getFullYear(), locale, {
+      buildMonthOptions({
+        year: viewDate.getFullYear(),
+        locale,
         minDate,
         maxDate,
         format: compact ? "short" : "long",

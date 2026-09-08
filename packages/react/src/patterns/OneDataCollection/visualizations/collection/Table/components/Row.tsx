@@ -242,7 +242,10 @@ const RowComponentInner = <
     item: R,
     column: TableColumnDefinition<R, Sortings, Summaries>
   ) => {
-    return renderProperty(item, column, "table", {
+    return renderProperty({
+      item,
+      property: column,
+      visualization: "table",
       i18n,
       tableAlign: column.align ?? "left",
     })

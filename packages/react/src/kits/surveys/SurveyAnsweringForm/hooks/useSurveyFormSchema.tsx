@@ -204,6 +204,8 @@ export function extractFlatQuestions(
 }
 
 type BuildFieldOptions = {
+  q: QuestionElement
+  t: (key: TranslationKey) => string
   sectionId?: string
   previewMode?: boolean
   /** Defaults to `previewMode`. */
@@ -212,17 +214,15 @@ type BuildFieldOptions = {
   datasets?: SurveyDatasets
 }
 
-function buildFieldForQuestion(
-  q: QuestionElement,
-  t: (key: TranslationKey) => string,
-  {
-    sectionId,
-    previewMode = false,
-    disableFields = previewMode,
-    formUseUpload,
-    datasets,
-  }: BuildFieldOptions = {}
-): ZodTypeAny {
+function buildFieldForQuestion({
+  q,
+  t,
+  sectionId,
+  previewMode = false,
+  disableFields = previewMode,
+  formUseUpload,
+  datasets,
+}: BuildFieldOptions): ZodTypeAny {
   const label = q.title ?? ""
   const baseConfig = {
     label,
@@ -648,6 +648,9 @@ function buildFieldForQuestion(
 }
 
 export type UseSurveyFormSchemaOptions = {
+  elements: SurveyFormBuilderElement[]
+  mode: SurveyAnsweringFormMode
+  t: (key: TranslationKey) => string
   defaultValues?: Partial<SurveyAnswers>
   currentQuestionId?: string
   accumulatedValues?: Record<string, unknown>
@@ -658,20 +661,18 @@ export type UseSurveyFormSchemaOptions = {
   datasets?: SurveyDatasets
 }
 
-export function useSurveyFormSchema(
-  elements: SurveyFormBuilderElement[],
-  mode: SurveyAnsweringFormMode,
-  t: (key: TranslationKey) => string,
-  {
-    defaultValues,
-    currentQuestionId,
-    accumulatedValues,
-    previewMode = false,
-    disableFields = previewMode,
-    useUpload,
-    datasets,
-  }: UseSurveyFormSchemaOptions = {}
-) {
+export function useSurveyFormSchema({
+  elements,
+  mode,
+  t,
+  defaultValues,
+  currentQuestionId,
+  accumulatedValues,
+  previewMode = false,
+  disableFields = previewMode,
+  useUpload,
+  datasets,
+}: UseSurveyFormSchemaOptions) {
   return useMemo(() => {
     const shape: Record<string, ZodTypeAny> = {}
     const defaults: Record<string, unknown> = {}
@@ -698,7 +699,9 @@ export function useSurveyFormSchema(
             continue
           }
 
-          shape[q.id] = buildFieldForQuestion(q, t, {
+          shape[q.id] = buildFieldForQuestion({
+            q,
+            t,
             sectionId: mode === "all-questions" ? sectionId : undefined,
             previewMode,
             disableFields,
@@ -715,7 +718,9 @@ export function useSurveyFormSchema(
           continue
         }
 
-        shape[q.id] = buildFieldForQuestion(q, t, {
+        shape[q.id] = buildFieldForQuestion({
+          q,
+          t,
           previewMode,
           disableFields,
           formUseUpload: useUpload,

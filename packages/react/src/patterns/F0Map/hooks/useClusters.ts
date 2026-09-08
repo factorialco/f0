@@ -29,15 +29,21 @@ export interface F0MapClusterResult {
  * points within the looser `clusterRadius`. This keeps individual markers
  * distinct while still gathering the rest of a dense pocket into one pile.
  */
-export const useClusters = (
-  map: maplibregl.Map | null,
-  points: F0MapPoint[],
-  enabled: boolean,
-  {
-    radius = 12,
-    clusterRadius = 164,
-  }: { radius?: number; clusterRadius?: number } = {}
-): F0MapClusterResult => {
+type UseClustersOptions = {
+  map: maplibregl.Map | null
+  points: F0MapPoint[]
+  enabled: boolean
+  radius?: number
+  clusterRadius?: number
+}
+
+export const useClusters = ({
+  map,
+  points,
+  enabled,
+  radius = 12,
+  clusterRadius = 164,
+}: UseClustersOptions): F0MapClusterResult => {
   const [result, setResult] = useState<F0MapClusterResult>({
     clusters: [],
     singles: points,

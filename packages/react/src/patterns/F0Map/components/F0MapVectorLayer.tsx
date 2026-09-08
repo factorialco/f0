@@ -57,19 +57,21 @@ interface LineCollection {
   features: LineFeature[]
 }
 
+type LineFeatureOptions = {
+  id: string
+  kind: LineKind
+  coordinates: [number, number][]
+  style: F0MapLineStyle
+  isDark: boolean
+}
+
 const feature = ({
   id,
   kind,
   coordinates,
   style,
   isDark,
-}: {
-  id: string
-  kind: LineKind
-  coordinates: [number, number][]
-  style: F0MapLineStyle
-  isDark: boolean
-}): LineFeature => ({
+}: LineFeatureOptions): LineFeature => ({
   type: "Feature",
   // Top-level id (via `promoteId`) is what `setFeatureState` keys on for hover.
   id,

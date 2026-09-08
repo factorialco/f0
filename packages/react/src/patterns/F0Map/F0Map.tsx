@@ -163,16 +163,23 @@ const framedCoords = (
   ...arcs.flatMap((a) => [a.from, a.to]),
 ]
 
-const fitToPoints = (
-  map: maplibregl.Map,
-  points: F0MapPoint[],
-  animate: boolean,
-  {
-    routes = [],
-    arcs = [],
-    padding = 64,
-  }: { routes?: F0MapRoute[]; arcs?: F0MapArc[]; padding?: number } = {}
-) => {
+type FitToPointsOptions = {
+  map: maplibregl.Map
+  points: F0MapPoint[]
+  animate: boolean
+  routes?: F0MapRoute[]
+  arcs?: F0MapArc[]
+  padding?: number
+}
+
+const fitToPoints = ({
+  map,
+  points,
+  animate,
+  routes = [],
+  arcs = [],
+  padding = 64,
+}: FitToPointsOptions) => {
   const coords = framedCoords(points, routes, arcs)
   if (coords.length === 0) {
     return
@@ -320,7 +327,10 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
   const handleZoomOut = useCallback(() => mapRef.current?.zoomOut(), [])
   const handleFit = useCallback(() => {
     if (mapRef.current) {
-      fitToPoints(mapRef.current, markersRef.current, !reduceMotion, {
+      fitToPoints({
+        map: mapRef.current,
+        points: markersRef.current,
+        animate: !reduceMotion,
         routes: routesRef.current,
         arcs: arcsRef.current,
       })
@@ -366,7 +376,10 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
       },
       fitToMarkers: () => {
         if (mapRef.current) {
-          fitToPoints(mapRef.current, markersRef.current, !reduceMotion, {
+          fitToPoints({
+            map: mapRef.current,
+            points: markersRef.current,
+            animate: !reduceMotion,
             routes: routesRef.current,
             arcs: arcsRef.current,
           })
@@ -438,7 +451,10 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
       setTileError(false)
       map.resize()
       if (shouldFit) {
-        fitToPoints(map, markersRef.current, false, {
+        fitToPoints({
+          map,
+          points: markersRef.current,
+          animate: false,
           routes: routesRef.current,
           arcs: arcsRef.current,
         })

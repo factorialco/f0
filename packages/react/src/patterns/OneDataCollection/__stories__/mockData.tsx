@@ -1039,19 +1039,21 @@ export const sortings = {
 } as const
 
 // Helper function to filter users based on filters
+type FilterUsersOptions = {
+  users: MockUser[]
+  filterValues: FiltersState<typeof filters>
+  sortingState: SortingsStateMultiple
+  navigationFilters?: NavigationFiltersState<NavigationFiltersDefinition>
+  search?: string
+}
+
 export const filterUsers = ({
   users,
   filterValues,
   sortingState,
   navigationFilters,
   search,
-}: {
-  users: MockUser[]
-  filterValues: FiltersState<typeof filters>
-  sortingState: SortingsStateMultiple
-  navigationFilters?: NavigationFiltersState<NavigationFiltersDefinition>
-  search?: string
-}) => {
+}: FilterUsersOptions) => {
   let filteredUsers = [...users]
 
   const searchValue = filterValues.search

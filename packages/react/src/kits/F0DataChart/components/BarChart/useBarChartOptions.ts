@@ -531,6 +531,8 @@ function buildBorderRadiusResolver(
  *  2. A stacked "target" bar showing `target - value` with a linear gradient fill
  */
 type BuildSeriesEntriesOptions = {
+  series: F0DataChartBarSeries
+  index: number
   isVertical: boolean
   showLabels: boolean
   stacked: boolean
@@ -543,22 +545,20 @@ type BuildSeriesEntriesOptions = {
   valueFormatter?: (value: number) => string
 }
 
-function buildSeriesEntries(
-  series: F0DataChartBarSeries,
-  index: number,
-  {
-    isVertical,
-    showLabels,
-    stacked,
-    highlightOverachievement,
-    labelColor,
-    stackGapColor,
-    labelFontSize,
-    resolveBorderRadius,
-    labelLayout,
-    valueFormatter,
-  }: BuildSeriesEntriesOptions
-): echarts.BarSeriesOption[] {
+function buildSeriesEntries({
+  series,
+  index,
+  isVertical,
+  showLabels,
+  stacked,
+  highlightOverachievement,
+  labelColor,
+  stackGapColor,
+  labelFontSize,
+  resolveBorderRadius,
+  labelLayout,
+  valueFormatter,
+}: BuildSeriesEntriesOptions): echarts.BarSeriesOption[] {
   const color = resolveColor(series, index)
   const hasTargetData = hasTargets(series)
   // When stacked, all series share "stacked"; when using targets, each series
@@ -877,20 +877,21 @@ function stackTotals(
  * still reads as the full total. The tooltip's total behaves the same way, so
  * the two stay consistent with each other.
  */
-function buildStackTotalSeries(
-  totals: number[],
-  {
-    labelColor,
-    labelFontSize,
-    containerWidth,
-    valueFormatter,
-  }: {
-    labelColor: string
-    labelFontSize: number
-    containerWidth: number
-    valueFormatter?: (value: number) => string
-  }
-): echarts.BarSeriesOption {
+type BuildStackTotalSeriesOptions = {
+  totals: number[]
+  labelColor: string
+  labelFontSize: number
+  containerWidth: number
+  valueFormatter?: (value: number) => string
+}
+
+function buildStackTotalSeries({
+  totals,
+  labelColor,
+  labelFontSize,
+  containerWidth,
+  valueFormatter,
+}: BuildStackTotalSeriesOptions): echarts.BarSeriesOption {
   return {
     name: STACK_TOTAL_SERIES_NAME,
     type: "bar",
@@ -1138,7 +1139,9 @@ export function useBarChartOptions(
 
     // Build all ECharts series (including target ghost bars)
     const echartsSeries = series.flatMap((s, i) =>
-      buildSeriesEntries(s, i, {
+      buildSeriesEntries({
+        series: s,
+        index: i,
         isVertical,
         showLabels,
         stacked,
@@ -1163,7 +1166,8 @@ export function useBarChartOptions(
         : undefined
     if (totals) {
       echartsSeries.push(
-        buildStackTotalSeries(totals, {
+        buildStackTotalSeries({
+          totals,
           labelColor: theme.colors.foregroundSecondary,
           labelFontSize: resolvedLabelFontSize,
           containerWidth,

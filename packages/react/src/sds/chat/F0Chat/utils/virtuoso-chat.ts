@@ -101,15 +101,21 @@ export function classifyWindowChange(
  * the old head never sat at row 0 and its raw new index over-shifts by at least
  * one row (see `chatWindowHeadRowIndex`).
  */
-export function nextFirstItemIndex(
-  prev: number,
-  change: WindowChange,
-  {
-    prevRowCount,
-    rowCount,
-    headShift = 0,
-  }: { prevRowCount: number; rowCount: number; headShift?: number }
-): number {
+export type NextFirstItemIndexOptions = {
+  prev: number
+  change: WindowChange
+  prevRowCount: number
+  rowCount: number
+  headShift?: number
+}
+
+export function nextFirstItemIndex({
+  prev,
+  change,
+  prevRowCount,
+  rowCount,
+  headShift = 0,
+}: NextFirstItemIndexOptions): number {
   if (change === "initial" || change === "replace") {
     return PREPEND_OFFSET
   }
@@ -215,7 +221,9 @@ export function advanceChatWindow(
   const headShift =
     survivingHeadIndex != null ? survivingHeadIndex - prev.headRowIndex : 0
 
-  const firstItemIndex = nextFirstItemIndex(prev.firstItemIndex, change, {
+  const firstItemIndex = nextFirstItemIndex({
+    prev: prev.firstItemIndex,
+    change,
     prevRowCount: prev.rowCount,
     rowCount,
     headShift,

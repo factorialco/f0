@@ -158,15 +158,7 @@ function useWizardActionBar() {
 // Step derivation
 // =============================================================================
 
-function deriveWizardSteps({
-  sectionIds,
-  sections,
-  customSteps,
-  isStepAllDisabled,
-  onNextForStep,
-  hasErrorsForStep,
-  isStepDataFilled,
-}: {
+type DeriveWizardStepsOptions = {
   sectionIds: string[]
   sections:
     | Record<string, F0SectionConfig | F0PerSectionSectionConfig>
@@ -176,7 +168,17 @@ function deriveWizardSteps({
   onNextForStep: (stepIndex: number) => () => Promise<void>
   hasErrorsForStep?: (stepIndex: number) => boolean
   isStepDataFilled?: (stepIndex: number) => boolean
-}): F0WizardStep[] {
+}
+
+function deriveWizardSteps({
+  sectionIds,
+  sections,
+  customSteps,
+  isStepAllDisabled,
+  onNextForStep,
+  hasErrorsForStep,
+  isStepDataFilled,
+}: DeriveWizardStepsOptions): F0WizardStep[] {
   const stepsConfig: F0WizardFormStep[] =
     customSteps ??
     sectionIds.map((id) => ({

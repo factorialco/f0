@@ -100,7 +100,7 @@ describe("getYearBounds", () => {
 
 describe("buildMonthOptions", () => {
   it("returns 12 localized months, none disabled without bounds", () => {
-    const options = buildMonthOptions(2026, "en-US")
+    const options = buildMonthOptions({ year: 2026, locale: "en-US" })
 
     expect(options).toHaveLength(12)
     expect(options[0]).toMatchObject({ value: "0", label: "January" })
@@ -109,21 +109,31 @@ describe("buildMonthOptions", () => {
   })
 
   it("localizes month names", () => {
-    const options = buildMonthOptions(2026, "es-ES")
+    const options = buildMonthOptions({ year: 2026, locale: "es-ES" })
     expect(options[0].label.toLowerCase()).toBe("enero")
   })
 
   it("returns localized short month names for compact headers", () => {
-    const english = buildMonthOptions(2026, "en-US", { format: "short" })
+    const english = buildMonthOptions({
+      year: 2026,
+      locale: "en-US",
+      format: "short",
+    })
     expect(english[8].label).toBe("Sep")
 
-    const spanish = buildMonthOptions(2026, "es-ES", { format: "short" })
+    const spanish = buildMonthOptions({
+      year: 2026,
+      locale: "es-ES",
+      format: "short",
+    })
     expect(spanish[0].label.toLowerCase()).toContain("ene")
   })
 
   it("disables months that fall entirely outside min/max", () => {
     // Range is only June–August 2026.
-    const options = buildMonthOptions(2026, "en-US", {
+    const options = buildMonthOptions({
+      year: 2026,
+      locale: "en-US",
       minDate: new Date(2026, 5, 1),
       maxDate: new Date(2026, 7, 31),
     })
@@ -139,7 +149,9 @@ describe("buildMonthOptions", () => {
 
   it("keeps a partially-covered boundary month enabled", () => {
     // minDate mid-March: March is partially covered, so it stays enabled.
-    const options = buildMonthOptions(2026, "en-US", {
+    const options = buildMonthOptions({
+      year: 2026,
+      locale: "en-US",
       minDate: new Date(2026, 2, 15),
     })
     expect(options[2].disabled).toBe(false)

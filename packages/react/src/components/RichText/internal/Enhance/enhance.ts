@@ -61,15 +61,21 @@ interface ApplyEnhancedTextResult {
   highlightTo: number
 }
 
-function applyEnhancedText(
-  editor: Editor,
-  enhancedText: string | JSONContent,
-  {
-    from,
-    to,
-    isFullDocumentSelected,
-  }: { from: number; to: number; isFullDocumentSelected: boolean }
-): ApplyEnhancedTextResult {
+type ApplyEnhancedTextOptions = {
+  editor: Editor
+  enhancedText: string | JSONContent
+  from: number
+  to: number
+  isFullDocumentSelected: boolean
+}
+
+function applyEnhancedText({
+  editor,
+  enhancedText,
+  from,
+  to,
+  isFullDocumentSelected,
+}: ApplyEnhancedTextOptions): ApplyEnhancedTextResult {
   if (isFullDocumentSelected) {
     editor.chain().focus().setContent(enhancedText).run()
     // For full document, highlight everything (1 to avoid the start, content.size - 1 to avoid the end)
@@ -162,7 +168,9 @@ async function handleEnhanceWithAIFunction({
     })
 
     if (success) {
-      const { highlightFrom, highlightTo } = applyEnhancedText(editor, text, {
+      const { highlightFrom, highlightTo } = applyEnhancedText({
+        editor,
+        enhancedText: text,
         from,
         to,
         isFullDocumentSelected:
