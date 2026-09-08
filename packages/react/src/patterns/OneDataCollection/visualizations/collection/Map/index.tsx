@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-
 import {
   GroupingDefinition,
   RecordType,
@@ -15,7 +14,6 @@ import {
   RECOMMENDED_MAX_MARKERS,
 } from "@/patterns/F0Map"
 import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
-
 import { useDataCollectionData } from "../../../hooks/useDataCollectionData"
 import { ItemActionsDefinition } from "../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
@@ -46,7 +44,9 @@ const personAvatars = (
 ): MapNotOnMapAvatar[] | null => {
   const people: MapNotOnMapAvatar[] = []
   for (const m of markers) {
-    if (m.variant !== "employee") return null
+    if (m.variant !== "employee") {
+      return null
+    }
     people.push({ firstName: m.firstName, lastName: m.lastName, src: m.src })
   }
   return people
@@ -118,7 +118,9 @@ export const MapCollection = <
     RECOMMENDED_MAX_MARKERS
   )
   const mapDataAdapter = useMemo(() => {
-    if (source.dataAdapter.paginationType !== "pages") return source.dataAdapter
+    if (source.dataAdapter.paginationType !== "pages") {
+      return source.dataAdapter
+    }
     return { ...source.dataAdapter, perPage: markerPageSize }
   }, [source.dataAdapter, markerPageSize])
 
@@ -199,9 +201,13 @@ export const MapCollection = <
 
   const selectRecord = useCallback(
     (id: string | null) => {
-      if (selectedRecordId === undefined) setInternalSelectedId(id)
+      if (selectedRecordId === undefined) {
+        setInternalSelectedId(id)
+      }
       zoomedIntoSelectionRef.current = false
-      if (!onSelect) return
+      if (!onSelect) {
+        return
+      }
       onSelect(
         id ? (records.find((record) => recordId(record) === id) ?? null) : null
       )
@@ -237,7 +243,9 @@ export const MapCollection = <
   const openSidebar = useCallback(() => {
     setNotOnMapOpen(true)
     setSidebarExpanded((expanded) => {
-      if (!expanded) onSidebarToggle?.(true)
+      if (!expanded) {
+        onSidebarToggle?.(true)
+      }
       return true
     })
   }, [onSidebarToggle])
@@ -254,11 +262,15 @@ export const MapCollection = <
         // has nowhere to fly to: it is selected where the camera stands, and
         // dropping it later has no zoom to undo.
         const placed = id !== null && placedIds.has(id)
-        if (placed) mapRef.current?.focusMarker(id)
+        if (placed) {
+          mapRef.current?.focusMarker(id)
+        }
         selectRecord(id)
         // Set after `selectRecord`, which resets it: this selection was flown
         // to, so dropping it has a zoom to undo.
-        if (placed) zoomedIntoSelectionRef.current = true
+        if (placed) {
+          zoomedIntoSelectionRef.current = true
+        }
       },
       selectedRecordId: selectedId,
     }),
@@ -274,7 +286,9 @@ export const MapCollection = <
   // Dropping the content on deselect would unmount the panel mid-transition and
   // it would simply vanish instead of leaving.
   const lastDetailRecord = useRef<Record | null>(null)
-  if (selectedRecord) lastDetailRecord.current = selectedRecord
+  if (selectedRecord) {
+    lastDetailRecord.current = selectedRecord
+  }
   const detailRecord = selectedRecord ?? lastDetailRecord.current
 
   // Filters and the search box both narrow the records the collection hands
@@ -304,16 +318,22 @@ export const MapCollection = <
       framedQueryRef.current = querySignature
       return
     }
-    if (framedQueryRef.current === querySignature) return
+    if (framedQueryRef.current === querySignature) {
+      return
+    }
 
     framedQueryRef.current = querySignature
     staleMarkerKeyRef.current = markerKey
   }, [querySignature, markerKey])
   useEffect(() => {
-    if (staleMarkerKeyRef.current === null || isLoading) return
+    if (staleMarkerKeyRef.current === null || isLoading) {
+      return
+    }
     // Same markers as before the filter changed: they have not arrived yet, or
     // the filter did not change what is shown and nothing needs reframing.
-    if (staleMarkerKeyRef.current === markerKey) return
+    if (staleMarkerKeyRef.current === markerKey) {
+      return
+    }
 
     staleMarkerKeyRef.current = null
     mapRef.current?.fitToMarkers()
@@ -327,9 +347,13 @@ export const MapCollection = <
   useEffect(() => {
     const previous = previousSelectedRef.current
     previousSelectedRef.current = selectedId
-    if (!previous || selectedId) return
+    if (!previous || selectedId) {
+      return
+    }
 
-    if (zoomedIntoSelectionRef.current) mapRef.current?.fitToMarkers()
+    if (zoomedIntoSelectionRef.current) {
+      mapRef.current?.fitToMarkers()
+    }
     zoomedIntoSelectionRef.current = false
   }, [selectedId])
 
@@ -338,7 +362,9 @@ export const MapCollection = <
   useEffect(() => {
     const previous = previousSearchRef.current
     previousSearchRef.current = search
-    if (!previous || search) return
+    if (!previous || search) {
+      return
+    }
 
     // Skipped when clearing the search is already going to widen the marker
     // set: the reframe above is the same movement, and firing both would ease
@@ -356,17 +382,25 @@ export const MapCollection = <
   // twice in a row, since the id alone would not change.
   const revealedRef = useRef<string | null>(null)
   useEffect(() => {
-    if (!revealRecordId) return
+    if (!revealRecordId) {
+      return
+    }
     const signature = `${revealRecordId}:${searchSelectionNonce ?? 0}`
-    if (revealedRef.current === signature) return
+    if (revealedRef.current === signature) {
+      return
+    }
     const placed = placedIds.has(revealRecordId)
     // Not here yet (or not here at all): wait for the records to arrive.
-    if (!placed && !records.some((r) => recordId(r) === revealRecordId)) return
+    if (!placed && !records.some((r) => recordId(r) === revealRecordId)) {
+      return
+    }
 
     revealedRef.current = signature
     // A record the map cannot place is still revealed - selected, its detail
     // open - there is just no marker to fly to.
-    if (placed) mapRef.current?.focusMarker(revealRecordId)
+    if (placed) {
+      mapRef.current?.focusMarker(revealRecordId)
+    }
     selectRecord(revealRecordId)
     // Set after `selectRecord`, which resets it: this selection was flown to,
     // so dropping it has a zoom to undo.
@@ -395,7 +429,7 @@ export const MapCollection = <
   // panel scrolls them as one list, so this only has to stack them.
   const panelContent = sidebar ? (
     <div className="flex flex-col gap-1">
-      {unplaced.length > 0 && (
+      {unplaced.length > 0 ? (
         <MapPanelSection
           title={i18n.collections.map.notOnMap}
           count={unplaced.length}
@@ -405,7 +439,7 @@ export const MapCollection = <
         >
           {sidebar(unplacedRecords, sidebarApi)}
         </MapPanelSection>
-      )}
+      ) : null}
       <MapPanelSection
         title={i18n.collections.map.onMap}
         count={placedRecords.length}
@@ -486,6 +520,7 @@ export const MapCollection = <
             detailRecord ? (
               detail(detailRecord, sidebarApi)
             ) : (
+              // oxlint-disable-next-line react/jsx-no-useless-fragment -- must stay a node, not null: see above
               <></>
             )
           ) : null

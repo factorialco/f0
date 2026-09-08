@@ -1,9 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { expect, fn, within } from "storybook/test"
-
 import { Building, Check, Placeholder } from "../../../icons/app"
-import { OneListItem } from "./index"
+import { OneListItem } from "."
 
 const meta = {
   title: "List/OneListItem",

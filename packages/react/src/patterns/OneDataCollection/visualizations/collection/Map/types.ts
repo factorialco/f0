@@ -1,5 +1,4 @@
 import type { ReactNode } from "react"
-
 import { RecordType, SortingsDefinition } from "@/hooks/datasource"
 import type {
   F0MapMarkerVariantProps,

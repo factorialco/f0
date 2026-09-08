@@ -1,11 +1,9 @@
 import { type ReactNode, useRef } from "react"
-
 import { useReducedMotion } from "@/lib/a11y"
 import { DataTestIdWrapper, type WithDataTestIdProps } from "@/lib/data-testid"
 import { F0Box } from "@/lib/F0Box"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import {
   MAP_PANEL,
   MAP_PANEL_ENTRANCE,
@@ -167,8 +165,11 @@ export const F0MapSidebar = ({
           role="complementary"
           aria-label={ariaLabel ?? i18n.map.panel}
           ref={(node) => {
-            if (open) node?.removeAttribute("inert")
-            else node?.setAttribute("inert", "")
+            if (open) {
+              node?.removeAttribute("inert")
+            } else {
+              node?.setAttribute("inert", "")
+            }
           }}
           className={cn(
             // MapLibre's stylesheet puts `font-size: 12px` on
@@ -206,11 +207,11 @@ export const F0MapSidebar = ({
                 !disableContentPadding && "p-1.5"
               )}
             >
-              {headerAction && (
+              {headerAction ? (
                 <div className="flex shrink-0 justify-start">
                   {headerAction}
                 </div>
-              )}
+              ) : null}
               {/* Takes the height the header leaves, and scrolls: the panel
                   owns that so its content can never reach the header row above
                   it, and so a consumer needs no scroll container of its own.

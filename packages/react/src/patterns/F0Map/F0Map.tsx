@@ -15,13 +15,6 @@ import { useReducedMotion } from "@/lib/a11y"
 import { DataTestIdWrapper, type WithDataTestIdProps } from "@/lib/data-testid"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-import type {
-  F0MapArc,
-  F0MapPoint,
-  F0MapRoute,
-  F0MapViewport,
-  F0MapViewportInset,
-} from "./types"
 import {
   F0MapControls,
   type F0MapControlLabels,
@@ -47,6 +40,13 @@ import { F0MapSkeleton } from "./F0MapSkeleton"
 import { useCurrentLocation } from "./hooks/useCurrentLocation"
 import { useIsDarkContext } from "./hooks/useIsDarkContext"
 import { f0MapStyles, type F0MapStylePair } from "./styles"
+import type {
+  F0MapArc,
+  F0MapPoint,
+  F0MapRoute,
+  F0MapViewport,
+  F0MapViewportInset,
+} from "./types"
 
 /** City-level default view (Barcelona) used when no `initialViewport` is given. */
 const DEFAULT_VIEWPORT: Required<F0MapViewport> = {
@@ -604,10 +604,14 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
   // `preventDefault` then marks it spent so one press doesn't also close a
   // dialog around the map.
   useEffect(() => {
-    if (selectedId === null) return
+    if (selectedId === null) {
+      return
+    }
 
     const onKeyDown = (event: globalThis.KeyboardEvent) => {
-      if (event.key !== "Escape" || event.defaultPrevented) return
+      if (event.key !== "Escape" || event.defaultPrevented) {
+        return
+      }
 
       event.preventDefault()
       selectMarker(null)
@@ -737,7 +741,9 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
     // opted out, because a panel the selection opened has to be dismissed
     // deliberately rather than by a stray click on the map.
     const handleBackgroundClick = () => {
-      if (!clearSelectionOnBackgroundClickRef.current) return
+      if (!clearSelectionOnBackgroundClickRef.current) {
+        return
+      }
       selectRef.current(null)
     }
     map.on("click", handleBackgroundClick)
@@ -813,14 +819,20 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
   useEffect(() => {
     const padding = cameraPadding(cameraInset, 0)
     const signature = JSON.stringify(padding)
-    if (signature === appliedInsetRef.current) return
+    if (signature === appliedInsetRef.current) {
+      return
+    }
 
     const isFirstRun = appliedInsetRef.current === null
     appliedInsetRef.current = signature
-    if (isFirstRun) return
+    if (isFirstRun) {
+      return
+    }
 
     const map = mapRef.current
-    if (!map) return
+    if (!map) {
+      return
+    }
 
     // With a marker selected, re-center on it: the point of the inset is to keep
     // *that* marker clear of the panel, and the current view may have been
@@ -967,7 +979,7 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
           ) : null}
           {/* Rendered before the toggle and the list panel: with equal
               z-index, paint order follows DOM order, so both sit above it. */}
-          {!webglFailed && mapInstance && detail && (
+          {!webglFailed && mapInstance && detail ? (
             <F0MapSidebar
               open={detailPanelOpen}
               offsetX={detailOffset}
@@ -982,7 +994,7 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
             >
               {detail}
             </F0MapSidebar>
-          )}
+          ) : null}
 
           {/* The map's own toggle. Never moves: it sits at the map's corner
               whatever is open, riding over the detail panel and disappearing
@@ -994,7 +1006,7 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
               the pointer would land on the canvas and take the map's grab
               cursor, and a cursor only re-resolves on the next mouse move, so
               it would sit wrong until you twitched. */}
-          {!webglFailed && mapInstance && onSidebarToggle && (
+          {!webglFailed && mapInstance && onSidebarToggle ? (
             <div
               className={cn(
                 "absolute left-2 top-2 z-10",
@@ -1018,8 +1030,11 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
                 // panel does: React's types do not know it yet.
                 aria-hidden={listPanelOpen || undefined}
                 ref={(node) => {
-                  if (listPanelOpen) node?.setAttribute("inert", "")
-                  else node?.removeAttribute("inert")
+                  if (listPanelOpen) {
+                    node?.setAttribute("inert", "")
+                  } else {
+                    node?.removeAttribute("inert")
+                  }
                 }}
               >
                 <F0MapSidebarToggle
@@ -1030,14 +1045,14 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
                   // announced.
                   inactive={listPanelOpen}
                 />
-                {sidebarToggleAddon && (
+                {sidebarToggleAddon ? (
                   <MapControlCard>{sidebarToggleAddon}</MapControlCard>
-                )}
+                ) : null}
               </div>
             </div>
-          )}
+          ) : null}
 
-          {!webglFailed && mapInstance && onSidebarToggle && (
+          {!webglFailed && mapInstance && onSidebarToggle ? (
             <F0MapSidebar
               open={listPanelOpen}
               offsetX={listOffset}
@@ -1057,7 +1072,7 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
             >
               {sidebar}
             </F0MapSidebar>
-          )}
+          ) : null}
 
           {!webglFailed && mapInstance && showControls && interactive ? (
             <div

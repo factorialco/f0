@@ -1,5 +1,4 @@
 import { lazy, Suspense } from "react"
-
 import { IconType } from "@/components/F0Icon"
 import {
   GroupingDefinition,

@@ -3,9 +3,8 @@ import { F0Button } from "@/components/F0Button"
 import { Add, FitView, Minus, Target } from "@/icons/app"
 import { DataTestIdWrapper } from "@/lib/data-testid"
 import { useI18n } from "@/lib/providers/i18n"
-import type { F0MapControlsProps } from "./types"
-
 import { MapControlCard } from "../internal/MapControlCard"
+import type { F0MapControlsProps } from "./types"
 
 /**
  * The map's navigation toolbar - locate, fit, zoom in/out - as a vertical stack

@@ -437,8 +437,12 @@ export const mapCityFor = (index: number) =>
 export const mapPlacementFor = (
   index: number
 ): "placed" | "incomplete" | "none" => {
-  if (index === 7) return "none"
-  if (index % 9 === 4) return "incomplete"
+  if (index === 7) {
+    return "none"
+  }
+  if (index % 9 === 4) {
+    return "incomplete"
+  }
   return "placed"
 }
 
@@ -1120,8 +1124,12 @@ export const getMockVisualizations = (options?: {
         // production data (dense in western Europe, sparser to the east).
         coordinates: (u) => {
           const placement = mapPlacementFor(u.index)
-          if (placement === "none") return null
-          if (placement === "incomplete") return { kind: "incomplete" }
+          if (placement === "none") {
+            return null
+          }
+          if (placement === "incomplete") {
+            return { kind: "incomplete" }
+          }
           return mapCityFor(u.index).at
         },
         label: (u) => u.name,

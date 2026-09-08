@@ -1,10 +1,9 @@
 import { type ComponentProps, createRef } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { fireEvent, screen, zeroRender as render } from "@/testing/test-utils"
-import type { F0MapArc, F0MapPoint, F0MapRoute } from "../types"
-
 import { MAP_PANEL } from "../components/internal/mapSurface"
 import { F0Map, type F0MapHandle } from "../F0Map"
+import type { F0MapArc, F0MapPoint, F0MapRoute } from "../types"
 
 // maplibre-gl needs WebGL (absent in jsdom). Stub the classes F0Map touches,
 // recording camera calls so behaviour is observable. `throwOnCreate` simulates
@@ -151,7 +150,9 @@ const mock = vi.hoisted(() => {
     element: HTMLElement | undefined
     constructor(opts?: { element?: HTMLElement }) {
       this.element = opts?.element
-      if (opts?.element) markerElements.push(opts.element)
+      if (opts?.element) {
+        markerElements.push(opts.element)
+      }
     }
     setLngLat() {
       return this
@@ -160,7 +161,9 @@ const mock = vi.hoisted(() => {
       // Real MapLibre attaches the marker element to the map container. Do the
       // same so a pin click is reachable from a test - pins are `aria-hidden`,
       // so they never collide with the accessible list's buttons.
-      if (this.element) document.body.appendChild(this.element)
+      if (this.element) {
+        document.body.appendChild(this.element)
+      }
       return this
     }
     remove() {
@@ -405,7 +408,9 @@ describe("F0Map", () => {
         <F0Map markers={POINTS} centerOnMarkerClick selectedMarkerId="hq" />
       )
       const pin = mock.markerElements[0]?.querySelector("button")
-      if (!pin) throw new Error("no pin rendered")
+      if (!pin) {
+        throw new Error("no pin rendered")
+      }
       fireEvent.click(pin)
 
       rerender(
@@ -614,7 +619,9 @@ describe("F0Map", () => {
     // as `aria-hidden` buttons (keyboard users get `F0MapList` instead).
     const clickPin = (index: number) => {
       const pin = mock.markerElements[index]?.querySelector("button")
-      if (!pin) throw new Error(`no pin rendered at index ${index}`)
+      if (!pin) {
+        throw new Error(`no pin rendered at index ${index}`)
+      }
       fireEvent.click(pin)
     }
 

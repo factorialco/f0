@@ -6,7 +6,6 @@ import { TagRawProps } from "@/components/tags/F0TagRaw"
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import { withSkeleton } from "@/lib/skeleton"
-
 import { OneListItem, OneListItemSkeleton } from "../OneListItem"
 
 export type OnePersonListItemProps = {

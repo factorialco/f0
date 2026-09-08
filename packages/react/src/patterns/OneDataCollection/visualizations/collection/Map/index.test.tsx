@@ -1,7 +1,6 @@
 import { act, waitFor } from "@testing-library/react"
 import { forwardRef, type ReactNode, useImperativeHandle } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import {
   FiltersDefinition,
   GroupingDefinition,
@@ -10,13 +9,12 @@ import {
 } from "@/hooks/datasource"
 import type { F0MapPoint } from "@/patterns/F0Map"
 import { fireEvent, screen, within, zeroRender } from "@/testing/test-utils"
-
 import { DataCollectionSource } from "../../../hooks/useDataCollectionSource/types"
 import { ItemActionsDefinition } from "../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
 import { SummariesDefinition } from "../../../summary"
-import { MapCollection } from "./index"
 import type { MapVisualizationOptions } from "./types"
+import { MapCollection } from "."
 
 // Stub the whole F0Map module: these tests are about what the visualization
 // hands the map (records projected onto markers, selection, reveal), not the
@@ -138,8 +136,9 @@ const baseOptions = (
   > = {}
 ): MapVisualizationOptions<Office, FiltersDefinition, SortingsDefinition> => ({
   coordinates: (office) => {
-    if (office.longitude != null && office.latitude != null)
+    if (office.longitude != null && office.latitude != null) {
       return [office.longitude, office.latitude]
+    }
     return office.incomplete ? { kind: "incomplete" } : null
   },
   label: (office) => office.name,

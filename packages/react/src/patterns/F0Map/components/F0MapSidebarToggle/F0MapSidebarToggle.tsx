@@ -1,10 +1,8 @@
 import { forwardRef } from "react"
-
 import { DataTestIdWrapper, type WithDataTestIdProps } from "@/lib/data-testid"
 import { useI18n } from "@/lib/providers/i18n"
 import { SidebarIconSvg } from "@/patterns/Navigation/Sidebar/Icon"
 import { Action } from "@/ui/Action"
-
 import { MapControlCard } from "../internal/MapControlCard"
 
 export interface F0MapSidebarToggleProps extends WithDataTestIdProps {

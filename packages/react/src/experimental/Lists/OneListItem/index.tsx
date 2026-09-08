@@ -1,11 +1,10 @@
 import React from "react"
-
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { AvatarVariant } from "@/components/avatars/F0Avatar/types"
 import { F0Button } from "@/components/F0Button"
-import { F0Icon, IconType } from "@/components/F0Icon"
 import { CardMetadata } from "@/components/F0Card/components/CardMetadata"
 import type { CardMetadata as CardMetadataType } from "@/components/F0Card/types"
+import { F0Icon, IconType } from "@/components/F0Icon"
 import { F0Text } from "@/components/F0Text"
 import { F0TagDot, TagDotProps } from "@/components/tags/F0TagDot"
 import { F0TagRaw, TagRawProps } from "@/components/tags/F0TagRaw"
@@ -98,11 +97,11 @@ const BaseOneListItem = React.forwardRef<HTMLDivElement, OneListItemProps>(
       )}
       onClick={onClick}
     >
-      {avatar && <F0Avatar avatar={avatar} size="sm" />}
+      {avatar ? <F0Avatar avatar={avatar} size="sm" /> : null}
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="flex min-w-0 flex-1 flex-row items-center gap-1">
           <F0Text variant="label" content={title} ellipsis />
-          {info && (
+          {info ? (
             <Tooltip label={info}>
               <F0Icon
                 icon={InfoCircle}
@@ -110,42 +109,42 @@ const BaseOneListItem = React.forwardRef<HTMLDivElement, OneListItemProps>(
                 className="text-f1-icon-secondary"
               />
             </Tooltip>
-          )}
+          ) : null}
         </div>
-        {bottomTags && bottomTags.length > 0 && (
+        {bottomTags && bottomTags.length > 0 ? (
           <div className="-ml-1.5 flex flex-row items-center [&>div]:-mr-1">
             {bottomTags.map((tag, i) => (
               <React.Fragment key={tag.text}>
                 <F0TagRaw {...tag} />
-                {i < bottomTags.length - 1 && <span>·</span>}
+                {i < bottomTags.length - 1 ? <span>·</span> : null}
               </React.Fragment>
             ))}
           </div>
-        )}
-        {description && (
+        ) : null}
+        {description ? (
           <F0Text variant="description" content={description} ellipsis />
-        )}
-        {metadata && metadata.length > 0 && (
+        ) : null}
+        {metadata && metadata.length > 0 ? (
           <div className="flex flex-col gap-0.5">
             {metadata.map((item, i) => (
               <CardMetadata key={i} metadata={item} />
             ))}
           </div>
-        )}
+        ) : null}
       </div>
       <div className="flex flex-row items-center justify-between gap-2">
-        {rightTag && <F0TagDot {...rightTag} />}
-        {actions && (
+        {rightTag ? <F0TagDot {...rightTag} /> : null}
+        {actions ? (
           <div className="flex flex-1 flex-row items-center justify-end gap-2">
-            {actions.primary && (
+            {actions.primary ? (
               <F0Button
                 variant="outline"
                 onClick={actions.primary.onClick}
                 label={actions.primary.label}
                 icon={actions.primary.icon}
               />
-            )}
-            {actions.secondary && (
+            ) : null}
+            {actions.secondary ? (
               <F0Button
                 variant="outline"
                 onClick={actions.secondary.onClick}
@@ -153,9 +152,9 @@ const BaseOneListItem = React.forwardRef<HTMLDivElement, OneListItemProps>(
                 icon={actions.secondary.icon}
                 hideLabel
               />
-            )}
+            ) : null}
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   )

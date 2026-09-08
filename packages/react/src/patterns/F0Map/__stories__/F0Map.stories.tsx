@@ -1,10 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { useState } from "react"
 import { expect, userEvent, within } from "storybook/test"
-import type { F0MapPoint } from "../types"
-
 import { F0Map } from "../F0Map"
+import type { F0MapPoint } from "../types"
 
 // Barcelona-area points: the four product-semantic marker variants.
 const BARCELONA: F0MapPoint[] = [

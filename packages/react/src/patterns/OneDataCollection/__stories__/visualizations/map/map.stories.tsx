@@ -1,6 +1,5 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
 import { useMemo, useState } from "react"
-
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0AvatarTeam } from "@/components/avatars/F0AvatarTeam"
 import { F0Button } from "@/components/F0Button"
@@ -17,7 +16,6 @@ import type { F0MapMarkerVariantProps } from "@/patterns/F0Map"
 import { Page } from "@/patterns/Navigation/Page"
 import { TabbedSidebar } from "@/patterns/Navigation/Sidebar/index.stories"
 import { Tabs } from "@/patterns/Navigation/Tabs"
-
 import {
   createDataAdapter,
   ExampleComponent,
