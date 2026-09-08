@@ -17,12 +17,12 @@ export const UsageRow = ({ label, percentage }: UsageRowProps) => {
   const exhausted = percentage >= 100
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between gap-2">
         <span className="min-w-0 truncate text-base font-medium text-f1-foreground">
           {label}
         </span>
-        <span className="shrink-0 font-medium tabular-nums text-f1-foreground-secondary">
+        <span className="shrink-0 font-normal tabular-nums text-f1-foreground-secondary">
           {i18n.t("ai.usageLimits.used", { percentage })}
         </span>
       </div>
@@ -39,7 +39,7 @@ export const UsageRow = ({ label, percentage }: UsageRowProps) => {
             "h-full rounded-full transition-[width] duration-300 ease-out motion-reduce:transition-none",
             exhausted
               ? "bg-f1-background-critical-bold"
-              : "bg-f1-background-accent-bold"
+              : "bg-f1-background-info-bold"
           )}
           style={{ width: `${percentage}%` }}
         />

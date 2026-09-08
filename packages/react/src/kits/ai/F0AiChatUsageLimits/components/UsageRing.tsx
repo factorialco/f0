@@ -48,7 +48,7 @@ export const UsageRing = ({ percentage, exhausted }: UsageRingProps) => {
           "transition-[stroke-dashoffset] duration-300 ease-out motion-reduce:transition-none",
           exhausted
             ? "stroke-f1-background-critical-bold"
-            : "stroke-f1-background-accent-bold"
+            : "stroke-f1-background-info-bold"
         )}
       />
     </svg>

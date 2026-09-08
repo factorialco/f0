@@ -81,43 +81,46 @@ export const F0AiChatUsageLimitsButton = ({
         align="end"
         sideOffset={8}
         collisionPadding={12}
-        className="flex w-[328px] flex-col gap-3 rounded-md border border-solid border-f1-border-secondary p-3"
+        className="flex w-[328px] flex-col overflow-hidden rounded-md border border-solid border-f1-border-secondary p-0 shadow-md"
       >
-        {error ? (
-          <span className="text-sm text-f1-foreground-secondary">
-            {i18n.t("ai.usageLimits.error")}
-          </span>
-        ) : !usage ? (
-          <UsageSkeleton />
-        ) : (
-          <>
+        <div className="p-4">
+          {error ? (
+            <span className="text-sm text-f1-foreground-secondary">
+              {i18n.t("ai.usageLimits.error")}
+            </span>
+          ) : !usage ? (
+            <UsageSkeleton />
+          ) : (
             <UsageRow label={title} percentage={personal} />
-            {hasTeamSection && (
-              <div className="flex flex-col gap-3 border-0 border-t border-solid border-f1-border-secondary pt-3">
-                {usage.onSeeTeam && (
-                  <button
-                    type="button"
-                    onClick={usage.onSeeTeam}
-                    className={cn(
-                      "flex w-full items-center justify-between gap-2 rounded-sm bg-transparent p-0 text-left text-base font-medium text-f1-foreground-secondary",
-                      "hover:text-f1-foreground",
-                      focusRing()
-                    )}
-                  >
-                    <span>{i18n.t("ai.usageLimits.yourTeam")}</span>
-                    <F0Icon icon={ChevronRight} size="sm" />
-                  </button>
+          )}
+        </div>
+        {usage && hasTeamSection && (
+          <div className="flex flex-col border-0 border-t border-solid border-f1-border-secondary p-2">
+            {usage.onSeeTeam && (
+              <button
+                type="button"
+                onClick={usage.onSeeTeam}
+                className={cn(
+                  "flex w-full items-center gap-2 rounded bg-transparent p-2 text-left text-base font-medium text-f1-foreground-tertiary",
+                  "hover:bg-f1-background-secondary hover:text-f1-foreground-secondary",
+                  focusRing()
                 )}
-                {sections.map((section) => (
-                  <UsageRow
-                    key={section.id}
-                    label={section.label}
-                    percentage={clampPercentage(section.usedPercentage)}
-                  />
-                ))}
-              </div>
+              >
+                <span className="min-w-0 flex-1 truncate">
+                  {i18n.t("ai.usageLimits.yourTeam")}
+                </span>
+                <F0Icon icon={ChevronRight} size="md" />
+              </button>
             )}
-          </>
+            {sections.map((section) => (
+              <div key={section.id} className="p-2">
+                <UsageRow
+                  label={section.label}
+                  percentage={clampPercentage(section.usedPercentage)}
+                />
+              </div>
+            ))}
+          </div>
         )}
       </PopoverContent>
     </Popover>
