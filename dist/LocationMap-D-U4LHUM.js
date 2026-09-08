@@ -1,11 +1,12 @@
 import { jsx as p } from "react/jsx-runtime";
-import { m } from "./experimental-fsR-lbDj.js";
+import { m } from "./experimental-B5CyqIAI.js";
 import { useRef as l, useEffect as i, useState as b } from "react";
 const k = "https://tiles.openfreemap.org/styles/positron", y = "https://tiles.openfreemap.org/styles/dark", R = 15, d = (n) => {
   const [c, s] = b(!1);
   return i(() => {
     const r = n.current;
-    if (!r) return;
+    if (!r)
+      return;
     const a = () => s(r.closest(".dark") !== null);
     a();
     const t = new MutationObserver(a);
@@ -25,7 +26,8 @@ const k = "https://tiles.openfreemap.org/styles/positron", y = "https://tiles.op
   const u = l(null);
   return i(() => {
     const o = s.current;
-    if (!o) return;
+    if (!o)
+      return;
     u.current = e.current;
     const f = new m.Map({
       container: o,

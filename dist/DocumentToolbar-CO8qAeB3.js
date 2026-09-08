@@ -1,28 +1,28 @@
-import { jsxs as i, jsx as l } from "react/jsx-runtime";
-import { useState as u, useCallback as m, useMemo as p } from "react";
-import { u as x, i as w, j as k, k as S, l as C } from "./F0CanvasPanel-CAFRMX4L.js";
-import { n as g, a as h, f as v, T as r, d as F } from "./index-Lufv1Bt8.js";
+import { jsxs as i, jsx as o } from "react/jsx-runtime";
+import { useState as b, useCallback as m, useMemo as p } from "react";
+import { u as x, i as w, j as k, k as S, l as C } from "./F0CanvasPanel-lktFVZdZ.js";
+import { n as g, a as h, f as v, T as n, d as F } from "./index-Db9AdZp1.js";
 const D = () => {
-  const [t, a] = u(1), n = m(
+  const [r, a] = b(1), t = m(
     () => a((e) => g(e) ?? e),
     []
   ), c = m(
     () => a((e) => h(e) ?? e),
     []
   );
-  return { scale: t, zoomIn: n, zoomOut: c, setScale: a };
+  return { scale: r, zoomIn: t, zoomOut: c, setScale: a };
 }, I = ({
-  url: t,
+  url: r,
   filename: a,
-  withCredentials: n,
+  withCredentials: t,
   actions: c,
   zoom: e,
   children: f
 }) => {
   const { pdfViewer: s } = x(), d = p(
-    () => v.map((o) => ({
-      value: o,
-      label: `${Number(o) * 100}%`
+    () => v.map((l) => ({
+      value: l,
+      label: `${Number(l) * 100}%`
     })),
     []
   );
@@ -33,54 +33,54 @@ const D = () => {
       "aria-label": s.toolbar,
       className: "F0PdfViewer__surface sticky top-0 z-10 flex flex-row items-center justify-between gap-2 px-6 py-4",
       children: [
-        /* @__PURE__ */ l("div", { className: "flex min-w-0 flex-1 basis-0 flex-row items-center gap-2 overflow-x-auto", children: f }),
-        e && /* @__PURE__ */ i("div", { className: "flex shrink-0 flex-row items-center gap-2", children: [
-          /* @__PURE__ */ l(
-            r,
+        /* @__PURE__ */ o("div", { className: "flex min-w-0 flex-1 basis-0 flex-row items-center gap-2 overflow-x-auto", children: f }),
+        e ? /* @__PURE__ */ i("div", { className: "flex shrink-0 flex-row items-center gap-2", children: [
+          /* @__PURE__ */ o(
+            n,
             {
               label: s.zoomOut,
               onClick: e.zoomOut,
               icon: w
             }
           ),
-          /* @__PURE__ */ l(
-            r,
+          /* @__PURE__ */ o(
+            n,
             {
               label: s.zoomIn,
               onClick: e.zoomIn,
               icon: k
             }
           ),
-          /* @__PURE__ */ l(
+          /* @__PURE__ */ o(
             S,
             {
               hideLabel: !0,
               label: s.scaleSelector,
               options: d,
               value: String(e.scale),
-              onChange: (o) => e.setScale(Number(o))
+              onChange: (l) => e.setScale(Number(l))
             }
           )
-        ] }),
+        ] }) : null,
         /* @__PURE__ */ i("div", { className: "flex flex-1 basis-0 flex-row items-center justify-end gap-2", children: [
-          /* @__PURE__ */ l(
-            r,
+          /* @__PURE__ */ o(
+            n,
             {
               label: s.download,
               onClick: () => {
-                F(t, a, n);
+                F(r, a, t);
               },
               icon: C
             }
           ),
-          c?.map((o, b) => /* @__PURE__ */ l(
-            r,
+          c?.map((l, u) => /* @__PURE__ */ o(
+            n,
             {
-              label: o.label,
-              onClick: o.onClick,
-              icon: o.icon
+              label: l.label,
+              onClick: l.onClick,
+              icon: l.icon
             },
-            `${o.label}-${b}`
+            `${l.label}-${u}`
           ))
         ] })
       ]

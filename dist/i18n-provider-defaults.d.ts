@@ -990,6 +990,11 @@ export declare const defaultTranslations: {
         readonly addressLine2Placeholder: "Enter a floor or unit";
         readonly postalCodePlaceholder: "e.g., 08001";
         readonly searching: "Searching addresses";
+        readonly searchError: "Couldn't load addresses. Try again.";
+        readonly resultsCount: {
+            readonly one: "{{count}} address found";
+            readonly other: "{{count}} addresses found";
+        };
     };
     readonly imageUpload: {
         readonly uploading: "Uploading...";
@@ -1332,29 +1337,29 @@ declare global {
 }
 
 
-declare namespace _Page {
+declare namespace _DaytimePage {
     var displayName: string;
 }
 
 
-declare namespace _DaytimePage {
+declare namespace _Page {
     var displayName: string;
 }
 
 declare module "gridstack" {
     interface GridStackWidget {
         id?: string;
-        allowedSizes?: Array<{
+        allowedSizes?: {
             w: number;
             h: number;
-        }>;
+        }[];
         meta?: Record<string, unknown>;
     }
     interface GridStackNode {
-        allowedSizes?: Array<{
+        allowedSizes?: {
             w: number;
             h: number;
-        }>;
+        }[];
     }
 }
 
