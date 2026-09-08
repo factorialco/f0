@@ -34,12 +34,12 @@ export const CalloutSkeleton = ({
             <Skeleton className="h-4 w-1/2 rounded-md" />
           </div>
         </div>
-        {!compact && (
+        {!compact ? (
           <div className="flex flex-row items-center justify-between gap-3 rounded-b-[13.25px] bg-f1-background px-4 py-3">
             <Skeleton className="h-8 w-24 rounded-md" />
             <Skeleton className="h-8 w-28 rounded-md" />
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   )

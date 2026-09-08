@@ -1,8 +1,6 @@
 import { cva } from "cva"
-
 import type { F0IconProps, IconType } from "@/components/F0Icon"
 import { AlertCircle, CheckCircle, InfoCircle, Warning } from "@/icons/app"
-
 import type { AiCalloutStatus } from "./types"
 
 /**

@@ -1,6 +1,5 @@
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
-
 import type { AiCalloutSkeletonProps } from "./types"
 import {
   cardBorderVariants,
@@ -30,7 +29,7 @@ export const AiCalloutSkeleton = ({
           <Skeleton className="h-4 w-full rounded-md" />
           <Skeleton className="h-4 w-3/4 rounded-md" />
         </div>
-        {!compact && (
+        {!compact ? (
           <div
             className={cn(
               rowClasses,
@@ -41,7 +40,7 @@ export const AiCalloutSkeleton = ({
             <Skeleton className="h-5 w-32 rounded-md" />
             <Skeleton className="h-8 w-24 rounded-md" />
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   )

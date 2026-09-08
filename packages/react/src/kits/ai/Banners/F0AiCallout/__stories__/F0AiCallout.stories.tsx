@@ -1,7 +1,5 @@
 import type { Meta, StoryFn, StoryObj } from "@storybook/react-vite"
-
 import { Summary } from "@/icons/ai"
-
 import { F0AiCallout } from ".."
 import { aiCalloutStatuses, type F0AiCalloutProps } from "../types"
 

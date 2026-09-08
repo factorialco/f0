@@ -1,6 +1,5 @@
 import { AnimatePresence, motion } from "motion/react"
 import { forwardRef, useEffect, useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
 import { One } from "@/icons/ai"
@@ -14,14 +13,12 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/ui/collapsible"
-
 import type {
   AiCalloutAction,
   AiCalloutFinding,
   AiCalloutStatus,
   F0AiCalloutProps,
 } from "./types"
-
 import {
   cardBorderVariants,
   cardClasses,
@@ -104,7 +101,7 @@ const FindingRow = ({
         {finding.description}
       </div>
     </div>
-    {finding.action && <ActionButton action={finding.action} />}
+    {finding.action ? <ActionButton action={finding.action} /> : null}
   </div>
 )
 
@@ -205,7 +202,9 @@ export const AiCalloutInternal = forwardRef<HTMLDivElement, F0AiCalloutProps>(
     const evidenceEmpty = Boolean(evidence) && !hasEvidence
 
     useEffect(() => {
-      if (process.env.NODE_ENV === "production") return
+      if (process.env.NODE_ENV === "production") {
+        return
+      }
 
       // The `neutral`/`info` line is enforced here rather than left in a doc:
       // if there is something to do, the callout is not neutral. Without this
@@ -260,14 +259,14 @@ export const AiCalloutInternal = forwardRef<HTMLDivElement, F0AiCalloutProps>(
               24 rather than the `…Solid` glyph at 20 the first cut measured,
               which closes the "F0 has no solid icons" gap that was open all
               along: there is nothing left to substitute. */}
-          {headerIcon && (
+          {headerIcon ? (
             <F0Icon
               icon={headerIcon}
               size="lg"
               color={statusIconColors[status]}
               aria-hidden
             />
-          )}
+          ) : null}
           <OneEllipsis
             className={cn(
               "text-base font-medium",
@@ -276,7 +275,7 @@ export const AiCalloutInternal = forwardRef<HTMLDivElement, F0AiCalloutProps>(
           >
             {title}
           </OneEllipsis>
-          {stacked && (
+          {stacked ? (
             // Figma gives the stacked header's byline the *status* foreground at
             // 50%, in Medium, and hides the One glyph — unlike the single
             // callout's footer byline, which is grey and keeps the mark. The
@@ -296,9 +295,9 @@ export const AiCalloutInternal = forwardRef<HTMLDivElement, F0AiCalloutProps>(
               <span aria-hidden>·</span>
               <span className="truncate">{ai.attribution}</span>
             </span>
-          )}
+          ) : null}
         </div>
-        {stacked && canFold && (
+        {stacked && canFold ? (
           <CollapsibleTrigger asChild>
             <F0Button
               variant="ghost"
@@ -311,8 +310,8 @@ export const AiCalloutInternal = forwardRef<HTMLDivElement, F0AiCalloutProps>(
               hideLabel
             />
           </CollapsibleTrigger>
-        )}
-        {onClose && (
+        ) : null}
+        {onClose ? (
           <F0Button
             variant="ghost"
             size="sm"
@@ -321,7 +320,7 @@ export const AiCalloutInternal = forwardRef<HTMLDivElement, F0AiCalloutProps>(
             label={actions.close}
             onClick={onClose}
           />
-        )}
+        ) : null}
       </div>
     )
 
@@ -344,7 +343,7 @@ export const AiCalloutInternal = forwardRef<HTMLDivElement, F0AiCalloutProps>(
             last={!open || !canFold}
           />
           <AnimatePresence initial={false}>
-            {open && canFold && (
+            {open && canFold ? (
               <motion.div
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: "auto", opacity: 1 }}
@@ -365,7 +364,7 @@ export const AiCalloutInternal = forwardRef<HTMLDivElement, F0AiCalloutProps>(
                   </div>
                 </CollapsibleContent>
               </motion.div>
-            )}
+            ) : null}
           </AnimatePresence>
         </div>
       )
@@ -388,11 +387,11 @@ export const AiCalloutInternal = forwardRef<HTMLDivElement, F0AiCalloutProps>(
               continuing. The 8px stays between this block and the disclosure,
               which *is* a separate thing. */}
           <div className="flex flex-col gap-0.5">
-            {summary && (
+            {summary ? (
               <span className="text-base font-medium text-f1-foreground">
                 {summary}
               </span>
-            )}
+            ) : null}
             {/* Secondary, and the `summary` above is what makes that work. Three
                 earlier cuts got this wrong in three different ways: dark item
                 labels over a grey description (the detail outranked the body),
@@ -408,7 +407,7 @@ export const AiCalloutInternal = forwardRef<HTMLDivElement, F0AiCalloutProps>(
               {children}
             </div>
           </div>
-          {hasEvidence && (
+          {hasEvidence ? (
             <>
               {/* The disclosure sits here, under the description it belongs to,
                   and not in the header — that placement is the clearest signal
@@ -442,7 +441,7 @@ export const AiCalloutInternal = forwardRef<HTMLDivElement, F0AiCalloutProps>(
                 </CollapsibleTrigger>
               </div>
               <AnimatePresence initial={false}>
-                {open && (
+                {open ? (
                   <motion.div
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: "auto", opacity: 1 }}
@@ -489,10 +488,10 @@ export const AiCalloutInternal = forwardRef<HTMLDivElement, F0AiCalloutProps>(
                       </EvidenceList>
                     </CollapsibleContent>
                   </motion.div>
-                )}
+                ) : null}
               </AnimatePresence>
             </>
-          )}
+          ) : null}
         </div>
         <div
           className={cn(
@@ -502,9 +501,9 @@ export const AiCalloutInternal = forwardRef<HTMLDivElement, F0AiCalloutProps>(
           )}
         >
           <Byline />
-          {(secondaryAction || action) && (
+          {secondaryAction || action ? (
             <div className="flex flex-row items-center gap-2">
-              {secondaryAction && (
+              {secondaryAction ? (
                 <F0Button
                   variant="ghost"
                   size="md"
@@ -513,10 +512,10 @@ export const AiCalloutInternal = forwardRef<HTMLDivElement, F0AiCalloutProps>(
                   disabled={secondaryAction.disabled}
                   onClick={secondaryAction.onClick}
                 />
-              )}
-              {action && <ActionButton action={action} />}
+              ) : null}
+              {action ? <ActionButton action={action} /> : null}
             </div>
-          )}
+          ) : null}
         </div>
       </div>
     )
@@ -541,39 +540,40 @@ export const AiCalloutInternal = forwardRef<HTMLDivElement, F0AiCalloutProps>(
         )}
         {...rest}
       >
-        {showDeck &&
-          deckLayers.map(({ inset, offset }) => (
-            // A whole callout behind: its own tint with its own white card
-            // pinned to the bottom, exactly as Figma stacks three complete
-            // Cards. Only ~8px shows, so the content is left out — rendering it
-            // twice would hand a screen reader a copy of what the fold hides.
-            <div
-              key={inset}
-              aria-hidden
-              className={cn(
-                // Tall enough that its 16px corners are never clamped: a box
-                // shorter than 32px makes the browser scale both radii to fit,
-                // and a scaled radius here no longer matches the white card's.
-                "absolute h-12 overflow-hidden rounded-xl",
-                inset,
-                offset,
-                statusTintVariants({ status })
-              )}
-            >
-              {/* `rounded-b-xl` rather than `rounded-xl`, and 32px tall. At 20px
+        {showDeck
+          ? deckLayers.map(({ inset, offset }) => (
+              // A whole callout behind: its own tint with its own white card
+              // pinned to the bottom, exactly as Figma stacks three complete
+              // Cards. Only ~8px shows, so the content is left out — rendering it
+              // twice would hand a screen reader a copy of what the fold hides.
+              <div
+                key={inset}
+                aria-hidden
+                className={cn(
+                  // Tall enough that its 16px corners are never clamped: a box
+                  // shorter than 32px makes the browser scale both radii to fit,
+                  // and a scaled radius here no longer matches the white card's.
+                  "absolute h-12 overflow-hidden rounded-xl",
+                  inset,
+                  offset,
+                  statusTintVariants({ status })
+                )}
+              >
+                {/* `rounded-b-xl` rather than `rounded-xl`, and 32px tall. At 20px
                   with all four corners the radii summed past the height, so the
                   browser scaled them to 10 while the layer kept 16 — and the
                   tint showed through the gap between the two curves as a red
                   smear in the corner. Bottom-only radii on a box this tall are
                   never clamped, so both curves coincide. */}
-              <div
-                className={cn(
-                  "absolute inset-x-0 bottom-0 top-4 rounded-b-xl border-x-2 border-b-2 border-t-0 border-solid bg-f1-background",
-                  cardBorderVariants({ status })
-                )}
-              />
-            </div>
-          ))}
+                <div
+                  className={cn(
+                    "absolute inset-x-0 bottom-0 top-4 rounded-b-xl border-x-2 border-b-2 border-t-0 border-solid bg-f1-background",
+                    cardBorderVariants({ status })
+                  )}
+                />
+              </div>
+            ))
+          : null}
         {/* Positioned so DOM order decides the painting: the absolute layers
             would otherwise sit above a static sibling. */}
         <div
@@ -588,7 +588,9 @@ export const AiCalloutInternal = forwardRef<HTMLDivElement, F0AiCalloutProps>(
       </div>
     )
 
-    if (!canFold) return shell
+    if (!canFold) {
+      return shell
+    }
 
     return (
       <Collapsible

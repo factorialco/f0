@@ -1,9 +1,7 @@
-import { afterEach, describe, expect, it, vi } from "vitest"
 import "@testing-library/jest-dom/vitest"
-import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
-
+import { afterEach, describe, expect, it, vi } from "vitest"
 import { Summary } from "@/icons/ai"
-
+import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
 import { F0AiCallout } from ".."
 import { aiCalloutStatuses } from "../types"
 
