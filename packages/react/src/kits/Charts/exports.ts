@@ -48,6 +48,11 @@ export const ComboChart = withDataTestId(
   Component({ name: "ComboChart", type: "info" }, ComboChartComponent)
 )
 
+/**
+ * @deprecated Use F0DataChart with `type="radar"` instead.
+ * @removeIn 7.0.0
+ * @migration https://github.com/factorialco/f0/blob/main/packages/react/docs/migrations/f0-radarchart-to-f0datachart.md
+ */
 export const RadarChart = withDataTestId(
   Component({ name: "RadarChart", type: "info" }, RadarChartComponent)
 )
