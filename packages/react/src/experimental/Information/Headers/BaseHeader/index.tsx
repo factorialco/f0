@@ -1,4 +1,4 @@
-import { Fragment } from "react"
+import { Fragment, ReactNode } from "react"
 import { AvatarVariant, F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0Button } from "@/components/F0Button"
 import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
@@ -47,7 +47,13 @@ interface BaseHeaderProps {
       }
     | AvatarVariant
 
-  description?: string
+  /**
+   * Supporting text under the title. Accepts a node so a consumer can render
+   * formatted copy — a link back to the source of truth, for instance — rather
+   * than flattening it to plain text. Clamped to two lines with a "show all"
+   * toggle either way.
+   */
+  description?: ReactNode
   primaryAction?: PrimaryActionButton | PrimaryDropdownAction<string>
   secondaryActions?: HeaderSecondaryAction[]
   otherActions?: (DropdownItem & { isVisible?: boolean })[]

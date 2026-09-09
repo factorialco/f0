@@ -1,6 +1,11 @@
 import { describe, expect, it, vi } from "vitest"
 import { Download } from "@/icons/app"
-import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
+import {
+  act,
+  zeroRender as render,
+  screen,
+  userEvent,
+} from "@/testing/test-utils"
 import { F0ResourceHeader } from ".."
 
 describe("F0ResourceHeader", () => {
@@ -77,5 +82,57 @@ describe("F0ResourceHeader", () => {
         expect.objectContaining({ value: "csv", label: "Export CSV" })
       )
     )
+  })
+  it("renders a plain string description as text", () => {
+    render(<F0ResourceHeader title="Reports" description="Quarterly revenue" />)
+
+    // Rendered twice: the visible copy plus the hidden one that measures the
+    // unclamped height.
+    expect(screen.getAllByText("Quarterly revenue")).toHaveLength(2)
+  })
+
+  it("renders a node description, keeping its links interactive", () => {
+    render(
+      <F0ResourceHeader
+        title="Reports"
+        description={
+          <>
+            See the <a href="https://example.com/rubric">rubric</a>
+          </>
+        }
+      />
+    )
+
+    // The header mirrors the description into an aria-hidden node to measure its
+    // unclamped height, so only the visible link reaches the a11y tree.
+    expect(screen.getAllByRole("link")).toHaveLength(1)
+    expect(screen.getByRole("link", { name: "rubric" })).toHaveAttribute(
+      "href",
+      "https://example.com/rubric"
+    )
+  })
+
+  it("leaves an unclamped description alone when focus enters it", async () => {
+    render(
+      <F0ResourceHeader
+        title="Reports"
+        description={
+          <>
+            See the <a href="https://example.com/rubric">rubric</a>
+          </>
+        }
+      />
+    )
+
+    // Focus expands the description so a clamped-away link cannot be reached
+    // while invisible. A description short enough to fit was never hidden, so
+    // focusing it must not raise a "show less" toggle over nothing.
+    await act(async () => {
+      screen.getByRole("link", { name: "rubric" }).focus()
+    })
+
+    expect(
+      screen.queryByRole("button", { name: /show/i })
+    ).not.toBeInTheDocument()
   })
 })

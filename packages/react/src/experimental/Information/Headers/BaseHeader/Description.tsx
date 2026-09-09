@@ -1,13 +1,16 @@
 import { motion } from "motion/react"
-import { useEffect, useRef, useState } from "react"
+import { ReactNode, useEffect, useId, useRef, useState } from "react"
 import { useResizeObserver } from "usehooks-ts"
+import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
-import { cn } from "@/lib/utils"
+import { cn, focusRing } from "@/lib/utils"
 
-export const Description = ({ description }: { description: string }) => {
+export const Description = ({ description }: { description: ReactNode }) => {
   const [isExpanded, setIsExpanded] = useState(false)
   const [needsTruncation, setNeedsTruncation] = useState(false)
   const translations = useI18n()
+  const descriptionId = useId()
+  const reducedMotion = useReducedMotion()
 
   /*
    * We render a hidden block (`measure`) which we then use to read the height of the
@@ -29,6 +32,17 @@ export const Description = ({ description }: { description: string }) => {
   return (
     <div className="flex max-w-[640px] flex-col gap-1">
       <motion.div
+        /*
+         * The clamp hides overflowing lines with `overflow: hidden`, which clips
+         * them visually but leaves them focusable. A description can hold a link,
+         * so expand as soon as focus reaches one — otherwise tabbing lands on a
+         * control nobody can see (WCAG 2.4.7).
+         */
+        onFocusCapture={() => {
+          if (needsTruncation) {
+            setIsExpanded(true)
+          }
+        }}
         initial={false}
         animate={{
           height: isExpanded
@@ -36,7 +50,7 @@ export const Description = ({ description }: { description: string }) => {
             : (descriptionSize.height ?? "3rem"),
         }}
         transition={{
-          duration: needsTruncation ? 0.15 : 0,
+          duration: reducedMotion || !needsTruncation ? 0 : 0.15,
           ease: [0.165, 0.84, 0.44, 1],
         }}
         className={cn(
@@ -53,6 +67,7 @@ export const Description = ({ description }: { description: string }) => {
         </div>
         <div
           ref={descriptionRef}
+          id={descriptionId}
           className={cn(
             "text-lg text-f1-foreground-secondary",
             !isExpanded && "line-clamp-2"
@@ -63,8 +78,14 @@ export const Description = ({ description }: { description: string }) => {
       </motion.div>
       {needsTruncation || isExpanded ? (
         <button
+          type="button"
+          aria-controls={descriptionId}
+          aria-expanded={isExpanded}
           onClick={() => setIsExpanded((current) => !current)}
-          className="relative w-fit font-medium text-f1-foreground after:absolute after:-bottom-0.5 after:left-0 after:right-0 after:h-[1.5px] after:bg-f1-border after:transition-all after:content-[''] hover:after:bg-f1-border-hover"
+          className={cn(
+            "relative w-fit font-medium text-f1-foreground after:absolute after:-bottom-0.5 after:left-0 after:right-0 after:h-[1.5px] after:bg-f1-border after:transition-all after:content-[''] hover:after:bg-f1-border-hover",
+            focusRing()
+          )}
         >
           {isExpanded
             ? translations.actions.showLess
