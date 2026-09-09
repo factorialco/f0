@@ -83,7 +83,7 @@ import type { InboxTask } from "./inbox/inboxTasks"
 import { TEAM_ABSENCE_FILTERS, WORKPLACES } from "./calendar/calendarFixtures"
 import { CalGroup, MiniMonth } from "./calendar/MiniMonth"
 import { CHANNEL_CHATS, DIRECT_CHATS } from "./comms/chats"
-import { requestChat, useOpenChats } from "./comms/chatStore"
+import { requestChat, requestChatsClose, useOpenChats } from "./comms/chatStore"
 import { factorialLogo, PROFILE_PEOPLE } from "./fixtures"
 import { hubSlug } from "./hub/hubSlug"
 import { motionKeyFor } from "./iconMotion"
@@ -1175,10 +1175,13 @@ function HubPanelBody() {
       {groups.map((group) => (
         <SidebarGroup key={group.label} label={group.label}>
           {group.items.map((label) => {
-            // EVERY row opens now, not just People. The window has a tab
-            // strip and a "+" over this same list, so a row that
-            // navigates nowhere would be the odd one out — an undesigned
-            // section opens as a tab and says so in the body.
+            // EVERY row navigates now, not just the handful that had a
+            // screen. Both sides of this merge reached the same rule
+            // independently — Jonathan inlined
+            // `label.toLowerCase().replaceAll(" ", "-")` here while this
+            // branch extracted the identical thing to `hubSlug`, which is
+            // also what killed the old HUB_VIEWS allow-list. A section
+            // with nothing designed lands on ModuleScreen and says so.
             const screen = hubSlug(label)
             return (
               <NavRow
@@ -1470,7 +1473,11 @@ export function HomeNav() {
     // Cal is the one section that is also a DESTINATION: the frame shows
     // its panel beside the week grid, not beside Home (Figma 2621:29173).
     // Comms/Inbox/Hub stay side panels and leave the canvas alone.
-    if (id === "cal") {
+    if (id === "home") {
+      requestChatsClose()
+      goHome()
+      setSearchParams({})
+    } else if (id === "cal") {
       // Also the way back if you closed the calendar WINDOW with its own
       // ✕ while staying in this section: the rail row is still lit and
       // the panel is still open, so clicking it has to reopen the window

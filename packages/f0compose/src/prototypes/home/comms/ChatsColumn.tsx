@@ -3,18 +3,12 @@ import { Ellipsis, Headset } from "@factorialco/f0-react/icons/app"
 
 import { avatarFor } from "@/fixtures/helpers"
 
-import type { ModulePaneId } from "../windows/ModulePane"
 import type { StackState } from "../windows/stack"
 import type { PanelSpec } from "../windows/WindowStack"
 import type { ChatId } from "./chats"
 
 import { taskTitle } from "../inbox/inboxTasks"
 import { TicketWindow } from "../inbox/TicketWindow"
-import {
-  isModulePane,
-  modulePaneSpec,
-  moduleViewOf,
-} from "../windows/ModulePane"
 import { SidePanelIcon } from "../windows/PanelIcons"
 import { useWindowStack } from "../windows/stack"
 import { animateWindowClose as animateClose } from "../windows/windowMotion"
@@ -49,7 +43,7 @@ export type TicketPaneId = `ticket:${string}`
  * width, two panes stacked — which is what the stacking rules already
  * mean, and what a bespoke pane beside the stack could never be.
  */
-export type LeftPaneId = ChatId | TicketPaneId | ModulePaneId
+export type LeftPaneId = ChatId | TicketPaneId
 
 export function isTicket(id: LeftPaneId): id is TicketPaneId {
   return id.startsWith("ticket:")
@@ -60,10 +54,7 @@ export function isTicket(id: LeftPaneId): id is TicketPaneId {
  * kind owns one slot: swapping conversations changes a card's contents
  * while a module and a chat are two cards that stack.
  */
-export function leftPaneKind(
-  id: LeftPaneId
-): "module" | "ticket" | "conversation" {
-  if (isModulePane(id)) return "module"
+export function leftPaneKind(id: LeftPaneId): "ticket" | "conversation" {
   return isTicket(id) ? "ticket" : "conversation"
 }
 
@@ -87,9 +78,6 @@ export function useChats() {
 }
 
 export function leftPaneSpec(id: LeftPaneId): PanelSpec {
-  // BEFORE the ticket branch, because the conversation path below is an
-  // unguarded `CHATS_BY_ID[id]` and a module id would crash on it.
-  if (isModulePane(id)) return modulePaneSpec(moduleViewOf(id))
   if (isTicket(id)) {
     const taskId = taskIdOf(id)
     return {
