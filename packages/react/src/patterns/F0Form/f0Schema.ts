@@ -750,6 +750,14 @@ export function unwrapZodSchema(schema: ZodTypeAny): ZodTypeAny {
   return innerSchema
 }
 
+/** Whether the field offers a choice list, from `options` or from a `source`. */
+function hasChoices(config: F0FieldConfig): boolean {
+  return Boolean(
+    ("options" in config && config.options) ||
+    ("source" in config && config.source)
+  )
+}
+
 /**
  * Infer field type from Zod schema when not explicitly specified
  */
@@ -762,11 +770,9 @@ export function inferFieldType(
     return config.fieldType
   }
 
-  // If options or source are provided, it's a select
-  if (
-    ("options" in config && config.options) ||
-    ("source" in config && config.source)
-  ) {
+  // A choice list makes it a select, however the list arrives — and whether
+  // the field holds one of them or an array.
+  if (hasChoices(config)) {
     return "select"
   }
 
@@ -797,16 +803,6 @@ export function inferFieldType(
 
   if (isZodType(innerSchema, "ZodEnum")) {
     return "select"
-  }
-
-  if (isZodType(innerSchema, "ZodArray")) {
-    // Arrays with options or source are multi-select
-    if (
-      ("options" in config && config.options) ||
-      ("source" in config && config.source)
-    ) {
-      return "select"
-    }
   }
 
   if (

@@ -135,6 +135,35 @@ export const Search = ({
     }
   }
 
+  /** Arrows and Enter, once the results list is the thing being driven. */
+  const handleResultsKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "ArrowDown") {
+      e.preventDefault()
+      if (activeIndex < resultItems.length - 1) {
+        setActiveIndex(activeIndex + 1)
+      } else if (hasMore && !loadingMore) {
+        // At the end of the loaded rows — pull the next page so keyboard users
+        // can page through as well, not just scrollers.
+        onLoadMore?.()
+      }
+      return
+    }
+
+    if (e.key === "ArrowUp") {
+      e.preventDefault()
+      setActiveIndex((index) => (index > 0 ? index - 1 : 0))
+      return
+    }
+
+    if (e.key === "Enter") {
+      e.preventDefault()
+      const target = resultItems[activeIndex >= 0 ? activeIndex : 0]
+      if (target) {
+        selectResult(target)
+      }
+    }
+  }
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (!open) {
       if (e.key === "Enter" || e.key === " ") {
@@ -159,25 +188,7 @@ export const Search = ({
       return
     }
 
-    if (e.key === "ArrowDown") {
-      e.preventDefault()
-      if (activeIndex < resultItems.length - 1) {
-        setActiveIndex(activeIndex + 1)
-      } else if (hasMore && !loadingMore) {
-        // At the end of the loaded rows — pull the next page so keyboard users
-        // can page through as well, not just scrollers.
-        onLoadMore?.()
-      }
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault()
-      setActiveIndex((index) => (index > 0 ? index - 1 : 0))
-    } else if (e.key === "Enter") {
-      e.preventDefault()
-      const target = resultItems[activeIndex >= 0 ? activeIndex : 0]
-      if (target) {
-        selectResult(target)
-      }
-    }
+    handleResultsKeyDown(e)
   }
 
   return (

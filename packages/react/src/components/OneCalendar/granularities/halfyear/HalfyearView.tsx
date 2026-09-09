@@ -8,6 +8,7 @@ import {
 import { AnimatePresence, motion } from "motion/react"
 import { cn, focusRing } from "@/lib/utils"
 import { CalendarMode, DateRange } from "../../types"
+import { isDateRange, rangeAfterPeriodClick } from "../periodClick"
 
 export const getHalfYearFromMonth = (month: number): number =>
   month < 6 ? 1 : 2
@@ -48,13 +49,6 @@ export const HalfYearView = ({
   const baseYear = Math.floor(year / 5) * 5
   const years = Array.from({ length: 5 }, (_, i) => baseYear + i)
 
-  // Check if a value is a DateRange
-  const isDateRange = (value: unknown): value is DateRange => {
-    return Boolean(
-      value && typeof value === "object" && ("from" in value || "to" in value)
-    )
-  }
-
   // Handle click on a half year
   const handleHalfYearClick = (halfYear: number, year: number) => {
     const halfYearRange = getHalfYearRange(halfYear, year)
@@ -62,43 +56,21 @@ export const HalfYearView = ({
     if (mode === "single") {
       // For single selection, use the first day of the half-year
       onSelect?.(halfYearRange.from)
-    } else if (mode === "range") {
-      if (selected && isDateRange(selected) && selected.from && !selected.to) {
-        // Complete the range
-        const fromDate = selected.from
-        const fromHalfYear = getHalfYearFromMonth(fromDate.getMonth())
-        const fromYear = fromDate.getFullYear()
+      return
+    }
 
-        if (fromHalfYear === halfYear && fromYear === year) {
-          // If clicking the same half-year, select just that half-year
-          onSelect?.({
-            from: halfYearRange.from,
-            to: halfYearRange.to,
-          })
-        } else {
-          // Create a range between the two half-years
-          const fromHalfYearRange = getHalfYearRange(fromHalfYear, fromYear)
-
-          const start = isBefore(fromHalfYearRange.from, halfYearRange.from)
-            ? fromHalfYearRange.from
-            : halfYearRange.from
-
-          const end = isAfter(fromHalfYearRange.to!, halfYearRange.to!)
-            ? fromHalfYearRange.to
-            : halfYearRange.to
-
-          onSelect?.({
-            from: start,
-            to: end,
-          })
-        }
-      } else {
-        // Start a new range
-        onSelect?.({
-          from: halfYearRange.from,
-          to: undefined,
+    if (mode === "range") {
+      onSelect?.(
+        rangeAfterPeriodClick({
+          selected,
+          clicked: halfYearRange,
+          periodRangeOf: (date) =>
+            getHalfYearRange(
+              getHalfYearFromMonth(date.getMonth()),
+              date.getFullYear()
+            ),
         })
-      }
+      )
     }
   }
 

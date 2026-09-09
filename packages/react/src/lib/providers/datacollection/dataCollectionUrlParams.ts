@@ -287,6 +287,34 @@ const decodeFilterValue = (type: string, values: string[]): unknown => {
 /* ------------------------------------------------------------------ */
 
 /**
+ * The `dc_<filterKey>` params decoded back to filter values. `undefined` when
+ * the URL carries none, so an empty filters object never reaches the state.
+ */
+const parseFilterParams = <
+  CurrentFiltersState extends FiltersState<FiltersDefinition>,
+>(
+  params: URLSearchParams,
+  filtersDefinition: FiltersDefinition
+): CurrentFiltersState | undefined => {
+  const filters: Record<string, unknown> = {}
+  let hasFilters = false
+
+  for (const [key, definition] of Object.entries(filtersDefinition)) {
+    const name = filterParamName(key)
+    if (!params.has(name)) {
+      continue
+    }
+    filters[key] = decodeFilterValue(
+      (definition as FilterDefinition).type,
+      params.getAll(name)
+    )
+    hasFilters = true
+  }
+
+  return hasFilters ? (filters as CurrentFiltersState) : undefined
+}
+
+/**
  * Parses a data collection's state out of URL query params.
  *
  * @param input - A query string, a `URLSearchParams`, or omitted to read from
@@ -317,44 +345,29 @@ export const parseDataCollectionUrlParams = <
     )
   }
 
-  if (params.has(DATA_COLLECTION_URL_PARAMS.visualization)) {
-    const view = params.get(DATA_COLLECTION_URL_PARAMS.visualization)
-    if (view) {
-      state.visualization = view
-    }
+  // `get` returns null for an absent param, so one truthiness check covers
+  // both "not there" and "there but empty".
+  const view = params.get(DATA_COLLECTION_URL_PARAMS.visualization)
+  if (view) {
+    state.visualization = view
   }
 
-  if (params.has(DATA_COLLECTION_URL_PARAMS.page)) {
-    const page = Number(params.get(DATA_COLLECTION_URL_PARAMS.page))
-    if (Number.isInteger(page) && page >= 1) {
-      state.page = page
-    }
+  // `Number(null)` is 0, which this guard rejects along with page 0.
+  const page = Number(params.get(DATA_COLLECTION_URL_PARAMS.page))
+  if (Number.isInteger(page) && page >= 1) {
+    state.page = page
   }
 
-  if (params.has(DATA_COLLECTION_URL_PARAMS.preset)) {
-    const preset = params.get(DATA_COLLECTION_URL_PARAMS.preset)
-    if (preset) {
-      state.preset = preset
-    }
+  const preset = params.get(DATA_COLLECTION_URL_PARAMS.preset)
+  if (preset) {
+    state.preset = preset
   }
 
-  if (filtersDefinition) {
-    const filters: Record<string, unknown> = {}
-    let hasFilters = false
-    for (const [key, definition] of Object.entries(filtersDefinition)) {
-      const name = filterParamName(key)
-      if (!params.has(name)) {
-        continue
-      }
-      filters[key] = decodeFilterValue(
-        (definition as FilterDefinition).type,
-        params.getAll(name)
-      )
-      hasFilters = true
-    }
-    if (hasFilters) {
-      state.filters = filters as CurrentFiltersState
-    }
+  const filters = filtersDefinition
+    ? parseFilterParams<CurrentFiltersState>(params, filtersDefinition)
+    : undefined
+  if (filters) {
+    state.filters = filters
   }
 
   return state
