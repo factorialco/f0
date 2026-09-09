@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.91.0](https://github.com/factorialco/f0/compare/f0-react-v6.90.2...f0-react-v6.91.0) (2026-09-09)
+
+
+### Features
+
+* **WidgetContainer:** mark every widget's box, arrangeable or not ([#5467](https://github.com/factorialco/f0/issues/5467)) ([d6deeae](https://github.com/factorialco/f0/commit/d6deeae2a4a38f9520abd1b3ab55f4b09570aa4d))
+
 ## [6.90.2](https://github.com/factorialco/f0/compare/f0-react-v6.90.1...f0-react-v6.90.2) (2026-09-08)
 
 
