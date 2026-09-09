@@ -2219,6 +2219,8 @@ export declare type CalendarDate = {
 
 export declare type CalendarMode = "single" | "range";
 
+export declare type CalendarSelection = Date | DateRange | null;
+
 export declare type CalendarView = "day" | "month" | "year" | "week" | "quarter" | "halfyear" | "periods";
 
 /**
@@ -4236,7 +4238,7 @@ declare type DataCollectionStatus<CurrentFiltersState extends FiltersState<Filte
     grouping?: GroupingState<RecordType, GroupingDefinition<RecordType>>;
     sortings?: SortingsState<SortingsDefinition>;
     filters?: CurrentFiltersState;
-    search?: string | undefined;
+    search?: string;
     navigationFilters?: NavigationFiltersState<NavigationFiltersDefinition>;
     visualization?: number;
     /** Per-visualization filter states, keyed by visualization index.
@@ -5557,6 +5559,7 @@ export declare const defaultTranslations: {
         readonly removeNamedFile: "Remove {{name}}";
         readonly tooManyFilesError: "You can attach up to {{maxFiles}} files at once";
         readonly fileTooLargeError: "Each file must be {{maxFileSize}} or smaller";
+        readonly messageTooLongError: "Messages can be up to {{maxCharacters}} characters";
         readonly fileUploadError: "Upload failed";
         readonly micPermissionDenied: "Microphone access is blocked. Allow it in your browser settings to dictate.";
         readonly micError: "Couldn't access the microphone.";
@@ -8202,7 +8205,7 @@ export declare type F0AvatarIconProps = {
 } & Partial<Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">>;
 
 export declare const F0AvatarList: WithDataTestIdReturnType_4<    {
-({ avatars, size, type, noTooltip, remainingCount: initialRemainingCount, max, tooltipScroll, layout, }: F0AvatarListProps_2): JSX_2.Element;
+({ avatars, size, type, noTooltip, remainingCount: initialRemainingCount, max, tooltipScroll: _tooltipScroll, layout: _layout, }: F0AvatarListProps_2): JSX_2.Element;
 displayName: string;
 }>;
 
@@ -11033,112 +11036,112 @@ export declare namespace f0FormField {
         optional: true;
     }): z.ZodOptional<z.ZodString> & F0ZodType<z.ZodOptional<z.ZodString>>;
     export function text(config: TextConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodString & F0ZodType<z.ZodString>;
     /* Excluded from this release type: EmailConfig */
     export function email(config: EmailConfig & {
         optional: true;
     }): z.ZodOptional<z.ZodString> & F0ZodType<z.ZodOptional<z.ZodString>>;
     export function email(config: EmailConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodString & F0ZodType<z.ZodString>;
     /* Excluded from this release type: TextareaConfig */
     export function textarea(config: TextareaConfig & {
         optional: true;
     }): z.ZodOptional<z.ZodString> & F0ZodType<z.ZodOptional<z.ZodString>>;
     export function textarea(config: TextareaConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodString & F0ZodType<z.ZodString>;
     /* Excluded from this release type: NumberConfig */
     export function number(config: NumberConfig & {
         optional: true;
     }): z.ZodOptional<z.ZodNumber> & F0ZodType<z.ZodOptional<z.ZodNumber>>;
     export function number(config: NumberConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodNumber & F0ZodType<z.ZodNumber>;
     /* Excluded from this release type: SwitchConfig */
     export function boolean(config: SwitchConfig & {
         optional: true;
     }): z.ZodBoolean & F0ZodType<z.ZodBoolean>;
     export function boolean(config: SwitchConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodLiteral<true> & F0ZodType<z.ZodLiteral<true>>;
     /* Excluded from this release type: CheckboxConfig */
     export function checkbox(config: CheckboxConfig & {
         optional: true;
     }): z.ZodBoolean & F0ZodType<z.ZodBoolean>;
     export function checkbox(config: CheckboxConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodLiteral<true> & F0ZodType<z.ZodLiteral<true>>;
     /* Excluded from this release type: DateConfig */
     export function date(config: DateConfig & {
         optional: true;
     }): z.ZodOptional<z.ZodDate> & F0ZodType<z.ZodOptional<z.ZodDate>>;
     export function date(config: DateConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodDate & F0ZodType<z.ZodDate>;
     /* Excluded from this release type: UrlConfig */
     export function url(config: UrlConfig & {
         optional: true;
     }): z.ZodOptional<z.ZodString> & F0ZodType<z.ZodOptional<z.ZodString>>;
     export function url(config: UrlConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodString & F0ZodType<z.ZodString>;
     /* Excluded from this release type: MoneyConfig */
     export function money(config: MoneyConfig & {
         optional: true;
     }): z.ZodOptional<z.ZodNumber> & F0ZodType<z.ZodOptional<z.ZodNumber>>;
     export function money(config: MoneyConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodNumber & F0ZodType<z.ZodNumber>;
     /* Excluded from this release type: PercentageConfig */
     export function percentage(config: PercentageConfig & {
         optional: true;
     }): z.ZodOptional<z.ZodNumber> & F0ZodType<z.ZodOptional<z.ZodNumber>>;
     export function percentage(config: PercentageConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodNumber & F0ZodType<z.ZodNumber>;
     /* Excluded from this release type: CardSelectConfig */
     export function cardSelect<const V extends string>(config: CardSelectConfig<V> & {
         optional: true;
     }): z.ZodOptional<z.ZodEnum<[V, ...V[]]>> & F0ZodType<z.ZodOptional<z.ZodEnum<[V, ...V[]]>>>;
     export function cardSelect<const V extends string>(config: CardSelectConfig<V> & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodEnum<[V, ...V[]]> & F0ZodType<z.ZodEnum<[V, ...V[]]>>;
     /* Excluded from this release type: FileConfig */
     export function file(config: FileConfig & {
         optional: true;
     }): z.ZodOptional<z.ZodString> & F0ZodType<z.ZodOptional<z.ZodString>>;
     export function file(config: FileConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodString & F0ZodType<z.ZodString>;
     /* Excluded from this release type: MultiFileConfig */
     export function multiFile(config: MultiFileConfig & {
         optional: true;
     }): z.ZodOptional<z.ZodArray<z.ZodString>> & F0ZodType<z.ZodOptional<z.ZodArray<z.ZodString>>>;
     export function multiFile(config: MultiFileConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodArray<z.ZodString> & F0ZodType<z.ZodArray<z.ZodString>>;
     /* Excluded from this release type: TimeConfig */
     export function time(config: TimeConfig & {
         optional: true;
     }): z.ZodOptional<z.ZodDate> & F0ZodType<z.ZodOptional<z.ZodDate>>;
     export function time(config: TimeConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodDate & F0ZodType<z.ZodDate>;
     /* Excluded from this release type: DateTimeConfig */
     export function datetime(config: DateTimeConfig & {
         optional: true;
     }): z.ZodOptional<z.ZodDate> & F0ZodType<z.ZodOptional<z.ZodDate>>;
     export function datetime(config: DateTimeConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodDate & F0ZodType<z.ZodDate>;
     /* Excluded from this release type: DurationConfig */
     export function duration(config: DurationConfig & {
         optional: true;
     }): z.ZodOptional<z.ZodNumber> & F0ZodType<z.ZodOptional<z.ZodNumber>>;
     export function duration(config: DurationConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodNumber & F0ZodType<z.ZodNumber>;
     /* Excluded from this release type: DateRangeObjectSchema */
     /* Excluded from this release type: DateRangeConfig */
@@ -11146,7 +11149,7 @@ export declare namespace f0FormField {
         optional: true;
     }): z.ZodOptional<DateRangeObjectSchema> & F0ZodType<z.ZodOptional<DateRangeObjectSchema>>;
     export function dateRange(config: DateRangeConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): DateRangeObjectSchema & F0ZodType<DateRangeObjectSchema>;
     /* Excluded from this release type: PeriodValueSchema */
     /* Excluded from this release type: DatePeriodConfig */
@@ -11154,7 +11157,7 @@ export declare namespace f0FormField {
         optional: true;
     }): z.ZodOptional<z.ZodNullable<PeriodValueSchema>> & F0ZodType<z.ZodOptional<z.ZodNullable<PeriodValueSchema>>>;
     export function datePeriod(config: DatePeriodConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): PeriodValueSchema & F0ZodType<PeriodValueSchema>;
     export type PhoneObjectSchema = z.ZodEffects<z.ZodObject<{
         prefix: z.ZodOptional<z.ZodString>;
@@ -11176,7 +11179,7 @@ export declare namespace f0FormField {
         optional: true;
     }): z.ZodOptional<PhoneObjectSchema> & F0ZodType<z.ZodOptional<PhoneObjectSchema>>;
     export function phone(config: PhoneFieldShortcutConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): PhoneObjectSchema & F0ZodType<PhoneObjectSchema>;
     /* Excluded from this release type: RichTextObjectSchema */
     /* Excluded from this release type: RichTextConfig */
@@ -11184,7 +11187,7 @@ export declare namespace f0FormField {
         optional: true;
     }): z.ZodOptional<RichTextObjectSchema> & F0ZodType<z.ZodOptional<RichTextObjectSchema>>;
     export function richText(config: RichTextConfig & {
-        optional?: false | undefined;
+        optional?: false;
     }): RichTextObjectSchema & F0ZodType<RichTextObjectSchema>;
     /* Excluded from this release type: SelectConfig */
     export function select<const V extends string, R extends Record<string, unknown> = Record<string, unknown>>(config: SelectConfig<R> & {
@@ -11197,13 +11200,13 @@ export declare namespace f0FormField {
         options: ({
             value: V;
         } & Record<string, unknown>)[];
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodEnum<[V, ...V[]]> & F0ZodType<z.ZodEnum<[V, ...V[]]>>;
     export function select<R extends Record<string, unknown> = Record<string, unknown>>(config: SelectConfig<R> & {
         optional: true;
     }): z.ZodOptional<z.ZodString> & F0ZodType<z.ZodOptional<z.ZodString>>;
     export function select<R extends Record<string, unknown> = Record<string, unknown>>(config: SelectConfig<R> & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodString & F0ZodType<z.ZodString>;
     /* Excluded from this release type: MultiSelectConfig */
     export function multiSelect<const V extends string>(config: Omit<MultiSelectConfig, "options"> & {
@@ -11216,13 +11219,13 @@ export declare namespace f0FormField {
         options: ({
             value: V;
         } & Record<string, unknown>)[];
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodArray<z.ZodEnum<[V, ...V[]]>> & F0ZodType<z.ZodArray<z.ZodEnum<[V, ...V[]]>>>;
     export function multiSelect<V extends string | number = string, R extends Record<string, unknown> = Record<string, unknown>>(config: MultiSelectConfig<V, R> & {
         optional: true;
     }): z.ZodOptional<z.ZodArray<z.ZodString>> & F0ZodType<z.ZodOptional<z.ZodArray<z.ZodString>>>;
     export function multiSelect<V extends string | number = string, R extends Record<string, unknown> = Record<string, unknown>>(config: MultiSelectConfig<V, R> & {
-        optional?: false | undefined;
+        optional?: false;
     }): z.ZodArray<z.ZodString> & F0ZodType<z.ZodArray<z.ZodString>>;
     /* Excluded from this release type: EntitiesListBaseConfig */
     /* Excluded from this release type: EntitiesListSingleConfig */
@@ -11263,13 +11266,13 @@ export declare namespace f0FormField {
         optional: true;
     }): OptionalEntitiesListArray<TItem> & F0ZodType<z.ZodOptional<z.ZodArray<TItem>>>;
     export function entitiesList<TItem extends z.ZodObject<z.ZodRawShape>>(config: EntitiesListSingleConfig<TItem> & {
-        optional?: false | undefined;
+        optional?: false;
     }): EntitiesListArray<TItem> & F0ZodType<z.ZodArray<TItem>>;
     export function entitiesList<TCreate extends z.ZodObject<z.ZodRawShape>, TUpdate extends z.ZodObject<z.ZodRawShape>>(config: EntitiesListFormDefsConfig<TCreate, TUpdate> & {
         optional: true;
     }): OptionalEntitiesListArray<TUpdate> & F0ZodType<z.ZodOptional<z.ZodArray<TUpdate>>>;
     export function entitiesList<TCreate extends z.ZodObject<z.ZodRawShape>, TUpdate extends z.ZodObject<z.ZodRawShape>>(config: EntitiesListFormDefsConfig<TCreate, TUpdate> & {
-        optional?: false | undefined;
+        optional?: false;
     }): EntitiesListArray<TUpdate> & F0ZodType<z.ZodArray<TUpdate>>;
         {};
 }
@@ -14195,7 +14198,7 @@ export declare const getDataCollectionStorageKey: (id: string) => string;
  * @returns The pagination type of the data adapter
  */
 export declare const getDataSourcePaginationType: <D extends {
-    paginationType?: PaginationType | undefined;
+    paginationType?: PaginationType;
 }>(dataAdapter: D) => PaginationType;
 
 export declare function getEmojiLabel(emoji: string): string;
@@ -14242,9 +14245,9 @@ export declare interface GranularityDefinition {
         max?: Date;
     } | undefined;
     label: (viewDate: Date, i18n: TranslationsType, locale?: string) => ReactNode;
-    toRangeString: (date: Date | DateRange | undefined | null, i18n: TranslationsType, format?: DateStringFormat) => DateRangeString;
-    toRange: <T extends Date | DateRange | undefined | null>(date: T) => T extends Date | DateRange ? DateRangeComplete : T;
-    toString: (date: Date | DateRange | undefined | null, i18n: TranslationsType, format?: DateStringFormat, locale?: string) => string;
+    toRangeString: (date: OptionalCalendarSelection, i18n: TranslationsType, format?: DateStringFormat) => DateRangeString;
+    toRange: <T extends OptionalCalendarSelection>(date: T) => T extends Date | DateRange ? DateRangeComplete : T;
+    toString: (date: OptionalCalendarSelection, i18n: TranslationsType, format?: DateStringFormat, locale?: string) => string;
     toStringMaxWidth: () => number;
     placeholder: () => string;
     fromString: (dateStr: string | DateRangeString, i18n: TranslationsType) => DateRange | null;
@@ -14253,8 +14256,8 @@ export declare interface GranularityDefinition {
     getViewDateFromDate: (date: Date) => Date;
     render: (renderProps: {
         mode: CalendarMode;
-        selected: Date | DateRange | null;
-        onSelect: (date: Date | DateRange | null) => void;
+        selected: CalendarSelection;
+        onSelect: (date: CalendarSelection) => void;
         month: Date;
         onMonthChange: (date: Date) => void;
         motionDirection: number;
@@ -15035,7 +15038,7 @@ declare type InputFieldProps<T> = {
     onClickPlaceholder?: () => void;
     onClickChildren?: () => void;
     onClickContent?: () => void;
-    value?: T | undefined;
+    value?: T;
     onChange?: (value: T) => void;
     size?: InputFieldSize;
     error?: string | boolean;
@@ -15955,6 +15958,12 @@ export declare interface NotesTextEditorSnapshot {
 declare type NotificationDialogBaseOptions = Optional<Pick<DialogDefinition, "id" | "title">, "id"> & {
     msg: string;
     type?: DialogNotificationType;
+    /**
+     * Renders a dismiss (X) control in the dialog's top-right corner. Lets a notification offer a
+     * way out without spending a button on "Cancel".
+     * @default false
+     */
+    dismissable?: boolean;
 };
 
 export declare type NotificationDialogOptions = NotificationDialogBaseOptions & {
@@ -16310,9 +16319,9 @@ export declare const OneCalendarInternal: ({ mode, view, onSelect, defaultMonth,
 export declare interface OneCalendarInternalProps {
     mode: CalendarMode;
     view: CalendarView;
-    onSelect?: (date: Date | DateRange | null) => void;
+    onSelect?: (date: CalendarSelection) => void;
     defaultMonth?: Date;
-    defaultSelected?: Date | DateRange | null;
+    defaultSelected?: CalendarSelection;
     showNavigation?: boolean;
     showInput?: boolean;
     minDate?: Date;
@@ -16548,6 +16557,8 @@ export declare type OpenFormWizardResult<T extends F0FormSchema_2 | F0PerSection
 };
 
 declare type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
+
+export declare type OptionalCalendarSelection = CalendarSelection | undefined;
 
 /** Overflow values */
 export declare type OverflowToken = "visible" | "hidden" | "auto" | "scroll";
@@ -20605,9 +20616,11 @@ declare namespace Calendar {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        aiBlock: {
-            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
-            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -20615,11 +20628,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        aiBlock: {
+            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
+            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
         };
     }
 }
