@@ -158,6 +158,7 @@ export const F0AiChatTextArea = ({
     inputValue,
     setInputValue,
     cursorPosition,
+    setCursorPosition,
     searchPersons,
     textareaRef,
   })
@@ -302,7 +303,7 @@ export const F0AiChatTextArea = ({
         }
       }
 
-      const transformed = mentions.transformMentions(inputValue.trim())
+      const transformed = mentions.transformMentions().trim()
       // Escape markdown/HTML in the user's own text so `*hola*` stays literal
       // and only features we control (@mentions) produce rich rendering.
       const safeUserText = escapeUserText(transformed)

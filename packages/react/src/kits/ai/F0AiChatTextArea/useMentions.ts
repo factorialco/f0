@@ -1,6 +1,14 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
 import type { PersonProfile } from "../F0AiChat/types"
 import { escapeXml } from "./highlight-utils"
+import { anchorEnd, eraseSpans, reanchor } from "./mention-anchors"
 
 /**
  * A tracked mention in the textarea text.
@@ -12,13 +20,32 @@ export type MentionEntry = {
   name: string
 }
 
+/**
+ * A tracked mention plus where its `@name` sits in the textarea text.
+ *
+ * The anchor is what makes a mention a token rather than a substring: it is
+ * maintained across edits instead of being re-derived from the text, so a
+ * mention survives whatever follows it (a comma, the end of the message), and
+ * an edit landing inside it removes the whole thing instead of dropping the id
+ * and leaving a broken name behind.
+ */
+export type AnchoredMention = MentionEntry & {
+  /** Index of the `@` in the textarea text. */
+  start: number
+}
+
 export type UseMentionsOptions = {
   /** Current textarea value (controlled) */
   inputValue: string
-  /** Setter for the textarea value */
+  /** Setter for the textarea value. Writes are assumed to land: the anchors are
+   * re-indexed against the value the hook just asked for, so a parent that
+   * rejects or rewrites one would leave them indexed against a string that
+   * never reached the textarea. */
   setInputValue: (value: string) => void
   /** Cursor position (selectionStart) in the textarea */
   cursorPosition: number
+  /** Setter for the cursor position — used when removing a mention moves it */
+  setCursorPosition: (position: number) => void
   /** Search function for person mentions (@mention autocomplete) */
   searchPersons?: (query: string) => Promise<PersonProfile[]>
   /** Ref to the textarea element for reading selection */
@@ -36,8 +63,8 @@ export type UseMentionsReturn = {
   isLoading: boolean
   /** Currently highlighted index in the results list */
   selectedIndex: number
-  /** Active mentions in the current text */
-  mentions: MentionEntry[]
+  /** Active mentions, anchored in the current text */
+  mentions: AnchoredMention[]
   /** Pixel position for the popover, relative to the textarea's offset parent */
   popoverPosition: PopoverPosition
   /**
@@ -51,8 +78,8 @@ export type UseMentionsReturn = {
   handleKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => boolean
   /** Select a person from the results list */
   selectPerson: (person: PersonProfile) => void
-  /** Transform text, replacing @Name mentions with <entity-ref> tags */
-  transformMentions: (text: string) => string
+  /** The current text with each anchored mention as an <entity-ref> tag */
+  transformMentions: () => string
   /** Close the popover */
   close: () => void
 }
@@ -61,12 +88,13 @@ export type UseMentionsReturn = {
  * Finds the active @ trigger near the cursor.
  * Returns the start index of @ and the query string, or null if no active trigger.
  *
- * Skips @ signs that belong to already-completed mentions (tracked in `mentions`).
+ * An `@` that starts an anchored mention never re-opens the popover: that token
+ * is already resolved.
  */
 function findAtTrigger(
   text: string,
   cursorPos: number,
-  mentions: MentionEntry[]
+  anchored: AnchoredMention[]
 ): { atIndex: number; query: string } | null {
   // Search backwards from cursor for @
   const textBeforeCursor = text.slice(0, cursorPos)
@@ -93,25 +121,8 @@ function findAtTrigger(
     return null
   }
 
-  // Skip if the text after @ matches an already-completed mention AND the
-  // cursor is past the mention with a word-boundary separator after it.
-  // This means "@Name " (with trailing space) is skipped, but "@Name" with
-  // cursor right at the end is NOT skipped — allowing the user to backspace
-  // into a mention and re-trigger search.
-  for (const mention of mentions) {
-    const afterAt = text.slice(atIndex + 1)
-    const mentionEnd = atIndex + 1 + mention.name.length
-    if (afterAt.startsWith(mention.name) && cursorPos >= mentionEnd) {
-      // Only skip if there is a separator after the mention name
-      const charAfterMention = text[mentionEnd]
-      if (
-        charAfterMention === " " ||
-        charAfterMention === "\n" ||
-        charAfterMention === "\t"
-      ) {
-        return null
-      }
-    }
+  if (anchored.some((mention) => mention.start === atIndex)) {
+    return null
   }
 
   return { atIndex, query }
@@ -206,6 +217,7 @@ export function useMentions({
   inputValue,
   setInputValue,
   cursorPosition,
+  setCursorPosition,
   searchPersons,
   textareaRef,
 }: UseMentionsOptions): UseMentionsReturn {
@@ -214,7 +226,70 @@ export function useMentions({
   const [results, setResults] = useState<PersonProfile[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(0)
-  const [mentions, setMentions] = useState<MentionEntry[]>([])
+  const [mentions, setMentions] = useState<AnchoredMention[]>([])
+
+  // The reconciler and `selectPerson` read the anchors without depending on
+  // them, so state and ref are written together and the ref is the source.
+  const mentionsRef = useRef<AnchoredMention[]>(mentions)
+  // Re-anchoring runs on every keystroke and usually produces the same anchors
+  // in a new array. Keeping the old reference when nothing moved saves a state
+  // write per character, and lets callers treat a new identity as real news.
+  const commitMentions = useCallback((next: AnchoredMention[]) => {
+    const current = mentionsRef.current
+    const unchanged =
+      current.length === next.length &&
+      current.every((mention, i) => {
+        const candidate = next[i]
+        return (
+          candidate !== undefined &&
+          candidate.id === mention.id &&
+          candidate.name === mention.name &&
+          candidate.start === mention.start
+        )
+      })
+    if (unchanged) {
+      return
+    }
+    mentionsRef.current = next
+    setMentions(next)
+  }, [])
+
+  // The text the anchors are valid for. Every writer to the textarea value goes
+  // through the reconciler below, which compares against this.
+  const prevValueRef = useRef(inputValue)
+
+  // A caret the hook wants applied once React has written `forText`. Setting a
+  // selection before the value is committed aims it at the old string, and the
+  // write then drops the caret at the end of the text.
+  const pendingSelectionRef = useRef<{
+    caret: number
+    forText: string
+    focus: boolean
+  } | null>(null)
+  const requestSelection = useCallback(
+    (caret: number, forText: string, focus = false) => {
+      pendingSelectionRef.current = { caret, forText, focus }
+    },
+    []
+  )
+  // Every commit, not only the ones that change the value: picking a person the
+  // composer had already spelled out in full writes the same string back, and
+  // that request still has to return focus from the clicked popover row. A
+  // request waits until its own text is on screen rather than being spent on
+  // the first commit that is not it, so a parent that applies the write a
+  // render later still gets its caret.
+  useLayoutEffect(() => {
+    const pending = pendingSelectionRef.current
+    const textarea = textareaRef.current
+    if (!pending || !textarea || pending.forText !== inputValue) {
+      return
+    }
+    pendingSelectionRef.current = null
+    if (pending.focus) {
+      textarea.focus()
+    }
+    textarea.setSelectionRange(pending.caret, pending.caret)
+  })
 
   // Track the position of the @ that triggered the current search
   const atIndexRef = useRef<number>(-1)
@@ -322,25 +397,41 @@ export function useMentions({
 
       setInputValue(newValue)
 
-      // Track this mention
-      setMentions((prev) => {
-        // Avoid duplicate mention for same person in same position
-        const filtered = prev.filter((m) => !(m.id === id && m.name === name))
-        return [...filtered, { id, name }]
-      })
+      // The trigger span becomes the inserted token, so anchors past it slide
+      // and any the trigger overlapped are gone. It is measured from the same
+      // clamped slices the new text is built from, never from the recorded
+      // indices: `atIndexRef` and the caret are read from an earlier render and
+      // both outlive a value that has since shrunk under them — the popover can
+      // still be open on a trigger the text no longer has. An anchor taken from
+      // the stale index would point past its own `@`, and an anchor that does
+      // not sit on its name is dropped from the sent payload without a word.
+      const triggerStart = before.length
+      const triggerEnd = Math.min(cursorPosition, inputValue.length)
+      const shift = insertedText.length - (triggerEnd - triggerStart)
+      const anchored = mentionsRef.current
+        .filter((m) => anchorEnd(m) <= triggerStart || m.start >= triggerEnd)
+        .map((m) =>
+          m.start >= triggerEnd ? { ...m, start: m.start + shift } : m
+        )
+      anchored.push({ id, name, start: triggerStart })
+      anchored.sort((a, b) => a.start - b.start)
+      prevValueRef.current = newValue
+      commitMentions(anchored)
 
       close()
 
-      // Restore cursor position after React re-render
-      requestAnimationFrame(() => {
-        const textarea = textareaRef.current
-        if (textarea) {
-          textarea.focus()
-          textarea.setSelectionRange(newCursorPos, newCursorPos)
-        }
-      })
+      // Focus too: the person may have been clicked, which took focus to the
+      // popover row.
+      requestSelection(newCursorPos, newValue, true)
     },
-    [inputValue, cursorPosition, setInputValue, textareaRef, close]
+    [
+      inputValue,
+      cursorPosition,
+      setInputValue,
+      close,
+      commitMentions,
+      requestSelection,
+    ]
   )
 
   const handleKeyDown = useCallback(
@@ -403,56 +494,78 @@ export function useMentions({
   )
 
   /**
-   * Transform the input text by replacing @Name patterns (that match
-   * tracked mentions) with <entity-ref> tags before sending to the agent.
+   * The current textarea text with each anchored mention replaced by an
+   * `<entity-ref>` tag, ready to send to the agent.
+   *
+   * It takes no text on purpose: the anchors index the raw value, so a caller
+   * handing in a trimmed or otherwise derived copy would silently read them at
+   * the wrong offsets. An anchor is verified against the text before it is
+   * applied — the same test the overlay uses, so the two cannot disagree about
+   * which glyphs are a mention.
    */
-  const transformMentions = useCallback(
-    (text: string): string => {
-      if (mentions.length === 0) {
-        return text
+  const transformMentions = useCallback((): string => {
+    const text = inputValue
+    if (mentions.length === 0) {
+      return text
+    }
+
+    const ordered = [...mentions].sort((a, b) => a.start - b.start)
+
+    let result = ""
+    let cursor = 0
+    for (const mention of ordered) {
+      const pattern = `@${mention.name}`
+      if (mention.start < cursor || !text.startsWith(pattern, mention.start)) {
+        continue
       }
+      result += text.slice(cursor, mention.start)
+      result += `<entity-ref type="person" id="${escapeXml(mention.id)}">${escapeXml(mention.name)}</entity-ref>`
+      cursor = mention.start + pattern.length
+    }
+    return result + text.slice(cursor)
+  }, [inputValue, mentions])
 
-      let result = text
-
-      // Sort mentions by name length descending to avoid partial replacements
-      const sorted = [...mentions].sort((a, b) => b.name.length - a.name.length)
-
-      for (const mention of sorted) {
-        // Replace all occurrences of @Name with entity-ref
-        const pattern = `@${mention.name}`
-        const replacement = `<entity-ref type="person" id="${escapeXml(mention.id)}">${escapeXml(mention.name)}</entity-ref>`
-
-        // Replace all occurrences
-        while (result.includes(pattern)) {
-          result = result.replace(pattern, replacement)
-        }
-      }
-
-      return result
-    },
-    [mentions]
-  )
-
-  // Clean up mentions that no longer exist in the text, or where the user
-  // is actively editing them (backspaced into the mention, removing the
-  // trailing separator). This re-enables trigger detection for that @.
+  // Keep the anchors on the text as it changes, and take a mention out whole
+  // when an edit lands inside it — a half-typed name is not a mention, and
+  // leaving one behind is what silently dropped the id before.
   useEffect(() => {
-    setMentions((prev) =>
-      prev.filter((m) => {
-        const pattern = `@${m.name}`
-        const idx = inputValue.indexOf(pattern)
-        if (idx === -1) {
-          return false
-        }
+    const prev = prevValueRef.current
+    if (prev === inputValue) {
+      return
+    }
+    prevValueRef.current = inputValue
 
-        // A mention is only "completed" when it has a word-boundary separator
-        // right after it. If the separator was deleted, the user is editing
-        // the mention and we should remove it to re-enable search.
-        const charAfter = inputValue[idx + pattern.length]
-        return charAfter === " " || charAfter === "\n" || charAfter === "\t"
-      })
-    )
-  }, [inputValue])
+    const anchored = mentionsRef.current
+    if (anchored.length === 0) {
+      return
+    }
+
+    const { kept, touched } = reanchor(prev, inputValue, anchored)
+    if (touched.length === 0) {
+      commitMentions(kept)
+      return
+    }
+
+    const erased = eraseSpans(inputValue, touched, kept, cursorPosition)
+    commitMentions(erased.mentions)
+    if (erased.text === inputValue) {
+      return
+    }
+    prevValueRef.current = erased.text
+    setInputValue(erased.text)
+    setCursorPosition(erased.caret)
+    // Removing a mention leaves the caret where the mention was, not at the end
+    // of the text — the edit happened here, and the rest of a multi-line draft
+    // is not where the user was looking.
+    requestSelection(erased.caret, erased.text)
+  }, [
+    inputValue,
+    cursorPosition,
+    setInputValue,
+    setCursorPosition,
+    commitMentions,
+    requestSelection,
+  ])
 
   // Compute popover position: pixel coordinates of the @ character
   // relative to the textarea, then offset so the popover sits above it.
