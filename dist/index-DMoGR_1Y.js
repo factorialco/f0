@@ -1,4 +1,4 @@
-import { m as L } from "./F0CanvasPanel-CfLlu11B.js";
+import { m as L } from "./F0CanvasPanel-CkjDoK5W.js";
 const O = (e) => e.map(([n, s]) => ({ lat: s, lng: n })), x = (e, n) => ({
   strokeColor: n && e.hover?.color || e.color,
   strokeWeight: n && e.hover?.width || e.width,
@@ -51,7 +51,7 @@ let f;
 const k = (e) => f || (f = new Promise((n, s) => {
   const a = window;
   a[w] = () => {
-    delete a[w], n();
+    Reflect.deleteProperty(a, w), n();
   };
   const i = document.createElement("script");
   i.async = !0, i.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(e)}&v=weekly&libraries=maps&callback=${w}`, i.onerror = () => {
@@ -146,7 +146,7 @@ const k = (e) => f || (f = new Promise((n, s) => {
   zoom: "zoom_changed",
   click: "click",
   styled: "idle"
-}, b = 5.3, _ = 11 - b, F = (e) => {
+}, b = 5.3, R = 11 - b, _ = (e) => {
   const n = document.createElement("div");
   n.style.cssText = "position:absolute;inset:0", e.container.appendChild(n);
   const s = new google.maps.Map(n, {
@@ -237,14 +237,14 @@ const k = (e) => f || (f = new Promise((n, s) => {
       });
       if (!y)
         return null;
-      const h = t?.gutter ?? 0, z = Math.max(Math.max(...o) - Math.min(...o), 1), Z = Math.max(Math.max(...d) - Math.min(...d), 1), M = {
+      const h = t?.gutter ?? 0, z = Math.max(Math.max(...o) - Math.min(...o), 1), P = Math.max(Math.max(...d) - Math.min(...d), 1), M = {
         width: Math.max(e.container.clientWidth - h * 2, 1),
         height: Math.max(e.container.clientHeight - h * 2, 1)
-      }, j = Math.min(M.width / z, M.height / Z), P = Math.min(
-        (s.getZoom() ?? e.zoom) + Math.log2(j),
+      }, Z = Math.min(M.width / z, M.height / P), j = Math.min(
+        (s.getZoom() ?? e.zoom) + Math.log2(Z),
         t?.maxZoom ?? 1 / 0
       );
-      return { center: y, zoom: P };
+      return { center: y, zoom: j };
     },
     addDomMarker: a.add,
     setLines: (r, t) => i.set(r, t?.onClick),
@@ -259,7 +259,7 @@ const k = (e) => f || (f = new Promise((n, s) => {
           `height:${b * 2}px`,
           "border-radius:50%",
           `background:hsl(${L.malibu[60]})`,
-          `box-shadow:0 0 0 ${_}px hsl(${L.malibu[50]} / 0.3)`,
+          `box-shadow:0 0 0 ${R}px hsl(${L.malibu[50]} / 0.3)`,
           "pointer-events:none"
         ].join(";"), p = a.add(l, r);
         return;
@@ -276,14 +276,14 @@ const k = (e) => f || (f = new Promise((n, s) => {
     setGlobeProjection: () => {
     }
   };
-}, I = async (e) => {
+}, G = async (e) => {
   if (!e?.apiKey)
     throw new Error(
       "F0Map: the google provider needs an apiKey on <F0Provider map={{ ... }}>."
     );
-  return await k(e.apiKey), F;
+  return await k(e.apiKey), _;
 };
 export {
-  F as createGoogleAdapter,
-  I as loadGoogleAdapter
+  _ as createGoogleAdapter,
+  G as loadGoogleAdapter
 };
