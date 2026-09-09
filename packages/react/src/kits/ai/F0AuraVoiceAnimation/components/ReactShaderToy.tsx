@@ -38,6 +38,29 @@ function isVectorListType(t: string, v: number[] | number): v is number[] {
     v.length > Number.parseInt(t.charAt(0), 10)
   )
 }
+
+/**
+ * The GLSL array suffix for a uniform that holds more than one value — a list
+ * of matrices, or of vectors. `undefined` for a single value.
+ */
+function uniformArraySize(
+  type: string,
+  value: number[] | number
+): string | undefined {
+  if (isMatrixType(type, value)) {
+    // "Matrix3fv" and friends: the order is the digit before the "fv".
+    const order = Number.parseInt(type.charAt(type.length - 3), 10)
+    if (value.length > order * order) {
+      return `[${Math.floor(value.length / (order * order))}]`
+    }
+    return undefined
+  }
+  if (isVectorListType(type, value)) {
+    const components = Number.parseInt(type.charAt(0), 10)
+    return `[${Math.floor(value.length / components)}]`
+  }
+  return undefined
+}
 function isVectorType(t: string, v: number[] | number): v is Vector4 {
   return (
     !t.includes("v") &&
@@ -739,34 +762,25 @@ export function ReactShaderToy({
   }
 
   const processCustomUniforms = () => {
-    if (propUniforms) {
-      for (const name of Object.keys(propUniforms)) {
-        const uniform = propUniforms[name]
-        if (!uniform) {
-          continue
-        }
-        const { value, type } = uniform
-        const glslType = uniformTypeToGLSLType(type)
-        if (!glslType) {
-          continue
-        }
-        const tempObject: { arraySize?: string } = {}
-        if (isMatrixType(type, value)) {
-          const arrayLength = type.length
-          const val = Number.parseInt(type.charAt(arrayLength - 3), 10)
-          const numberOfMatrices = Math.floor(value.length / (val * val))
-          if (value.length > val * val) {
-            tempObject.arraySize = `[${numberOfMatrices}]`
-          }
-        } else if (isVectorListType(type, value)) {
-          tempObject.arraySize = `[${Math.floor(value.length / Number.parseInt(type.charAt(0), 10))}]`
-        }
-        uniformsRef.current[name] = {
-          type: glslType,
-          isNeeded: false,
-          value,
-          ...tempObject,
-        }
+    if (!propUniforms) {
+      return
+    }
+    for (const name of Object.keys(propUniforms)) {
+      const uniform = propUniforms[name]
+      if (!uniform) {
+        continue
+      }
+      const { value, type } = uniform
+      const glslType = uniformTypeToGLSLType(type)
+      if (!glslType) {
+        continue
+      }
+      const arraySize = uniformArraySize(type, value)
+      uniformsRef.current[name] = {
+        type: glslType,
+        isNeeded: false,
+        value,
+        ...(arraySize ? { arraySize } : {}),
       }
     }
   }

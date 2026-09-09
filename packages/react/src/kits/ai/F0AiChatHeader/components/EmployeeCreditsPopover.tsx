@@ -22,6 +22,103 @@ type EmployeeCreditsPopoverProps = {
 }
 
 /**
+ * The allocation panel: the skeleton while it loads, the error, or the bar
+ * and its two readings.
+ */
+const CreditsUsagePanel = ({
+  loading,
+  error,
+  data,
+}: {
+  loading: boolean
+  error: boolean
+  data: EmployeeCreditsUsage | null
+}) => {
+  const i18n = useI18n()
+  const reduceMotion = useReducedMotion()
+
+  const percentage =
+    data && data.total > 0
+      ? Math.min(100, Math.round((data.used / data.total) * 100))
+      : 0
+  const remaining = data ? Math.max(0, data.total - data.used) : 0
+
+  /** The allocation panel: loading, the error, or the bar and its readings. */
+
+  return (
+    <div className="flex flex-col rounded border border-solid border-f1-border-secondary">
+      <div className="flex flex-col gap-2 p-3">
+        {loading ? (
+          <div
+            className="flex flex-col gap-2"
+            aria-busy="true"
+            aria-live="polite"
+          >
+            <div className="flex justify-between">
+              <div className="h-5 w-16 animate-pulse rounded bg-f1-background-secondary" />
+              <div className="h-5 w-20 animate-pulse rounded bg-f1-background-secondary" />
+            </div>
+            <div className="h-2 w-full animate-pulse rounded-full bg-f1-background-secondary" />
+            <div className="flex items-center gap-1.5">
+              <div className="h-2 w-2 animate-pulse rounded-full bg-f1-background-secondary" />
+              <div className="h-3 w-28 animate-pulse rounded bg-f1-background-secondary" />
+            </div>
+          </div>
+        ) : null}
+        {error ? (
+          <span className="text-sm text-f1-foreground-secondary">
+            {i18n.t("ai.credits.creditsError")}
+          </span>
+        ) : null}
+        {!loading && !error && data ? (
+          <div className="flex flex-col gap-2">
+            <div className="flex justify-between">
+              <span className="text-base font-medium text-f1-foreground">
+                {i18n.t("ai.credits.employeeCredits")}
+              </span>
+              <span className="font-medium text-f1-foreground-secondary">
+                {i18n.t("ai.credits.creditsLeft", {
+                  total: remaining.toLocaleString(),
+                })}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="relative h-2 w-full overflow-hidden rounded-full bg-f1-background-secondary">
+                <motion.div
+                  className="h-full rounded-full"
+                  style={{
+                    width: `${percentage}%`,
+                    backgroundImage: CREDITS_GRADIENT,
+                    backgroundSize: "300% 100%",
+                  }}
+                  animate={
+                    reduceMotion
+                      ? undefined
+                      : { backgroundPosition: ["0% 0%", "100% 0%"] }
+                  }
+                  transition={{
+                    duration: reduceMotion ? 0 : 4,
+                    ease: "linear",
+                    repeat: reduceMotion ? 0 : Infinity,
+                    repeatType: "reverse",
+                  }}
+                />
+              </div>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="h-2 w-2 rounded-full bg-f1-border" />
+              <span className="text-sm tabular-nums text-f1-foreground-secondary">
+                {i18n.t("ai.credits.monthlyCredits")}
+              </span>
+            </div>
+          </div>
+        ) : null}
+      </div>
+    </div>
+  )
+}
+
+/**
  * Employee-only credits popover.
  *
  * Rendered when the host passes `employeeCredits` to the AI provider.
@@ -40,7 +137,6 @@ export function EmployeeCreditsPopover({
   trigger,
 }: EmployeeCreditsPopoverProps) {
   const i18n = useI18n()
-  const reduceMotion = useReducedMotion()
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(false)
@@ -74,12 +170,6 @@ export function EmployeeCreditsPopover({
   }
 
   const hasHeader = !!employeeCredits.companyName
-  const percentage =
-    data && data.total > 0
-      ? Math.min(100, Math.round((data.used / data.total) * 100))
-      : 0
-  const remaining = data ? Math.max(0, data.total - data.used) : 0
-
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
@@ -123,75 +213,7 @@ export function EmployeeCreditsPopover({
             </div>
           </div>
         ) : null}
-        <div className="flex flex-col rounded border border-solid border-f1-border-secondary">
-          <div className="flex flex-col gap-2 p-3">
-            {loading ? (
-              <div
-                className="flex flex-col gap-2"
-                aria-busy="true"
-                aria-live="polite"
-              >
-                <div className="flex justify-between">
-                  <div className="h-5 w-16 animate-pulse rounded bg-f1-background-secondary" />
-                  <div className="h-5 w-20 animate-pulse rounded bg-f1-background-secondary" />
-                </div>
-                <div className="h-2 w-full animate-pulse rounded-full bg-f1-background-secondary" />
-                <div className="flex items-center gap-1.5">
-                  <div className="h-2 w-2 animate-pulse rounded-full bg-f1-background-secondary" />
-                  <div className="h-3 w-28 animate-pulse rounded bg-f1-background-secondary" />
-                </div>
-              </div>
-            ) : null}
-            {error ? (
-              <span className="text-sm text-f1-foreground-secondary">
-                {i18n.t("ai.credits.creditsError")}
-              </span>
-            ) : null}
-            {!loading && !error && data ? (
-              <div className="flex flex-col gap-2">
-                <div className="flex justify-between">
-                  <span className="text-base font-medium text-f1-foreground">
-                    {i18n.t("ai.credits.employeeCredits")}
-                  </span>
-                  <span className="font-medium text-f1-foreground-secondary">
-                    {i18n.t("ai.credits.creditsLeft", {
-                      total: remaining.toLocaleString(),
-                    })}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="relative h-2 w-full overflow-hidden rounded-full bg-f1-background-secondary">
-                    <motion.div
-                      className="h-full rounded-full"
-                      style={{
-                        width: `${percentage}%`,
-                        backgroundImage: CREDITS_GRADIENT,
-                        backgroundSize: "300% 100%",
-                      }}
-                      animate={
-                        reduceMotion
-                          ? undefined
-                          : { backgroundPosition: ["0% 0%", "100% 0%"] }
-                      }
-                      transition={{
-                        duration: reduceMotion ? 0 : 4,
-                        ease: "linear",
-                        repeat: reduceMotion ? 0 : Infinity,
-                        repeatType: "reverse",
-                      }}
-                    />
-                  </div>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <div className="h-2 w-2 rounded-full bg-f1-border" />
-                  <span className="text-sm tabular-nums text-f1-foreground-secondary">
-                    {i18n.t("ai.credits.monthlyCredits")}
-                  </span>
-                </div>
-              </div>
-            ) : null}
-          </div>
-        </div>
+        <CreditsUsagePanel loading={loading} error={error} data={data} />
       </PopoverContent>
     </Popover>
   )

@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useRef, useState } from "react"
-import { F0Button } from "@/components/F0Button"
+import { F0Button, type F0ButtonProps } from "@/components/F0Button"
 import { Dropdown } from "@/experimental/Navigation/Dropdown"
 import { Widget, WidgetProps } from "@/experimental/Widgets/Widget"
 import { Check, ChevronDown } from "@/icons/app"
@@ -20,6 +20,7 @@ import {
   type SlotRenderers,
   type WidgetParams,
 } from "../slotRenderers"
+import { useHomeWidgetTracking } from "../tracking"
 
 /**
  * SlotWidget — one Home widget rendered from data: the f0 `Widget` frame (the
@@ -287,6 +288,7 @@ export function SlotWidget({
       headerControls
     )
 
+  const { reportAction } = useHomeWidgetTracking()
   const { info, ...headerRest } = resolveWidgetHeader(header, params) ?? {}
   // Dropping `info` can leave the header with nothing in it — then there is no
   // header row to draw, unless the overflow menu needs one to sit in.
@@ -300,11 +302,44 @@ export function SlotWidget({
       ? headerRest
       : undefined
 
+  // The reporters DECORATE the frame's own handlers rather than replacing
+  // them: a widget that already had an `onClick` keeps it, and a widget that
+  // only had a `url` keeps navigating. Every widget in the column is reported
+  // this way, so a new one needs to remember nothing.
+  const trackedHeader =
+    headerProps?.link === undefined
+      ? headerProps
+      : {
+          ...headerProps,
+          link: {
+            ...headerProps.link,
+            onClick: () => {
+              reportAction("header-link")
+              headerProps.link?.onClick?.()
+            },
+          },
+        }
+
+  // A footer can hold one button or several, and every one of them is a way
+  // out of the widget — so each is reported the same way.
+  const trackFooter = (button: F0ButtonProps): F0ButtonProps => ({
+    ...button,
+    onClick: (event) => {
+      reportAction("footer-action")
+
+      return button.onClick?.(event)
+    },
+  })
+
+  const trackedAction: WidgetProps["action"] = Array.isArray(action)
+    ? action.map(trackFooter)
+    : action && trackFooter(action)
+
   const front = (
     <Widget
-      header={headerProps}
+      header={trackedHeader}
       fullHeight={fullHeight}
-      action={action}
+      action={trackedAction}
       footerClassName={FOOTER_CLASS}
       actions={actions}
       headerControls={controls}

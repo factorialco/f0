@@ -1,5 +1,26 @@
 # Changelog
 
+## [6.93.0](https://github.com/factorialco/f0/compare/f0-react-v6.92.0...f0-react-v6.93.0) (2026-09-09)
+
+
+### Features
+
+* **F0Checkbox:** stabilizing checkbox, adding description prop ([#5449](https://github.com/factorialco/f0/issues/5449)) ([0bdb512](https://github.com/factorialco/f0/commit/0bdb512d6c096c4251681e81ddb8128c24c9fe3c))
+
+## [6.92.0](https://github.com/factorialco/f0/compare/f0-react-v6.91.2...f0-react-v6.92.0) (2026-09-09)
+
+
+### Features
+
+* **NewHomeLayout:** give the Home an analytics seam ([#5488](https://github.com/factorialco/f0/issues/5488)) ([8fc49e1](https://github.com/factorialco/f0/commit/8fc49e13f9af98e33f05fd7ae64c9dd6c6f5c4ce))
+
+## [6.91.2](https://github.com/factorialco/f0/compare/f0-react-v6.91.1...f0-react-v6.91.2) (2026-09-09)
+
+
+### Bug Fixes
+
+* **F0Chat:** harden Unicode mention editing ([#5471](https://github.com/factorialco/f0/issues/5471)) ([a9d6c56](https://github.com/factorialco/f0/commit/a9d6c5659f9856cee2084e68fdc8f5dbbba4ad27))
+
 ## [6.91.1](https://github.com/factorialco/f0/compare/f0-react-v6.91.0...f0-react-v6.91.1) (2026-09-09)
 
 

@@ -385,15 +385,24 @@ function ButtonGroupRow({
     measurementContainerRef.current?.setAttribute("inert", "")
   }, [measurementContainerRef])
 
-  // Before the first measurement, optimistically show everything to avoid a flash.
-  // When `canOverflow` is false the group never sheds: every secondary stays
-  // inline and nothing is measured away into the "⋯" menu.
-  const shownPlain = !canOverflow
-    ? plainSecondaries
-    : isInitialized
-      ? visibleItems
-      : plainSecondaries
-  const overflowedPlain = !canOverflow ? [] : isInitialized ? overflowItems : []
+  /**
+   * What stays inline and what sheds into the "⋯" menu.
+   *
+   * Before the first measurement, optimistically show everything to avoid a
+   * flash. When `canOverflow` is false the group never sheds: every secondary
+   * stays inline and nothing is measured away.
+   */
+  const splitByOverflow = (): {
+    shown: typeof plainSecondaries
+    overflowed: typeof plainSecondaries
+  } => {
+    if (!canOverflow || !isInitialized) {
+      return { shown: plainSecondaries, overflowed: [] }
+    }
+    return { shown: visibleItems, overflowed: overflowItems }
+  }
+
+  const { shown: shownPlain, overflowed: overflowedPlain } = splitByOverflow()
   const shownIds = new Set(shownPlain.map((action) => action.id))
 
   const primaryNode = primaryAction
