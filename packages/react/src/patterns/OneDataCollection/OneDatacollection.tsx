@@ -1505,6 +1505,10 @@ const OneDataCollectionComp = <
         value: customPresets,
         setValue: setCustomPresets,
       },
+      selectedPresetId: {
+        value: selectedPresetId,
+        setValue: setSelectedPresetId,
+      },
       ...(hasPerVisualizationFilters
         ? {
             visualizationFilters: {
