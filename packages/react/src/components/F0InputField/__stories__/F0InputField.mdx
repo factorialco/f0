@@ -234,6 +234,47 @@ The example below sets `maxLength={10}` and a `value` of `"long text should be t
 
 Browsers do not fire `change` events on autofill, which would leave the floating placeholder visible on top of the autofilled value. `F0InputField` listens to the WebKit `animationstart` event and polls `:-webkit-autofill` / `:autofill` to hide the placeholder until the autofill state clears.
 
+### Trailing actions
+
+`actions` is a typed list, not a node slot: the field owns the glyph, the accessible name and the behaviour for each entry, so a copy button looks and reads the same in every input built on `F0InputField`. Four is the maximum — past that the trailing row crowds out the value, and the field warns in development.
+
+They render after the clear button and before `append`, `appendTag` and `buttonToggle`.
+
+<Canvas of={Stories.WithActions} />
+
+| Type             | Glyph   | Behaviour                                                                                                                                       |
+| ---------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `copy`           | Layers  | Writes `text ?? value` to the clipboard. The positive tick is gated on the write succeeding, and a failure announces "Could not copy" instead.  |
+| `visibility`     | Eye     | Masks the value by forcing the cloned child's `type` to `password`, and restores the child's own type when revealed. The field owns this state. |
+| `edit`           | Pencil  | Calls `onClick`. The field does not flip `readonly` itself.                                                                                     |
+| `request-change` | Comment | For a value the viewer may read but not set. Mutually exclusive with `edit`; both together warn in development.                                 |
+| `custom`         | Yours   | `icon` + `label` + `onClick`. `tone="positive"` tints the glyph and puts the label into the row's live region.                                  |
+
+Two rules that differ from the rest of the trailing area:
+
+- **`readonly` keeps the actions and drops the clear button.** A value that cannot be typed into is still one that can be copied, unmasked or queried. `disabled`, in contrast, disables every action.
+- **Every action stops the click.** The field's own `onClickContent` never fires alongside one.
+
+The confirmation for `tone="positive"` lives in a single `aria-live="polite"` region inside the row, not on the button: an icon-only button carries its name in `aria-label`, and screen readers do not reliably announce an `aria-label` that changes underneath them.
+
+**A positive tone also tints the whole field** `bg-f1-background-positive` for as long as it lasts, and holds the actions row open. One event, two expressions — the glyph becomes a tick and the cell confirms around it — so a successful copy and a committed edit read the same way without the consumer wiring anything extra. A `copy` action gets this for free; a commit gets it by swapping the `edit` action for a positive `custom` one for the length of the confirmation, so the control that caused the confirmation is the one carrying it rather than a tick appearing beside a pencil.
+
+### Hover-revealed actions and the resting value
+
+`actionsVisibility="hover"` fades the row in on hover or focus-within of the whole field, and holds it open while one of its buttons has focus or is showing a confirmation. While hidden the row is also `pointer-events-none`, so a fading button cannot be clicked blind. Touch screens — where hover never fires and the row would otherwise be permanently unreachable — always get `"always"`.
+
+<Canvas of={Stories.HoverActions} />
+
+`readonly` + `transparent` is the resting value cell: no border, no secondary "disabled form" background, just the value as text. Three things follow from it being the same cell the editable field will occupy:
+
+- **It keeps the field's height and radius.** A row that changes height when you click it moves the record under the reader, so the resting cell is the size box the editable field will take.
+- **It tints `bg-f1-background-secondary` on hover**, but only when there are hover-revealed actions to find — a tint with nothing behind it is a lie.
+- **`onClickContent` makes the whole cell the click target**, with a text cursor: the value is what the reader is pointing at, not the pencil. This needs the pointer to reach the cell, and `readonly` disables the inner input, which in every browser swallows the mouse event rather than letting it bubble — so the input becomes `pointer-events-none` whenever a resting value has an `onClickContent`.
+
+<Canvas of={Stories.ReadonlyTransparentValue} />
+
+<Canvas of={Stories.ReadonlyWithRequestChange} />
+
 ---
 
 ## Accessibility
@@ -603,6 +644,37 @@ The `loading` spinner is a separate live region — it carries its own `aria-bus
         <td>The value to be set when the input is cleared.</td>
         <td>
           <code>''</code>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>actions</code>
+        </td>
+        <td>
+          <code>InputFieldAction[]</code>
+        </td>
+        <td>
+          Trailing icon-only controls, after the clear button and before{" "}
+          <code>append</code>. Four at most. See{" "}
+          <a href="#trailing-actions">Trailing actions</a>.
+        </td>
+        <td>
+          <code>undefined</code>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>actionsVisibility</code>
+        </td>
+        <td>
+          <code>'always' | 'hover'</code>
+        </td>
+        <td>
+          <code>'hover'</code> fades the actions in on hover or focus-within.
+          Touch screens always get <code>'always'</code>.
+        </td>
+        <td>
+          <code>'always'</code>
         </td>
       </tr>
     </tbody>

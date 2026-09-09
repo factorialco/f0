@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { expect, userEvent, within } from "storybook/test"
+import { expect, fn, userEvent, waitFor, within } from "storybook/test"
 import * as icons from "@/icons/app"
 import { Placeholder, Search } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
@@ -305,6 +305,122 @@ export const WithAppendTag: Story = {
   },
 }
 
+export const WithActions: Story = {
+  args: {
+    ...Default.args,
+    value: "ada@example.com",
+    clearable: true,
+    actions: [{ type: "visibility" }, { type: "copy" }],
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    await userEvent.click(
+      canvas.getByRole("button", { name: "Show This is the label" })
+    )
+    await expect(
+      canvas.getByRole("button", { name: "Hide This is the label" })
+    ).toBeInTheDocument()
+  },
+}
+
+export const HoverActions: Story = {
+  args: {
+    ...Default.args,
+    value: "ada@example.com",
+    actions: [
+      {
+        type: "custom",
+        icon: icons.Archive,
+        label: "Archive",
+        onClick: () => {},
+      },
+      { type: "copy" },
+    ],
+    actionsVisibility: "hover",
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const row = canvas.getByTestId("input-field-actions")
+
+    await expect(row).toHaveClass("opacity-0")
+
+    // Focus is the keyboard path into a hover reveal: tabbing to the copy
+    // button has to make it visible, or it can be activated unseen.
+    await userEvent.click(canvas.getByRole("textbox"))
+    await waitFor(() => expect(getComputedStyle(row).opacity).toBe("1"))
+  },
+}
+
+export const ReadonlyTransparentValue: Story = {
+  args: {
+    ...Default.args,
+    label: "Email",
+    value: "ada.lovelace@example.com",
+    readonly: true,
+    transparent: true,
+    hideLabel: true,
+    actions: [{ type: "edit", onClick: () => {} }, { type: "copy" }],
+    actionsVisibility: "hover",
+    // The value itself is the click target, not just the pencil.
+    onClickContent: fn(),
+  },
+  decorators: [
+    (Story) => (
+      <div className="w-80 rounded-md border border-solid border-f1-border p-1">
+        <Story />
+      </div>
+    ),
+  ],
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getAllByLabelText("Email")[0]
+
+    // Real hit-testing, which jsdom cannot do: `readonly` disables the inner
+    // input, and a disabled control swallows the mouse event rather than
+    // letting it bubble. So the pointer must land on the cell instead.
+    await expect(input).toBeDisabled()
+    const box = input.getBoundingClientRect()
+    const underPointer = document.elementFromPoint(
+      box.left + box.width / 2,
+      box.top + box.height / 2
+    )
+    await expect(underPointer).not.toBe(input)
+
+    await userEvent.click(underPointer as HTMLElement)
+    await expect(args.onClickContent).toHaveBeenCalled()
+  },
+}
+
+export const ReadonlyWithRequestChange: Story = {
+  args: {
+    ...Default.args,
+    label: "Salary",
+    value: "€48,000",
+    readonly: true,
+    transparent: true,
+    hideLabel: true,
+    actions: [{ type: "request-change", onClick: () => {} }, { type: "copy" }],
+    actionsVisibility: "hover",
+  },
+  decorators: [
+    (Story) => (
+      <div className="w-80 rounded-md border border-solid border-f1-border p-1">
+        <Story />
+      </div>
+    ),
+  ],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // A comment, never a pencil: the viewer may read the value but not set it.
+    await expect(
+      canvas.getByRole("button", { name: "Request a change to Salary" })
+    ).toBeInTheDocument()
+    await expect(canvas.queryByRole("button", { name: /^Edit/ })).toBeNull()
+  },
+}
+
 export const LongPlaceholder: Story = {
   decorators: [
     (Story) => (
@@ -364,6 +480,45 @@ export const Snapshot: Story = {
             Tag
           </div>
         ),
+      },
+      {
+        ...base,
+        clearable: false,
+        value: "ada@example.com",
+        actions: [
+          { type: "edit" as const, onClick: () => {} },
+          { type: "visibility" as const },
+          { type: "copy" as const },
+        ],
+      },
+      {
+        ...base,
+        clearable: false,
+        value: "ada@example.com",
+        actions: [
+          {
+            type: "custom" as const,
+            icon: icons.CheckCircle,
+            label: "Saved",
+            tone: "positive" as const,
+            onClick: () => {},
+          },
+          { type: "copy" as const },
+        ],
+      },
+      {
+        ...base,
+        clearable: false,
+        icon: undefined,
+        labelIcon: undefined,
+        hideLabel: true,
+        readonly: true,
+        transparent: true,
+        value: "ada@example.com",
+        actions: [
+          { type: "request-change" as const, onClick: () => {} },
+          { type: "copy" as const },
+        ],
       },
       { ...base },
     ]

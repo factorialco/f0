@@ -42,6 +42,13 @@ export const defaultTranslations = {
       show: "Show {{label}}",
       hide: "Hide {{label}}",
     },
+    actions: {
+      copy: "Copy {{label}}",
+      copied: "Copied",
+      copyFailed: "Could not copy",
+      edit: "Edit {{label}}",
+      requestChange: "Request a change to {{label}}",
+    },
   },
   link: {
     opensInNewTab: "opens in new tab",

@@ -1,11 +1,6 @@
-import {
-  ComponentProps,
-  HTMLInputTypeAttribute,
-  useMemo,
-  useState,
-} from "react"
-import { InputFieldProps } from "@/components/F0InputField"
-import { EyeInvisible, EyeVisible, LockLocked } from "@/icons/app"
+import { ComponentProps, HTMLInputTypeAttribute, useMemo } from "react"
+import { InputFieldAction, InputFieldProps } from "@/components/F0InputField"
+import { LockLocked } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { Input as ShadcnInput } from "@/ui/input"
 
@@ -38,7 +33,11 @@ export type InputInternalProps = Pick<
     | "loading"
     | "transparent"
     | "onBlur"
+    | "onKeyDown"
     | "readonly"
+    | "actions"
+    | "actionsVisibility"
+    | "onClickContent"
   > & {
     /**
      * `"private"` is a non-HTML subtype for sensitive, non-credential data:
@@ -47,6 +46,12 @@ export type InputInternalProps = Pick<
      */
     type?: Exclude<HTMLInputTypeAttribute, "number"> | "private"
     onPressEnter?: () => void
+    /**
+     * Fires on Escape. Pairs with `onPressEnter` for inline editing: Enter
+     * commits, Escape reverts. Like `onPressEnter` it does not call
+     * `preventDefault`.
+     */
+    onPressEscape?: () => void
   }
 
 /**
@@ -65,16 +70,18 @@ const passwordManagerAvoidance = {
 const InputInternal = ({
   type,
   onPressEnter,
+  onPressEscape,
+  onKeyDown,
+  actions,
   ...props
 }: InputInternalProps) => {
-  const [showPassword, setShowPassword] = useState(false)
-
-  // `password` and `private` are both masked; the eye toggle flips them to text.
+  // `password` and `private` are both masked; the eye toggle flips them to
+  // text. F0InputField owns that flip — it masks by forcing the child's
+  // `type` — so here the field only declares the toggle and hands over the
+  // unmasked type.
   const maskable = type === "password" || type === "private"
 
-  const localType = useMemo(() => {
-    return maskable ? (showPassword ? "text" : "password") : type
-  }, [showPassword, maskable, type])
+  const localType = maskable ? "text" : type
 
   const localIcon = useMemo(() => {
     // Only `password` forces the lock icon; `private` keeps the consumer's icon.
@@ -82,33 +89,33 @@ const InputInternal = ({
   }, [type, props.icon])
 
   const i18n = useI18n()
-  const buttonToggle: InputFieldProps<string>["buttonToggle"] = useMemo(() => {
-    if (type === "password") {
-      return {
-        label: [i18n.inputs.password.show, i18n.inputs.password.hide],
-        icon: [EyeInvisible, EyeVisible],
-        selected: showPassword,
-        onChange: setShowPassword,
-      }
+
+  const localActions: InputFieldAction[] | undefined = useMemo(() => {
+    if (!maskable) {
+      return actions
     }
-    if (type === "private") {
-      // Build the toggle's accessible name from the field label so screen-reader
-      // users can tell multiple private fields apart (e.g. "Show social security
-      // number"). The label feeds F0ButtonToggle's aria-label + title only — the
-      // toggle renders an icon, so there is no visible-text change.
-      return {
-        label: [
-          i18n.t("inputs.private.show", { label: props.label }),
-          i18n.t("inputs.private.hide", { label: props.label }),
-        ],
-        icon: [EyeInvisible, EyeVisible],
-        selected: showPassword,
-        onChange: setShowPassword,
-      }
+    // A consumer-declared visibility action wins, so a private field never
+    // grows a second eye.
+    if (actions?.some((action) => action.type === "visibility")) {
+      return actions
     }
-    return props.buttonToggle
+
+    // `password` names the credential outright; `private` builds the name from
+    // the field label so screen-reader users can tell multiple private fields
+    // apart (e.g. "Show social security number"). The label feeds the button's
+    // aria-label and title only — the button renders an icon, so there is no
+    // visible-text change.
+    const label: [string, string] =
+      type === "password"
+        ? [i18n.inputs.password.show, i18n.inputs.password.hide]
+        : [
+            i18n.t("inputs.private.show", { label: props.label }),
+            i18n.t("inputs.private.hide", { label: props.label }),
+          ]
+
+    return [...(actions ?? []), { type: "visibility", label }]
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showPassword, type, props.buttonToggle, props.label])
+  }, [maskable, type, actions, props.label])
 
   return (
     <ShadcnInput
@@ -121,12 +128,22 @@ const InputInternal = ({
         props.onChange?.(type === "email" ? value.toLowerCase() : value)
       }
       onKeyDown={(event) => {
+        onKeyDown?.(event)
+        // A consumer that handled the key itself gets the last word: without
+        // this, a component using `onKeyDown` to run its own Enter/Escape
+        // logic would see the shortcut fire a second time.
+        if (event.defaultPrevented) {
+          return
+        }
         if (event.key === "Enter") {
           onPressEnter?.()
         }
+        if (event.key === "Escape") {
+          onPressEscape?.()
+        }
       }}
       icon={localIcon}
-      buttonToggle={buttonToggle}
+      actions={localActions}
     />
   )
 }

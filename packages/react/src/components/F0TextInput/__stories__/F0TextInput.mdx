@@ -171,6 +171,108 @@ A trailing eye-toggle flips between masked and visible text; its accessible name
 
 <Canvas of={Stories.Private} />
 
-**Enter key**
+**Keyboard**
 
-`onPressEnter` fires when `Enter` is pressed while the input has focus. Useful for form-less search boxes, inline editing, or single-field submit flows. It does not call `preventDefault` — wrap the input in a `<form onSubmit>` if native form submission is also needed.
+Three keyboard props, in the order they run on every key:
+
+1. `onKeyDown` gets the raw event first, for any key.
+2. `onPressEnter` fires on `Enter`.
+3. `onPressEscape` fires on `Escape`.
+
+`onKeyDown` has the last word: call `preventDefault()` on it and neither shortcut fires, so a consumer that already handles `Enter` itself never sees it twice. Neither shortcut calls `preventDefault` on its own, so wrap the input in a `<form onSubmit>` if native form submission is also needed.
+
+`onPressEnter` + `onPressEscape` is the inline-editing pair: Enter commits, Escape reverts.
+
+**Trailing actions**
+
+`actions` puts up to four icon-only controls at the right edge of the field, after the clear button and before `append`. Each one is a typed entry rather than a node, so every field draws the same glyph for the same job:
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Type</th>
+        <th className="text-left">Glyph</th>
+        <th className="text-left">What it does</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>copy</code>
+        </td>
+        <td>Layers</td>
+        <td>
+          Copies <code>text</code>, or the field's value when it is omitted. The
+          positive tick appears only once the write actually succeeded — a
+          rejected clipboard says so instead.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>visibility</code>
+        </td>
+        <td>Eye</td>
+        <td>
+          Masks the value with dots and toggles it back. This is the same
+          control <code>type="password"</code> and <code>type="private"</code>{" "}
+          render on their own — pass it explicitly only to rename it, and the
+          field still shows one eye, not two.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>edit</code>
+        </td>
+        <td>Pencil</td>
+        <td>
+          Fires <code>onClick</code>. The field does not become editable by
+          itself: the consumer flips <code>readonly</code> off in response.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>request-change</code>
+        </td>
+        <td>Comment</td>
+        <td>
+          For a value the viewer may read but not set. A pencil promises the
+          click lets you type; a comment promises somebody else decides. Passing
+          both on one field warns in development.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>custom</code>
+        </td>
+        <td>Yours</td>
+        <td>
+          Any <code>icon</code> + <code>label</code> + <code>onClick</code>.{" "}
+          <code>tone="positive"</code> tints the glyph and announces the label
+          in a live region — use it for a confirmation, not for a resting state.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+Unlike `clearable`, actions survive `readonly`: a value the user cannot type into is still one they can copy, unmask, or ask to have changed.
+
+<Canvas of={Stories.WithActions} />
+
+`actionsVisibility="hover"` fades them in on hover or focus-within and holds them open while one has focus or is showing a confirmation. On a touch screen, where hover never fires, they stay put.
+
+<Canvas of={Stories.ReadonlyValueWithActions} />
+
+**Inline editing**
+
+One component, four states, which is what the redesigned Employee profile › Details tab needs of a value cell:
+
+1. **Rest** — `readonly` + `transparent`: the value as plain text, no field chrome, at the height the editable field will take. Set `onClickContent` and the whole cell is the click target, with a text cursor.
+2. **Hover** — `actionsVisibility="hover"` tints the cell and fades the actions in inside the tint.
+3. **Editing** — drop `readonly` and `transparent` and the same component is the ordinary bordered field. `onPressEnter` commits, `onPressEscape` reverts, `onBlur` commits.
+4. **Confirmed** — swap the `edit` action for a positive `custom` one for the length of the confirmation. The pencil _becomes_ the tick and the cell goes positive around it, instead of a tick appearing next to a pencil.
+
+Two things the consumer owns: the `readonly` flip with its draft, and the confirmation timer. One thing to know: `autoFocus` only fires on mount, never when it turns true on an existing input, so remount on the flip with a changing `key` to land the caret.
+
+<Canvas of={Stories.InlineEditing} />

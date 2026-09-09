@@ -19,9 +19,14 @@ import { CrossedCircle } from "@/icons/app"
 import { cn, focusRing } from "@/lib/utils.ts"
 import { Spinner } from "@/ui/Spinner"
 import { AppendTag } from "./AppendTag"
+import { InputFieldActions } from "./components/InputFieldActions"
 import { InputMessages } from "./components/InputMessages"
 import { Label } from "./components/Label"
-import { InputFieldStatus } from "./types"
+import {
+  InputFieldAction,
+  InputFieldActionsVisibility,
+  InputFieldStatus,
+} from "./types"
 export const INPUTFIELD_SIZES = ["sm", "md"] as const
 export type InputFieldSize = (typeof INPUTFIELD_SIZES)[number]
 
@@ -234,6 +239,23 @@ export type InputFieldProps<T> = {
     onChange: (selected: boolean) => void
   }
   transparent?: boolean
+  /**
+   * Trailing icon-only controls, right-aligned, after the clear button and
+   * before `append`. Four at most.
+   *
+   * Unlike `clearable`, these survive `readonly`: a value the user cannot type
+   * into is still one they can copy, unmask, or ask to have changed. Combined
+   * with `readonly` + `transparent` that gives a resting value cell that turns
+   * into an editable field on demand.
+   */
+  actions?: InputFieldAction[]
+  /**
+   * `"hover"` fades the actions in on hover or focus-within, and holds them
+   * while one has focus or is showing a confirmation. Touch screens, where
+   * hover never fires, always get `"always"`.
+   * @default "always"
+   */
+  actionsVisibility?: InputFieldActionsVisibility
 }
 
 const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
@@ -278,6 +300,8 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
       "aria-autocomplete": ariaAutocomplete,
       buttonToggle,
       transparent,
+      actions,
+      actionsVisibility = "always",
       ...props
     }: InputFieldProps<string>,
     ref
@@ -288,6 +312,20 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
     const noEdit = disabled || readonly
 
     const [localValue, setLocalValue] = useState(value)
+
+    // The visibility action masks the value by forcing the child input's
+    // `type`, so the reveal state has to live here rather than inside the
+    // actions row.
+    const [revealed, setRevealed] = useState(false)
+    const hasVisibilityAction = !!actions?.some(
+      (action) => action.type === "visibility"
+    )
+    const masked = hasVisibilityAction && !revealed
+
+    // True while any action is showing a positive tone. One event, two
+    // expressions: the action's glyph becomes a tick and the whole field goes
+    // positive, so a copy and a commit confirm the same way.
+    const [actionConfirming, setActionConfirming] = useState(false)
 
     // For legacy reasons, error is a shortcut for status with type error
     if (hint) {
@@ -413,6 +451,18 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
     /**********************/
 
     const hasAppend = append || appendTag || buttonToggle
+    const hasActions = !!actions?.length
+    // The resting details cell: a value drawn as plain text, with no field
+    // chrome around it until the pointer arrives.
+    const isRestingValue = !!transparent && !!readonly
+    // A resting value that opens its own editor. The click has to reach the
+    // cell, and `readonly` disables the inner input, which in every browser
+    // swallows the mouse event instead of letting it bubble.
+    const isClickableRestingValue =
+      isRestingValue && !!onClickContent && !disabled
+    // Gated on the row still being there: an action removed mid-confirmation
+    // would otherwise leave the field stuck positive.
+    const confirming = hasActions && actionConfirming
 
     return (
       <div
@@ -456,7 +506,10 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
         )}
         <div
           className={cn(
-            "relative h-fit transition-all",
+            // Named so `actionsVisibility="hover"` can key off the whole
+            // field, transparent or not — the plain `group` below only exists
+            // on the bordered variant.
+            "group/field relative h-fit transition-all",
             !noEdit && !disabled && "hover:border-f1-border-hover",
             !transparent && [
               "border-[1px] border-solid border-f1-border bg-f1-background",
@@ -469,16 +522,38 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
               inputFieldVariants({ size, canGrow }),
             ],
             "active-within:border-f1-border active-within:ring-1 active-within:ring-f1-border-hover",
-            readonly && "border-f1-border-secondary bg-f1-background-secondary",
+            readonly &&
+              !transparent &&
+              "border-f1-border-secondary bg-f1-background-secondary",
+            // A resting value is not a disabled form control, so it keeps the
+            // plain background. It does keep the field's height and radius,
+            // though: this is the same cell the editable field will occupy, and
+            // a row that changes height on click moves the record under the
+            // reader.
+            isRestingValue && inputFieldVariants({ size, canGrow }),
+            // The tint only appears when there is something under the pointer
+            // to find.
+            isRestingValue &&
+              hasActions &&
+              actionsVisibility === "hover" &&
+              "hover:bg-f1-background-secondary",
+            isClickableRestingValue && "cursor-text",
+            // After the hover tint, and repeated under `hover:` so the tint
+            // does not win back the cell the pointer is sitting on.
+            confirming &&
+              "bg-f1-background-positive hover:bg-f1-background-positive",
             disabled && "cursor-not-allowed bg-f1-background-tertiary",
 
-            transparent && "h-full w-full "
+            // A resting value keeps the fixed height it got above; every other
+            // transparent field still fills its container.
+            transparent && (isRestingValue ? "w-full" : "h-full w-full")
           )}
           data-testid="input-field-wrapper"
         >
           <div
             className="pointer-events-auto relative flex h-full w-full min-w-0 flex-1"
             onClick={handleClickContent}
+            data-testid="input-field-content"
           >
             {(icon || avatar) && (
               <div
@@ -503,6 +578,9 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
               className="w-full min-w-0 flex-1"
             >
               {cloneElement(children as React.ReactElement, {
+                // Only while masked: an explicit `undefined` here would strip
+                // the child's own type (search, email, tel) down to text.
+                ...(masked ? { type: "password" } : {}),
                 onChange: handleChange,
                 onBlur: props.onBlur,
                 onFocus: props.onFocus,
@@ -532,6 +610,9 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                   (icon || avatar) && "pl-8",
                   (icon || avatar) && size === "md" && "pl-9",
                   disabled && "cursor-not-allowed",
+                  // The click belongs to the cell, not the disabled input
+                  // that would otherwise absorb it.
+                  isClickableRestingValue && "pointer-events-none cursor-text",
                   (children as React.ReactElement).props.className,
                   inputElementVariants({ size })
                 ),
@@ -559,7 +640,7 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
             >
               {placeholder}
             </div>
-            {(clearable || hasAppend || loading) && (
+            {(clearable || hasActions || hasAppend || loading) && (
               <div
                 className={cn(
                   "flex h-fit min-w-6 items-center gap-1.5 self-center pr-[3px]",
@@ -596,6 +677,19 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                       </motion.button>
                     )}
                   </AnimatePresence>
+                )}
+
+                {actions && hasActions && (
+                  <InputFieldActions
+                    actions={actions}
+                    visibility={actionsVisibility}
+                    label={label}
+                    value={localValue}
+                    disabled={disabled}
+                    revealed={revealed}
+                    onRevealedChange={setRevealed}
+                    onConfirmingChange={setActionConfirming}
+                  />
                 )}
 
                 {hasAppend && (

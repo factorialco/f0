@@ -157,4 +157,139 @@ describe("F0TextInput", () => {
       expect(onPressEnter).not.toHaveBeenCalled()
     })
   })
+
+  describe("onPressEscape", () => {
+    it("fires when Escape is pressed", () => {
+      const onPressEscape = vi.fn()
+      render(<F0TextInput label="Revert" onPressEscape={onPressEscape} />)
+
+      fireEvent.keyDown(screen.getAllByLabelText("Revert")[0], {
+        key: "Escape",
+      })
+
+      expect(onPressEscape).toHaveBeenCalledTimes(1)
+    })
+
+    it("does not fire on other keys", () => {
+      const onPressEscape = vi.fn()
+      render(<F0TextInput label="Revert" onPressEscape={onPressEscape} />)
+
+      const input = screen.getAllByLabelText("Revert")[0]
+      fireEvent.keyDown(input, { key: "Enter" })
+      fireEvent.keyDown(input, { key: "Tab" })
+      fireEvent.keyDown(input, { key: "a" })
+
+      expect(onPressEscape).not.toHaveBeenCalled()
+    })
+  })
+
+  describe("onKeyDown", () => {
+    it("receives every key, including the two with shortcuts", () => {
+      const onKeyDown = vi.fn()
+      render(<F0TextInput label="Keys" onKeyDown={onKeyDown} />)
+
+      const input = screen.getAllByLabelText("Keys")[0]
+      fireEvent.keyDown(input, { key: "a" })
+      fireEvent.keyDown(input, { key: "Enter" })
+      fireEvent.keyDown(input, { key: "Escape" })
+
+      expect(onKeyDown.mock.calls.map(([event]) => event.key)).toEqual([
+        "a",
+        "Enter",
+        "Escape",
+      ])
+    })
+
+    it("runs before the shortcuts, which still fire", () => {
+      const calls: string[] = []
+      render(
+        <F0TextInput
+          label="Order"
+          onKeyDown={() => calls.push("onKeyDown")}
+          onPressEnter={() => calls.push("onPressEnter")}
+        />
+      )
+
+      fireEvent.keyDown(screen.getAllByLabelText("Order")[0], { key: "Enter" })
+
+      expect(calls).toEqual(["onKeyDown", "onPressEnter"])
+    })
+
+    it("suppresses both shortcuts when it calls preventDefault", () => {
+      const onPressEnter = vi.fn()
+      const onPressEscape = vi.fn()
+      render(
+        <F0TextInput
+          label="Handled"
+          onKeyDown={(event) => event.preventDefault()}
+          onPressEnter={onPressEnter}
+          onPressEscape={onPressEscape}
+        />
+      )
+
+      const input = screen.getAllByLabelText("Handled")[0]
+      fireEvent.keyDown(input, { key: "Enter" })
+      fireEvent.keyDown(input, { key: "Escape" })
+
+      expect(onPressEnter).not.toHaveBeenCalled()
+      expect(onPressEscape).not.toHaveBeenCalled()
+    })
+  })
+
+  describe("actions", () => {
+    it("renders one eye for type=private, not two, when actions are also passed", () => {
+      const onClick = vi.fn()
+      render(
+        <F0TextInput
+          label="SSN"
+          type="private"
+          value="123-45-6789"
+          actions={[{ type: "edit", label: "Edit SSN", onClick }]}
+        />
+      )
+
+      expect(screen.getAllByRole("button", { name: /^show/i })).toHaveLength(1)
+      expect(
+        screen.getByRole("button", { name: "Edit SSN" })
+      ).toBeInTheDocument()
+    })
+
+    it("lets a consumer visibility action replace the built-in eye", () => {
+      render(
+        <F0TextInput
+          label="SSN"
+          type="private"
+          value="123-45-6789"
+          actions={[{ type: "visibility", label: ["Unmask", "Mask"] }]}
+        />
+      )
+
+      const input = screen.getAllByLabelText("SSN")[0] as HTMLInputElement
+      expect(input.type).toBe("password")
+      expect(
+        screen.queryByRole("button", { name: /show ssn/i })
+      ).not.toBeInTheDocument()
+
+      fireEvent.click(screen.getByRole("button", { name: "Unmask" }))
+      expect(input.type).toBe("text")
+    })
+
+    it("keeps a readonly field's actions while dropping its clear button", () => {
+      const onClick = vi.fn()
+      render(
+        <F0TextInput
+          label="Email"
+          value="ada@example.com"
+          readonly
+          clearable
+          actions={[{ type: "edit", onClick }]}
+        />
+      )
+
+      expect(
+        screen.getByRole("button", { name: "Edit Email" })
+      ).toBeInTheDocument()
+      expect(screen.queryByTestId("clear-button")).not.toBeInTheDocument()
+    })
+  })
 })
