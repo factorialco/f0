@@ -1,6 +1,5 @@
 import {
   F0AvatarCompany,
-  F0AvatarEmoji,
   F0AvatarPerson,
   F0Checkbox,
   F0Button,
@@ -13,14 +12,18 @@ import {
 } from "@factorialco/f0-react/dist/experimental"
 import {
   AcademicCap,
+  Archive,
   Balance,
   Bank,
   Basket,
   BookOpen,
+  Building,
   Calendar,
   ChartLine,
   ChartPie,
+  BarGraph,
   Check,
+  CheckCircleLine,
   ChevronDown,
   ChevronRight,
   Clock,
@@ -31,29 +34,29 @@ import {
   Ellipsis,
   Exit,
   Files,
+  Filter,
   Folder,
   Folders,
   Graph,
   Handshake,
-  Home as HomeIcon,
-  Hub as HubIcon,
-  Inbox as InboxIcon,
+  HardDrive,
+  Headset,
+  Heart,
   Laptop,
   Lightbulb,
   Marketplace,
-  Megaphone,
   MessageHeart,
   Messages,
-  Money,
+  MoneyBag,
   Moon,
   Office,
   Organization,
+  PalmTree,
   Pencil,
   People,
-  Plane,
-  PalmTree,
   Plus,
   Present,
+  Receipt,
   Schedule,
   SearchPerson,
   Settings,
@@ -62,7 +65,11 @@ import {
   Sparkles,
   Suitcase,
   Timer,
+  UserProtected,
   Wallet,
+  Home as HomeIcon,
+  Hub as HubIcon,
+  Inbox as InboxIcon,
 } from "@factorialco/f0-react/icons/app"
 import { useEffect, useRef, useState } from "react"
 import { createPortal } from "react-dom"
@@ -70,18 +77,15 @@ import { useNavigate, useSearchParams } from "react-router-dom"
 
 import { avatarFor } from "@/fixtures/helpers"
 
-import type { ActivityTone } from "./agents/agentThreads"
 import type { Chat, ChatId } from "./comms/chats"
 import type { InboxTask } from "./inbox/inboxTasks"
 
-import { latestRun, useAgents } from "./agents/agentStore"
-import { toneFor } from "./agents/agentThreads"
-import { Bot } from "./Bot"
 import { TEAM_ABSENCE_FILTERS, WORKPLACES } from "./calendar/calendarFixtures"
 import { CalGroup, MiniMonth } from "./calendar/MiniMonth"
 import { CHANNEL_CHATS, DIRECT_CHATS } from "./comms/chats"
 import { requestChat, useOpenChats } from "./comms/chatStore"
 import { factorialLogo, PROFILE_PEOPLE } from "./fixtures"
+import { hubSlug } from "./hub/hubSlug"
 import { motionKeyFor } from "./iconMotion"
 import { openInboxTasks } from "./inbox/inboxTasks"
 import { MenuDivider, MenuRow } from "./MenuRow"
@@ -97,12 +101,14 @@ import {
   type Conversation,
 } from "./one/conversationStore"
 import { PanelCollapse } from "./PanelCollapse"
+import { type PinnedItem, removePinned, usePinned } from "./pinnedStore"
 import {
   PROFILE_LABELS,
   setProfile,
   useProfile,
   type ProfileId,
 } from "./profileStore"
+import { COMMUNITIES } from "./windows/communityPosts"
 
 /**
  * Home's navigation (Figma 2621:22725, "Home - Vision"): a FIXED 48px
@@ -215,27 +221,6 @@ function NavRow({
   )
 }
 
-/**
- * The agents' activity dot (Figma 2741:465533): an 8px dot in a 16px box.
- * Filled while the agent wants something, hollow once it does not — all
- * three are exact f0 tokens (`--critical-50` IS the frame's #ff5c4b).
- */
-function ActivityDot({ tone }: { tone: ActivityTone }) {
-  return (
-    <span className="flex size-4 shrink-0 items-center justify-center">
-      <span
-        className={`size-2 rounded-full ${
-          tone === "warning"
-            ? "bg-f1-icon-warning"
-            : tone === "critical"
-              ? "bg-f1-icon-critical"
-              : "border-2 border-solid border-f1-border"
-        }`}
-      />
-    </span>
-  )
-}
-
 /** Collapsible section header ("Pinned ⌄", "Canales ⌄"…). */
 function SidebarGroup({
   label,
@@ -248,13 +233,19 @@ function SidebarGroup({
 }) {
   const [groupOpen, setGroupOpen] = useState(true)
   return (
-    <div className="flex flex-col gap-0.5">
+    // No gap: the frame's bundle puts its Items straight under the 32px
+    // Section header (2945:793556 — a plain flex-col, items at y=32).
+    <div className="flex flex-col">
       {/* pr-1 matches RecentRow's own right padding, so the trailing
           control lines up exactly with the "⋮" on the rows below. */}
       <div className="flex items-center justify-between pr-1">
+        {/* py-2, not py-1: the frame's Section header is 32 tall
+            (px-[6px] py-[8px] over a 12/16 label, 2945:793557), which is
+            what lines it up with the 36px rows under it. `flex-1` rather
+            than `w-full` so a trailing control still sits beside it. */}
         <button
           onClick={() => setGroupOpen(!groupOpen)}
-          className="f0c-pressable flex cursor-pointer items-center gap-1 rounded-[10px] px-1.5 py-1 text-sm font-medium text-f1-foreground-secondary"
+          className="f0c-pressable flex flex-1 cursor-pointer items-center gap-1 rounded-[10px] px-1.5 py-2 text-sm font-medium text-f1-foreground-secondary"
         >
           {label}
           {/* Icon swap, not a rotate class — F0Icon drops className. */}
@@ -266,7 +257,117 @@ function SidebarGroup({
         </button>
         {trailing}
       </div>
-      {groupOpen && children}
+      {/* The 2px lives HERE, on the Items column, not on the bundle: the
+          frame's Items is `gap-[2px]` while the bundle around it has no
+          gap at all (2945:793556/793558). Collapsing the two into one
+          `gap-0.5` on the outer div is what made the header sit 2px low;
+          collapsing them into `gap-0` then stacked the rows flush. */}
+      {groupOpen && <div className="flex flex-col gap-0.5">{children}</div>}
+    </div>
+  )
+}
+
+/**
+ * The hover "⋮" and the menu it opens, shared by the Recents and Pinned
+ * rows. Extracted when Pinned became deletable too (Oskar, 2026-09-09) —
+ * the button carries two hard-won details that are worth having in ONE
+ * place, both recorded below.
+ *
+ * `items` is a render prop so each row supplies its own menu and gets the
+ * closer back: Rename + Delete for a conversation, Delete for a pin.
+ */
+function RowOptions({
+  label,
+  items,
+}: {
+  label: string
+  items: (close: () => void) => React.ReactNode
+}) {
+  const buttonRef = useRef<HTMLButtonElement>(null)
+  const [pos, setPos] = useState<{ left: number; top: number } | null>(null)
+
+  const toggle = (event: React.MouseEvent) => {
+    event.stopPropagation()
+    const rect = buttonRef.current?.getBoundingClientRect()
+    if (!rect) return
+    setPos((open) => (open ? null : { left: rect.left, top: rect.bottom + 4 }))
+  }
+
+  // Portal events propagate through the REACT tree, not the DOM tree —
+  // without these stops every menu click would also fire the row's own
+  // onClick (Delete would then re-open the just-deleted id).
+  const menu = pos && (
+    <>
+      <div
+        className="fixed inset-0 z-40"
+        onClick={(event) => {
+          event.stopPropagation()
+          setPos(null)
+        }}
+      />
+      <div
+        onClick={(event) => event.stopPropagation()}
+        className="f0c-popover fixed z-50 flex w-[180px] flex-col rounded-md border border-solid border-f1-border-secondary bg-f1-background p-1 shadow-[0_4px_20px_0_rgba(13,22,37,0.08)]"
+        style={{ left: pos.left, top: pos.top, transformOrigin: "top left" }}
+      >
+        {items(() => setPos(null))}
+      </div>
+    </>
+  )
+
+  return (
+    <>
+      {menu && createPortal(menu, document.body)}
+      <button
+        ref={buttonRef}
+        onClick={toggle}
+        aria-label={`Options for "${label}"`}
+        // The reveal is hover-gated to fine pointers: on touch there is
+        // no hover, so the ⋮ would be permanently invisible and the row
+        // would lose its menu entirely.
+        // hover goes DARKER, not white. f0's background tokens are alpha
+        // (secondary = rgba(5,38,87,.06)), so a tint on the already-hovered
+        // row COMPOUNDS into a deeper grey — the two hovers multiply. The
+        // old `hover:bg-f1-background` was opaque white and punched a pale
+        // hole through the row instead.
+        className={`f0c-pressable flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-[6px] transition-opacity duration-100 hover:bg-f1-background-secondary-hover ${
+          pos
+            ? ""
+            : "[@media(hover:hover)_and_(pointer:fine)]:opacity-0 [@media(hover:hover)_and_(pointer:fine)]:group-hover:opacity-100"
+        }`}
+      >
+        <F0Icon icon={Ellipsis} size="sm" color="secondary" />
+      </button>
+    </>
+  )
+}
+
+/**
+ * A Pinned row: the Recents row's look and its ⋮, but the label is a
+ * fixture rather than a conversation, so the menu offers Delete only —
+ * there is nothing to rename a pin to. Not clickable, like the NavRow it
+ * replaces: Pinned is still visual-only, it just stopped being permanent.
+ */
+function PinnedRow({ item }: { item: PinnedItem }) {
+  return (
+    <div className="group flex w-full items-center gap-1.5 rounded-[10px] py-1.5 pl-1.5 pr-1 hover:bg-f1-background-secondary">
+      <F0Icon icon={item.icon} size="md" color="default" />
+      <span className="flex-1 truncate text-base font-medium text-f1-foreground">
+        {item.label}
+      </span>
+      <RowOptions
+        label={item.label}
+        items={(close) => (
+          <MenuRow
+            icon={<F0Icon icon={Delete} size="md" color="critical" />}
+            label="Delete"
+            onClick={() => {
+              close()
+              removePinned(item.id)
+            }}
+          />
+        )}
+      />
     </div>
   )
 }
@@ -283,24 +384,10 @@ function RecentRow({
   conversation: Conversation
   active: boolean
 }) {
-  const menuButtonRef = useRef<HTMLButtonElement>(null)
-  const [menuPos, setMenuPos] = useState<{ left: number; top: number } | null>(
-    null
-  )
   const [renaming, setRenaming] = useState(false)
   const [draft, setDraft] = useState(conversation.title)
 
-  const openMenu = (event: React.MouseEvent) => {
-    event.stopPropagation()
-    const rect = menuButtonRef.current?.getBoundingClientRect()
-    if (!rect) return
-    setMenuPos((pos) =>
-      pos ? null : { left: rect.left, top: rect.bottom + 4 }
-    )
-  }
-
   const startRename = () => {
-    setMenuPos(null)
     setDraft(conversation.title)
     setRenaming(true)
   }
@@ -329,44 +416,6 @@ function RecentRow({
     )
   }
 
-  // Portal events propagate through the REACT tree, not the DOM tree —
-  // without these stops every menu click would also fire the row's
-  // openConversation (Delete would then re-open the just-deleted id).
-  const menu = menuPos && (
-    <>
-      <div
-        className="fixed inset-0 z-40"
-        onClick={(event) => {
-          event.stopPropagation()
-          setMenuPos(null)
-        }}
-      />
-      <div
-        onClick={(event) => event.stopPropagation()}
-        className="f0c-popover fixed z-50 flex w-[180px] flex-col rounded-md border border-solid border-f1-border-secondary bg-f1-background p-1 shadow-[0_4px_20px_0_rgba(13,22,37,0.08)]"
-        style={{
-          left: menuPos.left,
-          top: menuPos.top,
-          transformOrigin: "top left",
-        }}
-      >
-        <MenuRow
-          icon={<F0Icon icon={Pencil} size="md" color="default" />}
-          label="Rename"
-          onClick={startRename}
-        />
-        <MenuRow
-          icon={<F0Icon icon={Delete} size="md" color="critical" />}
-          label="Delete"
-          onClick={() => {
-            setMenuPos(null)
-            deleteConversation(conversation.id)
-          }}
-        />
-      </div>
-    </>
-  )
-
   return (
     <div
       onClick={() => openConversation(conversation.id)}
@@ -376,31 +425,33 @@ function RecentRow({
           : "hover:bg-f1-background-secondary"
       }`}
     >
-      {menu && createPortal(menu, document.body)}
       <F0Icon icon={Comment} size="md" color="default" />
       <span className="flex-1 truncate text-base font-medium text-f1-foreground">
         {conversation.title}
       </span>
-      <button
-        ref={menuButtonRef}
-        onClick={openMenu}
-        aria-label={`Options for "${conversation.title}"`}
-        // The reveal is hover-gated to fine pointers: on touch there is
-        // no hover, so the ⋮ would be permanently invisible and the row
-        // would lose rename/delete entirely.
-        // hover goes DARKER, not white. f0's background tokens are alpha
-        // (secondary = rgba(5,38,87,.06)), so a tint on the already-hovered
-        // row COMPOUNDS into a deeper grey — the two hovers multiply. The
-        // old `hover:bg-f1-background` was opaque white and punched a pale
-        // hole through the row instead.
-        className={`f0c-pressable flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-[6px] transition-opacity duration-100 hover:bg-f1-background-secondary-hover ${
-          menuPos
-            ? ""
-            : "[@media(hover:hover)_and_(pointer:fine)]:opacity-0 [@media(hover:hover)_and_(pointer:fine)]:group-hover:opacity-100"
-        }`}
-      >
-        <F0Icon icon={Ellipsis} size="sm" color="secondary" />
-      </button>
+      <RowOptions
+        label={conversation.title}
+        items={(close) => (
+          <>
+            <MenuRow
+              icon={<F0Icon icon={Pencil} size="md" color="default" />}
+              label="Rename"
+              onClick={() => {
+                close()
+                startRename()
+              }}
+            />
+            <MenuRow
+              icon={<F0Icon icon={Delete} size="md" color="critical" />}
+              label="Delete"
+              onClick={() => {
+                close()
+                deleteConversation(conversation.id)
+              }}
+            />
+          </>
+        )}
+      />
     </div>
   )
 }
@@ -520,15 +571,8 @@ function RecentsControl({
  *  Recents (wired to conversations started from the ONE prompt bar). */
 function HomePanelBody() {
   const profile = useProfile()
-  const agents = useAgents()
   const { conversations, activeId } = useConversations()
-  // Newest conversation per agent — clicking the row reopens the one you
-  // were having rather than starting a second thread with the same agent.
-  const agentConversations = new Map(
-    [...conversations]
-      .sort((a, b) => a.lastActiveAt - b.lastActiveAt)
-      .flatMap((c) => (c.agentId ? [[c.agentId, c] as const] : []))
-  )
+  const pinned = usePinned(profile)
   // Sub-screens live in the URL (?view=policies) so back/forward and
   // deep links behave; an open conversation always wins the canvas.
   const [searchParams, setSearchParams] = useSearchParams()
@@ -547,10 +591,11 @@ function HomePanelBody() {
 
   // Most recently touched first; "Active only" keeps the section short.
   //
-  // AGENT conversations are EXCLUDED (per Oskar, 2026-09-02): the thread
-  // you have with an agent belongs to that agent, and the Agents group
-  // above already lists it. Leaving it in Recents too put the same
-  // conversation in the panel twice, under two different names.
+  // AGENT conversations stay EXCLUDED. The original reason was that the
+  // Agents group listed them (Oskar, 2026-09-02) and that group is gone,
+  // but the point of removing it was to get agents OUT of this panel —
+  // letting their threads back in through Recents would undo the change.
+  // Drop the filter if you want them listed again.
   const sorted = [...conversations]
     .filter((c) => !c.agentId)
     .sort((a, b) => b.lastActiveAt - a.lastActiveAt)
@@ -574,17 +619,9 @@ function HomePanelBody() {
             openScreen(null)
           }}
         />
-        {/* Agents and Reports are admin-only: the employee panel in the
-            frame is New / Routines / Documents. The real bot glyph comes
-            from the One AI Kit (13961:4824) — f0 ships no robot icon. */}
-        {profile === "admin" && (
-          <NavRow
-            icon={Bot}
-            label="Agents"
-            active={activeId === null && view === "agents"}
-            onClick={() => openScreen("agents")}
-          />
-        )}
+        {/* Agents is GONE from this panel (per Oskar, 2026-09-09) — the
+            row and the group below it. Reports stays admin-only, so the
+            employee panel is New / Routines / Files. */}
         <NavRow icon={Clock} label="Routines" />
         {/* Reports is NOT the Insights widget (per Oskar, 2026-08-31):
             Insights tells you about your own activity, Reports is for
@@ -593,65 +630,34 @@ function HomePanelBody() {
             visual-only like Agents and Routines until a Reports surface
             is designed. */}
         {profile === "admin" && <NavRow icon={Graph} label="Reports" />}
-        {/* The Documents screen is the Policies ODC sub-screen. */}
+        {/* The glyph is f0's `HardDrive` — the icon the frame's own menu
+            item carries (Figma 2944:727924, instance "HardDrive" in the
+            same 20px box). Storage, not a stack of folders. Still the
+            Policies ODC sub-screen behind it. */}
         <NavRow
-          icon={Folders}
-          label="Documents"
+          icon={HardDrive}
+          label="Files"
           active={activeId === null && view === "policies"}
           onClick={() => openScreen("policies")}
         />
       </div>
-      {/* The agents you have created (Figma 2741:465522). ONE ROW PER
-          AGENT, and its label is the rule that reconciles the two frames:
-          while you are inside an agent's conversation the row names the
-          agent ("Chief of Staff agent", as 2741:466470 draws it), and
-          otherwise it reports what that agent last did, with the status
-          dot beside it (2741:465055). No timers involved — the label
-          follows where you are, so both frames reproduce exactly. */}
-      {profile === "admin" && agents.length > 0 && (
-        <SidebarGroup label="Agents">
-          {agents.map((agent) => {
-            const conversation = agentConversations.get(agent.id)
-            const inside = conversation?.id === activeId
-            // The agent's own log is the source — its most recent run.
-            const run = latestRun(agent)
-            return (
-              <NavRow
-                key={agent.id}
-                emoji={agent.emoji}
-                label={
-                  inside ? `${agent.name} agent` : (run?.summary ?? agent.name)
-                }
-                active={inside}
-                trailing={
-                  inside || !run ? undefined : (
-                    <ActivityDot tone={toneFor(run.outcome)} />
-                  )
-                }
-                onClick={() => {
-                  if (conversation) openConversation(conversation.id)
-                  else openScreen("agents")
-                }}
-              />
-            )
-          })}
-        </SidebarGroup>
-      )}
       {/* Pinned carries a different example per profile, straight from the
           frame: a manager pins their triage queue, an employee pins their
-          own holidays. */}
-      <SidebarGroup label="Pinned">
-        {profile === "admin" ? (
-          <NavRow icon={Comment} label="Inbox triage" />
-        ) : (
-          <NavRow icon={Plane} label="My holidays" />
-        )}
-      </SidebarGroup>
+          own holidays. Both are DELETABLE now (Oskar, 2026-09-09), so the
+          group is gated on having a row left — the same rule Recents
+          follows, or you get a header standing over nothing. */}
+      {pinned.length > 0 && (
+        <SidebarGroup label="Pinned">
+          {pinned.map((item) => (
+            <PinnedRow key={item.id} item={item} />
+          ))}
+        </SidebarGroup>
+      )}
       {/* Recents is admin-only — the employee panel in the frame stops at
           Pinned. Conversations still work, they just aren't listed here. */}
-      {/* `sorted`, not `conversations`: agent threads live in the Agents
-          group now, so counting them here would leave "Recents" standing
-          with a header and no rows. */}
+      {/* `sorted`, not `conversations`: agent threads are filtered out
+          above, so counting them here would leave "Recents" standing with
+          a header and no rows. */}
       {profile === "admin" && sorted.length > 0 && (
         <SidebarGroup
           label="Recents"
@@ -676,10 +682,80 @@ function HomePanelBody() {
   )
 }
 
+/**
+ * A row inside a nav SECTION — the frame's "Selection list item"
+ * (2945:793559): `p-[8px] gap-[8px]`, so 36 tall around a 20px avatar,
+ * where the top-block "Menu item" that `NavRow` draws is 32 around the
+ * same glyph. Four pixels, but it is the difference between the chat
+ * rows and the Communities rows lining up or not, and it is why this is
+ * a separate component instead of another NavRow prop: NavRow is the
+ * 32px row and the Home and Hub panels are full of it.
+ */
+function SectionRow({
+  leading,
+  label,
+  bold = false,
+  trailing,
+  active = false,
+  onClick,
+}: {
+  leading: React.ReactNode
+  label: string
+  bold?: boolean
+  trailing?: React.ReactNode
+  active?: boolean
+  onClick?: () => void
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`f0c-pressable flex w-full cursor-pointer items-center gap-2 rounded-[10px] p-2 text-left ${
+        active
+          ? "bg-f1-background-secondary"
+          : "hover:bg-f1-background-secondary"
+      }`}
+    >
+      {leading}
+      <span
+        className={`flex-1 truncate text-base ${
+          bold ? "font-semibold" : "font-medium"
+        } text-f1-foreground`}
+      >
+        {label}
+      </span>
+      {trailing}
+    </button>
+  )
+}
+
+/**
+ * A section row's emoji, the way the frame draws it (2945:793623): a bare
+ * 20px box centring a 13.33px glyph — no tile.
+ *
+ * NOT `F0AvatarEmoji`: its smallest size is `sm` at 24px, which is what
+ * made every channel row 40 tall next to a 36 direct-chat row. A 20px box
+ * is also what `F0AvatarPerson size="xs"` gives the rows above, so the
+ * two kinds finally share one rhythm.
+ */
+function SectionEmoji({ emoji }: { emoji: string }) {
+  return (
+    <span
+      aria-hidden
+      className="flex size-5 shrink-0 items-center justify-center text-[13px] leading-none"
+    >
+      {emoji}
+    </span>
+  )
+}
+
 /** Light-blue unread badge used by the Comms section (vs the red Counter). */
 function UnreadBadge({ count }: { count: number }) {
   return (
-    <span className="flex min-w-5 items-center justify-center rounded-md bg-f1-background-selected-secondary px-1 text-sm font-medium text-f1-foreground-selected">
+    // `p-0.5` and `rounded-xs`, not `px-1 rounded-md`: the frame's Counter
+    // is 20x20 with `p-[2px] rounded-[6px]` over a 12/16 label
+    // (2945:793562), and with only horizontal padding the pill collapsed
+    // to its 16px line box next to a 20px avatar.
+    <span className="flex min-w-5 items-center justify-center rounded-xs bg-f1-background-selected-secondary p-0.5 text-sm font-medium text-f1-foreground-selected">
       {count}
     </span>
   )
@@ -701,24 +777,14 @@ function ChatRow({
   active: boolean
 }) {
   return (
-    <button
+    <SectionRow
+      leading={avatar}
+      label={label}
+      bold={unread !== undefined}
+      trailing={unread !== undefined && <UnreadBadge count={unread} />}
+      active={active}
       onClick={() => requestChat(id)}
-      className={`f0c-pressable flex w-full cursor-pointer items-center gap-1.5 rounded-[10px] py-1.5 pl-1.5 pr-2 text-left ${
-        active
-          ? "bg-f1-background-secondary"
-          : "hover:bg-f1-background-secondary"
-      }`}
-    >
-      {avatar}
-      <span
-        className={`flex-1 truncate text-base ${
-          unread ? "font-semibold" : "font-medium"
-        } text-f1-foreground`}
-      >
-        {label}
-      </span>
-      {unread !== undefined && <UnreadBadge count={unread} />}
-    </button>
+    />
   )
 }
 
@@ -736,7 +802,7 @@ function CommsPanelBody() {
       active={openChats.includes(chat.id)}
       avatar={
         chat.kind === "channel" ? (
-          <F0AvatarEmoji emoji={chat.emoji ?? "\u{1F4AC}"} size="sm" />
+          <SectionEmoji emoji={chat.emoji ?? "\u{1F4AC}"} />
         ) : (
           <F0AvatarPerson
             firstName={chat.title.split(" ")[0]}
@@ -751,15 +817,37 @@ function CommsPanelBody() {
     />
   )
   return (
-    <div className="flex flex-col gap-3 px-3 pb-1.5">
+    <div className="flex flex-col gap-4 px-3 pb-4">
+      {/* Only two rows up here now (Oskar, 2026-09-09, Figma 2945:793075):
+          "New channel" left with the redesign and Meetings arrived, on
+          f0's Headset — the same glyph the frame's menu item carries. Both
+          are visual-only, exactly like the rows they replace: the frame
+          gives them no destination and neither exists as a surface. */}
       <div className="flex flex-col gap-0.5">
-        <NavRow icon={Pencil} label="New conversation" />
-        <NavRow icon={Megaphone} label="New channel" />
+        <NavRow icon={Plus} label="New chat" />
+        <NavRow icon={Headset} label="Meetings" />
       </div>
       <SidebarGroup label="Chats directos">
         {DIRECT_CHATS.map(row)}
       </SidebarGroup>
       <SidebarGroup label="Canales">{CHANNEL_CHATS.map(row)}</SidebarGroup>
+      {/* Communities is NEW in that frame, and the frame's own rows are the
+          six CHANNELS copied across — emoji and counters included — so its
+          content was never authored. These are the real communities the
+          Communities widget posts into (`COMMUNITIES`, derived from the
+          wall), which is the only way the two lists cannot disagree.
+          Visual-only for now: the widget shows the whole wall and cannot
+          scope to one community, and landing "Book club" on Company
+          updates would read as a bug. */}
+      <SidebarGroup label="Communities">
+        {COMMUNITIES.map((community) => (
+          <SectionRow
+            key={community.name}
+            leading={<SectionEmoji emoji={community.emoji} />}
+            label={community.name}
+          />
+        ))}
+      </SidebarGroup>
     </div>
   )
 }
@@ -917,62 +1005,144 @@ function AbsenceFilterRow({ label }: { label: string }) {
  * Recruitment, Sales, Treasury and Accounting are admin-only rows the
  * employee frame never shows, so they keep their earlier matches.
  */
-const HUB_ICONS: Record<string, IconType> = {
+export const HUB_ICONS: Record<string, IconType> = {
   Absences: PalmTree,
+  // ICON GAP: the frame draws a coin with a currency symbol and f0 has
+  // no coin — all 256 app icons were checked, in both worktrees. `Balance`
+  // is weighing scales; it is the incumbent and it renders, but it is the
+  // wrong shape. Either accept the scales or ask f0 for a Coin.
   Accounting: Balance,
   Benefits: Present,
+  Billing: Receipt,
   Compensation: ChartPie,
+  // The frame's shopfront-with-awning: `Marketplace`'s second path IS
+  // that awning.
+  "Device catalog": Marketplace,
+  Documents: Folders,
   Engagement: MessageHeart,
   Equipment: Laptop,
   Handbook: Folder,
   Hours: Timer,
+  // Was "Sales" in the IT group, renamed on Oskar's word to break the
+  // collision with Finance's Sales. `Archive` is a lidded crate.
+  Inventory: Archive,
+  Kudos: Heart,
   Learning: AcademicCap,
-  Payroll: Money,
+  // Same glyph as "People" on purpose: it is the same row renamed and the
+  // same screen behind it.
+  Organization: People,
+  // `MoneyBag`, not `Money`: the frame draws a cinched bag with a
+  // currency glyph, while `Money` is an upright banknote with a second
+  // note behind it. The old Hub's choice predates this frame.
+  Payroll: MoneyBag,
   Payslips: DollarBill,
   People: People,
   Performance: ChartLine,
-  Planning: Organization,
+  // `ChartPie` — a donut with its top-right quadrant offset, i.e. the
+  // frame's exploded pie segment. It was `Organization`, an ORG-CHART
+  // glyph, which is no longer what this row draws (and is now Workflows).
+  Planning: ChartPie,
+  // f0's `HardDrive`, which the Files row also carries — different panels,
+  // and it is the glyph the frame draws for both.
+  "Platform IT": HardDrive,
+  // `UserProtected`, not `Shield`: the frame draws a shield with a person
+  // inside, which is exactly this icon.
+  Policies: UserProtected,
   Projects: Suitcase,
   Purchasing: Basket,
   Recruitment: SearchPerson,
   Sales: Handshake,
   Shifts: Schedule,
   Software: Computer,
+  // `Building`'s geometry is an isometric cube (M5 8L12 12M12 20V12),
+  // which is the frame's 3D box for Spaces — f0 has no cube glyph.
+  Spaces: Building,
   Spend: Wallet,
   Spending: Wallet,
+  // `BarGraph` is bars INSIDE a rounded rect (rect x=4 y=6 w=16 h=12
+  // rx=3), which is what the frame draws; `ChartVerticalBars` is bare
+  // bars with no container.
+  "Talent analytics": BarGraph,
+  // `CheckCircleLine`, the STROKED circle+check. `CheckCircle` is the
+  // solid variant (a filled disc with the check knocked out) and would
+  // have been the only filled glyph in an outline panel.
+  Tickets: CheckCircleLine,
   Training: BookOpen,
   Treasury: Bank,
   "Time off": PalmTree,
   "Time tracking": Timer,
+  // `Organization` is the only glyph here built from stroked nodes
+  // joined by connectors — the frame's small node graph. `Split` is a
+  // branching flow with arrowheads, which is a different idea.
+  Workflows: Organization,
   Workplaces: Office,
 }
 
-type HubGroup = { label: string; items: string[] }
+export type HubGroup = { label: string; items: string[] }
 
-/** Figma 2639:49719 — five groups. */
-const ADMIN_HUB: HubGroup[] = [
+/**
+ * Figma 2945:795787 — SIX groups, replacing the five of 2639:49719.
+ *
+ * Read off the frame's own render, since Dev Mode would only hand back
+ * metadata for this node: Company loses People/Workplaces/Equipment/
+ * Software/Handbook for Organization/Documents/Policies/Tickets/Spaces/
+ * Kudos, Work and Pay merge into Operations, Talent gains Talent
+ * analytics, and "Gestion de IT" and "More" are new.
+ *
+ * THREE things the mock says that this does not copy verbatim:
+ *   - "Engagment" is still the frame's typo; the spelling decision was
+ *     already recorded here and stands.
+ *   - "Sales" appeared TWICE, in IT and in Finance, which collide on one
+ *     `?view=sales`. Oskar: the IT one is "Inventory".
+ *   - "Gestion de IT" is the only Spanish group label, and unaccented.
+ *     Kept exactly as drawn — renaming a designer's label is their call.
+ */
+export const ADMIN_HUB: HubGroup[] = [
   {
     label: "Company",
-    items: ["People", "Workplaces", "Equipment", "Software", "Handbook"],
+    // "Organization" is the row that used to read "People", and it still
+    // points at that screen — PeopleScreen IS Organization › People
+    // (Figma 2730:459215). Without that mapping the prototype's one real
+    // Hub destination would lose its only entry point in this panel.
+    items: [
+      "Organization",
+      "Documents",
+      "Policies",
+      "Tickets",
+      "Spaces",
+      "Kudos",
+    ],
   },
-  { label: "Work", items: ["Time off", "Time tracking", "Shifts", "Projects"] },
-  { label: "Pay", items: ["Payroll", "Compensation", "Benefits"] },
+  {
+    label: "Operations",
+    items: [
+      "Time tracking",
+      "Time off",
+      "Shifts",
+      "Projects",
+      "Benefits",
+      "Payroll",
+    ],
+  },
   {
     label: "Talent",
-    // The frame reads "Engagment" — a typo in the mock.
-    items: ["Recruitment", "Performance", "Engagement", "Training"],
+    items: [
+      "Talent analytics",
+      "Performance",
+      "Recruitment",
+      "Engagement",
+      "Training",
+    ],
+  },
+  {
+    label: "Gestion de IT",
+    items: ["Device catalog", "Inventory", "Platform IT"],
   },
   {
     label: "Finance",
-    items: [
-      "Planning",
-      "Sales",
-      "Spending",
-      "Purchasing",
-      "Treasury",
-      "Accounting",
-    ],
+    items: ["Planning", "Spending", "Treasury", "Sales", "Accounting"],
   },
+  { label: "More", items: ["Billing", "Workflows"] },
 ]
 
 /**
@@ -982,7 +1152,7 @@ const ADMIN_HUB: HubGroup[] = [
  * the four things an employee opens about themselves. Software moves from
  * Company to Finance.
  */
-const EMPLOYEE_HUB: HubGroup[] = [
+export const EMPLOYEE_HUB: HubGroup[] = [
   { label: "Personal", items: ["Hours", "Absences", "Payslips", "Learning"] },
   { label: "Company", items: ["People", "Workplaces", "Handbook"] },
   { label: "Work", items: ["Time off", "Time tracking", "Projects"] },
@@ -991,19 +1161,10 @@ const EMPLOYEE_HUB: HubGroup[] = [
   { label: "Finance", items: ["Planning", "Spend", "Purchasing", "Software"] },
 ]
 
-/**
- * Hub rows that have a screen behind them, label → `?view=` slug. Every
- * other row is still visual-only (the prototype's rule: keep the finished
- * shape, don't fake the surface), so this map is the whole allow-list.
- */
-const HUB_VIEWS: Record<string, string> = {
-  People: "people",
-}
-
 function HubPanelBody() {
   const profile = useProfile()
   const groups = profile === "employee" ? EMPLOYEE_HUB : ADMIN_HUB
-  // Same URL-driven navigation the Home panel's Documents row uses.
+  // Same URL-driven navigation the Home panel's Files row uses.
   // `goHome()` first because an open conversation still owns the FLOOR —
   // the window lands over it either way, but leaving the thread mounted
   // under a freshly opened module reads as two unrelated things.
@@ -1014,7 +1175,11 @@ function HubPanelBody() {
       {groups.map((group) => (
         <SidebarGroup key={group.label} label={group.label}>
           {group.items.map((label) => {
-            const screen = HUB_VIEWS[label]
+            // EVERY row opens now, not just People. The window has a tab
+            // strip and a "+" over this same list, so a row that
+            // navigates nowhere would be the odd one out — an undesigned
+            // section opens as a tab and says so in the body.
+            const screen = hubSlug(label)
             return (
               <NavRow
                 key={label}
@@ -1024,15 +1189,14 @@ function HubPanelBody() {
                 // WINDOW now, so an open conversation on the floor does
                 // not take the canvas from it — both are on screen, and
                 // dimming the row would say otherwise.
-                active={screen !== undefined && view === screen}
-                onClick={
-                  screen === undefined
-                    ? undefined
-                    : () => {
-                        goHome()
-                        setSearchParams({ view: screen })
-                      }
-                }
+                active={view === screen}
+                onClick={() => {
+                  // The rail is "take me here", so it clears the floor.
+                  // The window's own "+" does not: there you are opening
+                  // another tab of something already on top of One.
+                  goHome()
+                  setSearchParams({ view: screen })
+                }}
               />
             )
           })}
@@ -1387,21 +1551,52 @@ export function HomeNav() {
             <span className="truncate text-base font-medium text-f1-foreground">
               {PANEL_TITLES[section]}
             </span>
-            <div className="flex shrink-0 items-center">
-              {/* The Inbox header carries a filter control beside the
-                  collapse button (Figma 2621:28151) — visual only. */}
+            {/* gap-1 and size="md": the frame's navbar right group is
+                `gap-[4px]` over 32px buttons (`p-[6px]` + a 20px glyph —
+                2945:793485), where these shipped as 24px `sm` ones flush
+                against each other. The 60px header is unchanged: 14 + 32
+                + 14 is exactly what it was built for. */}
+            <div className="flex shrink-0 items-center gap-1">
+              {/* The Inbox header carries TWO controls beside the collapse
+                  button now — a funnel added on Oskar's word (Figma
+                  2945:794858: three 32px buttons where there were two).
+                  Both visual-only, like the Sliders always was. */}
               {section === "inbox" && (
+                <>
+                  <F0Button
+                    variant="ghost"
+                    size="md"
+                    icon={Filter}
+                    hideLabel
+                    label="Filter inbox"
+                  />
+                  <F0Button
+                    variant="ghost"
+                    size="md"
+                    icon={Sliders}
+                    hideLabel
+                    label="Inbox display options"
+                  />
+                </>
+              )}
+              {/* Comms only, because Comms is the frame that draws it
+                  (2945:793494, the Gear left of HideSidebar). f0's
+                  `Settings` rather than the frame's filled glyph: every
+                  other icon in this panel is an f0 outline, and a single
+                  filled one would be the odd mark. Visual-only — the
+                  frame gives it no destination. */}
+              {section === "comms" && (
                 <F0Button
                   variant="ghost"
-                  size="sm"
-                  icon={Sliders}
+                  size="md"
+                  icon={Settings}
                   hideLabel
-                  label="Filter inbox"
+                  label="Comms settings"
                 />
               )}
               <F0Button
                 variant="ghost"
-                size="sm"
+                size="md"
                 icon={PanelCollapse}
                 hideLabel
                 label="Collapse panel"

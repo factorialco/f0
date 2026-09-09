@@ -29,19 +29,20 @@ Oskar serves it from the git worktree `~/code/f0-composer` (branch `oskar/f0comp
 ## Architecture (src/prototypes/home/)
 
 - `Home.tsx` — canvas + navbar + FULL_BLEED_CSS (all prototype-scoped CSS lives here: full-bleed chrome, all animations). Conditional canvas: active conversation → `ConversationView`, else greeting + Needs-you. The 1.7px stroke override was REVERTED to f0-native 1.3px (2026-08-03, per Oskar — forcing one width made icons with/without `non-scaling-stroke` render inconsistent weights). The navbar lost its sidebar-toggle with the new nav (2026-08-28); the windows "⋮" went with it and came BACK on 2026-08-29, so default Home mode shows the clock-in timer button + the ⋮ top-right (the timer briefly folded INTO the ⋮ list on 2026-08-30 and came back out on 08-31, per Oskar). Conversation/screen modes keep their own actions.
-- `HomeNav.tsx` — the navigation (meta.sidebar override; Figma 2621:22725, rail = 2621:22827; replaced `HomeSidebar.tsx` + `windows/WindowsMenu.tsx` on 2026-08-28, per Oskar): a FIXED 48px icon rail — company avatar on top: the REAL `F0AvatarCompany` in its with-logo variant (`src={factorialLogo}`, 24px), never an icon stand-in (per Oskar, 2026-08-29; it shipped first as `F0AvatarModule module="home"`, whose glyph is a HOUSE, then briefly as a hand-rolled squircle — both wrong). The logo file is f0's own storybook asset copied to `assets/factorial.png` and re-exported from `fixtures.ts`, since dist ships no image assets. Then Home / Comms / Inbox / Cal / Hub with 9px labels, then Marketplace + Shield 2px apart and the 24px user avatar 8px below (all measured off the frame render; the avatar opens the old footer user menu, now anchored to the rail) plus a 240px CONTEXTUAL panel (header = section title + collapse `PanelCollapse` button, SearchBar, per-section body). Re-clicking the active rail item toggles the panel; collapse is prototype state persisted at `f0compose:home:nav-section` / `f0compose:home:nav-open`. Section bodies: **home** = New/Agents/Routines/Reports/Documents (Reports is visual-only — NOT the Insights widget, see below; Documents → `?view=policies`) + Pinned + live Recents (filter, rename/delete — unchanged); **comms** = the old Chats tab (New conversation/channel, Chats directos, Canales); **inbox** = 4 actionable items (checkbox + avatar with module badge + meta, per the Inbox sidebar design); **cal** = INFERRED, no Figma state yet (New event, Meetings, Upcoming = `homeEvents`, click → events window); **hub** = Company/Operations/Talent/Finance module groups.
+- `HomeNav.tsx` — the navigation (meta.sidebar override; Figma 2621:22725, rail = 2621:22827; replaced `HomeSidebar.tsx` + `windows/WindowsMenu.tsx` on 2026-08-28, per Oskar): a FIXED 48px icon rail — company avatar on top: the REAL `F0AvatarCompany` in its with-logo variant (`src={factorialLogo}`, 24px), never an icon stand-in (per Oskar, 2026-08-29; it shipped first as `F0AvatarModule module="home"`, whose glyph is a HOUSE, then briefly as a hand-rolled squircle — both wrong). The logo file is f0's own storybook asset copied to `assets/factorial.png` and re-exported from `fixtures.ts`, since dist ships no image assets. Then Home / Comms / Inbox / Cal / Hub with 9px labels, then Marketplace + Shield 2px apart and the 24px user avatar 8px below (all measured off the frame render; the avatar opens the old footer user menu, now anchored to the rail) plus a 240px CONTEXTUAL panel (header = section title + collapse `PanelCollapse` button, SearchBar, per-section body). Re-clicking the active rail item toggles the panel; collapse is prototype state persisted at `f0compose:home:nav-section` / `f0compose:home:nav-open`. Section bodies: **home** = New/Routines/Reports/Files (Routines and Reports are visual-only — Reports is NOT the Insights widget, see below; Files → `?view=policies`, and it is the old "Documents" row relabelled) + Pinned (deletable since 2026-09-09, persisted) + live Recents (filter, rename/delete). **Agents left this panel on 2026-09-09** — both the row and the group below it; **comms** = New chat + Meetings, then Chats directos, Canales and Communities (Figma 2945:793075, 2026-09-09); **inbox** = a funnel + sliders in its header (2945:794858) over 4 actionable items (checkbox + avatar with module badge + meta, per the Inbox sidebar design); **cal** = INFERRED, no Figma state yet (New event, Meetings, Upcoming = `homeEvents`, click → events window); **hub** = six groups per Figma 2945:795787 (Company / Operations / Talent / Gestion de IT / Finance / More).
 - `OnePromptBar.tsx` — the One composer. Since 2026-08-29 the input is **f0's real `F0AiChatTextArea`** (`@factorialco/f0-react/dist/ai`, per Oskar — Figma 2639:45460), not a bespoke bar: the prototype inherits f0's autosize, focus gradient, Enter-to-send, and the send↔stop swap (driven by `inProgress={conversation.thinking}`). Radius/padding overrides live in `FULL_BLEED_CSS` (the component takes no className). Around it: the suggestions engine, the action chips BELOW the input, and only Settings on the right (Figma 2640:51198). The chats/routines buttons are gone with the redesign, so **`one/OnePickerModal.tsx` is orphaned** — kept for when an entry point returns.
 - **The suggestions engine survives on a DOM bridge** (`OnePromptBar`): `F0AiChatTextArea` owns its value and exposes no `onChange`, so the bar mirrors the real `<textarea name="one-ai-input">` to keep type-ahead alive. Two rules make it work, both learned the hard way: (1) listen on **document**, never on the node — React delegates to the app root, so an element-level `input` listener runs FIRST, and re-rendering there hands the controlled textarea its stale empty value, wiping the DOM and defeating React's change-tracker, which silently swallows EVERY keystroke; (2) resolve the node per event — f0 re-mounts the textarea as its state changes, so a captured node goes stale (that one killed ↑/↓ steering while typing still worked). Keydown steering is capture-phase so the panel gets ↑/↓/Enter before f0's own handler.
 - `one/` — `suggestions.ts` (the TYPE-AHEAD corpus + engine — `ONE_ACTIONS`, `buildSuggestions`, `categorySuggestions` — ported from one-notch's `oneContent.tsx`; the INTENTS corpus that decides replies lives in `conversationStore.ts`, not here), `conversationStore.ts` (module store, useSyncExternalStore — sidebar and canvas are sibling React trees; persists to localStorage `f0compose:home:conversations`, activeId intentionally NOT persisted; clarifying questions carry `intentKey` so resolve copy stays in code; answering echoes the answer as a user turn; intents can declare `reasoning: string[]` → steps stream one per beat via `Conversation.pendingReasoning` (transient, stripped on load) and land persisted on the turn's first reply message), `ClarifyPanel.tsx` (**the F0ClarifyingPanel pattern, Figma 1350:179756 / f0 main kits/ai**: when a clarifying question is pending, the prompt-bar input DISAPPEARS and this panel takes its place at the same width — question + ×, radios (RadioIndicator: selected = `bg-f1-background-selected-bold` + white dot), "Other" free text, Cancel/Submit footer, keyboard hints; ↑↓/Enter/Esc handled on window since the input is gone), `ConversationView.tsx` (pending question renders only an "Asking question…" line with a `bg-f1-special-highlight` dot — never an inline card; + ReasoningBlock: F0AiChat "Reasoning" collapsible ported from f0 main's Thinking/F0ActionItem — Lightbulb header, CheckCircleLine steps, connector line, shine-text on the executing step, collapsed once done; + TurnFeedback: copy (LayersFront→Check) + thumbs under the last reply, hidden while a question is pending; assistant copy supports `**bold**`; auto-scrolls to the newest turn), `OnePickerModal.tsx`, `PlayOutline.tsx` (icon gap), `chat-spinner/` (ChatSpinner + globeSpinMath **copied from f0 main** — our branch predates the globe-spin rewrite).
 - `comms/` — **the LEFT-hand chat stack** (Figma 2707:406513, per Oskar 2026-08-31: "al clicar en una conversacion, esta aparece de la misma manera que los widgets solo que en la parte izquierda, mismo comportamiento de apilamiento"). `chats.ts` (the 8 DMs/channels + their threads + the per-author palette), `ChatWindow.tsx` (thread + call card + composer), `ChatsColumn.tsx` (`useChats` = `useWindowStack<ChatId>` at a 428 column, `chatSpec` mapping a chat onto a `PanelSpec`), `chatStore.ts` (the nav↔canvas wiring). It is the SAME window system as the widgets, only mirrored — see the shared-stack note below.
+- `hub/` — **the Hub as a WINDOW with a browser header** (Figma 2787:43433, 2026-09-08). `hubStore.ts` (the open tabs, each tab's inner history and cursor, the annotate/select mode, the picks — one tab per section, `?view` mirrors the ACTIVE one), `hubSections.ts` (`HUB_SECTIONS`, derived from HomeNav's `ADMIN_HUB ∪ EMPLOYEE_HUB` plus `calendar`, so every Hub row can be a tab), `hubPane.tsx` (`HUB_PANE_ID = "module:hub"` — ONE pane id for every section, plus the `PanelSpec` whose `content` and `chrome` are COMPONENTS because `leftPaneSpec` is called from a render that does not subscribe), `HubChrome.tsx` (the two 44px rows: tab strip + "+" + overflow/size/close, then back/forward + pencil/cursor), `HubPaneBody.tsx` (the active section, select mode's outlines and the mode footer), `hubSlug.ts` (a dependency-free leaf, so HomeNav and the registry can share it without a cycle), `CursorIcon.tsx` (a shim for f0 main's `CursorClick`, missing from this worktree). Replaces `windows/ModulePane.tsx`.
 - `windows/` — Claude-Code-style window stack (Clock in, Communities, Events, Inbox, Insights, Anniversaries, Preview); widgets DOCK and maximize, they never float (see 2026-08-31) — the "widgets", in the design's language. The navbar "⋮" menu (`WindowsMenu`) was removed with the nav redesign and RESTORED on 2026-08-29 (Figma 2621:23687, per Oskar) — it is now the ONLY control top-right and lists five of the seven (`HIDDEN_FROM_MENU` still holds `celebrations` and `preview`; preview opens from the conversation play button). Windows also open from nav panel rows and One flows via `requestWindow` in conversationStore (the same channel One replies use). **Every open now animates identically** — a side-panel slide, see the stack note below; no caller passes a trigger rect any more. Preview content matches the updated survey window (Figma 1350:178521) — **Q5/Q6 copy is inferred** (nodes below the frame fold weren't extractable via the Dev Mode MCP), swap when the design settles.
 - Windows stack Claude-Code style (per Oskar, 2026-08-03): **max 2 per column**, the third window starts a new column (columns append on the outer side since 2026-08-30; all columns share `columnWidth`, drag on the leftmost edge resizes them together, clamped live to the canvas floor). **Maximize takes over the WHOLE canvas** (Figma 1365:12972: `MaximizedWindow` — title + Minimize (restore) + ✕, content in a centered 840px column; navbar/prompt bar give way until restore; keeps the same p-2 gutter + card chrome as the docked stack, per Oskar — it floats, never touches the page edges). Maximize ↔ restore is a real FLIP: the click stashes the outgoing rect in a module-level `flipOrigin` (the two elements live in swapped trees), the incoming element WAAPI-animates from it (240ms, Emil easing, honors reduced-motion, disables the CSS slide-in so transforms don't compose). **Open/close is a SIDE-PANEL slide, not a morph** (per Oskar, 2026-08-30 — the FLIP-from-trigger open "parecía cambiar de escala", because it warped a 224×40 menu row into a 448px panel, and the close jumped): widgets travel in from the right edge of their own column (`f0c-window-in`, 320ms, `cubic-bezier(0.23, 1, 0.32, 1)`, fade front-loaded over the first 40% so the panel is solid while travelling), and `animateWindowClose` is its exact reverse — same path out, fade only in the last 40%, over 280ms. The PATH reverses but the easing does NOT: exits keep the same strong ease-out (Emil is explicit that `ease-in` never belongs in UI, since it withholds movement at the moment the user is watching most closely). Two details keep it fluid: `fill: "forwards"` on the exit, or the panel snaps back to its resting spot for a frame before React unmounts it (that was the "salto"), and a timeout fallback comfortably longer than the animation. `setWindowFlipOrigin` is gone and no trigger rect is plumbed through any more; only maximize ↔ restore still FLIPs, because there one element really does travel between two rects. Nav actions (window requests, opening a conversation, `?view` changes) auto-restore a maximized window first — the nav lives outside Home's maximized early-return, so its clicks would otherwise appear dead behind the takeover. The canvas keeps `min-w-[320px]`; overflow shrinks the window columns instead.
 - Canvas layout: only the content scrolls (`.home-canvas-scroll`); the ONE bar + action chips stay pinned below it, and the scroller has a bottom `mask-image` fade so content dissolves as it slides under the bar.
 - `NeedsYouItem.tsx` — a "Needs you" row (Figma 2621:23747, redesigned 2026-08-29): 48px tall, 12px padding, 10px radius on `bg-f1-background-tertiary`, a bare 20px secondary icon, then title + subtitle on ONE line (title never shrinks, subtitle takes the slack and clips), then a chevron. The per-row CTA button is gone from the design; `ctaLabel` stays unused in the fixtures in case it returns.
 - `windows/ClockInWindow.tsx` + `windows/clockInStore.ts` — **Clock in** (renamed from "Time tracking" 2026-08-30, per Oskar), a WIDGET since 2026-08-30 (Figma 975:13056; it was `ClockInPopup.tsx`, a popover anchored to a navbar timer button, until Oskar asked for the navbar to carry only the ⋮). Same body as the old popup minus its portal/anchor chrome — the window stack supplies the surface and header. State moved to a module store because THREE sibling trees read it: the navbar ⋮ (which carries the pending dot), the widgets-menu row inside its popover, and the window itself. `clockedInAt` is deliberately not persisted. The pending dot (`PendingDot` in `WindowsMenu.tsx`) shows while `clockedInAt === null`, on the ⋮ with the menu closed and on the Time-tracking row's TRAILING edge with it open (per Oskar — beside the open-state check, not next to the label); both clear on clock-in and come back on clock-out.
 - `agents/agentThreads.ts` — **what each agent says and what it has done**, written to Oskar's mock-content brief (2026-09-02). Its two load-bearing ideas: an agent's THREAD IS ITS ACTIVITY LOG (no separate feed — the nav panel's row derives from the newest run), and a reply's last line asks for THE ONE THING the agent needs, which is why that question is a real clarifying card. Voice rules are in the file header.
-- `agents/` — **Agents** (Figma 2739:463194 empty, 2741:466470 the briefing conversation, 2741:465055 the list), URL-driven via `?view=agents` from the Home panel's Agents row. `agentsData.ts` (the four templates: emoji, description, prompt matcher, reasoning, greeting, seeded activity), `agentStore.ts` (the agents you have created — persisted, since the whole point is that the screen changes shape once one exists), `AgentsScreen.tsx` (both faces + the brief box). ONE SCREEN, TWO FACES: nothing created → the brief and the templates; at least one agent → the toolbar and the grid.
-- `people/` — **Organization › People** (Figma 2730:459215), the Hub's first real destination, URL-driven via `?view=people` (Hub panel → Company → People; `HUB_VIEWS` in HomeNav is the whole allow-list, every other Hub row is still visual-only). `PeopleScreen.tsx` (real f0 `Tabs` + the banners + a real `OneDataCollection`), `PeopleBanners.tsx` (the two "Inline Banner" cards — the left one carries One's button), `peopleData.ts` / `peopleColumns.ts` / `usePeopleSource.ts`. Runs EDGE TO EDGE with its own scroller (like the calendar) and carries **no prompt bar** — the frame has none, and One is reached from the button ON the headcount banner, which is the point of the design.
+- `agents/` — **Agents** (Figma 2739:463194 empty, 2741:466470 the briefing conversation, 2741:465055 the list), URL-driven via `?view=agents` — reached from the Home panel's Agents row until 2026-09-09, when that row was removed, so **nothing clicks into this screen any more**; it renders fine from a pasted URL. `agentsData.ts` (the four templates: emoji, description, prompt matcher, reasoning, greeting, seeded activity), `agentStore.ts` (the agents you have created — persisted, since the whole point is that the screen changes shape once one exists), `AgentsScreen.tsx` (both faces + the brief box). ONE SCREEN, TWO FACES: nothing created → the brief and the templates; at least one agent → the toolbar and the grid.
+- `people/` — **Organization › People** (Figma 2730:459215), the Hub's first real destination, URL-driven via `?view=people` (Hub panel → Company → People, or the Hub window's own "+"; since 2026-09-08 EVERY Hub row opens a tab and the undesigned ones say so, so there is no allow-list any more). `PeopleScreen.tsx` (real f0 `Tabs`, keyed on the tab so back/forward can move it, + the banners + a real `OneDataCollection`), `PeopleBanners.tsx` (the two "Inline Banner" cards — the left one carries One's button), `peopleData.ts` / `peopleColumns.ts` / `usePeopleSource.ts`. Runs EDGE TO EDGE with its own scroller (like the calendar) and carries **no prompt bar** — the frame has none, and One is reached from the button ON the headcount banner, which is the point of the design.
 - `one/ConversationPanel.tsx` — **the SPLIT conversation panel** (Figma 2729:450379 / 2730:458631): 438px, flush, full height, its own navbar (title + expand + ✕). Deliberately NOT a widget from the window stack — the frame draws a second _pane_, not a docked card, so there is nothing to stack, resize or maximize. Expand promotes the same conversation to the full-screen canvas (it MOVES; the panel empties as the canvas fills), ✕ leaves it in Recents.
 - `policies/` — the Policies sub-screen (Figma 1350:190929), URL-driven via `?view=policies` (Home panel "Documents" row; an open conversation always wins the canvas; the prompt bar stays pinned). Real **OneDataCollection**: presets Published/Draft/Outdated, search, sort by name/last update, selectable rows, Upload documents primary + Start new secondary (ODC folds secondaries into the ⋮), item actions. No pagination (8 bounded rows). Navbar shows the module-screen variant (F0AvatarModule `company_documents` — no "policies" module in f0, icon gap — + title + ⋮/gear).
 
@@ -97,6 +98,319 @@ sidepanel-right + floating (the widget dock/float toggle)→local `windows/Panel
 - **Unverified in the Claude browser pane, check in a real browser**: the composer's hover border (the pane reports `:hover` as matching but never recalculates the style) and the widget slide in/out (animations are frozen there — its structure, easing and durations were verified in the DOM instead).
 - **The pane's JS context can go stale and report a ZERO viewport** while still rendering the page correctly (hit 2026-08-30). `window.innerWidth`, `clientWidth` and every `vw` unit returned 0, so `getBoundingClientRect` read 2px on a card the screenshot showed at full size — it looks exactly like a layout bug you did not write. Tell them apart by probing `innerWidth` directly; the fix is a FRESH TAB (`tabs_create` + `navigate`), since reloading the dead tab does not restore it. Anything clamping against `window.innerWidth` (the floating card's drag/resize) will also misbehave in that state and be fine in a real browser.
 - **Never gate app logic on `requestAnimationFrame` firing** (learned 2026-08-30). The pane is a hidden tab, so rAF NEVER ticks — a `requestAnimationFrame(() => entered.add(id))` guard in `WindowsColumn` therefore never populated its set and every panel kept replaying its entrance, which read exactly like a broken fix. This is not only a pane artefact: any backgrounded tab does the same in a real browser. Use a timestamp comparison (`enteredAt` + a grace window) when the goal is "has this already happened once", and reserve rAF for actual frame-timed work. Corollary for verification: an inline `style.animation === "none"` is observable in the frozen pane even though the animation itself is not, so assert on the STRUCTURE the code sets, not on motion.
+
+## Done since last handoff (2026-09-08, the Hub window's header is a BROWSER)
+
+Oskar: "he cambiado la cabecera de la ventana de People para que funcione como una especie de
+browser, desde ahi, podrias abrir nuevas pestañas del hub, tendrías una barra de navegacion
+para manejarte mejor por el modulo sin necesidad de usar breadcrumbs, y en esa barra a la
+derecha podríamos añadir la opcion de hacer anotaciones en la pagina o seleccionar elementos"
+(Figma 2787:43433).
+
+- **ONE pane id, `HUB_PANE_ID = "module:hub"`.** This is the load-bearing change and the
+  reason `windows/ModulePane.tsx` is gone. The pane id IS the stack's window key, so
+  `module:people` → `module:calendar` on a tab switch would remount the card and lose its
+  column weights, its entrance suppression and any maximize. Verified by stamping the DOM
+  node (`section.__probe`) and switching tabs: `same-node`. It still reads REMOUNTED across
+  maximize ↔ restore, which is correct — those are two different components by design.
+- New in `hub/`: `hubStore.ts` (tabs, per-tab history, mode, picks), `hubSections.ts` (the
+  section registry), `hubPane.tsx` (the `PanelSpec`), `HubChrome.tsx` (the two rows),
+  `HubPaneBody.tsx` (the active section + select mode), `hubSlug.ts`, `CursorIcon.tsx`.
+- **`PanelSpec.chrome`** replaces the 44px header for this pane only, wired into BOTH render
+  sites (`WindowPanel` and `MaximizedWindow`), with `WindowChromeControls` exported so the
+  chrome gets the close and the size toggle from the stack rather than guessing them. Every
+  other window is untouched.
+- Geometry measured against the frame: header **88 = two 44px rows**, row 1 white, row 2
+  `background/default/tertiary` = `rgba(5,31,81,0.04)` with **no hairline** between them (the
+  band is the separation), 32px ghost buttons, chip 32 tall with a 24px ✕. First pass measured
+  row 1 at **49**: `F0Icon` is `inline-block`, so the ✕ button's line box made it 29 instead
+  of 24. `flex items-center justify-center` on that button fixes it — worth remembering for
+  any hand-rolled icon button in this prototype.
+- **Every Hub row opens now**, not just People. A tab strip with a "+" over the real Hub makes
+  a row that navigates nowhere the odd one out, so `HUB_SECTIONS` is DERIVED from
+  `ADMIN_HUB ∪ EMPLOYEE_HUB` (27 sections, all 27 have an icon) plus `calendar`, and an
+  undesigned section opens as a tab and says so in the body. `HUB_VIEWS` in HomeNav is gone;
+  the row computes `hubSlug(label)`. The rail still calls `goHome()` first, the window's "+"
+  does not — there you are opening another tab of something already sitting on One.
+- `?view` still means WHICH section, now as "the active tab": four writers use the object form
+  of `setSearchParams` and would wipe a tab list held in the URL, so the open SET lives in the
+  store. One tab per section, because `peopleFocusStore` is a module singleton and two People
+  tabs would share one filter.
+- **Back/forward walk the People inner tab** — the only walkable state that exists; a calendar
+  tab has a one-entry stack and both buttons are disabled. `Tabs` needs `key={tab}` for the
+  highlight to follow a programmatic set (it is uncontrolled). Verified: Teams → Back → the
+  table returns, Back off / Forward on.
+- **The infinite loop this cost.** f0's `Tabs` reports its selection from
+  `useEffect(..., [onChangeActiveTabId, activeTabId])`, so an inline arrow re-fires it on
+  every render; `navigateInner` then emitted a NEW state object because `Array.map` always
+  returns a new array — emit → render → new arrow → effect → emit, i.e. React's "Maximum
+  update depth exceeded" the first time People opened. Two fixes, both kept: `emitTabs` only
+  emits when a tab was actually replaced, and PeopleScreen passes a `useCallback`. **Rule:
+  never emit from a store when nothing changed** — `moveCursor`, `activateTab` and
+  `clearPicks` all bail now.
+- **SELECT mode works**: the pencil and the cursor are exclusive modes; select outlines
+  `tr,[role="row"],li,article` on hover, picks on click (capture phase, so a row does not also
+  navigate), and the footer bar names the picks with "Ask One about N" + Clear. Asking starts
+  a real conversation where Needs-you was ("About Marie Curie, Alan Turing in People: what
+  should I know?") and leaves the mode. Picks are DESCRIPTORS, not nodes — ODC remounts its
+  rows on every refetch, so a remount drops the outline and keeps the pick.
+- **`F0Button` silently strips `pressed`.** It typechecks (the union defeats excess-property
+  checking) and `F0ButtonProps` omits it, so the component removes it before render — measured:
+  no `data-pressed` on the element, while f0's own Filters button has it. The mode buttons wear
+  f0's own ghost-pressed treatment (`bg-f1-background-secondary-hover` + the inset shadow) on a
+  wrapper instead.
+- **Two deliberate deviations from the frame**, both worth a look: the overflow button is
+  `Ellipsis` (horizontal) because this worktree's icon set has no `DotsVertical`, and it opens
+  the section's own action (Announcements / Calendar settings) rather than being inert — the
+  frame's dots are the only place a browser header leaves for a module's buttons.
+  `hub/CursorIcon.tsx` is a local shim carrying the frame's exact path: f0 main HAS this glyph
+  as `CursorClick`, this worktree does not, so delete the shim at the next icon sync.
+- **Out of scope, said plainly**: annotation PINS. The pencil holds the mode and the bar says
+  the anchor that survives a scroll, a resize and a table refetch is not built.
+- `people/peopleTabStore.ts` is DELETED — the tab is the head of the hub tab's history now,
+  and two stores holding one value is how back/forward silently disagrees with the strip.
+
+## Done since last handoff (2026-09-09, the Inbox filter + the Hub retaxonomy)
+
+Two frames from Oskar. LOCAL ONLY.
+
+**Inbox (2945:793918).** "lo unico que he hecho es añadir un icono mas en la cabecera para
+filtrar" — the navbar's right group goes from two 32px buttons to three (2945:794858). A `Filter`
+funnel now sits before the `Sliders`, both visual-only as the Sliders always was; the Sliders'
+label became "Inbox display options" so the two do not both read "Filter inbox".
+
+**Hub (2945:795787) — six groups where there were five.** Company drops People / Workplaces /
+Equipment / Software / Handbook for Organization / Documents / Policies / Tickets / Spaces /
+Kudos; Work and Pay merge into Operations; Talent gains Talent analytics; "Gestion de IT" and
+"More" are new. 27 rows, verified in the DOM against the frame in order, none of them iconless.
+
+- **`get_design_context` would only return METADATA for these nodes**, unlike the Comms panel
+  earlier the same day — it appears to need the node selected in Figma. The labels came from
+  `get_screenshot` on the panel node instead, upscaled 3x and read. Worth knowing: the screenshot
+  route is the reliable fallback for reading copy out of a frame.
+- **`Organization` is the old `People` row renamed, and it still opens PeopleScreen.** Without
+  that, the prototype's one real Hub destination would have lost its only entry point in the
+  admin panel — `hubSlug("Organization")` is "organization", not "people". `HubPaneBody` now
+  accepts both, and the employee Hub still says People. Verified: `?view=organization` opens the
+  Hub window with an "Organization" tab and the 24-row People table inside.
+- **Three things the mock says that this does not copy verbatim:**
+  - "Sales" appeared TWICE, in IT and in Finance, colliding on one `?view=sales` — two rows with
+    one destination, both lighting up as active. Oskar's call: the IT one is **"Inventory"**.
+  - "Engagment" is still the frame's typo. The spelling decision was already recorded here.
+  - "Gestion de IT" is the only Spanish group label, and unaccented. Kept exactly as drawn —
+    renaming a designer's label is their call, not the implementation's.
+- **HUB_ICONS gained 12 keys and kept all 27 old ones**, because EMPLOYEE_HUB still uses People /
+  Workplaces / Handbook / Compensation / Spend / Purchasing / Software / Hours / Absences /
+  Payslips / Learning, and a missing key renders a silently iconless row (`F0Icon` returns null).
+  The employee Hub has no frame of its own yet, so it is untouched.
+  Every pick was read as SVG, not chosen by file name — and a parallel mapping pass that read
+  them independently **overturned five of mine**, each for a reason worth keeping:
+  - `Tickets: CheckCircleLine`, not `CheckCircle` — the latter is the SOLID variant (a filled
+    disc with the check knocked out) and would have been the only filled glyph in an outline
+    panel, the same trap the Comms gear avoided.
+  - `Talent analytics: BarGraph`, not `ChartVerticalBars` — `BarGraph` puts its bars INSIDE a
+    rounded rect (`rect x=4 y=6 w=16 h=12 rx=3`), which is what the frame draws; the other is
+    bare bars.
+  - `Payroll: MoneyBag`, not the incumbent `Money` — the frame draws a cinched bag with a
+    currency glyph; `Money` is an upright banknote with a second note behind it.
+  - `Planning: ChartPie`, not the incumbent `Organization` — that incumbent is an ORG-CHART
+    glyph, which is not what the row draws any more.
+  - `Workflows: Organization` — freed by the line above, and the only glyph here built from
+    stroked nodes joined by connectors, i.e. the frame's node graph. `Split`, my pick, is a
+    branching flow with arrowheads: a different idea.
+    Held from my picks: `Policies: UserProtected` (a shield WITH a person, not plain `Shield`),
+    `Spaces: Building` (whose geometry `M5 8L12 12M12 20V12` is an isometric CUBE — the name is
+    misleading and f0 has no other cube), `Device catalog: Marketplace` (its second path is the
+    frame's awning), `Inventory: Archive` (a lidded crate), `Kudos: Heart`, `Billing: Receipt`,
+    `Documents: Folders`, `Platform IT: HardDrive`, `Organization: People`. The last two share a
+    glyph with another row on purpose: Organization IS People, and Platform IT is in a different
+    panel from Files.
+- **ICON GAP, escalated rather than hidden: Accounting.** The frame draws a coin with a currency
+  symbol and f0 has NO coin — all 256 app icons were checked, in this worktree and in
+  `~/code/f0` (whose only extras are `CursorClick` and `FitView`). `DollarReset` is the closest
+  circular-currency glyph but carries a reset chevron, which on an Accounting row is worse than a
+  neutral wrong shape. The incumbent `Balance` (weighing scales) stays so something renders, with
+  the gap written into the map: accept the scales, or ask f0 for a Coin.
+- **Header gap, a mock inconsistency worth knowing:** the Comms frame sets its right group
+  `gap-[4px]` explicitly, while the Inbox frame's three buttons abut (x=0/32/64, gap 0). The
+  header is one shared component, so it keeps `gap-1` from the Comms frame.
+- **A scar from this pass:** a script of mine rewrote the icon import block with a regex whose
+  `.*?` spanned THREE import statements, merging `@factorialco/f0-react` and `dist/experimental`
+  into the icons block and mangling `F0AvatarCompany` into `F`. Rebuilt the head by hand. The
+  lesson is the one already written elsewhere here: when a patch makes things worse, stop
+  patching — and never regex across `} from "…"` boundaries.
+
+## Done since last handoff (2026-09-09, the Comms panel's spacing + the gear)
+
+Oskar: "Revisa bien los espacios, te falta el boton de gear al lado del de plegar el sidebar"
+(Figma 2945:793136). LOCAL ONLY. Every number below was read off the frame and then measured in
+the DOM, and the panel now matches on all of them.
+
+- **The Gear.** The frame's navbar right group is `gap-[4px]` over TWO 32px buttons —
+  `p-[6px]` + a 20px glyph (2945:793485) — Gear then HideSidebar. The header shipped with ONE
+  24px `sm` button, flush. So: `Settings` added before the collapse button, both to `size="md"`,
+  and `gap-1` on the group. The 60px header is untouched — `h-[60px]` was already built for
+  14 + 32 + 14. f0's outline `Settings`, not the frame's filled gear: every other icon in this
+  panel is an f0 outline and a single filled one would be the odd mark. Comms only, since Comms
+  is the frame that draws it; visual-only, since the frame gives it no destination.
+- **The real spacing bug was the row rhythm, and it predates this frame.** The design has two
+  row species and the code had collapsed them into one:
+  - top-block "Menu item" (2945:793511) — `p-[6px] gap-[6px]`, **32** tall;
+  - section "Selection list item" (2945:793559) — `p-[8px] gap-[8px]`, **36** tall.
+    Everything was drawn with `NavRow`'s 32px geometry. Worse, `F0AvatarEmoji`'s smallest size is
+    `sm` = 24px, so every CHANNEL row measured **40** against a 36 direct-chat row: two different
+    heights inside one list, which is what reads as ragged.
+- Fixed with a `SectionRow` (36 tall, `p-2 gap-2`) that `ChatRow` now wraps and the Communities
+  rows use directly, plus a `SectionEmoji` — the frame's bare 20px box centring a 13.33px glyph
+  (2945:793623), not a 24px `F0AvatarEmoji` tile. `NavRow` keeps its 32px "Menu item" geometry
+  untouched, which is what the Home and Hub panels are full of. Measured after: Lucía, Pablo,
+  Anuncios, Turno mañana, Company updates and Book club are all 36 with a 20px leading box.
+- **Section header 24 → 32.** The frame's is `px-[6px] py-[8px]` over a 12/16 label
+  (2945:793557); `SidebarGroup`'s was `py-1`. `flex-1` rather than `w-full` on the button so a
+  trailing control (Recents' sliders) still sits beside it.
+- **The header→items gap and the row gap are TWO gaps, and conflating them cost a regression.**
+  `SidebarGroup`'s outer `gap-0.5` was carrying both: it put 2px under the header (the frame
+  wants 0) AND 2px between the rows (the frame wants exactly that, `gap-[2px]` on Items,
+  2945:793558). Setting the outer div to `gap-0` fixed the header and silently stacked every
+  section's rows FLUSH — measured 0px between Lucía and Pablo, and between all six channels. The
+  fix is the frame's own structure: no gap on the bundle, `gap-0.5` on an Items column wrapping
+  `children`. Home's Pinned/Recents and the Hub groups get their 2px back with it.
+  Caught by the region-by-region audit, not by me — I had already reported the spacing as
+  matching while the rows were flush.
+- **The unread Counter was 16 tall and 12-round** where the frame's is 20x20 with
+  `p-[2px] rounded-[6px]` (2945:793562): `px-1` gave it horizontal padding only, so it collapsed
+  to its 16px line box beside a 20px avatar. Now `p-0.5 rounded-xs` (6px, verified against
+  `borderRadius.xs` = 0.375rem in the compiled CSS).
+- **16px under the last row**, not 6: the frame's bundle `pb-[10px]` + scroll `pb-[6px]`. The
+  Comms body's `pb-1.5` → `pb-4`.
+- **Left to f0, not fixed here:** the sidebar search field is `rounded` (f0's 10px default) where
+  the frame says `rounded-[8px]`. It lives in `packages/react/src/patterns/Navigation/Sidebar/
+Searchbar`, and a call-site `className` cannot fix it — SearchBar spreads `{...props}` after
+  its own `className`, so passing one REPLACES the internal class string. A 2px radius on a
+  shared design-system component is not a prototype's change to make.
+- Final measurement, all one value each: row heights `[36]`, in-section gaps `[2]`,
+  header→first row `0`, counter 20x20 r6, body bottom padding 16.
+- **Block gap 12 → 16.** The frame's blocks are flush in absolute terms (104+82=186,
+  186+122=308, 308+274=582); the 16px comes from the bundle's `pb-[10px]` plus the scroll
+  frame's `pb-[6px]`. Comms only — the other panel bodies have their own frames.
+- **Two frame numbers deliberately NOT copied, both with a reason:**
+  - The sections' `pl-[12px] pr-[6px]` (222 wide) against the top block's 216. Rows here are 205
+    because the panel scroller keeps an 11px scrollbar gutter, and that is a decision already
+    recorded in FULL_BLEED_CSS: "the gutter is NOT reclaimed... so nothing reflows when the bar
+    comes and goes". Absolute widths cannot match while that holds, and the 6px exists to place
+    a counter against an edge this panel does not have.
+  - `NavRow`'s `pr-2` against the frame's uniform `p-[6px]` — 2px, and that right padding is
+    where trailing badges and the ⋮ live.
+- **Noticed, not fixed:** `.home-panel-scroll` shows its thumb permanently, while the windows
+  hide theirs until you scroll (`useTransientScrollbars`). The Comms panel now overflows, so
+  there is a bar down its edge at rest. Same complaint Oskar raised for windows on 2026-09-08;
+  wiring the panel to the same hook is the fix.
+
+## Done since last handoff (2026-09-09, the Comms panel gains Communities)
+
+Oskar: "El sidebar de Comms deberia llevar arriba unicamente New chat y Meetings, abajo las
+secciones correspondientes a conversaciones, canales y Communities (nueva)" (Figma 2945:793075).
+LOCAL ONLY — not committed, not deployed.
+
+- Top block is two rows: **New chat** on `Plus` and **Meetings** on f0's `Headset` — the glyph
+  the frame's own menu item carries (`imgHeadset`; Code Connect resolved New chat's to `Plus`).
+  "New channel" left with the redesign, and `Megaphone` left the imports with it. Both rows are
+  visual-only, exactly like the two they replace: the frame gives them no destination and
+  neither exists as a surface.
+- **The frame's Communities block is the CHANNELS block copied across.** Its six rows are
+  Anuncios / Incidencias / Turno mañana / Tienda centro / Almacén Getafe / Encargados — same
+  labels, same emoji, same counters as Canales, which is the tell that the section was added but
+  never authored. Shipping it literally would have put six duplicate rows under two headers and
+  read as a bug.
+- So the rows are the **real communities this prototype already has**: `COMMUNITIES` in
+  `windows/communityPosts.ts`, DERIVED from the wall the Communities widget renders (distinct
+  `post.community`, first-appearance order — Company updates, Engineering, Product Design,
+  Running club, Barcelona office, Book club, New joiners). Derived rather than hand-listed for
+  the reason the Inbox nav shares the inbox fixtures: post in a new community and its row
+  appears, and the two lists cannot disagree.
+- **The emoji are the one invented part.** A post carries no glyph and the frame's are the
+  channels', so there is a name→emoji map beside the data with a `💬` fallback, so a new
+  community is never iconless.
+- Rendered with **`NavRow`'s `emoji` prop** — a 20px box at 16px, which is how the frame sets
+  them. That prop had been dead since the Agents group left (the 2026-09-09 audit flagged it);
+  it is live again, and it is why these are NavRows rather than a bespoke row: `NavRow` is a
+  `<button>` and an emoji span nests inside it legally, unlike the ⋮ button.
+- **Visual-only, deliberately.** `CommunitiesWindow` maps the WHOLE wall and cannot scope to one
+  community, so wiring the rows would land "Book club" on a Company updates post — worse than a
+  row that plainly does nothing, which is this prototype's convention for a surface that is not
+  designed yet. A per-community filter is ~30 lines (a store + the filter in that map + the
+  window title) and is the obvious next step if the section should be live.
+- No counters on the Communities rows: the frame draws some, but there is no unread data for a
+  community, and inventing numbers is what `communityPosts.ts` was written to stop.
+- Verified: all seven rows present and the panel still scrolls to reach them; the Canales rows
+  still open their chat windows (clicked "Tienda centro" → `pane:tienda-centro`).
+
+## Done since last handoff (2026-09-09, Pinned rows are deletable)
+
+Oskar: "los items de la seccion pinned tambien deberian poder borrarse, como los de recents."
+LOCAL ONLY — not committed, not deployed.
+
+- **`RowOptions` extracted, not duplicated.** The hover "⋮" plus its portalled menu now lives in
+  ONE component that Recents and Pinned share, with the menu supplied as a render prop that gets
+  the closer back — Rename + Delete for a conversation, Delete alone for a pin (there is nothing
+  to rename a pin to). Two hard-won details finally live in one place: the reveal is gated to
+  fine pointers, or touch users lose the menu entirely; and its hover goes DARKER rather than
+  white, because f0's background tokens are alpha and a white tint punched a pale hole through
+  the already-hovered row.
+- **`pinnedStore.ts` stores the REMOVALS, not the list** — the same shape as `needsYouStore`.
+  The seed stays in code so a pin keeps a real `IconType` instead of a string some map has to
+  turn back into a component, and what persists is what the user actually did. Module store
+  because the nav panel unmounts whenever a widget maximizes, and a `useState` list would
+  quietly restore a row you had deleted.
+- Keyed by id across both profiles, so deleting the manager's "Inbox triage" leaves the
+  employee's "My holidays" alone. Verified: deleted as admin, switched profile, reloaded — the
+  employee pin is still there with its own ⋮.
+- **The group hides when its last row goes**, the rule Recents already followed. Verified for
+  both: delete the only pin and the "Pinned" header leaves with it; same for Recents.
+- `PinnedRow` is a `div`, not a `NavRow`. `NavRow` renders a `<button>` and the ⋮ is another
+  button — the same invalid nesting the Hub tab chip hit. Its `trailing` prop, dead since the
+  Agents group left, therefore stays dead; it can only hold a non-interactive node.
+- Pinned rows are still NOT clickable, so they carry no `cursor-pointer`. Deletable, not
+  navigable — the pin targets do not exist as surfaces yet.
+- `restorePinned` has no caller: the prototype has no "pin this" affordance, so a deleted pin is
+  gone for the session. Kept because it is one line away from a menu row.
+- **Verification note.** `computer key "Return"` in the Claude browser pane does NOT produce a
+  keydown React's `onKeyDown` sees — Recents' inline rename looked broken until a synthetic
+  `new KeyboardEvent('keydown',{key:'Enter',bubbles:true})` committed it instantly. Add it to the
+  pane's list of false negatives alongside frozen animations and `setPointerCapture`. Delete
+  paths were exercised with real clicks and are genuinely fine.
+
+## Done since last handoff (2026-09-09, the Home panel loses Agents)
+
+Oskar: "quiero modificar los items que aparecen en la Home, quiero que sean estos: New /
+Routines / Reports / Files. Quiero quitar Agents y su seccion de mas abajo, dejaremos solo
+Pinned y Recents." LOCAL ONLY — not committed, not deployed.
+
+- The row list is now New / Routines / Reports / Files, and the per-agent `SidebarGroup` is
+  gone. Reports KEEPS its admin-only gate, which it used to share with the Agents row, so the
+  employee panel is New / Routines / Files. Verified in both profiles: admin gets exactly those
+  four rows + Pinned + Recents, employee gets three + Pinned, and no group is left standing
+  with a header and no rows.
+- "Documents" → **"Files"**, same `?view=policies` target. Verified: the row still opens
+  Policies and still takes NavRow's selected state.
+  - The glyph shipped as `Folders` for a few hours, on the reasoning that f0's `Files` icon was
+    already the "All conversations" row in the Recents filter menu. **Superseded the same day**:
+    Oskar pointed at Figma 2944:727924, whose menu item carries f0's **`HardDrive`** in the same
+    20px box — storage, not a stack of folders. `Folders` had no other caller and left the
+    import; `Folder` (singular) stays, it is `HUB_ICONS.Handbook`. Verified in the DOM: four
+    paths, all matching `HardDrive.tsx`, in a 20x20 box.
+- Deleted with it, because only it used them: the local `ActivityDot`, and the `useAgents`,
+  `latestRun`, `toneFor`, `ActivityTone` and `Bot` imports.
+- **SUPERSEDES the Agents-group rules below** — NOTES:1115 (one row per agent, label follows
+  where you are), and the halves of :1097 and :1100 that lean on the group existing.
+- **Recents still filters `c.agentId` out.** Its original reason (the group listed those threads
+  already) died with the group, but the POINT of the removal was to get agents out of this
+  panel, so letting their threads back in through Recents would undo the change. One line to
+  drop the filter if that is not what you meant.
+- **Known consequence, flagged not fixed:** those two rows were the ONLY clicks into
+  `?view=agents`, so the Agents screen and `agents/` (AgentsScreen, agentStore, agentThreads,
+  agentsData) are now reachable only by typing the URL. The screen still renders; nothing was
+  deleted.
 
 ## Done since last handoff (2026-09-07, New collapses the widgets)
 
@@ -214,8 +528,9 @@ Figma 2787:39347 (People) and 2789:54639 (calendar).
 - **No z-index.** `main#content` is `relative z-10` in f0's ApplicationFrame, which caps this
   subtree; DOM order is the only thing that can win, and it is enough.
 - PeopleScreen lost its own scroller and `flex-1` (a flex-1 child cannot hug), and its tab
-  moved to `people/peopleTabStore.ts` because a maximized widget unmounts the canvas and a
-  `useState` tab would come back as "people".
+  moved OUT of component state because a maximized widget unmounts the canvas and a `useState`
+  tab would come back as "people" (first to `people/peopleTabStore.ts`, since 2026-09-08 the
+  head of the hub tab's history — see the browser-header pass).
 - **Debt called in:** `ClarifyPanel`'s `window` keydown listener now ignores events from
   inside a `section[data-home-window]`. NOTES:150 flagged this as the prerequisite before a
   panel could coexist with a screen that keeps the composer — which is exactly what a module
@@ -645,9 +960,10 @@ las ventanas y las conversaciones no se ven."
   `animateModuleWindowClose`, the `settleOnMount` call, `PanelSpec.maximizeIcon`/
   `maximizeLabel`, and in Home the `moduleSize` state, the auto-minimize effect, the
   `moduleSize === "full"` early return, the in-canvas dock render, `dockWidth`, `dragOverlay`
-  and `overlayModule`. `windows/ModuleWindow.tsx` is now `windows/ModulePane.tsx` — a registry
+  and `overlayModule`. `windows/ModuleWindow.tsx` became `windows/ModulePane.tsx` — a registry
   and four helpers, no component.
-- **`LeftPaneId` gained `ModulePaneId`** with `leftPaneKind` giving three slots
+- **`LeftPaneId` gained the module pane id** (`ModulePaneId`, superseded 2026-09-08 by the
+  single `HubPaneId`) with `leftPaneKind` giving three slots
   (module / ticket / conversation), and `leftPaneSpec` dispatches modules BEFORE the ticket
   branch because the conversation path is an unguarded `CHATS_BY_ID[id]`.
 - **`?view` stays the source of truth for WHICH module**; the stack owns the geometry. One
@@ -682,7 +998,8 @@ there to give People more, which is how two stacked panes have always worked her
 face matters at rest then People needs restructuring so the TABLE scrolls while the tabs and
 banners pin.
 
-Verified at 1440x900: People alone `pane:module:people` 562x884; click a conversation and both
+Verified at 1440x900 (the pane id was per-section then, `module:hub` since 2026-09-08):
+People alone `pane:module:people` 562x884; click a conversation and both
 panes sit at x=308, both 562 wide, People y=16 h=438 and Lucía y=462 h=438 — same column,
 stacked, `stackedVertically: true`. Close People -> `?view` cleared, `pane:lucia` stays.
 Reopen from the Hub row -> `?view=people`, both panes back. Maximize -> 1136x884, navbar gone,

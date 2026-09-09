@@ -33,6 +33,27 @@ export type CommunityPost = {
   comments: number
 }
 
+/**
+ * The communities themselves, for the Comms nav section (Figma
+ * 2945:793075). DERIVED from the wall below rather than hand-listed, so
+ * the nav and the widget cannot drift: post a message in a new community
+ * and its row appears.
+ *
+ * The emoji are the one invented part — a post carries no glyph, and the
+ * frame's Communities rows reuse the CHANNELS' emoji, which is the tell
+ * that the block was duplicated rather than authored. One per name, with
+ * a fallback so a new community is never iconless.
+ */
+const COMMUNITY_EMOJI: Record<string, string> = {
+  "Company updates": "\u{1F4F0}",
+  Engineering: "\u{1F6E0}\uFE0F",
+  "Product Design": "\u{1F3A8}",
+  "Running club": "\u{1F3C3}",
+  "Barcelona office": "\u{1F3E2}",
+  "Book club": "\u{1F4DA}",
+  "New joiners": "\u{1F44B}",
+}
+
 const picsum = (seed: string) => `https://picsum.photos/seed/${seed}/600/400`
 
 export const COMMUNITY_POSTS: CommunityPost[] = [
@@ -166,3 +187,8 @@ export const COMMUNITY_POSTS: CommunityPost[] = [
     comments: 16,
   },
 ]
+
+/** Distinct communities, in the order they first appear on the wall. */
+export const COMMUNITIES: { name: string; emoji: string }[] = [
+  ...new Set(COMMUNITY_POSTS.map((post) => post.community)),
+].map((name) => ({ name, emoji: COMMUNITY_EMOJI[name] ?? "\u{1F4AC}" }))
