@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.91.2](https://github.com/factorialco/f0/compare/f0-react-v6.91.1...f0-react-v6.91.2) (2026-09-09)
+
+
+### Bug Fixes
+
+* **F0Chat:** harden Unicode mention editing ([#5471](https://github.com/factorialco/f0/issues/5471)) ([a9d6c56](https://github.com/factorialco/f0/commit/a9d6c5659f9856cee2084e68fdc8f5dbbba4ad27))
+
 ## [6.91.1](https://github.com/factorialco/f0/compare/f0-react-v6.91.0...f0-react-v6.91.1) (2026-09-09)
 
 
