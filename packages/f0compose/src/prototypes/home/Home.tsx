@@ -1476,7 +1476,7 @@ function HomeCanvas() {
             {/* See showPromptBar: the calendar and People frames carry no
               composer. Every other screen keeps ONE pinned. */}
             {showPromptBar && (
-              <div data-home-promptbar className="relative w-full shrink-0">
+              <div data-home-promptbar className="relative w-[712px] max-w-full shrink-0">
                 <div data-hybrid-target />
               </div>
             )}
