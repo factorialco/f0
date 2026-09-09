@@ -148,6 +148,62 @@ export interface F0CardHorizontalProps {
 }
 
 /**
+ * The left-hand group: the avatar, and the title with its description stacked
+ * under it. `inactive` strikes the text through.
+ */
+const CardHorizontalLeading = ({
+  avatar,
+  title,
+  description,
+  inactive,
+  descriptionAsSingleLine,
+  stackAt,
+}: Pick<
+  F0CardHorizontalProps,
+  | "avatar"
+  | "title"
+  | "description"
+  | "inactive"
+  | "descriptionAsSingleLine"
+  | "stackAt"
+> & { stackAt: NonNullable<F0CardHorizontalProps["stackAt"]> }) => (
+  <div
+    className={cn(
+      "flex min-w-0 flex-row gap-3",
+      // Centre a short single-line group against the taller controls, but
+      // let it fill from the top once it grows (see the class doc).
+      cardHorizontalLeadingAlignClassName[stackAt],
+      // Keep the avatar pinned to the top so it stays aligned with the
+      // title when the row grows (e.g. a long wrapping description).
+      avatar ? "items-start" : "items-center"
+    )}
+  >
+    {avatar ? <CardAvatar avatar={avatar} size="lg" /> : null}
+    <div className="flex min-w-0 flex-col gap-0">
+      <Text
+        variant="body"
+        content={title}
+        className={cn(
+          "break-words font-medium",
+          inactive && "text-f1-foreground-secondary line-through"
+        )}
+      />
+      {description ? (
+        <Text
+          variant="description"
+          content={description}
+          ellipsis={descriptionAsSingleLine || undefined}
+          className={cn(
+            !descriptionAsSingleLine && "break-words",
+            inactive && "line-through"
+          )}
+        />
+      ) : null}
+    </div>
+  </div>
+)
+
+/**
  * A single-row card: optional avatar on the left, stacked title + description,
  * and actions on the right. By default the actions stay inline at every width;
  * set `stackAt` to drop them onto their own line below a container breakpoint
@@ -184,7 +240,7 @@ const F0CardHorizontalBase = forwardRef<HTMLDivElement, F0CardHorizontalProps>(
     // keeps the hover affordance + pointer cursor tied to an actual click action.
     const clickable = (!!link || !!onClick) && !disabled
 
-    const renderBody = () => (
+    const body = (
       <Card
         ref={hasAlert ? undefined : ref}
         className={cn(
@@ -218,40 +274,14 @@ const F0CardHorizontalBase = forwardRef<HTMLDivElement, F0CardHorizontalProps>(
         ) : null}
 
         <div className={cardHorizontalClassName[stackAt]}>
-          <div
-            className={cn(
-              "flex min-w-0 flex-row gap-3",
-              // Centre a short single-line group against the taller controls, but
-              // let it fill from the top once it grows (see the class doc).
-              cardHorizontalLeadingAlignClassName[stackAt],
-              // Keep the avatar pinned to the top so it stays aligned with the
-              // title when the row grows (e.g. a long wrapping description).
-              avatar ? "items-start" : "items-center"
-            )}
-          >
-            {avatar ? <CardAvatar avatar={avatar} size="lg" /> : null}
-            <div className="flex min-w-0 flex-col gap-0">
-              <Text
-                variant="body"
-                content={title}
-                className={cn(
-                  "break-words font-medium",
-                  inactive && "text-f1-foreground-secondary line-through"
-                )}
-              />
-              {description ? (
-                <Text
-                  variant="description"
-                  content={description}
-                  ellipsis={descriptionAsSingleLine || undefined}
-                  className={cn(
-                    !descriptionAsSingleLine && "break-words",
-                    inactive && "line-through"
-                  )}
-                />
-              ) : null}
-            </div>
-          </div>
+          <CardHorizontalLeading
+            avatar={avatar}
+            title={title}
+            description={description}
+            inactive={inactive}
+            descriptionAsSingleLine={descriptionAsSingleLine}
+            stackAt={stackAt}
+          />
 
           <CardHorizontalActions
             primaryAction={primaryAction}
@@ -266,8 +296,6 @@ const F0CardHorizontalBase = forwardRef<HTMLDivElement, F0CardHorizontalProps>(
         </div>
       </Card>
     )
-
-    const body = renderBody()
 
     if (hasAlert) {
       return (

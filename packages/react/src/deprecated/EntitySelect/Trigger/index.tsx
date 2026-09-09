@@ -1,4 +1,5 @@
 import { useMemo } from "react"
+import type { IconType } from "@/components/F0Icon"
 import { F0InputField, InputFieldProps } from "@/components/F0InputField"
 import { Arrow } from "@/components/F0Select/components/Arrow"
 import { OneEllipsis } from "@/lib/OneEllipsis"
@@ -8,6 +9,52 @@ import {
   EntitySelectSubEntity,
   FlattenedItem,
 } from "../types"
+
+/** What the closed trigger reads: the placeholder, one name, or a count. */
+const TriggerSelectionLabel = ({
+  flattenedList,
+  placeholder,
+  value,
+  icon,
+  hiddenAvatar,
+  selectedWord,
+}: {
+  flattenedList: FlattenedItem[]
+  placeholder?: string
+  /** The field's own value, which decides the text colour. */
+  value?: string
+  icon?: IconType
+  hiddenAvatar?: boolean
+  /** The translated word after the count, e.g. "selected". */
+  selectedWord: string
+}) => (
+  <span
+    role="button"
+    className={cn(
+      "my-auto flex items-center pr-1",
+      placeholder && "text-f1-foreground-secondary",
+      value && "text-f1-foreground",
+      (flattenedList.length === 1 && !hiddenAvatar) || (icon && !value)
+        ? "pl-8"
+        : "pl-2"
+    )}
+  >
+    <OneEllipsis
+      tag="span"
+      className={
+        flattenedList.length === 1 && flattenedList[0].subItem.subDeactivated
+          ? "text-f1-foreground-disabled"
+          : undefined
+      }
+    >
+      {flattenedList.length === 0
+        ? (placeholder ?? "")
+        : flattenedList.length === 1
+          ? flattenedList[0].subItem.subName
+          : `${flattenedList.length} ${selectedWord}`}
+    </OneEllipsis>
+  </span>
+)
 
 export const Trigger = ({
   placeholder,
@@ -91,36 +138,6 @@ export const Trigger = ({
   const avatar =
     flattenedList.length === 1 ? flattenedList[0].subItem.subName : undefined
 
-  /** What the closed trigger reads: the placeholder, one name, or a count. */
-  const renderSelectionLabel = () => (
-    <span
-      role="button"
-      className={cn(
-        "my-auto flex items-center pr-1",
-        placeholder && "text-f1-foreground-secondary",
-        value && "text-f1-foreground",
-        (flattenedList.length === 1 && !hiddenAvatar) || (icon && !value)
-          ? "pl-8"
-          : "pl-2"
-      )}
-    >
-      <OneEllipsis
-        tag="span"
-        className={
-          flattenedList.length === 1 && flattenedList[0].subItem.subDeactivated
-            ? "text-f1-foreground-disabled"
-            : undefined
-        }
-      >
-        {flattenedList.length === 0
-          ? (placeholder ?? "")
-          : flattenedList.length === 1
-            ? flattenedList[0].subItem.subName
-            : `${flattenedList.length} ${selected}`}
-      </OneEllipsis>
-    </span>
-  )
-
   return (
     <F0InputField
       onClickContent={onClickContent}
@@ -162,7 +179,14 @@ export const Trigger = ({
         )
       }
     >
-      {renderSelectionLabel()}
+      <TriggerSelectionLabel
+        flattenedList={flattenedList}
+        placeholder={placeholder}
+        value={value}
+        icon={icon}
+        hiddenAvatar={hiddenAvatar}
+        selectedWord={selected}
+      />
     </F0InputField>
   )
 }

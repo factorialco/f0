@@ -22,58 +22,21 @@ type EmployeeCreditsPopoverProps = {
 }
 
 /**
- * Employee-only credits popover.
- *
- * Rendered when the host passes `employeeCredits` to the AI provider.
- * Mutually exclusive with the classic {@link CreditsPopover}: when both
- * `credits` and `employeeCredits` are provided, this one wins.
- *
- * Headless — takes `employeeCredits` as a prop. The Connected* wrapper
- * (ConnectedChatHeader) reads the value from `useAiChat()` and forwards it.
- *
- * No company-level section, no upgrade CTA — just the logged-in employee's
- * monthly allocation. Hosts opt in by passing `employeeCredits` only for
- * employees who have a per-employee monthly allocation configured.
+ * The allocation panel: the skeleton while it loads, the error, or the bar
+ * and its two readings.
  */
-export function EmployeeCreditsPopover({
-  employeeCredits,
-  trigger,
-}: EmployeeCreditsPopoverProps) {
+const CreditsUsagePanel = ({
+  loading,
+  error,
+  data,
+}: {
+  loading: boolean
+  error: boolean
+  data: EmployeeCreditsUsage | null
+}) => {
   const i18n = useI18n()
   const reduceMotion = useReducedMotion()
-  const [open, setOpen] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(false)
-  const [data, setData] = useState<EmployeeCreditsUsage | null>(null)
 
-  const handleOpenChange = useCallback(
-    (isOpen: boolean) => {
-      setOpen(isOpen)
-      if (isOpen && employeeCredits?.fetchUsage) {
-        setLoading(true)
-        setError(false)
-        employeeCredits
-          .fetchUsage()
-          .then((result: EmployeeCreditsUsage) => {
-            setData(result)
-            setError(false)
-          })
-          .catch(() => {
-            setError(true)
-          })
-          .finally(() => {
-            setLoading(false)
-          })
-      }
-    },
-    [employeeCredits]
-  )
-
-  if (!employeeCredits) {
-    return null
-  }
-
-  const hasHeader = !!employeeCredits.companyName
   const percentage =
     data && data.total > 0
       ? Math.min(100, Math.round((data.used / data.total) * 100))
@@ -81,7 +44,8 @@ export function EmployeeCreditsPopover({
   const remaining = data ? Math.max(0, data.total - data.used) : 0
 
   /** The allocation panel: loading, the error, or the bar and its readings. */
-  const renderUsage = () => (
+
+  return (
     <div className="flex flex-col rounded border border-solid border-f1-border-secondary">
       <div className="flex flex-col gap-2 p-3">
         {loading ? (
@@ -152,7 +116,60 @@ export function EmployeeCreditsPopover({
       </div>
     </div>
   )
+}
 
+/**
+ * Employee-only credits popover.
+ *
+ * Rendered when the host passes `employeeCredits` to the AI provider.
+ * Mutually exclusive with the classic {@link CreditsPopover}: when both
+ * `credits` and `employeeCredits` are provided, this one wins.
+ *
+ * Headless — takes `employeeCredits` as a prop. The Connected* wrapper
+ * (ConnectedChatHeader) reads the value from `useAiChat()` and forwards it.
+ *
+ * No company-level section, no upgrade CTA — just the logged-in employee's
+ * monthly allocation. Hosts opt in by passing `employeeCredits` only for
+ * employees who have a per-employee monthly allocation configured.
+ */
+export function EmployeeCreditsPopover({
+  employeeCredits,
+  trigger,
+}: EmployeeCreditsPopoverProps) {
+  const i18n = useI18n()
+  const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(false)
+  const [data, setData] = useState<EmployeeCreditsUsage | null>(null)
+
+  const handleOpenChange = useCallback(
+    (isOpen: boolean) => {
+      setOpen(isOpen)
+      if (isOpen && employeeCredits?.fetchUsage) {
+        setLoading(true)
+        setError(false)
+        employeeCredits
+          .fetchUsage()
+          .then((result: EmployeeCreditsUsage) => {
+            setData(result)
+            setError(false)
+          })
+          .catch(() => {
+            setError(true)
+          })
+          .finally(() => {
+            setLoading(false)
+          })
+      }
+    },
+    [employeeCredits]
+  )
+
+  if (!employeeCredits) {
+    return null
+  }
+
+  const hasHeader = !!employeeCredits.companyName
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
@@ -196,7 +213,7 @@ export function EmployeeCreditsPopover({
             </div>
           </div>
         ) : null}
-        {renderUsage()}
+        <CreditsUsagePanel loading={loading} error={error} data={data} />
       </PopoverContent>
     </Popover>
   )

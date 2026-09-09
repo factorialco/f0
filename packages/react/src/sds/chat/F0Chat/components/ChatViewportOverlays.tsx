@@ -9,37 +9,43 @@ import { CHAT_COMPOSER_HEIGHT } from "../utils/chat-layout"
 import { EASE_OUT_SWIFT } from "../utils/chat-motion"
 import { DateTimeSeparator } from "./DateTimeSeparator"
 
-export const ChatViewportOverlays = ({
-  atTop,
-  scrolledUp,
-  hasMoreOlder,
-  loadingOlder,
-  stickyDate,
-  showJumpButton,
+/**
+ * The control that takes you back to the newest message, and the unread count
+ * it carries. The inner `key={unreadCount}` re-plays the pop each time the
+ * count changes.
+ */
+const ChatJumpToBottomButton = ({
+  visible,
   unreadCount,
   hasMoreNewer,
+  transitionDuration,
   reducedMotion,
   onJumpToBottom,
 }: {
-  atTop: boolean
-  scrolledUp: boolean
-  hasMoreOlder: boolean
-  loadingOlder: boolean
-  stickyDate: string | null
-  showJumpButton: boolean
+  visible: boolean
   unreadCount: number
+  /** There are newer messages off screen, so this is "back to latest". */
   hasMoreNewer: boolean
+  transitionDuration: number
   reducedMotion: boolean
   onJumpToBottom: () => void
-}): ReactNode => {
+}) => {
   const i18n = useI18n()
   const emit = useF0ChatEmit()
-  const transitionDuration = reducedMotion ? 0 : 0.15
 
-  /** The "jump to the bottom" control, and the unread count it carries. */
-  const renderJumpButton = () => (
+  const label =
+    unreadCount > 0
+      ? i18n.t(
+          unreadCount === 1 ? "chat.unreadCount.one" : "chat.unreadCount.other",
+          { count: unreadCount }
+        )
+      : hasMoreNewer
+        ? i18n.chat.backToLatest
+        : i18n.chat.scrollToBottom
+
+  return (
     <AnimatePresence>
-      {showJumpButton ? (
+      {visible ? (
         <motion.div
           data-testid="chat-jump-overlay"
           className="pointer-events-none absolute inset-x-0 flex justify-center"
@@ -71,18 +77,7 @@ export const ChatViewportOverlays = ({
               }}
               variant="neutral"
               icon={ArrowDown}
-              label={
-                unreadCount > 0
-                  ? i18n.t(
-                      unreadCount === 1
-                        ? "chat.unreadCount.one"
-                        : "chat.unreadCount.other",
-                      { count: unreadCount }
-                    )
-                  : hasMoreNewer
-                    ? i18n.chat.backToLatest
-                    : i18n.chat.scrollToBottom
-              }
+              label={label}
               hideLabel={unreadCount === 0 && !hasMoreNewer}
             />
           </motion.div>
@@ -90,6 +85,33 @@ export const ChatViewportOverlays = ({
       ) : null}
     </AnimatePresence>
   )
+}
+
+export const ChatViewportOverlays = ({
+  atTop,
+  scrolledUp,
+  hasMoreOlder,
+  loadingOlder,
+  stickyDate,
+  showJumpButton,
+  unreadCount,
+  hasMoreNewer,
+  reducedMotion,
+  onJumpToBottom,
+}: {
+  atTop: boolean
+  scrolledUp: boolean
+  hasMoreOlder: boolean
+  loadingOlder: boolean
+  stickyDate: string | null
+  showJumpButton: boolean
+  unreadCount: number
+  hasMoreNewer: boolean
+  reducedMotion: boolean
+  onJumpToBottom: () => void
+}): ReactNode => {
+  const i18n = useI18n()
+  const transitionDuration = reducedMotion ? 0 : 0.15
 
   return (
     <>
@@ -124,7 +146,14 @@ export const ChatViewportOverlays = ({
         ) : null}
       </AnimatePresence>
 
-      {renderJumpButton()}
+      <ChatJumpToBottomButton
+        visible={showJumpButton}
+        unreadCount={unreadCount}
+        hasMoreNewer={hasMoreNewer}
+        transitionDuration={transitionDuration}
+        reducedMotion={reducedMotion}
+        onJumpToBottom={onJumpToBottom}
+      />
     </>
   )
 }

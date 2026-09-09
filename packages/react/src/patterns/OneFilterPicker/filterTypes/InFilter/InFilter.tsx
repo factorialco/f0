@@ -82,6 +82,73 @@ type InFilterComponentProps<
  * />
  * ```
  */
+/** Which state, if any, replaces the option list entirely. */
+const listPlaceholderState = ({
+  isLoading,
+  error,
+  optionCount,
+  hasSource,
+}: {
+  isLoading: boolean
+  error: unknown
+  optionCount: number
+  /** A source-backed filter searches remotely, so an empty page is not "empty". */
+  hasSource: boolean
+}): "loading" | "error" | "empty" | null => {
+  if (isLoading && optionCount === 0) {
+    return "loading"
+  }
+  if (error) {
+    return "error"
+  }
+  if (optionCount === 0 && !hasSource) {
+    return "empty"
+  }
+  return null
+}
+
+/** What the dropdown shows instead of the options. */
+const InFilterListPlaceholder = ({
+  state,
+  onRetry,
+}: {
+  state: NonNullable<ReturnType<typeof listPlaceholderState>>
+  onRetry: () => void
+}) => {
+  const i18n = useI18n()
+
+  if (state === "loading") {
+    return (
+      <div className="flex w-full items-center justify-center py-4">
+        <Spinner size="small" />
+      </div>
+    )
+  }
+
+  if (state === "error") {
+    return (
+      <div className="text-f1-foreground-destructive flex w-full flex-col items-center justify-center gap-2 py-4">
+        <p className="text-sm">{i18n.filters.failedToLoadOptions}</p>
+        <button
+          className={cn(
+            "text-f1-foreground-primary text-xs underline",
+            focusRing()
+          )}
+          onClick={onRetry}
+        >
+          {i18n.filters.retry}
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex w-full items-center justify-center py-4 text-sm text-f1-foreground-secondary">
+      No options available
+    </div>
+  )
+}
+
 export function InFilter<T extends string, R extends RecordType = RecordType>({
   schema,
   value,
@@ -183,51 +250,19 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
 
   const hasNestedSelections = nestedSelectionsCount > 0
 
-  /**
-   * The states that replace the list entirely: still loading, failed to
-   * load, or nothing to offer.
-   */
-  const renderPlaceholder = () => {
-    if (isLoading && !options.length) {
-      return (
-        <div className="flex w-full items-center justify-center py-4">
-          <Spinner size="small" />
-        </div>
-      )
-    }
-
-    if (error) {
-      return (
-        <div className="text-f1-foreground-destructive flex w-full flex-col items-center justify-center gap-2 py-4">
-          <p className="text-sm">{i18n.filters.failedToLoadOptions}</p>
-          <button
-            className={cn(
-              "text-f1-foreground-primary text-xs underline",
-              focusRing()
-            )}
-            onClick={() => {
-              loadOptions(true)
-            }}
-          >
-            {i18n.filters.retry}
-          </button>
-        </div>
-      )
-    }
-
-    if (options.length === 0 && !hasSource) {
-      return (
-        <div className="flex w-full items-center justify-center py-4 text-sm text-f1-foreground-secondary">
-          No options available
-        </div>
-      )
-    }
-    return null
-  }
-
-  const placeholder = renderPlaceholder()
+  const placeholder = listPlaceholderState({
+    isLoading,
+    error,
+    optionCount: options.length,
+    hasSource,
+  })
   if (placeholder) {
-    return placeholder
+    return (
+      <InFilterListPlaceholder
+        state={placeholder}
+        onRetry={() => loadOptions(true)}
+      />
+    )
   }
 
   const showSearch = options.length > 0 || hasSource

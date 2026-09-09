@@ -51,6 +51,66 @@ const BalanceTag = ({ balance }: { balance: BalanceConfig }) => {
   )
 }
 
+/** The reading itself: one shape per content type, and a card shows exactly one. */
+const CardMetadataReading = (
+  props: AiInsightCardContent & Pick<CardMetadataProps, "label">
+) => {
+  const { label } = props
+
+  if (props.content === "person") {
+    return (
+      <AvatarWithLabel label={label}>
+        <F0AvatarPerson
+          firstName={props.avatar.firstName}
+          lastName={props.avatar.lastName}
+          src={props.avatar.src}
+          size="xs"
+        />
+      </AvatarWithLabel>
+    )
+  }
+
+  if (props.content === "people") {
+    return (
+      <F0AvatarList type="person" avatars={props.avatars} size="md" max={3} />
+    )
+  }
+
+  if (props.content === "team") {
+    return (
+      <AvatarWithLabel label={label}>
+        <F0AvatarTeam
+          name={props.avatar.name}
+          src={props.avatar.src}
+          size="xs"
+        />
+      </AvatarWithLabel>
+    )
+  }
+
+  if (props.content === "company") {
+    return (
+      <AvatarWithLabel label={label}>
+        <F0AvatarCompany
+          name={props.avatar.name}
+          src={props.avatar.src}
+          size="xs"
+        />
+      </AvatarWithLabel>
+    )
+  }
+
+  if (props.content === "alert") {
+    return <F0TagAlert text={props.alertLabel} level={props.level} />
+  }
+
+  if (props.content === "balance") {
+    return <BalanceTag balance={props.balance} />
+  }
+
+  return null
+}
+
 export const CardMetadata = (props: CardMetadataProps) => {
   const {
     heading,
@@ -59,62 +119,6 @@ export const CardMetadata = (props: CardMetadataProps) => {
     shouldFadeContent = false,
     fadeTransition,
   } = props
-
-  /** One reading per content type — the card shows exactly one. */
-  const renderContent = () => {
-    if (content === "person") {
-      return (
-        <AvatarWithLabel label={label}>
-          <F0AvatarPerson
-            firstName={props.avatar.firstName}
-            lastName={props.avatar.lastName}
-            src={props.avatar.src}
-            size="xs"
-          />
-        </AvatarWithLabel>
-      )
-    }
-
-    if (content === "people") {
-      return (
-        <F0AvatarList type="person" avatars={props.avatars} size="md" max={3} />
-      )
-    }
-
-    if (content === "team") {
-      return (
-        <AvatarWithLabel label={label}>
-          <F0AvatarTeam
-            name={props.avatar.name}
-            src={props.avatar.src}
-            size="xs"
-          />
-        </AvatarWithLabel>
-      )
-    }
-
-    if (content === "company") {
-      return (
-        <AvatarWithLabel label={label}>
-          <F0AvatarCompany
-            name={props.avatar.name}
-            src={props.avatar.src}
-            size="xs"
-          />
-        </AvatarWithLabel>
-      )
-    }
-
-    if (content === "alert") {
-      return <F0TagAlert text={props.alertLabel} level={props.level} />
-    }
-
-    if (content === "balance") {
-      return <BalanceTag balance={props.balance} />
-    }
-
-    return null
-  }
 
   return (
     <div className="flex flex-1 flex-col gap-2">
@@ -125,7 +129,7 @@ export const CardMetadata = (props: CardMetadataProps) => {
         animate={{ opacity: shouldFadeContent ? 0 : 1 }}
         transition={fadeTransition}
       >
-        {renderContent()}
+        <CardMetadataReading {...props} />
       </motion.div>
 
       {label && !hiddenBottomLabelTypes.has(content) ? (
