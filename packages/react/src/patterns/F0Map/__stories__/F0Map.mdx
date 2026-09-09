@@ -264,7 +264,7 @@ Clustering is automatic (no prop) - see [Clustering](#clustering).
 
 | Prop                  | Type                        | Default         | Description                                               |
 | --------------------- | --------------------------- | --------------- | --------------------------------------------------------- |
-| `mapStyle`            | `F0MapStylePair`            | f0 styles       | Light/dark style pair override.                           |
+| `mapStyle`            | `F0MapStyle`                | f0 styles       | Light/dark style pair override.                           |
 | `interactive`         | `boolean`                   | `true`          | Allow pan/zoom.                                           |
 | `gestureHandling`     | `"cooperative" \| "greedy"` | `"cooperative"` | Cooperative requires Ctrl/⌘ + wheel to zoom (embed-safe). |
 | `fullScreen`          | `boolean`                   | `false`         | `false` frames as a card; `true` is edge-to-edge.         |
@@ -276,9 +276,9 @@ Clustering is automatic (no prop) - see [Clustering](#clustering).
 
 ### Imperative handle (`ref`)
 
-| Method             | Description                               |
-| ------------------ | ----------------------------------------- |
-| `getMap()`         | The raw MapLibre instance (escape hatch). |
-| `focusMarker(id)`  | Center on a marker and select it.         |
-| `fitToMarkers()`   | Frame all markers.                        |
-| `clearSelection()` | Clear the current selection.              |
+| Method             | Description                                                                 |
+| ------------------ | --------------------------------------------------------------------------- |
+| `getNativeMap()`   | The engine's own map object (escape hatch). `unknown` - narrow it yourself. |
+| `focusMarker(id)`  | Center on a marker and select it.                                           |
+| `fitToMarkers()`   | Frame all markers.                                                          |
+| `clearSelection()` | Clear the current selection.                                                |
