@@ -1,0 +1,463 @@
+import { Canvas, Controls, Meta, Unstyled } from "@storybook/addon-docs/blocks"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+import * as Stories from "./F0SharingDialog.stories"
+
+<Meta of={Stories} />
+
+# F0SharingDialog
+
+Combines person selection, role assignment, and an access list in one dialog for resources shared across product areas. It owns the interaction pattern while the product supplies its data source, permission rules, and mutations.
+
+## Anatomy
+
+<Canvas of={Stories.Default} />
+
+<Controls of={Stories.Default} />
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Prop</th>
+        <th className="text-left">Type</th>
+        <th className="text-left">Default</th>
+        <th className="text-left">Required</th>
+        <th className="text-left">Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>isOpen</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>—</td>
+        <td>Yes</td>
+        <td>Controls whether the sharing dialog is open.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>title</code>
+        </td>
+        <td>
+          <code>string</code>
+        </td>
+        <td>—</td>
+        <td>Yes</td>
+        <td>Names the resource or sharing context in the dialog heading.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>description</code>
+        </td>
+        <td>
+          <code>string</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Briefly explains what can be shared or managed. It also provides the
+          dialog's accessible description.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>onClose</code>
+        </td>
+        <td>
+          <code>() =&gt; void</code>
+        </td>
+        <td>—</td>
+        <td>Yes</td>
+        <td>Runs when the dialog is dismissed.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>peopleSource</code>
+        </td>
+        <td>
+          <code>DataSourceDefinition&lt;Person&gt;</code>
+        </td>
+        <td>—</td>
+        <td>Yes</td>
+        <td>
+          Loads searchable people for the multi-select. Apply product
+          authorization and exclusions in this source.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>mapPerson</code>
+        </td>
+        <td>
+          <code>
+            (person: Person) =&gt; F0SelectItemObject&lt;PersonId, Person&gt;
+          </code>
+        </td>
+        <td>—</td>
+        <td>Yes</td>
+        <td>
+          Maps each product record to its id, label, description, and avatar for
+          both the picker and access rows.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>accesses</code>
+        </td>
+        <td>
+          <code>F0SharingDialogAccess&lt;Person, Role&gt;[]</code>
+        </td>
+        <td>—</td>
+        <td>Yes</td>
+        <td>
+          Current access list, including per-entry role-change and removal
+          permissions.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>roles</code>
+        </td>
+        <td>
+          <code>F0SharingDialogRole&lt;Role&gt;[]</code>
+        </td>
+        <td>—</td>
+        <td>Yes</td>
+        <td>
+          Role labels and descriptions. Set <code>assignable=false</code> for
+          roles that must be excluded from new assignments and existing-role
+          changes. Every current access role must be present in this list.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>defaultRole</code>
+        </td>
+        <td>
+          <code>Role</code>
+        </td>
+        <td>—</td>
+        <td>Yes</td>
+        <td>
+          Initial role for newly selected people and the value restored after a
+          successful share or close. It must reference an assignable role.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>isAddingPeople</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          <code>false</code>
+        </td>
+        <td>—</td>
+        <td>
+          Shows loading on the share action and disables concurrent changes.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>isUpdatingAccess</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          <code>false</code>
+        </td>
+        <td>—</td>
+        <td>
+          Disables person selection, role changes, and removals while an access
+          mutation is running.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>onAddPeople</code>
+        </td>
+        <td>
+          <code>
+            (selection: F0SharingDialogSelection&lt;Person, Role, PersonId&gt;)
+            =&gt; boolean | void | Promise&lt;boolean | void&gt;
+          </code>
+        </td>
+        <td>—</td>
+        <td>Yes</td>
+        <td>
+          Receives selected ids, records, and role. Return <code>false</code> to
+          keep the pending selection.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>onRoleChange</code>
+        </td>
+        <td>
+          <code>
+            (access: F0SharingDialogAccess&lt;Person, Role&gt;, role: Role)
+            =&gt; boolean | void | Promise&lt;boolean | void&gt;
+          </code>
+        </td>
+        <td>—</td>
+        <td>Yes</td>
+        <td>Requests a new role for an existing access entry.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>onRemoveAccess</code>
+        </td>
+        <td>
+          <code>
+            (access: F0SharingDialogAccess&lt;Person, Role&gt;) =&gt; boolean |
+            void | Promise&lt;boolean | void&gt;
+          </code>
+        </td>
+        <td>—</td>
+        <td>Yes</td>
+        <td>
+          Removes the supplied access entry when <code>canRemove</code> permits
+          it.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>dataTestId</code>
+        </td>
+        <td>
+          <code>string</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>Adds a test id to the dialog content without changing layout.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+## Guidelines
+
+### Design best practices
+
+**When to use**
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Use F0SharingDialog when</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Sharing one resource</td>
+        <td>People can be added and assigned one of several access roles.</td>
+      </tr>
+      <tr>
+        <td>Managing existing access</td>
+        <td>
+          The same surface must show owners, editable roles, and revocable
+          access.
+        </td>
+      </tr>
+      <tr>
+        <td>Reusing the flow across products</td>
+        <td>
+          Products share the interaction but keep their own data fetching and
+          authorization.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+**When not to use**
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Use instead</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Sharing only copies or sends a public link</td>
+        <td>
+          A focused <code>F0Dialog</code> with the relevant link action.
+        </td>
+      </tr>
+      <tr>
+        <td>Permissions form a large matrix across many resources</td>
+        <td>
+          A product page built with <code>OneDataCollection</code> or{" "}
+          <code>F0Form</code>.
+        </td>
+      </tr>
+      <tr>
+        <td>The flow is unique to one product screen</td>
+        <td>
+          A product-owned composition of <code>F0Dialog</code> and form
+          components.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+**Do's and don'ts**
+
+<DoDonts
+  do={{
+    description: "Keep product responsibilities at the boundary.",
+    guidelines: [
+      "Filter the people source using backend authorization",
+      "Exclude people who already have access",
+      "Set canChangeRole and canRemove from backend capabilities",
+    ],
+  }}
+  dont={{
+    description:
+      "Don't encode product permission rules in the presentation mapping.",
+    guidelines: [
+      "Don't infer revocability from a role label",
+      "Don't expose records the current actor cannot share with",
+      "Don't use numeric-only assumptions for person ids",
+    ],
+  }}
+/>
+
+### Content best practices
+
+- Name the resource in the title.
+  - **Correct:** "Share time off policy"
+  - **Incorrect:** "Share"
+- Keep role labels short nouns and explain capabilities in descriptions.
+  - **Correct:** "Editor" — "Can view and edit this policy"
+  - **Incorrect:** "Has more permissions"
+
+<DoDonts
+  do={{
+    description:
+      "Name the resource so the scope of the access change is clear.",
+    children: <Canvas of={Stories.SpecificTitleExample} sourceState="none" />,
+  }}
+  dont={{
+    description: "Don't use a title that leaves the shared resource ambiguous.",
+    children: <Canvas of={Stories.AmbiguousTitleExample} sourceState="none" />,
+  }}
+/>
+
+### Behavior
+
+- WHEN no people are selected → THEN the role control stays hidden and the share action stays disabled.
+- WHEN one or more people are selected → THEN an inline role control appears inside the picker and starts at <code>defaultRole</code>.
+- WHEN <code>onAddPeople</code> resolves to anything except <code>false</code> → THEN the selected people and role reset.
+- WHEN <code>onAddPeople</code> resolves to <code>false</code> or rejects → THEN the pending selection remains available for retry.
+- WHEN the dialog closes → THEN transient selection state resets before the next opening.
+- WHEN <code>canChangeRole=false</code> → THEN the role renders as read-only text; an independent remove action remains available only when <code>canRemove=true</code>.
+- WHEN <code>canChangeRole=true</code> and <code>canRemove=false</code> → THEN the destructive remove action remains visible but disabled.
+- WHEN an editable role menu is open → THEN its destructive action uses the compact label "Remove access".
+- WHEN the dialog is wider than the mobile breakpoint → THEN the people selector and share action stay on one row without causing horizontal overflow.
+- WHEN the dialog is at the mobile breakpoint → THEN the share action moves below the full-width people selector and its popup stays within the viewport.
+- WHEN <code>accesses</code> is empty → THEN the access section shows an empty message.
+- WHEN <code>defaultRole</code> is missing or non-assignable → THEN the component throws a configuration error.
+- WHEN an access entry references a role absent from <code>roles</code> → THEN the component throws a configuration error.
+
+The generic parameters are <code>Person extends RecordType</code>, <code>Role extends string</code>, and <code>PersonId extends string = string</code>. <code>onAddPeople</code> receives <code>{`{ personIds: PersonId[]; people: Person[]; role: Role }`}</code>, while existing-row callbacks receive the complete typed access entry.
+
+### Usage examples
+
+**Resource without existing access**
+
+Use the empty state only after access data has loaded and the resource has no existing access entries.
+
+<Canvas of={Stories.EmptyAccessList} />
+
+**Owner and direct shares**
+
+Use non-assignable roles for owners and per-entry capabilities for editable or non-revocable shares.
+
+<Canvas of={Stories.FullConfiguration} />
+
+**Responsive layouts**
+
+Keep the people selector and share action on the same row above the mobile breakpoint.
+
+<Canvas of={Stories.NarrowViewport} />
+
+On mobile, give the people selector the full row, place the share action below it, and keep the selector popup within the viewport.
+
+<Canvas of={Stories.MobileViewport} />
+
+**Mutation in progress**
+
+Set <code>isUpdatingAccess</code> while the product updates an existing access entry to prevent conflicting changes.
+
+<Canvas of={Stories.UpdatingAccess} />
+
+**Adding people**
+
+Set <code>isAddingPeople</code> while the product adds the pending selection to show progress and prevent duplicate submissions.
+
+<Canvas of={Stories.AddingPeople} />
+
+## Accessibility
+
+### Keyboard interaction
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Key</th>
+        <th className="text-left">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <kbd>Tab</kbd> / <kbd>Shift</kbd> + <kbd>Tab</kbd>
+        </td>
+        <td>
+          Moves focus between the picker, role controls, share action, and
+          dialog controls.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>Enter</kbd> / <kbd>Space</kbd>
+        </td>
+        <td>Opens a focused select or activates the focused action.</td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>Arrow up</kbd> / <kbd>Arrow down</kbd>
+        </td>
+        <td>Moves through people or role options while a select is open.</td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>Escape</kbd>
+        </td>
+        <td>Closes the active select first, then dismisses the dialog.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+### Screen reader behavior
+
+- The dialog heading supplies the dialog's accessible name and focus remains trapped while it is open.
+- The people picker and new-person role selector have translated accessible labels even when their visible field labels are hidden.
+- Every editable access role is labelled with the mapped person name, for example "Access level for Blake Taylor".
+- Access entries use list semantics; avatar images remain supplementary to the visible person label.
+- Access mutations expose a polite status message and mark the access region as busy while an update is running.
+- After a successful removal, focus returns to the people picker instead of being lost with the removed row.
