@@ -57,7 +57,7 @@ function _DaytimePage({
   embedded = false,
   hideOneSwitch = false,
 }: DaytimePageProps) {
-  const { sidebarState, toggleSidebar, isSmallScreen } = useSidebar()
+  const { sidebarState, toggleSidebar, isSmallScreen, hasRail } = useSidebar()
 
   return (
     <div
@@ -69,7 +69,9 @@ function _DaytimePage({
       {header && (
         <div className="flex flex-row items-center justify-between pr-6 @container">
           <div className="flex flex-row items-center gap-2 px-5 py-4 @5xl:px-page">
-            {(isSmallScreen || sidebarState === "hidden") && (
+            {/* Nothing to restore when a module rail is on screen — see the
+                same guard in `PageHeader`. */}
+            {!hasRail && (isSmallScreen || sidebarState === "hidden") && (
               <F0Button
                 variant="ghost"
                 onClick={() => toggleSidebar()}

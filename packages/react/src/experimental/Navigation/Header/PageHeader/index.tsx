@@ -100,7 +100,7 @@ export function PageHeader({
   oneSwitchAutoOpen,
   hideOneSwitch = false,
 }: HeaderProps) {
-  const { sidebarState, toggleSidebar } = useSidebar()
+  const { sidebarState, toggleSidebar, hasRail } = useSidebar()
   const contextNavigation = useContext(PageHeaderNavigationContext)
   // The prop always wins; context is the fallback for pages that inject
   // navigation from below (e.g. useDataCollectionItemNavigation).
@@ -134,7 +134,11 @@ export function PageHeader({
     >
       <div className="flex flex-grow items-center">
         <AnimatePresence>
-          {!embedded && sidebarState !== "locked" && (
+          {/* Only when collapsing actually takes the navigation away. With a
+              module rail it never does — it is on screen at every viewport —
+              so a button to bring it back would restore something that never
+              left, and steal the first slot of the header to do it. */}
+          {!embedded && !hasRail && sidebarState !== "locked" && (
             <motion.div
               initial={{ opacity: 0, width: 0 }}
               animate={{ opacity: 1, width: "auto" }}

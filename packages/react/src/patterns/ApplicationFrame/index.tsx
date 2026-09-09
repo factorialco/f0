@@ -1,4 +1,4 @@
-import { breakpoints, motionTokens } from "@factorialco/f0-core"
+import { breakpoints, motionTokens, sidebarWidths } from "@factorialco/f0-core"
 import {
   AnimatePresence,
   LayoutGroup,
@@ -37,14 +37,14 @@ import {
 import { useWindowResizing } from "./useWindowResizing"
 
 /**
- * The room the locked sidebar takes out of the frame. Border box, so the
+ * The room the locked sidebar panel takes out of the frame. Border box, so the
  * slot's own `pl-3` is inside it — matches `--ds-sidebar-width`.
  *
  * Named because two places need the same number: the slot itself, and the
  * predicted frame width published when the sidebar changes state (see
  * `useFrameWidthPublisher`).
  */
-const SIDEBAR_SLOT_WIDTH = 240
+const SIDEBAR_SLOT_WIDTH = sidebarWidths.panel
 
 /**
  * How long the fullscreen transition holds the frame in its "changing what the
@@ -202,8 +202,13 @@ function ApplicationFrameContent({
   sidebar,
   banner,
 }: ApplicationFrameProps) {
-  const { sidebarState, toggleSidebar, isSmallScreen, setForceFloat } =
-    useSidebar()
+  const {
+    sidebarState,
+    toggleSidebar,
+    isSmallScreen,
+    setForceFloat,
+    railWidth,
+  } = useSidebar()
   const shouldReduceMotion = useReducedMotion()
   const {
     open: isAiChatOpen,
@@ -381,7 +386,13 @@ function ApplicationFrameContent({
   // first commit of a sidebar change, instead of a frame or two later once
   // the observer has caught up.
   const mainAreaRef = useRef<HTMLDivElement>(null)
-  const sidebarSlotWidth = sidebarState === "locked" ? SIDEBAR_SLOT_WIDTH : 0
+  // The rail is docked at every state and every viewport, so it is part of the
+  // room the navigation takes even when the panel is not. One number, read by
+  // the slot below and by the width published here — leaving the rail out of
+  // this one would tell the panel it has 56px more to grow into than it does,
+  // and it would cross `splitMinFrame` early on a narrow window.
+  const sidebarSlotWidth =
+    railWidth + (sidebarState === "locked" ? SIDEBAR_SLOT_WIDTH : 0)
   useEffect(() => {
     const row = mainAreaRef.current?.parentElement
     if (!row || !setFrameWidth) return
@@ -424,16 +435,21 @@ function ApplicationFrameContent({
   // motion component, which composes its ref once instead of re-running the
   // callback on every render, so a ref that reads state would keep answering
   // with the state it was mounted with.
+  //
+  // Only when there is no rail. With one, the collapsed thing is the panel and
+  // the rail stays on screen — sealing the whole slot would take the app's
+  // navigation away from the keyboard while it is still visible. `Sidebar`
+  // marks the panel itself in that case.
   const sidebarSlotRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
     const node = sidebarSlotRef.current
     if (!node) return
-    if (sidebarState === "hidden") {
+    if (sidebarState === "hidden" && railWidth === 0) {
       node.setAttribute("inert", "")
     } else {
       node.removeAttribute("inert")
     }
-  }, [sidebarState])
+  }, [sidebarState, railWidth])
 
   // The layout is following an input rather than playing a move: a handle drag
   // or a window resize. Everything laid out against the panel's edge reads this
@@ -572,9 +588,7 @@ function ApplicationFrameContent({
                 // padding would hold the slot open at 12px instead of 0.
                 sidebarState === "locked" && "pl-3"
               )}
-              animate={{
-                width: sidebarState === "locked" ? SIDEBAR_SLOT_WIDTH : 0,
-              }}
+              animate={{ width: sidebarSlotWidth }}
               transition={layoutTransition}
               ref={sidebarSlotRef}
             >

@@ -25,6 +25,9 @@ export const defaultTranslations = {
       tabs: {
         label: "Sidebar sections",
       },
+      rail: {
+        label: "Modules",
+      },
       companySelector: {
         label: "Select a company",
         placeholder: "Select a company",

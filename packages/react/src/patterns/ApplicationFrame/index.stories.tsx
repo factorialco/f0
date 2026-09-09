@@ -21,6 +21,7 @@ import {
   New,
   Pencil,
   Search,
+  Shield,
   Sliders,
   Comment,
 } from "@/icons/app"
@@ -72,6 +73,9 @@ import { SidebarHeader } from "@/patterns/Navigation/Sidebar/Header"
 import * as SidebarHeaderStories from "@/patterns/Navigation/Sidebar/Header/index.stories"
 import { TabbedSidebar } from "@/patterns/Navigation/Sidebar/index.stories"
 import { Menu, type MenuCategory } from "@/patterns/Navigation/Sidebar/Menu"
+import { useSidebar } from "@/patterns/ApplicationFrame/FrameProvider"
+import { SidebarPanelHeader } from "@/patterns/Navigation/Sidebar/PanelHeader"
+import { SidebarRail } from "@/patterns/Navigation/Sidebar/Rail"
 import { SearchBar } from "@/patterns/Navigation/Sidebar/Searchbar"
 import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
 import { SidebarTabPanel } from "@/patterns/Navigation/Sidebar/TabPanel"
@@ -836,16 +840,74 @@ const CommunityMain = ({
   children?: ReactNode
 }): ReactNode => <MockCommunitySurface fallback={children ?? <HomePage />} />
 
+/**
+ * The frame as it ships: a permanent module rail beside the section panel.
+ *
+ * The rail is the half of the navigation that never collapses — at any
+ * viewport, mobile included. Because of that there is no state in which the
+ * app has no navigation, and no "Open main menu" button anywhere in the
+ * content to put it back.
+ *
+ * What to exercise here:
+ * - collapse the panel from its header: the rail does not move a pixel, and
+ *   the content reflows against 56px instead of 296;
+ * - with the panel collapsed, pick another module — it opens showing that
+ *   module. Press the module you are already in and it folds away again;
+ * - open the AI chat below 1440: the panel auto-collapses, the rail stays;
+ * - narrow the window to 800 and then to 380. The rail survives both, and at
+ *   no width does an "Open main menu" button appear in the page header;
+ * - keyboard only: Tab reaches the rail, Up/Down walk the modules, and the
+ *   rail is still reachable with the panel collapsed.
+ *
+ * `FrameProvider` reads the real window, so the narrow behaviour only shows if
+ * you resize the BROWSER — shrinking the docs iframe is not enough.
+ *
+ * Conversations dock LEFT (`panelContentSide`) while the AI chat keeps its
+ * right-side panel, toggled from the page header's One switch. Opening one
+ * swaps the other out — only the main content moves, uncovering the incoming
+ * panel in place.
+ */
 export const Default: Story = {
   render: (args) => (
     <MockAiChatRuntimeProvider pace={5}>
       <MockChatAppProvider>
         <ApplicationFrame
-          // Transitional communications layout: conversations dock LEFT
-          // (panelContentSide) while the AI chat keeps its classic right-side
-          // panel, full header and history, toggled from the page header's One
-          // switch. Opening one swaps the other out — only the main content
-          // moves, uncovering the incoming panel in place.
+          ai={{
+            ...withMockChatSlots(args.ai),
+            panelContentSide: "left",
+          }}
+          aiPromotion={args.aiPromotion}
+          sidebar={
+            <ConversationsSidebar
+              layout="rail"
+              // State parity across reloads, like the panel content restore.
+              tabsPersistKey="rail-demo"
+            />
+          }
+        >
+          {/* Real-world main content: the home "daytime" page. */}
+          <CommunityMain />
+        </ApplicationFrame>
+      </MockChatAppProvider>
+    </MockAiChatRuntimeProvider>
+  ),
+}
+
+/**
+ * The navigation before the rail, kept for comparison and for hosts that have
+ * not moved yet: the company's name across the top of the panel, the modules
+ * in a row of tabs beneath it, the account in the panel's footer.
+ *
+ * Same frame, same fixtures, same chat as `Default` — everything that differs
+ * between the two is the navigation. Collapse the panel in each and the
+ * difference is the whole point: here it takes the navigation with it, and a
+ * menu button appears in the page header to bring it back.
+ */
+export const TabsNavigation: Story = {
+  render: (args) => (
+    <MockAiChatRuntimeProvider pace={5}>
+      <MockChatAppProvider>
+        <ApplicationFrame
           ai={{
             ...withMockChatSlots(args.ai),
             panelContentSide: "left",
@@ -854,14 +916,10 @@ export const Default: Story = {
           sidebar={
             <ConversationsSidebar
               withOneTab={false}
-              // State parity across reloads, like the panel content restore.
               tabsPersistKey="communications-demo"
             />
           }
         >
-          {/* Real-world main content: the home "daytime" page. The One switch
-              stays visible — it's how the AI chat opens (the sidebar only has
-              Home + Chat tabs here). */}
           <CommunityMain />
         </ApplicationFrame>
       </MockChatAppProvider>
@@ -1420,6 +1478,7 @@ const ConversationsSidebarInner = ({
   forceEmpty = false,
   withOneTab = true,
   tabsPersistKey,
+  layout = "tabs",
 }: {
   initialTab?: string
   /** Mount this conversation in the side panel on first render (demo only). */
@@ -1433,9 +1492,21 @@ const ConversationsSidebarInner = ({
   withOneTab?: boolean
   /** Remember the active tab across reloads (SidebarTabs `persistKey`). */
   tabsPersistKey?: string
+  /**
+   * Which navigation the same sidebar wears. `"tabs"` is today's composition —
+   * company name in the header, tabs in a row above the body. `"rail"` is the
+   * permanent module rail: logo only, modules down the left edge, account at
+   * the foot, and the panel titled after the active module.
+   *
+   * One component on purpose: the two stories then differ ONLY in the
+   * composition, over identical menu, chat and company fixtures, so the
+   * before/after comparison is about the navigation and nothing else.
+   */
+  layout?: "tabs" | "rail"
 } = {}) => {
   const [company, setCompany] = useState("1")
   const [tab, setTab] = useState(initialTab)
+  const { toggleSidebar, sidebarState } = useSidebar()
   const { unreadChatsCount } = useSidebarChats()
   const { setGroups, setActiveChat } = useSidebarChatActions()
   const {
@@ -1509,6 +1580,96 @@ const ConversationsSidebarInner = ({
     setActiveChat(open && panelContent ? panelContent.id : null)
   }, [open, panelContent, setActiveChat])
 
+  const isRail = layout === "rail"
+  const tabs = [
+    // The rail names the modules the way the navigation does ("Home", "Comms");
+    // the tab row names the panel's contents ("Menu", "Chat"), which is what a
+    // row above the body is describing.
+    { id: "home", label: isRail ? "Home" : "Menu", icon: Home },
+    {
+      id: "messages",
+      label: isRail ? "Comms" : "Chat",
+      icon: Comment,
+      badge: unreadChatsCount || undefined,
+    },
+    // The AI chat is reached from the page header's One switch, never from a
+    // navigation tab — so the rail never carries one.
+    ...(withOneTab && !isRail
+      ? [{ id: "one", label: "One", icon: One, variant: "ai" as const }]
+      : []),
+  ]
+
+  const body =
+    tab === "messages" ? (
+      <SidebarChatList
+        actions={exampleActions}
+        // Shared blank state with a CTA — shown when there are no chats yet.
+        emptyState={{
+          title: "No conversations yet",
+          description: "Start a chat with a teammate to see it here.",
+        }}
+      />
+    ) : tab === "one" ? (
+      <OneHistoryTab forceEmpty={forceEmpty} />
+    ) : (
+      <Menu tree={homeMenuTree} />
+    )
+
+  if (isRail) {
+    const { user, options } = SidebarFooterStories.Default.args
+    return (
+      <Sidebar
+        rail={
+          <SidebarRail
+            company={{
+              ...SidebarHeaderStories.Default.args,
+              selected: company,
+              onChange: setCompany,
+            }}
+            tabs={tabs}
+            activeTab={tab}
+            onTabChange={(id) => {
+              setTab(id)
+              // Picking a module always shows it: from the rail, choosing a
+              // section and opening the panel are the same intention.
+              if (sidebarState !== "locked") toggleSidebar()
+            }}
+            // Pressing the module you are already in folds the panel away, so
+            // the rail doubles as the collapse control.
+            onActiveTabPress={() => toggleSidebar()}
+            persistKey={tabsPersistKey}
+            actions={[
+              {
+                id: "marketplace",
+                label: "Marketplace",
+                icon: Marketplace,
+                onClick: () => {},
+              },
+              {
+                id: "security",
+                label: "Security",
+                icon: Shield,
+                onClick: () => {},
+              },
+            ]}
+            user={{ user, options }}
+          />
+        }
+        header={
+          <>
+            <SidebarPanelHeader
+              title={tabs.find((t) => t.id === tab)?.label ?? ""}
+            />
+            {tab === "home" && (
+              <SearchBar placeholder="Search..." onClick={() => {}} />
+            )}
+          </>
+        }
+        body={body}
+      />
+    )
+  }
+
   return (
     <Sidebar
       header={
@@ -1520,25 +1681,7 @@ const ConversationsSidebarInner = ({
           />
           <SidebarTabs
             persistKey={tabsPersistKey}
-            tabs={[
-              { id: "home", label: "Menu", icon: Home },
-              {
-                id: "messages",
-                label: "Chat",
-                icon: Comment,
-                badge: unreadChatsCount || undefined,
-              },
-              ...(withOneTab
-                ? [
-                    {
-                      id: "one",
-                      label: "One",
-                      icon: One,
-                      variant: "ai" as const,
-                    },
-                  ]
-                : []),
-            ]}
+            tabs={tabs}
             activeTab={tab}
             onTabChange={setTab}
           />
@@ -1549,22 +1692,7 @@ const ConversationsSidebarInner = ({
           )}
         </>
       }
-      body={
-        tab === "messages" ? (
-          <SidebarChatList
-            actions={exampleActions}
-            // Shared blank state with a CTA — shown when there are no chats yet.
-            emptyState={{
-              title: "No conversations yet",
-              description: "Start a chat with a teammate to see it here.",
-            }}
-          />
-        ) : tab === "one" ? (
-          <OneHistoryTab forceEmpty={forceEmpty} />
-        ) : (
-          <Menu tree={homeMenuTree} />
-        )
-      }
+      body={body}
       footer={<SidebarFooter {...SidebarFooterStories.Default.args} />}
     />
   )
@@ -1583,6 +1711,7 @@ const ConversationsSidebar = ({
   forceEmpty,
   withOneTab,
   tabsPersistKey,
+  layout,
 }: {
   initialTab?: string
   autoOpenConvId?: string
@@ -1590,6 +1719,7 @@ const ConversationsSidebar = ({
   forceEmpty?: boolean
   withOneTab?: boolean
   tabsPersistKey?: string
+  layout?: "tabs" | "rail"
 } = {}) => {
   return (
     <SidebarChatProvider>
@@ -1600,6 +1730,7 @@ const ConversationsSidebar = ({
         forceEmpty={forceEmpty}
         withOneTab={withOneTab}
         tabsPersistKey={tabsPersistKey}
+        layout={layout}
       />
     </SidebarChatProvider>
   )

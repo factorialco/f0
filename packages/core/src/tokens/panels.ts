@@ -47,3 +47,25 @@ export const panelWidths = {
    */
   splitMinFrame: 700,
 }
+
+/**
+ * Widths for the navigation on the other edge — the sidebar's two columns.
+ *
+ * Two numbers rather than one because they answer different questions. The
+ * `panel` is the section you are in and it collapses; the `rail` is how you
+ * change section and it never does, at any viewport. The frame reserves
+ * `rail + panel` when both are docked and `rail` alone when the panel is not,
+ * and the same number is subtracted when publishing how much room the side
+ * panel may grow into — so they cannot drift.
+ */
+export const sidebarWidths = {
+  /**
+   * The module rail: a 32px icon box with 6px either side, wide enough for a
+   * 9px label under it. One width at every viewport — it is narrow enough that
+   * a phone can carry it, and it is the one part of the navigation that never
+   * goes away.
+   */
+  rail: 48,
+  /** The section panel. Mirrored as `--ds-sidebar-width`. */
+  panel: 240,
+}
