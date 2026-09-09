@@ -56,7 +56,7 @@ export const UsageRow = ({
         </div>
       )}
       {description ? (
-        <span className="truncate text-base text-f1-foreground-secondary">
+        <span className="truncate text-sm text-f1-foreground-secondary">
           {description}
         </span>
       ) : null}
