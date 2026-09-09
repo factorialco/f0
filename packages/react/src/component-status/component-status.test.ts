@@ -261,6 +261,24 @@ describe("getComponentStatus (name matching)", () => {
     expect(getComponentStatus("Button", dataset)?.zone).toBe("components")
   })
 
+  test("prefers the spelling asked for over an F0-stripped twin", () => {
+    const twins: ComponentEntry[] = [
+      entry({ name: "AI/AICallout", zone: "kits", apiStatus: "deprecated" }),
+      entry({
+        name: "AI/F0AiCallout",
+        zone: "kits",
+        apiStatus: "experimental",
+      }),
+    ]
+
+    // `normalize` drops the F0 prefix, so both land in the same pool. Asking
+    // for the live one must not return the deprecated twin.
+    expect(getComponentStatus("F0AiCallout", twins)?.name).toBe(
+      "AI/F0AiCallout"
+    )
+    expect(getComponentStatus("AICallout", twins)?.name).toBe("AI/AICallout")
+  })
+
   test("resolves a fully-qualified Storybook title to its exact entry", () => {
     const withGrouped: ComponentEntry[] = [
       ...dataset,
