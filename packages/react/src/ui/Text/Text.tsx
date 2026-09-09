@@ -71,6 +71,12 @@ export interface TextProps
    * @default false
    */
   required?: boolean
+
+  /**
+   * The id of the control this text labels. Only meaningful together with
+   * `as="label"`; `React.HTMLAttributes` does not carry it.
+   */
+  htmlFor?: string
 }
 
 /**

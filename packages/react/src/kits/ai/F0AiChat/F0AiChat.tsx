@@ -178,74 +178,88 @@ const F0AiChatComponent = ({
   // then the chat itself. The `viewKey` drives a crossfade so switching between
   // conversations — or between a conversation and the AI chat — fades the
   // content out and the next one in, while the window stays put.
-  let viewKey: string
-  let viewContent: ReactNode
-  if (panelContent && !splitPanel) {
-    viewKey = `panel:${panelContent.id}`
-    viewContent = panelContent.content
-  } else if (restoringPanelContentId && !splitPanel) {
-    // The panel reopened with hosted content pending restoration — hold a
-    // skeleton instead of flashing the AI chat while the host re-mounts it.
-    viewKey = `restoring:${restoringPanelContentId}`
-    viewContent = (
-      <Skeleton
-        role="status"
-        aria-busy={true}
-        className="h-full w-full rounded-none"
-      />
-    )
-  } else if (mode === "voice" && VoiceMode) {
-    viewKey = "voice"
-    viewContent = (
-      <div className="flex h-full w-full flex-col">
-        <div className="absolute right-3 top-3 z-20">
-          <ButtonInternal
-            variant="ghost"
-            hideLabel
-            label={translations.ai.closeChat}
-            icon={Cross}
-            onClick={() => {
-              setOpen(false)
-              tracking?.onClose?.()
-            }}
+  const resolveView = (): { viewKey: string; viewContent: ReactNode } => {
+    if (panelContent && !splitPanel) {
+      return {
+        viewKey: `panel:${panelContent.id}`,
+        viewContent: panelContent.content,
+      }
+    }
+
+    if (restoringPanelContentId && !splitPanel) {
+      // The panel reopened with hosted content pending restoration — hold a
+      // skeleton instead of flashing the AI chat while the host re-mounts it.
+      return {
+        viewKey: `restoring:${restoringPanelContentId}`,
+        viewContent: (
+          <Skeleton
+            role="status"
+            aria-busy={true}
+            className="h-full w-full rounded-none"
           />
-        </div>
-        <VoiceMode />
-      </div>
-    )
-  } else {
-    viewKey = "chat"
-    viewContent = (
-      <div className="relative flex h-full w-full flex-col">
-        <div
-          ref={(node) => {
-            if (overlay) {
-              node?.setAttribute("inert", "")
-            } else {
-              node?.removeAttribute("inert")
-            }
-          }}
-          className="flex min-h-0 flex-1 flex-col"
-        >
-          {header}
-          <motion.div
-            className="flex min-h-0 flex-1 flex-col"
-            {...contentReveal}
-          >
-            <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-              {messages}
+        ),
+      }
+    }
+
+    if (mode === "voice" && VoiceMode) {
+      return {
+        viewKey: "voice",
+        viewContent: (
+          <div className="flex h-full w-full flex-col">
+            <div className="absolute right-3 top-3 z-20">
+              <ButtonInternal
+                variant="ghost"
+                hideLabel
+                label={translations.ai.closeChat}
+                icon={Cross}
+                onClick={() => {
+                  setOpen(false)
+                  tracking?.onClose?.()
+                }}
+              />
             </div>
-            {input}
-          </motion.div>
-        </div>
-        {overlay ? (
-          <div className="absolute inset-0 z-30 flex items-center justify-center bg-f1-background-overlay p-4">
-            {overlay}
+            <VoiceMode />
           </div>
-        ) : null}
-      </div>
-    )
+        ),
+      }
+    }
+
+    return {
+      viewKey: "chat",
+      viewContent: (
+        <div className="relative flex h-full w-full flex-col">
+          <div
+            ref={(node) => {
+              if (overlay) {
+                node?.setAttribute("inert", "")
+              } else {
+                node?.removeAttribute("inert")
+              }
+            }}
+            className="flex min-h-0 flex-1 flex-col"
+          >
+            {header}
+            <motion.div
+              className="flex min-h-0 flex-1 flex-col"
+              {...contentReveal}
+            >
+              <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+                {messages}
+              </div>
+              {input}
+            </motion.div>
+          </div>
+          {overlay ? (
+            <div className="absolute inset-0 z-30 flex items-center justify-center bg-f1-background-overlay p-4">
+              {overlay}
+            </div>
+          ) : null}
+        </div>
+      ),
+    }
   }
+
+  const { viewKey, viewContent } = resolveView()
 
   return (
     // In split mode this window hides while hosted content is up on the other

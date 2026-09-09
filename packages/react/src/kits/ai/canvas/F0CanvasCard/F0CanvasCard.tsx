@@ -51,6 +51,58 @@ export type F0CanvasCardProps = {
   children?: React.ReactNode
 }
 
+/** Whichever avatar the card was given: a module, a file, or an icon. */
+const CanvasCardAvatar = ({ avatar }: Pick<F0CanvasCardProps, "avatar">) => {
+  if (avatar?.type === "module") {
+    return <F0AvatarModule module={avatar.module} size="md" />
+  }
+  if (avatar?.type === "file") {
+    return <F0AvatarFile file={avatar.file} size="lg" />
+  }
+  if (avatar?.type === "icon") {
+    return <F0AvatarIcon icon={avatar.icon} size="md" />
+  }
+  return null
+}
+
+/** The card's own control: open/close, or the host's custom action. */
+const CanvasCardAction = ({
+  action,
+  isActive,
+}: Pick<F0CanvasCardProps, "action" | "isActive">) => {
+  const translations = useI18n()
+
+  if (action.type === "open" && action.showButton !== false) {
+    return (
+      <F0Button
+        variant="outline"
+        size="md"
+        label={
+          isActive
+            ? translations.actions.close
+            : translations.ai.reportCard.openButton
+        }
+        onClick={isActive ? action.onClose : action.onOpen}
+      />
+    )
+  }
+
+  if (action.type === "custom") {
+    return (
+      <F0Button
+        variant="outline"
+        size="md"
+        icon={action.icon}
+        label={action.label}
+        hideLabel={action.hideLabel}
+        onClick={action.onClick}
+      />
+    )
+  }
+
+  return null
+}
+
 /**
  * Shared inline card rendered in the AI chat for any canvas entity.
  * Shows an avatar, title, optional description, and a configurable action button.
@@ -71,8 +123,6 @@ export function F0CanvasCard({
   action,
   children,
 }: F0CanvasCardProps) {
-  const translations = useI18n()
-
   const isOpenAction = action.type === "open"
   const handleCardClick = isOpenAction
     ? isActive
@@ -90,15 +140,7 @@ export function F0CanvasCard({
       onClick={handleCardClick}
     >
       <div className="flex w-full min-w-0 flex-row items-center gap-3">
-        {avatar?.type === "module" ? (
-          <F0AvatarModule module={avatar.module} size="md" />
-        ) : null}
-        {avatar?.type === "file" ? (
-          <F0AvatarFile file={avatar.file} size="lg" />
-        ) : null}
-        {avatar?.type === "icon" ? (
-          <F0AvatarIcon icon={avatar.icon} size="md" />
-        ) : null}
+        <CanvasCardAvatar avatar={avatar} />
         <div className="flex min-w-0 flex-1 flex-col">
           <OneEllipsis className="text-lg font-semibold text-f1-foreground">
             {title}
@@ -109,28 +151,7 @@ export function F0CanvasCard({
             </OneEllipsis>
           ) : null}
         </div>
-        {action.type === "open" && action.showButton !== false ? (
-          <F0Button
-            variant="outline"
-            size="md"
-            label={
-              isActive
-                ? translations.actions.close
-                : translations.ai.reportCard.openButton
-            }
-            onClick={isActive ? action.onClose : action.onOpen}
-          />
-        ) : null}
-        {action.type === "custom" ? (
-          <F0Button
-            variant="outline"
-            size="md"
-            icon={action.icon}
-            label={action.label}
-            hideLabel={action.hideLabel}
-            onClick={action.onClick}
-          />
-        ) : null}
+        <CanvasCardAction action={action} isActive={isActive} />
       </div>
       {children}
     </div>

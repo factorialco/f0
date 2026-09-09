@@ -288,6 +288,54 @@ type ActionsMenuProps = {
   hiddenActions?: HiddenActions
 }
 
+/**
+ * Duplicate and delete, under a separator when the menu has anything above
+ * them.
+ */
+const QuestionRowActions = ({
+  showDuplicate,
+  showDelete,
+  withSeparator,
+  onDuplicate,
+  onDelete,
+}: {
+  showDuplicate: boolean
+  showDelete: boolean
+  /** Something precedes this group in the menu. */
+  withSeparator: boolean
+  onDuplicate: () => void
+  onDelete: () => void
+}) => {
+  const { t } = useI18n()
+
+  if (!showDuplicate && !showDelete) {
+    return null
+  }
+
+  return (
+    <>
+      {withSeparator ? <DropdownMenuSeparator /> : null}
+      <DropdownMenuGroup>
+        {showDuplicate ? (
+          <SimpleItem
+            label={t("surveyFormBuilder.actions.duplicateQuestion")}
+            icon={LayersFront}
+            onClick={onDuplicate}
+          />
+        ) : null}
+        {showDelete ? (
+          <SimpleItem
+            label={t("surveyFormBuilder.actions.deleteQuestion")}
+            icon={Delete}
+            onClick={onDelete}
+            critical
+          />
+        ) : null}
+      </DropdownMenuGroup>
+    </>
+  )
+}
+
 export function ActionsMenu({
   open,
   setOpen,
@@ -408,32 +456,18 @@ export function ActionsMenu({
             />
           </DropdownMenuGroup>
         ) : null}
-        {(showRequired ||
-          showMultiSelect ||
-          showAllowCreate ||
-          showQuestionType) &&
-        (showDuplicate || showDelete) ? (
-          <DropdownMenuSeparator />
-        ) : null}
-        {showDuplicate || showDelete ? (
-          <DropdownMenuGroup>
-            {showDuplicate ? (
-              <SimpleItem
-                label={t("surveyFormBuilder.actions.duplicateQuestion")}
-                icon={LayersFront}
-                onClick={handleDuplicate}
-              />
-            ) : null}
-            {showDelete ? (
-              <SimpleItem
-                label={t("surveyFormBuilder.actions.deleteQuestion")}
-                icon={Delete}
-                onClick={handleDelete}
-                critical
-              />
-            ) : null}
-          </DropdownMenuGroup>
-        ) : null}
+        <QuestionRowActions
+          showDuplicate={showDuplicate}
+          showDelete={showDelete}
+          withSeparator={
+            showRequired ||
+            showMultiSelect ||
+            showAllowCreate ||
+            showQuestionType
+          }
+          onDuplicate={handleDuplicate}
+          onDelete={handleDelete}
+        />
       </DropdownMenuContent>
     </DropdownMenu>
   )
