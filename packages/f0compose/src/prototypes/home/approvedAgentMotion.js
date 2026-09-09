@@ -4,7 +4,7 @@
  */
 export const approvedAgentArtwork =
   '\n<g><g data-agent-part="outer" fill="#E51943"><path d="M6.91895 16.2844C5.94243 15.1275 5.35384 13.6325 5.35384 12C5.35384 8.32943 8.32943 5.35384 12 5.35384C15.6706 5.35384 18.6461 8.32943 18.6461 12C18.6461 13.6325 18.0576 15.1275 17.0811 16.2844C17.417 16.4944 17.739 16.7244 18.0453 16.973L18.1792 17.0815C19.3168 15.6997 20 13.9296 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 13.9296 4.68318 15.6997 5.82087 17.0815L5.95467 16.973C6.26096 16.7244 6.58297 16.4944 6.91895 16.2844Z"/></g><g data-agent-part="shoulders" fill="#E51943"><path d="M17.0353 18.2143C15.66 19.3302 13.9072 19.9989 11.9981 19.9989C10.089 19.9989 8.33619 19.3302 6.96094 18.2143C8.33619 17.0984 10.089 16.4297 11.9981 16.4297C13.9072 16.4297 15.66 17.0984 17.0353 18.2143Z"/></g>\n<g data-agent-part="character"><g data-agent-part="head" fill="#E51943"><path d="M12.0007 14.7046C13.6321 14.7046 14.9546 13.3821 14.9546 11.7508C14.9546 10.1194 13.6321 8.79688 12.0007 8.79688C10.3693 8.79688 9.04688 10.1194 9.04688 11.7508C9.04688 13.3821 10.3693 14.7046 12.0007 14.7046Z"/></g><g data-agent-part="face" fill="none" stroke="white" stroke-linecap="round"><path data-agent-part="eye-left"/><path data-agent-part="eye-right"/></g></g></g>\n'
-export function mountApprovedAgentMotion(scene) {
+export function mountApprovedAgentMotion(scene, { once = false } = {}) {
   const $ = (id) => scene.querySelector(`[data-agent-part="${id}"]`),
     outer = $("outer"),
     shoulders = $("shoulders"),
@@ -94,7 +94,12 @@ export function mountApprovedAgentMotion(scene) {
       attributeFilter: ["data-compact"],
     })
   function frame(now) {
-    setActive(visible && (now - cycleStart) % 10450 < 7000)
+    const settled = once && (reduced.matches || now - cycleStart >= 1600)
+    setActive(once || (visible && (now - cycleStart) % 10450 < 7000))
+    if (settled) {
+      p = from = target = 1
+      started = now - duration
+    }
     const dt = Math.min((now - prev) / 1000, 0.05)
     prev = now
     const t = clamp((now - started) / duration)
@@ -108,7 +113,7 @@ export function mountApprovedAgentMotion(scene) {
     const eyeBlend = 1 - Math.exp(-dt * 10)
     eyeLook.x += (gaze.x - eyeLook.x) * eyeBlend
     eyeLook.y += (gaze.y - eyeLook.y) * eyeBlend
-    const motion = reduced.matches ? 0 : p
+    const motion = reduced.matches || settled ? 0 : p
     const blend = 1 - Math.exp(-dt * 4)
     look.x += (gaze.x - look.x) * blend
     look.y += (gaze.y - look.y) * blend
@@ -155,7 +160,7 @@ export function mountApprovedAgentMotion(scene) {
     )
     const cycle = eyeSec % 5.3
     let blink = 1
-    if (!reduced.matches && cycle > 4.85 && cycle < 5.09)
+    if (!reduced.matches && !settled && cycle > 4.85 && cycle < 5.09)
       blink = 1 - 0.94 * Math.sin(((cycle - 4.85) / 0.24) * Math.PI)
     const expression = reduced.matches ? 0 : eyeSec % 12
     const happy =
@@ -206,8 +211,8 @@ export function mountApprovedAgentMotion(scene) {
 
     scene.dataset.gaze = pointerInside ? "pointer" : String(gazeIndex)
     scene.dataset.progress = p.toFixed(4)
-    scene.dataset.phase = phase
-    raf = requestAnimationFrame(frame)
+    scene.dataset.phase = settled ? "rest" : phase
+    if (!settled) raf = requestAnimationFrame(frame)
   }
   raf = requestAnimationFrame(frame)
 

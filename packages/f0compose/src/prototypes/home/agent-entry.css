@@ -103,23 +103,6 @@
   border-radius: 10px;
   box-shadow: 0 2px 6px hsl(var(--neutral-90) / 0.1);
 }
-[data-hybrid-trigger] {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  visibility: hidden;
-  transition:
-    opacity 180ms ease,
-    visibility 180ms;
-}
-[data-hybrid-composer][data-compact="true"] [data-hybrid-trigger] {
-  opacity: 1;
-  visibility: visible;
-  transition-delay: 180ms;
-}
 [data-hybrid-editor] {
   position: absolute;
   inset: 0;
@@ -178,7 +161,6 @@
   resize: none;
   padding: 4px 0 !important;
   min-height: 36px !important;
-  font-size: 14px;
 }
 [data-hybrid-field] > div {
   border: 0 !important;
@@ -252,7 +234,7 @@
   height: 0;
 }
 
-/* Shared application floor: the framed page is separate from the agent dock. */
+/* Full-width application content; agent entry lives in the header. */
 [data-hybrid-root],
 [data-hybrid-work] {
   background: hsl(var(--page));
@@ -266,11 +248,13 @@
     border-radius 420ms;
 }
 [data-hybrid-root]:not([data-view="home"]) [data-hybrid-canvas] {
-  margin: 4px 4px 0 0;
-  width: calc(100% - 4px);
-  height: calc(100% - 52px);
-  border: 1px solid hsl(var(--neutral-10));
-  border-radius: 20px;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  padding-bottom: 0;
+  box-sizing: border-box;
+  border: 0;
+  border-radius: 0;
   overflow: hidden;
   background: hsl(var(--neutral-0));
 }
@@ -278,7 +262,7 @@
   position: absolute;
   bottom: 0;
   left: 0;
-  right: 4px;
+  right: 0;
   height: 48px;
   pointer-events: none;
 }
@@ -291,8 +275,9 @@
   height: 0;
 }
 [data-hybrid-root][data-mode="side"] [data-hybrid-canvas] {
-  width: calc(100% - 414px);
-  height: calc(100% - 8px);
+  width: calc(100% - 410px);
+  height: 100%;
+  padding-bottom: 0;
 }
 [data-hybrid-root][data-mode="side"] [data-hybrid-target],
 [data-hybrid-root][data-mode="focus"] [data-hybrid-target] {
@@ -343,9 +328,6 @@
   right: 16px;
   transform: none;
 }
-[data-hybrid-field] textarea {
-  font-size: 16px;
-}
 [data-hybrid-actions] {
   top: auto;
   bottom: 12px;
@@ -354,15 +336,15 @@
   transform: none !important;
 }
 [data-hybrid-chat-target] {
-  height: 196px;
+  height: 168px;
 }
-[data-hybrid-trigger] [data-factorial-agent-icon] {
+[data-testid="ask-factorial"] [data-factorial-agent-icon] {
   width: 20px !important;
   height: 20px !important;
 }
 @media (max-width: 900px) {
   [data-hybrid-root][data-mode="side"] [data-hybrid-canvas] {
-    width: calc(100% - 344px);
+    width: calc(100% - 340px);
   }
 }
 
@@ -375,7 +357,7 @@
   border-radius: 0 !important;
 }
 
-/* Match the original navigation floor; only the inset page owns a border. */
+/* Match the original navigation floor. */
 [data-home-nav],
 [data-home-rail],
 [data-home-panel],
@@ -397,7 +379,57 @@
     linear-gradient(hsl(var(--page)), hsl(var(--page))), hsl(var(--neutral-0)) !important;
 }
 
-/* Home has no inset page frame, so its menu supplies the shared divider. */
-body:has([data-hybrid-root][data-view="home"]) [data-home-panel] {
+/* The navigation panel supplies the divider beside the full-width content. */
+body:has([data-hybrid-root][data-view="home"]) [data-home-panel],
+[data-home-panel][data-nav-section="hub"] {
   box-shadow: inset -1px 0 0 hsl(var(--neutral-10)) !important;
+}
+
+/* Embedded F0 pages share the canvas without their own outer ring. */
+[data-hybrid-canvas] .bg-f1-special-page {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+[data-hybrid-root][data-view="agents"] [data-hybrid-canvas] {
+  padding-bottom: 0;
+}
+
+/* The side composer shares the panel's anchor; it never waits for a measured
+   screen coordinate to catch up during resizing or navigation changes. */
+[data-hybrid-work] {
+  --agent-panel-width: min(410px, 100%);
+}
+[data-hybrid-chat] {
+  width: var(--agent-panel-width);
+}
+[data-hybrid-root]:not([data-view="home"])[data-mode="side"]
+  [data-hybrid-composer] {
+  left: auto;
+  right: 14px;
+  top: auto;
+  bottom: 8px;
+  transform: none;
+  width: calc(var(--agent-panel-width) - 28px);
+  transition: none;
+}
+[data-hybrid-root]:not([data-view="home"])[data-mode="focus"]
+  [data-hybrid-composer] {
+  left: auto;
+  right: 50%;
+  top: auto;
+  bottom: 8px;
+  transform: translateX(50%);
+  width: min(780px, calc(100% - 28px));
+  transition: none;
+}
+@media (max-width: 900px) {
+  [data-hybrid-work] {
+    --agent-panel-width: min(340px, 100%);
+  }
+}
+@media (max-width: 700px) {
+  [data-hybrid-work] {
+    --agent-panel-width: 100%;
+  }
 }

@@ -1,16 +1,13 @@
 import {
-  F0AvatarCompany,
   F0AvatarPerson,
   F0Checkbox,
   F0Button,
   F0Icon,
   IconType,
 } from "@factorialco/f0-react"
+import { SearchBar } from "@factorialco/f0-react/dist/experimental"
 import {
-  F0AvatarModule,
-  SearchBar,
-} from "@factorialco/f0-react/dist/experimental"
-import {
+  Bell,
   AcademicCap,
   Archive,
   Balance,
@@ -32,7 +29,6 @@ import {
   Delete,
   DollarBill,
   Ellipsis,
-  Exit,
   Files,
   Filter,
   Folder,
@@ -43,12 +39,10 @@ import {
   Headset,
   Heart,
   Laptop,
-  Lightbulb,
   Marketplace,
   MessageHeart,
   Messages,
   MoneyBag,
-  Moon,
   Office,
   Organization,
   PalmTree,
@@ -60,9 +54,7 @@ import {
   Schedule,
   SearchPerson,
   Settings,
-  Shield,
   Sliders,
-  Sparkles,
   Suitcase,
   Timer,
   UserProtected,
@@ -73,7 +65,7 @@ import {
 } from "@factorialco/f0-react/icons/app"
 import { useEffect, useRef, useState } from "react"
 import { createPortal } from "react-dom"
-import { useNavigate, useSearchParams } from "react-router-dom"
+import { useSearchParams } from "react-router-dom"
 
 import { avatarFor } from "@/fixtures/helpers"
 
@@ -84,11 +76,15 @@ import { TEAM_ABSENCE_FILTERS, WORKPLACES } from "./calendar/calendarFixtures"
 import { CalGroup, MiniMonth } from "./calendar/MiniMonth"
 import { CHANNEL_CHATS, DIRECT_CHATS } from "./comms/chats"
 import { requestChat, requestChatsClose, useOpenChats } from "./comms/chatStore"
-import { factorialLogo, PROFILE_PEOPLE } from "./fixtures"
 import { hubSlug } from "./hub/hubSlug"
 import { motionKeyFor } from "./iconMotion"
 import { openInboxTasks } from "./inbox/inboxTasks"
 import { MenuDivider, MenuRow } from "./MenuRow"
+import {
+  LegalEntityMenu,
+  RailHelpMenu,
+  RailPersonalMenu,
+} from "./navigation/RailMenus"
 import { useNeedsYou } from "./needsYouStore"
 import {
   clearConversations,
@@ -102,17 +98,12 @@ import {
 } from "./one/conversationStore"
 import { PanelCollapse } from "./PanelCollapse"
 import { type PinnedItem, removePinned, usePinned } from "./pinnedStore"
-import {
-  PROFILE_LABELS,
-  setProfile,
-  useProfile,
-  type ProfileId,
-} from "./profileStore"
+import { useProfile } from "./profileStore"
 import { COMMUNITIES } from "./windows/communityPosts"
 
 /**
  * Home's navigation (Figma 2621:22725, "Home - Vision"): a FIXED 48px
- * icon rail (Home / Comms / Inbox / Cal / Hub, Marketplace + Security +
+ * icon rail (Home / Comms / Inbox / Cal / Hub, Marketplace / Settings / Notifications / Help +
  * user at the bottom) plus a 240px CONTEXTUAL panel that swaps its body
  * with the selected rail section and collapses behind the header button.
  * Replaces both the old Work/Chats sidebar and the navbar "⋮" windows
@@ -128,15 +119,6 @@ import { COMMUNITIES } from "./windows/communityPosts"
  * robot/Agents → Ai · panel-collapse → local PanelCollapse.tsx ·
  * cube/Spaces → LayersFront.
  */
-
-const THEME_STORAGE_KEY = "f0compose:theme"
-
-function readTheme(): "light" | "dark" {
-  if (typeof window === "undefined") return "light"
-  return window.localStorage.getItem(THEME_STORAGE_KEY) === "dark"
-    ? "dark"
-    : "light"
-}
 
 type NavSectionId = "home" | "comms" | "inbox" | "cal" | "hub"
 
@@ -1209,173 +1191,6 @@ function HubPanelBody() {
   )
 }
 
-const companies = [
-  { id: "factorial", name: "Factorial" },
-  { id: "test-de-verdad", name: "Test de verdad" },
-]
-
-/**
- * The user menu, matching the "View drawer" in the Home - Vision Figma
- * file (node 1338:171587): company switcher on top (email + companies
- * with a check on the active one), then dark mode + settings, then
- * back to catalog. Now anchored to the rail's bottom avatar, opening
- * to its right (portalled to <body> — the rail and the canvas are
- * sibling stacking contexts).
- */
-function RailUserMenu() {
-  const profile = useProfile()
-  // The rail face follows the profile too — it is the whole point of the
-  // switch that you are looking at someone else's Home.
-  const person = PROFILE_PEOPLE[profile]
-  const navigate = useNavigate()
-  const triggerRef = useRef<HTMLButtonElement>(null)
-  const [open, setOpen] = useState(false)
-  const [menuPos, setMenuPos] = useState<{
-    left: number
-    bottom: number
-  } | null>(null)
-  const [theme, setTheme] = useState<"light" | "dark">(readTheme)
-  const [activeCompany, setActiveCompany] = useState("factorial")
-
-  // Same mechanism FloatingControls used: toggle the .dark class on <html>.
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", theme === "dark")
-    document.documentElement.style.colorScheme = theme
-    window.localStorage.setItem(THEME_STORAGE_KEY, theme)
-  }, [theme])
-
-  const toggleMenu = () => {
-    if (!open && triggerRef.current) {
-      const rect = triggerRef.current.getBoundingClientRect()
-      setMenuPos({
-        // Just right of the rail, bottom-aligned with the avatar.
-        left: rect.right + 8,
-        bottom: window.innerHeight - rect.bottom,
-      })
-    }
-    setOpen((o) => !o)
-  }
-
-  const menu = open && menuPos && (
-    <>
-      <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-      <div
-        className="f0c-popover fixed z-50 flex w-[248px] flex-col rounded-md border border-solid border-f1-border-secondary bg-f1-background p-1 shadow-[0_4px_20px_0_rgba(13,22,37,0.08)]"
-        style={{
-          left: menuPos.left,
-          bottom: menuPos.bottom,
-          transformOrigin: "bottom left",
-        }}
-      >
-        {/* Company switcher — the Factorial row carries the brand
-            module avatar (Figma: AvatarModule), the rest a company
-            initial avatar. */}
-        <div className="p-2 text-sm font-medium text-f1-foreground-secondary">
-          alicia.keys@factorial.co
-        </div>
-        {companies.map((company) => (
-          <MenuRow
-            key={company.id}
-            icon={
-              company.id === "factorial" ? (
-                <F0AvatarModule module="home" size="sm" />
-              ) : (
-                <F0AvatarCompany name={company.name} size="xs" />
-              )
-            }
-            label={company.name}
-            trailing={
-              activeCompany === company.id ? (
-                <F0Icon icon={Check} size="sm" color="info" />
-              ) : undefined
-            }
-            onClick={() => setActiveCompany(company.id)}
-          />
-        ))}
-        <MenuDivider />
-        {/* New in the Figma (1356:193937): upgrade-plan icon has no
-            f0 equivalent — Sparkles is the closest stroke match. */}
-        <MenuRow
-          icon={<F0Icon icon={Sparkles} size="md" color="default" />}
-          label="Discover Factorial"
-        />
-        <MenuDivider />
-        {/* Profile switcher (per Oskar, Figma 2694:55469): the prototype
-            can be viewed as the manager it has always shown, or as an
-            employee — which swaps the canvas and strips this nav down to
-            the self-service essentials. */}
-        {(["admin", "employee"] as ProfileId[]).map((id) => (
-          <MenuRow
-            key={id}
-            icon={
-              <F0Icon
-                icon={id === "admin" ? Shield : SearchPerson}
-                size="md"
-                color="default"
-              />
-            }
-            label={`View as ${PROFILE_LABELS[id].toLowerCase()}`}
-            trailing={
-              profile === id ? (
-                <F0Icon icon={Check} size="sm" color="info" />
-              ) : undefined
-            }
-            onClick={() => {
-              setProfile(id)
-              setOpen(false)
-            }}
-          />
-        ))}
-        <MenuDivider />
-        <MenuRow
-          icon={
-            <F0Icon
-              icon={theme === "dark" ? Lightbulb : Moon}
-              size="md"
-              color="default"
-            />
-          }
-          label={
-            theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
-          }
-          onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
-        />
-        <MenuRow
-          icon={<F0Icon icon={Settings} size="md" color="default" />}
-          label="Settings"
-        />
-        <MenuDivider />
-        <MenuRow
-          icon={<F0Icon icon={Exit} size="md" color="default" />}
-          label="Back to catalog"
-          onClick={() => navigate("/")}
-        />
-      </div>
-    </>
-  )
-
-  return (
-    <>
-      {menu && createPortal(menu, document.body)}
-      <button
-        ref={triggerRef}
-        onClick={toggleMenu}
-        aria-label="Open user menu"
-        className="f0c-pressable flex cursor-pointer items-center justify-center rounded-full"
-      >
-        {/* 24px in the rail (Figma 2621:22884) — one step up from the
-            20px the old sidebar footer used. */}
-        <F0AvatarPerson
-          firstName={person.firstName}
-          lastName={person.lastName}
-          src={person.avatar}
-          size="sm"
-        />
-      </button>
-    </>
-  )
-}
-
 /** One 48px rail item: 32px icon button + 9px label (Figma 2621:22827). */
 function RailItem({
   icon,
@@ -1419,13 +1234,25 @@ function RailItem({
   )
 }
 
-/** Visual-only 32px icon button for the rail's bottom cluster. */
-function RailIconButton({ icon, label }: { icon: IconType; label: string }) {
+/** Utility destination with the same selected treatment as the main rail. */
+function RailIconButton({
+  icon,
+  label,
+  active,
+  onClick,
+}: {
+  icon: IconType
+  label: string
+  active: boolean
+  onClick: () => void
+}) {
   return (
     <button
       aria-label={label}
+      aria-current={active ? "page" : undefined}
+      onClick={onClick}
       data-icon-motion={motionKeyFor(icon)}
-      className="f0c-pressable flex size-8 cursor-pointer items-center justify-center rounded-[10px] hover:bg-f1-background-secondary"
+      className={`f0c-pressable flex size-8 cursor-pointer items-center justify-center rounded-[10px] hover:bg-f1-background-secondary ${active ? "bg-f1-background-secondary" : ""}`}
     >
       {/* Same token as the section items above — see RailItem. */}
       <F0Icon icon={icon} size="md" color="default" />
@@ -1440,6 +1267,18 @@ export function HomeNav() {
   const [section, setSection] = useState<NavSectionId>(readSection)
   const [panelOpen, setPanelOpen] = useState<boolean>(readPanelOpen)
   const rootRef = useRef<HTMLDivElement>(null)
+  const view = searchParams.get("view")
+  const utilityView =
+    view === "marketplace" || view === "settings" || view === "notifications"
+      ? view
+      : null
+  const panelVisible = panelOpen && !utilityView
+  const activeSection = utilityView ?? section
+
+  // Browser back to Calendar restores its rail selection as well as its page.
+  useEffect(() => {
+    if (view === "calendar") setSection("cal")
+  }, [view])
 
   // NEVER call toggleSidebar here: the ONE chat forces the xl breakpoint,
   // so under 1440px the FrameProvider treats the viewport as small and
@@ -1466,7 +1305,7 @@ export function HomeNav() {
   const pickSection = (id: NavSectionId) => {
     // Re-clicking the active section toggles the panel; anything else
     // switches (and reopens if collapsed).
-    const nextOpen = id === section ? !panelOpen : true
+    const nextOpen = !utilityView && id === section ? !panelOpen : true
     setSection(id)
     setPanelOpen(nextOpen)
     persist(id, nextOpen)
@@ -1484,7 +1323,7 @@ export function HomeNav() {
       // rather than be a no-op.
       goHome()
       setSearchParams({ view: "calendar" })
-    } else if (searchParams.get("view") === "calendar") {
+    } else if (view === "calendar" || utilityView) {
       setSearchParams({})
     }
   }
@@ -1513,7 +1352,7 @@ export function HomeNav() {
             (24px). The logo file is f0's own storybook asset, re-exported
             from fixtures; without `src` this falls back to initials. */}
         <div className="flex h-[60px] shrink-0 items-center justify-center">
-          <F0AvatarCompany name="Factorial" src={factorialLogo} size="sm" />
+          <LegalEntityMenu />
         </div>
         <div className="flex w-full flex-col gap-2 px-1.5">
           {RAIL_SECTIONS.map((s) => (
@@ -1521,21 +1360,43 @@ export function HomeNav() {
               key={s.id}
               icon={s.icon}
               label={s.label}
-              active={s.id === section}
+              active={s.id === activeSection}
               onClick={() => pickSection(s.id)}
             />
           ))}
         </div>
-        {/* Figma 2621:22880: Marketplace above Shield (2px apart), then the
-            user avatar 8px below — measured off the composed frame render.
-            Isolated per-node renders of this cluster resolve the icon
-            overrides differently (they come back as Feed/Shield swapped);
-            the composed frame is the one that matches the design. */}
+        {/* Utility actions follow the reference menu order. */}
         <div className="mt-auto flex flex-col items-center gap-0.5 pb-3 pt-2">
-          <RailIconButton icon={Marketplace} label="Marketplace" />
-          <RailIconButton icon={Shield} label="Security" />
+          <RailIconButton
+            icon={Marketplace}
+            label="Marketplace"
+            active={activeSection === "marketplace"}
+            onClick={() => {
+              goHome()
+              setSearchParams({ view: "marketplace" })
+            }}
+          />
+          <RailIconButton
+            icon={Settings}
+            label="Settings"
+            active={activeSection === "settings"}
+            onClick={() => {
+              goHome()
+              setSearchParams({ view: "settings" })
+            }}
+          />
+          <RailIconButton
+            icon={Bell}
+            label="Notifications"
+            active={activeSection === "notifications"}
+            onClick={() => {
+              goHome()
+              setSearchParams({ view: "notifications" })
+            }}
+          />
+          <RailHelpMenu />
           <span className="pt-1.5">
-            <RailUserMenu />
+            <RailPersonalMenu />
           </span>
         </div>
       </div>
@@ -1543,11 +1404,12 @@ export function HomeNav() {
       {/* Contextual panel — collapses to nothing behind the header button. */}
       <div
         data-home-panel
+        data-nav-section={section}
         className="f0c-ease-out h-full shrink-0 overflow-hidden transition-[width] duration-200 motion-reduce:transition-none"
-        style={{ width: panelOpen ? panelWidth : 0 }}
+        style={{ width: panelVisible ? panelWidth : 0 }}
         ref={(node) => {
           // Keep the collapsed panel out of the tab order.
-          if (panelOpen) node?.removeAttribute("inert")
+          if (panelVisible) node?.removeAttribute("inert")
           else node?.setAttribute("inert", "")
         }}
       >
