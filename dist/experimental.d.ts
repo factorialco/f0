@@ -32,7 +32,6 @@ import { DateCellValue } from './types/date';
 import { DateCellValue as DateCellValue_2 } from './experimental';
 import { DateFilterOptions } from './DateFilter/DateFilter';
 import { default as default_2 } from 'react';
-import { default as default_3 } from 'maplibre-gl';
 import { DeltaCellValue } from './types/delta';
 import { Dispatch } from 'react';
 import { DotTagCellValue } from './types/dotTag';
@@ -100,7 +99,6 @@ import { ScrollAreaProps } from '@radix-ui/react-scroll-area';
 import { SearchFilterOptions } from './SearchFilter/SearchFilter';
 import { StatusCellValue } from './types/status';
 import { StatusCellValue as StatusCellValue_2 } from './experimental';
-import { StyleSpecification } from 'maplibre-gl';
 import { SummaryCellValue } from './types/summary';
 import { SVGProps } from 'react';
 import { TagAlertProps } from './experimental';
@@ -8616,8 +8614,13 @@ export declare interface F0MapControlsProps extends WithDataTestIdProps {
 
 /** Imperative handle exposed via `ref`. */
 export declare interface F0MapHandle {
-    /** The raw MapLibre instance (escape hatch). `null` until the map has mounted. */
-    getMap: () => default_3.Map | null;
+    /**
+     * The rendering engine's own map object, as an escape hatch. Typed `unknown`
+     * on purpose: what comes back depends on the provider, so narrowing it is a
+     * deliberate decision at the call site instead of an implicit dependency on
+     * whichever engine F0Map happens to use. `null` until the map has mounted.
+     */
+    getNativeMap: () => unknown;
     /** Center on a marker (and select it). Always animates unless reduced-motion. */
     focusMarker: (id: string) => void;
     /** Frame all markers in view. */
@@ -8772,7 +8775,7 @@ export declare interface F0MapProps extends WithDataTestIdProps {
     /** Initial camera. Defaults to a city-level view. Read once on mount. */
     initialViewport?: F0MapViewport;
     /** Light/dark style pair. Defaults to the f0-themed OpenFreeMap styles. */
-    mapStyle?: F0MapStylePair;
+    mapStyle?: F0MapStyle;
     /**
      * Allow pan/zoom. Defaults to `true`. Read on mount: changing it recreates
      * the map (and resets the camera), so treat it as static.
@@ -8828,6 +8831,13 @@ export declare interface F0MapProps extends WithDataTestIdProps {
 }
 
 /**
+ * Which rendering engine a style is written for. The tag exists so a style
+ * built for one engine can never be handed to another: the shapes are not
+ * interchangeable, and without it the mismatch would only surface at runtime.
+ */
+export declare type F0MapProvider = "maplibre";
+
+/**
  * A route: a polyline drawn through the given coordinates exactly as provided.
  * `F0Map` renders the path; it does not compute routing - fetch that
  * server-side (or from a routing engine) and pass the resulting vertices.
@@ -8852,12 +8862,15 @@ export declare interface F0MapSkeletonProps extends WithDataTestIdProps {
 }
 
 /**
- * A light/dark pair of MapLibre styles. Each entry is either a hosted style
- * URL or an inline `StyleSpecification`.
+ * A light/dark style pair for one engine. `light` and `dark` are deliberately
+ * opaque - their real shape belongs to the engine (a MapLibre
+ * `StyleSpecification` or a style URL today), and F0Map's public surface must
+ * never make a consumer import an engine's types to describe a style.
  */
-export declare interface F0MapStylePair {
-    light: string | StyleSpecification;
-    dark: string | StyleSpecification;
+export declare interface F0MapStyle {
+    provider: F0MapProvider;
+    light: unknown;
+    dark: unknown;
 }
 
 /**
@@ -8868,7 +8881,7 @@ export declare interface F0MapStylePair {
  * resolved to concrete hex for the light and dark neutral ramps. Regenerate with
  * `node src/patterns/F0Map/styles/buildStyles.mjs`.
  */
-export declare const f0MapStyles: F0MapStylePair;
+export declare const f0MapStyles: F0MapStyle;
 
 /** Initial camera position for the map. */
 export declare interface F0MapViewport {
