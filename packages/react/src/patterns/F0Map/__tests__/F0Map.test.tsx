@@ -340,6 +340,37 @@ describe("F0Map", () => {
     })
   })
 
+  describe("flight tuning", () => {
+    it("bounds a flight's duration instead of discarding the animation", () => {
+      Object.defineProperty(navigator, "geolocation", {
+        configurable: true,
+        value: {
+          getCurrentPosition: (success: PositionCallback) =>
+            success({
+              coords: { longitude: -3.7, latitude: 40.42 },
+            } as GeolocationPosition),
+        },
+      })
+
+      render(
+        <F0Map
+          markers={POINTS}
+          showCurrentLocation
+          controlLabels={{ locate: "Locate me" }}
+        />
+      )
+      fireEvent.click(screen.getByRole("button", { name: "Locate me" }))
+
+      // `maxDuration` resets the computed duration to 0 whenever the flight
+      // would run longer, so every flight past a short hop teleports. An
+      // explicit `duration` bounds it and still animates.
+      const flyTo = mock.instances[0].calls.flyTo.at(-1)
+      expect(flyTo).toBeDefined()
+      expect(flyTo).not.toHaveProperty("maxDuration")
+      expect(flyTo?.duration).toBeGreaterThan(0)
+    })
+  })
+
   describe("projection", () => {
     it("applies the globe projection when requested", () => {
       render(<F0Map markers={POINTS} projection="globe" />)
