@@ -75,8 +75,17 @@ const ActiveCoachmark = ({
    * The step index is the ONLY thing the timer defers. Nothing here can leave
    * the coachmark stuck mid-fade: the close button and the shield's own ending
    * remove the item outright, and the timeout is cleared on unmount.
+   *
+   * ONE HANDOVER AT A TIME. The panel stays interactive while it is faded out,
+   * and Back and Next sit next to each other, so a second press inside the
+   * 150ms is easy: without this the first timer would still be pending, commit
+   * its own step at full opacity, and be replaced 50ms later — a step the user
+   * never asked for, flashing between the one they left and the one they
+   * chose. It would also outlive the unmount cleanup, which only ever holds
+   * the LAST timer.
    */
   const advanceTo = (nextIndex: number) => {
+    clearTimeout(handover.current)
     if (reducedMotion) {
       setIndex(nextIndex)
       return
@@ -95,6 +104,23 @@ const ActiveCoachmark = ({
   // is for, and a per-step count would never reach the threshold. A ref, not
   // state — the panel owns the wiggle, so nothing here re-renders on a press.
   const outsidePresses = useRef(0)
+
+  /**
+   * STEPS WHOSE ACTION HAS ALREADY RUN. `action.onClick` is a side effect the
+   * consumer hangs off advancing — an event tracked, a panel opened, a form
+   * seeded — and Back means the same step can be advanced past twice. Firing it
+   * again would double-count the event and re-open the panel, so each step's
+   * action runs the first time and is a no-op on the way through after that.
+   *
+   * Cleared when the sequence itself is replaced (`coachmarks.open` with the
+   * same id), because the step at index 1 is then a different step with a
+   * different action, and it has not run.
+   */
+  const actioned = useRef(new Set<number>())
+  useEffect(() => {
+    actioned.current = new Set()
+  }, [item.steps])
+
   const skipAfter =
     item.skipAfterOutsideClicks ?? DEFAULT_SKIP_AFTER_OUTSIDE_CLICKS
 
@@ -142,7 +168,10 @@ const ActiveCoachmark = ({
           : undefined
       }
       onAction={() => {
-        step.action?.onClick?.()
+        if (!actioned.current.has(stepIndex)) {
+          actioned.current.add(stepIndex)
+          step.action?.onClick?.()
+        }
         if (isLastStep) {
           item.onComplete?.()
           endWith("completed")
@@ -150,6 +179,12 @@ const ActiveCoachmark = ({
           advanceTo(stepIndex + 1)
         }
       }}
+      onBack={
+        // Only from the second step on: the first has nothing behind it. Goes
+        // through the same fade as advancing, so stepping back reads exactly
+        // like stepping forward.
+        stepIndex > 0 ? () => advanceTo(stepIndex - 1) : undefined
+      }
       onClose={() => {
         item.onDismiss?.()
         endWith("dismissed")

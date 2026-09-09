@@ -416,7 +416,7 @@ useEffect(() => {
 }, [])
 ```
 
-**Steps whose element is not there are left out.** A walkthrough is written once and runs on pages that differ: a control the reader has no permission for, a widget they removed, a block behind a flag. `start()` looks for every step's element, keeps looking for `lookForTargetsMs` (2000ms by default) while the page settles, then opens with the ones that turned up — the reader cannot tell there was ever another step, and the count is honest, because a walkthrough that says `1/3` has three steps to give. If none of them are there it does not open at all, and reports nothing: there was no walkthrough to dismiss.
+**Steps whose element is not there are left out.** A walkthrough is written once and runs on pages that differ: a control the reader has no permission for, a widget they removed, a block behind a flag. `start()` looks for every step's element, keeps looking for `lookForTargetsMs` (2000ms by default) while the page settles, then opens with the ones that turned up — the reader cannot tell there was ever another step, and the count is honest, because a walkthrough showing three dots has three steps to give. If none of them are there it does not open at all, and reports nothing: there was no walkthrough to dismiss.
 
 That waiting is not incidental. A walkthrough started on mount runs before the things it walks have arrived — a rail still measuring itself, a widget waiting on data — and opening on the first frame would drop those steps.
 
@@ -601,7 +601,7 @@ Open a single coachmark, a walkthrough, or two at once to watch the second one q
 
 **A walkthrough**
 
-Pass `steps` and the coachmark sequences itself: the indicator counts up, the action reads `Next` until the last step, and `onComplete` fires when the user reaches the end. Each step can point at a different element.
+Pass `steps` and the coachmark sequences itself: a row of dots in the centre of the footer tracks where the reader is, the action on the right reads `Next` until the last step, a `Back` button appears on the left from the second step on, and `onComplete` fires when the user reaches the end. Each step can point at a different element.
 
 ```tsx
 coachmarks.open({
@@ -616,6 +616,10 @@ coachmarks.open({
 ```
 
 <Canvas of={Stories.WithStep} />
+
+From the second step on there is somewhere to go back to, so a `Back` button appears at the bottom left. The dots keep the panel's centre line whether or not it is there:
+
+<Canvas of={Stories.WithBack} />
 
 The last step ends the walkthrough, so its action says so:
 

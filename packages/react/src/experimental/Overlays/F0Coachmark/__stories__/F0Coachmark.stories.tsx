@@ -91,8 +91,9 @@ type Story = StoryObj<typeof meta>
 export const Basic: Story = {}
 
 /**
- * A step indicator appears on its own once a coachmark has more than one step.
- * The action label follows: `Next` until the last step, then `Got it`.
+ * A step indicator — one dot per step, centred in the footer — appears on its
+ * own once a coachmark has more than one step. The action label follows:
+ * `Next` until the last step, then `Got it`.
  */
 export const WithStep: Story = {
   tags: ["no-sidebar"],
@@ -103,14 +104,29 @@ export const WithStep: Story = {
 }
 
 /**
+ * From the second step on there is somewhere to go back to, so a `Back` button
+ * appears at the bottom left. The dots stay on the panel's centre line whether
+ * or not it is there.
+ */
+export const WithBack: Story = {
+  tags: ["no-sidebar"],
+  args: {
+    step: { current: 2, total: 3 },
+    actionLabel: undefined,
+    onBack: () => undefined,
+  },
+}
+
+/**
  * The last step of a sequence ends it, so its action says so rather than
- * pointing forward.
+ * pointing forward. Back is still there — the last step is not a dead end.
  */
 export const LastStep: Story = {
   tags: ["no-sidebar"],
   args: {
     step: { current: 3, total: 3 },
     actionLabel: undefined,
+    onBack: () => undefined,
   },
 }
 

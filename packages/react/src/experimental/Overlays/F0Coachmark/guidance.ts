@@ -227,7 +227,7 @@ export const defineStepByStepCoachmarkGuidance = <
       // nothing until its element arrived, and the reader would be looking at a
       // walkthrough that stopped halfway with no way on but the close button.
       // Dropping them before opening is also what makes the count honest — a
-      // walkthrough that says 1/3 has three steps to give.
+      // walkthrough showing three dots has three steps to give.
       steps: present,
       overlay: options.overlay ?? true,
       skipAfterOutsideClicks: options.skipAfterOutsideClicks,

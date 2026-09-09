@@ -28,7 +28,13 @@ export type CoachmarkTarget = string | HTMLElement
 export type CoachmarkAction = {
   /** Defaults to `Next` on every step but the last, `Got it` on the last. */
   label?: string
-  /** Extra side effect. Advancing and closing happen either way. */
+  /**
+   * Extra side effect. Advancing and closing happen either way.
+   *
+   * ONCE PER STEP, even with `Back`: a reader who steps back and advances
+   * again does not run it a second time, so it is safe to track an event or
+   * open something from here.
+   */
   onClick?: () => void
 }
 
@@ -240,6 +246,12 @@ export interface F0CoachmarkProps extends CoachmarkPlacement {
   actionLabel?: string
   /** Fired by the action button. */
   onAction: () => void
+  /**
+   * Fired by the back button, which is rendered at the bottom left only when
+   * this is given — so the first step of a sequence, and a single-step
+   * coachmark, have nothing to go back to and show no button.
+   */
+  onBack?: () => void
   /** Fired by the close button and by Escape. Never by an outside click. */
   onClose: () => void
   /** Focus the target rather than the panel — see `CoachmarkStep.focusTarget`. */
@@ -261,8 +273,9 @@ export interface F0CoachmarkProps extends CoachmarkPlacement {
    */
   leaving?: boolean
   /**
-   * Position within a sequence, rendered as `current/total` beside the action.
-   * Omitted for a single-step coachmark, which shows no indicator.
+   * Position within a sequence, rendered as a row of dots centred in the
+   * footer (and as `current/total` for a screen reader). Omitted for a
+   * single-step coachmark, which shows no indicator.
    */
   step?: { current: number; total: number }
   /** Portal target for the panel. Defaults to `document.body`. */

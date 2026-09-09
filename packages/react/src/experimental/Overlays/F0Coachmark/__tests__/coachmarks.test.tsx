@@ -3,6 +3,7 @@ import { useState } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import {
   act,
+  fireEvent,
   screen,
   waitFor,
   zeroRender as render,
@@ -29,6 +30,9 @@ const open = (
   })
   return id
 }
+
+/** `STEP_FADE_OUT_MS` in CoachmarkProvider: the handover between two steps. */
+const FADE_MS = 150
 
 describe("coachmarks API", () => {
   beforeEach(() => {
@@ -382,6 +386,128 @@ describe("coachmarks API", () => {
       await waitFor(() =>
         expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
       )
+    })
+
+    it("goes back a step, and offers no back button on the first", async () => {
+      renderApp()
+
+      open({
+        steps: [
+          { targetElement: "#filters", title: "Start with a filter" },
+          { targetElement: "#views", title: "Then save it as a view" },
+        ],
+      })
+
+      const dialog = await screen.findByRole("dialog")
+      // Nothing behind the first step, so there is nothing to go back to.
+      expect(dialog).toHaveTextContent("1/2")
+      expect(
+        screen.queryByRole("button", { name: "Back" })
+      ).not.toBeInTheDocument()
+
+      await userEvent.click(screen.getByRole("button", { name: "Next" }))
+      await waitFor(() =>
+        expect(screen.getByRole("dialog")).toHaveAccessibleName(
+          "Then save it as a view"
+        )
+      )
+
+      await userEvent.click(screen.getByRole("button", { name: "Back" }))
+
+      await waitFor(() =>
+        expect(screen.getByRole("dialog")).toHaveAccessibleName(
+          "Start with a filter"
+        )
+      )
+      expect(screen.getByRole("dialog")).toHaveTextContent("1/2")
+      expect(
+        screen.queryByRole("button", { name: "Back" })
+      ).not.toBeInTheDocument()
+    })
+
+    it("runs a step's action side effect once, not again after going back", async () => {
+      const first = vi.fn()
+      renderApp()
+
+      open({
+        steps: [
+          {
+            targetElement: "#filters",
+            title: "Start with a filter",
+            action: { onClick: first },
+          },
+          { targetElement: "#views", title: "Then save it as a view" },
+        ],
+      })
+      await screen.findByRole("dialog")
+
+      await userEvent.click(screen.getByRole("button", { name: "Next" }))
+      expect(first).toHaveBeenCalledTimes(1)
+      await waitFor(() =>
+        expect(screen.getByRole("dialog")).toHaveAccessibleName(
+          "Then save it as a view"
+        )
+      )
+
+      await userEvent.click(screen.getByRole("button", { name: "Back" }))
+      await waitFor(() =>
+        expect(screen.getByRole("dialog")).toHaveAccessibleName(
+          "Start with a filter"
+        )
+      )
+
+      // Advancing past the same step a second time is the same advance, not a
+      // second one: whatever the consumer hung off it has already happened.
+      await userEvent.click(screen.getByRole("button", { name: "Next" }))
+      expect(first).toHaveBeenCalledTimes(1)
+    })
+
+    it("does not commit an overtaken step when two presses race the fade", async () => {
+      // Fake timers because the race is the point: the two presses have to land
+      // inside the same 150ms handover, and `userEvent` awaits past it.
+      vi.useFakeTimers()
+      try {
+        renderApp()
+
+        open({
+          steps: [
+            { targetElement: "#filters", title: "One" },
+            { targetElement: "#views", title: "Two" },
+            { targetElement: "#filters", title: "Three" },
+          ],
+        })
+
+        act(() => {
+          vi.advanceTimersByTime(FADE_MS)
+        })
+        fireEvent.click(screen.getByRole("button", { name: "Next" }))
+        act(() => {
+          vi.advanceTimersByTime(FADE_MS)
+        })
+        expect(screen.getByRole("dialog")).toHaveAccessibleName("Two")
+
+        // The panel stays interactive while it is faded out, and Back sits next
+        // to Next: press Back, change your mind 50ms later, press Next.
+        fireEvent.click(screen.getByRole("button", { name: "Back" }))
+        act(() => {
+          vi.advanceTimersByTime(50)
+        })
+        fireEvent.click(screen.getByRole("button", { name: "Next" }))
+
+        // Where the abandoned Back handover would have landed. Step One must
+        // not flash up here on its way to Three.
+        act(() => {
+          vi.advanceTimersByTime(FADE_MS - 50)
+        })
+        expect(screen.getByRole("dialog")).toHaveAccessibleName("Two")
+
+        act(() => {
+          vi.advanceTimersByTime(50)
+        })
+        expect(screen.getByRole("dialog")).toHaveAccessibleName("Three")
+      } finally {
+        vi.useRealTimers()
+      }
     })
 
     it("abandons the whole sequence when a step is dismissed", async () => {

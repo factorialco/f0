@@ -143,6 +143,40 @@ const useWiggle = (ref: RefObject<HTMLElement>) => {
 }
 
 /**
+ * WHERE YOU ARE IN THE WALKTHROUGH, as dots rather than "2/3". The dots are a
+ * shape the eye reads without stopping to parse it — how many are left is the
+ * length of the row, not a subtraction — and they hold the same width whatever
+ * the numbers are, which is what lets the centre track stay put.
+ *
+ * They are decoration to the accessibility tree: the row carries the count as
+ * text for a screen reader, which cannot see how many circles there are, and
+ * the circles themselves are hidden so it is not read as a list of bullets.
+ */
+const CoachmarkSteps = ({
+  step,
+}: {
+  step: NonNullable<F0CoachmarkProps["step"]>
+}) => (
+  <div className="flex flex-row items-center gap-1.5">
+    <span className="sr-only">
+      {step.current}/{step.total}
+    </span>
+    {Array.from({ length: step.total }, (_, index) => (
+      <span
+        key={index}
+        aria-hidden
+        className={cn(
+          "size-1.5 rounded-full bg-current transition-colors",
+          index + 1 === step.current
+            ? "text-f1-foreground-inverse"
+            : "text-f1-foreground-inverse-secondary opacity-40"
+        )}
+      />
+    ))}
+  </div>
+)
+
+/**
  * The coachmark panel. Rendered by `CoachmarkProvider` for whichever coachmark
  * is at the head of the queue — consumers call `coachmarks.open` instead of
  * rendering this, which is why it takes an already-resolved DOM element and has
@@ -154,6 +188,7 @@ const CoachmarkPanel = ({
   description,
   actionLabel,
   onAction,
+  onBack,
   onClose,
   step,
   arrow = true,
@@ -329,11 +364,13 @@ const CoachmarkPanel = ({
             buttons below free of colour overrides. */}
         <div
           data-coachmark-body
-          className="dark flex min-h-0 flex-col gap-3 overflow-y-auto"
+          className="dark flex min-h-0 flex-col gap-6 overflow-y-auto"
         >
           {/* Title and description are their own group on a tighter gap-1, the
               same pairing F0Toast uses, so they read as one block. The outer
-              gap-3 still separates that block from the action row. */}
+              gap-6 then separates that block from the action row by a clear
+              margin, so the controls read as something you act on rather than
+              as a third line of text. */}
           <div className="flex flex-col gap-1">
             <div className="flex flex-row items-start justify-between gap-2">
               <p id={titleId} className="font-semibold">
@@ -342,7 +379,7 @@ const CoachmarkPanel = ({
               {/* Inset by the panel's own padding rather than pulled into the
                   corner, matching F0Toast's placement. */}
               <ButtonInternal
-                variant="outline"
+                variant="ghost"
                 icon={Cross}
                 size="sm"
                 hideLabel
@@ -362,20 +399,45 @@ const CoachmarkPanel = ({
               </p>
             ) : null}
           </div>
-          {/* `ml-auto` on the action rather than `justify-end` on the row, so
-              the action stays right aligned whether or not a step is present. */}
-          <div className="flex flex-row items-center gap-3">
-            {step ? (
-              <p className="text-f1-foreground-inverse-secondary">
-                {step.current}/{step.total}
-              </p>
-            ) : null}
-            <ButtonInternal
-              variant="outline"
-              label={label}
-              onClick={onAction}
-              className="ml-auto"
-            />
+          {/* Back left, dots centred, action right. A grid with two equal
+              outer tracks rather than a flex row, so the dots sit on the
+              panel's centre line and STAY there: the first step has no back
+              button, and with auto margins the dots would slide right as it
+              appears — a marker of position that moves when you move is worse
+              than no marker.
+
+              All three cells are ALWAYS rendered, empty ones included. Leaving
+              a cell out does not leave a gap — grid auto-placement pulls the
+              next child into the free track, and a single-action coachmark
+              would find its button in the middle of the panel.
+
+              `min-w-0` on the two button cells because the panel is a fixed
+              `w-72` and a grid track's floor is its content: without it a long
+              label (a translated `actionLabel`, most of all — the buttons are
+              `whitespace-nowrap`) pushes the row wider than the panel and the
+              button renders outside the rounded background, which nothing here
+              clips. Allowed to shrink, `ButtonInternal` ellipsises its own
+              label and offers the full text on hover instead. */}
+          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+            <div className="flex min-w-0 justify-start">
+              {onBack ? (
+                <ButtonInternal
+                  variant="outline"
+                  label={i18n.actions.back}
+                  onClick={onBack}
+                />
+              ) : null}
+            </div>
+            <div className="flex justify-center">
+              {step ? <CoachmarkSteps step={step} /> : null}
+            </div>
+            <div className="flex min-w-0 justify-end">
+              <ButtonInternal
+                variant="outline"
+                label={label}
+                onClick={onAction}
+              />
+            </div>
           </div>
         </div>
         {arrow && !centred ? (
