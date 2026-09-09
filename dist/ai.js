@@ -1,5 +1,50 @@
-import { rt as e, tt as t } from "./popover-Sbb5IAHu.js";
-import { D as n, E as r, Jt as i, Xt as a, Yt as o, d as s, l as c, o as l, s as u, t as d, u as f } from "./F0CanvasPanel-CQY7qn8i.js";
-import { A as p, C as m, D as h, E as g, O as _, S as v, T as y, _ as b, a as x, b as S, c as C, d as w, f as T, g as E, h as D, i as O, j as k, k as A, l as j, m as M, n as N, o as P, p as F, r as I, s as L, t as R, u as z, v as B, w as V, x as H, y as U } from "./F0AiProcessingOverlay-CV7gpBo4.js";
-import { t as W } from "./i18n-provider-defaults-BAo9bfST.js";
-export { U as AiChatTranslationsProvider, n as ChatSpinner, x as CollapsibleGroup, s as DropOverlay, r as F0ActionItem, l as F0AiChat, L as F0AiChatCreditsButton, C as F0AiChatHeader, I as F0AiChatHistory, u as F0AiChatProvider, A as F0AiChatTextArea, F as F0AiInsightCard, E as F0AiMask, z as F0AiMessageSources, v as F0AiMessagesContainer, c as F0AiPong, R as F0AiProcessingOverlay, w as F0AiProposalCard, j as F0AiTableCard, D as F0AuraVoiceAnimation, h as F0CanvasCard, d as F0CanvasPanel, b as F0ClarifyingPanel, M as F0HILActionConfirmation, o as F0OneIcon, i as F0OneSwitch, V as FormCardValueFormatterProvider, t as I18nProvider, f as PongBall, P as ThreadItem, O as ThreadListSkeleton, p as actionItemStatuses, H as aiTranslations, T as contentTypes, W as defaultTranslations, _ as markdownRenderers, k as oneIconSizes, a as useAiChat, S as useAiChatTranslations, B as useCanvasEntity, N as useChatHistory, y as useFormCardValueFormatter, e as useI18n, g as useSetFormCardValueFormatter, m as useToolCallId };
+import { A as e, C as r, F as t, a as i, b as o, c as n, d as F, e as C, f as l, g as A, h as d, i as u, j as h, k as m, l as c, m as I, n as P, o as T, T as p, p as v, q as g, r as f, s as y, t as S, u as x, v as b, w as k, x as H, y as O, z as V, B as w } from "./F0AiProcessingOverlay-DaJlZfm6.js";
+import { C as M, D as z, F as D, a as L, b as j, c as q, d as E, e as G, f as R, I as J, P as K, u as N, g as Q } from "./F0CanvasPanel-_W3I4tue.js";
+import { defaultTranslations as W } from "./i18n-provider-defaults.js";
+export {
+  e as AiChatTranslationsProvider,
+  M as ChatSpinner,
+  r as CollapsibleGroup,
+  z as DropOverlay,
+  D as F0ActionItem,
+  L as F0AiChat,
+  t as F0AiChatCreditsButton,
+  i as F0AiChatHeader,
+  o as F0AiChatHistory,
+  j as F0AiChatProvider,
+  n as F0AiChatTextArea,
+  F as F0AiInsightCard,
+  C as F0AiMask,
+  l as F0AiMessageSources,
+  A as F0AiMessagesContainer,
+  q as F0AiPong,
+  d as F0AiProcessingOverlay,
+  u as F0AiProposalCard,
+  h as F0AiTableCard,
+  m as F0AuraVoiceAnimation,
+  c as F0CanvasCard,
+  E as F0CanvasPanel,
+  I as F0ClarifyingPanel,
+  P as F0HILActionConfirmation,
+  G as F0OneIcon,
+  R as F0OneSwitch,
+  T as FormCardValueFormatterProvider,
+  J as I18nProvider,
+  K as PongBall,
+  p as ThreadItem,
+  v as ThreadListSkeleton,
+  g as actionItemStatuses,
+  f as aiTranslations,
+  y as contentTypes,
+  W as defaultTranslations,
+  S as markdownRenderers,
+  x as oneIconSizes,
+  N as useAiChat,
+  b as useAiChatTranslations,
+  k as useCanvasEntity,
+  H as useChatHistory,
+  O as useFormCardValueFormatter,
+  Q as useI18n,
+  V as useSetFormCardValueFormatter,
+  w as useToolCallId
+};

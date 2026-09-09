@@ -1,6 +1,6 @@
 {
   "name": "@factorialco/f0-react",
-  "version": "6.90.2",
+  "version": "6.91.2",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/factorialco/f0.git",
@@ -35,8 +35,8 @@
     "build-icons": "tsc --project ./tsconfig-build-icons.json",
     "build:tailwind": "NODE_ENV=production tailwindcss -i src/styles.css -o ./dist/styles.css --postcss --minify",
     "build:watch": "pnpm build --watch",
-    "lint": "sh -c 'oxlint --type-aware \"${@:-src/}\" --max-warnings 0' --",
-    "lint:fix": "sh -c 'oxlint --type-aware \"${@:-src/}\" --fix --max-warnings 0' --",
+    "lint": "sh -c 'oxlint --type-aware \"${@:-src/}\" --quiet' --",
+    "lint:fix": "sh -c 'oxlint --type-aware \"${@:-src/}\" --fix --quiet' --",
     "preview": "vite preview",
     "generate-icons": "rm -fR src/icons/app/* src/icons/modules/* src/flags/components/* src/icons/ai/* && run-p generate-app-icons generate-module-icons generate-flag-icons generate-ai-icons && oxfmt \"src/{icons,flags}/**/*.tsx\" && pnpm generate-icon-barrels",
     "generate-icon-barrels": "bash scripts/generate-icon-barrels.sh src/icons/app src/icons/modules src/icons/ai src/flags/components",
@@ -58,6 +58,7 @@
     "check:new-component-dod": "tsx .scripts/check-new-component-dod.ts",
     "check:stable-dod": "tsx .scripts/check-stable-dod.ts",
     "check:untranslated-copy": "tsx .scripts/check-untranslated-copy.ts",
+    "check:lint-debt": "tsx .scripts/check-lint-debt.ts",
     "preflight": "tsx .scripts/pre-push-preflight.ts",
     "vitest": "vitest --project=unit",
     "vitest:ui": "vitest --project=unit --ui",
@@ -237,7 +238,7 @@
     "tsup": "^8.3.5",
     "typescript": "^5.7.2",
     "user-agent-data-types": "^0.4.2",
-    "vite": "^8.2.2",
+    "vite": "^7.3.5",
     "vite-plugin-dts": "4.3.0",
     "vite-plugin-lib-inject-css": "^2.2.1",
     "vitest": "^4.0.15"
