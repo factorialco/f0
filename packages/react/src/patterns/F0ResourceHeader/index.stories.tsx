@@ -600,8 +600,7 @@ export const RichDescriptionFocusExpands: Story = {
     const toggle = await canvas.findByRole("button", { name: /show/i })
     await expect(toggle).toHaveAttribute("aria-expanded", "false")
 
-    // The clamp only hides overflow, so this link is tabbable while invisible.
-    // Focus has to open the description (WCAG 2.4.7).
+    // Tabbable while the clamp hides it, so focus has to expand (WCAG 2.4.7).
     canvas.getByRole("link", { name: "interview rubric" }).focus()
 
     await waitFor(() => expect(toggle).toHaveAttribute("aria-expanded", "true"))

@@ -47,12 +47,7 @@ interface BaseHeaderProps {
       }
     | AvatarVariant
 
-  /**
-   * Supporting text under the title. Accepts a node so a consumer can render
-   * formatted copy — a link back to the source of truth, for instance — rather
-   * than flattening it to plain text. Clamped to two lines with a "show all"
-   * toggle either way.
-   */
+  /** Clamped to two lines behind a "show all" toggle. */
   description?: ReactNode
   primaryAction?: PrimaryActionButton | PrimaryDropdownAction<string>
   secondaryActions?: HeaderSecondaryAction[]

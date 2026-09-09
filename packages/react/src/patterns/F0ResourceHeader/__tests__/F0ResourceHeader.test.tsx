@@ -86,8 +86,7 @@ describe("F0ResourceHeader", () => {
   it("renders a plain string description as text", () => {
     render(<F0ResourceHeader title="Reports" description="Quarterly revenue" />)
 
-    // Rendered twice: the visible copy plus the hidden one that measures the
-    // unclamped height.
+    // Twice: the visible copy plus the hidden one that measures unclamped height.
     expect(screen.getAllByText("Quarterly revenue")).toHaveLength(2)
   })
 
@@ -103,8 +102,7 @@ describe("F0ResourceHeader", () => {
       />
     )
 
-    // The header mirrors the description into an aria-hidden node to measure its
-    // unclamped height, so only the visible link reaches the a11y tree.
+    // Only the visible copy reaches the a11y tree, not the measure clone.
     expect(screen.getAllByRole("link")).toHaveLength(1)
     expect(screen.getByRole("link", { name: "rubric" })).toHaveAttribute(
       "href",
@@ -124,9 +122,8 @@ describe("F0ResourceHeader", () => {
       />
     )
 
-    // Focus expands the description so a clamped-away link cannot be reached
-    // while invisible. A description short enough to fit was never hidden, so
-    // focusing it must not raise a "show less" toggle over nothing.
+    // Focus expands a clamped description; one that always fit hid nothing, so
+    // it must not raise a "show less" toggle over nothing.
     await act(async () => {
       screen.getByRole("link", { name: "rubric" }).focus()
     })

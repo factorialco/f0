@@ -32,12 +32,8 @@ export const Description = ({ description }: { description: ReactNode }) => {
   return (
     <div className="flex max-w-[640px] flex-col gap-1">
       <motion.div
-        /*
-         * The clamp hides overflowing lines with `overflow: hidden`, which clips
-         * them visually but leaves them focusable. A description can hold a link,
-         * so expand as soon as focus reaches one — otherwise tabbing lands on a
-         * control nobody can see (WCAG 2.4.7).
-         */
+        // The clamp only hides overflow, so a clamped-away link stays focusable:
+        // expand on focus or it is reachable while invisible (WCAG 2.4.7).
         onFocusCapture={() => {
           if (needsTruncation) {
             setIsExpanded(true)
