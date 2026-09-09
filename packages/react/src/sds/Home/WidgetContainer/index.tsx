@@ -800,9 +800,20 @@ export function WidgetContainer({
    * nothing to do must not leave a box behind, because that box is the flex item
    * the widget itself would have been.
    */
-  const enter = (order: number, node: ReactNode, widget?: HomeWidgetItem) => {
+  const enter = (
+    order: number,
+    node: ReactNode,
+    widget?: HomeWidgetItem,
+    /**
+     * Set only where nothing else marks the box — an arrangeable column's
+     * `SortableWidget` already carries the id one level up, and marking it here
+     * too would put the same attribute on two nested elements.
+     */
+    widgetId?: string
+  ) => {
     const widgetStow = widget ? stowOf(widget) : undefined
-    if (!arrival && !widgetStow) {
+    // The id needs a box to sit on, so asking for one is reason enough to wrap.
+    if (!arrival && !widgetStow && !widgetId) {
       return node
     }
     return (
@@ -818,6 +829,7 @@ export function WidgetContainer({
         }
         stow={widgetStow}
         fullHeight={widget?.fullHeight}
+        widgetId={widgetId}
       >
         {node}
       </WidgetMotion>
@@ -853,7 +865,9 @@ export function WidgetContainer({
             {(state) => enter(order, render(widget, state), widget)}
           </SortableWidget>
         ) : (
-          enter(order, render(widget), widget)
+          // No sortable to carry it here, so the arrival wrapper is the box the
+          // id goes on — see `enter`.
+          enter(order, render(widget), widget, widget.id)
         )}
       </WidgetStage>
     </WidgetSlot>
