@@ -12,6 +12,7 @@ import type {
   WelcomeScreenSuggestion,
   WelcomeScreenSuggestionItem,
 } from "../F0AiChat/types"
+import { F0AiChatUsageLimitsButton } from "../F0AiChatUsageLimits"
 import { F0OneIcon } from "../F0OneIcon"
 import { ActionBar } from "./components/ActionBar"
 import { AttachedFilesList } from "./components/AttachedFilesList"
@@ -81,7 +82,7 @@ export const F0AiChatTextArea = ({
   searchPersons,
   onProcessFilesRef,
   disclaimer,
-  disclaimerEnd,
+  usageLimits,
   footer,
   isWelcomeScreen = false,
   fullscreen = false,
@@ -922,13 +923,13 @@ export const F0AiChatTextArea = ({
             </span>
           </motion.div>
         ) : (
-          (disclaimer?.text || disclaimerEnd) &&
+          (disclaimer?.text || usageLimits) &&
           !isFullscreenWelcome && (
             <motion.div
               key="chat-disclaimer"
               className={cn(
                 "flex w-full max-w-content flex-row items-center gap-1",
-                disclaimerEnd ? "justify-between" : "justify-center"
+                usageLimits ? "justify-between" : "justify-center"
               )}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -977,9 +978,9 @@ export const F0AiChatTextArea = ({
                   </Link>
                 ) : null}
               </div>
-              {disclaimerEnd ? (
+              {usageLimits ? (
                 <div className="flex shrink-0 items-center">
-                  {disclaimerEnd}
+                  <F0AiChatUsageLimitsButton {...usageLimits} />
                 </div>
               ) : null}
             </motion.div>

@@ -8,29 +8,34 @@ const DISCLAIMER = {
   linkText: "See more",
 }
 
-describe("F0AiChatTextArea disclaimerEnd", () => {
-  it("pins the host control to the right end of the disclaimer row", () => {
+const USAGE_LIMITS = { usage: { usedPercentage: 30 } }
+
+const getRing = () =>
+  screen.getByRole("button", { name: /Personal allowance: 30% used/ })
+
+describe("F0AiChatTextArea usageLimits", () => {
+  it("pins the usage ring to the right end of the disclaimer row", () => {
     render(
       <F0AiChatTextArea
         onSubmit={vi.fn()}
         disclaimer={DISCLAIMER}
-        disclaimerEnd={<button type="button">Usage</button>}
+        usageLimits={USAGE_LIMITS}
       />
     )
 
     const text = screen.getByText(DISCLAIMER.text)
-    const control = screen.getByRole("button", { name: "Usage" })
+    const ring = getRing()
     const row = text.closest("[class*='max-w-content']")
 
     expect(row).not.toBeNull()
-    expect(row).toContainElement(control)
+    expect(row).toContainElement(ring)
     expect(row).toHaveClass("justify-between")
     expect(
-      text.compareDocumentPosition(control) & Node.DOCUMENT_POSITION_FOLLOWING
+      text.compareDocumentPosition(ring) & Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy()
   })
 
-  it("keeps the disclaimer centered when no control is passed", () => {
+  it("keeps the disclaimer centered without usage limits", () => {
     render(<F0AiChatTextArea onSubmit={vi.fn()} disclaimer={DISCLAIMER} />)
 
     const row = screen
@@ -38,17 +43,13 @@ describe("F0AiChatTextArea disclaimerEnd", () => {
       .closest("[class*='max-w-content']")
 
     expect(row).toHaveClass("justify-center")
+    expect(screen.queryByRole("button", { name: /allowance/ })).toBeNull()
   })
 
-  it("renders the control even without disclaimer text", () => {
-    render(
-      <F0AiChatTextArea
-        onSubmit={vi.fn()}
-        disclaimerEnd={<button type="button">Usage</button>}
-      />
-    )
+  it("renders the ring even without disclaimer text", () => {
+    render(<F0AiChatTextArea onSubmit={vi.fn()} usageLimits={USAGE_LIMITS} />)
 
-    expect(screen.getByRole("button", { name: "Usage" })).toBeInTheDocument()
+    expect(getRing()).toBeInTheDocument()
   })
 
   it("hides the row on the fullscreen welcome screen", () => {
@@ -56,14 +57,12 @@ describe("F0AiChatTextArea disclaimerEnd", () => {
       <F0AiChatTextArea
         onSubmit={vi.fn()}
         disclaimer={DISCLAIMER}
-        disclaimerEnd={<button type="button">Usage</button>}
+        usageLimits={USAGE_LIMITS}
         isWelcomeScreen
         fullscreen
       />
     )
 
-    expect(
-      screen.queryByRole("button", { name: "Usage" })
-    ).not.toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: /allowance/ })).toBeNull()
   })
 })

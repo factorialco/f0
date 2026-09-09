@@ -22,8 +22,8 @@ const UsageSkeleton = () => (
 )
 
 /**
- * Headless usage-limits popover with its ring trigger, meant for the
- * `disclaimerEnd` slot of `F0AiChatTextArea`.
+ * Headless usage-limits popover with its ring trigger. `F0AiChatTextArea`
+ * renders it from its `usageLimits` prop.
  */
 export const F0AiChatUsageLimitsButton = ({
   usage,

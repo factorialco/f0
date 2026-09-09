@@ -28,11 +28,13 @@ import type {
   UploadedFile,
   WelcomeScreenSuggestion,
 } from "../../F0AiChat/types"
-import { F0AiChatUsageLimitsButton } from "../../F0AiChatUsageLimits"
 import { F0ClarifyingPanel } from "../../F0ClarifyingPanel"
 import type { ClarifyingQuestionState } from "../../F0ClarifyingPanel/types"
 import { F0AiChatTextArea } from "../F0AiChatTextArea"
-import type { F0AiChatTextAreaSubmitPayload } from "../types"
+import type {
+  AiChatTextAreaUsageLimits,
+  F0AiChatTextAreaSubmitPayload,
+} from "../types"
 
 const ROTATING_PLACEHOLDERS = [
   "Ask about location, directions, or travel details…",
@@ -319,7 +321,7 @@ type WrapperProps = {
   clarifyingQuestion?: ClarifyingQuestionState | null
   creditWarning?: AiChatCreditWarning
   disclaimer?: AiChatDisclaimer
-  disclaimerEnd?: React.ReactNode
+  usageLimits?: AiChatTextAreaUsageLimits
   footer?: React.ReactNode
   welcomeScreenSuggestions?: WelcomeScreenSuggestion[]
   welcomeScreenSuggestionsPlacement?: "above" | "inside"
@@ -342,7 +344,7 @@ const Wrapper = ({
   clarifyingQuestion = null,
   creditWarning,
   disclaimer,
-  disclaimerEnd,
+  usageLimits,
   footer,
   welcomeScreenSuggestions,
   welcomeScreenSuggestionsPlacement,
@@ -413,7 +415,7 @@ const Wrapper = ({
         onTranscribe={onTranscribe}
         searchPersons={searchPersons}
         disclaimer={disclaimer}
-        disclaimerEnd={disclaimerEnd}
+        usageLimits={usageLimits}
         footer={footer}
         welcomeScreenSuggestions={welcomeScreenSuggestions}
         welcomeScreenSuggestionsPlacement={welcomeScreenSuggestionsPlacement}
@@ -531,17 +533,15 @@ export const WithDisclaimer: Story = {
 export const WithUsageLimits: Story = {
   args: {
     disclaimer: DISCLAIMER,
-    disclaimerEnd: (
-      <F0AiChatUsageLimitsButton
-        usage={{
-          usedPercentage: 30,
-          onSeeCompany: () => console.log("see company"),
-          sections: [
-            { id: "company", label: "Company allowance", usedPercentage: 70 },
-          ],
-        }}
-      />
-    ),
+    usageLimits: {
+      usage: {
+        usedPercentage: 30,
+        onSeeCompany: () => console.log("see company"),
+        sections: [
+          { id: "company", label: "Company allowance", usedPercentage: 70 },
+        ],
+      },
+    },
   },
 }
 
