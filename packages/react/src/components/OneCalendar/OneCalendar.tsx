@@ -324,8 +324,9 @@ const OneCalendarInternal = ({
     }
   }
 
-  return (
-    <div className="flex flex-col">
+  /** The typed date fields, above the calendar. */
+  const renderDateInputs = () => (
+    <>
       {showInput && !granularity.hideDateInput ? (
         <div className="mb-2 flex gap-2">
           <Input
@@ -368,6 +369,12 @@ const OneCalendarInternal = ({
           ) : null}
         </div>
       ) : null}
+    </>
+  )
+
+  /** The header: the label or its dropdowns, and the two arrows. */
+  const renderNavigation = () => (
+    <>
       {showNavigation ? (
         <div
           className={cn(
@@ -417,6 +424,13 @@ const OneCalendarInternal = ({
           </div>
         </div>
       ) : null}
+    </>
+  )
+
+  return (
+    <div className="flex flex-col">
+      {renderDateInputs()}
+      {renderNavigation()}
       <div className="relative">
         {granularity.render({
           mode,

@@ -379,7 +379,100 @@ const F0RichTextEditorComponent = forwardRef<
     return null
   }
 
-  const editorContent = (
+  /** The two floating toolbars fullscreen mode adds: the editing one, and the
+   *  compact accept/discard menu that replaces it while a change is in review. */
+  const renderFullscreenToolbars = () => (
+    <>
+      <AnimatePresence>
+        {/* The floating toolbar disappears the moment an enhance kicks off
+                (disableButtons covers loading, review and error). */}
+        {isFullscreen && isToolbarOpen && !enhance.disableButtons ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="absolute bottom-10 left-0 right-0 z-[9998] flex w-full items-center justify-center"
+            style={{ pointerEvents: "none" }}
+          >
+            <div
+              ref={fullscreenToolbarRef}
+              className="absolute -bottom-4 left-1/2 z-50 max-w-[calc(100%-48px)] -translate-x-1/2 rounded-lg border border-solid border-f1-border-secondary bg-f1-background p-1.5 shadow-md"
+              style={{ pointerEvents: "auto" }}
+            >
+              <div className="flex items-center gap-1">
+                <F0Button
+                  onClick={(e) => {
+                    e.preventDefault()
+                    setIsToolbarOpen(false)
+                    // Restore focus after state update to trigger BubbleMenu
+                    queueMicrotask(() => editor.commands.focus())
+                  }}
+                  variant="neutral"
+                  size="md"
+                  disabled={enhance.disableButtons}
+                  hideLabel
+                  label={i18n.actions.close}
+                  icon={Cross}
+                />
+                <ToolbarDivider />
+                {enhanceConfig ? (
+                  <>
+                    <EnhanceActivator
+                      enhance={enhance}
+                      disabled={enhance.disableButtons}
+                      menuWidth={fullscreenToolbarWidth}
+                      menuContainerRef={fullscreenToolbarRef}
+                    />
+                    <ToolbarDivider />
+                  </>
+                ) : null}
+                <Toolbar
+                  editor={editor}
+                  isFullscreen={isFullscreen}
+                  disableButtons={enhance.disableButtons}
+                  plainHtmlMode={plainHtmlMode}
+                />
+              </div>
+            </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+
+      {/* In review the floating toolbar disappears entirely and the
+              compact accept/discard menu takes its place. */}
+      <AnimatePresence>
+        {isFullscreen && isToolbarOpen && enhance.isAcceptChangesOpen ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="absolute bottom-10 left-0 right-0 z-[9998] flex w-full items-center justify-center"
+            style={{ pointerEvents: "none" }}
+          >
+            <div
+              className="absolute -bottom-4 left-1/2 -translate-x-1/2"
+              style={{ pointerEvents: "auto" }}
+            >
+              <AIEnhanceMenu
+                onSelect={() => {}}
+                enhancementOptions={[]}
+                inputPlaceholder=""
+                menuState="review"
+                compactReview
+                onAccept={enhance.acceptChanges}
+                onReject={enhance.rejectChanges}
+                onRetry={enhance.retryChanges}
+              />
+            </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+    </>
+  )
+
+  const renderEditorContent = () => (
     <FocusScope trapped={false}>
       <div
         ref={containerRef}
@@ -444,92 +537,7 @@ const F0RichTextEditorComponent = forwardRef<
             </div>
           </div>
 
-          <AnimatePresence>
-            {/* The floating toolbar disappears the moment an enhance kicks off
-                (disableButtons covers loading, review and error). */}
-            {isFullscreen && isToolbarOpen && !enhance.disableButtons ? (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                transition={{ duration: 0.2, ease: "easeOut" }}
-                className="absolute bottom-10 left-0 right-0 z-[9998] flex w-full items-center justify-center"
-                style={{ pointerEvents: "none" }}
-              >
-                <div
-                  ref={fullscreenToolbarRef}
-                  className="absolute -bottom-4 left-1/2 z-50 max-w-[calc(100%-48px)] -translate-x-1/2 rounded-lg border border-solid border-f1-border-secondary bg-f1-background p-1.5 shadow-md"
-                  style={{ pointerEvents: "auto" }}
-                >
-                  <div className="flex items-center gap-1">
-                    <F0Button
-                      onClick={(e) => {
-                        e.preventDefault()
-                        setIsToolbarOpen(false)
-                        // Restore focus after state update to trigger BubbleMenu
-                        queueMicrotask(() => editor.commands.focus())
-                      }}
-                      variant="neutral"
-                      size="md"
-                      disabled={enhance.disableButtons}
-                      hideLabel
-                      label={i18n.actions.close}
-                      icon={Cross}
-                    />
-                    <ToolbarDivider />
-                    {enhanceConfig ? (
-                      <>
-                        <EnhanceActivator
-                          enhance={enhance}
-                          disabled={enhance.disableButtons}
-                          menuWidth={fullscreenToolbarWidth}
-                          menuContainerRef={fullscreenToolbarRef}
-                        />
-                        <ToolbarDivider />
-                      </>
-                    ) : null}
-                    <Toolbar
-                      editor={editor}
-                      isFullscreen={isFullscreen}
-                      disableButtons={enhance.disableButtons}
-                      plainHtmlMode={plainHtmlMode}
-                    />
-                  </div>
-                </div>
-              </motion.div>
-            ) : null}
-          </AnimatePresence>
-
-          {/* In review the floating toolbar disappears entirely and the
-              compact accept/discard menu takes its place. */}
-          <AnimatePresence>
-            {isFullscreen && isToolbarOpen && enhance.isAcceptChangesOpen ? (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                transition={{ duration: 0.2, ease: "easeOut" }}
-                className="absolute bottom-10 left-0 right-0 z-[9998] flex w-full items-center justify-center"
-                style={{ pointerEvents: "none" }}
-              >
-                <div
-                  className="absolute -bottom-4 left-1/2 -translate-x-1/2"
-                  style={{ pointerEvents: "auto" }}
-                >
-                  <AIEnhanceMenu
-                    onSelect={() => {}}
-                    enhancementOptions={[]}
-                    inputPlaceholder=""
-                    menuState="review"
-                    compactReview
-                    onAccept={enhance.acceptChanges}
-                    onReject={enhance.rejectChanges}
-                    onRetry={enhance.retryChanges}
-                  />
-                </div>
-              </motion.div>
-            ) : null}
-          </AnimatePresence>
+          {renderFullscreenToolbars()}
         </div>
 
         <div
@@ -620,6 +628,8 @@ const F0RichTextEditorComponent = forwardRef<
       </div>
     </FocusScope>
   )
+
+  const editorContent = renderEditorContent()
 
   return isFullscreen
     ? ReactDOM.createPortal(editorContent, document.body)

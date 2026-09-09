@@ -184,7 +184,7 @@ const F0CardHorizontalBase = forwardRef<HTMLDivElement, F0CardHorizontalProps>(
     // keeps the hover affordance + pointer cursor tied to an actual click action.
     const clickable = (!!link || !!onClick) && !disabled
 
-    const body = (
+    const renderBody = () => (
       <Card
         ref={hasAlert ? undefined : ref}
         className={cn(
@@ -266,6 +266,8 @@ const F0CardHorizontalBase = forwardRef<HTMLDivElement, F0CardHorizontalProps>(
         </div>
       </Card>
     )
+
+    const body = renderBody()
 
     if (hasAlert) {
       return (

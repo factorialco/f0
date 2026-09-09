@@ -348,6 +348,38 @@ export function ActionsMenu({
     return null
   }
 
+  /** Duplicate and delete, under a separator when anything precedes them. */
+  const renderRowActions = () => (
+    <>
+      {(showRequired ||
+        showMultiSelect ||
+        showAllowCreate ||
+        showQuestionType) &&
+      (showDuplicate || showDelete) ? (
+        <DropdownMenuSeparator />
+      ) : null}
+      {showDuplicate || showDelete ? (
+        <DropdownMenuGroup>
+          {showDuplicate ? (
+            <SimpleItem
+              label={t("surveyFormBuilder.actions.duplicateQuestion")}
+              icon={LayersFront}
+              onClick={handleDuplicate}
+            />
+          ) : null}
+          {showDelete ? (
+            <SimpleItem
+              label={t("surveyFormBuilder.actions.deleteQuestion")}
+              icon={Delete}
+              onClick={handleDelete}
+              critical
+            />
+          ) : null}
+        </DropdownMenuGroup>
+      ) : null}
+    </>
+  )
+
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger tabIndex={-1} asChild>
@@ -408,32 +440,7 @@ export function ActionsMenu({
             />
           </DropdownMenuGroup>
         ) : null}
-        {(showRequired ||
-          showMultiSelect ||
-          showAllowCreate ||
-          showQuestionType) &&
-        (showDuplicate || showDelete) ? (
-          <DropdownMenuSeparator />
-        ) : null}
-        {showDuplicate || showDelete ? (
-          <DropdownMenuGroup>
-            {showDuplicate ? (
-              <SimpleItem
-                label={t("surveyFormBuilder.actions.duplicateQuestion")}
-                icon={LayersFront}
-                onClick={handleDuplicate}
-              />
-            ) : null}
-            {showDelete ? (
-              <SimpleItem
-                label={t("surveyFormBuilder.actions.deleteQuestion")}
-                icon={Delete}
-                onClick={handleDelete}
-                critical
-              />
-            ) : null}
-          </DropdownMenuGroup>
-        ) : null}
+        {renderRowActions()}
       </DropdownMenuContent>
     </DropdownMenu>
   )

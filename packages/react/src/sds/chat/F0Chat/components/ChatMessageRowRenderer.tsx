@@ -117,19 +117,22 @@ const ChatMessageRowRendererComponent = ({
     }
   }, [row, animatedIds])
 
-  if (row.type === "separator" || row.type === "system") {
+  /** Centred, author-less rows: a date separator or a system notice. */
+  const renderCenteredRow = (
+    centeredRow: Extract<typeof row, { type: "separator" } | { type: "system" }>
+  ) => {
     // Centered, author-less rows — same fast opacity-only entry as messages.
     const inner =
-      row.type === "separator" ? (
+      centeredRow.type === "separator" ? (
         // On a noticeboard the separator is the ONLY clock: the posts are
         // seeded, so they don't carry one of their own (see ChatMessageMeta).
         <DateTimeSeparator
-          at={row.at}
+          at={centeredRow.at}
           padded
           withTime={channelType === "announcement"}
         />
       ) : (
-        <ChatSystemMessage message={row.message} />
+        <ChatSystemMessage message={centeredRow.message} />
       )
     return animate ? (
       <motion.div
@@ -143,6 +146,10 @@ const ChatMessageRowRendererComponent = ({
     ) : (
       <div className={spacing}>{inner}</div>
     )
+  }
+
+  if (row.type === "separator" || row.type === "system") {
+    return renderCenteredRow(row)
   }
 
   if (row.type === "divider") {

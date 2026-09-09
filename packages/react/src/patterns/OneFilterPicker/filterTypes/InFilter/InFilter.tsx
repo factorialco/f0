@@ -183,39 +183,51 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
 
   const hasNestedSelections = nestedSelectionsCount > 0
 
-  if (isLoading && !options.length) {
-    return (
-      <div className="flex w-full items-center justify-center py-4">
-        <Spinner size="small" />
-      </div>
-    )
+  /**
+   * The states that replace the list entirely: still loading, failed to
+   * load, or nothing to offer.
+   */
+  const renderPlaceholder = () => {
+    if (isLoading && !options.length) {
+      return (
+        <div className="flex w-full items-center justify-center py-4">
+          <Spinner size="small" />
+        </div>
+      )
+    }
+
+    if (error) {
+      return (
+        <div className="text-f1-foreground-destructive flex w-full flex-col items-center justify-center gap-2 py-4">
+          <p className="text-sm">{i18n.filters.failedToLoadOptions}</p>
+          <button
+            className={cn(
+              "text-f1-foreground-primary text-xs underline",
+              focusRing()
+            )}
+            onClick={() => {
+              loadOptions(true)
+            }}
+          >
+            {i18n.filters.retry}
+          </button>
+        </div>
+      )
+    }
+
+    if (options.length === 0 && !hasSource) {
+      return (
+        <div className="flex w-full items-center justify-center py-4 text-sm text-f1-foreground-secondary">
+          No options available
+        </div>
+      )
+    }
+    return null
   }
 
-  if (error) {
-    return (
-      <div className="text-f1-foreground-destructive flex w-full flex-col items-center justify-center gap-2 py-4">
-        <p className="text-sm">{i18n.filters.failedToLoadOptions}</p>
-        <button
-          className={cn(
-            "text-f1-foreground-primary text-xs underline",
-            focusRing()
-          )}
-          onClick={() => {
-            loadOptions(true)
-          }}
-        >
-          {i18n.filters.retry}
-        </button>
-      </div>
-    )
-  }
-
-  if (options.length === 0 && !hasSource) {
-    return (
-      <div className="flex w-full items-center justify-center py-4 text-sm text-f1-foreground-secondary">
-        No options available
-      </div>
-    )
+  const placeholder = renderPlaceholder()
+  if (placeholder) {
+    return placeholder
   }
 
   const showSearch = options.length > 0 || hasSource

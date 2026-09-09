@@ -209,31 +209,43 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
   const controlsInBar = isSmallScreen
   const isFullscreenOnPhone = isSmallScreen && position === "fullscreen"
   const sideControlsSeat = "absolute top-1/2 z-10 -translate-y-1/2"
-  const renderedSideControls = !sideControls ? null : controlsInBar ? (
-    <div
-      className={cn(
-        "sticky bottom-0 z-10 flex shrink-0 flex-row items-center justify-between gap-2",
-        "border border-x-0 border-b-0 border-t border-solid border-f1-border-secondary",
-        "bg-f1-background px-4 py-3"
-      )}
-    >
-      {sideControls.previous}
-      {sideControls.next}
-    </div>
-  ) : (
-    <>
-      {sideControls.previous ? (
-        <div className={cn(sideControlsSeat, "-left-14")}>
+  const renderSideControls = () => {
+    if (!sideControls) {
+      return null
+    }
+
+    if (controlsInBar) {
+      return (
+        <div
+          className={cn(
+            "sticky bottom-0 z-10 flex shrink-0 flex-row items-center justify-between gap-2",
+            "border border-x-0 border-b-0 border-t border-solid border-f1-border-secondary",
+            "bg-f1-background px-4 py-3"
+          )}
+        >
           {sideControls.previous}
-        </div>
-      ) : null}
-      {sideControls.next ? (
-        <div className={cn(sideControlsSeat, "-right-14")}>
           {sideControls.next}
         </div>
-      ) : null}
-    </>
-  )
+      )
+    }
+
+    return (
+      <>
+        {sideControls.previous ? (
+          <div className={cn(sideControlsSeat, "-left-14")}>
+            {sideControls.previous}
+          </div>
+        ) : null}
+        {sideControls.next ? (
+          <div className={cn(sideControlsSeat, "-right-14")}>
+            {sideControls.next}
+          </div>
+        ) : null}
+      </>
+    )
+  }
+
+  const renderedSideControls = renderSideControls()
 
   if (isSmallScreen && asBottomSheetInMobile) {
     return (

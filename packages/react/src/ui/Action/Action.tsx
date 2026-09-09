@@ -71,7 +71,7 @@ export const Action = React.forwardRef<
       size: "md",
     },
   })
-  const innerContent = (
+  const renderInnerContent = () => (
     <>
       <div
         className={cn(
@@ -126,39 +126,42 @@ export const Action = React.forwardRef<
     ...restProps,
   }
 
-  const mainElement = isAnchor(props) ? (
-    <Link
-      {...CommonProps}
-      //We need to pass the onClick, onFocus, and onBlur props as here the type narrows to ActionLinkProps
-      onClick={props.onClick}
-      onFocus={props.onFocus}
-      onBlur={props.onBlur}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
-      ref={ref as React.Ref<HTMLAnchorElement>}
-      href={href}
-      target={target}
-      rel={target === "_blank" ? "noopener noreferrer" : undefined}
-      aria-disabled={disabled}
-      role="link"
-    >
-      {innerContent}
-    </Link>
-  ) : (
-    <button
-      {...CommonProps}
-      onClick={props.onClick}
-      onFocus={props.onFocus}
-      onBlur={props.onBlur}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
-      ref={ref as React.Ref<HTMLButtonElement>}
-      data-pressed={pressed}
-      role="button"
-    >
-      {innerContent}
-    </button>
-  )
+  const renderMainElement = () =>
+    isAnchor(props) ? (
+      <Link
+        {...CommonProps}
+        //We need to pass the onClick, onFocus, and onBlur props as here the type narrows to ActionLinkProps
+        onClick={props.onClick}
+        onFocus={props.onFocus}
+        onBlur={props.onBlur}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+        ref={ref as React.Ref<HTMLAnchorElement>}
+        href={href}
+        target={target}
+        rel={target === "_blank" ? "noopener noreferrer" : undefined}
+        aria-disabled={disabled}
+        role="link"
+      >
+        {renderInnerContent()}
+      </Link>
+    ) : (
+      <button
+        {...CommonProps}
+        onClick={props.onClick}
+        onFocus={props.onFocus}
+        onBlur={props.onBlur}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+        ref={ref as React.Ref<HTMLButtonElement>}
+        data-pressed={pressed}
+        role="button"
+      >
+        {renderInnerContent()}
+      </button>
+    )
+
+  const mainElement = renderMainElement()
 
   const tooltipProps =
     tooltip && typeof tooltip === "object"

@@ -86,7 +86,54 @@ export const ChatDocumentAttachmentCard = ({
   const cardWidth = compact ? 64 : CARD_WIDTH
   const thumbHeight = compact ? "100%" : THUMB_HEIGHT
 
-  if (failed) {
+  /** The thumbnail renderer for this document kind. */
+  const renderThumbnail = () => {
+    if (kind === "pdf") {
+      return (
+        <ChatPdfThumbnail
+          url={file.url}
+          width={cardWidth - 2}
+          onError={() => setFailed(true)}
+          onRendered={() => setRendered(true)}
+        />
+      )
+    }
+
+    if (kind === "sheet") {
+      return (
+        <ChatSheetThumbnail
+          url={file.url}
+          onError={() => setFailed(true)}
+          onRendered={() => setRendered(true)}
+        />
+      )
+    }
+
+    if (kind === "docx") {
+      return (
+        <ChatDocxThumbnail
+          url={file.url}
+          width={cardWidth - 2}
+          onError={() => setFailed(true)}
+          onRendered={() => setRendered(true)}
+        />
+      )
+    }
+
+    if (kind === "text") {
+      return (
+        <ChatTextThumbnail
+          url={file.url}
+          onError={() => setFailed(true)}
+          onRendered={() => setRendered(true)}
+        />
+      )
+    }
+    return null
+  }
+
+  /** The card once the thumbnail has failed to load: the file, and its action. */
+  const renderFailed = () => {
     if (compact) {
       return (
         <div
@@ -123,6 +170,10 @@ export const ChatDocumentAttachmentCard = ({
         actions={[fallbackAction]}
       />
     )
+  }
+
+  if (failed) {
+    return renderFailed()
   }
 
   return (
@@ -193,38 +244,7 @@ export const ChatDocumentAttachmentCard = ({
           )}
           data-testid="chat-document-snapshot"
         >
-          <Suspense fallback={null}>
-            {kind === "pdf" ? (
-              <ChatPdfThumbnail
-                url={file.url}
-                width={cardWidth - 2}
-                onError={() => setFailed(true)}
-                onRendered={() => setRendered(true)}
-              />
-            ) : null}
-            {kind === "sheet" ? (
-              <ChatSheetThumbnail
-                url={file.url}
-                onError={() => setFailed(true)}
-                onRendered={() => setRendered(true)}
-              />
-            ) : null}
-            {kind === "docx" ? (
-              <ChatDocxThumbnail
-                url={file.url}
-                width={cardWidth - 2}
-                onError={() => setFailed(true)}
-                onRendered={() => setRendered(true)}
-              />
-            ) : null}
-            {kind === "text" ? (
-              <ChatTextThumbnail
-                url={file.url}
-                onError={() => setFailed(true)}
-                onRendered={() => setRendered(true)}
-              />
-            ) : null}
-          </Suspense>
+          <Suspense fallback={null}>{renderThumbnail()}</Suspense>
         </div>
       </button>
       {compact && action ? (

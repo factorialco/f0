@@ -515,14 +515,9 @@ export function FileFieldRenderer({
     statusType,
   })
 
-  return (
-    <div className="flex flex-col gap-4">
-      {isLoadingInitialFiles && !hasFiles ? (
-        <div className="flex animate-pulse flex-col gap-2 rounded-xl border border-dashed border-f1-border px-4 py-10">
-          <div className="mx-auto h-8 w-8 rounded-full bg-f1-background-secondary" />
-          <div className="mx-auto h-4 w-32 rounded bg-f1-background-secondary" />
-        </div>
-      ) : null}
+  /** The drop target, while there is room for another file. */
+  const renderDropzone = () => (
+    <>
       {!isLoadingInitialFiles && showDropzone ? (
         <div
           role="button"
@@ -560,6 +555,18 @@ export function FileFieldRenderer({
           </div>
         </div>
       ) : null}
+    </>
+  )
+
+  return (
+    <div className="flex flex-col gap-4">
+      {isLoadingInitialFiles && !hasFiles ? (
+        <div className="flex animate-pulse flex-col gap-2 rounded-xl border border-dashed border-f1-border px-4 py-10">
+          <div className="mx-auto h-8 w-8 rounded-full bg-f1-background-secondary" />
+          <div className="mx-auto h-4 w-32 rounded bg-f1-background-secondary" />
+        </div>
+      ) : null}
+      {renderDropzone()}
 
       <input
         ref={fileInputRef}

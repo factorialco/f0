@@ -172,6 +172,67 @@ function MetadataItem({ item }: { item: MetadataItem }) {
     }
   }
 
+  /** The hover card: the full value, and the row's actions beside it. */
+  const renderHoverCard = () => (
+    <AnimatePresence>
+      {isActive && hasHover ? (
+        <motion.div
+          className={cn(
+            "absolute -left-1.5 -top-1.5 z-50 hidden max-h-[80vh] items-start justify-center gap-1.5 overflow-y-auto whitespace-nowrap rounded-sm bg-f1-background py-1 pl-1.5 shadow-md ring-1 ring-inset ring-f1-border-secondary md:flex",
+            !isList && "h-8 items-start",
+            isAction ? "pr-1" : "pr-1.5"
+          )}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.1 }}
+        >
+          <div
+            className={cn(
+              "flex h-6 items-center font-medium text-f1-foreground",
+              isList && "h-auto items-start pt-0.5"
+            )}
+          >
+            <MetadataValue item={item} />
+          </div>
+          {isAction ? (
+            <motion.div
+              className="flex gap-1"
+              initial={{ x: -16 }}
+              animate={{ x: 0 }}
+              exit={{ x: -16 }}
+              transition={{ duration: 0.1 }}
+            >
+              {item.actions?.map((action, index) => {
+                if (isMetadataCopyAction(action)) {
+                  return (
+                    <ButtonCopy
+                      key={`copy-${index}`}
+                      valueToCopy={getValueToCopy(item.value, action.copyValue)}
+                    />
+                  )
+                }
+                return (
+                  <Tooltip label={action.label} key={`tooltip-${index}`}>
+                    <F0Button
+                      key={`action-${index}`}
+                      size="sm"
+                      variant="neutral"
+                      label={action.label}
+                      hideLabel
+                      icon={action.icon}
+                      onClick={action.onClick}
+                    />
+                  </Tooltip>
+                )
+              })}
+            </motion.div>
+          ) : null}
+        </motion.div>
+      ) : null}
+    </AnimatePresence>
+  )
+
   return (
     <div className="flex h-8 items-center gap-2">
       {item.icon ? (
@@ -230,66 +291,7 @@ function MetadataItem({ item }: { item: MetadataItem }) {
             </MobileDropdown>
           </div>
         ) : null}
-        <AnimatePresence>
-          {isActive && hasHover ? (
-            <motion.div
-              className={cn(
-                "absolute -left-1.5 -top-1.5 z-50 hidden max-h-[80vh] items-start justify-center gap-1.5 overflow-y-auto whitespace-nowrap rounded-sm bg-f1-background py-1 pl-1.5 shadow-md ring-1 ring-inset ring-f1-border-secondary md:flex",
-                !isList && "h-8 items-start",
-                isAction ? "pr-1" : "pr-1.5"
-              )}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.1 }}
-            >
-              <div
-                className={cn(
-                  "flex h-6 items-center font-medium text-f1-foreground",
-                  isList && "h-auto items-start pt-0.5"
-                )}
-              >
-                <MetadataValue item={item} />
-              </div>
-              {isAction ? (
-                <motion.div
-                  className="flex gap-1"
-                  initial={{ x: -16 }}
-                  animate={{ x: 0 }}
-                  exit={{ x: -16 }}
-                  transition={{ duration: 0.1 }}
-                >
-                  {item.actions?.map((action, index) => {
-                    if (isMetadataCopyAction(action)) {
-                      return (
-                        <ButtonCopy
-                          key={`copy-${index}`}
-                          valueToCopy={getValueToCopy(
-                            item.value,
-                            action.copyValue
-                          )}
-                        />
-                      )
-                    }
-                    return (
-                      <Tooltip label={action.label} key={`tooltip-${index}`}>
-                        <F0Button
-                          key={`action-${index}`}
-                          size="sm"
-                          variant="neutral"
-                          label={action.label}
-                          hideLabel
-                          icon={action.icon}
-                          onClick={action.onClick}
-                        />
-                      </Tooltip>
-                    )
-                  })}
-                </motion.div>
-              ) : null}
-            </motion.div>
-          ) : null}
-        </AnimatePresence>
+        {renderHoverCard()}
       </div>
     </div>
   )

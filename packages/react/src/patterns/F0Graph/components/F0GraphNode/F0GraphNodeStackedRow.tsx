@@ -56,39 +56,9 @@ export const F0GraphNodeStackedRow = ({
   // collide with the row below.
   const isDot = titleType === null
 
-  const strip = (
-    <div
-      {...shellProps}
-      data-zoom-level={variant}
-      className={cn(
-        "group flex w-full items-center rounded-xl border border-solid",
-        "outline-none transition-[border-color,background-color,opacity] duration-200",
-        isDot
-          ? "justify-center border-transparent bg-transparent"
-          : isMarked
-            ? "border-f1-border-selected-bold bg-f1-background ring-2 ring-f1-background-selected ring-offset-0"
-            : // The card drops its border on hover, but it is a rounded pill
-              // whose shape survives without one. A flat row does not: losing
-              // the outline reads as the row going transparent against the
-              // canvas. Keep the border, move only the background.
-              "border-f1-border bg-f1-background hover:bg-f1-background-hover",
-        // In dot the visible node is the avatar, not the strip, so the focus
-        // ring moves there (below) — on the row it would frame empty space.
-        !isDot &&
-          "focus-visible:ring-2 focus-visible:ring-f1-background-selected focus-visible:ring-offset-0",
-        state === "dimmed" && "opacity-40"
-      )}
-      // Padding and gap are inline rather than utility classes because they are
-      // derived (see constants): the padding equals the avatar's inset on every
-      // side, and the gap is whatever lands the title on the card's own text
-      // offset. A rounded utility step would silently break both.
-      style={{
-        height,
-        paddingLeft: STACKED_NODE_PADDING,
-        paddingRight: STACKED_NODE_PADDING,
-        gap: STACKED_NODE_TITLE_GAP,
-      }}
-    >
+  /** The row itself: skeletons while loading, else the avatar and the title. */
+  const renderRowContent = () => (
+    <>
       {loading ? (
         <>
           <Skeleton
@@ -136,6 +106,43 @@ export const F0GraphNodeStackedRow = ({
           ) : null}
         </>
       )}
+    </>
+  )
+
+  const strip = (
+    <div
+      {...shellProps}
+      data-zoom-level={variant}
+      className={cn(
+        "group flex w-full items-center rounded-xl border border-solid",
+        "outline-none transition-[border-color,background-color,opacity] duration-200",
+        isDot
+          ? "justify-center border-transparent bg-transparent"
+          : isMarked
+            ? "border-f1-border-selected-bold bg-f1-background ring-2 ring-f1-background-selected ring-offset-0"
+            : // The card drops its border on hover, but it is a rounded pill
+              // whose shape survives without one. A flat row does not: losing
+              // the outline reads as the row going transparent against the
+              // canvas. Keep the border, move only the background.
+              "border-f1-border bg-f1-background hover:bg-f1-background-hover",
+        // In dot the visible node is the avatar, not the strip, so the focus
+        // ring moves there (below) — on the row it would frame empty space.
+        !isDot &&
+          "focus-visible:ring-2 focus-visible:ring-f1-background-selected focus-visible:ring-offset-0",
+        state === "dimmed" && "opacity-40"
+      )}
+      // Padding and gap are inline rather than utility classes because they are
+      // derived (see constants): the padding equals the avatar's inset on every
+      // side, and the gap is whatever lands the title on the card's own text
+      // offset. A rounded utility step would silently break both.
+      style={{
+        height,
+        paddingLeft: STACKED_NODE_PADDING,
+        paddingRight: STACKED_NODE_PADDING,
+        gap: STACKED_NODE_TITLE_GAP,
+      }}
+    >
+      {renderRowContent()}
       {/* Trailing content follows the title: it is a detail-level affordance,
           and at dot zoom there is no text for it to sit beside. */}
       {trailing && titleType ? (

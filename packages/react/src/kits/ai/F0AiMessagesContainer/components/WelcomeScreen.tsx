@@ -133,6 +133,39 @@ export const WelcomeScreen = ({
       }
     : undefined
 
+  /** The rotating phrase, typed out — and the whole thing is the CTA when
+   *  `onClick` is given. */
+  const renderPhrase = () => (
+    <>
+      {/* aria-label is prohibited on a plain paragraph role, so only the
+            interactive (button) case is named by it; the sr-only span names
+            the static case with the full, stable phrase instead of the
+            partially-typed slice. */}
+      <p
+        key={index}
+        role={interactive ? "button" : undefined}
+        tabIndex={interactive ? 0 : undefined}
+        onClick={onClick}
+        onKeyDown={handleKeyDown}
+        className={cn(
+          "min-h-[28px] bg-gradient-to-r from-[#E55619] via-[#E51943] to-[#A1ADE5] bg-clip-text text-center text-2xl font-semibold leading-[28px] text-transparent",
+          interactive &&
+            cn(
+              "cursor-pointer transition-transform duration-200",
+              "hover:scale-[1.02] focus-visible:scale-[1.02]",
+              "motion-reduce:transition-none motion-reduce:hover:scale-100 motion-reduce:focus-visible:scale-100"
+            )
+        )}
+        aria-label={interactive ? current : undefined}
+      >
+        <span aria-hidden="true">
+          {reducedMotion ? current : current.slice(0, chars)}
+        </span>
+        <span className="sr-only">{current}</span>
+      </p>
+    </>
+  )
+
   return (
     <div
       className={cn(
@@ -156,32 +189,7 @@ export const WelcomeScreen = ({
             {caption}
           </p>
         ) : null}
-        {/* aria-label is prohibited on a plain paragraph role, so only the
-            interactive (button) case is named by it; the sr-only span names
-            the static case with the full, stable phrase instead of the
-            partially-typed slice. */}
-        <p
-          key={index}
-          role={interactive ? "button" : undefined}
-          tabIndex={interactive ? 0 : undefined}
-          onClick={onClick}
-          onKeyDown={handleKeyDown}
-          className={cn(
-            "min-h-[28px] bg-gradient-to-r from-[#E55619] via-[#E51943] to-[#A1ADE5] bg-clip-text text-center text-2xl font-semibold leading-[28px] text-transparent",
-            interactive &&
-              cn(
-                "cursor-pointer transition-transform duration-200",
-                "hover:scale-[1.02] focus-visible:scale-[1.02]",
-                "motion-reduce:transition-none motion-reduce:hover:scale-100 motion-reduce:focus-visible:scale-100"
-              )
-          )}
-          aria-label={interactive ? current : undefined}
-        >
-          <span aria-hidden="true">
-            {reducedMotion ? current : current.slice(0, chars)}
-          </span>
-          <span className="sr-only">{current}</span>
-        </p>
+        {renderPhrase()}
         {subtitle ? (
           <p className="animate-in fade-in-0 mt-3 text-center text-base leading-snug text-f1-foreground-secondary duration-500">
             {subtitle}

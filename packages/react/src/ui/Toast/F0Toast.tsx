@@ -188,6 +188,56 @@ const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
     // Calculate progress percentage
     const progress = duration ? (remainingTime / duration) * 100 : 0
 
+    /** The toast's own action(s), inline on the trailing edge. */
+    const renderActions = () => (
+      <>
+        {/* Action(s) — inline on the trailing edge (never below the text).
+              Link sits to the LEFT of the primary button (button is trailing). */}
+        {!isLoading && hasActions ? (
+          <div className="dark flex flex-shrink-0 flex-row flex-wrap items-center gap-3">
+            {linkActions.map((linkAction) => (
+              <div
+                key={`link-${linkAction.label}`}
+                onClick={() => handleActionClick(linkAction)}
+              >
+                <F0Link href={linkAction.href}>{linkAction.label}</F0Link>
+              </div>
+            ))}
+            {buttonActions.map((buttonAction) => (
+              <F0Button
+                key={`button-${buttonAction.label}`}
+                label={buttonAction.label}
+                icon={buttonAction.icon}
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  handleActionClick(buttonAction, buttonAction.onClick)
+                }
+              />
+            ))}
+          </div>
+        ) : null}
+      </>
+    )
+
+    /** The countdown bar, drawn only while the toast is timing itself out. */
+    const renderProgressBar = () => (
+      <>
+        {/* Progress Bar */}
+        {!isLoading && duration && duration > 0 ? (
+          <div className="absolute bottom-0 left-0 right-0 h-[3px] w-full overflow-hidden rounded-b-lg">
+            <div
+              className={cn("h-full w-full", progressBarColor)}
+              style={{
+                transform: `translateX(-${100 - progress}%)`,
+                transition: isHovered ? "none" : "transform 16ms linear",
+              }}
+            />
+          </div>
+        ) : null}
+      </>
+    )
+
     return (
       <div
         ref={ref}
@@ -238,32 +288,7 @@ const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
             ) : null}
           </div>
 
-          {/* Action(s) — inline on the trailing edge (never below the text).
-              Link sits to the LEFT of the primary button (button is trailing). */}
-          {!isLoading && hasActions ? (
-            <div className="dark flex flex-shrink-0 flex-row flex-wrap items-center gap-3">
-              {linkActions.map((linkAction) => (
-                <div
-                  key={`link-${linkAction.label}`}
-                  onClick={() => handleActionClick(linkAction)}
-                >
-                  <F0Link href={linkAction.href}>{linkAction.label}</F0Link>
-                </div>
-              ))}
-              {buttonActions.map((buttonAction) => (
-                <F0Button
-                  key={`button-${buttonAction.label}`}
-                  label={buttonAction.label}
-                  icon={buttonAction.icon}
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    handleActionClick(buttonAction, buttonAction.onClick)
-                  }
-                />
-              ))}
-            </div>
-          ) : null}
+          {renderActions()}
 
           {/* Close — the manual dismiss. Hidden when the action is the only
               control AND the toast auto-dismisses (so the ✕ isn't adjacent to the
@@ -283,18 +308,7 @@ const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
           ) : null}
         </div>
 
-        {/* Progress Bar */}
-        {!isLoading && duration && duration > 0 ? (
-          <div className="absolute bottom-0 left-0 right-0 h-[3px] w-full overflow-hidden rounded-b-lg">
-            <div
-              className={cn("h-full w-full", progressBarColor)}
-              style={{
-                transform: `translateX(-${100 - progress}%)`,
-                transition: isHovered ? "none" : "transform 16ms linear",
-              }}
-            />
-          </div>
-        ) : null}
+        {renderProgressBar()}
       </div>
     )
   }

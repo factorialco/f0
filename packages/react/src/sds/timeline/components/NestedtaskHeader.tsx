@@ -31,6 +31,23 @@ export const NestedtaskHeader = ({
   const hasItems = (items?.length ?? 0) > 0 || content !== undefined
   const showToggle = hasItems && collapsible
 
+  /** The title, struck through when the task is done, and its description. */
+  const renderTitle = () => (
+    <>
+      <span
+        className={cn(
+          "text-base font-semibold text-f1-foreground whitespace-nowrap",
+          status === "completed" && "line-through"
+        )}
+      >
+        {title}
+      </span>
+      {description ? (
+        <F0Text content={description} variant="description" as="span" />
+      ) : null}
+    </>
+  )
+
   return (
     <>
       <F0AvatarIcon icon={icon} size="sm" />
@@ -46,17 +63,7 @@ export const NestedtaskHeader = ({
               focusRing()
             )}
           >
-            <span
-              className={cn(
-                "text-base font-semibold text-f1-foreground whitespace-nowrap",
-                status === "completed" && "line-through"
-              )}
-            >
-              {title}
-            </span>
-            {description ? (
-              <F0Text content={description} variant="description" as="span" />
-            ) : null}
+            {renderTitle()}
             <F0Icon
               icon={expanded ? ChevronUp : ChevronDown}
               size="xs"
@@ -64,19 +71,7 @@ export const NestedtaskHeader = ({
             />
           </button>
         ) : (
-          <div className="flex items-center gap-3">
-            <span
-              className={cn(
-                "text-base font-semibold text-f1-foreground whitespace-nowrap",
-                status === "completed" && "line-through"
-              )}
-            >
-              {title}
-            </span>
-            {description ? (
-              <F0Text content={description} variant="description" as="span" />
-            ) : null}
-          </div>
+          <div className="flex items-center gap-3">{renderTitle()}</div>
         )}
         {completedCount !== undefined && taskCount !== undefined ? (
           <div

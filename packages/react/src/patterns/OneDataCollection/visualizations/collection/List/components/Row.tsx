@@ -101,6 +101,34 @@ export const Row = <
     dropDownOpen,
   } = useItemActions({ source, item })
 
+  /** The row's own actions: inline on a wide row, a dropdown on a narrow one. */
+  const renderItemActions = () => (
+    <>
+      {source.itemActions ? (
+        <>
+          <ItemActionsRowContainer
+            dropDownOpen={dropDownOpen}
+            className="pointer-events-auto hidden md:flex"
+          >
+            <ItemActionsRow
+              primaryItemActions={primaryItemActions}
+              dropdownItemActions={dropdownItemActions}
+              handleDropDownOpenChange={handleDropDownOpenChange}
+            />
+          </ItemActionsRowContainer>
+
+          {hasMobileItemActions ? (
+            <ItemActionsMobile
+              className="absolute -right-px bottom-0 top-0 z-20 items-center justify-end gap-2 py-2 pl-20 pr-3 md:hidden"
+              items={mobileDropdownItemActions}
+              onOpenChange={handleDropDownOpenChange}
+            />
+          ) : null}
+        </>
+      ) : null}
+    </>
+  )
+
   return (
     <div
       className={cn(
@@ -171,28 +199,7 @@ export const Row = <
             )
           })}
       </div>
-      {source.itemActions ? (
-        <>
-          <ItemActionsRowContainer
-            dropDownOpen={dropDownOpen}
-            className="pointer-events-auto hidden md:flex"
-          >
-            <ItemActionsRow
-              primaryItemActions={primaryItemActions}
-              dropdownItemActions={dropdownItemActions}
-              handleDropDownOpenChange={handleDropDownOpenChange}
-            />
-          </ItemActionsRowContainer>
-
-          {hasMobileItemActions ? (
-            <ItemActionsMobile
-              className="absolute -right-px bottom-0 top-0 z-20 items-center justify-end gap-2 py-2 pl-20 pr-3 md:hidden"
-              items={mobileDropdownItemActions}
-              onOpenChange={handleDropDownOpenChange}
-            />
-          ) : null}
-        </>
-      ) : null}
+      {renderItemActions()}
       {source.selectable && id !== undefined ? (
         <div
           className={cn(

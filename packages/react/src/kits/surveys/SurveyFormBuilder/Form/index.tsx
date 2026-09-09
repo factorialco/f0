@@ -29,6 +29,7 @@ export type { FlatFormItem } from "./utils"
  */
 function DragSelectGuard({ children }: { children: React.ReactNode }) {
   const { isDragging } = useDragContext()
+
   return (
     <div className={cn("relative @container", isDragging && "select-none")}>
       {children}
@@ -142,6 +143,113 @@ const _SurveyFormBuilder = ({
 
   const showTableOfContent = !!elements.length
 
+  /**
+   * A locked section renders as one muted grey rounded panel wrapping its
+   * header and all of its questions. The right padding mirrors the
+   * drag-and-drop gutter reserved on the left so the cards sit symmetrically
+   * in the panel.
+   *
+   * Returns the panel and the index just past the questions it swallowed.
+   */
+  const renderLockedSection = (
+    headerItem: Extract<
+      (typeof reorderableItems)[number],
+      { type: "section-header" }
+    >,
+    index: number
+  ): { node: ReactNode; nextIndex: number } => {
+    const groupItems: typeof reorderableItems = [headerItem]
+    let next = index + 1
+    while (
+      next < reorderableItems.length &&
+      reorderableItems[next].type === "question" &&
+      inSectionQuestionIds.has(reorderableItems[next].id)
+    ) {
+      groupItems.push(reorderableItems[next])
+      next++
+    }
+
+    return {
+      nextIndex: next,
+      node: (
+        <div
+          key={`locked-${headerItem.section.id}`}
+          className={cn(
+            "rounded-2xl bg-f1-background-secondary pb-8 pt-4",
+            index === 0 ? "" : "mt-8"
+          )}
+        >
+          {groupItems.map((groupItem, groupIndex) => {
+            if (groupItem.type === "section-header") {
+              return (
+                <SectionHeaderItem
+                  key={groupItem.id}
+                  item={groupItem}
+                  className=""
+                />
+              )
+            }
+            if (groupItem.type === "question") {
+              // The grey panel delimits the section, so the "end of section"
+              // divider is suppressed here. The first question sits closer to
+              // the header, which has no inline description beneath it.
+              return (
+                <QuestionItem
+                  key={groupItem.id}
+                  item={groupItem}
+                  showEndOfSection={false}
+                  className={groupIndex === 1 ? "mt-2" : "mt-4"}
+                />
+              )
+            }
+            return null
+          })}
+        </div>
+      ),
+    }
+  }
+
+  /** The flat list: locked sections as one panel, everything else on its own. */
+  const renderReorderableItems = () => {
+    const nodes: ReactNode[] = []
+
+    let index = 0
+    while (index < reorderableItems.length) {
+      const item = reorderableItems[index]
+
+      if (
+        item.type === "section-header" &&
+        lockedSectionIds.has(item.section.id)
+      ) {
+        const { node, nextIndex } = renderLockedSection(item, index)
+        nodes.push(node)
+        index = nextIndex
+        continue
+      }
+
+      const gapClass =
+        index === 0 ? "" : inSectionQuestionIds.has(item.id) ? "mt-4" : "mt-8"
+
+      if (item.type === "section-header") {
+        nodes.push(
+          <SectionHeaderItem key={item.id} item={item} className={gapClass} />
+        )
+      } else if (item.type === "question") {
+        nodes.push(
+          <QuestionItem
+            key={item.id}
+            item={item}
+            showEndOfSection={sectionEndIds.has(item.id)}
+            className={gapClass}
+          />
+        )
+      }
+      index++
+    }
+
+    return nodes
+  }
+
   return (
     <SurveyFormBuilderProvider
       disabled={disabled}
@@ -176,107 +284,7 @@ const _SurveyFormBuilder = ({
                 onReorder={handleFlatReorder}
                 as="div"
               >
-                <div className="flex flex-col">
-                  {(() => {
-                    const nodes: ReactNode[] = []
-
-                    let index = 0
-                    while (index < reorderableItems.length) {
-                      const item = reorderableItems[index]
-
-                      // A locked section renders as one muted grey rounded
-                      // panel wrapping its header and all of its questions. The
-                      // right padding mirrors the drag-and-drop gutter reserved
-                      // on the left so the cards sit symmetrically in the panel.
-                      if (
-                        item.type === "section-header" &&
-                        lockedSectionIds.has(item.section.id)
-                      ) {
-                        const groupItems: typeof reorderableItems = [item]
-                        let next = index + 1
-                        while (
-                          next < reorderableItems.length &&
-                          reorderableItems[next].type === "question" &&
-                          inSectionQuestionIds.has(reorderableItems[next].id)
-                        ) {
-                          groupItems.push(reorderableItems[next])
-                          next++
-                        }
-
-                        nodes.push(
-                          <div
-                            key={`locked-${item.section.id}`}
-                            className={cn(
-                              "rounded-2xl bg-f1-background-secondary pb-8 pt-4",
-                              index === 0 ? "" : "mt-8"
-                            )}
-                          >
-                            {groupItems.map((groupItem, groupIndex) => {
-                              if (groupItem.type === "section-header") {
-                                return (
-                                  <SectionHeaderItem
-                                    key={groupItem.id}
-                                    item={groupItem}
-                                    className=""
-                                  />
-                                )
-                              }
-                              if (groupItem.type === "question") {
-                                // The grey panel delimits the section, so the
-                                // "end of section" divider is suppressed here.
-                                // The first question sits closer to the header,
-                                // which has no inline description beneath it.
-                                return (
-                                  <QuestionItem
-                                    key={groupItem.id}
-                                    item={groupItem}
-                                    showEndOfSection={false}
-                                    className={
-                                      groupIndex === 1 ? "mt-2" : "mt-4"
-                                    }
-                                  />
-                                )
-                              }
-                              return null
-                            })}
-                          </div>
-                        )
-
-                        index = next
-                        continue
-                      }
-
-                      const gapClass =
-                        index === 0
-                          ? ""
-                          : inSectionQuestionIds.has(item.id)
-                            ? "mt-4"
-                            : "mt-8"
-
-                      if (item.type === "section-header") {
-                        nodes.push(
-                          <SectionHeaderItem
-                            key={item.id}
-                            item={item}
-                            className={gapClass}
-                          />
-                        )
-                      } else if (item.type === "question") {
-                        nodes.push(
-                          <QuestionItem
-                            key={item.id}
-                            item={item}
-                            showEndOfSection={sectionEndIds.has(item.id)}
-                            className={gapClass}
-                          />
-                        )
-                      }
-                      index++
-                    }
-
-                    return nodes
-                  })()}
-                </div>
+                <div className="flex flex-col">{renderReorderableItems()}</div>
               </Reorder.Group>
               {shouldShowAddButton ? <AddButton /> : null}
             </motion.div>

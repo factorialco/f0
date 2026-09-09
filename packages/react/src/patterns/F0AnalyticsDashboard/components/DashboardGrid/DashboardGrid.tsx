@@ -316,16 +316,8 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
       // Found once when the drag starts, not on every move — this runs per
       // `pointermove`. The rect is still read live, since the panel can be
       // resized mid-drag.
-      for (const chatEl of chatDropZonesRef.current) {
-        const c = chatEl.getBoundingClientRect()
-        if (
-          clientX >= c.left &&
-          clientX <= c.right &&
-          clientY >= c.top &&
-          clientY <= c.bottom
-        ) {
-          return null
-        }
+      if (isPointInsideAny(chatDropZonesRef.current, clientX, clientY)) {
+        return null
       }
 
       const rowEls = containerRef.current
@@ -342,13 +334,7 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
 
       const rects = rowEls.map((el) => el.getBoundingClientRect())
       // Nearest row band, splitting the gap between rows at its midpoint.
-      let i = rects.length - 1
-      for (let k = 0; k < rects.length - 1; k++) {
-        if (clientY < (rects[k].bottom + rects[k + 1].top) / 2) {
-          i = k
-          break
-        }
-      }
+      const i = nearestRowIndex(rects, clientY)
 
       const rect = rects[i]
       const row = cur[i]
@@ -372,14 +358,8 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
       }
 
       const cards = rowEls[i].querySelectorAll("[data-card-id]")
-      let position = row.ids.length
-      for (let c = 0; c < cards.length; c++) {
-        const cr = cards[c].getBoundingClientRect()
-        if (clientX < cr.left + cr.width / 2) {
-          position = c
-          break
-        }
-      }
+      const position = insertPositionInRow(cards, clientX, row.ids.length)
+
       return { type: "into-row", rowIdx: i, position }
     },
     []
@@ -925,6 +905,51 @@ function RowGapDropZone({ active }: { active: boolean }) {
 }
 
 // ─── Layout helpers ─────────────────────────────────────────────
+
+/** Whether the point is inside any of these elements, measured live. */
+function isPointInsideAny(
+  elements: Iterable<Element>,
+  clientX: number,
+  clientY: number
+): boolean {
+  for (const element of elements) {
+    const rect = element.getBoundingClientRect()
+    if (
+      clientX >= rect.left &&
+      clientX <= rect.right &&
+      clientY >= rect.top &&
+      clientY <= rect.bottom
+    ) {
+      return true
+    }
+  }
+  return false
+}
+
+/** The row whose band holds the pointer, each gap between rows split at its midpoint. */
+function nearestRowIndex(rects: DOMRect[], clientY: number): number {
+  for (let k = 0; k < rects.length - 1; k++) {
+    if (clientY < (rects[k].bottom + rects[k + 1].top) / 2) {
+      return k
+    }
+  }
+  return rects.length - 1
+}
+
+/** Where in the row a drop lands: before the first card the pointer is left of. */
+function insertPositionInRow(
+  cards: ArrayLike<Element>,
+  clientX: number,
+  fallback: number
+): number {
+  for (let c = 0; c < cards.length; c++) {
+    const rect = cards[c].getBoundingClientRect()
+    if (clientX < rect.left + rect.width / 2) {
+      return c
+    }
+  }
+  return fallback
+}
 
 /**
  * Build initial rows from items.

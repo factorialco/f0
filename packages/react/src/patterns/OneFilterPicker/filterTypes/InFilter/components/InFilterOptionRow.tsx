@@ -75,6 +75,36 @@ export function InFilterOptionRow<T extends string>({
     { title: option.label }
   )
 
+  /** The expand/collapse control, with a dot when a hidden child is selected. */
+  const renderExpandButton = () => (
+    <>
+      {hasChildren ? (
+        <div className="relative shrink-0">
+          <F0Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setExpanded((prev) => !prev)}
+            icon={effectiveExpanded ? ChevronDown : ChevronRight}
+            label={expansionLabel}
+            aria-label={
+              hasDescendantSelected
+                ? `${expansionLabel}. ${i18n.status.selected.singular}`
+                : expansionLabel
+            }
+            aria-expanded={effectiveExpanded}
+            hideLabel
+          />
+          {hasDescendantSelected && !effectiveExpanded ? (
+            <span
+              aria-hidden="true"
+              className="absolute -right-px -top-px h-2 w-2 rounded-full bg-f1-background-selected-bold"
+            />
+          ) : null}
+        </div>
+      ) : null}
+    </>
+  )
+
   return (
     <div
       className={cn(
@@ -88,30 +118,7 @@ export function InFilterOptionRow<T extends string>({
         className="flex flex-row items-center overflow-hidden min-w-0"
         style={{ paddingLeft: `${depth * 24}px` }}
       >
-        {hasChildren ? (
-          <div className="relative shrink-0">
-            <F0Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setExpanded((prev) => !prev)}
-              icon={effectiveExpanded ? ChevronDown : ChevronRight}
-              label={expansionLabel}
-              aria-label={
-                hasDescendantSelected
-                  ? `${expansionLabel}. ${i18n.status.selected.singular}`
-                  : expansionLabel
-              }
-              aria-expanded={effectiveExpanded}
-              hideLabel
-            />
-            {hasDescendantSelected && !effectiveExpanded ? (
-              <span
-                aria-hidden="true"
-                className="absolute -right-px -top-px h-2 w-2 rounded-full bg-f1-background-selected-bold"
-              />
-            ) : null}
-          </div>
-        ) : null}
+        {renderExpandButton()}
         <div
           className={cn(
             "flex min-w-0 flex-1 cursor-pointer appearance-none items-center gap-1 rounded p-1.5 font-medium transition-colors hover:bg-f1-background-secondary",

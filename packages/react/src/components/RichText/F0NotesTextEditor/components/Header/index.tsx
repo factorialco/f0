@@ -90,64 +90,67 @@ const Header = ({
   const hasActions =
     hasSecondaryActions || hasOtherActions || isPrimaryActionVisible
 
+  /** The action row: other actions, the secondary ones, then the primary. */
+  const renderActions = () => (
+    <div className="flex flex-shrink-0 flex-row items-center gap-2">
+      {hasOtherActions ? <Dropdown items={visibleOtherActions} /> : null}
+      {visibleSecondaryActions.map((action, index) =>
+        isSecondaryDropdownAction(action) ? (
+          <F0ButtonDropdown
+            key={index}
+            items={action.items}
+            onClick={action.onClick}
+            variant={action.variant ?? "outline"}
+            value={action.value}
+            disabled={action.disabled}
+            tooltip={action.tooltip}
+            loading={action.loading}
+          />
+        ) : (
+          <F0Button
+            key={index}
+            onClick={action.onClick}
+            variant={action.variant || "outline"}
+            label={action.label}
+            icon={action.icon}
+            hideLabel={action.hideLabel}
+            disabled={action.disabled}
+            tooltip={action.tooltip}
+          />
+        )
+      )}
+      {isPrimaryActionVisible && (hasSecondaryActions || hasOtherActions) ? (
+        <div className="mx-1 h-4 w-px bg-f1-background-secondary-hover" />
+      ) : null}
+      {isPrimaryActionVisible && isPrimaryActionButton(primaryAction) ? (
+        <F0Button
+          label={primaryAction.label}
+          onClick={primaryAction.onClick}
+          variant="default"
+          icon={primaryAction.icon}
+          disabled={primaryAction.disabled}
+          tooltip={primaryAction.tooltip}
+        />
+      ) : null}
+      {isPrimaryActionVisible && isPrimaryDropdownAction(primaryAction) ? (
+        <F0ButtonDropdown
+          items={primaryAction.items}
+          onClick={primaryAction.onClick}
+          variant="default"
+          value={primaryAction.value}
+          disabled={primaryAction.disabled}
+          tooltip={primaryAction.tooltip}
+        />
+      ) : null}
+    </div>
+  )
+
   return (
     <div className="flex flex-col">
       {allMetadata.length > 0 || hasActions ? (
         <div className="flex flex-col items-start justify-between gap-2 sm:px-6 px-0 py-4 sm:flex-row sm:items-center">
           {allMetadata.length > 0 ? <Metadata items={allMetadata} /> : null}
-          <div className="flex flex-shrink-0 flex-row items-center gap-2">
-            {hasOtherActions ? <Dropdown items={visibleOtherActions} /> : null}
-            {visibleSecondaryActions.map((action, index) =>
-              isSecondaryDropdownAction(action) ? (
-                <F0ButtonDropdown
-                  key={index}
-                  items={action.items}
-                  onClick={action.onClick}
-                  variant={action.variant ?? "outline"}
-                  value={action.value}
-                  disabled={action.disabled}
-                  tooltip={action.tooltip}
-                  loading={action.loading}
-                />
-              ) : (
-                <F0Button
-                  key={index}
-                  onClick={action.onClick}
-                  variant={action.variant || "outline"}
-                  label={action.label}
-                  icon={action.icon}
-                  hideLabel={action.hideLabel}
-                  disabled={action.disabled}
-                  tooltip={action.tooltip}
-                />
-              )
-            )}
-            {isPrimaryActionVisible &&
-            (hasSecondaryActions || hasOtherActions) ? (
-              <div className="mx-1 h-4 w-px bg-f1-background-secondary-hover" />
-            ) : null}
-            {isPrimaryActionVisible && isPrimaryActionButton(primaryAction) ? (
-              <F0Button
-                label={primaryAction.label}
-                onClick={primaryAction.onClick}
-                variant="default"
-                icon={primaryAction.icon}
-                disabled={primaryAction.disabled}
-                tooltip={primaryAction.tooltip}
-              />
-            ) : null}
-            {isPrimaryActionVisible &&
-            isPrimaryDropdownAction(primaryAction) ? (
-              <F0ButtonDropdown
-                items={primaryAction.items}
-                onClick={primaryAction.onClick}
-                variant="default"
-                value={primaryAction.value}
-                disabled={primaryAction.disabled}
-                tooltip={primaryAction.tooltip}
-              />
-            ) : null}
-          </div>
+          {renderActions()}
         </div>
       ) : null}
     </div>
