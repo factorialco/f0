@@ -912,57 +912,73 @@ export function WidgetContainer({
     </div>
   )
 
-  /** The list inside the drag context, for a column that has an arrangement to make. */
-  const renderArrangeableList = () => (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      // The card the pointer carries goes up and down only, like the
-      // shuffle underneath it, and it stops at the widgets pinned to the top
-      // of the column — see `verticalOnly` and `lockedCeiling`.
-      modifiers={modifiers}
-      onDragStart={({ active }) => {
-        // BEFORE the card is told it is being dragged: what the ghost
-        // should look like — and where the pinned cards are — is what is on
-        // screen right now, while nothing has moved yet.
-        takeGhost(String(active.id))
-        ceilingRef.current = lockedCeiling(
-          widgets,
-          columnRef.current,
-          GAP_PX[side]
-        )
-        setActiveId(String(active.id))
-      }}
-      onDragCancel={() => {
-        setActiveId(null)
-        unpinSurface()
-        ghostRef.current = null
-        surfaceRef.current = null
-        ceilingRef.current = null
-      }}
-      onDragEnd={(event) => {
-        setActiveId(null)
-        ghostRef.current = null
-        surfaceRef.current = null
-        // The ceiling outlives the drag by one call: whether the card was
-        // held below the pins is what decides whether a drop up there is
-        // worth refusing out loud (`lockedTargetOf`).
-        handleDragEnd(event)
-        ceilingRef.current = null
-      }}
+  return (
+    <div
+      ref={columnRef}
+      className={cn(
+        // `relative` so this column is what a widget's `offsetTop` is measured
+        // from: the stow maps a widget onto its glyph by that offset, and an
+        // unpositioned column would hand the job to whatever ancestor happened to
+        // be positioned instead (see `WidgetMotion`).
+        "relative flex flex-col [&_*]:shadow-none",
+        // The main column's freeform content wants more air than the rail's
+        // stack of cards.
+        side === "main" ? "gap-6" : "gap-4",
+        className
+      )}
+      style={style}
     >
-      {/* EVERY WIDGET'S ID, mounted or not: the order a drop commits is the
+      {children}
+      {arrangeable ? (
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          // The card the pointer carries goes up and down only, like the
+          // shuffle underneath it, and it stops at the widgets pinned to the top
+          // of the column — see `verticalOnly` and `lockedCeiling`.
+          modifiers={modifiers}
+          onDragStart={({ active }) => {
+            // BEFORE the card is told it is being dragged: what the ghost
+            // should look like — and where the pinned cards are — is what is on
+            // screen right now, while nothing has moved yet.
+            takeGhost(String(active.id))
+            ceilingRef.current = lockedCeiling(
+              widgets,
+              columnRef.current,
+              GAP_PX[side]
+            )
+            setActiveId(String(active.id))
+          }}
+          onDragCancel={() => {
+            setActiveId(null)
+            unpinSurface()
+            ghostRef.current = null
+            surfaceRef.current = null
+            ceilingRef.current = null
+          }}
+          onDragEnd={(event) => {
+            setActiveId(null)
+            ghostRef.current = null
+            surfaceRef.current = null
+            // The ceiling outlives the drag by one call: whether the card was
+            // held below the pins is what decides whether a drop up there is
+            // worth refusing out loud (`lockedTargetOf`).
+            handleDragEnd(event)
+            ceilingRef.current = null
+          }}
+        >
+          {/* EVERY WIDGET'S ID, mounted or not: the order a drop commits is the
               column's own, and a sortable that only knew about the cards in view
               would reorder the slice instead of the list. dnd-kit takes the
               missing ones in its stride — it has no rect for a card that isn't
               there, so it moves the ones that are. */}
-      <SortableContext
-        items={widgets.map((widget) => widget.id)}
-        strategy={verticalListSortingStrategy}
-      >
-        {list}
-      </SortableContext>
-      {/* ONE CURSOR FOR THE WHOLE GESTURE. The pointer is not always over
+          <SortableContext
+            items={widgets.map((widget) => widget.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            {list}
+          </SortableContext>
+          {/* ONE CURSOR FOR THE WHOLE GESTURE. The pointer is not always over
               the card it is carrying: the card stops at the pinned widgets
               (`lockedCeiling`) while the pointer keeps going, and the moment it
               leaves the card it is over whatever lies beneath — a pinned widget,
@@ -980,37 +996,35 @@ export function WidgetContainer({
               dnd-kit is unaffected: its sensor listens on the document, and the
               column's collision detection is rect-based (`closestCenter`), so
               nothing here depends on which element the pointer is over. */}
-      {activeId ? (
-        <div
-          aria-hidden
-          data-drag-cursor
-          className="fixed inset-0 z-50 cursor-grabbing"
-        />
-      ) : null}
-      {/* The card that follows the pointer is a COPY of the real one's DOM
+          {activeId ? (
+            <div
+              aria-hidden
+              data-drag-cursor
+              className="fixed inset-0 z-50 cursor-grabbing"
+            />
+          ) : null}
+          {/* The card that follows the pointer is a COPY of the real one's DOM
               (`takeGhost`) in an overlay — the in-list card hides meanwhile
               (SortableWidget). On release the copy GLIDES from where it was
               dropped into its final slot (dropAnimation), which is what makes
               the drop soft: without the overlay, committing the reorder snaps
               the real card's DOM slot and transform in one frame. */}
-      <DragOverlay dropAnimation={DROP_ANIMATION}>
-        {activeId ? (
-          <div className="relative h-full w-full cursor-grabbing overflow-hidden rounded-xl bg-f1-background">
-            <div ref={mountSurface} className="absolute isolate" />
-            <div
-              ref={mountGhost}
-              className="relative h-full w-full [&_*]:shadow-none"
-            />
-          </div>
-        ) : null}
-      </DragOverlay>
-    </DndContext>
-  )
-
-  /** Everything under the widgets: the footnote, the offer to add another, and
-   *  the column's one params dialog. */
-  const renderColumnTail = () => (
-    <>
+          <DragOverlay dropAnimation={DROP_ANIMATION}>
+            {activeId ? (
+              <div className="relative h-full w-full cursor-grabbing overflow-hidden rounded-xl bg-f1-background">
+                <div ref={mountSurface} className="absolute isolate" />
+                <div
+                  ref={mountGhost}
+                  className="relative h-full w-full [&_*]:shadow-none"
+                />
+              </div>
+            ) : null}
+          </DragOverlay>
+        </DndContext>
+      ) : (
+        list
+      )}
+      {afterWidgets}
       {/* THE COLUMN'S FOOTNOTE: under every widget, above the offer to add
           another. It takes the beat after the last widget and the placeholder
           takes the one after it, so the arrival still runs straight down the
@@ -1061,29 +1075,6 @@ export function WidgetContainer({
           onSave={(params) => onChangeWidgetParams(editingParams.id, params)}
         />
       ) : null}
-    </>
-  )
-
-  return (
-    <div
-      ref={columnRef}
-      className={cn(
-        // `relative` so this column is what a widget's `offsetTop` is measured
-        // from: the stow maps a widget onto its glyph by that offset, and an
-        // unpositioned column would hand the job to whatever ancestor happened to
-        // be positioned instead (see `WidgetMotion`).
-        "relative flex flex-col [&_*]:shadow-none",
-        // The main column's freeform content wants more air than the rail's
-        // stack of cards.
-        side === "main" ? "gap-6" : "gap-4",
-        className
-      )}
-      style={style}
-    >
-      {children}
-      {arrangeable ? renderArrangeableList() : list}
-      {afterWidgets}
-      {renderColumnTail()}
     </div>
   )
 }

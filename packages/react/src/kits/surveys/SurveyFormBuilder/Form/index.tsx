@@ -12,7 +12,11 @@ import { QuestionItem } from "./QuestionItem"
 import { SectionHeaderItem } from "./SectionHeaderItem"
 import { TableOfContent } from "./TableOfContent"
 import { useReorderHandler } from "./useReorderHandler"
-import { computeSectionEndIds, flattenElements } from "./utils"
+import {
+  computeSectionEndIds,
+  type FlatFormItem,
+  flattenElements,
+} from "./utils"
 
 // Re-export utilities and types for consumers (including tests)
 export {
@@ -35,6 +39,133 @@ function DragSelectGuard({ children }: { children: React.ReactNode }) {
       {children}
     </div>
   )
+}
+
+/**
+ * The items a locked section swallows: its header, then every question that
+ * belonged to it. The reorderable list is flat, so the section's extent is
+ * whatever run of in-section questions follows its header.
+ */
+const lockedSectionItems = (
+  items: FlatFormItem[],
+  headerIndex: number,
+  inSectionQuestionIds: Set<string>
+): FlatFormItem[] => {
+  const group: FlatFormItem[] = [items[headerIndex]]
+  let next = headerIndex + 1
+  while (
+    next < items.length &&
+    items[next].type === "question" &&
+    inSectionQuestionIds.has(items[next].id)
+  ) {
+    group.push(items[next])
+    next++
+  }
+  return group
+}
+
+/**
+ * A locked section: one muted grey rounded panel around its header and all of
+ * its questions. The right padding mirrors the drag-and-drop gutter reserved
+ * on the left, so the cards sit symmetrically in the panel.
+ */
+const LockedSection = ({
+  items,
+  first,
+}: {
+  /** The header, then its questions — see {@link lockedSectionItems}. */
+  items: FlatFormItem[]
+  /** It opens the list, so it takes no top margin. */
+  first: boolean
+}) => (
+  <div
+    className={cn(
+      "rounded-2xl bg-f1-background-secondary pb-8 pt-4",
+      first ? "" : "mt-8"
+    )}
+  >
+    {items.map((item, index) => {
+      if (item.type === "section-header") {
+        return <SectionHeaderItem key={item.id} item={item} className="" />
+      }
+      if (item.type === "question") {
+        // The grey panel delimits the section, so the "end of section" divider
+        // is suppressed here. The first question sits closer to the header,
+        // which has no inline description beneath it.
+        return (
+          <QuestionItem
+            key={item.id}
+            item={item}
+            showEndOfSection={false}
+            className={index === 1 ? "mt-2" : "mt-4"}
+          />
+        )
+      }
+      return null
+    })}
+  </div>
+)
+
+/**
+ * The flat list of cards: a locked section as one panel, everything else on
+ * its own.
+ */
+const ReorderableItems = ({
+  items,
+  lockedSectionIds,
+  inSectionQuestionIds,
+  sectionEndIds,
+}: {
+  items: FlatFormItem[]
+  lockedSectionIds: Set<string>
+  /** Every question id that belongs to some section. */
+  inSectionQuestionIds: Set<string>
+  /** The questions that close a section, and so draw its divider. */
+  sectionEndIds: Set<string>
+}) => {
+  const nodes: ReactNode[] = []
+
+  let index = 0
+  while (index < items.length) {
+    const item = items[index]
+
+    if (
+      item.type === "section-header" &&
+      lockedSectionIds.has(item.section.id)
+    ) {
+      const group = lockedSectionItems(items, index, inSectionQuestionIds)
+      nodes.push(
+        <LockedSection
+          key={`locked-${item.section.id}`}
+          items={group}
+          first={index === 0}
+        />
+      )
+      index += group.length
+      continue
+    }
+
+    const gapClass =
+      index === 0 ? "" : inSectionQuestionIds.has(item.id) ? "mt-4" : "mt-8"
+
+    if (item.type === "section-header") {
+      nodes.push(
+        <SectionHeaderItem key={item.id} item={item} className={gapClass} />
+      )
+    } else if (item.type === "question") {
+      nodes.push(
+        <QuestionItem
+          key={item.id}
+          item={item}
+          showEndOfSection={sectionEndIds.has(item.id)}
+          className={gapClass}
+        />
+      )
+    }
+    index++
+  }
+
+  return <>{nodes}</>
 }
 
 const _SurveyFormBuilder = ({
@@ -143,113 +274,6 @@ const _SurveyFormBuilder = ({
 
   const showTableOfContent = !!elements.length
 
-  /**
-   * A locked section renders as one muted grey rounded panel wrapping its
-   * header and all of its questions. The right padding mirrors the
-   * drag-and-drop gutter reserved on the left so the cards sit symmetrically
-   * in the panel.
-   *
-   * Returns the panel and the index just past the questions it swallowed.
-   */
-  const renderLockedSection = (
-    headerItem: Extract<
-      (typeof reorderableItems)[number],
-      { type: "section-header" }
-    >,
-    index: number
-  ): { node: ReactNode; nextIndex: number } => {
-    const groupItems: typeof reorderableItems = [headerItem]
-    let next = index + 1
-    while (
-      next < reorderableItems.length &&
-      reorderableItems[next].type === "question" &&
-      inSectionQuestionIds.has(reorderableItems[next].id)
-    ) {
-      groupItems.push(reorderableItems[next])
-      next++
-    }
-
-    return {
-      nextIndex: next,
-      node: (
-        <div
-          key={`locked-${headerItem.section.id}`}
-          className={cn(
-            "rounded-2xl bg-f1-background-secondary pb-8 pt-4",
-            index === 0 ? "" : "mt-8"
-          )}
-        >
-          {groupItems.map((groupItem, groupIndex) => {
-            if (groupItem.type === "section-header") {
-              return (
-                <SectionHeaderItem
-                  key={groupItem.id}
-                  item={groupItem}
-                  className=""
-                />
-              )
-            }
-            if (groupItem.type === "question") {
-              // The grey panel delimits the section, so the "end of section"
-              // divider is suppressed here. The first question sits closer to
-              // the header, which has no inline description beneath it.
-              return (
-                <QuestionItem
-                  key={groupItem.id}
-                  item={groupItem}
-                  showEndOfSection={false}
-                  className={groupIndex === 1 ? "mt-2" : "mt-4"}
-                />
-              )
-            }
-            return null
-          })}
-        </div>
-      ),
-    }
-  }
-
-  /** The flat list: locked sections as one panel, everything else on its own. */
-  const renderReorderableItems = () => {
-    const nodes: ReactNode[] = []
-
-    let index = 0
-    while (index < reorderableItems.length) {
-      const item = reorderableItems[index]
-
-      if (
-        item.type === "section-header" &&
-        lockedSectionIds.has(item.section.id)
-      ) {
-        const { node, nextIndex } = renderLockedSection(item, index)
-        nodes.push(node)
-        index = nextIndex
-        continue
-      }
-
-      const gapClass =
-        index === 0 ? "" : inSectionQuestionIds.has(item.id) ? "mt-4" : "mt-8"
-
-      if (item.type === "section-header") {
-        nodes.push(
-          <SectionHeaderItem key={item.id} item={item} className={gapClass} />
-        )
-      } else if (item.type === "question") {
-        nodes.push(
-          <QuestionItem
-            key={item.id}
-            item={item}
-            showEndOfSection={sectionEndIds.has(item.id)}
-            className={gapClass}
-          />
-        )
-      }
-      index++
-    }
-
-    return nodes
-  }
-
   return (
     <SurveyFormBuilderProvider
       disabled={disabled}
@@ -284,7 +308,14 @@ const _SurveyFormBuilder = ({
                 onReorder={handleFlatReorder}
                 as="div"
               >
-                <div className="flex flex-col">{renderReorderableItems()}</div>
+                <div className="flex flex-col">
+                  <ReorderableItems
+                    items={reorderableItems}
+                    lockedSectionIds={lockedSectionIds}
+                    inSectionQuestionIds={inSectionQuestionIds}
+                    sectionEndIds={sectionEndIds}
+                  />
+                </div>
               </Reorder.Group>
               {shouldShowAddButton ? <AddButton /> : null}
             </motion.div>

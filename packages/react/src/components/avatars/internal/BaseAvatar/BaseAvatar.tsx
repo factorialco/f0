@@ -114,7 +114,7 @@ export const BaseAvatar = forwardRef<HTMLDivElement, BaseAvatarProps>(
       [badge, badgeSize, moduleAvatarSize]
     )
 
-    const renderAvatar = () => (
+    const avatar = (
       <div className="relative inline-flex h-fit w-fit">
         <div
           className="relative h-fit w-fit"
@@ -175,8 +175,6 @@ export const BaseAvatar = forwardRef<HTMLDivElement, BaseAvatarProps>(
         ) : null}
       </div>
     )
-
-    const avatar = renderAvatar()
 
     // The tooltip wraps the whole avatar (a real element the trigger can
     // attach to), so hovering anywhere on it — not just the badge — shows it.

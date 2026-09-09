@@ -281,73 +281,26 @@ const RAIL_ACTION_TONES = {
 >
 
 /**
- * One widget as the collapsed strip shows it: its own catalog glyph, standing in
- * for the whole card — or, when the widget carries a `railAction`, that action's
- * button wearing the same 40px.
+ * The genie, identical whichever face the glyph wears.
  *
- * It ARRIVES FROM LARGER THAN LIFE — the card that just shrank into it — and
- * leaves the other way, blooming back out into the card it becomes. While its
- * widget is floating it holds itself slightly forward, so the glyph and the panel
- * read as one object rather than a button and a popover.
+ * THE ARRIVAL IS A SLIDE, NOT A SCALE. A glyph used to come in from 1.18 and
+ * leave at 1.3, which was the card's own retract read at glyph size — and that
+ * only meant anything while the cards were really shrinking onto them. They fade
+ * where they stand now (`WidgetMotion`), so the strip does the one thing left
+ * that says the two states are changing places rather than one replacing the
+ * other: it slides in off the column that is closing, and back out the same way.
+ *
+ * THE PRESS IS THE ONLY SCALE, and it is TRANSIENT. A held fractional scale is
+ * rasterized once and then stretched: the glyph's icon and a pill's figures go
+ * soft, and they stay soft for as long as you keep the pointer there, which is
+ * exactly when they are being read. The hover and open states say what they have
+ * to say with the panel they open, the tooltip, and the button's own hover
+ * border.
  */
-const CollapsedGlyph = ({
-  widget,
-  order,
-  open,
-  delayMs,
-  onOpen,
-  onCancelOpen,
-  onClose,
-}: {
-  widget: HomeWidgetItem
-  /** Place in the strip's stagger. */
-  order: number
-  open: boolean
-  /** When this strip's first glyph starts arriving. */
-  delayMs: number
-  onOpen: (id: string, anchor: HTMLElement, instant?: boolean) => void
-  onCancelOpen: () => void
-  onClose: () => void
-}) => {
+const useGlyphMotion = (order: number, delayMs: number) => {
   const reducedMotion = useReducedMotion()
-  const action = widget.railAction
-  // The flash pauses while the widget is FLOATING, because the panel is open for
-  // exactly one reason — the pointer (or the focus ring) is on the glyph — and a
-  // face that changed under the pointer would make the click a coin toss about
-  // which icon was pressed.
-  const actionFace = useFlash(!!action?.flashing && !open)
-  /**
-   * THE PILL IS FOR THE STOWED WIDGET. Floating, the card is out with the same
-   * reading in full context, so the pill goes and leaves the button it was built
-   * around — which also takes the overhang out of the panel's way.
-   *
-   * THE BUTTON ITSELF DOES NOT CHANGE while that happens. Its colours come from
-   * whether the action HAS a reading, not from whether the pill is drawn right
-   * now (`action.text`, not this) — a control that repaints under the pointer is
-   * one you cannot aim at, and hover is exactly when you are aiming.
-   */
-  const text = action?.text && !open ? action.text : undefined
-  /** What the state's colour paints — the pill, the button, and its icon. */
-  const tone = RAIL_ACTION_TONES[action?.tone ?? "neutral"]
 
-  /**
-   * The genie, identical whichever face the glyph wears.
-   *
-   * THE ARRIVAL IS A SLIDE, NOT A SCALE. A glyph used to come in from 1.18 and
-   * leave at 1.3, which was the card's own retract read at glyph size — and that
-   * only meant anything while the cards were really shrinking onto them. They fade
-   * where they stand now (`WidgetMotion`), so the strip does the one thing left
-   * that says the two states are changing places rather than one replacing the
-   * other: it slides in off the column that is closing, and back out the same way.
-   *
-   * THE PRESS IS THE ONLY SCALE, and it is TRANSIENT. A held fractional scale is
-   * rasterized once and then stretched: the glyph's icon and a pill's figures go
-   * soft, and they stay soft for as long as you keep the pointer there, which is
-   * exactly when they are being read. The hover and open states say what they have
-   * to say with the panel they open, the tooltip, and the button's own hover
-   * border.
-   */
-  const glyphMotion = {
+  return {
     initial: {
       opacity: 0,
       x: reducedMotion ? 0 : -GENIE_GLYPH_SLIDE_PX,
@@ -360,34 +313,73 @@ const CollapsedGlyph = ({
       reducedMotion
     ),
   }
+}
 
-  /* Same accent dot HomeListItem draws for unread rows — the ring keeps it
-     legible over any glyph, action button included. */
-  const updatesDot = widget.hasUpdates ? (
+/* Same accent dot HomeListItem draws for unread rows — the ring keeps it
+   legible over any glyph, action button included. */
+const GlyphUpdatesDot = ({ hasUpdates }: { hasUpdates?: boolean }) =>
+  hasUpdates ? (
     <span className="pointer-events-none absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-f1-background-accent-bold ring-2 ring-f1-background" />
   ) : null
 
-  // The action's button IS the glyph — one control, so nothing is nested in
-  // anything and the strip's geometry is untouched (`size-10` + `compact`
-  // hold the button to the 40px every other glyph is).
-  //
-  // Which means the panel can't be a click any more: hover opens it as ever,
-  // and FOCUS opens it too, so reaching the glyph by keyboard still gets you
-  // to the widget's own controls — they are the next thing in the tab order.
-  //
-  // With a `text` the whole thing becomes a PILL: the reading, then the same
-  // button at the end of it. The pill costs the strip NO ROOM it would not have
-  // spent on the plain glyph — 40px of the column's rhythm, and the width it
-  // needs taken off the left, out over the feed.
-  //
-  // The tooltip is `instant`: it is the only place the action's NAME is
-  // written, and the glyph is a control you point at on your way past. The
-  // default 700ms wait is for a label that merely confirms what you can
-  // already read — here it withheld the whole thing.
-  const renderActionGlyph = (
-    railAction: NonNullable<HomeWidgetItem["railAction"]>
-  ) => (
-    <Tooltip label={railAction.label} instant>
+// The action's button IS the glyph — one control, so nothing is nested in
+// anything and the strip's geometry is untouched (`size-10` + `compact`
+// hold the button to the 40px every other glyph is).
+//
+// Which means the panel can't be a click any more: hover opens it as ever,
+// and FOCUS opens it too, so reaching the glyph by keyboard still gets you
+// to the widget's own controls — they are the next thing in the tab order.
+//
+// With a `text` the whole thing becomes a PILL: the reading, then the same
+// button at the end of it. The pill costs the strip NO ROOM it would not have
+// spent on the plain glyph — 40px of the column's rhythm, and the width it
+// needs taken off the left, out over the feed.
+//
+// The tooltip is `instant`: it is the only place the action's NAME is
+// written, and the glyph is a control you point at on your way past. The
+// default 700ms wait is for a label that merely confirms what you can
+// already read — here it withheld the whole thing.
+const RailActionGlyph = ({
+  widget,
+  action,
+  order,
+  open,
+  delayMs,
+  onOpen,
+  onCancelOpen,
+}: {
+  widget: HomeWidgetItem
+  action: NonNullable<HomeWidgetItem["railAction"]>
+  /** Place in the strip's stagger. */
+  order: number
+  open: boolean
+  /** When this strip's first glyph starts arriving. */
+  delayMs: number
+  onOpen: (id: string, anchor: HTMLElement, instant?: boolean) => void
+  onCancelOpen: () => void
+}) => {
+  const glyphMotion = useGlyphMotion(order, delayMs)
+  // The flash pauses while the widget is FLOATING, because the panel is open
+  // for exactly one reason — the pointer (or the focus ring) is on the glyph —
+  // and a face that changed under the pointer would make the click a coin toss
+  // about which icon was pressed.
+  const actionFace = useFlash(!!action.flashing && !open)
+  /**
+   * THE PILL IS FOR THE STOWED WIDGET. Floating, the card is out with the same
+   * reading in full context, so the pill goes and leaves the button it was
+   * built around — which also takes the overhang out of the panel's way.
+   *
+   * THE BUTTON ITSELF DOES NOT CHANGE while that happens. Its colours come
+   * from whether the action HAS a reading, not from whether the pill is drawn
+   * right now (`action.text`, not this) — a control that repaints under the
+   * pointer is one you cannot aim at, and hover is exactly when you are aiming.
+   */
+  const text = action.text && !open ? action.text : undefined
+  /** What the state's colour paints — the pill, the button, and its icon. */
+  const tone = RAIL_ACTION_TONES[action.tone ?? "neutral"]
+
+  return (
+    <Tooltip label={action.label} instant>
       <motion.div
         className={cn(
           // `pointer-events-auto` against the strip's `none`: a pill is wider
@@ -423,9 +415,7 @@ const CollapsedGlyph = ({
         onFocus={(event) => onOpen(widget.id, event.currentTarget, true)}
         {...glyphMotion}
       >
-        {text ? (
-          <GlyphReading text={text} ticking={!!railAction.ticking} />
-        ) : null}
+        {text ? <GlyphReading text={text} ticking={!!action.ticking} /> : null}
         <Action
           type="button"
           // `ghost` and then painted: the tone decides this button's fill and
@@ -446,7 +436,7 @@ const CollapsedGlyph = ({
             // room around it, and an `lg` button's own padding would squeeze a
             // 24px glyph out of a 40px box. The tile centres it instead.
             "size-10 shadow-none after:hidden hover:shadow-none active:shadow-none [&_.main]:px-0",
-            railAction.text ? tone.button : tone.solo,
+            action.text ? tone.button : tone.solo,
             // THE BORDER ANSWERS THE WHOLE GLYPH, not just its 40px: the pill is
             // one object, and pointing at the reading is pointing at the thing
             // the button belongs to. It stays for as long as the widget is out
@@ -454,12 +444,12 @@ const CollapsedGlyph = ({
             // doesn't switch the button off behind you.
             "ring-inset group-hover:ring-1",
             open && "ring-1",
-            railAction.text ? tone.ring : tone.soloRing
+            action.text ? tone.ring : tone.soloRing
           )}
           // "Resume" on its own doesn't say which glyph this is; the tooltip
           // can lean on the strip for that, an accessible name can't.
-          aria-label={`${railAction.label}, ${widgetTitle(widget)}`}
-          onClick={() => railAction.onClick()}
+          aria-label={`${action.label}, ${widgetTitle(widget)}`}
+          onClick={() => action.onClick()}
         >
           <F0Icon
             // The strip's own glyph size: `F0AvatarIcon` at `lg` draws its icon
@@ -469,19 +459,63 @@ const CollapsedGlyph = ({
             // `color` rather than a text class: it marks the svg
             // `data-has-color`, which is what stops the button variant's own
             // icon rules from painting over the tone.
-            color={railAction.text ? tone.icon : tone.soloIcon}
+            color={action.text ? tone.icon : tone.soloIcon}
             // No widget icon means no second face to flash to — the action's
             // is the only one there is.
-            icon={actionFace || !widget.icon ? railAction.icon : widget.icon}
+            icon={actionFace || !widget.icon ? action.icon : widget.icon}
           />
         </Action>
-        {updatesDot}
+        <GlyphUpdatesDot hasUpdates={widget.hasUpdates} />
       </motion.div>
     </Tooltip>
   )
+}
+
+/**
+ * One widget as the collapsed strip shows it: its own catalog glyph, standing in
+ * for the whole card — or, when the widget carries a `railAction`, that action's
+ * button wearing the same 40px.
+ *
+ * It ARRIVES FROM LARGER THAN LIFE — the card that just shrank into it — and
+ * leaves the other way, blooming back out into the card it becomes. While its
+ * widget is floating it holds itself slightly forward, so the glyph and the panel
+ * read as one object rather than a button and a popover.
+ */
+const CollapsedGlyph = ({
+  widget,
+  order,
+  open,
+  delayMs,
+  onOpen,
+  onCancelOpen,
+  onClose,
+}: {
+  widget: HomeWidgetItem
+  /** Place in the strip's stagger. */
+  order: number
+  open: boolean
+  /** When this strip's first glyph starts arriving. */
+  delayMs: number
+  onOpen: (id: string, anchor: HTMLElement, instant?: boolean) => void
+  onCancelOpen: () => void
+  onClose: () => void
+}) => {
+  const action = widget.railAction
+
+  const glyphMotion = useGlyphMotion(order, delayMs)
 
   if (action) {
-    return renderActionGlyph(action)
+    return (
+      <RailActionGlyph
+        widget={widget}
+        action={action}
+        order={order}
+        open={open}
+        delayMs={delayMs}
+        onOpen={onOpen}
+        onCancelOpen={onCancelOpen}
+      />
+    )
   }
 
   return (
@@ -508,7 +542,7 @@ const CollapsedGlyph = ({
             {widgetTitle(widget).charAt(0)}
           </span>
         )}
-        {updatesDot}
+        <GlyphUpdatesDot hasUpdates={widget.hasUpdates} />
       </span>
     </motion.button>
   )

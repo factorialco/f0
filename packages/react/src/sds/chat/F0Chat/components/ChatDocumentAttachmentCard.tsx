@@ -35,6 +35,106 @@ const ChatTextThumbnail = lazy(loadTextThumbnail)
 const CARD_WIDTH = 384
 const THUMB_HEIGHT = 160
 
+/** The snapshot renderer for this document kind. */
+const DocumentThumbnail = ({
+  kind,
+  url,
+  width,
+  onError,
+  onRendered,
+}: {
+  kind: ChatDocumentKind
+  url: string
+  /** Kinds that lay out to a fixed width need it up front. */
+  width: number
+  onError: () => void
+  onRendered: () => void
+}) => {
+  if (kind === "pdf") {
+    return (
+      <ChatPdfThumbnail
+        url={url}
+        width={width}
+        onError={onError}
+        onRendered={onRendered}
+      />
+    )
+  }
+
+  if (kind === "sheet") {
+    return (
+      <ChatSheetThumbnail url={url} onError={onError} onRendered={onRendered} />
+    )
+  }
+
+  if (kind === "docx") {
+    return (
+      <ChatDocxThumbnail
+        url={url}
+        width={width}
+        onError={onError}
+        onRendered={onRendered}
+      />
+    )
+  }
+
+  if (kind === "text") {
+    return (
+      <ChatTextThumbnail url={url} onError={onError} onRendered={onRendered} />
+    )
+  }
+
+  return null
+}
+/**
+ * What the card falls back to once the snapshot fails to render: the plain
+ * downloadable file chip, or a square tile in the compact surfaces.
+ */
+const FailedDocumentCard = ({
+  file,
+  action,
+  compact,
+  cornerClass,
+  surfaceClassName,
+}: {
+  file: F0ChatFileAttachment
+  /** The download action, or whatever the host put in its place. */
+  action: { label: string; icon: IconType; onClick: () => void }
+  compact: boolean
+  cornerClass: string
+  surfaceClassName: string | undefined
+}) => {
+  const fileDescriptor = { name: file.name, type: file.mimeType ?? "" }
+
+  if (!compact) {
+    return <F0FileItem size="md" file={fileDescriptor} actions={[action]} />
+  }
+
+  return (
+    <div
+      className={cn(
+        "group/attachment relative box-border flex h-16 w-16 items-center justify-center overflow-hidden border border-solid border-f1-border-secondary bg-f1-background-secondary",
+        cornerClass,
+        surfaceClassName
+      )}
+      data-testid="chat-document-attachment"
+    >
+      <F0AvatarFile file={fileDescriptor} size="md" />
+      <div className="absolute right-1 top-1 z-30 flex rounded bg-f1-background opacity-0 transition-opacity focus-within:opacity-100 group-hover/attachment:opacity-100">
+        <ButtonInternal
+          variant="outline"
+          size="sm"
+          hideLabel
+          icon={action.icon}
+          label={action.label}
+          onClick={action.onClick}
+        />
+      </div>
+      <span className="sr-only">{file.name}</span>
+    </div>
+  )
+}
+
 /**
  * Document card with a type badge and name over a cropped snapshot of the
  * content — the first PDF page, the first sheet's cells, the first Word page,
@@ -86,94 +186,16 @@ export const ChatDocumentAttachmentCard = ({
   const cardWidth = compact ? 64 : CARD_WIDTH
   const thumbHeight = compact ? "100%" : THUMB_HEIGHT
 
-  /** The thumbnail renderer for this document kind. */
-  const renderThumbnail = () => {
-    if (kind === "pdf") {
-      return (
-        <ChatPdfThumbnail
-          url={file.url}
-          width={cardWidth - 2}
-          onError={() => setFailed(true)}
-          onRendered={() => setRendered(true)}
-        />
-      )
-    }
-
-    if (kind === "sheet") {
-      return (
-        <ChatSheetThumbnail
-          url={file.url}
-          onError={() => setFailed(true)}
-          onRendered={() => setRendered(true)}
-        />
-      )
-    }
-
-    if (kind === "docx") {
-      return (
-        <ChatDocxThumbnail
-          url={file.url}
-          width={cardWidth - 2}
-          onError={() => setFailed(true)}
-          onRendered={() => setRendered(true)}
-        />
-      )
-    }
-
-    if (kind === "text") {
-      return (
-        <ChatTextThumbnail
-          url={file.url}
-          onError={() => setFailed(true)}
-          onRendered={() => setRendered(true)}
-        />
-      )
-    }
-    return null
-  }
-
-  /** The card once the thumbnail has failed to load: the file, and its action. */
-  const renderFailed = () => {
-    if (compact) {
-      return (
-        <div
-          className={cn(
-            "group/attachment relative box-border flex h-16 w-16 items-center justify-center overflow-hidden border border-solid border-f1-border-secondary bg-f1-background-secondary",
-            cornerClass,
-            surfaceClassName
-          )}
-          data-testid="chat-document-attachment"
-        >
-          <F0AvatarFile
-            file={{ name: file.name, type: file.mimeType ?? "" }}
-            size="md"
-          />
-          <div className="absolute right-1 top-1 z-30 flex rounded bg-f1-background opacity-0 transition-opacity focus-within:opacity-100 group-hover/attachment:opacity-100">
-            <ButtonInternal
-              variant="outline"
-              size="sm"
-              hideLabel
-              icon={fallbackAction.icon}
-              label={fallbackAction.label}
-              onClick={fallbackAction.onClick}
-            />
-          </div>
-          <span className="sr-only">{file.name}</span>
-        </div>
-      )
-    }
-
+  if (failed) {
     return (
-      <F0FileItem
-        size="md"
-        file={{ name: file.name, type: file.mimeType ?? "" }}
-        actions={[fallbackAction]}
+      <FailedDocumentCard
+        file={file}
+        action={fallbackAction}
+        compact={compact}
+        cornerClass={cornerClass}
+        surfaceClassName={surfaceClassName}
       />
     )
-  }
-
-  if (failed) {
-    return renderFailed()
   }
 
   return (
@@ -244,7 +266,15 @@ export const ChatDocumentAttachmentCard = ({
           )}
           data-testid="chat-document-snapshot"
         >
-          <Suspense fallback={null}>{renderThumbnail()}</Suspense>
+          <Suspense fallback={null}>
+            <DocumentThumbnail
+              kind={kind}
+              url={file.url}
+              width={cardWidth - 2}
+              onError={() => setFailed(true)}
+              onRendered={() => setRendered(true)}
+            />
+          </Suspense>
         </div>
       </button>
       {compact && action ? (
