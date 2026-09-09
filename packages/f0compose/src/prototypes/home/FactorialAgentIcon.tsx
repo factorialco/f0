@@ -14,16 +14,19 @@ import {
 /** The approved artwork supplied as an F0Button icon, without rebuilding its animation. */
 export const FactorialAgentIcon = forwardRef<
   SVGSVGElement,
-  SVGProps<SVGSVGElement> & { animate?: "normal" | "animate" }
+  SVGProps<SVGSVGElement> & { animate?: "normal" | "animate"; once?: boolean }
 >(function FactorialAgentIcon(
-  { animate: _animate, className, ...props },
+  { animate: _animate, once = false, className, ...props },
   forwardedRef
 ) {
   const scene = useRef<SVGSVGElement>(null)
   useImperativeHandle(forwardedRef, () => scene.current!, [])
   useEffect(
-    () => (scene.current ? mountApprovedAgentMotion(scene.current) : undefined),
-    []
+    () =>
+      scene.current
+        ? mountApprovedAgentMotion(scene.current, { once })
+        : undefined,
+    [once]
   )
   // F0's standard icon wrapper forces thin path strokes; the approved eyes own their stroke weight.
   const motionClassName = className

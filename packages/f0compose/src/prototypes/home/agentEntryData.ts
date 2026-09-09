@@ -1,3 +1,18 @@
+import {
+  Calendar,
+  Clock,
+  PersonMinus,
+  PersonPlus,
+  SearchPerson,
+  CalendarArrowRight,
+  File,
+  CheckCircle,
+  Comment,
+  InfoCircle,
+  Search,
+  List,
+} from "@factorialco/f0-react/icons/app"
+
 export type Presentation = "idle" | "expanded" | "side" | "focus"
 /** One relevant starting point, using the existing profile and current page. */
 export function suggestionFor(
@@ -45,4 +60,46 @@ export function suggestionFor(
         prompt:
           "Review pending HR approvals, upcoming onboardings and employee incidents. Prioritize what needs my attention today and prepare next steps for my approval.",
       }
+}
+
+/** Starting points describe possibilities, not findings from an analysis. */
+export function emptyStateFor(view: string | null) {
+  if (view === "calendar") {
+    return {
+      question: "What would you like to plan?",
+      suggestions: [
+        { label: "Find time for a meeting", icon: Clock },
+        { label: "Review my week", icon: Calendar },
+        { label: "Check who’s away", icon: PersonMinus },
+      ],
+    }
+  }
+  if (view === "people" || view === "organization") {
+    return {
+      question: "What would you like to know about your team?",
+      suggestions: [
+        { label: "Review pending onboarding", icon: PersonPlus },
+        { label: "Find people by role", icon: SearchPerson },
+        { label: "Check upcoming anniversaries", icon: CalendarArrowRight },
+      ],
+    }
+  }
+  if (view === "inbox") {
+    return {
+      question: "How would you like to approach this task?",
+      suggestions: [
+        { label: "Summarize this request", icon: File },
+        { label: "Explain what needs my approval", icon: CheckCircle },
+        { label: "Help me draft a reply", icon: Comment },
+      ],
+    }
+  }
+  return {
+    question: "What would you like to do here?",
+    suggestions: [
+      { label: "Help me understand this page", icon: InfoCircle },
+      { label: "Find what needs my attention", icon: Search },
+      { label: "Help me plan my next steps", icon: List },
+    ],
+  }
 }

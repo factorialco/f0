@@ -7,6 +7,7 @@ import type { StackState } from "../windows/stack"
 import type { PanelSpec } from "../windows/WindowStack"
 import type { ChatId } from "./chats"
 
+import { AskFactorialButton } from "../AskFactorial"
 import { taskTitle } from "../inbox/inboxTasks"
 import { TicketWindow } from "../inbox/TicketWindow"
 import { SidePanelIcon } from "../windows/PanelIcons"
@@ -164,7 +165,16 @@ export function MaximizedChat({
   return (
     <GenericMaximizedWindow
       windowKey={`${CHAT_KEY_PREFIX}:${id}`}
-      spec={leftPaneSpec(id)}
+      spec={{
+        ...leftPaneSpec(id),
+        actions: (
+          <>
+            {" "}
+            {leftPaneSpec(id).actions}
+            <AskFactorialButton />
+          </>
+        ),
+      }}
       onRestore={onRestore}
       onClose={onClose}
     />

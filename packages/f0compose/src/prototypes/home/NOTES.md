@@ -4,6 +4,12 @@ Prototype: `/p/home` · branch `feat/f0compose` · published https://my-project-
 
 **Read this file before touching Home**, and keep it current — it is what carries context between sessions. Below the two "Run" and "Key gotchas" sections it is a running log, newest first: the decisions, what they were measured against, and the traps already paid for.
 
+## Local version B — Ask Factorial (2026-09-09)
+
+The independent exploration at `/Users/jonathan.centeno/code/f0-agent-entry-top-right`, branch `codex/agent-entry-top-right`, starts at `58712d4f9`. Run its Vite server on **5177**. The original `f0-agent-entry` checkout and **5176** server remain the comparison baseline; do not overwrite them.
+
+Outside Home, the header now has an outline **Ask Factorial** button using a static chat bubble. The approved bot animates briefly above the empty-state title, then rests. Suggestions reuse the Home component. It directly opens the existing right panel. The bottom dock no longer takes up page space. Home retains its central composer and widgets. `AskFactorial.tsx` supplies the shared entry context to the page and maximized Inbox headers. Closing/reopening the panel retains both draft and conversation. See `agent-entry-plan.md` for validation. Browser storage is separate by port.
+
 ## Run
 
 From a clone of the repo on `feat/f0compose`:

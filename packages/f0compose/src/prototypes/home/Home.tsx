@@ -20,6 +20,7 @@ import type { WindowId } from "./windows/types"
 
 import { AgentsScreen } from "./agents/AgentsScreen"
 import { agentById } from "./agents/agentStore"
+import { AskFactorialButton } from "./AskFactorial"
 import { CalendarScreen } from "./calendar/CalendarScreen"
 import {
   animateChatClose,
@@ -41,8 +42,10 @@ import {
   type ProfilePerson,
 } from "./fixtures"
 import { HomeNav } from "./HomeNav"
+import { ImportedHubScreen, hasImportedScreen } from "./hub/ImportedHubScreen"
 import { HybridHome } from "./HybridHome"
 import { ModuleScreen } from "./ModuleScreen"
+import { PreferencesScreen } from "./navigation/PreferencesScreen"
 import { NeedsYouItem } from "./NeedsYouItem"
 import { phaseFor, useNeedsYou, visibleTasks } from "./needsYouStore"
 import {
@@ -846,61 +849,64 @@ function HomeNavbar({
           </span>
         ) : null}
       </div>
-      {conversationTitle ? (
-        <div className="flex items-center">
-          {/* An agent's brief has nothing to preview — the frame shows
+      <div className="flex shrink-0 items-center gap-2">
+        {conversationTitle ? (
+          <div className="flex items-center">
+            {/* An agent's brief has nothing to preview — the frame shows
               only the ⋮ there. */}
-          {!conversationEmoji && (
+            {!conversationEmoji && (
+              <F0Button
+                variant="ghost"
+                size="md"
+                icon={PlayOutline}
+                hideLabel
+                label="Open creation preview"
+                onClick={() => onToggleWindow("preview")}
+              />
+            )}
             <F0Button
               variant="ghost"
               size="md"
-              icon={PlayOutline}
+              icon={Ellipsis}
               hideLabel
-              label="Open creation preview"
-              onClick={() => onToggleWindow("preview")}
+              label="Conversation options"
             />
-          )}
-          <F0Button
-            variant="ghost"
-            size="md"
-            icon={Ellipsis}
-            hideLabel
-            label="Conversation options"
-          />
-        </div>
-      ) : screenTitle ? (
-        <div className="flex items-center">
-          {screenActions ?? (
-            <>
-              <F0Button
-                variant="ghost"
-                size="md"
-                icon={Ellipsis}
-                hideLabel
-                label="Screen options"
-              />
-              <F0Button
-                variant="ghost"
-                size="md"
-                icon={Settings}
-                hideLabel
-                label="Screen settings"
-              />
-            </>
-          )}
-        </div>
-      ) : (
-        // Default Home mode: Clock in's own button, then the widgets "⋮"
-        // (Figma 2621:23687).
-        <div className="flex items-center">
-          {homeAction}
-          <ClockInButton
-            open={openWindows.includes("clockin")}
-            onToggle={() => onToggleWindow("clockin")}
-          />
-          <WindowsMenu open={openWindows} onToggle={onToggleWindow} />
-        </div>
-      )}
+          </div>
+        ) : screenTitle ? (
+          <div className="flex items-center">
+            {screenActions ?? (
+              <>
+                <F0Button
+                  variant="ghost"
+                  size="md"
+                  icon={Ellipsis}
+                  hideLabel
+                  label="Screen options"
+                />
+                <F0Button
+                  variant="ghost"
+                  size="md"
+                  icon={Settings}
+                  hideLabel
+                  label="Screen settings"
+                />
+              </>
+            )}
+          </div>
+        ) : (
+          // Default Home mode: Clock in's own button, then the widgets "⋮"
+          // (Figma 2621:23687).
+          <div className="flex items-center">
+            {homeAction}
+            <ClockInButton
+              open={openWindows.includes("clockin")}
+              onToggle={() => onToggleWindow("clockin")}
+            />
+            <WindowsMenu open={openWindows} onToggle={onToggleWindow} />
+          </div>
+        )}
+        <AskFactorialButton />
+      </div>
     </div>
   )
 }
@@ -1009,7 +1015,9 @@ function HomeCanvas() {
   const fullWidthView =
     screenView === "calendar" ||
     screenView === "people" ||
-    screenView === "agents"
+    screenView === "organization" ||
+    screenView === "agents" ||
+    (screenView !== null && hasImportedScreen(screenView))
   // Agents owns its specialized brief composer; other screens reserve the
   // shared agent strip below their scrolling content and fixed actions.
   const showPromptBar = screenView !== "agents"
@@ -1408,7 +1416,13 @@ function HomeCanvas() {
               ) : screenView === "agents" ? (
                 <AgentsScreen />
               ) : screenView ? (
-                <ModuleScreen title={screenTitle ?? screenView} />
+                screenView === "preferences" ? (
+                  <PreferencesScreen />
+                ) : hasImportedScreen(screenView) ? (
+                  <ImportedHubScreen key={screenView} view={screenView} />
+                ) : (
+                  <ModuleScreen title={screenTitle ?? screenView} />
+                )
               ) : (
                 <div className="flex w-[712px] max-w-full flex-col gap-8">
                   <div className="flex items-center gap-3">

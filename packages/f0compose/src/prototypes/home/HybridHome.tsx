@@ -7,7 +7,6 @@ import {
   Minimize,
   Microphone,
   Paperclip,
-  Sparkles,
 } from "@factorialco/f0-react/icons/app"
 import {
   useEffect,
@@ -19,10 +18,16 @@ import {
 import { type ReactNode } from "react"
 import { useSearchParams } from "react-router-dom"
 
-import { suggestionFor, type Presentation } from "./agentEntryData"
+import {
+  emptyStateFor,
+  suggestionFor,
+  type Presentation,
+} from "./agentEntryData"
+import { AgentEntryContext } from "./AskFactorial"
 import { isTicket } from "./comms/ChatsColumn"
 import { useOpenChats } from "./comms/chatStore"
 import { FactorialAgentIcon } from "./FactorialAgentIcon"
+import { HomeSuggestion } from "./HomeSuggestion"
 import {
   goHome,
   startConversation,
@@ -41,6 +46,7 @@ export function HybridHome({ children }: { children: ReactNode }) {
   const profile = useProfile()
   const view = params.get("view") ?? (openChats.some(isTicket) ? "inbox" : null)
   const suggestion = suggestionFor(view, profile)
+  const emptyState = emptyStateFor(view)
   const [mode, setMode] = useState<Presentation>("idle")
   const [draft, setDraft] = useState("")
   const [notice, setNotice] = useState("")
@@ -53,6 +59,11 @@ export function HybridHome({ children }: { children: ReactNode }) {
     if (activeId) setMode(view ? "side" : "focus")
     else setMode("idle")
   }, [activeId])
+  useEffect(() => {
+    const openEntry = () => setMode(view ? "side" : "expanded")
+    window.addEventListener("home-agent:open", openEntry)
+    return () => window.removeEventListener("home-agent:open", openEntry)
+  }, [view])
   const compact = !!view && mode === "idle"
   const typing = draft.length > 0
   function focusField() {
@@ -71,18 +82,6 @@ export function HybridHome({ children }: { children: ReactNode }) {
     const timer = window.setTimeout(focusField, 380)
     return () => window.clearTimeout(timer)
   }, [mode])
-  // Collapse the entry without consuming the outside interaction or moving focus.
-  useEffect(() => {
-    if (mode !== "expanded" || !view) return
-    const dismissOutside = (event: PointerEvent) => {
-      if (event.composedPath().includes(composer.current!)) return
-      setMode("idle")
-      setNotice("")
-    }
-    document.addEventListener("pointerdown", dismissOutside, true)
-    return () =>
-      document.removeEventListener("pointerdown", dismissOutside, true)
-  }, [mode, view])
   // The composer stays mounted. Only its geometry follows the destination.
   useLayoutEffect(() => {
     const container = work.current,
@@ -137,12 +136,13 @@ export function HybridHome({ children }: { children: ReactNode }) {
     }
   }, [view, mode, compact, typing, open])
   function close() {
-    goHome()
+    if (!view) goHome()
     setMode("idle")
+    setNotice("")
     window.setTimeout(() => {
       if (view)
         root.current
-          ?.querySelector<HTMLButtonElement>("[data-hybrid-trigger] button")
+          ?.querySelector<HTMLButtonElement>('[data-testid="ask-factorial"]')
           ?.focus()
       else focusField()
     }, 420)
@@ -171,168 +171,197 @@ export function HybridHome({ children }: { children: ReactNode }) {
     }
   }
   return (
-    <div
-      className="flex h-full min-h-0 w-full bg-f1-background"
-      ref={root}
-      data-hybrid-root
-      data-mode={view ? mode : "idle"}
-      data-view={view ?? "home"}
-      data-typing={typing}
-      onKeyDown={keys}
+    <AgentEntryContext.Provider
+      value={{
+        visible: !!view,
+        open: () => {
+          setMode("side")
+          setNotice("")
+          if (mode === "side") focusField()
+        },
+      }}
     >
-      <div className="h-full min-w-0 flex-1" ref={work} data-hybrid-work>
-        <div className="h-full" data-hybrid-canvas>
-          {children}
-        </div>
-        <div data-hybrid-dock aria-hidden="true" />
-        <div
-          className="bg-f1-background"
-          data-hybrid-chat
-          data-open={open && !!view}
-          role={open && view ? "region" : undefined}
-          aria-label="Conversation"
-          aria-hidden={!open || !view}
-        >
-          <div className="flex items-center justify-between gap-2 p-4">
-            <F0Heading content="New conversation" variant="heading" />
-            <div className="flex gap-1">
-              {open && view && (
+      <div
+        className="flex h-full min-h-0 w-full bg-f1-background"
+        ref={root}
+        data-hybrid-root
+        data-mode={view ? mode : "idle"}
+        data-view={view ?? "home"}
+        data-typing={typing}
+        onKeyDown={keys}
+      >
+        <div className="h-full min-w-0 flex-1" ref={work} data-hybrid-work>
+          <div className="h-full" data-hybrid-canvas>
+            {children}
+          </div>
+          <div data-hybrid-dock aria-hidden="true" />
+          <div
+            className="bg-f1-background"
+            data-hybrid-chat
+            data-open={open && !!view}
+            role={open && view ? "region" : undefined}
+            aria-label="Conversation"
+            aria-hidden={!open || !view}
+          >
+            <div className="flex items-center justify-between gap-2 p-4">
+              <F0Heading content="Ask Factorial" variant="heading" />
+              <div className="flex gap-1">
+                {open && view && (
+                  <F0Button
+                    label={
+                      mode === "side"
+                        ? "Expand conversation"
+                        : "Show beside page"
+                    }
+                    icon={mode === "side" ? Maximize : Minimize}
+                    hideLabel
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setMode(mode === "side" ? "focus" : "side")}
+                  />
+                )}
                 <F0Button
-                  label={
-                    mode === "side" ? "Expand conversation" : "Show beside page"
-                  }
-                  icon={mode === "side" ? Maximize : Minimize}
+                  label="Close conversation"
+                  icon={Cross}
                   hideLabel
                   variant="ghost"
                   size="sm"
-                  onClick={() => setMode(mode === "side" ? "focus" : "side")}
-                />
-              )}
-              <F0Button
-                label="Close conversation"
-                icon={Cross}
-                hideLabel
-                variant="ghost"
-                size="sm"
-                onClick={close}
-              />
-            </div>
-          </div>
-          <div
-            className="flex flex-col gap-6 p-6"
-            data-hybrid-messages
-            aria-live="polite"
-          >
-            {view && activeConversation && (
-              <ConversationView conversation={activeConversation} />
-            )}
-          </div>
-          <div data-hybrid-chat-target />
-        </div>
-        <div
-          className="rounded-2xl border border-solid border-f1-border-secondary bg-f1-background"
-          ref={composer}
-          data-hybrid-composer
-          data-compact={compact}
-          data-writing={typing || open}
-        >
-          <div data-hybrid-trigger aria-hidden={!compact}>
-            <F0Button
-              label="What can I do for you?"
-              icon={FactorialAgentIcon}
-              size="md"
-              variant="ghost"
-              onClick={() => {
-                setMode("expanded")
-                setNotice("")
-              }}
-            />
-          </div>
-          <div data-hybrid-editor aria-hidden={compact}>
-            <div
-              className="flex gap-1"
-              data-hybrid-suggestions
-              aria-hidden={typing || open}
-            >
-              <F0Button
-                label={suggestion.label}
-                icon={Sparkles}
-                variant="neutral"
-                size="sm"
-                onClick={() => {
-                  send(suggestion.prompt)
-                }}
-              />
-            </div>
-            <div data-hybrid-field>
-              <F0TextAreaInput
-                label="Message your agent"
-                hideLabel
-                placeholder="Let me know what I can do for you"
-                value={draft}
-                onChange={setDraft}
-                rows={2}
-                maxHeight={72}
-              />
-            </div>
-            <div
-              className="flex items-center justify-between"
-              data-hybrid-actions
-            >
-              <F0Button
-                label="Attach a file"
-                icon={Paperclip}
-                hideLabel
-                size="md"
-                variant="outline"
-                onClick={() =>
-                  setNotice(
-                    "Attachments are not enabled in this interaction prototype."
-                  )
-                }
-              />
-              <div className="flex items-center gap-1">
-                <F0Button
-                  label="Record audio"
-                  icon={Microphone}
-                  hideLabel
-                  size="md"
-                  variant="ghost"
-                  onClick={() =>
-                    setNotice(
-                      "Audio recording is not enabled in this interaction prototype."
-                    )
-                  }
-                />
-                <F0Button
-                  label="Send message"
-                  icon={ArrowUp}
-                  hideLabel
-                  size="md"
-                  disabled={!draft.trim()}
-                  onClick={() => send()}
+                  onClick={close}
                 />
               </div>
             </div>
+            <div
+              className={
+                activeConversation
+                  ? "flex flex-col gap-6 p-6"
+                  : "flex flex-col px-6 pt-6"
+              }
+              data-hybrid-messages
+              aria-live="polite"
+            >
+              {view &&
+                (activeConversation ? (
+                  <ConversationView conversation={activeConversation} />
+                ) : (
+                  <div className="mt-auto flex flex-col gap-4">
+                    {open && (
+                      <FactorialAgentIcon key={view} width={40} height={40} />
+                    )}
+                    <div className="flex flex-col gap-3">
+                      <F0Heading
+                        content={emptyState.question}
+                        variant="heading"
+                      />
+                      <div className="flex flex-col items-start gap-2">
+                        {emptyState.suggestions.map(({ label, icon }) => (
+                          <HomeSuggestion
+                            key={label}
+                            label={label}
+                            icon={icon}
+                            size="md"
+                            variant="outline"
+                            onClick={() => send(label)}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+            </div>
+            <div data-hybrid-chat-target />
           </div>
-        </div>
-        {notice && (
           <div
-            className="rounded-md border border-solid border-f1-border-secondary bg-f1-background p-2"
-            data-hybrid-notice
-            role="status"
+            className="rounded-2xl border border-solid border-f1-border-secondary bg-f1-background"
+            ref={composer}
+            data-hybrid-composer
+            hidden={compact}
+            data-compact={compact}
+            data-writing={typing || open}
           >
-            <F0Text content={notice} variant="description" />
-            <F0Button
-              label="Dismiss"
-              icon={Cross}
-              variant="ghost"
-              size="sm"
-              onClick={() => setNotice("")}
-            />
+            <div data-hybrid-editor aria-hidden={compact}>
+              <div
+                className="flex gap-1"
+                data-hybrid-suggestions
+                aria-hidden={typing || open}
+              >
+                <HomeSuggestion
+                  label={suggestion.label}
+                  size="md"
+                  onClick={() => {
+                    send(suggestion.prompt)
+                  }}
+                />
+              </div>
+              <div data-hybrid-field>
+                <F0TextAreaInput
+                  label="Message your agent"
+                  hideLabel
+                  placeholder="Let me know what I can do for you"
+                  value={draft}
+                  onChange={setDraft}
+                  rows={2}
+                  maxHeight={72}
+                />
+              </div>
+              <div
+                className="flex items-center justify-between"
+                data-hybrid-actions
+              >
+                <F0Button
+                  label="Attach a file"
+                  icon={Paperclip}
+                  hideLabel
+                  size="md"
+                  variant="outline"
+                  onClick={() =>
+                    setNotice(
+                      "Attachments are not enabled in this interaction prototype."
+                    )
+                  }
+                />
+                <div className="flex items-center gap-1">
+                  <F0Button
+                    label="Record audio"
+                    icon={Microphone}
+                    hideLabel
+                    size="md"
+                    variant="ghost"
+                    onClick={() =>
+                      setNotice(
+                        "Audio recording is not enabled in this interaction prototype."
+                      )
+                    }
+                  />
+                  <F0Button
+                    label="Send message"
+                    icon={ArrowUp}
+                    hideLabel
+                    size="md"
+                    disabled={!draft.trim()}
+                    onClick={() => send()}
+                  />
+                </div>
+              </div>
+            </div>
           </div>
-        )}
+          {notice && (
+            <div
+              className="rounded-md border border-solid border-f1-border-secondary bg-f1-background p-2"
+              data-hybrid-notice
+              role="status"
+            >
+              <F0Text content={notice} variant="description" />
+              <F0Button
+                label="Dismiss"
+                icon={Cross}
+                variant="ghost"
+                size="sm"
+                onClick={() => setNotice("")}
+              />
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </AgentEntryContext.Provider>
   )
 }
