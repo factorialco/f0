@@ -397,6 +397,26 @@ describe("F0InputField actions", () => {
       expect(input.type).toBe("password")
     })
 
+    it("never forces a type onto a non-input child", () => {
+      // Masking works by forcing the child's `type`. On a `<button>` trigger
+      // (F0Select) `type="password"` is silently treated as `submit`, which
+      // would turn a select into a form submit.
+      const { container } = render(
+        <F0InputField
+          label="Legal gender"
+          value="Female"
+          actions={[{ type: "visibility" }]}
+        >
+          <button type="button">Female</button>
+        </F0InputField>
+      )
+
+      expect(container.querySelector("button[type=password]")).toBeNull()
+      expect(
+        screen.getByRole("button", { name: "Show Legal gender" })
+      ).toBeInTheDocument()
+    })
+
     it("takes an explicit [show, hide] label pair", () => {
       renderField({
         actions: [{ type: "visibility", label: ["Reveal IBAN", "Mask IBAN"] }],

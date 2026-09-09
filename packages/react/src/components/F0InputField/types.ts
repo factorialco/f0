@@ -58,6 +58,10 @@ export type InputFieldAction =
   /**
    * A pencil. The field does not become editable on its own — the consumer
    * flips `readonly` off in response.
+   *
+   * Always a pencil, because it always means "you are about to type here". A
+   * value chosen from a list or a calendar is a different act, and it belongs
+   * to `F0Select` / `F0DatePicker`, which draw their own chevron and calendar.
    */
   | (InputFieldActionShared & {
       type: "edit"

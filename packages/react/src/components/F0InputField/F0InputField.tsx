@@ -320,7 +320,12 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
     const hasVisibilityAction = !!actions?.some(
       (action) => action.type === "visibility"
     )
-    const masked = hasVisibilityAction && !revealed
+    // Masking works by forcing the child's `type`, so it only applies to a
+    // real `<input>`. On a `<button>` trigger (F0Select) `type="password"` is
+    // silently treated as `submit`, and on a `<textarea>` it is not an
+    // attribute at all.
+    const childIsInput = (children as React.ReactElement)?.type === "input"
+    const masked = hasVisibilityAction && !revealed && childIsInput
 
     // True while any action is showing a positive tone. One event, two
     // expressions: the action's glyph becomes a tick and the whole field goes
