@@ -1,7 +1,7 @@
 // Bundled with the package as a same-origin URL asset (not a runtime CDN
 // fetch), so it works offline and adds no third-party dependency.
 import rtlTextPluginUrl from "@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.js?url"
-import maplibregl, { type StyleSpecification } from "maplibre-gl"
+import maplibregl from "maplibre-gl"
 import darkStyle from "./f0-dark.json"
 import lightStyle from "./f0-light.json"
 
@@ -21,12 +21,22 @@ if (
 }
 
 /**
- * A light/dark pair of MapLibre styles. Each entry is either a hosted style
- * URL or an inline `StyleSpecification`.
+ * Which rendering engine a style is written for. The tag exists so a style
+ * built for one engine can never be handed to another: the shapes are not
+ * interchangeable, and without it the mismatch would only surface at runtime.
  */
-export interface F0MapStylePair {
-  light: string | StyleSpecification
-  dark: string | StyleSpecification
+export type F0MapProvider = "maplibre"
+
+/**
+ * A light/dark style pair for one engine. `light` and `dark` are deliberately
+ * opaque - their real shape belongs to the engine (a MapLibre
+ * `StyleSpecification` or a style URL today), and F0Map's public surface must
+ * never make a consumer import an engine's types to describe a style.
+ */
+export interface F0MapStyle {
+  provider: F0MapProvider
+  light: unknown
+  dark: unknown
 }
 
 /**
@@ -37,7 +47,8 @@ export interface F0MapStylePair {
  * resolved to concrete hex for the light and dark neutral ramps. Regenerate with
  * `node src/patterns/F0Map/styles/buildStyles.mjs`.
  */
-export const f0MapStyles: F0MapStylePair = {
-  light: lightStyle as unknown as StyleSpecification,
-  dark: darkStyle as unknown as StyleSpecification,
+export const f0MapStyles: F0MapStyle = {
+  provider: "maplibre",
+  light: lightStyle,
+  dark: darkStyle,
 }

@@ -272,10 +272,10 @@ describe("F0Map", () => {
       expect(onMarkerSelect).toHaveBeenCalledWith(null)
     })
 
-    it("getMap returns the underlying instance", () => {
+    it("getNativeMap returns the engine's own instance", () => {
       const ref = createRef<F0MapHandle>()
       render(<F0Map ref={ref} markers={POINTS} />)
-      expect(ref.current?.getMap()).toBe(mock.instances[0])
+      expect(ref.current?.getNativeMap()).toBe(mock.instances[0])
     })
   })
 
@@ -337,6 +337,23 @@ describe("F0Map", () => {
         cb({ features: [{ properties: { id: "commute", kind: "route" } }] })
       )
       expect(onRouteClick).toHaveBeenCalledWith("commute")
+    })
+  })
+
+  describe("style", () => {
+    it("hands the engine the matching half of the style pair", () => {
+      // The pair is opaque to F0Map (its shape belongs to the engine), so the
+      // only thing worth asserting is that the right half reaches the map
+      // unchanged - jsdom has no `.dark` ancestor, so that is `light`.
+      const light = { version: 8, name: "light" }
+      const dark = { version: 8, name: "dark" }
+      render(
+        <F0Map
+          markers={POINTS}
+          mapStyle={{ provider: "maplibre", light, dark }}
+        />
+      )
+      expect(mock.instances[0].opts.style).toBe(light)
     })
   })
 
