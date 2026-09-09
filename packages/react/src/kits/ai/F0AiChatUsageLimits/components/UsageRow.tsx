@@ -3,12 +3,14 @@ import { cn } from "@/lib/utils"
 
 type UsageRowProps = {
   label: string
+  description?: string
   percentage: number
   unlimited?: boolean
 }
 
 export const UsageRow = ({
   label,
+  description,
   percentage,
   unlimited = false,
 }: UsageRowProps) => {
@@ -18,9 +20,16 @@ export const UsageRow = ({
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between gap-2">
-        <span className="min-w-0 truncate text-base font-medium text-f1-foreground">
-          {label}
-        </span>
+        <div className="flex min-w-0 flex-col">
+          <span className="truncate text-base font-medium text-f1-foreground">
+            {label}
+          </span>
+          {description ? (
+            <span className="truncate text-base text-f1-foreground-secondary">
+              {description}
+            </span>
+          ) : null}
+        </div>
         <span className="shrink-0 font-normal tabular-nums text-f1-foreground-secondary">
           {unlimited
             ? i18n.t("ai.usageLimits.unlimited")

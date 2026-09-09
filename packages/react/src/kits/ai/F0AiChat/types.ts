@@ -566,6 +566,8 @@ export type AiChatUsageLimitsSection = {
   id: string
   /** Already localized. */
   label: string
+  /** Already localized, e.g. "Renews Sep 4". */
+  description?: string
   usedPercentage: number
   unlimited?: boolean
 }
@@ -577,6 +579,8 @@ export type AiChatUsageLimitsSection = {
 export type AiChatUsageLimits = {
   /** The viewer's own allowance, 0–100. */
   usedPercentage: number
+  /** Already localized, e.g. "Resets in 3 hr 6 min". */
+  description?: string
   unlimited?: boolean
   /** Extra rows below a divider, typically for admins. */
   sections?: AiChatUsageLimitsSection[]
