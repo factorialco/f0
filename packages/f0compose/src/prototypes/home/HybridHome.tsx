@@ -71,6 +71,17 @@ export function HybridHome({ children }: { children: ReactNode }) {
     const timer = window.setTimeout(focusField, 380)
     return () => window.clearTimeout(timer)
   }, [mode])
+  // Collapse the entry without consuming the outside interaction or moving focus.
+  useEffect(() => {
+    if (mode !== "expanded" || !view) return
+    const dismissOutside = (event: PointerEvent) => {
+      if (event.composedPath().includes(composer.current!)) return
+      setMode("idle")
+      setNotice("")
+    }
+    document.addEventListener("pointerdown", dismissOutside, true)
+    return () => document.removeEventListener("pointerdown", dismissOutside, true)
+  }, [mode, view])
   // The composer stays mounted. Only its geometry follows the destination.
   useLayoutEffect(() => {
     const container = work.current,
