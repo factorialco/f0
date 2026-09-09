@@ -3,10 +3,11 @@ import {
   OneEmptyState,
   Tabs,
 } from "@factorialco/f0-react/dist/experimental"
-import { useState } from "react"
 
 import { PeopleBanners } from "./PeopleBanners"
 import { peopleColumns } from "./peopleColumns"
+import { usePeopleFocus } from "./peopleFocusStore"
+import { setPeopleTab, usePeopleTab } from "./peopleTabStore"
 import { usePeopleSource } from "./usePeopleSource"
 
 /**
@@ -44,25 +45,45 @@ function PeopleTable() {
   )
 }
 
+/**
+ * The table, remounted when One changes its focus.
+ *
+ * ODC owns its own fetch lifecycle and knows nothing about our store, so
+ * changing `peopleFocus` alone would leave the rows it already has on
+ * screen. The `key` is the cheapest honest way to make it refetch — and
+ * remounting a 24-row table costs nothing. The alternative, threading the
+ * focus into `useDataCollectionSource`'s config and relying on ODC to
+ * notice, depends on internals we do not own.
+ */
+function FocusedPeopleTable() {
+  const focus = usePeopleFocus()
+  return <PeopleTable key={focus ?? "all"} />
+}
+
 export function PeopleScreen() {
   // Only the People tab is designed. The other four move the highlight and
   // say so, rather than silently showing the People table under a
   // different name — the prototype's rule for undesigned surfaces is to
   // keep the finished shape and be honest about the gap.
-  const [tab, setTab] = useState<TabId>("people")
+  // Module store, not component state: the window unmounts with the
+  // canvas whenever a widget maximizes, and the tab has to survive that.
+  const tab = usePeopleTab()
   const active = TABS.find((t) => t.id === tab)
 
   return (
-    <div className="home-canvas-scroll flex min-h-0 w-full flex-1 flex-col overflow-y-auto">
+    // The pane is `fills: true`, so the BODY owns its layout and its
+    // scroller. (It briefly did not, back when the card hugged its
+    // content — that premise died when the window took the full height.)
+    <div className="home-window-scroll flex min-h-0 w-full flex-1 flex-col overflow-auto overscroll-contain">
       <Tabs
         tabs={TABS.map((t) => ({ id: t.id, label: t.label }))}
         activeTabId={tab}
-        setActiveTabId={(id: string) => setTab(id as TabId)}
+        setActiveTabId={(id: string) => setPeopleTab(id as TabId)}
       />
       {tab === "people" ? (
         <div className="flex w-full flex-col pb-6">
           <PeopleBanners />
-          <PeopleTable />
+          <FocusedPeopleTable />
         </div>
       ) : (
         <div className="flex flex-1 items-center justify-center px-6 py-16">

@@ -12,6 +12,14 @@ import { useClockInPending } from "./clockInStore"
  *
  * Clicking toggles the widget open in the column. With its own entry
  * point it stays out of the "⋮" list, and the pending dot lives here.
+ *
+ * OPEN state is the glyph turning viridian, not the button held pressed
+ * (per Oskar, 2026-09-02) — a pressed ghost button reads as "you are
+ * hovering this", while a tinted glyph reads as "this thing is on". The
+ * tint is `--selected-60`, which IS viridian in f0: core's palette has
+ * `viridian.60 = 184 92% 28%` and `--selected-60` is the same triple. It
+ * is applied from FULL_BLEED_CSS via `[data-open]`, because F0Button
+ * gives no way to colour its icon (see the rule in Home.tsx).
  */
 export function ClockInButton({
   open,
@@ -22,9 +30,14 @@ export function ClockInButton({
 }) {
   const pending = useClockInPending()
   return (
-    <div data-home-clockin-button className="relative">
+    <div
+      data-home-clockin-button
+      data-icon-motion="timer"
+      data-open={open || undefined}
+      className="relative"
+    >
       <F0Button
-        variant={open ? "neutral" : "ghost"}
+        variant="ghost"
         size="md"
         icon={Timer}
         hideLabel

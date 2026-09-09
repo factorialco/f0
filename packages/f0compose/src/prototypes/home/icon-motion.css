@@ -1,0 +1,320 @@
+/**
+ * Hover micro-animations for the navigation glyphs.
+ *
+ * One bespoke gesture per icon, and the gesture is always the icon's own
+ * behaviour rather than a generic wiggle — the clock-in timer's hands turn
+ * once because that icon is about time passing (Oskar's own example,
+ * 2026-09-02). A glyph where the RIGHT part moves reads as the object
+ * doing its job; a glyph where everything moves reads as a hover effect.
+ *
+ * Why a stylesheet and not `FULL_BLEED_CSS`: that block is a template
+ * literal, and a stray backtick in it has silently broken the build twice
+ * (see NOTES). This file is nothing but `@keyframes` and cubic-beziers, so
+ * it does not belong in a template literal. Nothing here competes with
+ * Tailwind for specificity — Tailwind sets no transform or animation on
+ * these glyphs — so load order does not matter.
+ *
+ * How it reaches the glyph: `F0Icon` drops `className`, so the hook is a
+ * `data-icon-motion` attribute on the BUTTON (see `iconMotion.ts`) and
+ * every rule descends from there into the SVG's children.
+ *
+ * Two rules that are easy to get wrong and expensive to debug:
+ * - Any transform on an SVG CHILD needs `transform-box: view-box` plus an
+ *   explicit `transform-origin` in the viewBox's own units. Without it the
+ *   origin resolves against the whole SVG and the part flies out of frame.
+ * - A full rotation must be a `@keyframes`, never a `transition`: a
+ *   transition reverses on mouse-out, so the hands would unwind backwards.
+ */
+
+@media (hover: hover) and (pointer: fine) {
+  /* --- motions --- */
+  /* Timer — The hands are the only path whose vertex (12, 12.9967) sits on the dial centre, so they turn once while the dial, stem, top bar and both winders hold still. The travel curve accelerates off the mark and brakes back onto it: a stopwatch being started and stopped, one measured interval. This is the set's deliberate exception — 600ms and a full revolution — and it is the gesture Oskar asked for. */
+  /* The press comes FIRST and the sweep waits 80ms for it. Without the
+     delay the hands turn while the lever is still travelling and the
+     causality reads backwards — the point is that the click starts the
+     count. `both` holds the hands at 0deg through the delay so they cannot
+     jump when the sweep takes over. The dwell at 40-60% is the lever held
+     down; both halves share the timer's travel curve because they are one
+     gesture. */
+  [data-icon-motion="timer"]:hover svg path:nth-of-type(2),
+  [data-icon-motion="timer"]:hover svg path:nth-of-type(3) {
+    transform-box: view-box;
+    animation: f0c-timer-press 200ms cubic-bezier(0.77, 0, 0.175, 1);
+  }
+  @keyframes f0c-timer-press {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    40%,
+    60% {
+      transform: translateY(1.5px);
+    }
+  }
+  [data-icon-motion="timer"]:hover svg path:nth-of-type(1) {
+    transform-box: view-box;
+    transform-origin: 12px 13px;
+    animation: f0c-timer-sweep 600ms cubic-bezier(0.77, 0, 0.175, 1) 80ms both;
+  }
+  @keyframes f0c-timer-sweep {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Home — The glyph really is one path — the door notch is the same subpath — so the honest gesture is the house planting itself on its own footprint. The origin is the ground line the walls actually end on (y=19), so the roof rises 1.5 units while the base stays pinned: home base, not a centred pop. */
+  [data-icon-motion="home"]:hover svg path:nth-of-type(1) {
+    transform-box: view-box;
+    transform-origin: 12px 19px;
+    animation: f0c-home-plant 200ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  @keyframes f0c-home-plant {
+    0% {
+      transform: scale(0.9);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  /* Messages — Path 2's outline is deliberately broken at H16.5 because path 1 sits in front of it, so path 1 is the near bubble — the newest reply. It grows out of its own tail tip (~5.4, 20.2) and travels ~2.3 units up-right into place while the back bubble holds still, which is how a message lands in a conversation. Furthest start point is (3.4, 21.9), inside the box. */
+  [data-icon-motion="messages"]:hover svg path:nth-of-type(1) {
+    transform-box: view-box;
+    transform-origin: 5.4px 20.2px;
+    animation: f0c-messages-pop 200ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  @keyframes f0c-messages-pop {
+    0% {
+      transform: translate(-1.6px, 1.6px) scale(0.92);
+    }
+    100% {
+      transform: translate(0, 0) scale(1);
+    }
+  }
+
+  /* Inbox — Path 2 is the tray's own front rim — the slot the mail goes through — not an item resting in it, so it takes the weight of something arriving: it gives 2 units and springs back while the tray body stays rigid. Down is also the only legal direction: at y=12 the rim's ends stay inside the vertical sides (x=4 / x=20) and the trough clears the floor at y=18, whereas lifting it past the sloped shoulders pushes both ends outside the tray. */
+  [data-icon-motion="inbox"]:hover svg path:nth-of-type(2) {
+    transform-box: view-box;
+    animation: f0c-inbox-dip 240ms cubic-bezier(0.77, 0, 0.175, 1);
+  }
+  @keyframes f0c-inbox-dip {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(2px);
+    }
+  }
+
+  /* Calendar — The frame, both tab stems and the top edge are a single path, so the header rule is genuinely the only separable part: it drops 2.5 units from y=7.5 and lands at y=10, the grid forming under a still frame. 2.5 rather than 3 units because at y=7 the rule would touch the bottoms of the tab stems at x=9 and x=15 on its way down. */
+  [data-icon-motion="calendar"]:hover svg path:nth-of-type(2) {
+    transform-box: view-box;
+    animation: f0c-calendar-drop 200ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  @keyframes f0c-calendar-drop {
+    0% {
+      transform: translateY(-2.5px);
+    }
+    100% {
+      transform: translateY(0);
+    }
+  }
+
+  /* Hub — The Hub is a grid of modules and the rx=3 node is the one already different from its three rx=1.5 neighbours, so that tile rises out of its slot and drops back — the hub offering a module up. Straight up, not diagonal: the gap to the tile below goes 3 units to 5, so at 20px you read one tile leaving the grid rather than the grid shifting. The 1.06 is what makes it the only lift in the set that also comes toward you, and non-scaling-stroke keeps the outline hairline-thin as it grows. */
+  [data-icon-motion="hub"]:hover svg rect:nth-of-type(1) {
+    transform-box: view-box;
+    transform-origin: 7.5px 7.5px;
+    animation: f0c-hub-lift 240ms cubic-bezier(0.77, 0, 0.175, 1);
+  }
+  @keyframes f0c-hub-lift {
+    0%,
+    100% {
+      transform: translateY(0) scale(1);
+    }
+    50% {
+      transform: translateY(-2px) scale(1.06);
+    }
+  }
+
+  /* Plus — A plus means more, so the mark itself becomes more: all four arms push 1.5 units out from the exact crossing point at (12,12) and come back. It is the set's only uniform scale about a glyph's own centre. A quarter-turn was rejected as out of band, and a full turn on a four-fold symmetric cross reads as a loading spinner rather than as adding something. */
+  [data-icon-motion="plus"]:hover svg path:nth-of-type(1) {
+    transform-box: view-box;
+    transform-origin: 12px 12px;
+    animation: f0c-plus-pulse 240ms cubic-bezier(0.77, 0, 0.175, 1);
+  }
+  @keyframes f0c-plus-pulse {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.2);
+    }
+  }
+
+  /* Bot — The eyes scan left then right and the mouth goes from a flat line
+     to a smile: the agent noticing you and warming up (Oskar's brief). This
+     is why `Bot.tsx` was split into addressable parts — as one compound
+     path nothing inside it could be reached.
+     Selectors are `[data-bot="…"]`, not `nth-of-type`, because this icon is
+     ours: naming the part beats counting to it, and it cannot silently
+     shift if the glyph is ever re-ordered.
+     The mouth is a TRANSITION off `:hover`, so it holds the smile for as
+     long as you stay and returns to the flat line when you go — it is a
+     state, not a one-shot. The set's "nothing at opacity 0" rule is
+     deliberately bent: the glyph is fully visible at rest, and what is
+     hidden is one feature's alternate shape. No delay between the glance
+     and the smile — staggering them left a gap with no mouth at all. */
+  [data-icon-motion="bot"]:hover svg [data-bot="eyes"] {
+    transform-box: view-box;
+    animation: f0c-bot-glance 600ms cubic-bezier(0.77, 0, 0.175, 1);
+  }
+  @keyframes f0c-bot-glance {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    30% {
+      transform: translateX(-0.9px);
+    }
+    70% {
+      transform: translateX(0.9px);
+    }
+  }
+  [data-icon-motion="bot"] svg [data-bot="mouth-flat"],
+  [data-icon-motion="bot"] svg [data-bot="mouth-smile"] {
+    transition: opacity 200ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  [data-icon-motion="bot"] svg [data-bot="mouth-smile"] {
+    opacity: 0;
+  }
+  [data-icon-motion="bot"]:hover svg [data-bot="mouth-flat"] {
+    opacity: 0;
+  }
+  [data-icon-motion="bot"]:hover svg [data-bot="mouth-smile"] {
+    opacity: 1;
+  }
+
+  /* Clock — The hands' vertex is exactly on the dial centre, and with only a dial and a hands path there is nothing else honest to move — a tilt is out: any in-band angle moves a 4-unit hand less than a pixel at 20px. So this is the set's one accepted repeat of a gesture, and it is right because it is literally the same object doing the same job. What differs is character: the snap curve flicks the hands round and lets them glide to rest, a routine coming round again, against the timer's measured start-and-stop. Nothing translates or scales and the silhouette never changes, so despite the 360 it disturbs less of the glyph than the shield or the hub does. */
+  [data-icon-motion="clock"]:hover svg path:nth-of-type(1) {
+    transform-box: view-box;
+    transform-origin: 12px 12px;
+    animation: f0c-clock-sweep 600ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  @keyframes f0c-clock-sweep {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Graph — The series DRAWS ITSELF left to right while the L-shaped axis
+     holds still, so you watch the report being plotted onto its own track
+     (Oskar's brief). `stroke-dasharray` equal to the path's measured length
+     (22.54, rounded up to 23 so the tail cannot be left a hair short) and
+     the offset running to 0.
+     LINEAR, and it is the one motion in the set that is — with the
+     ease-in-out curve the offset went 23 -> 21.8 -> 9.3, so the first
+     150ms drew 5% and the next 150ms drew 56%: the middle of the line
+     arrived in one lump and the whole thing read as forming from the
+     centre outwards (Oskar). A draw-on is constant motion — a progress bar
+     that happens to follow a path — which is exactly the case linear is
+     for. Any easing makes the tip's speed vary, and a varying tip speed is
+     precisely what stops it reading as one line being drawn.
+     Path order does the rest for free: the series runs 0 -> 16.5 and the
+     two arrowhead barbs are the 2nd and 3rd subpaths, so the line reaches
+     the tip at ~440ms and the head assembles over the last 160ms.
+     Paint-only: `stroke-dashoffset` triggers no layout, which is why it is
+     the one property outside transform/opacity this set allows. It also
+     needs no rest-state rule — with no dasharray the path is simply whole,
+     so hover-out cannot leave it half-drawn. */
+  [data-icon-motion="graph"]:hover svg path:nth-of-type(2) {
+    stroke-dasharray: 23;
+    animation: f0c-graph-draw 600ms linear;
+  }
+  @keyframes f0c-graph-draw {
+    0% {
+      stroke-dashoffset: 23;
+    }
+    100% {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  /* Folders — The front folder tilts 9 degrees about its own centre and
+     holds while you stay: the top folder of a stack nudged out of square,
+     nothing more (Oskar's second pass — the version that grew until it met
+     the back line was too much, and the glyph should read as the original
+     at rest).
+     9 degrees rather than a smaller angle because that is what it takes to
+     be seen: the corner sits 9.22 units from the pivot, so 9deg moves it
+     1.45 units — right on this set's ~1.4-unit legibility floor at the
+     rendered 20px. Anything less is a shimmer.
+     Counter-clockwise, not clockwise, so the bottom-right corner lifts
+     (16 -> 14.83) AWAY from the back line rather than crowding it.
+     A TRANSITION declared off `:hover` so it applies both ways — the tilt
+     holds while the pointer is there and unwinds when it leaves, which is
+     the one case in this set where a transition's reversal is the feature
+     rather than the bug. */
+  [data-icon-motion="folders"] svg path:nth-of-type(1) {
+    transform-box: view-box;
+    transform-origin: 11px 10px;
+    transition: transform 240ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  [data-icon-motion="folders"]:hover svg path:nth-of-type(1) {
+    transform: rotate(-9deg);
+  }
+
+  /* Marketplace — The awning is the glyph's one movable flap, and its scalloped hem is welded to the shopfront at y=11, so it stretches from that hem instead of flying off it: the canopy pulls taut 1.4 units upward and relaxes, the stall opening for business with the shop unmoved. Scaling only in Y about the hem leaves the four hem tips at y=11 exactly where they were and takes the top edge to y=2.6, inside the box, and non-scaling-stroke keeps the line weight constant through the stretch. A plain 2-unit lift was rejected: it would have been the same gesture, direction and amplitude as the Hub's tile. */
+  [data-icon-motion="marketplace"]:hover svg path:nth-of-type(2) {
+    transform-box: view-box;
+    transform-origin: 12px 11px;
+    animation: f0c-marketplace-unfurl 240ms cubic-bezier(0.77, 0, 0.175, 1);
+  }
+  @keyframes f0c-marketplace-unfurl {
+    0%,
+    100% {
+      transform: scaleY(1);
+    }
+    50% {
+      transform: scaleY(1.2);
+    }
+  }
+
+  /* Shield — With a single path there is no part to move, so it does what a shield does: it pivots on its planted bottom point at (12,21) — an 18-unit lever, so 8deg swings the crown a very visible 2.5 units — angling into a blow and squaring straight back up. At full tilt the widest corner reaches x=2.5, so nothing escapes the box. It keeps the round trip; the Bot, the set's other bottom-pivot rotation, was made a one-way straighten so the two never read as the same tilt. */
+  [data-icon-motion="shield"]:hover svg path:nth-of-type(1) {
+    transform-box: view-box;
+    transform-origin: 12px 21px;
+    animation: f0c-shield-brace 240ms cubic-bezier(0.77, 0, 0.175, 1);
+  }
+  @keyframes f0c-shield-brace {
+    0%,
+    100% {
+      transform: rotate(0deg);
+    }
+    50% {
+      transform: rotate(-8deg);
+    }
+  }
+  /* --- /motions --- */
+}
+
+/**
+ * Reduced motion means fewer and gentler animations, not zero — but every
+ * gesture here is pure decoration carrying no information the glyph does
+ * not already carry, so all of it goes.
+ */
+@media (prefers-reduced-motion: reduce) {
+  [data-icon-motion] svg,
+  [data-icon-motion] svg * {
+    animation: none !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}

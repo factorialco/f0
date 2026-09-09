@@ -5,12 +5,7 @@ import {
   type ModuleId,
 } from "@factorialco/f0-react"
 import { F0AvatarModule } from "@factorialco/f0-react/dist/experimental"
-import {
-  Ellipsis,
-  Megaphone,
-  Reaction,
-  Settings,
-} from "@factorialco/f0-react/icons/app"
+import { Ellipsis, Reaction, Settings } from "@factorialco/f0-react/icons/app"
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { useSearchParams } from "react-router-dom"
 
@@ -18,41 +13,44 @@ import type { PrototypeMeta } from "../types"
 import type { LeftPaneId } from "./comms/ChatsColumn"
 import type { WindowId } from "./windows/types"
 
-import { MONTH_LABEL } from "./calendar/calendarFixtures"
-import { CalendarScreen } from "./calendar/CalendarScreen"
+import { AgentsScreen } from "./agents/AgentsScreen"
+import { agentById } from "./agents/agentStore"
 import {
   animateChatClose,
   ChatsColumn,
   isTicket,
+  leftPaneKind,
   MaximizedChat,
   useChats,
 } from "./comms/ChatsColumn"
 import { onChatRequest, setOpenChats } from "./comms/chatStore"
 import { EmployeeCanvas } from "./EmployeeCanvas"
 import {
-  INBOX_TOTAL,
-  needsYouTasks,
   PROFILE_PEOPLE,
   type NeedsYouTask,
   type ProfilePerson,
 } from "./fixtures"
 import { HomeNav } from "./HomeNav"
 import { NeedsYouItem } from "./NeedsYouItem"
-import { ConversationPanel } from "./one/ConversationPanel"
+import { phaseFor, useNeedsYou, visibleTasks } from "./needsYouStore"
 import {
-  closeConversationPanel,
   onWindowRequest,
+  onWindowsCollapseRequest,
   useConversations,
 } from "./one/conversationStore"
 import { ConversationView } from "./one/ConversationView"
 import { PlayOutline } from "./one/PlayOutline"
 import { OnePromptBar } from "./OnePromptBar"
-import { PeopleScreen } from "./people/PeopleScreen"
 import { PoliciesScreen } from "./policies/PoliciesScreen"
 import { useProfile } from "./profileStore"
 import { SectionHeader } from "./SectionHeader"
 import { ClockInButton } from "./windows/ClockInButton"
-import { stackWidth } from "./windows/stack"
+import {
+  isModulePane,
+  isModuleWindowView,
+  modulePaneId,
+} from "./windows/ModulePane"
+import { CANVAS_MIN_PEEK, stackWidth } from "./windows/stack"
 import { useWindows } from "./windows/useWindows"
 import {
   animateWindowClose,
@@ -62,6 +60,7 @@ import {
   WindowsColumn,
 } from "./windows/WindowsColumn"
 import { WindowsMenu } from "./windows/WindowsMenu"
+import "./icon-motion.css"
 
 /**
  * Home — "Needs you" (Manager view).
@@ -230,8 +229,54 @@ const FULL_BLEED_CSS = `
     font-size: 0;
   }
   [data-one-composer] div:has(> textarea[name="one-ai-input"]) > p::before {
-    content: "How can I help you today?";
+    /* Overridable per instance: the Agents brief passes its own copy in
+       through --f0c-one-placeholder (see OnePromptBar). */
+    content: var(--f0c-one-placeholder, "How can I help you today?");
     font-size: 14px;
+  }
+  /* ChatSpinner's own animations, copied from f0's
+     sds/ai/F0ActionItem/styles.css. They are NOT in f0-react's dist —
+     the reworked spinner lives on a branch that has not shipped — so the
+     local ChatSpinner would otherwise render with no entrance and no
+     breath. (shine-text DOES ship, in F0AiChat.css, which is why the
+     "Thinking..." label already shimmers.) Keep in step with that file.
+     No backticks in here: the whole block is a template literal. */
+  @keyframes globe-spin-enter {
+    from {
+      opacity: 0;
+      transform: scale(0.92);
+      /* Size-relative — set by the component. A flat px blur reads
+         completely differently at 20px and at 120px. */
+      filter: blur(var(--globe-spin-blur, 1px));
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+      filter: blur(0);
+    }
+  }
+  @keyframes globe-spin-fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  /* Subtle "thinking" breath, on the spin's own period so the two
+     rhythms stay in phase. ~3.5% so it reads as life, not noise. */
+  @keyframes globe-spin-breathe {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.035); }
+  }
+  /* Both in ONE class because the animation shorthand resets every
+     animation-* property: two separate classes would have the second
+     wipe out the first. */
+  .globe-spin-anim {
+    animation:
+      globe-spin-enter 0.2s cubic-bezier(0.23, 1, 0.32, 1) both,
+      globe-spin-breathe var(--globe-spin-cycle, 2300ms) ease-in-out 0.2s infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .globe-spin-anim {
+      animation: globe-spin-fade 0.2s ease both;
+    }
   }
   /* The ONE glow behind the clarifying panel (Figma 2732:462941): a
      blurred gradient sibling painted BEFORE the card, so only the ~4px
@@ -252,6 +297,16 @@ const FULL_BLEED_CSS = `
       rgba(229, 25, 67, 0.5),
       rgba(229, 86, 25, 0.5)
     );
+  }
+  /* Clock in reads as ACTIVE by tinting its glyph viridian rather than by
+     holding the button pressed (per Oskar). f0's ghost variant paints the
+     icon through a [&_svg:not([data-has-color])]:text-f1-icon utility,
+     which this selector matches in specificity — and this block is
+     injected after Tailwind's sheet, so it wins. --selected-60 IS
+     viridian: core's palette defines viridian.60 as the same 184 92% 28%.
+     (No backticks in here — this whole block is a template literal.) */
+  [data-home-clockin-button][data-open] svg {
+    color: hsl(var(--selected-60));
   }
   /* Hide the composer FAB — its actions (theme toggle, back to catalog)
      live in the sidebar's user menu on this prototype. */
@@ -296,13 +351,18 @@ const FULL_BLEED_CSS = `
       animation: f0c-window-fade-in 0.12s cubic-bezier(0.23, 1, 0.32, 1);
     }
   }
-  /* Once the columns overlay the canvas they need their own ground —
-     the p-2 gutters between panels would otherwise let the content show
-     through — plus a soft edge so the stack reads as sitting ON the
-     canvas rather than beside it. Same surface formula as the rail.
-     The shadow falls on the CANVAS-facing side, so it flips for the
-     left-hand chats stack — a -12px offset with -12px spread paints
-     only the left edge, which on that side would fire into the nav. */
+  /* The overlaying column carries NO ground and NO shadow of its own
+     (Oskar, 2026-09-04). It used to paint #FCFCFC plus a -12px edge
+     shadow, on the theory that the p-2 gutters between panels would
+     otherwise let content show through — but that is precisely what
+     should happen: over a conversation the opaque slab clipped the rows
+     behind it mid-word, and the shadow made the whole column read as one
+     sheet laid across the chat.
+     What floats is the WIDGET. Every panel already carries its own
+     surface and shadow in WindowStack's CARD_CLASS, which is exactly how
+     the Communities panel reads. The class is kept rather than deleted
+     because WindowsColumn still hangs data-window-stack off it and the
+     dark theme may yet want a ground here. */
   /* The canvas ground, for anything that must be opaque over it — the
      calendar's sticky day header would otherwise need white, which the
      frame does not use. Same value as the overlay below. */
@@ -310,19 +370,35 @@ const FULL_BLEED_CSS = `
   .dark .f0c-canvas-surface {
     background: linear-gradient(hsl(var(--page)), hsl(var(--page))), hsl(var(--neutral-0));
   }
-  .f0c-window-overlay {
-    background: #FCFCFC;
-    box-shadow: -12px 0 28px -12px rgba(13, 22, 37, 0.14);
-  }
-  .f0c-window-overlay[data-window-stack="left"] {
-    box-shadow: 12px 0 28px -12px rgba(13, 22, 37, 0.14);
-  }
-  .dark .f0c-window-overlay {
+  /* The People table's header is STICKY, so it needs an opaque ground or
+     rows scroll through it — but f0 paints it bg-f1-background, i.e.
+     white, and this canvas is #FCFCFC (Oskar: it should not read as a
+     white band). Same problem and same answer as the calendar's sticky
+     day header above: paint it the CANVAS surface, so it is opaque
+     without being a different colour from the page. This block is
+     injected after Tailwind's sheet and the selector outweighs a single
+     utility class, so it wins. */
+  main#content thead th { background: #FCFCFC; }
+  .dark main#content thead th {
     background: linear-gradient(hsl(var(--page)), hsl(var(--page))), hsl(var(--neutral-0));
-    box-shadow: -12px 0 28px -12px rgba(0, 0, 0, 0.5);
   }
-  .dark .f0c-window-overlay[data-window-stack="left"] {
-    box-shadow: 12px 0 28px -12px rgba(0, 0, 0, 0.5);
+  /* INSIDE A WINDOW THE GROUND IS THE CARD, NOT THE CANVAS.
+     The two rules above paint sticky headers #FCFCFC because the People
+     table and the calendar's day row used to sit directly on the page.
+     They are in a WHITE card now, where #FCFCFC reads as a grey band with
+     a seam where it meets the card — Oskar, comparing People against a
+     maximized chat: "es como que en People se ve la linea de separacion".
+     Same token the card itself uses (bg-f1-background compiles to
+     hsl(var(--neutral-0))), so this needs no dark twin: the token flips.
+     The main#content prefix is repeated only to out-specify the id
+     selector above; without it this loses to a rule with an id in it. */
+  main#content section[data-home-window] thead th,
+  main#content section[data-home-window] .f0c-canvas-surface {
+    background: hsl(var(--neutral-0));
+  }
+
+  .f0c-window-overlay {
+    background: transparent;
   }
   /* Thinnest scrollbar available, hidden until you interact with the window. */
   .home-window-scroll {
@@ -334,10 +410,30 @@ const FULL_BLEED_CSS = `
   .home-canvas-scroll {
     -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 40px), transparent 100%);
     mask-image: linear-gradient(to bottom, black calc(100% - 40px), transparent 100%);
+    transition: -webkit-mask-image 150ms ease, mask-image 150ms ease;
     scrollbar-width: thin;
     scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
   }
-  section[data-home-window]:hover .home-window-scroll {
+  /* The same fade the composer end has, at the TOP once you have
+     actually scrolled (Oskar). Gated on the data-scrolled attribute — which
+     ConversationView's existing scroll listener sets — because the bottom
+     fade can be permanent (the composer is always there) while a
+     permanent top one would sit on the first turn at rest. 32px against
+     the bottom's 40: there is less to hide up here, and the navbar edge
+     is right above it. */
+  .home-canvas-scroll[data-scrolled] {
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, black 32px, black calc(100% - 40px), transparent 100%);
+    mask-image: linear-gradient(to bottom, transparent 0, black 32px, black calc(100% - 40px), transparent 100%);
+  }
+  /* The thumb shows only WHILE YOU SCROLL (Oskar: "podemos ocultar la
+     barra de scroll si no estamos haciendo scroll?"). It used to appear on
+     hovering the window, which meant a long table showed a dark bar down
+     its edge the whole time your pointer was anywhere in it — and against
+     One's canvas that reads as another divider.
+     The gutter is NOT reclaimed: scrollbar-width stays thin and only the
+     colour changes, so nothing reflows when the bar comes and goes.
+     The data-scrolling attribute is set by useTransientScrollbars. */
+  .home-window-scroll[data-scrolling] {
     scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
   }
   /* Needs-you cards stack in on load. Home is seen dozens of times a
@@ -348,6 +444,57 @@ const FULL_BLEED_CSS = `
     to { opacity: 1; transform: none; }
   }
   .f0c-card-in { animation: f0c-card-in 0.2s cubic-bezier(0.23, 1, 0.32, 1) backwards; }
+  /* One resolving a row in place. Each reasoning step REPLACES the last,
+     so the change has to be marked — a line silently becoming a different
+     line is easy to miss at a glance. Same 3-4px/200ms/curve as the card
+     entrance above, so the row keeps one motion vocabulary. */
+  @keyframes f0c-step-in {
+    from { opacity: 0; transform: translateY(3px); }
+    to { opacity: 1; transform: none; }
+  }
+  .f0c-step-in { animation: f0c-step-in 0.2s cubic-bezier(0.23, 1, 0.32, 1) backwards; }
+  /* The check landing is the one beat worth a little weight. 0.8 and
+     never 0: nothing in the real world appears from nothing (Emil). */
+  @keyframes f0c-check-in {
+    from { opacity: 0; transform: scale(0.8); }
+    to { opacity: 1; transform: none; }
+  }
+  .f0c-check-in { animation: f0c-check-in 0.2s cubic-bezier(0.23, 1, 0.32, 1) backwards; }
+  /* A cleared row LEAVES by collapsing its own height and the gap it
+     owns, so the rows below slide up instead of teleporting when it
+     unmounts. 160ms against the entrance's 200ms — exit faster than
+     enter, because the user is waiting on the system here rather than
+     deciding (Emil). The gap lives on the inner element on purpose: a
+     parent flex gap-2 would survive the collapse and leave an 8px hole
+     behind, so each row carries its own spacing and takes it with it. */
+  /* One's blank-state headline (Figma 2756:475075). The three stops are
+     the SAME brand palette as the composer's focus glow above — lavender,
+     ONE red, ONE orange — which is what the prototype uses wherever the
+     brand speaks for itself. Fixed in both themes by design, like every
+     other ONE gradient here, which is also why it lives in this block
+     rather than as utilities: they are raw brand colours with no f1
+     token, and the prototype checker is right to reject those in a
+     className. */
+  .f0c-one-headline {
+    background-image: linear-gradient(to left, #a1ade5 18%, rgba(229, 25, 67, 0.7) 50%, rgba(229, 86, 25, 0.7) 83%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .f0c-row-slot {
+    display: grid;
+    grid-template-rows: 1fr;
+    transition: grid-template-rows 160ms cubic-bezier(0.23, 1, 0.32, 1), opacity 160ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  .f0c-row-slot[data-exiting] { grid-template-rows: 0fr; opacity: 0; }
+  /* Reduced motion keeps the OPACITY — it is what tells you the row has
+     gone, and Emil's rule is fewer and gentler, not none — and drops the
+     movement: no collapse, no offsets, no scale. */
+  @media (prefers-reduced-motion: reduce) {
+    .f0c-step-in, .f0c-check-in, .f0c-card-in { animation: none; }
+    .f0c-row-slot { transition: opacity 160ms ease; }
+    .f0c-row-slot[data-exiting] { grid-template-rows: 1fr; }
+  }
   /* The ONE gradient orbits the composer's focus glow. Constant
      decorative motion → linear (Emil), slow enough to be felt, not
      watched. Animating the angle on the pseudo-element itself is
@@ -457,6 +604,52 @@ const FULL_BLEED_CSS = `
   }
 `
 
+/* The navbar's One button lived here (Figma 2756:472409/472468) and is
+   GONE on Oskar's word: "sin el boton de One que se ve ahora". It was the
+   only caller of `OneMark`/`OneMarkGradient` and of `useOnePending`, both
+   of which are left intact in their own files — the gradient mark and the
+   notification dot survive, so putting the entry point back anywhere is a
+   handful of lines. One's insight reading is still reachable from the
+   chevron ON the headcount banner inside the People window, which is the
+   route the frame draws. */
+
+/**
+ * Flag any window scroll area as `data-scrolling` while it is moving, and
+ * clear it once it has been still for a beat.
+ *
+ * ONE listener on `document` in the CAPTURE phase rather than a hook per
+ * component: `scroll` does not bubble but it does capture, and this class
+ * is on eight different bodies today (window panels, the calendar grid,
+ * the ticket pane, a chat, the picker modal, celebrations). Anything that
+ * gets the class later is covered without being told.
+ */
+const SCROLLBAR_IDLE_MS = 700
+
+function useTransientScrollbars() {
+  useEffect(() => {
+    const timers = new WeakMap<Element, number>()
+    const onScroll = (event: Event) => {
+      const el = event.target
+      if (
+        !(el instanceof Element) ||
+        !el.classList.contains("home-window-scroll")
+      )
+        return
+      el.setAttribute("data-scrolling", "")
+      window.clearTimeout(timers.get(el))
+      timers.set(
+        el,
+        window.setTimeout(
+          () => el.removeAttribute("data-scrolling"),
+          SCROLLBAR_IDLE_MS
+        )
+      )
+    }
+    document.addEventListener("scroll", onScroll, true)
+    return () => document.removeEventListener("scroll", onScroll, true)
+  }, [])
+}
+
 function useFullBleedChrome() {
   useEffect(() => {
     const style = document.createElement("style")
@@ -466,18 +659,130 @@ function useFullBleedChrome() {
   }, [])
 }
 
+/**
+ * Remove the redundant `title` from f0's icon-only buttons, so the browser
+ * stops drawing its NATIVE tooltip on top of f0's styled one.
+ *
+ * `F0Button` with `hideLabel` produces both, from two independent lines in
+ * `components/F0Button/internal.tsx`:
+ *
+ *   tooltip={tooltip ?? (!noAutoTooltip && hideLabel && label)}   // f0's
+ *   title={noTitle ? undefined : props.title || (hideLabel && buttonLabel)}
+ *
+ * so you hover once and get two boxes with the same words (Oskar spotted
+ * it on the clock-in). Both of f0's own escape hatches for this,
+ * `noTitle` and `noAutoTooltip`, are listed in `F0Button`'s `privateProps`
+ * and stripped before they reach the component — from the public API there
+ * is no way to opt out, which is why this has to be a DOM pass.
+ *
+ * It strips ONLY a `title` identical to the element's `aria-label`. That is
+ * exactly f0's duplicate, because it sets both from the same label; a
+ * deliberately different `title` is somebody's real tooltip and is left
+ * alone. `aria-label` is never touched, so the accessible name survives —
+ * that, not `title`, is what a screen reader announces.
+ *
+ * The MutationObserver is not optional: most of these buttons mount later
+ * (windows, panels, the run cards), and React re-sets `title` on re-render,
+ * which the `attributeFilter` catches.
+ *
+ * The real fix is one line in f0 — `title` should be a FALLBACK for when no
+ * styled tooltip renders, not an addition to it. Kept local on Oskar's
+ * call (2026-09-02).
+ */
+function useSingleTooltip() {
+  useEffect(() => {
+    const stripped = new Map<Element, string>()
+    const stripOne = (el: Element) => {
+      const title = el.getAttribute("title")
+      if (title && title === el.getAttribute("aria-label")) {
+        stripped.set(el, title)
+        el.removeAttribute("title")
+      }
+    }
+    const strip = (root: Element | Document) => {
+      if (root instanceof Element) stripOne(root)
+      root.querySelectorAll("[title][aria-label]").forEach(stripOne)
+    }
+    strip(document)
+    const observer = new MutationObserver((records) => {
+      for (const record of records) {
+        if (record.type === "attributes") stripOne(record.target as Element)
+        record.addedNodes.forEach((node) => {
+          if (node instanceof Element) strip(node)
+        })
+      }
+    })
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributeFilter: ["title"],
+    })
+    return () => {
+      observer.disconnect()
+      // Reversible like the chrome above: anything still mounted when the
+      // prototype unmounts gets its attribute back.
+      stripped.forEach((title, el) => el.setAttribute("title", title))
+    }
+  }, [])
+}
+
+/**
+ * `?reset=1` on any prototype URL wipes this prototype's saved state and
+ * reloads clean.
+ *
+ * Nothing seeds an agent — a first-time visitor always gets the empty
+ * state — but everything IS persisted, so a shared link shows a returning
+ * visitor their own leftovers instead. That is right for Oskar mid-session
+ * and wrong for a link handed to a colleague, and a console one-liner is
+ * not something you can put in a Slack message. Scoped to this
+ * prototype's keys rather than `localStorage.clear()`, which would take
+ * the shell's own settings with it.
+ */
+const PROTOTYPE_KEYS = [
+  "agents",
+  "conversations",
+  "nav-open",
+  "needs-you",
+  "nav-section",
+  "profile",
+  "recents-filter",
+  "survey-draft",
+]
+
+function useResetParam(searchParams: URLSearchParams) {
+  const asked = searchParams.get("reset")
+  useEffect(() => {
+    if (!asked) return
+    for (const key of PROTOTYPE_KEYS) {
+      window.localStorage.removeItem(`f0compose:home:${key}`)
+    }
+    // Drop the param before reloading, or the reload wipes again forever.
+    const url = new URL(window.location.href)
+    url.searchParams.delete("reset")
+    window.location.replace(url.toString())
+  }, [asked])
+}
+
 function HomeNavbar({
   openWindows,
   onToggleWindow,
   conversationTitle,
+  conversationEmoji,
   screenTitle,
   screenModule,
   screenActions,
+  homeAction,
 }: {
   openWindows: WindowId[]
   onToggleWindow: (id: WindowId) => void
   /** When set, the navbar shows the conversation title + its actions. */
   conversationTitle?: string
+  /**
+   * The agent this conversation belongs to (Figma 2741:466470): its emoji
+   * leads the title, and the play button goes — that one previews a
+   * created survey, which has nothing to do with briefing an agent.
+   */
+  conversationEmoji?: string
   /** When set (and no conversation), a module screen title (Figma
    *  1350:190929: module avatar + name, gear + ⋮ on the right). */
   screenTitle?: string
@@ -486,13 +791,38 @@ function HomeNavbar({
   /** Replaces the screen's default ⋮ + gear pair. The People screen's
    *  frame (2730:461163) carries a single announcements button instead. */
   screenActions?: React.ReactNode
+  /**
+   * An extra control in HOME mode, before the clock-in. A module window
+   * leaves the navbar in Home mode (its title lives on the window), so
+   * this is where One's own button goes — `screenActions` is unreachable
+   * there, because that whole branch is gated on `screenTitle`.
+   */
+  homeAction?: React.ReactNode
+  /**
+   * Set when this conversation came from a module screen's split panel:
+   * a button LEFT of the title takes it back there, carrying the module's
+   * own icon so it says which screen it is going back to (per Oskar).
+   * Absent on a conversation that was never in a panel — there would be
+   * nothing to go back to.
+   */
+  /** The section's own glyph, so the button says where it goes back to. */
 }) {
   return (
     <div className="flex w-full items-center justify-between p-[14px]">
       <div className="flex min-w-0 items-center gap-2">
         {conversationTitle ? (
-          <span className="truncate text-base font-medium text-f1-foreground">
-            {conversationTitle}
+          <span className="flex min-w-0 items-center gap-2">
+            {conversationEmoji && (
+              <span
+                aria-hidden
+                className="flex size-5 shrink-0 items-center justify-center text-[16px] leading-none"
+              >
+                {conversationEmoji}
+              </span>
+            )}
+            <span className="truncate text-base font-medium text-f1-foreground">
+              {conversationTitle}
+            </span>
           </span>
         ) : screenTitle ? (
           <span className="flex min-w-0 items-center gap-2">
@@ -510,14 +840,18 @@ function HomeNavbar({
       </div>
       {conversationTitle ? (
         <div className="flex items-center">
-          <F0Button
-            variant="ghost"
-            size="md"
-            icon={PlayOutline}
-            hideLabel
-            label="Open creation preview"
-            onClick={() => onToggleWindow("preview")}
-          />
+          {/* An agent's brief has nothing to preview — the frame shows
+              only the ⋮ there. */}
+          {!conversationEmoji && (
+            <F0Button
+              variant="ghost"
+              size="md"
+              icon={PlayOutline}
+              hideLabel
+              label="Open creation preview"
+              onClick={() => onToggleWindow("preview")}
+            />
+          )}
           <F0Button
             variant="ghost"
             size="md"
@@ -551,6 +885,7 @@ function HomeNavbar({
         // Default Home mode: Clock in's own button, then the widgets "⋮"
         // (Figma 2621:23687).
         <div className="flex items-center">
+          {homeAction}
           <ClockInButton
             open={openWindows.includes("clockin")}
             onToggle={() => onToggleWindow("clockin")}
@@ -621,7 +956,12 @@ const GREETINGS = [
 ]
 
 export default function Home() {
+  useTransientScrollbars()
   useFullBleedChrome()
+  useSingleTooltip()
+  // Needs-you rows One has cleared. Read here rather than inside the row
+  // so both the list AND its ordering come from one snapshot.
+  const needsYou = useNeedsYou()
 
   // The TEMPLATE is picked once per load; the name re-resolves when the
   // profile changes, so switching does not reshuffle the greeting too.
@@ -630,26 +970,22 @@ export default function Home() {
   )
   const windows = useWindows()
   const chats = useChats()
-  const { conversations, activeId, panelId } = useConversations()
+  const { conversations, activeId } = useConversations()
   const activeConversation = conversations.find((c) => c.id === activeId)
-  // The SPLIT conversation (Figma 2730:458631) lives beside the canvas
-  // instead of taking it over, so it is independent of activeConversation.
-  const panelConversation = conversations.find((c) => c.id === panelId)
-  /**
-   * The right-hand pane holds EITHER the widgets or the split
-   * conversation — the same rule the left pane already has for a chat vs
-   * a ticket. Both frames hide the lateral widgets, and the arithmetic
-   * agrees: at the design's own 1440 a 438px panel, a 448px widget column
-   * and a readable canvas do not fit. The stack is HIDDEN, not closed, so
-   * closing the conversation brings it back exactly as it was; acting on
-   * a widget control the other way closes the panel (see toggleWindow and
-   * onWindowRequest), so a click is never dead.
-   */
-  const panelOpen = panelConversation !== undefined
   // Sub-screens have distinct URLs (?view=policies); an open conversation
   // always takes the canvas over the screen.
-  const [searchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   const view = searchParams.get("view")
+  /**
+   * A Hub section shown as a WINDOW over One rather than instead of One
+   * (Oskar, 2026-09-08: "a modo ventana para mantener como suelo de la
+   * aplicacion a One"). Deliberately NOT derived from
+   * `activeConversation`: the whole point is that both are on screen at
+   * once, so a conversation must not cancel the window the way it cancels
+   * a screen.
+   */
+  const windowView = isModuleWindowView(view) ? view : null
+  useResetParam(searchParams)
   /**
    * The screen the canvas is actually showing. An open conversation takes
    * the canvas over, so every screen-shaped rule below — the title, the
@@ -657,35 +993,46 @@ export default function Home() {
    * applying while one is open, or an expanded conversation inherits the
    * People screen's "no composer, no scroller" layout.
    */
-  const screenView = activeConversation ? null : view
-  const screenTitle =
-    screenView === "policies"
-      ? "Policies"
-      : screenView === "calendar"
-        ? MONTH_LABEL
-        : screenView === "people"
-          ? "Organization"
-          : undefined
+  const screenView = activeConversation || windowView ? null : view
+  // Only SCREENS title the navbar, and Agents is no longer one of them
+  // (Oskar, 2026-09-08: "quita lo de arriba a la izquierda que pone
+  // agents" — its face has to match New's, and New has no screen title).
+  // `people` and `calendar` fall through too: a window carries its title
+  // in its own 44px header.
+  const screenTitle = screenView === "policies" ? "Policies" : undefined
   // Screens that run EDGE TO EDGE and scroll their own content: nesting
   // them inside the canvas gutters plus its scroller would give them a
   // second scrollbar inside the first.
-  const fullWidthView = screenView === "calendar" || screenView === "people"
+  const fullWidthView =
+    screenView === "calendar" ||
+    screenView === "people" ||
+    screenView === "agents"
   // Screens whose frame carries no ONE composer. The calendar's grid uses
   // the full height and a floating composer would cover the hours you are
   // reading; the People screen reaches One from the button ON its
-  // headcount banner instead, which is the point of that design.
+  // headcount banner instead; and Agents has its OWN brief box, pinned at
+  // the bottom of its canvas, so a second composer below it would be two
+  // places to type the same thing. Agents keeps ownership of that one
+  // deliberately: it has to vanish on the list face, it carries its own
+  // placeholder and submit handler, and the suggestions bridge listens on
+  // `document` — so two mounted instances would fight for the events.
   const showPromptBar = !fullWidthView
   /**
-   * The widgets are the HOME canvas's, not a module's (per Oskar: "al
-   * clicar en People, los widgets que teniamos activados en la home
-   * deberian desaparecer"). Every module frame draws its lateral widgets
-   * hidden, so any `?view=` screen puts the stack away — and the raw
+   * The widgets are the HOME canvas's, and they belong to it AT REST: the
+   * moment any window occupies the canvas area they go (Oskar,
+   * 2026-09-08: "al entrar en cualquier seccion y abrir una ventana,
+   * deberian desaparecer los widgets que tengamos abiertos en la parte de
+   * needs you" — measured before this: a Comms chat pane left Clock in
+   * and Communities open, squeezing One's canvas into a strip between
+   * them).
+   *
+   * So: any `?view=` screen, OR any open pane in the left stack. The raw
    * `view`, not `screenView`, so expanding a conversation opened FROM such
    * a screen does not pop them back in mid-flow. Hidden, not closed:
-   * navigating back to Home restores exactly what was open.
+   * closing the window restores exactly what was open.
    */
   const onModuleScreen = view !== null
-  const hideWidgets = panelOpen || onModuleScreen
+  const hideWidgets = onModuleScreen || chats.state.open.length > 0
 
   // Replies and nav panel rows can call for a window — e.g. the survey
   // preview opens itself the moment One says it created the survey. A
@@ -695,9 +1042,6 @@ export default function Home() {
   useEffect(
     () =>
       onWindowRequest((id) => {
-        // Same handover as toggleWindow: whatever the user (or a reply)
-        // asked for takes the right-hand pane.
-        closeConversationPanel()
         if (windows.state.maximized) {
           windows.toggleMaximized(windows.state.maximized)
         }
@@ -716,6 +1060,32 @@ export default function Home() {
   )
 
   // Clicking a conversation in the nav's Comms section toggles it in the
+  // "New" in the nav asks for a clean canvas (per Oskar): the widgets
+  // collapse EVERY time it is clicked. The state a session opens with is
+  // untouched — DEFAULT_OPEN_WINDOWS is still the first-paint answer, so
+  // this is an action, not a new default.
+  //
+  // Each widget plays the normal exit and the stack empties in ONE update
+  // once the last one lands, so the remaining rows never reflow between
+  // two closes. A widget with no element on screen (the stack is hidden
+  // on a module screen, or a takeover is up) calls back synchronously,
+  // which is why the counter starts at the full length instead of being
+  // incremented as they finish.
+  useEffect(
+    () =>
+      onWindowsCollapseRequest(() => {
+        const open = windows.state.open
+        if (open.length === 0) return
+        let pending = open.length
+        const settle = () => {
+          pending -= 1
+          if (pending === 0) windows.closeAll()
+        }
+        open.forEach((id) => animateWindowClose(id, settle))
+      }),
+    [windows.state.open, windows.closeAll]
+  )
+
   // LEFT-hand stack. Same channel shape as onWindowRequest, and for the
   // same reason: HomeNav is the shell's `sidebar` slot — a sibling tree,
   // so it cannot be handed callbacks.
@@ -742,7 +1112,11 @@ export default function Home() {
         // conversation takes over the conversation you were reading
         // (Slack-style), but stacks below an open inbox task the way the
         // widgets stack on the right.
-        const sameKind = (open: LeftPaneId) => isTicket(open) === isTicket(id)
+        // Three kinds now, not two: a module, a ticket and a
+        // conversation each own a slot, so a new conversation replaces the
+        // conversation and stacks below either of the others.
+        const sameKind = (open: LeftPaneId) =>
+          leftPaneKind(open) === leftPaneKind(id)
         // Read BEFORE the update — this asks what was ALREADY there.
         const stacksWithSomething = chats.state.open.some((w) => !sameKind(w))
         chats.openReplacing(id, sameKind)
@@ -807,6 +1181,37 @@ export default function Home() {
   // So: a stack overlays when it ALONE cannot fit, or — when only the
   // PAIR overflows — when it is the wider of the two. The narrower one
   // keeps pushing, so the canvas always has one side to rest against.
+  /**
+   * `?view` stays the source of truth for WHICH module is open — it has
+   * three writers in HomeNav (the Hub row, `openScreen`, the Cal rail
+   * section), it carries non-module screens too, and it is what makes a
+   * pasted link land. The STACK owns everything else about the pane:
+   * which column, which row, its width, docked vs overlaid vs maximized.
+   *
+   * This is the one place the two are reconciled, in both directions.
+   *
+   * The pane takes the STACK's column width (CHAT_COLUMN_WIDTH, 428) and
+   * nothing seeds it wider. An earlier pass set the column to half the
+   * shell on open, to keep the 576-of-1152 the frames were drawn at, and
+   * it was wrong twice over: it raced the layout measurement — the first
+   * non-zero `shellWidth` is not the final one, so the write landed on an
+   * intermediate value and clamped, giving a 328px and then a 150px pane
+   * that never recovered — and it silently widened any chat already open,
+   * permanently, since one column has one width. One column with one
+   * width is the price of stacking; the seam is how you change it.
+   */
+  useEffect(() => {
+    const want = windowView ? modulePaneId(windowView) : null
+    const open = chats.state.open.find(isModulePane) ?? null
+    if (want === open) return
+    if (want) {
+      chats.openReplacing(want, isModulePane)
+    } else if (open) {
+      animateChatClose(open, () => chats.close(open))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [windowView, chats.state.open])
+
   const rightWidth = hideWidgets ? 0 : stackWidth(windows.state)
   const leftWidth = stackWidth(chats.state)
   const room = shellWidth - CANVAS_MIN_WIDTH
@@ -822,20 +1227,26 @@ export default function Home() {
   // already parked at its floor, with nothing between them — without a cap
   // they cross in the middle (measured: 24px of overlap at a 900px
   // viewport). Half the shell each: they meet, they never overlap.
-  const overlayCap = overlayColumns && overlayChats ? shellWidth / 2 : undefined
+  // And a SINGLE overlay gets a cap too, now that a drag can push past
+  // the floor: without it the seam could be dragged clean off the shell
+  // and there would be nothing left to grab to come back.
+  const overlayCap =
+    overlayColumns && overlayChats
+      ? shellWidth / 2
+      : overlayColumns || overlayChats
+        ? shellWidth - CANVAS_MIN_PEEK
+        : undefined
   useEffect(() => {
     if (maximized) windows.toggleMaximized(maximized)
     if (chats.state.maximized) chats.toggleMaximized(chats.state.maximized)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeId, panelId, view])
+  }, [activeId, view])
 
   // One motion language for the whole window system: widgets slide in
   // from the side and slide back out the same way (see f0c-window-in and
   // animateWindowClose). Only maximize ↔ restore morphs, because there a
   // single element really does travel between two rects.
   const toggleWindow = (id: WindowId) => {
-    // Acting on a widget hands the right-hand pane back to the stack.
-    closeConversationPanel()
     if (windows.state.open.includes(id)) {
       animateWindowClose(id, () => windows.close(id))
     } else {
@@ -844,8 +1255,15 @@ export default function Home() {
   }
   const closeWindow = (id: WindowId) =>
     animateWindowClose(id, () => windows.close(id))
+  /**
+   * A module pane's ✕ clears `?view` and lets the effect above do the
+   * closing, so the URL and the stack cannot disagree about whether the
+   * section is open. Everything else closes itself.
+   */
   const closeChat = (id: LeftPaneId) =>
-    animateChatClose(id, () => chats.close(id))
+    isModulePane(id)
+      ? setSearchParams({})
+      : animateChatClose(id, () => chats.close(id))
 
   const handleOpen = (task: NeedsYouTask) => {
     // eslint-disable-next-line no-console
@@ -907,7 +1325,15 @@ export default function Home() {
           CANVAS_MIN_WIDTH; past that the columns overlay instead and the
           canvas parks at its floor underneath (per Oskar). */}
         <div
-          className="flex flex-col overflow-hidden"
+          // `relative z-0` is a STACKING CONTEXT, not a z-index race: f0's
+          // chat textarea carries its own z-index inside the composer and
+          // was painting over the docked window (measured with
+          // elementFromPoint: the TEXTAREA was the top element inside the
+          // overlap). Confining One's whole column to level 0 puts
+          // everything in it — composer included — under the dock's z-20
+          // whatever f0 does inside, which is what "dejar el input por
+          // debajo" asks for.
+          className="relative z-0 flex flex-col overflow-hidden"
           style={
             overlayColumns || overlayChats
               ? {
@@ -917,6 +1343,7 @@ export default function Home() {
                   // the side you read from — so the canvas steps aside
                   // instead of parking underneath it. A right overlay needs
                   // no offset: the canvas already begins where it should.
+                  // The module dock is a left overlay too.
                   marginLeft: overlayChats ? "auto" : undefined,
                 }
               : { flex: "1 1 0%", minWidth: CANVAS_MIN_WIDTH }
@@ -927,28 +1354,8 @@ export default function Home() {
               openWindows={windows.state.open}
               onToggleWindow={toggleWindow}
               conversationTitle={activeConversation?.title}
+              conversationEmoji={agentById(activeConversation?.agentId)?.emoji}
               screenTitle={screenTitle}
-              screenModule={
-                screenView === "calendar"
-                  ? "calendar"
-                  : screenView === "people"
-                    ? // `employees` IS the Organization brand avatar in f0
-                      // (modules.ts maps it to ModuleIcons.Organization),
-                      // which is the glyph the frame's AvatarModule draws.
-                      "employees"
-                    : undefined
-              }
-              screenActions={
-                screenView === "people" ? (
-                  <F0Button
-                    variant="ghost"
-                    size="md"
-                    icon={Megaphone}
-                    hideLabel
-                    label="Announcements"
-                  />
-                ) : undefined
-              }
             />
           </div>
           {/* Figma 975:11536 — content column: pt-24px, centered 712px column,
@@ -957,13 +1364,21 @@ export default function Home() {
             with the full-screen ONE conversation (Figma 1342:168003).
             Only the content scrolls — the prompt bar + actions stay
             pinned, and the content fades out as it slides under them. */}
+          {/* Back to the shape it had before the module window existed:
+            the gutters live here and there is no extra wrapper. A DOCKED
+            module window is no longer inside this column at all — it is a
+            pane beside it, so nothing here has to make room for it. */}
           <div
             className={`flex min-h-0 w-full flex-1 flex-col items-center ${
-              fullWidthView ? "" : "px-4 pt-6"
+              // No top padding in a CONVERSATION (per Oskar): the thread
+              // brings its own `pt-2`, and the extra 24 pushed the first
+              // turn away from the navbar for no reason. The greeting
+              // canvas still wants it — that one is a page, not a thread.
+              fullWidthView ? "" : activeConversation ? "px-4" : "px-4 pt-6"
             }`}
           >
             <div
-              className={`flex min-h-0 w-full flex-1 flex-col items-center ${
+              className={`flex min-h-0 w-full min-w-0 flex-1 flex-col items-center ${
                 fullWidthView
                   ? "overflow-hidden"
                   : "home-canvas-scroll overflow-y-auto"
@@ -971,12 +1386,16 @@ export default function Home() {
             >
               {activeConversation ? (
                 <ConversationView conversation={activeConversation} />
-              ) : view === "policies" ? (
+              ) : /* WINDOW views are absent from this chain on
+                     purpose: they render in the layer below instead, and
+                     One's floor has to fall through to the greeting so it
+                     is still there underneath them. `screenView` is null
+                     for them, which is what makes the fall-through
+                     automatic rather than a second list to maintain. */
+              screenView === "policies" ? (
                 <PoliciesScreen />
-              ) : view === "calendar" ? (
-                <CalendarScreen />
-              ) : view === "people" ? (
-                <PeopleScreen />
+              ) : screenView === "agents" ? (
+                <AgentsScreen />
               ) : (
                 <div className="flex w-[712px] max-w-full flex-col gap-8">
                   <div className="flex items-center gap-3">
@@ -987,17 +1406,21 @@ export default function Home() {
                     <EmployeeCanvas />
                   ) : (
                     <div className="flex w-full flex-col gap-2">
-                      <SectionHeader
-                        title="Needs you"
-                        viewAllCount={INBOX_TOTAL}
-                      />
-                      <div className="flex w-full flex-col gap-2">
-                        {needsYouTasks.map((task, index) => (
+                      {/* No "View all" (per Oskar): the count was the
+                          only thing on the right and it sent you to a
+                          window that lists the same rows. */}
+                      <SectionHeader title="Needs you" />
+                      {/* No `gap-2`: each row slot carries its own
+                          bottom spacing so a collapsing row takes the gap
+                          with it (see .f0c-row-slot). */}
+                      <div className="flex w-full flex-col">
+                        {visibleTasks(needsYou).map((task, index) => (
                           <NeedsYouItem
                             key={task.id}
                             task={task}
                             index={index}
                             onOpen={handleOpen}
+                            phase={phaseFor(needsYou, task.id)}
                           />
                         ))}
                       </div>
@@ -1045,12 +1468,6 @@ export default function Home() {
           </>
         )}
       </div>
-
-      {/* The split conversation panel (Figma 2730:458631) — a flush,
-          full-height second pane, not a widget from the stack. */}
-      {panelConversation && (
-        <ConversationPanel conversation={panelConversation} />
-      )}
     </div>
   )
 }

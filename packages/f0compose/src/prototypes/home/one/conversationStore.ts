@@ -1,8 +1,26 @@
 import { useSyncExternalStore } from "react"
 
+import type { RunEntry } from "../agents/agentThreads"
 import type { WindowId } from "../windows/types"
 
+import { entriesFor, templateById, threadFor } from "../agents/agentsData"
+import { createAgent } from "../agents/agentStore"
+import {
+  NEW_AGENT_PROMPT,
+  NEW_AGENT_ROUTES,
+  NEW_AGENT_THREAD,
+  runSummary,
+} from "../agents/agentThreads"
+import { approveTasksByModule } from "../needsYouStore"
+import { setPeopleFocus } from "../people/peopleFocusStore"
 import { addSurveyQuestions, resetSurveyDraft } from "../windows/surveyDraft"
+import {
+  INSIGHT_ANSWERS,
+  type Insight,
+  PEOPLE_INSIGHT_INTRO,
+  PEOPLE_INSIGHT_REASONING,
+  PEOPLE_INSIGHTS,
+} from "./insights"
 
 /**
  * Conversation state for the Home ONE experience, ported from the
@@ -67,6 +85,39 @@ export type ChatMessage = {
   question?: QuestionCard
   /** Completed reasoning steps (F0AiChat "Reasoning" block) for this turn. */
   reasoning?: string[]
+  /** Numbered steps with explicit thresholds — an agent's working plan. */
+  plan?: string[]
+  /**
+   * Runs from an agent's log, rendered INSIDE the thread: an agent's
+   * thread IS its activity log, so its executions are turns here rather
+   * than rows in some separate feed.
+   */
+  runs?: RunEntry[]
+  /**
+   * One's read on a screen, as cards you can act on without leaving the
+   * panel (Figma 2760:589016). The same kind of thing as `runs`:
+   * structure inside a turn rather than a separate feed.
+   */
+  insights?: Insight[]
+}
+
+/**
+ * What you decided on a blocked run, and what the agent did about it.
+ *
+ * Kept on the conversation keyed by the run's `at`, NOT appended as
+ * messages. Choosing an action used to push a user bubble and a reply to
+ * the bottom of the thread, which said the same thing twice — once as dead
+ * text in the card, once as chat — and left the agent's answer floating far
+ * from the run it answered. Resolve three runs and nothing told you which
+ * reply belonged to which (Oskar's Grok comparison, 2026-09-02).
+ */
+export type RunResolution = {
+  /** The action you chose. */
+  label: string
+  /** Undefined until the agent answers; the card shows it working. */
+  reply?: string
+  /** The rule it now keeps, rendered against a pin. */
+  learned?: string
 }
 
 export type Conversation = {
@@ -74,22 +125,51 @@ export type Conversation = {
   title: string
   messages: ChatMessage[]
   thinking: boolean
+  /**
+   * Set when this conversation belongs to an AGENT (Figma 2741:466470) —
+   * the navbar shows the agent's emoji beside the title and the nav
+   * panel's Agents group marks that agent as the one you are inside.
+   */
+  agentId?: string
   /** Drives the Recents "Active only" filter: bumped on every open/turn. */
   lastActiveAt: number
+  /** Which action you took on each insight card, keyed by insight id. */
+  insightsActed?: Record<string, string>
   /** Transient: reasoning steps revealed so far while One "works". */
   pendingReasoning?: { steps: string[]; visible: number }
+  /**
+   * Transient: the turn being typed out. `done` are the paragraphs
+   * already finished, `typing` is the one in flight and `chars` how much
+   * of it has landed. Prose streams; structure (a plan, a run log, a
+   * question card) does not — you cannot half-render a numbered list
+   * without it reading as broken.
+   */
+  streaming?: { done: ChatMessage[]; typing: ChatMessage; chars: number }
+  /**
+   * Resolved blocked runs, keyed by run `at`. Persisted deliberately — a
+   * decision you already made must not come back as an open question after
+   * a reload, which is why this is NOT in the stripped-on-load list.
+   */
+  resolutions?: Record<string, RunResolution>
 }
 
 type ConversationState = {
   conversations: Conversation[]
   activeId: string | null
   /**
-   * Conversation shown in the RIGHT-HAND SPLIT PANEL (Figma 2730:458631,
-   * the People screen's One flow) — deliberately independent of
-   * `activeId`, because the canvas keeps showing its screen beside it.
-   * A conversation is in one place or the other, never both.
+  /**
+   * You have opened One at least once this session — the navbar button
+   * carries a notification dot until you have.
+   *
+   * Modelled on the clock-in exactly (per Oskar), including the part that
+   * matters: it is NOT persisted. `emit` only writes `conversations`, so a
+   * reload brings the dot back, the same way `clockInStore` starts the
+   * prototype's day over. That is what makes it demoable more than once.
    */
-  panelId: string | null
+  oneSeen: boolean
+  /** One's insight reading, so the button reopens it instead of starting
+   *  a second one. Unpersisted, like everything else in this block. */
+  insightsId?: string
 }
 
 const STORAGE_KEY = "f0compose:home:conversations"
@@ -109,6 +189,7 @@ function loadPersisted(): Conversation[] {
       ...c,
       thinking: false,
       pendingReasoning: undefined,
+      streaming: undefined,
       lastActiveAt: c.lastActiveAt ?? Date.now() - index * 60_000,
     }))
   } catch {
@@ -119,7 +200,7 @@ function loadPersisted(): Conversation[] {
 let state: ConversationState = {
   conversations: loadPersisted(),
   activeId: null,
-  panelId: null,
+  oneSeen: false,
 }
 const listeners = new Set<() => void>()
 
@@ -131,15 +212,24 @@ let nextId =
     return ids.reduce((m, id) => Math.max(m, Number(id.slice(1)) || 0), max)
   }, 0)
 
-function emit(next: ConversationState) {
+/**
+ * `persist: false` for the transient frames of a turn — the reasoning
+ * reveal and the reply stream tick many times a second, and serialising
+ * every conversation to localStorage on each of those would be the most
+ * expensive thing in the prototype for state that is deliberately not
+ * saved anyway (see `loadPersisted`, which strips it).
+ */
+function emit(next: ConversationState, { persist = true } = {}) {
   state = next
-  try {
-    window.localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify(state.conversations)
-    )
-  } catch {
-    // Quota/serialization failures only cost persistence, not the session.
+  if (persist) {
+    try {
+      window.localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(state.conversations)
+      )
+    } catch {
+      // Quota/serialization failures only cost persistence, not the session.
+    }
   }
   listeners.forEach((listener) => listener())
 }
@@ -175,6 +265,26 @@ export function requestWindow(id: WindowId) {
   windowListeners.forEach((listener) => listener(id))
 }
 
+/**
+ * Ask Home to collapse the widgets stack.
+ *
+ * Its own channel rather than a sentinel on `requestWindow`, whose whole
+ * payload is a `WindowId`: the nav's "New" row is asking for a clean
+ * canvas, and a clean canvas is not a window.
+ */
+const collapseListeners = new Set<() => void>()
+
+export function onWindowsCollapseRequest(listener: () => void) {
+  collapseListeners.add(listener)
+  return () => {
+    collapseListeners.delete(listener)
+  }
+}
+
+export function requestWindowsCollapse() {
+  collapseListeners.forEach((listener) => listener())
+}
+
 /** Does this prompt name an audience/assignee? If not, a create-task is
  *  ambiguous and One asks first (ported from one-notch's needsFollowUp). */
 const NAMES_AUDIENCE =
@@ -206,7 +316,83 @@ const INTENTS: {
   resolve?: (answer: string) => string[]
   /** Side effect when a clarifying answer resolves — live only. */
   onResolve?: (answer: string) => void
+  /**
+   * Resolves ON THE NEEDS-YOU CARD instead of opening a conversation.
+   *
+   * `module` picks which rows it targets and `done` is the one line the
+   * card shows before it leaves — the only place the figures appear on
+   * this path, so it has to carry them. The steps come from `reasoning`,
+   * unchanged, because they are the same words either way.
+   *
+   * It is a REQUEST, not a guarantee: if any targeted row is one One may
+   * not close (`oneCanClose`), the card path is refused and this falls
+   * through to the conversation below, where `reply` explains why. That
+   * is the whole point of declaring it on an intent that will be
+   * refused — see the contracts one.
+   */
+  inPlace?: { module: string; done: string }
 }[] = [
+  {
+    /**
+     * "Approve all the time off that is within policy" — typed on Home,
+     * and it CLEARS the matching rows from the Needs-you list above
+     * (Oskar's brief). Placed first in the corpus so its narrow match wins
+     * before the broader `documents` intent, which also tests /policy/.
+     *
+     * The side effect keys on the task's MODULE, not on its wording, so
+     * "todos los time off" means all of them and stays true if a fixture
+     * is reworded. `onReply` fires on LIVE delivery only, so reopening the
+     * conversation later cannot re-approve anything.
+     */
+    key: "timeoff-approve-in-policy",
+    match: (p) =>
+      /(approve|aprueba|aprobar|autoriza)/i.test(p) &&
+      /(time off|timeoff|time-off|vacacion\w*|ausencia\w*|holiday|pto)/i.test(
+        p
+      ),
+    title: "Approve time off within policy",
+    reasoning: [
+      "Pulling every open time-off request and the policy each one falls under.",
+      "Checking allowance, notice period and team cover on each.",
+      "Setting aside anything that needs a judgement call.",
+    ],
+    inPlace: {
+      module: "timeoff",
+      done: "Approved 12 requests — all inside allowance, none left a team short",
+    },
+    // Only reachable once the batch is already gone: the card path takes
+    // it otherwise, so this must be true of an empty queue rather than
+    // claiming an approval that did not happen.
+    reply: [
+      "Nothing is open in time off right now — the last batch of 12 went through inside allowance and is already off your list.",
+    ],
+  },
+  {
+    /**
+     * The same shape of request against CONTRACTS, and the branch that
+     * proves the refusal: it asks for the card path and
+     * `approveTasksByModule` turns it down, because a renewal touches
+     * someone's contract. So this lands in the full conversation instead
+     * and One says why rather than silently doing nothing.
+     */
+    key: "contracts-confirm",
+    match: (p) =>
+      /(confirm|confirma|renew|renov|approve|aprueba)/i.test(p) &&
+      /(contract|contrato)\w*/i.test(p),
+    title: "Confirm contract renewals",
+    inPlace: {
+      module: "company_documents",
+      done: "Confirmed 4 renewals",
+    },
+    reasoning: [
+      "Reading the 4 renewals and the terms each one changes.",
+      "Checking them against the standard template and this year's bands.",
+    ],
+    reply: [
+      "I can't close these from your list. All 4 are drafted and inside the standard template, but a renewal changes someone's contract, and that is the line where I stop and bring it to you — the same rule that lets me clear time off without asking.",
+      "They are ready to send as they are. Say the word and I'll put all 4 out, or open any one of them if you want to read the terms first.",
+    ],
+  },
   {
     // The One button on the headcount card lands here. Its prompt is
     // generated, not typed, so the match only has to be unambiguous
@@ -407,6 +593,25 @@ const THINK_MS = 1100
 const STEP_MS = 1200
 const FIRST_STEP_MS = 500
 
+/**
+ * Try to answer a prompt ON THE CARD rather than in a conversation.
+ *
+ * Returns true when it took the job, and the caller must NOT then open a
+ * conversation. False means either there was nothing to do or One is not
+ * allowed to close the rows in question, and the conversation is the right
+ * place for both.
+ */
+export function tryResolveInPlace(prompt: string): boolean {
+  const intent = intentFor(prompt)
+  if (!intent?.inPlace) return false
+  const outcome = approveTasksByModule(
+    intent.inPlace.module,
+    intent.reasoning ?? [],
+    intent.inPlace.done
+  )
+  return outcome === "running"
+}
+
 function intentFor(prompt: string) {
   return INTENTS.find((intent) => intent.match(prompt))
 }
@@ -420,14 +625,18 @@ function titleFor(prompt: string): string {
 
 function patchConversation(
   conversationId: string,
-  patch: (c: Conversation) => Conversation
+  patch: (c: Conversation) => Conversation,
+  options?: { persist?: boolean }
 ) {
-  emit({
-    ...state,
-    conversations: state.conversations.map((c) =>
-      c.id === conversationId ? patch(c) : c
-    ),
-  })
+  emit(
+    {
+      ...state,
+      conversations: state.conversations.map((c) =>
+        c.id === conversationId ? patch(c) : c
+      ),
+    },
+    options
+  )
 }
 
 /** The turn's messages: reply paragraphs (+ optional question card). */
@@ -466,29 +675,187 @@ function buildTurnMessages(prompt: string): ChatMessage[] {
  * only for a conversation the user is actually looking at.
  */
 function isVisible(conversationId: string): boolean {
-  return state.activeId === conversationId || state.panelId === conversationId
+  return state.activeId === conversationId
 }
 
-function deliverReply(conversationId: string, prompt: string) {
-  const intent = intentFor(prompt)
-  const steps = intent?.reasoning
-  const finish = () => {
-    const replies = buildTurnMessages(prompt)
+/**
+ * A reply written by the CALLER rather than matched from the corpus. The
+ * agent flow needs it: what an agent answers to its first brief belongs
+ * to that agent (see `agentsData`), not to a regex over what you typed.
+ */
+export type ReplyScript = {
+  reasoning?: string[]
+  reply: string[]
+  /**
+   * The ONE thing the reply asks for, as a clarifying card. `key` routes
+   * the answer — `agent-brief:<templateId>` lands the plan,
+   * `agent-policy:<templateId>` lands the confirmation and the run log
+   * (see `resolveAgentAnswer`).
+   */
+  question?: { key: string; text: string; options: string[] }
+}
+
+/**
+ * Characters per tick and the tick itself — ~400 chars a second, fast
+ * enough not to be a wait and slow enough to read as typing.
+ *
+ * Deliberately FEW, FAT ticks rather than many thin ones: a backgrounded
+ * tab clamps timers to roughly 1/s, and at 4 chars per 16ms that turned a
+ * three-line reply into a minute of crawling (hit while verifying in the
+ * Claude pane, which is always a hidden tab). More characters per tick
+ * degrades gracefully; a shorter interval does not.
+ */
+const STREAM_CHARS = 10
+const STREAM_MS = 24
+/** A beat between paragraphs, so they land as separate thoughts. */
+const STREAM_GAP_MS = 90
+
+/**
+ * Type a turn out paragraph by paragraph instead of dropping it in whole
+ * (per Oskar, 2026-09-02 — the replies had no stream effect at all).
+ *
+ * Only PROSE streams. A message carrying a plan, a run log or a question
+ * card is committed complete: half a numbered list reads as broken, not
+ * as arriving. Anything with no text at all is committed the same way.
+ */
+function streamTurn(
+  conversationId: string,
+  replies: ChatMessage[],
+  onDone: () => void
+) {
+  /**
+   * Don't animate when nobody is watching, or when they asked not to be
+   * animated at.
+   *
+   * A HIDDEN tab clamps timers to ~1/s and eventually freezes them, so a
+   * streamed reply there arrives letter by letter over minutes and you
+   * come back to a half-written sentence. Reduced motion is the same
+   * judgement for a different reason. Either way the honest answer is the
+   * finished turn, not a stalled animation — this is a presentation
+   * flourish, and it should never be what decides whether you can read
+   * the reply.
+   */
+  const instant = () =>
+    document.hidden ||
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches
+
+  const commit = (done: ChatMessage[]) => {
     patchConversation(conversationId, (c) => ({
       ...c,
       thinking: false,
       pendingReasoning: undefined,
-      messages: [...c.messages, ...replies],
+      streaming: undefined,
+      messages: [...c.messages, ...done],
     }))
-    // Only when the reply lands in the OPEN conversation — a reply
-    // finishing in the background shouldn't pop a window over whatever
-    // the user moved on to.
-    if (isVisible(conversationId)) {
-      intent?.onReply?.()
-      if (intent?.opensWindow) {
-        windowListeners.forEach((listener) => listener(intent.opensWindow!))
-      }
+    onDone()
+  }
+
+  const next = (done: ChatMessage[], index: number) => {
+    if (index >= replies.length) {
+      commit(done)
+      return
     }
+    // Checked per paragraph as well as up front: the tab can be hidden
+    // half way through a turn.
+    if (instant()) {
+      commit([...done, ...replies.slice(index)])
+      return
+    }
+    const message = replies[index]
+    const streamable = message.content && !message.plan && !message.runs
+    if (!streamable) {
+      // Structure, or an empty question card: straight in, then carry on.
+      // chars < 0 means "render this one whole" — `done` deliberately
+      // does not include it yet, or it would paint twice.
+      patchConversation(conversationId, (c) => ({
+        ...c,
+        thinking: false,
+        pendingReasoning: undefined,
+        streaming: { done, typing: message, chars: -1 },
+      }))
+      setTimeout(() => next([...done, message], index + 1), STREAM_GAP_MS)
+      return
+    }
+    const tick = (chars: number) => {
+      if (instant()) {
+        commit([...done, ...replies.slice(index)])
+        return
+      }
+      if (chars >= message.content.length) {
+        setTimeout(() => next([...done, message], index + 1), STREAM_GAP_MS)
+        return
+      }
+      patchConversation(
+        conversationId,
+        (c) => ({
+          ...c,
+          thinking: false,
+          pendingReasoning: undefined,
+          streaming: { done, typing: message, chars },
+        }),
+        // Every frame of this would otherwise re-serialise every
+        // conversation to localStorage.
+        { persist: false }
+      )
+      setTimeout(() => tick(chars + STREAM_CHARS), STREAM_MS)
+    }
+    tick(STREAM_CHARS)
+  }
+
+  if (instant()) {
+    commit(replies)
+    return
+  }
+  next([], 0)
+}
+
+function deliverReply(
+  conversationId: string,
+  prompt: string,
+  script?: ReplyScript
+) {
+  const intent = script ? undefined : intentFor(prompt)
+  const steps = script ? script.reasoning : intent?.reasoning
+  const finish = () => {
+    const replies = script
+      ? [
+          ...script.reply.map((content, index) => ({
+            id: `m${nextId++}`,
+            role: "assistant" as const,
+            content,
+            // The completed block belongs to the turn's first paragraph,
+            // exactly as an intent's does.
+            ...(index === 0 && script.reasoning
+              ? { reasoning: script.reasoning }
+              : {}),
+          })),
+          ...(script.question
+            ? [
+                {
+                  id: `m${nextId++}`,
+                  role: "assistant" as const,
+                  content: "",
+                  question: {
+                    intentKey: script.question.key,
+                    text: script.question.text,
+                    options: script.question.options,
+                  },
+                },
+              ]
+            : []),
+        ]
+      : buildTurnMessages(prompt)
+    streamTurn(conversationId, replies, () => {
+      // Only when the reply lands in the OPEN conversation — a reply
+      // finishing in the background shouldn't pop a window over whatever
+      // the user moved on to.
+      if (isVisible(conversationId)) {
+        intent?.onReply?.()
+        if (intent?.opensWindow) {
+          windowListeners.forEach((listener) => listener(intent.opensWindow!))
+        }
+      }
+    })
   }
   if (!steps?.length) {
     setTimeout(finish, THINK_MS)
@@ -510,29 +877,32 @@ function deliverReply(conversationId: string, prompt: string) {
 }
 
 /**
- * Where a new conversation shows up: the full-screen canvas (the prompt
- * bar's own flow) or the split panel beside a module screen.
+ * Every conversation now shows up in ONE place: the canvas, where the
+ * Needs-you queue lives. The split panel it used to have as an
+ * alternative is gone (Oskar, 2026-09-08: "es decir eliminamos el
+ * split"), so there is no target to choose any more.
  */
-type Target = "canvas" | "panel"
-
-function createConversation(prompt: string, target: Target): string {
+function createConversation(
+  prompt: string,
+  options?: { title?: string; agentId?: string; script?: ReplyScript }
+): string {
   const id = `c${nextId++}`
   const conversation: Conversation = {
     id,
-    title: titleFor(prompt),
+    title: options?.title ?? titleFor(prompt),
     thinking: true,
     lastActiveAt: Date.now(),
     messages: [{ id: `m${nextId++}`, role: "user", content: prompt }],
+    ...(options?.agentId ? { agentId: options.agentId } : {}),
   }
   emit({
     conversations: [conversation, ...state.conversations],
-    // A canvas conversation takes the screen over, so a panel left open
-    // beside it would be a second conversation with no context. The panel
-    // flow leaves `activeId` alone: the canvas keeps its module screen.
-    activeId: target === "canvas" ? id : state.activeId,
-    panelId: target === "panel" ? id : null,
+    activeId: id,
+    // Anything that opens One clears the dot — the banner's chevron as
+    // surely as a navbar button would.
+    oneSeen: true,
   })
-  deliverReply(id, prompt)
+  deliverReply(id, prompt, options?.script)
   return id
 }
 
@@ -541,12 +911,8 @@ function createConversation(prompt: string, target: Target): string {
  * drives intent matching — it is the question the click stands for — but
  * the turn renders as the card instead of as typed text.
  */
-function startWithContext(
-  context: MessageContext,
-  prompt: string,
-  target: Target
-): string {
-  const id = createConversation(prompt, target)
+function startWithContext(context: MessageContext, prompt: string): string {
+  const id = createConversation(prompt)
   patchConversation(id, (c) => ({
     ...c,
     title: context.title,
@@ -562,39 +928,260 @@ export function startConversationWithContext(
   context: MessageContext,
   prompt: string
 ): string {
-  return startWithContext(context, prompt, "canvas")
+  return startWithContext(context, prompt)
 }
 
 /**
- * The One button on a module screen's banner (Figma 2729:450379) — the
- * answer arrives in the split panel so the screen stays put beside it.
+ * The navbar's One button: open the panel with One's READ on the screen
+ * already in it (per Oskar) — the agents flow pointed at a screen instead
+ * of an agent. Or close the panel if One is already there.
+ *
+ * It replaced a blank composer, which asked you to think of the question.
+ * This arrives with the work: a paragraph of context, then a card per
+ * thing found, each with its own two actions.
+ *
+ * Reopening returns the SAME reading rather than a second copy — pressing
+ * twice should not give you two readings of one directory, which is what
+ * `insightsId` is for.
+ *
+ * HAS NO CALLER. Its button was the navbar One mark, removed on Oskar's
+ * word ("sin el boton de One que se ve ahora"), and the split it used to
+ * open is gone too. Kept and repointed at the CANVAS rather than deleted,
+ * because everything behind it is live and worth keeping: the three
+ * insight cards, `INSIGHT_ANSWERS`, the decision tree and the People
+ * focus store. Give it a button and it works where Needs-you lives.
  */
-export function startConversationInPanel(
-  context: MessageContext,
+export function openInsightReading() {
+  const existing = state.conversations.find((c) => c.id === state.insightsId)
+  if (existing) {
+    emit({ ...state, activeId: existing.id, oneSeen: true })
+    return
+  }
+  const id = `c${nextId++}`
+  // Opens EMPTY and thinking (per Oskar): One shows what it is reading
+  // before it says anything, so the reading is visible rather than
+  // asserted. The same three beats every other turn has — spinner,
+  // reasoning steps one by one, then the prose streams.
+  const conversation: Conversation = {
+    id,
+    title: "Today in People",
+    thinking: true,
+    lastActiveAt: Date.now(),
+    messages: [],
+  }
+  emit({
+    ...state,
+    conversations: [conversation, ...state.conversations],
+    activeId: id,
+    oneSeen: true,
+    insightsId: id,
+  })
+  deliverInsightReading(id)
+}
+
+/**
+ * The reasoning-then-reply beat for One's opening read.
+ *
+ * `deliverReply` cannot be reused: it is keyed on a PROMPT, and this
+ * conversation has no user turn — the button opened it and One speaks
+ * first. The reveal loop below is deliberately the same shape as that
+ * one's, so both surfaces pace identically.
+ *
+ * The intro paragraphs stream; the insights message does NOT, because
+ * `streamTurn` commits any message carrying structure whole — half a card
+ * reads as broken, not as arriving. The cards get their entrance in CSS
+ * instead (`f0c-card-in`, staggered).
+ */
+function deliverInsightReading(conversationId: string) {
+  const steps = PEOPLE_INSIGHT_REASONING
+  const finish = () => {
+    streamTurn(
+      conversationId,
+      [
+        ...PEOPLE_INSIGHT_INTRO.map((content, index) => ({
+          id: `m${nextId++}`,
+          role: "assistant" as const,
+          content,
+          // The completed block belongs to the turn's first paragraph,
+          // exactly as an intent's does.
+          ...(index === 0 ? { reasoning: steps } : {}),
+        })),
+        {
+          id: `m${nextId++}`,
+          role: "assistant" as const,
+          content: "",
+          insights: PEOPLE_INSIGHTS,
+        },
+      ],
+      () => {}
+    )
+  }
+  const reveal = (visible: number) => {
+    patchConversation(conversationId, (c) => ({
+      ...c,
+      pendingReasoning: { steps, visible },
+    }))
+    setTimeout(
+      () => (visible < steps.length ? reveal(visible + 1) : finish()),
+      STEP_MS
+    )
+  }
+  setTimeout(() => reveal(1), FIRST_STEP_MS)
+}
+
+/**
+ * Pick one of an insight card's two actions.
+ *
+ * This one DOES post to the thread, unlike `resolveRun`: One answers with
+ * a follow-up question, so there IS something to action afterwards and a
+ * conversation is the right place for it. The card keeps the label you
+ * chose in place of its buttons, so the thread records the choice once
+ * rather than showing it twice.
+ */
+export function actOnInsight(
+  conversationId: string,
+  insight: Insight,
+  actionIndex: number
+) {
+  const action = insight.actions[actionIndex]
+  if (!action) return
+  patchConversation(conversationId, (c) => ({
+    ...c,
+    thinking: true,
+    lastActiveAt: Date.now(),
+    insightsActed: { ...c.insightsActed, [insight.id]: action.label },
+    messages: [
+      ...c.messages,
+      { id: `m${nextId++}`, role: "user" as const, content: action.label },
+    ],
+  }))
+  setTimeout(() => {
+    streamTurn(
+      conversationId,
+      [
+        ...action.reply.map((content) => ({
+          id: `m${nextId++}`,
+          role: "assistant" as const,
+          content,
+        })),
+        // A reply that ends in a question gets the agents flow's own
+        // clarifying card — quick replies, a confirmation or a day
+        // picker, depending on what it asked.
+        ...(action.question
+          ? [
+              {
+                id: `m${nextId++}`,
+                role: "assistant" as const,
+                content: "",
+                question: {
+                  intentKey: action.question.key,
+                  text: action.question.text,
+                  options: action.question.options,
+                },
+              },
+            ]
+          : []),
+      ],
+      () => {
+        // AFTER the reply, not before: the table changing while One is
+        // still mid-sentence reads as two unrelated things happening.
+        if (action.focus) setPeopleFocus(action.focus)
+      }
+    )
+  }, THINK_MS)
+}
+
+/**
+ * One of the insight cards' questions, answered.
+ *
+ * Shaped like `resolveAgentAnswer` — it RETURNS the turn rather than
+ * posting it, so `answerQuestion` keeps being the single place that marks
+ * the card answered and echoes the choice as a user turn. Routed by the
+ * card's `intentKey`, a string rather than a closure, because the
+ * conversation is persisted and a function is not.
+ */
+function resolveInsightAnswer(
+  intentKey: string,
+  answer: string
+): ChatMessage[] | null {
+  const reply = INSIGHT_ANSWERS[intentKey]
+  if (!reply) return null
+  return reply(answer).map((content) => ({
+    id: `m${nextId++}`,
+    role: "assistant" as const,
+    content,
+  }))
+}
+
+/**
+ * One has never been opened this session — drives the notification dot on
+ * the navbar button, the same contract `useClockInPending` has.
+ */
+export function useOnePending(): boolean {
+  return !useConversations().oneSeen
+}
+
+/**
+ * Brief an AGENT for the first time (Figma 2741:466470): the prompt you
+ * typed on the Agents screen becomes the user's turn, and the agent
+ * answers with its own copy rather than anything the intent corpus would
+ * match. Takes the canvas full-screen, because configuring an agent is
+ * the task — not something you do beside another screen.
+ *
+ * The caller owns creating the agent (see `agents/agentStore`); this only
+ * needs its id, name and voice.
+ */
+export function startAgentConversation(args: {
+  agentId: string
+  agentName: string
+  /** Which scripted thread to play — see `agentThreads`. */
+  templateId: string
   prompt: string
-): string {
-  return startWithContext(context, prompt, "panel")
-}
-
-/** Close the split panel; the conversation stays in Recents. */
-export function closeConversationPanel() {
-  if (state.panelId === null) return
-  emit({ ...state, panelId: null })
+}): string {
+  const thread = threadFor(args.templateId)
+  return createConversation(args.prompt, {
+    // "Chief of Staff agent", as the frame's navbar and nav row read.
+    title: `${args.agentName} agent`,
+    agentId: args.agentId,
+    script: {
+      reasoning: thread.reasoning,
+      reply: thread.reply,
+      // The reply's closing question, as a real card: the brief's rule is
+      // that the last line asks for the ONE thing the agent needs, and a
+      // question you cannot answer is just a flourish.
+      question: {
+        key: `agent-brief:${args.templateId}`,
+        text: thread.question.text,
+        options: thread.question.options,
+      },
+    },
+  })
 }
 
 /**
- * The panel's expand button: the SAME conversation takes over the canvas
- * full-screen. Not a second surface — it moves, which is why the panel
- * empties as the canvas fills.
+ * "New agent" (Figma 2741:465055's toolbar): opens a conversation where
+ * One explains how agents work and then asks what you want delegated,
+ * instead of sending you back to the templates. The template is chosen by
+ * ANSWERING, and this same thread then becomes that agent's thread.
  */
-export function expandConversationPanel() {
-  if (state.panelId === null) return
-  emit({ ...state, activeId: state.panelId, panelId: null })
+export function startNewAgentConversation(): string {
+  return createConversation(NEW_AGENT_PROMPT, {
+    title: "New agent",
+    script: {
+      reasoning: NEW_AGENT_THREAD.reasoning,
+      reply: NEW_AGENT_THREAD.reply,
+      question: {
+        key: "agent-discover",
+        text: NEW_AGENT_THREAD.question.text,
+        options: [...NEW_AGENT_THREAD.question.options],
+      },
+    },
+  })
 }
 
 /** Prompt-bar submit on the Home screen → new full-screen conversation. */
 export function startConversation(prompt: string): string {
-  return createConversation(prompt, "canvas")
+  return createConversation(prompt)
 }
 
 /** Lock any question card the user routed around by typing instead. */
@@ -630,6 +1217,103 @@ export function sendMessage(prompt: string, conversationId?: string) {
 }
 
 /**
+ * The agent thread's two scripted steps, keyed by the question the user
+ * just answered.
+ *
+ * `agent-brief:<id>` → the four-step plan, then the policy offer.
+ * `agent-policy:<id>` → the confirmation, then the run log.
+ *
+ * The log lands HERE, at the end, rather than being present from the
+ * start: the runs are what the agent has done, and showing them before
+ * you have agreed how it should work would be a log for a job nobody
+ * assigned yet.
+ */
+function resolveAgentAnswer(
+  conversationId: string,
+  intentKey: string,
+  answer: string
+): ChatMessage[] | null {
+  const [kind, keyed] = intentKey.split(":")
+
+  // "New agent" opens a DISCOVERY conversation instead of the templates
+  // (per Oskar). Answering its one question is what picks the template —
+  // and from here the SAME thread becomes that agent's thread, which is
+  // why the conversation is retitled and bound rather than replaced.
+  if (kind === "agent-discover") {
+    const templateId = NEW_AGENT_ROUTES[answer] ?? "chief-of-staff"
+    const template = templateById(templateId)
+    const agent = createAgent(template)
+    const agentThread = threadFor(templateId)
+    patchConversation(conversationId, (c) => ({
+      ...c,
+      title: `${agent.name} agent`,
+      agentId: agent.id,
+    }))
+    return [
+      ...agentThread.reply.map((content) => ({
+        id: `m${nextId++}`,
+        role: "assistant" as const,
+        content,
+      })),
+      {
+        id: `m${nextId++}`,
+        role: "assistant",
+        content: "",
+        question: {
+          intentKey: `agent-brief:${templateId}`,
+          text: agentThread.question.text,
+          options: agentThread.question.options,
+        },
+      },
+    ]
+  }
+
+  if (kind !== "agent-brief" && kind !== "agent-policy") return null
+  const templateId = keyed
+  const thread = threadFor(templateId)
+
+  if (kind === "agent-brief") {
+    return [
+      {
+        id: `m${nextId++}`,
+        role: "assistant",
+        content: `Then that is what I'll optimise for. Here is how I'll work.`,
+        plan: thread.plan,
+      },
+      {
+        id: `m${nextId++}`,
+        role: "assistant",
+        content: "",
+        question: {
+          intentKey: `agent-policy:${templateId}`,
+          text: thread.policyOffer.text,
+          options: thread.policyOffer.options,
+        },
+      },
+    ]
+  }
+
+  // The policy answer decides what the agent says next, but the log is
+  // the same either way — those runs already happened.
+  const opening = answer.startsWith("No")
+    ? "Understood. I'll ask every time instead of assuming."
+    : answer.startsWith("With")
+      ? "Fine. Tell me which step to change and I'll hold the rest as it is."
+      : "Saved. I'll follow it without asking again, and tell you when something falls outside it."
+  const runs = entriesFor(templateId)
+  return [
+    { id: `m${nextId++}`, role: "assistant", content: opening },
+    {
+      id: `m${nextId++}`,
+      role: "assistant",
+      // Derived from the runs themselves — see runSummary.
+      content: runSummary(runs),
+      runs,
+    },
+  ]
+}
+
+/**
  * Submit from the clarifying panel: lock the question, echo the answer
  * as a user turn (like One's F0ClarifyingPanel confirm), think, and
  * deliver the follow-through.
@@ -655,25 +1339,89 @@ export function answerQuestion(
     ],
   }))
   setTimeout(() => {
+    // Agent threads resolve from their own script, not from the intent
+    // corpus: what an agent answers belongs to that agent.
+    const agentTurn = resolveAgentAnswer(
+      conversationId,
+      question.intentKey,
+      answer
+    )
+    if (agentTurn) {
+      streamTurn(conversationId, agentTurn, () => {})
+      return
+    }
+    const insightTurn = resolveInsightAnswer(question.intentKey, answer)
+    if (insightTurn) {
+      streamTurn(conversationId, insightTurn, () => {
+        // Confirming has nothing left to show — the 14 rows it filtered
+        // to are gone. Cancelling leaves the table as it was.
+        if (
+          question.intentKey === "insight-deactivate-confirm" &&
+          answer.startsWith("Confirm")
+        ) {
+          setPeopleFocus(null)
+        }
+      })
+      return
+    }
     const intent = INTENTS.find((i) => i.key === question.intentKey)
     const contents = intent?.resolve?.(answer) ?? [
       "Noted — I'll take it from here.",
     ]
+    streamTurn(
+      conversationId,
+      contents.map((content) => ({
+        id: `m${nextId++}`,
+        role: "assistant" as const,
+        content,
+      })),
+      // Side effects land WITH the resolution ("Added…" appears as the
+      // preview updates), not when the user clicks Submit.
+      () => intent?.onResolve?.(answer)
+    )
+  }, THINK_MS)
+}
+
+/**
+ * Acting on a run from the log: your choice lands as your turn and the
+ * agent answers in its own words (the reply is written next to the action
+ * in `agentThreads`, not generated from the label). The point is that the
+ * log is where you resolve things, not just where you read about them.
+ */
+/**
+ * Resolve a blocked run in place.
+ *
+ * The label lands FIRST, on its own: the run stops waiting on you the
+ * instant you choose, whatever the agent is still doing about it, and the
+ * card's tag flips immediately rather than sitting on a stale "Needs you"
+ * until the reply arrives. The reply and the learned rule follow.
+ *
+ * Note what this does NOT do: no `thinking` flag (that drives the
+ * conversation-level spinner, and this work belongs to one card) and no
+ * messages (see `RunResolution`).
+ */
+export function resolveRun(
+  conversationId: string,
+  runAt: string,
+  action: { label: string; reply: string; learned?: string }
+) {
+  patchConversation(conversationId, (c) => ({
+    ...c,
+    lastActiveAt: Date.now(),
+    resolutions: { ...c.resolutions, [runAt]: { label: action.label } },
+  }))
+  setTimeout(() => {
     patchConversation(conversationId, (c) => ({
       ...c,
-      thinking: false,
-      messages: [
-        ...c.messages,
-        ...contents.map((content) => ({
-          id: `m${nextId++}`,
-          role: "assistant" as const,
-          content,
-        })),
-      ],
+      resolutions: {
+        ...c.resolutions,
+        [runAt]: {
+          label: action.label,
+          reply: action.reply,
+          learned: action.learned,
+        },
+      },
     }))
-    // Side effects land WITH the resolution ("Added…" appears as the
-    // preview updates), not when the user clicks Submit.
-    intent?.onResolve?.(answer)
   }, THINK_MS)
 }
 
@@ -697,9 +1445,9 @@ export function openConversation(id: string) {
   if (!state.conversations.some((c) => c.id === id)) return
   emit({
     activeId: id,
+    oneSeen: state.oneSeen,
     // Recents opens into the CANVAS — the panel belongs to the screen that
     // spawned it, so it goes with the navigation.
-    panelId: null,
     conversations: state.conversations.map((c) =>
       c.id === id ? { ...c, lastActiveAt: Date.now() } : c
     ),
@@ -710,7 +1458,7 @@ export function openConversation(id: string) {
  *  panel goes too — the nav is navigating away from the screen it belongs
  *  to. */
 export function goHome() {
-  emit({ ...state, activeId: null, panelId: null })
+  emit({ ...state, activeId: null })
 }
 
 /** Rename from the Recents row menu. Empty titles are ignored. */
@@ -724,12 +1472,35 @@ export function renameConversation(id: string, title: string) {
 export function deleteConversation(id: string) {
   emit({
     conversations: state.conversations.filter((c) => c.id !== id),
+    oneSeen: state.oneSeen,
     activeId: state.activeId === id ? null : state.activeId,
-    panelId: state.panelId === id ? null : state.panelId,
+  })
+}
+
+/**
+ * Drop every thread belonging to an agent — called when that agent is
+ * deleted (see `agents/agentStore`). Without it the conversations would
+ * be orphaned AND unreachable: Recents filters agent threads out and the
+ * nav panel's Agents group only lists agents that still exist.
+ */
+export function deleteConversationsForAgent(agentId: string) {
+  const doomed = new Set(
+    state.conversations.filter((c) => c.agentId === agentId).map((c) => c.id)
+  )
+  if (doomed.size === 0) return
+  emit({
+    conversations: state.conversations.filter((c) => !doomed.has(c.id)),
+    oneSeen: state.oneSeen,
+    activeId:
+      state.activeId && doomed.has(state.activeId) ? null : state.activeId,
   })
 }
 
 /** "Clear recents" from the sliders menu — wipes the whole section. */
 export function clearConversations() {
-  emit({ conversations: [], activeId: null, panelId: null })
+  emit({
+    conversations: [],
+    activeId: null,
+    oneSeen: false,
+  })
 }

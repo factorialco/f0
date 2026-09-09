@@ -173,6 +173,35 @@ const JOINERS = [
   },
 ]
 
+/**
+ * The 14 accounts One calls "dormant" — long-tenured people with no
+ * active access (Figma 2760:589110's card says 14, and it names Grace
+ * Hopper, who is emp-004).
+ *
+ * An explicit list rather than a derived predicate, because the fixture
+ * has no "last access" field to derive from and only 3 rows carry an
+ * `uninvited` override. In a mock the list IS the definition; what
+ * matters is that the count One quotes and the rows the table shows are
+ * the same 14. The joiners are excluded by construction — somebody hired
+ * this month cannot have been idle for three years.
+ */
+export const DORMANT_IDS = [
+  "emp-004",
+  "emp-005",
+  "emp-006",
+  "emp-008",
+  "emp-009",
+  "emp-010",
+  "emp-011",
+  "emp-012",
+  "emp-014",
+  "emp-015",
+  "emp-016",
+  "emp-017",
+  "emp-018",
+  "emp-020",
+]
+
 export const peopleRows: PersonRow[] = [
   ...employees.map((employee) =>
     row({

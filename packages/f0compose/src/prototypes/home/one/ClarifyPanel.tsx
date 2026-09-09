@@ -130,6 +130,15 @@ export function ClarifyPanel({
   // The input is gone while the panel shows, so keys are handled globally.
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
+      // The listener is on `window` because the input is gone while the
+      // panel shows — but a module window now sits over this canvas with
+      // its own tables and grids, and Escape/ArrowUp/ArrowDown are
+      // preventDefault'd unconditionally below. Anything typed INSIDE a
+      // window is that window's. (NOTES flagged this as the prerequisite
+      // before a panel could coexist with a screen that keeps the
+      // composer, which is exactly what a module window is.)
+      const target = event.target as HTMLElement | null
+      if (target && target.closest?.("section[data-home-window]")) return
       if (event.key === "Escape") {
         event.preventDefault()
         dismiss()

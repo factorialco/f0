@@ -6,10 +6,12 @@ import { applySort } from "@/lib/applySort"
 import {
   ACCESS_LABEL,
   CONTRACT_LABEL,
+  DORMANT_IDS,
   peopleRows,
   WORKPLACE_OPTIONS,
   type PersonRow,
 } from "./peopleData"
+import { peopleFocus } from "./peopleFocusStore"
 
 /**
  * useDataCollectionSource for the People table (Figma 2730:461223).
@@ -72,7 +74,17 @@ export function usePeopleSource() {
           const contracts = wanted("contract")
           const term = (search ?? "").toLowerCase().trim()
 
-          const filtered = peopleRows
+          // One's own focus, applied BEFORE the toolbar's filters: it
+          // narrows what the table is about, and the user's filters then
+          // work within that. Read from the module store rather than
+          // passed in, because this closure outlives any one render — see
+          // peopleFocusStore for why the two filter states stay separate.
+          const base =
+            peopleFocus() === "dormant"
+              ? peopleRows.filter((p) => DORMANT_IDS.includes(p.id))
+              : peopleRows
+
+          const filtered = base
             .filter((p) =>
               workplaces.length === 0
                 ? true

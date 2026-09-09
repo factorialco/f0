@@ -17,13 +17,19 @@ import { requestWindow } from "./one/conversationStore"
 export function SectionHeader({
   title,
   viewAllCount,
+  action,
 }: {
   title: string
   viewAllCount?: number
+  /** A control of the section's own, where the Inbox link would go. The
+   *  Agents templates header uses it; `viewAllCount` stays the Inbox
+   *  route it always was. */
+  action?: React.ReactNode
 }) {
   return (
     <div className="flex w-full items-center justify-between gap-2">
       <F0Text content={title} variant="label" />
+      {action}
       {viewAllCount !== undefined && (
         <button
           onClick={() => requestWindow("inbox")}

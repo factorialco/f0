@@ -6,7 +6,7 @@ import type { StackState } from "./stack"
 
 import { FloatingIcon } from "./PanelIcons"
 import {
-  CANVAS_MIN_WIDTH,
+  CANVAS_MIN_PEEK,
   chunkColumns,
   dockedWindows,
   MIN_COLUMN_WIDTH,
@@ -47,6 +47,14 @@ export type PanelSpec = {
    *  the inbox ticket uses the side-panel icon, because from full screen
    *  its alternative is a docked panel rather than a smaller window. */
   restoreIcon?: IconType
+  /**
+   * The size toggle's glyph and name, for a host whose alternative state
+   * is not this stack's `maximized`. A module window is full-width or
+   * half-width, so from full it offers you Minimize — the same rule the
+   * float toggle follows: the glyph names the state you will GET.
+   */
+  maximizeIcon?: IconType
+  maximizeLabel?: string
 }
 
 export type Side = "left" | "right"
@@ -59,7 +67,7 @@ export type Side = "left" | "right"
 // gap-0.5, not gap-2: the frame puts the title at x=32, flush against the
 // 20px glyph box at x=12 — the optical gap comes from the glyph being
 // smaller than its box, not from a gutter.
-function WindowHeader({
+export function WindowHeader({
   spec,
   onClose,
   onMaximize,
@@ -95,9 +103,9 @@ function WindowHeader({
           <F0Button
             variant="ghost"
             size="md"
-            icon={Maximize}
+            icon={spec.maximizeIcon ?? Maximize}
             hideLabel
-            label={`Maximize ${title}`}
+            label={spec.maximizeLabel ?? `Maximize ${title}`}
             onClick={onMaximize}
           />
         )}
@@ -114,7 +122,7 @@ function WindowHeader({
   )
 }
 
-const CARD_CLASS =
+export const CARD_CLASS =
   "flex min-h-0 flex-col overflow-hidden rounded-md border border-solid border-f1-border-secondary bg-f1-background shadow-[0_2px_20px_0_rgba(13,22,37,0.04)]"
 
 function WindowPanel({
@@ -365,7 +373,7 @@ export function WindowStack<Id extends string>({
     const room = Math.max(
       startWidth,
       shell
-        ? (shell.width - others - CANVAS_MIN_WIDTH) / columns.length
+        ? (shell.width - others - CANVAS_MIN_PEEK) / columns.length
         : Infinity
     )
     const onMove = (ev: PointerEvent) =>

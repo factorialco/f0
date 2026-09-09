@@ -18,6 +18,17 @@ export const MAX_PER_COLUMN = 2
  * — they can keep growing while the canvas parks here underneath.
  */
 export const CANVAS_MIN_WIDTH = 480
+/**
+ * Once a stack has overlaid the canvas it may keep GROWING until only
+ * this much of One is left showing — the drag ceiling past
+ * CANVAS_MIN_WIDTH.
+ *
+ * One is the floor: it gets covered, never hidden, and the seam stays
+ * this far inside the shell so you can always drag back. Without it a
+ * drag could reach the overlay boundary and never cross it, which is
+ * exactly what "no puedo arrastrar la ventana mas a la derecha" was.
+ */
+export const CANVAS_MIN_PEEK = CANVAS_MIN_WIDTH / 2
 
 /**
  * State for ONE window stack. Generic over the id type because the
@@ -223,6 +234,30 @@ export function useWindowStack<Id extends string>({
     })
   }, [])
 
+  /**
+   * Empty the stack in one update.
+   *
+   * Not a loop over `close`: that is one render per widget, and it leaves
+   * `columnWeights` describing columns that no longer exist, so the next
+   * widget you open inherits a stale width share. Everything positional
+   * resets; `columnWidth` is a preference and survives.
+   */
+  const closeAll = useCallback(() => {
+    setState((s) =>
+      s.open.length === 0
+        ? s
+        : {
+            ...s,
+            open: [],
+            weights: [],
+            columnWeights: [],
+            maximized: null,
+            manualHeight: [],
+            floating: [],
+          }
+    )
+  }, [])
+
   /** Force a window maximized, unlike toggleMaximized which flips it.
    *  The inbox ticket opens this way; a chat does not. */
   const maximize = useCallback((id: Id) => {
@@ -323,6 +358,7 @@ export function useWindowStack<Id extends string>({
     openOnly,
     openReplacing,
     close,
+    closeAll,
     maximize,
     restore,
     toggleMaximized,

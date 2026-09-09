@@ -1,11 +1,11 @@
 import { F0AvatarList, F0Button, F0Icon } from "@factorialco/f0-react"
 import { InfoCircle, Warning } from "@factorialco/f0-react/icons/app"
+import { ChevronRight } from "@factorialco/f0-react/icons/app"
 
 import { avatarFor } from "@/fixtures/helpers"
 
 import { HEADCOUNT } from "../fixtures"
-import { startConversationInPanel } from "../one/conversationStore"
-import { OneFill } from "../one/OneFillIcon"
+import { startConversationWithContext } from "../one/conversationStore"
 import { Sparkline } from "../Sparkline"
 
 /**
@@ -56,20 +56,20 @@ function HeadcountBanner() {
       title={HEADCOUNT.title}
       action={
         /* f0's GHOST button (per Oskar, 2026-09-01 — it was outline
-           first): `size="sm"` IS the frame's 24px box on an 8px radius,
-           and the glyph is the monochrome One mark, not `F0OneIcon`'s
-           animated brand gradient. Ghost paints its icon the same
-           `text-f1-icon` grey outline does, so the mark stays black for
-           the reason OneFillIcon documents — its fill is pinned to a
-           token rather than inheriting currentColor. */
+           first): `size="sm"` IS the frame's 24px box on an 8px radius.
+           The glyph is now a plain CHEVRON, not a One mark (Oskar,
+           2026-09-02): the One mark moved to the navbar, where it opens
+           One's blank state, so leaving one here too said "ask One" twice
+           and meant something different each time. This button drills
+           into the card WITH its context, which is what a chevron says. */
         <F0Button
-          variant="ghost"
+          variant="outline"
           size="sm"
-          icon={OneFill}
+          icon={ChevronRight}
           hideLabel
           label={`Ask One about ${HEADCOUNT.title}`}
           onClick={() =>
-            startConversationInPanel(
+            startConversationWithContext(
               {
                 kind: "metric",
                 title: HEADCOUNT.title,

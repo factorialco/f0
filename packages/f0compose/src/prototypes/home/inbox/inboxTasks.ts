@@ -39,6 +39,19 @@ export function inboxTasks(profile: ProfileId): InboxTask[] {
       }))
 }
 
+/**
+ * The rows still open — what the nav LIST shows. Separate from
+ * `inboxTasks` on purpose: `taskTitle` looks ids up through that one, and
+ * a task One has cleared must still resolve to its own title rather than
+ * to "Ticket".
+ */
+export function openInboxTasks(
+  profile: ProfileId,
+  removed: string[]
+): InboxTask[] {
+  return inboxTasks(profile).filter((task) => !removed.includes(task.id))
+}
+
 /** Every task across both profiles, for looking a title up by id. */
 export function taskTitle(id: string): string {
   const all = [...inboxTasks("admin"), ...inboxTasks("employee")]

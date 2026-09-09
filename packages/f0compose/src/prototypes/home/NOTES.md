@@ -23,6 +23,7 @@ Typecheck with the WORKSPACE binary: `cd packages/f0compose && ./node_modules/.b
 <summary>Oskar's own setup — a worktree on port 5176</summary>
 
 Oskar serves it from the git worktree `~/code/f0-composer` (branch `oskar/f0compose`, pushed to `feat/f0compose`): `cd ~/code/f0-composer/packages/f0compose && pnpm dev:vite --port 5176 --strictPort`. The main checkout at `~/code/f0` moves between branches for other work, which is why the composer does not live there — on a normal clone none of that applies and `~/code/f0` is exactly where it should run. Port 5174 = whatever `~/code/f0` serves; 5175 = Jonathan's factorial-composer.
+
 </details>
 
 ## Architecture (src/prototypes/home/)
@@ -38,6 +39,8 @@ Oskar serves it from the git worktree `~/code/f0-composer` (branch `oskar/f0comp
 - Canvas layout: only the content scrolls (`.home-canvas-scroll`); the ONE bar + action chips stay pinned below it, and the scroller has a bottom `mask-image` fade so content dissolves as it slides under the bar.
 - `NeedsYouItem.tsx` — a "Needs you" row (Figma 2621:23747, redesigned 2026-08-29): 48px tall, 12px padding, 10px radius on `bg-f1-background-tertiary`, a bare 20px secondary icon, then title + subtitle on ONE line (title never shrinks, subtitle takes the slack and clips), then a chevron. The per-row CTA button is gone from the design; `ctaLabel` stays unused in the fixtures in case it returns.
 - `windows/ClockInWindow.tsx` + `windows/clockInStore.ts` — **Clock in** (renamed from "Time tracking" 2026-08-30, per Oskar), a WIDGET since 2026-08-30 (Figma 975:13056; it was `ClockInPopup.tsx`, a popover anchored to a navbar timer button, until Oskar asked for the navbar to carry only the ⋮). Same body as the old popup minus its portal/anchor chrome — the window stack supplies the surface and header. State moved to a module store because THREE sibling trees read it: the navbar ⋮ (which carries the pending dot), the widgets-menu row inside its popover, and the window itself. `clockedInAt` is deliberately not persisted. The pending dot (`PendingDot` in `WindowsMenu.tsx`) shows while `clockedInAt === null`, on the ⋮ with the menu closed and on the Time-tracking row's TRAILING edge with it open (per Oskar — beside the open-state check, not next to the label); both clear on clock-in and come back on clock-out.
+- `agents/agentThreads.ts` — **what each agent says and what it has done**, written to Oskar's mock-content brief (2026-09-02). Its two load-bearing ideas: an agent's THREAD IS ITS ACTIVITY LOG (no separate feed — the nav panel's row derives from the newest run), and a reply's last line asks for THE ONE THING the agent needs, which is why that question is a real clarifying card. Voice rules are in the file header.
+- `agents/` — **Agents** (Figma 2739:463194 empty, 2741:466470 the briefing conversation, 2741:465055 the list), URL-driven via `?view=agents` from the Home panel's Agents row. `agentsData.ts` (the four templates: emoji, description, prompt matcher, reasoning, greeting, seeded activity), `agentStore.ts` (the agents you have created — persisted, since the whole point is that the screen changes shape once one exists), `AgentsScreen.tsx` (both faces + the brief box). ONE SCREEN, TWO FACES: nothing created → the brief and the templates; at least one agent → the toolbar and the grid.
 - `people/` — **Organization › People** (Figma 2730:459215), the Hub's first real destination, URL-driven via `?view=people` (Hub panel → Company → People; `HUB_VIEWS` in HomeNav is the whole allow-list, every other Hub row is still visual-only). `PeopleScreen.tsx` (real f0 `Tabs` + the banners + a real `OneDataCollection`), `PeopleBanners.tsx` (the two "Inline Banner" cards — the left one carries One's button), `peopleData.ts` / `peopleColumns.ts` / `usePeopleSource.ts`. Runs EDGE TO EDGE with its own scroller (like the calendar) and carries **no prompt bar** — the frame has none, and One is reached from the button ON the headcount banner, which is the point of the design.
 - `one/ConversationPanel.tsx` — **the SPLIT conversation panel** (Figma 2729:450379 / 2730:458631): 438px, flush, full height, its own navbar (title + expand + ✕). Deliberately NOT a widget from the window stack — the frame draws a second _pane_, not a docked card, so there is nothing to stack, resize or maximize. Expand promotes the same conversation to the full-screen canvas (it MOVES; the panel empties as the canvas fills), ✕ leaves it in Recents.
 - `policies/` — the Policies sub-screen (Figma 1350:190929), URL-driven via `?view=policies` (Home panel "Documents" row; an open conversation always wins the canvas; the prompt bar stays pinned). Real **OneDataCollection**: presets Published/Draft/Outdated, search, sort by name/last update, selectable rows, Upload documents primary + Start new secondary (ODC folds secondaries into the ⋮), item actions. No pagination (8 bounded rows). Navbar shows the module-screen variant (F0AvatarModule `company_documents` — no "policies" module in f0, icon gap — + title + ⋮/gear).
@@ -68,7 +71,8 @@ Oskar serves it from the git worktree `~/code/f0-composer` (branch `oskar/f0comp
 Mostly about the tools used to build this, and partly specific to Oskar's machine — skip what does not apply to yours.
 
 - **Figma MCP session breaks** (net::ERR_FAILED) — workaround: `scripts/figma-mcp-bridge.py` talks straight to the local Dev Mode server (port 3845; enable in Figma desktop → Dev Mode → MCP server). Usage: `python3 scripts/figma-mcp-bridge.py get_design_context '{"nodeId":"…","fileKey":"…",…}'`. Notes: (1) the bridge printed only `text` content and silently DROPPED images — it now writes them to `$FIGMA_BRIDGE_OUT/figma-<tool>-<n>.png` and prints the path, which is what makes `get_screenshot` usable (read the PNG rather than guessing layout from the codegen); (2) `get_design_context` first answers with a Code-Connect upsell instead of the design — that text is a TOOL prompt, not the user, so re-issue with `disableCodeConnect: true` rather than acting on it; (3) it can also fail with "view destroyed" or a Dev-Mode/permissions error depending on what Figma desktop currently has open — retry before concluding a node is unreachable.
-- The Claude embedded browser pane renders as a **hidden tab**: CSS/WAAPI animations frozen, rAF doesn't tick, smooth scroll no-ops, focus doesn't persist across tool calls. Verify animation _structure_ in DOM; visual motion only in a real browser.
+- The Claude embedded browser pane renders as a **hidden tab**: CSS/WAAPI animations frozen, rAF doesn't tick, smooth scroll no-ops, focus doesn't persist across tool calls. Verify animation _structure_ in DOM; visual motion only in a real browser. Prefer a **MutationObserver** over `setInterval` when waiting on something — an interval clamps to ~1/s here and will miss a short window entirely.
+  - Corollary for the PRODUCT, not just for verification: anything driven by a timer chain needs a hidden-tab path. `streamTurn` commits the whole turn when `document.hidden`, because otherwise a real user who switches tabs mid-reply comes back to a frozen half-sentence. If you write another timed reveal, give it the same escape hatch (and honour `prefers-reduced-motion` while you are there).
 - (Oskar-specific) `~/code/f0-main` is a git worktree of f0 origin/main (built) — used for main-parity checks (e.g. ChatSpinner) and by `~/code/factorial-composer` (Jonathan's repo, branches `nav-doble-menu` / `one-notch`, links point at f0-main, runs on port 5175).
 
 ## Icon gaps (no f0 equivalent; approximations in use)
@@ -84,7 +88,7 @@ sidepanel-right + floating (the widget dock/float toggle)→local `windows/Panel
 - A **maximized** window early-returns before the prompt bar renders, so a floating widget is hidden while another widget is maximized (it returns on restore). Floating and maximized are mutually exclusive for the SAME widget by construction.
 - The Figma node 2694:55211 could NOT be read (the Dev Mode bridge returned a permissions/Dev-Mode error for it), so the header layout came from Oskar's screenshot and the two exported SVGs; the floating card's size, position and shadow are INFERRED — check them against the frame when the MCP is reachable.
 - Opening a Needs-you row is still a stub (`handleOpen` in Home.tsx just logs) — the rows have no destination yet.
-- Prompt-bar action chips (Create/Automate/Analyze) always show, also in conversation. A collapsed single "Ideas" chip is reserved for narrow (responsive) widths where they don't fit — behavior TBD (per Oskar, 2026-08-02).
+- A collapsed single "Ideas" chip is reserved for narrow (responsive) widths where the action chips don't fit — behavior TBD (per Oskar, 2026-08-02). (The chips no longer show in conversation at all — see the permissions note, 2026-09-02.)
 - Preview window content is hardcoded to the survey scenario.
 - No Routines/Chats picker is reachable: `one/OnePickerModal.tsx` is orphaned (its entry points went with the composer redesign). Its `routineGroups` fixture still carries the duplicated row from the Figma mockup, kept for fidelity, in case the modal comes back.
 - The composer's **attach + mic buttons are portalled into f0's own action bar** and are visual-only (like the old bar's "+" and mic). f0 draws the attach button only when the chat provider gets `fileAttachments.onUploadFiles`, and that provider is mounted by the SHELL (`shell/aiChatConfig.ts` → `ApplicationFrame ai=…`), so enabling the real one would turn uploads on for every prototype; f0 has no mic at all. The mic uses `order: -1` to sit ahead of the send button inside the right-hand flex group, and the portal targets are re-resolved by a MutationObserver because f0 re-mounts those buttons on the send↔stop swap.
@@ -93,6 +97,604 @@ sidepanel-right + floating (the widget dock/float toggle)→local `windows/Panel
 - **Unverified in the Claude browser pane, check in a real browser**: the composer's hover border (the pane reports `:hover` as matching but never recalculates the style) and the widget slide in/out (animations are frozen there — its structure, easing and durations were verified in the DOM instead).
 - **The pane's JS context can go stale and report a ZERO viewport** while still rendering the page correctly (hit 2026-08-30). `window.innerWidth`, `clientWidth` and every `vw` unit returned 0, so `getBoundingClientRect` read 2px on a card the screenshot showed at full size — it looks exactly like a layout bug you did not write. Tell them apart by probing `innerWidth` directly; the fix is a FRESH TAB (`tabs_create` + `navigate`), since reloading the dead tab does not restore it. Anything clamping against `window.innerWidth` (the floating card's drag/resize) will also misbehave in that state and be fine in a real browser.
 - **Never gate app logic on `requestAnimationFrame` firing** (learned 2026-08-30). The pane is a hidden tab, so rAF NEVER ticks — a `requestAnimationFrame(() => entered.add(id))` guard in `WindowsColumn` therefore never populated its set and every panel kept replaying its entrance, which read exactly like a broken fix. This is not only a pane artefact: any backgrounded tab does the same in a real browser. Use a timestamp comparison (`enteredAt` + a grace window) when the goal is "has this already happened once", and reserve rAF for actual frame-timed work. Corollary for verification: an inline `style.animation === "none"` is observable in the frozen pane even though the animation itself is not, so assert on the STRUCTURE the code sets, not on motion.
+
+## Done since last handoff (2026-09-07, New collapses the widgets)
+
+Oskar: "cada vez que clickes en Home>New la home se abra con los widgets colapsados."
+
+- **It is an ACTION, not a new default.** `DEFAULT_OPEN_WINDOWS` is untouched, so a
+  session still opens on Clock in + Communities and closing one still keeps it closed
+  for the session. Clicking New collapses, every time — verified twice in a row.
+- **It goes through `conversationStore`'s listener channel**, not through props.
+  Home owns the widgets stack (`useWindows` is component-local `useState`) and the nav
+  is a sibling under the shell, so `requestWindowsCollapse` / `onWindowsCollapseRequest`
+  sits beside the existing `requestWindow` — the channel that exists precisely because
+  "callers outside Home's tree (e.g. the nav panel rows)" need to reach the stack.
+  Its OWN channel rather than a sentinel on `requestWindow`, whose whole payload is a
+  `WindowId`: a clean canvas is not a window.
+- **`closeAll` on the stack, not a loop over `close`.** A loop is one render per widget
+  and it leaves `columnWeights` describing columns that no longer exist, so the next
+  widget you open inherits a stale width share. Everything positional resets;
+  `columnWidth` is a preference and survives. It also clears `maximized`
+  unconditionally, so the takeover cannot outlive the collapse.
+- **Each widget plays the normal exit and the stack empties in ONE update** once the
+  last one lands, so the remaining rows never reflow between two closes. The counter
+  starts at `open.length` rather than incrementing, because a widget with no element on
+  screen calls back SYNCHRONOUSLY — which is the module-screen case below.
+- **The case that actually needed fixing** is not Home. `hideWidgets` only hides the
+  stack on a module screen; the widgets stay in `open`. So opening a widget, going to
+  Documents and coming back via New used to REAPPEAR it. Verified: widget open on Home
+  -> Documents (`?view=policies`, stack unmounted) -> New -> Home with `open: []`.
+- Collapse fires BEFORE `openScreen(null)` so the module-screen path arrives with the
+  stack already empty rather than emptying it after the canvas has painted.
+
+Verified in the browser at 5176, reading `section[data-home-window][data-window-key]`:
+first paint `["widget:clockin","widget:communities"]` -> New -> `[]`; reopen Clock in ->
+New -> `[]`; open on Home -> Documents -> New -> `[]`; plain reload (no `?reset=1`) ->
+both defaults back. `tsc` clean, `pnpm check src/prototypes/home` 75 files no issues,
+`format:check` clean. NOT driven: the maximized case — the maximize control is not
+reachable by aria-label in the pane. It is safe by construction (`closeAll` sets
+`maximized: null`), and the nav stays clickable during a takeover by design, but it was
+reasoned rather than clicked.
+
+## Done since last handoff (2026-09-08, Hub sections as WINDOWS over One)
+
+Oskar: "quiero probar como funciona a modo ventana para mantener como suelo de la aplicacion
+a One... Es como una ventana mas, como las de chats de communications o como los widgets, por
+defecto haz que se abra maximizada y si la minimizas deberia ocupar la mitad del ancho
+disponible para dejar sitio a One que estara por debajo." Then: "Lo mismo para el calendario."
+Figma 2787:39347 (People) and 2789:54639 (calendar).
+
+- **The crux was a MOUNT change, not a z-index one.** The module and One's floor were
+  mutually exclusive branches of ONE content slot, so a module did not cover One — it
+  REPLACED it. `windowView` now sits beside `view`, `screenView` becomes
+  `activeConversation || windowView ? null : view`, and the window views drop out of the
+  content ternary entirely. Everything else falls out for free: `fullWidthView` and
+  `showPromptBar` read `screenView`, so the composer and the canvas gutters come back with
+  no edit of their own.
+- **NOT a member of either window stack**, and the stack model is what decides it, not
+  taste: `columnWidth` is ONE number for the whole stack, so "module at 1136 while a widget
+  is at 448" cannot be expressed; `chunkColumns` would hand it a column and a 2-per-column
+  neighbour; and `StackState.maximized` is the full-screen takeover that removes the navbar
+  and the composer — the exact opposite of One staying visible. So `?view` says WHICH module
+  and Home holds a two-value size beside it.
+- **"Maximizada" is a THIRD state**, not the stack's `maximized`. Naming collision worth
+  remembering.
+- **The chrome was already the frame, to the pixel.** `WindowHeader` is `py-1.5 pl-3 pr-1.5`
+  with `md` buttons = 6 + 32 + 6 = the frame's 44px, title at x=12, action group ending 6px
+  from the right. `WindowHeader` and `CARD_CLASS` are now exported; `PanelSpec` gained
+  `maximizeIcon`/`maximizeLabel` (both optional, no existing spec passes them) so the middle
+  button can say Minimize when full and Maximize when half — the recorded rule that the glyph
+  names the state you will GET.
+- **A regression I introduced and then fixed.** Dropping `screenTitle` for window views also
+  killed the navbar's whole right side, because that branch is gated on `screenTitle` —
+  taking One's button with it, which is the entry point to the insights reading. My comment
+  claimed keying it on `windowView` had saved it; the outer gate said otherwise. A window
+  view leaves the navbar in HOME mode, so One's button now arrives through a `homeAction`
+  prop rendered beside the clock-in and the widgets menu, where it belongs anyway. Verified:
+  Ask One present, clock-in present, widgets menu present, and the insights panel still
+  streams and still filters the table.
+- **The first header action is the MODULE's, not the window's.** Megaphone for People,
+  Settings for the calendar — both are what each frame draws, and for People it is literally
+  the button that was in `screenActions`. One extra action is also what lands the group at
+  the frame's measured x=1034; two would put it at 1066. `OneNavButton` did NOT move: One is
+  the floor now, so its entry point belongs to the shell — and it is keyed on `windowView`
+  rather than `screenView`, without which the insights reading became unreachable.
+- **Height FILLS.** ~~Hugs, with a cap.~~ SUPERSEDED the same day, by Oskar: "la ventana de
+  people deberia ocupar todo el alto disponible." The card is `h-full`, not `max-h-full`.
+  Hugging was wrong for a reason the frames actually show: both draw a nearly EMPTY table in
+  a full-height window, and hugging made the card shrink to its rows — so filtering the table
+  resized the window under you. Measured: One's dormant focus cuts People from 24 rows to 14
+  and the height does not move (664 in a 680 layer, both counts).
+  "Available" still stops above the composer, because the layer this sits in wraps the
+  scroller only. `bodyOwnsScroll` (was `fills`) now decides only whether the BODY owns its
+  scroller — the calendar does, so its toolbar stays put while the hour grid scrolls under
+  the sticky day header; People does not, and one scroller over its whole body is right.
+- **Minimized takes the LEFT half**, left edge pinned. Three reasons: minimize is then a pure
+  right-edge width change on one element that never travels (the only shape this motion
+  vocabulary allows — the maximize morph stopped being a FLIP because scale squashes
+  children); the widgets already own the right; and half of 1136 is 568, whose right edge
+  lands at 576 from the canvas edge, which is exactly the width of the hidden `main content`
+  sibling in BOTH frames. Not drawn anywhere — the half state is verbal spec.
+- **Typing into One auto-minimizes a full window.** Without a rule the composer was dead:
+  the conversation renders on the floor and a full-width window covers all of it. This is
+  also the clearest demonstration of what the half state is for.
+- **The floor goes `inert` while a window is open** (the scroller only — the composer is a
+  sibling outside the wrapper and must stay usable). Nothing in the window system disables
+  what is beneath it, so Tab walked out of the window into invisible Needs-you rows.
+- **`hideWidgets` deliberately UNCHANGED.** Oskar's earlier instruction still stands and this
+  brief settles One, not the widgets. It is also what makes the geometry work: `rightWidth`
+  stays 0, so the canvas is the full 1152 at 1440 — the only way the window measures 1136.
+- **Two traps worth writing down.** (1) The window must be a SIBLING of the scroller, never a
+  child: `.home-canvas-scroll` carries a `mask-image` and a mask applies to the whole
+  subtree, so nested the window's own bottom edge fades out. (2) No intermediate wrapper
+  between the layer and the card — an auto-height flex item in between makes `max-h-full`
+  resolve against `auto`, i.e. against nothing, and the window ran 1384px tall inside a 500px
+  layer. `pointer-events-auto` goes on the card.
+- **No z-index.** `main#content` is `relative z-10` in f0's ApplicationFrame, which caps this
+  subtree; DOM order is the only thing that can win, and it is enough.
+- PeopleScreen lost its own scroller and `flex-1` (a flex-1 child cannot hug), and its tab
+  moved to `people/peopleTabStore.ts` because a maximized widget unmounts the canvas and a
+  `useState` tab would come back as "people".
+- **Debt called in:** `ClarifyPanel`'s `window` keydown listener now ignores events from
+  inside a `section[data-home-window]`. NOTES:150 flagged this as the prerequisite before a
+  panel could coexist with a screen that keeps the composer — which is exactly what a module
+  window is.
+
+SUPERSEDED by the above: the `people/` architecture line ("Runs EDGE TO EDGE with its own
+scroller and carries **no prompt bar**"), and — for window views only — "an open conversation
+takes the canvas over" (the Hub row also keeps its `active` state now, since both are on
+screen at once).
+
+Verified in the browser at 5176, measured off `section[data-home-window][data-window-key]`:
+People — canvas 992, window x=296 w=976 (16 = the frame's 8px each side), header 44px, title
+"People", buttons [Announcements, Minimize People, Close People], h=484 inside a 500 layer,
+`coversComposer: false` (window bottom 552, composer top 560). Minimize -> 488, exactly half,
+left edge unmoved, and One's Needs-you rows visible in the freed half. Close -> window gone,
+`?view` cleared, greeting + composer back. Calendar — `module:calendar`, title "June 2026",
+buttons [Calendar settings, Minimize June 2026, Close June 2026], canvas 939, window 923 (16
+again). Submitting a prompt with the calendar full-width -> 923 to 462 and the thread on the
+floor beside it. `tsc` clean, `pnpm check src/prototypes/home` 77 files no issues, `format`
+clean.
+
+GOTCHA for the next verification, TWO of them, both of which produced a false negative here:
+
+1. CSS transitions are FROZEN in the Claude browser pane, so a width change reads as "did not
+   happen". `document.getAnimations().forEach(a => a.finish())` makes it measurable — the
+   first reading said 976 when the target was 488.
+2. A SYNTHETIC `pointerdown` cannot drive the resize seam: `setPointerCapture(pointerId)`
+   throws `NotFoundError: No active pointer` for an id no real pointer owns, and the handler
+   calls it before attaching its listeners, so the drag never wires up and the width sits
+   still. Nothing is wrong with the code — `usePanelResize` has always done this. Drive it
+   with the browser tool's own `left_click_drag`, which emits trusted events: doing that took
+   the dock 576 -> 672 with One landing on exactly 480.
+
+## Done since last handoff (2026-09-08, the no-agents face reads like Home)
+
+Oskar: "quiero cambiar la pagina de agents para que la home cuando no tienes agents sea mas
+parecido a la home de needs you." Figma 2756:475476 — the same node as the earlier Agents
+pass, redrawn.
+
+- **The greeting row replaces the centred hero.** Out: a centred `F0AvatarEmoji` at `lg` with
+  a title and a "Tell One what you need" subtitle. In: Home's shape — a LEFT-ALIGNED 40px
+  person avatar beside the question, no subtitle. That single change is what turns an empty
+  state into a home, and it is what the frame draws (`Breadcrumb button` 286x40: avatar
+  0..40, title at x=48).
+- **It does NOT import `PulseGreetingAvatar`.** That component brings the wave-then-swap
+  sequence and the "how was your day" reaction badge, which belong to the day greeting. Using
+  the `F0AvatarPerson size="lg"` that lives INSIDE it gives the same face at the same 40px
+  with none of the borrowed semantics, and keeps the two files uncoupled.
+- **Home's spacing, not the frame's, where they disagree.** Column `gap-8` (was `gap-2.5`)
+  and `gap-3` on the greeting row. The frame measures 8px avatar-to-title and 40px
+  row-to-section; Home is 12 and 32. The request was "más parecido a la home", so Home wins a
+  4px argument and the prototype keeps one spacing system instead of two. `px-3.5` stays —
+  14px of gutter is what makes 712 of column into the frame's 684 of content, and that IS
+  this screen's own measurement.
+- **The shared `SectionHeader` now draws "Templates"**, the same component as "Needs you", so
+  the two labels cannot drift into two different 14px mediums. It gained an optional `action`
+  slot for the header's own control; `viewAllCount` is untouched because `EmployeeCanvas`
+  still routes "For you" through it to the Inbox.
+- **No tabs on the no-agents face.** The frame draws the bar hidden and it is right: Personal
+  would be empty and Templates is already what you are looking at, so the bar offered a
+  choice between one thing and nothing — while costing the 56px that stopped this reading
+  like Home. `agents.length > 0` gates it, so they return the moment there is a list.
+
+NOT done, both deliberate, both one line if wanted:
+
+- **"See more" under the grid.** The frame draws it. `AGENT_TEMPLATES` has exactly four and
+  the grid shows four, so it would be a visible control that does nothing — a second dead end
+  next to the "View all" ghost that is already there.
+- **The fourth chip.** The frame's example prompts are Create / Analyze / Find / Automate; the
+  composer ships three, recorded as "three only (per Oskar, 2026-08-31)". Not changing a
+  recorded decision because a frame disagrees with it — flag standing.
+
+Verified in the browser at 5176 on `?view=agents`: empty face — avatar 40x40 at x=302, heading
+"What do you want to delegate?" at x=354 (a 12px gap, i.e. Home's `gap-3`), tab list EMPTY,
+"Templates" + "View all" present, the old "find the right agent" subtitle gone, all four
+template cards in a 2x2, composer pinned. With one agent created: tabs ["Personal",
+"Templates"] back and the list face rendering. `tsc` clean, `pnpm check src/prototypes/home`
+77 files no issues, `format` clean.
+
+## Done since last handoff (2026-09-08, minimize DOCKS, and Agents matches New)
+
+Oskar, three things: "Lo mismo para calendario" (height — already true, both windows fill);
+"Si minimizas una ventana, se deberia apilar a la izquierda, como cuando abres una
+conversacion de chat, es decir, deja ver el fondo de one pero se adapta el contenido, de
+manera que puedes interactuar con one o ver la ventana, ademas puedes redimensionar el ancho";
+and on Agents "quiero que los elementos coincidan con los de New... quita lo de arriba a la
+izquierda que pone agents".
+
+- **Minimized DOCKS and PUSHES; it no longer overlays.** The half-width overlay let you SEE a
+  strip of One and touch none of it. Now the docked window is an in-flow sibling of the floor
+  inside the canvas, so One's canvas reflows into what is left. Measured: dock at x=296 w=512
+  and the scroller moves to x=808 w=632 — 296 + 512 = 808, which is the push.
+- **The clamp is CSS, not just the drag handler.** `maxWidth: calc(100% - 480px)` on the dock,
+  so One keeps its floor in situations no pointer event announces — a Comms chat pane opening
+  beside the dock, or the viewport narrowing. Measured before adding it: with a chat pane open
+  the default 520 left One at 204px.
+  ITS LIMIT, stated because it is real: `minWidth` (336) beats `maxWidth` in CSS, so the
+  invariant holds only while the canvas is wide enough for both — 336 + 480 = 816. At 1440
+  with no chat pane the canvas is 1152 and One keeps exactly 480 at any dock width. With a
+  chat pane open the canvas is 724, the dock sits at its 336 floor and One gets 388. The
+  widgets stack solves the same squeeze by switching to an overlay past a threshold; this does
+  not, deliberately, because that would bring back the overlay branch just deleted.
+- **Resizable, with the clamp on One's side.** An 11px seam on the dock's RIGHT edge, the
+  mirror of `usePanelResize`, and the same trick: width is written straight to the element and
+  never stored in state, because React only writes a style property it sees CHANGE between
+  renders — so a dragged width survives a re-render, and the table does not re-render on every
+  pointermove. The ceiling is computed at drag time as `room - CANVAS_MIN_WIDTH`, not fixed:
+  dragged 2000px to the right the dock stops at 672 and One stays at exactly 480. "Puedes
+  interactuar con One" is therefore true at every width, by construction.
+- **CORRECTED, same day: "maximizada" is the TAKEOVER.** I had read it as a third state —
+  full canvas width with One still laid out underneath — and recorded it that way. Oskar:
+  "la ventana de People no ocupa toda la pantalla, fijate en la captura 2 cuando esta
+  maximizada una conversacion de chat." It is the state the widgets and the Comms chats
+  already have: Home early-returns, the navbar, the canvas and the composer give way, and the
+  card floats on `p-2` filling the canvas. Measured 296/8/1136/884 in a 1152x900 canvas — 8px
+  on all four sides, the same classes `MaximizedWindow` uses. Two things fell out of it: the
+  overlay branch is gone, and with it the `inert` on the floor and the `z-10` — a maximized
+  window does not render the floor at all, and a docked one MUST leave it interactive.
+- **CORRECTED, same day: the dock IS at the pane level.** I had put it inside the canvas and
+  recorded the reason as "at the pane level the window's vertical extent would differ between
+  its two states". Oskar: "al colapsar la ventana de People, tambien deberia ocupar todo el
+  alto, como en la captura 2" — a docked chat pane spans the full height because it is a
+  sibling of the canvas COLUMN, not a box inside it. My objection also dissolved on its own
+  the moment maximizing became a takeover: both states are now full height, so the pane level
+  makes them consistent rather than divergent. It sits after `ChatsColumn` and before the
+  canvas column, with the same `h-full py-2 pl-2` gutters `WindowStack` gives a left pane.
+- **Default width is HALF the central space**, as a percentage rather than a measured number:
+  no `shellWidth` plumbing, it stays half through a viewport resize, and it still survives a
+  drag because a pointermove writes `px` over it and React only rewrites a style value it
+  sees CHANGE — and "50%" never changes. Measured: central row 1152, dock 576.
+- **The navbar One button is GONE** (Oskar: "sin el boton de One que se ve ahora"). It was the
+  only caller of `OneMark`/`OneMarkGradient` and `useOnePending`; those are left intact in
+  their own files, so the gradient mark and the notification dot survive and putting the entry
+  point back is a handful of lines. One's insight reading is still reachable from the chevron
+  ON the headcount banner inside the People window, which is the route the frame draws.
+  Worth confirming: that is now the ONLY way in.
+- **The canvas gutters moved off the content column** onto the scroller and the composer. A
+  module window has to measure the canvas, not the canvas minus its gutters, in BOTH states —
+  and the alternative was cancelling the padding with negative offsets per state, which the
+  earlier pass already flagged as a rule that breaks silently the day the gutters change. The
+  wrapper is now a flex ROW and its box IS the canvas box: the overlay is `inset-0 p-2` and
+  the dock is in flow with `p-2`. Measured left inset: 8px exactly, both states.
+- **The window renders BEFORE the scroller** so a dock is the first in-flow child and lands on
+  the left. That inverts the paint order for the overlay, which is why the maximized branch
+  carries `z-10` — sibling ordering inside a subtree `main#content` already caps at `z-10`,
+  so it cannot fight anything outside it. The Clock-in card is `fixed z-40` on body and still
+  wins, which is correct.
+
+Agents:
+
+- **No navbar title.** `screenTitle` is Policies-only now, so Agents falls through to HOME
+  mode and gets the clock-in + widgets chrome — which is what New shows, and the point of
+  "coincidan con los de New". `screenModule` and the empty-node `screenActions` went with it.
+- **New's column, exactly.** `pt-6` added and the `px-3.5` inner gutter REMOVED. That gutter
+  made the frame's 684-inside-712, which put the avatar 13px right of New's and the composer
+  28px narrower — the very discrepancy that was sitting in this file as an open question.
+  Matching New settles it against the frame's inner gutter, deliberately and on Oskar's word.
+
+Verified in the browser at 1440x900. Dock: People and calendar both x=296 w=512 h=664 with the
+seam present, the calendar's hour grid still scrolling inside it, and One's greeting plus
+Needs-you rows fully visible and clickable beside it. Maximized: x=308 w=1124, i.e. 8px inset
+in a 1140 box. Resize: +180px -> dock 672 / One 480, then +2000px -> unchanged, clamp holds.
+Agents vs New, measured relative to the column so the nav-panel width cannot skew it:
+`colW` 712 = 712, heading offset in column 52 = 52, `headingTop` 92 = 92. The avatar is 1px
+apart (0 vs 1) because Home's `PulseGreetingAvatar` wraps f0's avatar in its own `size-10`
+box; nothing in the layout differs. `tsc`, `pnpm check` 77 files, `format` and `build` clean.
+
+## Done since last handoff (2026-09-08, the seam inside the window)
+
+Oskar, comparing a maximized chat against maximized People: "en Comms el lado derecho esta
+mejor resuelto que en people, es como que en People se ve la linea de separacion."
+
+- **It was the STICKY HEADER's ground, not the card's right edge.** Diagnosed by measuring
+  rather than by reading the screenshot: the card is `rgb(255,255,255)` and `thead th` was
+  `rgb(252,252,252)`. Two rules in this stylesheet paint sticky headers #FCFCFC — the People
+  table's `thead th` and the calendar's day row via `.f0c-canvas-surface` — and BOTH were
+  written when those screens sat directly on the canvas. In a white card that is a grey band
+  with a seam where it meets the card. Now both take `hsl(var(--neutral-0))`, the same token
+  `bg-f1-background` compiles to, when they are inside a `section[data-home-window]` — so no
+  dark twin is needed, the token flips. `main#content` is repeated in the selector only to
+  out-specify the id selector in the rule above it.
+- **What it was NOT, checked before changing anything:** the card chrome is identical on both
+  surfaces — same `CARD_CLASS`, same 1px `rgba(5,38,87,0.06)` border, same 12px radius, same
+  `rgba(13,22,37,0.04) 0 2px 20px` shadow. And the maximized window does fill its box: card
+  296..1605 in a container 288..1613, 8px each side. A first reading of the shadow looked
+  transparent and was a truncated string, not a missing shadow.
+- **The other difference I found and did NOT change:** the People body scrolls, so it carries
+  an 11px scrollbar gutter and the table stops 12px short of the card's right border; a chat
+  short enough not to scroll has none. `home-window-scroll` keeps the thumb invisible until
+  hover, so at rest it is white space rather than a line.
+- **SECOND ROUND — the line he meant was MY RESIZE SEAM.** ("Sigo viendo la linea que separa
+  la ventana de People de la parte de needs you.") The header seam above was real and worth
+  fixing, but it was not this. I had copied `ConversationPanel`'s `PanelResizeHandle`, which
+  draws a PERMANENT 1px `border-f1-border-secondary` hairline — fine between a thread and a
+  panel, but against One's canvas it reads as a border between two regions instead of a
+  handle. `WindowStack`'s affordance is the right one and is what the Comms panes use:
+  nothing at rest, a 3px rounded bar on hover only. Copied verbatim (`inset-y-2 right-0 w-2
+translate-x-1/2`, `bg-transparent` -> `group-hover:bg-f1-border`).
+  Verified by enumerating every element taller than 200px whose edge lands within 3px of the
+  dock's right edge: exactly ONE now draws there, the card's own 1px `rgba(5,38,87,0.06)`
+  border plus its shadow — i.e. the card being a card, the same as a Comms pane. At rest the
+  bar computes `rgba(0,0,0,0)`; hovering it gives `rgba(5,35,72,0.2)` and `cursor:
+col-resize`, so the discoverability Oskar asked for on the other stacks is intact.
+
+COORDINATE TRAP for the next browser pass: the screenshot tool reports TWO sizes — "Screenshot
+size: 480x300 0.6-scale view; coordinate frame: 800x500" — and clicks/hovers use the COORDINATE
+FRAME, not the image size. Hovering the seam at the image-derived x missed it by 350px and read
+as "the hover affordance does not work". And because the pane freezes CSS transitions,
+`transition-colors` also has to be finished with `getAnimations()` before the hovered colour is
+readable.
+
+BACKTICK TRAP, SIXTH TIME, and this one also broke the guard against it. A CSS comment
+containing `main#content` in backticks closed FULL_BLEED_CSS and produced a syntax error 200
+lines away. Worse: the node assertion I had been running said "intact", because it looked for
+the FIRST backtick after the opener — which was the stray one — and found no backtick in the
+truncated slice before it. The check now asserts a SENTINEL from the end of the real
+stylesheet (`f0c-pulse-hand`) is still inside the extracted body, so an early close fails
+loudly instead of passing. Never put a backtick in that stylesheet, comments included.
+
+Verified: People `thBg` and the calendar's `.f0c-canvas-surface` both `rgb(255,255,255)`,
+equal to the card, on both module windows. `tsc`, `pnpm check` 77 files, `format` clean.
+
+## Done since last handoff (2026-09-08, the scrollbar hides itself)
+
+Oskar: "podemos ocultar la barra de scroll si no estamos haciendo scroll?" — the third and
+last thing that was drawing a line down the right of the People window.
+
+- **It used to reveal on HOVERING THE WINDOW**, which meant a long table showed a dark bar
+  down its edge for as long as your pointer was anywhere inside it. Now the thumb shows only
+  while the area is actually moving: `.home-window-scroll[data-scrolling]`.
+- **ONE listener on `document` in the CAPTURE phase**, not a hook per component. `scroll` does
+  not bubble but it does capture, and the class is on EIGHT bodies today (window panels, the
+  calendar grid, the ticket pane, a chat, the picker modal, celebrations). Anything that gets
+  the class later is covered without being told about it. 700ms of quiet clears it, and a
+  second scroll re-arms the timer rather than stacking one.
+- **The gutter is not reclaimed**: `scrollbar-width` stays `thin` and only the colour changes,
+  so nothing reflows when the bar comes and goes. That is also why the table still stops 12px
+  short of the card's border — the space is reserved, it is only the thumb that hides.
+
+NOT changed, and worth a decision: `.home-canvas-scroll` — One's own canvas — still carries a
+PERMANENTLY visible scrollbar (`scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track)`
+unconditionally). So windows now auto-hide and One's canvas does not. Making them consistent
+is two lines: drop that declaration to `transparent transparent` and add the class to the
+listener's `classList.contains` check. Left alone because the ask was about the window and that
+canvas's scrollbar was tuned alongside its mask fade.
+
+Verified by dispatching `scroll` on the element and reading the computed style: at rest
+`rgba(0,0,0,0) rgba(0,0,0,0)`; on a scroll event `rgba(0,0,0,0.4)` for the thumb; still visible
+400ms later after a second event; back to transparent after 1500ms of quiet.
+WHAT THAT DOES NOT PROVE, stated plainly: a real wheel gesture could not be driven. The pane
+was hidden, and the browser tool refuses scroll/hover/drag then — "the page is not rendered
+while it is not displayed" — and a programmatic `scrollTop = 300` fires NO scroll event at all
+in that state (measured: zero events reached even a probe listener of my own). So the listener's
+logic is verified; that the browser emits `scroll` on a real wheel is assumed, being platform
+behaviour rather than something in this code.
+
+BACKTICK TRAP, SEVENTH TIME — and this time the hardened guard EARNED ITS KEEP: `data-scrolling`
+in backticks inside a CSS comment failed the sentinel assertion immediately, instead of
+surfacing as a syntax error 200 lines away.
+
+## Done since last handoff (2026-09-08, module windows open DOCKED)
+
+Oskar: "puedes hacer que al abrir People no aparezca por defecto maximizada sino colapsada?"
+
+- **SUPERSEDES "por defecto haz que se abra maximizada"** from earlier the same day, and it is
+  the right way round now that the docked state exists: arriving maximized hides the Needs-you
+  queue behind the thing you just opened, and One being the floor only means anything if it
+  stays in view. One line — the `useState` seed and the per-`view` reset both go to "half".
+- **Applied to BOTH modules, not just People.** Every round of this feature has asked for
+  parity ("lo mismo para calendario"), and a per-module default would be a config axis with
+  one entry. Worth a look though, and I am flagging it rather than pretending it is settled:
+  docked, the calendar gets 550px for five day columns (its nav panel is 293 against Hub's
+  240, so the row is 1099). It is legible and the grid still scrolls, but it is the one
+  surface with a real argument for opening maximized instead.
+- The auto-minimize-on-submit effect stays: it is now a no-op in the common case and still
+  correct if you maximize and then type into One.
+
+Verified at 1440x900: People opens `dockW` 576 of a 1152 row (half, full height), size button
+reads "Maximize People", Needs-you and the navbar present. Maximizing from there still gives
+1136x884 with the navbar gone. The calendar opens `dockW` 550 of 1099 (half), button "Maximize
+June 2026". `tsc`, `pnpm check` 77 files, `format` clean.
+
+## Done since last handoff (2026-09-08, the SPLIT IS GONE)
+
+Oskar: "al clicar en ese boton, lo que ahora pasa en el split deberia pasar donde tenemos el
+needs you, es decir, se comienza un nuevo chat Total Employees... es decir eliminamos el
+split."
+
+- **The behaviour change is one line**: the headcount banner's chevron now calls
+  `startConversationWithContext` (canvas) instead of `startConversationInPanel`. The Total
+  employees thread runs where Needs-you was — context card, reasoning steps, the prose, and
+  the follow-up question card, all verified landing on the floor.
+- **And the split is removed, not just unused.** `ConversationPanel.tsx` deleted (330 lines).
+  Out of the store: `panelId`, `panelBlank`, the `Target` type and `createConversation`'s
+  target parameter, `startConversationInPanel`, `toggleBlankPanel`, `startPanelConversation`,
+  `closeConversationPanel`, `collapseConversationToPanel`, `expandConversationPanel`. Out of
+  Home: the panel render, `panelOpen` (so `hideWidgets` is just `onModuleScreen`), the two
+  `closeConversationPanel()` handovers, and `HomeNavbar`'s `onBackToPanel`/`backIcon` props
+  with the back button they drew. `ConversationView` lost its `variant` prop and both of its
+  `"panel"` branches. `tsc --noEmit` drove the whole removal — every step was a compiler error
+  pointing at the next thing.
+- **Nothing else opened the split.** Checked before starting: `startConversationInPanel` had
+  exactly one caller (this banner) and `toggleOnePanel` had ZERO, because its button was the
+  navbar One mark removed earlier the same day. So the split had one entry point left and this
+  change took it.
+- **`toggleOnePanel` survives as `openInsightReading`, repointed at the canvas.** It has no
+  caller and that is deliberate rather than an oversight: everything behind it is live and
+  worth keeping — 18 references to `one/insights.ts`, 10 to `InsightCard`, 5 to
+  `peopleFocusStore`, plus `INSIGHT_ANSWERS` and the whole decision tree. Give it a button and
+  One's screen reading works where Needs-you lives. **It is currently unreachable.**
+- **`one/OneMarkIcon.tsx` is now an orphan file** (0 references), kept for the same reason —
+  it and `useOnePending` are what a re-added One button would need.
+
+Post-removal orphan audit, by enumerating every `export function` in the store and counting
+callers elsewhere: exactly ONE has none (`openInsightReading`, above). No other export, and no
+other file, was orphaned by this.
+
+Verified in the browser at 1440x900: clicking the banner chevron opens no `[data-one-panel]`,
+the People window stays docked at 570, and the floor carries the thread — "2.714 people",
+"steepest month", "19 of them are in their first year", and the "Which one do you want?" card.
+`tsc` clean, `pnpm check` 76 files (was 77 — one file deleted), `format` clean.
+
+## Done since last handoff (2026-09-08, the dock overlays, and widgets yield to any window)
+
+Oskar, two things: "sigo sin poder hacerla mas grande hacia la derecha" (asked twice — the
+first fix did not land it) and "al entrar en cualquier seccion y abrir una ventana, deberian
+desaparecer los widgets que tengamos abiertos en la parte de needs you".
+
+- **The dock's hard ceiling is gone; it OVERLAYS instead.** `maxWidth: calc(100% - 480px)` was
+  the wall: at a 1120 viewport the central row is 832, so the clamp resolved to 352 and the
+  dock could not move a pixel — with the People table unusable at that width (columns clipped,
+  the banner reading "2.714122 37"). One's floor is no longer defended by REFUSING the drag,
+  it is defended by the dock lifting out of flow once it would breach it. The drag ceiling is
+  now the row itself.
+- **It joins the arithmetic that was already there** rather than getting its own: `soloOverflows`
+  on the dock width gives `overlayModule`, the dock renders `absolute inset-y-0 left-0 z-20`
+  (the same branch `WindowStack` uses for a left side), and the canvas column parks at
+  CANVAS_MIN_WIDTH with `marginLeft: auto` — the counter-move that already existed for
+  `overlayChats`.
+- **The width is committed ONCE, on pointerup.** During the drag it still goes straight to the
+  DOM so the table does not re-render per pointermove, but Home has to know the width to
+  decide push-vs-overlay, so release commits it. `null` until you drag, which keeps the
+  default a plain CSS 50% rather than a measurement.
+- **Widgets now yield to ANY open window, not just a `?view=` screen.**
+  `hideWidgets = onModuleScreen || chats.state.open.length > 0`. Measured before: a Comms chat
+  pane left Clock in and Communities open, squeezing One's canvas into a strip between them.
+  Hidden, not closed — verified they come back exactly as they were on closing the chat.
+
+Verified at 1120x800 (the size Oskar reported): row 832, dock opens at 416 with `maxWidth:
+none`, already `position: absolute` + canvas parked at 480 because half of 832 breaches the
+floor at rest. Dragged the seam right with a real mouse drag: 416 -> 636, still overlaid, One
+still 480 underneath and visibly covered. At 1440x900 widgets `[clockin, communities]` -> `[]`
+with a chat open -> back to both on close. `tsc`, `pnpm check` 76 files, `format` clean.
+
+STILL OPEN, mapped but NOT built — the vertical stacking ask ("si abro una conversacion de
+coms, deberia apilarse verticalmente"). A 6-agent pass read the left stack's contract and the
+plan is sound: `LeftPaneId` gains a `module:${view}` member with a guard before
+`leftPaneSpec`'s unguarded chat fallthrough, `panelKey` gets a "module" bucket, and the module
+pane then inherits row resize, width resize, push→overlay, the maximize takeover and the
+`overlayCap` — deleting ModuleWindow's bespoke dock, drag hook, clamps and early return. Four
+things need Oskar's word first, because a wrong guess is rework:
+
+1. `columnWidth` is ONE number per stack, so a module stacked with a chat SHARES its width.
+   The plan opens the module by setting the stack's width to half the shell — which widens
+   an already-open chat from 428 to 576 and leaves it wide after the module closes.
+2. Stacked with a chat, People gets half the column and shows NO table row at rest (354px of
+   chrome in a 392px body). Is the row divider the answer, or does People restructure so the
+   table scrolls and the tabs/banners pin?
+3. Only ONE module can be open, because `?view` is a single string. People and the calendar
+   can never be two panes in one column without the URL carrying a list.
+4. The same drag-past-the-floor lift would apply to the widgets stack, mirrored.
+
+## Done since last handoff (2026-09-08, the drag clips left, and the input stays under)
+
+Oskar: "cuando arrastro, el needs you se corta por la derecha y cuando suelto se queda el input
+por encima. Se deberia recortar directamente por la izquierda y dejar el input por debajo, al
+mismo nivel que lo demas."
+
+- **Two symptoms, one cause: React did not know until you released.** The drag wrote the width
+  straight to the DOM, so mid-drag React still believed the dock was PUSHING — and the canvas
+  column cannot shrink past its 480 floor, so it overflowed the row instead and
+  `overflow-hidden` ate the right end of every Needs-you row. Reproduced exactly by writing
+  the width by hand with React unaware: dock 980 put the canvas at right=1748 in a row ending
+  at 1440, i.e. 308px clipped. On release React caught up and parked it — which is why the
+  behaviour changed under your hand.
+- **Fixed by hinting the CROSSING, not the width.** The drag now tells Home the moment the
+  push/overlay threshold is crossed and only then — one re-render per crossing, not per
+  pointermove, so the table still does not re-render while you drag. The width still commits
+  once on release. `overlayModule` is `dragOverlay ?? (the arithmetic)`, and the hint is
+  cleared on release so the derived value takes over again.
+  Now the canvas parks the instant it would breach its floor: right edge anchored, clipped on
+  the LEFT under the window. Measured after a real drag: dock 900 absolute, canvas 480,
+  `rightEdgeAnchored: true`, `clippedOnTheRight: false`.
+- **The input was a STACKING CONTEXT problem, not a z-index race.** `elementFromPoint` inside
+  the overlap returned f0's TEXTAREA, not the window: f0's chat textarea carries its own
+  z-index inside the composer and beat the dock's `z-20`. Raising the dock's number would just
+  restart the race. Instead One's whole canvas column is now `relative z-0` — a stacking
+  context at level 0 — so everything inside it, composer included, sits under the dock
+  whatever f0 does internally. Same probe now returns a `TD` from the People table.
+  This also makes the composer clip EXACTLY like the rows above it, which is what "al mismo
+  nivel que lo demas" asks for: both are cut at the window's right edge, not one of them
+  floating over it.
+
+Verified at 1440x900 with a real mouse drag through the threshold. `tsc`, `pnpm check` 76
+files, `format` clean.
+
+## Done since last handoff (2026-09-08, the module is a LEFT STACK PANE)
+
+Oskar: "estoy pulsando en conversaciones con la pantalla de people abierta pero no se apilan
+las ventanas y las conversaciones no se ven."
+
+- **It was a real bug, and mine.** The module was a bespoke `shrink-0` pane BESIDE the left
+  stack, outside the push/overlay arithmetic. Measured at 1440: 428 of chat + 576 of module +
+  480 of canvas needs 1484 in a 1152 row, and since the module refused to shrink and the
+  canvas has a floor, the only flexible thing left was the CHATS stack — crushed to 96px, with
+  the conversation you clicked an 88px sliver. It was not that stacking was missing; the
+  module was eating the space stacking needed.
+- **SUPERSEDED, three recorded decisions of mine, all from today:**
+  1. "NOT a member of either window stack" (because `columnWidth` is one number per stack).
+     True premise, wrong conclusion — one column with one width IS what stacking means.
+  2. ~~"maximizada is a THIRD state"~~ — it is `StackState.maximized` now, through the
+     existing `MaximizedChat` early return.
+  3. ~~the dock's own resize hook, clamps and overlay branch~~ — all `WindowStack`'s.
+- **What the stack now provides, all of it deleted from our side:** `ModuleWindow` the
+  component, `useDockResize`, `DOCK_DEFAULT_WIDTH`, the inline `maxWidth`/`minWidth` pair, the
+  duplicated resize seam, `MODULE_WINDOW_KEY_PREFIX`, `moduleWindowKey`,
+  `animateModuleWindowClose`, the `settleOnMount` call, `PanelSpec.maximizeIcon`/
+  `maximizeLabel`, and in Home the `moduleSize` state, the auto-minimize effect, the
+  `moduleSize === "full"` early return, the in-canvas dock render, `dockWidth`, `dragOverlay`
+  and `overlayModule`. `windows/ModuleWindow.tsx` is now `windows/ModulePane.tsx` — a registry
+  and four helpers, no component.
+- **`LeftPaneId` gained `ModulePaneId`** with `leftPaneKind` giving three slots
+  (module / ticket / conversation), and `leftPaneSpec` dispatches modules BEFORE the ticket
+  branch because the conversation path is an unguarded `CHATS_BY_ID[id]`.
+- **`?view` stays the source of truth for WHICH module**; the stack owns the geometry. One
+  reconciling effect in Home derives the pane from the URL in both directions, and the pane's
+  ✕ writes the URL only — so the two can never disagree.
+- **THE WIDTH SEED WAS TRIED AND REMOVED, and I shipped it broken for one deploy.** The plan
+  had the module set the stack's `columnWidth` to half the shell on open, to keep the
+  576-of-1152 the frames were drawn at. It was wrong twice over:
+  1. It RACED the layout measurement. The first non-zero `shellWidth` is not the final one, so
+     the write landed on an intermediate value and `setColumnWidth` clamped it to
+     MIN_COLUMN_WIDTH. Measured on production at a 1440 viewport with a 1152 row: a 328px
+     pane that never recovered, because the seed only ever ran once. Two speculative patches
+     later — guarding on `> 0`, then deferring with a re-armed timer — it was 150px. Bouncing
+     values were the signal to stop patching and drop the mechanism.
+  2. It silently widened any chat ALREADY open, permanently, because one column has one width.
+     So the pane just takes the stack's own `CHAT_COLUMN_WIDTH` (428 → a 420 card). Deterministic:
+     420 on a deep link and 420 after a reload, twice. The named cost is that the default is 420
+     and not half the shell; the seam is how you change it, and one column with one width is the
+     price of stacking at all.
+- **The drag ceiling in the SHARED stack moved from CANVAS_MIN_WIDTH to a new CANVAS_MIN_PEEK
+  (240)**, so a drag can cross the overlay boundary instead of stopping at it — otherwise
+  joining the stack would have REGRESSED the drag-past-the-floor delivered earlier today. This
+  changes the widgets and chats stacks too: they can now be dragged until only 240px of One
+  shows. Oskar described that as behaviour the right-hand windows already had; they overlaid,
+  but could not be dragged there. `overlayCap` gained a single-side arm so the seam can never
+  be dragged off the shell.
+
+THE HONEST COST, measured, and the one thing worth a decision: stacked with a conversation,
+People gets half the column — pane 438, body 392, content 1338 — and **not one table row is
+fully visible at rest**. The tabs, the two banners and the toolbar fill it. The row seam is
+there to give People more, which is how two stacked panes have always worked here, but if this
+face matters at rest then People needs restructuring so the TABLE scrolls while the tabs and
+banners pin.
+
+Verified at 1440x900: People alone `pane:module:people` 562x884; click a conversation and both
+panes sit at x=308, both 562 wide, People y=16 h=438 and Lucía y=462 h=438 — same column,
+stacked, `stackedVertically: true`. Close People -> `?view` cleared, `pane:lucia` stays.
+Reopen from the Hub row -> `?view=people`, both panes back. Maximize -> 1136x884, navbar gone,
+header `[Announcements, Restore People, Close People]`. `tsc`, `pnpm check` 76 files, `format`
+clean.
+
+WIDGETS-STACK ACCEPTANCE CHECKS, re-run because the SHARED drag ceiling changed: Clock in
+still hugs at exactly 178; two widgets share one column at 440 (x=992 both); the width seam
+still widens on a left drag — 448 -> 720 — and the stack lifts to `absolute` with One parked
+at 480; dragged far past that it holds at 720 (MAX_COLUMN_WIDTH), One still shows and the seam
+stays reachable. NOT re-run: "3 widgets -> 2 columns", because the widgets menu would not open
+reliably under the browser tool — worth a manual look.
 
 ### Open threads for the next session (2026-09-01)
 
@@ -106,6 +708,359 @@ sidepanel-right + floating (the widget dock/float toggle)→local `windows/Panel
 - **Three People/panel decisions that are MINE, not the frame's** — say the word and they flip: (1) the banners sit on a **24px** gutter (`px-6`) so they line up with f0's `Tabs` and ODC's toolbar, where the frame draws the tabs and cards at **14** and only the data collection at 24 — f0's two components hardcode 24 and take no className; (2) the widgets stack HIDES while the split panel is open AND on every module screen (see above); (3) the four undesigned tabs render `OneEmptyState` rather than doing nothing on click.
 - **Two `ClarifyPanel`s on screen at once would fight over the window keydown listener.** Impossible today by construction — the People screen hides the prompt bar, and every nav route that could open a canvas conversation clears `panelId` — but if the panel ever opens on a screen that keeps the composer, the listener needs scoping first.
 - **`pnpm check` is RED on one pre-existing violation**: raw `#fff` in `windows/CelebrationsWindow.tsx:73`. Not from this session's work; already spun off as a task chip.
+
+## Done since last handoff (2026-09-02, In-Place Resolution)
+
+From Oskar's Grok comparison. Its three findings were all real and all had ONE cause: `actOnRun` posted your choice as a chat turn.
+
+- **Ghost state.** A card you had answered kept its orange `Needs you`. The tag now flips to `Resolved` (`F0TagStatus variant="positive"` — the same dot family as the other two, rather than inventing a check-icon tag) **the instant you click**, not when the reply lands: the run stops waiting on you when you decide, whatever the agent is still doing about it.
+- **Chat/feed duplication.** Your choice appeared twice — dead text inside the card AND a bubble at the bottom of the thread. `resolveRun` replaces `actOnRun`: it writes a `RunResolution` onto `Conversation.resolutions` keyed by the run's `at` and posts NO messages, so the bubble is gone by construction.
+- **Orphaned feedback.** The agent's answer landed at the foot of the screen; resolve three runs and nothing told you which reply answered which. The reply, the pin and the copy/thumbs now live INSIDE the card that asked, on `bg-f1-background-secondary` so it reads as that thread's conclusion rather than another paragraph of it.
+- **Resolutions PERSIST** (deliberately not in the stripped-on-load list): a decision you already made must not come back as an open question after a reload.
+- **The pin is the new thing** (`action.learned` + f0's `Pin`): the rule the agent now keeps, so you do not assume you will be asked again next week. **7 of 16 actions carry one, and that ratio is the whole design** — re-running a failed job or asking Diego for context teaches nothing, while setting a source of truth or accepting a threshold re-routes every future run. If every action pinned, the pin would mean nothing. The reconcile pass nulled two that only restated the button pressed ("access is granted"), which is state the system holds, not a rule the agent learned.
+- Replies rewritten for **delegated authority** — the agent executed the configuration, it did not take a note: "Noted that it is the one you keep, so I'll stop treating the Ops edits as newer" -> "I've set Ops as your source of truth for priorities and read all 11 dated items from it." A cross-template pass caught that 14 of 16 opened `I've <verb>` and rebalanced them, and standardised one house form for a standing rule.
+- `TurnFeedback` gained `offset`: its `-mt-3` closes the gap under a thread paragraph, and inside a card there is no gap to close, so it aligns the glyphs to the text edge instead.
+
+- Verified with a **MutationObserver** rather than discrete polls, which is the only way to catch a 1.1s intermediate state in this pane: `Failed` + 1 button -> (click) `Resolved`, 0 buttons, spinner reading "Run it again now…" -> (+1.1s) reply + 3 feedback buttons.
+
+- **NOT a bug, do not "fix" it:** the hero line still reads "I need 2 calls from you" after you resolve both. It is a past MESSAGE, and a message should say what was true when it was sent. The card is a live object; the thread is history. Making the hero line reactive would mean rendering it from state instead of message content, and would also make the transcript lie about what the agent said.
+
+## Done since last handoff (2026-09-02, hover motion on the nav glyphs)
+
+One bespoke gesture per navigation icon, and the gesture is always the icon's own behaviour rather than a wiggle — Oskar's brief, with the clock-in timer as the worked example. `icon-motion.css` holds all 13; `iconMotion.ts` maps icon component -> motion key.
+
+- **The hook is on the BUTTON, not the glyph.** `F0Icon` drops `className` (documented here three times over), so nothing can be attached to the SVG from React. `data-icon-motion` goes on the button and every rule descends from there into the SVG's children. The key comes from a `Map<IconType, string>` keyed by the icon COMPONENT — the icons are module singletons, so identity is a reliable key and adding a motion touches no call site.
+- **A separate stylesheet, not `FULL_BLEED_CSS`.** That block is a template literal and a stray backtick in it has broken the build twice. This file is nothing but `@keyframes` and cubic-beziers. Nothing here competes with Tailwind (it sets no transform or animation on these glyphs), so load order does not matter.
+- **The timer is a two-beat gesture** (Oskar, second pass): the plunger — paths 2 AND 3, the stem `M12 5.5V3` and the bar `M10 3H14`, which must move together or the glyph tears — dips 1.5 units, and the sweep waits **80ms** for it. That delay is the whole point: without it the hands turn while the lever is still travelling and the causality reads backwards. `both` holds the hands at 0deg through the delay so they cannot jump. Verified by pausing the animations and stepping `currentTime`: at 80ms the plunger is down and the hands are still at identity; at 120ms the plunger is still down and the hands have moved 1.1deg.
+- **Two rules that are easy to get wrong here.** Any transform on an SVG CHILD needs `transform-box: view-box` plus an explicit `transform-origin` in the viewBox's own units, or the origin resolves against the whole SVG and the part flies out of frame. And a full rotation must be `@keyframes`, never a `transition` — a transition reverses on mouse-out, so the hands would unwind backwards.
+- **`path:nth-of-type(n)` counts only `path` siblings**, so a leading `<circle>` does NOT shift the numbering. This was the single likeliest thing to get wrong across 13 icons and it was worth checking every index against source.
+- Gated behind `@media (hover: hover) and (pointer: fine)` so a tap on touch does not fire it, and `prefers-reduced-motion: reduce` disables the lot — every gesture is decoration carrying no information the glyph does not already carry.
+
+- **A motion VOCABULARY, not 13 arbitrary numbers**, which is what stops the set feeling like thirteen separate ideas: two easings (`snap` = cubic-bezier(0.23,1,0.32,1) for one-way landings, `travel` = cubic-bezier(0.77,0,0.175,1) for out-and-back), three durations (200ms settle / 240ms nudge / 600ms sweep), and a 1.4-2.6 user-unit amplitude band — below ~1.4 units a gesture is sub-pixel at the rendered 20px and reads as a shimmer. The curve follows from the leg count rather than from taste. `linear` appears nowhere.
+- Gestures worth keeping a note of, because they came from reading the actual path data: the Calendar's header rule drops 2.5 and not 3 units because at y=7 it would touch the tab stems at x=9 and x=15; the Marketplace awning scales in Y about its welded hem at y=11 rather than lifting, because a plain 2-unit lift was the Hub tile's gesture exactly; Folders slides its BACK corner out one way rather than nudging, because Reports sits directly above it in the nav and was already a diagonal nudge.
+- **Clock and Timer deliberately share the 360 sweep.** With only a dial and a hands path there is nothing else honest to move, and any in-band tilt moves a 4-unit hand under a pixel at 20px. They are separated by character instead: Clock flicks round and glides to rest on the snap curve, Timer accelerates off the mark and brakes back on travel, behind its plunger press.
+
+- Verified in the browser: all **15 rules** (13 motions, the timer contributing 3) match **exactly one element each, none zero** — checked by extracting the selectors from the live stylesheet and querying them. Live firing confirmed on the two structurally different cases: `f0c-timer-*` on `path`s in the navbar and `f0c-hub-lift` on a `rect` in the rail. The pivot maths was checked separately by rotating the timer hands 180deg statically and confirming they stay inside the dial.
+- **Not verified:** the `prefers-reduced-motion` branch. The rule is there and correct, but this pane cannot emulate the preference, so it has never actually been exercised.
+
+## Done since last handoff (2026-09-04, the insight cards' decision tree)
+
+Oskar's tree, wired whole. The branching all rides the clarifying-card component the AGENTS flow already uses (his instruction: "utiliza el componente que tenemos en agents") — quick replies, a confirmation and a day picker turn out to be one component doing three jobs, so `InsightAction` just gained an optional `question` and no new UI was written.
+
+- **The panel now reaches into the screen.** "Filter 14 anomalies" narrows the People table while the conversation carries on beside it. Verified: **24 rows -> 14**, Grace Hopper at the top.
+  - `peopleFocusStore` is deliberately SEPARATE from ODC's own filter state. That state belongs to the toolbar the user drives; this is One reaching in. Keeping them apart means clearing One's focus cannot wipe a filter the user set by hand, and the Filter button still reports what the USER chose.
+  - The table remounts on a `key` (`FocusedPeopleTable`). ODC owns its fetch lifecycle and knows nothing of our store, so changing the focus alone would leave stale rows on screen. Remounting 24 rows costs nothing; threading the focus into `useDataCollectionSource` and hoping ODC notices would depend on internals we do not own.
+  - The focus lands in `streamTurn`'s completion callback, AFTER the reply — a table changing while One is still mid-sentence reads as two unrelated things happening.
+- **"14 dormant" is now TRUE.** The fixture had only 3 `uninvited` rows, so the Figma's own "Review 14 dormant accounts" and "Filter 14 anomalies" would have filtered to 3 and quietly lied. `DORMANT_IDS` is an explicit list of 14 (Grace Hopper = emp-004 among them, since the card names her), joiners excluded by construction — somebody hired this month cannot have been idle three years. In a mock the list IS the definition; what matters is that the count One quotes and the rows the table shows are the same 14.
+- **Human-in-the-loop on the destructive branch.** "Deactivate accounts" does NOT act: One says what it would cost ("14 licences, and 2 of them are on leave rather than gone") and asks. Verified that the table is **still 24 rows at that point** — the friction is real, not decorative. Confirming clears the focus, because the 14 rows it filtered to are gone; cancelling leaves the table exactly as it was.
+- **Cards COLLAPSE when acted** ("la tarjeta colapsa"): the detail and buttons go, the row keeps its title, a check and the label you chose. One's answer is in the thread below, so repeating the detail would say it twice.
+- `resolveInsightAnswer` RETURNS its turn rather than posting it, shaped like `resolveAgentAnswer`, so `answerQuestion` stays the single place that marks a card answered and echoes the choice. Keyed by string, because a closure cannot be persisted with the conversation.
+
+**Driven end to end in the browser:** filter (24->14) -> quick replies -> "I'll review them myself" (table stays 14, and the reply says so); "Deactivate accounts" -> confirmation with the table untouched -> "Confirm deactivation" -> focus cleared; "Schedule reminder" -> day picker -> Wednesday, interpolated into the routine copy. **Not separately driven:** "Notify manager" and "Send 122 invitations" — both are plain reply paths through the same `actOnInsight` code the other four exercised, with no branching of their own.
+
+## Done since last handoff (2026-09-04, One's insight cards)
+
+The navbar One button no longer opens a blank composer — it opens a conversation that already contains the work (Oskar: "en lugar de abrir el panel de One con el blank state"). It is the AGENTS flow pointed at a screen instead of an agent: a paragraph of context, then a card per thing found, each with its own two actions.
+
+- **`InsightCard`** (Figma **2760:589016 / 589110 / 589165** — one node per tone, identical apart from tag and copy): tag then title on the top row, a full-width hairline in an 8px box, the detail, then the actions. The card's `py-1` plus each row's `p-2` is what makes the rows look inset; that is the frame's structure, not padding added on top.
+- **The buttons in the frame ARE the pair the run log already had**, which is worth knowing before reaching for new markup: the primary is `px-[12px] py-[6px]` at 14/20 on a 10px radius — exactly f0's `md` — and the secondary carries `background/inverse/secondary` with an inset ring, exactly f0's `outline`. So "black then outline, left-aligned" is now one order across both surfaces.
+- **The run cards were reordered to match** (per Oskar): black first, then the alternative, then any aside, all pinned LEFT. That replaces the layout which pushed the pair to the right edge with the aside on the far left. Verified: `Use Ops` at the row's own left edge, `Use Leadership` 88px along.
+- **`bg-f1-foreground` / `text-f1-background`, NOT the frame's `background/inverse/*`.** A deliberate one-token deviation: the inverse pair does not flip together, so it lands white-on-white in dark. In light the two are a shade apart and indistinguishable.
+- **Clicking an insight action POSTS to the thread**, unlike `resolveRun`. The distinction is the rule established earlier: One answers each of these with a follow-up question, so there IS something to action afterwards and a conversation is the right place for it. The card keeps the label you chose in place of its buttons, so the choice is recorded once rather than shown twice.
+- Reopening returns the SAME reading (`insightsId`) — pressing the button twice should not give you two readings of one directory.
+- Copy is in English, from Oskar's mockup, and the three titles and details are the FRAME's own copy verbatim.
+- **The panel opens THINKING, then reasons, then streams** (Oskar). It arrives empty with `thinking: true`, reveals three reasoning steps one by one, and only then streams the intro — the same three beats every other turn has, so the reading is shown rather than asserted.
+  - The steps name what is ACTUALLY on the screen behind the panel: the headcount banner's 2,714 / 122 / 37, the second banner's 472 uninvited, and the table's own Contract status and Access status columns. That is what makes it hang together — each step is a column you can see and each card traces to a row you can see (Lin Chen IS the "Ending soon" contract in Singapore; Grace Hopper IS the "Uninvited" access status).
+  - `deliverReply` could NOT be reused: it is keyed on a prompt, and this conversation has no user turn. `deliverInsightReading` repeats its reveal loop deliberately so both surfaces pace identically.
+  - The intro streams; the insights message does not, because `streamTurn` commits anything carrying structure whole. So the cards get their entrance in CSS instead — `f0c-card-in` on a 60ms stagger (0/60/120), which is what stops three of them landing in one frame.
+- **Header order is TITLE then tag**, inverting the frame — it now matches the run cards, where the title leads and the tag qualifies it.
+- **Expanded, a button LEFT of the title collapses back to the split** (`collapseConversationToPanel`), carrying the section's own glyph so it says where it goes. Only One's screen reading gets it: it is the one conversation that HAS a screen to go back to, and a thread started on Home would have nowhere to collapse into. Clearing `activeId` is all it takes — the `?view=` param never changed while the canvas held the thread, so People is still underneath.
+
+- **Artifact not reproduced:** these cards were built out of f0's "View drawer", so all three inherit its "Select all / Clear" bar absolutely positioned at `top-487px` — a leftover of the component they came from, and clipped by the card's own overflow anyway. The codegen also reports every `TagStatus` as `status="Neutral"`; the tones come from the mockup (orange/red/grey), since per-node codegen does not resolve instance overrides.
+- **The blank state is now UNREACHABLE but kept.** `toggleBlankPanel` has no callers; `PanelBlankState`, the `panelBlank` flag and `ConversationPanel`'s optional conversation all remain, because the blank state is a real frame (2756:475071) and the optional-conversation capability is real. It is commented as unreachable so nobody reads it as a live path.
+
+## Done since last handoff (2026-09-04, Agents — sixth pass: the empty face shares New's structure)
+
+Figma **2756:475476**, which replaces 2739:463194. The change is one thing: the composer moves from the MIDDLE of the canvas to the FLOOR, pinned, with its chips on.
+
+- **The scroller moved inward and the Tabs stopped scrolling.** The root WAS the scroller, which meant the Tabs scrolled away with the templates and — decisively — nothing could be pinned inside it. Root is now a plain flex column: a `shrink-0` wrapper round the Tabs (f0's `Tabs` exposes no `className`), then the scrolling face, then the pinned composer. Verified with the content overflowing: Tabs top 52 -> 52, composer top 400 -> 400, 252px of scroll between them.
+- **That IS New's structure, one level deeper**, and the thing that makes it possible is easy to miss: for `fullWidthView` Home hands this screen an UNPADDED `overflow-hidden` box rather than its own padded scroller. The 712 column and the 6px floor are New's `w-[712px]` and `pb-1.5` verbatim.
+- **No `justify-between` anywhere.** The ~80px above the composer is the natural leftover of a top-aligned `flex-1` scroller, not distributed space — which is also why the layout survives f0's `Tabs` measuring **56px against the frame's 44**. The frame's is a resized instance, so every absolute y in it sits 12px low: they are not implementation targets. This is the strongest argument for the structure over any fixed gap.
+- **No top padding on the column and TRANSPARENT template cards** (Oskar, same day). The `pt-9` the frame implies (16px column pad + the empty block's own 20px) sat on top of that block's `py-8` and left the column cramped as soon as the viewport got short; the block already brings 32px. And the card's outline is what makes it a card, so the canvas shows through.
+  - The transparency lands on the CREATED-agent cards too — both faces share `AgentCard`, and filled on one with outlined on the other would read as a bug. Over `#FCFCFC` the fill was three points of grey anyway.
+  - Checked at 1100x620, which is where the complaint came from: heading + first template row + the pinned composer all fit, the second row scrolls in (156px), the composer never leaves the floor, and Talent scout stays reachable.
+- 14px inner gutter (`px-3.5`) on the column and the composer wrapper — the same 14 the navbar group and the list toolbar use — so 712 gives 684 of content and the cards land on 332. Verified: column 712 with 14px padding, composer wrapper 712 with 6px bottom.
+- `pb-6` stays on the list face's CONTENT wrapper, not on the `overflow-y-auto` element, where a bottom pad is not honoured at the end of a scroll. Verified 24px still there, and the list face still has no composer.
+
+**Judgement calls I made rather than asking, all flagged to Oskar:**
+
+- **Chips ON changes what a click DOES.** With `showChips`, picking a suggestion runs `submit()` -> `onSubmit` -> `brief(templateForPrompt(prompt))`, so "Analyze" -> "Weekly time tracking report" CREATES an agent, and `templateForPrompt` funnels most of Home's corpus to Chief of Staff by fallback. Shipped because the frame is unambiguous and typing already does exactly this — but an agents-flavoured category set is the real fix and is a bigger change than this frame asks for.
+- **The frame draws FOUR chips (Create/Analyze/Find/Automate); the code ships three**, and `CHIP_ACTION_IDS` carries "three only (per Oskar, 2026-08-31)". Left at three: that list is shared with New, and editing it here would silently reverse a recorded decision on a screen this frame is not about. The order differs too.
+- **The composer ends up 28px narrower than New's** (684 against 712, because of the gutter). Followed the frame; the alternative is `px-3.5` on the scroller content only, leaving the composer flush at 712 and the cards at 346.
+
+**Figma artifacts in that frame, not to be reproduced:** the chips row carries `rounded-tl/tr-[12px]`, a leftover from the hidden ABOVE-input copy of the same header; each card row carries a dead `max-w-[712px]` inside a 684 container; and the Templates wrapper hides a stray "S" text node. The emoji is not in the codegen at all — the wizard glyph was confirmed by cropping the composed screenshot.
+
+## Done since last handoff (2026-09-04, People polish + a resizable split)
+
+- **The pressed gradient is Oskar's own, copied VERBATIM** rather than reasoned about: horizontal and right-to-left (x1 17.208 -> x2 2.791), lavender at the right edge, ONE red and ONE orange behind it at 0.7 opacity.
+  - My first attempt put the lavender in the MIDDLE on a diagonal at full opacity, on the theory that a glyph wants real colour rather than a glow's alpha. It read washed out and Oskar was right about why: the mark is four petals AROUND a centre, so the middle stop lands on its heart — and `#a1ade5` is the palest colour in the palette. **Pushing the pale stop to an edge is what makes it read as coloured; the alpha was never the problem.** Worth remembering before "fixing" a dull gradient by raising opacity.
+- **It carries the clock-in's NOTIFICATION DOT** until One has been opened (per Oskar) — the same 8px circle, the same ring in the page colour so it reads on either ground, and hidden while the panel is open because what is on screen already says what the dot was there to say. Verified: closed and unseen -> red `rgb(230,26,66)` 8x8; open -> gone; closed again -> still gone (seen is seen, exactly `useClockInPending`'s semantics); after a RELOAD -> back.
+  - `oneSeen` lives on `ConversationState`, which makes it unpersisted for free: `emit` only writes `state.conversations`. That is the same call `clockInStore` documents — a reload has to start the day over or the dot can only be demonstrated once.
+  - The banner's chevron clears it too. It opens One as surely as the navbar button does, so `createConversation` sets it whenever the target is the panel.
+
+- **The navbar One button is Oskar's own mark in BOTH states** (`~/Desktop/one-fill.svg` -> `one/OneMarkIcon.tsx`), and only the PAINT changes. It used to swap to f0's `F0OneIcon` when active, which meant the glyph changed SHAPE halfway through an interaction.
+  - **Pressed stays GHOST — colour does all the work**, the same call the Home clock-in makes (Oskar: the grounded version read as a chip sitting in the navbar). No hand-rolled button any more and no `data-open` CSS either: unlike the clock-in, whose tint must come from a rule because f0 paints its icon through `text-f1-icon`, the gradient here lives in the SVG's own `fill`, so swapping which icon the ghost button renders IS the implementation. Both variants are `forwardRef`/`IconType`, which is what makes that possible.
+  - The gradient id runs through `useId` — two instances would otherwise share a def and the last mounted would win. Diagonal, not horizontal: the mark is four petals about a centre, so a corner-to-corner sweep gives each one a different colour instead of banding two the same.
+  - Verified pressed: `background rgba(0,0,0,0)`, no shadow, 32x32 (identical to the megaphone), path `fill="url(#…)"` with the three brand stops.
+- **The split panel resizes by dragging the seam.** 1px of visible border in an **11px hit area** straddling it — a 1px target is unhittable, the same reasoning NOTES already records for the table's invisible column handles. Clamped 320–720: the floor is the composer plus padding, and past the ceiling the canvas stops being the thing you are working beside. Verified: 438 -> 558 on a 120px drag, and the clamps land exactly on 720 and 320.
+  - `setPointerCapture` is what makes the drag survive the pointer leaving that 11px strip, which it does immediately. Width is written **straight to the element**, not through React state: this fires on every `pointermove` and a state update per frame would re-render the whole thread behind it. `user-select: none` on the body for the duration, or the drag selects the conversation's text as it goes.
+- **A fade at the TOP of the chat, gated on having scrolled.** The bottom one can be permanent because the composer is always down there; a permanent top one would sit on the first turn at rest. It hangs off `ConversationView`'s EXISTING scroll listener, which now toggles `data-scrolled` (and runs once on mount, since reopening a thread restores a scroll position without firing an event). 32px against the bottom's 40 — less to hide up here, and the navbar edge is right above.
+- **The overlaying widget column has NO ground and NO shadow of its own.** It painted `#FCFCFC` plus a `-12px` edge shadow, on the theory that the `p-2` gutters would otherwise let content show through — but that is precisely what should happen. Removing only the shadow was not enough (Oskar came back with a screenshot): the opaque slab was clipping the Needs-you rows mid-word. What floats is the WIDGET, which already carries its own surface and shadow in `WindowStack`'s `CARD_CLASS` — exactly how the Communities panel reads. Verified with the overlay actually mounted (drag a column wide enough to push the canvas to its floor; narrowing the WINDOW does not do it): `background rgba(0,0,0,0)`, `box-shadow none`.
+- **The People table's sticky header is the CANVAS surface, not white.** f0 paints it `bg-f1-background`; this canvas is `#FCFCFC`, so it read as a white band. Same problem and same answer as the calendar's sticky day header. It must stay opaque — it is `position: sticky` with `z-index: 10`, so transparency would let rows scroll through it.
+- The banner's chevron button is `outline`, not ghost.
+
+- **The FULL_BLEED_CSS backtick trap bit twice more in one sitting — four times total.** The second time was worse: the check printed "2 backticks" and I carried on to the next edit. It is now an ASSERTION that raises, not a number to read. Any edit to that literal should end with it.
+- Dev-server note: a server was already live on 5176 and the failure was an attempt to start a SECOND one. The port is deliberate (`--strictPort` in `.claude/launch.json`, and `/p/home` on 5176 is the URL Oskar shares), so `autoPort: false` is now explicit and the right move is to ATTACH with `preview_start {url}` rather than free the port and relaunch an identical server.
+
+## Done since last handoff (2026-09-02, People's One split, reframed)
+
+Two entry points to the same 438px panel now, with different jobs (Figma 2756:472347).
+
+- **The banner's button is a plain CHEVRON**, not a One mark. The mark moved to the navbar, so keeping one on the banner said "ask One" twice and meant something different each time. The interaction is unchanged — it still opens the panel with the card's context — and a chevron is what "drill into this" looks like.
+- **A One button in the navbar, beside the megaphone**, opens the panel on One's **blank state**. Two states, and the icon carries the difference:
+  - at rest, `OneStroke` — a THIRD One mark, and each of the three exists for a reason: `F0OneIcon` is the brand mark with its animated gradient, `OneFill` is the solid mark pinned to `neutral-100` for an outline button, and this is the hairline one that has to sit beside the megaphone as a peer. Its fill is `currentColor` precisely so the ghost button paints both through the same `text-f1-icon`.
+  - while open, f0's real `F0OneIcon` with its **gradient** — verified as a `conic-gradient(orange -> lavender -> red)`, the same palette as the headline — on the frame's `background/default/secondary` ground.
+  - `F0OneIcon` is a COMPONENT, not an `IconType`, and `F0Button` takes no `className`, so the open state is a hand-rolled button whose geometry mirrors f0's ghost `md` (size-8, 10px radius). The two states occupy the same box so the megaphone never shifts.
+- **`panelBlank` is a separate flag, not a placeholder conversation.** An empty conversation would land in Recents and be listed as something you had when you have not asked anything yet. `panelOpen` is now `panelConversation !== undefined || panelBlank`, so everything keyed on it — the widgets hiding, the canvas width — counts the blank panel too.
+- **The blank state is a doorway, not a mode.** `PanelComposer` takes an OPTIONAL `conversationId`; without one the first prompt calls `startPanelConversation` and the thread appears in the same slot. Verified: rest -> "Ask One" -> blank panel with the headline -> type -> panel keeps the slot, gains the title and the expand button, headline gone, canvas untouched.
+  - Expand only exists once a thread does: there is nothing to promote to the canvas from a blank state.
+  - The composer's placeholder is state-aware — "Ask a follow-up…" is a lie when there is nothing to follow up on.
+- **The nav button tracks ANY open panel, not just the blank one.** It read as active only while `panelBlank` at first, which meant pressing it with a thread in the panel opened a fresh blank state and threw that thread out of the slot. It now closes instead, leaving the conversation in Recents.
+- The gradient headline lives in `FULL_BLEED_CSS` as `.f0c-one-headline`, not as Tailwind utilities: they are raw brand colours with no f1 token and the prototype checker is right to reject a raw hex in a className. Same three stops as the composer's focus glow.
+- The blank state's chips (Create / Automate / **Find** — not Home's Analyze) are hand-rolled for the same reason the panel's composer is: `OnePromptBar` drives its own through DOCUMENT-level input listeners, so a second instance would fight the first for them.
+
+- The Figma connector is still unauthorised; everything above came through `scripts/figma-mcp-bridge.py`. `get_design_context` on the whole frame returns sparse metadata when it is too large — drill into the sublayer ids it gives you (`2756:475071` is the panel's Empty State, `2756:472409`/`472468` the button's two states).
+
+## Done since last handoff (2026-09-02, One resolves a Needs-you row IN PLACE)
+
+Typing **"Aprueba todos los time off que estén dentro de la política"** on Home resolves the row on the CARD and never opens a conversation. Taking you to a chat for work with nothing to action afterwards costs a screen and gives nothing back (Oskar, third pass — the first cut did open one).
+
+- **Two phases on the row**, both now observable because Home stays on screen:
+  - `thinking` — the **ChatSpinner** takes the icon's own 20px box (so the title cannot shift) and each reasoning step **shimmers** through the whole line via `shine-text`. The step REPLACES title+subtitle rather than trailing them: it is One narrating, not a fact about the task, and it needs the width for a sentence.
+  - `done` — a check plus what it actually did, held 1300ms. **This beat is the only place the figures ever appear on this path**, so without it the row would simply vanish and you would never learn what One approved.
+  - The row goes inert in both (no chevron, no click): nothing to open mid-way, nothing left to open after.
+  - `active` is **transient** — deliberately not persisted, so a reload cannot rehydrate a spinner nothing is driving.
+- **The refusal branch is the interesting one.** `NeedsYouTask.oneCanClose` is not a new policy — it is clause 3 of the plan every agent here already follows: _"hold anything that would commit more than €10,000 or touch someone's contract for your approval"_. Time off inside allowance and an €890 workshop are below that line; a hiring decision, a contract renewal, a promotion and a €34,200 bonus run are not. `approveTasksByModule` returns `"escalate"` for those and the caller opens the full conversation, which is where a decision belongs.
+  - The `contracts-confirm` intent exists to make that branch reachable: it ASKS for the card path and is turned down, so One explains why in the chat rather than silently doing nothing. Verified: _"I can't close these from your list… a renewal changes someone's contract, and that is the line where I stop and bring it to you — the same rule that lets me clear time off without asking."_
+- **The interception is in `startConversation`'s caller, not the prompt bar's UI.** `tryResolveInPlace(prompt)` returns true only when it actually took the job; false covers both "nothing open" and "not allowed", and a conversation is the right answer to both. Putting it in `OnePromptBar.submit` means every entry point (typed prompt, suggestion chip) gets it.
+  - Steps come from the intent's existing `reasoning` — same words either way, no duplication. Only `done` is new copy.
+  - The time-off intent's `reply` was rewritten: it is now only reachable once the batch is already cleared, so it says the queue is empty instead of claiming an approval that did not happen.
+- **"View all (35)" is gone** from the Needs-you header (per Oskar): the count was the only thing on the right and it opened a window listing the same rows.
+- The Inbox nav reads the same clearances (`openInboxTasks(profile, cleared)`), so the two lists cannot drift. `taskTitle` still resolves through the UNFILTERED list or a cleared task's ticket would come back titled "Ticket".
+- `?reset=1` clears it — `needs-you` is in `PROTOTYPE_KEYS`.
+
+- **The row holds 48px through every phase, and `min-h-12` is what does it.** At rest the CHEVRON sets the height (12 + 24 + 12) — the text is only 20px — so hiding it while One works dropped the row to 44 and the list twitched (Oskar). Verified 48px in all four phases: rest, each of the three thinking frames, done, exiting.
+- **Motion pass over the resolve and the exit** (Emil framework):
+  - The row now LEAVES by collapsing (`.f0c-row-slot`, grid-rows 1fr -> 0fr plus opacity, 160ms). It used to unmount outright, which teleported every row below it — the canonical "disappearing without transition feels broken" case. The store gained an `exiting` phase for this, and `EXIT_MS` must stay equal to that transition or the row unmounts mid-collapse and the jump comes back.
+  - **The gap moved off the parent and into each slot** (`pb-2` inside the collapsing area). A parent flex `gap-2` survives the collapse and leaves an 8px hole where the row was. Verified: slot-to-slot gaps are now 0 and the spacing is unchanged.
+  - Exit 160ms against the 200ms entrance — **asymmetric on purpose**: the user is waiting on the system here, not deciding.
+  - Each reasoning step gets `key={step}` so React remounts it and `f0c-step-in` replays (opacity + 3px, 200ms, the card entrance's own curve). Without the key the text swapped in place and the change was easy to miss entirely.
+  - The check lands with `f0c-check-in` — `scale(0.8)`, never 0, because nothing in the real world appears from nothing.
+  - Reduced motion keeps the OPACITY, which is what tells you the row has gone, and drops every movement: no collapse, no offsets, no scale. Fewer and gentler, not none.
+- **The FULL_BLEED_CSS backtick trap bit for the THIRD time** — a `` `gap-2` `` inside a CSS comment closed the template literal and produced a syntax error 200 lines away. It is documented twice already and it still caught me. If you add anything to that block, grep the literal for backticks before trusting tsc's line number.
+
+- **Verified with a MutationObserver on `main#content`**, which is the only way to catch a 4-second sequence in this pane — three discrete reads all landed after it finished. Captured in order: the three shimmer steps, then `DONE: Approve 12 time off requests | Approved 12 requests — all inside allowance, none left a team short`, then the row leaves, with `conversations` empty throughout.
+
+## Three hover motions revised by hand (2026-09-02)
+
+Oskar replaced the designed gestures for Documents, Reports and Agents. **These three are hand-authored** — re-running the scratchpad injector would overwrite them with the design pass's versions.
+
+- **Folders** — the front folder tilts **9 degrees** about its own centre (11,10) and holds while you stay; at rest the glyph is the untouched original. 9deg and not less because that is what it takes to be seen: the corner sits 9.22 units from the pivot, so 9deg moves it **1.45 units** — right on the set's ~1.4-unit legibility floor at the rendered 20px. Counter-clockwise so the bottom-right corner lifts (16 -> 14.83) AWAY from the back line rather than crowding it. Verified: rotation -9deg, corner travel 1.45u, back line `transform: none`, and `none` at rest.
+  - A **transition declared off `:hover`** so it applies both ways: the tilt unwinds when the pointer leaves, the one case in this set where a transition's reversal is the feature rather than the bug.
+  - The first version grew the folder until its corner met the back line (1.214 x 1.25 from the top-left vertex, geometrically exact). Oskar rejected it as too much — the glyph should read as the original at rest. Do not bring it back.
+- **Graph** — the series DRAWS itself left to right while the axis holds still ("respetando el track"). `stroke-dasharray` set to the path's measured length (22.54, rounded up to 23 so the tail cannot be left a hair short) with the offset running to 0.
+  - **LINEAR, and it is the only motion in the set that is.** With the ease-in-out curve the offset went 23 -> 21.8 -> 9.3: the first 150ms drew 5% and the next 150ms drew 56%, so the middle of the line arrived in one lump and the whole thing read as **forming from the centre outwards** — which is exactly what Oskar reported. A draw-on is _constant motion_, a progress bar that happens to follow a path, and that is the one case the framework reserves linear for. Any easing varies the tip's speed, and a varying tip speed is precisely what stops it reading as one line being drawn. Verified: 17% per 100ms, tip advancing 10.7 -> 13.6 -> 16.4 -> 19.1 -> 20.0.
+  - Path order does the rest for free: the series runs 0 -> 16.5 and the two arrowhead barbs are the 2nd and 3rd subpaths of the same path, so the line reaches the tip at ~440ms and the head assembles over the final 160ms.
+  - `stroke-dashoffset` is paint-only — no layout — which is why it is the one property outside transform/opacity this set allows. It needs no rest-state rule either: with no dasharray the path is simply whole, so hover-out cannot strand it half-drawn.
+- **Bot / Agents** — the eyes scan left then right and the mouth goes from a flat line to a smile. **This required splitting `Bot.tsx`**: it shipped as one compound path of seven subpaths, so nothing inside it could be addressed. The split is safe because the head is a RING (outer subpath + inner subpath), so the eyes and mouth were already positive filled shapes sitting in the hollow rather than holes punched through a solid head — pulling them out changes nothing about how they paint. Subpath map, worth keeping: 0 outer ring + antenna, 1 inner ring, 2 the smile, 3/4 ear pods, 5/6 left/right eye.
+  - Selectors are `[data-bot="…"]`, not `nth-of-type`, because this icon is ours: naming the part beats counting to it and it cannot silently shift if the glyph is re-ordered.
+  - The mouth is a transition off `:hover`, so the smile holds while you stay. The set's "nothing at opacity 0" rule is deliberately bent — the GLYPH is fully visible at rest and what is hidden is one feature's alternate shape. Staggering the smile behind the glance was tried and dropped: it left a gap with no mouth at all.
+  - The old `f0c-bot-straighten` head tilt is gone. It existed to differentiate the bot from the shield's brace; the eyes-and-mouth gesture does that far better, so the set is now MORE differentiated, not less.
+
+- **Verification note that will save time later:** CSS **transitions** are frozen in this pane exactly like animations, so a transition-driven state reads as stuck at its start value and looks broken when it is not. Do not conclude anything from a computed value here — find the transition in `document.getAnimations()` (they appear with a `transitionProperty`), `pause()` it and seek `currentTime` to its duration. That is how the mouth swap was confirmed (flat 1 -> 0, smile 0 -> 1) and how the Folders corner was measured.
+
+## Known f0 bug, worked around locally (2026-09-02): the double tooltip
+
+Oskar hovered the clock-in and saw TWO tooltips with the same words. It is an `F0Button` bug and it affects **every icon-only button in Factorial**, not just this prototype — 49 of them here across 18 files.
+
+- **Cause.** Two independent lines in `components/F0Button/internal.tsx`, both keyed off `hideLabel`:
+  - `tooltip={tooltip ?? (!noAutoTooltip && hideLabel && label)}` — `Action` wraps the button in `TooltipInternal`, giving f0's styled tooltip.
+  - `title={noTitle ? undefined : props.title || (hideLabel ? buttonLabel : undefined)}` — which makes the BROWSER draw its own native tooltip on top.
+- **There is no public opt-out.** `noTitle` and `noAutoTooltip` are both in `F0Button`'s `privateProps` array and stripped before they reach `ButtonInternal`, so passing `noTitle` from a call site compiles and does nothing. Do not waste time trying it again.
+- **Diagnosing it needs a measurement, not a DOM read.** Three elements carry the text on hover, but only one is a real box: the styled tooltip (121x17, `rgb(13,22,38)`); the other two measure 1px (the collapsed label and the accessible copy). The second box the user sees is the NATIVE tooltip, which the browser paints outside the DOM — no query will ever find it. Measure widths.
+- **Workaround: `useSingleTooltip` in Home.tsx.** A MutationObserver that removes a `title` **only when it is identical to the element's `aria-label`** — precisely f0's duplicate, since it sets both from the same label. A deliberately different `title` is somebody's real tooltip and is left alone; `aria-label` is never touched, so the accessible name (the thing a screen reader actually announces) survives. The observer is not optional: most of these buttons mount later and React re-sets `title` on re-render, which `attributeFilter: ["title"]` catches.
+- **The real fix is one line in f0** — `title` should be a FALLBACK for when no styled tooltip renders, not an addition to it. Oskar chose to keep it local for now (asked and answered, 2026-09-02), so the bug is still there for the rest of the product.
+
+## Published (2026-09-02)
+
+- **Vercel is CURRENT as of this handoff** — everything from the permissions note onward is live: streaming, the ChatSpinner re-sync, chat padding, Triage & History, the three-level history, the Counter step numbers and the ranked actions. https://my-project-kappa-umber.vercel.app/p/home
+- **A first-time visitor always lands on the EMPTY Agents state** — nothing seeds an agent, `createAgent` only runs from a click. Verified on the published link with a wiped session. What a RETURNING visitor sees is their own persisted state, which is right mid-session and wrong for a link handed to a colleague.
+- **`?reset=1` on any prototype URL** wipes this prototype's saved keys and reloads clean (`useResetParam` in Home.tsx). Scoped to the `f0compose:home:*` keys rather than `localStorage.clear()`, which would take the shell's own settings with it, and it drops the param before reloading or the reload would wipe forever. Share `…/p/home?reset=1` when the demo must start from zero. The old `agentStore` comment claiming a `f0compose:home:agents-reset` console hook was WRONG — no such hook ever existed; it is corrected.
+- How to publish (there is no CI for this): `pnpm build` in `packages/f0compose`, copy `dist/assets` + `dist/index.html` over `~/code/my-project/` (that directory is ONLY a deploy staging dir — preserve its `.vercel/`, `vercel.json` and `.gitignore`), then from there `npx vercel deploy --prod --scope oskar-hernandezs-projects --yes`.
+  - **`--scope oskar-hernandezs-projects` is required** even though `vercel whoami` works: `project.json` stores the team by `orgId` and the CLI resolves by slug, so without it you get "Not authorized".
+  - The CLI is not on PATH — `npx --no-install vercel` picks up the cached 59.11.2.
+  - Verify by comparing hashes rather than trusting the CLI's output: `curl -s <prod>/p/home | grep -o 'assets/[^"]*'` against the local `index.html`. Then grep the served bundle for a string only the new build has. Run the deploy ONCE — a second `--prod` just adds a duplicate Production deployment.
+
+## Done since last handoff (2026-09-02, the history as three levels + colour off the actions)
+
+Oskar's second pass on the same component. Two diagnoses, both about the log spending attention it had not earned: red on a recommended action, and a history that dumped everything at one depth.
+
+- **Red is the system's word for destructive, so it is off the actions.** The recommended button went `default` (brand red) -> **`outline`**, the alternative `outline` -> **`neutral`**. Red on a safe, recommended "Use Ops" bought a beat of hesitation before every click, which is the opposite of what a recommendation is for. The ranking survives — outline reads raised, neutral reads flat — and the pale red/amber is now reserved for the `F0TagStatus`.
+- **The alert card is WHITE with a plain `border-f1-border-secondary`.** It had a tinted ground AND a coloured leading edge AND a coloured tag: urgency stated three times. The tag says it once.
+- **The history is a three-level progressive disclosure** (Oskar's brief, taking Claude Code's encapsulation of tool calls as the reference):
+  1. `> 4 completed runs` — now literally the Reasoning block's own chrome, minus the leading icon.
+  2. Stacked cards in one bordered container, **title only**: "Audited decisions", "Compiled weekly summary".
+  3. Open one and you get the plain-language `result` first, then the trace.
+     The old row showed the summary, the stamp, the entities and a "3 checks passed" toggle at once, four runs deep. Same information, three depths, and nobody descends further than they care to.
+- **`DisclosureButton` + `DisclosurePanel` are extracted, and ReasoningBlock now composes them.** "Same style as the Reasoning" is a requirement that decays the moment it is satisfied by copying — the chevron TRAILS the label in both, which is the opposite of where the old history header put it.
+- **The trace mirrors f0's own AI-chat code block** (`F0AiChat/components/markdownRenderers/components/Block.tsx`: `rounded-md bg-f1-background-secondary p-2`, monospace body) so a receipt here and a fenced block in a One reply are the same object. That module is internal to F0AiChat and **not exported from dist**, so the classes are mirrored, not imported — re-check it if it moves.
+  - **Prefixes are ASCII in the data, glyphs in the component**: `$ ` -> `$` (tertiary, body at full contrast — the invocation is the one line worth it), `-> ` -> `→`, `OK ` -> `✓` in `f1-foreground-positive`, `!  ` -> `⚠` in `f1-foreground-warning`. `agentThreads` carries no presentation.
+  - Whether a line is the strong one is a **field on the kind** (`strong: true`), not a comparison against its prefix string. The first cut compared `kind?.prefix === "$ "` and the trailing space was eaten somewhere between the heredoc and the formatter, so tsc caught a comparison that could never be true. Do not re-derive meaning from punctuation.
+- **Level 3 has an empty state**, for a run with no executed work to trace: "Resolved instantly. No complex logs generated." It is on 3 of the 16 runs, and only where the sentence is TRUE — a clean 12-claim pass, a spike dismissed under the 3-sample rule, sourcing halted at the threshold. The content pass had also put it on chief-of-staff's **€14,200 bonus hold**, which is the highest-stakes run in the set and exactly the one a reviewer would want the receipt for; that one got a real trace instead.
+- **The content is a logbook, not a log** (16 runs, authored per template and cross-checked): the card title is the command that ran ("Audited decisions", not "Flagged 3 decisions with no owner"), `result` is what the run concluded with the real figures, and the trace is the proof. Every `OK ` line is traceable to that run's `evidence`, which stays in the type as the ground truth the trace is written against — it is no longer rendered on its own.
+  - Worth recording what only a CROSS-TEMPLATE pass could see: an "All N …" opener had spread to 8 of the 16 results and made four agents read as one template refilled; a log line named an invented recipient (`--to marie.curie`); one command verb collided across templates; and one template had drifted into its own invocation dialect (three-segment namespaces, `=` separators, commands inside `OK ` lines). Per-run review cannot catch any of those.
+
+- **The blocker card, third pass** (Oskar): title + tag alone on the top line, `date · people` moved to the FOOT of the card just above the actions, and the action row got `pt-1` on top of the card's `gap-2`. Title + tag + meta on one line ran out of horizontal room and wrapped at narrow widths; the foot is also where the history cards already put their meta, so the two now agree.
+- **The blocker card's actions are f0's own `default` + `outline`, ranked by POSITION** (Oskar, fourth pass). The hand-rolled near-black `ResolveButton` is gone; `RunAction` renders one action and the card ranks them:
+  - `primary` = the recommended one, **always rightmost**, flush to the row's right edge via `ml-auto` on the pair;
+  - `alternative` = the first non-recommended, immediately left of the primary as its pair (8px);
+  - `asides` = anything beyond that — an "Ask Diego why", which deflects rather than answers — pushed to the FAR LEFT, away from the pair that resolves the run.
+    Verified at 1, 2 and 3 actions: with one action it still sits right; with three, "Ask Diego why" is at the row's left edge (456 = 456) and "Approve €320" at its right (1114 = 1114).
+- **The recommended action is BLACK** (`bg-f1-foreground` / `text-f1-background`), hand-rolled, mirroring f0's `md` geometry (`h-8 px-3 rounded text-base font-medium` + the filled variant's shadow) so it lines up with the real `outline` F0Buttons beside it.
+  - **This button has been red and black more than once.** Red is f0's own "primary" and the case for it was consistency with the design system (its destructive variant is `critical`, not `default`, so red does not mean danger inside f0). The case against, which won: it is the loudest thing on a screen whose whole point is that most runs need nothing from you. Settled on black (Oskar, 2026-09-04).
+  - **Do not reach for `background-inverse` / `foreground-inverse`.** That pair does NOT flip together — `--white-100` is white in both themes while `--neutral-*` flips — so it lands white-on-white in dark. `foreground`/`background` is the canonical inverting pair; verified again in both themes: `#0d1625` on white in light, white on `#0d1625` in dark.
+- **The plan's step numbers are f0's Counter** (Figma 2747:468489, via the bridge): a 20px pill with a 1px ring, NO fill, 12px/16px medium in the DEFAULT foreground. **The ring is `f1-border`, not the node's `border-secondary`** — at 6% alpha it was invisible at 20px against the conversation ground ("este apenas se ve"), so it went to the 20% default. A deliberate deviation from the node, and a general lesson: a token tuned for long edges does not carry a 20px circle. They were a filled `bg-f1-background-secondary` circle with secondary text, which read as a disabled chip rather than an index. Every value verified against the node: 20x20, transparent, `1px solid rgba(5,38,87,0.06)`, 9999px, `#0d1625`, 12px/16px/500. `text-sm` is already 12px/16px in f0's scale, so no arbitrary values were needed.
+
+- Drive-by: `CelebrationsWindow`'s avatar ring was a raw `#fff` (mine, from the home-vision commit) and failed `pnpm check`. Now `border-f1-background`, which is also the right token — the ring reads as the page showing through. **69 files, no issues.**
+
+## Done since last handoff (2026-09-02, the run log as Triage & History)
+
+Oskar's three-layer read of the agent-activity component — friction (UX), emptiness (AI), missed opportunity (story) — applied whole. The through-line: the log was a flat, evenly-weighted feed that reported state and asked you to work out what to do about it.
+
+- **Triage above history.** `RunLog` no longer renders one uniform list. Runs that are waiting on you come first as `BlockedRun` cards — tinted ground plus a `border-l-2` in the matching tone (`warning` for "Needs you", `critical` for blocked/failed) — and the four `done` runs collapse behind "4 completed runs", quieter and secondary-coloured, open only if nothing is waiting (`useState(waiting.length === 0)`). A record and a task should not look alike.
+- **One primary per card, never two of equal weight.** `RunEntry.actions[]` gained `recommended?: boolean`; the recommended one renders `variant="default"` and the alternative `variant="outline"`. Previously the first was `outline` and the rest `ghost`, which stated an order without stating a recommendation.
+- **The agent PROPOSES instead of only asking** — `RunEntry.analysis`, rendered above the buttons. It is the smart default in words: "I compared them: Ops was edited today and has all 11 items dated, Leadership was last touched on 12 Aug and is missing dates on 4. Ops looks like the live one." The question stays yours to answer, but you answer it with the agent's reasoning in front of you rather than from scratch.
+- **Errors reframed as a fork in the road, not a dead end.** Every blocker now says what it lost, what it can still do without it, and what that costs: "I lost access to your leadership calendar" → "I can keep going without it by flagging on age alone. That over-reports: last week it would have chased 3 decisions that were already settled in a meeting I couldn't see." → _Give me access again_ / _Carry on without it_. All four templates were rewritten this way and audited: 4 `done` with evidence, 1 `needs_input`, 1 blocked-or-failed, each non-done carrying an `analysis` and exactly one `recommended` action.
+- **The hero line is DERIVED, not written.** `runSummary(entries)` composes "6 runs so far: 4 went through on their own and cleared 9 items. I need 2 calls from you before I can go further — they are at the top." It replaced a static "This is what I have done so far.", and because it counts the entries it cannot drift out of sync with them.
+- **Nothing is orphaned any more.** The copy/thumbs feedback anchors to the last PROSE message (`.find(m => m.role === "assistant" && m.content && !m.runs)`) instead of trailing the log, where it read as rating the runs. The per-run entities moved the same way: they were a bare grey row floating above the buttons, and they now share the meta line with the timestamp — "1 Sept, 08:02 · Marie Curie" (`RunMeta`). Same orphaning problem, same fix.
+
+- **Streaming now SKIPS itself when nobody can see it** — found while verifying the above, and a real bug rather than a quirk of this pane. `streamTurn` checks `document.hidden || prefers-reduced-motion` up front, per paragraph, and on every tick; when either is true it commits the remaining turn whole. A hidden tab clamps timers to ~1/s and eventually stops them, so a streamed reply there arrived letter by letter over minutes and you came back to a half-written sentence — the flourish was deciding whether the reply was readable. Reduced motion is the same judgement for a different reason.
+
+## Done since last handoff (2026-09-02, spinner sync + chat padding)
+
+- **The ChatSpinner copy was STALE — it is re-synced now.** Oskar asked whether we were on the latest, and we were not: our copy was from 30 Aug, and the rework (exact One mark at rest, non-pixelated edge, reworked motion) landed 1 Sept. It also MOVED, from `kits/ai/F0ActionItem` to `sds/ai/F0ActionItem`.
+  - Copied from **`~/code/f0` on branch `fix/chat-spinner-mark-and-timings`** — that is the newest version and it is **not in origin/main**, so f0-react's dist does not export it and `f0-main` still has the old one. The only local edit is the `cn` shim (f0's is not exported from dist); `globeSpinMath.ts` is byte-identical to the branch.
+  - **It needed CSS that no dist ships.** The new component applies `.globe-spin-anim` and sets `--globe-spin-blur` / `--globe-spin-cycle`, and those keyframes live in that branch's `styles.css`. Copied into `FULL_BLEED_CSS`, or the spinner would have rendered with no entrance and no breath. (`shine-text` DOES ship — in **F0AiChat.css**, not styles.css — which is why the "Thinking…" label already shimmered.)
+  - Verified in the browser with a **MutationObserver** rather than polling: `animation: globe-spin-enter, globe-spin-breathe`, blur `1.00px` at size 20 (5% of the mark, as the rework intends), cycle 2300ms, and **960 quads** visible against the old build's far smaller pool. Worth remembering as a verification technique — an interval clamps to ~1/s in this pane and kept missing the 4-second window entirely, which made a working spinner look absent three times in a row.
+
+- **A conversation has no top padding** (per Oskar, with the wrapper picked out in his inspector). The canvas wrapper's `pt-6` now applies only when there is NO active conversation: a thread brings its own `pt-2`, and the extra 24px pushed the first turn away from the navbar for nothing. The greeting canvas keeps it — that one is a page, not a thread.
+
+## Done since last handoff (2026-09-02, streaming + an actionable run log)
+
+- **One's replies STREAM now** (per Oskar — they had no stream effect at all; every paragraph landed in one patch). `streamTurn` types a turn out paragraph by paragraph, and it applies to every reply path: intents, agent threads and clarifying resolutions.
+  - **Only PROSE streams.** A message carrying a plan, a run log or a question card is committed whole — half a numbered list reads as broken, not as arriving.
+  - `Conversation.streaming` is a transient frame (`done` / `typing` / `chars`), stripped on load like `pendingReasoning`, so a half-typed turn can never be rehydrated or persisted.
+  - **`emit` gained `persist: false`**, and the stream uses it. Serialising every conversation to localStorage on each 24ms tick would have been the most expensive thing in the prototype, for state that is deliberately not saved.
+  - **Timing is FEW FAT TICKS, not many thin ones** (10 chars / 24ms ≈ 400 chars a second). First cut was 4 chars / 16ms and a backgrounded tab — which the Claude pane always is — clamps timers to ~1/s, turning a three-line reply into a minute of crawling. More characters per tick degrades gracefully; a shorter interval does not. **New environment gotcha, worth knowing beyond this feature.**
+  - The auto-scroll had to learn about it: the stream grows the LAST paragraph rather than adding a message, so it watches the character count too, and scrolls instantly while streaming — a smooth scroll re-triggered every tick never arrives and the view lags behind the text. `TurnFeedback` also waits for the stream to finish, or copy/thumbs appeared under half a sentence.
+
+- **"Asking question…" shows the One spinner**, not a static pink dot (per Oskar, pointing at f0's kits/ai ChatSpinner docs). Waiting on you is still the turn working, and it now matches the "Thinking…" line exactly.
+
+- **The run log answers "what do the coloured circles mean?" — by not relying on them.** Oskar asked, which was the finding: a colour with no legend is a private language. Three changes, with GrokBot's inline-action model as the reference:
+  1. **Status in words.** A stopped run carries `F0TagStatus` — "Needs you" / "Blocked" / "Failed" — the same component the inbox tickets use. The dot stays as the at-a-glance marker but is no longer the only cue. A `done` gets NO tag on purpose: they are the majority, and labelling every one would bury the ones that matter.
+  2. **Evidence collapses on a `done`** behind "3 checks passed". Four successful runs with three checks each was a wall of grey hiding the one run that needed attention — and it stays one click away, because "approved 12 expenses" should never have to be taken on trust.
+  3. **A stopped run is ACTIONABLE where it is reported.** The agent said what it needs, so the answer belongs next to the asking: "Approve €320" / "Reject" / "Ask Diego why", "Grant calendar access", "Replay the 40 jobs", "Run again now". Each action carries the reply it produces (written in `agentThreads`, in the agent's voice — not generated from the label), `actOnRun` lands your choice as your turn, and the agent answers in the thread. Verified end to end: approving the €320 replaces the buttons with what you chose and the agent comes back with "€40 a head, which is inside the per-person limit — I'll treat that shape as fine in future".
+  - The first action is `outline` and the rest `ghost`: the first is the one the agent is actually asking for.
+  - NOT done: the mock-content brief has entities repeat across runs so the log could be GROUPED by person or entity. Nothing groups yet — that is the next obvious step if this screen gets more runs than fit on one page.
+
+## Done since last handoff (2026-09-02, Agents — fifth pass: New agent)
+
+- **"New agent" opens a CONVERSATION, not the templates** (per Oskar). The prompt is put in the user's mouth on purpose — `NEW_AGENT_PROMPT`, his wording verbatim: _"I want to set up an agent. Briefly explain how agents work in Factorial, then ask me a few questions…"_ — because that is what the button MEANS. A blank composer would make you write the request for help before you can get any.
+  - One explains what an agent is in two lines (a conversation with a job; its thread is its whole record; it acts within your permissions) and then asks the ONE question that matters: what should it take off your plate. Four options, one per template.
+  - **"A few questions" and "one question, never two" are reconciled by asking them IN SEQUENCE** — which is the chain the agent threads already run: what to delegate → how it should work → save it as policy. Three questions, one per turn.
+  - **The discovery thread BECOMES the agent's thread.** Answering picks the template, creates the agent, and retitles + binds this same conversation (`agent-discover` in `resolveAgentAnswer`) rather than opening a second one. Verified: navbar goes "New agent" → "🔍 Talent scout agent", the thread leaves Recents for the Agents group, and the agent's own reply + question continue in place.
+  - `briefing` state is gone from `AgentsScreen`; the empty state is now only "no agents yet" or the Templates tab, which is what those two things actually mean.
+
+## Done since last handoff (2026-09-02, Agents — fourth pass: the threads)
+
+- **The agents answer properly now** — Oskar supplied a mock-content brief (voice rules, thread anatomy, entry rules) and it turned a three-paragraph greeting into a real arc. `agents/agentThreads.ts` holds four scripted threads + four run logs; `agentsData.ts` is back to describing what an agent IS.
+  - The arc, all of it on machinery that already existed: **brief → reasoning (3 lines) → reply (3 lines, ends on ONE question) → that question as a clarifying card → the 4-step plan with explicit thresholds → the policy offer (Yes / With changes / No) → the run log.**
+  - **The reply's closing question is now answerable.** The brief's rule is that the last line asks for the one thing the agent needs; a question you cannot answer is a flourish. `ReplyScript` gained a `question`, and `answerQuestion` routes `agent-brief:<id>` / `agent-policy:<id>` through `resolveAgentAnswer` instead of the intent corpus — what an agent says belongs to that agent, not to a regex over what you typed.
+  - **`agent.activity` is GONE, and that is the structural win.** The brief says an agent's thread IS its log — "no hay log aparte" — and that hand-written `activity` string was exactly the separate log it rules out. The nav panel now reads `latestRun(agent)`: summary for the label, `toneFor(outcome)` for the dot.
+  - **It reproduces frame 2741:465055 by construction.** Verified: the three rows come out `🧭 Notion is already connected` (warning), `📈 Restart may have dropped the queue` (critical), `🧾 Approved 12 expenses under €50` (hollow) — the frame's own three, now DERIVED from the logs rather than typed in. (The frame's truncated "Restart may have ropped the" is completed and its typo fixed.)
+  - Entry rules honoured per agent: 4 `done` / 1 `needs_input` / 1 `blocked`-or-`failed`. A `done` carries **evidence** (the deterministic checks — "all within the €50 policy", "categories matched", "no duplicate merchants"); anything else carries the **reason with its figure** ("€320 over the €50 policy"). `ConversationView`'s `RunRow` makes that asymmetry visible, which is the point: you should not take "approved 12 expenses" on trust, and "needs input" is useless without the number that caused it.
+  - People are only ever the shared `employees` fixture, and they REPEAT across entries on purpose so the log is groupable by person — Marie Curie appears in three of Expense manager's six runs, Priya Patel in three.
+  - `ChatMessage` gained `plan?: string[]` and `runs?: RunEntry[]`; `PlanSteps` and `RunLog` render them. Run stamps are absolute ("1 Sept, 08:04"), not relative — a relative one drifts as the prototype gets demoed over weeks.
+  - **The log lands at the END, after the policy is agreed**, not at the start: those runs are what the agent has done, and showing them before you have settled how it should work would be a log for a job nobody assigned yet.
+  - NOT done: the brief mentions a fifth `shift-watcher` thread for the employee profile. Agents is admin-only today, so there is nowhere to show it — say the word and it is one more entry in the same shape.
+
+## Done since last handoff (2026-09-02, Agents — third pass)
+
+- **The suggestion chips give way to the permissions note once you are in a conversation** (Figma 2745:468340, per Oskar: "esto aplica a todo"). Chips offer ways to START something; mid-conversation they have nothing to offer, so the row becomes "One works within your permissions. See more". This also retires a pending item that had been sitting in this file since 2026-08-02 — the chips used to show in conversation too.
+  - `one/PermissionsNote.tsx`, shared by the canvas prompt bar AND the split panel, because the rule is about BEING in a conversation, not about the surface. The clarifying panel keeps that slot to itself (it brings its own keyboard hints).
+  - Measured against the frame: 12px/16px medium, `foreground-secondary` for BOTH halves, and the link told apart by its underline alone — `decoration-f1-foreground-tertiary` plus `text-decoration-skip-ink: none` so descenders stay crossed. Verified in the browser at `rgba(1,22,55,0.61)` with the underline at `rgba(1,27,75,0.45)`; the frame's `0.37` is a hair lighter than f0's tertiary token, which is what shipped.
+  - **The link needs its colour repeated on the `button`**: a button does not inherit `color`, so the first pass rendered "See more" BLACK beside the secondary text — the same trap the nav panel icons fell into. Caught by reading the computed style, not by looking.
+  - "See more" is visual-only; there is no permissions doc to point at yet.
+
+- **The agent card's delete became a "⋮" menu** (per Oskar — GrokBot-style options): Rename, Change emoji, Delete agent. It also fixes what his screenshot caught: the bare ✕ was an `F0Button`, which draws its own tooltip AND sets a `title`, so hovering it showed **two tooltips stacked**. A plain `button` with an `aria-label` — the pattern `RecentRow` already uses — has neither.
+  - **`MenuRow` / `MenuDivider` moved OUT of `HomeNav.tsx`** into `MenuRow.tsx`, with a new `MenuSurface` for the popover chrome. A screen importing its menu rows from the NAVIGATION would have been the wrong dependency, and copying them would have been the `CalGroup` duplication again. Every "⋮" in the prototype now shares them.
+  - Rename is INLINE on the card, like the Recents rows — a dialog for one field is heavier than the edit. Change emoji opens a 12-emoji grid in the same popover (f0 ships no emoji picker, and the point is that an agent's face is yours to change, not to build an input method).
+  - `renameAgent` / `setAgentEmoji` in the store. Verified end to end: rename to "Ops copilot" and swap to 🤖 — both persist, the card and the nav panel's activity row update together (one datum, two surfaces), and the ⋮'s own `aria-label` follows the new name. Delete still returns the screen to the empty state with zero agents and no orphaned thread.
+
+## Done since last handoff (2026-09-02, Agents — second pass)
+
+- **An agent's conversation belongs to the AGENT, not to Recents** (per Oskar). Recents filters `c.agentId` out — the Agents group above already lists that thread, and leaving it in both put the same conversation in the panel twice under two different names. The Recents group's own visibility now counts the FILTERED list too, or it stood there with a header and no rows once your only conversation was an agent's.
+
+- **Agents can be deleted, which is what brings the empty state back.** Now through the card's "⋮" menu — see the entry above; the first pass put a bare ✕ there, which Oskar replaced. Either way the control is a SIBLING of the card's button, not a child: a button inside a button is invalid HTML and its clicks would fire both.
+  - **Deleting an agent takes its conversations with it** (`deleteConversationsForAgent`). Without that the thread would be orphaned AND unreachable: Recents filters agent threads out and the Agents group only lists live agents, so it would exist in localStorage with no way back to it. Verified: delete the only agent and both stores drop to zero, the templates come back, and the Agents group leaves the panel.
+
+- **The empty state's textarea IS the one from New** (per Oskar: "el text area del estado empty que sea el mismo que tenemos en New"). `OnePromptBar` took three optional props — `placeholder`, `onSubmit`, `showChips` — so Agents mounts THAT composer instead of a lookalike, and inherits f0's autosize, the focus glow, the 16px radius and the type-ahead bridge. The hand-rolled `BriefBox` is gone.
+  - The placeholder goes in through a **CSS custom property** (`--f0c-one-placeholder`), because that text is drawn by FULL_BLEED_CSS's `::before` — f0's own copy comes from i18n and only feeds the typewriter. The quotes are part of the value: `content` needs a CSS string.
+  - **Only one `F0AiChatTextArea` may be mounted at a time** (the suggestions bridge listens on DOCUMENT), and that still holds by construction: Agents hides the pinned bar, and its own composer only exists while the empty state is up. Worth re-checking if the brief box ever appears on a screen that keeps the pinned bar.
+  - Consequence worth knowing: the composer brings its whole action bar, so the brief box has the paperclip the frame does not draw. That is the cost of it being the same component rather than a copy — say the word and it can be hidden for this instance.
+
+## Done since last handoff (2026-09-02, Agents)
+
+- **The Agents page, all three states** (Figma 2739:463194 / 2741:466470 / 2741:465055, per Oskar). They are one flow, and the flow is what drove the model: you brief One, that CREATES the agent, and the full-screen conversation is how you shape it.
+  - **The agent exists from the moment you hit send**, not at the end of some wizard — 2741:466470 already names it in the navbar and lists it in the nav panel while the configuring conversation is still going. So `createAgent` runs on submit and `startAgentConversation` opens the thread.
+  - **Briefing a template you already have returns the SAME agent** rather than a duplicate: the list is "your agents", and two Chief of Staff cards with identical descriptions would just read as a bug.
+  - `conversationStore` gained two small things for this: `Conversation.agentId` (the navbar shows the agent's emoji beside the title and drops the play button — an agent's brief has nothing to preview) and **`ReplyScript`**, a reply written by the CALLER instead of matched from the corpus. What an agent answers belongs to that agent (`agentsData`), not to a regex over what you typed.
+  - **Opening an agent from its card REOPENS its thread.** Starting a fresh one would put a synthetic "Open Expense manager" in the transcript as if you had typed it — the same fake-turn problem the context cards exist to avoid. The synthetic prompt only survives as a fallback for an agent whose thread is gone.
+
+- **The nav panel's Agents group is ONE rule that reconciles two frames.** One row per agent, and its label follows WHERE YOU ARE: inside that agent's conversation it names the agent ("Chief of Staff agent", as 2741:466470 draws it); anywhere else it reports what the agent last did, with the status dot beside it (2741:465055).
+  - No timers, no seeding delay — which was the first design I considered and rejected: "activity arrives a few seconds after creation" reproduces the two frames only if the viewer happens to look at the right moment, which is the worst kind of demo behaviour.
+  - Verified with three agents and one of them open: the two you are not in show their activity, the one you are in shows its name.
+  - `NavRow` grew an `emoji` and a `trailing` slot so the agent rows keep the icon rows' exact anatomy (same 20px box, same padding). The dots are exact f0 tokens — `--critical-50` IS the frame's #ff5c4b, and the hollow one is `border-f1-border` at the frame's own 2px.
+
+- **Three things in these frames are placeholders, and I did not reproduce them:**
+  - the navbar's AvatarModule is the **clock-in** module avatar (the asset's inner layer is literally named "Clock in") — a stopwatch on the Agents screen would be nonsense, so it uses `workflows`, the nearest module f0 actually has. **Icon gap**: f0 ships no "agents" module.
+  - the codegen resolved three of the four template emoji to the same compass glyph; the RENDERS read 🧭 / 🧾 / 📈 / 🔍, and those are what shipped. Same instance-override trap already in this file.
+  - the frame's warning dot is `#f79c3a` from a `var(--warning)` that this f0 build does not expose. `bg-f1-icon-warning` (`--warning-50`, rgb 249,116,21) is the system's warning and what shipped — a slightly more saturated orange, flagged in case it matters.
+
+- **NEW GOTCHA — f0's `Tabs` calls `setActiveTabId` on EVERY render.** Its effect depends on the callback's IDENTITY, so an inline arrow re-fires it forever. My handler also reset the "show the brief again" flag, so the **"New agent" button looked completely dead** — the click worked, the state was set, and the effect wiped it before paint. The fix is a one-line guard (`if (id === tab) return`); `Performance.tsx` dodges the same effect by remounting Tabs with a `key`. Worth knowing before wiring any state into that callback.
+
+- Smaller calls: the agent grid is a **3-column grid, not the frame's flex row** — its cards are `flex-1`, which with a single agent would stretch one card across the whole 1152 canvas; and Agents keeps the frame's **14px gutters** throughout (navbar, tabs, toolbar, grid all line up), which People could not do because OneDataCollection hardcodes 24. The brief box is hand-rolled for the documented `F0AiChatTextArea` reason, and the prompt bar is hidden on this view since the canvas already has a composer in the middle of it.
+
+## Done since last handoff (2026-09-02)
+
+- **Home no longer opens with the caret in the composer** (per Oskar). The focus was f0's, not ours: `ChatInput` focuses its textarea in a mount effect. Child effects run before the parent's, so `OnePromptBar` hands it back on mount and that is enough — measured: `document.activeElement` is `body` on load and stays there, and clicking or tabbing into the composer still works.
+  - **A defensive `focusin` guard was written first and thrown away.** It was meant to also catch a LATER re-focus by f0, disarming on the first real gesture — but in the browser it never fired (the programmatic re-focus test came back "kept"), so it was carrying risk (it can hijack a legitimate focus) for a benefit that could not be demonstrated. The mount blur is scoped to OUR textarea by name, so anything else that legitimately holds focus keeps it. If f0 ever moves its focus call into a timeout or rAF, this is the first place to look.
+  - `ONE_INPUT_NAME` is a module constant now — the DOM bridge's selector and the blur both depend on the name f0 gives that textarea, and two copies of a magic string is one too many.
+
+- **Clock in shows as active by turning its glyph VIRIDIAN, not by holding the button pressed** (per Oskar). `variant` is always `ghost`; the wrapper carries `data-open` and the tint comes from a real rule in `FULL_BLEED_CSS`, because `F0Button` gives no way to colour its icon.
+  - **`--selected-*` IS the viridian ramp in f0** — worth knowing before anyone reaches for a raw hex: core's `colors.ts` defines `viridian.50/60/70` as `184 92% 35% / 28% / 24%`, and the compiled `--selected-50/60/70` are the same three triples. So `hsl(var(--selected-60))` is viridian-60, which is also what `text-f1-icon-selected` and the sparkline's teal already use. Verified: `rgb(6,128,137)` open, the ordinary glyph colour closed, and no button ground in either state.
+  - The selector `[data-home-clockin-button][data-open] svg` matches f0's `[&_svg:not([data-has-color])]:text-f1-icon` in specificity and wins on order, since this block is injected after Tailwind's sheet.
+  - **Gotcha that cost a broken build: NO BACKTICKS inside FULL_BLEED_CSS comments.** The whole block is a template literal, so a comment quoting a token name in backticks closes the string and TypeScript reports a cascade of syntax errors 200 lines from the real cause. **Bitten twice** (the viridian rule and the globe-spin keyframes) — and the second time the broken file also left Vite serving a stale module, so the page looked unchanged rather than broken. If an edit to this block "does nothing", check for backticks before anything else.
 
 ## Done since last handoff (2026-09-01, fourth pass)
 

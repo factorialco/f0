@@ -70,7 +70,7 @@ function CelebrationCard({ celebration }: { celebration: Celebration }) {
           <img
             src={avatarFor(celebration.id)}
             alt=""
-            className="size-20 rounded-full border-4 border-solid border-[#fff] object-cover"
+            className="size-20 rounded-full border-4 border-solid border-f1-background object-cover"
           />
         </div>
       </div>

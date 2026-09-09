@@ -70,22 +70,29 @@ import { useNavigate, useSearchParams } from "react-router-dom"
 
 import { avatarFor } from "@/fixtures/helpers"
 
+import type { ActivityTone } from "./agents/agentThreads"
 import type { Chat, ChatId } from "./comms/chats"
 import type { InboxTask } from "./inbox/inboxTasks"
 
+import { latestRun, useAgents } from "./agents/agentStore"
+import { toneFor } from "./agents/agentThreads"
 import { Bot } from "./Bot"
 import { TEAM_ABSENCE_FILTERS, WORKPLACES } from "./calendar/calendarFixtures"
 import { CalGroup, MiniMonth } from "./calendar/MiniMonth"
 import { CHANNEL_CHATS, DIRECT_CHATS } from "./comms/chats"
 import { requestChat, useOpenChats } from "./comms/chatStore"
 import { factorialLogo, PROFILE_PEOPLE } from "./fixtures"
-import { inboxTasks } from "./inbox/inboxTasks"
+import { motionKeyFor } from "./iconMotion"
+import { openInboxTasks } from "./inbox/inboxTasks"
+import { MenuDivider, MenuRow } from "./MenuRow"
+import { useNeedsYou } from "./needsYouStore"
 import {
   clearConversations,
   deleteConversation,
   goHome,
   openConversation,
   renameConversation,
+  requestWindowsCollapse,
   useConversations,
   type Conversation,
 } from "./one/conversationStore"
@@ -161,29 +168,71 @@ function readPanelOpen(): boolean {
 
 function NavRow({
   icon,
+  emoji,
   label,
   active = false,
+  trailing,
   onClick,
 }: {
   icon?: IconType
+  /**
+   * An emoji instead of an icon, for the agent rows (Figma 2741:465529):
+   * the frame puts the agent's own glyph in the same 20px box the icons
+   * use, so the rows line up whichever they carry.
+   */
+  emoji?: string
   label: string
   active?: boolean
+  /** Right-hand slot — the agents' activity dot lives here. */
+  trailing?: React.ReactNode
   onClick?: () => void
 }) {
   return (
     <button
       onClick={onClick}
+      data-icon-motion={motionKeyFor(icon)}
       className={`f0c-pressable flex w-full cursor-pointer items-center gap-1.5 rounded-[10px] py-1.5 pl-1.5 pr-2 text-left ${
         active
           ? "bg-f1-background-secondary"
           : "hover:bg-f1-background-secondary"
       }`}
     >
-      {icon && <F0Icon icon={icon} size="md" color="default" />}
+      {emoji ? (
+        <span
+          aria-hidden
+          className="flex size-5 shrink-0 items-center justify-center text-[16px] leading-none"
+        >
+          {emoji}
+        </span>
+      ) : (
+        icon && <F0Icon icon={icon} size="md" color="default" />
+      )}
       <span className="flex-1 truncate text-base font-medium text-f1-foreground">
         {label}
       </span>
+      {trailing}
     </button>
+  )
+}
+
+/**
+ * The agents' activity dot (Figma 2741:465533): an 8px dot in a 16px box.
+ * Filled while the agent wants something, hollow once it does not — all
+ * three are exact f0 tokens (`--critical-50` IS the frame's #ff5c4b).
+ */
+function ActivityDot({ tone }: { tone: ActivityTone }) {
+  return (
+    <span className="flex size-4 shrink-0 items-center justify-center">
+      <span
+        className={`size-2 rounded-full ${
+          tone === "warning"
+            ? "bg-f1-icon-warning"
+            : tone === "critical"
+              ? "bg-f1-icon-critical"
+              : "border-2 border-solid border-f1-border"
+        }`}
+      />
+    </span>
   )
 }
 
@@ -471,7 +520,15 @@ function RecentsControl({
  *  Recents (wired to conversations started from the ONE prompt bar). */
 function HomePanelBody() {
   const profile = useProfile()
+  const agents = useAgents()
   const { conversations, activeId } = useConversations()
+  // Newest conversation per agent — clicking the row reopens the one you
+  // were having rather than starting a second thread with the same agent.
+  const agentConversations = new Map(
+    [...conversations]
+      .sort((a, b) => a.lastActiveAt - b.lastActiveAt)
+      .flatMap((c) => (c.agentId ? [[c.agentId, c] as const] : []))
+  )
   // Sub-screens live in the URL (?view=policies) so back/forward and
   // deep links behave; an open conversation always wins the canvas.
   const [searchParams, setSearchParams] = useSearchParams()
@@ -489,20 +546,45 @@ function HomePanelBody() {
   }
 
   // Most recently touched first; "Active only" keeps the section short.
-  const sorted = [...conversations].sort(
-    (a, b) => b.lastActiveAt - a.lastActiveAt
-  )
+  //
+  // AGENT conversations are EXCLUDED (per Oskar, 2026-09-02): the thread
+  // you have with an agent belongs to that agent, and the Agents group
+  // above already lists it. Leaving it in Recents too put the same
+  // conversation in the panel twice, under two different names.
+  const sorted = [...conversations]
+    .filter((c) => !c.agentId)
+    .sort((a, b) => b.lastActiveAt - a.lastActiveAt)
   const visible =
     recentsFilter === "active" ? sorted.slice(0, RECENTS_ACTIVE_LIMIT) : sorted
 
   return (
     <div className="flex flex-col gap-3 px-3 pb-1.5">
       <div className="flex flex-col gap-0.5">
-        <NavRow icon={Plus} label="New" onClick={() => openScreen(null)} />
+        <NavRow
+          icon={Plus}
+          label="New"
+          onClick={() => {
+            // A clean canvas, not just a change of view (per Oskar).
+            // Home owns the widgets stack and lives outside this tree, so
+            // this goes through the same channel the reply-driven windows
+            // use. Collapse first: on a module screen the widgets are
+            // unmounted, so they close instantly and Home is reached with
+            // the stack already empty.
+            requestWindowsCollapse()
+            openScreen(null)
+          }}
+        />
         {/* Agents and Reports are admin-only: the employee panel in the
             frame is New / Routines / Documents. The real bot glyph comes
             from the One AI Kit (13961:4824) — f0 ships no robot icon. */}
-        {profile === "admin" && <NavRow icon={Bot} label="Agents" />}
+        {profile === "admin" && (
+          <NavRow
+            icon={Bot}
+            label="Agents"
+            active={activeId === null && view === "agents"}
+            onClick={() => openScreen("agents")}
+          />
+        )}
         <NavRow icon={Clock} label="Routines" />
         {/* Reports is NOT the Insights widget (per Oskar, 2026-08-31):
             Insights tells you about your own activity, Reports is for
@@ -519,6 +601,42 @@ function HomePanelBody() {
           onClick={() => openScreen("policies")}
         />
       </div>
+      {/* The agents you have created (Figma 2741:465522). ONE ROW PER
+          AGENT, and its label is the rule that reconciles the two frames:
+          while you are inside an agent's conversation the row names the
+          agent ("Chief of Staff agent", as 2741:466470 draws it), and
+          otherwise it reports what that agent last did, with the status
+          dot beside it (2741:465055). No timers involved — the label
+          follows where you are, so both frames reproduce exactly. */}
+      {profile === "admin" && agents.length > 0 && (
+        <SidebarGroup label="Agents">
+          {agents.map((agent) => {
+            const conversation = agentConversations.get(agent.id)
+            const inside = conversation?.id === activeId
+            // The agent's own log is the source — its most recent run.
+            const run = latestRun(agent)
+            return (
+              <NavRow
+                key={agent.id}
+                emoji={agent.emoji}
+                label={
+                  inside ? `${agent.name} agent` : (run?.summary ?? agent.name)
+                }
+                active={inside}
+                trailing={
+                  inside || !run ? undefined : (
+                    <ActivityDot tone={toneFor(run.outcome)} />
+                  )
+                }
+                onClick={() => {
+                  if (conversation) openConversation(conversation.id)
+                  else openScreen("agents")
+                }}
+              />
+            )
+          })}
+        </SidebarGroup>
+      )}
       {/* Pinned carries a different example per profile, straight from the
           frame: a manager pins their triage queue, an employee pins their
           own holidays. */}
@@ -531,13 +649,16 @@ function HomePanelBody() {
       </SidebarGroup>
       {/* Recents is admin-only — the employee panel in the frame stops at
           Pinned. Conversations still work, they just aren't listed here. */}
-      {profile === "admin" && conversations.length > 0 && (
+      {/* `sorted`, not `conversations`: agent threads live in the Agents
+          group now, so counting them here would leave "Recents" standing
+          with a header and no rows. */}
+      {profile === "admin" && sorted.length > 0 && (
         <SidebarGroup
           label="Recents"
           trailing={
             <RecentsControl
               filter={recentsFilter}
-              total={conversations.length}
+              total={sorted.length}
               onChange={changeFilter}
             />
           }
@@ -698,9 +819,11 @@ function InboxPanelRow({ item, active }: { item: InboxTask; active: boolean }) {
 function InboxPanelBody() {
   const profile = useProfile()
   const open = useOpenChats()
+  // Same resolutions the canvas list reads, so the two cannot drift.
+  const needsYou = useNeedsYou()
   return (
     <div className="flex flex-col">
-      {inboxTasks(profile).map((item) => (
+      {openInboxTasks(profile, needsYou.cleared).map((item) => (
         <InboxPanelRow
           key={item.id}
           item={item}
@@ -880,9 +1003,10 @@ const HUB_VIEWS: Record<string, string> = {
 function HubPanelBody() {
   const profile = useProfile()
   const groups = profile === "employee" ? EMPLOYEE_HUB : ADMIN_HUB
-  // Same URL-driven navigation the Home panel's Documents row uses — an
-  // open conversation always wins the canvas, so `goHome()` first.
-  const { activeId } = useConversations()
+  // Same URL-driven navigation the Home panel's Documents row uses.
+  // `goHome()` first because an open conversation still owns the FLOOR —
+  // the window lands over it either way, but leaving the thread mounted
+  // under a freshly opened module reads as two unrelated things.
   const [searchParams, setSearchParams] = useSearchParams()
   const view = searchParams.get("view")
   return (
@@ -896,9 +1020,11 @@ function HubPanelBody() {
                 key={label}
                 icon={HUB_ICONS[label]}
                 label={label}
-                active={
-                  screen !== undefined && activeId === null && view === screen
-                }
+                // No `activeId === null` term any more: the module is a
+                // WINDOW now, so an open conversation on the floor does
+                // not take the canvas from it — both are on screen, and
+                // dimming the row would say otherwise.
+                active={screen !== undefined && view === screen}
                 onClick={
                   screen === undefined
                     ? undefined
@@ -920,35 +1046,6 @@ const companies = [
   { id: "factorial", name: "Factorial" },
   { id: "test-de-verdad", name: "Test de verdad" },
 ]
-
-function MenuDivider() {
-  return <div className="-mx-1 my-1 h-px shrink-0 bg-f1-border-secondary" />
-}
-
-function MenuRow({
-  icon,
-  label,
-  trailing,
-  onClick,
-}: {
-  icon: React.ReactNode
-  label: string
-  trailing?: React.ReactNode
-  onClick?: () => void
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className="flex w-full cursor-pointer items-center gap-2 rounded-[10px] p-2 text-left hover:bg-f1-background-secondary"
-    >
-      {icon}
-      <span className="min-w-0 flex-1 truncate text-base font-medium text-f1-foreground">
-        {label}
-      </span>
-      {trailing}
-    </button>
-  )
-}
 
 /**
  * The user menu, matching the "View drawer" in the Home - Vision Figma
@@ -1129,6 +1226,7 @@ function RailItem({
       onClick={onClick}
       aria-label={label}
       aria-current={active ? "true" : undefined}
+      data-icon-motion={motionKeyFor(icon)}
       className="group flex w-full cursor-pointer flex-col items-center gap-0.5"
     >
       <span
@@ -1159,6 +1257,7 @@ function RailIconButton({ icon, label }: { icon: IconType; label: string }) {
   return (
     <button
       aria-label={label}
+      data-icon-motion={motionKeyFor(icon)}
       className="f0c-pressable flex size-8 cursor-pointer items-center justify-center rounded-[10px] hover:bg-f1-background-secondary"
     >
       {/* Same token as the section items above — see RailItem. */}
@@ -1208,6 +1307,10 @@ export function HomeNav() {
     // its panel beside the week grid, not beside Home (Figma 2621:29173).
     // Comms/Inbox/Hub stay side panels and leave the canvas alone.
     if (id === "cal") {
+      // Also the way back if you closed the calendar WINDOW with its own
+      // ✕ while staying in this section: the rail row is still lit and
+      // the panel is still open, so clicking it has to reopen the window
+      // rather than be a no-op.
       goHome()
       setSearchParams({ view: "calendar" })
     } else if (searchParams.get("view") === "calendar") {

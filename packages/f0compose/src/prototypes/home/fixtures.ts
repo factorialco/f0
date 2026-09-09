@@ -58,6 +58,18 @@ export type NeedsYouTask = {
    */
   avatarSeed: string
   module: ModuleId
+  /**
+   * Whether One is allowed to close this one on its own.
+   *
+   * Not a new policy — it is clause 3 of the plan every agent in this
+   * prototype already follows: "hold anything that would commit more than
+   * €10,000 or touch someone's contract for your approval". Time off
+   * inside allowance and an €890 workshop inside its budget are below
+   * that line; a hiring decision, a contract renewal, a promotion and a
+   * €34,200 bonus run are not, so those escalate to the chat where you
+   * can actually weigh them.
+   */
+  oneCanClose?: boolean
 }
 
 // Matches the "Needs you" list from the Home - Vision Figma file
@@ -98,6 +110,7 @@ export const needsYouTasks: NeedsYouTask[] = [
     title: "Approve 12 time off requests",
     subtitle: "All within policy · Jun–Jul · no team conflicts",
     ctaLabel: "Approve all",
+    oneCanClose: true,
   },
   {
     id: "recruitment-pick",
@@ -142,6 +155,7 @@ export const needsYouTasks: NeedsYouTask[] = [
     icon: AcademicCap,
     title: "Approve €890 design team workshop",
     subtitle: "Within Q2 L&D budget · requested by Marta",
+    oneCanClose: true,
     ctaLabel: "Approve",
   },
 ]

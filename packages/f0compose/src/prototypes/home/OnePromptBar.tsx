@@ -12,8 +12,10 @@ import { ClarifyPanel } from "./one/ClarifyPanel"
 import {
   sendMessage as sendToConversation,
   startConversation,
+  tryResolveInPlace,
   useConversations,
 } from "./one/conversationStore"
+import { PermissionsNote } from "./one/PermissionsNote"
 import {
   buildSuggestions,
   categorySuggestions,
@@ -50,7 +52,35 @@ function setNativeValue(el: HTMLTextAreaElement, value: string) {
   el.dispatchEvent(new Event("input", { bubbles: true }))
 }
 
-export function OnePromptBar() {
+/** The name f0 gives its chat textarea. Two things depend on it now — the
+ *  DOM bridge that keeps type-ahead alive and the focus guard below — so
+ *  it is a constant rather than a string repeated in two selectors. */
+const ONE_INPUT_NAME = "one-ai-input"
+
+/**
+ * `placeholder` and `onSubmit` exist so the Agents screen can use THIS
+ * composer rather than a lookalike (per Oskar, 2026-09-02: "el text area
+ * del estado empty que sea el mismo que tenemos en New"). Everything that
+ * makes the input feel like One — f0's autosize, the focus glow, the
+ * 16px radius, the type-ahead bridge — comes with it for free, which a
+ * second hand-rolled box could only imitate.
+ *
+ * Only ONE of these may be mounted at a time: the suggestions bridge
+ * listens on DOCUMENT for `input`, so two instances would fight over it.
+ * That holds by construction — Agents hides the pinned bar (see
+ * `showPromptBar` in Home) and only shows its own while the empty state
+ * is up.
+ */
+export function OnePromptBar({
+  placeholder,
+  onSubmit,
+  showChips = true,
+}: {
+  placeholder?: string
+  /** Replaces "start a conversation / next turn" with the caller's flow. */
+  onSubmit?: (text: string) => void
+  showChips?: boolean
+} = {}) {
   // Employee swaps the analyst chip for Find (Figma 2694:55469), and the
   // suggestion catalog itself is role-gated (see ROLE_PROMPTS).
   const profile = useProfile()
@@ -82,6 +112,34 @@ export function OnePromptBar() {
     right: HTMLElement
   } | null>(null)
 
+  /**
+   * The page must NOT open with the caret in the composer (per Oskar,
+   * 2026-09-02): Home is a screen you land on to READ — the greeting, the
+   * queue, the widgets — and a focused textarea both hides that behind a
+   * blinking caret and sends the first keystroke somewhere nobody asked
+   * for.
+   *
+   * The focus is f0's, not ours: `ChatInput` focuses its textarea in a
+   * mount effect. Child effects run before the parent's, so by the time
+   * this one fires the textarea already holds the focus and handing it
+   * back is enough — measured: `document.activeElement` is `body` on load
+   * and stays there.
+   *
+   * Scoped to OUR textarea on purpose: if some other element legitimately
+   * has the focus when this mounts, it keeps it. If f0 ever moves its
+   * focus call into a timeout or a rAF this will stop being enough — that
+   * is the thing to check here first.
+   */
+  useEffect(() => {
+    const active = document.activeElement
+    if (
+      active instanceof HTMLTextAreaElement &&
+      active.name === ONE_INPUT_NAME
+    ) {
+      active.blur()
+    }
+  }, [])
+
   const typedSuggestions = useMemo(
     () => buildSuggestions(value, profile),
     [value, profile]
@@ -96,22 +154,27 @@ export function OnePromptBar() {
 
   const textarea = () =>
     composerRef.current?.querySelector<HTMLTextAreaElement>(
-      'textarea[name="one-ai-input"]'
+      `textarea[name="${ONE_INPUT_NAME}"]`
     ) ?? null
 
   const submit = useCallback(
     (text: string) => {
       const trimmed = text.trim()
       if (!trimmed) return
-      // Home screen → start a full-screen conversation (lands in Recents);
-      // conversation open → next turn in the same thread.
-      if (inConversation) sendToConversation(trimmed)
-      else startConversation(trimmed)
+      // A caller-owned flow wins (Agents briefs an agent with it);
+      // otherwise: Home screen → start a full-screen conversation (lands
+      // in Recents); conversation open → next turn in the same thread.
+      if (onSubmit) onSubmit(trimmed)
+      else if (inConversation) sendToConversation(trimmed)
+      // Some work belongs on the card it came from, not in a chat: if One
+      // can close the Needs-you rows this prompt targets, it does that
+      // and we stay on Home (see `tryResolveInPlace`).
+      else if (!tryResolveInPlace(trimmed)) startConversation(trimmed)
       setValue("")
       setActiveChip(null)
       setSelectedIndex(-1)
     },
-    [inConversation]
+    [inConversation, onSubmit]
   )
 
   /** Pick a suggestion: send it and empty the real textarea behind it. */
@@ -291,7 +354,21 @@ export function OnePromptBar() {
         </div>
       )}
 
-      <div ref={composerRef} data-one-composer>
+      <div
+        ref={composerRef}
+        data-one-composer
+        // The placeholder is drawn by FULL_BLEED_CSS's ::before (f0's own
+        // copy comes from i18n and only feeds the typewriter), so it is
+        // overridden through a custom property rather than a prop. The
+        // quotes are part of the value: `content` needs a CSS string.
+        style={
+          placeholder
+            ? ({
+                "--f0c-one-placeholder": `"${placeholder}"`,
+              } as React.CSSProperties)
+            : undefined
+        }
+      >
         <F0AiChatTextArea
           inProgress={activeConversation?.thinking ?? false}
           onSend={async (text: string) => {
@@ -333,33 +410,49 @@ export function OnePromptBar() {
           )}
       </div>
 
-      {/* Action chips — below the input (Figma 2640:51198), with only
-          Settings on the right. */}
-      <div className="flex w-full items-center justify-between py-2">
-        <div className="flex items-center gap-1">
-          {chipActions.map((action) => (
-            <button
-              key={action.id}
-              onClick={() => toggleChip(action.id)}
-              className={`f0c-pressable flex cursor-pointer items-center gap-1 rounded-[10px] px-1.5 py-1 text-base font-medium ${
-                activeChip === action.id
-                  ? "bg-f1-background-secondary text-f1-foreground"
-                  : "text-f1-foreground hover:bg-f1-background-secondary"
-              }`}
-            >
-              <F0Icon icon={action.icon} size="sm" color="default" />
-              {action.label}
-            </button>
-          ))}
+      {/* Below the input, and it is EITHER/OR (per Oskar, 2026-09-02):
+          once a conversation is under way the suggestion chips have
+          nothing left to offer — you are already talking — so the row
+          becomes the permissions note (Figma 2745:468340). This also
+          retires a long-standing pending item: the chips used to show in
+          conversation too.
+
+          Order matters here: the note wins over `showChips`, because a
+          caller that hides the chips (the Agents brief) is saying "no
+          chips on my screen", not "never show the note". */}
+      {inConversation ? (
+        <PermissionsNote />
+      ) : (
+        <div
+          className={`w-full items-center justify-between py-2 ${
+            showChips ? "flex" : "hidden"
+          }`}
+        >
+          <div className="flex items-center gap-1">
+            {chipActions.map((action) => (
+              <button
+                key={action.id}
+                onClick={() => toggleChip(action.id)}
+                className={`f0c-pressable flex cursor-pointer items-center gap-1 rounded-[10px] px-1.5 py-1 text-base font-medium ${
+                  activeChip === action.id
+                    ? "bg-f1-background-secondary text-f1-foreground"
+                    : "text-f1-foreground hover:bg-f1-background-secondary"
+                }`}
+              >
+                <F0Icon icon={action.icon} size="sm" color="default" />
+                {action.label}
+              </button>
+            ))}
+          </div>
+          <F0Button
+            variant="ghost"
+            size="sm"
+            icon={Settings}
+            hideLabel
+            label="ONE settings"
+          />
         </div>
-        <F0Button
-          variant="ghost"
-          size="sm"
-          icon={Settings}
-          hideLabel
-          label="ONE settings"
-        />
-      </div>
+      )}
     </div>
   )
 }
