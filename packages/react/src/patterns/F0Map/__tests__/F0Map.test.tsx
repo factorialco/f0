@@ -58,7 +58,7 @@ const mock = vi.hoisted(() => {
         // alike - and the adapter subscribes with `on`. Deferred to a microtask
         // so the subscription is in place first.
         if (type === "load") {
-          void Promise.resolve().then(() => cb())
+          queueMicrotask(() => cb())
         }
       }
       return this
