@@ -4,6 +4,7 @@ import { createPortal } from "react-dom"
 import { F0Button } from "@/components/F0Button"
 import { Cross } from "@/icons/app"
 import { useReducedMotion } from "@/lib/a11y"
+import { aiGradientStopClasses } from "@/lib/ai-gradient"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { PongBall } from "./components/PongBall"
@@ -577,7 +578,7 @@ export const F0AiPong = ({ onClose }: F0AiPongProps) => {
                 "after:pointer-events-none after:absolute after:inset-0.5 after:z-[-2]",
                 "after:rounded-[inherit] after:blur-[5px] after:content-['']",
                 "after:bg-[conic-gradient(from_var(--gradient-angle),var(--tw-gradient-stops))]",
-                "from-[#E55619] via-[#A1ADE5] to-[#E51943]",
+                aiGradientStopClasses,
                 "after:scale-100 after:opacity-100"
               )}
               style={{

@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from "motion/react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import { useReducedMotion } from "@/lib/a11y"
+import { aiGradientStopClasses } from "@/lib/ai-gradient"
 import { Link } from "@/lib/linkHandler"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
@@ -625,7 +626,7 @@ export const F0AiChatTextArea = ({
               "after:[mask:linear-gradient(#000,#000)_padding-box_exclude,linear-gradient(#000,#000)]",
               "after:opacity-0",
               "after:bg-[conic-gradient(from_var(--gradient-angle),var(--tw-gradient-stops))]",
-              "from-[#E55619] via-[#A1ADE5] to-[#E51943]",
+              aiGradientStopClasses,
               "after:transition-opacity after:delay-200 after:duration-300",
               "has-[textarea:focus]:after:opacity-100",
               !shouldReduceMotion &&

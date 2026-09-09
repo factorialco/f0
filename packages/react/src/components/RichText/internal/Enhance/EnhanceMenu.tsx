@@ -4,6 +4,7 @@ import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon/F0Icon"
 import { ArrowUp, SolidStop } from "@/icons/app"
 import { F0ActionItem } from "@/kits/ai/F0ActionItem"
+import { aiGradientStopClasses } from "@/lib/ai-gradient"
 import { cn } from "@/lib/utils"
 import {
   DropdownMenu,
@@ -106,7 +107,7 @@ const AIEnhanceMenu = ({
                   "before:pointer-events-none before:absolute before:inset-0 before:z-[-1] before:rounded-[inherit] before:bg-f1-background before:content-['']",
                   "after:pointer-events-none after:absolute after:inset-0.5 after:z-[-2] after:rounded-md after:blur-[6px] after:content-['']",
                   "after:bg-[conic-gradient(from_var(--gradient-angle),var(--tw-gradient-stops))]",
-                  "from-[#E55619] via-[#A1ADE5] to-[#E51943]"
+                  aiGradientStopClasses
                 ),
               useCompactReview &&
                 "border border-solid border-f1-border-secondary drop-shadow-md",

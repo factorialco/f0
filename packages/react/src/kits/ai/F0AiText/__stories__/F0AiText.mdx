@@ -1,0 +1,93 @@
+import { Canvas, Controls, Meta } from "@storybook/addon-docs/blocks"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+import * as Stories from "./F0AiText.stories"
+
+<Meta of={Stories} />
+
+# F0AiText
+
+Text painted with the One brand gradient. It is the headline treatment that
+marks a surface as AI-generated — the One chat welcome headline, or the title of
+a "…with One" page — and it replaces the hand-written
+`bg-gradient-to-r from-[#E55619] … bg-clip-text text-transparent` that had been
+copied into a dozen files.
+
+## Anatomy
+
+A single text element whose glyphs are clipped out of a left-to-right gradient
+(orange → periwinkle → red). Everything else — size, weight, alignment,
+truncation, semantic tag — comes from the shared F0 text variants, so a gradient
+headline lines up with the plain `F0Heading` next to it.
+
+<Canvas of={Stories.Default} />
+
+<Controls of={Stories.Default} />
+
+The three allowed sizes map onto the existing typography scale:
+`heading-large` (2xl semibold, the chat headline size and the default),
+`heading` (lg semibold) and `body`.
+
+<Canvas of={Stories.Variants} />
+
+## Guidelines
+
+### When to use
+
+Use it for the one string that _is_ the AI moment: the headline of an
+AI-generated page, the assistant's greeting, a "drafted by One" label.
+
+<Canvas of={Stories.PageHeadline} />
+
+### When not to use
+
+Do not use it for supporting copy, body text, labels, or table content — reach
+for `F0Heading` and `F0Text` there. The gradient is a signal, and a signal
+applied to every string on the page stops signalling anything.
+
+<Canvas of={Stories.AlongsidePlainHeading} />
+
+<DoDonts
+  do={{
+    description:
+      "Give the gradient to the single string that names the AI moment, and let the surrounding copy stay on the neutral foreground tokens.",
+    guidelines: [
+      "One gradient string per view.",
+      "Pick the size from the variants so it matches the headings around it.",
+      "Keep it short — a display headline, not a paragraph.",
+    ],
+  }}
+  dont={{
+    description:
+      "Don't spread the gradient across a block of copy, and don't rebuild the ramp by hand with arbitrary Tailwind colour classes.",
+    guidelines: [
+      "No gradient body text, labels or table cells.",
+      "No hand-written `from-[#…] via-[#…] to-[#…]` — it drifts.",
+      "Don't use it to decorate non-AI features.",
+    ],
+  }}
+/>
+
+Long strings truncate like any other F0 text, so a gradient headline is safe in
+a narrow column.
+
+<Canvas of={Stories.Truncated} />
+
+## Accessibility
+
+The gradient renders the same paint in light and dark themes — it is fixed brand
+colour, not a themeable token — and its middle stop is a light periwinkle, so
+contrast against a light background is low by design. Two consequences:
+
+- Keep it to short display text. Anything a user has to _read_ rather than
+  recognise belongs in `F0Text`, which is token-driven and meets AA.
+- Never let the gradient carry meaning on its own. It says "this came from One";
+  the words still have to say what the thing is.
+
+Because the glyphs are painted by a gradient there is no single foreground
+colour for axe to measure, so the component tags its root with
+`data-a11y-color-contrast-ignore` rather than suppressing the `color-contrast`
+rule for the whole story.
+
+The semantic tag follows the variant (`h1` for `heading-large`, `h2` for
+`heading`, `p` for `body`) and `as` overrides it, so a gradient headline can
+still sit at the right level in the document outline.
