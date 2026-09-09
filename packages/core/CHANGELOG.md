@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.1](https://github.com/factorialco/f0/compare/f0-core-v2.2.0...f0-core-v2.2.1) (2026-09-09)
+
+
+### Bug Fixes
+
+* **ApplicationFrame:** serve the main content before the side panel ([#5328](https://github.com/factorialco/f0/issues/5328)) ([ef98943](https://github.com/factorialco/f0/commit/ef9894375fe5f1e0614a2c9064e9cb1da3837ac4))
+
 ## [2.2.0](https://github.com/factorialco/f0/compare/f0-core-v2.1.0...f0-core-v2.2.0) (2026-08-29)
 
 
