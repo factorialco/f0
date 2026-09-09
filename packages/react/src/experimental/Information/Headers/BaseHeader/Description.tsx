@@ -1,7 +1,9 @@
 import { motion } from "motion/react"
 import { useEffect, useId, useRef, useState } from "react"
 import { useResizeObserver } from "usehooks-ts"
+import { F0Icon } from "@/components/F0Icon"
 import { F0RichTextDisplay } from "@/components/RichText/F0RichTextDisplay"
+import { ChevronDown } from "@/icons/app"
 import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
@@ -92,13 +94,23 @@ export const Description = ({ description }: { description: string }) => {
           aria-expanded={isExpanded}
           onClick={() => setIsExpanded((current) => !current)}
           className={cn(
-            "relative w-fit font-medium text-f1-foreground after:absolute after:-bottom-0.5 after:left-0 after:right-0 after:h-[1.5px] after:bg-f1-border after:transition-all after:content-[''] hover:after:bg-f1-border-hover",
+            "flex w-fit items-center gap-1 font-medium text-f1-foreground transition-colors hover:text-f1-foreground-secondary",
             focusRing()
           )}
         >
           {isExpanded
             ? translations.actions.showLess
             : translations.actions.showAll}
+          {/* Decorative: the button is already named by its own label. */}
+          <F0Icon
+            icon={ChevronDown}
+            size="sm"
+            aria-hidden
+            className={cn(
+              !reducedMotion && "transition-transform duration-200 ease-out",
+              isExpanded && "rotate-180"
+            )}
+          />
         </button>
       ) : null}
     </div>
