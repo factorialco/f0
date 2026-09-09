@@ -8,7 +8,7 @@ Local checkout: `/Users/jonathan.centeno/code/f0-agent-entry-unified`.
 
 - Navigation: company switcher, right-opening Help and personal menus, exclusive utility selection, imported Hub screens, full-width page canvas and aligned tabs.
 - Personal agent: Ask Factorial header entry, contextual right panel, retained draft and conversation, original Home composer, approved icon motion and F0 field border/focus treatment.
-- Home + Onboarding: completed phase 1 at `/p/home-v2`, default widgets, conversational customization, undo and persistent preferences/history. This remains a separate exploration, not a replacement for `/p/home`. Routine/report cocreation is outside phase 1.
+- Home + Onboarding was removed from this PR at Jonathan’s request. The exploration remains available in the original local checkouts and is not part of the shared PR scope.
 
 Navigation and Personal agent changed the same canvas CSS. The integrated version retains the flat page geometry and Hub divider, removes the obsolete bottom-entry space and keeps the right-panel geometry. The imported Spending agent event opens the side panel when outside Home.
 
@@ -21,9 +21,8 @@ Original explorations remain in `f0-agent-entry` (5176) and `f0-agent-entry-top-
 ## Verification
 
 - TypeScript passes for the integrated app.
-- Prototype checks pass for Home (186 source files) and Home v2 (6 source files).
+- Prototype checks passed for Home (186 source files).
 - Browser: Organization and Training retain edge-to-edge geometry and tabs below the header. Hub divider and imported Training content remain present with the right agent panel open.
 - Browser: typed agent draft survives closing/reopening. Marketplace hides the contextual panel and leaves no bottom strip. Original Home retains its widgets and composer.
-- Browser: Home v2 loads with the three default widgets and shared agent artwork. Its phase-1 flows were independently verified by the owning task before this exact snapshot was copied.
 
 All product data and agent responses remain mocked.
