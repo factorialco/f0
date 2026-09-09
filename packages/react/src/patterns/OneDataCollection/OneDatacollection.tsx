@@ -1809,7 +1809,10 @@ const OneDataCollectionComp = <
         ) : null}
       </div>
       {emptyState ? (
-        <div className="flex flex-1 flex-col items-center justify-center">
+        // Stretch, never center: OneEmptyState is an inline-size container, so a
+        // shrink-to-fit parent leaves it with no content to measure and it
+        // collapses to its own padding. It centers its own contents anyway.
+        <div className="flex flex-1 flex-col items-stretch justify-center">
           <OneEmptyState
             emoji={emptyState.emoji}
             title={emptyState.title}
