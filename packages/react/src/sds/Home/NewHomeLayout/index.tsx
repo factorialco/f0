@@ -739,7 +739,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
     ref
   ) {
     const t = useI18n()
-    const { sidebarState, toggleSidebar, isSmallScreen } = useSidebar()
+    const { sidebarState, toggleSidebar, isSmallScreen, hasRail } = useSidebar()
     const reducedMotion = useReducedMotion()
     const rootRef = useRef<HTMLDivElement | null>(null)
     const [rootWidth, setRootWidth] = useState(0)
@@ -1137,8 +1137,10 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
           className="col-span-full flex flex-row items-center justify-between"
         >
           {/* The main-menu trigger, on the same terms as `DaytimePage`: shown
-              only when the sidebar isn't already there to be seen. */}
-          {isSmallScreen || sidebarState === "hidden" ? (
+              only when the sidebar isn't already there to be seen — and never
+              with a module rail, which is always there to be seen. The `span`
+              stays either way: it is what holds the row's `justify-between`. */}
+          {!hasRail && (isSmallScreen || sidebarState === "hidden") ? (
             <F0Button
               variant="ghost"
               onClick={() => toggleSidebar()}

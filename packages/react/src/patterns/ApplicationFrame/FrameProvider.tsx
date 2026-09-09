@@ -23,6 +23,20 @@ interface FrameContextType {
   prevSidebarState: SidebarState | null
   toggleSidebar: (callData?: { isInvokedByUser: boolean }) => void
   setForceFloat: (force: boolean) => void
+  /**
+   * How much room the permanent module rail takes, or 0 when the sidebar has
+   * no rail (the classic composition). Registered by `Sidebar` when it is
+   * given a `rail`, because the frame receives the whole navigation as one
+   * opaque node and cannot see inside it.
+   */
+  railWidth: number
+  /**
+   * Whether navigation is permanently on screen. What reads this is the
+   * "Open main menu" button in the page surfaces: with a rail there is no
+   * state without navigation, so the button has nothing to restore.
+   */
+  hasRail: boolean
+  setRailWidth: (width: number) => void
 }
 
 const FrameContext = createContext<FrameContextType | undefined>(undefined)
@@ -37,6 +51,9 @@ export function useSidebar(): FrameContextType {
       sidebarState: "locked",
       toggleSidebar: () => {},
       setForceFloat: () => {},
+      railWidth: 0,
+      hasRail: false,
+      setRailWidth: () => {},
     }
   }
   return context
@@ -49,6 +66,7 @@ interface FrameProviderProps {
 export function FrameProvider({ children }: FrameProviderProps) {
   const { currentPath } = useNavigation()
   const [forceFloat, setForceFloat] = useState(false)
+  const [railWidth, setRailWidth] = useState(0)
   const [isLastToggleInvokedByUser, setIsLastToggleInvokedByUser] =
     useState(false)
 
@@ -80,19 +98,23 @@ export function FrameProvider({ children }: FrameProviderProps) {
     [isSmallScreen, visible, locked, setLocked, setVisible]
   )
 
+  // Peeking the collapsed panel by reaching for the left edge. Both thresholds
+  // are offset by the rail, because with one on screen the first 56px of the
+  // viewport are the rail itself: unshifted, the reveal zone would sit UNDER
+  // the navigation and every trip to a rail tab would drag the panel out.
   const handlePointerMove = useCallback(
     (e: PointerEvent<HTMLDivElement>) => {
       if (isSmallScreen) return
 
-      if (e.clientX < 32) {
+      if (e.clientX >= railWidth && e.clientX < railWidth + 32) {
         setVisible(true)
       }
 
-      if (e.clientX > 280) {
+      if (e.clientX > railWidth + 280) {
         setVisible(false)
       }
     },
-    [isSmallScreen, setVisible]
+    [isSmallScreen, setVisible, railWidth]
   )
 
   const sidebarState: SidebarState = useMemo(() => {
@@ -130,6 +152,9 @@ export function FrameProvider({ children }: FrameProviderProps) {
         toggleSidebar,
         prevSidebarState,
         setForceFloat,
+        railWidth,
+        hasRail: railWidth > 0,
+        setRailWidth,
       }}
     >
       <div onPointerMove={handlePointerMove} className="h-screen w-screen">

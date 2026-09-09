@@ -386,7 +386,11 @@ const { Default, EverythingChannel, AnnouncementChannel, Snapshot } =
   composeStories(stories)
 
 const openBarcelonaFromSidebar = async () => {
-  await userEvent.click(await screen.findByRole("button", { name: "Chat" }))
+  // The conversations tab, whichever navigation the story wears: the rail
+  // names the module ("Comms"), the tab row names the panel ("Chat").
+  await userEvent.click(
+    await screen.findByRole("button", { name: /^(chat|comms)$/i })
+  )
   await userEvent.click(
     await screen.findByRole("button", { name: /barcelona office/i })
   )

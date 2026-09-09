@@ -7,6 +7,8 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { actionVariants, buttonSizeVariants } from "@/ui/Action/variants"
 
+import { usePersistedTab } from "./usePersistedTab"
+
 const UnreadDot = ({ isActive }: { isActive: boolean }) => {
   return (
     <div className="absolute right-0 top-0 flex h-2 w-2 items-center justify-center rounded-full bg-f1-background">
@@ -216,37 +218,8 @@ export const SidebarTabs = ({
   const probeRef = useRef<HTMLDivElement>(null)
   const [labelsFit, setLabelsFit] = useState(false)
 
-  // Tab persistence (opt-in). The component is controlled, so restoring is a
-  // one-shot mount nudge through `onTabChange`; the owner's state stays the
-  // single source of truth. This effect is declared BEFORE the write effect
-  // below so the stored tab is read before the current one overwrites it.
-  const storageKey = persistKey ? `f0-sidebar-tab:${persistKey}` : null
-  const restoredRef = useRef(false)
-  useEffect(() => {
-    if (!storageKey || restoredRef.current) return
-    restoredRef.current = true
-    let stored: string | null = null
-    try {
-      stored = localStorage.getItem(storageKey)
-    } catch {
-      // localStorage unavailable — skip restoring.
-    }
-    if (stored && stored !== activeTab && tabs.some((t) => t.id === stored)) {
-      onTabChange(stored)
-    }
-    // Mount-only (guarded by restoredRef): later tab/activeTab changes are
-    // user-driven and must not re-trigger a restore.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [storageKey])
-
-  useEffect(() => {
-    if (!storageKey) return
-    try {
-      localStorage.setItem(storageKey, activeTab)
-    } catch {
-      // localStorage full or unavailable — silently ignore.
-    }
-  }, [storageKey, activeTab])
+  // Tab persistence (opt-in) — shared with `SidebarRail`.
+  usePersistedTab(persistKey, tabs, activeTab, onTabChange)
 
   // The tabs array is usually rebuilt inline each render — key the measure
   // effect on what actually affects widths (count + labels).
