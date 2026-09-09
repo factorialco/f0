@@ -8,8 +8,28 @@ import { F0AiBanner, F0AiBannerProps } from "."
 const meta = {
   title: "AI/AiBanner",
   component: F0AiBanner,
+  // The tag is what the sidebar badge and the component-status API read. No
+  // "(deprecated)" title suffix: that changes the page id and 404s every
+  // existing link, and marks nothing the tag does not already mark.
+  tags: ["deprecated"],
   parameters: {
     layout: "centered",
+    docs: {
+      description: {
+        component: [
+          "**Deprecated — use `F0AiCallout`.**",
+          "",
+          "This one has no status, so it cannot say how much a message matters, and it signals its",
+          "authorship with a gradient built from raw hex — two signals for one message, and one that",
+          "cannot follow a theme. Both of its actions are outlined, which reads as two peers where",
+          "there is a recommendation and a way out of it.",
+          "",
+          'Migration: `content` becomes `children` (nodes, not a string), add `status="neutral"` with',
+          "an `icon` describing the content, and `primaryAction` becomes `action`. The byline is not a",
+          "prop — every F0AiCallout renders it.",
+        ].join("\n"),
+      },
+    },
   },
   argTypes: {
     title: {

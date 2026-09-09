@@ -170,6 +170,8 @@ Same disclosure, different content: steps the reader works through instead of re
 
 ### Design best practices
 
+AI output with nothing to decide — a draft, a summary of a history — is not an exception to this component: it is `status="neutral"`, with an `icon` that describes the content. `F0AiBanner` used to serve that case and is deprecated.
+
 **Where it goes and how long it lives**
 
 - **It belongs to a record, so it sits with that record** — in the page flow, above the content it judges. Never fixed, floating or page-level: a message about the product itself is `F0Alert`, and one that follows the reader everywhere is a global banner.
@@ -245,11 +247,9 @@ Same disclosure, different content: steps the reader works through instead of re
         </td>
       </tr>
       <tr>
+        <td>A turn in a conversation the reader is having with One</td>
         <td>
-          AI content with no verdict at all — a draft, a summary, a chat turn
-        </td>
-        <td>
-          <code>F0AiBanner</code> or <code>F0AiChat</code>.
+          <code>F0AiChat</code> — a reply is not an assessment of a record.
         </td>
       </tr>
     </tbody>
