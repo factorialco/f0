@@ -90,15 +90,11 @@ describe("F0ResourceHeader", () => {
     expect(screen.getAllByText("Quarterly revenue")).toHaveLength(2)
   })
 
-  it("renders a node description, keeping its links interactive", () => {
+  it("renders a markdown link in the description", () => {
     render(
       <F0ResourceHeader
         title="Reports"
-        description={
-          <>
-            See the <a href="https://example.com/rubric">rubric</a>
-          </>
-        }
+        description="See the [rubric](https://example.com/rubric)"
       />
     )
 
@@ -114,11 +110,7 @@ describe("F0ResourceHeader", () => {
     render(
       <F0ResourceHeader
         title="Reports"
-        description={
-          <>
-            See the <a href="https://example.com/rubric">rubric</a>
-          </>
-        }
+        description="See the [rubric](https://example.com/rubric)"
       />
     )
 

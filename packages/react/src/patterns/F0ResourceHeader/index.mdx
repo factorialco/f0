@@ -56,15 +56,11 @@ Designed to display information about a team.
 
 - Keep titles concise and descriptive, with 2-5 words and no punctuation
 - Write descriptions with meaningful context in 1-2 sentences
-- `description` takes a node as well as a string, so a description can carry
-  formatted copy — typically a link out to the source of truth the resource is
-  tracked against. Keep it to inline content: the header clamps the description
-  to two lines behind a "show all" toggle, so block-level layout inside it does
-  not survive the clamp
-- The description node is rendered twice — once visibly, once in a hidden copy
-  used to measure its unclamped height. Keep it pure: no `id`s, no form
-  controls, nothing that fires an effect on mount, or the duplicate will shadow
-  the original (an IDREF resolves to the hidden copy, which comes first)
+- `description` is markdown, so it can carry a link out to the source of truth
+  the resource is tracked against — the doc it is planned in, the dashboard it
+  is measured from. Keep to inline formatting: the header clamps the description
+  to two lines behind a "show all" toggle, and block-level markdown (headings,
+  lists, tables) does not survive that clamp
 - Use action verbs in [verb + noun] format (e.g., "Edit profile" instead of
   "Profile edition"). Capitalize only the first word unless it's a proper noun
   (e.g., "Add to Factorial")

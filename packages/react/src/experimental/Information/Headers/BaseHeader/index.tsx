@@ -1,4 +1,4 @@
-import { Fragment, ReactNode } from "react"
+import { Fragment } from "react"
 import { AvatarVariant, F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0Button } from "@/components/F0Button"
 import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
@@ -47,8 +47,12 @@ interface BaseHeaderProps {
       }
     | AvatarVariant
 
-  /** Clamped to two lines behind a "show all" toggle. */
-  description?: ReactNode
+  /**
+   * Markdown. Inline formatting only — a link out to the resource's source of
+   * truth is the case this exists for. Clamped to two lines behind a "show all"
+   * toggle.
+   */
+  description?: string
   primaryAction?: PrimaryActionButton | PrimaryDropdownAction<string>
   secondaryActions?: HeaderSecondaryAction[]
   otherActions?: (DropdownItem & { isVisible?: boolean })[]

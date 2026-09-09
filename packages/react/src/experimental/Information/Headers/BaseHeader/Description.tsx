@@ -1,11 +1,16 @@
 import { motion } from "motion/react"
-import { ReactNode, useEffect, useId, useRef, useState } from "react"
+import { useEffect, useId, useRef, useState } from "react"
 import { useResizeObserver } from "usehooks-ts"
+import { F0RichTextDisplay } from "@/components/RichText/F0RichTextDisplay"
 import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 
-export const Description = ({ description }: { description: ReactNode }) => {
+// The description is a single run of prose, so the paragraphs markdown wraps it
+// in must not add their own vertical rhythm inside the two-line clamp.
+const PROSE = "[&>p]:m-0 [&>p+p]:mt-2"
+
+export const Description = ({ description }: { description: string }) => {
   const [isExpanded, setIsExpanded] = useState(false)
   const [needsTruncation, setNeedsTruncation] = useState(false)
   const translations = useI18n()
@@ -59,7 +64,11 @@ export const Description = ({ description }: { description: ReactNode }) => {
           className="pointer-events-none invisible absolute left-0 top-0 -z-10 text-lg text-f1-foreground-secondary"
           aria-hidden="true"
         >
-          {description}
+          <F0RichTextDisplay
+            format="markdown"
+            content={description}
+            className={PROSE}
+          />
         </div>
         <div
           ref={descriptionRef}
@@ -69,7 +78,11 @@ export const Description = ({ description }: { description: ReactNode }) => {
             !isExpanded && "line-clamp-2"
           )}
         >
-          {description}
+          <F0RichTextDisplay
+            format="markdown"
+            content={description}
+            className={PROSE}
+          />
         </div>
       </motion.div>
       {needsTruncation || isExpanded ? (
