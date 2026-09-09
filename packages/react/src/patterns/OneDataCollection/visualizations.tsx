@@ -180,14 +180,14 @@ export const VisualizationSelector = <
               const IconVisualization: IconType =
                 visualization.type === "custom"
                   ? visualization.icon
-                  : visualization.type === "table"
-                    ? Table
-                    : Kanban
+                  : (visualization.icon ??
+                    (visualization.type === "table" ? Table : Kanban))
 
               const label =
                 visualization.type === "custom"
                   ? visualization.label
-                  : i18n.collections.visualizations[visualization.type]
+                  : (visualization.label ??
+                    i18n.collections.visualizations[visualization.type])
 
               return (
                 <button

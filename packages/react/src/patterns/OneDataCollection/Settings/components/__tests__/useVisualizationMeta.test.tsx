@@ -45,6 +45,26 @@ describe("useVisualizationMeta", () => {
     expect(withOverride.icon).toBe(withoutOverride.icon)
   })
 
+  it("uses the per-instance icon override for built-in visualizations", () => {
+    const resolve = renderResolver()
+
+    const meta = resolve(
+      viz({ type: "table", label: "Monthly", icon: CustomIcon, options: {} })
+    )
+
+    expect(meta.icon).toBe(CustomIcon)
+    expect(meta.label).toBe("Monthly")
+  })
+
+  it("keeps the built-in label when only the icon is overridden", () => {
+    const resolve = renderResolver()
+
+    const meta = resolve(viz({ type: "table", icon: CustomIcon, options: {} }))
+
+    expect(meta.icon).toBe(CustomIcon)
+    expect(meta.label).toBe("Table")
+  })
+
   it("honors the label and icon of a custom visualization", () => {
     const resolve = renderResolver()
 

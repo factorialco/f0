@@ -3,7 +3,8 @@ import { Meta, StoryObj } from "@storybook/react-vite"
 import { useRef, useState } from "react"
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0Button } from "@/components/F0Button"
-import { Calendar, Office } from "@/icons/app"
+import { IconType } from "@/components/F0Icon"
+import { Calendar, List, Office } from "@/icons/app"
 import { F0Dialog } from "@/patterns/F0Dialog"
 import type { F0GraphNodeTag } from "@/patterns/F0Graph"
 import { OneDataCollection } from "../.."
@@ -711,6 +712,8 @@ const OrgChartExample = ({
   initialSelectedNodeId,
   graphLabel,
   tableLabel,
+  graphIcon,
+  tableIcon,
   lockedTagTypes,
 }: {
   defaultExpandDepth: number
@@ -721,6 +724,10 @@ const OrgChartExample = ({
   graphLabel?: string
   /** Custom label for the table chip; falls back to the localized "Table". */
   tableLabel?: string
+  /** Custom icon for the graph chip; falls back to the built-in graph icon. */
+  graphIcon?: IconType
+  /** Custom icon for the table chip; falls back to the built-in table icon. */
+  tableIcon?: IconType
   /** Tag columns locked (OFF + disabled + tooltip) in the settings, per reason. */
   lockedTagTypes?: Partial<Record<(typeof NODE_TAG_TYPES)[number], string>>
 }) => {
@@ -737,6 +744,7 @@ const OrgChartExample = ({
           {
             ...graphVisualization,
             label: graphLabel,
+            icon: graphIcon,
             options: {
               ...graphVisualization.options,
               defaultExpandDepth,
@@ -746,7 +754,7 @@ const OrgChartExample = ({
               lockedTagTypes,
             },
           },
-          { ...tableVisualization, label: tableLabel },
+          { ...tableVisualization, label: tableLabel, icon: tableIcon },
         ]}
       />
       <F0Dialog
@@ -1155,6 +1163,25 @@ export const CustomViewLabels: Story = {
       defaultExpandDepth={1}
       graphLabel="Org chart"
       tableLabel="Directory"
+    />
+  ),
+}
+
+/**
+ * The view-switcher chips can carry an icon of their own too, with the optional
+ * `icon` on each built-in visualization — here the office for the org chart and
+ * a list for the directory. Omit `icon` to keep the built-in one. Together with
+ * `label` this tells two views of the same type apart, e.g. a "Total" and a
+ * "Monthly" table.
+ */
+export const CustomViewIcons: Story = {
+  render: () => (
+    <OrgChartExample
+      defaultExpandDepth={1}
+      graphLabel="Org chart"
+      graphIcon={Office}
+      tableLabel="Directory"
+      tableIcon={List}
     />
   ),
 }

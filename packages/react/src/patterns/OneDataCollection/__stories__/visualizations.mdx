@@ -67,10 +67,12 @@ visualization's icon and label.
 ## Renaming the switcher chips
 
 By default each built-in visualization uses its localized name — "Table",
-"Graph", "List", etc. To rename a chip for a specific collection, pass an
-optional `label` on the visualization. Different collections can label the same
-type differently — e.g. the `graph` view as "Org chart" for employees, or the
-`table` view as "Teams" for teams.
+"Graph", "List", etc. — and the icon of its type. To rename a chip for a
+specific collection, pass an optional `label` on the visualization; to give it
+an icon of its own, pass an optional `icon`. Different collections can label the
+same type differently — e.g. the `graph` view as "Org chart" for employees, or
+the `table` view as "Teams" for teams — and two views of the same type can be
+told apart, e.g. a "Total" and a "Monthly" table.
 
 ```tsx
 <OneDataCollection
@@ -78,18 +80,29 @@ type differently — e.g. the `graph` view as "Org chart" for employees, or the
   visualizations={[
     // Renames the chip to "Org chart"; the built-in graph icon is kept.
     { type: "graph", label: "Org chart", options: {} },
-    // Omit `label` to keep the default localized name ("Table").
-    { type: "table", options: {} },
+    // Two tables: the label and the icon are what tell them apart.
+    { type: "table", label: "Total", options: totalOptions },
+    {
+      type: "table",
+      label: "Monthly",
+      icon: Calendar,
+      options: monthlyOptions,
+    },
   ]}
 />
 ```
 
-- `label` is optional; when omitted the localized built-in label is used, so
-  existing collections keep showing "Table" and "Graph".
-- Only the text is customizable — the icon still comes from the visualization
-  type. For a fully custom icon and label, use a `type: "custom"` visualization.
+- `label` and `icon` are optional; when omitted the localized built-in label and
+  the type's icon are used, so existing collections keep showing "Table" and
+  "Graph" as they did.
+- For a fully custom view, use a `type: "custom"` visualization, where both are
+  required.
 
 In the example below the two chips read "Org chart" and "Directory" instead of
 the defaults "Graph" and "Table":
 
 <Canvas of={GraphStories.CustomViewLabels} />
+
+And here each chip carries its own icon as well:
+
+<Canvas of={GraphStories.CustomViewIcons} />
