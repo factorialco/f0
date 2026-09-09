@@ -1,8 +1,7 @@
 import { render, screen } from "@testing-library/react"
-import { describe, expect, it } from "vitest"
-
+import type { ReactElement } from "react"
+import { assertType, describe, expect, it } from "vitest"
 import { WeekStartDay } from "@/components/OneCalendar/types"
-
 import { L10nProvider, useL10n } from "./l10n-provider"
 
 // Test component that uses the l10n hook
@@ -26,21 +25,21 @@ describe("L10nProvider", () => {
 
   // Type tests - these will fail at compile time if types are wrong
   it.skip("maintains type safety for l10n props", () => {
-    render(
+    assertType<ReactElement>(
       // @ts-expect-error - Invalid l10n prop should be caught by TypeScript
       <L10nProvider l10n={{ invalidKey: "test" }}>
         <div />
       </L10nProvider>
     )
 
-    render(
+    assertType<ReactElement>(
       // @ts-expect-error - Missing required locale should be caught by TypeScript
       <L10nProvider l10n={{}}>
         <div />
       </L10nProvider>
     )
 
-    render(
+    assertType<ReactElement>(
       // @ts-expect-error - L10n prop is required
       <L10nProvider>
         <div />

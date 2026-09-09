@@ -1,8 +1,6 @@
 import type { Decorator, Meta, StoryObj } from "@storybook/react-vite"
-
 import { useState } from "react"
 import { expect, fn, within } from "storybook/test"
-
 import { IconType } from "@/components/F0Icon"
 import { inputFieldStatus } from "@/components/F0InputField"
 import {
@@ -14,8 +12,7 @@ import { SelectedItemsDetailedStatus } from "@/hooks/datasource/types/selection.
 import { Appearance, Circle, Desktop, Placeholder, Plus } from "@/icons/app"
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
-import { F0Select, selectSizes, selectVariants } from "../index"
+import { F0Select, selectSizes, selectVariants } from ".."
 import {
   Employee,
   employeeNestedPaginatedSource,
@@ -269,10 +266,14 @@ const meta: Meta = {
       const isMultiplePaginated = args.multiple && args.source
 
       const getSelectionDisplay = () => {
-        if (!selectionStatus) return "No selection yet"
+        if (!selectionStatus) {
+          return "No selection yet"
+        }
         const { allSelected, selectedIds, itemsStatus } = selectionStatus
 
-        if (allSelected === true) return "All selected"
+        if (allSelected === true) {
+          return "All selected"
+        }
 
         if (allSelected === "indeterminate") {
           const uncheckedIds = itemsStatus
@@ -283,18 +284,24 @@ const meta: Meta = {
           return `All selected except: ${uncheckedIds.slice(0, 10).join(", ")}${uncheckedIds.length > 10 ? "..." : ""}`
         }
 
-        if (selectedIds.length === 0) return "No items selected"
+        if (selectedIds.length === 0) {
+          return "No items selected"
+        }
         return `Selected: ${selectedIds.slice(0, 10).join(", ")}${selectedIds.length > 10 ? "..." : ""}`
       }
 
       const getFiltersDisplay = () => {
-        if (!selectionStatus?.filters) return ""
+        if (!selectionStatus?.filters) {
+          return ""
+        }
         const activeFilters = Object.entries(selectionStatus.filters)
           .filter(
             ([, value]) => value !== undefined && value !== null && value !== ""
           )
           .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
-        if (activeFilters.length === 0) return ""
+        if (activeFilters.length === 0) {
+          return ""
+        }
         return `Filters: ${activeFilters.join(", ")}`
       }
 
@@ -318,15 +325,17 @@ const meta: Meta = {
             {isMultiplePaginated ? (
               <>
                 <p>{getSelectionDisplay()}</p>
-                {selectionStatus && (
+                {selectionStatus ? (
                   <p>Total: {selectionStatus.selectedCount}</p>
-                )}
-                {getFiltersDisplay() && <p>Filters: {getFiltersDisplay()}</p>}
+                ) : null}
+                {getFiltersDisplay() ? (
+                  <p>Filters: {getFiltersDisplay()}</p>
+                ) : null}
               </>
             ) : (
               <>
                 Selected: {JSON.stringify(truncatedValue, null, 2)}
-                {args.multiple && ` - Total: ${localValue?.length ?? 0}`}
+                {args.multiple ? ` - Total: ${localValue?.length ?? 0}` : null}
               </>
             )}
           </div>
@@ -703,25 +712,23 @@ export const WithSearchBox: Story = {
   },
   render: (args) => {
     return (
-      <>
-        <F0Select
-          showSearchBox
-          label="Select a theme"
-          onChange={fn()}
-          searchFn={(option, searchValue) => {
-            console.log("searchFn", option, searchValue)
-            return (
-              option.type === "separator" ||
-              !searchValue ||
-              option.label.toLowerCase().includes(searchValue.toLowerCase()) ||
-              option.description
-                ?.toLowerCase()
-                .includes(searchValue.toLowerCase())
-            )
-          }}
-          options={args.options}
-        />
-      </>
+      <F0Select
+        showSearchBox
+        label="Select a theme"
+        onChange={fn()}
+        searchFn={(option, searchValue) => {
+          console.log("searchFn", option, searchValue)
+          return (
+            option.type === "separator" ||
+            !searchValue ||
+            option.label.toLowerCase().includes(searchValue.toLowerCase()) ||
+            option.description
+              ?.toLowerCase()
+              .includes(searchValue.toLowerCase())
+          )
+        }}
+        options={args.options}
+      />
     )
   },
 }
@@ -815,13 +822,13 @@ export const WithDataSourceGrouping: Story = {
         groupBy: {
           role: {
             name: "Role",
-            label: (groupId) => `${groupId}`,
+            label: (groupId) => groupId,
             itemCount: (groupId) =>
               mockItems.filter((item) => item.role === groupId).length,
           },
           workplace: {
             name: "Workplace",
-            label: (groupId) => `${groupId}`,
+            label: (groupId) => groupId,
             itemCount: (groupId) =>
               mockItems.filter((item) => item.workplace === groupId).length,
           },
@@ -898,7 +905,7 @@ export const WithDataSourceGroupingDefaultOpen: Story = {
         groupBy: {
           role: {
             name: "Role",
-            label: (groupId) => `${groupId}`,
+            label: (groupId) => groupId,
             itemCount: (groupId) =>
               mockItems.filter((item) => item.role === groupId).length,
           },
@@ -954,7 +961,7 @@ export const WithManyCollapsibleGroups: Story = {
         groupBy: {
           role: {
             name: "Role",
-            label: (groupId) => `${groupId}`,
+            label: (groupId) => groupId,
             itemCount: (groupId) =>
               mockItems.filter((item) => item.role === groupId).length,
           },

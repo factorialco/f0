@@ -1,16 +1,14 @@
-import { ReactFlowProvider } from "@xyflow/react"
 import { renderHook } from "@testing-library/react"
-import { beforeEach, describe, expect, it, vi } from "vitest"
-
+import { ReactFlowProvider } from "@xyflow/react"
 import { createElement, type MutableRefObject, type ReactNode } from "react"
-
+import { beforeEach, describe, expect, it, vi } from "vitest"
+import { STACKED_GROUP_PADDING, STACKED_NODE_GAP } from "../../constants"
 import type {
   ExpanderNodeData,
   GraphNodeData,
 } from "../../internal/ReactFlowAdapters"
 import type { LayoutEngine, TreeNode } from "../../types"
 import type { ViewportRect } from "../../utils"
-import { STACKED_GROUP_PADDING, STACKED_NODE_GAP } from "../../constants"
 import { useGraphRenderModel } from "../useGraphRenderModel"
 
 // Stub the viewport rect so windowing is deterministic without a real canvas.
@@ -27,6 +25,8 @@ const wrapper = ({ children }: { children: ReactNode }) =>
 const renderModel = (options: Parameters<typeof useGraphRenderModel>[0]) =>
   renderHook(() => useGraphRenderModel(options), { wrapper })
 
+// Fixture builder: 39 call sites read better positionally than as objects.
+// oxlint-disable-next-line max-params
 const treeNode = (
   id: string,
   parentId: string | null,

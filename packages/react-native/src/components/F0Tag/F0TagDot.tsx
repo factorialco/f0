@@ -23,7 +23,9 @@ const F0TagDot = React.memo(function F0TagDot({
       ? `hsl(${baseColors[props.color][50]})`
       : "customColor" in props && props.customColor
 
-  if (!backgroundColor) return null
+  if (!backgroundColor) {
+    return null
+  }
 
   return (
     <F0TagRoot

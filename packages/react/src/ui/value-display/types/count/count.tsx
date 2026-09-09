@@ -18,7 +18,7 @@ export const CountCell = (
       <span className="text-f1-foreground-secondary">
         {meta.i18n.collections.summaries.types.count}
       </span>
-      {`${args.label}`}
+      {args.label}
     </div>
   )
 }

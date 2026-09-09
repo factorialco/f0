@@ -26,7 +26,9 @@ export const parseWorkbook = (
   return workbook.SheetNames.map((name) => {
     const sheet = workbook.Sheets[name]
     const ref = sheet?.["!ref"]
-    if (!sheet || !ref) return { name, rows: [], truncatedRows: false }
+    if (!sheet || !ref) {
+      return { name, rows: [], truncatedRows: false }
+    }
     const range = XLSX.utils.decode_range(ref)
     const truncatedRows = range.e.r - range.s.r + 1 > maxRows
     range.e.r = Math.min(range.e.r, range.s.r + maxRows - 1)
@@ -60,6 +62,8 @@ export const fetchWorkbook = async (
   const response = await fetch(url, {
     credentials: withCredentials ? "include" : "same-origin",
   })
-  if (!response.ok) throw new Error(`Failed to fetch sheet: ${response.status}`)
+  if (!response.ok) {
+    throw new Error(`Failed to fetch sheet: ${response.status}`)
+  }
   return parseWorkbook(await response.arrayBuffer(), { maxRows, maxCols })
 }

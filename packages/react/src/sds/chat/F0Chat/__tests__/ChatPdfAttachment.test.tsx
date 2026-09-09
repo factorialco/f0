@@ -1,6 +1,5 @@
 import { type ReactNode, useEffect, useRef } from "react"
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest"
-
 import {
   act,
   fireEvent,
@@ -8,7 +7,6 @@ import {
   screen,
   waitFor,
 } from "@/testing/test-utils"
-
 import { F0Chat } from "../F0Chat"
 import { F0ChatProvider } from "../providers/F0ChatProvider"
 import { type F0ChatAttachment, type F0ChatRuntime } from "../types"
@@ -16,7 +14,7 @@ import { type F0ChatAttachment, type F0ChatRuntime } from "../types"
 const pdfDocumentRender = vi.hoisted(() => vi.fn())
 const pdfPageRenderControl = vi.hoisted(() => ({
   deferred: false,
-  callbacks: [] as Array<() => void>,
+  callbacks: [] as (() => void)[],
 }))
 
 // jsdom has no layout — wrap Virtuoso in its official mock context so every
@@ -52,12 +50,17 @@ vi.mock("@/ui/pdf", () => ({
     pdfDocumentRender(url)
     useEffect(() => {
       const id = setTimeout(() => {
-        if (url.includes("broken")) onLoadError?.(new Error("broken"))
-        else onLoadSuccess?.({ numPages: 2 })
+        if (url.includes("broken")) {
+          onLoadError?.(new Error("broken"))
+        } else {
+          onLoadSuccess?.({ numPages: 2 })
+        }
       }, 0)
       return () => clearTimeout(id)
     }, [url, onLoadSuccess, onLoadError])
-    if (url.includes("broken")) return null
+    if (url.includes("broken")) {
+      return null
+    }
     return <div data-testid="pdf-document">{children}</div>
   },
   Page: ({

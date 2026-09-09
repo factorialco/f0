@@ -1,8 +1,6 @@
 import { useMemo } from "react"
-
 import { useDataCollectionSettings } from "@/patterns/OneDataCollection/Settings/SettingsProvider"
 import { SortAndHideSettings } from "@/patterns/OneDataCollection/Settings/SortAndHideSettings"
-
 import { getNextLockedColumnIds, useColumns } from "../hooks/useColums"
 import { TableColumnDefinition } from "../types"
 
@@ -46,15 +44,15 @@ export const TableSettings = ({
 
   const usesExplicitColumnLocking =
     lockedColumnIds !== undefined || !!onLockedColumnIdsChange
-  const { columnsWithStatus, savedOrder, managedLockedColumnIds } = useColumns(
+  const { columnsWithStatus, savedOrder, managedLockedColumnIds } = useColumns({
     originalColumns,
     frozenColumns,
-    visualizationSettings,
+    settings: visualizationSettings,
     allowSorting,
     allowHiding,
     lockedColumnIds,
-    usesExplicitColumnLocking
-  )
+    usesExplicitColumnLocking,
+  })
 
   const items = useMemo(() => {
     const visibleUnlockedIds = new Set(

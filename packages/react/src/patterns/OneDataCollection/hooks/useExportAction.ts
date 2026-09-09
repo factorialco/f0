@@ -1,5 +1,4 @@
 import { useState, useCallback } from "react"
-
 import {
   RecordType,
   FiltersDefinition,
@@ -10,11 +9,8 @@ import {
   PaginatedResponse,
 } from "@/hooks/datasource"
 import { Download } from "@/icons/app"
-import { useI18n } from "@/lib/providers/i18n"
 import { PromiseState } from "@/lib/promise-to-observable"
-
-import type { Visualization } from "../visualizations/collection"
-
+import { useI18n } from "@/lib/providers/i18n"
 import { SecondaryActionItem } from "../actions"
 import { DataCollectionSource } from "../hooks/useDataCollectionSource/types"
 import { ItemActionsDefinition } from "../item-actions"
@@ -22,6 +18,7 @@ import { NavigationFiltersDefinition } from "../navigationFilters/types"
 import { useDataCollectionSettings } from "../Settings/SettingsProvider"
 import { SummariesDefinition } from "../summary"
 import { downloadAsCSV } from "../utils/csvExport"
+import type { Visualization } from "../visualizations/collection"
 
 /** Maximum number of records to export as a safety cap */
 const MAX_EXPORT_ROWS = 10_000
@@ -95,7 +92,9 @@ async function resolveResult<T>(
     return new Promise<T>((resolve, reject) => {
       const subscription = observable.subscribe({
         next(state: PromiseState<T>) {
-          if (state.loading) return
+          if (state.loading) {
+            return
+          }
           subscription?.unsubscribe()
           if (state.error) {
             reject(state.error)
@@ -185,6 +184,7 @@ async function fetchAllRecords<
     let currentPage = 1
 
     while (allRecords.length < MAX_EXPORT_ROWS) {
+      // oxlint-disable-next-line no-await-in-loop -- the previous response says whether there is another page
       const result = await resolveResult(
         fetchFn({
           ...baseParams,
@@ -193,11 +193,15 @@ async function fetchAllRecords<
       )
 
       const response = result as PaginatedResponse<R>
-      if (!response.records || response.records.length === 0) break
+      if (!response.records || response.records.length === 0) {
+        break
+      }
 
       allRecords.push(...response.records)
 
-      if ("pagesCount" in response && currentPage >= response.pagesCount) break
+      if ("pagesCount" in response && currentPage >= response.pagesCount) {
+        break
+      }
       currentPage++
     }
 
@@ -209,6 +213,7 @@ async function fetchAllRecords<
     let cursor: string | null = null
 
     while (allRecords.length < MAX_EXPORT_ROWS) {
+      // oxlint-disable-next-line no-await-in-loop -- the previous response says whether there is another page
       const result = await resolveResult(
         fetchFn({
           ...baseParams,
@@ -217,11 +222,15 @@ async function fetchAllRecords<
       )
 
       const response = result as PaginatedResponse<R>
-      if (!response.records || response.records.length === 0) break
+      if (!response.records || response.records.length === 0) {
+        break
+      }
 
       allRecords.push(...response.records)
 
-      if ("hasMore" in response && !response.hasMore) break
+      if ("hasMore" in response && !response.hasMore) {
+        break
+      }
       if ("cursor" in response) {
         cursor = response.cursor ?? null
       } else {
@@ -269,7 +278,9 @@ export function useExportAction<
   const { settings } = useDataCollectionSettings()
 
   const handleExport = useCallback(async () => {
-    if (!enabled) return
+    if (!enabled) {
+      return
+    }
 
     setIsExporting(true)
 

@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { z, type ZodType } from "zod"
-
 import type { ModuleId } from "@/components/avatars/F0AvatarModule"
 import type { InitialFile } from "@/patterns/F0Form/fields/file/types"
 import type {
@@ -11,7 +10,6 @@ import type {
   F0SectionConfig,
   F0PerSectionSectionConfig,
 } from "@/patterns/F0Form/types"
-
 import type {
   F0FormDefinitionPerSection,
   F0FormDefinitionSingleSchema,
@@ -149,7 +147,9 @@ type UseF0FormDefinitionPerSectionInput<
 // =============================================================================
 
 function isZodSchema(value: unknown): boolean {
-  if (typeof value !== "object" || value === null) return false
+  if (typeof value !== "object" || value === null) {
+    return false
+  }
   const obj = value as Record<string, unknown>
   const def = obj._def as Record<string, unknown> | undefined
   return def?.typeName === "ZodObject" || def?.typeName === "ZodEffects"
@@ -186,7 +186,9 @@ export function useAsyncDefaultValues<T>(
   paramsSchemaRef.current = defaultValuesParamsSchema
 
   useEffect(() => {
-    if (typeof asyncFnRef.current !== "function") return
+    if (typeof asyncFnRef.current !== "function") {
+      return
+    }
 
     const controller = new AbortController()
     setIsLoading(true)
@@ -209,7 +211,7 @@ export function useAsyncDefaultValues<T>(
           setIsLoading(false)
         }
       })
-      .catch((err) => {
+      .catch((err: unknown) => {
         if (!controller.signal.aborted) {
           console.warn(
             "[useAsyncDefaultValues] Async defaultValues rejected:",

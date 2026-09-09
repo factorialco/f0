@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest"
-
 import { zeroRender as render, screen } from "@/testing/test-utils"
-
 import { ChatBubble } from "../components/ChatBubble"
 import { type F0ChatMessage } from "../types"
 

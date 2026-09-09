@@ -1,13 +1,15 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
-import { withDataTestId } from "@/lib/data-testid"
 import { ChevronLeft, ChevronRight } from "@/icons/app"
+import { withDataTestId } from "@/lib/data-testid"
 import { useI18n } from "@/lib/providers/i18n"
 import { useL10n } from "@/lib/providers/l10n"
 import { cn } from "@/lib/utils"
 import { Input } from "@/ui/input"
-
+import {
+  CalendarHeaderDropdowns,
+  getYearBounds,
+} from "./components/CalendarHeaderDropdowns"
 import {
   DatePeriodsDefinition,
   GranularityDefinition,
@@ -15,19 +17,15 @@ import {
   resolveGranularityDefinition,
   GranularityDefinitionSimple,
   getGranularityDefinitions,
-} from "./granularities/index"
+} from "./granularities"
 import {
   CalendarMode,
+  CalendarSelection,
   CalendarView,
-  DateRange,
   DateRangeString,
   WeekStartDay,
   WeekStartsOn,
 } from "./types"
-import {
-  CalendarHeaderDropdowns,
-  getYearBounds,
-} from "./components/CalendarHeaderDropdowns"
 import { earliestDate, isActiveDate, latestDate, toDateRange } from "./utils"
 
 const privateProps = ["compact"] as const
@@ -35,9 +33,9 @@ const privateProps = ["compact"] as const
 interface OneCalendarInternalProps {
   mode: CalendarMode
   view: CalendarView
-  onSelect?: (date: Date | DateRange | null) => void
+  onSelect?: (date: CalendarSelection) => void
   defaultMonth?: Date
-  defaultSelected?: Date | DateRange | null
+  defaultSelected?: CalendarSelection
   showNavigation?: boolean
   showInput?: boolean
   minDate?: Date
@@ -95,18 +93,23 @@ const OneCalendarInternal = ({
   // otherwise the nearest bound (e.g. a start date acting as the end date's
   // minDate). An explicit `defaultMonth` always takes precedence.
   const effectiveDefaultMonth = useMemo(() => {
-    if (defaultMonth) return defaultMonth
+    if (defaultMonth) {
+      return defaultMonth
+    }
     const today = new Date()
-    if (minDate && today < minDate) return minDate
-    if (maxDate && today > maxDate) return maxDate
+    if (minDate && today < minDate) {
+      return minDate
+    }
+    if (maxDate && today > maxDate) {
+      return maxDate
+    }
     return today
   }, [defaultMonth, minDate, maxDate])
 
   const [viewDate, setViewDate] = useState<Date>(effectiveDefaultMonth)
 
-  const [selected, setSelectedInternal] = useState<Date | DateRange | null>(
-    defaultSelected
-  )
+  const [selected, setSelectedInternal] =
+    useState<CalendarSelection>(defaultSelected)
 
   const [motionDirection, setMotionDirection] = useState(1)
 
@@ -119,7 +122,7 @@ const OneCalendarInternal = ({
   }, [view, effectiveWeekStartsOn, periods])
 
   const setSelected = useCallback(
-    (date: Date | DateRange | null) => {
+    (date: CalendarSelection) => {
       setSelectedInternal(date)
 
       // Set the input value
@@ -180,14 +183,18 @@ const OneCalendarInternal = ({
     : null
 
   const canNavigate = (direction: -1 | 1) => {
-    if (!yearBounds) return true
+    if (!yearBounds) {
+      return true
+    }
     const year = granularity.navigateUIView(viewDate, direction).getFullYear()
     return year >= yearBounds.fromYear && year <= yearBounds.toYear
   }
 
   // Handle ui view navigation
   const navigate = (direction: -1 | 1) => {
-    if (!canNavigate(direction)) return
+    if (!canNavigate(direction)) {
+      return
+    }
     const newDate = granularity.navigateUIView(viewDate, direction)
     setMotionDirection(direction)
     setViewDate(newDate)
@@ -201,8 +208,10 @@ const OneCalendarInternal = ({
   }
 
   // Handle selection of a date
-  const handleSelect = (date: Date | DateRange | null) => {
-    if (!date) return
+  const handleSelect = (date: CalendarSelection) => {
+    if (!date) {
+      return
+    }
 
     date = granularity.toRange(date)
 
@@ -262,7 +271,9 @@ const OneCalendarInternal = ({
   useEffect(
     () => {
       const range = toDateRange(selected)
-      if (!range) return
+      if (!range) {
+        return
+      }
 
       // Convert the range to the correct granularity reducing the range to the correct granularity
       const newRange =
@@ -315,7 +326,7 @@ const OneCalendarInternal = ({
 
   return (
     <div className="flex flex-col">
-      {showInput && !granularity.hideDateInput && (
+      {showInput && !granularity.hideDateInput ? (
         <div className="mb-2 flex gap-2">
           <Input
             label={i18n.date.from}
@@ -335,7 +346,7 @@ const OneCalendarInternal = ({
             }}
             onChange={(value) => setInputValue({ ...inputValue, from: value })}
           />
-          {mode === "range" && (
+          {mode === "range" ? (
             <Input
               label={i18n.date.to}
               hideLabel
@@ -354,10 +365,10 @@ const OneCalendarInternal = ({
               }}
               onChange={(value) => setInputValue({ ...inputValue, to: value })}
             />
-          )}
+          ) : null}
         </div>
-      )}
-      {showNavigation && (
+      ) : null}
+      {showNavigation ? (
         <div
           className={cn(
             "flex items-center justify-between",
@@ -405,7 +416,7 @@ const OneCalendarInternal = ({
             />
           </div>
         </div>
-      )}
+      ) : null}
       <div className="relative">
         {granularity.render({
           mode,
@@ -427,10 +438,13 @@ const OneCalendarInternal = ({
 }
 
 const OneCalendarBase = (props: OneCalendarProps) => {
-  const publicProps = privateProps.reduce((acc, key) => {
-    const { [key]: _, ...rest } = acc
-    return rest
-  }, props as OneCalendarInternalProps)
+  const publicProps = privateProps.reduce<OneCalendarInternalProps>(
+    (acc, key) => {
+      const { [key]: _, ...rest } = acc
+      return rest
+    },
+    props
+  )
 
   return <OneCalendarInternal {...publicProps} />
 }

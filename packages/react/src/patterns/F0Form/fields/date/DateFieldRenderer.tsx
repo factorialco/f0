@@ -1,15 +1,13 @@
 import { useMemo } from "react"
-import { ControllerRenderProps, FieldValues } from "react-hook-form"
-
+import { ControllerRenderProps } from "react-hook-form"
 import { F0DatePicker, DatePickerValue } from "@/components/F0DatePicker"
 import type { InputFieldStatus } from "@/components/F0InputField/types"
-
-import type { F0DateField, ResolvedDateField } from "./types"
 import { FORM_SIZE } from "../../constants"
+import type { F0DateField, ResolvedDateField } from "./types"
 
 interface DateFieldRendererProps {
   field: ResolvedDateField
-  formField: ControllerRenderProps<FieldValues>
+  formField: ControllerRenderProps
   error?: boolean
   loading?: boolean
   status?: InputFieldStatus
@@ -22,7 +20,9 @@ function dateToPickerValue(
   date: Date | undefined,
   granularity: F0DateField["granularities"]
 ): DatePickerValue | undefined {
-  if (!date) return undefined
+  if (!date) {
+    return undefined
+  }
   return {
     value: { from: date, to: date },
     granularity: granularity?.[0] ?? "day",

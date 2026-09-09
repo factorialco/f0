@@ -1,5 +1,10 @@
 import { useEffect, useMemo, useState } from "react"
-
+import { getGranularityDefinitions } from "@/components/OneCalendar/granularities"
+import {
+  DateRange,
+  DateRangeComplete,
+  WeekStartDay,
+} from "@/components/OneCalendar/types"
 import { DataTestIdWrapper, WithDataTestIdProps } from "@/lib/data-testid"
 import { useL10n } from "@/lib/providers/l10n"
 import {
@@ -10,13 +15,6 @@ import {
   isSameDatePickerValue,
   reviveDatePickerValue,
 } from "@/ui/DatePickerPopup/utils"
-
-import { getGranularityDefinitions } from "@/components/OneCalendar/granularities"
-import {
-  DateRange,
-  DateRangeComplete,
-  WeekStartDay,
-} from "@/components/OneCalendar/types"
 import { DatePickerTrigger } from "./components/DateNavigatorTrigger"
 import { DatePickerValue } from "./types"
 

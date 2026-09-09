@@ -1,6 +1,5 @@
 import { type ReactNode, useEffect, useRef } from "react"
 import { describe, expect, it, vi } from "vitest"
-
 import { Cross as CrossIcon } from "@/icons/app"
 import {
   fireEvent,
@@ -8,8 +7,7 @@ import {
   screen,
   waitFor,
 } from "@/testing/test-utils"
-
-import { F0PdfViewer } from "../index"
+import { F0PdfViewer } from ".."
 
 interface FakePdf {
   numPages: number

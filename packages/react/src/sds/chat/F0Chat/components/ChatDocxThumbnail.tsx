@@ -1,6 +1,5 @@
-import { useEffect, useRef, useState, type ReactNode } from "react"
-
 import { renderAsync } from "docx-preview"
+import { useEffect, useRef, useState, type ReactNode } from "react"
 
 /**
  * First-page snapshot for the chat's Word card: docx-preview renders the
@@ -35,32 +34,41 @@ const ChatDocxThumbnail = ({
 
   useEffect(() => {
     const host = hostRef.current
-    if (!host) return
+    if (!host) {
+      return
+    }
     let cancelled = false
     fetch(url)
       .then((response) => {
-        if (!response.ok) throw new Error(`${response.status}`)
+        if (!response.ok) {
+          throw new Error(`${response.status}`)
+        }
         return response.blob()
       })
-      .then((blob) => {
-        if (cancelled) return
+      .then(async (blob) => {
+        if (cancelled) {
+          return
+        }
         // No wrapper chrome for the snapshot — just the page content; the
         // card provides the white background and the crop.
-        return renderAsync(blob, host, undefined, {
+        await renderAsync(blob, host, undefined, {
           inWrapper: false,
           breakPages: false,
           ignoreLastRenderedPageBreak: true,
           renderHeaders: false,
           renderFooters: false,
-        }).then(() => {
-          if (cancelled) return
-          const naturalWidth = host.scrollWidth
-          setScale(naturalWidth > 0 ? Math.min(1, width / naturalWidth) : 1)
-          onRenderedRef.current()
         })
+        if (cancelled) {
+          return
+        }
+        const naturalWidth = host.scrollWidth
+        setScale(naturalWidth > 0 ? Math.min(1, width / naturalWidth) : 1)
+        onRenderedRef.current()
       })
       .catch(() => {
-        if (!cancelled) onErrorRef.current()
+        if (!cancelled) {
+          onErrorRef.current()
+        }
       })
     return () => {
       cancelled = true

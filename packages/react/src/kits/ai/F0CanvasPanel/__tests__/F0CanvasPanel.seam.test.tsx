@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest"
-
 import { zeroRender as render, screen } from "@/testing/test-utils"
-
 import type { CanvasContent } from "../../canvas/types"
 import { F0CanvasPanel } from "../F0CanvasPanel"
 
@@ -37,7 +35,9 @@ const backdrop = (): HTMLElement => {
   while (element && !element.className.includes("bg-f1-special-page")) {
     element = element.parentElement
   }
-  if (!element) throw new Error("canvas backdrop not found")
+  if (!element) {
+    throw new Error("canvas backdrop not found")
+  }
   return element
 }
 

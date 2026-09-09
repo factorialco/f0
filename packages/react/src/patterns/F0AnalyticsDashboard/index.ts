@@ -1,5 +1,4 @@
 import { experimentalComponent } from "@/lib/experimental"
-
 import { F0AnalyticsDashboard as _F0AnalyticsDashboard } from "./F0AnalyticsDashboard"
 
 export type {

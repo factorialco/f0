@@ -1,12 +1,10 @@
 import React from "react"
-
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/ui/tooltip"
-
 import { A11yRow, A11yTooltipRow } from "./A11yRow"
 import {
   getComponentStatus,
@@ -82,7 +80,9 @@ export function ComponentStability({
   className,
 }: ComponentStabilityProps) {
   const status = getComponentStatus(componentName, components)
-  if (!status) return null
+  if (!status) {
+    return null
+  }
 
   return (
     <div
@@ -98,7 +98,7 @@ export function ComponentStability({
         {status.summary}
       </p>
 
-      {status.showChecklist && (
+      {status.showChecklist ? (
         // role="list" divs (not <ul>/<li>): Storybook docs injects a global
         // `#storybook-docs ul { margin-bottom: 24px !important }` that .sb-unstyled
         // doesn't neutralize and no utility class can outrank, so semantic-role
@@ -129,7 +129,7 @@ export function ComponentStability({
                   </div>
                   <div className="mt-0.5 text-base text-f1-foreground-secondary">
                     {req.detail}
-                    {req.criteria && req.criteria.length > 0 && (
+                    {req.criteria && req.criteria.length > 0 ? (
                       <div role="list" className="mt-1 space-y-0.5">
                         {req.criteria.map((criterion) => (
                           <div
@@ -147,14 +147,14 @@ export function ComponentStability({
                           </div>
                         ))}
                       </div>
-                    )}
+                    ) : null}
                   </div>
                 </div>
               </div>
             )
           )}
         </div>
-      )}
+      ) : null}
     </div>
   )
 }
@@ -174,7 +174,7 @@ function StatusDetails({ status }: { status: ComponentStatus }) {
     <div className="text-f1-foreground-inverse">
       <p className="m-0 text-base opacity-90">{status.summary}</p>
 
-      {status.showChecklist && (
+      {status.showChecklist ? (
         <div role="list" className="mt-3 space-y-3">
           {status.requirements.map((req) =>
             req.key === "a11y" ? (
@@ -199,7 +199,7 @@ function StatusDetails({ status }: { status: ComponentStatus }) {
                   <div className="text-base">{req.label}</div>
                   <div className="mt-0.5 text-base opacity-75">
                     {req.detail}
-                    {req.criteria && req.criteria.length > 0 && (
+                    {req.criteria && req.criteria.length > 0 ? (
                       <div role="list" className="mt-1 space-y-0.5">
                         {req.criteria.map((criterion) => (
                           <div
@@ -217,14 +217,14 @@ function StatusDetails({ status }: { status: ComponentStatus }) {
                           </div>
                         ))}
                       </div>
-                    )}
+                    ) : null}
                   </div>
                 </div>
               </div>
             )
           )}
         </div>
-      )}
+      ) : null}
     </div>
   )
 }
@@ -243,7 +243,9 @@ export function ComponentMaturityTag({
   className,
 }: ComponentStabilityProps) {
   const status = getComponentStatus(componentName, components)
-  if (!status) return null
+  if (!status) {
+    return null
+  }
 
   return (
     <TooltipProvider delayDuration={150}>

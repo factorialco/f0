@@ -3,7 +3,6 @@
  * Supports both direct number values and objects with placeholder states.
  */
 import { cn } from "@/lib/utils"
-
 import { tableDisplayClassNames } from "../../const"
 import { ValueDisplayRendererContext } from "../../renderers"
 import { isShowingPlaceholder, resolveValue } from "../../utils"
@@ -13,7 +12,7 @@ interface NumberValue extends WithPlaceholder {
   number: number | undefined
   units?: string
   unitsPosition?: "left" | "right"
-  decimalPlaces?: number | undefined
+  decimalPlaces?: number
 }
 
 export type NumberCellValue = number | undefined | NumberValue
@@ -49,15 +48,15 @@ export const NumberCell = (
         shouldShowPlaceholderStyling && "text-f1-foreground-secondary"
       )}
     >
-      {number.unitsPosition === "left" && number.units && (
+      {number.unitsPosition === "left" && number.units ? (
         <Units units={number.units} />
-      )}
+      ) : null}
       {number.decimalPlaces !== undefined
         ? number.number?.toFixed(number.decimalPlaces)
         : (number.number?.toString() ?? "")}
-      {number.unitsPosition === "right" && number.units && (
+      {number.unitsPosition === "right" && number.units ? (
         <Units units={number.units} />
-      )}
+      ) : null}
     </div>
   )
 }

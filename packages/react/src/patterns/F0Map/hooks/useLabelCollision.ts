@@ -1,6 +1,5 @@
 import type maplibregl from "maplibre-gl"
 import { useEffect, useState } from "react"
-
 import {
   getMarkerMetrics,
   type BaseMapMarkerLabelPlacement,
@@ -35,19 +34,23 @@ export const measureLabel = (text: string, fontPx: number): number => {
   if (!measureCtx && typeof document !== "undefined") {
     measureCtx = document.createElement("canvas").getContext("2d")
   }
-  if (!measureCtx) return text.length * fontPx * 0.55
+  if (!measureCtx) {
+    return text.length * fontPx * 0.55
+  }
   measureCtx.font = `600 ${fontPx}px Inter, system-ui, sans-serif`
   return measureCtx.measureText(text).width
 }
 
 // Label box for a given placement, relative to a head centered at (cx, cy).
-const labelBox = (
-  placement: BaseMapMarkerLabelPlacement,
-  cx: number,
-  cy: number,
-  point: F0MapPoint,
+type LabelBoxOptions = {
+  placement: BaseMapMarkerLabelPlacement
+  cx: number
+  cy: number
+  point: F0MapPoint
   size: BaseMapMarkerSize
-): Box => {
+}
+
+const labelBox = ({ placement, cx, cy, point, size }: LabelBoxOptions): Box => {
   const m = getMarkerMetrics(size)
   const raw = measureLabel(point.label ?? "", m.label) + 2
   const half = m.d / 2
@@ -98,7 +101,7 @@ export const useLabelCollision = (
     const recompute = () => {
       const d = getMarkerMetrics(size).d
       const heads: Box[] = []
-      const center: Array<{ x: number; y: number }> = []
+      const center: { x: number; y: number }[] = []
       for (const p of points) {
         const pt = map.project(p.coordinates)
         heads.push({ x: pt.x - d / 2, y: pt.y - d / 2, w: d, h: d })
@@ -109,20 +112,25 @@ export const useLabelCollision = (
       const n = points.length
       const parent = Array.from({ length: n }, (_, i) => i)
       const find = (x: number): number => {
-        while (parent[x] !== x) x = parent[x] = parent[parent[x]]
+        while (parent[x] !== x) {
+          x = parent[x] = parent[parent[x]]
+        }
         return x
       }
       const connectR2 = (d * CONNECT_FACTOR) ** 2
-      for (let i = 0; i < n; i++)
+      for (let i = 0; i < n; i++) {
         for (let j = i + 1; j < n; j++) {
           const dx = center[i].x - center[j].x
           const dy = center[i].y - center[j].y
           if (dx * dx + dy * dy <= connectR2) {
             const ra = find(i)
             const rb = find(j)
-            if (ra !== rb) parent[ra] = rb
+            if (ra !== rb) {
+              parent[ra] = rb
+            }
           }
         }
+      }
 
       // Place each label on the first side that clears every head and every
       // already-placed label; `null` means no side fits (a collision).
@@ -130,14 +138,16 @@ export const useLabelCollision = (
       const placedLabels: Box[] = []
       for (let i = 0; i < n; i++) {
         const p = points[i]
-        if (!p.label) continue
+        if (!p.label) {
+          continue
+        }
         const s = center[i]
         const preferred: BaseMapMarkerLabelPlacement = "right"
         const candidates = [preferred, ...ORDER.filter((o) => o !== preferred)]
 
         let chosen: BaseMapMarkerLabelPlacement | null = null
         for (const placement of candidates) {
-          const box = labelBox(placement, s.x, s.y, p, size)
+          const box = labelBox({ placement, cx: s.x, cy: s.y, point: p, size })
           const hitsHead = heads.some((h) => boxesOverlap(box, h))
           const hitsLabel = placedLabels.some((l) => boxesOverlap(box, l))
           if (!hitsHead && !hitsLabel) {
@@ -153,12 +163,16 @@ export const useLabelCollision = (
       // collided (null), the whole pocket drops its labels - even members that
       // found room - so a dense area declutters together, not piecemeal.
       const collidedPocket = new Set<number>()
-      for (let i = 0; i < n; i++)
-        if (points[i].label && next[points[i].id] === null)
+      for (let i = 0; i < n; i++) {
+        if (points[i].label && next[points[i].id] === null) {
           collidedPocket.add(find(i))
-      for (let i = 0; i < n; i++)
-        if (points[i].label && collidedPocket.has(find(i)))
+        }
+      }
+      for (let i = 0; i < n; i++) {
+        if (points[i].label && collidedPocket.has(find(i))) {
           next[points[i].id] = null
+        }
+      }
 
       // Bail out when nothing moved enough to change a placement (the common
       // case per frame): keeping the previous object's identity stops the

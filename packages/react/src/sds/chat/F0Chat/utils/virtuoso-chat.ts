@@ -65,14 +65,26 @@ export function classifyWindowChange(
    * conversation takes when its panel is reopened). */
   overlaps = false
 ): WindowChange {
-  if (prev.length === 0 && next.length === 0) return "none"
-  if (prev.length === 0) return "initial"
-  if (next.length === 0) return "replace"
+  if (prev.length === 0 && next.length === 0) {
+    return "none"
+  }
+  if (prev.length === 0) {
+    return "initial"
+  }
+  if (next.length === 0) {
+    return "replace"
+  }
   const firstChanged = next.firstId !== prev.firstId
   const lastChanged = next.lastId !== prev.lastId
-  if (!firstChanged && !lastChanged) return "none"
-  if (firstChanged && !lastChanged) return "prepend"
-  if (!firstChanged && lastChanged) return "append"
+  if (!firstChanged && !lastChanged) {
+    return "none"
+  }
+  if (firstChanged && !lastChanged) {
+    return "prepend"
+  }
+  if (!firstChanged && lastChanged) {
+    return "append"
+  }
   return overlaps ? "grow" : "replace"
 }
 
@@ -89,16 +101,30 @@ export function classifyWindowChange(
  * the old head never sat at row 0 and its raw new index over-shifts by at least
  * one row (see `chatWindowHeadRowIndex`).
  */
-export function nextFirstItemIndex(
-  prev: number,
-  change: WindowChange,
-  prevRowCount: number,
-  rowCount: number,
-  headShift = 0
-): number {
-  if (change === "initial" || change === "replace") return PREPEND_OFFSET
-  if (change === "prepend") return prev - (rowCount - prevRowCount)
-  if (change === "grow") return prev - headShift
+export type NextFirstItemIndexOptions = {
+  prev: number
+  change: WindowChange
+  prevRowCount: number
+  rowCount: number
+  headShift?: number
+}
+
+export function nextFirstItemIndex({
+  prev,
+  change,
+  prevRowCount,
+  rowCount,
+  headShift = 0,
+}: NextFirstItemIndexOptions): number {
+  if (change === "initial" || change === "replace") {
+    return PREPEND_OFFSET
+  }
+  if (change === "prepend") {
+    return prev - (rowCount - prevRowCount)
+  }
+  if (change === "grow") {
+    return prev - headShift
+  }
   return prev
 }
 
@@ -186,20 +212,22 @@ export function advanceChatWindow(
     (prevEnds.lastId != null && indexById.has(prevEnds.lastId))
   const change = classifyWindowChange(prevEnds, nextEnds, overlaps)
 
-  if (change === "none") return { state: prev, change, ownGlide: false }
+  if (change === "none") {
+    return { state: prev, change, ownGlide: false }
+  }
 
   // How far the surviving head MOVED — not where it landed. Its previous row
   // index is carried in the state precisely because it is never 0.
   const headShift =
     survivingHeadIndex != null ? survivingHeadIndex - prev.headRowIndex : 0
 
-  const firstItemIndex = nextFirstItemIndex(
-    prev.firstItemIndex,
+  const firstItemIndex = nextFirstItemIndex({
+    prev: prev.firstItemIndex,
     change,
-    prev.rowCount,
+    prevRowCount: prev.rowCount,
     rowCount,
-    headShift
-  )
+    headShift,
+  })
 
   const last = messages[messages.length - 1]
   const ownGlide =
@@ -251,10 +279,14 @@ export function entryLocation({
   /** True when the loaded window isn't the live tail. */
   hasMoreNewer: boolean
 }): ChatEntryLocation {
-  if (pendingIndex != null) return { index: pendingIndex, align: "center" }
+  if (pendingIndex != null) {
+    return { index: pendingIndex, align: "center" }
+  }
   // An older window without a jump target (deep link): hold its top — landing
   // at its bottom would immediately trigger the load-newer edge.
-  if (hasMoreNewer) return { index: 0, align: "start" }
+  if (hasMoreNewer) {
+    return { index: 0, align: "start" }
+  }
   if (dividerIndex >= 0) {
     return {
       index: dividerIndex,
@@ -353,7 +385,9 @@ const ESTIMATE_FOOTER = 24
 
 const estimateTextHeight = (body: string): number => {
   const text = body.trim()
-  if (text.length === 0) return 0
+  if (text.length === 0) {
+    return 0
+  }
   const longest = text
     .split("\n")
     .reduce(
@@ -386,7 +420,9 @@ export function chatRowHeightEstimate(row: ChatRow): number {
     ? ESTIMATE_RUN_START_SPACING
     : ESTIMATE_MESSAGE_RUN_SPACING
 
-  if (message.deleted) return height + ESTIMATE_BUBBLE_PADDING
+  if (message.deleted) {
+    return height + ESTIMATE_BUBBLE_PADDING
+  }
 
   const media = message.attachments ?? []
   let hasMedia = false
@@ -397,23 +433,38 @@ export function chatRowHeightEstimate(row: ChatRow): number {
       images += 1
       continue
     }
-    if (attachment.kind === "location") height += ESTIMATE_LOCATION
-    else if (attachment.kind === "voice") height += ESTIMATE_VOICE
-    else if (attachment.kind === "card") height += ESTIMATE_CARD
-    else if (isVideoFileAttachment(attachment)) height += ESTIMATE_VIDEO
-    else if (documentPreviewKind(attachment)) height += ESTIMATE_DOCUMENT_CARD
-    else height += ESTIMATE_FILE_CHIP
+    if (attachment.kind === "location") {
+      height += ESTIMATE_LOCATION
+    } else if (attachment.kind === "voice") {
+      height += ESTIMATE_VOICE
+    } else if (attachment.kind === "card") {
+      height += ESTIMATE_CARD
+    } else if (isVideoFileAttachment(attachment)) {
+      height += ESTIMATE_VIDEO
+    } else if (documentPreviewKind(attachment)) {
+      height += ESTIMATE_DOCUMENT_CARD
+    } else {
+      height += ESTIMATE_FILE_CHIP
+    }
   }
-  if (images > 0) height += ESTIMATE_ALBUM
+  if (images > 0) {
+    height += ESTIMATE_ALBUM
+  }
 
   const body = estimateTextHeight(message.body)
   if (body > 0 || message.replyTo) {
     height += ESTIMATE_BUBBLE_PADDING + body
-    if (message.replyTo) height += ESTIMATE_REPLY_QUOTE
-    if (row.isFirstOfRun && !hasMedia) height += ESTIMATE_SENDER_NAME
+    if (message.replyTo) {
+      height += ESTIMATE_REPLY_QUOTE
+    }
+    if (row.isFirstOfRun && !hasMedia) {
+      height += ESTIMATE_SENDER_NAME
+    }
     height += (message.linkPreviews?.length ?? 0) * ESTIMATE_LINK_PREVIEW
   }
-  if ((message.reactions?.length ?? 0) > 0) height += ESTIMATE_REACTIONS
+  if ((message.reactions?.length ?? 0) > 0) {
+    height += ESTIMATE_REACTIONS
+  }
 
   return height
 }

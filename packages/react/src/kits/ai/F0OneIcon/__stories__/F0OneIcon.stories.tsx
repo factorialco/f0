@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { F0OneIcon } from "../F0OneIcon"
 
 const meta: Meta<typeof F0OneIcon> = {

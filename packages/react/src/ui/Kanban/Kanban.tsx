@@ -1,19 +1,15 @@
 import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter"
 import { useEffect, useRef, useState } from "react"
-
-import type { RecordType } from "@/hooks/datasource"
-
 import { ScrollArea } from "@/experimental/Utilities/ScrollArea"
+import type { RecordType } from "@/hooks/datasource"
 import { useDndEvents } from "@/lib/dnd/hooks"
 import { cn } from "@/lib/utils"
-
+import { KanbanLane } from "./components/KanbanLane.tsx"
 import type {
   KanbanLaneAttributes,
   KanbanOnMoveParam,
   KanbanProps,
 } from "./types.ts"
-
-import { KanbanLane } from "./components/KanbanLane.tsx"
 
 export function Kanban<TRecord extends RecordType>(
   props: KanbanProps<TRecord>
@@ -67,8 +63,12 @@ export function Kanban<TRecord extends RecordType>(
   const lastTimeRef = useRef<number | null>(null)
 
   useDndEvents(({ phase }) => {
-    if (phase === "start") setIsDragging(true)
-    if (phase === "drop" || phase === "cancel") setIsDragging(false)
+    if (phase === "start") {
+      setIsDragging(true)
+    }
+    if (phase === "drop" || phase === "cancel") {
+      setIsDragging(false)
+    }
   })
 
   useEffect(() => {
@@ -107,7 +107,7 @@ export function Kanban<TRecord extends RecordType>(
       lastTimeRef.current = null
     }
 
-    const cleanups: Array<() => void> = []
+    const cleanups: (() => void)[] = []
     if (leftEdgeRef.current) {
       cleanups.push(
         dropTargetForElements({
@@ -141,7 +141,9 @@ export function Kanban<TRecord extends RecordType>(
 
   const getIndexById = (laneId: string, id: string): number => {
     const lane = localLanes.find((l) => l.id === laneId)
-    if (!lane) return -1
+    if (!lane) {
+      return -1
+    }
     return lane.items.findIndex((item, index) => {
       const key = String(getKey(item as TRecord, index, laneId))
       return key === String(id)
@@ -157,7 +159,9 @@ export function Kanban<TRecord extends RecordType>(
     // Find source record and indices in snapshot (robust to mis-reported fromLaneId)
     let fromLaneIdx = prev.findIndex((l) => l.id === fromLaneId)
     const toLaneIdx = prev.findIndex((l) => l.id === toLaneId)
-    if (toLaneIdx === -1) return Promise.reject(new Error("Lane not found"))
+    if (toLaneIdx === -1) {
+      return Promise.reject(new Error("Lane not found"))
+    }
     let sourceIndex = -1
     if (fromLaneIdx !== -1) {
       sourceIndex = prev[fromLaneIdx].items.findIndex((item, index) => {
@@ -263,13 +267,17 @@ export function Kanban<TRecord extends RecordType>(
         // Replace record by id with backend version
         setLocalLanes((curr) => {
           const updated = curr.map((lane) => {
-            if (lane.id !== toLaneId) return lane
+            if (lane.id !== toLaneId) {
+              return lane
+            }
             const items = [...lane.items]
             const idx = items.findIndex((item, index) => {
               const key = String(getKey(item as TRecord, index, toLaneId))
               return key === String(sourceId)
             })
-            if (idx !== -1) items.splice(idx, 1, result)
+            if (idx !== -1) {
+              items.splice(idx, 1, result)
+            }
             return { ...lane, items }
           })
 

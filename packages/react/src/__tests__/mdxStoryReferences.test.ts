@@ -24,10 +24,15 @@ const PKG_DIR = path.resolve(SRC_DIR, "..")
 
 function walk(dir: string, acc: string[] = []): string[] {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    if (entry.name === "node_modules") continue
+    if (entry.name === "node_modules") {
+      continue
+    }
     const full = path.join(dir, entry.name)
-    if (entry.isDirectory()) walk(full, acc)
-    else if (entry.name.endsWith(".mdx")) acc.push(full)
+    if (entry.isDirectory()) {
+      walk(full, acc)
+    } else if (entry.name.endsWith(".mdx")) {
+      acc.push(full)
+    }
   }
   return acc
 }
@@ -35,10 +40,15 @@ function walk(dir: string, acc: string[] = []): string[] {
 // Resolve an alias / relative module specifier to a concrete file on disk.
 function resolveModule(spec: string, fromDir: string): string | null {
   let base: string
-  if (spec.startsWith("@/")) base = path.join(SRC_DIR, spec.slice(2))
-  else if (spec.startsWith("~/")) base = path.join(PKG_DIR, spec.slice(2))
-  else if (spec.startsWith(".")) base = path.join(fromDir, spec)
-  else return null // bare package import (e.g. @storybook/...)
+  if (spec.startsWith("@/")) {
+    base = path.join(SRC_DIR, spec.slice(2))
+  } else if (spec.startsWith("~/")) {
+    base = path.join(PKG_DIR, spec.slice(2))
+  } else if (spec.startsWith(".")) {
+    base = path.join(fromDir, spec)
+  } else {
+    return null
+  } // bare package import (e.g. @storybook/...)
 
   const candidates = [
     base,
@@ -57,36 +67,50 @@ function resolveModule(spec: string, fromDir: string): string | null {
 
 // Shallow, regex-based collection of a module's exported names.
 function getExports(file: string, seen = new Set<string>()): Set<string> {
-  if (seen.has(file)) return new Set()
+  if (seen.has(file)) {
+    return new Set()
+  }
   seen.add(file)
   const src = readFileSync(file, "utf-8")
   const names = new Set<string>()
 
   for (const m of src.matchAll(
     /export\s+(?:const|let|var|function|class)\s+([A-Za-z0-9_$]+)/g
-  ))
+  )) {
     names.add(m[1])
+  }
 
-  if (/export\s+default\b/.test(src)) names.add("default")
+  if (/export\s+default\b/.test(src)) {
+    names.add("default")
+  }
 
-  for (const m of src.matchAll(/export\s*\{([^}]*)\}(?!\s*from)/g))
+  for (const m of src.matchAll(/export\s*\{([^}]*)\}(?!\s*from)/g)) {
     for (const part of m[1].split(",")) {
       const as = part.split(/\sas\s/)
       const name = (as[1] ?? as[0]).trim()
-      if (name) names.add(name)
+      if (name) {
+        names.add(name)
+      }
     }
+  }
 
   for (const m of src.matchAll(
     /export\s*(\*|\{([^}]*)\})\s*from\s*["']([^"']+)["']/g
   )) {
     const target = resolveModule(m[3], path.dirname(file))
     if (m[1] === "*") {
-      if (target) for (const n of getExports(target, seen)) names.add(n)
+      if (target) {
+        for (const n of getExports(target, seen)) {
+          names.add(n)
+        }
+      }
     } else {
       for (const part of m[2].split(",")) {
         const as = part.split(/\sas\s/)
         const name = (as[1] ?? as[0]).trim()
-        if (name) names.add(name)
+        if (name) {
+          names.add(name)
+        }
       }
     }
   }
@@ -103,21 +127,27 @@ function buildSymbolTable(src: string): Map<string, Symbol> {
 
   for (const m of src.matchAll(
     /import\s+\*\s+as\s+([A-Za-z0-9_$]+)\s+from\s*["']([^"']+)["']/g
-  ))
+  )) {
     symbols.set(m[1], { kind: "namespace", module: m[2] })
+  }
 
   for (const m of src.matchAll(
-    /import\s+(?:([A-Za-z0-9_$]+)\s*,?\s*)?(?:\{([^}]*)\})?\s*from\s*["']([^"']+)["']/g
+    /import\s+(?:([A-Za-z0-9_$]+)[\s,]*)?(?:\{([^}]*)\})?\s*from\s*["']([^"']+)["']/g
   )) {
     const [, def, named, mod] = m
-    if (def) symbols.set(def, { kind: "default", module: mod })
-    if (named)
+    if (def) {
+      symbols.set(def, { kind: "default", module: mod })
+    }
+    if (named) {
       for (const part of named.split(",")) {
         const as = part.split(/\sas\s/)
         const local = (as[1] ?? as[0]).trim()
         const orig = as[0].trim()
-        if (local) symbols.set(local, { kind: "named", module: mod, orig })
+        if (local) {
+          symbols.set(local, { kind: "named", module: mod, orig })
+        }
       }
+    }
   }
   return symbols
 }
@@ -147,11 +177,13 @@ function findDanglingReferences(mdxFile: string): string[] {
 
     if (sym.kind === "namespace") {
       // `of={NS}` (no member) references the whole CSF file — always valid.
-      if (member && !exports.has(member))
+      if (member && !exports.has(member)) {
         problems.push(`of={${expr}} — '${member}' is not exported by ${rel}`)
+      }
     } else if (sym.kind === "named") {
-      if (!exports.has(sym.orig))
+      if (!exports.has(sym.orig)) {
         problems.push(`of={${expr}} — '${sym.orig}' is not exported by ${rel}`)
+      }
     } else if (!exports.has("default")) {
       problems.push(`of={${expr}} — no default export in ${rel}`)
     }

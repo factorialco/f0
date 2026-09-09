@@ -4,7 +4,6 @@ import {
   NavigationGranularityKey,
 } from "@/components/OneCalendar/granularities/index"
 import { DatePreset } from "@/ui/DatePickerPopup"
-
 import {
   NavigationFilterComponentProps,
   NavigationFilterDefinitionBase,

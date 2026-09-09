@@ -1,9 +1,7 @@
 import { Reorder, useDragControls } from "motion/react"
-
 import { F0Icon } from "@/components/F0Icon"
 import { Handle } from "@/icons/app"
 import { cn } from "@/lib/utils"
-
 import { useSurveyFormBuilderContext } from "../Context"
 import { useDragContext } from "../DragContext"
 import {
@@ -60,9 +58,8 @@ export const SectionHeaderItem = ({
               isDragging && "cursor-grabbing"
             )}
           >
-            {!disabled &&
-              !answering &&
-              (item.section.locked ? (
+            {!disabled && !answering ? (
+              item.section.locked ? (
                 // Blocked section: drop the drag affordance but keep the
                 // handle's gutter so the header stays aligned with the
                 // editable rows around it.
@@ -79,19 +76,20 @@ export const SectionHeaderItem = ({
                 >
                   <F0Icon icon={Handle} size="sm" />
                 </div>
-              ))}
+              )
+            ) : null}
             <SectionComponent {...item.section} hideQuestions />
           </div>
 
           {isDraggingThisSection &&
-            (item.section.questions ?? []).length > 0 && (
-              <div className="flex flex-col gap-4 w-full mt-4 ml-7">
-                {(item.section.questions ?? []).map((q) => (
-                  <QuestionComponent key={q.id} {...(q as QuestionProps)} />
-                ))}
-                <EndOfSectionDivider />
-              </div>
-            )}
+          (item.section.questions ?? []).length > 0 ? (
+            <div className="flex flex-col gap-4 w-full mt-4 ml-7">
+              {(item.section.questions ?? []).map((q) => (
+                <QuestionComponent key={q.id} {...(q as QuestionProps)} />
+              ))}
+              <EndOfSectionDivider />
+            </div>
+          ) : null}
         </div>
       </div>
     </Reorder.Item>

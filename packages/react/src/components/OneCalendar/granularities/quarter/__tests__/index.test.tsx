@@ -1,7 +1,6 @@
 import { endOfQuarter, startOfQuarter } from "date-fns"
 import { describe, expect, it } from "vitest"
-
-import { quarterGranularity } from "../index"
+import { quarterGranularity } from ".."
 
 describe("quarterGranularity", () => {
   const baseDate = new Date(2024, 0, 15) // January 15, 2024 (Q1)

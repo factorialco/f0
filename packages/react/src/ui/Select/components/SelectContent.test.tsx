@@ -1,7 +1,6 @@
-import { describe, expect, it, vi } from "vitest"
 import { useEffect, useState } from "react"
 import { flushSync } from "react-dom"
-
+import { describe, expect, it, vi } from "vitest"
 import {
   act,
   screen,
@@ -9,7 +8,6 @@ import {
   waitFor,
   zeroRender as render,
 } from "@/testing/test-utils"
-
 import { Select } from "./Select"
 import { SelectContent } from "./SelectContent"
 import { SelectItem } from "./SelectItem"

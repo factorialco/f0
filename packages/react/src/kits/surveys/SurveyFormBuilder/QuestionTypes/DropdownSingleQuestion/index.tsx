@@ -1,13 +1,10 @@
-import type { F0SelectField } from "@/patterns/F0Form/fields/select/types"
-
-import { F0FormField } from "@/patterns/F0FormField"
 import { useI18n } from "@/lib/providers/i18n"
-
-import type { DropdownMultiQuestionProps } from "../DropdownMultiQuestion/types"
-import type { DropdownSingleQuestionProps } from "./types"
-
+import type { F0SelectField } from "@/patterns/F0Form/fields/select/types"
+import { F0FormField } from "@/patterns/F0FormField"
 import { useSurveyFormBuilderContext } from "../../Context"
 import { BaseQuestion, useQuestionDisabled } from "../BaseQuestion"
+import type { DropdownMultiQuestionProps } from "../DropdownMultiQuestion/types"
+import type { DropdownSingleQuestionProps } from "./types"
 
 /**
  * Unified component for both `dropdown-single` and `dropdown-multi` question
@@ -42,20 +39,18 @@ export const DropdownSingleQuestion = ({
 
   const handleCreate =
     answering && !isMulti && allowCreate && dataset.onCreate
-      ? (value: string) => {
-          return dataset.onCreate!(value).then(
-            (record) => {
-              const option = dataset.mapOptions(record)
-              onQuestionChange?.({
-                id: props.id,
-                type: "dropdown-single",
-                value: option.value,
-              })
-            },
-            (err: unknown) => {
-              console.warn("[SurveyFormBuilder] onCreate failed:", err)
-            }
-          )
+      ? async (value: string) => {
+          try {
+            const record = await dataset.onCreate!(value)
+            const option = dataset.mapOptions(record)
+            onQuestionChange?.({
+              id: props.id,
+              type: "dropdown-single",
+              value: option.value,
+            })
+          } catch (err) {
+            console.warn("[SurveyFormBuilder] onCreate failed:", err)
+          }
         }
       : undefined
 

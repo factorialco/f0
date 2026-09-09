@@ -1,8 +1,6 @@
 import React from "react"
 import { describe, expect, it } from "vitest"
-
 import { screen, userEvent, waitFor, zeroRender } from "@/testing/test-utils"
-
 import { F0ButtonToggle } from "../F0ButtonToggle"
 
 const MockIcon = React.forwardRef<SVGSVGElement>((props, ref) => (

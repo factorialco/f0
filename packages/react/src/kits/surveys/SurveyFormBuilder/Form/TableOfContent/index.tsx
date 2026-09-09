@@ -1,10 +1,8 @@
 import { useCallback, useContext } from "react"
-
-import { F0DialogContext } from "@/patterns/F0Dialog/components/F0DialogProvider"
 import { F0TableOfContentPopover } from "@/components/F0TableOfContentPopover/F0TableOfContentPopover"
 import { IdStructure } from "@/experimental/Navigation/F0TableOfContent/types"
 import { useI18n } from "@/lib/providers/i18n"
-
+import { F0DialogContext } from "@/patterns/F0Dialog/components/F0DialogProvider"
 import { useSurveyFormBuilderContext } from "../../Context"
 import {
   SurveyFormBuilderElement,
@@ -41,7 +39,9 @@ function reorderElements(
       const sectionId = node.id.slice(SECTION_PREFIX.length)
       const section = sectionMap.get(sectionId)
 
-      if (!section) return
+      if (!section) {
+        return
+      }
 
       const reorderedQuestions = (node.children ?? [])
         .filter((child) => child.id.startsWith(QUESTION_PREFIX))

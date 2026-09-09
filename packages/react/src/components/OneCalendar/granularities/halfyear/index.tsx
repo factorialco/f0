@@ -10,8 +10,11 @@ import {
   startOfMonth,
   startOfYear,
 } from "date-fns"
-
-import { DateRange, DateRangeComplete } from "../../types"
+import {
+  DateRange,
+  DateRangeComplete,
+  OptionalCalendarSelection,
+} from "../../types"
 import {
   isAfterOrEqual,
   isBeforeOrEqual,
@@ -35,7 +38,7 @@ const formatHalfYear = (date: Date) => {
   return `H${halfYear + 1}`
 }
 
-const toRangeString = (date: Date | DateRange | undefined | null) => {
+const toRangeString = (date: OptionalCalendarSelection) => {
   const dateRange = toHalfYearGranularityDateRange(date)
   if (!dateRange) {
     return {
@@ -61,7 +64,7 @@ const add = (date: DateRangeComplete, delta: number): DateRangeComplete => {
 }
 
 export function toHalfYearGranularityDateRange<
-  T extends Date | DateRange | undefined | null,
+  T extends OptionalCalendarSelection,
 >(date: T): T extends Date | DateRange ? DateRangeComplete : T {
   return toGranularityDateRange(
     date,
@@ -82,17 +85,18 @@ const isSameHalfYear = (date1: Date, date2: Date) => {
   return formatHalfYearFull(start.from) === formatHalfYearFull(end.from)
 }
 
-const formatHalfYearShort = (date: Date | DateRange | undefined | null) => {
+const formatHalfYearShort = (date: OptionalCalendarSelection) => {
   const dateRange = toRangeString(date)
   if (!dateRange) {
     return "-"
   }
   const { from, to } = dateRange
 
-  return `${from}${to && from !== to ? ` ${rangeSeparator} ${to}` : ""}`
+  const toPart = to && from !== to ? ` ${rangeSeparator} ${to}` : ""
+  return `${from}${toPart}`
 }
 
-const formatHalfYearLong = (date: Date | DateRange | undefined | null) => {
+const formatHalfYearLong = (date: OptionalCalendarSelection) => {
   const dateRange = toHalfYearGranularityDateRange(date)
   if (!dateRange) {
     return ""

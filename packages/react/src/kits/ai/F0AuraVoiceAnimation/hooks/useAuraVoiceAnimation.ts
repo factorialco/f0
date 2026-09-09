@@ -1,5 +1,3 @@
-import { useCallback, useEffect, useRef, useState } from "react"
-
 import {
   type AgentState,
   type TrackReference,
@@ -14,6 +12,7 @@ import {
   useMotionValue,
   useMotionValueEvent,
 } from "motion/react"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 const DEFAULT_SPEED = 10
 const DEFAULT_AMPLITUDE = 2

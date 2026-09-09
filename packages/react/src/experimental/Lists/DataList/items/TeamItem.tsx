@@ -1,8 +1,6 @@
 import { forwardRef } from "react"
-
 import { F0AvatarTeam } from "@/components/avatars/F0AvatarTeam"
 import { experimentalComponent } from "@/lib/experimental"
-
 import { ItemContainer } from "../ItemContainer"
 import type { TeamItemProps } from "../types"
 import { getInternalAction } from "../utils"

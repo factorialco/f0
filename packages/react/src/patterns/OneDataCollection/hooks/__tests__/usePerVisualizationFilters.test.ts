@@ -1,8 +1,6 @@
 import { act } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-
 import { zeroRenderHook as renderHook } from "@/testing/test-utils"
-
 import { usePerVisualizationFilters } from "../usePerVisualizationFilters"
 
 const departmentFilter = {
@@ -518,7 +516,7 @@ describe("usePerVisualizationFilters", () => {
 
       rerender({ currentViz: 0 })
 
-      expect(sourceSetCurrentFilters.mock.calls.length).toBe(
+      expect(sourceSetCurrentFilters.mock.calls).toHaveLength(
         callCountAfterFirst
       )
     })

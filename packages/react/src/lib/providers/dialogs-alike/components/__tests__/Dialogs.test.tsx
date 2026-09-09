@@ -1,12 +1,9 @@
-import { act, screen, waitFor } from "@testing-library/react"
 import "@testing-library/jest-dom/vitest"
+import { act, screen, waitFor } from "@testing-library/react"
 import React from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import { zeroRender } from "@/testing/test-utils"
-
 import type { DialogDefinitionInternal } from "../../internal-types"
-
 import { DialogsAlike } from "../DialogsAlike"
 
 // Mock nanoid
@@ -72,11 +69,12 @@ const MockDialogNotificationInternal = vi.hoisted(() => {
       data-description={props.description}
       data-type={props.type}
       data-is-open={props.isOpen}
+      data-dismissable={String(!!props.dismissable)}
     >
       <button data-testid="notification-close-button" onClick={props.onClose}>
         Close
       </button>
-      {props.primaryAction && (
+      {props.primaryAction ? (
         <button
           data-testid="notification-primary-action"
           onClick={props.primaryAction.onClick}
@@ -84,7 +82,7 @@ const MockDialogNotificationInternal = vi.hoisted(() => {
         >
           {props.primaryAction.label}
         </button>
-      )}
+      ) : null}
       {props.secondaryAction?.map((action: any, index: number) => (
         <button
           key={`notification-secondary-${index}`}
@@ -276,6 +274,51 @@ describe("DialogsAlike", () => {
       )
       expect(dialog).toHaveAttribute("data-type", "warning")
       expect(dialog).toHaveAttribute("data-is-open", "true")
+    })
+
+    it("should forward dismissable to DialogNotificationInternal", () => {
+      const dialogs: DialogDefinitionInternal[] = [
+        {
+          id: "dialog-notif-dismissable",
+          title: "Unsaved changes",
+          description: "Save them before leaving, or discard them.",
+          variant: "notification",
+          type: "warning",
+          dismissable: true,
+          content: <div>Content</div>,
+          actions: { primary: { label: "Save", value: true } },
+          onCloseDialog: vi.fn(),
+          onClickAction: vi.fn(),
+        },
+      ]
+
+      zeroRender(<DialogsAlike items={dialogs} />)
+
+      expect(
+        screen.getByTestId("f0-dialog-notification-internal")
+      ).toHaveAttribute("data-dismissable", "true")
+    })
+
+    it("defaults dismissable to false, so existing notifications keep no close control", () => {
+      const dialogs: DialogDefinitionInternal[] = [
+        {
+          id: "dialog-notif-plain",
+          title: "Heads up",
+          description: "Something happened.",
+          variant: "notification",
+          type: "info",
+          content: <div>Content</div>,
+          actions: { primary: { label: "Ok", value: true } },
+          onCloseDialog: vi.fn(),
+          onClickAction: vi.fn(),
+        },
+      ]
+
+      zeroRender(<DialogsAlike items={dialogs} />)
+
+      expect(
+        screen.getByTestId("f0-dialog-notification-internal")
+      ).toHaveAttribute("data-dismissable", "false")
     })
 
     it("should render dialog content", () => {

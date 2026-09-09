@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from "react"
-
 import type {
   DeferredNodesPayload,
   DeferredStatus,
@@ -73,14 +72,22 @@ export function useDeferredMerge<T>(
 
     promise.then(
       (payload) => {
-        if (!mountedRef.current) return
-        if (deferredRef.current !== capturedRef) return // stale
+        if (!mountedRef.current) {
+          return
+        }
+        if (deferredRef.current !== capturedRef) {
+          return
+        } // stale
         setDeferredPayload(payload)
         setDeferredStatus("resolved")
       },
       (err: unknown) => {
-        if (!mountedRef.current) return
-        if (deferredRef.current !== capturedRef) return // stale
+        if (!mountedRef.current) {
+          return
+        }
+        if (deferredRef.current !== capturedRef) {
+          return
+        } // stale
         setError(err instanceof Error ? err : new Error(String(err)))
         setDeferredStatus("error")
       }
@@ -106,7 +113,9 @@ function mergeNodes<T>(
   initial: GraphNode<T>[],
   deferred: GraphNode<T>[] | undefined
 ): GraphNode<T>[] {
-  if (!deferred || deferred.length === 0) return initial
+  if (!deferred || deferred.length === 0) {
+    return initial
+  }
 
   const merged = new Map<string, GraphNode<T>>()
   for (const node of initial) {
@@ -123,7 +132,9 @@ function mergeEdges(
   initial: GraphEdge[],
   deferred: GraphEdge[] | undefined
 ): GraphEdge[] {
-  if (!deferred || deferred.length === 0) return initial
+  if (!deferred || deferred.length === 0) {
+    return initial
+  }
 
   const merged = new Map<string, GraphEdge>()
   for (const edge of initial) {

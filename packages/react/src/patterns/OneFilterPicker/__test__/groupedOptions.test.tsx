@@ -1,12 +1,9 @@
-import userEvent from "@testing-library/user-event"
 import "@testing-library/jest-dom/vitest"
+import userEvent from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
-
 import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
-
+import { OneFilterPicker } from ".."
 import type { FiltersDefinition } from "../types"
-
-import { OneFilterPicker } from "../index"
 
 /**
  * Grouped ("in" filter with nested children) options store their selection under

@@ -1,5 +1,4 @@
 import { nanoid } from "nanoid"
-
 import { coachmarkStore } from "./store"
 import type {
   CoachmarkId,
@@ -11,7 +10,9 @@ import type {
 const isDev = process.env.NODE_ENV !== "production"
 
 const warn = (message: string) => {
-  if (isDev) console.warn(`[f0] ${message}`)
+  if (isDev) {
+    console.warn(`[f0] ${message}`)
+  }
 }
 
 const warnIfNoProvider = (method: string) => {

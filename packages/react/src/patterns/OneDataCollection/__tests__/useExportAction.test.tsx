@@ -1,9 +1,7 @@
 import { act } from "@testing-library/react"
 import { afterEach, describe, expect, test, vi, beforeEach } from "vitest"
-
 import { defaultTranslations, I18nProvider } from "@/lib/providers/i18n"
 import { zeroRenderHook as renderHook } from "@/testing/test-utils"
-
 import { useExportAction } from "../hooks/useExportAction"
 
 type MockRecord = { id: number; name: string; email: string }
@@ -83,11 +81,11 @@ beforeEach(() => {
   vi.stubGlobal(
     "URL",
     class extends URL {
-      static override createObjectURL = (blob: Blob) => {
+      static override readonly createObjectURL = (blob: Blob) => {
         blobCapture = blob
         return "blob:mock"
       }
-      static override revokeObjectURL = vi.fn()
+      static override readonly revokeObjectURL = vi.fn()
     }
   )
 
@@ -360,7 +358,9 @@ describe("useExportAction", () => {
       const pageSize = 100
 
       const fetchData = vi.fn().mockImplementation(({ pagination }) => {
-        const cursorIndex = pagination.cursor ? parseInt(pagination.cursor) : 0
+        const cursorIndex = pagination.cursor
+          ? parseInt(pagination.cursor, 10)
+          : 0
         const pageRecords = allRecords.slice(
           cursorIndex,
           cursorIndex + pageSize

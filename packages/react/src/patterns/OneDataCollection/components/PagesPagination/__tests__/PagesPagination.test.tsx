@@ -1,8 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
-
 import { PaginationInfo } from "@/hooks/datasource"
 import { zeroRender as render, screen } from "@/testing/test-utils"
-
 import { PagesPagination } from "../PagesPagination"
 
 vi.mock("@/ui/OnePagination", () => ({

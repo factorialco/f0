@@ -1,11 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { useState } from "react"
 import { expect, fn, userEvent, waitFor, within } from "storybook/test"
-
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
-import { F0Select, type F0SelectItemProps, type F0SelectProps } from "../index"
+import { F0Select, type F0SelectItemProps, type F0SelectProps } from ".."
 
 type Role = "owner" | "editor" | "viewer"
 

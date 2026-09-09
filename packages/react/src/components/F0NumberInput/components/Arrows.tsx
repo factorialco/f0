@@ -1,5 +1,4 @@
 import { ChevronDown } from "lucide-react"
-
 import { F0Icon } from "@/components/F0Icon/F0Icon"
 import { ChevronUp } from "@/icons/app"
 
@@ -10,7 +9,9 @@ type ArrowsProps = {
 }
 
 export const Arrows = ({ onClickArrow, step, disabled }: ArrowsProps) => {
-  if (!step || disabled) return null
+  if (!step || disabled) {
+    return null
+  }
 
   return (
     <div

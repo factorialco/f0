@@ -1,5 +1,4 @@
 import { forwardRef, ReactNode } from "react"
-
 import { F0Icon } from "@/components/F0Icon"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { InfoCircleLine } from "@/icons/app"
@@ -32,11 +31,11 @@ export const TwoColumnsList = forwardRef<HTMLDivElement, TwoColumnsListType>(
   function TwoColumnsList({ title, titleValue, titleTooltip, list }, ref) {
     return (
       <div ref={ref} className="flex flex-col gap-2">
-        {title && (
+        {title ? (
           <div className="flex items-center justify-between gap-2 font-medium">
             <div className="flex items-center gap-1">
               <div>{title}</div>
-              {titleTooltip && (
+              {titleTooltip ? (
                 <div className="flex h-4 w-4 items-center text-f1-foreground-tertiary hover:cursor-help">
                   <Tooltip
                     label={titleTooltip.label}
@@ -45,11 +44,11 @@ export const TwoColumnsList = forwardRef<HTMLDivElement, TwoColumnsListType>(
                     <F0Icon icon={InfoCircleLine} size="sm" />
                   </Tooltip>
                 </div>
-              )}
+              ) : null}
             </div>
-            {titleValue && <div>{titleValue}</div>}
+            {titleValue ? <div>{titleValue}</div> : null}
           </div>
-        )}
+        ) : null}
         {list.map((item) => (
           <Item key={item.title} title={item.title} info={item.info} />
         ))}

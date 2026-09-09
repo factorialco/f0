@@ -71,6 +71,9 @@ function qRot(ax: number, ay: number, az: number, ang: number): Q {
 // hot loop doesn't allocate a 3-tuple per call (~1100 allocations/frame saved).
 const _scratchV: V = [0, 0, 0]
 
+// Hot path (runs per vertex per frame). Primitives avoid allocating a vector
+// per call.
+// oxlint-disable-next-line max-params
 function rotVecInto(q: Q, x: number, y: number, z: number, out: V): void {
   const w = q[0]
   const qx = q[1]
@@ -96,13 +99,19 @@ export function spinEase(t: number): number {
   // quadratic: unclamped, a negative `t` comes back POSITIVE (t² / 2r / area),
   // so a clock that briefly runs backwards would jump the mark most of a turn
   // instead of holding it at rest.
-  if (t <= 0) return 0
-  if (t >= 1) return 1
+  if (t <= 0) {
+    return 0
+  }
+  if (t >= 1) {
+    return 1
+  }
   // Area under the unit-height trapezoid; dividing by it makes spinEase(1) = 1.
   // Numerically equal to where the ramp down starts, but a different quantity —
   // they are spelled out separately on purpose.
   const area = 1 - SPIN_RAMP
-  if (t <= SPIN_RAMP) return (t * t) / (2 * SPIN_RAMP) / area
+  if (t <= SPIN_RAMP) {
+    return (t * t) / (2 * SPIN_RAMP) / area
+  }
   if (t >= 1 - SPIN_RAMP) {
     const u = 1 - t
     return (area - (u * u) / (2 * SPIN_RAMP)) / area
@@ -116,17 +125,13 @@ export function spinEase(t: number): number {
 // (~700 string allocations/frame saved). 256 levels is well below the eye's
 // gradient discrimination, so the LUT is visually lossless.
 const COLOR_LUT_SIZE = 256
-const COLOR_LUT: string[] = (() => {
-  const out: string[] = new Array(COLOR_LUT_SIZE)
-  for (let i = 0; i < COLOR_LUT_SIZE; i++) {
-    const t = i / (COLOR_LUT_SIZE - 1)
-    const r = Math.round(COLOR_A[0] + (COLOR_B[0] - COLOR_A[0]) * t)
-    const g = Math.round(COLOR_A[1] + (COLOR_B[1] - COLOR_A[1]) * t)
-    const b = Math.round(COLOR_A[2] + (COLOR_B[2] - COLOR_A[2]) * t)
-    out[i] = `rgb(${r},${g},${b})`
-  }
-  return out
-})()
+const COLOR_LUT: string[] = Array.from({ length: COLOR_LUT_SIZE }, (_, i) => {
+  const t = i / (COLOR_LUT_SIZE - 1)
+  const r = Math.round(COLOR_A[0] + (COLOR_B[0] - COLOR_A[0]) * t)
+  const g = Math.round(COLOR_A[1] + (COLOR_B[1] - COLOR_A[1]) * t)
+  const b = Math.round(COLOR_A[2] + (COLOR_B[2] - COLOR_A[2]) * t)
+  return `rgb(${r},${g},${b})`
+})
 
 function colorFor(t: number): string {
   // Clamp + quantize to LUT index. `t` is expected in [0, 1].
@@ -153,27 +158,25 @@ export const QUAD_POOL_SIZE = 4 * LAT_STEPS * SEGS // 960
 const LENS_EDGE: number[] = (() => {
   const a = LENS_C
   const r2 = LENS_R * LENS_R
-  const out = new Array<number>(SEGS + 1)
-  for (let si = 0; si <= SEGS; si++) {
+  return Array.from({ length: SEGS + 1 }, (_, si) => {
     const lon = (si / SEGS) * Math.PI * 2
     const k = Math.sin(lon) ** 2
     const c =
       k < 1e-9
         ? (a * a + 1 - r2) / (2 * a)
         : (a - Math.sqrt(a * a - k * (a * a + 1 - k - r2))) / k
-    out[si] = Math.acos(Math.max(-1, Math.min(1, c)))
-  }
-  return out
+    return Math.acos(Math.max(-1, Math.min(1, c)))
+  })
 })()
 
 // Azimuth trig, hoisted — it no longer depends on anything per-frame.
-const COS_LON: number[] = new Array(SEGS + 1)
-const SIN_LON: number[] = new Array(SEGS + 1)
-for (let si = 0; si <= SEGS; si++) {
-  const lon = (si / SEGS) * Math.PI * 2
-  COS_LON[si] = Math.cos(lon)
-  SIN_LON[si] = Math.sin(lon)
-}
+const lonAt = (si: number): number => (si / SEGS) * Math.PI * 2
+const COS_LON: number[] = Array.from({ length: SEGS + 1 }, (_, si) =>
+  Math.cos(lonAt(si))
+)
+const SIN_LON: number[] = Array.from({ length: SEGS + 1 }, (_, si) =>
+  Math.sin(lonAt(si))
+)
 
 // The four lenses are one patch repeated at 0/90/180/270° about the view axis,
 // which is what makes the resting mark four-fold symmetric like the logo.
@@ -189,14 +192,17 @@ const _capQs: Q[] = [
 const _compareAvgZ = (a: Quad, b: Quad): number => a.avgZ - b.avgZ
 
 export function createGlobeSpinState(): GlobeSpinState {
-  const quads: Quad[] = new Array(QUAD_POOL_SIZE)
-  for (let i = 0; i < QUAD_POOL_SIZE; i++) {
-    quads[i] = { points: "", color: "", avgZ: Infinity }
-  }
-  const grid: GridPoint[] = new Array(GRID_SIZE)
-  for (let i = 0; i < GRID_SIZE; i++) {
-    grid[i] = { x: 0, y: 0, z: 0, t: 0 }
-  }
+  const quads: Quad[] = Array.from({ length: QUAD_POOL_SIZE }, () => ({
+    points: "",
+    color: "",
+    avgZ: Infinity,
+  }))
+  const grid: GridPoint[] = Array.from({ length: GRID_SIZE }, () => ({
+    x: 0,
+    y: 0,
+    z: 0,
+    t: 0,
+  }))
   return { quads, grid }
 }
 
@@ -229,7 +235,9 @@ export function buildFrameInto(
   const precessQ = qRot(0, 0, 1, axisPhase * 2 * Math.PI)
   rotVecInto(precessQ, PATH_AXIS[0], PATH_AXIS[1], PATH_AXIS[2], _scratchV)
   const qDelta = qRot(_scratchV[0], _scratchV[1], _scratchV[2], angle)
-  for (let k = 0; k < 4; k++) _capQs[k] = qMul(qDelta, Q_LENS[k])
+  for (let k = 0; k < 4; k++) {
+    _capQs[k] = qMul(qDelta, Q_LENS[k])
+  }
 
   let count = 0
 
@@ -272,7 +280,9 @@ export function buildFrameInto(
         const p11 = grid[rowB + si + 1]
 
         const avgT = (p00.t + p01.t + p10.t + p11.t) * 0.25
-        if (avgT < 0.001) continue
+        if (avgT < 0.001) {
+          continue
+        }
 
         const mx = (p00.x + p01.x + p10.x + p11.x) * 0.25
         const my = (p00.y + p01.y + p10.y + p11.y) * 0.25

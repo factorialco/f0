@@ -1,7 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
-
 import { screen, userEvent, zeroRender as render } from "@/testing/test-utils"
-
 import { type F0ChatCardAttachment } from "../../types"
 import { CHAT_MEDIA_WIDTH_CLASS } from "../../utils/media-layout"
 import { ChatCardAttachment } from "../ChatCardAttachment"

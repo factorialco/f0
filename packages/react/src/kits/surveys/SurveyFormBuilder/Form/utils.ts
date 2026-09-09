@@ -111,7 +111,9 @@ export function injectSectionEnds(
   let sectionBuffer: FlatFormItem[] = []
 
   function flushSection() {
-    if (!currentSectionId) return
+    if (!currentSectionId) {
+      return
+    }
 
     // Find the last question in the buffer that was in any section.
     // Everything up to (and including) that question stays in the section;

@@ -1,5 +1,4 @@
 import { Dispatch, SetStateAction } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { F0Icon, IconType } from "@/components/F0Icon/F0Icon"
 import { Switch } from "@/experimental/Forms/Fields/Switch"
@@ -28,7 +27,6 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/ui/dropdown-menu"
-
 import { useSurveyFormBuilderContext } from "../../../Context"
 import { RatingOptionType } from "../../../lib"
 import { QuestionType } from "../../../types"
@@ -117,11 +115,11 @@ const QuestionTypeMenuItem = ({
         <div className="flex w-full flex-row items-center gap-2">
           <F0Icon icon={Hub} color="default" />
           <span className="flex-1 text-base font-medium">{label}</span>
-          {!!selectedOptionLabel && (
+          {selectedOptionLabel ? (
             <span className="mr-1 text-base text-f1-foreground-secondary">
               {selectedOptionLabel}
             </span>
-          )}
+          ) : null}
         </div>
       </DropdownMenuSubTrigger>
       <DropdownMenuPortal>
@@ -138,7 +136,7 @@ const QuestionTypeMenuItem = ({
                     <div className="flex w-full flex-row items-center gap-2 text-base font-medium">
                       <F0Icon icon={questionType.icon} color="default" />
                       <span className="flex-1">{questionType.label}</span>
-                      {currentRatingType && (
+                      {currentRatingType ? (
                         <span className="mr-1 text-base text-f1-foreground-secondary">
                           {
                             RATING_OPTIONS.find(
@@ -146,7 +144,7 @@ const QuestionTypeMenuItem = ({
                             )?.label
                           }
                         </span>
-                      )}
+                      ) : null}
                     </div>
                   </DropdownMenuSubTrigger>
                   <DropdownMenuPortal>
@@ -158,9 +156,9 @@ const QuestionTypeMenuItem = ({
                         >
                           <div className="flex w-full flex-row items-center gap-2 pl-2">
                             <span className="flex-1">{ratingOption.label}</span>
-                            {currentRatingType === ratingOption.value && (
+                            {currentRatingType === ratingOption.value ? (
                               <F0Icon icon={Check} color="default" />
-                            )}
+                            ) : null}
                           </div>
                         </DropdownMenuItem>
                       ))}
@@ -178,12 +176,12 @@ const QuestionTypeMenuItem = ({
                 <div className="flex w-full flex-row items-center gap-2">
                   <F0Icon icon={questionType.icon} color="default" />
                   <span className="flex-1">{questionType.label}</span>
-                  {isSelected && <F0Icon icon={Check} color="default" />}
+                  {isSelected ? <F0Icon icon={Check} color="default" /> : null}
                 </div>
               </DropdownMenuItem>
             )
           })}
-          {datasetKeys.length > 0 && (
+          {datasetKeys.length > 0 ? (
             <>
               <DropdownMenuSeparator />
               {datasetKeys.map((dk) => {
@@ -197,20 +195,20 @@ const QuestionTypeMenuItem = ({
                   <DropdownMenuSub key={dk}>
                     <DropdownMenuSubTrigger className="mx-1 px-2 data-[state=open]:rounded-sm data-[state=closed]:bg-transparent data-[state=open]:bg-f1-background-hover">
                       <div className="flex w-full flex-row items-center gap-2">
-                        {singleEntry && (
+                        {singleEntry ? (
                           <F0Icon icon={singleEntry.icon} color="default" />
-                        )}
+                        ) : null}
                         <span className="flex-1 text-base font-medium">
                           {singleEntry?.label ?? dk}
                         </span>
-                        {currentDatasetKey === dk && (
+                        {currentDatasetKey === dk ? (
                           <F0Icon icon={Check} color="default" />
-                        )}
+                        ) : null}
                       </div>
                     </DropdownMenuSubTrigger>
                     <DropdownMenuPortal>
                       <DropdownMenuSubContent>
-                        {isQuestionTypeAllowed("dropdown-single") && (
+                        {isQuestionTypeAllowed("dropdown-single") ? (
                           <DropdownMenuItem
                             onClick={() =>
                               onSelectQuestionType("dropdown-single", dk)
@@ -222,13 +220,13 @@ const QuestionTypeMenuItem = ({
                                 {t("surveyFormBuilder.labels.singleSelection")}
                               </span>
                               {currentDatasetKey === dk &&
-                                value === "dropdown-single" && (
-                                  <F0Icon icon={Check} color="default" />
-                                )}
+                              value === "dropdown-single" ? (
+                                <F0Icon icon={Check} color="default" />
+                              ) : null}
                             </div>
                           </DropdownMenuItem>
-                        )}
-                        {isQuestionTypeAllowed("dropdown-multi") && (
+                        ) : null}
+                        {isQuestionTypeAllowed("dropdown-multi") ? (
                           <DropdownMenuItem
                             onClick={() =>
                               onSelectQuestionType("dropdown-multi", dk)
@@ -240,19 +238,19 @@ const QuestionTypeMenuItem = ({
                                 {t("surveyFormBuilder.labels.multiSelection")}
                               </span>
                               {currentDatasetKey === dk &&
-                                value === "dropdown-multi" && (
-                                  <F0Icon icon={Check} color="default" />
-                                )}
+                              value === "dropdown-multi" ? (
+                                <F0Icon icon={Check} color="default" />
+                              ) : null}
                             </div>
                           </DropdownMenuItem>
-                        )}
+                        ) : null}
                       </DropdownMenuSubContent>
                     </DropdownMenuPortal>
                   </DropdownMenuSub>
                 )
               })}
             </>
-          )}
+          ) : null}
         </DropdownMenuSubContent>
       </DropdownMenuPortal>
     </DropdownMenuSub>
@@ -366,7 +364,7 @@ export function ActionsMenu({
         <DropdownMenuLabel className="p-4 pb-2 font-medium text-f1-foreground-secondary">
           {t("surveyFormBuilder.labels.questionOptions")}
         </DropdownMenuLabel>
-        {showRequired && (
+        {showRequired ? (
           <DropdownMenuGroup>
             <ToggleItem
               label={t("surveyFormBuilder.labels.required")}
@@ -375,8 +373,8 @@ export function ActionsMenu({
               onChange={handleChangeRequired}
             />
           </DropdownMenuGroup>
-        )}
-        {showMultiSelect && (
+        ) : null}
+        {showMultiSelect ? (
           <DropdownMenuGroup>
             <ToggleItem
               label={t("surveyFormBuilder.labels.allowMultiSelection")}
@@ -385,8 +383,8 @@ export function ActionsMenu({
               onChange={handleToggleMultiSelect}
             />
           </DropdownMenuGroup>
-        )}
-        {showAllowCreate && (
+        ) : null}
+        {showAllowCreate ? (
           <DropdownMenuGroup>
             <ToggleItem
               label={t("surveyFormBuilder.labels.allowCreate")}
@@ -395,8 +393,8 @@ export function ActionsMenu({
               onChange={handleToggleAllowCreate}
             />
           </DropdownMenuGroup>
-        )}
-        {showQuestionType && (
+        ) : null}
+        {showQuestionType ? (
           <DropdownMenuGroup>
             <QuestionTypeMenuItem
               label={t("surveyFormBuilder.labels.questionType")}
@@ -409,31 +407,33 @@ export function ActionsMenu({
               onSelectRatingType={handleSelectRatingType}
             />
           </DropdownMenuGroup>
-        )}
+        ) : null}
         {(showRequired ||
           showMultiSelect ||
           showAllowCreate ||
           showQuestionType) &&
-          (showDuplicate || showDelete) && <DropdownMenuSeparator />}
-        {(showDuplicate || showDelete) && (
+        (showDuplicate || showDelete) ? (
+          <DropdownMenuSeparator />
+        ) : null}
+        {showDuplicate || showDelete ? (
           <DropdownMenuGroup>
-            {showDuplicate && (
+            {showDuplicate ? (
               <SimpleItem
                 label={t("surveyFormBuilder.actions.duplicateQuestion")}
                 icon={LayersFront}
                 onClick={handleDuplicate}
               />
-            )}
-            {showDelete && (
+            ) : null}
+            {showDelete ? (
               <SimpleItem
                 label={t("surveyFormBuilder.actions.deleteQuestion")}
                 icon={Delete}
                 onClick={handleDelete}
                 critical
               />
-            )}
+            ) : null}
           </DropdownMenuGroup>
-        )}
+        ) : null}
       </DropdownMenuContent>
     </DropdownMenu>
   )

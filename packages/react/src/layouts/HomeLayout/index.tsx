@@ -5,9 +5,7 @@ import {
   useImperativeHandle,
   useRef,
 } from "react"
-
 import { Carousel } from "@/experimental/Navigation/Carousel"
-
 import { LayoutProvider } from "../LayoutProvider"
 
 type Props = {

@@ -1,27 +1,16 @@
 import { useCallback, useRef, useState, useMemo } from "react"
-
-import type { DialogPosition } from "@/patterns/F0Dialog/types"
-import type { F0FormSubmitResult } from "@/patterns/F0Form/types"
-
 import { OneEmptyState } from "@/components/OneEmptyState"
 import { ArrowLeft, ArrowRight, Maximize, Minimize } from "@/icons/app"
 import { F0Box } from "@/lib/F0Box"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { F0Dialog } from "@/patterns/F0Dialog"
+import type { DialogPosition } from "@/patterns/F0Dialog/types"
 import { F0Form } from "@/patterns/F0Form/F0Form"
+import type { F0FormSubmitResult } from "@/patterns/F0Form/types"
 import { useF0Form } from "@/patterns/F0Form/useF0Form"
 import { F0ResourceHeader } from "@/patterns/F0ResourceHeader"
 import { ProgressBarCell } from "@/ui/value-display/types/progressBar"
-
-import type {
-  SurveyAnsweringFormDefaultProps,
-  SurveyAnsweringFormInlineReadonlyProps,
-  SurveyAnsweringFormPreviewProps,
-  SurveyAnsweringFormProps,
-  SurveySubmitAnswers,
-} from "./types"
-
 import { SurveyFormBuilderProvider } from "../SurveyFormBuilder/Context"
 import { TableOfContent } from "../SurveyFormBuilder/Form/TableOfContent"
 import {
@@ -33,6 +22,13 @@ import {
   extractFlatQuestions,
   useSurveyFormSchema,
 } from "./hooks/useSurveyFormSchema"
+import type {
+  SurveyAnsweringFormDefaultProps,
+  SurveyAnsweringFormInlineReadonlyProps,
+  SurveyAnsweringFormPreviewProps,
+  SurveyAnsweringFormProps,
+  SurveySubmitAnswers,
+} from "./types"
 
 const noop = () => {}
 
@@ -101,18 +97,18 @@ function SurveyAnsweringFormDialog({
     schema,
     defaultValues: formDefaultValues,
     sections,
-  } = useSurveyFormSchema(
+  } = useSurveyFormSchema({
     elements,
     mode,
     t,
     defaultValues,
     currentQuestionId,
-    isStepped ? accumulatedValuesRef.current : undefined,
-    preview,
-    isReadonlyPreview,
+    accumulatedValues: isStepped ? accumulatedValuesRef.current : undefined,
+    previewMode: preview,
+    disableFields: isReadonlyPreview,
     useUpload,
-    datasets
-  )
+    datasets,
+  })
 
   const position: DialogPosition = isFullscreen
     ? "fullscreen"
@@ -123,7 +119,9 @@ function SurveyAnsweringFormDialog({
 
   const scheduleClose = useCallback(
     (delay: number) => {
-      if (closeTimerRef.current) clearTimeout(closeTimerRef.current)
+      if (closeTimerRef.current) {
+        clearTimeout(closeTimerRef.current)
+      }
       closeTimerRef.current = setTimeout(() => {
         closeTimerRef.current = null
         onClose()
@@ -305,10 +303,10 @@ function SurveyAnsweringFormDialog({
             isStepped && !isFullscreen && "min-h-[600px]"
           )}
         >
-          {showTableOfContent && (
+          {showTableOfContent ? (
             <TableOfContent elements={elements} onChange={noop} answering />
-          )}
-          {showStepperProgress && (
+          ) : null}
+          {showStepperProgress ? (
             <div className="absolute left-0 right-0 top-0 [&>div>div>div]:h-1 [&>div>div>div]:rounded-none">
               <ProgressBarCell
                 label="Value"
@@ -316,7 +314,7 @@ function SurveyAnsweringFormDialog({
                 hideLabel
               />
             </div>
-          )}
+          ) : null}
           <div
             className={cn(
               "mx-auto flex w-full flex-1 justify-center flex-col @lg:w-[750px] max-w-full pt-0",
@@ -352,19 +350,19 @@ function SurveyAnsweringFormDialog({
                 />
               </F0Box>
             ) : null}
-            {showSectionHeader && (
+            {showSectionHeader ? (
               <div className="py-1 pl-5">
                 <span className="text-lg font-semibold text-f1-foreground">
                   {stepper.currentQuestion?.sectionTitle}
                 </span>
-                {stepper.currentQuestion?.sectionDescription && (
+                {stepper.currentQuestion?.sectionDescription ? (
                   <p className="text-f1-foreground-secondary">
                     {stepper.currentQuestion?.sectionDescription}
                   </p>
-                )}
+                ) : null}
               </div>
-            )}
-            {hasQuestions && !loading && (
+            ) : null}
+            {hasQuestions && !loading ? (
               <F0Form
                 key={isStepped ? stepper.currentStep : undefined}
                 formRef={formRef}
@@ -378,7 +376,7 @@ function SurveyAnsweringFormDialog({
                 errorTriggerMode={errorTriggerMode}
                 sections={sections}
               />
-            )}
+            ) : null}
           </div>
         </div>
       </SurveyFormBuilderProvider>
@@ -419,18 +417,16 @@ function SurveyAnsweringFormInline({
     schema,
     defaultValues: formDefaultValues,
     sections,
-  } = useSurveyFormSchema(
+  } = useSurveyFormSchema({
     elements,
-    "all-questions",
+    mode: "all-questions",
     t,
     defaultValues,
-    undefined,
-    undefined,
-    true,
-    true,
+    previewMode: true,
+    disableFields: true,
     useUpload,
-    datasets
-  )
+    datasets,
+  })
 
   return (
     <SurveyFormBuilderProvider
@@ -440,7 +436,7 @@ function SurveyAnsweringFormInline({
       datasets={datasets}
     >
       <div className="mx-auto flex w-full max-w-3xl flex-col">
-        {!hideResourceHeader && (
+        {!hideResourceHeader ? (
           <div className="mb-6">
             <F0ResourceHeader
               title={title}
@@ -448,7 +444,7 @@ function SurveyAnsweringFormInline({
               {...resourceHeader}
             />
           </div>
-        )}
+        ) : null}
         {loading ? (
           <SurveyAllQuestionsLoadingSkeleton />
         ) : !hasQuestions ? (

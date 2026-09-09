@@ -1,9 +1,7 @@
 import { Editor, useEditorState } from "@tiptap/react"
 import { compact } from "lodash"
 import { Fragment, ReactNode, memo, useMemo } from "react"
-
 import { F0ButtonToggle } from "@/components/F0ButtonToggle"
-import { Picker } from "@/sds/social/Reactions/Picker"
 import {
   AlignTextCenter,
   AlignTextJustify,
@@ -28,7 +26,7 @@ import {
 } from "@/icons/app"
 import { I18nContextType, useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
+import { Picker } from "@/sds/social/Reactions/Picker"
 import { LinkPopup } from "./LinkPopup"
 import { ToolbarDivider } from "./ToolbarDivider"
 import { ToolbarDropdown } from "./ToolbarDropdown"
@@ -38,7 +36,7 @@ const intersperse = (arr: ReactNode[], sep: ReactNode) =>
   arr.map((item, index) => (
     <Fragment key={`intersperse-${index}`}>
       {item}
-      {index < arr.length - 1 && sep}
+      {index < arr.length - 1 ? sep : null}
     </Fragment>
   ))
 

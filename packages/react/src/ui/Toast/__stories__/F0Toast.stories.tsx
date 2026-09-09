@@ -1,10 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { useState } from "react"
 import { fn } from "storybook/test"
-
 import { F0Button } from "@/components/F0Button"
-
 import { F0Toast } from "../F0Toast"
 
 const meta: Meta<typeof F0Toast> = {
@@ -61,15 +58,15 @@ const meta: Meta<typeof F0Toast> = {
       return (
         <div className="flex flex-col items-start gap-4 p-4">
           <div className="h-10">
-            {!isOpen && (
+            {!isOpen ? (
               <F0Button label="Open Toast" onClick={() => setIsOpen(true)} />
-            )}
+            ) : null}
           </div>
-          {isOpen && (
+          {isOpen ? (
             <Story
               args={{ ...context.args, onClose: () => setIsOpen(false) }}
             />
-          )}
+          ) : null}
         </div>
       )
     },
@@ -108,7 +105,7 @@ export const Success: Story = {
   ),
 }
 
-export const Error: Story = {
+const ErrorState: Story = {
   args: {
     title: "Error occurred",
     description: "Something went wrong. Please try again.",
@@ -367,3 +364,6 @@ export const AllVariants: Story = {
     </div>
   ),
 }
+
+// Exported under the global's name so the story id stays `--error`.
+export { ErrorState as Error }

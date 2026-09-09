@@ -1,15 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { useState } from "react"
-
 import { F0Text } from "@/components/F0Text"
 import { Add } from "@/icons/app"
 import { F0Dialog } from "@/patterns/F0Dialog"
 import { useF0Form } from "@/patterns/F0Form"
 import { F0Wizard } from "@/ui/F0Wizard"
-
+import { OneDataCollection } from "../../.."
 import { useDataCollectionSource } from "../../../hooks/useDataCollectionSource"
-import { OneDataCollection } from "../../../index"
 import {
   createResourceDataAdapter,
   CrudPatternLayout,
@@ -206,8 +203,12 @@ function WizardDialogScenario() {
         onSubmit={async () => setOpen(false)}
       >
         {({ currentStep }) => {
-          if (currentStep === 0) return <WizardStepBasic />
-          if (currentStep === 1) return <WizardStepAssignments />
+          if (currentStep === 0) {
+            return <WizardStepBasic />
+          }
+          if (currentStep === 1) {
+            return <WizardStepAssignments />
+          }
           return (
             <F0Text
               content="Review the details above and click Create plan to finish."

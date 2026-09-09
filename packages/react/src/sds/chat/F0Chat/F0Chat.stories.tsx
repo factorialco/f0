@@ -1,14 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { Profiler, type ReactNode, useEffect, useRef, useState } from "react"
 import { expect, userEvent, waitFor, within } from "storybook/test"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
-import { F0Chat } from "./F0Chat"
 import { ChatBubble } from "./components/ChatBubble"
 import { ChatMessageAttachments } from "./components/ChatMessageAttachments"
+import { F0Chat } from "./F0Chat"
 import { MOCK_VIDEO_CAPTIONS, MOCK_VIDEO_DESCRIPTIONS } from "./mocks/constants"
 import { useMockChatRuntime } from "./mocks/createMockChatRuntime"
 import { useChatStorm } from "./mocks/useChatStorm"
@@ -395,7 +392,9 @@ const StormHud = ({
         const distance =
           viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight
         samples.push(distance)
-        if (samples.length > 120) samples.shift()
+        if (samples.length > 120) {
+          samples.shift()
+        }
         const canvas = canvasRef.current
         const ctx = canvas?.getContext("2d")
         if (canvas && ctx) {
@@ -407,8 +406,11 @@ const StormHud = ({
           samples.forEach((s, i) => {
             const x = (i / 119) * canvas.width
             const y = canvas.height - (s / max) * (canvas.height - 4) - 2
-            if (i === 0) ctx.moveTo(x, y)
-            else ctx.lineTo(x, y)
+            if (i === 0) {
+              ctx.moveTo(x, y)
+            } else {
+              ctx.lineTo(x, y)
+            }
           })
           ctx.stroke()
         }
@@ -508,6 +510,29 @@ const Conversation = ({
     <Frame>
       <F0ChatProvider runtime={runtime}>
         <F0Chat headerActions={headerActions} />
+      </F0ChatProvider>
+    </Frame>
+  )
+}
+
+const MessageLengthConversation = (): ReactNode => {
+  const runtime = useMockChatRuntime({
+    channel: dmChannel,
+    me,
+    others: [ana],
+    initialCount: 8,
+    olderPages: 0,
+    ambientEveryMs: 0,
+  })
+  const constrainedRuntime = {
+    ...runtime,
+    maxMessageCharacters: 10,
+  } satisfies F0ChatRuntime
+
+  return (
+    <Frame>
+      <F0ChatProvider runtime={constrainedRuntime}>
+        <F0Chat />
       </F0ChatProvider>
     </Frame>
   )
@@ -901,7 +926,9 @@ const VideoConversation = (): ReactNode => {
 const ColdStartVideoConversation = (): ReactNode => {
   const [isOpen, setIsOpen] = useState(false)
 
-  if (isOpen) return <VideoConversation />
+  if (isOpen) {
+    return <VideoConversation />
+  }
 
   return (
     <div className="flex h-[680px] items-center justify-center">
@@ -1039,6 +1066,13 @@ export const Snapshot: Story = {
       </section>
       <section
         className="flex w-[760px] flex-col gap-2"
+        data-testid="snapshot-message-limit"
+      >
+        <h2 className="text-lg font-medium">Message character limit</h2>
+        <MessageLengthConversation />
+      </section>
+      <section
+        className="flex w-[760px] flex-col gap-2"
         data-testid="snapshot-documents"
       >
         <h2 className="text-lg font-medium">Document attachments</h2>
@@ -1088,6 +1122,18 @@ export const Snapshot: Story = {
       )
     })
 
+    await step("Show the message length validation", async () => {
+      const messageLimit = within(canvas.getByTestId("snapshot-message-limit"))
+      const composer = messageLimit.getByRole("combobox", {
+        name: /write something here/i,
+      })
+      await userEvent.type(composer, "12345678901")
+      await userEvent.keyboard("{Enter}")
+      await expect(
+        messageLimit.getByText("Messages can be up to 10 characters")
+      ).toBeVisible()
+    })
+
     await step("Render document snapshots", async () => {
       const documents = within(canvas.getByTestId("snapshot-documents"))
       canvas
@@ -1127,6 +1173,43 @@ export const Snapshot: Story = {
 export const ComposerMotion: Story = {
   name: "Composer micro-interactions",
   render: () => <Conversation initialCount={8} />,
+}
+
+export const MessageCharacterLimit: Story = {
+  name: "Message character limit",
+  render: () => <MessageLengthConversation />,
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    const composer = canvas.getByRole("combobox", {
+      name: /write something here/i,
+    })
+
+    await step("Keep an oversized draft and show the limit", async () => {
+      await userEvent.type(composer, "12345678901")
+      await userEvent.keyboard("{Enter}")
+
+      const alert = canvas.getByRole("alert")
+      await expect(alert).toHaveTextContent(
+        "Messages can be up to 10 characters"
+      )
+      await expect(composer).toHaveValue("12345678901")
+      await expect(composer).toHaveFocus()
+      await expect(composer).toHaveAttribute("aria-invalid", "true")
+      await expect(composer).toHaveAttribute("aria-describedby", alert.id)
+    })
+
+    await step("Clear the error after correction and send", async () => {
+      await userEvent.clear(composer)
+      await userEvent.type(composer, "1234567890")
+      await waitFor(() => expect(canvas.queryByRole("alert")).toBeNull())
+      await expect(composer).not.toHaveAttribute("aria-invalid")
+      await expect(composer).not.toHaveAttribute("aria-describedby")
+
+      await userEvent.keyboard("{Enter}")
+      await waitFor(() => expect(composer).toHaveValue(""))
+      await waitFor(() => expect(canvas.getByText("1234567890")).toBeVisible())
+    })
+  },
 }
 
 /** Minimized-chat regression (360px panel): the waveform compresses before
@@ -1300,6 +1383,27 @@ export const ComposerHotkeys: Story = {
       // Radix keeps the popover mounted for its exit animation and only then
       // decides about focus — assert after that window, not before.
       await waitFor(() => expect(composer).toHaveFocus(), { timeout: 3000 })
+    })
+
+    await step("Escape backs out of the quote, keeping the draft", async () => {
+      await userEvent.type(composer, "ya lo miro")
+      await userEvent.keyboard("{Escape}")
+      await waitFor(() =>
+        expect(
+          canvas.queryByRole("button", { name: /remove quote/i })
+        ).not.toBeInTheDocument()
+      )
+      await expect(composer).toHaveValue("ya lo miro")
+    })
+
+    await step("The next Escape clears the draft", async () => {
+      await userEvent.keyboard("{Escape}")
+      await waitFor(() => expect(composer).toHaveValue(""))
+    })
+
+    await step("Undo puts the cleared draft back", async () => {
+      await userEvent.keyboard("{Meta>}z{/Meta}")
+      await waitFor(() => expect(composer).toHaveValue("ya lo miro"))
     })
   },
 }

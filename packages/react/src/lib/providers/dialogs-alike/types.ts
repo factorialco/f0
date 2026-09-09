@@ -1,5 +1,4 @@
 import { ReactNode } from "react"
-
 import {
   DialogNotificationType,
   F0DialogSize,
@@ -10,7 +9,6 @@ import {
 } from "@/components/dialog-alike/F0Drawer/types"
 import { F0ButtonProps } from "@/components/F0Button"
 import { Optional } from "@/lib/typescript-utils/optional"
-
 import { DialogModule } from "./module-types"
 
 export type { DialogModule }
@@ -98,6 +96,7 @@ export type DialogDefinitionInternal =
   | (Omit<DialogDefinition, "modal" | "module"> & {
       variant: "notification"
       type: DialogNotificationType
+      dismissable?: boolean
     })
 
 // =============================================================================
@@ -147,6 +146,12 @@ export type NotificationDialogBaseOptions = Optional<
 > & {
   msg: string
   type?: DialogNotificationType
+  /**
+   * Renders a dismiss (X) control in the dialog's top-right corner. Lets a notification offer a
+   * way out without spending a button on "Cancel".
+   * @default false
+   */
+  dismissable?: boolean
 }
 
 export type NotificationDialogOptions = NotificationDialogBaseOptions & {

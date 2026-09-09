@@ -1,5 +1,4 @@
 import { useState } from "react"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
 import { EllipsisHorizontal } from "@/icons/app"
@@ -13,7 +12,6 @@ import {
   DrawerOverlay,
   DrawerTrigger,
 } from "@/ui/drawer"
-
 import { DropdownItemContent } from "./DropdownItem"
 import {
   DropdownInternal,
@@ -35,10 +33,10 @@ type DropdownProps = Omit<
 
 const _Dropdown = (props: DropdownProps) => {
   const { open, onOpenChange, dataTestId, ...rest } = props
-  const publicProps = privateProps.reduce((acc, key) => {
+  const publicProps = privateProps.reduce<DropdownInternalProps>((acc, key) => {
     const { [key]: _, ...rest } = acc
     return rest
-  }, rest as DropdownInternalProps)
+  }, rest)
 
   return (
     <DataTestIdWrapper dataTestId={dataTestId}>
@@ -128,7 +126,7 @@ const _MobileDropdown = ({ items, children, dataTestId }: DropdownProps) => {
                   }}
                   className="flex w-full cursor-pointer items-center gap-2 p-3"
                 >
-                  {item.icon && (
+                  {item.icon ? (
                     <span
                       className={cn(
                         "h-5 w-5 text-f1-icon",
@@ -137,7 +135,7 @@ const _MobileDropdown = ({ items, children, dataTestId }: DropdownProps) => {
                     >
                       <F0Icon icon={item.icon} size="md" />
                     </span>
-                  )}
+                  ) : null}
                   <span
                     className={cn(
                       "font-medium",

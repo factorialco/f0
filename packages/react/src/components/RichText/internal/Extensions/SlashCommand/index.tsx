@@ -3,9 +3,7 @@ import { Editor, Extension, ReactRenderer } from "@tiptap/react"
 import { Suggestion } from "@tiptap/suggestion"
 import React from "react"
 import { createRoot, Root } from "react-dom/client"
-
 import { I18nContextType } from "@/lib/providers/i18n"
-
 import { ImageUploadConfig } from "../Image"
 import {
   AIBlockConfig,
@@ -159,7 +157,9 @@ const createSlashCommandExtension = ({
             ) => {
               if (clientRect) {
                 const rect = clientRect()
-                if (rect && rect.width && rect.height) return rect
+                if (rect && rect.width && rect.height) {
+                  return rect
+                }
               }
               return getSlashRect()
             }
@@ -220,7 +220,9 @@ const createSlashCommandExtension = ({
                 range: { from: number; to: number }
                 query?: string
               }) => {
-                if (props.items.length === 0) return
+                if (props.items.length === 0) {
+                  return
+                }
 
                 component = new ReactRenderer(CommandList, {
                   props: {
@@ -251,7 +253,9 @@ const createSlashCommandExtension = ({
                 editor: Editor
                 query?: string
               }) => {
-                if (!component || !container || !popoverRoot) return
+                if (!component || !container || !popoverRoot) {
+                  return
+                }
 
                 // Always update the component with current items (even if empty)
                 component.updateProps({

@@ -7,7 +7,6 @@ import React, {
   useRef,
   useState,
 } from "react"
-
 import { F0Button, type F0ButtonProps } from "@/components/F0Button"
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { F0TagAlert } from "@/components/tags/F0TagAlert"
@@ -16,26 +15,25 @@ import {
   DropdownInternal,
   DropdownItem,
 } from "@/experimental/Navigation/Dropdown/internal.tsx"
-import { One as OneIcon } from "@/icons/ai"
-import { Ellipsis } from "@/icons/app"
-import { AIButton as AIButtonComponent } from "@/kits/ai/AIButton"
-import { useI18n } from "@/lib/providers/i18n"
-import { Counter } from "@/ui/Counter"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
-import { PrivateBox } from "@/sds/Profile/PrivateBox"
+import { One as OneIcon } from "@/icons/ai"
 import {
+  Ellipsis,
   ChevronRight,
   EyeInvisible,
   EyeVisible,
   Handle,
   InfoCircleLine,
 } from "@/icons/app"
+import { AIButton as AIButtonComponent } from "@/kits/ai/AIButton"
 import { withDataTestId } from "@/lib/data-testid"
-import { isExternalHref, Link } from "@/lib/linkHandler"
 import { experimentalComponent } from "@/lib/experimental"
+import { isExternalHref, Link } from "@/lib/linkHandler"
 import { usePrivacyMode } from "@/lib/privacyMode"
+import { useI18n } from "@/lib/providers/i18n"
 import { withSkeleton } from "@/lib/skeleton"
 import { cn } from "@/lib/utils"
+import { PrivateBox } from "@/sds/Profile/PrivateBox"
 import {
   Card,
   CardComment,
@@ -45,6 +43,7 @@ import {
   CardSubtitle,
   CardTitle,
 } from "@/ui/Card"
+import { Counter } from "@/ui/Counter"
 import { Separator } from "@/ui/separator"
 import { Skeleton as SkeletonPrimitive } from "@/ui/skeleton"
 
@@ -76,8 +75,17 @@ export interface WidgetProps {
     }
     count?: number
   }
-  /** The card's footer button — its call to action. `neutral`/`sm` by default. */
-  action?: F0ButtonProps
+  /**
+   * The card's footer button — its call to action. `neutral`/`sm` by default,
+   * `outline`/`md` once the card is wide.
+   *
+   * AN ARRAY draws TWO, side by side, for a card that carries both its own call
+   * to action and the way out of it ("Sign now", "Go to Documents"). A pair is
+   * drawn `outline` at every width: two buttons in a footer are a set of equals,
+   * and filling one of them nominates it as the card's answer. Two is the
+   * ceiling — a third belongs in `actions`, the overflow menu.
+   */
+  action?: F0ButtonProps | F0ButtonProps[]
   /**
    * Extra classes for the FOOTER row that `action` draws in. For content that
    * BLEEDS past the card's content box and wants the footer brought onto its
@@ -86,12 +94,12 @@ export interface WidgetProps {
    * takes no className of its own, so this is the seam for it.
    */
   footerClassName?: string
-  summaries?: Array<{
+  summaries?: {
     label: string
     value: string | number
     prefixUnit?: string
     postfixUnit?: string
-  }>
+  }[]
   alert?: string
   status?: {
     text: string
@@ -166,7 +174,9 @@ const useIsWide = (ref: React.RefObject<HTMLElement | null>) => {
 
   useEffect(() => {
     const element = ref.current
-    if (!element || typeof ResizeObserver === "undefined") return
+    if (!element || typeof ResizeObserver === "undefined") {
+      return
+    }
 
     const measure = () => setIsWide(element.clientWidth >= WIDE_WIDGET_PX)
 
@@ -239,7 +249,9 @@ const WidgetTitle = ({
   // title never moves anything beside it.
   const titleClass = cn("truncate", isWide && "text-lg font-semibold")
 
-  if (!link) return <CardTitle className={titleClass}>{title}</CardTitle>
+  if (!link) {
+    return <CardTitle className={titleClass}>{title}</CardTitle>
+  }
 
   const content = (
     <>
@@ -311,8 +323,15 @@ const Container = forwardRef<
   const composedRef = useComposedRefs(ref, cardRef)
   const isWide = useIsWide(cardRef)
 
+  // One or two, drawn the same way either way — the footer's only difference is
+  // how many buttons are in the row.
+  const footerActions = action ? [action].flat() : []
+  const isPairOfActions = footerActions.length > 1
+
   useEffect(() => {
-    if (!isDragging || !onDragEnd) return
+    if (!isDragging || !onDragEnd) {
+      return
+    }
     // The pointer can be released anywhere, so the end of a drag is a document
     // concern rather than this card's.
     const handleGlobalMouseUp = () => onDragEnd()
@@ -357,11 +376,11 @@ const Container = forwardRef<
         )}
         ref={composedRef}
       >
-        {header && (
+        {header ? (
           <CardHeader className="-mr-1 -mt-1">
             <div className="flex w-full flex-1 flex-col gap-4">
               <div className="flex flex-1 flex-row flex-nowrap items-center justify-between gap-2">
-                {draggable && (
+                {draggable ? (
                   <div
                     className="-ml-1 flex h-6 w-6 shrink-0 items-center justify-center text-f1-icon-secondary hover:cursor-grab"
                     onMouseDown={onDragStart}
@@ -369,28 +388,28 @@ const Container = forwardRef<
                   >
                     <F0Icon icon={Handle} size="xs" />
                   </div>
-                )}
+                ) : null}
                 {/* `min-w-0` rather than `truncate`: the ellipsis belongs to the
                   TITLE, which carries its own (see `WidgetTitle`), and an
                   `overflow: hidden` here clipped the linked title's hover
                   background where it bleeds past the content box. */}
                 <div className="flex min-h-6 min-w-0 grow flex-row items-center gap-1">
-                  {header.title && (
+                  {header.title ? (
                     <WidgetTitle
                       title={header.title}
                       link={header.link}
                       isWide={isWide}
                     />
-                  )}
-                  {header.subtitle && (
+                  ) : null}
+                  {header.subtitle ? (
                     <div className="flex flex-row items-center gap-1">
-                      <InlineDot />
+                      {!header.link ? <InlineDot /> : null}
                       <CardSubtitle className="truncate">
                         {header.subtitle}
                       </CardSubtitle>
                     </div>
-                  )}
-                  {header.info && (
+                  ) : null}
+                  {header.info ? (
                     <Tooltip label={header.info}>
                       <F0Icon
                         icon={InfoCircleLine}
@@ -398,28 +417,28 @@ const Container = forwardRef<
                         className="text-f1-foreground-secondary"
                       />
                     </Tooltip>
-                  )}
-                  {header.count && (
+                  ) : null}
+                  {header.count ? (
                     <div className="ml-0.5">
                       <Counter value={header.count} />
                     </div>
-                  )}
+                  ) : null}
                 </div>
                 <div className="flex flex-row items-center gap-3">
-                  {alert && <F0TagAlert text={alert} level="critical" />}
-                  {status && (
+                  {alert ? <F0TagAlert text={alert} level="critical" /> : null}
+                  {status ? (
                     <F0TagStatus text={status.text} variant={status.variant} />
-                  )}
+                  ) : null}
                   {headerControls}
-                  {AIButton && (
+                  {AIButton ? (
                     <AIButtonComponent
                       size="sm"
                       label={t.ai.ask}
                       onClick={AIButton}
                       icon={OneIcon}
                     />
-                  )}
-                  {actions && (
+                  ) : null}
+                  {actions ? (
                     <DropdownInternal items={actions} align="end">
                       <F0Button
                         icon={Ellipsis}
@@ -429,17 +448,17 @@ const Container = forwardRef<
                         hideLabel
                       />
                     </DropdownInternal>
-                  )}
+                  ) : null}
                   {/* No link here: it is the TITLE (see `WidgetTitle`). This
                     corner belongs to the overflow menu. */}
                 </div>
               </div>
-              {header.comment && (
+              {header.comment ? (
                 <div className="flex flex-row items-center gap-3 overflow-visible">
                   <PrivateBox>
                     <CardComment>{header.comment}</CardComment>
                   </PrivateBox>
-                  {!!header.canBeBlurred && (
+                  {header.canBeBlurred ? (
                     <span>
                       <F0Button
                         icon={privacyModeEnabled ? EyeInvisible : EyeVisible}
@@ -450,14 +469,14 @@ const Container = forwardRef<
                         size="sm"
                       />
                     </span>
-                  )}
+                  ) : null}
                 </div>
-              )}
+              ) : null}
             </div>
           </CardHeader>
-        )}
+        ) : null}
         <CardContent className="flex h-full flex-col gap-4">
-          {summaries && (
+          {summaries ? (
             <div className="flex flex-row">
               {summaries.map((summary, index) => (
                 <div key={index} className="grow">
@@ -465,51 +484,57 @@ const Container = forwardRef<
                     {summary.label}
                   </div>
                   <div className="flex flex-row items-end gap-0.5 text-2xl font-semibold">
-                    {!!summary.prefixUnit && (
+                    {summary.prefixUnit ? (
                       <div className="text-lg font-medium">
                         {summary.prefixUnit}
                       </div>
-                    )}
+                    ) : null}
                     {summary.value}
-                    {!!summary.postfixUnit && (
+                    {summary.postfixUnit ? (
                       <div className="text-lg font-medium">
                         {summary.postfixUnit}
                       </div>
-                    )}
+                    ) : null}
                   </div>
                 </div>
               ))}
             </div>
-          )}
+          ) : null}
           {React.Children.toArray(children)
             .filter(isRealNode)
             .map((child, index) => {
               return (
                 <React.Fragment key={index}>
-                  {index > 0 && <Separator bare />}
+                  {index > 0 ? <Separator bare /> : null}
                   {child}
                 </React.Fragment>
               )
             })}
         </CardContent>
-        {action && (
-          <CardFooter className={cn(footerClassName)}>
-            {/* Both are DEFAULTS, not decisions: `action` is spread after them,
-              so a widget that asks for a particular variant or size still gets
-              it.
+        {footerActions.length > 0 ? (
+          <CardFooter className={cn("gap-2", footerClassName)}>
+            {footerActions.map((footerAction, index) => (
+              /* Both are DEFAULTS, not decisions: each action is spread after
+                them, so a widget that asks for a particular variant or size
+                still gets it.
 
-              `outline` only once the card is WIDE. In the rail the footer button
-              sits directly under a dense stack of rows, and a bordered rectangle
-              across the card there reads as one more row; the filled `neutral`
-              reads as a control. With the room a wide card has, that fill
-              becomes the heaviest thing on the card and the border is enough. */}
-            <F0Button
-              variant={isWide ? "outline" : "neutral"}
-              size={isWide ? "md" : "sm"}
-              {...action}
-            />
+                `outline` once the card is WIDE, and whenever there are TWO.
+                Alone in the rail the footer button sits directly under a dense
+                stack of rows, and a bordered rectangle across the card there
+                reads as one more row; the filled `neutral` reads as a control.
+                With the room a wide card has, that fill becomes the heaviest
+                thing on the card and the border is enough — and a PAIR is a set
+                of equals, where one filled button would nominate itself as the
+                card's answer. */
+              <F0Button
+                key={index}
+                variant={isPairOfActions || isWide ? "outline" : "neutral"}
+                size={isWide ? "md" : "sm"}
+                {...footerAction}
+              />
+            ))}
           </CardFooter>
-        )}
+        ) : null}
       </Card>
     </WidgetIsWideContext.Provider>
   )
@@ -559,7 +584,9 @@ const Skeleton = forwardRef<HTMLDivElement, WidgetSkeletonProps>(
             ) : (
               <SkeletonPrimitive className="h-4 w-full max-w-16" />
             )}
-            {header?.subtitle && <CardSubtitle>{header.subtitle}</CardSubtitle>}
+            {header?.subtitle ? (
+              <CardSubtitle>{header.subtitle}</CardSubtitle>
+            ) : null}
           </div>
         </CardHeader>
         <CardContent

@@ -1,11 +1,10 @@
 "use client"
 
-import type { ReactNode } from "react"
-
 import {
   createContext,
   type FC,
   type PropsWithChildren,
+  type ReactNode,
   useCallback,
   useContext,
   useEffect,
@@ -18,7 +17,6 @@ import { breakpoints, panelWidths } from "@factorialco/f0-core"
 import { useMediaQuery } from "usehooks-ts"
 
 import { useI18n } from "@/lib/providers/i18n"
-
 import { AiChatProviderReturnValue, AiChatState } from "../internal-types"
 import {
   type AiChatMode,
@@ -100,19 +98,18 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   const [footer, setFooter] = useState<ReactNode | undefined>(initialFooter)
   const [enabledInternal, setEnabledInternal] = useState(enabled)
 
-  const [chatWidth, setChatWidth] = usePersistedState<number>(
-    CHAT_WIDTH_STORAGE_KEY,
-    DEFAULT_CHAT_WIDTH,
-    (v): v is number =>
+  const [chatWidth, setChatWidth] = usePersistedState<number>({
+    key: CHAT_WIDTH_STORAGE_KEY,
+    fallback: DEFAULT_CHAT_WIDTH,
+    validate: (v): v is number =>
       typeof v === "number" &&
       !isNaN(v) &&
       v >= CHAT_WIDTH_MIN &&
       v <= CHAT_WIDTH_MAX,
-    undefined,
     // The only continuously-changing persisted value: a drag would otherwise
     // mean one synchronous localStorage write per animation frame.
-    CHAT_WIDTH_PERSIST_DEBOUNCE_MS
-  )
+    debounceMs: CHAT_WIDTH_PERSIST_DEBOUNCE_MS,
+  })
 
   // Not persisted: this is the live state of a pointer drag, not a preference.
   const [isResizing, setIsResizing] = useState(false)
@@ -156,23 +153,24 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   const panelOverlays =
     (isCoarsePointer && isCompactViewport) || chatWidthBounds.shouldOverlay
 
-  const [open, setOpen] = usePersistedState<boolean>(
-    CHAT_OPEN_STORAGE_KEY,
-    defaultVisualizationMode === "fullscreen",
-    (v): v is boolean => typeof v === "boolean"
-  )
+  const [open, setOpen] = usePersistedState<boolean>({
+    key: CHAT_OPEN_STORAGE_KEY,
+    fallback: defaultVisualizationMode === "fullscreen",
+    validate: (v): v is boolean => typeof v === "boolean",
+  })
 
   const fallbackVisualizationMode: VisualizationMode =
     defaultVisualizationMode === "canvas"
       ? "sidepanel"
       : defaultVisualizationMode
   const [visualizationMode, setVisualizationModeRaw] =
-    usePersistedState<VisualizationMode>(
-      CHAT_VISUALIZATION_MODE_STORAGE_KEY,
-      fallbackVisualizationMode,
-      (v): v is VisualizationMode => v === "sidepanel" || v === "fullscreen",
-      isPersistableVisualizationMode
-    )
+    usePersistedState<VisualizationMode>({
+      key: CHAT_VISUALIZATION_MODE_STORAGE_KEY,
+      fallback: fallbackVisualizationMode,
+      validate: (v): v is VisualizationMode =>
+        v === "sidepanel" || v === "fullscreen",
+      shouldWrite: isPersistableVisualizationMode,
+    })
 
   const [mode, setMode] = useState<AiChatMode>("chat")
   const [shouldPlayEntranceAnimation, setShouldPlayEntranceAnimation] =
@@ -344,11 +342,11 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   // persist only its id so a reload can reopen WHAT was showing, not just that
   // the panel was open. The host re-mounts the content when it's loaded.
   const [persistedPanelContentId, setPersistedPanelContentId] =
-    usePersistedState<string | null>(
-      CHAT_PANEL_CONTENT_ID_STORAGE_KEY,
-      null,
-      (v): v is string | null => v === null || typeof v === "string"
-    )
+    usePersistedState<string | null>({
+      key: CHAT_PANEL_CONTENT_ID_STORAGE_KEY,
+      fallback: null,
+      validate: (v): v is string | null => v === null || typeof v === "string",
+    })
 
   // Pending restore: the panel reopened (persisted `open`) while hosted
   // content was up on the last session. Until the host re-mounts it (via
@@ -382,20 +380,26 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   // a restore is pending — panelContent is still null then and writing would
   // wipe the very id being restored (breaking a reload mid-restore).
   useEffect(() => {
-    if (restoringPanelContentId) return
+    if (restoringPanelContentId) {
+      return
+    }
     setPersistedPanelContentId(panelContent?.id ?? null)
   }, [panelContent, restoringPanelContentId, setPersistedPanelContentId])
 
   // A restore only makes sense while the panel is open; closing it drops the
   // pending id (the AI chat comes back normally on the next open).
   useEffect(() => {
-    if (!open) setRestoringPanelContentId(null)
+    if (!open) {
+      setRestoringPanelContentId(null)
+    }
   }, [open])
 
   // Safety net: a host that never resolves the restore must not block the
   // panel — fall back to the AI chat.
   useEffect(() => {
-    if (!restoringPanelContentId) return
+    if (!restoringPanelContentId) {
+      return
+    }
     const timer = setTimeout(
       () => setRestoringPanelContentId(null),
       PANEL_RESTORE_TIMEOUT_MS
@@ -573,12 +577,22 @@ const REAL_VALUES: Partial<AiChatProviderReturnValue> = {
 
 const NO_PROVIDER_CONTEXT = new Proxy({} as AiChatProviderReturnValue, {
   get(_, prop) {
-    if (typeof prop !== "string") return undefined
+    if (typeof prop !== "string") {
+      return undefined
+    }
     const key = prop as ProviderKey
-    if (key in REAL_VALUES) return REAL_VALUES[key]
-    if (NULL_KEYS.has(key)) return null
-    if (UNDEFINED_KEYS.has(key)) return undefined
-    if (FALSE_KEYS.has(key)) return false
+    if (key in REAL_VALUES) {
+      return REAL_VALUES[key]
+    }
+    if (NULL_KEYS.has(key)) {
+      return null
+    }
+    if (UNDEFINED_KEYS.has(key)) {
+      return undefined
+    }
+    if (FALSE_KEYS.has(key)) {
+      return false
+    }
     return noop
   },
 })

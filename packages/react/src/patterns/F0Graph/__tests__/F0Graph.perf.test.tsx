@@ -1,10 +1,7 @@
 import React from "react"
 import { beforeAll, describe, expect, it, vi } from "vitest"
-
 import { zeroRender, screen } from "@/testing/test-utils"
-
 import type { GraphNode, ZoomLevel } from "../../types"
-
 import { F0Graph } from "../F0Graph"
 
 // ─── Fixtures ──────────────────────────────────────────────────
@@ -130,7 +127,7 @@ describe("Fix 2 — renderNode stabilization", () => {
     )
 
     // No crash — stable ref pattern handles the update
-    expect(true).toBe(true)
+    expect(screen.getByRole("tree", { name: "Graph view" })).toBeInTheDocument()
   })
 })
 

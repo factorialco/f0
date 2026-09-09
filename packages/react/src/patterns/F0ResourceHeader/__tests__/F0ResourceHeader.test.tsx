@@ -1,9 +1,7 @@
 import { describe, expect, it, vi } from "vitest"
-
 import { Download } from "@/icons/app"
 import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
-
-import { F0ResourceHeader } from "../index"
+import { F0ResourceHeader } from ".."
 
 describe("F0ResourceHeader", () => {
   it("renders secondary dropdown actions and calls the selected actions", async () => {

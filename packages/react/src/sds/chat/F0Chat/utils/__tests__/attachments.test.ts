@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import { type F0ChatAttachment, type F0ChatFileAttachment } from "../../types"
 import {
   documentPreviewKind,

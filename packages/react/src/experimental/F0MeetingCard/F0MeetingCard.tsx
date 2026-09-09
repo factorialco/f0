@@ -1,5 +1,4 @@
 import { forwardRef } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
@@ -9,7 +8,6 @@ import { cn } from "@/lib/utils"
 import { Card } from "@/ui/Card"
 import { Skeleton } from "@/ui/skeleton"
 import { Text } from "@/ui/Text"
-
 import { MeetingAttendees } from "./components/MeetingAttendees"
 import { MeetingJoinButton } from "./components/MeetingJoinButton"
 import { MeetingStatusTag } from "./components/MeetingStatusTag"
@@ -114,7 +112,7 @@ const F0MeetingCardBase = forwardRef<HTMLDivElement, F0MeetingCardProps>(
 
     const titleBlock = (
       <>
-        {headline && (
+        {headline ? (
           <Text
             variant="body"
             content={headline}
@@ -126,10 +124,10 @@ const F0MeetingCardBase = forwardRef<HTMLDivElement, F0MeetingCardProps>(
               state === "cancelled" && "line-through"
             )}
           />
-        )}
-        {metaSegments.length > 0 && (
+        ) : null}
+        {metaSegments.length > 0 ? (
           <Text variant="description" content={metaSegments.join(" · ")} />
-        )}
+        ) : null}
       </>
     )
 
@@ -161,9 +159,9 @@ const F0MeetingCardBase = forwardRef<HTMLDivElement, F0MeetingCardProps>(
             onClick={action.onClick}
           />
         ))}
-        {showsJoin && join && (
+        {showsJoin && join ? (
           <MeetingJoinButton join={join} disabled={joinDisabled} />
-        )}
+        ) : null}
       </>
     )
 
@@ -190,11 +188,11 @@ const F0MeetingCardBase = forwardRef<HTMLDivElement, F0MeetingCardProps>(
               {attendeesBlock}
               {summaryBlock}
             </div>
-            {hasActions && (
+            {hasActions ? (
               <div className="flex shrink-0 flex-row items-center gap-2">
                 {actionsBlock}
               </div>
-            )}
+            ) : null}
           </div>
         ) : (
           <>
@@ -204,7 +202,7 @@ const F0MeetingCardBase = forwardRef<HTMLDivElement, F0MeetingCardProps>(
             {summaryBlock}
 
             {/* Stretched over the card padding so the divider reaches both edges. */}
-            {(hasActions || showsStatusTag) && (
+            {hasActions || showsStatusTag ? (
               <div
                 className={cn(
                   "flex flex-row items-center gap-2",
@@ -215,13 +213,13 @@ const F0MeetingCardBase = forwardRef<HTMLDivElement, F0MeetingCardProps>(
                 <div className="flex flex-1 flex-row items-center gap-2">
                   {statusTagBlock}
                 </div>
-                {hasActions && (
+                {hasActions ? (
                   <div className="flex flex-row items-center gap-2">
                     {actionsBlock}
                   </div>
-                )}
+                ) : null}
               </div>
-            )}
+            ) : null}
           </>
         )}
       </Card>

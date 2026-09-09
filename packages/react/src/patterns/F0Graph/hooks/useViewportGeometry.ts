@@ -1,5 +1,4 @@
 import { useStore } from "@xyflow/react"
-
 import {
   DEFAULT_NODE_WINDOW_PADDING,
   NODE_WINDOW_QUANTIZE_STEP,
@@ -41,10 +40,14 @@ export function useViewportGeometry({
   // identity in between, so every downstream memo stays stable too.
   const rect = useStore(
     (s): ViewportRect | null => {
-      if (!enabled) return null
+      if (!enabled) {
+        return null
+      }
       const [tx, ty, zoom] = s.transform
       const { width, height } = s
-      if (width <= 0 || height <= 0 || zoom <= 0) return null
+      if (width <= 0 || height <= 0 || zoom <= 0) {
+        return null
+      }
 
       // Flow-space rect of what the camera currently shows, grown by `padding`.
       // Screen point p maps to flow coordinate (p - t) / zoom.

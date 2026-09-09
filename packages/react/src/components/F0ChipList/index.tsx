@@ -1,15 +1,14 @@
+import { Chip, type ChipProps } from "@/components/OneChip"
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import { OverflowList } from "@/ui/OverflowList"
-
-import { Chip, type ChipProps } from "@/components/OneChip"
 import { ChipCounter } from "./ChipCounter"
 
 type Props = {
   /**
    * Array of chips to display.
    */
-  chips: Array<ChipProps>
+  chips: ChipProps[]
 
   /**
    * The maximum number of chips to display.
@@ -71,12 +70,12 @@ const _F0ChipList = ({
         return <Chip key={index} {...chip} />
       })}
 
-      {showCounter && (
+      {showCounter ? (
         <ChipCounter
           count={remainingCount}
           list={initialRemainingCount ? undefined : remainingChips}
         />
-      )}
+      ) : null}
     </div>
   )
 }

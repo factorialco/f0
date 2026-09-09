@@ -32,7 +32,9 @@ const getIconComponent = (iconName: string): IconType => {
 }
 
 const SourceIcon = ({ iconName }: { iconName?: string }) => {
-  if (!iconName) return null
+  if (!iconName) {
+    return null
+  }
   return (
     <div className="mr-1 flex items-center justify-center">
       <F0Icon icon={getIconComponent(iconName)} size="md" color="default" />

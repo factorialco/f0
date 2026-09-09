@@ -1,5 +1,4 @@
 import { useEffect, useRef } from "react"
-
 import { DEFAULT_VISIBLE_DATA_DEBOUNCE_MS } from "../constants"
 
 interface UseViewportDataLoaderOptions {
@@ -58,7 +57,9 @@ export function useViewportDataLoader({
   useEffect(() => {
     latestNodeIdsRef.current = new Set(nodeIds)
 
-    if (!loadVisibleNodeData || !enabled) return
+    if (!loadVisibleNodeData || !enabled) {
+      return
+    }
 
     let hasNew = false
     for (const id of nodeIds) {
@@ -67,7 +68,9 @@ export function useViewportDataLoader({
         hasNew = true
       }
     }
-    if (pendingRef.current.size === 0) return
+    if (pendingRef.current.size === 0) {
+      return
+    }
 
     // Trailing debounce: reset the timer while new ids keep arriving; otherwise
     // only (re)arm it when none is scheduled. That second case also recovers the
@@ -75,8 +78,12 @@ export function useViewportDataLoader({
     // ids are already pending, so `hasNew` is false, but the timer is gone).
     // No cleanup here on purpose — an unrelated re-render must not cancel a
     // pending flush; unmount is handled by the effect below.
-    if (!hasNew && timerRef.current !== null) return
-    if (timerRef.current) clearTimeout(timerRef.current)
+    if (!hasNew && timerRef.current !== null) {
+      return
+    }
+    if (timerRef.current) {
+      clearTimeout(timerRef.current)
+    }
     timerRef.current = setTimeout(() => {
       timerRef.current = null
       // Drop fly-over ids that left the viewport before this flush; only the
@@ -92,13 +99,17 @@ export function useViewportDataLoader({
         }
       }
       pendingRef.current.clear()
-      if (batch.length > 0) callbackRef.current?.(batch)
+      if (batch.length > 0) {
+        callbackRef.current?.(batch)
+      }
     }, debounceMs)
   }, [nodeIds, loadVisibleNodeData, debounceMs, enabled])
 
   useEffect(
     () => () => {
-      if (timerRef.current) clearTimeout(timerRef.current)
+      if (timerRef.current) {
+        clearTimeout(timerRef.current)
+      }
       timerRef.current = null
     },
     []

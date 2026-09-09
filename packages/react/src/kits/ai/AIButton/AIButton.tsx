@@ -1,9 +1,7 @@
 import { forwardRef } from "react"
-
-import * as AIIcons from "@/icons/ai"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { ButtonInternalProps } from "@/components/F0Button/internal-types"
+import * as AIIcons from "@/icons/ai"
 
 // Create a type that only includes AI icon types
 type AIIconType = (typeof AIIcons)[keyof typeof AIIcons]
@@ -42,7 +40,7 @@ const AIButton = forwardRef<
       {...publicProps}
       variant="ai"
       ref={ref}
-      iconRotate={props.icon == AIIcons.One ? true : false}
+      iconRotate={props.icon === AIIcons.One}
     />
   )
 })

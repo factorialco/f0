@@ -1,16 +1,14 @@
 "use client"
 
 import { useEffect, useRef } from "react"
-
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0Icon } from "@/components/F0Icon"
-import { OneEllipsis } from "@/lib/OneEllipsis"
 import { CrossedCircle } from "@/icons/app"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { ScrollArea } from "@/ui/scrollarea"
 import { Spinner } from "@/ui/Spinner"
-
 import type { F0SelectItemObject } from "../types"
 
 interface SelectionPreviewProps<T extends string> {
@@ -33,14 +31,14 @@ function PreviewItem<T extends string>({
   return (
     <div className="flex w-fit max-w-full min-w-0 items-center justify-between gap-1.5 rounded-md border border-solid border-f1-border-secondary p-1">
       <div className="flex min-w-0 flex-1 items-center gap-1.5">
-        {item.avatar && <F0Avatar avatar={item.avatar} size="xs" />}
-        {item.icon && (
+        {item.avatar ? <F0Avatar avatar={item.avatar} size="xs" /> : null}
+        {item.icon ? (
           <F0Icon
             icon={item.icon}
             size="sm"
             className="shrink-0 text-f1-icon"
           />
-        )}
+        ) : null}
         <OneEllipsis className="text-sm">{item.label}</OneEllipsis>
       </div>
       <button
@@ -91,7 +89,9 @@ export function SelectionPreview<T extends string>({
   // interfering.
   useEffect(() => {
     const el = containerRef.current
-    if (!el) return
+    if (!el) {
+      return
+    }
 
     const stop = (e: Event) => e.stopPropagation()
 
@@ -130,11 +130,11 @@ export function SelectionPreview<T extends string>({
                   onDeselect={onDeselect}
                 />
               ))}
-              {isLoadingMore && (
+              {isLoadingMore ? (
                 <div className="flex items-center justify-center py-2">
                   <Spinner size="small" />
                 </div>
-              )}
+              ) : null}
             </div>
           </ScrollArea>
         </div>

@@ -1,7 +1,6 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
-
-import { CLOCK_IN_COLORS, ClockInGraph, ClockInGraphProps } from "./index"
+import { CLOCK_IN_COLORS, ClockInGraph, ClockInGraphProps } from "."
 
 describe("ClockInGraph", () => {
   it("renders with default props", () => {

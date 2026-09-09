@@ -1,7 +1,5 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
-
 import { Page } from "@/patterns/Navigation/Page"
-
 import { ExampleComponent, getMockVisualizations } from "./mockData"
 
 /**

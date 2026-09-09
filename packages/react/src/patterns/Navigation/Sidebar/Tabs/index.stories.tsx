@@ -1,11 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { useState } from "react"
 import { action } from "storybook/actions"
-
 import { Menu, Messages } from "@/icons/app"
-
-import { SidebarTab, SidebarTabs } from "./index"
+import { SidebarTab, SidebarTabs } from "."
 
 const tabs: SidebarTab[] = [
   { id: "main", label: "Main", icon: Menu },

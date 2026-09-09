@@ -1,13 +1,11 @@
 import { cva } from "cva"
 import { forwardRef } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { F0Icon, IconType } from "@/components/F0Icon"
-import { OneEllipsis } from "@/lib/OneEllipsis"
 import { CheckCircle, Cross, InfoCircle, Warning } from "@/icons/app"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
-
 import { CalloutInternalProps, CalloutSkeletonProps } from "./types"
 
 const calloutVariants = cva({
@@ -64,16 +62,16 @@ export const CalloutInternal = forwardRef<HTMLDivElement, CalloutInternalProps>(
               variantTitleColors[variant]
             )}
           >
-            {variantIcons[variant] && (
+            {variantIcons[variant] ? (
               <F0Icon icon={variantIcons[variant]} size="sm" aria-hidden />
-            )}
+            ) : null}
             <OneEllipsis
               className={variantTitleColors[variant] || "font-medium"}
             >
               {title}
             </OneEllipsis>
           </div>
-          {onClose && (
+          {onClose ? (
             <F0Button
               variant="ghost"
               icon={Cross}
@@ -82,7 +80,7 @@ export const CalloutInternal = forwardRef<HTMLDivElement, CalloutInternalProps>(
               onClick={onClose}
               label="Close"
             />
-          )}
+          ) : null}
         </div>
 
         <div className="flex flex-col gap-[1px]">
@@ -94,7 +92,7 @@ export const CalloutInternal = forwardRef<HTMLDivElement, CalloutInternalProps>(
           >
             {children}
           </div>
-          {hasActions && (
+          {hasActions ? (
             <div className="flex flex-row items-center justify-between gap-3 rounded-b-[13.25px] bg-f1-background px-4 py-3">
               {actions.map((action, index) => (
                 <div key={index}>
@@ -107,7 +105,7 @@ export const CalloutInternal = forwardRef<HTMLDivElement, CalloutInternalProps>(
                 </div>
               ))}
             </div>
-          )}
+          ) : null}
         </div>
       </div>
     )
@@ -141,12 +139,12 @@ export const CalloutSkeleton = ({
             <Skeleton className="h-4 w-1/2 rounded-md" />
           </div>
         </div>
-        {!compact && (
+        {!compact ? (
           <div className="flex flex-row items-center justify-between gap-3 rounded-b-[13.25px] bg-f1-background px-4 py-3">
             <Skeleton className="h-8 w-24 rounded-md" />
             <Skeleton className="h-8 w-28 rounded-md" />
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   )

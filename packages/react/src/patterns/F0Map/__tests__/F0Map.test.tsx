@@ -1,8 +1,6 @@
 import { createRef } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import { fireEvent, screen, zeroRender as render } from "@/testing/test-utils"
-
 import { F0Map, type F0MapHandle } from "../F0Map"
 import type { F0MapArc, F0MapPoint, F0MapRoute } from "../types"
 
@@ -15,11 +13,11 @@ const mock = vi.hoisted(() => {
 
   class MockMap {
     opts: Record<string, unknown>
-    handlers: Record<string, Array<(e?: unknown) => void>> = {}
+    handlers: Record<string, ((e?: unknown) => void)[]> = {}
     calls = {
-      easeTo: [] as Array<Record<string, unknown>>,
-      flyTo: [] as Array<Record<string, unknown>>,
-      jumpTo: [] as Array<Record<string, unknown>>,
+      easeTo: [] as Record<string, unknown>[],
+      flyTo: [] as Record<string, unknown>[],
+      jumpTo: [] as Record<string, unknown>[],
       fitBounds: [] as unknown[],
       setStyle: [] as unknown[],
       setProjection: [] as unknown[],
@@ -35,7 +33,9 @@ const mock = vi.hoisted(() => {
     style = {}
 
     constructor(opts: Record<string, unknown>) {
-      if (state.throwOnCreate) throw new Error("WebGL not supported")
+      if (state.throwOnCreate) {
+        throw new Error("WebGL not supported")
+      }
       this.opts = opts
       instances.push(this)
     }
@@ -46,12 +46,17 @@ const mock = vi.hoisted(() => {
       b?: (e?: unknown) => void
     ) {
       const cb = typeof a === "function" ? a : b
-      if (cb) (this.handlers[type] ??= []).push(cb)
+      if (cb) {
+        this.handlers[type] ??= []
+        this.handlers[type].push(cb)
+      }
       return this
     }
     once(type: string, cb: (e?: unknown) => void) {
       // Fire `load` on a microtask so the component's handler is registered.
-      if (type === "load") void Promise.resolve().then(() => cb())
+      if (type === "load") {
+        queueMicrotask(() => cb())
+      }
       return this
     }
     off() {
@@ -119,7 +124,8 @@ const mock = vi.hoisted(() => {
       return this.sources[id]
     }
     removeSource(id: string) {
-      delete this.sources[id]
+      const { [id]: _removed, ...rest } = this.sources
+      this.sources = rest
     }
     addLayer(spec: { id: string }) {
       this.layers.add(spec.id)
@@ -152,7 +158,12 @@ const mock = vi.hoisted(() => {
       return this
     }
   }
-  class MockAttributionControl {}
+  class MockAttributionControl {
+    opts: Record<string, unknown> | undefined
+    constructor(opts?: Record<string, unknown>) {
+      this.opts = opts
+    }
+  }
 
   return {
     instances,
@@ -261,10 +272,10 @@ describe("F0Map", () => {
       expect(onMarkerSelect).toHaveBeenCalledWith(null)
     })
 
-    it("getMap returns the underlying instance", () => {
+    it("getNativeMap returns the engine's own instance", () => {
       const ref = createRef<F0MapHandle>()
       render(<F0Map ref={ref} markers={POINTS} />)
-      expect(ref.current?.getMap()).toBe(mock.instances[0])
+      expect(ref.current?.getNativeMap()).toBe(mock.instances[0])
     })
   })
 
@@ -326,6 +337,23 @@ describe("F0Map", () => {
         cb({ features: [{ properties: { id: "commute", kind: "route" } }] })
       )
       expect(onRouteClick).toHaveBeenCalledWith("commute")
+    })
+  })
+
+  describe("style", () => {
+    it("hands the engine the matching half of the style pair", () => {
+      // The pair is opaque to F0Map (its shape belongs to the engine), so the
+      // only thing worth asserting is that the right half reaches the map
+      // unchanged - jsdom has no `.dark` ancestor, so that is `light`.
+      const light = { version: 8, name: "light" }
+      const dark = { version: 8, name: "dark" }
+      render(
+        <F0Map
+          markers={POINTS}
+          mapStyle={{ provider: "maplibre", light, dark }}
+        />
+      )
+      expect(mock.instances[0].opts.style).toBe(light)
     })
   })
 

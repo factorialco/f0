@@ -3,7 +3,6 @@ import { F0AvatarEmoji } from "@/components/avatars/F0AvatarEmoji"
 import { F0Button } from "@/components/F0Button"
 import { withDataTestId } from "@/lib/data-testid"
 import { UpsellingButton } from "@/sds/UpsellingKit/UpsellingButton"
-
 import * as Types from "./types"
 
 function _OneEmptyState({
@@ -16,22 +15,26 @@ function _OneEmptyState({
 }: Types.OneEmptyStateProps) {
   return (
     <div
-      className="@container flex flex-col items-center justify-center gap-5 p-8"
+      className="@container flex w-full flex-col items-center justify-center gap-5 p-8"
       {...rest}
     >
-      {variant === "default" && <F0AvatarEmoji emoji={emoji!} size="lg" />}
-      {variant !== "default" && <F0AvatarAlert type={variant} size="lg" />}
+      {variant === "default" ? (
+        <F0AvatarEmoji emoji={emoji!} size="lg" />
+      ) : null}
+      {variant !== "default" ? (
+        <F0AvatarAlert type={variant} size="lg" />
+      ) : null}
       <div className="flex flex-col items-center justify-center gap-0.5">
         <p className="text-center text-lg font-medium text-f1-foreground">
           {title}
         </p>
-        {description && (
+        {description ? (
           <p className="max-w-96 text-center text-f1-foreground-secondary">
             {description}
           </p>
-        )}
+        ) : null}
       </div>
-      {actions && (
+      {actions ? (
         <div className="flex w-full max-w-full flex-col items-center justify-center gap-2 @sm:w-fit @sm:flex-row @sm:flex-wrap @sm:gap-3 [&>div]:w-full">
           {actions.map((action) => {
             if (action.type === "upsell") {
@@ -47,20 +50,19 @@ function _OneEmptyState({
                   closeLabel={action.closeLabel}
                 />
               )
-            } else {
-              return (
-                <F0Button
-                  key={action.label}
-                  label={action.label}
-                  variant={action.variant}
-                  onClick={action.onClick}
-                  icon={action.icon}
-                />
-              )
             }
+            return (
+              <F0Button
+                key={action.label}
+                label={action.label}
+                variant={action.variant}
+                onClick={action.onClick}
+                icon={action.icon}
+              />
+            )
           })}
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

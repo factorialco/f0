@@ -1,5 +1,4 @@
 import { z, ZodTypeAny } from "zod"
-
 import type { F0AlertProps } from "@/components/F0Alert/types"
 import type {
   DurationFieldConfig,
@@ -7,13 +6,11 @@ import type {
   DurationUnit,
 } from "@/components/F0DurationInput/types"
 import type { InputFieldStatus } from "@/components/F0InputField/types"
-import type { F0FormDefinitionSingleSchema } from "@/patterns/F0WizardForm/types"
-
 import {
   isPossiblePhoneValue,
   isValidPhoneValue,
 } from "@/experimental/Forms/F0PhoneInput/lib/phone"
-
+import type { F0FormDefinitionSingleSchema } from "@/patterns/F0WizardForm/types"
 import type { F0CardSelectConfig } from "./fields/cardSelect/types"
 import type { F0CheckboxConfig } from "./fields/checkbox/types"
 import type { F0CustomConfig } from "./fields/custom/types"
@@ -441,7 +438,7 @@ export type F0ArrayConfig<
  * @typeParam TValue - Type of the field value (inferred from Zod schema)
  */
 export type F0CustomFieldConfigBase<TValue = unknown> = F0BaseConfig &
-  F0CustomConfig<TValue, undefined> & {
+  F0CustomConfig<TValue> & {
     fieldType: "custom"
   }
 
@@ -862,7 +859,7 @@ export namespace f0FormField {
     config: TextConfig & { optional: true }
   ): z.ZodOptional<z.ZodString> & F0ZodType<z.ZodOptional<z.ZodString>>
   export function text(
-    config: TextConfig & { optional?: false | undefined }
+    config: TextConfig & { optional?: false }
   ): z.ZodString & F0ZodType<z.ZodString>
   export function text({
     optional,
@@ -872,8 +869,12 @@ export namespace f0FormField {
   }: TextConfig) {
     let schema = z.string()
     const effectiveMin = !optional && minLength === undefined ? 1 : minLength
-    if (effectiveMin !== undefined) schema = schema.min(effectiveMin)
-    if (maxLength !== undefined) schema = schema.max(maxLength)
+    if (effectiveMin !== undefined) {
+      schema = schema.min(effectiveMin)
+    }
+    if (maxLength !== undefined) {
+      schema = schema.max(maxLength)
+    }
     const finalSchema = optional ? schema.optional() : schema
     return f0FormField(finalSchema as never, config as never)
   }
@@ -889,7 +890,7 @@ export namespace f0FormField {
     config: EmailConfig & { optional: true }
   ): z.ZodOptional<z.ZodString> & F0ZodType<z.ZodOptional<z.ZodString>>
   export function email(
-    config: EmailConfig & { optional?: false | undefined }
+    config: EmailConfig & { optional?: false }
   ): z.ZodString & F0ZodType<z.ZodString>
   export function email({ optional, ...config }: EmailConfig) {
     const schema = optional ? z.string().email().optional() : z.string().email()
@@ -907,7 +908,7 @@ export namespace f0FormField {
     config: TextareaConfig & { optional: true }
   ): z.ZodOptional<z.ZodString> & F0ZodType<z.ZodOptional<z.ZodString>>
   export function textarea(
-    config: TextareaConfig & { optional?: false | undefined }
+    config: TextareaConfig & { optional?: false }
   ): z.ZodString & F0ZodType<z.ZodString>
   export function textarea({ optional, ...config }: TextareaConfig) {
     const schema = optional ? z.string().optional() : z.string().min(1)
@@ -931,7 +932,7 @@ export namespace f0FormField {
     config: NumberConfig & { optional: true }
   ): z.ZodOptional<z.ZodNumber> & F0ZodType<z.ZodOptional<z.ZodNumber>>
   export function number(
-    config: NumberConfig & { optional?: false | undefined }
+    config: NumberConfig & { optional?: false }
   ): z.ZodNumber & F0ZodType<z.ZodNumber>
   export function number({
     optional,
@@ -941,9 +942,15 @@ export namespace f0FormField {
     ...config
   }: NumberConfig) {
     let schema = z.number()
-    if (isInt) schema = schema.int()
-    if (min !== undefined) schema = schema.min(min)
-    if (max !== undefined) schema = schema.max(max)
+    if (isInt) {
+      schema = schema.int()
+    }
+    if (min !== undefined) {
+      schema = schema.min(min)
+    }
+    if (max !== undefined) {
+      schema = schema.max(max)
+    }
     const finalSchema = optional ? schema.optional() : schema
     return f0FormField(finalSchema as never, config as never)
   }
@@ -959,7 +966,7 @@ export namespace f0FormField {
     config: SwitchConfig & { optional: true }
   ): z.ZodBoolean & F0ZodType<z.ZodBoolean>
   export function boolean(
-    config: SwitchConfig & { optional?: false | undefined }
+    config: SwitchConfig & { optional?: false }
   ): z.ZodLiteral<true> & F0ZodType<z.ZodLiteral<true>>
   export function boolean({ optional, ...config }: SwitchConfig) {
     const schema = optional ? z.boolean() : z.literal(true as const)
@@ -980,7 +987,7 @@ export namespace f0FormField {
     config: CheckboxConfig & { optional: true }
   ): z.ZodBoolean & F0ZodType<z.ZodBoolean>
   export function checkbox(
-    config: CheckboxConfig & { optional?: false | undefined }
+    config: CheckboxConfig & { optional?: false }
   ): z.ZodLiteral<true> & F0ZodType<z.ZodLiteral<true>>
   export function checkbox({ optional, ...config }: CheckboxConfig) {
     const schema = optional ? z.boolean() : z.literal(true as const)
@@ -1001,7 +1008,7 @@ export namespace f0FormField {
     config: DateConfig & { optional: true }
   ): z.ZodOptional<z.ZodDate> & F0ZodType<z.ZodOptional<z.ZodDate>>
   export function date(
-    config: DateConfig & { optional?: false | undefined }
+    config: DateConfig & { optional?: false }
   ): z.ZodDate & F0ZodType<z.ZodDate>
   export function date({ optional, ...config }: DateConfig) {
     const schema = optional ? z.date().optional() : z.date()
@@ -1019,7 +1026,7 @@ export namespace f0FormField {
     config: UrlConfig & { optional: true }
   ): z.ZodOptional<z.ZodString> & F0ZodType<z.ZodOptional<z.ZodString>>
   export function url(
-    config: UrlConfig & { optional?: false | undefined }
+    config: UrlConfig & { optional?: false }
   ): z.ZodString & F0ZodType<z.ZodString>
   export function url({ optional, ...config }: UrlConfig) {
     const schema = optional ? z.string().url().optional() : z.string().url()
@@ -1037,7 +1044,7 @@ export namespace f0FormField {
     config: MoneyConfig & { optional: true }
   ): z.ZodOptional<z.ZodNumber> & F0ZodType<z.ZodOptional<z.ZodNumber>>
   export function money(
-    config: MoneyConfig & { optional?: false | undefined }
+    config: MoneyConfig & { optional?: false }
   ): z.ZodNumber & F0ZodType<z.ZodNumber>
   export function money({ optional, ...config }: MoneyConfig) {
     const schema = optional ? z.number().optional() : z.number()
@@ -1060,7 +1067,7 @@ export namespace f0FormField {
     config: PercentageConfig & { optional: true }
   ): z.ZodOptional<z.ZodNumber> & F0ZodType<z.ZodOptional<z.ZodNumber>>
   export function percentage(
-    config: PercentageConfig & { optional?: false | undefined }
+    config: PercentageConfig & { optional?: false }
   ): z.ZodNumber & F0ZodType<z.ZodNumber>
   export function percentage({
     optional,
@@ -1069,8 +1076,12 @@ export namespace f0FormField {
     ...config
   }: PercentageConfig) {
     let schema = z.number()
-    if (min !== undefined) schema = schema.min(min)
-    if (max !== undefined) schema = schema.max(max)
+    if (min !== undefined) {
+      schema = schema.min(min)
+    }
+    if (max !== undefined) {
+      schema = schema.max(max)
+    }
     const finalSchema = optional ? schema.optional() : schema
     return f0FormField(
       finalSchema as never,
@@ -1085,7 +1096,7 @@ export namespace f0FormField {
     F0StringCardSelectConfig,
     "fieldType" | "options"
   > & {
-    options: Array<{ value: V } & Record<string, unknown>>
+    options: ({ value: V } & Record<string, unknown>)[]
     optional?: boolean
   }
 
@@ -1094,7 +1105,7 @@ export namespace f0FormField {
   ): z.ZodOptional<z.ZodEnum<[V, ...V[]]>> &
     F0ZodType<z.ZodOptional<z.ZodEnum<[V, ...V[]]>>>
   export function cardSelect<const V extends string>(
-    config: CardSelectConfig<V> & { optional?: false | undefined }
+    config: CardSelectConfig<V> & { optional?: false }
   ): z.ZodEnum<[V, ...V[]]> & F0ZodType<z.ZodEnum<[V, ...V[]]>>
   export function cardSelect<const V extends string>(
     config: CardSelectConfig<V>
@@ -1124,7 +1135,7 @@ export namespace f0FormField {
     config: FileConfig & { optional: true }
   ): z.ZodOptional<z.ZodString> & F0ZodType<z.ZodOptional<z.ZodString>>
   export function file(
-    config: FileConfig & { optional?: false | undefined }
+    config: FileConfig & { optional?: false }
   ): z.ZodString & F0ZodType<z.ZodString>
   export function file({ optional, ...config }: FileConfig) {
     const schema = optional ? z.string().optional() : z.string().min(1)
@@ -1146,7 +1157,7 @@ export namespace f0FormField {
   ): z.ZodOptional<z.ZodArray<z.ZodString>> &
     F0ZodType<z.ZodOptional<z.ZodArray<z.ZodString>>>
   export function multiFile(
-    config: MultiFileConfig & { optional?: false | undefined }
+    config: MultiFileConfig & { optional?: false }
   ): z.ZodArray<z.ZodString> & F0ZodType<z.ZodArray<z.ZodString>>
   export function multiFile({ optional, ...config }: MultiFileConfig) {
     const schema = optional
@@ -1169,7 +1180,7 @@ export namespace f0FormField {
     config: TimeConfig & { optional: true }
   ): z.ZodOptional<z.ZodDate> & F0ZodType<z.ZodOptional<z.ZodDate>>
   export function time(
-    config: TimeConfig & { optional?: false | undefined }
+    config: TimeConfig & { optional?: false }
   ): z.ZodDate & F0ZodType<z.ZodDate>
   export function time({ optional, ...config }: TimeConfig) {
     const schema = optional ? z.date().optional() : z.date()
@@ -1190,7 +1201,7 @@ export namespace f0FormField {
     config: DateTimeConfig & { optional: true }
   ): z.ZodOptional<z.ZodDate> & F0ZodType<z.ZodOptional<z.ZodDate>>
   export function datetime(
-    config: DateTimeConfig & { optional?: false | undefined }
+    config: DateTimeConfig & { optional?: false }
   ): z.ZodDate & F0ZodType<z.ZodDate>
   export function datetime({ optional, ...config }: DateTimeConfig) {
     const schema = optional ? z.date().optional() : z.date()
@@ -1211,7 +1222,7 @@ export namespace f0FormField {
     config: DurationConfig & { optional: true }
   ): z.ZodOptional<z.ZodNumber> & F0ZodType<z.ZodOptional<z.ZodNumber>>
   export function duration(
-    config: DurationConfig & { optional?: false | undefined }
+    config: DurationConfig & { optional?: false }
   ): z.ZodNumber & F0ZodType<z.ZodNumber>
   export function duration({ optional, ...config }: DurationConfig) {
     const schema = optional ? z.number().optional() : z.number()
@@ -1235,7 +1246,7 @@ export namespace f0FormField {
   ): z.ZodOptional<DateRangeObjectSchema> &
     F0ZodType<z.ZodOptional<DateRangeObjectSchema>>
   export function dateRange(
-    config: DateRangeConfig & { optional?: false | undefined }
+    config: DateRangeConfig & { optional?: false }
   ): DateRangeObjectSchema & F0ZodType<DateRangeObjectSchema>
   export function dateRange({ optional, ...config }: DateRangeConfig) {
     const baseSchema = z.object({ from: z.date(), to: z.date() })
@@ -1265,7 +1276,7 @@ export namespace f0FormField {
   ): z.ZodOptional<z.ZodNullable<PeriodValueSchema>> &
     F0ZodType<z.ZodOptional<z.ZodNullable<PeriodValueSchema>>>
   export function datePeriod(
-    config: DatePeriodConfig & { optional?: false | undefined }
+    config: DatePeriodConfig & { optional?: false }
   ): PeriodValueSchema & F0ZodType<PeriodValueSchema>
   export function datePeriod({ optional, ...config }: DatePeriodConfig) {
     const base = z.object({
@@ -1317,7 +1328,7 @@ export namespace f0FormField {
   ): z.ZodOptional<PhoneObjectSchema> &
     F0ZodType<z.ZodOptional<PhoneObjectSchema>>
   export function phone(
-    config: PhoneFieldShortcutConfig & { optional?: false | undefined }
+    config: PhoneFieldShortcutConfig & { optional?: false }
   ): PhoneObjectSchema & F0ZodType<PhoneObjectSchema>
   export function phone({
     optional,
@@ -1331,8 +1342,12 @@ export namespace f0FormField {
         number: z.string(),
       })
       .superRefine((value, ctx) => {
-        if (validate === false) return
-        if (optional && !value.number?.trim()) return
+        if (validate === false) {
+          return
+        }
+        if (optional && !value.number?.trim()) {
+          return
+        }
         const pair = { prefix: value.prefix, number: value.number }
         const isOk =
           validate === "possible"
@@ -1370,7 +1385,7 @@ export namespace f0FormField {
   ): z.ZodOptional<RichTextObjectSchema> &
     F0ZodType<z.ZodOptional<RichTextObjectSchema>>
   export function richText(
-    config: RichTextConfig & { optional?: false | undefined }
+    config: RichTextConfig & { optional?: false }
   ): RichTextObjectSchema & F0ZodType<RichTextObjectSchema>
   export function richText({ optional, ...config }: RichTextConfig) {
     const base = z.object({
@@ -1397,7 +1412,7 @@ export namespace f0FormField {
     R extends Record<string, unknown> = Record<string, unknown>,
   >(
     config: SelectConfig<R> & {
-      options: Array<{ value: V } & Record<string, unknown>>
+      options: ({ value: V } & Record<string, unknown>)[]
       optional: true
     }
   ): z.ZodOptional<z.ZodEnum<[V, ...V[]]>> &
@@ -1407,8 +1422,8 @@ export namespace f0FormField {
     R extends Record<string, unknown> = Record<string, unknown>,
   >(
     config: SelectConfig<R> & {
-      options: Array<{ value: V } & Record<string, unknown>>
-      optional?: false | undefined
+      options: ({ value: V } & Record<string, unknown>)[]
+      optional?: false
     }
   ): z.ZodEnum<[V, ...V[]]> & F0ZodType<z.ZodEnum<[V, ...V[]]>>
   // Without options → z.string()
@@ -1420,7 +1435,7 @@ export namespace f0FormField {
   export function select<
     R extends Record<string, unknown> = Record<string, unknown>,
   >(
-    config: SelectConfig<R> & { optional?: false | undefined }
+    config: SelectConfig<R> & { optional?: false }
   ): z.ZodString & F0ZodType<z.ZodString>
   export function select(config: unknown) {
     if (typeof config !== "object" || config === null) {
@@ -1458,16 +1473,16 @@ export namespace f0FormField {
 
   // With typed options → z.array(z.enum(...)).min(1) inferred from option values
   export function multiSelect<const V extends string>(
-    config: Omit<MultiSelectConfig<string>, "options"> & {
-      options: Array<{ value: V } & Record<string, unknown>>
+    config: Omit<MultiSelectConfig, "options"> & {
+      options: ({ value: V } & Record<string, unknown>)[]
       optional: true
     }
   ): z.ZodOptional<z.ZodArray<z.ZodEnum<[V, ...V[]]>>> &
     F0ZodType<z.ZodOptional<z.ZodArray<z.ZodEnum<[V, ...V[]]>>>>
   export function multiSelect<const V extends string>(
-    config: Omit<MultiSelectConfig<string>, "options"> & {
-      options: Array<{ value: V } & Record<string, unknown>>
-      optional?: false | undefined
+    config: Omit<MultiSelectConfig, "options"> & {
+      options: ({ value: V } & Record<string, unknown>)[]
+      optional?: false
     }
   ): z.ZodArray<z.ZodEnum<[V, ...V[]]>> &
     F0ZodType<z.ZodArray<z.ZodEnum<[V, ...V[]]>>>
@@ -1483,7 +1498,7 @@ export namespace f0FormField {
     V extends string | number = string,
     R extends Record<string, unknown> = Record<string, unknown>,
   >(
-    config: MultiSelectConfig<V, R> & { optional?: false | undefined }
+    config: MultiSelectConfig<V, R> & { optional?: false }
   ): z.ZodArray<z.ZodString> & F0ZodType<z.ZodArray<z.ZodString>>
   export function multiSelect(config: unknown) {
     if (typeof config !== "object" || config === null) {
@@ -1619,7 +1634,7 @@ export namespace f0FormField {
   ): OptionalEntitiesListArray<TItem> &
     F0ZodType<z.ZodOptional<z.ZodArray<TItem>>>
   export function entitiesList<TItem extends z.ZodObject<z.ZodRawShape>>(
-    config: EntitiesListSingleConfig<TItem> & { optional?: false | undefined }
+    config: EntitiesListSingleConfig<TItem> & { optional?: false }
   ): EntitiesListArray<TItem> & F0ZodType<z.ZodArray<TItem>>
   // Split-form overloads: the value type follows the update form's schema.
   export function entitiesList<
@@ -1634,7 +1649,7 @@ export namespace f0FormField {
     TUpdate extends z.ZodObject<z.ZodRawShape>,
   >(
     config: EntitiesListFormDefsConfig<TCreate, TUpdate> & {
-      optional?: false | undefined
+      optional?: false
     }
   ): EntitiesListArray<TUpdate> & F0ZodType<z.ZodArray<TUpdate>>
   export function entitiesList(
@@ -1663,8 +1678,12 @@ export namespace f0FormField {
     const options = rest.config
     let base = z.array(canonical)
     const effectiveMin = options?.minItems ?? (optional ? undefined : 1)
-    if (effectiveMin !== undefined) base = base.min(effectiveMin)
-    if (options?.maxItems !== undefined) base = base.max(options.maxItems)
+    if (effectiveMin !== undefined) {
+      base = base.min(effectiveMin)
+    }
+    if (options?.maxItems !== undefined) {
+      base = base.max(options.maxItems)
+    }
     const finalSchema = optional ? base.optional() : base
     return f0FormField(
       finalSchema as never,

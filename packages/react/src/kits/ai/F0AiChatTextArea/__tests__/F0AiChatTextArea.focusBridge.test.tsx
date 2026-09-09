@@ -1,9 +1,7 @@
-import { useState } from "react"
 import { userEvent } from "@testing-library/user-event"
+import { useState } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
 import { screen, waitFor, zeroRender as render } from "@/testing/test-utils"
-
 import {
   AiChatStateProvider,
   useAiChat,
@@ -41,14 +39,14 @@ const FocusHarness = () => {
       <button type="button" onClick={() => setIsClarifying(false)}>
         Restore composer
       </button>
-      {showInput && (
+      {showInput ? (
         <F0AiChatTextArea
           onSubmit={vi.fn()}
           clarifyingUI={
             isClarifying ? <div>Choose a reporting period</div> : undefined
           }
         />
-      )}
+      ) : null}
     </>
   )
 }

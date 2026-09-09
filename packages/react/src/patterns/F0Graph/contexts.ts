@@ -1,5 +1,4 @@
 import { createContext, useContext, type ReactNode } from "react"
-
 import type { LayoutDirection, ZoomLevel } from "./types"
 
 // ─── Zoom ──────────────────────────────────────────────────────

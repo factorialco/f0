@@ -1,15 +1,13 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
-
-import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
-import { SummariesDefinition } from "@/patterns/OneDataCollection/summary.ts"
 import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
 import { Ai, Delete, Download, Pencil, Person, Upload } from "@/icons/app"
-
+import { SummariesDefinition } from "@/patterns/OneDataCollection/summary.ts"
+import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
+import { OneDataCollection } from "../.."
 import {
   DataCollectionSource,
   useDataCollectionSource,
 } from "../../hooks/useDataCollectionSource"
-import { OneDataCollection } from "../../index"
 import { ItemActionsDefinition } from "../../item-actions"
 import { NavigationFiltersDefinition } from "../../navigationFilters/types"
 import { GroupingDefinition } from "../../types"
@@ -127,17 +125,15 @@ function BaseStory<
     NavigationFilters,
     GroupingDefinition<(typeof mockUsers)[number]>
   >
-  visualizations?: ReadonlyArray<
-    Visualization<
-      (typeof mockUsers)[number],
-      Filters,
-      Sortings,
-      Summaries,
-      ItemActions,
-      NavigationFilters,
-      GroupingDefinition<(typeof mockUsers)[number]>
-    >
-  >
+  visualizations?: readonly Visualization<
+    (typeof mockUsers)[number],
+    Filters,
+    Sortings,
+    Summaries,
+    ItemActions,
+    NavigationFilters,
+    GroupingDefinition<(typeof mockUsers)[number]>
+  >[]
 }) {
   return (
     <div className="space-y-8">

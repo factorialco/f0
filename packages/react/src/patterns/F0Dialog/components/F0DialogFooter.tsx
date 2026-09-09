@@ -1,6 +1,5 @@
 import { F0Button } from "@/components/F0Button"
 import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
-
 import {
   F0DialogActionsProps,
   F0DialogPrimaryAction,
@@ -33,7 +32,9 @@ export const F0DialogFooter = ({
   }
 
   const renderPrimaryAction = () => {
-    if (!hasPrimaryAction) return null
+    if (!hasPrimaryAction) {
+      return null
+    }
 
     if (isPrimaryActionArray(primaryAction)) {
       return (
@@ -66,7 +67,9 @@ export const F0DialogFooter = ({
   }
 
   const renderSecondaryAction = () => {
-    if (!hasSecondaryAction) return null
+    if (!hasSecondaryAction) {
+      return null
+    }
 
     if (isSecondaryActionArray(secondaryAction)) {
       return (

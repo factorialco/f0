@@ -1,8 +1,6 @@
 import { useId } from "react"
 import { Area, AreaChart, ResponsiveContainer, YAxis } from "recharts"
-
 import { cn } from "@/lib/utils"
-
 import type { SparklineDataPoint } from "../types"
 
 type CardSparklineProps = {
@@ -49,8 +47,12 @@ function deriveTrendDirection(
   const direction = Math.sign(lastValue - firstValue)
   const effectiveDirection = invertStatus ? direction * -1 : direction
 
-  if (effectiveDirection > 0) return "positive"
-  if (effectiveDirection < 0) return "negative"
+  if (effectiveDirection > 0) {
+    return "positive"
+  }
+  if (effectiveDirection < 0) {
+    return "negative"
+  }
   return "neutral"
 }
 
@@ -61,8 +63,12 @@ const LastPointDot = ({
   dataLength,
   color,
 }: SparklineDotProps & { dataLength: number; color: string }) => {
-  if (index !== dataLength - 1) return null
-  if (cx == null || cy == null) return null
+  if (index !== dataLength - 1) {
+    return null
+  }
+  if (cx == null || cy == null) {
+    return null
+  }
 
   return <circle cx={cx} cy={cy} r={2} fill={color} stroke="none" />
 }

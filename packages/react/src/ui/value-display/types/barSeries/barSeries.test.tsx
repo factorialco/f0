@@ -1,6 +1,5 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
-
 import { ValueDisplayRendererContext } from "../../renderers"
 import { BarSeriesCell, BarSeriesCellValue } from "./barSeries"
 
@@ -47,7 +46,7 @@ describe("BarSeriesCell", () => {
     ).toBeInTheDocument()
     const barSeriesEl = container.querySelector('[data-cell-type="barSeries"]')
     const bars = barSeriesEl?.querySelectorAll(':scope > * [role="img"]') ?? []
-    expect(bars.length).toBe(2)
+    expect(bars).toHaveLength(2)
   })
 
   it("renders with secondaryValue (under/over semantics)", () => {
@@ -65,7 +64,7 @@ describe("BarSeriesCell", () => {
     ).toBeInTheDocument()
     const barSeriesEl = container.querySelector('[data-cell-type="barSeries"]')
     const bars = barSeriesEl?.querySelectorAll(':scope > * [role="img"]') ?? []
-    expect(bars.length).toBe(2)
+    expect(bars).toHaveLength(2)
   })
 
   it("renders empty bar (value 0) with grey bottom border", () => {

@@ -1,13 +1,11 @@
 "use client"
 
 import { useCallback, useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
-import { OneEllipsis } from "@/lib/OneEllipsis"
 import { ChevronDown, ChevronRight } from "@/icons/app"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
-
 import { InFilterOptionItem } from "../types"
 import { cacheLabel, cacheNestedLabel } from "../useLoadOptions"
 import { InFilterOptionCheckbox } from "./InFilterOptionCheckbox"
@@ -53,7 +51,9 @@ export function InFilterOptionRow<T extends string>({
 
   const handleToggleChild = useCallback(
     (childValue: T, childLabel: string) => {
-      if (!childFilterKey || !onFilterChange) return
+      if (!childFilterKey || !onFilterChange) {
+        return
+      }
       const isChildSelected = childValues.includes(childValue)
       if (!isChildSelected) {
         cacheLabel(cacheKey, childValue, childLabel)
@@ -88,7 +88,7 @@ export function InFilterOptionRow<T extends string>({
         className="flex flex-row items-center overflow-hidden min-w-0"
         style={{ paddingLeft: `${depth * 24}px` }}
       >
-        {hasChildren && (
+        {hasChildren ? (
           <div className="relative shrink-0">
             <F0Button
               variant="ghost"
@@ -104,14 +104,14 @@ export function InFilterOptionRow<T extends string>({
               aria-expanded={effectiveExpanded}
               hideLabel
             />
-            {hasDescendantSelected && !effectiveExpanded && (
+            {hasDescendantSelected && !effectiveExpanded ? (
               <span
                 aria-hidden="true"
                 className="absolute -right-px -top-px h-2 w-2 rounded-full bg-f1-background-selected-bold"
               />
-            )}
+            ) : null}
           </div>
-        )}
+        ) : null}
         <div
           className={cn(
             "flex min-w-0 flex-1 cursor-pointer appearance-none items-center gap-1 rounded p-1.5 font-medium transition-colors hover:bg-f1-background-secondary",
@@ -134,7 +134,7 @@ export function InFilterOptionRow<T extends string>({
           </div>
         </div>
       </div>
-      {effectiveExpanded && option.children && (
+      {effectiveExpanded && option.children ? (
         <div>
           {option.children.options
             .filter(
@@ -161,7 +161,7 @@ export function InFilterOptionRow<T extends string>({
               )
             })}
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

@@ -1,9 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react"
 import { userEvent } from "@testing-library/user-event"
 import { describe, expect, it } from "vitest"
-
 import { Placeholder } from "@/icons/app"
-
 import { ValueDisplayRendererContext } from "../../renderers"
 import { IconCell, IconCellValue } from "./icon"
 

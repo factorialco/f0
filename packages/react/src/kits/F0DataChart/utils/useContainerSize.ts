@@ -16,7 +16,9 @@ export function useContainerSize(
 
   useEffect(() => {
     const el = ref.current
-    if (!el) return
+    if (!el) {
+      return
+    }
 
     setSize({ width: el.clientWidth, height: el.clientHeight })
 

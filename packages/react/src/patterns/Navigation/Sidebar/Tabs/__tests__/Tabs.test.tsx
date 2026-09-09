@@ -1,11 +1,9 @@
 import { act } from "@testing-library/react"
 import { userEvent } from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import { Menu, Messages } from "@/icons/app"
 import { zeroRender as render, screen } from "@/testing/test-utils"
-
-import { SidebarTab, SidebarTabs } from "../index"
+import { SidebarTab, SidebarTabs } from ".."
 
 // jsdom has no layout and the suite-wide ResizeObserver mock never fires, so
 // the measure effect has to be driven by hand. This fake delivers a resize the
@@ -36,7 +34,9 @@ globalThis.ResizeObserver = class FakeResizeObserver {
 const resize = (element: Element) => {
   act(() => {
     for (const observer of observers) {
-      if (!observer.targets.has(element)) continue
+      if (!observer.targets.has(element)) {
+        continue
+      }
       observer.callback(
         [{ target: element } as ResizeObserverEntry],
         {} as ResizeObserver
@@ -228,6 +228,6 @@ describe("SidebarTabs persistence", () => {
     const onTabChange = vi.fn()
     renderTabs({ onTabChange })
     expect(onTabChange).not.toHaveBeenCalled()
-    expect(localStorage.length).toBe(0)
+    expect(localStorage).toHaveLength(0)
   })
 })

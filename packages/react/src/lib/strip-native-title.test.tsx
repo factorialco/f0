@@ -1,6 +1,5 @@
 import { isValidElement, type ReactElement } from "react"
 import { describe, expect, test } from "vitest"
-
 import { stripNativeTitle } from "./strip-native-title"
 
 describe("stripNativeTitle", () => {
@@ -63,6 +62,6 @@ describe("stripNativeTitle", () => {
 
   test("returns non-element children untouched", () => {
     expect(stripNativeTitle("plain text")).toBe("plain text")
-    expect(stripNativeTitle(null)).toBe(null)
+    expect(stripNativeTitle(null)).toBeNull()
   })
 })

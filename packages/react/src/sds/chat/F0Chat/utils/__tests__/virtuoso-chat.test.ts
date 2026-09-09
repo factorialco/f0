@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import { type F0ChatMessage } from "../../types"
 import { flattenChatRows } from "../grouping"
 import {
@@ -85,30 +84,78 @@ describe("classifyWindowChange", () => {
 
 describe("nextFirstItemIndex", () => {
   it("starts at (and resets to) PREPEND_OFFSET", () => {
-    expect(nextFirstItemIndex(123, "initial", 0, 10)).toBe(PREPEND_OFFSET)
-    expect(nextFirstItemIndex(123, "replace", 10, 10)).toBe(PREPEND_OFFSET)
+    expect(
+      nextFirstItemIndex({
+        prev: 123,
+        change: "initial",
+        prevRowCount: 0,
+        rowCount: 10,
+      })
+    ).toBe(PREPEND_OFFSET)
+    expect(
+      nextFirstItemIndex({
+        prev: 123,
+        change: "replace",
+        prevRowCount: 10,
+        rowCount: 10,
+      })
+    ).toBe(PREPEND_OFFSET)
   })
 
   it("decreases by the net ROW delta on prepend", () => {
     // 20 messages landed but the old head's day separator merged away:
     // 12 rows → 31 rows is a net +19.
-    expect(nextFirstItemIndex(PREPEND_OFFSET, "prepend", 12, 31)).toBe(
-      PREPEND_OFFSET - 19
-    )
+    expect(
+      nextFirstItemIndex({
+        prev: PREPEND_OFFSET,
+        change: "prepend",
+        prevRowCount: 12,
+        rowCount: 31,
+      })
+    ).toBe(PREPEND_OFFSET - 19)
   })
 
   it("increases on a head removal so surviving rows keep their index", () => {
-    expect(nextFirstItemIndex(1000, "prepend", 10, 9)).toBe(1001)
+    expect(
+      nextFirstItemIndex({
+        prev: 1000,
+        change: "prepend",
+        prevRowCount: 10,
+        rowCount: 9,
+      })
+    ).toBe(1001)
   })
 
   it("keeps the index on append and none", () => {
-    expect(nextFirstItemIndex(1000, "append", 10, 11)).toBe(1000)
-    expect(nextFirstItemIndex(1000, "none", 10, 10)).toBe(1000)
+    expect(
+      nextFirstItemIndex({
+        prev: 1000,
+        change: "append",
+        prevRowCount: 10,
+        rowCount: 11,
+      })
+    ).toBe(1000)
+    expect(
+      nextFirstItemIndex({
+        prev: 1000,
+        change: "none",
+        prevRowCount: 10,
+        rowCount: 10,
+      })
+    ).toBe(1000)
   })
 
   it("shifts a grow by how far the surviving head moved, not the net delta", () => {
     // 3 rows landed on top and 5 at the bottom: only the 3 may move the base.
-    expect(nextFirstItemIndex(1000, "grow", 10, 18, 3)).toBe(997)
+    expect(
+      nextFirstItemIndex({
+        prev: 1000,
+        change: "grow",
+        prevRowCount: 10,
+        rowCount: 18,
+        headShift: 3,
+      })
+    ).toBe(997)
   })
 })
 

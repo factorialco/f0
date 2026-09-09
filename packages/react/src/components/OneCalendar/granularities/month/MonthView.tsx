@@ -7,10 +7,8 @@ import {
   startOfMonth,
 } from "date-fns"
 import { AnimatePresence, motion } from "motion/react"
-
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
-
 import { CalendarMode, DateRange } from "../../types"
 
 interface MonthViewProps {
@@ -73,13 +71,7 @@ export function MonthView({
         to: monthEnd,
       })
     } else if (mode === "range") {
-      if (!selected || !isDateRange(selected)) {
-        // Start of range
-        onSelect?.({
-          from: selectedDate,
-          to: undefined,
-        })
-      } else if (selected.from && !selected.to) {
+      if (selected && isDateRange(selected) && selected.from && !selected.to) {
         // Complete the range
         const fromDate = selected.from
 
@@ -118,25 +110,26 @@ export function MonthView({
 
   // Check if a month is selected
   const isMonthSelected = (monthIndex: number): boolean => {
-    if (!selected) return false
+    if (!selected) {
+      return false
+    }
 
     if (!isDateRange(selected)) {
       return (
         selected.getMonth() === monthIndex && selected.getFullYear() === year
       )
-    } else {
-      if (selected.from && selected.to) {
-        const current = new Date(year, monthIndex, 15)
-        return isWithinInterval(current, {
-          start: selected.from,
-          end: selected.to,
-        })
-      } else if (selected.from) {
-        return (
-          selected.from.getMonth() === monthIndex &&
-          selected.from.getFullYear() === year
-        )
-      }
+    }
+    if (selected.from && selected.to) {
+      const current = new Date(year, monthIndex, 15)
+      return isWithinInterval(current, {
+        start: selected.from,
+        end: selected.to,
+      })
+    } else if (selected.from) {
+      return (
+        selected.from.getMonth() === monthIndex &&
+        selected.from.getFullYear() === year
+      )
     }
 
     return false
@@ -144,7 +137,9 @@ export function MonthView({
 
   // Check if the month is the start of the range
   const isRangeStart = (monthIndex: number): boolean => {
-    if (!selected || !isDateRange(selected) || !selected.from) return false
+    if (!selected || !isDateRange(selected) || !selected.from) {
+      return false
+    }
 
     return (
       selected.from.getMonth() === monthIndex &&
@@ -154,7 +149,9 @@ export function MonthView({
 
   // Check if the month is the end of the range
   const isRangeEnd = (monthIndex: number): boolean => {
-    if (!selected || !isDateRange(selected) || !selected.to) return false
+    if (!selected || !isDateRange(selected) || !selected.to) {
+      return false
+    }
 
     return (
       selected.to.getMonth() === monthIndex &&
@@ -245,7 +242,7 @@ export function MonthView({
               )}
             >
               <span>{month.name}</span>
-              {isCurrent && (
+              {isCurrent ? (
                 <div
                   className={cn(
                     "absolute inset-x-0 z-20 mx-auto h-0.5 rounded-full bg-f1-background-selected-bold transition-colors duration-100",
@@ -259,7 +256,7 @@ export function MonthView({
                       "bg-f1-background-selected-bold"
                   )}
                 />
-              )}
+              ) : null}
             </button>
           )
         })}

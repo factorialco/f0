@@ -1,12 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { ComponentProps } from "react"
 import { expect, fn, within } from "storybook/test"
-
 import Pencil from "@/icons/app/Pencil"
 import { Placeholder } from "@/lib/storybook-utils/placeholder"
-
-import { Widget } from "./index"
+import { Widget } from "."
 
 const meta: Meta = {
   title: "Widgets/Widget",
@@ -83,6 +80,10 @@ export const WithAction: Story = {
 /**
  * Two footer buttons: `action` takes an ARRAY for a card that carries both its
  * own call to action and the way out of it, side by side in the footer.
+ *
+ * A pair is drawn `outline` at every width, where a lone button in the rail is
+ * filled. Two buttons in a footer are a set of equals; filling one of them
+ * would nominate it as the card's answer.
  */
 export const WithTwoActions: Story = {
   args: {

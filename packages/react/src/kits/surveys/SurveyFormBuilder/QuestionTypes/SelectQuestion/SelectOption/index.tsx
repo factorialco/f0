@@ -1,12 +1,10 @@
 import { Reorder } from "motion/react"
-
 import { F0Button } from "@/components/F0Button"
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { F0Icon } from "@/components/F0Icon/F0Icon"
 import { CheckCircleLine, Cross, Delete, Handle } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { useDragContext } from "../../../DragContext"
 import { OnClickOptionActionParams, SelectOptionProps } from "./types"
 
@@ -28,7 +26,9 @@ function RadioIndicator({
         disabled && "opacity-50"
       )}
     >
-      {checked && <div className="h-2 w-2 rounded-full bg-f1-background" />}
+      {checked ? (
+        <div className="h-2 w-2 rounded-full bg-f1-background" />
+      ) : null}
     </div>
   )
 }
@@ -59,7 +59,9 @@ export const SelectOption = ({
   const isDraggingThisItem = isDragging && draggedItemId === value
 
   const handleClick = () => {
-    if (!disabled && !answering) return // edit mode — do not select answer
+    if (!disabled && !answering) {
+      return
+    } // edit mode — do not select answer
     onClick(value)
   }
 
@@ -169,11 +171,11 @@ export const SelectOption = ({
         ) : (
           <p className="flex-1 font-medium">{label}</p>
         )}
-        {!disabled && !answering && correct && (
+        {!disabled && !answering && correct ? (
           <span className="text-sm font-medium text-f1-foreground-positive">
             {t("surveyFormBuilder.selectQuestion.correct")}
           </span>
-        )}
+        ) : null}
         {!disabled && !answering && !locked ? (
           <div className="hidden flex-row items-center gap-1 group-hover:inline-block">
             <F0Button

@@ -1,5 +1,4 @@
 import { ComponentProps } from "react"
-
 import { PersonAvatarVariant } from "@/components/avatars/F0Avatar"
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import { F0AvatarEmoji } from "@/components/avatars/F0AvatarEmoji"
@@ -73,8 +72,12 @@ export function WidgetAvatarsListItem({
       withEmoji={"emoji" in props && !!props.emoji}
       withPointerCursor={withPointerCursor}
     >
-      {"alert" in props && props.alert && <F0AvatarAlert type={props.alert} />}
-      {"emoji" in props && props.emoji && <F0AvatarEmoji emoji={props.emoji} />}
+      {"alert" in props && props.alert ? (
+        <F0AvatarAlert type={props.alert} />
+      ) : null}
+      {"emoji" in props && props.emoji ? (
+        <F0AvatarEmoji emoji={props.emoji} />
+      ) : null}
       <div className="flex-1">
         <p className="line-clamp-1 font-medium">{title}</p>
         <p className="line-clamp-1 text-f1-foreground-secondary">{subtitle}</p>

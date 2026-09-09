@@ -8,7 +8,6 @@ import {
   useState,
 } from "react"
 import { Masonry } from "react-masonry"
-
 import { Blend, withSkeleton } from "../../../../lib/skeleton"
 import { Widget } from "../../Widget"
 
@@ -32,7 +31,9 @@ const _Dashboard = forwardRef<HTMLDivElement, DashboardProps>(
     useEffect(() => {
       const handleResize = () => {
         const width = containerRef.current?.offsetWidth
-        if (width) setColumns(Math.floor(width / maxWidgetWidth) || 1)
+        if (width) {
+          setColumns(Math.floor(width / maxWidgetWidth) || 1)
+        }
       }
 
       handleResize()
@@ -75,8 +76,20 @@ const _Dashboard = forwardRef<HTMLDivElement, DashboardProps>(
   }
 )
 
-const skeletonHeights: Array<ComponentProps<typeof Widget.Skeleton>["height"]> =
-  ["sm", "lg", "md", "md", "lg", "sm", "lg", "lg", "sm", "sm", "md", "md"]
+const skeletonHeights: ComponentProps<typeof Widget.Skeleton>["height"][] = [
+  "sm",
+  "lg",
+  "md",
+  "md",
+  "lg",
+  "sm",
+  "lg",
+  "lg",
+  "sm",
+  "sm",
+  "md",
+  "md",
+]
 
 export const Dashboard = withSkeleton(_Dashboard, () => (
   <Blend>

@@ -1,12 +1,9 @@
-import { screen } from "@testing-library/react"
 import "@testing-library/jest-dom/vitest"
+import { screen } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
 import { zeroRender } from "@/testing/test-utils"
-
-import type { BigNumberProps } from "../types"
-
 import { F0BigNumber } from "../F0BigNumber"
+import type { BigNumberProps } from "../types"
 
 // Mock F0TagBalance component - use vi.hoisted to ensure proper hoisting
 const MockF0TagBalance = vi.hoisted(() => {
@@ -92,7 +89,7 @@ describe("F0BigNumber", () => {
           numericValue: value.numericValue || { value: value.value },
           formatter: value.formatter || mockFormatter,
           formatterOptions: {
-            ...(options?.formatterOptions || {}),
+            ...options?.formatterOptions,
             ...value.formatterOptions,
           },
         }
@@ -119,11 +116,8 @@ describe("F0BigNumber", () => {
     class MockNumberFormat {
       format = mockFormat
 
-      constructor() {
-        // Constructor can be empty, format is set as instance property
-      }
-
-      static supportedLocalesOf = OriginalIntl.NumberFormat.supportedLocalesOf
+      static readonly supportedLocalesOf =
+        OriginalIntl.NumberFormat.supportedLocalesOf
     }
 
     global.Intl = {

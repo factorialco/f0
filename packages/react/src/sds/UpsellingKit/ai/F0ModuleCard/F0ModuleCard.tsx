@@ -2,7 +2,6 @@ import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0Button } from "@/components/F0Button"
 import { useI18n } from "@/lib/providers/i18n"
 import { Card, CardContent, CardFooter } from "@/ui/Card"
-
 import { F0ModuleCardProps } from "./types"
 
 export const F0ModuleCard = ({

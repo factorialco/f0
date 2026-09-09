@@ -1,14 +1,14 @@
 import { forwardRef } from "react"
-
 import { DataTestIdWrapper, type WithDataTestIdProps } from "@/lib/data-testid"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import type { F0MapPoint } from "../../types"
 
 /** Human-readable name for a point, for the accessible list / fallback. */
 const pointLabel = (p: F0MapPoint, fallback: string): string => {
-  if (p.label) return p.label
+  if (p.label) {
+    return p.label
+  }
   switch (p.variant) {
     case "employee":
       return `${p.firstName} ${p.lastName}`.trim()
@@ -76,11 +76,11 @@ export const F0MapList = forwardRef<HTMLElement, F0MapListProps>(
             className
           )}
         >
-          {visible && (
+          {visible ? (
             <h2 className="text-f1-foreground mb-2 text-base font-medium">
               {listLabel}
             </h2>
-          )}
+          ) : null}
           <ul className={visible ? "flex flex-col gap-0.5" : undefined}>
             {points.map((p) => (
               <li key={p.id}>

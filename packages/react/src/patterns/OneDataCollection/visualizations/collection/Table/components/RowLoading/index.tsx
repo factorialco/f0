@@ -1,11 +1,4 @@
 import { forwardRef, useLayoutEffect, useRef } from "react"
-
-import type { TableVisualizationType } from "@/patterns/OneDataCollection/types"
-
-import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
-import { ItemActionsDefinition } from "@/patterns/OneDataCollection/item-actions"
-import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
-import { SummariesDefinition } from "@/patterns/OneDataCollection/summary"
 import {
   FiltersDefinition,
   GroupingDefinition,
@@ -13,7 +6,12 @@ import {
   SortingsDefinition,
 } from "@/hooks/datasource"
 import { ChildrenPaginationInfo } from "@/hooks/datasource/types/nested.typings"
-
+import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
+import { ItemActionsDefinition } from "@/patterns/OneDataCollection/item-actions"
+import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
+import { SummariesDefinition } from "@/patterns/OneDataCollection/summary"
+import type { TableVisualizationType } from "@/patterns/OneDataCollection/types"
+import type { TableRowRef } from "../../types"
 import { Row, RowProps } from "../Row"
 
 export const DEFAULT_LOADING_ROWS_COUNT = 5
@@ -36,7 +34,6 @@ const SingleLoadingRowInner = <
     frozenColumnsLeft,
     nestedRowProps,
     groupIndex,
-    onCheckedChange,
     selectedItems,
     checkColumnWidth,
     tableWithChildren,
@@ -57,10 +54,7 @@ const SingleLoadingRowInner = <
     shouldHideBorder?: boolean
     fromVisualization?: TableVisualizationType
   },
-  ref:
-    | ((element: HTMLTableRowElement | null) => void)
-    | React.RefObject<HTMLTableRowElement>
-    | null
+  ref: TableRowRef
 ) => {
   const loadingRowRef = useRef<HTMLTableRowElement | null>(null)
   const rowRefCurrent = rowRef?.current
@@ -95,7 +89,6 @@ const SingleLoadingRowInner = <
       columns={columns}
       noBorder={shouldHideBorder ?? false}
       groupIndex={groupIndex}
-      onCheckedChange={onCheckedChange}
       selectedItems={selectedItems}
       checkColumnWidth={checkColumnWidth}
       loading
@@ -135,10 +128,7 @@ const SingleLoadingRow = forwardRef(SingleLoadingRowInner) as <
     rowIndex: number
     shouldHideBorder?: boolean
   } & {
-    ref?:
-      | ((element: HTMLTableRowElement | null) => void)
-      | React.RefObject<HTMLTableRowElement>
-      | null
+    ref?: TableRowRef
   }
 ) => JSX.Element
 
@@ -177,10 +167,7 @@ const RowLoadingInner = <
     shouldHideBorder?: boolean
     fromVisualization?: TableVisualizationType
   },
-  ref:
-    | ((element: HTMLTableRowElement | null) => void)
-    | React.RefObject<HTMLTableRowElement>
-    | null
+  ref: TableRowRef
 ) => {
   const childrenCount = props.source.childrenCount?.({
     item: props.item,
@@ -252,10 +239,7 @@ export const RowLoading = forwardRef(RowLoadingInner) as <
     >
     paginationInfo?: ChildrenPaginationInfo
   } & {
-    ref?:
-      | ((element: HTMLTableRowElement | null) => void)
-      | React.RefObject<HTMLTableRowElement>
-      | null
+    ref?: TableRowRef
     shouldHideBorder?: boolean
   }
 ) => JSX.Element

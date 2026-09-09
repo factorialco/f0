@@ -35,14 +35,14 @@ function isVectorListType(t: string, v: number[] | number): v is number[] {
   return (
     t.includes("v") &&
     Array.isArray(v) &&
-    v.length > Number.parseInt(t.charAt(0))
+    v.length > Number.parseInt(t.charAt(0), 10)
   )
 }
 function isVectorType(t: string, v: number[] | number): v is Vector4 {
   return (
     !t.includes("v") &&
     Array.isArray(v) &&
-    v.length > Number.parseInt(t.charAt(0))
+    v.length > Number.parseInt(t.charAt(0), 10)
   )
 }
 const processUniform = <T extends UniformType>(
@@ -68,12 +68,10 @@ const processUniform = <T extends UniformType>(
     }
   }
   if (typeof value === "number") {
-    switch (t) {
-      case "1i":
-        return gl.uniform1i(location, value)
-      default:
-        return gl.uniform1f(location, value)
+    if (t === "1i") {
+      return gl.uniform1i(location, value)
     }
+    return gl.uniform1f(location, value)
   }
   switch (t) {
     case "1iv":
@@ -237,8 +235,9 @@ class Texture {
       image instanceof HTMLCanvasElement ||
       image instanceof ImageBitmap
     ) {
-      if (this.pow2canvas === undefined)
+      if (this.pow2canvas === undefined) {
         this.pow2canvas = document.createElement("canvas")
+      }
       this.pow2canvas.width = 2 ** Math.floor(Math.log(image.width) / Math.LN2)
       this.pow2canvas.height =
         2 ** Math.floor(Math.log(image.height) / Math.LN2)
@@ -561,17 +560,22 @@ export function ReactShaderToy({
     const width = "width" in texture ? (texture.width ?? 0) : 0
     const height = "height" in texture ? (texture.height ?? 0) : 0
     const channelResUniform = uniformsRef.current.iChannelResolution
-    if (!channelResUniform) return
-    const channelResValue = Array.isArray(channelResUniform.value)
-      ? channelResUniform.value
-      : (channelResUniform.value = [])
+    if (!channelResUniform) {
+      return
+    }
+    if (!Array.isArray(channelResUniform.value)) {
+      channelResUniform.value = []
+    }
+    const channelResValue = channelResUniform.value
     channelResValue[id * 3] = width * devicePixelRatio
     channelResValue[id * 3 + 1] = height * devicePixelRatio
     channelResValue[id * 3 + 2] = 0
   }
 
   const initWebGL = () => {
-    if (!canvasRef.current) return
+    if (!canvasRef.current) {
+      return
+    }
     glRef.current = (canvasRef.current.getContext("webgl", contextAttributes) ||
       canvasRef.current.getContext(
         "experimental-webgl",
@@ -659,7 +663,9 @@ export function ReactShaderToy({
 
   const onResize = () => {
     const gl = glRef.current
-    if (!gl) return
+    if (!gl) {
+      return
+    }
     canvasPositionRef.current = canvasRef.current?.getBoundingClientRect()
     // Force pixel ratio to be one to avoid expensive calculus on retina display.
     const realToCSSPixels = devicePixelRatio
@@ -682,9 +688,13 @@ export function ReactShaderToy({
 
   const createShader = (type: number, shaderCodeAsText: string) => {
     const gl = glRef.current
-    if (!gl) return null
+    if (!gl) {
+      return null
+    }
     const shader = gl.createShader(type)
-    if (!shader) return null
+    if (!shader) {
+      return null
+    }
     gl.shaderSource(shader, shaderCodeAsText)
     gl.compileShader(shader)
     if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
@@ -698,12 +708,15 @@ export function ReactShaderToy({
 
   const initShaders = (fragmentShader: string, vertexShader: string) => {
     const gl = glRef.current
-    if (!gl) return
+    if (!gl) {
+      return
+    }
     const fragmentShaderObj = createShader(gl.FRAGMENT_SHADER, fragmentShader)
     const vertexShaderObj = createShader(gl.VERTEX_SHADER, vertexShader)
     shaderProgramRef.current = gl.createProgram()
-    if (!shaderProgramRef.current || !vertexShaderObj || !fragmentShaderObj)
+    if (!shaderProgramRef.current || !vertexShaderObj || !fragmentShaderObj) {
       return
+    }
     gl.attachShader(shaderProgramRef.current, vertexShaderObj)
     gl.attachShader(shaderProgramRef.current, fragmentShaderObj)
     gl.linkProgram(shaderProgramRef.current)
@@ -729,19 +742,24 @@ export function ReactShaderToy({
     if (propUniforms) {
       for (const name of Object.keys(propUniforms)) {
         const uniform = propUniforms[name]
-        if (!uniform) continue
+        if (!uniform) {
+          continue
+        }
         const { value, type } = uniform
         const glslType = uniformTypeToGLSLType(type)
-        if (!glslType) continue
+        if (!glslType) {
+          continue
+        }
         const tempObject: { arraySize?: string } = {}
         if (isMatrixType(type, value)) {
           const arrayLength = type.length
-          const val = Number.parseInt(type.charAt(arrayLength - 3))
+          const val = Number.parseInt(type.charAt(arrayLength - 3), 10)
           const numberOfMatrices = Math.floor(value.length / (val * val))
-          if (value.length > val * val)
+          if (value.length > val * val) {
             tempObject.arraySize = `[${numberOfMatrices}]`
+          }
         } else if (isVectorListType(type, value)) {
-          tempObject.arraySize = `[${Math.floor(value.length / Number.parseInt(type.charAt(0)))}]`
+          tempObject.arraySize = `[${Math.floor(value.length / Number.parseInt(type.charAt(0), 10))}]`
         }
         uniformsRef.current[name] = {
           type: glslType,
@@ -755,9 +773,11 @@ export function ReactShaderToy({
 
   const processTextures = () => {
     const gl = glRef.current
-    if (!gl) return
+    if (!gl) {
+      return
+    }
     if (textures && textures.length > 0) {
-      uniformsRef.current[`${UNIFORM_CHANNELRESOLUTION}`] = {
+      uniformsRef.current[UNIFORM_CHANNELRESOLUTION] = {
         type: "vec3",
         isNeeded: false,
         arraySize: `[${textures.length}]`,
@@ -774,20 +794,24 @@ export function ReactShaderToy({
           texturesArrRef.current[id] = new Texture(gl)
           return texturesArrRef.current[id]
             ?.load(texture)
-            .then((t: Texture) => {
-              setupChannelRes(t, id)
-            })
+            .then((t: Texture) => setupChannelRes(t, id))
         }
       )
       Promise.all(texturePromisesArr)
         .then(() => {
-          if (onDoneLoadingTextures) onDoneLoadingTextures()
+          if (onDoneLoadingTextures) {
+            onDoneLoadingTextures()
+          }
         })
-        .catch((e) => {
-          onError?.(e)
-          if (onDoneLoadingTextures) onDoneLoadingTextures()
+        .catch((e: unknown) => {
+          onError?.(e instanceof Error ? e.message : String(e))
+          if (onDoneLoadingTextures) {
+            onDoneLoadingTextures()
+          }
         })
-    } else if (onDoneLoadingTextures) onDoneLoadingTextures()
+    } else if (onDoneLoadingTextures) {
+      onDoneLoadingTextures()
+    }
   }
 
   const preProcessFragment = (fragment: string) => {
@@ -806,7 +830,9 @@ export function ReactShaderToy({
     for (const uniform of Object.keys(uniformsRef.current)) {
       if (fragment.includes(uniform)) {
         const u = uniformsRef.current[uniform]
-        if (!u) continue
+        if (!u) {
+          continue
+        }
         fragmentShader = insertStringAtIndex(
           fragmentShader,
           `uniform ${u.type} ${uniform}${u.arraySize || ""}; \n`,
@@ -816,13 +842,17 @@ export function ReactShaderToy({
       }
     }
     const isShadertoy = fragment.includes("mainImage")
-    if (isShadertoy) fragmentShader = fragmentShader.concat(FS_MAIN_SHADER)
+    if (isShadertoy) {
+      fragmentShader = fragmentShader.concat(FS_MAIN_SHADER)
+    }
     return fragmentShader
   }
 
   const setUniforms = (timestamp: number) => {
     const gl = glRef.current
-    if (!gl || !shaderProgramRef.current) return
+    if (!gl || !shaderProgramRef.current) {
+      return
+    }
     const delta = lastTimeRef.current
       ? (timestamp - lastTimeRef.current) / 1000
       : 0
@@ -831,14 +861,20 @@ export function ReactShaderToy({
     if (propUniforms) {
       for (const name of Object.keys(propUniforms)) {
         const currentUniform = propUniforms[name]
-        if (!currentUniform) continue
+        if (!currentUniform) {
+          continue
+        }
         if (uniformsRef.current[name]?.isNeeded) {
-          if (!shaderProgramRef.current) return
+          if (!shaderProgramRef.current) {
+            return
+          }
           const customUniformLocation = gl.getUniformLocation(
             shaderProgramRef.current,
             name
           )
-          if (!customUniformLocation) return
+          if (!customUniformLocation) {
+            return
+          }
           processUniform(
             gl,
             customUniformLocation,
@@ -880,7 +916,8 @@ export function ReactShaderToy({
         shaderProgramRef.current,
         UNIFORM_TIME
       )
-      gl.uniform1f(timeUniform, (timerRef.current += delta))
+      timerRef.current += delta
+      gl.uniform1f(timeUniform, timerRef.current)
     }
     if (uniformsRef.current.iTimeDelta?.isNeeded) {
       const timeDeltaUniform = gl.getUniformLocation(
@@ -917,11 +954,17 @@ export function ReactShaderToy({
     if (texturesArrRef.current.length > 0) {
       for (let index = 0; index < texturesArrRef.current.length; index++) {
         const texture = texturesArrRef.current[index]
-        if (!texture) return
+        if (!texture) {
+          return
+        }
         const { isVideo, _webglTexture, source, flipY, isLoaded } = texture
-        if (!isLoaded || !_webglTexture || !source) return
+        if (!isLoaded || !_webglTexture || !source) {
+          return
+        }
         if (uniformsRef.current[`iChannel${index}`]?.isNeeded) {
-          if (!shaderProgramRef.current) return
+          if (!shaderProgramRef.current) {
+            return
+          }
           const iChannel = gl.getUniformLocation(
             shaderProgramRef.current,
             `iChannel${index}`
@@ -943,7 +986,9 @@ export function ReactShaderToy({
 
   const drawScene = (timestamp: number) => {
     const gl = glRef.current
-    if (!gl) return
+    if (!gl) {
+      return
+    }
     gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight)
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
     gl.bindBuffer(gl.ARRAY_BUFFER, squareVerticesBufferRef.current)

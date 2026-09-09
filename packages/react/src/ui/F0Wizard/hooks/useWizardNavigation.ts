@@ -1,5 +1,4 @@
 import { useCallback, useRef, useState } from "react"
-
 import type { F0WizardStep } from "../types"
 
 interface UseWizardNavigationOptions {
@@ -44,24 +43,34 @@ export function useWizardNavigation({
 
   const goToStep = useCallback(
     async (index: number) => {
-      if (index < 0 || index >= stepsRef.current.length) return
+      if (index < 0 || index >= stepsRef.current.length) {
+        return
+      }
 
-      if (stepsRef.current[currentStep]?.hasErrors?.() === true) return
+      if (stepsRef.current[currentStep]?.hasErrors?.() === true) {
+        return
+      }
 
-      if (!allowStepSkipping && index > currentStep + 1) return
+      if (!allowStepSkipping && index > currentStep + 1) {
+        return
+      }
 
       if (index > currentStep) {
         const intermediateHasErrors = stepsRef.current
           .slice(currentStep, index)
           .some((step) => step.hasErrors?.() === true)
-        if (intermediateHasErrors) return
+        if (intermediateHasErrors) {
+          return
+        }
       }
 
       const canJump = stepsRef.current
         .slice(0, index)
         .every((step) => step.isCompleted?.() !== false)
 
-      if (!canJump) return
+      if (!canJump) {
+        return
+      }
 
       if (index > currentStep) {
         setLoading(true)
@@ -69,6 +78,7 @@ export function useWizardNavigation({
           for (let i = currentStep; i < index; i++) {
             const step = stepsRef.current[i]
             if (step?.onNext) {
+              // oxlint-disable-next-line no-await-in-loop -- steps run onNext in order and a rejection stops the jump
               await step.onNext()
             }
           }
@@ -88,7 +98,9 @@ export function useWizardNavigation({
 
   const goNext = useCallback(async () => {
     const step = stepsRef.current[currentStep]
-    if (!step) return
+    if (!step) {
+      return
+    }
 
     setLoading(true)
     try {

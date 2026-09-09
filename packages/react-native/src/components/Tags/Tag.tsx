@@ -19,7 +19,9 @@ export type TagVariant = BaseTag<{ type: "alert" } & AlertTagProps>
 
 const tagComponent = (tag: TagVariant): ReactNode | undefined => {
   const { type } = tag
-  if (type === "alert") return <AlertTag {...tag} />
+  if (type === "alert") {
+    return <AlertTag {...tag} />
+  }
 
   return undefined
 }
@@ -27,7 +29,9 @@ const tagComponent = (tag: TagVariant): ReactNode | undefined => {
 export const Tag = ({ tag }: { tag: TagVariant }): ReactNode => {
   const renderTag = tagComponent(tag)
 
-  if (!renderTag) return "Invalid tag type"
+  if (!renderTag) {
+    return "Invalid tag type"
+  }
 
   return renderTag
 }

@@ -1,12 +1,10 @@
 import sortBy from "lodash/sortBy"
 import throttle from "lodash/throttle"
 import React from "react"
-
 import { categorizeItemsByDate } from "@/lib/date"
 import { experimentalComponent } from "@/lib/experimental"
 import { useI18n } from "@/lib/providers/i18n"
 import { withSkeleton } from "@/lib/skeleton"
-
 import { ActivityItem } from "../ActivityItem"
 import { Section, SectionProps } from "./Section"
 
@@ -51,13 +49,15 @@ export const BaseActivityItemList = ({
 
   const categorizedItems = categorizeItemsByDate(items, "createdAt")
 
-  const lastItemIds = Object.values(categorizedItems)
-    .slice()
-    .flatMap((items) => items.map((item) => item.id))
-    .slice(-onEndReachedItemsThreshold)
+  const lastItemIds = new Set(
+    Object.values(categorizedItems)
+      .slice()
+      .flatMap((items) => items.map((item) => item.id))
+      .slice(-onEndReachedItemsThreshold)
+  )
 
   const handleItemVisible = throttle((id: string) => {
-    if (lastItemIds.includes(id)) {
+    if (lastItemIds.has(id)) {
       onEndReached?.()
     }
   }, 1000)
@@ -82,13 +82,14 @@ export const BaseActivityItemList = ({
             onClickItem={onClickItem}
             onItemVisible={handleItemVisible}
           />
-          {index !== groups.length - 1 && <Separator />}
+          {index !== groups.length - 1 ? <Separator /> : null}
         </React.Fragment>
       ))}
-      {loadingMoreItems &&
-        new Array(MORE_ITEMS_LOADING_COUNT)
-          .fill(null)
-          .map((_, index) => <ActivityItem.Skeleton key={index} />)}
+      {loadingMoreItems
+        ? Array.from({ length: MORE_ITEMS_LOADING_COUNT }, (_, index) => (
+            <ActivityItem.Skeleton key={index} />
+          ))
+        : null}
     </div>
   )
 }

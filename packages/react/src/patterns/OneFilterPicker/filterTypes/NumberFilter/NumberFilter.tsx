@@ -2,14 +2,12 @@
 
 import { useDeepCompareEffect } from "@reactuses/core"
 import { useMemo, useState } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { NumberInputInternal } from "@/components/F0NumberInput/internal"
 import { Switch } from "@/experimental/Forms/Fields/Switch"
 import { EqualGreater, EqualLess, Greater, Less } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { useL10n } from "@/lib/providers/l10n"
-
 import { FilterTypeComponentProps } from "../types"
 
 export type NumberFilterOptions = {
@@ -130,7 +128,7 @@ export function NumberFilter({
         return {
           ...prev,
           [index]: {
-            ...(prev?.[index] ?? {}),
+            ...prev?.[index],
             value: inputValue ?? undefined,
           },
         }
@@ -219,7 +217,7 @@ export function NumberFilter({
               }
             />
           </div>
-          {localValue?.mode === "range" && (
+          {localValue?.mode === "range" ? (
             <div className="min-w-1/2 flex-1">
               <NumberInputInternal
                 label={
@@ -248,17 +246,17 @@ export function NumberFilter({
                 }
               />
             </div>
-          )}
+          ) : null}
         </div>
-        {showModeSwitch && (
+        {showModeSwitch ? (
           <Switch
             title={i18n.filters.number.rangeTitle}
             checked={localValue?.mode === "range"}
             onCheckedChange={handleModeChange}
           />
-        )}
+        ) : null}
       </div>
-      {!isCompactMode && (
+      {!isCompactMode ? (
         <div className="sticky bottom-0 left-0 right-0 z-20 flex items-center justify-end gap-2 border border-solid border-transparent border-t-f1-border-secondary bg-f1-background/80 p-2 backdrop-blur-[8px]">
           <F0Button
             variant="ghost"
@@ -268,7 +266,7 @@ export function NumberFilter({
             size="sm"
           />
         </div>
-      )}
+      ) : null}
     </>
   )
 }

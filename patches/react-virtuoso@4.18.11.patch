@@ -1,0 +1,74 @@
+diff --git a/dist/index.mjs b/dist/index.mjs
+index b1ccd3a27eeabe74abd770b5e2d03bf8552942b8..2d837ed111f52d62ff0c258ad0bb95fe89e549d7 100644
+--- a/dist/index.mjs
++++ b/dist/index.mjs
+@@ -399,7 +399,7 @@ function $e(t, e, n) {
+ }
+ const It = j(
+   () => {
+-    const t = U(), e = U(), n = T(0), o = U(), r = T(0), s = U(), i = U(), l = T(0), c = T(0), d = T(0), m = T(0), v = U(), p = U(), I = T(!1), w = T(!1), R = T(!1);
++    const t = U(), e = U(), n = T(0), o = U(), r = T(0), s = U(), i = U(), l = T(0), c = T(0), d = T(0), m = T(0), v = U(), p = U(), I = T(!1), w = T(!1), R = T(!1), Dc = U();
+     return z(
+       x(
+         t,
+@@ -414,6 +414,7 @@ const It = j(
+       i
+     ), z(e, r), {
+       deviation: n,
++      deviationCommitted: Dc,
+       fixedFooterHeight: d,
+       fixedHeaderHeight: c,
+       footerHeight: m,
+@@ -2063,13 +2064,21 @@ function no(t) {
+ }
+ const rr = no(() => /iP(ad|od|hone)/i.test(navigator.userAgent) && /WebKit/i.test(navigator.userAgent)), sr = j(
+   ([
+-    { deviation: t, scrollBy: e, scrollingInProgress: n, scrollTop: o },
++    { deviation: t, deviationCommitted: Dk, scrollBy: e, scrollingInProgress: n, scrollTop: o },
+     { isAtBottom: r, isScrolling: s, lastJumpDueToItemResize: i, scrollDirection: l },
+     { listState: c },
+     { beforeUnshiftWith: d, gap: m, shiftWithOffset: v, sizes: p },
+     { log: I },
+     { recalcInProgress: w }
+   ]) => {
++    let Pq = null, Pa = !1, Pd = 0;
++    const Pc = (f) => {
++      if (Pq !== f) return;
++      Pq = null;
++      M(e, { top: f }), requestAnimationFrame(() => {
++        M(t, 0), M(w, !1), Pd = 0;
++      });
++    };
+     const R = Tt(
+       x(
+         c,
+@@ -2129,13 +2138,14 @@ const rr = no(() => /iP(ad|od|hone)/i.test(navigator.userAgent) && /WebKit/i.tes
+         })
+       ),
+       (f) => {
++        Pa = Pd !== f, Pq = f, Pd = f;
+         M(t, f), requestAnimationFrame(() => {
+-          M(e, { top: f }), requestAnimationFrame(() => {
+-            M(t, 0), M(w, !1);
+-          });
++          Pc(f);
+         });
+       }
+-    ), { deviation: t };
++    ), Y(Dk, (cv) => {
++      Pq !== null && Pa && cv === Pq && Pc(cv);
++    }), { deviation: t };
+   },
+   rt(It, pe, Kt, Lt, Gt, Ue)
+ ), ir = j(
+@@ -2471,6 +2481,10 @@ const ur = /* @__PURE__ */ j(() => {
+   on("deviation", (F) => {
+     a !== F && S(F);
+   });
++  const Dp = Ct("deviationCommitted");
++  (typeof document === "undefined" ? E.useEffect : E.useLayoutEffect)(() => {
++    Dp(a);
++  }, [a, Dp]);
+   const H = A("EmptyPlaceholder"), y = A("ScrollSeekPlaceholder") ?? dr, k = A("ListComponent"), u = A("ItemComponent"), g = A("GroupComponent"), C = A("computeItemKey"), L = A("isSeeking"), O = A("groupIndices").length > 0, V = A("alignToBottom"), N = A("initialItemFinalLocationReached"), Z = e ? {} : {
+     boxSizing: "border-box",
+     ...h ? {

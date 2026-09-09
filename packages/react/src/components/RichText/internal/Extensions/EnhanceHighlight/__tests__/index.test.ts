@@ -1,7 +1,6 @@
 import { Editor } from "@tiptap/core"
 import StarterKit from "@tiptap/starter-kit"
 import { describe, expect, it } from "vitest"
-
 import { EnhanceHighlight } from "@/components/RichText/internal/Extensions/EnhanceHighlight"
 
 const createEditor = (content = "<p>Hello world enhance me</p>") =>
@@ -42,8 +41,8 @@ describe("EnhanceHighlight", () => {
     editor.commands.setEnhanceHighlight(0, to, { placeholder: "Loading..." })
 
     expect(
-      editor.view.dom.querySelectorAll(".enhance-highlight-placeholder").length
-    ).toBe(0)
+      editor.view.dom.querySelectorAll(".enhance-highlight-placeholder")
+    ).toHaveLength(0)
     expect(
       editor.view.dom.querySelectorAll(".enhance-highlight").length
     ).toBeGreaterThan(0)
@@ -53,7 +52,7 @@ describe("EnhanceHighlight", () => {
     const editor = createEditor("<p></p>")
     editor.commands.setEnhanceHighlight(0, editor.state.doc.content.size)
 
-    expect(editor.view.dom.querySelectorAll(".enhance-highlight").length).toBe(
+    expect(editor.view.dom.querySelectorAll(".enhance-highlight")).toHaveLength(
       0
     )
   })
@@ -69,8 +68,8 @@ describe("EnhanceHighlight", () => {
 
     editor.commands.clearEnhanceHighlight()
     expect(
-      editor.view.dom.querySelectorAll(".enhance-highlight-placeholder").length
-    ).toBe(0)
+      editor.view.dom.querySelectorAll(".enhance-highlight-placeholder")
+    ).toHaveLength(0)
   })
 
   it("clears decorations", () => {
@@ -80,7 +79,7 @@ describe("EnhanceHighlight", () => {
       editor.view.dom.querySelectorAll(".enhance-highlight").length
     ).toBeGreaterThan(0)
     editor.commands.clearEnhanceHighlight()
-    expect(editor.view.dom.querySelectorAll(".enhance-highlight").length).toBe(
+    expect(editor.view.dom.querySelectorAll(".enhance-highlight")).toHaveLength(
       0
     )
   })

@@ -1,13 +1,9 @@
-import type { GridItemHTMLElement, GridStackWidget } from "gridstack"
-
 import "@testing-library/jest-dom/vitest"
+import type { GridItemHTMLElement, GridStackWidget } from "gridstack"
 import React, { type ReactNode } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import { zeroRender } from "@/testing/test-utils"
-
 import type { GridStackReactWidget } from "../F0GridStack"
-
 import { F0GridStack } from "../F0GridStack"
 
 // Prevent organize imports from removing React (needed for JSX in mocks)
@@ -675,10 +671,14 @@ describe("F0GridStack", () => {
 
       // Simulate onResizeStop logic
       const node = mockElement.gridstackNode
-      if (!node) return
+      if (!node) {
+        return
+      }
 
       const allowed = node.allowedSizes ?? []
-      if (allowed.length === 0) return
+      if (allowed.length === 0) {
+        return
+      }
 
       const closestAllowed = (
         w: number,
@@ -727,10 +727,14 @@ describe("F0GridStack", () => {
       } as unknown as GridItemHTMLElement
 
       const node = mockElement.gridstackNode
-      if (!node) return
+      if (!node) {
+        return
+      }
 
       const allowed = node.allowedSizes ?? []
-      if (allowed.length === 0) return
+      if (allowed.length === 0) {
+        return
+      }
 
       const closestAllowed = (
         w: number,
@@ -781,10 +785,12 @@ describe("F0GridStack", () => {
       } as unknown as GridItemHTMLElement
 
       const node = mockElement.gridstackNode
-      if (!node) return
+      if (!node) {
+        return
+      }
 
       const allowed = node.allowedSizes ?? []
-      expect(allowed.length).toBe(0)
+      expect(allowed).toHaveLength(0)
     })
   })
 

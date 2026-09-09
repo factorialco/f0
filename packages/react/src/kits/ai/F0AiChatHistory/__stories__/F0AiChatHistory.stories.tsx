@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-
 import { F0AiChatHistory } from "../F0AiChatHistory"
 import type { ChatThread } from "../useChatHistory"
 
@@ -83,7 +82,7 @@ export const Empty: Story = {
   },
 }
 
-export const Error: Story = {
+const ErrorState: Story = {
   args: {
     ...baseArgs,
     threads: [],
@@ -112,3 +111,6 @@ export const WithPinned: Story = {
     pinnedIds: new Set(["t1", "t3"]),
   },
 }
+
+// Exported under the global's name so the story id stays `--error`.
+export { ErrorState as Error }

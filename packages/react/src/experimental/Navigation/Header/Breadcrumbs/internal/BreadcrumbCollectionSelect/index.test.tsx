@@ -1,7 +1,6 @@
 import { screen, waitFor } from "@testing-library/react"
 import { useState } from "react"
 import { afterEach, describe, expect, it, vi } from "vitest"
-
 import { F0Button } from "@/components/F0Button"
 import {
   DataAdapter,
@@ -15,10 +14,9 @@ import {
 } from "@/lib/providers/datacollection"
 import { subscribeToDataCollectionStorageChanges } from "@/lib/providers/datacollection/dataCollectionStorageEvents"
 import { userEvent, zeroRender as render } from "@/testing/test-utils"
-
-import { Breadcrumbs } from "../../index"
+import { Breadcrumbs } from "../.."
 import { BreadcrumbCollectionSelectItemType } from "../../types"
-import { BreadcrumbCollectionSelect } from "./index"
+import { BreadcrumbCollectionSelect } from "."
 
 // Mock ResizeObserver - must be a class constructor for 'new ResizeObserver()' to work
 global.ResizeObserver = class MockResizeObserver {
@@ -42,7 +40,7 @@ vi.mock("../BreadcrumbSelect", async (importOriginal) => {
   const BreadcrumbSelect: typeof actual.BreadcrumbSelect = (props) => (
     <>
       <actual.BreadcrumbSelect {...props} />
-      {driver.selection && (
+      {driver.selection ? (
         <button
           aria-label="pick"
           onClick={() =>
@@ -56,8 +54,8 @@ vi.mock("../BreadcrumbSelect", async (importOriginal) => {
             )
           }
         />
-      )}
-      {driver.filtersChange && (
+      ) : null}
+      {driver.filtersChange ? (
         <button
           aria-label="set-filters"
           onClick={() =>
@@ -68,7 +66,7 @@ vi.mock("../BreadcrumbSelect", async (importOriginal) => {
             )
           }
         />
-      )}
+      ) : null}
     </>
   )
   return { ...actual, BreadcrumbSelect }
@@ -187,9 +185,11 @@ const concretelyTypedItem = (
   getItemHref: (value: string, employee?: Employee) =>
     employee ? `/employees/${value}` : undefined,
 })
-void concretelyTypedItem
-
 describe("BreadcrumbCollectionSelect", () => {
+  it("accepts a concretely typed collection item", () => {
+    expect(concretelyTypedItem).toBeTypeOf("function")
+  })
+
   it("seeds the persisted filters and sortings into the fetch", async () => {
     localStorage.setItem(
       STORAGE_KEY,

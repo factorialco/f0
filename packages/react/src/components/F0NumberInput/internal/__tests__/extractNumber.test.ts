@@ -1,5 +1,4 @@
 import { describe, expect, test } from "vitest"
-
 import { Options, extractNumber } from "../extractNumber"
 
 describe("extractNumber", () => {
@@ -110,24 +109,11 @@ describe("extractNumber", () => {
   })
 
   describe("decimal options", () => {
-    test("empty string", () => {
-      const input = ""
-      expect(extractNumber(input, decimalOptions)).toEqual({
-        formattedValue: input,
-        value: null,
-      })
-    })
-
-    test("lone decimal", () => {
-      const input = "."
-      expect(extractNumber(input, decimalOptions)).toEqual({
-        formattedValue: input,
-        value: null,
-      })
-    })
-
-    test("minus sign", () => {
-      const input = "-"
+    test.each([
+      { name: "empty string", input: "" },
+      { name: "lone decimal", input: "." },
+      { name: "minus sign", input: "-" },
+    ])("$name", ({ input }) => {
       expect(extractNumber(input, decimalOptions)).toEqual({
         formattedValue: input,
         value: null,

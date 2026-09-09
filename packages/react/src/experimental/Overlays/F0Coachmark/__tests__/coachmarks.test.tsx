@@ -1,14 +1,12 @@
 import { userEvent } from "@testing-library/user-event"
 import { useState } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
 import {
   act,
   screen,
   waitFor,
   zeroRender as render,
 } from "@/testing/test-utils"
-
 import { CoachmarkProvider } from "../CoachmarkProvider"
 import { coachmarks } from "../imperative"
 
@@ -143,7 +141,7 @@ describe("coachmarks API", () => {
         return (
           <CoachmarkProvider>
             <button onClick={() => setMounted(true)}>Mount target</button>
-            {mounted && <button id="late">Late</button>}
+            {mounted ? <button id="late">Late</button> : null}
           </CoachmarkProvider>
         )
       }
@@ -171,7 +169,7 @@ describe("coachmarks API", () => {
             <button onClick={() => setMounted((value) => !value)}>
               Toggle target
             </button>
-            {mounted && <button id="toggling">Toggling</button>}
+            {mounted ? <button id="toggling">Toggling</button> : null}
           </CoachmarkProvider>
         )
       }

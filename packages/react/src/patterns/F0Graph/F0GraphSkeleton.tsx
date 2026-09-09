@@ -114,10 +114,10 @@ export const F0GraphSkeleton = ({
   >
     <div className="flex flex-col items-center gap-2">
       <SkeletonNodeCard />
-      {showTags && <SkeletonTagPill />}
+      {showTags ? <SkeletonTagPill /> : null}
     </div>
 
-    {childrenCount > 0 && (
+    {childrenCount > 0 ? (
       <>
         <SkeletonConnectors childrenCount={childrenCount} />
 
@@ -125,12 +125,12 @@ export const F0GraphSkeleton = ({
           {Array.from({ length: childrenCount }).map((_, index) => (
             <div key={index} className="flex flex-col items-center gap-2">
               <SkeletonNodeCard />
-              {showTags && <SkeletonTagPill />}
+              {showTags ? <SkeletonTagPill /> : null}
               <SkeletonExpander />
             </div>
           ))}
         </div>
       </>
-    )}
+    ) : null}
   </div>
 )

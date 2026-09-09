@@ -1,7 +1,6 @@
 import { renderHook } from "@testing-library/react"
 import { StrictMode, act, createElement, type ReactNode } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
 import { useViewportDataLoader } from "../useViewportDataLoader"
 
 const strictWrapper = ({ children }: { children: ReactNode }) =>
@@ -13,8 +12,8 @@ afterEach(() => vi.useRealTimers())
 describe("useViewportDataLoader", () => {
   it("does nothing when loadVisibleNodeData is undefined", () => {
     renderHook(() => useViewportDataLoader({ nodeIds: ["a", "b"] }))
-    // No callback → nothing to assert beyond "no throw"; advancing timers is safe.
-    act(() => vi.advanceTimersByTime(1000))
+    // No callback → nothing to load; advancing timers must be a no-op.
+    expect(() => act(() => vi.advanceTimersByTime(1000))).not.toThrow()
   })
 
   it("flushes newly-visible ids as one batch after the debounce", () => {

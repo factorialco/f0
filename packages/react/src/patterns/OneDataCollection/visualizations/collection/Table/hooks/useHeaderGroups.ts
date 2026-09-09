@@ -1,8 +1,6 @@
 import { useCallback, useMemo, useState } from "react"
-
 import { RecordType, SortingsDefinition } from "@/hooks/datasource"
 import { useReducedMotion } from "@/lib/a11y"
-
 import { SummariesDefinition } from "../../../../summary"
 import { ColId, HeaderGroupDefinition, TableColumnDefinition } from "../types"
 import { ColumnCollapseTransition } from "./useColumnCollapseAnimation"
@@ -64,7 +62,9 @@ const emptyPreservedColumnIds: ReadonlySet<ColId> = new Set()
 export const normalizeHeaderGroups = (
   headerGroups?: Record<string, string | HeaderGroupDefinition>
 ): NormalizedHeaderGroups | null => {
-  if (!headerGroups) return null
+  if (!headerGroups) {
+    return null
+  }
 
   const normalized: NormalizedHeaderGroups = {}
 
@@ -89,13 +89,15 @@ export const normalizeHeaderGroups = (
  * headers are laid out.
  */
 const getHeaderGroupRuns = (
-  columns: ReadonlyArray<{ headerGroupId?: string }>
+  columns: readonly { headerGroupId?: string }[]
 ): HeaderGroupRun[] => {
   const runs: HeaderGroupRun[] = []
 
   columns.forEach((column, index) => {
     const groupId = column.headerGroupId
-    if (!groupId) return
+    if (!groupId) {
+      return
+    }
 
     const last = runs[runs.length - 1]
     const isAdjacent =
@@ -124,7 +126,7 @@ const getCollapsedColumnIndices = <
     "id" | "label"
   > & { headerGroupId?: string },
 >(
-  columns: ReadonlyArray<Col>,
+  columns: readonly Col[],
   definitions: NormalizedHeaderGroups,
   collapsedGroups: ReadonlySet<string>,
   preservedColumnIds: ReadonlySet<ColId> = emptyPreservedColumnIds
@@ -132,7 +134,9 @@ const getCollapsedColumnIndices = <
   const hidden = new Set<number>()
 
   getHeaderGroupRuns(columns).forEach((run) => {
-    if (!collapsedGroups.has(run.groupId)) return
+    if (!collapsedGroups.has(run.groupId)) {
+      return
+    }
 
     const collapsedColumns = definitions[run.groupId]?.collapsedColumns
     const kept = run.columnIndices.filter((index) => {
@@ -144,7 +148,9 @@ const getCollapsedColumnIndices = <
     const keptIndices = new Set(kept.length > 0 ? kept : [run.columnIndices[0]])
 
     run.columnIndices.forEach((index) => {
-      if (!keptIndices.has(index)) hidden.add(index)
+      if (!keptIndices.has(index)) {
+        hidden.add(index)
+      }
     })
   })
 
@@ -173,7 +179,7 @@ const getCollapsedColumnIndices = <
  * that renders an empty cell in the group row and the real header in the column row.
  */
 export const computeHeaderGroups = (
-  columns: ReadonlyArray<{ headerGroupId?: string }>,
+  columns: readonly { headerGroupId?: string }[],
   definitions: NormalizedHeaderGroups,
   collapsedGroups: ReadonlySet<string> = new Set()
 ): HeaderGroupEntry[] => {
@@ -226,7 +232,7 @@ export type UseHeaderGroupsReturn<
    * The columns to render, with the ones hidden by collapsed groups removed.
    * Identical to the input when nothing is collapsed.
    */
-  columns: ReadonlyArray<TableColumnDefinition<R, Sortings, Summaries>>
+  columns: readonly TableColumnDefinition<R, Sortings, Summaries>[]
   /**
    * Header group entries for the two-row header. `null` when no groups are
    * configured or no visible column carries a `headerGroupId`, signalling that
@@ -256,7 +262,7 @@ export const useHeaderGroups = <
   Sortings extends SortingsDefinition,
   Summaries extends SummariesDefinition,
 >(
-  columns: ReadonlyArray<TableColumnDefinition<R, Sortings, Summaries>>,
+  columns: readonly TableColumnDefinition<R, Sortings, Summaries>[],
   {
     headerGroups,
     onCollapsedChange,
@@ -288,7 +294,9 @@ export const useHeaderGroups = <
 
   const settleGroup = useCallback((groupId: string) => {
     setAnimatingGroups((current) => {
-      if (!current.has(groupId)) return current
+      if (!current.has(groupId)) {
+        return current
+      }
       const next = new Set(current)
       next.delete(groupId)
       return next
@@ -324,7 +332,9 @@ export const useHeaderGroups = <
 
   // A collapsed group only drops its columns once it has finished animating.
   const settledCollapsedGroups = useMemo(() => {
-    if (animatingGroups.size === 0) return collapsedGroups
+    if (animatingGroups.size === 0) {
+      return collapsedGroups
+    }
     return new Set(
       [...collapsedGroups].filter((groupId) => !animatingGroups.has(groupId))
     )
@@ -349,7 +359,9 @@ export const useHeaderGroups = <
     // A highlighted group's emphasis lives on its columns — equivalent to setting
     // `highlighted` on each of them — so headers, body cells and the summary row
     // can all read `column.highlighted` directly.
-    if (!definitions) return kept
+    if (!definitions) {
+      return kept
+    }
     return kept.map((column) =>
       column.headerGroupId && definitions[column.headerGroupId]?.highlighted
         ? { ...column, highlighted: true }
@@ -370,11 +382,15 @@ export const useHeaderGroups = <
   // Which marker class each animating column's cells should carry, if any.
   const collapsingCellClasses = useMemo(() => {
     const classes = new Map<ColId, string>()
-    if (!definitions || animatingGroups.size === 0) return classes
+    if (!definitions || animatingGroups.size === 0) {
+      return classes
+    }
 
     animatingGroups.forEach((groupId) => {
       const groupIndex = collapsibleGroupIds.indexOf(groupId)
-      if (groupIndex === -1) return
+      if (groupIndex === -1) {
+        return
+      }
 
       const indices = getCollapsedColumnIndices(
         visibleColumns,
@@ -418,8 +434,12 @@ export const useHeaderGroups = <
   )
 
   const entries = useMemo(() => {
-    if (!definitions) return null
-    if (!visibleColumns.some((column) => column.headerGroupId)) return null
+    if (!definitions) {
+      return null
+    }
+    if (!visibleColumns.some((column) => column.headerGroupId)) {
+      return null
+    }
 
     // Built from the requested state, so the toggle's icon and aria-expanded
     // answer the click while the columns are still on their way out.

@@ -45,7 +45,9 @@ export function getSvgAvatarData(
     case "person": {
       const { avatar } = input
       const { firstName, lastName } = avatar
-      if (avatar.src) return { kind: "image", src: avatar.src }
+      if (avatar.src) {
+        return { kind: "image", src: avatar.src }
+      }
       const colorName = getAvatarColorByText(firstName + lastName) ?? "viridian"
       return {
         kind: "initials",
@@ -56,7 +58,9 @@ export function getSvgAvatarData(
     case "team": {
       const { avatar } = input
       const { name } = avatar
-      if (avatar.src) return { kind: "image", src: avatar.src }
+      if (avatar.src) {
+        return { kind: "image", src: avatar.src }
+      }
       const colorName = getAvatarColorByText(name) ?? "viridian"
       return {
         kind: "initials",
@@ -67,7 +71,9 @@ export function getSvgAvatarData(
     case "company": {
       const { avatar } = input
       const { name } = avatar
-      if (avatar.src) return { kind: "image", src: avatar.src }
+      if (avatar.src) {
+        return { kind: "image", src: avatar.src }
+      }
       return {
         kind: "initials",
         fill: AVATAR_FILL.viridian,

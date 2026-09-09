@@ -21,7 +21,6 @@ import {
   useRef,
   useState,
 } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
 import {
@@ -33,7 +32,6 @@ import { toasts } from "@/hooks/toast"
 import { Delete, Ellipsis, InfoCircleLine, Plus, Sliders } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-
 import { arrivalWindowMs, useElapsed } from "../home-motion"
 import {
   resolveWidgetHeader,
@@ -47,6 +45,7 @@ import {
 import { SlotWidget } from "../SlotWidget"
 import { WidgetUpdateDialog } from "../WidgetUpdateDialog"
 import { takeCardGhost, takePageSurface } from "./dragGhost"
+import { Footnote } from "./Footnote"
 import { lockedCeiling, noHigherThan, topPins } from "./lockedCeiling"
 import { SortableWidget } from "./SortableWidget"
 import {
@@ -55,8 +54,8 @@ import {
   type WidgetVirtualization,
 } from "./useWidgetVirtualizer"
 import { verticalOnly } from "./verticalOnly"
-import { Footnote } from "./Footnote"
 import { WidgetMotion, type WidgetStow } from "./WidgetMotion"
+import { WidgetStage } from "./WidgetStage"
 
 export type { WidgetVirtualization } from "./useWidgetVirtualizer"
 
@@ -85,19 +84,22 @@ const INTERACTIVE = [
 ].join(",")
 
 class WidgetDragSensor extends PointerSensor {
-  static activators = [
+  static readonly activators = [
     {
       eventName: "onPointerDown" as const,
       handler: (
-        { nativeEvent: event }: PointerEvent<Element>,
+        { nativeEvent: event }: PointerEvent,
         { onActivation }: PointerSensorOptions
       ) => {
         // The base sensor's own two conditions, kept as they are — a secondary
         // pointer or any button but the left one is not a drag.
-        if (!event.isPrimary || event.button !== 0) return false
-        const target = event.target
-        if (target instanceof Element && target.closest(INTERACTIVE))
+        if (!event.isPrimary || event.button !== 0) {
           return false
+        }
+        const target = event.target
+        if (target instanceof Element && target.closest(INTERACTIVE)) {
+          return false
+        }
         onActivation?.({ event })
         return true
       },
@@ -120,7 +122,9 @@ const DROP_ANIMATION = {
 const findUp = (from: Element | null, selector: string): Element | null => {
   for (let el: Element | null = from; el; el = el.parentElement) {
     const found = el.querySelector(selector)
-    if (found) return found
+    if (found) {
+      return found
+    }
   }
   return null
 }
@@ -269,6 +273,8 @@ export interface WidgetContainerProps {
   disableEdition?: boolean
   /** Disables dragging without changing the tree: the sortables stay mounted. */
   disableDrag?: boolean
+  widgetHostFor?: (widget: HomeWidgetItem) => HTMLElement | null | undefined
+  afterWidgets?: ReactNode
   /**
    * Marks the element a dragged card should carry a copy of behind it — the
    * page's own surface, so the card the pointer holds is the colour it was.
@@ -409,6 +415,8 @@ export function WidgetContainer({
   renderWidget,
   disableEdition = false,
   disableDrag = false,
+  widgetHostFor,
+  afterWidgets,
   dragSurfaceSelector,
   onRemoveWidget,
   onClickAddNewWidget,
@@ -432,6 +440,7 @@ export function WidgetContainer({
   const canEdit = !disableEdition
   const isHidden = (widget: HomeWidgetItem) =>
     visibleWidgetId !== undefined && widget.id !== visibleWidgetId
+  const arrangeable = canEdit && onReorder != null
   /**
    * WHETHER THERE IS AN ARRANGEMENT TO MAKE — two widgets that can actually
    * move, not merely two widgets. A column of one free card among pinned ones
@@ -439,10 +448,7 @@ export function WidgetContainer({
    * offering a gesture whose every outcome is the arrangement you already have
    * is offering a refusal.
    */
-  const canDrag =
-    canEdit &&
-    onReorder != null &&
-    widgets.filter((widget) => !widget.locked).length > 1
+  const hasArrangement = widgets.filter((widget) => !widget.locked).length > 1
   // The widget being dragged: its in-list card hides while a copy of it rides
   // the pointer in the DragOverlay (see below).
   const [activeId, setActiveId] = useState<string | null>(null)
@@ -492,23 +498,31 @@ export function WidgetContainer({
 
   /** Puts the copy in the overlay dnd-kit positions for us. */
   const mountGhost = (host: HTMLDivElement | null) => {
-    if (host && ghostRef.current) host.replaceChildren(ghostRef.current)
+    if (host && ghostRef.current) {
+      host.replaceChildren(ghostRef.current)
+    }
   }
   const pinFrame = useRef(0)
   const unpinSurface = () => cancelAnimationFrame(pinFrame.current)
   const mountSurface = (host: HTMLDivElement | null) => {
     unpinSurface()
     const surface = surfaceRef.current
-    if (!host || !surface) return
+    if (!host || !surface) {
+      return
+    }
     host.replaceChildren(surface.node)
     host.style.top = `${surface.offset.top}px`
     host.style.left = `${surface.offset.left}px`
     host.style.width = `${surface.offset.width}px`
     host.style.height = `${surface.offset.height}px`
-    if (surface.base) host.style.backgroundColor = surface.base
+    if (surface.base) {
+      host.style.backgroundColor = surface.base
+    }
 
     const overlay = host.parentElement?.parentElement
-    if (!overlay || typeof DOMMatrix !== "function") return
+    if (!overlay || typeof DOMMatrix !== "function") {
+      return
+    }
     const pin = () => {
       const { m41, m42 } = new DOMMatrix(getComputedStyle(overlay).transform)
       host.style.transform = `translate3d(${-m41}px, ${-m42}px, 0)`
@@ -586,11 +600,15 @@ export function WidgetContainer({
     const unreachable = ceilingRef.current == null ? [] : topPins(widgets)
 
     return widgets.find((widget) => {
-      if (!widget.locked || unreachable.includes(widget)) return false
+      if (!widget.locked || unreachable.includes(widget)) {
+        return false
+      }
       const box = columnRef.current
         ?.querySelector(`[data-widget-id="${widget.id}"]`)
         ?.getBoundingClientRect()
-      if (!box) return false
+      if (!box) {
+        return false
+      }
 
       const midline = box.top + box.height / 2
       const covered =
@@ -625,22 +643,26 @@ export function WidgetContainer({
     // What the widget is telling you, if it says. Its copy is the PROVIDER's
     // (`t.widgets.whatThisMeans`), not this column's: the question a user asks of
     // a widget is the same question in every product that ships one.
-    if (resolveWidgetHeader(widget.header, widget.params)?.info)
+    if (resolveWidgetHeader(widget.header, widget.params)?.info) {
       items.push({
         label: t.widgets.whatThisMeans,
         icon: InfoCircleLine,
         onClick: () => setFlippedId(widget.id),
       })
-    if (widget.paramsSchema && onChangeWidgetParams)
+    }
+    if (widget.paramsSchema && onChangeWidgetParams) {
       items.push({
         label: editParamsLabel ?? t.widgets.editParams,
         icon: Sliders,
         onClick: () => setEditingParamsId(widget.id),
       })
+    }
     if (canEdit && !widget.locked && onRemoveWidget) {
       // A separator only when there is something to separate it FROM — a menu
       // that opens on a rule reads as if an item failed to render.
-      if (items.length > 0) items.push({ type: "separator" })
+      if (items.length > 0) {
+        items.push({ type: "separator" })
+      }
       items.push({
         label: removeLabel ?? t.widgets.removeWidget,
         icon: Delete,
@@ -665,11 +687,15 @@ export function WidgetContainer({
       })
       return
     }
-    if (!over || active.id === over.id) return
+    if (!over || active.id === over.id) {
+      return
+    }
     const ids = widgets.map((widget) => widget.id)
     const from = ids.indexOf(String(active.id))
     const to = ids.indexOf(String(over.id))
-    if (from < 0 || to < 0) return
+    if (from < 0 || to < 0) {
+      return
+    }
     // A locked widget is PINNED to its index. `disabled` stops it being picked
     // up, but a plain arrayMove would still slide it along when another widget
     // crosses it — so the moved order is replayed into the free slots only, and
@@ -684,7 +710,9 @@ export function WidgetContainer({
       return
     }
     // Dropping onto a pinned widget has no meaning: it can't give up its place.
-    if ([...pinned.values()].includes(String(over.id))) return
+    if ([...pinned.values()].includes(String(over.id))) {
+      return
+    }
     const moved = arrayMove(ids, from, to).filter(
       (id) => !pinned.has(ids.indexOf(id))
     )
@@ -701,7 +729,7 @@ export function WidgetContainer({
     const items = menuItems(widget)
     // The default render puts the menu where the frame keeps its own overflow
     // menu — the header's top-right — rather than laying a control over the card.
-    if (!renderWidget)
+    if (!renderWidget) {
       return (
         <SlotWidget
           {...widgetChrome(widget)}
@@ -718,8 +746,11 @@ export function WidgetContainer({
           isDragging={drag?.isDragging}
         />
       )
+    }
     const node = renderWidget(widget, ctx)
-    if (items.length === 0) return node
+    if (items.length === 0) {
+      return node
+    }
     // A CUSTOM render has no header for the menu to live in, so the column puts
     // one over the card, in the same corner the frame would have drawn it.
     return (
@@ -769,9 +800,22 @@ export function WidgetContainer({
    * nothing to do must not leave a box behind, because that box is the flex item
    * the widget itself would have been.
    */
-  const enter = (order: number, node: ReactNode, widget?: HomeWidgetItem) => {
+  const enter = (
+    order: number,
+    node: ReactNode,
+    widget?: HomeWidgetItem,
+    /**
+     * Set only where nothing else marks the box — an arrangeable column's
+     * `SortableWidget` already carries the id one level up, and marking it here
+     * too would put the same attribute on two nested elements.
+     */
+    widgetId?: string
+  ) => {
     const widgetStow = widget ? stowOf(widget) : undefined
-    if (!arrival && !widgetStow) return node
+    // The id needs a box to sit on, so asking for one is reason enough to wrap.
+    if (!arrival && !widgetStow && !widgetId) {
+      return node
+    }
     return (
       <WidgetMotion
         arrival={
@@ -785,6 +829,7 @@ export function WidgetContainer({
         }
         stow={widgetStow}
         fullHeight={widget?.fullHeight}
+        widgetId={widgetId}
       >
         {node}
       </WidgetMotion>
@@ -807,17 +852,24 @@ export function WidgetContainer({
       placement={placement}
       measureRef={virtual.measureRef}
     >
-      {canDrag ? (
-        <SortableWidget id={widget.id} disabled={widget.locked || disableDrag}>
-          {/* The arrival wrapper sits INSIDE the sortable rather than around it:
-              dnd-kit measures the element it holds the ref to, and a transformed
-              ancestor would offset every rect it reads while a drag is in
-              flight. */}
-          {(state) => enter(order, render(widget, state), widget)}
-        </SortableWidget>
-      ) : (
-        enter(order, render(widget), widget)
-      )}
+      <WidgetStage host={widgetHostFor?.(widget)}>
+        {arrangeable ? (
+          <SortableWidget
+            id={widget.id}
+            disabled={widget.locked || disableDrag || !hasArrangement}
+          >
+            {/* The arrival wrapper sits INSIDE the sortable rather than around
+                it: dnd-kit measures the element it holds the ref to, and a
+                transformed ancestor would offset every rect it reads while a
+                drag is in flight. */}
+            {(state) => enter(order, render(widget, state), widget)}
+          </SortableWidget>
+        ) : (
+          // No sortable to carry it here, so the arrival wrapper is the box the
+          // id goes on — see `enter`.
+          enter(order, render(widget), widget, widget.id)
+        )}
+      </WidgetStage>
     </WidgetSlot>
   )
 
@@ -877,7 +929,7 @@ export function WidgetContainer({
       style={style}
     >
       {children}
-      {canDrag ? (
+      {arrangeable ? (
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
@@ -972,6 +1024,7 @@ export function WidgetContainer({
       ) : (
         list
       )}
+      {afterWidgets}
       {/* THE COLUMN'S FOOTNOTE: under every widget, above the offer to add
           another. It takes the beat after the last widget and the placeholder
           takes the one after it, so the arrival still runs straight down the

@@ -1,6 +1,5 @@
 import { render } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
-
 import { ChatSpinner } from "../components/ChatSpinner"
 
 const paintedPolygons = (container: HTMLElement) =>

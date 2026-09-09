@@ -7,7 +7,6 @@ import {
   useRef,
   useState,
 } from "react"
-
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { Cross } from "@/icons/app"
 import { useReducedMotion } from "@/lib/a11y"
@@ -20,7 +19,6 @@ import {
   PopoverArrow,
   PopoverContent,
 } from "@/ui/popover"
-
 import { CoachmarkSpotlight } from "./CoachmarkSpotlight"
 import type { F0CoachmarkProps } from "./types"
 
@@ -57,7 +55,9 @@ const FOCUSABLE = `${FIELDS}, select, button, a[href], [tabindex]:not([tabindex=
  * around the thing you actually type into.
  */
 const fieldIn = (target: HTMLElement): HTMLElement | null => {
-  if (target.matches(FOCUSABLE)) return target
+  if (target.matches(FOCUSABLE)) {
+    return target
+  }
   return (
     target.querySelector<HTMLElement>(FIELDS) ??
     target.querySelector<HTMLElement>(FOCUSABLE)
@@ -77,21 +77,29 @@ const useCentredWhenItCannotFit = (
     setCentred(false)
 
     const element = ref.current
-    if (!element || typeof ResizeObserver !== "function") return
+    if (!element || typeof ResizeObserver !== "function") {
+      return
+    }
 
     const check = () => {
-      if (latched.current) return
+      if (latched.current) {
+        return
+      }
       const style = getComputedStyle(element)
       const room = parseFloat(
         style.getPropertyValue("--radix-popover-content-available-height")
       )
-      if (!Number.isFinite(room)) return
+      if (!Number.isFinite(room)) {
+        return
+      }
 
       const body = element.querySelector<HTMLElement>("[data-coachmark-body]")
       const padding =
         parseFloat(style.paddingTop) + parseFloat(style.paddingBottom)
       const needed = (body?.scrollHeight ?? element.scrollHeight) + padding
-      if (room >= needed) return
+      if (room >= needed) {
+        return
+      }
 
       latched.current = true
       setCentred(true)
@@ -195,7 +203,9 @@ const CoachmarkPanel = ({
   // that is the panel or the element the new step points at.
   const announcedStep = useRef(step?.current)
   useEffect(() => {
-    if (announcedStep.current === step?.current) return
+    if (announcedStep.current === step?.current) {
+      return
+    }
     announcedStep.current = step?.current
     focusForStep()
   }, [step?.current])
@@ -212,14 +222,16 @@ const CoachmarkPanel = ({
       onOpenChange={(nextOpen) => {
         // Radix only ever requests closing here (Escape). The coachmark closes
         // itself: there is no `open` prop for a consumer to keep in sync.
-        if (!nextOpen) onClose()
+        if (!nextOpen) {
+          onClose()
+        }
       }}
     >
       <PopoverAnchor virtualRef={centred ? viewportCentre : anchorRef} />
       {/* Under the panel and over everything else. Rendered from here rather
           than by the provider so the two always agree on which element is lit:
           the panel points at `target`, and so does the hole. */}
-      {overlay && (
+      {overlay ? (
         <CoachmarkSpotlight
           target={target}
           container={container}
@@ -228,7 +240,7 @@ const CoachmarkPanel = ({
             onOutsideInteraction?.()
           }}
         />
-      )}
+      ) : null}
       <PopoverContent
         ref={contentRef}
         container={container}
@@ -339,7 +351,7 @@ const CoachmarkPanel = ({
                 className="flex-shrink-0"
               />
             </div>
-            {description && (
+            {description ? (
               // One level down from the title, which keeps the panel's own
               // colour. Same pairing F0Toast uses for title vs description.
               <p
@@ -348,16 +360,16 @@ const CoachmarkPanel = ({
               >
                 {description}
               </p>
-            )}
+            ) : null}
           </div>
           {/* `ml-auto` on the action rather than `justify-end` on the row, so
               the action stays right aligned whether or not a step is present. */}
           <div className="flex flex-row items-center gap-3">
-            {step && (
+            {step ? (
               <p className="text-f1-foreground-inverse-secondary">
                 {step.current}/{step.total}
               </p>
-            )}
+            ) : null}
             <ButtonInternal
               variant="outline"
               label={label}
@@ -366,7 +378,7 @@ const CoachmarkPanel = ({
             />
           </div>
         </div>
-        {arrow && !centred && (
+        {arrow && !centred ? (
           <PopoverArrow asChild width={ARROW_WIDTH} height={ARROW_HEIGHT}>
             {/* The fill uses the panel's own surface tokens, alpha included, so
                 both composite over the same backdrop to the same colour. It is
@@ -380,7 +392,7 @@ const CoachmarkPanel = ({
               />
             </svg>
           </PopoverArrow>
-        )}
+        ) : null}
       </PopoverContent>
     </Popover>
   )

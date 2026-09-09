@@ -1,15 +1,4 @@
 import { forwardRef } from "react"
-
-import { F0Link } from "@/components/F0Link"
-import { DropdownItem } from "@/experimental/Navigation/Dropdown"
-import { withDataTestId } from "@/lib/data-testid"
-import { experimentalComponent } from "@/lib/experimental"
-import { withSkeleton } from "@/lib/skeleton"
-import { cn, focusRing } from "@/lib/utils"
-import { Card } from "@/ui/Card"
-import { Skeleton } from "@/ui/skeleton"
-import { Text } from "@/ui/Text"
-
 import {
   type CardPrimaryAction,
   type CardSecondaryAction,
@@ -24,7 +13,15 @@ import {
   type CardAvatarVariant,
 } from "@/components/F0Card/components/CardAvatar"
 import { type CardAlertProps } from "@/components/F0Card/types"
-
+import { F0Link } from "@/components/F0Link"
+import { DropdownItem } from "@/experimental/Navigation/Dropdown"
+import { withDataTestId } from "@/lib/data-testid"
+import { experimentalComponent } from "@/lib/experimental"
+import { withSkeleton } from "@/lib/skeleton"
+import { cn, focusRing } from "@/lib/utils"
+import { Card } from "@/ui/Card"
+import { Skeleton } from "@/ui/skeleton"
+import { Text } from "@/ui/Text"
 import {
   CardHorizontalActions,
   type CardHorizontalConfirmAction,
@@ -209,7 +206,7 @@ const F0CardHorizontalBase = forwardRef<HTMLDivElement, F0CardHorizontalProps>(
         onClick={disabled ? undefined : onClick}
         data-testid="card"
       >
-        {link && !disableOverlayLink && (
+        {link && !disableOverlayLink ? (
           <F0Link
             href={link}
             variant="unstyled"
@@ -218,7 +215,7 @@ const F0CardHorizontalBase = forwardRef<HTMLDivElement, F0CardHorizontalProps>(
           >
             &nbsp;
           </F0Link>
-        )}
+        ) : null}
 
         <div className={cardHorizontalClassName[stackAt]}>
           <div
@@ -232,7 +229,7 @@ const F0CardHorizontalBase = forwardRef<HTMLDivElement, F0CardHorizontalProps>(
               avatar ? "items-start" : "items-center"
             )}
           >
-            {avatar && <CardAvatar avatar={avatar} size="lg" />}
+            {avatar ? <CardAvatar avatar={avatar} size="lg" /> : null}
             <div className="flex min-w-0 flex-col gap-0">
               <Text
                 variant="body"
@@ -242,7 +239,7 @@ const F0CardHorizontalBase = forwardRef<HTMLDivElement, F0CardHorizontalProps>(
                   inactive && "text-f1-foreground-secondary line-through"
                 )}
               />
-              {description && (
+              {description ? (
                 <Text
                   variant="description"
                   content={description}
@@ -252,7 +249,7 @@ const F0CardHorizontalBase = forwardRef<HTMLDivElement, F0CardHorizontalProps>(
                     inactive && "line-through"
                   )}
                 />
-              )}
+              ) : null}
             </div>
           </div>
 

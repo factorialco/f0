@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import { getValueByPath } from "./objectPaths"
 
 describe("getValueByPath", () => {
@@ -64,68 +63,68 @@ describe("getValueByPath", () => {
 
   describe("handling null and undefined values", () => {
     it("should return null values correctly", () => {
-      expect(getValueByPath(testObject, "b.c.e")).toBe(null)
+      expect(getValueByPath(testObject, "b.c.e")).toBeNull()
     })
 
     it("should return undefined values correctly", () => {
-      expect(getValueByPath(testObject, "b.c.f")).toBe(undefined)
+      expect(getValueByPath(testObject, "b.c.f")).toBeUndefined()
     })
   })
 
   describe("invalid paths", () => {
     it("should return undefined for non-existent top-level properties", () => {
-      expect(getValueByPath(testObject, "nonExistent")).toBe(undefined)
+      expect(getValueByPath(testObject, "nonExistent")).toBeUndefined()
     })
 
     it("should return undefined for non-existent nested properties", () => {
-      expect(getValueByPath(testObject, "a.nonExistent")).toBe(undefined)
-      expect(getValueByPath(testObject, "b.nonExistent")).toBe(undefined)
-      expect(getValueByPath(testObject, "b.c.nonExistent")).toBe(undefined)
+      expect(getValueByPath(testObject, "a.nonExistent")).toBeUndefined()
+      expect(getValueByPath(testObject, "b.nonExistent")).toBeUndefined()
+      expect(getValueByPath(testObject, "b.c.nonExistent")).toBeUndefined()
     })
 
     it("should return undefined when traversing through non-object values", () => {
-      expect(getValueByPath(testObject, "a.b.c")).toBe(undefined)
-      expect(getValueByPath(testObject, "stringValue.length")).toBe(undefined)
-      expect(getValueByPath(testObject, "booleanValue.toString")).toBe(
-        undefined
-      )
+      expect(getValueByPath(testObject, "a.b.c")).toBeUndefined()
+      expect(getValueByPath(testObject, "stringValue.length")).toBeUndefined()
+      expect(
+        getValueByPath(testObject, "booleanValue.toString")
+      ).toBeUndefined()
     })
 
     it("should return undefined for paths that go beyond available nesting", () => {
-      expect(getValueByPath(testObject, "b.c.d.e.f")).toBe(undefined)
-      expect(getValueByPath(testObject, "emptyObject.nonExistent.deep")).toBe(
-        undefined
-      )
+      expect(getValueByPath(testObject, "b.c.d.e.f")).toBeUndefined()
+      expect(
+        getValueByPath(testObject, "emptyObject.nonExistent.deep")
+      ).toBeUndefined()
     })
   })
 
   describe("edge cases", () => {
     it("should handle empty path strings", () => {
-      expect(getValueByPath(testObject, "")).toBe(undefined)
+      expect(getValueByPath(testObject, "")).toBeUndefined()
     })
 
     it("should handle null objects", () => {
-      expect(getValueByPath(null, "a")).toBe(undefined)
-      expect(getValueByPath(null, "a.b.c")).toBe(undefined)
+      expect(getValueByPath(null, "a")).toBeUndefined()
+      expect(getValueByPath(null, "a.b.c")).toBeUndefined()
     })
 
     it("should handle undefined objects", () => {
-      expect(getValueByPath(undefined, "a")).toBe(undefined)
-      expect(getValueByPath(undefined, "a.b.c")).toBe(undefined)
+      expect(getValueByPath(undefined, "a")).toBeUndefined()
+      expect(getValueByPath(undefined, "a.b.c")).toBeUndefined()
     })
 
     it("should handle non-object inputs", () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any -- to test the function
-      expect(getValueByPath("string" as any, "a")).toBe(undefined)
+      expect(getValueByPath("string" as any, "a")).toBeUndefined()
       // eslint-disable-next-line @typescript-eslint/no-explicit-any -- to test the function
-      expect(getValueByPath(42 as any, "a")).toBe(undefined)
+      expect(getValueByPath(42 as any, "a")).toBeUndefined()
       // eslint-disable-next-line @typescript-eslint/no-explicit-any -- to test the function
-      expect(getValueByPath(true as any, "a")).toBe(undefined)
+      expect(getValueByPath(true as any, "a")).toBeUndefined()
     })
 
     it("should handle empty objects", () => {
-      expect(getValueByPath({}, "a")).toBe(undefined)
-      expect(getValueByPath({}, "a.b.c")).toBe(undefined)
+      expect(getValueByPath({}, "a")).toBeUndefined()
+      expect(getValueByPath({}, "a.b.c")).toBeUndefined()
     })
 
     it("should handle paths with single dots", () => {
@@ -136,8 +135,8 @@ describe("getValueByPath", () => {
         },
       }
       // The function splits by dots, so it won't find keys that contain dots
-      expect(getValueByPath(objWithDots, "a.b")).toBe(undefined)
-      expect(getValueByPath(objWithDots, "c.d.e")).toBe(undefined)
+      expect(getValueByPath(objWithDots, "a.b")).toBeUndefined()
+      expect(getValueByPath(objWithDots, "c.d.e")).toBeUndefined()
     })
   })
 

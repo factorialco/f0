@@ -1,9 +1,7 @@
 import { RefObject } from "react"
-
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { getAvatarColor } from "@/components/avatars/internal/BaseAvatar/utils"
 import { cn } from "@/lib/utils"
-
 import { Picker } from "@/sds/social/Reactions/Picker"
 import { BACKGROUND_COLORS } from "../types"
 
@@ -39,12 +37,12 @@ export function CelebrationAvatar({
           : ""
       )}
     >
-      {src && (
+      {src ? (
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-10"
           style={{ backgroundImage: `url("${src}")` }}
         />
-      )}
+      ) : null}
       <div className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-md backdrop-blur">
         <div className="relative h-fit w-fit">
           <div
@@ -64,7 +62,7 @@ export function CelebrationAvatar({
               size="2xl"
             />
           </div>
-          {canReact && (
+          {canReact ? (
             <div
               ref={pickerRef}
               className={cn(
@@ -79,7 +77,7 @@ export function CelebrationAvatar({
                 variant="neutral"
               />
             </div>
-          )}
+          ) : null}
         </div>
       </div>
     </div>

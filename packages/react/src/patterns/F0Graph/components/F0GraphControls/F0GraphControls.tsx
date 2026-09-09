@@ -1,9 +1,7 @@
 import { forwardRef } from "react"
-
 import { F0Button } from "@/components/F0Button"
 import { Add, FitView, Minus, SearchPerson } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
-
 import type { F0GraphControlsProps } from "./types"
 
 export const F0GraphControls = forwardRef<HTMLDivElement, F0GraphControlsProps>(
@@ -17,7 +15,7 @@ export const F0GraphControls = forwardRef<HTMLDivElement, F0GraphControlsProps>(
         aria-label={i18n.graph.controls.navigation}
         className="flex flex-col items-center gap-2"
       >
-        {onFocusUser && (
+        {onFocusUser ? (
           <F0Button
             variant="outline"
             size="md"
@@ -26,7 +24,7 @@ export const F0GraphControls = forwardRef<HTMLDivElement, F0GraphControlsProps>(
             hideLabel
             onClick={onFocusUser}
           />
-        )}
+        ) : null}
 
         <F0Button
           variant="outline"

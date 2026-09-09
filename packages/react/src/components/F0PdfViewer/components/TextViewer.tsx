@@ -1,9 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react"
-
 import { parseMarkdownDocument } from "@/lib/markdown"
 import { useI18n } from "@/lib/providers/i18n"
 import { Skeleton } from "@/ui/skeleton"
-
 import { type F0PdfViewerAction } from "../types"
 import { DocumentToolbar, useDocumentZoom } from "./DocumentToolbar"
 
@@ -69,14 +67,20 @@ const TextViewer = ({
     setFailed(false)
     fetch(url, { credentials: withCredentials ? "include" : "same-origin" })
       .then((response) => {
-        if (!response.ok) throw new Error(`${response.status}`)
+        if (!response.ok) {
+          throw new Error(`${response.status}`)
+        }
         return response.text()
       })
       .then((content) => {
-        if (!cancelled) setText(content.slice(0, MAX_CHARS))
+        if (!cancelled) {
+          setText(content.slice(0, MAX_CHARS))
+        }
       })
       .catch(() => {
-        if (!cancelled) setFailed(true)
+        if (!cancelled) {
+          setFailed(true)
+        }
       })
     return () => {
       cancelled = true

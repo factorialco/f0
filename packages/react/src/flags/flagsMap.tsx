@@ -1,6 +1,5 @@
 // packages/react/src/flags/flagsMap.ts
 import type { ComponentType, ReactElement } from "react"
-
 // Import all flags
 import { CountryCode } from "@/lib/countries"
 

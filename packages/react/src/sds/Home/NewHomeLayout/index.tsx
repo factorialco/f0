@@ -11,7 +11,6 @@ import {
   useRef,
   useState,
 } from "react"
-
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { F0Button } from "@/components/F0Button"
 import { F0Icon, type F0IconProps } from "@/components/F0Icon"
@@ -26,7 +25,6 @@ import { cn } from "@/lib/utils"
 import { useSidebar } from "@/patterns/ApplicationFrame/FrameProvider"
 import { SidebarIconSvg } from "@/patterns/Navigation/Sidebar/Icon"
 import { Action } from "@/ui/Action"
-
 import {
   entranceDelay,
   entranceTransition,
@@ -49,7 +47,6 @@ import {
   type SlotRenderers,
   type WidgetParams,
 } from "../slotRenderers"
-import { SlotWidget } from "../SlotWidget"
 import { useScrollFade } from "../useScrollFade"
 import {
   WidgetContainer,
@@ -521,6 +518,7 @@ const SCROLLBAR_HIDDEN = "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
 const COLUMN_GAP_PX = 16
 /** Tailwind's `md` — below it the layout is one column unless the rail is collapsed. */
 const TWO_COLUMN_MIN_PX = 768
+const NO_BOX = { display: "contents" } as const
 const PANEL_LEAVE_MS = 150
 const PANEL_OPEN_MS = 150
 /** How far the floating panel clears the strip it comes out of. */
@@ -757,10 +755,14 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
     // what decides it is the room THIS layout has.
     useLayoutEffect(() => {
       const el = rootRef.current
-      if (!el) return
+      if (!el) {
+        return
+      }
       const read = () => setRootWidth(el.clientWidth)
       read()
-      if (typeof ResizeObserver !== "function") return
+      if (typeof ResizeObserver !== "function") {
+        return
+      }
       const observer = new ResizeObserver(read)
       observer.observe(el)
       return () => observer.disconnect()
@@ -773,7 +775,9 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
     // during the render that first sees a width, rather than from an effect, keeps
     // it from lagging a paint behind the measurement.
     const [hasMeasured, setHasMeasured] = useState(false)
-    if (rootWidth > 0 && !hasMeasured) setHasMeasured(true)
+    if (rootWidth > 0 && !hasMeasured) {
+      setHasMeasured(true)
+    }
 
     const [manualCollapsed, setManualCollapsed] = useState<boolean | null>(null)
     const canEditSide = (side: WidgetContainerSide) =>
@@ -783,23 +787,6 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
     // arrangeable column takes new widgets.
     const canAddToSide = (side: WidgetContainerSide) =>
       canEditSide(side) && (addableWidgetContainers?.includes(side) ?? true)
-
-    const render = (widget: HomeWidgetItem) => {
-      const node = renderWidget ? (
-        renderWidget(widget, ctx)
-      ) : (
-        <SlotWidget
-          header={widget.header}
-          params={widget.params}
-          fullHeight={widget.fullHeight}
-          slots={widget.slots}
-          loading={widget.loading}
-          slotRenderers={slotRenderers}
-          ctx={ctx}
-        />
-      )
-      return node
-    }
 
     // EACH COLUMN SCROLLS ITSELF: the grid is bounded to the viewport minus the
     // gutter it sits in, and each column takes its own overflow inside it. Both
@@ -866,22 +853,31 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
     const hasRailColumn =
       sideReady && !stacked && (collapsed || rootWidth >= TWO_COLUMN_MIN_PX)
     const loosePins = {
-      pinned: stacked ? rightWidgets.filter((widget) => widget.locked) : [],
-      rest: stacked ? rightWidgets.filter((widget) => !widget.locked) : [],
+      pinned: rightWidgets.filter((widget) => widget.locked),
+      rest: rightWidgets.filter((widget) => !widget.locked),
     }
+    const [hosts, setHosts] = useState<Record<string, HTMLElement | null>>({})
+    const hostRefs = useRef(
+      new Map<string, (node: HTMLElement | null) => void>()
+    )
+    const hostRef = (id: string) => {
+      const kept = hostRefs.current.get(id)
+      if (kept) {
+        return kept
+      }
+      const fresh = (node: HTMLElement | null) =>
+        setHosts((was) => (was[id] === node ? was : { ...was, [id]: node }))
+      hostRefs.current.set(id, fresh)
+      return fresh
+    }
+    const widgetHostFor = stacked
+      ? (widget: HomeWidgetItem) => hosts[widget.id] ?? null
+      : undefined
+
     // The pins go BETWEEN blocks of `children` — after `stackedPinsAfter` of
     // them — because "just under the shortcuts" is a place inside content this
     // layout doesn't own. Splitting the children is the only way to reach it.
     const childBlocks = Children.toArray(children)
-    const mainBlocks = !stacked
-      ? childBlocks
-      : [
-          ...childBlocks.slice(0, stackedPinsAfter),
-          ...loosePins.pinned.map((widget) => (
-            <Fragment key={widget.id}>{render(widget)}</Fragment>
-          )),
-          ...childBlocks.slice(stackedPinsAfter),
-        ]
     // ARRIVAL, in reading order: each block of the main column rises in one beat
     // after the one above it, and the widgets under them (the container's own
     // `entrance.order`) carry the same count on rather than restarting it — a
@@ -890,14 +886,27 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
     // Each block keeps the key `Children.toArray` gave it, so the wrapper is
     // identified by the block it wraps: keyed by index instead, reordering the
     // content would re-key every wrapper below the change and replay its entrance.
-    const mainChildren = mainBlocks.map((block, order) => (
+    const asBlock = (block: ReactNode, order: number) => (
       <HomeEntrance
         key={isValidElement(block) && block.key != null ? block.key : order}
         order={order}
       >
         {block}
       </HomeEntrance>
-    ))
+    )
+    const mainChildren = [
+      ...childBlocks.slice(0, stackedPinsAfter).map(asBlock),
+      ...loosePins.pinned.map((widget) => (
+        <div
+          key={`pin-host-${widget.id}`}
+          ref={hostRef(widget.id)}
+          style={NO_BOX}
+        />
+      )),
+      ...childBlocks
+        .slice(stackedPinsAfter)
+        .map((block, index) => asBlock(block, stackedPinsAfter + index)),
+    ]
 
     const openWidget = collapsed
       ? rightWidgets.find((widget) => widget.id === openId)
@@ -907,16 +916,24 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
     // the rail opens up: kept, it would reopen whatever was last hovered the
     // moment the layout narrowed again.
     useEffect(() => {
-      if (collapsed) return
-      if (openTimer.current) clearTimeout(openTimer.current)
+      if (collapsed) {
+        return
+      }
+      if (openTimer.current) {
+        clearTimeout(openTimer.current)
+      }
       openTimer.current = null
       setOpenId(null)
     }, [collapsed])
 
     useEffect(
       () => () => {
-        if (openTimer.current) clearTimeout(openTimer.current)
-        if (leaveTimer.current) clearTimeout(leaveTimer.current)
+        if (openTimer.current) {
+          clearTimeout(openTimer.current)
+        }
+        if (leaveTimer.current) {
+          clearTimeout(leaveTimer.current)
+        }
       },
       []
     )
@@ -943,7 +960,9 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
      * size halfway through the fade.
      */
     const closingId = useRef<string | null>(null)
-    if (openId) closingId.current = openId
+    if (openId) {
+      closingId.current = openId
+    }
     const shownId = useRef<string | null>(null)
     shownId.current = openId
     const panelWidgetId =
@@ -1010,11 +1029,15 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
         }
 
     const cancelLeave = () => {
-      if (leaveTimer.current) clearTimeout(leaveTimer.current)
+      if (leaveTimer.current) {
+        clearTimeout(leaveTimer.current)
+      }
       leaveTimer.current = null
     }
     const cancelOpen = () => {
-      if (openTimer.current) clearTimeout(openTimer.current)
+      if (openTimer.current) {
+        clearTimeout(openTimer.current)
+      }
       openTimer.current = null
     }
     const scheduleLeave = () => {
@@ -1044,7 +1067,9 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
     ) => {
       cancelLeave()
       cancelOpen()
-      if (shownId.current === id) return
+      if (shownId.current === id) {
+        return
+      }
       if (instant) {
         showFromAnchor(id, anchor)
         return
@@ -1059,8 +1084,11 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
       <motion.div
         ref={(node) => {
           rootRef.current = node
-          if (typeof ref === "function") ref(node)
-          else if (ref) ref.current = node
+          if (typeof ref === "function") {
+            ref(node)
+          } else if (ref) {
+            ref.current = node
+          }
         }}
         className={cn(
           // `isolate` so the surface layer's -z-10 stays INSIDE this layout
@@ -1176,12 +1204,12 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
                 the top-right controls, after the rail's own collapse button. It
                 draws NOTHING unless the AI chat context is enabled, so a Home
                 without One keeps the row it had. */}
-            {!hideOneSwitch && (
+            {!hideOneSwitch ? (
               <F0OneSwitch
                 tooltip={oneSwitchTooltip}
                 autoOpen={oneSwitchAutoOpen}
               />
-            )}
+            ) : null}
           </div>
         </HomeEntrance>
         {/* Main column: its own scroll region, no mask — a reading column should
@@ -1232,9 +1260,14 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             // class cannot take one. 672px by default (`MAIN_WIDTH`) — the
             // column's own width, no longer the reading column's.
             style={{ maxWidth: `${mainWidth}px` }}
-            widgets={
-              stacked ? [...leftWidgets, ...loosePins.rest] : leftWidgets
-            }
+            widgets={leftWidgets}
+            afterWidgets={loosePins.rest.map((widget) => (
+              <div
+                key={`loose-host-${widget.id}`}
+                ref={hostRef(widget.id)}
+                style={NO_BOX}
+              />
+            ))}
             footnote={mainFootnote}
             slotRenderers={slotRenderers}
             renderWidget={renderWidget}
@@ -1258,7 +1291,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
                 : undefined
             }
             // The widgets pick the stagger up where the freeform blocks left it.
-            entrance={{ order: mainChildren.length }}
+            entrance={{ order: childBlocks.length }}
           >
             {mainChildren}
           </WidgetContainer>
@@ -1399,10 +1432,8 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             built the rail's widgets again from nothing: a tile that had loaded
             went back to loading, a running clock restarted, an animation
             replayed. Presentation changes now move ONE render around instead of
-            replacing it. (Stacked is the exception, and cannot be otherwise:
-            below `md` the rail's widgets belong to the main column's flow,
-            interleaved with content this layout doesn't own.) */}
-        {stacked || !sideReady ? null : (
+            replacing it. */}
+        {!sideReady ? null : (
           <motion.aside
             ref={railFade.ref}
             // With nothing hovered there is no panel to see or to read out — but
@@ -1410,7 +1441,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
             // waits for the retract, because `display: none` cannot be animated
             // out of: applied on the frame the rail collapses, it would delete the
             // cards instead of letting them go into the glyphs.
-            hidden={railInPanel && rail.panelHidden}
+            hidden={stacked || (railInPanel && rail.panelHidden)}
             className={cn(
               "min-h-0 overflow-y-auto overflow-x-hidden",
               SCROLLBAR_HIDDEN,
@@ -1449,28 +1480,29 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
               // panel's one-widget filter belongs to the panel; while the rail is
               // still retracting the column is still a column, and its cards have
               // a fade to finish (`stow`).
-              visibleWidgetId={railInPanel ? panelWidgetId : undefined}
+              visibleWidgetId={
+                !stacked && railInPanel ? panelWidgetId : undefined
+              }
               // Whether the strip owns them yet. Nothing about the strip's
               // geometry comes with it: the cards fade where they stand, so
               // there is nothing for them to be mapped onto.
-              stow={{ stowed: collapsed }}
+              stow={{ stowed: !stacked && collapsed }}
+              widgetHostFor={widgetHostFor}
               slotRenderers={slotRenderers}
               renderWidget={renderWidget}
               ctx={ctx}
               // The rail virtualizes only while it is a COLUMN — as a floating
               // panel it is one card in a box of its own, and the container reads
               // that off `visibleWidgetId` by itself, mounting only the card the
-              // panel shows. The setting stays put through the change: it decides
-              // how the widgets are drawn, and a prop that came and went would be
-              // one more thing moving mid-gesture.
-              virtualized={virtualizationFor("right")}
+              // panel shows.
+              virtualized={stacked ? false : virtualizationFor("right")}
               // NOT gated on `collapsed`: whether the column is arrangeable
               // decides its tree's SHAPE (a draggable column is wrapped in a
               // DndContext), and a shape that changed when the rail collapsed
               // would rebuild every widget in it — the one thing this rail
               // exists to avoid.
               disableEdition={!canEditSide("right")}
-              disableDrag={collapsed}
+              disableDrag={collapsed || stacked}
               dragSurfaceSelector="[data-page-surface]"
               onReorder={
                 onReorderWidgets
@@ -1486,7 +1518,10 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
               // affordance, and a placeholder under a single floating widget
               // would be an offer in the wrong place.
               onClickAddNewWidget={
-                onClickAddNewWidget && canAddToSide("right") && !collapsed
+                onClickAddNewWidget &&
+                canAddToSide("right") &&
+                !collapsed &&
+                !stacked
                   ? () => onClickAddNewWidget("right")
                   : undefined
               }

@@ -3,7 +3,6 @@ import {
   F0AvatarAlert,
 } from "@/components/avatars/F0AvatarAlert"
 import { DialogDescription, DialogTitle } from "@/ui/Dialog"
-
 import { F0DialogAction } from "../types"
 import { DialogInternal } from "./DialogInternal"
 
@@ -23,6 +22,12 @@ type F0DialogNotificationProps = {
    * @default undefined
    */
   secondaryAction?: F0DialogAction | F0DialogAction[]
+  /**
+   * Renders the dismiss (X) control in the top-right corner, so the dialog does not need to spend
+   * a button on "Cancel".
+   * @default false
+   */
+  dismissable?: boolean
 }
 
 export const DialogNotificationInternal = ({
@@ -33,6 +38,7 @@ export const DialogNotificationInternal = ({
   description,
   primaryAction,
   secondaryAction,
+  dismissable = false,
 }: F0DialogNotificationProps) => {
   return (
     <DialogInternal
@@ -43,6 +49,7 @@ export const DialogNotificationInternal = ({
       primaryAction={primaryAction}
       secondaryAction={secondaryAction}
       type={type === "critical" ? "critical" : "default"}
+      dismissable={dismissable}
       modal
     >
       <div className="flex flex-col gap-4 py-2">
