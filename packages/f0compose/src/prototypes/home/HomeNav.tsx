@@ -81,7 +81,7 @@ import { motionKeyFor } from "./iconMotion"
 import { openInboxTasks } from "./inbox/inboxTasks"
 import { MenuDivider, MenuRow } from "./MenuRow"
 import {
-  LegalEntityMenu,
+  CompanyLogo,
   RailHelpMenu,
   RailPersonalMenu,
 } from "./navigation/RailMenus"
@@ -1352,7 +1352,7 @@ export function HomeNav() {
             (24px). The logo file is f0's own storybook asset, re-exported
             from fixtures; without `src` this falls back to initials. */}
         <div className="flex h-[60px] shrink-0 items-center justify-center">
-          <LegalEntityMenu />
+          <CompanyLogo />
         </div>
         <div className="flex w-full flex-col gap-2 px-1.5">
           {RAIL_SECTIONS.map((s) => (

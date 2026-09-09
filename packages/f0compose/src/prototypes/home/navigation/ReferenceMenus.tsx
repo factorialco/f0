@@ -1,7 +1,7 @@
 import { F0AvatarCompany, F0Icon, type IconType } from "@factorialco/f0-react"
 import {
   Bell,
-  CheckCircleLine,
+  Check,
   ChevronRight,
   ExternalLink,
   Question,
@@ -22,12 +22,20 @@ export type HelpRow =
   | { kind: "separator" }
   | { kind: "item"; label: string; icon: IconType; href?: string }
 export function ProfileMenu({
+  accountEmail,
+  entities,
+  selectedEntity,
+  onSelectEntity,
   personal,
   help,
   labels,
   collapsed = false,
   children,
 }: {
+  accountEmail: string
+  entities: Entity[]
+  selectedEntity: string
+  onSelectEntity: (id: string) => void
   personal: {
     label: string
     icon: IconType
@@ -113,8 +121,37 @@ export function ProfileMenu({
               <div
                 role="menu"
                 aria-label="Navigation menu"
-                className="w-[216px] rounded-[14px] border border-solid border-f1-border-secondary bg-f1-background p-1 shadow-md"
+                className="w-[248px] rounded-[14px] border border-solid border-f1-border-secondary bg-f1-background p-1 shadow-md"
               >
+                <div className="p-2 text-sm font-medium text-f1-foreground-secondary">
+                  {accountEmail}
+                </div>
+                {entities.map((entity) => (
+                  <button
+                    key={entity.id}
+                    type="button"
+                    role="menuitemradio"
+                    aria-checked={entity.id === selectedEntity}
+                    className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-left text-base font-medium text-f1-foreground hover:bg-f1-background-hover"
+                    onClick={() => onSelectEntity(entity.id)}
+                  >
+                    <F0AvatarCompany
+                      name={entity.name}
+                      src={entity.src}
+                      size="xs"
+                    />
+                    <span className="min-w-0 flex-1 truncate">
+                      {entity.name}
+                    </span>
+                    {entity.id === selectedEntity && (
+                      <F0Icon icon={Check} size="sm" color="info" />
+                    )}
+                  </button>
+                ))}
+                <div
+                  role="separator"
+                  className="my-1 h-px bg-f1-border-secondary"
+                />
                 {collapsed ? (
                   <>
                     {/* Folded only: Help and Notifications have lost their own
@@ -251,129 +288,6 @@ type Entity = {
   mark?: string
   tone?: string
   src?: string
-}
-
-/**
- * The legal-entity switcher's menu. F0's `Dropdown` takes flat `{label, icon}`
- * rows, so it can't render the brand marks, the current-entity tick, or the rule
- * that separates the entities from Settings / Billing. Same portaled-popover
- * approach as `HelpMenu` below, opening DOWNWARD from the header.
- */
-export function EntityMenu({
-  entities,
-  selected,
-  onSelect,
-  actions,
-  children,
-}: {
-  entities: Entity[]
-  selected: string
-  onSelect: (id: string) => void
-  actions: { label: string; icon: IconType; onClick: () => void }[]
-  children: ReactNode
-}) {
-  const [open, setOpen] = useState(false)
-  const anchorRef = useRef<HTMLDivElement>(null)
-  const popRef = useRef<HTMLDivElement>(null)
-  const [pos, setPos] = useState<{ left: number; top: number } | null>(null)
-
-  const toggle = () => {
-    const r = anchorRef.current?.getBoundingClientRect()
-    if (r) setPos({ left: r.left, top: r.bottom + 6 })
-    setOpen((o) => !o)
-  }
-
-  useEffect(() => {
-    if (!open) return
-    const onDown = (e: MouseEvent) => {
-      const target = e.target as Node
-      if (
-        !anchorRef.current?.contains(target) &&
-        !popRef.current?.contains(target)
-      )
-        setOpen(false)
-    }
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false)
-    const close = () => setOpen(false)
-    document.addEventListener("mousedown", onDown)
-    document.addEventListener("keydown", onKey)
-    window.addEventListener("resize", close)
-    window.addEventListener("scroll", close, true)
-    return () => {
-      document.removeEventListener("mousedown", onDown)
-      document.removeEventListener("keydown", onKey)
-      window.removeEventListener("resize", close)
-      window.removeEventListener("scroll", close, true)
-    }
-  }, [open])
-
-  return (
-    <div ref={anchorRef} style={{ position: "relative", display: "flex" }}>
-      <div onClick={toggle}>{children}</div>
-      {open && pos
-        ? createPortal(
-            <div
-              ref={popRef}
-              role="menu"
-              aria-label="Navigation menu"
-              className="w-[216px] rounded-[14px] border border-solid border-f1-border-secondary bg-f1-background p-1 shadow-md"
-              style={{
-                position: "fixed",
-                left: pos.left,
-                top: pos.top,
-                zIndex: 60,
-              }}
-            >
-              {entities.map((e) => (
-                <button
-                  key={e.id}
-                  type="button"
-                  role="menuitemradio"
-                  aria-checked={e.id === selected}
-                  className={`flex w-full cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-left text-base font-medium text-f1-foreground hover:bg-f1-background-hover${e.id === selected ? " bg-f1-background-secondary" : ""}`}
-                  onClick={() => {
-                    onSelect(e.id)
-                    setOpen(false)
-                  }}
-                >
-                  <F0AvatarCompany name={e.name} src={e.src} size="xs" />
-                  <span className="min-w-0 flex-1 truncate">{e.name}</span>
-                  {e.id === selected ? (
-                    <CheckCircleLine
-                      width={20}
-                      height={20}
-                      className="shrink-0 text-f1-foreground-secondary"
-                    />
-                  ) : null}
-                </button>
-              ))}
-              {actions.length > 0 && (
-                <div className="mx-2 my-1 h-px bg-f1-border-secondary" />
-              )}
-              {actions.map((a) => {
-                const Icon = a.icon
-                return (
-                  <button
-                    key={a.label}
-                    type="button"
-                    role="menuitem"
-                    className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-left text-base font-medium text-f1-foreground hover:bg-f1-background-hover"
-                    onClick={() => {
-                      setOpen(false)
-                      a.onClick()
-                    }}
-                  >
-                    <Icon width={20} height={20} className="shrink-0" />
-                    <span className="min-w-0 flex-1 truncate">{a.label}</span>
-                  </button>
-                )
-              })}
-            </div>,
-            document.body
-          )
-        : null}
-    </div>
-  )
 }
 
 export function HelpMenu({ label, rows }: { label: string; rows: HelpRow[] }) {
