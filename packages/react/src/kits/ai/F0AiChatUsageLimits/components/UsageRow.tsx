@@ -20,16 +20,9 @@ export const UsageRow = ({
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between gap-2">
-        <div className="flex min-w-0 flex-col">
-          <span className="truncate text-base font-medium text-f1-foreground">
-            {label}
-          </span>
-          {description ? (
-            <span className="truncate text-base text-f1-foreground-secondary">
-              {description}
-            </span>
-          ) : null}
-        </div>
+        <span className="min-w-0 truncate text-base font-medium text-f1-foreground">
+          {label}
+        </span>
         <span className="shrink-0 font-normal tabular-nums text-f1-foreground-secondary">
           {unlimited
             ? i18n.t("ai.usageLimits.unlimited")
@@ -62,6 +55,11 @@ export const UsageRow = ({
           />
         </div>
       )}
+      {description ? (
+        <span className="truncate text-base text-f1-foreground-secondary">
+          {description}
+        </span>
+      ) : null}
     </div>
   )
 }
