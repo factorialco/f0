@@ -1,5 +1,4 @@
 import React from "react"
-import type { WidgetContainerSide } from "./WidgetContainer"
 
 /**
  * TRACKING FOR THE HOME — the same shape the AI kit uses (`AiChatTrackingOptions`):
@@ -11,6 +10,11 @@ import type { WidgetContainerSide } from "./WidgetContainer"
  * a type test holds the line), so a host had no seam to observe an interaction
  * from — its analytics simply could not see the Home. These callbacks are that
  * seam, and they leave the row data alone: navigation is still the anchor's.
+ *
+ * BEHAVIOUR ONLY, deliberately. The payloads carry what the reader DID and say
+ * nothing about which column a widget sits in or where in it — that is the
+ * host's own persisted layout, and duplicating it into an analytics event
+ * would make two sources for one fact, the stale one being the event.
  */
 
 /**
@@ -20,29 +24,25 @@ import type { WidgetContainerSide } from "./WidgetContainer"
  */
 export type HomeWidgetActionKind = "header-link" | "footer-action" | "view-more"
 
-/** What identifies the widget an event came from. */
-type HomeWidgetScope = {
-  /** The widget's id, as the column was given it. */
-  widgetId: string
-  side: WidgetContainerSide
-  /** 1-based place in its column. */
-  position: number
-}
-
 /**
- * Payload for `tracking.onWidgetAction`. Carries everything an analytics layer
- * (e.g. Amplitude) needs to attribute the action without the host tracing back
- * which card it came from.
+ * Payload for `tracking.onWidgetAction`. The widget is named by the id the host
+ * gave it, which is the key to everything else the host already knows about it.
  */
-export type HomeWidgetActionEvent = HomeWidgetScope & {
+export type HomeWidgetActionEvent = {
+  widgetId: string
   action: HomeWidgetActionKind
 }
 
 /** Payload for `tracking.onWidgetItemActivate`. */
-export type HomeWidgetItemActivateEvent = HomeWidgetScope & {
+export type HomeWidgetItemActivateEvent = {
+  widgetId: string
   /** The row's own id, as the slot was given it. */
   itemId: string | number
-  /** 1-based place of the row within its slot, as drawn. */
+  /**
+   * 1-based place of the row within its slot, AS DRAWN. Not layout state: it
+   * is where the reader's attention landed in a list ordered by its own data,
+   * which is the one position worth reporting.
+   */
   itemPosition: number
 }
 
@@ -74,57 +74,49 @@ export const HomeTrackingProvider = ({
   </HomeTrackingContext.Provider>
 )
 
-const HomeWidgetScopeContext = React.createContext<HomeWidgetScope | undefined>(
-  undefined
-)
+const HomeWidgetIdContext = React.createContext<string | undefined>(undefined)
 
 /**
  * WHICH WIDGET is being drawn, published by the column around each card. The
  * slots inside it cannot know their own card otherwise: a renderer is handed
  * params and a ctx, not a place in a layout.
  */
-export const HomeWidgetScopeProvider = ({
+export const HomeWidgetIdProvider = ({
   widgetId,
-  side,
-  position,
   children,
-}: HomeWidgetScope & { children: React.ReactNode }) => {
-  const scope = React.useMemo(
-    () => ({ widgetId, side, position }),
-    [widgetId, side, position]
-  )
-
-  return (
-    <HomeWidgetScopeContext.Provider value={scope}>
-      {children}
-    </HomeWidgetScopeContext.Provider>
-  )
-}
+}: {
+  widgetId: string
+  children: React.ReactNode
+}) => (
+  <HomeWidgetIdContext.Provider value={widgetId}>
+    {children}
+  </HomeWidgetIdContext.Provider>
+)
 
 /**
  * Reporters for the widget being drawn. They are NO-OPS when the host passed
- * no `tracking`, and outside a column's scope, so every call site can call
- * them unconditionally without knowing whether anyone is listening.
+ * no `tracking`, and outside a column, so every call site can call them
+ * unconditionally without knowing whether anyone is listening.
  */
 export const useHomeWidgetTracking = () => {
   const tracking = React.useContext(HomeTrackingContext)
-  const scope = React.useContext(HomeWidgetScopeContext)
+  const widgetId = React.useContext(HomeWidgetIdContext)
 
   return React.useMemo(
     () => ({
       reportAction: (action: HomeWidgetActionKind) => {
-        if (!scope) {
+        if (widgetId === undefined) {
           return
         }
-        tracking?.onWidgetAction?.({ ...scope, action })
+        tracking?.onWidgetAction?.({ widgetId, action })
       },
       reportItemActivate: (itemId: string | number, itemPosition: number) => {
-        if (!scope) {
+        if (widgetId === undefined) {
           return
         }
-        tracking?.onWidgetItemActivate?.({ ...scope, itemId, itemPosition })
+        tracking?.onWidgetItemActivate?.({ widgetId, itemId, itemPosition })
       },
     }),
-    [tracking, scope]
+    [tracking, widgetId]
   )
 }

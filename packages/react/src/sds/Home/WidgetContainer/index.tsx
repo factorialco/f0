@@ -43,7 +43,7 @@ import {
   type WidgetParams,
 } from "../slotRenderers"
 import { SlotWidget } from "../SlotWidget"
-import { HomeWidgetScopeProvider } from "../tracking"
+import { HomeWidgetIdProvider } from "../tracking"
 import { WidgetUpdateDialog } from "../WidgetUpdateDialog"
 import { takeCardGhost, takePageSurface } from "./dragGhost"
 import { Footnote } from "./Footnote"
@@ -732,15 +732,9 @@ export function WidgetContainer({
     drag?: { isDragging: boolean },
     params: WidgetParams | undefined = widget.params
   ) => (
-    <HomeWidgetScopeProvider
-      widgetId={widget.id}
-      side={side}
-      position={
-        widgets.findIndex((candidate) => candidate.id === widget.id) + 1
-      }
-    >
+    <HomeWidgetIdProvider widgetId={widget.id}>
       {renderCard(widget, drag, params)}
-    </HomeWidgetScopeProvider>
+    </HomeWidgetIdProvider>
   )
 
   const renderCard = (

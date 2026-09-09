@@ -12,8 +12,11 @@ import { WidgetContainer } from "."
  * the widget they came from, and that they never take over the navigation.
  *
  * Driven through `WidgetContainer` (the column) rather than the whole layout:
- * this is where a card's scope is published, and a column needs no measured
- * width to draw one.
+ * this is where a card names itself, and a column needs no measured width to
+ * draw one.
+ *
+ * BEHAVIOUR ONLY: the payloads say what was activated, never which column the
+ * widget sits in or where — that is the host's own persisted layout.
  */
 
 const rows = (count: number) =>
@@ -53,8 +56,6 @@ describe("Home tracking", () => {
 
     expect(onWidgetItemActivate).toHaveBeenCalledWith({
       widgetId: "events",
-      side: "right",
-      position: 1,
       itemId: "row-2",
       itemPosition: 2,
     })
@@ -69,7 +70,7 @@ describe("Home tracking", () => {
     await userEvent.click(screen.getAllByText("Row 1")[1]!)
 
     expect(onWidgetItemActivate).toHaveBeenCalledWith(
-      expect.objectContaining({ widgetId: "tasks", position: 2 })
+      expect.objectContaining({ widgetId: "tasks" })
     )
   })
 
@@ -99,8 +100,6 @@ describe("Home tracking", () => {
 
     expect(onWidgetAction).toHaveBeenCalledWith({
       widgetId: "events",
-      side: "right",
-      position: 1,
       action: "header-link",
     })
     expect(onClick).toHaveBeenCalled()
