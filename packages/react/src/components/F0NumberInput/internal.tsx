@@ -15,7 +15,10 @@ import { IconType } from "@/components/F0Icon"
 import { InputFieldProps } from "@/components/F0InputField"
 import { InputMessages } from "@/components/F0InputField/components/InputMessages"
 import { Label } from "@/components/F0InputField/components/Label"
-import { InputFieldStatus } from "@/components/F0InputField/types"
+import {
+  InputFieldStatus,
+  InputFieldValueActions,
+} from "@/components/F0InputField/types"
 import { Calculator, Check } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
@@ -180,7 +183,7 @@ export type NumberInputInternalProps = Pick<
     extraContent?: ReactNode
     inputWidth?: string
     popover?: NumberInputPopoverConfig
-  }
+  } & InputFieldValueActions
 
 export const NumberInputInternal = forwardRef<
   HTMLInputElement,

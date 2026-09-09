@@ -22,11 +22,7 @@ import { AppendTag } from "./AppendTag"
 import { InputFieldActions } from "./components/InputFieldActions"
 import { InputMessages } from "./components/InputMessages"
 import { Label } from "./components/Label"
-import {
-  InputFieldAction,
-  InputFieldActionsVisibility,
-  InputFieldStatus,
-} from "./types"
+import { InputFieldStatus, InputFieldValueActions } from "./types"
 export const INPUTFIELD_SIZES = ["sm", "md"] as const
 export type InputFieldSize = (typeof INPUTFIELD_SIZES)[number]
 
@@ -239,24 +235,7 @@ export type InputFieldProps<T> = {
     onChange: (selected: boolean) => void
   }
   transparent?: boolean
-  /**
-   * Trailing icon-only controls, right-aligned, after the clear button and
-   * before `append`. Four at most.
-   *
-   * Unlike `clearable`, these survive `readonly`: a value the user cannot type
-   * into is still one they can copy, unmask, or ask to have changed. Combined
-   * with `readonly` + `transparent` that gives a resting value cell that turns
-   * into an editable field on demand.
-   */
-  actions?: InputFieldAction[]
-  /**
-   * `"hover"` fades the actions in on hover or focus-within, and holds them
-   * while one has focus or is showing a confirmation. Touch screens, where
-   * hover never fires, always get `"always"`.
-   * @default "always"
-   */
-  actionsVisibility?: InputFieldActionsVisibility
-}
+} & InputFieldValueActions
 
 const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
   (
@@ -300,8 +279,12 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
       "aria-autocomplete": ariaAutocomplete,
       buttonToggle,
       transparent,
-      actions,
+      copyable,
+      masked: maskable,
+      onEdit,
+      onRequestChange,
       actionsVisibility = "always",
+      confirmed,
       ...props
     }: InputFieldProps<string>,
     ref
@@ -317,15 +300,12 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
     // `type`, so the reveal state has to live here rather than inside the
     // actions row.
     const [revealed, setRevealed] = useState(false)
-    const hasVisibilityAction = !!actions?.some(
-      (action) => action.type === "visibility"
-    )
-    // Masking works by forcing the child's `type`, so it only applies to a
-    // real `<input>`. On a `<button>` trigger (F0Select) `type="password"` is
-    // silently treated as `submit`, and on a `<textarea>` it is not an
-    // attribute at all.
+    const masked = !!maskable && !revealed
+    // A real `<input>` masks as a password field. Any other editable child —
+    // `F0Select`'s `<button>` trigger, a `<textarea>` — has no such type
+    // (`type="password"` on a button is silently treated as `submit`), so its
+    // displayed value is replaced with dots instead.
     const childIsInput = (children as React.ReactElement)?.type === "input"
-    const masked = hasVisibilityAction && !revealed && childIsInput
 
     // True while any action is showing a positive tone. One event, two
     // expressions: the action's glyph becomes a tick and the whole field goes
@@ -385,11 +365,63 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
       props.onClear?.()
     }
 
-    const handleClickContent = () => {
-      if (!disabled) {
-        onClickContent?.()
+    /**
+     * Clicking the value puts the caret in it — whether the field is already
+     * editable or is a resting value about to become one.
+     *
+     * The second case cannot focus synchronously: while `readonly` the inner
+     * input is disabled, so `focus()` does nothing. The click flips the flag,
+     * the consumer flips `readonly`, and the effect below focuses once the
+     * input can actually take it. The copy and eye buttons stop the click, so
+     * they never drag focus into the field.
+     */
+    const focusOnEditableRef = useRef(false)
+
+    const focusInput = () => {
+      const element =
+        typeof inputRef === "object" && inputRef?.current
+          ? (inputRef.current as HTMLElement)
+          : null
+      element?.focus()
+    }
+
+    useEffect(() => {
+      if (!focusOnEditableRef.current || noEdit) {
+        return
+      }
+      focusOnEditableRef.current = false
+      focusInput()
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [noEdit])
+
+    const requestFocus = () => {
+      focusOnEditableRef.current = true
+      if (!noEdit) {
+        focusInput()
       }
     }
+
+    const handleClickContent = () => {
+      if (disabled) {
+        return
+      }
+      requestFocus()
+      if (onClickContent) {
+        onClickContent()
+      } else if (noEdit) {
+        // A resting value with a pencil and no explicit content handler still
+        // opens its editor when the value itself is clicked. An already
+        // editable field only takes the caret.
+        onEdit?.()
+      }
+    }
+
+    const handleEdit = onEdit
+      ? () => {
+          requestFocus()
+          onEdit()
+        }
+      : undefined
 
     const handleClickChildren = () => {
       if (!disabled) {
@@ -456,7 +488,12 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
     /**********************/
 
     const hasAppend = append || appendTag || buttonToggle
-    const hasActions = !!actions?.length
+    const hasActions = !!copyable || !!maskable || !!onEdit || !!onRequestChange
+    // Long values would give the length away, so the mask is a fixed-ish run
+    // of dots rather than one per character.
+    const maskedValue = "•".repeat(
+      Math.min(lengthProvider(localValue) || 8, 12)
+    )
     // The resting details cell: a value drawn as plain text, with no field
     // chrome around it until the pointer arrives.
     const isRestingValue = !!transparent && !!readonly
@@ -464,7 +501,7 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
     // cell, and `readonly` disables the inner input, which in every browser
     // swallows the mouse event instead of letting it bubble.
     const isClickableRestingValue =
-      isRestingValue && !!onClickContent && !disabled
+      isRestingValue && (!!onClickContent || !!onEdit) && !disabled
     // Gated on the row still being there: an action removed mid-confirmation
     // would otherwise leave the field stuck positive.
     const confirming = hasActions && actionConfirming
@@ -585,7 +622,7 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
               {cloneElement(children as React.ReactElement, {
                 // Only while masked: an explicit `undefined` here would strip
                 // the child's own type (search, email, tel) down to text.
-                ...(masked ? { type: "password" } : {}),
+                ...(masked && childIsInput ? { type: "password" } : {}),
                 onChange: handleChange,
                 onBlur: props.onBlur,
                 onFocus: props.onFocus,
@@ -604,7 +641,8 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                 "aria-activedescendant": ariaActiveDescendant,
                 "aria-autocomplete": ariaAutocomplete,
                 id,
-                value: localValue ?? "",
+                value:
+                  masked && !childIsInput ? maskedValue : (localValue ?? ""),
                 "aria-label": label || placeholder || "no-label",
                 "aria-busy": loading,
                 "aria-disabled": noEdit,
@@ -684,10 +722,14 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                   </AnimatePresence>
                 )}
 
-                {actions && hasActions && (
+                {hasActions && (
                   <InputFieldActions
-                    actions={actions}
-                    visibility={actionsVisibility}
+                    copyable={copyable}
+                    masked={maskable}
+                    onEdit={handleEdit}
+                    onRequestChange={onRequestChange}
+                    actionsVisibility={actionsVisibility}
+                    confirmed={confirmed}
                     label={label}
                     value={localValue}
                     disabled={disabled}

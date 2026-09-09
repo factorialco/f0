@@ -1,7 +1,6 @@
 import { ComponentProps, HTMLInputTypeAttribute, useMemo } from "react"
-import { InputFieldAction, InputFieldProps } from "@/components/F0InputField"
+import { InputFieldProps } from "@/components/F0InputField"
 import { LockLocked } from "@/icons/app"
-import { useI18n } from "@/lib/providers/i18n"
 import { Input as ShadcnInput } from "@/ui/input"
 
 export type InputInternalProps = Pick<
@@ -35,9 +34,14 @@ export type InputInternalProps = Pick<
     | "onBlur"
     | "onKeyDown"
     | "readonly"
-    | "actions"
-    | "actionsVisibility"
     | "onClickContent"
+    // The value controls every writable F0 input inherits.
+    | "copyable"
+    | "masked"
+    | "onEdit"
+    | "onRequestChange"
+    | "actionsVisibility"
+    | "confirmed"
   > & {
     /**
      * `"private"` is a non-HTML subtype for sensitive, non-credential data:
@@ -72,15 +76,16 @@ const InputInternal = ({
   onPressEnter,
   onPressEscape,
   onKeyDown,
-  actions,
+  masked,
   ...props
 }: InputInternalProps) => {
-  // `password` and `private` are both masked; the eye toggle flips them to
-  // text. F0InputField owns that flip — it masks by forcing the child's
-  // `type` — so here the field only declares the toggle and hands over the
-  // unmasked type.
+  // `password` and `private` are masked by definition; the field's own eye
+  // flips them back. It owns the masking, so there is one implementation of
+  // the toggle rather than one per input type.
   const maskable = type === "password" || type === "private"
 
+  // The field forces `type="password"` while hidden, so hand it the unmasked
+  // type and let it do the masking.
   const localType = maskable ? "text" : type
 
   const localIcon = useMemo(() => {
@@ -88,40 +93,12 @@ const InputInternal = ({
     return type === "password" ? LockLocked : props.icon
   }, [type, props.icon])
 
-  const i18n = useI18n()
-
-  const localActions: InputFieldAction[] | undefined = useMemo(() => {
-    if (!maskable) {
-      return actions
-    }
-    // A consumer-declared visibility action wins, so a private field never
-    // grows a second eye.
-    if (actions?.some((action) => action.type === "visibility")) {
-      return actions
-    }
-
-    // `password` names the credential outright; `private` builds the name from
-    // the field label so screen-reader users can tell multiple private fields
-    // apart (e.g. "Show social security number"). The label feeds the button's
-    // aria-label and title only — the button renders an icon, so there is no
-    // visible-text change.
-    const label: [string, string] =
-      type === "password"
-        ? [i18n.inputs.password.show, i18n.inputs.password.hide]
-        : [
-            i18n.t("inputs.private.show", { label: props.label }),
-            i18n.t("inputs.private.hide", { label: props.label }),
-          ]
-
-    return [...(actions ?? []), { type: "visibility", label }]
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [maskable, type, actions, props.label])
-
   return (
     <ShadcnInput
       {...props}
       {...(type === "private" ? passwordManagerAvoidance : {})}
       type={localType}
+      masked={maskable || masked}
       // Email addresses are case-insensitive, so normalise to lowercase as the
       // user types (lowercasing preserves length, so the caret doesn't jump).
       onChange={(value) =>
@@ -143,7 +120,6 @@ const InputInternal = ({
         }
       }}
       icon={localIcon}
-      actions={localActions}
     />
   )
 }

@@ -111,13 +111,15 @@ export const Password: Story = {
 
     await expect(input).toHaveAttribute("type", "password")
 
+    // The eye is named after the field, not "password": that is what tells
+    // two masked fields on one page apart.
     await userEvent.click(
-      canvas.getByRole("button", { name: /show password/i })
+      canvas.getByRole("button", { name: "Show Label text here" })
     )
     await expect(input).toHaveAttribute("type", "text")
 
     await userEvent.click(
-      canvas.getByRole("button", { name: /hide password/i })
+      canvas.getByRole("button", { name: "Hide Label text here" })
     )
     await expect(input).toHaveAttribute("type", "password")
   },
@@ -267,9 +269,6 @@ const InlineEditingDemo = () => {
   return (
     <div className="w-80 rounded-md border border-solid border-f1-border p-1">
       <F0TextInput
-        // Remounting on the flip is what lets `autoFocus` land the caret: it
-        // only fires on mount, never when it turns true on an existing input.
-        key={editing ? "editing" : "resting"}
         label="Email"
         hideLabel
         type="email"
@@ -278,36 +277,19 @@ const InlineEditingDemo = () => {
         readonly={!editing}
         transparent={!editing}
         clearable={editing}
-        autoFocus={editing}
         onPressEnter={() => commit(draft)}
         onPressEscape={revert}
         // Clicking away is a commit, not a cancel: the only way to throw a
         // draft away is to say so with Escape.
         onBlur={editing ? () => commit(draft) : undefined}
-        // The whole cell is the target, not just the pencil — the value is
-        // what the reader is pointing at.
-        onClickContent={editing ? undefined : startEditing}
         actionsVisibility="hover"
-        actions={
-          editing
-            ? []
-            : [
-                // The control that caused the confirmation is the one that
-                // carries it, and it stays pressable throughout: fixing a typo
-                // you spotted the instant it saved should not mean waiting out
-                // an animation.
-                justSaved
-                  ? {
-                      type: "custom" as const,
-                      icon: Icons.CheckCircle,
-                      label: "Email saved",
-                      tone: "positive" as const,
-                      onClick: startEditing,
-                    }
-                  : { type: "edit" as const, onClick: startEditing },
-                { type: "copy" as const },
-              ]
-        }
+        // While editing there is nothing to copy or unmask yet, so the
+        // trailing controls stand down and the field is just a field.
+        onEdit={editing ? undefined : startEditing}
+        copyable={!editing}
+        // The pencil becomes a tick and the cell goes positive. The field owns
+        // both; the consumer owns only the timer.
+        confirmed={justSaved}
       />
     </div>
   )
@@ -376,7 +358,8 @@ export const WithActions: Story = {
   args: {
     label: "Email",
     value: "ada@example.com",
-    actions: [{ type: "edit", onClick: () => {} }, { type: "copy" }],
+    onEdit: () => {},
+    copyable: true,
   },
 }
 
@@ -387,7 +370,8 @@ export const ReadonlyValueWithActions: Story = {
     value: "€48,000",
     readonly: true,
     transparent: true,
-    actions: [{ type: "request-change", onClick: () => {} }, { type: "copy" }],
+    onRequestChange: () => {},
+    copyable: true,
     actionsVisibility: "hover",
   },
   decorators: [
@@ -427,10 +411,8 @@ export const Snapshot: Story = {
         ...base,
         clearable: false,
         value: "ada@example.com",
-        actions: [
-          { type: "edit" as const, onClick: () => {} },
-          { type: "copy" as const },
-        ],
+        onEdit: () => {},
+        copyable: true,
       },
       {
         ...base,
@@ -441,10 +423,8 @@ export const Snapshot: Story = {
         readonly: true,
         transparent: true,
         value: "ada@example.com",
-        actions: [
-          { type: "request-change" as const, onClick: () => {} },
-          { type: "copy" as const },
-        ],
+        onRequestChange: () => {},
+        copyable: true,
       },
       { ...base, status: { type: "error" as const, message: "Error message" } },
       {

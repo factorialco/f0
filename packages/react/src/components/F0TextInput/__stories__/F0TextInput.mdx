@@ -155,7 +155,7 @@ The `type` prop accepts every native HTML input type **except `"number"`**, whic
 When `type="password"`:
 
 - A lock icon replaces any `icon` prop.
-- A trailing eye-toggle button appears, with i18n labels ("Show password" / "Hide password"), to flip between masked and visible text.
+- A trailing eye-toggle button appears, named after the field ("Show Current password"), to flip between masked and visible text.
 - The `buttonToggle` prop becomes private — consumers cannot override the eye toggle while in password mode.
 
 <Canvas of={Stories.Password} />
@@ -167,7 +167,7 @@ When `type="password"`:
 - **No lock icon** — the consumer `icon` prop is respected (default: none), so the field does not read as a login credential.
 - **Password managers are disabled** — the field sets `autocomplete="off"` plus `data-1p-ignore`, `data-lpignore`, `data-bwignore` and `data-form-type="other"`, so 1Password, LastPass, Bitwarden and browser autofill never offer to save or fill it.
 
-A trailing eye-toggle flips between masked and visible text; its accessible name is built from the field label (e.g. "Show social security number") so screen-reader users can tell multiple private fields apart. As with password mode, the `buttonToggle` prop is private. Use `type="password"` for the user's own login password, where autofill is helpful; use `type="private"` for secrets a password manager must never capture.
+A trailing eye-toggle flips between masked and visible text; its accessible name is built from the field label (e.g. "Show Social security number") so screen-reader users can tell multiple masked fields apart. As with password mode, the `buttonToggle` prop is private. Use `type="password"` for the user's own login password, where autofill is helpful; use `type="private"` for secrets a password manager must never capture.
 
 <Canvas of={Stories.Private} />
 
@@ -183,15 +183,15 @@ Three keyboard props, in the order they run on every key:
 
 `onPressEnter` + `onPressEscape` is the inline-editing pair: Enter commits, Escape reverts.
 
-**Trailing actions**
+**Trailing value controls**
 
-`actions` puts up to four icon-only controls at the right edge of the field, after the clear button and before `append`. Each one is a typed entry rather than a node, so every field draws the same glyph for the same job:
+Icon-only controls at the right edge of the field, after the clear button and before `append`. They are a closed set of flags and callbacks rather than a list you compose, so the same job draws the same glyph in every F0 input — there is no slot for an arbitrary icon.
 
 <Unstyled>
   <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
     <thead>
       <tr>
-        <th className="text-left">Type</th>
+        <th className="text-left">Prop</th>
         <th className="text-left">Glyph</th>
         <th className="text-left">What it does</th>
       </tr>
@@ -199,40 +199,29 @@ Three keyboard props, in the order they run on every key:
     <tbody>
       <tr>
         <td>
-          <code>copy</code>
-        </td>
-        <td>Layers</td>
-        <td>
-          Copies <code>text</code>, or the field's value when it is omitted. The
-          positive tick appears only once the write actually succeeded — a
-          rejected clipboard says so instead.
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <code>visibility</code>
-        </td>
-        <td>Eye</td>
-        <td>
-          Masks the value with dots and toggles it back. This is the same
-          control <code>type="password"</code> and <code>type="private"</code>{" "}
-          render on their own — pass it explicitly only to rename it, and the
-          field still shows one eye, not two.
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <code>edit</code>
+          <code>onEdit</code>
         </td>
         <td>Pencil</td>
         <td>
-          Fires <code>onClick</code>. The field does not become editable by
-          itself: the consumer flips <code>readonly</code> off in response.
+          Puts the caret in the field, then calls back. The field does not
+          become editable by itself: the consumer flips <code>readonly</code>{" "}
+          off in response.
         </td>
       </tr>
       <tr>
         <td>
-          <code>request-change</code>
+          <code>masked</code>
+        </td>
+        <td>Eye</td>
+        <td>
+          Masks the value and toggles it back. The same control{" "}
+          <code>type="password"</code> and <code>type="private"</code> render on
+          their own, so those types need nothing here — and never show two eyes.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>onRequestChange</code>
         </td>
         <td>Comment</td>
         <td>
@@ -243,20 +232,29 @@ Three keyboard props, in the order they run on every key:
       </tr>
       <tr>
         <td>
-          <code>custom</code>
+          <code>copyable</code>
         </td>
-        <td>Yours</td>
+        <td>Layers</td>
         <td>
-          Any <code>icon</code> + <code>label</code> + <code>onClick</code>.{" "}
-          <code>tone="positive"</code> tints the glyph and announces the label
-          in a live region — use it for a confirmation, not for a resting state.
+          Copies the field's value. The positive tick appears only once the
+          write actually succeeded — a rejected clipboard says so instead.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>confirmed</code>
+        </td>
+        <td>Tick</td>
+        <td>
+          Turns the pencil into a positive tick and flashes the field, to
+          confirm a value just committed. Stays pressable throughout.
         </td>
       </tr>
     </tbody>
   </table>
 </Unstyled>
 
-Unlike `clearable`, actions survive `readonly`: a value the user cannot type into is still one they can copy, unmask, or ask to have changed.
+Unlike `clearable`, these survive `readonly`: a value the user cannot type into is still one they can copy, unmask, or ask to have changed.
 
 <Canvas of={Stories.WithActions} />
 
@@ -268,11 +266,11 @@ Unlike `clearable`, actions survive `readonly`: a value the user cannot type int
 
 One component, four states, which is what the redesigned Employee profile › Details tab needs of a value cell:
 
-1. **Rest** — `readonly` + `transparent`: the value as plain text, no field chrome, at the height the editable field will take. Set `onClickContent` and the whole cell is the click target, with a text cursor.
-2. **Hover** — `actionsVisibility="hover"` tints the cell and fades the actions in inside the tint.
+1. **Rest** — `readonly` + `transparent`: the value as plain text, no field chrome, at the height the editable field will take. The whole cell is the click target, with a text cursor.
+2. **Hover** — `actionsVisibility="hover"` tints the cell and fades the controls in inside the tint.
 3. **Editing** — drop `readonly` and `transparent` and the same component is the ordinary bordered field. `onPressEnter` commits, `onPressEscape` reverts, `onBlur` commits.
-4. **Confirmed** — swap the `edit` action for a positive `custom` one for the length of the confirmation. The pencil _becomes_ the tick and the cell goes positive around it, instead of a tick appearing next to a pencil.
+4. **Confirmed** — `confirmed` for the length of the confirmation. The pencil _becomes_ the tick and the cell goes positive around it, instead of a tick appearing next to a pencil.
 
-Two things the consumer owns: the `readonly` flip with its draft, and the confirmation timer. One thing to know: `autoFocus` only fires on mount, never when it turns true on an existing input, so remount on the flip with a changing `key` to land the caret.
+The consumer owns two things: the `readonly` flip with its draft, and the confirmation timer. It does **not** own focus — clicking the value or the pencil puts the caret in the field, and the field waits for `readonly` to lift before doing it, so neither `autoFocus` nor a remount is needed.
 
 <Canvas of={Stories.InlineEditing} />

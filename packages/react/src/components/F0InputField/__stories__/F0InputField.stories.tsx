@@ -310,7 +310,8 @@ export const WithActions: Story = {
     ...Default.args,
     value: "ada@example.com",
     clearable: true,
-    actions: [{ type: "visibility" }, { type: "copy" }],
+    masked: true,
+    copyable: true,
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
@@ -328,15 +329,8 @@ export const HoverActions: Story = {
   args: {
     ...Default.args,
     value: "ada@example.com",
-    actions: [
-      {
-        type: "custom",
-        icon: icons.Archive,
-        label: "Archive",
-        onClick: () => {},
-      },
-      { type: "copy" },
-    ],
+    onEdit: () => {},
+    copyable: true,
     actionsVisibility: "hover",
   },
   play: async ({ canvasElement }) => {
@@ -360,7 +354,8 @@ export const ReadonlyTransparentValue: Story = {
     readonly: true,
     transparent: true,
     hideLabel: true,
-    actions: [{ type: "edit", onClick: () => {} }, { type: "copy" }],
+    onEdit: () => {},
+    copyable: true,
     actionsVisibility: "hover",
     // The value itself is the click target, not just the pencil.
     onClickContent: fn(),
@@ -400,7 +395,8 @@ export const ReadonlyWithRequestChange: Story = {
     readonly: true,
     transparent: true,
     hideLabel: true,
-    actions: [{ type: "request-change", onClick: () => {} }, { type: "copy" }],
+    onRequestChange: () => {},
+    copyable: true,
     actionsVisibility: "hover",
   },
   decorators: [
@@ -485,26 +481,17 @@ export const Snapshot: Story = {
         ...base,
         clearable: false,
         value: "ada@example.com",
-        actions: [
-          { type: "edit" as const, onClick: () => {} },
-          { type: "visibility" as const },
-          { type: "copy" as const },
-        ],
+        onEdit: () => {},
+        masked: true,
+        copyable: true,
       },
       {
         ...base,
         clearable: false,
         value: "ada@example.com",
-        actions: [
-          {
-            type: "custom" as const,
-            icon: icons.CheckCircle,
-            label: "Saved",
-            tone: "positive" as const,
-            onClick: () => {},
-          },
-          { type: "copy" as const },
-        ],
+        onEdit: () => {},
+        confirmed: true,
+        copyable: true,
       },
       {
         ...base,
@@ -515,10 +502,8 @@ export const Snapshot: Story = {
         readonly: true,
         transparent: true,
         value: "ada@example.com",
-        actions: [
-          { type: "request-change" as const, onClick: () => {} },
-          { type: "copy" as const },
-        ],
+        onRequestChange: () => {},
+        copyable: true,
       },
       { ...base },
     ]

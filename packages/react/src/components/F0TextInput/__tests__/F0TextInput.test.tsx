@@ -49,7 +49,7 @@ describe("F0TextInput", () => {
     it("renders an eye toggle that reveals the value when clicked", () => {
       render(<F0TextInput label="Password" type="password" />)
 
-      const toggle = screen.getByRole("button", { name: /show password/i })
+      const toggle = screen.getByRole("button", { name: "Show Password" })
       fireEvent.click(toggle)
 
       const input = screen.getAllByLabelText("Password")[0] as HTMLInputElement
@@ -60,10 +60,10 @@ describe("F0TextInput", () => {
       render(<F0TextInput label="Password" type="password" />)
 
       const initialToggle = screen.getByRole("button", {
-        name: /show password/i,
+        name: "Show Password",
       })
       fireEvent.click(initialToggle)
-      const hideToggle = screen.getByRole("button", { name: /hide password/i })
+      const hideToggle = screen.getByRole("button", { name: "Hide Password" })
       fireEvent.click(hideToggle)
 
       const input = screen.getAllByLabelText("Password")[0] as HTMLInputElement
@@ -112,10 +112,11 @@ describe("F0TextInput", () => {
       expect(countIcons(privateRender.container)).toBeLessThan(
         countIcons(passwordRender.container)
       )
-      // The private eye toggle uses the neutral "Show" label (not "Show password").
+      // Every masked field names its eye after its own label, so the two
+      // renders here get different names rather than a shared fixed string.
       expect(
         within(privateRender.container).queryByRole("button", {
-          name: /show password/i,
+          name: "Show Pwd",
         })
       ).not.toBeInTheDocument()
       expect(
@@ -236,15 +237,15 @@ describe("F0TextInput", () => {
     })
   })
 
-  describe("actions", () => {
-    it("renders one eye for type=private, not two, when actions are also passed", () => {
-      const onClick = vi.fn()
+  describe("value actions", () => {
+    it("renders one eye for type=private, not two, alongside the other controls", () => {
       render(
         <F0TextInput
           label="SSN"
           type="private"
           value="123-45-6789"
-          actions={[{ type: "edit", label: "Edit SSN", onClick }]}
+          onEdit={vi.fn()}
+          copyable
         />
       )
 
@@ -252,37 +253,29 @@ describe("F0TextInput", () => {
       expect(
         screen.getByRole("button", { name: "Edit SSN" })
       ).toBeInTheDocument()
+      expect(
+        screen.getByRole("button", { name: "Copy SSN" })
+      ).toBeInTheDocument()
     })
 
-    it("lets a consumer visibility action replace the built-in eye", () => {
-      render(
-        <F0TextInput
-          label="SSN"
-          type="private"
-          value="123-45-6789"
-          actions={[{ type: "visibility", label: ["Unmask", "Mask"] }]}
-        />
-      )
+    it("masks a plain text field when `masked` is set on its own", () => {
+      render(<F0TextInput label="IBAN" value="ES91 2100" masked />)
 
-      const input = screen.getAllByLabelText("SSN")[0] as HTMLInputElement
+      const input = screen.getAllByLabelText("IBAN")[0] as HTMLInputElement
       expect(input.type).toBe("password")
-      expect(
-        screen.queryByRole("button", { name: /show ssn/i })
-      ).not.toBeInTheDocument()
 
-      fireEvent.click(screen.getByRole("button", { name: "Unmask" }))
+      fireEvent.click(screen.getByRole("button", { name: "Show IBAN" }))
       expect(input.type).toBe("text")
     })
 
-    it("keeps a readonly field's actions while dropping its clear button", () => {
-      const onClick = vi.fn()
+    it("keeps a readonly field's controls while dropping its clear button", () => {
       render(
         <F0TextInput
           label="Email"
           value="ada@example.com"
           readonly
           clearable
-          actions={[{ type: "edit", onClick }]}
+          onEdit={vi.fn()}
         />
       )
 
