@@ -1,5 +1,6 @@
 "use client"
 
+import { breakpoints, panelWidths } from "@factorialco/f0-core"
 import {
   createContext,
   type FC,
@@ -12,10 +13,7 @@ import {
   useRef,
   useState,
 } from "react"
-
-import { breakpoints, panelWidths } from "@factorialco/f0-core"
 import { useMediaQuery } from "usehooks-ts"
-
 import { useI18n } from "@/lib/providers/i18n"
 import { AiChatProviderReturnValue, AiChatState } from "../internal-types"
 import {
@@ -34,7 +32,6 @@ import {
   resolvePanelWidth,
   type PanelBounds,
 } from "../utils/panelWidth"
-
 import { usePersistedState } from "./usePersistedState"
 
 const AiChatStateContext = createContext<AiChatProviderReturnValue | null>(null)

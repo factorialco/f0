@@ -1,7 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
 import { act, zeroRenderHook as renderHook } from "@/testing/test-utils"
-
 import { useThinkingClock } from "../useThinkingClock"
 
 const START = new Date("2026-01-01T10:00:00Z").getTime()

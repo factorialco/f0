@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react"
-
 import { useI18n } from "@/lib/providers/i18n"
 
 /** Below this the number is noise — a turn that answers instantly would flash "0s". */
@@ -41,7 +40,9 @@ export const ThinkingElapsed = ({
     return () => clearInterval(id)
   }, [startedAt])
 
-  if (startedAt === null || elapsedMs < MIN_VISIBLE_MS) return null
+  if (startedAt === null || elapsedMs < MIN_VISIBLE_MS) {
+    return null
+  }
 
   const total = Math.floor(elapsedMs / 1000)
   const minutes = Math.floor(total / 60)

@@ -80,7 +80,9 @@ export const resolvePanelTransition = (
   isFullscreenChange: boolean,
   reducedMotion = false
 ): Transition => {
-  if (isTracking || reducedMotion) return INSTANT_TRANSITION
+  if (isTracking || reducedMotion) {
+    return INSTANT_TRANSITION
+  }
   return isFullscreenChange ? REVEAL_TRANSITION : CONTENT_TRANSITION
 }
 

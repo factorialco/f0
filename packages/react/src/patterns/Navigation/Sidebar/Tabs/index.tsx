@@ -1,6 +1,5 @@
 import { LayoutGroup, motion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
-
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
@@ -134,7 +133,7 @@ const TabButton = ({
           Toggled (no fade) so it appears/disappears directly — shown only once
           the pill has settled (see `showAura`) so it never flashes mid-transition.
           The slower spin comes from the inline animation-duration (keyframe is 2s). */}
-      {showAura && (
+      {showAura ? (
         <span
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 rounded"
@@ -145,16 +144,16 @@ const TabButton = ({
           />
           <span className="absolute inset-0 rounded bg-f1-background" />
         </span>
-      )}
+      ) : null}
       {/* The sliding active background — one element shared across tabs. */}
-      {isActive && (
+      {isActive ? (
         <motion.span
           layoutId="sidebar-tab-active-pill"
           transition={transition}
           aria-hidden="true"
           className="absolute inset-0 rounded bg-f1-background-inverse-secondary ring-1 ring-inset ring-f1-border dark:bg-f1-background"
         />
-      )}
+      ) : null}
       <div className="main flex h-8 min-w-0 items-center justify-center">
         {/* Icon inherits the span's colour (F0Icon ignores a passed className),
             so an inactive tab only darkens its icon on hover — no background. */}
@@ -169,7 +168,7 @@ const TabButton = ({
           {/* The unread dot shows on an inactive tab (hover only darkens the
               icon now, so the dot no longer needs to hide). */}
 
-          {tab.badge && <UnreadDot isActive={isActive} />}
+          {tab.badge ? <UnreadDot isActive={isActive} /> : null}
         </span>
         {/* The label reveals via an animated grid column (0fr → 1fr). Unlike a
             width:auto tween it interpolates cleanly and never resets at the
@@ -223,7 +222,9 @@ export const SidebarTabs = ({
   const storageKey = persistKey ? `f0-sidebar-tab:${persistKey}` : null
   const restoredRef = useRef(false)
   useEffect(() => {
-    if (!storageKey || restoredRef.current) return
+    if (!storageKey || restoredRef.current) {
+      return
+    }
     restoredRef.current = true
     let stored: string | null = null
     try {
@@ -240,7 +241,9 @@ export const SidebarTabs = ({
   }, [storageKey])
 
   useEffect(() => {
-    if (!storageKey) return
+    if (!storageKey) {
+      return
+    }
     try {
       localStorage.setItem(storageKey, activeTab)
     } catch {
@@ -258,7 +261,9 @@ export const SidebarTabs = ({
   useEffect(() => {
     const group = groupRef.current
     const probe = probeRef.current
-    if (!group || !probe) return
+    if (!group || !probe) {
+      return
+    }
     const measure = () => {
       setLabelsFit(probe.scrollWidth <= group.clientWidth)
     }
@@ -270,7 +275,9 @@ export const SidebarTabs = ({
     // standing, and the labels revealed in a row too narrow to hold them.
     const observer = new ResizeObserver(measure)
     observer.observe(group)
-    for (const child of Array.from(probe.children)) observer.observe(child)
+    for (const child of Array.from(probe.children)) {
+      observer.observe(child)
+    }
     return () => observer.disconnect()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tabsKey])

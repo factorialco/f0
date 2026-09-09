@@ -1,6 +1,5 @@
 import { panelWidths } from "@factorialco/f0-core"
 import { describe, expect, it } from "vitest"
-
 import {
   clampPanelWidth,
   panelBoundsFor,

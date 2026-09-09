@@ -1,15 +1,13 @@
 import { type ReactNode } from "react"
-
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon, type IconType } from "@/components/F0Icon"
 import { Dropdown, type DropdownItem } from "@/experimental/Navigation/Dropdown"
 import { Cross, Ellipsis, Maximize, Minimize, Search } from "@/icons/app"
+import { useAiChat } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
 import { EmojiImage } from "@/lib/emojis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-import { useAiChat } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
-
 import { useChatSearch } from "../providers/ChatUIProvider"
 import { type F0ChatChannel, type F0ChatHeaderAction } from "../types"
 import { ChatHeaderSearch } from "./ChatHeaderSearch"
@@ -22,7 +20,9 @@ const PresenceDot = ({
   online: boolean
   label: string
 }): ReactNode => {
-  if (!online) return null
+  if (!online) {
+    return null
+  }
 
   return (
     <span
@@ -127,12 +127,12 @@ export const ChatHeader = ({
         ) : (
           <F0Avatar size="sm" avatar={channel.avatar} />
         )}
-        {showPresence && (
+        {showPresence ? (
           <PresenceDot
             online={channel.presence === "online"}
             label={i18n.chat.online}
           />
-        )}
+        ) : null}
       </div>
       <span className="truncate text-base font-medium text-f1-foreground">
         {channel.title}
@@ -179,7 +179,7 @@ export const ChatHeader = ({
             ))}
             {/* Search + the host's menu actions live behind the ellipsis menu,
                 which only exists while it holds something. */}
-            {menuItems.length > 0 && (
+            {menuItems.length > 0 ? (
               <Dropdown items={menuItems} align="end" label={i18n.chat.options}>
                 <ButtonInternal
                   variant="ghost"
@@ -188,8 +188,8 @@ export const ChatHeader = ({
                   icon={Ellipsis}
                 />
               </Dropdown>
-            )}
-            {onToggleFullscreen && !panelOverlays && (
+            ) : null}
+            {onToggleFullscreen && !panelOverlays ? (
               <ButtonInternal
                 variant="ghost"
                 hideLabel
@@ -199,8 +199,8 @@ export const ChatHeader = ({
                 icon={isFullscreen ? Minimize : Maximize}
                 onClick={onToggleFullscreen}
               />
-            )}
-            {onClose && (
+            ) : null}
+            {onClose ? (
               <ButtonInternal
                 variant="ghost"
                 hideLabel
@@ -208,7 +208,7 @@ export const ChatHeader = ({
                 icon={Cross}
                 onClick={onClose}
               />
-            )}
+            ) : null}
           </div>
         </>
       )}

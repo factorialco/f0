@@ -7,17 +7,12 @@ import {
 } from "motion/react"
 import { Fragment, useEffect, useRef, useState } from "react"
 import { useMediaQuery } from "usehooks-ts"
-
 import {
   AiPromotionChat,
   AiPromotionChatProvider,
   AiPromotionChatProviderProps,
 } from "@/experimental/AiPromotionChat"
 import { useAiPromotionChat } from "@/experimental/AiPromotionChat/providers/AiPromotionChatStateProvider"
-import { useReducedMotion } from "@/lib/a11y"
-import { experimentalComponent } from "@/lib/experimental"
-import { useI18n } from "@/lib/providers/i18n"
-import { cn, focusRing } from "@/lib/utils"
 import {
   F0AiChat,
   F0AiChatProvider,
@@ -27,7 +22,10 @@ import { HostedPanelWindow } from "@/kits/ai/F0AiChat/components/layout/HostedPa
 import { useAiChat } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
 import { DEFAULT_CHAT_WIDTH } from "@/kits/ai/F0AiChat/utils/constants"
 import { F0CanvasPanel } from "@/kits/ai/F0CanvasPanel"
-
+import { useReducedMotion } from "@/lib/a11y"
+import { experimentalComponent } from "@/lib/experimental"
+import { useI18n } from "@/lib/providers/i18n"
+import { cn, focusRing } from "@/lib/utils"
 import { FrameProvider, SidebarState, useSidebar } from "./FrameProvider"
 import {
   resolveLayoutTransition,
@@ -282,7 +280,9 @@ function ApplicationFrameContent({
   // fade. Holding the content's scroll locked past the end of the animation is
   // its own small jank, a scrollbar reappearing after everything has settled.
   useEffect(() => {
-    if (!isFullscreenExitTransitionActive) return
+    if (!isFullscreenExitTransitionActive) {
+      return
+    }
     const playing = isAiChatOpen
       ? FULLSCREEN_TRANSITION_MS
       : CLOSE_TRANSITION_MS
@@ -384,14 +384,18 @@ function ApplicationFrameContent({
   const sidebarSlotWidth = sidebarState === "locked" ? SIDEBAR_SLOT_WIDTH : 0
   useEffect(() => {
     const row = mainAreaRef.current?.parentElement
-    if (!row || !setFrameWidth) return
+    if (!row || !setFrameWidth) {
+      return
+    }
 
     let frame = 0
     const measure = (): void => {
       const { width } = row.getBoundingClientRect()
       // A hidden container measures 0. Publishing that would read as "no
       // room" and collapse the panel, so leave the last good width standing.
-      if (width <= 0) return
+      if (width <= 0) {
+        return
+      }
       setFrameWidth(width - sidebarSlotWidth)
     }
     const publish = (): void => {
@@ -427,7 +431,9 @@ function ApplicationFrameContent({
   const sidebarSlotRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
     const node = sidebarSlotRef.current
-    if (!node) return
+    if (!node) {
+      return
+    }
     if (sidebarState === "hidden") {
       node.setAttribute("inert", "")
     } else {
@@ -490,7 +496,9 @@ function ApplicationFrameContent({
         : 0,
   }
   const heldPaddingRef = useRef(desiredPadding)
-  if (!isFullscreenCover) heldPaddingRef.current = desiredPadding
+  if (!isFullscreenCover) {
+    heldPaddingRef.current = desiredPadding
+  }
   const contentPadding = isFullscreenCover
     ? heldPaddingRef.current
     : desiredPadding
@@ -541,7 +549,7 @@ function ApplicationFrameContent({
           <div className="relative isolate flex h-full">
             {/* Sidebar backdrop */}
             <AnimatePresence>
-              {sidebarState === "unlocked" && (
+              {sidebarState === "unlocked" ? (
                 <motion.nav
                   className={cn(
                     "fixed inset-0 z-20 bg-f1-background-inverse",
@@ -553,7 +561,7 @@ function ApplicationFrameContent({
                   transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
                   onClick={() => toggleSidebar()}
                 />
-              )}
+              ) : null}
             </AnimatePresence>
 
             {/* Sidebar */}
@@ -652,7 +660,7 @@ function ApplicationFrameContent({
 
               {/* Chat */}
               {/* Canvas dashboard panel */}
-              {ai?.enabled && isCanvasMode && canvasContent && (
+              {ai?.enabled && isCanvasMode && canvasContent ? (
                 <motion.div
                   className={cn(
                     // z-[21] sits above the chat wrapper (z-20 in canvas
@@ -694,90 +702,93 @@ function ApplicationFrameContent({
                     side={panelSide}
                   />
                 </motion.div>
-              )}
+              ) : null}
 
-              {ai?.enabled &&
-                (() => {
-                  // One absolutely-positioned container per docked window. A
-                  // single side (the default) keeps today's lone container;
-                  // split mode adds a second one on the other edge for hosted
-                  // content, both sitting under the main content (z-0), which
-                  // covers/uncovers them as its padding moves.
-                  const panelContainer = (
-                    side: "left" | "right",
-                    isActivePanel: boolean,
-                    wasActivePanel: boolean,
-                    content: React.ReactNode
-                  ) => (
-                    <motion.div
-                      key={`panel-${side}`}
-                      className={cn(
-                        "pointer-events-none",
-                        "[&_.copilotKitSidebarContentWrapper]:relative [&_.copilotKitSidebarContentWrapper]:h-full [&_.copilotKitSidebarContentWrapper]:w-full",
-                        shouldOverlayPanel
-                          ? "fixed inset-0 z-[30]"
-                          : cn(
-                              "absolute top-0 bottom-0",
-                              side === "left" ? "left-0" : "right-0",
-                              // In canvas mode the chat wrapper must sit above
-                              // the CanvasPanel (z-[15]) so the ResizeHandle's
-                              // hit-area (which extends a few pixels over the
-                              // canvas side of the seam) can receive hover
-                              // events — otherwise the canvas captures them
-                              // and the handle never lights up.
-                              isInFullscreenTransition || isCanvasMode
-                                ? "z-20"
-                                : "z-0",
-                              // Left seam for the panel — owned by the frame because
-                              // it depends on the sidebar. The panel's left edge needs
-                              // a gap only when it's left-docked or filling the screen;
-                              // and never when the sidebar is active (locked), since
-                              // the sidebar already provides the gap (same rule as the
-                              // main content). md:-gated so mobile fullscreen is full-bleed.
-                              sidebarState !== "locked" &&
-                                (side === "left" || isInFullscreenTransition) &&
-                                "md:pl-1"
-                            )
-                      )}
-                      animate={{
-                        width: resolvePanelWidthTarget({
-                          coversFrame: shouldOverlayPanel,
-                          isFullscreen: isAiChatFullscreen,
-                          isClosingFromFullscreen,
-                          isActivePanel,
-                          reservedWidth: reservedChatWidth,
-                        }),
-                      }}
-                      transition={panelContainerTransition(
-                        isActivePanel,
-                        wasActivePanel
-                      )}
-                    >
-                      {content}
-                    </motion.div>
-                  )
-
-                  return (
-                    <>
-                      {panelContainer(
-                        panelSide,
-                        !isSplitPanel || !hasPanelContent,
-                        prevAiWindowShowingRef.current,
-                        <F0AiChat />
-                      )}
-                      {isSplitPanel &&
-                        panelContainer(
-                          panelContentSide,
-                          hasPanelContent,
-                          prevHostedWindowShowingRef.current,
-                          <HostedPanelWindow />
+              {ai?.enabled
+                ? (() => {
+                    // One absolutely-positioned container per docked window. A
+                    // single side (the default) keeps today's lone container;
+                    // split mode adds a second one on the other edge for hosted
+                    // content, both sitting under the main content (z-0), which
+                    // covers/uncovers them as its padding moves.
+                    const panelContainer = (
+                      side: "left" | "right",
+                      isActivePanel: boolean,
+                      wasActivePanel: boolean,
+                      content: React.ReactNode
+                    ) => (
+                      <motion.div
+                        key={`panel-${side}`}
+                        className={cn(
+                          "pointer-events-none",
+                          "[&_.copilotKitSidebarContentWrapper]:relative [&_.copilotKitSidebarContentWrapper]:h-full [&_.copilotKitSidebarContentWrapper]:w-full",
+                          shouldOverlayPanel
+                            ? "fixed inset-0 z-[30]"
+                            : cn(
+                                "absolute top-0 bottom-0",
+                                side === "left" ? "left-0" : "right-0",
+                                // In canvas mode the chat wrapper must sit above
+                                // the CanvasPanel (z-[15]) so the ResizeHandle's
+                                // hit-area (which extends a few pixels over the
+                                // canvas side of the seam) can receive hover
+                                // events — otherwise the canvas captures them
+                                // and the handle never lights up.
+                                isInFullscreenTransition || isCanvasMode
+                                  ? "z-20"
+                                  : "z-0",
+                                // Left seam for the panel — owned by the frame because
+                                // it depends on the sidebar. The panel's left edge needs
+                                // a gap only when it's left-docked or filling the screen;
+                                // and never when the sidebar is active (locked), since
+                                // the sidebar already provides the gap (same rule as the
+                                // main content). md:-gated so mobile fullscreen is full-bleed.
+                                sidebarState !== "locked" &&
+                                  (side === "left" ||
+                                    isInFullscreenTransition) &&
+                                  "md:pl-1"
+                              )
                         )}
-                    </>
-                  )
-                })()}
+                        animate={{
+                          width: resolvePanelWidthTarget({
+                            coversFrame: shouldOverlayPanel,
+                            isFullscreen: isAiChatFullscreen,
+                            isClosingFromFullscreen,
+                            isActivePanel,
+                            reservedWidth: reservedChatWidth,
+                          }),
+                        }}
+                        transition={panelContainerTransition(
+                          isActivePanel,
+                          wasActivePanel
+                        )}
+                      >
+                        {content}
+                      </motion.div>
+                    )
+
+                    return (
+                      <>
+                        {panelContainer(
+                          panelSide,
+                          !isSplitPanel || !hasPanelContent,
+                          prevAiWindowShowingRef.current,
+                          <F0AiChat />
+                        )}
+                        {isSplitPanel
+                          ? panelContainer(
+                              panelContentSide,
+                              hasPanelContent,
+                              prevHostedWindowShowingRef.current,
+                              <HostedPanelWindow />
+                            )
+                          : null}
+                      </>
+                    )
+                  })()
+                : null}
             </motion.div>
 
-            {aiPromotion?.enabled && <AiPromotionChat />}
+            {aiPromotion?.enabled ? <AiPromotionChat /> : null}
           </div>
         </LayoutGroup>
       </div>

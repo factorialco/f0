@@ -1,6 +1,5 @@
 import { motionTokens } from "@factorialco/f0-core"
 import { describe, expect, it } from "vitest"
-
 import {
   CONTENT_TRANSITION,
   INSTANT_TRANSITION,

@@ -1,10 +1,7 @@
-import type { CSSProperties, Ref } from "react"
-
 import { MotionGlobalConfig } from "motion"
+import type { CSSProperties, Ref } from "react"
 import { forwardRef, useEffect, useMemo, useRef } from "react"
-
 import { cn } from "@/lib/utils"
-
 import type { GlobeSpinState } from "./globeSpinMath"
 import {
   buildFrameInto,
@@ -50,23 +47,35 @@ const ChatSpinnerComponent = (
   const resumeRef = useRef<(() => void) | null>(null)
   // Pool — created lazily once per instance, reused across all frames.
   const stateRef = useRef<GlobeSpinState | null>(null)
-  if (stateRef.current === null) stateRef.current = createGlobeSpinState()
+  if (stateRef.current === null) {
+    stateRef.current = createGlobeSpinState()
+  }
 
   // Stable placeholder array for the JSX: one <polygon> per pool slot. We pay
   // the React mount cost ONCE; per-frame updates go straight to the DOM.
-  const placeholders = useMemo(() => new Array(QUAD_POOL_SIZE).fill(0), [])
+  const placeholders = useMemo(
+    () => Array.from({ length: QUAD_POOL_SIZE }, () => 0),
+    []
+  )
 
   const setRefs = (el: HTMLDivElement | null) => {
     wrapperRef.current = el
-    if (!ref) return
-    if (typeof ref === "function") ref(el)
-    else (ref as { current: HTMLDivElement | null }).current = el
+    if (!ref) {
+      return
+    }
+    if (typeof ref === "function") {
+      ref(el)
+    } else {
+      ;(ref as { current: HTMLDivElement | null }).current = el
+    }
   }
 
   useEffect(() => {
     const svg = svgRef.current
     const wrapper = wrapperRef.current
-    if (!svg || !wrapper) return
+    if (!svg || !wrapper) {
+      return
+    }
 
     const polys = svg.querySelectorAll(
       "polygon"
@@ -107,7 +116,9 @@ const ChatSpinnerComponent = (
           const q = quads[i]
           p.setAttribute("points", q.points)
           p.setAttribute("fill", q.color)
-          if (p.hasAttribute("display")) p.removeAttribute("display")
+          if (p.hasAttribute("display")) {
+            p.removeAttribute("display")
+          }
         } else if (!p.hasAttribute("display")) {
           p.setAttribute("display", "none")
         }
@@ -168,7 +179,9 @@ const ChatSpinnerComponent = (
     }
 
     const startLoop = () => {
-      if (rafId !== null || reduced) return
+      if (rafId !== null || reduced) {
+        return
+      }
       rafId = requestAnimationFrame(tick)
     }
     const stopLoop = () => {
@@ -185,9 +198,13 @@ const ChatSpinnerComponent = (
         // Off-screen, the observer will shift `start` forward by the elapsed
         // gap when we come back. Re-anchor the gap to now, or it gets counted
         // twice and `start` lands in the future — negative progress.
-        if (pausedAt !== null) pausedAt = start
+        if (pausedAt !== null) {
+          pausedAt = start
+        }
       }
-      if (visible) startLoop()
+      if (visible) {
+        startLoop()
+      }
     }
 
     // Initial paint so the spinner shows static geometry before the first
@@ -202,7 +219,9 @@ const ChatSpinnerComponent = (
       observer = new IntersectionObserver(
         (entries) => {
           const isVisible = entries[0]?.isIntersecting ?? true
-          if (isVisible === visible) return
+          if (isVisible === visible) {
+            return
+          }
           visible = isVisible
           if (isVisible) {
             if (pausedAt !== null && everTicked) {
@@ -234,7 +253,9 @@ const ChatSpinnerComponent = (
     }
     motionQuery?.addEventListener("change", onMotionPref)
 
-    if (variant === "continuous" || playingRef.current) startLoop()
+    if (variant === "continuous" || playingRef.current) {
+      startLoop()
+    }
 
     return () => {
       stopLoop()
@@ -246,7 +267,9 @@ const ChatSpinnerComponent = (
 
   useEffect(() => {
     playingRef.current = playing
-    if (playing) resumeRef.current?.()
+    if (playing) {
+      resumeRef.current?.()
+    }
   }, [playing])
 
   return (

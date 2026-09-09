@@ -1,9 +1,7 @@
 import { act } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-
 import { useAiChat } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
 import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
-
 import { ApplicationFrame } from ".."
 
 /**
@@ -109,7 +107,9 @@ const renderFrame = (
 /** The box the frame measures and pads — the parent of `<main id="content">`. */
 const mainArea = (): HTMLElement => {
   const element = document.getElementById("content")?.parentElement
-  if (!element) throw new Error("main area not found")
+  if (!element) {
+    throw new Error("main area not found")
+  }
   return element
 }
 
