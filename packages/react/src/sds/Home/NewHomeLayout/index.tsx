@@ -47,6 +47,7 @@ import {
   type SlotRenderers,
   type WidgetParams,
 } from "../slotRenderers"
+import { HomeTrackingProvider, type HomeTrackingOptions } from "../tracking"
 import { useScrollFade } from "../useScrollFade"
 import {
   WidgetContainer,
@@ -646,6 +647,17 @@ export interface NewHomeLayoutProps {
   onClickAddNewWidget?: (side: WidgetContainerSide) => void
   /** Called with a side and its widget ids in their new order after a drag. */
   onReorderWidgets?: (side: WidgetContainerSide, ids: string[]) => void
+  /**
+   * ANALYTICS CALLBACKS for what the reader does inside the widgets — the same
+   * shape the AI kit takes (`ai.tracking`).
+   *
+   * A widget is declarative: its rows carry an `href` and never an `onClick`,
+   * so a host had no seam to observe a row from and its analytics could not see
+   * the Home at all. These fire for EVERY widget in the column, so a newly
+   * added one is measured without remembering anything. Nothing here changes
+   * behaviour — a row still navigates through its own anchor.
+   */
+  tracking?: HomeTrackingOptions
   /** The daytime gradient period for the page surface. */
   period?: HomePeriod
   /** Fixed px width of the side rail. */
@@ -723,6 +735,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
       renderWidgetPreview,
       onClickAddNewWidget,
       onReorderWidgets,
+      tracking,
       period = "morning",
       asideWidth = 396,
       mainWidth = MAIN_WIDTH,
@@ -1080,7 +1093,7 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
       )
     }
 
-    return (
+    const layout = (
       <motion.div
         ref={(node) => {
           rootRef.current = node
@@ -1571,6 +1584,10 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
           />
         ) : null}
       </motion.div>
+    )
+
+    return (
+      <HomeTrackingProvider tracking={tracking}>{layout}</HomeTrackingProvider>
     )
   }
 )
