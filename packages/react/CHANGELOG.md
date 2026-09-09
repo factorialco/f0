@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.91.1](https://github.com/factorialco/f0/compare/f0-react-v6.91.0...f0-react-v6.91.1) (2026-09-09)
+
+
+### Bug Fixes
+
+* **OneEmptyState:** keep its width when it is a container ([#5484](https://github.com/factorialco/f0/issues/5484)) ([85762f2](https://github.com/factorialco/f0/commit/85762f2e547feb64ebb500ee850f46b90bfd3218))
+
 ## [6.91.0](https://github.com/factorialco/f0/compare/f0-react-v6.90.2...f0-react-v6.91.0) (2026-09-09)
 
 
