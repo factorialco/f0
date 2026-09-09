@@ -17,19 +17,11 @@ import { PROFILE_PEOPLE } from "../fixtures"
 import { goHome } from "../one/conversationStore"
 import { useProfile } from "../profileStore"
 import factorial from "./assets/factorial.svg"
-import jira from "./assets/jira.svg"
-import planes from "./assets/planes.svg"
-import {
-  EntityMenu,
-  HelpMenu,
-  ProfileMenu,
-  type HelpRow,
-} from "./ReferenceMenus"
+import { HelpMenu, ProfileMenu, type HelpRow } from "./ReferenceMenus"
 
 const entities = [
   { id: "factorial", name: "Factorial", src: factorial },
-  { id: "jira", name: "Jira", src: jira },
-  { id: "planes", name: "Planes", src: planes },
+  { id: "test-de-verdad", name: "Test de verdad" },
 ]
 const ENTITY_KEY = "f0compose:home:legal-entity"
 // These destinations are placeholders in the reference; the prototype does not contact support.
@@ -54,40 +46,20 @@ const helpRows: HelpRow[] = [
   { kind: "item", label: "What's new?", icon: Megaphone },
   { kind: "footer", text: "User ID: #4079271" },
 ]
-export function LegalEntityMenu() {
+export function CompanyLogo() {
+  return <F0AvatarCompany name="Factorial" src={factorial} size="sm" />
+}
+export function RailHelpMenu() {
+  return <HelpMenu label="Help" rows={helpRows} />
+}
+export function RailPersonalMenu() {
   const [selected, setSelected] = useState(() => {
     const stored = window.localStorage.getItem(ENTITY_KEY)
     return entities.some((entity) => entity.id === stored)
       ? stored!
       : "factorial"
   })
-  const active =
-    entities.find((entity) => entity.id === selected) ?? entities[0]
-  return (
-    <EntityMenu
-      entities={entities}
-      selected={selected}
-      actions={[]}
-      onSelect={(id) => {
-        setSelected(id)
-        window.localStorage.setItem(ENTITY_KEY, id)
-      }}
-    >
-      <button
-        type="button"
-        aria-label={`Change legal entity: ${active.name}`}
-        aria-haspopup="menu"
-        className="flex size-8 cursor-pointer items-center justify-center rounded-lg hover:bg-f1-background-hover"
-      >
-        <F0AvatarCompany name={active.name} src={active.src} size="sm" />
-      </button>
-    </EntityMenu>
-  )
-}
-export function RailHelpMenu() {
-  return <HelpMenu label="Help" rows={helpRows} />
-}
-export function RailPersonalMenu() {
+
   useEffect(() => {
     const theme =
       window.localStorage.getItem("f0compose:theme") === "dark"
@@ -115,6 +87,13 @@ export function RailPersonalMenu() {
   ]
   return (
     <ProfileMenu
+      accountEmail="alicia.keys@factorial.co"
+      entities={entities}
+      selectedEntity={selected}
+      onSelectEntity={(id) => {
+        setSelected(id)
+        window.localStorage.setItem(ENTITY_KEY, id)
+      }}
       personal={personal}
       help={helpRows}
       labels={{
