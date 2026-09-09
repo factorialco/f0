@@ -8,8 +8,15 @@ on:
 env:
   PUBLIC_BUILD: true
 
+# `github.sha`, not `github.ref`, for the push side: on main every commit shares
+# `refs/heads/main`, so a single group covered them all and the release-please
+# commit that lands ~90s after each merge cancelled the previous commit's run —
+# turning that commit's `✅` gate red for no reason (the gate counts a
+# cancellation as fatal, and rightly so). Main's commits arrive serially, so
+# per-SHA groups cancel nothing worth keeping. PRs are unaffected: their runs
+# still group by PR number, so a new push supersedes the one in flight.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 
 jobs:
