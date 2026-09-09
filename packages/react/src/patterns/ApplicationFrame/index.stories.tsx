@@ -8,6 +8,7 @@ import {
   useState,
 } from "react"
 import { expect, waitFor, within } from "storybook/test"
+import { F0Button } from "@/components/F0Button"
 import { PageHeader } from "@/experimental/Navigation/Header/PageHeader"
 import One from "@/icons/ai/One"
 import {
@@ -718,6 +719,71 @@ const withMockChatSlots = (
 ): ComponentProps<typeof ApplicationFrame>["ai"] =>
   ai ? { ...ai, ...mockChatSlots } : ai
 
+/**
+ * Manual-QA controls for the frame's motion. Storybook only — nothing here
+ * ships.
+ *
+ * Opening straight into fullscreen is the one entry the product's own chrome
+ * cannot give you: the header's expand button only exists once the panel is
+ * already docked. And fullscreen is where the two hardest transitions start —
+ * leaving it for the sidepanel, and closing outright, which is a different
+ * movement (`open` goes false first, and the mode resets a commit later).
+ *
+ * `clearPanelContent` first because these stories dock conversations on the
+ * opposite edge: without it the fullscreen would be the hosted window, not
+ * the AI chat.
+ */
+const MotionQaControls = () => {
+  const {
+    setOpen,
+    setVisualizationMode,
+    clearPanelContent,
+    open,
+    visualizationMode,
+  } = useAiChat()
+
+  const openAiChat = (mode: "sidepanel" | "fullscreen") => {
+    clearPanelContent()
+    // `setVisualizationMode("fullscreen")` opens the panel by itself; the
+    // docked case has to say so.
+    if (mode === "fullscreen") {
+      setVisualizationMode("fullscreen")
+    } else {
+      setVisualizationMode("sidepanel")
+      setOpen(true)
+    }
+  }
+
+  return (
+    <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-dashed border-f1-border-secondary p-3">
+      <span className="text-sm font-medium text-f1-foreground-secondary">
+        Motion QA
+      </span>
+      <F0Button
+        label="AI chat · fullscreen"
+        variant="outline"
+        size="sm"
+        onClick={() => openAiChat("fullscreen")}
+      />
+      <F0Button
+        label="AI chat · docked"
+        variant="outline"
+        size="sm"
+        onClick={() => openAiChat("sidepanel")}
+      />
+      <F0Button
+        label="Close panel"
+        variant="neutral"
+        size="sm"
+        onClick={() => setOpen(false)}
+      />
+      <span className="text-sm text-f1-foreground-secondary">
+        open: {String(open)} · {visualizationMode}
+      </span>
+    </div>
+  )
+}
+
 // Communications mode hides the per-page One switch (One is reached from the
 // sidebar tab), so the page header opts out via `hideOneSwitch`.
 const communicationsPageHeader = (
@@ -733,7 +799,7 @@ const communicationsPageHeader = (
 
 export const Default: Story = {
   render: (args) => (
-    <MockAiChatRuntimeProvider>
+    <MockAiChatRuntimeProvider pace={5}>
       <MockChatAppProvider>
         <ApplicationFrame
           // Transitional communications layout: conversations dock LEFT
@@ -766,6 +832,7 @@ export const Default: Story = {
               employeeAvatar: "/avatars/person05.jpg",
             }}
           >
+            <MotionQaControls />
             <HomeLayout {...HomeLayoutStories.Default.args} />
           </DaytimePage>
         </ApplicationFrame>
@@ -796,7 +863,7 @@ export const Default: Story = {
  */
 export const EverythingChannel: Story = {
   render: (args) => (
-    <MockAiChatRuntimeProvider>
+    <MockAiChatRuntimeProvider pace={5}>
       <MockChatAppProvider>
         <ApplicationFrame
           ai={{
@@ -821,6 +888,7 @@ export const EverythingChannel: Story = {
               employeeAvatar: "/avatars/person05.jpg",
             }}
           >
+            <MotionQaControls />
             <HomeLayout {...HomeLayoutStories.Default.args} />
           </DaytimePage>
         </ApplicationFrame>
@@ -850,7 +918,7 @@ export const EverythingChannel: Story = {
  */
 export const AnnouncementChannel: Story = {
   render: (args) => (
-    <MockAiChatRuntimeProvider>
+    <MockAiChatRuntimeProvider pace={5}>
       <MockChatAppProvider>
         <ApplicationFrame
           ai={{
@@ -875,6 +943,7 @@ export const AnnouncementChannel: Story = {
               employeeAvatar: "/avatars/person05.jpg",
             }}
           >
+            <MotionQaControls />
             <HomeLayout {...HomeLayoutStories.Default.args} />
           </DaytimePage>
         </ApplicationFrame>

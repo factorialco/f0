@@ -733,7 +733,7 @@ const manyFieldsSchema = z.object({
     fieldType: "select",
     options: [
       { value: "saul", label: "Saul Dominguez" },
-      { value: "dani", label: "Dani Moreno" },
+      { value: "jordan", label: "Jordan Avery" },
       { value: "jj", label: "Josep Jaume Rey" },
     ],
   }),
