@@ -54,6 +54,7 @@ describe("Everything Chat stress seed", () => {
     )
     expect(messages.some((message) => message.deleted)).toBe(true)
     expect(messages.some((message) => message.edited)).toBe(true)
+    expect(messages.some((message) => message.aiAssisted)).toBe(true)
   })
 
   it("covers every outgoing status and membership event", () => {
@@ -87,6 +88,10 @@ describe("Everything Chat stress seed", () => {
     expect(sending?.readAt).toBeUndefined()
     expect(messages.some((message) => message.deleted)).toBe(true)
     expect(messages.some((message) => message.editedAt)).toBe(true)
+    expect(messages.some((message) => message.aiAssisted)).toBe(true)
+    expect(
+      messages.some((message) => message.aiAssisted && message.editedAt)
+    ).toBe(true)
     expect(messages.some((message) => message.readByCount === 57)).toBe(true)
   })
 })

@@ -17,7 +17,9 @@ import { formatClock } from "../utils/natural-time"
  *   chips, whose markup we don't own.
  *
  * `edited` joins the same cluster instead of trailing the body on its own —
- * again what WhatsApp does, and it keeps a single meta group per message.
+ * again what WhatsApp does, and it keeps a single meta group per message. So
+ * does the "Drafted with One" marker of an AI-assisted message: one cluster
+ * per message, and the `sr-only` twin carries it to assistive technology.
  *
  * One type scale across all three (`text-xs`): the clock reads as the same
  * piece of information wherever it lands, and a message with a photo above its
@@ -41,7 +43,7 @@ export const ChatMessageMeta = ({
 }): ReactNode => {
   const i18n = useI18n()
   const channelType = useF0ChatChannelType()
-  const label = metaLabel(message, i18n.chat.edited)
+  const label = <MetaText parts={metaParts(message, i18n.chat)} />
 
   if (channelType === "announcement") {
     return null
@@ -84,6 +86,13 @@ export const ChatMessageMeta = ({
   // stays correct for any body length or label ("22:14" vs "edited · 22:14").
   //
   // The pin's offsets mirror the body box's px-3.5 py-2.5.
+  //
+  // Neither copy is nowrap as a whole: on a narrow bubble the "Drafted with
+  // One" origin may fold onto its own line while "edited · 22:14" stays
+  // together (see MetaText). Both copies wrap at the same point because they
+  // get the same width — the twin is capped at the content width and the pin
+  // spans it (left-3 to right-3), each with the same 1.5 leading gap — so the
+  // reserve stays exactly as tall as the pin.
   return (
     <>
       <span
@@ -91,7 +100,7 @@ export const ChatMessageMeta = ({
         // Must track the pinned copy's type scale exactly — this is what
         // reserves its width, and a narrower twin lets the time overlap the
         // last word.
-        className="invisible ml-1.5 inline-block select-none whitespace-nowrap align-bottom text-xs leading-none"
+        className="invisible ml-1.5 inline-block max-w-full select-none align-bottom text-xs leading-none"
         data-testid="chat-message-time-reserve"
       >
         {label}
@@ -101,7 +110,7 @@ export const ChatMessageMeta = ({
       <span
         aria-hidden
         className={cn(
-          "absolute bottom-2.5 right-3 select-none whitespace-nowrap text-xs leading-none [unicode-bidi:isolate]",
+          "absolute bottom-2.5 left-3 right-3 select-none pl-1.5 text-right text-xs leading-none [unicode-bidi:isolate]",
           // `f1-foreground-secondary` is white 50% in dark, which lands just
           // under AA on the coloured bubbles; 60% clears it on every hue.
           "text-f1-foreground-tertiary dark:text-[hsl(var(--neutral-100)/0.6)]"
@@ -126,13 +135,46 @@ export const ChatMessageMetaLabel = ({
   if (channelType === "announcement") {
     return null
   }
-  return <span className="sr-only">{metaLabel(message, i18n.chat.edited)}</span>
+  return (
+    <span className="sr-only">{metaLabel(metaParts(message, i18n.chat))}</span>
+  )
 }
 
-const metaLabel = (message: F0ChatMessage, editedLabel: string): string => {
-  const time = formatClock(new Date(message.createdAt))
-  // A tombstone never carries the edit history of what it replaced.
-  return message.editedAt && !message.deleted
-    ? `${editedLabel} · ${time}`
-    : time
+type MetaParts = {
+  /** "Drafted with One", or null when the message was not AI-assisted. */
+  origin: string | null
+  /** "edited · 22:14" or "22:14" — never split across lines. */
+  tail: string
 }
+
+const metaParts = (
+  message: F0ChatMessage,
+  labels: { edited: string; aiAssisted: string }
+): MetaParts => {
+  const time = formatClock(new Date(message.createdAt))
+  // A tombstone never carries the edit history, nor the origin, of what it
+  // replaced.
+  if (message.deleted) {
+    return { origin: null, tail: time }
+  }
+  return {
+    origin: message.aiAssisted ? labels.aiAssisted : null,
+    tail: message.editedAt ? `${labels.edited} · ${time}` : time,
+  }
+}
+
+const metaLabel = ({ origin, tail }: MetaParts): string =>
+  origin ? `${origin} · ${tail}` : tail
+
+/**
+ * The visible cluster. The only allowed line break is between the origin and
+ * the tail: the edited marker and the time read as one unit.
+ */
+const MetaText = ({ parts }: { parts: MetaParts }): ReactNode =>
+  parts.origin ? (
+    <>
+      {parts.origin} · <span className="whitespace-nowrap">{parts.tail}</span>
+    </>
+  ) : (
+    parts.tail
+  )

@@ -781,7 +781,8 @@ export const Default: Story = {
  * `grp-everything-stress` — a year of history, ten extra pages, every message
  * shape (albums of 1/2/3/4/7, a 1:10 tower, a dimensionless photo, video,
  * voice, location, pdf/sheet/docx/text cards, file chips, link previews,
- * replies, mentions, reactions, edits, deletions, failures, system rows) and a
+ * replies, mentions, reactions, edits, AI-assisted drafts, deletions, failures,
+ * system rows) and a
  * live typing indicator.
  *
  * What to exercise here:

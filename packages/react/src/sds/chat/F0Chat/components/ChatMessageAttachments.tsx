@@ -20,7 +20,7 @@ import { ChatCardAttachment } from "./ChatCardAttachment"
 import { ChatDocumentAttachmentCard } from "./ChatDocumentAttachmentCard"
 import { ChatImageTile } from "./ChatImageTile"
 import { ChatLocationAttachment } from "./ChatLocationAttachment"
-import { ChatMessageMeta } from "./ChatMessageMeta"
+import { ChatMessageMeta, ChatMessageMetaLabel } from "./ChatMessageMeta"
 import { ChatVideoAttachment } from "./ChatVideoAttachment"
 import { ChatVoiceAttachment } from "./ChatVoiceAttachment"
 
@@ -312,6 +312,11 @@ export const ChatMessageAttachments = ({
       {metaHost === "below" ? (
         <ChatMessageMeta message={message} placement="below" />
       ) : null}
+      {/* No caption means no bubble, and the bubble is where the sr-only
+          twin normally lives — so an attachment-only message carries its own,
+          after the content in reading order. `metaHost` is non-null exactly
+          when the bubble is absent, so this never double-announces. */}
+      {metaHost !== null ? <ChatMessageMetaLabel message={message} /> : null}
     </div>
   )
 }

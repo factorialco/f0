@@ -354,6 +354,14 @@ export type F0ChatMessage = {
    * reactions/read updates), so it never false-positives the label.
    */
   editedAt?: string
+  /**
+   * The message was drafted with One (Factorial's AI) and approved by its
+   * author, who remains the sender. Drives the muted "Drafted with One" label
+   * after the body, next to the edited marker, so the reader and assistive
+   * technology learn it on every surface that shows the content. The host maps
+   * it from server-set message metadata, never from body text.
+   */
+  aiAssisted?: boolean
 }
 
 /**

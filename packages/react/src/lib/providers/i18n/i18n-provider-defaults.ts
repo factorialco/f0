@@ -642,6 +642,9 @@ export const defaultTranslations = {
     edit: "Edit",
     editing: "Editing",
     edited: "edited",
+    // Muted label on a message drafted with One and approved by its sender.
+    // "One" is the product name and stays untranslated.
+    aiAssisted: "Drafted with One",
     cancelEdit: "Cancel edit",
     saveEdit: "Save",
     // Shown as the quoted sender's name when the replied-to message is your own.

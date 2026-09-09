@@ -270,6 +270,8 @@ type MessageLine = {
   deleted?: boolean
   /** Marks the message as edited shortly after it was sent. */
   edited?: boolean
+  /** Marks the message as drafted with One and approved by its sender. */
+  aiAssisted?: boolean
 }
 
 /** A membership event in the transcript — becomes a centered system row. */
@@ -807,6 +809,17 @@ const everythingStressLines = (): Line[] => {
     body: "This message intentionally demonstrates a failed send",
     status: "failed",
     failureReason: "Simulated network error for the stress fixture",
+  })
+  add({
+    from: MARCUS,
+    body: "Reminder: timesheets close on Friday, please submit yours by noon.",
+    aiAssisted: true,
+  })
+  add({
+    from: MARCUS,
+    body: "Reminder: timesheets close on Friday, please submit yours by 11:00.",
+    aiAssisted: true,
+    edited: true,
   })
   add({
     from: MARCUS,
@@ -1781,6 +1794,7 @@ export const buildSeedMessages = (seed: Seed): F0ChatItem[] => {
       editedAt: line.edited
         ? new Date(sentMs + 5 * 60_000).toISOString()
         : undefined,
+      aiAssisted: line.aiAssisted,
     }
   })
   // Second pass: resolve reply references now that every message has an id.
