@@ -21,10 +21,15 @@ describe("F0AiChatUsageLimitsButton", () => {
   })
 
   it("shows only the personal row for a plain employee", async () => {
-    render(<F0AiChatUsageLimitsButton usage={{ usedPercentage: 30 }} />)
+    render(
+      <F0AiChatUsageLimitsButton
+        usage={{ usedPercentage: 30, description: "Resets in 3 hr 6 min" }}
+      />
+    )
     const dialog = await openPopover()
 
     expect(dialog).toHaveTextContent("Personal allowance")
+    expect(dialog).toHaveTextContent("Resets in 3 hr 6 min")
     expect(dialog).toHaveTextContent("30% used")
     expect(
       screen.queryByRole("button", { name: /your company/i })

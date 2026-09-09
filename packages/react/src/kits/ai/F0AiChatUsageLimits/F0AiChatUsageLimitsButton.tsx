@@ -104,6 +104,7 @@ export const F0AiChatUsageLimitsButton = ({
           ) : (
             <UsageRow
               label={title}
+              description={usage.description}
               percentage={personal}
               unlimited={unlimited}
             />
@@ -131,6 +132,7 @@ export const F0AiChatUsageLimitsButton = ({
               <div key={section.id} className="p-2">
                 <UsageRow
                   label={section.label}
+                  description={section.description}
                   percentage={clampPercentage(section.usedPercentage)}
                   unlimited={section.unlimited}
                 />

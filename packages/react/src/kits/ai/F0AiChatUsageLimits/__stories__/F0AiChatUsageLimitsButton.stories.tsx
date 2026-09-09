@@ -27,16 +27,22 @@ const onSeeCompany = fn()
 
 const ADMIN_USAGE = {
   usedPercentage: 30,
+  description: "Resets in 3 hr 6 min",
   onSeeCompany,
   sections: [
-    { id: "company", label: "Company allowance", usedPercentage: 70 },
+    {
+      id: "company",
+      label: "Company allowance",
+      description: "Renews Sep 4",
+      usedPercentage: 70,
+    },
     { id: "team", label: "Personal allowance", usedPercentage: 30 },
   ],
 }
 
 export const Employee: Story = {
   args: {
-    usage: { usedPercentage: 30 },
+    usage: { usedPercentage: 30, description: "Resets in 3 hr 6 min" },
   },
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement)
