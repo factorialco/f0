@@ -1204,12 +1204,12 @@ export const NewHomeLayout = forwardRef<HTMLDivElement, NewHomeLayoutProps>(
                 the top-right controls, after the rail's own collapse button. It
                 draws NOTHING unless the AI chat context is enabled, so a Home
                 without One keeps the row it had. */}
-            {!hideOneSwitch && (
+            {!hideOneSwitch ? (
               <F0OneSwitch
                 tooltip={oneSwitchTooltip}
                 autoOpen={oneSwitchAutoOpen}
               />
-            )}
+            ) : null}
           </div>
         </HomeEntrance>
         {/* Main column: its own scroll region, no mask — a reading column should

@@ -25,7 +25,7 @@ export const ConfirmFooter = ({
   return (
     <div className="flex items-center justify-end gap-3 p-3">
       <div className="flex items-center">
-        {showSkip && onSkip && (
+        {showSkip && onSkip ? (
           <F0Button
             variant="outline"
             type="button"
@@ -33,7 +33,7 @@ export const ConfirmFooter = ({
             onClick={onSkip}
             disabled={submitDisabled}
           />
-        )}
+        ) : null}
       </div>
       <F0Button
         disabled={!canProceed || submitDisabled}

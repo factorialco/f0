@@ -28,7 +28,7 @@ const OverflowIndicator: FC<OverflowIndicatorProps> = ({
       )}
     >
       <span>
-        {count < totalItemsCount && "+"}
+        {count < totalItemsCount ? "+" : null}
         {count}
       </span>
       <span>{i18n.actions.more}</span>

@@ -41,7 +41,7 @@ export const validateStorageKey = (key: string): boolean => {
   }
 
   // Version must match 'v' followed by one or more digits (e.g., v1, v2, v123 v.1.2)
-  if (!version || !/^v[0-9]+$/.test(version)) {
+  if (!version || !/^v\d+$/.test(version)) {
     return false
   }
 

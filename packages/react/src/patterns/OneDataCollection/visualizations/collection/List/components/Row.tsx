@@ -78,7 +78,7 @@ export const Row = <
     item: Record,
     property: ListPropertyDefinition<Record, Sortings>
   ) => {
-    return renderProperty(item, property, "list", i18n)
+    return renderProperty({ item, property, visualization: "list", i18n })
   }
 
   const itemHref = source.itemUrl ? source.itemUrl(item) : undefined
@@ -115,7 +115,7 @@ export const Row = <
         className="pointer-events-auto absolute inset-0"
       ></div>
       <div className="pointer-events-none flex flex-1 flex-row items-center gap-2">
-        {source.selectable && id !== undefined && (
+        {source.selectable && id !== undefined ? (
           // z-10 is needed here to prevent the checkbox from not being selectable when itemHref is provided
           <div
             className={cn(
@@ -134,8 +134,8 @@ export const Row = <
               hideLabel
             />
           </div>
-        )}
-        {itemHref && (
+        ) : null}
+        {itemHref ? (
           <F0Link
             href={itemHref}
             className="pointer-events-auto absolute inset-0 block"
@@ -145,7 +145,7 @@ export const Row = <
           >
             <span className="sr-only">{actions.view}</span>
           </F0Link>
-        )}
+        ) : null}
         <ItemTeaser
           title={itemDef.title}
           avatar={itemDef.avatar}
@@ -171,7 +171,7 @@ export const Row = <
             )
           })}
       </div>
-      {source.itemActions && (
+      {source.itemActions ? (
         <>
           <ItemActionsRowContainer
             dropDownOpen={dropDownOpen}
@@ -184,16 +184,16 @@ export const Row = <
             />
           </ItemActionsRowContainer>
 
-          {hasMobileItemActions && (
+          {hasMobileItemActions ? (
             <ItemActionsMobile
               className="absolute -right-px bottom-0 top-0 z-20 items-center justify-end gap-2 py-2 pl-20 pr-3 md:hidden"
               items={mobileDropdownItemActions}
               onOpenChange={handleDropDownOpenChange}
             />
-          )}
+          ) : null}
         </>
-      )}
-      {source.selectable && id !== undefined && (
+      ) : null}
+      {source.selectable && id !== undefined ? (
         <div
           className={cn(
             "pointer-events-auto absolute right-3 top-3 flex h-8 w-8 items-center justify-center md:hidden",
@@ -209,7 +209,7 @@ export const Row = <
             hideLabel
           />
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

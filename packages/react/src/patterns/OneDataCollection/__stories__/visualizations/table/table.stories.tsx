@@ -1283,7 +1283,7 @@ export const TableWithHighlightedHeaderGroup: Story = {
     const highlightedHeaders = canvasElement.querySelectorAll(
       "th[data-highlighted]"
     )
-    expect(highlightedHeaders.length).toBe(4)
+    expect(highlightedHeaders).toHaveLength(4)
     highlightedHeaders.forEach((header) => {
       expect(header.className).toContain(highlightClass)
     })
@@ -1298,7 +1298,7 @@ export const TableWithHighlightedHeaderGroup: Story = {
         "th[data-highlighted]"
       )
       // The group header plus the remaining total column.
-      expect(collapsedHighlighted.length).toBe(2)
+      expect(collapsedHighlighted).toHaveLength(2)
       expect(
         collapsedHighlighted[collapsedHighlighted.length - 1].className
       ).toContain(highlightClass)

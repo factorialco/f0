@@ -631,7 +631,7 @@ const PersistenceHarness = () => {
           <span>
             <strong>Visualization filter keys:</strong>{" "}
             {vizFilterKeys.length > 0
-              ? `[${vizFilterKeys.map((k) => `"${k}"`).join(", ")}]`
+              ? `[${vizFilterKeys.map((k) => JSON.stringify(k)).join(", ")}]`
               : "(none)"}{" "}
             — {statusBadge.label}
           </span>
@@ -649,7 +649,7 @@ const PersistenceHarness = () => {
         </details>
       </div>
 
-      {mounted && <PersistenceCollection />}
+      {mounted ? <PersistenceCollection /> : null}
     </div>
   )
 }

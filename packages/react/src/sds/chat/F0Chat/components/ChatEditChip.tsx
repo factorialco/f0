@@ -22,7 +22,7 @@ export const ChatEditChip = ({
   return (
     <div className="p-1">
       <div className="flex items-stretch gap-2 overflow-hidden rounded-[10px] bg-f1-background-tertiary py-1.5 pl-2 pr-1.5">
-        {thumbnailUrl && (
+        {thumbnailUrl ? (
           <img
             src={thumbnailUrl}
             alt=""
@@ -30,7 +30,7 @@ export const ChatEditChip = ({
             decoding="async"
             className="h-9 w-9 shrink-0 self-center rounded-sm object-cover"
           />
-        )}
+        ) : null}
         <div className="min-w-0 flex-1 gap-0.5 p-1">
           {/* Mention-info pill (matches the @-mention chip styling) so the chip
               reads as a mention-like indicator that you're editing. */}
@@ -39,7 +39,7 @@ export const ChatEditChip = ({
             {i18n.chat.editing}
           </span>
           <span className="mt-0.5 flex min-w-0 items-center gap-1 text-f1-foreground-secondary">
-            {icon && <F0Icon icon={icon} size="xs" color="default" />}
+            {icon ? <F0Icon icon={icon} size="xs" color="default" /> : null}
             <OneEllipsis className="min-w-0 text-base" lines={1}>
               {label}
             </OneEllipsis>

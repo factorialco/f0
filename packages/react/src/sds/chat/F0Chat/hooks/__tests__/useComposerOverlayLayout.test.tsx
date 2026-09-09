@@ -12,7 +12,7 @@ const ComposerLayoutHarness = ({ enabled }: { enabled: boolean }) => {
 
   return (
     <div ref={shellRef} data-testid="shell">
-      {enabled && <div ref={composerOverlayRef}>Composer</div>}
+      {enabled ? <div ref={composerOverlayRef}>Composer</div> : null}
     </div>
   )
 }

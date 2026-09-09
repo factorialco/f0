@@ -55,7 +55,7 @@ export const ChatImageTile = ({
       aria-label={label}
       data-testid="chat-image-attachment"
     >
-      {image.blurUrl && !loaded && (
+      {image.blurUrl && !loaded ? (
         // Scaled up so the blur's soft edges fall outside the cell instead of
         // fading into the tint at the border.
         <img
@@ -65,7 +65,7 @@ export const ChatImageTile = ({
           className="absolute inset-0 h-full w-full scale-105 object-cover blur-md"
           data-testid="chat-image-blur"
         />
-      )}
+      ) : null}
       <FadeInImage
         src={image.thumbnailUrl ?? image.url}
         alt={image.name}

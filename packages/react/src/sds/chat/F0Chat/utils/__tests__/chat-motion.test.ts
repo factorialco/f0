@@ -38,8 +38,8 @@ describe("chat-motion vocabulary", () => {
   })
 
   it("micro presences stay in the discreet 120-160ms band", () => {
-    expect(microEnterTransition.duration).toBe(0.16)
-    expect(microExitTransition.duration).toBe(0.12)
+    expect(microEnterTransition.duration).toBeCloseTo(0.16)
+    expect(microExitTransition.duration).toBeCloseTo(0.12)
   })
 
   it("layout shifts carry an explicit tween (framer's default bounces)", () => {

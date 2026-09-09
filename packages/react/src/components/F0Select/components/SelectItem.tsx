@@ -13,20 +13,20 @@ const DIAL_CODE_PATTERN = /^\+\d{1,4}$/
 const warnedDialCodes = new Set<string>()
 
 const metadataText = (metadata: F0SelectItemMetadata): string => {
-  switch (metadata.type) {
-    case "dialCode":
-      if (
-        process.env.NODE_ENV !== "production" &&
-        !DIAL_CODE_PATTERN.test(metadata.dialCode) &&
-        !warnedDialCodes.has(metadata.dialCode)
-      ) {
-        warnedDialCodes.add(metadata.dialCode)
-        console.warn(
-          `[F0Select] metadata dialCode "${metadata.dialCode}" is not a valid dial code (expected "+" followed by 1-4 digits).`
-        )
-      }
-      return metadata.dialCode
+  if (metadata.type !== "dialCode") {
+    return ""
   }
+  if (
+    process.env.NODE_ENV !== "production" &&
+    !DIAL_CODE_PATTERN.test(metadata.dialCode) &&
+    !warnedDialCodes.has(metadata.dialCode)
+  ) {
+    warnedDialCodes.add(metadata.dialCode)
+    console.warn(
+      `[F0Select] metadata dialCode "${metadata.dialCode}" is not a valid dial code (expected "+" followed by 1-4 digits).`
+    )
+  }
+  return metadata.dialCode
 }
 
 export const SelectItem = <T extends string, R>({
@@ -42,36 +42,36 @@ export const SelectItem = <T extends string, R>({
       <div
         className={`flex w-full gap-1.5 ${item.description ? "items-start" : "items-center"}`}
       >
-        {item.avatar && (
+        {item.avatar ? (
           <div className="flex shrink-0 items-center">
             <F0Avatar avatar={item.avatar} size="xs" />
           </div>
-        )}
-        {item.icon && (
+        ) : null}
+        {item.icon ? (
           <div className="flex shrink-0 items-center text-f1-icon">
             <F0Icon icon={item.icon} />
           </div>
-        )}
-        {!isStatusTag && (
+        ) : null}
+        {!isStatusTag ? (
           <div className="flex min-w-0 flex-1 flex-col">
             <div className="flex min-w-0 items-baseline gap-1.5">
               <OneEllipsis lines={2} className="font-medium">
                 {item.label}
               </OneEllipsis>
-              {item.metadata && (
+              {item.metadata ? (
                 <span className="whitespace-nowrap text-f1-foreground-secondary">
                   {metadataText(item.metadata)}
                 </span>
-              )}
+              ) : null}
             </div>
-            {item.description && (
+            {item.description ? (
               <OneEllipsis lines={2} className="text-f1-foreground-secondary">
                 {item.description}
               </OneEllipsis>
-            )}
+            ) : null}
           </div>
-        )}
-        {item.tag && (
+        ) : null}
+        {item.tag ? (
           <div className={item.description ? "self-start" : "self-center"}>
             {typeof item.tag === "string" ? (
               <F0TagRaw text={item.tag} />
@@ -85,7 +85,7 @@ export const SelectItem = <T extends string, R>({
               <F0TagPerson name={item.tag.name} src={item.tag.src} />
             )}
           </div>
-        )}
+        ) : null}
       </div>
     </SelectItemPrimitive>
   )

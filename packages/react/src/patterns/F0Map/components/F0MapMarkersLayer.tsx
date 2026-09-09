@@ -226,7 +226,7 @@ export const F0MapMarkersLayer = ({
   const reduceMotion = useReducedMotion()
   // Clustering is always on - markers gather when zoomed out and separate as
   // you zoom in. It is intrinsic to the map, not a mode the caller opts into.
-  const { clusters, singles } = useClusters(map, points, true)
+  const { clusters, singles } = useClusters({ map, points, enabled: true })
   // Markers bump one size step up once POI names appear (see POI_LABEL_ZOOM).
   const poiZoom = useZoomAtLeast(map, POI_LABEL_ZOOM)
   const sizeStep: BaseMapMarkerSize = poiZoom ? "lg" : "md"

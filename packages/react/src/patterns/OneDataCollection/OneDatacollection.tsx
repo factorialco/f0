@@ -409,14 +409,10 @@ const OneDataCollectionComp = <
   // only trims, never grows. List rows are a fixed height (no reflow); the
   // table and editable table depend on their content, so they seed at the
   // baseline and rely on the measurement to trim.
-  const autoPerPageRowHeight = (() => {
-    switch (visualizations[currentVisualization]?.type) {
-      case "list":
-        return ESTIMATED_LIST_ROW_HEIGHT
-      default:
-        return ESTIMATED_ROW_HEIGHT
-    }
-  })()
+  const autoPerPageRowHeight =
+    visualizations[currentVisualization]?.type === "list"
+      ? ESTIMATED_LIST_ROW_HEIGHT
+      : ESTIMATED_ROW_HEIGHT
   const autoPerPage = useAutoPerPage(vizContainerRef, autoPerPageEnabled, {
     rowHeight: autoPerPageRowHeight,
     ready: firstDataLoaded,
@@ -816,6 +812,30 @@ const OneDataCollectionComp = <
       ? source.bulkActions(selectedItems)
       : undefined
 
+    const settleBulkAction = (
+      bulkAction: BulkActionDefinition,
+      result: Promise<void>
+    ) => {
+      setInternalBulkActionStatus("loading")
+      result.then(
+        () => {
+          setInternalBulkActionStatus("success")
+          // Always wipe on success — prevents already-processed items from
+          // mixing with new selections made during loading.
+          scheduleDismiss(() => {
+            if (!bulkAction.keepSelection) {
+              clearSelectedItems()
+            }
+            setInternalBulkActionStatus("idle")
+          }, !bulkAction.keepSelection)
+        },
+        () => {
+          setInternalBulkActionStatus("error")
+          actionBarRef.current?.wiggle({ errorHighlight: true })
+        }
+      )
+    }
+
     const mapBulkActions = (
       action: BulkActionDefinition | { type: "separator" }
     ): MappedBulkAction => {
@@ -856,24 +876,7 @@ const OneDataCollectionComp = <
             return
           }
 
-          setInternalBulkActionStatus("loading")
-          ;(result as Promise<void>).then(
-            () => {
-              setInternalBulkActionStatus("success")
-              // Always wipe on success — prevents already-processed items from
-              // mixing with new selections made during loading.
-              scheduleDismiss(() => {
-                if (!bulkAction.keepSelection) {
-                  clearSelectedItems()
-                }
-                setInternalBulkActionStatus("idle")
-              }, !bulkAction.keepSelection)
-            },
-            () => {
-              setInternalBulkActionStatus("error")
-              actionBarRef.current?.wiggle({ errorHighlight: true })
-            }
-          )
+          settleBulkAction(bulkAction, result as Promise<void>)
         },
       }
     }
@@ -1660,26 +1663,26 @@ const OneDataCollectionComp = <
           layout === "standard" && !tmpFullWidth ? "calc(100% + 46px)" : "100%", // To counteract the -mx-[23px] from the layout,
       }}
     >
-      {showTopToolbar && (
+      {showTopToolbar ? (
         <div className="border-f1-border-primary px-page flex gap-4">
-          {totalItemSummaryPosition === "top" && (
+          {totalItemSummaryPosition === "top" ? (
             <TotalItemsSummary
               isReady={!showTotalItemSummarySkeleton}
               totalItemSummaryResult={totalItemSummaryResult}
             />
-          )}
+          ) : null}
           <div className="flex flex-1 flex-shrink justify-end">
-            {navigationFiltersPosition === "top" && (
+            {navigationFiltersPosition === "top" ? (
               <NavigationFiltersComponent
                 navigationFilters={navigationFilters}
                 currentNavigationFilters={currentNavigationFilters}
                 onChangeNavigationFilters={setCurrentNavigationFilters}
               />
-            )}
+            ) : null}
           </div>
         </div>
-      )}
-      {showBottomToolbar && (
+      ) : null}
+      {showBottomToolbar ? (
         <div
           ref={toolbarRef}
           className={cn(
@@ -1688,14 +1691,14 @@ const OneDataCollectionComp = <
             tmpFullWidth && "px-0"
           )}
         >
-          {totalItemSummaryPosition === "bottom" && (
+          {totalItemSummaryPosition === "bottom" ? (
             <div ref={headerSummaryRef} className="flex items-center">
               <TotalItemsSummary
                 isReady={!showTotalItemSummarySkeleton}
                 totalItemSummaryResult={totalItemSummaryResult}
               />
             </div>
-          )}
+          ) : null}
           <div className="flex-1">
             <OneFilterPicker
               filters={effectiveFilters}
@@ -1712,7 +1715,7 @@ const OneDataCollectionComp = <
               onPresetAction={onPresetAction}
             >
               <div ref={headerActionsRef} className="flex items-center gap-2">
-                {isLoading && (
+                {isLoading ? (
                   <motion.div
                     className="flex h-8 w-8 items-center justify-center"
                     initial={{ opacity: 0 }}
@@ -1723,8 +1726,8 @@ const OneDataCollectionComp = <
                   >
                     <Spinner size="small" />
                   </motion.div>
-                )}
-                {search && (
+                ) : null}
+                {search ? (
                   <Search
                     onChange={setCurrentSearch}
                     value={currentSearch}
@@ -1735,16 +1738,16 @@ const OneDataCollectionComp = <
                     loadingMore={searchPreview.loadingMore}
                     onLoadMore={searchPreview.onLoadMore}
                   />
-                )}
-                {visualizations && visualizations.length > 1 && (
+                ) : null}
+                {visualizations && visualizations.length > 1 ? (
                   <VisualizationSwitcher
                     visualizations={visualizations}
                     currentVisualization={currentVisualization}
                     onVisualizationChange={setCurrentVisualization}
                     hideLabels={collapseHeaderActions}
                   />
-                )}
-                {shouldShowSettings && (
+                ) : null}
+                {shouldShowSettings ? (
                   <Settings
                     visualizations={visualizations}
                     currentVisualization={currentVisualization}
@@ -1756,12 +1759,12 @@ const OneDataCollectionComp = <
                     defaultSortings={defaultSortings.current}
                     onSortingsChange={setCurrentSortings}
                   />
-                )}
-                {hasCollectionsActions && (
+                ) : null}
+                {hasCollectionsActions ? (
                   <>
-                    {elementsRightActions && (
+                    {elementsRightActions ? (
                       <div className="mx-1 h-4 w-px bg-f1-background-secondary-hover" />
-                    )}
+                    ) : null}
                     <CollectionActions
                       primaryActions={primaryActionItems}
                       primaryActionsLabel={primaryActionsLabel}
@@ -1770,19 +1773,19 @@ const OneDataCollectionComp = <
                       upsellAction={upsellActionItem}
                     />
                   </>
-                )}
-                {navigationFiltersPosition === "bottom" && (
+                ) : null}
+                {navigationFiltersPosition === "bottom" ? (
                   <NavigationFiltersComponent
                     navigationFilters={navigationFilters}
                     currentNavigationFilters={currentNavigationFilters}
                     onChangeNavigationFilters={setCurrentNavigationFilters}
                   />
-                )}
+                ) : null}
               </div>
             </OneFilterPicker>
           </div>
         </div>
-      )}
+      ) : null}
       {/* Visualization renderer must be always mounted to react (load data) even if empty state is shown */}
       <div
         ref={vizContainerRef}
@@ -1793,7 +1796,7 @@ const OneDataCollectionComp = <
       >
         {/* With perPage "auto", defer mounting one frame until the container
             is measured, so the first fetch already uses the resolved size */}
-        {(!autoPerPageEnabled || autoPerPage !== undefined) && (
+        {!autoPerPageEnabled || autoPerPage !== undefined ? (
           <VisualizationRenderer
             visualization={visualizations[currentVisualization]}
             source={effectiveSource}
@@ -1803,7 +1806,7 @@ const OneDataCollectionComp = <
             tmpFullWidth={tmpFullWidth}
             searchSelectionNonce={searchPreview.selectionNonce}
           />
-        )}
+        ) : null}
       </div>
       {emptyState ? (
         <div className="flex flex-1 flex-col items-center justify-center">
@@ -1816,7 +1819,7 @@ const OneDataCollectionComp = <
         </div>
       ) : (
         <>
-          {bulkActions && (
+          {bulkActions ? (
             <ActionBar
               ref={actionBarRef}
               isOpen={
@@ -1846,7 +1849,7 @@ const OneDataCollectionComp = <
               isAllItemsSelected={isAllItemsSelected}
               totalItems={totalItems}
             />
-          )}
+          ) : null}
         </>
       )}
       <PresetFormDialog
@@ -1891,23 +1894,24 @@ const OneDataCollectionComp = <
           )
           .map((preset) => preset.label)}
       />
-      {typeof document !== "undefined" &&
-        createPortal(
-          // Portal next to the preset dialog (same container it uses) inside a
-          // stacking context above its overlay (z-50), so the confirmation
-          // paints on top of the overlay it's triggered from. The z-index is
-          // set inline (not a Tailwind arbitrary class) so it always applies
-          // regardless of the consumer's CSS build.
-          <div style={{ position: "relative", zIndex: 9999 }}>
-            <F0ActionBar
-              isOpen={shareCopied}
-              variant="light"
-              status="success"
-              label={i18n.collections.presets.copiedToClipboard}
-            />
-          </div>,
-          document.getElementById("content") ?? document.body
-        )}
+      {typeof document !== "undefined"
+        ? createPortal(
+            // Portal next to the preset dialog (same container it uses) inside a
+            // stacking context above its overlay (z-50), so the confirmation
+            // paints on top of the overlay it's triggered from. The z-index is
+            // set inline (not a Tailwind arbitrary class) so it always applies
+            // regardless of the consumer's CSS build.
+            <div style={{ position: "relative", zIndex: 9999 }}>
+              <F0ActionBar
+                isOpen={shareCopied}
+                variant="light"
+                status="success"
+                label={i18n.collections.presets.copiedToClipboard}
+              />
+            </div>,
+            document.getElementById("content") ?? document.body
+          )
+        : null}
     </div>
   )
 }

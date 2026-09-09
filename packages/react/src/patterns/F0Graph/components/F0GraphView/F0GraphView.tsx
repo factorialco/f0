@@ -1010,19 +1010,19 @@ export function F0GraphView<T = unknown>(
                       </ReactFlow>
                     </div>
 
-                    {canvasActions && (
+                    {canvasActions ? (
                       <div className="absolute left-6 top-3 z-10 flex flex-col gap-2 rounded-md backdrop-blur-[140px]">
                         {canvasActions}
                       </div>
-                    )}
+                    ) : null}
 
-                    {canvasFooterActions && (
+                    {canvasFooterActions ? (
                       <div className="absolute bottom-6 right-6 z-10 flex flex-col items-end gap-2">
                         {canvasFooterActions}
                       </div>
-                    )}
+                    ) : null}
 
-                    {showControls && (
+                    {showControls ? (
                       <div className="absolute bottom-6 left-6 z-10">
                         <F0GraphControls
                           onZoomIn={handleZoomIn}
@@ -1043,7 +1043,7 @@ export function F0GraphView<T = unknown>(
                           labels={controlLabels}
                         />
                       </div>
-                    )}
+                    ) : null}
                   </div>
                 </F0GraphStackHoverContext.Provider>
               </F0GraphSelectionContext.Provider>

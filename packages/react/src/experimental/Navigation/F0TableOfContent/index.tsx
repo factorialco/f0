@@ -20,7 +20,13 @@ import { ScrollArea } from "@/ui/scrollarea"
 import { Item } from "./Item"
 import { ItemSectionHeader } from "./ItemSectionHeader"
 import { TOCFooter } from "./TOCFooter"
-import { TOCAction, TOCItem, TOCItemAction, TOCProps } from "./types"
+import {
+  DropPosition,
+  TOCAction,
+  TOCItem,
+  TOCItemAction,
+  TOCProps,
+} from "./types"
 import {
   calculateAdjustedIndex,
   convertToIds,
@@ -33,34 +39,48 @@ import {
   wouldCreateCycle,
 } from "./utils"
 
-function renderTOCItem(
-  item: TOCItem,
-  sortable: boolean,
-  depth: number,
-  activeItem?: string,
-  collapsible?: boolean,
-  hideChildrenCounter?: boolean,
-  expandedItems?: Set<string>,
-  onToggleExpanded?: (id: string) => void,
-  onMoveItem?: (
-    itemId: string,
-    targetParentId: string | null,
-    targetIndex: number
-  ) => void,
-  allItems?: TOCItem[],
-  draggedItemId?: string | null,
-  dragOverItemId?: string | null,
-  dragOverPosition?: "before" | "after" | "inside" | null,
-  onChildrenReorder?: (parentId: string) => (newOrder: TOCItem[]) => void,
-  currentParentId?: string | null,
-  onDragOver?: (
-    itemId: string,
-    position: "before" | "after" | "inside"
-  ) => void,
-  onDragLeave?: () => void,
-  onDrop?: (itemId: string, position: "before" | "after" | "inside") => void,
+type RenderTOCItemProps = {
+  item: TOCItem
+  sortable: boolean
+  depth: number
+  activeItem?: string
+  collapsible?: boolean
+  hideChildrenCounter?: boolean
+  expandedItems?: Set<string>
+  onToggleExpanded?: (id: string) => void
+  allItems?: TOCItem[]
+  draggedItemId?: string | null
+  dragOverItemId?: string | null
+  dragOverPosition?: "before" | "after" | "inside" | null
+  onChildrenReorder?: (parentId: string) => (newOrder: TOCItem[]) => void
+  currentParentId?: string | null
+  onDragOver?: (itemId: string, position: "before" | "after" | "inside") => void
+  onDragLeave?: () => void
+  onDrop?: (itemId: string, position: "before" | "after" | "inside") => void
   justDroppedItemId?: string | null
-): ReactElement {
+}
+
+function renderTOCItem(props: RenderTOCItemProps): ReactElement {
+  const {
+    item,
+    sortable,
+    depth,
+    activeItem,
+    collapsible,
+    hideChildrenCounter,
+    expandedItems,
+    onToggleExpanded,
+    allItems,
+    draggedItemId,
+    dragOverItemId,
+    dragOverPosition,
+    onChildrenReorder,
+    currentParentId,
+    onDragOver,
+    onDragLeave,
+    onDrop,
+    justDroppedItemId,
+  } = props
   const Component = item.children ? ItemSectionHeader : Item
   const isExpanded = expandedItems?.has(item.id) ?? true
 
@@ -104,7 +124,7 @@ function renderTOCItem(
   return (
     <>
       {/* Placeholder before item — instant, pointer-events-none to avoid layout thrashing */}
-      {showPlaceholderBefore && (
+      {showPlaceholderBefore ? (
         <div
           className={cn(
             "pointer-events-none h-10 rounded border-2 border-dashed border-f1-border-secondary bg-f1-background-hover/40",
@@ -112,7 +132,7 @@ function renderTOCItem(
             "mb-0.5"
           )}
         />
-      )}
+      ) : null}
       {Component === Item ? (
         <Item
           key={item.id}
@@ -149,7 +169,7 @@ function renderTOCItem(
           currentParentId={currentParentId}
           draggedItemId={draggedItemId}
         >
-          {item.children && (Component === ItemSectionHeader || isExpanded) && (
+          {item.children && (Component === ItemSectionHeader || isExpanded) ? (
             <div
               className={cn(
                 "flex flex-col",
@@ -161,45 +181,31 @@ function renderTOCItem(
               )}
             >
               {item.children.map((child) => {
-                return renderTOCItem(
-                  child,
-                  sortable,
-                  depth + 1,
-                  activeItem,
-                  collapsible,
-                  hideChildrenCounter,
-                  expandedItems,
-                  onToggleExpanded,
-                  onMoveItem,
-                  allItems,
-                  draggedItemId,
-                  dragOverItemId,
-                  dragOverPosition,
-                  sortable ? onChildrenReorder : undefined,
-                  item.id,
-                  onDragOver,
-                  onDragLeave,
-                  onDrop,
-                  justDroppedItemId
-                )
+                return renderTOCItem({
+                  ...props,
+                  item: child,
+                  depth: depth + 1,
+                  onChildrenReorder: sortable ? onChildrenReorder : undefined,
+                  currentParentId: item.id,
+                })
               })}
               {/* Placeholder when dragging inside and section is empty or collapsed */}
               {isDragOver &&
-                dragOverPosition === "inside" &&
-                canDropInside &&
-                (!isExpanded || item.children.length === 0) && (
-                  <div className="flex h-9 items-center justify-center rounded-md bg-f1-background-hover/30 text-xs text-f1-foreground-secondary">
-                    Drop here
-                  </div>
-                )}
+              dragOverPosition === "inside" &&
+              canDropInside &&
+              (!isExpanded || item.children.length === 0) ? (
+                <div className="flex h-9 items-center justify-center rounded-md bg-f1-background-hover/30 text-xs text-f1-foreground-secondary">
+                  Drop here
+                </div>
+              ) : null}
             </div>
-          )}
+          ) : null}
         </Component>
       )}
       {/* Placeholder after item — instant, pointer-events-none to avoid layout thrashing */}
-      {showPlaceholderAfter && (
+      {showPlaceholderAfter ? (
         <div className="pointer-events-none my-0.5 h-10 rounded border-2 border-dashed border-f1-border-secondary bg-f1-background-hover/40" />
-      )}
+      ) : null}
     </>
   )
 }
@@ -218,9 +224,9 @@ function EdgeDropZone({
 }: {
   targetItemId: string
   position: "before" | "after"
-  onDragOver: (itemId: string, position: "before" | "after" | "inside") => void
+  onDragOver: (itemId: string, position: DropPosition) => void
   onDragLeave: () => void
-  onDrop: (itemId: string, position: "before" | "after" | "inside") => void
+  onDrop: (itemId: string, position: DropPosition) => void
   visible: boolean
 }) {
   const ref = useRef<HTMLDivElement>(null)
@@ -407,9 +413,9 @@ function TOCContent({
   // State for drag and drop
   const [draggedItemId, setDraggedItemId] = useState<string | null>(null)
   const [dragOverItemId, setDragOverItemId] = useState<string | null>(null)
-  const [dragOverPosition, setDragOverPosition] = useState<
-    "before" | "after" | "inside" | null
-  >(null)
+  const [dragOverPosition, setDragOverPosition] = useState<DropPosition | null>(
+    null
+  )
   const [justDroppedItemId, setJustDroppedItemId] = useState<string | null>(
     null
   )
@@ -420,13 +426,13 @@ function TOCContent({
   const handleDropCalledRef = useRef<boolean>(false)
   // Use refs to access current dragOver state in useDndEvents callback
   const dragOverItemIdRef = useRef<string | null>(null)
-  const dragOverPositionRef = useRef<"before" | "after" | "inside" | null>(null)
+  const dragOverPositionRef = useRef<DropPosition | null>(null)
 
   // Use refs to stabilize drag over updates and prevent flickering
   const dragOverTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const lastDragOverRef = useRef<{
     itemId: string
-    position: "before" | "after" | "inside"
+    position: DropPosition
   } | null>(null)
   const lastItemIndexRef = useRef<number | null>(null)
   // Track when the current state was set to add persistence
@@ -440,7 +446,7 @@ function TOCContent({
 
   // Handle drag over from Item component with debounce
   const handleDragOver = useCallback(
-    (itemId: string, position: "before" | "after" | "inside") => {
+    (itemId: string, position: DropPosition) => {
       // Cancel any pending timeout
       if (dragOverTimeoutRef.current) {
         clearTimeout(dragOverTimeoutRef.current)
@@ -611,7 +617,7 @@ function TOCContent({
 
   // Handle drop from Item component
   const handleDrop = useCallback(
-    (targetItemId: string, position: "before" | "after" | "inside") => {
+    (targetItemId: string, position: DropPosition) => {
       // Mark that handleDrop has been called to prevent safety timeout from clearing state
       handleDropCalledRef.current = true
 
@@ -658,8 +664,6 @@ function TOCContent({
           if (targetItem.parentPath.length > 0) {
             targetParentId =
               targetItem.parentPath[targetItem.parentPath.length - 1]
-          } else {
-            targetParentId = null // Root level
           }
           // Find the index of the target item in its parent
           if (targetParentId === null) {
@@ -677,8 +681,6 @@ function TOCContent({
           if (targetItem.parentPath.length > 0) {
             targetParentId =
               targetItem.parentPath[targetItem.parentPath.length - 1]
-          } else {
-            targetParentId = null // Root level
           }
           // Find the index of the target item in its parent and add 1
           if (targetParentId === null) {
@@ -901,9 +903,9 @@ function TOCContent({
       aria-label={title}
       ref={containerRef}
     >
-      {(title || showSearchBox) && (
+      {title || showSearchBox ? (
         <div className="shrink-0 bg-f1-background pb-2 pl-5 pr-4 pt-5">
-          {showSearchBox && (
+          {showSearchBox ? (
             <div className="mb-4">
               <F0SearchInput
                 placeholder={searchPlaceholder ?? i18n.toc.search}
@@ -912,9 +914,9 @@ function TOCContent({
                 clearable
               />
             </div>
-          )}
+          ) : null}
 
-          {title && (
+          {title ? (
             <OneEllipsis
               lines={1}
               tag="h2"
@@ -922,9 +924,9 @@ function TOCContent({
             >
               {title}
             </OneEllipsis>
-          )}
+          ) : null}
         </div>
-      )}
+      ) : null}
       {(() => {
         const displayItems = sortable ? filteredSortableItems : filteredItems
         const firstItem = displayItems[0]
@@ -933,7 +935,7 @@ function TOCContent({
 
         const listContent = (
           <>
-            {sortable && firstItem && (
+            {sortable && firstItem ? (
               <EdgeDropZone
                 targetItemId={firstItem.id}
                 position="before"
@@ -942,31 +944,30 @@ function TOCContent({
                 onDrop={handleDrop}
                 visible={hasDrag}
               />
-            )}
+            ) : null}
             {displayItems.map((item) =>
-              renderTOCItem(
+              renderTOCItem({
                 item,
                 sortable,
-                0,
+                depth: 0,
                 activeItem,
                 collapsible,
                 hideChildrenCounter,
                 expandedItems,
-                handleToggleExpanded,
-                handleMoveItem,
-                sortableItems,
+                onToggleExpanded: handleToggleExpanded,
+                allItems: sortableItems,
                 draggedItemId,
                 dragOverItemId,
                 dragOverPosition,
-                sortable ? handleChildrenReorder : undefined,
-                null,
-                handleDragOver,
-                handleDragLeave,
-                handleDrop,
-                justDroppedItemId
-              )
+                onChildrenReorder: sortable ? handleChildrenReorder : undefined,
+                currentParentId: null,
+                onDragOver: handleDragOver,
+                onDragLeave: handleDragLeave,
+                onDrop: handleDrop,
+                justDroppedItemId,
+              })
             )}
-            {sortable && lastItem && (
+            {sortable && lastItem ? (
               <EdgeDropZone
                 targetItemId={lastItem.id}
                 position="after"
@@ -975,7 +976,7 @@ function TOCContent({
                 onDrop={handleDrop}
                 visible={hasDrag}
               />
-            )}
+            ) : null}
           </>
         )
 

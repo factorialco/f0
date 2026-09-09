@@ -89,7 +89,7 @@ describe("F0BigNumber", () => {
           numericValue: value.numericValue || { value: value.value },
           formatter: value.formatter || mockFormatter,
           formatterOptions: {
-            ...(options?.formatterOptions || {}),
+            ...options?.formatterOptions,
             ...value.formatterOptions,
           },
         }
@@ -116,11 +116,8 @@ describe("F0BigNumber", () => {
     class MockNumberFormat {
       format = mockFormat
 
-      constructor() {
-        // Constructor can be empty, format is set as instance property
-      }
-
-      static supportedLocalesOf = OriginalIntl.NumberFormat.supportedLocalesOf
+      static readonly supportedLocalesOf =
+        OriginalIntl.NumberFormat.supportedLocalesOf
     }
 
     global.Intl = {

@@ -30,9 +30,9 @@ export const ResizeHandle = ({
     [setIsResizing]
   )
 
-  const handleDoubleClick = useCallback(async () => {
+  const handleDoubleClick = useCallback(() => {
     setIsResizing(true)
-    await onReset()
+    onReset()
     setIsResizing(false)
   }, [onReset, setIsResizing])
 

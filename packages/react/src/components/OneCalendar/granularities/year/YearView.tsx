@@ -57,13 +57,7 @@ export function YearView({
         to: endOfYear(selectedDate),
       })
     } else if (mode === "range") {
-      if (!selected || !isDateRange(selected)) {
-        // Start of range
-        onSelect?.({
-          from: selectedDate,
-          to: undefined,
-        })
-      } else if (selected && selected.from && !selected.to) {
+      if (selected && isDateRange(selected) && selected.from && !selected.to) {
         // Complete the range
         if (isSameYear(selected.from, selectedDate)) {
           // If clicking the same year, select just that year
@@ -104,17 +98,16 @@ export function YearView({
     if (!isDateRange(selected)) {
       // Single date selection
       return selected.getFullYear() === year
-    } else {
-      // Range selection
-      if (selected.from && selected.to) {
-        const current = new Date(year, 6, 1)
-        return isWithinInterval(current, {
-          start: selected.from,
-          end: selected.to,
-        })
-      } else if (selected.from) {
-        return selected.from.getFullYear() === year
-      }
+    }
+    // Range selection
+    if (selected.from && selected.to) {
+      const current = new Date(year, 6, 1)
+      return isWithinInterval(current, {
+        start: selected.from,
+        end: selected.to,
+      })
+    } else if (selected.from) {
+      return selected.from.getFullYear() === year
     }
 
     return false
@@ -209,7 +202,7 @@ export function YearView({
               )}
             >
               <span>{year}</span>
-              {isCurrent && (
+              {isCurrent ? (
                 <div
                   className={cn(
                     "absolute inset-x-0 bottom-1 z-20 mx-auto h-0.5 w-1.5 rounded-full bg-f1-background-selected-bold transition-colors duration-100",
@@ -222,7 +215,7 @@ export function YearView({
                       "bg-f1-background-selected-bold"
                   )}
                 />
-              )}
+              ) : null}
             </button>
           )
         })}

@@ -80,7 +80,12 @@ export const FileVariant: Story = {
       actions: [
         {
           label: "Open",
-          onClick: () => window.open("https://example.com/contract.pdf"),
+          onClick: () =>
+            window.open(
+              "https://example.com/contract.pdf",
+              "_blank",
+              "noopener,noreferrer"
+            ),
         },
       ],
     },

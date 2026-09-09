@@ -321,19 +321,19 @@ const F0AudioPlayerCardBase = forwardRef<
             <span className="truncate text-base font-medium text-f1-foreground">
               {title}
             </span>
-            {subtitle && (
+            {subtitle ? (
               <span className="truncate text-base text-f1-foreground-secondary">
                 {subtitle}
               </span>
-            )}
+            ) : null}
           </div>
         </div>
-        {(hasDetails ||
-          controller.playbackRates.length > 0 ||
-          audioLang.languages.length > 1 ||
-          actions) && (
+        {hasDetails ||
+        controller.playbackRates.length > 0 ||
+        audioLang.languages.length > 1 ||
+        actions ? (
           <div className="flex shrink-0 items-center gap-2">
-            {hasDetails && (
+            {hasDetails ? (
               <F0Button
                 variant="outline"
                 size="sm"
@@ -341,10 +341,10 @@ const F0AudioPlayerCardBase = forwardRef<
                 onClick={() => setExpanded(!isExpanded)}
                 aria-expanded={isExpanded}
               />
-            )}
-            {(controller.playbackRates.length > 0 ||
-              audioLang.languages.length > 1 ||
-              actions) && (
+            ) : null}
+            {controller.playbackRates.length > 0 ||
+            audioLang.languages.length > 1 ||
+            actions ? (
               <PlaybackMenu
                 playbackRate={controller.playbackRate}
                 playbackRates={controller.playbackRates}
@@ -355,9 +355,9 @@ const F0AudioPlayerCardBase = forwardRef<
                 audioLanguage={audioLang.activeLocale}
                 onAudioLanguageChange={changeAudioLanguage}
               />
-            )}
+            ) : null}
           </div>
-        )}
+        ) : null}
       </div>
 
       <div className="flex w-full items-center gap-2">
@@ -376,7 +376,7 @@ const F0AudioPlayerCardBase = forwardRef<
         />
       </div>
 
-      {hasDetails && (
+      {hasDetails ? (
         <motion.div
           role="region"
           aria-label={singleTab ? singleTab.label : i18n.audioPlayer.details}
@@ -395,7 +395,7 @@ const F0AudioPlayerCardBase = forwardRef<
         >
           {/* Language picker when the content is provided in several languages;
               a single selection drives both tabs. */}
-          {languages.length > 1 && activeLocale && (
+          {languages.length > 1 && activeLocale ? (
             <div className="flex justify-end pb-2.5">
               <LanguageSelect
                 value={activeLocale}
@@ -404,9 +404,9 @@ const F0AudioPlayerCardBase = forwardRef<
                 kind={i18n.audioPlayer.language}
               />
             </div>
-          )}
+          ) : null}
           {/* One tab has nothing to switch between — show the content alone. */}
-          {!singleTab && (
+          {!singleTab ? (
             <F0SegmentedControl
               fullWidth
               ariaLabel={i18n.audioPlayer.details}
@@ -417,7 +417,7 @@ const F0AudioPlayerCardBase = forwardRef<
                 label: tab.label,
               }))}
             />
-          )}
+          ) : null}
           <div className={singleTab ? undefined : "pt-2.5"}>
             <ScrollArea
               viewportRef={viewportRef}
@@ -434,7 +434,7 @@ const F0AudioPlayerCardBase = forwardRef<
             </ScrollArea>
           </div>
         </motion.div>
-      )}
+      ) : null}
     </div>
   )
 })

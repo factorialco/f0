@@ -22,12 +22,14 @@ export const TaskHeader = ({ props }: { props: F0TimelineRowTaskProps }) => {
         >
           {title}
         </h4>
-        {description && <F0Text content={description} variant="description" />}
+        {description ? (
+          <F0Text content={description} variant="description" />
+        ) : null}
       </div>
       <div className="flex justify-end items-center gap-3 pl-9">
-        {status === "completed" && metadata && hasMetadata && (
+        {status === "completed" && metadata && hasMetadata ? (
           <Metadata items={metadata} />
-        )}
+        ) : null}
       </div>
     </div>
   )

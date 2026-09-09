@@ -41,6 +41,7 @@ import type {
   ColId,
   RowWrapperProps,
   TableColumnDefinition,
+  TableRowRef,
 } from "../types"
 import { AddRowRow } from "./AddRow"
 import { LoadMoreRow } from "./LoadMore"
@@ -126,10 +127,7 @@ const NestedRowContent = <
     NavigationFilters,
     Grouping
   >,
-  externalRef:
-    | ((element: HTMLTableRowElement | null) => void)
-    | React.RefObject<HTMLTableRowElement>
-    | null
+  externalRef: TableRowRef
 ) => {
   const internalRowRef = useRef<HTMLTableRowElement | null>(null)
 
@@ -143,7 +141,9 @@ const NestedRowContent = <
   const sentinelRef = useRef<HTMLTableCellElement | null>(null)
   const addRow = useAddRow()
 
-  const rowId = `${props.nestedRowProps?.depth ?? 0}-${"id" in props.item ? props.item.id + "-" + props.index : props.index}`
+  const itemKey =
+    "id" in props.item ? `${String(props.item.id)}-${props.index}` : props.index
+  const rowId = `${props.nestedRowProps?.depth ?? 0}-${itemKey}`
 
   const {
     expandedRowIds,
@@ -291,92 +291,92 @@ const NestedRowContent = <
         fromVisualization={props.fromVisualization}
       />
 
-      {shouldShowChildren &&
-        children.map((child, childIndex) => {
-          const childItem = child as R
-          const childHasChildren = props.source.itemsWithChildren?.(childItem)
-          const isFirstChild = childIndex === 0
-          const isLastChildInLevel = childIndex === children.length - 1
+      {shouldShowChildren
+        ? children.map((child, childIndex) => {
+            const childItem = child as R
+            const childHasChildren = props.source.itemsWithChildren?.(childItem)
+            const isFirstChild = childIndex === 0
+            const isLastChildInLevel = childIndex === children.length - 1
 
-          const depth = (props.nestedRowProps?.depth ?? 0) + 1
+            const depth = (props.nestedRowProps?.depth ?? 0) + 1
 
-          /**
-           * Get the appropriate ref for connector height calculations
-           *
-           * We only need refs for the first and last children to calculate
-           * the connector line height. Other children don't need refs.
-           *
-           * Special case: If there's a "Load More" button, the last child
-           * doesn't get the ref because the LoadMore component will be the
-           * actual last element.
-           */
-          const getChildRef = () => {
-            if (isFirstChild) {
-              return (el: HTMLTableRowElement | null) => {
-                setFirstChildRef(el)
+            /**
+             * Get the appropriate ref for connector height calculations
+             *
+             * We only need refs for the first and last children to calculate
+             * the connector line height. Other children don't need refs.
+             *
+             * Special case: If there's a "Load More" button, the last child
+             * doesn't get the ref because the LoadMore component will be the
+             * actual last element.
+             */
+            const getChildRef = () => {
+              if (isFirstChild) {
+                return (el: HTMLTableRowElement | null) => {
+                  setFirstChildRef(el)
+                }
+              } else if (
+                isLastChildInLevel &&
+                !shouldShowLoadMore &&
+                !hasAddRowActions
+              ) {
+                return (el: HTMLTableRowElement | null) => {
+                  setLastChildRef(el)
+                }
               }
-            } else if (
-              isLastChildInLevel &&
-              !shouldShowLoadMore &&
-              !hasAddRowActions
-            ) {
-              return (el: HTMLTableRowElement | null) => {
-                setLastChildRef(el)
-              }
+              return undefined
             }
-            return undefined
-          }
 
-          /**
-           * Determine if this child is the last visible element in the tree
-           *
-           * A child is the "last in tree" only if:
-           * 1. It's the last child in its current level
-           * 2. Its parent is also the last in the tree (isLastChild from props)
-           * 3. There's no LoadMore button (which would add more elements)
-           *
-           * This ensures the border "bubbles down" to the deepest last visible element
-           */
-          const childIsLastInTree =
-            isLastChildInLevel && isLastChild && !shouldShowLoadMore
+            /**
+             * Determine if this child is the last visible element in the tree
+             *
+             * A child is the "last in tree" only if:
+             * 1. It's the last child in its current level
+             * 2. Its parent is also the last in the tree (isLastChild from props)
+             * 3. There's no LoadMore button (which would add more elements)
+             *
+             * This ensures the border "bubbles down" to the deepest last visible element
+             */
+            const childIsLastInTree =
+              isLastChildInLevel && isLastChild && !shouldShowLoadMore
 
-          const RowWrapper = props.rowWrapper
+            const RowWrapper = props.rowWrapper
 
-          // Recursive case: Child has its own children
-          if (childHasChildren) {
-            const nestedChild = (
-              <NestedRow
-                {...props}
-                key={`nested-row-${props.groupIndex}-${child.id}-${props.index}-${childIndex}`}
-                index={childIndex}
-                item={childItem}
-                isSelected={isChildSelected(childItem)}
-                tableWithChildren={props.tableWithChildren}
-                ref={getChildRef()}
-                nestedRowProps={{
-                  ...props.nestedRowProps,
-                  parentHasChildren: true,
-                  depth: depth,
-                  isLastChild: childIsLastInTree,
-                }}
-                fromVisualization={props.fromVisualization}
-              />
-            )
-
-            if (RowWrapper) {
-              return (
-                <RowWrapper
+            // Recursive case: Child has its own children
+            if (childHasChildren) {
+              const nestedChild = (
+                <NestedRow
+                  {...props}
                   key={`nested-row-${props.groupIndex}-${child.id}-${props.index}-${childIndex}`}
-                  item={childItem}
                   index={childIndex}
-                >
-                  {nestedChild}
-                </RowWrapper>
+                  item={childItem}
+                  isSelected={isChildSelected(childItem)}
+                  tableWithChildren={props.tableWithChildren}
+                  ref={getChildRef()}
+                  nestedRowProps={{
+                    ...props.nestedRowProps,
+                    parentHasChildren: true,
+                    depth: depth,
+                    isLastChild: childIsLastInTree,
+                  }}
+                  fromVisualization={props.fromVisualization}
+                />
               )
-            }
 
-            return nestedChild
-          } else {
+              if (RowWrapper) {
+                return (
+                  <RowWrapper
+                    key={`nested-row-${props.groupIndex}-${child.id}-${props.index}-${childIndex}`}
+                    item={childItem}
+                    index={childIndex}
+                  >
+                    {nestedChild}
+                  </RowWrapper>
+                )
+              }
+
+              return nestedChild
+            }
             // Base case: Leaf node with no children
             // For leaf nodes, border is shown only if it's the last visible element in the tree
             const leafShouldHideBorder =
@@ -417,10 +417,10 @@ const NestedRowContent = <
             }
 
             return leafChild
-          }
-        })}
+          })
+        : null}
 
-      {shouldShowLoading && (
+      {shouldShowLoading ? (
         <RowLoading
           {...props}
           rowRef={internalRowRef}
@@ -432,9 +432,9 @@ const NestedRowContent = <
           ref={setLastChildRef}
           shouldHideBorder={!isLastChild}
         />
-      )}
+      ) : null}
 
-      {shouldShowLoadMore && !isLoading && (
+      {shouldShowLoadMore && !isLoading ? (
         <LoadMoreRow
           {...props}
           disableHover={true}
@@ -448,9 +448,9 @@ const NestedRowContent = <
             isLastChild,
           }}
         />
-      )}
+      ) : null}
 
-      {hasAddRowActions && (
+      {hasAddRowActions ? (
         <AddRowRow
           {...props}
           disableHover={true}
@@ -469,11 +469,11 @@ const NestedRowContent = <
             nestedVariant: childrenType,
           }}
         />
-      )}
+      ) : null}
 
       {/* Invisible sentinel row used by useStickyParentRow to detect when
           all children have been scrolled past and the parent should unstick. */}
-      {open && (
+      {open ? (
         <tr aria-hidden="true" className="h-0 border-none p-0">
           <td
             ref={sentinelRef}
@@ -485,7 +485,7 @@ const NestedRowContent = <
             className="h-0 border-none p-0"
           />
         </tr>
-      )}
+      ) : null}
     </>
   )
 }
@@ -508,10 +508,7 @@ const NestedRowComponentInner = <
     NavigationFilters,
     Grouping
   >,
-  ref:
-    | ((element: HTMLTableRowElement | null) => void)
-    | React.RefObject<HTMLTableRowElement>
-    | null
+  ref: TableRowRef
 ) => {
   // Provider is mounted at Table level when tableWithChildren is true, so we
   // never wrap here. This keeps expansion state and fetched data in a single
@@ -537,10 +534,7 @@ const NestedRowContentWithRef = forwardRef(NestedRowContent) as <
     NavigationFilters,
     Grouping
   > & {
-    ref?:
-      | ((element: HTMLTableRowElement | null) => void)
-      | React.RefObject<HTMLTableRowElement>
-      | null
+    ref?: TableRowRef
   }
 ) => ReturnType<typeof NestedRowContent>
 

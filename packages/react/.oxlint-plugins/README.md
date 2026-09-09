@@ -13,11 +13,13 @@ f0 has two enforcement mechanisms and they are not interchangeable. Pick by
 | Inline styles                    | 244              | `.scripts/check-inline-styles.ts` — AST scan + shrink-only baseline |
 | `dangerouslySetInnerHTML` misuse | 1–2              | a rule in here, shipped as `error`                                  |
 
-A lint rule has no baseline mechanism: it is on or off for the whole codebase.
-With hundreds of pre-existing violations that leaves only "ship it as `off`" or
-"add hundreds of suppressions", which is why the inline-styles gate is a script.
-With one or two violations you just fix them and turn the rule on, and a rule is
-the better tool — it runs on every file, needs no debt file, and cannot drift.
+A lint rule is on or off for the whole codebase. With hundreds of pre-existing
+violations that leaves "ship it as `off`", "add hundreds of suppressions", or
+the RATCHET group in `.oxlintrc.json`: the rule runs as `"warn"`, `pnpm lint`
+hides warnings (`--quiet`), and `pnpm check:lint-debt` compares them per file
+against `.scripts/lint-debt.json`, a baseline that may only shrink. It runs on
+staged files in the pre-commit hook and over the whole tree in CI. With one or
+two violations you just fix them and turn the rule on as `error`.
 
 So: **a handful of violations → write a rule here. Hundreds → write a ratchet
 script.** If a rule you want lands in between, that is the signal to fix the
@@ -25,11 +27,18 @@ code first.
 
 ## External JS plugins
 
-`.oxlintrc.json` also loads two published ESLint plugins the same way:
+`.oxlintrc.json` also loads three published ESLint plugins the same way:
 `eslint-plugin-sonarjs` (the `recommended` set, minus rules listed as debt in
-the config) and `eslint-plugin-import` under the alias `import-js`, for the
-rules oxlint has no native version of. The same editor caveat below applies to
-them. Rules that need type information run without it under oxlint's JS plugin
+the config), `eslint-plugin-import` under the alias `import-js`, and
+`eslint-plugin-react` under the alias `react-js`, for the rules oxlint has no
+native version of. The aliases are needed because oxlint reserves the names
+`import` and `react` for its own plugins. The same editor caveat below applies
+to them.
+
+`f0-react/` is a local wrapper around `eslint-plugin-react`'s
+`jsx-no-leaked-render`. The upstream rule reports `&&` in attribute values as
+well as in children; the wrapper only reports children, where a leaked `0` or
+`""` actually renders. It is tested in `__tests__/f0-react.test.ts`. Rules that need type information run without it under oxlint's JS plugin
 bridge; the type-aware rules that do work come from oxlint's own `typescript`
 plugin with `--type-aware` (see the `lint` script).
 

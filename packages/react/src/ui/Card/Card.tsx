@@ -50,11 +50,11 @@ const Card = React.forwardRef<
         }
       }}
     >
-      {href && !disabled && (
+      {href && !disabled ? (
         <Link href={href} className="absolute inset-0 block" tabIndex={0}>
           <span className="sr-only">{actions.view}</span>
         </Link>
-      )}
+      ) : null}
       {children}
     </div>
   )

@@ -155,7 +155,7 @@ const OverflowList = function OverflowList<T>({
         marginLeft: gap < 0 ? `${-gap}px` : undefined,
       }}
     >
-      {!itemsWidth && (
+      {!itemsWidth ? (
         <div
           ref={measurementContainerRef}
           aria-hidden="true"
@@ -180,7 +180,7 @@ const OverflowList = function OverflowList<T>({
             </div>
           ))}
         </div>
-      )}
+      ) : null}
 
       <div
         className={cn(
@@ -199,24 +199,25 @@ const OverflowList = function OverflowList<T>({
         }}
         data-testid="overflow-visible-container"
       >
-        {isInitialized &&
-          visibleItems.map((item, index) => (
-            <div
-              key={`item-${index}`}
-              className="transition-all duration-150"
-              data-testid="overflow-visible-item"
-              style={{
-                marginLeft: gap < 0 ? `${gap}px` : undefined,
-              }}
-            >
-              {renderListItem(item, index, true)}
-            </div>
-          ))}
+        {isInitialized
+          ? visibleItems.map((item, index) => (
+              <div
+                key={`item-${index}`}
+                className="transition-all duration-150"
+                data-testid="overflow-visible-item"
+                style={{
+                  marginLeft: gap < 0 ? `${gap}px` : undefined,
+                }}
+              >
+                {renderListItem(item, index, true)}
+              </div>
+            ))
+          : null}
 
         {placeholderElements}
       </div>
 
-      {showOverflow && (
+      {showOverflow ? (
         <>
           {overflowIndicatorWithPopover ? (
             <Popover open={isOpen} onOpenChange={handleOpenChange}>
@@ -252,7 +253,7 @@ const OverflowList = function OverflowList<T>({
             </div>
           )}
         </>
-      )}
+      ) : null}
     </div>
   )
 }

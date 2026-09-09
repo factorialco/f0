@@ -136,14 +136,14 @@ export function FileAttachment({
         <span className="truncate text-sm font-medium text-f1-foreground">
           {fileName}
         </span>
-        {subtitleText && (
+        {subtitleText ? (
           <span className="text-sm text-f1-foreground-secondary">
             {subtitleText}
           </span>
-        )}
+        ) : null}
       </div>
 
-      {!disabled && (
+      {!disabled ? (
         <F0Button
           variant="outline"
           size="sm"
@@ -152,7 +152,7 @@ export function FileAttachment({
           icon={Cross}
           hideLabel
         />
-      )}
+      ) : null}
     </div>
   )
 }

@@ -60,6 +60,13 @@ type EntitiesListError =
  */
 type EntitiesListRow = { __key: string } & Record<string, unknown>
 
+const patchRow = (
+  rows: EntitiesListRow[],
+  key: string,
+  partial: Partial<EntitiesListItem>
+): EntitiesListRow[] =>
+  rows.map((r) => (r.__key === key ? { ...r, ...partial } : r))
+
 interface EntitiesListFieldRendererProps {
   field: ResolvedField<F0EntitiesListField>
   formField: ControllerRenderProps
@@ -749,12 +756,7 @@ export function EntitiesListFieldRenderer({
             action.onClick({
               item,
               index,
-              update: (partial) =>
-                commit(
-                  rows.map((r) =>
-                    r.__key === row.__key ? { ...r, ...partial } : r
-                  )
-                ),
+              update: (partial) => commit(patchRow(rows, row.__key, partial)),
               // Route through the confirm + persist path so custom actions that
               // call remove() also confirm and hit onRemove.
               remove: () => void performRemove(row),
@@ -881,10 +883,7 @@ export function EntitiesListFieldRenderer({
           action.onClick({
             item,
             index,
-            update: (partial) =>
-              commit(
-                rows.map((r) => (r.__key === rowKey ? { ...r, ...partial } : r))
-              ),
+            update: (partial) => commit(patchRow(rows, rowKey, partial)),
             // Route through the confirm + persist path so custom actions that
             // call remove() also confirm and hit onRemove.
             remove: () => void performRemove(rows[index]),
@@ -906,11 +905,11 @@ export function EntitiesListFieldRenderer({
           FieldRenderer.tsx. */}
       <label className="text-base font-medium leading-normal text-f1-foreground-secondary">
         {field.label}
-        {isRequired && (
+        {isRequired ? (
           <span className="ml-0.5 text-f1-foreground-critical">*</span>
-        )}
+        ) : null}
       </label>
-      {addConfig && <AddButton config={addConfig} />}
+      {addConfig ? <AddButton config={addConfig} /> : null}
     </div>
   )
 
@@ -955,11 +954,11 @@ export function EntitiesListFieldRenderer({
           viewLabel={translations.view}
         />
 
-        {rootError && (
+        {rootError ? (
           <p className="text-sm font-medium text-f1-foreground-critical">
             {rootError}
           </p>
-        )}
+        ) : null}
       </div>
     )
   }
@@ -1000,11 +999,11 @@ export function EntitiesListFieldRenderer({
         disabled={isDisabled || removingKeys.size > 0}
       />
 
-      {rootError && (
+      {rootError ? (
         <p className="text-sm font-medium text-f1-foreground-critical">
           {rootError}
         </p>
-      )}
+      ) : null}
     </div>
   )
 }

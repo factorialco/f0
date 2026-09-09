@@ -1,5 +1,5 @@
 // eslint-disable-next-line no-useless-escape
-const COMPLETE_NUMBER_FORMAT = /^(-?)([0-9]+)?(?:([\.,])([0-9]+)?)?$/
+const COMPLETE_NUMBER_FORMAT = /^(-?)(\d+)?(?:([\.,])(\d+)?)?$/
 
 interface ExtractedNumber {
   formattedValue: string

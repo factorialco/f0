@@ -204,6 +204,7 @@ export function useExpandState<T>({
       // frontier from the result without waiting on React commits. Errors
       // are swallowed per-node so one failing branch does not abort the
       // cascade.
+      // oxlint-disable-next-line no-await-in-loop -- each level expands in parallel; the next frontier comes from its children
       const results = await Promise.all(
         frontier.map((id) =>
           lazyTreeRef.current

@@ -134,11 +134,11 @@ export const CountrySelect = ({
           data-testid="phone-input-country-trigger"
         >
           <CountryFlag country={value} />
-          {value && (
+          {value ? (
             <span className="whitespace-nowrap text-f1-foreground">
               {dialCodeFor(value)}
             </span>
-          )}
+          ) : null}
           <span
             className={cn(
               "flex origin-center items-center transition-transform duration-200",

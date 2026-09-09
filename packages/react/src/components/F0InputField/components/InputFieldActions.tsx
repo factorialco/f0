@@ -11,6 +11,7 @@ import {
 } from "@/icons/app"
 import { copyToClipboard } from "@/lib/clipboard"
 import { useI18n } from "@/lib/providers/i18n"
+import type { TranslationKey } from "@/lib/providers/i18n/i18n-provider-defaults"
 import { useTouchScreen } from "@/lib/useTouchScreen"
 import { cn } from "@/lib/utils"
 import type { InputFieldValueActions } from "../types"
@@ -25,6 +26,98 @@ type ResolvedAction = {
   positive?: boolean
   onClick: () => void
 }
+
+/** A flag that falls back to `false` on its own after `ms`. */
+const useTransientFlag = (ms: number) => {
+  const [raised, setRaised] = useState(false)
+
+  useEffect(() => {
+    if (!raised) {
+      return
+    }
+    const timer = setTimeout(() => setRaised(false), ms)
+    return () => clearTimeout(timer)
+  }, [raised, ms])
+
+  return [raised, setRaised] as const
+}
+
+type BuildActionsInput = Pick<
+  InputFieldValueActions,
+  "copyable" | "masked" | "onEdit" | "onRequestChange" | "confirmed"
+> & {
+  revealed: boolean
+  copied: boolean
+  /** Resolves a translation key against the field's label. */
+  name: (key: TranslationKey) => string
+  onToggleReveal: () => void
+  onCopy: () => void
+}
+
+/**
+ * The pencil, or the tick that replaces it while a commit is confirming.
+ *
+ * The control that caused the confirmation carries it, rather than a tick
+ * appearing beside a pencil. It stays pressable throughout: fixing a typo you
+ * spotted the instant it saved should not mean waiting out an animation.
+ */
+const editAction = (
+  { confirmed, name }: BuildActionsInput,
+  onClick: () => void
+): ResolvedAction => ({
+  key: "edit",
+  icon: confirmed ? CheckCircle : Pencil,
+  label: name(confirmed ? "inputs.actions.saved" : "inputs.actions.edit"),
+  positive: confirmed,
+  onClick,
+})
+
+const visibilityAction = ({
+  revealed,
+  name,
+  onToggleReveal,
+}: BuildActionsInput): ResolvedAction => ({
+  key: "visibility",
+  icon: revealed ? EyeVisible : EyeInvisible,
+  label: name(revealed ? "inputs.private.hide" : "inputs.private.show"),
+  onClick: onToggleReveal,
+})
+
+const requestChangeAction = (
+  { name }: BuildActionsInput,
+  onClick: () => void
+): ResolvedAction => ({
+  key: "request-change",
+  icon: Comment,
+  label: name("inputs.actions.requestChange"),
+  onClick,
+})
+
+const copyAction = ({
+  copied,
+  name,
+  onCopy,
+}: BuildActionsInput): ResolvedAction => ({
+  key: "copy",
+  icon: copied ? CheckCircle : LayersFront,
+  label: name(copied ? "inputs.actions.copied" : "inputs.actions.copy"),
+  positive: copied,
+  onClick: onCopy,
+})
+
+/**
+ * The fixed order: the act you are most likely to want sits closest to the
+ * value, and copy, the one you reach for without reading, sits at the edge.
+ */
+const buildActions = (input: BuildActionsInput): ResolvedAction[] =>
+  [
+    input.onEdit ? editAction(input, input.onEdit) : null,
+    input.masked ? visibilityAction(input) : null,
+    input.onRequestChange
+      ? requestChangeAction(input, input.onRequestChange)
+      : null,
+    input.copyable ? copyAction(input) : null,
+  ].filter((action): action is ResolvedAction => action !== null)
 
 export type InputFieldActionsProps = Required<
   Pick<InputFieldValueActions, "actionsVisibility">
@@ -64,24 +157,8 @@ export const InputFieldActions = ({
 }: InputFieldActionsProps) => {
   const i18n = useI18n()
   const isTouchScreen = useTouchScreen()
-  const [copied, setCopied] = useState(false)
-  const [copyFailed, setCopyFailed] = useState(false)
-
-  useEffect(() => {
-    if (!copied) {
-      return
-    }
-    const timer = setTimeout(() => setCopied(false), COPY_FEEDBACK_MS)
-    return () => clearTimeout(timer)
-  }, [copied])
-
-  useEffect(() => {
-    if (!copyFailed) {
-      return
-    }
-    const timer = setTimeout(() => setCopyFailed(false), COPY_FEEDBACK_MS)
-    return () => clearTimeout(timer)
-  }, [copyFailed])
+  const [copied, setCopied] = useTransientFlag(COPY_FEEDBACK_MS)
+  const [copyFailed, setCopyFailed] = useTransientFlag(COPY_FEEDBACK_MS)
 
   useEffect(() => {
     if (onEdit && onRequestChange) {
@@ -92,73 +169,23 @@ export const InputFieldActions = ({
   }, [!!onEdit, !!onRequestChange]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleCopy = async () => {
-    if (await copyToClipboard(value ?? "")) {
-      setCopyFailed(false)
-      setCopied(true)
-    } else {
-      setCopied(false)
-      setCopyFailed(true)
-    }
+    const ok = await copyToClipboard(value ?? "")
+    setCopied(ok)
+    setCopyFailed(!ok)
   }
 
-  // Fixed order: the act you are most likely to want sits closest to the
-  // value, and copy — the one you reach for without reading — sits at the edge.
-  const actions: ResolvedAction[] = []
-
-  if (onEdit) {
-    actions.push(
-      confirmed
-        ? {
-            // The control that caused the confirmation carries it, rather than
-            // a tick appearing beside a pencil. It stays pressable throughout:
-            // fixing a typo you spotted the instant it saved should not mean
-            // waiting out an animation.
-            key: "edit",
-            icon: CheckCircle,
-            label: i18n.t("inputs.actions.saved", { label }),
-            positive: true,
-            onClick: onEdit,
-          }
-        : {
-            key: "edit",
-            icon: Pencil,
-            label: i18n.t("inputs.actions.edit", { label }),
-            onClick: onEdit,
-          }
-    )
-  }
-
-  if (masked) {
-    actions.push({
-      key: "visibility",
-      icon: revealed ? EyeVisible : EyeInvisible,
-      label: revealed
-        ? i18n.t("inputs.private.hide", { label })
-        : i18n.t("inputs.private.show", { label }),
-      onClick: () => onRevealedChange(!revealed),
-    })
-  }
-
-  if (onRequestChange) {
-    actions.push({
-      key: "request-change",
-      icon: Comment,
-      label: i18n.t("inputs.actions.requestChange", { label }),
-      onClick: onRequestChange,
-    })
-  }
-
-  if (copyable) {
-    actions.push({
-      key: "copy",
-      icon: copied ? CheckCircle : LayersFront,
-      label: copied
-        ? i18n.inputs.actions.copied
-        : i18n.t("inputs.actions.copy", { label }),
-      positive: copied,
-      onClick: () => void handleCopy(),
-    })
-  }
+  const actions = buildActions({
+    copyable,
+    masked,
+    onEdit,
+    onRequestChange,
+    confirmed,
+    revealed,
+    copied,
+    name: (key) => i18n.t(key, { label }),
+    onToggleReveal: () => onRevealedChange(!revealed),
+    onCopy: () => void handleCopy(),
+  })
 
   const confirming = !!confirmed || copied
 

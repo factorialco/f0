@@ -126,11 +126,11 @@ function NumberRow({
       >
         {children}
       </div>
-      {extraContent && (
+      {extraContent ? (
         <span className="shrink-0 text-f1-foreground-secondary">
           {extraContent}
         </span>
-      )}
+      ) : null}
       {trailingAction}
     </div>
   )
@@ -377,7 +377,10 @@ export const NumberInputInternal = forwardRef<
     // Otherwise (grouping off, or focused): reconcile the field only when
     // `value` changed externally, so in-progress typing isn't clobbered.
     const extractedData = extractNumber(fieldValue, { maxDecimals })
-    if (inputValue === undefined || inputValue == extractedData?.value) {
+    if (
+      inputValue === undefined ||
+      inputValue === (extractedData?.value ?? null)
+    ) {
       return
     }
     setFieldValue(

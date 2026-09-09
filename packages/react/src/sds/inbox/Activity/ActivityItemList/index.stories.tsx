@@ -38,12 +38,12 @@ export default meta
 
 type Story = StoryObj<typeof ActivityItemList>
 
-const ITEMS = new Array(10).fill(null).map((_, index) => ({
+const ITEMS = Array.from({ length: 10 }, (_, index) => ({
   id: index.toString(),
   title: `Activity Item ${index + 1}`,
   description:
     "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.".replace(
-      /[\s]/g,
+      /\s/g,
       ""
     ),
   category: (() => {

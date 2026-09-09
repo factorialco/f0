@@ -90,26 +90,26 @@ export function F0CanvasCard({
       onClick={handleCardClick}
     >
       <div className="flex w-full min-w-0 flex-row items-center gap-3">
-        {avatar?.type === "module" && (
+        {avatar?.type === "module" ? (
           <F0AvatarModule module={avatar.module} size="md" />
-        )}
-        {avatar?.type === "file" && (
+        ) : null}
+        {avatar?.type === "file" ? (
           <F0AvatarFile file={avatar.file} size="lg" />
-        )}
-        {avatar?.type === "icon" && (
+        ) : null}
+        {avatar?.type === "icon" ? (
           <F0AvatarIcon icon={avatar.icon} size="md" />
-        )}
+        ) : null}
         <div className="flex min-w-0 flex-1 flex-col">
           <OneEllipsis className="text-lg font-semibold text-f1-foreground">
             {title}
           </OneEllipsis>
-          {description && (
+          {description ? (
             <OneEllipsis className="text-base text-f1-foreground-secondary">
               {description}
             </OneEllipsis>
-          )}
+          ) : null}
         </div>
-        {action.type === "open" && action.showButton !== false && (
+        {action.type === "open" && action.showButton !== false ? (
           <F0Button
             variant="outline"
             size="md"
@@ -120,8 +120,8 @@ export function F0CanvasCard({
             }
             onClick={isActive ? action.onClose : action.onOpen}
           />
-        )}
-        {action.type === "custom" && (
+        ) : null}
+        {action.type === "custom" ? (
           <F0Button
             variant="outline"
             size="md"
@@ -130,7 +130,7 @@ export function F0CanvasCard({
             hideLabel={action.hideLabel}
             onClick={action.onClick}
           />
-        )}
+        ) : null}
       </div>
       {children}
     </div>

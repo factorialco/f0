@@ -647,7 +647,9 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
           <div key={ri} className="relative">
             {/* Drop line before this row. The first row also gets one so an
                 item can be reordered to the very top (afterRowIdx -1). */}
-            {canDrag && <RowGapDropZone active={!!isNewRowTarget(ri - 1)} />}
+            {canDrag ? (
+              <RowGapDropZone active={!!isNewRowTarget(ri - 1)} />
+            ) : null}
             <div
               data-dashboard-row=""
               className={cn(
@@ -713,7 +715,7 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
               })}
             </div>
             {/* Row resize handle — only in edit mode */}
-            {canDrag && (
+            {canDrag ? (
               <div
                 className="group/resize absolute -bottom-3.5 mx-auto flex h-3 w-full items-center justify-center hover:cursor-ns-resize"
                 onMouseDown={(e) => {
@@ -748,20 +750,20 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
               >
                 <div className="h-1 w-16 rounded-full bg-transparent transition-colors group-hover/resize:bg-f1-foreground-tertiary" />
               </div>
-            )}
+            ) : null}
           </div>
         )
       })}
 
       {/* Drop line after the last row — reorder to the very bottom */}
-      {canDrag && (
+      {canDrag ? (
         <RowGapDropZone active={!!isNewRowTarget(displayRows.length - 1)} />
-      )}
+      ) : null}
 
       {/* Floating ghost that tracks the cursor during a pointer drag. Its
           position is written imperatively in the pointermove handler so the
           grid doesn't re-render on every mouse move. */}
-      {dragId && (
+      {dragId ? (
         <div
           ref={ghostRef}
           className="pointer-events-none fixed left-0 top-0 z-50 max-w-xs truncate rounded-lg border border-solid border-f1-border-secondary bg-f1-background px-3 py-2 text-sm font-medium text-f1-foreground shadow-lg"
@@ -769,7 +771,7 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
         >
           {itemMap.get(dragId)?.title ?? ""}
         </div>
-      )}
+      ) : null}
     </div>
   )
 }
@@ -861,7 +863,7 @@ function RowItem({
 
   return (
     <>
-      {showIndicatorBefore && <DropIndicator />}
+      {showIndicatorBefore ? <DropIndicator /> : null}
       <div
         ref={itemRef}
         data-card-id={id}
@@ -870,7 +872,7 @@ function RowItem({
           isDragging && "opacity-40 scale-[0.97]"
         )}
       >
-        {canDrag && (
+        {canDrag ? (
           // Pointer-based drag (not native HTML5 DnD): a `pointerdown` on the
           // grip starts a document-tracked gesture. Native drag was unusable
           // here — its ghost never tracked the cursor over a chart canvas, and
@@ -884,10 +886,10 @@ function RowItem({
           >
             <F0Icon icon={Handle} size="xs" />
           </div>
-        )}
+        ) : null}
         {children}
       </div>
-      {showIndicatorAfter && <DropIndicator />}
+      {showIndicatorAfter ? <DropIndicator /> : null}
     </>
   )
 }

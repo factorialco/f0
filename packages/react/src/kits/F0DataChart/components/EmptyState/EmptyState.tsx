@@ -31,11 +31,11 @@ const _DataChartEmptyState = forwardRef<
     >
       <div className="relative flex flex-col items-center gap-1 px-6 text-center">
         <p className="text-lg font-medium text-f1-foreground">{content}</p>
-        {description && (
+        {description ? (
           <p className="text-md max-w-sm text-f1-foreground-secondary">
             {description}
           </p>
-        )}
+        ) : null}
       </div>
     </div>
   )

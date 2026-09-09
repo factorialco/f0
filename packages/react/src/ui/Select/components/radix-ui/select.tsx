@@ -26,8 +26,8 @@ import { RemoveScroll } from "react-remove-scroll"
 
 type Direction = "ltr" | "rtl"
 
-const OPEN_KEYS = [" ", "Enter", "ArrowUp", "ArrowDown"]
-const SELECTION_KEYS = [" ", "Enter"]
+const OPEN_KEYS = new Set([" ", "Enter", "ArrowUp", "ArrowDown"])
+const SELECTION_KEYS = new Set([" ", "Enter"])
 const SELECTED_ITEM_FALLBACK_DELAY = 50
 
 /* -------------------------------------------------------------------------------------------------
@@ -104,7 +104,7 @@ type SelectProps<T extends string = string> = SelectSharedProps &
         value?: T
         defaultValue?: T
         onValueChange?(value: T): void
-        multiple?: false | never
+        multiple?: false
       }
     | {
         value?: T[]
@@ -374,7 +374,7 @@ const SelectTrigger = React.forwardRef<
           if (isTypingAhead && event.key === " ") {
             return
           }
-          if (OPEN_KEYS.includes(event.key)) {
+          if (OPEN_KEYS.has(event.key)) {
             handleOpen()
             event.preventDefault()
           }
@@ -741,7 +741,6 @@ const SelectContentImpl = React.forwardRef<
 
       if (!context.multiple) {
         focusFirst([selectedItem, content])
-        return
       }
     },
     [focusFirst, selectedItem, content, context.multiple]
@@ -763,9 +762,11 @@ const SelectContentImpl = React.forwardRef<
     if (isPositioned && !hasFocusedOnOpenRef.current) {
       let cancelled = false
       let fallbackTimeout: ReturnType<typeof setTimeout> | undefined
-      const selectedValues = (
-        Array.isArray(context.value) ? context.value : [context.value]
-      ).filter((value): value is string => value !== undefined)
+      const selectedValues = new Set(
+        (Array.isArray(context.value) ? context.value : [context.value]).filter(
+          (value): value is string => value !== undefined
+        )
+      )
       const isPlaceholderValue =
         context.value === undefined || context.value === ""
       const selectedItemMatchesCurrentValue =
@@ -775,7 +776,7 @@ const SelectContentImpl = React.forwardRef<
             getItems().some(
               (item) =>
                 item.ref.current === selectedItem &&
-                selectedValues.includes(item.value)
+                selectedValues.has(item.value)
             )))
 
       const timeout = setTimeout(() => {
@@ -1420,7 +1421,9 @@ const SelectPopperPosition = React.forwardRef<
         // Ensure border-box for floating-ui calculations
         boxSizing: "border-box",
         ...popperProps.style,
-        // re-namespace exposed content custom properties
+        // re-namespace exposed content custom properties. The spread lets the
+        // custom properties past the CSSProperties type.
+        // oxlint-disable-next-line unicorn/no-useless-spread
         ...{
           "--radix-select-content-transform-origin":
             "var(--radix-popper-transform-origin)",
@@ -1751,7 +1754,7 @@ const SelectItem = React.forwardRef<SelectItemElement, SelectItemProps>(
               if (isTypingAhead && event.key === " ") {
                 return
               }
-              if (SELECTION_KEYS.includes(event.key)) {
+              if (SELECTION_KEYS.has(event.key)) {
                 handleSelect()
               }
               // prevent page scroll if using the space key to select an item
@@ -2209,7 +2212,7 @@ SelectBubbleInput.displayName = BUBBLE_INPUT_NAME
 
 function shouldShowPlaceholder(value?: string[] | string) {
   if (Array.isArray(value)) {
-    return value.length === 0 || value.every((v) => v === "")
+    return value.every((v) => v === "")
   }
   return value === "" || value === undefined
 }

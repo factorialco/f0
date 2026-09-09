@@ -233,7 +233,7 @@ export function useDataCollectionItemNavigation<
     if (!enabled || !restorePersistedState) {
       return
     }
-    return subscribeToDataCollectionStorageChanges(collectionId, async () => {
+    const reseedFromStorage = async () => {
       try {
         // NOTE: must await (not .then) — the default noop handler returns a
         // plain object typed as a Promise.
@@ -260,6 +260,9 @@ export function useDataCollectionItemNavigation<
       } catch {
         // Unreadable persisted state — keep the current state.
       }
+    }
+    return subscribeToDataCollectionStorageChanges(collectionId, () => {
+      void reseedFromStorage()
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [collectionId, enabled, restorePersistedState])

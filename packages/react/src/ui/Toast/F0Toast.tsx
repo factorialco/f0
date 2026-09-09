@@ -221,7 +221,7 @@ const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
           )}
 
           <div className="flex flex-1 flex-col gap-1">
-            {title && (
+            {title ? (
               <p
                 className={titleVariants({
                   variant,
@@ -230,17 +230,17 @@ const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
               >
                 {title}
               </p>
-            )}
-            {description && (
+            ) : null}
+            {description ? (
               <p className="line-clamp-3 text-base text-f1-foreground-inverse-secondary">
                 {description}
               </p>
-            )}
+            ) : null}
           </div>
 
           {/* Action(s) — inline on the trailing edge (never below the text).
               Link sits to the LEFT of the primary button (button is trailing). */}
-          {!isLoading && hasActions && (
+          {!isLoading && hasActions ? (
             <div className="dark flex flex-shrink-0 flex-row flex-wrap items-center gap-3">
               {linkActions.map((linkAction) => (
                 <div
@@ -263,13 +263,13 @@ const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
                 />
               ))}
             </div>
-          )}
+          ) : null}
 
           {/* Close — the manual dismiss. Hidden when the action is the only
               control AND the toast auto-dismisses (so the ✕ isn't adjacent to the
               action). But a toast that WON'T auto-dismiss (persistent) always
               keeps the ✕, even with an action, so it's never a dead-end. */}
-          {onClose && !isLoading && (!hasActions || !willAutoDismiss) && (
+          {onClose && !isLoading && (!hasActions || !willAutoDismiss) ? (
             <div className="dark flex-shrink-0">
               <F0Button
                 variant="outline"
@@ -280,11 +280,11 @@ const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
                 label={i18n.actions.close}
               />
             </div>
-          )}
+          ) : null}
         </div>
 
         {/* Progress Bar */}
-        {!isLoading && duration && duration > 0 && (
+        {!isLoading && duration && duration > 0 ? (
           <div className="absolute bottom-0 left-0 right-0 h-[3px] w-full overflow-hidden rounded-b-lg">
             <div
               className={cn("h-full w-full", progressBarColor)}
@@ -294,7 +294,7 @@ const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
               }}
             />
           </div>
-        )}
+        ) : null}
       </div>
     )
   }

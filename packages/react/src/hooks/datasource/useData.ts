@@ -84,7 +84,7 @@ export interface UseDataOptions<
  */
 export const GROUP_ID_SYMBOL = Symbol("groupId")
 export type WithGroupId<RecordType> = RecordType & {
-  [GROUP_ID_SYMBOL]: unknown | undefined
+  [GROUP_ID_SYMBOL]: unknown
 }
 
 type GroupIdCache<R extends RecordType> = {
@@ -635,7 +635,7 @@ export function useData<
     currentPage?: number
     appendMode?: boolean
     cursor?: string | null
-    search?: string | undefined
+    search?: string
   }
 
   const fetchDataAndUpdate = useCallback(
@@ -708,8 +708,8 @@ export function useData<
           // Use appropriate pagination type based on dataAdapter configuration
           return dataAdapter.fetchData({
             ...baseFetchOptions,
-            pagination: {
-              ...(dataAdapter.paginationType === "pages"
+            pagination:
+              dataAdapter.paginationType === "pages"
                 ? {
                     currentPage,
                     perPage: perPageValue,
@@ -719,8 +719,7 @@ export function useData<
                       cursor,
                       perPage: perPageValue,
                     }
-                  : {}),
-            },
+                  : {},
           }) as PromiseOrObservable<ResultType>
         }
 

@@ -1354,26 +1354,24 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       })}
 
       {/* Root error message */}
-      {rootError && (
+      {rootError ? (
         <p className="mt-4 text-base font-medium text-f1-foreground-critical">
           {rootError.message}
         </p>
-      )}
+      ) : null}
 
       {/* Default submit button */}
-      {!isActionBar &&
-        showSubmitButton &&
-        (!showSubmitWhenDirty || isDirty) && (
-          <div className="mt-4 flex justify-end">
-            <F0Button
-              type="submit"
-              label={submitLabel}
-              icon={submitIcon}
-              loading={isSubmitting}
-              disabled={hasErrors || isFormLoading || hasPendingUploads}
-            />
-          </div>
-        )}
+      {!isActionBar && showSubmitButton && (!showSubmitWhenDirty || isDirty) ? (
+        <div className="mt-4 flex justify-end">
+          <F0Button
+            type="submit"
+            label={submitLabel}
+            icon={submitIcon}
+            loading={isSubmitting}
+            disabled={hasErrors || isFormLoading || hasPendingUploads}
+          />
+        </div>
+      ) : null}
     </form>
   )
 
@@ -1405,7 +1403,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
           </div>
         )}
 
-        {!hideActionBar && (
+        {!hideActionBar ? (
           <FormActionBar
             ref={actionBarRef}
             isActionBar={isActionBar}
@@ -1427,7 +1425,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
             goToPreviousError={goToPreviousError}
             goToNextError={goToNextError}
           />
-        )}
+        ) : null}
       </FormProvider>
     </F0FormContext.Provider>
   )

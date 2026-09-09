@@ -96,6 +96,7 @@ export type DialogDefinitionInternal =
   | (Omit<DialogDefinition, "modal" | "module"> & {
       variant: "notification"
       type: DialogNotificationType
+      dismissable?: boolean
     })
 
 // =============================================================================
@@ -145,6 +146,12 @@ export type NotificationDialogBaseOptions = Optional<
 > & {
   msg: string
   type?: DialogNotificationType
+  /**
+   * Renders a dismiss (X) control in the dialog's top-right corner. Lets a notification offer a
+   * way out without spending a button on "Cancel".
+   * @default false
+   */
+  dismissable?: boolean
 }
 
 export type NotificationDialogOptions = NotificationDialogBaseOptions & {

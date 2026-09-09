@@ -37,8 +37,10 @@ function Harness({
             <FormControl>
               <input aria-label="Field" {...field} />
             </FormControl>
-            {description && <FormDescription>{description}</FormDescription>}
-            {message && <FormMessage>{message}</FormMessage>}
+            {description ? (
+              <FormDescription>{description}</FormDescription>
+            ) : null}
+            {message ? <FormMessage>{message}</FormMessage> : null}
           </FormItem>
         )}
       />

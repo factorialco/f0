@@ -76,9 +76,11 @@ const _Chip = ({
   const closeDescriptionId = useId()
   const content = (
     <>
-      {avatar && <F0Avatar avatar={avatar} size="xs" />}
+      {avatar ? <F0Avatar avatar={avatar} size="xs" /> : null}
       <div className="flex items-center gap-0.5">
-        {icon && <F0Icon icon={icon} size="sm" className="text-f1-icon" />}
+        {icon ? (
+          <F0Icon icon={icon} size="sm" className="text-f1-icon" />
+        ) : null}
         <span
           id={onClose ? closeDescriptionId : undefined}
           className={deactivated ? "text-f1-foreground/[0.61]" : undefined}
@@ -113,7 +115,7 @@ const _Chip = ({
       ) : (
         content
       )}
-      {onClose && (
+      {onClose ? (
         <button
           type="button"
           onClick={(e) => {
@@ -132,7 +134,7 @@ const _Chip = ({
         >
           <F0Icon icon={CrossedCircle} size="sm" />
         </button>
-      )}
+      ) : null}
     </div>
   )
 }

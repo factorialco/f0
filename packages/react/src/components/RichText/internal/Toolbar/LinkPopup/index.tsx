@@ -40,9 +40,7 @@ export const LinkPopup = ({ editor, disabled }: LinkPopupProps) => {
   const checkIfUrlIsValid = (url: string) => {
     const trimmedUrl = url.trim()
     const isValidUrl =
-      /^(https?:\/\/)([\w-]+(\.[\w-]+)+)(:[0-9]{1,5})?(\/.*)?$/i.test(
-        trimmedUrl
-      )
+      /^(https?:\/\/)([\w-]+(\.[\w-]+)+)(:\d{1,5})?(\/.*)?$/i.test(trimmedUrl)
     return isValidUrl
   }
 
@@ -110,7 +108,7 @@ export const LinkPopup = ({ editor, disabled }: LinkPopupProps) => {
           style={{ zIndex: 9999 }}
         >
           <AnimatePresence>
-            {openLinkPopover && (
+            {openLinkPopover ? (
               <motion.div
                 initial={{ opacity: 0, y: 10, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -179,14 +177,14 @@ export const LinkPopup = ({ editor, disabled }: LinkPopupProps) => {
                       }}
                     />
 
-                    {editor.isActive("link") && (
+                    {editor.isActive("link") ? (
                       <F0Icon
                         size="md"
                         icon={CrossedCircle}
                         className="cursor-pointer text-f1-foreground-tertiary hover:text-f1-foreground-secondary"
                         onClick={handleDelete}
                       />
-                    )}
+                    ) : null}
 
                     <F0Button
                       variant="outline"
@@ -208,7 +206,7 @@ export const LinkPopup = ({ editor, disabled }: LinkPopupProps) => {
                   ></F0Button>
                 </div>
               </motion.div>
-            )}
+            ) : null}
           </AnimatePresence>
         </Popover.Content>
       </Popover.Portal>

@@ -190,7 +190,7 @@ export function Controls({
         containerRef={containerRef}
       />
 
-      {captionsInBar && (
+      {captionsInBar ? (
         // Filled glyph when captions are on, line glyph when off; `aria-pressed`
         // conveys the state to assistive tech (the label stays stable).
         <F0Button
@@ -202,9 +202,9 @@ export function Controls({
           aria-pressed={captionsOn}
           onClick={onToggleCaptions}
         />
-      )}
+      ) : null}
 
-      {audioDescriptionInBar && (
+      {audioDescriptionInBar ? (
         // Filled "AD" badge when on, line badge when off — the same on/off
         // language as captions, legible over video. `hideLabel` gives the
         // captions-style tooltip from the label; `aria-pressed` conveys state.
@@ -221,9 +221,9 @@ export function Controls({
           aria-pressed={audioDescriptionOn}
           onClick={onToggleAudioDescription}
         />
-      )}
+      ) : null}
 
-      {showSettings && (
+      {showSettings ? (
         <SettingsMenu
           containerRef={containerRef}
           audioLanguages={audioLanguages}
@@ -240,9 +240,9 @@ export function Controls({
           onAudioDescriptionLanguageChange={onAudioDescriptionLanguageChange}
           onAudioDescriptionOff={onAudioDescriptionOff}
         />
-      )}
+      ) : null}
 
-      {download && (
+      {download ? (
         <F0Button
           variant="ghost"
           size="sm"
@@ -251,7 +251,7 @@ export function Controls({
           label={download.label}
           onClick={download.onClick}
         />
-      )}
+      ) : null}
 
       <F0Button
         variant="ghost"

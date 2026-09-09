@@ -128,24 +128,29 @@ export function ReadOnlyCellContent<R extends RecordType>({
       )}
     >
       <span className="flex min-w-0 items-center gap-1.5">
-        {leadingIcon && (
+        {leadingIcon ? (
           <span className="flex h-5 w-5 shrink-0 items-center justify-center">
             <F0Icon icon={leadingIcon} color={iconColor} />
           </span>
-        )}
-        {unitsBefore && unit}
+        ) : null}
+        {unitsBefore ? unit : null}
         <span className="min-w-0 truncate">
           {formattedDate ??
             multiSelectLabel ??
-            renderProperty(item, editableColumn, "editableTable", i18n)}
+            renderProperty({
+              item,
+              property: editableColumn,
+              visualization: "editableTable",
+              i18n,
+            })}
         </span>
-        {!unitsBefore && unit}
+        {!unitsBefore ? unit : null}
       </span>
-      {isSelect && (
+      {isSelect ? (
         <span className="flex shrink-0 items-center">
           <Arrow open={false} size="sm" />
         </span>
-      )}
+      ) : null}
     </div>
   )
 }

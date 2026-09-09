@@ -29,7 +29,7 @@ const BreadcrumbItem = forwardRef<
   PropsWithChildren<BreadcrumbItemProps>
 >(({ item, isLast, isOnly = false, isFirst = false, children }, ref) => (
   <ShadBreadcrumbItem key={getBreadcrumbKey(item)} ref={ref}>
-    {!isFirst && <BreadcrumbSeparator />}
+    {!isFirst ? <BreadcrumbSeparator /> : null}
     <BreadcrumbContent
       item={item}
       isLast={isLast}
@@ -65,11 +65,11 @@ const BreadcrumbContent = forwardRef<HTMLDivElement, BreadcrumbItemProps>(
         transition={{ duration: 0.15 }}
       >
         {!isLoading &&
-          "module" in item &&
-          item.module &&
-          (isOnly || isFirst) && (
-            <F0AvatarModule module={item.module} size={isOnly ? "md" : "xs"} />
-          )}
+        "module" in item &&
+        item.module &&
+        (isOnly || isFirst) ? (
+          <F0AvatarModule module={item.module} size={isOnly ? "md" : "xs"} />
+        ) : null}
         <span className="truncate">
           {!isLoading && "label" in item ? item.label : ""}
         </span>
@@ -82,22 +82,20 @@ const BreadcrumbContent = forwardRef<HTMLDivElement, BreadcrumbItemProps>(
       select: "type" in item &&
         item.type === "select" &&
         (item.options || item.source) && (
-          <>
-            <BreadcrumbSelect
-              label={item.label}
-              hideLabel
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              source={item.source as any}
-              options={item.options}
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              mapOptions={item.mapOptions as any}
-              defaultItem={item.defaultItem}
-              clearable={false}
-              onChange={item.onChange}
-              value={item.value}
-              showSearchBox={item.searchbox}
-            />
-          </>
+          <BreadcrumbSelect
+            label={item.label}
+            hideLabel
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            source={item.source as any}
+            options={item.options}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            mapOptions={item.mapOptions as any}
+            defaultItem={item.defaultItem}
+            clearable={false}
+            onChange={item.onChange}
+            value={item.value}
+            showSearchBox={item.searchbox}
+          />
         ),
       "collection-select": "type" in item &&
         item.type === "collection-select" && (

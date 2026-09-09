@@ -61,12 +61,12 @@ const _F0Link = forwardRef<HTMLAnchorElement, F0LinkProps>(function Link(
   return (
     <Action ref={ref} {...actionProps} variant={variant}>
       <span>{children}</span>
-      {external && (
+      {external ? (
         <>
           <F0Icon icon={ExternalLink} size="sm" aria-hidden={true} />
           <span className="sr-only"> (opens in new tab)</span>
         </>
-      )}
+      ) : null}
     </Action>
   )
 })

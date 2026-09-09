@@ -107,11 +107,11 @@ const ChatProbe = ({
         data-open={String(open)}
       />
       <textarea ref={inputRef} aria-label="Chat question" />
-      {onCapture && (
+      {onCapture ? (
         <button type="button" onClick={() => onCapture(pendingQuote)}>
           Capture pending quote
         </button>
-      )}
+      ) : null}
     </>
   )
 }

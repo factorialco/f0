@@ -54,7 +54,7 @@ export function SidebarFooter({
           </button>
         </Dropdown>
       </div>
-      {showActivityButton && (
+      {showActivityButton ? (
         <Tooltip label={i18n.notifications} shortcut={activityButtonShortcut}>
           <div className="relative">
             <F0Button
@@ -64,14 +64,14 @@ export function SidebarFooter({
               variant="ghost"
               hideLabel
             />
-            {hasActivityUpdates && (
+            {hasActivityUpdates ? (
               <div className="absolute -right-1 -top-1 rounded-full bg-f1-background">
                 <Badge type="highlight" size="sm" icon={CircleIcon} />
               </div>
-            )}
+            ) : null}
           </div>
         </Tooltip>
-      )}
+      ) : null}
     </div>
   )
 }

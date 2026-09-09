@@ -129,32 +129,33 @@ const F0MapClusterBase = forwardRef<HTMLDivElement, F0MapClusterProps>(
           ))}
           {/* Overflow counter: f0's avatar-list "+N" circle (secondary surface,
               secondary foreground, fully rounded), in the last slot. */}
-          {hasCounter &&
-            (() => {
-              const [cx, cy] = positions[heads.length] ?? [0, 0]
-              return (
-                <span
-                  className={cn(
-                    "absolute left-0 top-0 flex h-6 min-w-6 items-center justify-center overflow-hidden rounded-full px-1.5",
-                    "border border-solid border-f1-border-secondary",
-                    // White-90 base with the translucent hover layer on top.
-                    "text-f1-foreground-secondary text-sm font-medium leading-none"
-                  )}
-                  style={{
-                    zIndex: MAX_AVATARS_WITH_COUNTER,
-                    backgroundColor: "hsl(var(--white-90))",
-                    transform: `translate(${cx * spread}px, ${cy * spread}px) translate(-50%, -50%) scale(${scale})`,
-                    transition: `transform 240ms ${EASE}`,
-                  }}
-                >
+          {hasCounter
+            ? (() => {
+                const [cx, cy] = positions[heads.length] ?? [0, 0]
+                return (
                   <span
-                    aria-hidden
-                    className="absolute inset-0 bg-f1-background-hover"
-                  />
-                  <span className="relative">{overflowLabel}</span>
-                </span>
-              )
-            })()}
+                    className={cn(
+                      "absolute left-0 top-0 flex h-6 min-w-6 items-center justify-center overflow-hidden rounded-full px-1.5",
+                      "border border-solid border-f1-border-secondary",
+                      // White-90 base with the translucent hover layer on top.
+                      "text-f1-foreground-secondary text-sm font-medium leading-none"
+                    )}
+                    style={{
+                      zIndex: MAX_AVATARS_WITH_COUNTER,
+                      backgroundColor: "hsl(var(--white-90))",
+                      transform: `translate(${cx * spread}px, ${cy * spread}px) translate(-50%, -50%) scale(${scale})`,
+                      transition: `transform 240ms ${EASE}`,
+                    }}
+                  >
+                    <span
+                      aria-hidden
+                      className="absolute inset-0 bg-f1-background-hover"
+                    />
+                    <span className="relative">{overflowLabel}</span>
+                  </span>
+                )
+              })()
+            : null}
         </div>
       </DataTestIdWrapper>
     )

@@ -396,9 +396,9 @@ const F0RichTextEditorComponent = forwardRef<
             "border-f1-border-critical-bold bg-f1-background-critical bg-opacity-10"
         )}
       >
-        {isFullscreen && (
+        {isFullscreen ? (
           <div className="pointer-events-none fixed inset-0 z-40" />
-        )}
+        ) : null}
 
         <Head
           fullScreenMode={fullScreenMode}
@@ -447,7 +447,7 @@ const F0RichTextEditorComponent = forwardRef<
           <AnimatePresence>
             {/* The floating toolbar disappears the moment an enhance kicks off
                 (disableButtons covers loading, review and error). */}
-            {isFullscreen && isToolbarOpen && !enhance.disableButtons && (
+            {isFullscreen && isToolbarOpen && !enhance.disableButtons ? (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -477,7 +477,7 @@ const F0RichTextEditorComponent = forwardRef<
                       icon={Cross}
                     />
                     <ToolbarDivider />
-                    {enhanceConfig && (
+                    {enhanceConfig ? (
                       <>
                         <EnhanceActivator
                           enhance={enhance}
@@ -487,7 +487,7 @@ const F0RichTextEditorComponent = forwardRef<
                         />
                         <ToolbarDivider />
                       </>
-                    )}
+                    ) : null}
                     <Toolbar
                       editor={editor}
                       isFullscreen={isFullscreen}
@@ -497,13 +497,13 @@ const F0RichTextEditorComponent = forwardRef<
                   </div>
                 </div>
               </motion.div>
-            )}
+            ) : null}
           </AnimatePresence>
 
           {/* In review the floating toolbar disappears entirely and the
               compact accept/discard menu takes its place. */}
           <AnimatePresence>
-            {isFullscreen && isToolbarOpen && enhance.isAcceptChangesOpen && (
+            {isFullscreen && isToolbarOpen && enhance.isAcceptChangesOpen ? (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -528,7 +528,7 @@ const F0RichTextEditorComponent = forwardRef<
                   />
                 </div>
               </motion.div>
-            )}
+            ) : null}
           </AnimatePresence>
         </div>
 
@@ -540,7 +540,7 @@ const F0RichTextEditorComponent = forwardRef<
           )}
         >
           <AnimatePresence>
-            {enhance.error && !enhance.isLoading && (
+            {enhance.error && !enhance.isLoading ? (
               <motion.div
                 key="accordion"
                 initial={{ height: 0, opacity: 0, y: -20 }}
@@ -554,11 +554,11 @@ const F0RichTextEditorComponent = forwardRef<
                   onDismiss={enhance.clearError}
                 />
               </motion.div>
-            )}
+            ) : null}
           </AnimatePresence>
 
           <AnimatePresence initial={false}>
-            {dictationError && (
+            {dictationError ? (
               <motion.div
                 key="dictation-error"
                 role="alert"
@@ -574,7 +574,7 @@ const F0RichTextEditorComponent = forwardRef<
                   dismissLabel={i18n.actions.close}
                 />
               </motion.div>
-            )}
+            ) : null}
           </AnimatePresence>
 
           <FileList

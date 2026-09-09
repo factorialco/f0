@@ -658,6 +658,109 @@ describe("F0Chat", () => {
     )
   })
 
+  it("keeps an oversized message in the composer and shows the limit", async () => {
+    const sendMessage = vi.fn()
+    renderChat(makeRuntime({ sendMessage, maxMessageCharacters: 10 }))
+    const input = screen.getByPlaceholderText(/write something here/i)
+
+    await userEvent.type(input, "12345678901")
+    await userEvent.keyboard("{Enter}")
+
+    expect(sendMessage).not.toHaveBeenCalled()
+    expect(input).toHaveValue("12345678901")
+    const error = screen.getByText("Messages can be up to 10 characters")
+    expect(error).toBeInTheDocument()
+    expect(input).toHaveAttribute("aria-invalid", "true")
+    expect(input).toHaveAttribute("aria-describedby", error.closest("[id]")?.id)
+
+    await userEvent.keyboard("{Meta>}z{/Meta}")
+    await waitFor(() => expect(input).toHaveValue(""))
+    expect(
+      screen.queryByText("Messages can be up to 10 characters")
+    ).not.toBeInTheDocument()
+    expect(input).not.toHaveAttribute("aria-invalid")
+    expect(input).not.toHaveAttribute("aria-describedby")
+
+    await userEvent.type(input, "1234567890")
+
+    expect(
+      screen.queryByText("Messages can be up to 10 characters")
+    ).not.toBeInTheDocument()
+    expect(input).not.toHaveAttribute("aria-invalid")
+    expect(input).not.toHaveAttribute("aria-describedby")
+    await userEvent.keyboard("{Enter}")
+    expect(sendMessage).toHaveBeenCalledWith(
+      expect.objectContaining({ body: "1234567890" })
+    )
+  })
+
+  it("keeps an oversized edit active and saves it after correction", async () => {
+    const editMessage = vi.fn()
+    renderChat(
+      makeRuntime({
+        editMessage,
+        editWindowMs: 60_000,
+        maxMessageCharacters: 10,
+      })
+    )
+    const menus = screen.getAllByRole("button", { name: /message actions/i })
+    await userEvent.click(menus[1])
+    await userEvent.click(screen.getByRole("button", { name: /^Edit$/i }))
+    const input = screen.getByPlaceholderText(/write something here/i)
+
+    await userEvent.type(input, " too long")
+    await userEvent.click(screen.getByRole("button", { name: /^Save$/i }))
+
+    expect(editMessage).not.toHaveBeenCalled()
+    expect(input).toHaveValue("Hi back too long")
+    expect(screen.getByText(/editing/i)).toBeInTheDocument()
+    expect(
+      screen.getByText("Messages can be up to 10 characters")
+    ).toBeInTheDocument()
+
+    await userEvent.clear(input)
+    await userEvent.type(input, "Updated")
+
+    expect(
+      screen.queryByText("Messages can be up to 10 characters")
+    ).not.toBeInTheDocument()
+    await userEvent.click(screen.getByRole("button", { name: /^Save$/i }))
+    expect(editMessage).toHaveBeenCalledWith(
+      "m2",
+      expect.objectContaining({ body: "Updated" })
+    )
+    expect(screen.queryByText(/editing/i)).not.toBeInTheDocument()
+  })
+
+  it("clears length validation when an oversized edit is cancelled", async () => {
+    renderChat(
+      makeRuntime({
+        editMessage: vi.fn(),
+        editWindowMs: 60_000,
+        maxMessageCharacters: 10,
+      })
+    )
+    const menus = screen.getAllByRole("button", { name: /message actions/i })
+    await userEvent.click(menus[1])
+    await userEvent.click(screen.getByRole("button", { name: /^Edit$/i }))
+    const input = screen.getByPlaceholderText(/write something here/i)
+
+    await userEvent.type(input, " too long")
+    await userEvent.click(screen.getByRole("button", { name: /^Save$/i }))
+    expect(
+      screen.getByText("Messages can be up to 10 characters")
+    ).toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole("button", { name: /cancel edit/i }))
+
+    expect(input).toHaveValue("")
+    expect(screen.queryByText(/editing/i)).not.toBeInTheDocument()
+    expect(
+      screen.queryByText("Messages can be up to 10 characters")
+    ).not.toBeInTheDocument()
+    expect(input).not.toHaveAttribute("aria-invalid")
+  })
+
   it("selects an emoji with Enter before sending the completed message", async () => {
     const sendMessage = vi.fn()
     renderChat(makeRuntime({ sendMessage }))

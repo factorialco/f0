@@ -201,6 +201,7 @@ export const DialogsAlike = ({ items }: DialogsAlikeProps) => {
               onClose={item.onCloseDialog}
               primaryAction={item.actions.primary[0]}
               secondaryAction={item.actions.secondary}
+              dismissable={item.dismissable}
             />
           ) : item.variant === "drawer" ? (
             <DrawerInternal

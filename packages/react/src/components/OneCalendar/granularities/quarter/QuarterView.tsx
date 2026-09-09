@@ -63,12 +63,7 @@ export const QuarterView = ({
     if (mode === "single") {
       onSelect?.(quarterRange.from)
     } else if (mode === "range") {
-      if (!selected || !isDateRange(selected)) {
-        onSelect?.({
-          from: quarterRange.from,
-          to: undefined,
-        })
-      } else if (selected && selected.from && !selected.to) {
+      if (selected && isDateRange(selected) && selected.from && !selected.to) {
         const fromDate = selected.from
         const fromQuarter = getQuarterFromMonth(fromDate.getMonth())
         const fromYear = fromDate.getFullYear()
@@ -122,23 +117,22 @@ export const QuarterView = ({
       const selectedMonth = selected.getMonth()
       const selectedQuarter = getQuarterFromMonth(selectedMonth)
       return selectedQuarter === quarter && selected.getFullYear() === year
-    } else {
-      // Range selection
-      const from = selected.from
-      const to = selected.to
+    }
+    // Range selection
+    const from = selected.from
+    const to = selected.to
 
-      if (from && to) {
-        // Check if any part of the quarter is within the selected range
-        return (
-          isWithinInterval(quarterRange.from, { start: from, end: to }) ||
-          isWithinInterval(quarterRange.to, { start: from, end: to }) ||
-          (isBefore(quarterRange.from, from) && isAfter(quarterRange.to, to))
-        )
-      } else if (from) {
-        // Check if the from date is in this quarter
-        const fromQuarter = getQuarterFromMonth(from.getMonth())
-        return fromQuarter === quarter && from.getFullYear() === year
-      }
+    if (from && to) {
+      // Check if any part of the quarter is within the selected range
+      return (
+        isWithinInterval(quarterRange.from, { start: from, end: to }) ||
+        isWithinInterval(quarterRange.to, { start: from, end: to }) ||
+        (isBefore(quarterRange.from, from) && isAfter(quarterRange.to, to))
+      )
+    } else if (from) {
+      // Check if the from date is in this quarter
+      const fromQuarter = getQuarterFromMonth(from.getMonth())
+      return fromQuarter === quarter && from.getFullYear() === year
     }
 
     return false
@@ -239,14 +233,14 @@ export const QuarterView = ({
                         "rounded-none bg-f1-background-selected after:opacity-0 after:transition-none first:rounded-l-md last:rounded-r-md hover:bg-f1-background-selected [&>span]:text-f1-foreground-selected"
                     )}
                   >
-                    {isStart && (
+                    {isStart ? (
                       <div className="absolute inset-y-0 right-0 z-0 w-1/2 bg-f1-background-selected" />
-                    )}
-                    {isEnd && (
+                    ) : null}
+                    {isEnd ? (
                       <div className="absolute inset-y-0 left-0 z-0 w-1/2 bg-f1-background-selected" />
-                    )}
+                    ) : null}
                     <span className="z-10 font-medium">Q{quarter}</span>
-                    {isCurrent && (
+                    {isCurrent ? (
                       <div
                         className={cn(
                           "absolute inset-x-0 bottom-1 z-20 mx-auto h-0.5 w-1.5 rounded-full bg-f1-background-selected-bold transition-colors duration-100",
@@ -259,7 +253,7 @@ export const QuarterView = ({
                             "bg-f1-background-selected-bold"
                         )}
                       />
-                    )}
+                    ) : null}
                   </button>
                 )
               })}

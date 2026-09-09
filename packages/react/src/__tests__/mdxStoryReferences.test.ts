@@ -132,7 +132,7 @@ function buildSymbolTable(src: string): Map<string, Symbol> {
   }
 
   for (const m of src.matchAll(
-    /import\s+(?:([A-Za-z0-9_$]+)\s*,?\s*)?(?:\{([^}]*)\})?\s*from\s*["']([^"']+)["']/g
+    /import\s+(?:([A-Za-z0-9_$]+)[\s,]*)?(?:\{([^}]*)\})?\s*from\s*["']([^"']+)["']/g
   )) {
     const [, def, named, mod] = m
     if (def) {

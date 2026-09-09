@@ -87,14 +87,14 @@ const F0AudioPlayerBase = forwardRef<HTMLDivElement, F0AudioPlayerProps>(
         />
 
         {/* Inline audio-language picker when several dubbed tracks are given. */}
-        {audioLang.languages.length > 1 && audioLang.activeLocale && (
+        {audioLang.languages.length > 1 && audioLang.activeLocale ? (
           <LanguageSelect
             value={audioLang.activeLocale}
             options={audioLang.languages}
             onChange={changeAudioLanguage}
             kind={i18n.audioPlayer.audio}
           />
-        )}
+        ) : null}
       </div>
     )
   }

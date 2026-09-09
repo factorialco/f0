@@ -43,12 +43,12 @@ const F0AvatarFile = forwardRef<ElementRef<typeof Avatar>, F0AvatarFileProps>(
       () =>
         badge ? (
           <>
-            {badge.type === "module" && (
+            {badge.type === "module" ? (
               <F0AvatarModule module={badge.module} size={moduleAvatarSize} />
-            )}
-            {badge.type !== "module" && (
+            ) : null}
+            {badge.type !== "module" ? (
               <Badge type={badge.type} icon={badge.icon} size={badgeSize} />
-            )}
+            ) : null}
           </>
         ) : null,
       [badge, badgeSize, moduleAvatarSize]
@@ -77,7 +77,7 @@ const F0AvatarFile = forwardRef<ElementRef<typeof Avatar>, F0AvatarFileProps>(
           >
             {fileType}
           </AvatarFallback>
-          {badge && (
+          {badge ? (
             <div className="absolute -bottom-0.5 -right-0.5">
               {badge.tooltip ? (
                 <Tooltip description={badge.tooltip}>
@@ -87,7 +87,7 @@ const F0AvatarFile = forwardRef<ElementRef<typeof Avatar>, F0AvatarFileProps>(
                 badgeContent
               )}
             </div>
-          )}
+          ) : null}
         </Avatar>
       </DataTestIdWrapper>
     )

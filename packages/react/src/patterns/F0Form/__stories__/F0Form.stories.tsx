@@ -22,6 +22,8 @@ import type {
 } from "../fields/types"
 import type { RenderCustomFieldSelectConfig } from "../types"
 
+const DISABLED_STORY_SAMPLE_VALUE = "sample-value"
+
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 const meta: Meta = {
@@ -1408,7 +1410,7 @@ export const AllFieldTypesDisabled: Story = {
       defaultValues: {
         textField: "Sample text value",
         emailField: "user@example.com",
-        passwordField: "secretpassword",
+        passwordField: DISABLED_STORY_SAMPLE_VALUE,
         numberField: 42,
         durationField: 3661,
         textareaField:
@@ -2503,9 +2505,9 @@ export const CustomField: Story = {
               </option>
             ))}
           </select>
-          {error && (
+          {error ? (
             <span className="text-sm text-f1-foreground-critical">{error}</span>
-          )}
+          ) : null}
         </div>
       )
     }
@@ -2554,9 +2556,9 @@ export const CustomField: Story = {
               </button>
             ))}
           </div>
-          {error && (
+          {error ? (
             <span className="text-sm text-f1-foreground-critical">{error}</span>
-          )}
+          ) : null}
         </div>
       )
     }
@@ -3537,9 +3539,9 @@ export const FormInDialog: Story = {
     return (
       <div className="flex flex-col items-start gap-3">
         <F0Button label="Add Team Member" icon={Plus} onClick={handleAdd} />
-        {lastResult && (
+        {lastResult ? (
           <p className="text-sm text-f1-foreground-secondary">{lastResult}</p>
-        )}
+        ) : null}
       </div>
     )
   },

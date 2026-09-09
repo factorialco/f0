@@ -45,14 +45,14 @@ export const Searcher = ({
         value={search}
         onChange={(e) => onSearch(e.target.value)}
       />
-      {search && (
+      {search ? (
         <F0Icon
           icon={CrossedCircle}
           size="md"
           onClick={() => onSearch("")}
           className="cursor-pointer text-f1-icon-secondary"
         />
-      )}
+      ) : null}
     </div>
   )
 }

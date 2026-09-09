@@ -530,20 +530,35 @@ function buildBorderRadiusResolver(
  *  1. The main (solid) bar showing `value`
  *  2. A stacked "target" bar showing `target - value` with a linear gradient fill
  */
-function buildSeriesEntries(
-  series: F0DataChartBarSeries,
-  index: number,
-  isVertical: boolean,
-  showLabels: boolean,
-  stacked: boolean,
-  highlightOverachievement: boolean,
-  labelColor: string,
-  stackGapColor: string,
-  labelFontSize: number,
-  resolveBorderRadius: BorderRadiusResolver | undefined,
-  labelLayout?: echarts.BarSeriesOption["labelLayout"],
+type BuildSeriesEntriesOptions = {
+  series: F0DataChartBarSeries
+  index: number
+  isVertical: boolean
+  showLabels: boolean
+  stacked: boolean
+  highlightOverachievement: boolean
+  labelColor: string
+  stackGapColor: string
+  labelFontSize: number
+  resolveBorderRadius: BorderRadiusResolver | undefined
+  labelLayout?: echarts.BarSeriesOption["labelLayout"]
   valueFormatter?: (value: number) => string
-): echarts.BarSeriesOption[] {
+}
+
+function buildSeriesEntries({
+  series,
+  index,
+  isVertical,
+  showLabels,
+  stacked,
+  highlightOverachievement,
+  labelColor,
+  stackGapColor,
+  labelFontSize,
+  resolveBorderRadius,
+  labelLayout,
+  valueFormatter,
+}: BuildSeriesEntriesOptions): echarts.BarSeriesOption[] {
   const color = resolveColor(series, index)
   const hasTargetData = hasTargets(series)
   // When stacked, all series share "stacked"; when using targets, each series
@@ -862,13 +877,21 @@ function stackTotals(
  * still reads as the full total. The tooltip's total behaves the same way, so
  * the two stay consistent with each other.
  */
-function buildStackTotalSeries(
-  totals: number[],
-  labelColor: string,
-  labelFontSize: number,
-  containerWidth: number,
+type BuildStackTotalSeriesOptions = {
+  totals: number[]
+  labelColor: string
+  labelFontSize: number
+  containerWidth: number
   valueFormatter?: (value: number) => string
-): echarts.BarSeriesOption {
+}
+
+function buildStackTotalSeries({
+  totals,
+  labelColor,
+  labelFontSize,
+  containerWidth,
+  valueFormatter,
+}: BuildStackTotalSeriesOptions): echarts.BarSeriesOption {
   return {
     name: STACK_TOTAL_SERIES_NAME,
     type: "bar",
@@ -1116,20 +1139,21 @@ export function useBarChartOptions(
 
     // Build all ECharts series (including target ghost bars)
     const echartsSeries = series.flatMap((s, i) =>
-      buildSeriesEntries(
-        s,
-        i,
+      buildSeriesEntries({
+        series: s,
+        index: i,
         isVertical,
         showLabels,
         stacked,
         highlightOverachievement,
-        theme.colors.foregroundSecondary,
-        theme.colors.containerBackground ?? theme.colors.background,
-        resolvedLabelFontSize,
+        labelColor: theme.colors.foregroundSecondary,
+        stackGapColor:
+          theme.colors.containerBackground ?? theme.colors.background,
+        labelFontSize: resolvedLabelFontSize,
         resolveBorderRadius,
         labelLayout,
-        valueFormatter
-      )
+        valueFormatter,
+      })
     )
 
     // A horizontal stacked bar reads as one quantity split into parts, so the
@@ -1142,13 +1166,13 @@ export function useBarChartOptions(
         : undefined
     if (totals) {
       echartsSeries.push(
-        buildStackTotalSeries(
+        buildStackTotalSeries({
           totals,
-          theme.colors.foregroundSecondary,
-          resolvedLabelFontSize,
+          labelColor: theme.colors.foregroundSecondary,
+          labelFontSize: resolvedLabelFontSize,
           containerWidth,
-          valueFormatter
-        )
+          valueFormatter,
+        })
       )
     }
 
@@ -1259,7 +1283,9 @@ export function useBarChartOptions(
           0,
           currentSeries.data.length - ARIA_MAX_VALUES_PER_SERIES
         )
-        return `${currentSeries.name}: ${values}${remainingValues > 0 ? `; ${remainingValues} more values` : ""}.`
+        const remainingSuffix =
+          remainingValues > 0 ? `; ${remainingValues} more values` : ""
+        return `${currentSeries.name}: ${values}${remainingSuffix}.`
       })
     if (series.length > ARIA_MAX_SERIES) {
       ariaDescriptions.push(`${series.length - ARIA_MAX_SERIES} more series.`)

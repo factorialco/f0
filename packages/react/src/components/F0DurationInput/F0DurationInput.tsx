@@ -335,7 +335,7 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
           disabled && "cursor-not-allowed"
         )}
       >
-        {showLabel && (
+        {showLabel ? (
           <Label
             label={label}
             required={required}
@@ -343,7 +343,7 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
             className="min-w-0 flex-1"
             disabled={disabled}
           />
-        )}
+        ) : null}
         <div
           id={id}
           data-testid="input-field-wrapper"
@@ -381,14 +381,14 @@ export const F0DurationInput = forwardRef<HTMLDivElement, F0DurationInputProps>(
 
             return (
               <Fragment key={unit}>
-                {index > 0 && (
+                {index > 0 ? (
                   <F0Icon
                     icon={Bullet}
                     size="xs"
                     color="default"
                     aria-hidden="true"
                   />
-                )}
+                ) : null}
                 <input
                   ref={setInputRef(unit)}
                   id={`${baseId}-${unit}`}

@@ -96,8 +96,8 @@ export const RecordingWaveform = ({
     const id = setInterval(() => {
       analyser.getByteTimeDomainData(data)
       let sum = 0
-      for (let i = 0; i < data.length; i++) {
-        const deviation = (data[i] - 128) / 128
+      for (const sample of data) {
+        const deviation = (sample - 128) / 128
         sum += deviation * deviation
       }
       const rms = Math.sqrt(sum / data.length)

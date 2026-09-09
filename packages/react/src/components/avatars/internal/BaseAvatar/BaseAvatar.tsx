@@ -58,7 +58,7 @@ export const BaseAvatar = forwardRef<HTMLDivElement, BaseAvatarProps>(
     ): size is AvatarSize => avatarSizes.includes(size as AvatarSize)
 
     // Check if size is a valid avatar size
-    let mappedSize: AvatarSize = DEFAULT_SIZE
+    let mappedSize: AvatarSize
     if (size && !isSize(size)) {
       console.warn(
         `The avatar size: ${size} is deprecated. Use ${sizesMapping[size]} instead.`
@@ -83,12 +83,12 @@ export const BaseAvatar = forwardRef<HTMLDivElement, BaseAvatarProps>(
       () =>
         badge ? (
           <>
-            {badge.type === "module" && (
+            {badge.type === "module" ? (
               <F0AvatarModule module={badge.module} size={moduleAvatarSize} />
-            )}
-            {badge.type !== "module" && (
+            ) : null}
+            {badge.type !== "module" ? (
               <Badge type={badge.type} icon={badge.icon} size={badgeSize} />
-            )}
+            ) : null}
           </>
         ) : null,
       [badge, badgeSize, moduleAvatarSize]
@@ -156,9 +156,9 @@ export const BaseAvatar = forwardRef<HTMLDivElement, BaseAvatarProps>(
           </AvatarComponent>
         </div>
 
-        {badge && (
+        {badge ? (
           <div className="absolute -bottom-0.5 -right-0.5">{badgeContent}</div>
-        )}
+        ) : null}
       </div>
     )
 

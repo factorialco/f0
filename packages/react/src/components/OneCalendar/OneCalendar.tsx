@@ -20,8 +20,8 @@ import {
 } from "./granularities"
 import {
   CalendarMode,
+  CalendarSelection,
   CalendarView,
-  DateRange,
   DateRangeString,
   WeekStartDay,
   WeekStartsOn,
@@ -33,9 +33,9 @@ const privateProps = ["compact"] as const
 interface OneCalendarInternalProps {
   mode: CalendarMode
   view: CalendarView
-  onSelect?: (date: Date | DateRange | null) => void
+  onSelect?: (date: CalendarSelection) => void
   defaultMonth?: Date
-  defaultSelected?: Date | DateRange | null
+  defaultSelected?: CalendarSelection
   showNavigation?: boolean
   showInput?: boolean
   minDate?: Date
@@ -108,9 +108,8 @@ const OneCalendarInternal = ({
 
   const [viewDate, setViewDate] = useState<Date>(effectiveDefaultMonth)
 
-  const [selected, setSelectedInternal] = useState<Date | DateRange | null>(
-    defaultSelected
-  )
+  const [selected, setSelectedInternal] =
+    useState<CalendarSelection>(defaultSelected)
 
   const [motionDirection, setMotionDirection] = useState(1)
 
@@ -123,7 +122,7 @@ const OneCalendarInternal = ({
   }, [view, effectiveWeekStartsOn, periods])
 
   const setSelected = useCallback(
-    (date: Date | DateRange | null) => {
+    (date: CalendarSelection) => {
       setSelectedInternal(date)
 
       // Set the input value
@@ -209,7 +208,7 @@ const OneCalendarInternal = ({
   }
 
   // Handle selection of a date
-  const handleSelect = (date: Date | DateRange | null) => {
+  const handleSelect = (date: CalendarSelection) => {
     if (!date) {
       return
     }
@@ -327,7 +326,7 @@ const OneCalendarInternal = ({
 
   return (
     <div className="flex flex-col">
-      {showInput && !granularity.hideDateInput && (
+      {showInput && !granularity.hideDateInput ? (
         <div className="mb-2 flex gap-2">
           <Input
             label={i18n.date.from}
@@ -347,7 +346,7 @@ const OneCalendarInternal = ({
             }}
             onChange={(value) => setInputValue({ ...inputValue, from: value })}
           />
-          {mode === "range" && (
+          {mode === "range" ? (
             <Input
               label={i18n.date.to}
               hideLabel
@@ -366,10 +365,10 @@ const OneCalendarInternal = ({
               }}
               onChange={(value) => setInputValue({ ...inputValue, to: value })}
             />
-          )}
+          ) : null}
         </div>
-      )}
-      {showNavigation && (
+      ) : null}
+      {showNavigation ? (
         <div
           className={cn(
             "flex items-center justify-between",
@@ -417,7 +416,7 @@ const OneCalendarInternal = ({
             />
           </div>
         </div>
-      )}
+      ) : null}
       <div className="relative">
         {granularity.render({
           mode,

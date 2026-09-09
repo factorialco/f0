@@ -146,8 +146,8 @@ export const F0DialogHeader = ({
 
     return (
       <>
-        {controls.expand &&
-          (controls.expand.url !== undefined ? (
+        {controls.expand ? (
+          controls.expand.url !== undefined ? (
             <ButtonInternal
               variant="outline"
               icon={Maximize}
@@ -161,9 +161,12 @@ export const F0DialogHeader = ({
               onClick={controls.expand.onClick}
               label={controls.expand.label}
             />
-          ))}
-        {controls.expand && controls.navigation && <Divider />}
-        {controls.navigation && <PageNavigation {...controls.navigation} />}
+          )
+        ) : null}
+        {controls.expand && controls.navigation ? <Divider /> : null}
+        {controls.navigation ? (
+          <PageNavigation {...controls.navigation} />
+        ) : null}
       </>
     )
   }
@@ -210,7 +213,7 @@ export const F0DialogHeader = ({
         )}
       >
         <div className="flex flex-row items-center gap-3">
-          {(module || title || !!description) && (
+          {module || title || !!description ? (
             <div className="flex flex-col gap-1">
               {module ? (
                 <Module />
@@ -221,19 +224,19 @@ export const F0DialogHeader = ({
                   </DialogTitle>
                 )
               )}
-              {!!description && (
+              {description ? (
                 <DrawerDescription className="text-base text-f1-foreground-secondary">
                   {description}
                 </DrawerDescription>
-              )}
+              ) : null}
             </div>
-          )}
+          ) : null}
         </div>
         <div className="flex flex-row items-center gap-2">
-          {navigation && <PageNavigation {...navigation} />}
+          {navigation ? <PageNavigation {...navigation} /> : null}
           <Status />
           <Actions />
-          {(navigation || otherActions) && <Divider />}
+          {navigation || otherActions ? <Divider /> : null}
           <CloseButton />
         </div>
       </div>

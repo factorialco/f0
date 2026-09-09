@@ -573,7 +573,7 @@ export const F0AiChatTextArea = ({
       {...(fullscreen ? composerReveal : {})}
     >
       <div className="flex w-full max-w-content flex-col gap-2">
-        {suggestionsRow && !suggestionsInside && (
+        {suggestionsRow && !suggestionsInside ? (
           <div>
             {/* The row above the composer has no bar to collapse — it IS the
                 thing that opens, so the reveal is its own height. Composers that
@@ -581,7 +581,7 @@ export const F0AiChatTextArea = ({
                 nothing for a layout to trip over. */}
             {welcomeScreenSuggestionsCollapsedByDefault ? (
               <AnimatePresence initial={false}>
-                {composerOpen && (
+                {composerOpen ? (
                   <motion.div
                     key="welcome-suggestions"
                     className="overflow-hidden"
@@ -592,13 +592,13 @@ export const F0AiChatTextArea = ({
                   >
                     {suggestionsRow}
                   </motion.div>
-                )}
+                ) : null}
               </AnimatePresence>
             ) : (
               suggestionsRow
             )}
           </div>
-        )}
+        ) : null}
         <CreditWarningWrapper creditWarning={creditWarning}>
           <form
             aria-busy={inProgress}
@@ -701,15 +701,15 @@ export const F0AiChatTextArea = ({
                     ease: [0.4, 0, 0.2, 1],
                   }}
                 >
-                  {pendingQuote && (
+                  {pendingQuote ? (
                     <PendingQuoteChip
                       quote={pendingQuote}
                       onRemove={() => onPendingQuoteChange?.(null)}
                     />
-                  )}
+                  ) : null}
 
                   <AnimatePresence initial={false}>
-                    {transientError && (
+                    {transientError ? (
                       <motion.div
                         key="transient-error"
                         role="alert"
@@ -737,7 +737,7 @@ export const F0AiChatTextArea = ({
                           </p>
                         </div>
                       </motion.div>
-                    )}
+                    ) : null}
                   </AnimatePresence>
 
                   <AttachedFilesList
@@ -777,11 +777,11 @@ export const F0AiChatTextArea = ({
                         Spins while a response streams — F0OneIcon's own
                         affordance for exactly this, and the only moving part the
                         composer has to say the AI is working. */}
-                    {inlineComposerBar && (
+                    {inlineComposerBar ? (
                       <div className="flex shrink-0 self-center pl-3">
                         <F0OneIcon size="sm" spin={inProgress} />
                       </div>
-                    )}
+                    ) : null}
                     <TextareaField
                       textareaRef={textareaRef}
                       highlightRef={highlightRef}
@@ -809,7 +809,7 @@ export const F0AiChatTextArea = ({
                         taller than the line, visibly high against the top
                         border. Grown past one line the same 10px keeps it on the
                         last line. */}
-                    {barCollapsed && (
+                    {barCollapsed ? (
                       // `preventDefault` ON MOUSEDOWN IS LOAD-BEARING, and the
                       // bug it fixes is worth spelling out: taking focus is the
                       // browser's DEFAULT ACTION for mousedown, focus is what
@@ -828,14 +828,14 @@ export const F0AiChatTextArea = ({
                         className="flex shrink-0 items-center gap-2 pb-[10px] pl-2"
                         onMouseDown={(event) => event.preventDefault()}
                       >
-                        {canRecord && (
+                        {canRecord ? (
                           <DictationButton
                             inProgress={inProgress}
                             recordingStatus={recorder.status}
                             onStartRecording={handleStartRecording}
                             size="sm"
                           />
-                        )}
+                        ) : null}
                         <SubmitButton
                           inProgress={inProgress}
                           hasDataToSend={hasDataToSend}
@@ -844,7 +844,7 @@ export const F0AiChatTextArea = ({
                           size="sm"
                         />
                       </div>
-                    )}
+                    ) : null}
                   </div>
 
                   {/* THE CONTROL ROW, and whether it is there at all. The
@@ -862,7 +862,7 @@ export const F0AiChatTextArea = ({
                       (its focus-ring room) is not clipped with it. */}
                   {barCollapsible ? (
                     <AnimatePresence initial={false}>
-                      {!barCollapsed && (
+                      {!barCollapsed ? (
                         <motion.div
                           key="action-row"
                           className="overflow-hidden"
@@ -873,7 +873,7 @@ export const F0AiChatTextArea = ({
                         >
                           {actionRow}
                         </motion.div>
-                      )}
+                      ) : null}
                     </AnimatePresence>
                   ) : (
                     actionRow
@@ -885,17 +885,17 @@ export const F0AiChatTextArea = ({
         </CreditWarningWrapper>
       </div>
 
-      {showWelcomeCards && (
+      {showWelcomeCards ? (
         <div className="w-full max-w-content pt-2">
           <WelcomeScreenCardsRow cards={welcomeScreenCards} />
         </div>
-      )}
+      ) : null}
 
-      {footer && isWelcomeScreen && fullscreen && (
+      {footer && isWelcomeScreen && fullscreen ? (
         <div className="w-full py-4 mx-auto flex max-w-content justify-center">
           {footer}
         </div>
-      )}
+      ) : null}
 
       <AnimatePresence mode="wait" initial={false}>
         {isClarifying ? (
@@ -961,7 +961,7 @@ export const F0AiChatTextArea = ({
                 </OneEllipsis>
               )}
 
-              {disclaimer.link && disclaimer.linkText && (
+              {disclaimer.link && disclaimer.linkText ? (
                 <Link
                   href={disclaimer.link}
                   target="_blank"
@@ -970,7 +970,7 @@ export const F0AiChatTextArea = ({
                 >
                   {disclaimer.linkText}
                 </Link>
-              )}
+              ) : null}
             </motion.div>
           )
         )}

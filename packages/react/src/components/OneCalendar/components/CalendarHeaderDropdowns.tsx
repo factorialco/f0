@@ -74,13 +74,21 @@ export function buildYearOptions(
  * "short" format ("Sep", "sept.") so the trigger fits its narrower header at
  * a fixed width across locales.
  */
-export function buildMonthOptions(
-  year: number,
-  locale: string,
-  minDate?: Date,
-  maxDate?: Date,
-  format: "long" | "short" = "long"
-): SelectOption[] {
+type BuildMonthOptionsOptions = {
+  year: number
+  locale: string
+  minDate?: Date
+  maxDate?: Date
+  format?: "long" | "short"
+}
+
+export function buildMonthOptions({
+  year,
+  locale,
+  minDate,
+  maxDate,
+  format = "long",
+}: BuildMonthOptionsOptions): SelectOption[] {
   const formatter = new Intl.DateTimeFormat(locale, { month: format })
   return Array.from({ length: 12 }, (_, month) => {
     const monthDate = new Date(year, month, 1)
@@ -145,13 +153,13 @@ export function CalendarHeaderDropdowns({
 
   const monthOptions = useMemo(
     () =>
-      buildMonthOptions(
-        viewDate.getFullYear(),
+      buildMonthOptions({
+        year: viewDate.getFullYear(),
         locale,
         minDate,
         maxDate,
-        compact ? "short" : "long"
-      ),
+        format: compact ? "short" : "long",
+      }),
     [locale, viewDate, minDate, maxDate, compact]
   )
 
@@ -167,7 +175,7 @@ export function CalendarHeaderDropdowns({
     // min-w-0 lets the header shrink this side instead of pushing the
     // prev/next arrows out of the container.
     <div className="flex min-w-0 items-center gap-1">
-      {showMonth && (
+      {showMonth ? (
         // Fixed width so the trigger (and the popover around it) doesn't
         // resize when switching between short and long month names. Compact
         // pairs a narrower trigger with short month labels: 5.5rem fits the
@@ -185,7 +193,7 @@ export function CalendarHeaderDropdowns({
             fitContentWidth
           />
         </div>
-      )}
+      ) : null}
       <div className={compact ? "w-[5.5rem]" : "w-[6rem]"}>
         <F0Select
           size="sm"

@@ -141,7 +141,7 @@ describe("coachmarks API", () => {
         return (
           <CoachmarkProvider>
             <button onClick={() => setMounted(true)}>Mount target</button>
-            {mounted && <button id="late">Late</button>}
+            {mounted ? <button id="late">Late</button> : null}
           </CoachmarkProvider>
         )
       }
@@ -169,7 +169,7 @@ describe("coachmarks API", () => {
             <button onClick={() => setMounted((value) => !value)}>
               Toggle target
             </button>
-            {mounted && <button id="toggling">Toggling</button>}
+            {mounted ? <button id="toggling">Toggling</button> : null}
           </CoachmarkProvider>
         )
       }

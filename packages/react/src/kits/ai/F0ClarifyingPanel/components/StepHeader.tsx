@@ -43,7 +43,7 @@ export const StepHeader = ({
         {question}
       </OneEllipsis>
 
-      {stepLabel && (
+      {stepLabel ? (
         <div className="flex shrink-0 items-center gap-0.5">
           <F0Button
             variant="ghost"
@@ -78,7 +78,7 @@ export const StepHeader = ({
             icon={ChevronRight}
           />
         </div>
-      )}
+      ) : null}
       <F0Button
         variant="ghost"
         size="sm"

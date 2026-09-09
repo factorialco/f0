@@ -94,11 +94,11 @@ function LanguageSubmenu({
                 {languageLabel(option)}
               </DropdownMenuRadioItem>
             ))}
-            {toggleable && (
+            {toggleable ? (
               <DropdownMenuRadioItem value={OFF} className={ITEM_CLASS}>
                 {offLabel}
               </DropdownMenuRadioItem>
-            )}
+            ) : null}
           </DropdownMenuRadioGroup>
         </DropdownMenuSubContent>
       </DropdownMenuPortal>
@@ -180,7 +180,7 @@ export function SettingsMenu({
         align="end"
         className={CONTENT_CLASS}
       >
-        {audioLanguages.length > 1 && (
+        {audioLanguages.length > 1 ? (
           <LanguageSubmenu
             icon={Globe}
             label={t("videoPlayer.audio")}
@@ -190,8 +190,8 @@ export function SettingsMenu({
             onLanguageChange={onAudioLanguageChange}
             offLabel={offLabel}
           />
-        )}
-        {captionLanguages.length > 1 && (
+        ) : null}
+        {captionLanguages.length > 1 ? (
           <LanguageSubmenu
             icon={CaptionsLineIcon}
             label={t("videoPlayer.subtitles")}
@@ -203,8 +203,8 @@ export function SettingsMenu({
             onOff={onCaptionsOff}
             offLabel={offLabel}
           />
-        )}
-        {audioDescriptionLanguages.length > 1 && (
+        ) : null}
+        {audioDescriptionLanguages.length > 1 ? (
           <LanguageSubmenu
             icon={AudioDescriptionLineIcon}
             label={t("videoPlayer.audioDescription")}
@@ -216,7 +216,7 @@ export function SettingsMenu({
             onOff={onAudioDescriptionOff}
             offLabel={offLabel}
           />
-        )}
+        ) : null}
       </DropdownMenuContent>
     </DropdownMenu>
   )

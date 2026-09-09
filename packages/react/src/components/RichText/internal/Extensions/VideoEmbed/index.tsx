@@ -79,6 +79,10 @@ const VideoEmbedNodeView = ({
         )}
       >
         <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
+          {/* No sandbox: the YouTube and Vimeo players need allow-scripts and
+              allow-same-origin together, which the rule rejects. `src` only
+              ever comes from parseVideoUrl, so it is one of those two hosts. */}
+          {/* oxlint-disable-next-line react/iframe-missing-sandbox */}
           <iframe
             src={src}
             title={`${provider} video`}
@@ -87,7 +91,7 @@ const VideoEmbedNodeView = ({
             allowFullScreen
           />
         </div>
-        {isEditable && (
+        {isEditable ? (
           <div className="dark absolute right-2 top-2">
             <F0Button
               onClick={deleteNode}
@@ -98,7 +102,7 @@ const VideoEmbedNodeView = ({
               size="sm"
             />
           </div>
-        )}
+        ) : null}
       </div>
     </NodeViewWrapper>
   )

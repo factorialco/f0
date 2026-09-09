@@ -45,26 +45,25 @@ const ChatDocxThumbnail = ({
         }
         return response.blob()
       })
-      .then((blob) => {
+      .then(async (blob) => {
         if (cancelled) {
           return
         }
         // No wrapper chrome for the snapshot — just the page content; the
         // card provides the white background and the crop.
-        return renderAsync(blob, host, undefined, {
+        await renderAsync(blob, host, undefined, {
           inWrapper: false,
           breakPages: false,
           ignoreLastRenderedPageBreak: true,
           renderHeaders: false,
           renderFooters: false,
-        }).then(() => {
-          if (cancelled) {
-            return
-          }
-          const naturalWidth = host.scrollWidth
-          setScale(naturalWidth > 0 ? Math.min(1, width / naturalWidth) : 1)
-          onRenderedRef.current()
         })
+        if (cancelled) {
+          return
+        }
+        const naturalWidth = host.scrollWidth
+        setScale(naturalWidth > 0 ? Math.min(1, width / naturalWidth) : 1)
+        onRenderedRef.current()
       })
       .catch(() => {
         if (!cancelled) {

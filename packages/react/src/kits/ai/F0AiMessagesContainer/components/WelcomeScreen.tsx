@@ -141,7 +141,7 @@ export const WelcomeScreen = ({
       )}
     >
       <div className="flex flex-col items-center">
-        {cta && (
+        {cta ? (
           <ButtonInternal
             variant="neutral"
             size="sm"
@@ -150,12 +150,12 @@ export const WelcomeScreen = ({
             icon={cta.icon}
             onClick={cta.onClick}
           />
-        )}
-        {caption && (
+        ) : null}
+        {caption ? (
           <p className="animate-in fade-in-0 text-center text-2xl font-semibold leading-[28px] text-f1-foreground-secondary duration-500">
             {caption}
           </p>
-        )}
+        ) : null}
         {/* aria-label is prohibited on a plain paragraph role, so only the
             interactive (button) case is named by it; the sr-only span names
             the static case with the full, stable phrase instead of the
@@ -182,11 +182,11 @@ export const WelcomeScreen = ({
           </span>
           <span className="sr-only">{current}</span>
         </p>
-        {subtitle && (
+        {subtitle ? (
           <p className="animate-in fade-in-0 mt-3 text-center text-base leading-snug text-f1-foreground-secondary duration-500">
             {subtitle}
           </p>
-        )}
+        ) : null}
       </div>
     </div>
   )

@@ -205,7 +205,7 @@ export const Readonly: Story = {
   },
 }
 
-export const Error: Story = {
+const ErrorState: Story = {
   args: {
     ...Default.args,
     icon: Search,
@@ -530,3 +530,6 @@ export const Snapshot: Story = {
     )
   },
 }
+
+// Exported under the global's name so the story id stays `--error`.
+export { ErrorState as Error }

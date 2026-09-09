@@ -1694,7 +1694,8 @@ function SurveyStoreProvider({ children }: { children: ReactNode }) {
 
   const createSurvey = useCallback<SurveyStoreValue["createSurvey"]>(
     (name, opts) => {
-      const surveyId = `survey-${(idRef.current += 1)}`
+      idRef.current += 1
+      const surveyId = `survey-${idRef.current}`
       setSurveys((prev) => ({
         ...prev,
         [surveyId]: {
@@ -1783,10 +1784,10 @@ function SurveyStoreProvider({ children }: { children: ReactNode }) {
     []
   )
 
-  const nextCardId = useCallback<SurveyStoreValue["nextCardId"]>(
-    () => `card-${(idRef.current += 1)}`,
-    []
-  )
+  const nextCardId = useCallback<SurveyStoreValue["nextCardId"]>(() => {
+    idRef.current += 1
+    return `card-${idRef.current}`
+  }, [])
 
   const registerLiveCard = useCallback<SurveyStoreValue["registerLiveCard"]>(
     (surveyId, cardId) => {
@@ -3051,7 +3052,7 @@ function FlowContent({
               href: "/cocreation",
             }}
           />
-          {visualizationMode !== "fullscreen" && (
+          {visualizationMode !== "fullscreen" ? (
             <ClickableTabs
               tabs={[
                 { label: config.navTabLabel, id: config.id },
@@ -3060,7 +3061,7 @@ function FlowContent({
               activeTabId={activeTabId}
               setActiveTabId={setActiveTabId}
             />
-          )}
+          ) : null}
         </>
       }
     >
@@ -3186,7 +3187,9 @@ function CreationWithAIFlow({
               {/* Feeds the survey welcome cards into the chat via
                   `welcomeScreenCards`; renders nothing itself. "cards" entry
                   flow (Engagement) only — "guidedType" (Training) has none. */}
-              {config.entryMode === "cards" && <SurveyWelcomeCardsRegistrar />}
+              {config.entryMode === "cards" ? (
+                <SurveyWelcomeCardsRegistrar />
+              ) : null}
               <FlowContent phase={phase} setPhase={setPhase} />
             </ApplicationFrame>
           </TemplatesReturnProvider>

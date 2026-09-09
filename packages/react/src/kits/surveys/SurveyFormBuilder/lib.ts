@@ -5,18 +5,18 @@ export type RatingOptionType = "1-5" | "1-10" | "0-10" | "emojis"
 export const getRatingOptions = (type: RatingOptionType) => {
   switch (type) {
     case "1-5":
-      return new Array(5).fill(0).map((_, index) => ({
+      return Array.from({ length: 5 }, (_, index) => ({
         value: index + 1,
         label: (index + 1).toString(),
       }))
     case "1-10":
-      return new Array(10).fill(0).map((_, index) => ({
+      return Array.from({ length: 10 }, (_, index) => ({
         value: index + 1,
         label: (index + 1).toString(),
       }))
     // Starts at 0, which makes it the standard eNPS scale.
     case "0-10":
-      return new Array(11).fill(0).map((_, index) => ({
+      return Array.from({ length: 11 }, (_, index) => ({
         value: index,
         label: index.toString(),
       }))
@@ -90,16 +90,13 @@ export const getDefaultParamsForQuestionType = (questionType: QuestionType) => {
       return {}
     case "text":
     case "longText":
+    case "link":
       return {
         value: "",
       }
     case "numeric":
       return {
         value: 0,
-      }
-    case "link":
-      return {
-        value: "",
       }
     case "date":
       return {
