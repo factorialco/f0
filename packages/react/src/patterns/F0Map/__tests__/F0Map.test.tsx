@@ -116,8 +116,11 @@ const mock = vi.hoisted(() => {
     zoomOut() {
       this.calls.zoomOut++
     }
-    project() {
-      return { x: 0, y: 0 }
+    // Coordinate-dependent, so clustering and label collision behave like
+    // themselves: with every point at the same pixel, everything always
+    // clustered and the single-marker paths were unreachable.
+    project(at: [number, number]) {
+      return { x: at[0] * 1000, y: -at[1] * 1000 }
     }
     getCanvas() {
       return document.createElement("canvas")
