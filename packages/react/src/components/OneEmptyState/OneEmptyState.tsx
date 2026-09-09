@@ -15,7 +15,7 @@ function _OneEmptyState({
 }: Types.OneEmptyStateProps) {
   return (
     <div
-      className="@container flex flex-col items-center justify-center gap-5 p-8"
+      className="@container flex w-full flex-col items-center justify-center gap-5 p-8"
       {...rest}
     >
       {variant === "default" ? (

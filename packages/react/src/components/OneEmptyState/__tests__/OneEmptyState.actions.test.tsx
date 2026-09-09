@@ -51,3 +51,18 @@ describe("OneEmptyState's actions", () => {
     expect(actionsRow().parentElement).toHaveClass("@container")
   })
 })
+
+describe("OneEmptyState's own width", () => {
+  it("fills its parent, so being a container cannot collapse it", () => {
+    // `@container` applies inline-size containment, which drops the empty
+    // state's content from its intrinsic width. In a shrink-to-fit parent (a
+    // flex column with `items-center`, say) that leaves it as wide as its
+    // padding and nothing else, so it has to take its width from the parent.
+    render(<OneEmptyState emoji="🧾" title="No expenses yet" />)
+
+    const root = screen.getByText("No expenses yet").closest("div")
+      ?.parentElement as HTMLElement
+
+    expect(root).toHaveClass("@container", "w-full")
+  })
+})
