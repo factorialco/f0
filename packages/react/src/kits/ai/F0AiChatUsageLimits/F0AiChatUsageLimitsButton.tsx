@@ -125,7 +125,7 @@ export const F0AiChatUsageLimitsButton = ({
                 <span className="min-w-0 flex-1 truncate">
                   {i18n.t("ai.usageLimits.yourCompany")}
                 </span>
-                <F0Icon icon={ChevronRight} size="md" />
+                <F0Icon icon={ChevronRight} size="md" color="default" />
               </button>
             ) : null}
             {sections.map((section) => (

@@ -27,7 +27,7 @@ const onSeeCompany = fn()
 
 const ADMIN_USAGE = {
   usedPercentage: 30,
-  description: "Resets in 3 hr 6 min",
+  description: "Resets in 3h 6m",
   onSeeCompany,
   sections: [
     {
@@ -42,7 +42,7 @@ const ADMIN_USAGE = {
 
 export const Employee: Story = {
   args: {
-    usage: { usedPercentage: 30, description: "Resets in 3 hr 6 min" },
+    usage: { usedPercentage: 30, description: "Resets in 3h 6m" },
   },
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement)
