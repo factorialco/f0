@@ -601,7 +601,8 @@ export const RichDescriptionFocusExpands: Story = {
     await expect(toggle).toHaveAttribute("aria-expanded", "false")
 
     // Tabbable while the clamp hides it, so focus has to expand (WCAG 2.4.7).
-    canvas.getByRole("link", { name: "interview rubric" }).focus()
+    // F0Link appends an sr-only "(opens in new tab)" to the accessible name.
+    canvas.getByRole("link", { name: /interview rubric/ }).focus()
 
     await waitFor(() => expect(toggle).toHaveAttribute("aria-expanded", "true"))
   },
