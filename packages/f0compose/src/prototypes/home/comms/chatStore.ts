@@ -60,3 +60,14 @@ export function useOpenChats(): LeftPaneId[] {
     () => openChats
   )
 }
+
+const closeListeners = new Set<() => void>()
+export function onChatsCloseRequest(listener: () => void) {
+  closeListeners.add(listener)
+  return () => {
+    closeListeners.delete(listener)
+  }
+}
+export function requestChatsClose() {
+  closeListeners.forEach((listener) => listener())
+}

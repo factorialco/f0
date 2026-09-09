@@ -5,7 +5,12 @@ import {
   type ModuleId,
 } from "@factorialco/f0-react"
 import { F0AvatarModule } from "@factorialco/f0-react/dist/experimental"
-import { Ellipsis, Reaction, Settings } from "@factorialco/f0-react/icons/app"
+import {
+  Cross,
+  Ellipsis,
+  Reaction,
+  Settings,
+} from "@factorialco/f0-react/icons/app"
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { useSearchParams } from "react-router-dom"
 
@@ -15,6 +20,7 @@ import type { WindowId } from "./windows/types"
 
 import { AgentsScreen } from "./agents/AgentsScreen"
 import { agentById } from "./agents/agentStore"
+import { CalendarScreen } from "./calendar/CalendarScreen"
 import {
   animateChatClose,
   ChatsColumn,
@@ -23,7 +29,11 @@ import {
   MaximizedChat,
   useChats,
 } from "./comms/ChatsColumn"
-import { onChatRequest, setOpenChats } from "./comms/chatStore"
+import {
+  onChatRequest,
+  onChatsCloseRequest,
+  setOpenChats,
+} from "./comms/chatStore"
 import { EmployeeCanvas } from "./EmployeeCanvas"
 import {
   PROFILE_PEOPLE,
@@ -31,25 +41,24 @@ import {
   type ProfilePerson,
 } from "./fixtures"
 import { HomeNav } from "./HomeNav"
+import { HybridHome } from "./HybridHome"
+import { ModuleScreen } from "./ModuleScreen"
 import { NeedsYouItem } from "./NeedsYouItem"
 import { phaseFor, useNeedsYou, visibleTasks } from "./needsYouStore"
 import {
+  goHome,
   onWindowRequest,
   onWindowsCollapseRequest,
   useConversations,
 } from "./one/conversationStore"
 import { ConversationView } from "./one/ConversationView"
 import { PlayOutline } from "./one/PlayOutline"
-import { OnePromptBar } from "./OnePromptBar"
+import { PeopleScreen } from "./people/PeopleScreen"
 import { PoliciesScreen } from "./policies/PoliciesScreen"
 import { useProfile } from "./profileStore"
 import { SectionHeader } from "./SectionHeader"
 import { ClockInButton } from "./windows/ClockInButton"
-import {
-  isModulePane,
-  isModuleWindowView,
-  modulePaneId,
-} from "./windows/ModulePane"
+import { isModulePane, modulePaneId } from "./windows/ModulePane"
 import { CANVAS_MIN_PEEK, stackWidth } from "./windows/stack"
 import { useWindows } from "./windows/useWindows"
 import {
@@ -956,6 +965,14 @@ const GREETINGS = [
 ]
 
 export default function Home() {
+  return (
+    <HybridHome>
+      <HomeCanvas />
+    </HybridHome>
+  )
+}
+
+function HomeCanvas() {
   useTransientScrollbars()
   useFullBleedChrome()
   useSingleTooltip()
@@ -971,35 +988,23 @@ export default function Home() {
   const windows = useWindows()
   const chats = useChats()
   const { conversations, activeId } = useConversations()
-  const activeConversation = conversations.find((c) => c.id === activeId)
   // Sub-screens have distinct URLs (?view=policies); an open conversation
   // always takes the canvas over the screen.
   const [searchParams, setSearchParams] = useSearchParams()
   const view = searchParams.get("view")
-  /**
-   * A Hub section shown as a WINDOW over One rather than instead of One
-   * (Oskar, 2026-09-08: "a modo ventana para mantener como suelo de la
-   * aplicacion a One"). Deliberately NOT derived from
-   * `activeConversation`: the whole point is that both are on screen at
-   * once, so a conversation must not cancel the window the way it cancels
-   * a screen.
-   */
-  const windowView = isModuleWindowView(view) ? view : null
+  const activeConversation =
+    !view && !chats.state.open.some(isTicket)
+      ? conversations.find((conversation) => conversation.id === activeId)
+      : undefined
+  // Module screens now occupy the canvas. The persistent agent entry owns
+  // the adjacent conversation, while the existing widget stacks stay intact.
+  const windowView = null
   useResetParam(searchParams)
-  /**
-   * The screen the canvas is actually showing. An open conversation takes
-   * the canvas over, so every screen-shaped rule below — the title, the
-   * edge-to-edge gutters, whether the composer shows — has to stop
-   * applying while one is open, or an expanded conversation inherits the
-   * People screen's "no composer, no scroller" layout.
-   */
-  const screenView = activeConversation || windowView ? null : view
-  // Only SCREENS title the navbar, and Agents is no longer one of them
-  // (Oskar, 2026-09-08: "quita lo de arriba a la izquierda que pone
-  // agents" — its face has to match New's, and New has no screen title).
-  // `people` and `calendar` fall through too: a window carries its title
-  // in its own 44px header.
-  const screenTitle = screenView === "policies" ? "Policies" : undefined
+  const screenView = view
+  const screenTitle = screenView
+    ? screenView.charAt(0).toUpperCase() +
+      screenView.slice(1).replaceAll("-", " ")
+    : undefined
   // Screens that run EDGE TO EDGE and scroll their own content: nesting
   // them inside the canvas gutters plus its scroller would give them a
   // second scrollbar inside the first.
@@ -1007,16 +1012,9 @@ export default function Home() {
     screenView === "calendar" ||
     screenView === "people" ||
     screenView === "agents"
-  // Screens whose frame carries no ONE composer. The calendar's grid uses
-  // the full height and a floating composer would cover the hours you are
-  // reading; the People screen reaches One from the button ON its
-  // headcount banner instead; and Agents has its OWN brief box, pinned at
-  // the bottom of its canvas, so a second composer below it would be two
-  // places to type the same thing. Agents keeps ownership of that one
-  // deliberately: it has to vanish on the list face, it carries its own
-  // placeholder and submit handler, and the suggestions bridge listens on
-  // `document` — so two mounted instances would fight for the events.
-  const showPromptBar = !fullWidthView
+  // Agents owns its specialized brief composer; other screens reserve the
+  // shared agent strip below their scrolling content and fixed actions.
+  const showPromptBar = screenView !== "agents"
   /**
    * The widgets are the HOME canvas's, and they belong to it AT REST: the
    * moment any window occupies the canvas area they go (Oskar,
@@ -1270,11 +1268,30 @@ export default function Home() {
     console.log("open", task.id)
   }
 
+  useEffect(
+    () =>
+      onChatsCloseRequest(() => {
+        if (!chats.state.open.length) return
+        let pending = chats.state.open.length
+        chats.state.open.forEach((id) =>
+          animateChatClose(id, () => {
+            pending -= 1
+            if (!pending) chats.closeAll()
+          })
+        )
+      }),
+    [chats.state.open, chats.closeAll]
+  )
+
   // A maximized window takes over the whole canvas (Figma 1365:12972) —
   // navbar, content, and prompt bar give way until it's restored.
   if (windows.state.maximized) {
     return (
-      <div className="flex min-h-full w-full overflow-hidden">
+      <div
+        data-hybrid-source
+        data-hybrid-maximized
+        className="flex min-h-full w-full overflow-hidden"
+      >
         <MaximizedWindow
           id={windows.state.maximized}
           onRestore={() => windows.toggleMaximized(windows.state.maximized!)}
@@ -1287,7 +1304,11 @@ export default function Home() {
   // same window system, so maximize behaves identically on either side.
   if (chats.state.maximized) {
     return (
-      <div className="flex min-h-full w-full overflow-hidden">
+      <div
+        data-hybrid-source
+        data-hybrid-maximized
+        className="flex min-h-full w-full overflow-hidden"
+      >
         <MaximizedChat
           id={chats.state.maximized}
           onRestore={() => chats.toggleMaximized(chats.state.maximized!)}
@@ -1298,7 +1319,7 @@ export default function Home() {
   }
 
   return (
-    <div className="flex min-h-full w-full overflow-hidden">
+    <div data-hybrid-source className="flex min-h-full w-full overflow-hidden">
       {/* The pane the window stacks measure themselves against. The split
           conversation panel sits OUTSIDE it, so an overlaying stack
           (`absolute right-0`) pins to the panel's edge instead of covering
@@ -1346,7 +1367,7 @@ export default function Home() {
                   // The module dock is a left overlay too.
                   marginLeft: overlayChats ? "auto" : undefined,
                 }
-              : { flex: "1 1 0%", minWidth: CANVAS_MIN_WIDTH }
+              : { flex: "1 1 0%", minWidth: 0 }
           }
         >
           <div className="flex flex-col">
@@ -1385,17 +1406,40 @@ export default function Home() {
               }`}
             >
               {activeConversation ? (
-                <ConversationView conversation={activeConversation} />
+                <div
+                  data-home-inline-conversation
+                  className="flex w-full min-w-0 flex-col"
+                  role="region"
+                  aria-label="Conversation"
+                >
+                  <div className="flex justify-end">
+                    <F0Button
+                      label="Close conversation"
+                      icon={Cross}
+                      hideLabel
+                      variant="ghost"
+                      size="md"
+                      onClick={goHome}
+                    />
+                  </div>
+                  <ConversationView conversation={activeConversation} />
+                </div>
               ) : /* WINDOW views are absent from this chain on
                      purpose: they render in the layer below instead, and
                      One's floor has to fall through to the greeting so it
                      is still there underneath them. `screenView` is null
                      for them, which is what makes the fall-through
                      automatic rather than a second list to maintain. */
-              screenView === "policies" ? (
+              screenView === "people" ? (
+                <PeopleScreen />
+              ) : screenView === "calendar" ? (
+                <CalendarScreen />
+              ) : screenView === "policies" ? (
                 <PoliciesScreen />
               ) : screenView === "agents" ? (
                 <AgentsScreen />
+              ) : screenView ? (
+                <ModuleScreen title={screenTitle ?? screenView} />
               ) : (
                 <div className="flex w-[712px] max-w-full flex-col gap-8">
                   <div className="flex items-center gap-3">
@@ -1432,11 +1476,8 @@ export default function Home() {
             {/* See showPromptBar: the calendar and People frames carry no
               composer. Every other screen keeps ONE pinned. */}
             {showPromptBar && (
-              <div
-                data-home-promptbar
-                className="relative w-[712px] max-w-full shrink-0 pb-1.5"
-              >
-                <OnePromptBar />
+              <div data-home-promptbar className="relative w-full shrink-0">
+                <div data-hybrid-target />
               </div>
             )}
           </div>

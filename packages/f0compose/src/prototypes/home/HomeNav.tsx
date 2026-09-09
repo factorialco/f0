@@ -80,6 +80,7 @@ import { Bot } from "./Bot"
 import { TEAM_ABSENCE_FILTERS, WORKPLACES } from "./calendar/calendarFixtures"
 import { CalGroup, MiniMonth } from "./calendar/MiniMonth"
 import { CHANNEL_CHATS, DIRECT_CHATS } from "./comms/chats"
+import { requestChatsClose } from "./comms/chatStore"
 import { requestChat, useOpenChats } from "./comms/chatStore"
 import { factorialLogo, PROFILE_PEOPLE } from "./fixtures"
 import { motionKeyFor } from "./iconMotion"
@@ -1014,7 +1015,8 @@ function HubPanelBody() {
       {groups.map((group) => (
         <SidebarGroup key={group.label} label={group.label}>
           {group.items.map((label) => {
-            const screen = HUB_VIEWS[label]
+            const screen =
+              HUB_VIEWS[label] ?? label.toLowerCase().replaceAll(" ", "-")
             return (
               <NavRow
                 key={label}
@@ -1306,7 +1308,11 @@ export function HomeNav() {
     // Cal is the one section that is also a DESTINATION: the frame shows
     // its panel beside the week grid, not beside Home (Figma 2621:29173).
     // Comms/Inbox/Hub stay side panels and leave the canvas alone.
-    if (id === "cal") {
+    if (id === "home") {
+      requestChatsClose()
+      goHome()
+      setSearchParams({})
+    } else if (id === "cal") {
       // Also the way back if you closed the calendar WINDOW with its own
       // ✕ while staying in this section: the rail row is still lit and
       // the panel is still open, so clicking it has to reopen the window
