@@ -1,8 +1,7 @@
+import { RightPanelCollapse, RightPanelExpand } from "./HomeToolbarActions"
 import { F0Button } from "@factorialco/f0-react"
 import {
   Comment,
-  Minimize,
-  Maximize,
   ChartLine,
   CalendarArrowRight,
   SearchPerson,
@@ -11,6 +10,7 @@ import {
 } from "@factorialco/f0-react/icons/app"
 import {
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   type ComponentProps,
@@ -32,14 +32,23 @@ export function WidgetRail(
   props: ComponentProps<typeof WindowStack<WindowId>>
 ) {
   const profile = useProfile()
-  const { collapsed, toggleCollapsed, setCollapsed } =
-    useWidgetCollapse(profile)
+  const { collapsed, toggleCollapsed } = useWidgetCollapse(profile)
   const loading = useHomeRefreshing(profile)
   const [peek, setPeek] = useState<{ id: WindowId; top: number } | null>(
     null
   )
   const leaveTimer = useRef<ReturnType<typeof setTimeout>>()
   const root = useRef<HTMLDivElement>(null)
+  const previewRef = useRef<HTMLDivElement>(null)
+  const [previewHeight, setPreviewHeight] = useState(0)
+  useLayoutEffect(() => {
+    if (!previewRef.current) return
+    const observer = new ResizeObserver(([entry]) =>
+      setPreviewHeight(entry.contentRect.height)
+    )
+    observer.observe(previewRef.current)
+    return () => observer.disconnect()
+  }, [peek?.id])
   useEffect(() => () => clearTimeout(leaveTimer.current), [])
   const docked = props.state.open.filter(
     (id) => !props.state.floating.includes(id)
@@ -65,7 +74,7 @@ export function WidgetRail(
           {original.actions}
           <F0Button
             label={`${preview ? "Expand" : "Collapse"} ${original.title}`}
-            icon={preview ? Maximize : Minimize}
+            icon={preview ? RightPanelExpand : RightPanelCollapse}
             hideLabel
             variant="ghost"
             size="md"
@@ -83,23 +92,11 @@ export function WidgetRail(
     <div
       ref={root}
       data-widget-rail
-      className={`flex h-full min-h-0 shrink-0 ${props.overlay ? "absolute inset-y-0 right-0 z-20" : "relative"}`}
+      className={`flex min-h-0 shrink-0 ${props.overlay ? "absolute bottom-0 right-0 top-12 z-20" : "relative h-full"}`}
       style={{ width, maxWidth: props.maxWidth }}
     >
       {expanded.length > 0 && (
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-          <div className="flex justify-end px-2 pt-2">
-            <F0Button
-              label="Collapse all widgets"
-              icon={Minimize}
-              hideLabel
-              variant="ghost"
-              size="md"
-              onClick={() =>
-                setCollapsed([...new Set([...collapsed, ...docked])])
-              }
-            />
-          </div>
           <div className="min-h-0 flex-1">
             <WindowStack
               {...props}
@@ -126,17 +123,6 @@ export function WidgetRail(
           className="flex h-full w-14 shrink-0 flex-col items-center gap-2 overflow-y-auto py-2"
           onScroll={() => setPeek(null)}
         >
-          <F0Button
-            label="Expand all widgets"
-            icon={Maximize}
-            hideLabel
-            size="md"
-            variant="ghost"
-            onClick={() => {
-              setCollapsed([])
-              setPeek(null)
-            }}
-          />
           {folded.map((id) => (
             <div
               key={id}
@@ -147,14 +133,11 @@ export function WidgetRail(
                   (root.current?.getBoundingClientRect().top ?? 0)
                 setPeek({
                   id,
-                  top: railPanelTop({
-                    anchorOffsetTop: top,
-                    panelHeight: 400,
-                    containerHeight: root.current?.clientHeight ?? 600,
-                  }),
+                  top,
                 })
               }}
               onMouseLeave={closePeek}
+              data-widget-anchor={id}
             >
               <F0Button
                 label={`Expand ${props.specFor(id).title}`}
@@ -173,9 +156,15 @@ export function WidgetRail(
       )}
       {peek && folded.includes(peek.id) && (
         <div
-          className="absolute right-14 z-30 flex"
+          ref={previewRef}
+          data-widget-preview
+          className="absolute right-14 z-30 flex flex-col [&>section]:!shrink"
           style={{
-            top: peek.top,
+            top: railPanelTop({
+              anchorOffsetTop: peek.top,
+              panelHeight: previewHeight,
+              containerHeight: root.current?.clientHeight ?? 600,
+            }),
             width: Math.min(props.state.columnWidth, 448),
             maxHeight: "calc(100% - 16px)",
           }}

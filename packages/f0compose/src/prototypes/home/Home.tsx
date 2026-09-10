@@ -1,3 +1,4 @@
+import { HomeToolbarActions } from "./windows/HomeToolbarActions"
 import {
   F0AvatarPerson,
   F0Button,
@@ -862,7 +863,11 @@ function HomeNavbar({
       <div className="flex shrink-0 items-center gap-2">
         {conversationTitle ? (
           <div className="flex items-center">
-            <WindowsMenu open={openWindows} onToggle={onToggleWindow} />
+            {homeSession ? (
+              <HomeToolbarActions openWindows={openWindows} />
+            ) : (
+              <WindowsMenu open={openWindows} onToggle={onToggleWindow} />
+            )}
             {/* An agent's brief has nothing to preview — the frame shows
               only the ⋮ there. */}
             {!conversationEmoji && !homeSession && (
@@ -915,7 +920,7 @@ function HomeNavbar({
               open={openWindows.includes("clockin")}
               onToggle={() => onToggleWindow("clockin")}
             />
-            <WindowsMenu open={openWindows} onToggle={onToggleWindow} />
+            <HomeToolbarActions openWindows={openWindows} />
           </div>
         )}
         <AskFactorialButton />

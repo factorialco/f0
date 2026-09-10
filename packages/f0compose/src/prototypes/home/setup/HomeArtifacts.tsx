@@ -9,7 +9,7 @@ import {
   F0Text,
 } from "@factorialco/f0-react"
 import { Celebration } from "@factorialco/f0-react/dist/experimental"
-import { Pencil, Spinner } from "@factorialco/f0-react/icons/app"
+import { Spinner } from "@factorialco/f0-react/icons/app"
 import { useEffect, useRef, useState } from "react"
 import { avatarFor } from "@/fixtures/helpers"
 import type { HomeArtifact } from "./homeSetup"
@@ -22,7 +22,6 @@ import { NeedsYouItem } from "../NeedsYouItem"
 import { SectionHeader } from "../SectionHeader"
 import {
   requestWindow,
-  resumeHomeSetup,
   startConversationWithContext,
   type ChatMessage,
   type Conversation,
@@ -322,8 +321,10 @@ export function HomeSessionBar({
         justifyContent="between"
         gap="md"
       >
-        <F0Box display="flex" alignItems="center" gap="sm">
-          <FactorialAgentIcon width={40} height={40} />
+        <F0Box display="flex" alignItems="center" gap="xl">
+          <span className="flex size-12 shrink-0">
+            <FactorialAgentIcon width={48} height={48} />
+          </span>
           <F0Box display="flex" flexDirection="column" gap="xs">
             <F0Heading
               content={`Welcome back, ${PROFILE_PEOPLE[profile].firstName}`}
@@ -367,13 +368,6 @@ export function HomeSessionBar({
             </F0Box>
           </F0Box>
         </F0Box>
-        <F0Button
-          label="Edit"
-          icon={Pencil}
-          variant="ghost"
-          size="sm"
-          onClick={() => resumeHomeSetup(profile)}
-        />
       </F0Box>
       {sources && (
         <F0Box display="flex" flexDirection="column" gap="sm" padding="md">

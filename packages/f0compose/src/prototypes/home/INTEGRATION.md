@@ -51,3 +51,5 @@ The previous verification was insufficient. Read [the correction and direct brow
 ## Widget rail and update feedback
 
 Read [the latest verification](memory/2026-09-10-widget-rail-loading.md) and [PR48 reuse details](windows/rail-reference.md). Selection confirmation now shows finite skeleton/bot feedback. Widgets fold into a persisted icon rail and scroll in one column. Ask Factorial moved into the original widget header actions. The sticky greeting uses the canvas background.
+
+Latest toolbar and widget-hover correction: see memory/2026-09-10-toolbar-hover-alignment.md (integrated preview on port 5181).
