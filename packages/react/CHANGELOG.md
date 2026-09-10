@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.97.1](https://github.com/factorialco/f0/compare/f0-react-v6.97.0...f0-react-v6.97.1) (2026-09-10)
+
+
+### Bug Fixes
+
+* **OneDataCollection:** persist which view is selected ([#5490](https://github.com/factorialco/f0/issues/5490)) ([bef4ea2](https://github.com/factorialco/f0/commit/bef4ea23d6bcc3026fccb3f78fcbc6698e509a99))
+
 ## [6.97.0](https://github.com/factorialco/f0/compare/f0-react-v6.96.0...f0-react-v6.97.0) (2026-09-10)
 
 
