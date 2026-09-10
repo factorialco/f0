@@ -90,7 +90,12 @@ export interface F0LocationInputProps {
   partLabels?: Partial<Record<LocationPart, string>>
   /** Restricts the country selector. A single entry also scopes the search */
   countries?: CountryCode[]
-  /** Country used to scope the search while the value has none */
+  /**
+   * Country the search is scoped to. The value's own country is never used
+   * for this: the search only exists without manual entry, where nothing on
+   * screen would show or undo that scope, so the first picked address would
+   * silently lock every later search to its country.
+   */
   defaultCountry?: CountryCode
   /**
    * Suggestion provider. Without it there is no autocomplete and the parts
