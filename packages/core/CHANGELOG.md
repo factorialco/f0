@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.0](https://github.com/factorialco/f0/compare/f0-core-v2.2.1...f0-core-v2.3.0) (2026-09-10)
+
+
+### Features
+
+* **icons:** add PinOff app icon ([#5463](https://github.com/factorialco/f0/issues/5463)) ([9d83c43](https://github.com/factorialco/f0/commit/9d83c43798aa1a8cd4c664ad204a0b01ea215370))
+
 ## [2.2.1](https://github.com/factorialco/f0/compare/f0-core-v2.2.0...f0-core-v2.2.1) (2026-09-09)
 
 
