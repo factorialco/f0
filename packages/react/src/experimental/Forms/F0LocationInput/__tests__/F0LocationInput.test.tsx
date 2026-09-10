@@ -165,6 +165,50 @@ describe("F0LocationInput", () => {
       )
     })
 
+    it("opens, searches and picks with the keyboard alone", async () => {
+      const user = userEvent.setup()
+      const onChange = vi.fn()
+      render(
+        <F0LocationInput
+          label="Address"
+          searchPlaces={searchPlaces}
+          resolvePlace={resolvePlace}
+          onChange={onChange}
+        />
+      )
+
+      await user.tab()
+      expect(getAddressTrigger()).toHaveFocus()
+
+      // ArrowDown is the canonical gesture for a combobox, and it does nothing
+      // here: Radix puts it in the trigger's `onKeyDown`, and F0InputField does
+      // not forward that prop when it clones the inner button. Add
+      // `onKeyDown: props.onKeyDown` to the cloneElement in F0InputField.tsx and
+      // this expectation flips - which is the point of pinning it.
+      await user.keyboard("{ArrowDown}")
+      expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
+
+      await user.keyboard("{Enter}")
+      await waitFor(() =>
+        expect(screen.getByRole("listbox")).toBeInTheDocument()
+      )
+      fireEvent.animationStart(screen.getByRole("listbox"))
+
+      await user.type(screen.getByRole("searchbox"), "Colon")
+      await waitFor(() => expect(screen.getAllByRole("option")).toHaveLength(2))
+
+      await user.keyboard("{ArrowDown}")
+      expect(screen.getAllByRole("option")[0]).toHaveFocus()
+
+      await user.keyboard("{Enter}")
+      await waitFor(() =>
+        expect(onChange).toHaveBeenLastCalledWith(resolved, {
+          source: "picked",
+          isResolved: true,
+        })
+      )
+    })
+
     it("resolves the picked suggestion and emits a resolved value", async () => {
       const user = userEvent.setup()
       const onChange = vi.fn()
