@@ -514,6 +514,25 @@ describe("F0LocationInput", () => {
       ).not.toBeInTheDocument()
     })
 
+    it("tags every typed part for browser autofill", () => {
+      render(
+        <F0LocationInput
+          label="Office"
+          manualEntry
+          searchPlaces={searchPlaces}
+        />
+      )
+
+      const tokenOf = (name: string) =>
+        screen.getByRole("textbox", { name }).getAttribute("autocomplete")
+
+      expect(tokenOf("Address line 1")).toBe("address-line1")
+      expect(tokenOf("Address line 2")).toBe("address-line2")
+      expect(tokenOf("City")).toBe("address-level2")
+      expect(tokenOf("Region")).toBe("address-level1")
+      expect(tokenOf("Postal code")).toBe("postal-code")
+    })
+
     it("honours partLabels overrides", () => {
       render(
         <F0LocationInput

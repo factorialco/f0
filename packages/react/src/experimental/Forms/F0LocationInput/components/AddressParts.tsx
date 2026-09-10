@@ -21,6 +21,20 @@ type Props = {
  * Every part typed by hand. The two address lines take the full width; city,
  * region and postal code share one row.
  */
+/**
+ * The HTML autofill tokens for a postal address, so the browser can offer the
+ * address it already has instead of making the user type six fields. The
+ * country is missing on purpose: it is a select, and `country-name` only
+ * applies to a text field.
+ */
+const autofillTokens = {
+  addressLine1: "address-line1",
+  addressLine2: "address-line2",
+  city: "address-level2",
+  state: "address-level1",
+  postalCode: "postal-code",
+} as const satisfies Record<EditableLocationPart, string>
+
 export const AddressParts = ({
   value,
   labels,
@@ -43,6 +57,7 @@ export const AddressParts = ({
     <F0TextInput
       key={key}
       label={labels[key]}
+      autocomplete={autofillTokens[key]}
       placeholder={placeholders[key]}
       value={value?.[key] ?? ""}
       onChange={(text) => onChangePart(key, text)}
