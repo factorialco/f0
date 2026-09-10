@@ -15229,10 +15229,7 @@ declare type InputFieldProps<T> = {
     maskToggleAlwaysVisible?: boolean;
     /** Overrides the eye's `[show, hide]` names. Defaults to naming the field. */
     maskToggleLabels?: [string, string];
-    /**
-     * Focuses the field once it stops being `readonly` or `disabled`, which
-     * `autoFocus` cannot do because it only fires at mount.
-     */
+    /** Focuses the field once it stops being `readonly`, which `autoFocus` cannot. */
     focusOnEditable?: boolean;
 };
 
@@ -20804,10 +20801,11 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        indent: {
-            setIndent: (level: number) => ReturnType;
-            unsetIndent: () => ReturnType;
-            outdent: () => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -20815,11 +20813,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        indent: {
+            setIndent: (level: number) => ReturnType;
+            unsetIndent: () => ReturnType;
+            outdent: () => ReturnType;
         };
     }
 }

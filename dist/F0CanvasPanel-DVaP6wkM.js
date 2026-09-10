@@ -117875,8 +117875,7 @@ const _Y1 = ({ text: e }) => /* @__PURE__ */ i(
       {
         className: U(
           "flex flex-col gap-2",
-          // Without this a flex-row item collapses to the child input's
-          // intrinsic width and clips the value.
+          // Or a flex-row item collapses to the input's intrinsic width.
           "w-full min-w-0",
           "pointer-events-none",
           t && "cursor-not-allowed",
@@ -117938,8 +117937,7 @@ const _Y1 = ({ text: e }) => /* @__PURE__ */ i(
                 ],
                 "active-within:border-f1-border active-within:ring-1 active-within:ring-f1-border-hover",
                 n && !q && "border-f1-border-secondary bg-f1-background-secondary",
-                // Same box the editable field will occupy, so the row does not
-                // move when it is clicked.
+                // Same box the editable field takes, so the row does not move.
                 L2 && XI({ size: f, canGrow: m }),
                 I2 && "cursor-text hover:bg-f1-background-secondary",
                 t && "cursor-not-allowed bg-f1-background-tertiary",
@@ -117980,8 +117978,7 @@ const _Y1 = ({ text: e }) => /* @__PURE__ */ i(
                         onClick: c2,
                         className: "w-full min-w-0 flex-1",
                         children: Fe(e, {
-                          // Spread, not `undefined`: that would strip the child's own
-                          // type (search, email, tel) down to text.
+                          // Spread, or an `undefined` strips the child's own type.
                           ...O2 && B2 ? { type: "password" } : {},
                           onChange: Q2,
                           onBlur: () => {
