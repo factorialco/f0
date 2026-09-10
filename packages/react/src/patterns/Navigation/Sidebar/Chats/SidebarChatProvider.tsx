@@ -43,6 +43,45 @@ export type SidebarChatProviderProps = {
   initialActiveChatId?: string
 }
 
+const patchChatIn = (
+  groups: SidebarChatGroup[],
+  id: string,
+  patch: Partial<SidebarChat>
+) =>
+  mapChats(groups, (chats) =>
+    chats.map((c) => (c.id === id ? { ...c, ...patch } : c))
+  )
+
+const removeChatFrom = (groups: SidebarChatGroup[], id: string) =>
+  mapChats(groups, (chats) => chats.filter((c) => c.id !== id))
+
+const upsertChatIn = (
+  groups: SidebarChatGroup[],
+  groupId: string,
+  chat: SidebarChat
+) => {
+  const exists = groups.some((group) =>
+    group.chats.some((c) => c.id === chat.id)
+  )
+  if (exists) {
+    return patchChatIn(groups, chat.id, chat)
+  }
+  return mapGroup(groups, groupId, (group) => ({
+    ...group,
+    chats: [...group.chats, chat],
+  }))
+}
+
+const reorderChats = (group: SidebarChatGroup, orderedIds: string[]) => {
+  const byId = new Map(group.chats.map((c) => [c.id, c]))
+  const reordered = orderedIds
+    .map((id) => byId.get(id))
+    .filter((c): c is SidebarChat => Boolean(c))
+  // Keep any chat not referenced in orderedIds at the end.
+  const rest = group.chats.filter((c) => !orderedIds.includes(c.id))
+  return { ...group, chats: [...reordered, ...rest] }
+}
+
 export const SidebarChatProvider = ({
   children,
   initialGroups = [],
@@ -61,47 +100,15 @@ export const SidebarChatProvider = ({
       setGroups,
       setActiveChat: (id) => setActiveChatId(id ?? undefined),
       upsertChat: (groupId, chat) =>
-        setGroups((prev) => {
-          const exists = prev.some((group) =>
-            group.chats.some((c) => c.id === chat.id)
-          )
-          if (exists) {
-            return mapChats(prev, (chats) =>
-              chats.map((c) => (c.id === chat.id ? { ...c, ...chat } : c))
-            )
-          }
-          return mapGroup(prev, groupId, (group) => ({
-            ...group,
-            chats: [...group.chats, chat],
-          }))
-        }),
+        setGroups((prev) => upsertChatIn(prev, groupId, chat)),
       updateChat: (id, patch) =>
-        setGroups((prev) =>
-          mapChats(prev, (chats) =>
-            chats.map((c) => (c.id === id ? { ...c, ...patch } : c))
-          )
-        ),
-      removeChat: (id) =>
-        setGroups((prev) =>
-          mapChats(prev, (chats) => chats.filter((c) => c.id !== id))
-        ),
+        setGroups((prev) => patchChatIn(prev, id, patch)),
+      removeChat: (id) => setGroups((prev) => removeChatFrom(prev, id)),
       setUnread: (id, count) =>
-        setGroups((prev) =>
-          mapChats(prev, (chats) =>
-            chats.map((c) => (c.id === id ? { ...c, unreadCount: count } : c))
-          )
-        ),
+        setGroups((prev) => patchChatIn(prev, id, { unreadCount: count })),
       reorder: (groupId, orderedIds) =>
         setGroups((prev) =>
-          mapGroup(prev, groupId, (group) => {
-            const byId = new Map(group.chats.map((c) => [c.id, c]))
-            const reordered = orderedIds
-              .map((id) => byId.get(id))
-              .filter((c): c is SidebarChat => Boolean(c))
-            // Keep any chat not referenced in orderedIds at the end.
-            const rest = group.chats.filter((c) => !orderedIds.includes(c.id))
-            return { ...group, chats: [...reordered, ...rest] }
-          })
+          mapGroup(prev, groupId, (group) => reorderChats(group, orderedIds))
         ),
     }),
     []

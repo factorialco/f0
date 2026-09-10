@@ -2,13 +2,19 @@ import {
   endOfYear,
   isAfter,
   isBefore,
-  isSameYear,
   isWithinInterval,
   startOfYear,
 } from "date-fns"
 import { AnimatePresence, motion } from "motion/react"
 import { cn, focusRing } from "@/lib/utils"
 import { CalendarMode, DateRange } from "../../types"
+import { isDateRange, rangeAfterPeriodClick } from "../periodClick"
+
+/** The whole year a date falls in. */
+const yearRange = (date: Date): DateRange => ({
+  from: startOfYear(date),
+  to: endOfYear(date),
+})
 
 interface YearViewProps {
   mode: CalendarMode
@@ -31,13 +37,6 @@ export function YearView({
 }: YearViewProps) {
   const today = new Date()
 
-  // Check if a value is a DateRange
-  const isDateRange = (value: unknown): value is DateRange => {
-    return Boolean(
-      value && typeof value === "object" && ("from" in value || "to" in value)
-    )
-  }
-
   // Generate years for a decade
   const decadeStart = Math.floor(decade / 10) * 10
   const years = [
@@ -48,44 +47,18 @@ export function YearView({
 
   // Handle year click
   const handleYearClick = (year: number) => {
-    const selectedDate = new Date(year, 0, 1)
+    const clicked = yearRange(new Date(year, 0, 1))
 
     if (mode === "single") {
       // Return the full year range
-      onSelect?.({
-        from: startOfYear(selectedDate),
-        to: endOfYear(selectedDate),
-      })
-    } else if (mode === "range") {
-      if (selected && isDateRange(selected) && selected.from && !selected.to) {
-        // Complete the range
-        if (isSameYear(selected.from, selectedDate)) {
-          // If clicking the same year, select just that year
-          onSelect?.({
-            from: startOfYear(selected.from),
-            to: endOfYear(selected.from),
-          })
-        } else {
-          // Create a range between the two years
-          const start = isBefore(selected.from, selectedDate)
-            ? selected.from
-            : selectedDate
-          const end = isBefore(selected.from, selectedDate)
-            ? selectedDate
-            : selected.from
+      onSelect?.(clicked)
+      return
+    }
 
-          onSelect?.({
-            from: startOfYear(start),
-            to: endOfYear(end),
-          })
-        }
-      } else {
-        // Start a new range
-        onSelect?.({
-          from: selectedDate,
-          to: undefined,
-        })
-      }
+    if (mode === "range") {
+      onSelect?.(
+        rangeAfterPeriodClick({ selected, clicked, periodRangeOf: yearRange })
+      )
     }
   }
 
@@ -98,17 +71,16 @@ export function YearView({
     if (!isDateRange(selected)) {
       // Single date selection
       return selected.getFullYear() === year
-    } else {
-      // Range selection
-      if (selected.from && selected.to) {
-        const current = new Date(year, 6, 1)
-        return isWithinInterval(current, {
-          start: selected.from,
-          end: selected.to,
-        })
-      } else if (selected.from) {
-        return selected.from.getFullYear() === year
-      }
+    }
+    // Range selection
+    if (selected.from && selected.to) {
+      const current = new Date(year, 6, 1)
+      return isWithinInterval(current, {
+        start: selected.from,
+        end: selected.to,
+      })
+    } else if (selected.from) {
+      return selected.from.getFullYear() === year
     }
 
     return false

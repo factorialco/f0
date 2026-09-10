@@ -4,60 +4,29 @@ import { numericFormatter } from "../utils/numericFormatter"
 
 describe("numericFormatter", () => {
   describe("basic number formatting", () => {
-    it("should format a simple number value", () => {
-      const value: NumericValue = { value: 123.456 }
-      const result = numericFormatter(value)
-      expect(result).toBe("123.46")
-    })
-
-    it("should format a whole number", () => {
-      const value: NumericValue = { value: 100 }
-      const result = numericFormatter(value)
-      expect(result).toBe("100")
-    })
-
-    it("should format zero", () => {
-      const value: NumericValue = { value: 0 }
-      const result = numericFormatter(value)
-      expect(result).toBe("0")
-    })
-
-    it("should format negative numbers", () => {
-      const value: NumericValue = { value: -123.456 }
-      const result = numericFormatter(value)
-      expect(result).toBe("-123.46")
-    })
-
-    it("should format large numbers", () => {
-      const value: NumericValue = { value: 1234567.89 }
-      const result = numericFormatter(value)
-      expect(result).toBe("1,234,567.89")
+    it.each([
+      { name: "a simple number value", value: 123.456, expected: "123.46" },
+      { name: "a whole number", value: 100, expected: "100" },
+      { name: "zero", value: 0, expected: "0" },
+      { name: "negative numbers", value: -123.456, expected: "-123.46" },
+      { name: "large numbers", value: 1234567.89, expected: "1,234,567.89" },
+    ])("should format $name", ({ value, expected }) => {
+      const numericValue: NumericValue = { value }
+      const result = numericFormatter(numericValue)
+      expect(result).toBe(expected)
     })
   })
 
   describe("value_x100 formatting", () => {
-    it("should format value_x100 correctly", () => {
-      const value: NumericValue = { value_x100: 12345 }
+    it.each([
+      { name: "value_x100 correctly", value_x100: 12345, expected: "123.45" },
+      { name: "value_x100 with zero", value_x100: 0, expected: "0" },
+      { name: "negative value_x100", value_x100: -12345, expected: "-123.45" },
+      { name: "value_x100 with single digit", value_x100: 5, expected: "0.05" },
+    ])("should format $name", ({ value_x100, expected }) => {
+      const value: NumericValue = { value_x100 }
       const result = numericFormatter(value)
-      expect(result).toBe("123.45")
-    })
-
-    it("should format value_x100 with zero", () => {
-      const value: NumericValue = { value_x100: 0 }
-      const result = numericFormatter(value)
-      expect(result).toBe("0")
-    })
-
-    it("should format negative value_x100", () => {
-      const value: NumericValue = { value_x100: -12345 }
-      const result = numericFormatter(value)
-      expect(result).toBe("-123.45")
-    })
-
-    it("should format value_x100 with single digit", () => {
-      const value: NumericValue = { value_x100: 5 }
-      const result = numericFormatter(value)
-      expect(result).toBe("0.05")
+      expect(result).toBe(expected)
     })
   })
 
@@ -209,28 +178,23 @@ describe("numericFormatter", () => {
   })
 
   describe("Numeric type - direct number values", () => {
-    it("should format a direct number value", () => {
-      const value: Numeric = 123.456
-      const result = numericFormatter(value)
-      expect(result).toBe("123.46")
-    })
-
-    it("should format a direct whole number", () => {
-      const value: Numeric = 100
-      const result = numericFormatter(value)
-      expect(result).toBe("100")
-    })
-
-    it("should format a direct negative number", () => {
-      const value: Numeric = -123.456
-      const result = numericFormatter(value)
-      expect(result).toBe("-123.46")
-    })
-
-    it("should format a direct number without units", () => {
-      const value: Numeric = 123.45
-      const result = numericFormatter(value)
-      expect(result).toBe("123.45")
+    it.each([
+      { name: "a direct number value", value: 123.456, expected: "123.46" },
+      { name: "a direct whole number", value: 100, expected: "100" },
+      {
+        name: "a direct negative number",
+        value: -123.456,
+        expected: "-123.46",
+      },
+      {
+        name: "a direct number without units",
+        value: 123.45,
+        expected: "123.45",
+      },
+    ])("should format $name", ({ value, expected }) => {
+      const numeric: Numeric = value
+      const result = numericFormatter(numeric)
+      expect(result).toBe(expected)
     })
 
     it("should format a direct number with custom decimal places", () => {

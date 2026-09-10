@@ -396,6 +396,11 @@ export const defaultTranslations = {
     thoughtsGroupTitle: "Reasoning",
     resourcesGroupTitle: "Resources",
     thinking: "Thinking...",
+    // How long the turn has been thinking, shown beside the step that is
+    // running. Two keys rather than one unbounded second count, because "137s"
+    // reads badly past a couple of minutes — the consumer picks.
+    thinkingElapsedSeconds: "{{seconds}}s",
+    thinkingElapsedMinutes: "{{minutes}}m {{seconds}}s",
     feedbackModal: {
       positive: {
         title: "What did you like about this response?",
@@ -596,6 +601,7 @@ export const defaultTranslations = {
     // Composer errors (upload/voice failures are transient; validation may persist).
     tooManyFilesError: "You can attach up to {{maxFiles}} files at once",
     fileTooLargeError: "Each file must be {{maxFileSize}} or smaller",
+    messageTooLongError: "Messages can be up to {{maxCharacters}} characters",
     fileUploadError: "Upload failed",
     micPermissionDenied:
       "Microphone access is blocked. Allow it in your browser settings to dictate.",

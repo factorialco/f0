@@ -56,96 +56,153 @@ const PHOTO_AVATAR_COLORS = [
   "camel",
 ] as const satisfies readonly F0ChatSenderColor[]
 
-const person = (
-  id: string,
-  firstName: string,
-  lastName: string,
-  subtitle: string,
+type PersonSeed = {
+  id: string
+  firstName: string
+  lastName: string
+  subtitle: string
+  online?: boolean
+  vacation?: boolean
   // `image` (index into the mock photo set) gives a photo avatar; omit it to use
   // the initials + colour avatar — the mock mixes both on purpose.
-  opts: {
-    online?: boolean
-    vacation?: boolean
-    image?: number
-    avatarColor?: F0ChatSenderColor
-  } = {}
-): MockPerson =>
-  ({
-    id,
-    name: `${firstName} ${lastName}`,
-    subtitle,
-    avatar: {
-      type: "person",
-      firstName,
-      lastName,
-      ...(opts.image !== undefined
-        ? { src: mockImage("person", opts.image) }
-        : {}),
-    },
-    ...(opts.avatarColor
-      ? { avatarColor: opts.avatarColor }
-      : opts.image !== undefined
-        ? {
-            avatarColor:
-              PHOTO_AVATAR_COLORS[opts.image % PHOTO_AVATAR_COLORS.length],
-          }
-        : {}),
-    profileHref: `/people/${id}`,
-    online: opts.online ?? false,
-    vacation: opts.vacation,
-  })
+  image?: number
+  avatarColor?: F0ChatSenderColor
+}
+
+const person = ({
+  id,
+  firstName,
+  lastName,
+  subtitle,
+  ...opts
+}: PersonSeed): MockPerson => ({
+  id,
+  name: `${firstName} ${lastName}`,
+  subtitle,
+  avatar: {
+    type: "person",
+    firstName,
+    lastName,
+    ...(opts.image !== undefined
+      ? { src: mockImage("person", opts.image) }
+      : {}),
+  },
+  ...(opts.avatarColor
+    ? { avatarColor: opts.avatarColor }
+    : opts.image !== undefined
+      ? {
+          avatarColor:
+            PHOTO_AVATAR_COLORS[opts.image % PHOTO_AVATAR_COLORS.length],
+        }
+      : {}),
+  profileHref: `/people/${id}`,
+  online: opts.online ?? false,
+  vacation: opts.vacation,
+})
 
 // A deliberate mix: some people have a photo (`image`), others fall back to the
 // initials + colour avatar (and their name is tinted to match — WhatsApp-style).
-export const ME = person("me", "Jordan", "Avery", "Product Manager", {
+export const ME = person({
+  id: "me",
+  firstName: "Jordan",
+  lastName: "Avery",
+  subtitle: "Product Manager",
   online: true,
   image: 4,
 })
 // Online people reply when you message them; offline people never do.
-const ELEANOR = person(
-  "u_eleanor",
-  "Eleanor",
-  "Whitfield",
-  "Senior Product Designer",
-  { online: true, image: 0 }
-)
-const MARCUS = person("u_marcus", "Marcus", "Bennett", "Engineering Manager", {
+const ELEANOR = person({
+  id: "u_eleanor",
+  firstName: "Eleanor",
+  lastName: "Whitfield",
+  subtitle: "Senior Product Designer",
+  online: true,
+  image: 0,
+})
+const MARCUS = person({
+  id: "u_marcus",
+  firstName: "Marcus",
+  lastName: "Bennett",
+  subtitle: "Engineering Manager",
   online: true,
   image: 1,
 })
-const PRIYA = person("u_priya", "Priya", "Raman", "Account Executive", {
+const PRIYA = person({
+  id: "u_priya",
+  firstName: "Priya",
+  lastName: "Raman",
+  subtitle: "Account Executive",
   online: true,
   vacation: true,
   image: 2,
 })
 // No photo — initials + colour avatar.
-const THEO = person("u_theo", "Theo", "Lindqvist", "On vacation until Monday", {
+const THEO = person({
+  id: "u_theo",
+  firstName: "Theo",
+  lastName: "Lindqvist",
+  subtitle: "On vacation until Monday",
   vacation: true,
 })
-const NADIA = person("u_nadia", "Nadia", "Costa", "Recruiter")
-const OWEN = person("u_owen", "Owen", "Carter", "Finance Analyst", {
+const NADIA = person({
+  id: "u_nadia",
+  firstName: "Nadia",
+  lastName: "Costa",
+  subtitle: "Recruiter",
+})
+const OWEN = person({
+  id: "u_owen",
+  firstName: "Owen",
+  lastName: "Carter",
+  subtitle: "Finance Analyst",
   online: true,
   image: 3,
 })
-const HARPER = person("u_harper", "Harper", "Quinn", "Customer Success", {
+const HARPER = person({
+  id: "u_harper",
+  firstName: "Harper",
+  lastName: "Quinn",
+  subtitle: "Customer Success",
   online: true,
   image: 7,
 })
 // No photo — initials + colour avatar.
-const GRACE = person("u_grace", "Grace", "Liang", "Data Analyst", {
+const GRACE = person({
+  id: "u_grace",
+  firstName: "Grace",
+  lastName: "Liang",
+  subtitle: "Data Analyst",
   online: true,
 })
-const SAM = person("u_sam", "Sam", "Okafor", "Frontend Engineer", {
+const SAM = person({
+  id: "u_sam",
+  firstName: "Sam",
+  lastName: "Okafor",
+  subtitle: "Frontend Engineer",
   online: true,
   image: 5,
 })
-const NOAH = person("u_noah", "Noah", "Bergström", "QA Engineer")
-const ISLA = person("u_isla", "Isla", "Romano", "Content Strategist", {
+const NOAH = person({
+  id: "u_noah",
+  firstName: "Noah",
+  lastName: "Bergström",
+  subtitle: "QA Engineer",
+})
+const ISLA = person({
+  id: "u_isla",
+  firstName: "Isla",
+  lastName: "Romano",
+  subtitle: "Content Strategist",
   online: true,
   image: 6,
 })
 // No photo — initials + colour avatar.
-const VIKTOR = person("u_viktor", "Viktor", "Hale", "Staff Engineer")
+const VIKTOR = person({
+  id: "u_viktor",
+  firstName: "Viktor",
+  lastName: "Hale",
+  subtitle: "Staff Engineer",
+})
 
 /** The brand mark, the same one the ApplicationFrame sidebar shows. */
 const FACTORIAL_AVATAR: AvatarVariant = {
@@ -172,12 +229,12 @@ const FACTORIAL: MockPerson = {
  * so the message-info list has a realistic overflow state. */
 const RECEIPT_DEMO_READERS = Array.from({ length: 42 }, (_, index) => {
   const number = String(index + 1).padStart(2, "0")
-  return person(
-    `u_receipt_demo_${number}`,
-    "Demo",
-    `Reader ${number}`,
-    "Quarterly Reporting member"
-  )
+  return person({
+    id: `u_receipt_demo_${number}`,
+    firstName: "Demo",
+    lastName: `Reader ${number}`,
+    subtitle: "Quarterly Reporting member",
+  })
 })
 
 // ---------------------------------------------------------------------------
@@ -829,9 +886,11 @@ const everythingStressLines = (): Line[] => {
 
 export const SEEDS: Seed[] = [
   // ANNOUNCEMENT — the product's own noticeboard, and the welcome screen every
-  // employee lands on. Nothing here is sent: both messages are seeded, which is
+  // employee lands on. Nothing here is sent: every message is seeded, which is
   // why the timestamp is anchored (see `yesterdayAt`) and the per-message clock
   // doesn't render. Read-only comes from the channel TYPE, not `readOnly`.
+  // The copy is factorial's noticeboard verbatim (admin variant, the one with
+  // the permissions card) — keep both in sync.
   {
     id: "dm-factorial",
     type: "announcement",
@@ -840,27 +899,31 @@ export const SEEDS: Seed[] = [
     readOnlyNotice: "Only Factorial can send messages",
     participants: [FACTORIAL],
     // Badge in the sidebar, but no unread divider inside — see MockChatApp.
-    unread: 2,
+    unread: 3,
     myRole: "guest",
     lines: [
       {
         from: FACTORIAL,
         min: yesterdayAt(22, 14),
-        body: `👋 Hi ${ME.name.split(" ")[0]}. This is your team's chat — right now only administrators can see it.`,
+        body: `👋 Hi ${ME.name.split(" ")[0]}! Welcome to your company's chat.`,
       },
       {
         from: FACTORIAL,
         min: yesterdayAt(22, 14) - 1,
+        body: "No new app, no new password — everyone you work with is already here. Files, voice notes and more, from your computer or your phone 💬",
+      },
+      {
+        from: FACTORIAL,
+        min: yesterdayAt(22, 14) - 2,
         body: "",
         attachments: [
           {
             kind: "card",
             avatar: { type: "icon", icon: People },
-            title: "Give your team access",
-            description:
-              "One step. We've prepared 📣 General for when they join.",
+            title: "Set up the chat for your company",
+            description: "Choose who sees each channel and who can post 🔐",
             action: {
-              label: "Give your team access",
+              label: "Manage permissions",
               onClick: () => {},
             },
           },

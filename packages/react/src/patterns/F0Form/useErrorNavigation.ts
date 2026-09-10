@@ -45,7 +45,7 @@ const applyErrorNavigationHighlight = (element: HTMLElement) => {
 
   // Remove and re-add class to restart animation
   element.classList.remove(errorNavigateClassName)
-  void element.offsetWidth // Force reflow
+  element.getBoundingClientRect() // Force reflow
   element.classList.add(errorNavigateClassName)
 
   const timeout = setTimeout(() => {

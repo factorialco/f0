@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "import"],
+  "plugins": ["react", "typescript", "import", "unicorn", "oxc", "promise"],
   "categories": {
     "correctness": "error"
   },
@@ -14,6 +14,23 @@
     "no-regex-spaces": "error",
     "no-unexpected-multiline": "error",
     "preserve-caught-error": "error",
+
+    // oxlint's own rules from outside the `correctness` category, cherry-picked.
+    // `unicorn`, `oxc` and `promise` are also enabled as plugins above so their
+    // `correctness` rules run.
+    "eqeqeq": ["error", "always", { "null": "ignore" }], // `x == null` is the nullish check, keep it
+    "no-else-return": "error",
+    "no-unneeded-ternary": "error",
+    "no-useless-constructor": "error",
+    "no-await-in-loop": "error",
+    "radix": "error",
+    "react/jsx-no-useless-fragment": ["error", { "allowExpressions": true }], // `<>{children}</>` is how a ReactNode becomes an element
+    "react/no-unescaped-entities": "error",
+    "react/iframe-missing-sandbox": "error",
+    "import/no-empty-named-blocks": "error",
+    "oxc/no-accumulating-spread": "error",
+    "unicorn/prefer-set-has": "error",
+    "promise/always-return": ["error", { "ignoreLastCallback": true }], // a lost value only matters when the chain continues
 
     // typescript-eslint strict + stylistic, no type information needed.
     "typescript/no-dynamic-delete": "error",
@@ -37,7 +54,13 @@
     "import/no-duplicates": "error",
     "import/namespace": "error",
 
+    // DEBT. Turn on once the code is fixed. Number = violations when this
+    // was written. Do not add new violations.
+    "react/no-array-index-key": "off", // 3
+
     // OFF ON PURPOSE. Not planned to be enabled.
+    "typescript/ban-types": "off", // deprecated upstream; it bans `(string & {})`, which keeps autocomplete on open string unions. no-unsafe-function-type covers the useful part
+    "oxc/no-map-spread": "off", // wants Object.assign onto the mapped item, which mutates the input; props and state are immutable here. Its autofix also breaks code (oxlint 1.43)
     "import/default": "off", // false positives with CommonJS interop packages
     "import/no-named-as-default": "off", // false positives with CommonJS interop packages
     "import/no-named-as-default-member": "off" // false positives with CommonJS interop packages
@@ -88,7 +111,8 @@
         "**/__tests__/**"
       ],
       "rules": {
-        "no-console": "off"
+        "no-console": "off",
+        "no-await-in-loop": "off" // stories and tests step through flows one await at a time
       }
     },
     {

@@ -2,7 +2,6 @@ import {
   endOfMonth,
   isAfter,
   isBefore,
-  isSameMonth,
   isWithinInterval,
   startOfMonth,
 } from "date-fns"
@@ -10,6 +9,87 @@ import { AnimatePresence, motion } from "motion/react"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { CalendarMode, DateRange } from "../../types"
+import { isDateRange, rangeAfterPeriodClick } from "../periodClick"
+
+/** The whole month a date falls in. */
+const monthRange = (date: Date): DateRange => ({
+  from: startOfMonth(date),
+  to: endOfMonth(date),
+})
+
+/** A month cell's own classes: its size, its selection, its ends of a range. */
+function monthCellClasses({
+  compact,
+  disabled,
+  mode,
+  isSelected,
+  isStart,
+  isEnd,
+}: {
+  compact: boolean
+  disabled: boolean | undefined
+  mode: CalendarMode
+  isSelected: boolean
+  isStart: boolean
+  isEnd: boolean
+}): string {
+  return cn(
+    "relative isolate flex items-center justify-center font-medium text-f1-foreground transition-colors duration-100 after:absolute after:inset-0 after:z-0 after:bg-f1-background-selected-bold after:opacity-0 after:transition-all after:duration-100 after:content-['']",
+    compact
+      ? "h-8 rounded-sm after:rounded-sm"
+      : "h-10 rounded-md after:rounded-md",
+    !disabled &&
+      "hover:bg-f1-background-hover hover:after:bg-f1-background-selected-bold-hover",
+    disabled && "cursor-not-allowed text-f1-foreground-secondary",
+    focusRing(),
+    isSelected &&
+      mode === "single" &&
+      "bg-f1-background-selected-bold after:opacity-100 hover:bg-f1-background-selected-bold-hover [&>span]:z-10 [&>span]:text-f1-foreground-inverse",
+    isSelected &&
+      mode === "range" &&
+      cn(
+        "rounded-none bg-f1-background-selected hover:bg-f1-background-selected [&>span]:text-f1-foreground-selected",
+        compact
+          ? "[&:nth-child(4n+1)]:rounded-s-sm [&:nth-child(4n+4)]:rounded-e-sm"
+          : "[&:nth-child(3n+1)]:rounded-s-md [&:nth-child(3n+3)]:rounded-e-md"
+      ),
+    (isStart || isEnd) &&
+      mode === "range" &&
+      "rounded-none bg-f1-background-selected after:opacity-100 [&>span]:z-10 [&>span]:text-f1-foreground-inverse",
+    isStart &&
+      mode === "range" &&
+      isEnd &&
+      (compact ? "rounded-s-sm" : "rounded-s-md"),
+    isEnd && mode === "range" && (compact ? "rounded-e-sm" : "rounded-e-md")
+  )
+}
+
+/** The "today" underline, which has to stay legible over every cell state. */
+function currentMonthDotClasses({
+  compact,
+  mode,
+  isSelected,
+  isStart,
+  isEnd,
+}: {
+  compact: boolean
+  mode: CalendarMode
+  isSelected: boolean
+  isStart: boolean
+  isEnd: boolean
+}): string {
+  return cn(
+    "absolute inset-x-0 z-20 mx-auto h-0.5 rounded-full bg-f1-background-selected-bold transition-colors duration-100",
+    compact ? "bottom-0.5 w-1" : "bottom-1 w-1.5",
+    isSelected && mode === "single" && "bg-f1-background",
+    (isStart || isEnd) && "bg-f1-background",
+    !isStart &&
+      !isEnd &&
+      isSelected &&
+      mode === "range" &&
+      "bg-f1-background-selected-bold"
+  )
+}
 
 interface MonthViewProps {
   mode: CalendarMode
@@ -51,55 +131,20 @@ export function MonthView({
 
   const today = new Date()
 
-  // Check if a value is a DateRange
-  const isDateRange = (value: unknown): value is DateRange => {
-    return Boolean(
-      value && typeof value === "object" && ("from" in value || "to" in value)
-    )
-  }
-
   // Handle click on a month
   const handleMonthClick = (monthIndex: number) => {
-    const selectedDate = new Date(year, monthIndex, 1)
-    const monthStart = startOfMonth(selectedDate)
-    const monthEnd = endOfMonth(selectedDate)
+    const clicked = monthRange(new Date(year, monthIndex, 1))
 
     if (mode === "single") {
       // Return the full month range
-      onSelect?.({
-        from: monthStart,
-        to: monthEnd,
-      })
-    } else if (mode === "range") {
-      if (selected && isDateRange(selected) && selected.from && !selected.to) {
-        // Complete the range
-        const fromDate = selected.from
+      onSelect?.(clicked)
+      return
+    }
 
-        if (isSameMonth(fromDate, selectedDate)) {
-          // If clicking the same month, select just that month
-          onSelect?.({
-            from: startOfMonth(selectedDate),
-            to: endOfMonth(selectedDate),
-          })
-        } else {
-          // Create a range between the two months
-          const start = isBefore(fromDate, selectedDate)
-            ? fromDate
-            : selectedDate
-          const end = isBefore(fromDate, selectedDate) ? selectedDate : fromDate
-
-          onSelect?.({
-            from: startOfMonth(start),
-            to: endOfMonth(end),
-          })
-        }
-      } else {
-        // Start a new range
-        onSelect?.({
-          from: selectedDate,
-          to: undefined,
-        })
-      }
+    if (mode === "range") {
+      onSelect?.(
+        rangeAfterPeriodClick({ selected, clicked, periodRangeOf: monthRange })
+      )
     }
   }
 
@@ -118,19 +163,18 @@ export function MonthView({
       return (
         selected.getMonth() === monthIndex && selected.getFullYear() === year
       )
-    } else {
-      if (selected.from && selected.to) {
-        const current = new Date(year, monthIndex, 15)
-        return isWithinInterval(current, {
-          start: selected.from,
-          end: selected.to,
-        })
-      } else if (selected.from) {
-        return (
-          selected.from.getMonth() === monthIndex &&
-          selected.from.getFullYear() === year
-        )
-      }
+    }
+    if (selected.from && selected.to) {
+      const current = new Date(year, monthIndex, 15)
+      return isWithinInterval(current, {
+        start: selected.from,
+        end: selected.to,
+      })
+    } else if (selected.from) {
+      return (
+        selected.from.getMonth() === monthIndex &&
+        selected.from.getFullYear() === year
+      )
     }
 
     return false
@@ -210,52 +254,25 @@ export function MonthView({
               key={month.index}
               onClick={() => handleMonthClick(month.index)}
               disabled={disabled}
-              className={cn(
-                "relative isolate flex items-center justify-center font-medium text-f1-foreground transition-colors duration-100 after:absolute after:inset-0 after:z-0 after:bg-f1-background-selected-bold after:opacity-0 after:transition-all after:duration-100 after:content-['']",
-                compact
-                  ? "h-8 rounded-sm after:rounded-sm"
-                  : "h-10 rounded-md after:rounded-md",
-                !disabled &&
-                  "hover:bg-f1-background-hover hover:after:bg-f1-background-selected-bold-hover",
-                disabled && "cursor-not-allowed text-f1-foreground-secondary",
-                focusRing(),
-                isSelected &&
-                  mode === "single" &&
-                  "bg-f1-background-selected-bold after:opacity-100 hover:bg-f1-background-selected-bold-hover [&>span]:z-10 [&>span]:text-f1-foreground-inverse",
-                isSelected &&
-                  mode === "range" &&
-                  cn(
-                    "rounded-none bg-f1-background-selected hover:bg-f1-background-selected [&>span]:text-f1-foreground-selected",
-                    compact
-                      ? "[&:nth-child(4n+1)]:rounded-s-sm [&:nth-child(4n+4)]:rounded-e-sm"
-                      : "[&:nth-child(3n+1)]:rounded-s-md [&:nth-child(3n+3)]:rounded-e-md"
-                  ),
-                (isStart || isEnd) &&
-                  mode === "range" &&
-                  "rounded-none bg-f1-background-selected after:opacity-100 [&>span]:z-10 [&>span]:text-f1-foreground-inverse",
-                isStart &&
-                  mode === "range" &&
-                  isEnd &&
-                  (compact ? "rounded-s-sm" : "rounded-s-md"),
-                isEnd &&
-                  mode === "range" &&
-                  (compact ? "rounded-e-sm" : "rounded-e-md")
-              )}
+              className={monthCellClasses({
+                compact,
+                disabled,
+                mode,
+                isSelected,
+                isStart,
+                isEnd,
+              })}
             >
               <span>{month.name}</span>
               {isCurrent ? (
                 <div
-                  className={cn(
-                    "absolute inset-x-0 z-20 mx-auto h-0.5 rounded-full bg-f1-background-selected-bold transition-colors duration-100",
-                    compact ? "bottom-0.5 w-1" : "bottom-1 w-1.5",
-                    isSelected && mode === "single" && "bg-f1-background",
-                    (isStart || isEnd) && "bg-f1-background",
-                    !isStart &&
-                      !isEnd &&
-                      isSelected &&
-                      mode === "range" &&
-                      "bg-f1-background-selected-bold"
-                  )}
+                  className={currentMonthDotClasses({
+                    compact,
+                    mode,
+                    isSelected,
+                    isStart,
+                    isEnd,
+                  })}
                 />
               ) : null}
             </button>

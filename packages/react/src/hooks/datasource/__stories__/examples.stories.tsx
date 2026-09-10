@@ -81,8 +81,8 @@ const createMockDataAdapter = () =>
 
       if (cursor) {
         filteredUsers = filteredUsers.slice(
-          parseInt(cursor),
-          parseInt(cursor) + (perPage ?? 10)
+          parseInt(cursor, 10),
+          parseInt(cursor, 10) + (perPage ?? 10)
         )
       }
 

@@ -642,12 +642,11 @@ const F0SelectComponent = forwardRef(function Select<
     [handleSelectAllItems]
   )
 
-  const getMultiSelectionPayload = useCallback(() => {
-    const checkedItems = Array.from(selectedState.items.values() || []).filter(
-      (item) => item.checked
-    )
-
-    const extractOriginalItem = (
+  // Extract the original item from a record.
+  // For static options: the record IS the option, and option.item contains the original data.
+  // For datasource: the record is the original data, optionMapper creates the option.
+  const extractOriginalItem = useCallback(
+    (
       record: ActualRecordType | undefined
     ): ResolvedRecordType<R> | undefined => {
       if (!record) {
@@ -656,13 +655,19 @@ const F0SelectComponent = forwardRef(function Select<
       if (source) {
         return record as unknown as ResolvedRecordType<R>
       }
-
       const option = record as unknown as F0SelectItemObject<
         T,
         ResolvedRecordType<R>
       >
       return option.item
-    }
+    },
+    [source]
+  )
+
+  const getMultiSelectionPayload = useCallback(() => {
+    const checkedItems = Array.from(selectedState.items.values() || []).filter(
+      (item) => item.checked
+    )
 
     const records = checkedItems
       .map((item) => item.item)
@@ -693,7 +698,7 @@ const F0SelectComponent = forwardRef(function Select<
       originalItems,
       options,
     }
-  }, [optionMapper, selectedState.items, source])
+  }, [extractOriginalItem, optionMapper, selectedState.items, source])
 
   /**
    * Emit the value change. The type depends on the multiple prop and selectionMode.
@@ -716,27 +721,6 @@ const F0SelectComponent = forwardRef(function Select<
     // and clearing would trigger useSelectable to reset the selection
     if (!multiple && !openLocal && !asList) {
       setCurrentSearch(undefined)
-    }
-
-    // Helper to extract the original item from a record
-    // For static options: the record IS the option, and option.item contains the original data
-    // For datasource: the record is the original data, optionMapper creates the option
-    const extractOriginalItem = (
-      record: ActualRecordType | undefined
-    ): ResolvedRecordType<R> | undefined => {
-      if (!record) {
-        return undefined
-      }
-      if (source) {
-        // For datasource, the record itself is the original item
-        return record as unknown as ResolvedRecordType<R>
-      }
-      // For static options, extract the 'item' property from the option
-      const option = record as unknown as F0SelectItemObject<
-        T,
-        ResolvedRecordType<R>
-      >
-      return option.item
     }
 
     // TypeScript cannot infer the type of the onChange callback when it has generics,
@@ -819,6 +803,7 @@ const F0SelectComponent = forwardRef(function Select<
       }
     }
   }, [
+    extractOriginalItem,
     controlledInlineValue,
     getMultiSelectionPayload,
     hasDeferredApply,

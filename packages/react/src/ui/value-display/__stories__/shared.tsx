@@ -83,5 +83,5 @@ export function Cell({
   property: PropertyDefinition<typeof mockItem>
 }) {
   const i18n = useI18n()
-  return renderProperty(item, property, "table", i18n)
+  return renderProperty({ item, property, visualization: "table", i18n })
 }

@@ -201,6 +201,20 @@ const buildAssistantMessage = (content: string): F0Message => ({
   role: "assistant",
   content,
 })
+const withMessageContent = (
+  messages: F0Message[],
+  id: string,
+  content: string
+): F0Message[] => {
+  const idx = messages.findIndex((m) => m.id === id)
+  if (idx === -1) {
+    return messages
+  }
+  const next = messages.slice()
+  next[idx] = { ...next[idx], content }
+  return next
+}
+
 const buildUserMessage = (content: string): F0Message => ({
   id: nextId(),
   role: "user",
@@ -372,6 +386,13 @@ export type MockAiChatRuntimeProviderProps = {
    * Falls back to a random phrase when the script is exhausted or absent.
    */
   script?: string[]
+  /**
+   * Multiplier on the thinking beats. The default pace answers in under two
+   * seconds, which is fine for laying out a story but too fast to watch the
+   * agent reason — the elapsed counter barely reaches "1s". Raise it where the
+   * point of the story is the thinking itself.
+   */
+  pace?: number
 }
 
 export const MockAiChatRuntimeProvider = ({
@@ -379,7 +400,10 @@ export const MockAiChatRuntimeProvider = ({
   seedMessages,
   seedThreads,
   script,
+  pace = 1,
 }: MockAiChatRuntimeProviderProps) => {
+  const thinkingDelayMs = THINKING_DELAY_MS * pace
+  const thinkingStepMs = THINKING_STEP_MS * pace
   const [messages, setMessages] = useState<F0Message[]>(seedMessages ?? [])
   const [inProgress, setInProgress] = useState(false)
   const [composerHidden, setComposerHidden] = useState(false)
@@ -471,15 +495,35 @@ export const MockAiChatRuntimeProvider = ({
               },
             ])
           },
-          THINKING_STEP_MS * (i + 1)
+          thinkingStepMs * (i + 1)
         )
         timersRef.current.push(t)
       })
 
-      return THINKING_STEP_MS * thinkingSteps.length
+      return thinkingStepMs * thinkingSteps.length
     },
-    []
+    [thinkingStepMs]
   )
+
+  const streamText = useCallback((assistantId: string, response: string) => {
+    setMessages((prev) => [
+      ...prev,
+      { id: assistantId, role: "assistant", content: "" },
+    ])
+
+    let charIndex = 0
+    const streamInterval = setInterval(() => {
+      charIndex += 1
+      const partial = response.slice(0, charIndex)
+      setMessages((prev) => withMessageContent(prev, assistantId, partial))
+
+      if (charIndex >= response.length) {
+        clearInterval(streamInterval)
+        setInProgress(false)
+      }
+    }, CHAR_INTERVAL_MS)
+    intervalsRef.current.push(streamInterval)
+  }, [])
 
   const streamAssistantResponse = useCallback(() => {
     const thinkingSteps = pickRandomThinkingSteps(3)
@@ -494,38 +538,15 @@ export const MockAiChatRuntimeProvider = ({
       const totalThinkingMs = emitThinkingSteps(thinkingSteps, thinkingId)
 
       // Once thinking is done, open the assistant text message and stream chars.
-      const startText = setTimeout(() => {
-        setMessages((prev) => [
-          ...prev,
-          { id: assistantId, role: "assistant", content: "" },
-        ])
-
-        let charIndex = 0
-        const streamInterval = setInterval(() => {
-          charIndex += 1
-          const partial = response.slice(0, charIndex)
-          setMessages((prev) => {
-            const idx = prev.findIndex((m) => m.id === assistantId)
-            if (idx === -1) {
-              return prev
-            }
-            const next = prev.slice()
-            next[idx] = { ...next[idx], content: partial }
-            return next
-          })
-
-          if (charIndex >= response.length) {
-            clearInterval(streamInterval)
-            setInProgress(false)
-          }
-        }, CHAR_INTERVAL_MS)
-        intervalsRef.current.push(streamInterval)
-      }, totalThinkingMs)
+      const startText = setTimeout(
+        () => streamText(assistantId, response),
+        totalThinkingMs
+      )
       timersRef.current.push(startText)
-    }, THINKING_DELAY_MS)
+    }, thinkingDelayMs)
 
     timersRef.current.push(startThinking)
-  }, [emitThinkingSteps])
+  }, [emitThinkingSteps, streamText, thinkingDelayMs])
 
   const sendMessage = useCallback(
     (text: string, options?: { replyQuote?: string }) => {
@@ -572,11 +593,11 @@ export const MockAiChatRuntimeProvider = ({
           onComplete?.()
         }, totalThinkingMs)
         timersRef.current.push(done)
-      }, THINKING_DELAY_MS)
+      }, thinkingDelayMs)
 
       timersRef.current.push(startThinking)
     },
-    [emitThinkingSteps]
+    [emitThinkingSteps, thinkingDelayMs]
   )
 
   const sendMessageWithThinkingOnly = useCallback(
@@ -876,24 +897,28 @@ export const MockAiChatRuntimeProvider = ({
     [threads]
   )
 
+  const removeThread = useCallback((id: string) => {
+    setThreads((prev) => prev.filter((thread) => thread.id !== id))
+    // If the deleted thread is the one currently loaded, clear it.
+    setCurrentThreadId((current) => {
+      if (current !== id) {
+        return current
+      }
+      setCurrentThreadTitle(null)
+      return null
+    })
+  }, [])
+
   const deleteThread = useCallback<MockAiChatRuntime["deleteThread"]>(
     (id) =>
       new Promise((resolve) => {
         const t = setTimeout(() => {
-          setThreads((prev) => prev.filter((thread) => thread.id !== id))
-          // If the deleted thread is the one currently loaded, clear it.
-          setCurrentThreadId((current) => {
-            if (current !== id) {
-              return current
-            }
-            setCurrentThreadTitle(null)
-            return null
-          })
+          removeThread(id)
           resolve()
         }, 200)
         timersRef.current.push(t)
       }),
-    []
+    [removeThread]
   )
 
   const loadThread = useCallback<MockAiChatRuntime["loadThread"]>(

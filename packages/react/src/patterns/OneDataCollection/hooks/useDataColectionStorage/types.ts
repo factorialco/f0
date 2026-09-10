@@ -23,7 +23,7 @@ export type DataCollectionStatus<
   grouping?: GroupingState<RecordType, GroupingDefinition<RecordType>>
   sortings?: SortingsState<SortingsDefinition>
   filters?: CurrentFiltersState
-  search?: string | undefined
+  search?: string
   navigationFilters?: NavigationFiltersState<NavigationFiltersDefinition>
   visualization?: number
   /** Per-visualization filter states, keyed by visualization index.

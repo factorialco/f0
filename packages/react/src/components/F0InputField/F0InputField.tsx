@@ -165,7 +165,7 @@ export type InputFieldProps<T> = {
   onClickPlaceholder?: () => void
   onClickChildren?: () => void
   onClickContent?: () => void
-  value?: T | undefined
+  value?: T
   onChange?: (value: T) => void
   size?: InputFieldSize
   /* @deprecated Use state (with type error)instead */
@@ -540,7 +540,11 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
             <div
               data-slot="placeholder"
               className={cn(
-                "pointer-events-none absolute left-0 top-[1px] z-10 flex flex-1 justify-start px-3 text-f1-foreground-secondary transition-opacity line-clamp-1",
+                // `line-clamp-1` used to sit here, but it sets `display` and
+                // loses to `flex`, so a placeholder longer than the field
+                // wrapped onto a second line and spilled out of it. The child
+                // truncates instead.
+                "pointer-events-none absolute inset-x-0 top-[1px] z-10 flex flex-1 justify-start overflow-hidden px-3 text-f1-foreground-secondary transition-opacity",
                 !canGrow && "bottom-0",
                 canGrow && "items-start",
                 (icon || avatar) && "pl-8",
@@ -557,7 +561,7 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
               aria-hidden="true"
               title={placeholder}
             >
-              {placeholder}
+              <span className="min-w-0 truncate">{placeholder}</span>
             </div>
             {clearable || hasAppend || loading ? (
               <div

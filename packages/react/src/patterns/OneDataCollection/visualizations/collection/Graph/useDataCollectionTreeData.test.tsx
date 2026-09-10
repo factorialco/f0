@@ -408,7 +408,7 @@ describe("useDataCollectionTreeData — two-phase hydration", () => {
       result.current.nodes.find((node) => node.id === "vp1")?.data.name
     ).toBe("Renamed")
     expect(result.current.expandedNodes.has("ceo")).toBe(true)
-    expect(fetchData.mock.calls.length).toBe(fetchesBefore)
+    expect(fetchData.mock.calls).toHaveLength(fetchesBefore)
     expect(result.current.nodes.map((node) => node.id)).not.toContain("mgr1")
   })
 
@@ -440,7 +440,7 @@ describe("useDataCollectionTreeData — two-phase hydration", () => {
     expect(
       result.current.nodes.find((node) => node.id === "vp3")?.parentId
     ).toBe("ceo")
-    expect(fetchData.mock.calls.length).toBe(fetchesBefore)
+    expect(fetchData.mock.calls).toHaveLength(fetchesBefore)
   })
 
   it("liveUpdate remove drops a node with its descendants and prunes expansion", async () => {

@@ -1892,6 +1892,17 @@ export const EditableTableWithStatusPillSelect: Story = {
                   selectConfig: {
                     placeholder: "Status",
                     showSearchBox: false,
+                    actions: (item: MockUser) =>
+                      item.status === "pending"
+                        ? [
+                            {
+                              label: "Withdraw request",
+                              icon: Delete,
+                              variant: "ghost" as const,
+                              onClick: () => alert(`Withdrawn: ${item.name}`),
+                            },
+                          ]
+                        : undefined,
                     options: STATUS_VALUES.map((id) => ({
                       value: id,
                       label: STATUS_LABEL[id],

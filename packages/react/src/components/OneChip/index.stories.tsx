@@ -105,12 +105,12 @@ export const ClickableAndRemovable: Story = {
 
 export const WithAvatar: Story = {
   args: {
-    label: "Dani Moreno",
+    label: "Jordan Avery",
     variant: "default",
     avatar: {
       type: "person",
-      firstName: "Dani",
-      lastName: "Moreno",
+      firstName: "Jordan",
+      lastName: "Avery",
       src: "/avatars/person01.jpg",
     },
   },
@@ -224,8 +224,8 @@ export const Snapshot: Story = {
         label="With avatar"
         avatar={{
           type: "person",
-          firstName: "Dani",
-          lastName: "Moreno",
+          firstName: "Jordan",
+          lastName: "Avery",
           src: "/avatars/person01.jpg",
         }}
       />

@@ -102,7 +102,7 @@ describe("F0SegmentedControl", () => {
     ]
     render(<F0SegmentedControl items={items} />)
     const svgs = document.querySelectorAll("svg")
-    expect(svgs.length).toBe(2)
+    expect(svgs).toHaveLength(2)
   })
 
   it("forwards ariaLabel to the underlying radiogroup", () => {

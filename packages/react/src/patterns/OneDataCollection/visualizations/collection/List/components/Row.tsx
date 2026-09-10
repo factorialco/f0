@@ -48,6 +48,51 @@ type RowProps<
 /**
  * Group List: Renders the list for a group
  */
+/**
+ * A row's own actions: inline on a wide row, a dropdown on a narrow one. Draws
+ * nothing when the collection defines no item actions.
+ */
+const ListRowItemActions = ({
+  primaryItemActions,
+  dropdownItemActions,
+  mobileDropdownItemActions,
+  hasMobileItemActions,
+  dropDownOpen,
+  onDropDownOpenChange,
+}: Pick<
+  ReturnType<typeof useItemActions>,
+  | "primaryItemActions"
+  | "dropdownItemActions"
+  | "mobileDropdownItemActions"
+  | "hasMobileItemActions"
+  | "dropDownOpen"
+> & {
+  onDropDownOpenChange: ReturnType<
+    typeof useItemActions
+  >["handleDropDownOpenChange"]
+}) => (
+  <>
+    <ItemActionsRowContainer
+      dropDownOpen={dropDownOpen}
+      className="pointer-events-auto hidden md:flex"
+    >
+      <ItemActionsRow
+        primaryItemActions={primaryItemActions}
+        dropdownItemActions={dropdownItemActions}
+        handleDropDownOpenChange={onDropDownOpenChange}
+      />
+    </ItemActionsRowContainer>
+
+    {hasMobileItemActions ? (
+      <ItemActionsMobile
+        className="absolute -right-px bottom-0 top-0 z-20 items-center justify-end gap-2 py-2 pl-20 pr-3 md:hidden"
+        items={mobileDropdownItemActions}
+        onOpenChange={onDropDownOpenChange}
+      />
+    ) : null}
+  </>
+)
+
 export const Row = <
   Record extends RecordType,
   Filters extends FiltersDefinition,
@@ -78,7 +123,7 @@ export const Row = <
     item: Record,
     property: ListPropertyDefinition<Record, Sortings>
   ) => {
-    return renderProperty(item, property, "list", i18n)
+    return renderProperty({ item, property, visualization: "list", i18n })
   }
 
   const itemHref = source.itemUrl ? source.itemUrl(item) : undefined
@@ -172,26 +217,14 @@ export const Row = <
           })}
       </div>
       {source.itemActions ? (
-        <>
-          <ItemActionsRowContainer
-            dropDownOpen={dropDownOpen}
-            className="pointer-events-auto hidden md:flex"
-          >
-            <ItemActionsRow
-              primaryItemActions={primaryItemActions}
-              dropdownItemActions={dropdownItemActions}
-              handleDropDownOpenChange={handleDropDownOpenChange}
-            />
-          </ItemActionsRowContainer>
-
-          {hasMobileItemActions ? (
-            <ItemActionsMobile
-              className="absolute -right-px bottom-0 top-0 z-20 items-center justify-end gap-2 py-2 pl-20 pr-3 md:hidden"
-              items={mobileDropdownItemActions}
-              onOpenChange={handleDropDownOpenChange}
-            />
-          ) : null}
-        </>
+        <ListRowItemActions
+          primaryItemActions={primaryItemActions}
+          dropdownItemActions={dropdownItemActions}
+          mobileDropdownItemActions={mobileDropdownItemActions}
+          hasMobileItemActions={hasMobileItemActions}
+          dropDownOpen={dropDownOpen}
+          onDropDownOpenChange={handleDropDownOpenChange}
+        />
       ) : null}
       {source.selectable && id !== undefined ? (
         <div

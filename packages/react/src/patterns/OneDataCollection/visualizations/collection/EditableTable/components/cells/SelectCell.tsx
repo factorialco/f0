@@ -30,7 +30,12 @@ export function SelectCell<R extends RecordType>({
     }
     return (
       <BaseCell>
-        {renderProperty(item, editableColumn, "editableTable", i18n)}
+        {renderProperty({
+          item,
+          property: editableColumn,
+          visualization: "editableTable",
+          i18n,
+        })}
       </BaseCell>
     )
   }
@@ -52,6 +57,10 @@ export function SelectCell<R extends RecordType>({
     defaultItem: config.defaultItem?.(item),
     multiple: false as const,
     onOpenChange: setIsOpen,
+    actions:
+      typeof config.actions === "function"
+        ? config.actions(item)
+        : config.actions,
   }
 
   const clearableProps = config.clearable

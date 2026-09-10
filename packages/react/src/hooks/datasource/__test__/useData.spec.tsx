@@ -120,7 +120,7 @@ describe("useData", () => {
       })
       expect(result.current.isLoading).toBe(false)
       expect(result.current.isInitialLoading).toBe(false)
-      expect(result.current.error).toBe(null)
+      expect(result.current.error).toBeNull()
     })
 
     it("should handle synchronous paginated data", async () => {

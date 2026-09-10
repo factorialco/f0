@@ -68,7 +68,7 @@ describe("Graph SettingsRenderer", () => {
     renderSettings(baseOptions)
     const switches = screen.getAllByRole("switch")
     const disabled = switches.filter((s) => s.hasAttribute("disabled"))
-    expect(disabled.length).toBe(1)
+    expect(disabled).toHaveLength(1)
   })
 
   it("renders a locked tag as OFF + disabled, and locked wins over pinned", () => {

@@ -188,6 +188,49 @@ ${colorConfig
 
 const ChartTooltip = RechartsPrimitive.Tooltip
 
+/** The colour key beside a tooltip item: the series' own icon, or the swatch. */
+const TooltipItemIndicator = ({
+  icon: Icon,
+  hidden,
+  indicator,
+  nested,
+  color,
+}: {
+  icon: React.ComponentType | undefined
+  hidden: boolean
+  indicator: "line" | "dot" | "dashed"
+  /** A single-item tooltip nests its label, which shifts the swatch down. */
+  nested: boolean
+  color: string | undefined
+}) => {
+  if (Icon) {
+    return <Icon />
+  }
+  if (hidden) {
+    return null
+  }
+  return (
+    <div
+      className={cn(
+        "shrink-0 rounded-[2px] border-[--color-border] bg-[--color-bg]",
+        {
+          "h-2.5 w-2.5": indicator === "dot",
+          "w-1": indicator === "line",
+          "w-0 border-[1.5px] border-dashed bg-transparent":
+            indicator === "dashed",
+          "my-0.5": nested && indicator === "dashed",
+        }
+      )}
+      style={
+        {
+          "--color-bg": color,
+          "--color-border": color,
+        } as React.CSSProperties
+      }
+    />
+  )
+}
+
 const ChartTooltipContent = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<typeof RechartsPrimitive.Tooltip> &
@@ -290,30 +333,13 @@ const ChartTooltipContent = React.forwardRef<
                   formatter(item.value, item.name, item, index, item.payload)
                 ) : (
                   <>
-                    {itemConfig?.icon ? (
-                      <itemConfig.icon />
-                    ) : (
-                      !hideIndicator && (
-                        <div
-                          className={cn(
-                            "shrink-0 rounded-[2px] border-[--color-border] bg-[--color-bg]",
-                            {
-                              "h-2.5 w-2.5": indicator === "dot",
-                              "w-1": indicator === "line",
-                              "w-0 border-[1.5px] border-dashed bg-transparent":
-                                indicator === "dashed",
-                              "my-0.5": nestLabel && indicator === "dashed",
-                            }
-                          )}
-                          style={
-                            {
-                              "--color-bg": indicatorColor,
-                              "--color-border": indicatorColor,
-                            } as React.CSSProperties
-                          }
-                        />
-                      )
-                    )}
+                    <TooltipItemIndicator
+                      icon={itemConfig?.icon}
+                      hidden={hideIndicator}
+                      indicator={indicator}
+                      nested={nestLabel}
+                      color={indicatorColor}
+                    />
                     <div
                       className={cn(
                         "flex flex-1 justify-between text-sm leading-none",

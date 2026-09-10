@@ -80,6 +80,44 @@ export const countryForPartialE164 = (
   return undefined
 }
 
+/** A full international number stored in `number`, which wins over any prefix. */
+const internationalToE164 = (raw: string): string | undefined => {
+  const parsed = parsePhoneNumberFromString(raw)
+  if (parsed) {
+    return parsed.number
+  }
+  const digits = onlyDigits(raw)
+  return digits ? `+${digits}` : undefined
+}
+
+/**
+ * A national number carrying a stored dial code. Parsing with the country
+ * strips trunk prefixes (e.g. GB "07911…").
+ */
+const prefixedToE164 = (raw: string, prefix: string): string => {
+  const country = countryForDialCode(prefix)
+  const parsed = country
+    ? parsePhoneNumberFromString(raw, country)
+    : parsePhoneNumberFromString(`${prefix}${onlyDigits(raw)}`)
+  if (parsed) {
+    return parsed.number
+  }
+  return `${prefix}${onlyDigits(raw)}`
+}
+
+/** A national number with no stored prefix, read against the selected country. */
+const nationalToE164 = (
+  raw: string,
+  country: PhoneCountry
+): string | undefined => {
+  const parsed = parsePhoneNumberFromString(raw, country)
+  if (parsed) {
+    return parsed.number
+  }
+  const digits = onlyDigits(raw)
+  return digits ? `+${getCountryCallingCode(country)}${digits}` : undefined
+}
+
 /**
  * Normalizes any stored `{ prefix, number }` shape — including legacy ones
  * where `number` holds a full international number, or where the national
@@ -96,14 +134,8 @@ export const valueToE164 = (
   const raw = value.number?.trim() ?? ""
   const prefix = value.prefix?.trim()
 
-  // A full international number stored in `number` wins over the prefix
   if (raw.startsWith("+")) {
-    const parsed = parsePhoneNumberFromString(raw)
-    if (parsed) {
-      return parsed.number
-    }
-    const digits = onlyDigits(raw)
-    return digits ? `+${digits}` : undefined
+    return internationalToE164(raw)
   }
 
   if (!raw) {
@@ -111,26 +143,11 @@ export const valueToE164 = (
   }
 
   if (prefix && DIAL_CODE_PATTERN.test(prefix)) {
-    const country = countryForDialCode(prefix)
-    // Parsing with the country strips trunk prefixes (e.g. GB "07911…")
-    const parsed = country
-      ? parsePhoneNumberFromString(raw, country)
-      : parsePhoneNumberFromString(`${prefix}${onlyDigits(raw)}`)
-    if (parsed) {
-      return parsed.number
-    }
-    return `${prefix}${onlyDigits(raw)}`
+    return prefixedToE164(raw, prefix)
   }
 
   if (fallbackCountry) {
-    const parsed = parsePhoneNumberFromString(raw, fallbackCountry)
-    if (parsed) {
-      return parsed.number
-    }
-    const digits = onlyDigits(raw)
-    return digits
-      ? `+${getCountryCallingCode(fallbackCountry)}${digits}`
-      : undefined
+    return nationalToE164(raw, fallbackCountry)
   }
 
   return undefined

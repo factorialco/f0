@@ -40,7 +40,7 @@ const AIButton = forwardRef<
       {...publicProps}
       variant="ai"
       ref={ref}
-      iconRotate={props.icon == AIIcons.One ? true : false}
+      iconRotate={props.icon === AIIcons.One}
     />
   )
 })

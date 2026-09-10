@@ -9,6 +9,13 @@ interface CheckboxProps extends DataAttributes {
   title?: string
 
   /**
+   * A secondary line of text rendered under the title, for context the title
+   * cannot carry on its own. Hidden along with the title when `hideLabel` is
+   * set, and exposed to assistive technology as the checkbox's description.
+   */
+  description?: string
+
+  /**
    * The id of the checkbox
    */
   id?: string
@@ -73,6 +80,7 @@ interface CheckboxProps extends DataAttributes {
 
 function _F0Checkbox({
   title,
+  description,
   onCheckedChange,
   id,
   disabled,
@@ -89,6 +97,7 @@ function _F0Checkbox({
   return (
     <CheckboxRoot
       title={title}
+      description={description}
       onCheckedChange={onCheckedChange}
       id={id}
       disabled={disabled}

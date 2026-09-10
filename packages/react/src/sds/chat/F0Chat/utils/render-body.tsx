@@ -1,6 +1,6 @@
 import { Fragment, type ReactNode } from "react"
 import { F0Link } from "@/components/F0Link"
-import { cn } from "@/lib/utils"
+import { cn, focusRing } from "@/lib/utils"
 import { ChatUserHoverCard } from "../components/ChatUserHoverCard"
 import { type F0ChatLinkPreview, type F0ChatUser } from "../types"
 import { locateMentions } from "./mention-ranges"
@@ -109,15 +109,17 @@ export const renderBodyWithMentions = (
   tokens: MentionToken[],
   previews?: F0ChatLinkPreview[]
 ): ReactNode => {
-  // Sanitize BEFORE the range math so mention indices match what renders.
-  const body = sanitizeDisplayText(rawBody)
   if (tokens.length === 0) {
-    return renderBodyWithLinks(body, previews)
+    return renderBodyWithLinks(rawBody, previews)
   }
 
-  const clean = locateMentions(body, tokens)
+  // Resolve identity against the original spelling before sanitization can
+  // compose canonically equivalent occurrences into the same text. Each raw
+  // range is sanitized independently below, so its offsets never address a
+  // differently sized normalized string.
+  const clean = locateMentions(rawBody, tokens)
   if (clean.length === 0) {
-    return renderBodyWithLinks(body, previews)
+    return renderBodyWithLinks(rawBody, previews)
   }
 
   const nodes: ReactNode[] = []
@@ -126,17 +128,38 @@ export const renderBodyWithMentions = (
     if (range.start > cursor) {
       nodes.push(
         <Fragment key={`t-${i}`}>
-          {renderBodyWithLinks(body.slice(cursor, range.start), previews)}
+          {renderBodyWithLinks(rawBody.slice(cursor, range.start), previews)}
         </Fragment>
       )
     }
     const token = range.entry
-    const chip = (
-      <span
-        className={cn("text-f1-foreground-secondary hover:text-f1-foreground")}
+    const label = sanitizeDisplayText(rawBody.slice(range.start, range.end))
+    const accessibleLabel = token.user?.subtitle
+      ? `${label}, ${token.user.subtitle}`
+      : label
+    const mentionClassName = cn(
+      "cursor-pointer rounded-sm border-0 bg-transparent p-0 text-f1-foreground-secondary hover:text-f1-foreground",
+      focusRing()
+    )
+    const chip = token.user?.profileHref ? (
+      <F0Link
+        href={token.user.profileHref}
+        variant="unstyled"
+        stopPropagation
+        aria-label={accessibleLabel}
+        className={mentionClassName}
       >
-        {body.slice(range.start, range.end)}
+        {label}
+      </F0Link>
+    ) : token.user ? (
+      <span className="cursor-default text-f1-foreground-secondary">
+        {label}
+        {token.user.subtitle ? (
+          <span className="sr-only">, {token.user.subtitle}</span>
+        ) : null}
       </span>
+    ) : (
+      <span className="text-f1-foreground-secondary">{label}</span>
     )
     // A person mention opens their profile card on hover, mirroring the
     // sender-avatar affordance. `@here` is a broadcast — no single person.
@@ -151,10 +174,10 @@ export const renderBodyWithMentions = (
     )
     cursor = range.end
   })
-  if (cursor < body.length) {
+  if (cursor < rawBody.length) {
     nodes.push(
       <Fragment key="t-last">
-        {renderBodyWithLinks(body.slice(cursor), previews)}
+        {renderBodyWithLinks(rawBody.slice(cursor), previews)}
       </Fragment>
     )
   }

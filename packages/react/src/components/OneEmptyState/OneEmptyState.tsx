@@ -15,7 +15,7 @@ function _OneEmptyState({
 }: Types.OneEmptyStateProps) {
   return (
     <div
-      className="@container flex flex-col items-center justify-center gap-5 p-8"
+      className="@container flex w-full flex-col items-center justify-center gap-5 p-8"
       {...rest}
     >
       {variant === "default" ? (
@@ -50,17 +50,16 @@ function _OneEmptyState({
                   closeLabel={action.closeLabel}
                 />
               )
-            } else {
-              return (
-                <F0Button
-                  key={action.label}
-                  label={action.label}
-                  variant={action.variant}
-                  onClick={action.onClick}
-                  icon={action.icon}
-                />
-              )
             }
+            return (
+              <F0Button
+                key={action.label}
+                label={action.label}
+                variant={action.variant}
+                onClick={action.onClick}
+                icon={action.icon}
+              />
+            )
           })}
         </div>
       ) : null}

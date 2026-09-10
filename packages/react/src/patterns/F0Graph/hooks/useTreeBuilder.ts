@@ -138,6 +138,8 @@ function buildTree<T>(nodes: GraphNode<T>[]): TreeBuilderResult<T> {
     inStack.delete(node.id)
   }
 
+  // detectCycles promotes cyclic children to roots while this runs, so iterate a copy.
+  // oxlint-disable-next-line unicorn/no-useless-spread
   for (const root of [...roots]) {
     detectCycles(root)
   }

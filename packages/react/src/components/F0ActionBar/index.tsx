@@ -77,18 +77,16 @@ const normalizeItems = (
     if (items.every((item) => isActionGroup(item))) {
       // ActionBarGroup[]
       return items
-    } else {
-      // ActionType[]
-      return [
-        {
-          items: items,
-        },
-      ]
     }
-  } else {
-    // ActionBarGroup
-    return [items]
+    // ActionType[]
+    return [
+      {
+        items: items,
+      },
+    ]
   }
+  // ActionBarGroup
+  return [items]
 }
 
 export const actionBarStatuses = [
@@ -273,7 +271,7 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
         }
 
         el.classList.remove(errorNavigateClassName, wiggleClassName)
-        void el.offsetWidth // Force reflow to restart animation
+        el.getBoundingClientRect() // Force reflow to restart animation
         el.classList.add(className)
 
         wiggleTimeoutRef.current = setTimeout(() => {
@@ -298,7 +296,7 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
 
         setShowErrorStyles(false)
         el.classList.remove(errorNavigateClassName)
-        void el.offsetWidth
+        el.getBoundingClientRect() // Force reflow to restart animation
         el.classList.add(errorNavigateClassName)
 
         wiggleTimeoutRef.current = setTimeout(() => {
@@ -492,17 +490,15 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
                       />
                     ))}
                   {!singlePrimaryAction ? (
-                    <>
-                      <F0ButtonDropdown
-                        items={primaryActionsDropdownItems}
-                        onClick={(value) => {
-                          const action = getActionByValue(value)
-                          ;(action as ActionType)?.onClick?.()
-                        }}
-                        disabled={isInteractionDisabled || hasLoadingAction}
-                        loading={hasLoadingAction}
-                      />
-                    </>
+                    <F0ButtonDropdown
+                      items={primaryActionsDropdownItems}
+                      onClick={(value) => {
+                        const action = getActionByValue(value)
+                        ;(action as ActionType)?.onClick?.()
+                      }}
+                      disabled={isInteractionDisabled || hasLoadingAction}
+                      loading={hasLoadingAction}
+                    />
                   ) : (
                     <WithReason reason={singlePrimaryAction.tooltip}>
                       <F0Button
