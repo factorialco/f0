@@ -57,6 +57,9 @@ export type F0ChatStable = {
   /** Present only when the host wired {@link F0ChatRuntime.openPost} — an
    * absent one is what makes a post card non-clickable, on purpose. */
   openPost?: (id: string, context: { source: "card" | "comment" }) => void
+  /** Present only when the host wired {@link F0ChatRuntime.openCommunity} —
+   * absent leaves an aggregated feed's origin label as plain text. */
+  openCommunity?: (communityId: string) => void
   /** Resolves a post's overflow menu through the LATEST runtime, so the host
    * may rebuild the function every render without re-rendering the feed. */
   postActions: (post: F0ChatPost) => F0ChatPostAction[]
@@ -261,6 +264,8 @@ export const F0ChatProvider = ({
         void runtimeRef.current.editMessage?.(id, input),
       openPost: (id: string, context: { source: "card" | "comment" }) =>
         runtimeRef.current.openPost?.(id, context),
+      openCommunity: (communityId: string) =>
+        runtimeRef.current.openCommunity?.(communityId),
       postActions: (post: F0ChatPost): F0ChatPostAction[] =>
         runtimeRef.current.postActions?.(post) ?? [],
     }),
@@ -344,6 +349,7 @@ export const F0ChatProvider = ({
   const hasDeleteFailedMessage = !!runtime.deleteFailedMessage
   const hasLoadReactionUsers = !!runtime.loadReactionUsers
   const hasOpenPost = !!runtime.openPost
+  const hasOpenCommunity = !!runtime.openCommunity
 
   const stable = useMemo<F0ChatStable>(
     () => ({
@@ -363,6 +369,7 @@ export const F0ChatProvider = ({
         : undefined,
       editMessage: hasEditMessage ? delegates.editMessage : undefined,
       openPost: hasOpenPost ? delegates.openPost : undefined,
+      openCommunity: hasOpenCommunity ? delegates.openCommunity : undefined,
       postActions: delegates.postActions,
     }),
     [
@@ -375,6 +382,7 @@ export const F0ChatProvider = ({
       hasDeleteFailedMessage,
       hasLoadReactionUsers,
       hasOpenPost,
+      hasOpenCommunity,
       delegates,
     ]
   )

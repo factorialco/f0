@@ -282,7 +282,7 @@ export const BaseCommunityPost = ({
   return (
     <div
       className={cn(
-        "@container flex w-full flex-col gap-3 rounded-xl border border-solid border-transparent p-3 pt-2 md:pb-4 md:pt-3",
+        "@container flex w-full flex-col gap-3 rounded-xl border border-solid border-transparent p-4",
         // The affordances belong to the click, so they come and go with it.
         isClickable &&
           "cursor-pointer hover:bg-f1-background-hover focus:border-f1-border-secondary focus:outline focus:outline-1 focus:outline-offset-1 focus:outline-f1-border-selected-bold"

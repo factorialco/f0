@@ -17,9 +17,10 @@ import {
   postReactionsFrom,
 } from "../utils/posts"
 
-/** The community link is hidden (`hideGroup`), so this is never called — it is
- * only here because `group` is a required prop and the card would otherwise
- * need a nullable handler for a link it doesn't render. */
+/** Stands in for the community link's handler when there is nothing to go to:
+ * either the link isn't drawn at all (`hideGroup`, the single-community case)
+ * or it is drawn without navigation because the host passed no
+ * `openCommunity`. `group` is a required prop either way. */
 const noop = (): void => {}
 
 /**
@@ -47,6 +48,7 @@ const ChatPostRowComponent = ({
     toggleReaction,
     loadReactionUsers,
     openPost,
+    openCommunity,
     postActions,
   } = useF0ChatStable()
   const emit = useF0ChatEmit()
@@ -55,6 +57,9 @@ const ChatPostRowComponent = ({
   const active = useChatActivePostId() === post.id
 
   const canReact = chatPermission("canReact", channelType, capabilities)
+  // Present ⇒ this is an aggregated feed and the card says which community the
+  // post is from. Absent ⇒ one community's channel, and the header already did.
+  const origin = post.community
 
   const reactions = useMemo(
     () => postReactionsFrom(post, { toggleReaction, loadReactionUsers }),
@@ -117,7 +122,7 @@ const ChatPostRowComponent = ({
         // the panel. Any padding here would inset the tint and leave a
         // 4px frame of untinted row around a hovered post.
         //
-        // The content's own inset is the card's `p-3`, which is where it comes
+        // The content's own inset is the card's `p-4`, which is where it comes
         // from on every other surface too.
         // …except on the last one, where the line would divide the feed from
         // the composer. Nothing follows it, so there is nothing to divide.
@@ -141,10 +146,21 @@ const ChatPostRowComponent = ({
       <CommunityPost
         id={post.id}
         author={communityAuthorFrom(post.author)}
-        // Required by the card, hidden by `hideGroup`: the channel header already
-        // names this community an inch above every card in the feed.
-        group={{ title: channelTitle, onClick: noop }}
-        hideGroup
+        // WHERE the post came from — drawn as "Ana in Barcelona" — but only in
+        // an aggregated feed, where the posts come from different communities
+        // and the channel header can't answer it. In a single community's
+        // channel the header names it an inch above every card, so repeating it
+        // per post is the same word twice; `hideGroup` drops it and the card
+        // still needs the required prop.
+        group={
+          origin
+            ? {
+                title: origin.name,
+                onClick: () => openCommunity?.(origin.id),
+              }
+            : { title: channelTitle, onClick: noop }
+        }
+        hideGroup={!origin}
         createdAt={new Date(post.createdAt)}
         title={post.title}
         description={post.description}

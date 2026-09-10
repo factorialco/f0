@@ -116,6 +116,17 @@ export type MockChatAppValue = {
   openComposerSurface: (convId: string, postId?: string) => void
   openScheduledSurface: (convId: string, postId: string) => void
   closeSurface: () => void
+  /**
+   * Switch the panel to another CHANNEL — used by the aggregated feed, whose
+   * cards link to the community each post came from.
+   *
+   * Registered by whoever owns the panel (`setPanelContent` lives in the
+   * story's sidebar, not here) and a no-op until it is: the panel is stashed as
+   * an element outside this tree, so the store can only forward the request.
+   */
+  openConversation: (convId: string) => void
+  /** Called once by the panel's owner to wire `openConversation`. */
+  setConversationOpener: (open: (convId: string) => void) => void
   createComment: (convId: string, postId: string, text: string) => void
   editComment: (postId: string, commentId: string, text: string) => void
   deleteComment: (convId: string, postId: string, commentId: string) => void
@@ -1082,6 +1093,22 @@ export const useMockChatStore = (): MockChatAppValue => {
 
   const closeSurface = useCallback(() => setOpenSurface(null), [])
 
+  // A ref, not state: registering the opener must not re-render everything the
+  // store feeds, and nothing reads it during render.
+  const conversationOpener = useRef<(convId: string) => void>(() => {})
+  const setConversationOpener = useCallback(
+    (open: (convId: string) => void) => {
+      conversationOpener.current = open
+    },
+    []
+  )
+  const openConversation = useCallback((convId: string) => {
+    // Leaving for another channel closes whatever page was open beside this
+    // one: it belonged to the community you just left.
+    setOpenSurface(null)
+    conversationOpener.current(convId)
+  }, [])
+
   const togglePostInteractions = useCallback(
     (convId: string, postId: string) => {
       const post = states[convId]?.messages.find(
@@ -1155,6 +1182,8 @@ export const useMockChatStore = (): MockChatAppValue => {
       openComposerSurface,
       openScheduledSurface,
       closeSurface,
+      openConversation,
+      setConversationOpener,
       createComment,
       editComment,
       deleteComment,
@@ -1196,6 +1225,8 @@ export const useMockChatStore = (): MockChatAppValue => {
       openComposerSurface,
       openScheduledSurface,
       closeSurface,
+      openConversation,
+      setConversationOpener,
       createComment,
       editComment,
       deleteComment,

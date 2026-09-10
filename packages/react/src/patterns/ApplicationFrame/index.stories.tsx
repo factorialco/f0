@@ -89,6 +89,7 @@ import {
 import { MockCommunitySurface } from "@/sds/chat/F0Chat/mocks/MockCommunitySurface"
 import { SEED_BY_ID } from "@/sds/chat/F0Chat/mocks/mockSeeds"
 import { useDemoHeaderActions } from "@/sds/chat/F0Chat/mocks/useDemoHeaderActions"
+import { useMockChatApp } from "@/sds/chat/F0Chat/mocks/useMockChatApp"
 import { DaytimePage } from "@/sds/Home/DaytimePage"
 import { ApplicationFrame } from "."
 
@@ -1034,6 +1035,56 @@ export const CommunityPosting: Story = {
 }
 
 /**
+ * THE AGGREGATED FEED — "All posts", every community you belong to in one
+ * channel. The first row of the Communities group, and the one a reader who
+ * follows six communities actually opens.
+ *
+ * What only this story demonstrates:
+ * - every card names WHERE it came from — "Marcus in Company news", "Nadia in
+ *   People Ops" — as a link to that community. It is the one place F0 is told
+ *   the community name instead of deriving it from the channel title, because
+ *   here the channel title cannot answer the question;
+ * - a pinned shelf that spans communities, which is how you find the post you
+ *   half-remember without remembering where it was published;
+ * - a composer that publishes into a community you pick, rather than the one
+ *   you happen to be reading;
+ * - no unread badge and no "New posts" divider. Deliberate: there is no
+ *   per-post read state to derive them from, so a count here would be a number
+ *   nobody could explain — and a feed is exactly where a reader expects one.
+ *
+ * What to exercise: click a community name and land in that community's own
+ * channel (the origin label is the shortest path from "this is interesting" to
+ * "show me more of it"); open a post and confirm the card stays selected while
+ * its page is open beside the feed; then compare against `CommunityChannel` —
+ * a single community must NOT repeat its name on every card, because its
+ * header already said it an inch above.
+ */
+export const GeneralFeed: Story = {
+  render: (args) => (
+    <MockAiChatRuntimeProvider>
+      <MockChatAppProvider>
+        <ApplicationFrame
+          ai={{
+            ...withMockChatSlots(args.ai),
+            panelContentSide: "left",
+          }}
+          aiPromotion={args.aiPromotion}
+          sidebar={
+            <ConversationsSidebar
+              withOneTab={false}
+              autoOpenConvId="feed"
+              tabsPersistKey="communications-feed"
+            />
+          }
+        >
+          <CommunityMain />
+        </ApplicationFrame>
+      </MockChatAppProvider>
+    </MockAiChatRuntimeProvider>
+  ),
+}
+
+/**
  * A fully-mocked conversation hosted in the side panel, driven by the shared
  * `MockChatApp` store (so reads/unreads stay in sync with the sidebar). Wires
  * fullscreen/close to the panel via `useAiChat()`.
@@ -1456,6 +1507,14 @@ const ConversationsSidebarInner = ({
     },
     [receiptPreview, setPanelContent]
   )
+
+  // The aggregated feed's cards link to the community each post came from, and
+  // following one means switching CHANNEL — which only this component can do,
+  // since `setPanelContent` lives here. The store just forwards the request.
+  const { setConversationOpener } = useMockChatApp()
+  useEffect(() => {
+    setConversationOpener(onSelect)
+  }, [setConversationOpener, onSelect])
 
   // Demo convenience: open a conversation straight away (e.g. the mentions story
   // lands inside the group so the chat + composer are visible without a click).

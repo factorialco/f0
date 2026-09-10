@@ -175,6 +175,54 @@ describe("community channel — post vs message rendering", () => {
     expect(screen.getAllByText("Company news")).toHaveLength(1)
   })
 
+  describe("an aggregated feed says where each post came from", () => {
+    // The one case where the channel title cannot answer "which of my
+    // communities is this?" — so the post carries the answer itself.
+    const fromBarcelona = post({
+      community: { id: "com-barcelona", name: "Barcelona" },
+    })
+
+    it("names the post's own community, not the channel's", () => {
+      renderChat(makeRuntime({ messages: [fromBarcelona] }))
+
+      expect(screen.getByText("Barcelona")).toBeVisible()
+      // The channel is still named once, in the header — and the card must not
+      // have borrowed that name for a post published somewhere else.
+      expect(screen.getAllByText("Company news")).toHaveLength(1)
+    })
+
+    it("goes to that community when the name is pressed", async () => {
+      const openCommunity = vi.fn()
+      renderChat(makeRuntime({ messages: [fromBarcelona], openCommunity }))
+
+      await userEvent.click(screen.getByText("Barcelona"))
+
+      expect(openCommunity).toHaveBeenCalledWith("com-barcelona")
+    })
+
+    it("still says where a post came from with nowhere to go", () => {
+      // No `openCommunity`: the origin is information first and a link second.
+      renderChat(makeRuntime({ messages: [fromBarcelona] }))
+
+      expect(screen.getByText("Barcelona")).toBeVisible()
+    })
+
+    it("does not open the post when the community name is pressed", async () => {
+      // The name sits INSIDE the clickable card, so the card's handler would
+      // otherwise win the bubble and take the reader to the post instead.
+      const openPost = vi.fn()
+      const openCommunity = vi.fn()
+      renderChat(
+        makeRuntime({ messages: [fromBarcelona], openPost, openCommunity })
+      )
+
+      await userEvent.click(screen.getByText("Barcelona"))
+
+      expect(openCommunity).toHaveBeenCalledWith("com-barcelona")
+      expect(openPost).not.toHaveBeenCalled()
+    })
+  })
+
   it("shows the post counters", () => {
     renderChat(makeRuntime())
 

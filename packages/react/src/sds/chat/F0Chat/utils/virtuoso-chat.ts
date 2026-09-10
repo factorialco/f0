@@ -390,8 +390,8 @@ const ESTIMATE_FILE_CHIP = 56
 /** The row's own 1px divider. Posts have no gap between them — see
  * `topSpacing` in the row renderer. */
 const ESTIMATE_POST_SPACING = 1
-/** The card's `p-3` plus its `md:pb-4`. */
-const ESTIMATE_POST_PADDING = 28
+/** The card's `p-4`, top and bottom. */
+const ESTIMATE_POST_PADDING = 32
 /** 32px avatar next to two lines of author/community. */
 const ESTIMATE_POST_HEADER = 44
 /** `text-xl`, one line (the card clamps the title to two). */

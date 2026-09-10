@@ -545,11 +545,11 @@ export type F0ChatPostEvent = {
  * click does comes from {@link F0ChatRuntime.openPost}; what its menu offers,
  * from {@link F0ChatRuntime.postActions}.
  *
- * What F0 DERIVES and the host must not send: the community's name (it is
- * `channel.title` — the post is in the channel you're reading), the words "in"
- * and "Comment" (i18n), and the wording of the counters (numbers on the wire,
+ * What F0 DERIVES and the host must not send: the words "in" and "Comment"
+ * (i18n), and the wording of the counters (numbers on the wire,
  * `{{count}} comments` at the edge; otherwise the host translates what F0
- * already translates).
+ * already translates). The community's name is the one exception, and only in
+ * an aggregated feed — see {@link F0ChatPost.community}.
  */
 export type F0ChatPost = {
   type: "post"
@@ -632,6 +632,31 @@ export type F0ChatPost = {
    * pinned post is usually not in the loaded window at all.
    */
   pinnedAt?: string
+  /**
+   * Where the post was published, named on the card as "… in Barcelona".
+   *
+   * ONLY for an aggregated feed — a channel that gathers posts from several
+   * communities at once. In a single community's channel the answer is already
+   * the channel title an inch above every card, so sending it there prints the
+   * same word twice per post; omit it and F0 draws no origin at all.
+   *
+   * That makes this the one field where the host tells F0 something F0 would
+   * otherwise derive, and the reason is that an aggregated feed is the one
+   * place where the derivation is wrong: "which of my communities is this
+   * from?" is the question the reader actually has, and the channel can't
+   * answer it.
+   *
+   * Clicking it calls {@link F0ChatRuntime.openCommunity}; without that
+   * handler the name is still drawn, just not as a link.
+   */
+  community?: F0ChatPostCommunity
+}
+
+/** The community a post came from, for an aggregated feed's origin label. */
+export type F0ChatPostCommunity = {
+  id: string
+  /** As the reader knows it — "Barcelona", "Company news". No `#`. */
+  name: string
 }
 
 /** A file attached to a post: the chip is a download link, nothing more. */
@@ -1139,6 +1164,16 @@ export type F0ChatRuntime = {
     id: string,
     context: { source: "card" | "comment" | "pinned" }
   ) => void
+  /**
+   * Go to a community, from the origin label an aggregated feed puts on each
+   * card (see {@link F0ChatPost.community}).
+   *
+   * Separate from `openPost` because it is a different destination — the
+   * community, not the post — and hosts wire the two to different routes.
+   * Omit it and the name is still drawn, just not clickable: an aggregated feed
+   * that cannot navigate should still say where each post came from.
+   */
+  openCommunity?: (communityId: string) => void
   /**
    * Each post's overflow menu. FUNCTION form, like `headerActions`: every post
    * offers exactly what the user may do to THAT post, and only the host knows.

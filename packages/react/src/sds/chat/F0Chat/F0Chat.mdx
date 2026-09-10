@@ -156,6 +156,27 @@ is open beside the feed. It is the host's answer because only the host knows
 whether the reader is still there — they may have followed a link out, or
 arrived on that post without ever touching this feed.
 
+#### Aggregated feeds
+
+A community channel usually shows one community, and its header names it an inch
+above every card — so the cards say nothing about where the post came from.
+
+A channel that gathers **several** communities is the exception, and the only one:
+there the reader's real question is "which of my communities is this?", and the
+channel title cannot answer it. Give each post a **`community`** (`{ id, name }`)
+and the card reads "Ana in Barcelona", linked through **`openCommunity`**. Omit
+the handler and the name is still drawn, just not as a link — where a post came
+from is information first.
+
+This is the single field the host tells F0 that F0 would otherwise derive from
+`channel.title`. Sending it in a single community's channel prints the same word
+twice on every card, so don't.
+
+Seen whole in **ApplicationFrame → GeneralFeed**, which is where an aggregated
+feed makes sense: in the panel, beside the page, with the sidebar's Communities
+group behind it. Note what it does NOT have — no unread badge and no "New posts"
+divider, because there is no per-post read state to derive either from.
+
 ### Participant, receipt, reaction, message, and upload contracts
 
 <Unstyled>

@@ -11,6 +11,8 @@ import {
   type F0ChatLinkPreview,
   type F0ChatMessageStatus,
   type F0ChatMention,
+  type F0ChatPost,
+  type F0ChatPostCommunity,
   type F0ChatReaction,
   type F0ChatSenderColor,
   type F0ChatSystemEvent,
@@ -362,6 +364,17 @@ export type Seed = {
    * the composer would be.
    */
   canPost?: boolean
+  /**
+   * Demo (communities): an AGGREGATED feed — the ids of the communities whose
+   * posts it gathers. Its own `lines` are ignored.
+   *
+   * Derived rather than written out, so the feed cannot drift from the
+   * communities it claims to aggregate: add a post to People Ops and it shows
+   * up here, which is the only behaviour worth demoing. Every post it yields
+   * carries `community`, which is what makes the card say "Ana in Barcelona"
+   * instead of leaving the reader to guess.
+   */
+  aggregates?: string[]
   /**
    * Demo (communities): posts written but not yet visible. `at: null` is a
    * draft. They are NOT in `lines` — nobody can read them yet.
@@ -1808,7 +1821,48 @@ export const SEEDS: Seed[] = [
   //
   // They live at the END of SEEDS, and the sidebar puts their group last too:
   // a community is not a conversation of yours, it is a place you go to read.
+  //
+  // NONE OF THEM CARRIES AN EMOJI, and that is production parity rather than a
+  // gap in the fixtures: `PostsGroup` has a title, a description and an
+  // identifier, and no field for one. So every community draws the ＃ fallback,
+  // and these seeds are what proves the fallback holds up as a whole COLUMN of
+  // ＃ rather than as the one odd row out. The synthetic feed below is the
+  // exception, and the reason is in its own comment.
   // ─────────────────────────────────────────────────────────────────────────
+  // EVERYTHING, IN ONE PLACE — the aggregated feed, and the first row of the
+  // group. It reads from the four communities below rather than carrying posts
+  // of its own, so it cannot fall out of step with them.
+  //
+  // Two things only this channel demos: every card names the community it came
+  // from (`community` on the post — the reason the field exists at all), and
+  // the pinned shelf spans communities, which is how you find something you
+  // half-remember without knowing where it was posted.
+  //
+  // THE ONE WITH AN EMOJI, and the only one entitled to it: it is not a
+  // `PostsGroup` at all — no row in any table, nothing for a customer to name —
+  // so nothing constrains it to the ＃ its neighbours must draw. Which is also
+  // what makes it findable: one 📣 at the head of a column of ＃.
+  {
+    id: "feed",
+    type: "community",
+    title: "All posts",
+    avatar: { type: "emoji", emoji: "📣" },
+    aggregates: [
+      "com-company-news",
+      "com-barcelona-office",
+      "com-kudos",
+      "com-people-ops",
+    ],
+    // Publishing from here is real: the composer offers the communities you may
+    // post in, rather than assuming the one you are reading.
+    canPost: true,
+    // No unread: there is no per-post read state to derive one from, so a badge
+    // here would be a number nobody could explain. Said out loud because a feed
+    // is exactly where a reader expects one.
+    participants: [MARCUS, ELEANOR, GRACE, NADIA, HARPER],
+    myRole: "member",
+    lines: [],
+  },
   // The common case: a company-wide feed most people can only read. Three
   // unread posts, so the divider, the badge and the jump pill all have
   // something to say.
@@ -1816,7 +1870,7 @@ export const SEEDS: Seed[] = [
     id: "com-company-news",
     type: "community",
     title: "Company news",
-    avatar: { type: "emoji", emoji: "📣" },
+    avatar: groupAvatar("Company news"),
     readOnlyNotice: "Only the Communications team can post here",
     participants: [MARCUS, ELEANOR, GRACE, ISLA, OWEN],
     myRole: "guest",
@@ -1990,7 +2044,7 @@ export const SEEDS: Seed[] = [
     id: "com-barcelona-office",
     type: "community",
     title: "Barcelona office",
-    avatar: { type: "team", name: "Barcelona office" },
+    avatar: groupAvatar("Barcelona office"),
     participants: [ELEANOR, PRIYA, THEO, NADIA],
     canPost: true,
     unread: 1,
@@ -2130,7 +2184,7 @@ export const SEEDS: Seed[] = [
     id: "com-kudos",
     type: "community",
     title: "Kudos",
-    avatar: { type: "emoji", emoji: "🎉" },
+    avatar: groupAvatar("Kudos"),
     participants: [ELEANOR, MARCUS, PRIYA, THEO, GRACE, SAM],
     canPost: true,
     lines: [
@@ -2187,7 +2241,7 @@ export const SEEDS: Seed[] = [
     id: "com-people-ops",
     type: "community",
     title: "People Ops",
-    avatar: { type: "emoji", emoji: "🌱" },
+    avatar: groupAvatar("People Ops"),
     readOnlyNotice: "Only People Ops can post here",
     participants: [NADIA, HARPER, ELEANOR],
     myRole: "guest",
@@ -2290,7 +2344,76 @@ export const groupReadersFor = (
   return [...uniqueParticipants.values()]
 }
 
+/**
+ * One {@link PostLine} → one {@link F0ChatPost}.
+ *
+ * `community` is passed only by the aggregated feed: in a single community's
+ * channel the header already names it, so the card leaves it off.
+ */
+const postFrom = (
+  line: PostLine,
+  community?: F0ChatPostCommunity
+): F0ChatPost => {
+  const sentMs = Date.now() - line.min * 60_000
+  const author = line.from === "company" ? undefined : line.from
+  return {
+    type: "post",
+    id: nextId(),
+    createdAt: new Date(sentMs).toISOString(),
+    author,
+    isMine: author?.id === ME.id,
+    title: line.title,
+    description: line.body,
+    mediaUrl: line.mediaUrl,
+    event: line.event,
+    reactions: line.commentsOff ? undefined : line.reactions,
+    commentCount: line.commentsOff ? 0 : (line.commentCount ?? 0),
+    viewCount: line.viewCount,
+    allowCommentsAndReactions: line.commentsOff ? false : undefined,
+    attachments: line.attachments?.map((file, index) => ({
+      id: `${line.title}-f${index}`,
+      filename: file.filename,
+      url: file.url,
+    })),
+    requiredAction: line.acknowledge
+      ? {
+          type: "acknowledge",
+          completedAt:
+            line.acknowledge === "done"
+              ? new Date(sentMs + 3 * 3_600_000).toISOString()
+              : undefined,
+        }
+      : undefined,
+    pinnedAt: line.pinned ? new Date(sentMs + 60_000).toISOString() : undefined,
+    community,
+  }
+}
+
+/**
+ * An aggregated feed's transcript: every post of every community it gathers,
+ * oldest first, each tagged with where it came from.
+ *
+ * Only posts — a community's `lines` are all posts anyway, and a system row
+ * from one community would make no sense in a feed of several.
+ */
+const buildAggregatedPosts = (communityIds: string[]): F0ChatItem[] =>
+  communityIds
+    .flatMap((id) => {
+      const source = SEED_BY_ID.get(id)
+      if (!source) {
+        return []
+      }
+      const community = { id: source.id, name: source.title }
+      return source.lines
+        .filter(isPostLine)
+        .map((line) => postFrom(line, community))
+    })
+    .sort((a, b) => (a.createdAt < b.createdAt ? -1 : 1))
+
 export const buildSeedMessages = (seed: Seed): F0ChatItem[] => {
+  if (seed.aggregates) {
+    return buildAggregatedPosts(seed.aggregates)
+  }
   const built = seed.lines.map((line): F0ChatItem => {
     const sentMs = Date.now() - line.min * 60_000
     if (isSystemLine(line)) {
@@ -2302,39 +2425,7 @@ export const buildSeedMessages = (seed: Seed): F0ChatItem[] => {
       }
     }
     if (isPostLine(line)) {
-      const author = line.from === "company" ? undefined : line.from
-      return {
-        type: "post",
-        id: nextId(),
-        createdAt: new Date(sentMs).toISOString(),
-        author,
-        isMine: author?.id === ME.id,
-        title: line.title,
-        description: line.body,
-        mediaUrl: line.mediaUrl,
-        event: line.event,
-        reactions: line.commentsOff ? undefined : line.reactions,
-        commentCount: line.commentsOff ? 0 : (line.commentCount ?? 0),
-        viewCount: line.viewCount,
-        allowCommentsAndReactions: line.commentsOff ? false : undefined,
-        attachments: line.attachments?.map((file, index) => ({
-          id: `${line.title}-f${index}`,
-          filename: file.filename,
-          url: file.url,
-        })),
-        requiredAction: line.acknowledge
-          ? {
-              type: "acknowledge",
-              completedAt:
-                line.acknowledge === "done"
-                  ? new Date(sentMs + 3 * 3_600_000).toISOString()
-                  : undefined,
-            }
-          : undefined,
-        pinnedAt: line.pinned
-          ? new Date(sentMs + 60_000).toISOString()
-          : undefined,
-      }
+      return postFrom(line)
     }
     const isMine = line.from.id === ME.id
     return {

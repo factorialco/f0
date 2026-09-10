@@ -269,6 +269,14 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
     [app, convId]
   )
 
+  // The origin label on an aggregated feed's cards: leave the feed for the
+  // community the post was published in. A channel switch, not a page — which
+  // is why it is not `openPost` with a different argument.
+  const openCommunity = useCallback(
+    (communityId: string) => app.openConversation(communityId),
+    [app]
+  )
+
   const postActions = useCallback(
     (post: F0ChatPost): F0ChatPostAction[] => {
       // Pinning is a MODERATION verb, not an authorship one: whoever may post
@@ -547,6 +555,9 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
     // The mock owns the composer, so F0's built-in dialog never mounts: the
     // CTA opens the full `/dashboard/post/new` replica instead.
     composePost: isCommunity ? composePost : undefined,
+    // Only an aggregated feed puts a community name on its cards, so only it
+    // has anywhere for that link to go.
+    openCommunity: seed?.aggregates ? openCommunity : undefined,
     postActions: isCommunity ? postActions : undefined,
     // Which card is drawn selected: the one whose PAGE is open, and only while
     // the page open is this community's post — the composer and a scheduled
