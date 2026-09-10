@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.96.0](https://github.com/factorialco/f0/compare/f0-react-v6.95.0...f0-react-v6.96.0) (2026-09-10)
+
+
+### Features
+
+* **F0ResourceHeader:** accept a md as the description ([#5489](https://github.com/factorialco/f0/issues/5489)) ([de55434](https://github.com/factorialco/f0/commit/de554349643227246176b16596d0e0bd5795dc6e))
+
 ## [6.95.0](https://github.com/factorialco/f0/compare/f0-react-v6.94.0...f0-react-v6.95.0) (2026-09-10)
 
 
