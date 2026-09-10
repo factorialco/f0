@@ -32,13 +32,13 @@ import { DateCellValue } from './types/date';
 import { DateCellValue as DateCellValue_2 } from './experimental';
 import { DateFilterOptions } from './DateFilter/DateFilter';
 import { default as default_2 } from 'react';
-import { default as default_3 } from 'maplibre-gl';
 import { DeltaCellValue } from './types/delta';
 import { Dispatch } from 'react';
 import { DotTagCellValue } from './types/dotTag';
 import { DotTagCellValue as DotTagCellValue_2 } from './experimental';
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 import { EmployeeItemProps } from './types';
+import { F0CommandPaletteProviderProps as F0CommandPaletteProviderProps_2 } from './types';
 import { F0EmojiPickerProps as F0EmojiPickerProps_2 } from './types';
 import { F0ENPSButtonProps as F0ENPSButtonProps_2 } from './types';
 import { F0PhoneInputProps as F0PhoneInputProps_2 } from './types';
@@ -99,7 +99,6 @@ import { ScrollAreaProps } from '@radix-ui/react-scroll-area';
 import { SearchFilterOptions } from './SearchFilter/SearchFilter';
 import { StatusCellValue } from './types/status';
 import { StatusCellValue as StatusCellValue_2 } from './experimental';
-import { StyleSpecification } from 'maplibre-gl';
 import { SummaryCellValue } from './types/summary';
 import { SVGProps } from 'react';
 import { TagAlertProps } from './experimental';
@@ -474,10 +473,19 @@ declare type AiChatCredits = {
 declare type AiChatCreditWarning = {
     /** The severity level of the warning. */
     level: "soft";
+    /** Host-localized message; defaults to `ai.creditWarning.soft`. */
+    text?: string;
+    /** Host-localized label of the action button; defaults to `ai.creditWarning.getCredits`. */
+    actionLabel?: string;
     /** Called when the user dismisses the credit warning banner. */
     onDismiss?: () => void;
     /** Called when the user clicks the "Get Credits" button. */
     onGetCredits?: () => void;
+    /**
+     * Icon rendered to the left of the "Get Credits" label. Only used when
+     * `onGetCredits` is provided. Hosts typically pass the `Upsell` icon.
+     */
+    getCreditsIcon?: IconType;
 };
 
 /**
@@ -1101,7 +1109,7 @@ export declare const BaseCommunityPost: ({ id, author, group, createdAt, title, 
  */
 export declare type BaseDataAdapter<R extends RecordType, Filters extends FiltersDefinition, Options extends BaseFetchOptions<Filters>, FetchReturn = BaseResponse<R>> = {
     /** Indicates this adapter doesn't use pagination */
-    paginationType?: never | undefined;
+    paginationType?: undefined;
     /**
      * Function to fetch data based on filter options
      * @param options - The filter options to apply when fetching data
@@ -1162,6 +1170,11 @@ declare interface BaseHeaderProps_2 {
         name: string;
         src?: string;
     } | AvatarVariant;
+    /**
+     * Markdown. Inline formatting only — a link out to the resource's source of
+     * truth is the case this exists for. Clamped to two lines behind a "show all"
+     * toggle.
+     */
     description?: string;
     primaryAction?: PrimaryActionButton | PrimaryDropdownAction<string>;
     secondaryActions?: HeaderSecondaryAction[];
@@ -1467,7 +1480,7 @@ declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "clas
     /**
      * Callback fired when the button is clicked. Supports async functions for loading state.
      */
-    onClick?: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void | Promise<unknown>;
+    onClick?: (event: React.MouseEvent<HTMLElement>) => void | Promise<unknown>;
     /**
      * The title of the button.
      */
@@ -1635,6 +1648,8 @@ export declare interface CalendarEventProps {
 }
 
 export declare type CalendarMode = "single" | "range";
+
+export declare type CalendarSelection = Date | DateRange | null;
 
 export declare type CalendarView = "day" | "month" | "year" | "week" | "quarter" | "halfyear" | "periods";
 
@@ -2176,7 +2191,7 @@ export declare interface CardSelectableSingleProps<T extends CardSelectableValue
 export declare type CardSelectableValue = string | number;
 
 declare type CardVisualizationOptions<T, _Filters extends FiltersDefinition, _Sortings extends SortingsDefinition> = {
-    cardProperties: ReadonlyArray<CardPropertyDefinition<T>>;
+    cardProperties: readonly CardPropertyDefinition<T>[];
     title: (record: T) => string;
     description?: (record: T) => string;
     avatar?: (record: T) => CardAvatarVariant;
@@ -3293,6 +3308,430 @@ values: {
 }) => void) | undefined;
 } & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
 
+/** A flat global command: a shortcut, a jump, a thing to create. */
+export declare type CommandAction = CommandActionBase & CommandDoes<(context: CommandRunContext) => void>;
+
+/** A flat global command: a shortcut, a jump, a thing to create. */
+declare type CommandActionBase = {
+    id: string;
+    label: string;
+    icon?: IconType;
+    /** Extra terms the ranker should match on. */
+    keywords?: string;
+    /** Second line. Leave it out unless it says something the label cannot. */
+    description?: string;
+};
+
+export declare type CommandActionRisk = (typeof commandActionRisks)[number];
+
+/**
+ * Friction tier of an action.
+ *
+ * It is a claim about CONSEQUENCE, not a confirmation step — the palette never
+ * asks. `danger` keeps a row out of the default selection and stops a bare
+ * `Enter` from reaching it, so the reader has to arrive on it deliberately; the
+ * confirmation itself belongs to the dialog the consumer already owns.
+ */
+export declare const commandActionRisks: readonly ["none", "confirm", "danger"];
+
+/**
+ * The assistant escape hatch — the way out of the list when nothing in it fit.
+ *
+ * Optional by design: with no `assistant`, the bar button, the trailing row and
+ * the `mod+Enter` binding all disappear rather than degrading into dead
+ * affordances. The palette does not know or care WHICH assistant this is; it
+ * hands over a prompt and the scope it was built from.
+ */
+export declare type CommandAssistant = {
+    /** The bar button's label, e.g. "Ask One". */
+    label: string;
+    /** The assistant's own mark. Rendered as given — not tinted to a control glyph. */
+    icon?: IconType;
+    /**
+     * Receives the prompt the reader built. `ref` is the scope it was asked
+     * inside, when there was one.
+     */
+    onAsk: (prompt: string, ref?: CommandEntityRef) => void;
+};
+
+/**
+ * Whether an action can run on the current scope, and why not.
+ *
+ * A gated action is never hidden: it stays listed, sinks below the runnable
+ * ones, and shows its reason. Policy changes an action's behaviour, never its
+ * presence — a row that vanishes teaches the reader nothing.
+ */
+export declare type CommandAvailability = {
+    disabled: boolean;
+    reason?: string;
+};
+
+/**
+ * A row has to DO something, and there are exactly two things it can be: a
+ * DESTINATION or a BEHAVIOUR. `href` for the first, `run` for the second, and
+ * the union is what makes "one of them, never neither" a type error rather than
+ * a row that silently does nothing when pressed.
+ *
+ * Most rows are destinations, so most rows want a plain string and no callback:
+ * writing `run: () => navigate("/x")` to express "go to /x" buries a link inside
+ * a function, and the palette then cannot know it IS a link — which is what
+ * lets a destination row offer `Copy link` and open in a new tab.
+ *
+ * `TRun` is the callback's own shape, because a global command is handed the
+ * context while an entity action is handed its target as well.
+ */
+declare type CommandDoes<TRun, THref = string> = {
+    href: THref;
+    run?: never;
+} | {
+    run: TRun;
+    href?: never;
+};
+
+/**
+ * An action that applies to a scoped record or selection.
+ *
+ * Either a destination or a behaviour, never neither. The destination may be a
+ * plain string when it is the same wherever you came from, or a function of the
+ * target when it is not — `(ref) => \`/devices/${ref.id}/history\`` — and it
+ * receives the collected parameters too, so a step's answer can end up in the
+ * URL.
+ */
+export declare type CommandEntityAction = CommandEntityActionBase & CommandDoes<(ref: CommandEntityRef, values: CommandParamValues, context: CommandRunContext) => void, string | ((ref: CommandEntityRef, values: CommandParamValues) => string)>;
+
+/** An action that applies to a scoped record or selection. */
+declare type CommandEntityActionBase = {
+    /** Unique within its provider. */
+    key: string;
+    /** Verb-first, so scanning and search both work: "Lock screen". */
+    label: string;
+    description?: string;
+    icon: IconType;
+    /** Origin as metadata, never as navigation: "Script", "Query". */
+    badge?: string;
+    risk: CommandActionRisk;
+    /** Extra terms the ranker should match on. */
+    keywords?: string;
+    availability?: (ref: CommandEntityRef) => CommandAvailability;
+    impact?: (ref: CommandEntityRef) => CommandImpact | undefined;
+    /** Floats the action into "Suggested" while the query is empty. */
+    suggested?: (ref: CommandEntityRef) => boolean;
+    params?: CommandParamStep[];
+};
+
+/**
+ * A named set of actions on one record: "Security", "Maintenance", "Lifecycle".
+ *
+ * The heading sits HERE rather than on each action, for the same reason it sits
+ * on `CommandGroup` rather than on each command. Three maintenance actions used
+ * to write `group: "Maintenance"` three times — three chances to disagree — and
+ * because the heading was per-row the palette then had to re-sort the list so
+ * that rows of one intent came out contiguous, or a straggler re-emitted a
+ * heading that had already appeared. A group cannot be non-contiguous.
+ */
+export declare type CommandEntityActionGroup = {
+    label: string;
+    items: CommandEntityAction[];
+};
+
+/**
+ * The public surface of `F0CommandPalette` (SPEC-006 / SPEC-039).
+ *
+ * The palette has ONE grammar — `[scope] › [action] › [params]` — and every type
+ * here is a piece of it. Read them in that order: an `CommandEntityRef` is the
+ * scope, a `CommandEntityAction` is the verb, a `CommandParamStep` is a value the
+ * verb still needs.
+ */
+/** A person rendered as a real avatar instead of an icon. */
+export declare type CommandEntityAvatar = {
+    firstName: string;
+    lastName: string;
+    src?: string;
+};
+
+/**
+ * One domain's contribution to the palette: how to find its records, and what
+ * can be done to one.
+ *
+ * Declaring an action here once is what keeps a row menu, a bulk bar and the
+ * palette projections of a single list instead of N×M surfaces.
+ */
+export declare type CommandEntityProvider = {
+    /** Stable discriminator, and the value of `CommandEntityRef.type`. */
+    type: string;
+    /** Group heading in the global list, e.g. "Devices". */
+    label: string;
+    /**
+     * Record lookup. Ranking across providers is the palette's job.
+     *
+     * MAY BE ASYNC, because real entity search is remote. Return an array when the
+     * records are already in hand and a promise when they are not — the palette
+     * renders skeleton rows in this provider's group while one is outstanding, and
+     * a reason row if it rejects.
+     *
+     * The palette calls this on every query change and applies only the NEWEST
+     * response, so a slow answer to `mac` can never overwrite a fast one to
+     * `macbook`. It does not debounce: a provider that wants fewer round trips
+     * should debounce inside its own `search`, since only it knows what a
+     * round trip costs.
+     */
+    search: (query: string, limit: number) => CommandEntityRef[] | Promise<CommandEntityRef[]>;
+    /**
+     * The actions a ref can run. Omit it while a domain has not adopted the
+     * registry: its records stay findable, they are just not yet actionable —
+     * a valid state, since the palette still offers navigation.
+     */
+    actions?: (ref: CommandEntityRef) => CommandEntityActionGroup[];
+    /**
+     * The records that live INSIDE a ref, so the palette can narrow before it
+     * acts: a team's people, a project's tasks, a folder's documents.
+     *
+     * Named `inside` and not `children` on purpose: this returns REFS, and a prop
+     * called `children` on anything React-shaped reads as a `ReactNode` slot.
+     * Props here are data, strongly typed — never rendered nodes handed in.
+     *
+     * Return refs of any `type`. The palette resolves each one's actions from the
+     * provider matching that type, so a team provider hands back `person` refs and
+     * the person provider supplies what can be done to them — nothing has to know
+     * about both.
+     *
+     * `query` is what has been typed inside the scope, and `limit` caps the rows:
+     * a team of forty is a list to filter, not a list to print.
+     */
+    inside?: (ref: CommandEntityRef, query: string, limit: number) => CommandEntityRef[] | Promise<CommandEntityRef[]>;
+};
+
+/**
+ * What the palette is scoped to: one record, or a selection of them.
+ *
+ * `kind: "many"` carries an id SNAPSHOT rather than a live selection, taken when
+ * the palette opened — it is the authoritative target list for the run, so a
+ * selection changing behind the overlay cannot redirect an action mid-flight.
+ */
+export declare type CommandEntityRef = {
+    type: string;
+    kind: "one";
+    id: string;
+    /** Scope label and row title, e.g. `MacBook Pro 14"`. */
+    label: string;
+    /** Tells duplicates apart while choosing, e.g. an owner or a model. */
+    sublabel?: string;
+    icon?: IconType;
+    avatar?: CommandEntityAvatar;
+    /** Where `Enter` goes in global mode. Scoping uses `/` instead. */
+    href?: string;
+} | {
+    type: string;
+    kind: "many";
+    ids: string[];
+    /** Scope label, e.g. `12 devices`. */
+    label: string;
+    icon?: IconType;
+};
+
+/**
+ * ONE HEADING AND WHAT SITS UNDER IT.
+ *
+ * Either items the consumer wrote, or a provider that fetches records — one
+ * ordered list holds both, and the order it is written in is the order the
+ * groups appear on screen.
+ *
+ * There is no separate `navigation` prop and no built-in "Go to". A destination
+ * is a command whose `CommandDoes` picked `href`, so a group of destinations is
+ * a group like any other and the product names it. The palette used to assign
+ * those headings itself, which made "Actions" and "Go to" the only two words on
+ * screen a product could not choose — and put copy about the consumer's own
+ * content into a labels table, where it did not belong.
+ *
+ * Exactly one of `items` or `provider`, enforced by `never` on the other, so a
+ * group carrying both is a type error rather than a silent precedence rule.
+ *
+ * Give it a STABLE identity — module scope, or memoised. It keys the row memos.
+ */
+export declare type CommandGroup = {
+    label: string;
+    items: CommandAction[];
+    provider?: never;
+} | {
+    provider: CommandEntityProvider;
+    label?: never;
+    items?: never;
+};
+
+/** How a run lands on a selection — stated on the row, before the commit. */
+export declare type CommandImpact = {
+    eligible: number;
+    total: number;
+    skipped: number;
+    reason?: string;
+};
+
+/**
+ * EVERY WORD THE PALETTE PUTS ON SCREEN — all of it, and all of it required.
+ *
+ * The palette ships no copy of its own. It renders the consumer's records,
+ * their commands and their destinations, so the words wrapped around that
+ * content belong to the same product and arrive the same way: as props, rather
+ * than half here and half in a shared translation table this component would
+ * have to grow a key in every time a row learned a new state.
+ *
+ * REQUIRED, not optional with a fallback, because a fallback is exactly where
+ * an untranslated string hides. An English default renders perfectly inside a
+ * Spanish app and nothing fails — nothing is even detectably wrong until a
+ * reader sees it. A required field is a compile error instead.
+ *
+ * ANYTHING THAT INTERPOLATES IS A FUNCTION, never a template carrying
+ * `{{name}}`. A function is typed, so a missing value is a compile error rather
+ * than a literal `{{name}}` on screen; it cannot be handed the wrong
+ * interpolation dialect; and it is the only form that can reorder its parts or
+ * choose a plural, which a template cannot do in any language that inflects.
+ *
+ * Define it at MODULE SCOPE and hand over the same object every render. It is
+ * static copy, so there is nothing to recompute — and the palette keys its row
+ * memos off these values.
+ */
+export declare type CommandPaletteLabels = {
+    /** Accessible name of the overlay, for a screen reader announcing it. */
+    label: string;
+    /** The prompt in the field while nothing is typed and nothing is scoped. */
+    placeholder: string;
+    /** The short form, for a field sharing its row with the assistant on a phone. */
+    placeholderPhone: string;
+    /** The prompt once the palette is scoped and only actions remain. */
+    placeholderScoped: string;
+    /** The same, once the palette is scoped to a record. */
+    fieldLabelScoped: (name: string) => string;
+    empty: {
+        title: string;
+        description: string;
+    };
+    /**
+     * Headings over the buckets the palette COMPUTES, and only those.
+     *
+     * Every other heading arrives with its content: a `CommandGroup` names itself
+     * with `label`, and a provider names its records' group the same way. What is
+     * left here is the three rearrangements the palette performs on that content
+     * — what you did lately, what it floats first, what it had to gate. Those are
+     * facts about this component's own behaviour, so they are generic copy;
+     * "Actions" and "Go to" never were, and used to sit here by mistake.
+     */
+    groups: {
+        recent: string;
+        suggested: string;
+        unavailable: string;
+    };
+    /** The key legend's labels. The keys themselves are glyphs, not copy. */
+    footer: {
+        actions: string;
+        rowActions: string;
+        ask: string;
+        choose: string;
+        leaveScope: string;
+        goBack: string;
+    };
+    /** The chip in the field, which is a control and needs a name. */
+    scope: {
+        remove: (name: string) => string;
+    };
+    /** Visible text and tooltips on the controls a row carries. */
+    rowActions: {
+        actions: string;
+        actionsFor: (label: string) => string;
+        copyLink: string;
+        copyLinkTo: (label: string) => string;
+        linkCopied: string;
+    };
+    /**
+     * What the live region says when the palette changes under the reader.
+     *
+     * `scoped` is handed the count so it can pick its own plural — including the
+     * zero case, which is why there is no separate "no actions" string.
+     */
+    announce: {
+        scoped: (name: string, count: number) => string;
+        cleared: string;
+        unavailable: (label: string, reason: string) => string;
+        linkCopied: (url: string) => string;
+    };
+    /** What one row says, and what pressing it will do. */
+    row: {
+        open: (label: string) => string;
+        run: (label: string) => string;
+        ask: (label: string) => string;
+        /** One word each, on the tooltip of a row's own `↵`. */
+        verb: {
+            open: string;
+            run: string;
+            ask: string;
+        };
+        /** Shown on a gated row that supplied no reason of its own. */
+        unavailable: string;
+        /** Shown in a provider's group when its search could not be reached. */
+        searchFailed: string;
+    };
+    /**
+     * The blast radius, as a sentence. Three values and a conditional reason,
+     * which is more than a template can put in a sensible order.
+     */
+    impact: (impact: CommandImpact) => string;
+};
+
+/** One choice inside a parameter step. */
+export declare type CommandParamOption = {
+    value: string;
+    label: string;
+    sublabel?: string;
+    icon?: IconType;
+    avatar?: CommandEntityAvatar;
+};
+
+/**
+ * A value the action still needs, rendered as the next level of the palette
+ * rather than as a separate dialog.
+ *
+ * Covers the `select` and `multiple` shapes. An action needing free-form or
+ * multi-field input should collect nothing here and hand off to its own dialog
+ * from `run` instead.
+ */
+export declare type CommandParamStep = {
+    key: string;
+    /** Level heading and input placeholder, e.g. "Choose a version". */
+    label: string;
+    options: (ref: CommandEntityRef) => CommandParamOption[];
+    multiple?: boolean;
+};
+
+/** Values collected across the parameter levels, keyed by `CommandParamStep.key`. */
+export declare type CommandParamValues = Record<string, string[]>;
+
+export declare type CommandRowAction = {
+    key: string;
+    /**
+     * The accessible name, and it always carries the target: `Copy link to
+     * MacBook Pro 14"`. The tooltip may be shorter — see `tip`.
+     */
+    label: string;
+    icon?: IconType;
+    /**
+     * Visible text next to the icon. Give it to at most one action per row —
+     * otherwise the row turns into a row of buttons.
+     */
+    text?: string;
+    tip?: string;
+    run: () => void;
+};
+
+/**
+ * What the palette lends an action at run time, so a provider stays free of the
+ * router and of any assistant runtime. An action that has to reach a screen
+ * calls `navigate` rather than importing a router itself.
+ */
+export declare type CommandRunContext = {
+    navigate: (href: string) => void;
+    /** Hands a prompt to the assistant. A no-op when no `assistant` is configured. */
+    ask: (prompt: string) => void;
+};
+
 export declare const CommunityPost: (({ id, author, group, createdAt, title, description, onClick, mediaUrl, event, counters, reactions, inLabel, comment, actions, dropdownItems, noReactionsButton, descriptionExpandable, noDescriptionClamp, hideTitle, hideGroup, pinned, pinnedLabel, relativeDate, }: CommunityPostProps) => JSX_2.Element) & {
     Skeleton: ({ withEvent, withImage, }: CommunityPostSkeletonProps) => JSX_2.Element;
 };
@@ -3595,10 +4034,10 @@ declare type DashboardCanvasActions = {
 };
 
 declare interface DashboardFetchSpec {
-    fetch: Array<{
+    fetch: {
         toolId: string;
         args: Record<string, unknown>;
-    }>;
+    }[];
     query: string | null;
     columnLabels?: Record<string, string>;
 }
@@ -3699,6 +4138,11 @@ declare interface DataCollectionSettingsContextType {
  * Extends the base data source with data collection specific elements / features
  */
 export declare type DataCollectionSource<R extends RecordType = RecordType, Filters extends FiltersDefinition = FiltersDefinition, Sortings extends SortingsDefinition = SortingsDefinition, Summaries extends SummariesDefinition = SummariesDefinition, ItemActions extends ItemActionsDefinition<R> = ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition = NavigationFiltersDefinition, Grouping extends GroupingDefinition<R> = GroupingDefinition<R>> = DataSource<R, Filters, Sortings, Grouping> & DataCollectionSourceDefinition<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping> & {
+    /**
+     * The definition, pinned to `deps`, for what is rendered per record — the
+     * source itself changes identity every render. Set by `memoizeDefinition`.
+     */
+    definition?: DataCollectionSourceDefinition<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>;
     currentNavigationFilters: NavigationFiltersState<NavigationFilters>;
     setCurrentNavigationFilters: React.Dispatch<React.SetStateAction<NavigationFiltersState<NavigationFilters>>>;
     /** Current summaries data */
@@ -3715,6 +4159,12 @@ export declare type DataCollectionSourceDefinition<R extends RecordType = Record
     /**
      * Data Collection specific datasource elements / features
      */
+    /**
+     * Pin this definition to `deps` so rows can skip a render. Only safe if `deps`
+     * lists everything the callbacks below close over: miss one and a row keeps
+     * calling the closure it mounted with.
+     */
+    memoizeDefinition?: boolean;
     /** Navigation filters */
     navigationFilters?: NavigationFilters;
     currentNavigationFilters?: NavigationFiltersState<NavigationFilters>;
@@ -3748,7 +4198,7 @@ export declare type DataCollectionSourceDefinition<R extends RecordType = Record
     /** Item filter that can be used to filter the items before they are displayed */
     itemPreFilter?: (item: R) => boolean;
     /** Lanes configuration */
-    lanes?: ReadonlyArray<Lane<Filters>>;
+    lanes?: readonly Lane<Filters>[];
     /** Rich search preview shown in the shared header search (all visualizations). */
     searchPreview?: SearchPreview<R>;
 };
@@ -3760,7 +4210,7 @@ declare type DataCollectionStatus<CurrentFiltersState extends FiltersState<Filte
     grouping?: GroupingState<RecordType, GroupingDefinition<RecordType>>;
     sortings?: SortingsState<SortingsDefinition>;
     filters?: CurrentFiltersState;
-    search?: string | undefined;
+    search?: string;
     navigationFilters?: NavigationFiltersState<NavigationFiltersDefinition>;
     visualization?: number;
     /** Per-visualization filter states, keyed by visualization index.
@@ -3768,6 +4218,9 @@ declare type DataCollectionStatus<CurrentFiltersState extends FiltersState<Filte
     visualizationFilters?: Record<string, CurrentFiltersState>;
     /** User-created custom presets persisted alongside the rest of the state. */
     customPresets?: PresetsDefinition<FiltersDefinition>;
+    /** The active view's id, so a revisit restores which view is selected and not
+     *  just the views themselves. */
+    selectedPresetId?: string;
 };
 
 declare type DataCollectionStatusComplete<CurrentFiltersState extends FiltersState<FiltersDefinition>> = DataCollectionStatus<CurrentFiltersState> & {
@@ -3785,7 +4238,7 @@ declare type DataCollectionStorageFeature = (typeof dataCollectionStorageFeature
  */
 declare const dataCollectionStorageFeatures: readonly ["filters", "navigationFilters", "sortings", "grouping", "visualization", "search", "visualizationFilters"];
 
-declare type DataCollectionStorageFeaturesDefinition = ("*" | `all` | `!${DataCollectionStorageFeature}` | `${DataCollectionStorageFeature}`)[];
+declare type DataCollectionStorageFeaturesDefinition = ("*" | `all` | `!${DataCollectionStorageFeature}` | DataCollectionStorageFeature)[];
 
 /**
  * Represents an error that occurred during data fetching
@@ -4868,6 +5321,13 @@ declare const defaultTranslations: {
             readonly upgradePlan: "Upgrade";
             readonly needMoreCredits: "Need more credits?";
         };
+        readonly usageLimits: {
+            readonly title: "Personal allowance";
+            readonly used: "{{percentage}}% used";
+            readonly yourCompany: "Your company";
+            readonly unlimited: "Unlimited";
+            readonly error: "Could not load usage";
+        };
         readonly reportCard: {
             readonly tableLabel: "Table";
             readonly openButton: "Open";
@@ -5005,6 +5465,7 @@ declare const defaultTranslations: {
         readonly removeNamedFile: "Remove {{name}}";
         readonly tooManyFilesError: "You can attach up to {{maxFiles}} files at once";
         readonly fileTooLargeError: "Each file must be {{maxFileSize}} or smaller";
+        readonly messageTooLongError: "Messages can be up to {{maxCharacters}} characters";
         readonly fileUploadError: "Upload failed";
         readonly micPermissionDenied: "Microphone access is blocked. Allow it in your browser settings to dictate.";
         readonly micError: "Couldn't access the microphone.";
@@ -5811,7 +6272,7 @@ declare type DialogControls = {
 } | {
     kind: "back";
     label: string;
-    onClick: () => void;
+    onClick: () => void | Promise<void>;
 };
 
 declare type DialogPosition = (typeof dialogPositions)[number];
@@ -5927,6 +6388,8 @@ declare type DropdownProps = Omit<DropdownInternalProps, (typeof privateProps_5)
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
 } & WithDataTestIdProps;
+
+declare type DropPosition = "before" | "after" | "inside";
 
 /* Excluded from this release type: EditableColumn */
 
@@ -6071,7 +6534,7 @@ declare type EditableTableOnCellChangeParams<R extends RecordType> = {
 };
 
 declare type EditableTableVisualizationOptions<R extends RecordType, _Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition> = Omit<TableVisualizationOptions<R, _Filters, Sortings, Summaries>, "columns"> & {
-    columns: ReadonlyArray<EditableTableColumnDefinition<R, Sortings, Summaries>>;
+    columns: readonly EditableTableColumnDefinition<R, Sortings, Summaries>[];
     /**
      * Called when a cell value changes. Receives an object with the full updated
      * row (`updatedItem`) and a `changes` map of the modified attributes, keyed by
@@ -7575,11 +8038,11 @@ declare type F0ChatPinnedPost = {
  * click does comes from {@link F0ChatRuntime.openPost}; what its menu offers,
  * from {@link F0ChatRuntime.postActions}.
  *
- * What F0 DERIVES and the host must not send: the community's name (it is
- * `channel.title` — the post is in the channel you're reading), the words "in"
- * and "Comment" (i18n), and the wording of the counters (numbers on the wire,
+ * What F0 DERIVES and the host must not send: the words "in" and "Comment"
+ * (i18n), and the wording of the counters (numbers on the wire,
  * `{{count}} comments` at the edge; otherwise the host translates what F0
- * already translates).
+ * already translates). The community's name is the one exception, and only in
+ * an aggregated feed — see {@link F0ChatPost.community}.
  */
 export declare type F0ChatPost = {
     type: "post";
@@ -7662,6 +8125,24 @@ export declare type F0ChatPost = {
      * pinned post is usually not in the loaded window at all.
      */
     pinnedAt?: string;
+    /**
+     * Where the post was published, named on the card as "… in Barcelona".
+     *
+     * ONLY for an aggregated feed — a channel that gathers posts from several
+     * communities at once. In a single community's channel the answer is already
+     * the channel title an inch above every card, so sending it there prints the
+     * same word twice per post; omit it and F0 draws no origin at all.
+     *
+     * That makes this the one field where the host tells F0 something F0 would
+     * otherwise derive, and the reason is that an aggregated feed is the one
+     * place where the derivation is wrong: "which of my communities is this
+     * from?" is the question the reader actually has, and the channel can't
+     * answer it.
+     *
+     * Clicking it calls {@link F0ChatRuntime.openCommunity}; without that
+     * handler the name is still drawn, just not as a link.
+     */
+    community?: F0ChatPostCommunity;
 };
 
 /**
@@ -7694,6 +8175,13 @@ export declare type F0ChatPostComment = {
     createdAt: string;
     /** Whether the current user may edit or delete it. */
     isMine?: boolean;
+};
+
+/** The community a post came from, for an aggregated feed's origin label. */
+declare type F0ChatPostCommunity = {
+    id: string;
+    /** As the reader knows it — "Barcelona", "Company news". No `#`. */
+    name: string;
 };
 
 /**
@@ -7897,6 +8385,12 @@ export declare type F0ChatRuntime = {
      */
     maxFileSizeBytes?: number;
     /**
+     * Maximum number of characters allowed in a message. The composer keeps an
+     * oversized draft in place and shows its existing validation banner instead
+     * of calling `sendMessage`. Omit for no limit.
+     */
+    maxMessageCharacters?: number;
+    /**
      * Optional voice dictation — same signature as the AI chat (streams partials).
      * Not part of the Stream transport; a host wires it to its own speech service
      * (the Stream adapter omits it, so the mic button stays hidden there).
@@ -7933,6 +8427,16 @@ export declare type F0ChatRuntime = {
     openPost?: (id: string, context: {
         source: "card" | "comment" | "pinned";
     }) => void;
+    /**
+     * Go to a community, from the origin label an aggregated feed puts on each
+     * card (see {@link F0ChatPost.community}).
+     *
+     * Separate from `openPost` because it is a different destination — the
+     * community, not the post — and hosts wire the two to different routes.
+     * Omit it and the name is still drawn, just not clickable: an aggregated feed
+     * that cannot navigate should still say where each post came from.
+     */
+    openCommunity?: (communityId: string) => void;
     /**
      * Each post's overflow menu. FUNCTION form, like `headerActions`: every post
      * offers exactly what the user may do to THAT post, and only the host knows.
@@ -8191,6 +8695,62 @@ export declare type F0ChatVoiceAttachment = {
     name?: string;
 };
 
+/** What `useCommandPalette()` hands back. */
+export declare type F0CommandPaletteApi = {
+    open: () => void;
+    /**
+     * Open already scoped to a record or a selection — the shortcut for any
+     * surface that already knows its target (a row menu, a bulk bar, a detail
+     * header), so the only thing left to do is name the verb.
+     */
+    openScoped: (ref: CommandEntityRef) => void;
+    close: () => void;
+    isOpen: boolean;
+};
+
+/**
+ * @experimental This is an experimental API use it at your own risk
+ */
+export declare const F0CommandPaletteProvider: ({ children, groups, recent, assistant, labels, onNavigate, shortcut, open: openProp, onOpenChange, }: F0CommandPaletteProviderProps_2) => JSX_2.Element;
+
+export declare type F0CommandPaletteProviderProps = {
+    children: ReactNode;
+    /** Every word the palette puts on screen. Required: it ships none itself. */
+    labels: CommandPaletteLabels;
+    /**
+     * Everything findable, as an ordered list of groups.
+     *
+     * One prop rather than three, because `actions`, `navigation` and `providers`
+     * were the same idea three times — a heading and the rows under it. Order
+     * here is order on screen, so where records sit relative to commands is the
+     * product's call and no longer a rule buried in this component.
+     */
+    groups: CommandGroup[];
+    /**
+     * Ids of items in `groups` to lead the empty state with, most recent first.
+     *
+     * Consumer-owned on purpose: what counts as recent is a fact about the app's
+     * history, not about this overlay, and the palette must not be the thing that
+     * decides to write to storage.
+     */
+    recent?: string[];
+    assistant?: CommandAssistant;
+    /**
+     * How an `href` is followed. Defaults to a full page load, which is right for
+     * an app without a client router and wrong for one with it — pass the router's
+     * own navigate.
+     */
+    onNavigate?: (href: string) => void;
+    /**
+     * Bind `mod+K` to open the palette.
+     * @default true
+     */
+    shortcut?: boolean;
+    /** Controlled open state. Leave it out to let the palette own it. */
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
+};
+
 /**
  * F0CommunityPostsCarousel — the Communities widget's content: the latest posts as
  * TILES you page through, two at a time on a main-column card and one in
@@ -8355,7 +8915,7 @@ declare type F0DialogPrimaryAction = {
     label: string;
     icon?: IconType;
     iconPosition?: "left" | "right";
-    onClick: () => void;
+    onClick: () => void | Promise<void>;
     disabled?: boolean;
     loading?: boolean;
 };
@@ -8366,7 +8926,7 @@ declare type F0DialogSecondaryAction = {
     label: string;
     icon?: IconType;
     iconPosition?: "left" | "right";
-    onClick: () => void;
+    onClick: () => void | Promise<void>;
     disabled?: boolean;
     loading?: boolean;
 };
@@ -8573,7 +9133,7 @@ export declare type F0FormEditableTableColumn<R extends RecordType> = Omit<Edita
  */
 export declare type F0FormEditableTableProps<R extends RecordType> = {
     /** Column definitions (see {@link F0FormEditableTableColumn}). */
-    columns: ReadonlyArray<F0FormEditableTableColumn<R>>;
+    columns: readonly F0FormEditableTableColumn<R>[];
     /**
      * Rows in display order. The table is controlled: edits, reorders and
      * removals are reported via callbacks and the parent updates `items`.
@@ -8775,8 +9335,13 @@ export declare interface F0MapControlsProps extends WithDataTestIdProps {
 
 /** Imperative handle exposed via `ref`. */
 export declare interface F0MapHandle {
-    /** The raw MapLibre instance (escape hatch). `null` until the map has mounted. */
-    getMap: () => default_3.Map | null;
+    /**
+     * The rendering engine's own map object, as an escape hatch. Typed `unknown`
+     * on purpose: what comes back depends on the provider, so narrowing it is a
+     * deliberate decision at the call site instead of an implicit dependency on
+     * whichever engine F0Map happens to use. `null` until the map has mounted.
+     */
+    getNativeMap: () => unknown;
     /** Center on a marker (and select it). Always animates unless reduced-motion. */
     focusMarker: (id: string) => void;
     /** Frame all markers in view. */
@@ -8931,7 +9496,7 @@ export declare interface F0MapProps extends WithDataTestIdProps {
     /** Initial camera. Defaults to a city-level view. Read once on mount. */
     initialViewport?: F0MapViewport;
     /** Light/dark style pair. Defaults to the f0-themed OpenFreeMap styles. */
-    mapStyle?: F0MapStylePair;
+    mapStyle?: F0MapStyle;
     /**
      * Allow pan/zoom. Defaults to `true`. Read on mount: changing it recreates
      * the map (and resets the camera), so treat it as static.
@@ -8987,6 +9552,13 @@ export declare interface F0MapProps extends WithDataTestIdProps {
 }
 
 /**
+ * Which rendering engine a style is written for. The tag exists so a style
+ * built for one engine can never be handed to another: the shapes are not
+ * interchangeable, and without it the mismatch would only surface at runtime.
+ */
+export declare type F0MapProvider = "maplibre";
+
+/**
  * A route: a polyline drawn through the given coordinates exactly as provided.
  * `F0Map` renders the path; it does not compute routing - fetch that
  * server-side (or from a routing engine) and pass the resulting vertices.
@@ -9011,12 +9583,15 @@ export declare interface F0MapSkeletonProps extends WithDataTestIdProps {
 }
 
 /**
- * A light/dark pair of MapLibre styles. Each entry is either a hosted style
- * URL or an inline `StyleSpecification`.
+ * A light/dark style pair for one engine. `light` and `dark` are deliberately
+ * opaque - their real shape belongs to the engine (a MapLibre
+ * `StyleSpecification` or a style URL today), and F0Map's public surface must
+ * never make a consumer import an engine's types to describe a style.
  */
-export declare interface F0MapStylePair {
-    light: string | StyleSpecification;
-    dark: string | StyleSpecification;
+export declare interface F0MapStyle {
+    provider: F0MapProvider;
+    light: unknown;
+    dark: unknown;
 }
 
 /**
@@ -9027,7 +9602,7 @@ export declare interface F0MapStylePair {
  * resolved to concrete hex for the light and dark neutral ramps. Regenerate with
  * `node src/patterns/F0Map/styles/buildStyles.mjs`.
  */
-export declare const f0MapStyles: F0MapStylePair;
+export declare const f0MapStyles: F0MapStyle;
 
 /** Initial camera position for the map. */
 export declare interface F0MapViewport {
@@ -9350,7 +9925,7 @@ export declare const F0RichTextDisplay: ForwardRefExoticComponent<F0RichTextDisp
 
 export declare type F0RichTextDisplayHandle = HTMLDivElement;
 
-export declare interface F0RichTextDisplayProps extends HTMLAttributes<HTMLDivElement> {
+export declare interface F0RichTextDisplayProps extends Omit<HTMLAttributes<HTMLDivElement>, "dangerouslySetInnerHTML"> {
     content: string;
     className?: string;
     format?: "html" | "markdown";
@@ -9508,8 +10083,8 @@ declare type F0SelectDataProps<T extends string, R = unknown> = {
 } | {
     source?: never;
     mapOptions?: never;
-    searchFn?: (option: F0SelectItemProps<T, unknown>, search?: string) => boolean | undefined;
-    options: F0SelectItemProps<T, unknown>[];
+    searchFn?: (option: F0SelectItemProps<T>, search?: string) => boolean | undefined;
+    options: F0SelectItemProps<T>[];
 };
 
 declare type F0SelectFieldProps<T extends string, R = unknown> = F0SelectPopupProps<T, R> & F0SelectSelectionProps<T, R> & {
@@ -9657,7 +10232,7 @@ declare type F0SelectSelectionProps<T extends string, R = unknown> = F0SelectSin
     multiple?: false;
     value?: T;
     defaultItem?: F0SelectItemObject<T, ResolvedRecordType<R>>;
-    onChange?: (value: T, originalItem?: ResolvedRecordType<R> | undefined, option?: F0SelectItemObject<T, ResolvedRecordType<R>>) => void;
+    onChange?: (value: T, originalItem?: ResolvedRecordType<R>, option?: F0SelectItemObject<T, ResolvedRecordType<R>>) => void;
     onSelectItems?: never;
 } | {
     multiple: true;
@@ -9689,7 +10264,7 @@ declare type F0SelectSingleSelectionProps<T extends string, R = unknown> = {
     multiple?: false;
     value?: T;
     defaultItem?: F0SelectItemObject<T, ResolvedRecordType<R>>;
-    onChange?: (value: T, originalItem?: ResolvedRecordType<R> | undefined, option?: F0SelectItemObject<T, ResolvedRecordType<R>>) => void;
+    onChange?: (value: T, originalItem?: ResolvedRecordType<R>, option?: F0SelectItemObject<T, ResolvedRecordType<R>>) => void;
     /** Callback for selection changes - provides full selection state for advanced use cases (e.g., "Select All" with exclusions) */
     onSelectItems?: never;
 };
@@ -9765,7 +10340,7 @@ declare type F0TagListProps<T extends TagType_2> = {
     /**
      * Array of tag data corresponding to the specified type.
      */
-    tags: Array<TagTypeMapping[T]>;
+    tags: TagTypeMapping[T][];
     /**
      * The maximum number of tags to display.
      * @default 4
@@ -9869,7 +10444,7 @@ export declare interface F0VersionHistoryProps {
     title: string;
     versions: Version[];
     currentVersion?: CurrentVersion;
-    activeVersionId?: string | "current";
+    activeVersionId?: "current" | (string & {});
 }
 
 /**
@@ -10225,9 +10800,9 @@ export declare interface GranularityDefinition {
         max?: Date;
     } | undefined;
     label: (viewDate: Date, i18n: TranslationsType, locale?: string) => ReactNode;
-    toRangeString: (date: Date | DateRange | undefined | null, i18n: TranslationsType, format?: DateStringFormat) => DateRangeString;
-    toRange: <T extends Date | DateRange | undefined | null>(date: T) => T extends Date | DateRange ? DateRangeComplete : T;
-    toString: (date: Date | DateRange | undefined | null, i18n: TranslationsType, format?: DateStringFormat, locale?: string) => string;
+    toRangeString: (date: OptionalCalendarSelection, i18n: TranslationsType, format?: DateStringFormat) => DateRangeString;
+    toRange: <T extends OptionalCalendarSelection>(date: T) => T extends Date | DateRange ? DateRangeComplete : T;
+    toString: (date: OptionalCalendarSelection, i18n: TranslationsType, format?: DateStringFormat, locale?: string) => string;
     toStringMaxWidth: () => number;
     placeholder: () => string;
     fromString: (dateStr: string | DateRangeString, i18n: TranslationsType) => DateRange | null;
@@ -10236,8 +10811,8 @@ export declare interface GranularityDefinition {
     getViewDateFromDate: (date: Date) => Date;
     render: (renderProps: {
         mode: CalendarMode;
-        selected: Date | DateRange | null;
-        onSelect: (date: Date | DateRange | null) => void;
+        selected: CalendarSelection;
+        onSelect: (date: CalendarSelection) => void;
         month: Date;
         onMonthChange: (date: Date) => void;
         motionDirection: number;
@@ -10303,13 +10878,13 @@ export declare type GraphVisualizationOptions<R extends RecordType, Filters exte
      * toggle to show/hide each metadata column (like configuring table columns).
      * Values are tag `column` keys (or `type` when a tag has no `column`).
      */
-    nodeTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>;
+    nodeTagTypes?: readonly F0GraphNodeTagColumn[];
     /** Friendly labels per tag column, shown in the metadata visibility toggle. */
     nodeTagTypeLabels?: Partial<Record<F0GraphNodeTagColumn, string>>;
     /** Tag columns visible by default. Defaults to all of `nodeTagTypes`. */
-    defaultVisibleTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>;
+    defaultVisibleTagTypes?: readonly F0GraphNodeTagColumn[];
     /** Tag columns that are always visible and cannot be hidden in the settings. */
-    pinnedTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>;
+    pinnedTagTypes?: readonly F0GraphNodeTagColumn[];
     /**
      * Tag columns the actor is not allowed to see, mapped to the reason. Each is
      * still listed in the settings but with its toggle forced OFF and disabled,
@@ -10803,6 +11378,49 @@ export declare interface HomeSlotParamsMap {
     indicators: IndicatorsListProps;
 }
 
+export declare type HomeTrackingOptions = {
+    /** A widget's header link, footer action, or "View more" was used. */
+    onWidgetAction?: (event: HomeWidgetActionEvent) => void;
+    /**
+     * A row inside a widget was activated. Fires ALONGSIDE the navigation the
+     * row's `href` performs — it does not replace or gate it, so a middle-click
+     * or a modified click still behaves like the link it is.
+     */
+    onWidgetItemActivate?: (event: HomeWidgetItemActivateEvent) => void;
+};
+
+/**
+ * Payload for `tracking.onWidgetAction`. The widget is named by the id the host
+ * gave it, which is the key to everything else the host already knows about it.
+ */
+export declare type HomeWidgetActionEvent = {
+    widgetId: string;
+    action: HomeWidgetActionKind;
+};
+
+/**
+ * TRACKING FOR THE HOME — the same shape the AI kit uses (`AiChatTrackingOptions`):
+ * the host passes callbacks, the components fire them, and nothing about a
+ * widget's data changes to make it measurable.
+ *
+ * This exists because a Home widget is DECLARATIVE. Its rows carry an `href`
+ * and never an `onClick` (that is the one click behavior a `list` slot has, and
+ * a type test holds the line), so a host had no seam to observe an interaction
+ * from — its analytics simply could not see the Home. These callbacks are that
+ * seam, and they leave the row data alone: navigation is still the anchor's.
+ *
+ * BEHAVIOUR ONLY, deliberately. The payloads carry what the reader DID and say
+ * nothing about which column a widget sits in or where in it — that is the
+ * host's own persisted layout, and duplicating it into an analytics event
+ * would make two sources for one fact, the stale one being the event.
+ */
+/**
+ * WHICH AFFORDANCE was used. A widget has three ways out of it and they mean
+ * different things to whoever reads the numbers: the header's own link, the
+ * footer's call to action, and the "View more" a capped list grows.
+ */
+export declare type HomeWidgetActionKind = "header-link" | "footer-action" | "view-more";
+
 /**
  * The `Widget` chrome a Home widget may carry beyond its header, passed straight
  * through to the frame.
@@ -10909,6 +11527,19 @@ export declare type HomeWidgetItem = HomeWidgetChrome & {
      * its content (see `SlotWidget`'s `loading`).
      */
     loading?: boolean;
+};
+
+/** Payload for `tracking.onWidgetItemActivate`. */
+export declare type HomeWidgetItemActivateEvent = {
+    widgetId: string;
+    /** The row's own id, as the slot was given it. */
+    itemId: string | number;
+    /**
+     * 1-based place of the row within its slot, AS DRAWN. Not layout state: it
+     * is where the reader's attention landed in a list ordered by its own data,
+     * which is the one position worth reporting.
+     */
+    itemPosition: number;
 };
 
 /**
@@ -11100,7 +11731,7 @@ declare type InFilterOptionItem<T = unknown> = {
         /** The filter key where child selections are stored in FiltersState */
         filterKey: string;
         /** Child options, which can themselves have children for infinite nesting */
-        options: Array<InFilterOptionItem<T>>;
+        options: InFilterOptionItem<T>[];
     };
 };
 
@@ -11120,7 +11751,7 @@ declare type InFilterOptions_2<T, _R extends RecordType = RecordType> = {
      */
     getLabel?: (value: unknown) => string | Promise<string>;
 } & ({
-    options: Array<InFilterOptionItem<T>> | (() => Array<InFilterOptionItem<T>> | Promise<Array<InFilterOptionItem<T>>>);
+    options: Array<InFilterOptionItem<T>> | (() => Array<InFilterOptionItem<T>> | Promise<InFilterOptionItem<T>[]>);
 } | {
     source: DataSourceDefinition<any, FiltersDefinition, SortingsDefinition, GroupingDefinition<any>>;
     mapOptions: (item: any) => InFilterOptionItem<T>;
@@ -11217,7 +11848,7 @@ declare type InputFieldProps<T> = {
     onClickPlaceholder?: () => void;
     onClickChildren?: () => void;
     onClickContent?: () => void;
-    value?: T | undefined;
+    value?: T;
     onChange?: (value: T) => void;
     size?: InputFieldSize;
     error?: string | boolean;
@@ -11441,12 +12072,12 @@ declare type KanbanOnMove<TRecord extends RecordType> = (fromLaneId: string, toL
 } | null) => Promise<TRecord>;
 
 declare type KanbanVisualizationOptions<Record extends RecordType, _Filters extends FiltersDefinition, _Sortings extends SortingsDefinition> = {
-    lanes: ReadonlyArray<KanbanLaneDefinition>;
+    lanes: readonly KanbanLaneDefinition[];
     /** Per-group columns: when grouping is active, each group's board renders the
      * lanes this returns instead of the global `lanes` (lane ids must exist in
      * `source.lanes`). Enables the onboarding case where each policy version has
      * its own phases. NOTE: API shape pending Foundations review. */
-    getLanesForGroup?: (groupKey: string) => ReadonlyArray<KanbanLaneDefinition>;
+    getLanesForGroup?: (groupKey: string) => readonly KanbanLaneDefinition[];
     /** Whether each group header shows a selection checkbox when the collection is
      * selectable. Defaults to `true` (parity with Card/List). Set to `false` to
      * keep per-card selection while hiding the group-level checkbox — e.g. when
@@ -11457,7 +12088,7 @@ declare type KanbanVisualizationOptions<Record extends RecordType, _Filters exte
     title?: (record: Record) => string;
     description?: (record: Record) => string;
     avatar?: (record: Record) => CardAvatarVariant;
-    metadata?: (record: Record) => ReadonlyArray<CardMetadata>;
+    metadata?: (record: Record) => readonly CardMetadata[];
     onMove?: KanbanOnMove<Record>;
     onCreate?: KanbanOnCreate;
 };
@@ -11598,7 +12229,7 @@ export declare const listMoreButtonClass: (ctx: HomeRenderCtx) => string;
 /** `list` params: the schema, then items shaped by it. Build with {@link listSlot}. */
 export declare interface ListParams<S extends ListSchema = ListSchema> {
     schema: S;
-    items: Array<ListItem<S>>;
+    items: ListItem<S>[];
 }
 
 declare type ListPropertyDefinition<R, Sortings extends SortingsDefinition> = WithOptionalSorting_2<R, Sortings> & PropertyDefinition_2<R>;
@@ -11606,7 +12237,7 @@ declare type ListPropertyDefinition<R, Sortings extends SortingsDefinition> = Wi
 declare type ListRightData<R, Optional> = R extends "counter" ? Demanded<{
     count: number;
 }, Optional> : R extends `${infer T extends F0AvatarListProps["type"]}-list` ? Demanded<{
-    avatars: Array<AvatarData<T>>;
+    avatars: AvatarData<T>[];
 }, Optional> & {
     remainingCount?: number;
 } : R extends AvatarVariant["type"] ? Demanded<{
@@ -11698,7 +12329,7 @@ export declare interface ListSchema {
  * CHECKED against it — a `left: "person"` slot only takes person data, a
  * `clickBehavior: "link"` slot demands an `href` on every row.
  */
-export declare const listSlot: <const S extends ListSchema>(schema: S, items: Array<ListItem<S>>, options?: SlotOptions) => HomeWidgetSlot;
+export declare const listSlot: <const S extends ListSchema>(schema: S, items: ListItem<S>[], options?: SlotOptions) => HomeWidgetSlot;
 
 declare type ListTextData<S extends ListSchema> = {
     title: string;
@@ -11719,7 +12350,7 @@ declare type ListTextData<S extends ListSchema> = {
 
 declare type ListVisualizationOptions<R extends RecordType, _Filters extends FiltersDefinition, Sortings extends SortingsDefinition> = {
     itemDefinition: (record: R) => ItemDefinition;
-    fields: ReadonlyArray<ListPropertyDefinition<R, Sortings>>;
+    fields: readonly ListPropertyDefinition<R, Sortings>[];
 };
 
 declare interface LoadingStateProps {
@@ -12277,6 +12908,17 @@ export declare interface NewHomeLayoutProps {
     onClickAddNewWidget?: (side: WidgetContainerSide) => void;
     /** Called with a side and its widget ids in their new order after a drag. */
     onReorderWidgets?: (side: WidgetContainerSide, ids: string[]) => void;
+    /**
+     * ANALYTICS CALLBACKS for what the reader does inside the widgets — the same
+     * shape the AI kit takes (`ai.tracking`).
+     *
+     * A widget is declarative: its rows carry an `href` and never an `onClick`,
+     * so a host had no seam to observe a row from and its analytics could not see
+     * the Home at all. These fire for EVERY widget in the column, so a newly
+     * added one is measured without remembering anything. Nothing here changes
+     * behaviour — a row still navigates through its own anchor.
+     */
+    tracking?: HomeTrackingOptions;
     /** The daytime gradient period for the page surface. */
     period?: HomePeriod;
     /** Fixed px width of the side rail. */
@@ -12611,9 +13253,9 @@ export declare const OneCalendarInternal: ({ mode, view, onSelect, defaultMonth,
 export declare interface OneCalendarInternalProps {
     mode: CalendarMode;
     view: CalendarView;
-    onSelect?: (date: Date | DateRange | null) => void;
+    onSelect?: (date: CalendarSelection) => void;
     defaultMonth?: Date;
-    defaultSelected?: Date | DateRange | null;
+    defaultSelected?: CalendarSelection;
     showNavigation?: boolean;
     showInput?: boolean;
     minDate?: Date;
@@ -12660,7 +13302,7 @@ declare type OneDataCollectionGeneric = <R extends RecordType, Filters extends F
  */
 declare type OneDataCollectionProps<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<R>> = {
     source: DataCollectionSource<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>;
-    visualizations: ReadonlyArray<Visualization<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>>;
+    visualizations: readonly Visualization<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>[];
     onSelectItems?: OnSelectItemsCallback<R, Filters>;
     onBulkAction?: OnBulkActionCallback<R, Filters>;
     /**
@@ -12958,6 +13600,8 @@ declare interface Option_2 {
     onClick?: (event: any) => unknown;
 }
 
+export declare type OptionalCalendarSelection = CalendarSelection | undefined;
+
 declare interface OverflowListProps<T> {
     items: T[];
     /**
@@ -13008,10 +13652,10 @@ export declare type PageAction = {
 } | {
     onClick: () => void;
 } | {
-    actions: Array<{
+    actions: {
         label: string;
         href: string;
-    }>;
+    }[];
 });
 
 /**
@@ -13343,7 +13987,7 @@ declare type ProductUpdate = {
 declare type ProductUpdatesProp = {
     label: string;
     updatesPageUrl: string;
-    getUpdates: () => Promise<Array<ProductUpdate>>;
+    getUpdates: () => Promise<ProductUpdate[]>;
     hasUnread?: boolean;
     currentModule: string;
     onOpenChange?: ComponentProps<typeof DropdownMenu>["onOpenChange"];
@@ -13363,7 +14007,7 @@ declare type ProductUpdatesProp = {
         isVisible: boolean;
         sectionTitle: string;
         onClose?: () => void;
-        products: Array<{
+        products: ({
             title: string;
             description: string;
             onClick: () => void;
@@ -13376,7 +14020,7 @@ declare type ProductUpdatesProp = {
         } | {
             module: ModuleId;
             type?: never;
-        })>;
+        }))[];
     };
 };
 
@@ -13524,11 +14168,11 @@ dataTestId?: string;
 declare interface RadarComputation {
     datasetId: string;
     seriesColumn: string;
-    indicators: Array<{
+    indicators: {
         column: string;
         label: string;
         max?: number;
-    }>;
+    }[];
     limit?: number;
     sortBy?: string;
     sortOrder?: "asc" | "desc";
@@ -13876,6 +14520,11 @@ declare type SelectCellConfig<R extends RecordType> = {
     clearable?: boolean;
     showSearchBox?: boolean;
     defaultItem?: (item: R) => F0SelectItemObject<string, RecordType> | undefined;
+    /**
+     * Buttons rendered below the options, for what a value cannot express —
+     * dropping a scheduled change, say. Pass a function to decide them per row.
+     */
+    actions?: Action[] | ((item: R) => Action[] | undefined);
 } & ({
     options: F0SelectItemProps<string>[] | ((item: R) => F0SelectItemProps<string>[]);
     source?: never;
@@ -13890,17 +14539,17 @@ declare type SelectCellConfig<R extends RecordType> = {
  * Represents a collection of selected items.
  * @template T - The type of items in the collection
  */
-export declare type SelectedItems<T> = ReadonlyArray<T>;
+export declare type SelectedItems<T> = readonly T[];
 
 export declare type SelectedItemsDetailedStatus<R extends RecordType, Filters extends FiltersDefinition> = {
     allSelected: boolean | "indeterminate";
     /** Status of items that have been loaded. Items not yet loaded won't appear here. */
-    itemsStatus: ReadonlyArray<{
+    itemsStatus: readonly {
         item: R;
         checked: boolean;
-    }>;
+    }[];
     /** All selected item IDs, including those not yet loaded */
-    selectedIds: ReadonlyArray<SelectionId>;
+    selectedIds: readonly SelectionId[];
     groupsStatus: Record<string, boolean>;
     filters: FiltersState<Filters>;
     selectedCount: number;
@@ -14864,7 +15513,7 @@ declare type TableVisualizationOptions<R extends RecordType, _Filters extends Fi
     /**
      * The columns to display
      */
-    columns: ReadonlyArray<TableColumnDefinition<R, Sortings, Summaries>>;
+    columns: readonly TableColumnDefinition<R, Sortings, Summaries>[];
     /**
      * Placeholder to display in summary-row cells when no summary value is
      * rendered. This also applies to columns without a `summary` definition.
@@ -15172,9 +15821,9 @@ declare interface TOCItemProps {
     isExpanded?: boolean;
     onToggleExpanded?: (id: string) => void;
     children?: ReactNode;
-    onDragOver?: (itemId: string, position: "before" | "after" | "inside") => void;
+    onDragOver?: (itemId: string, position: DropPosition) => void;
     onDragLeave?: () => void;
-    onDrop?: (itemId: string, position: "before" | "after" | "inside") => void;
+    onDrop?: (itemId: string, position: DropPosition) => void;
     canDropInside?: boolean;
     currentParentId?: string | null;
     draggedItemId?: string | null;
@@ -15379,6 +16028,15 @@ export declare type UpsellActionDefinitionFn = () => UpsellActionDefinition | un
 
 export declare function useAiPromotionChat(): AiPromotionChatProviderReturnValue;
 
+/**
+ * Open the palette from anywhere below the provider.
+ *
+ * `openScoped(ref)` is the one every surface that already knows its target
+ * should reach for — a row menu, a bulk bar, a detail header. The UI supplies
+ * the scope, the reader supplies the intent.
+ */
+export declare const useCommandPalette: () => F0CommandPaletteApi;
+
 export declare type UseDataCollectionData<R extends RecordType> = UseDataCollectionDataReturn<R> & {
     summaries?: R;
 };
@@ -15492,7 +16150,7 @@ export declare interface UseDataCollectionItemNavigationProps<R extends RecordTy
      * Forwarded to `useDataCollectionSource` for `dataAdapter` memoization,
      * same convention as `useDataCollectionSource(source, deps)`.
      */
-    deps?: ReadonlyArray<unknown>;
+    deps?: readonly unknown[];
 }
 
 export declare interface UseDataCollectionItemNavigationReturn<R extends RecordType = RecordType, Filters extends FiltersDefinition = FiltersDefinition, Sortings extends SortingsDefinition = SortingsDefinition, Summaries extends SummariesDefinition = SummariesDefinition, ItemActions extends ItemActionsDefinition<R> = ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition = NavigationFiltersDefinition, Grouping extends GroupingDefinition<R> = GroupingDefinition<R>> extends UseDataSourceItemNavigationReturn<R> {
@@ -15518,7 +16176,7 @@ export declare interface UseDataCollectionItemNavigationReturn<R extends RecordT
     isLoading: boolean;
 }
 
-export declare const useDataCollectionSource: <R extends RecordType = RecordType, FiltersSchema extends FiltersDefinition = FiltersDefinition, Sortings extends SortingsDefinition = SortingsDefinition, Summaries extends SummariesDefinition = SummariesDefinition, ItemActions extends ItemActionsDefinition<R> = ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition = NavigationFiltersDefinition, Grouping extends GroupingDefinition<R> = GroupingDefinition<R>>(source: DataCollectionSourceDefinition<R, FiltersSchema, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>, deps?: ReadonlyArray<unknown>) => DataCollectionSource<R, FiltersSchema, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>;
+export declare const useDataCollectionSource: <R extends RecordType = RecordType, FiltersSchema extends FiltersDefinition = FiltersDefinition, Sortings extends SortingsDefinition = SortingsDefinition, Summaries extends SummariesDefinition = SummariesDefinition, ItemActions extends ItemActionsDefinition<R> = ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition = NavigationFiltersDefinition, Grouping extends GroupingDefinition<R> = GroupingDefinition<R>>(source: DataCollectionSourceDefinition<R, FiltersSchema, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>, deps?: readonly unknown[]) => DataCollectionSource<R, FiltersSchema, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>;
 
 /**
  * Hook options for useData
@@ -16257,11 +16915,11 @@ export declare type WidgetEmptyStateProps = {
  */
 export declare interface WidgetHeaderSelect {
     /** What the reader can switch between. The first one is the default. */
-    options: Array<{
+    options: {
         value: string;
         label: string;
         icon?: IconType;
-    }>;
+    }[];
     /** Which one the card starts on. Defaults to the first option. */
     value?: string;
     /** The trigger names the selection, so this is what says what KIND it is. */
@@ -16347,8 +17005,17 @@ export declare interface WidgetProps {
         };
         count?: number;
     };
-    /** The card's footer button — its call to action. `neutral`/`sm` by default. */
-    action?: F0ButtonProps;
+    /**
+     * The card's footer button — its call to action. `neutral`/`sm` by default,
+     * `outline`/`md` once the card is wide.
+     *
+     * AN ARRAY draws TWO, side by side, for a card that carries both its own call
+     * to action and the way out of it ("Sign now", "Go to Documents"). A pair is
+     * drawn `outline` at every width: two buttons in a footer are a set of equals,
+     * and filling one of them nominates it as the card's answer. Two is the
+     * ceiling — a third belongs in `actions`, the overflow menu.
+     */
+    action?: F0ButtonProps | F0ButtonProps[];
     /**
      * Extra classes for the FOOTER row that `action` draws in. For content that
      * BLEEDS past the card's content box and wants the footer brought onto its
@@ -16357,12 +17024,12 @@ export declare interface WidgetProps {
      * takes no className of its own, so this is the seam for it.
      */
     footerClassName?: string;
-    summaries?: Array<{
+    summaries?: {
         label: string;
         value: string | number;
         prefixUnit?: string;
         postfixUnit?: string;
-    }>;
+    }[];
     alert?: string;
     status?: {
         text: string;
@@ -16535,7 +17202,7 @@ declare type WithDataTestIdProps = {
 };
 
 declare type WithGroupId<RecordType> = RecordType & {
-    [GROUP_ID_SYMBOL]: unknown | undefined;
+    [GROUP_ID_SYMBOL]: unknown;
 };
 
 declare type WithOptionalSorting<R extends RecordType, Sortings extends SortingsDefinition> = Omit<PropertyDefinition_2<R>, "hide"> & {
@@ -16612,17 +17279,17 @@ declare namespace _Page {
 declare module "gridstack" {
     interface GridStackWidget {
         id?: string;
-        allowedSizes?: Array<{
+        allowedSizes?: {
             w: number;
             h: number;
-        }>;
+        }[];
         meta?: Record<string, unknown>;
     }
     interface GridStackNode {
-        allowedSizes?: Array<{
+        allowedSizes?: {
             w: number;
             h: number;
-        }>;
+        }[];
     }
 }
 
@@ -16666,15 +17333,6 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
-        };
-    }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
         indent: {
             setIndent: (level: number) => ReturnType;
             unsetIndent: () => ReturnType;
@@ -16686,8 +17344,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData) => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
@@ -16699,6 +17357,15 @@ declare module "@tiptap/core" {
             setVideoEmbed: (options: {
                 src: string;
             }) => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
 }
