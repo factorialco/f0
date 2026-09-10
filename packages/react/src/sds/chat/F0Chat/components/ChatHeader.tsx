@@ -125,7 +125,14 @@ export const ChatHeader = ({
               showGroupFallback ? "chat-group-avatar-fallback" : undefined
             }
           >
-            <EmojiImage emoji={identityEmoji} size="sm" />
+            {/* Same split as the sidebar row one panel away, and for the same
+                reasons — see `SidebarChatItem`. The two must agree: they are
+                the same identity, an inch apart. */}
+            {showGroupFallback ? (
+              identityEmoji
+            ) : (
+              <EmojiImage emoji={identityEmoji} size="sm" mode="native" />
+            )}
           </span>
         ) : (
           <F0Avatar size="sm" avatar={channel.avatar} />

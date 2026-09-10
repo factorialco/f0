@@ -108,6 +108,47 @@ describe("SidebarChatList", () => {
     ).toBeInTheDocument()
   })
 
+  /** One row on its own, so an assertion about "no image anywhere" means it. */
+  const renderOneChat = (chat: SidebarChatGroup["chats"][number]) =>
+    render(
+      <SidebarChatProvider
+        initialGroups={[{ id: "groups", title: "Groups", chats: [chat] }]}
+      >
+        <SidebarChatList emptyState={defaultEmptyState} />
+      </SidebarChatProvider>
+    )
+
+  it("draws a group's emoji as a native glyph, not a downloaded image", () => {
+    // At 20px a twemoji sprite reads soft beside Inter, and it costs one
+    // network image per row of a list that can be fifty rows long.
+    const { container } = renderOneChat({
+      id: "emoji",
+      label: "Product",
+      avatar: { type: "emoji", emoji: "🧭" },
+    })
+
+    expect(container.querySelector("img")).toBeNull()
+    expect(screen.getByRole("img", { name: "🧭" })).toHaveTextContent("🧭")
+    expect(screen.getByRole("img", { name: "🧭" }).className).toMatch(
+      /font-emoji/
+    )
+  })
+
+  it("keeps the hash glyph OUT of the emoji font", () => {
+    // ＃ is typography, not an emoji: U+FF03 has no glyph in any font of the
+    // emoji stack, so it would fall through to the browser's generic
+    // `sans-serif` while the name beside it stays Inter.
+    const { container } = renderOneChat({
+      id: "plain",
+      label: "General",
+      avatar: { type: "company", name: "General" },
+    })
+
+    const fallback = screen.getByTestId("sidebar-group-avatar-fallback")
+    expect(fallback).toHaveTextContent("＃")
+    expect(container.querySelector(".font-emoji")).toBeNull()
+  })
+
   it("shows a blank state when there are no chats", () => {
     render(
       <SidebarChatProvider initialGroups={[]}>

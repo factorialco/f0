@@ -127,7 +127,20 @@ export const SidebarChatItem = ({
                     : undefined
                 }
               >
-                <EmojiImage emoji={identityEmoji} size="sm" />
+                {showGroupFallback ? (
+                  // ＃ IS NOT AN EMOJI — it is the typographic stand-in for a
+                  // community, which has no emoji to give (`PostsGroup` has no
+                  // field for one). So it must not go through the emoji font:
+                  // that stack ends in `sans-serif`, and U+FF03 has no glyph in
+                  // any of the emoji fonts before it, so the ＃ would fall
+                  // through to the browser's generic sans while the name beside
+                  // it stays Inter.
+                  identityEmoji
+                ) : (
+                  // NATIVE, not a twemoji image: at 20px the sprite reads soft
+                  // next to Inter, and it costs a network image per row.
+                  <EmojiImage emoji={identityEmoji} size="sm" mode="native" />
+                )}
               </span>
             ) : (
               <F0Avatar size="xs" avatar={chat.avatar} />
