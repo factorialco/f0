@@ -369,6 +369,36 @@ export const SearchAndPick: Story = {
 }
 
 /**
+ * Ends with the suggestion list open, which is the point: the dropdown is
+ * portalled out of the story root, so it is the one part of the component that
+ * a story leaving it closed never puts in front of the accessibility checker.
+ */
+export const OpenSuggestionList: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(document.body)
+
+    // Held from before the open: Radix marks everything outside the portal
+    // `aria-hidden` while the list is up, so the trigger is no longer
+    // reachable by role once it has been clicked
+    const trigger = canvas.getByRole("combobox", { name: "Address" })
+    await userEvent.click(trigger)
+    const search = await body.findByRole("searchbox")
+    await userEvent.type(search, "Colon")
+
+    const suggestion = await body.findByRole("option", {
+      name: /Carrer de Colón/,
+    })
+
+    // The contract the list has to hold up while it is open
+    const list = await body.findByRole("listbox")
+    await expect(trigger).toHaveAttribute("aria-expanded", "true")
+    await expect(trigger).toHaveAttribute("aria-controls", list.id)
+    await expect(suggestion).toBeVisible()
+  },
+}
+
+/**
  * A stored address that no suggestion covers still reads on the trigger: the
  * value it came from is what gets displayed, not a matching option.
  */
