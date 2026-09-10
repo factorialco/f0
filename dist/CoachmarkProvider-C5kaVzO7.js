@@ -82908,7 +82908,7 @@ const Mp = /* @__PURE__ */ new Set(), ek = /* @__PURE__ */ new Set(), hb = () =>
                   "data-coachmark-body": !0,
                   className: "dark flex min-h-0 flex-col gap-6 overflow-y-auto",
                   children: [
-                    /* @__PURE__ */ P("div", { className: "flex flex-col gap-1", children: [
+                    /* @__PURE__ */ P("div", { className: "flex flex-col gap-0.5", children: [
                       /* @__PURE__ */ P("div", { className: "flex flex-row items-start justify-between gap-2", children: [
                         /* @__PURE__ */ m("p", { id: S, className: "font-semibold", children: t }),
                         /* @__PURE__ */ m(
