@@ -117875,11 +117875,8 @@ const _Y1 = ({ text: e }) => /* @__PURE__ */ i(
       {
         className: U(
           "flex flex-col gap-2",
-          // The width is unconditional. In a block or column parent the field
-          // filled its container anyway; as a row item it used to fall back to
-          // the child input's intrinsic width, so dropping `transparent` to
-          // start editing shrank the field and clipped the value. `min-w-0`
-          // lets it shrink past that width beside a sibling button.
+          // Without this a flex-row item collapses to the child input's
+          // intrinsic width and clips the value.
           "w-full min-w-0",
           "pointer-events-none",
           t && "cursor-not-allowed",
@@ -117926,9 +117923,7 @@ const _Y1 = ({ text: e }) => /* @__PURE__ */ i(
             "div",
             {
               className: U(
-                // Named so a consumer can key its own hover reveal off the whole
-                // field, transparent or not: the plain `group` below only exists on
-                // the bordered variant.
+                // Named because the plain `group` below is bordered-only.
                 "group/field relative h-fit transition-all",
                 !B && !t && "hover:border-f1-border-hover",
                 !q && [
@@ -117943,17 +117938,11 @@ const _Y1 = ({ text: e }) => /* @__PURE__ */ i(
                 ],
                 "active-within:border-f1-border active-within:ring-1 active-within:ring-f1-border-hover",
                 n && !q && "border-f1-border-secondary bg-f1-background-secondary",
-                // A resting value is not a disabled form control, so it keeps the
-                // plain background. It does keep the field's height and radius,
-                // though: this is the same cell the editable field will occupy, and
-                // a row that changes height on click moves the record under the
-                // reader.
+                // Same box the editable field will occupy, so the row does not
+                // move when it is clicked.
                 L2 && XI({ size: f, canGrow: m }),
-                // The tint only appears when the click does something.
                 I2 && "cursor-text hover:bg-f1-background-secondary",
                 t && "cursor-not-allowed bg-f1-background-tertiary",
-                // A resting value keeps the fixed height it got above; every other
-                // transparent field still fills its container.
                 q && (L2 ? "w-full" : "h-full w-full")
               ),
               "data-testid": "input-field-wrapper",
@@ -117991,8 +117980,8 @@ const _Y1 = ({ text: e }) => /* @__PURE__ */ i(
                         onClick: c2,
                         className: "w-full min-w-0 flex-1",
                         children: Fe(e, {
-                          // Only while masked: an explicit `undefined` here would strip
-                          // the child's own type (search, email, tel) down to text.
+                          // Spread, not `undefined`: that would strip the child's own
+                          // type (search, email, tel) down to text.
                           ...O2 && B2 ? { type: "password" } : {},
                           onChange: Q2,
                           onBlur: () => {
@@ -118027,8 +118016,7 @@ const _Y1 = ({ text: e }) => /* @__PURE__ */ i(
                             (h || J) && "pl-8",
                             (h || J) && f === "md" && "pl-9",
                             t && "cursor-not-allowed",
-                            // The click belongs to the cell, not the disabled input
-                            // that would otherwise absorb it.
+                            // A disabled input absorbs the click instead of bubbling it.
                             I2 && "pointer-events-none cursor-text",
                             e.props.className,
                             fy({ size: f })

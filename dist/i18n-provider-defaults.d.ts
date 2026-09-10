@@ -279,11 +279,7 @@ export declare const defaultTranslations: {
         readonly next: "Next";
     };
     readonly inputs: {
-        /**
-         * `type="password"` keeps the conventional fixed string. Every other masked
-         * field, `private` and a bare `masked` included, is named after its own
-         * label, which is what tells two of them on one page apart.
-         */
+        /** Fixed, unlike every other masked field, which names its own label. */
         readonly password: {
             readonly show: "Show password";
             readonly hide: "Hide password";
@@ -1381,18 +1377,6 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
-        };
-    }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
         fontSize: {
             setFontSize: (fontSize: string) => ReturnType;
             unsetFontSize: () => ReturnType;
@@ -1407,6 +1391,18 @@ declare module "@tiptap/core" {
             setIndent: (level: number) => ReturnType;
             unsetIndent: () => ReturnType;
             outdent: () => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }

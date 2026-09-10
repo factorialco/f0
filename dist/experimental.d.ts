@@ -4881,11 +4881,7 @@ declare const defaultTranslations: {
         readonly next: "Next";
     };
     readonly inputs: {
-        /**
-         * `type="password"` keeps the conventional fixed string. Every other masked
-         * field, `private` and a bare `masked` included, is named after its own
-         * label, which is what tells two of them on one page apart.
-         */
+        /** Fixed, unlike every other masked field, which names its own label. */
         readonly password: {
             readonly show: "Show password";
             readonly hide: "Hide password";
@@ -11234,44 +11230,15 @@ declare type InputFieldProps<T> = {
         onChange: (selected: boolean) => void;
     };
     transparent?: boolean;
-    /**
-     * Renders the value masked, with an eye button to reveal it.
-     *
-     * One implementation for every masked field. On a real `<input>` the mask is
-     * a password field, so the browser's own protections apply; any other
-     * editable child (`F0Select`'s `<button>` trigger, a `<textarea>`) has its
-     * displayed value replaced with dots, because `type="password"` on a button
-     * is silently treated as `submit` and on a textarea is not an attribute.
-     */
+    /** Renders the value masked, with an eye button to reveal it. */
     masked?: boolean;
-    /**
-     * Keeps the eye up while the field has focus.
-     *
-     * The eye normally goes away while you are typing: on a details row the
-     * trailing controls act on a value you are reading, and none of them applies
-     * mid-edit. A credential field is the exception, where revealing what you
-     * just typed is the point of the button, so `F0TextInput` sets this for
-     * `type="password"` and `type="private"`. Not part of any public input's API.
-     */
+    /** Keeps the eye up while the field has focus. Set for credential fields. */
     maskToggleAlwaysVisible?: boolean;
-    /**
-     * Overrides the eye's `[show, hide]` accessible names.
-     *
-     * The default names the field, which is what tells two masked values on one
-     * page apart. `F0TextInput type="password"` overrides it with the
-     * conventional fixed "Show password", the string it has always used. Not part
-     * of any public input's API.
-     */
+    /** Overrides the eye's `[show, hide]` names. Defaults to naming the field. */
     maskToggleLabels?: [string, string];
     /**
-     * Puts the caret in the field as soon as it can take it, and nothing sooner.
-     *
-     * `autoFocus` only fires at mount, which is no use to a value that starts
-     * `readonly` and becomes editable later: while `readonly` the inner input is
-     * disabled, so `focus()` is a no-op. Set this alongside the flag that makes
-     * the field editable and the caret lands once the input can accept it, with
-     * no remount. Clicking the value does this on its own; this is for an edit
-     * control that sits outside the field.
+     * Focuses the field once it stops being `readonly` or `disabled`, which
+     * `autoFocus` cannot do because it only fires at mount.
      */
     focusOnEditable?: boolean;
 };
@@ -11298,11 +11265,7 @@ declare type InputInternalProps = Pick<ComponentProps<typeof Input_2>, "ref" | "
      */
     type?: Exclude<HTMLInputTypeAttribute, "number"> | "private";
     onPressEnter?: () => void;
-    /**
-     * Fires on Escape. Pairs with `onPressEnter` for inline editing: Enter
-     * commits, Escape reverts. Like `onPressEnter` it does not call
-     * `preventDefault`.
-     */
+    /** Fires on Escape. Does not call `preventDefault`, like `onPressEnter`. */
     onPressEscape?: () => void;
 };
 
@@ -16652,18 +16615,6 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
-        };
-    }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
         fontSize: {
             setFontSize: (fontSize: string) => ReturnType;
             unsetFontSize: () => ReturnType;
@@ -16678,6 +16629,18 @@ declare module "@tiptap/core" {
             setIndent: (level: number) => ReturnType;
             unsetIndent: () => ReturnType;
             outdent: () => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
