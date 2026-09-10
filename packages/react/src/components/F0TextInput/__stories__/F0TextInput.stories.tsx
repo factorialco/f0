@@ -234,6 +234,8 @@ export const Clearable: Story = {
  *
  * The trailing buttons a details row also wants (copy, comment, and the tick
  * that confirms a commit) belong to the pattern that draws the row, not here.
+ * They all stand down while the value is being typed, the pencil below
+ * included, leaving the clear button alone in the trailing area.
  */
 const InlineEditingDemo = () => {
   const [value, setValue] = useState("ada.lovelace@example.com")
@@ -276,14 +278,21 @@ const InlineEditingDemo = () => {
         // in. This asks the field to take it as soon as it can.
         focusOnEditable={editing}
       />
-      <F0Button
-        variant="ghost"
-        size="sm"
-        hideLabel
-        icon={Icons.Pencil}
-        label="Edit Email"
-        onClick={startEditing}
-      />
+      {/*
+        The pencil is the row's, not the field's, so the row is what takes it
+        away while the value is being typed. Nothing in the trailing area
+        applies to a draft: the clear button is all that is left.
+      */}
+      {editing ? null : (
+        <F0Button
+          variant="ghost"
+          size="sm"
+          hideLabel
+          icon={Icons.Pencil}
+          label="Edit Email"
+          onClick={startEditing}
+        />
+      )}
     </div>
   )
 }
@@ -317,19 +326,27 @@ export const InlineEditing: Story = {
     // And the caret is already in it, without autoFocus or a remount.
     await expect(field()).toHaveFocus()
 
-    // The editor is the ordinary bordered field, at the size the resting cell
-    // already had. `getBoundingClientRect` is all zeros in jsdom, so only a
-    // real browser can check this. Width matters as much as height here:
-    // dropping `transparent` used to collapse the field to the inner input's
-    // intrinsic width, clipping the value and leaving dead space beside it.
+    // Only the clear button is left beside the value being typed.
+    await expect(
+      canvas.queryByRole("button", { name: "Edit Email" })
+    ).toBeNull()
+    await waitFor(() =>
+      expect(canvas.getByTestId("clear-button")).toBeVisible()
+    )
+
+    // The editor is the ordinary bordered field, and the row does not move
+    // under the reader: same height, same left edge. `getBoundingClientRect`
+    // is all zeros in jsdom, so only a real browser can check this.
     await expect(wrapper()).toHaveClass("border-[1px]")
     const editingBox = wrapper().getBoundingClientRect()
     await expect(Math.round(editingBox.height)).toBe(
       Math.round(restingBox.height)
     )
-    await expect(Math.round(editingBox.width)).toBe(
-      Math.round(restingBox.width)
-    )
+    await expect(Math.round(editingBox.left)).toBe(Math.round(restingBox.left))
+    // It may only grow, into the space the pencil gave up. Dropping
+    // `transparent` used to collapse the field to the inner input's intrinsic
+    // width instead, clipping the value and leaving dead space beside it.
+    await expect(editingBox.width).toBeGreaterThanOrEqual(restingBox.width)
 
     // Enter commits. Two fixed values, picking whichever is not already
     // showing, so the story is deterministic for Chromatic and still proves a
@@ -347,7 +364,11 @@ export const InlineEditing: Story = {
     await expect(field()).toHaveValue(next)
 
     // Escape reverts, and the pencil is the other way in: it sits outside the
-    // field, so `focusOnEditable` is what puts the caret there.
+    // field, so `focusOnEditable` is what puts the caret there. It is back now
+    // that the row is at rest again.
+    await waitFor(() =>
+      expect(canvas.getByRole("button", { name: "Edit Email" })).toBeVisible()
+    )
     await userEvent.click(canvas.getByRole("button", { name: "Edit Email" }))
     await waitFor(() => expect(field()).not.toBeDisabled())
     await expect(field()).toHaveFocus()

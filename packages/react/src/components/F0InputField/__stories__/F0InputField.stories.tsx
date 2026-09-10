@@ -328,7 +328,9 @@ export const MaskedValue: Story = {
     await waitFor(() =>
       expect(canvas.queryByTestId("input-field-mask-toggle")).toBeNull()
     )
-    await expect(canvas.getByTestId("clear-button")).toBeVisible()
+    await waitFor(() =>
+      expect(canvas.getByTestId("clear-button")).toBeVisible()
+    )
   },
 }
 
