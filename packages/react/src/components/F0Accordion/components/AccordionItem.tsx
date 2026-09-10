@@ -33,8 +33,7 @@ export const AccordionItem = ({
 
   return (
     <Collapsible open={open} onOpenChange={onOpenChange} asChild>
-      {/* The item id in the DOM lets consumers scroll an item into view. */}
-      <div className="flex flex-col" data-accordion-item={item.id}>
+      <div className="flex flex-col">
         <div className="flex items-center">
           <CollapsibleTrigger asChild>
             <button

@@ -1,5 +1,4 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
-import { useState } from "react"
 import { Check } from "../../../icons/app"
 import { DataList } from "."
 
@@ -89,7 +88,6 @@ export const WithRecordItems: Story = {
           title="Hire two engineers"
           description="Q3 2026 · Target 2 hires"
           detail={{ type: "alert-tag", text: "Overdue", level: "warning" }}
-          progress={{ value: 50 }}
           action={{ type: "navigate", href: "#goals/hire-engineers" }}
         />
         <DataList.RecordItem
@@ -104,45 +102,7 @@ export const WithRecordItems: Story = {
     docs: {
       description: {
         story:
-          "`DataList.RecordItem` is for entries that are things rather than facts: a title, an optional secondary line, an optional `detail` tag on the right, an optional `progress` bar underneath, and any item action.",
-      },
-    },
-  },
-}
-
-const DrawerActionExample = () => {
-  const [expanded, setExpanded] = useState(false)
-  const revealedId = "data-list-drawer-example"
-
-  return (
-    <DataList label="Performance">
-      <DataList.Item
-        text="4.2 / 5"
-        action={{
-          type: "drawer",
-          expanded,
-          onToggle: () => setExpanded((value) => !value),
-          controls: revealedId,
-        }}
-      />
-      <li
-        id={revealedId}
-        hidden={!expanded}
-        className="list-none px-1.5 py-1 text-f1-foreground-secondary"
-      >
-        Q4 2025 review · 4.2 / 5 · Feb 28, 2026
-      </li>
-    </DataList>
-  )
-}
-
-export const WithDrawerAction: Story = {
-  render: () => <DrawerActionExample />,
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "The `drawer` action is a controlled disclosure: the item renders the chevron and calls `onToggle`, the parent owns `expanded` and renders what is revealed. `DetailsItem` wraps this to reveal nested rows on its own.",
+          "`DataList.RecordItem` is for entries that are things rather than facts: a title, an optional secondary line, an optional `detail` tag on the right, and any item action.",
       },
     },
   },

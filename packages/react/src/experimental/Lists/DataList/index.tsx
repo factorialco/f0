@@ -20,12 +20,10 @@ export type {
   ActionType,
   CopyActionType,
   DataListProps,
-  DrawerActionType,
   ItemProps,
   NavigateActionType,
   OpenLinkActionType,
   RecordDetail,
-  RecordProgress,
   RecordItemProps,
 } from "./types"
 

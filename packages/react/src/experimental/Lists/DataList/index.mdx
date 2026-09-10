@@ -20,16 +20,15 @@ The list support these types of items:
 - `DataList.CompanyItem` - represents a company;
 - `DataList.TeamItem` - represents a team;
 - `DataList.RecordItem` - an entry that is a thing rather than a fact (a
-  review, a goal, a meeting): a title, an optional secondary line, an
-  optional tag on the right and an optional progress bar underneath.
+  review, an absence, a meeting): a title, an optional secondary line and an
+  optional tag on the right.
 
 ## Records
 
 A record row carries a `detail` tag using the same shapes as the tag items:
-`status-tag`, `alert-tag`, `dot-tag`, `raw-tag` or `balance-tag`. A
-`progress` value adds a bar with its percentage under the text, for goals and
-other things that are part-way done; pass `max` when the value is not out of
-100 and `label` to replace the percentage.
+`status-tag`, `alert-tag`, `dot-tag`, `raw-tag` or `balance-tag`. With a
+`navigate` action the whole row is the link and the trailing chevron is
+dropped, so the tag keeps the right edge.
 
 <Canvas of={DataListStories.WithRecordItems} />
 
@@ -45,7 +44,6 @@ other things that are part-way done; pass `max` when the value is not out of
     title="Hire two engineers"
     description="Q3 2026 · Target 2 hires"
     detail={{ type: "status-tag", text: "Overdue", variant: "warning" }}
-    progress={{ value: 50 }}
     action={{ type: "navigate", href: "/goals/hire-engineers" }}
   />
 </DataList>
@@ -58,13 +56,8 @@ actions are:
 
 - copy text of the item;
 - navigate to another URL, internal or external;
-- drawer: reveal more content under the item. The item shows a chevron that
-  flips when open; you render the revealed content and own the `expanded`
-  state.
 
-To attach an action, pass an `action` prop to an item. The tag items
-(`DotTagItem`, `AlertTagItem`, `StatusTagItem`, `RawTagItem`) take the same
-prop and then behave like any other row, with the tag as their content:
+To attach an action, pass an `action` prop to an item:
 
 ```tsx
 <DataList>
@@ -73,23 +66,9 @@ prop and then behave like any other row, with the tag as their content:
     action={{ type: "navigate", href: "https://factorialhr.com/" }}
     text="Factorial"
   />
-  <DataList.Item
-    text="4.2 / 5"
-    action={{
-      type: "drawer",
-      expanded,
-      onToggle: () => setExpanded((value) => !value),
-      controls: "performance-reviews",
-    }}
-  />
 </DataList>
 ```
 
 Here is the list where all items are used with different actions:
 
 <Canvas of={DataListStories.Primary} />
-
-The drawer action is a controlled disclosure. `DetailsItem` builds on it to
-reveal nested rows without you managing the state:
-
-<Canvas of={DataListStories.WithDrawerAction} />

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { expect, userEvent, within } from "storybook/test"
+import { expect, within } from "storybook/test"
 import type { TagDotProps } from "@/components/tags/F0TagDot"
 import type { TagListProps } from "@/components/tags/F0TagList"
 import { DetailsItemsList } from "."
@@ -419,71 +419,5 @@ export const WithTeamAvatarList: Story = {
         },
       },
     ],
-  },
-}
-
-export const TableViewWithDrawerAction: Story = {
-  args: {
-    title: undefined,
-    tableView: true,
-    details: [
-      {
-        title: "Performance",
-        content: {
-          type: "item",
-          text: "4.2 / 5",
-          action: {
-            type: "drawer",
-            details: [
-              {
-                title: "Q4 2025 review",
-                content: { type: "item", text: "4.2 / 5 · Feb 28, 2026" },
-              },
-              {
-                title: "Mid-year 2025",
-                content: { type: "item", text: "3.8 / 5 · Aug 14, 2025" },
-              },
-            ],
-          },
-        },
-      },
-      {
-        title: "Absences",
-        content: {
-          type: "item",
-          text: "3 approved",
-          action: {
-            type: "drawer",
-            details: [
-              {
-                title: "Duration",
-                content: { type: "item", text: "12 days · 96 hours" },
-              },
-              {
-                title: "Upcoming",
-                content: { type: "item", text: "Sep 15 – Sep 19, 2026" },
-              },
-            ],
-          },
-        },
-      },
-      {
-        title: "Goals",
-        content: { type: "item", text: "72%" },
-      },
-    ],
-  },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "A `drawer` action on a row's content reveals nested rows under it. Rows without one stay static.",
-      },
-    },
-  },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    await userEvent.click(canvas.getByRole("button", { name: "4.2 / 5" }))
-    await expect(canvas.getByText("Q4 2025 review")).toBeInTheDocument()
   },
 }

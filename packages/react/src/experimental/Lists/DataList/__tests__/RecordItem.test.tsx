@@ -58,41 +58,6 @@ describe("DataList.RecordItem", () => {
     expect(screen.getByRole("link").querySelector("svg")).toBeNull()
   })
 
-  it("renders a progress bar with its percentage", () => {
-    render(
-      <DataList>
-        <DataList.RecordItem
-          title="Ship pricing experiment"
-          progress={{ value: 90 }}
-        />
-      </DataList>
-    )
-
-    expect(
-      screen.getByRole("progressbar", {
-        name: "Ship pricing experiment progress",
-      })
-    ).toHaveAttribute("aria-valuenow", "90")
-    expect(screen.getByText("90%")).toBeInTheDocument()
-  })
-
-  it("scales progress to max and shows a custom label", () => {
-    render(
-      <DataList>
-        <DataList.RecordItem
-          title="Hire two engineers"
-          progress={{ value: 1, max: 2, label: "1 of 2" }}
-        />
-      </DataList>
-    )
-
-    expect(screen.getByRole("progressbar")).toHaveAttribute(
-      "aria-valuenow",
-      "50"
-    )
-    expect(screen.getByText("1 of 2")).toBeInTheDocument()
-  })
-
   it("copies the title, not the description, for a copy action", () => {
     render(
       <DataList>

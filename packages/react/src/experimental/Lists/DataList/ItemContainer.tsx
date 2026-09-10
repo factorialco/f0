@@ -2,7 +2,6 @@ import { forwardRef, ReactElement, ReactNode } from "react"
 import { F0Icon, IconType } from "../../../components/F0Icon"
 import { cn } from "../../../lib/utils"
 import { CopyAction } from "./actions/CopyAction"
-import { DrawerAction } from "./actions/DrawerAction"
 import { NavigateAction } from "./actions/NavigateAction"
 import { OpenLinkAction } from "./actions/OpenLinkAction"
 
@@ -23,7 +22,6 @@ export type InternalActionType =
   | InternalCopyActionType
   | InternalNavigateActionType
   | InternalOpenLinkActionType
-  | InternalDrawerActionType
   | InternalNoopActionType
 
 export type InternalCopyActionType = {
@@ -39,13 +37,6 @@ export type InternalNavigateActionType = {
 export type InternalOpenLinkActionType = {
   type: "open-link"
   href: string
-}
-
-export type InternalDrawerActionType = {
-  type: "drawer"
-  expanded: boolean
-  onToggle: () => void
-  controls?: string
 }
 
 export type InternalNoopActionType = {
@@ -122,12 +113,6 @@ const Action = ({
         <OpenLinkAction {...action} {...props}>
           {children}
         </OpenLinkAction>
-      )
-    case "drawer":
-      return (
-        <DrawerAction {...action} {...props}>
-          {children}
-        </DrawerAction>
       )
     case "noop":
       return <div {...props}>{children}</div>

@@ -216,14 +216,6 @@ describe("F0Accordion", () => {
     expect(screen.getAllByTestId("skeleton").length).toBeGreaterThan(0)
   })
 
-  it("marks each item's root with its id for scrolling", () => {
-    const { container } = render(<F0Accordion items={items} />)
-
-    expect(
-      container.querySelector('[data-accordion-item="one"]')
-    ).toHaveTextContent("Item One")
-  })
-
   it("closes an open item when its trigger is clicked again", async () => {
     const onValueChange = vi.fn()
     render(<F0Accordion items={items} onValueChange={onValueChange} />)

@@ -15,7 +15,6 @@ import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import { F0Accordion } from "@/components/F0Accordion"
 import type { F0AccordionItem } from "@/components/F0Accordion"
 import { F0Button } from "@/components/F0Button"
-import { F0Card } from "@/components/F0Card"
 import { F0Heading } from "@/components/F0Heading"
 import { F0Icon } from "@/components/F0Icon"
 import type { IconType } from "@/components/F0Icon"
@@ -238,7 +237,7 @@ const PROMOTION_CONDITIONS: Check[] = [
  * A verdict in a box that borrows the collection rows' border and padding so
  * it lines up with the lists below. The row is a disclosure: a large alert
  * avatar carries the verdict, and the chevron unfolds the checks behind it
- * with the same reveal the other drawers use. Positive when every check is
+ * with the same reveal F0Accordion uses. Positive when every check is
  * met, a warning otherwise.
  */
 const VerdictDisclosure = ({
@@ -507,10 +506,62 @@ const STATUS_TEXT: Record<SummaryStatus, string> = {
 }
 
 /**
- * The verdict box, then the headline figures as a two-column grid of compact
- * F0Cards, one figure each: the label in secondary text, the value large
- * underneath. A card tied to a section is clickable, shows a chevron, and
- * hands the section to the panel, which scrolls there and opens it.
+ * One headline figure: the label in secondary text, the value large
+ * underneath. Tied to a section it is a real button (so it has a name and a
+ * focus ring) that shows a chevron; otherwise a plain box.
+ */
+const SummaryTile = ({
+  label,
+  value,
+  of,
+  status,
+  onClick,
+}: Omit<SummaryFigure, "section"> & { onClick?: () => void }) => {
+  const body = (
+    <>
+      <div className="flex items-center justify-between gap-1 text-base font-medium text-f1-foreground-secondary">
+        <span>{label}</span>
+        {onClick ? (
+          <F0Icon icon={ChevronRight} size="sm" className="text-f1-icon-bold" />
+        ) : null}
+      </div>
+      <span
+        className={cn(
+          "flex items-center gap-2 text-xl font-semibold",
+          status ? STATUS_TEXT[status] : "text-f1-foreground"
+        )}
+      >
+        {status ? (
+          <span
+            aria-hidden="true"
+            className={cn("aspect-square w-2 rounded-full", STATUS_DOT[status])}
+          />
+        ) : null}
+        {value}
+        {of ? (
+          <span className="text-f1-foreground-secondary">/ {of}</span>
+        ) : null}
+      </span>
+    </>
+  )
+  const className = cn(
+    "flex flex-col gap-1 rounded-xl border border-solid border-f1-border-secondary bg-f1-background p-3 text-left",
+    onClick && cn("hover:bg-f1-background-hover", focusRing())
+  )
+
+  return onClick ? (
+    <button type="button" onClick={onClick} className={className}>
+      {body}
+    </button>
+  ) : (
+    <div className={className}>{body}</div>
+  )
+}
+
+/**
+ * The verdict box, then the headline figures as a two-column grid of tiles,
+ * one figure each. A tile tied to a section hands the section to the panel,
+ * which scrolls there.
  */
 const Summary = ({
   title,
@@ -535,42 +586,12 @@ const Summary = ({
     </div>
     {verdict}
     <div className="grid grid-cols-2 gap-2">
-      {figures.map(({ label, value, of, section, status }) => (
-        <F0Card
-          key={label}
-          compact
-          subtleBorder
+      {figures.map(({ section, ...figure }) => (
+        <SummaryTile
+          key={figure.label}
+          {...figure}
           onClick={section ? () => onSelect(section) : undefined}
-        >
-          {/* The card renders an empty title row above its children; pull
-              the content up over that row's gap so the padding stays even. */}
-          <div className="-mt-2 flex flex-col gap-1">
-            <div className="flex items-center justify-between gap-1 text-base font-medium text-f1-foreground-secondary">
-              <span>{label}</span>
-              {section ? (
-                <F0Icon
-                  icon={ChevronRight}
-                  size="sm"
-                  className="text-f1-icon-bold"
-                />
-              ) : null}
-            </div>
-            <span
-              className={`flex items-center gap-2 text-xl font-semibold ${status ? STATUS_TEXT[status] : "text-f1-foreground"}`}
-            >
-              {status ? (
-                <span
-                  aria-hidden="true"
-                  className={`aspect-square w-2 rounded-full ${STATUS_DOT[status]}`}
-                />
-              ) : null}
-              {value}
-              {of ? (
-                <span className="text-f1-foreground-secondary">/ {of}</span>
-              ) : null}
-            </span>
-          </div>
-        </F0Card>
+        />
       ))}
     </div>
   </div>
@@ -1029,9 +1050,11 @@ const TENURE_EVENTS: {
   role: string
   date: string
   salary: string
+  href: string
 }[] = [
   {
     id: "2025-01",
+    href: "#tenure/2025-01",
     kind: "promotion",
     role: "Senior Product Designer",
     date: "Jan 15, 2025",
@@ -1039,6 +1062,7 @@ const TENURE_EVENTS: {
   },
   {
     id: "2024-01",
+    href: "#tenure/2024-01",
     kind: "increase",
     role: "Product Designer",
     date: "Jan 15, 2024",
@@ -1046,6 +1070,7 @@ const TENURE_EVENTS: {
   },
   {
     id: "2022-06",
+    href: "#tenure/2022-06",
     kind: "promotion",
     role: "Product Designer",
     date: "Jun 1, 2022",
@@ -1053,6 +1078,7 @@ const TENURE_EVENTS: {
   },
   {
     id: "2021-09",
+    href: "#tenure/2021-09",
     kind: "promotion",
     role: "Junior Product Designer",
     date: "Sep 1, 2021",
@@ -1060,6 +1086,7 @@ const TENURE_EVENTS: {
   },
   {
     id: "2021-03",
+    href: "#tenure/2021-03",
     kind: "joined",
     role: "Design Intern",
     date: "Mar 4, 2021",
@@ -1078,6 +1105,7 @@ const SALARY_INCREASE_LABEL = "Salary increase"
 const RolesCollection = () => (
   <RecordCollection
     records={TENURE_EVENTS}
+    itemUrl={(event) => event.href}
     itemDefinition={(event) => ({
       title: event.kind === "increase" ? SALARY_INCREASE_LABEL : event.role,
       // The icon says what kind of change it is; the line under is the date.
@@ -1288,7 +1316,7 @@ export const Details: Story = {
     docs: {
       description: {
         story:
-          "An employee profile: header, summary cards, manager, `DetailsItemsList`s in table view and teams. Rows with a chevron reveal nested rows in place; a Summary card scrolls to its row and opens it; once the name scrolls out of view the drawer title becomes the employee's name.",
+          "An employee profile: header, summary tiles, manager, one section per topic with its content shown outright, contacts, workplace and teams. A summary tile scrolls to its section; once the name scrolls out of view the drawer title becomes the employee's name.",
       },
     },
   },
@@ -1551,11 +1579,11 @@ const ComparedToAverageBlock = () => {
 }
 
 /** The leave types that need a document (a sick note, a certificate) to count as justified. */
-const DOCUMENTED_TYPES: AbsenceType[] = [
+const DOCUMENTED_TYPES = new Set<AbsenceType>([
   "Sick leave",
   "Doctor's appointment",
   "Compassionate leave",
-]
+])
 
 /**
  * The types as an accordion: the type and its days in the header, and the
@@ -1580,7 +1608,7 @@ const ABSENCE_TYPE_ITEMS: F0AccordionItem[] = ABSENCE_TYPES.map((entry) => ({
             title={`${absence.dates} · ${absence.length}`}
             description={`Approved by ${MANAGER.name}`}
             detail={
-              DOCUMENTED_TYPES.includes(absence.type)
+              DOCUMENTED_TYPES.has(absence.type)
                 ? absence.justified
                   ? {
                       type: "status-tag",

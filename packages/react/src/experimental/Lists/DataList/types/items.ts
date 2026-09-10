@@ -52,24 +52,13 @@ export type RecordDetail =
   | ({ type: "balance-tag" } & TagBalanceProps)
 
 /**
- * How far along a record is. `value` is out of `max` (100 by default); the
- * label defaults to the rounded percentage.
- */
-export type RecordProgress = {
-  value: number
-  max?: number
-  label?: string
-}
-
-/**
- * A row for an entry that is a thing (a review, a goal, a meeting) rather than
- * a plain fact: a title, an optional secondary line, an optional tag on the
- * right, an optional progress bar underneath, and the usual item action.
+ * A row for an entry that is a thing (a review, an absence, a meeting) rather
+ * than a plain fact: a title, an optional secondary line, an optional tag on
+ * the right, and the usual item action.
  */
 export type RecordItemProps = {
   title: string
   description?: string
   detail?: RecordDetail
-  progress?: RecordProgress
   action?: ActionType
 }
