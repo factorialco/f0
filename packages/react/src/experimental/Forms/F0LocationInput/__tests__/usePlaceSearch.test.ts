@@ -1,5 +1,6 @@
-import { act, renderHook } from "@testing-library/react"
+import { act } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { zeroRenderHook as renderHook } from "@/testing/test-utils"
 import { MIN_QUERY_LENGTH, usePlaceSearch } from "../hooks/usePlaceSearch"
 import type { F0LocationSuggestion } from "../types"
 
