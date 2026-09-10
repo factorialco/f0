@@ -11,4 +11,6 @@ export type {
   EmployeeItemProps,
   CompanyItemProps,
   TeamItemProps,
+  RecordDetail,
+  RecordItemProps,
 } from "./items"

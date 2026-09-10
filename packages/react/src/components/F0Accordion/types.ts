@@ -1,3 +1,4 @@
+import { ReactNode } from "react"
 import { F0SegmentedControlItem } from "@/experimental/Actions/F0SegmentedControl/types"
 import { DropdownItem } from "@/experimental/Navigation/Dropdown"
 import { DataAttributes } from "@/global.types"
@@ -26,7 +27,19 @@ export type F0AccordionItemAction =
 export interface F0AccordionItem {
   id: string
   title: string
-  description: string
+  /** Plain-text body. Optional when `content` carries the body instead. */
+  description?: string
+  /**
+   * Rich body — a DataList, a form, any node. Rendered under the description
+   * when both are given.
+   */
+  content?: ReactNode
+  /**
+   * Shown in the header, before the actions and chevron, and stays visible
+   * while collapsed: a headline value, a tag, a DataList item. Not part of the
+   * toggle target, so it can carry its own action.
+   */
+  summary?: ReactNode
   actions?: F0AccordionItemAction[]
   defaultOpen?: boolean
 }

@@ -49,6 +49,13 @@ export const AccordionItem = ({
             </button>
           </CollapsibleTrigger>
           <div className="flex items-center gap-2 py-3 pl-2 pr-4">
+            {item.summary !== undefined ? (
+              // Children hug their content: a DataList brings a 128px minimum
+              // that would otherwise push the value away from the chevron.
+              <div className="flex items-center [&>*]:min-w-0">
+                {item.summary}
+              </div>
+            ) : null}
             {hasActions ? <AccordionActions actions={item.actions!} /> : null}
             <CollapsibleTrigger asChild>
               <F0Button
@@ -71,8 +78,9 @@ export const AccordionItem = ({
               className="overflow-hidden"
             >
               <CollapsibleContent forceMount asChild>
-                <div className="px-4 pb-4 text-f1-foreground-secondary">
-                  {item.description}
+                <div className="flex flex-col gap-2 px-4 pb-4 text-f1-foreground-secondary">
+                  {item.description ? <p>{item.description}</p> : null}
+                  {item.content}
                 </div>
               </CollapsibleContent>
             </motion.div>

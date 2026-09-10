@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
 import { expect, within } from "storybook/test"
+import { DataList } from "@/experimental/Lists/DataList"
 import { Delete, Pencil } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { F0Accordion } from ".."
@@ -26,6 +27,47 @@ const baseItems: F0AccordionItem[] = [
       "Applies design thinking methodologies to frame problems and explore solution spaces collaboratively.",
   },
 ]
+
+// Items whose body is a DataList instead of a paragraph.
+const contentItems: F0AccordionItem[] = [
+  {
+    id: "performance",
+    title: "Performance",
+    defaultOpen: true,
+    content: (
+      <DataList>
+        <DataList.Item text="4.2 / 5" />
+        <DataList.Item text="Q4 2025 review · 4.2 / 5 · Feb 28, 2026" />
+        <DataList.Item text="Mid-year 2025 · 3.8 / 5 · Aug 14, 2025" />
+      </DataList>
+    ),
+  },
+  {
+    id: "absences",
+    title: "Absences",
+    description: "Approved in the last 12 months.",
+    content: (
+      <DataList>
+        <DataList.Item text="3 approved · 12 days · 96 hours" />
+        <DataList.Item text="Away Sep 15 – Sep 19, 2026" />
+      </DataList>
+    ),
+  },
+]
+
+// Items with a headline value in the header, visible while collapsed.
+const summaryValues = ["4.2 / 5", "12 interviews", "3 workshops"]
+const summaryItems: F0AccordionItem[] = baseItems.map((item, index) => ({
+  ...item,
+  summary: (
+    <DataList>
+      <DataList.Item
+        text={summaryValues[index] ?? ""}
+        action={{ type: "copy" }}
+      />
+    </DataList>
+  ),
+}))
 
 const relevanceSegments = [
   { value: "required", label: "Required" },
@@ -145,6 +187,20 @@ export const Controlled: Story = {
   render: () => <ControlledExample />,
 }
 
+export const WithContent: Story = {
+  tags: ["!dev"],
+  args: {
+    items: contentItems,
+  },
+}
+
+export const WithSummary: Story = {
+  tags: ["!dev"],
+  args: {
+    items: summaryItems,
+  },
+}
+
 export const Skeleton: Story = {
   tags: ["!dev"],
   render: () => <F0Accordion.Skeleton items={3} />,
@@ -176,6 +232,8 @@ export const Snapshot: Story = {
           ],
         }))}
       />
+      <F0Accordion items={contentItems} />
+      <F0Accordion items={summaryItems} />
       <F0Accordion.Skeleton items={3} />
     </div>
   ),
