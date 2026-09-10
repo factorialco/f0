@@ -455,6 +455,20 @@ describe("F0LocationInput", () => {
       await waitFor(() => expect(live).toHaveTextContent("2 addresses found"))
     })
 
+    it("shows the provider's whole address, not just the street", () => {
+      render(
+        <F0LocationInput
+          label="Address"
+          searchPlaces={searchPlaces}
+          defaultValue={resolved}
+        />
+      )
+
+      expect(getAddressTrigger()).toHaveTextContent(
+        "Carrer de Colón 12, 08001 Barcelona, Spain"
+      )
+    })
+
     it("displays a value the options do not contain", () => {
       render(
         <F0LocationInput
@@ -575,6 +589,27 @@ describe("F0LocationInput", () => {
       expect(value.latitude).toBe(41.38)
       expect(value.longitude).toBe(2.17)
       expect(value.timezone).toBe("Europe/Madrid")
+    })
+
+    it("keeps the provider's formatted string when the edit keeps the pin", async () => {
+      const user = userEvent.setup()
+      const onChange = vi.fn()
+      render(
+        <F0LocationInput
+          label="Office"
+          manualEntry
+          defaultValue={resolved}
+          onChange={onChange}
+        />
+      )
+
+      await user.type(
+        screen.getByRole("textbox", { name: "Address line 2" }),
+        "!"
+      )
+
+      const [value] = onChange.mock.lastCall as [F0LocationInputValue, unknown]
+      expect(value.formatted).toBe(resolved.formatted)
     })
 
     it("emits undefined once every part is cleared", async () => {

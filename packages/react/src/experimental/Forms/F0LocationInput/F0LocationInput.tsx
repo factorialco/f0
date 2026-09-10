@@ -188,7 +188,10 @@ export const F0LocationInput = forwardRef<
         hideLabel={hideLabel}
         labelIcon={labelIcon}
         placeholder={placeholder}
-        text={pendingLabel ?? value?.addressLine1 ?? value?.formatted ?? ""}
+        // The provider's own string first: it is the whole address, which is
+        // what this shape shows, and the parts are not on screen to complete
+        // an address line on their own
+        text={pendingLabel ?? value?.formatted ?? value?.addressLine1 ?? ""}
         placeId={value?.placeId}
         country={searchCountry}
         searchPlaces={searchPlaces}

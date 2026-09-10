@@ -63,7 +63,13 @@ export const useLocationValue = ({
       emit(
         {
           ...base,
-          formatted: formatLocationValue(base, getCountryName(base.country)),
+          // An edit that leaves the picked place standing leaves its provider
+          // string standing too: the local join is the fallback for a value
+          // that no longer describes what the provider returned.
+          formatted: keepResolution
+            ? (base.formatted ??
+              formatLocationValue(base, getCountryName(base.country)))
+            : formatLocationValue(base, getCountryName(base.country)),
         },
         "typed"
       )
